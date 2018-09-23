@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp2.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="VSOP87.bin" />
+    <None Remove="VSOP87.HP.bin" />
+    <None Remove="VSOP87.LP.bin" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Data\VSOP87.HP.bin" />
+    <EmbeddedResource Include="Data\VSOP87.LP.bin" />
+  </ItemGroup>
+
+</Project>
