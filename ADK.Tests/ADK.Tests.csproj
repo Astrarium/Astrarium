@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="VSOP87.chk">
+    <EmbeddedResource Include="Data\VSOP87.chk">
       <CopyToOutputDirectory></CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>

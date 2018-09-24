@@ -8,6 +8,26 @@ namespace ADK
     public class Date
     {
         /// <summary>
+        /// Epoch B1875.0 in julian days.
+        /// </summary>
+        public const double EPOCH_B1875 = 2405889.5;
+
+        /// <summary>
+        /// Epoch J1975.0 in julian days.
+        /// </summary>
+        public const double EPOCH_J1975 = 2442412.5;
+
+        /// <summary>
+        /// Epoch B1950.0 in julian days.
+        /// </summary>
+        public const double EPOCH_B1950 = 2433282.4235;
+
+        /// <summary>
+        /// Epoch J2000.0 in julian days.
+        /// </summary>
+        public const double EPOCH_J2000 = 2451545.0;
+
+        /// <summary>
         /// Year. Positive value means A.D. year. Zero value means 1 B.C. -1 value = 2 B.C., -2 = 3 B.C. etc.
         /// </summary>
         public int Year { get; private set; }
@@ -133,33 +153,51 @@ namespace ADK
         }
 
         /// <summary>
-        /// Adds specified amount of days to <see cref="Date"/>.
+        /// Subsracts specified amount of days (with fractions if required) from the <see cref="Date"/>.
         /// </summary>
-        /// <returns></returns>
-        public static Date operator +(Date left, double right)
-        {
-            return new Date(left.ToJulianDay() + right);
-        }
-
+        /// <returns>New <see cref="Date"/> instance</returns>
         public static Date operator -(Date left, double right)
         {
             return new Date(left.ToJulianDay() - right);
         }
 
+        /// <summary>
+        /// Adds specified amount of days to the <see cref="Date"/>.
+        /// </summary>
+        /// <returns>>New <see cref="Date"/> instance</returns>
+        public static Date operator +(Date left, double right)
+        {
+            return new Date(left.ToJulianDay() + right);
+        }
+
+        /// <summary>
+        /// Converts the <see cref="Date"/> to Julian Day value.
+        /// </summary>
+        /// <returns>Julian Day value.</returns>
         public double ToJulianDay()
         {
             return JulianDay(this);
         }
 
+        /// <summary>
+        /// Checks if the date's year is a leap (bissextile) year.
+        /// </summary>
+        /// <returns>True if the date's year is a leap (bissextile) year, false otherwise.</returns>
         public bool IsLeapYear()
         {
             return IsLeapYear(Year);
         }
 
+        /// <summary>
+        /// Gets day of the week for the <see cref="Date"/>.
+        /// </summary>
+        /// <returns><see cref="System.DayOfWeek"/> value.</returns>
         public DayOfWeek DayOfWeek()
         {
             return DayOfWeek(ToJulianDay());
         }
+
+        #region Static methods
 
         public static double JulianDay(Date date)
         {
@@ -203,6 +241,21 @@ namespace ADK
             return (int)(365.25 * (Y + 4716)) + (int)(30.600001 * (M + 1)) + D + B - 1524.5;
         }
 
+        /// <summary>
+        /// Gets Julian day corresponding to January 0.0 of a given year. 
+        /// </summary>
+        /// <param name="year">Year in Gregorian calendar.</param>
+        /// <returns>Julian day corresponding to January 0.0 of a given year.</returns>
+        public static double JulianDay0(int year)
+        {
+            if (year < 1582)
+                throw new ArgumentException("Year should be in Gregorian calendar (greater or equal to 1582).", nameof(year));
+
+            int Y = year - 1;
+            int A = Y / 100;
+            return (int)(365.25 * Y) - A + (A / 4) + 1721424.5;
+        }
+
         public static bool IsLeapYear(int year)
         {
             if (year < 1582)
@@ -234,5 +287,51 @@ namespace ADK
 
             return DAYS_IN_MONTH[month] + month == 2 ? (IsLeapYear(year) ? 1 : 0) : 0;
         }
+
+        /// <summary>
+        /// Gets <see cref="Date"/> of Gregorian Easter for a given year.
+        /// The function valid for all years in the Gregorian calendar, hence from the year 1583 on. 
+        /// </summary>
+        /// <param name="year">Given year to find the date of the Easter Sunday.</param>
+        /// <returns><see cref="Date"/> of Gregorian Easter.</returns>
+        public static Date GregorianEaster(int year)
+        {
+            if (year < 1582)
+                throw new ArgumentException("Year should be in Gregorian calendar (greater or equal to 1582).", nameof(year));
+
+            int x = year;
+            int a = year % 19;
+            int b = year / 100;
+            int c = year % 100;
+            int d = b / 4;
+            int e = b % 4;
+            int f = (b + 8) / 25;
+            int g = (b - f + 1) / 3;
+            int h = (19 * a + b - d - g + 15) % 30;
+            int i = c / 4;
+            int k = c % 4;
+            int L = (32 + 2 * e + 2 * i - h - k) % 7;
+            int m = (a + 11 * h + 22 * L) / 451;
+            int z = h + L - 7 * m + 114;
+            int n = z / 31;
+            int p = z % 31;
+            return new Date(year, n, p + 1);
+        }
+
+        public static Date JulianEaster(int year)
+        {
+            int x = year;
+            int a = x % 4;
+            int b = x % 7;
+            int c = x % 19;
+            int d = (19 * c + 15) % 30;
+            int e = (2 * a + 4 * b - d + 34) % 7;
+            int z = d + e + 114;
+            int f = z / 31;
+            int g = z % 31;
+            return new Date(year, f, g + 1);
+        }
+
+        #endregion Static methods
     }
 }

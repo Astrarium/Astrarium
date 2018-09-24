@@ -79,5 +79,29 @@ namespace ADK.Tests
             // AA2, p.65
             Assert.AreEqual(System.DayOfWeek.Wednesday, new Date(1954, 6, 30).DayOfWeek());
         }
+
+        [TestMethod]
+        public void GregorianEaster()
+        {
+            // AA2, p.68
+            Assert.AreEqual(new Date(1991, 3, 31), Date.GregorianEaster(1991));
+            Assert.AreEqual(new Date(1992, 4, 19), Date.GregorianEaster(1992));
+            Assert.AreEqual(new Date(1993, 4, 11), Date.GregorianEaster(1993));
+            Assert.AreEqual(new Date(1954, 4, 18), Date.GregorianEaster(1954));
+            Assert.AreEqual(new Date(2000, 4, 23), Date.GregorianEaster(2000));
+            Assert.AreEqual(new Date(1818, 3, 22), Date.GregorianEaster(1818));
+        }
+
+        [TestMethod]
+        public void JulianEaster()
+        {
+            // Dates of Easter Sunday in Julian calendar are taken from
+            // http://www.kevinlaughery.com/east4099.html
+
+            Assert.AreEqual(new Date(375, 4, 5), Date.JulianEaster(375));
+            Assert.AreEqual(new Date(561, 4, 17), Date.JulianEaster(561));
+            Assert.AreEqual(new Date(1483, 3, 30), Date.JulianEaster(1483));
+            Assert.AreEqual(new Date(1570, 3, 26), Date.JulianEaster(1570));
+        }
     }
 }
