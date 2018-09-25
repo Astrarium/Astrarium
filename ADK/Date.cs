@@ -178,6 +178,15 @@ namespace ADK
         }
 
         /// <summary>
+        /// Julian Ephemeris Day (JDE) for the <see cref="Date"/>.
+        /// </summary>
+        /// <returns>Julian Ephemeris Day (JDE) value.</returns>
+        public double ToJulianEphemerisDay()
+        {
+            return JulianEphemerisDay(this);
+        }
+
+        /// <summary>
         /// Checks if the date's year is a leap (bissextile) year.
         /// </summary>
         /// <returns>True if the date's year is a leap (bissextile) year, false otherwise.</returns>
@@ -215,6 +224,17 @@ namespace ADK
         public Date ToJulianCalendarDate()
         {
             return GregorianToJulian(this);
+        }
+
+        /// <summary>
+        /// Calculates time difference between Dynamical and Universal Times (DELTA_T = TD - UT) for the date.
+        /// </summary>
+        /// <returns>
+        /// The time difference expressed in seconds of time.
+        /// </returns>
+        public double DeltaT()
+        {
+            return DeltaT(this);
         }
 
         #region Static methods
@@ -285,6 +305,16 @@ namespace ADK
             int Y = year - 1;
             int A = Y / 100;
             return (int)(365.25 * Y) - A + (A / 4) + 1721424.5;
+        }
+
+        /// <summary>
+        /// Gets Modified Julian Day (MJD) for a specified Julian Day.
+        /// </summary>
+        /// <param name="jd">Julian Day value</param>
+        /// <returns>Modified Julian Day (MJD) value.</returns>
+        public static double ModifiedJulianDay(double jd)
+        {
+            return jd - 2400000.5;
         }
 
         /// <summary>
@@ -432,6 +462,123 @@ namespace ADK
                 gregorianCalendar.GetYear(dt),
                 gregorianCalendar.GetMonth(dt),
                 gregorianCalendar.GetDayOfMonth(dt));
+        }
+
+        /// <summary>
+        /// Calculates Julian Ephemeris Day (JDE) for the given <see cref="Date"/>.
+        /// </summary>
+        /// <param name="date">Date to calculate Julian Ephemeris Day (JDE)</param>
+        /// <returns>Julian Ephemeris Day (JDE) value</returns>
+        public static double JulianEphemerisDay(Date date)
+        {
+            double jd = JulianDay(date);
+            return jd + DeltaT(date) / 86400.0;
+        }
+
+        /// <summary>
+        /// Calculates time difference between Dynamical and Universal Times (DELTA_T = TD - UT) for a given date.
+        /// </summary>
+        /// <param name="date">Date for which the time difference should be calculated</param>
+        /// <returns>The time difference expressed in seconds of time.</returns>
+        /// <remarks>
+        /// The polynomial expressions are taken from https://eclipse.gsfc.nasa.gov/SEhelp/deltatpoly2004.html
+        /// </remarks>
+        public static double DeltaT(Date date)
+        {
+            double y = date.Year + (date.Month - 0.5) / 12.0;
+            double u = 0, u2 = 0, u3 = 0, u4 = 0, u5 = 0, u6 = 0, u7 = 0;
+            double deltaT = 0;
+
+            Action<double> powersOfU = (value) => {
+                u = value;
+                u2 = u * u;
+                u3 = u2 * u;
+                u4 = u3 * u;
+                u5 = u4 * u;
+                u6 = u5 * u;
+                u7 = u6 * u;
+            }; 
+
+            if (date.Year < -500)
+            {
+                u = (y - 1820) / 100;
+                deltaT = -20 + 32 * u * u;
+            }
+            else if (date.Year >= -500 && date.Year <= 500)
+            {
+                powersOfU(y / 100);
+                deltaT = 10583.6 - 1014.41 * u + 33.78311 * u2 - 5.952053 * u3
+                    - 0.1798452 * u4 + 0.022174192 * u5 + 0.0090316521 * u6;
+            }
+            else if (date.Year > 500 && date.Year <= 1600)
+            {
+                powersOfU((y - 1000) / 100);
+                deltaT = 1574.2 - 556.01 * u + 71.23472 * u2 + 0.319781 * u3
+                    - 0.8503463 * u4 - 0.005050998 * u5 + 0.0083572073 * u6;
+            }
+            else if (date.Year > 1600 && date.Year <= 1700)
+            {
+                powersOfU(y - 1600);
+                deltaT = 120 - 0.9808 * u - 0.01532 * u2 + u3 / 7129.0;
+            }
+            else if(date.Year > 1700 && date.Year <= 1800)
+            {
+                powersOfU(y - 1700);
+                deltaT = 8.83 + 0.1603 * u - 0.0059285 * u2 + 0.00013336 * u3 - u4 / 1174000.0;
+            }
+            else if(date.Year > 1800 && date.Year <= 1860)
+            {
+                powersOfU(y - 1800);
+                deltaT = 13.72 - 0.332447 * u + 0.0068612 * u2 + 0.0041116 * u3 - 0.00037436 * u4
+                    + 0.0000121272 * u5 - 0.0000001699 * u6 + 0.000000000875 * u7;
+            }
+            else if (date.Year > 1860 && date.Year <= 1900)
+            {
+                powersOfU(y - 1860);
+                deltaT = 7.62 + 0.5737 * u - 0.251754 * u2 + 0.01680668 * u3
+                    - 0.0004473624 * u4 + u5 / 233174.0;
+            }
+            else if (date.Year > 1900 && date.Year <= 1920)
+            {
+                powersOfU(y - 1900);
+                deltaT = -2.79 + 1.494119 * u - 0.0598939 * u2 + 0.0061966 * u3 - 0.000197 * u4;
+            }
+            else if (date.Year > 1920 && date.Year <= 1941)
+            {
+                powersOfU(y - 1920);
+                deltaT = 21.20 + 0.84493 * u - 0.076100 * u2 + 0.0020936 * u3;
+            }
+            else if (date.Year > 1941 && date.Year <= 1961)
+            {
+                powersOfU(y - 1950);
+                deltaT = 29.07 + 0.407 * u - u2 / 233.0 + u3 / 2547.0;
+            }
+            else if (date.Year > 1961 && date.Year <= 1986)
+            {
+                powersOfU(y - 1975);
+                deltaT = 45.45 + 1.067 * u - u2 / 260.0 - u3 / 718.0;
+            }
+            else if (date.Year > 1986 && date.Year <= 2005)
+            {
+                powersOfU(y - 2000);
+                deltaT = 63.86 + 0.3345 * u - 0.060374 * u2 + 0.0017275 * u3 + 0.000651814 * u4
+                    + 0.00002373599 * u5;
+            }
+            else if (date.Year > 2005 && date.Year <= 2050)
+            {
+                powersOfU(y - 2000);
+                deltaT = 62.92 + 0.32217 * u + 0.005589 * u2;
+            }
+            else if (date.Year > 2050 && date.Year <= 2150)
+            {
+                deltaT = -20 + 32 * ((y - 1820) / 100.0) * ((y - 1820) / 100.0) - 0.5628 * (2150 - y);
+            }
+            else if (date.Year > 2150)
+            {
+                powersOfU((y - 1820) / 100);
+                deltaT = -20 + 32 * u2;
+            }
+            return deltaT;
         }
 
         #endregion Static methods
