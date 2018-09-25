@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 
 namespace ADK
 {
@@ -197,13 +195,46 @@ namespace ADK
             return DayOfWeek(ToJulianDay());
         }
 
+        /// <summary>
+        /// Converts the date in Julian Calendar to a date in Gregorian Calendar. 
+        /// </summary>
+        /// <returns>
+        /// Date in Gregorian Calendar
+        /// </returns>
+        public Date ToGregorianCalendarDate()
+        {
+            return JulianToGregorian(this);
+        }
+
+        /// <summary>
+        /// Converts the date in Gregorian Calendar to a date in Julian Calendar. 
+        /// </summary>
+        /// <returns>
+        /// Date in Julian Calendar
+        /// </returns>
+        public Date ToJulianCalendarDate()
+        {
+            return GregorianToJulian(this);
+        }
+
         #region Static methods
 
+        /// <summary>
+        /// Converts the specified <see cref="Date"/> to Julian Day value.
+        /// </summary>
+        /// <returns>Julian Day value.</returns>
         public static double JulianDay(Date date)
         {
             return JulianDay(date.Year, date.Month, date.Day);
         }
 
+        /// <summary>
+        /// Converts the specified date to Julian Day value.
+        /// </summary>
+        /// <param name="Y">Year. Positive value means A.D. year. Zero value means 1 B.C. -1 value = 2 B.C., -2 = 3 B.C. etc.</param>
+        /// <param name="M">Month value. 1 = January, 2 = February etc.</param>
+        /// <param name="D">Day of month.</param>
+        /// <returns>Julian Day value.</returns>
         public static double JulianDay(int Y, int M, double D)
         { 
             bool isJulianCalendar = Y < 1582;
@@ -256,6 +287,11 @@ namespace ADK
             return (int)(365.25 * Y) - A + (A / 4) + 1721424.5;
         }
 
+        /// <summary>
+        /// Checks if the date's year is a leap (bissextile) year.
+        /// </summary>
+        /// <param name="year">Date to check for a leap year.</param>
+        /// <returns>True if the date's year is a leap (bissextile) year, false otherwise.</returns>
         public static bool IsLeapYear(int year)
         {
             if (year < 1582)
@@ -267,19 +303,40 @@ namespace ADK
             return false;
         }
 
+        /// <summary>
+        /// Gets day of the week for the specified Julian Day.
+        /// </summary>
+        /// <returns><see cref="System.DayOfWeek"/> value.</returns>
+        /// <param name="jd">Julian Day to get the day of the week for.</param>
+        /// <returns><see cref="System.DayOfWeek"/> value.</returns>
         public static DayOfWeek DayOfWeek(double jd)
         {
             double d = jd + 1.5;
             return (DayOfWeek)((int)d % 7);
         }
 
+        /// <summary>
+        /// Gets ordinal number of day in a year.
+        /// </summary>
+        /// <param name="date">Date to get ordinal number of day in a year.</param>
+        /// <returns>Ordinal number of day in a year.</returns>
         public static int DayOfYear(Date date)
         {
             int K = IsLeapYear(date.Year) ? 1 : 2;
             return (int)((275 * date.Month / 9) - K * ((date.Month + 9) / 12) + date.Day - 30);
         }
 
-        private static int[] DAYS_IN_MONTH = new int[] { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+        /// <summary>
+        /// Number of days by months for regular (non-leap) year.
+        /// </summary>
+        private static readonly int[] DAYS_IN_MONTH = new int[] { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+
+        /// <summary>
+        /// Gets number of days in the specified month.
+        /// </summary>
+        /// <param name="year">Year</param>
+        /// <param name="month">Month. 1 = Janaury, 2 = February etc.</param>
+        /// <returns>Number of days for specified month and year.</returns>
         public static int DaysInMonth(int year, int month)
         {
             if (month < 0 || month > 12)
@@ -294,6 +351,9 @@ namespace ADK
         /// </summary>
         /// <param name="year">Given year to find the date of the Easter Sunday.</param>
         /// <returns><see cref="Date"/> of Gregorian Easter.</returns>
+        /// <remarks>
+        /// Method is taken from AA2 book, ch.8 
+        /// </remarks>
         public static Date GregorianEaster(int year)
         {
             if (year < 1582)
@@ -318,6 +378,14 @@ namespace ADK
             return new Date(year, n, p + 1);
         }
 
+        /// <summary>
+        /// Gets <see cref="Date"/> of Julian Easter for a given year.
+        /// </summary>
+        /// <param name="year">Given year to find the date of the Easter Sunday.</param>
+        /// <returns><see cref="Date"/> of Julian Easter.</returns>
+        /// <remarks>
+        /// Method is taken from AA2 book, ch.8 
+        /// </remarks>
         public static Date JulianEaster(int year)
         {
             int x = year;
@@ -330,6 +398,40 @@ namespace ADK
             int f = z / 31;
             int g = z % 31;
             return new Date(year, f, g + 1);
+        }
+
+        /// <summary>
+        /// Converts the date in Gregorian Calendar to a date in Julian Calendar. 
+        /// </summary>
+        /// <param name="date">Date in Gregorian Calendar</param>
+        /// <returns>
+        /// Date in Julian Calendar
+        /// </returns>
+        public static Date GregorianToJulian(Date date)
+        {
+            DateTime dt = new DateTime(date.Year, date.Month, (int)date.Day, new GregorianCalendar());
+            JulianCalendar julianCalendar = new JulianCalendar();
+            return new Date(
+                julianCalendar.GetYear(dt), 
+                julianCalendar.GetMonth(dt), 
+                julianCalendar.GetDayOfMonth(dt));
+        }
+
+        /// <summary>
+        /// Converts the date in Julian Calendar to a date in Gregorian Calendar. 
+        /// </summary>
+        /// <param name="date">Date in Julian Calendar</param>
+        /// <returns>
+        /// Date in Gregorian Calendar
+        /// </returns>
+        public static Date JulianToGregorian(Date date)
+        {
+            DateTime dt = new DateTime(date.Year, date.Month, (int)date.Day, new JulianCalendar());
+            GregorianCalendar gregorianCalendar = new GregorianCalendar();
+            return new Date(
+                gregorianCalendar.GetYear(dt),
+                gregorianCalendar.GetMonth(dt),
+                gregorianCalendar.GetDayOfMonth(dt));
         }
 
         #endregion Static methods

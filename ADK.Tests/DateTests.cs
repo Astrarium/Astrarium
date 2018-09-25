@@ -102,6 +102,56 @@ namespace ADK.Tests
             Assert.AreEqual(new Date(561, 4, 17), Date.JulianEaster(561));
             Assert.AreEqual(new Date(1483, 3, 30), Date.JulianEaster(1483));
             Assert.AreEqual(new Date(1570, 3, 26), Date.JulianEaster(1570));
+
+            // Some tests for modern (Gregorian Calendar) dates of Orthodox Chirstian Easter.
+            // Dates are taken from: https://en.wikipedia.org/wiki/List_of_dates_for_Easter
+
+            Assert.AreEqual(new Date(2004, 4, 11), Date.JulianEaster(2004).ToGregorianCalendarDate());
+            Assert.AreEqual(new Date(2005, 5, 1), Date.JulianEaster(2005).ToGregorianCalendarDate());
+            Assert.AreEqual(new Date(2030, 4, 28), Date.JulianEaster(2030).ToGregorianCalendarDate());
+            Assert.AreEqual(new Date(2051, 5, 7), Date.JulianEaster(2051).ToGregorianCalendarDate());
+        }
+
+        [TestMethod]
+        public void GregorianToJulianCalendarDate()
+        {
+            Assert.AreEqual(new Date(1582, 10, 5), Date.GregorianToJulian(new Date(1582, 10, 15)));
+            Assert.AreEqual(new Date(400, 2, 4), Date.GregorianToJulian(new Date(400, 2, 5)));
+            Assert.AreEqual(new Date(2018, 9, 12), Date.GregorianToJulian(new Date(2018, 9, 25)));
+            Assert.AreEqual(new Date(2018, 12, 29), Date.GregorianToJulian(new Date(2019, 1, 11)));
+            Assert.AreEqual(new Date(2016, 12, 31), Date.GregorianToJulian(new Date(2017, 1, 13)));
+            Assert.AreEqual(new Date(2015, 12, 31), Date.GregorianToJulian(new Date(2016, 1, 13)));
+            Assert.AreEqual(new Date(2015, 12, 30), Date.GregorianToJulian(new Date(2016, 1, 12)));
+            Assert.AreEqual(new Date(1900, 1, 1), Date.GregorianToJulian(new Date(1900, 1, 13)));
+            Assert.AreEqual(new Date(1899, 12, 31), Date.GregorianToJulian(new Date(1900, 1, 12)));
+            Assert.AreEqual(new Date(1904, 2, 16), Date.GregorianToJulian(new Date(1904, 2, 29)));
+            Assert.AreEqual(new Date(1000, 2, 23), Date.GregorianToJulian(new Date(1000, 2, 28)));
+            Assert.AreEqual(new Date(1000, 2, 23), Date.GregorianToJulian(new Date(1000, 2, 28)));
+            Assert.AreEqual(new Date(1000, 2, 24), Date.GregorianToJulian(new Date(1000, 3, 1)));
+            Assert.AreEqual(new Date(1000, 2, 28), Date.GregorianToJulian(new Date(1000, 3, 5)));
+            Assert.AreEqual(new Date(1000, 2, 29), Date.GregorianToJulian(new Date(1000, 3, 6)));
+            Assert.AreEqual(new Date(1000, 12, 25), Date.GregorianToJulian(new Date(1000, 12, 31)));
+        }
+
+        [TestMethod]
+        public void JulianToGregorianCalendarDate()
+        {
+            Assert.AreEqual(new Date(1582, 10, 15), Date.JulianToGregorian(new Date(1582, 10, 5)));
+            Assert.AreEqual(new Date(400, 2, 5), Date.JulianToGregorian(new Date(400, 2, 4)));
+            Assert.AreEqual(new Date(2018, 9, 25), Date.JulianToGregorian(new Date(2018, 9, 12)));
+            Assert.AreEqual(new Date(2019, 1, 11), Date.JulianToGregorian(new Date(2018, 12, 29)));
+            Assert.AreEqual(new Date(2017, 1, 13), Date.JulianToGregorian(new Date(2016, 12, 31)));
+            Assert.AreEqual(new Date(2016, 1, 13), Date.JulianToGregorian(new Date(2015, 12, 31) ));
+            Assert.AreEqual(new Date(2016, 1, 12), Date.JulianToGregorian(new Date(2015, 12, 30) ));
+            Assert.AreEqual(new Date(1900, 1, 13), Date.JulianToGregorian(new Date(1900, 1, 1)));
+            Assert.AreEqual(new Date(1900, 1, 12), Date.JulianToGregorian(new Date(1899, 12, 31)));
+            Assert.AreEqual(new Date(1904, 2, 29), Date.JulianToGregorian(new Date(1904, 2, 16)));
+            Assert.AreEqual(new Date(1000, 2, 28), Date.JulianToGregorian(new Date(1000, 2, 23)));
+            Assert.AreEqual(new Date(1000, 2, 28), Date.JulianToGregorian(new Date(1000, 2, 23)));
+            Assert.AreEqual(new Date(1000, 3, 1), Date.JulianToGregorian(new Date(1000, 2, 24)));
+            Assert.AreEqual(new Date(1000, 3, 5), Date.JulianToGregorian(new Date(1000, 2, 28)));
+            Assert.AreEqual(new Date(1000, 3, 6), Date.JulianToGregorian(new Date(1000, 2, 29)));
+            Assert.AreEqual(new Date(1000, 12, 31), Date.JulianToGregorian(new Date(1000, 12, 25)));
         }
     }
 }
