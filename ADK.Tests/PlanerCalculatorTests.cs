@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 namespace ADK.Tests
 {
     [TestClass]
-    public class PlanerCalculatorTests
+    public class PlanerCalculatorTests : TestClassBase
     {
         /// <summary>
         /// Number of seconds in 1 degree of arc.
@@ -29,8 +29,7 @@ namespace ADK.Tests
             NumberFormatInfo numericFormat = new NumberFormatInfo();
             numericFormat.NumberDecimalSeparator = ".";
 
-            var lines = ReadLines(() => Assembly.GetExecutingAssembly().GetManifestResourceStream("ADK.Tests.Data.VSOP87.chk"),
-                Encoding.ASCII).ToList();
+            var lines = ReadLinesFromResource("ADK.Tests.Data.VSOP87.chk", Encoding.ASCII).ToList();
 
             Regex regexHeader = new Regex(@"^VSOP87D\s+([\w]+)\s*JD([\w\d\.]+).*$");
             Regex regexValues = new Regex(@"^\s*l\s+([-\d.]+)\s+rad\s+b\s+([-\d.]+)\s+rad\s+r\s+([\d.]+)\s+au\s*$");
@@ -108,25 +107,6 @@ namespace ADK.Tests
 
                 // difference in R should be less than 1e-5 AU
                 Assert.IsTrue(deltaR < 1e-5);
-            }
-        }
-
-        /// <summary>
-        /// Reads string linse from a stream
-        /// </summary>
-        /// <param name="streamProvider">Function provides a stream to read from</param>
-        /// <param name="encoding">Encoding to decode strings from bytes</param>
-        /// <returns>Collection of string lines</returns>
-        private static IEnumerable<string> ReadLines(Func<Stream> streamProvider, Encoding encoding)
-        {
-            using (var stream = streamProvider())
-            using (var reader = new StreamReader(stream, encoding))
-            {
-                string line;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    yield return line;
-                }
             }
         }
 

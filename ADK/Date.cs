@@ -3,6 +3,10 @@ using System.Globalization;
 
 namespace ADK
 {
+    /// <summary>
+    /// Represents astronomical date.
+    /// Contains methods and functions related to time, dates, calendars.
+    /// </summary>
     public class Date
     {
         /// <summary>
@@ -40,8 +44,14 @@ namespace ADK
         /// </summary>
         public double Day { get; private set; }
 
-        public CultureInfo Culture { get; set; } = CultureInfo.InvariantCulture;
+        #region Constructors
 
+        /// <summary>
+        /// Creates new <see cref="Date"/> by year, month and day values.
+        /// </summary>
+        /// <param name="year">Year. Positive value means A.D. year. Zero value means 1 B.C. -1 value = 2 B.C., -2 = 3 B.C. etc.</param>
+        /// <param name="month">Month. 1 = January, 2 = February, etc.</param>
+        /// <param name="day">Day of month with fractions (if needed). For example, 17.5 means 17th day of month, 12:00.</param>
         public Date(int year, int month, double day)
         {
             if (month < 1 || month > 12)
@@ -55,54 +65,16 @@ namespace ADK
             Day = day;
         }
 
+        /// <summary>
+        /// Creates new <see cref="Date"/> from <see cref="DateTime"/> object.
+        /// </summary>
+        /// <param name="dateTime"><see cref="DateTime"/> object to create a <see cref="Date"/> from.</param>
         public Date(DateTime dateTime)
         {
             DateTime uDateTime = dateTime.ToUniversalTime();
             Year = uDateTime.Year;
             Month = uDateTime.Month;
             Day = uDateTime.Day + uDateTime.TimeOfDay.TotalHours / 24.0;
-        }
-
-        public static Date Now
-        {
-            get
-            {
-                return new Date(DateTime.Now);
-            }
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj is null) return false;
-            if (obj is Date)
-            {
-                Date other = obj as Date;
-                return
-                    other.Year == Year &&
-                    other.Month == Month &&
-                    Math.Abs(other.Day - Day) < 1e-9;
-            }
-            else
-                return false;
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked 
-            {
-                int hash = 17;
-                hash = hash * 23 + Year.GetHashCode();
-                hash = hash * 23 + Month.GetHashCode();
-                hash = hash * 23 + Day.GetHashCode();
-                return hash;
-            }
-        }
-
-        public override string ToString()
-        {
-            string month = Culture.DateTimeFormat.GetMonthName(Month);
-            string day = Day.ToString("0.##",Culture.NumberFormat);
-            return string.Format($"{Year} {month} {day}");
         }
 
         /// <summary>
@@ -141,6 +113,66 @@ namespace ADK
             if (Month <= 2) Year = C - 4715;
         }
 
+        #endregion Constructors
+
+        #region Overrides
+
+        /// <summary>
+        /// Checks <see cref="Date"/> for equality
+        /// </summary>
+        /// <param name="obj">Object to compare with</param>
+        /// <returns>
+        /// True if two dates are equal, false otherwise.
+        /// </returns>
+        public override bool Equals(object obj)
+        {
+            if (obj is null) return false;
+            if (obj is Date)
+            {
+                Date other = obj as Date;
+                return
+                    other.Year == Year &&
+                    other.Month == Month &&
+                    Math.Abs(other.Day - Day) < 1e-9;
+            }
+            else
+                return false;
+        }
+
+        /// <summary>
+        /// Gets hash code for the <see cref="Date"/> object.
+        /// </summary>
+        /// <returns>Hash code for the <see cref="Date"/> object.</returns>
+        public override int GetHashCode()
+        {
+            unchecked 
+            {
+                int hash = 17;
+                hash = hash * 23 + Year.GetHashCode();
+                hash = hash * 23 + Month.GetHashCode();
+                hash = hash * 23 + Day.GetHashCode();
+                return hash;
+            }
+        }
+
+        /// <summary>
+        /// Gets string that represents the <see cref="Date"/> object.
+        /// </summary>
+        /// <returns>
+        /// String that represents the <see cref="Date"/> object.
+        /// </returns>
+        public override string ToString()
+        {
+            var culture = CultureInfo.InvariantCulture;
+            string month = culture.DateTimeFormat.GetMonthName(Month);
+            string day = Day.ToString("0.##", culture.NumberFormat);
+            return string.Format($"{Year} {month} {day}");
+        }
+
+        #endregion Overrides
+
+        #region Operators
+
         /// <summary>
         /// Gets difference between dates, in days.
         /// </summary>
@@ -167,6 +199,10 @@ namespace ADK
         {
             return new Date(left.ToJulianDay() + right);
         }
+
+        #endregion Operators
+
+        #region Instance Methods
 
         /// <summary>
         /// Converts the <see cref="Date"/> to Julian Day value.
@@ -227,7 +263,7 @@ namespace ADK
         }
 
         /// <summary>
-        /// Calculates time difference between Dynamical and Universal Times (DELTA_T = TD - UT) for the date.
+        /// Calculates time difference between Dynamical and Universal Times (ΔT = TD - UT) for the date.
         /// </summary>
         /// <returns>
         /// The time difference expressed in seconds of time.
@@ -237,7 +273,20 @@ namespace ADK
             return DeltaT(this);
         }
 
+        #endregion Instance Methods
+
         #region Static methods
+
+        /// <summary>
+        /// Gets current <see cref="Date"/>.
+        /// </summary>
+        public static Date Now
+        {
+            get
+            {
+                return new Date(DateTime.Now);
+            }
+        }
 
         /// <summary>
         /// Converts the specified <see cref="Date"/> to Julian Day value.
@@ -476,7 +525,7 @@ namespace ADK
         }
 
         /// <summary>
-        /// Calculates time difference between Dynamical and Universal Times (DELTA_T = TD - UT) for a given date.
+        /// Calculates time difference between Dynamical and Universal Times (ΔT = TD - UT) for a given date.
         /// </summary>
         /// <param name="date">Date for which the time difference should be calculated</param>
         /// <returns>The time difference expressed in seconds of time.</returns>

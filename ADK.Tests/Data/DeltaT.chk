@@ -1,0 +1,48 @@
+# Table 1 - Values of ΔT Derived from Historical Records
+# Year;	ΔT (seconds)
+# https://eclipse.gsfc.nasa.gov/SEhelp/deltat2004.html#tab1
+
+-500; 17190
+-400; 15530
+-300; 14080
+-200; 12790
+-100; 11640
+0; 10580
+100; 9600
+200; 8640
+300; 7680
+400; 6700
+500; 5710
+600; 4740
+700; 3810
+800; 2960
+900; 2200
+1000; 1570
+1100; 1090
+1200; 740
+1300; 490
+1400; 320
+1500; 200
+1600; 120
+1700; 9
+1750; 13
+1800; 14
+1850; 7
+1900; -3
+1950; 29
+
+# Table 2 - Recent Values of ΔT from Direct Observations
+# Year;	ΔT (seconds)
+# https://eclipse.gsfc.nasa.gov/SEhelp/deltat2004.html#tab2
+
+1955; 31.1
+1960; 33.2
+1965; 35.7
+1970; 40.2
+1975; 45.5
+1980; 50.5
+1985; 54.3
+1990; 56.9
+1995; 60.8
+2000; 63.8
+2005; 64.7

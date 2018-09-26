@@ -2,11 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
+using System.Globalization;
 
 namespace ADK.Tests
 {
     [TestClass]
-    public class DateTests
+    public class DateTests : TestClassBase
     {
         [TestMethod]
         public void DateToJulianDay()
@@ -141,8 +143,8 @@ namespace ADK.Tests
             Assert.AreEqual(new Date(2018, 9, 25), Date.JulianToGregorian(new Date(2018, 9, 12)));
             Assert.AreEqual(new Date(2019, 1, 11), Date.JulianToGregorian(new Date(2018, 12, 29)));
             Assert.AreEqual(new Date(2017, 1, 13), Date.JulianToGregorian(new Date(2016, 12, 31)));
-            Assert.AreEqual(new Date(2016, 1, 13), Date.JulianToGregorian(new Date(2015, 12, 31) ));
-            Assert.AreEqual(new Date(2016, 1, 12), Date.JulianToGregorian(new Date(2015, 12, 30) ));
+            Assert.AreEqual(new Date(2016, 1, 13), Date.JulianToGregorian(new Date(2015, 12, 31)));
+            Assert.AreEqual(new Date(2016, 1, 12), Date.JulianToGregorian(new Date(2015, 12, 30)));
             Assert.AreEqual(new Date(1900, 1, 13), Date.JulianToGregorian(new Date(1900, 1, 1)));
             Assert.AreEqual(new Date(1900, 1, 12), Date.JulianToGregorian(new Date(1899, 12, 31)));
             Assert.AreEqual(new Date(1904, 2, 29), Date.JulianToGregorian(new Date(1904, 2, 16)));
@@ -152,6 +154,44 @@ namespace ADK.Tests
             Assert.AreEqual(new Date(1000, 3, 5), Date.JulianToGregorian(new Date(1000, 2, 28)));
             Assert.AreEqual(new Date(1000, 3, 6), Date.JulianToGregorian(new Date(1000, 2, 29)));
             Assert.AreEqual(new Date(1000, 12, 31), Date.JulianToGregorian(new Date(1000, 12, 25)));
+        }
+
+        [TestMethod]
+        public void DeltaT()
+        {
+            NumberFormatInfo numericFormat = new NumberFormatInfo();
+            numericFormat.NumberDecimalSeparator = ".";
+
+            var testValues = ReadLinesFromResource("ADK.Tests.Data.DeltaT.chk", Encoding.UTF8)
+                .Where(line => !string.IsNullOrWhiteSpace(line) && !line.Trim().StartsWith("#"))
+                .Select(line =>
+                {
+                    string[] chunks = line.Split(';');
+                    return new {
+                        Year = Int32.Parse(chunks[0].Trim(), numericFormat),
+                        DeltaT = Double.Parse(chunks[1].Trim(), numericFormat)
+                    };
+                })
+                .ToArray();
+
+            foreach (var testValue in testValues)
+            {
+                for (int m = 1; m <= 12; m++)
+                {
+                    double expected = testValue.DeltaT;
+                    double actual = new Date(testValue.Year, m, 1).DeltaT();
+
+                    // difference between expected and actual values, in seconds
+                    double diff = Math.Abs(expected - actual);
+
+                    // error of calculation, in percents
+                    double error = diff / expected * 100;
+
+                    // suppose absolute difference is less than 1 second,
+                    // or error less than 2 percent
+                    Assert.IsTrue(diff < 1 || error < 2);
+                }
+            }
         }
     }
 }

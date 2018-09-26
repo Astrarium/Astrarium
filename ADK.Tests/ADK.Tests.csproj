@@ -7,10 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Data\DeltaT.chk" />
     <None Remove="VSOP87.chk" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Data\DeltaT.chk">
+      <CopyToOutputDirectory></CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="Data\VSOP87.chk">
       <CopyToOutputDirectory></CopyToOutputDirectory>
     </EmbeddedResource>
