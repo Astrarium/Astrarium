@@ -17,5 +17,13 @@ namespace ADK
         /// Declination, in degrees, from -90 to +90. Positive if north of the celestial equator, negative if south.
         /// </summary>
         public double Delta { get; set; }
+
+        public CrdsEquatorial() { }
+
+        public CrdsEquatorial(double alpha, double delta)
+        {
+            Alpha = alpha;
+            Delta = delta;
+        }
     }
 }
