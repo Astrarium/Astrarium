@@ -193,5 +193,25 @@ namespace ADK.Tests
                 }
             }
         }
+
+        [TestMethod]
+        public void Epochs()
+        {
+            double expectedError = 1e-4;
+
+            // Test from AA
+            Assert.AreEqual(2446431.5, Date.JulianEpoch(1986), expectedError);
+
+            Assert.AreEqual(Date.EPOCH_J1900, Date.JulianEpoch(1900), expectedError);
+            Assert.AreEqual(Date.EPOCH_J1950, Date.JulianEpoch(1950), expectedError);
+            Assert.AreEqual(Date.EPOCH_J1975, Date.JulianEpoch(1975), expectedError);
+            Assert.AreEqual(Date.EPOCH_J2000, Date.JulianEpoch(2000), expectedError);
+            Assert.AreEqual(Date.EPOCH_J2050, Date.JulianEpoch(2050), expectedError);
+
+            
+            Assert.AreEqual(Date.EPOCH_B1875, Date.BesselianEpoch(1875), expectedError);
+            Assert.AreEqual(Date.EPOCH_B1900, Date.BesselianEpoch(1900), expectedError);
+            Assert.AreEqual(Date.EPOCH_B1950, Date.BesselianEpoch(1950), expectedError);
+        }
     }
 }

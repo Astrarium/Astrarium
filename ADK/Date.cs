@@ -9,15 +9,17 @@ namespace ADK
     /// </summary>
     public class Date
     {
+        #region Epochs
+
         /// <summary>
         /// Epoch B1875.0 in julian days.
         /// </summary>
-        public const double EPOCH_B1875 = 2405889.5;
+        public const double EPOCH_B1875 = 2405889.25855;
 
         /// <summary>
-        /// Epoch J1975.0 in julian days.
+        /// Epoch B1900.0 in julian days.
         /// </summary>
-        public const double EPOCH_J1975 = 2442412.5;
+        public const double EPOCH_B1900 = 2415020.3135;
 
         /// <summary>
         /// Epoch B1950.0 in julian days.
@@ -25,9 +27,31 @@ namespace ADK
         public const double EPOCH_B1950 = 2433282.4235;
 
         /// <summary>
+        /// Epoch J1900.0 in julian days.
+        /// </summary>
+        public const double EPOCH_J1900 = 2415020.0;
+
+        /// <summary>
+        /// Epoch J1950.0 in julian days.
+        /// </summary>
+        public const double EPOCH_J1950 = 2433282.5;
+
+        /// <summary>
+        /// Epoch J1975.0 in julian days.
+        /// </summary>
+        public const double EPOCH_J1975 = 2442413.75;
+
+        /// <summary>
         /// Epoch J2000.0 in julian days.
         /// </summary>
         public const double EPOCH_J2000 = 2451545.0;
+
+        /// <summary>
+        /// Epoch J2050.0 in julian days.
+        /// </summary>
+        public const double EPOCH_J2050 = 2469807.5;
+
+        #endregion Epochs
 
         /// <summary>
         /// Year. Positive value means A.D. year. Zero value means 1 B.C. -1 value = 2 B.C., -2 = 3 B.C. etc.
@@ -628,6 +652,28 @@ namespace ADK
                 deltaT = -20 + 32 * u2;
             }
             return deltaT;
+        }
+
+        /// <summary>
+        /// Gets Julian Day corresponding to Besselian epoch of a specified year,
+        /// for example: BesselianEpoch(1950) = B1950.0 = 2433282.4235
+        /// </summary>
+        /// <param name="year">Year of the epoch</param>
+        /// <returns>Epoch value, in Julian Days</returns>
+        public static double BesselianEpoch(int year)
+        {
+            return (year - 1900.0) * 365.242198781 + 2415020.31352;
+        }
+
+        /// <summary>
+        /// Gets Julian Day corresponding to Julian epoch of a specified year,
+        /// for example: JulianEpoch(2000) = J2000.0 = 2451545.00
+        /// </summary>
+        /// <param name="year">Year of the epoch</param>
+        /// <returns>Epoch value, in Julian Days</returns>
+        public static double JulianEpoch(int year)
+        {
+            return (year - 2000.0) * 365.25 + 2451545.0;
         }
 
         #endregion Static methods
