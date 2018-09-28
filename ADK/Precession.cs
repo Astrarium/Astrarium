@@ -6,7 +6,7 @@ namespace ADK
 {
     public static class Precession
     {
-        public static PrecessionalElements GetPrecessionalElementsFK4(double jd0, double jd)
+        public static PrecessionalElements ElementsFK4(double jd0, double jd)
         {
             PrecessionalElements p = new PrecessionalElements();
 
@@ -29,7 +29,7 @@ namespace ADK
             return p;
         }
 
-        public static PrecessionalElements GetPrecessionalElementsFK5(double JDE0, double JDE)
+        public static PrecessionalElements ElementsFK5(double JDE0, double JDE)
         {
             PrecessionalElements p = new PrecessionalElements();
 

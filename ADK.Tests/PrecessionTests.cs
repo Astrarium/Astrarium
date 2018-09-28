@@ -20,7 +20,7 @@ namespace ADK.Tests
             // proper motion of Theta Persei, units per year
             CrdsEquatorial pm = new CrdsEquatorial(
                 new HMS(0, 0, 0.03425).ToDecimalAngle(),
-                -1 * new DMS(0, 0, 0.0895).ToDecimalAngle()
+                -new DMS(0, 0, 0.0895).ToDecimalAngle()
             );
             
             // target date (2018 November 13.19)
@@ -37,7 +37,7 @@ namespace ADK.Tests
             eq0.Delta += pm.Delta * years;
 
             // precessional elements
-            var p = Precession.GetPrecessionalElementsFK5(Date.EPOCH_J2000, jd);
+            var p = Precession.ElementsFK5(Date.EPOCH_J2000, jd);
 
             // Equatorial coordinates for the mean equinox and epoch
             // of the target date
