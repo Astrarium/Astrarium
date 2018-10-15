@@ -29,12 +29,12 @@ namespace ADK
             return p;
         }
 
-        public static PrecessionalElements ElementsFK5(double JDE0, double JDE)
+        public static PrecessionalElements ElementsFK5(double jd0, double jd)
         {
             PrecessionalElements p = new PrecessionalElements();
 
-            double T = (JDE0 - 2451545.0) / 36525.0;
-            double t = (JDE - JDE0) / 36525.0;
+            double T = (jd0 - 2451545.0) / 36525.0;
+            double t = (jd - jd0) / 36525.0;
 
             double T2 = T * T;
             double t2 = t * t;

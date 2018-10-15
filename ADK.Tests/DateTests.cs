@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using System.Globalization;
@@ -206,9 +205,7 @@ namespace ADK.Tests
             Assert.AreEqual(Date.EPOCH_J1950, Date.JulianEpoch(1950), expectedError);
             Assert.AreEqual(Date.EPOCH_J1975, Date.JulianEpoch(1975), expectedError);
             Assert.AreEqual(Date.EPOCH_J2000, Date.JulianEpoch(2000), expectedError);
-            Assert.AreEqual(Date.EPOCH_J2050, Date.JulianEpoch(2050), expectedError);
-
-            
+            Assert.AreEqual(Date.EPOCH_J2050, Date.JulianEpoch(2050), expectedError);            
             Assert.AreEqual(Date.EPOCH_B1875, Date.BesselianEpoch(1875), expectedError);
             Assert.AreEqual(Date.EPOCH_B1900, Date.BesselianEpoch(1900), expectedError);
             Assert.AreEqual(Date.EPOCH_B1950, Date.BesselianEpoch(1950), expectedError);

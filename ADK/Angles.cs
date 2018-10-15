@@ -4,12 +4,19 @@ using System.Text.RegularExpressions;
 
 namespace ADK
 {
+    #region DMS
+
     /// <summary>
     /// Represents angle expressed in degrees, minutes and seconds
     /// and provides methods to convert from/to decimal units.
     /// </summary>
     public struct DMS
     {
+        /// <summary>
+        /// Regex to parse angle value from string.
+        /// </summary>
+        private static readonly Regex REGEX = new Regex("^\\s*([-+]?)\\s*(\\d+)[\\*°\\s]\\s*(\\d+)[\\s']\\s*(\\d+\\.?\\d*)(''|\"|\\s*){1}\\s*$");
+
         /// <summary>
         /// Degrees part of angle value.
         /// Should be non-negative.
@@ -60,19 +67,32 @@ namespace ADK
         /// <param name="seconds">Seconds part of angle value. Should be in range [0 ... 60).</param>
         public DMS(uint degrees, uint minutes, double seconds)
         {
-            if (degrees < 0)
-                throw new ArgumentException("Degrees value should be non-negative.", nameof(degrees));
-
-            if (minutes < 0 || minutes > 59)
-                throw new ArgumentException("Minutes value should be in range from 0 to 59.", nameof(minutes));
-
-            if (seconds < 0 || seconds > 60)
-                throw new ArgumentException("Seconds value should be in range from 0 to 59.", nameof(seconds));
-
             Degrees = degrees;
             Minutes = minutes;
             Seconds = seconds;
             Sign = Degrees == 0 && Minutes == 0 && Seconds == 0 ? 0 : 1;
+
+            Validate();
+        }
+
+        /// <summary>
+        /// Creates new angle from string that represents sexagesimal value. 
+        /// </summary>
+        /// <param name="angle">String in form DD*MM'SS''</param>
+        public DMS(string angle)
+        {
+            Match match = REGEX.Match(angle);
+
+            if (!match.Success)
+                throw new ArgumentException("Unable to parse string as angle value.", nameof(angle));
+
+            Sign = int.Parse(match.Groups[1].Value + "1");
+
+            Degrees = uint.Parse(match.Groups[2].Value);
+            Minutes = uint.Parse(match.Groups[3].Value);
+            Seconds = double.Parse(match.Groups[4].Value, CultureInfo.InvariantCulture);
+
+            Validate();
         }
 
         /// <summary>
@@ -84,24 +104,6 @@ namespace ADK
         {
             dms.Sign = -dms.Sign;
             return dms;
-        }
-
-        private static readonly Regex PARSE_REGEX = new Regex("^\\s*([-+]?)\\s*(\\d+)[\\*°\\s]\\s*(\\d+)[\\s']\\s*(\\d+\\.?\\d*)(''|\"|\\s*){1}\\s*$");
-
-        public static DMS Parse(string angle)
-        {
-            Match match = PARSE_REGEX.Match(angle);
-
-            if (!match.Success)
-                throw new ArgumentException("Unable to parse string as angle value.", nameof(angle));
-
-            int sign = int.Parse(match.Groups[1].Value + "1");
-
-            uint dd = uint.Parse(match.Groups[2].Value);
-            uint mm = uint.Parse(match.Groups[3].Value);
-            double ss = double.Parse(match.Groups[4].Value, CultureInfo.InvariantCulture);
-                
-            return sign > 0 ? new DMS(dd, mm, ss) : -new DMS(dd, mm, ss);            
         }
 
         /// <summary>
@@ -136,6 +138,7 @@ namespace ADK
             {
                 var other = (DMS)obj;
                 return
+                    Sign == other.Sign &&
                     Degrees == other.Degrees &&
                     Minutes == other.Minutes &&
                     Math.Abs(Seconds - other.Seconds) < 1e-2;
@@ -152,13 +155,33 @@ namespace ADK
             unchecked
             {
                 int hash = 17;
+                hash = hash * 23 + Sign.GetHashCode();
                 hash = hash * 23 + Degrees.GetHashCode();
                 hash = hash * 23 + Minutes.GetHashCode();
                 hash = hash * 23 + Seconds.GetHashCode();
                 return hash;
             }
         }
+
+        /// <summary>
+        /// Checks correctness of the value
+        /// </summary>
+        private void Validate()
+        {
+            if (Degrees < 0)
+                throw new ArgumentException("Degrees value should be non-negative.", nameof(Degrees));
+
+            if (Minutes < 0 || Minutes > 59)
+                throw new ArgumentException("Minutes value should be in range from 0 to 59.", nameof(Minutes));
+
+            if (Seconds < 0 || Seconds > 60)
+                throw new ArgumentException("Seconds value should be in range from 0 to 59.", nameof(Seconds));
+        }
     }
+
+    #endregion DMS
+
+    #region HMS
 
     /// <summary>
     /// Represents angle expressed in hours, minutes and seconds
@@ -166,6 +189,11 @@ namespace ADK
     /// </summary>
     public struct HMS
     {
+        /// <summary>
+        /// Regex to parse angle value from string.
+        /// </summary>
+        private static readonly Regex REGEX = new Regex("^\\s*(\\d+)\\s*[h\\s]\\s*(\\d+)\\s*[m\\s]\\s*(\\d+\\.?\\d*)\\s*[s\\s*]?\\s*$");
+
         /// <summary>
         /// Hours part of angle value.
         /// Should be in range [0 ... 24)
@@ -212,18 +240,29 @@ namespace ADK
         /// <param name="seconds">Seconds part of angle value. Should be in range [0 ... 60).</param>
         public HMS(uint hours, uint minutes, double seconds)
         {
-            if (hours < 0 || hours > 23)
-                throw new ArgumentException("Hours value should be in range from 0 to 59.", nameof(hours));
-
-            if (minutes < 0 || minutes > 59)
-                throw new ArgumentException("Minutes value should be in range from 0 to 59.", nameof(minutes));
-
-            if (seconds < 0 || seconds > 60)
-                throw new ArgumentException("Seconds value should be in range from 0 to 59.", nameof(seconds));
-
             Hours = hours;
             Minutes = minutes;
             Seconds = seconds;
+
+            Validate();
+        }
+
+        /// <summary>
+        /// Creates new angle from string that represents sexagesimal value. 
+        /// </summary>
+        /// <param name="angle">String in form HHh MMm SSs</param>
+        public HMS(string angle)
+        {
+            Match match = REGEX.Match(angle);
+
+            if (!match.Success)
+                throw new ArgumentException("Unable to parse string as angle value.", nameof(angle));
+
+            Hours = uint.Parse(match.Groups[1].Value);
+            Minutes = uint.Parse(match.Groups[2].Value);
+            Seconds = double.Parse(match.Groups[3].Value, CultureInfo.InvariantCulture);
+
+            Validate();
         }
 
         /// <summary>
@@ -286,5 +325,22 @@ namespace ADK
                 return hash;
             }
         }
+
+        /// <summary>
+        /// Checks correctness of the value
+        /// </summary>
+        private void Validate()
+        {
+            if (Hours < 0 || Hours > 23)
+                throw new ArgumentException("Hours value should be in range from 0 to 59.", nameof(Hours));
+
+            if (Minutes < 0 || Minutes > 59)
+                throw new ArgumentException("Minutes value should be in range from 0 to 59.", nameof(Minutes));
+
+            if (Seconds < 0 || Seconds > 60)
+                throw new ArgumentException("Seconds value should be in range from 0 to 59.", nameof(Seconds));
+        }
     }
+
+    #endregion HMS
 }
