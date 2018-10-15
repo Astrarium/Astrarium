@@ -5,12 +5,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Data\Constells.dat" />
     <None Remove="VSOP87.bin" />
     <None Remove="VSOP87.HP.bin" />
     <None Remove="VSOP87.LP.bin" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Data\Constells.dat" />
     <EmbeddedResource Include="Data\VSOP87.HP.bin" />
     <EmbeddedResource Include="Data\VSOP87.LP.bin" />
   </ItemGroup>

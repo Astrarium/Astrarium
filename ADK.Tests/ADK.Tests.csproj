@@ -7,11 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Data\Constells.chk" />
     <None Remove="Data\DeltaT.chk" />
     <None Remove="VSOP87.chk" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Data\Constells.chk" />
     <EmbeddedResource Include="Data\DeltaT.chk">
       <CopyToOutputDirectory></CopyToOutputDirectory>
     </EmbeddedResource>
