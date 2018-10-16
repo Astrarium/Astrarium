@@ -5,7 +5,8 @@ using System.Text;
 namespace ADK
 {
     /// <summary>
-    /// Describes triplet of precessional elements
+    /// Describes triplet of precessional elements 
+    /// needed for reduction of coordinates from one epoch to another.
     /// </summary>
     public class PrecessionalElements
     {
@@ -23,5 +24,15 @@ namespace ADK
         /// θ
         /// </summary>
         public double theta { get; set; }
+
+        /// <summary>
+        /// Initial epoch, in Julian Days.
+        /// </summary>
+        public double InitialEpoch { get; set; }
+
+        /// <summary>
+        /// Target epoch, in Julian Days.
+        /// </summary>
+        public double TargetEpoch { get; set; }
     }
 }

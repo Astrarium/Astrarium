@@ -12,12 +12,21 @@ namespace ADK.Tests
         private static List<TestData> testData = new List<TestData>();
 
         [TestMethod]
-        public void GetConstellationByCoordinates()
+        public void FindConstellation()
         {
+            // precessional elements for converting from J1950 to B1875 epoch
+            var p = Precession.ElementsFK4(Date.EPOCH_J1950, Date.EPOCH_B1875);
+
             foreach (var test in testData)
             {
-                string con = Constellations.GetConstellationByCoordinates(new CrdsEquatorial(test.RA, test.Dec), Date.EPOCH_B1950);
-                Assert.AreEqual(test.Name, con);
+                // Equatorial coordinates for B1875 epoch
+                CrdsEquatorial eq = Precession.GetEquatorialCoordinates(new CrdsEquatorial(test.RA, test.Dec), p);
+
+                // Constellation name
+                string con = Constellations.FindConstellation(eq);
+
+                // Check result
+                Assert.AreEqual(test.ConstName, con);
             }
         }
 
@@ -40,13 +49,13 @@ namespace ADK.Tests
         {
             public double RA { get; set; }
             public double Dec { get; set; }
-            public string Name { get; set; }
+            public string ConstName { get; set; }
 
-            public TestData(double ra, double dec, string con)
+            public TestData(double ra, double dec, string constName)
             {
                 RA = ra;
                 Dec = dec;
-                Name = con;
+                ConstName = constName;
             }
         }
     }

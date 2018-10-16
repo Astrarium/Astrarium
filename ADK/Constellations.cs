@@ -7,36 +7,62 @@ using System.Text;
 
 namespace ADK
 {
+    /// <summary>
+    /// Contains methods to find constellation by coordinates of a point on celestial sphere.
+    /// </summary>
     public class Constellations
     {
+        /// <summary>
+        /// Constellations borders data
+        /// </summary>
         private static List<Border> Borders = null;
 
+        /// <summary>
+        /// Represents constellation border segment.
+        /// </summary>
         private struct Border
         {
-            public float ra_upper { get; private set; }
-            public float ra_lower { get; private set; }
-            public float dec { get; private set; }
-            public string name { get; private set; }
+            /// <summary>
+            /// Right Ascension point 1 
+            /// </summary>
+            public float RA1 { get; private set; }
 
-            public Border(float ra_upper, float ra_lower, float dec, string name)
+            /// <summary>
+            /// Right Ascension point 2 
+            /// </summary>
+            public float RA2 { get; private set; }
+
+            /// <summary>
+            /// Declination
+            /// </summary>
+            public float Dec { get; private set; }
+
+            /// <summary>
+            /// Constallation name (3-letter code).
+            /// </summary>
+            public string ConstName { get; private set; }
+
+            /// <summary>
+            /// Creates new constellation border segment.
+            /// </summary>
+            public Border(float ra1, float ra2, float dec, string constName)
             {
-                this.ra_upper = ra_upper;
-                this.ra_lower = ra_lower;
-                this.dec = dec;
-                this.name = name;
+                this.RA1 = ra2;
+                this.RA2 = ra1;
+                this.Dec = dec;
+                this.ConstName = constName;
             }
         }
 
         /// <summary>
-        /// 
+        /// Finds constellation name by point with specified equatorial coordinates for epoch B1875.
         /// </summary>
-        /// <param name="eq0"></param>
-        /// <param name="jd"></param>
-        /// <returns></returns>
+        /// <param name="eq1875">Equatorial coordinates of the point for epoch B1875.</param>
+        /// <returns>International 3-letter code of a constellation.</returns>
         /// <remarks>
         /// Implementation is based on <see href="ftp://cdsarc.u-strasbg.fr/pub/cats/VI/42/"/>.
         /// </remarks>
-        public static string GetConstellationByCoordinates(CrdsEquatorial eq0, double jd)
+        public static string FindConstellation(CrdsEquatorial eq1875)
         {
             // Load borders data if needed
             if (Borders == null)
@@ -46,37 +72,45 @@ namespace ADK
                 {
                     Borders = new List<Border>();
 
-                    while (reader.BaseStream.Position != reader.BaseStream.Length)
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
                     {
-                        string line = reader.ReadLine();
-                        float ra_lower = float.Parse(line.Substring(0, 8), CultureInfo.InvariantCulture);
-                        float ra_upper = float.Parse(line.Substring(9, 7), CultureInfo.InvariantCulture);
-                        float dec = float.Parse(line.Substring(18, 7), CultureInfo.InvariantCulture);
-                        string name = line.Substring(26, 3);
+                        float ra1 = float.Parse(line.Substring(0, 8), CultureInfo.InvariantCulture);
+                        float ra2 = float.Parse(line.Substring(9, 7), CultureInfo.InvariantCulture);
+                        float dec = float.Parse(line.Substring(17, 8), CultureInfo.InvariantCulture);
+                        string constName = line.Substring(26, 3);
 
-                        Borders.Add(new Border(ra_upper, ra_lower, dec, name));
+                        Borders.Add(new Border(ra1, ra2, dec, constName));
                     }
                 }
             }
 
-            // precessional elements for B1950 epoch
-            var p = Precession.ElementsFK4(jd, Date.EPOCH_B1950);
-
-            // Equatorial coordinates for B1950 epoch 
-            CrdsEquatorial eq = Precession.GetEquatorialCoordinatesOfEpoch(eq0, p);
-
-            double alpha = eq.Alpha / 15.0;
-            double delta = eq.Delta;
+            double alpha = eq1875.Alpha / 15.0;
+            double delta = eq1875.Delta;
 
             for (int i = 0; i < Borders.Count; i++)
             {
-                if (Borders[i].dec > delta) continue;
-                if (Borders[i].ra_upper <= alpha) continue;
-                if (Borders[i].ra_lower > alpha) continue;
+                if (Borders[i].Dec > delta)
+                    continue;
 
-                if (alpha >= Borders[i].ra_lower && alpha < Borders[i].ra_upper && Borders[i].dec <= delta) return Borders[i].name;
-                else if (Borders[i].ra_upper < alpha) continue;
+                if (Borders[i].RA1 <= alpha)
+                    continue;
+
+                if (Borders[i].RA2 > alpha)
+                    continue;
+
+                if (alpha >= Borders[i].RA2 &&
+                    alpha < Borders[i].RA1 &&
+                    Borders[i].Dec <= delta)
+                {
+                    return Borders[i].ConstName;
+                }
+                else if (Borders[i].RA1 < alpha)
+                {
+                    continue;
+                }
             }
+
             return "";
         }
     }

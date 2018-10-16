@@ -6,19 +6,13 @@ namespace ADK.Tests
     public class PrecessionTests
     {
         [TestMethod]
-        public void GetEquatorialCoordinatesOfEpoch()
+        public void GetEquatorialCoordinates()
         {
             // Equatorial coordinates of Theta Persei
-            CrdsEquatorial eq0 = new CrdsEquatorial(
-                new HMS(2, 44, 11.986).ToDecimalAngle(), 
-                new DMS(49, 13, 42.48).ToDecimalAngle()
-            );
+            CrdsEquatorial eq0 = new CrdsEquatorial(new HMS(2, 44, 11.986), new DMS(49, 13, 42.48));
 
             // proper motion of Theta Persei, units per year
-            CrdsEquatorial pm = new CrdsEquatorial(
-                new HMS(0, 0, 0.03425).ToDecimalAngle(),
-                -new DMS(0, 0, 0.0895).ToDecimalAngle()
-            );
+            CrdsEquatorial pm = new CrdsEquatorial(new HMS(0, 0, 0.03425), -new DMS(0, 0, 0.0895));
             
             // target date (2018 November 13.19)
             double jd = Date.JulianDay(new Date(2028, 11, 13.19));
@@ -36,9 +30,8 @@ namespace ADK.Tests
             // precessional elements
             var p = Precession.ElementsFK5(Date.EPOCH_J2000, jd);
 
-            // Equatorial coordinates for the mean equinox and epoch
-            // of the target date
-            CrdsEquatorial eq = Precession.GetEquatorialCoordinatesOfEpoch(eq0, p);
+            // Equatorial coordinates for the mean equinox and epoch of the target date
+            CrdsEquatorial eq = Precession.GetEquatorialCoordinates(eq0, p);
 
             // Check final results
             Assert.AreEqual(new HMS(2, 46, 11.331), new HMS(eq.Alpha));
