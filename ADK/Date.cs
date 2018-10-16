@@ -297,6 +297,15 @@ namespace ADK
             return DeltaT(this);
         }
 
+        /// <summary>
+        /// Gets mean sidereal time at Greenwich for given instant.
+        /// </summary>
+        /// <returns>Mean sidereal time at Greenwich, expressed in degrees.</returns>
+        public double SiderealTime()
+        {
+            return SiderealTime(ToJulianDay());
+        }
+
         #endregion Instance Methods
 
         #region Static methods
@@ -652,6 +661,25 @@ namespace ADK
                 deltaT = -20 + 32 * u2;
             }
             return deltaT;
+        }
+
+        /// <summary>
+        /// Calculates mean sidereal time at Greenwich for given instant.
+        /// </summary>
+        /// <param name="jd">Julian Day</param>
+        /// <returns>Mean sidereal time at Greenwich, expressed in degrees.</returns>
+        public static double SiderealTime(double jd)
+        {
+            double T = (jd - 2451545.0) / 36525.0;
+            double T2 = T * T;
+            double T3 = T2 * T;
+
+            double theta0 = 280.46061837 + 360.98564736629 * (jd - 2451545.0) +
+                0.000387933 * T2 - T3 / 38710000.0;
+
+            theta0 = AstroUtils.To360(theta0);
+
+            return theta0;
         }
 
         /// <summary>

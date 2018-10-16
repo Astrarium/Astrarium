@@ -166,7 +166,8 @@ namespace ADK.Tests
                 .Select(line =>
                 {
                     string[] chunks = line.Split(';');
-                    return new {
+                    return new
+                    {
                         Year = Int32.Parse(chunks[0].Trim(), numericFormat),
                         DeltaT = Double.Parse(chunks[1].Trim(), numericFormat)
                     };
@@ -205,10 +206,20 @@ namespace ADK.Tests
             Assert.AreEqual(Date.EPOCH_J1950, Date.JulianEpoch(1950), expectedError);
             Assert.AreEqual(Date.EPOCH_J1975, Date.JulianEpoch(1975), expectedError);
             Assert.AreEqual(Date.EPOCH_J2000, Date.JulianEpoch(2000), expectedError);
-            Assert.AreEqual(Date.EPOCH_J2050, Date.JulianEpoch(2050), expectedError);            
+            Assert.AreEqual(Date.EPOCH_J2050, Date.JulianEpoch(2050), expectedError);
             Assert.AreEqual(Date.EPOCH_B1875, Date.BesselianEpoch(1875), expectedError);
             Assert.AreEqual(Date.EPOCH_B1900, Date.BesselianEpoch(1900), expectedError);
             Assert.AreEqual(Date.EPOCH_B1950, Date.BesselianEpoch(1950), expectedError);
+        }
+
+        [TestMethod]
+        public void SiderealTime()
+        {
+            // AA(I), example 11.a
+            Assert.AreEqual(new HMS("13h 10m 46.3668s"), new HMS(new Date(1987, 4, 10).SiderealTime()));
+
+            // AA(I), example 11.b
+            Assert.AreEqual(128.7378734, Date.SiderealTime(2446896.30625), 1e-6);
         }
     }
 }
