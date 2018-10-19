@@ -301,9 +301,9 @@ namespace ADK
         /// Gets mean sidereal time at Greenwich for given instant.
         /// </summary>
         /// <returns>Mean sidereal time at Greenwich, expressed in degrees.</returns>
-        public double SiderealTime()
+        public double MeanSiderealTime()
         {
-            return SiderealTime(ToJulianDay());
+            return MeanSiderealTime(ToJulianDay());
         }
 
         #endregion Instance Methods
@@ -668,7 +668,7 @@ namespace ADK
         /// </summary>
         /// <param name="jd">Julian Day</param>
         /// <returns>Mean sidereal time at Greenwich, expressed in degrees.</returns>
-        public static double SiderealTime(double jd)
+        public static double MeanSiderealTime(double jd)
         {
             double T = (jd - 2451545.0) / 36525.0;
             double T2 = T * T;

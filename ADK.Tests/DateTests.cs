@@ -216,10 +216,10 @@ namespace ADK.Tests
         public void SiderealTime()
         {
             // AA(I), example 11.a
-            Assert.AreEqual(new HMS("13h 10m 46.3668s"), new HMS(new Date(1987, 4, 10).SiderealTime()));
+            Assert.AreEqual(new HMS("13h 10m 46.3668s"), new HMS(new Date(1987, 4, 10).MeanSiderealTime()));
 
             // AA(I), example 11.b
-            Assert.AreEqual(128.7378734, Date.SiderealTime(2446896.30625), 1e-6);
+            Assert.AreEqual(128.7378734, Date.MeanSiderealTime(2446896.30625), 1e-6);
         }
     }
 }
