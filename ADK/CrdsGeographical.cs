@@ -7,12 +7,14 @@ namespace ADK
     public class CrdsGeographical
     {
         /// <summary>
-        /// Latitude, in degrees.
+        /// Latitude, in degrees. 
+        /// Measured from +90 (North pole) to -90 (South pole).
         /// </summary> 
         public double Latitude { get; set; }
 
         /// <summary>
-        /// Longitude, in degrees.
+        /// Longitude, in degrees. Positive west, negative east to Greenwich.
+        /// Measured from -180 to +180.
         /// </summary>
         public double Longitude { get; set; }
 

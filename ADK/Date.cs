@@ -306,6 +306,15 @@ namespace ADK
             return MeanSiderealTime(ToJulianDay());
         }
 
+        /// <summary>
+        /// Gets apparent sidereal time at Greenwich for given instant.
+        /// </summary>
+        /// <returns>Apparent sidereal time at Greenwich, expressed in degrees.</returns>
+        public double ApparentSiderealTime()
+        {
+            return ApparentSiderealTime(ToJulianDay());
+        }
+
         #endregion Instance Methods
 
         #region Static methods
@@ -668,6 +677,9 @@ namespace ADK
         /// </summary>
         /// <param name="jd">Julian Day</param>
         /// <returns>Mean sidereal time at Greenwich, expressed in degrees.</returns>
+        /// <remarks>
+        /// AA(II), formula 12.4.
+        /// </remarks>
         public static double MeanSiderealTime(double jd)
         {
             double T = (jd - 2451545.0) / 36525.0;
@@ -680,6 +692,22 @@ namespace ADK
             theta0 = AstroUtils.To360(theta0);
 
             return theta0;
+        }
+
+        /// <summary>
+        /// Calculates apparent sidereal time at Greenwich for given instant.
+        /// </summary>
+        /// <param name="jd">Julian Day</param>
+        /// <returns>Apparent sidereal time at Greenwich, expressed in degrees.</returns>
+        /// <remarks>
+        /// AA(II), formula 12.4, with corrections for nutation (chapter 22).
+        /// </remarks>
+        public static double ApparentSiderealTime(double jd)
+        {
+            double deltaPsi = Nutation.NutationInLongitude(jd);
+            double cosEpsilon = Math.Cos(AstroUtils.ToRadian(Nutation.TrueObliquity(jd)));
+
+            return MeanSiderealTime(jd) + deltaPsi * cosEpsilon;
         }
 
         /// <summary>
