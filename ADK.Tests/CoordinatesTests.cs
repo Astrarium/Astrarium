@@ -8,6 +8,9 @@ namespace ADK.Tests
     [TestClass]
     public class CoordinatesTests
     {
+        private const double errorInHMS = 1 / 3600.0 * 0.1 * 15; // 0.1 of second of time
+        private const double errorInDMS = 1 / 3600.0 * 0.1;      // 0.1 of second of degree
+
         /// <remarks>
         /// AA(II), Example 13.b. 
         /// </remarks>
@@ -46,7 +49,7 @@ namespace ADK.Tests
         {
             // Apparent local horizontal coordinates of Venus
             var hor = new CrdsHorizontal(68.0337, 15.1249);
-            
+
             // Geographical coordinates of US Naval Observatory at Washington, DC
             var geo = new CrdsGeographical(new DMS("+38* 55' 17''"), new DMS("+77* 03' 56''"));
 
@@ -59,15 +62,87 @@ namespace ADK.Tests
 
             // Expected apparent equatorial coordinates of Venus
             var eqExpected = new CrdsEquatorial(new HMS("23h 09m 16.641s"), new DMS("-6* 43' 11.61''"));
-       
+
             // Tested value
             var eqActual = hor.ToEquatorial(geo, theta0);
 
-            double errorInAlpha = 1 / 3600.0 * 15 * 0.1; // 0.1 of second of time
-            double errorInDelta = 1 / 3600.0 * 0.1;      // 0.1 of second of degree
+            Assert.AreEqual(eqExpected.Alpha, eqActual.Alpha, errorInHMS);
+            Assert.AreEqual(eqExpected.Delta, eqActual.Delta, errorInDMS);
+        }
 
-            Assert.AreEqual(eqExpected.Alpha, eqActual.Alpha, errorInAlpha);
-            Assert.AreEqual(eqExpected.Delta, eqActual.Delta, errorInDelta);
+        /// <remarks>
+        /// AA(II), Example 13.a. 
+        /// </remarks>
+        [TestMethod]
+        public void EquatorialToEcliptical()
+        {
+            CrdsEquatorial eq = new CrdsEquatorial(new HMS("7h 45m 18.946s"), new DMS("+28* 01' 34.26''"));
+
+            CrdsEcliptical ecl = eq.ToEcliptical(23.4392911);
+
+            Assert.AreEqual(113.215630, ecl.Lambda, errorInDMS);
+            Assert.AreEqual(6.684170, ecl.Beta, errorInDMS);
+        }
+
+        /// <remarks>
+        /// AA(II), Example 13.a (exercise).
+        /// </remarks>
+        [TestMethod]
+        public void EclipticalToEquatorial()
+        {
+            CrdsEcliptical ecl = new CrdsEcliptical(113.215630, 6.684170);
+
+            CrdsEquatorial eq = ecl.ToEquatorial(23.4392911);
+
+            CrdsEquatorial eqExpected = new CrdsEquatorial(new HMS("7h 45m 18.946s"), new DMS("+28* 01' 34.26''"));
+
+            Assert.AreEqual(eqExpected.Alpha, eq.Alpha, errorInHMS);
+            Assert.AreEqual(eqExpected.Delta, eq.Delta, errorInDMS);
+        }
+
+        /// <remarks>
+        /// AA(II), page 96, exercise.
+        /// </remarks>
+        [TestMethod]
+        public void EquatorialToGalactical()
+        {
+            CrdsEquatorial eq = new CrdsEquatorial(new HMS("17h 48m 59.74s"), new DMS("-14* 43' 08.2''"));
+
+            CrdsGalactical gal = eq.ToGalactical();
+
+            Assert.AreEqual(12.9593, gal.l, 1e-4);
+            Assert.AreEqual(6.0463, gal.b, 1e-4);
+        }
+
+        /// <remarks>
+        /// AA(II), page 96, exercise (inverted).
+        /// </remarks>
+        [TestMethod]
+        public void GalacticalToEquatorial()
+        {
+            CrdsEquatorial eqExpected = new CrdsEquatorial(new HMS("17h 48m 59.74s"), new DMS("-14* 43' 08.2''"));
+
+            CrdsGalactical gal = new CrdsGalactical(12.9593, 6.0463);
+
+            CrdsEquatorial eq = gal.ToEquatorial();
+
+            Assert.AreEqual(eqExpected.Alpha, eq.Alpha, 1e-4);
+            Assert.AreEqual(eqExpected.Delta, eq.Delta, 1e-4);
+        }
+
+        /// <remarks>
+        /// AA(II), example 26.a.
+        /// </remarks>
+        [TestMethod]
+        public void EclipticalToRectangular()
+        {
+            CrdsEcliptical ecl = new CrdsEcliptical(199.907347, 0.62 / 3600.0, 0.99760775);
+
+            CrdsRectangular rect = ecl.ToRectangular(23.4402297);
+
+            Assert.AreEqual(-0.9379952, rect.X, 1e-7);
+            Assert.AreEqual(-0.3116544, rect.Y, 1e-7);
+            Assert.AreEqual(-0.1351215, rect.Z, 1e-7);
         }
     }
 }
