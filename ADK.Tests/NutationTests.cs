@@ -10,6 +10,9 @@ namespace ADK.Tests
     {
         double jd = Date.JulianDay(1987, 4, 10);
 
+        /// <summary>
+        /// AA(II), example 22.a.
+        /// </summary>
         [TestMethod]
         public void MeanObliquity()
         {
@@ -17,6 +20,9 @@ namespace ADK.Tests
             Assert.AreEqual(new DMS("23* 26' 27.407''"), new DMS(epsilon0));
         }
 
+        /// <summary>
+        /// AA(II), example 22.a.
+        /// </summary>
         [TestMethod]
         public void TrueObliquity()
         {
@@ -24,6 +30,9 @@ namespace ADK.Tests
             Assert.AreEqual(new DMS("23* 26' 36.850''").ToDecimalAngle(), epsilon, 1 / 3600.0 / 2);
         }
 
+        /// <summary>
+        /// AA(II), example 22.a.
+        /// </summary>
         [TestMethod]
         public void NutationInLongitude()
         {
@@ -31,11 +40,32 @@ namespace ADK.Tests
             Assert.AreEqual(-3.788, deltaPsi, 0.5);
         }
 
+        /// <summary>
+        /// AA(II), example 22.a.
+        /// </summary>
         [TestMethod]
         public void NutationInObliquity()
         {
             var deltaEpsilon = Nutation.NutationInObliquity(jd) * 3600;
             Assert.AreEqual(9.443, deltaEpsilon, 0.5);
+        }
+
+        /// <summary>
+        /// AA(II), example 23.a.
+        /// </summary>
+        [TestMethod]
+        public void NutationEffect()
+        {
+            CrdsEquatorial eq = new CrdsEquatorial(41.5472, 49.3485);
+
+            double deltaPsi = 14.861 / 3600.0;
+            double deltaEpsilon = 2.705 / 3600.0;
+            double epsilon = 23.436;
+
+            CrdsEquatorial correction = Nutation.NutationEffect(eq, deltaPsi, deltaEpsilon, epsilon);
+
+            Assert.AreEqual(15.843, correction.Alpha * 3600, 1e-3);
+            Assert.AreEqual(6.218, correction.Delta * 3600, 1e-3);
         }
     }
 }

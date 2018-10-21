@@ -101,5 +101,37 @@ namespace ADK
 
             return deltaPsi / 3600.0;
         }
+
+        /// <summary>
+        /// Returns nutation corrections for ecliptical coordinates.
+        /// </summary>
+        /// <param name="deltaPsi">Nutation in longitude (Δψ) for given instant.</param>
+        /// <remarks>See AA(II), page 150, last paragraph.</remarks>
+        public static CrdsEcliptical NutationEffect(double deltaPsi)
+        {
+            return new CrdsEcliptical(deltaPsi, 0);
+        }
+
+        /// <summary>
+        /// Returns nutation corrections for equatorial coordiantes.
+        /// </summary>
+        /// <param name="eq">Initial (not corrected) equatorial coordiantes.</param>
+        /// <param name="deltaPsi">Nutation in longitude (Δψ) for given instant, in degrees.</param>
+        /// <param name="deltaEpsilon">Nutation in obliquity (Δε) for given instant, in degrees.</param>
+        /// <param name="epsilon">True obliquity of the ecliptic (ε), in degrees.</param>
+        /// <returns>Nutation corrections for equatorial coordiantes.</returns>
+        /// <remarks>AA(II), formula 23.1</remarks>
+        public static CrdsEquatorial NutationEffect(CrdsEquatorial eq, double deltaPsi, double deltaEpsilon, double epsilon)
+        {
+            CrdsEquatorial correction = new CrdsEquatorial();
+
+            epsilon = AstroUtils.ToRadian(epsilon);
+            double alpha = AstroUtils.ToRadian(eq.Alpha);
+            double delta = AstroUtils.ToRadian(eq.Delta);
+
+            correction.Alpha = (Math.Cos(epsilon) + Math.Sin(epsilon) * Math.Sin(alpha) * Math.Tan(delta)) * deltaPsi - (Math.Cos(alpha) * Math.Tan(delta)) * deltaEpsilon;
+            correction.Delta = Math.Sin(epsilon) * Math.Cos(alpha) * deltaPsi + Math.Sin(alpha) * deltaEpsilon;
+            return correction;
+        }
     }
 }
