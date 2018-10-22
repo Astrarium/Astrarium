@@ -59,6 +59,8 @@ namespace ADK
         /// </summary>
         /// <param name="jd">Julian Day, corresponding to the given date.</param>
         /// <returns>Returns nutation in obliquity value in degrees.</returns>
+        /// The method is taken from AA(II), page 144.
+        /// Accuracy of the method is 0.1".
         public static double NutationInObliquity(double jd)
         {
             double T = (jd - 2451545) / 36525.0;
@@ -83,6 +85,10 @@ namespace ADK
         /// </summary>
         /// <param name="jd">Julian Day, corresponding to the given date.</param>
         /// <returns>Returns nutation in longitude value in degrees.</returns>
+        /// <remarks>
+        /// The method is taken from AA(II), page 144.
+        /// Accuracy of the method is 0.5".
+        /// </remarks>
         public static double NutationInLongitude(double jd)
         {
             double T = (jd - 2451545) / 36525.0;

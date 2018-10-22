@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 namespace ADK.Tests
 {
     [TestClass]
-    public class PlanerCalculatorTests : TestClassBase
+    public class PlanetPositionsTests : TestClassBase
     {
         /// <summary>
         /// Number of seconds in 1 degree of arc.
@@ -61,7 +61,7 @@ namespace ADK.Tests
         {
             // Example 32.a from AA
             {
-                CrdsHeliocentrical crds = PlanetCalculator.GetPlanetCoordinates(Planet.Venus, 2448976.5, highPrecision: false);
+                CrdsHeliocentrical crds = ADK.PlanetPositions.GetPlanetCoordinates(Planet.Venus, 2448976.5, highPrecision: false);
                 Assert.AreEqual(26.11428, crds.L, 1e-5);
                 Assert.AreEqual(-2.62070, crds.B, 1e-5);
                 Assert.AreEqual(0.724603, crds.R, 1e-6);
@@ -70,7 +70,7 @@ namespace ADK.Tests
             // Test low-precision implementation from AA2 book
             foreach (VSOP87DTestData testValue in testData)
             {
-                CrdsHeliocentrical crds = PlanetCalculator.GetPlanetCoordinates(testValue.Planet, testValue.JDE, highPrecision: false);
+                CrdsHeliocentrical crds = ADK.PlanetPositions.GetPlanetCoordinates(testValue.Planet, testValue.JDE, highPrecision: false);
 
                 double deltaL = Math.Abs(testValue.L - crds.L) * SECONDS_IN_DEGREE;
                 double deltaB = Math.Abs(testValue.B - crds.B) * SECONDS_IN_DEGREE;
@@ -93,7 +93,7 @@ namespace ADK.Tests
             // Test high-precision implementation from original VSOP87 theory.
             foreach (VSOP87DTestData testValue in testData)
             {
-                CrdsHeliocentrical crds = PlanetCalculator.GetPlanetCoordinates(testValue.Planet, testValue.JDE, highPrecision: true);
+                CrdsHeliocentrical crds = PlanetPositions.GetPlanetCoordinates(testValue.Planet, testValue.JDE, highPrecision: true);
 
                 double deltaL = Math.Abs(testValue.L - crds.L) * SECONDS_IN_DEGREE;
                 double deltaB = Math.Abs(testValue.B - crds.B) * SECONDS_IN_DEGREE;
@@ -108,6 +108,68 @@ namespace ADK.Tests
                 // difference in R should be less than 1e-5 AU
                 Assert.IsTrue(deltaR < 1e-5);
             }
+        }
+
+        /// <summary>
+        /// AA(II), example 25.b.
+        /// </summary>
+        [TestMethod]
+        public void GetSolarCoordinatesLP()
+        {
+            double jde = 2448908.5;
+
+            // get Earth coordinates
+            CrdsHeliocentrical crds = PlanetPositions.GetPlanetCoordinates(Planet.Earth, jde, highPrecision: false);
+
+            Assert.AreEqual(19.907372, crds.L, 1e-6);
+            Assert.AreEqual(-0.644, crds.B * 3600, 1e-3);
+            Assert.AreEqual(0.99760775, crds.R, 1e-8);
+
+            // transform to ecliptical coordinates of the Sun
+            CrdsEcliptical ecl = new CrdsEcliptical(AstroUtils.To360(crds.L + 180), -crds.B, crds.R);
+
+            // get FK5 system correction
+            CrdsEcliptical corr = PlanetPositions.CorrectionForFK5(jde, ecl);
+            Assert.AreEqual(-0.09033, corr.Lambda * 3600, 1e-5);
+            Assert.AreEqual(-0.023, corr.Beta * 3600, 1e-3);
+
+            // correct solar coordinates to FK5 system
+            ecl += corr;
+
+            Assert.AreEqual(199.907347, ecl.Lambda, 1e-6);
+            Assert.AreEqual(0.62, ecl.Beta * 3600, 1e-2);
+            Assert.AreEqual(0.99760775, ecl.Distance, 1e-8);
+
+            // accuracy of the method is 0.5"
+            double deltaPsi = Nutation.NutationInLongitude(jde);
+            Assert.AreEqual(15.908, deltaPsi * 3600, 0.5);
+
+            // accuracy of the method is 0.1"
+            double deltaEpsilon = Nutation.NutationInObliquity(jde);            
+            Assert.AreEqual(-0.308, deltaEpsilon * 3600, 0.1);
+
+            // accuracy of the method is 0.1"
+            double epsilon = Nutation.TrueObliquity(jde);
+            Assert.AreEqual(23.4401443, epsilon, 0.1 / 3600.0);
+
+            // add nutation effect
+            ecl += Nutation.NutationEffect(deltaPsi);
+
+            // calculate aberration effect 
+            CrdsEcliptical aberration = Aberration.AberrationEffect(ecl.Distance);
+            Assert.AreEqual(-20.539, aberration.Lambda * 3600.0, 1e-3);
+
+            // add aberration effect 
+            ecl += aberration;
+
+            // convert ecliptical to equatorial coordinates
+            CrdsEquatorial eq = ecl.ToEquatorial(epsilon);
+
+            // check apparent equatorial coordinates
+            // assume an accuracy of 0.5'' is sufficient
+            Assert.AreEqual(198.378178, eq.Alpha, 1.0 / 3600 * 0.5);
+            Assert.AreEqual(-7.783871, eq.Delta, 1.0 / 3600 * 0.5);
+            
         }
 
         /// <summary>

@@ -8,7 +8,7 @@ namespace ADK
     /// <summary>
     /// Contains methods for calculating ephemeris of planets
     /// </summary>
-    public static class PlanetCalculator
+    public static class PlanetPositions
     {
         /// <summary>
         /// Total number of planets
@@ -170,6 +170,32 @@ namespace ADK
             result.R = (r[0] + r[1] * t + r[2] * t2 + r[3] * t3 + r[4] * t4 + r[5] * t5) * d;
 
             return result;
+        }
+
+        /// <summary>
+        /// Gets correction for ecliptical coordinates obtained by VSOP87 theory, 
+        /// needed for conversion to standard FK5 system.
+        /// This correction should be used only for high-precision version of VSOP87.
+        /// </summary>
+        /// <param name="jde">Julian Ephemeris Day</param>
+        /// <param name="ecl">Non-corrected ecliptical coordinates of the body.</param>
+        /// <returns>Corrections values for longutude and latitude, in degrees.</returns>
+        /// <remarks>
+        /// AA(II), formula 32.3.
+        /// </remarks>
+        public static CrdsEcliptical CorrectionForFK5(double jde, CrdsEcliptical ecl)
+        {
+            double T = (jde - 2451545) / 36525.0;
+
+            double L_ = AstroUtils.ToRadian(ecl.Lambda - 1.397 * T - 0.00031 * T * T);
+
+            double sinL_ = Math.Sin(L_);
+            double cosL_ = Math.Cos(L_);
+
+            double deltaL = -0.09033 + 0.03916 * (cosL_ + sinL_) * Math.Tan(AstroUtils.ToRadian(ecl.Beta));
+            double deltaB = 0.03916 * (cosL_ - sinL_);
+
+            return new CrdsEcliptical(deltaL / 3600, deltaB / 3600);
         }
 
         /// <summary>

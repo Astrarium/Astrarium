@@ -47,7 +47,7 @@ namespace ADK.Tests
         public void NutationInObliquity()
         {
             var deltaEpsilon = Nutation.NutationInObliquity(jd) * 3600;
-            Assert.AreEqual(9.443, deltaEpsilon, 0.5);
+            Assert.AreEqual(9.443, deltaEpsilon, 0.1);
         }
 
         /// <summary>
