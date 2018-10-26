@@ -103,27 +103,27 @@ namespace ADK
         {
             CrdsEquatorial eq = new CrdsEquatorial();
 
-            double sinDelta0 = Math.Sin(AstroUtils.ToRadian(eq0.Delta));
-            double cosDelta0 = Math.Cos(AstroUtils.ToRadian(eq0.Delta));
-            double sinTheta = Math.Sin(AstroUtils.ToRadian(p.theta));
-            double cosTheta = Math.Cos(AstroUtils.ToRadian(p.theta));
-            double sinAlpha0Zeta = Math.Sin(AstroUtils.ToRadian(eq0.Alpha + p.zeta));
-            double cosAlpha0Zeta = Math.Cos(AstroUtils.ToRadian(eq0.Alpha + p.zeta));
+            double sinDelta0 = Math.Sin(Angle.ToRadians(eq0.Delta));
+            double cosDelta0 = Math.Cos(Angle.ToRadians(eq0.Delta));
+            double sinTheta = Math.Sin(Angle.ToRadians(p.theta));
+            double cosTheta = Math.Cos(Angle.ToRadians(p.theta));
+            double sinAlpha0Zeta = Math.Sin(Angle.ToRadians(eq0.Alpha + p.zeta));
+            double cosAlpha0Zeta = Math.Cos(Angle.ToRadians(eq0.Alpha + p.zeta));
 
             double A = cosDelta0 * sinAlpha0Zeta;
             double B = cosTheta * cosDelta0 * cosAlpha0Zeta - sinTheta * sinDelta0;
             double C = sinTheta * cosDelta0 * cosAlpha0Zeta + cosTheta * sinDelta0;
 
-            eq.Alpha = AstroUtils.ToDegree(Math.Atan2(A, B)) + p.z;
-            eq.Alpha = AstroUtils.To360(eq.Alpha);
+            eq.Alpha = Angle.ToDegrees(Math.Atan2(A, B)) + p.z;
+            eq.Alpha = Angle.To360(eq.Alpha);
 
             if (Math.Abs(C) == 1)
             {
-                eq.Delta = AstroUtils.ToDegree(Math.Acos(A * A + B * B));
+                eq.Delta = Angle.ToDegrees(Math.Acos(A * A + B * B));
             }
             else
             {
-                eq.Delta = AstroUtils.ToDegree(Math.Asin(C));
+                eq.Delta = Angle.ToDegrees(Math.Asin(C));
             }
 
             return eq;

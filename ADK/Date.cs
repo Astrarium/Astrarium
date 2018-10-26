@@ -689,7 +689,7 @@ namespace ADK
             double theta0 = 280.46061837 + 360.98564736629 * (jd - 2451545.0) +
                 0.000387933 * T2 - T3 / 38710000.0;
 
-            theta0 = AstroUtils.To360(theta0);
+            theta0 = Angle.To360(theta0);
 
             return theta0;
         }
@@ -705,7 +705,7 @@ namespace ADK
         public static double ApparentSiderealTime(double jd)
         {
             double deltaPsi = Nutation.NutationInLongitude(jd);
-            double cosEpsilon = Math.Cos(AstroUtils.ToRadian(Nutation.TrueObliquity(jd)));
+            double cosEpsilon = Math.Cos(Angle.ToRadians(Nutation.TrueObliquity(jd)));
 
             return MeanSiderealTime(jd) + deltaPsi * cosEpsilon;
         }

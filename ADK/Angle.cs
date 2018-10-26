@@ -4,6 +4,51 @@ using System.Text.RegularExpressions;
 
 namespace ADK
 {
+    #region Angle
+
+    /// <summary>
+    /// Contains utility methods to work with angle values.
+    /// </summary>
+    public static class Angle
+    {
+        /// <summary>
+        /// 1 radian in degrees 
+        /// </summary>
+        private const double RAD = 180.0 / Math.PI;
+
+        /// <summary>
+        /// Converts angle value expressed in degrees to radians.
+        /// </summary>
+        /// <param name="angle">Angle value in degrees</param>
+        /// <returns>Angle value expressed in radians</returns>
+        public static double ToRadians(double angle)
+        {
+            return angle / RAD;
+        }
+
+        /// <summary>
+        /// Converts angle value expressed in radians to degrees.
+        /// </summary>
+        /// <param name="angle">Angle value in radians</param>
+        /// <returns>Angle value expressed in degrees</returns>
+        public static double ToDegrees(double angle)
+        {
+            return angle * RAD;
+        }
+
+        /// <summary>
+        /// Normalizes angle value expressed in degrees to value in range from 0 to 360.
+        /// </summary>
+        /// <param name="angle">Angle value expressed in degrees.</param>
+        /// <returns>Value expressed in degrees in range from 0 to 360</returns>
+        public static double To360(double angle)
+        {
+            return angle - 360 * (long)(angle / 360.0) + (angle < 0 ? 360 : 0);
+        }
+    }
+
+    #endregion Angle
+
     #region DMS
 
     /// <summary>
@@ -124,6 +169,16 @@ namespace ADK
         public override string ToString()
         {
             return string.Format(CultureInfo.InvariantCulture, "{0:+;-}{1:#}° {2:D2}\u2032 {3:0.##}\u2033", Sign, Degrees, Minutes, Seconds);
+        }
+
+        /// <summary>
+        /// Converts sexagesimal angle to arbitrary string representation.
+        /// </summary>
+        /// <param name="formatter">Formatter function</param>
+        /// <returns></returns>
+        public string ToString(Func<DMS, string> formatter)
+        {
+            return formatter(this);
         }
 
         /// <summary>
@@ -283,6 +338,16 @@ namespace ADK
         public override string ToString()
         {
             return string.Format(CultureInfo.InvariantCulture, "{0:D2}h {1:D2}m {2:.###}s", Hours, Minutes, Seconds);
+        }
+
+        /// <summary>
+        /// Converts sexagesimal angle to arbitrary string representation.
+        /// </summary>
+        /// <param name="formatter">Formatter function</param>
+        /// <returns></returns>
+        public string ToString(Func<HMS, string> formatter)
+        {
+            return formatter(this);
         }
 
         /// <summary>

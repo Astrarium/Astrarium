@@ -75,7 +75,7 @@ namespace ADK
             // Mean longitude of Moon
             double L_ = 218.3165 + 481267.8813 * T;
 
-            double deltaEpsilon = 9.20 * Math.Cos(AstroUtils.ToRadian(Omega)) + 0.57 * Math.Cos(AstroUtils.ToRadian(2 * L)) + 0.10 * Math.Cos(AstroUtils.ToRadian(2 * L_)) - 0.09 * Math.Cos(AstroUtils.ToRadian(2 * Omega));
+            double deltaEpsilon = 9.20 * Math.Cos(Angle.ToRadians(Omega)) + 0.57 * Math.Cos(Angle.ToRadians(2 * L)) + 0.10 * Math.Cos(Angle.ToRadians(2 * L_)) - 0.09 * Math.Cos(Angle.ToRadians(2 * Omega));
 
             return deltaEpsilon / 3600.0;
         }
@@ -103,7 +103,7 @@ namespace ADK
             // Mean longitude of Moon
             double L_ = 218.3165 + 481267.8813 * T;
 
-            double deltaPsi = -17.20 * Math.Sin(AstroUtils.ToRadian(Omega)) - 1.32 * Math.Sin(AstroUtils.ToRadian(2 * L)) - 0.23 * Math.Sin(AstroUtils.ToRadian(2 * L_)) + 0.21 * Math.Sin(AstroUtils.ToRadian(2 * Omega));
+            double deltaPsi = -17.20 * Math.Sin(Angle.ToRadians(Omega)) - 1.32 * Math.Sin(Angle.ToRadians(2 * L)) - 0.23 * Math.Sin(Angle.ToRadians(2 * L_)) + 0.21 * Math.Sin(Angle.ToRadians(2 * Omega));
 
             return deltaPsi / 3600.0;
         }
@@ -131,9 +131,9 @@ namespace ADK
         {
             CrdsEquatorial correction = new CrdsEquatorial();
 
-            epsilon = AstroUtils.ToRadian(epsilon);
-            double alpha = AstroUtils.ToRadian(eq.Alpha);
-            double delta = AstroUtils.ToRadian(eq.Delta);
+            epsilon = Angle.ToRadians(epsilon);
+            double alpha = Angle.ToRadians(eq.Alpha);
+            double delta = Angle.ToRadians(eq.Delta);
 
             correction.Alpha = (Math.Cos(epsilon) + Math.Sin(epsilon) * Math.Sin(alpha) * Math.Tan(delta)) * deltaPsi - (Math.Cos(alpha) * Math.Tan(delta)) * deltaEpsilon;
             correction.Delta = Math.Sin(epsilon) * Math.Cos(alpha) * deltaPsi + Math.Sin(alpha) * deltaEpsilon;

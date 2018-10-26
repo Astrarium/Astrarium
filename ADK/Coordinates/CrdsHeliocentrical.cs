@@ -29,7 +29,7 @@ namespace ADK
         {
             return new CrdsHeliocentrical()
             {
-                L = AstroUtils.To360(lhs.L + rhs.L),
+                L = Angle.To360(lhs.L + rhs.L),
                 B = lhs.B + rhs.B,
                 R = lhs.R + rhs.R,
             };

@@ -1,10 +1,21 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Globalization;
 
 namespace ADK.Tests
 {
     [TestClass]
-    public class AnglesTests
+    public class AngleTests
     {
+        [TestMethod]
+        public void To360()
+        {
+            Assert.AreEqual(2, Angle.To360(362));
+            Assert.AreEqual(183, Angle.To360(183));
+            Assert.AreEqual(348, Angle.To360(-12));
+            Assert.AreEqual(90, Angle.To360(-270));
+        }
+
         [TestMethod]
         public void FromDecimalToDms()
         {
@@ -56,6 +67,20 @@ namespace ADK.Tests
         {
             Assert.AreEqual(new HMS(4, 27, 40.386), new HMS("4h 27m 40.386s"));
             Assert.AreEqual(new HMS(17, 13, 21.13), new HMS("17 13 21.13"));
+        }
+
+        [TestMethod]
+        public void HmsToString()
+        {
+            Func<HMS, string> formatter = (HMS hms) => string.Format(CultureInfo.InvariantCulture, "{0:D2}ч {1:D2}м {2:.##}с", hms.Hours, hms.Minutes, hms.Seconds);
+            Assert.AreEqual("04ч 27м 40.39с", new HMS(4, 27, 40.386).ToString(formatter));
+        }
+
+        [TestMethod]
+        public void DmsToString()
+        {
+            Func<DMS, string> formatter = (DMS dms) => string.Format(CultureInfo.InvariantCulture, "{0:#}° {1:D2}' {2:0.##}''", dms.Degrees, dms.Minutes, dms.Seconds);
+            Assert.AreEqual("4° 27' 40.39''", new DMS(4, 27, 40.386).ToString(formatter));
         }
     }
 }

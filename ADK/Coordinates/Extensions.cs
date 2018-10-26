@@ -31,19 +31,19 @@ namespace ADK
         /// </remarks>
         public static CrdsHorizontal ToHorizontal(this CrdsEquatorial eq, CrdsGeographical geo, double theta0)
         {
-            double H = AstroUtils.ToRadian(HourAngle(theta0, geo.Longitude, eq.Alpha));
-            double phi = AstroUtils.ToRadian(geo.Latitude);        
-            double delta = AstroUtils.ToRadian(eq.Delta);
+            double H = Angle.ToRadians(HourAngle(theta0, geo.Longitude, eq.Alpha));
+            double phi = Angle.ToRadians(geo.Latitude);        
+            double delta = Angle.ToRadians(eq.Delta);
 
             CrdsHorizontal hor = new CrdsHorizontal();
 
             double Y = Math.Sin(H);
             double X = Math.Cos(H) * Math.Sin(phi) - Math.Tan(delta) * Math.Cos(phi);
 
-            hor.Altitude = AstroUtils.ToDegree(Math.Asin(Math.Sin(phi) * Math.Sin(delta) + Math.Cos(phi) * Math.Cos(delta) * Math.Cos(H)));
+            hor.Altitude = Angle.ToDegrees(Math.Asin(Math.Sin(phi) * Math.Sin(delta) + Math.Cos(phi) * Math.Cos(delta) * Math.Cos(H)));
 
-            hor.Azimuth = AstroUtils.ToDegree(Math.Atan2(Y, X));
-            hor.Azimuth = AstroUtils.To360(hor.Azimuth);
+            hor.Azimuth = Angle.ToDegrees(Math.Atan2(Y, X));
+            hor.Azimuth = Angle.To360(hor.Azimuth);
 
             return hor;
         }
@@ -58,17 +58,17 @@ namespace ADK
         public static CrdsEquatorial ToEquatorial(this CrdsHorizontal hor, CrdsGeographical geo, double theta0)
         {
             CrdsEquatorial eq = new CrdsEquatorial();
-            double A = AstroUtils.ToRadian(hor.Azimuth);
-            double h = AstroUtils.ToRadian(hor.Altitude);
-            double phi = AstroUtils.ToRadian(geo.Latitude);
+            double A = Angle.ToRadians(hor.Azimuth);
+            double h = Angle.ToRadians(hor.Altitude);
+            double phi = Angle.ToRadians(geo.Latitude);
 
             double Y = Math.Sin(A);
             double X = Math.Cos(A) * Math.Sin(phi) + Math.Tan(h) * Math.Cos(phi);
 
-            double H = AstroUtils.ToDegree(Math.Atan2(Y, X));
+            double H = Angle.ToDegrees(Math.Atan2(Y, X));
 
-            eq.Alpha = AstroUtils.To360(theta0 - geo.Longitude - H);
-            eq.Delta = AstroUtils.ToDegree(Math.Asin(Math.Sin(phi) * Math.Sin(h) - Math.Cos(phi) * Math.Cos(h) * Math.Cos(A)));
+            eq.Alpha = Angle.To360(theta0 - geo.Longitude - H);
+            eq.Delta = Angle.ToDegrees(Math.Asin(Math.Sin(phi) * Math.Sin(h) - Math.Cos(phi) * Math.Cos(h) * Math.Cos(A)));
 
             return eq;
         }
@@ -83,15 +83,15 @@ namespace ADK
         {
             CrdsEquatorial eq = new CrdsEquatorial();
 
-            epsilon = AstroUtils.ToRadian(epsilon);
-            double lambda = AstroUtils.ToRadian(ecl.Lambda);
-            double beta = AstroUtils.ToRadian(ecl.Beta);
+            epsilon = Angle.ToRadians(epsilon);
+            double lambda = Angle.ToRadians(ecl.Lambda);
+            double beta = Angle.ToRadians(ecl.Beta);
 
             double Y = Math.Sin(lambda) * Math.Cos(epsilon) - Math.Tan(beta) * Math.Sin(epsilon);
             double X = Math.Cos(lambda);
 
-            eq.Alpha = AstroUtils.To360(AstroUtils.ToDegree(Math.Atan2(Y, X)));
-            eq.Delta = AstroUtils.ToDegree(Math.Asin(Math.Sin(beta) * Math.Cos(epsilon) + Math.Cos(beta) * Math.Sin(epsilon) * Math.Sin(lambda)));
+            eq.Alpha = Angle.To360(Angle.ToDegrees(Math.Atan2(Y, X)));
+            eq.Delta = Angle.ToDegrees(Math.Asin(Math.Sin(beta) * Math.Cos(epsilon) + Math.Cos(beta) * Math.Sin(epsilon) * Math.Sin(lambda)));
 
             return eq;
         }
@@ -106,15 +106,15 @@ namespace ADK
         {
             CrdsEcliptical ecl = new CrdsEcliptical();
 
-            epsilon = AstroUtils.ToRadian(epsilon);
-            double alpha = AstroUtils.ToRadian(eq.Alpha);
-            double delta = AstroUtils.ToRadian(eq.Delta);
+            epsilon = Angle.ToRadians(epsilon);
+            double alpha = Angle.ToRadians(eq.Alpha);
+            double delta = Angle.ToRadians(eq.Delta);
 
             double Y = Math.Sin(alpha) * Math.Cos(epsilon) + Math.Tan(delta) * Math.Sin(epsilon);
             double X = Math.Cos(alpha);
             
-            ecl.Lambda = AstroUtils.ToDegree(Math.Atan2(Y, X));
-            ecl.Beta = AstroUtils.ToDegree(Math.Asin(Math.Sin(delta) * Math.Cos(epsilon) - Math.Cos(delta) * Math.Sin(epsilon) * Math.Sin(alpha)));
+            ecl.Lambda = Angle.ToDegrees(Math.Atan2(Y, X));
+            ecl.Beta = Angle.ToDegrees(Math.Asin(Math.Sin(delta) * Math.Cos(epsilon) - Math.Cos(delta) * Math.Sin(epsilon) * Math.Sin(alpha)));
 
             return ecl;
         }
@@ -128,16 +128,16 @@ namespace ADK
         {
             CrdsGalactical gal = new CrdsGalactical();
 
-            double alpha0_alpha = AstroUtils.ToRadian(192.25 - eq.Alpha);
-            double delta = AstroUtils.ToRadian(eq.Delta);
-            double delta0 = AstroUtils.ToRadian(27.4);
+            double alpha0_alpha = Angle.ToRadians(192.25 - eq.Alpha);
+            double delta = Angle.ToRadians(eq.Delta);
+            double delta0 = Angle.ToRadians(27.4);
             
             double Y = Math.Sin(alpha0_alpha);
             double X = Math.Cos(alpha0_alpha) * Math.Sin(delta0) - Math.Tan(delta) * Math.Cos(delta0);
             double sinb = Math.Sin(delta) * Math.Sin(delta0) + Math.Cos(delta) * Math.Cos(delta0) * Math.Cos(alpha0_alpha);
 
-            gal.l = AstroUtils.To360(303 - AstroUtils.ToDegree(Math.Atan2(Y, X)));
-            gal.b = AstroUtils.ToDegree(Math.Asin(sinb));
+            gal.l = Angle.To360(303 - Angle.ToDegrees(Math.Atan2(Y, X)));
+            gal.b = Angle.ToDegrees(Math.Asin(sinb));
             return gal;
         }
 
@@ -150,16 +150,16 @@ namespace ADK
         {
             CrdsEquatorial eq = new CrdsEquatorial();
 
-            double l_l0 = AstroUtils.ToRadian(gal.l - 123.0);
-            double delta0 = AstroUtils.ToRadian(27.4);
-            double b = AstroUtils.ToRadian(gal.b);
+            double l_l0 = Angle.ToRadians(gal.l - 123.0);
+            double delta0 = Angle.ToRadians(27.4);
+            double b = Angle.ToRadians(gal.b);
 
             double Y = Math.Sin(l_l0);
             double X = Math.Cos(l_l0) * Math.Sin(delta0) - Math.Tan(b) * Math.Cos(delta0);
             double sinDelta = Math.Sin(b) * Math.Sin(delta0) + Math.Cos(b) * Math.Cos(delta0) * Math.Cos(l_l0);
 
-            eq.Alpha = AstroUtils.To360(AstroUtils.ToDegree(Math.Atan2(Y, X)) + 12.25);
-            eq.Delta = AstroUtils.ToDegree(Math.Asin(sinDelta));
+            eq.Alpha = Angle.To360(Angle.ToDegrees(Math.Atan2(Y, X)) + 12.25);
+            eq.Delta = Angle.ToDegrees(Math.Asin(sinDelta));
             return eq;
         }
 
@@ -173,11 +173,11 @@ namespace ADK
         {
             CrdsRectangular rect = new CrdsRectangular();
 
-            double beta = AstroUtils.ToRadian(ecl.Beta);
-            double lambda = AstroUtils.ToRadian(ecl.Lambda);
+            double beta = Angle.ToRadians(ecl.Beta);
+            double lambda = Angle.ToRadians(ecl.Lambda);
             double R = ecl.Distance;
 
-            epsilon = AstroUtils.ToRadian(epsilon);
+            epsilon = Angle.ToRadians(epsilon);
 
             double cosBeta = Math.Cos(beta);
             double sinBeta = Math.Sin(beta);

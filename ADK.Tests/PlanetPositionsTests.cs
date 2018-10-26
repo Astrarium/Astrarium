@@ -47,8 +47,8 @@ namespace ADK.Tests
                     i++;
                     string[] values = regexValues.Match(lines[i]).Groups.Select(g => g.Value).ToArray();
 
-                    double L = AstroUtils.ToDegree(Double.Parse(values[1], numericFormat));
-                    double B = AstroUtils.ToDegree(Double.Parse(values[2], numericFormat));
+                    double L = Angle.ToDegrees(Double.Parse(values[1], numericFormat));
+                    double B = Angle.ToDegrees(Double.Parse(values[2], numericFormat));
                     double R = Double.Parse(values[3], numericFormat);
 
                     testData.Add(new VSOP87DTestData(planet, jd, L, B, R));
@@ -126,7 +126,7 @@ namespace ADK.Tests
             Assert.AreEqual(0.99760775, crds.R, 1e-8);
 
             // transform to ecliptical coordinates of the Sun
-            CrdsEcliptical ecl = new CrdsEcliptical(AstroUtils.To360(crds.L + 180), -crds.B, crds.R);
+            CrdsEcliptical ecl = new CrdsEcliptical(Angle.To360(crds.L + 180), -crds.B, crds.R);
 
             // get FK5 system correction
             CrdsEcliptical corr = PlanetPositions.CorrectionForFK5(jde, ecl);

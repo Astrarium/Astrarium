@@ -68,7 +68,7 @@ namespace ADK
 
             // mean anomaly of the Sun
             double M = 257.52911 + 35999.05029 * T - 0.0001537 * T2;
-            M = AstroUtils.ToRadian(M);
+            M = Angle.ToRadians(M);
 
             // Sun's equation of the center
             double C = (1.914602 - 0.004817 * T - 0.000014 * T2) * Math.Sin(M)
@@ -79,7 +79,7 @@ namespace ADK
             {
                 e = e,
                 pi = pi,
-                lambda = AstroUtils.To360(L0 + C),
+                lambda = Angle.To360(L0 + C),
                 epsilon = Nutation.TrueObliquity(jde)
             };
         }
@@ -95,9 +95,9 @@ namespace ADK
         /// </remarks>
         public static CrdsEcliptical AberrationEffect(CrdsEcliptical ecl, AberrationElements ae)
         {
-            double thetaLambda = AstroUtils.ToRadian(ae.lambda - ecl.Lambda);
-            double piLambda = AstroUtils.ToRadian(ae.pi - ecl.Lambda);
-            double beta = AstroUtils.ToRadian(ecl.Beta);
+            double thetaLambda = Angle.ToRadians(ae.lambda - ecl.Lambda);
+            double piLambda = Angle.ToRadians(ae.pi - ecl.Lambda);
+            double beta = Angle.ToRadians(ecl.Beta);
 
             double dLambda = (-k * Math.Cos(thetaLambda) + ae.e * k * Math.Cos(piLambda)) / Math.Cos(beta);
             double dBeta = -k * Math.Sin(beta) * (Math.Sin(thetaLambda) - ae.e * Math.Sin(piLambda));
@@ -114,11 +114,11 @@ namespace ADK
         /// <remarks>AA(II), formula 23.3</remarks>
         public static CrdsEquatorial AberrationEffect(CrdsEquatorial eq, AberrationElements ae)
         {
-            double a = AstroUtils.ToRadian(eq.Alpha);
-            double d = AstroUtils.ToRadian(eq.Delta);
-            double epsilon = AstroUtils.ToRadian(ae.epsilon);
-            double theta = AstroUtils.ToRadian(ae.lambda);
-            double pi = AstroUtils.ToRadian(ae.pi);
+            double a = Angle.ToRadians(eq.Alpha);
+            double d = Angle.ToRadians(eq.Delta);
+            double epsilon = Angle.ToRadians(ae.epsilon);
+            double theta = Angle.ToRadians(ae.lambda);
+            double pi = Angle.ToRadians(ae.pi);
 
             double da = -k * (Math.Cos(a) * Math.Cos(theta) * Math.Cos(epsilon) + Math.Sin(a) * Math.Sin(theta)) / Math.Cos(d)
                 + epsilon * k * (Math.Cos(a) * Math.Cos(pi) * Math.Cos(epsilon) + Math.Sin(a) * Math.Sin(pi)) / Math.Cos(d);

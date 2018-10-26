@@ -161,11 +161,11 @@ namespace ADK
             CrdsHeliocentrical result = new CrdsHeliocentrical();
 
             result.L = (l[0] + l[1] * t + l[2] * t2 + l[3] * t3 + l[4] * t4 + l[5] * t5) * d;
-            result.L = AstroUtils.ToDegree(result.L);
-            result.L = AstroUtils.To360(result.L);
+            result.L = Angle.ToDegrees(result.L);
+            result.L = Angle.To360(result.L);
 
             result.B = (b[0] + b[1] * t + b[2] * t2 + b[3] * t3 + b[4] * t4 + b[5] * t5) * d;
-            result.B = AstroUtils.ToDegree(result.B);
+            result.B = Angle.ToDegrees(result.B);
                 
             result.R = (r[0] + r[1] * t + r[2] * t2 + r[3] * t3 + r[4] * t4 + r[5] * t5) * d;
 
@@ -187,12 +187,12 @@ namespace ADK
         {
             double T = (jde - 2451545) / 36525.0;
 
-            double L_ = AstroUtils.ToRadian(ecl.Lambda - 1.397 * T - 0.00031 * T * T);
+            double L_ = Angle.ToRadians(ecl.Lambda - 1.397 * T - 0.00031 * T * T);
 
             double sinL_ = Math.Sin(L_);
             double cosL_ = Math.Cos(L_);
 
-            double deltaL = -0.09033 + 0.03916 * (cosL_ + sinL_) * Math.Tan(AstroUtils.ToRadian(ecl.Beta));
+            double deltaL = -0.09033 + 0.03916 * (cosL_ + sinL_) * Math.Tan(Angle.ToRadians(ecl.Beta));
             double deltaB = 0.03916 * (cosL_ - sinL_);
 
             return new CrdsEcliptical(deltaL / 3600, deltaB / 3600);
