@@ -4,29 +4,6 @@ using System.Text;
 
 namespace ADK
 {
-    public class AberrationElements
-    {
-        /// <summary>
-        /// Earth orbit longitude of perihelion
-        /// </summary>
-        public double pi { get; set; }
-
-        /// <summary>
-        /// Eccentricity of the Earth orbit
-        /// </summary>
-        public double e { get; set; }
-
-        /// <summary>
-        /// Sun's true longitude
-        /// </summary>
-        public double lambda { get; set; }
-
-        /// <summary>
-        /// rue obliquity of the ecliptic (ε).
-        /// </summary>
-        public double epsilon { get; set; }
-    }
-
     /// <summary>
     /// Contains methods for calculation of aberration effects.
     /// </summary>
@@ -55,7 +32,7 @@ namespace ADK
         /// <remarks>
         /// AA(II), pp. 151, 163, 164
         /// </remarks>
-        public static AberrationElements Elements(double jde)
+        public static AberrationElements AberrationElements(double jde)
         {
             double T = (jde - 2451545.0) / 36525.0;
             double T2 = T * T;
@@ -75,12 +52,13 @@ namespace ADK
                 + (0.019993 - 0.000101 * T) * Math.Sin(2 * M)
                 + 0.000289 * Math.Sin(3 * M);
 
+            NutationElements nutation = Nutation.NutationElements(jde);
+
             return new AberrationElements()
             {
                 e = e,
                 pi = pi,
-                lambda = Angle.To360(L0 + C),
-                epsilon = Nutation.TrueObliquity(jde)
+                lambda = Angle.To360(L0 + C)
             };
         }
 
@@ -112,13 +90,13 @@ namespace ADK
         /// <param name="ae"></param>
         /// <returns></returns>
         /// <remarks>AA(II), formula 23.3</remarks>
-        public static CrdsEquatorial AberrationEffect(CrdsEquatorial eq, AberrationElements ae)
+        public static CrdsEquatorial AberrationEffect(CrdsEquatorial eq, AberrationElements ae, double epsilon)
         {
             double a = Angle.ToRadians(eq.Alpha);
             double d = Angle.ToRadians(eq.Delta);
-            double epsilon = Angle.ToRadians(ae.epsilon);
             double theta = Angle.ToRadians(ae.lambda);
             double pi = Angle.ToRadians(ae.pi);
+            epsilon = Angle.ToRadians(epsilon);
 
             double da = -k * (Math.Cos(a) * Math.Cos(theta) * Math.Cos(epsilon) + Math.Sin(a) * Math.Sin(theta)) / Math.Cos(d)
                 + epsilon * k * (Math.Cos(a) * Math.Cos(pi) * Math.Cos(epsilon) + Math.Sin(a) * Math.Sin(pi)) / Math.Cos(d);
@@ -131,5 +109,23 @@ namespace ADK
 
             return new CrdsEquatorial(da / 3600, dd / 3600);
         }
+    }
+
+    public class AberrationElements
+    {
+        /// <summary>
+        /// Earth orbit longitude of perihelion
+        /// </summary>
+        public double pi { get; set; }
+
+        /// <summary>
+        /// Eccentricity of the Earth orbit
+        /// </summary>
+        public double e { get; set; }
+
+        /// <summary>
+        /// Sun's true longitude
+        /// </summary>
+        public double lambda { get; set; }
     }
 }

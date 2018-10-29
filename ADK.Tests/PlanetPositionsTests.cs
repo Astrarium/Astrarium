@@ -140,20 +140,22 @@ namespace ADK.Tests
             Assert.AreEqual(0.62, ecl.Beta * 3600, 1e-2);
             Assert.AreEqual(0.99760775, ecl.Distance, 1e-8);
 
-            // accuracy of the method is 0.5"
-            double deltaPsi = Nutation.NutationInLongitude(jde);
-            Assert.AreEqual(15.908, deltaPsi * 3600, 0.5);
+            var nutation = Nutation.NutationElements(jde);
 
-            // accuracy of the method is 0.1"
-            double deltaEpsilon = Nutation.NutationInObliquity(jde);            
-            Assert.AreEqual(-0.308, deltaEpsilon * 3600, 0.1);
+            // True obliquity
+            double epsilon = Date.TrueObliquity(jde, nutation.deltaEpsilon);
 
-            // accuracy of the method is 0.1"
-            double epsilon = Nutation.TrueObliquity(jde);
+            // accuracy of the value is 0.5"
+            Assert.AreEqual(15.908, nutation.deltaPsi * 3600, 0.5);
+
+            // accuracy of the value is 0.1"        
+            Assert.AreEqual(-0.308, nutation.deltaEpsilon * 3600, 0.1);
+
+            // accuracy of the value is 0.1"
             Assert.AreEqual(23.4401443, epsilon, 0.1 / 3600.0);
 
             // add nutation effect
-            ecl += Nutation.NutationEffect(deltaPsi);
+            ecl += Nutation.NutationEffect(nutation.deltaPsi);
 
             // calculate aberration effect 
             CrdsEcliptical aberration = Aberration.AberrationEffect(ecl.Distance);

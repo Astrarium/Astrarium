@@ -217,12 +217,46 @@ namespace ADK.Tests
         {
             double jd = new Date(1987, 4, 10).ToJulianDay();
 
+            // Nutation elements
+            var nutation = Nutation.NutationElements(jd);
+
+            // True obliquity
+            var epsilon = Date.TrueObliquity(jd, nutation.deltaEpsilon);
+
             // AA(II), example 12.a
             Assert.AreEqual(new HMS("13h 10m 46.3668s"), new HMS(Date.MeanSiderealTime(jd)));
-            Assert.AreEqual(new HMS("13h 10m 46.1351s"), new HMS(Date.ApparentSiderealTime(jd)));
+            Assert.AreEqual(new HMS("13h 10m 46.1351s"), new HMS(Date.ApparentSiderealTime(jd, nutation.deltaPsi, epsilon)));
 
             // AA(II), example 12.b
             Assert.AreEqual(128.7378734, Date.MeanSiderealTime(2446896.30625), 1e-6);
+        }
+
+        /// <summary>
+        /// AA(II), example 22.a.
+        /// </summary>
+        [TestMethod]
+        public void MeanObliquity()
+        {
+            double jd = Date.JulianDay(1987, 4, 10);
+            var epsilon0 = Date.MeanObliquity(jd);
+            Assert.AreEqual(new DMS("23* 26' 27.407''"), new DMS(epsilon0));
+        }
+
+        /// <summary>
+        /// AA(II), example 22.a.
+        /// </summary>
+        [TestMethod]
+        public void TrueObliquity()
+        {
+            double jd = Date.JulianDay(1987, 4, 10);
+
+            // Nutation elements
+            var nutation = Nutation.NutationElements(jd);
+
+            // True obliquity
+            var epsilon = Date.TrueObliquity(jd, nutation.deltaEpsilon);
+
+            Assert.AreEqual(new DMS("23* 26' 36.850''").ToDecimalAngle(), epsilon, 1 / 3600.0 / 2);
         }
     }
 }

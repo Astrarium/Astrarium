@@ -306,15 +306,6 @@ namespace ADK
             return MeanSiderealTime(ToJulianDay());
         }
 
-        /// <summary>
-        /// Gets apparent sidereal time at Greenwich for given instant.
-        /// </summary>
-        /// <returns>Apparent sidereal time at Greenwich, expressed in degrees.</returns>
-        public double ApparentSiderealTime()
-        {
-            return ApparentSiderealTime(ToJulianDay());
-        }
-
         #endregion Instance Methods
 
         #region Static methods
@@ -567,6 +558,28 @@ namespace ADK
         }
 
         /// <summary>
+        /// Gets Julian Day corresponding to Besselian epoch of a specified year,
+        /// for example: BesselianEpoch(1950) = B1950.0 = 2433282.4235
+        /// </summary>
+        /// <param name="year">Year of the epoch</param>
+        /// <returns>Epoch value, in Julian Days</returns>
+        public static double BesselianEpoch(int year)
+        {
+            return (year - 1900.0) * 365.242198781 + 2415020.31352;
+        }
+
+        /// <summary>
+        /// Gets Julian Day corresponding to Julian epoch of a specified year,
+        /// for example: JulianEpoch(2000) = J2000.0 = 2451545.00
+        /// </summary>
+        /// <param name="year">Year of the epoch</param>
+        /// <returns>Epoch value, in Julian Days</returns>
+        public static double JulianEpoch(int year)
+        {
+            return (year - 2000.0) * 365.25 + 2451545.0;
+        }
+
+        /// <summary>
         /// Calculates time difference between Dynamical and Universal Times (ΔT = TD - UT) for a given date.
         /// </summary>
         /// <param name="date">Date for which the time difference should be calculated</param>
@@ -702,34 +715,55 @@ namespace ADK
         /// <remarks>
         /// AA(II), formula 12.4, with corrections for nutation (chapter 22).
         /// </remarks>
-        public static double ApparentSiderealTime(double jd)
+        public static double ApparentSiderealTime(double jd, double deltaPsi, double epsilon)
         {
-            double deltaPsi = Nutation.NutationInLongitude(jd);
-            double cosEpsilon = Math.Cos(Angle.ToRadians(Nutation.TrueObliquity(jd)));
-
+            double cosEpsilon = Math.Cos(Angle.ToRadians(epsilon));
             return MeanSiderealTime(jd) + deltaPsi * cosEpsilon;
         }
 
+
         /// <summary>
-        /// Gets Julian Day corresponding to Besselian epoch of a specified year,
-        /// for example: BesselianEpoch(1950) = B1950.0 = 2433282.4235
+        /// Calculates the mean obliquity of the ecliptic (ε0).
         /// </summary>
-        /// <param name="year">Year of the epoch</param>
-        /// <returns>Epoch value, in Julian Days</returns>
-        public static double BesselianEpoch(int year)
+        /// <param name="jd">Julian Day, corresponding to the given date.</param>
+        /// <returns>Returns mean obliquity of the ecliptic for the given date, expressed in degrees.</returns>
+        /// <remarks>
+        /// AA(II) formula 22.3.
+        /// </remarks>
+        public static double MeanObliquity(double jd)
         {
-            return (year - 1900.0) * 365.242198781 + 2415020.31352;
+            double T = (jd - 2451545) / 36525.0;
+
+            double[] U = new double[11];
+            double[] c = new double[] { 84381.448, -4680.93, -1.55, +1999.25, -51.38, -249.67, -39.05, +7.12, +27.87, +5.79, +2.45 };
+
+            U[0] = 1;
+            U[1] = T / 100.0;
+            for (int i = 2; i <= 10; i++)
+            {
+                U[i] = U[i - 1] * U[1];
+            }
+
+            double epsilon0 = 0;
+            for (int i = 0; i <= 10; i++)
+            {
+                epsilon0 += c[i] * U[i];
+            }
+
+            return epsilon0 / 3600.0;
         }
 
         /// <summary>
-        /// Gets Julian Day corresponding to Julian epoch of a specified year,
-        /// for example: JulianEpoch(2000) = J2000.0 = 2451545.00
+        /// Calculates the true obliquity of the ecliptic (ε).
         /// </summary>
-        /// <param name="year">Year of the epoch</param>
-        /// <returns>Epoch value, in Julian Days</returns>
-        public static double JulianEpoch(int year)
+        /// <param name="jd">Julian Day, corresponding to the given date.</param>
+        /// <returns>Returns true obliquity of the ecliptic for the given date, expressed in degrees.</returns>
+        /// <remarks>
+        /// AA(II) chapter 22.
+        /// </remarks>
+        public static double TrueObliquity(double jd, double deltaEpsilon)
         {
-            return (year - 2000.0) * 365.25 + 2451545.0;
+            return MeanObliquity(jd) + deltaEpsilon;
         }
 
         #endregion Static methods

@@ -10,50 +10,32 @@ namespace ADK
     /// </summary>
     public static class Nutation
     {
-        /// <summary>
-        /// Calculates the mean obliquity of the ecliptic (ε0).
-        /// </summary>
-        /// <param name="jd">Julian Day, corresponding to the given date.</param>
-        /// <returns>Returns mean obliquity of the ecliptic for the given date, expressed in degrees.</returns>
-        /// <remarks>
-        /// AA(II) formula 22.3.
-        /// </remarks>
-        public static double MeanObliquity(double jd)
+        public static NutationElements NutationElements(double jd)
         {
             double T = (jd - 2451545) / 36525.0;
 
-            double[] U = new double[11];
-            double[] c = new double[] { 84381.448, -4680.93, -1.55, +1999.25, -51.38, -249.67, -39.05, +7.12, +27.87, +5.79, +2.45 };
+            // Longitude of the ascending node of Moon's mean orbit on the ecliptic, 
+            // measured from the mean equinox of the date: 
+            double Omega = 125.04452 - 1934.136261 * T;
 
-            U[0] = 1;
-            U[1] = T / 100.0;
-            for (int i = 2; i <= 10; i++)
-            {
-                U[i] = U[i - 1] * U[1];
-            }
+            // Mean longutude of Sun
+            double L = 280.4665 + 36000.7698 * T;
 
-            double epsilon0 = 0;
-            for (int i = 0; i <= 10; i++)
+            // Mean longitude of Moon
+            double L_ = 218.3165 + 481267.8813 * T;
+
+            double deltaEpsilon = 9.20 * Math.Cos(Angle.ToRadians(Omega)) + 0.57 * Math.Cos(Angle.ToRadians(2 * L)) + 0.10 * Math.Cos(Angle.ToRadians(2 * L_)) - 0.09 * Math.Cos(Angle.ToRadians(2 * Omega));
+
+            double deltaPsi = -17.20 * Math.Sin(Angle.ToRadians(Omega)) - 1.32 * Math.Sin(Angle.ToRadians(2 * L)) - 0.23 * Math.Sin(Angle.ToRadians(2 * L_)) + 0.21 * Math.Sin(Angle.ToRadians(2 * Omega));
+
+            return new NutationElements()
             {
-                epsilon0 += c[i] * U[i];
-            }
-            
-            return epsilon0 / 3600.0;
+                deltaEpsilon = deltaEpsilon / 3600,
+                deltaPsi = deltaPsi / 3600
+            };
         }
 
-        /// <summary>
-        /// Calculates the true obliquity of the ecliptic (ε).
-        /// </summary>
-        /// <param name="jd">Julian Day, corresponding to the given date.</param>
-        /// <returns>Returns true obliquity of the ecliptic for the given date, expressed in degrees.</returns>
-        /// <remarks>
-        /// AA(II) chapter 22.
-        /// </remarks>
-        public static double TrueObliquity(double jd)
-        {
-            return MeanObliquity(jd) + NutationInObliquity(jd);
-        }
-
+        /*
         /// <summary>
         /// Calculates the nutation in obliquity (Δε) for given date.
         /// </summary>
@@ -79,7 +61,9 @@ namespace ADK
 
             return deltaEpsilon / 3600.0;
         }
+        */
 
+        /*
         /// <summary>
         /// Calculates the nutation in longitude (Δψ) for given date.
         /// </summary>
@@ -107,6 +91,7 @@ namespace ADK
 
             return deltaPsi / 3600.0;
         }
+        */
 
         /// <summary>
         /// Returns nutation corrections for ecliptical coordinates.
@@ -127,7 +112,7 @@ namespace ADK
         /// <param name="epsilon">True obliquity of the ecliptic (ε), in degrees.</param>
         /// <returns>Nutation corrections for equatorial coordiantes.</returns>
         /// <remarks>AA(II), formula 23.1</remarks>
-        public static CrdsEquatorial NutationEffect(CrdsEquatorial eq, double deltaPsi, double deltaEpsilon, double epsilon)
+        public static CrdsEquatorial NutationEffect(CrdsEquatorial eq, NutationElements ne, double epsilon)
         {
             CrdsEquatorial correction = new CrdsEquatorial();
 
@@ -135,9 +120,16 @@ namespace ADK
             double alpha = Angle.ToRadians(eq.Alpha);
             double delta = Angle.ToRadians(eq.Delta);
 
-            correction.Alpha = (Math.Cos(epsilon) + Math.Sin(epsilon) * Math.Sin(alpha) * Math.Tan(delta)) * deltaPsi - (Math.Cos(alpha) * Math.Tan(delta)) * deltaEpsilon;
-            correction.Delta = Math.Sin(epsilon) * Math.Cos(alpha) * deltaPsi + Math.Sin(alpha) * deltaEpsilon;
+            correction.Alpha = (Math.Cos(epsilon) + Math.Sin(epsilon) * Math.Sin(alpha) * Math.Tan(delta)) * ne.deltaPsi - (Math.Cos(alpha) * Math.Tan(delta)) * ne.deltaEpsilon;
+            correction.Delta = Math.Sin(epsilon) * Math.Cos(alpha) * ne.deltaPsi + Math.Sin(alpha) * ne.deltaEpsilon;
             return correction;
         }
+    }
+
+    public class NutationElements
+    {
+        public double deltaPsi { get; set; }
+
+        public double deltaEpsilon { get; set; }
     }
 }

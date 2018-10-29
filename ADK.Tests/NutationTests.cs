@@ -9,44 +9,19 @@ namespace ADK.Tests
     public class NutationTests
     {
         double jd = Date.JulianDay(1987, 4, 10);
-
+       
         /// <summary>
         /// AA(II), example 22.a.
         /// </summary>
         [TestMethod]
-        public void MeanObliquity()
+        public void NutationElements()
         {
-            var epsilon0 = Nutation.MeanObliquity(jd);
-            Assert.AreEqual(new DMS("23* 26' 27.407''"), new DMS(epsilon0));
-        }
+            var nutation = Nutation.NutationElements(jd);
 
-        /// <summary>
-        /// AA(II), example 22.a.
-        /// </summary>
-        [TestMethod]
-        public void TrueObliquity()
-        {
-            var epsilon = Nutation.TrueObliquity(jd);
-            Assert.AreEqual(new DMS("23* 26' 36.850''").ToDecimalAngle(), epsilon, 1 / 3600.0 / 2);
-        }
+            var deltaPsi = nutation.deltaPsi * 3600;
+            var deltaEpsilon = nutation.deltaEpsilon * 3600;
 
-        /// <summary>
-        /// AA(II), example 22.a.
-        /// </summary>
-        [TestMethod]
-        public void NutationInLongitude()
-        {
-            var deltaPsi = Nutation.NutationInLongitude(jd) * 3600;
             Assert.AreEqual(-3.788, deltaPsi, 0.5);
-        }
-
-        /// <summary>
-        /// AA(II), example 22.a.
-        /// </summary>
-        [TestMethod]
-        public void NutationInObliquity()
-        {
-            var deltaEpsilon = Nutation.NutationInObliquity(jd) * 3600;
             Assert.AreEqual(9.443, deltaEpsilon, 0.1);
         }
 
@@ -58,11 +33,15 @@ namespace ADK.Tests
         {
             CrdsEquatorial eq = new CrdsEquatorial(41.5472, 49.3485);
 
-            double deltaPsi = 14.861 / 3600.0;
-            double deltaEpsilon = 2.705 / 3600.0;
+            NutationElements ne = new NutationElements()
+            {
+                deltaPsi = 14.861 / 3600,
+                deltaEpsilon = 2.705 / 3600
+            };
+
             double epsilon = 23.436;
 
-            CrdsEquatorial correction = Nutation.NutationEffect(eq, deltaPsi, deltaEpsilon, epsilon);
+            CrdsEquatorial correction = Nutation.NutationEffect(eq, ne, epsilon);
 
             Assert.AreEqual(15.843, correction.Alpha * 3600, 1e-3);
             Assert.AreEqual(6.218, correction.Delta * 3600, 1e-3);

@@ -30,8 +30,14 @@ namespace ADK.Tests
             var theta0 = Date.MeanSiderealTime(jd);
             Assert.AreEqual(new HMS("8h 34m 57.0896s"), new HMS(theta0));
 
+            // Nutation elements
+            var nutation = Nutation.NutationElements(jd);
+
+            // True obliquity
+            var epsilon = Date.TrueObliquity(jd, nutation.deltaEpsilon);
+
             // Apparent sidereal time at Greenwich
-            theta0 = Date.ApparentSiderealTime(jd);
+            theta0 = Date.ApparentSiderealTime(jd, nutation.deltaPsi, epsilon);
             Assert.AreEqual(new HMS("8h 34m 56.853s"), new HMS(theta0));
 
             // Expected local horizontal coordinates of Venus
@@ -56,8 +62,14 @@ namespace ADK.Tests
             // Date of observation
             var jd = new Date(new DateTime(1987, 4, 10, 19, 21, 0, DateTimeKind.Utc)).ToJulianDay();
 
+            // Nutation elements
+            var nutation = Nutation.NutationElements(jd);
+
+            // True obliquity
+            var epsilon = Date.TrueObliquity(jd, nutation.deltaEpsilon);
+
             // Apparent sidereal time at Greenwich
-            var theta0 = Date.ApparentSiderealTime(jd);
+            var theta0 = Date.ApparentSiderealTime(jd, nutation.deltaPsi, epsilon);
             Assert.AreEqual(new HMS("8h 34m 56.853s"), new HMS(theta0));
 
             // Expected apparent equatorial coordinates of Venus
