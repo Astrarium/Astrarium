@@ -145,13 +145,13 @@ namespace ADK.Tests
             // True obliquity
             double epsilon = Date.TrueObliquity(jde, nutation.deltaEpsilon);
 
-            // accuracy of the value is 0.5"
+            // accuracy is 0.5"
             Assert.AreEqual(15.908, nutation.deltaPsi * 3600, 0.5);
 
-            // accuracy of the value is 0.1"        
+            // accuracyis 0.1"        
             Assert.AreEqual(-0.308, nutation.deltaEpsilon * 3600, 0.1);
 
-            // accuracy of the value is 0.1"
+            // accuracy is 0.1"
             Assert.AreEqual(23.4401443, epsilon, 0.1 / 3600.0);
 
             // add nutation effect

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ADK
 {
@@ -25,9 +23,9 @@ namespace ADK
         }
 
         /// <summary>
-        /// Gets aberration elements for given instant
+        /// Calculates aberration elements for given instant.
         /// </summary>
-        /// <param name="jde">Julian Ephemeris Day, corresponded to the given instant.</param>
+        /// <param name="jde">Julian Ephemeris Day, corresponding to the given instant.</param>
         /// <returns>Aberration elements for the given instant.</returns>
         /// <remarks>
         /// AA(II), pp. 151, 163, 164
@@ -52,8 +50,6 @@ namespace ADK
                 + (0.019993 - 0.000101 * T) * Math.Sin(2 * M)
                 + 0.000289 * Math.Sin(3 * M);
 
-            NutationElements nutation = Nutation.NutationElements(jde);
-
             return new AberrationElements()
             {
                 e = e,
@@ -63,11 +59,11 @@ namespace ADK
         }
 
         /// <summary>
-        /// Calculates the aberration effect for a star or planet for given instant.
+        /// Calculates the aberration effect for a celestial body (star or planet) for given instant.
         /// </summary>
-        /// <param name="ecl">Ecliptical coordinates of a body (not corrected).</param>
-        /// <param name="ae">Aberration elements needed for calculation of aberration correction</param>
-        /// <returns>Returns aberration correction for ecliptical coordinates.</returns>
+        /// <param name="ecl">Ecliptical coordinates of the body (not corrected).</param>
+        /// <param name="ae">Aberration elements needed for calculation of aberration correction.</param>
+        /// <returns>Returns aberration correction values for ecliptical coordinates.</returns>
         /// <remarks>
         /// AA(II), formula 23.2
         /// </remarks>
@@ -84,11 +80,11 @@ namespace ADK
         }
 
         /// <summary>
-        /// 
+        /// Calculates the aberration effect for a celestial body (star or planet) for given instant.
         /// </summary>
-        /// <param name="eq"></param>
-        /// <param name="ae"></param>
-        /// <returns></returns>
+        /// <param name="eq">Equatorial coordinates of the body (not corrected).</param>
+        /// <param name="ae">Aberration elements needed for calculation of aberration correction.</param>
+        /// <returns>Returns aberration correction values for equatorial coordinates.</returns>
         /// <remarks>AA(II), formula 23.3</remarks>
         public static CrdsEquatorial AberrationEffect(CrdsEquatorial eq, AberrationElements ae, double epsilon)
         {
@@ -111,6 +107,9 @@ namespace ADK
         }
     }
 
+    /// <summary>
+    /// Defines elements needed for calculation of aberration effect.
+    /// </summary>
     public class AberrationElements
     {
         /// <summary>

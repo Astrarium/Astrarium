@@ -10,6 +10,15 @@ namespace ADK
     /// </summary>
     public static class Nutation
     {
+        /// <summary>
+        /// Calculates nutation elements for given instant.
+        /// </summary>
+        /// <param name="jd">Julian Day, corresponding to the given instant.</param>
+        /// <returns>Aberration elements for the given instant.</returns>
+        /// <remarks>
+        /// The method is taken from AA(II), page 144.
+        /// Accuracy of the method is 0.1" for Δε and 0.5" for Δψ.
+        /// </remarks>
         public static NutationElements NutationElements(double jd)
         {
             double T = (jd - 2451545) / 36525.0;
@@ -96,7 +105,7 @@ namespace ADK
         /// <summary>
         /// Returns nutation corrections for ecliptical coordinates.
         /// </summary>
-        /// <param name="deltaPsi">Nutation in longitude (Δψ) for given instant.</param>
+        /// <param name="deltaPsi">Nutation in longitude (Δψ) for given instant, in degrees.</param>
         /// <remarks>See AA(II), page 150, last paragraph.</remarks>
         public static CrdsEcliptical NutationEffect(double deltaPsi)
         {
@@ -107,8 +116,7 @@ namespace ADK
         /// Returns nutation corrections for equatorial coordiantes.
         /// </summary>
         /// <param name="eq">Initial (not corrected) equatorial coordiantes.</param>
-        /// <param name="deltaPsi">Nutation in longitude (Δψ) for given instant, in degrees.</param>
-        /// <param name="deltaEpsilon">Nutation in obliquity (Δε) for given instant, in degrees.</param>
+        /// <param name="ne">Nutation elements for given instant.</param>
         /// <param name="epsilon">True obliquity of the ecliptic (ε), in degrees.</param>
         /// <returns>Nutation corrections for equatorial coordiantes.</returns>
         /// <remarks>AA(II), formula 23.1</remarks>
@@ -126,10 +134,19 @@ namespace ADK
         }
     }
 
+    /// <summary>
+    /// Defines elements needed for calculation of nutation effect.
+    /// </summary>
     public class NutationElements
     {
+        /// <summary>
+        /// Nutation in longitude (Δψ), in degrees.
+        /// </summary>
         public double deltaPsi { get; set; }
 
+        /// <summary>
+        /// Nutation in obliquity (Δε), in degrees.
+        /// </summary>
         public double deltaEpsilon { get; set; }
     }
 }

@@ -723,7 +723,7 @@ namespace ADK
 
 
         /// <summary>
-        /// Calculates the mean obliquity of the ecliptic (ε0).
+        /// Calculates the mean obliquity of the ecliptic (ε0) for the given instant.
         /// </summary>
         /// <param name="jd">Julian Day, corresponding to the given date.</param>
         /// <returns>Returns mean obliquity of the ecliptic for the given date, expressed in degrees.</returns>
