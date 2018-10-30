@@ -168,7 +168,7 @@ namespace ADK
         /// <returns>String that represents angle in sexagesimal form.</returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0:+;-}{1:#}° {2:D2}\u2032 {3:0.##}\u2033", Sign, Degrees, Minutes, Seconds);
+            return string.Format(CultureInfo.InvariantCulture, "{0:+;-}{1:#}° {2:D2}\u2032 {3:00.##}\u2033", Sign, Degrees, Minutes, Seconds);
         }
 
         /// <summary>
@@ -337,7 +337,7 @@ namespace ADK
         /// <returns>String that represents angle in sexagesimal form.</returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0:D2}h {1:D2}m {2:.###}s", Hours, Minutes, Seconds);
+            return string.Format(CultureInfo.InvariantCulture, "{0:D2}h {1:D2}m {2:00.###}s", Hours, Minutes, Seconds);
         }
 
         /// <summary>
