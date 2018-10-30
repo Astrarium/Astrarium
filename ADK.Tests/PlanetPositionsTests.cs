@@ -61,7 +61,7 @@ namespace ADK.Tests
         {
             // Example 32.a from AA
             {
-                CrdsHeliocentrical crds = ADK.PlanetPositions.GetPlanetCoordinates(Planet.Venus, 2448976.5, highPrecision: false);
+                CrdsHeliocentrical crds = PlanetPositions.GetPlanetCoordinates(Planet.Venus, 2448976.5, highPrecision: false);
                 Assert.AreEqual(26.11428, crds.L, 1e-5);
                 Assert.AreEqual(-2.62070, crds.B, 1e-5);
                 Assert.AreEqual(0.724603, crds.R, 1e-6);
@@ -70,7 +70,7 @@ namespace ADK.Tests
             // Test low-precision implementation from AA2 book
             foreach (VSOP87DTestData testValue in testData)
             {
-                CrdsHeliocentrical crds = ADK.PlanetPositions.GetPlanetCoordinates(testValue.Planet, testValue.JDE, highPrecision: false);
+                CrdsHeliocentrical crds = PlanetPositions.GetPlanetCoordinates(testValue.Planet, testValue.JDE, highPrecision: false);
 
                 double deltaL = Math.Abs(testValue.L - crds.L) * SECONDS_IN_DEGREE;
                 double deltaB = Math.Abs(testValue.B - crds.B) * SECONDS_IN_DEGREE;

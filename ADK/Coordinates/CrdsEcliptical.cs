@@ -23,7 +23,7 @@ namespace ADK
         public double Beta { get; set; }
         
         /// <summary>
-        /// Distance from the Sun, in astronomical units.
+        /// Distance.
         /// </summary>
         public double Distance { get; set; }
 
