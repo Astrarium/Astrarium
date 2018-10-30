@@ -79,8 +79,10 @@ namespace ADK
             double Sum_r = 0;
 
             double[] DMMF = new double[] { D, M, M_, F };
-            double lrArg, bArg;
+            double[] powE = new double[3] { 1, E, E * E };
 
+            double lrArg, bArg;
+            
             for (int i = 0; i < 60; i++)
             {
                 lrArg = 0;
@@ -92,9 +94,9 @@ namespace ADK
                     bArg += DMMF[j] * ARGS_B[i, j];
                 }
 
-                Sum_l += SIN_C[i] * Math.Sin(lrArg);
-                Sum_r += COS_C[i] * Math.Cos(lrArg);
-                Sum_b += B_C[i] * Math.Sin(bArg);
+                Sum_l += SIN_C[i] * Math.Sin(lrArg) * powE[Math.Abs(ARGS_LR[i, 1])];
+                Sum_r += COS_C[i] * Math.Cos(lrArg) * powE[Math.Abs(ARGS_LR[i, 1])];
+                Sum_b += B_C[i] * Math.Sin(bArg) * powE[Math.Abs(ARGS_B[i, 1])];
             }
 
             Sum_l += 3958 * Math.Sin(A1)
