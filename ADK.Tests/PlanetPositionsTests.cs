@@ -39,13 +39,13 @@ namespace ADK.Tests
                 string header = lines[i].Trim();
                 if (header.StartsWith("VSOP87D"))
                 {
-                    string[] chunks = regexHeader.Match(header).Groups.Select(g => g.Value).ToArray();
+                    string[] chunks = regexHeader.Match(header).Groups.Cast<Group>().Select(g => g.Value).ToArray();
 
                     Planet planet = GetPlanet(FirstCharToUpper(chunks[1].ToLower()));
                     double jd = Double.Parse(chunks[2], numericFormat);
 
                     i++;
-                    string[] values = regexValues.Match(lines[i]).Groups.Select(g => g.Value).ToArray();
+                    string[] values = regexValues.Match(lines[i]).Groups.Cast<Group>().Select(g => g.Value).ToArray();
 
                     double L = Angle.ToDegrees(Double.Parse(values[1], numericFormat));
                     double B = Angle.ToDegrees(Double.Parse(values[2], numericFormat));

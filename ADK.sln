@@ -3,9 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2003
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ADK", "ADK\ADK.csproj", "{0DA17A1C-068E-4CCE-82A4-646E137CC121}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ADK", "ADK\ADK.csproj", "{0DA17A1C-068E-4CCE-82A4-646E137CC121}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ADK.Tests", "ADK.Tests\ADK.Tests.csproj", "{B8E35F4C-4324-48DE-97DB-6C9D083D59B1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ADK.Tests", "ADK.Tests\ADK.Tests.csproj", "{B8E35F4C-4324-48DE-97DB-6C9D083D59B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ADK.Demo", "ADK.Demo\ADK.Demo.csproj", "{31551388-2945-4E56-9EDC-FDD96C36538D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0DA17A1C-068E-4CCE-82A4-646E137CC121} = {0DA17A1C-068E-4CCE-82A4-646E137CC121}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +26,10 @@ Global
 		{B8E35F4C-4324-48DE-97DB-6C9D083D59B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B8E35F4C-4324-48DE-97DB-6C9D083D59B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B8E35F4C-4324-48DE-97DB-6C9D083D59B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31551388-2945-4E56-9EDC-FDD96C36538D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31551388-2945-4E56-9EDC-FDD96C36538D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31551388-2945-4E56-9EDC-FDD96C36538D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31551388-2945-4E56-9EDC-FDD96C36538D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

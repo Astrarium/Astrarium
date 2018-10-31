@@ -45,5 +45,10 @@ namespace ADK
             Azimuth = azimuth;
             Altitude = altitude;
         }
+
+        public override string ToString()
+        {
+            return $"Az: {new DMS(Azimuth)}; Alt:{new DMS(Altitude)}";
+        }
     }
 }

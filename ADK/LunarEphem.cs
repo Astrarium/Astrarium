@@ -57,6 +57,22 @@ namespace ADK
         }
 
         /// <summary>
+        /// Gets magnitude of the Moon by its phase angle.
+        /// </summary>
+        /// <param name="phaseAngle">Phase angle value, in degrees, from 0 to 180.</param>
+        /// <returns>Moon magnitude</returns>
+        /// <remarks>
+        /// Formula is taken from <see href="https://astronomy.stackexchange.com/questions/10246/is-there-a-simple-analytical-formula-for-the-lunar-phase-brightness-curve"/>
+        /// </remarks>
+        public static double Magnitude(double phaseAngle)
+        {
+            double psi = Angle.ToRadians(phaseAngle);
+            double psi4 = Math.Pow(psi, 4);
+
+            return -12.73 + 1.49 * Math.Abs(psi) + 0.043 * psi4;
+        }
+
+        /// <summary>
         /// Gets longitude of mean ascending node of Lunar orbit for given instant.
         /// </summary>
         /// <param name="jd">Julian Day</param>
