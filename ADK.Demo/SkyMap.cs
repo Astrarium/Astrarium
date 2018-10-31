@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,20 @@ namespace ADK.Demo
         public CrdsHorizontal Center { get; set; } = new CrdsHorizontal(0, 0);
 
         private double Rho = 0;
+
+        // TODO: this is temp
+        private CrdsHorizontal[,] GridHorizontal = new CrdsHorizontal[19, 25];
+
+        public SkyMap()
+        {
+            for (int i = 0, a = 90; i < 19; ++i, a -= 10)
+            {
+                for (int j = 0, A = 0; j < 25; ++j, A += 15)
+                {
+                    GridHorizontal[i, j] = new CrdsHorizontal(A, a);
+                }
+            }
+        }
 
         public Point Projection(CrdsHorizontal hor)
         {
@@ -212,8 +227,72 @@ namespace ADK.Demo
 
         public void Render(Graphics g)
         {
+
             g.Clear(Color.Black);
+
+            g.PageUnit = GraphicsUnit.Display;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+
+            DrawGrid(g);
+
             g.DrawString(Center.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 10);
+        }
+
+        // TODO: move to separate renderer
+        private void DrawGrid(Graphics g)
+        {
+            Pen penGrid = new Pen(Color.Green, 1);
+            penGrid.DashStyle = DashStyle.Dash;
+
+            // Azimuths 
+            for (int j = 0; j < 24; ++j)
+            {
+                var col = GridHorizontal.GetColumn(j).Skip(1).Take(17);
+
+                var groups = col
+                    .Select(h => Angle.Separation(h, Center) < ViewAngle * 1.2 ? h : null)
+                    .Select(h => h != null ? Projection(h) : (Point?)null)                        
+                    .Split(p => p == null, true)
+                    .ToArray();
+
+                if (groups.Any())
+                {
+                    foreach (var group in groups)
+                    {
+                        var points = group.Select(p => (Point)p).ToArray();
+
+                        if (points.Length > 1)
+                        {
+                            g.DrawCurve(penGrid, points);
+                        }
+                    }
+                }
+            }
+
+            // Altitudes
+            for (int i = 1; i < 19; ++i)
+            {
+                var row = GridHorizontal.GetRow(i);
+
+                var groups = row
+                    .Select(h => Angle.Separation(h, Center) < ViewAngle * 1.2 ? h : null)
+                    .Select(h => h != null ? Projection(h) : (Point?)null)
+                    .Split(p => p == null, true)
+                    .ToArray();
+
+                if (groups.Any())
+                {
+                    foreach (var group in groups)
+                    {
+                        var points = group.Select(p => (Point)p).ToArray();
+
+                        if (points.Length > 1)
+                        {
+                            g.DrawCurve(penGrid, points);
+                        }
+                    }
+                }
+            }
         }
     }
 }

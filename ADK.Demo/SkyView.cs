@@ -11,7 +11,7 @@ using System.Windows.Forms;
 namespace ADK.Demo
 {
     [DesignerCategory("code")]
-    public partial class SkyView : Control
+    public partial class SkyView : PictureBox
     {
         private Point pOld;
         private Point pNew;
@@ -59,6 +59,7 @@ namespace ADK.Demo
             {
                 SkyMap.Width = Width;
                 SkyMap.Height = Height;
+                Invalidate();
             }
         }
 

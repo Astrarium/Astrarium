@@ -45,6 +45,26 @@ namespace ADK
         {
             return angle - 360 * (long)(angle / 360.0) + (angle < 0 ? 360 : 0);
         }
+
+        /// <summary>
+        /// Calculates angular separation between two points with horizontal coordinates
+        /// </summary>
+        /// <param name="p1">Horizontal coordinates of the first point</param>
+        /// <param name="p2">Horizontal coordinates of the second point</param>
+        /// <returns>Angular separation in degrees</returns>
+        public static double Separation(CrdsHorizontal p1, CrdsHorizontal p2)
+        {
+            double a1 = ToRadians(p1.Altitude);
+            double a2 = ToRadians(p2.Altitude);
+            double A1 = p1.Azimuth;
+            double A2 = p2.Azimuth;
+
+            double a = Math.Acos(
+                Math.Sin(a1) * Math.Sin(a2) +
+                Math.Cos(a1) * Math.Cos(a2) * Math.Cos(ToRadians(A1 - A2)));
+
+            return double.IsNaN(a) ? 0 : ToDegrees(a);
+        }
     }
 
     #endregion Angle
