@@ -275,6 +275,7 @@ namespace ADK.Demo
         {
             var segments = col
                     .Select(h => Angle.Separation(h, Center) <= 90 * 1.2 ? (PointF?)Projection(h) : null)
+                    //.Select(p => p != null && !IsOutOfScreen(p.Value) ? p : null)
                     .Split(p => p == null, true);
 
             foreach (var segment in segments)
@@ -283,15 +284,21 @@ namespace ADK.Demo
 
                 if (points.Length > 1)
                 {
-                    GraphicsPath gp = new GraphicsPath();
-                    gp.AddCurve(points);
-                    bool flatten = !points.Any(p => Math.Abs(p.X) > Width * 5 || Math.Abs(p.Y) > Height * 5);
-                    if (flatten)
+                    var checkPoints = points.OrderBy(p => DistanceBetweenPoints(p, new PointF(Width / 2, Height / 2))).Take(2).ToArray();
+
+                    if (DistanceBetweenPoints(checkPoints[0], checkPoints[1]) < Width * 3)
                     {
+                        GraphicsPath gp = new GraphicsPath();
+                        gp.AddCurve(points);
                         gp.Flatten();
-                    
+                        points = gp.PathPoints;
+
+                        Console.WriteLine("Path points : " + points.Length);
                     }
-                    points = gp.PathPoints;
+                    else
+                    {
+                        continue;
+                    }
 
                     var pp = new List<PointF?>();
 
@@ -305,7 +312,7 @@ namespace ADK.Demo
 
                         if (i < points.Length - 1)
                         {
-                            var pCross = EdgeCrosspoint(points[i], points[i + 1], Width, Height);
+                            var pCross = EdgeCrosspoint(points[i + 1], points[i], Width, Height);
                             if (pCross != null)
                             {
                                 pp.Add(pCross);
@@ -315,13 +322,14 @@ namespace ADK.Demo
 
                         if (i > 0)
                         {
-                            var pCross = EdgeCrosspoint(points[i], points[i - 1], Width, Height);
+                            var pCross = EdgeCrosspoint(points[i - 1], points[i], Width, Height);
                             if (pCross != null)
                             {
                                 pp.Add(pCross);
                                 continue;
                             }
                         }
+                
 
                         pp.Add(null);
                     }
@@ -360,31 +368,34 @@ namespace ADK.Demo
             PointF pWH = new PointF(Width, Height);
             PointF p0H = new PointF(0, Height);
 
-            List<PointF?> crossPoints = new List<PointF?>();
+            List<PointF> crossPoints = new List<PointF>();
 
             PointF? pCross = null;
 
             // top edge
             pCross = CrossingPoint(p1, p2, p00, pW0);
             if (pCross != null)
-                return pCross;
+                crossPoints.Add(pCross.Value);
 
             // right edge
             pCross = CrossingPoint(p1, p2, pW0, pWH);
             if (pCross != null)
-                return pCross;
+                crossPoints.Add(pCross.Value);
 
             // bottom edge
             pCross = CrossingPoint(p1, p2, pWH, p0H);
             if (pCross != null)
-                return pCross;
+                crossPoints.Add(pCross.Value);
 
             // left edge
             pCross = CrossingPoint(p1, p2, p0H, p00);
             if (pCross != null)
-                return pCross;
+                crossPoints.Add(pCross.Value);
 
-            return null ;
+            if (crossPoints.Any())
+                return crossPoints.OrderByDescending(p => DistanceBetweenPoints(p1, p)).First();
+            else
+                return null;
         }
 
         //private IEnumerable<PointF> EdgeCrosspoints(PointF p1, PointF p2, int width, int height)

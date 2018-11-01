@@ -11,7 +11,7 @@ using System.Windows.Forms;
 namespace ADK.Demo
 {
     [DesignerCategory("code")]
-    public partial class SkyView : PictureBox
+    public partial class SkyView : Control
     {
         private Point pOld;
         private Point pNew;
@@ -19,6 +19,7 @@ namespace ADK.Demo
         public SkyView()
         {
             InitializeComponent();
+            DoubleBuffered = true;
             Cursor = Cursors.Cross;
         }
 
@@ -48,6 +49,7 @@ namespace ADK.Demo
             }
             else
             {
+                pe.Graphics.SetClip(new Rectangle(0, 0, Width, Height));
                 SkyMap.Render(pe.Graphics);
             }
         }
@@ -76,9 +78,17 @@ namespace ADK.Demo
             }
         }
 
+        protected override void OnMouseUp(MouseEventArgs e)
+        {
+            base.OnMouseUp(e);
+            Invalidate();
+        }
+
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
+
+            Select();
 
             if (SkyMap != null)
             {
@@ -153,6 +163,23 @@ namespace ADK.Demo
 
                 SkyMap.ViewAngle = v;            
                 Invalidate();
+            }
+        }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+            
+            // Add = Zoom In
+            if (e.KeyCode == Keys.Add)
+            {
+                OnMouseWheel(new MouseEventArgs(MouseButtons.None, 0, 0, 0, 1));
+            }
+
+            // Subtract = Zoom Out
+            if (e.KeyCode == Keys.Subtract)
+            {
+                OnMouseWheel(new MouseEventArgs(MouseButtons.None, 0, 0, 0, -1));
             }
         }
     }
