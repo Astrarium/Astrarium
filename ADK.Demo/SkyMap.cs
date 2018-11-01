@@ -22,16 +22,26 @@ namespace ADK.Demo
 
         public SkyMap()
         {
-            for (int i = 0, a = 90; i < 19; ++i, a -= 10)
+            //for (int i = 0, a = 90; i < 19; ++i, a -= 10)
+            //{
+            //    for (int j = 0, A = 0; j < 25; ++j, A += 15)
+            //    {
+            //        GridHorizontal[i, j] = new CrdsHorizontal(A, a);
+            //    }
+            //}
+
+            for (int i = 0; i < 19; i++)
             {
-                for (int j = 0, A = 0; j < 25; ++j, A += 15)
+                for (int j = 0; j < 25; j++)
                 {
+                    double a = i * 10 - 90;
+                    double A = j * 15;
                     GridHorizontal[i, j] = new CrdsHorizontal(A, a);
                 }
             }
         }
 
-        public Point Projection(CrdsHorizontal hor)
+        public PointF Projection(CrdsHorizontal hor)
         {
             // ARC projection, AIPS MEMO 27
             // Zenith Equidistant Projection
@@ -125,10 +135,10 @@ namespace ADK.Demo
         /// <returns>Corrected horizontal coordinates</returns>
         private CrdsHorizontal CorrectProjectionInv(PointF p, CrdsHorizontal hor)
         {
-            Point pLeftEdge = Projection(new CrdsHorizontal() { Azimuth = Center.Azimuth - 90, Altitude = hor.Altitude });
-            Point pRightEdge = Projection(new CrdsHorizontal() { Azimuth = Center.Azimuth + 90, Altitude = hor.Altitude });
+            PointF pLeftEdge = Projection(new CrdsHorizontal() { Azimuth = Center.Azimuth - 90, Altitude = hor.Altitude });
+            PointF pRightEdge = Projection(new CrdsHorizontal() { Azimuth = Center.Azimuth + 90, Altitude = hor.Altitude });
 
-            Point pEdge;
+            PointF pEdge;
             if (p.X < Width / 2.0)
             {
                 pEdge = pLeftEdge;
@@ -149,7 +159,7 @@ namespace ADK.Demo
             if (correctionNeeded)
             {
                 // projected coordinates of a horizontal grid pole (zenith or nadir point)
-                Point pole = Projection(new CrdsHorizontal() { Altitude = 90 * (Center.Altitude > 0 ? 1 : -1), Azimuth = 0 });
+                PointF pole = Projection(new CrdsHorizontal() { Altitude = 90 * (Center.Altitude > 0 ? 1 : -1), Azimuth = 0 });
 
                 double angleWhole = 360 - AngleBetweenVectors(pole, pLeftEdge, pRightEdge);
 
@@ -173,7 +183,7 @@ namespace ADK.Demo
 
                 double azimuthShift = poleAngle / angleWhole * 180;
 
-                Point pCorrected = new Point(0, 0);
+                PointF pCorrected = new PointF(0, 0);
 
                 double distOriginal = DistanceBetweenPoints(p, pEdge);
                 double distCorrected = 0;
@@ -244,55 +254,203 @@ namespace ADK.Demo
             Pen penGrid = new Pen(Color.Green, 1);
             penGrid.DashStyle = DashStyle.Dash;
 
+            double screenDiag = Math.Sqrt(Width * Width + Height * Height);
+
             // Azimuths 
             for (int j = 0; j < 24; ++j)
             {
                 var col = GridHorizontal.GetColumn(j).Skip(1).Take(17);
-
-                var groups = col
-                    .Select(h => Angle.Separation(h, Center) < ViewAngle * 1.2 ? h : null)
-                    .Select(h => h != null ? Projection(h) : (Point?)null)                        
-                    .Split(p => p == null, true)
-                    .ToArray();
-
-                if (groups.Any())
-                {
-                    foreach (var group in groups)
-                    {
-                        var points = group.Select(p => (Point)p).ToArray();
-
-                        if (points.Length > 1)
-                        {
-                            g.DrawCurve(penGrid, points);
-                        }
-                    }
-                }
+                DrawLine(g, penGrid, col);                
             }
 
             // Altitudes
-            for (int i = 1; i < 19; ++i)
+            for (int i = 0; i < 19; i++)
             {
                 var row = GridHorizontal.GetRow(i);
+                DrawLine(g, penGrid, row);
+            }
+        }
 
-                var groups = row
-                    .Select(h => Angle.Separation(h, Center) < ViewAngle * 1.2 ? h : null)
-                    .Select(h => h != null ? Projection(h) : (Point?)null)
-                    .Split(p => p == null, true)
-                    .ToArray();
+        private void DrawLine(Graphics g, Pen penGrid, IEnumerable<CrdsHorizontal> col)
+        {
+            var segments = col
+                    .Select(h => Angle.Separation(h, Center) <= 90 * 1.2 ? (PointF?)Projection(h) : null)
+                    .Split(p => p == null, true);
 
-                if (groups.Any())
+            foreach (var segment in segments)
+            {
+                var points = segment.Cast<PointF>().ToArray();
+
+                if (points.Length > 1)
                 {
+                    GraphicsPath gp = new GraphicsPath();
+                    gp.AddCurve(points);
+                    bool flatten = !points.Any(p => Math.Abs(p.X) > Width * 5 || Math.Abs(p.Y) > Height * 5);
+                    if (flatten)
+                    {
+                        gp.Flatten();
+                    
+                    }
+                    points = gp.PathPoints;
+
+                    var pp = new List<PointF?>();
+
+                    for (int i = 0; i < points.Length; i++)
+                    {
+                        if (!IsOutOfScreen(points[i]))
+                        {
+                            pp.Add(points[i]);
+                            continue;
+                        }
+
+                        if (i < points.Length - 1)
+                        {
+                            var pCross = EdgeCrosspoint(points[i], points[i + 1], Width, Height);
+                            if (pCross != null)
+                            {
+                                pp.Add(pCross);
+                                continue;
+                            }
+                        }
+
+                        if (i > 0)
+                        {
+                            var pCross = EdgeCrosspoint(points[i], points[i - 1], Width, Height);
+                            if (pCross != null)
+                            {
+                                pp.Add(pCross);
+                                continue;
+                            }
+                        }
+
+                        pp.Add(null);
+                    }
+
+                    var groups = pp.Split(p => p == null, true);
+
                     foreach (var group in groups)
                     {
-                        var points = group.Select(p => (Point)p).ToArray();
+                        var points2 = group.Cast<PointF>().ToArray();
 
-                        if (points.Length > 1)
+                        if (points2.Length > 1)
                         {
-                            g.DrawCurve(penGrid, points);
+                            g.DrawLines(penGrid, points2);
                         }
                     }
                 }
             }
+
         }
+
+
+        /// <summary>
+        /// Checks if the point is out of screen bounds
+        /// </summary>
+        /// <param name="p">Point to check</param>
+        /// <returns>True if out from screen, false otherwise</returns>
+        private bool IsOutOfScreen(PointF p)
+        {
+            return p.Y < 0 || p.Y > Height || p.X < 0 || p.X > Width;
+        }
+
+        private PointF? EdgeCrosspoint(PointF p1, PointF p2, int width, int height)
+        {
+            PointF p00 = new PointF(0, 0);
+            PointF pW0 = new PointF(Width, 0);
+            PointF pWH = new PointF(Width, Height);
+            PointF p0H = new PointF(0, Height);
+
+            List<PointF?> crossPoints = new List<PointF?>();
+
+            PointF? pCross = null;
+
+            // top edge
+            pCross = CrossingPoint(p1, p2, p00, pW0);
+            if (pCross != null)
+                return pCross;
+
+            // right edge
+            pCross = CrossingPoint(p1, p2, pW0, pWH);
+            if (pCross != null)
+                return pCross;
+
+            // bottom edge
+            pCross = CrossingPoint(p1, p2, pWH, p0H);
+            if (pCross != null)
+                return pCross;
+
+            // left edge
+            pCross = CrossingPoint(p1, p2, p0H, p00);
+            if (pCross != null)
+                return pCross;
+
+            return null ;
+        }
+
+        //private IEnumerable<PointF> EdgeCrosspoints(PointF p1, PointF p2, int width, int height)
+        //{
+        //    PointF p00 = new PointF(0, 0);
+        //    PointF pW0 = new PointF(Width, 0);
+        //    PointF pWH = new PointF(Width, Height);
+        //    PointF p0H = new PointF(0, Height);
+
+        //    List<PointF?> crossPoints = new List<PointF?>();
+
+        //    // top edge
+        //    crossPoints.Add(CrossingPoint(p1, p2, p00, pW0));
+        //    if (crossPoints.Any())
+
+        //    // right edge
+        //    crossPoints.Add(CrossingPoint(p1, p2, pW0, pWH));
+
+        //    // bottom edge
+        //    crossPoints.Add(CrossingPoint(p1, p2, pWH, p0H));
+
+        //    // left edge
+        //    crossPoints.Add(CrossingPoint(p1, p2, p0H, p00));
+
+        //    return crossPoints.Where(p => p != null).Cast<PointF>();
+        //}
+
+        private float VectorMult(float ax, float ay, float bx, float by) //векторное произведение
+        {
+            return ax * by - bx * ay;
+        }
+
+        private void LineEquation(PointF p1, PointF p2, ref float A, ref float B, ref float C)
+        {
+            A = p2.Y - p1.Y;
+            B = p1.X - p2.X;
+            C = -p1.X * (p2.Y - p1.Y) + p1.Y * (p2.X - p1.X);
+        }
+
+        //поиск точки пересечения
+        private PointF? CrossingPoint(PointF p1, PointF p2, PointF p3, PointF p4)
+        {
+            float v1 = VectorMult(p4.X - p3.X, p4.Y - p3.Y, p1.X - p3.X, p1.Y - p3.Y);
+            float v2 = VectorMult(p4.X - p3.X, p4.Y - p3.Y, p2.X - p3.X, p2.Y - p3.Y);
+            float v3 = VectorMult(p2.X - p1.X, p2.Y - p1.Y, p3.X - p1.X, p3.Y - p1.Y);
+            float v4 = VectorMult(p2.X - p1.X, p2.Y - p1.Y, p4.X - p1.X, p4.Y - p1.Y);
+
+            if ((v1 * v2) < 0 && (v3 * v4) < 0)
+            {
+                float a1 = 0, b1 = 0, c1 = 0;
+                LineEquation(p1, p2, ref a1, ref b1, ref c1);
+
+                float a2 = 0, b2 = 0, c2 = 0;
+                LineEquation(p3, p4, ref a2, ref b2, ref c2);
+
+                PointF pt = new PointF();
+                double d = (a1 * b2 - b1 * a2);
+                double dx = (-c1 * b2 + b1 * c2);
+                double dy = (-a1 * c2 + c1 * a2);
+                pt.X = (int)(dx / d);
+                pt.Y = (int)(dy / d);
+                return pt;
+            }
+
+            return null;
+        }
+
     }
 }

@@ -80,44 +80,78 @@ namespace ADK.Demo
         {
             base.OnMouseMove(e);
 
-            bool shift = (ModifierKeys & Keys.Shift) != Keys.None;
-
-            if (e.Button == MouseButtons.Left && !shift)
+            if (SkyMap != null)
             {
-                pNew.X = e.X;
-                pNew.Y = e.Y;
-                double dx = pNew.X - pOld.X;
-                double dy = pNew.Y - pOld.Y;
+                bool shift = (ModifierKeys & Keys.Shift) != Keys.None;
 
-                double f = SkyMap.Width / (SkyMap.ViewAngle * 2);
-
-                if (Math.Abs(SkyMap.Center.Altitude) < 30 || SkyMap.ViewAngle > 80)
+                if (e.Button == MouseButtons.Left && !shift)
                 {
-                    SkyMap.Center.Azimuth = (SkyMap.Center.Azimuth - dx / f + 360) % 360;
+                    pNew.X = e.X;
+                    pNew.Y = e.Y;
+                    double dx = pNew.X - pOld.X;
+                    double dy = pNew.Y - pOld.Y;
+
+                    double f = SkyMap.Width / (SkyMap.ViewAngle * 2);
+
+                    if (Math.Abs(SkyMap.Center.Altitude) < 30 || SkyMap.ViewAngle > 80)
+                    {
+                        SkyMap.Center.Azimuth = (SkyMap.Center.Azimuth - dx / f + 360) % 360;
+                    }
+                    else
+                    {
+                        CrdsHorizontal cpNew = SkyMap.CoordinatesByPoint(pNew);
+                        CrdsHorizontal cpOld = SkyMap.CoordinatesByPoint(pOld);
+                        double da = Math.Abs(cpNew.Azimuth - cpOld.Azimuth);
+                        da = Math.Abs(da) * Math.Sign(dx);
+                        SkyMap.Center.Azimuth -= da;
+                        SkyMap.Center.Azimuth %= 360;
+                    }
+
+                    SkyMap.Center.Altitude += dy / f;
+
+                    if (SkyMap.Center.Altitude > 90) SkyMap.Center.Altitude = 90;
+                    if (SkyMap.Center.Altitude < -90) SkyMap.Center.Altitude = -90;
+
+                    if (double.IsNaN(SkyMap.Center.Azimuth))
+                    {
+                        SkyMap.Center.Azimuth = 0;
+                    }
+
+                    pOld.X = pNew.X;
+                    pOld.Y = pNew.Y;
+
+                    Invalidate();
+                }
+            }
+        }
+
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            base.OnMouseWheel(e);
+
+            if (SkyMap != null)
+            {
+                double v = SkyMap.ViewAngle;
+
+                if (e.Delta < 0)
+                {
+                    v *= 1.1;
                 }
                 else
                 {
-                    CrdsHorizontal cpNew = SkyMap.CoordinatesByPoint(pNew);
-                    CrdsHorizontal cpOld = SkyMap.CoordinatesByPoint(pOld);
-                    double da = Math.Abs(cpNew.Azimuth - cpOld.Azimuth);
-                    da = Math.Abs(da) * Math.Sign(dx);
-                    SkyMap.Center.Azimuth -= da;
-                    SkyMap.Center.Azimuth %= 360;
+                    v /= 1.1;
                 }
 
-                SkyMap.Center.Altitude += dy / f;
-
-                if (SkyMap.Center.Altitude > 90) SkyMap.Center.Altitude = 90;
-                if (SkyMap.Center.Altitude < -90) SkyMap.Center.Altitude = -90;
-
-                if (double.IsNaN(SkyMap.Center.Azimuth))
+                if (v >= 90)
                 {
-                    SkyMap.Center.Azimuth = 0;
+                    v = 90;
+                }
+                if (v < 1.0 / 1024.0)
+                {
+                    v = 1.0 / 1024.0;
                 }
 
-                pOld.X = pNew.X;
-                pOld.Y = pNew.Y;
-
+                SkyMap.ViewAngle = v;            
                 Invalidate();
             }
         }

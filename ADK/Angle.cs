@@ -188,7 +188,7 @@ namespace ADK
         /// <returns>String that represents angle in sexagesimal form.</returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0:+;-}{1:#}° {2:D2}\u2032 {3:00.##}\u2033", Sign, Degrees, Minutes, Seconds);
+            return string.Format(CultureInfo.InvariantCulture, "{0:+;-}{1:D}° {2:D2}\u2032 {3:00.##}\u2033", Sign, Degrees, Minutes, Seconds);
         }
 
         /// <summary>
