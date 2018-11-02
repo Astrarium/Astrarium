@@ -32,6 +32,7 @@ namespace ADK.Demo
             Nodes = new GridPoint[rows, columns];
             Rows = rows;
             Columns = columns;
+       
         }
 
         public GridPoint this[int row, int column]
@@ -53,25 +54,13 @@ namespace ADK.Demo
         }
 
 
-        public GridPoint PrevRowNode(int row, int column)
+        public GridPoint ClosestTo(CrdsHorizontal hor)
         {
-            return row == 0 ? Nodes[Rows - 1, column] : Nodes[row - 1, column];
+            return Nodes.Cast<GridPoint>()
+                .OrderBy(p => Angle.Separation(p, hor))
+                .First();
         }
 
-        public GridPoint NextRowNode(int row, int column)
-        {
-            return row == Rows - 1 ? Nodes[0, column] : Nodes[row + 1, column];
-        }
-
-        public GridPoint PrevColumnNode(int row, int column)
-        {
-            return column == 0 ? Nodes[row, Columns - 1] : Nodes[row, column - 1];
-        }
-
-        public GridPoint NextColumnNode(int row, int column)
-        {
-            return column == Columns - 1 ? Nodes[row, 0] : Nodes[row, column + 1];
-        }
     }
 
     public class SkyMap : ISkyMap
@@ -312,176 +301,124 @@ namespace ADK.Demo
             Pen penGrid = new Pen(Color.Green, 1);
             penGrid.DashStyle = DashStyle.Dash;
 
-            double screenDiag = Math.Sqrt(Width * Width + Height * Height);
+
+            bool isAnyPoint = false;
+
 
             // Azimuths 
             for (int j = 0; j < 24; ++j)
             {
-                var col = GridHorizontal.Column(j).Skip(1).Take(17);
-                DrawLine(g, penGrid, GridHorizontal, col, false);                
+                var segments = GridHorizontal.Column(j).Skip(1).Take(17)
+                    .Select(p => Angle.Separation(p, Center) < ViewAngle * 1.2 ? p : null)
+                    .Split(p => p == null, true);
+
+                foreach (var segment in segments)
+                {
+                    var seg = segment.ToList();
+                    if (seg.First().RowIndex > 1)
+                        seg.Insert(0, GridHorizontal[seg.First().RowIndex - 1, j]);
+
+                    if (seg.Last().RowIndex < GridHorizontal.Rows - 2)
+                        seg.Add(GridHorizontal[seg.Last().RowIndex + 1, j]);
+
+                    DrawGroupOfPoints(g, seg.Select(s => (PointF?)Projection(s)), penGrid, 0);
+
+                    isAnyPoint = true;
+                }
             }
 
+        
             // Altitudes
             for (int i = 0; i < 19; i++)
             {
-                var row = GridHorizontal.Row(i);
-                DrawLine(g, penGrid, GridHorizontal, row, true);
-            }
-        }
-
-        private void DrawLine(Graphics g, Pen penGrid, CelestialGrid grid, IEnumerable<GridPoint> line, bool isColumns)
-        {
-            var segments = line
-                    .Select(h =>
-
-                    Angle.Separation(h, Center) <= 90 * 1.2
-                    /*
-                        !IsOutOfScreen(Projection(h)) ||
-
-                        (isColumns ? 
-                            !IsOutOfScreen(Projection(grid.PrevColumnNode(h.RowIndex, h.ColumnIndex))) :
-                            !IsOutOfScreen(Projection(grid.PrevRowNode(h.RowIndex, h.ColumnIndex)))) ||
-
-                        (isColumns ?
-                            !IsOutOfScreen(Projection(grid.NextColumnNode(h.RowIndex, h.ColumnIndex))) :
-                            !IsOutOfScreen(Projection(grid.NextRowNode(h.RowIndex, h.ColumnIndex))))
-                            */
-
-
-                    ? (PointF?)Projection(h) : null)
-                    //.Select(p => p != null && !IsOutOfScreen(p.Value) ? p : null)
+                var segments = GridHorizontal.Row(i)
+                    .Select(p => Angle.Separation(p, Center) < ViewAngle * 1.2 ? p : null)
                     .Split(p => p == null, true);
 
-            foreach (var segment in segments)
+                foreach (var segment in segments)
+                {
+                    var seg = segment.ToList();
+
+                    for (int k = 0; k < 2; k++)
+                    {
+                        if (seg.First().ColumnIndex > 0)
+                            seg.Insert(0, GridHorizontal[i, seg.First().ColumnIndex - 1]);
+                    }
+
+                    for (int k = 0; k < 2; k++)
+                    {
+                        if (seg.Last().ColumnIndex < GridHorizontal.Columns - 1)
+                            seg.Add(GridHorizontal[i, seg.Last().ColumnIndex + 1]);
+                    }
+
+                    DrawGroupOfPoints(g, seg.Select(s => (PointF?)Projection(s)), penGrid, 0);
+
+                    isAnyPoint = true;
+                }
+            }
+
+            if (!isAnyPoint)
             {
-                DrawGroupOfPoints(g, segment, penGrid, 0);
+                GridPoint closestPoint = GridHorizontal.ClosestTo(Center);
+
+                {
+                    var seg = new List<GridPoint>();
+                    seg.Add(closestPoint);
+                    int i = closestPoint.RowIndex;
+
+                    for (int k = 0; k < 2; k++)
+                    {
+                        if (seg.First().ColumnIndex > 0)
+                            seg.Insert(0, GridHorizontal[i, seg.First().ColumnIndex - 1]);
+                    }
+
+                    for (int k = 0; k < 2; k++)
+                    {
+                        if (seg.Last().ColumnIndex < GridHorizontal.Columns - 1)
+                            seg.Add(GridHorizontal[i, seg.Last().ColumnIndex + 1]);
+                    }
+
+                    DrawGroupOfPoints(g, seg.Select(s => (PointF?)Projection(s)), penGrid, 0);
+                }
+
+                
+                {
+                    var seg = new List<GridPoint>();
+                    seg.Add(closestPoint);
+                    int j = closestPoint.ColumnIndex;
+
+                    for (int k = 0; k < 2; k++)
+                    {
+                        if (seg.First().RowIndex > 1)
+                            seg.Insert(0, GridHorizontal[seg.First().RowIndex - 1, j]);
+                    }
+
+                    for (int k = 0; k < 2; k++)
+                    {
+                        if (seg.Last().RowIndex < GridHorizontal.Rows - 2)
+                            seg.Add(GridHorizontal[seg.Last().RowIndex + 1, j]);
+                    }
+
+                    DrawGroupOfPoints(g, seg.Select(s => (PointF?)Projection(s)), penGrid, 0);
+                }
             }
         }
-
 
         private void DrawGroupOfPoints(Graphics g, IEnumerable<PointF?> segment, Pen penGrid, int iteration)
         {
             var points = segment.Cast<PointF>().ToArray();
 
-            if (points.Length > 1)
+            if (points.Length == 3 && AngleBetweenVectors(points[1], points[0], points[2]) >= 179)
             {
-                if (points.Length == 2) return;
-
-                if (iteration < 5)
-                {
-                    using (GraphicsPath gp = new GraphicsPath())
-                    {
-                        gp.AddCurve(points);
-                        gp.Flatten();
-
-                        points = gp.PathPoints;
-                    }
-                }
-                
-                var pointsList = new List<PointF?>();
-                bool isVisible = false;
-                bool needSplit = false;
-                bool lastIsEmpty = false;
-
-                for (int i = 0; i < points.Length; i++)
-                {
-                    if (!IsOutOfScreen(points[i]))
-                    {
-                        if (lastIsEmpty)
-                        {
-                            lastIsEmpty = false;
-                            pointsList.Add(null);
-                            needSplit = true;
-                        }
-
-                        pointsList.Add(points[i]);
-                        isVisible = true;
-                        continue;
-                    }
-
-                    if (i < points.Length - 1 && !IsOutOfScreen(points[i + 1]))
-                    {
-                        if (lastIsEmpty)
-                        {
-                            lastIsEmpty = false;
-                            pointsList.Add(null);
-                            needSplit = true;
-                        }
-
-                        pointsList.Add(points[i]);
-                        isVisible = true;
-                        continue;
-                    }
-
-                    if (i > 0 && !IsOutOfScreen(points[i - 1]))
-                    {
-                        if (lastIsEmpty)
-                        {
-                            lastIsEmpty = false;
-                            pointsList.Add(null);
-                            needSplit = true;
-                        }
-
-                        pointsList.Add(points[i]);
-                        isVisible = true;
-                        continue;
-                    }
-
-                    if (isVisible)
-                    {
-                        lastIsEmpty = true;
-                        continue;
-                    }
-                }
-
-                if (!isVisible)
-                {
-                    return;
-                }
-
-                if (needSplit)
-                {
-                    var groups = pointsList.Split(p => p == null, true);
-
-                    foreach (var group in groups)
-                    {
-                        DrawGroupOfPoints(g, group, penGrid, iteration + 1);
-                    }
-                }
-                else 
-                {
-
-                    //using (GraphicsPath gp = new GraphicsPath())
-                    //{
-
-
-
-                    //var pointsOnScreen = points.Where(p => !IsOutOfScreen(p));
-
-                    //PointF p1 = pointsOnScreen.First();
-                    //PointF p2 = pointsOnScreen.Last();
-
-                    //gp.AddLine(p1, p2);
-
-                    //Pen rad = new Pen(Brushes.Black, 10);
-
-
-                    //if (pointsOnScreen.All(p => gp.IsOutlineVisible(p, rad)))
-                    //{
-                    //    if (pointsOnScreen.Any())
-                    //    {
-
-                    //        g.DrawLine(penGrid, points.First(p => !IsOutOfScreen(p)), points.Last(p => !IsOutOfScreen(p)));
-                    //    }
-                    //}
-                    //else
-                    //{
-                    Console.WriteLine(points.Length);
-                            g.DrawLines(penGrid, points);
-                        //}
-                    //}
-                    
-                }              
+                //g.DrawLines(penGrid, points);
+            }          
+            else if (ViewAngle < 1)
+            {
+                   
+            }
+            else
+            {
+                g.DrawCurve(penGrid, points);
             }
         }
 
