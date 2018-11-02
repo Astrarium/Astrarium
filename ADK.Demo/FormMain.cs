@@ -17,5 +17,10 @@ namespace ADK.Demo
             InitializeComponent();
             skyView.SkyMap = new SkyMap();
         }
+
+        private void skyView_MouseMove(object sender, MouseEventArgs e)
+        {
+            Text = skyView.SkyMap.CoordinatesByPoint(e.Location).ToString() + " " +  skyView.SkyMap.ViewAngle;
+        }
     }
 }

@@ -8,6 +8,72 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo
 {
+
+    public class GridPoint : CrdsHorizontal
+    {
+        public int RowIndex { get; set; }
+        public int ColumnIndex { get; set; }
+        public GridPoint(int row, int column, double azimuth, double altitude) : base(azimuth, altitude)
+        {
+            RowIndex = row;
+            ColumnIndex = column;
+        }
+    }
+
+    public class CelestialGrid
+    {
+        private GridPoint[,] Nodes = null;
+
+        public int Rows { get; private set; }
+        public int Columns { get; private set; }
+
+        public CelestialGrid(int rows, int columns)
+        {
+            Nodes = new GridPoint[rows, columns];
+            Rows = rows;
+            Columns = columns;
+        }
+
+        public GridPoint this[int row, int column]
+        {
+            get { return Nodes[row, column]; }
+            set { Nodes[row, column] = value; }
+        }
+
+        public IEnumerable<GridPoint> Column(int columnNumber)
+        {
+            return Enumerable.Range(0, Nodes.GetLength(0))
+                    .Select(x => Nodes[x, columnNumber]);
+        }
+
+        public IEnumerable<GridPoint> Row(int rowNumber)
+        {
+            return Enumerable.Range(0, Nodes.GetLength(1))
+                    .Select(x => Nodes[rowNumber, x]);
+        }
+
+
+        public GridPoint PrevRowNode(int row, int column)
+        {
+            return row == 0 ? Nodes[Rows - 1, column] : Nodes[row - 1, column];
+        }
+
+        public GridPoint NextRowNode(int row, int column)
+        {
+            return row == Rows - 1 ? Nodes[0, column] : Nodes[row + 1, column];
+        }
+
+        public GridPoint PrevColumnNode(int row, int column)
+        {
+            return column == 0 ? Nodes[row, Columns - 1] : Nodes[row, column - 1];
+        }
+
+        public GridPoint NextColumnNode(int row, int column)
+        {
+            return column == Columns - 1 ? Nodes[row, 0] : Nodes[row, column + 1];
+        }
+    }
+
     public class SkyMap : ISkyMap
     {
         public int Width { get; set; }
@@ -18,25 +84,17 @@ namespace ADK.Demo
         private double Rho = 0;
 
         // TODO: this is temp
-        private CrdsHorizontal[,] GridHorizontal = new CrdsHorizontal[19, 25];
+        private CelestialGrid GridHorizontal = new CelestialGrid(19, 25);
 
         public SkyMap()
         {
-            //for (int i = 0, a = 90; i < 19; ++i, a -= 10)
-            //{
-            //    for (int j = 0, A = 0; j < 25; ++j, A += 15)
-            //    {
-            //        GridHorizontal[i, j] = new CrdsHorizontal(A, a);
-            //    }
-            //}
-
             for (int i = 0; i < 19; i++)
             {
                 for (int j = 0; j < 25; j++)
                 {
                     double a = i * 10 - 90;
                     double A = j * 15;
-                    GridHorizontal[i, j] = new CrdsHorizontal(A, a);
+                    GridHorizontal[i, j] = new GridPoint(i, j, A, a);
                 }
             }
         }
@@ -259,106 +317,182 @@ namespace ADK.Demo
             // Azimuths 
             for (int j = 0; j < 24; ++j)
             {
-                var col = GridHorizontal.GetColumn(j).Skip(1).Take(17);
-                DrawLine(g, penGrid, col);                
+                var col = GridHorizontal.Column(j).Skip(1).Take(17);
+                DrawLine(g, penGrid, GridHorizontal, col, false);                
             }
 
             // Altitudes
             for (int i = 0; i < 19; i++)
             {
-                var row = GridHorizontal.GetRow(i);
-                DrawLine(g, penGrid, row);
+                var row = GridHorizontal.Row(i);
+                DrawLine(g, penGrid, GridHorizontal, row, true);
             }
         }
 
-        private void DrawLine(Graphics g, Pen penGrid, IEnumerable<CrdsHorizontal> col)
+        private void DrawLine(Graphics g, Pen penGrid, CelestialGrid grid, IEnumerable<GridPoint> line, bool isColumns)
         {
-            var segments = col
-                    .Select(h => Angle.Separation(h, Center) <= 90 * 1.2 ? (PointF?)Projection(h) : null)
+            var segments = line
+                    .Select(h =>
+
+                    Angle.Separation(h, Center) <= 90 * 1.2
+                    /*
+                        !IsOutOfScreen(Projection(h)) ||
+
+                        (isColumns ? 
+                            !IsOutOfScreen(Projection(grid.PrevColumnNode(h.RowIndex, h.ColumnIndex))) :
+                            !IsOutOfScreen(Projection(grid.PrevRowNode(h.RowIndex, h.ColumnIndex)))) ||
+
+                        (isColumns ?
+                            !IsOutOfScreen(Projection(grid.NextColumnNode(h.RowIndex, h.ColumnIndex))) :
+                            !IsOutOfScreen(Projection(grid.NextRowNode(h.RowIndex, h.ColumnIndex))))
+                            */
+
+
+                    ? (PointF?)Projection(h) : null)
                     //.Select(p => p != null && !IsOutOfScreen(p.Value) ? p : null)
                     .Split(p => p == null, true);
 
             foreach (var segment in segments)
             {
-                var points = segment.Cast<PointF>().ToArray();
+                DrawGroupOfPoints(g, segment, penGrid, 0);
+            }
+        }
 
-                if (points.Length > 1)
+
+        private void DrawGroupOfPoints(Graphics g, IEnumerable<PointF?> segment, Pen penGrid, int iteration)
+        {
+            var points = segment.Cast<PointF>().ToArray();
+
+            if (points.Length > 1)
+            {
+                if (points.Length == 2) return;
+
+                if (iteration < 5)
                 {
-                    var checkPoints = points.OrderBy(p => DistanceBetweenPoints(p, new PointF(Width / 2, Height / 2))).Take(2).ToArray();
-
-                    if (DistanceBetweenPoints(checkPoints[0], checkPoints[1]) < Width * 3)
+                    using (GraphicsPath gp = new GraphicsPath())
                     {
-                        GraphicsPath gp = new GraphicsPath();
                         gp.AddCurve(points);
                         gp.Flatten();
-                        points = gp.PathPoints;
 
-                        Console.WriteLine("Path points : " + points.Length);
+                        points = gp.PathPoints;
                     }
-                    else
+                }
+                
+                var pointsList = new List<PointF?>();
+                bool isVisible = false;
+                bool needSplit = false;
+                bool lastIsEmpty = false;
+
+                for (int i = 0; i < points.Length; i++)
+                {
+                    if (!IsOutOfScreen(points[i]))
                     {
+                        if (lastIsEmpty)
+                        {
+                            lastIsEmpty = false;
+                            pointsList.Add(null);
+                            needSplit = true;
+                        }
+
+                        pointsList.Add(points[i]);
+                        isVisible = true;
                         continue;
                     }
 
-                    var pp = new List<PointF?>();
-
-                    for (int i = 0; i < points.Length; i++)
+                    if (i < points.Length - 1 && !IsOutOfScreen(points[i + 1]))
                     {
-                        if (!IsOutOfScreen(points[i]))
+                        if (lastIsEmpty)
                         {
-                            pp.Add(points[i]);
-                            continue;
+                            lastIsEmpty = false;
+                            pointsList.Add(null);
+                            needSplit = true;
                         }
 
-                        if (i < points.Length - 1)
-                        {
-                            var pCross = EdgeCrosspoint(points[i + 1], points[i], Width, Height);
-                            if (pCross != null)
-                            {
-                                pp.Add(pCross);
-                                continue;
-                            }
-                        }
-
-                        if (i > 0)
-                        {
-                            var pCross = EdgeCrosspoint(points[i - 1], points[i], Width, Height);
-                            if (pCross != null)
-                            {
-                                pp.Add(pCross);
-                                continue;
-                            }
-                        }
-                
-
-                        pp.Add(null);
+                        pointsList.Add(points[i]);
+                        isVisible = true;
+                        continue;
                     }
 
-                    var groups = pp.Split(p => p == null, true);
+                    if (i > 0 && !IsOutOfScreen(points[i - 1]))
+                    {
+                        if (lastIsEmpty)
+                        {
+                            lastIsEmpty = false;
+                            pointsList.Add(null);
+                            needSplit = true;
+                        }
+
+                        pointsList.Add(points[i]);
+                        isVisible = true;
+                        continue;
+                    }
+
+                    if (isVisible)
+                    {
+                        lastIsEmpty = true;
+                        continue;
+                    }
+                }
+
+                if (!isVisible)
+                {
+                    return;
+                }
+
+                if (needSplit)
+                {
+                    var groups = pointsList.Split(p => p == null, true);
 
                     foreach (var group in groups)
                     {
-                        var points2 = group.Cast<PointF>().ToArray();
-
-                        if (points2.Length > 1)
-                        {
-                            g.DrawLines(penGrid, points2);
-                        }
+                        DrawGroupOfPoints(g, group, penGrid, iteration + 1);
                     }
                 }
+                else 
+                {
+
+                    //using (GraphicsPath gp = new GraphicsPath())
+                    //{
+
+
+
+                    //var pointsOnScreen = points.Where(p => !IsOutOfScreen(p));
+
+                    //PointF p1 = pointsOnScreen.First();
+                    //PointF p2 = pointsOnScreen.Last();
+
+                    //gp.AddLine(p1, p2);
+
+                    //Pen rad = new Pen(Brushes.Black, 10);
+
+
+                    //if (pointsOnScreen.All(p => gp.IsOutlineVisible(p, rad)))
+                    //{
+                    //    if (pointsOnScreen.Any())
+                    //    {
+
+                    //        g.DrawLine(penGrid, points.First(p => !IsOutOfScreen(p)), points.Last(p => !IsOutOfScreen(p)));
+                    //    }
+                    //}
+                    //else
+                    //{
+                    Console.WriteLine(points.Length);
+                            g.DrawLines(penGrid, points);
+                        //}
+                    //}
+                    
+                }              
             }
-
         }
-
 
         /// <summary>
         /// Checks if the point is out of screen bounds
         /// </summary>
         /// <param name="p">Point to check</param>
         /// <returns>True if out from screen, false otherwise</returns>
-        private bool IsOutOfScreen(PointF p)
+        private bool IsOutOfScreen(PointF p, float margin = 0)
         {
-            return p.Y < 0 || p.Y > Height || p.X < 0 || p.X > Width;
+            return p.Y < -margin || p.Y > Height + margin || p.X < -margin || p.X > Width + margin;
         }
 
         private PointF? EdgeCrosspoint(PointF p1, PointF p2, int width, int height)
@@ -463,5 +597,40 @@ namespace ADK.Demo
             return null;
         }
 
+        PointEqualityComparer pointEqComparer = new PointEqualityComparer();
+
+
+        private IEnumerable<PointF> Straighten(IEnumerable<PointF> points)
+        {
+            PointF prev = points.First();
+            foreach (var p in points)
+            {
+                if (!(Math.Abs(p.X - prev.X) < 10 && Math.Abs(p.Y - prev.Y) < 10))
+                {
+                    prev = p;
+                    yield return p;
+                }
+                else
+                {
+                    prev = p;
+                }
+            }
+            yield break;
+        }
+
+        private class PointEqualityComparer : IEqualityComparer<PointF>
+        {
+            public bool Equals(PointF p1, PointF p2)
+            {
+                return Math.Abs(p1.X - p2.X) < 10 && Math.Abs(p1.Y - p2.Y) < 10;
+            }
+
+            public int GetHashCode(PointF obj)
+            {
+                return obj.GetHashCode();
+            }
+        }
     }
+
+    
 }

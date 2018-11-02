@@ -34,12 +34,15 @@
             // skyView
             // 
             this.skyView.BackColor = System.Drawing.Color.Black;
+            this.skyView.Cursor = System.Windows.Forms.Cursors.Cross;
             this.skyView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.skyView.Location = new System.Drawing.Point(0, 0);
             this.skyView.Name = "skyView";
             this.skyView.Size = new System.Drawing.Size(800, 450);
             this.skyView.SkyMap = null;
             this.skyView.TabIndex = 0;
+            this.skyView.TabStop = false;
+            this.skyView.MouseMove += new System.Windows.Forms.MouseEventHandler(this.skyView_MouseMove);
             // 
             // FormMain
             // 
