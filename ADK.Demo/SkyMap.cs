@@ -321,7 +321,7 @@ namespace ADK.Demo
                     if (seg.Last().RowIndex < GridHorizontal.Rows - 2)
                         seg.Add(GridHorizontal[seg.Last().RowIndex + 1, j]);
 
-                    DrawGroupOfPoints(g, seg.Select(s => (PointF?)Projection(s)), penGrid, 0);
+                    DrawGroupOfPoints(g, seg.Select(s => (PointF?)Projection(s)), penGrid);
 
                     isAnyPoint = true;
                 }
@@ -351,12 +351,15 @@ namespace ADK.Demo
                             seg.Add(GridHorizontal[i, seg.Last().ColumnIndex + 1]);
                     }
 
-                    DrawGroupOfPoints(g, seg.Select(s => (PointF?)Projection(s)), penGrid, 0);
+                    DrawGroupOfPoints(g, seg.Select(s => (PointF?)Projection(s)), penGrid);
 
                     isAnyPoint = true;
                 }
             }
 
+            // Special case: there are no points visible 
+            // on the screen at the current position and zoom.
+            // Then we select one point that is closest to screen senter. 
             if (!isAnyPoint)
             {
                 GridPoint closestPoint = GridHorizontal.ClosestTo(Center);
@@ -378,7 +381,7 @@ namespace ADK.Demo
                             seg.Add(GridHorizontal[i, seg.Last().ColumnIndex + 1]);
                     }
 
-                    DrawGroupOfPoints(g, seg.Select(s => (PointF?)Projection(s)), penGrid, 0);
+                    DrawGroupOfPoints(g, seg.Select(s => (PointF?)Projection(s)), penGrid);
                 }
 
                 
@@ -399,28 +402,94 @@ namespace ADK.Demo
                             seg.Add(GridHorizontal[seg.Last().RowIndex + 1, j]);
                     }
 
-                    DrawGroupOfPoints(g, seg.Select(s => (PointF?)Projection(s)), penGrid, 0);
+                    DrawGroupOfPoints(g, seg.Select(s => (PointF?)Projection(s)), penGrid);
                 }
             }
         }
 
-        private void DrawGroupOfPoints(Graphics g, IEnumerable<PointF?> segment, Pen penGrid, int iteration)
+        private void DrawGroupOfPoints(Graphics g, IEnumerable<PointF?> segment, Pen penGrid)
         {
             var points = segment.Cast<PointF>().ToArray();
 
-            if (points.Length == 3 && AngleBetweenVectors(points[1], points[0], points[2]) >= 179)
+            if (points.Length == 5)
             {
-                //g.DrawLines(penGrid, points);
-            }          
-            else if (ViewAngle < 1)
-            {
-                   
+                double alpha = AngleBetweenVectors(points[2], points[1], points[3]);
+                
+                double r = Math.Sqrt(Width * Width + Height * Height) / 2;
+
+                var bigCircle = FindCircle(points[1], points[2], points[3]);
+                var smallCircle = new Circle() { X = Width / 2, Y = Height / 2, R = r };
+
+
+                if (bigCircle.R / smallCircle.R > 60)
+                {
+                    var cross = CirclesIntersection(bigCircle, smallCircle);
+                    g.DrawLine(penGrid, cross[0], cross[1]);
+                       
+                    Console.WriteLine($"cross[0]={cross[0]}, cross[1] = {cross[1]}");
+
+                    return;
+                }
             }
-            else
+
+            if (points.Length == 3)
             {
-                g.DrawCurve(penGrid, points);
-            }
+                double alpha = AngleBetweenVectors(points[1], points[0], points[2]);
+
+                double r = Math.Sqrt(Width * Width + Height * Height) / 2;
+
+                var bigCircle = FindCircle(points[0], points[1], points[2]);
+                var smallCircle = new Circle() { X = Width / 2, Y = Height / 2, R = r };
+
+
+                if (bigCircle.R / smallCircle.R > 60)
+                {
+                    var cross = CirclesIntersection(bigCircle, smallCircle);
+                    g.DrawLine(penGrid, cross[0], cross[1]);
+
+                    Console.WriteLine($"cross[0]={cross[0]}, cross[1] = {cross[1]}");
+
+                    return;
+                }
+            }     
+                        
+            g.DrawCurve(penGrid, points);            
         }
+
+        public Circle FindCircle(PointF p1, PointF p2, PointF p3)
+        {
+            double ma = (p2.Y - p1.Y) / (p2.X - p1.X);
+            double mb = (p3.Y - p2.Y) / (p3.X - p2.X);
+
+            double x = (ma * mb * (p1.Y - p3.Y) + mb * (p1.X + p2.X) - ma * (p2.X + p3.X)) / (2 * mb - ma);
+            double y = -1.0 / ma * (x - (p1.X + p2.X) / 2) + (p1.Y + p2.Y) / 2;
+
+            double r = DistanceBetweenPoints(new PointF((float)x, (float)y), p1);
+
+            return new Circle() { X = x, Y = y, R = r };
+        }
+
+        // https://www.xarg.org/2016/07/calculate-the-intersection-points-of-two-circles/
+        public PointF[] CirclesIntersection(Circle A, Circle B)
+        {
+            double d = DistanceBetweenPoints(new PointF((float)A.X, (float)A.Y), new PointF((float)B.X, (float)B.Y));
+
+            double ex = (B.X - A.X) / d;
+            double ey = (B.Y - A.Y) / d;
+
+            double x = (A.R * A.R - B.R * B.R + d * d) / (2 * d);
+            double y = Math.Sqrt(A.R * A.R - x * x);
+
+            PointF p1 = new PointF(
+                (float)(A.X + x * ex - y * ey),
+                (float)(A.Y + x * ey + y * ex));
+
+            PointF p2 = new PointF(
+                (float)(A.X + x * ex + y * ey),
+                (float)(A.Y + x * ey - y * ex));
+
+            return new PointF[] { p1, p2 };
+        } 
 
         /// <summary>
         /// Checks if the point is out of screen bounds
