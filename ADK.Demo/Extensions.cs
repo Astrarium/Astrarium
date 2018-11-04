@@ -10,7 +10,7 @@ namespace ADK.Demo
         /// <remarks>
         /// This method drops partitioning elements.
         /// </remarks>
-        public static IEnumerable<IEnumerable<TSource>> Split<TSource>(
+        public static IEnumerable<List<TSource>> Split<TSource>(
             this IEnumerable<TSource> source,
             Func<TSource, bool> partitionBy,
             bool removeEmptyEntries = false,
@@ -24,14 +24,14 @@ namespace ADK.Demo
                     items.Add(item);
                 else if (!removeEmptyEntries || items.Count > 0)
                 {
-                    yield return items.ToArray();
+                    yield return items.ToList();
                     items.Clear();
 
                     if (count > 0 && ++yielded == count) yield break;
                 }
             }
 
-            if (items.Count > 0) yield return items.ToArray();
+            if (items.Count > 0) yield return items.ToList();
         }
 
         public static IEnumerable<T> GetColumn<T>(this T[,] matrix, int columnNumber)

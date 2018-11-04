@@ -73,17 +73,25 @@ namespace ADK.Demo
         private double Rho = 0;
 
         // TODO: this is temp
-        private CelestialGrid GridHorizontal = new CelestialGrid(19, 25);
+        private CelestialGrid GridHorizontal = new CelestialGrid(19, 24);
+
+        private CelestialGrid GridEquatorial = new CelestialGrid(19, 24);
 
         public SkyMap()
         {
+            var geo = new CrdsGeographical(56.3333, 44);
+
             for (int i = 0; i < 19; i++)
             {
-                for (int j = 0; j < 25; j++)
+                for (int j = 0; j < 24; j++)
                 {
                     double a = i * 10 - 90;
                     double A = j * 15;
                     GridHorizontal[i, j] = new GridPoint(i, j, A, a);
+
+                    var hor = new CrdsEquatorial(A, a).ToHorizontal(geo, 17);
+
+                    GridEquatorial[i, j] = new GridPoint(i, j, hor.Azimuth, hor.Altitude);
                 }
             }
         }
@@ -156,7 +164,15 @@ namespace ADK.Demo
             double moda = Math.Sqrt(a[0] * a[0] + a[1] * a[1]);
             double modb = Math.Sqrt(b[0] * b[0] + b[1] * b[1]);
 
-            return Angle.ToDegrees(Math.Acos(ab / (moda * modb)));
+            double cos = ab / (moda * modb);
+
+            if (cos < -1)
+                cos = -1;
+
+            if (cos > 1)
+                cos = 1;
+
+            return Angle.ToDegrees(Math.Acos(cos));
         }
 
         /// <summary>
@@ -290,68 +306,98 @@ namespace ADK.Demo
             g.PageUnit = GraphicsUnit.Display;
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
-            DrawGrid(g);
+            DrawGrid(g, GridEquatorial);
 
             g.DrawString(Center.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 10);
         }
 
         // TODO: move to separate renderer
-        private void DrawGrid(Graphics g)
+        private void DrawGrid(Graphics g, CelestialGrid grid)
         {
             Pen penGrid = new Pen(Color.Green, 1);
             penGrid.DashStyle = DashStyle.Dash;
 
-
             bool isAnyPoint = false;
 
-
             // Azimuths 
-            for (int j = 0; j < 24; ++j)
+            for (int j = 0; j < 24; j++)
             {
-                var segments = GridHorizontal.Column(j).Skip(1).Take(17)
+                var segments = grid.Column(j).Skip(1).Take(17)
                     .Select(p => Angle.Separation(p, Center) < ViewAngle * 1.2 ? p : null)
                     .Split(p => p == null, true);
 
                 foreach (var segment in segments)
                 {
-                    var seg = segment.ToList();
-                    if (seg.First().RowIndex > 1)
-                        seg.Insert(0, GridHorizontal[seg.First().RowIndex - 1, j]);
+                    for (int k = 0; k < 2; k++)
+                    {
+                        if (segment.First().RowIndex > 1)
+                            segment.Insert(0, grid[segment.First().RowIndex - 1, j]);
+                    }
 
-                    if (seg.Last().RowIndex < GridHorizontal.Rows - 2)
-                        seg.Add(GridHorizontal[seg.Last().RowIndex + 1, j]);
-
-                    DrawGroupOfPoints(g, seg.Select(s => (PointF?)Projection(s)), penGrid);
+                    for (int k = 0; k < 2; k++)
+                    {
+                        if (segment.Last().RowIndex < grid.Rows - 2)
+                            segment.Add(grid[segment.Last().RowIndex + 1, j]);
+                    }
+                    
+                    DrawGroupOfPoints(g, segment.Select(s => Projection(s)).ToArray(), penGrid);
 
                     isAnyPoint = true;
                 }
             }
 
         
-            // Altitudes
-            for (int i = 0; i < 19; i++)
+            // Altitude circles
+            for (int i = 0; i < 18; i++)
             {
-                var segments = GridHorizontal.Row(i)
+                var segments = grid.Row(i)
                     .Select(p => Angle.Separation(p, Center) < ViewAngle * 1.2 ? p : null)
-                    .Split(p => p == null, true);
+                    .Split(p => p == null, true).ToList();
+
+                // segment that starts with point "0 degrees"
+                var seg0 = segments.FirstOrDefault(s => s.First().ColumnIndex == 0);
+
+                // segment that ends with point "345 degrees"
+                var seg23 = segments.FirstOrDefault(s => s.Last().ColumnIndex == 23);
+
+                // join segments into one
+                if (seg0 != null && seg23 != null && seg0 != seg23)
+                {
+                    segments.Remove(seg0);
+                    seg23.AddRange(seg0);
+                }
 
                 foreach (var segment in segments)
                 {
-                    var seg = segment.ToList();
-
-                    for (int k = 0; k < 2; k++)
+                    if (segment.Count == 24)
                     {
-                        if (seg.First().ColumnIndex > 0)
-                            seg.Insert(0, GridHorizontal[i, seg.First().ColumnIndex - 1]);
+                        g.DrawClosedCurve(Pens.Azure, segment.Select(s => Projection(s)).ToArray());
                     }
-
-                    for (int k = 0; k < 2; k++)
+                    else
                     {
-                        if (seg.Last().ColumnIndex < GridHorizontal.Columns - 1)
-                            seg.Add(GridHorizontal[i, seg.Last().ColumnIndex + 1]);
-                    }
 
-                    DrawGroupOfPoints(g, seg.Select(s => (PointF?)Projection(s)), penGrid);
+                        for (int k = 0; k < 2; k++)
+                        {
+                            int col = segment.First().ColumnIndex;
+                            if (col == 0)
+                                segment.Insert(0, grid[i, 23]);
+                            else
+                                segment.Insert(0, grid[i, col - 1]);
+                        }
+
+                        for (int k = 0; k < 2; k++)
+                        {
+                            int col = segment.Last().ColumnIndex;
+
+                            if (col < 23)
+                                segment.Add(grid[i, col + 1]);
+                            else if (col == 23)
+                                segment.Add(grid[i, 0]);
+                        }
+
+
+                        DrawGroupOfPoints(g, segment.Select(s => Projection(s)).ToArray(), penGrid);
+                    }
 
                     isAnyPoint = true;
                 }
@@ -362,98 +408,192 @@ namespace ADK.Demo
             // Then we select one point that is closest to screen senter. 
             if (!isAnyPoint)
             {
-                GridPoint closestPoint = GridHorizontal.ClosestTo(Center);
+                GridPoint closestPoint = grid.ClosestTo(Center);
 
                 {
-                    var seg = new List<GridPoint>();
-                    seg.Add(closestPoint);
+                    var segment = new List<GridPoint>();
+                    segment.Add(closestPoint);
                     int i = closestPoint.RowIndex;
 
                     for (int k = 0; k < 2; k++)
                     {
-                        if (seg.First().ColumnIndex > 0)
-                            seg.Insert(0, GridHorizontal[i, seg.First().ColumnIndex - 1]);
+                        int col = segment.First().ColumnIndex;
+                        if (col == 0)
+                            segment.Insert(0, grid[i, 23]);
+                        else
+                            segment.Insert(0, grid[i, col - 1]);
                     }
 
                     for (int k = 0; k < 2; k++)
                     {
-                        if (seg.Last().ColumnIndex < GridHorizontal.Columns - 1)
-                            seg.Add(GridHorizontal[i, seg.Last().ColumnIndex + 1]);
+                        int col = segment.Last().ColumnIndex;
+
+                        if (col < 23)
+                            segment.Add(grid[i, col + 1]);
+                        else if (col == 23)
+                            segment.Add(grid[i, 0]);
                     }
 
-                    DrawGroupOfPoints(g, seg.Select(s => (PointF?)Projection(s)), penGrid);
+                    DrawGroupOfPoints(g, segment.Select(s => Projection(s)).ToArray(), penGrid);
                 }
 
                 
                 {
-                    var seg = new List<GridPoint>();
-                    seg.Add(closestPoint);
+                    var segment = new List<GridPoint>();
+                    segment.Add(closestPoint);
                     int j = closestPoint.ColumnIndex;
 
                     for (int k = 0; k < 2; k++)
                     {
-                        if (seg.First().RowIndex > 1)
-                            seg.Insert(0, GridHorizontal[seg.First().RowIndex - 1, j]);
+                        if (segment.First().RowIndex > 1)
+                            segment.Insert(0, grid[segment.First().RowIndex - 1, j]);
                     }
 
                     for (int k = 0; k < 2; k++)
                     {
-                        if (seg.Last().RowIndex < GridHorizontal.Rows - 2)
-                            seg.Add(GridHorizontal[seg.Last().RowIndex + 1, j]);
+                        if (segment.Last().RowIndex < grid.Rows - 2)
+                            segment.Add(grid[segment.Last().RowIndex + 1, j]);
                     }
 
-                    DrawGroupOfPoints(g, seg.Select(s => (PointF?)Projection(s)), penGrid);
+                    DrawGroupOfPoints(g, segment.Select(s => Projection(s)).ToArray(), penGrid);
                 }
             }
         }
 
-        private void DrawGroupOfPoints(Graphics g, IEnumerable<PointF?> segment, Pen penGrid)
+        private void DrawGroupOfPoints(Graphics g, PointF[] points, Pen penGrid)
         {
-            var points = segment.Cast<PointF>().ToArray();
+            try
+            {            
+                var origin = new PointF(Width / 2, Height / 2);
 
-            if (points.Length == 5)
-            {
-                double alpha = AngleBetweenVectors(points[2], points[1], points[3]);
+                if (points.Length == 2)
+                {
+                    g.DrawLine(Pens.Blue, points[0], points[1]);
+                    return;
+                }
+
                 
-                double r = Math.Sqrt(Width * Width + Height * Height) / 2;
 
-                var bigCircle = FindCircle(points[1], points[2], points[3]);
-                var smallCircle = new Circle() { X = Width / 2, Y = Height / 2, R = r };
-
-
-                if (bigCircle.R / smallCircle.R > 60)
+                if (points.Length == 5)
                 {
-                    var cross = CirclesIntersection(bigCircle, smallCircle);
-                    g.DrawLine(penGrid, cross[0], cross[1]);
-                       
-                    Console.WriteLine($"cross[0]={cross[0]}, cross[1] = {cross[1]}");
+                    double alpha = AngleBetweenVectors(points[2], points[1], points[3]);
 
-                    return;
+                    if (alpha > 179)
+                    {
+                        g.DrawLine(Pens.Violet, points[0], points[1]);
+                        g.DrawLine(Pens.Violet, points[1], points[2]);
+                        g.DrawLine(Pens.Violet, points[2], points[3]);
+                        g.DrawLine(Pens.Violet, points[3], points[4]);
+                        return;
+                    }
+
+
+                    if (IsOutOfScreen(points[0]) && IsOutOfScreen(points[4]) &&
+                        DistanceBetweenPoints(points[0], origin) > Width * 2 &&
+                        DistanceBetweenPoints(points[4], origin) > Width * 2)
+                    {
+                        double r = Math.Sqrt(Width * Width + Height * Height) / 2;
+
+                        var bigCircle = FindCircle(points);
+                        var smallCircle = new Circle() { X = origin.X, Y = origin.Y, R = r };
+
+                        if (bigCircle.R / smallCircle.R > 60)
+                        {
+                            var cross = CirclesIntersection(bigCircle, smallCircle);
+
+                            g.DrawLine(Pens.Red, cross[0], cross[1]);
+                            
+                           
+                            Console.WriteLine($"cross[0]={cross[0]}, cross[1] = {cross[1]}");
+
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        g.DrawCurve(Pens.Brown, points);
+                    }
                 }
+
+                if (points.Length == 3)
+                {
+                    double alpha = AngleBetweenVectors(points[1], points[0], points[2]);
+
+                    if (alpha > 179)
+                    {
+                        g.DrawLine(Pens.Orange, points[0], points[1]);
+                        g.DrawLine(Pens.Orange, points[1], points[2]);
+                        return;
+                    }
+
+                    if (IsOutOfScreen(points[0]) && IsOutOfScreen(points[2]) &&
+                        DistanceBetweenPoints(points[0], origin) > Width * 2 &&
+                        DistanceBetweenPoints(points[2], origin) > Width * 2)
+                    {
+
+                        double r = Math.Sqrt(Width * Width + Height * Height) / 2;
+
+                        var bigCircle = FindCircle(points);
+                        var smallCircle = new Circle() { X = Width / 2, Y = Height / 2, R = r };
+
+
+                        if (bigCircle.R / smallCircle.R > 60)
+                        {
+                            var cross = CirclesIntersection(bigCircle, smallCircle);
+                            g.DrawLine(Pens.Yellow, cross[0], cross[1]);
+
+                            Console.WriteLine($"p1={ProjectionInv(points[1])}, p2={ProjectionInv(points[2])}");
+
+
+                            //Console.WriteLine($"cross[0]={cross[0]}, cross[1] = {cross[1]}");
+
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        g.DrawCurve(Pens.Coral, points);
+                    }
+                }
+
+                g.DrawCurve(penGrid, points);
             }
-
-            if (points.Length == 3)
+            catch (Exception ex)
             {
-                double alpha = AngleBetweenVectors(points[1], points[0], points[2]);
-
-                double r = Math.Sqrt(Width * Width + Height * Height) / 2;
-
-                var bigCircle = FindCircle(points[0], points[1], points[2]);
-                var smallCircle = new Circle() { X = Width / 2, Y = Height / 2, R = r };
 
 
-                if (bigCircle.R / smallCircle.R > 60)
-                {
-                    var cross = CirclesIntersection(bigCircle, smallCircle);
-                    g.DrawLine(penGrid, cross[0], cross[1]);
+            }
+        }
 
-                    Console.WriteLine($"cross[0]={cross[0]}, cross[1] = {cross[1]}");
+        public Circle FindCircle(PointF[] l)
+        {
+            // https://www.scribd.com/document/14819165/Regressions-coniques-quadriques-circulaire-spherique
+            // via http://math.stackexchange.com/questions/662634/find-the-approximate-center-of-a-circle-passing-through-more-than-three-points
 
-                    return;
-                }
-            }     
-                        
-            g.DrawCurve(penGrid, points);            
+            var n = l.Count();
+            var sumx = l.Sum(p => p.X);
+            var sumxx = l.Sum(p => p.X * p.X);
+            var sumy = l.Sum(p => p.Y);
+            var sumyy = l.Sum(p => p.Y * p.Y);
+
+            var d11 = n * l.Sum(p => p.X * p.Y) - sumx * sumy;
+
+            var d20 = n * sumxx - sumx * sumx;
+            var d02 = n * sumyy - sumy * sumy;
+
+            var d30 = n * l.Sum(p => p.X * p.X * p.X) - sumxx * sumx;
+            var d03 = n * l.Sum(p => p.Y * p.Y * p.Y) - sumyy * sumy;
+
+            var d21 = n * l.Sum(p => p.X * p.X * p.Y) - sumxx * sumy;
+            var d12 = n * l.Sum(p => p.Y * p.Y * p.X) - sumyy * sumx;
+
+            var x = ((d30 + d12) * d02 - (d03 + d21) * d11) / (2 * (d20 * d02 - d11 * d11));
+            var y = ((d03 + d21) * d20 - (d30 + d12) * d11) / (2 * (d20 * d02 - d11 * d11));
+
+            var c = (sumxx + sumyy - 2 * x * sumx - 2 * y * sumy) / n;
+            var r = Math.Sqrt(c + x * x + y * y);
+
+            return new Circle() { X = x, Y = y, R = r };
         }
 
         public Circle FindCircle(PointF p1, PointF p2, PointF p3)
