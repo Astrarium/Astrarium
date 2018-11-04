@@ -45,5 +45,10 @@ namespace ADK
             Alpha = alpha.ToDecimalAngle();
             Delta = delta.ToDecimalAngle();
         }
+
+        public override string ToString()
+        {
+            return $"RA: {new HMS(Alpha)}; Dec:{new DMS(Delta)}";
+        }
     }
 }

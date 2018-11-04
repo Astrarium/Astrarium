@@ -24,7 +24,7 @@ namespace ADK
         /// Converts equatorial coodinates to local horizontal
         /// </summary>
         /// <param name="eq">Pair of equatorial coodinates</param>
-        /// <param name="geo">Geographical of the observer</param>
+        /// <param name="geo">Geographical coordinates of the observer</param>
         /// <param name="theta0">Local sidereal time</param>
         /// <remarks>
         /// Implementation is taken from AA(I), formulae 12.5, 12.6.

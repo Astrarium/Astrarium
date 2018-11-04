@@ -12,6 +12,9 @@ namespace ADK.Demo
 {
     public partial class FormMain : Form
     {
+        private CrdsGeographical location = new CrdsGeographical(56.3333, 44);
+        private double siderealTime = 17;
+
         public FormMain()
         {
             InitializeComponent();
@@ -20,7 +23,10 @@ namespace ADK.Demo
 
         private void skyView_MouseMove(object sender, MouseEventArgs e)
         {
-            Text = skyView.SkyMap.CoordinatesByPoint(e.Location).ToString() + " " +  skyView.SkyMap.ViewAngle;
+            Text = 
+                skyView.SkyMap.CoordinatesByPoint(e.Location).ToString() + " / " +
+                skyView.SkyMap.CoordinatesByPoint(e.Location).ToEquatorial(location, siderealTime).ToString() + " / " +
+                skyView.SkyMap.ViewAngle;
         }
     }
 }

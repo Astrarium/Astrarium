@@ -77,10 +77,12 @@ namespace ADK.Demo
 
         private CelestialGrid GridEquatorial = new CelestialGrid(19, 24);
 
+        private CrdsGeographical GeoLocation  = new CrdsGeographical(56.3333, 44);
+
+        private double LocalSiderealTime = 17; 
+
         public SkyMap()
         {
-            var geo = new CrdsGeographical(56.3333, 44);
-
             for (int i = 0; i < 19; i++)
             {
                 for (int j = 0; j < 24; j++)
@@ -89,7 +91,7 @@ namespace ADK.Demo
                     double A = j * 15;
                     GridHorizontal[i, j] = new GridPoint(i, j, A, a);
 
-                    var hor = new CrdsEquatorial(A, a).ToHorizontal(geo, 17);
+                    var hor = new CrdsEquatorial(A, a).ToHorizontal(GeoLocation, LocalSiderealTime);
 
                     GridEquatorial[i, j] = new GridPoint(i, j, hor.Azimuth, hor.Altitude);
                 }
@@ -339,8 +341,21 @@ namespace ADK.Demo
                         if (segment.Last().RowIndex < grid.Rows - 2)
                             segment.Add(grid[segment.Last().RowIndex + 1, j]);
                     }
-                    
-                    DrawGroupOfPoints(g, segment.Select(s => Projection(s)).ToArray(), penGrid);
+
+                    PointF[] refPoints = new PointF[2];
+                    for (int k = 0; k < 2; k++)
+                    {
+                        var refEquatorial = Center.ToEquatorial(GeoLocation, LocalSiderealTime);
+                        refEquatorial.Alpha = j * 15;
+                        refEquatorial.Delta += -ViewAngle * 1.2 + k * (ViewAngle * 2 * 1.2);
+                        refEquatorial.Delta = Math.Min(refEquatorial.Delta, 80);
+                        refEquatorial.Delta = Math.Max(refEquatorial.Delta, -80);
+
+                        var refHorizontal = refEquatorial.ToHorizontal(GeoLocation, LocalSiderealTime);
+                        refPoints[k] = Projection(refHorizontal);
+                    }
+
+                    DrawGroupOfPoints(g, segment.Select(s => Projection(s)).ToArray(), penGrid, refPoints);
 
                     isAnyPoint = true;
                 }
@@ -371,11 +386,10 @@ namespace ADK.Demo
                 {
                     if (segment.Count == 24)
                     {
-                        g.DrawClosedCurve(Pens.Azure, segment.Select(s => Projection(s)).ToArray());
+                        g.DrawClosedCurve(penGrid, segment.Select(s => Projection(s)).ToArray());
                     }
                     else
                     {
-
                         for (int k = 0; k < 2; k++)
                         {
                             int col = segment.First().ColumnIndex;
@@ -395,8 +409,18 @@ namespace ADK.Demo
                                 segment.Add(grid[i, 0]);
                         }
 
+                        PointF[] refPoints = new PointF[2];
+                        for (int k = 0; k < 2; k++)
+                        {
+                            var refEquatorial = Center.ToEquatorial(GeoLocation, LocalSiderealTime);
+                            refEquatorial.Alpha += -ViewAngle * 1.2 + k * (ViewAngle * 1.2 * 2);
+                            refEquatorial.Delta = i * 10 - 90;
+                            var refHorizontal = refEquatorial.ToHorizontal(GeoLocation, LocalSiderealTime);
+                            refPoints[k] = Projection(refHorizontal);
+                        }
 
-                        DrawGroupOfPoints(g, segment.Select(s => Projection(s)).ToArray(), penGrid);
+                        refPoints = LineRectangleIntersection(refPoints[0], refPoints[1], Width, Height);
+                        DrawGroupOfPoints(g, segment.Select(s => Projection(s)).ToArray(), penGrid, refPoints);
                     }
 
                     isAnyPoint = true;
@@ -434,7 +458,18 @@ namespace ADK.Demo
                             segment.Add(grid[i, 0]);
                     }
 
-                    DrawGroupOfPoints(g, segment.Select(s => Projection(s)).ToArray(), penGrid);
+                    PointF[] refPoints = new PointF[2];
+                    for (int k = 0; k < 2; k++)
+                    {
+                        var refEquatorial = Center.ToEquatorial(GeoLocation, LocalSiderealTime);
+                        refEquatorial.Alpha += -ViewAngle * 1.2 + k * (ViewAngle * 2 * 1.2);
+                        refEquatorial.Delta = i * 10 - 90;
+                        var refHorizontal = refEquatorial.ToHorizontal(GeoLocation, LocalSiderealTime);
+                        refPoints[k] = Projection(refHorizontal);
+                    }
+
+                    refPoints = LineRectangleIntersection(refPoints[0], refPoints[1], Width, Height);
+                    DrawGroupOfPoints(g, segment.Select(s => Projection(s)).ToArray(), penGrid, refPoints);
                 }
 
                 
@@ -455,114 +490,80 @@ namespace ADK.Demo
                             segment.Add(grid[segment.Last().RowIndex + 1, j]);
                     }
 
-                    DrawGroupOfPoints(g, segment.Select(s => Projection(s)).ToArray(), penGrid);
+                    PointF[] refPoints = new PointF[2];
+                    for (int k = 0; k < 2; k++)
+                    {
+                        var refEquatorial = Center.ToEquatorial(GeoLocation, LocalSiderealTime);
+                        refEquatorial.Alpha = j * 15;
+                        refEquatorial.Delta += -ViewAngle * 1.2 + k * (ViewAngle * 2 * 1.2);
+                        refEquatorial.Delta = Math.Min(refEquatorial.Delta, 80);
+                        refEquatorial.Delta = Math.Max(refEquatorial.Delta, -80);
+
+                        var refHorizontal = refEquatorial.ToHorizontal(GeoLocation, LocalSiderealTime);
+                        refPoints[k] = Projection(refHorizontal);
+                    }
+
+                    DrawGroupOfPoints(g, segment.Select(s => Projection(s)).ToArray(), penGrid, refPoints);
                 }
             }
         }
 
-        private void DrawGroupOfPoints(Graphics g, PointF[] points, Pen penGrid)
+        private void DrawGroupOfPoints(Graphics g, PointF[] points, Pen penGrid, PointF[] refPoints)
         {
-            try
-            {            
-                var origin = new PointF(Width / 2, Height / 2);
-
-                if (points.Length == 2)
-                {
-                    g.DrawLine(Pens.Blue, points[0], points[1]);
-                    return;
-                }
-
+            // Coordinates of the screen center
+            var origin = new PointF(Width / 2, Height / 2);
                 
-
-                if (points.Length == 5)
-                {
-                    double alpha = AngleBetweenVectors(points[2], points[1], points[3]);
-
-                    if (alpha > 179)
-                    {
-                        g.DrawLine(Pens.Violet, points[0], points[1]);
-                        g.DrawLine(Pens.Violet, points[1], points[2]);
-                        g.DrawLine(Pens.Violet, points[2], points[3]);
-                        g.DrawLine(Pens.Violet, points[3], points[4]);
-                        return;
-                    }
-
-
-                    if (IsOutOfScreen(points[0]) && IsOutOfScreen(points[4]) &&
-                        DistanceBetweenPoints(points[0], origin) > Width * 2 &&
-                        DistanceBetweenPoints(points[4], origin) > Width * 2)
-                    {
-                        double r = Math.Sqrt(Width * Width + Height * Height) / 2;
-
-                        var bigCircle = FindCircle(points);
-                        var smallCircle = new Circle() { X = origin.X, Y = origin.Y, R = r };
-
-                        if (bigCircle.R / smallCircle.R > 60)
-                        {
-                            var cross = CirclesIntersection(bigCircle, smallCircle);
-
-                            g.DrawLine(Pens.Red, cross[0], cross[1]);
-                            
-                           
-                            Console.WriteLine($"cross[0]={cross[0]}, cross[1] = {cross[1]}");
-
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        g.DrawCurve(Pens.Brown, points);
-                    }
-                }
-
-                if (points.Length == 3)
-                {
-                    double alpha = AngleBetweenVectors(points[1], points[0], points[2]);
-
-                    if (alpha > 179)
-                    {
-                        g.DrawLine(Pens.Orange, points[0], points[1]);
-                        g.DrawLine(Pens.Orange, points[1], points[2]);
-                        return;
-                    }
-
-                    if (IsOutOfScreen(points[0]) && IsOutOfScreen(points[2]) &&
-                        DistanceBetweenPoints(points[0], origin) > Width * 2 &&
-                        DistanceBetweenPoints(points[2], origin) > Width * 2)
-                    {
-
-                        double r = Math.Sqrt(Width * Width + Height * Height) / 2;
-
-                        var bigCircle = FindCircle(points);
-                        var smallCircle = new Circle() { X = Width / 2, Y = Height / 2, R = r };
-
-
-                        if (bigCircle.R / smallCircle.R > 60)
-                        {
-                            var cross = CirclesIntersection(bigCircle, smallCircle);
-                            g.DrawLine(Pens.Yellow, cross[0], cross[1]);
-
-                            Console.WriteLine($"p1={ProjectionInv(points[1])}, p2={ProjectionInv(points[2])}");
-
-
-                            //Console.WriteLine($"cross[0]={cross[0]}, cross[1] = {cross[1]}");
-
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        g.DrawCurve(Pens.Coral, points);
-                    }
-                }
-
-                g.DrawCurve(penGrid, points);
+            // Two points can be simply drawn as line
+            if (points.Length == 2)
+            {                    
+                g.DrawLine(penGrid, points[0], points[1]);
             }
-            catch (Exception ex)
+
+            // From 3 to 5 points probably we can straighten curve as line.
+            // Apply some calculations to detect conditions when it's possible.
+            else if (points.Length > 2 && points.Length < 6)
             {
+                // Determine start, middle and end points of the segment
+                PointF pStart = points[0];
+                PointF pMid = points[points.Length / 2];
+                PointF pEnd = points[points.Length - 1];
 
+                // Get angle between middle and last points of the segment
+                double alpha = AngleBetweenVectors(pMid, pStart, pEnd);
 
+                // It's almost a straight line
+                if (alpha > 179)
+                {
+                    // Check the line segment is crossing the screen bounds
+                    var cross = EdgeCrosspoints(pStart, pEnd, Width, Height);
+                    if (cross.Any())
+                    {
+                        g.DrawLine(penGrid, refPoints[0], refPoints[1]);
+                        return;
+                    }
+                }
+
+                // Small radius is a screen diagonal
+                double r = Math.Sqrt(Width * Width + Height * Height) / 2;
+
+                // If last points of the line are far enough from the screen center 
+                // then assume that the curve is an arc of big circle.
+                // Check the curvature of that circle by comparing its radius with small radius
+                // by comparing big circ 
+                if (DistanceBetweenPoints(pStart, origin) > r * 4 &&
+                    DistanceBetweenPoints(pEnd, origin) > r * 4)
+                {
+                    var circle = FindCircle(points);
+                    if (circle.R / r > 60)
+                    {
+                        g.DrawLine(penGrid, refPoints[0], refPoints[1]);
+                        return;
+                    }
+                }
             }
+
+            // Draw regular curve
+            g.DrawCurve(penGrid, points);
         }
 
         public Circle FindCircle(PointF[] l)
@@ -641,67 +642,84 @@ namespace ADK.Demo
             return p.Y < -margin || p.Y > Height + margin || p.X < -margin || p.X > Width + margin;
         }
 
-        private PointF? EdgeCrosspoint(PointF p1, PointF p2, int width, int height)
+        private PointF? LinesIntersection(PointF p1, PointF p2, PointF p3, PointF p4)
+        {
+            float x1 = p1.X;
+            float x2 = p2.X;
+            float x3 = p3.X;
+            float x4 = p4.X;
+
+            float y1 = p1.Y;
+            float y2 = p2.Y;
+            float y3 = p3.Y;
+            float y4 = p4.Y;
+
+            float x = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
+            float y = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
+
+            return new PointF() { X = x, Y = y };
+        }
+
+        private PointF[] LineRectangleIntersection(PointF p1, PointF p2, int width, int height)
         {
             PointF p00 = new PointF(0, 0);
             PointF pW0 = new PointF(Width, 0);
             PointF pWH = new PointF(Width, Height);
             PointF p0H = new PointF(0, Height);
 
-            List<PointF> crossPoints = new List<PointF>();
+            List<PointF> crosses = new List<PointF>();
 
-            PointF? pCross = null;
+            PointF? c1 = LinesIntersection(p1, p2, p00, pW0);
+            if (c1 != null && c1.Value.Y == 0 && c1.Value.X >= 0 && c1.Value.X <= Width)
+            {
+                crosses.Add(c1.Value);
+            }
 
-            // top edge
-            pCross = CrossingPoint(p1, p2, p00, pW0);
-            if (pCross != null)
-                crossPoints.Add(pCross.Value);
+            PointF? c2 = LinesIntersection(p1, p2, pW0, pWH);
+            if (c2 != null && c2.Value.X == Width && c2.Value.Y >= 0 && c2.Value.Y <= Height)
+            {
+                crosses.Add(c2.Value);
+            }
 
-            // right edge
-            pCross = CrossingPoint(p1, p2, pW0, pWH);
-            if (pCross != null)
-                crossPoints.Add(pCross.Value);
+            PointF? c3 = LinesIntersection(p1, p2, p0H, pWH);
+            if (c3 != null && c3.Value.Y == Height && c3.Value.X >= 0 && c3.Value.X <= Width)
+            {
+                crosses.Add(c3.Value);
+            }
 
-            // bottom edge
-            pCross = CrossingPoint(p1, p2, pWH, p0H);
-            if (pCross != null)
-                crossPoints.Add(pCross.Value);
+            PointF? c4 = LinesIntersection(p1, p2, p00, p0H);
+            if (c4 != null && c4.Value.X == 0 && c4.Value.Y >= 0 && c4.Value.Y <= Height)
+            {
+                crosses.Add(c4.Value);
+            }
 
-            // left edge
-            pCross = CrossingPoint(p1, p2, p0H, p00);
-            if (pCross != null)
-                crossPoints.Add(pCross.Value);
-
-            if (crossPoints.Any())
-                return crossPoints.OrderByDescending(p => DistanceBetweenPoints(p1, p)).First();
-            else
-                return null;
+            return crosses.ToArray();
         }
 
-        //private IEnumerable<PointF> EdgeCrosspoints(PointF p1, PointF p2, int width, int height)
-        //{
-        //    PointF p00 = new PointF(0, 0);
-        //    PointF pW0 = new PointF(Width, 0);
-        //    PointF pWH = new PointF(Width, Height);
-        //    PointF p0H = new PointF(0, Height);
+        private PointF[] EdgeCrosspoints(PointF p1, PointF p2, int width, int height)
+        {
+            PointF p00 = new PointF(0, 0);
+            PointF pW0 = new PointF(Width, 0);
+            PointF pWH = new PointF(Width, Height);
+            PointF p0H = new PointF(0, Height);
 
-        //    List<PointF?> crossPoints = new List<PointF?>();
+            List<PointF?> crossPoints = new List<PointF?>();
 
-        //    // top edge
-        //    crossPoints.Add(CrossingPoint(p1, p2, p00, pW0));
-        //    if (crossPoints.Any())
+            // top edge
+            crossPoints.Add(CrossingPoint(p1, p2, p00, pW0));
+            if (crossPoints.Any())
 
-        //    // right edge
-        //    crossPoints.Add(CrossingPoint(p1, p2, pW0, pWH));
+            // right edge
+            crossPoints.Add(CrossingPoint(p1, p2, pW0, pWH));
 
-        //    // bottom edge
-        //    crossPoints.Add(CrossingPoint(p1, p2, pWH, p0H));
+            // bottom edge
+            crossPoints.Add(CrossingPoint(p1, p2, pWH, p0H));
 
-        //    // left edge
-        //    crossPoints.Add(CrossingPoint(p1, p2, p0H, p00));
+            // left edge
+            crossPoints.Add(CrossingPoint(p1, p2, p0H, p00));
 
-        //    return crossPoints.Where(p => p != null).Cast<PointF>();
-        //}
+            return crossPoints.Where(p => p != null).Cast<PointF>().ToArray();
+        }
 
         private float VectorMult(float ax, float ay, float bx, float by) //векторное произведение
         {
@@ -743,39 +761,6 @@ namespace ADK.Demo
             return null;
         }
 
-        PointEqualityComparer pointEqComparer = new PointEqualityComparer();
-
-
-        private IEnumerable<PointF> Straighten(IEnumerable<PointF> points)
-        {
-            PointF prev = points.First();
-            foreach (var p in points)
-            {
-                if (!(Math.Abs(p.X - prev.X) < 10 && Math.Abs(p.Y - prev.Y) < 10))
-                {
-                    prev = p;
-                    yield return p;
-                }
-                else
-                {
-                    prev = p;
-                }
-            }
-            yield break;
-        }
-
-        private class PointEqualityComparer : IEqualityComparer<PointF>
-        {
-            public bool Equals(PointF p1, PointF p2)
-            {
-                return Math.Abs(p1.X - p2.X) < 10 && Math.Abs(p1.Y - p2.Y) < 10;
-            }
-
-            public int GetHashCode(PointF obj)
-            {
-                return obj.GetHashCode();
-            }
-        }
     }
 
     
