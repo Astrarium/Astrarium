@@ -355,12 +355,11 @@ namespace ADK.Demo
                         refPoints[k] = Projection(refHorizontal);
                     }
 
-                    DrawGroupOfPoints(g, segment.Select(s => Projection(s)).ToArray(), penGrid, refPoints);
+                    DrawGroupOfPoints(g, penGrid, segment.Select(s => Projection(s)).ToArray(), refPoints);
 
                     isAnyPoint = true;
                 }
             }
-
         
             // Altitude circles
             for (int i = 0; i < 18; i++)
@@ -419,8 +418,12 @@ namespace ADK.Demo
                             refPoints[k] = Projection(refHorizontal);
                         }
 
-                        refPoints = LineRectangleIntersection(refPoints[0], refPoints[1], Width, Height);
-                        DrawGroupOfPoints(g, segment.Select(s => Projection(s)).ToArray(), penGrid, refPoints);
+                        if (!IsOutOfScreen(refPoints[0]) || !IsOutOfScreen(refPoints[1]))
+                        {
+                            refPoints = LineRectangleIntersection(refPoints[0], refPoints[1], Width, Height);
+                        }
+
+                        DrawGroupOfPoints(g, penGrid, segment.Select(s => Projection(s)).ToArray(), refPoints);
                     }
 
                     isAnyPoint = true;
@@ -468,8 +471,12 @@ namespace ADK.Demo
                         refPoints[k] = Projection(refHorizontal);
                     }
 
-                    refPoints = LineRectangleIntersection(refPoints[0], refPoints[1], Width, Height);
-                    DrawGroupOfPoints(g, segment.Select(s => Projection(s)).ToArray(), penGrid, refPoints);
+                    if (!IsOutOfScreen(refPoints[0]) || !IsOutOfScreen(refPoints[1]))
+                    {
+                        refPoints = LineRectangleIntersection(refPoints[0], refPoints[1], Width, Height);
+                    }
+
+                    DrawGroupOfPoints(g, penGrid, segment.Select(s => Projection(s)).ToArray(), refPoints);
                 }
 
                 
@@ -503,55 +510,57 @@ namespace ADK.Demo
                         refPoints[k] = Projection(refHorizontal);
                     }
 
-                    DrawGroupOfPoints(g, segment.Select(s => Projection(s)).ToArray(), penGrid, refPoints);
+                    DrawGroupOfPoints(g, penGrid, segment.Select(s => Projection(s)).ToArray(), refPoints);
                 }
             }
         }
 
-        private void DrawGroupOfPoints(Graphics g, PointF[] points, Pen penGrid, PointF[] refPoints)
+        private void DrawGroupOfPoints(Graphics g, Pen penGrid, PointF[] points, PointF[] refPoints)
         {
             // Coordinates of the screen center
             var origin = new PointF(Width / 2, Height / 2);
-                
-            // Two points can be simply drawn as line
+
+            // Small radius is a screen diagonal
+            double r = Math.Sqrt(Width * Width + Height * Height) / 2;
+
+            // Two points can be simply drawn as a line
             if (points.Length == 2)
-            {                    
+            {
                 g.DrawLine(penGrid, points[0], points[1]);
+                return;
             }
 
-            // From 3 to 5 points probably we can straighten curve as line.
+            // From 3 to 5 points. Probably we can straighten curve to line.
             // Apply some calculations to detect conditions when it's possible.
             else if (points.Length > 2 && points.Length < 6)
             {
-                // Determine start, middle and end points of the segment
+                // Determine start, middle and end points of the curve
                 PointF pStart = points[0];
                 PointF pMid = points[points.Length / 2];
                 PointF pEnd = points[points.Length - 1];
 
-                // Get angle between middle and last points of the segment
+                // Get angle between middle and last points of the curve
                 double alpha = AngleBetweenVectors(pMid, pStart, pEnd);
+
+                double d1 = DistanceBetweenPoints(pStart, origin);
+                double d2 = DistanceBetweenPoints(pEnd, origin);
 
                 // It's almost a straight line
                 if (alpha > 179)
                 {
-                    // Check the line segment is crossing the screen bounds
-                    var cross = EdgeCrosspoints(pStart, pEnd, Width, Height);
-                    if (cross.Any())
+                    // Check the at lease one last point of the curve 
+                    // is far enough from the screen center
+                    if (d1 > r * 2 || d2 > r * 2)
                     {
                         g.DrawLine(penGrid, refPoints[0], refPoints[1]);
                         return;
                     }
                 }
 
-                // Small radius is a screen diagonal
-                double r = Math.Sqrt(Width * Width + Height * Height) / 2;
-
-                // If last points of the line are far enough from the screen center 
-                // then assume that the curve is an arc of big circle.
+                // If both of last points of the line are far enough from the screen center 
+                // then assume that the curve is an arc of a big circle.
                 // Check the curvature of that circle by comparing its radius with small radius
-                // by comparing big circ 
-                if (DistanceBetweenPoints(pStart, origin) > r * 4 &&
-                    DistanceBetweenPoints(pEnd, origin) > r * 4)
+                if (d1 > r * 2 && d2 > r * 2)
                 {
                     var circle = FindCircle(points);
                     if (circle.R / r > 60)
@@ -562,8 +571,11 @@ namespace ADK.Demo
                 }
             }
 
-            // Draw regular curve
-            g.DrawCurve(penGrid, points);
+            if (points.All(p => DistanceBetweenPoints(p, origin) < r * 60))
+            {
+                // Draw the curve in regular way
+                g.DrawCurve(penGrid, points);
+            }
         }
 
         public Circle FindCircle(PointF[] l)
