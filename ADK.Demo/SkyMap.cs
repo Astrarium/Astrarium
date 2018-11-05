@@ -22,45 +22,44 @@ namespace ADK.Demo
 
     public class CelestialGrid
     {
-        private GridPoint[,] Nodes = null;
+        private GridPoint[,] nodes = null;
 
         public int Rows { get; private set; }
-        public int Columns { get; private set; }
 
+        public int Columns { get; private set; }
+        
         public CelestialGrid(int rows, int columns)
         {
-            Nodes = new GridPoint[rows, columns];
+            nodes = new GridPoint[rows, columns];
             Rows = rows;
             Columns = columns;
-       
         }
 
         public GridPoint this[int row, int column]
         {
-            get { return Nodes[row, column]; }
-            set { Nodes[row, column] = value; }
+            get { return nodes[row, column]; }
+            set { nodes[row, column] = value; }
+        }
+
+        public IEnumerable<GridPoint> Nodes
+        {
+            get
+            {
+                return nodes.Cast<GridPoint>();
+            }
         }
 
         public IEnumerable<GridPoint> Column(int columnNumber)
         {
-            return Enumerable.Range(0, Nodes.GetLength(0))
-                    .Select(x => Nodes[x, columnNumber]);
+            return Enumerable.Range(0, nodes.GetLength(0))
+                    .Select(x => nodes[x, columnNumber]);
         }
 
         public IEnumerable<GridPoint> Row(int rowNumber)
         {
-            return Enumerable.Range(0, Nodes.GetLength(1))
-                    .Select(x => Nodes[rowNumber, x]);
+            return Enumerable.Range(0, nodes.GetLength(1))
+                    .Select(x => nodes[rowNumber, x]);
         }
-
-
-        public GridPoint ClosestTo(CrdsHorizontal hor)
-        {
-            return Nodes.Cast<GridPoint>()
-                .OrderBy(p => Angle.Separation(p, hor))
-                .First();
-        }
-
     }
 
     public class SkyMap : ISkyMap
@@ -73,9 +72,9 @@ namespace ADK.Demo
         private double Rho = 0;
 
         // TODO: this is temp
-        private CelestialGrid GridHorizontal = new CelestialGrid(19, 24);
+        private CelestialGrid GridHorizontal = new CelestialGrid(17, 24);
 
-        private CelestialGrid GridEquatorial = new CelestialGrid(19, 24);
+        private CelestialGrid GridEquatorial = new CelestialGrid(17, 24);
 
         private CrdsGeographical GeoLocation  = new CrdsGeographical(56.3333, 44);
 
@@ -83,15 +82,27 @@ namespace ADK.Demo
 
         public SkyMap()
         {
-            for (int i = 0; i < 19; i++)
+            // Horizontal grid
+            for (int i = 0; i < GridHorizontal.Rows; i++)
             {
-                for (int j = 0; j < 24; j++)
+                for (int j = 0; j < GridHorizontal.Columns; j++)
                 {
-                    double a = i * 10 - 90;
-                    double A = j * 15;
-                    GridHorizontal[i, j] = new GridPoint(i, j, A, a);
+                    double altitude = i * 10 - 80;
+                    double azimuth = j * 15;
+                    GridHorizontal[i, j] = new GridPoint(i, j, azimuth, altitude);
+                }
+            }
 
-                    var hor = new CrdsEquatorial(A, a).ToHorizontal(GeoLocation, LocalSiderealTime);
+            // Equatorial grid
+            for (int i = 0; i < GridEquatorial.Rows; i++)
+            {
+                for (int j = 0; j < GridEquatorial.Columns; j++)
+                {
+                    double delta = i * 10 - 80;
+                    double alpha = j * 15;
+
+                    var hor = new CrdsEquatorial(alpha, delta)
+                        .ToHorizontal(GeoLocation, LocalSiderealTime);
 
                     GridEquatorial[i, j] = new GridPoint(i, j, hor.Azimuth, hor.Altitude);
                 }
@@ -324,7 +335,7 @@ namespace ADK.Demo
             // Azimuths 
             for (int j = 0; j < 24; j++)
             {
-                var segments = grid.Column(j).Skip(1).Take(17)
+                var segments = grid.Column(j)
                     .Select(p => Angle.Separation(p, Center) < ViewAngle * 1.2 ? p : null)
                     .Split(p => p == null, true);
 
@@ -362,7 +373,7 @@ namespace ADK.Demo
             }
         
             // Altitude circles
-            for (int i = 0; i < 18; i++)
+            for (int i = 0; i < 17; i++)
             {
                 var segments = grid.Row(i)
                     .Select(p => Angle.Separation(p, Center) < ViewAngle * 1.2 ? p : null)
@@ -413,7 +424,7 @@ namespace ADK.Demo
                         {
                             var refEquatorial = Center.ToEquatorial(GeoLocation, LocalSiderealTime);
                             refEquatorial.Alpha += -ViewAngle * 1.2 + k * (ViewAngle * 1.2 * 2);
-                            refEquatorial.Delta = i * 10 - 90;
+                            refEquatorial.Delta = i * 10 - 80;
                             var refHorizontal = refEquatorial.ToHorizontal(GeoLocation, LocalSiderealTime);
                             refPoints[k] = Projection(refHorizontal);
                         }
@@ -435,7 +446,7 @@ namespace ADK.Demo
             // Then we select one point that is closest to screen senter. 
             if (!isAnyPoint)
             {
-                GridPoint closestPoint = grid.ClosestTo(Center);
+                GridPoint closestPoint = grid.Nodes.OrderBy(p => Angle.Separation(p, Center)).First();
 
                 {
                     var segment = new List<GridPoint>();
@@ -466,7 +477,7 @@ namespace ADK.Demo
                     {
                         var refEquatorial = Center.ToEquatorial(GeoLocation, LocalSiderealTime);
                         refEquatorial.Alpha += -ViewAngle * 1.2 + k * (ViewAngle * 2 * 1.2);
-                        refEquatorial.Delta = i * 10 - 90;
+                        refEquatorial.Delta = i * 10 - 80;
                         var refHorizontal = refEquatorial.ToHorizontal(GeoLocation, LocalSiderealTime);
                         refPoints[k] = Projection(refHorizontal);
                     }
