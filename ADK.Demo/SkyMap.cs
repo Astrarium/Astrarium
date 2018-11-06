@@ -101,7 +101,6 @@ namespace ADK.Demo
             GridHorizontal.FromHorizontal = (hor) => new CrdsSpherical(hor.Azimuth, hor.Altitude);
             GridHorizontal.ToHorizontal = (c) => new CrdsHorizontal(c.Longitude, c.Latitude);
 
-
             for (int i = 0; i < GridHorizontal.Rows; i++)
             {
                 for (int j = 0; j < GridHorizontal.Columns; j++)
@@ -345,11 +344,13 @@ namespace ADK.Demo
 
             g.PageUnit = GraphicsUnit.Display;
             g.SmoothingMode = Antialias ? SmoothingMode.HighQuality : SmoothingMode.None;
-            
-            Pen penEquatorialGrid = new Pen(Color.CornflowerBlue, 1);
+
+            Color colorGridEquatorial = Color.FromArgb(0, 64, 64);
+            Pen penEquatorialGrid = new Pen(Antialias ? colorGridEquatorial : Color.FromArgb(200, colorGridEquatorial));
             penEquatorialGrid.DashStyle = DashStyle.Dash;
 
-            Pen penHorizontalGrid = new Pen(Color.Green, 1f);
+            Color colorGridHorizontal = Color.FromArgb(0, 64, 0);
+            Pen penHorizontalGrid = new Pen(Antialias ? colorGridHorizontal : Color.FromArgb(200, colorGridHorizontal));
             penHorizontalGrid.DashStyle = DashStyle.Dash;
 
             DrawGrid(g, penHorizontalGrid, GridHorizontal);
