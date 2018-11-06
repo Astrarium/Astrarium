@@ -9,6 +9,17 @@ using System.Threading.Tasks;
 namespace ADK.Demo
 {
 
+    public class CrdsSpherical
+    {
+        public double Longitude { get; set; }
+        public double Latitude { get; set; }
+        public CrdsSpherical(double longitude, double latitude)
+        {
+            Longitude = longitude;
+            Latitude = latitude;
+        }
+    }
+
     public class GridPoint : CrdsHorizontal
     {
         public int RowIndex { get; set; }
@@ -60,6 +71,9 @@ namespace ADK.Demo
             return Enumerable.Range(0, nodes.GetLength(1))
                     .Select(x => nodes[rowNumber, x]);
         }
+
+        public Func<CrdsHorizontal, CrdsSpherical> FromHorizontal { get; set; }
+        public Func<CrdsSpherical, CrdsHorizontal> ToHorizontal { get; set; }
     }
 
     public class SkyMap : ISkyMap
@@ -68,6 +82,7 @@ namespace ADK.Demo
         public int Height { get; set; }
         public double ViewAngle { get; set; } = 90;
         public CrdsHorizontal Center { get; set; } = new CrdsHorizontal(0, 0);
+        public bool Antialias { get; set; }
 
         private double Rho = 0;
 
@@ -83,6 +98,10 @@ namespace ADK.Demo
         public SkyMap()
         {
             // Horizontal grid
+            GridHorizontal.FromHorizontal = (hor) => new CrdsSpherical(hor.Azimuth, hor.Altitude);
+            GridHorizontal.ToHorizontal = (c) => new CrdsHorizontal(c.Longitude, c.Latitude);
+
+
             for (int i = 0; i < GridHorizontal.Rows; i++)
             {
                 for (int j = 0; j < GridHorizontal.Columns; j++)
@@ -94,6 +113,14 @@ namespace ADK.Demo
             }
 
             // Equatorial grid
+
+            GridEquatorial.ToHorizontal = (coord) => new CrdsEquatorial(coord.Longitude, coord.Latitude).ToHorizontal(GeoLocation, LocalSiderealTime);
+            GridEquatorial.FromHorizontal = (hor) =>
+            {
+                var eq = hor.ToEquatorial(GeoLocation, LocalSiderealTime);
+                return new CrdsSpherical(eq.Alpha, eq.Delta);
+            };
+
             for (int i = 0; i < GridEquatorial.Rows; i++)
             {
                 for (int j = 0; j < GridEquatorial.Columns; j++)
@@ -317,19 +344,24 @@ namespace ADK.Demo
             g.Clear(Color.Black);
 
             g.PageUnit = GraphicsUnit.Display;
-            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.SmoothingMode = Antialias ? SmoothingMode.HighQuality : SmoothingMode.None;
+            
+            Pen penEquatorialGrid = new Pen(Color.CornflowerBlue, 1);
+            penEquatorialGrid.DashStyle = DashStyle.Dash;
 
-            DrawGrid(g, GridEquatorial);
+            Pen penHorizontalGrid = new Pen(Color.Green, 1f);
+            penHorizontalGrid.DashStyle = DashStyle.Dash;
+
+            DrawGrid(g, penHorizontalGrid, GridHorizontal);
+            DrawGrid(g, penEquatorialGrid, GridEquatorial);
+            
 
             g.DrawString(Center.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 10);
         }
 
         // TODO: move to separate renderer
-        private void DrawGrid(Graphics g, CelestialGrid grid)
+        private void DrawGrid(Graphics g, Pen penGrid, CelestialGrid grid)
         {
-            Pen penGrid = new Pen(Color.Green, 1);
-            penGrid.DashStyle = DashStyle.Dash;
-
             bool isAnyPoint = false;
 
             // Azimuths 
@@ -356,13 +388,12 @@ namespace ADK.Demo
                     PointF[] refPoints = new PointF[2];
                     for (int k = 0; k < 2; k++)
                     {
-                        var refEquatorial = Center.ToEquatorial(GeoLocation, LocalSiderealTime);
-                        refEquatorial.Alpha = j * 15;
-                        refEquatorial.Delta += -ViewAngle * 1.2 + k * (ViewAngle * 2 * 1.2);
-                        refEquatorial.Delta = Math.Min(refEquatorial.Delta, 80);
-                        refEquatorial.Delta = Math.Max(refEquatorial.Delta, -80);
-
-                        var refHorizontal = refEquatorial.ToHorizontal(GeoLocation, LocalSiderealTime);
+                        var coord = grid.FromHorizontal(Center);
+                        coord.Longitude = j * 15;
+                        coord.Latitude += -ViewAngle * 1.2 + k * (ViewAngle * 2 * 1.2);
+                        coord.Latitude = Math.Min(coord.Latitude, 80);
+                        coord.Latitude = Math.Max(coord.Latitude, -80);
+                        var refHorizontal = grid.ToHorizontal(coord);
                         refPoints[k] = Projection(refHorizontal);
                     }
 
@@ -422,10 +453,10 @@ namespace ADK.Demo
                         PointF[] refPoints = new PointF[2];
                         for (int k = 0; k < 2; k++)
                         {
-                            var refEquatorial = Center.ToEquatorial(GeoLocation, LocalSiderealTime);
-                            refEquatorial.Alpha += -ViewAngle * 1.2 + k * (ViewAngle * 1.2 * 2);
-                            refEquatorial.Delta = i * 10 - 80;
-                            var refHorizontal = refEquatorial.ToHorizontal(GeoLocation, LocalSiderealTime);
+                            var coord = grid.FromHorizontal(Center);
+                            coord.Longitude += -ViewAngle * 1.2 + k * (ViewAngle * 1.2 * 2);
+                            coord.Latitude = i * 10 - 80;
+                            var refHorizontal = grid.ToHorizontal(coord);
                             refPoints[k] = Projection(refHorizontal);
                         }
 
@@ -475,10 +506,10 @@ namespace ADK.Demo
                     PointF[] refPoints = new PointF[2];
                     for (int k = 0; k < 2; k++)
                     {
-                        var refEquatorial = Center.ToEquatorial(GeoLocation, LocalSiderealTime);
-                        refEquatorial.Alpha += -ViewAngle * 1.2 + k * (ViewAngle * 2 * 1.2);
-                        refEquatorial.Delta = i * 10 - 80;
-                        var refHorizontal = refEquatorial.ToHorizontal(GeoLocation, LocalSiderealTime);
+                        var coord = grid.FromHorizontal(Center);
+                        coord.Longitude += -ViewAngle * 1.2 + k * (ViewAngle * 1.2 * 2);
+                        coord.Latitude = i * 10 - 80;
+                        var refHorizontal = grid.ToHorizontal(coord);
                         refPoints[k] = Projection(refHorizontal);
                     }
 
@@ -511,13 +542,12 @@ namespace ADK.Demo
                     PointF[] refPoints = new PointF[2];
                     for (int k = 0; k < 2; k++)
                     {
-                        var refEquatorial = Center.ToEquatorial(GeoLocation, LocalSiderealTime);
-                        refEquatorial.Alpha = j * 15;
-                        refEquatorial.Delta += -ViewAngle * 1.2 + k * (ViewAngle * 2 * 1.2);
-                        refEquatorial.Delta = Math.Min(refEquatorial.Delta, 80);
-                        refEquatorial.Delta = Math.Max(refEquatorial.Delta, -80);
-
-                        var refHorizontal = refEquatorial.ToHorizontal(GeoLocation, LocalSiderealTime);
+                        var coord = grid.FromHorizontal(Center);
+                        coord.Longitude = j * 15;
+                        coord.Latitude += -ViewAngle * 1.2 + k * (ViewAngle * 2 * 1.2);
+                        coord.Latitude = Math.Min(coord.Latitude, 80);
+                        coord.Latitude = Math.Max(coord.Latitude, -80);
+                        var refHorizontal = grid.ToHorizontal(coord);
                         refPoints[k] = Projection(refHorizontal);
                     }
 
@@ -528,6 +558,9 @@ namespace ADK.Demo
 
         private void DrawGroupOfPoints(Graphics g, Pen penGrid, PointF[] points, PointF[] refPoints)
         {
+            g.DrawCurve(penGrid, points);
+            return;
+
             // Coordinates of the screen center
             var origin = new PointF(Width / 2, Height / 2);
 
