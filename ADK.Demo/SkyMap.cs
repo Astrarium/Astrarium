@@ -20,20 +20,24 @@ namespace ADK.Demo
         }
     }
 
-    public class GridPoint : CrdsHorizontal
+    public class GridPoint
     {
         public int RowIndex { get; set; }
         public int ColumnIndex { get; set; }
-        public GridPoint(int row, int column, double azimuth, double altitude) : base(azimuth, altitude)
+
+        public double Longitude { get; set; }
+        public double Latitude { get; set; }
+
+        public GridPoint(double longitude, double latitude)
         {
-            RowIndex = row;
-            ColumnIndex = column;
+            Longitude = longitude;
+            Latitude = latitude;
         }
     }
 
     public class CelestialGrid
     {
-        private GridPoint[,] nodes = null;
+        protected GridPoint[,] points = null;
 
         public int Rows { get; private set; }
 
@@ -41,39 +45,51 @@ namespace ADK.Demo
         
         public CelestialGrid(int rows, int columns)
         {
-            nodes = new GridPoint[rows, columns];
+            points = new GridPoint[rows, columns];
             Rows = rows;
             Columns = columns;
+
+            for (int i = 0; i < Rows; i++)
+            {
+                for (int j = 0; j < Columns; j++)
+                {
+                    double latitude = i * 10 - Rows / 2 * 10;
+                    double longitude = j * 15;
+                    points[i, j] = new GridPoint(longitude, latitude);
+                    points[i, j].RowIndex = i;
+                    points[i, j].ColumnIndex = j;
+                }
+            }
         }
 
         public GridPoint this[int row, int column]
         {
-            get { return nodes[row, column]; }
-            set { nodes[row, column] = value; }
+            get { return points[row, column]; }
+            set { points[row, column] = value; }
         }
 
-        public IEnumerable<GridPoint> Nodes
+        public IEnumerable<GridPoint> Points
         {
             get
             {
-                return nodes.Cast<GridPoint>();
+                return points.Cast<GridPoint>();
             }
         }
 
         public IEnumerable<GridPoint> Column(int columnNumber)
         {
-            return Enumerable.Range(0, nodes.GetLength(0))
-                    .Select(x => nodes[x, columnNumber]);
+            return Enumerable.Range(0, points.GetLength(0))
+                    .Select(x => points[x, columnNumber]);
         }
 
         public IEnumerable<GridPoint> Row(int rowNumber)
         {
-            return Enumerable.Range(0, nodes.GetLength(1))
-                    .Select(x => nodes[rowNumber, x]);
+            return Enumerable.Range(0, points.GetLength(1))
+                    .Select(x => points[rowNumber, x]);
         }
 
-        public Func<CrdsHorizontal, CrdsSpherical> FromHorizontal { get; set; }
-        public Func<CrdsSpherical, CrdsHorizontal> ToHorizontal { get; set; }
+        public Func<CrdsHorizontal, GridPoint> FromHorizontal { get; set; }
+        public Func<GridPoint, CrdsHorizontal> ToHorizontal { get; set; }
     }
 
     public class SkyMap : ISkyMap
@@ -82,7 +98,7 @@ namespace ADK.Demo
         public int Height { get; set; }
         public double ViewAngle { get; set; } = 90;
         public CrdsHorizontal Center { get; set; } = new CrdsHorizontal(0, 0);
-        public bool Antialias { get; set; }
+        public bool Antialias { get; set; } = true;
 
         private double Rho = 0;
 
@@ -91,48 +107,44 @@ namespace ADK.Demo
 
         private CelestialGrid GridEquatorial = new CelestialGrid(17, 24);
 
-        private CrdsGeographical GeoLocation  = new CrdsGeographical(56.3333, 44);
+        private CelestialGrid LineEcliptic = new CelestialGrid(1, 24);
+
+        private CrdsGeographical GeoLocation = new CrdsGeographical(56.3333, 44);
+
+        private double Epsilon = Date.MeanObliquity(new Date(DateTime.Now).ToJulianDay());
 
         private double LocalSiderealTime = 17; 
 
         public SkyMap()
         {
-            // Horizontal grid
-            GridHorizontal.FromHorizontal = (hor) => new CrdsSpherical(hor.Azimuth, hor.Altitude);
-            GridHorizontal.ToHorizontal = (c) => new CrdsHorizontal(c.Longitude, c.Latitude);
-
-            for (int i = 0; i < GridHorizontal.Rows; i++)
+            LineEcliptic.FromHorizontal = (h) =>
             {
-                for (int j = 0; j < GridHorizontal.Columns; j++)
-                {
-                    double altitude = i * 10 - 80;
-                    double azimuth = j * 15;
-                    GridHorizontal[i, j] = new GridPoint(i, j, azimuth, altitude);
-                }
-            }
-
-            // Equatorial grid
-
-            GridEquatorial.ToHorizontal = (coord) => new CrdsEquatorial(coord.Longitude, coord.Latitude).ToHorizontal(GeoLocation, LocalSiderealTime);
-            GridEquatorial.FromHorizontal = (hor) =>
+                var eq = h.ToEquatorial(GeoLocation, LocalSiderealTime);
+                var ec = eq.ToEcliptical(Epsilon);
+                return new GridPoint(ec.Lambda, ec.Beta);
+            };
+            LineEcliptic.ToHorizontal = (c) =>
             {
-                var eq = hor.ToEquatorial(GeoLocation, LocalSiderealTime);
-                return new CrdsSpherical(eq.Alpha, eq.Delta);
+                var ec = new CrdsEcliptical(c.Longitude, c.Latitude);
+                var eq = ec.ToEquatorial(Epsilon);
+                return eq.ToHorizontal(GeoLocation, LocalSiderealTime);
             };
 
-            for (int i = 0; i < GridEquatorial.Rows; i++)
+            // Horizontal grid
+            GridHorizontal.FromHorizontal = (h) => new GridPoint(h.Azimuth, h.Altitude);
+            GridHorizontal.ToHorizontal = (c) => new CrdsHorizontal(c.Longitude, c.Latitude);
+
+            // Equatorial grid
+            GridEquatorial.FromHorizontal = (h) =>
             {
-                for (int j = 0; j < GridEquatorial.Columns; j++)
-                {
-                    double delta = i * 10 - 80;
-                    double alpha = j * 15;
-
-                    var hor = new CrdsEquatorial(alpha, delta)
-                        .ToHorizontal(GeoLocation, LocalSiderealTime);
-
-                    GridEquatorial[i, j] = new GridPoint(i, j, hor.Azimuth, hor.Altitude);
-                }
-            }
+                var eq = h.ToEquatorial(GeoLocation, LocalSiderealTime);
+                return new GridPoint(eq.Alpha, eq.Delta);
+            };
+            GridEquatorial.ToHorizontal = (c) =>
+            {
+                var eq = new CrdsEquatorial(c.Longitude, c.Latitude);
+                return eq.ToHorizontal(GeoLocation, LocalSiderealTime);
+            };
         }
 
         public PointF Projection(CrdsHorizontal hor)
@@ -353,9 +365,13 @@ namespace ADK.Demo
             Pen penHorizontalGrid = new Pen(Antialias ? colorGridHorizontal : Color.FromArgb(200, colorGridHorizontal));
             penHorizontalGrid.DashStyle = DashStyle.Dash;
 
-            DrawGrid(g, penHorizontalGrid, GridHorizontal);
+            Color colorLineEcliptic = Color.FromArgb(128, 128, 0);
+            Pen penEclipticLine = new Pen(Antialias ? colorLineEcliptic : Color.FromArgb(200, colorLineEcliptic));
+            penEclipticLine.DashStyle = DashStyle.Dash;
+
+            //DrawGrid(g, penHorizontalGrid, GridHorizontal);
             DrawGrid(g, penEquatorialGrid, GridEquatorial);
-            
+            DrawGrid(g, penEclipticLine, LineEcliptic);
 
             g.DrawString(Center.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 10);
         }
@@ -366,10 +382,10 @@ namespace ADK.Demo
             bool isAnyPoint = false;
 
             // Azimuths 
-            for (int j = 0; j < 24; j++)
+            for (int j = 0; j < grid.Columns; j++)
             {
                 var segments = grid.Column(j)
-                    .Select(p => Angle.Separation(p, Center) < ViewAngle * 1.2 ? p : null)
+                    .Select(p => Angle.Separation(grid.ToHorizontal(p), Center) < ViewAngle * 1.2 ? p : null)
                     .Split(p => p == null, true);
 
                 foreach (var segment in segments)
@@ -390,7 +406,7 @@ namespace ADK.Demo
                     for (int k = 0; k < 2; k++)
                     {
                         var coord = grid.FromHorizontal(Center);
-                        coord.Longitude = j * 15;
+                        coord.Longitude = segment[0].Longitude;
                         coord.Latitude += -ViewAngle * 1.2 + k * (ViewAngle * 2 * 1.2);
                         coord.Latitude = Math.Min(coord.Latitude, 80);
                         coord.Latitude = Math.Max(coord.Latitude, -80);
@@ -398,17 +414,17 @@ namespace ADK.Demo
                         refPoints[k] = Projection(refHorizontal);
                     }
 
-                    DrawGroupOfPoints(g, penGrid, segment.Select(s => Projection(s)).ToArray(), refPoints);
+                    DrawGroupOfPoints(g, penGrid, segment.Select(s => Projection(grid.ToHorizontal(s))).ToArray(), refPoints);
 
                     isAnyPoint = true;
                 }
             }
         
             // Altitude circles
-            for (int i = 0; i < 17; i++)
+            for (int i = 0; i < grid.Rows; i++)
             {
                 var segments = grid.Row(i)
-                    .Select(p => Angle.Separation(p, Center) < ViewAngle * 1.2 ? p : null)
+                    .Select(p => Angle.Separation(grid.ToHorizontal(p), Center) < ViewAngle * 1.2 ? p : null)
                     .Split(p => p == null, true).ToList();
 
                 // segment that starts with point "0 degrees"
@@ -428,7 +444,7 @@ namespace ADK.Demo
                 {
                     if (segment.Count == 24)
                     {
-                        g.DrawClosedCurve(penGrid, segment.Select(s => Projection(s)).ToArray());
+                        g.DrawClosedCurve(penGrid, segment.Select(s => Projection(grid.ToHorizontal(s))).ToArray());
                     }
                     else
                     {
@@ -456,7 +472,7 @@ namespace ADK.Demo
                         {
                             var coord = grid.FromHorizontal(Center);
                             coord.Longitude += -ViewAngle * 1.2 + k * (ViewAngle * 1.2 * 2);
-                            coord.Latitude = i * 10 - 80;
+                            coord.Latitude = segment[0].Latitude;
                             var refHorizontal = grid.ToHorizontal(coord);
                             refPoints[k] = Projection(refHorizontal);
                         }
@@ -466,7 +482,7 @@ namespace ADK.Demo
                             refPoints = LineRectangleIntersection(refPoints[0], refPoints[1], Width, Height);
                         }
 
-                        DrawGroupOfPoints(g, penGrid, segment.Select(s => Projection(s)).ToArray(), refPoints);
+                        DrawGroupOfPoints(g, penGrid, segment.Select(s => Projection(grid.ToHorizontal(s))).ToArray(), refPoints);
                     }
 
                     isAnyPoint = true;
@@ -478,7 +494,7 @@ namespace ADK.Demo
             // Then we select one point that is closest to screen senter. 
             if (!isAnyPoint)
             {
-                GridPoint closestPoint = grid.Nodes.OrderBy(p => Angle.Separation(p, Center)).First();
+                GridPoint closestPoint = grid.Points.OrderBy(p => Angle.Separation(grid.ToHorizontal(p), Center)).First();
 
                 {
                     var segment = new List<GridPoint>();
@@ -509,7 +525,7 @@ namespace ADK.Demo
                     {
                         var coord = grid.FromHorizontal(Center);
                         coord.Longitude += -ViewAngle * 1.2 + k * (ViewAngle * 1.2 * 2);
-                        coord.Latitude = i * 10 - 80;
+                        coord.Latitude = segment[0].Latitude;
                         var refHorizontal = grid.ToHorizontal(coord);
                         refPoints[k] = Projection(refHorizontal);
                     }
@@ -519,7 +535,7 @@ namespace ADK.Demo
                         refPoints = LineRectangleIntersection(refPoints[0], refPoints[1], Width, Height);
                     }
 
-                    DrawGroupOfPoints(g, penGrid, segment.Select(s => Projection(s)).ToArray(), refPoints);
+                    DrawGroupOfPoints(g, penGrid, segment.Select(s => Projection(grid.ToHorizontal(s))).ToArray(), refPoints);
                 }
 
                 
@@ -544,7 +560,7 @@ namespace ADK.Demo
                     for (int k = 0; k < 2; k++)
                     {
                         var coord = grid.FromHorizontal(Center);
-                        coord.Longitude = j * 15;
+                        coord.Longitude = segment[0].Longitude;
                         coord.Latitude += -ViewAngle * 1.2 + k * (ViewAngle * 2 * 1.2);
                         coord.Latitude = Math.Min(coord.Latitude, 80);
                         coord.Latitude = Math.Max(coord.Latitude, -80);
@@ -552,21 +568,18 @@ namespace ADK.Demo
                         refPoints[k] = Projection(refHorizontal);
                     }
 
-                    DrawGroupOfPoints(g, penGrid, segment.Select(s => Projection(s)).ToArray(), refPoints);
+                    DrawGroupOfPoints(g, penGrid, segment.Select(s => Projection(grid.ToHorizontal(s))).ToArray(), refPoints);
                 }
             }
         }
 
         private void DrawGroupOfPoints(Graphics g, Pen penGrid, PointF[] points, PointF[] refPoints)
         {
-            g.DrawCurve(penGrid, points);
-            return;
-
-            // Coordinates of the screen center
-            var origin = new PointF(Width / 2, Height / 2);
-
-            // Small radius is a screen diagonal
-            double r = Math.Sqrt(Width * Width + Height * Height) / 2;
+            // Do not draw figure containing less than 2 points
+            if (points.Length < 2)
+            {
+                return;
+            }
 
             // Two points can be simply drawn as a line
             if (points.Length == 2)
@@ -575,9 +588,15 @@ namespace ADK.Demo
                 return;
             }
 
+            // Coordinates of the screen center
+            var origin = new PointF(Width / 2, Height / 2);
+
+            // Small radius is a screen diagonal
+            double r = Math.Sqrt(Width * Width + Height * Height) / 2;
+
             // From 3 to 5 points. Probably we can straighten curve to line.
             // Apply some calculations to detect conditions when it's possible.
-            else if (points.Length > 2 && points.Length < 6)
+            if (points.Length > 2 && points.Length < 6)
             {
                 // Determine start, middle and end points of the curve
                 PointF pStart = points[0];
