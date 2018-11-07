@@ -8,18 +8,6 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo
 {
-
-    public class CrdsSpherical
-    {
-        public double Longitude { get; set; }
-        public double Latitude { get; set; }
-        public CrdsSpherical(double longitude, double latitude)
-        {
-            Longitude = longitude;
-            Latitude = latitude;
-        }
-    }
-
     public class GridPoint
     {
         public int RowIndex { get; set; }
@@ -152,46 +140,41 @@ namespace ADK.Demo
             // ARC projection, AIPS MEMO 27
             // Zenith Equidistant Projection
 
-            double da = hor.Azimuth - Center.Azimuth;
-            double X, Y;
+            double X, Y, L, M;
 
-            double horAltitudeRadian = Angle.ToRadians(hor.Altitude);
-            double centerHorAltitudeRadian = Angle.ToRadians(Center.Altitude);
-            double daRadian = Angle.ToRadians(da);
-            double rhoRadian = Angle.ToRadians(Rho);
+            double d = Angle.ToRadians(hor.Altitude);
+            double d0 = Angle.ToRadians(Center.Altitude);
+            double da = Angle.ToRadians(hor.Azimuth - Center.Azimuth);
+            double rho = Angle.ToRadians(Rho);
 
-            double sinDaRadian = Math.Sin(daRadian);
-            double cosDaRadian = Math.Cos(daRadian);
+            double sin_da = Math.Sin(da);
+            double cos_da = Math.Cos(da);
 
-            double sinHorAltitudeRadian = Math.Sin(horAltitudeRadian);
-            double cosHorAltitudeRadian = Math.Cos(horAltitudeRadian);
+            double sin_d = Math.Sin(d);
+            double cos_d = Math.Cos(d);
 
-            double sinCenterHorAltitudeRadian = Math.Sin(centerHorAltitudeRadian);
-            double cosCenterHorAltitudeRadian = Math.Cos(centerHorAltitudeRadian);
+            double sin_d0 = Math.Sin(d0);
+            double cos_d0 = Math.Cos(d0);
 
-            double theta = Angle.ToDegrees(Math.Acos(sinHorAltitudeRadian * sinCenterHorAltitudeRadian + cosHorAltitudeRadian * cosCenterHorAltitudeRadian * cosDaRadian));
+            double theta = Math.Acos(sin_d * sin_d0 + cos_d * cos_d0 * cos_da);
 
-            double L, M;
-
-            if (theta == 0 || Double.IsNaN(theta))
+            if (theta == 0 || double.IsNaN(theta))
             {
                 X = 0;
                 Y = 0;
-                return new Point((int)(Width / 2.0 + X), (int)(Height / 2.0 - Y));
+                return new PointF((float)(Width / 2.0 + X), (float)(Height / 2.0 - Y));
             }
 
-            double thetaRadian = Angle.ToRadians(theta);
+            double k = theta / Math.Sin(theta);
 
-            double k = thetaRadian / Math.Sin(thetaRadian);
+            L = k * cos_d * sin_da;
+            M = k * (sin_d * cos_d0 - cos_d * sin_d0 * cos_da);
 
-            L = k * cosHorAltitudeRadian * sinDaRadian;
-            M = k * (sinHorAltitudeRadian * cosCenterHorAltitudeRadian - cosHorAltitudeRadian * sinCenterHorAltitudeRadian * cosDaRadian);
+            double sin_rho = Math.Sin(rho);
+            double cos_rho = Math.Cos(rho);
 
-            double sinRhoRadian = Math.Sin(rhoRadian);
-            double cosRhoRadian = Math.Cos(rhoRadian);
-
-            X = L * cosRhoRadian + M * sinRhoRadian;
-            Y = M * cosRhoRadian - L * sinRhoRadian;
+            X = L * cos_rho + M * sin_rho;
+            Y = M * cos_rho - L * sin_rho;
 
             X = Angle.ToDegrees(X) / ViewAngle * Width / 2;
             Y = Angle.ToDegrees(Y) / ViewAngle * Width / 2;
@@ -249,8 +232,8 @@ namespace ADK.Demo
         /// <returns>Corrected horizontal coordinates</returns>
         private CrdsHorizontal CorrectProjectionInv(PointF p, CrdsHorizontal hor)
         {
-            PointF pLeftEdge = Projection(new CrdsHorizontal() { Azimuth = Center.Azimuth - 90, Altitude = hor.Altitude });
-            PointF pRightEdge = Projection(new CrdsHorizontal() { Azimuth = Center.Azimuth + 90, Altitude = hor.Altitude });
+            PointF pLeftEdge = Projection(new CrdsHorizontal(Center.Azimuth - 90, hor.Altitude));
+            PointF pRightEdge = Projection(new CrdsHorizontal(Center.Azimuth + 90, hor.Altitude));
 
             PointF pEdge;
             if (p.X < Width / 2.0)
@@ -273,7 +256,7 @@ namespace ADK.Demo
             if (correctionNeeded)
             {
                 // projected coordinates of a horizontal grid pole (zenith or nadir point)
-                PointF pole = Projection(new CrdsHorizontal() { Altitude = 90 * (Center.Altitude > 0 ? 1 : -1), Azimuth = 0 });
+                PointF pole = Projection(new CrdsHorizontal(0, 90 * (Center.Altitude > 0 ? 1 : -1)));
 
                 double angleWhole = 360 - AngleBetweenVectors(pole, pLeftEdge, pRightEdge);
 
@@ -306,7 +289,7 @@ namespace ADK.Demo
 
                 do
                 {
-                    hor = new CrdsHorizontal() { Altitude = hor.Altitude, Azimuth = Angle.To360(Center.Azimuth + shiftSign * 90 + poleFix * shiftSign * azimuthShift) };
+                    hor = new CrdsHorizontal(Angle.To360(Center.Azimuth + shiftSign * 90 + poleFix * shiftSign * azimuthShift), hor.Altitude);
 
                     // corrected coordinates of a projected point
                     pCorrected = Projection(hor);
@@ -369,7 +352,7 @@ namespace ADK.Demo
             Pen penEclipticLine = new Pen(Antialias ? colorLineEcliptic : Color.FromArgb(200, colorLineEcliptic));
             penEclipticLine.DashStyle = DashStyle.Dash;
 
-            //DrawGrid(g, penHorizontalGrid, GridHorizontal);
+            DrawGrid(g, penHorizontalGrid, GridHorizontal);
             DrawGrid(g, penEquatorialGrid, GridEquatorial);
             DrawGrid(g, penEclipticLine, LineEcliptic);
 
@@ -419,7 +402,7 @@ namespace ADK.Demo
                     isAnyPoint = true;
                 }
             }
-        
+
             // Altitude circles
             for (int i = 0; i < grid.Rows; i++)
             {
@@ -538,7 +521,7 @@ namespace ADK.Demo
                     DrawGroupOfPoints(g, penGrid, segment.Select(s => Projection(grid.ToHorizontal(s))).ToArray(), refPoints);
                 }
 
-                
+
                 {
                     var segment = new List<GridPoint>();
                     segment.Add(closestPoint);
@@ -673,49 +656,15 @@ namespace ADK.Demo
             return new Circle() { X = x, Y = y, R = r };
         }
 
-        public Circle FindCircle(PointF p1, PointF p2, PointF p3)
-        {
-            double ma = (p2.Y - p1.Y) / (p2.X - p1.X);
-            double mb = (p3.Y - p2.Y) / (p3.X - p2.X);
-
-            double x = (ma * mb * (p1.Y - p3.Y) + mb * (p1.X + p2.X) - ma * (p2.X + p3.X)) / (2 * mb - ma);
-            double y = -1.0 / ma * (x - (p1.X + p2.X) / 2) + (p1.Y + p2.Y) / 2;
-
-            double r = DistanceBetweenPoints(new PointF((float)x, (float)y), p1);
-
-            return new Circle() { X = x, Y = y, R = r };
-        }
-
-        // https://www.xarg.org/2016/07/calculate-the-intersection-points-of-two-circles/
-        public PointF[] CirclesIntersection(Circle A, Circle B)
-        {
-            double d = DistanceBetweenPoints(new PointF((float)A.X, (float)A.Y), new PointF((float)B.X, (float)B.Y));
-
-            double ex = (B.X - A.X) / d;
-            double ey = (B.Y - A.Y) / d;
-
-            double x = (A.R * A.R - B.R * B.R + d * d) / (2 * d);
-            double y = Math.Sqrt(A.R * A.R - x * x);
-
-            PointF p1 = new PointF(
-                (float)(A.X + x * ex - y * ey),
-                (float)(A.Y + x * ey + y * ex));
-
-            PointF p2 = new PointF(
-                (float)(A.X + x * ex + y * ey),
-                (float)(A.Y + x * ey - y * ex));
-
-            return new PointF[] { p1, p2 };
-        } 
 
         /// <summary>
         /// Checks if the point is out of screen bounds
         /// </summary>
         /// <param name="p">Point to check</param>
         /// <returns>True if out from screen, false otherwise</returns>
-        private bool IsOutOfScreen(PointF p, float margin = 0)
+        private bool IsOutOfScreen(PointF p)
         {
-            return p.Y < -margin || p.Y > Height + margin || p.X < -margin || p.X > Width + margin;
+            return p.Y < 0 || p.Y > Height || p.X < 0 || p.X > Width;
         }
 
         private PointF? LinesIntersection(PointF p1, PointF p2, PointF p3, PointF p4)
@@ -770,71 +719,6 @@ namespace ADK.Demo
             }
 
             return crosses.ToArray();
-        }
-
-        private PointF[] EdgeCrosspoints(PointF p1, PointF p2, int width, int height)
-        {
-            PointF p00 = new PointF(0, 0);
-            PointF pW0 = new PointF(Width, 0);
-            PointF pWH = new PointF(Width, Height);
-            PointF p0H = new PointF(0, Height);
-
-            List<PointF?> crossPoints = new List<PointF?>();
-
-            // top edge
-            crossPoints.Add(CrossingPoint(p1, p2, p00, pW0));
-            if (crossPoints.Any())
-
-            // right edge
-            crossPoints.Add(CrossingPoint(p1, p2, pW0, pWH));
-
-            // bottom edge
-            crossPoints.Add(CrossingPoint(p1, p2, pWH, p0H));
-
-            // left edge
-            crossPoints.Add(CrossingPoint(p1, p2, p0H, p00));
-
-            return crossPoints.Where(p => p != null).Cast<PointF>().ToArray();
-        }
-
-        private float VectorMult(float ax, float ay, float bx, float by) //векторное произведение
-        {
-            return ax * by - bx * ay;
-        }
-
-        private void LineEquation(PointF p1, PointF p2, ref float A, ref float B, ref float C)
-        {
-            A = p2.Y - p1.Y;
-            B = p1.X - p2.X;
-            C = -p1.X * (p2.Y - p1.Y) + p1.Y * (p2.X - p1.X);
-        }
-
-        //поиск точки пересечения
-        private PointF? CrossingPoint(PointF p1, PointF p2, PointF p3, PointF p4)
-        {
-            float v1 = VectorMult(p4.X - p3.X, p4.Y - p3.Y, p1.X - p3.X, p1.Y - p3.Y);
-            float v2 = VectorMult(p4.X - p3.X, p4.Y - p3.Y, p2.X - p3.X, p2.Y - p3.Y);
-            float v3 = VectorMult(p2.X - p1.X, p2.Y - p1.Y, p3.X - p1.X, p3.Y - p1.Y);
-            float v4 = VectorMult(p2.X - p1.X, p2.Y - p1.Y, p4.X - p1.X, p4.Y - p1.Y);
-
-            if ((v1 * v2) < 0 && (v3 * v4) < 0)
-            {
-                float a1 = 0, b1 = 0, c1 = 0;
-                LineEquation(p1, p2, ref a1, ref b1, ref c1);
-
-                float a2 = 0, b2 = 0, c2 = 0;
-                LineEquation(p3, p4, ref a2, ref b2, ref c2);
-
-                PointF pt = new PointF();
-                double d = (a1 * b2 - b1 * a2);
-                double dx = (-c1 * b2 + b1 * c2);
-                double dy = (-a1 * c2 + c1 * a2);
-                pt.X = (int)(dx / d);
-                pt.Y = (int)(dy / d);
-                return pt;
-            }
-
-            return null;
         }
 
     }
