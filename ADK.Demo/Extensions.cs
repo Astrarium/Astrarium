@@ -33,41 +33,5 @@ namespace ADK.Demo
 
             if (items.Count > 0) yield return items.ToList();
         }
-
-        public static IEnumerable<T> GetColumn<T>(this T[,] matrix, int columnNumber)
-        {
-            return Enumerable.Range(0, matrix.GetLength(0))
-                    .Select(x => matrix[x, columnNumber]);
-        }
-
-        public static IEnumerable<T> GetRow<T>(this T[,] matrix, int rowNumber)
-        {
-            return Enumerable.Range(0, matrix.GetLength(1))
-                    .Select(x => matrix[rowNumber, x]);
-        }
-
-        public static T GetNext<T>(this ICollection<T> list, T current)
-        {
-            try
-            {
-                return list.SkipWhile(x => !x.Equals(current)).Skip(1).First();
-            }
-            catch
-            {
-                return default(T);
-            }
-        }
-
-        public static T GetPrevious<T>(this IEnumerable<T> list, T current)
-        {
-            try
-            {
-                return list.TakeWhile(x => !x.Equals(current)).Last();
-            }
-            catch
-            {
-                return default(T);
-            }
-        }
     }
 }
