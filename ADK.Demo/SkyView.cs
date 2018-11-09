@@ -15,7 +15,6 @@ namespace ADK.Demo
     {
         private Point pOld;
         private Point pNew;
-        private bool isMouseMoving = false;
 
         public SkyView()
         {
@@ -49,7 +48,6 @@ namespace ADK.Demo
             }
             else
             {
-                SkyMap.Antialias = !isMouseMoving;
                 SkyMap.Render(pe.Graphics);
             }
         }
@@ -81,7 +79,7 @@ namespace ADK.Demo
         protected override void OnMouseUp(MouseEventArgs e)
         {
             base.OnMouseUp(e);
-            isMouseMoving = false;
+            SkyMap.Antialias = true;
             Invalidate();
         }
 
@@ -97,7 +95,7 @@ namespace ADK.Demo
 
                 if (e.Button == MouseButtons.Left && !shift)
                 {
-                    isMouseMoving = true;
+                    SkyMap.Antialias = false;
 
                     pNew.X = e.X;
                     pNew.Y = e.Y;

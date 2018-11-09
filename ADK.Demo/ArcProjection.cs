@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo
 {
+    /// <summary>
+    /// ARC projection, AIPS MEMO 27
+    /// Zenith Equidistant Projection
+    /// </summary>
     public class ArcProjection : IProjection
     {
         private readonly ISkyMap Map = null;
@@ -18,15 +22,11 @@ namespace ADK.Demo
 
         public PointF Project(CrdsHorizontal hor)
         {
-            // ARC projection, AIPS MEMO 27
-            // Zenith Equidistant Projection
-
-            double X, Y, L, M;
+            double X, Y;
 
             double d = Angle.ToRadians(hor.Altitude);
             double d0 = Angle.ToRadians(Map.Center.Altitude);
             double da = Angle.ToRadians(hor.Azimuth - Map.Center.Azimuth);
-            double rho = Angle.ToRadians(0);
 
             double sin_da = Math.Sin(da);
             double cos_da = Math.Cos(da);
@@ -48,14 +48,8 @@ namespace ADK.Demo
 
             double k = theta / Math.Sin(theta);
 
-            L = k * cos_d * sin_da;
-            M = k * (sin_d * cos_d0 - cos_d * sin_d0 * cos_da);
-
-            double sin_rho = Math.Sin(rho);
-            double cos_rho = Math.Cos(rho);
-
-            X = L * cos_rho + M * sin_rho;
-            Y = M * cos_rho - L * sin_rho;
+            X = k * cos_d * sin_da;
+            Y = k * (sin_d * cos_d0 - cos_d * sin_d0 * cos_da);
 
             X = Angle.ToDegrees(X) / Map.ViewAngle * Map.Width / 2;
             Y = Angle.ToDegrees(Y) / Map.ViewAngle * Map.Width / 2;
@@ -65,14 +59,10 @@ namespace ADK.Demo
 
         public CrdsHorizontal Invert(PointF p)
         {
-            double X = Angle.ToRadians((p.X - Map.Width / 2.0) * Map.ViewAngle / Map.Width * 2);
-            double Y = Angle.ToRadians((-p.Y + Map.Height / 2.0) * Map.ViewAngle / Map.Width * 2);
-
-            double L = X;
-            double M = Y;
+            double L = Angle.ToRadians((p.X - Map.Width / 2.0) * Map.ViewAngle / Map.Width * 2);
+            double M = Angle.ToRadians((-p.Y + Map.Height / 2.0) * Map.ViewAngle / Map.Width * 2);
 
             double theta = Math.Sqrt(L * L + M * M);
-
 
             double a;
             double A;
