@@ -44,13 +44,11 @@ namespace ADK.Demo
         {
             if (DesignMode || SkyMap == null)
             {
-                pe.Graphics.FillRectangle(Brushes.Black, 0, 0, Width, Height);
                 pe.Graphics.DrawString("SkyView", SystemFonts.DefaultFont, Brushes.White, 10, 10);
                 System.Diagnostics.Trace.WriteLine("OnPaint");
             }
             else
             {
-                pe.Graphics.SetClip(new Rectangle(0, 0, Width, Height));
                 SkyMap.Antialias = !isMouseMoving;
                 SkyMap.Render(pe.Graphics);
             }
@@ -114,8 +112,8 @@ namespace ADK.Demo
                     }
                     else
                     {
-                        CrdsHorizontal cpNew = SkyMap.CoordinatesByPoint(pNew);
-                        CrdsHorizontal cpOld = SkyMap.CoordinatesByPoint(pOld);
+                        CrdsHorizontal cpNew = SkyMap.Projection.Invert(pNew);
+                        CrdsHorizontal cpOld = SkyMap.Projection.Invert(pOld);
                         double da = Math.Abs(cpNew.Azimuth - cpOld.Azimuth);
                         da = Math.Abs(da) * Math.Sign(dx);
                         SkyMap.Center.Azimuth -= da;

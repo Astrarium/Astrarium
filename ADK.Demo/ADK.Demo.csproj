@@ -46,7 +46,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArcProjection.cs" />
+    <Compile Include="BaseSkyRenderer.cs" />
     <Compile Include="CelestialGrid.cs" />
+    <Compile Include="CelestialGridRenderer.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="FormMain.cs">
       <SubType>Form</SubType>
@@ -55,6 +58,7 @@
       <DependentUpon>FormMain.cs</DependentUpon>
     </Compile>
     <Compile Include="Geometry.cs" />
+    <Compile Include="IProjection.cs" />
     <Compile Include="ISkyMap.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

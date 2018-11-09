@@ -19,7 +19,11 @@ namespace ADK.Demo
             InitializeComponent();
 
             sky = new Sky();
-            skyView.SkyMap = new SkyMap(sky);
+            ISkyMap map = new SkyMap();
+
+            map.Renderers.Add(new CelestialGridRenderer(sky, map));
+
+            skyView.SkyMap = map;
         }
 
         private void skyView_MouseMove(object sender, MouseEventArgs e)
@@ -27,8 +31,8 @@ namespace ADK.Demo
 
 
             Text = 
-                skyView.SkyMap.CoordinatesByPoint(e.Location).ToString() + " / " +
-                skyView.SkyMap.CoordinatesByPoint(e.Location).ToEquatorial(sky.GeoLocation, sky.LocalSiderealTime).ToString() + " / " +
+                skyView.SkyMap.Projection.Invert(e.Location).ToString() + " / " +
+                skyView.SkyMap.Projection.Invert(e.Location).ToEquatorial(sky.GeoLocation, sky.LocalSiderealTime).ToString() + " / " +
                 skyView.SkyMap.ViewAngle;
         }
     }

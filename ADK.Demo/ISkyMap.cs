@@ -33,12 +33,9 @@ namespace ADK.Demo
         /// </summary>
         CrdsHorizontal Center { get; set; }
 
-        /// <summary>
-        /// Gets horizontal coordinates of a graphics point
-        /// </summary>
-        /// <param name="point">Point to get horizontal coordinates</param>
-        /// <returns>Horizontal coordinates of a graphics point</returns>
-        CrdsHorizontal CoordinatesByPoint(PointF point);
+        ICollection<BaseSkyRenderer> Renderers { get; }
+
+        IProjection Projection { get; set; }
         
         /// <summary>
         /// Renders the celestial map on provided Graphics object
