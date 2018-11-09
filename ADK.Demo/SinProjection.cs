@@ -11,11 +11,11 @@ namespace ADK.Demo
     /// ARC projection, AIPS MEMO 27
     /// Zenith Equidistant Projection
     /// </summary>
-    public class ArcProjection : IProjection
+    public class SinProjection : IProjection
     {
         private readonly ISkyMap Map = null;
 
-        public ArcProjection(ISkyMap map)
+        public SinProjection(ISkyMap map)
         {
             Map = map;
         }
@@ -37,22 +37,11 @@ namespace ADK.Demo
             double sin_d0 = Math.Sin(d0);
             double cos_d0 = Math.Cos(d0);
 
-            double theta = Math.Acos(sin_d * sin_d0 + cos_d * cos_d0 * cos_da);
+            X = cos_d * sin_da;
+            Y = sin_d * cos_d0 - cos_d * sin_d0 * cos_da;
 
-            if (theta == 0 || double.IsNaN(theta))
-            {
-                X = 0;
-                Y = 0;
-                return new PointF((float)(Map.Width / 2.0 + X), (float)(Map.Height / 2.0 - Y));
-            }
-
-            double k = theta / Math.Sin(theta);
-
-            X = k * cos_d * sin_da;
-            Y = k * (sin_d * cos_d0 - cos_d * sin_d0 * cos_da);
-
-            X = Angle.ToDegrees(X) / Map.ViewAngle * Map.Width / 2;
-            Y = Angle.ToDegrees(Y) / Map.ViewAngle * Map.Width / 2;
+            X = X * 90 / Map.ViewAngle / 2 * Map.Width;
+            Y = Y * 90 / Map.ViewAngle / 2* Map.Width;
 
             return new Point((int)(Map.Width / 2.0 + X), (int)(Map.Height / 2.0 - Y));
         }

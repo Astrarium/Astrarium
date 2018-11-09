@@ -10,13 +10,16 @@ namespace ADK.Demo
     {
         protected GridPoint[,] points = null;
 
+        public string Name { get; private set; }
+
         public int Rows { get; private set; }
 
         public int Columns { get; private set; }
 
-        public CelestialGrid(int rows, int columns)
+        public CelestialGrid(string name, int rows, int columns)
         {
             points = new GridPoint[rows, columns];
+            Name = name;
             Rows = rows;
             Columns = columns;
 

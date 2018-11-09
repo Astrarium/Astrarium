@@ -10,33 +10,47 @@ namespace ADK.Demo
 {
     public class CelestialGridRenderer : BaseSkyRenderer
     {
-        Pen penEquatorialGrid;
-        Pen penHorizontalGrid;
-        Pen penEclipticLine;
+        private CelestialGrid gridEquatorial = null;
+        private CelestialGrid gridHorizontal = null;
+        private CelestialGrid lineEcliptic = null;
+ 
+        private Pen penGridEquatorial = null;
+        private Pen penGridHorizontal = null;
+        private Pen penLineEcliptic = null;
 
         public CelestialGridRenderer(Sky sky, ISkyMap skyMap) : base(sky, skyMap)
         {
-            Color colorGridEquatorial = Color.FromArgb(0, 64, 64);
-            penEquatorialGrid = new Pen(Map.Antialias ? colorGridEquatorial : Color.FromArgb(200, colorGridEquatorial));
-            penEquatorialGrid.DashStyle = DashStyle.Dash;
+            gridEquatorial = Sky.Grids.First(c => c.Name == "Equatorial");
+            gridHorizontal = Sky.Grids.First(c => c.Name == "Horizontal");
+            lineEcliptic = Sky.Grids.First(c => c.Name == "Ecliptic");
 
-            Color colorGridHorizontal = Color.FromArgb(0, 64, 0);
-            penHorizontalGrid = new Pen(Map.Antialias ? colorGridHorizontal : Color.FromArgb(200, colorGridHorizontal));
-            penHorizontalGrid.DashStyle = DashStyle.Dash;
-
-            Color colorLineEcliptic = Color.FromArgb(128, 128, 0);
-            penEclipticLine = new Pen(Map.Antialias ? colorLineEcliptic : Color.FromArgb(200, colorLineEcliptic));
-            penEclipticLine.DashStyle = DashStyle.Dash;
+            penGridEquatorial = new Pen(Brushes.Transparent);
+            penGridEquatorial.DashStyle = DashStyle.Custom;
+            penGridEquatorial.DashPattern = new float[] { 3, 3 };
+            
+            penGridHorizontal = new Pen(Brushes.Transparent);
+            penGridHorizontal.DashStyle = DashStyle.Custom;
+            penGridHorizontal.DashPattern = new float[] { 3, 3 };
+            
+            penLineEcliptic = new Pen(Brushes.Transparent);
+            penLineEcliptic.DashStyle = DashStyle.Dash;
         }
 
         public override void Render(Graphics g)
         {
-            DrawGrid(g, penEquatorialGrid, Sky.GridEquatorial);
-            DrawGrid(g, penHorizontalGrid, Sky.GridHorizontal);
-            DrawGrid(g, penEclipticLine, Sky.LineEcliptic);
+            Color colorGridEquatorial = Color.FromArgb(0, 64, 64);
+            Color colorGridHorizontal = Color.FromArgb(0, 64, 0);
+            Color colorLineEcliptic = Color.FromArgb(128, 128, 0);
+
+            penGridEquatorial.Color = Map.Antialias ? colorGridEquatorial : Color.FromArgb(200, colorGridEquatorial);            
+            penGridHorizontal.Color = Map.Antialias ? colorGridHorizontal : Color.FromArgb(200, colorGridHorizontal);
+            penLineEcliptic.Color = Map.Antialias ? colorLineEcliptic : Color.FromArgb(200, colorLineEcliptic);
+
+            DrawGrid(g, penGridEquatorial, gridEquatorial);
+            DrawGrid(g, penGridHorizontal, gridHorizontal);
+            DrawGrid(g, penLineEcliptic, lineEcliptic);
         }
 
-        // TODO: move to separate renderer
         private void DrawGrid(Graphics g, Pen penGrid, CelestialGrid grid)
         {
             bool isAnyPoint = false;
@@ -155,7 +169,6 @@ namespace ADK.Demo
             if (!isAnyPoint)
             {
                 GridPoint closestPoint = grid.Points.OrderBy(p => Angle.Separation(grid.ToHorizontal(p), Map.Center)).First();
-
                 {
                     var segment = new List<GridPoint>();
                     segment.Add(closestPoint);
@@ -197,7 +210,6 @@ namespace ADK.Demo
 
                     DrawGroupOfPoints(g, penGrid, segment.Select(s => Map.Projection.Project(grid.ToHorizontal(s))).ToArray(), refPoints);
                 }
-
 
                 {
                     var segment = new List<GridPoint>();

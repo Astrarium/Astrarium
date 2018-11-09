@@ -35,11 +35,6 @@ namespace ADK.Demo
 
             g.DrawString(Center.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 10);
         }
-
-        
-
-        
-
     }
 
     
