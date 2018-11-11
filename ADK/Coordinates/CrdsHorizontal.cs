@@ -31,7 +31,7 @@ namespace ADK
         /// <param name="altitude">Altitude, in degrees. Positive above the horizon, negative below.</param>
         public CrdsHorizontal(double azimuth, double altitude)
         {
-            Azimuth = azimuth;
+            Azimuth = Angle.To360(azimuth);
             Altitude = altitude;
         }
 
@@ -42,7 +42,7 @@ namespace ADK
         /// <param name="altitude">Altitude, in degrees. Positive above the horizon, negative below.</param>
         public void Set(double azimuth, double altitude)
         {
-            Azimuth = azimuth;
+            Azimuth = Angle.To360(azimuth);
             Altitude = altitude;
         }
 

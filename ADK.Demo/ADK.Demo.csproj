@@ -46,6 +46,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BaseSkyCalc.cs" />
+    <Compile Include="CelestialGridCalc.cs" />
+    <Compile Include="GroundAndHorizonRenderer.cs" />
     <Compile Include="SinProjection.cs" />
     <Compile Include="ArcProjection.cs" />
     <Compile Include="BaseSkyRenderer.cs" />

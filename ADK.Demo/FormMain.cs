@@ -19,17 +19,17 @@ namespace ADK.Demo
             InitializeComponent();
 
             sky = new Sky();
-            ISkyMap map = new SkyMap();
+            sky.Calculators.Add(new CelestialGridCalc(sky));
 
+            ISkyMap map = new SkyMap();
             map.Renderers.Add(new CelestialGridRenderer(sky, map));
+            map.Renderers.Add(new GroundAndHorizonRenderer(sky, map));
 
             skyView.SkyMap = map;
         }
 
         private void skyView_MouseMove(object sender, MouseEventArgs e)
         {
-
-
             Text = 
                 skyView.SkyMap.Projection.Invert(e.Location).ToString() + " / " +
                 skyView.SkyMap.Projection.Invert(e.Location).ToEquatorial(sky.GeoLocation, sky.LocalSiderealTime).ToString() + " / " +
