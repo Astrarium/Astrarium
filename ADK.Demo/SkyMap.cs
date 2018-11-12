@@ -35,6 +35,14 @@ namespace ADK.Demo
 
             g.DrawString(Center.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 10);
         }
+
+        public void Initialize()
+        {
+            foreach (var renderer in Renderers)
+            {
+                renderer.Initialize();
+            }
+        }
     }
 
     

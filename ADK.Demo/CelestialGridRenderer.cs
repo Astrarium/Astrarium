@@ -25,13 +25,13 @@ namespace ADK.Demo
             lineEcliptic = Sky.Grids.First(c => c.Name == "Ecliptic");
 
             penGridEquatorial = new Pen(Brushes.Transparent);
-            penGridEquatorial.DashStyle = DashStyle.Custom;
-            penGridEquatorial.DashPattern = new float[] { 3, 3 };
+            penGridEquatorial.DashStyle = DashStyle.Dash;
+            //penGridEquatorial.DashPattern = new float[] { 3, 3 };
             
             penGridHorizontal = new Pen(Brushes.Transparent);
-            penGridHorizontal.DashStyle = DashStyle.Custom;
-            penGridHorizontal.DashPattern = new float[] { 3, 3 };
-            
+            //penGridHorizontal.DashPattern = new float[] { 3, 3 };
+            penGridHorizontal.DashStyle = DashStyle.Dash;
+
             penLineEcliptic = new Pen(Brushes.Transparent);
             penLineEcliptic.DashStyle = DashStyle.Dash;
         }

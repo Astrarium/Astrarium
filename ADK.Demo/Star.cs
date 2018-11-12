@@ -32,5 +32,10 @@ namespace ADK.Demo
         /// Apparent magnitude of the star
         /// </summary>
         public float Mag { get; set; }
+
+        /// <summary>
+        /// Star color, i.e. spectral class
+        /// </summary>
+        public char Color { get; set; }
     }
 }

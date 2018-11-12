@@ -22,5 +22,7 @@ namespace ADK.Demo
         }
 
         public abstract void Render(Graphics g);
+
+        public virtual void Initialize() { }
     }
 }

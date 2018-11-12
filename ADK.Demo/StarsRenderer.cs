@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,56 +12,130 @@ namespace ADK.Demo
 {
     public class StarsRenderer : BaseSkyRenderer
     {
+        private ICollection<KeyValuePair<int, int>> ConLines = new List<KeyValuePair<int, int>>();
+
+        private Pen penConLine;
+
         public StarsRenderer(Sky sky, ISkyMap skyMap) : base(sky, skyMap)
         {
-
+            penConLine = new Pen(new SolidBrush(Color.FromArgb(64, 64, 64)));
+            penConLine.DashStyle = DashStyle.Dot;
         }
 
         public override void Render(Graphics g)
         {
-            var stars = Sky.Objects.OfType<Star>().Where(s => Angle.Separation(Map.Center, s.Horizontal) < Map.ViewAngle * 1.2);
+            var allStars = Sky.Objects.OfType<Star>().ToArray();
 
+            
+            foreach (var line in ConLines)
+            {
+                var h1 = allStars.ElementAt(line.Key).Horizontal;
+                var h2 = allStars.ElementAt(line.Value).Horizontal;
+
+                if (Angle.Separation(Map.Center, h1) < Map.ViewAngle * 1.2 ||
+                    Angle.Separation(Map.Center, h2) < Map.ViewAngle * 1.2)
+                {
+                    var p1 = Map.Projection.Project(h1);
+                    var p2 = Map.Projection.Project(h2);
+
+                    g.DrawLine(penConLine, p1, p2);
+                }                
+            }
+            
+            var stars = allStars.Where(s => Angle.Separation(Map.Center, s.Horizontal) < Map.ViewAngle * 1.2);
             foreach (var star in stars)
             {
                 float diam = GetDrawingSize(star.Mag);
                 if ((int)diam > 0)
                 {
                     PointF p = Map.Projection.Project(star.Horizontal);
-                    g.FillEllipse(Brushes.White, p.X - diam / 2, p.Y - diam / 2, diam, diam);
+                    g.FillEllipse(GetColor(star.Color), p.X - diam / 2, p.Y - diam / 2, diam, diam);
                 }
             }
         }
 
-
-        // TODO: refactor this
         private float GetDrawingSize(float mag)
         {
-            double maxMag = 0;
-            double minMag = 5.0;
+            float maxMag = 0;
+            const float MAG_LIMIT_NARROW_ANGLE = 10;
+            const float MAG_LIMIT_WIDE_ANGLE = 5;
 
-            
-            minMag = 5.0;
-            if (Map.ViewAngle <= 90) minMag = 5.0;
-            if (Map.ViewAngle <= 70) minMag = 5.5;
-            if (Map.ViewAngle < 50) minMag = 6.0;
-            if (Map.ViewAngle < 30) minMag = 6.5;
-            if (Map.ViewAngle < 20) minMag = 7.0;
-            if (Map.ViewAngle < 15) minMag = 7.5;
-            if (Map.ViewAngle < 10) minMag = 8.0;
-            if (Map.ViewAngle < 5) minMag = 9.0;
-            if (Map.ViewAngle < 2) minMag = 10.0;
+            const float NARROW_ANGLE = 2;
+            const float WIDE_ANGLE = 90;
 
+            float K = (MAG_LIMIT_NARROW_ANGLE - MAG_LIMIT_WIDE_ANGLE) / (NARROW_ANGLE - WIDE_ANGLE);
+            float B = MAG_LIMIT_WIDE_ANGLE - K * WIDE_ANGLE;
 
-            double d = 1;
-            if (Map.ViewAngle < 2 && mag > minMag) return 1;
-            if (mag > minMag) return 0;
-            if (mag <= maxMag) return (float)(d * minMag - maxMag);
+            float minMag = K * (float)Map.ViewAngle + B;
 
-            float diam = (float)(d * minMag - mag);
+            float d = 1;
+            if (Map.ViewAngle < 2 && mag > minMag)
+                return 1;
 
-            if (Map.ViewAngle < 2 && diam < 1) return 1;
+            if (mag > minMag)
+                return 0;
 
-            return diam;
+            if (mag <= maxMag)
+                return d * minMag - maxMag;
+
+            float size = d * minMag - mag;
+
+            if (Map.ViewAngle < 2 && size < 1)
+                return 1;
+
+            return size;
+        }
+
+        private Brush GetColor(char spClass)
+        {
+            switch (spClass)
+            {
+                case 'O':
+                case 'W':
+                    return Brushes.LightBlue;
+                case 'B':
+                    return Brushes.LightCyan;
+                case 'A':
+                    return Brushes.White;
+                case 'F':
+                    return Brushes.LightYellow;
+                case 'G':
+                    return Brushes.Yellow;
+                case 'K':
+                    return Brushes.Orange;
+                case 'M':
+                    return Brushes.OrangeRed;
+                default:
+                    return Brushes.White;
+            }
+        }
+
+        public override void Initialize()
+        {
+            LoadConLines();
+        }
+
+        /// <summary>
+        /// Loads constellation lines
+        /// </summary>
+        private void LoadConLines()
+        {
+            string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/ConLines.dat");
+            string[] parsed_line = new string[2];
+            int from, to;
+            string line = "";
+
+            using (var sr = new StreamReader(file, Encoding.Default))
+            {
+                while (line != null && !sr.EndOfStream)
+                {
+                    line = sr.ReadLine();
+                    parsed_line = line.Split(',');
+                    from = Convert.ToInt32(parsed_line[0]) - 1;
+                    to = Convert.ToInt32(parsed_line[1]) - 1;
+                    ConLines.Add(new KeyValuePair<int, int>(from, to));
+                }
+            }
         }
     }
 }

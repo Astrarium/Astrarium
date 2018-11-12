@@ -41,11 +41,13 @@ namespace ADK.Demo
                 star.Horizontal = star.Equatorial.ToHorizontal(Sky.GeoLocation, Sky.LocalSiderealTime);
             }
         }
-
         public override void Initialize()
         {
-            // TODO: probably it's better to move loading of data to separate class
+            LoadStars();
+        }
 
+        private void LoadStars()
+        {
             string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Stars.dat");
 
             int i = 0;
@@ -93,6 +95,8 @@ namespace ADK.Demo
                     }
 
                     star.Mag = Convert.ToSingle(line.Substring(102, 5), CultureInfo.InvariantCulture);
+
+                    star.Color = line[129];
 
                     i++;
 

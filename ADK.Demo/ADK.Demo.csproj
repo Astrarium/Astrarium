@@ -89,6 +89,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="Data\Conlines.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Data\Stars.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

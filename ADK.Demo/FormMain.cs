@@ -29,6 +29,7 @@ namespace ADK.Demo
             map.Renderers.Add(new CelestialGridRenderer(sky, map));
             map.Renderers.Add(new StarsRenderer(sky, map));
             map.Renderers.Add(new GroundAndHorizonRenderer(sky, map));
+            map.Initialize();
 
             skyView.SkyMap = map;
         }
