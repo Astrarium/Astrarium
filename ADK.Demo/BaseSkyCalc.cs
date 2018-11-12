@@ -15,6 +15,8 @@ namespace ADK.Demo
             Sky = sky;
         }
 
-        public abstract void Calculate();
+        public virtual void Initialize() { }
+
+        public virtual void Calculate() { }
     }
 }

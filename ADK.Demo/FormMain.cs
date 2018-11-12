@@ -20,9 +20,14 @@ namespace ADK.Demo
 
             sky = new Sky();
             sky.Calculators.Add(new CelestialGridCalc(sky));
+            sky.Calculators.Add(new StarsCalc(sky));
+
+            sky.Initialize();
+            sky.Calculate();
 
             ISkyMap map = new SkyMap();
             map.Renderers.Add(new CelestialGridRenderer(sky, map));
+            map.Renderers.Add(new StarsRenderer(sky, map));
             map.Renderers.Add(new GroundAndHorizonRenderer(sky, map));
 
             skyView.SkyMap = map;

@@ -48,6 +48,8 @@
   <ItemGroup>
     <Compile Include="BaseSkyCalc.cs" />
     <Compile Include="CelestialGridCalc.cs" />
+    <Compile Include="CelestialObject.cs" />
+    <Compile Include="StarsRenderer.cs" />
     <Compile Include="GroundAndHorizonRenderer.cs" />
     <Compile Include="SinProjection.cs" />
     <Compile Include="ArcProjection.cs" />
@@ -72,6 +74,8 @@
     <Compile Include="SkyView.Designer.cs">
       <DependentUpon>SkyView.cs</DependentUpon>
     </Compile>
+    <Compile Include="Star.cs" />
+    <Compile Include="StarsCalc.cs" />
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
     </EmbeddedResource>
@@ -85,6 +89,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="Data\Stars.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

@@ -15,14 +15,22 @@ namespace ADK.Demo
         public double Epsilon { get; private set; }
 
         public ICollection<CelestialGrid> Grids { get; private set; } = new List<CelestialGrid>();
+        public List<CelestialObject> Objects { get; private set; } = new List<CelestialObject>();
 
         public ICollection<BaseSkyCalc> Calculators { get; private set; } = new List<BaseSkyCalc>();
+
+        public void Initialize()
+        {
+            foreach (var calc in Calculators)
+            {
+                calc.Initialize();
+            }
+        }
 
         public Sky()
         {
             JulianDay = new Date(DateTime.Now).ToJulianDay();
             GeoLocation = new CrdsGeographical(56.3333, 44);
-            Calculate();
         }
 
         public void Calculate()

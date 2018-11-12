@@ -45,11 +45,6 @@ namespace ADK.Demo
                 return eq.ToHorizontal(Sky.GeoLocation, Sky.LocalSiderealTime);
             };
             Sky.Grids.Add(GridEquatorial);
-        } 
-
-        public override void Calculate()
-        {
-            // Do nothing here since grids do not have ephemerides
         }
     }
 }

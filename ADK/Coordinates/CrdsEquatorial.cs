@@ -25,6 +25,16 @@ namespace ADK
         public CrdsEquatorial() { }
 
         /// <summary>
+        /// Copying construtor
+        /// </summary>
+        /// <param name="eq">Equatorial coordinates to be copied</param>
+        public CrdsEquatorial(CrdsEquatorial eq)
+        {
+            Alpha = eq.Alpha;
+            Delta = eq.Delta;
+        }
+
+        /// <summary>
         /// Creates a pair of equatorial coordinates with provided values of Right Ascension and Declination.
         /// </summary>
         /// <param name="alpha">Right Ascension value, in decimal degrees.</param>
