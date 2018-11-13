@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ADK;
+using ADK.Demo.Projections;
+using ADK.Demo.Renderers;
 
 namespace ADK.Demo
 {

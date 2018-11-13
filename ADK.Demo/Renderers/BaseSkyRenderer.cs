@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ADK.Demo
+namespace ADK.Demo.Renderers
 {
     /// <summary>
     /// Base class for all renderer classes which implement drawing logic of sky map.

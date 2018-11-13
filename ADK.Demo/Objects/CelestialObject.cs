@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ADK.Demo
+namespace ADK.Demo.Objects
 {
     /// <summary>
     /// Base class for all physical objects that can be displayed on the sky map

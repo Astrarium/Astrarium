@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ADK.Demo
+namespace ADK.Demo.Projections
 {
     public interface IProjection
     {

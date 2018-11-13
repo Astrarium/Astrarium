@@ -91,7 +91,7 @@ namespace ADK.Demo
             return p.Y < 0 || p.Y > height || p.X < 0 || p.X > width;
         }
 
-        public static PointF? LinesIntersection(PointF p1, PointF p2, PointF p3, PointF p4)
+        public static PointF LinesIntersection(PointF p1, PointF p2, PointF p3, PointF p4)
         {
             float x1 = p1.X;
             float x2 = p2.X;
@@ -109,6 +109,97 @@ namespace ADK.Demo
             return new PointF() { X = x, Y = y };
         }
 
+        public static PointF[] SegmentRectangleIntersection(PointF p1, PointF p2, int width, int height)
+        {
+            List<PointF> crosses = new List<PointF>();
+
+            if (!IsOutOfScreen(p1, width, height))
+            {
+                crosses.Add(p1);
+            }
+
+            if (!IsOutOfScreen(p2, width, height))
+            {
+                crosses.Add(p2);
+            }
+
+            if (crosses.Count != 2)
+            {
+                crosses.AddRange(EdgeCrosspoints(p1, p2, width, height));
+            }
+
+            return crosses.ToArray();
+        }
+
+        private static PointF[] EdgeCrosspoints(PointF p1, PointF p2, int width, int height)
+        {
+            PointF p00 = new PointF(0, 0);
+            PointF pW0 = new PointF(width, 0);
+            PointF pWH = new PointF(width, height);
+            PointF p0H = new PointF(0, height);
+
+            List<PointF?> crossPoints = new List<PointF?>();
+
+            // top edge
+            crossPoints.Add(SegmentsIntersection(p1, p2, p00, pW0));
+
+            // right edge
+            crossPoints.Add(SegmentsIntersection(p1, p2, pW0, pWH));
+
+            // bottom edge
+            crossPoints.Add(SegmentsIntersection(p1, p2, pWH, p0H));
+
+            // left edge
+            crossPoints.Add(SegmentsIntersection(p1, p2, p0H, p00));
+
+            return crossPoints.Where(p => p != null).Cast<PointF>().ToArray();
+        }
+
+        private static float VectorMult(float ax, float ay, float bx, float by)
+        {
+            return ax * by - bx * ay;
+        }
+
+        private static void LineEquation(PointF p1, PointF p2, ref float A, ref float B, ref float C)
+        {
+            A = p2.Y - p1.Y;
+            B = p1.X - p2.X;
+            C = -p1.X * (p2.Y - p1.Y) + p1.Y * (p2.X - p1.X);
+        }
+
+        private static PointF? SegmentsIntersection(PointF p1, PointF p2, PointF p3, PointF p4)
+        {
+            float v1 = VectorMult(p4.X - p3.X, p4.Y - p3.Y, p1.X - p3.X, p1.Y - p3.Y);
+            float v2 = VectorMult(p4.X - p3.X, p4.Y - p3.Y, p2.X - p3.X, p2.Y - p3.Y);
+            float v3 = VectorMult(p2.X - p1.X, p2.Y - p1.Y, p3.X - p1.X, p3.Y - p1.Y);
+            float v4 = VectorMult(p2.X - p1.X, p2.Y - p1.Y, p4.X - p1.X, p4.Y - p1.Y);
+
+            if ((v1 * v2) < 0 && (v3 * v4) < 0)
+            {
+                float a1 = 0, b1 = 0, c1 = 0;
+                LineEquation(p1, p2, ref a1, ref b1, ref c1);
+
+                float a2 = 0, b2 = 0, c2 = 0;
+                LineEquation(p3, p4, ref a2, ref b2, ref c2);
+
+                double d = a1 * b2 - b1 * a2;
+
+                if (d < 1e-10)
+                {
+                    return null;
+                }
+                else
+                {
+                    double dx = -c1 * b2 + b1 * c2;
+                    double dy = -a1 * c2 + c1 * a2;
+
+                    return new PointF((float)(dx / d), (float)(dy / d));
+                }
+            }
+
+            return null;
+        }
+
         public static PointF[] LineRectangleIntersection(PointF p1, PointF p2, int width, int height)
         {
             PointF p00 = new PointF(0, 0);
@@ -118,28 +209,28 @@ namespace ADK.Demo
 
             List<PointF> crosses = new List<PointF>();
 
-            PointF? c1 = LinesIntersection(p1, p2, p00, pW0);
-            if (c1 != null && c1.Value.Y == 0 && c1.Value.X >= 0 && c1.Value.X <= width)
+            PointF c1 = LinesIntersection(p1, p2, p00, pW0);
+            if (c1.Y == 0 && c1.X >= 0 && c1.X <= width)
             {
-                crosses.Add(c1.Value);
+                crosses.Add(c1);
             }
 
-            PointF? c2 = LinesIntersection(p1, p2, pW0, pWH);
-            if (c2 != null && c2.Value.X == width && c2.Value.Y >= 0 && c2.Value.Y <= height)
+            PointF c2 = LinesIntersection(p1, p2, pW0, pWH);
+            if (c2.X == width && c2.Y >= 0 && c2.Y <= height)
             {
-                crosses.Add(c2.Value);
+                crosses.Add(c2);
             }
 
-            PointF? c3 = LinesIntersection(p1, p2, p0H, pWH);
-            if (c3 != null && c3.Value.Y == height && c3.Value.X >= 0 && c3.Value.X <= width)
+            PointF c3 = LinesIntersection(p1, p2, p0H, pWH);
+            if (c3.Y == height && c3.X >= 0 && c3.X <= width)
             {
-                crosses.Add(c3.Value);
+                crosses.Add(c3);
             }
 
-            PointF? c4 = LinesIntersection(p1, p2, p00, p0H);
-            if (c4 != null && c4.Value.X == 0 && c4.Value.Y >= 0 && c4.Value.Y <= height)
+            PointF c4 = LinesIntersection(p1, p2, p00, p0H);
+            if (c4.X == 0 && c4.Y >= 0 && c4.Y <= height)
             {
-                crosses.Add(c4.Value);
+                crosses.Add(c4);
             }
 
             return crosses.ToArray();

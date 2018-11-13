@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ADK.Demo.Calculators;
+using ADK.Demo.Renderers;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -28,7 +30,7 @@ namespace ADK.Demo
             ISkyMap map = new SkyMap();
             map.Renderers.Add(new CelestialGridRenderer(sky, map));
             map.Renderers.Add(new StarsRenderer(sky, map));
-            map.Renderers.Add(new GroundAndHorizonRenderer(sky, map));
+            map.Renderers.Add(new GroundRenderer(sky, map));
             map.Initialize();
 
             skyView.SkyMap = map;

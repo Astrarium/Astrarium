@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ADK.Demo
+namespace ADK.Demo.Renderers
 {
     public class CelestialGridRenderer : BaseSkyRenderer
     {
@@ -25,22 +25,15 @@ namespace ADK.Demo
             lineEcliptic = Sky.Grids.First(c => c.Name == "Ecliptic");
 
             penGridEquatorial = new Pen(Brushes.Transparent);
-            penGridEquatorial.DashStyle = DashStyle.Dash;
-            //penGridEquatorial.DashPattern = new float[] { 3, 3 };
-            
             penGridHorizontal = new Pen(Brushes.Transparent);
-            //penGridHorizontal.DashPattern = new float[] { 3, 3 };
-            penGridHorizontal.DashStyle = DashStyle.Dash;
-
             penLineEcliptic = new Pen(Brushes.Transparent);
-            penLineEcliptic.DashStyle = DashStyle.Dash;
         }
 
         public override void Render(Graphics g)
         {
-            Color colorGridEquatorial = Color.FromArgb(0, 64, 64);
-            Color colorGridHorizontal = Color.FromArgb(0, 64, 0);
-            Color colorLineEcliptic = Color.FromArgb(128, 128, 0);
+            Color colorGridEquatorial = Color.FromArgb(200, 0, 64, 64);
+            Color colorGridHorizontal = Color.FromArgb(200, 0, 64, 0);
+            Color colorLineEcliptic = Color.FromArgb(200, 128, 128, 0);
 
             penGridEquatorial.Color = Map.Antialias ? colorGridEquatorial : Color.FromArgb(200, colorGridEquatorial);            
             penGridHorizontal.Color = Map.Antialias ? colorGridHorizontal : Color.FromArgb(200, colorGridHorizontal);

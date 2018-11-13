@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ADK.Demo.Objects;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -7,7 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ADK.Demo
+namespace ADK.Demo.Calculators
 {
     public class StarsCalc : BaseSkyCalc
     {

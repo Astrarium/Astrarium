@@ -6,11 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ADK.Demo
+namespace ADK.Demo.Renderers
 {
-    public class GroundAndHorizonRenderer : BaseSkyRenderer
+    public class GroundRenderer : BaseSkyRenderer
     {
-        public GroundAndHorizonRenderer(Sky sky, ISkyMap skyMap) : base(sky, skyMap)
+        public GroundRenderer(Sky sky, ISkyMap skyMap) : base(sky, skyMap)
         {
 
         }

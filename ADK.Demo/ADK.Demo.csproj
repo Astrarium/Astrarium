@@ -46,16 +46,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BaseSkyCalc.cs" />
-    <Compile Include="CelestialGridCalc.cs" />
-    <Compile Include="CelestialObject.cs" />
-    <Compile Include="StarsRenderer.cs" />
-    <Compile Include="GroundAndHorizonRenderer.cs" />
-    <Compile Include="SinProjection.cs" />
-    <Compile Include="ArcProjection.cs" />
-    <Compile Include="BaseSkyRenderer.cs" />
+    <Compile Include="Calculators\BaseSkyCalc.cs" />
+    <Compile Include="Calculators\CelestialGridCalc.cs" />
+    <Compile Include="Objects\CelestialObject.cs" />
+    <Compile Include="Renderers\StarsRenderer.cs" />
+    <Compile Include="Renderers\GroundRenderer.cs" />
+    <Compile Include="Projections\SinProjection.cs" />
+    <Compile Include="Projections\ArcProjection.cs" />
+    <Compile Include="Renderers\BaseSkyRenderer.cs" />
     <Compile Include="CelestialGrid.cs" />
-    <Compile Include="CelestialGridRenderer.cs" />
+    <Compile Include="Renderers\CelestialGridRenderer.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="FormMain.cs">
       <SubType>Form</SubType>
@@ -64,7 +64,7 @@
       <DependentUpon>FormMain.cs</DependentUpon>
     </Compile>
     <Compile Include="Geometry.cs" />
-    <Compile Include="IProjection.cs" />
+    <Compile Include="Projections\IProjection.cs" />
     <Compile Include="ISkyMap.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -74,8 +74,8 @@
     <Compile Include="SkyView.Designer.cs">
       <DependentUpon>SkyView.cs</DependentUpon>
     </Compile>
-    <Compile Include="Star.cs" />
-    <Compile Include="StarsCalc.cs" />
+    <Compile Include="Objects\Star.cs" />
+    <Compile Include="Calculators\StarsCalc.cs" />
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
     </EmbeddedResource>

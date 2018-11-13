@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ADK.Demo.Objects;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -8,7 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ADK.Demo
+namespace ADK.Demo.Renderers
 {
     public class StarsRenderer : BaseSkyRenderer
     {
@@ -26,22 +27,21 @@ namespace ADK.Demo
         {
             var allStars = Sky.Objects.OfType<Star>().ToArray();
 
-            
             foreach (var line in ConLines)
             {
                 var h1 = allStars.ElementAt(line.Key).Horizontal;
                 var h2 = allStars.ElementAt(line.Value).Horizontal;
 
-                if (Angle.Separation(Map.Center, h1) < Map.ViewAngle * 1.2 ||
-                    Angle.Separation(Map.Center, h2) < Map.ViewAngle * 1.2)
-                {
-                    var p1 = Map.Projection.Project(h1);
-                    var p2 = Map.Projection.Project(h2);
+                var p1 = Map.Projection.Project(h1);
+                var p2 = Map.Projection.Project(h2);
 
-                    g.DrawLine(penConLine, p1, p2);
-                }                
+                var points = Geometry.SegmentRectangleIntersection(p1, p2, Map.Width, Map.Height);
+                if (points.Length == 2)
+                {
+                    g.DrawLine(penConLine, points[0], points[1]);
+                }
             }
-            
+
             var stars = allStars.Where(s => Angle.Separation(Map.Center, s.Horizontal) < Map.ViewAngle * 1.2);
             foreach (var star in stars)
             {
@@ -111,14 +111,6 @@ namespace ADK.Demo
         }
 
         public override void Initialize()
-        {
-            LoadConLines();
-        }
-
-        /// <summary>
-        /// Loads constellation lines
-        /// </summary>
-        private void LoadConLines()
         {
             string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/ConLines.dat");
             string[] parsed_line = new string[2];
