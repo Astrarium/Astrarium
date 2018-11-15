@@ -103,7 +103,7 @@ namespace ADK.Demo.Calculators
                 }
             }
 
-            Sky.Objects.AddRange(Stars);
+            Sky.AddDataProvider("Stars", () => Stars);
         }
     }
 }

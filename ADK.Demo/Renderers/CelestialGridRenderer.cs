@@ -20,9 +20,9 @@ namespace ADK.Demo.Renderers
 
         public CelestialGridRenderer(Sky sky, ISkyMap skyMap) : base(sky, skyMap)
         {
-            gridEquatorial = Sky.Grids.First(c => c.Name == "Equatorial");
-            gridHorizontal = Sky.Grids.First(c => c.Name == "Horizontal");
-            lineEcliptic = Sky.Grids.First(c => c.Name == "Ecliptic");
+            gridEquatorial = Sky.Get<CelestialGrid>("GridEquatorial");
+            gridHorizontal = Sky.Get<CelestialGrid>("GridHorizontal");
+            lineEcliptic = Sky.Get<CelestialGrid>("LineEcliptic");
 
             penGridEquatorial = new Pen(Brushes.Transparent);
             penGridHorizontal = new Pen(Brushes.Transparent);

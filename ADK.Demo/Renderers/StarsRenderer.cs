@@ -26,21 +26,27 @@ namespace ADK.Demo.Renderers
 
         public override void Render(Graphics g)
         {
-            var allStars = Sky.Objects.OfType<Star>().ToArray();
+            var allStars = Sky.Get<ICollection<Star>>("Stars");
+
             magLimit = allStars.Select(s => s.Mag).Max();
+            double maxSeparation = 90 * 1.2;
 
             foreach (var line in ConLines)
             {
                 var h1 = allStars.ElementAt(line.Item1).Horizontal;
                 var h2 = allStars.ElementAt(line.Item2).Horizontal;
 
-                var p1 = Map.Projection.Project(h1);
-                var p2 = Map.Projection.Project(h2);
-
-                var points = Geometry.SegmentRectangleIntersection(p1, p2, Map.Width, Map.Height);
-                if (points.Length == 2)
+                if (Angle.Separation(Map.Center, h1) < maxSeparation &&
+                    Angle.Separation(Map.Center, h2) < maxSeparation)
                 {
-                    g.DrawLine(penConLine, points[0], points[1]);
+                    var p1 = Map.Projection.Project(h1);
+                    var p2 = Map.Projection.Project(h2);
+
+                    var points = Geometry.SegmentRectangleIntersection(p1, p2, Map.Width, Map.Height);
+                    if (points.Length == 2)
+                    {
+                        g.DrawLine(penConLine, points[0], points[1]);
+                    }
                 }
             }
 

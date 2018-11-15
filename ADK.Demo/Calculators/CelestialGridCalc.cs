@@ -24,13 +24,13 @@ namespace ADK.Demo.Calculators
                 var eq = ec.ToEquatorial(Sky.Epsilon);
                 return eq.ToHorizontal(Sky.GeoLocation, Sky.LocalSiderealTime);
             };
-            Sky.Grids.Add(LineEcliptic);
+            Sky.AddDataProvider("LineEcliptic", () => LineEcliptic);
 
             // Horizontal grid
             CelestialGrid GridHorizontal = new CelestialGrid("Horizontal", 17, 24);
             GridHorizontal.FromHorizontal = (h) => new GridPoint(h.Azimuth, h.Altitude);
             GridHorizontal.ToHorizontal = (c) => new CrdsHorizontal(c.Longitude, c.Latitude);
-            Sky.Grids.Add(GridHorizontal);
+            Sky.AddDataProvider("GridHorizontal", () => GridHorizontal);
 
             // Equatorial grid
             CelestialGrid GridEquatorial = new CelestialGrid("Equatorial", 17, 24);
@@ -44,7 +44,7 @@ namespace ADK.Demo.Calculators
                 var eq = new CrdsEquatorial(c.Longitude, c.Latitude);
                 return eq.ToHorizontal(Sky.GeoLocation, Sky.LocalSiderealTime);
             };
-            Sky.Grids.Add(GridEquatorial);
+            Sky.AddDataProvider("GridEquatorial", () => GridEquatorial);
         }
     }
 }

@@ -52,7 +52,7 @@ namespace ADK.Demo.Calculators
                 }
             }
 
-            Sky.Borders.AddRange(Borders);
+            Sky.AddDataProvider("Borders", () => Borders);
         }
     }
 }

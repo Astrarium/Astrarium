@@ -2,6 +2,7 @@
 using ADK.Demo.Objects;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,11 +17,26 @@ namespace ADK.Demo
         public NutationElements NutationElements { get; private set; }
         public double Epsilon { get; private set; }
 
-        public List<CelestialGrid> Grids { get; private set; } = new List<CelestialGrid>();
-        public List<CelestialObject> Objects { get; private set; } = new List<CelestialObject>();        
-        public List<ConstBorderPoint> Borders { get; private set; } = new List<ConstBorderPoint>();
-
         public ICollection<BaseSkyCalc> Calculators { get; private set; } = new List<BaseSkyCalc>();
+
+        private Dictionary<string, object> DataProviders = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
+        public void AddDataProvider<T>(string key, Func<T> provider)
+        {
+            DataProviders.Add(key, provider);
+        }
+
+        public T Get<T>(string key)
+        {
+            if (DataProviders.ContainsKey(key))
+            {
+                return (DataProviders[key] as Func<T>).Invoke();
+            }
+            else
+            {
+                throw new ArgumentException($"There is no data provider with name `{key}`.");
+            }
+        } 
 
         public void Initialize()
         {
