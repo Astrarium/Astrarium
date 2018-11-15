@@ -23,11 +23,13 @@ namespace ADK.Demo
             sky = new Sky();
             sky.Calculators.Add(new CelestialGridCalc(sky));
             sky.Calculators.Add(new StarsCalc(sky));
+            sky.Calculators.Add(new BordersCalc(sky));
 
             sky.Initialize();
             sky.Calculate();
 
             ISkyMap map = new SkyMap();
+            map.Renderers.Add(new BordersRenderer(sky, map));
             map.Renderers.Add(new CelestialGridRenderer(sky, map));
             map.Renderers.Add(new StarsRenderer(sky, map));
             map.Renderers.Add(new GroundRenderer(sky, map));
@@ -38,10 +40,21 @@ namespace ADK.Demo
 
         private void skyView_MouseMove(object sender, MouseEventArgs e)
         {
+            var hor = skyView.SkyMap.Projection.Invert(e.Location);
+
+            var eq = hor.ToEquatorial(sky.GeoLocation, sky.LocalSiderealTime);
+
+            // precessional elements for converting from current to B1875 epoch
+            var p1875 = Precession.ElementsFK5(sky.JulianDay, Date.EPOCH_B1875);
+
+            // Equatorial coordinates for B1875 epoch
+            CrdsEquatorial eq1875 = Precession.GetEquatorialCoordinates(eq, p1875);
+
             Text = 
-                skyView.SkyMap.Projection.Invert(e.Location).ToString() + " / " +
-                skyView.SkyMap.Projection.Invert(e.Location).ToEquatorial(sky.GeoLocation, sky.LocalSiderealTime).ToString() + " / " +
-                skyView.SkyMap.ViewAngle;
+                hor.ToString() + " / " +
+                eq.ToString() + " / " +
+                skyView.SkyMap.ViewAngle + " / " +
+                Constellations.FindConstellation(eq1875);
         }
     }
 }

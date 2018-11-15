@@ -184,17 +184,10 @@ namespace ADK.Demo
 
                 double d = a1 * b2 - b1 * a2;
 
-                if (d < 1e-10)
-                {
-                    return null;
-                }
-                else
-                {
-                    double dx = -c1 * b2 + b1 * c2;
-                    double dy = -a1 * c2 + c1 * a2;
+                double dx = -c1 * b2 + b1 * c2;
+                double dy = -a1 * c2 + c1 * a2;
 
-                    return new PointF((float)(dx / d), (float)(dy / d));
-                }
+                return new PointF((float)(dx / d), (float)(dy / d));
             }
 
             return null;

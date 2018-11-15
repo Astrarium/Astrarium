@@ -37,17 +37,15 @@ namespace ADK.Demo.Calculators
 
                 // Equatorial coordinates for the mean equinox and epoch of the target date
                 star.Equatorial = Precession.GetEquatorialCoordinates(eq0, p);
+                          
+                // TODO: nutation and aberration
 
                 // Apparent horizontal coordinates
                 star.Horizontal = star.Equatorial.ToHorizontal(Sky.GeoLocation, Sky.LocalSiderealTime);
             }
         }
-        public override void Initialize()
-        {
-            LoadStars();
-        }
 
-        private void LoadStars()
+        public override void Initialize()
         {
             string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Stars.dat");
 

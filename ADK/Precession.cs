@@ -11,44 +11,6 @@ namespace ADK
     {
         /// <summary>
         /// Gets precessional elements to convert equatorial coordinates of a point from one epoch to another.
-        /// Equatorial coordinates of a point must be reffered to system FK4.
-        /// </summary>
-        /// <param name="jd0">Initial epoch, in Julian Days.</param>
-        /// <param name="jd">Target (final) epoch, in Julian Days.</param>
-        /// <returns>
-        /// <see cref="PrecessionalElements"/> to convert equatorial coordinates of a point from 
-        /// one epoch (<paramref name="jd0"/>) to another (<paramref name="jd"/>).
-        /// </returns>
-        /// <remarks>
-        /// This method is taken from AA(I), chapter 20 ("Precession", topic "The old precessional elements").
-        /// </remarks>
-        public static PrecessionalElements ElementsFK4(double jd0, double jd)
-        {
-            PrecessionalElements p = new PrecessionalElements();
-            p.InitialEpoch = jd0;
-            p.TargetEpoch = jd;
-
-            double T = (jd0 - 2415020.3135) / 36524.2199;
-            double t = (jd - jd0) / 36524.2199;
-
-            double t2 = t * t;
-            double t3 = t2 * t;
-
-            // all values in seconds of arc
-            p.zeta = (2304.250 + 1.396 * T) * t + 0.302 * t2 + 0.018 * t3;
-            p.z = p.zeta + 0.791 * t2 + 0.001 * t3;
-            p.theta = (2004.682 - 0853 * T) * t - 0.426 * t2 - 0.042 * t3;
-
-            // convert to degress
-            p.zeta /= 3600;
-            p.z /= 3600;
-            p.theta /= 3600;
-
-            return p;
-        }
-
-        /// <summary>
-        /// Gets precessional elements to convert equatorial coordinates of a point from one epoch to another.
         /// Equatorial coordinates of a point must be reffered to system FK5.
         /// </summary>
         /// <param name="jd0">Initial epoch, in Julian Days.</param>

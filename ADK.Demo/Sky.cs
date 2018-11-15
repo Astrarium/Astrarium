@@ -16,8 +16,9 @@ namespace ADK.Demo
         public NutationElements NutationElements { get; private set; }
         public double Epsilon { get; private set; }
 
-        public ICollection<CelestialGrid> Grids { get; private set; } = new List<CelestialGrid>();
-        public List<CelestialObject> Objects { get; private set; } = new List<CelestialObject>();
+        public List<CelestialGrid> Grids { get; private set; } = new List<CelestialGrid>();
+        public List<CelestialObject> Objects { get; private set; } = new List<CelestialObject>();        
+        public List<ConstBorderPoint> Borders { get; private set; } = new List<ConstBorderPoint>();
 
         public ICollection<BaseSkyCalc> Calculators { get; private set; } = new List<BaseSkyCalc>();
 

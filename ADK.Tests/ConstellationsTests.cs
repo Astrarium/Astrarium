@@ -15,7 +15,7 @@ namespace ADK.Tests
         public void FindConstellation()
         {
             // precessional elements for converting from J1950 to B1875 epoch
-            var p = Precession.ElementsFK4(Date.EPOCH_J1950, Date.EPOCH_B1875);
+            var p = Precession.ElementsFK5(Date.EPOCH_J1950, Date.EPOCH_B1875);
 
             foreach (var test in testData)
             {

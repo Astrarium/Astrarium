@@ -13,9 +13,10 @@ namespace ADK.Demo.Renderers
 {
     public class StarsRenderer : BaseSkyRenderer
     {
-        private ICollection<KeyValuePair<int, int>> ConLines = new List<KeyValuePair<int, int>>();
+        private ICollection<Tuple<int, int>> ConLines = new List<Tuple<int, int>>();
 
         private Pen penConLine;
+        private float magLimit = 100;
 
         public StarsRenderer(Sky sky, ISkyMap skyMap) : base(sky, skyMap)
         {
@@ -26,11 +27,12 @@ namespace ADK.Demo.Renderers
         public override void Render(Graphics g)
         {
             var allStars = Sky.Objects.OfType<Star>().ToArray();
+            magLimit = allStars.Select(s => s.Mag).Max();
 
             foreach (var line in ConLines)
             {
-                var h1 = allStars.ElementAt(line.Key).Horizontal;
-                var h2 = allStars.ElementAt(line.Value).Horizontal;
+                var h1 = allStars.ElementAt(line.Item1).Horizontal;
+                var h2 = allStars.ElementAt(line.Item2).Horizontal;
 
                 var p1 = Map.Projection.Project(h1);
                 var p2 = Map.Projection.Project(h2);
@@ -57,8 +59,8 @@ namespace ADK.Demo.Renderers
         private float GetDrawingSize(float mag)
         {
             float maxMag = 0;
-            const float MAG_LIMIT_NARROW_ANGLE = 10;
-            const float MAG_LIMIT_WIDE_ANGLE = 5;
+            float MAG_LIMIT_NARROW_ANGLE = magLimit;
+            const float MAG_LIMIT_WIDE_ANGLE = 5.5f;
 
             const float NARROW_ANGLE = 2;
             const float WIDE_ANGLE = 90;
@@ -68,7 +70,6 @@ namespace ADK.Demo.Renderers
 
             float minMag = K * (float)Map.ViewAngle + B;
 
-            float d = 1;
             if (Map.ViewAngle < 2 && mag > minMag)
                 return 1;
 
@@ -76,14 +77,11 @@ namespace ADK.Demo.Renderers
                 return 0;
 
             if (mag <= maxMag)
-                return d * minMag - maxMag;
+                mag = maxMag;
 
-            float size = d * minMag - mag;
+            float range = minMag - maxMag;
 
-            if (Map.ViewAngle < 2 && size < 1)
-                return 1;
-
-            return size;
+            return (range - mag + 1);
         }
 
         private Brush GetColor(char spClass)
@@ -125,7 +123,7 @@ namespace ADK.Demo.Renderers
                     parsed_line = line.Split(',');
                     from = Convert.ToInt32(parsed_line[0]) - 1;
                     to = Convert.ToInt32(parsed_line[1]) - 1;
-                    ConLines.Add(new KeyValuePair<int, int>(from, to));
+                    ConLines.Add(new Tuple<int, int>(from, to));
                 }
             }
         }

@@ -48,7 +48,10 @@
   <ItemGroup>
     <Compile Include="Calculators\BaseSkyCalc.cs" />
     <Compile Include="Calculators\CelestialGridCalc.cs" />
+    <Compile Include="Calculators\BordersCalc.cs" />
     <Compile Include="Objects\CelestialObject.cs" />
+    <Compile Include="Objects\ConstBorderPoint.cs" />
+    <Compile Include="Renderers\BordersRenderer.cs" />
     <Compile Include="Renderers\StarsRenderer.cs" />
     <Compile Include="Renderers\GroundRenderer.cs" />
     <Compile Include="Projections\SinProjection.cs" />
@@ -89,6 +92,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="Data\Borders.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Data\Conlines.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
