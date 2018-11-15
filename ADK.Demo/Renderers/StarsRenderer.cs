@@ -17,6 +17,7 @@ namespace ADK.Demo.Renderers
 
         private Pen penConLine;
         private float magLimit = 100;
+        private const double maxSeparation = 90 * 1.2;
 
         public StarsRenderer(Sky sky, ISkyMap skyMap) : base(sky, skyMap)
         {
@@ -29,18 +30,20 @@ namespace ADK.Demo.Renderers
             var allStars = Sky.Get<ICollection<Star>>("Stars");
 
             magLimit = allStars.Select(s => s.Mag).Max();
-            double maxSeparation = 90 * 1.2;
+
+            PointF p1, p2;
+            CrdsHorizontal h1, h2;
 
             foreach (var line in ConLines)
             {
-                var h1 = allStars.ElementAt(line.Item1).Horizontal;
-                var h2 = allStars.ElementAt(line.Item2).Horizontal;
+                h1 = allStars.ElementAt(line.Item1).Horizontal;
+                h2 = allStars.ElementAt(line.Item2).Horizontal;
 
                 if (Angle.Separation(Map.Center, h1) < maxSeparation &&
                     Angle.Separation(Map.Center, h2) < maxSeparation)
                 {
-                    var p1 = Map.Projection.Project(h1);
-                    var p2 = Map.Projection.Project(h2);
+                    p1 = Map.Projection.Project(h1);
+                    p2 = Map.Projection.Project(h2);
 
                     var points = Geometry.SegmentRectangleIntersection(p1, p2, Map.Width, Map.Height);
                     if (points.Length == 2)

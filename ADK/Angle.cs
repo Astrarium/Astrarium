@@ -65,6 +65,43 @@ namespace ADK
 
             return double.IsNaN(a) ? 0 : ToDegrees(a);
         }
+
+        /// <summary>
+        /// Calculates an intermediate point at any fraction along the great circle path 
+        /// between two points with horizontal coordinates
+        /// </summary>
+        /// <param name="p1">Horizontal coordinates of the first point</param>
+        /// <param name="p2">Horizontal coordinates of the second point</param>
+        /// <param name="fraction">Fraction along great circle route (f=0 is point 1, f=1 is point 2).</param>
+        /// <returns>
+        /// The intermediate point at specified fraction
+        /// </returns>
+        /// <remarks>
+        /// Formula is taken from <see href="http://www.movable-type.co.uk/scripts/latlong.html"/>
+        /// that is originally based on <see cref="http://www.edwilliams.org/avform.htm#Intermediate"/>.
+        /// </remarks>
+        public static CrdsHorizontal Intermediate(CrdsHorizontal p1, CrdsHorizontal p2, double fraction)
+        {
+            if (fraction < 0 || fraction > 1)
+                throw new ArgumentException("Fraction value should be in range [0, 1]", nameof(fraction));
+
+            double d = ToRadians(Separation(p1, p2));
+            double a = Math.Sin((1 - fraction) * d) / Math.Sin(d);
+            double b = Math.Sin(fraction * d) / Math.Sin(d);
+
+            double alt1 = ToRadians(p1.Altitude);
+            double alt2 = ToRadians(p2.Altitude);
+            double az1 = ToRadians(p1.Azimuth);
+            double az2 = ToRadians(p2.Azimuth);
+
+            double x = a * Math.Cos(alt1) * Math.Cos(az1) + b * Math.Cos(alt2) * Math.Cos(az2);
+            double y = a * Math.Cos(alt1) * Math.Sin(az1) + b * Math.Cos(alt2) * Math.Sin(az2);
+            double z = a * Math.Sin(alt1) + b * Math.Sin(alt2);
+            double alt = Math.Atan2(z, Math.Sqrt(x * x + y * y));
+            double az = Math.Atan2(y, x);
+
+            return new CrdsHorizontal(ToDegrees(az), ToDegrees(alt));
+        }
     }
 
     #endregion Angle
