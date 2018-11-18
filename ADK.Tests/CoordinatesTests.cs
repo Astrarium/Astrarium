@@ -156,5 +156,30 @@ namespace ADK.Tests
             Assert.AreEqual(-0.3116544, rect.Y, 1e-7);
             Assert.AreEqual(-0.1351215, rect.Z, 1e-7);
         }
+
+        /// <summary>
+        /// Example 40.a
+        /// </summary>
+        [TestMethod]
+        public void ToTopocentric()
+        {
+            // Geocentric coordinates of Mars
+            CrdsEquatorial eq = new CrdsEquatorial(339.530208, -15.771083);
+
+            // Palomar Observatory coordinates, see example 11.a
+            CrdsGeographical geo = new CrdsGeographical(new DMS("+33* 21' 22''").ToDecimalAngle(), new HMS("7h 47m 27s").ToDecimalAngle(), 1706);
+
+            // Equatoria horizontal parallax 
+            double pi = 23.592 / 3600;
+
+            // Apparent sidereal time at Greenwich
+            double theta0 = new HMS("1h 40m 45s").ToDecimalAngle();
+
+            // Equatorial topocentric coordinates of Mars
+            CrdsEquatorial topo = eq.ToTopocentric(geo, theta0, pi);
+
+            Assert.AreEqual(new HMS("22h 38m 08.54s").ToDecimalAngle(), topo.Alpha, errorInHMS);
+            Assert.AreEqual(new DMS("-15* 46' 30.04''").ToDecimalAngle(), topo.Delta, errorInDMS);
+        }
     }
 }

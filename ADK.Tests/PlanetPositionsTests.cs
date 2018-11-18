@@ -171,7 +171,6 @@ namespace ADK.Tests
             // assume an accuracy of 0.5'' is sufficient
             Assert.AreEqual(198.378178, eq.Alpha, 1.0 / 3600 * 0.5);
             Assert.AreEqual(-7.783871, eq.Delta, 1.0 / 3600 * 0.5);
-            
         }
 
         /// <summary>

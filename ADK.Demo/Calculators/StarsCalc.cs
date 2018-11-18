@@ -37,11 +37,18 @@ namespace ADK.Demo.Calculators
 
                 // Equatorial coordinates for the mean equinox and epoch of the target date
                 star.Equatorial = Precession.GetEquatorialCoordinates(eq0, p);
-                          
-                // TODO: nutation and aberration
+
+                // Nutation effect
+                var eq1 = Nutation.NutationEffect(star.Equatorial, Sky.NutationElements, Sky.Epsilon);
+
+                // Aberration effect
+                var eq2 = Aberration.AberrationEffect(star.Equatorial, Sky.AberrationElements, Sky.Epsilon);
+
+                // Apparent coordinates of the star
+                star.Equatorial += eq1 + eq2;
 
                 // Apparent horizontal coordinates
-                star.Horizontal = star.Equatorial.ToHorizontal(Sky.GeoLocation, Sky.LocalSiderealTime);
+                star.Horizontal = star.Equatorial.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
             }
         }
 

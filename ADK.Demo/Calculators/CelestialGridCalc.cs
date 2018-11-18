@@ -14,7 +14,7 @@ namespace ADK.Demo.Calculators
             CelestialGrid LineEcliptic = new CelestialGrid("Ecliptic", 1, 24);
             LineEcliptic.FromHorizontal = (h) =>
             {
-                var eq = h.ToEquatorial(Sky.GeoLocation, Sky.LocalSiderealTime);
+                var eq = h.ToEquatorial(Sky.GeoLocation, Sky.SiderealTime);
                 var ec = eq.ToEcliptical(Sky.Epsilon);
                 return new GridPoint(ec.Lambda, ec.Beta);
             };
@@ -22,7 +22,7 @@ namespace ADK.Demo.Calculators
             {
                 var ec = new CrdsEcliptical(c.Longitude, c.Latitude);
                 var eq = ec.ToEquatorial(Sky.Epsilon);
-                return eq.ToHorizontal(Sky.GeoLocation, Sky.LocalSiderealTime);
+                return eq.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
             };
             Sky.AddDataProvider("LineEcliptic", () => LineEcliptic);
 
@@ -36,13 +36,13 @@ namespace ADK.Demo.Calculators
             CelestialGrid GridEquatorial = new CelestialGrid("Equatorial", 17, 24);
             GridEquatorial.FromHorizontal = (h) =>
             {
-                var eq = h.ToEquatorial(Sky.GeoLocation, Sky.LocalSiderealTime);
+                var eq = h.ToEquatorial(Sky.GeoLocation, Sky.SiderealTime);
                 return new GridPoint(eq.Alpha, eq.Delta);
             };
             GridEquatorial.ToHorizontal = (c) =>
             {
                 var eq = new CrdsEquatorial(c.Longitude, c.Latitude);
-                return eq.ToHorizontal(Sky.GeoLocation, Sky.LocalSiderealTime);
+                return eq.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
             };
             Sky.AddDataProvider("GridEquatorial", () => GridEquatorial);
         }

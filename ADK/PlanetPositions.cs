@@ -198,6 +198,13 @@ namespace ADK
             return new CrdsEcliptical(deltaL / 3600, deltaB / 3600);
         }
 
+        // TODO: this should be moved to separate class
+        private static readonly double[] s0 = new double[] { 3.36, 8.41, 959.63, 4.68, 98.44, 82.73, 35.02, 33.5, 2.07 };
+        public static double Semidiameter(Planet p, double distance)
+        {
+            return s0[(int)p - 1] / distance;
+        }
+
         /// <summary>
         /// Represents triplet of VSOP87 terms used for calculation of heliocentrical planet positions
         /// </summary>

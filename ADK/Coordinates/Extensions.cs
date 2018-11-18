@@ -191,5 +191,36 @@ namespace ADK
             rect.Z = R * (cosBeta * sinLambda * sinEpsilon + sinBeta * cosEpsilon);
             return rect;
         }
+
+        /// <summary>
+        /// Calculates topocentric equatorial coordinates of celestial body 
+        /// with taking into account correction for parallax.
+        /// </summary>
+        /// <param name="eq">Geocentric equatorial coordinates of the body</param>
+        /// <param name="geo">Geographical coordinates of the body</param>
+        /// <param name="theta0">Apparent sidereal time at Greenwich</param>
+        /// <returns>Topocentric equatorial coordinates of the celestial body</returns>
+        /// <remarks>
+        /// Method is taken from AA(II), formulae 40.6-40.7.
+        /// </remarks>
+        public static CrdsEquatorial ToTopocentric(this CrdsEquatorial eq, CrdsGeographical geo, double theta0, double pi)
+        {
+            double H = Angle.ToRadians(HourAngle(theta0, geo.Longitude, eq.Alpha));
+            double delta = Angle.ToRadians(eq.Delta);
+            double sinPi = Math.Sin(Angle.ToRadians(pi));
+
+            double A = Math.Cos(delta) * Math.Sin(H);
+            double B = Math.Cos(delta) * Math.Cos(H) - geo.RhoCosPhi * sinPi;
+            double C = Math.Sin(delta) - geo.RhoSinPhi * sinPi;
+
+            double q = Math.Sqrt(A * A + B * B + C * C);
+
+            double H_ = Angle.ToDegrees(Math.Atan2(A, B));
+
+            double alpha_ = Angle.To360(theta0 - geo.Longitude - H_);
+            double delta_ = Angle.ToDegrees(Math.Asin(C / q));
+
+            return new CrdsEquatorial(alpha_, delta_);
+        }
     }
 }

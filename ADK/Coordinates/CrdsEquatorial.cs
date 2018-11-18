@@ -60,5 +60,16 @@ namespace ADK
         {
             return $"RA: {new HMS(Alpha)}; Dec:{new DMS(Delta)}";
         }
+
+        /// <summary>
+        /// Adds corrections to equatorial coordinates
+        /// </summary>
+        public static CrdsEquatorial operator +(CrdsEquatorial lhs, CrdsEquatorial rhs)
+        {
+            CrdsEquatorial eq = new CrdsEquatorial();
+            eq.Alpha = Angle.To360(lhs.Alpha + rhs.Alpha);
+            eq.Delta = lhs.Delta + rhs.Delta;
+            return eq;
+        }
     }
 }

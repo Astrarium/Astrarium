@@ -26,7 +26,7 @@ namespace ADK.Demo.Calculators
                 bp.Equatorial = Precession.GetEquatorialCoordinates(bp.Equatorial0, p);
 
                 // Apparent horizontal coordinates
-                bp.Horizontal = bp.Equatorial.ToHorizontal(Sky.GeoLocation, Sky.LocalSiderealTime);
+                bp.Horizontal = bp.Equatorial.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
             }
         }
 

@@ -11,10 +11,34 @@ namespace ADK.Demo
 {
     public class Sky
     {
+        /// <summary>
+        /// Julian ephemeris day
+        /// </summary>
         public double JulianDay { get; set; }
+
+        /// <summary>
+        /// Geographical coordinates of the observer
+        /// </summary>
         public CrdsGeographical GeoLocation { get; set; }
-        public double LocalSiderealTime { get; private set; }
+
+        /// <summary>
+        /// Apparent sidereal time at Greenwich (theta0), in degrees
+        /// </summary>
+        public double SiderealTime { get; private set; }
+
+        /// <summary>
+        /// Elements to calculate nutation effect
+        /// </summary>
         public NutationElements NutationElements { get; private set; }
+
+        /// <summary>
+        /// Elements to calculate aberration effect
+        /// </summary>
+        public AberrationElements AberrationElements { get; private set; }
+
+        /// <summary>
+        /// True obliquity of the ecliptic, in degrees
+        /// </summary>
         public double Epsilon { get; private set; }
 
         public ICollection<BaseSkyCalc> Calculators { get; private set; } = new List<BaseSkyCalc>();
@@ -48,15 +72,19 @@ namespace ADK.Demo
 
         public Sky()
         {
-            JulianDay = new Date(DateTime.Now).ToJulianDay();
-            GeoLocation = new CrdsGeographical(56.3333, 44);
+            JulianDay = new Date(new DateTime(2018, 11, 17, 22, 0, 0)).ToJulianEphemerisDay();
+
+            //JulianDay = new Date(DateTime.Now).ToJulianDay();
+            GeoLocation = new CrdsGeographical(56.3333, -44);
         }
 
         public void Calculate()
         {
             NutationElements = Nutation.NutationElements(JulianDay);
+            AberrationElements = Aberration.AberrationElements(JulianDay);
+
             Epsilon = Date.TrueObliquity(JulianDay, NutationElements.deltaEpsilon);
-            LocalSiderealTime = Date.ApparentSiderealTime(JulianDay, NutationElements.deltaPsi, Epsilon);
+            SiderealTime = Date.ApparentSiderealTime(JulianDay, NutationElements.deltaPsi, Epsilon);
 
             foreach (var calc in Calculators)
             {

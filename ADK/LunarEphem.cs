@@ -8,6 +8,51 @@ namespace ADK
     public static class LunarEphem
     {
         /// <summary>
+        /// Calculates Moon horizontal equatorial parallax. 
+        /// </summary>
+        /// <param name="distance">Distance between Moon and Earth centers, in kilometers.</param>
+        /// <returns>Returns value of parallax in degrees.</returns>
+        /// <remarks>Taken from AA(II), page 390</remarks>
+        // TODO: test
+        public static double Parallax(double distance)
+        {
+            return Angle.ToDegrees(Math.Asin(6378.14 / distance));
+        }
+
+        /// <summary>
+        /// Calculates visible semidiameter of the Moon, in seconds of arc.
+        /// </summary>
+        /// <param name="distance">Distance to the Moon, in kilometers</param>
+        /// <returns>Visible semidiameter of the Moon, in seconds of arc.</returns>
+        /// <remarks>Taken from AA(II), page 391</remarks>
+        // TODO: test
+        public static double Semidiameter(double distance)
+        {
+            return 358473400.0 / distance;
+        }
+
+        /// <summary>
+        /// Calculates position angle of Moon bright limb.
+        /// </summary>
+        /// <param name="sun">Geocentric equatorial coordinates of the Sun</param>
+        /// <param name="moon">Geocentric equatorial coordinates of the Moon</param>
+        /// <returns>Position angle of Moon bright limb, in degrees</returns>
+        /// <remarks>
+        /// Method is taken from AA(II), formula 48.5.
+        /// </remarks>
+        public static double PositionAngleOfBrightLimb(CrdsEquatorial sun, CrdsEquatorial moon)
+        {
+            double sunDelta = Angle.ToRadians(sun.Delta);
+            double moonDelta = Angle.ToRadians(moon.Delta);
+            double deltaAlpha = Angle.ToRadians(sun.Alpha - moon.Alpha);
+
+            double y = Math.Cos(sunDelta) * Math.Sin(deltaAlpha);
+            double x = Math.Sin(sunDelta) * Math.Cos(moonDelta) - Math.Cos(sunDelta) * Math.Sin(moonDelta) * Math.Cos(deltaAlpha);
+
+            return Angle.ToDegrees(Math.Atan2(y, x));
+        }
+
+        /// <summary>
         /// Gets geocentric elongation angle of the Moon from Sun
         /// </summary>
         /// <param name="sun">Ecliptical geocentrical coordinates of the Sun</param>
