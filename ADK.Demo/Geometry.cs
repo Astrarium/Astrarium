@@ -37,14 +37,15 @@ namespace ADK.Demo
         }
 
         /// <summary>
-        /// Gets inclination angle of a line or segment from Y axis
+        /// Gets inclination angle of a line or segment from top-oriented Y axis.
+        /// Measured from 0 (line or segment pointed top) to 360 clockwise.
         /// </summary>
         /// <param name="p1">First point of a line/segment</param>
         /// <param name="p2">Second point of a line/segment</param>
         /// <returns></returns>
         public static double LineInclinationY(PointF p1, PointF p2)
         {
-            return 90 - Angle.ToDegrees(Math.Atan2(p1.Y - p2.Y, p2.X - p1.X));
+            return Angle.To360(90 - Angle.ToDegrees(Math.Atan2(p1.Y - p2.Y, p2.X - p1.X)));
         }
 
         /// <summary>

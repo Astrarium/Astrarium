@@ -52,12 +52,44 @@ namespace ADK
             return Angle.To360(Angle.ToDegrees(Math.Atan2(y, x)));
         }
 
+        // TODO: reference to PAWC book, tests
+        public static double PositionAngleOfNorthCusp(double PAlimb)
+        {
+            if (PAlimb < 180)
+            {
+                return Angle.To360(PAlimb - 90);
+            }
+            else
+            {
+                return Angle.To360(PAlimb + 90);
+            }
+        }
+
+        // TODO: not finished yet: AA(II), p.373 
+        public static double PositionAngleOfAxis(double jd)
+        {
+            double T = (jd - 2451545.0) / 36525.0;
+
+            double T2 = T * T;
+            double T3 = T2 * T;
+            double T4 = T3 * T;
+
+            double Omega = 125.0445479 - 1934.1362891 * T + 0.0020754 * T2 + T3 / 467441.0 - T4 / 60616000.0;
+
+            // Moon's argument of latitude (mean dinstance of the Moon from its ascending node)
+            double F = 93.2720950 + 483202.0175233 * T - 0.0036539 * T2 - T3 / 3526000.0 + T4 / 863310000.0;
+
+            return 0;
+        }
+
         /// <summary>
         /// Gets geocentric elongation angle of the Moon from Sun
         /// </summary>
         /// <param name="sun">Ecliptical geocentrical coordinates of the Sun</param>
         /// <param name="moon">Ecliptical geocentrical coordinates of the Moon</param>
-        /// <returns>Geocentric elongation angle, in degrees, from 0 to 180.</returns>
+        /// <returns>Geocentric elongation angle, in degrees, from -180 to 180.
+        /// Negative sign means western elongation, positive eastern.
+        /// </returns>
         /// <remarks>
         /// AA(II), formula 48.2
         /// </remarks>
@@ -67,7 +99,22 @@ namespace ADK
             double lambda = Angle.ToRadians(moon.Lambda);
             double lambda0 = Angle.ToRadians(sun.Lambda);
 
-            return Angle.ToDegrees(Math.Acos(Math.Cos(beta) * Math.Cos(lambda - lambda0)));
+            double s = sun.Lambda;
+            double b = moon.Lambda;
+
+            if (Math.Abs(s - b) > 180)
+            {
+                if (s < b)
+                {
+                    s += 360;
+                }
+                else
+                {
+                    b += 360;
+                }
+            }
+
+            return Math.Sign(b - s) * Angle.ToDegrees(Math.Acos(Math.Cos(beta) * Math.Cos(lambda - lambda0)));
         }
 
         /// <summary>

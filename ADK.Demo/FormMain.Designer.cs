@@ -43,6 +43,7 @@
             this.skyView.TabIndex = 0;
             this.skyView.TabStop = false;
             this.skyView.MouseMove += new System.Windows.Forms.MouseEventHandler(this.skyView_MouseMove);
+            this.skyView.KeyDown += new System.Windows.Forms.KeyEventHandler(this.skyView_KeyDown);
             // 
             // FormMain
             // 
@@ -52,7 +53,7 @@
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.skyView);
             this.Name = "FormMain";
-            this.Text = "ADK Demo App";
+            this.Text = "ADK Demo App";            
             this.ResumeLayout(false);
 
         }

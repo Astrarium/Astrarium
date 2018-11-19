@@ -30,6 +30,22 @@ namespace ADK.Demo.Objects
 
         public double Phase { get; set; }
 
-        public double PositionAngleBrightLimb { get; set; }
+        /// <summary>
+        /// Position angle of bright limb, in degrees.
+        /// Measured counter-clockwise from direction to celestial North pole.
+        /// Also known as χ (chi).
+        /// </summary>
+        public double PAlimb { get; set; }
+
+        /// <summary>
+        /// Position angle of North cusp, in degrees.
+        /// Measured counter-clockwise from direction to celestial North pole.
+        /// </summary>
+        public double PAcusp { get; set; }
+
+        /// <summary>
+        /// Position angle of Moon axis, in degrees.
+        /// </summary>
+        public double PAaxis { get; set; }
     }
 }

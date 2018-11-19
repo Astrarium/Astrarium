@@ -34,8 +34,6 @@ namespace ADK.Demo
             {
                 renderer.Render(g);
             }
-
-            g.DrawString(Center.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 10);
         }
 
         public void Initialize()

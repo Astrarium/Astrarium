@@ -42,6 +42,12 @@ namespace ADK.Demo.Renderers
             DrawGrid(g, penGridEquatorial, gridEquatorial);
             DrawGrid(g, penGridHorizontal, gridHorizontal);
             DrawGrid(g, penLineEcliptic, lineEcliptic);
+
+            var date = new Date(Sky.JulianDay);
+
+            
+
+            g.DrawString($"{(int)date.Day}.{date.Month}.{date.Year} {(date.Day - (int)date.Day) * 24}]", SystemFonts.DefaultFont, Brushes.Red, 10, 10);
         }
 
         private void DrawGrid(Graphics g, Pen penGrid, CelestialGrid grid)

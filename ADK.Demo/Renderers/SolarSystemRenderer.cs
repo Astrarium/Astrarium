@@ -51,32 +51,26 @@ namespace ADK.Demo.Renderers
             {
                 PointF p = Map.Projection.Project(moon.Horizontal);
 
+                // drawing size
                 float size = Math.Max(10, GetDrawingSize(moon.Semidiameter));
+             
+                // rotation of image around North pole
+                double inc = GetRotationTowardsNorth(moon.Equatorial);
 
-                g.FillEllipse(Brushes.White, p.X - size / 2, p.Y - size / 2, size, size);
+                // final rotation of drawn image
+                // cusp rotation is negated because measured counter-clockwise
+                float rot = (float)(inc - moon.PAcusp);
 
-                // TODO: elongation/phase should have sign
+                // signed value of Moon phase
                 float phase = (float)moon.Phase * Math.Sign(moon.Elongation);
 
-                PointF pNorth = Map.Projection.Project((moon.Equatorial + new CrdsEquatorial(0, 1)).ToHorizontal(Sky.GeoLocation, Sky.SiderealTime));
-
-                double inc = Geometry.LineInclinationY(p, pNorth);
-
-                g.DrawString(inc.ToString(), SystemFonts.DefaultFont, Brushes.Red, pNorth);
-
-                g.DrawLine(Pens.Red, p, pNorth);
- 
-
-
-
-                // TODO: PA of cusps is needed
-                float rot = (float)(inc + (360 - (moon.PositionAngleBrightLimb + 90)));
-
+                // Moon phase shadow
                 Region shadow = GetPhaseShadow(phase, size, rot);
 
+                g.FillEllipse(Brushes.White, p.X - size / 2, p.Y - size / 2, size, size);
                 g.TranslateTransform(p.X - size / 2, p.Y - size / 2);
                 g.FillRegion(brushMoon, shadow);
-                g.ResetTransform();                
+                g.ResetTransform();
             }
         }
 
@@ -149,6 +143,24 @@ namespace ADK.Demo.Renderers
             Matrix result = new Matrix();
             result.RotateAt(rotation, center);
             return result;
+        }
+
+        /// <summary>
+        /// Gets drawing rotation of image, measured clockwise from 
+        /// a point oriented to top of the screen towards North celestial pole point 
+        /// </summary>
+        /// <param name="eq">Equatorial coordinates of a central point of a body.</param>
+        /// <returns></returns>
+        private float GetRotationTowardsNorth(CrdsEquatorial eq)
+        {
+            // Coordinates of center of a body (image) to be rotated
+            PointF p = Map.Projection.Project(eq.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime));
+
+            // Point directed to North celestial pole
+            PointF pNorth = Map.Projection.Project((eq + new CrdsEquatorial(0, 1)).ToHorizontal(Sky.GeoLocation, Sky.SiderealTime));
+
+            // Clockwise rotation
+            return (float)Geometry.LineInclinationY(p, pNorth);
         }
     }
 }

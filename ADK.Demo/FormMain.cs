@@ -59,5 +59,27 @@ namespace ADK.Demo
                 skyView.SkyMap.ViewAngle + " / " +
                 Constellations.FindConstellation(eq1875);
         }
+
+        private void skyView_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.D)
+            {
+                sky.JulianDay += 1;
+                sky.Calculate();
+                skyView.Invalidate();
+            }
+            else if (e.KeyCode == Keys.A)
+            {
+                sky.JulianDay -= 1;
+                sky.Calculate();
+                skyView.Invalidate();
+            }
+            else if (e.KeyCode == Keys.S)
+            {
+                sky.JulianDay = Date.Now.ToJulianEphemerisDay();
+                sky.Calculate();
+                skyView.Invalidate();
+            }
+        }
     }
 }
