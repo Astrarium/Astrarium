@@ -31,7 +31,5 @@ namespace ADK.Demo.Objects
         public double Phase { get; set; }
 
         public double PositionAngleBrightLimb { get; set; }
-
-        public CrdsHorizontal HorizontalNorth { get; set; }
     }
 }

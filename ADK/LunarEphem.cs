@@ -49,7 +49,7 @@ namespace ADK
             double y = Math.Cos(sunDelta) * Math.Sin(deltaAlpha);
             double x = Math.Sin(sunDelta) * Math.Cos(moonDelta) - Math.Cos(sunDelta) * Math.Sin(moonDelta) * Math.Cos(deltaAlpha);
 
-            return Angle.ToDegrees(Math.Atan2(y, x));
+            return Angle.To360(Angle.ToDegrees(Math.Atan2(y, x)));
         }
 
         /// <summary>

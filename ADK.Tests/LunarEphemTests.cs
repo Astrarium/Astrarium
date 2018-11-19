@@ -31,5 +31,18 @@ namespace ADK.Tests
             double phase = LunarEphem.Phase(phaseAngle);
             Assert.AreEqual(0.68, phase, 1e-2);
         }
+
+        /// <summary>
+        /// PAWC, ex. 55 (p. 111)
+        /// </summary>
+        [TestMethod]
+        public void PositionAngleOfBrightLimb()
+        {
+            CrdsEquatorial eqMoon= new CrdsEquatorial(new HMS("14h 35m 02s"), new DMS("-12* 45' 46''"));
+            CrdsEquatorial eqSun = new CrdsEquatorial(15.843611 * 15, -20.117778);
+
+            double pa = LunarEphem.PositionAngleOfBrightLimb(eqSun, eqMoon);
+            Assert.AreEqual(114.6, pa, 0.1);
+        }
     }
 }

@@ -58,7 +58,21 @@ namespace ADK.Demo.Renderers
                 // TODO: elongation/phase should have sign
                 float phase = (float)moon.Phase * Math.Sign(moon.Elongation);
 
-                Region shadow = GetPhaseShadow(phase, size, 0);
+                PointF pNorth = Map.Projection.Project((moon.Equatorial + new CrdsEquatorial(0, 1)).ToHorizontal(Sky.GeoLocation, Sky.SiderealTime));
+
+                double inc = Geometry.LineInclinationY(p, pNorth);
+
+                g.DrawString(inc.ToString(), SystemFonts.DefaultFont, Brushes.Red, pNorth);
+
+                g.DrawLine(Pens.Red, p, pNorth);
+ 
+
+
+
+                // TODO: PA of cusps is needed
+                float rot = (float)(inc + (360 - (moon.PositionAngleBrightLimb + 90)));
+
+                Region shadow = GetPhaseShadow(phase, size, rot);
 
                 g.TranslateTransform(p.X - size / 2, p.Y - size / 2);
                 g.FillRegion(brushMoon, shadow);
@@ -129,7 +143,7 @@ namespace ADK.Demo.Renderers
             return region_rect;
         }
 
-        // Return a rotation matrix to rotate around a point.
+        // Return a rotation matrix to rotate clockwise around a point.
         private Matrix RotateAroundPoint(float rotation, PointF center)
         {
             Matrix result = new Matrix();

@@ -45,6 +45,8 @@ namespace ADK.Demo.Calculators
             // local horizontal coordinates of the Sun
             Sun.Horizontal = Sun.Equatorial.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
 
+            // TODO: parallax effect
+
             // Solar semidiameter
             // TODO: move to separate class
             Sun.Semidiameter = PlanetPositions.Semidiameter(Planet.Earth, Sun.Ecliptical.Distance);

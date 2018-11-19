@@ -37,6 +37,17 @@ namespace ADK.Demo
         }
 
         /// <summary>
+        /// Gets inclination angle of a line or segment from Y axis
+        /// </summary>
+        /// <param name="p1">First point of a line/segment</param>
+        /// <param name="p2">Second point of a line/segment</param>
+        /// <returns></returns>
+        public static double LineInclinationY(PointF p1, PointF p2)
+        {
+            return 90 - Angle.ToDegrees(Math.Atan2(p1.Y - p2.Y, p2.X - p1.X));
+        }
+
+        /// <summary>
         /// Gets distance between two points in pixels
         /// </summary>
         /// <param name="p1">First point</param>

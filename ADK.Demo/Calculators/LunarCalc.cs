@@ -51,8 +51,8 @@ namespace ADK.Demo.Calculators
             
             moon.Phase = LunarEphem.Phase(moon.PhaseAngle);
 
-            moon.PositionAngleBrightLimb = LunarEphem.PositionAngleOfBrightLimb(sun.Equatorial0, moon.Equatorial0);
-
+            // TODO: should use sun.Equatorial0 here?
+            moon.PositionAngleBrightLimb = LunarEphem.PositionAngleOfBrightLimb(sun.Equatorial, moon.Equatorial0);
         }
     }
 }
