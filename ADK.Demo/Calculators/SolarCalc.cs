@@ -22,7 +22,7 @@ namespace ADK.Demo.Calculators
         public override void Calculate()
         {
             // get Earth coordinates
-            CrdsHeliocentrical crds = PlanetPositions.GetPlanetCoordinates(Planet.Earth, Sky.JulianDay, highPrecision: true);
+            CrdsHeliocentrical crds = PlanetPositions.GetPlanetCoordinates(3, Sky.JulianDay, highPrecision: true);
 
             // transform to ecliptical coordinates of the Sun
             Sun.Ecliptical = new CrdsEcliptical(Angle.To360(crds.L + 180), -crds.B, crds.R);
@@ -49,7 +49,7 @@ namespace ADK.Demo.Calculators
 
             // Solar semidiameter
             // TODO: move to separate class
-            Sun.Semidiameter = PlanetPositions.Semidiameter(Planet.Earth, Sun.Ecliptical.Distance);
+            Sun.Semidiameter = PlanetPositions.Semidiameter(3, Sun.Ecliptical.Distance);
         }
     }
 }

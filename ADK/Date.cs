@@ -507,7 +507,6 @@ namespace ADK
         /// <param name="year">Year</param>
         /// <param name="month">Month. 1 = Janaury, 2 = February etc.</param>
         /// <returns>Number of days for specified month and year.</returns>
-        // TODO: tests
         public static int DaysInMonth(int year, int month)
         {
             if (month < 1 || month > 12)

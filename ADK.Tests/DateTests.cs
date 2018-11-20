@@ -77,8 +77,39 @@ namespace ADK.Tests
         [TestMethod]
         public void DayOfWeek()
         {
-            // AA2, p.65
+            // AA2, p.65, ex. 7.e
             Assert.AreEqual(System.DayOfWeek.Wednesday, new Date(1954, 6, 30).DayOfWeek());
+        }
+
+        [TestMethod]
+        public void DayOfYear()
+        {
+            // AA2, p.65, ex. 7.f
+            Assert.AreEqual(318, Date.DayOfYear(new Date(1978, 11, 14)));
+
+            // AA2, p.65, ex. 7.g
+            Assert.AreEqual(113, Date.DayOfYear(new Date(1988, 4, 22)));
+        }
+
+        [TestMethod]
+        public void DaysInMonth()
+        {
+            Assert.AreEqual(31, Date.DaysInMonth(2017, 1));
+            Assert.AreEqual(28, Date.DaysInMonth(2017, 2));
+            Assert.AreEqual(31, Date.DaysInMonth(2017, 3));
+            Assert.AreEqual(30, Date.DaysInMonth(2017, 4));
+            Assert.AreEqual(31, Date.DaysInMonth(2017, 5));
+            Assert.AreEqual(30, Date.DaysInMonth(2017, 6));
+            Assert.AreEqual(31, Date.DaysInMonth(2017, 7));
+            Assert.AreEqual(31, Date.DaysInMonth(2017, 8));
+            Assert.AreEqual(30, Date.DaysInMonth(2017, 9));
+            Assert.AreEqual(31, Date.DaysInMonth(2017, 10));
+            Assert.AreEqual(30, Date.DaysInMonth(2017, 11));
+            Assert.AreEqual(31, Date.DaysInMonth(2017, 12));
+            Assert.AreEqual(28, Date.DaysInMonth(1900, 2));
+            Assert.AreEqual(29, Date.DaysInMonth(2000, 2));
+            Assert.AreEqual(29, Date.DaysInMonth(2020, 2));
+            Assert.AreEqual(28, Date.DaysInMonth(2100, 2));
         }
 
         [TestMethod]

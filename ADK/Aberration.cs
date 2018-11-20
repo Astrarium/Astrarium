@@ -30,6 +30,7 @@ namespace ADK
         /// <remarks>
         /// AA(II), pp. 151, 163, 164
         /// </remarks>
+        // TODO: there are no tests for aberration!
         public static AberrationElements AberrationElements(double jde)
         {
             double T = (jde - 2451545.0) / 36525.0;
@@ -42,7 +43,7 @@ namespace ADK
             double L0 = 280.46646 + 36000.76983 * T + 0.0003032 * T2;
 
             // mean anomaly of the Sun
-            double M = 257.52911 + 35999.05029 * T - 0.0001537 * T2;
+            double M = 357.52911 + 35999.05029 * T - 0.0001537 * T2;
             M = Angle.ToRadians(M);
 
             // Sun's equation of the center

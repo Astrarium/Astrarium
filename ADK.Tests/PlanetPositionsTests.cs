@@ -41,7 +41,7 @@ namespace ADK.Tests
                 {
                     string[] chunks = regexHeader.Match(header).Groups.Cast<Group>().Select(g => g.Value).ToArray();
 
-                    Planet planet = GetPlanet(FirstCharToUpper(chunks[1].ToLower()));
+                    int planet = GetPlanet(FirstCharToUpper(chunks[1].ToLower()));
                     double jd = Double.Parse(chunks[2], numericFormat);
 
                     i++;
@@ -61,7 +61,7 @@ namespace ADK.Tests
         {
             // Example 32.a from AA
             {
-                CrdsHeliocentrical crds = PlanetPositions.GetPlanetCoordinates(Planet.Venus, 2448976.5, highPrecision: false);
+                CrdsHeliocentrical crds = PlanetPositions.GetPlanetCoordinates(2, 2448976.5, highPrecision: false);
                 Assert.AreEqual(26.11428, crds.L, 1e-5);
                 Assert.AreEqual(-2.62070, crds.B, 1e-5);
                 Assert.AreEqual(0.724603, crds.R, 1e-6);
@@ -119,7 +119,7 @@ namespace ADK.Tests
             double jde = 2448908.5;
 
             // get Earth coordinates
-            CrdsHeliocentrical crds = PlanetPositions.GetPlanetCoordinates(Planet.Earth, jde, highPrecision: false);
+            CrdsHeliocentrical crds = PlanetPositions.GetPlanetCoordinates(3, jde, highPrecision: false);
 
             Assert.AreEqual(19.907372, crds.L, 1e-6);
             Assert.AreEqual(-0.644, crds.B * 3600, 1e-3);
@@ -174,6 +174,84 @@ namespace ADK.Tests
         }
 
         /// <summary>
+        /// AA(II), example 33.a.
+        /// </summary>
+        [TestMethod]
+        public void CalculatePlanetApparentPlace()
+        {
+            // TODO: test not pass
+
+            double jde = 2448976.5;
+
+            CrdsHeliocentrical hEarth = PlanetPositions.GetPlanetCoordinates(3, jde, highPrecision: false);
+            Assert.AreEqual(88.35704, hEarth.L, 1e-5);
+            Assert.AreEqual(0.00014, hEarth.B, 1e-5);
+            Assert.AreEqual(0.983824, hEarth.R, 1e-6);
+
+            CrdsHeliocentrical hVenus = PlanetPositions.GetPlanetCoordinates(2, jde, highPrecision: false);
+            Assert.AreEqual(26.11428, hVenus.L, 1e-5);
+            Assert.AreEqual(-2.62070, hVenus.B, 1e-5);
+            Assert.AreEqual(0.724603, hVenus.R, 1e-6);
+
+            CrdsRectangular rect = hVenus.ToRectangular(hEarth);
+            Assert.AreEqual(0.621746, rect.X, 1e-6);
+            Assert.AreEqual(-0.664810, rect.Y, 1e-6);
+            Assert.AreEqual(-0.033134, rect.Z, 1e-6);
+
+            double delta = rect.ToEcliptical().Distance;
+            Assert.AreEqual(0.910845, delta, 1e-6);
+
+            double tau = 0.0057755183 * rect.ToEcliptical().Distance;
+            Assert.AreEqual(0.0052606, tau, 1e-7);
+
+            hVenus = PlanetPositions.GetPlanetCoordinates(2, jde - tau, highPrecision: false);
+            Assert.AreEqual(26.10588, hVenus.L, 1e-5);
+            Assert.AreEqual(-2.62102, hVenus.B, 1e-5);
+            Assert.AreEqual(0.724604, hVenus.R, 1e-6);
+
+            rect = hVenus.ToRectangular(hEarth);
+            Assert.AreEqual(0.621794, rect.X, 1e-6);
+            Assert.AreEqual(-0.664905, rect.Y, 1e-6);
+            Assert.AreEqual(-0.033138, rect.Z, 1e-6);
+
+            // Ecliptical coordinates of Venus.
+            // Corrected for light time, but not yet for aberration.
+            CrdsEcliptical ecl = rect.ToEcliptical();
+            Assert.AreEqual(313.08097, ecl.Lambda, 1e-5);
+            Assert.AreEqual(-2.08474, ecl.Beta, 1e-5);
+
+            AberrationElements ae = Aberration.AberrationElements(jde);
+            ae.lambda = Angle.To360(hEarth.L + 180);
+
+            Assert.AreEqual(0.016711589, ae.e, 1e-9);
+            Assert.AreEqual(102.81644, ae.pi, 1e-5);
+            Assert.AreEqual(268.35704, ae.lambda, 1e-5);
+
+            CrdsEcliptical deltaEcl = Aberration.AberrationEffect(ecl, ae);
+            Assert.AreEqual(-14.868, deltaEcl.Lambda * 3600, 1e-3);
+            Assert.AreEqual(-0.531, deltaEcl.Beta * 3600, 1e-3);
+
+            ecl += deltaEcl;
+            Assert.AreEqual(313.07684, ecl.Lambda, 1e-5);
+            Assert.AreEqual(-2.08489, ecl.Beta, 1e-5);
+
+            CrdsEcliptical fk5corr = PlanetPositions.CorrectionForFK5(jde, ecl);
+            Assert.AreEqual(-0.09027, fk5corr.Lambda * 3600, 1e-5);
+            Assert.AreEqual(0.05535, fk5corr.Beta * 3600, 1e-5);
+            ecl += fk5corr;
+
+            Assert.AreEqual(313.07686, ecl.Lambda, 1e-5);
+            Assert.AreEqual(-2.08487, ecl.Beta, 1e-5);
+
+            ecl += Nutation.NutationEffect(16.749 / 3600.0);
+
+            CrdsEquatorial eq = ecl.ToEquatorial(23.439669);
+
+            Assert.AreEqual(new HMS("21h 04m 41.50s"), new HMS(eq.Alpha));
+            Assert.AreEqual(new DMS("-18* 53' 16.84''"), new DMS(eq.Delta));
+        }
+
+        /// <summary>
         /// Converts first char of string to uppercase
         /// </summary>
         /// <param name="input">Input string</param>
@@ -189,13 +267,27 @@ namespace ADK.Tests
         }
 
         /// <summary>
-        /// Gets <see cref="Planet"/> enum value from its string value
+        /// Planets names
         /// </summary>
-        /// <param name="value">String value to be prsed as enum</param>
-        /// <returns>Enum value</returns>
-        private static Planet GetPlanet(string value)
+        private static string[] PlanetNames = new string[] {
+            "Mercury",
+            "Venus",
+            "Earth",
+            "Mars",
+            "Jupiter",
+            "Saturn",
+            "Uranus",
+            "Neptune"
+        };
+
+        /// <summary>
+        /// Gets planet ordering number from its string name
+        /// </summary>
+        /// <param name="value">String planet name</param>
+        /// <returns>Ordering number of a planet</returns>
+        private static int GetPlanet(string value)
         {
-            return (Planet)Enum.Parse(typeof(Planet), value);
+            return Array.IndexOf(PlanetNames, value) + 1;
         }
 
         /// <summary>
@@ -204,9 +296,9 @@ namespace ADK.Tests
         private class VSOP87DTestData
         {
             /// <summary>
-            /// Planet
+            /// Planet ordering number (1 = Mercury, 2 = Venus etc.)
             /// </summary>
-            public Planet Planet { get; private set; }
+            public int Planet { get; private set; }
 
             /// <summary>
             /// Julian Ephemeris Day
@@ -236,7 +328,7 @@ namespace ADK.Tests
             /// <param name="L">L value</param>
             /// <param name="B">B value</param>
             /// <param name="R">R value</param>
-            public VSOP87DTestData(Planet planet, double jde, double L, double B, double R)
+            public VSOP87DTestData(int planet, double jde, double L, double B, double R)
             {
                 Planet = planet;
                 JDE = jde;

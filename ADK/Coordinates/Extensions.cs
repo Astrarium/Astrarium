@@ -193,6 +193,54 @@ namespace ADK
         }
 
         /// <summary>
+        /// Converts heliocentrical coordinates to rectangular topocentrical coordinates. 
+        /// </summary>
+        /// <param name="planet">Heliocentrical coordinates of a planet</param>
+        /// <param name="earth">Heliocentrical coordinates of Earth</param>
+        /// <returns>Rectangular topocentrical coordinates of a planet.</returns>
+        public static CrdsRectangular ToRectangular(this CrdsHeliocentrical planet, CrdsHeliocentrical earth)
+        {
+            CrdsRectangular rect = new CrdsRectangular();
+
+            double B = Angle.ToRadians(planet.B);
+            double L = Angle.ToRadians(planet.L);
+            double R = planet.R;
+
+            double B0 = Angle.ToRadians(earth.B);
+            double L0 = Angle.ToRadians(earth.L);
+            double R0 = earth.R;
+
+            double cosL = Math.Cos(L);
+            double sinL = Math.Sin(L);
+            double cosB = Math.Cos(B);
+            double sinB = Math.Sin(B);
+
+            double cosL0 = Math.Cos(L0);
+            double sinL0 = Math.Sin(L0);
+            double cosB0 = Math.Cos(B0);
+            double sinB0 = Math.Sin(B0);
+
+            rect.X = R * cosB * cosL - R0 * cosB0 * cosL0;
+            rect.Y = R * cosB * sinL - R0 * cosB0 * sinL0;
+            rect.Z = R * sinB - R0 * sinB0;
+
+            return rect;
+        }
+
+        /// <summary>
+        /// Converts rectangular topocentric coordinates of a planet to topocentrical ecliptical coordinates
+        /// </summary>
+        /// <param name="rect">Rectangular topocentric coordinates of a planet</param>
+        /// <returns>Topocentrical ecliptical coordinates of a planet</returns>
+        public static CrdsEcliptical ToEcliptical(this CrdsRectangular rect)
+        {
+            double lambda = Angle.To360(Angle.ToDegrees(Math.Atan2(rect.Y, rect.X)));
+            double beta = Angle.ToDegrees(Math.Atan(rect.Z / Math.Sqrt(rect.X * rect.X + rect.Y * rect.Y)));
+            double distance = Math.Sqrt(rect.X * rect.X + rect.Y * rect.Y + rect.Z * rect.Z);
+            return new CrdsEcliptical(lambda, beta, distance);
+        }
+
+        /// <summary>
         /// Calculates topocentric equatorial coordinates of celestial body 
         /// with taking into account correction for parallax.
         /// </summary>

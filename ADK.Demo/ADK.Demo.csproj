@@ -49,11 +49,13 @@
     <Compile Include="Calculators\BaseSkyCalc.cs" />
     <Compile Include="Calculators\CelestialGridCalc.cs" />
     <Compile Include="Calculators\BordersCalc.cs" />
+    <Compile Include="Calculators\PlanetsCalc.cs" />
     <Compile Include="Calculators\LunarCalc.cs" />
     <Compile Include="Calculators\SolarCalc.cs" />
     <Compile Include="Objects\CelestialObject.cs" />
     <Compile Include="Objects\ConstBorderPoint.cs" />
     <Compile Include="Objects\Moon.cs" />
+    <Compile Include="Objects\Planet.cs" />
     <Compile Include="Objects\Sun.cs" />
     <Compile Include="Renderers\BordersRenderer.cs" />
     <Compile Include="Renderers\SolarSystemRenderer.cs" />

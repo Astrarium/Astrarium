@@ -107,10 +107,10 @@ namespace ADK
         /// <summary>
         /// Calculates heliocentrical coordinates of the planet using VSOP87 motion theory. 
         /// </summary>
-        /// <param name="planet"><see cref="Planet"/> to calculate heliocentrical coordinates.</param>
+        /// <param name="planet">Planet serial number - from 1 (Mercury) to 8 (Neptune) to calculate heliocentrical coordinates.</param>
         /// <param name="jde">Julian Ephemeris Day</param>
         /// <returns>Returns heliocentric coordinates of the planet for given date.</returns>
-        public static CrdsHeliocentrical GetPlanetCoordinates(Planet planet, double jde, bool highPrecision = true)
+        public static CrdsHeliocentrical GetPlanetCoordinates(int planet, double jde, bool highPrecision = true)
         {
             Initialize(highPrecision);
 
@@ -118,7 +118,7 @@ namespace ADK
             const int B = 1;
             const int R = 2;
 
-            int p = (int)planet - 1;
+            int p = planet - 1;
 
             double t = (jde - 2451545.0) / 365250.0;
 
@@ -200,9 +200,19 @@ namespace ADK
 
         // TODO: this should be moved to separate class
         private static readonly double[] s0 = new double[] { 3.36, 8.41, 959.63, 4.68, 98.44, 82.73, 35.02, 33.5, 2.07 };
-        public static double Semidiameter(Planet p, double distance)
+
+        /// <summary>
+        /// Gets planet semidiameter
+        /// </summary>
+        /// <param name="p">Planet serial number, starting from 1 (Mercury) to 8 (Neptune).</param>
+        /// <param name="distance">Distance to the planet from Earth, in AU.</param>
+        /// <returns></returns>
+        public static double Semidiameter(int p, double distance)
         {
-            return s0[(int)p - 1] / distance;
+            if (p < 1 || p > 8)
+                throw new ArgumentException("Planet serial number should be in range from 1 to 8.", nameof(p));
+
+            return s0[p - 1] / distance;
         }
 
         /// <summary>
