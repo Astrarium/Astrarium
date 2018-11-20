@@ -72,9 +72,7 @@ namespace ADK.Demo
 
         public Sky()
         {
-            //JulianDay = new Date(new DateTime(2018, 11, 17, 0, 0, 0)).ToJulianEphemerisDay();
-
-            JulianDay = new Date(DateTime.Now).ToJulianDay();
+            JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
             GeoLocation = new CrdsGeographical(56.3333, -44);
         }
 

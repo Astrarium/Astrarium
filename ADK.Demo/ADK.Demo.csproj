@@ -84,6 +84,13 @@
     </Compile>
     <Compile Include="Objects\Star.cs" />
     <Compile Include="Calculators\StarsCalc.cs" />
+    <Compile Include="UI\FormDateTime.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\FormDateTime.Designer.cs">
+      <DependentUpon>FormDateTime.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\NumericUpDownEx.cs" />
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
     </EmbeddedResource>
@@ -97,6 +104,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="UI\FormDateTime.resx">
+      <DependentUpon>FormDateTime.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="Data\Borders.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

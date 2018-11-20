@@ -67,9 +67,18 @@ namespace ADK.Demo.Renderers
                 // Moon phase shadow
                 Region shadow = GetPhaseShadow(phase, size, rot);
 
+                Region shadow2 = GetPhaseShadow(phase, size + 2, GetRotationTowardsEclipticPole(moon.Ecliptical));
+
                 g.FillEllipse(Brushes.White, p.X - size / 2, p.Y - size / 2, size, size);
+
+                // first method
                 g.TranslateTransform(p.X - size / 2, p.Y - size / 2);
                 g.FillRegion(brushMoon, shadow);
+                g.ResetTransform();
+
+                // second method
+                g.TranslateTransform(p.X - size / 2 - 1, p.Y - size / 2 - 1);
+                g.FillRegion(new SolidBrush(Color.FromArgb(100, 255, 0, 0)), shadow2);
                 g.ResetTransform();
             }
         }
@@ -158,6 +167,24 @@ namespace ADK.Demo.Renderers
 
             // Point directed to North celestial pole
             PointF pNorth = Map.Projection.Project((eq + new CrdsEquatorial(0, 1)).ToHorizontal(Sky.GeoLocation, Sky.SiderealTime));
+
+            // Clockwise rotation
+            return (float)Geometry.LineInclinationY(p, pNorth);
+        }
+
+        /// <summary>
+        /// Gets drawing rotation of image, measured clockwise from 
+        /// a point oriented to top of the screen towards North ecliptic pole point 
+        /// </summary>
+        /// <param name="ecl">Ecliptical coordinates of a central point of a body.</param>
+        /// <returns></returns>
+        private float GetRotationTowardsEclipticPole(CrdsEcliptical ecl)
+        {
+            // Coordinates of center of a body (image) to be rotated
+            PointF p = Map.Projection.Project(ecl.ToEquatorial(Sky.Epsilon).ToHorizontal(Sky.GeoLocation, Sky.SiderealTime));
+
+            // Point directed to North ecliptic pole
+            PointF pNorth = Map.Projection.Project((ecl + new CrdsEcliptical(0, 1)).ToEquatorial(Sky.Epsilon).ToHorizontal(Sky.GeoLocation, Sky.SiderealTime));
 
             // Clockwise rotation
             return (float)Geometry.LineInclinationY(p, pNorth);

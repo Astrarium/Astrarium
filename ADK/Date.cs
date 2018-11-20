@@ -68,6 +68,48 @@ namespace ADK
         /// </summary>
         public double Day { get; private set; }
 
+        /// <summary>
+        /// Hour of day. From 0 to 23.
+        /// </summary>
+        public int Hour
+        {
+            get
+            {
+                double value = Day;
+                value = (value - (int)value) * 24.0;
+                return (int)value;
+            }
+        }
+
+        /// <summary>
+        /// Minutes. From 0 to 59.
+        /// </summary>
+        public int Minute
+        {
+            get
+            {
+                double value = Day;
+                value = (value - (int)value) * 24.0;
+                value = (value - (int)value) * 60.0;
+                return (int)value;
+            }
+        }
+
+        /// <summary>
+        /// Seconds. From 0 to 59.
+        /// </summary>
+        public int Second
+        {
+            get
+            {
+                double value = Day;
+                value = (value - (int)value) * 24.0;
+                value = (value - (int)value) * 60.0;
+                value = (value - (int)value) * 60.0;
+                return (int)value;
+            }
+        }
+
         #region Constructors
 
         /// <summary>
@@ -335,7 +377,23 @@ namespace ADK
         /// </summary>
         /// <param name="Y">Year. Positive value means A.D. year. Zero value means 1 B.C. -1 value = 2 B.C., -2 = 3 B.C. etc.</param>
         /// <param name="M">Month value. 1 = January, 2 = February etc.</param>
-        /// <param name="D">Day of month.</param>
+        /// <param name="D">Day of month</param>
+        /// <param name="h">Hour of day</param>
+        /// <param name="m">Minutes</param>
+        /// <param name="s">Seconds</param>
+        /// <returns>Julian Day value.</returns>
+        public static double JulianDay(int Y, int M, int D, int h, int m, int s)
+        {
+            double day = D + h / 24.0 + m / 1440.0 + s / 86400.0;
+            return JulianDay(Y, M, day);
+        }
+
+        /// <summary>
+        /// Converts the specified date to Julian Day value.
+        /// </summary>
+        /// <param name="Y">Year. Positive value means A.D. year. Zero value means 1 B.C. -1 value = 2 B.C., -2 = 3 B.C. etc.</param>
+        /// <param name="M">Month value. 1 = January, 2 = February etc.</param>
+        /// <param name="D">Day of month, with fractions.</param>
         /// <returns>Julian Day value.</returns>
         public static double JulianDay(int Y, int M, double D)
         { 
@@ -449,12 +507,13 @@ namespace ADK
         /// <param name="year">Year</param>
         /// <param name="month">Month. 1 = Janaury, 2 = February etc.</param>
         /// <returns>Number of days for specified month and year.</returns>
+        // TODO: tests
         public static int DaysInMonth(int year, int month)
         {
-            if (month < 0 || month > 12)
+            if (month < 1 || month > 12)
                 throw new ArgumentException("Month value should be from 1 to 12.", nameof(month));
 
-            return DAYS_IN_MONTH[month] + month == 2 ? (IsLeapYear(year) ? 1 : 0) : 0;
+            return DAYS_IN_MONTH[month - 1] + (month == 2 ? (IsLeapYear(year) ? 1 : 0) : 0);
         }
 
         /// <summary>
@@ -577,6 +636,19 @@ namespace ADK
         public static double JulianEpoch(int year)
         {
             return (year - 2000.0) * 365.25 + 2451545.0;
+        }
+
+        /// <summary>
+        /// Calculates time difference between Dynamical and Universal Times (ΔT = TD - UT) for a given Julian Day.
+        /// </summary>
+        /// <param name="jd">julian Day for which the time difference should be calculated</param>
+        /// <returns>The time difference expressed in seconds of time.</returns>
+        /// <remarks>
+        /// The polynomial expressions are taken from https://eclipse.gsfc.nasa.gov/SEhelp/deltatpoly2004.html
+        /// </remarks>
+        public static double DeltaT(double jd)
+        {
+            return DeltaT(new Date(jd));
         }
 
         /// <summary>

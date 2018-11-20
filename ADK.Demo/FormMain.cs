@@ -1,5 +1,6 @@
 ﻿using ADK.Demo.Calculators;
 using ADK.Demo.Renderers;
+using ADK.Demo.UI;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -64,19 +65,31 @@ namespace ADK.Demo
         {
             if (e.KeyCode == Keys.D)
             {
-                sky.JulianDay += 1;
-                sky.Calculate();
-                skyView.Invalidate();
+                double jd = sky.JulianDay;
+                double deltaT = Date.DeltaT(sky.JulianDay) / 86400;
+                double tzone = 3.0 / 24;
+
+                using (var frmDateTime = new FormDateTime(jd + tzone - deltaT))
+                {
+                    if (frmDateTime.ShowDialog(skyView) == DialogResult.OK)
+                    {
+                        jd = frmDateTime.JulianDay;
+                        deltaT = Date.DeltaT(jd) / 86400;
+                        sky.JulianDay = jd - tzone + deltaT;
+                        sky.Calculate();
+                        skyView.Invalidate();
+                    }
+                }
             }
             else if (e.KeyCode == Keys.A)
             {
-                sky.JulianDay -= 1;
+                sky.JulianDay += 1;
                 sky.Calculate();
                 skyView.Invalidate();
             }
             else if (e.KeyCode == Keys.S)
             {
-                sky.JulianDay = Date.Now.ToJulianEphemerisDay();
+                sky.JulianDay -= 1;
                 sky.Calculate();
                 skyView.Invalidate();
             }
