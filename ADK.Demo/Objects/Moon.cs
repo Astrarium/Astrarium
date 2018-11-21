@@ -6,12 +6,15 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo.Objects
 {
+    /// <summary>
+    /// Contains coordinates and visual appearance data for the Moon for given instant of time.
+    /// </summary>
     public class Moon : CelestialObject
     {
         /// <summary>
         /// Geocentrical equatorial coordinates
         /// </summary>
-        public CrdsEquatorial Equatorial0 { get; set; } = new CrdsEquatorial();
+        public CrdsEquatorial Equatorial0 { get; set; }
 
         /// <summary>
         /// Apparent topocentrical equatorial coordinates
@@ -28,12 +31,25 @@ namespace ADK.Demo.Objects
         /// </summary>
         public double Semidiameter { get; set; }
 
+        /// <summary>
+        /// Elongation angle, i.e. angular distance from the Sun. 
+        /// Positive if eastern elongation, negative if western. 
+        /// </summary>
         public double Elongation { get; set; }
 
+        /// <summary>
+        /// Moon parallax
+        /// </summary>
         public double Parallax { get; set; }
 
+        /// <summary>
+        /// Phase angle of Moon, in degrees.
+        /// </summary>
         public double PhaseAngle { get; set; }
 
+        /// <summary>
+        /// Phase of the Moon, from 0 (New Moon) to 1 (Full Moon).
+        /// </summary>
         public double Phase { get; set; }
 
         /// <summary>

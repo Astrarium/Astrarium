@@ -1,4 +1,5 @@
-﻿using ADK.Demo.Projections;
+﻿using ADK.Demo.Objects;
+using ADK.Demo.Projections;
 using ADK.Demo.Renderers;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,8 @@ namespace ADK.Demo
         public double ViewAngle { get; set; } = 90;
         public CrdsHorizontal Center { get; set; } = new CrdsHorizontal(0, 0);
         public bool Antialias { get; set; } = true;
-        public ICollection<BaseSkyRenderer> Renderers { get; private set; } = new List<BaseSkyRenderer>();
+        public ICollection<BaseSkyRenderer> Renderers { get; } = new List<BaseSkyRenderer>();
+        public ICollection<CelestialObject> VisibleObjects { get; } = new List<CelestialObject>();
         public IProjection Projection { get; set; } = null;
 
         public SkyMap()
@@ -29,6 +31,8 @@ namespace ADK.Demo
         {
             g.PageUnit = GraphicsUnit.Display;
             g.SmoothingMode = Antialias ? SmoothingMode.HighQuality : SmoothingMode.HighSpeed;
+
+            VisibleObjects.Clear();
 
             foreach (var renderer in Renderers)
             {

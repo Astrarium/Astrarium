@@ -80,6 +80,8 @@ namespace ADK.Demo.Renderers
                 g.TranslateTransform(p.X - size / 2 - 1, p.Y - size / 2 - 1);
                 g.FillRegion(new SolidBrush(Color.FromArgb(100, 255, 0, 0)), shadow2);
                 g.ResetTransform();
+
+                Map.VisibleObjects.Add(moon);
             }
         }
 

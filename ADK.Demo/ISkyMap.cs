@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ADK;
+using ADK.Demo.Objects;
 using ADK.Demo.Projections;
 using ADK.Demo.Renderers;
 
@@ -35,7 +36,12 @@ namespace ADK.Demo
         /// </summary>
         CrdsHorizontal Center { get; set; }
 
+        /// <summary>
+        /// Collection of renderers
+        /// </summary>
         ICollection<BaseSkyRenderer> Renderers { get; }
+
+        ICollection<CelestialObject> VisibleObjects { get; }
 
         /// <summary>
         /// Gets or sets projection which is used for converting celestial coordinates to the sky map plane.

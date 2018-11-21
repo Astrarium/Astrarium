@@ -28,8 +28,18 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
+            this.tipCelestialObject = new System.Windows.Forms.ToolTip(this.components);
             this.skyView = new ADK.Demo.SkyView();
             this.SuspendLayout();
+            // 
+            // tipCelestialObject
+            // 
+            this.tipCelestialObject.AutoPopDelay = 5000;
+            this.tipCelestialObject.InitialDelay = 1000;
+            this.tipCelestialObject.ReshowDelay = 100;
+            this.tipCelestialObject.UseAnimation = false;
+            this.tipCelestialObject.UseFading = false;
             // 
             // skyView
             // 
@@ -42,8 +52,8 @@
             this.skyView.SkyMap = null;
             this.skyView.TabIndex = 0;
             this.skyView.TabStop = false;
-            this.skyView.MouseMove += new System.Windows.Forms.MouseEventHandler(this.skyView_MouseMove);
             this.skyView.KeyDown += new System.Windows.Forms.KeyEventHandler(this.skyView_KeyDown);
+            this.skyView.MouseMove += new System.Windows.Forms.MouseEventHandler(this.skyView_MouseMove);
             // 
             // FormMain
             // 
@@ -53,7 +63,7 @@
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.skyView);
             this.Name = "FormMain";
-            this.Text = "ADK Demo App";            
+            this.Text = "ADK Demo App";
             this.ResumeLayout(false);
 
         }
@@ -61,6 +71,7 @@
         #endregion
 
         private SkyView skyView;
+        private System.Windows.Forms.ToolTip tipCelestialObject;
     }
 }
 
