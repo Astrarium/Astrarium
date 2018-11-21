@@ -52,7 +52,7 @@ namespace ADK
             return Angle.To360(Angle.ToDegrees(Math.Atan2(y, x)));
         }
 
-        // TODO: reference to PAWC book, tests
+        // TODO: reference to PAWC book, tests, move to separate class
         public static double PositionAngleOfNorthCusp(double PAlimb)
         {
             if (PAlimb < 180)
@@ -93,6 +93,7 @@ namespace ADK
         /// <remarks>
         /// AA(II), formula 48.2
         /// </remarks>
+        // TODO: move to separate class
         public static double Elongation(CrdsEcliptical sun, CrdsEcliptical moon)
         {
             double beta = Angle.ToRadians(moon.Beta);
@@ -127,6 +128,8 @@ namespace ADK
         /// <remarks>
         /// AA(II), formula 48.3.
         /// </remarks>
+        /// 
+        // TODO: move to separate class
         public static double PhaseAngle(double psi, double R, double Delta)
         {
             psi = Angle.ToRadians(Math.Abs(psi));
@@ -143,6 +146,7 @@ namespace ADK
         /// <remarks>
         /// AA(II), formula 48.1
         /// </remarks>
+        // TODO: move to separate class
         public static double Phase(double phaseAngle)
         {
             return (1 + Math.Cos(Angle.ToRadians(phaseAngle))) / 2;

@@ -42,13 +42,16 @@ namespace ADK.Demo.Calculators
             // Local horizontal coordinates of the Moon
             moon.Horizontal = moon.Equatorial.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
            
+            // Sun ephemerides should be already calculated
             Sun sun = Sky.Get<Sun>("Sun");
 
             // Elongation of the Moon
             moon.Elongation = LunarEphem.Elongation(sun.Ecliptical, moon.Ecliptical);
             
+            // Phase angle
             moon.PhaseAngle = LunarEphem.PhaseAngle(moon.Elongation, sun.Ecliptical.Distance * 149597871.0, moon.Ecliptical.Distance);
             
+            // Moon phase
             moon.Phase = LunarEphem.Phase(moon.PhaseAngle);
 
             // TODO: should use sun.Equatorial0 here?

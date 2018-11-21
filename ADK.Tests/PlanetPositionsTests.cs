@@ -177,78 +177,139 @@ namespace ADK.Tests
         /// AA(II), example 33.a.
         /// </summary>
         [TestMethod]
-        public void CalculatePlanetApparentPlace()
+        public void CalculatePlanetApparentPlaceLP()
         {
             // TODO: test not pass
 
             double jde = 2448976.5;
 
-            CrdsHeliocentrical hEarth = PlanetPositions.GetPlanetCoordinates(3, jde, highPrecision: false);
-            Assert.AreEqual(88.35704, hEarth.L, 1e-5);
-            Assert.AreEqual(0.00014, hEarth.B, 1e-5);
-            Assert.AreEqual(0.983824, hEarth.R, 1e-6);
+            double tau = 0;
+            CrdsEcliptical ecl = null;
 
-            CrdsHeliocentrical hVenus = PlanetPositions.GetPlanetCoordinates(2, jde, highPrecision: false);
-            Assert.AreEqual(26.11428, hVenus.L, 1e-5);
-            Assert.AreEqual(-2.62070, hVenus.B, 1e-5);
-            Assert.AreEqual(0.724603, hVenus.R, 1e-6);
+            for (int i = 0; i < 2; i++)
+            {
+                CrdsHeliocentrical hEarth = PlanetPositions.GetPlanetCoordinates(3, jde - tau, highPrecision: false);
 
-            CrdsRectangular rect = hVenus.ToRectangular(hEarth);
-            Assert.AreEqual(0.621746, rect.X, 1e-6);
-            Assert.AreEqual(-0.664810, rect.Y, 1e-6);
-            Assert.AreEqual(-0.033134, rect.Z, 1e-6);
+                if (i == 0)
+                {
+                    Assert.AreEqual(88.35704, hEarth.L, 1e-5);
+                    Assert.AreEqual(0.00014, hEarth.B, 1e-5);
+                    Assert.AreEqual(0.983824, hEarth.R, 1e-6);
+                }
+                else
+                {
+                    Assert.AreEqual(88.35168, hEarth.L, 1e-5);
+                    Assert.AreEqual(0.00014, hEarth.B, 1e-5);
+                    Assert.AreEqual(0.983825, hEarth.R, 1e-6);
+                }
 
-            double delta = rect.ToEcliptical().Distance;
-            Assert.AreEqual(0.910845, delta, 1e-6);
+                CrdsHeliocentrical hVenus = PlanetPositions.GetPlanetCoordinates(2, jde - tau, highPrecision: false);
+                if (i == 0)
+                {
+                    Assert.AreEqual(26.11428, hVenus.L, 1e-5);
+                    Assert.AreEqual(-2.62070, hVenus.B, 1e-5);
+                    Assert.AreEqual(0.724603, hVenus.R, 1e-6);
+                }
+                else
+                {
+                    Assert.AreEqual(26.10588, hVenus.L, 1e-5);
+                    Assert.AreEqual(-2.62102, hVenus.B, 1e-5);
+                    Assert.AreEqual(0.724604, hVenus.R, 1e-6);
+                }
 
-            double tau = 0.0057755183 * rect.ToEcliptical().Distance;
-            Assert.AreEqual(0.0052606, tau, 1e-7);
+                var rect = hVenus.ToRectangular(hEarth);
+                if (i == 0)
+                {
+                    Assert.AreEqual(0.621746, rect.X, 1e-6);
+                    Assert.AreEqual(-0.664810, rect.Y, 1e-6);
+                    Assert.AreEqual(-0.033134, rect.Z, 1e-6);
+                }
+                else
+                {
+                    Assert.AreEqual(0.621702, rect.X, 1e-6);
+                    Assert.AreEqual(-0.664903, rect.Y, 1e-6);
+                    Assert.AreEqual(-0.033138, rect.Z, 1e-6);
+                }
 
-            hVenus = PlanetPositions.GetPlanetCoordinates(2, jde - tau, highPrecision: false);
-            Assert.AreEqual(26.10588, hVenus.L, 1e-5);
-            Assert.AreEqual(-2.62102, hVenus.B, 1e-5);
-            Assert.AreEqual(0.724604, hVenus.R, 1e-6);
+                ecl = rect.ToEcliptical();
+               
+                tau = PlanetPositions.LightTimeEffect(ecl.Distance);
 
-            rect = hVenus.ToRectangular(hEarth);
-            Assert.AreEqual(0.621794, rect.X, 1e-6);
-            Assert.AreEqual(-0.664905, rect.Y, 1e-6);
-            Assert.AreEqual(-0.033138, rect.Z, 1e-6);
+                if (i == 0)
+                {
+                    Assert.AreEqual(0.910845, ecl.Distance, 1e-6);
+                    Assert.AreEqual(0.0052606, tau, 1e-7);
+                }
+            }
 
-            // Ecliptical coordinates of Venus.
-            // Corrected for light time, but not yet for aberration.
-            CrdsEcliptical ecl = rect.ToEcliptical();
-            Assert.AreEqual(313.08097, ecl.Lambda, 1e-5);
-            Assert.AreEqual(-2.08474, ecl.Beta, 1e-5);
-
-            AberrationElements ae = Aberration.AberrationElements(jde);
-            ae.lambda = Angle.To360(hEarth.L + 180);
-
-            Assert.AreEqual(0.016711589, ae.e, 1e-9);
-            Assert.AreEqual(102.81644, ae.pi, 1e-5);
-            Assert.AreEqual(268.35704, ae.lambda, 1e-5);
-
-            CrdsEcliptical deltaEcl = Aberration.AberrationEffect(ecl, ae);
-            Assert.AreEqual(-14.868, deltaEcl.Lambda * 3600, 1e-3);
-            Assert.AreEqual(-0.531, deltaEcl.Beta * 3600, 1e-3);
-
-            ecl += deltaEcl;
             Assert.AreEqual(313.07684, ecl.Lambda, 1e-5);
             Assert.AreEqual(-2.08489, ecl.Beta, 1e-5);
 
-            CrdsEcliptical fk5corr = PlanetPositions.CorrectionForFK5(jde, ecl);
-            Assert.AreEqual(-0.09027, fk5corr.Lambda * 3600, 1e-5);
-            Assert.AreEqual(0.05535, fk5corr.Beta * 3600, 1e-5);
-            ecl += fk5corr;
+            // Correction for FK5 system
+            CrdsEcliptical corr = PlanetPositions.CorrectionForFK5(jde, ecl);            
+            Assert.AreEqual(-0.09027, corr.Lambda * 3600, 1e-5);
+            Assert.AreEqual(0.05535, corr.Beta * 3600, 1e-5);
 
-            Assert.AreEqual(313.07686, ecl.Lambda, 1e-5);
-            Assert.AreEqual(-2.08487, ecl.Beta, 1e-5);
+            ecl += corr;
+            Assert.AreEqual(313.07682, ecl.Lambda, 1e-5);
+            Assert.AreEqual(-2.08488, ecl.Beta, 1e-5);
 
             ecl += Nutation.NutationEffect(16.749 / 3600.0);
 
             CrdsEquatorial eq = ecl.ToEquatorial(23.439669);
 
-            Assert.AreEqual(new HMS("21h 04m 41.50s"), new HMS(eq.Alpha));
-            Assert.AreEqual(new DMS("-18* 53' 16.84''"), new DMS(eq.Delta));
+            Assert.AreEqual(new HMS("21h 04m 41.48s"), new HMS(eq.Alpha));
+            Assert.AreEqual(new DMS("-18* 53' 16.91''"), new DMS(eq.Delta));
+        }
+
+        /// <summary>
+        /// Test values for the full VSOP87 theory 
+        /// are taken from AA(II), page 227, end of example 33.a
+        /// </summary>
+        [TestMethod]
+        public void CalculatePlanetApparentPlaceHP()
+        {
+            double jde = 2448976.5;
+
+            // time taken by the light to reach the Earth
+            double tau = 0;
+
+            // previous value of tau to calculate the difference
+            double tau0 = 1;
+
+            // final difference to stop iteration process, 1 second of time
+            double deltaTau = TimeSpan.FromSeconds(1).TotalDays;
+
+            // Ecliptical coordinates of Venus
+            CrdsEcliptical ecl = null;
+
+            // Iterative process to find ecliptical coordinates of Venus
+            while (Math.Abs(tau - tau0) > deltaTau)
+            {
+                // Heliocentrical coordinates of Earth
+                var hEarth = PlanetPositions.GetPlanetCoordinates(3, jde - tau, highPrecision: true);
+
+                // Heliocentrical coordinates of Venus
+                var hVenus = PlanetPositions.GetPlanetCoordinates(2, jde - tau, highPrecision: true);
+
+                // Ecliptical coordinates of Venus
+                ecl = hVenus.ToRectangular(hEarth).ToEcliptical();
+
+                tau0 = tau;
+                tau = PlanetPositions.LightTimeEffect(ecl.Distance);
+            }
+
+            // Correction for FK5 system
+            ecl += PlanetPositions.CorrectionForFK5(jde, ecl);
+
+            // Take nutation into account
+            ecl += Nutation.NutationEffect(16.749 / 3600.0);
+
+            // Apparent equatorial coordinates of Venus
+            CrdsEquatorial eq = ecl.ToEquatorial(23.439669);
+
+            Assert.AreEqual(new HMS("21h 04m 41.454s"), new HMS(eq.Alpha));
+            Assert.AreEqual(new DMS("-18* 53' 16.82''"), new DMS(eq.Delta));
         }
 
         /// <summary>

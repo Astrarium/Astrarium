@@ -247,6 +247,7 @@ namespace ADK
         /// <param name="eq">Geocentric equatorial coordinates of the body</param>
         /// <param name="geo">Geographical coordinates of the body</param>
         /// <param name="theta0">Apparent sidereal time at Greenwich</param>
+        /// <param name="pi">Parallax of a body</param>
         /// <returns>Topocentric equatorial coordinates of the celestial body</returns>
         /// <remarks>
         /// Method is taken from AA(II), formulae 40.6-40.7.

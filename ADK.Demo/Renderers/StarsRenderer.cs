@@ -16,7 +16,6 @@ namespace ADK.Demo.Renderers
         private ICollection<Tuple<int, int>> ConLines = new List<Tuple<int, int>>();
 
         private Pen penConLine;
-        private float magLimit = 100;
         private const double maxSeparation = 90 * 1.2;
 
         public StarsRenderer(Sky sky, ISkyMap skyMap) : base(sky, skyMap)
@@ -28,8 +27,6 @@ namespace ADK.Demo.Renderers
         public override void Render(Graphics g)
         {
             var allStars = Sky.Get<ICollection<Star>>("Stars");
-
-            magLimit = allStars.Select(s => s.Mag).Max();
 
             PointF p1, p2;
             CrdsHorizontal h1, h2;
@@ -56,41 +53,13 @@ namespace ADK.Demo.Renderers
             var stars = allStars.Where(s => Angle.Separation(Map.Center, s.Horizontal) < Map.ViewAngle * 1.2);
             foreach (var star in stars)
             {
-                float diam = GetDrawingSize(star.Mag);
+                float diam = GetPointSize(star.Mag);
                 if ((int)diam > 0)
                 {
                     PointF p = Map.Projection.Project(star.Horizontal);
                     g.FillEllipse(GetColor(star.Color), p.X - diam / 2, p.Y - diam / 2, diam, diam);
                 }
             }
-        }
-
-        private float GetDrawingSize(float mag)
-        {
-            float maxMag = 0;
-            float MAG_LIMIT_NARROW_ANGLE = magLimit;
-            const float MAG_LIMIT_WIDE_ANGLE = 5.5f;
-
-            const float NARROW_ANGLE = 2;
-            const float WIDE_ANGLE = 90;
-
-            float K = (MAG_LIMIT_NARROW_ANGLE - MAG_LIMIT_WIDE_ANGLE) / (NARROW_ANGLE - WIDE_ANGLE);
-            float B = MAG_LIMIT_WIDE_ANGLE - K * WIDE_ANGLE;
-
-            float minMag = K * (float)Map.ViewAngle + B;
-
-            if (Map.ViewAngle < 2 && mag > minMag)
-                return 1;
-
-            if (mag > minMag)
-                return 0;
-
-            if (mag <= maxMag)
-                mag = maxMag;
-
-            float range = minMag - maxMag;
-
-            return (range - mag + 1);
         }
 
         private Brush GetColor(char spClass)

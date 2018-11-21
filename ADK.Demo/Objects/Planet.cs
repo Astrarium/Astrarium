@@ -33,6 +33,8 @@ namespace ADK.Demo.Objects
         /// </summary>
         public double Semidiameter { get; set; }
 
+        public float Flattening { get; set; }
+
         public double Elongation { get; set; }
 
         public double Parallax { get; set; }
@@ -40,5 +42,15 @@ namespace ADK.Demo.Objects
         public double PhaseAngle { get; set; }
 
         public double Phase { get; set; }
+
+        /// <summary>
+        /// Distance from planet to Sun
+        /// </summary>
+        public double Distance { get; set; }
+
+        /// <summary>
+        /// Magnitude of planet
+        /// </summary>
+        public float Magnitude { get; set; }
     }
 }

@@ -14,7 +14,7 @@ namespace ADK.Demo.Renderers
     public class SolarSystemRenderer : BaseSkyRenderer
     {
         private Pen penSun = new Pen(Color.FromArgb(250, 210, 10));
-        private Brush brushMoon = new SolidBrush(Color.FromArgb(100, 100, 100));
+        private Brush brushShadow = new SolidBrush(Color.FromArgb(100, 100, 100));
 
         public SolarSystemRenderer(Sky sky, ISkyMap skyMap) : base(sky, skyMap)
         {
@@ -25,6 +25,16 @@ namespace ADK.Demo.Renderers
         {
             RenderSun(g);
             RenderMoon(g);
+
+            var planets = Sky.Get<ICollection<Planet>>("Planets");
+
+            for (int i = 0; i < planets.Count; i++)
+            {
+                if (i + 1 != 3)
+                {
+                    RenderPlanet(g, planets.ElementAt(i));
+                }
+            }
         }
 
         private void RenderSun(Graphics g)
@@ -36,9 +46,11 @@ namespace ADK.Demo.Renderers
             {
                 PointF p = Map.Projection.Project(sun.Horizontal);
 
-                float size = Math.Max(10, GetDrawingSize(sun.Semidiameter));
+                float size = GetDiskSize(sun.Semidiameter, 10);
 
                 g.FillEllipse(penSun.Brush, p.X - size / 2, p.Y - size / 2, size, size);
+
+                Map.VisibleObjects.Add(sun);
             }
         }
 
@@ -52,50 +64,119 @@ namespace ADK.Demo.Renderers
                 PointF p = Map.Projection.Project(moon.Horizontal);
 
                 // drawing size
-                float size = Math.Max(10, GetDrawingSize(moon.Semidiameter));
+                float size = GetDiskSize(moon.Semidiameter, 10);
              
                 // rotation of image around North pole
-                double inc = GetRotationTowardsNorth(moon.Equatorial);
-
+                // double inc = GetRotationTowardsNorth(moon.Equatorial);
                 // final rotation of drawn image
                 // cusp rotation is negated because measured counter-clockwise
-                float rot = (float)(inc - moon.PAcusp);
+                // float rot = (float)(inc - moon.PAcusp);
 
                 // signed value of Moon phase
                 float phase = (float)moon.Phase * Math.Sign(moon.Elongation);
 
                 // Moon phase shadow
-                Region shadow = GetPhaseShadow(phase, size, rot);
+                // Region shadow = GetPhaseShadow(phase, size, rot);
 
-                Region shadow2 = GetPhaseShadow(phase, size + 2, GetRotationTowardsEclipticPole(moon.Ecliptical));
+                Region shadow = GetPhaseShadow(phase, size + 2, GetRotationTowardsEclipticPole(moon.Ecliptical));
 
                 g.FillEllipse(Brushes.White, p.X - size / 2, p.Y - size / 2, size, size);
 
                 // first method
-                g.TranslateTransform(p.X - size / 2, p.Y - size / 2);
-                g.FillRegion(brushMoon, shadow);
-                g.ResetTransform();
+                // g.TranslateTransform(p.X - size / 2, p.Y - size / 2);
+                // g.FillRegion(brushMoon, shadow);
+                // g.ResetTransform();
 
                 // second method
                 g.TranslateTransform(p.X - size / 2 - 1, p.Y - size / 2 - 1);
-                g.FillRegion(new SolidBrush(Color.FromArgb(100, 255, 0, 0)), shadow2);
+                g.FillRegion(brushShadow, shadow);
                 g.ResetTransform();
 
                 Map.VisibleObjects.Add(moon);
             }
         }
 
-        /// <summary>
-        /// Gets drawing size of a celestial body
-        /// </summary>
-        /// <param name="semidiameter">Semidiameter of a body, in seconds of arc.</param>
-        /// <returns></returns>
-        private float GetDrawingSize(double semidiameter)
-        {          
-            return (float)(semidiameter / 3600.0 / Map.ViewAngle * Map.Width);
+        private void RenderPlanet(Graphics g, Planet planet)
+        {
+            double ad = Angle.Separation(planet.Horizontal, Map.Center);
+            
+            if (ad < 1.2 * Map.ViewAngle + planet.Semidiameter / 3600.0)
+            {
+                float size = GetPointSize(planet.Magnitude);
+                float diam = GetDiskSize(planet.Semidiameter);
+
+                // diameter is to small to render as planet disk, 
+                // but point size caclulated from magnitude is enough to be drawn
+                if (size > diam && (int)size > 0)
+                {
+                    PointF p = Map.Projection.Project(planet.Horizontal);
+                    g.FillEllipse(GetPlanetColor(planet.Serial), p.X - size / 2, p.Y - size / 2, size, size);
+
+                    DrawObjectCaption(g, planet.Names.ElementAt(0), p, size);
+
+                    Map.VisibleObjects.Add(planet);
+                }
+
+                // planet should be rendered as disk
+                else if (diam >= size && (int)diam > 0)
+                {
+                    PointF p = Map.Projection.Project(planet.Horizontal);
+
+                    // TODO: Saturn rings, rotation of planets
+
+                    float diamEquat = diam;
+                    float diamPolar = (1 - planet.Flattening) * diam;
+
+                    float rotation = GetRotationTowardsEclipticPole(planet.Ecliptical);
+
+                    g.TranslateTransform(p.X - diamEquat / 2, p.Y - diamPolar / 2);
+                    g.RotateTransform(rotation);
+                    g.FillEllipse(GetPlanetColor(planet.Serial), 0, 0, diamEquat, diamPolar);
+                    g.ResetTransform();
+
+                    // drawing shadow on the almost full phase makes no sense
+                    if (planet.Phase < 0.99)
+                    {
+                        float phase = (float)planet.Phase * Math.Sign(planet.Elongation);
+
+                        Region shadow = GetPhaseShadow(phase, diam + 2, rotation);
+
+                        g.TranslateTransform(p.X - diamEquat / 2 - 1, p.Y - diamPolar / 2 - 1);
+                        g.FillRegion(brushShadow, shadow);
+                        g.ResetTransform();
+                    }
+
+                    DrawObjectCaption(g, planet.Names.ElementAt(0), p, diam);
+
+                    Map.VisibleObjects.Add(planet);
+                }
+            }
         }
 
-        public Region GetPhaseShadow(float phase, float size, float rotation)
+        private Brush GetPlanetColor(int planet)
+        {
+            switch (planet)
+            {
+                case 1:
+                    return Brushes.LightGray;
+                case 2:
+                    return Brushes.White;
+                case 4:
+                    return Brushes.DarkRed;
+                case 5:
+                    return Brushes.LightYellow;
+                case 6:
+                    return Brushes.LightYellow;
+                case 7:
+                    return Brushes.LightGreen;
+                case 8:
+                    return Brushes.LightSkyBlue;
+                default:
+                    return Brushes.White;
+            }
+        }
+
+        private Region GetPhaseShadow(float phase, float size, float rotation)
         {
             GraphicsPath gp_rect = new GraphicsPath();
             GraphicsPath gp_ell = new GraphicsPath();

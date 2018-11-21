@@ -198,6 +198,17 @@ namespace ADK
             return new CrdsEcliptical(deltaL / 3600, deltaB / 3600);
         }
 
+        /// <summary>
+        /// Calculates time taken by the light to reach the Earth from a celestial body.
+        /// </summary>
+        /// <param name="distance">Distance to celestial body, in A.U.</param>
+        /// <returns>Time, in days, taken by the light to reach the Earth.</returns>
+        // TODO: reference to book, tests
+        public static double LightTimeEffect(double distance)
+        {
+            return 0.0057755183 * distance;
+        }
+
         // TODO: this should be moved to separate class
         private static readonly double[] s0 = new double[] { 3.36, 8.41, 959.63, 4.68, 98.44, 82.73, 35.02, 33.5, 2.07 };
 
@@ -213,6 +224,54 @@ namespace ADK
                 throw new ArgumentException("Planet serial number should be in range from 1 to 8.", nameof(p));
 
             return s0[p - 1] / distance;
+        }
+
+        // TODO: move to separate class, tests
+        // taken from AA(II), p. 279
+
+        /// <summary>
+        /// Calculates parallax of a planet
+        /// </summary>
+        /// <param name="distance">Distance, in A.U.</param>
+        /// <returns>Parallax value in degrees</returns>
+        public static double Parallax(double distance)
+        {
+            return 8.794 / distance / 3600;
+        }
+
+        /// <summary>
+        /// Calculates magnitude of planet.
+        /// </summary>
+        /// <param name="planet">Planet number, from 1 (Mercury) to 8 (Neptune).</param>
+        /// <param name="Delta">Distance Earth-Planet, in AU.</param>
+        /// <param name="r">Distance Sun-Planet, in AU.</param>
+        /// <param name="i">Phase angle of the planet, in degrees.</param>
+        /// <returns>Returns magnitude value for the planet.</returns>
+        // TODO: move to separate class, reference to book, tests
+        public static float GetPlanetMagnitude(int planet, double Delta, double r, double i)
+        {
+            double i2 = i * i;
+            double i3 = i2 * i;
+
+            switch (planet)
+            {
+                case 1:
+                    return (float)(-0.42 + 5 * Math.Log10(r * Delta) + 0.0380 * i - 0.000273 * i2 + 0.000002 * i3);
+                case 2:
+                    return (float)(-4.40 + 5 * Math.Log10(r * Delta) + 0.0009 * i + 0.000239 * i2 - 0.00000065 * i3);
+                case 4:
+                    return (float)(-1.52 + 5 * Math.Log10(r * Delta) + 0.016 * i);
+                case 5:
+                    return (float)(-9.40 + 5 * Math.Log10(r * Delta) + 0.005 * i);
+                case 6:
+                    return (float)(-8.88 + 5 * Math.Log10(r * Delta));
+                case 7:
+                    return (float)(-7.19 + 5 * Math.Log10(r * Delta));
+                case 8:
+                    return (float)(-6.87 + 5 * Math.Log10(r * Delta));
+                default:
+                    throw new ArgumentException("Wrong planet number.", nameof(planet));
+            }
         }
 
         /// <summary>
