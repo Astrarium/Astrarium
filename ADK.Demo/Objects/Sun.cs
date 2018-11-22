@@ -21,5 +21,7 @@ namespace ADK.Demo.Objects
         public CrdsEcliptical Ecliptical { get; set; }
 
         public double Semidiameter { get; set; }
+
+        public double Parallax { get; set; }
     }
 }

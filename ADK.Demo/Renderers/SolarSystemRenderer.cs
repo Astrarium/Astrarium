@@ -23,24 +23,33 @@ namespace ADK.Demo.Renderers
 
         public override void Render(Graphics g)
         {
-            RenderSun(g);
-            RenderMoon(g);
+            Sun sun = Sky.Get<Sun>("Sun");
+            Moon moon = Sky.Get<Moon>("Moon");
 
-            var planets = Sky.Get<ICollection<Planet>>("Planets");
+            // Flag indicated Sun is already rendered
+            bool isSunRendered = false;
 
-            for (int i = 0; i < planets.Count; i++)
+            // Get all planets esxept Earth, and sort them by distance from Earth (most distant planet is first)
+            var planets = Sky.Get<ICollection<Planet>>("Planets")
+                .Where(p => p.Number != 3)
+                .OrderByDescending(p => p.Ecliptical.Distance);
+
+            foreach (Planet p in planets)
             {
-                if (i + 1 != 3)
+                if (!isSunRendered && p.Ecliptical.Distance < sun.Ecliptical.Distance)
                 {
-                    RenderPlanet(g, planets.ElementAt(i));
+                    RenderSun(g, sun);
+                    isSunRendered = true;
                 }
+
+                RenderPlanet(g, p);
             }
+
+            RenderMoon(g, moon);
         }
 
-        private void RenderSun(Graphics g)
+        private void RenderSun(Graphics g, Sun sun)
         {
-            Sun sun = Sky.Get<Sun>("Sun");
-
             double ad = Angle.Separation(sun.Horizontal, Map.Center);
             if (ad < 1.2 * Map.ViewAngle + sun.Semidiameter / 3600.0)
             {
@@ -54,10 +63,8 @@ namespace ADK.Demo.Renderers
             }
         }
 
-        private void RenderMoon(Graphics g)
+        private void RenderMoon(Graphics g, Moon moon)
         {
-            Moon moon = Sky.Get<Moon>("Moon");
-
             double ad = Angle.Separation(moon.Horizontal, Map.Center);
             if (ad < 1.2 * Map.ViewAngle + moon.Semidiameter / 3600.0)
             {
@@ -70,26 +77,19 @@ namespace ADK.Demo.Renderers
                 // double inc = GetRotationTowardsNorth(moon.Equatorial);
                 // final rotation of drawn image
                 // cusp rotation is negated because measured counter-clockwise
-                // float rot = (float)(inc - moon.PAcusp);
+                // float rotation = (float)(inc - moon.PAcusp);
 
-                // signed value of Moon phase
-                float phase = (float)moon.Phase * Math.Sign(moon.Elongation);
-
-                // Moon phase shadow
-                // Region shadow = GetPhaseShadow(phase, size, rot);
-
-                Region shadow = GetPhaseShadow(phase, size + 2, GetRotationTowardsEclipticPole(moon.Ecliptical));
-
+                // Moon disk
                 g.FillEllipse(Brushes.White, p.X - size / 2, p.Y - size / 2, size, size);
 
-                // first method
-                // g.TranslateTransform(p.X - size / 2, p.Y - size / 2);
-                // g.FillRegion(brushMoon, shadow);
-                // g.ResetTransform();
+                float phase = (float)moon.Phase * Math.Sign(moon.Elongation);
+                float rotation = GetRotationTowardsEclipticPole(moon.Ecliptical);
+                GraphicsPath shadow = GetPhaseShadow(phase, size + 1);
 
-                // second method
-                g.TranslateTransform(p.X - size / 2 - 1, p.Y - size / 2 - 1);
-                g.FillRegion(brushShadow, shadow);
+                // shadowed part of disk
+                g.TranslateTransform(p.X, p.Y);
+                g.RotateTransform(rotation);
+                g.FillPath(brushShadow, shadow);
                 g.ResetTransform();
 
                 Map.VisibleObjects.Add(moon);
@@ -110,7 +110,7 @@ namespace ADK.Demo.Renderers
                 if (size > diam && (int)size > 0)
                 {
                     PointF p = Map.Projection.Project(planet.Horizontal);
-                    g.FillEllipse(GetPlanetColor(planet.Serial), p.X - size / 2, p.Y - size / 2, size, size);
+                    g.FillEllipse(GetPlanetColor(planet.Number), p.X - size / 2, p.Y - size / 2, size, size);
 
                     DrawObjectCaption(g, planet.Names.ElementAt(0), p, size);
 
@@ -129,22 +129,25 @@ namespace ADK.Demo.Renderers
 
                     float rotation = GetRotationTowardsEclipticPole(planet.Ecliptical);
 
-                    g.TranslateTransform(p.X - diamEquat / 2, p.Y - diamPolar / 2);
+                    g.TranslateTransform(p.X, p.Y);
                     g.RotateTransform(rotation);
-                    g.FillEllipse(GetPlanetColor(planet.Serial), 0, 0, diamEquat, diamPolar);
+                    g.FillEllipse(GetPlanetColor(planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
+
+                    //g.FillEllipse(GetVolumeBrush(diam, planet.Flattening), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
+
                     g.ResetTransform();
 
-                    // drawing shadow on the almost full phase makes no sense
-                    if (planet.Phase < 0.99)
-                    {
-                        float phase = (float)planet.Phase * Math.Sign(planet.Elongation);
+                    float phase = (float)planet.Phase * Math.Sign(planet.Elongation);
 
-                        Region shadow = GetPhaseShadow(phase, diam + 2, rotation);
+                    GraphicsPath shadow = GetPhaseShadow(phase, diam + 1, planet.Flattening);
 
-                        g.TranslateTransform(p.X - diamEquat / 2 - 1, p.Y - diamPolar / 2 - 1);
-                        g.FillRegion(brushShadow, shadow);
-                        g.ResetTransform();
-                    }
+                    g.TranslateTransform(p.X, p.Y);
+                    g.RotateTransform(rotation);
+                    g.FillPath(brushShadow, shadow);
+                    g.ResetTransform();
+                    
+                    // TODO: Remove marker on center of the disk. For testing only.
+                    g.FillEllipse(Brushes.Red, p.X - 2, p.Y - 2, 4, 4);
 
                     DrawObjectCaption(g, planet.Names.ElementAt(0), p, diam);
 
@@ -176,65 +179,117 @@ namespace ADK.Demo.Renderers
             }
         }
 
-        private Region GetPhaseShadow(float phase, float size, float rotation)
+        /// <summary>
+        /// Gets graphics path for drawing shadowed part of a planet / Moon.
+        /// </summary>
+        /// <param name="phase">Phase of celestial object (signed).</param>
+        /// <param name="rotation">
+        /// Rotation angle in degrees. 
+        /// Resulting graphics path will be rotated clockwise on this angle around central point of the planet / Moon disk.</param>
+        /// <param name="size">Size of a drawn planet / Moon disk</param>
+        /// <param name="flattening">Flattening value of a planet globe.</param>
+        /// <returns>Graphics path for drawing shadowed part of a planet / Moon.</returns>
+        private GraphicsPath GetPhaseShadow(float phase, float size, float flattening = 0)
         {
-            GraphicsPath gp_rect = new GraphicsPath();
-            GraphicsPath gp_ell = new GraphicsPath();
-            GraphicsPath gp_circle = new GraphicsPath();
+            float sizeEquat = size;
+            float sizePolar = (1 - flattening) * size;
 
-            gp_circle.AddEllipse(0, 0, size, size);
-
-            Region region_rect = new Region();
-            Region region_ell;
-
-            if (phase > 0 && phase <= 0.5)
+            GraphicsPath gp = new GraphicsPath();
+            
+            // растущий серп
+            if (phase >= 0 && phase <= 0.5)
             {
-                gp_rect.AddRectangle(new RectangleF(0, 0, size / 2, size));
-                gp_ell.AddEllipse(phase * size, 0, (0.5f - phase) * size * 2, size);
-                region_rect = new Region(gp_rect);
-                region_ell = new Region(gp_ell);
-                region_rect.Union(region_ell);
+                float width = (0.5f - phase) * sizeEquat * 2;
+                float height = sizePolar;
+                float x = -width / 2;
+                float y = -height / 2;
+
+                // terminator arc
+                gp.AddArc(x, y, width, height, -90, 180);
+
+                // dark side arc
+                gp.AddArc(-sizeEquat / 2, -sizePolar / 2, sizeEquat, sizePolar, 90, 180);
             }
+
+            // растущая горбушка
             if (phase > 0.5 && phase <= 1.0)
             {
-                gp_rect.AddRectangle(new RectangleF(0, 0, size / 2, size));
-                gp_ell.AddEllipse(phase * size, 0, (0.5f - phase) * size * 2, size);
-                region_rect = new Region(gp_rect);
-                region_ell = new Region(gp_ell);
-                region_rect.Exclude(region_ell);
+                float width = (phase - 0.5f) * sizeEquat * 2;
+                float height = sizePolar;
+                float x = -width / 2;
+                float y = -height / 2;
+
+                // terminator arc 
+                gp.AddArc(x, y, width, height, 90, 180);
+                gp.Reverse();
+
+                // dark side arc 
+                gp.AddArc(-sizeEquat / 2, -sizePolar / 2, sizeEquat, sizePolar, 90, 180);
             }
 
+            // убывающая горбушка 
             if (phase > -1.0 && phase <= -0.5)
             {
-                gp_rect.AddRectangle(new RectangleF(size / 2, 0, size / 2, size));
-                gp_ell.AddEllipse(-phase * size, 0, (0.5f + phase) * size * 2, size);
-                region_rect = new Region(gp_rect);
-                region_ell = new Region(gp_ell);
-                region_rect.Exclude(region_ell);
+                float width = -(phase + 0.5f) * sizeEquat * 2;
+                float height = sizePolar;
+                float x = -width / 2;
+                float y = -height / 2;
+
+                // terminator arc
+                gp.AddArc(x, y, width, height, -90, 180);
+                gp.Reverse();
+
+                // dark side arc
+                gp.AddArc(-sizeEquat / 2, -sizePolar / 2, sizeEquat, sizePolar, -90, 180);
             }
 
+            // убывающий серп
             if (phase > -0.5 && phase <= 0)
             {
-                gp_rect.AddRectangle(new RectangleF(size / 2, 0, size / 2, size));
-                gp_ell.AddEllipse(-phase * size, 0, (0.5f + phase) * size * 2, size);
-                region_rect = new Region(gp_rect);
-                region_ell = new Region(gp_ell);
-                region_rect.Union(region_ell);
+                float width = (phase + 0.5f) * sizeEquat * 2;
+                float height = sizePolar;
+                float x = -width / 2;
+                float y = -height / 2;
+
+                // dark side arc
+                gp.AddArc(-sizeEquat / 2, -sizePolar / 2, sizeEquat, sizePolar, -90, 180);
+
+                // terminator arc
+                gp.AddArc(x, y, width, height, 90, 180);
             }
 
-            region_rect.Intersect(gp_circle);
+            gp.CloseAllFigures();
 
-            region_rect.Transform(RotateAroundPoint(rotation, new PointF(size / 2, size / 2)));
-
-            return region_rect;
+            return gp;
         }
 
-        // Return a rotation matrix to rotate clockwise around a point.
-        private Matrix RotateAroundPoint(float rotation, PointF center)
+        private PathGradientBrush GetVolumeBrush(float size, float flattening = 0)
         {
-            Matrix result = new Matrix();
-            result.RotateAt(rotation, center);
-            return result;
+            float sizeEquat = size;
+            float sizePolar = (1 - flattening) * size;
+
+            GraphicsPath gpVolume = new GraphicsPath();
+            gpVolume.AddEllipse(-sizeEquat / 2, -sizePolar / 2, sizeEquat, sizePolar);
+
+            PathGradientBrush brushVolume = new PathGradientBrush(gpVolume);
+            brushVolume.CenterPoint = new PointF(0, 0);
+            brushVolume.CenterColor = Color.Transparent;
+
+            //Blend blnd = new Blend();
+            //blnd.Positions = new float[] { 0, 0.3f, 0.4f, 1 };
+            //blnd.Factors = new float[] {  0, 1, 1, 1 };
+            //brushVolume.Blend = blnd;
+
+            //brushVolume.SetBlendTriangularShape(1, 0.5f);
+            brushVolume.SetSigmaBellShape((float)0.3, (float)1.0);
+            List<Color> clrs = new List<Color>();
+            for (int i = 0; i < gpVolume.PathPoints.Length; i++)
+            {
+                clrs.Add(Color.FromArgb(255, Color.Black));
+            }
+            brushVolume.SurroundColors = clrs.ToArray();
+
+            return brushVolume;
         }
 
         /// <summary>

@@ -30,7 +30,7 @@ namespace ADK.Demo.Calculators
         {
             for (int i = 0; i < Planets.Length; i++)
             {
-                Planets[i] = new Planet() { Serial = i + 1, Names = new string[] { PlanetNames[i] } };
+                Planets[i] = new Planet() { Number = i + 1, Names = new string[] { PlanetNames[i] } };
             }
 
             Planets[4].Flattening = 0.064874f;

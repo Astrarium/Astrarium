@@ -11,7 +11,7 @@ namespace ADK.Demo.Objects
         /// <summary>
         /// Serial number of the planet, from 1 (Mercury) to 8 (Neptune).
         /// </summary>
-        public int Serial { get; set; }
+        public int Number { get; set; }
 
         /// <summary>
         /// Geocentrical equatorial coordinates

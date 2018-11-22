@@ -39,13 +39,17 @@ namespace ADK.Demo.Calculators
             // add aberration effect 
             Sun.Ecliptical += Aberration.AberrationEffect(Sun.Ecliptical.Distance);
 
-            // convert ecliptical to equatorial coordinates
-            Sun.Equatorial = Sun.Ecliptical.ToEquatorial(Sky.Epsilon);
+            // convert ecliptical to geocentric equatorial coordinates
+            Sun.Equatorial0 = Sun.Ecliptical.ToEquatorial(Sky.Epsilon);
+
+            // solar parallax
+            Sun.Parallax = PlanetPositions.Parallax(Sun.Ecliptical.Distance);
+           
+            // Topocentric equatorial coordinates (parallax effect)
+            Sun.Equatorial = Sun.Equatorial0.ToTopocentric(Sky.GeoLocation, Sky.SiderealTime, Sun.Parallax);
 
             // local horizontal coordinates of the Sun
             Sun.Horizontal = Sun.Equatorial.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
-
-            // TODO: parallax effect
 
             // Solar semidiameter
             // TODO: move to separate class
