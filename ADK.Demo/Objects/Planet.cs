@@ -14,6 +14,11 @@ namespace ADK.Demo.Objects
         public int Number { get; set; }
 
         /// <summary>
+        /// Heliocentrical coordinates of the planet.
+        /// </summary>
+        public CrdsHeliocentrical Heliocentrical { get; set; }
+
+        /// <summary>
         /// Geocentrical equatorial coordinates
         /// </summary>
         public CrdsEquatorial Equatorial0 { get; set; } = new CrdsEquatorial();

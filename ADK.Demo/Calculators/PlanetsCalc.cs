@@ -13,6 +13,7 @@ namespace ADK.Demo.Calculators
     public class PlanetsCalc : BaseSkyCalc
     {
         private Planet[] Planets = new Planet[8];
+        private RingsAppearance SaturnRings = new RingsAppearance();
 
         private string[] PlanetNames = new string[]
         {
@@ -37,12 +38,16 @@ namespace ADK.Demo.Calculators
             Planets[5].Flattening = 0.097962f;
 
             Sky.AddDataProvider("Planets", () => Planets);
+            Sky.AddDataProvider("SaturnRings", () => SaturnRings);
         }
 
         public override void Calculate()
         {
             // final difference to stop iteration process, 1 second of time
             double deltaTau = TimeSpan.FromSeconds(1).TotalDays;
+
+            // Heliocentrical coordinates of Earth
+            Planets[3].Heliocentrical = PlanetPositions.GetPlanetCoordinates(3, Sky.JulianDay, highPrecision: true);
 
             for (int p = 0; p < Planets.Length; p++)
             {
@@ -62,13 +67,13 @@ namespace ADK.Demo.Calculators
                     var hEarth = PlanetPositions.GetPlanetCoordinates(3, Sky.JulianDay - tau, highPrecision: true);
 
                     // Heliocentrical coordinates of planet
-                    var hPlanet = PlanetPositions.GetPlanetCoordinates(p + 1, Sky.JulianDay - tau, highPrecision: true);
+                    Planets[p].Heliocentrical = PlanetPositions.GetPlanetCoordinates(p + 1, Sky.JulianDay - tau, highPrecision: true);
 
                     // Distance from planet to Sun
-                    Planets[p].Distance = hPlanet.R;
+                    Planets[p].Distance = Planets[p].Heliocentrical.R;
 
                     // Ecliptical coordinates of planet
-                    Planets[p].Ecliptical = hPlanet.ToRectangular(hEarth).ToEcliptical();
+                    Planets[p].Ecliptical = Planets[p].Heliocentrical.ToRectangular(hEarth).ToEcliptical();
 
                     tau0 = tau;
                     tau = PlanetPositions.LightTimeEffect(Planets[p].Ecliptical.Distance);
@@ -99,17 +104,19 @@ namespace ADK.Demo.Calculators
                 Sun sun = Sky.Get<Sun>("Sun");
 
                 // Elongation of the Planet
-                Planets[p].Elongation = LunarEphem.Elongation(sun.Ecliptical, Planets[p].Ecliptical);
+                Planets[p].Elongation = Appearance.Elongation(sun.Ecliptical, Planets[p].Ecliptical);
 
                 // Phase angle
-                Planets[p].PhaseAngle = LunarEphem.PhaseAngle(Planets[p].Elongation, sun.Ecliptical.Distance, Planets[p].Ecliptical.Distance);
+                Planets[p].PhaseAngle = Appearance.PhaseAngle(Planets[p].Elongation, sun.Ecliptical.Distance, Planets[p].Ecliptical.Distance);
 
                 // Planet phase
-                Planets[p].Phase = LunarEphem.Phase(Planets[p].PhaseAngle);
+                Planets[p].Phase = Appearance.Phase(Planets[p].PhaseAngle);
 
                 // Planet magnitude
                 Planets[p].Magnitude = PlanetPositions.GetPlanetMagnitude(p + 1, Planets[p].Ecliptical.Distance, Planets[p].Distance, Planets[p].PhaseAngle);
             }
+
+            SaturnRings = PlanetAppearance.SaturnRings(Sky.JulianDay, Planets[6].Heliocentrical, Planets[3].Heliocentrical, Sky.Epsilon);
         }
     }
 }

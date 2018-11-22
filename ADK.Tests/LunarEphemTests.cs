@@ -22,13 +22,13 @@ namespace ADK.Tests
             CrdsEcliptical moon = eqMoon.ToEcliptical(epslion);
             moon.Distance = 368410;
 
-            double psi = LunarEphem.Elongation(sun, moon);
+            double psi = Appearance.Elongation(sun, moon);
             Assert.AreEqual(110.79, psi, 1e-2);
 
-            double phaseAngle = LunarEphem.PhaseAngle(psi, sun.Distance, moon.Distance);
+            double phaseAngle = Appearance.PhaseAngle(psi, sun.Distance, moon.Distance);
             Assert.AreEqual(69.08, phaseAngle, 1e-2);
 
-            double phase = LunarEphem.Phase(phaseAngle);
+            double phase = Appearance.Phase(phaseAngle);
             Assert.AreEqual(0.68, phase, 1e-2);
         }
 

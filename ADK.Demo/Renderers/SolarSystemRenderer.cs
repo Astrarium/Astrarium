@@ -14,7 +14,7 @@ namespace ADK.Demo.Renderers
     public class SolarSystemRenderer : BaseSkyRenderer
     {
         private Pen penSun = new Pen(Color.FromArgb(250, 210, 10));
-        private Brush brushShadow = new SolidBrush(Color.FromArgb(100, 100, 100));
+        private Brush brushShadow = new SolidBrush(Color.FromArgb(200, 0, 0, 0));
 
         public SolarSystemRenderer(Sky sky, ISkyMap skyMap) : base(sky, skyMap)
         {
@@ -131,10 +131,55 @@ namespace ADK.Demo.Renderers
 
                     g.TranslateTransform(p.X, p.Y);
                     g.RotateTransform(rotation);
+
+                    if (planet.Number == 6)
+                    {
+                        var rings = Sky.Get<RingsAppearance>("SaturnRings");
+
+                        double a = rings.a / 3600 / Map.ViewAngle * Map.Width / 2;
+                        double b = rings.b / 3600 / Map.ViewAngle * Map.Width / 2;
+
+                        {
+                            float a0 = (float)(a * RingsAppearance.OuterRing[0]);
+                            float b0 = (float)(b * RingsAppearance.OuterRing[0]);
+                            float a1 = (float)(a * RingsAppearance.OuterRing[1]);
+                            float b1 = (float)(b * RingsAppearance.OuterRing[1]);
+
+                            GraphicsPath gp = new GraphicsPath();
+                            gp.AddEllipse(-a0, -b0, a0 * 2, b0 * 2);
+                            gp.AddEllipse(-a1, -b1, a1 * 2, b1 * 2);
+
+                            g.FillPath(GetPlanetColor(planet.Number), gp);
+                        }
+                        {
+                            float a0 = (float)(a * RingsAppearance.InnerRing[0]);
+                            float b0 = (float)(b * RingsAppearance.InnerRing[0]);
+                            float a1 = (float)(a * RingsAppearance.InnerRing[1]);
+                            float b1 = (float)(b * RingsAppearance.InnerRing[1]);
+
+                            GraphicsPath gp = new GraphicsPath();
+                            gp.AddEllipse(-a0, -b0, a0 * 2, b0 * 2);
+                            gp.AddEllipse(-a1, -b1, a1 * 2, b1 * 2);
+
+                            g.FillPath(GetPlanetColor(planet.Number), gp);
+                        }
+                        {
+                            float a0 = (float)(a * RingsAppearance.DuskyRing[0]);
+                            float b0 = (float)(b * RingsAppearance.DuskyRing[0]);
+                            float a1 = (float)(a * RingsAppearance.DuskyRing[1]);
+                            float b1 = (float)(b * RingsAppearance.DuskyRing[1]);
+
+                            GraphicsPath gp = new GraphicsPath();
+                            gp.AddEllipse(-a0, -b0, a0 * 2, b0 * 2);
+                            gp.AddEllipse(-a1, -b1, a1 * 2, b1 * 2);
+
+                            g.FillPath(Brushes.Gray, gp);
+                        }
+                    }
+
+
                     g.FillEllipse(GetPlanetColor(planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
-
-                    //g.FillEllipse(GetVolumeBrush(diam, planet.Flattening), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
-
+                    //g.FillEllipse(GetVolumeBrush(diam, planet.Flattening), -diamEquat / 2 - 1, -diamPolar / 2 - 1, diamEquat + 2, diamPolar + 2);
                     g.ResetTransform();
 
                     float phase = (float)planet.Phase * Math.Sign(planet.Elongation);
@@ -163,7 +208,7 @@ namespace ADK.Demo.Renderers
                 case 1:
                     return Brushes.LightGray;
                 case 2:
-                    return Brushes.White;
+                    return new SolidBrush(Color.FromArgb(229, 216, 200));
                 case 4:
                     return Brushes.DarkRed;
                 case 5:
@@ -269,23 +314,17 @@ namespace ADK.Demo.Renderers
             float sizePolar = (1 - flattening) * size;
 
             GraphicsPath gpVolume = new GraphicsPath();
-            gpVolume.AddEllipse(-sizeEquat / 2, -sizePolar / 2, sizeEquat, sizePolar);
+            gpVolume.AddEllipse(-sizeEquat, -sizePolar, sizeEquat * 2, sizePolar * 2);
 
             PathGradientBrush brushVolume = new PathGradientBrush(gpVolume);
             brushVolume.CenterPoint = new PointF(0, 0);
-            brushVolume.CenterColor = Color.Transparent;
+            brushVolume.CenterColor = Color.Black;
+            brushVolume.SetSigmaBellShape(0.3f, 1);
 
-            //Blend blnd = new Blend();
-            //blnd.Positions = new float[] { 0, 0.3f, 0.4f, 1 };
-            //blnd.Factors = new float[] {  0, 1, 1, 1 };
-            //brushVolume.Blend = blnd;
-
-            //brushVolume.SetBlendTriangularShape(1, 0.5f);
-            brushVolume.SetSigmaBellShape((float)0.3, (float)1.0);
             List<Color> clrs = new List<Color>();
             for (int i = 0; i < gpVolume.PathPoints.Length; i++)
             {
-                clrs.Add(Color.FromArgb(255, Color.Black));
+                clrs.Add(Color.Transparent);
             }
             brushVolume.SurroundColors = clrs.ToArray();
 

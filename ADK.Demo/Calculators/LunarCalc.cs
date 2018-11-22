@@ -46,13 +46,13 @@ namespace ADK.Demo.Calculators
             Sun sun = Sky.Get<Sun>("Sun");
 
             // Elongation of the Moon
-            moon.Elongation = LunarEphem.Elongation(sun.Ecliptical, moon.Ecliptical);
+            moon.Elongation = Appearance.Elongation(sun.Ecliptical, moon.Ecliptical);
             
             // Phase angle
-            moon.PhaseAngle = LunarEphem.PhaseAngle(moon.Elongation, sun.Ecliptical.Distance * 149597871.0, moon.Ecliptical.Distance);
+            moon.PhaseAngle = Appearance.PhaseAngle(moon.Elongation, sun.Ecliptical.Distance * 149597871.0, moon.Ecliptical.Distance);
             
             // Moon phase
-            moon.Phase = LunarEphem.Phase(moon.PhaseAngle);
+            moon.Phase = Appearance.Phase(moon.PhaseAngle);
 
             // TODO: should use sun.Equatorial0 here?
             moon.PAlimb = LunarEphem.PositionAngleOfBrightLimb(sun.Equatorial, moon.Equatorial0);
