@@ -34,8 +34,8 @@ namespace ADK.Demo.Calculators
                 Planets[i] = new Planet() { Number = i + 1, Names = new string[] { PlanetNames[i] } };
             }
 
-            Planets[4].Flattening = 0.064874f;
-            Planets[5].Flattening = 0.097962f;
+            Planets[Planet.JUPITER - 1].Flattening = 0.064874f;
+            Planets[Planet.SATURN - 1].Flattening = 0.097962f;
 
             Sky.AddDataProvider("Planets", () => Planets);
             Sky.AddDataProvider("SaturnRings", () => SaturnRings);
@@ -47,12 +47,12 @@ namespace ADK.Demo.Calculators
             double deltaTau = TimeSpan.FromSeconds(1).TotalDays;
 
             // Heliocentrical coordinates of Earth
-            Planets[3].Heliocentrical = PlanetPositions.GetPlanetCoordinates(3, Sky.JulianDay, highPrecision: true);
+            Planets[Planet.EARTH - 1].Heliocentrical = PlanetPositions.GetPlanetCoordinates(3, Sky.JulianDay, highPrecision: true);
 
             for (int p = 0; p < Planets.Length; p++)
             {
                 // Skip Earth
-                if (p + 1 == 3) continue;
+                if (p + 1 == Planet.EARTH) continue;
 
                 // time taken by the light to reach the Earth
                 double tau = 0;
@@ -64,7 +64,7 @@ namespace ADK.Demo.Calculators
                 while (Math.Abs(tau - tau0) > deltaTau)
                 {
                     // Heliocentrical coordinates of Earth
-                    var hEarth = PlanetPositions.GetPlanetCoordinates(3, Sky.JulianDay - tau, highPrecision: true);
+                    var hEarth = PlanetPositions.GetPlanetCoordinates(Planet.EARTH, Sky.JulianDay - tau, highPrecision: true);
 
                     // Heliocentrical coordinates of planet
                     Planets[p].Heliocentrical = PlanetPositions.GetPlanetCoordinates(p + 1, Sky.JulianDay - tau, highPrecision: true);
@@ -116,7 +116,8 @@ namespace ADK.Demo.Calculators
                 Planets[p].Magnitude = PlanetPositions.GetPlanetMagnitude(p + 1, Planets[p].Ecliptical.Distance, Planets[p].Distance, Planets[p].PhaseAngle);
             }
 
-            SaturnRings = PlanetAppearance.SaturnRings(Sky.JulianDay, Planets[6].Heliocentrical, Planets[3].Heliocentrical, Sky.Epsilon);
+            SaturnRings = PlanetAppearance.SaturnRings(Sky.JulianDay, Planets[Planet.SATURN - 1].Heliocentrical, Planets[Planet.EARTH - 1].Heliocentrical, Sky.Epsilon);
+            Planets[Planet.SATURN - 1].PApole = SaturnRings.P;
         }
     }
 }

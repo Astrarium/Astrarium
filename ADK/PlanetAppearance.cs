@@ -23,8 +23,10 @@ namespace ADK
         {
             RingsAppearance rings = new RingsAppearance();
             double T = (jd - 2451545.0) / 36525.0;
-            double i = 28.075216 - 0.012998 * T + 0.000004 * T * T;
-            double Omega = 169.508470 + 1.394681 * T + 0.000412 * T * T;
+            double T2 = T * T;
+
+            double i = 28.075216 - 0.012998 * T + 0.000004 * T2;
+            double Omega = 169.508470 + 1.394681 * T + 0.000412 * T2;
 
             CrdsEcliptical ecl = saturn.ToRectangular(earth).ToEcliptical();
 

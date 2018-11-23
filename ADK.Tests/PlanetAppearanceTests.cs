@@ -9,7 +9,7 @@ namespace ADK.Tests
         /// AA(II), example 45.a
         /// </summary>
         [TestMethod]
-        public void SaturnRingsAppearance()
+        public void SaturnRings()
         {
             double jd = 2448972.5 + 0.00068;
 

@@ -15,6 +15,12 @@ namespace ADK.Demo.Renderers
     {
         private Pen penSun = new Pen(Color.FromArgb(250, 210, 10));
         private Brush brushShadow = new SolidBrush(Color.FromArgb(200, 0, 0, 0));
+        private Brush[] brushRings = new Brush[] 
+        {
+            new SolidBrush(Color.FromArgb(200, 224, 224, 195)),
+            new SolidBrush(Color.FromArgb(200, 224, 224, 195)),
+            new SolidBrush(Color.FromArgb(200, Color.DarkGray))
+        };
 
         public SolarSystemRenderer(Sky sky, ISkyMap skyMap) : base(sky, skyMap)
         {
@@ -122,64 +128,66 @@ namespace ADK.Demo.Renderers
                 {
                     PointF p = Map.Projection.Project(planet.Horizontal);
 
-                    // TODO: Saturn rings, rotation of planets
-
                     float diamEquat = diam;
                     float diamPolar = (1 - planet.Flattening) * diam;
 
-                    float rotation = GetRotationTowardsEclipticPole(planet.Ecliptical);
+                    float rotation = 0;
+
+                    if (planet.Number == Planet.SATURN)
+                    {
+                        rotation = GetRotationTowardsNorth(planet.Equatorial) + 360 - (float)planet.PApole;
+                    }
+                    else
+                    {
+                        rotation = GetRotationTowardsEclipticPole(planet.Ecliptical);
+                    }
 
                     g.TranslateTransform(p.X, p.Y);
                     g.RotateTransform(rotation);
 
-                    if (planet.Number == 6)
+                    if (planet.Number == Planet.SATURN)
                     {
                         var rings = Sky.Get<RingsAppearance>("SaturnRings");
 
-                        double a = rings.a / 3600 / Map.ViewAngle * Map.Width / 2;
-                        double b = rings.b / 3600 / Map.ViewAngle * Map.Width / 2;
+                        // scale value to convert visible size of ring to screen pixels
+                        double scale = 1.0 / 3600 / Map.ViewAngle * Map.Width / 4;
 
+                        // draw rings by halfs arcs, first half is farther one
+                        for (int half = 0; half < 2; half++)
                         {
-                            float a0 = (float)(a * RingsAppearance.OuterRing[0]);
-                            float b0 = (float)(b * RingsAppearance.OuterRing[0]);
-                            float a1 = (float)(a * RingsAppearance.OuterRing[1]);
-                            float b1 = (float)(b * RingsAppearance.OuterRing[1]);
+                            float startAngle = -180 * half + ((rings.B > 0) ? 180 : 0) - 1e-2f;
 
-                            GraphicsPath gp = new GraphicsPath();
-                            gp.AddEllipse(-a0, -b0, a0 * 2, b0 * 2);
-                            gp.AddEllipse(-a1, -b1, a1 * 2, b1 * 2);
+                            // three rings
+                            for (int r = 0; r < 3; r++)
+                            {
+                                float aOut = (float)(rings.GetRingSize(r, RingEdge.Outer, RingAxis.Major) * scale);
+                                float bOut = (float)(rings.GetRingSize(r, RingEdge.Outer, RingAxis.Minor) * scale);
 
-                            g.FillPath(GetPlanetColor(planet.Number), gp);
-                        }
-                        {
-                            float a0 = (float)(a * RingsAppearance.InnerRing[0]);
-                            float b0 = (float)(b * RingsAppearance.InnerRing[0]);
-                            float a1 = (float)(a * RingsAppearance.InnerRing[1]);
-                            float b1 = (float)(b * RingsAppearance.InnerRing[1]);
+                                float aIn = (float)(rings.GetRingSize(r, RingEdge.Inner, RingAxis.Major) * scale);
+                                float bIn = (float)(rings.GetRingSize(r, RingEdge.Inner, RingAxis.Minor) * scale);
 
-                            GraphicsPath gp = new GraphicsPath();
-                            gp.AddEllipse(-a0, -b0, a0 * 2, b0 * 2);
-                            gp.AddEllipse(-a1, -b1, a1 * 2, b1 * 2);
+                                GraphicsPath gp = new GraphicsPath();
+                                gp.AddArc(-aOut, -bOut, aOut * 2, bOut * 2, startAngle, 180 + 1e-2f * 2);
+                                gp.Reverse();
+                                gp.AddArc(-aIn, -bIn, aIn * 2, bIn * 2, startAngle, 180 + 1e-2f * 2);
 
-                            g.FillPath(GetPlanetColor(planet.Number), gp);
-                        }
-                        {
-                            float a0 = (float)(a * RingsAppearance.DuskyRing[0]);
-                            float b0 = (float)(b * RingsAppearance.DuskyRing[0]);
-                            float a1 = (float)(a * RingsAppearance.DuskyRing[1]);
-                            float b1 = (float)(b * RingsAppearance.DuskyRing[1]);
+                                g.FillPath(brushRings[r], gp);
+                            }
 
-                            GraphicsPath gp = new GraphicsPath();
-                            gp.AddEllipse(-a0, -b0, a0 * 2, b0 * 2);
-                            gp.AddEllipse(-a1, -b1, a1 * 2, b1 * 2);
-
-                            g.FillPath(Brushes.Gray, gp);
+                            // draw planet disk after first half of rings
+                            if (half == 0)
+                            {
+                                g.FillEllipse(GetPlanetColor(planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
+                                //g.FillEllipse(GetVolumeBrush(diam, planet.Flattening), -diamEquat / 2 - 1, -diamPolar / 2 - 1, diamEquat + 2, diamPolar + 2);
+                            }
                         }
                     }
+                    else
+                    {
+                        g.FillEllipse(GetPlanetColor(planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
+                        //g.FillEllipse(GetVolumeBrush(diam, planet.Flattening), -diamEquat / 2 - 1, -diamPolar / 2 - 1, diamEquat + 2, diamPolar + 2);
+                    }
 
-
-                    g.FillEllipse(GetPlanetColor(planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
-                    //g.FillEllipse(GetVolumeBrush(diam, planet.Flattening), -diamEquat / 2 - 1, -diamPolar / 2 - 1, diamEquat + 2, diamPolar + 2);
                     g.ResetTransform();
 
                     float phase = (float)planet.Phase * Math.Sign(planet.Elongation);
