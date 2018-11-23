@@ -19,8 +19,14 @@ namespace ADK.Demo.Renderers
         {
             new SolidBrush(Color.FromArgb(200, 224, 224, 195)),
             new SolidBrush(Color.FromArgb(200, 224, 224, 195)),
-            new SolidBrush(Color.FromArgb(200, Color.DarkGray))
+            new SolidBrush(Color.FromArgb(32, 0, 0, 0))
         };
+
+        private SphereRenderer sphereRenderer = new SphereRenderer();
+
+        // TODO: make images cache
+        private Image ringsTexture = Image.FromFile("Data\\Rings.png", true);
+        private Image saturnTexture = null;
 
         public SolarSystemRenderer(Sky sky, ISkyMap skyMap) : base(sky, skyMap)
         {
@@ -135,7 +141,7 @@ namespace ADK.Demo.Renderers
 
                     if (planet.Number == Planet.SATURN)
                     {
-                        rotation = GetRotationTowardsNorth(planet.Equatorial) + 360 - (float)planet.PApole;
+                        rotation = GetRotationTowardsNorth(planet.Equatorial) + 360 - (float)planet.PAaxis;
                     }
                     else
                     {
@@ -155,30 +161,74 @@ namespace ADK.Demo.Renderers
                         // draw rings by halfs arcs, first half is farther one
                         for (int half = 0; half < 2; half++)
                         {
-                            float startAngle = -180 * half + ((rings.B > 0) ? 180 : 0) - 1e-2f;
-
-                            // three rings
-                            for (int r = 0; r < 3; r++)
+                            if (false /* Not textured */)
                             {
-                                float aOut = (float)(rings.GetRingSize(r, RingEdge.Outer, RingAxis.Major) * scale);
-                                float bOut = (float)(rings.GetRingSize(r, RingEdge.Outer, RingAxis.Minor) * scale);
+                                float startAngle = -180 * half + ((rings.B > 0) ? 180 : 0) - 1e-2f;
 
-                                float aIn = (float)(rings.GetRingSize(r, RingEdge.Inner, RingAxis.Major) * scale);
-                                float bIn = (float)(rings.GetRingSize(r, RingEdge.Inner, RingAxis.Minor) * scale);
+                                // three rings
+                                for (int r = 0; r < 3; r++)
+                                {
+                                    float aOut = (float)(rings.GetRingSize(r, RingEdge.Outer, RingAxis.Major) * scale);
+                                    float bOut = (float)(rings.GetRingSize(r, RingEdge.Outer, RingAxis.Minor) * scale);
 
-                                GraphicsPath gp = new GraphicsPath();
-                                gp.AddArc(-aOut, -bOut, aOut * 2, bOut * 2, startAngle, 180 + 1e-2f * 2);
-                                gp.Reverse();
-                                gp.AddArc(-aIn, -bIn, aIn * 2, bIn * 2, startAngle, 180 + 1e-2f * 2);
+                                    float aIn = (float)(rings.GetRingSize(r, RingEdge.Inner, RingAxis.Major) * scale);
+                                    float bIn = (float)(rings.GetRingSize(r, RingEdge.Inner, RingAxis.Minor) * scale);
 
-                                g.FillPath(brushRings[r], gp);
+                                    GraphicsPath gp = new GraphicsPath();
+                                    gp.AddArc(-aOut, -bOut, aOut * 2, bOut * 2, startAngle, 180 + 1e-2f * 2);
+                                    gp.Reverse();
+                                    gp.AddArc(-aIn, -bIn, aIn * 2, bIn * 2, startAngle, 180 + 1e-2f * 2);
+                                    g.FillPath(brushRings[r], gp);
+                                }
+                            }
+
+                            if (true /* Textured */)
+                            {
+                                float a = (float)(rings.GetRingSize(0, RingEdge.Outer, RingAxis.Major) * scale);
+                                float b = (float)(rings.GetRingSize(0, RingEdge.Outer, RingAxis.Minor) * scale);
+
+                                // half of source image: 0 = top, 1 = bottom
+                                int h = (half + (rings.B > 0 ? 0 : 1)) % 2;
+
+                                g.DrawImage(ringsTexture,
+                                    // destination rectangle
+                                    new RectangleF(-a, -b + h * b, a * 2, b),
+                                    // source rectangle
+                                    new RectangleF(0, h * ringsTexture.Height / 2f, ringsTexture.Width, ringsTexture.Height / 2f), 
+                                    GraphicsUnit.Pixel);
                             }
 
                             // draw planet disk after first half of rings
                             if (half == 0)
                             {
-                                g.FillEllipse(GetPlanetColor(planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
-                                //g.FillEllipse(GetVolumeBrush(diam, planet.Flattening), -diamEquat / 2 - 1, -diamPolar / 2 - 1, diamEquat + 2, diamPolar + 2);
+                                if (false /* Not textured */)
+                                {
+                                    g.FillEllipse(GetPlanetColor(planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
+                                    //g.FillEllipse(GetVolumeBrush(diam, planet.Flattening), -diamEquat / 2 - 1, -diamPolar / 2 - 1, diamEquat + 2, diamPolar + 2);
+                                }
+                                else /* Textured */
+                                {
+                                    if (saturnTexture == null)
+                                    {
+                                        saturnTexture = Image.FromFile("Data\\Saturn.jpg");
+                                        RendererOptions opts = new RendererOptions()
+                                        {
+                                            LatitudeShift = Math.Abs(rings.B) + 180 * (rings.B > 0 ? 0 : 1),
+                                            LongutudeShift = 0,
+                                            OutputImageSize = 1024,
+                                            TextureFilePath = "Data\\Saturn.jpg"
+                                        };
+
+                                        sphereRenderer.Render(opts, bmp =>
+                                        {
+                                            saturnTexture = bmp;
+                                        });
+                                    }
+                                    else
+                                    {
+                                        g.DrawImage(saturnTexture, -diamEquat / 2 * 1.01f, -diamPolar / 2 * 1.01f, diamEquat * 1.01f, diamPolar * 1.01f);
+                                    }
+                                }
                             }
                         }
                     }

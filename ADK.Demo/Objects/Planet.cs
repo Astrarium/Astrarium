@@ -59,10 +59,10 @@ namespace ADK.Demo.Objects
         public float Magnitude { get; set; }
 
         /// <summary>
-        /// Position angle of planet north pole.
-        /// Measured counter-clockwise from direction to celestial north pole. 
+        /// Position angle of planet rotation axis.
+        /// Measured counter-clockwise from direction to celestial north pole towards planet north pole.
         /// </summary>
-        public double PApole { get; set; }
+        public double PAaxis { get; set; }
 
         public const int MERCURY = 1;
         public const int VENUS = 2;

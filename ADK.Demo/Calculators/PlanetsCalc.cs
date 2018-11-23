@@ -117,7 +117,7 @@ namespace ADK.Demo.Calculators
             }
 
             SaturnRings = PlanetAppearance.SaturnRings(Sky.JulianDay, Planets[Planet.SATURN - 1].Heliocentrical, Planets[Planet.EARTH - 1].Heliocentrical, Sky.Epsilon);
-            Planets[Planet.SATURN - 1].PApole = SaturnRings.P;
+            Planets[Planet.SATURN - 1].PAaxis = SaturnRings.P;
         }
     }
 }
