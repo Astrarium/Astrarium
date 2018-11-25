@@ -25,7 +25,7 @@ namespace ADK
         public CrdsHorizontal() { }
 
         /// <summary>
-        /// Creates a pair of equatorial coordinates with provided values of Right Ascension and Declination.
+        /// Creates a pair of horizontal coordinates with provided values of Azimuth and Altitude.
         /// </summary>
         /// <param name="azimuth">Azimuth, in degrees. Measured westwards from the south.</param>
         /// <param name="altitude">Altitude, in degrees. Positive above the horizon, negative below.</param>
@@ -33,6 +33,16 @@ namespace ADK
         {
             Azimuth = Angle.To360(azimuth);
             Altitude = altitude;
+        }
+
+        /// <summary>
+        ///  Creates a pair of horizontal coordinates by copying from other instance.
+        /// </summary>
+        /// <param name="other">Instance of coordinates to be copied.</param>
+        public CrdsHorizontal(CrdsHorizontal other)
+        {
+            Azimuth = other.Azimuth;
+            Altitude = other.Altitude;
         }
 
         /// <summary>

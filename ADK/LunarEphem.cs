@@ -66,7 +66,7 @@ namespace ADK
         }
 
         // TODO: not finished yet: AA(II), p.373 
-        public static double PositionAngleOfAxis(double jd)
+        public static double PositionAngleOfAxis(double jd, CrdsEcliptical ecl, double epsilon, double deltaPsi)
         {
             double T = (jd - 2451545.0) / 36525.0;
 
@@ -74,12 +74,85 @@ namespace ADK
             double T3 = T2 * T;
             double T4 = T3 * T;
 
+            // Mean longitude of ascending node
             double Omega = 125.0445479 - 1934.1362891 * T + 0.0020754 * T2 + T3 / 467441.0 - T4 / 60616000.0;
+            
+            // Mean elongation of the Moon
+            double D = 297.8501921 + 445267.1114034 * T - 0.0018819 * T2 + T3 / 545868.0 - T4 / 113065000.0;
+            D = Angle.ToRadians(Angle.To360(D));
+
+            // Sun's mean anomaly
+            double M = 357.5291092 + 35999.0502909 * T - 0.0001536 * T2 + T3 / 24490000.0;
+            M = Angle.ToRadians(Angle.To360(M));
+
+            // Moon's mean anomaly
+            double M_ = 134.9633964 + 477198.8675055 * T + 0.0087414 * T2 + T3 / 69699.0 - T4 / 14712000.0;
+            M_ = Angle.ToRadians(Angle.To360(M_));
 
             // Moon's argument of latitude (mean dinstance of the Moon from its ascending node)
             double F = 93.2720950 + 483202.0175233 * T - 0.0036539 * T2 - T3 / 3526000.0 + T4 / 863310000.0;
 
-            return 0;
+            double rho =
+                - 0.02752 * Math.Cos(M_)
+                - 0.02245 * Math.Sin(F)
+                + 0.00684 * Math.Cos(M_ - 2 * F)
+                - 0.00293 * Math.Cos(2 * F)
+                - 0.00085 * Math.Cos(2 * F - 2 * D)
+                - 0.00054 * Math.Cos(M_ - 2 * D)
+                - 0.00020 * Math.Sin(M_ + F)
+                - 0.00020 * Math.Cos(M_ + 2 * F)
+                - 0.00020 * Math.Cos(M_ - F)
+                + 0.00014 * Math.Cos(M_ + 2 * F - 2 * D);
+
+            double sigma =
+                -0.02816 * Math.Sin(M_)
+                + 0.02244 * Math.Cos(F)
+                - 0.00682 * Math.Sin(M_ - 2 * F)
+                - 0.00279 * Math.Sin(2 * F)
+                - 0.00083 * Math.Sin(2 * F - 2 * D)
+                + 0.00069 * Math.Sin(M_ - 2 * D)
+                + 0.00040 * Math.Cos(M_ + F)
+                - 0.00025 * Math.Sin(2 * M_)
+                - 0.00023 * Math.Sin(M_ + 2 * F)
+                + 0.00020 * Math.Cos(M_ - F)
+                + 0.00019 * Math.Sin(M_ - F)
+                + 0.00013 * Math.Sin(M_ + 2 * F - 2 * D)
+                - 0.00010 * Math.Cos(M_ - 3 * F);
+
+            double W = Angle.ToRadians(ecl.Lambda - deltaPsi - Omega);
+            double beta = Angle.ToRadians(ecl.Beta);
+
+            // Inclination of the mean lunar equator to ecliptic
+            double I = Angle.ToRadians(1.54242);
+
+            double y = Math.Sin(W) * Math.Cos(beta) * Math.Cos(I) - Math.Sin(beta) * Math.Sin(I);
+            double x = Math.Cos(W) * Math.Cos(beta);
+
+            double A = Math.Atan2(y, x);
+
+            double b_ = Angle.ToDegrees(Math.Asin(-Math.Sin(W) * Math.Cos(beta) * Math.Sin(I) - Math.Sin(beta) * Math.Cos(I)));
+            double b__ = sigma * Math.Cos(A) - rho * Math.Sin(A);
+
+            double b = b_ + b__;
+
+            double V = Angle.ToRadians(Omega + deltaPsi + sigma / Math.Sin(I));
+
+            double sinIrho = Math.Sin(I + Angle.ToRadians(rho));
+            double cosIrho = Math.Sin(I + Angle.ToRadians(rho));
+
+            epsilon = Angle.ToRadians(epsilon);
+
+            double X = sinIrho * Math.Sin(V);
+            double Y = sinIrho * Math.Cos(V) * Math.Cos(epsilon) - cosIrho * Math.Sin(epsilon);
+
+            double omega = Math.Atan2(Y, X);
+
+            // TODO: pass RA to function
+            double alpha = 0;
+
+            double P = Math.Asin(Math.Sqrt(X * X + Y * Y) * Math.Cos(alpha - omega) / Math.Cos(Angle.ToRadians(b)));
+
+            return Angle.ToDegrees(P);
         }
 
         /// <summary>

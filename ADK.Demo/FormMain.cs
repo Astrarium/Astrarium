@@ -1,4 +1,5 @@
 ﻿using ADK.Demo.Calculators;
+using ADK.Demo.Objects;
 using ADK.Demo.Renderers;
 using ADK.Demo.UI;
 using System;
@@ -82,6 +83,12 @@ namespace ADK.Demo
                         deltaT = Date.DeltaT(jd) / 86400;
                         sky.JulianDay = jd - tzone + deltaT;
                         sky.Calculate();
+                        skyView.Invalidate();
+
+                        var planets = sky.Get<ICollection<Planet>>("Planets");
+                        var saturn = planets.ElementAt(5);
+                        skyView.SkyMap.Center = new CrdsHorizontal(saturn.Horizontal);
+                        skyView.SkyMap.ViewAngle = saturn.Semidiameter * 2 * 10 / 3600; ;
                         skyView.Invalidate();
                     }
                 }

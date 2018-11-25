@@ -27,6 +27,7 @@ namespace ADK.Demo.Renderers
         // TODO: make images cache
         private Image ringsTexture = Image.FromFile("Data\\Rings.png", true);
         private Image saturnTexture = null;
+        private float B = 0;
 
         public SolarSystemRenderer(Sky sky, ISkyMap skyMap) : base(sky, skyMap)
         {
@@ -208,8 +209,9 @@ namespace ADK.Demo.Renderers
                                 }
                                 else /* Textured */
                                 {
-                                    if (saturnTexture == null)
+                                    if (Math.Abs(rings.B - B) > 1)
                                     {
+                                        B = (float)rings.B;
                                         saturnTexture = Image.FromFile("Data\\Saturn.jpg");
                                         RendererOptions opts = new RendererOptions()
                                         {
@@ -227,6 +229,7 @@ namespace ADK.Demo.Renderers
                                     else
                                     {
                                         g.DrawImage(saturnTexture, -diamEquat / 2 * 1.01f, -diamPolar / 2 * 1.01f, diamEquat * 1.01f, diamPolar * 1.01f);
+                                        g.FillEllipse(GetVolumeBrush(diam, planet.Flattening), -diamEquat / 2 - 1, -diamPolar / 2 - 1, diamEquat + 2, diamPolar + 2);
                                     }
                                 }
                             }
