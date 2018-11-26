@@ -38,11 +38,26 @@ namespace ADK.Tests
         [TestMethod]
         public void PositionAngleOfBrightLimb()
         {
-            CrdsEquatorial eqMoon= new CrdsEquatorial(new HMS("14h 35m 02s"), new DMS("-12* 45' 46''"));
+            CrdsEquatorial eqMoon = new CrdsEquatorial(new HMS("14h 35m 02s"), new DMS("-12* 45' 46''"));
             CrdsEquatorial eqSun = new CrdsEquatorial(15.843611 * 15, -20.117778);
 
             double pa = LunarEphem.PositionAngleOfBrightLimb(eqSun, eqMoon);
             Assert.AreEqual(114.6, pa, 0.1);
+        }
+
+        /// <summary>
+        /// TODO: reference to book
+        /// </summary>
+        [TestMethod]
+        public void PositionAngleOfAxis()
+        {
+            double jd = 2448724.5;
+            CrdsEcliptical ecl = new CrdsEcliptical(new DMS("133* 10' 00''"), new DMS("-3* 13' 45''"));
+            double epsilon = 23.440636;
+            double deltaPsi = 0.004610;
+
+            double P = LunarEphem.PositionAngleOfAxis(jd, ecl, epsilon, deltaPsi);
+            Assert.AreEqual(15.08, P, 1e-2);
         }
     }
 }

@@ -65,7 +65,19 @@ namespace ADK
             }
         }
 
-        // TODO: not finished yet: AA(II), p.373 
+        /// <summary>
+        /// Calculates position angle of Moon axis for given instant.
+        /// </summary>
+        /// <param name="jd">Julian Ephemeris Day to calculate position angle.</param>
+        /// <param name="ecl">Apparent geocentrical ecliptical coordinates of the Moon for that instant.</param>
+        /// <param name="epsilon">True obliquity of the ecliptic, in degrees.</param>
+        /// <param name="deltaPsi">Nutation in longitude, in degrees.</param>
+        /// <returns>
+        /// Position angle of Moon axis for given instant, in degrees.
+        /// </returns>
+        /// <remarks>
+        /// Method is taken from AA(II), p.373.
+        /// </remarks>
         public static double PositionAngleOfAxis(double jd, CrdsEcliptical ecl, double epsilon, double deltaPsi)
         {
             double T = (jd - 2451545.0) / 36525.0;
@@ -91,6 +103,10 @@ namespace ADK
 
             // Moon's argument of latitude (mean dinstance of the Moon from its ascending node)
             double F = 93.2720950 + 483202.0175233 * T - 0.0036539 * T2 - T3 / 3526000.0 + T4 / 863310000.0;
+            F = Angle.ToRadians(Angle.To360(F));
+
+            // Inclination of the mean lunar equator to ecliptic
+            double I = Angle.ToRadians(1.54242);
 
             double rho =
                 - 0.02752 * Math.Cos(M_)
@@ -119,36 +135,35 @@ namespace ADK
                 + 0.00013 * Math.Sin(M_ + 2 * F - 2 * D)
                 - 0.00010 * Math.Cos(M_ - 3 * F);
 
-            double W = Angle.ToRadians(ecl.Lambda - deltaPsi - Omega);
+            double W = Angle.ToRadians(Angle.To360(ecl.Lambda - deltaPsi - Omega));
             double beta = Angle.ToRadians(ecl.Beta);
-
-            // Inclination of the mean lunar equator to ecliptic
-            double I = Angle.ToRadians(1.54242);
 
             double y = Math.Sin(W) * Math.Cos(beta) * Math.Cos(I) - Math.Sin(beta) * Math.Sin(I);
             double x = Math.Cos(W) * Math.Cos(beta);
 
             double A = Math.Atan2(y, x);
 
+            // optical libration in latitude, in degrees
             double b_ = Angle.ToDegrees(Math.Asin(-Math.Sin(W) * Math.Cos(beta) * Math.Sin(I) - Math.Sin(beta) * Math.Cos(I)));
+
+            // physical libration in latitude, in degrees
             double b__ = sigma * Math.Cos(A) - rho * Math.Sin(A);
 
+            // total libration in latitude, in degrees
             double b = b_ + b__;
 
             double V = Angle.ToRadians(Omega + deltaPsi + sigma / Math.Sin(I));
 
             double sinIrho = Math.Sin(I + Angle.ToRadians(rho));
-            double cosIrho = Math.Sin(I + Angle.ToRadians(rho));
+            double cosIrho = Math.Cos(I + Angle.ToRadians(rho));
 
+            double alpha = Angle.ToRadians(ecl.ToEquatorial(epsilon).Alpha);
             epsilon = Angle.ToRadians(epsilon);
 
             double X = sinIrho * Math.Sin(V);
             double Y = sinIrho * Math.Cos(V) * Math.Cos(epsilon) - cosIrho * Math.Sin(epsilon);
 
-            double omega = Math.Atan2(Y, X);
-
-            // TODO: pass RA to function
-            double alpha = 0;
+            double omega = Math.Atan2(X, Y);
 
             double P = Math.Asin(Math.Sqrt(X * X + Y * Y) * Math.Cos(alpha - omega) / Math.Cos(Angle.ToRadians(b)));
 

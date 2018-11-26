@@ -13,19 +13,43 @@ using System.Windows.Threading;
 
 namespace ADK.Demo.Renderers
 {
+    /// <summary>
+    /// Rendering options
+    /// </summary>
     public class RendererOptions
     {
+        /// <summary>
+        /// Full path to the spherical texture.
+        /// </summary>
         public string TextureFilePath { get; set; }
+
+        /// <summary>
+        /// Desired size of output image, in pixels.
+        /// </summary>
         public uint OutputImageSize { get; set; }
+
         public double LatitudeShift { get; set; }
         public double LongutudeShift { get; set; }
     }
 
+    /// <summary>
+    /// Class for rendering spherical images of celestial objects.
+    /// </summary>
     public class SphereRenderer
     {
+        /// <summary>
+        /// Internal rendering options
+        /// </summary>
         private class RendererOptionsInOut
         {
+            /// <summary>
+            /// Action to be called when output bitmap is ready
+            /// </summary>
             public Action<Bitmap> OnComplete { get; }
+
+            /// <summary>
+            /// Rendering options
+            /// </summary>
             public RendererOptions Options { get; }
 
             public RendererOptionsInOut(RendererOptions opts, Action<Bitmap> onComplete)
@@ -48,7 +72,7 @@ namespace ADK.Demo.Renderers
             return (Math.PI / 180) * angle;
         }
 
-        public void RenderSTA(object param)
+        private void RenderSTA(object param)
         {
             RendererOptionsInOut inOut = (RendererOptionsInOut)param;
 
@@ -88,11 +112,10 @@ namespace ADK.Demo.Renderers
             // Define lights.
             AmbientLight ambientLight = new AmbientLight(Colors.White);
 
-            //DirectionalLight directional_light = new DirectionalLight(Colors.Red, new Vector3D(-x, -y, -z));
-
             group.Children.Add(ambientLight);
-            //group.Children.Add(directional_light);
 
+            //DirectionalLight directional_light = new DirectionalLight(Colors.Red, new Vector3D(-x, -y, -z));
+            //group.Children.Add(directional_light);
 
             // Create the model.
             // Globe. Place it in a new model so we can transform it.

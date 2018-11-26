@@ -3,11 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 
 namespace ADK.Demo.Renderers
 {
@@ -25,13 +27,16 @@ namespace ADK.Demo.Renderers
         private SphereRenderer sphereRenderer = new SphereRenderer();
 
         // TODO: make images cache
+
+        private ImagesCache imagesCache = new ImagesCache();
+
         private Image ringsTexture = Image.FromFile("Data\\Rings.png", true);
         private Image saturnTexture = null;
         private float B = 0;
 
         public SolarSystemRenderer(Sky sky, ISkyMap skyMap) : base(sky, skyMap)
         {
-
+            imagesCache.AddImageProvider("Rings", () => Image.FromFile("Data\\Rings.png", true));
         }
 
         public override void Render(Graphics g)
