@@ -59,22 +59,22 @@ namespace ADK.Demo.Renderers
             }
         }
 
-        public void Render(RendererOptions options, Action<Bitmap> onComplete)
-        {
-            Thread thread = new Thread(new ParameterizedThreadStart(RenderSTA));
-            thread.SetApartmentState(ApartmentState.STA);
-            thread.Name = "RenderThread";
-            thread.Start(new RendererOptionsInOut(options, onComplete));
-        }
+        //public Image Render(RendererOptions options)
+        //{
+            //Thread thread = new Thread(new ParameterizedThreadStart(RenderSTA));
+            //thread.SetApartmentState(ApartmentState.STA);
+            //thread.Name = "RenderThread";
+            //thread.Start(new RendererOptionsInOut(options, onComplete));
+        //}
 
         private double ToRadians(double angle)
         {
             return (Math.PI / 180) * angle;
         }
 
-        private void RenderSTA(object param)
+        public System.Drawing.Image Render(RendererOptions options)
         {
-            RendererOptionsInOut inOut = (RendererOptionsInOut)param;
+            //RendererOptionsInOut inOut = (RendererOptionsInOut)param;
 
             // The main object model group.
             Model3DGroup group = new Model3DGroup();
@@ -90,10 +90,10 @@ namespace ADK.Demo.Renderers
 
             // The camera's current location.
 
-            string textureFilePath = inOut.Options.TextureFilePath;
-            int size = (int)inOut.Options.OutputImageSize;
-            double cameraPhi = ToRadians(inOut.Options.LatitudeShift);
-            double cameraTheta = ToRadians(180 - inOut.Options.LongutudeShift);
+            string textureFilePath = options.TextureFilePath;
+            int size = (int)options.OutputImageSize;
+            double cameraPhi = ToRadians(options.LatitudeShift);
+            double cameraTheta = ToRadians(options.LongutudeShift);
             double cameraR = 20;
 
             // Calculate the camera's position in Cartesian coordinates.
@@ -139,7 +139,7 @@ namespace ADK.Demo.Renderers
             viewport.Measure(new System.Windows.Size(size, size));
             viewport.Arrange(new System.Windows.Rect(0, 0, size, size));
 
-            viewport.Dispatcher.Invoke(() => {
+            //viewport.Dispatcher.Invoke(() => {
 
                 viewport.InvalidateVisual();
 
@@ -149,9 +149,11 @@ namespace ADK.Demo.Renderers
 
                 bmp.Render(viewport);
 
-                inOut.OnComplete?.BeginInvoke(ToWinFormsBitmap(bmp), null, null);
-            },
-            DispatcherPriority.Render);
+
+            return ToWinFormsBitmap(bmp);
+                //inOut.OnComplete?.BeginInvoke(ToWinFormsBitmap(bmp), null, null);
+            //},
+            //DispatcherPriority.Render);
         }
 
         // Make a sphere.

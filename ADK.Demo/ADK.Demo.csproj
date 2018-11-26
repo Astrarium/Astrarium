@@ -61,6 +61,7 @@
     <Compile Include="Objects\Planet.cs" />
     <Compile Include="Objects\Sun.cs" />
     <Compile Include="Renderers\BordersRenderer.cs" />
+    <Compile Include="Renderers\ImagesCache.cs" />
     <Compile Include="Renderers\SolarSystemRenderer.cs" />
     <Compile Include="Renderers\SphereRenderer.cs" />
     <Compile Include="Renderers\StarsRenderer.cs" />
@@ -150,6 +151,11 @@
     <None Include="Data\Saturn.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Data\Moon.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

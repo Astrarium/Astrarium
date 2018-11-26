@@ -85,10 +85,9 @@ namespace ADK.Demo
                         sky.Calculate();
                         skyView.Invalidate();
 
-                        var planets = sky.Get<ICollection<Planet>>("Planets");
-                        var saturn = planets.ElementAt(5);
-                        skyView.SkyMap.Center = new CrdsHorizontal(saturn.Horizontal);
-                        skyView.SkyMap.ViewAngle = saturn.Semidiameter * 2 * 10 / 3600; ;
+                        var moon = sky.Get<Moon>("Moon");
+                        skyView.SkyMap.Center = new CrdsHorizontal(moon.Horizontal);
+                        skyView.SkyMap.ViewAngle = moon.Semidiameter * 2 * 10 / 3600; ;
                         skyView.Invalidate();
                     }
                 }

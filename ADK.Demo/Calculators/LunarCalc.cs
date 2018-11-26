@@ -58,6 +58,8 @@ namespace ADK.Demo.Calculators
             moon.PAlimb = LunarEphem.PositionAngleOfBrightLimb(sun.Equatorial, moon.Equatorial0);
 
             moon.PAcusp = LunarEphem.PositionAngleOfNorthCusp(moon.PAlimb);
+
+            moon.PAaxis = LunarEphem.PositionAngleOfAxis(Sky.JulianDay, moon.Ecliptical, Sky.Epsilon, Sky.NutationElements.deltaPsi);
         }
     }
 }

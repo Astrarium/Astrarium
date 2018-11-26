@@ -13,32 +13,43 @@ namespace ADK.Demo.Renderers
         private class ImageData
         {
             public Image Image { get; set; }
-            public Func<Image> ImageProvider { get; set; }
+            public object InvalidateToken { get; set; }
         }
 
         private Dictionary<string, ImageData> DictImages = new Dictionary<string, ImageData>();
 
         public ImagesCache() { }
 
-        public Image GetImage(string key)
+        public Image GetImage<T>(string key, T token, Func<T, Image> getImage)
         {
             if (DictImages.ContainsKey(key))
             {
-                return DictImages[key].Image;
+                var data = DictImages[key];
+                if (data.InvalidateToken.Equals(token))
+                {
+                    return DictImages[key].Image;
+                }
+                else
+                {
+                    Image image = getImage.Invoke(token);
+                    DictImages[key].Image = image;
+                    DictImages[key].InvalidateToken = token;
+                    return image;
+                }
             }
             else
             {
-                return null;
-            }
-        }
+                Image image = getImage.Invoke(token);
 
-        public void AddImageProvider(string key, Func<Image> imageProvider)
-        {
-            DictImages.Add(key, new ImageData()
-            {
-                Image = null,
-                ImageProvider = imageProvider,
-            });
+                ImageData data = new ImageData()
+                {
+                    Image = image,
+                    InvalidateToken = token
+                };
+
+                DictImages.Add(key, data);
+                return image;
+            }
         }
     }
 }
