@@ -22,7 +22,12 @@ namespace ADK.Demo.Objects
         public CrdsEquatorial Equatorial { get; set; }
 
         /// <summary>
-        /// Ecliptical corrdinates
+        /// Geocentrical ecliptical corrdinates
+        /// </summary>
+        public CrdsEcliptical Ecliptical0 { get; set; }
+
+        /// <summary>
+        /// Topocentrical ecliptical coordinates
         /// </summary>
         public CrdsEcliptical Ecliptical { get; set; }
 
@@ -69,5 +74,10 @@ namespace ADK.Demo.Objects
         /// Position angle of Moon axis, in degrees.
         /// </summary>
         public double PAaxis { get; set; }
+
+        /// <summary>
+        /// Libration elements for the Moon
+        /// </summary>
+        public Libration Libration { get; set; }
     }
 }

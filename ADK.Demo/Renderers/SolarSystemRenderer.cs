@@ -97,8 +97,7 @@ namespace ADK.Demo.Renderers
                     g.TranslateTransform(p.X, p.Y);
                     g.RotateTransform(axisRotation);
 
-                    // TODO: libration
-                    Image textureMoon = imagesCache.GetImage("Moon", 0, MoonTextureProvider);
+                    Image textureMoon = imagesCache.GetImage("Moon", new LonLatShift(moon.Libration.l, moon.Libration.b), MoonTextureProvider);
                     g.FillEllipse(Brushes.Gray, -size / 2, -size / 2, size, size);
                     g.DrawImage(textureMoon, -size / 2 * 1.01f, -size / 2 * 1.01f, size * 1.01f, size * 1.01f);
 
@@ -111,7 +110,7 @@ namespace ADK.Demo.Renderers
                 }
 
                 float phase = (float)moon.Phase * Math.Sign(moon.Elongation);
-                float rotation = GetRotationTowardsEclipticPole(moon.Ecliptical);
+                float rotation = GetRotationTowardsEclipticPole(moon.Ecliptical0);
                 GraphicsPath shadow = GetPhaseShadow(phase, size + 1);
 
                 // shadowed part of disk
@@ -272,12 +271,12 @@ namespace ADK.Demo.Renderers
             });
         }
 
-        private Image MoonTextureProvider(int token)
+        private Image MoonTextureProvider(LonLatShift token)
         {
             return sphereRenderer.Render(new RendererOptions()
             {
-                LatitudeShift = token,
-                LongutudeShift = 180,
+                LatitudeShift = token.Latitude,
+                LongutudeShift = 180 - token.Longitude,
                 OutputImageSize = 1024,
                 TextureFilePath = "Data\\Moon.jpg"
             });
@@ -447,6 +446,38 @@ namespace ADK.Demo.Renderers
 
             // Clockwise rotation
             return (float)Geometry.LineInclinationY(p, pNorth);
+        }
+
+        private struct LonLatShift
+        {
+            public double Longitude { get; private set; }
+            public double Latitude { get; private set; }
+
+            public LonLatShift(double longitude, double latitude)
+            {
+                Longitude = longitude;
+                Latitude = latitude;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj is LonLatShift)
+                {
+                    LonLatShift other = (LonLatShift)obj;
+                    return
+                        Math.Abs(Longitude - other.Longitude) < 1 &&
+                        Math.Abs(Latitude - other.Latitude) < 1;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
         }
     }
 }

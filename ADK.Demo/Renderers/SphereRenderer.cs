@@ -32,9 +32,13 @@ namespace ADK.Demo.Renderers
         public double LongutudeShift { get; set; }
     }
 
+
     /// <summary>
     /// Class for rendering spherical images of celestial objects.
     /// </summary>
+    /// <remarks>
+    /// Implementation of the class is based on the solution from article <see href="http://csharphelper.com/blog/2017/05/make-3d-globe-wpf-c/"/>.
+    /// </remarks>
     public class SphereRenderer
     {
         /// <summary>

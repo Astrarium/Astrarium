@@ -59,5 +59,20 @@ namespace ADK.Tests
             double P = LunarEphem.PositionAngleOfAxis(jd, ecl, epsilon, deltaPsi);
             Assert.AreEqual(15.08, P, 1e-2);
         }
+
+        /// <summary>
+        /// TODO: reference to book
+        /// </summary>
+        [TestMethod]
+        public void Libration()
+        {
+            double jd = 2448724.5;
+            CrdsEcliptical ecl = new CrdsEcliptical(133.167260, -3.229127);
+            double deltaPsi = 0.004610;
+
+            Libration le = LunarEphem.Libration(jd, ecl, deltaPsi);
+            Assert.AreEqual(-1.23, le.l, 1e-2);
+            Assert.AreEqual(4.20, le.b, 1e-2);
+        }
     }
 }
