@@ -21,6 +21,7 @@ namespace ADK.Demo
         public ICollection<BaseSkyRenderer> Renderers { get; } = new List<BaseSkyRenderer>();
         public ICollection<CelestialObject> VisibleObjects { get; } = new List<CelestialObject>();
         public IProjection Projection { get; set; } = null;
+        public event Action OnInvalidate;
 
         public SkyMap()
         {
@@ -47,7 +48,10 @@ namespace ADK.Demo
                 renderer.Initialize();
             }
         }
-    }
 
-    
+        public void Invalidate()
+        {
+            OnInvalidate?.Invoke();
+        }
+    }
 }

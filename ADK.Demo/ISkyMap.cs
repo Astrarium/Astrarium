@@ -56,6 +56,10 @@ namespace ADK.Demo
 
         void Initialize();
 
+        void Invalidate();
+
         bool Antialias { get; set; }
+
+        event Action OnInvalidate;
     }
 }

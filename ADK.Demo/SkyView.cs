@@ -35,6 +35,7 @@ namespace ADK.Demo
                 {
                     mSkyMap.Width = Width;
                     mSkyMap.Height = Height;
+                    mSkyMap.OnInvalidate += Invalidate;
                 }
             }
         }

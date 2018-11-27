@@ -31,7 +31,12 @@ namespace ADK.Demo.Renderers
 
         public SolarSystemRenderer(Sky sky, ISkyMap skyMap) : base(sky, skyMap)
         {
+            
+        }
 
+        private void ImagesCache_OnRequestCompleted()
+        {
+            Map.Invalidate();
         }
 
         public override void Render(Graphics g)
@@ -83,31 +88,38 @@ namespace ADK.Demo.Renderers
             {
                 PointF p = Map.Projection.Project(moon.Horizontal);
 
+                double inc = GetRotationTowardsNorth(moon.Equatorial);
+
+                // final rotation of drawn image
+                // axis rotation is negated because measured counter-clockwise
+                float axisRotation = (float)(inc - moon.PAaxis);
+
+                g.TranslateTransform(p.X, p.Y);
+                g.RotateTransform(axisRotation);
+
                 // drawing size
                 float size = GetDiskSize(moon.Semidiameter, 10);
 
                 if (useTextures && size > 10)
                 {
-                    double inc = GetRotationTowardsNorth(moon.Equatorial);
-
-                    // final rotation of drawn image
-                    // axis rotation is negated because measured counter-clockwise
-                    float axisRotation = (float)(inc - moon.PAaxis);
-
-                    g.TranslateTransform(p.X, p.Y);
-                    g.RotateTransform(axisRotation);
-
-                    Image textureMoon = imagesCache.GetImage("Moon", new LonLatShift(moon.Libration.l, moon.Libration.b), MoonTextureProvider);
-                    g.FillEllipse(Brushes.Gray, -size / 2, -size / 2, size, size);
-                    g.DrawImage(textureMoon, -size / 2 * 1.01f, -size / 2 * 1.01f, size * 1.01f, size * 1.01f);
-
-                    g.ResetTransform();
+                    Image textureMoon = imagesCache.GetImage("Moon", new LonLatShift(moon.Libration.l, moon.Libration.b), MoonTextureProvider, Map.Invalidate);
+                    if (textureMoon != null)
+                    {
+                        g.FillEllipse(Brushes.Gray, -size / 2, -size / 2, size, size);
+                        g.DrawImage(textureMoon, -size / 2 * 1.01f, -size / 2 * 1.01f, size * 1.01f, size * 1.01f);
+                    }
+                    else
+                    {
+                        g.FillEllipse(Brushes.Gray, -size / 2, -size / 2, size, size);
+                    }
                 }
                 else
                 {
                     // Moon disk
-                    g.FillEllipse(Brushes.Gray, p.X - size / 2, p.Y - size / 2, size, size);
+                    g.FillEllipse(Brushes.Gray, -size / 2, -size / 2, size, size);
                 }
+
+                g.ResetTransform();
 
                 float phase = (float)moon.Phase * Math.Sign(moon.Elongation);
                 float rotation = GetRotationTowardsEclipticPole(moon.Ecliptical0);
@@ -187,14 +199,16 @@ namespace ADK.Demo.Renderers
                                 // half of source image: 0 = top, 1 = bottom
                                 int h = (half + (rings.B > 0 ? 0 : 1)) % 2;
 
-                                Image textureRings = imagesCache.GetImage("Rings", true, t => Image.FromFile("Data\\Rings.png", true));                               
-
-                                g.DrawImage(textureRings,
-                                    // destination rectangle
-                                    new RectangleF(-a, -b + h * b, a * 2, b),
-                                    // source rectangle
-                                    new RectangleF(0, h * textureRings.Height / 2f, textureRings.Width, textureRings.Height / 2f), 
-                                    GraphicsUnit.Pixel);
+                                Image textureRings = imagesCache.GetImage("Rings", true, t => Image.FromFile("Data\\Rings.png", true), Map.Invalidate);
+                                if (textureRings != null)
+                                {
+                                    g.DrawImage(textureRings,
+                                        // destination rectangle
+                                        new RectangleF(-a, -b + h * b, a * 2, b),
+                                        // source rectangle
+                                        new RectangleF(0, h * textureRings.Height / 2f, textureRings.Width, textureRings.Height / 2f),
+                                        GraphicsUnit.Pixel);
+                                }
                             }
                             // do not use textures
                             else
@@ -223,15 +237,50 @@ namespace ADK.Demo.Renderers
                             {
                                 if (useTextures)
                                 {
-                                    Image textureSaturn = imagesCache.GetImage("Saturn", (int)rings.B, SaturnImageProvider);
-                                    g.DrawImage(textureSaturn, -diamEquat / 2 * 1.01f, -diamPolar / 2 * 1.01f, diamEquat * 1.01f, diamPolar * 1.01f);
-                                    g.FillEllipse(GetVolumeBrush(diam, planet.Flattening), -diamEquat / 2 - 1, -diamPolar / 2 - 1, diamEquat + 2, diamPolar + 2);
+                                    Image textureSaturn = imagesCache.GetImage("Saturn", (int)rings.B, SaturnImageProvider, Map.Invalidate);
+                                    if (textureSaturn != null)
+                                    {
+                                        g.DrawImage(textureSaturn, -diamEquat / 2 * 1.01f, -diamPolar / 2 * 1.01f, diamEquat * 1.01f, diamPolar * 1.01f);
+                                        g.FillEllipse(GetVolumeBrush(diam, planet.Flattening), -diamEquat / 2 - 1, -diamPolar / 2 - 1, diamEquat + 2, diamPolar + 2);
+                                    }
                                 }
                                 else
                                 {
                                     g.FillEllipse(GetPlanetColor(planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);                                    
                                 }
                             }
+                        }
+                    }
+                    else if (planet.Number == Planet.JUPITER)
+                    {
+                        if (useTextures)
+                        {
+                            Image texturePlanet = imagesCache.GetImage("Jupiter", 0, JupiterImageProvider, Map.Invalidate);
+                            if (texturePlanet != null)
+                            {
+                                g.DrawImage(texturePlanet, -diamEquat / 2 * 1.01f, -diamPolar / 2 * 1.01f, diamEquat * 1.01f, diamPolar * 1.01f);
+                                g.FillEllipse(GetVolumeBrush(diam, planet.Flattening), -diamEquat / 2 - 1, -diamPolar / 2 - 1, diamEquat + 2, diamPolar + 2);
+                            }
+                        }
+                        else
+                        {
+                            g.FillEllipse(GetPlanetColor(planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
+                        }
+                    }
+                    else if (planet.Number == Planet.MARS)
+                    {
+                        if (useTextures)
+                        {
+                            Image texturePlanet = imagesCache.GetImage("Mars", 0, MarsImageProvider, Map.Invalidate);
+                            if (texturePlanet != null)
+                            {
+                                g.DrawImage(texturePlanet, -diamEquat / 2 * 1.01f, -diamPolar / 2 * 1.01f, diamEquat * 1.01f, diamPolar * 1.01f);
+                                g.FillEllipse(GetVolumeBrush(diam, planet.Flattening), -diamEquat / 2 - 1, -diamPolar / 2 - 1, diamEquat + 2, diamPolar + 2);
+                            }
+                        }
+                        else
+                        {
+                            g.FillEllipse(GetPlanetColor(planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
                         }
                     }
                     else
@@ -258,6 +307,28 @@ namespace ADK.Demo.Renderers
                     Map.VisibleObjects.Add(planet);
                 }
             }
+        }
+
+        private Image JupiterImageProvider(int ringsB)
+        {
+            return sphereRenderer.Render(new RendererOptions()
+            {
+                LatitudeShift = 180,
+                LongutudeShift = 0,
+                OutputImageSize = 1024,
+                TextureFilePath = "Data\\Jupiter.jpg"
+            });
+        }
+
+        private Image MarsImageProvider(int ringsB)
+        {
+            return sphereRenderer.Render(new RendererOptions()
+            {
+                LatitudeShift = 180,
+                LongutudeShift = 0,
+                OutputImageSize = 1024,
+                TextureFilePath = "Data\\Mars.jpg"
+            });
         }
 
         private Image SaturnImageProvider(int ringsB)

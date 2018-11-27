@@ -63,14 +63,6 @@ namespace ADK.Demo.Renderers
             }
         }
 
-        //public Image Render(RendererOptions options)
-        //{
-            //Thread thread = new Thread(new ParameterizedThreadStart(RenderSTA));
-            //thread.SetApartmentState(ApartmentState.STA);
-            //thread.Name = "RenderThread";
-            //thread.Start(new RendererOptionsInOut(options, onComplete));
-        //}
-
         private double ToRadians(double angle)
         {
             return (Math.PI / 180) * angle;
@@ -78,8 +70,6 @@ namespace ADK.Demo.Renderers
 
         public System.Drawing.Image Render(RendererOptions options)
         {
-            //RendererOptionsInOut inOut = (RendererOptionsInOut)param;
-
             // The main object model group.
             Model3DGroup group = new Model3DGroup();
 
@@ -142,22 +132,10 @@ namespace ADK.Demo.Renderers
             viewport.Height = size;
             viewport.Measure(new System.Windows.Size(size, size));
             viewport.Arrange(new System.Windows.Rect(0, 0, size, size));
-
-            //viewport.Dispatcher.Invoke(() => {
-
-                viewport.InvalidateVisual();
-
-                RenderTargetBitmap bmp = new RenderTargetBitmap(size, size, 96, 96, PixelFormats.Pbgra32);
-
-                //RenderOptions.SetEdgeMode(viewport, EdgeMode.Aliased);
-
-                bmp.Render(viewport);
-
-
+            viewport.InvalidateVisual();
+            RenderTargetBitmap bmp = new RenderTargetBitmap(size, size, 96, 96, PixelFormats.Pbgra32);
+            bmp.Render(viewport);
             return ToWinFormsBitmap(bmp);
-                //inOut.OnComplete?.BeginInvoke(ToWinFormsBitmap(bmp), null, null);
-            //},
-            //DispatcherPriority.Render);
         }
 
         // Make a sphere.
