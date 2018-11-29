@@ -38,6 +38,9 @@ namespace ADK.Demo.Objects
         /// </summary>
         public double Semidiameter { get; set; }
 
+        /// <summary>
+        /// Planet flattening. 0 means ideal sphere.
+        /// </summary>
         public float Flattening { get; set; }
 
         public double Elongation { get; set; }
@@ -63,6 +66,18 @@ namespace ADK.Demo.Objects
         /// Measured counter-clockwise from direction to celestial north pole towards planet north pole.
         /// </summary>
         public double PAaxis { get; set; }
+
+        /// <summary>
+        /// Planetocentric declination of the Earth.
+        /// If poisitive, the planet northern pole is tilted towards the Earth.
+        /// Measured in degrees.
+        /// </summary>
+        public double D { get; set; }
+
+        /// <summary>
+        /// Planetographic longitude of central meridian, in degrees.
+        /// </summary>
+        public double CM { get; set; }
 
         public const int MERCURY = 1;
         public const int VENUS = 2;

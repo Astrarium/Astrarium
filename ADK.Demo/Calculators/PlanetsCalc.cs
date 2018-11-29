@@ -114,10 +114,15 @@ namespace ADK.Demo.Calculators
 
                 // Planet magnitude
                 Planets[p].Magnitude = PlanetPositions.GetPlanetMagnitude(p + 1, Planets[p].Ecliptical.Distance, Planets[p].Distance, Planets[p].PhaseAngle);
+
+                PlanetAppearance a = PlanetEphem.PlanetAppearance(Sky.JulianDay, p + 1, Planets[p].Equatorial0, Planets[p].Ecliptical.Distance);
+
+                Planets[p].D = a.D;
+                Planets[p].PAaxis = a.P;
+                Planets[p].CM = a.CM;
             }
 
-            SaturnRings = PlanetAppearance.SaturnRings(Sky.JulianDay, Planets[Planet.SATURN - 1].Heliocentrical, Planets[Planet.EARTH - 1].Heliocentrical, Sky.Epsilon);
-            Planets[Planet.SATURN - 1].PAaxis = SaturnRings.P;
+            SaturnRings = PlanetEphem.SaturnRings(Sky.JulianDay, Planets[Planet.SATURN - 1].Heliocentrical, Planets[Planet.EARTH - 1].Heliocentrical, Sky.Epsilon);
         }
     }
 }

@@ -16,12 +16,13 @@
         public double b { get; set; }
 
         /// <summary>
-        /// Saturnicentric latitude of the Sun referred to the plane of rings
+        /// Saturnicentric latitude of the Earth referred to the plane of rings.
+        /// If positive, the visible surface of the ring is the northern one.
         /// </summary>
         public double B { get; set; }
 
         /// <summary>
-        /// Difference between Saturnicentri longitudes of the Sun and the Earth, in degrees
+        /// Difference between Saturnicentric longitudes of the Sun and the Earth, in degrees
         /// </summary>
         public double DeltaU { get; set; }
 

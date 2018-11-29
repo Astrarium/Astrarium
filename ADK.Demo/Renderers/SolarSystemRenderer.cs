@@ -102,7 +102,7 @@ namespace ADK.Demo.Renderers
 
                 if (useTextures && size > 10)
                 {
-                    Image textureMoon = imagesCache.GetImage("Moon", new LonLatShift(moon.Libration.l, moon.Libration.b), MoonTextureProvider, Map.Invalidate);
+                    Image textureMoon = imagesCache.GetImage("Moon", new LonLatShift("Moon", moon.Libration.l, moon.Libration.b), MoonTextureProvider, Map.Invalidate);
                     if (textureMoon != null)
                     {
                         g.FillEllipse(Brushes.Gray, -size / 2, -size / 2, size, size);
@@ -163,19 +163,7 @@ namespace ADK.Demo.Renderers
                 {
                     PointF p = Map.Projection.Project(planet.Horizontal);
 
-                    float diamEquat = diam;
-                    float diamPolar = (1 - planet.Flattening) * diam;
-
-                    float rotation = 0;
-
-                    if (planet.Number == Planet.SATURN)
-                    {
-                        rotation = GetRotationTowardsNorth(planet.Equatorial) + 360 - (float)planet.PAaxis;
-                    }
-                    else
-                    {
-                        rotation = GetRotationTowardsEclipticPole(planet.Ecliptical);
-                    }
+                    float rotation = GetRotationTowardsNorth(planet.Equatorial) + 360 - (float)planet.PAaxis;
 
                     g.TranslateTransform(p.X, p.Y);
                     g.RotateTransform(rotation);
@@ -235,57 +223,13 @@ namespace ADK.Demo.Renderers
                             // draw planet disk after first half of rings
                             if (half == 0)
                             {
-                                if (useTextures)
-                                {
-                                    Image textureSaturn = imagesCache.GetImage("Saturn", (int)rings.B, SaturnImageProvider, Map.Invalidate);
-                                    if (textureSaturn != null)
-                                    {
-                                        g.DrawImage(textureSaturn, -diamEquat / 2 * 1.01f, -diamPolar / 2 * 1.01f, diamEquat * 1.01f, diamPolar * 1.01f);
-                                        g.FillEllipse(GetVolumeBrush(diam, planet.Flattening), -diamEquat / 2 - 1, -diamPolar / 2 - 1, diamEquat + 2, diamPolar + 2);
-                                    }
-                                }
-                                else
-                                {
-                                    g.FillEllipse(GetPlanetColor(planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);                                    
-                                }
+                                RenderPlanetGlobe(g, planet, diam);                                
                             }
-                        }
-                    }
-                    else if (planet.Number == Planet.JUPITER)
-                    {
-                        if (useTextures)
-                        {
-                            Image texturePlanet = imagesCache.GetImage("Jupiter", 0, JupiterImageProvider, Map.Invalidate);
-                            if (texturePlanet != null)
-                            {
-                                g.DrawImage(texturePlanet, -diamEquat / 2 * 1.01f, -diamPolar / 2 * 1.01f, diamEquat * 1.01f, diamPolar * 1.01f);
-                                g.FillEllipse(GetVolumeBrush(diam, planet.Flattening), -diamEquat / 2 - 1, -diamPolar / 2 - 1, diamEquat + 2, diamPolar + 2);
-                            }
-                        }
-                        else
-                        {
-                            g.FillEllipse(GetPlanetColor(planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
-                        }
-                    }
-                    else if (planet.Number == Planet.MARS)
-                    {
-                        if (useTextures)
-                        {
-                            Image texturePlanet = imagesCache.GetImage("Mars", 0, MarsImageProvider, Map.Invalidate);
-                            if (texturePlanet != null)
-                            {
-                                g.DrawImage(texturePlanet, -diamEquat / 2 * 1.01f, -diamPolar / 2 * 1.01f, diamEquat * 1.01f, diamPolar * 1.01f);
-                                g.FillEllipse(GetVolumeBrush(diam, planet.Flattening), -diamEquat / 2 - 1, -diamPolar / 2 - 1, diamEquat + 2, diamPolar + 2);
-                            }
-                        }
-                        else
-                        {
-                            g.FillEllipse(GetPlanetColor(planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
                         }
                     }
                     else
                     {
-                        g.FillEllipse(GetPlanetColor(planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);                        
+                        RenderPlanetGlobe(g, planet, diam);                     
                     }
 
                     g.ResetTransform();
@@ -293,6 +237,9 @@ namespace ADK.Demo.Renderers
                     float phase = (float)planet.Phase * Math.Sign(planet.Elongation);
 
                     GraphicsPath shadow = GetPhaseShadow(phase, diam + 1, planet.Flattening);
+
+                    // rotation of phase image
+                    rotation = GetRotationTowardsEclipticPole(planet.Ecliptical);
 
                     g.TranslateTransform(p.X, p.Y);
                     g.RotateTransform(rotation);
@@ -309,36 +256,34 @@ namespace ADK.Demo.Renderers
             }
         }
 
-        private Image JupiterImageProvider(int ringsB)
+        private void RenderPlanetGlobe(Graphics g, Planet planet, float diam)
         {
-            return sphereRenderer.Render(new RendererOptions()
+            float diamEquat = diam;
+            float diamPolar = (1 - planet.Flattening) * diam;
+
+            if (useTextures)
             {
-                LatitudeShift = 180,
-                LongutudeShift = 0,
-                OutputImageSize = 1024,
-                TextureFilePath = "Data\\Jupiter.jpg"
-            });
+                Image texturePlanet = imagesCache.GetImage(planet.Number.ToString(), new LonLatShift(planet.Number.ToString(), planet.CM, planet.D), PlanetTextureProvider, Map.Invalidate);
+                if (texturePlanet != null)
+                {
+                    g.DrawImage(texturePlanet, -diamEquat / 2 * 1.01f, -diamPolar / 2 * 1.01f, diamEquat * 1.01f, diamPolar * 1.01f);
+                    g.FillEllipse(GetVolumeBrush(diam, planet.Flattening), -diamEquat / 2 - 1, -diamPolar / 2 - 1, diamEquat + 2, diamPolar + 2);
+                }
+            }
+            else
+            {
+                g.FillEllipse(GetPlanetColor(planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
+            }
         }
 
-        private Image MarsImageProvider(int ringsB)
+        private Image PlanetTextureProvider(LonLatShift token)
         {
             return sphereRenderer.Render(new RendererOptions()
             {
-                LatitudeShift = 180,
-                LongutudeShift = 0,
+                LatitudeShift = token.Latitude,
+                LongutudeShift = 180 + token.Longitude,
                 OutputImageSize = 1024,
-                TextureFilePath = "Data\\Mars.jpg"
-            });
-        }
-
-        private Image SaturnImageProvider(int ringsB)
-        {
-            return sphereRenderer.Render(new RendererOptions()
-            {
-                LatitudeShift = Math.Abs(ringsB) + 180 * (ringsB > 0 ? 0 : 1),
-                LongutudeShift = 0,
-                OutputImageSize = 1024,
-                TextureFilePath = "Data\\Saturn.jpg"
+                TextureFilePath = $"Data\\{token.TextureName}.jpg"
             });
         }
 
@@ -521,11 +466,13 @@ namespace ADK.Demo.Renderers
 
         private struct LonLatShift
         {
+            public string TextureName { get; private set; }
             public double Longitude { get; private set; }
             public double Latitude { get; private set; }
 
-            public LonLatShift(double longitude, double latitude)
+            public LonLatShift(string name, double longitude, double latitude)
             {
+                TextureName = name;
                 Longitude = longitude;
                 Latitude = latitude;
             }
