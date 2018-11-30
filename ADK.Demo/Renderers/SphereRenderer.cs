@@ -41,6 +41,8 @@ namespace ADK.Demo.Renderers
     /// </remarks>
     public class SphereRenderer
     {
+        private RenderTargetBitmap targetBitmap = null;
+
         /// <summary>
         /// Internal rendering options
         /// </summary>
@@ -133,9 +135,16 @@ namespace ADK.Demo.Renderers
             viewport.Measure(new System.Windows.Size(size, size));
             viewport.Arrange(new System.Windows.Rect(0, 0, size, size));
             viewport.InvalidateVisual();
-            RenderTargetBitmap bmp = new RenderTargetBitmap(size, size, 96, 96, PixelFormats.Pbgra32);
-            bmp.Render(viewport);
-            return ToWinFormsBitmap(bmp);
+
+            if (targetBitmap == null)
+            {
+                targetBitmap = new RenderTargetBitmap(size, size, 96, 96, PixelFormats.Pbgra32);
+            }
+
+            targetBitmap.Clear();
+            targetBitmap.Render(viewport);
+
+            return ToWinFormsBitmap(targetBitmap);
         }
 
         // Make a sphere.

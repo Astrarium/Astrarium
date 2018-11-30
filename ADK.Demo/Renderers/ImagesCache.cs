@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace ADK.Demo.Renderers
 {
@@ -19,27 +15,39 @@ namespace ADK.Demo.Renderers
             public bool IsRequestInProgress { get; set; }
         }
 
-        private Dictionary<string, ImageData> Cache = new Dictionary<string, ImageData>();
+        private Dictionary<string, ImageData> cache = new Dictionary<string, ImageData>();
+        private Thread worker = null;
+        private AutoResetEvent waitSignal = new AutoResetEvent(true);
+        private Queue<Action> requests = new Queue<Action>(); 
 
-        public Image GetImage<T>(string key, T token, Func<T, Image> getImage, Action onComplete = null)
+        public ImagesCache()
         {
-            if (Cache.ContainsKey(key))
+            worker = new Thread(DoWork);
+            worker.Name = "SphereRendererWorker";
+            worker.IsBackground = true;
+            worker.SetApartmentState(ApartmentState.STA);
+            worker.Start();
+        }
+
+        public Image RequestImage<T>(string key, T token, Func<T, Image> getImage, Action onComplete = null)
+        {
+            if (cache.ContainsKey(key))
             {
-                var data = Cache[key];
+                var data = cache[key];
                 if (data.InvalidateToken.Equals(token))
                 {
-                    return Cache[key].Image;
+                    return cache[key].Image;
                 }
                 else
                 {
-                    if (!Cache[key].IsRequestInProgress)
+                    if (!cache[key].IsRequestInProgress)
                     {
-                        Cache[key].Image = null;
-                        Cache[key].InvalidateToken = token;
-                        Cache[key].IsRequestInProgress = true;
-                        GetImageInBackground(key, token, getImage, onComplete);
+                        cache[key].InvalidateToken = token;
+                        cache[key].IsRequestInProgress = true;
+                        EnqueueRequest(key, token, getImage, onComplete);
                     }
-                    return null;
+
+                    return cache[key].Image;
                 }
             }
             else
@@ -51,30 +59,33 @@ namespace ADK.Demo.Renderers
                     IsRequestInProgress = true
                 };
 
-                Cache.Add(key, data);
-                GetImageInBackground(key, token, getImage);
+                cache.Add(key, data);
+                EnqueueRequest(key, token, getImage, onComplete);
 
                 return null;
             }
         }
 
-        /// <summary>
-        /// Gets image in background thread
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key"></param>
-        /// <param name="token"></param>
-        /// <param name="getImage"></param>
-        private void GetImageInBackground<T>(string key, T token, Func<T, Image> getImage, Action onComplete = null)
+        private void EnqueueRequest<T>(string key, T token, Func<T, Image> getImage, Action onComplete)
         {
-            Thread thread = new Thread(() => 
+            requests.Enqueue(() => 
             {
-                Cache[key].Image = getImage.Invoke(token);
-                Cache[key].IsRequestInProgress = false;
+                cache[key].Image = getImage.Invoke(token);
+                cache[key].IsRequestInProgress = false;
                 onComplete?.BeginInvoke(null, null);
             });
-            thread.SetApartmentState(ApartmentState.STA);
-            thread.Start();
+            waitSignal.Set();
+        }
+
+        private void DoWork()
+        {
+            while (waitSignal.WaitOne())
+            {
+                while (requests.Any())
+                {
+                    requests.Dequeue().Invoke();
+                }
+            }
         }
     }
 }

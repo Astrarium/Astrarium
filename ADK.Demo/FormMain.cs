@@ -94,14 +94,24 @@ namespace ADK.Demo
             }
             else if (e.KeyCode == Keys.A)
             {
-                sky.JulianDay += 1;
+                sky.JulianDay += 1 / 24.0 / 2;
                 sky.Calculate();
+                //skyView.Invalidate();
+
+                var jup = sky.Get<ICollection<Planet>>("Planets").FirstOrDefault(p => p.Number == Planet.JUPITER);
+                skyView.SkyMap.Center = new CrdsHorizontal(jup.Horizontal);
+                skyView.SkyMap.ViewAngle = jup.Semidiameter * 2 * 1 / 3600;
                 skyView.Invalidate();
             }
             else if (e.KeyCode == Keys.S)
             {
-                sky.JulianDay -= 1;
+                sky.JulianDay -= 1 / 24.0 / 2 ;
                 sky.Calculate();
+                //skyView.Invalidate();
+
+                var jup = sky.Get<ICollection<Planet>>("Planets").FirstOrDefault(p => p.Number == Planet.JUPITER);
+                skyView.SkyMap.Center = new CrdsHorizontal(jup.Horizontal);
+                skyView.SkyMap.ViewAngle = jup.Semidiameter * 2 * 1 / 3600;
                 skyView.Invalidate();
             }
         }

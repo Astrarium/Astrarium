@@ -3,16 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media.Imaging;
 
 namespace ADK.Demo.Renderers
 {
+    /// <summary>
+    /// Draws solar system objects (Sun, Moon and planets) on the map.
+    /// </summary>
     public class SolarSystemRenderer : BaseSkyRenderer
     {
         private Pen penSun = new Pen(Color.FromArgb(250, 210, 10));
@@ -49,7 +46,7 @@ namespace ADK.Demo.Renderers
 
             // Get all planets esxept Earth, and sort them by distance from Earth (most distant planet is first)
             var planets = Sky.Get<ICollection<Planet>>("Planets")
-                .Where(p => p.Number != 3)
+                .Where(p => p.Number != Planet.EARTH)
                 .OrderByDescending(p => p.Ecliptical.Distance);
 
             foreach (Planet p in planets)
@@ -102,7 +99,7 @@ namespace ADK.Demo.Renderers
 
                 if (useTextures && size > 10)
                 {
-                    Image textureMoon = imagesCache.GetImage("Moon", new LonLatShift("Moon", moon.Libration.l, moon.Libration.b), MoonTextureProvider, Map.Invalidate);
+                    Image textureMoon = imagesCache.RequestImage("Moon", new LonLatShift("Moon", moon.Libration.l, moon.Libration.b), MoonTextureProvider, Map.Invalidate);
                     if (textureMoon != null)
                     {
                         g.FillEllipse(Brushes.Gray, -size / 2, -size / 2, size, size);
@@ -168,6 +165,8 @@ namespace ADK.Demo.Renderers
                     g.TranslateTransform(p.X, p.Y);
                     g.RotateTransform(rotation);
 
+                    DrawRotationAxis(g, diam);
+
                     if (planet.Number == Planet.SATURN)
                     {
                         var rings = Sky.Get<RingsAppearance>("SaturnRings");
@@ -187,7 +186,7 @@ namespace ADK.Demo.Renderers
                                 // half of source image: 0 = top, 1 = bottom
                                 int h = (half + (rings.B > 0 ? 0 : 1)) % 2;
 
-                                Image textureRings = imagesCache.GetImage("Rings", true, t => Image.FromFile("Data\\Rings.png", true), Map.Invalidate);
+                                Image textureRings = imagesCache.RequestImage("Rings", true, t => Image.FromFile("Data\\Rings.png", true), Map.Invalidate);
                                 if (textureRings != null)
                                 {
                                     g.DrawImage(textureRings,
@@ -223,32 +222,32 @@ namespace ADK.Demo.Renderers
                             // draw planet disk after first half of rings
                             if (half == 0)
                             {
-                                RenderPlanetGlobe(g, planet, diam);                                
+                                DrawPlanetGlobe(g, planet, diam);                                
                             }
                         }
                     }
                     else
                     {
-                        RenderPlanetGlobe(g, planet, diam);                     
+                        DrawPlanetGlobe(g, planet, diam);                     
                     }
 
                     g.ResetTransform();
 
-                    float phase = (float)planet.Phase * Math.Sign(planet.Elongation);
+                    if (planet.Number <= Planet.MARS)
+                    {
+                        float phase = (float)planet.Phase * Math.Sign(planet.Elongation);
 
-                    GraphicsPath shadow = GetPhaseShadow(phase, diam + 1, planet.Flattening);
+                        GraphicsPath shadow = GetPhaseShadow(phase, diam + 1, planet.Flattening);
 
-                    // rotation of phase image
-                    rotation = GetRotationTowardsEclipticPole(planet.Ecliptical);
+                        // rotation of phase image
+                        rotation = GetRotationTowardsEclipticPole(planet.Ecliptical);
 
-                    g.TranslateTransform(p.X, p.Y);
-                    g.RotateTransform(rotation);
-                    g.FillPath(brushShadow, shadow);
-                    g.ResetTransform();
+                        g.TranslateTransform(p.X, p.Y);
+                        g.RotateTransform(rotation);
+                        g.FillPath(brushShadow, shadow);
+                        g.ResetTransform();
+                    }
                     
-                    // TODO: Remove marker on center of the disk. For testing only.
-                    g.FillEllipse(Brushes.Red, p.X - 2, p.Y - 2, 4, 4);
-
                     DrawObjectCaption(g, planet.Names.ElementAt(0), p, diam);
 
                     Map.VisibleObjects.Add(planet);
@@ -256,24 +255,35 @@ namespace ADK.Demo.Renderers
             }
         }
 
-        private void RenderPlanetGlobe(Graphics g, Planet planet, float diam)
+        private void DrawPlanetGlobe(Graphics g, Planet planet, float diam)
         {
             float diamEquat = diam;
             float diamPolar = (1 - planet.Flattening) * diam;
 
             if (useTextures)
             {
-                Image texturePlanet = imagesCache.GetImage(planet.Number.ToString(), new LonLatShift(planet.Number.ToString(), planet.CM, planet.D), PlanetTextureProvider, Map.Invalidate);
+                Image texturePlanet = imagesCache.RequestImage(planet.Number.ToString(), new LonLatShift(planet.Number.ToString(), planet.CM, planet.D), PlanetTextureProvider, Map.Invalidate);
                 if (texturePlanet != null)
                 {
                     g.DrawImage(texturePlanet, -diamEquat / 2 * 1.01f, -diamPolar / 2 * 1.01f, diamEquat * 1.01f, diamPolar * 1.01f);
                     g.FillEllipse(GetVolumeBrush(diam, planet.Flattening), -diamEquat / 2 - 1, -diamPolar / 2 - 1, diamEquat + 2, diamPolar + 2);
+                }
+                else
+                {
+                    g.FillEllipse(GetPlanetColor(planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
                 }
             }
             else
             {
                 g.FillEllipse(GetPlanetColor(planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
             }
+        }
+
+        private void DrawRotationAxis(Graphics g, float diam)
+        {
+            var p1 = new PointF(0, -(diam / 2 + 10));
+            var p2 = new PointF(0, diam / 2 + 10);
+            g.DrawLine(Pens.Gray, p1, p2);
         }
 
         private Image PlanetTextureProvider(LonLatShift token)
