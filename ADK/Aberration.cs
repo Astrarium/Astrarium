@@ -30,7 +30,6 @@ namespace ADK
         /// <remarks>
         /// AA(II), pp. 151, 163, 164
         /// </remarks>
-        // TODO: there are no tests for aberration!
         public static AberrationElements AberrationElements(double jde)
         {
             double T = (jde - 2451545.0) / 36525.0;

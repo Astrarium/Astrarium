@@ -89,10 +89,10 @@ namespace ADK.Demo.Calculators
                 Planets[p].Equatorial0 = Planets[p].Ecliptical.ToEquatorial(Sky.Epsilon);
 
                 // Planet semidiameter
-                Planets[p].Semidiameter = PlanetPositions.Semidiameter(p + 1, Planets[p].Ecliptical.Distance);
+                Planets[p].Semidiameter = PlanetEphem.Semidiameter(p + 1, Planets[p].Ecliptical.Distance);
 
                 // Planet parallax
-                Planets[p].Parallax = PlanetPositions.Parallax(Planets[p].Ecliptical.Distance);
+                Planets[p].Parallax = PlanetEphem.Parallax(Planets[p].Ecliptical.Distance);
 
                 // Apparent topocentric coordinates of planet
                 Planets[p].Equatorial = Planets[p].Equatorial0.ToTopocentric(Sky.GeoLocation, Sky.SiderealTime, Planets[p].Parallax);
@@ -113,7 +113,7 @@ namespace ADK.Demo.Calculators
                 Planets[p].Phase = Appearance.Phase(Planets[p].PhaseAngle);
 
                 // Planet magnitude
-                Planets[p].Magnitude = PlanetPositions.GetPlanetMagnitude(p + 1, Planets[p].Ecliptical.Distance, Planets[p].Distance, Planets[p].PhaseAngle);
+                Planets[p].Magnitude = PlanetEphem.Magnitude(p + 1, Planets[p].Ecliptical.Distance, Planets[p].Distance, Planets[p].PhaseAngle);
 
                 PlanetAppearance a = PlanetEphem.PlanetAppearance(Sky.JulianDay, p + 1, Planets[p].Equatorial0, Planets[p].Ecliptical.Distance);
 
@@ -123,6 +123,7 @@ namespace ADK.Demo.Calculators
             }
 
             SaturnRings = PlanetEphem.SaturnRings(Sky.JulianDay, Planets[Planet.SATURN - 1].Heliocentrical, Planets[Planet.EARTH - 1].Heliocentrical, Sky.Epsilon);
+            Planets[Planet.SATURN - 1].Magnitude += SaturnRings.GetRingsMagnitude();
         }
     }
 }

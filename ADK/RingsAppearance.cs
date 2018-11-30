@@ -1,4 +1,6 @@
-﻿namespace ADK
+﻿using System;
+
+namespace ADK
 {
     /// <summary>
     /// Describes appearance of Saturn rings
@@ -43,6 +45,16 @@
         {
             double ax = axis == RingAxis.Major ? a : b;
             return ax * Rings[ring][(int)edge];
+        }
+
+        /// <summary>
+        /// Gets magnitude component of Saturn rings, that should be added to Saturn disk magnitude (see <see cref="PlanetEphem.Magnitude(int, double, double, double)"/>).
+        /// </summary>
+        /// <returns></returns>
+        public float GetRingsMagnitude()
+        {
+            double sinB = Math.Sin(Angle.ToRadians(B));
+            return (float)(0.044 * Math.Abs(DeltaU) - 2.6 * Math.Sin(Angle.ToRadians(Math.Abs(B))) + 1.25 * sinB * sinB);
         }
 
         /// <summary>

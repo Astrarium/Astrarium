@@ -52,7 +52,14 @@ namespace ADK
             return Angle.To360(Angle.ToDegrees(Math.Atan2(y, x)));
         }
 
-        // TODO: reference to PAWC book, tests, move to separate class
+        /// <summary>
+        /// Calculates position angle of Moon north cusp.
+        /// </summary>
+        /// <param name="PAlimb">Position angle of bright limb, in degrees.</param>
+        /// <returns>Position angle of Moon north cusp, in degrees</returns>
+        /// <remarks>
+        /// Method is based on relations described in book PAWC, chapter 55, p. 110.
+        /// </remarks>
         public static double PositionAngleOfNorthCusp(double PAlimb)
         {
             if (PAlimb < 180)

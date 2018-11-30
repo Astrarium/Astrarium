@@ -179,8 +179,6 @@ namespace ADK.Tests
         [TestMethod]
         public void CalculatePlanetApparentPlaceLP()
         {
-            // TODO: test not pass
-
             double jde = 2448976.5;
 
             double tau = 0;

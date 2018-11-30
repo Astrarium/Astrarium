@@ -33,6 +33,16 @@ namespace ADK.Tests
         }
 
         /// <summary>
+        /// AA(II), example 47.a
+        /// </summary>
+        [TestMethod]
+        public void Parallax()
+        {
+            double pi = LunarEphem.Parallax(368409.7);
+            Assert.AreEqual(0.991990, pi, 1e-6);
+        }
+
+        /// <summary>
         /// PAWC, ex. 55 (p. 111)
         /// </summary>
         [TestMethod]
@@ -46,7 +56,7 @@ namespace ADK.Tests
         }
 
         /// <summary>
-        /// TODO: reference to book
+        /// AA(II), p. 374, example 53.a.
         /// </summary>
         [TestMethod]
         public void PositionAngleOfAxis()
@@ -61,7 +71,7 @@ namespace ADK.Tests
         }
 
         /// <summary>
-        /// TODO: reference to book
+        /// AA(II), p. 374, example 53.a.
         /// </summary>
         [TestMethod]
         public void Libration()

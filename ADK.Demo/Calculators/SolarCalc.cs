@@ -43,7 +43,8 @@ namespace ADK.Demo.Calculators
             Sun.Equatorial0 = Sun.Ecliptical.ToEquatorial(Sky.Epsilon);
 
             // solar parallax
-            Sun.Parallax = PlanetPositions.Parallax(Sun.Ecliptical.Distance);
+            // TODO: move to separate class SolarEphem
+            Sun.Parallax = PlanetEphem.Parallax(Sun.Ecliptical.Distance);
            
             // Topocentric equatorial coordinates (parallax effect)
             Sun.Equatorial = Sun.Equatorial0.ToTopocentric(Sky.GeoLocation, Sky.SiderealTime, Sun.Parallax);
@@ -52,8 +53,8 @@ namespace ADK.Demo.Calculators
             Sun.Horizontal = Sun.Equatorial.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
 
             // Solar semidiameter
-            // TODO: move to separate class
-            Sun.Semidiameter = PlanetPositions.Semidiameter(3, Sun.Ecliptical.Distance);
+            // TODO: move to separate class SolarEphem
+            Sun.Semidiameter = PlanetEphem.Semidiameter(3, Sun.Ecliptical.Distance);
         }
     }
 }

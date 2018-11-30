@@ -27,6 +27,24 @@ namespace ADK.Tests
         }
 
         /// <summary>
+        /// Test is based on example 41.c/41.d, AA(II),
+        /// but with formulae from page 286.
+        /// </summary>
+        [TestMethod]
+        public void Magnitude()
+        {
+            double venusMag =
+                PlanetEphem.Magnitude(2, 0.910947, 0.724604, 72.96);
+
+            double saturnMag =
+                PlanetEphem.Magnitude(6, 10.464606, 9.867882, 0) +
+                new RingsAppearance() { B = 16.442, DeltaU = 4.198 }.GetRingsMagnitude();
+
+            Assert.AreEqual(-4.2, venusMag, 1e-1);
+            Assert.AreEqual(0.7, saturnMag, 1e-1);
+        }
+
+        /// <summary>
         /// Example from book "Practical Ephemeris Calculations" (Montenbruck), page 93.
         /// </summary>
         [TestMethod]
