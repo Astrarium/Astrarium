@@ -41,7 +41,15 @@ namespace ADK.Demo
         /// </summary>
         ICollection<BaseSkyRenderer> Renderers { get; }
 
+        /// <summary>
+        /// Collection of objects currently displaying on the map
+        /// </summary>
         ICollection<CelestialObject> VisibleObjects { get; }
+
+        /// <summary>
+        /// Selected celestial object
+        /// </summary>
+        CelestialObject SelectedObject { get; set; }
 
         /// <summary>
         /// Gets or sets projection which is used for converting celestial coordinates to the sky map plane.

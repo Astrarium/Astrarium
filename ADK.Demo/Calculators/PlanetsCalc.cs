@@ -49,6 +49,9 @@ namespace ADK.Demo.Calculators
             // Heliocentrical coordinates of Earth
             Planets[Planet.EARTH - 1].Heliocentrical = PlanetPositions.GetPlanetCoordinates(3, Sky.JulianDay, highPrecision: true);
 
+            // Sun ephemerides should be already calculated
+            Sun sun = Sky.Get<Sun>("Sun");
+
             for (int p = 0; p < Planets.Length; p++)
             {
                 // Skip Earth
@@ -99,9 +102,6 @@ namespace ADK.Demo.Calculators
 
                 // Local horizontal coordinates of planet
                 Planets[p].Horizontal = Planets[p].Equatorial.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
-
-                // Sun ephemerides should be already calculated
-                Sun sun = Sky.Get<Sun>("Sun");
 
                 // Elongation of the Planet
                 Planets[p].Elongation = Appearance.Elongation(sun.Ecliptical, Planets[p].Ecliptical);

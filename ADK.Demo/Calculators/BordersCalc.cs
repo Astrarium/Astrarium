@@ -23,10 +23,10 @@ namespace ADK.Demo.Calculators
             foreach (var bp in Borders)
             {
                 // Equatorial coordinates for the mean equinox and epoch of the target date
-                bp.Equatorial = Precession.GetEquatorialCoordinates(bp.Equatorial0, p);
+                var eq = Precession.GetEquatorialCoordinates(bp.Equatorial0, p);
 
                 // Apparent horizontal coordinates
-                bp.Horizontal = bp.Equatorial.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
+                bp.Horizontal = eq.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
             }
         }
 

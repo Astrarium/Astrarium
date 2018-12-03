@@ -20,6 +20,7 @@ namespace ADK.Demo
         public bool Antialias { get; set; } = true;
         public ICollection<BaseSkyRenderer> Renderers { get; } = new List<BaseSkyRenderer>();
         public ICollection<CelestialObject> VisibleObjects { get; } = new List<CelestialObject>();
+        public CelestialObject SelectedObject { get; set; }
         public IProjection Projection { get; set; } = null;
         public event Action OnInvalidate;
 

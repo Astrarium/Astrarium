@@ -52,6 +52,7 @@
             this.skyView.SkyMap = null;
             this.skyView.TabIndex = 0;
             this.skyView.TabStop = false;
+            this.skyView.DoubleClick += new System.EventHandler(this.skyView_DoubleClick);
             this.skyView.KeyDown += new System.Windows.Forms.KeyEventHandler(this.skyView_KeyDown);
             this.skyView.MouseMove += new System.Windows.Forms.MouseEventHandler(this.skyView_MouseMove);
             // 

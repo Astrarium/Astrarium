@@ -58,6 +58,7 @@ namespace ADK.Demo.Renderers
                 {
                     PointF p = Map.Projection.Project(star.Horizontal);
                     g.FillEllipse(GetColor(star.Color), p.X - diam / 2, p.Y - diam / 2, diam, diam);
+                    Map.VisibleObjects.Add(star);
                 }
             }
         }

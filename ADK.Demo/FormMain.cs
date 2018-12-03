@@ -23,6 +23,7 @@ namespace ADK.Demo
             InitializeComponent();
 
             sky = new Sky();
+            sky.Calculators.Add(new MilkyWayCalc(sky));
             sky.Calculators.Add(new CelestialGridCalc(sky));
             sky.Calculators.Add(new BordersCalc(sky));
             sky.Calculators.Add(new StarsCalc(sky));
@@ -34,6 +35,7 @@ namespace ADK.Demo
             sky.Calculate();
 
             ISkyMap map = new SkyMap();
+            map.Renderers.Add(new MilkyWayRenderer(sky, map));
             map.Renderers.Add(new BordersRenderer(sky, map));
             map.Renderers.Add(new CelestialGridRenderer(sky, map));
             map.Renderers.Add(new StarsRenderer(sky, map));
@@ -114,6 +116,14 @@ namespace ADK.Demo
                 skyView.SkyMap.ViewAngle = jup.Semidiameter * 2 * 1 / 3600;
                 skyView.Invalidate();
             }
+        }
+
+        private void skyView_DoubleClick(object sender, EventArgs e)
+        {
+            MouseEventArgs me = e as MouseEventArgs;
+            MouseButtons buttonPushed = me.Button;
+            var hor = skyView.SkyMap.Projection.Invert(me.Location);
+            skyView.SkyMap.SelectedObject = skyView.SkyMap.VisibleObjects.FirstOrDefault(c => Angle.Separation(hor, c.Horizontal) < 1);
         }
     }
 }

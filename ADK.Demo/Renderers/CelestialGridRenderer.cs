@@ -44,9 +44,7 @@ namespace ADK.Demo.Renderers
             DrawGrid(g, penLineEcliptic, lineEcliptic);
 
             var date = new Date(Sky.JulianDay);
-
-            
-
+           
             g.DrawString($"{(int)date.Day}.{date.Month}.{date.Year} {(date.Day - (int)date.Day) * 24}]", SystemFonts.DefaultFont, Brushes.Red, 10, 10);
         }
 

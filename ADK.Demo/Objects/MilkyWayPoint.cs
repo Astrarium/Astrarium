@@ -1,15 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ADK.Demo.Objects
+﻿namespace ADK.Demo.Objects
 {
-    public class ConstBorderPoint
-    {
-        public bool Start { get; set; }
-
+    public class MilkyWayPoint
+    {        
         /// <summary>
         /// Equatorial coordinates of a point referred to J2000.0 epoch
         /// </summary>
