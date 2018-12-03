@@ -3,7 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
 using System.Linq;
+using System.Net;
 
 namespace ADK.Demo.Renderers
 {
@@ -70,10 +72,34 @@ namespace ADK.Demo.Renderers
             {
                 PointF p = Map.Projection.Project(sun.Horizontal);
 
+                float inc = (float)GetRotationTowardsNorth(sun.Equatorial);
+
+                g.TranslateTransform(p.X, p.Y);
+                g.RotateTransform(inc);
+
                 float size = GetDiskSize(sun.Semidiameter, 10);
 
-                g.FillEllipse(penSun.Brush, p.X - size / 2, p.Y - size / 2, size, size);
+                if (useTextures && size > 10)
+                {
+                    Image imageSun = imagesCache.RequestImage("Sun", true, SunImageProvider, Map.Invalidate);
+                    if (imageSun != null)
+                    {
+                        g.FillEllipse(penSun.Brush, -size / 2, -size / 2, size, size);
+                        g.DrawImage(imageSun, -size / 2, -size / 2, size, size);
+                    }
+                    else
+                    {
+                        g.FillEllipse(penSun.Brush, -size / 2, -size / 2, size, size);
+                    }
+                }
+                else
+                {
+                    g.FillEllipse(penSun.Brush, -size / 2, -size / 2, size, size);
+                }
 
+                g.ResetTransform();
+
+                DrawObjectCaption(g, "Sun", p, size);
                 Map.VisibleObjects.Add(sun);
             }
         }
@@ -129,7 +155,6 @@ namespace ADK.Demo.Renderers
                 g.ResetTransform();
 
                 DrawObjectCaption(g, "Moon", p, size);
-
                 Map.VisibleObjects.Add(moon);
             }
         }
@@ -306,6 +331,76 @@ namespace ADK.Demo.Renderers
                 OutputImageSize = 1024,
                 TextureFilePath = "Data\\Moon.jpg"
             });
+        }
+
+        private Image SunImageProvider(bool token)
+        {
+            // TODO: take from settings
+            float cropFactor = 0.93f;
+            string url = "https://sohowww.nascom.nasa.gov/data/realtime/hmi_igr/1024/latest.jpg";
+
+            string tempFile = Path.Combine(Path.GetTempPath(), "Sun.jpg");
+            try
+            {
+                // Download latest Solar image from provided URL
+                using (var client = new WebClient())
+                {
+                    ServicePointManager.Expect100Continue = true;
+                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                    client.DownloadFile(new Uri(url), tempFile);                
+                }
+
+                // Prepare resulting circle image with transparent background
+                using (var image = Image.FromFile(tempFile))
+                {
+                    Image result = new Bitmap(
+                        (int)(image.Width * cropFactor), 
+                        (int)(image.Height * cropFactor), 
+                        System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+                    using (var g = Graphics.FromImage(result))
+                    {
+                        g.Clear(Color.Transparent);
+                        g.SmoothingMode = SmoothingMode.AntiAlias;
+
+                        using (var crop = new GraphicsPath())
+                        {
+                            g.TranslateTransform(
+                                image.Width * cropFactor / 2,
+                                image.Height * cropFactor / 2);
+
+                            float cropMargin = 1e-3f;
+
+                            crop.AddEllipse(
+                                -image.Width * cropFactor / 2 * (1 - cropMargin), 
+                                -image.Height * cropFactor / 2 * (1 - cropMargin), 
+                                image.Width * cropFactor * (1 - cropMargin), 
+                                image.Height * cropFactor * (1 - cropMargin));
+
+                            g.SetClip(crop);
+                           
+                            g.DrawImage(image, -image.Width / 2, -image.Height / 2, image.Width, image.Height);
+                        }
+                    }
+
+                    return result;
+                }
+            }
+            catch
+            {
+                return null;
+            }
+            finally
+            {
+                if (File.Exists(tempFile))
+                {
+                    try
+                    {
+                        File.Delete(tempFile);
+                    }
+                    catch { }
+                }
+            }
         }
 
         private Brush GetPlanetColor(int planet)
