@@ -10,10 +10,20 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo.Calculators
 {
+    /// <summary>
+    /// Calculates coordinates of Milky Way outline points to be rendered on map
+    /// </summary>
     public class MilkyWayCalc : BaseSkyCalc
     {
-        private List<MilkyWayPoint>[] MilkyWay = new List<MilkyWayPoint>[11];
+        /// <summary>
+        /// Outline points
+        /// </summary>
+        private List<List<CelestialPoint>> MilkyWay = new List<List<CelestialPoint>>();
 
+        /// <summary>
+        /// Creates new instance of 
+        /// </summary>
+        /// <param name="sky"></param>
         public MilkyWayCalc(Sky sky) : base(sky) { }
 
         public override void Calculate()
@@ -37,25 +47,24 @@ namespace ADK.Demo.Calculators
         {
             string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/MilkyWay.dat");
 
-            string line = "";
-            string[] chunks;
-            List<ConstBorderPoint> block = new List<ConstBorderPoint>();
-            for (int i = 0; i < 11; i++)
+            List<CelestialPoint> block = null;
+            using (var sr = new BinaryReader(new FileStream(file, FileMode.Open)))
             {
-                MilkyWay[i] = new List<MilkyWayPoint>();
-            }
-            using (var sr = new StreamReader(file, Encoding.Default))
-            {
-                while (line != null && !sr.EndOfStream)
+                int fragment = -1;
+                while (sr.BaseStream.Position != sr.BaseStream.Length)
                 {
-                    line = sr.ReadLine();
-                    chunks = line.Split(';');
-                    int fragment = Convert.ToInt32(chunks[0].Trim());
-                    double ra = Convert.ToDouble(chunks[1].Trim(), CultureInfo.InvariantCulture);
-                    double dec = Convert.ToDouble(chunks[2].Trim(), CultureInfo.InvariantCulture);
-                    MilkyWayPoint point = new MilkyWayPoint();
-                    point.Equatorial0 = new CrdsEquatorial(ra, dec);
-                    MilkyWay[fragment].Add(point);
+                    int f = sr.ReadChar();
+                    if (f != fragment)
+                    {
+                        fragment = f;
+                        block = new List<CelestialPoint>();
+                        MilkyWay.Add(block);
+                    }
+
+                    block.Add(new CelestialPoint()
+                    {
+                        Equatorial0 = new CrdsEquatorial(sr.ReadSingle(), sr.ReadSingle())
+                    });
                 }
             }
 

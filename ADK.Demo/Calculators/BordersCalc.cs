@@ -1,18 +1,13 @@
 ﻿using ADK.Demo.Objects;
-using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ADK.Demo.Calculators
 {
     public class BordersCalc : BaseSkyCalc
     {
-        private ICollection<ConstBorderPoint> Borders = new List<ConstBorderPoint>();
+        private List<List<CelestialPoint>> Borders = new List<List<CelestialPoint>>();
 
         public BordersCalc(Sky sky) : base(sky) { }
 
@@ -20,13 +15,16 @@ namespace ADK.Demo.Calculators
         {
             var p = Precession.ElementsFK5(Date.EPOCH_J2000, Sky.JulianDay);
 
-            foreach (var bp in Borders)
+            foreach (var b in Borders)
             {
-                // Equatorial coordinates for the mean equinox and epoch of the target date
-                var eq = Precession.GetEquatorialCoordinates(bp.Equatorial0, p);
+                foreach (var bp in b)
+                {
+                    // Equatorial coordinates for the mean equinox and epoch of the target date
+                    var eq = Precession.GetEquatorialCoordinates(bp.Equatorial0, p);
 
-                // Apparent horizontal coordinates
-                bp.Horizontal = eq.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
+                    // Apparent horizontal coordinates
+                    bp.Horizontal = eq.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
+                }
             }
         }
 
@@ -34,21 +32,22 @@ namespace ADK.Demo.Calculators
         {
             string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Borders.dat");
 
-            string line = "";
-            string[] chunks;
-            using (var sr = new StreamReader(file, Encoding.Default))
+            using (var sr = new BinaryReader(new FileStream(file, FileMode.Open)))
             {
-                while (line != null && !sr.EndOfStream)
+                List<CelestialPoint> block = null;
+                while (sr.BaseStream.Position != sr.BaseStream.Length)
                 {
-                    line = sr.ReadLine().Trim();
-                    if (line == "" || line.StartsWith("//")) continue;
+                    bool start = sr.ReadBoolean();
+                    if (start)
+                    {
+                        block = new List<CelestialPoint>();
+                        Borders.Add(block);
+                    }
 
-                    chunks = line.Split(';');
-                    ConstBorderPoint border = new ConstBorderPoint();
-                    border.Start = chunks[0].Trim() == "1";
-                    border.Equatorial0.Alpha = 15.0 * Convert.ToDouble(chunks[1].Trim(), CultureInfo.InvariantCulture);
-                    border.Equatorial0.Delta = Convert.ToDouble(chunks[2].Trim(), CultureInfo.InvariantCulture);
-                    Borders.Add(border);
+                    block.Add(new CelestialPoint()
+                    {
+                        Equatorial0 = new CrdsEquatorial(sr.ReadDouble(), sr.ReadDouble())
+                    });
                 }
             }
 

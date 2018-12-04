@@ -1,11 +1,7 @@
 ﻿using ADK.Demo.Objects;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ADK.Demo.Renderers
 {
@@ -23,14 +19,14 @@ namespace ADK.Demo.Renderers
         {
             PointF p1, p2;
             CrdsHorizontal h1, h2;
-            var borders = Sky.Get<ICollection<ConstBorderPoint>>("Borders");
-            
-            for (int i = 0; i < borders.Count - 1; i++)
+            var borders = Sky.Get<List<List<CelestialPoint>>>("Borders");
+
+            foreach (var block in borders)
             {
-                if (!borders.ElementAt(i + 1).Start)
+                for (int i = 0; i < block.Count - 1; i++)
                 {
-                    h1 = borders.ElementAt(i).Horizontal;
-                    h2 = borders.ElementAt(i + 1).Horizontal;
+                    h1 = block.ElementAt(i).Horizontal;
+                    h2 = block.ElementAt(i + 1).Horizontal;
 
                     if (Angle.Separation(Map.Center, h1) < maxSeparation &&
                         Angle.Separation(Map.Center, h2) < maxSeparation)

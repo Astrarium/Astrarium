@@ -4,52 +4,67 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ADK.Demo.Renderers
 {
+    /// <summary>
+    /// Renders Milky Way filled outline on the map
+    /// </summary>
     public class MilkyWayRenderer : BaseSkyRenderer
     {
-        private List<MilkyWayPoint>[] milkyWay = null;
-        private Brush brushMilkyWay = new SolidBrush(Color.FromArgb(20, 20, 20));
+        /// <summary>
+        /// Outline points divided by groups
+        /// </summary>
+        private List<List<CelestialPoint>> milkyWay = null;
+
+        /// <summary>
+        /// Primary color to fill outline
+        /// </summary>
+        private Color colorMilkyWay = Color.FromArgb(20, 20, 20);
+
+        private double minAlpha = 255;
+        private double maxAlpha = 10;
+        private double minZoom = 90;
+        private double maxZoom = 0.1;
+        private double k;
+        private double b;
 
         public MilkyWayRenderer(Sky sky, ISkyMap skyMap) : base(sky, skyMap)
         {
-            milkyWay = Sky.Get<List<MilkyWayPoint>[]>("MilkyWay");
+            milkyWay = Sky.Get<List<List<CelestialPoint>>>("MilkyWay");
+
+            k = -(minAlpha - maxAlpha) / (maxZoom - minZoom);
+            b = -(minZoom * maxAlpha - maxZoom * minAlpha) / (maxZoom - minZoom);
         }
 
         public override void Render(Graphics g)
         {
-            var smoothing = g.SmoothingMode;
-            g.SmoothingMode = SmoothingMode.None;
+            int alpha = Math.Min((int)(k * Map.ViewAngle + b), 255);
 
-            for (int i = 0; i < milkyWay.Count(); i++)
+            if (alpha > maxAlpha)
             {
-                List<PointF> points = new List<PointF>();
+                var smoothing = g.SmoothingMode;
+                g.SmoothingMode = SmoothingMode.None;
 
-                PointF p0 = Map.Projection.Project(milkyWay[i][0].Horizontal);
-                points.Add(p0);
-
-                bool isPartVisible = p0.X >= 0 && p0.X <= Map.Width && p0.Y >= 0 && p0.Y <= Map.Height;
-                
-                for (int j = 1; j < milkyWay[i].Count; j++)
+                for (int i = 0; i < milkyWay.Count(); i++)
                 {
-                    PointF p1 = Map.Projection.Project(milkyWay[i][j].Horizontal);
-                    if (p1.X >= 0 && p1.X <= Map.Width && p1.Y >= 0 && p1.Y <= Map.Height)
+                    var points = new List<PointF>();
+                    for (int j = 0; j < milkyWay[i].Count; j++)
                     {
-                        isPartVisible = true;
+                        if (Angle.Separation(milkyWay[i][j].Horizontal, Map.Center) < 90 * 1.2)
+                        {
+                            points.Add(Map.Projection.Project(milkyWay[i][j].Horizontal));
+                        }
                     }
-                    points.Add(p1);
+
+                    if (points.Count >= 3)
+                    {
+                        g.FillPolygon(new SolidBrush(Color.FromArgb(alpha, colorMilkyWay)), points.ToArray(), FillMode.Winding);
+                    }
                 }
 
-                if (isPartVisible)
-                {
-                    g.FillPolygon(brushMilkyWay, points.ToArray(), FillMode.Alternate);
-                }
+                g.SmoothingMode = smoothing;
             }
-
-            g.SmoothingMode = smoothing;
         }
     }
 }

@@ -57,8 +57,7 @@
     <Compile Include="Calculators\LunarCalc.cs" />
     <Compile Include="Calculators\SolarCalc.cs" />
     <Compile Include="Objects\CelestialObject.cs" />
-    <Compile Include="Objects\MilkyWayPoint.cs" />
-    <Compile Include="Objects\ConstBorderPoint.cs" />
+    <Compile Include="Objects\CelestialPoint.cs" />
     <Compile Include="Objects\Moon.cs" />
     <Compile Include="Objects\Planet.cs" />
     <Compile Include="Objects\Sun.cs" />

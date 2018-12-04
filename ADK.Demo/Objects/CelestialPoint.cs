@@ -1,9 +1,15 @@
-﻿namespace ADK.Demo.Objects
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ADK.Demo.Objects
 {
-    public class MilkyWayPoint
-    {        
+    public class CelestialPoint
+    {
         /// <summary>
-        /// Equatorial coordinates of a point referred to J2000.0 epoch
+        /// Equatorial coordinates of a point referred to initial epoch
         /// </summary>
         public CrdsEquatorial Equatorial0 { get; set; } = new CrdsEquatorial();
 
