@@ -4,15 +4,16 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Linq;
 
 namespace ADK.Demo.Calculators
 {
     public class ConstellationsCalc : BaseSkyCalc
     {
         /// <summary>
-        /// Constellations labels coordinates
+        /// Constellations
         /// </summary>
-        private Dictionary<string, CelestialPoint> ConstLabels = new Dictionary<string, CelestialPoint>();
+        private List<Constellation> Constellations = new List<Constellation>();
 
         /// <summary>
         /// Constellations borders coordinates
@@ -37,13 +38,13 @@ namespace ADK.Demo.Calculators
                 }
             }
 
-            foreach (var c in ConstLabels)
+            foreach (var c in Constellations)
             {
                 // Equatorial coordinates for the mean equinox and epoch of the target date
-                var eq = Precession.GetEquatorialCoordinates(c.Value.Equatorial0, p);
+                var eq = Precession.GetEquatorialCoordinates(c.Label.Equatorial0, p);
 
                 // Apparent horizontal coordinates
-                c.Value.Horizontal = eq.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
+                c.Label.Horizontal = eq.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
             }
         }
 
@@ -51,6 +52,7 @@ namespace ADK.Demo.Calculators
         {
             LoadBordersData();
             LoadLabelsData();
+            LoadConstNames();
         }
 
         /// <summary>
@@ -92,15 +94,40 @@ namespace ADK.Demo.Calculators
             {
                 while (sr.BaseStream.Position != sr.BaseStream.Length)
                 {
-                    string name = sr.ReadString();
-                    ConstLabels[name] = new CelestialPoint()
+                    string code = sr.ReadString();                
+                    Constellations.Add(new Constellation()
                     {
-                        Equatorial0 = new CrdsEquatorial(sr.ReadSingle(), sr.ReadSingle())
-                    };
+                        Code = code,
+                        Label = new CelestialPoint()
+                        {
+                            Equatorial0 = new CrdsEquatorial(sr.ReadSingle(), sr.ReadSingle())
+                        }
+                    });
                 }
             }
-            
-            Sky.AddDataProvider("ConstLabels", () => ConstLabels);
+
+            Sky.AddDataProvider("Constellations", () => Constellations);
+        }
+
+        /// <summary>
+        /// Loads constellation labels data
+        /// </summary>
+        private void LoadConstNames()
+        {
+            string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Connames.dat");
+            string line = "";
+            using (var sr = new StreamReader(file, Encoding.Default))
+            {               
+                while (line != null && !sr.EndOfStream)
+                {
+                    line = sr.ReadLine();
+                    var chunks = line.Split(';');
+                    string code = chunks[0].Trim().ToUpper();
+                    var constellation = Constellations.First(c => c.Code == code);
+                    constellation.Name = chunks[1].Trim();
+                    constellation.Genitive = chunks[2].Trim();
+                }
+            }
         }
     }
 }

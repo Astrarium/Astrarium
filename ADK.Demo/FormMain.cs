@@ -40,7 +40,7 @@ namespace ADK.Demo
             map.Renderers.Add(new CelestialGridRenderer(sky, map));
             map.Renderers.Add(new StarsRenderer(sky, map));
             map.Renderers.Add(new SolarSystemRenderer(sky, map));
-            //map.Renderers.Add(new GroundRenderer(sky, map));
+            map.Renderers.Add(new GroundRenderer(sky, map));
             map.Initialize();
 
             skyView.SkyMap = map;
@@ -84,34 +84,19 @@ namespace ADK.Demo
                         sky.JulianDay = jd - tzone + deltaT;
                         sky.Calculate();
                         skyView.Invalidate();
-
-                        var moon = sky.Get<Moon>("Moon");
-                        skyView.SkyMap.Center = new CrdsHorizontal(moon.Horizontal);
-                        skyView.SkyMap.ViewAngle = moon.Semidiameter * 2 * 10 / 3600; ;
-                        skyView.Invalidate();
                     }
                 }
             }
             else if (e.KeyCode == Keys.A)
             {
-                sky.JulianDay += 1 / 24.0 / 2;
+                sky.JulianDay += 1;
                 sky.Calculate();
-                //skyView.Invalidate();
-
-                var jup = sky.Get<ICollection<Planet>>("Planets").FirstOrDefault(p => p.Number == Planet.JUPITER);
-                skyView.SkyMap.Center = new CrdsHorizontal(jup.Horizontal);
-                skyView.SkyMap.ViewAngle = jup.Semidiameter * 2 * 1 / 3600;
                 skyView.Invalidate();
             }
             else if (e.KeyCode == Keys.S)
             {
-                sky.JulianDay -= 1 / 24.0 / 2 ;
+                sky.JulianDay -= 1;
                 sky.Calculate();
-                //skyView.Invalidate();
-
-                var jup = sky.Get<ICollection<Planet>>("Planets").FirstOrDefault(p => p.Number == Planet.JUPITER);
-                skyView.SkyMap.Center = new CrdsHorizontal(jup.Horizontal);
-                skyView.SkyMap.ViewAngle = jup.Semidiameter * 2 * 1 / 3600;
                 skyView.Invalidate();
             }
         }

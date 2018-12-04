@@ -61,7 +61,7 @@ namespace ADK.Demo.Renderers
         /// </summary>
         private void RenderConstLabels(Graphics g)
         {
-            var labels = Sky.Get<Dictionary<string, CelestialPoint>>("ConstLabels");
+            var constellations = Sky.Get<List<Constellation>>("Constellations");
 
             StringFormat format = new StringFormat();
             format.LineAlignment = StringAlignment.Center;
@@ -70,13 +70,13 @@ namespace ADK.Demo.Renderers
             int fontSize = Math.Min((int)(800 / Map.ViewAngle), 32);
             Font font = new Font(FontFamily.GenericSansSerif, fontSize);
 
-            foreach (var c in labels)
+            foreach (var c in constellations)
             {
-                var h = c.Value.Horizontal;                
+                var h = c.Label.Horizontal;                
                 if (Angle.Separation(Map.Center, h) < Map.ViewAngle * 1.2)
                 {
                     var p = Map.Projection.Project(h);
-                    g.DrawString(c.Key, font, brushLabel, p, format);
+                    g.DrawString(c.Name, font, brushLabel, p, format);
                 }
             }
         }

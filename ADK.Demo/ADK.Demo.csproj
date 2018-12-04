@@ -58,6 +58,7 @@
     <Compile Include="Calculators\SolarCalc.cs" />
     <Compile Include="Objects\CelestialObject.cs" />
     <Compile Include="Objects\CelestialPoint.cs" />
+    <Compile Include="Objects\Constellation.cs" />
     <Compile Include="Objects\Moon.cs" />
     <Compile Include="Objects\Planet.cs" />
     <Compile Include="Objects\Sun.cs" />
@@ -126,6 +127,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Data\!Credits.md" />
+    <None Include="Data\Connames.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Data\MilkyWay.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
