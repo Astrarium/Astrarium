@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ADK.Demo.Renderers
 {
@@ -13,20 +10,24 @@ namespace ADK.Demo.Renderers
         private CelestialGrid gridEquatorial = null;
         private CelestialGrid gridHorizontal = null;
         private CelestialGrid lineEcliptic = null;
- 
+        private CelestialGrid lineGalactic = null;
+
         private Pen penGridEquatorial = null;
         private Pen penGridHorizontal = null;
         private Pen penLineEcliptic = null;
+        private Pen penLineGalactic = null;
 
         public CelestialGridRenderer(Sky sky, ISkyMap skyMap) : base(sky, skyMap)
         {
             gridEquatorial = Sky.Get<CelestialGrid>("GridEquatorial");
             gridHorizontal = Sky.Get<CelestialGrid>("GridHorizontal");
             lineEcliptic = Sky.Get<CelestialGrid>("LineEcliptic");
+            lineGalactic = Sky.Get<CelestialGrid>("LineGalactic");
 
             penGridEquatorial = new Pen(Brushes.Transparent);
             penGridHorizontal = new Pen(Brushes.Transparent);
             penLineEcliptic = new Pen(Brushes.Transparent);
+            penLineGalactic = new Pen(Brushes.Transparent);
         }
 
         public override void Render(Graphics g)
@@ -34,11 +35,14 @@ namespace ADK.Demo.Renderers
             Color colorGridEquatorial = Color.FromArgb(200, 0, 64, 64);
             Color colorGridHorizontal = Color.FromArgb(200, 0, 64, 0);
             Color colorLineEcliptic = Color.FromArgb(200, 128, 128, 0);
+            Color colorLineGalactic = Color.FromArgb(200, 64, 0, 64);
 
             penGridEquatorial.Color = Map.Antialias ? colorGridEquatorial : Color.FromArgb(200, colorGridEquatorial);            
             penGridHorizontal.Color = Map.Antialias ? colorGridHorizontal : Color.FromArgb(200, colorGridHorizontal);
             penLineEcliptic.Color = Map.Antialias ? colorLineEcliptic : Color.FromArgb(200, colorLineEcliptic);
+            penLineGalactic.Color = Map.Antialias ? colorLineGalactic : Color.FromArgb(200, colorLineGalactic);
 
+            DrawGrid(g, penLineGalactic, lineGalactic);
             DrawGrid(g, penGridEquatorial, gridEquatorial);
             DrawGrid(g, penGridHorizontal, gridHorizontal);
             DrawGrid(g, penLineEcliptic, lineEcliptic);

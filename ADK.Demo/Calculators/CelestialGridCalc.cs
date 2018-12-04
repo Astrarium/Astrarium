@@ -8,6 +8,9 @@ namespace ADK.Demo.Calculators
 {
     public class CelestialGridCalc : BaseSkyCalc
     {
+        private PrecessionalElements peFrom1950 = null;
+        private PrecessionalElements peTo1950 = null;
+
         public CelestialGridCalc(Sky sky) : base(sky)
         {
             // Ecliptic
@@ -25,6 +28,24 @@ namespace ADK.Demo.Calculators
                 return eq.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
             };
             Sky.AddDataProvider("LineEcliptic", () => LineEcliptic);
+
+            // Galactic equator
+            CelestialGrid LineGalactic = new CelestialGrid("Galactic", 1, 24);
+            LineGalactic.FromHorizontal = (h) =>
+            {
+                var eq = h.ToEquatorial(Sky.GeoLocation, Sky.SiderealTime);
+                var eq1950 = Precession.GetEquatorialCoordinates(eq, peTo1950);
+                var gal = eq1950.ToGalactical();
+                return new GridPoint(gal.l, gal.b);
+            };
+            LineGalactic.ToHorizontal = (c) =>
+            {
+                var gal = new CrdsGalactical(c.Longitude, c.Latitude);
+                var eq1950 = gal.ToEquatorial();
+                var eq = Precession.GetEquatorialCoordinates(eq1950, peFrom1950);
+                return eq.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
+            };
+            Sky.AddDataProvider("LineGalactic", () => LineGalactic);
 
             // Horizontal grid
             CelestialGrid GridHorizontal = new CelestialGrid("Horizontal", 17, 24);
@@ -45,6 +66,12 @@ namespace ADK.Demo.Calculators
                 return eq.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
             };
             Sky.AddDataProvider("GridEquatorial", () => GridEquatorial);
+        }
+
+        public override void Calculate()
+        {
+            peFrom1950 = Precession.ElementsFK5(Date.EPOCH_B1950, Sky.JulianDay);
+            peTo1950 = Precession.ElementsFK5(Sky.JulianDay, Date.EPOCH_B1950);
         }
     }
 }
