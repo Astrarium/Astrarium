@@ -52,7 +52,7 @@
     <Compile Include="Calculators\BaseSkyCalc.cs" />
     <Compile Include="Calculators\MilkyWayCalc.cs" />
     <Compile Include="Calculators\CelestialGridCalc.cs" />
-    <Compile Include="Calculators\BordersCalc.cs" />
+    <Compile Include="Calculators\ConstellationsCalc.cs" />
     <Compile Include="Calculators\PlanetsCalc.cs" />
     <Compile Include="Calculators\LunarCalc.cs" />
     <Compile Include="Calculators\SolarCalc.cs" />
@@ -62,7 +62,7 @@
     <Compile Include="Objects\Planet.cs" />
     <Compile Include="Objects\Sun.cs" />
     <Compile Include="Renderers\MilkyWayRenderer.cs" />
-    <Compile Include="Renderers\BordersRenderer.cs" />
+    <Compile Include="Renderers\ConstellationsRenderer.cs" />
     <Compile Include="Renderers\ImagesCache.cs" />
     <Compile Include="Renderers\SolarSystemRenderer.cs" />
     <Compile Include="Renderers\SphereRenderer.cs" />
@@ -119,6 +119,9 @@
     <None Include="Data\Borders.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Data\Conlabels.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Data\Conlines.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -173,6 +176,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Data\8.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\Concenters.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Data\Moon.jpg">

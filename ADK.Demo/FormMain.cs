@@ -25,7 +25,7 @@ namespace ADK.Demo
             sky = new Sky();
             sky.Calculators.Add(new MilkyWayCalc(sky));
             sky.Calculators.Add(new CelestialGridCalc(sky));
-            sky.Calculators.Add(new BordersCalc(sky));
+            sky.Calculators.Add(new ConstellationsCalc(sky));
             sky.Calculators.Add(new StarsCalc(sky));
             sky.Calculators.Add(new SolarCalc(sky));
             sky.Calculators.Add(new LunarCalc(sky));
@@ -36,7 +36,7 @@ namespace ADK.Demo
 
             ISkyMap map = new SkyMap();
             map.Renderers.Add(new MilkyWayRenderer(sky, map));
-            map.Renderers.Add(new BordersRenderer(sky, map));
+            map.Renderers.Add(new ConstellationsRenderer(sky, map));
             map.Renderers.Add(new CelestialGridRenderer(sky, map));
             map.Renderers.Add(new StarsRenderer(sky, map));
             map.Renderers.Add(new SolarSystemRenderer(sky, map));
