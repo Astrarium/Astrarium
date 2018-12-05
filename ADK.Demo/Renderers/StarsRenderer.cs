@@ -18,7 +18,7 @@ namespace ADK.Demo.Renderers
         private Pen penConLine;
         private const double maxSeparation = 90 * 1.2;
 
-        public StarsRenderer(Sky sky, ISkyMap skyMap) : base(sky, skyMap)
+        public StarsRenderer(Sky sky, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
         {
             penConLine = new Pen(new SolidBrush(Color.FromArgb(64, 64, 64)));
             penConLine.DashStyle = DashStyle.Dot;

@@ -14,11 +14,13 @@ namespace ADK.Demo.Renderers
     {
         protected Sky Sky { get; private set; }
         protected ISkyMap Map { get; private set; }
+        protected ISettings Settings { get; private set; }
 
-        public BaseSkyRenderer(Sky sky, ISkyMap skyMap)
+        public BaseSkyRenderer(Sky sky, ISkyMap skyMap, ISettings settings)
         {
             Sky = sky;
             Map = skyMap;
+            Settings = settings;
         }
 
         public abstract void Render(Graphics g);

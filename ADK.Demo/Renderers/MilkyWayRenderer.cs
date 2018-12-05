@@ -29,7 +29,7 @@ namespace ADK.Demo.Renderers
         private double k;
         private double b;
 
-        public MilkyWayRenderer(Sky sky, ISkyMap skyMap) : base(sky, skyMap)
+        public MilkyWayRenderer(Sky sky, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
         {
             milkyWay = Sky.Get<List<List<CelestialPoint>>>("MilkyWay");
 

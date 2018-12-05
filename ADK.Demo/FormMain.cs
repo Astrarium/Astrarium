@@ -22,6 +22,8 @@ namespace ADK.Demo
         {
             InitializeComponent();
 
+            var settings = new Settings.Settings();
+
             sky = new Sky();
             sky.Calculators.Add(new MilkyWayCalc(sky));
             sky.Calculators.Add(new CelestialGridCalc(sky));
@@ -35,12 +37,12 @@ namespace ADK.Demo
             sky.Calculate();
 
             ISkyMap map = new SkyMap();
-            map.Renderers.Add(new MilkyWayRenderer(sky, map));
-            map.Renderers.Add(new ConstellationsRenderer(sky, map));
-            map.Renderers.Add(new CelestialGridRenderer(sky, map));
-            map.Renderers.Add(new StarsRenderer(sky, map));
-            map.Renderers.Add(new SolarSystemRenderer(sky, map));
-            map.Renderers.Add(new GroundRenderer(sky, map));
+            map.Renderers.Add(new MilkyWayRenderer(sky, map, settings));
+            map.Renderers.Add(new ConstellationsRenderer(sky, map, settings));
+            map.Renderers.Add(new CelestialGridRenderer(sky, map, settings));
+            map.Renderers.Add(new StarsRenderer(sky, map, settings));
+            map.Renderers.Add(new SolarSystemRenderer(sky, map, settings));
+            map.Renderers.Add(new GroundRenderer(sky, map, settings));
             map.Initialize();
 
             skyView.SkyMap = map;

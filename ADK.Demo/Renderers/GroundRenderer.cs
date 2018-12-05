@@ -10,7 +10,7 @@ namespace ADK.Demo.Renderers
 {
     public class GroundRenderer : BaseSkyRenderer
     {
-        public GroundRenderer(Sky sky, ISkyMap skyMap) : base(sky, skyMap)
+        public GroundRenderer(Sky sky, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
         {
 
         }

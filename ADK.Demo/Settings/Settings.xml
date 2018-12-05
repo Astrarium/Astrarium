@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Settings>
+
+  <!-- Draw Milky Way outline -->
+  <Setting name="DrawMilkyWay" value="false" />
+  
+  <!-- Use textures for solar system objects -->
+  <Setting name="UseTextures" value="false" />
+  
+  <!-- Ecliptic line color -->
+  <Setting name="Ecliptic.Color.Night" type="color" value="#C8808000" />
+
+  <!-- Horizontal grid color -->
+  <Setting name="HorizontalGrid.Color.Night" type="color" value="#C8004000" />
+</Settings>

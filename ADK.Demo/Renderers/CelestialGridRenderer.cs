@@ -17,7 +17,7 @@ namespace ADK.Demo.Renderers
         private Pen penLineEcliptic = null;
         private Pen penLineGalactic = null;
 
-        public CelestialGridRenderer(Sky sky, ISkyMap skyMap) : base(sky, skyMap)
+        public CelestialGridRenderer(Sky sky, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
         {
             gridEquatorial = Sky.Get<CelestialGrid>("GridEquatorial");
             gridHorizontal = Sky.Get<CelestialGrid>("GridHorizontal");
@@ -33,8 +33,8 @@ namespace ADK.Demo.Renderers
         public override void Render(Graphics g)
         {
             Color colorGridEquatorial = Color.FromArgb(200, 0, 64, 64);
-            Color colorGridHorizontal = Color.FromArgb(200, 0, 64, 0);
-            Color colorLineEcliptic = Color.FromArgb(200, 128, 128, 0);
+            Color colorGridHorizontal = Settings.Get<Color>("HorizontalGrid.Color.Night");
+            Color colorLineEcliptic = Settings.Get<Color>("Ecliptic.Color.Night");
             Color colorLineGalactic = Color.FromArgb(200, 64, 0, 64);
 
             penGridEquatorial.Color = Map.Antialias ? colorGridEquatorial : Color.FromArgb(200, colorGridEquatorial);            

@@ -28,7 +28,7 @@ namespace ADK.Demo.Renderers
 
         private bool useTextures = true;
 
-        public SolarSystemRenderer(Sky sky, ISkyMap skyMap) : base(sky, skyMap)
+        public SolarSystemRenderer(Sky sky, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
         {
             
         }

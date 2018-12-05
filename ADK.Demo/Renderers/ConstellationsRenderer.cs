@@ -13,7 +13,7 @@ namespace ADK.Demo.Renderers
 
         private const double maxSeparation = 90 * 1.2;
 
-        public ConstellationsRenderer(Sky sky, ISkyMap skyMap) : base(sky, skyMap)
+        public ConstellationsRenderer(Sky sky, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
         {
 
         }
