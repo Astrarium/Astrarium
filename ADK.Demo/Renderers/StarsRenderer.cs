@@ -28,24 +28,26 @@ namespace ADK.Demo.Renderers
         {
             var allStars = Sky.Get<ICollection<Star>>("Stars");
 
-            PointF p1, p2;
-            CrdsHorizontal h1, h2;
-
-            foreach (var line in ConLines)
+            if (Settings.Get<bool>("ConstLines"))
             {
-                h1 = allStars.ElementAt(line.Item1).Horizontal;
-                h2 = allStars.ElementAt(line.Item2).Horizontal;
-
-                if (Angle.Separation(Map.Center, h1) < maxSeparation &&
-                    Angle.Separation(Map.Center, h2) < maxSeparation)
+                PointF p1, p2;
+                CrdsHorizontal h1, h2;
+                foreach (var line in ConLines)
                 {
-                    p1 = Map.Projection.Project(h1);
-                    p2 = Map.Projection.Project(h2);
+                    h1 = allStars.ElementAt(line.Item1).Horizontal;
+                    h2 = allStars.ElementAt(line.Item2).Horizontal;
 
-                    var points = Geometry.SegmentRectangleIntersection(p1, p2, Map.Width, Map.Height);
-                    if (points.Length == 2)
+                    if (Angle.Separation(Map.Center, h1) < maxSeparation &&
+                        Angle.Separation(Map.Center, h2) < maxSeparation)
                     {
-                        g.DrawLine(penConLine, points[0], points[1]);
+                        p1 = Map.Projection.Project(h1);
+                        p2 = Map.Projection.Project(h2);
+
+                        var points = Geometry.SegmentRectangleIntersection(p1, p2, Map.Width, Map.Height);
+                        if (points.Length == 2)
+                        {
+                            g.DrawLine(penConLine, points[0], points[1]);
+                        }
                     }
                 }
             }

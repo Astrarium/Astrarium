@@ -1,6 +1,7 @@
 ﻿using ADK.Demo.Objects;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 
@@ -20,8 +21,14 @@ namespace ADK.Demo.Renderers
 
         public override void Render(Graphics g)
         {
-            RenderBorders(g);
-            RenderConstLabels(g);
+            if (Settings.Get<bool>("ConstBorders"))
+            {
+                RenderBorders(g);
+            }
+            if (Settings.Get<bool>("ConstLabels"))
+            {
+                RenderConstLabels(g);
+            }
         }
 
         /// <summary>
@@ -60,7 +67,7 @@ namespace ADK.Demo.Renderers
         /// Renders constellations labels on the map
         /// </summary>
         private void RenderConstLabels(Graphics g)
-        {
+        {          
             var constellations = Sky.Get<List<Constellation>>("Constellations");
 
             StringFormat format = new StringFormat();
@@ -69,6 +76,7 @@ namespace ADK.Demo.Renderers
 
             int fontSize = Math.Min((int)(800 / Map.ViewAngle), 32);
             Font font = new Font(FontFamily.GenericSansSerif, fontSize);
+            LabelType labelType = Settings.Get<LabelType>("ConstLabelsType");
 
             foreach (var c in constellations)
             {
@@ -76,9 +84,31 @@ namespace ADK.Demo.Renderers
                 if (Angle.Separation(Map.Center, h) < Map.ViewAngle * 1.2)
                 {
                     var p = Map.Projection.Project(h);
-                    g.DrawString(c.Name, font, brushLabel, p, format);
+
+                    string label = null;
+                    switch (labelType)
+                    {
+                        case LabelType.InternationalCode:
+                            label = c.Code;
+                            break;
+                        case LabelType.InternationalName:
+                        default:
+                            label = c.Name;
+                            break;
+                    }
+
+                    g.DrawString(label, font, brushLabel, p, format);
                 }
             }
+        }
+
+        public enum LabelType
+        {
+            [Description("International Name")]
+            InternationalName = 0,
+
+            [Description("International Abbreviation")]
+            InternationalCode = 1,
         }
     }
 }

@@ -108,9 +108,16 @@ namespace ADK.Demo
             {
                 using (var frmSettings = new FormSettings(settings))
                 {
+                    settings.OnSettingValueChanged += Settings_OnSettingChanged;
                     frmSettings.ShowDialog();
+                    settings.OnSettingValueChanged -= Settings_OnSettingChanged;
                 }
             }
+        }
+
+        private void Settings_OnSettingChanged(string settingName)
+        {
+            skyView.Invalidate();
         }
 
         private void skyView_DoubleClick(object sender, EventArgs e)

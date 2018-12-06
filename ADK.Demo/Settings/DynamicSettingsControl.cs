@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Reflection;
 
 namespace ADK.Demo.Settings
 {
@@ -23,8 +24,11 @@ namespace ADK.Demo.Settings
                     settings.OnSettingValueChanged -= UpdateDependentControls;
                 }
                 settings = value;
-                settings.OnSettingValueChanged += UpdateDependentControls;
-                CreateControls();
+                if (settings != null)
+                {
+                    settings.OnSettingValueChanged += UpdateDependentControls;
+                    CreateControls();
+                }                
             }
         }
 
@@ -41,15 +45,19 @@ namespace ADK.Demo.Settings
             foreach (var section in Settings.Tree.Sections)
             {
                 listSections.Items.Add(section.Title ?? section.Name);
-                FlowLayoutPanel panel = new FlowLayoutPanel();
-                panel.FlowDirection = FlowDirection.TopDown;
-                panel.Dock = DockStyle.Fill;
-                panel.Visible = false;
+                var panel = new FlowLayoutPanel()
+                {
+                    FlowDirection = FlowDirection.TopDown,
+                    Dock = DockStyle.Fill,
+                    Visible = false,
+                    AutoScroll = true,
+                };
+                splitContainer.Panel2.Controls.Add(panel);
                 foreach (var setting in section.Settings)
                 {
                     panel.Controls.Add(BuildSettingControl(setting));
                 }
-                splitContainer.Panel2.Controls.Add(panel);
+                
                 SettingsPanels[section.Name] = panel;
             }
 
@@ -65,6 +73,7 @@ namespace ADK.Demo.Settings
         private void UpdateDependentControls(string masterSettingName)
         {
             var masterValue = Settings.Get<object>(masterSettingName);
+            var masterSetting = Settings.All.First(n => n.Name == masterSettingName);
             var dependentNodes = Settings.All.Where(n => n.DependsOn == masterSettingName);
             
             foreach (var n in dependentNodes)
@@ -74,12 +83,12 @@ namespace ADK.Demo.Settings
                 {
                     if (!string.IsNullOrEmpty(n.EnabledIf))
                     {                        
-                        control.Enabled = masterValue.Equals(n.ValueFromString(n.EnabledIf));
+                        control.Enabled = masterValue.Equals(masterSetting.ValueFromString(n.EnabledIf));
                     }
 
                     if (!string.IsNullOrEmpty(n.VisibleIf))
                     {
-                        control.Visible = masterValue.Equals(n.ValueFromString(n.VisibleIf));
+                        control.Visible = masterValue.Equals(masterSetting.ValueFromString(n.VisibleIf));
                     }
                 }
             }
@@ -95,6 +104,7 @@ namespace ADK.Demo.Settings
             {
                 case "checkbox":
                     CheckBox checkBox = new CheckBox();
+                    checkBox.Padding = new Padding(5, 0, 5, 2);
                     checkBox.Text = setting.Title;
                     checkBox.Checked = Settings.Get<bool>(setting.Name);
                     checkBox.AutoSize = true;
@@ -103,12 +113,56 @@ namespace ADK.Demo.Settings
                     checkBox.CheckedChanged += (s, e) => Settings.Set(setting.Name, checkBox.Checked);
                     control = checkBox;
                     break;
+                case "radio":
+                    {
+                        var group = new GroupBox()
+                        {
+                            Name = setting.Name,
+                            AutoSize = true,
+                            Text = setting.Title,
+                            Margin = new Padding(8, 0, 5, 2)
+                        };
+                      
+                        var panel = new FlowLayoutPanel()
+                        {
+                            FlowDirection = FlowDirection.TopDown,
+                            AutoSize = true,
+                            Location = new Point(10, 20)
+                        };
+
+                        Array values = Enum.GetValues(setting.ValueType);
+                        foreach (var value in values)
+                        {
+                            RadioButton radio = new RadioButton()
+                            {
+                                Name = $"{setting.Name}.{value}",
+                                AutoSize = true,
+                                Checked = value.Equals(Settings.Get<object>(setting.Name)),
+                                Text = value.GetType()
+                                    .GetMember(value.ToString())
+                                    .FirstOrDefault()
+                                    ?.GetCustomAttribute<DescriptionAttribute>()
+                                    ?.Description,
+                            };
+                            radio.CheckedChanged += (s, e) => { if (radio.Checked) { Settings.Set(setting.Name, value); } };
+                            
+                            panel.Controls.Add(radio);
+                            panel.Height = radio.Bottom;
+                        }
+
+                        group.Height = panel.Height;
+                        group.Controls.Add(panel);
+                        control = group;
+                    }
+                    break;
                 case "colorpicker":
                     ColorPicker picker = new ColorPicker();
+                    picker.Margin = new Padding(8, 0, 5, 2);
                     picker.Text = setting.Title;
                     picker.SelectedValue = Settings.Get<Color>(setting.Name);
                     picker.AutoSize = true;
                     picker.Name = setting.Name;
+                    picker.Anchor = AnchorStyles.Left | AnchorStyles.Right;
                     picker.SelectedValueChanged += (s, e) => Settings.Set(setting.Name, picker.SelectedValue);
                     control = picker;
                     break;

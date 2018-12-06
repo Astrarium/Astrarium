@@ -7,8 +7,16 @@
     <Setting name="EclipticLine" value="false" title="Ecliptic" />
     <Setting name="LabelVernalPoints" value="false" title="Label vernal points" dependsOn="EclipticLine" enabledIf="true" />
     <Setting name="GalacticEquator" value="false" title="Galactic equator" />
+    <Setting name="MilkyWay" value="false" title="Draw Milky Way outline" />
   </Section>
 
+  <Section name="Constelations" title="Constelations">
+    <Setting name="ConstLabels" value="true" title="Constellations Labels" />
+    <Setting name="ConstLabelsType" type="ADK.Demo.Renderers.ConstellationsRenderer+LabelType, ADK.Demo" value="0" title="Labels type" control="radio" dependsOn="ConstLabels" enabledIf="true" />
+    <Setting name="ConstLines" value="true" title="Constellations Lines" />
+    <Setting name="ConstBorders" value="true" title="Constellations Borders" />
+  </Section>
+  
   <Section name="Other">
     <!-- Use textures for solar system objects -->
     <Setting name="UseTextures" value="false" title="Use textures" control="checkbox" />

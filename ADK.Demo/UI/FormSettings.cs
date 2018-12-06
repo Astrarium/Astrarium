@@ -12,6 +12,12 @@ namespace ADK.Demo.UI
 {
     public partial class FormSettings : Form
     {
+        [DesignOnly(true)]
+        public FormSettings()
+        {
+            InitializeComponent();
+        }
+
         public FormSettings(ISettings settings)
         {
             InitializeComponent();

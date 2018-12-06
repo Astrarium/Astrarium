@@ -159,12 +159,11 @@ namespace ADK.Demo
             var converter = TypeDescriptor.GetConverter(t);
             if (converter != null)
             {
-                return converter.ConvertFromString(Value);
+                return converter.ConvertFromString(value);
             }
             else
             {
-
-                return Convert.ChangeType(Value, t);
+                return Convert.ChangeType(value, t);
             }
         }
 

@@ -39,31 +39,33 @@ namespace ADK.Demo.Renderers
 
         public override void Render(Graphics g)
         {
-            int alpha = Math.Min((int)(k * Map.ViewAngle + b), 255);
-
-            if (alpha > maxAlpha)
+            if (Settings.Get<bool>("MilkyWay"))
             {
-                var smoothing = g.SmoothingMode;
-                g.SmoothingMode = SmoothingMode.None;
-
-                for (int i = 0; i < milkyWay.Count(); i++)
+                int alpha = Math.Min((int)(k * Map.ViewAngle + b), 255);
+                if (alpha > maxAlpha)
                 {
-                    var points = new List<PointF>();
-                    for (int j = 0; j < milkyWay[i].Count; j++)
+                    var smoothing = g.SmoothingMode;
+                    g.SmoothingMode = SmoothingMode.None;
+
+                    for (int i = 0; i < milkyWay.Count(); i++)
                     {
-                        if (Angle.Separation(milkyWay[i][j].Horizontal, Map.Center) < 90 * 1.2)
+                        var points = new List<PointF>();
+                        for (int j = 0; j < milkyWay[i].Count; j++)
                         {
-                            points.Add(Map.Projection.Project(milkyWay[i][j].Horizontal));
+                            if (Angle.Separation(milkyWay[i][j].Horizontal, Map.Center) < 90 * 1.2)
+                            {
+                                points.Add(Map.Projection.Project(milkyWay[i][j].Horizontal));
+                            }
+                        }
+
+                        if (points.Count >= 3)
+                        {
+                            g.FillPolygon(new SolidBrush(Color.FromArgb(alpha, colorMilkyWay)), points.ToArray(), FillMode.Winding);
                         }
                     }
 
-                    if (points.Count >= 3)
-                    {
-                        g.FillPolygon(new SolidBrush(Color.FromArgb(alpha, colorMilkyWay)), points.ToArray(), FillMode.Winding);
-                    }
+                    g.SmoothingMode = smoothing;
                 }
-
-                g.SmoothingMode = smoothing;
             }
         }
     }

@@ -97,10 +97,10 @@ namespace ADK.Demo.Settings
                             throw new FileFormatException($"Setting `{setting.Name}` has unknown type `{setting.Type}`.");
                         }
 
-                        if (setting.DefaultControl == null)
-                        {
-                            throw new FileFormatException($"Setting `{setting.Name}` has unknown control type `{setting.Control}`.");
-                        }
+                        //if (setting.DefaultControl == null)
+                        //{
+                        //   throw new FileFormatException($"Setting `{setting.Name}` has unknown control type `{setting.Control}`.");
+                        //}
 
                         SettingsValues[setting.Name] = setting.ValueFromString(setting.Value);
                         All.Add(setting);
@@ -126,6 +126,11 @@ namespace ADK.Demo.Settings
 
         public void Save()
         {
+            string directory = Path.GetDirectoryName(SettingsPath);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
             using (var stream = new FileStream(SettingsPath, FileMode.OpenOrCreate))
             {
                 Save(stream);

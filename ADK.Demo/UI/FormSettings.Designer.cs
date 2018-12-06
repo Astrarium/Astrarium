@@ -35,10 +35,12 @@
             // 
             // settingsControl
             // 
-            this.settingsControl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.settingsControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.settingsControl.Location = new System.Drawing.Point(8, 3);
             this.settingsControl.Name = "settingsControl";
+            this.settingsControl.Settings = null;
             this.settingsControl.Size = new System.Drawing.Size(618, 369);
             this.settingsControl.TabIndex = 0;
             // 
