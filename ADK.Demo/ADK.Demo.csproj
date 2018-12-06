@@ -87,6 +87,18 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ISettings.cs" />
+    <Compile Include="Settings\ColorPicker.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Settings\ColorPicker.Designer.cs">
+      <DependentUpon>ColorPicker.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Settings\DynamicSettingsControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Settings\DynamicSettingsControl.Designer.cs">
+      <DependentUpon>DynamicSettingsControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Settings\Settings.cs" />
     <Compile Include="Sky.cs" />
     <Compile Include="SkyMap.cs" />
@@ -102,6 +114,12 @@
     <Compile Include="UI\FormDateTime.Designer.cs">
       <DependentUpon>FormDateTime.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\FormSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\FormSettings.Designer.cs">
+      <DependentUpon>FormSettings.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\NumericUpDownEx.cs" />
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
@@ -116,8 +134,17 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="Settings\ColorPicker.resx">
+      <DependentUpon>ColorPicker.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Settings\DynamicSettingsControl.resx">
+      <DependentUpon>DynamicSettingsControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\FormDateTime.resx">
       <DependentUpon>FormDateTime.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\FormSettings.resx">
+      <DependentUpon>FormSettings.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Data\Borders.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

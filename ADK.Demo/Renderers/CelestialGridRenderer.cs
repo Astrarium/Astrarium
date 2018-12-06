@@ -42,10 +42,22 @@ namespace ADK.Demo.Renderers
             penLineEcliptic.Color = Map.Antialias ? colorLineEcliptic : Color.FromArgb(200, colorLineEcliptic);
             penLineGalactic.Color = Map.Antialias ? colorLineGalactic : Color.FromArgb(200, colorLineGalactic);
 
-            DrawGrid(g, penLineGalactic, lineGalactic);
-            DrawGrid(g, penGridEquatorial, gridEquatorial);
-            DrawGrid(g, penGridHorizontal, gridHorizontal);
-            DrawGrid(g, penLineEcliptic, lineEcliptic);
+            if (Settings.Get<bool>("GalacticEquator"))
+            {
+                DrawGrid(g, penLineGalactic, lineGalactic);
+            }
+            if (Settings.Get<bool>("EquatorialGrid"))
+            {
+                DrawGrid(g, penGridEquatorial, gridEquatorial);
+            }
+            if (Settings.Get<bool>("HorizontalGrid"))
+            {
+                DrawGrid(g, penGridHorizontal, gridHorizontal);
+            }
+            if (Settings.Get<bool>("EclipticLine"))
+            {
+                DrawGrid(g, penLineEcliptic, lineEcliptic);
+            }
 
             var date = new Date(Sky.JulianDay);
            

@@ -17,12 +17,14 @@ namespace ADK.Demo
     public partial class FormMain : Form
     {
         private Sky sky;
+        private ISettings settings;
 
         public FormMain()
         {
             InitializeComponent();
 
-            var settings = new Settings.Settings();
+            settings = new Settings.Settings();
+            settings.Load();
 
             sky = new Sky();
             sky.Calculators.Add(new MilkyWayCalc(sky));
@@ -100,6 +102,14 @@ namespace ADK.Demo
                 sky.JulianDay -= 1;
                 sky.Calculate();
                 skyView.Invalidate();
+            }
+
+            else if (e.KeyCode == Keys.O)
+            {
+                using (var frmSettings = new FormSettings(settings))
+                {
+                    frmSettings.ShowDialog();
+                }
             }
         }
 

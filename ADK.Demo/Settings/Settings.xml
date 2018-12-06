@@ -1,15 +1,24 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Settings>
 
-  <!-- Draw Milky Way outline -->
-  <Setting name="DrawMilkyWay" value="false" />
-  
-  <!-- Use textures for solar system objects -->
-  <Setting name="UseTextures" value="false" />
-  
-  <!-- Ecliptic line color -->
-  <Setting name="Ecliptic.Color.Night" type="color" value="#C8808000" />
+  <Section name="Grids" title="Grids and lines">
+    <Setting name="EquatorialGrid" value="false" title="Equatorial grid" />
+    <Setting name="HorizontalGrid" value="false" title="Horizontal grid" />
+    <Setting name="EclipticLine" value="false" title="Ecliptic" />
+    <Setting name="LabelVernalPoints" value="false" title="Label vernal points" dependsOn="EclipticLine" enabledIf="true" />
+    <Setting name="GalacticEquator" value="false" title="Galactic equator" />
+  </Section>
 
-  <!-- Horizontal grid color -->
-  <Setting name="HorizontalGrid.Color.Night" type="color" value="#C8004000" />
+  <Section name="Other">
+    <!-- Use textures for solar system objects -->
+    <Setting name="UseTextures" value="false" title="Use textures" control="checkbox" />
+
+    <!-- Ecliptic line color -->
+    <Setting name="Ecliptic.Color.Night" title="Ecliptic line" type="color" value="#C8808000" />
+
+    <!-- Horizontal grid color -->
+    <Setting name="HorizontalGrid.Color.Night" title="Horizontal grid" type="color" value="#C8004000" />
+  </Section>
+
+
 </Settings>

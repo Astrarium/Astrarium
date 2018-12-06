@@ -23,20 +23,16 @@ namespace ADK.Demo.Settings
         /// </summary>
         private string SettingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ADK", "Settings.xml");
 
-        /// <summary>
-        /// Short type names dictionary
-        /// </summary>
-        private Dictionary<string, string> ShortTypeNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase); 
+        public SettingsTree Tree { get; private set; }
+
+        public ICollection<SettingNode> All { get; } = new List<SettingNode>();
+
+        public bool IsChanged { get; private set; }
+
+        public event Action<string> OnSettingValueChanged;
 
         public Settings()
         {
-            ShortTypeNames.Add("bool", typeof(bool).AssemblyQualifiedName);
-            ShortTypeNames.Add("boolean", typeof(bool).AssemblyQualifiedName);
-            ShortTypeNames.Add("color", typeof(System.Drawing.Color).AssemblyQualifiedName);
-            ShortTypeNames.Add("int", typeof(int).AssemblyQualifiedName);
-            ShortTypeNames.Add("integer", typeof(int).AssemblyQualifiedName);
-            ShortTypeNames.Add("string", typeof(string).AssemblyQualifiedName);
-
             // Initialize with default values
             using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("ADK.Demo.Settings.Settings.xml"))
             {
@@ -51,7 +47,17 @@ namespace ADK.Demo.Settings
 
         public void Set(string settingName, object value)
         {
-            SettingsValues[settingName] = value;
+            if (SettingsValues.ContainsKey(settingName) )
+            {
+                var oldValue = SettingsValues[settingName];
+
+                if (!oldValue.Equals(value))
+                {
+                    SettingsValues[settingName] = value;
+                    OnSettingValueChanged?.Invoke(settingName);
+                    IsChanged = true;
+                }
+            }
         }
 
         public void Load()
@@ -61,7 +67,7 @@ namespace ADK.Demo.Settings
                 using (var stream = new FileStream(SettingsPath, FileMode.Open))
                 {
                     Load(stream);
-                }                
+                }
             }
         }
 
@@ -69,67 +75,76 @@ namespace ADK.Demo.Settings
         {
             using (XmlReader reader = XmlReader.Create(stream))
             {
-                XmlSerializer serializer = new XmlSerializer(typeof(XmlSettings));
-                var xml = (XmlSettings)serializer.Deserialize(reader);
-                foreach (var s in xml.Settings)
+                XmlSerializer serializer = new XmlSerializer(typeof(SettingsTree));
+                Tree = (SettingsTree)serializer.Deserialize(reader);
+
+                foreach (var section in Tree.Sections)
                 {
-                    if (string.IsNullOrWhiteSpace(s.Name))
+                    if (string.IsNullOrWhiteSpace(section.Name))
                     {
-                        throw new FileFormatException($"Setting should have non-empty name.");
+                        throw new FileFormatException($"Section should have non-empty name.");
                     }
 
-                    if (ShortTypeNames.ContainsKey(s.Type))
+                    foreach (var setting in section.Settings)
                     {
-                        s.Type = ShortTypeNames[s.Type];
-                    }
-
-                    Type t = Type.GetType(s.Type, false, true);
-                    if (t != null)
-                    {
-                        var converter = TypeDescriptor.GetConverter(t);
-                        if (converter != null)
+                        if (string.IsNullOrWhiteSpace(setting.Name))
                         {
-                            SettingsValues[s.Name] = converter.ConvertFromString(s.Value);
+                            throw new FileFormatException($"Setting should have non-empty name.");
                         }
-                        else
-                        {
 
-                            SettingsValues[s.Name] = Convert.ChangeType(s.Value, t);
+                        if (setting.ValueType == null)
+                        {
+                            throw new FileFormatException($"Setting `{setting.Name}` has unknown type `{setting.Type}`.");
                         }
+
+                        if (setting.DefaultControl == null)
+                        {
+                            throw new FileFormatException($"Setting `{setting.Name}` has unknown control type `{setting.Control}`.");
+                        }
+
+                        SettingsValues[setting.Name] = setting.ValueFromString(setting.Value);
+                        All.Add(setting);
                     }
-                    else
+                }
+
+                var settings = Tree.Sections.SelectMany(s => s.Settings);
+                var dependentSettings = settings.Where(s => !string.IsNullOrEmpty(s.DependsOn));
+                foreach (var setting in dependentSettings)
+                {
+                    if (settings.All(s => s.Name != setting.DependsOn))
                     {
-                        throw new FileFormatException($"Setting {s.Name} has unknown type {s.Type}");
+                        throw new FileFormatException($"Setting `{setting.Name}` depends on undefined setting `{setting.DependsOn}`.");
                     }
+
+                    if (string.IsNullOrEmpty(setting.EnabledIf) && string.IsNullOrEmpty(setting.VisibleIf))
+                    {
+                        throw new FileFormatException($"Setting `{setting.Name}` depends on setting `{setting.DependsOn}` but neither `enabledIf` or `visibleIf` attributes were specified.");
+                    } 
                 }
             }
         }
 
         public void Save()
         {
-            throw new NotImplementedException();
+            using (var stream = new FileStream(SettingsPath, FileMode.OpenOrCreate))
+            {
+                Save(stream);
+            }
         }
 
-        [Serializable]
-        [XmlRoot("Settings")]
-        public class XmlSettings
+        private void Save(Stream stream)
         {
-            [XmlElement("Setting")]
-            public XmlSettingNode[] Settings { get; set; }
-        }
+            XmlSerializer serializer = new XmlSerializer(typeof(SettingsTree));
 
-        [Serializable]
-        [XmlType(AnonymousType = true, TypeName = "Setting")]
-        public class XmlSettingNode
-        {
-            [XmlAttribute("name")]
-            public string Name { get; set; }
+            foreach (var section in Tree.Sections)
+            {
+                foreach (var setting in section.Settings)
+                {
+                    setting.Value = setting.ValueToString(SettingsValues[setting.Name]);
+                }    
+            }
 
-            [XmlAttribute("type")]
-            public string Type { get; set; } = "System.Boolean";
-
-            [XmlAttribute("value")]
-            public string Value { get; set; }
+            serializer.Serialize(stream, Tree);           
         }
     }    
 }
