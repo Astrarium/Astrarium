@@ -17,6 +17,15 @@ namespace ADK.Demo.Renderers
         private Pen penLineEcliptic = null;
         private Pen penLineGalactic = null;
 
+        private string[] equinoxLabels = new string[] { "\u2648", "\u264E" };
+        private int[] equinoxRA = new int[] { 0, 12 };
+
+        private string[] horizontalLabels = new string[] { "Zenith", "Nadir" };
+        private CrdsHorizontal[] horizontalPoles = new CrdsHorizontal[2] { new CrdsHorizontal(0, 90), new CrdsHorizontal(0, -90) };
+
+        private string[] equatorialLabels = new string[] { "NCP", "SCP" };
+        private GridPoint[] polePoints = new GridPoint[] { new GridPoint(0, 90), new GridPoint(0, -90) };
+
         public CelestialGridRenderer(Sky sky, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
         {
             gridEquatorial = Sky.Get<CelestialGrid>("GridEquatorial");
@@ -49,19 +58,21 @@ namespace ADK.Demo.Renderers
             if (Settings.Get<bool>("EquatorialGrid"))
             {
                 DrawGrid(g, penGridEquatorial, gridEquatorial);
+                DrawEquatorialPoles(g);
             }
             if (Settings.Get<bool>("HorizontalGrid"))
             {
                 DrawGrid(g, penGridHorizontal, gridHorizontal);
+                DrawHorizontalPoles(g);
             }
             if (Settings.Get<bool>("EclipticLine"))
             {
                 DrawGrid(g, penLineEcliptic, lineEcliptic);
+                DrawEquinoxLabels(g);
             }
 
-            var date = new Date(Sky.JulianDay);
-           
-            g.DrawString($"{(int)date.Day}.{date.Month}.{date.Year} {(date.Day - (int)date.Day) * 24}]", SystemFonts.DefaultFont, Brushes.Red, 10, 10);
+            //var date = new Date(Sky.JulianDay);           
+            //g.DrawString($"{(int)date.Day}.{date.Month}.{date.Year} {(date.Day - (int)date.Day) * 24}]", SystemFonts.DefaultFont, Brushes.Red, 10, 10);
         }
 
         private void DrawGrid(Graphics g, Pen penGrid, CelestialGrid grid)
@@ -324,6 +335,55 @@ namespace ADK.Demo.Renderers
             {
                 // Draw the curve in regular way
                 g.DrawCurve(penGrid, points);
+            }
+        }
+
+        private void DrawEquinoxLabels(Graphics g)
+        {
+            if (Settings.Get<bool>("LabelEquinoxPoints"))
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    var h = lineEcliptic.ToHorizontal(lineEcliptic.Column(equinoxRA[i]).ElementAt(0));
+                    if (Angle.Separation(h, Map.Center) < Map.ViewAngle * 1.2)
+                    {
+                        PointF p = Map.Projection.Project(h);
+                        g.DrawStringOpaque(equinoxLabels[i], SystemFonts.DefaultFont, penLineEcliptic.Brush, Brushes.Black, p);
+                    }
+                }
+            }
+        }
+
+        private void DrawHorizontalPoles(Graphics g)
+        {
+            if (Settings.Get<bool>("LabelHorizontalPoles"))
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    if (Angle.Separation(horizontalPoles[i], Map.Center) < Map.ViewAngle * 1.2)
+                    {
+                        PointF p = Map.Projection.Project(horizontalPoles[i]);
+                        g.DrawXCross(penGridHorizontal, p, 3);
+                        g.DrawString(horizontalLabels[i], SystemFonts.DefaultFont, penGridHorizontal.Brush, p.X + 5, p.Y + 5);
+                    }
+                }
+            }
+        }
+
+        private void DrawEquatorialPoles(Graphics g)
+        {
+            if (Settings.Get<bool>("LabelEquatorialPoles"))
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    var h = gridEquatorial.ToHorizontal(polePoints[i]);
+                    if (Angle.Separation(h, Map.Center) < Map.ViewAngle * 1.2)
+                    {
+                        PointF p = Map.Projection.Project(h);
+                        g.DrawXCross(penGridEquatorial, p, 3);
+                        g.DrawString(equatorialLabels[i], SystemFonts.DefaultFont, penGridEquatorial.Brush, p.X + 5, p.Y + 5);
+                    }
+                }
             }
         }
     }

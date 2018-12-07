@@ -62,6 +62,7 @@
     <Compile Include="Objects\Moon.cs" />
     <Compile Include="Objects\Planet.cs" />
     <Compile Include="Objects\Sun.cs" />
+    <Compile Include="Renderers\GraphicsExtenstions.cs" />
     <Compile Include="Renderers\MilkyWayRenderer.cs" />
     <Compile Include="Renderers\ConstellationsRenderer.cs" />
     <Compile Include="Renderers\ImagesCache.cs" />

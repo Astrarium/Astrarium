@@ -2,12 +2,16 @@
 <Settings>
 
   <Section name="Grids" title="Grids and lines">
-    <Setting name="EquatorialGrid" value="false" title="Equatorial grid" />
+    <Setting name="EquatorialGrid" value="true" title="Equatorial grid" />
+    <Setting name="LabelEquatorialPoles" value="false" title="Label celestial poles" dependsOn="EquatorialGrid" enabledIf="true" />
     <Setting name="HorizontalGrid" value="false" title="Horizontal grid" />
-    <Setting name="EclipticLine" value="false" title="Ecliptic" />
-    <Setting name="LabelVernalPoints" value="false" title="Label vernal points" dependsOn="EclipticLine" enabledIf="true" />
-    <Setting name="GalacticEquator" value="false" title="Galactic equator" />
-    <Setting name="MilkyWay" value="false" title="Draw Milky Way outline" />
+    <Setting name="LabelHorizontalPoles" value="false" title="Label zenith and nadir points" dependsOn="HorizontalGrid" enabledIf="true" />
+    <Setting name="EclipticLine" value="true" title="Ecliptic" />
+    <Setting name="LabelEquinoxPoints" value="false" title="Label equinox points" dependsOn="EclipticLine" enabledIf="true" />
+    <Setting name="GalacticEquator" value="true" title="Galactic equator" />
+    <Setting name="MilkyWay" value="true" title="Draw Milky Way outline" />
+    <Setting name="Ground" value="true" title="Draw ground" />
+    <Setting name="LabelCardinalDirections" value="true" title="Label cardinal directions" />
   </Section>
 
   <Section name="Constelations" title="Constelations">
@@ -18,14 +22,10 @@
   </Section>
   
   <Section name="Other">
-    <!-- Use textures for solar system objects -->
     <Setting name="UseTextures" value="false" title="Use textures" control="checkbox" />
-
-    <!-- Ecliptic line color -->
     <Setting name="Ecliptic.Color.Night" title="Ecliptic line" type="color" value="#C8808000" />
-
-    <!-- Horizontal grid color -->
     <Setting name="HorizontalGrid.Color.Night" title="Horizontal grid" type="color" value="#C8004000" />
+    <Setting name="CardinalDirections.Color" title="Cardinal directions" type="color" value="#009999" />
   </Section>
 
 
