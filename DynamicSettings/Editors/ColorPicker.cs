@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace ADK.Demo.Settings
+namespace DynamicSettings.Editors
 {
     public partial class ColorPicker : UserControl
     {

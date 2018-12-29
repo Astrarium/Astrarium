@@ -75,5 +75,41 @@ namespace ADK.Demo.Renderers
 
             return (range - mag + 1);
         }
+
+        /// <summary>
+        /// Gets drawing rotation of image, measured clockwise from 
+        /// a point oriented to top of the screen towards North celestial pole point 
+        /// </summary>
+        /// <param name="eq">Equatorial coordinates of a central point of a body.</param>
+        /// <returns></returns>
+        protected float GetRotationTowardsNorth(CrdsEquatorial eq)
+        {
+            // Coordinates of center of a body (image) to be rotated
+            PointF p = Map.Projection.Project(eq.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime));
+
+            // Point directed to North celestial pole
+            PointF pNorth = Map.Projection.Project((eq + new CrdsEquatorial(0, 1)).ToHorizontal(Sky.GeoLocation, Sky.SiderealTime));
+
+            // Clockwise rotation
+            return (float)Geometry.LineInclinationY(p, pNorth);
+        }
+
+        /// <summary>
+        /// Gets drawing rotation of image, measured clockwise from 
+        /// a point oriented to top of the screen towards North ecliptic pole point 
+        /// </summary>
+        /// <param name="ecl">Ecliptical coordinates of a central point of a body.</param>
+        /// <returns></returns>
+        protected float GetRotationTowardsEclipticPole(CrdsEcliptical ecl)
+        {
+            // Coordinates of center of a body (image) to be rotated
+            PointF p = Map.Projection.Project(ecl.ToEquatorial(Sky.Epsilon).ToHorizontal(Sky.GeoLocation, Sky.SiderealTime));
+
+            // Point directed to North ecliptic pole
+            PointF pNorth = Map.Projection.Project((ecl + new CrdsEcliptical(0, 1)).ToEquatorial(Sky.Epsilon).ToHorizontal(Sky.GeoLocation, Sky.SiderealTime));
+
+            // Clockwise rotation
+            return (float)Geometry.LineInclinationY(p, pNorth);
+        }
     }
 }

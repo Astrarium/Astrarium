@@ -36,6 +36,7 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -50,15 +51,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Calculators\BaseSkyCalc.cs" />
+    <Compile Include="Calculators\DeepSkyCalc.cs" />
     <Compile Include="Calculators\MilkyWayCalc.cs" />
     <Compile Include="Calculators\CelestialGridCalc.cs" />
     <Compile Include="Calculators\ConstellationsCalc.cs" />
     <Compile Include="Calculators\PlanetsCalc.cs" />
     <Compile Include="Calculators\LunarCalc.cs" />
     <Compile Include="Calculators\SolarCalc.cs" />
+    <Compile Include="Config\ConfigSectionHandler.cs" />
     <Compile Include="Objects\CelestialObject.cs" />
     <Compile Include="Objects\CelestialPoint.cs" />
     <Compile Include="Objects\Constellation.cs" />
+    <Compile Include="Objects\DeepSky.cs" />
     <Compile Include="Objects\Moon.cs" />
     <Compile Include="Objects\Planet.cs" />
     <Compile Include="Objects\Sun.cs" />
@@ -68,6 +72,7 @@
     <Compile Include="Renderers\ImagesCache.cs" />
     <Compile Include="Renderers\SolarSystemRenderer.cs" />
     <Compile Include="Renderers\SphereRenderer.cs" />
+    <Compile Include="Renderers\DeepSkyRenderer.cs" />
     <Compile Include="Renderers\StarsRenderer.cs" />
     <Compile Include="Renderers\GroundRenderer.cs" />
     <Compile Include="Projections\SinProjection.cs" />
@@ -88,19 +93,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ISettings.cs" />
-    <Compile Include="Settings\ColorPicker.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Settings\ColorPicker.Designer.cs">
-      <DependentUpon>ColorPicker.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Settings\DynamicSettingsControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Settings\DynamicSettingsControl.Designer.cs">
-      <DependentUpon>DynamicSettingsControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Settings\Settings.cs" />
+    <Compile Include="Config\Settings.cs" />
     <Compile Include="Sky.cs" />
     <Compile Include="SkyMap.cs" />
     <Compile Include="SkyView.cs" />
@@ -135,12 +128,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="Settings\ColorPicker.resx">
-      <DependentUpon>ColorPicker.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Settings\DynamicSettingsControl.resx">
-      <DependentUpon>DynamicSettingsControl.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="UI\FormDateTime.resx">
       <DependentUpon>FormDateTime.cs</DependentUpon>
     </EmbeddedResource>
@@ -163,18 +150,15 @@
     <None Include="Data\MilkyWay.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Data\NGCIC.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\NI2018.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Data\Stars.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -183,6 +167,10 @@
     <ProjectReference Include="..\ADK\ADK.csproj">
       <Project>{0da17a1c-068e-4cce-82a4-646e137cc121}</Project>
       <Name>ADK</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DynamicSettings\DynamicSettings.csproj">
+      <Project>{d04194db-714f-4032-928e-959523936c5f}</Project>
+      <Name>DynamicSettings</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -215,7 +203,6 @@
     <Content Include="Data\Moon.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <EmbeddedResource Include="Settings\Settings.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

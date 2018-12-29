@@ -10,11 +10,9 @@ namespace ADK.Demo.Renderers
 {
     public class GroundRenderer : BaseSkyRenderer
     {
-        private Brush brushCardinalLabels;
-
         public GroundRenderer(Sky sky, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
         {
-            brushCardinalLabels = new SolidBrush(Settings.Get<Color>("CardinalDirections.Color"));
+            
         }
 
         public override void Render(Graphics g)
@@ -78,6 +76,7 @@ namespace ADK.Demo.Renderers
 
             if (Settings.Get<bool>("LabelCardinalDirections"))
             {
+                Brush brushCardinalLabels = new SolidBrush(Settings.Get<Color>("CardinalDirections.Color"));
                 string[] labels = new string[] { "S", "SW", "W", "NW", "N", "NE", "E", "SE" };
                 StringFormat format = new StringFormat() { LineAlignment = StringAlignment.Center, Alignment = StringAlignment.Center };
                 for (int i = 0; i < labels.Length; i++)

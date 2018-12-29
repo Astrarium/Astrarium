@@ -19,7 +19,7 @@ namespace ADK
 
         /// <summary>
         /// Planetocentric declination of the Earth.
-        /// If poisitive, the planet northern pole is tilted towards the Earth.
+        /// If positive, the planet northern pole is tilted towards the Earth.
         /// Measured in degrees.
         /// </summary>
         public double D { get; set; }

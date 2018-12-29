@@ -1,4 +1,5 @@
 ﻿using ADK.Demo.Calculators;
+using ADK.Demo.Config;
 using ADK.Demo.Objects;
 using ADK.Demo.Renderers;
 using ADK.Demo.UI;
@@ -7,7 +8,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -17,13 +20,14 @@ namespace ADK.Demo
     public partial class FormMain : Form
     {
         private Sky sky;
-        private ISettings settings;
+        private Settings settings;
+        private bool fullScreen = false;
 
         public FormMain()
         {
             InitializeComponent();
 
-            settings = new Settings.Settings();
+            settings = new Settings();
             settings.Load();
 
             sky = new Sky();
@@ -34,11 +38,13 @@ namespace ADK.Demo
             sky.Calculators.Add(new SolarCalc(sky));
             sky.Calculators.Add(new LunarCalc(sky));
             sky.Calculators.Add(new PlanetsCalc(sky));
+            sky.Calculators.Add(new DeepSkyCalc(sky));
 
             sky.Initialize();
             sky.Calculate();
 
             ISkyMap map = new SkyMap();
+            map.Renderers.Add(new DeepSkyRenderer(sky, map, settings));
             map.Renderers.Add(new MilkyWayRenderer(sky, map, settings));
             map.Renderers.Add(new ConstellationsRenderer(sky, map, settings));
             map.Renderers.Add(new CelestialGridRenderer(sky, map, settings));
@@ -108,14 +114,20 @@ namespace ADK.Demo
             {
                 using (var frmSettings = new FormSettings(settings))
                 {
-                    settings.OnSettingValueChanged += Settings_OnSettingChanged;
+                    settings.SettingValueChanged += Settings_OnSettingChanged;
                     frmSettings.ShowDialog();
-                    settings.OnSettingValueChanged -= Settings_OnSettingChanged;
+                    settings.SettingValueChanged -= Settings_OnSettingChanged;
                 }
+            }
+
+            else if (e.KeyCode == Keys.F12)
+            {
+                fullScreen = !fullScreen;
+                ShowFullScreen(fullScreen);
             }
         }
 
-        private void Settings_OnSettingChanged(string settingName)
+        private void Settings_OnSettingChanged(string settingName, object settingValue)
         {
             skyView.Invalidate();
         }
@@ -126,6 +138,21 @@ namespace ADK.Demo
             MouseButtons buttonPushed = me.Button;
             var hor = skyView.SkyMap.Projection.Invert(me.Location);
             skyView.SkyMap.SelectedObject = skyView.SkyMap.VisibleObjects.FirstOrDefault(c => Angle.Separation(hor, c.Horizontal) < 1);
+        }
+
+        private void ShowFullScreen(bool fullscreen)
+        {
+            if (fullscreen)
+            {
+                this.WindowState = FormWindowState.Normal;
+                this.FormBorderStyle = FormBorderStyle.None;
+                this.Bounds = Screen.FromControl(this).Bounds;
+            }
+            else
+            {
+                this.WindowState = FormWindowState.Maximized;
+                this.FormBorderStyle = FormBorderStyle.Sizable;
+            }
         }
     }
 }

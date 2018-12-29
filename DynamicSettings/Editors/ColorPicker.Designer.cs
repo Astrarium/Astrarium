@@ -1,4 +1,4 @@
-﻿namespace ADK.Demo.Settings
+﻿namespace DynamicSettings.Editors
 {
     partial class ColorPicker
     {
@@ -35,7 +35,7 @@
             // lblCaption
             // 
             this.lblCaption.AutoSize = true;
-            this.lblCaption.Location = new System.Drawing.Point(17, 4);
+            this.lblCaption.Location = new System.Drawing.Point(17, 2);
             this.lblCaption.Name = "lblCaption";
             this.lblCaption.Size = new System.Drawing.Size(43, 13);
             this.lblCaption.TabIndex = 1;
@@ -45,7 +45,7 @@
             // 
             // btnPicker
             // 
-            this.btnPicker.Location = new System.Drawing.Point(0, 4);
+            this.btnPicker.Location = new System.Drawing.Point(0, 2);
             this.btnPicker.Name = "btnPicker";
             this.btnPicker.Size = new System.Drawing.Size(13, 13);
             this.btnPicker.TabIndex = 2;
@@ -55,12 +55,12 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.SystemColors.Control;
+            this.BackColor = System.Drawing.Color.Transparent;
             this.Controls.Add(this.btnPicker);
             this.Controls.Add(this.lblCaption);
             this.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.Name = "ColorPicker";
-            this.Size = new System.Drawing.Size(64, 21);
+            this.Size = new System.Drawing.Size(64, 18);
             this.Click += new System.EventHandler(this.btnPicker_Click);
             this.ResumeLayout(false);
             this.PerformLayout();

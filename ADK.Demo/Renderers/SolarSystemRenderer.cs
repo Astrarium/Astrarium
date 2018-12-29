@@ -337,7 +337,7 @@ namespace ADK.Demo.Renderers
         {
             // TODO: take from settings
             float cropFactor = 0.93f;
-            string url = "https://sohowww.nascom.nasa.gov/data/realtime/hmi_igr/1024/latest.jpg";
+            string url = Settings.Get<string>("TextureSunPath");
 
             string tempFile = Path.Combine(Path.GetTempPath(), "Sun.jpg");
             try
@@ -346,7 +346,11 @@ namespace ADK.Demo.Renderers
                 using (var client = new WebClient())
                 {
                     ServicePointManager.Expect100Continue = true;
-                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                    ServicePointManager.SecurityProtocol = 
+                        SecurityProtocolType.Tls |
+                        SecurityProtocolType.Tls11 |
+                        SecurityProtocolType.Tls12 |
+                        SecurityProtocolType.Ssl3;
                     client.DownloadFile(new Uri(url), tempFile);                
                 }
 
@@ -533,41 +537,7 @@ namespace ADK.Demo.Renderers
             return brushVolume;
         }
 
-        /// <summary>
-        /// Gets drawing rotation of image, measured clockwise from 
-        /// a point oriented to top of the screen towards North celestial pole point 
-        /// </summary>
-        /// <param name="eq">Equatorial coordinates of a central point of a body.</param>
-        /// <returns></returns>
-        private float GetRotationTowardsNorth(CrdsEquatorial eq)
-        {
-            // Coordinates of center of a body (image) to be rotated
-            PointF p = Map.Projection.Project(eq.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime));
-
-            // Point directed to North celestial pole
-            PointF pNorth = Map.Projection.Project((eq + new CrdsEquatorial(0, 1)).ToHorizontal(Sky.GeoLocation, Sky.SiderealTime));
-
-            // Clockwise rotation
-            return (float)Geometry.LineInclinationY(p, pNorth);
-        }
-
-        /// <summary>
-        /// Gets drawing rotation of image, measured clockwise from 
-        /// a point oriented to top of the screen towards North ecliptic pole point 
-        /// </summary>
-        /// <param name="ecl">Ecliptical coordinates of a central point of a body.</param>
-        /// <returns></returns>
-        private float GetRotationTowardsEclipticPole(CrdsEcliptical ecl)
-        {
-            // Coordinates of center of a body (image) to be rotated
-            PointF p = Map.Projection.Project(ecl.ToEquatorial(Sky.Epsilon).ToHorizontal(Sky.GeoLocation, Sky.SiderealTime));
-
-            // Point directed to North ecliptic pole
-            PointF pNorth = Map.Projection.Project((ecl + new CrdsEcliptical(0, 1)).ToEquatorial(Sky.Epsilon).ToHorizontal(Sky.GeoLocation, Sky.SiderealTime));
-
-            // Clockwise rotation
-            return (float)Geometry.LineInclinationY(p, pNorth);
-        }
+        
 
         private struct LonLatShift
         {

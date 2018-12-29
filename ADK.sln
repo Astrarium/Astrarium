@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ADK.Demo", "ADK.Demo\ADK.De
 		{0DA17A1C-068E-4CCE-82A4-646E137CC121} = {0DA17A1C-068E-4CCE-82A4-646E137CC121}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicSettings", "DynamicSettings\DynamicSettings.csproj", "{D04194DB-714F-4032-928E-959523936C5F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,6 +32,10 @@ Global
 		{31551388-2945-4E56-9EDC-FDD96C36538D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31551388-2945-4E56-9EDC-FDD96C36538D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31551388-2945-4E56-9EDC-FDD96C36538D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D04194DB-714F-4032-928E-959523936C5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D04194DB-714F-4032-928E-959523936C5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D04194DB-714F-4032-928E-959523936C5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D04194DB-714F-4032-928E-959523936C5F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

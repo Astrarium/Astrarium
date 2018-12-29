@@ -1,4 +1,4 @@
-﻿namespace ADK.Demo.Settings
+﻿namespace DynamicSettings
 {
     partial class DynamicSettingsControl
     {
@@ -16,11 +16,6 @@
             if (disposing && (components != null))
             {
                 components.Dispose();
-            }
-
-            if (settings != null)
-            {
-                settings.OnSettingValueChanged -= UpdateDependentControls;
             }
 
             base.Dispose(disposing);
@@ -61,6 +56,10 @@
             // 
             this.splitContainer.Panel1.Controls.Add(this.listSections);
             this.splitContainer.Panel1MinSize = 100;
+            // 
+            // splitContainer.Panel2
+            // 
+            this.splitContainer.Panel2.Padding = new System.Windows.Forms.Padding(5);
             this.splitContainer.Size = new System.Drawing.Size(600, 400);
             this.splitContainer.SplitterDistance = 150;
             this.splitContainer.TabIndex = 1;

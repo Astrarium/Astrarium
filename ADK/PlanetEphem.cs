@@ -9,7 +9,7 @@ namespace ADK
         /// <summary>
         /// Planet semidiameters, in arcseconds, from distance 1 A.U.
         /// </summary>
-        private static readonly double[] s0 = new double[] { 3.36, 8.41, 959.63, 4.68, 98.44, 82.73, 35.02, 33.5, 2.07 };
+        private static readonly double[] s0 = new double[] { 3.36, 8.41, 0, 4.68, 98.44, 82.73, 35.02, 33.5, 2.07 };
 
         /// <summary>
         /// Terms needed for calculation of direction of planet north pole (Right Ascension)
@@ -71,8 +71,8 @@ namespace ADK
         /// </returns>
         public static double Semidiameter(int p, double distance)
         {
-            if (p < 1 || p > 8)
-                throw new ArgumentException("Planet serial number should be in range from 1 to 8.", nameof(p));
+            if (p < 1 || p > 8 || p == 3)
+                throw new ArgumentException("Planet serial number should be in range from 1 (= Mercury) to 8 (= Neptune), excluding 3 (= Earth).", nameof(p));
 
             return s0[p - 1] / distance;
         }
