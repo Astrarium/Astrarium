@@ -18,37 +18,10 @@ namespace ADK.Demo.Calculators
 
         public override void Calculate()
         {
-            // precessional elements
-            var p = Precession.ElementsFK5(Date.EPOCH_J2000, Sky.JulianDay);
-
-            // years since J2000 epoch
-            double years = (Sky.JulianDay - Date.EPOCH_J2000) / 365.25;
-
+            int i = 0;
             foreach (var star in Stars)
             {
-                // Initial coodinates for J2000 epoch
-                CrdsEquatorial eq0 = new CrdsEquatorial(star.Equatorial0);
-
-                // Take into account effect of proper motion:
-                // now coordinates are for the mean equinox of J2000.0,
-                // but for epoch of the target date
-                eq0.Alpha += star.PmAlpha * years / 3600.0;
-                eq0.Delta += star.PmDelta * years / 3600.0;
-
-                // Equatorial coordinates for the mean equinox and epoch of the target date
-                star.Equatorial = Precession.GetEquatorialCoordinates(eq0, p);
-
-                // Nutation effect
-                var eq1 = Nutation.NutationEffect(star.Equatorial, Sky.NutationElements, Sky.Epsilon);
-
-                // Aberration effect
-                var eq2 = Aberration.AberrationEffect(star.Equatorial, Sky.AberrationElements, Sky.Epsilon);
-
-                // Apparent coordinates of the star
-                star.Equatorial += eq1 + eq2;
-
-                // Apparent horizontal coordinates
-                star.Horizontal = star.Equatorial.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
+                star.Horizontal = Sky.Formula<CrdsHorizontal>("Star.Horizontal", i++);
             }
         }
 
@@ -110,7 +83,49 @@ namespace ADK.Demo.Calculators
                 }
             }
 
-            Sky.AddDataProvider("Stars", () => Stars);
+            Sky.AddFormula("PE2000", () => Precession.ElementsFK5(Date.EPOCH_J2000, Sky.JulianDay));
+
+            Sky.AddFormula("YearsSince2000", () => (Sky.JulianDay - Date.EPOCH_J2000) / 365.25);
+
+            Sky.AddFormula("Stars", () => Stars);
+
+            Sky.AddFormula("Star.Equatorial", (index) => {
+
+                var star = Stars.ElementAt(index);
+
+                double years = Sky.Formula<double>("YearsSince2000");
+
+                PrecessionalElements p = Sky.Formula<PrecessionalElements>("PE2000");
+
+                // Initial coodinates for J2000 epoch
+                CrdsEquatorial eq0 = star.Equatorial0;
+
+                // Take into account effect of proper motion:
+                // now coordinates are for the mean equinox of J2000.0,
+                // but for epoch of the target date
+                eq0.Alpha += star.PmAlpha * years / 3600.0;
+                eq0.Delta += star.PmDelta * years / 3600.0;
+
+                // Equatorial coordinates for the mean equinox and epoch of the target date
+                var equatorial = Precession.GetEquatorialCoordinates(eq0, p);
+
+                // Nutation effect
+                var eq1 = Nutation.NutationEffect(equatorial, Sky.NutationElements, Sky.Epsilon);
+
+                // Aberration effect
+                var eq2 = Aberration.AberrationEffect(equatorial, Sky.AberrationElements, Sky.Epsilon);
+
+                // Apparent coordinates of the star
+                equatorial += eq1 + eq2;
+
+                return equatorial;
+            });
+
+            Sky.AddFormula("Star.Horizontal", (index) =>
+            {
+                var eq = Sky.Formula<CrdsEquatorial>("Star.Equatorial", index);
+                return eq.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
+            });
         }
     }
 }

@@ -26,14 +26,14 @@ namespace ADK.Demo.Renderers
 
         public override void Render(Graphics g)
         {
-            var allStars = Sky.Get<ICollection<Star>>("Stars");
+            var allStars = Sky.Formula<ICollection<Star>>("Stars");
 
             if (Settings.Get<bool>("ConstLines"))
             {
                 PointF p1, p2;
                 CrdsHorizontal h1, h2;
                 foreach (var line in ConLines)
-                {
+                {                   
                     h1 = allStars.ElementAt(line.Item1).Horizontal;
                     h2 = allStars.ElementAt(line.Item2).Horizontal;
 
@@ -51,7 +51,7 @@ namespace ADK.Demo.Renderers
                     }
                 }
             }
-
+            
             var stars = allStars.Where(s => Angle.Separation(Map.Center, s.Horizontal) < Map.ViewAngle * 1.2);
             foreach (var star in stars)
             {

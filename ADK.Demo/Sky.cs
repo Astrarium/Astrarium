@@ -60,7 +60,79 @@ namespace ADK.Demo
             {
                 throw new ArgumentException($"There is no data provider with name `{key}`.");
             }
-        } 
+        }
+
+        private Dictionary<string, object> formulae = new Dictionary<string, object>();
+        private Dictionary<string, object> values = new Dictionary<string, object>();
+
+        public void AddFormula<T>(string key, Func<T> formula)
+        {
+            formulae[key] = formula;
+            values[key] = null;
+        }
+
+        public void AddFormula<T>(string key, Func<int, T> formula)
+        {
+            formulae[key] = formula;
+            values[key] = new Dictionary<int, object>();
+        }
+
+        public T Formula<T>(string key)
+        {
+            object cached = values[key];
+
+            if (cached != null)
+            {
+                return (T)cached;
+            }
+
+            if (formulae.ContainsKey(key))
+            {
+                var func = formulae[key] as Func<T>;
+                if (func != null)
+                {
+                    var result = func.Invoke();
+                    values[key] = result;
+                    return result;
+                }
+                else
+                {
+                    throw new ArgumentException("Formula return value does not match with requested result type.");
+                }
+            }
+            else
+            {
+                throw new ArgumentException("Formula with specified key wan not found");
+            }
+        }
+
+        public T Formula<T>(string key, int index)
+        {            
+            var dict = values[key] as Dictionary<int, object>;
+           
+            if (dict.ContainsKey(index))
+            {
+                return (T)dict[index];
+            }            
+            else if (formulae.ContainsKey(key))
+            {
+                var func = formulae[key] as Func<int, T>;
+                if (func != null)
+                {
+                    var result = func.Invoke(index);                    
+                    dict[index] = result;
+                    return result;
+                }
+                else
+                {
+                    throw new ArgumentException("Formula return value does not match with requested result type.");
+                }
+            }
+            else
+            {
+                throw new ArgumentException($"Formula with key `{key}` is not defined.");
+            }
+        }
 
         public void Initialize()
         {
