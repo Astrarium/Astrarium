@@ -26,7 +26,7 @@ namespace ADK.Demo.Calculators
             Sky.AddDataProvider("DeepSky", () => DeepSkies);
         }
 
-        public override void Calculate()
+        public override void Calculate(CalculationContext context)
         {
             // precessional elements
             var p = Precession.ElementsFK5(Date.EPOCH_J2000, Sky.JulianDay);

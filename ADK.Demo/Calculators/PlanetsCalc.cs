@@ -41,7 +41,7 @@ namespace ADK.Demo.Calculators
             Sky.AddDataProvider("SaturnRings", () => SaturnRings);
         }
 
-        public override void Calculate()
+        public override void Calculate(CalculationContext context)
         {
             // final difference to stop iteration process, 1 second of time
             double deltaTau = TimeSpan.FromSeconds(1).TotalDays;

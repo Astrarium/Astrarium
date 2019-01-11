@@ -19,7 +19,7 @@ namespace ADK.Demo.Calculators
             Sky.AddDataProvider("Sun", () => Sun);
         }
 
-        public override void Calculate()
+        public override void Calculate(CalculationContext context)
         {
             // get Earth coordinates
             CrdsHeliocentrical crds = PlanetPositions.GetPlanetCoordinates(3, Sky.JulianDay, highPrecision: true);

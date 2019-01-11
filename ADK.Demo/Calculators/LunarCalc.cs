@@ -19,7 +19,7 @@ namespace ADK.Demo.Calculators
             Sky.AddDataProvider("Moon", () => moon);
         }
 
-        public override void Calculate()
+        public override void Calculate(CalculationContext context)
         {
             // geocentrical coordinates
             moon.Ecliptical0 = LunarMotion.GetCoordinates(Sky.JulianDay);

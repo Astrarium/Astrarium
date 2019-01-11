@@ -68,7 +68,7 @@ namespace ADK.Demo.Calculators
             Sky.AddDataProvider("GridEquatorial", () => GridEquatorial);
         }
 
-        public override void Calculate()
+        public override void Calculate(CalculationContext context)
         {
             peFrom1950 = Precession.ElementsFK5(Date.EPOCH_B1950, Sky.JulianDay);
             peTo1950 = Precession.ElementsFK5(Sky.JulianDay, Date.EPOCH_B1950);

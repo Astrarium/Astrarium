@@ -63,16 +63,74 @@ namespace ADK.Demo
             }
         }
 
-        private Dictionary<string, object> formulae = new Dictionary<string, object>();
+        private CalculationContext context = new CalculationContext();
+
+
+
+        
+
+
+        public void Initialize()
+        {
+            foreach (var calc in Calculators)
+            {
+                calc.Initialize();
+            }
+        }
+
+        public Sky()
+        {
+            JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
+            GeoLocation = new CrdsGeographical(56.3333, -44);
+        }
+
+        public void Calculate()
+        {
+            context.ClearCache();
+
+            NutationElements = Nutation.NutationElements(JulianDay);
+            AberrationElements = Aberration.AberrationElements(JulianDay);
+
+            Epsilon = Date.TrueObliquity(JulianDay, NutationElements.deltaEpsilon);
+            SiderealTime = Date.ApparentSiderealTime(JulianDay, NutationElements.deltaPsi, Epsilon);
+
+            foreach (var calc in Calculators)
+            {
+                calc.Calculate(context);
+            }
+        }
+    }
+
+    public class CalculationContext : DynamicObject
+    {
+        private static Dictionary<string, object> formulae = new Dictionary<string, object>();
         private Dictionary<string, object> cacheSingle = new Dictionary<string, object>();
         private Dictionary<string, Dictionary<int, object>> cacheCollection = new Dictionary<string, Dictionary<int, object>>();
 
-        public void AddFormula<TResult>(string key, Func<TResult> func)
+        public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
+        {
+            if (args.Length == 1)
+            {
+                result = Formula<CelestialObject, object>(binder.Name, args[0] as CelestialObject);
+                return true;
+            }
+            else if (args.Length == 0)
+            {
+                result = Formula<object>(binder.Name);
+                return true;
+            }
+
+            return base.TryInvokeMember(binder, args, out result);
+        }
+
+        public static void AddFormula<TResult>(string key, Func<dynamic, TResult> func)
         {
             formulae[key] = func;
         }
 
-        public void AddFormula<TObject, TResult>(string formulaName, Func<TObject, TResult> formula)
+
+
+        public static void AddFormula<TObject, TResult>(string formulaName, Func<dynamic, TObject, TResult> formula)
         {
             string key = $"{typeof(TObject).Name}.{formulaName}";
             formulae[key] = formula;
@@ -95,8 +153,8 @@ namespace ADK.Demo
             {
                 switch (formulae[formulaName])
                 {
-                    case Func<TResult> func:
-                        TResult result = func.Invoke();
+                    case Func<dynamic, TResult> func:
+                        TResult result = func.Invoke(this);
                         cacheSingle[formulaName] = result;
                         return result;
 
@@ -139,13 +197,13 @@ namespace ADK.Demo
             {
                 switch (formulae[key])
                 {
-                    case Func<TObject, TResult> func:
-                        var result = func.Invoke(obj);
+                    case Func<dynamic, TObject, TResult> func:
+                        var result = func.Invoke(this, obj);
                         cacheCollection[key][obj.Id] = result;
                         return result;
 
                     default:
-                        throw new ArgumentException("Formula return value does not match with requested result type.");                        
+                        throw new ArgumentException("Formula return value does not match with requested result type.");
                 }
             }
             else
@@ -158,36 +216,6 @@ namespace ADK.Demo
         {
             cacheSingle.Clear();
             cacheCollection.Clear();
-        }
-
-        public void Initialize()
-        {
-            foreach (var calc in Calculators)
-            {
-                calc.Initialize();
-            }
-        }
-
-        public Sky()
-        {
-            JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
-            GeoLocation = new CrdsGeographical(56.3333, -44);
-        }
-
-        public void Calculate()
-        {
-            ClearCache();
-
-            NutationElements = Nutation.NutationElements(JulianDay);
-            AberrationElements = Aberration.AberrationElements(JulianDay);
-
-            Epsilon = Date.TrueObliquity(JulianDay, NutationElements.deltaEpsilon);
-            SiderealTime = Date.ApparentSiderealTime(JulianDay, NutationElements.deltaPsi, Epsilon);
-
-            foreach (var calc in Calculators)
-            {
-                calc.Calculate();
-            }
         }
     }
 }

@@ -26,7 +26,7 @@ namespace ADK.Demo.Calculators
         /// <param name="sky"></param>
         public MilkyWayCalc(Sky sky) : base(sky) { }
 
-        public override void Calculate()
+        public override void Calculate(CalculationContext context)
         {
             var p = Precession.ElementsFK5(Date.EPOCH_J2000, Sky.JulianDay);
 
