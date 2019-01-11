@@ -26,7 +26,7 @@ namespace ADK.Demo.Renderers
 
         public override void Render(Graphics g)
         {
-            var allStars = Sky.Formula<ICollection<Star>>("Stars");
+            var allStars = Sky.Get<ICollection<Star>>("Stars");
 
             if (Settings.Get<bool>("ConstLines"))
             {

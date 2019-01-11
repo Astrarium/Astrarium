@@ -60,6 +60,11 @@ namespace ADK.Demo.Renderers
                 }
 
                 RenderPlanet(g, p);
+
+                if (!isSunRendered)
+                {
+                    RenderSun(g, sun);
+                }
             }
 
             RenderMoon(g, moon);

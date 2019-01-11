@@ -14,11 +14,6 @@ namespace ADK.Demo.Objects
         public CrdsEquatorial Equatorial0 { get; set; } = new CrdsEquatorial();
 
         /// <summary>
-        /// Apparent equatorial coordinates for the current epoch
-        /// </summary>
-        public CrdsEquatorial Equatorial { get; set; }
-
-        /// <summary>
         /// Annual proper motion in RA J2000, FK5 system, arcsec/yr
         /// </summary>
         public float PmAlpha { get; set; }

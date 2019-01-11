@@ -20,5 +20,10 @@ namespace ADK.Demo.Objects
         /// Local horizontal coordinates of the object
         /// </summary>
         public CrdsHorizontal Horizontal { get; set; }
+
+        /// <summary>
+        /// Unique object id among the collection of objects with same type
+        /// </summary>
+        public int Id { get; set; }
     }
 }
