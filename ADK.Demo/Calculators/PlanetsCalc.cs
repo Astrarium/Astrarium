@@ -1,12 +1,5 @@
 ﻿using ADK.Demo.Objects;
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ADK.Demo.Calculators
 {
@@ -109,17 +102,14 @@ namespace ADK.Demo.Calculators
                 // Phase angle
                 Planets[p].PhaseAngle = Appearance.PhaseAngle(Planets[p].Elongation, sun.Ecliptical.Distance, Planets[p].Ecliptical.Distance);
 
-                // Planet phase
+                // Planet phase                
                 Planets[p].Phase = Appearance.Phase(Planets[p].PhaseAngle);
 
                 // Planet magnitude
                 Planets[p].Magnitude = PlanetEphem.Magnitude(p + 1, Planets[p].Ecliptical.Distance, Planets[p].Distance, Planets[p].PhaseAngle);
 
-                PlanetAppearance a = PlanetEphem.PlanetAppearance(Sky.JulianDay, p + 1, Planets[p].Equatorial0, Planets[p].Ecliptical.Distance);
-
-                Planets[p].D = a.D;
-                Planets[p].PAaxis = a.P;
-                Planets[p].CM = a.CM;
+                // Planet appearance
+                Planets[p].Appearance = PlanetEphem.PlanetAppearance(Sky.JulianDay, p + 1, Planets[p].Equatorial0, Planets[p].Ecliptical.Distance);
             }
 
             SaturnRings = PlanetEphem.SaturnRings(Sky.JulianDay, Planets[Planet.SATURN - 1].Heliocentrical, Planets[Planet.EARTH - 1].Heliocentrical, Sky.Epsilon);

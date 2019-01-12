@@ -101,38 +101,19 @@ namespace ADK.Demo
         }
     }
 
-    public class CalculationContext : DynamicObject
+    public class CalculationContext
     {
-        private static Dictionary<string, object> formulae = new Dictionary<string, object>();
+        private static Dictionary<string, Delegate> formulae = new Dictionary<string, Delegate>();
         private Dictionary<string, object> cacheSingle = new Dictionary<string, object>();
         private Dictionary<string, Dictionary<int, object>> cacheCollection = new Dictionary<string, Dictionary<int, object>>();
 
-        public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
-        {
-            if (args.Length == 1)
-            {
-                result = Formula<CelestialObject, object>(binder.Name, args[0] as CelestialObject);
-                return true;
-            }
-            else if (args.Length == 0)
-            {
-                result = Formula<object>(binder.Name);
-                return true;
-            }
-
-            return base.TryInvokeMember(binder, args, out result);
-        }
-
-        public static void AddFormula<TResult>(string key, Func<dynamic, TResult> func)
+        public static void AddFormula<TResult>(string key, Func<CalculationContext, TResult> func)
         {
             formulae[key] = func;
         }
 
-
-
-        public static void AddFormula<TObject, TResult>(string formulaName, Func<dynamic, TObject, TResult> formula)
+        public static void AddFormula<TObject, TResult>(string key, Func<CalculationContext, TObject, TResult> formula) where TObject : CelestialObject
         {
-            string key = $"{typeof(TObject).Name}.{formulaName}";
             formulae[key] = formula;
         }
 
@@ -151,16 +132,7 @@ namespace ADK.Demo
 
             if (formulae.ContainsKey(formulaName))
             {
-                switch (formulae[formulaName])
-                {
-                    case Func<dynamic, TResult> func:
-                        TResult result = func.Invoke(this);
-                        cacheSingle[formulaName] = result;
-                        return result;
-
-                    default:
-                        throw new ArgumentException("Formula return value does not match with requested result type.");
-                }
+                return (TResult)formulae[formulaName].DynamicInvoke(this);               
             }
             else
             {
@@ -168,10 +140,8 @@ namespace ADK.Demo
             }
         }
 
-        public TResult Formula<TObject, TResult>(string formulaName, TObject obj) where TObject : CelestialObject
+        public TResult Formula<TResult>(string key, CelestialObject obj)
         {
-            string key = $"{typeof(TObject).Name}.{formulaName}";
-
             if (cacheCollection.ContainsKey(key))
             {
                 var dict = cacheCollection[key];
@@ -195,20 +165,11 @@ namespace ADK.Demo
 
             if (formulae.ContainsKey(key))
             {
-                switch (formulae[key])
-                {
-                    case Func<dynamic, TObject, TResult> func:
-                        var result = func.Invoke(this, obj);
-                        cacheCollection[key][obj.Id] = result;
-                        return result;
-
-                    default:
-                        throw new ArgumentException("Formula return value does not match with requested result type.");
-                }
+                return (TResult)formulae[key].DynamicInvoke(this, obj);
             }
             else
             {
-                throw new ArgumentException("Formula with specified key wan not found");
+                throw new ArgumentException($"Formula with name \"{key}\" was not found");
             }
         }
 

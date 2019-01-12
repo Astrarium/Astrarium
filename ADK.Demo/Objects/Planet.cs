@@ -62,22 +62,9 @@ namespace ADK.Demo.Objects
         public float Magnitude { get; set; }
 
         /// <summary>
-        /// Position angle of planet rotation axis.
-        /// Measured counter-clockwise from direction to celestial north pole towards planet north pole.
+        /// Planet appearance parameters
         /// </summary>
-        public double PAaxis { get; set; }
-
-        /// <summary>
-        /// Planetocentric declination of the Earth.
-        /// If poisitive, the planet northern pole is tilted towards the Earth.
-        /// Measured in degrees.
-        /// </summary>
-        public double D { get; set; }
-
-        /// <summary>
-        /// Planetographic longitude of central meridian, in degrees.
-        /// </summary>
-        public double CM { get; set; }
+        public PlanetAppearance Appearance { get; set; }
 
         public const int MERCURY = 1;
         public const int VENUS = 2;

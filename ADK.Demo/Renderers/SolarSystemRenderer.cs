@@ -190,7 +190,7 @@ namespace ADK.Demo.Renderers
                 {
                     PointF p = Map.Projection.Project(planet.Horizontal);
 
-                    float rotation = GetRotationTowardsNorth(planet.Equatorial) + 360 - (float)planet.PAaxis;
+                    float rotation = GetRotationTowardsNorth(planet.Equatorial) + 360 - (float)planet.Appearance.P;
 
                     g.TranslateTransform(p.X, p.Y);
                     g.RotateTransform(rotation);
@@ -292,7 +292,7 @@ namespace ADK.Demo.Renderers
 
             if (useTextures)
             {
-                Image texturePlanet = imagesCache.RequestImage(planet.Number.ToString(), new LonLatShift(planet.Number.ToString(), planet.CM, planet.D), PlanetTextureProvider, Map.Invalidate);
+                Image texturePlanet = imagesCache.RequestImage(planet.Number.ToString(), new LonLatShift(planet.Number.ToString(), planet.Appearance.CM, planet.Appearance.D), PlanetTextureProvider, Map.Invalidate);
                 if (texturePlanet != null)
                 {
                     g.DrawImage(texturePlanet, -diamEquat / 2 * 1.01f, -diamPolar / 2 * 1.01f, diamEquat * 1.01f, diamPolar * 1.01f);

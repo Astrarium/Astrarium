@@ -26,7 +26,7 @@ namespace ADK.Demo.Calculators
         {
             foreach (var star in Stars)
             {
-                star.Horizontal = context.Formula<Star, CrdsHorizontal>("Horizontal", star);
+                star.Horizontal = context.Formula<CrdsHorizontal>("Star.Horizontal", star);
             }
         }
 
@@ -88,26 +88,29 @@ namespace ADK.Demo.Calculators
                 }
             }
 
-            CalculationContext.AddFormula("PE2000", 
-                ctx => {
-                    return Precession.ElementsFK5(Date.EPOCH_J2000, Sky.JulianDay);
-                });
-
-            CalculationContext.AddFormula("YearsSince2000", ctx => (Sky.JulianDay - Date.EPOCH_J2000) / 365.25);
-
-            CalculationContext.AddFormula<Star, CrdsEquatorial>("Equatorial", Star_Equatorial);
-            CalculationContext.AddFormula<Star, CrdsHorizontal>("Horizontal", Star_Horizontal);
+            CalculationContext.AddFormula("PE2000", PrecessionalElements2000);
+            CalculationContext.AddFormula("YearsSince2000", YearsSince2000);
+            CalculationContext.AddFormula<Star, CrdsEquatorial>("Star.Equatorial", Star_Equatorial);
+            CalculationContext.AddFormula<Star, CrdsHorizontal>("Star.Horizontal", Star_Horizontal);
         }
 
-        private CrdsHorizontal Star_Horizontal(dynamic context, Star star)
+        private double YearsSince2000(CalculationContext context)
         {
-            
+            return (Sky.JulianDay - Date.EPOCH_J2000) / 365.25;
+        }
 
-            CrdsEquatorial eq = context.Formula<Star, CrdsEquatorial>("Equatorial", star);
+        private PrecessionalElements PrecessionalElements2000(CalculationContext context)
+        {
+            return Precession.ElementsFK5(Date.EPOCH_J2000, Sky.JulianDay);
+        }
+
+        private CrdsHorizontal Star_Horizontal(CalculationContext context, Star star)
+        {
+            var eq = context.Formula<CrdsEquatorial>("Star.Equatorial", star);
             return eq.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
         }
 
-        private CrdsEquatorial Star_Equatorial(dynamic context, Star star)
+        private CrdsEquatorial Star_Equatorial(CalculationContext context, Star star)
         {
             double years = context.Formula<double>("YearsSince2000");
 
