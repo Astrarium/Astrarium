@@ -1,5 +1,6 @@
 ﻿using ADK.Demo.Objects;
 using System;
+using System.Collections.Generic;
 
 namespace ADK.Demo.Calculators
 {
@@ -36,19 +37,33 @@ namespace ADK.Demo.Calculators
 
         public override void Calculate(CalculationContext context)
         {
+            Calculate(context, Planets);
+        }
+
+        public void Calculate(CalculationContext context, params Planet[] planets)
+        {
             // final difference to stop iteration process, 1 second of time
             double deltaTau = TimeSpan.FromSeconds(1).TotalDays;
 
-            // Heliocentrical coordinates of Earth
-            Planets[Planet.EARTH - 1].Heliocentrical = PlanetPositions.GetPlanetCoordinates(3, Sky.JulianDay, highPrecision: true);
+            // get Earth coordinates
+            CrdsHeliocentrical hEarth = PlanetPositions.GetPlanetCoordinates(Planet.EARTH, Sky.JulianDay, highPrecision: true);
 
-            // Sun ephemerides should be already calculated
-            Sun sun = Sky.Get<Sun>("Sun");
+            // transform to ecliptical coordinates of the Sun
+            CrdsEcliptical sunEcliptical = new CrdsEcliptical(Angle.To360(hEarth.L + 180), -hEarth.B, hEarth.R);
 
-            for (int p = 0; p < Planets.Length; p++)
+            // correct solar coordinates to FK5 system
+            sunEcliptical += PlanetPositions.CorrectionForFK5(Sky.JulianDay, sunEcliptical); ;
+
+            // add nutation effect to ecliptical coordinates of the Sun
+            sunEcliptical += Nutation.NutationEffect(Sky.NutationElements.deltaPsi);
+
+            // add aberration effect, so we have an final ecliptical coordinates of the Sun 
+            sunEcliptical += Aberration.AberrationEffect(sunEcliptical.Distance);
+
+            foreach (Planet p in planets)
             {
                 // Skip Earth
-                if (p + 1 == Planet.EARTH) continue;
+                if (p.Number == Planet.EARTH) continue;
 
                 // time taken by the light to reach the Earth
                 double tau = 0;
@@ -60,60 +75,87 @@ namespace ADK.Demo.Calculators
                 while (Math.Abs(tau - tau0) > deltaTau)
                 {
                     // Heliocentrical coordinates of Earth
-                    var hEarth = PlanetPositions.GetPlanetCoordinates(Planet.EARTH, Sky.JulianDay - tau, highPrecision: true);
+                    hEarth = PlanetPositions.GetPlanetCoordinates(Planet.EARTH, Sky.JulianDay - tau, highPrecision: true);
 
                     // Heliocentrical coordinates of planet
-                    Planets[p].Heliocentrical = PlanetPositions.GetPlanetCoordinates(p + 1, Sky.JulianDay - tau, highPrecision: true);
+                    p.Heliocentrical = PlanetPositions.GetPlanetCoordinates(p.Number, Sky.JulianDay - tau, highPrecision: true);
 
                     // Distance from planet to Sun
-                    Planets[p].Distance = Planets[p].Heliocentrical.R;
+                    p.Distance = p.Heliocentrical.R;
 
                     // Ecliptical coordinates of planet
-                    Planets[p].Ecliptical = Planets[p].Heliocentrical.ToRectangular(hEarth).ToEcliptical();
+                    p.Ecliptical = p.Heliocentrical.ToRectangular(hEarth).ToEcliptical();
 
                     tau0 = tau;
-                    tau = PlanetPositions.LightTimeEffect(Planets[p].Ecliptical.Distance);
+                    tau = PlanetPositions.LightTimeEffect(p.Ecliptical.Distance);
                 }
 
                 // Correction for FK5 system
-                Planets[p].Ecliptical += PlanetPositions.CorrectionForFK5(Sky.JulianDay, Planets[p].Ecliptical);
+                p.Ecliptical += PlanetPositions.CorrectionForFK5(Sky.JulianDay, p.Ecliptical);
 
                 // Take nutation into account
-                Planets[p].Ecliptical += Nutation.NutationEffect(Sky.NutationElements.deltaPsi);
+                p.Ecliptical += Nutation.NutationEffect(Sky.NutationElements.deltaPsi);
 
                 // Apparent geocentrical equatorial coordinates of planet
-                Planets[p].Equatorial0 = Planets[p].Ecliptical.ToEquatorial(Sky.Epsilon);
+                p.Equatorial0 = p.Ecliptical.ToEquatorial(Sky.Epsilon);
 
                 // Planet semidiameter
-                Planets[p].Semidiameter = PlanetEphem.Semidiameter(p + 1, Planets[p].Ecliptical.Distance);
+                p.Semidiameter = PlanetEphem.Semidiameter(p.Number, p.Ecliptical.Distance);
 
                 // Planet parallax
-                Planets[p].Parallax = PlanetEphem.Parallax(Planets[p].Ecliptical.Distance);
+                p.Parallax = PlanetEphem.Parallax(p.Ecliptical.Distance);
 
                 // Apparent topocentric coordinates of planet
-                Planets[p].Equatorial = Planets[p].Equatorial0.ToTopocentric(Sky.GeoLocation, Sky.SiderealTime, Planets[p].Parallax);
+                p.Equatorial = p.Equatorial0.ToTopocentric(Sky.GeoLocation, Sky.SiderealTime, p.Parallax);
 
                 // Local horizontal coordinates of planet
-                Planets[p].Horizontal = Planets[p].Equatorial.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
+                p.Horizontal = p.Equatorial.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
 
                 // Elongation of the Planet
-                Planets[p].Elongation = Appearance.Elongation(sun.Ecliptical, Planets[p].Ecliptical);
+                p.Elongation = Appearance.Elongation(sunEcliptical, p.Ecliptical);
 
                 // Phase angle
-                Planets[p].PhaseAngle = Appearance.PhaseAngle(Planets[p].Elongation, sun.Ecliptical.Distance, Planets[p].Ecliptical.Distance);
+                p.PhaseAngle = Appearance.PhaseAngle(p.Elongation, sunEcliptical.Distance, p.Ecliptical.Distance);
 
                 // Planet phase                
-                Planets[p].Phase = Appearance.Phase(Planets[p].PhaseAngle);
+                p.Phase = Appearance.Phase(p.PhaseAngle);
 
                 // Planet magnitude
-                Planets[p].Magnitude = PlanetEphem.Magnitude(p + 1, Planets[p].Ecliptical.Distance, Planets[p].Distance, Planets[p].PhaseAngle);
+                p.Magnitude = PlanetEphem.Magnitude(p.Number, p.Ecliptical.Distance, p.Distance, p.PhaseAngle);
+                if (p.Number == Planet.SATURN)
+                {
+                    SaturnRings = PlanetEphem.SaturnRings(Sky.JulianDay, p.Heliocentrical, hEarth, Sky.Epsilon);
+                    p.Magnitude += SaturnRings.GetRingsMagnitude();
+                }
 
                 // Planet appearance
-                Planets[p].Appearance = PlanetEphem.PlanetAppearance(Sky.JulianDay, p + 1, Planets[p].Equatorial0, Planets[p].Ecliptical.Distance);
-            }
+                p.Appearance = PlanetEphem.PlanetAppearance(Sky.JulianDay, p.Number, p.Equatorial0, p.Ecliptical.Distance);
+            }            
+        }
 
-            SaturnRings = PlanetEphem.SaturnRings(Sky.JulianDay, Planets[Planet.SATURN - 1].Heliocentrical, Planets[Planet.EARTH - 1].Heliocentrical, Sky.Epsilon);
-            Planets[Planet.SATURN - 1].Magnitude += SaturnRings.GetRingsMagnitude();
+        public void OnDefineEphemeris(Dictionary<string, Func<CalculationContext, Planet, object>> formulae)
+        {
+            formulae["Equatorial"] = (ctx, p) => p.Equatorial;
+            formulae["Horizontal"] = (ctx, p) => p.Horizontal;
+            formulae["Magnitude"] = (ctx, p) => p.Magnitude;
+            formulae["DistanceFromSun"] = (ctx, p) => p.Distance;
+            formulae["DistanceFromEarth"] = (ctx, p) => p.Ecliptical.Distance;
+
+            formulae["RTS"] = (ctx, p) =>
+            {               
+                Calculate(ctx /* TODO: context for JD-1 */, p);
+                var eqJdBefore = new CrdsEquatorial(p.Equatorial);
+
+                Calculate(ctx /* TODO: context for JD+1 */, p);
+                var eqJdAfter = new CrdsEquatorial(p.Equatorial);
+
+                Calculate(ctx, p);
+                var eqJd = new CrdsEquatorial(p.Equatorial);
+
+                // TODO: calculate rise/transit/set
+
+                return null;
+            };
         }
     }
 }

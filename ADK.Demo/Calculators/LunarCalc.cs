@@ -21,7 +21,22 @@ namespace ADK.Demo.Calculators
 
         public override void Calculate(CalculationContext context)
         {
-            // geocentrical coordinates
+            // get Earth coordinates
+            CrdsHeliocentrical hEarth = PlanetPositions.GetPlanetCoordinates(Planet.EARTH, Sky.JulianDay, highPrecision: true);
+
+            // transform to ecliptical coordinates of the Sun
+            CrdsEcliptical sunEcliptical = new CrdsEcliptical(Angle.To360(hEarth.L + 180), -hEarth.B, hEarth.R);
+
+            // correct solar coordinates to FK5 system
+            sunEcliptical += PlanetPositions.CorrectionForFK5(Sky.JulianDay, sunEcliptical); ;
+
+            // add nutation effect to ecliptical coordinates of the Sun
+            sunEcliptical += Nutation.NutationEffect(Sky.NutationElements.deltaPsi);
+
+            // add aberration effect, so we have an final ecliptical coordinates of the Sun 
+            sunEcliptical += Aberration.AberrationEffect(sunEcliptical.Distance);
+
+            // geocentrical coordinates of the Moon
             moon.Ecliptical0 = LunarMotion.GetCoordinates(Sky.JulianDay);
 
             // apparent geocentrical ecliptical coordinates 
@@ -44,15 +59,12 @@ namespace ADK.Demo.Calculators
 
             // Local horizontal coordinates of the Moon
             moon.Horizontal = moon.Equatorial.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
-           
-            // Sun ephemerides should be already calculated
-            Sun sun = Sky.Get<Sun>("Sun");
 
             // Elongation of the Moon
-            moon.Elongation = Appearance.Elongation(sun.Ecliptical, moon.Ecliptical0);
+            moon.Elongation = Appearance.Elongation(sunEcliptical, moon.Ecliptical0);
             
             // Phase angle
-            moon.PhaseAngle = Appearance.PhaseAngle(moon.Elongation, sun.Ecliptical.Distance * 149597871.0, moon.Ecliptical0.Distance);
+            moon.PhaseAngle = Appearance.PhaseAngle(moon.Elongation, sunEcliptical.Distance * 149597871.0, moon.Ecliptical0.Distance);
             
             // Moon phase
             moon.Phase = Appearance.Phase(moon.PhaseAngle);

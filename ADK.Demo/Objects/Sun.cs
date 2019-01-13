@@ -22,6 +22,9 @@ namespace ADK.Demo.Objects
 
         public double Semidiameter { get; set; }
 
+        /// <summary>
+        /// Solar parallax, in degrees
+        /// </summary>
         public double Parallax { get; set; }
     }
 }
