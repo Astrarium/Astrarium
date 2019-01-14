@@ -67,7 +67,7 @@ namespace ADK.Demo.Calculators
                 // previous value of tau to calculate the difference
                 double tau0 = 1;
 
-                CrdsHeliocentrical hEarth;
+                CrdsHeliocentrical hEarth = new CrdsHeliocentrical();
 
                 // Iterative process to find ecliptical coordinates of planet
                 while (Math.Abs(tau - tau0) > deltaTau)
