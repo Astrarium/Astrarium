@@ -45,11 +45,7 @@ namespace ADK.Demo.Calculators
             // final difference to stop iteration process, 1 second of time
             double deltaTau = TimeSpan.FromSeconds(1).TotalDays;
 
-            // get Earth coordinates
-            CrdsHeliocentrical hEarth = PlanetPositions.GetPlanetCoordinates(Planet.EARTH, Sky.JulianDay, highPrecision: true);
-
-            // transform to ecliptical coordinates of the Sun
-            CrdsEcliptical sunEcliptical = new CrdsEcliptical(Angle.To360(hEarth.L + 180), -hEarth.B, hEarth.R);
+            CrdsEcliptical sunEcliptical = context.Formula<CrdsEcliptical>("SunEcliptical");
 
             // correct solar coordinates to FK5 system
             sunEcliptical += PlanetPositions.CorrectionForFK5(Sky.JulianDay, sunEcliptical); ;
@@ -70,6 +66,8 @@ namespace ADK.Demo.Calculators
 
                 // previous value of tau to calculate the difference
                 double tau0 = 1;
+
+                CrdsHeliocentrical hEarth;
 
                 // Iterative process to find ecliptical coordinates of planet
                 while (Math.Abs(tau - tau0) > deltaTau)
@@ -130,11 +128,32 @@ namespace ADK.Demo.Calculators
 
                 // Planet appearance
                 p.Appearance = PlanetEphem.PlanetAppearance(Sky.JulianDay, p.Number, p.Equatorial0, p.Ecliptical.Distance);
-            }            
+            }
         }
 
-        public void OnDefineEphemeris(Dictionary<string, Func<CalculationContext, Planet, object>> formulae)
+        //public void ConfigureObjectInfo(ObjectInfo info)
+        //{
+        //    info.AddHeader("");
+        //    info.AddProperty("Equatorial.Alpha", Formatters.RA);
+        //    info.AddProperty("Equatorial.Delta");
+        //}
+
+       
+        public void ConfigureEphemeris(EphemerisConfig<Planet> config) // Dictionary<string, Func<CalculationContext, Planet, object>> formulae)
         {
+            // Define formulae for object ephemeris
+
+            config.AddFormula("Sun.Ecliptical", GetSunEcliptical);
+
+            config.AddFormula("Magnitude", (ctx, p) => p.Magnitude).AsEphem();
+                
+            config.AddFormula("Equatorial", (ctx, p) => p.Equatorial)
+                .AsEphem("Equatorial.Alpha", eq => eq.Alpha, Formatters.RA)
+                .AsEphem("Equatorial.Delta", eq => eq.Delta, Formatters.Dec);
+
+
+
+
             formulae["Equatorial"] = (ctx, p) => p.Equatorial;
             formulae["Horizontal"] = (ctx, p) => p.Horizontal;
             formulae["Magnitude"] = (ctx, p) => p.Magnitude;
@@ -142,7 +161,7 @@ namespace ADK.Demo.Calculators
             formulae["DistanceFromEarth"] = (ctx, p) => p.Ecliptical.Distance;
 
             formulae["RTS"] = (ctx, p) =>
-            {               
+            {
                 Calculate(ctx /* TODO: context for JD-1 */, p);
                 var eqJdBefore = new CrdsEquatorial(p.Equatorial);
 
@@ -157,5 +176,62 @@ namespace ADK.Demo.Calculators
                 return null;
             };
         }
+
+        private CrdsEcliptical GetSunEcliptical(CalculationContext calculationContext, Planet p)
+        {
+            // get Earth coordinates
+            CrdsHeliocentrical hEarth = PlanetPositions.GetPlanetCoordinates(Planet.EARTH, Sky.JulianDay, highPrecision: true);
+
+            // transform to ecliptical coordinates of the Sun
+            CrdsEcliptical sunEcliptical = new CrdsEcliptical(Angle.To360(hEarth.L + 180), -hEarth.B, hEarth.R);
+
+            // correct solar coordinates to FK5 system
+            sunEcliptical += PlanetPositions.CorrectionForFK5(Sky.JulianDay, sunEcliptical); ;
+
+            // add nutation effect to ecliptical coordinates of the Sun
+            sunEcliptical += Nutation.NutationEffect(Sky.NutationElements.deltaPsi);
+
+            // add aberration effect, so we have an final ecliptical coordinates of the Sun 
+            sunEcliptical += Aberration.AberrationEffect(sunEcliptical.Distance);
+
+            return sunEcliptical;
+        }
+    }
+
+    public class EphemerisConfig<TObject> where TObject : CelestialObject
+    {
+        public void FormulaFor<TResult>(string key, Func<CalculationContext, TObject, TResult> formula, EphemFormatter formatter)
+        {
+
+        }
+
+        public EphemerisConfigItem<TObject, TResult> AddFormula<TResult>(string key, Func<CalculationContext, TObject, TResult> formula)
+        {
+            return new EphemerisConfigItem<TObject, TResult>();
+        }
+    }
+
+    public class EphemerisConfigItem<TObject, TEphemType> where TObject : CelestialObject
+    {
+        public EphemerisConfigItem<TObject, TEphemType> AsEphem<TResult>(string key, Func<TEphemType, TResult> formula, EphemFormatter formatter = null)
+        {
+            return this;
+        }
+
+        public EphemerisConfigItem<TObject, TEphemType> AsEphem(EphemFormatter formatter = null)
+        {
+            return this;
+        }
+    }
+
+    public class EphemFormatter
+    {
+
+    }
+
+    public static class Formatters
+    {
+        public static readonly EphemFormatter RA = new EphemFormatter();
+        public static readonly EphemFormatter Dec = new EphemFormatter();
     }
 }
