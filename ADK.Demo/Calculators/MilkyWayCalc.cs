@@ -26,9 +26,9 @@ namespace ADK.Demo.Calculators
         /// <param name="sky"></param>
         public MilkyWayCalc(Sky sky) : base(sky) { }
 
-        public override void Calculate(CalculationContext context)
+        public override void Calculate(SkyContext context)
         {
-            var p = Precession.ElementsFK5(Date.EPOCH_J2000, Sky.JulianDay);
+            var p = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
 
             foreach (var block in MilkyWay)
             {
@@ -38,7 +38,7 @@ namespace ADK.Demo.Calculators
                     var eq = Precession.GetEquatorialCoordinates(bp.Equatorial0, p);
 
                     // Apparent horizontal coordinates
-                    bp.Horizontal = eq.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
+                    bp.Horizontal = eq.ToHorizontal(context.GeoLocation, context.SiderealTime);
                 }
             }
         }

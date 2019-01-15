@@ -26,10 +26,10 @@ namespace ADK.Demo.Calculators
             Sky.AddDataProvider("DeepSky", () => DeepSkies);
         }
 
-        public override void Calculate(CalculationContext context)
+        public override void Calculate(SkyContext context)
         {
             // precessional elements
-            var p = Precession.ElementsFK5(Date.EPOCH_J2000, Sky.JulianDay);
+            var p = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
 
             foreach (var ds in DeepSkies)
             {
@@ -40,16 +40,16 @@ namespace ADK.Demo.Calculators
                 ds.Equatorial = Precession.GetEquatorialCoordinates(eq0, p);
 
                 // Nutation effect
-                var eq1 = Nutation.NutationEffect(ds.Equatorial, Sky.NutationElements, Sky.Epsilon);
+                var eq1 = Nutation.NutationEffect(ds.Equatorial, context.NutationElements, context.Epsilon);
 
                 // Aberration effect
-                var eq2 = Aberration.AberrationEffect(ds.Equatorial, Sky.AberrationElements, Sky.Epsilon);
+                var eq2 = Aberration.AberrationEffect(ds.Equatorial, context.AberrationElements, context.Epsilon);
 
                 // Apparent coordinates of the object
                 ds.Equatorial += eq1 + eq2;
 
                 // Apparent horizontal coordinates
-                ds.Horizontal = ds.Equatorial.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
+                ds.Horizontal = ds.Equatorial.ToHorizontal(context.GeoLocation, context.SiderealTime);
             }
         }
 

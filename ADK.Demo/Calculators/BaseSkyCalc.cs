@@ -17,6 +17,6 @@ namespace ADK.Demo.Calculators
 
         public virtual void Initialize() { }
 
-        public virtual void Calculate(CalculationContext context) { }
+        public virtual void Calculate(SkyContext context) { }
     }
 }

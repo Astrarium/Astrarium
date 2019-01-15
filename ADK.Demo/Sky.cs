@@ -12,10 +12,137 @@ namespace ADK.Demo
 {
     public class Sky
     {
+        public SkyContext Context { get; set; }
+
+        public ICollection<BaseSkyCalc> Calculators { get; private set; } = new List<BaseSkyCalc>();
+
+        private Dictionary<string, object> DataProviders = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
+        public void AddDataProvider<T>(string key, Func<T> provider)
+        {
+            DataProviders.Add(key, provider);
+        }
+
+        public T Get<T>(string key)
+        {
+            if (DataProviders.ContainsKey(key))
+            {
+                return (DataProviders[key] as Func<T>).Invoke();
+            }
+            else
+            {
+                throw new ArgumentException($"There is no data provider with name `{key}`.");
+            }
+        }
+
+        public void Initialize()
+        {
+            foreach (var calc in Calculators)
+            {
+                calc.Initialize();
+            }
+        }
+
+        public Sky()
+        {
+            Context = new SkyContext(
+                new Date(DateTime.Now).ToJulianEphemerisDay(), 
+                new CrdsGeographical(56.3333, -44));
+        }
+
+        public void Calculate()
+        {
+            foreach (var calc in Calculators)
+            {
+                calc.Calculate(Context);
+            }
+        }
+
+        public List<Dictionary<string, object>> GetEphemeris(CelestialObject obj, double from, double to, ICollection<string> keys)
+        {
+            List<Dictionary<string, object>> result = new List<Dictionary<string, object>>();
+
+            var copy = obj.CreateCopy();
+            EphemerisConfig config = new EphemerisConfig<Planet>();
+            Type providerType = typeof(IEphemProvider<>).MakeGenericType(obj.GetType());
+
+            var provider = Calculators.OfType<IEphemProvider>().FirstOrDefault(c => typeof(IEphemProvider).IsAssignableFrom(c.GetType()));
+
+            providerType.GetMethod("ConfigureEphemeris").Invoke(provider, new object[] { config });
+
+            List<EphemerisConfigItem> itemsToBeCalled = config.Items.Where(i =>
+                keys.Contains(i.Key) ||
+                keys.Intersect(i.Formulae.Select(f => f.Key)).Count() > 0).ToList();
+
+            for (double jd = from; jd < to; jd++)
+            {
+                var context = new SkyContext(jd, Context.GeoLocation);
+                provider.Calculate(context, copy);
+
+                Dictionary<string, object> ephemeris = new Dictionary<string, object>();
+
+                foreach (var item in itemsToBeCalled)
+                {
+                    object value = item.Formula.DynamicInvoke(context, copy);
+
+                    if (keys.Contains(item.Key))
+                    {
+                        if (item.Formulae.Count == 0)
+                        {
+                            ephemeris.Add(item.Key, value);
+                        }
+                        else
+                        {
+                            foreach (string key in item.Formulae.Keys)
+                            {
+                                object subvalue = item.Formulae[key].DynamicInvoke(value);
+                                ephemeris.Add(key, subvalue);
+                            }
+                        }
+                    }
+
+                    foreach (string key in item.Formulae.Keys)
+                    {
+                        if (keys.Contains(key))
+                        {
+                            object subvalue = item.Formulae[key].DynamicInvoke(value);
+                            ephemeris.Add(key, subvalue);
+                        }
+                    }
+                }
+
+                result.Add(ephemeris);
+            }
+
+            return result;
+        }
+    }
+
+    public class SkyContext
+    {    
+        public SkyContext(double jd, CrdsGeographical location)
+        {
+            GeoLocation = location;
+            JulianDay = jd;
+        }
+
+        private double _JulianDay;
+
         /// <summary>
         /// Julian ephemeris day
         /// </summary>
-        public double JulianDay { get; set; }
+        public double JulianDay
+        {
+            get { return _JulianDay; }
+            set
+            {
+                _JulianDay = value;
+                NutationElements = Nutation.NutationElements(_JulianDay);
+                AberrationElements = Aberration.AberrationElements(_JulianDay);
+                Epsilon = Date.TrueObliquity(_JulianDay, NutationElements.deltaEpsilon);
+                SiderealTime = Date.ApparentSiderealTime(_JulianDay, NutationElements.deltaPsi, Epsilon);
+            }
+        }
 
         /// <summary>
         /// Geographical coordinates of the observer
@@ -42,67 +169,8 @@ namespace ADK.Demo
         /// </summary>
         public double Epsilon { get; private set; }
 
-        public ICollection<BaseSkyCalc> Calculators { get; private set; } = new List<BaseSkyCalc>();
 
-        private Dictionary<string, object> DataProviders = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-
-        public void AddDataProvider<T>(string key, Func<T> provider)
-        {
-            DataProviders.Add(key, provider);
-        }
-
-        public T Get<T>(string key)
-        {
-            if (DataProviders.ContainsKey(key))
-            {
-                return (DataProviders[key] as Func<T>).Invoke();
-            }
-            else
-            {
-                throw new ArgumentException($"There is no data provider with name `{key}`.");
-            }
-        }
-
-        private CalculationContext context = new CalculationContext();
-
-
-
-        
-
-
-        public void Initialize()
-        {
-            foreach (var calc in Calculators)
-            {
-                calc.Initialize();
-            }
-        }
-
-        public Sky()
-        {
-            JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
-            GeoLocation = new CrdsGeographical(56.3333, -44);
-        }
-
-        public void Calculate()
-        {
-            context.ClearCache();
-
-            NutationElements = Nutation.NutationElements(JulianDay);
-            AberrationElements = Aberration.AberrationElements(JulianDay);
-
-            Epsilon = Date.TrueObliquity(JulianDay, NutationElements.deltaEpsilon);
-            SiderealTime = Date.ApparentSiderealTime(JulianDay, NutationElements.deltaPsi, Epsilon);
-
-            foreach (var calc in Calculators)
-            {
-                calc.Calculate(context);
-            }
-        }
-    }
-
-    public class CalculationContext
-    {
+        /*
         private static Dictionary<string, Delegate> formulae = new Dictionary<string, Delegate>();
         private Dictionary<string, object> cacheSingle = new Dictionary<string, object>();
         private Dictionary<string, Dictionary<int, object>> cacheCollection = new Dictionary<string, Dictionary<int, object>>();
@@ -138,6 +206,7 @@ namespace ADK.Demo
             {
                 throw new ArgumentException("Formula with specified key wan not found");
             }
+            
         }
 
         public TResult Formula<TResult>(string key, CelestialObject obj)
@@ -178,5 +247,6 @@ namespace ADK.Demo
             cacheSingle.Clear();
             cacheCollection.Clear();
         }
+        */
     }
 }

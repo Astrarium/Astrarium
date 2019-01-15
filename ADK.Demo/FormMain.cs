@@ -43,6 +43,16 @@ namespace ADK.Demo
             sky.Initialize();
             sky.Calculate();
 
+
+            List<string> keys = new List<string>();
+            keys.Add("Rise");
+            keys.Add("Set");
+            keys.Add("Horizontal");
+
+            sky.GetEphemeris(sky.Get<ICollection<Planet>>("Planets").ElementAt(0), sky.Context.JulianDay, sky.Context.JulianDay + 50, keys);
+
+            //sky.Calculate();
+
             ISkyMap map = new SkyMap();
             map.Renderers.Add(new DeepSkyRenderer(sky, map, settings));
             map.Renderers.Add(new MilkyWayRenderer(sky, map, settings));
@@ -60,10 +70,10 @@ namespace ADK.Demo
         {
             var hor = skyView.SkyMap.Projection.Invert(e.Location);
 
-            var eq = hor.ToEquatorial(sky.GeoLocation, sky.SiderealTime);
+            var eq = hor.ToEquatorial(sky.Context.GeoLocation, sky.Context.SiderealTime);
 
             // precessional elements for converting from current to B1875 epoch
-            var p1875 = Precession.ElementsFK5(sky.JulianDay, Date.EPOCH_B1875);
+            var p1875 = Precession.ElementsFK5(sky.Context.JulianDay, Date.EPOCH_B1875);
 
             // Equatorial coordinates for B1875 epoch
             CrdsEquatorial eq1875 = Precession.GetEquatorialCoordinates(eq, p1875);
@@ -81,8 +91,8 @@ namespace ADK.Demo
         {
             if (e.KeyCode == Keys.D)
             {
-                double jd = sky.JulianDay;
-                double deltaT = Date.DeltaT(sky.JulianDay) / 86400;
+                double jd = sky.Context.JulianDay;
+                double deltaT = Date.DeltaT(sky.Context.JulianDay) / 86400;
                 double tzone = 3.0 / 24;
 
                 using (var frmDateTime = new FormDateTime(jd + tzone - deltaT))
@@ -91,7 +101,7 @@ namespace ADK.Demo
                     {
                         jd = frmDateTime.JulianDay;
                         deltaT = Date.DeltaT(jd) / 86400;
-                        sky.JulianDay = jd - tzone + deltaT;
+                        sky.Context.JulianDay = jd - tzone + deltaT;
                         sky.Calculate();
                         skyView.Invalidate();
                     }
@@ -99,13 +109,13 @@ namespace ADK.Demo
             }
             else if (e.KeyCode == Keys.A)
             {
-                sky.JulianDay += 1;
+                sky.Context.JulianDay += 1;
                 sky.Calculate();
                 skyView.Invalidate();
             }
             else if (e.KeyCode == Keys.S)
             {
-                sky.JulianDay -= 1;
+                sky.Context.JulianDay -= 1;
                 sky.Calculate();
                 skyView.Invalidate();
             }

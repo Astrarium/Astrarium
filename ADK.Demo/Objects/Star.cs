@@ -13,6 +13,8 @@ namespace ADK.Demo.Objects
         /// </summary>
         public CrdsEquatorial Equatorial0 { get; set; } = new CrdsEquatorial();
 
+        public CrdsEquatorial Equatorial { get; set; }
+
         /// <summary>
         /// Annual proper motion in RA J2000, FK5 system, arcsec/yr
         /// </summary>

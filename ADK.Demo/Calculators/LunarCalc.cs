@@ -19,31 +19,31 @@ namespace ADK.Demo.Calculators
             Sky.AddDataProvider("Moon", () => moon);
         }
 
-        public override void Calculate(CalculationContext context)
+        public override void Calculate(SkyContext context)
         {
             // get Earth coordinates
-            CrdsHeliocentrical hEarth = PlanetPositions.GetPlanetCoordinates(Planet.EARTH, Sky.JulianDay, highPrecision: true);
+            CrdsHeliocentrical hEarth = PlanetPositions.GetPlanetCoordinates(Planet.EARTH, context.JulianDay, highPrecision: true);
 
             // transform to ecliptical coordinates of the Sun
             CrdsEcliptical sunEcliptical = new CrdsEcliptical(Angle.To360(hEarth.L + 180), -hEarth.B, hEarth.R);
 
             // correct solar coordinates to FK5 system
-            sunEcliptical += PlanetPositions.CorrectionForFK5(Sky.JulianDay, sunEcliptical); ;
+            sunEcliptical += PlanetPositions.CorrectionForFK5(context.JulianDay, sunEcliptical); ;
 
             // add nutation effect to ecliptical coordinates of the Sun
-            sunEcliptical += Nutation.NutationEffect(Sky.NutationElements.deltaPsi);
+            sunEcliptical += Nutation.NutationEffect(context.NutationElements.deltaPsi);
 
             // add aberration effect, so we have an final ecliptical coordinates of the Sun 
             sunEcliptical += Aberration.AberrationEffect(sunEcliptical.Distance);
 
             // geocentrical coordinates of the Moon
-            moon.Ecliptical0 = LunarMotion.GetCoordinates(Sky.JulianDay);
+            moon.Ecliptical0 = LunarMotion.GetCoordinates(context.JulianDay);
 
             // apparent geocentrical ecliptical coordinates 
-            moon.Ecliptical0 += Nutation.NutationEffect(Sky.NutationElements.deltaPsi);
+            moon.Ecliptical0 += Nutation.NutationEffect(context.NutationElements.deltaPsi);
 
             // equatorial geocentrical coordinates
-            moon.Equatorial0 = moon.Ecliptical0.ToEquatorial(Sky.Epsilon);
+            moon.Equatorial0 = moon.Ecliptical0.ToEquatorial(context.Epsilon);
 
             // Horizontal equatorial parallax
             moon.Parallax = LunarEphem.Parallax(moon.Ecliptical0.Distance);
@@ -52,13 +52,13 @@ namespace ADK.Demo.Calculators
             moon.Semidiameter = LunarEphem.Semidiameter(moon.Ecliptical0.Distance);
 
             // Topocentric equatorial coordinates
-            moon.Equatorial = moon.Equatorial0.ToTopocentric(Sky.GeoLocation, Sky.SiderealTime, moon.Parallax);
+            moon.Equatorial = moon.Equatorial0.ToTopocentric(context.GeoLocation, context.SiderealTime, moon.Parallax);
 
             // Topocentric ecliptical coordinates
-            moon.Ecliptical = moon.Equatorial.ToEcliptical(Sky.Epsilon);
+            moon.Ecliptical = moon.Equatorial.ToEcliptical(context.Epsilon);
 
             // Local horizontal coordinates of the Moon
-            moon.Horizontal = moon.Equatorial.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
+            moon.Horizontal = moon.Equatorial.ToHorizontal(context.GeoLocation, context.SiderealTime);
 
             // Elongation of the Moon
             moon.Elongation = Appearance.Elongation(sunEcliptical, moon.Ecliptical0);
@@ -70,10 +70,10 @@ namespace ADK.Demo.Calculators
             moon.Phase = Appearance.Phase(moon.PhaseAngle);
 
             // Topocentrical PA of axis
-            moon.PAaxis = LunarEphem.PositionAngleOfAxis(Sky.JulianDay, moon.Ecliptical, Sky.Epsilon, Sky.NutationElements.deltaPsi);
+            moon.PAaxis = LunarEphem.PositionAngleOfAxis(context.JulianDay, moon.Ecliptical, context.Epsilon, context.NutationElements.deltaPsi);
 
             // Topocentrical libration
-            moon.Libration = LunarEphem.Libration(Sky.JulianDay, moon.Ecliptical, Sky.NutationElements.deltaPsi);
+            moon.Libration = LunarEphem.Libration(context.JulianDay, moon.Ecliptical, context.NutationElements.deltaPsi);
         }
     }
 }

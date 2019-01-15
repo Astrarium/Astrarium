@@ -66,6 +66,15 @@ namespace ADK.Demo.Objects
         /// </summary>
         public PlanetAppearance Appearance { get; set; }
 
+        public override CelestialObject CreateCopy()
+        {
+            return new Planet()
+            {
+                Number = this.Number,
+                Flattening = this.Flattening
+            };
+        }
+
         public const int MERCURY = 1;
         public const int VENUS = 2;
         public const int EARTH = 3;

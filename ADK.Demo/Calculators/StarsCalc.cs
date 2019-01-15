@@ -22,11 +22,37 @@ namespace ADK.Demo.Calculators
             Sky.AddDataProvider("Stars", () => Stars);
         }
 
-        public override void Calculate(CalculationContext context)
+        public override void Calculate(SkyContext context)
         {
             foreach (var star in Stars)
             {
-                star.Horizontal = context.Formula<CrdsHorizontal>("Star.Horizontal", star);
+                double years = (context.JulianDay - Date.EPOCH_J2000) / 365.25;
+
+                PrecessionalElements p = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
+
+                // Initial coodinates for J2000 epoch
+                CrdsEquatorial eq0 = star.Equatorial0;
+
+                // Take into account effect of proper motion:
+                // now coordinates are for the mean equinox of J2000.0,
+                // but for epoch of the target date
+                eq0.Alpha += star.PmAlpha * years / 3600.0;
+                eq0.Delta += star.PmDelta * years / 3600.0;
+
+                // Equatorial coordinates for the mean equinox and epoch of the target date
+                star.Equatorial = Precession.GetEquatorialCoordinates(eq0, p);
+
+                // Nutation effect
+                var eq1 = Nutation.NutationEffect(star.Equatorial, context.NutationElements, context.Epsilon);
+
+                // Aberration effect
+                var eq2 = Aberration.AberrationEffect(star.Equatorial, context.AberrationElements, context.Epsilon);
+
+                // Apparent coordinates of the star
+                star.Equatorial += eq1 + eq2;
+
+                // Local horizontal coordinates
+                star.Horizontal = star.Equatorial.ToHorizontal(context.GeoLocation, context.SiderealTime);
             }
         }
 
@@ -48,7 +74,7 @@ namespace ADK.Demo.Calculators
 
                     if (line.Length < 197) line += new string(' ', 197 - line.Length);
 
-                    Star star = new Star() { Id = i };
+                    Star star = new Star();
 
                     if (line[94] == ' ')
                     {
@@ -87,57 +113,10 @@ namespace ADK.Demo.Calculators
                     Stars.Add(star);
                 }
             }
-
-            CalculationContext.AddFormula("PE2000", PrecessionalElements2000);
-            CalculationContext.AddFormula("YearsSince2000", YearsSince2000);
-            CalculationContext.AddFormula<Star, CrdsEquatorial>("Star.Equatorial", Star_Equatorial);
-            CalculationContext.AddFormula<Star, CrdsHorizontal>("Star.Horizontal", Star_Horizontal);
         }
 
-        private double YearsSince2000(CalculationContext context)
-        {
-            return (Sky.JulianDay - Date.EPOCH_J2000) / 365.25;
-        }
 
-        private PrecessionalElements PrecessionalElements2000(CalculationContext context)
-        {
-            return Precession.ElementsFK5(Date.EPOCH_J2000, Sky.JulianDay);
-        }
 
-        private CrdsHorizontal Star_Horizontal(CalculationContext context, Star star)
-        {
-            var eq = context.Formula<CrdsEquatorial>("Star.Equatorial", star);
-            return eq.ToHorizontal(Sky.GeoLocation, Sky.SiderealTime);
-        }
 
-        private CrdsEquatorial Star_Equatorial(CalculationContext context, Star star)
-        {
-            double years = context.Formula<double>("YearsSince2000");
-
-            PrecessionalElements p = context.Formula<PrecessionalElements>("PE2000");
-
-            // Initial coodinates for J2000 epoch
-            CrdsEquatorial eq0 = star.Equatorial0;
-
-            // Take into account effect of proper motion:
-            // now coordinates are for the mean equinox of J2000.0,
-            // but for epoch of the target date
-            eq0.Alpha += star.PmAlpha * years / 3600.0;
-            eq0.Delta += star.PmDelta * years / 3600.0;
-
-            // Equatorial coordinates for the mean equinox and epoch of the target date
-            var equatorial = Precession.GetEquatorialCoordinates(eq0, p);
-
-            // Nutation effect
-            var eq1 = Nutation.NutationEffect(equatorial, Sky.NutationElements, Sky.Epsilon);
-
-            // Aberration effect
-            var eq2 = Aberration.AberrationEffect(equatorial, Sky.AberrationElements, Sky.Epsilon);
-
-            // Apparent coordinates of the star
-            equatorial += eq1 + eq2;
-
-            return equatorial;
-        }
     }
 }

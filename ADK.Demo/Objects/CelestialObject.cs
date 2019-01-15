@@ -21,9 +21,9 @@ namespace ADK.Demo.Objects
         /// </summary>
         public CrdsHorizontal Horizontal { get; set; }
 
-        /// <summary>
-        /// Unique object id among the collection of objects with same type
-        /// </summary>
-        public int Id { get; set; }
+        public virtual CelestialObject CreateCopy()
+        {
+            return null;
+        }
     }
 }
