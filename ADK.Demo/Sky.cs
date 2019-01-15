@@ -70,45 +70,33 @@ namespace ADK.Demo
 
             providerType.GetMethod("ConfigureEphemeris").Invoke(provider, new object[] { config });
 
-            List<EphemerisConfigItem> itemsToBeCalled = config.Items.Where(i =>
-                keys.Contains(i.Key) ||
-                keys.Intersect(i.Formulae.Select(f => f.Key)).Count() > 0).ToList();
+            var itemsToBeCalled = config.Filter(keys);
+
+            List<Delegate> calledDelegates = new List<Delegate>();
 
             for (double jd = from; jd < to; jd++)
             {
                 var context = new SkyContext(jd, Context.GeoLocation);
+                calledDelegates.Clear();
+
                 provider.Calculate(context, copy);
 
                 Dictionary<string, object> ephemeris = new Dictionary<string, object>();
 
                 foreach (var item in itemsToBeCalled)
                 {
+                    foreach (var action in item.Actions)
+                    {
+                        if (!calledDelegates.Contains(action))
+                        {
+                            action.DynamicInvoke(context, copy);
+                            calledDelegates.Add(action);
+                        }
+                    }
+
                     object value = item.Formula.DynamicInvoke(context, copy);
 
-                    if (keys.Contains(item.Key))
-                    {
-                        if (item.Formulae.Count == 0)
-                        {
-                            ephemeris.Add(item.Key, value);
-                        }
-                        else
-                        {
-                            foreach (string key in item.Formulae.Keys)
-                            {
-                                object subvalue = item.Formulae[key].DynamicInvoke(value);
-                                ephemeris.Add(key, subvalue);
-                            }
-                        }
-                    }
-
-                    foreach (string key in item.Formulae.Keys)
-                    {
-                        if (keys.Contains(key))
-                        {
-                            object subvalue = item.Formulae[key].DynamicInvoke(value);
-                            ephemeris.Add(key, subvalue);
-                        }
-                    }
+                    ephemeris.Add(item.Key, value);
                 }
 
                 result.Add(ephemeris);
@@ -169,84 +157,9 @@ namespace ADK.Demo
         /// </summary>
         public double Epsilon { get; private set; }
 
-
-        /*
-        private static Dictionary<string, Delegate> formulae = new Dictionary<string, Delegate>();
-        private Dictionary<string, object> cacheSingle = new Dictionary<string, object>();
-        private Dictionary<string, Dictionary<int, object>> cacheCollection = new Dictionary<string, Dictionary<int, object>>();
-
-        public static void AddFormula<TResult>(string key, Func<CalculationContext, TResult> func)
-        {
-            formulae[key] = func;
-        }
-
-        public static void AddFormula<TObject, TResult>(string key, Func<CalculationContext, TObject, TResult> formula) where TObject : CelestialObject
-        {
-            formulae[key] = formula;
-        }
-
-        public TResult Formula<TResult>(string formulaName)
-        {
-            if (cacheSingle.ContainsKey(formulaName))
-            {
-                switch (cacheSingle[formulaName])
-                {
-                    case TResult result:
-                        return result;
-                    default:
-                        throw new ArgumentException("Cached value has different type.");
-                }
-            }
-
-            if (formulae.ContainsKey(formulaName))
-            {
-                return (TResult)formulae[formulaName].DynamicInvoke(this);               
-            }
-            else
-            {
-                throw new ArgumentException("Formula with specified key wan not found");
-            }
-            
-        }
-
-        public TResult Formula<TResult>(string key, CelestialObject obj)
-        {
-            if (cacheCollection.ContainsKey(key))
-            {
-                var dict = cacheCollection[key];
-
-                if (dict.ContainsKey(obj.Id))
-                {
-                    switch (dict[obj.Id])
-                    {
-                        case TResult result:
-                            return result;
-
-                        default:
-                            throw new ArgumentException("Cached value has different type.");
-                    }
-                }
-            }
-            else
-            {
-                cacheCollection[key] = new Dictionary<int, object>();
-            }
-
-            if (formulae.ContainsKey(key))
-            {
-                return (TResult)formulae[key].DynamicInvoke(this, obj);
-            }
-            else
-            {
-                throw new ArgumentException($"Formula with name \"{key}\" was not found");
-            }
-        }
-
-        public void ClearCache()
-        {
-            cacheSingle.Clear();
-            cacheCollection.Clear();
-        }
-        */
+        /// <summary>
+        /// Extra data to store within the context
+        /// </summary>
+        public dynamic Data { get; } = new ExpandoObject();
     }
 }
