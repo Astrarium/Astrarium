@@ -42,6 +42,84 @@ namespace ADK.Demo.Calculators
 
             Sky.AddDataProvider("Planets", () => Planets);
             Sky.AddDataProvider("SaturnRings", () => SaturnRings);
+
+
+
+            Formula["SunEcliptical"] = (c, p) =>
+            {
+                CrdsHeliocentrical earthHeliocentrical = c.Data.EarthHeliocentric;
+                var sunEcliptical = new CrdsEcliptical(Angle.To360(earthHeliocentrical.L + 180), -earthHeliocentrical.B, earthHeliocentrical.R);
+
+                // Corrected solar coordinates to FK5 system
+                sunEcliptical += PlanetPositions.CorrectionForFK5(c.JulianDay, sunEcliptical);
+
+                // Add nutation effect to ecliptical coordinates of the Sun
+                sunEcliptical += Nutation.NutationEffect(c.NutationElements.deltaPsi);
+
+                // Add aberration effect, so we have an final ecliptical coordinates of the Sun 
+                sunEcliptical += Aberration.AberrationEffect(sunEcliptical.Distance);
+
+                return sunEcliptical;
+            };
+
+            
+
+            Formula["Ecliptical"] = (context, p) =>
+            {
+                CrdsHeliocentrical heliocentrical = context.Data.Heliocentrical;
+
+                CrdsHeliocentrical earthHeliocentrical = context.Formula(GetEarthHeliocentrial, p);
+
+                // Ecliptical coordinates of planet
+                var ecliptical = heliocentrical.ToRectangular(earthHeliocentrical).ToEcliptical();
+
+                // Correction for FK5 system
+                ecliptical += PlanetPositions.CorrectionForFK5(context.JulianDay, ecliptical);
+
+                // Take nutation into account
+                ecliptical += Nutation.NutationEffect(context.NutationElements.deltaPsi);
+
+                return ecliptical;
+            };
+         }
+
+        private CrdsHeliocentrical GetEarthHeliocentrial(SkyContext context, Planet p)
+        {
+            return PlanetPositions.GetPlanetCoordinates(Planet.EARTH, context.JulianDay, highPrecision: true);
+        }
+
+        private CrdsHeliocentrical GetPlanetHeliocentrical(SkyContext context, Planet p)
+        {
+            // final difference to stop iteration process, 1 second of time
+            double deltaTau = TimeSpan.FromSeconds(1).TotalDays;
+
+            // time taken by the light to reach the Earth
+            double tau = 0;
+
+            // previous value of tau to calculate the difference
+            double tau0 = 1;
+
+            // Heliocentrical coordinates of planet
+            CrdsHeliocentrical planetHeliocentrial = null;
+
+            CrdsHeliocentrical earthHeliocentrical = context.Formula(GetEarthHeliocentrial, p);
+
+            // Iterative process to find heliocentrical coordinates of planet
+            while (Math.Abs(tau - tau0) > deltaTau)
+            {
+
+                // Heliocentrical coordinates of planet
+                // TODO: set planet number
+                planetHeliocentrial = PlanetPositions.GetPlanetCoordinates(1, context.JulianDay - tau, highPrecision: true);
+
+                // Ecliptical coordinates of planet
+                var planetEcliptical = planetHeliocentrial.ToRectangular(earthHeliocentrical).ToEcliptical();
+
+                tau0 = tau;
+                tau = PlanetPositions.LightTimeEffect(planetEcliptical.Distance);
+            }
+
+            return planetHeliocentrial;
         }
 
         public override void Calculate(SkyContext context)
@@ -102,7 +180,7 @@ namespace ADK.Demo.Calculators
             // previous value of tau to calculate the difference
             double tau0 = 1;
 
-            // Iterative process to find ecliptical coordinates of planet
+            // Iterative process to find heliocentrical coordinates of planet
             while (Math.Abs(tau - tau0) > deltaTau)
             {
                 // Heliocentrical coordinates of Earth

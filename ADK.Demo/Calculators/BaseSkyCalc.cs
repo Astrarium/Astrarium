@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ADK.Demo.Objects;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,5 +19,8 @@ namespace ADK.Demo.Calculators
         public virtual void Initialize() { }
 
         public virtual void Calculate(SkyContext context) { }
+
+        public FormulaDefinitions<CelestialObject, object> Formula { get; private set; } = new FormulaDefinitions<CelestialObject, object>();
+        
     }
 }

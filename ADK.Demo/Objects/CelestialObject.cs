@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace ADK.Demo.Objects
 {
     /// <summary>
-    /// Base class for all physical objects that can be displayed on the sky map
+    /// Base class for all physical objects that can be operated by the planetarium app
     /// </summary>
     public abstract class CelestialObject
     {
