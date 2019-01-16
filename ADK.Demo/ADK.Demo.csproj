@@ -95,6 +95,7 @@
     <Compile Include="ISettings.cs" />
     <Compile Include="Config\Settings.cs" />
     <Compile Include="Sky.cs" />
+    <Compile Include="SkyContext.cs" />
     <Compile Include="SkyMap.cs" />
     <Compile Include="SkyView.cs" />
     <Compile Include="SkyView.Designer.cs">

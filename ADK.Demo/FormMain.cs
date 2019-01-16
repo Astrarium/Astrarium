@@ -44,12 +44,9 @@ namespace ADK.Demo
             sky.Calculate();
 
 
-            List<string> keys = new List<string>();
-            keys.Add("Rise");
-            keys.Add("Set");
-            keys.Add("Horizontal");
+            var planet = sky.Get<ICollection<Planet>>("Planets").ElementAt(0);
 
-            sky.GetEphemeris(sky.Get<ICollection<Planet>>("Planets").ElementAt(0), sky.Context.JulianDay, sky.Context.JulianDay + 50, keys);
+            var ephems = sky.GetEphemeris(planet, sky.Context.JulianDay, sky.Context.JulianDay + 365, new string[] { "Rise", "Set", "Equatorial.Alpha" });
 
             //sky.Calculate();
 

@@ -6,12 +6,7 @@ using System.Linq;
 
 namespace ADK.Demo.Calculators
 {
-    public interface IEphemProvider
-    {
-        void Calculate(SkyContext context, CelestialObject obj);
-    }
-
-    public interface IEphemProvider<TCelestialObject> : IEphemProvider where TCelestialObject : CelestialObject
+    public interface IEphemProvider<TCelestialObject> where TCelestialObject : CelestialObject
     {
         void ConfigureEphemeris(EphemerisConfig<TCelestialObject> config);        
     }
@@ -59,10 +54,10 @@ namespace ADK.Demo.Calculators
             CalcSaturnRings(context);
         }
 
-        public void Calculate(SkyContext context, CelestialObject planet)
+        public void Calculate(SkyContext context, Planet p)
         {
             CalcSunEarthPositions(context);
-            CalcPlanetPosition(context, (Planet)planet);
+            CalcPlanetPosition(context, p);
         }
 
         private void CalcSunEarthPositions(SkyContext context)
@@ -182,30 +177,33 @@ namespace ADK.Demo.Calculators
             config.Define("Magnitude", (ctx, p) => p.Magnitude);
 
             config.Define("Horizontal.Altitude", (ctx, p) => p.Horizontal.Altitude)
-                .WithBeforeAction(CalcPlanetPosition)
+                .WithBeforeAction(Calculate)
                 .AttachToGroup("Horizontal");
 
             config.Define("Horizontal.Azimuth", (ctx, p) => p.Horizontal.Azimuth)
-                .WithBeforeAction(CalcPlanetPosition)
+                .WithBeforeAction(Calculate)
                 .AttachToGroup("Horizontal");
 
             config.Define("Equatorial.Alpha", (ctx, p) => p.Equatorial.Alpha)
-                .WithBeforeAction(CalcPlanetPosition)
+                .WithBeforeAction(Calculate)
                 .AttachToGroup("Equatorial");
 
             config.Define("Equatorial.Delta", (ctx, p) => p.Equatorial.Delta)
-                .WithBeforeAction(CalcPlanetPosition)
+                .WithBeforeAction(Calculate)
                 .AttachToGroup("Equatorial");
 
             config.Define("Rise", (ctx, p) => ctx.Data.RTS.Rise)
+                .WithBeforeAction(Calculate)
                 .WithBeforeAction(CalcRiseTransitSet)
                 .AttachToGroup("RTS");
 
             config.Define("Transit", (ctx, p) => ctx.Data.RTS.Transit)
+                .WithBeforeAction(Calculate)
                 .WithBeforeAction(CalcRiseTransitSet)
                 .AttachToGroup("RTS");
 
             config.Define("Set", (ctx, p) => ctx.Data.RTS.Set)
+                .WithBeforeAction(Calculate)
                 .WithBeforeAction(CalcRiseTransitSet)
                 .AttachToGroup("RTS");
         }
