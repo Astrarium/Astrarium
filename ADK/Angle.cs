@@ -80,6 +80,7 @@ namespace ADK
         /// Formula is taken from <see href="http://www.movable-type.co.uk/scripts/latlong.html"/>
         /// that is originally based on <see cref="http://www.edwilliams.org/avform.htm#Intermediate"/>.
         /// </remarks>
+        /// TODO: tests
         public static CrdsHorizontal Intermediate(CrdsHorizontal p1, CrdsHorizontal p2, double fraction)
         {
             if (fraction < 0 || fraction > 1)
@@ -101,6 +102,18 @@ namespace ADK
             double az = Math.Atan2(y, x);
 
             return new CrdsHorizontal(ToDegrees(az), ToDegrees(alt));
+        }
+
+        public static void NormalizeAngles(double[] array)
+        {
+            for (int i = 0; i < array.Length - 1; i++)
+            {
+                double d = array[i + 1] - array[i];
+                if (Math.Abs(d) > 180)
+                {
+                    array[i + 1] += 360 * -Math.Sign(d);
+                }
+            }
         }
     }
 

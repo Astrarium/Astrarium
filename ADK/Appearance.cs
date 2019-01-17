@@ -80,11 +80,78 @@ namespace ADK
             return (1 + Math.Cos(Angle.ToRadians(phaseAngle))) / 2;
         }
 
-        public static RTS RiseTransitSet(double jd, CrdsEquatorial[] eq, CrdsGeographical location, double h0)
-        {
-            
 
-            return new RTS();
+        // TODO: not finished yet
+        public static RTS RiseTransitSet(double jd, CrdsEquatorial[] eq, CrdsGeographical location, double siderealTime, double h0)
+        {
+            if (eq.Length != 3)
+                throw new ArgumentException("Number of equatorial coordinates in the array should be equal to 3.");
+
+            double[] alpha = new double[3];
+            double[] delta = new double[3];
+            for (int i = 0; i < 3; i++)
+            {
+                alpha[i] = eq[i].Alpha;
+                delta[i] = eq[i].Delta;
+            }
+
+            double cosH0 = (Math.Sin(Angle.ToRadians(h0)) - Math.Sin(Angle.ToRadians(location.Latitude)) * Math.Sin(Angle.ToRadians(delta[1]))) /
+                (Math.Cos(Angle.ToRadians(location.Latitude)) * Math.Cos(Angle.ToRadians(delta[1])));
+
+            if (Math.Abs(cosH0) >= 1)
+            {
+                throw new Exception("Circumpolar");
+            }
+
+            double H0 = Angle.ToDegrees(Math.Acos(cosH0));
+
+            double[] m = new double[3];
+
+            m[0] = (alpha[1] + location.Longitude - siderealTime) / 360;
+            m[1] = m[0] - H0 / 360;
+            m[2] = m[0] + H0 / 360;
+
+            double deltaT = Date.DeltaT(jd);
+
+            Angle.NormalizeAngles(alpha);
+            Angle.NormalizeAngles(delta);
+
+            double[] x = new double[] { 0, 0.5, 1 };
+
+            for (int i = 0; i < 3; i++)
+            {
+                double th0 = siderealTime + 360.985647 * m[i];
+                double n = m[i] + deltaT / 86400;
+
+                double a = Angle.To360(Interpolation.Lagrange(x, alpha, n));
+                double d = Interpolation.Lagrange(x, delta, n);
+
+                var eq0 = new CrdsEquatorial(a, d);
+
+                double H = Coordinates.HourAngle(th0, location.Longitude, a);
+                var h = eq0.ToHorizontal(location, th0);
+
+                double deltaM;
+
+                // transit
+                if (i == 0)
+                {
+                    deltaM = -H / 360;
+                }
+                else
+                {
+                    deltaM = (h.Altitude - h0) / (360 * Math.Cos(Angle.ToRadians(d)) * Math.Cos(Angle.ToRadians(location.Latitude) * Math.Sin(Angle.ToRadians(H))));
+                }
+
+
+            }
+
+            return new RTS()
+            {
+                Rise = m[1] * 24,
+                Transit = m[0] * 24,
+                Set = m[2] * 24
+            };
         }
     }
 }

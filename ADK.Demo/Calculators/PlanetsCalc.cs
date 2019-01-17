@@ -249,7 +249,7 @@ namespace ADK.Demo.Calculators
             var c2 = new SkyContext(c.JulianDay + 1, c.GeoLocation);
             eq[2] = c2.Get(Equatorial, p);
 
-            return ADK.Appearance.RiseTransitSet(c.JulianDay, eq, c.GeoLocation, 0);
+            return ADK.Appearance.RiseTransitSet(c.JulianDay, eq, c.GeoLocation, c.SiderealTime, -0.5667);
         }
 
         public override void Calculate(SkyContext context)
