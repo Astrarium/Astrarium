@@ -28,7 +28,7 @@ namespace ADK.Demo.Calculators
             CrdsEcliptical sunEcliptical = new CrdsEcliptical(Angle.To360(hEarth.L + 180), -hEarth.B, hEarth.R);
 
             // correct solar coordinates to FK5 system
-            sunEcliptical += PlanetPositions.CorrectionForFK5(context.JulianDay, sunEcliptical); ;
+            sunEcliptical += PlanetPositions.CorrectionForFK5(context.JulianDay, sunEcliptical);
 
             // add nutation effect to ecliptical coordinates of the Sun
             sunEcliptical += Nutation.NutationEffect(context.NutationElements.deltaPsi);

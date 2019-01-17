@@ -26,41 +26,17 @@ namespace ADK.Demo.Calculators
         {
             foreach (var star in Stars)
             {
-                double years = (context.JulianDay - Date.EPOCH_J2000) / 365.25;
-
-                PrecessionalElements p = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
-
-                // Initial coodinates for J2000 epoch
-                CrdsEquatorial eq0 = star.Equatorial0;
-
-                // Take into account effect of proper motion:
-                // now coordinates are for the mean equinox of J2000.0,
-                // but for epoch of the target date
-                eq0.Alpha += star.PmAlpha * years / 3600.0;
-                eq0.Delta += star.PmDelta * years / 3600.0;
-
-                // Equatorial coordinates for the mean equinox and epoch of the target date
-                star.Equatorial = Precession.GetEquatorialCoordinates(eq0, p);
-
-                // Nutation effect
-                var eq1 = Nutation.NutationEffect(star.Equatorial, context.NutationElements, context.Epsilon);
-
-                // Aberration effect
-                var eq2 = Aberration.AberrationEffect(star.Equatorial, context.AberrationElements, context.Epsilon);
-
-                // Apparent coordinates of the star
-                star.Equatorial += eq1 + eq2;
-
-                // Local horizontal coordinates
-                star.Horizontal = star.Equatorial.ToHorizontal(context.GeoLocation, context.SiderealTime);
+                if (star != null)
+                {
+                    star.Horizontal = context.Get(Horizontal, star);
+                    star.Equatorial = context.Get(Equatorial, star);
+                }
             }
         }
 
         public override void Initialize()
         {
             string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Stars.dat");
-
-            int i = 0;
 
             string line = "";
             int len = 0;
@@ -74,49 +50,100 @@ namespace ADK.Demo.Calculators
 
                     if (line.Length < 197) line += new string(' ', 197 - line.Length);
 
-                    Star star = new Star();
+                    Star star = null;
 
-                    if (line[94] == ' ')
+                    if (line[94] != ' ')
                     {
-                        Stars.Add(star);
-                        i++;
-                        continue;
+                        star = new Star();
+
+                        star.Equatorial0.Alpha = new HMS(
+                                                    Convert.ToUInt32(line.Substring(75, 2)),
+                                                    Convert.ToUInt32(line.Substring(77, 2)),
+                                                    Convert.ToDouble(line.Substring(79, 4), CultureInfo.InvariantCulture)
+                                                ).ToDecimalAngle();
+
+                        star.Equatorial0.Delta = (line[83] == '-' ? -1 : 1) * new DMS(
+                                                    Convert.ToUInt32(line.Substring(84, 2)),
+                                                    Convert.ToUInt32(line.Substring(86, 2)),
+                                                    Convert.ToUInt32(line.Substring(88, 2))
+                                                ).ToDecimalAngle();
+
+                        if (line[148] != ' ')
+                        {
+                            star.PmAlpha = Convert.ToSingle(line.Substring(148, 6), CultureInfo.InvariantCulture);
+                        }
+                        if (line[154] != ' ')
+                        {
+                            star.PmDelta = Convert.ToSingle(line.Substring(154, 6), CultureInfo.InvariantCulture);
+                        }
+
+                        star.Mag = Convert.ToSingle(line.Substring(102, 5), CultureInfo.InvariantCulture);
+                        star.Color = line[129];
                     }
-
-                    star.Equatorial0.Alpha = new HMS(
-                                                Convert.ToUInt32(line.Substring(75, 2)),
-                                                Convert.ToUInt32(line.Substring(77, 2)),
-                                                Convert.ToDouble(line.Substring(79, 4), CultureInfo.InvariantCulture)
-                                            ).ToDecimalAngle();
-
-                    star.Equatorial0.Delta = (line[83] == '-' ? -1 : 1) * new DMS(
-                                                Convert.ToUInt32(line.Substring(84, 2)),
-                                                Convert.ToUInt32(line.Substring(86, 2)),
-                                                Convert.ToUInt32(line.Substring(88, 2))
-                                            ).ToDecimalAngle();
-
-                    if (line[148] != ' ')
-                    {
-                        star.PmAlpha = Convert.ToSingle(line.Substring(148, 6), CultureInfo.InvariantCulture);
-                    }
-                    if (line[154] != ' ')
-                    {
-                        star.PmDelta = Convert.ToSingle(line.Substring(154, 6), CultureInfo.InvariantCulture);
-                    }
-
-                    star.Mag = Convert.ToSingle(line.Substring(102, 5), CultureInfo.InvariantCulture);
-
-                    star.Color = line[129];
-
-                    i++;
 
                     Stars.Add(star);
                 }
             }
         }
 
+        #region Ephemeris
 
+        /// <summary>
+        /// Gets number of years since J2000.0
+        /// </summary>
+        private double YearsSince2000(SkyContext c)
+        {
+            return (c.JulianDay - Date.EPOCH_J2000) / 365.25;
+        }
 
+        /// <summary>
+        /// Gets precessional elements to convert euqtorial coordinates of stars to current epoch 
+        /// </summary>
+        private PrecessionalElements GetPrecessionalElements(SkyContext c)
+        {
+            return Precession.ElementsFK5(Date.EPOCH_J2000, c.JulianDay);
+        }
 
+        /// <summary>
+        /// Gets equatorial coordinates of a star for current epoch
+        /// </summary>
+        private CrdsEquatorial Equatorial(SkyContext c, Star star)
+        {
+            PrecessionalElements p = c.Get(GetPrecessionalElements);
+            double years = c.Get(YearsSince2000);
+
+            // Initial coodinates for J2000 epoch
+            CrdsEquatorial eq0 = new CrdsEquatorial(star.Equatorial0);
+
+            // Take into account effect of proper motion:
+            // now coordinates are for the mean equinox of J2000.0,
+            // but for epoch of the target date
+            eq0.Alpha += star.PmAlpha * years / 3600.0;
+            eq0.Delta += star.PmDelta * years / 3600.0;
+
+            // Equatorial coordinates for the mean equinox and epoch of the target date
+            CrdsEquatorial eq = Precession.GetEquatorialCoordinates(eq0, p);
+
+            // Nutation effect
+            var eq1 = Nutation.NutationEffect(eq, c.NutationElements, c.Epsilon);
+
+            // Aberration effect
+            var eq2 = Aberration.AberrationEffect(eq, c.AberrationElements, c.Epsilon);
+
+            // Apparent coordinates of the star
+            eq += eq1 + eq2;
+
+            return eq;
+        }
+
+        /// <summary>
+        /// Gets apparent horizontal coordinates of star for given instant
+        /// </summary>
+        private CrdsHorizontal Horizontal(SkyContext c, Star star)
+        {
+            return c.Get(Equatorial, star).ToHorizontal(c.GeoLocation, c.SiderealTime);
+        }
+
+        #endregion Ephemeris
     }
 }

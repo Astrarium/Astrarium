@@ -44,9 +44,14 @@ namespace ADK.Demo
             sky.Calculate();
 
 
-            var planet = sky.Get<ICollection<Planet>>("Planets").ElementAt(0);
+            var planet = sky.Get<ICollection<Planet>>("Planets").First(p => p.Number == Planet.MERCURY);
 
-            var ephems = sky.GetEphemeris(planet, sky.Context.JulianDay, sky.Context.JulianDay + 365, new string[] { "Rise", "Set", "Equatorial.Alpha" });
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            var ephems = sky.GetEphemeris(planet, sky.Context.JulianDay, sky.Context.JulianDay + 365, new string[] { "RTS.Rise", "RTS.Set", "Equatorial.Alpha", "SaturnRings.a", "SaturnRings.b" });
+            watch.Stop();
+            Console.WriteLine("ELASPSED ms: " + watch.ElapsedMilliseconds);
+
+            
 
             //sky.Calculate();
 

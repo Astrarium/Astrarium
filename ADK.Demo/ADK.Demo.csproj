@@ -59,6 +59,8 @@
     <Compile Include="Calculators\LunarCalc.cs" />
     <Compile Include="Calculators\SolarCalc.cs" />
     <Compile Include="Config\ConfigSectionHandler.cs" />
+    <Compile Include="EphemerisConfig.cs" />
+    <Compile Include="Formatting.cs" />
     <Compile Include="Objects\CelestialObject.cs" />
     <Compile Include="Objects\CelestialPoint.cs" />
     <Compile Include="Objects\Constellation.cs" />

@@ -79,5 +79,12 @@ namespace ADK
         {
             return (1 + Math.Cos(Angle.ToRadians(phaseAngle))) / 2;
         }
+
+        public static RTS RiseTransitSet(double jd, CrdsEquatorial[] eq, CrdsGeographical location, double h0)
+        {
+            
+
+            return new RTS();
+        }
     }
 }

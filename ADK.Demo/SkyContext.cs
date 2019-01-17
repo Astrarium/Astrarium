@@ -1,7 +1,5 @@
-﻿using ADK.Demo.Objects;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,8 +8,16 @@ namespace ADK.Demo
 {
     public class SkyContext
     {
+        private Dictionary<IntPtr, object> resultsCache = new Dictionary<IntPtr, object>();
+        private Dictionary<IntPtr, object>[] argsCache = new Dictionary<IntPtr, object>[6];
+
         public SkyContext(double jd, CrdsGeographical location)
         {
+            for (int i = 0; i < argsCache.Length; i++)
+            {
+                argsCache[i] = new Dictionary<IntPtr, object>();
+            }
+
             GeoLocation = location;
             JulianDay = jd;
         }
@@ -31,13 +37,27 @@ namespace ADK.Demo
                 AberrationElements = Aberration.AberrationElements(_JulianDay);
                 Epsilon = Date.TrueObliquity(_JulianDay, NutationElements.deltaEpsilon);
                 SiderealTime = Date.ApparentSiderealTime(_JulianDay, NutationElements.deltaPsi, Epsilon);
+                ClearCache();
             }
         }
+
+        private CrdsGeographical _GeoLocation;
 
         /// <summary>
         /// Geographical coordinates of the observer
         /// </summary>
-        public CrdsGeographical GeoLocation { get; set; }
+        public CrdsGeographical GeoLocation
+        {
+            get
+            {
+                return _GeoLocation;
+            }
+            set
+            {
+                _GeoLocation = value;
+                ClearCache();
+            }
+        }
 
         /// <summary>
         /// Apparent sidereal time at Greenwich (theta0), in degrees
@@ -59,84 +79,84 @@ namespace ADK.Demo
         /// </summary>
         public double Epsilon { get; private set; }
 
-        private DynamicFormulae Formulae { get; set; }
-
-
-
-        /// <summary>
-        /// Extra data to store within the context
-        /// </summary>
-        public dynamic Data { get; } = new ExpandoObject();
-
-        public R Formula<T, R>(FormulaDelegate<T, R> formula, T obj)
+        public R Get<R>(Func<SkyContext, R> formula)
         {
-            return formula.Invoke(this, obj);
-        }
-    }
-
-    public delegate R FormulaDelegate<T, R>(SkyContext context, T obj);
-
-    public class FormulaDefinitions<T, R>
-    {
-        public FormulaDelegate<T, R> this[string formulaName]
-        {
-            set
-            {
-
-            }
-        }
-    }
-
-    public class DynamicFormulae : DynamicObject
-    {
-        private SkyContext context;
-
-        
-
-        public void SetContext(SkyContext context)
-        {
-            this.context = context;
+            return InvokeWithCache<R>(formula, this);
         }
 
-        private Dictionary<string, Delegate> formulae = new Dictionary<string, Delegate>();
-        private Dictionary<string, object> cachedResults = new Dictionary<string, object>();
-
-        public override bool TrySetMember(SetMemberBinder binder, object value)
+        public R Get<T1, R>(Func<SkyContext, T1, R> formula, T1 arg)
         {
-            if (value.GetType() == typeof(Func<,,>) &&
-                value.GetType().GetGenericArguments()[0] == typeof(SkyContext) &&
-                typeof(CelestialObject).IsAssignableFrom(value.GetType().GetGenericArguments()[1]) &&
-                value.GetType().GetGenericArguments()[2] == typeof(object))
-            {
-                formulae.Add(binder.Name, value as Delegate);
-            }
-            else
-            {
-                throw new Exception("Wrong assignment.");
-            }
-
-            return true;
+            return InvokeWithCache<R>(formula, this, arg);
         }
 
-        public override bool TryGetMember(GetMemberBinder binder, out object result)
+        public R Get<T1, T2, R>(Func<SkyContext, T1, T2, R> formula, T1 arg1, T2 arg2)
         {
-            if (formulae.ContainsKey(binder.Name))
+            return InvokeWithCache<R>(formula, this, arg1, arg2);
+        }
+
+        public R Get<T1, T2, T3, R>(Func<SkyContext, T1, T2, T3, R> formula, T1 arg1, T2 arg2, T3 arg3)
+        {
+            return InvokeWithCache<R>(formula, this, arg1, arg2, arg3);
+        }
+
+        public R Get<T1, T2, T3, T4, R>(Func<SkyContext, T1, T2, T3, T4, R> formula, T1 arg1, T2 arg2, T3 arg3, T4 arg4)
+        {
+            return InvokeWithCache<R>(formula, this, arg1, arg2, arg3, arg4);
+        }
+
+        public R Get<T1, T2, T3, T4, T5, R>(Func<SkyContext, T1, T2, T3, T4, R> formula, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5)
+        {
+            return InvokeWithCache<R>(formula, this, arg1, arg2, arg3, arg4, arg5);
+        }
+
+        public R Get<T1, T2, T3, T4, T5, T6, R>(Func<SkyContext, T1, T2, T3, T4, R> formula, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6)
+        {
+            return InvokeWithCache<R>(formula, this, arg1, arg2, arg3, arg4, arg5, arg6);
+        }
+
+        private R InvokeWithCache<R>(Delegate formula, params object[] args)
+        {
+            IntPtr key = formula.Method.MethodHandle.Value;
+
+            bool needInvoke = false;
+            if (resultsCache.ContainsKey(key))
             {
-                if (cachedResults.ContainsKey(binder.Name))
+                for (int i = 1; i < args.Length; i++)
                 {
-                    result = cachedResults[binder.Name];
-                    return true;
-                }
-                else
-                {
-
-                    result = formulae[binder.Name].DynamicInvoke(context, null);
-                    return true;
+                    if (!argsCache[i - 1][key].Equals(args[i]))
+                    {
+                        needInvoke = true;
+                        break;
+                    }
                 }
             }
             else
             {
-                throw new Exception("Formula not set.");
+                needInvoke = true;
+            }
+
+            if (needInvoke)
+            {
+                R result = (R)formula.DynamicInvoke(args);
+                resultsCache[key] = result;
+                for (int i = 1; i < args.Length; i++)
+                {
+                    argsCache[i - 1][key] = args[i];
+                }
+                return result;
+            }
+            else
+            {
+                return (R)resultsCache[key];
+            }
+        }
+
+        private void ClearCache()
+        {
+            resultsCache.Clear();
+            for (int i = 0; i < argsCache.Length; i++)
+            {
+                argsCache[i].Clear();
             }
         }
     }

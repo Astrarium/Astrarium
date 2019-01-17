@@ -52,7 +52,7 @@ namespace ADK.Demo.Renderers
                 }
             }
             
-            var stars = allStars.Where(s => Angle.Separation(Map.Center, s.Horizontal) < Map.ViewAngle * 1.2);
+            var stars = allStars.Where(s => s != null && Angle.Separation(Map.Center, s.Horizontal) < Map.ViewAngle * 1.2);
             foreach (var star in stars)
             {
                 float diam = GetPointSize(star.Mag);

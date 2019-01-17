@@ -13,6 +13,9 @@ namespace ADK.Demo.Objects
         /// </summary>
         public CrdsEquatorial Equatorial0 { get; set; } = new CrdsEquatorial();
 
+        /// <summary>
+        /// Equatorial coordinates for the current epoch
+        /// </summary>
         public CrdsEquatorial Equatorial { get; set; }
 
         /// <summary>

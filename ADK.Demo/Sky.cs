@@ -68,7 +68,6 @@ namespace ADK.Demo
                     }
                 }
             }
-
         }
 
         public Sky()
@@ -90,35 +89,28 @@ namespace ADK.Demo
         {
             List<Dictionary<string, object>> result = new List<Dictionary<string, object>>();
 
-            var copy = obj.CreateCopy();
-
             var config = ephemConfigs[obj.GetType()];
 
             var itemsToBeCalled = config.Filter(keys);
 
-            List<Delegate> calledDelegates = new List<Delegate>();
-
             for (double jd = from; jd < to; jd++)
             {
                 var context = new SkyContext(jd, Context.GeoLocation);
-                calledDelegates.Clear();
 
                 Dictionary<string, object> ephemeris = new Dictionary<string, object>();
 
                 foreach (var item in itemsToBeCalled)
                 {
-                    foreach (var action in item.Actions)
+                    object value = item.Formula.DynamicInvoke(context, obj);
+
+                    if (item.Formatter != null)
                     {
-                        if (!calledDelegates.Contains(action))
-                        {
-                            action.DynamicInvoke(context, copy);
-                            calledDelegates.Add(action);
-                        }
+                        ephemeris.Add(item.Key, item.Formatter.Format(value));
                     }
-
-                    object value = item.Formula.DynamicInvoke(context, copy);
-
-                    ephemeris.Add(item.Key, value);
+                    else
+                    {
+                        ephemeris.Add(item.Key, value);
+                    }
                 }
 
                 result.Add(ephemeris);

@@ -20,10 +20,5 @@ namespace ADK.Demo.Objects
         /// Local horizontal coordinates of the object
         /// </summary>
         public CrdsHorizontal Horizontal { get; set; }
-
-        public virtual CelestialObject CreateCopy()
-        {
-            return null;
-        }
     }
 }

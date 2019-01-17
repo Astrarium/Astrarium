@@ -14,11 +14,6 @@ namespace ADK.Demo.Objects
         public int Number { get; set; }
 
         /// <summary>
-        /// Heliocentrical coordinates of the planet.
-        /// </summary>
-        public CrdsHeliocentrical Heliocentrical { get; set; }
-
-        /// <summary>
         /// Geocentrical equatorial coordinates
         /// </summary>
         public CrdsEquatorial Equatorial0 { get; set; } = new CrdsEquatorial();
@@ -45,16 +40,7 @@ namespace ADK.Demo.Objects
 
         public double Elongation { get; set; }
 
-        public double Parallax { get; set; }
-
-        public double PhaseAngle { get; set; }
-
         public double Phase { get; set; }
-
-        /// <summary>
-        /// Distance from planet to Sun
-        /// </summary>
-        public double Distance { get; set; }
 
         /// <summary>
         /// Magnitude of planet
@@ -65,15 +51,6 @@ namespace ADK.Demo.Objects
         /// Planet appearance parameters
         /// </summary>
         public PlanetAppearance Appearance { get; set; }
-
-        public override CelestialObject CreateCopy()
-        {
-            return new Planet()
-            {
-                Number = this.Number,
-                Flattening = this.Flattening
-            };
-        }
 
         public const int MERCURY = 1;
         public const int VENUS = 2;
