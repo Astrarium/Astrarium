@@ -61,6 +61,7 @@
     <Compile Include="Config\ConfigSectionHandler.cs" />
     <Compile Include="EphemerisConfig.cs" />
     <Compile Include="Formatting.cs" />
+    <Compile Include="IEphemProvider.cs" />
     <Compile Include="Objects\CelestialObject.cs" />
     <Compile Include="Objects\CelestialPoint.cs" />
     <Compile Include="Objects\Constellation.cs" />

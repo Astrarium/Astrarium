@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ADK
 {
@@ -14,29 +10,32 @@ namespace ADK
                 throw new ArgumentException("Array sizes do not match.");
 
             if (x.Length < 2)
-                throw new ArgumentException("Arrays must contains at least 2 points.");
+                throw new ArgumentException("Arrays must contain at least 2 points.");
 
-            double product, sum = 0;
-
+            double sum = 0;
             int n = x.Length;
-
-            product = 1;
-            // Peforming Arithmatic Operation
             for (int i = 0; i < n; i++)
             {
+                double p = 1;
                 for (int j = 0; j < n; j++)
                 {
                     if (j != i)
                     {
-                        product *= (x0 - x[j]) / (x[i] - x[j]);
+                        p *= (x0 - x[j]) / (x[i] - x[j]);
                     }
                 }
-                sum += product * y[i];
-
-                product = 1;    // Must set to 1
+                sum += p * y[i];
             }
 
             return sum;
+        }
+
+        public static double ThreeTabular(double[] x, double[] y, double n)
+        {
+            double a = y[1] - y[0];
+            double b = y[2] - y[1];
+            double c = b - a;
+            return y[1] + n / 2 * (a + b + n * c);
         }
     }
 }

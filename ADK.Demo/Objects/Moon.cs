@@ -10,12 +10,7 @@ namespace ADK.Demo.Objects
     /// Contains coordinates and visual appearance data for the Moon for given instant of time.
     /// </summary>
     public class Moon : CelestialObject
-    {
-        /// <summary>
-        /// Geocentrical equatorial coordinates
-        /// </summary>
-        public CrdsEquatorial Equatorial0 { get; set; }
-
+    { 
         /// <summary>
         /// Apparent topocentrical equatorial coordinates
         /// </summary>
@@ -27,11 +22,6 @@ namespace ADK.Demo.Objects
         public CrdsEcliptical Ecliptical0 { get; set; }
 
         /// <summary>
-        /// Topocentrical ecliptical coordinates
-        /// </summary>
-        public CrdsEcliptical Ecliptical { get; set; }
-
-        /// <summary>
         /// Visible semidiameter, in seconds of arc
         /// </summary>
         public double Semidiameter { get; set; }
@@ -41,16 +31,6 @@ namespace ADK.Demo.Objects
         /// Positive if eastern elongation, negative if western. 
         /// </summary>
         public double Elongation { get; set; }
-
-        /// <summary>
-        /// Moon parallax
-        /// </summary>
-        public double Parallax { get; set; }
-
-        /// <summary>
-        /// Phase angle of Moon, in degrees.
-        /// </summary>
-        public double PhaseAngle { get; set; }
 
         /// <summary>
         /// Phase of the Moon, from 0 (New Moon) to 1 (Full Moon).

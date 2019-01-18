@@ -74,7 +74,8 @@ namespace ADK.Demo
         {
             Context = new SkyContext(
                 new Date(DateTime.Now).ToJulianEphemerisDay(),
-                new CrdsGeographical(56.3333, -44));
+                new CrdsGeographical(0, 0));
+                //new CrdsGeographical(56.3333, -44));
         }
 
         public void Calculate()

@@ -33,6 +33,7 @@ namespace ADK.Demo
             set
             {
                 _JulianDay = value;
+                DeltaT = Date.DeltaT(_JulianDay);
                 NutationElements = Nutation.NutationElements(_JulianDay);
                 AberrationElements = Aberration.AberrationElements(_JulianDay);
                 Epsilon = Date.TrueObliquity(_JulianDay, NutationElements.deltaEpsilon);
@@ -40,6 +41,8 @@ namespace ADK.Demo
                 ClearCache();
             }
         }
+
+        public double DeltaT { get; private set; }
 
         private CrdsGeographical _GeoLocation;
 

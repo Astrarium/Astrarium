@@ -44,10 +44,10 @@ namespace ADK.Demo
             sky.Calculate();
 
 
-            var planet = sky.Get<ICollection<Planet>>("Planets").First(p => p.Number == Planet.MERCURY);
+            var moon = sky.Get<Moon>("Moon");
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
-            var ephems = sky.GetEphemeris(planet, sky.Context.JulianDay, sky.Context.JulianDay + 365, new string[] { "RTS.Rise", "RTS.Set", "Equatorial.Alpha", "SaturnRings.a", "SaturnRings.b" });
+            var ephems = sky.GetEphemeris(moon, sky.Context.JulianDay, sky.Context.JulianDay + 1, new string[] { "RTS.Rise", "RTS.Transit", "RTS.Set"/*, "Equatorial.Alpha", "Equatorial.Delta"*/ });
             watch.Stop();
             Console.WriteLine("ELASPSED ms: " + watch.ElapsedMilliseconds);
 

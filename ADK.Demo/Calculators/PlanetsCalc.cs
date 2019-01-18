@@ -6,12 +6,6 @@ using System.Linq;
 
 namespace ADK.Demo.Calculators
 {
-    public interface IEphemProvider<TCelestialObject> where TCelestialObject : CelestialObject
-    {
-        void ConfigureEphemeris(EphemerisConfig<TCelestialObject> config);        
-    }
-
-
     public class PlanetsCalc : BaseSkyCalc, IEphemProvider<Planet>
     {
         private Planet[] Planets = new Planet[8];
@@ -249,7 +243,7 @@ namespace ADK.Demo.Calculators
             var c2 = new SkyContext(c.JulianDay + 1, c.GeoLocation);
             eq[2] = c2.Get(Equatorial, p);
 
-            return ADK.Appearance.RiseTransitSet(c.JulianDay, eq, c.GeoLocation, c.SiderealTime, -0.5667);
+            return ADK.Appearance.RiseTransitSet(eq, c.GeoLocation, c.DeltaT, c.SiderealTime, -0.5667);
         }
 
         public override void Calculate(SkyContext context)
