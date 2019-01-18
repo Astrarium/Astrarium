@@ -189,19 +189,19 @@ namespace ADK.Demo.Calculators
         private RTS RiseTransitSet(SkyContext c)
         {
             Date d = new Date(c.JulianDay);
-            double jd = new Date(d.Year, d.Month, (int)d.Day).ToJulianEphemerisDay();
+            double jd = new Date(d.Year, d.Month, (int)d.Day).ToJulianEphemerisDay() - 3 / 24.0;
 
             double theta0 = Date.ApparentSiderealTime(jd, c.NutationElements.deltaPsi, c.Epsilon);
 
             CrdsEquatorial[] eq = new CrdsEquatorial[3];            
-            int[] diff = new int[] { -1, 0, 1 };
+            double[] diff = new double[] { 0, 0.5, 1 };
 
             for (int i = 0; i < 3; i++)
             {
                 eq[i] = new SkyContext(jd + diff[i], c.GeoLocation).Get(Equatorial);
             }
 
-            return Appearance.RiseTransitSet(eq, c.GeoLocation, c.DeltaT, theta0, 0.125);
+            return Appearance.RiseTransitSet2(eq, c.GeoLocation, c.DeltaT, theta0, 0.125);
         }
 
         public void ConfigureEphemeris(EphemerisConfig<Moon> config)
