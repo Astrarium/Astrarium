@@ -170,7 +170,7 @@ namespace ADK
             };
         }
 
-        public static RTS RiseTransitSet2(CrdsEquatorial[] eq, CrdsGeographical location, double deltaT, double theta0, double h0)
+        public static RTS RiseTransitSet2(double jd, double deltaPsi, double epsilon, CrdsEquatorial[] eq, CrdsGeographical location, double deltaT, double h0)
         {
             if (eq.Length != 3)
                 throw new ArgumentException("Number of equatorial coordinates in the array should be equal to 3.");
@@ -189,44 +189,97 @@ namespace ADK
             double[] x = new double[] { 0, 0.5, 1 };
            
             List<CrdsHorizontal> hor = new List<CrdsHorizontal>();
-
-            for (int i=0; i<=24; i++)
+            for (int i = 0; i <= 24; i++)
             {
-                double a = Interpolation.Lagrange(x, alpha, i / 24.0);
-                double d = Interpolation.Lagrange(x, delta, i / 24.0);
-
-                CrdsEquatorial eqP = new CrdsEquatorial(Angle.To360(a), d);
-                CrdsHorizontal h = eqP.ToHorizontal(location, Angle.To360(theta0 + i / 24.0 * 360));
+                double n = i / 24.0;
+                CrdsEquatorial eqP = new CrdsEquatorial();
+                eqP.Alpha = Interpolation.Lagrange(x, alpha, n);
+                eqP.Delta = Interpolation.Lagrange(x, delta, n);
+                var sidTime = Date.ApparentSiderealTime(jd + n, deltaPsi, epsilon);
+                var h = eqP.ToHorizontal(location, sidTime);
                 h.Altitude += h0;
-                hor.Add(h);                
-            }
-
-            var maxH = hor.OrderBy(f => f.Altitude).Last();
-            var minH = hor.OrderBy(f => f.Altitude).First();
-
-            int maxAltIndex = hor.IndexOf(maxH);
-            int minAltIndex = hor.IndexOf(minH);
-
-
-            if (maxAltIndex + 1 > 24)
-            {
-                maxAltIndex -= 1;
-            }
-            if (maxAltIndex - 1 < 0)
-            {
-                maxAltIndex += 1;
+                hor.Add(h);
             }
 
             var result = new RTS();
 
-            // transit:
-            result.Transit = Double.NaN;
-            
-            double n = SolveParabola(Math.Sin(Angle.ToRadians(hor[maxAltIndex - 1].Azimuth)), Math.Sin(Angle.ToRadians(hor[maxAltIndex].Azimuth)), Math.Sin(Angle.ToRadians(hor[maxAltIndex + 1].Azimuth)));
-            if (!Double.IsNaN(n))
+            int rise = -1;
+            int set = -1;
+            for (int i = 0; i < 24; i++)
             {
-                result.Transit = (maxAltIndex - 1 + n / 24.0) / 24.0;  
+                // rise:
+                if (hor[i].Altitude <= 0 && hor[i + 1].Altitude >= 0)
+                {
+                    rise = i;
+                }
+                // set:
+                else if (hor[i].Altitude >= 0 && hor[i + 1].Altitude <= 0)
+                {
+                    set = i;
+                }
             }
+
+
+            for (int i=0; i<2;i++)
+            {
+                int t;
+                double time;
+
+                if (i == 0) t = rise;
+                else t = set;
+
+                // If occurs:
+                if (t != -1)
+                {
+                    // eq: at the middle of hour
+                    CrdsEquatorial eqP = new CrdsEquatorial();
+                    eqP.Alpha = Interpolation.Lagrange(x, alpha, (t + 0.5) / 24.0);
+                    eqP.Delta = Interpolation.Lagrange(x, delta, (t + 0.5) / 24.0);
+
+                    var sidTime = Date.ApparentSiderealTime(jd + (t + 0.5) / 24.0, deltaPsi, epsilon);
+                    var hor0 = eqP.ToHorizontal(location, sidTime);
+                    hor0.Altitude += h0;
+
+                    double n = SolveParabola(hor[rise].Altitude, hor0.Altitude, hor[t + 1].Altitude);
+
+                    time = (t + n) / 24.0;
+
+                }
+                else
+                {
+                    time = Double.NegativeInfinity;
+                }
+
+                if (i == 0) result.Rise = time;
+                else result.Set = time;
+            }
+
+            // TRANSIT
+            for (int i = 0; i <= 24; i++)
+            {
+                double n = (i + 0.5) / 24.0;
+               
+                // eq: at the middle of hour
+                CrdsEquatorial eqP = new CrdsEquatorial();
+                eqP.Alpha = Interpolation.Lagrange(x, alpha, n);
+                eqP.Delta = Interpolation.Lagrange(x, delta, n);
+
+                var sidTime = Date.ApparentSiderealTime(jd + n, deltaPsi, epsilon);
+                var hor0 = eqP.ToHorizontal(location, sidTime);
+
+
+                if (hor0.Altitude > 0)
+                {
+                    double nn = SolveParabola(Math.Sin(Angle.ToRadians(hor[i].Azimuth)), Math.Sin(Angle.ToRadians(hor0.Azimuth)), Math.Sin(Angle.ToRadians(hor[i + 1].Azimuth)));
+                    if (!double.IsNaN(nn))
+                    {
+                        result.Transit = (i + nn) / 24.0;
+                        
+                        break;
+                    }
+                }
+            }
+
 
             return result;
         }

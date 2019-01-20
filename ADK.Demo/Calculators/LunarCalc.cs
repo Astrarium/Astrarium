@@ -201,7 +201,7 @@ namespace ADK.Demo.Calculators
                 eq[i] = new SkyContext(jd + diff[i], c.GeoLocation).Get(Equatorial);
             }
 
-            return Appearance.RiseTransitSet2(eq, c.GeoLocation, c.DeltaT, theta0, 0.125);
+            return Appearance.RiseTransitSet2(jd, c.NutationElements.deltaPsi, c.Epsilon, eq, c.GeoLocation, c.DeltaT, 0.7275 * c.Get(Parallax) /*- 0.566666*/);
         }
 
         public void ConfigureEphemeris(EphemerisConfig<Moon> config)
