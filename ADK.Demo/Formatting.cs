@@ -38,7 +38,14 @@ namespace ADK.Demo
             public string Format(object value)
             {
                 double v = (double)value;
-                return TimeSpan.FromHours(v * 24).ToString(@"hh\:mm");
+                if (double.IsInfinity(v) || double.IsNaN(v))
+                {
+                    return "-----";
+                }
+                else
+                {
+                    return TimeSpan.FromHours(v * 24).ToString(@"hh\:mm");
+                }
             }
         }
 

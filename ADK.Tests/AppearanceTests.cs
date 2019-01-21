@@ -19,7 +19,7 @@ namespace ADK.Tests
 
                 CrdsGeographical location = new CrdsGeographical(42.3333, 71.0833);
 
-                var rts = Appearance.RiseTransitSet(eq, location, 56, 177.74208, -0.5667);
+                var rts = Appearance.RiseTransitSet(eq, location, 177.74208, 0, 0);
 
                 const double MIN_PER_DAY = 24 * 60;
 

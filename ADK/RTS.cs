@@ -6,10 +6,14 @@ using System.Threading.Tasks;
 
 namespace ADK
 {
-    public struct RTS
+    public class RTS
     {
-        public double Rise { get; set; }
-        public double Transit { get; set; }
-        public double Set { get; set; }
+        public double Rise { get; set; } = None;
+        public double Transit { get; set; } = None;
+        public double Set { get; set; } = None;
+
+        public const double None = double.NaN;
+        public const double NonRising = double.NegativeInfinity;
+        public const double NonSetting = double.PositiveInfinity;
     }
 }

@@ -233,17 +233,21 @@ namespace ADK.Demo.Calculators
         /// </summary>
         private RTS RiseTransitSet(SkyContext c, int p)
         {
+            Date d = new Date(c.JulianDay);
+            double jd = new Date(d.Year, d.Month, (int)d.Day).ToJulianEphemerisDay() - 3 / 24.0;
+
+            double theta0 = Date.ApparentSiderealTime(jd, c.NutationElements.deltaPsi, c.Epsilon);
+            double parallax = c.Get(Parallax, p);
+
             CrdsEquatorial[] eq = new CrdsEquatorial[3];
+            double[] diff = new double[] { 0, 0.5, 1 };
 
-            eq[1] = c.Get(Equatorial, p);
+            for (int i = 0; i < 3; i++)
+            {
+                eq[i] = new SkyContext(jd + diff[i], c.GeoLocation).Get(Equatorial0, p);
+            }
 
-            var c0 = new SkyContext(c.JulianDay - 1, c.GeoLocation);
-            eq[0] = c0.Get(Equatorial, p);
-
-            var c2 = new SkyContext(c.JulianDay + 1, c.GeoLocation);
-            eq[2] = c2.Get(Equatorial, p);
-
-            return ADK.Appearance.RiseTransitSet(eq, c.GeoLocation, c.DeltaT, c.SiderealTime, -0.5667);
+            return ADK.Appearance.RiseTransitSet(eq, c.GeoLocation, theta0, parallax);
         }
 
         public override void Calculate(SkyContext context)
@@ -293,9 +297,14 @@ namespace ADK.Demo.Calculators
             e.Add("SaturnRings.b", (c, p) => c.Get(GetSaturnRings, p.Number).b)
                 .AvailableIf((c, p) => p.Number == Planet.SATURN);
 
-            e.Add("RTS.Rise", (c, p) => c.Get(RiseTransitSet, p.Number).Rise);
-            e.Add("RTS.Transit", (c, p) => c.Get(RiseTransitSet, p.Number).Transit);
-            e.Add("RTS.Set", (c, p) => c.Get(RiseTransitSet, p.Number).Set);
+            e.Add("RTS.Rise", (c, p) => c.Get(RiseTransitSet, p.Number).Rise)
+                .WithFormatter(Formatters.RTS);
+
+            e.Add("RTS.Transit", (c, p) => c.Get(RiseTransitSet, p.Number).Transit)
+                .WithFormatter(Formatters.RTS);
+
+            e.Add("RTS.Set", (c, p) => c.Get(RiseTransitSet, p.Number).Set)
+               .WithFormatter(Formatters.RTS);
         }
     }
 }

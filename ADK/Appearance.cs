@@ -80,97 +80,8 @@ namespace ADK
             return (1 + Math.Cos(Angle.ToRadians(phaseAngle))) / 2;
         }
 
-
-        // TODO: not finished yet
-        public static RTS RiseTransitSet(CrdsEquatorial[] eq, CrdsGeographical location, double deltaT, double theta0, double h0)
-        {
-            if (eq.Length != 3)
-                throw new ArgumentException("Number of equatorial coordinates in the array should be equal to 3.");
-
-            double[] alpha = new double[3];
-            double[] delta = new double[3];
-            for (int i = 0; i < 3; i++)
-            {
-                alpha[i] = eq[i].Alpha;
-                delta[i] = eq[i].Delta;
-            }
-
-            double cosH0 = (Math.Sin(Angle.ToRadians(h0)) - Math.Sin(Angle.ToRadians(location.Latitude)) * Math.Sin(Angle.ToRadians(delta[1]))) /
-                (Math.Cos(Angle.ToRadians(location.Latitude)) * Math.Cos(Angle.ToRadians(delta[1])));
-
-            if (Math.Abs(cosH0) >= 1)
-            {
-                throw new Exception("Circumpolar");
-            }
-
-            double H0 = Angle.ToDegrees(Math.Acos(cosH0));
-
-            double[] m = new double[3];
-
-            m[0] = (alpha[1] + location.Longitude - theta0) / 360;
-            m[1] = m[0] - H0 / 360;
-            m[2] = m[0] + H0 / 360;
-
-            for (int i = 0; i < 3; i++)
-            {
-                if (m[i] >= 1) m[i] -= 1;
-                if (m[i] < 0) m[i] += 1;
-            }
-
-            Angle.NormalizeAngles(alpha);
-            Angle.NormalizeAngles(delta);
-
-            double[] x = new double[] { 0, 0.5, 1 };
-
-            for (int i = 0; i < 3; i++)
-            {
-                double deltaM;
-
-                do
-                {
-                    double theta = Angle.To360(theta0 + 360.985647 * m[i]) - 180;
-
-                    double n = m[i] + deltaT / 86400;
-
-                    double a = Angle.To360(Interpolation.Lagrange(x, alpha, n));
-                    double d = Interpolation.Lagrange(x, delta, n);
-
-                    var eq0 = new CrdsEquatorial(a, d);
-
-                    double H = Angle.To360(Coordinates.HourAngle(theta, location.Longitude, a));
-                    if (H > 180) H -= 360;
-
-
-                    var h = eq0.ToHorizontal(location, theta);
-
-
-
-                    // transit
-                    if (i == 0)
-                    {
-                        deltaM = -H / 360;
-                    }
-                    else
-                    {
-                        deltaM = (h.Altitude - h0) / (360 * Math.Cos(Angle.ToRadians(d)) * Math.Cos(Angle.ToRadians(location.Latitude) * Math.Sin(Angle.ToRadians(H))));
-                    }
-
-                    m[i] += deltaM;
-
-                }
-                while (Math.Abs(deltaM * 24 * 60) > 1);
-
-            }
-
-            return new RTS()
-            {
-                Transit = m[0],
-                Rise = m[1],
-                Set = m[2]
-            };
-        }
-
-        public static RTS RiseTransitSet2(double jd, double deltaPsi, double epsilon, CrdsEquatorial[] eq, CrdsGeographical location, double deltaT, double h0)
+        // TODO: tests
+        public static RTS RiseTransitSet(CrdsEquatorial[] eq, CrdsGeographical location, double theta0, double pi, double h0 = 0)
         {
             if (eq.Length != 3)
                 throw new ArgumentException("Number of equatorial coordinates in the array should be equal to 3.");
@@ -187,7 +98,7 @@ namespace ADK
             Angle.NormalizeAngles(delta);
 
             double[] x = new double[] { 0, 0.5, 1 };
-           
+
             List<CrdsHorizontal> hor = new List<CrdsHorizontal>();
             for (int i = 0; i <= 24; i++)
             {
@@ -195,92 +106,59 @@ namespace ADK
                 CrdsEquatorial eqP = new CrdsEquatorial();
                 eqP.Alpha = Interpolation.Lagrange(x, alpha, n);
                 eqP.Delta = Interpolation.Lagrange(x, delta, n);
-                var sidTime = Date.ApparentSiderealTime(jd + n, deltaPsi, epsilon);
-                var h = eqP.ToHorizontal(location, sidTime);
-                h.Altitude += h0;
-                hor.Add(h);
+                var sidTime = Angle.To360(theta0 + n * 360.98564736629);
+                hor.Add(eqP.ToTopocentric(location, sidTime, pi).ToHorizontal(location, sidTime));
             }
 
             var result = new RTS();
 
-            int rise = -1;
-            int set = -1;
             for (int i = 0; i < 24; i++)
             {
-                // rise:
-                if (hor[i].Altitude <= 0 && hor[i + 1].Altitude >= 0)
-                {
-                    rise = i;
-                }
-                // set:
-                else if (hor[i].Altitude >= 0 && hor[i + 1].Altitude <= 0)
-                {
-                    set = i;
-                }
-            }
-
-
-            for (int i=0; i<2;i++)
-            {
-                int t;
-                double time;
-
-                if (i == 0) t = rise;
-                else t = set;
-
-                // If occurs:
-                if (t != -1)
-                {
-                    // eq: at the middle of hour
-                    CrdsEquatorial eqP = new CrdsEquatorial();
-                    eqP.Alpha = Interpolation.Lagrange(x, alpha, (t + 0.5) / 24.0);
-                    eqP.Delta = Interpolation.Lagrange(x, delta, (t + 0.5) / 24.0);
-
-                    var sidTime = Date.ApparentSiderealTime(jd + (t + 0.5) / 24.0, deltaPsi, epsilon);
-                    var hor0 = eqP.ToHorizontal(location, sidTime);
-                    hor0.Altitude += h0;
-
-                    double n = SolveParabola(hor[rise].Altitude, hor0.Altitude, hor[t + 1].Altitude);
-
-                    time = (t + n) / 24.0;
-
-                }
-                else
-                {
-                    time = Double.NegativeInfinity;
-                }
-
-                if (i == 0) result.Rise = time;
-                else result.Set = time;
-            }
-
-            // TRANSIT
-            for (int i = 0; i <= 24; i++)
-            {
                 double n = (i + 0.5) / 24.0;
-               
-                // eq: at the middle of hour
-                CrdsEquatorial eqP = new CrdsEquatorial();
-                eqP.Alpha = Interpolation.Lagrange(x, alpha, n);
-                eqP.Delta = Interpolation.Lagrange(x, delta, n);
 
-                var sidTime = Date.ApparentSiderealTime(jd + n, deltaPsi, epsilon);
-                var hor0 = eqP.ToHorizontal(location, sidTime);
+                // eqM: at the middle of hour
+                CrdsEquatorial eqM = new CrdsEquatorial();
+                eqM.Alpha = Interpolation.Lagrange(x, alpha, n);
+                eqM.Delta = Interpolation.Lagrange(x, delta, n);
 
+                var sidTime = Angle.To360(theta0 + n * 360.98564736629);
+                var hor0 = eqM.ToTopocentric(location, sidTime, pi).ToHorizontal(location, sidTime);
 
-                if (hor0.Altitude > 0)
+                if (double.IsNaN(result.Transit) && hor0.Altitude > 0)
                 {
-                    double nn = SolveParabola(Math.Sin(Angle.ToRadians(hor[i].Azimuth)), Math.Sin(Angle.ToRadians(hor0.Azimuth)), Math.Sin(Angle.ToRadians(hor[i + 1].Azimuth)));
-                    if (!double.IsNaN(nn))
+                    double r = SolveParabola(Math.Sin(Angle.ToRadians(hor[i].Azimuth)), Math.Sin(Angle.ToRadians(hor0.Azimuth)), Math.Sin(Angle.ToRadians(hor[i + 1].Azimuth)));
+                    if (!double.IsNaN(r))
                     {
-                        result.Transit = (i + nn) / 24.0;
-                        
-                        break;
+                        result.Transit = (i + r) / 24.0;
                     }
                 }
+
+                if (double.IsNaN(result.Rise) || double.IsNaN(result.Set))
+                {
+                    double r = SolveParabola(hor[i].Altitude + h0, hor0.Altitude + h0, hor[i + 1].Altitude + h0);
+
+                    if (!double.IsNaN(r))
+                    {
+                        double t = (i + r) / 24.0;
+
+                        if (double.IsNaN(result.Rise) && hor[i].Altitude + h0 < 0 && hor[i + 1].Altitude + h0 > 0)
+                        {
+                            result.Rise = t;
+                        }
+
+                        if (double.IsNaN(result.Set) && hor[i].Altitude + h0 > 0 && hor[i + 1].Altitude + h0 < 0)
+                        {
+                            result.Set = t;
+                        }
+
+                        if (!double.IsNaN(result.Transit) && !double.IsNaN(result.Rise) && !double.IsNaN(result.Set))
+                        {
+                            break;
+                        }
+                    }
+                }                
             }
-
-
+       
             return result;
         }
 
@@ -295,10 +173,10 @@ namespace ADK
             double x1 = (-b - D) / (2 * a);
             double x2 = (-b + D) / (2 * a);
 
-            if (x1 >= 0 && x1 <= 1) return x1;
-            if (x2 >= 0 && x2 <= 1) return x2;
+            if (x1 >= 0 && x1 < 1) return x1;
+            if (x2 >= 0 && x2 < 1) return x2;
 
-            return Double.NaN;
+            return double.NaN;
         }
     }
 }

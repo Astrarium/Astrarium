@@ -47,11 +47,15 @@ namespace ADK.Demo
             var moon = sky.Get<Moon>("Moon");
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
-            var ephems = sky.GetEphemeris(moon, sky.Context.JulianDay, sky.Context.JulianDay + 1, new string[] { "RTS.Rise", "RTS.Transit", "RTS.Set"/*, "Equatorial.Alpha", "Equatorial.Delta"*/ });
+
+            var ephems = sky.GetEphemeris(moon, sky.Context.JulianDay, sky.Context.JulianDay + 30, new string[] { "RTS.Rise", "RTS.Transit", "RTS.Set"/*, "Equatorial.Alpha", "Equatorial.Delta"*/ });
             watch.Stop();
             Console.WriteLine("ELASPSED ms: " + watch.ElapsedMilliseconds);
 
-            
+            foreach (var e in ephems)
+            {
+                Console.WriteLine(e["RTS.Rise"].ToString() + " " + e["RTS.Transit"].ToString() + " " + e["RTS.Set"].ToString());
+            }
 
             //sky.Calculate();
 
