@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo.Calculators
 {
-    public class StarsCalc : BaseSkyCalc
+    public class StarsCalc : BaseSkyCalc, IEphemProvider<Star>
     {
         /// <summary>
         /// Collection of all stars
@@ -144,6 +144,30 @@ namespace ADK.Demo.Calculators
             return c.Get(Equatorial, star).ToHorizontal(c.GeoLocation, c.SiderealTime);
         }
 
+        /// <summary>
+        /// Gets rise, transit and set info for the star
+        /// </summary>
+        private RTS RiseTransitSet(SkyContext c, Star star)
+        {
+            Date d = new Date(c.JulianDay);
+            double jd = new Date(d.Year, d.Month, (int)d.Day).ToJulianEphemerisDay() - 3 / 24.0;
+            double theta0 = Date.ApparentSiderealTime(jd, c.NutationElements.deltaPsi, c.Epsilon);
+            var eq = c.Get(Equatorial, star); 
+            return Appearance.RiseTransitSet(eq, c.GeoLocation, theta0);
+        }
+
         #endregion Ephemeris
+
+        public void ConfigureEphemeris(EphemerisConfig<Star> e)
+        {
+            e.Add("RTS.Rise", (c, s) => c.Get(RiseTransitSet, s).Rise)
+                .WithFormatter(Formatters.RTS);
+
+            e.Add("RTS.Transit", (c, s) => c.Get(RiseTransitSet, s).Transit)
+                .WithFormatter(Formatters.RTS);
+
+            e.Add("RTS.Set", (c, s) => c.Get(RiseTransitSet, s).Set)
+               .WithFormatter(Formatters.RTS);
+        }
     }
 }

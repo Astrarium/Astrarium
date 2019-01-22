@@ -81,7 +81,7 @@ namespace ADK
         }
 
         // TODO: tests
-        public static RTS RiseTransitSet(CrdsEquatorial[] eq, CrdsGeographical location, double theta0, double pi, double h0 = 0)
+        public static RTS RiseTransitSet(CrdsEquatorial[] eq, CrdsGeographical location, double theta0, double pi, double sd = 0)
         {
             if (eq.Length != 3)
                 throw new ArgumentException("Number of equatorial coordinates in the array should be equal to 3.");
@@ -94,20 +94,16 @@ namespace ADK
                 delta[i] = eq[i].Delta;
             }
 
-            Angle.NormalizeAngles(alpha);
-            Angle.NormalizeAngles(delta);
-
-            double[] x = new double[] { 0, 0.5, 1 };
+            Angle.Align(alpha);
+            Angle.Align(delta);
 
             List<CrdsHorizontal> hor = new List<CrdsHorizontal>();
             for (int i = 0; i <= 24; i++)
             {
                 double n = i / 24.0;
-                CrdsEquatorial eqP = new CrdsEquatorial();
-                eqP.Alpha = Interpolation.Lagrange(x, alpha, n);
-                eqP.Delta = Interpolation.Lagrange(x, delta, n);
-                var sidTime = Angle.To360(theta0 + n * 360.98564736629);
-                hor.Add(eqP.ToTopocentric(location, sidTime, pi).ToHorizontal(location, sidTime));
+                CrdsEquatorial eq0 = InterpolateEq(alpha, delta, n);
+                var sidTime = InterpolateSiderialTime(theta0, n);
+                hor.Add(eq0.ToTopocentric(location, sidTime, pi).ToHorizontal(location, sidTime));
             }
 
             var result = new RTS();
@@ -116,39 +112,46 @@ namespace ADK
             {
                 double n = (i + 0.5) / 24.0;
 
-                // eqM: at the middle of hour
-                CrdsEquatorial eqM = new CrdsEquatorial();
-                eqM.Alpha = Interpolation.Lagrange(x, alpha, n);
-                eqM.Delta = Interpolation.Lagrange(x, delta, n);
+                CrdsEquatorial eq0 = InterpolateEq(alpha, delta, n);
 
-                var sidTime = Angle.To360(theta0 + n * 360.98564736629);
-                var hor0 = eqM.ToTopocentric(location, sidTime, pi).ToHorizontal(location, sidTime);
+                var sidTime = InterpolateSiderialTime(theta0, n);
+                var hor0 = eq0.ToTopocentric(location, sidTime, pi).ToHorizontal(location, sidTime);
 
                 if (double.IsNaN(result.Transit) && hor0.Altitude > 0)
                 {
                     double r = SolveParabola(Math.Sin(Angle.ToRadians(hor[i].Azimuth)), Math.Sin(Angle.ToRadians(hor0.Azimuth)), Math.Sin(Angle.ToRadians(hor[i + 1].Azimuth)));
                     if (!double.IsNaN(r))
                     {
-                        result.Transit = (i + r) / 24.0;
+                        double t = (i + r) / 24.0;
+
+                        eq0 = InterpolateEq(alpha, delta, t);
+                        sidTime = InterpolateSiderialTime(theta0, t);
+
+                        result.Transit = t;
+                        result.TransitAltitude = eq0.ToTopocentric(location, sidTime, pi).ToHorizontal(location, sidTime).Altitude;
                     }
                 }
 
                 if (double.IsNaN(result.Rise) || double.IsNaN(result.Set))
                 {
-                    double r = SolveParabola(hor[i].Altitude + h0, hor0.Altitude + h0, hor[i + 1].Altitude + h0);
+                    double r = SolveParabola(hor[i].Altitude + sd, hor0.Altitude + sd, hor[i + 1].Altitude + sd);
 
                     if (!double.IsNaN(r))
                     {
                         double t = (i + r) / 24.0;
+                        eq0 = InterpolateEq(alpha, delta, t);
+                        sidTime = InterpolateSiderialTime(theta0, t);
 
-                        if (double.IsNaN(result.Rise) && hor[i].Altitude + h0 < 0 && hor[i + 1].Altitude + h0 > 0)
+                        if (double.IsNaN(result.Rise) && hor[i].Altitude + sd < 0 && hor[i + 1].Altitude + sd > 0)
                         {
                             result.Rise = t;
+                            result.RiseAzimuth = eq0.ToTopocentric(location, sidTime, pi).ToHorizontal(location, sidTime).Azimuth;
                         }
 
-                        if (double.IsNaN(result.Set) && hor[i].Altitude + h0 > 0 && hor[i + 1].Altitude + h0 < 0)
+                        if (double.IsNaN(result.Set) && hor[i].Altitude + sd > 0 && hor[i + 1].Altitude + sd < 0)
                         {
                             result.Set = t;
+                            result.SetAzimuth = eq0.ToTopocentric(location, sidTime, pi).ToHorizontal(location, sidTime).Azimuth;
                         }
 
                         if (!double.IsNaN(result.Transit) && !double.IsNaN(result.Rise) && !double.IsNaN(result.Set))
@@ -160,6 +163,85 @@ namespace ADK
             }
        
             return result;
+        }
+
+        // TODO: tests
+        public static RTS RiseTransitSet(CrdsEquatorial eq, CrdsGeographical location, double theta0)
+        {
+            List<CrdsHorizontal> hor = new List<CrdsHorizontal>();
+            for (int i = 0; i <= 24; i++)
+            {
+                double n = i / 24.0;
+                var sidTime = InterpolateSiderialTime(theta0, n);
+                hor.Add(eq.ToHorizontal(location, sidTime));
+            }
+
+            var result = new RTS();
+
+            for (int i = 0; i < 24; i++)
+            {
+                double n = (i + 0.5) / 24.0;
+
+                var sidTime = InterpolateSiderialTime(theta0, n);
+                var hor0 = eq.ToHorizontal(location, sidTime);
+
+                if (double.IsNaN(result.Transit) && hor0.Altitude > 0)
+                {
+                    double r = SolveParabola(Math.Sin(Angle.ToRadians(hor[i].Azimuth)), Math.Sin(Angle.ToRadians(hor0.Azimuth)), Math.Sin(Angle.ToRadians(hor[i + 1].Azimuth)));
+                    if (!double.IsNaN(r))
+                    {
+                        double t = (i + r) / 24.0;                        
+                        sidTime = InterpolateSiderialTime(theta0, t);
+
+                        result.Transit = t;
+                        result.TransitAltitude = eq.ToHorizontal(location, sidTime).Altitude;
+                    }
+                }
+
+                if (double.IsNaN(result.Rise) || double.IsNaN(result.Set))
+                {
+                    double r = SolveParabola(hor[i].Altitude, hor0.Altitude, hor[i + 1].Altitude);
+
+                    if (!double.IsNaN(r))
+                    {
+                        double t = (i + r) / 24.0;
+                        sidTime = InterpolateSiderialTime(theta0, t);
+
+                        if (double.IsNaN(result.Rise) && hor[i].Altitude < 0 && hor[i + 1].Altitude > 0)
+                        {
+                            result.Rise = t;
+                            result.RiseAzimuth = eq.ToHorizontal(location, sidTime).Azimuth;
+                        }
+
+                        if (double.IsNaN(result.Set) && hor[i].Altitude > 0 && hor[i + 1].Altitude < 0)
+                        {
+                            result.Set = t;
+                            result.SetAzimuth = eq.ToHorizontal(location, sidTime).Azimuth;
+                        }
+
+                        if (!double.IsNaN(result.Transit) && !double.IsNaN(result.Rise) && !double.IsNaN(result.Set))
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private static double InterpolateSiderialTime(double theta0, double n)
+        {
+            return Angle.To360(theta0 + n * 360.98564736629);
+        }
+
+        private static CrdsEquatorial InterpolateEq(double[] alpha, double[] delta, double n)
+        {
+            double[] x = new double[] { 0, 0.5, 1 };
+            CrdsEquatorial eq = new CrdsEquatorial();
+            eq.Alpha = Interpolation.Lagrange(x, alpha, n);
+            eq.Delta = Interpolation.Lagrange(x, delta, n);
+            return eq;
         }
 
         private static double SolveParabola(double y1, double y2, double y3)

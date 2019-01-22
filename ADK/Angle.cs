@@ -104,7 +104,7 @@ namespace ADK
             return new CrdsHorizontal(ToDegrees(az), ToDegrees(alt));
         }
 
-        public static void NormalizeAngles(double[] array)
+        public static void Align(double[] array)
         {
             for (int i = 0; i < array.Length - 1; i++)
             {

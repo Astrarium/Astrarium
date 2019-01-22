@@ -35,19 +35,20 @@ namespace ADK.Demo
             }
         }
 
-        private List<Type> celestialObjectTypes = new List<Type>();
-        private Dictionary<Type, BaseSkyCalc> ephemProviders = new Dictionary<Type, BaseSkyCalc>();
-        private Dictionary<Type, EphemerisConfig> ephemConfigs = new Dictionary<Type, EphemerisConfig>();
+        private List<Type> CelestialObjectTypes = new List<Type>();
+        private Dictionary<Type, Delegate> InfoProviders = new Dictionary<Type, Delegate>();
+        private Dictionary<Type, EphemerisConfig> EphemConfigs = new Dictionary<Type, EphemerisConfig>();
 
         public void Initialize()
         {
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            celestialObjectTypes = assemblies.SelectMany(a => a.GetTypes())
+            CelestialObjectTypes = assemblies.SelectMany(a => a.GetTypes())
                 .Where(t => !t.IsAbstract && typeof(CelestialObject).IsAssignableFrom(t))
                 .ToList();
 
-            Type providerType = typeof(IEphemProvider<>);
+            Type ephemProviderType = typeof(IEphemProvider<>);
+            Type infoProviderType = typeof(IInfoProvider<>);
 
             string configureEphemerisMethodName = nameof(IEphemProvider<CelestialObject>.ConfigureEphemeris);
 
@@ -55,16 +56,23 @@ namespace ADK.Demo
             {
                 calc.Initialize();
 
-                foreach (Type celestialObjectType in celestialObjectTypes)
+                foreach (Type bodyType in CelestialObjectTypes)
                 {
-                    Type genericProviderType = providerType.MakeGenericType(celestialObjectType);
+                    Type genericEphemProviderType = ephemProviderType.MakeGenericType(bodyType);
+                    Type genericInfoProviderType = infoProviderType.MakeGenericType(bodyType);
 
-                    if (genericProviderType.IsAssignableFrom(calc.GetType()))
+                    if (genericEphemProviderType.IsAssignableFrom(calc.GetType()))
                     {
-                        EphemerisConfig config = Activator.CreateInstance(typeof(EphemerisConfig<>).MakeGenericType(celestialObjectType)) as EphemerisConfig;
-                        genericProviderType.GetMethod(configureEphemerisMethodName).Invoke(calc, new object[] { config });
-                        ephemConfigs[celestialObjectType] = config;
-                        ephemProviders[celestialObjectType] = calc;
+                        EphemerisConfig config = Activator.CreateInstance(typeof(EphemerisConfig<>).MakeGenericType(bodyType)) as EphemerisConfig;
+                        genericEphemProviderType.GetMethod(configureEphemerisMethodName).Invoke(calc, new object[] { config });
+                        EphemConfigs[bodyType] = config;
+                    }
+
+                    if (genericInfoProviderType.IsAssignableFrom(calc.GetType()))
+                    {
+                        Type funcType = typeof(Func<,,>);
+                        Type genericFuncType = funcType.MakeGenericType(typeof(SkyContext), bodyType, typeof(string));
+                        InfoProviders[bodyType] = genericInfoProviderType.GetMethod(nameof(IInfoProvider<CelestialObject>.GetInfo)).CreateDelegate(genericFuncType, calc);
                     }
                 }
             }
@@ -89,7 +97,7 @@ namespace ADK.Demo
         {
             List<Dictionary<string, object>> result = new List<Dictionary<string, object>>();
 
-            var config = ephemConfigs[obj.GetType()];
+            var config = EphemConfigs[obj.GetType()];
 
             var itemsToBeCalled = config.Filter(keys);
 
@@ -117,6 +125,19 @@ namespace ADK.Demo
             }
 
             return result;
+        }
+
+        public string GetInfo(CelestialObject body)
+        {
+            Type bodyType = body.GetType();
+            if (InfoProviders.ContainsKey(bodyType))
+            {
+                return InfoProviders[bodyType].DynamicInvoke(Context, body).ToString();
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

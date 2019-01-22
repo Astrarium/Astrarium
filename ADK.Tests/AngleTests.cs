@@ -17,26 +17,26 @@ namespace ADK.Tests
         }
 
         [TestMethod]
-        public void Normalize()
+        public void Align()
         {
             {
                 var array = new double[] { 359, 0, 1, 2, 3 };
-                Angle.NormalizeAngles(array);
+                Angle.Align(array);
                 CollectionAssert.AreEqual(new double[] { 359, 360, 361, 362, 363 }, array);
             }
             {
                 var array = new double[] { -3, -7, -11 };
-                Angle.NormalizeAngles(array);
+                Angle.Align(array);
                 CollectionAssert.AreEqual(new double[] { -3, -7, -11 }, array);
             }
             {
                 var array = new double[] { 4, 350, 340 };
-                Angle.NormalizeAngles(array);
+                Angle.Align(array);
                 CollectionAssert.AreEqual(new double[] { 4, -10, -20 }, array);
             }
             {
                 var array = new double[] { 350, 10, 20 };
-                Angle.NormalizeAngles(array);
+                Angle.Align(array);
                 CollectionAssert.AreEqual(new double[] { 350, 370, 380 }, array);
             }
         }

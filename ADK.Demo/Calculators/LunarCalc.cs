@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo.Calculators
 {
-    public class LunarCalc : BaseSkyCalc, IEphemProvider<Moon>
+    public class LunarCalc : BaseSkyCalc, IEphemProvider<Moon>, IInfoProvider<Moon>
     {
         private Moon moon = new Moon();
 
@@ -29,60 +29,6 @@ namespace ADK.Demo.Calculators
             moon.Semidiameter = c.Get(Semidiameter);
             moon.Elongation = c.Get(Elongation);
             moon.Libration = c.Get(LibrationElements);
-
-            //// get Earth coordinates
-            //CrdsHeliocentrical hEarth = PlanetPositions.GetPlanetCoordinates(Planet.EARTH, context.JulianDay, highPrecision: true);
-
-            //// transform to ecliptical coordinates of the Sun
-            //CrdsEcliptical sunEcliptical = new CrdsEcliptical(Angle.To360(hEarth.L + 180), -hEarth.B, hEarth.R);
-
-            //// correct solar coordinates to FK5 system
-            //sunEcliptical += PlanetPositions.CorrectionForFK5(context.JulianDay, sunEcliptical);
-
-            //// add nutation effect to ecliptical coordinates of the Sun
-            //sunEcliptical += Nutation.NutationEffect(context.NutationElements.deltaPsi);
-
-            //// add aberration effect, so we have an final ecliptical coordinates of the Sun 
-            //sunEcliptical += Aberration.AberrationEffect(sunEcliptical.Distance);
-
-            //// geocentrical coordinates of the Moon
-            //moon.Ecliptical0 = LunarMotion.GetCoordinates(context.JulianDay);
-
-            //// apparent geocentrical ecliptical coordinates 
-            //moon.Ecliptical0 += Nutation.NutationEffect(context.NutationElements.deltaPsi);
-
-            //// equatorial geocentrical coordinates
-            //moon.Equatorial0 = moon.Ecliptical0.ToEquatorial(context.Epsilon);
-
-            //// Horizontal equatorial parallax
-            //moon.Parallax = LunarEphem.Parallax(moon.Ecliptical0.Distance);
-
-            //// Visible semidiameter
-            //moon.Semidiameter = LunarEphem.Semidiameter(moon.Ecliptical0.Distance);
-
-            //// Topocentric equatorial coordinates
-            //moon.Equatorial = moon.Equatorial0.ToTopocentric(context.GeoLocation, context.SiderealTime, moon.Parallax);
-
-            //// Topocentric ecliptical coordinates
-            //moon.Ecliptical = moon.Equatorial.ToEcliptical(context.Epsilon);
-
-            //// Local horizontal coordinates of the Moon
-            //moon.Horizontal = moon.Equatorial.ToHorizontal(context.GeoLocation, context.SiderealTime);
-
-            //// Elongation of the Moon
-            //moon.Elongation = Appearance.Elongation(sunEcliptical, moon.Ecliptical0);
-            
-            //// Phase angle
-            //moon.PhaseAngle = Appearance.PhaseAngle(moon.Elongation, sunEcliptical.Distance * 149597871.0, moon.Ecliptical0.Distance);
-            
-            //// Moon phase
-            //moon.Phase = Appearance.Phase(moon.PhaseAngle);
-
-            //// Topocentrical PA of axis
-            //moon.PAaxis = LunarEphem.PositionAngleOfAxis(context.JulianDay, moon.Ecliptical, context.Epsilon, context.NutationElements.deltaPsi);
-
-            //// Topocentrical libration
-            //moon.Libration = LunarEphem.Libration(context.JulianDay, moon.Ecliptical, context.NutationElements.deltaPsi);
         }
 
         private CrdsHeliocentrical EarthHeliocentrical(SkyContext c)
@@ -182,7 +128,6 @@ namespace ADK.Demo.Calculators
             return LunarEphem.Libration(c.JulianDay, c.Get(Ecliptical), c.NutationElements.deltaPsi);
         }
 
-
         /// <summary>
         /// Gets rise, transit and set info for the Moon
         /// </summary>
@@ -209,11 +154,20 @@ namespace ADK.Demo.Calculators
             config.Add("RTS.Rise", (c, m) => c.Get(RiseTransitSet).Rise)
                 .WithFormatter(Formatters.RTS);
 
+            config.Add("RTS.RiseAzimuth", (c, m) => c.Get(RiseTransitSet).RiseAzimuth)
+                .WithFormatter(Formatters.IntAzimuth);
+
             config.Add("RTS.Transit", (c, m) => c.Get(RiseTransitSet).Transit)
                 .WithFormatter(Formatters.RTS);
 
+            config.Add("RTS.TransitAltitude", (c, m) => c.Get(RiseTransitSet).TransitAltitude)
+                .WithFormatter(Formatters.Altitude1d);
+
             config.Add("RTS.Set", (c, m) => c.Get(RiseTransitSet).Set)
                 .WithFormatter(Formatters.RTS);
+
+            config.Add("RTS.SetAzimuth", (c, m) => c.Get(RiseTransitSet).SetAzimuth)
+                .WithFormatter(Formatters.IntAzimuth);
 
             config.Add("Equatorial.Alpha", (c, m) => c.Get(Equatorial).Alpha)
                 .WithFormatter(Formatters.RA);
@@ -222,6 +176,15 @@ namespace ADK.Demo.Calculators
                 .WithFormatter(Formatters.Dec);
         }
 
-        
+        string IInfoProvider<Moon>.GetInfo(SkyContext c, Moon m)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append("Rise: ").Append(Formatters.RTS.Format(c.Get(RiseTransitSet).Rise)).AppendLine();
+            sb.Append("Transit: ").Append(Formatters.RTS.Format(c.Get(RiseTransitSet).Transit)).AppendLine();
+            sb.Append("Set: ").Append(Formatters.RTS.Format(c.Get(RiseTransitSet).Set)).AppendLine();
+
+            return sb.ToString();
+        }
     }
 }

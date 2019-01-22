@@ -48,7 +48,7 @@ namespace ADK.Demo
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
-            var ephems = sky.GetEphemeris(moon, sky.Context.JulianDay, sky.Context.JulianDay + 30, new string[] { "RTS.Rise", "RTS.Transit", "RTS.Set"/*, "Equatorial.Alpha", "Equatorial.Delta"*/ });
+            var ephems = sky.GetEphemeris(moon, sky.Context.JulianDay, sky.Context.JulianDay + 30, new string[] { "RTS.Rise", "RTS.Transit", "RTS.Set", "RTS.RiseAzimuth", "RTS.TransitAltitude", "RTS.SetAzimuth"/*, "Equatorial.Alpha", "Equatorial.Delta"*/ });
             watch.Stop();
             Console.WriteLine("ELASPSED ms: " + watch.ElapsedMilliseconds);
 
@@ -56,8 +56,6 @@ namespace ADK.Demo
             {
                 Console.WriteLine(e["RTS.Rise"].ToString() + " " + e["RTS.Transit"].ToString() + " " + e["RTS.Set"].ToString());
             }
-
-            //sky.Calculate();
 
             ISkyMap map = new SkyMap();
             map.Renderers.Add(new DeepSkyRenderer(sky, map, settings));
@@ -153,7 +151,21 @@ namespace ADK.Demo
             MouseEventArgs me = e as MouseEventArgs;
             MouseButtons buttonPushed = me.Button;
             var hor = skyView.SkyMap.Projection.Invert(me.Location);
-            skyView.SkyMap.SelectedObject = skyView.SkyMap.VisibleObjects.FirstOrDefault(c => Angle.Separation(hor, c.Horizontal) < 1);
+            var body = skyView.SkyMap.VisibleObjects
+                .Where(c => Angle.Separation(hor, c.Horizontal) < 1)
+                .OrderBy(c => Angle.Separation(hor, c.Horizontal))
+                .FirstOrDefault();
+
+            skyView.SkyMap.SelectedObject = body;
+
+            if (body != null)
+            {
+                var info = sky.GetInfo(body);
+                if (info != null)
+                {
+                    MessageBox.Show(info);
+                }
+            }
         }
 
         private void ShowFullScreen(bool fullscreen)
