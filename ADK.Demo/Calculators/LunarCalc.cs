@@ -71,38 +71,56 @@ namespace ADK.Demo.Calculators
         }
 
         /// <summary>
-        /// Gets equatorial geocentrical coordinates  of the Moon
+        /// Gets equatorial geocentrical coordinates of the Moon
         /// </summary>
         private CrdsEquatorial Equatorial0(SkyContext c)
         {            
             return c.Get(Ecliptical0).ToEquatorial(c.Epsilon);
         }
 
+        /// <summary>
+        /// Gets Moon horizontal equatorial parallax
+        /// </summary>
         private double Parallax(SkyContext c)
         {
             return LunarEphem.Parallax(c.Get(Ecliptical0).Distance);
         }
 
+        /// <summary>
+        /// Gets visible semidiameter of the Moon, in seconds of arc 
+        /// </summary>
         private double Semidiameter(SkyContext c)
         {
             return LunarEphem.Semidiameter(c.Get(Ecliptical0).Distance);
         }
 
+        /// <summary>
+        /// Gets euqatorial topocentric coordinates of the Moon
+        /// </summary>
         private CrdsEquatorial Equatorial(SkyContext c)
         {
             return c.Get(Equatorial0).ToTopocentric(c.GeoLocation, c.SiderealTime, c.Get(Parallax));
         }
 
+        /// <summary>
+        /// Gets ecliptical coordinates of the Moon
+        /// </summary>
         private CrdsEcliptical Ecliptical(SkyContext c)
         {
             return c.Get(Equatorial).ToEcliptical(c.Epsilon);
         }
 
+        /// <summary>
+        /// Gets local horizontal coordinates of the Moon
+        /// </summary>
         private CrdsHorizontal Horizontal(SkyContext c)
         {
             return c.Get(Equatorial).ToHorizontal(c.GeoLocation, c.SiderealTime);
         }
 
+        /// <summary>
+        /// Gets geocentric elongation angle of the Moon
+        /// </summary>
         private double Elongation(SkyContext c)
         {
             return Appearance.Elongation(c.Get(SunEcliptical), c.Get(Ecliptical0));
@@ -133,9 +151,7 @@ namespace ADK.Demo.Calculators
         /// </summary>
         private RTS RiseTransitSet(SkyContext c)
         {
-            Date d = new Date(c.JulianDay);
-            double jd = new Date(d.Year, d.Month, (int)d.Day).ToJulianEphemerisDay() - 3 / 24.0;
-
+            double jd = c.JulianDayMidnight;
             double theta0 = Date.ApparentSiderealTime(jd, c.NutationElements.deltaPsi, c.Epsilon);
 
             CrdsEquatorial[] eq = new CrdsEquatorial[3];            
@@ -152,19 +168,19 @@ namespace ADK.Demo.Calculators
         public void ConfigureEphemeris(EphemerisConfig<Moon> config)
         {
             config.Add("RTS.Rise", (c, m) => c.Get(RiseTransitSet).Rise)
-                .WithFormatter(Formatters.RTS);
+                .WithFormatter(Formatters.Time);
 
             config.Add("RTS.RiseAzimuth", (c, m) => c.Get(RiseTransitSet).RiseAzimuth)
                 .WithFormatter(Formatters.IntAzimuth);
 
             config.Add("RTS.Transit", (c, m) => c.Get(RiseTransitSet).Transit)
-                .WithFormatter(Formatters.RTS);
+                .WithFormatter(Formatters.Time);
 
             config.Add("RTS.TransitAltitude", (c, m) => c.Get(RiseTransitSet).TransitAltitude)
                 .WithFormatter(Formatters.Altitude1d);
 
             config.Add("RTS.Set", (c, m) => c.Get(RiseTransitSet).Set)
-                .WithFormatter(Formatters.RTS);
+                .WithFormatter(Formatters.Time);
 
             config.Add("RTS.SetAzimuth", (c, m) => c.Get(RiseTransitSet).SetAzimuth)
                 .WithFormatter(Formatters.IntAzimuth);
@@ -180,9 +196,9 @@ namespace ADK.Demo.Calculators
         {
             StringBuilder sb = new StringBuilder();
 
-            sb.Append("Rise: ").Append(Formatters.RTS.Format(c.Get(RiseTransitSet).Rise)).AppendLine();
-            sb.Append("Transit: ").Append(Formatters.RTS.Format(c.Get(RiseTransitSet).Transit)).AppendLine();
-            sb.Append("Set: ").Append(Formatters.RTS.Format(c.Get(RiseTransitSet).Set)).AppendLine();
+            sb.Append("Rise: ").Append(Formatters.Time.Format(c.Get(RiseTransitSet).Rise)).AppendLine();
+            sb.Append("Transit: ").Append(Formatters.Time.Format(c.Get(RiseTransitSet).Transit)).AppendLine();
+            sb.Append("Set: ").Append(Formatters.Time.Format(c.Get(RiseTransitSet).Set)).AppendLine();
 
             return sb.ToString();
         }

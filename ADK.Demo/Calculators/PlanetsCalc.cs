@@ -3,10 +3,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace ADK.Demo.Calculators
 {
-    public class PlanetsCalc : BaseSkyCalc, IEphemProvider<Planet>
+    public class PlanetsCalc : BaseSkyCalc, IEphemProvider<Planet>, IInfoProvider<Planet>
     {
         private Planet[] Planets = new Planet[8];
 
@@ -233,9 +234,7 @@ namespace ADK.Demo.Calculators
         /// </summary>
         private RTS RiseTransitSet(SkyContext c, int p)
         {
-            Date d = new Date(c.JulianDay);
-            double jd = new Date(d.Year, d.Month, (int)d.Day).ToJulianEphemerisDay() - 3 / 24.0;
-
+            double jd = c.JulianDayMidnight;
             double theta0 = Date.ApparentSiderealTime(jd, c.NutationElements.deltaPsi, c.Epsilon);
             double parallax = c.Get(Parallax, p);
 
@@ -298,13 +297,25 @@ namespace ADK.Demo.Calculators
                 .AvailableIf((c, p) => p.Number == Planet.SATURN);
 
             e.Add("RTS.Rise", (c, p) => c.Get(RiseTransitSet, p.Number).Rise)
-                .WithFormatter(Formatters.RTS);
+                .WithFormatter(Formatters.Time);
 
             e.Add("RTS.Transit", (c, p) => c.Get(RiseTransitSet, p.Number).Transit)
-                .WithFormatter(Formatters.RTS);
+                .WithFormatter(Formatters.Time);
 
             e.Add("RTS.Set", (c, p) => c.Get(RiseTransitSet, p.Number).Set)
-               .WithFormatter(Formatters.RTS);
+               .WithFormatter(Formatters.Time);
+        }
+
+        string IInfoProvider<Planet>.GetInfo(SkyContext c, Planet planet)
+        {
+            int p = planet.Number;
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append("Rise: ").Append(Formatters.Time.Format(c.Get(RiseTransitSet, p).Rise)).AppendLine();
+            sb.Append("Transit: ").Append(Formatters.Time.Format(c.Get(RiseTransitSet, p).Transit)).AppendLine();
+            sb.Append("Set: ").Append(Formatters.Time.Format(c.Get(RiseTransitSet, p).Set)).AppendLine();
+
+            return sb.ToString();
         }
     }
 }

@@ -27,21 +27,22 @@ namespace ADK
 
         public double RhoSinPhi { get; private set; }
 
-        public CrdsGeographical(double latitude, double longitude, double elevation = 0)
+        /// <summary>
+        /// Utc offset, in hours
+        /// </summary>
+        public double UtcOffset { get; set; }
+
+        public CrdsGeographical(double latitude, double longitude, double utcOffset = 0, double elevation = 0)
         {
             Latitude = latitude;
             Longitude = longitude;
+            UtcOffset = utcOffset;
             Elevation = elevation;
             CalculateParallaxTerms();
         }
 
-        public CrdsGeographical(DMS latitude, DMS longitude, double elevation = 0)
-        {
-            Latitude = latitude.ToDecimalAngle();
-            Longitude = longitude.ToDecimalAngle();
-            Elevation = elevation;
-            CalculateParallaxTerms();
-        }
+        public CrdsGeographical(DMS latitude, DMS longitude, double utcOffset = 0, double elevation = 0) 
+            : this(latitude.ToDecimalAngle(), longitude.ToDecimalAngle(), utcOffset, elevation) { }
 
         /// <summary>
         /// Calculates terms needed for calculation of parallax effect.

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo.Calculators
 {
-    public class StarsCalc : BaseSkyCalc, IEphemProvider<Star>
+    public class StarsCalc : BaseSkyCalc, IEphemProvider<Star>, IInfoProvider<Star>
     {
         /// <summary>
         /// Collection of all stars
@@ -149,9 +149,7 @@ namespace ADK.Demo.Calculators
         /// </summary>
         private RTS RiseTransitSet(SkyContext c, Star star)
         {
-            Date d = new Date(c.JulianDay);
-            double jd = new Date(d.Year, d.Month, (int)d.Day).ToJulianEphemerisDay() - 3 / 24.0;
-            double theta0 = Date.ApparentSiderealTime(jd, c.NutationElements.deltaPsi, c.Epsilon);
+            double theta0 = Date.ApparentSiderealTime(c.JulianDayMidnight, c.NutationElements.deltaPsi, c.Epsilon);
             var eq = c.Get(Equatorial, star); 
             return Appearance.RiseTransitSet(eq, c.GeoLocation, theta0);
         }
@@ -161,13 +159,24 @@ namespace ADK.Demo.Calculators
         public void ConfigureEphemeris(EphemerisConfig<Star> e)
         {
             e.Add("RTS.Rise", (c, s) => c.Get(RiseTransitSet, s).Rise)
-                .WithFormatter(Formatters.RTS);
+                .WithFormatter(Formatters.Time);
 
             e.Add("RTS.Transit", (c, s) => c.Get(RiseTransitSet, s).Transit)
-                .WithFormatter(Formatters.RTS);
+                .WithFormatter(Formatters.Time);
 
             e.Add("RTS.Set", (c, s) => c.Get(RiseTransitSet, s).Set)
-               .WithFormatter(Formatters.RTS);
+               .WithFormatter(Formatters.Time);
+        }
+
+        string IInfoProvider<Star>.GetInfo(SkyContext c, Star s)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append("Rise: ").Append(Formatters.Time.Format(c.Get(RiseTransitSet, s).Rise)).AppendLine();
+            sb.Append("Transit: ").Append(Formatters.Time.Format(c.Get(RiseTransitSet, s).Transit)).AppendLine();
+            sb.Append("Set: ").Append(Formatters.Time.Format(c.Get(RiseTransitSet, s).Set)).AppendLine();
+
+            return sb.ToString();
         }
     }
 }

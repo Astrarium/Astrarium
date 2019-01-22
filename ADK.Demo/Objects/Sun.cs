@@ -9,11 +9,6 @@ namespace ADK.Demo.Objects
     public class Sun : CelestialObject
     {
         /// <summary>
-        /// Geocentrical equatorial coordinates
-        /// </summary>
-        public CrdsEquatorial Equatorial0 { get; set; } = new CrdsEquatorial();
-
-        /// <summary>
         /// Apparent topocentrical equatorial coordinates
         /// </summary>
         public CrdsEquatorial Equatorial { get; set; }
@@ -21,10 +16,5 @@ namespace ADK.Demo.Objects
         public CrdsEcliptical Ecliptical { get; set; }
 
         public double Semidiameter { get; set; }
-
-        /// <summary>
-        /// Solar parallax, in degrees
-        /// </summary>
-        public double Parallax { get; set; }
     }
 }

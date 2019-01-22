@@ -8,8 +8,15 @@ namespace ADK.Demo
         string Format(object value);
     }
 
+    /// <summary>
+    /// Contains default formatters for converting data values to string
+    /// </summary>
     public static class Formatters
     {
+        /// <summary>
+        /// Trivial converter for formatting any value to string.
+        /// Calls default ToString() implementation for the type.
+        /// </summary>
         private class SimpleFormatter : IEphemFormatter
         {
             public string Format(object value)
@@ -98,7 +105,7 @@ namespace ADK.Demo
 
         public static readonly IEphemFormatter RA = new RAFormatter();
         public static readonly IEphemFormatter Dec = new DecFormatter();
-        public static readonly IEphemFormatter RTS = new RTSFormatter();
+        public static readonly IEphemFormatter Time = new RTSFormatter();
         public static readonly IEphemFormatter IntAzimuth = new UnsignedDoubleFormatter(0);
         public static readonly IEphemFormatter Altitude1d = new SignedDoubleFormatter(1);
     }

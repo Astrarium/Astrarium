@@ -25,7 +25,7 @@ namespace ADK.Demo
         private double _JulianDay;
 
         /// <summary>
-        /// Julian ephemeris day
+        /// Julian ephemeris day for the context time instant
         /// </summary>
         public double JulianDay
         {
@@ -33,7 +33,6 @@ namespace ADK.Demo
             set
             {
                 _JulianDay = value;
-                DeltaT = Date.DeltaT(_JulianDay);
                 NutationElements = Nutation.NutationElements(_JulianDay);
                 AberrationElements = Aberration.AberrationElements(_JulianDay);
                 Epsilon = Date.TrueObliquity(_JulianDay, NutationElements.deltaEpsilon);
@@ -42,7 +41,14 @@ namespace ADK.Demo
             }
         }
 
-        public double DeltaT { get; private set; }
+        public double JulianDayMidnight
+        {
+            get
+            {
+                Date date = new Date(_JulianDay + _GeoLocation.UtcOffset / 24.0 - Date.DeltaT(_JulianDay) / 86400);
+                return _JulianDay - (date.Day - Math.Truncate(date.Day));
+            }
+        }
 
         private CrdsGeographical _GeoLocation;
 
