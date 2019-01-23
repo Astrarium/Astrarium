@@ -60,6 +60,7 @@ namespace ADK.Demo.Renderers
                     g.RotateTransform(rotation);
                     g.DrawEllipse(Pens.Gray, -diamA / 2, -diamB / 2, diamA, diamB);
                     g.ResetTransform();
+                    Map.VisibleObjects.Add(ds);
                 }
             }
             // round object
@@ -71,6 +72,7 @@ namespace ADK.Demo.Renderers
                     g.TranslateTransform(p.X, p.Y);
                     g.DrawEllipse(Pens.Gray, -diamA / 2, -diamA / 2, diamA, diamA);
                     g.ResetTransform();
+                    Map.VisibleObjects.Add(ds);
                 }
             }
             // point object
@@ -78,6 +80,7 @@ namespace ADK.Demo.Renderers
             {
                 g.TranslateTransform(p.X, p.Y);
                 g.DrawEllipse(Pens.Gray, -5, -5, 10f, 10f);
+                Map.VisibleObjects.Add(ds);
             }
         }
 

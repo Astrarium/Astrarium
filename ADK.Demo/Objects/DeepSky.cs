@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo.Objects
 {
-    public class DeepSky : CelestialObject
+    public class DeepSky : SizeableCelestialObject
     {
         /// <summary>
         /// Equatorial coordinates for epoch J2000.0
@@ -47,6 +47,8 @@ namespace ADK.Demo.Objects
         /// Deep sky type
         /// </summary>
         public string Type { get; set; }
+
+        public override double Semidiameter { get => Math.Max(SizeA, SizeB) * 30; }
     }
 
     public enum DeepSkyStatus : byte
