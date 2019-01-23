@@ -9,7 +9,7 @@ namespace ADK.Demo.Objects
     /// <summary>
     /// Contains coordinates and visual appearance data for the Moon for given instant of time.
     /// </summary>
-    public class Moon : CelestialObject
+    public class Moon : SizeableCelestialObject
     { 
         /// <summary>
         /// Apparent topocentrical equatorial coordinates
@@ -20,11 +20,6 @@ namespace ADK.Demo.Objects
         /// Geocentrical ecliptical corrdinates
         /// </summary>
         public CrdsEcliptical Ecliptical0 { get; set; }
-
-        /// <summary>
-        /// Visible semidiameter, in seconds of arc
-        /// </summary>
-        public double Semidiameter { get; set; }
 
         /// <summary>
         /// Elongation angle, i.e. angular distance from the Sun. 

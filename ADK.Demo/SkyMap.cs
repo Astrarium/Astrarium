@@ -33,9 +33,7 @@ namespace ADK.Demo
         {
             g.PageUnit = GraphicsUnit.Display;
             g.SmoothingMode = Antialias ? SmoothingMode.HighQuality : SmoothingMode.HighSpeed;
-
             VisibleObjects.Clear();
-
             foreach (var renderer in Renderers)
             {
                 renderer.Render(g);
@@ -53,6 +51,31 @@ namespace ADK.Demo
         public void Invalidate()
         {
             OnInvalidate?.Invoke();
+        }
+
+        public CelestialObject FindObject(PointF point)
+        {
+            var hor = Projection.Invert(point);
+            var body = VisibleObjects
+                .OrderBy(c => Angle.Separation(hor, c.Horizontal))
+                .FirstOrDefault();
+
+            if (body != null)
+            {
+                double sd = (body is SizeableCelestialObject) ?
+                    (body as SizeableCelestialObject).Semidiameter : 0;
+
+                double size = Math.Max(10, sd / 3600.0 / ViewAngle * Width);
+
+                PointF p = Projection.Project(body.Horizontal);
+
+                if (Geometry.DistanceBetweenPoints(p, point) <= size / 2)
+                {
+                    return body;
+                }
+            }
+
+            return null;
         }
     }
 }

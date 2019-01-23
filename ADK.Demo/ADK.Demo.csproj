@@ -69,6 +69,7 @@
     <Compile Include="Objects\DeepSky.cs" />
     <Compile Include="Objects\Moon.cs" />
     <Compile Include="Objects\Planet.cs" />
+    <Compile Include="Objects\SizeableCelestialObject.cs" />
     <Compile Include="Objects\Sun.cs" />
     <Compile Include="Renderers\GraphicsExtenstions.cs" />
     <Compile Include="Renderers\MilkyWayRenderer.cs" />

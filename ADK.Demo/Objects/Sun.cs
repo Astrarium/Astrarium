@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo.Objects
 {
-    public class Sun : CelestialObject
+    public class Sun : SizeableCelestialObject
     {
         /// <summary>
         /// Apparent topocentrical equatorial coordinates
@@ -14,7 +14,5 @@ namespace ADK.Demo.Objects
         public CrdsEquatorial Equatorial { get; set; }
 
         public CrdsEcliptical Ecliptical { get; set; }
-
-        public double Semidiameter { get; set; }
     }
 }

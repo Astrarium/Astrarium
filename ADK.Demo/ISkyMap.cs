@@ -68,6 +68,8 @@ namespace ADK.Demo
 
         bool Antialias { get; set; }
 
+        CelestialObject FindObject(PointF point);
+
         event Action OnInvalidate;
     }
 }

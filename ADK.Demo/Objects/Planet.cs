@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo.Objects
 {
-    public class Planet : CelestialObject
+    public class Planet : SizeableCelestialObject
     {
         /// <summary>
         /// Serial number of the planet, from 1 (Mercury) to 8 (Neptune).
@@ -27,11 +27,6 @@ namespace ADK.Demo.Objects
         /// Ecliptical corrdinates
         /// </summary>
         public CrdsEcliptical Ecliptical { get; set; }
-
-        /// <summary>
-        /// Visible semidiameter, in seconds of arc
-        /// </summary>
-        public double Semidiameter { get; set; }
 
         /// <summary>
         /// Planet flattening. 0 means ideal sphere.

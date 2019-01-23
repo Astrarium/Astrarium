@@ -149,17 +149,10 @@ namespace ADK.Demo
         private void skyView_DoubleClick(object sender, EventArgs e)
         {
             MouseEventArgs me = e as MouseEventArgs;
-            MouseButtons buttonPushed = me.Button;
-            var hor = skyView.SkyMap.Projection.Invert(me.Location);
-            var body = skyView.SkyMap.VisibleObjects
-                .Where(c => Angle.Separation(hor, c.Horizontal) < 1)
-                .OrderBy(c => Angle.Separation(hor, c.Horizontal))
-                .FirstOrDefault();
-
-            skyView.SkyMap.SelectedObject = body;
-
+            var body = skyView.SkyMap.FindObject(me.Location);
             if (body != null)
             {
+                skyView.SkyMap.SelectedObject = body;
                 var info = sky.GetInfo(body);
                 if (info != null)
                 {
