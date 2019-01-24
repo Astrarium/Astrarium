@@ -156,7 +156,16 @@ namespace ADK.Demo
                 var info = sky.GetInfo(body);
                 if (info != null)
                 {
-                    MessageBox.Show(info);
+                    FormObjectInfo formInfo = new FormObjectInfo(info);
+                    var result = formInfo.ShowDialog();
+                    if (result == DialogResult.OK)
+                    {
+                        sky.Context.JulianDay = formInfo.JulianDay;                        
+                        sky.Calculate();
+                        skyView.SkyMap.ViewAngle = 3;
+                        skyView.SkyMap.Center = new CrdsHorizontal(body.Horizontal);
+                        skyView.Invalidate();
+                    }
                 }
             }
         }

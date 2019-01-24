@@ -95,7 +95,7 @@ namespace ADK.Demo.Calculators
             return Appearance.RiseTransitSet(eq, c.GeoLocation, theta0, c.Get(Parallax), c.Get(Semidiameter) / 3600.0);
         }
 
-        string IInfoProvider<Sun>.GetInfo(SkyContext c, Sun sun)
+        CelestialObjectInfo IInfoProvider<Sun>.GetInfo(SkyContext c, Sun sun)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -103,7 +103,7 @@ namespace ADK.Demo.Calculators
             sb.Append("Transit: ").Append(Formatters.Time.Format(c.Get(RiseTransitSet).Transit)).AppendLine();
             sb.Append("Set: ").Append(Formatters.Time.Format(c.Get(RiseTransitSet).Set)).AppendLine();
 
-            return sb.ToString();
+            return null;
         }
 
         public void ConfigureEphemeris(EphemerisConfig<Sun> e)

@@ -38,6 +38,7 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -114,6 +115,12 @@
     <Compile Include="UI\FormDateTime.Designer.cs">
       <DependentUpon>FormDateTime.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\FormObjectInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\FormObjectInfo.Designer.cs">
+      <DependentUpon>FormObjectInfo.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\FormSettings.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -136,6 +143,9 @@
     </Compile>
     <EmbeddedResource Include="UI\FormDateTime.resx">
       <DependentUpon>FormDateTime.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\FormObjectInfo.resx">
+      <DependentUpon>FormObjectInfo.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\FormSettings.resx">
       <DependentUpon>FormSettings.cs</DependentUpon>
@@ -209,6 +219,7 @@
     <Content Include="Data\Moon.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <EmbeddedResource Include="UI\ObjectInfoTemplate.html" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

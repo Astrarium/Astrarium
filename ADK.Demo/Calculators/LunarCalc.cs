@@ -192,15 +192,19 @@ namespace ADK.Demo.Calculators
                 .WithFormatter(Formatters.Dec);
         }
 
-        string IInfoProvider<Moon>.GetInfo(SkyContext c, Moon m)
+        CelestialObjectInfo IInfoProvider<Moon>.GetInfo(SkyContext c, Moon m)
         {
-            StringBuilder sb = new StringBuilder();
+            var rts = c.Get(RiseTransitSet);
 
-            sb.Append("Rise: ").Append(Formatters.Time.Format(c.Get(RiseTransitSet).Rise)).AppendLine();
-            sb.Append("Transit: ").Append(Formatters.Time.Format(c.Get(RiseTransitSet).Transit)).AppendLine();
-            sb.Append("Set: ").Append(Formatters.Time.Format(c.Get(RiseTransitSet).Set)).AppendLine();
+            var info = new CelestialObjectInfo();
+            info.SetTitle("Moon")
 
-            return sb.ToString();
+                .AddHeader("Visibility")
+                .AddRow("Rise", rts.Rise, Formatters.Time, c.JulianDayMidnight + rts.Rise)
+                .AddRow("Transit", rts.Transit, Formatters.Time, c.JulianDayMidnight + rts.Transit)
+                .AddRow("Set", rts.Set, Formatters.Time, c.JulianDayMidnight + rts.Set);
+
+            return info;
         }
     }
 }

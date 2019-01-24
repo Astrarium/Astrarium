@@ -168,7 +168,7 @@ namespace ADK.Demo.Calculators
                .WithFormatter(Formatters.Time);
         }
 
-        string IInfoProvider<Star>.GetInfo(SkyContext c, Star s)
+        CelestialObjectInfo IInfoProvider<Star>.GetInfo(SkyContext c, Star s)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -176,7 +176,7 @@ namespace ADK.Demo.Calculators
             sb.Append("Transit: ").Append(Formatters.Time.Format(c.Get(RiseTransitSet, s).Transit)).AppendLine();
             sb.Append("Set: ").Append(Formatters.Time.Format(c.Get(RiseTransitSet, s).Set)).AppendLine();
 
-            return sb.ToString();
+            return null;
         }
     }
 }

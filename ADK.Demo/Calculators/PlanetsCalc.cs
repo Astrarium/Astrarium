@@ -306,7 +306,7 @@ namespace ADK.Demo.Calculators
                .WithFormatter(Formatters.Time);
         }
 
-        string IInfoProvider<Planet>.GetInfo(SkyContext c, Planet planet)
+        CelestialObjectInfo IInfoProvider<Planet>.GetInfo(SkyContext c, Planet planet)
         {
             int p = planet.Number;
             StringBuilder sb = new StringBuilder();
@@ -315,7 +315,7 @@ namespace ADK.Demo.Calculators
             sb.Append("Transit: ").Append(Formatters.Time.Format(c.Get(RiseTransitSet, p).Transit)).AppendLine();
             sb.Append("Set: ").Append(Formatters.Time.Format(c.Get(RiseTransitSet, p).Set)).AppendLine();
 
-            return sb.ToString();
+            return null;
         }
     }
 }

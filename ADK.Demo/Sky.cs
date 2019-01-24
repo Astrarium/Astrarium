@@ -71,7 +71,7 @@ namespace ADK.Demo
                     if (genericInfoProviderType.IsAssignableFrom(calc.GetType()))
                     {
                         Type funcType = typeof(Func<,,>);
-                        Type genericFuncType = funcType.MakeGenericType(typeof(SkyContext), bodyType, typeof(string));
+                        Type genericFuncType = funcType.MakeGenericType(typeof(SkyContext), bodyType, typeof(CelestialObjectInfo));
                         InfoProviders[bodyType] = genericInfoProviderType.GetMethod(nameof(IInfoProvider<CelestialObject>.GetInfo)).CreateDelegate(genericFuncType, calc);
                     }
                 }
@@ -127,12 +127,12 @@ namespace ADK.Demo
             return result;
         }
 
-        public string GetInfo(CelestialObject body)
+        public CelestialObjectInfo GetInfo(CelestialObject body)
         {
             Type bodyType = body.GetType();
             if (InfoProviders.ContainsKey(bodyType))
             {
-                return InfoProviders[bodyType].DynamicInvoke(Context, body).ToString();
+                return (CelestialObjectInfo)InfoProviders[bodyType].DynamicInvoke(Context, body);
             }
             else
             {
