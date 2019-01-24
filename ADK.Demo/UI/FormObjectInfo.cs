@@ -16,11 +16,26 @@ using System.Windows.Forms;
 
 namespace ADK.Demo.UI
 {
+    /// <summary>
+    /// Provides detailed info about selected celestial object
+    /// </summary>
     public partial class FormObjectInfo : Form
     {
-        public double JulianDay { get; private set; }
+        /// <summary>
+        /// Gets Julian Day to be set when user clicks on a date/time link in the "Object Info" window.
+        /// This property is set only if <see cref="Form.DialogResult"/> property is "OK", otherwise it's undefined (i.e. "NaN").
+        /// </summary>
+        public double JulianDay { get; private set; } = double.NaN;
+
+        /// <summary>
+        /// Gets object info passed to the constructor of the form.
+        /// </summary>
         public CelestialObjectInfo ObjectInfo { get; private set; }
 
+        /// <summary>
+        /// Creates new instance of the form.
+        /// </summary>
+        /// <param name="info">Object info to be displyed in the form.</param>
         public FormObjectInfo(CelestialObjectInfo info)
         {
             InitializeComponent();
@@ -47,7 +62,7 @@ namespace ADK.Demo.UI
                         break;
                     case InfoElementProperty p:
                         sb.AppendLine($"<tr><td class='expand'>{HttpUtility.HtmlEncode(p.Caption)}</td>")
-                          .AppendLine($"<td class='shrink'>{HttpUtility.HtmlEncode(p.Value)}</td></tr>");
+                          .AppendLine($"<td class='shrink'>{p.Value}</td></tr>");
                         break;
                     case InfoElementPropertyLink pl:
                         sb.AppendLine($"<tr><td class='expand'>{HttpUtility.HtmlEncode(pl.Caption)}</td>")
@@ -81,6 +96,11 @@ namespace ADK.Demo.UI
                 JulianDay = Convert.ToDouble(query["jd"], CultureInfo.InvariantCulture);
             }
             DialogResult = DialogResult.OK;
+        }
+
+        private void btnCopyToClipboard_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

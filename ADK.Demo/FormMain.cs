@@ -150,9 +150,10 @@ namespace ADK.Demo
         {
             MouseEventArgs me = e as MouseEventArgs;
             var body = skyView.SkyMap.FindObject(me.Location);
+            skyView.SkyMap.SelectedObject = body;
+            skyView.Invalidate();
             if (body != null)
             {
-                skyView.SkyMap.SelectedObject = body;
                 var info = sky.GetInfo(body);
                 if (info != null)
                 {

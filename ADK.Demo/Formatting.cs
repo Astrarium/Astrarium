@@ -25,7 +25,7 @@ namespace ADK.Demo
             }
         }
 
-        private class RAFormatter : IEphemFormatter
+        private class HMSAngleFormatter : IEphemFormatter
         {
             public string Format(object value)
             {
@@ -33,11 +33,28 @@ namespace ADK.Demo
             }
         }
 
-        private class DecFormatter : IEphemFormatter
+        private class SignedAngleFormatter : IEphemFormatter
         {
             public string Format(object value)
             {
                 return new DMS((double)value).ToString();
+            }
+        }
+
+        private class UnsignedAngleFormatter : IEphemFormatter
+        {
+            public string Format(object value)
+            {
+                return new DMS((double)value).ToUnsignedString();
+            }
+        }
+
+        private class PhaseFormatter : IEphemFormatter
+        {
+            public string Format(object value)
+            {
+                double phase = (double)value;
+                return Math.Round(Math.Abs(phase), 2).ToString("0.00", CultureInfo.InvariantCulture);
             }
         }
 
@@ -82,11 +99,12 @@ namespace ADK.Demo
 
         private class SignedDoubleFormatter : IEphemFormatter
         {
-            private int decimalPlaces = 0;
+            private readonly string format = null;
 
             public SignedDoubleFormatter(uint decimalPlaces)
             {
-                this.decimalPlaces = (int)decimalPlaces;
+                string decimals = new string('0', (int)decimalPlaces);
+                format = $"+0.{decimals};-0.{decimals}";
             }
 
             public string Format(object value)
@@ -98,15 +116,20 @@ namespace ADK.Demo
                 }
                 else
                 {
-                    return Math.Round(v, decimalPlaces).ToString("+0.0", CultureInfo.InvariantCulture);
+                    return v.ToString(format, CultureInfo.InvariantCulture);
                 }
             }
         }
 
-        public static readonly IEphemFormatter RA = new RAFormatter();
-        public static readonly IEphemFormatter Dec = new DecFormatter();
+        public static readonly IEphemFormatter RA = new HMSAngleFormatter();
+        public static readonly IEphemFormatter Dec = new SignedAngleFormatter();
+        public static readonly IEphemFormatter Latitude = new SignedAngleFormatter();
+        public static readonly IEphemFormatter Longitude = new UnsignedAngleFormatter();
         public static readonly IEphemFormatter Time = new RTSFormatter();
         public static readonly IEphemFormatter IntAzimuth = new UnsignedDoubleFormatter(0);
         public static readonly IEphemFormatter Altitude1d = new SignedDoubleFormatter(1);
+
+        public static readonly IEphemFormatter Phase = new PhaseFormatter();
+        public static readonly IEphemFormatter Magnitude = new SignedDoubleFormatter(2);
     }
 }

@@ -242,6 +242,15 @@ namespace ADK
         }
 
         /// <summary>
+        /// Gets string that represents angle in unsigned sexagesimal form.
+        /// </summary>
+        /// <returns>String that represents angle in unsigned sexagesimal form.</returns>
+        public string ToUnsignedString()
+        {
+            return string.Format(CultureInfo.InvariantCulture, "{0:D}° {1:D2}\u2032 {2:00.##}\u2033", Degrees, Minutes, Seconds);
+        }
+
+        /// <summary>
         /// Converts sexagesimal angle to arbitrary string representation.
         /// </summary>
         /// <param name="formatter">Formatter function</param>

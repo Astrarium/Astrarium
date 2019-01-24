@@ -146,6 +146,11 @@ namespace ADK.Demo.Calculators
             return LunarEphem.Libration(c.JulianDay, c.Get(Ecliptical), c.NutationElements.deltaPsi);
         }
 
+        private double Magnitude(SkyContext c)
+        {
+            return LunarEphem.Magnitude(c.Get(PhaseAngle));
+        }
+
         /// <summary>
         /// Gets rise, transit and set info for the Moon
         /// </summary>
@@ -199,11 +204,38 @@ namespace ADK.Demo.Calculators
             var info = new CelestialObjectInfo();
             info.SetTitle("Moon")
 
+                .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial)))
+
+                .AddHeader("Equatorial coordinates (geocentrical)")
+                .AddRow("RA", c.Get(Equatorial0).Alpha, Formatters.RA)
+                .AddRow("Dec", c.Get(Equatorial0).Delta, Formatters.Dec)
+
+                .AddHeader("Equatorial coordinates (topocentrical)")
+                .AddRow("RA", c.Get(Equatorial).Alpha, Formatters.RA)
+                .AddRow("Dec", c.Get(Equatorial).Delta, Formatters.Dec)
+
+                .AddHeader("Ecliptical coordinates")
+                .AddRow("Longitude", c.Get(Ecliptical0).Lambda, Formatters.Longitude)
+                .AddRow("Latitude", c.Get(Ecliptical0).Beta, Formatters.Latitude)
+
+                 .AddHeader("Horizontal coordinates")
+                .AddRow("Azimuth", c.Get(Horizontal).Azimuth, Formatters.Longitude)
+                .AddRow("Altitude", c.Get(Horizontal).Altitude, Formatters.Latitude)
+
                 .AddHeader("Visibility")
                 .AddRow("Rise", rts.Rise, Formatters.Time, c.JulianDayMidnight + rts.Rise)
                 .AddRow("Transit", rts.Transit, Formatters.Time, c.JulianDayMidnight + rts.Transit)
-                .AddRow("Set", rts.Set, Formatters.Time, c.JulianDayMidnight + rts.Set);
+                .AddRow("Set", rts.Set, Formatters.Time, c.JulianDayMidnight + rts.Set)
 
+                .AddHeader("Appearance")
+                .AddRow("Phase", c.Get(Phase), Formatters.Phase)
+                .AddRow("Phase angle", c.Get(PhaseAngle))
+                .AddRow("Magnitude", Formatters.Magnitude.Format(c.Get(Magnitude)) + "<sup>m</sup>")
+                .AddRow("Distance", (int)c.Get(Ecliptical0).Distance + " km")
+                .AddRow("Horizontal parallax", c.Get(Parallax))
+                .AddRow("Angular diameter", c.Get(Semidiameter) * 2)
+                .AddRow("Libration in latitude", c.Get(LibrationElements).b)
+                .AddRow("Libration in longitude", c.Get(LibrationElements).l);
             return info;
         }
     }
