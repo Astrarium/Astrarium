@@ -11,6 +11,6 @@ namespace ADK.Demo.Objects
         /// <summary>
         /// Visible semidiameter, in seconds of arc
         /// </summary>
-        public double Semidiameter { get; set; }
+        public virtual double Semidiameter { get; set; }
     }
 }

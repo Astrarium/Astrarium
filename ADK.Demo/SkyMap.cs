@@ -34,9 +34,16 @@ namespace ADK.Demo
             g.PageUnit = GraphicsUnit.Display;
             g.SmoothingMode = Antialias ? SmoothingMode.HighQuality : SmoothingMode.HighSpeed;
             VisibleObjects.Clear();
+
+            bool needDrawSelectedObject = true;
+
             foreach (var renderer in Renderers)
             {
                 renderer.Render(g);
+                if (needDrawSelectedObject)
+                {
+                    needDrawSelectedObject = !DrawSelectedObject(g);
+                }
             }
         }
 
@@ -76,6 +83,38 @@ namespace ADK.Demo
             }
 
             return null;
+        }
+
+        private bool DrawSelectedObject(Graphics g)
+        {           
+            // screen diagonal, in pixels
+            double diag = Math.Sqrt(Width * Width / 4 + Height * Height / 4);
+
+            if (SelectedObject != null && VisibleObjects.Contains(SelectedObject))
+            {
+                var body = SelectedObject;
+
+                double sd = (body is SizeableCelestialObject) ?
+                    (body as SizeableCelestialObject).Semidiameter : 0;
+
+                double size = Math.Max(10, sd / 3600.0 / ViewAngle * Width);
+
+                // do not draw selection circle if image is too large
+                bool drawCircle = true; // diam / 2 < diag;
+
+                if (drawCircle)
+                {
+                    PointF p = Projection.Project(body.Horizontal);
+                    Pen pen = new Pen(Brushes.DarkRed, 2);
+                    pen.DashStyle = DashStyle.Dash;
+
+                    g.DrawEllipse(pen, (float)(p.X - (size + 6) / 2), (float)(p.Y - (size + 6) / 2), (float)(size + 6), (float)(size + 6));
+
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
