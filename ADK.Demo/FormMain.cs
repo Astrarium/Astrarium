@@ -48,7 +48,7 @@ namespace ADK.Demo
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
-            var ephems = sky.GetEphemeris(moon, sky.Context.JulianDay, sky.Context.JulianDay + 30, new string[] { "RTS.Rise", "RTS.Transit", "RTS.Set", "RTS.RiseAzimuth", "RTS.TransitAltitude", "RTS.SetAzimuth"/*, "Equatorial.Alpha", "Equatorial.Delta"*/ });
+            var ephems = sky.GetEphemeris(moon, sky.Context.JulianDay, sky.Context.JulianDay + 365, new string[] { "RTS.Rise", "RTS.Transit", "RTS.Set", "RTS.RiseAzimuth", "RTS.TransitAltitude", "RTS.SetAzimuth"/*, "Equatorial.Alpha", "Equatorial.Delta"*/ });
             watch.Stop();
             Console.WriteLine("ELASPSED ms: " + watch.ElapsedMilliseconds);
 

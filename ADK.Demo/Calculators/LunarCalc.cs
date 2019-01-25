@@ -36,6 +36,9 @@ namespace ADK.Demo.Calculators
             return PlanetPositions.GetPlanetCoordinates(Planet.EARTH, c.JulianDay, highPrecision: true);
         }
 
+        /// <summary>
+        /// Gets apparent geocentrical ecliptical coordinates of the Sun
+        /// </summary>
         private CrdsEcliptical SunEcliptical(SkyContext c)
         {
             // get Earth coordinates
@@ -126,26 +129,41 @@ namespace ADK.Demo.Calculators
             return Appearance.Elongation(c.Get(SunEcliptical), c.Get(Ecliptical0));
         }
 
+        /// <summary>
+        /// Gets phase angle for the Moon
+        /// </summary>
         private double PhaseAngle(SkyContext c)
         {
             return Appearance.PhaseAngle(c.Get(Elongation), c.Get(SunEcliptical).Distance * 149597871.0, c.Get(Ecliptical0).Distance);
         }
 
+        /// <summary>
+        /// Gets phase of the Moon
+        /// </summary>
         private double Phase(SkyContext c)
         {
             return Appearance.Phase(c.Get(PhaseAngle));
         }
 
+        /// <summary>
+        /// Get position angle of axis for the Moon
+        /// </summary>
         private double PAaxis(SkyContext c)
         {
             return LunarEphem.PositionAngleOfAxis(c.JulianDay, c.Get(Ecliptical), c.Epsilon, c.NutationElements.deltaPsi);
         }
 
+        /// <summary>
+        /// Gets libration info for the Moon
+        /// </summary>
         private Libration LibrationElements(SkyContext c)
         {
             return LunarEphem.Libration(c.JulianDay, c.Get(Ecliptical), c.NutationElements.deltaPsi);
         }
 
+        /// <summary>
+        /// Gets visual magnitude of the Moon
+        /// </summary>
         private double Magnitude(SkyContext c)
         {
             return LunarEphem.Magnitude(c.Get(PhaseAngle));
@@ -172,20 +190,17 @@ namespace ADK.Demo.Calculators
 
         public void ConfigureEphemeris(EphemerisConfig<Moon> config)
         {
-            config.Add("RTS.Rise", (c, m) => c.Get(RiseTransitSet).Rise)
-                .WithFormatter(Formatters.Time);
+            config.Add("RTS.Rise", (c, m) => c.Get(RiseTransitSet).Rise);
 
             config.Add("RTS.RiseAzimuth", (c, m) => c.Get(RiseTransitSet).RiseAzimuth)
                 .WithFormatter(Formatters.IntAzimuth);
 
-            config.Add("RTS.Transit", (c, m) => c.Get(RiseTransitSet).Transit)
-                .WithFormatter(Formatters.Time);
+            config.Add("RTS.Transit", (c, m) => c.Get(RiseTransitSet).Transit);
 
             config.Add("RTS.TransitAltitude", (c, m) => c.Get(RiseTransitSet).TransitAltitude)
                 .WithFormatter(Formatters.Altitude1d);
 
-            config.Add("RTS.Set", (c, m) => c.Get(RiseTransitSet).Set)
-                .WithFormatter(Formatters.Time);
+            config.Add("RTS.Set", (c, m) => c.Get(RiseTransitSet).Set);
 
             config.Add("RTS.SetAzimuth", (c, m) => c.Get(RiseTransitSet).SetAzimuth)
                 .WithFormatter(Formatters.IntAzimuth);
@@ -207,35 +222,35 @@ namespace ADK.Demo.Calculators
                 .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial)))
 
                 .AddHeader("Equatorial coordinates (geocentrical)")
-                .AddRow("RA", c.Get(Equatorial0).Alpha, Formatters.RA)
-                .AddRow("Dec", c.Get(Equatorial0).Delta, Formatters.Dec)
+                .AddRow("Equatorial0.Alpha", c.Get(Equatorial0).Alpha)
+                .AddRow("Equatorial0.Delta", c.Get(Equatorial0).Delta)
 
                 .AddHeader("Equatorial coordinates (topocentrical)")
-                .AddRow("RA", c.Get(Equatorial).Alpha, Formatters.RA)
-                .AddRow("Dec", c.Get(Equatorial).Delta, Formatters.Dec)
+                .AddRow("Equatorial.Alpha", c.Get(Equatorial).Alpha)
+                .AddRow("Equatorial.Delta", c.Get(Equatorial).Delta)
 
                 .AddHeader("Ecliptical coordinates")
-                .AddRow("Longitude", c.Get(Ecliptical0).Lambda, Formatters.Longitude)
-                .AddRow("Latitude", c.Get(Ecliptical0).Beta, Formatters.Latitude)
+                .AddRow("Ecliptical.Lambda", c.Get(Ecliptical0).Lambda)
+                .AddRow("Ecliptical.Beta", c.Get(Ecliptical0).Beta)
 
-                 .AddHeader("Horizontal coordinates")
-                .AddRow("Azimuth", c.Get(Horizontal).Azimuth, Formatters.Longitude)
-                .AddRow("Altitude", c.Get(Horizontal).Altitude, Formatters.Latitude)
+                .AddHeader("Horizontal coordinates")
+                .AddRow("Horizontal.Azimuth", c.Get(Horizontal).Azimuth)
+                .AddRow("Horizontal.Altitude", c.Get(Horizontal).Altitude)
 
                 .AddHeader("Visibility")
-                .AddRow("Rise", rts.Rise, Formatters.Time, c.JulianDayMidnight + rts.Rise)
-                .AddRow("Transit", rts.Transit, Formatters.Time, c.JulianDayMidnight + rts.Transit)
-                .AddRow("Set", rts.Set, Formatters.Time, c.JulianDayMidnight + rts.Set)
+                .AddRow("RTS.Rise", rts.Rise, c.JulianDayMidnight + rts.Rise)
+                .AddRow("RTS.Transit", rts.Transit, c.JulianDayMidnight + rts.Transit)
+                .AddRow("RTS.Set", rts.Set, c.JulianDayMidnight + rts.Set)
 
                 .AddHeader("Appearance")
-                .AddRow("Phase", c.Get(Phase), Formatters.Phase)
-                .AddRow("Phase angle", c.Get(PhaseAngle))
-                .AddRow("Magnitude", Formatters.Magnitude.Format(c.Get(Magnitude)) + "<sup>m</sup>")
-                .AddRow("Distance", (int)c.Get(Ecliptical0).Distance + " km")
-                .AddRow("Horizontal parallax", c.Get(Parallax))
-                .AddRow("Angular diameter", c.Get(Semidiameter) * 2)
-                .AddRow("Libration in latitude", c.Get(LibrationElements).b)
-                .AddRow("Libration in longitude", c.Get(LibrationElements).l);
+                .AddRow("Phase", c.Get(Phase))
+                .AddRow("PhaseAngle", c.Get(PhaseAngle), "\u00B0")
+                .AddRow("Magnitude", c.Get(Magnitude), " m")
+                .AddRow("Distance", (int)c.Get(Ecliptical0).Distance, " km")
+                .AddRow("HorizontalParallax", c.Get(Parallax))
+                .AddRow("AngularDiameter", c.Get(Semidiameter) * 2 / 3600.0)
+                .AddRow("Libration.Latitude", c.Get(LibrationElements).b)
+                .AddRow("Libration.Longitude", c.Get(LibrationElements).l);
             return info;
         }
     }

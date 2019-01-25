@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace ADK.Demo
@@ -13,6 +14,45 @@ namespace ADK.Demo
     /// </summary>
     public static class Formatters
     {
+        /// <summary>
+        /// Dictionary of defult formatters to be used when formatter is not provided.
+        /// Key is an ephemeris key, value is formatter instance, if exists.
+        /// </summary>
+        public static Dictionary<string, IEphemFormatter> Default { get; } = new Dictionary<string, IEphemFormatter>();
+
+        static Formatters()
+        {
+            Default["RTS.Rise"]             = Time;
+            Default["RTS.Transit"]          = Time;
+            Default["RTS.Set"]              = Time;
+            Default["Equatorial0.Alpha"]    = RA;
+            Default["Equatorial0.Delta"]    = Dec;
+            Default["Equatorial.Alpha"]     = RA;
+            Default["Equatorial.Delta"]     = Dec;
+            Default["Ecliptical.Lambda"]    = Longitude;
+            Default["Ecliptical.Beta"]      = Latitude;
+            Default["Horizontal.Azimuth"]   = Longitude;
+            Default["Horizontal.Altitude"]  = Latitude;
+            Default["Magnitude"]            = Magnitude;
+            Default["PhaseAngle"]           = PhaseAngle;
+            Default["Phase"]                = Phase;
+            Default["HorizontalParallax"]   = HorizontalParallax;
+            Default["AngularDiameter"]      = AngularDiameter;
+            Default["Libration.Latitude"]   = LibrationLatitude;
+            Default["Libration.Longitude"]  = LibrationLongitude;
+        }
+
+        public static IEphemFormatter GetDefault(string key)
+        {
+            IEphemFormatter formatter = null;
+            Default.TryGetValue(key, out formatter);
+            if (formatter == null)
+            {
+                formatter = Simple;
+            }
+            return formatter;
+        }
+
         /// <summary>
         /// Trivial converter for formatting any value to string.
         /// Calls default ToString() implementation for the type.
@@ -49,6 +89,28 @@ namespace ADK.Demo
             }
         }
 
+        private class AngularDiameterFormatter : IEphemFormatter
+        {
+            public string Format(object value)
+            {
+                double angle = (double)value;
+                var a = new DMS((double)value);
+                
+                if (angle > 1)
+                {
+                    return string.Format(CultureInfo.InvariantCulture, "{0:D}° {1:D2}\u2032 {2:00.##}\u2033", a.Degrees, a.Minutes, a.Seconds);
+                }
+                else if (angle > 1.0 / 60)
+                {
+                    return string.Format(CultureInfo.InvariantCulture, "{0:D2}\u2032 {1:00.##}\u2033", a.Minutes, a.Seconds);
+                }
+                else
+                {
+                    return string.Format(CultureInfo.InvariantCulture, "{0:00.##}\u2033", a.Seconds);
+                }
+            }
+        }
+
         private class PhaseFormatter : IEphemFormatter
         {
             public string Format(object value)
@@ -58,14 +120,14 @@ namespace ADK.Demo
             }
         }
 
-        private class RTSFormatter : IEphemFormatter
+        private class TimeFormatter : IEphemFormatter
         {
             public string Format(object value)
             {
                 double v = (double)value;
                 if (double.IsInfinity(v) || double.IsNaN(v))
                 {
-                    return "-----";
+                    return "—";
                 }
                 else
                 {
@@ -76,24 +138,18 @@ namespace ADK.Demo
 
         private class UnsignedDoubleFormatter : IEphemFormatter
         {
-            private int decimalPlaces = 0;
+            private readonly string format = null;
 
             public UnsignedDoubleFormatter(uint decimalPlaces)
             {
-                this.decimalPlaces = (int)decimalPlaces;
+                string decimals = new string('0', (int)decimalPlaces);
+                format = $"0.{decimals}";
             }
 
             public string Format(object value)
             {
                 double v = (double)value;
-                if (double.IsNaN(v))
-                {
-                    return "-----";
-                }
-                else
-                {
-                    return Math.Round(v, decimalPlaces).ToString();
-                }
+                return v.ToString(format, CultureInfo.InvariantCulture);
             }
         }
 
@@ -110,26 +166,45 @@ namespace ADK.Demo
             public string Format(object value)
             {
                 double v = (double)value;
-                if (double.IsNaN(v))
-                {
-                    return "-----";
-                }
-                else
-                {
-                    return v.ToString(format, CultureInfo.InvariantCulture);
-                }
+                return v.ToString(format, CultureInfo.InvariantCulture);
             }
         }
+
+        private class LibrationLatitudeFormatter : IEphemFormatter
+        {
+            public string Format(object value)
+            {
+                double libration = (double)value;
+                return $"{Math.Abs(libration).ToString("0.0", CultureInfo.InvariantCulture)}\u00B0 {(libration > 0 ? "N" : "S")}";
+            }
+        }
+
+        private class LibrationLongitudeFormatter : IEphemFormatter
+        {
+            public string Format(object value)
+            {
+                double libration = (double)value;
+                return $"{Math.Abs(libration).ToString("0.0", CultureInfo.InvariantCulture)}\u00B0 {(libration > 0 ? "E" : "W")}";
+            }
+        }
+
+        private static readonly IEphemFormatter Simple = new SimpleFormatter(); 
 
         public static readonly IEphemFormatter RA = new HMSAngleFormatter();
         public static readonly IEphemFormatter Dec = new SignedAngleFormatter();
         public static readonly IEphemFormatter Latitude = new SignedAngleFormatter();
         public static readonly IEphemFormatter Longitude = new UnsignedAngleFormatter();
-        public static readonly IEphemFormatter Time = new RTSFormatter();
+        public static readonly IEphemFormatter Time = new TimeFormatter();
         public static readonly IEphemFormatter IntAzimuth = new UnsignedDoubleFormatter(0);
         public static readonly IEphemFormatter Altitude1d = new SignedDoubleFormatter(1);
 
         public static readonly IEphemFormatter Phase = new PhaseFormatter();
         public static readonly IEphemFormatter Magnitude = new SignedDoubleFormatter(2);
+        public static readonly IEphemFormatter PhaseAngle = new UnsignedDoubleFormatter(2);
+        public static readonly IEphemFormatter HorizontalParallax = new UnsignedAngleFormatter();
+        public static readonly IEphemFormatter AngularDiameter = new AngularDiameterFormatter();
+
+        public static readonly IEphemFormatter LibrationLatitude = new LibrationLatitudeFormatter();
+        public static readonly IEphemFormatter LibrationLongitude = new LibrationLongitudeFormatter();
     }
 }

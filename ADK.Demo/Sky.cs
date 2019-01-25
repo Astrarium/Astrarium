@@ -110,15 +110,8 @@ namespace ADK.Demo
                 foreach (var item in itemsToBeCalled)
                 {
                     object value = item.Formula.DynamicInvoke(context, obj);
-
-                    if (item.Formatter != null)
-                    {
-                        ephemeris.Add(item.Key, item.Formatter.Format(value));
-                    }
-                    else
-                    {
-                        ephemeris.Add(item.Key, value);
-                    }
+                    IEphemFormatter formatter = item.Formatter ?? Formatters.GetDefault(item.Key);
+                    ephemeris.Add(item.Key, formatter.Format(value));
                 }
 
                 result.Add(ephemeris);

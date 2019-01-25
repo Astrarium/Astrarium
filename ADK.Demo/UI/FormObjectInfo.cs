@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
@@ -55,18 +56,21 @@ namespace ADK.Demo.UI
             StringBuilder sb = new StringBuilder();
             foreach (var item in ObjectInfo.InfoElements)
             {
+                IEphemFormatter formatter;
                 switch (item)
                 {
                     case InfoElementHeader h:
                         sb.AppendLine($"<tr><td class='header' colspan='2'>{HttpUtility.HtmlEncode(h.Text)}</td></tr>");
                         break;
-                    case InfoElementProperty p:
+                    case InfoElementPropertyLink p when !double.IsNaN(p.JulianDay):
+                        formatter = p.Formatter ?? Formatters.GetDefault(p.Caption);
                         sb.AppendLine($"<tr><td class='expand'>{HttpUtility.HtmlEncode(p.Caption)}</td>")
-                          .AppendLine($"<td class='shrink'>{p.Value}</td></tr>");
+                          .AppendLine($"<td class='shrink'><a href='?jd={p.JulianDay.ToString(CultureInfo.InvariantCulture)}'>{HttpUtility.HtmlEncode(formatter.Format(p.Value))}{p.Units ?? ""}</td></tr>");
                         break;
-                    case InfoElementPropertyLink pl:
-                        sb.AppendLine($"<tr><td class='expand'>{HttpUtility.HtmlEncode(pl.Caption)}</td>")
-                          .AppendLine($"<td class='shrink'><a href='?jd={pl.JulianDay.ToString(CultureInfo.InvariantCulture)}'>{HttpUtility.HtmlEncode(pl.Value)}</td></tr>");
+                    case InfoElementProperty p:
+                        formatter = p.Formatter ?? Formatters.GetDefault(p.Caption);
+                        sb.AppendLine($"<tr><td class='expand'>{HttpUtility.HtmlEncode(p.Caption)}</td>")
+                          .AppendLine($"<td class='shrink'>{formatter.Format(p.Value)}{p.Units ?? ""}</td></tr>");
                         break;
                     default:
                         break;
@@ -100,7 +104,27 @@ namespace ADK.Demo.UI
 
         private void btnCopyToClipboard_Click(object sender, EventArgs e)
         {
+            StringBuilder sb = new StringBuilder();
+            foreach (var item in ObjectInfo.InfoElements)
+            {
+                IEphemFormatter formatter;
+                switch (item)
+                {
+                    case InfoElementHeader h:
+                        sb.AppendLine().AppendLine(h.Text);
+                        break;
+                    case InfoElementProperty p:
+                        formatter = p.Formatter ?? Formatters.GetDefault(p.Caption);
+                        sb.AppendLine($"{p.Caption}: {formatter.Format(p.Value)}{p.Units ?? ""}");
+                        break;
+                    default:
+                        break;
+                }
+            }
 
+            string text = Regex.Replace(sb.ToString(), "<.*?>", string.Empty);
+
+            Clipboard.SetText(text, TextDataFormat.UnicodeText);
         }
     }
 }
