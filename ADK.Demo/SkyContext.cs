@@ -45,9 +45,14 @@ namespace ADK.Demo
         {
             get
             {
-                Date date = new Date(_JulianDay + _GeoLocation.UtcOffset / 24.0 - Date.DeltaT(_JulianDay) / 86400);
+                Date date = ToLocalDate(_JulianDay);
                 return _JulianDay - (date.Day - Math.Truncate(date.Day));
             }
+        }
+
+        public Date ToLocalDate(double jd)
+        {
+            return new Date(jd + _GeoLocation.UtcOffset / 24.0 - Date.DeltaT(jd) / 86400);
         }
 
         private CrdsGeographical _GeoLocation;

@@ -84,5 +84,38 @@ namespace ADK.Tests
             Assert.AreEqual(-1.23, le.l, 1e-2);
             Assert.AreEqual(4.20, le.b, 1e-2);
         }
+
+        /// <summary>
+        /// AA(II), p. 353, examples 49.a, 49.b.
+        /// </summary>
+        [TestMethod]
+        public void NearestPhase()
+        {
+            {
+                // New Moon takes place in February 1977
+                Date date = new Date(1977, 2, 15);
+                double jd = date.ToJulianEphemerisDay();
+
+                double jdNewMoon = LunarEphem.NearestPhase(jd, MoonPhase.NewMoon);
+
+                // 1 second error
+                double error = 1.0 / (24 * 60 * 60);
+
+                Assert.AreEqual(2443192.65118, jdNewMoon, error);
+            }
+
+            {
+                // First last quarter of 2044
+                Date date = new Date(2044, 1, 1);
+                double jd = date.ToJulianEphemerisDay();
+
+                double jdLastQuarter = LunarEphem.NearestPhase(jd, MoonPhase.LastQuarter);
+
+                // 1 second error
+                double error = 1.0 / (24 * 60 * 60);
+
+                Assert.AreEqual(2467636.49186, jdLastQuarter, error);
+            }
+        }
     }
 }

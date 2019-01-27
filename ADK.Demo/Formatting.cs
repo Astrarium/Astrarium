@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 
 namespace ADK.Demo
 {
@@ -188,6 +189,17 @@ namespace ADK.Demo
             }
         }
 
+        private class DateTimeFormatter : IEphemFormatter
+        {
+            private readonly string[] months = CultureInfo.InvariantCulture.DateTimeFormat.AbbreviatedMonthNames.Take(12).ToArray();
+
+            public string Format(object value)
+            {
+                Date d = (Date)value;
+                return $"{(int)d.Day:00} {months[d.Month-1]} {d.Year} {d.Hour:00}:{d.Minute:00}";
+            }
+        }
+
         private static readonly IEphemFormatter Simple = new SimpleFormatter(); 
 
         public static readonly IEphemFormatter RA = new HMSAngleFormatter();
@@ -206,5 +218,7 @@ namespace ADK.Demo
 
         public static readonly IEphemFormatter LibrationLatitude = new LibrationLatitudeFormatter();
         public static readonly IEphemFormatter LibrationLongitude = new LibrationLongitudeFormatter();
+
+        public static readonly IEphemFormatter DateTime = new DateTimeFormatter();
     }
 }

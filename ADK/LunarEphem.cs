@@ -304,6 +304,202 @@ namespace ADK
         }
 
         /// <summary>
+        /// Calculates instant of the nearest Moon phase for the given date
+        /// </summary>
+        /// <param name="jd">Julian Day to calculate nearest phase</param>
+        /// <param name="phase">Phase to be found</param>
+        /// <returns>Julain Day corrsponding to the instant of nearest lunar phase</returns>
+        /// <remarks>
+        /// The method is taken from AA(II), chapter 49.
+        /// </remarks>
+        public static double NearestPhase(double jd, MoonPhase phase)
+        {
+            Date d = new Date(jd);
+            double year = d.Year + (Date.JulianEphemerisDay(d) - Date.JulianDay0(d.Year)) / 365.25;
+            double k = Math.Floor((year - 2000) * 12.3685);
+
+            k += (int)phase / 100.0;
+
+            double T = k / 1236.85;
+            double T2 = T * T;
+            double T3 = T2 * T;
+            double T4 = T3 * T;
+
+            double jdMeanPhase = 2451550.09766 + 29.530588861 * k
+                                            + 0.00015437 * T2
+                                            - 0.000000150 * T3
+                                            + 0.00000000073 * 4;
+
+            double M = 2.5534 + 29.10535670 * k
+                             - 0.0000014 * T2
+                             - 0.00000011 * T3;
+            
+
+            double M_ = 201.5643 + 385.81693528 * k
+                                 + 0.0107582 * T2
+                                 + 0.00001238 * T3
+                                 - 0.000000058 * T4;
+
+            double F = 160.7108 + 390.67050284 * k
+                                - 0.0016118 * T2
+                                - 0.00000227 * T3
+                                + 0.000000011 * T4;
+            
+
+            double Omega = 124.7746 - 1.56375588 * k
+                                    + 0.0020672 * T2
+                                    + 0.00000215 * T3;
+
+            M = Angle.ToRadians(M);
+            M_ = Angle.ToRadians(M_);
+            F = Angle.ToRadians(F);
+            Omega = Angle.ToRadians(Omega);
+
+            double[] A = new double[15];
+
+            A[1] = 299.77 + 0.107408 * k - 0.009173 * T2;
+            A[2] = 251.88 + 0.016321 * k;
+            A[3] = 251.83 + 26.651866 * k;
+            A[4] = 349.42 + 36.412478 * k;
+            A[5] = 84.66 + 18.206239 * k;
+            A[6] = 141.74 + 53.303771 * k;
+            A[7] = 207.14 + 2.453732 * k;
+            A[8] = 154.84 + 7.306860 * k;
+            A[9] = 34.52 + 27.261239 * k;
+            A[10] = 207.19 + 0.121824 * k;
+            A[11] = 291.34 + 1.844379 * k;
+            A[12] = 161.72 + 24.198154 * k;
+            A[13] = 239.56 + 25.513099 * k;
+            A[14] = 331.55 + 3.592518 * k;
+
+            for (int i = 1; i < 15; i++)
+            {
+                A[i] = Angle.ToRadians(A[i]);
+            }
+
+            double E = 1 - 0.002516 * T - 0.0000074 * T2;
+
+            double addition = 0;
+
+            if (phase == MoonPhase.NewMoon)
+            {
+                addition =
+                    -0.40720 * Math.Sin(M_)
+                    + 0.17241 * E * Math.Sin(M)
+                    + 0.01608 * Math.Sin(2 * M_)
+                    + 0.01039 * Math.Sin(2 * F)
+                    + 0.00739 * E * Math.Sin(M_ - M)
+                    - 0.00514 * E * Math.Sin(M_ + M)
+                    + 0.00208 * E * E * Math.Sin(2 * M)
+                    - 0.00111 * Math.Sin(M_ - 2 * F)
+                    - 0.00057 * Math.Sin(M_ + 2 * F)
+                    + 0.00056 * E * Math.Sin(2 * M_ + M)
+                    - 0.00042 * Math.Sin(3 * M_)
+                    + 0.00042 * E * Math.Sin(M + 2 * F)
+                    + 0.00038 * E * Math.Sin(M - 2 * F)
+                    - 0.00024 * E * Math.Sin(2 * M_ - M)
+                    - 0.00017 * Math.Sin(Omega)
+                    - 0.00007 * Math.Sin(M_ + 2 * M)
+                    + 0.00004 * Math.Sin(2 * M_ - 2 * F)
+                    + 0.00004 * Math.Sin(3 * M)
+                    + 0.00003 * Math.Sin(M_ + M - 2 * F)
+                    + 0.00003 * Math.Sin(2 * M_ + 2 * F)
+                    - 0.00003 * Math.Sin(M_ + M + 2 * F)
+                    + 0.00003 * Math.Sin(M_ - M + 2 * F)
+                    - 0.00002 * Math.Sin(M_ - M - 2 * F)
+                    - 0.00002 * Math.Sin(3 * M_ + M)
+                    + 0.00002 * Math.Sin(4 * M_);
+            }
+
+            if (phase == MoonPhase.FullMoon)
+            {
+                addition =
+                    -0.40614 * Math.Sin(M_)
+                    + 0.17302 * E * Math.Sin(M)
+                    + 0.01614 * Math.Sin(2 * M_)
+                    + 0.01043 * Math.Sin(2 * F)
+                    + 0.00734 * E * Math.Sin(M_ - M)
+                    - 0.00515 * E * Math.Sin(M_ + M)
+                    + 0.00209 * E * E * Math.Sin(2 * M)
+                    - 0.00111 * Math.Sin(M_ - 2 * F)
+                    - 0.00057 * Math.Sin(M_ + 2 * F)
+                    + 0.00056 * E * Math.Sin(2 * M_ + M)
+                    - 0.00042 * Math.Sin(3 * M_)
+                    + 0.00042 * E * Math.Sin(M + 2 * F)
+                    + 0.00038 * E * Math.Sin(M - 2 * F)
+                    - 0.00024 * E * Math.Sin(2 * M_ - M)
+                    - 0.00017 * Math.Sin(Omega)
+                    - 0.00007 * Math.Sin(M_ + 2 * M)
+                    + 0.00004 * Math.Sin(2 * M_ - 2 * F)
+                    + 0.00004 * Math.Sin(3 * M)
+                    + 0.00003 * Math.Sin(M_ + M - 2 * F)
+                    + 0.00003 * Math.Sin(2 * M_ + 2 * F)
+                    - 0.00003 * Math.Sin(M_ + M + 2 * F)
+                    + 0.00003 * Math.Sin(M_ - M + 2 * F)
+                    - 0.00002 * Math.Sin(M_ - M - 2 * F)
+                    - 0.00002 * Math.Sin(3 * M_ + M)
+                    + 0.00002 * Math.Sin(4 * M_);
+            }
+
+            if (phase == MoonPhase.FirstQuarter ||
+                phase == MoonPhase.LastQuarter)
+            {
+                addition =
+                    -0.62801 * Math.Sin(M_)
+                    + 0.17172 * E * Math.Sin(M)
+                    - 0.01183 * E * Math.Sin(M_ + M)
+                    + 0.00862 * Math.Sin(2 * M_)
+                    + 0.00804 * Math.Sin(2 * F)
+                    + 0.00454 * E * Math.Sin(M_ - M)
+                    + 0.00204 * E * E * Math.Sin(2 * M)
+                    - 0.00180 * Math.Sin(M_ - 2 * F)
+                    - 0.00070 * Math.Sin(M_ + 2 * F)
+                    - 0.00040 * Math.Sin(3 * M_)
+                    - 0.00034 * E * Math.Sin(2 * M_ - M)
+                    + 0.00032 * E * Math.Sin(M + 2 * F)
+                    + 0.00032 * E * Math.Sin(M - 2 * F)
+                    - 0.00028 * E * E * Math.Sin(M_ + 2 * M)
+                    + 0.00027 * E * Math.Sin(2 * M_ + M)
+                    - 0.00017 * Math.Sin(Omega)
+                    - 0.00005 * Math.Sin(M_ - M - 2 * F)
+                    + 0.00004 * Math.Sin(2 * M_ + 2 * F)
+                    - 0.00004 * Math.Sin(M_ + M + 2 * F)
+                    + 0.00004 * Math.Sin(M_ - 2 * M)
+                    + 0.00003 * Math.Sin(M_ + M - 2 * F)
+                    + 0.00003 * Math.Sin(3 * M)
+                    + 0.00002 * Math.Sin(2 * M_ - 2 * F)
+                    + 0.00002 * Math.Sin(M_ - M + 2 * F)
+                    - 0.00002 * Math.Sin(3 * M_ + M);
+
+                double W = 0.00306 - 0.00038 * E * Math.Cos(M) + 0.00026 * Math.Cos(M_)
+                    - 0.00002 * Math.Cos(M_ - M) + 0.00002 * Math.Cos(M_ + M) + 0.00002 * Math.Cos(2 * F);
+
+                if (phase == MoonPhase.FirstQuarter) addition += W;
+                if (phase == MoonPhase.LastQuarter) addition -= W;
+            }
+
+            double correction =
+                  0.000325 * Math.Sin(A[1])
+                + 0.000165 * Math.Sin(A[2])
+                + 0.000164 * Math.Sin(A[3])
+                + 0.000126 * Math.Sin(A[4])
+                + 0.000110 * Math.Sin(A[5])
+                + 0.000062 * Math.Sin(A[6])
+                + 0.000060 * Math.Sin(A[7])
+                + 0.000056 * Math.Sin(A[8])
+                + 0.000047 * Math.Sin(A[9])
+                + 0.000042 * Math.Sin(A[10])
+                + 0.000040 * Math.Sin(A[11])
+                + 0.000037 * Math.Sin(A[12])
+                + 0.000035 * Math.Sin(A[13])
+                + 0.000023 * Math.Sin(A[14]);
+
+            jdMeanPhase += addition + correction;
+
+            return jdMeanPhase;
+        }
+
+        /// <summary>
         /// Gets magnitude of the Moon by its phase angle.
         /// </summary>
         /// <param name="phaseAngle">Phase angle value, in degrees, from 0 to 180.</param>

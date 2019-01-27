@@ -106,6 +106,30 @@ namespace ADK.Demo.Calculators
         }
 
         /// <summary>
+        /// Gets precessional elements for converting from current to B1875 epoch
+        /// </summary>
+        private PrecessionalElements PrecessionalElements1875(SkyContext c)
+        {
+            return Precession.ElementsFK5(c.JulianDay, Date.EPOCH_B1875);
+        }
+
+        /// <summary>
+        /// Gets equatorial coordinates for B1875 epoch
+        /// </summary>
+        private CrdsEquatorial Equatorial1875(SkyContext c)
+        {
+            return Precession.GetEquatorialCoordinates(c.Get(Equatorial), c.Get(PrecessionalElements1875));
+        }
+
+        /// <summary>
+        /// Gets constellation where the Moon is located for current context instant
+        /// </summary>
+        private string Constellation(SkyContext c)
+        {
+            return Constellations.FindConstellation(c.Get(Equatorial1875));
+        }
+
+        /// <summary>
         /// Gets ecliptical coordinates of the Moon
         /// </summary>
         private CrdsEcliptical Ecliptical(SkyContext c)
@@ -170,6 +194,14 @@ namespace ADK.Demo.Calculators
         }
 
         /// <summary>
+        /// Gets nearest phase dates for the Moon
+        /// </summary>
+        private Date NearestPhase(SkyContext c, MoonPhase p)
+        {
+            return c.ToLocalDate(LunarEphem.NearestPhase(c.JulianDay, p));
+        }
+
+        /// <summary>
         /// Gets rise, transit and set info for the Moon
         /// </summary>
         private RTS RiseTransitSet(SkyContext c)
@@ -219,7 +251,7 @@ namespace ADK.Demo.Calculators
             var info = new CelestialObjectInfo();
             info.SetTitle("Moon")
 
-                .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial)))
+                .AddRow("Constellation", c.Get(Constellation))
 
                 .AddHeader("Equatorial coordinates (geocentrical)")
                 .AddRow("Equatorial0.Alpha", c.Get(Equatorial0).Alpha)
@@ -250,7 +282,13 @@ namespace ADK.Demo.Calculators
                 .AddRow("HorizontalParallax", c.Get(Parallax))
                 .AddRow("AngularDiameter", c.Get(Semidiameter) * 2 / 3600.0)
                 .AddRow("Libration.Latitude", c.Get(LibrationElements).b)
-                .AddRow("Libration.Longitude", c.Get(LibrationElements).l);
+                .AddRow("Libration.Longitude", c.Get(LibrationElements).l)
+
+                .AddHeader("Nearest phases")
+                .AddRow("Phases.NewMoon", c.Get(NearestPhase, MoonPhase.NewMoon), Formatters.DateTime)
+                .AddRow("Phases.FirstQuarter", c.Get(NearestPhase, MoonPhase.FirstQuarter), Formatters.DateTime)
+                .AddRow("Phases.FullMoon", c.Get(NearestPhase, MoonPhase.FullMoon), Formatters.DateTime)
+                .AddRow("Phases.LastQuarter", c.Get(NearestPhase, MoonPhase.LastQuarter), Formatters.DateTime);
             return info;
         }
     }
