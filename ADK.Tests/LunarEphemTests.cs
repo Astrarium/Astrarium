@@ -118,16 +118,19 @@ namespace ADK.Tests
             }
         }
 
+        /// <summary>
+        /// AA(II), p. 357, example 50.a.
+        /// </summary>
         [TestMethod]
-        public void Apsis()
+        public void NearestApsis()
         {
             Date date = new Date(1988, 10, 1);
             double jd = date.ToJulianEphemerisDay();
 
             double jsApogee = LunarEphem.NearestApsis(jd, MoonApsis.Apogee);
 
-            // 1 second error
-            double error = 1.0 / (24 * 60 * 60);
+            // 1 minute error
+            double error = 1.0 / (24 * 60);
 
             Assert.AreEqual(2447442.3537, jsApogee, error);
         }

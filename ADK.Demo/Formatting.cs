@@ -48,6 +48,8 @@ namespace ADK.Demo
             Default["MoonPhases.FirstQuarter"]  = DateTime;
             Default["MoonPhases.FullMoon"]      = DateTime;
             Default["MoonPhases.LastQuarter"]   = DateTime;
+            Default["MoonApsides.Apogee"]       = DateTime;
+            Default["MoonApsides.Perigee"]      = DateTime;
         }
 
         public static IEphemFormatter GetDefault(string key)

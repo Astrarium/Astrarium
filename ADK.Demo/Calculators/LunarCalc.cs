@@ -197,11 +197,19 @@ namespace ADK.Demo.Calculators
         }
 
         /// <summary>
-        /// Gets nearest phase dates for the Moon
+        /// Gets nearest phase date
         /// </summary>
         private double NearestPhase(SkyContext c, MoonPhase p)
         {
             return LunarEphem.NearestPhase(c.JulianDay, p);
+        }
+
+        /// <summary>
+        /// Gets nearest apsis date
+        /// </summary>
+        private double NearestApsis(SkyContext c, MoonApsis a)
+        {
+            return LunarEphem.NearestApsis(c.JulianDay, a);
         }
 
         /// <summary>
@@ -254,6 +262,8 @@ namespace ADK.Demo.Calculators
             var jdFQ = c.Get(NearestPhase, MoonPhase.FirstQuarter);
             var jdFM = c.Get(NearestPhase, MoonPhase.FullMoon);
             var jdLQ = c.Get(NearestPhase, MoonPhase.LastQuarter);
+            var jdApogee = c.Get(NearestApsis, MoonApsis.Apogee);
+            var jdPerigee = c.Get(NearestApsis, MoonApsis.Perigee);
 
             var info = new CelestialObjectInfo();
             info.SetTitle("Moon")
@@ -292,10 +302,14 @@ namespace ADK.Demo.Calculators
                 .AddRow("Libration.Longitude", c.Get(LibrationElements).l)
 
                 .AddHeader("Nearest phases")
-                .AddRow("MoonPhases.NewMoon", c.ToLocalDate(jdNM), Formatters.DateTime, jdNM)
-                .AddRow("MoonPhases.FirstQuarter", c.ToLocalDate(jdFQ), Formatters.DateTime, jdFQ)
-                .AddRow("MoonPhases.FullMoon", c.ToLocalDate(jdFM), Formatters.DateTime, jdFM)
-                .AddRow("MoonPhases.LastQuarter", c.ToLocalDate(jdLQ), Formatters.DateTime, jdLQ);
+                .AddRow("MoonPhases.NewMoon", c.ToLocalDate(jdNM), jdNM)
+                .AddRow("MoonPhases.FirstQuarter", c.ToLocalDate(jdFQ), jdFQ)
+                .AddRow("MoonPhases.FullMoon", c.ToLocalDate(jdFM), jdFM)
+                .AddRow("MoonPhases.LastQuarter", c.ToLocalDate(jdLQ), jdLQ)
+
+                .AddHeader("Nearest apsides")
+                .AddRow("MoonApsides.Apogee", c.ToLocalDate(jdApogee), jdApogee)
+                .AddRow("MoonApsides.Perigee", c.ToLocalDate(jdPerigee), jdPerigee);
 
             return info;
         }

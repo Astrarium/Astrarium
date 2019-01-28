@@ -499,14 +499,22 @@ namespace ADK
             return jdMeanPhase;
         }
 
-        public static double NearestApsis(double jd, MoonApsis aspect)
+        /// <summary>
+        /// Calculates instant of the nearest Moon apsis (perigee or apogee) for the given date
+        /// </summary>
+        /// <param name="jd">Julian Day to calculate nearest apsis</param>
+        /// <param name="apsis">Apsis to be found</param>
+        /// <returns>Julain Day corrsponding to the instant of nearest apsis</returns>
+        /// <remarks>
+        /// The method is taken from AA(II), chapter 50.
+        /// </remarks>
+        public static double NearestApsis(double jd, MoonApsis apsis)
         {
-            // p. 325-326
             Date d = new Date(jd);
             double year = d.Year + (Date.JulianEphemerisDay(d) - Date.JulianDay0(d.Year)) / 365.25;
 
             double k = Math.Floor((year - 1999.97) * 13.2555);
-            k += (double)aspect / 10.0;
+            k += (double)apsis / 10.0;
 
             double T = k / 1325.55;
             double T2 = T * T;
@@ -514,22 +522,22 @@ namespace ADK
             double T4 = T3 * T;
 
 
-            double jdMean = 2451534.6698 + 27.55454988 * k
-                                      - 0.0006886 * T2
+            double jdMean = 2451534.6698 + 27.55454989 * k
+                                      - 0.0006691 * T2
                                       - 0.000001098 * T3
                                       + 0.0000000052 * T4;
 
             double D = 171.9179 + 335.9106046 * k
-                                - 0.0100250 * T2
+                                - 0.0100383 * T2
                                 - 0.00001156 * T3
                                 + 0.000000055 * T4;
 
             double M = 347.3477 + 27.1577721 * k
-                                - 0.0008323 * T2
+                                - 0.0008130 * T2
                                 - 0.0000010 * T3;
 
             double F = 316.6109 + 364.5287911 * k
-                                - 0.0125131 * T2
+                                - 0.0125053 * T2
                                 - 0.0000148 * T3;
             D = Angle.To360(D);
             M = Angle.To360(M);
@@ -542,9 +550,8 @@ namespace ADK
 
             double terms = 0;
 
-            if (aspect == MoonApsis.Perigee)
+            if (apsis == MoonApsis.Perigee)
             {
-
                 terms =
                     Math.Sin(2 * D) * (-1.6769) +
                     Math.Sin(4 * D) * (+0.4589) +
@@ -607,7 +614,7 @@ namespace ADK
                     Math.Sin(2 * D + 2 * M) * (+0.0005) +
                     Math.Sin(D - M) * (-0.0004);
             }
-            if (aspect == MoonApsis.Apogee)
+            if (apsis == MoonApsis.Apogee)
             {
                 terms =
                     Math.Sin(2 * D) * (+0.4392) +
