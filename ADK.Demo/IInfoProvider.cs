@@ -35,6 +35,16 @@ namespace ADK.Demo
             return this;
         }
 
+        public CelestialObjectInfo AddRow(string key, object value)
+        {
+            InfoElements.Add(new InfoElementProperty()
+            {
+                Caption = key,
+                Value = value
+            });
+            return this;
+        }
+
         public CelestialObjectInfo AddRow(string key, object value, IEphemFormatter formmater)
         {
             InfoElements.Add(new InfoElementProperty()
@@ -46,48 +56,14 @@ namespace ADK.Demo
             return this;
         }
 
-        public CelestialObjectInfo AddRow(string key, object value)
-        {
-            InfoElements.Add(new InfoElementProperty()
-            {
-                Caption = key,
-                Value = value
-            });
-            return this;
-        }
-
-        public CelestialObjectInfo AddRow(string key, object value, string units)
-        {
-            InfoElements.Add(new InfoElementProperty()
-            {
-                Caption = key,
-                Value = value,
-                Units = units
-            });
-            return this;
-        }
-
-        public CelestialObjectInfo AddRow(string key, object value, string units, IEphemFormatter formatter = null)
-        {
-            InfoElements.Add(new InfoElementProperty()
-            {
-                Caption = key,
-                Value = value,
-                Formatter = formatter,
-                Units = units
-            });
-            return this;
-        }
-
-        public CelestialObjectInfo AddRow(string key, object value, string units, IEphemFormatter formatter, double jd)
+        public CelestialObjectInfo AddRow(string key, object value, IEphemFormatter formatter, double jd)
         {
             InfoElements.Add(new InfoElementPropertyLink()
             {
                 Caption = key,
                 Value = value,
                 JulianDay = jd,
-                Formatter = formatter,
-                Units = units
+                Formatter = formatter
             });
             return this;
         }
@@ -99,18 +75,6 @@ namespace ADK.Demo
                 Caption = key,
                 Value = value,
                 JulianDay = jd
-            });
-            return this;
-        }
-
-        public CelestialObjectInfo AddRow(string key, object value, string units, double jd)
-        {
-            InfoElements.Add(new InfoElementPropertyLink()
-            {
-                Caption = key,
-                Value = value,
-                JulianDay = jd,
-                Units = units
             });
             return this;
         }
@@ -128,7 +92,6 @@ namespace ADK.Demo
         public IEphemFormatter Formatter { get; set; }
         public string Caption { get; set; }
         public object Value { get; set; }
-        public string Units { get; set; }
     }
 
     public class InfoElementPropertyLink : InfoElementProperty

@@ -65,12 +65,12 @@ namespace ADK.Demo.UI
                     case InfoElementPropertyLink p when !double.IsNaN(p.JulianDay):
                         formatter = p.Formatter ?? Formatters.GetDefault(p.Caption);
                         sb.AppendLine($"<tr><td class='expand'>{HttpUtility.HtmlEncode(p.Caption)}</td>")
-                          .AppendLine($"<td class='shrink'><a href='?jd={p.JulianDay.ToString(CultureInfo.InvariantCulture)}'>{HttpUtility.HtmlEncode(formatter.Format(p.Value))}{p.Units ?? ""}</td></tr>");
+                          .AppendLine($"<td class='shrink'><a href='?jd={p.JulianDay.ToString(CultureInfo.InvariantCulture)}'>{HttpUtility.HtmlEncode(formatter.Format(p.Value))}</td></tr>");
                         break;
                     case InfoElementProperty p:
                         formatter = p.Formatter ?? Formatters.GetDefault(p.Caption);
                         sb.AppendLine($"<tr><td class='expand'>{HttpUtility.HtmlEncode(p.Caption)}</td>")
-                          .AppendLine($"<td class='shrink'>{formatter.Format(p.Value)}{p.Units ?? ""}</td></tr>");
+                          .AppendLine($"<td class='shrink'>{formatter.Format(p.Value)}</td></tr>");
                         break;
                     default:
                         break;
@@ -115,7 +115,7 @@ namespace ADK.Demo.UI
                         break;
                     case InfoElementProperty p:
                         formatter = p.Formatter ?? Formatters.GetDefault(p.Caption);
-                        sb.AppendLine($"{p.Caption}: {formatter.Format(p.Value)}{p.Units ?? ""}");
+                        sb.AppendLine($"{p.Caption}: {formatter.Format(p.Value)}");
                         break;
                     default:
                         break;

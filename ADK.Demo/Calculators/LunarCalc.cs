@@ -31,6 +31,9 @@ namespace ADK.Demo.Calculators
             moon.Libration = c.Get(LibrationElements);
         }
 
+        /// <summary>
+        /// Gets helipcentrical coordinates of Earth
+        /// </summary>
         private CrdsHeliocentrical EarthHeliocentrical(SkyContext c)
         {
             return PlanetPositions.GetPlanetCoordinates(Planet.EARTH, c.JulianDay, highPrecision: true);
@@ -196,9 +199,9 @@ namespace ADK.Demo.Calculators
         /// <summary>
         /// Gets nearest phase dates for the Moon
         /// </summary>
-        private Date NearestPhase(SkyContext c, MoonPhase p)
+        private double NearestPhase(SkyContext c, MoonPhase p)
         {
-            return c.ToLocalDate(LunarEphem.NearestPhase(c.JulianDay, p));
+            return LunarEphem.NearestPhase(c.JulianDay, p);
         }
 
         /// <summary>
@@ -247,6 +250,10 @@ namespace ADK.Demo.Calculators
         CelestialObjectInfo IInfoProvider<Moon>.GetInfo(SkyContext c, Moon m)
         {
             var rts = c.Get(RiseTransitSet);
+            var jdNM = c.Get(NearestPhase, MoonPhase.NewMoon);
+            var jdFQ = c.Get(NearestPhase, MoonPhase.FirstQuarter);
+            var jdFM = c.Get(NearestPhase, MoonPhase.FullMoon);
+            var jdLQ = c.Get(NearestPhase, MoonPhase.LastQuarter);
 
             var info = new CelestialObjectInfo();
             info.SetTitle("Moon")
@@ -276,19 +283,20 @@ namespace ADK.Demo.Calculators
 
                 .AddHeader("Appearance")
                 .AddRow("Phase", c.Get(Phase))
-                .AddRow("PhaseAngle", c.Get(PhaseAngle), "\u00B0")
-                .AddRow("Magnitude", c.Get(Magnitude), " m")
-                .AddRow("Distance", (int)c.Get(Ecliptical0).Distance, " km")
+                .AddRow("PhaseAngle", c.Get(PhaseAngle))
+                .AddRow("Magnitude", c.Get(Magnitude))
+                .AddRow("Distance", (int)c.Get(Ecliptical0).Distance + " km")
                 .AddRow("HorizontalParallax", c.Get(Parallax))
                 .AddRow("AngularDiameter", c.Get(Semidiameter) * 2 / 3600.0)
                 .AddRow("Libration.Latitude", c.Get(LibrationElements).b)
                 .AddRow("Libration.Longitude", c.Get(LibrationElements).l)
 
                 .AddHeader("Nearest phases")
-                .AddRow("Phases.NewMoon", c.Get(NearestPhase, MoonPhase.NewMoon), Formatters.DateTime)
-                .AddRow("Phases.FirstQuarter", c.Get(NearestPhase, MoonPhase.FirstQuarter), Formatters.DateTime)
-                .AddRow("Phases.FullMoon", c.Get(NearestPhase, MoonPhase.FullMoon), Formatters.DateTime)
-                .AddRow("Phases.LastQuarter", c.Get(NearestPhase, MoonPhase.LastQuarter), Formatters.DateTime);
+                .AddRow("MoonPhases.NewMoon", c.ToLocalDate(jdNM), Formatters.DateTime, jdNM)
+                .AddRow("MoonPhases.FirstQuarter", c.ToLocalDate(jdFQ), Formatters.DateTime, jdFQ)
+                .AddRow("MoonPhases.FullMoon", c.ToLocalDate(jdFM), Formatters.DateTime, jdFM)
+                .AddRow("MoonPhases.LastQuarter", c.ToLocalDate(jdLQ), Formatters.DateTime, jdLQ);
+
             return info;
         }
     }

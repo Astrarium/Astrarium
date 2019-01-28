@@ -499,6 +499,156 @@ namespace ADK
             return jdMeanPhase;
         }
 
+        public static double NearestApsis(double jd, MoonApsis aspect)
+        {
+            // p. 325-326
+            Date d = new Date(jd);
+            double year = d.Year + (Date.JulianEphemerisDay(d) - Date.JulianDay0(d.Year)) / 365.25;
+
+            double k = Math.Floor((year - 1999.97) * 13.2555);
+            k += (double)aspect / 10.0;
+
+            double T = k / 1325.55;
+            double T2 = T * T;
+            double T3 = T2 * T;
+            double T4 = T3 * T;
+
+
+            double jdMean = 2451534.6698 + 27.55454988 * k
+                                      - 0.0006886 * T2
+                                      - 0.000001098 * T3
+                                      + 0.0000000052 * T4;
+
+            double D = 171.9179 + 335.9106046 * k
+                                - 0.0100250 * T2
+                                - 0.00001156 * T3
+                                + 0.000000055 * T4;
+
+            double M = 347.3477 + 27.1577721 * k
+                                - 0.0008323 * T2
+                                - 0.0000010 * T3;
+
+            double F = 316.6109 + 364.5287911 * k
+                                - 0.0125131 * T2
+                                - 0.0000148 * T3;
+            D = Angle.To360(D);
+            M = Angle.To360(M);
+            F = Angle.To360(F);
+
+
+            D = Angle.ToRadians(D);
+            M = Angle.ToRadians(M);            
+            F = Angle.ToRadians(F);
+
+            double terms = 0;
+
+            if (aspect == MoonApsis.Perigee)
+            {
+
+                terms =
+                    Math.Sin(2 * D) * (-1.6769) +
+                    Math.Sin(4 * D) * (+0.4589) +
+                    Math.Sin(6 * D) * (-0.1856) +
+                    Math.Sin(8 * D) * (+0.0883) +
+                    Math.Sin(2 * D - M) * (-0.0773 + 0.00019 * T) +
+                    Math.Sin(M) * (+0.0502 - 0.00013 * T) +
+                    Math.Sin(10 * D) * (-0.0460) +
+                    Math.Sin(4 * D - M) * (+0.0422 - 0.00011 * T) +
+                    Math.Sin(6 * D - M) * (-0.0256) +
+                    Math.Sin(12 * D) * (+0.0253) +
+                    Math.Sin(D) * (+0.0237) +
+                    Math.Sin(8 * D - M) * (+0.0162) +
+                    Math.Sin(14 * D) * (-0.0145) +
+                    Math.Sin(2 * F) * (+0.0129) +
+                    Math.Sin(3 * D) * (-0.0112) +
+                    Math.Sin(10 * D - M) * (-0.0104) +
+                    Math.Sin(16 * D) * (+0.0086) +
+                    Math.Sin(12 * D - M) * (+0.0069) +
+                    Math.Sin(5 * D) * (+0.0066) +
+                    Math.Sin(2 * D + 2 * F) * (-0.0053) +
+                    Math.Sin(18 * D) * (-0.0052) +
+                    Math.Sin(14 * D - M) * (-0.0046) +
+                    Math.Sin(7 * D) * (-0.0041) +
+                    Math.Sin(2 * D + M) * (+0.0040) +
+                    Math.Sin(20 * D) * (+0.0032) +
+                    Math.Sin(D + M) * (-0.0032) +
+                    Math.Sin(16 * D - M) * (+0.0031) +
+                    Math.Sin(4 * D + M) * (-0.0029) +
+                    Math.Sin(9 * D) * (+0.0027) +
+                    Math.Sin(4 * D + 2 * F) * (+0.0027) +
+                    Math.Sin(2 * D - 2 * M) * (-0.0027) +
+                    Math.Sin(4 * D - 2 * M) * (+0.0024) +
+                    Math.Sin(6 * D - 2 * M) * (-0.0021) +
+                    Math.Sin(22 * D) * (-0.0021) +
+                    Math.Sin(18 * D - M) * (-0.0021) +
+                    Math.Sin(6 * D + M) * (+0.0019) +
+                    Math.Sin(11 * D) * (-0.0018) +
+                    Math.Sin(8 * D + M) * (-0.0014) +
+                    Math.Sin(4 * D - 2 * F) * (-0.0014) +
+                    Math.Sin(6 * D + 2 * F) * (-0.0014) +
+                    Math.Sin(3 * D + M) * (+0.0014) +
+                    Math.Sin(5 * D + M) * (-0.0014) +
+                    Math.Sin(13 * D) * (+0.0013) +
+                    Math.Sin(20 * D - M) * (+0.0013) +
+                    Math.Sin(3 * D + 2 * M) * (+0.0011) +
+                    Math.Sin(4 * D + 2 * F - 2 * M) * (-0.0011) +
+                    Math.Sin(D + 2 * M) * (-0.0010) +
+                    Math.Sin(22 * D - M) * (-0.0009) +
+                    Math.Sin(4 * F) * (-0.0008) +
+                    Math.Sin(6 * D - 2 * F) * (+0.0008) +
+                    Math.Sin(2 * D - 2 * F + M) * (+0.0008) +
+                    Math.Sin(2 * M) * (+0.0007) +
+                    Math.Sin(2 * F - M) * (+0.0007) +
+                    Math.Sin(2 * D + 4 * F) * (+0.0007) +
+                    Math.Sin(2 * F - 2 * M) * (-0.0006) +
+                    Math.Sin(2 * D - 2 * F + 2 * M) * (-0.0006) +
+                    Math.Sin(24 * D) * (+0.0006) +
+                    Math.Sin(4 * D - 4 * F) * (+0.0005) +
+                    Math.Sin(2 * D + 2 * M) * (+0.0005) +
+                    Math.Sin(D - M) * (-0.0004);
+            }
+            if (aspect == MoonApsis.Apogee)
+            {
+                terms =
+                    Math.Sin(2 * D) * (+0.4392) +
+                    Math.Sin(4 * D) * (+0.0684) +
+                    Math.Sin(M) * (+0.0456 - 0.00011 * T) +
+                    Math.Sin(2 * D - M) * (+0.0426 - 0.00011 * T) +
+                    Math.Sin(2 * F) * (+0.0212) +
+                    Math.Sin(D) * (-0.0189) +
+                    Math.Sin(6 * D) * (+0.0144) +
+                    Math.Sin(4 * D - M) * (+0.0113) +
+                    Math.Sin(2 * D + 2 * F) * (+0.0047) +
+                    Math.Sin(D + M) * (+0.0036) +
+                    Math.Sin(8 * D) * (+0.0035) +
+                    Math.Sin(6 * D - M) * (+0.0034) +
+                    Math.Sin(2 * D - 2 * F) * (-0.0034) +
+                    Math.Sin(2 * D - 2 * M) * (+0.0022) +
+                    Math.Sin(3 * D) * (-0.0017) +
+                    Math.Sin(4 * D + 2 * F) * (+0.0013) +
+                    Math.Sin(8 * D - M) * (+0.0011) +
+                    Math.Sin(4 * D - 2 * M) * (+0.0010) +
+                    Math.Sin(10 * D) * (+0.0009) +
+                    Math.Sin(3 * D + M) * (+0.0007) +
+                    Math.Sin(2 * M) * (+0.0006) +
+                    Math.Sin(2 * D + M) * (+0.0005) +
+                    Math.Sin(2 * D + 2 * M) * (+0.0005) +
+                    Math.Sin(6 * D + 2 * F) * (+0.0004) +
+                    Math.Sin(6 * D - 2 * M) * (+0.0004) +
+                    Math.Sin(10 * D - M) * (+0.0004) +
+                    Math.Sin(5 * D) * (-0.0004) +
+                    Math.Sin(4 * D - 2 * F) * (-0.0004) +
+                    Math.Sin(2 * F + M) * (+0.0003) +
+                    Math.Sin(12 * D) * (+0.0003) +
+                    Math.Sin(2 * D + 2 * F - M) * (+0.0003) +
+                    Math.Sin(D - M) * (-0.0003);
+            }
+
+            jdMean = jdMean + terms;
+
+            return jdMean;
+        }
+
         /// <summary>
         /// Gets magnitude of the Moon by its phase angle.
         /// </summary>

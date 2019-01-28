@@ -21,26 +21,33 @@ namespace ADK.Demo
         /// </summary>
         public static Dictionary<string, IEphemFormatter> Default { get; } = new Dictionary<string, IEphemFormatter>();
 
+        /// <summary>
+        /// Intializes default formatters dictionary.
+        /// </summary>
         static Formatters()
         {
-            Default["RTS.Rise"]             = Time;
-            Default["RTS.Transit"]          = Time;
-            Default["RTS.Set"]              = Time;
-            Default["Equatorial0.Alpha"]    = RA;
-            Default["Equatorial0.Delta"]    = Dec;
-            Default["Equatorial.Alpha"]     = RA;
-            Default["Equatorial.Delta"]     = Dec;
-            Default["Ecliptical.Lambda"]    = Longitude;
-            Default["Ecliptical.Beta"]      = Latitude;
-            Default["Horizontal.Azimuth"]   = Longitude;
-            Default["Horizontal.Altitude"]  = Latitude;
-            Default["Magnitude"]            = Magnitude;
-            Default["PhaseAngle"]           = PhaseAngle;
-            Default["Phase"]                = Phase;
-            Default["HorizontalParallax"]   = HorizontalParallax;
-            Default["AngularDiameter"]      = AngularDiameter;
-            Default["Libration.Latitude"]   = LibrationLatitude;
-            Default["Libration.Longitude"]  = LibrationLongitude;
+            Default["RTS.Rise"]                 = Time;
+            Default["RTS.Transit"]              = Time;
+            Default["RTS.Set"]                  = Time;
+            Default["Equatorial0.Alpha"]        = RA;
+            Default["Equatorial0.Delta"]        = Dec;
+            Default["Equatorial.Alpha"]         = RA;
+            Default["Equatorial.Delta"]         = Dec;
+            Default["Ecliptical.Lambda"]        = Longitude;
+            Default["Ecliptical.Beta"]          = Latitude;
+            Default["Horizontal.Azimuth"]       = Longitude;
+            Default["Horizontal.Altitude"]      = Latitude;
+            Default["Magnitude"]                = Magnitude;
+            Default["PhaseAngle"]               = PhaseAngle;
+            Default["Phase"]                    = Phase;
+            Default["HorizontalParallax"]       = HorizontalParallax;
+            Default["AngularDiameter"]          = AngularDiameter;
+            Default["Libration.Latitude"]       = LibrationLatitude;
+            Default["Libration.Longitude"]      = LibrationLongitude;
+            Default["MoonPhases.NewMoon"]       = DateTime;
+            Default["MoonPhases.FirstQuarter"]  = DateTime;
+            Default["MoonPhases.FullMoon"]      = DateTime;
+            Default["MoonPhases.LastQuarter"]   = DateTime;
         }
 
         public static IEphemFormatter GetDefault(string key)
@@ -140,34 +147,38 @@ namespace ADK.Demo
         private class UnsignedDoubleFormatter : IEphemFormatter
         {
             private readonly string format = null;
+            private readonly string units = null;
 
-            public UnsignedDoubleFormatter(uint decimalPlaces)
+            public UnsignedDoubleFormatter(uint decimalPlaces, string units = null)
             {
                 string decimals = new string('0', (int)decimalPlaces);
                 format = $"0.{decimals}";
+                this.units = units;
             }
 
             public string Format(object value)
             {
                 double v = (double)value;
-                return v.ToString(format, CultureInfo.InvariantCulture);
+                return v.ToString(format, CultureInfo.InvariantCulture) + (units ?? "");
             }
         }
 
         private class SignedDoubleFormatter : IEphemFormatter
         {
             private readonly string format = null;
+            private readonly string units = null;
 
-            public SignedDoubleFormatter(uint decimalPlaces)
+            public SignedDoubleFormatter(uint decimalPlaces, string units = null)
             {
                 string decimals = new string('0', (int)decimalPlaces);
                 format = $"+0.{decimals};-0.{decimals}";
+                this.units = units;
             }
 
             public string Format(object value)
             {
                 double v = (double)value;
-                return v.ToString(format, CultureInfo.InvariantCulture);
+                return v.ToString(format, CultureInfo.InvariantCulture) + (units ?? "");
             }
         }
 
@@ -211,8 +222,8 @@ namespace ADK.Demo
         public static readonly IEphemFormatter Altitude1d = new SignedDoubleFormatter(1);
 
         public static readonly IEphemFormatter Phase = new PhaseFormatter();
-        public static readonly IEphemFormatter Magnitude = new SignedDoubleFormatter(2);
-        public static readonly IEphemFormatter PhaseAngle = new UnsignedDoubleFormatter(2);
+        public static readonly IEphemFormatter Magnitude = new SignedDoubleFormatter(2, " m");
+        public static readonly IEphemFormatter PhaseAngle = new UnsignedDoubleFormatter(2, "\u00B0");
         public static readonly IEphemFormatter HorizontalParallax = new UnsignedAngleFormatter();
         public static readonly IEphemFormatter AngularDiameter = new AngularDiameterFormatter();
 
