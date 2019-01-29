@@ -37,5 +37,11 @@ namespace ADK.Demo.Objects
         /// Star color, i.e. spectral class
         /// </summary>
         public char Color { get; set; }
+
+        /// <summary>
+        /// Position in star catalogue (offset from beginning of the file).
+        /// Needed for extracting detailed info about star.
+        /// </summary>
+        public long FilePosition { get; set; }
     }
 }

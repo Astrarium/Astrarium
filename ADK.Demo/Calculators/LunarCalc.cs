@@ -153,7 +153,7 @@ namespace ADK.Demo.Calculators
         /// </summary>
         private double Elongation(SkyContext c)
         {
-            return Appearance.Elongation(c.Get(SunEcliptical), c.Get(Ecliptical0));
+            return BasicEphem.Elongation(c.Get(SunEcliptical), c.Get(Ecliptical0));
         }
 
         /// <summary>
@@ -161,7 +161,7 @@ namespace ADK.Demo.Calculators
         /// </summary>
         private double PhaseAngle(SkyContext c)
         {
-            return Appearance.PhaseAngle(c.Get(Elongation), c.Get(SunEcliptical).Distance * 149597871.0, c.Get(Ecliptical0).Distance);
+            return BasicEphem.PhaseAngle(c.Get(Elongation), c.Get(SunEcliptical).Distance * 149597871.0, c.Get(Ecliptical0).Distance);
         }
 
         /// <summary>
@@ -169,7 +169,7 @@ namespace ADK.Demo.Calculators
         /// </summary>
         private double Phase(SkyContext c)
         {
-            return Appearance.Phase(c.Get(PhaseAngle));
+            return BasicEphem.Phase(c.Get(PhaseAngle));
         }
 
         /// <summary>
@@ -228,34 +228,22 @@ namespace ADK.Demo.Calculators
                 eq[i] = new SkyContext(jd + diff[i], c.GeoLocation).Get(Equatorial0);
             }
 
-            return Appearance.RiseTransitSet(eq, c.GeoLocation, theta0, c.Get(Parallax), c.Get(Semidiameter) / 3600.0);
+            return Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, c.Get(Parallax), c.Get(Semidiameter) / 3600.0);
         }
 
-        public void ConfigureEphemeris(EphemerisConfig<Moon> config)
+        public void ConfigureEphemeris(EphemerisConfig<Moon> e)
         {
-            config.Add("RTS.Rise", (c, m) => c.Get(RiseTransitSet).Rise);
-
-            config.Add("RTS.RiseAzimuth", (c, m) => c.Get(RiseTransitSet).RiseAzimuth)
-                .WithFormatter(Formatters.IntAzimuth);
-
-            config.Add("RTS.Transit", (c, m) => c.Get(RiseTransitSet).Transit);
-
-            config.Add("RTS.TransitAltitude", (c, m) => c.Get(RiseTransitSet).TransitAltitude)
-                .WithFormatter(Formatters.Altitude1d);
-
-            config.Add("RTS.Set", (c, m) => c.Get(RiseTransitSet).Set);
-
-            config.Add("RTS.SetAzimuth", (c, m) => c.Get(RiseTransitSet).SetAzimuth)
-                .WithFormatter(Formatters.IntAzimuth);
-
-            config.Add("Equatorial.Alpha", (c, m) => c.Get(Equatorial).Alpha)
-                .WithFormatter(Formatters.RA);
-
-            config.Add("Equatorial.Delta", (c, m) => c.Get(Equatorial).Delta)
-                .WithFormatter(Formatters.Dec);
+            e.Add("RTS.Rise", (c, m) => c.Get(RiseTransitSet).Rise);
+            e.Add("RTS.RiseAzimuth", (c, m) => c.Get(RiseTransitSet).RiseAzimuth);
+            e.Add("RTS.Transit", (c, m) => c.Get(RiseTransitSet).Transit);
+            e.Add("RTS.TransitAltitude", (c, m) => c.Get(RiseTransitSet).TransitAltitude);
+            e.Add("RTS.Set", (c, m) => c.Get(RiseTransitSet).Set);
+            e.Add("RTS.SetAzimuth", (c, m) => c.Get(RiseTransitSet).SetAzimuth);
+            e.Add("Equatorial.Alpha", (c, m) => c.Get(Equatorial).Alpha);
+            e.Add("Equatorial.Delta", (c, m) => c.Get(Equatorial).Delta);
         }
 
-        CelestialObjectInfo IInfoProvider<Moon>.GetInfo(SkyContext c, Moon m)
+        public CelestialObjectInfo GetInfo(SkyContext c, Moon m)
         {
             var rts = c.Get(RiseTransitSet);
             var jdNM = c.Get(NearestPhase, MoonPhase.NewMoon);
@@ -290,12 +278,13 @@ namespace ADK.Demo.Calculators
                 .AddRow("RTS.Rise", rts.Rise, c.JulianDayMidnight + rts.Rise)
                 .AddRow("RTS.Transit", rts.Transit, c.JulianDayMidnight + rts.Transit)
                 .AddRow("RTS.Set", rts.Set, c.JulianDayMidnight + rts.Set)
+                .AddRow("RTS.Duration", rts.Duration)
 
                 .AddHeader("Appearance")
                 .AddRow("Phase", c.Get(Phase))
                 .AddRow("PhaseAngle", c.Get(PhaseAngle))
                 .AddRow("Magnitude", c.Get(Magnitude))
-                .AddRow("Distance", (int)c.Get(Ecliptical0).Distance + " km")
+                .AddRow("Distance", (int)c.Get(Ecliptical0).Distance + " km", Formatters.Simple)
                 .AddRow("HorizontalParallax", c.Get(Parallax))
                 .AddRow("AngularDiameter", c.Get(Semidiameter) * 2 / 3600.0)
                 .AddRow("Libration.Latitude", c.Get(LibrationElements).b)

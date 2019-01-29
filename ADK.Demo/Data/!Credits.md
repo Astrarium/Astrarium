@@ -6,5 +6,7 @@ Saturn rings texture is by Alpha-Element, taken from https://www.deviantart.com/
 Constellation centers data are taken from http://pbarbier.com/constellations/boundaries.html
 Under Creative Commons Attribution-ShareAlike 4.0 International License.
 
+Stars data (Yale Bright Star Catalog revision 5) are taken from http://tdc-www.harvard.edu/catalogs/bsc5.html
+
 NGC/IC catalogs data are taken from http://www.klima-luft.de/steinicke/index_e.htm
 (c) Dr. Wolfgang Steinicke, under condition: any non-commercial use of data is free

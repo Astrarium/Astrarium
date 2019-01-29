@@ -43,19 +43,25 @@ namespace ADK.Demo
             sky.Initialize();
             sky.Calculate();
 
+            //var moon = sky.Get<Moon>("Moon");
+            //var watch = System.Diagnostics.Stopwatch.StartNew();
+            //var ephems = sky.GetEphemeris(moon, sky.Context.JulianDay, sky.Context.JulianDay + 365, new string[] { "RTS.Rise", "RTS.Transit", "RTS.Set", "RTS.RiseAzimuth", "RTS.TransitAltitude", "RTS.SetAzimuth"/*, "Equatorial.Alpha", "Equatorial.Delta"*/ });
+            //watch.Stop();
+            //Console.WriteLine("ELASPSED ms: " + watch.ElapsedMilliseconds);
 
-            var moon = sky.Get<Moon>("Moon");
+            //foreach (var e in ephems)
+            //{
+            //    Console.WriteLine(e["RTS.Rise"].ToString() + " " + e["RTS.Transit"].ToString() + " " + e["RTS.Set"].ToString());
+            //}
+
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
-            var ephems = sky.GetEphemeris(moon, sky.Context.JulianDay, sky.Context.JulianDay + 365, new string[] { "RTS.Rise", "RTS.Transit", "RTS.Set", "RTS.RiseAzimuth", "RTS.TransitAltitude", "RTS.SetAzimuth"/*, "Equatorial.Alpha", "Equatorial.Delta"*/ });
+            var jd0 = new Date(2019, 6, 21).ToJulianEphemerisDay();
+
+            var evens = sky.GetEvents(jd0, jd0 + 1);
             watch.Stop();
             Console.WriteLine("ELASPSED ms: " + watch.ElapsedMilliseconds);
-
-            foreach (var e in ephems)
-            {
-                Console.WriteLine(e["RTS.Rise"].ToString() + " " + e["RTS.Transit"].ToString() + " " + e["RTS.Set"].ToString());
-            }
 
             ISkyMap map = new SkyMap();
             map.Renderers.Add(new DeepSkyRenderer(sky, map, settings));

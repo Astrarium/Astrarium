@@ -539,10 +539,10 @@ namespace ADK
             double F = 316.6109 + 364.5287911 * k
                                 - 0.0125053 * T2
                                 - 0.0000148 * T3;
+
             D = Angle.To360(D);
             M = Angle.To360(M);
             F = Angle.To360(F);
-
 
             D = Angle.ToRadians(D);
             M = Angle.ToRadians(M);            
@@ -614,7 +614,7 @@ namespace ADK
                     Math.Sin(2 * D + 2 * M) * (+0.0005) +
                     Math.Sin(D - M) * (-0.0004);
             }
-            if (apsis == MoonApsis.Apogee)
+            else if (apsis == MoonApsis.Apogee)
             {
                 terms =
                     Math.Sin(2 * D) * (+0.4392) +

@@ -4,9 +4,26 @@ using System.Collections.ObjectModel;
 
 namespace ADK.Demo
 {
+    public class AstroEvent
+    {
+        public string Text { get; private set; }
+        public double JulianDay { get; private set; }
+
+        public AstroEvent(double jd, string text)
+        {
+            JulianDay = jd;
+            Text = text;
+        }
+    }
+
     public interface IInfoProvider<T> where T : CelestialObject
     {
         CelestialObjectInfo GetInfo(SkyContext context, T body);
+    }
+
+    public interface IAstroEventProvider
+    {
+        ICollection<AstroEvent> GetEvents(double jdFrom, double jdTo);
     }
 
     public class CelestialObjectInfo
@@ -45,18 +62,18 @@ namespace ADK.Demo
             return this;
         }
 
-        public CelestialObjectInfo AddRow(string key, object value, IEphemFormatter formmater)
+        public CelestialObjectInfo AddRow(string key, object value, IEphemFormatter formatter)
         {
             InfoElements.Add(new InfoElementProperty()
             {
                 Caption = key,
                 Value = value,
-                Formatter = formmater
+                Formatter = formatter
             });
             return this;
         }
 
-        public CelestialObjectInfo AddRow(string key, object value, IEphemFormatter formatter, double jd)
+        public CelestialObjectInfo AddRow(string key, object value, double jd, IEphemFormatter formatter)
         {
             InfoElements.Add(new InfoElementPropertyLink()
             {

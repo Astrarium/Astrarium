@@ -36,6 +36,7 @@ namespace ADK.Demo
         }
 
         private List<Type> CelestialObjectTypes = new List<Type>();
+        private List<IAstroEventProvider> EventProviders = new List<IAstroEventProvider>();
         private Dictionary<Type, Delegate> InfoProviders = new Dictionary<Type, Delegate>();
         private Dictionary<Type, EphemerisConfig> EphemConfigs = new Dictionary<Type, EphemerisConfig>();
 
@@ -74,6 +75,11 @@ namespace ADK.Demo
                         Type genericFuncType = funcType.MakeGenericType(typeof(SkyContext), bodyType, typeof(CelestialObjectInfo));
                         InfoProviders[bodyType] = genericInfoProviderType.GetMethod(nameof(IInfoProvider<CelestialObject>.GetInfo)).CreateDelegate(genericFuncType, calc);
                     }
+                }
+
+                if (typeof(IAstroEventProvider).IsAssignableFrom(calc.GetType()))
+                {
+                    EventProviders.Add(calc as IAstroEventProvider);
                 }
             }
         }
@@ -131,6 +137,17 @@ namespace ADK.Demo
             {
                 return null;
             }
+        }
+
+        public ICollection<AstroEvent> GetEvents(double jdFrom, double jdTo)
+        {
+            List<AstroEvent> events = new List<AstroEvent>();
+            foreach (var ep in EventProviders)
+            {
+                events.AddRange(ep.GetEvents(jdFrom, jdTo));
+            }
+
+            return events.OrderBy(e => e.JulianDay).ToArray();
         }
     }
 }

@@ -7,81 +7,21 @@ using System.Threading.Tasks;
 namespace ADK
 {
     /// <summary>
-    /// Contains methods for calculating appearance parameters of celestial bodies
+    /// Contains methods for calculating visibility details of celestial bodies
     /// </summary>
-    public static class Appearance
+    public static class Visibility
     {
         /// <summary>
-        /// Gets geocentric elongation angle of the celestial body
+        /// Calculates instants of rising, transit and setting for non-stationary celestial body for the desired date.
+        /// Non-stationary in this particular case means that body has fastly changing celestial coordinates during the day.
         /// </summary>
-        /// <param name="sun">Ecliptical geocentrical coordinates of the Sun</param>
-        /// <param name="body">Ecliptical geocentrical coordinates of the body</param>
-        /// <returns>Geocentric elongation angle, in degrees, from -180 to 180.
-        /// Negative sign means western elongation, positive eastern.
-        /// </returns>
-        /// <remarks>
-        /// AA(II), formula 48.2
-        /// </remarks>
-        // TODO: tests
-        public static double Elongation(CrdsEcliptical sun, CrdsEcliptical body)
-        {
-            double beta = Angle.ToRadians(body.Beta);
-            double lambda = Angle.ToRadians(body.Lambda);
-            double lambda0 = Angle.ToRadians(sun.Lambda);
-
-            double s = sun.Lambda;
-            double b = body.Lambda;
-
-            if (Math.Abs(s - b) > 180)
-            {
-                if (s < b)
-                {
-                    s += 360;
-                }
-                else
-                {
-                    b += 360;
-                }
-            }
-
-            return Math.Sign(b - s) * Angle.ToDegrees(Math.Acos(Math.Cos(beta) * Math.Cos(lambda - lambda0)));
-        }
-
-        /// <summary>
-        /// Calculates phase angle of celestial body
-        /// </summary>
-        /// <param name="psi">Geocentric elongation of the body.</param>
-        /// <param name="R">Distance Earth-Sun, in any units</param>
-        /// <param name="Delta">Distance Earth-body, in the same units</param>
-        /// <returns>Phase angle, in degrees, from 0 to 180</returns>
-        /// <remarks>
-        /// AA(II), formula 48.3.
-        /// </remarks>
-        /// TODO: tests
-        public static double PhaseAngle(double psi, double R, double Delta)
-        {
-            psi = Angle.ToRadians(Math.Abs(psi));
-            double phaseAngle = Angle.ToDegrees(Math.Atan(R * Math.Sin(psi) / (Delta - R * Math.Cos(psi))));
-            if (phaseAngle < 0) phaseAngle += 180;
-            return phaseAngle;
-        }
-
-        /// <summary>
-        /// Gets phase value (illuminated fraction of the disk).
-        /// </summary>
-        /// <param name="phaseAngle">Phase angle of celestial body, in degrees.</param>
-        /// <returns>Illuminated fraction of the disk, from 0 to 1.</returns>
-        /// <remarks>
-        /// AA(II), formula 48.1
-        /// </remarks>
-        // TODO: tests
-        public static double Phase(double phaseAngle)
-        {
-            return (1 + Math.Cos(Angle.ToRadians(phaseAngle))) / 2;
-        }
-
-        // TODO: tests
-        public static RTS RiseTransitSet(CrdsEquatorial[] eq, CrdsGeographical location, double theta0, double pi, double sd = 0)
+        /// <param name="eq">Array of three equatorial coordinates of the celestial body correspoding to local midnight, local noon, and local midnight of the following day after the desired date respectively.</param>
+        /// <param name="location">Geographical location of the observation point.</param>
+        /// <param name="theta0">Apparent sidereal time at Greenwich for local midnight of the desired date.</param>
+        /// <param name="pi">Horizontal equatorial parallax of the body.</param>
+        /// <param name="sd">Visible semidiameter of the body, expressed in degrees.</param>
+        /// <returns>Instants of rising, transit and setting for the celestial body for the desired date.</returns>
+        public static RTS RiseTransitSet(CrdsEquatorial[] eq, CrdsGeographical location, double theta0, double pi = 0, double sd = 0)
         {
             if (eq.Length != 3)
                 throw new ArgumentException("Number of equatorial coordinates in the array should be equal to 3.");
@@ -165,7 +105,14 @@ namespace ADK
             return result;
         }
 
-        // TODO: tests
+        /// <summary>
+        /// Calculates instants of rising, transit and setting for stationary celestial body for the desired date.
+        /// Stationary in this particular case means that body has unchanged (or slightly changing) celestial coordinates during the day.
+        /// </summary>
+        /// <param name="eq">Equatorial coordinates of the celestial body.</param>
+        /// <param name="location">Geographical location of the observation point.</param>
+        /// <param name="theta0">Apparent sidereal time at Greenwich for local midnight of the desired date.</param>
+        /// <returns>Instants of rising, transit and setting for the celestial body for the desired date.</returns>
         public static RTS RiseTransitSet(CrdsEquatorial eq, CrdsGeographical location, double theta0)
         {
             List<CrdsHorizontal> hor = new List<CrdsHorizontal>();

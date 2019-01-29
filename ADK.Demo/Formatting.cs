@@ -29,10 +29,14 @@ namespace ADK.Demo
             Default["RTS.Rise"]                 = Time;
             Default["RTS.Transit"]              = Time;
             Default["RTS.Set"]                  = Time;
+            Default["RTS.Duration"]             = Duration;
             Default["Equatorial0.Alpha"]        = RA;
             Default["Equatorial0.Delta"]        = Dec;
             Default["Equatorial.Alpha"]         = RA;
             Default["Equatorial.Delta"]         = Dec;
+            Default["Distance"]                 = Distance;
+            Default["DistanceFromSun"] = Distance;
+            Default["DistanceFromEarth"] = Distance;
             Default["Ecliptical.Lambda"]        = Longitude;
             Default["Ecliptical.Beta"]          = Latitude;
             Default["Horizontal.Azimuth"]       = Longitude;
@@ -50,6 +54,15 @@ namespace ADK.Demo
             Default["MoonPhases.LastQuarter"]   = DateTime;
             Default["MoonApsides.Apogee"]       = DateTime;
             Default["MoonApsides.Perigee"]      = DateTime;
+            Default["Seasons.Spring"]           = DateTime;
+            Default["Seasons.Summer"]           = DateTime;
+            Default["Seasons.Autumn"]           = DateTime;
+            Default["Seasons.Winter"]           = DateTime;
+            Default["Appearance.CM"]            = CentralMeridian;
+            Default["Appearance.P"]             = RotationAxis;
+            Default["Appearance.D"]             = EarthDeclination;
+            Default["SaturnRings.a"]            = SaturnRingsSize;
+            Default["SaturnRings.b"]            = SaturnRingsSize;
         }
 
         public static IEphemFormatter GetDefault(string key)
@@ -99,7 +112,7 @@ namespace ADK.Demo
             }
         }
 
-        private class AngularDiameterFormatter : IEphemFormatter
+        private class SmallAngleFormatter : IEphemFormatter
         {
             public string Format(object value)
             {
@@ -146,6 +159,27 @@ namespace ADK.Demo
             }
         }
 
+        private class DurationFormatter : IEphemFormatter
+        {
+            public string Format(object value)
+            {
+                double v = (double)value;
+                if (v == 0)
+                {
+                    return "Nonrising";
+                }
+                else if (v == 1)
+                {
+                    return "Nonsetting";
+                }
+                else
+                {
+                    var ts = TimeSpan.FromHours(v * 24);
+                    return $"{ts.Hours:D2}h {ts.Minutes:D2}m";
+                }
+            }
+        }
+
         private class UnsignedDoubleFormatter : IEphemFormatter
         {
             private readonly string format = null;
@@ -173,14 +207,13 @@ namespace ADK.Demo
             public SignedDoubleFormatter(uint decimalPlaces, string units = null)
             {
                 string decimals = new string('0', (int)decimalPlaces);
-                format = $"+0.{decimals};-0.{decimals}";
+                format = $"{{0:+0.{decimals};-0.{decimals}}}";
                 this.units = units;
             }
 
             public string Format(object value)
             {
-                double v = (double)value;
-                return v.ToString(format, CultureInfo.InvariantCulture) + (units ?? "");
+                return string.Format(CultureInfo.InvariantCulture, format, value) + (units ?? "");
             }
         }
 
@@ -213,25 +246,30 @@ namespace ADK.Demo
             }
         }
 
-        private static readonly IEphemFormatter Simple = new SimpleFormatter(); 
+        public static readonly IEphemFormatter Simple = new SimpleFormatter(); 
 
         public static readonly IEphemFormatter RA = new HMSAngleFormatter();
         public static readonly IEphemFormatter Dec = new SignedAngleFormatter();
         public static readonly IEphemFormatter Latitude = new SignedAngleFormatter();
         public static readonly IEphemFormatter Longitude = new UnsignedAngleFormatter();
         public static readonly IEphemFormatter Time = new TimeFormatter();
+        public static readonly IEphemFormatter Duration = new DurationFormatter();
         public static readonly IEphemFormatter IntAzimuth = new UnsignedDoubleFormatter(0);
         public static readonly IEphemFormatter Altitude1d = new SignedDoubleFormatter(1);
-
+        public static readonly IEphemFormatter Distance = new UnsignedDoubleFormatter(3, " a.u.");
         public static readonly IEphemFormatter Phase = new PhaseFormatter();
         public static readonly IEphemFormatter Magnitude = new SignedDoubleFormatter(2, " m");
         public static readonly IEphemFormatter PhaseAngle = new UnsignedDoubleFormatter(2, "\u00B0");
-        public static readonly IEphemFormatter HorizontalParallax = new UnsignedAngleFormatter();
-        public static readonly IEphemFormatter AngularDiameter = new AngularDiameterFormatter();
-
+        public static readonly IEphemFormatter HorizontalParallax = new SmallAngleFormatter();
+        public static readonly IEphemFormatter AngularDiameter = new SmallAngleFormatter();
         public static readonly IEphemFormatter LibrationLatitude = new LibrationLatitudeFormatter();
         public static readonly IEphemFormatter LibrationLongitude = new LibrationLongitudeFormatter();
-
         public static readonly IEphemFormatter DateTime = new DateTimeFormatter();
+
+        public static readonly IEphemFormatter CentralMeridian = new UnsignedDoubleFormatter(2, "\u00B0");
+        public static readonly IEphemFormatter RotationAxis = new UnsignedDoubleFormatter(2, "\u00B0");
+        public static readonly IEphemFormatter EarthDeclination = new SignedDoubleFormatter(2, "\u00B0");
+
+        public static readonly IEphemFormatter SaturnRingsSize = new SmallAngleFormatter();
     }
 }

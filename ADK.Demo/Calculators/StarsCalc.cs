@@ -12,6 +12,8 @@ namespace ADK.Demo.Calculators
 {
     public class StarsCalc : BaseSkyCalc, IEphemProvider<Star>, IInfoProvider<Star>
     {
+        private string STARS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Stars.dat");
+
         /// <summary>
         /// Collection of all stars
         /// </summary>
@@ -35,19 +37,19 @@ namespace ADK.Demo.Calculators
         }
 
         public override void Initialize()
-        {
-            string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Stars.dat");
-
+        {         
             string line = "";
-            int len = 0;
 
-            using (var sr = new StreamReader(file, Encoding.Default))
+            using (var sr = new StreamReader(STARS_FILE, Encoding.Default))
             {
+                long position = 0;
+                int len = 0;
+
                 while (line != null && !sr.EndOfStream)
-                {
+                {                    
                     line = sr.ReadLine();
                     len = line.Length;
-
+                                       
                     if (line.Length < 197) line += new string(' ', 197 - line.Length);
 
                     Star star = null;
@@ -79,7 +81,10 @@ namespace ADK.Demo.Calculators
 
                         star.Mag = Convert.ToSingle(line.Substring(102, 5), CultureInfo.InvariantCulture);
                         star.Color = line[129];
+                        star.FilePosition = position;
                     }
+
+                    position += len + 1;
 
                     Stars.Add(star);
                 }
@@ -151,32 +156,107 @@ namespace ADK.Demo.Calculators
         {
             double theta0 = Date.ApparentSiderealTime(c.JulianDayMidnight, c.NutationElements.deltaPsi, c.Epsilon);
             var eq = c.Get(Equatorial, star); 
-            return Appearance.RiseTransitSet(eq, c.GeoLocation, theta0);
+            return Visibility.RiseTransitSet(eq, c.GeoLocation, theta0);
+        }
+
+        /// <summary>
+        /// Gets precessional elements for converting from current to B1875 epoch
+        /// </summary>
+        private PrecessionalElements PrecessionalElements1875(SkyContext c)
+        {
+            return Precession.ElementsFK5(c.JulianDay, Date.EPOCH_B1875);
+        }
+
+        /// <summary>
+        /// Gets equatorial coordinates of star for B1875 epoch
+        /// </summary>
+        private CrdsEquatorial Equatorial1875(SkyContext c, Star s)
+        {
+            return Precession.GetEquatorialCoordinates(c.Get(Equatorial, s), c.Get(PrecessionalElements1875));
+        }
+
+        /// <summary>
+        /// Gets constellation where the star is located for current context instant
+        /// </summary>
+        private string Constellation(SkyContext c, Star s)
+        {
+            return Constellations.FindConstellation(c.Get(Equatorial1875, s));
+        }
+
+        private StarDetails ReadStarDetails(SkyContext c, Star s)
+        {
+            var details = new StarDetails();
+
+            using (var sr = new StreamReader(STARS_FILE, Encoding.Default))
+            {
+                sr.BaseStream.Seek(s.FilePosition, SeekOrigin.Begin);               
+                string line = sr.ReadLine();
+
+                details.IsInfraredSource = line[41] == 'I';
+                details.SpectralClass = line.Substring(127, 20).Trim();
+                details.Pecularity = line.Substring(147, 1).Trim();
+
+                string radialVelocity = line.Substring(166, 4).Trim();
+
+                details.RadialVelocity = string.IsNullOrEmpty(radialVelocity) ? (int?)null : int.Parse(radialVelocity);
+            }
+
+
+            return details;
         }
 
         #endregion Ephemeris
 
         public void ConfigureEphemeris(EphemerisConfig<Star> e)
         {
-            e.Add("RTS.Rise", (c, s) => c.Get(RiseTransitSet, s).Rise)
-                .WithFormatter(Formatters.Time);
-
-            e.Add("RTS.Transit", (c, s) => c.Get(RiseTransitSet, s).Transit)
-                .WithFormatter(Formatters.Time);
-
-            e.Add("RTS.Set", (c, s) => c.Get(RiseTransitSet, s).Set)
-               .WithFormatter(Formatters.Time);
+            e.Add("RTS.Rise", (c, s) => c.Get(RiseTransitSet, s).Rise);
+            e.Add("RTS.Transit", (c, s) => c.Get(RiseTransitSet, s).Transit);
+            e.Add("RTS.Set", (c, s) => c.Get(RiseTransitSet, s).Set);
         }
 
-        CelestialObjectInfo IInfoProvider<Star>.GetInfo(SkyContext c, Star s)
+        public CelestialObjectInfo GetInfo(SkyContext c, Star s)
         {
-            StringBuilder sb = new StringBuilder();
+            var rts = c.Get(RiseTransitSet, s);
 
-            sb.Append("Rise: ").Append(Formatters.Time.Format(c.Get(RiseTransitSet, s).Rise)).AppendLine();
-            sb.Append("Transit: ").Append(Formatters.Time.Format(c.Get(RiseTransitSet, s).Transit)).AppendLine();
-            sb.Append("Set: ").Append(Formatters.Time.Format(c.Get(RiseTransitSet, s).Set)).AppendLine();
+            var info = new CelestialObjectInfo();
+            info.SetTitle("Star")
 
-            return null;
+            .AddRow("Constellation", c.Get(Constellation, s))
+
+            .AddHeader("Equatorial coordinates (current epoch)")
+            .AddRow("Equatorial.Alpha", c.Get(Equatorial, s).Alpha)
+            .AddRow("Equatorial.Delta", c.Get(Equatorial, s).Delta)
+
+            .AddHeader("Equatorial coordinates (J2000.0 epoch)")
+            .AddRow("Equatorial0.Alpha", s.Equatorial0.Alpha)
+            .AddRow("Equatorial0.Delta", s.Equatorial0.Delta)
+
+            .AddHeader("Horizontal coordinates")
+            .AddRow("Horizontal.Azimuth", c.Get(Horizontal, s).Azimuth)
+            .AddRow("Horizontal.Altitude", c.Get(Horizontal, s).Altitude)
+
+            .AddHeader("Visibility")
+            .AddRow("RTS.Rise", rts.Rise, c.JulianDayMidnight + rts.Rise)
+            .AddRow("RTS.Transit", rts.Transit, c.JulianDayMidnight + rts.Transit)
+            .AddRow("RTS.Set", rts.Set, c.JulianDayMidnight + rts.Set)
+            .AddRow("RTS.Duration", rts.Duration)
+
+            .AddHeader("Properties")
+            .AddRow("Magnitude", s.Mag)
+            .AddRow("Is Infrared Source", c.Get(ReadStarDetails, s).IsInfraredSource)
+            .AddRow("SpectralClass", c.Get(ReadStarDetails, s).SpectralClass)
+            .AddRow("Pecularity", c.Get(ReadStarDetails, s).Pecularity)
+            .AddRow("Radial velocity", c.Get(ReadStarDetails, s).RadialVelocity + " km/s");
+
+            return info;
+        }
+
+        private class StarDetails
+        {
+            public int? RadialVelocity { get; set; }
+            public bool IsInfraredSource { get; set; }
+            public string SpectralClass { get; set; }
+            public string Pecularity { get; set; }
         }
     }
 }

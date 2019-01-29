@@ -127,7 +127,7 @@ namespace ADK.Demo.Calculators
         }
 
         /// <summary>
-        /// Gets topocentrical equatorial coordinates of Earth
+        /// Gets geocentrical equatorial coordinates of Earth
         /// </summary>
         private CrdsEquatorial Equatorial0(SkyContext c, int p)
         {
@@ -187,7 +187,7 @@ namespace ADK.Demo.Calculators
         /// </summary>
         private double Elongation(SkyContext c, int p)
         {
-            return ADK.Appearance.Elongation(c.Get(this.SunEcliptical), c.Get(Ecliptical, p));
+            return BasicEphem.Elongation(c.Get(this.SunEcliptical), c.Get(Ecliptical, p));
         }
 
         /// <summary>
@@ -195,7 +195,7 @@ namespace ADK.Demo.Calculators
         /// </summary>
         private double PhaseAngle(SkyContext c, int p)
         {
-            return ADK.Appearance.PhaseAngle(c.Get(this.Elongation, p), c.Get(SunEcliptical).Distance, c.Get(DistanceFromEarth, p));
+            return BasicEphem.PhaseAngle(c.Get(this.Elongation, p), c.Get(SunEcliptical).Distance, c.Get(DistanceFromEarth, p));
         }
 
         /// <summary>
@@ -203,7 +203,7 @@ namespace ADK.Demo.Calculators
         /// </summary>
         private double Phase(SkyContext c, int p)
         {
-            return ADK.Appearance.Phase(c.Get(this.PhaseAngle, p));
+            return BasicEphem.Phase(c.Get(this.PhaseAngle, p));
         } 
 
         /// <summary>
@@ -246,7 +246,7 @@ namespace ADK.Demo.Calculators
                 eq[i] = new SkyContext(jd + diff[i], c.GeoLocation).Get(Equatorial0, p);
             }
 
-            return ADK.Appearance.RiseTransitSet(eq, c.GeoLocation, theta0, parallax);
+            return ADK.Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, parallax);
         }
 
         public override void Calculate(SkyContext context)
@@ -275,6 +275,30 @@ namespace ADK.Demo.Calculators
         private RingsAppearance GetSaturnRings(SkyContext c, int p)
         {
             return PlanetEphem.SaturnRings(c.JulianDay, c.Get(Heliocentrical, p), c.Get(EarthHeliocentrial), c.Epsilon);
+        }
+
+        /// <summary>
+        /// Gets precessional elements for converting from current to B1875 epoch
+        /// </summary>
+        private PrecessionalElements PrecessionalElements1875(SkyContext c)
+        {
+            return Precession.ElementsFK5(c.JulianDay, Date.EPOCH_B1875);
+        }
+
+        /// <summary>
+        /// Gets equatorial coordinates of planet for B1875 epoch
+        /// </summary>
+        private CrdsEquatorial Equatorial1875(SkyContext c, int p)
+        {
+            return Precession.GetEquatorialCoordinates(c.Get(Equatorial, p), c.Get(PrecessionalElements1875));
+        }
+
+        /// <summary>
+        /// Gets constellation where the planet is located for current context instant
+        /// </summary>
+        private string Constellation(SkyContext c, int p)
+        {
+            return Constellations.FindConstellation(c.Get(Equatorial1875, p));
         }
 
         public void ConfigureEphemeris(EphemerisConfig<Planet> e)
@@ -306,16 +330,61 @@ namespace ADK.Demo.Calculators
                .WithFormatter(Formatters.Time);
         }
 
-        CelestialObjectInfo IInfoProvider<Planet>.GetInfo(SkyContext c, Planet planet)
+        public CelestialObjectInfo GetInfo(SkyContext c, Planet planet)
         {
             int p = planet.Number;
-            StringBuilder sb = new StringBuilder();
 
-            sb.Append("Rise: ").Append(Formatters.Time.Format(c.Get(RiseTransitSet, p).Rise)).AppendLine();
-            sb.Append("Transit: ").Append(Formatters.Time.Format(c.Get(RiseTransitSet, p).Transit)).AppendLine();
-            sb.Append("Set: ").Append(Formatters.Time.Format(c.Get(RiseTransitSet, p).Set)).AppendLine();
+            var rts = c.Get(RiseTransitSet, p);
 
-            return null;
+            var info = new CelestialObjectInfo();
+            info.SetTitle(PlanetNames[p - 1])
+
+            .AddRow("Constellation", c.Get(Constellation, p))
+
+            .AddHeader("Equatorial coordinates (geocentrical)")
+            .AddRow("Equatorial0.Alpha", c.Get(Equatorial0, p).Alpha)
+            .AddRow("Equatorial0.Delta", c.Get(Equatorial0, p).Delta)
+
+            .AddHeader("Equatorial coordinates (topocentrical)")
+            .AddRow("Equatorial.Alpha", c.Get(Equatorial, p).Alpha)
+            .AddRow("Equatorial.Delta", c.Get(Equatorial, p).Delta)
+
+            .AddHeader("Ecliptical coordinates")
+            .AddRow("Ecliptical.Lambda", c.Get(Ecliptical, p).Lambda)
+            .AddRow("Ecliptical.Beta", c.Get(Ecliptical, p).Beta)
+
+            .AddHeader("Horizontal coordinates")
+            .AddRow("Horizontal.Azimuth", c.Get(Horizontal, p).Azimuth)
+            .AddRow("Horizontal.Altitude", c.Get(Horizontal, p).Altitude)
+
+            .AddHeader("Visibility")
+            .AddRow("RTS.Rise", rts.Rise, c.JulianDayMidnight + rts.Rise)
+            .AddRow("RTS.Transit", rts.Transit, c.JulianDayMidnight + rts.Transit)
+            .AddRow("RTS.Set", rts.Set, c.JulianDayMidnight + rts.Set)
+            .AddRow("RTS.Duration", rts.Duration)
+
+            .AddHeader("Appearance")
+            .AddRow("Phase", c.Get(Phase, p))
+            .AddRow("PhaseAngle", c.Get(PhaseAngle, p))
+            .AddRow("Magnitude", c.Get(Magnitude, p))
+            .AddRow("DistanceFromEarth", c.Get(DistanceFromEarth, p))
+            .AddRow("DistanceFromSun", c.Get(DistanceFromSun, p))
+            .AddRow("HorizontalParallax", c.Get(Parallax, p))
+            .AddRow("AngularDiameter", c.Get(Semidiameter, p) * 2 / 3600.0);
+
+            if (p == Planet.SATURN)
+            {
+                info
+                .AddRow("SaturnRings.a", c.Get(GetSaturnRings, p).a / 3600)
+                .AddRow("SaturnRings.b", c.Get(GetSaturnRings, p).b / 3600);
+            }
+
+            info
+            .AddRow("Appearance.CM", c.Get(Appearance, p).CM)
+            .AddRow("Appearance.P", c.Get(Appearance, p).P)
+            .AddRow("Appearance.D", c.Get(Appearance, p).D);
+
+            return info;
         }
     }
 }
