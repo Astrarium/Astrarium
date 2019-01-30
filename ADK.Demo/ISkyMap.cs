@@ -47,6 +47,11 @@ namespace ADK.Demo
         ICollection<CelestialObject> VisibleObjects { get; }
 
         /// <summary>
+        /// Collection of objects labels
+        /// </summary>
+        ICollection<RectangleF> Labels { get; }
+
+        /// <summary>
         /// Selected celestial object
         /// </summary>
         CelestialObject SelectedObject { get; set; }

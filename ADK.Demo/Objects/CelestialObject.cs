@@ -12,11 +12,6 @@ namespace ADK.Demo.Objects
     public abstract class CelestialObject
     {
         /// <summary>
-        /// Collection of object names
-        /// </summary>
-        public ICollection<string> Names { get; set; }
-
-        /// <summary>
         /// Local horizontal coordinates of the object
         /// </summary>
         public CrdsHorizontal Horizontal { get; set; }

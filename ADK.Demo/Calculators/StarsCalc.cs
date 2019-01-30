@@ -13,6 +13,7 @@ namespace ADK.Demo.Calculators
     public class StarsCalc : BaseSkyCalc, IEphemProvider<Star>, IInfoProvider<Star>
     {
         private string STARS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Stars.dat");
+        
 
         /// <summary>
         /// Collection of all stars
@@ -31,32 +32,29 @@ namespace ADK.Demo.Calculators
                 if (star != null)
                 {
                     star.Horizontal = context.Get(Horizontal, star);
-                    star.Equatorial = context.Get(Equatorial, star);
                 }
             }
         }
 
         public override void Initialize()
-        {         
+        {
             string line = "";
 
             using (var sr = new StreamReader(STARS_FILE, Encoding.Default))
             {
-                long position = 0;
-                int len = 0;
-
                 while (line != null && !sr.EndOfStream)
-                {                    
+                {
                     line = sr.ReadLine();
-                    len = line.Length;
-                                       
-                    if (line.Length < 197) line += new string(' ', 197 - line.Length);
 
                     Star star = null;
 
                     if (line[94] != ' ')
                     {
                         star = new Star();
+
+                        star.Number = int.Parse(line.Substring(0, 4).Trim());
+
+                        star.Name = line.Substring(4, 10);
 
                         star.Equatorial0.Alpha = new HMS(
                                                     Convert.ToUInt32(line.Substring(75, 2)),
@@ -81,14 +79,13 @@ namespace ADK.Demo.Calculators
 
                         star.Mag = Convert.ToSingle(line.Substring(102, 5), CultureInfo.InvariantCulture);
                         star.Color = line[129];
-                        star.FilePosition = position;
                     }
-
-                    position += len + 1;
 
                     Stars.Add(star);
                 }
             }
+
+            
         }
 
         #region Ephemeris
@@ -183,13 +180,16 @@ namespace ADK.Demo.Calculators
             return Constellations.FindConstellation(c.Get(Equatorial1875, s));
         }
 
+        /// <summary>
+        /// Gets detailed info about star
+        /// </summary>
         private StarDetails ReadStarDetails(SkyContext c, Star s)
         {
             var details = new StarDetails();
 
             using (var sr = new StreamReader(STARS_FILE, Encoding.Default))
             {
-                sr.BaseStream.Seek(s.FilePosition, SeekOrigin.Begin);               
+                sr.BaseStream.Seek((s.Number - 1) * 199, SeekOrigin.Begin);               
                 string line = sr.ReadLine();
 
                 details.IsInfraredSource = line[41] == 'I';
@@ -200,7 +200,6 @@ namespace ADK.Demo.Calculators
 
                 details.RadialVelocity = string.IsNullOrEmpty(radialVelocity) ? (int?)null : int.Parse(radialVelocity);
             }
-
 
             return details;
         }
@@ -217,9 +216,10 @@ namespace ADK.Demo.Calculators
         public CelestialObjectInfo GetInfo(SkyContext c, Star s)
         {
             var rts = c.Get(RiseTransitSet, s);
+            var det = c.Get(ReadStarDetails, s);
 
             var info = new CelestialObjectInfo();
-            info.SetTitle("Star")
+            info.SetSubtitle("Star").SetTitle(s.BayerName)
 
             .AddRow("Constellation", c.Get(Constellation, s))
 
@@ -243,10 +243,10 @@ namespace ADK.Demo.Calculators
 
             .AddHeader("Properties")
             .AddRow("Magnitude", s.Mag)
-            .AddRow("Is Infrared Source", c.Get(ReadStarDetails, s).IsInfraredSource)
-            .AddRow("SpectralClass", c.Get(ReadStarDetails, s).SpectralClass)
-            .AddRow("Pecularity", c.Get(ReadStarDetails, s).Pecularity)
-            .AddRow("Radial velocity", c.Get(ReadStarDetails, s).RadialVelocity + " km/s");
+            .AddRow("Is Infrared Source", det.IsInfraredSource)
+            .AddRow("SpectralClass", det.SpectralClass)
+            .AddRow("Pecularity", det.Pecularity)
+            .AddRow("Radial velocity", det.RadialVelocity + " km/s");
 
             return info;
         }

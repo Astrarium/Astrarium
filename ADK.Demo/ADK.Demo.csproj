@@ -150,6 +150,9 @@
     <EmbeddedResource Include="UI\FormSettings.resx">
       <DependentUpon>FormSettings.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="Data\Alphabet.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Data\Borders.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

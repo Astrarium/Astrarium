@@ -96,12 +96,12 @@ namespace ADK.Demo
 
                 if (e.Button == MouseButtons.Left && !shift)
                 {
-                    SkyMap.Antialias = false;
-
                     pNew.X = e.X;
                     pNew.Y = e.Y;
                     double dx = pNew.X - pOld.X;
                     double dy = pNew.Y - pOld.Y;
+
+                    SkyMap.Antialias = Math.Sqrt(dx * dx + dy * dy) < 30;
 
                     double f = SkyMap.Width / (SkyMap.ViewAngle * 2);
 

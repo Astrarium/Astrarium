@@ -29,6 +29,7 @@ namespace ADK.Demo
     public class CelestialObjectInfo
     { 
         public string Title { get; private set; }
+        public string Subtitle { get; private set; }
 
         public IList<InfoElement> InfoElements { get; } = new List<InfoElement>();
 
@@ -40,6 +41,12 @@ namespace ADK.Demo
         public CelestialObjectInfo SetTitle(string title)
         {
             Title = title;
+            return this;
+        }
+
+        public CelestialObjectInfo SetSubtitle(string subtitle)
+        {
+            Subtitle = subtitle;
             return this;
         }
 

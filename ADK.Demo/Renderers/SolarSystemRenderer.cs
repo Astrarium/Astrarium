@@ -14,6 +14,7 @@ namespace ADK.Demo.Renderers
     /// </summary>
     public class SolarSystemRenderer : BaseSkyRenderer
     {
+        private Font fontCelestialObjectName = SystemFonts.DefaultFont;
         private Pen penSun = new Pen(Color.FromArgb(250, 210, 10));
         private Brush brushShadow = new SolidBrush(Color.FromArgb(200, 0, 0, 0));
         private Brush[] brushRings = new Brush[] 
@@ -64,6 +65,7 @@ namespace ADK.Demo.Renderers
                 if (!isSunRendered)
                 {
                     RenderSun(g, sun);
+                    isSunRendered = true;
                 }
             }
 
@@ -104,7 +106,7 @@ namespace ADK.Demo.Renderers
 
                 g.ResetTransform();
 
-                DrawObjectCaption(g, "Sun", p, size);
+                DrawObjectCaption(g, fontCelestialObjectName, "Sun", p, size);
                 Map.VisibleObjects.Add(sun);
             }
         }
@@ -159,7 +161,7 @@ namespace ADK.Demo.Renderers
                 g.FillPath(brushShadow, shadow);
                 g.ResetTransform();
 
-                DrawObjectCaption(g, "Moon", p, size);
+                DrawObjectCaption(g, fontCelestialObjectName, "Moon", p, size);
                 Map.VisibleObjects.Add(moon);
             }
         }
@@ -180,7 +182,7 @@ namespace ADK.Demo.Renderers
                     PointF p = Map.Projection.Project(planet.Horizontal);
                     g.FillEllipse(GetPlanetColor(planet.Number), p.X - size / 2, p.Y - size / 2, size, size);
 
-                    DrawObjectCaption(g, planet.Names.ElementAt(0), p, size);
+                    DrawObjectCaption(g, fontCelestialObjectName, planet.Name, p, size);
 
                     Map.VisibleObjects.Add(planet);
                 }
@@ -278,7 +280,7 @@ namespace ADK.Demo.Renderers
                         g.ResetTransform();
                     }
                     
-                    DrawObjectCaption(g, planet.Names.ElementAt(0), p, diam);
+                    DrawObjectCaption(g, fontCelestialObjectName, planet.Name, p, diam);
 
                     Map.VisibleObjects.Add(planet);
                 }

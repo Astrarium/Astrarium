@@ -27,9 +27,26 @@ namespace ADK.Demo.Renderers
 
         public virtual void Initialize() { }
 
-        protected void DrawObjectCaption(Graphics g, string caption, PointF p, float size)
+        protected void DrawObjectCaption(Graphics g, Font font, string caption, PointF p, float size)
         {
-            g.DrawString(caption, SystemFonts.DefaultFont, Brushes.DimGray, p.X + size / 2.8284f + 2, p.Y + size / 2.8284f + 2);
+            SizeF b = g.MeasureString(caption, font);
+
+            float s = size / 2.8284f + 2;
+            for (int x = 0; x < 2; x++)
+            {
+                for (int y = 0; y < 2; y++)
+                {
+                    float dx = x == 0 ? s : -s - b.Width;
+                    float dy = y == 0 ? s : -s - b.Height;
+                    RectangleF r = new RectangleF(p.X + dx, p.Y + dy, b.Width, b.Height);
+                    if (!Map.Labels.Any(l => l.IntersectsWith(r)))
+                    {
+                        g.DrawString(caption, font, Brushes.DimGray, r.Location);
+                        Map.Labels.Add(r);
+                        return;
+                    }
+                }
+            }
         }
 
         /// <summary>

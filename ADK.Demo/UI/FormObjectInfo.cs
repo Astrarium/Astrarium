@@ -77,7 +77,7 @@ namespace ADK.Demo.UI
                 }
             }
 
-            templateContent.Replace("{0}", "Object type");
+            templateContent.Replace("{0}", ObjectInfo.Subtitle);
             templateContent.Replace("{1}", ObjectInfo.Title);
             templateContent.Replace("{2}", sb.ToString());
 

@@ -20,6 +20,7 @@ namespace ADK.Demo
         public bool Antialias { get; set; } = true;
         public ICollection<BaseSkyRenderer> Renderers { get; } = new List<BaseSkyRenderer>();
         public ICollection<CelestialObject> VisibleObjects { get; } = new List<CelestialObject>();
+        public ICollection<RectangleF> Labels { get; } = new List<RectangleF>();
         public CelestialObject SelectedObject { get; set; }
         public IProjection Projection { get; set; } = null;
         public event Action OnInvalidate;
@@ -34,6 +35,7 @@ namespace ADK.Demo
             g.PageUnit = GraphicsUnit.Display;
             g.SmoothingMode = Antialias ? SmoothingMode.HighQuality : SmoothingMode.HighSpeed;
             VisibleObjects.Clear();
+            Labels.Clear();
 
             bool needDrawSelectedObject = true;
 

@@ -15,11 +15,13 @@ namespace ADK.Demo.Renderers
     {
         private ICollection<Tuple<int, int>> ConLines = new List<Tuple<int, int>>();
 
+        private Font fontStarNames;
         private Pen penConLine;
         private const double maxSeparation = 90 * 1.2;
 
         public StarsRenderer(Sky sky, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
         {
+            fontStarNames = new Font("Arial", 8);
             penConLine = new Pen(new SolidBrush(Color.FromArgb(64, 64, 64)));
             penConLine.DashStyle = DashStyle.Dot;
         }
@@ -61,6 +63,7 @@ namespace ADK.Demo.Renderers
                     PointF p = Map.Projection.Project(star.Horizontal);
                     g.FillEllipse(GetColor(star.Color), p.X - diam / 2, p.Y - diam / 2, diam, diam);
                     Map.VisibleObjects.Add(star);
+                    DrawStarName(g, p, star, diam);
                 }
             }
         }
@@ -86,6 +89,62 @@ namespace ADK.Demo.Renderers
                     return Brushes.OrangeRed;
                 default:
                     return Brushes.White;
+            }
+        }
+
+        /// <summary>
+        /// Draws star name
+        /// </summary>
+        private void DrawStarName(Graphics g, PointF point, Star s, float diam)
+        {           
+            int limitProperNames = 45; 
+            int limitBayerNames = 45;
+            int limitFlamsteed = 10;
+            int limitVarNames = 10;
+
+            Brush brush = Brushes.Gray;
+
+            //// If star has proper name:
+            //if (Map.ViewAngle < limitProperNames && Sky.StarNames.ContainsKey(s.HRIndex))
+            //{
+            //    DrawLabel(g, Sky.StarNames[s.HRIndex], font, brush, point);
+            //    //g.DrawString(Sky.StarNames[s.HRIndex], font, brush, point.X + (float)(diam / 2 * 0.7), point.Y + (float)(diam / 2 * 0.7));
+            //    return;
+            //}
+
+            // If star has Bayer name (greek letter)
+            if (Map.ViewAngle < limitBayerNames)
+            {
+                string bayerName = s.BayerName;
+                if (bayerName != null)
+                {
+                    DrawObjectCaption(g, fontStarNames, bayerName, point, diam);
+                    return;                    
+                }
+            }
+            // If star has Flamsteed number
+            if (Map.ViewAngle < limitFlamsteed)
+            {
+                string flamsteedNumber = s.FlamsteedNumber;
+                if (flamsteedNumber != null)
+                {
+                    DrawObjectCaption(g, fontStarNames, flamsteedNumber, point, diam);
+                    return;
+                }
+            }
+
+            // If star has variable id
+            //if (Map.ViewAngle < limitVarNames && s.NameVar != "")
+            //{
+            //    //g.DrawString(s.NameVar.Substring(0, s.NameVar.Length - 4), font, brush, point.X + (float)(diam / 2 * 0.7), point.Y + (float)(diam / 2 * 0.7));
+            //    DrawLabel(g, s.NameVar.Substring(0, s.NameVar.Length - 4), font, brush, point);
+            //    return;
+            //}
+
+            // If star doesn't have any names
+            if (Map.ViewAngle < 2)
+            {
+                DrawObjectCaption(g, fontStarNames, $"HR {s.Number}", point, diam);
             }
         }
 
