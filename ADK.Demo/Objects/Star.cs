@@ -13,14 +13,14 @@ namespace ADK.Demo.Objects
         /// <summary>
         /// Greek alphabet abbreviations
         /// </summary>
-        private static IDictionary<string, string> Alphabet = new Dictionary<string, string>() {
-            {"Alp", "α"}, {"Bet", "β"}, {"Gam", "γ"}, {"Del", "δ"}, {"Eps", "ε"}, {"Zet", "ζ"}, {"Eta", "η"}, {"The", "θ"}, {"Iot", "ι"}, {"Kap", "κ"}, {"Lam", "λ"}, {"Mu", "μ"}, {"Nu", "ν"}, {"Xi", "ξ"}, {"Omi", "ο"}, {"Pi", "π"}, {"Rho", "ρ"}, {"Sig", "σ"}, {"Tau", "τ"}, {"Ups", "υ"}, {"Phi", "φ"}, {"Chi", "χ"}, {"Psi", "ψ"}, {"Ome", "ω"}
-        };
+        private static List<string> Alphabet = new List<string> {
+            "Alp", "Bet", "Gam", "Del", "Eps", "Zet", "Eta", "The", "Iot", "Kap", "Lam", "Mu",
+            "Nu", "Xi", "Omi", "Pi", "Rho", "Sig", "Tau", "Ups", "Phi", "Chi", "Psi", "Ome" };
 
         /// <summary>
         /// Superscript digits
         /// </summary>
-        private static string[] SuperscrriptDigits = new string[] {
+        private static string[] SuperscriptDigits = new string[] {
             "⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹"
         };
 
@@ -38,19 +38,20 @@ namespace ADK.Demo.Objects
         {
             get
             {
-                if (Name[2] != ' ')
+                if (Name[3] != ' ')
                 {
-                    string letter = Name.Substring(3, 3).Trim();  
-                    
-                    if (Alphabet.ContainsKey(letter))
+                    string letter = Name.Substring(3, 3).Trim();
+
+                    int i = Alphabet.IndexOf(letter);
+                    if (i >= 0)
                     {
-                        letter = Alphabet[letter];
+                        letter = ((char)('\u03b1' + i)).ToString();
                     }
 
                     if (Name[6] != ' ')
                     {
                         int digit = int.Parse(Name[6].ToString());
-                        return $"{letter}\u2006{SuperscrriptDigits[digit]}";
+                        return $"{letter}\u2006{SuperscriptDigits[digit]}";
                     }
                     else
                     {
@@ -72,6 +73,8 @@ namespace ADK.Demo.Objects
                 return string.IsNullOrEmpty(name) ? null : name;
             }
         }
+
+        public string VariableName { get; set; }
 
         /// <summary>
         /// Equatorial coordinates for the catalogue epoch

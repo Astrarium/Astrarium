@@ -56,6 +56,9 @@ namespace ADK.Demo.Calculators
 
                         star.Name = line.Substring(4, 10);
 
+                        string varName = line.Substring(51, 9).Trim();
+                        star.VariableName = string.IsNullOrEmpty(varName) ? null : varName;
+
                         star.Equatorial0.Alpha = new HMS(
                                                     Convert.ToUInt32(line.Substring(75, 2)),
                                                     Convert.ToUInt32(line.Substring(77, 2)),

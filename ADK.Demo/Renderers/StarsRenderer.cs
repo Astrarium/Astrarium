@@ -112,7 +112,7 @@ namespace ADK.Demo.Renderers
             //    return;
             //}
 
-            // If star has Bayer name (greek letter)
+            // Star has Bayer name (greek letter)
             if (Map.ViewAngle < limitBayerNames)
             {
                 string bayerName = s.BayerName;
@@ -122,7 +122,7 @@ namespace ADK.Demo.Renderers
                     return;                    
                 }
             }
-            // If star has Flamsteed number
+            // Star has Flamsteed number
             if (Map.ViewAngle < limitFlamsteed)
             {
                 string flamsteedNumber = s.FlamsteedNumber;
@@ -133,13 +133,12 @@ namespace ADK.Demo.Renderers
                 }
             }
 
-            // If star has variable id
-            //if (Map.ViewAngle < limitVarNames && s.NameVar != "")
-            //{
-            //    //g.DrawString(s.NameVar.Substring(0, s.NameVar.Length - 4), font, brush, point.X + (float)(diam / 2 * 0.7), point.Y + (float)(diam / 2 * 0.7));
-            //    DrawLabel(g, s.NameVar.Substring(0, s.NameVar.Length - 4), font, brush, point);
-            //    return;
-            //}
+            // Star has variable id
+            if (Map.ViewAngle < limitVarNames && s.VariableName != null)
+            {
+                DrawObjectCaption(g, fontStarNames, s.VariableName, point, diam);
+                return;
+            }
 
             // If star doesn't have any names
             if (Map.ViewAngle < 2)

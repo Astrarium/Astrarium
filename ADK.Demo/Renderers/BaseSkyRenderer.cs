@@ -31,7 +31,7 @@ namespace ADK.Demo.Renderers
         {
             SizeF b = g.MeasureString(caption, font);
 
-            float s = size / 2.8284f + 2;
+            float s = size > 5 ? (size / 2.8284f + 2) : 1;
             for (int x = 0; x < 2; x++)
             {
                 for (int y = 0; y < 2; y++)
