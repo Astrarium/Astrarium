@@ -13,25 +13,16 @@ namespace ADK.Demo.Objects
         /// <summary>
         /// Greek alphabet abbreviations
         /// </summary>
-        private static IDictionary<string, string> Alphabet = new Dictionary<string, string>();
+        private static IDictionary<string, string> Alphabet = new Dictionary<string, string>() {
+            {"Alp", "α"}, {"Bet", "β"}, {"Gam", "γ"}, {"Del", "δ"}, {"Eps", "ε"}, {"Zet", "ζ"}, {"Eta", "η"}, {"The", "θ"}, {"Iot", "ι"}, {"Kap", "κ"}, {"Lam", "λ"}, {"Mu", "μ"}, {"Nu", "ν"}, {"Xi", "ξ"}, {"Omi", "ο"}, {"Pi", "π"}, {"Rho", "ρ"}, {"Sig", "σ"}, {"Tau", "τ"}, {"Ups", "υ"}, {"Phi", "φ"}, {"Chi", "χ"}, {"Psi", "ψ"}, {"Ome", "ω"}
+        };
 
-        private static string[] supercripts = new string[] { "⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹" };
-
-        static Star() 
-        {
-            string alphabetFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Alphabet.dat");
-
-            using (var sr = new StreamReader(alphabetFile, Encoding.Default))
-            {
-                string line = null;
-                while (!sr.EndOfStream)
-                {
-                    line = sr.ReadLine();
-                    string[] values = line.Split(';');
-                    Alphabet[values[1].Trim()] = values[0].Trim();
-                }
-            }
-        }
+        /// <summary>
+        /// Superscript digits
+        /// </summary>
+        private static string[] SuperscrriptDigits = new string[] {
+            "⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹"
+        };
 
         /// <summary>
         /// Star number in BSC catalogue (= HR number = Harvard Revised Number = Bright Star Number) 
@@ -59,7 +50,7 @@ namespace ADK.Demo.Objects
                     if (Name[6] != ' ')
                     {
                         int digit = int.Parse(Name[6].ToString());
-                        return $"{letter}\u2006{supercripts[digit]}";
+                        return $"{letter}\u2006{SuperscrriptDigits[digit]}";
                     }
                     else
                     {
