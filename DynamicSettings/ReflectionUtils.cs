@@ -1,6 +1,7 @@
 ﻿using Microsoft.CSharp.RuntimeBinder;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -36,28 +37,37 @@ namespace DynamicSettings
 
         public static object GetDynamicProperty(object obj, string memberName)
         {
-            var binder = Microsoft.CSharp.RuntimeBinder.Binder.GetMember(CSharpBinderFlags.None, memberName, obj.GetType(), new[] { CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null) });
-            var callsite = CallSite<Func<CallSite, object, object>>.Create(binder);
-            return callsite.Target(callsite, obj);
+            object result;
+            (obj as DynamicObject).TryGetMember(new GetBinder(memberName, false), out result);
+            return result;
         }
 
         public static bool SetDynamicProperty(object obj, string memberName, object value)
         {
-            try
-            {
-                var binder = Microsoft.CSharp.RuntimeBinder.Binder.SetMember(CSharpBinderFlags.None,
-                   memberName, obj.GetType(),
-                   new List<CSharpArgumentInfo>{
-                       CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null),
-                       CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null)});
+            return (obj as DynamicObject).TrySetMember(new SetBinder(memberName, false), value);
+        }
 
-                var callsite = CallSite<Func<CallSite, object, object, object>>.Create(binder);
-                callsite.Target(callsite, obj, value);
-                return true;
-            }
-            catch
+        private class GetBinder : GetMemberBinder
+        {
+            public GetBinder(string name, bool ignoreCase) : base(name, ignoreCase)
             {
-                return false;
+            }
+
+            public override DynamicMetaObject FallbackGetMember(DynamicMetaObject target, DynamicMetaObject errorSuggestion)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class SetBinder : SetMemberBinder
+        {
+            public SetBinder(string name, bool ignoreCase) : base(name, ignoreCase)
+            {
+            }
+
+            public override DynamicMetaObject FallbackSetMember(DynamicMetaObject target, DynamicMetaObject value, DynamicMetaObject errorSuggestion)
+            {
+                throw new NotImplementedException();
             }
         }
     }

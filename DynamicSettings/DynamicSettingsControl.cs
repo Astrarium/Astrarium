@@ -8,8 +8,6 @@ using System.Windows.Forms;
 using System.Reflection;
 using System.IO;
 using System.Dynamic;
-using Microsoft.CSharp.RuntimeBinder;
-using System.Runtime.CompilerServices;
 using DynamicSettings.Editors;
 using DynamicSettings.Layout;
 using System.Configuration;
