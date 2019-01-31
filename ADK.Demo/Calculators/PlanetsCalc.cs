@@ -337,7 +337,7 @@ namespace ADK.Demo.Calculators
             var rts = c.Get(RiseTransitSet, p);
 
             var info = new CelestialObjectInfo();
-            info.SetTitle(PlanetNames[p - 1])
+            info.SetSubtitle("Planet").SetTitle(PlanetNames[p - 1])
 
             .AddRow("Constellation", c.Get(Constellation, p))
 

@@ -8,5 +8,8 @@ Under Creative Commons Attribution-ShareAlike 4.0 International License.
 
 Stars data (Yale Bright Star Catalog revision 5) are taken from http://tdc-www.harvard.edu/catalogs/bsc5.html
 
+Star names are taken from https://www.iau.org/public/themes/naming_stars/
+Under Creative Commons Attribution 4.0 International license (https://www.iau.org/copyright/)
+
 NGC/IC catalogs data are taken from http://www.klima-luft.de/steinicke/index_e.htm
 (c) Dr. Wolfgang Steinicke, under condition: any non-commercial use of data is free

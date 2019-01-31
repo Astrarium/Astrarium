@@ -17,7 +17,14 @@ namespace ADK.Demo.Renderers
 
         private Font fontStarNames;
         private Pen penConLine;
+
         private const double maxSeparation = 90 * 1.2;
+
+        private const int limitAllNames = 40;
+        private const int limitBayerNames = 40;
+        private const int limitProperNames = 20;
+        private const int limitFlamsteedNames = 10;
+        private const int limitVarNames = 5;
 
         public StarsRenderer(Sky sky, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
         {
@@ -45,7 +52,7 @@ namespace ADK.Demo.Renderers
                         p1 = Map.Projection.Project(h1);
                         p2 = Map.Projection.Project(h2);
 
-                        var points = Geometry.SegmentRectangleIntersection(p1, p2, Map.Width, Map.Height);
+                        var points = SegmentScreenIntersection(p1, p2);
                         if (points.Length == 2)
                         {
                             g.DrawLine(penConLine, points[0], points[1]);
@@ -53,17 +60,39 @@ namespace ADK.Demo.Renderers
                     }
                 }
             }
-            
-            var stars = allStars.Where(s => s != null && Angle.Separation(Map.Center, s.Horizontal) < Map.ViewAngle * 1.2);
-            foreach (var star in stars)
+
+            if (Settings.Get<bool>("Stars"))
             {
-                float diam = GetPointSize(star.Mag);
-                if ((int)diam > 0)
+                var stars = allStars.Where(s => s != null && Angle.Separation(Map.Center, s.Horizontal) < Map.ViewAngle * 1.2);
+                foreach (var star in stars)
                 {
-                    PointF p = Map.Projection.Project(star.Horizontal);
-                    g.FillEllipse(GetColor(star.Color), p.X - diam / 2, p.Y - diam / 2, diam, diam);
-                    Map.VisibleObjects.Add(star);
-                    DrawStarName(g, p, star, diam);
+                    float diam = GetPointSize(star.Mag);
+                    if ((int)diam > 0)
+                    {
+                        PointF p = Map.Projection.Project(star.Horizontal);
+                        if (!IsOutOfScreen(p))
+                        {
+                            g.FillEllipse(GetColor(star.Color), p.X - diam / 2, p.Y - diam / 2, diam, diam);
+                            Map.AddDrawnObject(star, p);
+                        }
+                    }
+                }
+
+                if (Settings.Get<bool>("StarsLabels") && Map.ViewAngle <= limitAllNames)
+                {
+                    foreach (var star in stars)
+                    {
+                        float diam = GetPointSize(star.Mag);
+                        if ((int)diam > 0)
+                        {
+                            PointF p = Map.Projection.Project(star.Horizontal);
+                            if (!IsOutOfScreen(p))
+                            {
+                                DrawStarName(g, p, star, diam);
+                            }
+                        }
+                    }
+
                 }
             }
         }
@@ -96,21 +125,13 @@ namespace ADK.Demo.Renderers
         /// Draws star name
         /// </summary>
         private void DrawStarName(Graphics g, PointF point, Star s, float diam)
-        {           
-            int limitProperNames = 45; 
-            int limitBayerNames = 45;
-            int limitFlamsteed = 10;
-            int limitVarNames = 10;
-
-            Brush brush = Brushes.Gray;
-
-            //// If star has proper name:
-            //if (Map.ViewAngle < limitProperNames && Sky.StarNames.ContainsKey(s.HRIndex))
-            //{
-            //    DrawLabel(g, Sky.StarNames[s.HRIndex], font, brush, point);
-            //    //g.DrawString(Sky.StarNames[s.HRIndex], font, brush, point.X + (float)(diam / 2 * 0.7), point.Y + (float)(diam / 2 * 0.7));
-            //    return;
-            //}
+        {
+            // Star has proper name:
+            if (Map.ViewAngle < limitProperNames && Settings.Get<bool>("StarsProperNames") && s.ProperName != null)
+            {
+                DrawObjectCaption(g, fontStarNames, s.ProperName, point, diam);
+                return;
+            }
 
             // Star has Bayer name (greek letter)
             if (Map.ViewAngle < limitBayerNames)
@@ -123,7 +144,7 @@ namespace ADK.Demo.Renderers
                 }
             }
             // Star has Flamsteed number
-            if (Map.ViewAngle < limitFlamsteed)
+            if (Map.ViewAngle < limitFlamsteedNames)
             {
                 string flamsteedNumber = s.FlamsteedNumber;
                 if (flamsteedNumber != null)
@@ -136,7 +157,8 @@ namespace ADK.Demo.Renderers
             // Star has variable id
             if (Map.ViewAngle < limitVarNames && s.VariableName != null)
             {
-                DrawObjectCaption(g, fontStarNames, s.VariableName, point, diam);
+                string varName = s.VariableName.Split(' ')[0];
+                DrawObjectCaption(g, fontStarNames, varName, point, diam);
                 return;
             }
 

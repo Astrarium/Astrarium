@@ -6,14 +6,16 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace ADK.Demo.Calculators
 {
     public class StarsCalc : BaseSkyCalc, IEphemProvider<Star>, IInfoProvider<Star>
     {
-        private string STARS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Stars.dat");
+        private readonly string STARS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Stars.dat");
         
+        private readonly string NAMES_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/StarNames.dat");
 
         /// <summary>
         /// Collection of all stars
@@ -52,12 +54,33 @@ namespace ADK.Demo.Calculators
                     {
                         star = new Star();
 
-                        star.Number = int.Parse(line.Substring(0, 4).Trim());
+                        star.Number = ushort.Parse(line.Substring(0, 4).Trim());
 
                         star.Name = line.Substring(4, 10);
 
+                        string hdNumber = line.Substring(25, 6).Trim();
+                        if (!string.IsNullOrEmpty(hdNumber))
+                        {
+                            star.HDNumber = uint.Parse(hdNumber);
+                        }
+
+                        string saoNumber = line.Substring(31, 6).Trim();
+                        if (!string.IsNullOrEmpty(saoNumber))
+                        {
+                            star.SAONumber = uint.Parse(saoNumber);
+                        }
+
+                        string fk5Number = line.Substring(37, 4).Trim();
+                        if (!string.IsNullOrEmpty(fk5Number))
+                        {
+                            star.FK5Number = ushort.Parse(fk5Number);
+                        }
+
                         string varName = line.Substring(51, 9).Trim();
-                        star.VariableName = string.IsNullOrEmpty(varName) ? null : varName;
+                        if (!string.IsNullOrEmpty(varName) && !varName.Equals("Var?") && !varName.Equals(star.Name.Substring(3)) && !varName.All(char.IsDigit))
+                        {
+                            star.VariableName = varName;
+                        }
 
                         star.Equatorial0.Alpha = new HMS(
                                                     Convert.ToUInt32(line.Substring(75, 2)),
@@ -88,7 +111,16 @@ namespace ADK.Demo.Calculators
                 }
             }
 
-            
+            using (var sr = new StreamReader(NAMES_FILE, Encoding.Default))
+            {
+                while (line != null && !sr.EndOfStream)
+                {
+                    line = sr.ReadLine();
+                    string[] parts = line.Split(';');
+                    int number = int.Parse(parts[0].Trim());
+                    Stars.ElementAt(number - 1).ProperName = parts[1].Trim();
+                }
+            }
         }
 
         #region Ephemeris
@@ -222,7 +254,7 @@ namespace ADK.Demo.Calculators
             var det = c.Get(ReadStarDetails, s);
 
             var info = new CelestialObjectInfo();
-            info.SetSubtitle("Star").SetTitle(s.BayerName)
+            info.SetSubtitle("Star").SetTitle(string.Join(" / ", GetStarNames(s)))
 
             .AddRow("Constellation", c.Get(Constellation, s))
 
@@ -252,6 +284,43 @@ namespace ADK.Demo.Calculators
             .AddRow("Radial velocity", det.RadialVelocity + " km/s");
 
             return info;
+        }
+
+        private ICollection<string> GetStarNames(Star s)
+        {
+            List<string> names = new List<string>();
+
+            if (s.ProperName != null)
+            {
+                names.Add(s.ProperName);
+            }
+            if (s.BayerName != null)
+            {
+                names.Add($"{s.BayerName} {s.Name.Substring(7, 3)}");
+            }
+            if (s.FlamsteedNumber != null)
+            {
+                names.Add($"{s.FlamsteedNumber} {s.Name.Substring(7, 3)}");
+            }
+            if (s.VariableName != null)
+            {
+                names.Add(s.VariableName);
+            }
+            if (s.HDNumber > 0)
+            {
+                names.Add($"HD {s.HDNumber}");
+            }
+            if (s.SAONumber > 0)
+            {
+                names.Add($"SAO {s.SAONumber}");
+            }
+            if (s.FK5Number > 0)
+            {
+                names.Add($"FK5 {s.FK5Number}");
+            }
+            names.Add($"HR {s.Number}");
+
+            return names;
         }
 
         private class StarDetails

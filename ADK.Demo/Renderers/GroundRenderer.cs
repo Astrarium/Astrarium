@@ -34,7 +34,7 @@ namespace ADK.Demo.Renderers
                 if (hor[0].X >= 0) hor[0].X = -1;
                 if (hor[POINTS_COUNT - 1].X <= Map.Width) hor[POINTS_COUNT - 1].X = Map.Width + 1;
 
-                if (hor.Any(h => h.X > 0 && h.X < Map.Width && h.Y > 0 && h.Y < Map.Height))
+                if (hor.Any(h => !IsOutOfScreen(h)))
                 {
                     GraphicsPath gp = new GraphicsPath();
 
@@ -58,7 +58,7 @@ namespace ADK.Demo.Renderers
                         hor[i] = Map.Projection.Project(h);
                     }
 
-                    if (hor.Any(h => h.X > 0 && h.X < Map.Width && h.Y > 0 && h.Y < Map.Height))
+                    if (hor.Any(h => !IsOutOfScreen(h)))
                     {
                         GraphicsPath gp = new GraphicsPath();
 

@@ -53,7 +53,7 @@ namespace ADK.Demo.Renderers
                         p1 = Map.Projection.Project(h1);
                         p2 = Map.Projection.Project(h2);
 
-                        var points = Geometry.SegmentRectangleIntersection(p1, p2, Map.Width, Map.Height);
+                        var points = SegmentScreenIntersection(p1, p2);
                         if (points.Length == 2)
                         {
                             g.DrawLine(penBorder, points[0], points[1]);
@@ -98,6 +98,8 @@ namespace ADK.Demo.Renderers
                     }
 
                     g.DrawString(label, font, brushLabel, p, format);
+                    var sz = g.MeasureString(label, font);
+                    Map.Labels.Add(new RectangleF(new PointF(p.X - sz.Width / 2, p.Y - sz.Height / 2), sz));
                 }
             }
         }

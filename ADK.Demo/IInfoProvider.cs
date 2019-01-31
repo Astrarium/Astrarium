@@ -26,6 +26,11 @@ namespace ADK.Demo
         ICollection<AstroEvent> GetEvents(double jdFrom, double jdTo);
     }
 
+    public interface ISearchProvider<T> where T : CelestialObject
+    {
+        ICollection<T> Search(string searchString);
+    }
+
     public class CelestialObjectInfo
     { 
         public string Title { get; private set; }

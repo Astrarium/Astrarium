@@ -68,6 +68,12 @@ namespace ADK.Demo.Calculators
                 return eq.ToHorizontal(context.GeoLocation, context.SiderealTime);
             };
             Sky.AddDataProvider("GridEquatorial", () => GridEquatorial);
+
+            // Hozizon line
+            CelestialGrid LineHorizon = new CelestialGrid("Horizon", 1, 24);
+            LineHorizon.FromHorizontal = (h) => new GridPoint(h.Azimuth, h.Altitude);
+            LineHorizon.ToHorizontal = (c) => new CrdsHorizontal(c.Longitude, c.Latitude);
+            Sky.AddDataProvider("LineHorizon", () => LineHorizon);
         }
 
         public override void Calculate(SkyContext context)

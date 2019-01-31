@@ -11,6 +11,7 @@ namespace ADK.Demo.Renderers
         private CelestialGrid gridHorizontal = null;
         private CelestialGrid lineEcliptic = null;
         private CelestialGrid lineGalactic = null;
+        private CelestialGrid lineHorizon = null;
 
         private Pen penGridEquatorial = null;
         private Pen penGridHorizontal = null;
@@ -32,6 +33,7 @@ namespace ADK.Demo.Renderers
             gridHorizontal = Sky.Get<CelestialGrid>("GridHorizontal");
             lineEcliptic = Sky.Get<CelestialGrid>("LineEcliptic");
             lineGalactic = Sky.Get<CelestialGrid>("LineGalactic");
+            lineHorizon = Sky.Get<CelestialGrid>("LineHorizon");
 
             penGridEquatorial = new Pen(Brushes.Transparent);
             penGridHorizontal = new Pen(Brushes.Transparent);
@@ -70,9 +72,10 @@ namespace ADK.Demo.Renderers
                 DrawGrid(g, penLineEcliptic, lineEcliptic);
                 DrawEquinoxLabels(g);
             }
-
-            //var date = new Date(Sky.JulianDay);           
-            //g.DrawString($"{(int)date.Day}.{date.Month}.{date.Year} {(date.Day - (int)date.Day) * 24}]", SystemFonts.DefaultFont, Brushes.Red, 10, 10);
+            if (Settings.Get<bool>("HorizonLine"))
+            {
+                DrawGrid(g, penGridHorizontal, lineHorizon);
+            }
         }
 
         private void DrawGrid(Graphics g, Pen penGrid, CelestialGrid grid)
@@ -175,9 +178,9 @@ namespace ADK.Demo.Renderers
                             refPoints[k] = Map.Projection.Project(refHorizontal);
                         }
 
-                        if (!Geometry.IsOutOfScreen(refPoints[0], Map.Width, Map.Height) || !Geometry.IsOutOfScreen(refPoints[1], Map.Width, Map.Height))
+                        if (!IsOutOfScreen(refPoints[0]) || !IsOutOfScreen(refPoints[1]))
                         {
-                            refPoints = Geometry.LineRectangleIntersection(refPoints[0], refPoints[1], Map.Width, Map.Height);
+                            refPoints = LineScreenIntersection(refPoints[0], refPoints[1]);
                         }
 
                         DrawGroupOfPoints(g, penGrid, segment.Select(s => Map.Projection.Project(grid.ToHorizontal(s))).ToArray(), refPoints);
@@ -227,9 +230,9 @@ namespace ADK.Demo.Renderers
                         refPoints[k] = Map.Projection.Project(refHorizontal);
                     }
 
-                    if (!Geometry.IsOutOfScreen(refPoints[0], Map.Width, Map.Height) || !Geometry.IsOutOfScreen(refPoints[1], Map.Width, Map.Height))
+                    if (!IsOutOfScreen(refPoints[0]) || !IsOutOfScreen(refPoints[1]))
                     {
-                        refPoints = Geometry.LineRectangleIntersection(refPoints[0], refPoints[1], Map.Width, Map.Height);
+                        refPoints = LineScreenIntersection(refPoints[0], refPoints[1]);
                     }
 
                     DrawGroupOfPoints(g, penGrid, segment.Select(s => Map.Projection.Project(grid.ToHorizontal(s))).ToArray(), refPoints);
@@ -322,8 +325,8 @@ namespace ADK.Demo.Renderers
                 // Check the curvature of that circle by comparing its radius with small radius
                 if (d1 > r * 2 && d2 > r * 2)
                 {
-                    var circle = Geometry.FindCircle(points);
-                    if (circle.R / r > 60)
+                    var R = FindCircleRadius(points);
+                    if (R / r > 60)
                     {
                         g.DrawLine(penGrid, refPoints[0], refPoints[1]);
                         return;
@@ -385,6 +388,37 @@ namespace ADK.Demo.Renderers
                     }
                 }
             }
+        }
+
+        private double FindCircleRadius(PointF[] l)
+        {
+            // https://www.scribd.com/document/14819165/Regressions-coniques-quadriques-circulaire-spherique
+            // via http://math.stackexchange.com/questions/662634/find-the-approximate-center-of-a-circle-passing-through-more-than-three-points
+
+            var n = l.Count();
+            var sumx = l.Sum(p => p.X);
+            var sumxx = l.Sum(p => p.X * p.X);
+            var sumy = l.Sum(p => p.Y);
+            var sumyy = l.Sum(p => p.Y * p.Y);
+
+            var d11 = n * l.Sum(p => p.X * p.Y) - sumx * sumy;
+
+            var d20 = n * sumxx - sumx * sumx;
+            var d02 = n * sumyy - sumy * sumy;
+
+            var d30 = n * l.Sum(p => p.X * p.X * p.X) - sumxx * sumx;
+            var d03 = n * l.Sum(p => p.Y * p.Y * p.Y) - sumyy * sumy;
+
+            var d21 = n * l.Sum(p => p.X * p.X * p.Y) - sumxx * sumy;
+            var d12 = n * l.Sum(p => p.Y * p.Y * p.X) - sumyy * sumx;
+
+            var x = ((d30 + d12) * d02 - (d03 + d21) * d11) / (2 * (d20 * d02 - d11 * d11));
+            var y = ((d03 + d21) * d20 - (d30 + d12) * d11) / (2 * (d20 * d02 - d11 * d11));
+
+            var c = (sumxx + sumyy - 2 * x * sumx - 2 * y * sumy) / n;
+            var r = Math.Sqrt(c + x * x + y * y);
+
+            return r;
         }
     }
 }

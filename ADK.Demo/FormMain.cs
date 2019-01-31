@@ -92,9 +92,7 @@ namespace ADK.Demo
                 hor.ToString() + " / " +
                 eq.ToString() + " / " +
                 skyView.SkyMap.ViewAngle + " / " +
-                Constellations.FindConstellation(eq1875);
-
-            var obj = skyView.SkyMap.VisibleObjects.FirstOrDefault(c => Angle.Separation(hor, c.Horizontal) < 1);            
+                Constellations.FindConstellation(eq1875);          
         }
 
         private void skyView_KeyDown(object sender, KeyEventArgs e)

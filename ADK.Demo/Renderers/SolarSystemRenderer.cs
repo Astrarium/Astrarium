@@ -107,7 +107,7 @@ namespace ADK.Demo.Renderers
                 g.ResetTransform();
 
                 DrawObjectCaption(g, fontCelestialObjectName, "Sun", p, size);
-                Map.VisibleObjects.Add(sun);
+                Map.AddDrawnObject(sun, p);
             }
         }
 
@@ -162,7 +162,7 @@ namespace ADK.Demo.Renderers
                 g.ResetTransform();
 
                 DrawObjectCaption(g, fontCelestialObjectName, "Moon", p, size);
-                Map.VisibleObjects.Add(moon);
+                Map.AddDrawnObject(moon, p);
             }
         }
 
@@ -183,8 +183,7 @@ namespace ADK.Demo.Renderers
                     g.FillEllipse(GetPlanetColor(planet.Number), p.X - size / 2, p.Y - size / 2, size, size);
 
                     DrawObjectCaption(g, fontCelestialObjectName, planet.Name, p, size);
-
-                    Map.VisibleObjects.Add(planet);
+                    Map.AddDrawnObject(planet, p);
                 }
 
                 // planet should be rendered as disk
@@ -281,8 +280,7 @@ namespace ADK.Demo.Renderers
                     }
                     
                     DrawObjectCaption(g, fontCelestialObjectName, planet.Name, p, diam);
-
-                    Map.VisibleObjects.Add(planet);
+                    Map.AddDrawnObject(planet, p);
                 }
             }
         }

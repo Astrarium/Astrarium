@@ -19,11 +19,16 @@ namespace ADK.Demo
         public CrdsHorizontal Center { get; set; } = new CrdsHorizontal(0, 0);
         public bool Antialias { get; set; } = true;
         public ICollection<BaseSkyRenderer> Renderers { get; } = new List<BaseSkyRenderer>();
-        public ICollection<CelestialObject> VisibleObjects { get; } = new List<CelestialObject>();
+        public ICollection<PointF> DrawnPoints { get; } = new List<PointF>();
         public ICollection<RectangleF> Labels { get; } = new List<RectangleF>();
         public CelestialObject SelectedObject { get; set; }
         public IProjection Projection { get; set; } = null;
         public event Action OnInvalidate;
+
+        /// <summary>
+        /// Collection of celestial objects drawn on the map
+        /// </summary>
+        private ICollection<CelestialObject> drawnObjects = new List<CelestialObject>();
 
         public SkyMap()
         {
@@ -34,7 +39,8 @@ namespace ADK.Demo
         {
             g.PageUnit = GraphicsUnit.Display;
             g.SmoothingMode = Antialias ? SmoothingMode.HighQuality : SmoothingMode.HighSpeed;
-            VisibleObjects.Clear();
+            DrawnPoints.Clear();
+            drawnObjects.Clear();
             Labels.Clear();
 
             bool needDrawSelectedObject = true;
@@ -65,7 +71,7 @@ namespace ADK.Demo
         public CelestialObject FindObject(PointF point)
         {
             var hor = Projection.Invert(point);
-            var body = VisibleObjects
+            var body = drawnObjects
                 .OrderBy(c => Angle.Separation(hor, c.Horizontal))
                 .FirstOrDefault();
 
@@ -87,12 +93,18 @@ namespace ADK.Demo
             return null;
         }
 
+        public void AddDrawnObject(CelestialObject obj, PointF p)
+        {
+            drawnObjects.Add(obj);
+            DrawnPoints.Add(p);
+        }
+
         private bool DrawSelectedObject(Graphics g)
         {           
             // screen diagonal, in pixels
             double diag = Math.Sqrt(Width * Width / 4 + Height * Height / 4);
 
-            if (SelectedObject != null && VisibleObjects.Contains(SelectedObject))
+            if (SelectedObject != null && drawnObjects.Contains(SelectedObject))
             {
                 var body = SelectedObject;
 

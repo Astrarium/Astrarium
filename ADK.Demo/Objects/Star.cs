@@ -27,12 +27,14 @@ namespace ADK.Demo.Objects
         /// <summary>
         /// Star number in BSC catalogue (= HR number = Harvard Revised Number = Bright Star Number) 
         /// </summary>
-        public int Number { get; set; }
+        public ushort Number { get; set; }
 
         /// <summary>
         /// Star name, generally Bayer and/or Flamsteed name
         /// </summary>
         public string Name { get; set; }
+
+        public string ProperName { get; set; }
 
         public string BayerName
         {
@@ -75,6 +77,12 @@ namespace ADK.Demo.Objects
         }
 
         public string VariableName { get; set; }
+
+        public uint HDNumber { get; set; }
+
+        public uint SAONumber { get; set; }
+
+        public ushort FK5Number { get; set; }
 
         /// <summary>
         /// Equatorial coordinates for the catalogue epoch
