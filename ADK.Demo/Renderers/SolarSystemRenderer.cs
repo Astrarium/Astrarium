@@ -14,9 +14,11 @@ namespace ADK.Demo.Renderers
     /// </summary>
     public class SolarSystemRenderer : BaseSkyRenderer
     {
-        private Font fontCelestialObjectName = SystemFonts.DefaultFont;
+        private Font fontLabel = SystemFonts.DefaultFont;
         private Pen penSun = new Pen(Color.FromArgb(250, 210, 10));
         private Brush brushShadow = new SolidBrush(Color.FromArgb(200, 0, 0, 0));
+        private Brush brushLabel = Brushes.DimGray;
+
         private Brush[] brushRings = new Brush[] 
         {
             new SolidBrush(Color.FromArgb(200, 224, 224, 195)),
@@ -106,7 +108,7 @@ namespace ADK.Demo.Renderers
 
                 g.ResetTransform();
 
-                DrawObjectCaption(g, fontCelestialObjectName, "Sun", p, size);
+                DrawObjectCaption(g, fontLabel, brushLabel, "Sun", p, size);
                 Map.AddDrawnObject(sun, p);
             }
         }
@@ -161,7 +163,7 @@ namespace ADK.Demo.Renderers
                 g.FillPath(brushShadow, shadow);
                 g.ResetTransform();
 
-                DrawObjectCaption(g, fontCelestialObjectName, "Moon", p, size);
+                DrawObjectCaption(g, fontLabel, brushLabel, "Moon", p, size);
                 Map.AddDrawnObject(moon, p);
             }
         }
@@ -182,7 +184,7 @@ namespace ADK.Demo.Renderers
                     PointF p = Map.Projection.Project(planet.Horizontal);
                     g.FillEllipse(GetPlanetColor(planet.Number), p.X - size / 2, p.Y - size / 2, size, size);
 
-                    DrawObjectCaption(g, fontCelestialObjectName, planet.Name, p, size);
+                    DrawObjectCaption(g, fontLabel, brushLabel, planet.Name, p, size);
                     Map.AddDrawnObject(planet, p);
                 }
 
@@ -279,7 +281,7 @@ namespace ADK.Demo.Renderers
                         g.ResetTransform();
                     }
                     
-                    DrawObjectCaption(g, fontCelestialObjectName, planet.Name, p, diam);
+                    DrawObjectCaption(g, fontLabel, brushLabel, planet.Name, p, diam);
                     Map.AddDrawnObject(planet, p);
                 }
             }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Text;
 using System.Linq;
 
 namespace ADK.Demo.Renderers
@@ -17,6 +18,8 @@ namespace ADK.Demo.Renderers
         private Pen penGridHorizontal = null;
         private Pen penLineEcliptic = null;
         private Pen penLineGalactic = null;
+
+        private Font fontEquinoxLabel = new Font("Arial", 8);
 
         private string[] equinoxLabels = new string[] { "\u2648", "\u264E" };
         private int[] equinoxRA = new int[] { 0, 12 };
@@ -351,7 +354,11 @@ namespace ADK.Demo.Renderers
                     if (Angle.Separation(h, Map.Center) < Map.ViewAngle * 1.2)
                     {
                         PointF p = Map.Projection.Project(h);
-                        g.DrawStringOpaque(equinoxLabels[i], SystemFonts.DefaultFont, penLineEcliptic.Brush, Brushes.Black, p);
+
+                        var hint = g.TextRenderingHint;
+                        g.TextRenderingHint = TextRenderingHint.AntiAlias;
+                        g.DrawStringOpaque(equinoxLabels[i], fontEquinoxLabel, penLineEcliptic.Brush, Brushes.Black, p);
+                        g.TextRenderingHint = hint;
                     }
                 }
             }

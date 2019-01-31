@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -27,7 +28,7 @@ namespace ADK.Demo.Renderers
 
         public virtual void Initialize() { }
 
-        protected void DrawObjectCaption(Graphics g, Font font, string caption, PointF p, float size)
+        protected void DrawObjectCaption(Graphics g, Font font, Brush brush, string caption, PointF p, float size)
         {
             SizeF b = g.MeasureString(caption, font);
 
@@ -41,7 +42,7 @@ namespace ADK.Demo.Renderers
                     RectangleF r = new RectangleF(p.X + dx, p.Y + dy, b.Width, b.Height);
                     if (!Map.Labels.Any(l => l.IntersectsWith(r)) && !Map.DrawnPoints.Any(v => r.Contains(v)))
                     {
-                        g.DrawString(caption, font, Brushes.DimGray, r.Location);
+                        g.DrawString(caption, font, brush, r.Location);
                         Map.Labels.Add(r);
                         return;
                     }

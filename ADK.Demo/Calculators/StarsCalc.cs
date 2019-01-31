@@ -288,7 +288,14 @@ namespace ADK.Demo.Calculators
 
         private ICollection<string> GetStarNames(Star s)
         {
+            var constellations = Sky.Get<ICollection<Constellation>>("Constellations");
             List<string> names = new List<string>();
+
+            string conName = s.Name.Substring(7, 3).Trim();
+            if (!string.IsNullOrEmpty(conName))
+            {
+                conName = constellations.FirstOrDefault(c => c.Code.StartsWith(conName, StringComparison.OrdinalIgnoreCase)).Genitive;
+            }
 
             if (s.ProperName != null)
             {
@@ -296,11 +303,11 @@ namespace ADK.Demo.Calculators
             }
             if (s.BayerName != null)
             {
-                names.Add($"{s.BayerName} {s.Name.Substring(7, 3)}");
+                names.Add($"{s.BayerName} {conName}");
             }
             if (s.FlamsteedNumber != null)
             {
-                names.Add($"{s.FlamsteedNumber} {s.Name.Substring(7, 3)}");
+                names.Add($"{s.FlamsteedNumber} {conName}");
             }
             if (s.VariableName != null)
             {

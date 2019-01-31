@@ -17,6 +17,7 @@ namespace ADK.Demo.Renderers
 
         private Font fontStarNames;
         private Pen penConLine;
+        private Brush brushStarNames;
 
         private const double maxSeparation = 90 * 1.2;
 
@@ -31,6 +32,7 @@ namespace ADK.Demo.Renderers
             fontStarNames = new Font("Arial", 8);
             penConLine = new Pen(new SolidBrush(Color.FromArgb(64, 64, 64)));
             penConLine.DashStyle = DashStyle.Dot;
+            brushStarNames = new SolidBrush(Color.FromArgb(64, 64, 64));
         }
 
         public override void Render(Graphics g)
@@ -72,7 +74,7 @@ namespace ADK.Demo.Renderers
                         PointF p = Map.Projection.Project(star.Horizontal);
                         if (!IsOutOfScreen(p))
                         {
-                            g.FillEllipse(GetColor(star.Color), p.X - diam / 2, p.Y - diam / 2, diam, diam);
+                            g.FillEllipse(GetColor(star.Color), p.X - diam / 2, p.Y - diam / 2, diam, diam);                                
                             Map.AddDrawnObject(star, p);
                         }
                     }
@@ -92,7 +94,6 @@ namespace ADK.Demo.Renderers
                             }
                         }
                     }
-
                 }
             }
         }
@@ -126,10 +127,10 @@ namespace ADK.Demo.Renderers
         /// </summary>
         private void DrawStarName(Graphics g, PointF point, Star s, float diam)
         {
-            // Star has proper name:
+            // Star has proper name
             if (Map.ViewAngle < limitProperNames && Settings.Get<bool>("StarsProperNames") && s.ProperName != null)
             {
-                DrawObjectCaption(g, fontStarNames, s.ProperName, point, diam);
+                DrawObjectCaption(g, fontStarNames, brushStarNames, s.ProperName, point, diam);
                 return;
             }
 
@@ -139,7 +140,7 @@ namespace ADK.Demo.Renderers
                 string bayerName = s.BayerName;
                 if (bayerName != null)
                 {
-                    DrawObjectCaption(g, fontStarNames, bayerName, point, diam);
+                    DrawObjectCaption(g, fontStarNames, brushStarNames, bayerName, point, diam);
                     return;                    
                 }
             }
@@ -149,7 +150,7 @@ namespace ADK.Demo.Renderers
                 string flamsteedNumber = s.FlamsteedNumber;
                 if (flamsteedNumber != null)
                 {
-                    DrawObjectCaption(g, fontStarNames, flamsteedNumber, point, diam);
+                    DrawObjectCaption(g, fontStarNames, brushStarNames, flamsteedNumber, point, diam);
                     return;
                 }
             }
@@ -158,14 +159,14 @@ namespace ADK.Demo.Renderers
             if (Map.ViewAngle < limitVarNames && s.VariableName != null)
             {
                 string varName = s.VariableName.Split(' ')[0];
-                DrawObjectCaption(g, fontStarNames, varName, point, diam);
+                DrawObjectCaption(g, fontStarNames, brushStarNames, varName, point, diam);
                 return;
             }
 
-            // If star doesn't have any names
+            // Star doesn't have any names
             if (Map.ViewAngle < 2)
             {
-                DrawObjectCaption(g, fontStarNames, $"HR {s.Number}", point, diam);
+                DrawObjectCaption(g, fontStarNames, brushStarNames, $"HR {s.Number}", point, diam);
             }
         }
 
