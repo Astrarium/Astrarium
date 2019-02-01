@@ -9,14 +9,14 @@ namespace ADK.Demo.Objects
     public class DeepSky : SizeableCelestialObject
     {
         /// <summary>
-        /// Catalog number
-        /// </summary>
-        public string Number { get; set; }
-
-        /// <summary>
         /// Flag indicating IC catalog
         /// </summary>
         public bool IC { get; set; }
+
+        /// <summary>
+        /// Catalog number
+        /// </summary>
+        public string CatalogNumber { get; set; }
 
         /// <summary>
         /// Equatorial coordinates for epoch J2000.0
@@ -54,11 +54,60 @@ namespace ADK.Demo.Objects
         public short PA { get; set; }
 
         /// <summary>
-        /// Deep sky type
+        /// Proper name of NGC/IC object
         /// </summary>
-        public string Type { get; set; }
+        public string ProperName { get; set; }
+
+        /// <summary>
+        /// Gets name of deep sky object in NGC/IC catalog
+        /// </summary>
+        public string CatalogName { get => $"{(IC ? "IC" : "NGC")} {CatalogNumber}"; }
+
+        /// <summary>
+        /// Name of deep sky object to be displayed on map
+        /// </summary>
+        public string DisplayName
+        {
+            get
+            {
+                if (ProperName != null)
+                    return ProperName;
+                else if (OtherNames != null && OtherNames[0].StartsWith("M "))
+                    return OtherNames[0];
+                else
+                    return CatalogName;
+            }
+        }
+
+        /// <summary>
+        /// Names of deep sky object in other catalogs
+        /// </summary>
+        public string[] OtherNames { get; set; }
+
+        /// <summary>
+        /// Gets array of all deep sky object names 
+        /// </summary>
+        public string[] AllNames
+        {
+            get
+            {
+                var names = new List<string>();
+                if (ProperName != null)
+                {
+                    names.Add(ProperName);
+                }            
+                names.Add(CatalogName);
+                if (OtherNames != null)
+                {
+                    names.AddRange(OtherNames);  
+                }
+                return names.ToArray();
+            }
+        }
 
         public override double Semidiameter { get => Math.Max(SizeA, SizeB) * 30; }
+
+        public ICollection<CelestialPoint> Outline { get; set; }
     }
 
     public enum DeepSkyStatus : byte

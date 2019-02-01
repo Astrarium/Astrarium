@@ -216,6 +216,7 @@ namespace ADK.Demo.Renderers
             protected abstract void DrawRoundObject(Graphics g, float diamA);
             protected abstract void DrawPointObject(Graphics g);
 
+
             public BaseDrawingStrategy(DeepSkyRenderer renderer)
             {
                 Renderer = renderer;
@@ -235,16 +236,23 @@ namespace ADK.Demo.Renderers
                     if (diamA > 10)
                     {
                         float diamB = GetDiameter(ds.SizeB);
-                        float rotation = Renderer.GetRotationTowardsNorth(ds.Equatorial) + 90 - ds.PA;
-                        g.TranslateTransform(p.X, p.Y);
-                        g.RotateTransform(rotation);
-                        DrawEllipticObject(g, diamA, diamB);
-                        g.ResetTransform();
+                        if (ds.Outline != null)
+                        {
+                            DrawOutline(g, ds.Outline);
+                        }
+                        else
+                        {
+                            float rotation = Renderer.GetRotationTowardsNorth(ds.Equatorial) + 90 - ds.PA;
+                            g.TranslateTransform(p.X, p.Y);
+                            g.RotateTransform(rotation);
+                            DrawEllipticObject(g, diamA, diamB);
+                            g.ResetTransform();
+                        }
                         Renderer.Map.AddDrawnObject(ds, p);
 
                         if (Renderer.Map.ViewAngle <= Renderer.limitLabels)
                         {
-                            Renderer.DrawObjectCaption(g, Renderer.fontCaption, Renderer.brushCaption, $"{(ds.IC ? "IC" : "NGC")} {ds.Number}", p, Math.Min(diamA, diamB));
+                            Renderer.DrawObjectCaption(g, Renderer.fontCaption, Renderer.brushCaption, ds.DisplayName, p, Math.Min(diamA, diamB));
                         }
                     }
                 }
@@ -254,30 +262,64 @@ namespace ADK.Demo.Renderers
                     float diamA = GetDiameter(ds.SizeA);
                     if (diamA > 10)
                     {
-                        float rotation = Renderer.GetRotationTowardsNorth(ds.Equatorial) + 90 - ds.PA;
-                        g.TranslateTransform(p.X, p.Y);
-                        g.RotateTransform(rotation);
-                        DrawRoundObject(g, diamA);
-                        g.ResetTransform();
+                        if (ds.Outline != null)
+                        {
+                            DrawOutline(g, ds.Outline);
+                        }
+                        else
+                        {
+                            float rotation = Renderer.GetRotationTowardsNorth(ds.Equatorial) + 90 - ds.PA;
+                            g.TranslateTransform(p.X, p.Y);
+                            g.RotateTransform(rotation);
+                            DrawRoundObject(g, diamA);
+                            g.ResetTransform();
+                        }
                         Renderer.Map.AddDrawnObject(ds, p);
 
                         if (Renderer.Map.ViewAngle <= Renderer.limitLabels)
                         {
-                            Renderer.DrawObjectCaption(g, Renderer.fontCaption, Renderer.brushCaption, $"{(ds.IC ? "IC" : "NGC")} {ds.Number}", p, diamA);
+                            Renderer.DrawObjectCaption(g, Renderer.fontCaption, Renderer.brushCaption, ds.DisplayName, p, diamA);
                         }
                     }
                 }
                 // point object
                 else
                 {
-                    g.TranslateTransform(p.X, p.Y);
-                    DrawPointObject(g);
-                    g.ResetTransform();
+                    if (ds.Outline != null)
+                    {
+                        DrawOutline(g, ds.Outline);
+                    }
+                    else
+                    {
+                        g.TranslateTransform(p.X, p.Y);
+                        DrawPointObject(g);
+                        g.ResetTransform();
+                    }
                     Renderer.Map.AddDrawnObject(ds, p);
 
                     if (Renderer.Map.ViewAngle <= Renderer.limitLabels)
                     {
-                        Renderer.DrawObjectCaption(g, Renderer.fontCaption, Renderer.brushCaption, $"{(ds.IC ? "IC" : "NGC")} {ds.Number}", p, 0);
+                        Renderer.DrawObjectCaption(g, Renderer.fontCaption, Renderer.brushCaption, ds.DisplayName, p, 0);
+                    }
+                }
+            }
+
+            protected virtual void DrawOutline(Graphics g, ICollection<CelestialPoint> outline)
+            {
+                for (int i = 0; i < outline.Count - 1; i++)
+                {
+                    var h1 = outline.ElementAt(i).Horizontal;
+                    var h2 = outline.ElementAt(i + 1).Horizontal;
+
+                    double ad1 = Angle.Separation(h1, Renderer.Map.Center);
+                    double ad2 = Angle.Separation(h2, Renderer.Map.Center);
+                    PointF p1, p2;
+                    if (ad1 < Renderer.Map.ViewAngle * 1.2 || 
+                        ad2 < Renderer.Map.ViewAngle * 1.2)
+                    {
+                        p1 = Renderer.Map.Projection.Project(h1);
+                        p2 = Renderer.Map.Projection.Project(h2);
+                        g.DrawLine(Renderer.penCluster, p1, p2);
                     }
                 }
             }

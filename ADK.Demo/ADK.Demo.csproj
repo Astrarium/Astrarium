@@ -169,7 +169,7 @@
     <None Include="Data\NGCIC.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Data\NI2018.csv">
+    <None Include="Data\NGCICNames.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Data\Outlines.dat">
