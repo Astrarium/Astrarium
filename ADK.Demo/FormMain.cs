@@ -64,8 +64,8 @@ namespace ADK.Demo
             Console.WriteLine("ELASPSED ms: " + watch.ElapsedMilliseconds);
 
             ISkyMap map = new SkyMap();
-            map.Renderers.Add(new DeepSkyRenderer(sky, map, settings));
             map.Renderers.Add(new MilkyWayRenderer(sky, map, settings));
+            map.Renderers.Add(new DeepSkyRenderer(sky, map, settings));
             map.Renderers.Add(new ConstellationsRenderer(sky, map, settings));
             map.Renderers.Add(new CelestialGridRenderer(sky, map, settings));
             map.Renderers.Add(new StarsRenderer(sky, map, settings));

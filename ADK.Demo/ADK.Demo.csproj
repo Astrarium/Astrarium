@@ -172,6 +172,9 @@
     <None Include="Data\NI2018.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Data\Outlines.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Data\StarNames.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

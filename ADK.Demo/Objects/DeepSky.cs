@@ -9,6 +9,16 @@ namespace ADK.Demo.Objects
     public class DeepSky : SizeableCelestialObject
     {
         /// <summary>
+        /// Catalog number
+        /// </summary>
+        public string Number { get; set; }
+
+        /// <summary>
+        /// Flag indicating IC catalog
+        /// </summary>
+        public bool IC { get; set; }
+
+        /// <summary>
         /// Equatorial coordinates for epoch J2000.0
         /// </summary>
         public CrdsEquatorial Equatorial0 { get; set; }
@@ -63,5 +73,13 @@ namespace ADK.Demo.Objects
         DuplicateIC     = 8,
         Star            = 9,
         NotFound        = 0
+    }
+
+    public static class DeepSkyStatusExtensions
+    {
+        public static bool IsEmpty(this DeepSkyStatus status)
+        {
+            return ((int)status > 5 || status == DeepSkyStatus.NotFound);
+        }
     }
 }

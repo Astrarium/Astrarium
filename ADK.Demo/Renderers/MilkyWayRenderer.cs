@@ -52,9 +52,10 @@ namespace ADK.Demo.Renderers
                         var points = new List<PointF>();
                         for (int j = 0; j < milkyWay[i].Count; j++)
                         {
-                            if (Angle.Separation(milkyWay[i][j].Horizontal, Map.Center) < 90 * 1.2)
+                            var h = milkyWay[i][j].Horizontal;
+                            if (Angle.Separation(h, Map.Center) < 90 * 1.2)
                             {
-                                points.Add(Map.Projection.Project(milkyWay[i][j].Horizontal));
+                                points.Add(Map.Projection.Project(h));
                             }
                         }
 

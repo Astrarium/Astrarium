@@ -39,6 +39,7 @@ namespace ADK.Demo.Renderers
             PointF p1, p2;
             CrdsHorizontal h1, h2;
             var borders = Sky.Get<List<List<CelestialPoint>>>("ConstBorders");
+            bool isGround = Settings.Get<bool>("Ground");
 
             foreach (var block in borders)
             {
@@ -47,7 +48,8 @@ namespace ADK.Demo.Renderers
                     h1 = block.ElementAt(i).Horizontal;
                     h2 = block.ElementAt(i + 1).Horizontal;
 
-                    if (Angle.Separation(Map.Center, h1) < maxSeparation &&
+                    if ((!isGround || h1.Altitude >= 0 || h2.Altitude >= 0) &&
+                        Angle.Separation(Map.Center, h1) < maxSeparation &&
                         Angle.Separation(Map.Center, h2) < maxSeparation)
                     {
                         p1 = Map.Projection.Project(h1);
@@ -67,8 +69,9 @@ namespace ADK.Demo.Renderers
         /// Renders constellations labels on the map
         /// </summary>
         private void RenderConstLabels(Graphics g)
-        {          
+        {  
             var constellations = Sky.Get<List<Constellation>>("Constellations");
+            bool isGround = Settings.Get<bool>("Ground");
 
             StringFormat format = new StringFormat();
             format.LineAlignment = StringAlignment.Center;
@@ -81,7 +84,7 @@ namespace ADK.Demo.Renderers
             foreach (var c in constellations)
             {
                 var h = c.Label.Horizontal;                
-                if (Angle.Separation(Map.Center, h) < Map.ViewAngle * 1.2)
+                if ((!isGround || h.Altitude > 0) && Angle.Separation(Map.Center, h) < Map.ViewAngle * 1.2)
                 {
                     var p = Map.Projection.Project(h);
 

@@ -77,7 +77,9 @@ namespace ADK.Demo.Renderers
         private void RenderSun(Graphics g, Sun sun)
         {
             double ad = Angle.Separation(sun.Horizontal, Map.Center);
-            if (ad < 1.2 * Map.ViewAngle + sun.Semidiameter / 3600.0)
+            bool isGround = Settings.Get<bool>("Ground");
+            if ((!isGround || sun.Horizontal.Altitude + sun.Semidiameter / 3600 > 0) && 
+                ad < 1.2 * Map.ViewAngle + sun.Semidiameter / 3600)
             {
                 PointF p = Map.Projection.Project(sun.Horizontal);
 
@@ -115,8 +117,10 @@ namespace ADK.Demo.Renderers
 
         private void RenderMoon(Graphics g, Moon moon)
         {
+            bool isGround = Settings.Get<bool>("Ground");
             double ad = Angle.Separation(moon.Horizontal, Map.Center);
-            if (ad < 1.2 * Map.ViewAngle + moon.Semidiameter / 3600.0)
+            if ((!isGround || moon.Horizontal.Altitude + moon.Semidiameter / 3600 > 0) && 
+                ad < 1.2 * Map.ViewAngle + moon.Semidiameter / 3600.0)
             {
                 PointF p = Map.Projection.Project(moon.Horizontal);
 
@@ -171,8 +175,10 @@ namespace ADK.Demo.Renderers
         private void RenderPlanet(Graphics g, Planet planet)
         {
             double ad = Angle.Separation(planet.Horizontal, Map.Center);
-            
-            if (ad < 1.2 * Map.ViewAngle + planet.Semidiameter / 3600.0)
+            bool isGround = Settings.Get<bool>("Ground");
+
+            if ((!isGround || planet.Horizontal.Altitude + planet.Semidiameter / 3600 > 0) && 
+                ad < 1.2 * Map.ViewAngle + planet.Semidiameter / 3600)
             {
                 float size = GetPointSize(planet.Magnitude);
                 float diam = GetDiskSize(planet.Semidiameter);

@@ -13,7 +13,7 @@ namespace ADK.Demo.Calculators
     /// <summary>
     /// Calculates coordinates of Deep Sky objects
     /// </summary>
-    public class DeepSkyCalc : BaseSkyCalc
+    public class DeepSkyCalc : BaseSkyCalc, IInfoProvider<DeepSky>
     {
         private ICollection<DeepSky> DeepSkies = new List<DeepSky>();
 
@@ -53,6 +53,14 @@ namespace ADK.Demo.Calculators
             }
         }
 
+        public CelestialObjectInfo GetInfo(SkyContext context, DeepSky ds)
+        {
+            var info = new CelestialObjectInfo();
+            info.SetSubtitle("Deep Sky").SetTitle(ds.Number);
+
+            return info;
+        }
+
         public override void Initialize()
         {
             string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/NGCIC.dat");
@@ -83,6 +91,8 @@ namespace ADK.Demo.Calculators
 
                     var ds = new DeepSky()
                     {
+                        Number = line.Substring(2, 7).Trim(),
+                        IC = line[0] == 'I',
                         Equatorial0 = new CrdsEquatorial(ra, dec),
                         Status = (DeepSkyStatus)int.Parse(line.Substring(10, 1)),
                         Mag = float.Parse(string.IsNullOrWhiteSpace(mag) ? "0" : mag, CultureInfo.InvariantCulture),

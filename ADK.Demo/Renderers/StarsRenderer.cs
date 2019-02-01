@@ -38,17 +38,19 @@ namespace ADK.Demo.Renderers
         public override void Render(Graphics g)
         {
             var allStars = Sky.Get<ICollection<Star>>("Stars");
+            bool isGround = Settings.Get<bool>("Ground");
 
             if (Settings.Get<bool>("ConstLines"))
             {
                 PointF p1, p2;
                 CrdsHorizontal h1, h2;
                 foreach (var line in ConLines)
-                {                   
+                {
                     h1 = allStars.ElementAt(line.Item1).Horizontal;
                     h2 = allStars.ElementAt(line.Item2).Horizontal;
 
-                    if (Angle.Separation(Map.Center, h1) < maxSeparation &&
+                    if ((!isGround || h1.Altitude > 0 || h2.Altitude > 0) && 
+                        Angle.Separation(Map.Center, h1) < maxSeparation &&
                         Angle.Separation(Map.Center, h2) < maxSeparation)
                     {
                         p1 = Map.Projection.Project(h1);
@@ -66,6 +68,11 @@ namespace ADK.Demo.Renderers
             if (Settings.Get<bool>("Stars"))
             {
                 var stars = allStars.Where(s => s != null && Angle.Separation(Map.Center, s.Horizontal) < Map.ViewAngle * 1.2);
+                if (isGround)
+                {
+                    stars = stars.Where(s => s.Horizontal.Altitude >= 0);
+                }
+
                 foreach (var star in stars)
                 {
                     float diam = GetPointSize(star.Mag);

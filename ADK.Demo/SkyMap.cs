@@ -71,11 +71,8 @@ namespace ADK.Demo
         public CelestialObject FindObject(PointF point)
         {
             var hor = Projection.Invert(point);
-            var body = drawnObjects
-                .OrderBy(c => Angle.Separation(hor, c.Horizontal))
-                .FirstOrDefault();
 
-            if (body != null)
+            foreach (var body in drawnObjects.OrderBy(c => Angle.Separation(hor, c.Horizontal)))
             {
                 double sd = (body is SizeableCelestialObject) ?
                     (body as SizeableCelestialObject).Semidiameter : 0;
@@ -87,7 +84,7 @@ namespace ADK.Demo
                 if (Geometry.DistanceBetweenPoints(p, point) <= size / 2)
                 {
                     return body;
-                }
+                }                
             }
 
             return null;
