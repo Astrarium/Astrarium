@@ -213,7 +213,14 @@ namespace ADK.Demo
 
             public string Format(object value)
             {
-                return string.Format(CultureInfo.InvariantCulture, format, value) + (units ?? "");
+                if (value == null)
+                {
+                    return "—";
+                }
+                else
+                {
+                    return string.Format(CultureInfo.InvariantCulture, format, value) + (units ?? "");
+                }
             }
         }
 

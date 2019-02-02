@@ -17,6 +17,7 @@ namespace ADK.Demo.Calculators
         public LunarCalc(Sky sky) : base(sky)
         {
             Sky.AddDataProvider("Moon", () => moon);
+            Sky.AddDataProvider("Moon.AscendingNode", () => moon.AscendingNode);
         }
 
         public override void Calculate(SkyContext c)
@@ -29,6 +30,7 @@ namespace ADK.Demo.Calculators
             moon.Semidiameter = c.Get(Semidiameter);
             moon.Elongation = c.Get(Elongation);
             moon.Libration = c.Get(LibrationElements);
+            moon.AscendingNode = c.Get(AscendingNode);
         }
 
         /// <summary>
@@ -210,6 +212,14 @@ namespace ADK.Demo.Calculators
         private double NearestApsis(SkyContext c, MoonApsis a)
         {
             return LunarEphem.NearestApsis(c.JulianDay, a);
+        }
+
+        /// <summary>
+        /// Gets longitude of true ascending node of lunar orbit
+        /// </summary>
+        private double AscendingNode(SkyContext c)
+        {
+            return LunarEphem.TrueAscendingNode(c.JulianDay);
         }
 
         /// <summary>

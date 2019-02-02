@@ -9,14 +9,25 @@ namespace ADK.Demo.Objects
     public class DeepSky : SizeableCelestialObject
     {
         /// <summary>
+        /// Number of record in the catalog file
+        /// </summary>
+        public short RecordNumber { get; set; }
+
+        /// <summary>
         /// Flag indicating IC catalog
         /// </summary>
-        public bool IC { get; set; }
+        public bool IC { get => RecordNumber >= 9106; }
 
         /// <summary>
         /// Catalog number
         /// </summary>
-        public string CatalogNumber { get; set; }
+        public ushort Number { get; set; }
+
+        public char Letter { get; set; }
+
+        public char Component { get; set; }
+
+        public byte Messier { get; set; }
 
         /// <summary>
         /// Equatorial coordinates for epoch J2000.0
@@ -36,7 +47,7 @@ namespace ADK.Demo.Objects
         /// <summary>
         /// Visual (if present) or photographic magnitude
         /// </summary>
-        public float Mag { get; set; }
+        public float? Mag { get; set; }
 
         /// <summary>
         /// Larger diameter, in seconds of arc
@@ -61,7 +72,7 @@ namespace ADK.Demo.Objects
         /// <summary>
         /// Gets name of deep sky object in NGC/IC catalog
         /// </summary>
-        public string CatalogName { get => $"{(IC ? "IC" : "NGC")} {CatalogNumber}"; }
+        public string CatalogName { get => $"{(IC ? "IC" : "NGC")} {Number}{(Letter != ' ' ? new string(Letter, 1) : "")}{(Component != ' ' ? new string(Component, 1) : "")}"; }
 
         /// <summary>
         /// Name of deep sky object to be displayed on map
@@ -72,17 +83,12 @@ namespace ADK.Demo.Objects
             {
                 if (ProperName != null)
                     return ProperName;
-                else if (OtherNames != null && OtherNames[0].StartsWith("M "))
-                    return OtherNames[0];
+                else if (Messier > 0)
+                    return $"M {(int)Messier}";
                 else
                     return CatalogName;
             }
         }
-
-        /// <summary>
-        /// Names of deep sky object in other catalogs
-        /// </summary>
-        public string[] OtherNames { get; set; }
 
         /// <summary>
         /// Gets array of all deep sky object names 
@@ -95,12 +101,13 @@ namespace ADK.Demo.Objects
                 if (ProperName != null)
                 {
                     names.Add(ProperName);
-                }            
-                names.Add(CatalogName);
-                if (OtherNames != null)
-                {
-                    names.AddRange(OtherNames);  
                 }
+                if (Messier > 0)
+                {
+                    names.Add($"M {(int)Messier}");
+                }
+                names.Add(CatalogName);
+                
                 return names.ToArray();
             }
         }

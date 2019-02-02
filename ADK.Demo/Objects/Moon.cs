@@ -41,5 +41,10 @@ namespace ADK.Demo.Objects
         /// Libration elements for the Moon
         /// </summary>
         public Libration Libration { get; set; }
+
+        /// <summary>
+        /// Longitude of ascending node of lunar orbit
+        /// </summary>
+        public double AscendingNode { get; set; }
     }
 }

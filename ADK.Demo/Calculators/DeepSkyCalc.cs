@@ -89,8 +89,8 @@ namespace ADK.Demo.Calculators
         public CelestialObjectInfo GetInfo(SkyContext context, DeepSky ds)
         {
             var info = new CelestialObjectInfo();
-            info.SetSubtitle("Deep Sky").SetTitle(string.Join(" / ", ds.AllNames));
-
+            info.SetSubtitle(ds.Status.ToString()).SetTitle(string.Join(" / ", ds.AllNames));
+            info.AddRow("Magnitude", ds.Mag);
             return info;
         }
 
@@ -99,55 +99,62 @@ namespace ADK.Demo.Calculators
             // Load NGC/IC catalogs data
             using (var reader = new StreamReader(NGCIC_FILE))
             {
+                short record = 0;
+
                 while (!reader.EndOfStream)
                 {
-                    string[] line = reader.ReadLine().Split(';');
+                    record++;
+                    string line = reader.ReadLine();
+
+                    string strStatus = line.Substring(10, 2).Trim();
+                    if (strStatus == "")
+                    {
+                        continue;
+                    }
+                    DeepSkyStatus status = (DeepSkyStatus)(Convert.ToInt32(strStatus) % 10);
+                    if (status == DeepSkyStatus.Duplicate || 
+                        status == DeepSkyStatus.DuplicateIC)
+                    {
+                        continue;
+                    }
 
                     var ra = new HMS(
-                        uint.Parse(line[8]),
-                        uint.Parse(line[9]),
-                        double.Parse(line[10], CultureInfo.InvariantCulture))
+                        uint.Parse(line.Substring(20, 2)),
+                        uint.Parse(line.Substring(23, 2)),
+                        double.Parse(line.Substring(26, 4), CultureInfo.InvariantCulture))
                         .ToDecimalAngle();
 
                     var dec =
-                        (line[11].Equals("-") ? -1 : 1) * new DMS(
-                        uint.Parse(line[12]),
-                        uint.Parse(line[13]),
-                        uint.Parse(line[14]))
+                        (line[31]  == '-' ? -1 : 1) * new DMS(
+                        uint.Parse(line.Substring(32, 2)),
+                        uint.Parse(line.Substring(35, 2)),
+                        uint.Parse(line.Substring(38, 2)))
                         .ToDecimalAngle();
 
-                    string mag = line[16];
-                    string sizeA = line[19];
-                    string sizeB = line[20];
-                    string PA = line[21];
-
-                    // collect names from different catalogs
-                    List<string> names = new List<string>();
-                    for (int i = 0; i < 11; i++)
+                    string mag = line.Substring(50, 4).Trim();
+                    string sizeA = line.Substring(61, 7).Trim();
+                    string sizeB = line.Substring(67, 6).Trim();
+                    string PA = line.Substring(74, 3).Trim();
+                    string id1 = line.Substring(96, 16).Trim();
+                    byte messier = 0;
+                    if (id1.StartsWith("M "))
                     {
-                        if (!string.IsNullOrEmpty(line[27 + i]))
-                        {
-                            names.Add(line[27 + i]);
-                        }
-                    }
-
-                    // detect comments/proper name in last name column, and remove it
-                    if (names.Any() && names.Last().All(c => !char.IsDigit(c)))
-                    {
-                        names.Remove(names.Last());
+                        messier = (byte)Convert.ToInt32(id1.Substring(2));
                     }
 
                     var ds = new DeepSky()
                     {
-                        CatalogNumber = $"{line[1]} {line[2]}{line[3]}".Trim(),
-                        IC = line[0].Equals("I"),
+                        RecordNumber = record,
+                        Number = Convert.ToUInt16(line.Substring(0, 4).Trim()),
+                        Letter = line.Substring(4, 1)[0],
+                        Component = line.Substring(5, 1)[0],
                         Equatorial0 = new CrdsEquatorial(ra, dec),
-                        Status = (DeepSkyStatus)(int.Parse(line[5]) % 10),
-                        Mag = float.Parse(string.IsNullOrWhiteSpace(mag) ? "0" : mag, CultureInfo.InvariantCulture),
+                        Status = status,
+                        Mag = string.IsNullOrWhiteSpace(mag) ? (float?)null : float.Parse(mag, CultureInfo.InvariantCulture),
                         SizeA = float.Parse(string.IsNullOrWhiteSpace(sizeA) ? "0" : sizeA, CultureInfo.InvariantCulture),
                         SizeB = float.Parse(string.IsNullOrWhiteSpace(sizeB) ? "0" : sizeB, CultureInfo.InvariantCulture),
                         PA = short.Parse(string.IsNullOrWhiteSpace(PA) ? "0" : PA),
-                        OtherNames = names.Any() ? names.ToArray() : null,
+                        Messier = messier,
                     };
 
                     DeepSkies.Add(ds);
@@ -185,13 +192,9 @@ namespace ADK.Demo.Calculators
 
                         string name = line.Substring(2).Trim().ToUpper();
                         var ds = DeepSkies.FirstOrDefault(d => d.AllNames.Any(n => n.Replace(" ", "").Equals(name)));
-                        if (ds != null)
+                        if (ds != null && ds.Status != DeepSkyStatus.Galaxy)
                         {
                             ds.Outline = outline;
-                        }
-                        else
-                        {
-
                         }
 
                         continue;

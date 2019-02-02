@@ -21,6 +21,7 @@ namespace ADK.Demo.Renderers
 
         private Font fontEquinoxLabel = new Font("Arial", 8);
 
+        private string[] nodesLabels = new string[] { "\u260A", "\u260B" };
         private string[] equinoxLabels = new string[] { "\u2648", "\u264E" };
         private int[] equinoxRA = new int[] { 0, 12 };
 
@@ -74,6 +75,7 @@ namespace ADK.Demo.Renderers
             {
                 DrawGrid(g, penLineEcliptic, lineEcliptic);
                 DrawEquinoxLabels(g);
+                DrawLunarNodes(g);
             }
             if (Settings.Get<bool>("HorizonLine"))
             {
@@ -358,6 +360,29 @@ namespace ADK.Demo.Renderers
                         var hint = g.TextRenderingHint;
                         g.TextRenderingHint = TextRenderingHint.AntiAlias;
                         g.DrawStringOpaque(equinoxLabels[i], fontEquinoxLabel, penLineEcliptic.Brush, Brushes.Black, p);
+                        g.TextRenderingHint = hint;
+                    }
+                }
+            }
+        }
+
+        private void DrawLunarNodes(Graphics g)
+        {
+            if (Settings.Get<bool>("LabelLunarNodes"))
+            {
+                double ascNode = Sky.Get<double>("Moon.AscendingNode");
+
+                for (int i = 0; i < 2; i++)
+                {
+                    var h = lineEcliptic.ToHorizontal(new GridPoint(ascNode + (i > 0 ? 180 : 0), 0));
+                    if (Angle.Separation(h, Map.Center) < Map.ViewAngle * 1.2)
+                    {
+                        PointF p = Map.Projection.Project(h);
+
+                        var hint = g.TextRenderingHint;
+                        g.TextRenderingHint = TextRenderingHint.AntiAlias;
+                        g.FillEllipse(penLineEcliptic.Brush, p.X - 1.5f, p.Y - 1.5f, 3, 3);
+                        DrawObjectCaption(g, fontEquinoxLabel, penLineEcliptic.Brush, nodesLabels[i], p, 3);
                         g.TextRenderingHint = hint;
                     }
                 }

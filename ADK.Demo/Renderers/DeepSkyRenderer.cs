@@ -29,6 +29,7 @@ namespace ADK.Demo.Renderers
 
         private Color colorOutline = Color.FromArgb(50, 50, 50);
         private Brush brushCaption = new SolidBrush(Color.FromArgb(0, 64, 128));
+        private Brush brushOutline = new SolidBrush(Color.FromArgb(20, 20, 20));
 
         private Dictionary<DeepSkyStatus, IDrawingStrategy> drawingHandlers = null;
 
@@ -40,7 +41,7 @@ namespace ADK.Demo.Renderers
             drawingHandlers = new Dictionary<DeepSkyStatus, IDrawingStrategy>()
             {
                 { DeepSkyStatus.Galaxy, new GalaxyDrawingStrategy(this) },
-                { DeepSkyStatus.GalacticNebula, new NebulaDrawingStrategy(this) },
+                { DeepSkyStatus.GalacticNebula, new GalacticNebulaDrawingStrategy(this) },
                 { DeepSkyStatus.PlanetaryNebula, new PlanetaryNebulaDrawingStrategy(this) },
                 { DeepSkyStatus.OpenCluster, new ClusterDrawingStrategy(this) },
                 { DeepSkyStatus.GlobularCluster, new ClusterDrawingStrategy(this) },
@@ -95,23 +96,25 @@ namespace ADK.Demo.Renderers
 
             protected override void DrawEllipticObject(Graphics g, float diamA, float diamB)
             {
-                g.DrawEllipse(Pens.DimGray, -diamA / 2, -diamB / 2, diamA, diamB);
+                g.FillEllipse(Renderer.brushOutline, -diamA / 2, -diamB / 2, diamA, diamB);
+                g.DrawEllipse(Renderer.penNebula, -diamA / 2, -diamB / 2, diamA, diamB);
             }
 
-            protected override void DrawPointObject(Graphics g)
+            protected override void DrawPointObject(Graphics g, float size)
             {
-                g.FillEllipse(Brushes.DimGray, -1, -1, 2, 2);
+                g.FillEllipse(Brushes.DimGray, -size / 2, - size / 2, size, size);
             }
 
             protected override void DrawRoundObject(Graphics g, float diamA)
             {
-                g.DrawEllipse(Pens.DimGray, -diamA / 2, -diamA / 2, diamA, diamA);
+                g.FillEllipse(Renderer.brushOutline, -diamA / 2, -diamA / 2, diamA, diamA);
+                g.DrawEllipse(Renderer.penNebula, -diamA / 2, -diamA / 2, diamA, diamA);
             }
         }
 
-        private class NebulaDrawingStrategy : BaseDrawingStrategy
+        private class GalacticNebulaDrawingStrategy : BaseDrawingStrategy
         {
-            public NebulaDrawingStrategy(DeepSkyRenderer renderer) : base(renderer) { }
+            public GalacticNebulaDrawingStrategy(DeepSkyRenderer renderer) : base(renderer) { }
 
             public override void Draw(Graphics g, DeepSky ds)
             {
@@ -126,9 +129,9 @@ namespace ADK.Demo.Renderers
                 g.DrawRoundedRectangle(Renderer.penNebula, -diamA / 2, -diamB / 2, diamA, diamB, Math.Min(diamA, diamB) / 3);
             }
 
-            protected override void DrawPointObject(Graphics g)
+            protected override void DrawPointObject(Graphics g, float size)
             {
-                g.FillEllipse(Brushes.DimGray, -1, -1, 2, 2);
+                g.FillEllipse(Brushes.DimGray, -size / 2, -size / 2, size, size);
             }
 
             protected override void DrawRoundObject(Graphics g, float diamA)
@@ -151,12 +154,13 @@ namespace ADK.Demo.Renderers
 
             protected override void DrawEllipticObject(Graphics g, float diamA, float diamB)
             {
+                g.FillEllipse(Renderer.brushOutline, -diamA / 2, -diamB / 2, diamA, diamB);
                 g.DrawEllipse(Renderer.penNebula, -diamA / 2, -diamB / 2, diamA, diamB);
             }
 
-            protected override void DrawPointObject(Graphics g)
+            protected override void DrawPointObject(Graphics g, float size)
             {
-                g.FillEllipse(Brushes.DimGray, -1, -1, 2, 2);
+                g.FillEllipse(Brushes.DimGray, -size / 2, -size / 2, size, size);
             }
 
             protected override void DrawRoundObject(Graphics g, float diamA)
@@ -182,9 +186,9 @@ namespace ADK.Demo.Renderers
                 g.DrawEllipse(Renderer.penCluster, -diamA / 2, -diamB / 2, diamA, diamB);
             }
 
-            protected override void DrawPointObject(Graphics g)
+            protected override void DrawPointObject(Graphics g, float size)
             {
-                g.FillEllipse(Brushes.DimGray, -1, -1, 2, 2);
+                g.FillEllipse(Brushes.DimGray, -size / 2, -size / 2, size, size);
             }
 
             protected override void DrawRoundObject(Graphics g, float diamA)
@@ -214,8 +218,7 @@ namespace ADK.Demo.Renderers
 
             protected abstract void DrawEllipticObject(Graphics g, float diamA, float diamB);
             protected abstract void DrawRoundObject(Graphics g, float diamA);
-            protected abstract void DrawPointObject(Graphics g);
-
+            protected abstract void DrawPointObject(Graphics g, float size);
 
             public BaseDrawingStrategy(DeepSkyRenderer renderer)
             {
@@ -226,16 +229,16 @@ namespace ADK.Demo.Renderers
             {
                 PointF p = Renderer.Map.Projection.Project(ds.Horizontal);
 
-                float sizeA = GetDiameter(ds.SizeA);
-                float sizeB = GetDiameter(ds.SizeB);
+                float sizeA = Renderer.GetDiameter(ds.SizeA);
+                float sizeB = Renderer.GetDiameter(ds.SizeB);
 
                 // elliptic object with known size
                 if (sizeB > 0)
                 {
-                    float diamA = GetDiameter(ds.SizeA);
+                    float diamA = Renderer.GetDiameter(ds.SizeA);
                     if (diamA > 10)
                     {
-                        float diamB = GetDiameter(ds.SizeB);
+                        float diamB = Renderer.GetDiameter(ds.SizeB);
                         if (ds.Outline != null)
                         {
                             DrawOutline(g, ds.Outline);
@@ -259,7 +262,7 @@ namespace ADK.Demo.Renderers
                 // round object
                 else if (sizeA > 0)
                 {
-                    float diamA = GetDiameter(ds.SizeA);
+                    float diamA = Renderer.GetDiameter(ds.SizeA);
                     if (diamA > 10)
                     {
                         if (ds.Outline != null)
@@ -285,48 +288,61 @@ namespace ADK.Demo.Renderers
                 // point object
                 else
                 {
-                    if (ds.Outline != null)
+                    float size = Renderer.GetPointSize(ds.Mag == null ? 15 : ds.Mag.Value);
+                    if ((int)size > 0)
                     {
-                        DrawOutline(g, ds.Outline);
-                    }
-                    else
-                    {
-                        g.TranslateTransform(p.X, p.Y);
-                        DrawPointObject(g);
-                        g.ResetTransform();
-                    }
-                    Renderer.Map.AddDrawnObject(ds, p);
+                        if (ds.Outline != null)
+                        {
+                            DrawOutline(g, ds.Outline);
+                        }
+                        else
+                        {
+                            g.TranslateTransform(p.X, p.Y);
+                            DrawPointObject(g, size);
+                            g.ResetTransform();
+                        }
+                        Renderer.Map.AddDrawnObject(ds, p);
 
-                    if (Renderer.Map.ViewAngle <= Renderer.limitLabels)
-                    {
-                        Renderer.DrawObjectCaption(g, Renderer.fontCaption, Renderer.brushCaption, ds.DisplayName, p, 0);
+                        if (Renderer.Map.ViewAngle <= Renderer.limitLabels)
+                        {
+                            Renderer.DrawObjectCaption(g, Renderer.fontCaption, Renderer.brushCaption, ds.DisplayName, p, 0);
+                        }
                     }
                 }
             }
 
             protected virtual void DrawOutline(Graphics g, ICollection<CelestialPoint> outline)
             {
-                for (int i = 0; i < outline.Count - 1; i++)
+                using (GraphicsPath gp = new GraphicsPath(FillMode.Winding))
                 {
-                    var h1 = outline.ElementAt(i).Horizontal;
-                    var h2 = outline.ElementAt(i + 1).Horizontal;
-
-                    double ad1 = Angle.Separation(h1, Renderer.Map.Center);
-                    double ad2 = Angle.Separation(h2, Renderer.Map.Center);
-                    PointF p1, p2;
-                    if (ad1 < Renderer.Map.ViewAngle * 1.2 || 
-                        ad2 < Renderer.Map.ViewAngle * 1.2)
+                    for (int i = 0; i < outline.Count - 1; i++)
                     {
-                        p1 = Renderer.Map.Projection.Project(h1);
-                        p2 = Renderer.Map.Projection.Project(h2);
-                        g.DrawLine(Renderer.penCluster, p1, p2);
-                    }
-                }
-            }
+                        var h1 = outline.ElementAt(i).Horizontal;
+                        var h2 = outline.ElementAt(i + 1).Horizontal;
 
-            private float GetDiameter(double diam)
-            {
-                return (float)(diam / 60 / Renderer.Map.ViewAngle * Renderer.Map.Width / 2);
+                        double ad1 = Angle.Separation(h1, Renderer.Map.Center);
+                        double ad2 = Angle.Separation(h2, Renderer.Map.Center);
+
+
+
+                        PointF p1, p2;
+                        //if (ad1 < Renderer.Map.ViewAngle * 1.2 || 
+                        //    ad2 < Renderer.Map.ViewAngle * 1.2)
+                        {
+                            p1 = Renderer.Map.Projection.Project(h1);
+                            p2 = Renderer.Map.Projection.Project(h2);
+                            gp.AddLine(p1, p2);
+                            //g.DrawLine(Renderer.penNebula, p1, p2);
+                        }
+
+
+                    }
+
+                    g.FillPath(Renderer.brushOutline, gp);
+                    g.DrawPath(Renderer.penNebula, gp);
+                }
+
+                
             }
         }
     }
