@@ -31,6 +31,8 @@ namespace ADK.Demo.Calculators
             moon.Elongation = c.Get(Elongation);
             moon.Libration = c.Get(LibrationElements);
             moon.AscendingNode = c.Get(AscendingNode);
+            moon.EarthShadow = c.Get(EarthShadow);
+            moon.EarthShadowCoordinates = c.Get(EarthShadowCoordinates);
         }
 
         /// <summary>
@@ -220,6 +222,35 @@ namespace ADK.Demo.Calculators
         private double AscendingNode(SkyContext c)
         {
             return LunarEphem.TrueAscendingNode(c.JulianDay);
+        }
+
+        /// <summary>
+        /// Gets details of Earth shadow 
+        /// </summary>
+        private ShadowAppearance EarthShadow(SkyContext c)
+        {
+            return LunarEphem.Shadow(c.JulianDay);
+        }
+
+        /// <summary>
+        /// Gets horizontal topocentrical coordinates of Earth Shadow
+        /// </summary>
+        private CrdsHorizontal EarthShadowCoordinates(SkyContext c)
+        {
+            // Ecliptical coordinates of Sun
+            var eclSun = c.Get(SunEcliptical);
+
+            // Coordinates of Earth shadow is an opposite point on the celestial sphere
+            var eclShadow = new CrdsEcliptical(eclSun.Lambda + 180, -eclSun.Beta);
+
+            // Equatorial geocentrical coordinates of the shadow center
+            var eq0 = eclShadow.ToEquatorial(c.Epsilon);
+
+            // Topocentrical equatorial coordinates
+            var eq = eq0.ToTopocentric(c.GeoLocation, c.SiderealTime, c.Get(Parallax));
+
+            // finally get the horizontal coordinates
+            return eq.ToHorizontal(c.GeoLocation, c.SiderealTime);
         }
 
         /// <summary>

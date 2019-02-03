@@ -732,5 +732,41 @@ namespace ADK
 
             return Angle.To360(Omega);
         }
+
+        /// <summary>
+        /// Gets details of Earth shadow for given date.
+        /// </summary>
+        /// <param name="jd">Julian day to cacluate details.</param>
+        /// <returns>Instance of <see cref="ShadowAppearance"/>.</returns>
+        /// <remarks>This method is taken from AA(II), chapter 54.</remarks>
+        public static ShadowAppearance Shadow(double jd)
+        {
+            double T = (jd - 2451545.0) / 36525.0;
+            double T2 = T * T;
+            double T3 = T2 * T;
+            double T4 = T3 * T;
+
+            // Sun's mean anomaly (formula 49.4)
+            double M = 357.5291092 + 35999.0502909 * T - 0.0001536 * T2 + T3 / 24490000.0;
+            M = Angle.To360(M);
+            M = Angle.ToRadians(M);
+
+            // Moon's mean anomaly (formula 49.5)
+            double M_ = 134.9633964 + 477198.8675055 * T + 0.0087414 * T2 + T3 / 69699.0 - T4 / 14712000.0;
+            M_ = Angle.To360(M_);
+            M_ = Angle.ToRadians(M_);
+
+            // Multiplier related to the eccentricity of the Earth orbit (formula 47.6)
+            double E = 1 - 0.002516 * T - 0.0000074 * T2;
+
+            // p. 381
+            double u = 0.0059
+                + 0.0046 * E * Math.Cos(M)
+                - 0.0182 * Math.Cos(M_)
+                + 0.0004 * Math.Cos(2 * M_)
+                - 0.0005 * Math.Cos(M + M_);
+
+            return new ShadowAppearance(u);
+        }
     }
 }

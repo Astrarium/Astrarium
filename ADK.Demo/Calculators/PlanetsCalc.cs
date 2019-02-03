@@ -127,7 +127,7 @@ namespace ADK.Demo.Calculators
         }
 
         /// <summary>
-        /// Gets geocentrical equatorial coordinates of Earth
+        /// Gets geocentrical equatorial coordinates of planet
         /// </summary>
         private CrdsEquatorial Equatorial0(SkyContext c, int p)
         {

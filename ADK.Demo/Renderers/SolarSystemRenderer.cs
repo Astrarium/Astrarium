@@ -72,6 +72,7 @@ namespace ADK.Demo.Renderers
             }
 
             RenderMoon(g, moon);
+            RenderEarthShadow(g, moon);
         }
 
         private void RenderSun(Graphics g, Sun sun)
@@ -169,6 +170,70 @@ namespace ADK.Demo.Renderers
 
                 DrawObjectCaption(g, fontLabel, brushLabel, "Moon", p, size);
                 Map.AddDrawnObject(moon, p);
+            }
+        }
+
+        private void RenderEarthShadow(Graphics g, Moon moon)
+        {
+            // angular distance from center of map to earth shadow center
+            double ad = Angle.Separation(moon.EarthShadowCoordinates, Map.Center);
+
+            // semidiameter of penumbra in seconds of arc
+            double sdP = moon.EarthShadow.PenumbraRadius * 6378.0 / 1738.0 * moon.Semidiameter;
+
+            bool isGround = Settings.Get<bool>("Ground");
+            if ((!isGround || moon.EarthShadowCoordinates.Altitude + sdP / 3600 > 0) &&
+                ad < 1.2 * Map.ViewAngle + sdP / 3600)
+            {
+                PointF p = Map.Projection.Project(moon.EarthShadowCoordinates);
+                PointF pMoon = Map.Projection.Project(moon.Horizontal);
+
+                // size of penumbra, in pixels
+                float szP = GetDiskSize(sdP, 10);
+
+                // size of umbra, in pixels
+                float szU = szP / (float)moon.EarthShadow.Ratio;
+
+                // size of Moon, in pixels 
+                float szM = GetDiskSize(moon.Semidiameter, 10);
+
+                GraphicsPath gpMoon = new GraphicsPath();
+                GraphicsPath gpPenumbra = new GraphicsPath();
+                GraphicsPath gpUmbra = new GraphicsPath();
+
+                gpPenumbra.AddEllipse(p.X - szP / 2, p.Y - szP / 2, szP, szP);
+                gpUmbra.AddEllipse(p.X - szU / 2, p.Y - szU / 2, szU, szU);
+                gpMoon.AddEllipse(pMoon.X - szM / 2 - 0.5f, pMoon.Y - szM / 2 - 0.5f, szM + 1, szM + 1);
+
+                PathGradientBrush brushPenumbra = new PathGradientBrush(gpPenumbra);
+                brushPenumbra.CenterPoint = p;
+                brushPenumbra.CenterColor = Color.FromArgb(200, 10, 10, 10);
+                brushPenumbra.SurroundColors = new Color[] { Color.Transparent };
+                //brushPenumbra.SetSigmaBellShape(0.9f, 0.9f);
+                brushPenumbra.Blend.Factors = new float[] { 1, 1, 1, 0 };
+                brushPenumbra.Blend.Positions = new float[] { 0, 0.5f, 0.6f, 1f };
+
+                PathGradientBrush brushUmbra = new PathGradientBrush(gpUmbra);
+                brushUmbra.CenterColor = Color.FromArgb(200, 50, 0, 0);
+                brushUmbra.SurroundColors = new Color[] { Color.FromArgb(230, 10, 10, 10) };
+                brushUmbra.Blend.Factors = new float[] { 0, 0.8f, 1 };
+                brushUmbra.Blend.Positions = new float[] { 0, 0.8f, 1 };
+
+                Region regionPenumbra = new Region(gpPenumbra);
+                Region regionUmbra = new Region(gpUmbra);
+
+                regionPenumbra.Exclude(regionUmbra);
+                regionPenumbra.Intersect(gpMoon);
+                regionUmbra.Intersect(gpMoon);
+
+                g.FillRegion(brushPenumbra, regionPenumbra);
+                g.FillRegion(brushUmbra, regionUmbra);
+
+                // outline circles
+                g.TranslateTransform(p.X, p.Y);
+                g.DrawEllipse(Pens.DimGray, -szP / 2, -szP / 2, szP, szP);
+                g.DrawEllipse(Pens.DimGray, -szU / 2, -szU / 2, szU, szU);
+                g.ResetTransform();
             }
         }
 

@@ -136,6 +136,7 @@ namespace ADK.Demo.Renderers
 
             protected override void DrawRoundObject(Graphics g, float diamA)
             {
+                diamA /= 1.15f;
                 g.DrawRoundedRectangle(Renderer.penNebula, -diamA / 2, -diamA / 2, diamA, diamA, diamA / 3);
             }
         }
@@ -233,7 +234,7 @@ namespace ADK.Demo.Renderers
                 float sizeB = Renderer.GetDiameter(ds.SizeB);
 
                 // elliptic object with known size
-                if (sizeB > 0)
+                if (sizeB > 0 && sizeB != sizeA)
                 {
                     float diamA = Renderer.GetDiameter(ds.SizeA);
                     if (diamA > 10)
@@ -311,7 +312,7 @@ namespace ADK.Demo.Renderers
                 }
             }
 
-            protected virtual void DrawOutline(Graphics g, ICollection<CelestialPoint> outline)
+            protected virtual GraphicsPath DrawOutline(Graphics g, ICollection<CelestialPoint> outline)
             {
                 using (GraphicsPath gp = new GraphicsPath(FillMode.Winding))
                 {
@@ -323,8 +324,6 @@ namespace ADK.Demo.Renderers
                         double ad1 = Angle.Separation(h1, Renderer.Map.Center);
                         double ad2 = Angle.Separation(h2, Renderer.Map.Center);
 
-
-
                         PointF p1, p2;
                         //if (ad1 < Renderer.Map.ViewAngle * 1.2 || 
                         //    ad2 < Renderer.Map.ViewAngle * 1.2)
@@ -334,12 +333,12 @@ namespace ADK.Demo.Renderers
                             gp.AddLine(p1, p2);
                             //g.DrawLine(Renderer.penNebula, p1, p2);
                         }
-
-
                     }
 
                     g.FillPath(Renderer.brushOutline, gp);
                     g.DrawPath(Renderer.penNebula, gp);
+
+                    return gp;
                 }
 
                 

@@ -46,5 +46,15 @@ namespace ADK.Demo.Objects
         /// Longitude of ascending node of lunar orbit
         /// </summary>
         public double AscendingNode { get; set; }
+
+        /// <summary>
+        /// Appearance details of Earth shadow
+        /// </summary>
+        public ShadowAppearance EarthShadow { get; set; }
+
+        /// <summary>
+        /// Topocentrical coordinates of Earth shadow
+        /// </summary>
+        public CrdsHorizontal EarthShadowCoordinates { get; set; }
     }
 }

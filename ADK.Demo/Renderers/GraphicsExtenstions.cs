@@ -27,7 +27,7 @@ namespace ADK.Demo.Renderers
 
         public static void DrawStringOpaque(this Graphics g, string s, Font font, Brush textBrush, Brush bgBrush, PointF p, StringFormat format)
         {
-            var size = g.MeasureString(s, font);
+            var size = g.MeasureString(s, font, p, format);
             PointF pBox = new PointF(p.X, p.Y);
             if (format.Alignment == StringAlignment.Center)
             {

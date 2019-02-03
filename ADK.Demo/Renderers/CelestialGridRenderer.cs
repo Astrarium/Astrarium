@@ -19,6 +19,7 @@ namespace ADK.Demo.Renderers
         private Pen penLineEcliptic = null;
         private Pen penLineGalactic = null;
 
+        private Font fontNodeLabel = new Font("Arial", 8);
         private Font fontEquinoxLabel = new Font("Arial", 8);
 
         private string[] nodesLabels = new string[] { "\u260A", "\u260B" };
@@ -382,7 +383,7 @@ namespace ADK.Demo.Renderers
                         var hint = g.TextRenderingHint;
                         g.TextRenderingHint = TextRenderingHint.AntiAlias;
                         g.FillEllipse(penLineEcliptic.Brush, p.X - 1.5f, p.Y - 1.5f, 3, 3);
-                        DrawObjectCaption(g, fontEquinoxLabel, penLineEcliptic.Brush, nodesLabels[i], p, 3);
+                        g.DrawStringOpaque(nodesLabels[i], fontNodeLabel, penLineEcliptic.Brush, Brushes.Black, p);
                         g.TextRenderingHint = hint;
                     }
                 }
