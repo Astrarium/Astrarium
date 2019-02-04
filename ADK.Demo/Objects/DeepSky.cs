@@ -72,7 +72,7 @@ namespace ADK.Demo.Objects
         /// <summary>
         /// Gets name of deep sky object in NGC/IC catalog
         /// </summary>
-        public string CatalogName { get => $"{(IC ? "IC" : "NGC")} {Number}{(Letter != ' ' ? new string(Letter, 1) : "")}{(Component != ' ' ? new string(Component, 1) : "")}"; }
+        public string CatalogName { get => $"{(IC ? "IC" : "NGC")} {Number}{(Letter != ' ' ? new string(Letter, 1) : "")}{(Component != ' ' ? $"-{Component}" : "")}"; }
 
         /// <summary>
         /// Name of deep sky object to be displayed on map

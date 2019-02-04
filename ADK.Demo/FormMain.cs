@@ -158,10 +158,35 @@ namespace ADK.Demo
                     var result = frmSearch.ShowDialog();
                     if (result == DialogResult.OK)
                     {
-                        skyView.SkyMap.SelectedObject = frmSearch.SelectedObject;
-                        skyView.SkyMap.ViewAngle = 3;
-                        skyView.SkyMap.Center = new CrdsHorizontal(skyView.SkyMap.SelectedObject.Horizontal);
-                        skyView.Invalidate();
+                        bool show = true;
+                        var body = frmSearch.SelectedObject;
+                        if (settings.Get<bool>("Ground") && body.Horizontal.Altitude <= 0)
+                        {
+                            show = false;
+                            if (DialogResult.Yes == MessageBox.Show("The object is under horizon at the moment. Do you want to switch off displaying the ground?", "Question", MessageBoxButtons.YesNo))
+                            {
+                                show = true;
+                                settings.Set("Ground", false);
+                            }
+                        }
+
+                        if (show)
+                        {
+                            CrdsHorizontal centerOriginal = new CrdsHorizontal(skyView.SkyMap.Center);
+                            double viewAngleOriginal = skyView.SkyMap.ViewAngle;
+                            double viewAngleTarget = 0.5;
+                            double steps = 100;
+
+                            skyView.SkyMap.SelectedObject = body;
+                         
+                            for (int i = 0; i <= steps; i++)
+                            {
+                                skyView.SkyMap.Center = Angle.Intermediate(centerOriginal, body.Horizontal, i / steps);
+                                skyView.SkyMap.ViewAngle = viewAngleTarget - viewAngleOriginal / steps * i + viewAngleOriginal;
+                                skyView.Invalidate();
+                                Application.DoEvents();
+                            }
+                        }
                     }
                 }
             }

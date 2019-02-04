@@ -47,6 +47,10 @@ namespace ADK.Demo.Renderers
 
                     g.FillPath(brushGround, gp);
                 }
+                else if (Map.Center.Altitude <= 0)
+                {
+                    g.FillRectangle(brushGround, 0, 0, Map.Width, Map.Height);
+                }
 
                 // Top part of ground shape 
 
@@ -58,7 +62,7 @@ namespace ADK.Demo.Renderers
                         hor[i] = Map.Projection.Project(h);
                     }
 
-                    if (hor.Any(h => !IsOutOfScreen(h)))
+                    if (hor.Count(h => !IsOutOfScreen(h)) > 2)
                     {
                         GraphicsPath gp = new GraphicsPath();
 

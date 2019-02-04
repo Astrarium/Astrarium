@@ -363,9 +363,9 @@ namespace ADK.Demo.Calculators
             try
             {
                 var details = new DeepSkyInfo();
-                using (StreamReader sr = new StreamReader(NGCIC_FILE))
+                using (StreamReader sr = new StreamReader(NGCIC_FILE, Encoding.UTF8))
                 {
-                    sr.BaseStream.Seek((ds.RecordNumber - 1) * 178, SeekOrigin.Begin);
+                    sr.BaseStream.Seek((ds.RecordNumber - 1) * 177, SeekOrigin.Begin);
                     string line = sr.ReadLine();
 
                     string sb = line.Substring(56, 4).Trim();

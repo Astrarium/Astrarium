@@ -119,11 +119,11 @@ namespace ADK.Demo
                 double angle = Convert.ToDouble(value);
                 var a = new DMS(angle);
                 
-                if (angle > 1)
+                if (angle >= 1)
                 {
                     return string.Format(CultureInfo.InvariantCulture, "{0:D}° {1:D2}\u2032 {2:00.##}\u2033", a.Degrees, a.Minutes, a.Seconds);
                 }
-                else if (angle > 1.0 / 60)
+                else if (angle >= 1.0 / 60)
                 {
                     return string.Format(CultureInfo.InvariantCulture, "{0:D2}\u2032 {1:00.##}\u2033", a.Minutes, a.Seconds);
                 }
