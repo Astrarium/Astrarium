@@ -38,6 +38,7 @@ namespace ADK.Demo
         private List<Type> CelestialObjectTypes = new List<Type>();
         private List<IAstroEventProvider> EventProviders = new List<IAstroEventProvider>();
         private Dictionary<Type, Delegate> InfoProviders = new Dictionary<Type, Delegate>();
+        private List<ISearchProvider> SearchProviders = new List<ISearchProvider>();
         private Dictionary<Type, EphemerisConfig> EphemConfigs = new Dictionary<Type, EphemerisConfig>();
 
         public void Initialize()
@@ -50,6 +51,7 @@ namespace ADK.Demo
 
             Type ephemProviderType = typeof(IEphemProvider<>);
             Type infoProviderType = typeof(IInfoProvider<>);
+            Type searchProviderType = typeof(ISearchProvider<>);
 
             string configureEphemerisMethodName = nameof(IEphemProvider<CelestialObject>.ConfigureEphemeris);
 
@@ -61,6 +63,7 @@ namespace ADK.Demo
                 {
                     Type genericEphemProviderType = ephemProviderType.MakeGenericType(bodyType);
                     Type genericInfoProviderType = infoProviderType.MakeGenericType(bodyType);
+                    Type genericSearchProviderType = searchProviderType.MakeGenericType(bodyType);
 
                     if (genericEphemProviderType.IsAssignableFrom(calc.GetType()))
                     {
@@ -74,6 +77,11 @@ namespace ADK.Demo
                         Type funcType = typeof(Func<,,>);
                         Type genericFuncType = funcType.MakeGenericType(typeof(SkyContext), bodyType, typeof(CelestialObjectInfo));
                         InfoProviders[bodyType] = genericInfoProviderType.GetMethod(nameof(IInfoProvider<CelestialObject>.GetInfo)).CreateDelegate(genericFuncType, calc);
+                    }
+
+                    if (genericSearchProviderType.IsAssignableFrom(calc.GetType()))
+                    {
+                        SearchProviders.Add(calc as ISearchProvider);
                     }
                 }
 
@@ -148,6 +156,27 @@ namespace ADK.Demo
             }
 
             return events.OrderBy(e => e.JulianDay).ToArray();
+        }
+
+        public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
+        {
+            searchString = searchString.Replace(" ", "");
+            var results = new List<SearchResultItem>();
+            if (!string.IsNullOrWhiteSpace(searchString))
+            {               
+                foreach (var sp in SearchProviders)
+                {
+                    if (results.Count < maxCount)
+                    {
+                        results.AddRange(sp.Search(searchString, maxCount));
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+            return results.Take(maxCount).ToList();
         }
     }
 }

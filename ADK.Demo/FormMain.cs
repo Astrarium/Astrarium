@@ -42,7 +42,7 @@ namespace ADK.Demo
 
             sky.Initialize();
 
-            sky.Context = new SkyContext(Date.JulianEphemerisDay(new Date(2019, 1, 21 + 5 / 24.0)), sky.Context.GeoLocation);
+            //sky.Context = new SkyContext(Date.JulianEphemerisDay(new Date(2019, 1, 21 + 5 / 24.0)), sky.Context.GeoLocation);
 
             sky.Calculate();
 
@@ -77,8 +77,8 @@ namespace ADK.Demo
             map.Renderers.Add(new GroundRenderer(sky, map, settings));
             map.Initialize();
 
-            map.Center = sky.Get<Moon>("Moon").Horizontal;
-            map.ViewAngle = 3;
+            //map.Center = sky.Get<Moon>("Moon").Horizontal;
+            //map.ViewAngle = 3;
 
             skyView.SkyMap = map;
         }
@@ -149,6 +149,21 @@ namespace ADK.Demo
             {
                 fullScreen = !fullScreen;
                 ShowFullScreen(fullScreen);
+            }
+
+            else if (e.Control && e.KeyCode == Keys.F)
+            {
+                using (var frmSearch = new FormSearch(sky.Search))
+                {
+                    var result = frmSearch.ShowDialog();
+                    if (result == DialogResult.OK)
+                    {
+                        skyView.SkyMap.SelectedObject = frmSearch.SelectedObject;
+                        skyView.SkyMap.ViewAngle = 3;
+                        skyView.SkyMap.Center = new CrdsHorizontal(skyView.SkyMap.SelectedObject.Horizontal);
+                        skyView.Invalidate();
+                    }
+                }
             }
         }
 

@@ -116,8 +116,8 @@ namespace ADK.Demo
         {
             public string Format(object value)
             {
-                double angle = (double)value;
-                var a = new DMS((double)value);
+                double angle = Convert.ToDouble(value);
+                var a = new DMS(angle);
                 
                 if (angle > 1)
                 {
@@ -129,7 +129,7 @@ namespace ADK.Demo
                 }
                 else
                 {
-                    return string.Format(CultureInfo.InvariantCulture, "{0:00.##}\u2033", a.Seconds);
+                    return string.Format(CultureInfo.InvariantCulture, "{0:0.##}\u2033", a.Seconds);
                 }
             }
         }
@@ -194,7 +194,7 @@ namespace ADK.Demo
 
             public string Format(object value)
             {
-                double v = (double)value;
+                double v = Convert.ToDouble(value);
                 return v.ToString(format, CultureInfo.InvariantCulture) + (units ?? "");
             }
         }
@@ -213,14 +213,7 @@ namespace ADK.Demo
 
             public string Format(object value)
             {
-                if (value == null)
-                {
-                    return "—";
-                }
-                else
-                {
-                    return string.Format(CultureInfo.InvariantCulture, format, value) + (units ?? "");
-                }
+                return string.Format(CultureInfo.InvariantCulture, format, value) + (units ?? "");
             }
         }
 
@@ -228,7 +221,7 @@ namespace ADK.Demo
         {
             public string Format(object value)
             {
-                double libration = (double)value;
+                double libration = Convert.ToDouble(value);
                 return $"{Math.Abs(libration).ToString("0.0", CultureInfo.InvariantCulture)}\u00B0 {(libration > 0 ? "N" : "S")}";
             }
         }
@@ -237,7 +230,7 @@ namespace ADK.Demo
         {
             public string Format(object value)
             {
-                double libration = (double)value;
+                double libration = Convert.ToDouble(value);
                 return $"{Math.Abs(libration).ToString("0.0", CultureInfo.InvariantCulture)}\u00B0 {(libration > 0 ? "E" : "W")}";
             }
         }
@@ -266,6 +259,7 @@ namespace ADK.Demo
         public static readonly IEphemFormatter Distance = new UnsignedDoubleFormatter(3, " a.u.");
         public static readonly IEphemFormatter Phase = new PhaseFormatter();
         public static readonly IEphemFormatter Magnitude = new SignedDoubleFormatter(2, " m");
+        public static readonly IEphemFormatter SurfaceBrightness = new SignedDoubleFormatter(2, " mag/sq.arcsec");
         public static readonly IEphemFormatter PhaseAngle = new UnsignedDoubleFormatter(2, "\u00B0");
         public static readonly IEphemFormatter HorizontalParallax = new SmallAngleFormatter();
         public static readonly IEphemFormatter AngularDiameter = new SmallAngleFormatter();

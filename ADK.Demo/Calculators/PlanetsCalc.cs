@@ -2,12 +2,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
 namespace ADK.Demo.Calculators
 {
-    public class PlanetsCalc : BaseSkyCalc, IEphemProvider<Planet>, IInfoProvider<Planet>
+    public class PlanetsCalc : BaseSkyCalc, IEphemProvider<Planet>, IInfoProvider<Planet>, ISearchProvider<Planet>
     {
         private Planet[] Planets = new Planet[8];
 
@@ -385,6 +386,13 @@ namespace ADK.Demo.Calculators
             .AddRow("Appearance.D", c.Get(Appearance, p).D);
 
             return info;
+        }
+
+        public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
+        {
+            return Planets.Where(p => CultureInfo.InvariantCulture.CompareInfo.IndexOf(p.Name, searchString, CompareOptions.IgnoreCase) >= 0)
+                .Select(p => new SearchResultItem(p, p.Name))
+                .ToArray();
         }
     }
 }

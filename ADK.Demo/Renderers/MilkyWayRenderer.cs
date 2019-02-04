@@ -25,7 +25,7 @@ namespace ADK.Demo.Renderers
         private double minAlpha = 255;
         private double maxAlpha = 10;
         private double minZoom = 90;
-        private double maxZoom = 0.1;
+        private double maxZoom = 5;
         private double k;
         private double b;
 

@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace ADK.Demo.Calculators
@@ -13,7 +14,7 @@ namespace ADK.Demo.Calculators
     /// <summary>
     /// Calculates coordinates of Deep Sky objects
     /// </summary>
-    public class DeepSkyCalc : BaseSkyCalc, IInfoProvider<DeepSky>
+    public class DeepSkyCalc : BaseSkyCalc, IInfoProvider<DeepSky>, IEphemProvider<DeepSky>, ISearchProvider<DeepSky>
     {
         private static string LOCATION = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         private static string NGCIC_FILE = Path.Combine(LOCATION, "Data/NGCIC.dat");
@@ -41,25 +42,8 @@ namespace ADK.Demo.Calculators
 
             foreach (var ds in DeepSkies)
             {
-                {
-                    // Initial coodinates for J2000 epoch
-                    CrdsEquatorial eq0 = new CrdsEquatorial(ds.Equatorial0);
-
-                    // Equatorial coordinates for the mean equinox and epoch of the target date
-                    ds.Equatorial = Precession.GetEquatorialCoordinates(eq0, p);
-
-                    // Nutation effect
-                    var eq1 = Nutation.NutationEffect(ds.Equatorial, context.NutationElements, context.Epsilon);
-
-                    // Aberration effect
-                    var eq2 = Aberration.AberrationEffect(ds.Equatorial, context.AberrationElements, context.Epsilon);
-
-                    // Apparent coordinates of the object
-                    ds.Equatorial += eq1 + eq2;
-
-                    // Apparent horizontal coordinates
-                    ds.Horizontal = ds.Equatorial.ToHorizontal(context.GeoLocation, context.SiderealTime);
-                }
+                ds.Equatorial = context.Get(Equatorial, ds);
+                ds.Horizontal = context.Get(Horizontal, ds);
 
                 if (ds.Outline != null)
                 {
@@ -86,12 +70,170 @@ namespace ADK.Demo.Calculators
             }
         }
 
-        public CelestialObjectInfo GetInfo(SkyContext context, DeepSky ds)
+        /// <summary>
+        /// Gets precessional elements to convert euqtorial coordinates of stars to current epoch 
+        /// </summary>
+        private PrecessionalElements GetPrecessionalElements(SkyContext c)
         {
+            return Precession.ElementsFK5(Date.EPOCH_J2000, c.JulianDay);
+        }
+
+        /// <summary>
+        /// Gets equatorial coordinates of deep sky object for current epoch
+        /// </summary>
+        private CrdsEquatorial Equatorial(SkyContext c, DeepSky ds)
+        {
+            PrecessionalElements p = c.Get(GetPrecessionalElements);
+            
+            // Equatorial coordinates for the mean equinox and epoch of the target date
+            CrdsEquatorial eq = Precession.GetEquatorialCoordinates(ds.Equatorial0, p);
+
+            // Nutation effect
+            var eq1 = Nutation.NutationEffect(eq, c.NutationElements, c.Epsilon);
+
+            // Aberration effect
+            var eq2 = Aberration.AberrationEffect(eq, c.AberrationElements, c.Epsilon);
+
+            // Apparent coordinates of the object
+            eq += eq1 + eq2;
+
+            return eq;
+        }
+
+        /// <summary>
+        /// Gets apparent horizontal coordinates of deep sky object for given instant
+        /// </summary>
+        private CrdsHorizontal Horizontal(SkyContext c, DeepSky ds)
+        {
+            return c.Get(Equatorial, ds).ToHorizontal(c.GeoLocation, c.SiderealTime);
+        }
+
+        /// <summary>
+        /// Gets precessional elements for converting from current to B1875 epoch
+        /// </summary>
+        private PrecessionalElements PrecessionalElements1875(SkyContext c)
+        {
+            return Precession.ElementsFK5(c.JulianDay, Date.EPOCH_B1875);
+        }
+
+        /// <summary>
+        /// Gets equatorial coordinates of object for B1875 epoch
+        /// </summary>
+        private CrdsEquatorial Equatorial1875(SkyContext c, DeepSky ds)
+        {
+            return Precession.GetEquatorialCoordinates(c.Get(Equatorial, ds), c.Get(PrecessionalElements1875));
+        }
+
+        /// <summary>
+        /// Gets rise, transit and set info for the deep sky object
+        /// </summary>
+        private RTS RiseTransitSet(SkyContext c, DeepSky ds)
+        {
+            double theta0 = Date.ApparentSiderealTime(c.JulianDayMidnight, c.NutationElements.deltaPsi, c.Epsilon);
+            var eq = c.Get(Equatorial, ds);
+            return Visibility.RiseTransitSet(eq, c.GeoLocation, theta0);
+        }
+
+        /// <summary>
+        /// Gets constellation where the deep sky object is located
+        /// </summary>
+        private string Constellation(SkyContext c, DeepSky ds)
+        {
+            return Constellations.FindConstellation(c.Get(Equatorial1875, ds));
+        }
+
+        public void ConfigureEphemeris(EphemerisConfig<DeepSky> e)
+        {
+            e.Add("RTS.Rise", (c, ds) => c.Get(RiseTransitSet, ds).Rise);
+            e.Add("RTS.Transit", (c, ds) => c.Get(RiseTransitSet, ds).Transit);
+            e.Add("RTS.Set", (c, ds) => c.Get(RiseTransitSet, ds).Set);
+        }
+
+        public CelestialObjectInfo GetInfo(SkyContext c, DeepSky ds)
+        {
+            var rts = c.Get(RiseTransitSet, ds);
+            var det = c.Get(ReadDeepSkyDetails, ds);
+
             var info = new CelestialObjectInfo();
-            info.SetSubtitle(ds.Status.ToString()).SetTitle(string.Join(" / ", ds.AllNames));
-            info.AddRow("Magnitude", ds.Mag);
+            info.SetSubtitle(ds.Status.ToString())
+            .SetTitle(string.Join(" / ", ds.AllNames))
+            .AddRow("Constellation", c.Get(Constellation, ds))
+
+            .AddHeader("Equatorial coordinates (current epoch)")
+            .AddRow("Equatorial.Alpha", c.Get(Equatorial, ds).Alpha)
+            .AddRow("Equatorial.Delta", c.Get(Equatorial, ds).Delta)
+
+            .AddHeader("Equatorial coordinates (J2000.0 epoch)")
+            .AddRow("Equatorial0.Alpha", ds.Equatorial0.Alpha)
+            .AddRow("Equatorial0.Delta", ds.Equatorial0.Delta)
+
+            .AddHeader("Horizontal coordinates")
+            .AddRow("Horizontal.Azimuth", c.Get(Horizontal, ds).Azimuth)
+            .AddRow("Horizontal.Altitude", c.Get(Horizontal, ds).Altitude)
+
+            .AddHeader("Visibility")
+            .AddRow("RTS.Rise", rts.Rise, c.JulianDayMidnight + rts.Rise)
+            .AddRow("RTS.Transit", rts.Transit, c.JulianDayMidnight + rts.Transit)
+            .AddRow("RTS.Set", rts.Set, c.JulianDayMidnight + rts.Set)
+            .AddRow("RTS.Duration", rts.Duration)
+
+            .AddHeader("Properties");
+
+            info.AddRow("DeepSky.Type", det.ObjectType);
+            if (ds.Mag != null)
+            {
+                info.AddRow("Visual Magnitude", ds.Mag, Formatters.Magnitude);
+            }
+            if (det.PhotoMagnitude != null)
+            {
+                info.AddRow("Photographic Magnitude", det.PhotoMagnitude, Formatters.Magnitude);
+            }
+            if (det.SurfaceBrightness != null)
+            {
+                info.AddRow("Surface brightness", det.SurfaceBrightness, Formatters.SurfaceBrightness);
+            }
+
+            if (ds.SizeA > 0)
+            {
+                string size = $"{Formatters.AngularDiameter.Format(ds.SizeA / 60)}";
+                if (ds.SizeB > 0)
+                {
+                    size += $" x {Formatters.AngularDiameter.Format(ds.SizeB / 60)}";
+                }
+                info.AddRow("AngularDiameter", size, Formatters.Simple);
+            }
+            if (ds.PA > 0)
+            {
+                info.AddRow("Position angle", ds.PA, Formatters.RotationAxis);
+            }
+
+            if (det.Identifiers.Any() || det.PGC != null)
+            {
+                info.AddHeader("Designations");
+                if (det.Identifiers.Any())
+                {
+                    info.AddRow("Other catalogs identifiers", string.Join(", ", det.Identifiers));
+                }
+                if (det.PGC != null)
+                {
+                    info.AddRow("PGC catalog number", string.Join(", ", det.PGC));
+                }
+            }
+
+            if (!string.IsNullOrEmpty(det.Remarks))
+            {
+                info.AddRow("Remarks", det.Remarks);
+            }
+
             return info;
+        }
+
+        public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
+        {           
+            return DeepSkies.Where(ds => ds.AllNames.Any(name => CultureInfo.InvariantCulture.CompareInfo.IndexOf(name.Replace(" ", ""), searchString, CompareOptions.IgnoreCase) >= 0))
+                .Take(maxCount)
+                .Select(ds => new SearchResultItem(ds, string.Join(", ", ds.AllNames)))
+                .ToArray();
         }
 
         public override void Initialize()
@@ -214,6 +356,67 @@ namespace ADK.Demo.Calculators
                     outline.Add(cp);
                 }
             }
+        }
+
+        private DeepSkyInfo ReadDeepSkyDetails(SkyContext c, DeepSky ds)
+        {
+            try
+            {
+                var details = new DeepSkyInfo();
+                using (StreamReader sr = new StreamReader(NGCIC_FILE))
+                {
+                    sr.BaseStream.Seek((ds.RecordNumber - 1) * 178, SeekOrigin.Begin);
+                    string line = sr.ReadLine();
+
+                    string sb = line.Substring(56, 4).Trim();
+                    if (!string.IsNullOrEmpty(sb))
+                        details.SurfaceBrightness = Convert.ToSingle(sb, CultureInfo.InvariantCulture);
+
+                    string bmag = line.Substring(43, 4).Trim();
+
+                    if (!string.IsNullOrEmpty(bmag))
+                        details.PhotoMagnitude = Convert.ToSingle(bmag, CultureInfo.InvariantCulture);
+
+                    details.ObjectType = line.Substring(78, 8).Trim();
+
+                    string pgc = line.Substring(86, 8).Trim();
+
+                    if (!string.IsNullOrEmpty(pgc))
+                        details.PGC = Convert.ToInt64(pgc);
+
+                    List<string> ids = new List<string>();
+                    ids.Add(line.Substring(96, 16).Trim());
+                    ids.Add(line.Substring(112, 16).Trim());
+                    ids.Add(line.Substring(128, 16).Trim());
+
+                    details.Identifiers = ids.Where(id => !string.IsNullOrEmpty(id)).ToArray();
+                    details.Remarks = line.Substring(144).Trim();
+
+                    return details;
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Contains detailed info about deep sky object
+        /// </summary>
+        private class DeepSkyInfo
+        {
+            public float? SurfaceBrightness { get; set; }
+
+            public float? PhotoMagnitude { get; set; }
+
+            public string ObjectType { get; set; }
+
+            public long? PGC { get; set; }
+
+            public string[] Identifiers { get; set; }
+
+            public string Remarks { get; set; }
         }
     }
 }

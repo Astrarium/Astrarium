@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo.Calculators
 {
-    public class SolarCalc : BaseSkyCalc, IEphemProvider<Sun>, IInfoProvider<Sun>, IAstroEventProvider
+    public class SolarCalc : BaseSkyCalc, IEphemProvider<Sun>, IInfoProvider<Sun>, ISearchProvider<Sun>, IAstroEventProvider
     {
         private Sun Sun = new Sun();
 
@@ -50,9 +50,11 @@ namespace ADK.Demo.Calculators
             return ecl;
         }
 
+        /// <summary>
+        /// Gets geocentric equatorial coordinates of the Sun
+        /// </summary>
         private CrdsEquatorial Equatorial0(SkyContext c)
         {
-            // convert ecliptical to geocentric equatorial coordinates
             return c.Get(Ecliptical).ToEquatorial(c.Epsilon);
         }
 
@@ -199,6 +201,14 @@ namespace ADK.Demo.Calculators
             }
 
             return events.Where(e => e.JulianDay >= jdFrom && e.JulianDay < jdTo).ToArray();
+        }
+
+        public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
+        {
+            if (CultureInfo.InvariantCulture.CompareInfo.IndexOf("Sun", searchString, CompareOptions.IgnoreCase) >= 0)
+                return new[] { new SearchResultItem(Sun, "Sun") };
+            else
+                return new SearchResultItem[0];
         }
     }
 }

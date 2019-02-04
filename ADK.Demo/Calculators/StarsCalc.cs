@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo.Calculators
 {
-    public class StarsCalc : BaseSkyCalc, IEphemProvider<Star>, IInfoProvider<Star>
+    public class StarsCalc : BaseSkyCalc, IEphemProvider<Star>, IInfoProvider<Star>, ISearchProvider<Star>
     {
         private readonly string STARS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Stars.dat");
         
@@ -208,7 +208,7 @@ namespace ADK.Demo.Calculators
         }
 
         /// <summary>
-        /// Gets constellation where the star is located for current context instant
+        /// Gets constellation where the star is located
         /// </summary>
         private string Constellation(SkyContext c, Star s)
         {
@@ -284,6 +284,14 @@ namespace ADK.Demo.Calculators
             .AddRow("Radial velocity", det.RadialVelocity + " km/s");
 
             return info;
+        }
+
+        public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
+        {
+            return Stars.Where(s => s != null && GetStarNames(s).Any(name => CultureInfo.InvariantCulture.CompareInfo.IndexOf(name.Replace(" ", ""), searchString, CompareOptions.IgnoreCase) >= 0))
+                .Take(maxCount)
+                .Select(s => new SearchResultItem(s, string.Join(", ", GetStarNames(s))))
+                .ToArray();
         }
 
         private ICollection<string> GetStarNames(Star s)

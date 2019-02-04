@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo.Calculators
 {
-    public class LunarCalc : BaseSkyCalc, IEphemProvider<Moon>, IInfoProvider<Moon>
+    public class LunarCalc : BaseSkyCalc, IEphemProvider<Moon>, IInfoProvider<Moon>, ISearchProvider<Moon>
     {
         private Moon moon = new Moon();
 
@@ -342,6 +342,14 @@ namespace ADK.Demo.Calculators
                 .AddRow("MoonApsides.Perigee", c.ToLocalDate(jdPerigee), jdPerigee);
 
             return info;
+        }
+
+        public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
+        {
+            if (CultureInfo.InvariantCulture.CompareInfo.IndexOf("Moon", searchString, CompareOptions.IgnoreCase) >= 0)
+                return new[] { new SearchResultItem(moon, "Moon") };
+            else
+                return new SearchResultItem[0];
         }
     }
 }

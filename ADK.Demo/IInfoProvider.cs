@@ -1,4 +1,5 @@
 ﻿using ADK.Demo.Objects;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
@@ -26,10 +27,26 @@ namespace ADK.Demo
         ICollection<AstroEvent> GetEvents(double jdFrom, double jdTo);
     }
 
-    public interface ISearchProvider<T> where T : CelestialObject
+    public struct SearchResultItem 
     {
-        ICollection<T> Search(string searchString);
+        public string Name { get; private set; }
+        public CelestialObject Body { get; private set; }
+
+        public SearchResultItem(CelestialObject body, string name)
+        {
+            Body = body;
+            Name = name;
+        }
     }
+
+    public delegate ICollection<SearchResultItem> SearchDelegate(string searchString, int maxCount);
+
+    public interface ISearchProvider
+    {
+        ICollection<SearchResultItem> Search(string searchString, int maxCount = 50);
+    }
+
+    public interface ISearchProvider<T> : ISearchProvider where T : CelestialObject { }
 
     public class CelestialObjectInfo
     { 

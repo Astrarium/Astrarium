@@ -77,6 +77,7 @@
     <Compile Include="Renderers\ConstellationsRenderer.cs" />
     <Compile Include="Renderers\ImagesCache.cs" />
     <Compile Include="Renderers\SolarSystemRenderer.cs" />
+    <Compile Include="Renderers\SolarTextureDownloader.cs" />
     <Compile Include="Renderers\SphereRenderer.cs" />
     <Compile Include="Renderers\DeepSkyRenderer.cs" />
     <Compile Include="Renderers\StarsRenderer.cs" />
@@ -121,6 +122,12 @@
     <Compile Include="UI\FormObjectInfo.Designer.cs">
       <DependentUpon>FormObjectInfo.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\FormSearch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\FormSearch.Designer.cs">
+      <DependentUpon>FormSearch.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\FormSettings.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -146,6 +153,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI\FormObjectInfo.resx">
       <DependentUpon>FormObjectInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\FormSearch.resx">
+      <DependentUpon>FormSearch.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\FormSettings.resx">
       <DependentUpon>FormSettings.cs</DependentUpon>

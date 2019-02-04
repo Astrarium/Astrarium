@@ -3,9 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.IO;
 using System.Linq;
-using System.Net;
 
 namespace ADK.Demo.Renderers
 {
@@ -14,11 +12,23 @@ namespace ADK.Demo.Renderers
     /// </summary>
     public class SolarSystemRenderer : BaseSkyRenderer
     {
-        private Font fontLabel = SystemFonts.DefaultFont;
+        private Font fontLabel = new Font("Arial", 8);
+        private Font fontShadowLabel = new Font("Arial", 8);
+
         private Pen penSun = new Pen(Color.FromArgb(250, 210, 10));
         private Brush brushShadow = new SolidBrush(Color.FromArgb(200, 0, 0, 0));
         private Brush brushLabel = Brushes.DimGray;
 
+        private static Color clrShadow = Color.FromArgb(10, 10, 10);
+        private Color clrPenumbraTransp = Color.Transparent;
+        private Color clrPenumbraGrayLight = Color.FromArgb(100, clrShadow);
+        private Color clrPenumbraGrayDark = Color.FromArgb(200, clrShadow);
+        private Color clrUmbraGray = Color.FromArgb(230, clrShadow);
+        private Color clrUmbraRed = Color.FromArgb(200, 50, 0, 0);
+        private static Color clrShadowOutline = Color.FromArgb(100, 50, 0);
+        private Pen penShadowOutline = new Pen(clrShadowOutline);
+        private Brush brushShadowLabel = new SolidBrush(clrShadowOutline);
+        
         private Brush[] brushRings = new Brush[] 
         {
             new SolidBrush(Color.FromArgb(200, 224, 224, 195)),
@@ -26,14 +36,13 @@ namespace ADK.Demo.Renderers
             new SolidBrush(Color.FromArgb(32, 0, 0, 0))
         };
 
+        private SolarTextureDownloader solarTextureDownloader = new SolarTextureDownloader();
         private SphereRenderer sphereRenderer = new SphereRenderer();
         private ImagesCache imagesCache = new ImagesCache();
 
-        private bool useTextures = true;
-
         public SolarSystemRenderer(Sky sky, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
         {
-            
+            penShadowOutline.DashStyle = DashStyle.Dot;
         }
 
         private void ImagesCache_OnRequestCompleted()
@@ -76,9 +85,11 @@ namespace ADK.Demo.Renderers
         }
 
         private void RenderSun(Graphics g, Sun sun)
-        {
-            double ad = Angle.Separation(sun.Horizontal, Map.Center);
+        {            
             bool isGround = Settings.Get<bool>("Ground");
+            bool useTextures = Settings.Get<bool>("UseTextures");
+            double ad = Angle.Separation(sun.Horizontal, Map.Center);
+
             if ((!isGround || sun.Horizontal.Altitude + sun.Semidiameter / 3600 > 0) && 
                 ad < 1.2 * Map.ViewAngle + sun.Semidiameter / 3600)
             {
@@ -119,7 +130,9 @@ namespace ADK.Demo.Renderers
         private void RenderMoon(Graphics g, Moon moon)
         {
             bool isGround = Settings.Get<bool>("Ground");
+            bool useTextures = Settings.Get<bool>("UseTextures");
             double ad = Angle.Separation(moon.Horizontal, Map.Center);
+
             if ((!isGround || moon.Horizontal.Altitude + moon.Semidiameter / 3600 > 0) && 
                 ad < 1.2 * Map.ViewAngle + moon.Semidiameter / 3600.0)
             {
@@ -175,6 +188,8 @@ namespace ADK.Demo.Renderers
 
         private void RenderEarthShadow(Graphics g, Moon moon)
         {
+            // here and below suffixes meanings are: "M" = Moon, "P" = penumbra, "U" = umbra
+
             // angular distance from center of map to earth shadow center
             double ad = Angle.Separation(moon.EarthShadowCoordinates, Map.Center);
 
@@ -182,6 +197,7 @@ namespace ADK.Demo.Renderers
             double sdP = moon.EarthShadow.PenumbraRadius * 6378.0 / 1738.0 * moon.Semidiameter;
 
             bool isGround = Settings.Get<bool>("Ground");
+
             if ((!isGround || moon.EarthShadowCoordinates.Altitude + sdP / 3600 > 0) &&
                 ad < 1.2 * Map.ViewAngle + sdP / 3600)
             {
@@ -189,51 +205,71 @@ namespace ADK.Demo.Renderers
                 PointF pMoon = Map.Projection.Project(moon.Horizontal);
 
                 // size of penumbra, in pixels
-                float szP = GetDiskSize(sdP, 10);
+                float szP = GetDiskSize(sdP);
 
                 // size of umbra, in pixels
                 float szU = szP / (float)moon.EarthShadow.Ratio;
 
                 // size of Moon, in pixels 
-                float szM = GetDiskSize(moon.Semidiameter, 10);
+                float szM = GetDiskSize(moon.Semidiameter);
 
-                GraphicsPath gpMoon = new GraphicsPath();
-                GraphicsPath gpPenumbra = new GraphicsPath();
-                GraphicsPath gpUmbra = new GraphicsPath();
+                // fraction of the penumbra ring (without umbra part)
+                float fr = 1 - szU / szP;
 
-                gpPenumbra.AddEllipse(p.X - szP / 2, p.Y - szP / 2, szP, szP);
-                gpUmbra.AddEllipse(p.X - szU / 2, p.Y - szU / 2, szU, szU);
-                gpMoon.AddEllipse(pMoon.X - szM / 2 - 0.5f, pMoon.Y - szM / 2 - 0.5f, szM + 1, szM + 1);
+                // do not render on large view angle
+                if (szM >= 10)
+                {
+                    // if eclipse takes place
+                    if (Angle.Separation(moon.Horizontal, moon.EarthShadowCoordinates) <= sdP / 3600)
+                    {
+                        var gpM = new GraphicsPath();
+                        var gpP = new GraphicsPath();
+                        var gpU = new GraphicsPath();
 
-                PathGradientBrush brushPenumbra = new PathGradientBrush(gpPenumbra);
-                brushPenumbra.CenterPoint = p;
-                brushPenumbra.CenterColor = Color.FromArgb(200, 10, 10, 10);
-                brushPenumbra.SurroundColors = new Color[] { Color.Transparent };
-                //brushPenumbra.SetSigmaBellShape(0.9f, 0.9f);
-                brushPenumbra.Blend.Factors = new float[] { 1, 1, 1, 0 };
-                brushPenumbra.Blend.Positions = new float[] { 0, 0.5f, 0.6f, 1f };
+                        gpP.AddEllipse(p.X - szP / 2, p.Y - szP / 2, szP, szP);
+                        gpU.AddEllipse(p.X - szU / 2, p.Y - szU / 2, szU, szU);
+                        gpM.AddEllipse(pMoon.X - szM / 2 - 0.5f, pMoon.Y - szM / 2 - 0.5f, szM + 1, szM + 1);
 
-                PathGradientBrush brushUmbra = new PathGradientBrush(gpUmbra);
-                brushUmbra.CenterColor = Color.FromArgb(200, 50, 0, 0);
-                brushUmbra.SurroundColors = new Color[] { Color.FromArgb(230, 10, 10, 10) };
-                brushUmbra.Blend.Factors = new float[] { 0, 0.8f, 1 };
-                brushUmbra.Blend.Positions = new float[] { 0, 0.8f, 1 };
+                        var brushP = new PathGradientBrush(gpP);
+                        brushP.CenterPoint = p;
+                        brushP.CenterColor = clrPenumbraGrayDark;
+                        brushP.SurroundColors = new Color[] { clrPenumbraTransp };
 
-                Region regionPenumbra = new Region(gpPenumbra);
-                Region regionUmbra = new Region(gpUmbra);
+                        var blendP = new ColorBlend();
+                        blendP.Colors = new Color[] { clrPenumbraTransp, clrPenumbraTransp, clrPenumbraGrayLight, clrPenumbraGrayDark, clrPenumbraGrayDark };
+                        blendP.Positions = new float[] { 0, fr / 2, fr * 0.95f, fr, 1 };
+                        brushP.InterpolationColors = blendP;
 
-                regionPenumbra.Exclude(regionUmbra);
-                regionPenumbra.Intersect(gpMoon);
-                regionUmbra.Intersect(gpMoon);
+                        var brushU = new PathGradientBrush(gpU);
+                        brushU.CenterColor = clrUmbraRed;
+                        brushU.SurroundColors = new Color[] { clrUmbraGray };
+                        brushU.Blend.Factors = new float[] { 0, 0.8f, 1 };
+                        brushU.Blend.Positions = new float[] { 0, 0.8f, 1 };
 
-                g.FillRegion(brushPenumbra, regionPenumbra);
-                g.FillRegion(brushUmbra, regionUmbra);
+                        var regionP = new Region(gpP);
+                        var regionU = new Region(gpU);
 
-                // outline circles
-                g.TranslateTransform(p.X, p.Y);
-                g.DrawEllipse(Pens.DimGray, -szP / 2, -szP / 2, szP, szP);
-                g.DrawEllipse(Pens.DimGray, -szU / 2, -szU / 2, szU, szU);
-                g.ResetTransform();
+                        regionP.Exclude(regionU);
+                        regionP.Intersect(gpM);
+                        regionU.Intersect(gpM);
+
+                        g.FillRegion(brushP, regionP);
+                        g.FillRegion(brushU, regionU);
+                    }
+
+                    // outline circles
+                    if (Settings.Get<bool>("EarthShadowOutline"))
+                    {
+                        g.TranslateTransform(p.X, p.Y);
+                        g.DrawEllipse(penShadowOutline, -szP / 2, -szP / 2, szP, szP);
+                        g.DrawEllipse(penShadowOutline, -szU / 2, -szU / 2, szU, szU);                       
+                        g.ResetTransform();
+                        if (Map.ViewAngle <= 10)
+                        {
+                            DrawObjectCaption(g, fontShadowLabel, brushShadowLabel, "Earth shadow", p, szP);
+                        }
+                    }
+                }
             }
         }
 
@@ -241,6 +277,7 @@ namespace ADK.Demo.Renderers
         {
             double ad = Angle.Separation(planet.Horizontal, Map.Center);
             bool isGround = Settings.Get<bool>("Ground");
+            bool useTextures = Settings.Get<bool>("UseTextures");
 
             if ((!isGround || planet.Horizontal.Altitude + planet.Semidiameter / 3600 > 0) && 
                 ad < 1.2 * Map.ViewAngle + planet.Semidiameter / 3600)
@@ -362,6 +399,7 @@ namespace ADK.Demo.Renderers
         {
             float diamEquat = diam;
             float diamPolar = (1 - planet.Flattening) * diam;
+            bool useTextures = Settings.Get<bool>("UseTextures");
 
             if (useTextures)
             {
@@ -413,76 +451,8 @@ namespace ADK.Demo.Renderers
 
         private Image SunImageProvider(bool token)
         {
-            // TODO: take from settings
-            float cropFactor = 0.93f;
             string url = Settings.Get<string>("TextureSunPath");
-
-            string tempFile = Path.Combine(Path.GetTempPath(), "Sun.jpg");
-            try
-            {
-                // Download latest Solar image from provided URL
-                using (var client = new WebClient())
-                {
-                    ServicePointManager.Expect100Continue = true;
-                    ServicePointManager.SecurityProtocol = 
-                        SecurityProtocolType.Tls |
-                        SecurityProtocolType.Tls11 |
-                        SecurityProtocolType.Tls12 |
-                        SecurityProtocolType.Ssl3;
-                    client.DownloadFile(new Uri(url), tempFile);                
-                }
-
-                // Prepare resulting circle image with transparent background
-                using (var image = Image.FromFile(tempFile))
-                {
-                    Image result = new Bitmap(
-                        (int)(image.Width * cropFactor), 
-                        (int)(image.Height * cropFactor), 
-                        System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-                    using (var g = Graphics.FromImage(result))
-                    {
-                        g.Clear(Color.Transparent);
-                        g.SmoothingMode = SmoothingMode.AntiAlias;
-
-                        using (var crop = new GraphicsPath())
-                        {
-                            g.TranslateTransform(
-                                image.Width * cropFactor / 2,
-                                image.Height * cropFactor / 2);
-
-                            float cropMargin = 1e-3f;
-
-                            crop.AddEllipse(
-                                -image.Width * cropFactor / 2 * (1 - cropMargin), 
-                                -image.Height * cropFactor / 2 * (1 - cropMargin), 
-                                image.Width * cropFactor * (1 - cropMargin), 
-                                image.Height * cropFactor * (1 - cropMargin));
-
-                            g.SetClip(crop);
-                           
-                            g.DrawImage(image, -image.Width / 2, -image.Height / 2, image.Width, image.Height);
-                        }
-                    }
-
-                    return result;
-                }
-            }
-            catch
-            {
-                return null;
-            }
-            finally
-            {
-                if (File.Exists(tempFile))
-                {
-                    try
-                    {
-                        File.Delete(tempFile);
-                    }
-                    catch { }
-                }
-            }
+            return solarTextureDownloader.Download(url, 0.93f);
         }
 
         private Brush GetPlanetColor(int planet)
@@ -616,7 +586,6 @@ namespace ADK.Demo.Renderers
         }
 
         
-
         private struct LonLatShift
         {
             public string TextureName { get; private set; }
