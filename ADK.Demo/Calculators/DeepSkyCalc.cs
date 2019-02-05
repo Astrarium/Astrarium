@@ -27,6 +27,11 @@ namespace ADK.Demo.Calculators
         private ICollection<DeepSky> DeepSkies = new List<DeepSky>();
 
         /// <summary>
+        /// Length of single record in data file
+        /// </summary>
+        private long RecordLength = 0;
+
+        /// <summary>
         /// Creates new instance of DeepSkyCalc
         /// </summary>
         /// <param name="sky"></param>
@@ -230,7 +235,7 @@ namespace ADK.Demo.Calculators
 
         public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
         {           
-            return DeepSkies.Where(ds => ds.AllNames.Any(name => CultureInfo.InvariantCulture.CompareInfo.IndexOf(name.Replace(" ", ""), searchString, CompareOptions.IgnoreCase) >= 0))
+            return DeepSkies.Where(ds => ds.AllNames.Any(name => name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
                 .Take(maxCount)
                 .Select(ds => new SearchResultItem(ds, string.Join(", ", ds.AllNames)))
                 .ToArray();
@@ -241,11 +246,11 @@ namespace ADK.Demo.Calculators
             // Load NGC/IC catalogs data
             using (var reader = new StreamReader(NGCIC_FILE))
             {
-                short record = 0;
+                short recordNumber = 0;
 
                 while (!reader.EndOfStream)
                 {
-                    record++;
+                    recordNumber++;
                     string line = reader.ReadLine();
 
                     string strStatus = line.Substring(10, 2).Trim();
@@ -253,6 +258,7 @@ namespace ADK.Demo.Calculators
                     {
                         continue;
                     }
+
                     DeepSkyStatus status = (DeepSkyStatus)(Convert.ToInt32(strStatus) % 10);
                     if (status == DeepSkyStatus.Duplicate || 
                         status == DeepSkyStatus.DuplicateIC)
@@ -286,7 +292,7 @@ namespace ADK.Demo.Calculators
 
                     var ds = new DeepSky()
                     {
-                        RecordNumber = record,
+                        RecordNumber = recordNumber,
                         Number = Convert.ToUInt16(line.Substring(0, 4).Trim()),
                         Letter = line.Substring(4, 1)[0],
                         Component = line.Substring(5, 1)[0],
@@ -301,6 +307,8 @@ namespace ADK.Demo.Calculators
 
                     DeepSkies.Add(ds);
                 }
+
+                RecordLength = (long)Math.Round(reader.BaseStream.Length / (double)recordNumber);
             }
 
             // Load proper names of deep sky objects and assign them
@@ -365,7 +373,7 @@ namespace ADK.Demo.Calculators
                 var details = new DeepSkyInfo();
                 using (StreamReader sr = new StreamReader(NGCIC_FILE, Encoding.UTF8))
                 {
-                    sr.BaseStream.Seek((ds.RecordNumber - 1) * 177, SeekOrigin.Begin);
+                    sr.BaseStream.Seek((ds.RecordNumber - 1) * RecordLength, SeekOrigin.Begin);
                     string line = sr.ReadLine();
 
                     string sb = line.Substring(56, 4).Trim();

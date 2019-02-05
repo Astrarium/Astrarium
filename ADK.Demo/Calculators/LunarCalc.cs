@@ -209,6 +209,22 @@ namespace ADK.Demo.Calculators
         }
 
         /// <summary>
+        /// Gets Moon age in days
+        /// </summary>
+        private double Age(SkyContext c)
+        {
+            double jd = c.JulianDay;
+            double jdNM = c.Get(NearestPhase, MoonPhase.NewMoon);
+
+            if (jd < jdNM)
+            {
+                jdNM = LunarEphem.NearestPhase(jd - 29.5306, MoonPhase.NewMoon);
+            }
+
+            return jd - jdNM;            
+        }
+
+        /// <summary>
         /// Gets nearest apsis date
         /// </summary>
         private double NearestApsis(SkyContext c, MoonApsis a)
@@ -324,6 +340,7 @@ namespace ADK.Demo.Calculators
                 .AddHeader("Appearance")
                 .AddRow("Phase", c.Get(Phase))
                 .AddRow("PhaseAngle", c.Get(PhaseAngle))
+                .AddRow("Age", c.Get(Age))
                 .AddRow("Magnitude", c.Get(Magnitude))
                 .AddRow("Distance", (int)c.Get(Ecliptical0).Distance + " km", Formatters.Simple)
                 .AddRow("HorizontalParallax", c.Get(Parallax))
@@ -346,7 +363,7 @@ namespace ADK.Demo.Calculators
 
         public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
         {
-            if (CultureInfo.InvariantCulture.CompareInfo.IndexOf("Moon", searchString, CompareOptions.IgnoreCase) >= 0)
+            if ("Moon".StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
                 return new[] { new SearchResultItem(moon, "Moon") };
             else
                 return new SearchResultItem[0];

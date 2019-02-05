@@ -163,7 +163,7 @@ namespace ADK.Demo
                         if (settings.Get<bool>("Ground") && body.Horizontal.Altitude <= 0)
                         {
                             show = false;
-                            if (DialogResult.Yes == MessageBox.Show("The object is under horizon at the moment. Do you want to switch off displaying the ground?", "Question", MessageBoxButtons.YesNo))
+                            if (DialogResult.Yes == MessageBox.Show("The object is under horizon at the moment. Do you want to switch off displaying the ground?", "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question))
                             {
                                 show = true;
                                 settings.Set("Ground", false);
@@ -172,20 +172,7 @@ namespace ADK.Demo
 
                         if (show)
                         {
-                            CrdsHorizontal centerOriginal = new CrdsHorizontal(skyView.SkyMap.Center);
-                            double viewAngleOriginal = skyView.SkyMap.ViewAngle;
-                            double viewAngleTarget = 0.5;
-                            double steps = 100;
-
-                            skyView.SkyMap.SelectedObject = body;
-                         
-                            for (int i = 0; i <= steps; i++)
-                            {
-                                skyView.SkyMap.Center = Angle.Intermediate(centerOriginal, body.Horizontal, i / steps);
-                                skyView.SkyMap.ViewAngle = viewAngleTarget - viewAngleOriginal / steps * i + viewAngleOriginal;
-                                skyView.Invalidate();
-                                Application.DoEvents();
-                            }
+                            skyView.SkyMap.GoToObject(body, TimeSpan.FromSeconds(1));
                         }
                     }
                 }
@@ -214,9 +201,7 @@ namespace ADK.Demo
                     {
                         sky.Context.JulianDay = formInfo.JulianDay;                        
                         sky.Calculate();
-                        skyView.SkyMap.ViewAngle = 3;
-                        skyView.SkyMap.Center = new CrdsHorizontal(body.Horizontal);
-                        skyView.Invalidate();
+                        skyView.SkyMap.GoToObject(body, TimeSpan.Zero);
                     }
                 }
             }

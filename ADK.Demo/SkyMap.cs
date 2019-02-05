@@ -3,6 +3,7 @@ using ADK.Demo.Projections;
 using ADK.Demo.Renderers;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
@@ -13,6 +14,22 @@ namespace ADK.Demo
 {
     public class SkyMap : ISkyMap
     {
+        /// <summary>
+        /// Stopwatch to measure rendering time
+        /// </summary>
+        private Stopwatch renderStopWatch = new Stopwatch();
+
+        /// <summary>
+        /// Mean rendering time, in milliseconds
+        /// </summary>
+        private double meanRenderTime = 0;
+
+        /// <summary>
+        /// Total count of calls of <see cref="Render(Graphics)"/> method.
+        /// Needed for calculating mean rendering time.
+        /// </summary>
+        private long rendersCount = 0;
+
         public int Width { get; set; }
         public int Height { get; set; }
         public double ViewAngle { get; set; } = 90;
@@ -37,6 +54,8 @@ namespace ADK.Demo
 
         public void Render(Graphics g)
         {
+            renderStopWatch.Restart();
+
             g.PageUnit = GraphicsUnit.Display;
             g.SmoothingMode = Antialias ? SmoothingMode.HighQuality : SmoothingMode.HighSpeed;
             DrawnPoints.Clear();
@@ -53,6 +72,12 @@ namespace ADK.Demo
                     needDrawSelectedObject = !DrawSelectedObject(g);
                 }
             }
+
+            renderStopWatch.Stop();
+            rendersCount++;
+
+            // Calculate mean time of rendering with Cumulative Moving Average formula
+            meanRenderTime = (renderStopWatch.ElapsedMilliseconds + rendersCount * meanRenderTime) / (rendersCount + 1);
         }
 
         public void Initialize()
@@ -88,6 +113,40 @@ namespace ADK.Demo
             }
 
             return null;
+        }
+
+        public void GoToObject(CelestialObject body, TimeSpan animationDuration)
+        {
+            double sd = (body is SizeableCelestialObject) ?
+                        (body as SizeableCelestialObject).Semidiameter / 3600 : 0;
+
+            double viewAngleTarget = sd == 0 ? 1 : sd * 10;
+
+            if (animationDuration.Equals(TimeSpan.Zero))
+            {
+                Center = new CrdsHorizontal(body.Horizontal);
+                ViewAngle = viewAngleTarget;
+                Invalidate();
+            }
+            else
+            {
+                CrdsHorizontal centerOriginal = new CrdsHorizontal(Center);
+                double ad = Angle.Separation(body.Horizontal, centerOriginal);
+                double steps = Math.Round(animationDuration.TotalMilliseconds / meanRenderTime);
+                double[] x = new double[] { 0, steps / 2, steps };
+                double[] y = (ad < ViewAngle) ?
+                    // linear zooming if body is already on the screen:
+                    new double[] { ViewAngle, (ViewAngle + viewAngleTarget) / 2, viewAngleTarget } :
+                    // parabolic zooming with jumping to 90 degrees view angle at the middle of path:
+                    new double[] { ViewAngle, 90, viewAngleTarget };
+
+                for (int i = 0; i <= steps; i++)
+                {
+                    Center = Angle.Intermediate(centerOriginal, body.Horizontal, i / steps);
+                    ViewAngle = Math.Min(90, Interpolation.Lagrange(x, y, i));
+                    Invalidate();
+                }
+            }            
         }
 
         public void AddDrawnObject(CelestialObject obj, PointF p)

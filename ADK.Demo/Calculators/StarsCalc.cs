@@ -18,6 +18,11 @@ namespace ADK.Demo.Calculators
         private readonly string NAMES_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/StarNames.dat");
 
         /// <summary>
+        /// Length of single record in data file
+        /// </summary>
+        private long RecordLength = 0;
+
+        /// <summary>
         /// Collection of all stars
         /// </summary>
         private ICollection<Star> Stars = new List<Star>();
@@ -109,6 +114,8 @@ namespace ADK.Demo.Calculators
 
                     Stars.Add(star);
                 }
+
+                RecordLength = (long)Math.Round(sr.BaseStream.Length / 9110.0);
             }
 
             using (var sr = new StreamReader(NAMES_FILE, Encoding.Default))
@@ -224,7 +231,7 @@ namespace ADK.Demo.Calculators
 
             using (var sr = new StreamReader(STARS_FILE, Encoding.Default))
             {
-                sr.BaseStream.Seek((s.Number - 1) * 199, SeekOrigin.Begin);               
+                sr.BaseStream.Seek((s.Number - 1) * RecordLength, SeekOrigin.Begin);
                 string line = sr.ReadLine();
 
                 details.IsInfraredSource = line[41] == 'I';
@@ -288,7 +295,7 @@ namespace ADK.Demo.Calculators
 
         public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
         {
-            return Stars.Where(s => s != null && GetStarNames(s).Any(name => CultureInfo.InvariantCulture.CompareInfo.IndexOf(name.Replace(" ", ""), searchString, CompareOptions.IgnoreCase) >= 0))
+            return Stars.Where(s => s != null && GetStarNames(s).Any(name => name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
                 .Take(maxCount)
                 .Select(s => new SearchResultItem(s, string.Join(", ", GetStarNames(s))))
                 .ToArray();

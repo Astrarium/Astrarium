@@ -44,6 +44,7 @@ namespace ADK.Demo
             Default["Magnitude"]                = Magnitude;
             Default["PhaseAngle"]               = PhaseAngle;
             Default["Phase"]                    = Phase;
+            Default["Age"]                      = Age;
             Default["HorizontalParallax"]       = HorizontalParallax;
             Default["AngularDiameter"]          = AngularDiameter;
             Default["Libration.Latitude"]       = LibrationLatitude;
@@ -261,12 +262,12 @@ namespace ADK.Demo
         public static readonly IEphemFormatter Magnitude = new SignedDoubleFormatter(2, " m");
         public static readonly IEphemFormatter SurfaceBrightness = new SignedDoubleFormatter(2, " mag/sq.arcsec");
         public static readonly IEphemFormatter PhaseAngle = new UnsignedDoubleFormatter(2, "\u00B0");
+        public static readonly IEphemFormatter Age = new UnsignedDoubleFormatter(2, " d");
         public static readonly IEphemFormatter HorizontalParallax = new SmallAngleFormatter();
         public static readonly IEphemFormatter AngularDiameter = new SmallAngleFormatter();
         public static readonly IEphemFormatter LibrationLatitude = new LibrationLatitudeFormatter();
         public static readonly IEphemFormatter LibrationLongitude = new LibrationLongitudeFormatter();
         public static readonly IEphemFormatter DateTime = new DateTimeFormatter();
-
         public static readonly IEphemFormatter CentralMeridian = new UnsignedDoubleFormatter(2, "\u00B0");
         public static readonly IEphemFormatter RotationAxis = new UnsignedDoubleFormatter(2, "\u00B0");
         public static readonly IEphemFormatter EarthDeclination = new SignedDoubleFormatter(2, "\u00B0");

@@ -160,7 +160,6 @@ namespace ADK.Demo
 
         public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
         {
-            searchString = searchString.Replace(" ", "");
             var results = new List<SearchResultItem>();
             if (!string.IsNullOrWhiteSpace(searchString))
             {               
@@ -176,7 +175,7 @@ namespace ADK.Demo
                     }
                 }
             }
-            return results.Take(maxCount).ToList();
+            return results.Take(maxCount).OrderBy(r => r.Name).ToList();
         }
     }
 }

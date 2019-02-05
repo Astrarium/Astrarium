@@ -390,7 +390,7 @@ namespace ADK.Demo.Calculators
 
         public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
         {
-            return Planets.Where(p => CultureInfo.InvariantCulture.CompareInfo.IndexOf(p.Name, searchString, CompareOptions.IgnoreCase) >= 0)
+            return Planets.Where(p => p.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
                 .Select(p => new SearchResultItem(p, p.Name))
                 .ToArray();
         }

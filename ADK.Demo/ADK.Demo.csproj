@@ -110,6 +110,7 @@
     </Compile>
     <Compile Include="Objects\Star.cs" />
     <Compile Include="Calculators\StarsCalc.cs" />
+    <Compile Include="UI\CustomListView.cs" />
     <Compile Include="UI\FormDateTime.cs">
       <SubType>Form</SubType>
     </Compile>

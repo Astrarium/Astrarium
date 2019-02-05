@@ -74,6 +74,8 @@ namespace ADK.Demo
 
         CelestialObject FindObject(PointF point);
 
+        void GoToObject(CelestialObject body, TimeSpan animationDuration);
+
         event Action OnInvalidate;
     }
 }

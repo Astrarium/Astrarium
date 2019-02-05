@@ -35,7 +35,7 @@ namespace ADK.Demo
                 {
                     mSkyMap.Width = Width;
                     mSkyMap.Height = Height;
-                    mSkyMap.OnInvalidate += Invalidate;
+                    mSkyMap.OnInvalidate += InvalidateWithDoEvents;
                 }
             }
         }
@@ -183,6 +183,12 @@ namespace ADK.Demo
             {
                 OnMouseWheel(new MouseEventArgs(MouseButtons.None, 0, 0, 0, -1));
             }
+        }
+
+        private void InvalidateWithDoEvents()
+        {
+            Invalidate();
+            Application.DoEvents();
         }
     }
 }

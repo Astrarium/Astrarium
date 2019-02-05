@@ -87,8 +87,19 @@ namespace ADK
                 throw new ArgumentException("Fraction value should be in range [0, 1]", nameof(fraction));
 
             double d = ToRadians(Separation(p1, p2));
-            double a = Math.Sin((1 - fraction) * d) / Math.Sin(d);
-            double b = Math.Sin(fraction * d) / Math.Sin(d);
+
+            double a, b;
+
+            if (d <= 1e-6)
+            {
+                a = 1 - fraction;
+                b = fraction;
+            }
+            else
+            {
+                a = Math.Sin((1 - fraction) * d) / Math.Sin(d);
+                b = Math.Sin(fraction * d) / Math.Sin(d);
+            }
 
             double alt1 = ToRadians(p1.Altitude);
             double alt2 = ToRadians(p2.Altitude);
