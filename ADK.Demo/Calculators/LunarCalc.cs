@@ -213,15 +213,7 @@ namespace ADK.Demo.Calculators
         /// </summary>
         private double Age(SkyContext c)
         {
-            double jd = c.JulianDay;
-            double jdNM = c.Get(NearestPhase, MoonPhase.NewMoon);
-
-            if (jd < jdNM)
-            {
-                jdNM = LunarEphem.NearestPhase(jd - 29.5306, MoonPhase.NewMoon);
-            }
-
-            return jd - jdNM;            
+            return LunarEphem.Age(c.JulianDay);
         }
 
         /// <summary>
@@ -296,6 +288,7 @@ namespace ADK.Demo.Calculators
             e.Add("RTS.TransitAltitude", (c, m) => c.Get(RiseTransitSet).TransitAltitude);
             e.Add("RTS.Set", (c, m) => c.Get(RiseTransitSet).Set);
             e.Add("RTS.SetAzimuth", (c, m) => c.Get(RiseTransitSet).SetAzimuth);
+            e.Add("Equatorial", (c, m) => c.Get(Equatorial));
             e.Add("Equatorial.Alpha", (c, m) => c.Get(Equatorial).Alpha);
             e.Add("Equatorial.Delta", (c, m) => c.Get(Equatorial).Delta);
         }

@@ -317,7 +317,7 @@ namespace ADK.Demo.Renderers
                 // It's almost a straight line
                 if (alpha > 179)
                 {
-                    // Check the at lease one last point of the curve 
+                    // Check the at least one last point of the curve 
                     // is far enough from the screen center
                     if (d1 > r * 2 || d2 > r * 2)
                     {

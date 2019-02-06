@@ -9,7 +9,7 @@ namespace ADK.Demo.Objects
     /// <summary>
     /// Contains coordinates and visual appearance data for the Moon for given instant of time.
     /// </summary>
-    public class Moon : SizeableCelestialObject
+    public class Moon : SizeableCelestialObject, IMovingObject
     { 
         /// <summary>
         /// Apparent topocentrical equatorial coordinates
@@ -56,5 +56,10 @@ namespace ADK.Demo.Objects
         /// Topocentrical coordinates of Earth shadow
         /// </summary>
         public CrdsHorizontal EarthShadowCoordinates { get; set; }
+
+        /// <summary>
+        /// Mean daily motion of the Moon, in degrees
+        /// </summary>
+        public double AverageDailyMotion => 13.2;
     }
 }

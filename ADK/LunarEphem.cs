@@ -657,6 +657,27 @@ namespace ADK
         }
 
         /// <summary>
+        /// Gets age of the Moon (time since last new moon in days)
+        /// </summary>
+        /// <param name="jd">Julian day to get the Moon age</param>
+        /// <returns>Time since last new moon in days</returns>
+        /// <remarks>
+        /// This method based on calculation of the instant of new moon (see <see cref="NearestPhase(double, MoonPhase)"/> for details).
+        /// If calculated nearest date of the new moon is in the future, then we should calculate the previous date of the new moon
+        /// by subtracting amount of days (synodic period of the Moon expressed in days, i.e. 29.5306) from the date of calculation.
+        /// </remarks>
+        // TODO: tests
+        public static double Age(double jd)
+        {
+            double jdNM = NearestPhase(jd, MoonPhase.NewMoon);
+            if (jd < jdNM)
+            {
+                jdNM = NearestPhase(jd - 29.5306, MoonPhase.NewMoon);
+            }
+            return jd - jdNM;
+        }
+
+        /// <summary>
         /// Gets magnitude of the Moon by its phase angle.
         /// </summary>
         /// <param name="phaseAngle">Phase angle value, in degrees, from 0 to 180.</param>
@@ -664,6 +685,7 @@ namespace ADK
         /// <remarks>
         /// Formula is taken from <see href="https://astronomy.stackexchange.com/questions/10246/is-there-a-simple-analytical-formula-for-the-lunar-phase-brightness-curve"/>
         /// </remarks>
+        // TODO: tests
         public static double Magnitude(double phaseAngle)
         {
             double psi = Angle.ToRadians(phaseAngle);
@@ -677,6 +699,7 @@ namespace ADK
         /// </summary>
         /// <param name="jd">Julian Day</param>
         /// <returns>Longitude of mean ascending node of Lunar orbit, in degrees.</returns>
+        // TODO: tests
         public static double MeanAscendingNode(double jd)
         {
             return AscendingNode(jd, trueAscendingNode: false);
@@ -687,6 +710,7 @@ namespace ADK
         /// </summary>
         /// <param name="jd">Julian Day</param>
         /// <returns>Longitude of true ascending node of Lunar orbit, in degrees.</returns>
+        // TODO: tests
         public static double TrueAscendingNode(double jd)
         {
             return AscendingNode(jd, trueAscendingNode: true);
@@ -698,6 +722,7 @@ namespace ADK
         /// <param name="jd">Julian Day</param>
         /// <param name="trueAscendingNode">True if position of true ascending node is needed, false for mean position</param>
         /// <returns>Longitude of ascending node of Lunar orbit, in degrees.</returns>
+        // TODO: tests
         private static double AscendingNode(double jd, bool trueAscendingNode)
         {
             double T = (jd - 2451545.0) / 36525.0;
@@ -739,6 +764,7 @@ namespace ADK
         /// <param name="jd">Julian day to cacluate details.</param>
         /// <returns>Instance of <see cref="ShadowAppearance"/>.</returns>
         /// <remarks>This method is taken from AA(II), chapter 54.</remarks>
+        // TODO: tests
         public static ShadowAppearance Shadow(double jd)
         {
             double T = (jd - 2451545.0) / 36525.0;

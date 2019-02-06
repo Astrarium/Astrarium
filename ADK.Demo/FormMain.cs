@@ -39,6 +39,7 @@ namespace ADK.Demo
             sky.Calculators.Add(new LunarCalc(sky));
             sky.Calculators.Add(new PlanetsCalc(sky));
             sky.Calculators.Add(new DeepSkyCalc(sky));
+            sky.Calculators.Add(new TrackCalc(sky));
 
             sky.Initialize();
 
@@ -57,12 +58,15 @@ namespace ADK.Demo
             //    Console.WriteLine(e["RTS.Rise"].ToString() + " " + e["RTS.Transit"].ToString() + " " + e["RTS.Set"].ToString());
             //}
 
+            var mercury = sky.Get<ICollection<Planet>>("Planets").ElementAt(0);
+            sky.CreateTrack(mercury, sky.Context.JulianDay, sky.Context.JulianDay + 365);
+
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
             var jd0 = new Date(2019, 6, 21).ToJulianEphemerisDay();
 
-            var evens = sky.GetEvents(jd0, jd0 + 1);
+            var events = sky.GetEvents(jd0, jd0 + 1);
             watch.Stop();
             Console.WriteLine("ELASPSED ms: " + watch.ElapsedMilliseconds);
 
@@ -72,6 +76,7 @@ namespace ADK.Demo
             map.Renderers.Add(new DeepSkyRenderer(sky, map, settings));
             map.Renderers.Add(new ConstellationsRenderer(sky, map, settings));
             map.Renderers.Add(new CelestialGridRenderer(sky, map, settings));
+            map.Renderers.Add(new TrackRenderer(sky, map, settings));
             map.Renderers.Add(new StarsRenderer(sky, map, settings));
             map.Renderers.Add(new SolarSystemRenderer(sky, map, settings));
             map.Renderers.Add(new GroundRenderer(sky, map, settings));

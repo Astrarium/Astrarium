@@ -53,12 +53,14 @@
   <ItemGroup>
     <Compile Include="Calculators\BaseSkyCalc.cs" />
     <Compile Include="Calculators\DeepSkyCalc.cs" />
+    <Compile Include="Calculators\TrackCalc.cs" />
     <Compile Include="Calculators\MilkyWayCalc.cs" />
     <Compile Include="Calculators\CelestialGridCalc.cs" />
     <Compile Include="Calculators\ConstellationsCalc.cs" />
     <Compile Include="Calculators\PlanetsCalc.cs" />
     <Compile Include="Calculators\LunarCalc.cs" />
     <Compile Include="Calculators\SolarCalc.cs" />
+    <Compile Include="Calculators\StarsReader.cs" />
     <Compile Include="Config\ConfigSectionHandler.cs" />
     <Compile Include="EphemerisConfig.cs" />
     <Compile Include="Formatting.cs" />
@@ -68,11 +70,13 @@
     <Compile Include="Objects\CelestialPoint.cs" />
     <Compile Include="Objects\Constellation.cs" />
     <Compile Include="Objects\DeepSky.cs" />
+    <Compile Include="Objects\IMovingObject.cs" />
     <Compile Include="Objects\Moon.cs" />
     <Compile Include="Objects\Planet.cs" />
     <Compile Include="Objects\SizeableCelestialObject.cs" />
     <Compile Include="Objects\Sun.cs" />
     <Compile Include="Renderers\GraphicsExtenstions.cs" />
+    <Compile Include="Renderers\TrackRenderer.cs" />
     <Compile Include="Renderers\MilkyWayRenderer.cs" />
     <Compile Include="Renderers\ConstellationsRenderer.cs" />
     <Compile Include="Renderers\ImagesCache.cs" />
@@ -110,6 +114,7 @@
     </Compile>
     <Compile Include="Objects\Star.cs" />
     <Compile Include="Calculators\StarsCalc.cs" />
+    <Compile Include="Track.cs" />
     <Compile Include="UI\CustomListView.cs" />
     <Compile Include="UI\FormDateTime.cs">
       <SubType>Form</SubType>

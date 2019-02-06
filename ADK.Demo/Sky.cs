@@ -40,6 +40,7 @@ namespace ADK.Demo
         private Dictionary<Type, Delegate> InfoProviders = new Dictionary<Type, Delegate>();
         private List<ISearchProvider> SearchProviders = new List<ISearchProvider>();
         private Dictionary<Type, EphemerisConfig> EphemConfigs = new Dictionary<Type, EphemerisConfig>();
+        private List<Track> Tracks = new List<Track>();
 
         public void Initialize()
         {
@@ -90,6 +91,8 @@ namespace ADK.Demo
                     EventProviders.Add(calc as IAstroEventProvider);
                 }
             }
+
+            AddDataProvider<ICollection<Track>>("Tracks", () => Tracks);
         }
 
         public Sky()
@@ -107,7 +110,7 @@ namespace ADK.Demo
             }
         }
 
-        public List<Dictionary<string, object>> GetEphemeris(CelestialObject obj, double from, double to, ICollection<string> keys)
+        public List<Dictionary<string, object>> GetEphemeris(CelestialObject obj, double from, double to, double step, ICollection<string> keys)
         {
             List<Dictionary<string, object>> result = new List<Dictionary<string, object>>();
 
@@ -115,7 +118,7 @@ namespace ADK.Demo
 
             var itemsToBeCalled = config.Filter(keys);
 
-            for (double jd = from; jd < to; jd++)
+            for (double jd = from; jd < to; jd += step)
             {
                 var context = new SkyContext(jd, Context.GeoLocation);
 
@@ -124,8 +127,8 @@ namespace ADK.Demo
                 foreach (var item in itemsToBeCalled)
                 {
                     object value = item.Formula.DynamicInvoke(context, obj);
-                    IEphemFormatter formatter = item.Formatter ?? Formatters.GetDefault(item.Key);
-                    ephemeris.Add(item.Key, formatter.Format(value));
+                    //IEphemFormatter formatter = item.Formatter ?? Formatters.GetDefault(item.Key);
+                    ephemeris.Add(item.Key, value);
                 }
 
                 result.Add(ephemeris);
@@ -176,6 +179,38 @@ namespace ADK.Demo
                 }
             }
             return results.Take(maxCount).OrderBy(r => r.Name).ToList();
+        }
+
+        public void CreateTrack(CelestialObject body, double jdFrom, double jdTo)
+        {
+            var mb = body as IMovingObject;
+            if (mb == null)
+            {
+                throw new Exception($"The '{body.GetType()}' class should implement '{nameof(IMovingObject)}' interface.");
+            }
+
+            Track track = new Track()
+            {
+                Body = body,
+                FromJD = jdFrom,
+                ToJD = jdTo,
+                LabelsStep = TimeSpan.FromDays(10)
+            };
+
+            double step = mb.AverageDailyMotion > 1 ? 1 / Math.Round(mb.AverageDailyMotion) : 1;
+
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            var ephem = GetEphemeris(body, jdFrom, jdTo, step, new[] { "Equatorial" });
+            foreach (var e in ephem)
+            {
+                track.Points.Add(new CelestialPoint() { Equatorial0 = (CrdsEquatorial)e["Equatorial"] });
+            }
+            watch.Stop();
+
+            Console.WriteLine("Track calculation elapsed time: " + watch.ElapsedMilliseconds);
+
+            Tracks.Add(track);
+            Calculate();
         }
     }
 }

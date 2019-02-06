@@ -33,5 +33,19 @@ namespace ADK.Demo
 
             if (items.Count > 0) yield return items.ToList();
         }
+
+        public static T Prev<T>(this IList<T> list, T item)
+        {
+            int index = list.IndexOf(item);
+            if (index > 0) return list[index - 1];
+            else return default(T);
+        }
+
+        public static T Next<T>(this IList<T> list, T item)
+        {
+            int index = list.IndexOf(item);
+            if (index < list.Count - 1) return list[index + 1];
+            else return default(T);
+        }
     }
 }

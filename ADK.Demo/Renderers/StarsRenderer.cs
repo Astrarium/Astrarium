@@ -166,8 +166,11 @@ namespace ADK.Demo.Renderers
             if (Map.ViewAngle < limitVarNames && s.VariableName != null)
             {
                 string varName = s.VariableName.Split(' ')[0];
-                DrawObjectCaption(g, fontStarNames, brushStarNames, varName, point, diam);
-                return;
+                if (!varName.All(char.IsDigit))
+                {
+                    DrawObjectCaption(g, fontStarNames, brushStarNames, varName, point, diam);
+                    return;
+                }
             }
 
             // Star doesn't have any names

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo.Objects
 {
-    public class Planet : SizeableCelestialObject
+    public class Planet : SizeableCelestialObject, IMovingObject
     {
         /// <summary>
         /// Serial number of the planet, from 1 (Mercury) to 8 (Neptune).
@@ -51,6 +51,16 @@ namespace ADK.Demo.Objects
         /// Planet appearance parameters
         /// </summary>
         public PlanetAppearance Appearance { get; set; }
+
+        /// <summary>
+        /// Mean daily motion of the planet, in degrees
+        /// </summary>
+        public double AverageDailyMotion => DAILY_MOTIONS[Number - 1];
+
+        /// <summary>
+        /// Average daily motions of planets
+        /// </summary>
+        public static readonly double[] DAILY_MOTIONS = new[] { 1.3833, 1.2, 0, 0.542, 0.0831, 0.0336, 0.026666, 0.006668 };
 
         public const int MERCURY = 1;
         public const int VENUS = 2;
