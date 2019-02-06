@@ -19,8 +19,6 @@ namespace ADK.Demo.Renderers
             
         }
 
-
-
         public override void Render(Graphics g)
         {
             var tracks = Sky.Get<ICollection<Track>>("Tracks");
@@ -40,7 +38,7 @@ namespace ADK.Demo.Renderers
                 bool isAnyPoint = false;
 
                 foreach (var segment in segments)
-                {
+                {                  
                     DrawSegment(g, segment, trackPoints);
                     isAnyPoint = true;
                 }
@@ -84,6 +82,7 @@ namespace ADK.Demo.Renderers
         private void DrawSegment(Graphics g, List<CelestialPoint> segment, IList<CelestialPoint> allPoints)
         {
             var pts = segment.Select(tp => Map.Projection.Project(tp.Horizontal)).ToList();
+            var allPts = allPoints.Select(tp => Map.Projection.Project(tp.Horizontal)).ToList();
 
             var firstP = segment.First();
             var prevP = allPoints.Prev(firstP);
@@ -101,44 +100,10 @@ namespace ADK.Demo.Renderers
                 pts.Add(p1);
             }
 
-            PointF[] refPoints = new PointF[2];
-
-
-            if (segment.Count > 0)
-            {
-                var centerP = segment[segment.Count / 2];
-                var h0 = centerP.Horizontal;
-
-                var h1 = allPoints.Prev(centerP).Horizontal;
-                var h2 = allPoints.Next(centerP).Horizontal;
-
-                double f = Angle.Separation(h1, h2);
-
-                //if (f / 4  < 1 && f * 3 / 4.0 < 1)
-                {
-                    double[] alt = new double[] { h1.Altitude, h0.Altitude, h2.Altitude };
-                    double[] az = new double[] { h1.Azimuth, h0.Azimuth, h2.Azimuth };
-
-                    double[] x = new double[] { 0, 0.5, 1 };
-
-                    Angle.Align(alt);
-                    Angle.Align(az);
-
-                    double alt1 = Interpolation.Lagrange(x, alt, 1 / 8.0);
-                    double az1 = Interpolation.Lagrange(x, az, f / 8.0);
-
-                    double alt2 = Interpolation.Lagrange(x, alt, 0.5 + 1 / 8.0);
-                    double az2 = Interpolation.Lagrange(x, az, 0.5 + 1 / 8.0);
-
-                    refPoints[0] = Map.Projection.Project(new CrdsHorizontal(az1, alt1));
-                    refPoints[1] = Map.Projection.Project(new CrdsHorizontal(az2, alt2));
-                }
-            }
-
-            DrawGroupOfPoints(g, Pens.Gray, pts.ToArray(), refPoints);
+            DrawGroupOfPoints(g, Pens.Gray, pts.ToArray());
         }
 
-        private void DrawGroupOfPoints(Graphics g, Pen penGrid, PointF[] points, PointF[] refPoints)
+        private void DrawGroupOfPoints(Graphics g, Pen penGrid, PointF[] points)
         {
             // Do not draw figure containing less than 2 points
             if (points.Length < 2)
@@ -163,41 +128,61 @@ namespace ADK.Demo.Renderers
             // Apply some calculations to detect conditions when it's possible.
             if (points.Length > 2 && points.Length < 6)
             {
-                // Determine start, middle and end points of the curve
-                PointF pStart = points[0];
-                PointF pMid = points[points.Length / 2];
-                PointF pEnd = points[points.Length - 1];
+                float maxX = points.Select(p => Math.Abs(p.X)).Max();
+                float maxY = points.Select(p => Math.Abs(p.Y)).Max();
 
-                // Get angle between middle and last points of the curve
-                double alpha = Geometry.AngleBetweenVectors(pMid, pStart, pEnd);
+                float f = 2 * (float)r / Math.Max(maxX, maxY);
 
-                double d1 = Geometry.DistanceBetweenPoints(pStart, origin);
-                double d2 = Geometry.DistanceBetweenPoints(pEnd, origin);
+                var scaledPoints = points.Select(p => new PointF(p.X * f, p.Y * f)).ToArray();
 
-                // It's almost a straight line
-                if (alpha > 179)
+                using (GraphicsPath gp = new GraphicsPath())
                 {
-                    // Check the at least one last point of the curve 
-                    // is far enough from the screen center
-                    if (d1 > r * 2 || d2 > r * 2)
+                    gp.AddCurve(scaledPoints);
+                    gp.Flatten();
+                    scaledPoints = gp.PathPoints.Select(p => new PointF(p.X / f, p.Y / f)).ToArray();
+
+                    var segments = scaledPoints.Select(p => Geometry.DistanceBetweenPoints(p, origin) < r * 3 ? p : PointF.Empty)
+                        .Split(p => p == PointF.Empty, true);
+
+                    foreach (var segment in segments)
                     {
-                        g.DrawLine(penGrid, refPoints[0], refPoints[1]);
-                        return;
+                        var p1 = scaledPoints.Prev(segment.First());
+                        var p2 = scaledPoints.Next(segment.Last());
+
+                        List<PointF> newPoints = new List<PointF>(segment);
+
+                        if (p1 != PointF.Empty)
+                        {
+                            newPoints.Insert(0, p1);
+                        }
+
+                        if (p2 != PointF.Empty)
+                        {
+                            newPoints.Add(p2);
+                        }
+
+                        DrawGroupOfPoints(g, Pens.Red, newPoints.ToArray());
                     }
+
+                    if (!segments.Any())
+                    {
+                        var p0 = scaledPoints.OrderBy(p => Geometry.DistanceBetweenPoints(p, origin)).First();
+
+                        var p1 = scaledPoints.Prev(p0);
+                        var p2 = scaledPoints.Next(p0);
+
+                        List<PointF> newPoints = new List<PointF>() { p1, p0, p2 };
+
+                        DrawGroupOfPoints(g, Pens.Red, newPoints.ToArray());
+
+
+
+                    }
+
+                    return;
                 }
 
-                // If both of last points of the line are far enough from the screen center 
-                // then assume that the curve is an arc of a big circle.
-                // Check the curvature of that circle by comparing its radius with small radius
-                if (d1 > r * 2 && d2 > r * 2)
-                {
-                    var R = FindCircleRadius(points);
-                    if (R / r > 60)
-                    {
-                        g.DrawLine(penGrid, refPoints[0], refPoints[1]);
-                        return;
-                    }
-                }
+               
             }
 
             if (points.All(p => Geometry.DistanceBetweenPoints(p, origin) < r * 60))
@@ -205,37 +190,6 @@ namespace ADK.Demo.Renderers
                 // Draw the curve in regular way
                 g.DrawCurve(penGrid, points);
             }
-        }
-
-        private double FindCircleRadius(PointF[] l)
-        {
-            // https://www.scribd.com/document/14819165/Regressions-coniques-quadriques-circulaire-spherique
-            // via http://math.stackexchange.com/questions/662634/find-the-approximate-center-of-a-circle-passing-through-more-than-three-points
-
-            var n = l.Count();
-            var sumx = l.Sum(p => p.X);
-            var sumxx = l.Sum(p => p.X * p.X);
-            var sumy = l.Sum(p => p.Y);
-            var sumyy = l.Sum(p => p.Y * p.Y);
-
-            var d11 = n * l.Sum(p => p.X * p.Y) - sumx * sumy;
-
-            var d20 = n * sumxx - sumx * sumx;
-            var d02 = n * sumyy - sumy * sumy;
-
-            var d30 = n * l.Sum(p => p.X * p.X * p.X) - sumxx * sumx;
-            var d03 = n * l.Sum(p => p.Y * p.Y * p.Y) - sumyy * sumy;
-
-            var d21 = n * l.Sum(p => p.X * p.X * p.Y) - sumxx * sumy;
-            var d12 = n * l.Sum(p => p.Y * p.Y * p.X) - sumyy * sumx;
-
-            var x = ((d30 + d12) * d02 - (d03 + d21) * d11) / (2 * (d20 * d02 - d11 * d11));
-            var y = ((d03 + d21) * d20 - (d30 + d12) * d11) / (2 * (d20 * d02 - d11 * d11));
-
-            var c = (sumxx + sumyy - 2 * x * sumx - 2 * y * sumy) / n;
-            var r = Math.Sqrt(c + x * x + y * y);
-
-            return r;
         }
     }
 }
