@@ -110,11 +110,53 @@ namespace ADK.Demo
             }
         }
 
-        public List<Dictionary<string, object>> GetEphemeris(CelestialObject obj, double from, double to, double step, ICollection<string> keys)
+        public T GetEphemeris<T>(CelestialObject body, double jd, string ephemKey)
+        {
+            return GetEphemeris<T>(body, jd, jd + 1, 2, ephemKey).First();
+        }
+
+        public ICollection<T> GetEphemeris<T>(CelestialObject body, double from, double to, double step, string ephemKey)
+        {
+            Type bodyType = body.GetType();
+
+            if (body == null)
+                throw new ArgumentNullException("Celestial body should not be null.", nameof(body));
+
+            if (string.IsNullOrWhiteSpace(ephemKey))
+                throw new ArgumentException("Ephemeris key should not be null or empty.", nameof(body));
+
+            if (!EphemConfigs.ContainsKey(bodyType))
+                throw new ArgumentException($"Object of type '{bodyType}' does not have configured ephemeris provider.", nameof(body));
+
+            var config = EphemConfigs[body.GetType()];
+
+            var item = config.FirstOrDefault(c => c.Key == ephemKey);
+
+            if (item == null)
+                throw new Exception($"Unknown ephemeris key '{ephemKey}'. Check that corresponding ephemeris provider has required ephemeris key.");
+
+            List<T> result = new List<T>();
+
+            for (double jd = from; jd <= to; jd += step)
+            {
+                var context = new SkyContext(jd, Context.GeoLocation);
+
+                object value = item.Formula.DynamicInvoke(context, body);
+
+                if (!(value is T))
+                    throw new Exception($"Ephemeris with key '{ephemKey}' has type {value.GetType()} but requested cast to {typeof(T)}.");
+
+                result.Add((T)value);
+            }
+
+            return result;
+        }
+
+        public List<Dictionary<string, object>> GetEphemeris(CelestialObject body, double from, double to, double step, ICollection<string> keys)
         {
             List<Dictionary<string, object>> result = new List<Dictionary<string, object>>();
 
-            var config = EphemConfigs[obj.GetType()];
+            var config = EphemConfigs[body.GetType()];
 
             var itemsToBeCalled = config.Filter(keys);
 
@@ -126,8 +168,7 @@ namespace ADK.Demo
 
                 foreach (var item in itemsToBeCalled)
                 {
-                    object value = item.Formula.DynamicInvoke(context, obj);
-                    //IEphemFormatter formatter = item.Formatter ?? Formatters.GetDefault(item.Key);
+                    object value = item.Formula.DynamicInvoke(context, body);
                     ephemeris.Add(item.Key, value);
                 }
 
@@ -181,33 +222,20 @@ namespace ADK.Demo
             return results.Take(maxCount).OrderBy(r => r.Name).ToList();
         }
 
-        public void CreateTrack(CelestialObject body, double jdFrom, double jdTo)
+        public void AddTrack(Track track)
         {
-            var mb = body as IMovingObject;
-            if (mb == null)
+            if (!(track.Body is IMovingObject))
+                throw new Exception($"The '{track.Body.GetType()}' class should implement '{nameof(IMovingObject)}' interface.");
+
+            var body = track.Body as IMovingObject;
+
+            double step = body.AverageDailyMotion > 1 ? 1 / Math.Round(body.AverageDailyMotion) : 1;
+
+            var positions = GetEphemeris<CrdsEquatorial>(track.Body, track.FromJD, track.ToJD, step, "Equatorial");
+            foreach (var eq in positions)
             {
-                throw new Exception($"The '{body.GetType()}' class should implement '{nameof(IMovingObject)}' interface.");
+                track.Points.Add(new CelestialPoint() { Equatorial0 = eq });
             }
-
-            Track track = new Track()
-            {
-                Body = body,
-                FromJD = jdFrom,
-                ToJD = jdTo,
-                LabelsStep = TimeSpan.FromDays(10)
-            };
-
-            double step = mb.AverageDailyMotion > 1 ? 1 / Math.Round(mb.AverageDailyMotion) : 1;
-
-            var watch = System.Diagnostics.Stopwatch.StartNew();
-            var ephem = GetEphemeris(body, jdFrom, jdTo, step, new[] { "Equatorial" });
-            foreach (var e in ephem)
-            {
-                track.Points.Add(new CelestialPoint() { Equatorial0 = (CrdsEquatorial)e["Equatorial"] });
-            }
-            watch.Stop();
-
-            Console.WriteLine("Track calculation elapsed time: " + watch.ElapsedMilliseconds);
 
             Tracks.Add(track);
             Calculate();

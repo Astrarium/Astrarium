@@ -59,8 +59,16 @@ namespace ADK.Demo
             //}
 
             var mercury = sky.Get<ICollection<Planet>>("Planets").ElementAt(0);
-            sky.CreateTrack(mercury, sky.Context.JulianDay, sky.Context.JulianDay + 365);
 
+            var track = new Track()
+            {
+                Body = mercury,
+                FromJD = sky.Context.JulianDay,
+                ToJD = sky.Context.JulianDay + 30,
+                LabelsStep = TimeSpan.FromDays(5)
+            };
+
+            sky.AddTrack(track);
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
 

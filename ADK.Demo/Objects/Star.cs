@@ -15,7 +15,7 @@ namespace ADK.Demo.Objects
         /// </summary>
         private static List<string> Alphabet = new List<string> {
             "Alp", "Bet", "Gam", "Del", "Eps", "Zet", "Eta", "The", "Iot", "Kap", "Lam", "Mu",
-            "Nu", "Xi", "Omi", "Pi", "Rho", "Sig", "Tau", "Ups", "Phi", "Chi", "Psi", "Ome" };
+            "Nu", "Xi", "Omi", "Pi", "Rho", "FSg", "Sig", "Tau", "Ups", "Phi", "Chi", "Psi", "Ome" };
 
         /// <summary>
         /// Superscript digits
@@ -54,6 +54,30 @@ namespace ADK.Demo.Objects
                     {
                         int digit = int.Parse(Name[6].ToString());
                         return $"{letter}\u2006{SuperscriptDigits[digit]}";
+                    }
+                    else
+                    {
+                        return letter;
+                    }
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        public string BayerLetterCode
+        {
+            get
+            {
+                if (Name[3] != ' ')
+                {
+                    string letter = Name.Substring(3, 3).Trim();
+
+                    if (Name[6] != ' ')
+                    {
+                        return $"{letter} {Name[6]}";
                     }
                     else
                     {

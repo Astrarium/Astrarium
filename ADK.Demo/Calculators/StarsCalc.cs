@@ -197,12 +197,97 @@ namespace ADK.Demo.Calculators
             return info;
         }
 
+        private static Regex regexSpaceRemover = new Regex("[ ]{2,}", RegexOptions.None);
         public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
         {
-            return Stars.Where(s => s != null && GetStarNames(s).Any(name => name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
+            searchString = regexSpaceRemover.Replace(searchString, " ").Trim();
+
+            return Stars.Where(s => s != null && 
+                GetStarNamesForSearch(s)
+                .Any(name => name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
                 .Take(maxCount)
                 .Select(s => new SearchResultItem(s, string.Join(", ", GetStarNames(s))))
                 .ToArray();
+        }
+
+        private ICollection<string> GetStarNamesForSearch(Star s)
+        {
+            var constellations = Sky.Get<ICollection<Constellation>>("Constellations");
+            List<string> names = new List<string>();
+
+            string conCode = s.Name.Substring(7, 3).Trim();
+            string conName = conCode;
+            if (!string.IsNullOrEmpty(conName))
+            {
+                conName = constellations.FirstOrDefault(c => c.Code.StartsWith(conName, StringComparison.OrdinalIgnoreCase)).Genitive;
+            }
+
+            if (s.ProperName != null)
+            {
+                names.Add(s.ProperName);
+            }
+
+            string bayerName = s.BayerName;
+            if (bayerName != null)
+            {
+                string bayerLetterCode = s.BayerLetterCode;
+
+                names.Add($"{bayerName} {conName}");
+                names.Add($"{bayerName} {conCode}");
+                names.Add($"{bayerLetterCode} {conName}");
+                names.Add($"{bayerLetterCode} {conCode}");
+                names.Add($"{bayerLetterCode.Replace(" ", "")} {conName}");
+                names.Add($"{bayerLetterCode.Replace(" ", "")} {conCode}");
+            }
+
+            string flamsteedNumber = s.FlamsteedNumber;
+            if (flamsteedNumber != null)
+            {
+                names.Add($"{flamsteedNumber} {conName}");
+                names.Add($"{flamsteedNumber} {conCode}");
+            }
+
+            string variableName = s.VariableName;
+            if (variableName != null)
+            {
+                string[] varName = variableName.Split(' ');
+                if (varName.Length > 1)
+                {
+                    names.Add($"{varName[0]} {conName}");
+                    names.Add($"{varName[0]} {varName[1]}");
+                }
+                else
+                {
+                    names.Add($"NSV {variableName}");
+                    names.Add($"NSV{variableName}");
+                    names.Add($"{variableName}");
+                }
+            }
+            if (s.HDNumber > 0)
+            {
+                names.Add($"HD {s.HDNumber}");
+                names.Add($"HD{s.HDNumber}");
+                names.Add($"{s.HDNumber}");
+            }
+            if (s.SAONumber > 0)
+            {
+                names.Add($"SAO {s.SAONumber}");
+                names.Add($"SAO{s.SAONumber}");
+                names.Add($"{s.SAONumber}");
+            }
+            if (s.FK5Number > 0)
+            {
+                names.Add($"FK5 {s.FK5Number}");
+                names.Add($"{s.FK5Number}");
+            }
+            names.Add($"HR {s.Number}");
+            names.Add($"HR{s.Number}");
+            names.Add($"{s.Number}");
+
+            names.Add(conName);
+            names.Add(conCode);
+
+            return names;
         }
 
         private ICollection<string> GetStarNames(Star s)
@@ -211,6 +296,7 @@ namespace ADK.Demo.Calculators
             List<string> names = new List<string>();
 
             string conName = s.Name.Substring(7, 3).Trim();
+
             if (!string.IsNullOrEmpty(conName))
             {
                 conName = constellations.FirstOrDefault(c => c.Code.StartsWith(conName, StringComparison.OrdinalIgnoreCase)).Genitive;
@@ -254,7 +340,6 @@ namespace ADK.Demo.Calculators
                 names.Add($"FK5 {s.FK5Number}");
             }
             names.Add($"HR {s.Number}");
-
             return names;
         }
     }
