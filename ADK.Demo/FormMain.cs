@@ -58,9 +58,10 @@ namespace ADK.Demo
             //    Console.WriteLine(e["RTS.Rise"].ToString() + " " + e["RTS.Transit"].ToString() + " " + e["RTS.Set"].ToString());
             //}
 
+            var moon = sky.Get<Moon>("Moon");
             var mercury = sky.Get<ICollection<Planet>>("Planets").ElementAt(0);
 
-            var track = new Track()
+            var mercuryTrack = new Track()
             {
                 Body = mercury,
                 FromJD = sky.Context.JulianDay,
@@ -68,7 +69,16 @@ namespace ADK.Demo
                 LabelsStep = TimeSpan.FromDays(5)
             };
 
-            sky.AddTrack(track);
+            var moonTrack = new Track()
+            {
+                Body = moon,
+                FromJD = sky.Context.JulianDay,
+                ToJD = sky.Context.JulianDay + 15,
+                LabelsStep = TimeSpan.FromHours(3)
+            };
+
+            sky.AddTrack(mercuryTrack);
+            sky.AddTrack(moonTrack);
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
 

@@ -19,6 +19,24 @@ namespace ADK.Demo
         public double ToJD { get; set; }
 
         /// <summary>
+        /// Gets track coordinates calculations step, in days.
+        /// </summary>
+        public double Step
+        {
+            get
+            {
+                //double minStep = 1.0 / (24 * 60);
+
+                //// average daily motion in degress
+                double dailyMotion = (Body as IMovingObject).AverageDailyMotion;
+
+                //double minuteMotion = dailyMotion / (24 * 60);
+
+                return dailyMotion > 1 ? 1 / Math.Round(dailyMotion) : 1;
+            }
+        }
+
+        /// <summary>
         /// Gets track duration, in days
         /// </summary>
         public double Duration => ToJD - FromJD;

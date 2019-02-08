@@ -33,16 +33,6 @@ namespace ADK.Demo.Renderers
 
             foreach (var track in tracks)
             {
-                PointF pBody = PointF.Empty;
-                if (Sky.Context.JulianDay > track.FromJD && Sky.Context.JulianDay < track.ToJD)
-                {
-                    pBody = Map.Projection.Project(track.Body.Horizontal);
-                    if (IsOutOfScreen(pBody) || Angle.Separation(track.Body.Horizontal, Map.Center) > Map.ViewAngle * 1.2)
-                    {
-                        pBody = PointF.Empty;
-                    }
-                }
-
                 var segments = track.Points
                     .Select(p => Angle.Separation(p.Horizontal, Map.Center) < Map.ViewAngle * 1.2 ? p : null)
                     .Split(p => p == null, true);
@@ -61,6 +51,7 @@ namespace ADK.Demo.Renderers
                         segment.Add(nextP);
                     }
 
+                    PointF pBody = IsSegmentContainsBody(segment, track) ? Map.Projection.Project(track.Body.Horizontal) : PointF.Empty;
                     DrawTrackSegment(g, penTrack, segment.Select(p => Map.Projection.Project(p.Horizontal)).ToArray(), pBody);
                 }
 
@@ -83,6 +74,7 @@ namespace ADK.Demo.Renderers
                         segment.Add(p2);
                     }
 
+                    PointF pBody = IsSegmentContainsBody(segment, track) ? Map.Projection.Project(track.Body.Horizontal) : PointF.Empty;
                     DrawTrackSegment(g, penTrack, segment.Select(p => Map.Projection.Project(p.Horizontal)).ToArray(), pBody);
                 }
 
@@ -90,12 +82,21 @@ namespace ADK.Demo.Renderers
             }
         }
 
+        private bool IsSegmentContainsBody(ICollection<CelestialPoint> segment, Track track)
+        {
+            int firstIndex = track.Points.IndexOf(segment.First());
+            int lastIndex = track.Points.IndexOf(segment.Last());
+            double from = (double)firstIndex / (track.Points.Count - 1) * track.Duration + track.FromJD;
+            double to = (double)lastIndex / (track.Points.Count - 1) * track.Duration + track.FromJD;
+            return Sky.Context.JulianDay > from && Sky.Context.JulianDay < to;            
+        }
+
         private void DrawLabels(Graphics g, Track track)
         {
+            double trackStep = track.Step;
             double stepLabels = track.LabelsStep.TotalDays;
-            double stepPoints = track.Duration / (track.Points.Count - 1);
-
-            int each = (int)(stepLabels / stepPoints);
+            
+            int each = (int)(stepLabels / trackStep);
 
             double jd = track.FromJD;
             for (int i = 0; i < track.Points.Count; i++)
@@ -115,7 +116,7 @@ namespace ADK.Demo.Renderers
                     }
                 }
 
-                jd += stepPoints;
+                jd += trackStep;
             }
         }
 
@@ -134,8 +135,8 @@ namespace ADK.Demo.Renderers
                 points = ShiftToAncorPoint(points, pBody);
                 g.DrawLine(penGrid, points[0], points[1]);
             }
-            // From 3 to 19 points interpolation is needed
-            else if (points.Length > 2 && points.Length < 20 &&  iterationStep < 10)
+            // interpolation is needed
+            else if (points.Length > 2 && points.Length < 20 && iterationStep < 10)
             {
                 // Coordinates of the screen center
                 var origin = new PointF(Map.Width / 2, Map.Height / 2);
@@ -201,23 +202,29 @@ namespace ADK.Demo.Renderers
             }
             // draw the curve in regular way
             else
-            {               
+            {
                 g.DrawCurve(penGrid, ShiftToAncorPoint(points, pBody));
             }
         }
 
-        private PointF[] ShiftToAncorPoint(PointF[] points, PointF pBody)
+        /// <summary>
+        /// Shifts all points of the curve (or line) to the ancor point.
+        /// </summary>
+        /// <param name="points">Points of the curve (or line)</param>
+        /// <param name="p0">Ancor point. All curve or line points will be corrected, 
+        /// so the shifted curve (or line) will intersect the ancor point.</param>
+        /// <returns>Corrected points of the curve (or line)</returns>
+        private PointF[] ShiftToAncorPoint(PointF[] points, PointF p0)
         {
-            if (pBody != PointF.Empty)
+            if (p0 != PointF.Empty)
             {
-                PointF[] nearest = points.OrderBy(p => Geometry.DistanceBetweenPoints(p, pBody)).Take(2).ToArray();
+                PointF proj = GetProjectedPoint(points, p0);
 
-                PointF proj = GetProjectedPoint(nearest[0], nearest[1], pBody);
-
-                if (Geometry.DistanceBetweenPoints(proj, pBody) > 1)
+                if (Geometry.DistanceBetweenPoints(proj, p0) > 1)
                 {
-                    float dx = pBody.X - proj.X;
-                    float dy = pBody.Y - proj.Y;
+                    float dx = p0.X - proj.X;
+                    float dy = p0.Y - proj.Y;
+                    
                     points = points.Select(p => new PointF(p.X + dx, p.Y + dy)).ToArray();
                 }
             }
@@ -225,8 +232,19 @@ namespace ADK.Demo.Renderers
             return points;
         }
 
-        private PointF GetProjectedPoint(PointF p1, PointF p2, PointF p0)
+        /// <summary>
+        /// Gets nearest point on the curve (or the line) to the provided point.
+        /// </summary>
+        /// <param name="points">Points of the curve (or the line)</param>
+        /// <param name="p0">Some point to find the nearest one on the curve (on the line), i.e. projection.</param>
+        /// <returns>Nearest point on the curve (or the line), i.e. projection of the point p0.</returns>
+        private PointF GetProjectedPoint(PointF[] points, PointF p0)
         {
+            PointF[] nearest = points.OrderBy(n => Geometry.DistanceBetweenPoints(n, p0)).Take(2).ToArray();
+
+            PointF p1 = nearest[0];
+            PointF p2 = nearest[1];
+
             PointF e1 = new PointF(p2.X - p1.X, p2.Y - p1.Y);
             PointF e2 = new PointF(p0.X - p1.X, p0.Y - p1.Y);
             double val = e1.X * e2.X + e1.Y * e2.Y;
