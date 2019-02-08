@@ -33,11 +33,15 @@ namespace ADK.Demo.Renderers
 
             foreach (var track in tracks)
             {
-                PointF pBody = (Sky.Context.JulianDay > track.FromJD &&
-                    Sky.Context.JulianDay < track.ToJD &&
-                    Angle.Separation(track.Body.Horizontal, Map.Center) < Map.ViewAngle * 1.2) ?
-                 Map.Projection.Project(track.Body.Horizontal) :
-                 PointF.Empty;
+                PointF pBody = PointF.Empty;
+                if (Sky.Context.JulianDay > track.FromJD && Sky.Context.JulianDay < track.ToJD)
+                {
+                    pBody = Map.Projection.Project(track.Body.Horizontal);
+                    if (IsOutOfScreen(pBody) || Angle.Separation(track.Body.Horizontal, Map.Center) > Map.ViewAngle * 1.2)
+                    {
+                        pBody = PointF.Empty;
+                    }
+                }
 
                 var segments = track.Points
                     .Select(p => Angle.Separation(p.Horizontal, Map.Center) < Map.ViewAngle * 1.2 ? p : null)
@@ -115,8 +119,10 @@ namespace ADK.Demo.Renderers
             }
         }
 
-        private void DrawTrackSegment(Graphics g, Pen penGrid, PointF[] points, PointF pBody)
+        private void DrawTrackSegment(Graphics g, Pen penGrid, PointF[] points, PointF pBody, int iterationStep = 0)
         {
+            iterationStep++;
+
             // Do not draw figure containing less than 2 points
             if (points.Length < 2)
             {
@@ -125,10 +131,11 @@ namespace ADK.Demo.Renderers
             // Two points can be simply drawn as a line
             else if (points.Length == 2)
             {
+                points = ShiftToAncorPoint(points, pBody);
                 g.DrawLine(penGrid, points[0], points[1]);
             }
-            // From 3 to 6 points interpolation is needed
-            else if (points.Length > 2 && points.Length < 7)
+            // From 3 to 19 points interpolation is needed
+            else if (points.Length > 2 && points.Length < 20 &&  iterationStep < 10)
             {
                 // Coordinates of the screen center
                 var origin = new PointF(Map.Width / 2, Map.Height / 2);
@@ -169,7 +176,7 @@ namespace ADK.Demo.Renderers
                             newPoints.Add(p2);
                         }
 
-                        DrawTrackSegment(g, penGrid, newPoints.ToArray(), pBody);
+                        DrawTrackSegment(g, penGrid, newPoints.ToArray(), pBody, iterationStep);
                     }
 
                     if (!segments.Any())
@@ -188,50 +195,45 @@ namespace ADK.Demo.Renderers
                             newPoints.Add(p2);
                         }
 
-                        DrawTrackSegment(g, penGrid, newPoints.ToArray(), pBody);
+                        DrawTrackSegment(g, penGrid, newPoints.ToArray(), pBody, iterationStep);
                     }
                 }
             }
-            // More or equal than 7 points draw the curve in regular way
+            // draw the curve in regular way
             else
-            {
-                if (pBody != PointF.Empty)
-                {
-                    g.DrawCurve(Pens.Red, points);
-
-                    PointF[] nearest = points.OrderBy(p => Geometry.DistanceBetweenPoints(p, pBody)).Take(2).ToArray();
-                    if (Geometry.DistanceBetweenPoints(nearest[0], nearest[1]) > 1)
-                    {
-                        PointF proj = getProjectedPointOnLineFast(nearest[0], nearest[1], pBody);
-
-                        float dx = pBody.X - proj.X;
-                        float dy = pBody.Y - proj.Y;
-                        points = points.Select(p => new PointF(p.X + dx, p.Y + dy)).ToArray();
-                    }
-                }
-                g.DrawCurve(penGrid, points);
+            {               
+                g.DrawCurve(penGrid, ShiftToAncorPoint(points, pBody));
             }
         }
 
-        private PointF getProjectedPointOnLineFast(PointF v1, PointF v2, PointF p0)
+        private PointF[] ShiftToAncorPoint(PointF[] points, PointF pBody)
         {
-            // get dot product of e1, e2
-            PointF e1 = new PointF(v2.X - v1.X, v2.Y - v1.Y);
-            PointF e2 = new PointF(p0.X - v1.X, p0.Y - v1.Y);
+            if (pBody != PointF.Empty)
+            {
+                PointF[] nearest = points.OrderBy(p => Geometry.DistanceBetweenPoints(p, pBody)).Take(2).ToArray();
 
+                PointF proj = GetProjectedPoint(nearest[0], nearest[1], pBody);
 
-            double val = dotProduct(e1, e2);
+                if (Geometry.DistanceBetweenPoints(proj, pBody) > 1)
+                {
+                    float dx = pBody.X - proj.X;
+                    float dy = pBody.Y - proj.Y;
+                    points = points.Select(p => new PointF(p.X + dx, p.Y + dy)).ToArray();
+                }
+            }
 
-            // get squared length of e1
-            double len2 = e1.X * e1.X + e1.Y * e1.Y;
-            PointF p = new PointF((float)(v1.X + (val * e1.X) / len2),
-                                 (float)(v1.Y + (val * e1.Y) / len2));
-            return p;
+            return points;
         }
 
-        private float dotProduct(PointF p1, PointF p2)
+        private PointF GetProjectedPoint(PointF p1, PointF p2, PointF p0)
         {
-            return (p1.X * p2.X + p1.Y * p2.Y);
+            PointF e1 = new PointF(p2.X - p1.X, p2.Y - p1.Y);
+            PointF e2 = new PointF(p0.X - p1.X, p0.Y - p1.Y);
+            double val = e1.X * e2.X + e1.Y * e2.Y;
+            double len = e1.X * e1.X + e1.Y * e1.Y;
+            PointF p = new PointF((float)(p1.X + val * e1.X / len),
+                                  (float)(p1.Y + val * e1.Y / len));
+            return p;
         }
     }
 }
