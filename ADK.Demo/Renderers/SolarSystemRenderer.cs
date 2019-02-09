@@ -95,7 +95,7 @@ namespace ADK.Demo.Renderers
             {
                 PointF p = Map.Projection.Project(sun.Horizontal);
 
-                float inc = (float)GetRotationTowardsNorth(sun.Equatorial);
+                float inc = GetRotationTowardsNorth(sun.Equatorial);
 
                 g.TranslateTransform(p.X, p.Y);
                 g.RotateTransform(inc);

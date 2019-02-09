@@ -61,24 +61,24 @@ namespace ADK.Demo
             var moon = sky.Get<Moon>("Moon");
             var mercury = sky.Get<ICollection<Planet>>("Planets").ElementAt(0);
 
-            var mercuryTrack = new Track()
-            {
-                Body = mercury,
-                FromJD = sky.Context.JulianDay,
-                ToJD = sky.Context.JulianDay + 30,
-                LabelsStep = TimeSpan.FromDays(5)
-            };
+            //var mercuryTrack = new Track()
+            //{
+            //    Body = mercury,
+            //    From = sky.Context.JulianDay,
+            //    To = sky.Context.JulianDay + 30,
+            //    LabelsStep = TimeSpan.FromDays(7)
+            //};
 
-            var moonTrack = new Track()
-            {
-                Body = moon,
-                FromJD = sky.Context.JulianDay,
-                ToJD = sky.Context.JulianDay + 15,
-                LabelsStep = TimeSpan.FromHours(3)
-            };
+            //var moonTrack = new Track()
+            //{
+            //    Body = moon,
+            //    From = sky.Context.JulianDay,
+            //    To = sky.Context.JulianDay + 365,
+            //    LabelsStep = TimeSpan.FromDays(1)
+            //};
 
-            sky.AddTrack(mercuryTrack);
-            sky.AddTrack(moonTrack);
+            //sky.AddTrack(mercuryTrack);
+            //sky.AddTrack(moonTrack);
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
 

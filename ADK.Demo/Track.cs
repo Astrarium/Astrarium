@@ -12,11 +12,20 @@ namespace ADK.Demo
     /// </summary>
     public class Track
     {
+        /// <summary>
+        /// Celestial body the track belongs to
+        /// </summary>
         public CelestialObject Body { get; set; }
 
-        public double FromJD { get; set; }
+        /// <summary>
+        /// Starting Julian Day
+        /// </summary>
+        public double From { get; set; }
 
-        public double ToJD { get; set; }
+        /// <summary>
+        /// Ending Julian Day
+        /// </summary>
+        public double To { get; set; }
 
         /// <summary>
         /// Gets track coordinates calculations step, in days.
@@ -25,27 +34,47 @@ namespace ADK.Demo
         {
             get
             {
-                //double minStep = 1.0 / (24 * 60);
+                // smallest labels step = default calculation step
+                double step = SmallestLabelsStep(Body as IMovingObject);
 
-                //// average daily motion in degress
-                double dailyMotion = (Body as IMovingObject).AverageDailyMotion;
-
-                //double minuteMotion = dailyMotion / (24 * 60);
-
-                return dailyMotion > 1 ? 1 / Math.Round(dailyMotion) : 1;
+                // labels step, in days
+                double labelsStep = LabelsStep.TotalDays;
+                
+                if (step <= labelsStep)
+                {
+                    int f = (int)Math.Round(labelsStep / step);
+                    return labelsStep / f;
+                }
+                else
+                {
+                    return step;
+                }
             }
         }
 
         /// <summary>
         /// Gets track duration, in days
         /// </summary>
-        public double Duration => ToJD - FromJD;
+        public double Duration => To - From;
 
         /// <summary>
         /// Track path points
         /// </summary>
         public IList<CelestialPoint> Points { get; } = new List<CelestialPoint>();
 
+        /// <summary>
+        /// Desired labels step. This value should not be less than calculation step.
+        /// To check this, compare desired value with <see cref="SmallestLabelsStep(IMovingObject)"/> result.
+        /// </summary>
         public TimeSpan LabelsStep { get; set; }
+
+        public static double SmallestLabelsStep(IMovingObject body)
+        {
+            // mean daily motion, in degrees
+            double dailyMotion = (body as IMovingObject).AverageDailyMotion;
+
+            // recommended calculation step, in days
+            return dailyMotion > 1 ? 1 / dailyMotion : 1;
+        }
     }
 }

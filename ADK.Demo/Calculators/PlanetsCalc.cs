@@ -8,11 +8,19 @@ using System.Text;
 
 namespace ADK.Demo.Calculators
 {
-    public class PlanetsCalc : BaseSkyCalc, IEphemProvider<Planet>, IInfoProvider<Planet>, ISearchProvider<Planet>
+    public interface IPlanetsProvider
     {
-        private Planet[] Planets = new Planet[8];
+        ICollection<Planet> Planets { get; }
+        RingsAppearance SaturnRings { get; }
+    }
 
-        private RingsAppearance SaturnRings = new RingsAppearance();
+    public class PlanetsCalc : BaseSkyCalc, IEphemProvider<Planet>, IInfoProvider<Planet>, ISearchProvider<Planet>, IPlanetsProvider
+    {
+        private Planet[] planets = new Planet[8];
+
+        public ICollection<Planet> Planets => planets;
+
+        public RingsAppearance SaturnRings { get; private set; } = new RingsAppearance();
 
         private string[] PlanetNames = new string[]
         {
@@ -28,15 +36,15 @@ namespace ADK.Demo.Calculators
 
         public PlanetsCalc(Sky sky) : base(sky)
         {
-            for (int i = 0; i < Planets.Length; i++)
+            for (int i = 0; i < planets.Length; i++)
             {
-                Planets[i] = new Planet() { Number = i + 1, Name = PlanetNames[i] };
+                planets[i] = new Planet() { Number = i + 1, Name = PlanetNames[i] };
             }
 
-            Planets[Planet.JUPITER - 1].Flattening = 0.064874f;
-            Planets[Planet.SATURN - 1].Flattening = 0.097962f;
+            planets[Planet.JUPITER - 1].Flattening = 0.064874f;
+            planets[Planet.SATURN - 1].Flattening = 0.097962f;
 
-            Sky.AddDataProvider("Planets", () => Planets);
+            Sky.AddDataProvider("Planets", () => planets);
             Sky.AddDataProvider("SaturnRings", () => SaturnRings);
         }
 
@@ -252,7 +260,7 @@ namespace ADK.Demo.Calculators
 
         public override void Calculate(SkyContext context)
         {
-            foreach (var p in Planets)
+            foreach (var p in planets)
             {
                 if (p.Number == Planet.EARTH) continue;
 
@@ -392,7 +400,7 @@ namespace ADK.Demo.Calculators
 
         public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
         {
-            return Planets.Where(p => p.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
+            return planets.Where(p => p.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
                 .Select(p => new SearchResultItem(p, p.Name))
                 .ToArray();
         }

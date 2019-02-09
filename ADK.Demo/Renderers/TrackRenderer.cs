@@ -86,8 +86,8 @@ namespace ADK.Demo.Renderers
         {
             int firstIndex = track.Points.IndexOf(segment.First());
             int lastIndex = track.Points.IndexOf(segment.Last());
-            double from = (double)firstIndex / (track.Points.Count - 1) * track.Duration + track.FromJD;
-            double to = (double)lastIndex / (track.Points.Count - 1) * track.Duration + track.FromJD;
+            double from = (double)firstIndex / (track.Points.Count - 1) * track.Duration + track.From;
+            double to = (double)lastIndex / (track.Points.Count - 1) * track.Duration + track.From;
             return Sky.Context.JulianDay > from && Sky.Context.JulianDay < to;            
         }
 
@@ -98,7 +98,7 @@ namespace ADK.Demo.Renderers
             
             int each = (int)(stepLabels / trackStep);
 
-            double jd = track.FromJD;
+            double jd = track.From;
             for (int i = 0; i < track.Points.Count; i++)
             {
                 if (i % each == 0 || i == track.Points.Count - 1)

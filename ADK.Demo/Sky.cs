@@ -227,7 +227,7 @@ namespace ADK.Demo
             if (!(track.Body is IMovingObject))
                 throw new Exception($"The '{track.Body.GetType()}' class should implement '{nameof(IMovingObject)}' interface.");
 
-            var positions = GetEphemeris<CrdsEquatorial>(track.Body, track.FromJD, track.ToJD, track.Step, "Equatorial");
+            var positions = GetEphemeris<CrdsEquatorial>(track.Body, track.From, track.To, track.Step, "Equatorial");
             foreach (var eq in positions)
             {
                 track.Points.Add(new CelestialPoint() { Equatorial0 = eq });
