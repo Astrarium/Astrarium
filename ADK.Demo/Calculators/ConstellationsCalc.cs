@@ -8,19 +8,27 @@ using System.Linq;
 
 namespace ADK.Demo.Calculators
 {
-    public class ConstellationsCalc : BaseSkyCalc
+    public interface IConstellationsProvider
+    {
+        List<Constellation> Constellations { get; }
+    }
+
+    public interface IConstellationsBordersProvider
+    {
+        List<List<CelestialPoint>> ConstBorders { get; }
+    }
+
+    public class ConstellationsCalc : BaseSkyCalc, IConstellationsProvider, IConstellationsBordersProvider
     {
         /// <summary>
         /// Constellations
         /// </summary>
-        private List<Constellation> Constellations = new List<Constellation>();
+        public List<Constellation> Constellations { get; private set; } = new List<Constellation>();
 
         /// <summary>
         /// Constellations borders coordinates
         /// </summary>
-        private List<List<CelestialPoint>> ConstBorders = new List<List<CelestialPoint>>();
-
-        public ConstellationsCalc(Sky sky) : base(sky) { }
+        public List<List<CelestialPoint>> ConstBorders { get; private set; } = new List<List<CelestialPoint>>();
 
         public override void Calculate(SkyContext context)
         {
@@ -80,8 +88,6 @@ namespace ADK.Demo.Calculators
                     });
                 }
             }
-
-            Sky.AddDataProvider("ConstBorders", () => ConstBorders);
         }
 
         /// <summary>
@@ -105,8 +111,6 @@ namespace ADK.Demo.Calculators
                     });
                 }
             }
-
-            Sky.AddDataProvider("Constellations", () => Constellations);
         }
 
         /// <summary>

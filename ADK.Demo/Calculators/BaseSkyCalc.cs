@@ -9,12 +9,11 @@ namespace ADK.Demo.Calculators
 {
     public abstract class BaseSkyCalc
     {
-        protected Sky Sky { get; private set; }
-
-        public BaseSkyCalc(Sky sky)
-        {
-            Sky = sky;
-        }
+        //protected Sky Sky { get; private set; }
+        //public BaseSkyCalc(Sky sky)
+        //{
+        //    Sky = sky;
+        //}
 
         public virtual void Initialize() { }
 

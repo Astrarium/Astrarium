@@ -15,17 +15,19 @@ namespace ADK.Demo.Calculators
     /// </summary>
     public class TrackCalc : BaseSkyCalc
     {
+        private ITracksProvider TracksProvider;
+
         /// <summary>
         /// Creates new instance of TrackCalc
         /// </summary>
-        /// <param name="sky"></param>
-        public TrackCalc(Sky sky) : base(sky) { }
+        public TrackCalc(ITracksProvider tracksProvider)
+        {
+            TracksProvider = tracksProvider;
+        }
 
         public override void Calculate(SkyContext context)
         {
-            var tracks = Sky.Get<ICollection<Track>>("Tracks");
-
-            foreach (var track in tracks)
+            foreach (var track in TracksProvider.Tracks)
             {
                 foreach (var tp in track.Points)
                 {

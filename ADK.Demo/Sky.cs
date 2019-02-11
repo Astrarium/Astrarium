@@ -10,8 +10,17 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo
 {
-    public class Sky
+    public interface ITracksProvider
     {
+        List<Track> Tracks { get; }
+    }
+
+    public class Sky : ITracksProvider
+    {
+
+
+        public List<Track> Tracks { get; private set; } = new List<Track>();
+
         public SkyContext Context { get; set; }
 
         public ICollection<BaseSkyCalc> Calculators { get; private set; } = new List<BaseSkyCalc>();
@@ -40,7 +49,7 @@ namespace ADK.Demo
         private Dictionary<Type, Delegate> InfoProviders = new Dictionary<Type, Delegate>();
         private List<ISearchProvider> SearchProviders = new List<ISearchProvider>();
         private Dictionary<Type, EphemerisConfig> EphemConfigs = new Dictionary<Type, EphemerisConfig>();
-        private List<Track> Tracks = new List<Track>();
+        
 
         public void Initialize()
         {
@@ -92,7 +101,7 @@ namespace ADK.Demo
                 }
             }
 
-            AddDataProvider<ICollection<Track>>("Tracks", () => Tracks);
+            //AddDataProvider<ICollection<Track>>("Tracks", () => Tracks);
         }
 
         public Sky()

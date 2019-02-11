@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ADK.Demo.Calculators;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Text;
@@ -8,11 +9,8 @@ namespace ADK.Demo.Renderers
 {
     public class CelestialGridRenderer : BaseSkyRenderer
     {
-        private CelestialGrid gridEquatorial = null;
-        private CelestialGrid gridHorizontal = null;
-        private CelestialGrid lineEcliptic = null;
-        private CelestialGrid lineGalactic = null;
-        private CelestialGrid lineHorizon = null;
+        private ICelestialGridProvider gridProvider;
+        private ILunarProvider lunarProvider;
 
         private Pen penGridEquatorial = null;
         private Pen penGridHorizontal = null;
@@ -32,13 +30,10 @@ namespace ADK.Demo.Renderers
         private string[] equatorialLabels = new string[] { "NCP", "SCP" };
         private GridPoint[] polePoints = new GridPoint[] { new GridPoint(0, 90), new GridPoint(0, -90) };
 
-        public CelestialGridRenderer(Sky sky, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
+        public CelestialGridRenderer(Sky sky, ILunarProvider lunarProvider, ICelestialGridProvider gridProvider, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
         {
-            gridEquatorial = Sky.Get<CelestialGrid>("GridEquatorial");
-            gridHorizontal = Sky.Get<CelestialGrid>("GridHorizontal");
-            lineEcliptic = Sky.Get<CelestialGrid>("LineEcliptic");
-            lineGalactic = Sky.Get<CelestialGrid>("LineGalactic");
-            lineHorizon = Sky.Get<CelestialGrid>("LineHorizon");
+            this.gridProvider = gridProvider;
+            this.lunarProvider = lunarProvider;
 
             penGridEquatorial = new Pen(Brushes.Transparent);
             penGridHorizontal = new Pen(Brushes.Transparent);
@@ -60,27 +55,27 @@ namespace ADK.Demo.Renderers
 
             if (Settings.Get<bool>("GalacticEquator"))
             {
-                DrawGrid(g, penLineGalactic, lineGalactic);
+                DrawGrid(g, penLineGalactic, gridProvider.LineGalactic);
             }
             if (Settings.Get<bool>("EquatorialGrid"))
             {
-                DrawGrid(g, penGridEquatorial, gridEquatorial);
+                DrawGrid(g, penGridEquatorial, gridProvider.GridEquatorial);
                 DrawEquatorialPoles(g);
             }
             if (Settings.Get<bool>("HorizontalGrid"))
             {
-                DrawGrid(g, penGridHorizontal, gridHorizontal);
+                DrawGrid(g, penGridHorizontal, gridProvider.GridHorizontal);
                 DrawHorizontalPoles(g);
             }
             if (Settings.Get<bool>("EclipticLine"))
             {
-                DrawGrid(g, penLineEcliptic, lineEcliptic);
+                DrawGrid(g, penLineEcliptic, gridProvider.LineEcliptic);
                 DrawEquinoxLabels(g);
                 DrawLunarNodes(g);
             }
             if (Settings.Get<bool>("HorizonLine"))
             {
-                DrawGrid(g, penGridHorizontal, lineHorizon);
+                DrawGrid(g, penGridHorizontal, gridProvider.LineHorizon);
             }
         }
 
@@ -92,7 +87,7 @@ namespace ADK.Demo.Renderers
             for (int j = 0; j < grid.Columns; j++)
             {
                 var segments = grid.Column(j)
-                    .Select(p => Angle.Separation(grid.ToHorizontal(p), Map.Center) < Map.ViewAngle * 1.2 ? p : null)
+                    .Select(p => Angle.Separation(grid.ToHorizontal(p, Sky.Context), Map.Center) < Map.ViewAngle * 1.2 ? p : null)
                     .Split(p => p == null, true);
 
                 foreach (var segment in segments)
@@ -112,16 +107,16 @@ namespace ADK.Demo.Renderers
                     PointF[] refPoints = new PointF[2];
                     for (int k = 0; k < 2; k++)
                     {
-                        var coord = grid.FromHorizontal(Map.Center);
+                        var coord = grid.FromHorizontal(Map.Center, Sky.Context);
                         coord.Longitude = segment[0].Longitude;
                         coord.Latitude += -Map.ViewAngle * 1.2 + k * (Map.ViewAngle * 2 * 1.2);
                         coord.Latitude = Math.Min(coord.Latitude, 80);
                         coord.Latitude = Math.Max(coord.Latitude, -80);
-                        var refHorizontal = grid.ToHorizontal(coord);
+                        var refHorizontal = grid.ToHorizontal(coord, Sky.Context);
                         refPoints[k] = Map.Projection.Project(refHorizontal);
                     }
 
-                    DrawGroupOfPoints(g, penGrid, segment.Select(s => Map.Projection.Project(grid.ToHorizontal(s))).ToArray(), refPoints);
+                    DrawGroupOfPoints(g, penGrid, segment.Select(s => Map.Projection.Project(grid.ToHorizontal(s, Sky.Context))).ToArray(), refPoints);
 
                     isAnyPoint = true;
                 }
@@ -131,7 +126,7 @@ namespace ADK.Demo.Renderers
             for (int i = 0; i < grid.Rows; i++)
             {
                 var segments = grid.Row(i)
-                    .Select(p => Angle.Separation(grid.ToHorizontal(p), Map.Center) < Map.ViewAngle * 1.2 ? p : null)
+                    .Select(p => Angle.Separation(grid.ToHorizontal(p, Sky.Context), Map.Center) < Map.ViewAngle * 1.2 ? p : null)
                     .Split(p => p == null, true).ToList();
 
                 // segment that starts with point "0 degrees"
@@ -151,7 +146,7 @@ namespace ADK.Demo.Renderers
                 {
                     if (segment.Count == 24)
                     {
-                        g.DrawClosedCurve(penGrid, segment.Select(s => Map.Projection.Project(grid.ToHorizontal(s))).ToArray());
+                        g.DrawClosedCurve(penGrid, segment.Select(s => Map.Projection.Project(grid.ToHorizontal(s, Sky.Context))).ToArray());
                     }
                     else
                     {
@@ -177,10 +172,10 @@ namespace ADK.Demo.Renderers
                         PointF[] refPoints = new PointF[2];
                         for (int k = 0; k < 2; k++)
                         {
-                            var coord = grid.FromHorizontal(Map.Center);
+                            var coord = grid.FromHorizontal(Map.Center, Sky.Context);
                             coord.Longitude += -Map.ViewAngle * 1.2 + k * (Map.ViewAngle * 1.2 * 2);
                             coord.Latitude = segment[0].Latitude;
-                            var refHorizontal = grid.ToHorizontal(coord);
+                            var refHorizontal = grid.ToHorizontal(coord, Sky.Context);
                             refPoints[k] = Map.Projection.Project(refHorizontal);
                         }
 
@@ -189,7 +184,7 @@ namespace ADK.Demo.Renderers
                             refPoints = LineScreenIntersection(refPoints[0], refPoints[1]);
                         }
 
-                        DrawGroupOfPoints(g, penGrid, segment.Select(s => Map.Projection.Project(grid.ToHorizontal(s))).ToArray(), refPoints);
+                        DrawGroupOfPoints(g, penGrid, segment.Select(s => Map.Projection.Project(grid.ToHorizontal(s, Sky.Context))).ToArray(), refPoints);
                     }
 
                     isAnyPoint = true;
@@ -201,7 +196,7 @@ namespace ADK.Demo.Renderers
             // Then we select one point that is closest to screen senter. 
             if (!isAnyPoint)
             {
-                GridPoint closestPoint = grid.Points.OrderBy(p => Angle.Separation(grid.ToHorizontal(p), Map.Center)).First();
+                GridPoint closestPoint = grid.Points.OrderBy(p => Angle.Separation(grid.ToHorizontal(p, Sky.Context), Map.Center)).First();
                 {
                     var segment = new List<GridPoint>();
                     segment.Add(closestPoint);
@@ -229,10 +224,10 @@ namespace ADK.Demo.Renderers
                     PointF[] refPoints = new PointF[2];
                     for (int k = 0; k < 2; k++)
                     {
-                        var coord = grid.FromHorizontal(Map.Center);
+                        var coord = grid.FromHorizontal(Map.Center, Sky.Context);
                         coord.Longitude += -Map.ViewAngle * 1.2 + k * (Map.ViewAngle * 1.2 * 2);
                         coord.Latitude = segment[0].Latitude;
-                        var refHorizontal = grid.ToHorizontal(coord);
+                        var refHorizontal = grid.ToHorizontal(coord, Sky.Context);
                         refPoints[k] = Map.Projection.Project(refHorizontal);
                     }
 
@@ -241,7 +236,7 @@ namespace ADK.Demo.Renderers
                         refPoints = LineScreenIntersection(refPoints[0], refPoints[1]);
                     }
 
-                    DrawGroupOfPoints(g, penGrid, segment.Select(s => Map.Projection.Project(grid.ToHorizontal(s))).ToArray(), refPoints);
+                    DrawGroupOfPoints(g, penGrid, segment.Select(s => Map.Projection.Project(grid.ToHorizontal(s, Sky.Context))).ToArray(), refPoints);
                 }
 
                 {
@@ -264,16 +259,16 @@ namespace ADK.Demo.Renderers
                     PointF[] refPoints = new PointF[2];
                     for (int k = 0; k < 2; k++)
                     {
-                        var coord = grid.FromHorizontal(Map.Center);
+                        var coord = grid.FromHorizontal(Map.Center, Sky.Context);
                         coord.Longitude = segment[0].Longitude;
                         coord.Latitude += -Map.ViewAngle * 1.2 + k * (Map.ViewAngle * 2 * 1.2);
                         coord.Latitude = Math.Min(coord.Latitude, 80);
                         coord.Latitude = Math.Max(coord.Latitude, -80);
-                        var refHorizontal = grid.ToHorizontal(coord);
+                        var refHorizontal = grid.ToHorizontal(coord, Sky.Context);
                         refPoints[k] = Map.Projection.Project(refHorizontal);
                     }
 
-                    DrawGroupOfPoints(g, penGrid, segment.Select(s => Map.Projection.Project(grid.ToHorizontal(s))).ToArray(), refPoints);
+                    DrawGroupOfPoints(g, penGrid, segment.Select(s => Map.Projection.Project(grid.ToHorizontal(s, Sky.Context))).ToArray(), refPoints);
                 }
             }
         }
@@ -353,7 +348,7 @@ namespace ADK.Demo.Renderers
             {
                 for (int i = 0; i < 2; i++)
                 {
-                    var h = lineEcliptic.ToHorizontal(lineEcliptic.Column(equinoxRA[i]).ElementAt(0));
+                    var h = gridProvider.LineEcliptic.ToHorizontal(gridProvider.LineEcliptic.Column(equinoxRA[i]).ElementAt(0), Sky.Context);
                     if (Angle.Separation(h, Map.Center) < Map.ViewAngle * 1.2)
                     {
                         PointF p = Map.Projection.Project(h);
@@ -371,11 +366,11 @@ namespace ADK.Demo.Renderers
         {
             if (Settings.Get<bool>("LabelLunarNodes"))
             {
-                double ascNode = Sky.Get<double>("Moon.AscendingNode");
+                double ascNode = lunarProvider.Moon.AscendingNode;
 
                 for (int i = 0; i < 2; i++)
                 {
-                    var h = lineEcliptic.ToHorizontal(new GridPoint(ascNode + (i > 0 ? 180 : 0), 0));
+                    var h = gridProvider.LineEcliptic.ToHorizontal(new GridPoint(ascNode + (i > 0 ? 180 : 0), 0), Sky.Context);
                     if (Angle.Separation(h, Map.Center) < Map.ViewAngle * 1.2)
                     {
                         PointF p = Map.Projection.Project(h);
@@ -412,7 +407,7 @@ namespace ADK.Demo.Renderers
             {
                 for (int i = 0; i < 2; i++)
                 {
-                    var h = gridEquatorial.ToHorizontal(polePoints[i]);
+                    var h = gridProvider.GridEquatorial.ToHorizontal(polePoints[i], Sky.Context);
                     if (Angle.Separation(h, Map.Center) < Map.ViewAngle * 1.2)
                     {
                         PointF p = Map.Projection.Project(h);

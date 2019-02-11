@@ -10,21 +10,20 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo.Calculators
 {
+    public interface IMilkyWayProvider
+    {
+        List<List<CelestialPoint>> MilkyWay { get; }
+    }
+
     /// <summary>
     /// Calculates coordinates of Milky Way outline points to be rendered on map
     /// </summary>
-    public class MilkyWayCalc : BaseSkyCalc
+    public class MilkyWayCalc : BaseSkyCalc, IMilkyWayProvider
     {
         /// <summary>
         /// Outline points
         /// </summary>
-        private List<List<CelestialPoint>> MilkyWay = new List<List<CelestialPoint>>();
-
-        /// <summary>
-        /// Creates new instance of 
-        /// </summary>
-        /// <param name="sky"></param>
-        public MilkyWayCalc(Sky sky) : base(sky) { }
+        public List<List<CelestialPoint>> MilkyWay { get; private set; } = new List<List<CelestialPoint>>();
 
         public override void Calculate(SkyContext context)
         {
@@ -67,8 +66,6 @@ namespace ADK.Demo.Calculators
                     });
                 }
             }
-
-            Sky.AddDataProvider("MilkyWay", () => MilkyWay);
         }
     }
 }

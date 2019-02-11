@@ -34,7 +34,7 @@ namespace ADK.Demo.Calculators
             "Neptune"
         };
 
-        public PlanetsCalc(Sky sky) : base(sky)
+        public PlanetsCalc()
         {
             for (int i = 0; i < planets.Length; i++)
             {
@@ -43,9 +43,6 @@ namespace ADK.Demo.Calculators
 
             planets[Planet.JUPITER - 1].Flattening = 0.064874f;
             planets[Planet.SATURN - 1].Flattening = 0.097962f;
-
-            Sky.AddDataProvider("Planets", () => planets);
-            Sky.AddDataProvider("SaturnRings", () => SaturnRings);
         }
 
         /// <summary>

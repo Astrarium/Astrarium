@@ -1,4 +1,5 @@
-﻿using ADK.Demo.Objects;
+﻿using ADK.Demo.Calculators;
+using ADK.Demo.Objects;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -13,6 +14,8 @@ namespace ADK.Demo.Renderers
 {
     public class StarsRenderer : BaseSkyRenderer
     {
+        private IStarsProvider starsProvider;
+
         private ICollection<Tuple<int, int>> ConLines = new List<Tuple<int, int>>();
 
         private Font fontStarNames;
@@ -27,8 +30,10 @@ namespace ADK.Demo.Renderers
         private const int limitFlamsteedNames = 10;
         private const int limitVarNames = 5;
 
-        public StarsRenderer(Sky sky, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
+        public StarsRenderer(Sky sky, IStarsProvider starsProvider, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
         {
+            this.starsProvider = starsProvider;
+
             fontStarNames = new Font("Arial", 8);
             penConLine = new Pen(new SolidBrush(Color.FromArgb(64, 64, 64)));
             penConLine.DashStyle = DashStyle.Dot;
@@ -37,7 +42,7 @@ namespace ADK.Demo.Renderers
 
         public override void Render(Graphics g)
         {
-            var allStars = Sky.Get<ICollection<Star>>("Stars");
+            var allStars = starsProvider.Stars;
             bool isGround = Settings.Get<bool>("Ground");
 
             if (Settings.Get<bool>("ConstLines"))

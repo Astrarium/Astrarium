@@ -11,10 +11,15 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo.Calculators
 {
+    public interface IDeepSkyProvider
+    {
+        ICollection<DeepSky> DeepSkies { get; }
+    }
+
     /// <summary>
     /// Calculates coordinates of Deep Sky objects
     /// </summary>
-    public class DeepSkyCalc : BaseSkyCalc, IInfoProvider<DeepSky>, IEphemProvider<DeepSky>, ISearchProvider<DeepSky>
+    public class DeepSkyCalc : BaseSkyCalc, IDeepSkyProvider, IInfoProvider<DeepSky>, IEphemProvider<DeepSky>, ISearchProvider<DeepSky>
     {
         private static string LOCATION = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         private static string NGCIC_FILE = Path.Combine(LOCATION, "Data/NGCIC.dat");
@@ -24,20 +29,16 @@ namespace ADK.Demo.Calculators
         /// <summary>
         /// Collection of NGC/IC object
         /// </summary>
-        private ICollection<DeepSky> DeepSkies = new List<DeepSky>();
+        public ICollection<DeepSky> DeepSkies { get; private set; } = new List<DeepSky>();
 
         /// <summary>
         /// Length of single record in data file
         /// </summary>
         private long RecordLength = 0;
 
-        /// <summary>
-        /// Creates new instance of DeepSkyCalc
-        /// </summary>
-        /// <param name="sky"></param>
-        public DeepSkyCalc(Sky sky) : base(sky)
+        public DeepSkyCalc()
         {
-            Sky.AddDataProvider("DeepSky", () => DeepSkies);
+
         }
 
         public override void Calculate(SkyContext context)

@@ -1,4 +1,5 @@
-﻿using ADK.Demo.Objects;
+﻿using ADK.Demo.Calculators;
+using ADK.Demo.Objects;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -12,6 +13,10 @@ namespace ADK.Demo.Renderers
     /// </summary>
     public class SolarSystemRenderer : BaseSkyRenderer
     {
+        private ISolarProvider solarProvider;
+        private ILunarProvider lunarProvider;
+        private IPlanetsProvider planetsProvider;
+
         private Font fontLabel = new Font("Arial", 8);
         private Font fontShadowLabel = new Font("Arial", 8);
 
@@ -40,8 +45,11 @@ namespace ADK.Demo.Renderers
         private SphereRenderer sphereRenderer = new SphereRenderer();
         private ImagesCache imagesCache = new ImagesCache();
 
-        public SolarSystemRenderer(Sky sky, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
+        public SolarSystemRenderer(Sky sky, ILunarProvider lunarProvider, ISolarProvider solarProvider, IPlanetsProvider planetsProvider, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
         {
+            this.solarProvider = solarProvider;
+            this.lunarProvider = lunarProvider;
+            this.planetsProvider = planetsProvider;
             penShadowOutline.DashStyle = DashStyle.Dot;
         }
 
@@ -52,14 +60,14 @@ namespace ADK.Demo.Renderers
 
         public override void Render(Graphics g)
         {
-            Sun sun = Sky.Get<Sun>("Sun");
-            Moon moon = Sky.Get<Moon>("Moon");
+            Sun sun = solarProvider.Sun;
+            Moon moon = lunarProvider.Moon;
 
             // Flag indicated Sun is already rendered
             bool isSunRendered = false;
 
             // Get all planets esxept Earth, and sort them by distance from Earth (most distant planet is first)
-            var planets = Sky.Get<ICollection<Planet>>("Planets")
+            var planets = planetsProvider.Planets
                 .Where(p => p.Number != Planet.EARTH)
                 .OrderByDescending(p => p.Ecliptical.Distance);
 
@@ -310,7 +318,7 @@ namespace ADK.Demo.Renderers
 
                     if (planet.Number == Planet.SATURN)
                     {
-                        var rings = Sky.Get<RingsAppearance>("SaturnRings");
+                        var rings = planetsProvider.SaturnRings;
 
                         // scale value to convert visible size of ring to screen pixels
                         double scale = 1.0 / 3600 / Map.ViewAngle * Map.Width / 4;

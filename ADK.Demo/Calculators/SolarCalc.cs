@@ -10,14 +10,14 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo.Calculators
 {
-    public class SolarCalc : BaseSkyCalc, IEphemProvider<Sun>, IInfoProvider<Sun>, ISearchProvider<Sun>, IAstroEventProvider
+    public interface ISolarProvider
     {
-        private Sun Sun = new Sun();
+        Sun Sun { get; }
+    }
 
-        public SolarCalc(Sky sky) : base(sky)
-        {
-            Sky.AddDataProvider("Sun", () => Sun);
-        }
+    public class SolarCalc : BaseSkyCalc, ISolarProvider, IEphemProvider<Sun>, IInfoProvider<Sun>, ISearchProvider<Sun>, IAstroEventProvider
+    {
+        public Sun Sun { get; private set; } = new Sun();
 
         public override void Calculate(SkyContext c)
         {

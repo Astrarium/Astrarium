@@ -10,29 +10,28 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo.Calculators
 {
-    public class LunarCalc : BaseSkyCalc, IEphemProvider<Moon>, IInfoProvider<Moon>, ISearchProvider<Moon>
+    public interface ILunarProvider
     {
-        private Moon moon = new Moon();
+        Moon Moon { get; }
+    }
 
-        public LunarCalc(Sky sky) : base(sky)
-        {
-            Sky.AddDataProvider("Moon", () => moon);
-            Sky.AddDataProvider("Moon.AscendingNode", () => moon.AscendingNode);
-        }
+    public class LunarCalc : BaseSkyCalc, ILunarProvider, IEphemProvider<Moon>, IInfoProvider<Moon>, ISearchProvider<Moon>
+    {
+        public Moon Moon { get; private set; } = new Moon();
 
         public override void Calculate(SkyContext c)
         {
-            moon.Equatorial = c.Get(Equatorial);
-            moon.Horizontal = c.Get(Horizontal);
-            moon.PAaxis = c.Get(PAaxis);
-            moon.Phase = c.Get(Phase);
-            moon.Ecliptical0 = c.Get(Ecliptical0);
-            moon.Semidiameter = c.Get(Semidiameter);
-            moon.Elongation = c.Get(Elongation);
-            moon.Libration = c.Get(LibrationElements);
-            moon.AscendingNode = c.Get(AscendingNode);
-            moon.EarthShadow = c.Get(EarthShadow);
-            moon.EarthShadowCoordinates = c.Get(EarthShadowCoordinates);
+            Moon.Equatorial = c.Get(Equatorial);
+            Moon.Horizontal = c.Get(Horizontal);
+            Moon.PAaxis = c.Get(PAaxis);
+            Moon.Phase = c.Get(Phase);
+            Moon.Ecliptical0 = c.Get(Ecliptical0);
+            Moon.Semidiameter = c.Get(Semidiameter);
+            Moon.Elongation = c.Get(Elongation);
+            Moon.Libration = c.Get(LibrationElements);
+            Moon.AscendingNode = c.Get(AscendingNode);
+            Moon.EarthShadow = c.Get(EarthShadow);
+            Moon.EarthShadowCoordinates = c.Get(EarthShadowCoordinates);
         }
 
         /// <summary>
@@ -357,7 +356,7 @@ namespace ADK.Demo.Calculators
         public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
         {
             if ("Moon".StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
-                return new[] { new SearchResultItem(moon, "Moon") };
+                return new[] { new SearchResultItem(Moon, "Moon") };
             else
                 return new SearchResultItem[0];
         }

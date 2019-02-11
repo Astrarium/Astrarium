@@ -1,4 +1,5 @@
-﻿using ADK.Demo.Objects;
+﻿using ADK.Demo.Calculators;
+using ADK.Demo.Objects;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,14 +10,18 @@ namespace ADK.Demo.Renderers
 {
     public class ConstellationsRenderer : BaseSkyRenderer
     {
+        private IConstellationsBordersProvider bordersProvider;
+        private IConstellationsProvider constellationsProvider;
+
         private Pen penBorder = new Pen(Color.FromArgb(64, 32, 32));
         private Brush brushLabel = new SolidBrush(Color.FromArgb(64, 32, 32));
 
         private const double maxSeparation = 90 * 1.2;
 
-        public ConstellationsRenderer(Sky sky, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
+        public ConstellationsRenderer(Sky sky, IConstellationsProvider constellationsProvider, IConstellationsBordersProvider bordersProvider, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
         {
-
+            this.constellationsProvider = constellationsProvider;
+            this.bordersProvider = bordersProvider;
         }
 
         public override void Render(Graphics g)
@@ -38,7 +43,7 @@ namespace ADK.Demo.Renderers
         {
             PointF p1, p2;
             CrdsHorizontal h1, h2;
-            var borders = Sky.Get<List<List<CelestialPoint>>>("ConstBorders");
+            var borders = bordersProvider.ConstBorders;
             bool isGround = Settings.Get<bool>("Ground");
 
             foreach (var block in borders)
@@ -69,8 +74,8 @@ namespace ADK.Demo.Renderers
         /// Renders constellations labels on the map
         /// </summary>
         private void RenderConstLabels(Graphics g)
-        {  
-            var constellations = Sky.Get<List<Constellation>>("Constellations");
+        {
+            var constellations = constellationsProvider.Constellations;
             bool isGround = Settings.Get<bool>("Ground");
 
             StringFormat format = new StringFormat();

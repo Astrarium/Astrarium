@@ -6,74 +6,78 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo.Calculators
 {
-    public class CelestialGridCalc : BaseSkyCalc
+    public interface ICelestialGridProvider
+    {
+        CelestialGrid LineEcliptic { get; }
+        CelestialGrid LineGalactic { get; }
+        CelestialGrid GridHorizontal { get; }
+        CelestialGrid GridEquatorial { get; }
+        CelestialGrid LineHorizon { get; }
+    }
+
+    public class CelestialGridCalc : BaseSkyCalc, ICelestialGridProvider
     {
         private PrecessionalElements peFrom1950 = null;
         private PrecessionalElements peTo1950 = null;
 
-        public CelestialGridCalc(Sky sky) : base(sky)
-        {
-            var context = Sky.Context;
+        public CelestialGrid LineEcliptic { get; private set; } = new CelestialGrid("Ecliptic", 1, 24);
+        public CelestialGrid LineGalactic { get; private set; } = new CelestialGrid("Galactic", 1, 24);
+        public CelestialGrid GridHorizontal { get; private set; } = new CelestialGrid("Horizontal", 17, 24);
+        public CelestialGrid GridEquatorial { get; private set; } = new CelestialGrid("Equatorial", 17, 24);
+        public CelestialGrid LineHorizon { get; private set; } = new CelestialGrid("Horizon", 1, 24);
 
+        public CelestialGridCalc(Sky sky)
+        {
             // Ecliptic
-            CelestialGrid LineEcliptic = new CelestialGrid("Ecliptic", 1, 24);
-            LineEcliptic.FromHorizontal = (h) =>
+            
+            LineEcliptic.FromHorizontal = (h, ctx) =>
             {
-                var eq = h.ToEquatorial(context.GeoLocation, context.SiderealTime);
-                var ec = eq.ToEcliptical(context.Epsilon);
+                var eq = h.ToEquatorial(ctx.GeoLocation, ctx.SiderealTime);
+                var ec = eq.ToEcliptical(ctx.Epsilon);
                 return new GridPoint(ec.Lambda, ec.Beta);
             };
-            LineEcliptic.ToHorizontal = (c) =>
+            LineEcliptic.ToHorizontal = (c, ctx) =>
             {
                 var ec = new CrdsEcliptical(c.Longitude, c.Latitude);
-                var eq = ec.ToEquatorial(context.Epsilon);
-                return eq.ToHorizontal(context.GeoLocation, context.SiderealTime);
+                var eq = ec.ToEquatorial(ctx.Epsilon);
+                return eq.ToHorizontal(ctx.GeoLocation, ctx.SiderealTime);
             };
-            Sky.AddDataProvider("LineEcliptic", () => LineEcliptic);
 
             // Galactic equator
-            CelestialGrid LineGalactic = new CelestialGrid("Galactic", 1, 24);
-            LineGalactic.FromHorizontal = (h) =>
+            LineGalactic.FromHorizontal = (h, ctx) =>
             {
-                var eq = h.ToEquatorial(context.GeoLocation, context.SiderealTime);
+                var eq = h.ToEquatorial(ctx.GeoLocation, ctx.SiderealTime);
                 var eq1950 = Precession.GetEquatorialCoordinates(eq, peTo1950);
                 var gal = eq1950.ToGalactical();
                 return new GridPoint(gal.l, gal.b);
             };
-            LineGalactic.ToHorizontal = (c) =>
+            LineGalactic.ToHorizontal = (c, ctx) =>
             {
                 var gal = new CrdsGalactical(c.Longitude, c.Latitude);
                 var eq1950 = gal.ToEquatorial();
                 var eq = Precession.GetEquatorialCoordinates(eq1950, peFrom1950);
-                return eq.ToHorizontal(context.GeoLocation, context.SiderealTime);
+                return eq.ToHorizontal(ctx.GeoLocation, ctx.SiderealTime);
             };
-            Sky.AddDataProvider("LineGalactic", () => LineGalactic);
 
             // Horizontal grid
-            CelestialGrid GridHorizontal = new CelestialGrid("Horizontal", 17, 24);
-            GridHorizontal.FromHorizontal = (h) => new GridPoint(h.Azimuth, h.Altitude);
-            GridHorizontal.ToHorizontal = (c) => new CrdsHorizontal(c.Longitude, c.Latitude);
-            Sky.AddDataProvider("GridHorizontal", () => GridHorizontal);
+            GridHorizontal.FromHorizontal = (h, ctx) => new GridPoint(h.Azimuth, h.Altitude);
+            GridHorizontal.ToHorizontal = (c, context) => new CrdsHorizontal(c.Longitude, c.Latitude);
 
             // Equatorial grid
-            CelestialGrid GridEquatorial = new CelestialGrid("Equatorial", 17, 24);
-            GridEquatorial.FromHorizontal = (h) =>
+            GridEquatorial.FromHorizontal = (h, ctx) =>
             {
-                var eq = h.ToEquatorial(context.GeoLocation, context.SiderealTime);
+                var eq = h.ToEquatorial(ctx.GeoLocation, ctx.SiderealTime);
                 return new GridPoint(eq.Alpha, eq.Delta);
             };
-            GridEquatorial.ToHorizontal = (c) =>
+            GridEquatorial.ToHorizontal = (c, ctx) =>
             {
                 var eq = new CrdsEquatorial(c.Longitude, c.Latitude);
-                return eq.ToHorizontal(context.GeoLocation, context.SiderealTime);
+                return eq.ToHorizontal(ctx.GeoLocation, ctx.SiderealTime);
             };
-            Sky.AddDataProvider("GridEquatorial", () => GridEquatorial);
 
-            // Hozizon line
-            CelestialGrid LineHorizon = new CelestialGrid("Horizon", 1, 24);
-            LineHorizon.FromHorizontal = (h) => new GridPoint(h.Azimuth, h.Altitude);
-            LineHorizon.ToHorizontal = (c) => new CrdsHorizontal(c.Longitude, c.Latitude);
-            Sky.AddDataProvider("LineHorizon", () => LineHorizon);
+            // Hozizon line            
+            LineHorizon.FromHorizontal = (h, ctx) => new GridPoint(h.Azimuth, h.Altitude);
+            LineHorizon.ToHorizontal = (c, ctx) => new CrdsHorizontal(c.Longitude, c.Latitude);
         }
 
         public override void Calculate(SkyContext context)

@@ -32,7 +32,7 @@ namespace ADK.Demo.Config
 
         public bool IsChanged { get; private set; }
 
-        public Settings()
+        static Settings()
         {
             ShortTypeNames.Add("bool", typeof(bool));
             ShortTypeNames.Add("boolean", typeof(bool));

@@ -12,14 +12,18 @@ namespace ADK.Demo.Renderers
     /// </summary>
     public class TrackRenderer : BaseSkyRenderer
     {
+        private ITracksProvider tracksProvider;
+
         private Font fontLabel;
         private Color colorLabel;
         private Color colorTrack;
         private Brush brushLabel;
         private Pen penTrack;
 
-        public TrackRenderer(Sky sky, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
+        public TrackRenderer(Sky sky, ITracksProvider tracksProvider, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
         {
+            this.tracksProvider = tracksProvider;
+
             fontLabel = new Font("Arial", 8);
             colorTrack = Color.FromArgb(100, 100, 100);
             colorLabel = Color.FromArgb(100, 100, 100);
@@ -29,7 +33,7 @@ namespace ADK.Demo.Renderers
 
         public override void Render(Graphics g)
         {
-            var tracks = Sky.Get<ICollection<Track>>("Tracks");
+            var tracks = tracksProvider.Tracks;
 
             foreach (var track in tracks)
             {

@@ -1,4 +1,5 @@
-﻿using ADK.Demo.Objects;
+﻿using ADK.Demo.Calculators;
+using ADK.Demo.Objects;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -12,10 +13,7 @@ namespace ADK.Demo.Renderers
     /// </summary>
     public class MilkyWayRenderer : BaseSkyRenderer
     {
-        /// <summary>
-        /// Outline points divided by groups
-        /// </summary>
-        private List<List<CelestialPoint>> milkyWay = null;
+        private IMilkyWayProvider milkyWayProvider;
 
         /// <summary>
         /// Primary color to fill outline
@@ -29,9 +27,9 @@ namespace ADK.Demo.Renderers
         private double k;
         private double b;
 
-        public MilkyWayRenderer(Sky sky, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
+        public MilkyWayRenderer(Sky sky, IMilkyWayProvider milkyWayProvider, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
         {
-            milkyWay = Sky.Get<List<List<CelestialPoint>>>("MilkyWay");
+            this.milkyWayProvider = milkyWayProvider;
 
             k = -(minAlpha - maxAlpha) / (maxZoom - minZoom);
             b = -(minZoom * maxAlpha - maxZoom * minAlpha) / (maxZoom - minZoom);
@@ -47,12 +45,12 @@ namespace ADK.Demo.Renderers
                     var smoothing = g.SmoothingMode;
                     g.SmoothingMode = SmoothingMode.None;
 
-                    for (int i = 0; i < milkyWay.Count(); i++)
+                    for (int i = 0; i < milkyWayProvider.MilkyWay.Count(); i++)
                     {
                         var points = new List<PointF>();
-                        for (int j = 0; j < milkyWay[i].Count; j++)
+                        for (int j = 0; j < milkyWayProvider.MilkyWay[i].Count; j++)
                         {
-                            var h = milkyWay[i][j].Horizontal;
+                            var h = milkyWayProvider.MilkyWay[i][j].Horizontal;
                             if (Angle.Separation(h, Map.Center) < 90 * 1.2)
                             {
                                 points.Add(Map.Projection.Project(h));

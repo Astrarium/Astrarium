@@ -20,26 +20,29 @@ namespace ADK.Demo
     public partial class FormMain : Form
     {
         private Sky sky;
+        private ISkyMap skyMap;
         private Settings settings;
         private bool fullScreen = false;
 
-        public FormMain()
+        public FormMain(Sky sky, ISkyMap skyMap, Settings settings)
         {
             InitializeComponent();
 
-            settings = new Settings();
+            this.sky = sky;
+            this.skyMap = skyMap;
+            this.settings = settings;
+
             settings.Load();
 
-            sky = new Sky();
-            sky.Calculators.Add(new MilkyWayCalc(sky));
-            sky.Calculators.Add(new CelestialGridCalc(sky));
-            sky.Calculators.Add(new ConstellationsCalc(sky));
-            sky.Calculators.Add(new StarsCalc(sky));
-            sky.Calculators.Add(new SolarCalc(sky));
-            sky.Calculators.Add(new LunarCalc(sky));
-            sky.Calculators.Add(new PlanetsCalc(sky));
-            sky.Calculators.Add(new DeepSkyCalc(sky));
-            sky.Calculators.Add(new TrackCalc(sky));
+            //sky.Calculators.Add(new MilkyWayCalc(sky));
+            //sky.Calculators.Add(new CelestialGridCalc(sky));
+            //sky.Calculators.Add(new ConstellationsCalc(sky));
+            //sky.Calculators.Add(new StarsCalc(sky));
+            //sky.Calculators.Add(new SolarCalc(sky));
+            //sky.Calculators.Add(new LunarCalc(sky));
+            //sky.Calculators.Add(new PlanetsCalc(sky));
+            //sky.Calculators.Add(new DeepSkyCalc(sky));
+            //sky.Calculators.Add(new TrackCalc(sky));
 
             sky.Initialize();
 
@@ -58,8 +61,8 @@ namespace ADK.Demo
             //    Console.WriteLine(e["RTS.Rise"].ToString() + " " + e["RTS.Transit"].ToString() + " " + e["RTS.Set"].ToString());
             //}
 
-            var moon = sky.Get<Moon>("Moon");
-            var mercury = sky.Get<ICollection<Planet>>("Planets").ElementAt(0);
+            //var moon = sky.Get<Moon>("Moon");
+            //var mercury = sky.Get<ICollection<Planet>>("Planets").ElementAt(0);
 
             //var mercuryTrack = new Track()
             //{
@@ -88,22 +91,13 @@ namespace ADK.Demo
             watch.Stop();
             Console.WriteLine("ELASPSED ms: " + watch.ElapsedMilliseconds);
 
-            ISkyMap map = new SkyMap();
 
-            map.Renderers.Add(new MilkyWayRenderer(sky, map, settings));
-            map.Renderers.Add(new DeepSkyRenderer(sky, map, settings));
-            map.Renderers.Add(new ConstellationsRenderer(sky, map, settings));
-            map.Renderers.Add(new CelestialGridRenderer(sky, map, settings));
-            map.Renderers.Add(new TrackRenderer(sky, map, settings));
-            map.Renderers.Add(new StarsRenderer(sky, map, settings));
-            map.Renderers.Add(new SolarSystemRenderer(sky, map, settings));
-            map.Renderers.Add(new GroundRenderer(sky, map, settings));
-            map.Initialize();
+            skyMap.Initialize();
 
             //map.Center = sky.Get<Moon>("Moon").Horizontal;
             //map.ViewAngle = 3;
 
-            skyView.SkyMap = map;
+            skyView.SkyMap = skyMap;
         }
 
         private void skyView_MouseMove(object sender, MouseEventArgs e)

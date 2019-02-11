@@ -1,4 +1,5 @@
-﻿using ADK.Demo.Objects;
+﻿using ADK.Demo.Calculators;
+using ADK.Demo.Objects;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -32,9 +33,12 @@ namespace ADK.Demo.Renderers
         private Brush brushOutline = new SolidBrush(Color.FromArgb(20, 20, 20));
 
         private Dictionary<DeepSkyStatus, IDrawingStrategy> drawingHandlers = null;
+        private IDeepSkyProvider deepSkyProvider;
 
-        public DeepSkyRenderer(Sky sky, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
+        public DeepSkyRenderer(Sky sky, IDeepSkyProvider deepSkyProvider, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
         {
+            this.deepSkyProvider = deepSkyProvider;
+
             k = -(minAlpha - maxAlpha) / (maxZoom - minZoom);
             b = -(minZoom * maxAlpha - maxZoom * minAlpha) / (maxZoom - minZoom);
 
@@ -60,7 +64,7 @@ namespace ADK.Demo.Renderers
 
         public override void Render(Graphics g)
         {
-            var allDeepSkies = Sky.Get<ICollection<DeepSky>>("DeepSky");
+            var allDeepSkies = deepSkyProvider.DeepSkies;
             bool isGround = Settings.Get<bool>("Ground");
 
             int alpha = Math.Max(0, Math.Min((int)(k * Map.ViewAngle + b), 255));

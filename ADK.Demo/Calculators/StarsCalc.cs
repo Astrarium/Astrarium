@@ -11,7 +11,12 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo.Calculators
 {
-    public class StarsCalc : BaseSkyCalc, IEphemProvider<Star>, IInfoProvider<Star>, ISearchProvider<Star>
+    public interface IStarsProvider
+    {
+        ICollection<Star> Stars { get; }
+    }
+
+    public class StarsCalc : BaseSkyCalc, IStarsProvider, IEphemProvider<Star>, IInfoProvider<Star>, ISearchProvider<Star>
     {
         private readonly string STARS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Stars.dat");
         private readonly string NAMES_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/StarNames.dat");
@@ -22,16 +27,18 @@ namespace ADK.Demo.Calculators
         /// <summary>
         /// Collection of all stars
         /// </summary>
-        private ICollection<Star> Stars = new List<Star>();
+        public ICollection<Star> Stars { get; private set; } = new List<Star>();
 
         /// <summary>
         /// Stars data reader
         /// </summary>
         private StarsReader DataReader = new StarsReader();
 
-        public StarsCalc(Sky sky) : base(sky)
+        private IConstellationsProvider ConstellationsProvider;
+
+        public StarsCalc(IConstellationsProvider constellationsProvider)
         {
-            Sky.AddDataProvider("Stars", () => Stars);
+            ConstellationsProvider = constellationsProvider;
         }
 
         public override void Calculate(SkyContext context)
@@ -216,7 +223,6 @@ namespace ADK.Demo.Calculators
 
         private ICollection<string> GetStarNamesForSearch(Star s)
         {
-            var constellations = Sky.Get<ICollection<Constellation>>("Constellations");
             List<string> names = new List<string>();
 
             // constellation name synonims
@@ -226,7 +232,7 @@ namespace ADK.Demo.Calculators
             if (!string.IsNullOrEmpty(conCode))
             {
                 constSynonyms.Add(conCode);
-                var constellation = constellations.FirstOrDefault(c => c.Code.StartsWith(conCode, StringComparison.OrdinalIgnoreCase));
+                var constellation = ConstellationsProvider.Constellations.FirstOrDefault(c => c.Code.StartsWith(conCode, StringComparison.OrdinalIgnoreCase));
                 if (constellation != null)
                 {
                     constSynonyms.Add(constellation.Genitive);
@@ -331,14 +337,13 @@ namespace ADK.Demo.Calculators
 
         private ICollection<string> GetStarNames(Star s)
         {
-            var constellations = Sky.Get<ICollection<Constellation>>("Constellations");
             List<string> names = new List<string>();
 
             string conName = s.Name.Substring(7, 3).Trim();
 
             if (!string.IsNullOrEmpty(conName))
             {
-                conName = constellations.FirstOrDefault(c => c.Code.StartsWith(conName, StringComparison.OrdinalIgnoreCase)).Genitive;
+                conName = ConstellationsProvider.Constellations.FirstOrDefault(c => c.Code.StartsWith(conName, StringComparison.OrdinalIgnoreCase)).Genitive;
             }
 
             if (s.ProperName != null)
@@ -358,7 +363,7 @@ namespace ADK.Demo.Calculators
                 string[] varName = s.VariableName.Split(' ');
                 if (varName.Length > 1)
                 {
-                    conName = constellations.FirstOrDefault(c => c.Code.StartsWith(varName[1], StringComparison.OrdinalIgnoreCase)).Genitive;
+                    conName = ConstellationsProvider.Constellations.FirstOrDefault(c => c.Code.StartsWith(varName[1], StringComparison.OrdinalIgnoreCase)).Genitive;
                     names.Add($"{varName[0]} {conName}");
                 }
                 else

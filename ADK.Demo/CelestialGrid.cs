@@ -62,8 +62,8 @@ namespace ADK.Demo
                     .Select(x => points[rowNumber, x]);
         }
 
-        public Func<CrdsHorizontal, GridPoint> FromHorizontal { get; set; }
-        public Func<GridPoint, CrdsHorizontal> ToHorizontal { get; set; }
+        public Func<CrdsHorizontal, SkyContext, GridPoint> FromHorizontal { get; set; }
+        public Func<GridPoint, SkyContext, CrdsHorizontal> ToHorizontal { get; set; }
     }
 
     public class GridPoint
