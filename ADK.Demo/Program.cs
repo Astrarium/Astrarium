@@ -38,7 +38,7 @@ namespace ADK.Demo
                     // each interface that calculator implements
                     // should be bound to the calc instance
                     interfaces.Add(calcType);
-                    kernel.Bind(calcTypes.ToArray()).To(calcType).InSingletonScope();
+                    kernel.Bind(interfaces.ToArray()).To(calcType).InSingletonScope();
                 }
             }
 

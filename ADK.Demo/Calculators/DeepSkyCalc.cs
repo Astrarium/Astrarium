@@ -36,11 +36,6 @@ namespace ADK.Demo.Calculators
         /// </summary>
         private long RecordLength = 0;
 
-        public DeepSkyCalc()
-        {
-
-        }
-
         public override void Calculate(SkyContext context)
         {
             // precessional elements
