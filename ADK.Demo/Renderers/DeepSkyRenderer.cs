@@ -96,7 +96,7 @@ namespace ADK.Demo.Renderers
 
             protected override void DrawEllipticObject(Graphics g, float diamA, float diamB)
             {
-                g.FillEllipse(Renderer.brushOutline, -diamA / 2, -diamB / 2, diamA, diamB);
+                //g.FillEllipse(Renderer.brushOutline, -diamA / 2, -diamB / 2, diamA, diamB);
                 g.DrawEllipse(Renderer.penNebula, -diamA / 2, -diamB / 2, diamA, diamB);
             }
 
@@ -107,7 +107,7 @@ namespace ADK.Demo.Renderers
 
             protected override void DrawRoundObject(Graphics g, float diamA)
             {
-                g.FillEllipse(Renderer.brushOutline, -diamA / 2, -diamA / 2, diamA, diamA);
+                //g.FillEllipse(Renderer.brushOutline, -diamA / 2, -diamA / 2, diamA, diamA);
                 g.DrawEllipse(Renderer.penNebula, -diamA / 2, -diamA / 2, diamA, diamA);
             }
         }
@@ -155,7 +155,7 @@ namespace ADK.Demo.Renderers
 
             protected override void DrawEllipticObject(Graphics g, float diamA, float diamB)
             {
-                g.FillEllipse(Renderer.brushOutline, -diamA / 2, -diamB / 2, diamA, diamB);
+                //g.FillEllipse(Renderer.brushOutline, -diamA / 2, -diamB / 2, diamA, diamB);
                 g.DrawEllipse(Renderer.penNebula, -diamA / 2, -diamB / 2, diamA, diamB);
             }
 
@@ -335,7 +335,7 @@ namespace ADK.Demo.Renderers
                         }
                     }
 
-                    g.FillPath(Renderer.brushOutline, gp);
+                    //g.FillPath(Renderer.brushOutline, gp);
                     g.DrawPath(Renderer.penNebula, gp);
 
                     return gp;

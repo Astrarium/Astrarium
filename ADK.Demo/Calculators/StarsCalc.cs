@@ -14,8 +14,10 @@ namespace ADK.Demo.Calculators
     public class StarsCalc : BaseSkyCalc, IEphemProvider<Star>, IInfoProvider<Star>, ISearchProvider<Star>
     {
         private readonly string STARS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Stars.dat");
-        
         private readonly string NAMES_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/StarNames.dat");
+        private readonly string ALPHABET_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Alphabet.dat");
+
+        private Dictionary<string, string> Alphabet = new Dictionary<string, string>();
 
         /// <summary>
         /// Collection of all stars
@@ -47,7 +49,9 @@ namespace ADK.Demo.Calculators
         {
             DataReader.StarsDataFilePath = STARS_FILE;
             DataReader.StarsNamesFilePath = NAMES_FILE;
+            DataReader.AlphabetFilePath = ALPHABET_FILE;
             Stars = DataReader.ReadStars();
+            Alphabet = DataReader.ReadAlphabet();
         }
 
         #region Ephemeris
@@ -215,11 +219,19 @@ namespace ADK.Demo.Calculators
             var constellations = Sky.Get<ICollection<Constellation>>("Constellations");
             List<string> names = new List<string>();
 
+            // constellation name synonims
+            List<string> constSynonyms = new List<string>();
+
             string conCode = s.Name.Substring(7, 3).Trim();
-            string conName = conCode;
-            if (!string.IsNullOrEmpty(conName))
+            if (!string.IsNullOrEmpty(conCode))
             {
-                conName = constellations.FirstOrDefault(c => c.Code.StartsWith(conName, StringComparison.OrdinalIgnoreCase)).Genitive;
+                constSynonyms.Add(conCode);
+                var constellation = constellations.FirstOrDefault(c => c.Code.StartsWith(conCode, StringComparison.OrdinalIgnoreCase));
+                if (constellation != null)
+                {
+                    constSynonyms.Add(constellation.Genitive);
+                    constSynonyms.Add(constellation.Name);
+                }
             }
 
             if (s.ProperName != null)
@@ -227,34 +239,62 @@ namespace ADK.Demo.Calculators
                 names.Add(s.ProperName);
             }
 
-            string bayerName = s.BayerName;
-            if (bayerName != null)
-            {
-                string bayerLetterCode = s.BayerLetterCode;
+            // star name idenitifier synonims
+            List<string> idSynonyms = new List<string>();
 
-                names.Add($"{bayerName} {conName}");
-                names.Add($"{bayerName} {conCode}");
-                names.Add($"{bayerLetterCode} {conName}");
-                names.Add($"{bayerLetterCode} {conCode}");
-                names.Add($"{bayerLetterCode.Replace(" ", "")} {conName}");
-                names.Add($"{bayerLetterCode.Replace(" ", "")} {conCode}");
+            // Star has Bayer letter identifier
+            string bayerLetter = s.Name.Substring(3, 3).Trim();
+            if (!string.IsNullOrEmpty(bayerLetter))
+            {
+                // transliterated greek letter (alpha, beta, ...)
+                if (Alphabet.ContainsKey(bayerLetter))
+                {
+                    idSynonyms.Add(Alphabet[bayerLetter]);
+                }
+
+                // greek letter abbreviation (Alp, Bet, ...)
+                idSynonyms.Add(bayerLetter);
+
+                // greek letter (α, β)
+                idSynonyms.Add(s.BayerName[0].ToString());
+
+                // if star has multiple components 
+                char digit = s.Name[6];
+                if (digit != ' ')
+                {
+                    string[] digitSynonims = idSynonyms.Select(v => $"{v}{digit}").ToArray();
+                    string[] digitAndSpaceSynonims = idSynonyms.Select(v => $"{v} {digit}").ToArray();
+
+                    idSynonyms.AddRange(digitSynonims);
+                    idSynonyms.AddRange(digitAndSpaceSynonims);
+                }
             }
 
-            string flamsteedNumber = s.FlamsteedNumber;
-            if (flamsteedNumber != null)
+            // star has digital Flamsteed identifier ("33" Andromedae)
+            string flamsteedNumber = s.Name.Substring(0, 3).Trim();
+            if (!string.IsNullOrEmpty(flamsteedNumber))
             {
-                names.Add($"{flamsteedNumber} {conName}");
-                names.Add($"{flamsteedNumber} {conCode}");
+                idSynonyms.Add(flamsteedNumber);
             }
 
+            foreach (string id in idSynonyms)
+            {
+                foreach (string con in constSynonyms)
+                {
+                    names.Add($"{id} {con}");
+                }
+            }
+            
             string variableName = s.VariableName;
             if (variableName != null)
             {
                 string[] varName = variableName.Split(' ');
                 if (varName.Length > 1)
                 {
-                    names.Add($"{varName[0]} {conName}");
-                    names.Add($"{varName[0]} {varName[1]}");
+                    foreach (string con in constSynonyms)
+                    {
+                        names.Add($"{varName[0]} {con}");
+                    }
                 }
                 else
                 {
@@ -284,8 +324,7 @@ namespace ADK.Demo.Calculators
             names.Add($"HR{s.Number}");
             names.Add($"{s.Number}");
 
-            names.Add(conName);
-            names.Add(conCode);
+            names.AddRange(constSynonyms);
 
             return names;
         }

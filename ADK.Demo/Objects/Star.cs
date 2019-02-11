@@ -34,8 +34,14 @@ namespace ADK.Demo.Objects
         /// </summary>
         public string Name { get; set; }
 
+        /// <summary>
+        /// Proper name of the star
+        /// </summary>
         public string ProperName { get; set; }
 
+        /// <summary>
+        /// Gets Bayer designation of the star name
+        /// </summary>
         public string BayerName
         {
             get
@@ -67,30 +73,9 @@ namespace ADK.Demo.Objects
             }
         }
 
-        public string BayerLetterCode
-        {
-            get
-            {
-                if (Name[3] != ' ')
-                {
-                    string letter = Name.Substring(3, 3).Trim();
-
-                    if (Name[6] != ' ')
-                    {
-                        return $"{letter} {Name[6]}";
-                    }
-                    else
-                    {
-                        return letter;
-                    }
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }
-
+        /// <summary>
+        /// Gets Flamesteed designation of the star name
+        /// </summary>
         public string FlamsteedNumber
         {
             get
@@ -100,6 +85,9 @@ namespace ADK.Demo.Objects
             }
         }
 
+        /// <summary>
+        /// Gets variable star designation (like RR, V399)
+        /// </summary>
         public string VariableName { get; set; }
 
         public uint HDNumber { get; set; }

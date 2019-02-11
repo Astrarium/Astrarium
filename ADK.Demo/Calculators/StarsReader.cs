@@ -27,6 +27,11 @@ namespace ADK.Demo.Calculators
         public string StarsNamesFilePath { get; set; }
 
         /// <summary>
+        /// File with greek alphabet letters abbreviations and full names
+        /// </summary>
+        public string AlphabetFilePath { get; set; }
+
+        /// <summary>
         /// Reads stars data
         /// </summary>
         public ICollection<Star> ReadStars()
@@ -146,6 +151,22 @@ namespace ADK.Demo.Calculators
             return details;
         }
 
+        public Dictionary<string, string> ReadAlphabet()
+        {
+            Dictionary<string, string> alphabet = new Dictionary<string, string>();
+            using (var sr = new StreamReader(AlphabetFilePath, Encoding.Default))
+            {
+                string line = "";
+                while (line != null && !sr.EndOfStream)
+                {
+                    line = sr.ReadLine();
+                    string[] chunks = line.Split('=');
+                    alphabet.Add(chunks[0].Trim(), chunks[1].Trim());
+                }
+            }
+            return alphabet;
+        }
+
         private void SanityCheck()
         {
             if (string.IsNullOrEmpty(StarsDataFilePath))
@@ -153,6 +174,9 @@ namespace ADK.Demo.Calculators
 
             if (string.IsNullOrEmpty(StarsNamesFilePath))
                 throw new Exception("Stars names file path is not set.");
+
+            if (string.IsNullOrEmpty(AlphabetFilePath))
+                throw new Exception("Alhabet file path is not set.");
         }
     }
 

@@ -242,6 +242,9 @@
     <Content Include="Data\8.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Data\Alphabet.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Data\Moon.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
