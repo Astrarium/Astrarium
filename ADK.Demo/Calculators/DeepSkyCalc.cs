@@ -19,7 +19,7 @@ namespace ADK.Demo.Calculators
     /// <summary>
     /// Calculates coordinates of Deep Sky objects
     /// </summary>
-    public class DeepSkyCalc : BaseSkyCalc, IDeepSkyProvider, IInfoProvider<DeepSky>, IEphemProvider<DeepSky>, ISearchProvider<DeepSky>
+    public class DeepSkyCalc : ISkyCalc, IDeepSkyProvider, IInfoProvider<DeepSky>, IEphemProvider<DeepSky>, ISearchProvider<DeepSky>
     {
         private static string LOCATION = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         private static string NGCIC_FILE = Path.Combine(LOCATION, "Data/NGCIC.dat");
@@ -36,7 +36,7 @@ namespace ADK.Demo.Calculators
         /// </summary>
         private long RecordLength = 0;
 
-        public override void Calculate(SkyContext context)
+        public void Calculate(SkyContext context)
         {
             // precessional elements
             var p = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
@@ -237,7 +237,7 @@ namespace ADK.Demo.Calculators
                 .ToArray();
         }
 
-        public override void Initialize()
+        public void Initialize()
         {
             // Load NGC/IC catalogs data
             using (var reader = new StreamReader(NGCIC_FILE))

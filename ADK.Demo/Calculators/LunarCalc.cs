@@ -15,11 +15,11 @@ namespace ADK.Demo.Calculators
         Moon Moon { get; }
     }
 
-    public class LunarCalc : BaseSkyCalc, ILunarProvider, IEphemProvider<Moon>, IInfoProvider<Moon>, ISearchProvider<Moon>
+    public class LunarCalc : ISkyCalc, ILunarProvider, IEphemProvider<Moon>, IInfoProvider<Moon>, ISearchProvider<Moon>
     {
         public Moon Moon { get; private set; } = new Moon();
 
-        public override void Calculate(SkyContext c)
+        public void Calculate(SkyContext c)
         {
             Moon.Equatorial = c.Get(Equatorial);
             Moon.Horizontal = c.Get(Horizontal);
@@ -33,6 +33,8 @@ namespace ADK.Demo.Calculators
             Moon.EarthShadow = c.Get(EarthShadow);
             Moon.EarthShadowCoordinates = c.Get(EarthShadowCoordinates);
         }
+
+        public void Initialize() { }
 
         /// <summary>
         /// Gets helipcentrical coordinates of Earth

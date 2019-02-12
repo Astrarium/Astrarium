@@ -15,7 +15,7 @@ namespace ADK.Demo.Calculators
         CelestialGrid LineHorizon { get; }
     }
 
-    public class CelestialGridCalc : BaseSkyCalc, ICelestialGridProvider
+    public class CelestialGridCalc : ISkyCalc, ICelestialGridProvider
     {
         private PrecessionalElements peFrom1950 = null;
         private PrecessionalElements peTo1950 = null;
@@ -80,7 +80,9 @@ namespace ADK.Demo.Calculators
             LineHorizon.ToHorizontal = (c, ctx) => new CrdsHorizontal(c.Longitude, c.Latitude);
         }
 
-        public override void Calculate(SkyContext context)
+        public void Initialize() { }
+
+        public void Calculate(SkyContext context)
         {
             peFrom1950 = Precession.ElementsFK5(Date.EPOCH_B1950, context.JulianDay);
             peTo1950 = Precession.ElementsFK5(context.JulianDay, Date.EPOCH_B1950);

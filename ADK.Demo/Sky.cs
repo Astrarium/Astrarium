@@ -23,7 +23,7 @@ namespace ADK.Demo
 
         public SkyContext Context { get; set; }
 
-        public ICollection<BaseSkyCalc> Calculators { get; private set; } = new List<BaseSkyCalc>();
+        public ICollection<ISkyCalc> Calculators { get; private set; } = new List<ISkyCalc>();
 
         private Dictionary<string, object> DataProviders = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 

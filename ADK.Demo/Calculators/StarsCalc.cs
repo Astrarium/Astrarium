@@ -16,7 +16,7 @@ namespace ADK.Demo.Calculators
         ICollection<Star> Stars { get; }
     }
 
-    public class StarsCalc : BaseSkyCalc, IStarsProvider, IEphemProvider<Star>, IInfoProvider<Star>, ISearchProvider<Star>
+    public class StarsCalc : ISkyCalc, IStarsProvider, IEphemProvider<Star>, IInfoProvider<Star>, ISearchProvider<Star>
     {
         private readonly string STARS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Stars.dat");
         private readonly string NAMES_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/StarNames.dat");
@@ -41,7 +41,7 @@ namespace ADK.Demo.Calculators
             ConstellationsProvider = constellationsProvider;
         }
 
-        public override void Calculate(SkyContext context)
+        public void Calculate(SkyContext context)
         {
             foreach (var star in Stars)
             {
@@ -52,7 +52,7 @@ namespace ADK.Demo.Calculators
             }
         }
 
-        public override void Initialize()
+        public void Initialize()
         {
             DataReader.StarsDataFilePath = STARS_FILE;
             DataReader.StarsNamesFilePath = NAMES_FILE;

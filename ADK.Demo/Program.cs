@@ -27,7 +27,7 @@ namespace ADK.Demo
             // from the specific directory and search for calculators there
             Type[] calcTypes = Assembly.GetExecutingAssembly()
                 .GetTypes()
-                .Where(t => typeof(BaseSkyCalc).IsAssignableFrom(t) && !t.IsAbstract)
+                .Where(t => typeof(ISkyCalc).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
                 .ToArray();
                         
             foreach (Type calcType in calcTypes)
@@ -73,7 +73,7 @@ namespace ADK.Demo
 
             foreach (Type calcType in calcTypes)
             {
-                sky.Calculators.Add(kernel.Get(calcType) as BaseSkyCalc);
+                sky.Calculators.Add(kernel.Get(calcType) as ISkyCalc);
             }
 
             kernel.Get<Settings>().Load();

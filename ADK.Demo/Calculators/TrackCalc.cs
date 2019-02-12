@@ -13,7 +13,7 @@ namespace ADK.Demo.Calculators
     /// <summary>
     /// Calculates coordinates of motion tracks of celestial bodies
     /// </summary>
-    public class TrackCalc : BaseSkyCalc
+    public class TrackCalc : ISkyCalc
     {
         private ITracksProvider TracksProvider;
 
@@ -25,7 +25,9 @@ namespace ADK.Demo.Calculators
             TracksProvider = tracksProvider;
         }
 
-        public override void Calculate(SkyContext context)
+        public void Initialize() { }
+
+        public void Calculate(SkyContext context)
         {
             foreach (var track in TracksProvider.Tracks)
             {

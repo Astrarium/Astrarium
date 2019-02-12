@@ -15,11 +15,13 @@ namespace ADK.Demo.Calculators
         Sun Sun { get; }
     }
 
-    public class SolarCalc : BaseSkyCalc, ISolarProvider, IEphemProvider<Sun>, IInfoProvider<Sun>, ISearchProvider<Sun>, IAstroEventProvider
+    public class SolarCalc : ISkyCalc, ISolarProvider, IEphemProvider<Sun>, IInfoProvider<Sun>, ISearchProvider<Sun>, IAstroEventProvider
     {
         public Sun Sun { get; private set; } = new Sun();
 
-        public override void Calculate(SkyContext c)
+        public void Initialize() { }
+
+        public void Calculate(SkyContext c)
         {
             Sun.Equatorial = c.Get(Equatorial);
             Sun.Horizontal = c.Get(Horizontal);

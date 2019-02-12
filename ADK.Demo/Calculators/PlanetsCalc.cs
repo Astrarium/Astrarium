@@ -14,7 +14,7 @@ namespace ADK.Demo.Calculators
         RingsAppearance SaturnRings { get; }
     }
 
-    public class PlanetsCalc : BaseSkyCalc, IEphemProvider<Planet>, IInfoProvider<Planet>, ISearchProvider<Planet>, IPlanetsProvider
+    public class PlanetsCalc : ISkyCalc, IEphemProvider<Planet>, IInfoProvider<Planet>, ISearchProvider<Planet>, IPlanetsProvider
     {
         private Planet[] planets = new Planet[8];
 
@@ -44,6 +44,8 @@ namespace ADK.Demo.Calculators
             planets[Planet.JUPITER - 1].Flattening = 0.064874f;
             planets[Planet.SATURN - 1].Flattening = 0.097962f;
         }
+
+        public void Initialize() { }
 
         /// <summary>
         /// Get heliocentrical coordinates of Earth
@@ -255,7 +257,7 @@ namespace ADK.Demo.Calculators
             return ADK.Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, parallax);
         }
 
-        public override void Calculate(SkyContext context)
+        public void Calculate(SkyContext context)
         {
             foreach (var p in planets)
             {
