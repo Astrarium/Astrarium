@@ -9,9 +9,17 @@ namespace ADK.Demo.Renderers
 {
     public class CelestialGridRenderer : IRenderer
     {
-        private readonly ICelestialGridProvider gridProvider;
         private readonly ILunarProvider lunarProvider;
         private readonly ISettings settings;
+
+        private PrecessionalElements peFrom1950 = null;
+        private PrecessionalElements peTo1950 = null;
+
+        private CelestialGrid LineEcliptic = new CelestialGrid("Ecliptic", 1, 24);
+        private CelestialGrid LineGalactic = new CelestialGrid("Galactic", 1, 24);
+        private CelestialGrid GridHorizontal = new CelestialGrid("Horizontal", 17, 24);
+        private CelestialGrid GridEquatorial = new CelestialGrid("Equatorial", 17, 24);
+        private CelestialGrid LineHorizon = new CelestialGrid("Horizon", 1, 24);
 
         private Pen penGridEquatorial = null;
         private Pen penGridHorizontal = null;
@@ -31,9 +39,8 @@ namespace ADK.Demo.Renderers
         private string[] equatorialLabels = new string[] { "NCP", "SCP" };
         private GridPoint[] polePoints = new GridPoint[] { new GridPoint(0, 90), new GridPoint(0, -90) };
 
-        public CelestialGridRenderer(ILunarProvider lunarProvider, ICelestialGridProvider gridProvider, ISettings settings)
+        public CelestialGridRenderer(ILunarProvider lunarProvider, ISettings settings)
         {
-            this.gridProvider = gridProvider;
             this.lunarProvider = lunarProvider;
             this.settings = settings;
 
@@ -43,10 +50,64 @@ namespace ADK.Demo.Renderers
             penLineGalactic = new Pen(Brushes.Transparent);
         }
 
-        public void Initialize() { }
+        public void Initialize()
+        {
+            // Ecliptic
+            LineEcliptic.FromHorizontal = (h, ctx) =>
+            {
+                var eq = h.ToEquatorial(ctx.GeoLocation, ctx.SiderealTime);
+                var ec = eq.ToEcliptical(ctx.Epsilon);
+                return new GridPoint(ec.Lambda, ec.Beta);
+            };
+            LineEcliptic.ToHorizontal = (c, ctx) =>
+            {
+                var ec = new CrdsEcliptical(c.Longitude, c.Latitude);
+                var eq = ec.ToEquatorial(ctx.Epsilon);
+                return eq.ToHorizontal(ctx.GeoLocation, ctx.SiderealTime);
+            };
+
+            // Galactic equator
+            LineGalactic.FromHorizontal = (h, ctx) =>
+            {
+                var eq = h.ToEquatorial(ctx.GeoLocation, ctx.SiderealTime);
+                var eq1950 = Precession.GetEquatorialCoordinates(eq, peTo1950);
+                var gal = eq1950.ToGalactical();
+                return new GridPoint(gal.l, gal.b);
+            };
+            LineGalactic.ToHorizontal = (c, ctx) =>
+            {
+                var gal = new CrdsGalactical(c.Longitude, c.Latitude);
+                var eq1950 = gal.ToEquatorial();
+                var eq = Precession.GetEquatorialCoordinates(eq1950, peFrom1950);
+                return eq.ToHorizontal(ctx.GeoLocation, ctx.SiderealTime);
+            };
+
+            // Horizontal grid
+            GridHorizontal.FromHorizontal = (h, ctx) => new GridPoint(h.Azimuth, h.Altitude);
+            GridHorizontal.ToHorizontal = (c, context) => new CrdsHorizontal(c.Longitude, c.Latitude);
+
+            // Equatorial grid
+            GridEquatorial.FromHorizontal = (h, ctx) =>
+            {
+                var eq = h.ToEquatorial(ctx.GeoLocation, ctx.SiderealTime);
+                return new GridPoint(eq.Alpha, eq.Delta);
+            };
+            GridEquatorial.ToHorizontal = (c, ctx) =>
+            {
+                var eq = new CrdsEquatorial(c.Longitude, c.Latitude);
+                return eq.ToHorizontal(ctx.GeoLocation, ctx.SiderealTime);
+            };
+
+            // Hozizon line            
+            LineHorizon.FromHorizontal = (h, ctx) => new GridPoint(h.Azimuth, h.Altitude);
+            LineHorizon.ToHorizontal = (c, ctx) => new CrdsHorizontal(c.Longitude, c.Latitude);
+        }
 
         public void Render(IMapContext map)
         {
+            peFrom1950 = Precession.ElementsFK5(Date.EPOCH_B1950, map.Observer.JulianDay);
+            peTo1950 = Precession.ElementsFK5(map.Observer.JulianDay, Date.EPOCH_B1950);
+
             Color colorGridEquatorial = Color.FromArgb(200, 0, 64, 64);
             Color colorGridHorizontal = settings.Get<Color>("HorizontalGrid.Color.Night");
             Color colorLineEcliptic = settings.Get<Color>("Ecliptic.Color.Night");
@@ -59,27 +120,27 @@ namespace ADK.Demo.Renderers
 
             if (settings.Get<bool>("GalacticEquator"))
             {
-                DrawGrid(map, penLineGalactic, gridProvider.LineGalactic);
+                DrawGrid(map, penLineGalactic, LineGalactic);
             }
             if (settings.Get<bool>("EquatorialGrid"))
             {
-                DrawGrid(map, penGridEquatorial, gridProvider.GridEquatorial);
+                DrawGrid(map, penGridEquatorial, GridEquatorial);
                 DrawEquatorialPoles(map);
             }
             if (settings.Get<bool>("HorizontalGrid"))
             {
-                DrawGrid(map, penGridHorizontal, gridProvider.GridHorizontal);
+                DrawGrid(map, penGridHorizontal, GridHorizontal);
                 DrawHorizontalPoles(map);
             }
             if (settings.Get<bool>("EclipticLine"))
             {
-                DrawGrid(map, penLineEcliptic, gridProvider.LineEcliptic);
+                DrawGrid(map, penLineEcliptic, LineEcliptic);
                 DrawEquinoxLabels(map);
                 DrawLunarNodes(map);
             }
             if (settings.Get<bool>("HorizonLine"))
             {
-                DrawGrid(map, penGridHorizontal, gridProvider.LineHorizon);
+                DrawGrid(map, penGridHorizontal, LineHorizon);
             }
         }
 
@@ -352,7 +413,7 @@ namespace ADK.Demo.Renderers
             {
                 for (int i = 0; i < 2; i++)
                 {
-                    var h = gridProvider.LineEcliptic.ToHorizontal(gridProvider.LineEcliptic.Column(equinoxRA[i]).ElementAt(0), map.Observer);
+                    var h = LineEcliptic.ToHorizontal(LineEcliptic.Column(equinoxRA[i]).ElementAt(0), map.Observer);
                     if (Angle.Separation(h, map.Center) < map.ViewAngle * 1.2)
                     {
                         PointF p = map.Project(h);
@@ -374,7 +435,7 @@ namespace ADK.Demo.Renderers
 
                 for (int i = 0; i < 2; i++)
                 {
-                    var h = gridProvider.LineEcliptic.ToHorizontal(new GridPoint(ascNode + (i > 0 ? 180 : 0), 0), map.Observer);
+                    var h = LineEcliptic.ToHorizontal(new GridPoint(ascNode + (i > 0 ? 180 : 0), 0), map.Observer);
                     if (Angle.Separation(h, map.Center) < map.ViewAngle * 1.2)
                     {
                         PointF p = map.Project(h);
@@ -411,7 +472,7 @@ namespace ADK.Demo.Renderers
             {
                 for (int i = 0; i < 2; i++)
                 {
-                    var h = gridProvider.GridEquatorial.ToHorizontal(polePoints[i], map.Observer);
+                    var h = GridEquatorial.ToHorizontal(polePoints[i], map.Observer);
                     if (Angle.Separation(h, map.Center) < map.ViewAngle * 1.2)
                     {
                         PointF p = map.Project(h);

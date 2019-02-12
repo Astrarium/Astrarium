@@ -58,7 +58,6 @@
     <Compile Include="Calculators\ISkyCalc.cs" />
     <Compile Include="Calculators\TrackCalc.cs" />
     <Compile Include="Calculators\MilkyWayCalc.cs" />
-    <Compile Include="Calculators\CelestialGridCalc.cs" />
     <Compile Include="Calculators\ConstellationsCalc.cs" />
     <Compile Include="Calculators\PlanetsCalc.cs" />
     <Compile Include="Calculators\LunarCalc.cs" />
