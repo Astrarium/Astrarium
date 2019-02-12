@@ -10,9 +10,9 @@ namespace ADK.Demo.Renderers
     /// <summary>
     /// Renders celestial bodies motion tracks on the map
     /// </summary>
-    public class TrackRenderer : BaseSkyRenderer
+    public class TrackRenderer : IRenderer
     {
-        private ITracksProvider tracksProvider;
+        private readonly ITracksProvider tracksProvider;
 
         private Font fontLabel;
         private Color colorLabel;
@@ -20,7 +20,7 @@ namespace ADK.Demo.Renderers
         private Brush brushLabel;
         private Pen penTrack;
 
-        public TrackRenderer(Sky sky, ITracksProvider tracksProvider, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
+        public TrackRenderer(ITracksProvider tracksProvider)
         {
             this.tracksProvider = tracksProvider;
 
@@ -31,7 +31,9 @@ namespace ADK.Demo.Renderers
             brushLabel = new SolidBrush(colorLabel);
         }
 
-        public override void Render(IMapContext map)
+        public void Initialize() { }
+
+        public void Render(IMapContext map)
         {
             var tracks = tracksProvider.Tracks;
 
@@ -55,8 +57,8 @@ namespace ADK.Demo.Renderers
                         segment.Add(nextP);
                     }
 
-                    PointF pBody = IsSegmentContainsBody(segment, track) ? map.Projection.Project(track.Body.Horizontal) : PointF.Empty;
-                    DrawTrackSegment(map, penTrack, segment.Select(p => map.Projection.Project(p.Horizontal)).ToArray(), pBody);
+                    PointF pBody = IsSegmentContainsBody(map, segment, track) ? map.Project(track.Body.Horizontal) : PointF.Empty;
+                    DrawTrackSegment(map, penTrack, segment.Select(p => map.Project(p.Horizontal)).ToArray(), pBody);
                 }
 
                 if (!segments.Any())
@@ -78,21 +80,21 @@ namespace ADK.Demo.Renderers
                         segment.Add(p2);
                     }
 
-                    PointF pBody = IsSegmentContainsBody(segment, track) ? map.Projection.Project(track.Body.Horizontal) : PointF.Empty;
-                    DrawTrackSegment(map, penTrack, segment.Select(p => map.Projection.Project(p.Horizontal)).ToArray(), pBody);
+                    PointF pBody = IsSegmentContainsBody(map, segment, track) ? map.Project(track.Body.Horizontal) : PointF.Empty;
+                    DrawTrackSegment(map, penTrack, segment.Select(p => map.Project(p.Horizontal)).ToArray(), pBody);
                 }
 
                 DrawLabels(map, track);
             }
         }
 
-        private bool IsSegmentContainsBody(ICollection<CelestialPoint> segment, Track track)
+        private bool IsSegmentContainsBody(IMapContext map, ICollection<CelestialPoint> segment, Track track)
         {
             int firstIndex = track.Points.IndexOf(segment.First());
             int lastIndex = track.Points.IndexOf(segment.Last());
             double from = (double)firstIndex / (track.Points.Count - 1) * track.Duration + track.From;
             double to = (double)lastIndex / (track.Points.Count - 1) * track.Duration + track.From;
-            return Sky.Context.JulianDay > from && Sky.Context.JulianDay < to;            
+            return map.Observer.JulianDay > from && map.Observer.JulianDay < to;            
         }
 
         private void DrawLabels(IMapContext map, Track track)
@@ -111,11 +113,11 @@ namespace ADK.Demo.Renderers
                     double ad = Angle.Separation(tp.Horizontal, map.Center);
                     if (ad < map.ViewAngle * 1.2)
                     {
-                        PointF p = map.Projection.Project(tp.Horizontal);
+                        PointF p = map.Project(tp.Horizontal);
                         if (!map.IsOutOfScreen(p))
                         {
                             map.Graphics.FillEllipse(brushLabel, p.X - 2, p.Y - 2, 4, 4);
-                            DrawObjectCaption(map, fontLabel, brushLabel, Formatters.DateTime.Format(Sky.Context.ToLocalDate(jd)), p, 4);
+                            map.DrawObjectCaption(fontLabel, brushLabel, Formatters.DateTime.Format(new Date(jd, map.Observer.GeoLocation.UtcOffset)), p, 4);
                         }
                     }
                 }

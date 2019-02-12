@@ -6,7 +6,15 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo
 {
-    public class SkyContext
+    public interface IObserverContext
+    {
+        double JulianDay { get; }
+        CrdsGeographical GeoLocation { get; }
+        double SiderealTime { get; }
+        double Epsilon { get; }
+    }
+
+    public class SkyContext : IObserverContext
     {
         private Dictionary<IntPtr, object> resultsCache = new Dictionary<IntPtr, object>();
         private Dictionary<IntPtr, object>[] argsCache = new Dictionary<IntPtr, object>[6];
@@ -45,14 +53,9 @@ namespace ADK.Demo
         {
             get
             {
-                Date date = ToLocalDate(_JulianDay);
+                Date date = new Date(_JulianDay, _GeoLocation.UtcOffset);
                 return _JulianDay - (date.Day - Math.Truncate(date.Day));
             }
-        }
-
-        public Date ToLocalDate(double jd)
-        {
-            return new Date(jd + _GeoLocation.UtcOffset / 24.0 - Date.DeltaT(jd) / 86400);
         }
 
         private CrdsGeographical _GeoLocation;

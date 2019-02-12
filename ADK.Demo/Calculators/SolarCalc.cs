@@ -174,10 +174,10 @@ namespace ADK.Demo.Calculators
                 .AddRow("CRN", c.Get(CarringtonNumber))
 
                 .AddHeader("Seasons")
-                .AddRow("Seasons.Spring", c.ToLocalDate(jdSpring), jdSpring)
-                .AddRow("Seasons.Summer", c.ToLocalDate(jdSummer), jdSummer)
-                .AddRow("Seasons.Autumn", c.ToLocalDate(jdAutumn), jdAutumn)
-                .AddRow("Seasons.Winter", c.ToLocalDate(jdWinter), jdWinter);
+                .AddRow("Seasons.Spring", new Date(jdSpring, c.GeoLocation.UtcOffset), jdSpring)
+                .AddRow("Seasons.Summer", new Date(jdSummer, c.GeoLocation.UtcOffset), jdSummer)
+                .AddRow("Seasons.Autumn", new Date(jdAutumn, c.GeoLocation.UtcOffset), jdAutumn)
+                .AddRow("Seasons.Winter", new Date(jdWinter, c.GeoLocation.UtcOffset), jdWinter);
 
             return info;
         }

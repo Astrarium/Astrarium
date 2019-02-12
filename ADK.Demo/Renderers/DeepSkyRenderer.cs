@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo.Renderers
 {
-    public class DeepSkyRenderer : BaseSkyRenderer
+    public class DeepSkyRenderer : IRenderer
     {
         private int limitLabels = 20;
         private double minAlpha = 10;
@@ -33,11 +33,14 @@ namespace ADK.Demo.Renderers
         private Brush brushOutline = new SolidBrush(Color.FromArgb(20, 20, 20));
 
         private Dictionary<DeepSkyStatus, IDrawingStrategy> drawingHandlers = null;
-        private IDeepSkyProvider deepSkyProvider;
 
-        public DeepSkyRenderer(Sky sky, IDeepSkyProvider deepSkyProvider, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
+        private readonly IDeepSkyProvider deepSkyProvider;
+        private readonly ISettings settings;
+
+        public DeepSkyRenderer(IDeepSkyProvider deepSkyProvider, ISettings settings)
         {
             this.deepSkyProvider = deepSkyProvider;
+            this.settings = settings;
 
             k = -(minAlpha - maxAlpha) / (maxZoom - minZoom);
             b = -(minZoom * maxAlpha - maxZoom * minAlpha) / (maxZoom - minZoom);
@@ -57,10 +60,12 @@ namespace ADK.Demo.Renderers
             };
         }
 
-        public override void Render(IMapContext map)
+        public void Initialize() { }
+
+        public void Render(IMapContext map)
         {
             var allDeepSkies = deepSkyProvider.DeepSkies;
-            bool isGround = Settings.Get<bool>("Ground");
+            bool isGround = settings.Get<bool>("Ground");
 
             int alpha = Math.Max(0, Math.Min((int)(k * map.ViewAngle + b), 255));
 
@@ -95,7 +100,6 @@ namespace ADK.Demo.Renderers
 
             protected override void DrawEllipticObject(Graphics g, float diamA, float diamB)
             {
-                //g.FillEllipse(Renderer.brushOutline, -diamA / 2, -diamB / 2, diamA, diamB);
                 g.DrawEllipse(Renderer.penNebula, -diamA / 2, -diamB / 2, diamA, diamB);
             }
 
@@ -106,7 +110,6 @@ namespace ADK.Demo.Renderers
 
             protected override void DrawRoundObject(Graphics g, float diamA)
             {
-                //g.FillEllipse(Renderer.brushOutline, -diamA / 2, -diamA / 2, diamA, diamA);
                 g.DrawEllipse(Renderer.penNebula, -diamA / 2, -diamA / 2, diamA, diamA);
             }
         }
@@ -154,7 +157,6 @@ namespace ADK.Demo.Renderers
 
             protected override void DrawEllipticObject(Graphics g, float diamA, float diamB)
             {
-                //g.FillEllipse(Renderer.brushOutline, -diamA / 2, -diamB / 2, diamA, diamB);
                 g.DrawEllipse(Renderer.penNebula, -diamA / 2, -diamB / 2, diamA, diamB);
             }
 
@@ -227,7 +229,7 @@ namespace ADK.Demo.Renderers
 
             public virtual void Draw(IMapContext map, DeepSky ds)
             {
-                PointF p = map.Projection.Project(ds.Horizontal);
+                PointF p = map.Project(ds.Horizontal);
 
                 float sizeA = GetDiameter(map, ds.SizeA);
                 float sizeB = GetDiameter(map, ds.SizeB);
@@ -255,7 +257,7 @@ namespace ADK.Demo.Renderers
 
                         if (map.ViewAngle <= Renderer.limitLabels)
                         {
-                            Renderer.DrawObjectCaption(map, Renderer.fontCaption, Renderer.brushCaption, ds.DisplayName, p, Math.Min(diamA, diamB));
+                            map.DrawObjectCaption(Renderer.fontCaption, Renderer.brushCaption, ds.DisplayName, p, Math.Min(diamA, diamB));
                         }
                     }
                 }
@@ -281,7 +283,7 @@ namespace ADK.Demo.Renderers
 
                         if (map.ViewAngle <= Renderer.limitLabels)
                         {
-                            Renderer.DrawObjectCaption(map, Renderer.fontCaption, Renderer.brushCaption, ds.DisplayName, p, diamA);
+                            map.DrawObjectCaption(Renderer.fontCaption, Renderer.brushCaption, ds.DisplayName, p, diamA);
                         }
                     }
                 }
@@ -305,7 +307,7 @@ namespace ADK.Demo.Renderers
 
                         if (map.ViewAngle <= Renderer.limitLabels)
                         {
-                            Renderer.DrawObjectCaption(map, Renderer.fontCaption, Renderer.brushCaption, ds.DisplayName, p, 0);
+                            map.DrawObjectCaption(Renderer.fontCaption, Renderer.brushCaption, ds.DisplayName, p, 0);
                         }
                     }
                 }
@@ -324,17 +326,11 @@ namespace ADK.Demo.Renderers
                         double ad2 = Angle.Separation(h2, map.Center);
 
                         PointF p1, p2;
-                        //if (ad1 < Renderer.Map.ViewAngle * 1.2 || 
-                        //    ad2 < Renderer.Map.ViewAngle * 1.2)
-                        {
-                            p1 = map.Projection.Project(h1);
-                            p2 = map.Projection.Project(h2);
-                            gp.AddLine(p1, p2);
-                            //g.DrawLine(Renderer.penNebula, p1, p2);
-                        }
+                        p1 = map.Project(h1);
+                        p2 = map.Project(h2);
+                        gp.AddLine(p1, p2);
                     }
 
-                    //g.FillPath(Renderer.brushOutline, gp);
                     map.Graphics.DrawPath(Renderer.penNebula, gp);
 
                     return gp;

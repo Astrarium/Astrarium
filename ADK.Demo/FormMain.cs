@@ -32,19 +32,8 @@ namespace ADK.Demo
             this.skyMap = skyMap;
             this.settings = settings;
 
-            settings.Load();
-
-            //sky.Calculators.Add(new MilkyWayCalc(sky));
-            //sky.Calculators.Add(new CelestialGridCalc(sky));
-            //sky.Calculators.Add(new ConstellationsCalc(sky));
-            //sky.Calculators.Add(new StarsCalc(sky));
-            //sky.Calculators.Add(new SolarCalc(sky));
-            //sky.Calculators.Add(new LunarCalc(sky));
-            //sky.Calculators.Add(new PlanetsCalc(sky));
-            //sky.Calculators.Add(new DeepSkyCalc(sky));
-            //sky.Calculators.Add(new TrackCalc(sky));
-
             sky.Initialize();
+            skyMap.Initialize();
 
             //sky.Context = new SkyContext(Date.JulianEphemerisDay(new Date(2019, 1, 21 + 5 / 24.0)), sky.Context.GeoLocation);
 
@@ -91,8 +80,7 @@ namespace ADK.Demo
             watch.Stop();
             Console.WriteLine("ELASPSED ms: " + watch.ElapsedMilliseconds);
 
-
-            skyMap.Initialize();
+            
 
             //map.Center = sky.Get<Moon>("Moon").Horizontal;
             //map.ViewAngle = 3;

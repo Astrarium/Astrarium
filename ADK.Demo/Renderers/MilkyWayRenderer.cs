@@ -11,9 +11,10 @@ namespace ADK.Demo.Renderers
     /// <summary>
     /// Renders Milky Way filled outline on the map
     /// </summary>
-    public class MilkyWayRenderer : BaseSkyRenderer
+    public class MilkyWayRenderer : IRenderer
     {
-        private IMilkyWayProvider milkyWayProvider;
+        private readonly IMilkyWayProvider milkyWayProvider;
+        private readonly ISettings settings;
 
         /// <summary>
         /// Primary color to fill outline
@@ -27,17 +28,20 @@ namespace ADK.Demo.Renderers
         private double k;
         private double b;
 
-        public MilkyWayRenderer(Sky sky, IMilkyWayProvider milkyWayProvider, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
+        public MilkyWayRenderer(IMilkyWayProvider milkyWayProvider, ISettings settings)
         {
             this.milkyWayProvider = milkyWayProvider;
+            this.settings = settings;
 
             k = -(minAlpha - maxAlpha) / (maxZoom - minZoom);
             b = -(minZoom * maxAlpha - maxZoom * minAlpha) / (maxZoom - minZoom);
         }
 
-        public override void Render(IMapContext map)
+        public void Initialize() { }
+
+        public void Render(IMapContext map)
         {
-            if (Settings.Get<bool>("MilkyWay"))
+            if (settings.Get<bool>("MilkyWay"))
             {
                 int alpha = Math.Min((int)(k * map.ViewAngle + b), 255);
                 if (alpha > maxAlpha)
@@ -53,7 +57,7 @@ namespace ADK.Demo.Renderers
                             var h = milkyWayProvider.MilkyWay[i][j].Horizontal;
                             if (Angle.Separation(h, map.Center) < 90 * 1.2)
                             {
-                                points.Add(map.Projection.Project(h));
+                                points.Add(map.Project(h));
                             }
                         }
 

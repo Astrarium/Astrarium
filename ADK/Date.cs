@@ -179,6 +179,15 @@ namespace ADK
             if (Month <= 2) Year = C - 4715;
         }
 
+        /// <summary>
+        /// Creates new date from julian day and UTC offset in hours
+        /// </summary>
+        /// <param name="jd">Julian Day to convert to local date</param>
+        /// <param name="utcOffset">UTC offset in hours</param>
+        public Date(double jd, double utcOffset) :
+            this(jd + utcOffset / 24.0 - DeltaT(jd) / 86400)
+        { }
+
         #endregion Constructors
 
         #region Overrides

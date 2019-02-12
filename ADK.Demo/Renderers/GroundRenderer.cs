@@ -8,16 +8,20 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo.Renderers
 {
-    public class GroundRenderer : BaseSkyRenderer
+    public class GroundRenderer : IRenderer
     {
-        public GroundRenderer(Sky sky, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
+        private readonly ISettings settings;
+
+        public GroundRenderer(ISettings settings)
         {
-            
+            this.settings = settings;
         }
 
-        public override void Render(IMapContext map)
+        public void Initialize() { }
+
+        public void Render(IMapContext map)
         {
-            if (Settings.Get<bool>("Ground"))
+            if (settings.Get<bool>("Ground"))
             {
                 const int POINTS_COUNT = 64;
                 PointF[] hor = new PointF[POINTS_COUNT];
@@ -29,7 +33,7 @@ namespace ADK.Demo.Renderers
                 for (int i = 0; i < POINTS_COUNT; i++)
                 {
                     var h = new CrdsHorizontal(map.Center.Azimuth - map.ViewAngle + step * i, 0);
-                    hor[i] = map.Projection.Project(h);
+                    hor[i] = map.Project(h);
                 }
                 if (hor[0].X >= 0) hor[0].X = -1;
                 if (hor[POINTS_COUNT - 1].X <= map.Width) hor[POINTS_COUNT - 1].X = map.Width + 1;
@@ -59,7 +63,7 @@ namespace ADK.Demo.Renderers
                     for (int i = 0; i < POINTS_COUNT; i++)
                     {
                         var h = new CrdsHorizontal(map.Center.Azimuth - map.ViewAngle - step * i, 0);
-                        hor[i] = map.Projection.Project(h);
+                        hor[i] = map.Project(h);
                     }
 
                     if (hor.Count(h => !map.IsOutOfScreen(h)) > 2)
@@ -78,9 +82,9 @@ namespace ADK.Demo.Renderers
                 }
             }
 
-            if (Settings.Get<bool>("LabelCardinalDirections"))
+            if (settings.Get<bool>("LabelCardinalDirections"))
             {
-                Brush brushCardinalLabels = new SolidBrush(Settings.Get<Color>("CardinalDirections.Color"));
+                Brush brushCardinalLabels = new SolidBrush(settings.Get<Color>("CardinalDirections.Color"));
                 string[] labels = new string[] { "S", "SW", "W", "NW", "N", "NE", "E", "SE" };
                 StringFormat format = new StringFormat() { LineAlignment = StringAlignment.Center, Alignment = StringAlignment.Center };
                 for (int i = 0; i < labels.Length; i++)
@@ -88,7 +92,7 @@ namespace ADK.Demo.Renderers
                     var h = new CrdsHorizontal(i * 360 / labels.Length, 0);
                     if (Angle.Separation(h, map.Center) < map.ViewAngle * 1.2)
                     {
-                        PointF p = map.Projection.Project(h);
+                        PointF p = map.Project(h);
                         map.Graphics.DrawStringOpaque(labels[i], SystemFonts.DefaultFont, brushCardinalLabels, Brushes.Black, p, format);
                     }
                 }

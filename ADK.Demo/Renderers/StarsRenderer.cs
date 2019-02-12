@@ -12,9 +12,10 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo.Renderers
 {
-    public class StarsRenderer : BaseSkyRenderer
+    public class StarsRenderer : IRenderer
     {
-        private IStarsProvider starsProvider;
+        private readonly IStarsProvider starsProvider;
+        private readonly ISettings settings;
 
         private ICollection<Tuple<int, int>> ConLines = new List<Tuple<int, int>>();
 
@@ -30,9 +31,10 @@ namespace ADK.Demo.Renderers
         private const int limitFlamsteedNames = 10;
         private const int limitVarNames = 5;
 
-        public StarsRenderer(Sky sky, IStarsProvider starsProvider, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
+        public StarsRenderer(IStarsProvider starsProvider, ISettings settings)
         {
             this.starsProvider = starsProvider;
+            this.settings = settings;
 
             fontStarNames = new Font("Arial", 8);
             penConLine = new Pen(new SolidBrush(Color.FromArgb(64, 64, 64)));
@@ -40,13 +42,13 @@ namespace ADK.Demo.Renderers
             brushStarNames = new SolidBrush(Color.FromArgb(64, 64, 64));
         }
 
-        public override void Render(IMapContext map)
+        public void Render(IMapContext map)
         {
             Graphics g = map.Graphics;
             var allStars = starsProvider.Stars;
-            bool isGround = Settings.Get<bool>("Ground");
+            bool isGround = settings.Get<bool>("Ground");
 
-            if (Settings.Get<bool>("ConstLines"))
+            if (settings.Get<bool>("ConstLines"))
             {
                 PointF p1, p2;
                 CrdsHorizontal h1, h2;
@@ -59,8 +61,8 @@ namespace ADK.Demo.Renderers
                         Angle.Separation(map.Center, h1) < maxSeparation &&
                         Angle.Separation(map.Center, h2) < maxSeparation)
                     {
-                        p1 = map.Projection.Project(h1);
-                        p2 = map.Projection.Project(h2);
+                        p1 = map.Project(h1);
+                        p2 = map.Project(h2);
 
                         var points = map.SegmentScreenIntersection(p1, p2);
                         if (points.Length == 2)
@@ -71,7 +73,7 @@ namespace ADK.Demo.Renderers
                 }
             }
 
-            if (Settings.Get<bool>("Stars"))
+            if (settings.Get<bool>("Stars"))
             {
                 var stars = allStars.Where(s => s != null && Angle.Separation(map.Center, s.Horizontal) < map.ViewAngle * 1.2);
                 if (isGround)
@@ -84,7 +86,7 @@ namespace ADK.Demo.Renderers
                     float diam = map.GetPointSize(star.Mag);
                     if ((int)diam > 0)
                     {
-                        PointF p = map.Projection.Project(star.Horizontal);
+                        PointF p = map.Project(star.Horizontal);
                         if (!map.IsOutOfScreen(p))
                         {
                             g.FillEllipse(GetColor(star.Color), p.X - diam / 2, p.Y - diam / 2, diam, diam);                                
@@ -93,14 +95,14 @@ namespace ADK.Demo.Renderers
                     }
                 }
 
-                if (Settings.Get<bool>("StarsLabels") && map.ViewAngle <= limitAllNames)
+                if (settings.Get<bool>("StarsLabels") && map.ViewAngle <= limitAllNames)
                 {
                     foreach (var star in stars)
                     {
                         float diam = map.GetPointSize(star.Mag);
                         if ((int)diam > 0)
                         {
-                            PointF p = map.Projection.Project(star.Horizontal);
+                            PointF p = map.Project(star.Horizontal);
                             if (!map.IsOutOfScreen(p))
                             {
                                 DrawStarName(map, p, star, diam);
@@ -141,9 +143,9 @@ namespace ADK.Demo.Renderers
         private void DrawStarName(IMapContext map, PointF point, Star s, float diam)
         {
             // Star has proper name
-            if (map.ViewAngle < limitProperNames && Settings.Get<bool>("StarsProperNames") && s.ProperName != null)
+            if (map.ViewAngle < limitProperNames && settings.Get<bool>("StarsProperNames") && s.ProperName != null)
             {
-                DrawObjectCaption(map, fontStarNames, brushStarNames, s.ProperName, point, diam);
+                map.DrawObjectCaption(fontStarNames, brushStarNames, s.ProperName, point, diam);
                 return;
             }
 
@@ -153,7 +155,7 @@ namespace ADK.Demo.Renderers
                 string bayerName = s.BayerName;
                 if (bayerName != null)
                 {
-                    DrawObjectCaption(map, fontStarNames, brushStarNames, bayerName, point, diam);
+                    map.DrawObjectCaption(fontStarNames, brushStarNames, bayerName, point, diam);
                     return;                    
                 }
             }
@@ -163,7 +165,7 @@ namespace ADK.Demo.Renderers
                 string flamsteedNumber = s.FlamsteedNumber;
                 if (flamsteedNumber != null)
                 {
-                    DrawObjectCaption(map, fontStarNames, brushStarNames, flamsteedNumber, point, diam);
+                    map.DrawObjectCaption(fontStarNames, brushStarNames, flamsteedNumber, point, diam);
                     return;
                 }
             }
@@ -174,7 +176,7 @@ namespace ADK.Demo.Renderers
                 string varName = s.VariableName.Split(' ')[0];
                 if (!varName.All(char.IsDigit))
                 {
-                    DrawObjectCaption(map, fontStarNames, brushStarNames, varName, point, diam);
+                    map.DrawObjectCaption(fontStarNames, brushStarNames, varName, point, diam);
                     return;
                 }
             }
@@ -182,11 +184,11 @@ namespace ADK.Demo.Renderers
             // Star doesn't have any names
             if (map.ViewAngle < 2)
             {
-                DrawObjectCaption(map, fontStarNames, brushStarNames, $"HR {s.Number}", point, diam);
+                map.DrawObjectCaption(fontStarNames, brushStarNames, $"HR {s.Number}", point, diam);
             }
         }
 
-        public override void Initialize()
+        public void Initialize()
         {
             string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/ConLines.dat");
             string[] parsed_line = new string[2];

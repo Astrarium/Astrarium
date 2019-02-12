@@ -35,7 +35,7 @@ namespace ADK.Demo
         public double ViewAngle { get; set; } = 90;
         public CrdsHorizontal Center { get; set; } = new CrdsHorizontal(0, 0);
         public bool Antialias { get; set; } = true;
-        public ICollection<BaseSkyRenderer> Renderers { get; } = new List<BaseSkyRenderer>();
+        public ICollection<IRenderer> Renderers { get; } = new List<IRenderer>();
         public ICollection<PointF> DrawnPoints { get; } = new List<PointF>();
         public ICollection<RectangleF> Labels { get; } = new List<RectangleF>();
         public CelestialObject SelectedObject { get; set; }
@@ -49,10 +49,10 @@ namespace ADK.Demo
 
         private MapContext mapContext = null;
 
-        public SkyMap(Sky sky)
+        public SkyMap(IObserverContext observerContext)
         {
             Projection = new ArcProjection(this);
-            mapContext = new MapContext(this, sky);
+            mapContext = new MapContext(this, observerContext);
         }
 
         public void Render(Graphics g)
@@ -89,7 +89,6 @@ namespace ADK.Demo
         {
             foreach (var renderer in Renderers)
             {
-                renderer.OnInvalidateRequested += Invalidate;
                 renderer.Initialize();
             }
         }
@@ -196,10 +195,10 @@ namespace ADK.Demo
         private class MapContext : IMapContext
         {
             private SkyMap map;
-            private Sky sky;
-            public MapContext(SkyMap map, Sky sky)
+            private IObserverContext observerContext;
+            public MapContext(SkyMap map, IObserverContext observerContext)
             {
-                this.sky = sky;
+                this.observerContext = observerContext;
                 this.map = map;
             }
 
@@ -208,14 +207,43 @@ namespace ADK.Demo
             public int Height => map.Height;
             public double ViewAngle => map.ViewAngle;
             public CrdsHorizontal Center => map.Center;
-            public ICollection<PointF> DrawnPoints => map.DrawnPoints;
-            public ICollection<RectangleF> Labels => map.Labels;
-            public CelestialObject SelectedObject => map.SelectedObject;
-            public IProjection Projection => map.Projection;
-            public SkyContext Sky => sky.Context;
+            public IObserverContext Observer => observerContext;
+
+            public PointF Project(CrdsHorizontal hor)
+            {
+                return map.Projection.Project(hor);
+            }
+
             public void AddDrawnObject(CelestialObject obj, PointF p)
             {
                 map.AddDrawnObject(obj, p);
+            }
+
+            public void DrawObjectCaption(Font font, Brush brush, string caption, PointF p, float size)
+            {
+                SizeF b = Graphics.MeasureString(caption, font);
+
+                float s = size > 5 ? (size / 2.8284f + 2) : 1;
+                for (int x = 0; x < 2; x++)
+                {
+                    for (int y = 0; y < 2; y++)
+                    {
+                        float dx = x == 0 ? s : -s - b.Width;
+                        float dy = y == 0 ? s : -s - b.Height;
+                        RectangleF r = new RectangleF(p.X + dx, p.Y + dy, b.Width, b.Height);
+                        if (!map.Labels.Any(l => l.IntersectsWith(r)) && !map.DrawnPoints.Any(v => r.Contains(v)))
+                        {
+                            Graphics.DrawString(caption, font, brush, r.Location);
+                            map.Labels.Add(r);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            public void Redraw()
+            {
+                map.Invalidate();
             }
         }
     }

@@ -343,14 +343,14 @@ namespace ADK.Demo.Calculators
                 .AddRow("Libration.Longitude", c.Get(LibrationElements).l)
 
                 .AddHeader("Nearest phases")
-                .AddRow("MoonPhases.NewMoon", c.ToLocalDate(jdNM), jdNM)
-                .AddRow("MoonPhases.FirstQuarter", c.ToLocalDate(jdFQ), jdFQ)
-                .AddRow("MoonPhases.FullMoon", c.ToLocalDate(jdFM), jdFM)
-                .AddRow("MoonPhases.LastQuarter", c.ToLocalDate(jdLQ), jdLQ)
+                .AddRow("MoonPhases.NewMoon", new Date(jdNM, c.GeoLocation.UtcOffset), jdNM)
+                .AddRow("MoonPhases.FirstQuarter", new Date(jdFQ, c.GeoLocation.UtcOffset), jdFQ)
+                .AddRow("MoonPhases.FullMoon", new Date(jdFM, c.GeoLocation.UtcOffset), jdFM)
+                .AddRow("MoonPhases.LastQuarter", new Date(jdLQ, c.GeoLocation.UtcOffset), jdLQ)
 
                 .AddHeader("Nearest apsides")
-                .AddRow("MoonApsides.Apogee", c.ToLocalDate(jdApogee), jdApogee)
-                .AddRow("MoonApsides.Perigee", c.ToLocalDate(jdPerigee), jdPerigee);
+                .AddRow("MoonApsides.Apogee", new Date(jdApogee, c.GeoLocation.UtcOffset), jdApogee)
+                .AddRow("MoonApsides.Perigee", new Date(jdPerigee, c.GeoLocation.UtcOffset), jdPerigee);
 
             return info;
         }

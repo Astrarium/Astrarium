@@ -92,7 +92,7 @@
     <Compile Include="Renderers\GroundRenderer.cs" />
     <Compile Include="Projections\SinProjection.cs" />
     <Compile Include="Projections\ArcProjection.cs" />
-    <Compile Include="Renderers\BaseSkyRenderer.cs" />
+    <Compile Include="Renderers\IRenderer.cs" />
     <Compile Include="CelestialGrid.cs" />
     <Compile Include="Renderers\CelestialGridRenderer.cs" />
     <Compile Include="Extensions.cs" />

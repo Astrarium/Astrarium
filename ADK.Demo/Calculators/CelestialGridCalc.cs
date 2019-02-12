@@ -26,7 +26,7 @@ namespace ADK.Demo.Calculators
         public CelestialGrid GridEquatorial { get; private set; } = new CelestialGrid("Equatorial", 17, 24);
         public CelestialGrid LineHorizon { get; private set; } = new CelestialGrid("Horizon", 1, 24);
 
-        public CelestialGridCalc(Sky sky)
+        public CelestialGridCalc()
         {
             // Ecliptic
             

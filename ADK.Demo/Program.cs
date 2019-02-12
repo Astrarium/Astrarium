@@ -45,7 +45,7 @@ namespace ADK.Demo
 
             Type[] rendererTypes = Assembly.GetExecutingAssembly()
                 .GetTypes()
-                .Where(t => typeof(BaseSkyRenderer).IsAssignableFrom(t) && !t.IsAbstract)
+                .Where(t => typeof(IRenderer).IsAssignableFrom(t) && !t.IsAbstract)
                 .ToArray();
 
             foreach (Type rendererType in rendererTypes)
@@ -57,7 +57,7 @@ namespace ADK.Demo
 
             // TODO: this should be rewritten
             // Renderers should be loaded from difference assemblies
-            kernel.Bind<ISkyMap>().ToConstant(new SkyMap(sky));
+            kernel.Bind<ISkyMap>().ToConstant(new SkyMap(sky.Context));
 
 
             ISkyMap map = kernel.Get<ISkyMap>();

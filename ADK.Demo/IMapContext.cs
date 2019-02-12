@@ -36,27 +36,20 @@ namespace ADK.Demo
         /// </summary>
         CrdsHorizontal Center { get; }
 
-        ICollection<PointF> DrawnPoints { get; }
-
-        /// <summary>
-        /// Collection of objects labels
-        /// </summary>
-        ICollection<RectangleF> Labels { get; }
-
-        /// <summary>
-        /// Selected celestial object
-        /// </summary>
-        CelestialObject SelectedObject { get; }
-
         void AddDrawnObject(CelestialObject obj, PointF p);
 
         /// <summary>
-        /// Gets projection which is used for converting celestial coordinates to the sky map plane.
+        /// Projects horizontal coordinates to the point on the map
         /// </summary>
-        IProjection Projection { get; }
+        /// <param name="hor">Horizontal coordinates to be projected to the map.</param>
+        /// <returns><see cref="PointF"/> instance - is a projection of horizontal corrdinates on the map.</returns>
+        PointF Project(CrdsHorizontal hor);
 
-        SkyContext Sky { get; }
+        IObserverContext Observer { get; }
 
+        void DrawObjectCaption(Font font, Brush brush, string caption, PointF p, float size);
+
+        void Redraw();
     }
 
     public static class MapContextExtensions
@@ -114,10 +107,10 @@ namespace ADK.Demo
         public static float GetRotationTowardsNorth(this IMapContext map, CrdsEquatorial eq)
         {
             // Coordinates of center of a body (image) to be rotated
-            PointF p = map.Projection.Project(eq.ToHorizontal(map.Sky.GeoLocation, map.Sky.SiderealTime));
+            PointF p = map.Project(eq.ToHorizontal(map.Observer.GeoLocation, map.Observer.SiderealTime));
 
             // Point directed to North celestial pole
-            PointF pNorth = map.Projection.Project((eq + new CrdsEquatorial(0, 1)).ToHorizontal(map.Sky.GeoLocation, map.Sky.SiderealTime));
+            PointF pNorth = map.Project((eq + new CrdsEquatorial(0, 1)).ToHorizontal(map.Observer.GeoLocation, map.Observer.SiderealTime));
 
             // Clockwise rotation
             return LineInclinationY(p, pNorth);
@@ -132,10 +125,10 @@ namespace ADK.Demo
         public static float GetRotationTowardsEclipticPole(this IMapContext map, CrdsEcliptical ecl)
         {
             // Coordinates of center of a body (image) to be rotated
-            PointF p = map.Projection.Project(ecl.ToEquatorial(map.Sky.Epsilon).ToHorizontal(map.Sky.GeoLocation, map.Sky.SiderealTime));
+            PointF p = map.Project(ecl.ToEquatorial(map.Observer.Epsilon).ToHorizontal(map.Observer.GeoLocation, map.Observer.SiderealTime));
 
             // Point directed to North ecliptic pole
-            PointF pNorth = map.Projection.Project((ecl + new CrdsEcliptical(0, 1)).ToEquatorial(map.Sky.Epsilon).ToHorizontal(map.Sky.GeoLocation, map.Sky.SiderealTime));
+            PointF pNorth = map.Project((ecl + new CrdsEcliptical(0, 1)).ToEquatorial(map.Observer.Epsilon).ToHorizontal(map.Observer.GeoLocation, map.Observer.SiderealTime));
 
             // Clockwise rotation
             return LineInclinationY(p, pNorth);

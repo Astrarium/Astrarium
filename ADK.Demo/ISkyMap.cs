@@ -39,7 +39,7 @@ namespace ADK.Demo
         /// <summary>
         /// Collection of renderers
         /// </summary>
-        ICollection<BaseSkyRenderer> Renderers { get; }
+        ICollection<IRenderer> Renderers { get; }
 
         ICollection<PointF> DrawnPoints { get; }
 

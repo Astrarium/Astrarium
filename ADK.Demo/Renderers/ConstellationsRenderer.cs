@@ -8,29 +8,33 @@ using System.Linq;
 
 namespace ADK.Demo.Renderers
 {
-    public class ConstellationsRenderer : BaseSkyRenderer
+    public class ConstellationsRenderer : IRenderer
     {
-        private IConstellationsBordersProvider bordersProvider;
-        private IConstellationsProvider constellationsProvider;
+        private readonly IConstellationsBordersProvider bordersProvider;
+        private readonly IConstellationsProvider constellationsProvider;
+        private readonly ISettings settings;
 
         private Pen penBorder = new Pen(Color.FromArgb(64, 32, 32));
         private Brush brushLabel = new SolidBrush(Color.FromArgb(64, 32, 32));
 
         private const double maxSeparation = 90 * 1.2;
 
-        public ConstellationsRenderer(Sky sky, IConstellationsProvider constellationsProvider, IConstellationsBordersProvider bordersProvider, ISkyMap skyMap, ISettings settings) : base(sky, skyMap, settings)
+        public ConstellationsRenderer(IConstellationsProvider constellationsProvider, IConstellationsBordersProvider bordersProvider, ISettings settings)
         {
             this.constellationsProvider = constellationsProvider;
             this.bordersProvider = bordersProvider;
+            this.settings = settings;
         }
 
-        public override void Render(IMapContext map)
+        public void Initialize() { }
+
+        public void Render(IMapContext map)
         {
-            if (Settings.Get<bool>("ConstBorders"))
+            if (settings.Get<bool>("ConstBorders"))
             {
                 RenderBorders(map);
             }
-            if (Settings.Get<bool>("ConstLabels"))
+            if (settings.Get<bool>("ConstLabels"))
             {
                 RenderConstLabels(map);
             }
@@ -44,7 +48,7 @@ namespace ADK.Demo.Renderers
             PointF p1, p2;
             CrdsHorizontal h1, h2;
             var borders = bordersProvider.ConstBorders;
-            bool isGround = Settings.Get<bool>("Ground");
+            bool isGround = settings.Get<bool>("Ground");
 
             foreach (var block in borders)
             {
@@ -57,8 +61,8 @@ namespace ADK.Demo.Renderers
                         Angle.Separation(map.Center, h1) < maxSeparation &&
                         Angle.Separation(map.Center, h2) < maxSeparation)
                     {
-                        p1 = map.Projection.Project(h1);
-                        p2 = map.Projection.Project(h2);
+                        p1 = map.Project(h1);
+                        p2 = map.Project(h2);
 
                         var points = map.SegmentScreenIntersection(p1, p2);
                         if (points.Length == 2)
@@ -76,7 +80,7 @@ namespace ADK.Demo.Renderers
         private void RenderConstLabels(IMapContext map)
         {
             var constellations = constellationsProvider.Constellations;
-            bool isGround = Settings.Get<bool>("Ground");
+            bool isGround = settings.Get<bool>("Ground");
 
             StringFormat format = new StringFormat();
             format.LineAlignment = StringAlignment.Center;
@@ -84,14 +88,14 @@ namespace ADK.Demo.Renderers
 
             int fontSize = Math.Min((int)(800 / map.ViewAngle), 32);
             Font font = new Font(FontFamily.GenericSansSerif, fontSize);
-            LabelType labelType = Settings.Get<LabelType>("ConstLabelsType");
+            LabelType labelType = settings.Get<LabelType>("ConstLabelsType");
 
             foreach (var c in constellations)
             {
                 var h = c.Label.Horizontal;                
                 if ((!isGround || h.Altitude > 0) && Angle.Separation(map.Center, h) < map.ViewAngle * 1.2)
                 {
-                    var p = map.Projection.Project(h);
+                    var p = map.Project(h);
 
                     string label = null;
                     switch (labelType)
@@ -105,9 +109,7 @@ namespace ADK.Demo.Renderers
                             break;
                     }
 
-                    map.Graphics.DrawString(label, font, brushLabel, p, format);
-                    var sz = map.Graphics.MeasureString(label, font);
-                    map.Labels.Add(new RectangleF(new PointF(p.X - sz.Width / 2, p.Y - sz.Height / 2), sz));
+                    map.DrawObjectCaption(font, brushLabel, label, p, 0);
                 }
             }
         }
