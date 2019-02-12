@@ -17,32 +17,11 @@ namespace ADK.Demo
 
     public class Sky : ITracksProvider
     {
-
-
         public List<Track> Tracks { get; private set; } = new List<Track>();
 
-        public SkyContext Context { get; set; }
+        public SkyContext Context { get; private set; }
 
         public ICollection<ISkyCalc> Calculators { get; private set; } = new List<ISkyCalc>();
-
-        private Dictionary<string, object> DataProviders = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-
-        public void AddDataProvider<T>(string key, Func<T> provider)
-        {
-            DataProviders.Add(key, provider);
-        }
-
-        public T Get<T>(string key)
-        {
-            if (DataProviders.ContainsKey(key))
-            {
-                return (DataProviders[key] as Func<T>).Invoke();
-            }
-            else
-            {
-                throw new ArgumentException($"There is no data provider with name `{key}`.");
-            }
-        }
 
         private List<Type> CelestialObjectTypes = new List<Type>();
         private List<IAstroEventProvider> EventProviders = new List<IAstroEventProvider>();

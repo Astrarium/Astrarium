@@ -31,14 +31,14 @@ namespace ADK.Demo.Renderers
             brushLabel = new SolidBrush(colorLabel);
         }
 
-        public override void Render(Graphics g)
+        public override void Render(IMapContext map)
         {
             var tracks = tracksProvider.Tracks;
 
             foreach (var track in tracks)
             {
                 var segments = track.Points
-                    .Select(p => Angle.Separation(p.Horizontal, Map.Center) < Map.ViewAngle * 1.2 ? p : null)
+                    .Select(p => Angle.Separation(p.Horizontal, map.Center) < map.ViewAngle * 1.2 ? p : null)
                     .Split(p => p == null, true);
 
                 foreach (var segment in segments)
@@ -55,14 +55,14 @@ namespace ADK.Demo.Renderers
                         segment.Add(nextP);
                     }
 
-                    PointF pBody = IsSegmentContainsBody(segment, track) ? Map.Projection.Project(track.Body.Horizontal) : PointF.Empty;
-                    DrawTrackSegment(g, penTrack, segment.Select(p => Map.Projection.Project(p.Horizontal)).ToArray(), pBody);
+                    PointF pBody = IsSegmentContainsBody(segment, track) ? map.Projection.Project(track.Body.Horizontal) : PointF.Empty;
+                    DrawTrackSegment(map, penTrack, segment.Select(p => map.Projection.Project(p.Horizontal)).ToArray(), pBody);
                 }
 
                 if (!segments.Any())
                 {
                     var segment = new List<CelestialPoint>();
-                    var p0 = track.Points.OrderBy(p => Angle.Separation(p.Horizontal, Map.Center)).First();
+                    var p0 = track.Points.OrderBy(p => Angle.Separation(p.Horizontal, map.Center)).First();
                     segment.Add(p0);
 
                     var p1 = track.Points.Prev(p0);
@@ -78,11 +78,11 @@ namespace ADK.Demo.Renderers
                         segment.Add(p2);
                     }
 
-                    PointF pBody = IsSegmentContainsBody(segment, track) ? Map.Projection.Project(track.Body.Horizontal) : PointF.Empty;
-                    DrawTrackSegment(g, penTrack, segment.Select(p => Map.Projection.Project(p.Horizontal)).ToArray(), pBody);
+                    PointF pBody = IsSegmentContainsBody(segment, track) ? map.Projection.Project(track.Body.Horizontal) : PointF.Empty;
+                    DrawTrackSegment(map, penTrack, segment.Select(p => map.Projection.Project(p.Horizontal)).ToArray(), pBody);
                 }
 
-                DrawLabels(g, track);
+                DrawLabels(map, track);
             }
         }
 
@@ -95,7 +95,7 @@ namespace ADK.Demo.Renderers
             return Sky.Context.JulianDay > from && Sky.Context.JulianDay < to;            
         }
 
-        private void DrawLabels(Graphics g, Track track)
+        private void DrawLabels(IMapContext map, Track track)
         {
             double trackStep = track.Step;
             double stepLabels = track.LabelsStep.TotalDays;
@@ -108,14 +108,14 @@ namespace ADK.Demo.Renderers
                 if (i % each == 0 || i == track.Points.Count - 1)
                 {
                     var tp = track.Points[i];
-                    double ad = Angle.Separation(tp.Horizontal, Map.Center);
-                    if (ad < Map.ViewAngle * 1.2)
+                    double ad = Angle.Separation(tp.Horizontal, map.Center);
+                    if (ad < map.ViewAngle * 1.2)
                     {
-                        PointF p = Map.Projection.Project(tp.Horizontal);
-                        if (!IsOutOfScreen(p))
+                        PointF p = map.Projection.Project(tp.Horizontal);
+                        if (!map.IsOutOfScreen(p))
                         {
-                            g.FillEllipse(brushLabel, p.X - 2, p.Y - 2, 4, 4);
-                            DrawObjectCaption(g, fontLabel, brushLabel, Formatters.DateTime.Format(Sky.Context.ToLocalDate(jd)), p, 4);
+                            map.Graphics.FillEllipse(brushLabel, p.X - 2, p.Y - 2, 4, 4);
+                            DrawObjectCaption(map, fontLabel, brushLabel, Formatters.DateTime.Format(Sky.Context.ToLocalDate(jd)), p, 4);
                         }
                     }
                 }
@@ -124,7 +124,7 @@ namespace ADK.Demo.Renderers
             }
         }
 
-        private void DrawTrackSegment(Graphics g, Pen penGrid, PointF[] points, PointF pBody, int iterationStep = 0)
+        private void DrawTrackSegment(IMapContext map, Pen penGrid, PointF[] points, PointF pBody, int iterationStep = 0)
         {
             iterationStep++;
 
@@ -137,16 +137,16 @@ namespace ADK.Demo.Renderers
             else if (points.Length == 2)
             {
                 points = ShiftToAncorPoint(points, pBody);
-                g.DrawLine(penGrid, points[0], points[1]);
+                map.Graphics.DrawLine(penGrid, points[0], points[1]);
             }
             // interpolation is needed
             else if (points.Length > 2 && points.Length < 20 && iterationStep < 10)
             {
                 // Coordinates of the screen center
-                var origin = new PointF(Map.Width / 2, Map.Height / 2);
+                var origin = new PointF(map.Width / 2, map.Height / 2);
 
                 // Screen diagonal
-                double diag = Math.Sqrt(Map.Width * Map.Width + Map.Height * Map.Height);
+                double diag = Math.Sqrt(map.Width * map.Width + map.Height * map.Height);
 
                 float maxX = points.Select(p => Math.Abs(p.X)).Max();
                 float maxY = points.Select(p => Math.Abs(p.Y)).Max();
@@ -181,7 +181,7 @@ namespace ADK.Demo.Renderers
                             newPoints.Add(p2);
                         }
 
-                        DrawTrackSegment(g, penGrid, newPoints.ToArray(), pBody, iterationStep);
+                        DrawTrackSegment(map, penGrid, newPoints.ToArray(), pBody, iterationStep);
                     }
 
                     if (!segments.Any())
@@ -200,14 +200,14 @@ namespace ADK.Demo.Renderers
                             newPoints.Add(p2);
                         }
 
-                        DrawTrackSegment(g, penGrid, newPoints.ToArray(), pBody, iterationStep);
+                        DrawTrackSegment(map, penGrid, newPoints.ToArray(), pBody, iterationStep);
                     }
                 }
             }
             // draw the curve in regular way
             else
             {
-                g.DrawCurve(penGrid, ShiftToAncorPoint(points, pBody));
+                map.Graphics.DrawCurve(penGrid, ShiftToAncorPoint(points, pBody));
             }
         }
 

@@ -57,17 +57,12 @@ namespace ADK.Demo.Renderers
             };
         }
 
-        private float GetDiameter(double diam)
-        {
-            return (float)(diam / 60 / Map.ViewAngle * Map.Width / 2);
-        }
-
-        public override void Render(Graphics g)
+        public override void Render(IMapContext map)
         {
             var allDeepSkies = deepSkyProvider.DeepSkies;
             bool isGround = Settings.Get<bool>("Ground");
 
-            int alpha = Math.Max(0, Math.Min((int)(k * Map.ViewAngle + b), 255));
+            int alpha = Math.Max(0, Math.Min((int)(k * map.ViewAngle + b), 255));
 
             if (lastAlpha != alpha)
             {
@@ -77,7 +72,7 @@ namespace ADK.Demo.Renderers
                 penCluster.DashStyle = DashStyle.Dash;
             }
 
-            var deepSkies = allDeepSkies.Where(ds => !ds.Status.IsEmpty() && Angle.Separation(Map.Center, ds.Horizontal) < Map.ViewAngle * 1.2);
+            var deepSkies = allDeepSkies.Where(ds => !ds.Status.IsEmpty() && Angle.Separation(map.Center, ds.Horizontal) < map.ViewAngle * 1.2);
             if (isGround)
             {
                 deepSkies = deepSkies.Where(ds => ds.Horizontal.Altitude + ds.Semidiameter / 3600 > 0);
@@ -85,13 +80,13 @@ namespace ADK.Demo.Renderers
 
             foreach (var ds in deepSkies)
             {
-                drawingHandlers[ds.Status].Draw(g, ds);
+                drawingHandlers[ds.Status].Draw(map, ds);
             }
         }
 
         private interface IDrawingStrategy
         {
-            void Draw(Graphics g, DeepSky ds);
+            void Draw(IMapContext map, DeepSky ds);
         }
 
         private class GalaxyDrawingStrategy : BaseDrawingStrategy
@@ -120,11 +115,11 @@ namespace ADK.Demo.Renderers
         {
             public GalacticNebulaDrawingStrategy(DeepSkyRenderer renderer) : base(renderer) { }
 
-            public override void Draw(Graphics g, DeepSky ds)
+            public override void Draw(IMapContext map, DeepSky ds)
             {
-                if (Renderer.Map.ViewAngle <= Renderer.minZoom)
+                if (map.ViewAngle <= Renderer.minZoom)
                 {
-                    base.Draw(g, ds);
+                    base.Draw(map, ds);
                 }
             }
 
@@ -149,11 +144,11 @@ namespace ADK.Demo.Renderers
         {
             public PlanetaryNebulaDrawingStrategy(DeepSkyRenderer renderer) : base(renderer) { }
 
-            public override void Draw(Graphics g, DeepSky ds)
+            public override void Draw(IMapContext map, DeepSky ds)
             {
-                if (Renderer.Map.ViewAngle <= Renderer.minZoom)
+                if (map.ViewAngle <= Renderer.minZoom)
                 {
-                    base.Draw(g, ds);
+                    base.Draw(map, ds);
                 }
             }
 
@@ -178,11 +173,11 @@ namespace ADK.Demo.Renderers
         {
             public ClusterDrawingStrategy(DeepSkyRenderer renderer) : base(renderer) { }
 
-            public override void Draw(Graphics g, DeepSky ds)
+            public override void Draw(IMapContext map, DeepSky ds)
             {
-                if (Renderer.Map.ViewAngle <= Renderer.minZoom)
+                if (map.ViewAngle <= Renderer.minZoom)
                 {
-                    base.Draw(g, ds);
+                    base.Draw(map, ds);
                 }
             }
 
@@ -211,7 +206,7 @@ namespace ADK.Demo.Renderers
                 Renderer = renderer;
             }
 
-            public void Draw(Graphics g, DeepSky ds)
+            public void Draw(IMapContext map, DeepSky ds)
             {
                 // Do nothing
             }
@@ -230,93 +225,93 @@ namespace ADK.Demo.Renderers
                 Renderer = renderer;
             }
 
-            public virtual void Draw(Graphics g, DeepSky ds)
+            public virtual void Draw(IMapContext map, DeepSky ds)
             {
-                PointF p = Renderer.Map.Projection.Project(ds.Horizontal);
+                PointF p = map.Projection.Project(ds.Horizontal);
 
-                float sizeA = Renderer.GetDiameter(ds.SizeA);
-                float sizeB = Renderer.GetDiameter(ds.SizeB);
+                float sizeA = GetDiameter(map, ds.SizeA);
+                float sizeB = GetDiameter(map, ds.SizeB);
 
                 // elliptic object with known size
                 if (sizeB > 0 && sizeB != sizeA)
                 {
-                    float diamA = Renderer.GetDiameter(ds.SizeA);
+                    float diamA = GetDiameter(map, ds.SizeA);
                     if (diamA > 10)
                     {
-                        float diamB = Renderer.GetDiameter(ds.SizeB);
+                        float diamB = GetDiameter(map, ds.SizeB);
                         if (ds.Outline != null)
                         {
-                            DrawOutline(g, ds.Outline);
+                            DrawOutline(map, ds.Outline);
                         }
                         else
                         {
-                            float rotation = Renderer.GetRotationTowardsNorth(ds.Equatorial) + 90 - ds.PA;
-                            g.TranslateTransform(p.X, p.Y);
-                            g.RotateTransform(rotation);
-                            DrawEllipticObject(g, diamA, diamB);
-                            g.ResetTransform();
+                            float rotation = map.GetRotationTowardsNorth(ds.Equatorial) + 90 - ds.PA;
+                            map.Graphics.TranslateTransform(p.X, p.Y);
+                            map.Graphics.RotateTransform(rotation);
+                            DrawEllipticObject(map.Graphics, diamA, diamB);
+                            map.Graphics.ResetTransform();
                         }
-                        Renderer.Map.AddDrawnObject(ds, p);
+                        map.AddDrawnObject(ds, p);
 
-                        if (Renderer.Map.ViewAngle <= Renderer.limitLabels)
+                        if (map.ViewAngle <= Renderer.limitLabels)
                         {
-                            Renderer.DrawObjectCaption(g, Renderer.fontCaption, Renderer.brushCaption, ds.DisplayName, p, Math.Min(diamA, diamB));
+                            Renderer.DrawObjectCaption(map, Renderer.fontCaption, Renderer.brushCaption, ds.DisplayName, p, Math.Min(diamA, diamB));
                         }
                     }
                 }
                 // round object
                 else if (sizeA > 0)
                 {
-                    float diamA = Renderer.GetDiameter(ds.SizeA);
+                    float diamA = GetDiameter(map, ds.SizeA);
                     if (diamA > 10)
                     {
                         if (ds.Outline != null)
                         {
-                            DrawOutline(g, ds.Outline);
+                            DrawOutline(map, ds.Outline);
                         }
                         else
                         {
-                            float rotation = Renderer.GetRotationTowardsNorth(ds.Equatorial) + 90 - ds.PA;
-                            g.TranslateTransform(p.X, p.Y);
-                            g.RotateTransform(rotation);
-                            DrawRoundObject(g, diamA);
-                            g.ResetTransform();
+                            float rotation = map.GetRotationTowardsNorth(ds.Equatorial) + 90 - ds.PA;
+                            map.Graphics.TranslateTransform(p.X, p.Y);
+                            map.Graphics.RotateTransform(rotation);
+                            DrawRoundObject(map.Graphics, diamA);
+                            map.Graphics.ResetTransform();
                         }
-                        Renderer.Map.AddDrawnObject(ds, p);
+                        map.AddDrawnObject(ds, p);
 
-                        if (Renderer.Map.ViewAngle <= Renderer.limitLabels)
+                        if (map.ViewAngle <= Renderer.limitLabels)
                         {
-                            Renderer.DrawObjectCaption(g, Renderer.fontCaption, Renderer.brushCaption, ds.DisplayName, p, diamA);
+                            Renderer.DrawObjectCaption(map, Renderer.fontCaption, Renderer.brushCaption, ds.DisplayName, p, diamA);
                         }
                     }
                 }
                 // point object
                 else
                 {
-                    float size = Renderer.GetPointSize(ds.Mag == null ? 15 : ds.Mag.Value);
+                    float size = map.GetPointSize(ds.Mag == null ? 15 : ds.Mag.Value);
                     if ((int)size > 0)
                     {
                         if (ds.Outline != null)
                         {
-                            DrawOutline(g, ds.Outline);
+                            DrawOutline(map, ds.Outline);
                         }
                         else
                         {
-                            g.TranslateTransform(p.X, p.Y);
-                            DrawPointObject(g, size);
-                            g.ResetTransform();
+                            map.Graphics.TranslateTransform(p.X, p.Y);
+                            DrawPointObject(map.Graphics, size);
+                            map.Graphics.ResetTransform();
                         }
-                        Renderer.Map.AddDrawnObject(ds, p);
+                        map.AddDrawnObject(ds, p);
 
-                        if (Renderer.Map.ViewAngle <= Renderer.limitLabels)
+                        if (map.ViewAngle <= Renderer.limitLabels)
                         {
-                            Renderer.DrawObjectCaption(g, Renderer.fontCaption, Renderer.brushCaption, ds.DisplayName, p, 0);
+                            Renderer.DrawObjectCaption(map, Renderer.fontCaption, Renderer.brushCaption, ds.DisplayName, p, 0);
                         }
                     }
                 }
             }
 
-            protected virtual GraphicsPath DrawOutline(Graphics g, ICollection<CelestialPoint> outline)
+            protected virtual GraphicsPath DrawOutline(IMapContext map, ICollection<CelestialPoint> outline)
             {
                 using (GraphicsPath gp = new GraphicsPath(FillMode.Winding))
                 {
@@ -325,27 +320,30 @@ namespace ADK.Demo.Renderers
                         var h1 = outline.ElementAt(i).Horizontal;
                         var h2 = outline.ElementAt(i + 1).Horizontal;
 
-                        double ad1 = Angle.Separation(h1, Renderer.Map.Center);
-                        double ad2 = Angle.Separation(h2, Renderer.Map.Center);
+                        double ad1 = Angle.Separation(h1, map.Center);
+                        double ad2 = Angle.Separation(h2, map.Center);
 
                         PointF p1, p2;
                         //if (ad1 < Renderer.Map.ViewAngle * 1.2 || 
                         //    ad2 < Renderer.Map.ViewAngle * 1.2)
                         {
-                            p1 = Renderer.Map.Projection.Project(h1);
-                            p2 = Renderer.Map.Projection.Project(h2);
+                            p1 = map.Projection.Project(h1);
+                            p2 = map.Projection.Project(h2);
                             gp.AddLine(p1, p2);
                             //g.DrawLine(Renderer.penNebula, p1, p2);
                         }
                     }
 
                     //g.FillPath(Renderer.brushOutline, gp);
-                    g.DrawPath(Renderer.penNebula, gp);
+                    map.Graphics.DrawPath(Renderer.penNebula, gp);
 
                     return gp;
                 }
+            }
 
-                
+            private float GetDiameter(IMapContext map, double diam)
+            {
+                return (float)(diam / 60 / map.ViewAngle * map.Width / 2);
             }
         }
     }

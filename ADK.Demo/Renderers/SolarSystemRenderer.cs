@@ -53,12 +53,7 @@ namespace ADK.Demo.Renderers
             penShadowOutline.DashStyle = DashStyle.Dot;
         }
 
-        private void ImagesCache_OnRequestCompleted()
-        {
-            Map.Invalidate();
-        }
-
-        public override void Render(Graphics g)
+        public override void Render(IMapContext map)
         {
             Sun sun = solarProvider.Sun;
             Moon moon = lunarProvider.Moon;
@@ -75,131 +70,131 @@ namespace ADK.Demo.Renderers
             {
                 if (!isSunRendered && p.Ecliptical.Distance < sun.Ecliptical.Distance)
                 {
-                    RenderSun(g, sun);
+                    RenderSun(map, sun);
                     isSunRendered = true;
                 }
 
-                RenderPlanet(g, p);
+                RenderPlanet(map, p);
 
                 if (!isSunRendered)
                 {
-                    RenderSun(g, sun);
+                    RenderSun(map, sun);
                     isSunRendered = true;
                 }
             }
 
-            RenderMoon(g, moon);
-            RenderEarthShadow(g, moon);
+            RenderMoon(map, moon);
+            RenderEarthShadow(map, moon);
         }
 
-        private void RenderSun(Graphics g, Sun sun)
+        private void RenderSun(IMapContext map, Sun sun)
         {            
             bool isGround = Settings.Get<bool>("Ground");
             bool useTextures = Settings.Get<bool>("UseTextures");
-            double ad = Angle.Separation(sun.Horizontal, Map.Center);
+            double ad = Angle.Separation(sun.Horizontal, map.Center);
 
             if ((!isGround || sun.Horizontal.Altitude + sun.Semidiameter / 3600 > 0) && 
-                ad < 1.2 * Map.ViewAngle + sun.Semidiameter / 3600)
+                ad < 1.2 * map.ViewAngle + sun.Semidiameter / 3600)
             {
-                PointF p = Map.Projection.Project(sun.Horizontal);
+                PointF p = map.Projection.Project(sun.Horizontal);
 
-                float inc = GetRotationTowardsNorth(sun.Equatorial);
+                float inc = map.GetRotationTowardsNorth(sun.Equatorial);
 
-                g.TranslateTransform(p.X, p.Y);
-                g.RotateTransform(inc);
+                map.Graphics.TranslateTransform(p.X, p.Y);
+                map.Graphics.RotateTransform(inc);
 
-                float size = GetDiskSize(sun.Semidiameter, 10);
+                float size = map.GetDiskSize(sun.Semidiameter, 10);
 
                 if (useTextures && size > 10)
                 {
-                    Image imageSun = imagesCache.RequestImage("Sun", true, SunImageProvider, Map.Invalidate);
+                    Image imageSun = imagesCache.RequestImage("Sun", true, SunImageProvider, RaiseInvalidateRequest);
                     if (imageSun != null)
                     {
-                        g.FillEllipse(penSun.Brush, -size / 2, -size / 2, size, size);
-                        g.DrawImage(imageSun, -size / 2, -size / 2, size, size);
+                        map.Graphics.FillEllipse(penSun.Brush, -size / 2, -size / 2, size, size);
+                        map.Graphics.DrawImage(imageSun, -size / 2, -size / 2, size, size);
                     }
                     else
                     {
-                        g.FillEllipse(penSun.Brush, -size / 2, -size / 2, size, size);
+                        map.Graphics.FillEllipse(penSun.Brush, -size / 2, -size / 2, size, size);
                     }
                 }
                 else
                 {
-                    g.FillEllipse(penSun.Brush, -size / 2, -size / 2, size, size);
+                    map.Graphics.FillEllipse(penSun.Brush, -size / 2, -size / 2, size, size);
                 }
 
-                g.ResetTransform();
+                map.Graphics.ResetTransform();
 
-                DrawObjectCaption(g, fontLabel, brushLabel, "Sun", p, size);
-                Map.AddDrawnObject(sun, p);
+                DrawObjectCaption(map, fontLabel, brushLabel, "Sun", p, size);
+                map.AddDrawnObject(sun, p);
             }
         }
 
-        private void RenderMoon(Graphics g, Moon moon)
+        private void RenderMoon(IMapContext map, Moon moon)
         {
             bool isGround = Settings.Get<bool>("Ground");
             bool useTextures = Settings.Get<bool>("UseTextures");
-            double ad = Angle.Separation(moon.Horizontal, Map.Center);
+            double ad = Angle.Separation(moon.Horizontal, map.Center);
 
             if ((!isGround || moon.Horizontal.Altitude + moon.Semidiameter / 3600 > 0) && 
-                ad < 1.2 * Map.ViewAngle + moon.Semidiameter / 3600.0)
+                ad < 1.2 * map.ViewAngle + moon.Semidiameter / 3600.0)
             {
-                PointF p = Map.Projection.Project(moon.Horizontal);
+                PointF p = map.Projection.Project(moon.Horizontal);
 
-                double inc = GetRotationTowardsNorth(moon.Equatorial);
+                double inc = map.GetRotationTowardsNorth(moon.Equatorial);
 
                 // final rotation of drawn image
                 // axis rotation is negated because measured counter-clockwise
                 float axisRotation = (float)(inc - moon.PAaxis);
 
-                g.TranslateTransform(p.X, p.Y);
-                g.RotateTransform(axisRotation);
+                map.Graphics.TranslateTransform(p.X, p.Y);
+                map.Graphics.RotateTransform(axisRotation);
 
                 // drawing size
-                float size = GetDiskSize(moon.Semidiameter, 10);
+                float size = map.GetDiskSize(moon.Semidiameter, 10);
 
                 if (useTextures && size > 10)
                 {
-                    Image textureMoon = imagesCache.RequestImage("Moon", new LonLatShift("Moon", moon.Libration.l, moon.Libration.b), MoonTextureProvider, Map.Invalidate);
+                    Image textureMoon = imagesCache.RequestImage("Moon", new LonLatShift("Moon", moon.Libration.l, moon.Libration.b), MoonTextureProvider, RaiseInvalidateRequest);
                     if (textureMoon != null)
                     {
-                        g.FillEllipse(Brushes.Gray, -size / 2, -size / 2, size, size);
-                        g.DrawImage(textureMoon, -size / 2 * 1.01f, -size / 2 * 1.01f, size * 1.01f, size * 1.01f);
+                        map.Graphics.FillEllipse(Brushes.Gray, -size / 2, -size / 2, size, size);
+                        map.Graphics.DrawImage(textureMoon, -size / 2 * 1.01f, -size / 2 * 1.01f, size * 1.01f, size * 1.01f);
                     }
                     else
                     {
-                        g.FillEllipse(Brushes.Gray, -size / 2, -size / 2, size, size);
+                        map.Graphics.FillEllipse(Brushes.Gray, -size / 2, -size / 2, size, size);
                     }
                 }
                 else
                 {
                     // Moon disk
-                    g.FillEllipse(Brushes.Gray, -size / 2, -size / 2, size, size);
+                    map.Graphics.FillEllipse(Brushes.Gray, -size / 2, -size / 2, size, size);
                 }
 
-                g.ResetTransform();
+                map.Graphics.ResetTransform();
 
                 float phase = (float)moon.Phase * Math.Sign(moon.Elongation);
-                float rotation = GetRotationTowardsEclipticPole(moon.Ecliptical0);
+                float rotation = map.GetRotationTowardsEclipticPole(moon.Ecliptical0);
                 GraphicsPath shadow = GetPhaseShadow(phase, size + 1);
 
                 // shadowed part of disk
-                g.TranslateTransform(p.X, p.Y);
-                g.RotateTransform(rotation);
-                g.FillPath(brushShadow, shadow);
-                g.ResetTransform();
+                map.Graphics.TranslateTransform(p.X, p.Y);
+                map.Graphics.RotateTransform(rotation);
+                map.Graphics.FillPath(brushShadow, shadow);
+                map.Graphics.ResetTransform();
 
-                DrawObjectCaption(g, fontLabel, brushLabel, "Moon", p, size);
-                Map.AddDrawnObject(moon, p);
+                DrawObjectCaption(map, fontLabel, brushLabel, "Moon", p, size);
+                map.AddDrawnObject(moon, p);
             }
         }
 
-        private void RenderEarthShadow(Graphics g, Moon moon)
+        private void RenderEarthShadow(IMapContext map, Moon moon)
         {
             // here and below suffixes meanings are: "M" = Moon, "P" = penumbra, "U" = umbra
 
             // angular distance from center of map to earth shadow center
-            double ad = Angle.Separation(moon.EarthShadowCoordinates, Map.Center);
+            double ad = Angle.Separation(moon.EarthShadowCoordinates, map.Center);
 
             // semidiameter of penumbra in seconds of arc
             double sdP = moon.EarthShadow.PenumbraRadius * 6378.0 / 1738.0 * moon.Semidiameter;
@@ -207,19 +202,19 @@ namespace ADK.Demo.Renderers
             bool isGround = Settings.Get<bool>("Ground");
 
             if ((!isGround || moon.EarthShadowCoordinates.Altitude + sdP / 3600 > 0) &&
-                ad < 1.2 * Map.ViewAngle + sdP / 3600)
+                ad < 1.2 * map.ViewAngle + sdP / 3600)
             {
-                PointF p = Map.Projection.Project(moon.EarthShadowCoordinates);
-                PointF pMoon = Map.Projection.Project(moon.Horizontal);
+                PointF p = map.Projection.Project(moon.EarthShadowCoordinates);
+                PointF pMoon = map.Projection.Project(moon.Horizontal);
 
                 // size of penumbra, in pixels
-                float szP = GetDiskSize(sdP);
+                float szP = map.GetDiskSize(sdP);
 
                 // size of umbra, in pixels
                 float szU = szP / (float)moon.EarthShadow.Ratio;
 
                 // size of Moon, in pixels 
-                float szM = GetDiskSize(moon.Semidiameter);
+                float szM = map.GetDiskSize(moon.Semidiameter);
 
                 // fraction of the penumbra ring (without umbra part)
                 float fr = 1 - szU / szP;
@@ -261,55 +256,56 @@ namespace ADK.Demo.Renderers
                         regionP.Intersect(gpM);
                         regionU.Intersect(gpM);
 
-                        g.FillRegion(brushP, regionP);
-                        g.FillRegion(brushU, regionU);
+                        map.Graphics.FillRegion(brushP, regionP);
+                        map.Graphics.FillRegion(brushU, regionU);
                     }
 
                     // outline circles
                     if (Settings.Get<bool>("EarthShadowOutline"))
                     {
-                        g.TranslateTransform(p.X, p.Y);
-                        g.DrawEllipse(penShadowOutline, -szP / 2, -szP / 2, szP, szP);
-                        g.DrawEllipse(penShadowOutline, -szU / 2, -szU / 2, szU, szU);                       
-                        g.ResetTransform();
-                        if (Map.ViewAngle <= 10)
+                        map.Graphics.TranslateTransform(p.X, p.Y);
+                        map.Graphics.DrawEllipse(penShadowOutline, -szP / 2, -szP / 2, szP, szP);
+                        map.Graphics.DrawEllipse(penShadowOutline, -szU / 2, -szU / 2, szU, szU);
+                        map.Graphics.ResetTransform();
+                        if (map.ViewAngle <= 10)
                         {
-                            DrawObjectCaption(g, fontShadowLabel, brushShadowLabel, "Earth shadow", p, szP);
+                            DrawObjectCaption(map, fontShadowLabel, brushShadowLabel, "Earth shadow", p, szP);
                         }
                     }
                 }
             }
         }
 
-        private void RenderPlanet(Graphics g, Planet planet)
+        private void RenderPlanet(IMapContext map, Planet planet)
         {
-            double ad = Angle.Separation(planet.Horizontal, Map.Center);
+            Graphics g = map.Graphics;
+            double ad = Angle.Separation(planet.Horizontal, map.Center);
             bool isGround = Settings.Get<bool>("Ground");
             bool useTextures = Settings.Get<bool>("UseTextures");
 
             if ((!isGround || planet.Horizontal.Altitude + planet.Semidiameter / 3600 > 0) && 
-                ad < 1.2 * Map.ViewAngle + planet.Semidiameter / 3600)
+                ad < 1.2 * map.ViewAngle + planet.Semidiameter / 3600)
             {
-                float size = GetPointSize(planet.Magnitude);
-                float diam = GetDiskSize(planet.Semidiameter);
+                float size = map.GetPointSize(planet.Magnitude);
+                float diam = map.GetDiskSize(planet.Semidiameter);
 
                 // diameter is to small to render as planet disk, 
                 // but point size caclulated from magnitude is enough to be drawn
                 if (size > diam && (int)size > 0)
                 {
-                    PointF p = Map.Projection.Project(planet.Horizontal);
+                    PointF p = map.Projection.Project(planet.Horizontal);
                     g.FillEllipse(GetPlanetColor(planet.Number), p.X - size / 2, p.Y - size / 2, size, size);
 
-                    DrawObjectCaption(g, fontLabel, brushLabel, planet.Name, p, size);
-                    Map.AddDrawnObject(planet, p);
+                    DrawObjectCaption(map, fontLabel, brushLabel, planet.Name, p, size);
+                    map.AddDrawnObject(planet, p);
                 }
 
                 // planet should be rendered as disk
                 else if (diam >= size && (int)diam > 0)
                 {
-                    PointF p = Map.Projection.Project(planet.Horizontal);
+                    PointF p = map.Projection.Project(planet.Horizontal);
 
-                    float rotation = GetRotationTowardsNorth(planet.Equatorial) + 360 - (float)planet.Appearance.P;
+                    float rotation = map.GetRotationTowardsNorth(planet.Equatorial) + 360 - (float)planet.Appearance.P;
 
                     g.TranslateTransform(p.X, p.Y);
                     g.RotateTransform(rotation);
@@ -321,7 +317,7 @@ namespace ADK.Demo.Renderers
                         var rings = planetsProvider.SaturnRings;
 
                         // scale value to convert visible size of ring to screen pixels
-                        double scale = 1.0 / 3600 / Map.ViewAngle * Map.Width / 4;
+                        double scale = 1.0 / 3600 / map.ViewAngle * map.Width / 4;
 
                         // draw rings by halfs arcs, first half is farther one
                         for (int half = 0; half < 2; half++)
@@ -335,7 +331,7 @@ namespace ADK.Demo.Renderers
                                 // half of source image: 0 = top, 1 = bottom
                                 int h = (half + (rings.B > 0 ? 0 : 1)) % 2;
 
-                                Image textureRings = imagesCache.RequestImage("Rings", true, t => Image.FromFile("Data\\Rings.png", true), Map.Invalidate);
+                                Image textureRings = imagesCache.RequestImage("Rings", true, t => Image.FromFile("Data\\Rings.png", true), RaiseInvalidateRequest);
                                 if (textureRings != null)
                                 {
                                     g.DrawImage(textureRings,
@@ -371,13 +367,13 @@ namespace ADK.Demo.Renderers
                             // draw planet disk after first half of rings
                             if (half == 0)
                             {
-                                DrawPlanetGlobe(g, planet, diam);                                
+                                DrawPlanetGlobe(map, planet, diam);                                
                             }
                         }
                     }
                     else
                     {
-                        DrawPlanetGlobe(g, planet, diam);                     
+                        DrawPlanetGlobe(map, planet, diam);                     
                     }
 
                     g.ResetTransform();
@@ -389,7 +385,7 @@ namespace ADK.Demo.Renderers
                         GraphicsPath shadow = GetPhaseShadow(phase, diam + 1, planet.Flattening);
 
                         // rotation of phase image
-                        rotation = GetRotationTowardsEclipticPole(planet.Ecliptical);
+                        rotation = map.GetRotationTowardsEclipticPole(planet.Ecliptical);
 
                         g.TranslateTransform(p.X, p.Y);
                         g.RotateTransform(rotation);
@@ -397,21 +393,22 @@ namespace ADK.Demo.Renderers
                         g.ResetTransform();
                     }
                     
-                    DrawObjectCaption(g, fontLabel, brushLabel, planet.Name, p, diam);
-                    Map.AddDrawnObject(planet, p);
+                    DrawObjectCaption(map, fontLabel, brushLabel, planet.Name, p, diam);
+                    map.AddDrawnObject(planet, p);
                 }
             }
         }
 
-        private void DrawPlanetGlobe(Graphics g, Planet planet, float diam)
+        private void DrawPlanetGlobe(IMapContext map, Planet planet, float diam)
         {
+            Graphics g = map.Graphics;
             float diamEquat = diam;
             float diamPolar = (1 - planet.Flattening) * diam;
             bool useTextures = Settings.Get<bool>("UseTextures");
 
             if (useTextures)
             {
-                Image texturePlanet = imagesCache.RequestImage(planet.Number.ToString(), new LonLatShift(planet.Number.ToString(), planet.Appearance.CM, planet.Appearance.D), PlanetTextureProvider, Map.Invalidate);
+                Image texturePlanet = imagesCache.RequestImage(planet.Number.ToString(), new LonLatShift(planet.Number.ToString(), planet.Appearance.CM, planet.Appearance.D), PlanetTextureProvider, RaiseInvalidateRequest);
                 if (texturePlanet != null)
                 {
                     g.DrawImage(texturePlanet, -diamEquat / 2 * 1.01f, -diamPolar / 2 * 1.01f, diamEquat * 1.01f, diamPolar * 1.01f);

@@ -47,9 +47,12 @@ namespace ADK.Demo
         /// </summary>
         private ICollection<CelestialObject> drawnObjects = new List<CelestialObject>();
 
-        public SkyMap()
+        private MapContext mapContext = null;
+
+        public SkyMap(Sky sky)
         {
             Projection = new ArcProjection(this);
+            mapContext = new MapContext(this, sky);
         }
 
         public void Render(Graphics g)
@@ -64,9 +67,11 @@ namespace ADK.Demo
 
             bool needDrawSelectedObject = true;
 
+            mapContext.Graphics = g;
+
             foreach (var renderer in Renderers)
             {
-                renderer.Render(g);
+                renderer.Render(mapContext);
                 if (needDrawSelectedObject)
                 {
                     needDrawSelectedObject = !DrawSelectedObject(g);
@@ -84,11 +89,12 @@ namespace ADK.Demo
         {
             foreach (var renderer in Renderers)
             {
+                renderer.OnInvalidateRequested += Invalidate;
                 renderer.Initialize();
             }
         }
 
-        public void Invalidate()
+        private void Invalidate()
         {
             OnInvalidate?.Invoke();
         }
@@ -185,6 +191,32 @@ namespace ADK.Demo
             }
 
             return false;
+        }
+
+        private class MapContext : IMapContext
+        {
+            private SkyMap map;
+            private Sky sky;
+            public MapContext(SkyMap map, Sky sky)
+            {
+                this.sky = sky;
+                this.map = map;
+            }
+
+            public Graphics Graphics { get; set; }
+            public int Width => map.Width;
+            public int Height => map.Height;
+            public double ViewAngle => map.ViewAngle;
+            public CrdsHorizontal Center => map.Center;
+            public ICollection<PointF> DrawnPoints => map.DrawnPoints;
+            public ICollection<RectangleF> Labels => map.Labels;
+            public CelestialObject SelectedObject => map.SelectedObject;
+            public IProjection Projection => map.Projection;
+            public SkyContext Sky => sky.Context;
+            public void AddDrawnObject(CelestialObject obj, PointF p)
+            {
+                map.AddDrawnObject(obj, p);
+            }
         }
     }
 }

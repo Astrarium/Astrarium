@@ -40,8 +40,9 @@ namespace ADK.Demo.Renderers
             brushStarNames = new SolidBrush(Color.FromArgb(64, 64, 64));
         }
 
-        public override void Render(Graphics g)
+        public override void Render(IMapContext map)
         {
+            Graphics g = map.Graphics;
             var allStars = starsProvider.Stars;
             bool isGround = Settings.Get<bool>("Ground");
 
@@ -55,13 +56,13 @@ namespace ADK.Demo.Renderers
                     h2 = allStars.ElementAt(line.Item2).Horizontal;
 
                     if ((!isGround || h1.Altitude > 0 || h2.Altitude > 0) && 
-                        Angle.Separation(Map.Center, h1) < maxSeparation &&
-                        Angle.Separation(Map.Center, h2) < maxSeparation)
+                        Angle.Separation(map.Center, h1) < maxSeparation &&
+                        Angle.Separation(map.Center, h2) < maxSeparation)
                     {
-                        p1 = Map.Projection.Project(h1);
-                        p2 = Map.Projection.Project(h2);
+                        p1 = map.Projection.Project(h1);
+                        p2 = map.Projection.Project(h2);
 
-                        var points = SegmentScreenIntersection(p1, p2);
+                        var points = map.SegmentScreenIntersection(p1, p2);
                         if (points.Length == 2)
                         {
                             g.DrawLine(penConLine, points[0], points[1]);
@@ -72,7 +73,7 @@ namespace ADK.Demo.Renderers
 
             if (Settings.Get<bool>("Stars"))
             {
-                var stars = allStars.Where(s => s != null && Angle.Separation(Map.Center, s.Horizontal) < Map.ViewAngle * 1.2);
+                var stars = allStars.Where(s => s != null && Angle.Separation(map.Center, s.Horizontal) < map.ViewAngle * 1.2);
                 if (isGround)
                 {
                     stars = stars.Where(s => s.Horizontal.Altitude >= 0);
@@ -80,29 +81,29 @@ namespace ADK.Demo.Renderers
 
                 foreach (var star in stars)
                 {
-                    float diam = GetPointSize(star.Mag);
+                    float diam = map.GetPointSize(star.Mag);
                     if ((int)diam > 0)
                     {
-                        PointF p = Map.Projection.Project(star.Horizontal);
-                        if (!IsOutOfScreen(p))
+                        PointF p = map.Projection.Project(star.Horizontal);
+                        if (!map.IsOutOfScreen(p))
                         {
                             g.FillEllipse(GetColor(star.Color), p.X - diam / 2, p.Y - diam / 2, diam, diam);                                
-                            Map.AddDrawnObject(star, p);
+                            map.AddDrawnObject(star, p);
                         }
                     }
                 }
 
-                if (Settings.Get<bool>("StarsLabels") && Map.ViewAngle <= limitAllNames)
+                if (Settings.Get<bool>("StarsLabels") && map.ViewAngle <= limitAllNames)
                 {
                     foreach (var star in stars)
                     {
-                        float diam = GetPointSize(star.Mag);
+                        float diam = map.GetPointSize(star.Mag);
                         if ((int)diam > 0)
                         {
-                            PointF p = Map.Projection.Project(star.Horizontal);
-                            if (!IsOutOfScreen(p))
+                            PointF p = map.Projection.Project(star.Horizontal);
+                            if (!map.IsOutOfScreen(p))
                             {
-                                DrawStarName(g, p, star, diam);
+                                DrawStarName(map, p, star, diam);
                             }
                         }
                     }
@@ -137,51 +138,51 @@ namespace ADK.Demo.Renderers
         /// <summary>
         /// Draws star name
         /// </summary>
-        private void DrawStarName(Graphics g, PointF point, Star s, float diam)
+        private void DrawStarName(IMapContext map, PointF point, Star s, float diam)
         {
             // Star has proper name
-            if (Map.ViewAngle < limitProperNames && Settings.Get<bool>("StarsProperNames") && s.ProperName != null)
+            if (map.ViewAngle < limitProperNames && Settings.Get<bool>("StarsProperNames") && s.ProperName != null)
             {
-                DrawObjectCaption(g, fontStarNames, brushStarNames, s.ProperName, point, diam);
+                DrawObjectCaption(map, fontStarNames, brushStarNames, s.ProperName, point, diam);
                 return;
             }
 
             // Star has Bayer name (greek letter)
-            if (Map.ViewAngle < limitBayerNames)
+            if (map.ViewAngle < limitBayerNames)
             {
                 string bayerName = s.BayerName;
                 if (bayerName != null)
                 {
-                    DrawObjectCaption(g, fontStarNames, brushStarNames, bayerName, point, diam);
+                    DrawObjectCaption(map, fontStarNames, brushStarNames, bayerName, point, diam);
                     return;                    
                 }
             }
             // Star has Flamsteed number
-            if (Map.ViewAngle < limitFlamsteedNames)
+            if (map.ViewAngle < limitFlamsteedNames)
             {
                 string flamsteedNumber = s.FlamsteedNumber;
                 if (flamsteedNumber != null)
                 {
-                    DrawObjectCaption(g, fontStarNames, brushStarNames, flamsteedNumber, point, diam);
+                    DrawObjectCaption(map, fontStarNames, brushStarNames, flamsteedNumber, point, diam);
                     return;
                 }
             }
 
             // Star has variable id
-            if (Map.ViewAngle < limitVarNames && s.VariableName != null)
+            if (map.ViewAngle < limitVarNames && s.VariableName != null)
             {
                 string varName = s.VariableName.Split(' ')[0];
                 if (!varName.All(char.IsDigit))
                 {
-                    DrawObjectCaption(g, fontStarNames, brushStarNames, varName, point, diam);
+                    DrawObjectCaption(map, fontStarNames, brushStarNames, varName, point, diam);
                     return;
                 }
             }
 
             // Star doesn't have any names
-            if (Map.ViewAngle < 2)
+            if (map.ViewAngle < 2)
             {
-                DrawObjectCaption(g, fontStarNames, brushStarNames, $"HR {s.Number}", point, diam);
+                DrawObjectCaption(map, fontStarNames, brushStarNames, $"HR {s.Number}", point, diam);
             }
         }
 

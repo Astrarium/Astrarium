@@ -15,65 +15,65 @@ namespace ADK.Demo.Renderers
             
         }
 
-        public override void Render(Graphics g)
+        public override void Render(IMapContext map)
         {
             if (Settings.Get<bool>("Ground"))
             {
                 const int POINTS_COUNT = 64;
                 PointF[] hor = new PointF[POINTS_COUNT];
-                double step = 2 * Map.ViewAngle / (POINTS_COUNT - 1);
+                double step = 2 * map.ViewAngle / (POINTS_COUNT - 1);
                 SolidBrush brushGround = new SolidBrush(Color.FromArgb(4, 10, 10));
 
                 // Bottom part of ground shape
 
                 for (int i = 0; i < POINTS_COUNT; i++)
                 {
-                    var h = new CrdsHorizontal(Map.Center.Azimuth - Map.ViewAngle + step * i, 0);
-                    hor[i] = Map.Projection.Project(h);
+                    var h = new CrdsHorizontal(map.Center.Azimuth - map.ViewAngle + step * i, 0);
+                    hor[i] = map.Projection.Project(h);
                 }
                 if (hor[0].X >= 0) hor[0].X = -1;
-                if (hor[POINTS_COUNT - 1].X <= Map.Width) hor[POINTS_COUNT - 1].X = Map.Width + 1;
+                if (hor[POINTS_COUNT - 1].X <= map.Width) hor[POINTS_COUNT - 1].X = map.Width + 1;
 
-                if (hor.Any(h => !IsOutOfScreen(h)))
+                if (hor.Any(h => !map.IsOutOfScreen(h)))
                 {
                     GraphicsPath gp = new GraphicsPath();
 
                     gp.AddCurve(hor);
                     gp.AddLines(new PointF[]
                     {
-                        new PointF(Map.Width + 1, Map.Height + 1),
-                        new PointF(-1, Map.Height + 1)
+                        new PointF(map.Width + 1, map.Height + 1),
+                        new PointF(-1, map.Height + 1)
                     });
 
-                    g.FillPath(brushGround, gp);
+                    map.Graphics.FillPath(brushGround, gp);
                 }
-                else if (Map.Center.Altitude <= 0)
+                else if (map.Center.Altitude <= 0)
                 {
-                    g.FillRectangle(brushGround, 0, 0, Map.Width, Map.Height);
+                    map.Graphics.FillRectangle(brushGround, 0, 0, map.Width, map.Height);
                 }
 
                 // Top part of ground shape 
 
-                if (Map.Center.Altitude > 0)
+                if (map.Center.Altitude > 0)
                 {
                     for (int i = 0; i < POINTS_COUNT; i++)
                     {
-                        var h = new CrdsHorizontal(Map.Center.Azimuth - Map.ViewAngle - step * i, 0);
-                        hor[i] = Map.Projection.Project(h);
+                        var h = new CrdsHorizontal(map.Center.Azimuth - map.ViewAngle - step * i, 0);
+                        hor[i] = map.Projection.Project(h);
                     }
 
-                    if (hor.Count(h => !IsOutOfScreen(h)) > 2)
+                    if (hor.Count(h => !map.IsOutOfScreen(h)) > 2)
                     {
                         GraphicsPath gp = new GraphicsPath();
 
                         gp.AddCurve(hor);
                         gp.AddLines(new PointF[]
                         {
-                            new PointF(Map.Width + 1, -1),
+                            new PointF(map.Width + 1, -1),
                             new PointF(-1, -1),
                         });
 
-                        g.FillPath(brushGround, gp);
+                        map.Graphics.FillPath(brushGround, gp);
                     }
                 }
             }
@@ -86,10 +86,10 @@ namespace ADK.Demo.Renderers
                 for (int i = 0; i < labels.Length; i++)
                 {
                     var h = new CrdsHorizontal(i * 360 / labels.Length, 0);
-                    if (Angle.Separation(h, Map.Center) < Map.ViewAngle * 1.2)
+                    if (Angle.Separation(h, map.Center) < map.ViewAngle * 1.2)
                     {
-                        PointF p = Map.Projection.Project(h);
-                        g.DrawStringOpaque(labels[i], SystemFonts.DefaultFont, brushCardinalLabels, Brushes.Black, p, format);
+                        PointF p = map.Projection.Project(h);
+                        map.Graphics.DrawStringOpaque(labels[i], SystemFonts.DefaultFont, brushCardinalLabels, Brushes.Black, p, format);
                     }
                 }
             }

@@ -24,22 +24,22 @@ namespace ADK.Demo.Renderers
             this.bordersProvider = bordersProvider;
         }
 
-        public override void Render(Graphics g)
+        public override void Render(IMapContext map)
         {
             if (Settings.Get<bool>("ConstBorders"))
             {
-                RenderBorders(g);
+                RenderBorders(map);
             }
             if (Settings.Get<bool>("ConstLabels"))
             {
-                RenderConstLabels(g);
+                RenderConstLabels(map);
             }
         }
 
         /// <summary>
         /// Renders constellation borders on the map
         /// </summary>
-        private void RenderBorders(Graphics g)
+        private void RenderBorders(IMapContext map)
         {
             PointF p1, p2;
             CrdsHorizontal h1, h2;
@@ -54,16 +54,16 @@ namespace ADK.Demo.Renderers
                     h2 = block.ElementAt(i + 1).Horizontal;
 
                     if ((!isGround || h1.Altitude >= 0 || h2.Altitude >= 0) &&
-                        Angle.Separation(Map.Center, h1) < maxSeparation &&
-                        Angle.Separation(Map.Center, h2) < maxSeparation)
+                        Angle.Separation(map.Center, h1) < maxSeparation &&
+                        Angle.Separation(map.Center, h2) < maxSeparation)
                     {
-                        p1 = Map.Projection.Project(h1);
-                        p2 = Map.Projection.Project(h2);
+                        p1 = map.Projection.Project(h1);
+                        p2 = map.Projection.Project(h2);
 
-                        var points = SegmentScreenIntersection(p1, p2);
+                        var points = map.SegmentScreenIntersection(p1, p2);
                         if (points.Length == 2)
                         {
-                            g.DrawLine(penBorder, points[0], points[1]);
+                            map.Graphics.DrawLine(penBorder, points[0], points[1]);
                         }
                     }
                 }
@@ -73,7 +73,7 @@ namespace ADK.Demo.Renderers
         /// <summary>
         /// Renders constellations labels on the map
         /// </summary>
-        private void RenderConstLabels(Graphics g)
+        private void RenderConstLabels(IMapContext map)
         {
             var constellations = constellationsProvider.Constellations;
             bool isGround = Settings.Get<bool>("Ground");
@@ -82,16 +82,16 @@ namespace ADK.Demo.Renderers
             format.LineAlignment = StringAlignment.Center;
             format.Alignment = StringAlignment.Center;
 
-            int fontSize = Math.Min((int)(800 / Map.ViewAngle), 32);
+            int fontSize = Math.Min((int)(800 / map.ViewAngle), 32);
             Font font = new Font(FontFamily.GenericSansSerif, fontSize);
             LabelType labelType = Settings.Get<LabelType>("ConstLabelsType");
 
             foreach (var c in constellations)
             {
                 var h = c.Label.Horizontal;                
-                if ((!isGround || h.Altitude > 0) && Angle.Separation(Map.Center, h) < Map.ViewAngle * 1.2)
+                if ((!isGround || h.Altitude > 0) && Angle.Separation(map.Center, h) < map.ViewAngle * 1.2)
                 {
-                    var p = Map.Projection.Project(h);
+                    var p = map.Projection.Project(h);
 
                     string label = null;
                     switch (labelType)
@@ -105,9 +105,9 @@ namespace ADK.Demo.Renderers
                             break;
                     }
 
-                    g.DrawString(label, font, brushLabel, p, format);
-                    var sz = g.MeasureString(label, font);
-                    Map.Labels.Add(new RectangleF(new PointF(p.X - sz.Width / 2, p.Y - sz.Height / 2), sz));
+                    map.Graphics.DrawString(label, font, brushLabel, p, format);
+                    var sz = map.Graphics.MeasureString(label, font);
+                    map.Labels.Add(new RectangleF(new PointF(p.X - sz.Width / 2, p.Y - sz.Height / 2), sz));
                 }
             }
         }

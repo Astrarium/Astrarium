@@ -35,15 +35,15 @@ namespace ADK.Demo.Renderers
             b = -(minZoom * maxAlpha - maxZoom * minAlpha) / (maxZoom - minZoom);
         }
 
-        public override void Render(Graphics g)
+        public override void Render(IMapContext map)
         {
             if (Settings.Get<bool>("MilkyWay"))
             {
-                int alpha = Math.Min((int)(k * Map.ViewAngle + b), 255);
+                int alpha = Math.Min((int)(k * map.ViewAngle + b), 255);
                 if (alpha > maxAlpha)
                 {
-                    var smoothing = g.SmoothingMode;
-                    g.SmoothingMode = SmoothingMode.None;
+                    var smoothing = map.Graphics.SmoothingMode;
+                    map.Graphics.SmoothingMode = SmoothingMode.None;
 
                     for (int i = 0; i < milkyWayProvider.MilkyWay.Count(); i++)
                     {
@@ -51,19 +51,19 @@ namespace ADK.Demo.Renderers
                         for (int j = 0; j < milkyWayProvider.MilkyWay[i].Count; j++)
                         {
                             var h = milkyWayProvider.MilkyWay[i][j].Horizontal;
-                            if (Angle.Separation(h, Map.Center) < 90 * 1.2)
+                            if (Angle.Separation(h, map.Center) < 90 * 1.2)
                             {
-                                points.Add(Map.Projection.Project(h));
+                                points.Add(map.Projection.Project(h));
                             }
                         }
 
                         if (points.Count >= 3)
                         {
-                            g.FillPolygon(new SolidBrush(Color.FromArgb(alpha, colorMilkyWay)), points.ToArray(), FillMode.Winding);
+                            map.Graphics.FillPolygon(new SolidBrush(Color.FromArgb(alpha, colorMilkyWay)), points.ToArray(), FillMode.Winding);
                         }
                     }
 
-                    g.SmoothingMode = smoothing;
+                    map.Graphics.SmoothingMode = smoothing;
                 }
             }
         }

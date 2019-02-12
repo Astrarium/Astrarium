@@ -53,11 +53,13 @@ namespace ADK.Demo
                 kernel.Bind(rendererType).ToSelf().InSingletonScope();                
             }
 
+            Sky sky = kernel.Get<Sky>();
+
             // TODO: this should be rewritten
             // Renderers should be loaded from difference assemblies
-            kernel.Bind<ISkyMap>().ToConstant(new SkyMap());
+            kernel.Bind<ISkyMap>().ToConstant(new SkyMap(sky));
 
-            Sky sky = kernel.Get<Sky>();
+
             ISkyMap map = kernel.Get<ISkyMap>();
 
             map.Renderers.Add(kernel.Get<MilkyWayRenderer>());
