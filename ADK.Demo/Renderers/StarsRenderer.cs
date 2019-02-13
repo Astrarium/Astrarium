@@ -207,5 +207,7 @@ namespace ADK.Demo.Renderers
                 }
             }
         }
+
+        public int ZOrder => 600;
     }
 }

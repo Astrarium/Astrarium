@@ -34,26 +34,12 @@ namespace ADK.Demo
         /// <summary>
         /// Gets or sets horizontal coordinates of the central point of the canvas.
         /// </summary>
-        CrdsHorizontal Center { get; set; }
-
-        /// <summary>
-        /// Collection of renderers
-        /// </summary>
-        ICollection<IRenderer> Renderers { get; }
-
-        ICollection<PointF> DrawnPoints { get; }
-
-        /// <summary>
-        /// Collection of objects labels
-        /// </summary>
-        ICollection<RectangleF> Labels { get; }
+        CrdsHorizontal Center { get; }
 
         /// <summary>
         /// Selected celestial object
         /// </summary>
         CelestialObject SelectedObject { get; set; }
-
-        void AddDrawnObject(CelestialObject obj, PointF p);
 
         /// <summary>
         /// Gets or sets projection which is used for converting celestial coordinates to the sky map plane.

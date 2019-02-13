@@ -10,30 +10,27 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo
 {
-    public interface ITracksProvider
+    public interface ICelestialObjectsProvider
     {
-        List<Track> Tracks { get; }
+        ICollection<CelestialObject> CelestialObjects<T>(Func<T, bool> search = null) where T : CelestialObject;
     }
 
-    public class Sky : ITracksProvider
+    public class Sky : ICelestialObjectsProvider
     {
-        public List<Track> Tracks { get; private set; } = new List<Track>();
-
         public SkyContext Context { get; private set; }
 
-        public ICollection<ISkyCalc> Calculators { get; private set; } = new List<ISkyCalc>();
-
+        private List<ISkyCalc> Calculators = new List<ISkyCalc>();
         private List<Type> CelestialObjectTypes = new List<Type>();
         private List<IAstroEventProvider> EventProviders = new List<IAstroEventProvider>();
         private Dictionary<Type, Delegate> InfoProviders = new Dictionary<Type, Delegate>();
         private List<ISearchProvider> SearchProviders = new List<ISearchProvider>();
         private Dictionary<Type, EphemerisConfig> EphemConfigs = new Dictionary<Type, EphemerisConfig>();
         
-
         public void Initialize()
         {
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
+            // TODO: move to assembly scanner
             CelestialObjectTypes = assemblies.SelectMany(a => a.GetTypes())
                 .Where(t => !t.IsAbstract && typeof(CelestialObject).IsAssignableFrom(t))
                 .ToList();
@@ -79,15 +76,12 @@ namespace ADK.Demo
                     EventProviders.Add(calc as IAstroEventProvider);
                 }
             }
-
-            //AddDataProvider<ICollection<Track>>("Tracks", () => Tracks);
         }
 
-        public Sky()
+        public Sky(SkyContext context, ICollection<ISkyCalc> calculators)
         {
-            Context = new SkyContext(
-                new Date(DateTime.Now).ToJulianEphemerisDay(),
-                new CrdsGeographical(56.3333, -44, +3));
+            Calculators.AddRange(calculators);
+            Context = context;
         }
 
         public void Calculate()
@@ -184,7 +178,7 @@ namespace ADK.Demo
             List<AstroEvent> events = new List<AstroEvent>();
             foreach (var ep in EventProviders)
             {
-                events.AddRange(ep.GetEvents(jdFrom, jdTo));
+                events.AddRange(ep.GetEvents(null, jdFrom, jdTo));
             }
 
             return events.OrderBy(e => e.JulianDay).ToArray();
@@ -210,19 +204,24 @@ namespace ADK.Demo
             return results.Take(maxCount).OrderBy(r => r.Name).ToList();
         }
 
-        public void AddTrack(Track track)
+        public ICollection<CelestialObject> CelestialObjects<T>(Func<T, bool> search = null) where T : CelestialObject
         {
-            if (!(track.Body is IMovingObject))
-                throw new Exception($"The '{track.Body.GetType()}' class should implement '{nameof(IMovingObject)}' interface.");
-
-            var positions = GetEphemeris<CrdsEquatorial>(track.Body, track.From, track.To, track.Step, "Equatorial");
-            foreach (var eq in positions)
-            {
-                track.Points.Add(new CelestialPoint() { Equatorial0 = eq });
-            }
-
-            Tracks.Add(track);
-            Calculate();
+            return null;
         }
+
+        //public void AddTrack(Track track)
+        //{
+        //    if (!(track.Body is IMovingObject))
+        //        throw new Exception($"The '{track.Body.GetType()}' class should implement '{nameof(IMovingObject)}' interface.");
+
+        //    var positions = GetEphemeris<CrdsEquatorial>(track.Body, track.From, track.To, track.Step, "Equatorial");
+        //    foreach (var eq in positions)
+        //    {
+        //        track.Points.Add(new CelestialPoint() { Equatorial0 = eq });
+        //    }
+
+        //    Tracks.Add(track);
+        //    Calculate();
+        //}
     }
 }

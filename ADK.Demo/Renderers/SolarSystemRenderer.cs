@@ -57,6 +57,8 @@ namespace ADK.Demo.Renderers
 
         public void Initialize() { }
 
+        public int ZOrder => 700;
+
         public void Render(IMapContext map)
         {
             Sun sun = solarProvider.Sun;

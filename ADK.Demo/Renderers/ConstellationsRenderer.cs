@@ -26,8 +26,6 @@ namespace ADK.Demo.Renderers
             this.settings = settings;
         }
 
-        public void Initialize() { }
-
         public void Render(IMapContext map)
         {
             if (settings.Get<bool>("ConstBorders"))
@@ -39,6 +37,10 @@ namespace ADK.Demo.Renderers
                 RenderConstLabels(map);
             }
         }
+
+        public void Initialize() { }
+
+        public int ZOrder => 300;
 
         /// <summary>
         /// Renders constellation borders on the map
@@ -109,7 +111,7 @@ namespace ADK.Demo.Renderers
                             break;
                     }
 
-                    map.DrawObjectCaption(font, brushLabel, label, p, 0);
+                    map.Graphics.DrawString(label, font, brushLabel, p, format);
                 }
             }
         }

@@ -60,8 +60,6 @@ namespace ADK.Demo.Renderers
             };
         }
 
-        public void Initialize() { }
-
         public void Render(IMapContext map)
         {
             var allDeepSkies = deepSkyProvider.DeepSkies;
@@ -342,5 +340,9 @@ namespace ADK.Demo.Renderers
                 return (float)(diam / 60 / map.ViewAngle * map.Width / 2);
             }
         }
+
+        public void Initialize() { }
+
+        public int ZOrder => 200;
     }
 }

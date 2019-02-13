@@ -190,7 +190,7 @@ namespace ADK.Demo.Calculators
             e.Add("RTS.Duration", (c, s) => RiseTransitSet(c).Duration);
         }
 
-        public ICollection<AstroEvent> GetEvents(double jdFrom, double jdTo)
+        public ICollection<AstroEvent> GetEvents(ICelestialObjectsProvider objectsProvider, double jdFrom, double jdTo)
         {
             List<AstroEvent> events = new List<AstroEvent>();
 

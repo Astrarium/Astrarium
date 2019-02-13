@@ -56,6 +56,16 @@ namespace ADK
             Altitude = altitude;
         }
 
+        /// <summary>
+        /// Sets horizontal coordinates values.
+        /// </summary>
+        /// <param name="other">Instance of coordinates to be copied.</param>
+        public void Set(CrdsHorizontal other)
+        {
+            Azimuth = other.Azimuth;
+            Altitude = other.Altitude;
+        }
+
         public override string ToString()
         {
             return $"Az: {new DMS(Azimuth)}; Alt:{new DMS(Altitude)}";

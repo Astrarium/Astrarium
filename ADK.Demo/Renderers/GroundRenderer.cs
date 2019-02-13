@@ -19,6 +19,8 @@ namespace ADK.Demo.Renderers
 
         public void Initialize() { }
 
+        public int ZOrder => 800;
+
         public void Render(IMapContext map)
         {
             if (settings.Get<bool>("Ground"))

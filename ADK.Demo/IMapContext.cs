@@ -45,7 +45,13 @@ namespace ADK.Demo
         /// <returns><see cref="PointF"/> instance - is a projection of horizontal corrdinates on the map.</returns>
         PointF Project(CrdsHorizontal hor);
 
-        IObserverContext Observer { get; }
+        double JulianDay { get; }
+
+        double Epsilon { get; }
+
+        CrdsGeographical GeoLocation { get; }
+
+        double SiderealTime { get; }
 
         void DrawObjectCaption(Font font, Brush brush, string caption, PointF p, float size);
 
@@ -107,10 +113,10 @@ namespace ADK.Demo
         public static float GetRotationTowardsNorth(this IMapContext map, CrdsEquatorial eq)
         {
             // Coordinates of center of a body (image) to be rotated
-            PointF p = map.Project(eq.ToHorizontal(map.Observer.GeoLocation, map.Observer.SiderealTime));
+            PointF p = map.Project(eq.ToHorizontal(map.GeoLocation, map.SiderealTime));
 
             // Point directed to North celestial pole
-            PointF pNorth = map.Project((eq + new CrdsEquatorial(0, 1)).ToHorizontal(map.Observer.GeoLocation, map.Observer.SiderealTime));
+            PointF pNorth = map.Project((eq + new CrdsEquatorial(0, 1)).ToHorizontal(map.GeoLocation, map.SiderealTime));
 
             // Clockwise rotation
             return LineInclinationY(p, pNorth);
@@ -125,10 +131,10 @@ namespace ADK.Demo
         public static float GetRotationTowardsEclipticPole(this IMapContext map, CrdsEcliptical ecl)
         {
             // Coordinates of center of a body (image) to be rotated
-            PointF p = map.Project(ecl.ToEquatorial(map.Observer.Epsilon).ToHorizontal(map.Observer.GeoLocation, map.Observer.SiderealTime));
+            PointF p = map.Project(ecl.ToEquatorial(map.Epsilon).ToHorizontal(map.GeoLocation, map.SiderealTime));
 
             // Point directed to North ecliptic pole
-            PointF pNorth = map.Project((ecl + new CrdsEcliptical(0, 1)).ToEquatorial(map.Observer.Epsilon).ToHorizontal(map.Observer.GeoLocation, map.Observer.SiderealTime));
+            PointF pNorth = map.Project((ecl + new CrdsEcliptical(0, 1)).ToEquatorial(map.Epsilon).ToHorizontal(map.GeoLocation, map.SiderealTime));
 
             // Clockwise rotation
             return LineInclinationY(p, pNorth);

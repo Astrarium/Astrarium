@@ -10,26 +10,23 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo.Calculators
 {
+    public interface ITracksProvider
+    {
+        List<Track> Tracks { get; }
+    }
+
     /// <summary>
     /// Calculates coordinates of motion tracks of celestial bodies
     /// </summary>
-    public class TrackCalc : ISkyCalc
+    public class TrackCalc : ISkyCalc, ITracksProvider
     {
-        private ITracksProvider TracksProvider;
-
-        /// <summary>
-        /// Creates new instance of TrackCalc
-        /// </summary>
-        public TrackCalc(ITracksProvider tracksProvider)
-        {
-            TracksProvider = tracksProvider;
-        }
+        public List<Track> Tracks { get; } = new List<Track>();
 
         public void Initialize() { }
 
         public void Calculate(SkyContext context)
         {
-            foreach (var track in TracksProvider.Tracks)
+            foreach (var track in Tracks)
             {
                 foreach (var tp in track.Points)
                 {

@@ -16,5 +16,6 @@ namespace ADK.Demo.Renderers
     {
         void Render(IMapContext map);
         void Initialize();
+        int ZOrder { get; }
     }
 }

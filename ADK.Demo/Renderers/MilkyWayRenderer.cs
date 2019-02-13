@@ -37,8 +37,6 @@ namespace ADK.Demo.Renderers
             b = -(minZoom * maxAlpha - maxZoom * minAlpha) / (maxZoom - minZoom);
         }
 
-        public void Initialize() { }
-
         public void Render(IMapContext map)
         {
             if (settings.Get<bool>("MilkyWay"))
@@ -71,5 +69,9 @@ namespace ADK.Demo.Renderers
                 }
             }
         }
+
+        public void Initialize() { }
+
+        public int ZOrder => 100;
     }
 }

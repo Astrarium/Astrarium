@@ -1,4 +1,5 @@
-﻿using ADK.Demo.Objects;
+﻿using ADK.Demo.Calculators;
+using ADK.Demo.Objects;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -30,8 +31,6 @@ namespace ADK.Demo.Renderers
             penTrack = new Pen(colorTrack);
             brushLabel = new SolidBrush(colorLabel);
         }
-
-        public void Initialize() { }
 
         public void Render(IMapContext map)
         {
@@ -88,13 +87,17 @@ namespace ADK.Demo.Renderers
             }
         }
 
+        public void Initialize() { }
+
+        public int ZOrder => 500;
+
         private bool IsSegmentContainsBody(IMapContext map, ICollection<CelestialPoint> segment, Track track)
         {
             int firstIndex = track.Points.IndexOf(segment.First());
             int lastIndex = track.Points.IndexOf(segment.Last());
             double from = (double)firstIndex / (track.Points.Count - 1) * track.Duration + track.From;
             double to = (double)lastIndex / (track.Points.Count - 1) * track.Duration + track.From;
-            return map.Observer.JulianDay > from && map.Observer.JulianDay < to;            
+            return map.JulianDay > from && map.JulianDay < to;            
         }
 
         private void DrawLabels(IMapContext map, Track track)
@@ -117,7 +120,7 @@ namespace ADK.Demo.Renderers
                         if (!map.IsOutOfScreen(p))
                         {
                             map.Graphics.FillEllipse(brushLabel, p.X - 2, p.Y - 2, 4, 4);
-                            map.DrawObjectCaption(fontLabel, brushLabel, Formatters.DateTime.Format(new Date(jd, map.Observer.GeoLocation.UtcOffset)), p, 4);
+                            map.DrawObjectCaption(fontLabel, brushLabel, Formatters.DateTime.Format(new Date(jd, map.GeoLocation.UtcOffset)), p, 4);
                         }
                     }
                 }

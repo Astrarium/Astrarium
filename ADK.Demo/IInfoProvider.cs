@@ -24,7 +24,7 @@ namespace ADK.Demo
 
     public interface IAstroEventProvider
     {
-        ICollection<AstroEvent> GetEvents(double jdFrom, double jdTo);
+        ICollection<AstroEvent> GetEvents(ICelestialObjectsProvider celestialObjectsProvider, double jdFrom, double jdTo);
     }
 
     public struct SearchResultItem 

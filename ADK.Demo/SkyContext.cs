@@ -6,15 +6,7 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo
 {
-    public interface IObserverContext
-    {
-        double JulianDay { get; }
-        CrdsGeographical GeoLocation { get; }
-        double SiderealTime { get; }
-        double Epsilon { get; }
-    }
-
-    public class SkyContext : IObserverContext
+    public class SkyContext
     {
         private Dictionary<IntPtr, object> resultsCache = new Dictionary<IntPtr, object>();
         private Dictionary<IntPtr, object>[] argsCache = new Dictionary<IntPtr, object>[6];
