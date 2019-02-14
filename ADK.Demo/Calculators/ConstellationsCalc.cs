@@ -18,7 +18,7 @@ namespace ADK.Demo.Calculators
         List<List<CelestialPoint>> ConstBorders { get; }
     }
 
-    public class ConstellationsCalc : ISkyCalc, IConstellationsProvider, IConstellationsBordersProvider
+    public class ConstellationsCalc : BaseCalc, IConstellationsProvider, IConstellationsBordersProvider
     {
         /// <summary>
         /// Constellations
@@ -30,7 +30,7 @@ namespace ADK.Demo.Calculators
         /// </summary>
         public List<List<CelestialPoint>> ConstBorders { get; private set; } = new List<List<CelestialPoint>>();
 
-        public void Calculate(SkyContext context)
+        public override void Calculate(SkyContext context)
         {
             var p = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
 
@@ -56,7 +56,7 @@ namespace ADK.Demo.Calculators
             }
         }
 
-        public void Initialize()
+        public override void Initialize()
         {
             LoadBordersData();
             LoadLabelsData();

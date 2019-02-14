@@ -15,13 +15,11 @@ namespace ADK.Demo.Calculators
         Sun Sun { get; }
     }
 
-    public class SolarCalc : ISkyCalc, ISolarProvider, IEphemProvider<Sun>, IInfoProvider<Sun>, ISearchProvider<Sun>, IAstroEventProvider
+    public class SolarCalc : BaseCalc<Sun>, ISolarProvider
     {
         public Sun Sun { get; private set; } = new Sun();
 
-        public void Initialize() { }
-
-        public void Calculate(SkyContext c)
+        public override void Calculate(SkyContext c)
         {
             Sun.Equatorial = c.Get(Equatorial);
             Sun.Horizontal = c.Get(Horizontal);
@@ -133,7 +131,7 @@ namespace ADK.Demo.Calculators
             return Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, c.Get(Parallax), c.Get(Semidiameter) / 3600.0);
         }
 
-        public CelestialObjectInfo GetInfo(SkyContext c, Sun sun)
+        public override CelestialObjectInfo GetInfo(SkyContext c, Sun sun)
         {
             var rts = c.Get(RiseTransitSet);
             var jdSpring = c.Get(Seasons, Season.Spring);
@@ -182,7 +180,7 @@ namespace ADK.Demo.Calculators
             return info;
         }
 
-        public void ConfigureEphemeris(EphemerisConfig<Sun> e)
+        public override void ConfigureEphemeris(EphemerisConfig<Sun> e)
         {
             e.Add("RTS.Rise", (c, s) => RiseTransitSet(c).Rise);
             e.Add("RTS.Transit", (c, s) => RiseTransitSet(c).Transit);
@@ -190,7 +188,7 @@ namespace ADK.Demo.Calculators
             e.Add("RTS.Duration", (c, s) => RiseTransitSet(c).Duration);
         }
 
-        public ICollection<AstroEvent> GetEvents(ICelestialObjectsProvider objectsProvider, double jdFrom, double jdTo)
+        public override ICollection<AstroEvent> GetEvents(ICelestialObjectsProvider objectsProvider, double jdFrom, double jdTo)
         {
             List<AstroEvent> events = new List<AstroEvent>();
 
@@ -205,7 +203,7 @@ namespace ADK.Demo.Calculators
             return events.Where(e => e.JulianDay >= jdFrom && e.JulianDay < jdTo).ToArray();
         }
 
-        public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
+        public override ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
         {
             if (CultureInfo.InvariantCulture.CompareInfo.IndexOf("Sun", searchString, CompareOptions.IgnoreCase) >= 0)
                 return new[] { new SearchResultItem(Sun, "Sun") };

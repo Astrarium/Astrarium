@@ -14,7 +14,7 @@ namespace ADK.Demo.Calculators
         RingsAppearance SaturnRings { get; }
     }
 
-    public class PlanetsCalc : ISkyCalc, IEphemProvider<Planet>, IInfoProvider<Planet>, ISearchProvider<Planet>, IPlanetsProvider
+    public class PlanetsCalc : BaseCalc<Planet>, IPlanetsProvider
     {
         private Planet[] planets = new Planet[8];
 
@@ -44,8 +44,6 @@ namespace ADK.Demo.Calculators
             planets[Planet.JUPITER - 1].Flattening = 0.064874f;
             planets[Planet.SATURN - 1].Flattening = 0.097962f;
         }
-
-        public void Initialize() { }
 
         /// <summary>
         /// Get heliocentrical coordinates of Earth
@@ -254,10 +252,10 @@ namespace ADK.Demo.Calculators
                 eq[i] = new SkyContext(jd + diff[i], c.GeoLocation).Get(Equatorial0, p);
             }
 
-            return ADK.Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, parallax);
+            return Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, parallax);
         }
 
-        public void Calculate(SkyContext context)
+        public override void Calculate(SkyContext context)
         {
             foreach (var p in planets)
             {
@@ -309,7 +307,7 @@ namespace ADK.Demo.Calculators
             return Constellations.FindConstellation(c.Get(Equatorial1875, p));
         }
 
-        public void ConfigureEphemeris(EphemerisConfig<Planet> e)
+        public override void ConfigureEphemeris(EphemerisConfig<Planet> e)
         {
             e.Add("Magnitude", (c, p) => c.Get(Magnitude, p.Number));
 
@@ -340,7 +338,7 @@ namespace ADK.Demo.Calculators
                .WithFormatter(Formatters.Time);
         }
 
-        public CelestialObjectInfo GetInfo(SkyContext c, Planet planet)
+        public override CelestialObjectInfo GetInfo(SkyContext c, Planet planet)
         {
             int p = planet.Number;
 
@@ -397,7 +395,7 @@ namespace ADK.Demo.Calculators
             return info;
         }
 
-        public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
+        public override ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
         {
             return planets.Where(p => p.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
                 .Select(p => new SearchResultItem(p, p.Name))

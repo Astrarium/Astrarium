@@ -18,14 +18,14 @@ namespace ADK.Demo.Calculators
     /// <summary>
     /// Calculates coordinates of Milky Way outline points to be rendered on map
     /// </summary>
-    public class MilkyWayCalc : ISkyCalc, IMilkyWayProvider
+    public class MilkyWayCalc : BaseCalc, IMilkyWayProvider
     {
         /// <summary>
         /// Outline points
         /// </summary>
         public List<List<CelestialPoint>> MilkyWay { get; private set; } = new List<List<CelestialPoint>>();
 
-        public void Calculate(SkyContext context)
+        public override void Calculate(SkyContext context)
         {
             var p = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
 
@@ -42,7 +42,7 @@ namespace ADK.Demo.Calculators
             }
         }
 
-        public void Initialize()
+        public override void Initialize()
         {
             string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/MilkyWay.dat");
 

@@ -19,7 +19,7 @@ namespace ADK.Demo
     {
         public SkyContext Context { get; private set; }
 
-        private List<ISkyCalc> Calculators = new List<ISkyCalc>();
+        private List<BaseCalc> Calculators = new List<BaseCalc>();
         private List<Type> CelestialObjectTypes = new List<Type>();
         private List<IAstroEventProvider> EventProviders = new List<IAstroEventProvider>();
         private Dictionary<Type, Delegate> InfoProviders = new Dictionary<Type, Delegate>();
@@ -78,7 +78,7 @@ namespace ADK.Demo
             }
         }
 
-        public Sky(SkyContext context, ICollection<ISkyCalc> calculators)
+        public Sky(SkyContext context, ICollection<BaseCalc> calculators)
         {
             Calculators.AddRange(calculators);
             Context = context;

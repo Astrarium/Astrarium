@@ -15,11 +15,11 @@ namespace ADK.Demo.Calculators
         Moon Moon { get; }
     }
 
-    public class LunarCalc : ISkyCalc, ILunarProvider, IEphemProvider<Moon>, IInfoProvider<Moon>, ISearchProvider<Moon>
+    public class LunarCalc : BaseCalc<Moon>, ILunarProvider
     {
         public Moon Moon { get; private set; } = new Moon();
 
-        public void Calculate(SkyContext c)
+        public override void Calculate(SkyContext c)
         {
             Moon.Equatorial = c.Get(Equatorial);
             Moon.Horizontal = c.Get(Horizontal);
@@ -33,8 +33,6 @@ namespace ADK.Demo.Calculators
             Moon.EarthShadow = c.Get(EarthShadow);
             Moon.EarthShadowCoordinates = c.Get(EarthShadowCoordinates);
         }
-
-        public void Initialize() { }
 
         /// <summary>
         /// Gets helipcentrical coordinates of Earth
@@ -281,7 +279,7 @@ namespace ADK.Demo.Calculators
             return Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, c.Get(Parallax), c.Get(Semidiameter) / 3600.0);
         }
 
-        public void ConfigureEphemeris(EphemerisConfig<Moon> e)
+        public override void ConfigureEphemeris(EphemerisConfig<Moon> e)
         {
             e.Add("RTS.Rise", (c, m) => c.Get(RiseTransitSet).Rise);
             e.Add("RTS.RiseAzimuth", (c, m) => c.Get(RiseTransitSet).RiseAzimuth);
@@ -294,7 +292,7 @@ namespace ADK.Demo.Calculators
             e.Add("Equatorial.Delta", (c, m) => c.Get(Equatorial).Delta);
         }
 
-        public CelestialObjectInfo GetInfo(SkyContext c, Moon m)
+        public override CelestialObjectInfo GetInfo(SkyContext c, Moon m)
         {
             var rts = c.Get(RiseTransitSet);
             var jdNM = c.Get(NearestPhase, MoonPhase.NewMoon);
@@ -355,7 +353,7 @@ namespace ADK.Demo.Calculators
             return info;
         }
 
-        public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
+        public override ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
         {
             if ("Moon".StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
                 return new[] { new SearchResultItem(Moon, "Moon") };

@@ -55,7 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Calculators\DeepSkyCalc.cs" />
-    <Compile Include="Calculators\ISkyCalc.cs" />
+    <Compile Include="Calculators\BaseCalc.cs" />
     <Compile Include="Calculators\TrackCalc.cs" />
     <Compile Include="Calculators\MilkyWayCalc.cs" />
     <Compile Include="Calculators\ConstellationsCalc.cs" />

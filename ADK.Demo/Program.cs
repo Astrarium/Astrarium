@@ -33,18 +33,18 @@ namespace ADK.Demo
             // from the specific directory and search for calculators there
             Type[] calcTypes = Assembly.GetExecutingAssembly()
                 .GetTypes()
-                .Where(t => typeof(ISkyCalc).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
+                .Where(t => typeof(BaseCalc).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
                 .ToArray();
                         
             foreach (Type calcType in calcTypes)
             {
-                var interfaces = calcType.GetInterfaces().ToList();
-                if (interfaces.Any())
+                var types = calcType.GetInterfaces().ToList();
+                if (types.Any())
                 {
                     // each interface that calculator implements
                     // should be bound to the calc instance
-                    interfaces.Add(calcType);
-                    kernel.Bind(interfaces.ToArray()).To(calcType).InSingletonScope();
+                    types.Add(calcType);
+                    kernel.Bind(types.ToArray()).To(calcType).InSingletonScope();
                 }
             }
 
@@ -63,7 +63,7 @@ namespace ADK.Demo
             
             var calculators = calcTypes
                 .Select(c => kernel.Get(c))
-                .Cast<ISkyCalc>()
+                .Cast<BaseCalc>()
                 .ToArray();
 
             var renderers = rendererTypes

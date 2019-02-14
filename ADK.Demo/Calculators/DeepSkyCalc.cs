@@ -19,7 +19,7 @@ namespace ADK.Demo.Calculators
     /// <summary>
     /// Calculates coordinates of Deep Sky objects
     /// </summary>
-    public class DeepSkyCalc : ISkyCalc, IDeepSkyProvider, IInfoProvider<DeepSky>, IEphemProvider<DeepSky>, ISearchProvider<DeepSky>
+    public class DeepSkyCalc : BaseCalc<DeepSky>, IDeepSkyProvider
     {
         private static string LOCATION = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         private static string NGCIC_FILE = Path.Combine(LOCATION, "Data/NGCIC.dat");
@@ -36,7 +36,7 @@ namespace ADK.Demo.Calculators
         /// </summary>
         private long RecordLength = 0;
 
-        public void Calculate(SkyContext context)
+        public override void Calculate(SkyContext context)
         {
             // precessional elements
             var p = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
@@ -143,14 +143,14 @@ namespace ADK.Demo.Calculators
             return Constellations.FindConstellation(c.Get(Equatorial1875, ds));
         }
 
-        public void ConfigureEphemeris(EphemerisConfig<DeepSky> e)
+        public override void ConfigureEphemeris(EphemerisConfig<DeepSky> e)
         {
             e.Add("RTS.Rise", (c, ds) => c.Get(RiseTransitSet, ds).Rise);
             e.Add("RTS.Transit", (c, ds) => c.Get(RiseTransitSet, ds).Transit);
             e.Add("RTS.Set", (c, ds) => c.Get(RiseTransitSet, ds).Set);
         }
 
-        public CelestialObjectInfo GetInfo(SkyContext c, DeepSky ds)
+        public override CelestialObjectInfo GetInfo(SkyContext c, DeepSky ds)
         {
             var rts = c.Get(RiseTransitSet, ds);
             var det = c.Get(ReadDeepSkyDetails, ds);
@@ -229,7 +229,7 @@ namespace ADK.Demo.Calculators
             return info;
         }
 
-        public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
+        public override ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
         {           
             return DeepSkies.Where(ds => ds.AllNames.Any(name => name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
                 .Take(maxCount)
@@ -237,7 +237,7 @@ namespace ADK.Demo.Calculators
                 .ToArray();
         }
 
-        public void Initialize()
+        public override void Initialize()
         {
             // Load NGC/IC catalogs data
             using (var reader = new StreamReader(NGCIC_FILE))
