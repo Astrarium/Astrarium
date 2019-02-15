@@ -67,7 +67,6 @@
     <Compile Include="EphemerisConfig.cs" />
     <Compile Include="Formatting.cs" />
     <Compile Include="IInfoProvider.cs" />
-    <Compile Include="IEphemProvider.cs" />
     <Compile Include="IMapContext.cs" />
     <Compile Include="Objects\CelestialObject.cs" />
     <Compile Include="Objects\CelestialPoint.cs" />
@@ -91,7 +90,7 @@
     <Compile Include="Renderers\GroundRenderer.cs" />
     <Compile Include="Projections\SinProjection.cs" />
     <Compile Include="Projections\ArcProjection.cs" />
-    <Compile Include="Renderers\IRenderer.cs" />
+    <Compile Include="Renderers\BaseRenderer.cs" />
     <Compile Include="CelestialGrid.cs" />
     <Compile Include="Renderers\CelestialGridRenderer.cs" />
     <Compile Include="Extensions.cs" />

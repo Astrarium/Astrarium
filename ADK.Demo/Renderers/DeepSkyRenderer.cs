@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo.Renderers
 {
-    public class DeepSkyRenderer : IRenderer
+    public class DeepSkyRenderer : BaseRenderer
     {
         private int limitLabels = 20;
         private double minAlpha = 10;
@@ -60,7 +60,7 @@ namespace ADK.Demo.Renderers
             };
         }
 
-        public void Render(IMapContext map)
+        public override void Render(IMapContext map)
         {
             var allDeepSkies = deepSkyProvider.DeepSkies;
             bool isGround = settings.Get<bool>("Ground");
@@ -341,8 +341,6 @@ namespace ADK.Demo.Renderers
             }
         }
 
-        public void Initialize() { }
-
-        public int ZOrder => 200;
+        public override int ZOrder => 200;
     }
 }

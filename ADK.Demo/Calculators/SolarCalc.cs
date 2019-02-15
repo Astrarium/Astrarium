@@ -188,7 +188,7 @@ namespace ADK.Demo.Calculators
             e.Add("RTS.Duration", (c, s) => RiseTransitSet(c).Duration);
         }
 
-        public override ICollection<AstroEvent> GetEvents(ICelestialObjectsProvider objectsProvider, double jdFrom, double jdTo)
+        public override ICollection<AstroEvent> GetEvents(double jdFrom, double jdTo)
         {
             List<AstroEvent> events = new List<AstroEvent>();
 

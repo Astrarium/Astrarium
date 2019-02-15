@@ -17,16 +17,6 @@ namespace ADK.Demo
         }
     }
 
-    public interface IInfoProvider<T> where T : CelestialObject
-    {
-        CelestialObjectInfo GetInfo(SkyContext context, T body);
-    }
-
-    public interface IAstroEventProvider
-    {
-        ICollection<AstroEvent> GetEvents(ICelestialObjectsProvider celestialObjectsProvider, double jdFrom, double jdTo);
-    }
-
     public struct SearchResultItem 
     {
         public string Name { get; private set; }
@@ -40,13 +30,6 @@ namespace ADK.Demo
     }
 
     public delegate ICollection<SearchResultItem> SearchDelegate(string searchString, int maxCount);
-
-    public interface ISearchProvider
-    {
-        ICollection<SearchResultItem> Search(string searchString, int maxCount = 50);
-    }
-
-    public interface ISearchProvider<T> : ISearchProvider where T : CelestialObject { }
 
     public class CelestialObjectInfo
     { 

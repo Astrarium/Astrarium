@@ -53,7 +53,7 @@ namespace ADK.Demo
             // from the specific directory and search for renderers there
             Type[] rendererTypes = Assembly.GetExecutingAssembly()
                 .GetTypes()
-                .Where(t => typeof(IRenderer).IsAssignableFrom(t) && !t.IsAbstract)
+                .Where(t => typeof(BaseRenderer).IsAssignableFrom(t) && !t.IsAbstract)
                 .ToArray();
 
             foreach (Type rendererType in rendererTypes)
@@ -68,7 +68,7 @@ namespace ADK.Demo
 
             var renderers = rendererTypes
                 .Select(r => kernel.Get(r))
-                .Cast<IRenderer>()
+                .Cast<BaseRenderer>()
                 .OrderBy(r => r.ZOrder)
                 .ToArray();
 

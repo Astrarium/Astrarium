@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo.Renderers
 {
-    public class GroundRenderer : IRenderer
+    public class GroundRenderer : BaseRenderer
     {
         private readonly ISettings settings;
 
@@ -17,11 +17,9 @@ namespace ADK.Demo.Renderers
             this.settings = settings;
         }
 
-        public void Initialize() { }
+        public override int ZOrder => 800;
 
-        public int ZOrder => 800;
-
-        public void Render(IMapContext map)
+        public override void Render(IMapContext map)
         {
             if (settings.Get<bool>("Ground"))
             {

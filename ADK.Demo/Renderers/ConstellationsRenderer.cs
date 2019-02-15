@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace ADK.Demo.Renderers
 {
-    public class ConstellationsRenderer : IRenderer
+    public class ConstellationsRenderer : BaseRenderer
     {
         private readonly IConstellationsBordersProvider bordersProvider;
         private readonly IConstellationsProvider constellationsProvider;
@@ -26,7 +26,7 @@ namespace ADK.Demo.Renderers
             this.settings = settings;
         }
 
-        public void Render(IMapContext map)
+        public override void Render(IMapContext map)
         {
             if (settings.Get<bool>("ConstBorders"))
             {
@@ -38,9 +38,7 @@ namespace ADK.Demo.Renderers
             }
         }
 
-        public void Initialize() { }
-
-        public int ZOrder => 300;
+        public override int ZOrder => 300;
 
         /// <summary>
         /// Renders constellation borders on the map

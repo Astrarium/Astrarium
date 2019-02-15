@@ -10,70 +10,54 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo
 {
-    public interface ICelestialObjectsProvider
+    public class Sky
     {
-        ICollection<CelestialObject> CelestialObjects<T>(Func<T, bool> search = null) where T : CelestialObject;
-    }
-
-    public class Sky : ICelestialObjectsProvider
-    {
-        public SkyContext Context { get; private set; }
+        private delegate ICollection<SearchResultItem> SearchDelegate(string searchString, int maxCount = 50);
+        private delegate ICollection<AstroEvent> GetEventsDelegate(double from, double to);
+        private delegate CelestialObjectInfo GetInfoDelegate<T>(SkyContext context, T body) where T : CelestialObject;
 
         private List<BaseCalc> Calculators = new List<BaseCalc>();
-        private List<Type> CelestialObjectTypes = new List<Type>();
-        private List<IAstroEventProvider> EventProviders = new List<IAstroEventProvider>();
-        private Dictionary<Type, Delegate> InfoProviders = new Dictionary<Type, Delegate>();
-        private List<ISearchProvider> SearchProviders = new List<ISearchProvider>();
         private Dictionary<Type, EphemerisConfig> EphemConfigs = new Dictionary<Type, EphemerisConfig>();
-        
+        private Dictionary<Type, Delegate> InfoProviders = new Dictionary<Type, Delegate>();
+        private Dictionary<Type, SearchDelegate> SearchProviders = new Dictionary<Type, SearchDelegate>();
+        private Dictionary<Type, GetEventsDelegate> EventProviders = new Dictionary<Type, GetEventsDelegate>();
+
+        public SkyContext Context { get; private set; }
+
         public void Initialize()
         {
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-            // TODO: move to assembly scanner
-            CelestialObjectTypes = assemblies.SelectMany(a => a.GetTypes())
-                .Where(t => !t.IsAbstract && typeof(CelestialObject).IsAssignableFrom(t))
-                .ToList();
-
-            Type ephemProviderType = typeof(IEphemProvider<>);
-            Type infoProviderType = typeof(IInfoProvider<>);
-            Type searchProviderType = typeof(ISearchProvider<>);
-
-            string configureEphemerisMethodName = nameof(IEphemProvider<CelestialObject>.ConfigureEphemeris);
 
             foreach (var calc in Calculators)
             {
                 calc.Initialize();
 
-                foreach (Type bodyType in CelestialObjectTypes)
-                {
-                    Type genericEphemProviderType = ephemProviderType.MakeGenericType(bodyType);
-                    Type genericInfoProviderType = infoProviderType.MakeGenericType(bodyType);
-                    Type genericSearchProviderType = searchProviderType.MakeGenericType(bodyType);
+                Type calcType = calc.GetType();
+                Type calcBaseType = calcType.BaseType;
 
-                    if (genericEphemProviderType.IsAssignableFrom(calc.GetType()))
+                if (calcBaseType.IsGenericType && calcBaseType.GetGenericTypeDefinition() == typeof(BaseCalc<>))
+                {
+                    Type bodyType = calcBaseType.GetGenericArguments().First();
+
+                    // Ephemeris configs
+                    EphemerisConfig config = Activator.CreateInstance(typeof(EphemerisConfig<>).MakeGenericType(bodyType)) as EphemerisConfig;
+                    calcType.GetMethod(nameof(BaseCalc<CelestialObject>.ConfigureEphemeris)).Invoke(calc, new object[] { config });
+                    if (config.Any())
                     {
-                        EphemerisConfig config = Activator.CreateInstance(typeof(EphemerisConfig<>).MakeGenericType(bodyType)) as EphemerisConfig;
-                        genericEphemProviderType.GetMethod(configureEphemerisMethodName).Invoke(calc, new object[] { config });
                         EphemConfigs[bodyType] = config;
                     }
 
-                    if (genericInfoProviderType.IsAssignableFrom(calc.GetType()))
-                    {
-                        Type funcType = typeof(Func<,,>);
-                        Type genericFuncType = funcType.MakeGenericType(typeof(SkyContext), bodyType, typeof(CelestialObjectInfo));
-                        InfoProviders[bodyType] = genericInfoProviderType.GetMethod(nameof(IInfoProvider<CelestialObject>.GetInfo)).CreateDelegate(genericFuncType, calc);
-                    }
+                    // Info provider
+                    Type genericGetInfoFuncType = typeof(GetInfoDelegate<>).MakeGenericType(bodyType);
+                    InfoProviders[bodyType] = calcType.GetMethod(nameof(BaseCalc<CelestialObject>.GetInfo)).CreateDelegate(genericGetInfoFuncType, calc) as Delegate;
 
-                    if (genericSearchProviderType.IsAssignableFrom(calc.GetType()))
-                    {
-                        SearchProviders.Add(calc as ISearchProvider);
-                    }
-                }
+                    // Search provider
+                    var searchFunc = calcType.GetMethod(nameof(BaseCalc<CelestialObject>.Search)).CreateDelegate(typeof(SearchDelegate), calc) as SearchDelegate;
+                    SearchProviders[bodyType] = searchFunc;
 
-                if (typeof(IAstroEventProvider).IsAssignableFrom(calc.GetType()))
-                {
-                    EventProviders.Add(calc as IAstroEventProvider);
+                    // Astro events provider
+                    var eventsFunc = calcType.GetMethod(nameof(BaseCalc<CelestialObject>.GetEvents)).CreateDelegate(typeof(GetEventsDelegate), calc) as GetEventsDelegate;
+                    EventProviders[bodyType] = eventsFunc;
                 }
             }
         }
@@ -163,6 +147,7 @@ namespace ADK.Demo
         public CelestialObjectInfo GetInfo(CelestialObject body)
         {
             Type bodyType = body.GetType();
+
             if (InfoProviders.ContainsKey(bodyType))
             {
                 return (CelestialObjectInfo)InfoProviders[bodyType].DynamicInvoke(Context, body);
@@ -176,9 +161,13 @@ namespace ADK.Demo
         public ICollection<AstroEvent> GetEvents(double jdFrom, double jdTo)
         {
             List<AstroEvent> events = new List<AstroEvent>();
-            foreach (var ep in EventProviders)
+            foreach (var eventProvider in EventProviders.Values)
             {
-                events.AddRange(ep.GetEvents(null, jdFrom, jdTo));
+                var providerEvents = eventProvider(jdFrom, jdTo);
+                if (providerEvents != null)
+                {
+                    events.AddRange(providerEvents);
+                }
             }
 
             return events.OrderBy(e => e.JulianDay).ToArray();
@@ -189,11 +178,11 @@ namespace ADK.Demo
             var results = new List<SearchResultItem>();
             if (!string.IsNullOrWhiteSpace(searchString))
             {               
-                foreach (var sp in SearchProviders)
+                foreach (var searchProvider in SearchProviders.Values)
                 {
                     if (results.Count < maxCount)
                     {
-                        results.AddRange(sp.Search(searchString, maxCount));
+                        results.AddRange(searchProvider(searchString, maxCount));
                     }
                     else
                     {

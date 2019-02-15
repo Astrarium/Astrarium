@@ -11,7 +11,7 @@ namespace ADK.Demo.Renderers
     /// <summary>
     /// Renders celestial bodies motion tracks on the map
     /// </summary>
-    public class TrackRenderer : IRenderer
+    public class TrackRenderer : BaseRenderer
     {
         private readonly ITracksProvider tracksProvider;
 
@@ -32,7 +32,7 @@ namespace ADK.Demo.Renderers
             brushLabel = new SolidBrush(colorLabel);
         }
 
-        public void Render(IMapContext map)
+        public override void Render(IMapContext map)
         {
             var tracks = tracksProvider.Tracks;
 
@@ -87,9 +87,7 @@ namespace ADK.Demo.Renderers
             }
         }
 
-        public void Initialize() { }
-
-        public int ZOrder => 500;
+        public override int ZOrder => 500;
 
         private bool IsSegmentContainsBody(IMapContext map, ICollection<CelestialPoint> segment, Track track)
         {

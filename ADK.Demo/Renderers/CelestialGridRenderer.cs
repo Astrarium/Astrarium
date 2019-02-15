@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace ADK.Demo.Renderers
 {
-    public class CelestialGridRenderer : IRenderer
+    public class CelestialGridRenderer : BaseRenderer
     {
         private readonly ILunarProvider lunarProvider;
         private readonly ISettings settings;
@@ -50,7 +50,7 @@ namespace ADK.Demo.Renderers
             penLineGalactic = new Pen(Brushes.Transparent);
         }
 
-        public void Initialize()
+        public override void Initialize()
         {
             // Ecliptic
             LineEcliptic.FromHorizontal = (h, ctx) =>
@@ -103,7 +103,7 @@ namespace ADK.Demo.Renderers
             LineHorizon.ToHorizontal = (c, ctx) => new CrdsHorizontal(c.Longitude, c.Latitude);
         }
 
-        public void Render(IMapContext map)
+        public override void Render(IMapContext map)
         {
             peFrom1950 = Precession.ElementsFK5(Date.EPOCH_B1950, map.JulianDay);
             peTo1950 = Precession.ElementsFK5(map.JulianDay, Date.EPOCH_B1950);
@@ -144,7 +144,7 @@ namespace ADK.Demo.Renderers
             }
         }
 
-        public int ZOrder => 400;
+        public override int ZOrder => 400;
 
         private void DrawGrid(IMapContext map, Pen penGrid, CelestialGrid grid)
         {

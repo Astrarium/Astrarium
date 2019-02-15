@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 namespace ADK.Demo.Renderers
 {
     /// <summary>
-    /// Defines methods for all renderer classes which implement drawing logic of sky map.
+    /// Base class for all renderer classes which implement drawing logic of sky map.
     /// </summary>
-    public interface IRenderer
+    public abstract class BaseRenderer
     {
-        void Render(IMapContext map);
-        void Initialize();
-        int ZOrder { get; }
+        public abstract void Render(IMapContext map);
+        public virtual void Initialize() { }
+        public virtual int ZOrder => 0;
     }
 }

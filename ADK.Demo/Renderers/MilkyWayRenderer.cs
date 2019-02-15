@@ -11,7 +11,7 @@ namespace ADK.Demo.Renderers
     /// <summary>
     /// Renders Milky Way filled outline on the map
     /// </summary>
-    public class MilkyWayRenderer : IRenderer
+    public class MilkyWayRenderer : BaseRenderer
     {
         private readonly IMilkyWayProvider milkyWayProvider;
         private readonly ISettings settings;
@@ -37,7 +37,7 @@ namespace ADK.Demo.Renderers
             b = -(minZoom * maxAlpha - maxZoom * minAlpha) / (maxZoom - minZoom);
         }
 
-        public void Render(IMapContext map)
+        public override void Render(IMapContext map)
         {
             if (settings.Get<bool>("MilkyWay"))
             {
@@ -70,8 +70,6 @@ namespace ADK.Demo.Renderers
             }
         }
 
-        public void Initialize() { }
-
-        public int ZOrder => 100;
+        public override int ZOrder => 100;
     }
 }

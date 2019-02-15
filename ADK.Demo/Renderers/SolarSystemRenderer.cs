@@ -11,7 +11,7 @@ namespace ADK.Demo.Renderers
     /// <summary>
     /// Draws solar system objects (Sun, Moon and planets) on the map.
     /// </summary>
-    public class SolarSystemRenderer : IRenderer
+    public class SolarSystemRenderer : BaseRenderer
     {
         private readonly ISolarProvider solarProvider;
         private readonly ILunarProvider lunarProvider;
@@ -55,11 +55,9 @@ namespace ADK.Demo.Renderers
             penShadowOutline.DashStyle = DashStyle.Dot;
         }
 
-        public void Initialize() { }
+        public override int ZOrder => 700;
 
-        public int ZOrder => 700;
-
-        public void Render(IMapContext map)
+        public override void Render(IMapContext map)
         {
             Sun sun = solarProvider.Sun;
             Moon moon = lunarProvider.Moon;

@@ -40,7 +40,7 @@ namespace ADK.Demo
         /// </summary>
         private ICollection<RectangleF> labels = new List<RectangleF>();
 
-        private readonly List<IRenderer> renderers = new List<IRenderer>();
+        private readonly List<BaseRenderer> renderers = new List<BaseRenderer>();
 
         public int Width { get; set; }
         public int Height { get; set; }
@@ -59,7 +59,7 @@ namespace ADK.Demo
 
         private MapContext mapContext = null;
 
-        public SkyMap(SkyContext skyContext, ICollection<IRenderer> renderers)
+        public SkyMap(SkyContext skyContext, ICollection<BaseRenderer> renderers)
         {
             Projection = new ArcProjection(this);
 

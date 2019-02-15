@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo.Renderers
 {
-    public class StarsRenderer : IRenderer
+    public class StarsRenderer : BaseRenderer
     {
         private readonly IStarsProvider starsProvider;
         private readonly ISettings settings;
@@ -42,7 +42,7 @@ namespace ADK.Demo.Renderers
             brushStarNames = new SolidBrush(Color.FromArgb(64, 64, 64));
         }
 
-        public void Render(IMapContext map)
+        public override void Render(IMapContext map)
         {
             Graphics g = map.Graphics;
             var allStars = starsProvider.Stars;
@@ -188,7 +188,7 @@ namespace ADK.Demo.Renderers
             }
         }
 
-        public void Initialize()
+        public override void Initialize()
         {
             string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/ConLines.dat");
             string[] parsed_line = new string[2];
@@ -208,6 +208,6 @@ namespace ADK.Demo.Renderers
             }
         }
 
-        public int ZOrder => 600;
+        public override int ZOrder => 600;
     }
 }
