@@ -188,11 +188,11 @@ namespace ADK.Demo.Calculators
             e.Add("RTS.Duration", (c, s) => RiseTransitSet(c).Duration);
         }
 
-        public override ICollection<AstroEvent> GetEvents(double jdFrom, double jdTo)
+        public override ICollection<AstroEvent> GetEvents(AstroEventsContext context)
         {
             List<AstroEvent> events = new List<AstroEvent>();
 
-            for (double jd = jdFrom; jd < jdTo; jd += 365)
+            for (double jd = context.From; jd < context.To; jd += 365)
             {
                 events.Add(new AstroEvent(SolarEphem.Season(jd, Season.Spring), "Vernal Equinox"));
                 events.Add(new AstroEvent(SolarEphem.Season(jd, Season.Summer), "Summer Solstice"));
@@ -200,7 +200,7 @@ namespace ADK.Demo.Calculators
                 events.Add(new AstroEvent(SolarEphem.Season(jd, Season.Winter), "Winter Solstice"));
             }
 
-            return events.Where(e => e.JulianDay >= jdFrom && e.JulianDay < jdTo).ToArray();
+            return events.Where(e => e.JulianDay >= context.From && e.JulianDay < context.To).ToArray();
         }
 
         public override ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)

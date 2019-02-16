@@ -303,6 +303,28 @@ namespace ADK
             return new Libration() { l = l, b = b };
         }
 
+        private static void CalcParabolaVertex(double[] x, double[] y, out double xv, out double yv)
+        {
+            double denom = (x[0] - x[1]) * (x[0] - x[2]) * (x[1] - x[2]);
+            double A = (x[2] * (y[1] - y[0]) + x[1] * (y[0] - y[2]) + x[0] * (y[2] - y[1])) / denom;
+            double B = (x[2] * x[2] * (y[0] - y[1]) + x[1] * x[1] * (y[2] - y[0]) + x[0] * x[0] * (y[1] - y[2])) / denom;
+            double C = (x[1] * x[2] * (x[1] - x[2]) * y[0] + x[2] * x[0] * (x[2] - x[0]) * y[1] + x[0] * x[1] * (x[0] - x[1]) * y[2]) / denom;
+
+            xv = -B / (2 * A);
+            yv = C - B * B / (4 * A);
+        }
+
+        public static bool IsMaximalLibration(double[] jd, double[] librations, out double jdMaximum, out double maxLibration)
+        {
+            double[] x = new[] { 0, jd[1] - jd[0], jd[2] - jd[0] };
+            double xMax = 0;
+            CalcParabolaVertex(x, librations, out xMax, out maxLibration);
+
+            jdMaximum = jd[0] + xMax;
+
+            return xMax >= x[0] && xMax < x[2];
+        }
+
         /// <summary>
         /// Calculates instant of the nearest Moon phase for the given date
         /// </summary>

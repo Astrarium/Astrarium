@@ -74,14 +74,14 @@ namespace ADK.Demo
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
-            var jd0 = new Date(2019, 6, 21).ToJulianEphemerisDay();
-
-            var events = sky.GetEvents(jd0, jd0 + 1);
+            var events = sky.GetEvents(sky.Context.JulianDayMidnight, sky.Context.JulianDayMidnight + 365);
             watch.Stop();
             Console.WriteLine("ELASPSED ms: " + watch.ElapsedMilliseconds);
 
-            
-
+            foreach (var e in events)
+            {
+                Console.WriteLine($"{Formatters.DateTime.Format(new Date(e.JulianDay, 3))}: {e.Text}");
+            }
             //map.Center = sky.Get<Moon>("Moon").Horizontal;
             //map.ViewAngle = 3;
 

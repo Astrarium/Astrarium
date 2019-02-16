@@ -360,5 +360,63 @@ namespace ADK.Demo.Calculators
             else
                 return new SearchResultItem[0];
         }
+
+        public override ICollection<AstroEvent> GetEvents(AstroEventsContext context)
+        {
+            List<AstroEvent> events = new List<AstroEvent>();
+
+            // Period between two same successive lunar phases 
+            const double SINODIC_PERIOD = 29.530588;
+
+            // The time that elapses between two passages of the Moon at its perigee/apogee
+            const double ANOMALISTIC_PERIOD = 27.55455;
+
+            // Lunar phases. Can be calculated with synodic period.
+            for (double jd = context.From; jd < context.To; jd += SINODIC_PERIOD)
+            {
+                events.Add(new AstroEvent(LunarEphem.NearestPhase(jd, MoonPhase.NewMoon), "New Moon"));
+                events.Add(new AstroEvent(LunarEphem.NearestPhase(jd, MoonPhase.FirstQuarter), "First Quarter"));
+                events.Add(new AstroEvent(LunarEphem.NearestPhase(jd, MoonPhase.FullMoon), "Full Moon"));
+                events.Add(new AstroEvent(LunarEphem.NearestPhase(jd, MoonPhase.LastQuarter), "Last Quarter"));
+            }
+
+            // Perigees ang apogees
+            for (double jd = context.From; jd < context.To; jd += ANOMALISTIC_PERIOD)
+            {
+                events.Add(new AstroEvent(LunarEphem.NearestApsis(jd, MoonApsis.Apogee), "Moon at apogee"));
+                events.Add(new AstroEvent(LunarEphem.NearestApsis(jd, MoonApsis.Perigee), "Moon at perigee"));
+            }
+
+            // Maximal librations
+
+
+            Queue<Tuple<double, Libration>> libr = new Queue<Tuple<double, Libration>>();
+
+            for (double jd = context.From; jd < context.To; jd++)
+            {
+                SkyContext ctx = new SkyContext(jd, context.GeoLocation);
+                libr.Enqueue(new Tuple<double, Libration>(jd, LibrationElements(ctx)));
+                if (libr.Count > 3)
+                {
+                    libr.Dequeue();
+                }
+
+                if (libr.Count == 3)
+                {
+                    double maxJd = 0;
+                    double maxLibration = 0;
+                    if (LunarEphem.IsMaximalLibration(libr.Select(v => v.Item1).ToArray(), libr.Select(v => v.Item2.l).ToArray(), out maxJd, out maxLibration))
+                    {
+                        events.Add(new AstroEvent(maxJd, $"Maximal libration of the Moon in longitude ({Formatters.LibrationLongitude.Format(maxLibration)})"));
+                    }
+                    if (LunarEphem.IsMaximalLibration(libr.Select(v => v.Item1).ToArray(), libr.Select(v => v.Item2.b).ToArray(), out maxJd, out maxLibration))
+                    {
+                        events.Add(new AstroEvent(maxJd, $"Maximal libration of the Moon in latitude ({Formatters.LibrationLatitude.Format(maxLibration)})"));
+                    }
+                }
+            }
+
+            return events.Where(e => e.JulianDay >= context.From && e.JulianDay < context.To).ToArray();
+        }
     }
 }

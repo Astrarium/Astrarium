@@ -13,7 +13,7 @@ namespace ADK.Demo
     public class Sky
     {
         private delegate ICollection<SearchResultItem> SearchDelegate(string searchString, int maxCount = 50);
-        private delegate ICollection<AstroEvent> GetEventsDelegate(double from, double to);
+        private delegate ICollection<AstroEvent> GetEventsDelegate(AstroEventsContext context);
         private delegate CelestialObjectInfo GetInfoDelegate<T>(SkyContext context, T body) where T : CelestialObject;
 
         private List<BaseCalc> Calculators = new List<BaseCalc>();
@@ -163,7 +163,7 @@ namespace ADK.Demo
             List<AstroEvent> events = new List<AstroEvent>();
             foreach (var eventProvider in EventProviders.Values)
             {
-                var providerEvents = eventProvider(jdFrom, jdTo);
+                var providerEvents = eventProvider(new AstroEventsContext() { From = jdFrom, To = jdTo, GeoLocation = Context.GeoLocation });
                 if (providerEvents != null)
                 {
                     events.AddRange(providerEvents);

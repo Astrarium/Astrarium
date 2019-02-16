@@ -35,6 +35,13 @@ namespace ADK.Demo.Calculators
         public virtual void ConfigureEphemeris(EphemerisConfig<T> config) { }
         public virtual CelestialObjectInfo GetInfo(SkyContext context, T body) { return null; }
         public virtual ICollection<SearchResultItem> Search(string searchString, int maxCount = 50) { return null; }
-        public virtual ICollection<AstroEvent> GetEvents(double jdFrom, double jdTo) { return null; }
+        public virtual ICollection<AstroEvent> GetEvents(AstroEventsContext context) { return null; }
+    }
+
+    public class AstroEventsContext
+    {
+        public CrdsGeographical GeoLocation { get; set; }
+        public double From { get; set; }
+        public double To { get; set; }
     }
 }
