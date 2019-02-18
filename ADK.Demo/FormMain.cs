@@ -74,13 +74,14 @@ namespace ADK.Demo
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
-            var events = sky.GetEvents(sky.Context.JulianDayMidnight, sky.Context.JulianDayMidnight + 365);
+            
+            var events = sky.GetEvents(sky.Context.JulianDayMidnight, sky.Context.JulianDayMidnight + 30);
             watch.Stop();
             Console.WriteLine("ELASPSED ms: " + watch.ElapsedMilliseconds);
 
             foreach (var e in events)
             {
-                Console.WriteLine($"{Formatters.DateTime.Format(new Date(e.JulianDay, 3))}: {e.Text}");
+                Console.WriteLine($"{Formatters.DateTime.Format(new Date(e.JulianDay, 3))} ({e.JulianDay}): {e.Text}");
             }
             //map.Center = sky.Get<Moon>("Moon").Horizontal;
             //map.ViewAngle = 3;

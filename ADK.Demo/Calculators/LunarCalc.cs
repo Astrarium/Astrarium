@@ -388,49 +388,51 @@ namespace ADK.Demo.Calculators
             //}
 
             // Maximal librations
-
-
-            Queue<Tuple<double, Libration>> libr = new Queue<Tuple<double, Libration>>();
-
-            //for (double jd = context.From; jd < context.From + 30; jd += 1/24.0)
+            //for (double jd = context.From; jd < context.From + 30; jd += 1 / 24.0)
             //{
             //    SkyContext ctx = new SkyContext(jd, context.GeoLocation);
 
-            //    double day = jd - context.From;
+            //    double day = jd;
             //    double librationTopocentric = LibrationElements(ctx).l;
             //    double librationMean = LunarEphem.Libration(jd, LunarMotion.GetCoordinates(jd), Nutation.NutationElements(jd).deltaPsi).l;
 
-            //    Console.WriteLine($"{day}; {librationMean}; {librationTopocentric}");
-
+            //    Console.WriteLine($"{Formatters.DateTime.Format(new Date(day, 3))}; {librationMean}; {librationTopocentric}");
             //}
 
+            //double jdLibration = 0;
+            double librationAngle = 0;
+            double jd = 0;
 
-            for (double jd = context.From; jd < context.To; jd++)
+            jd = context.From;
+            while (jd >= context.From && jd < context.To)
             {
-                //SkyContext ctx = new SkyContext(jd, context.GeoLocation);
+                jd = LunarEphem.NearestLibration(jd, LibrationEdge.East, out librationAngle);
+                events.Add(new AstroEvent(jd, $"Maximal eastern libration of the Moon ({Formatters.LibrationLongitude.Format(librationAngle)})"));
+                jd += ANOMALISTIC_PERIOD;
+            }
 
+            jd = context.From;
+            while (jd >= context.From && jd < context.To)
+            {
+                jd = LunarEphem.NearestLibration(jd, LibrationEdge.West, out librationAngle);
+                events.Add(new AstroEvent(jd, $"Maximal western libration of the Moon ({Formatters.LibrationLongitude.Format(librationAngle)})"));
+                jd += ANOMALISTIC_PERIOD;
+            }
 
-                var librationMean = LunarEphem.Libration(jd, LunarMotion.GetCoordinates(jd), Nutation.NutationElements(jd).deltaPsi);
+            jd = context.From;
+            while (jd >= context.From && jd < context.To)
+            {
+                jd = LunarEphem.NearestLibration(jd, LibrationEdge.North, out librationAngle);
+                events.Add(new AstroEvent(jd, $"Maximal northern libration of the Moon ({Formatters.LibrationLatitude.Format(librationAngle)})"));
+                jd += SINODIC_PERIOD;
+            }
 
-                libr.Enqueue(new Tuple<double, Libration>(jd, librationMean));
-                if (libr.Count > 3)
-                {
-                    libr.Dequeue();
-                }
-
-                if (libr.Count == 3)
-                {
-                    double maxJd = 0;
-                    double maxLibration = 0;
-                    if (LunarEphem.IsMaximalLibration(libr.Select(v => v.Item1).ToArray(), libr.Select(v => v.Item2.l).ToArray(), out maxJd, out maxLibration))
-                    {
-                        events.Add(new AstroEvent(maxJd, $"Maximal libration of the Moon in longitude ({Formatters.LibrationLongitude.Format(maxLibration)})"));
-                    }
-                    if (LunarEphem.IsMaximalLibration(libr.Select(v => v.Item1).ToArray(), libr.Select(v => v.Item2.b).ToArray(), out maxJd, out maxLibration))
-                    {
-                        events.Add(new AstroEvent(maxJd, $"Maximal libration of the Moon in latitude ({Formatters.LibrationLatitude.Format(maxLibration)})"));
-                    }
-                }
+            jd = context.From;
+            while (jd >= context.From && jd < context.To)
+            {
+                jd = LunarEphem.NearestLibration(jd, LibrationEdge.South, out librationAngle);
+                events.Add(new AstroEvent(jd, $"Maximal southern libration of the Moon ({Formatters.LibrationLatitude.Format(librationAngle)})"));
+                jd += SINODIC_PERIOD;
             }
 
             return events.Where(e => e.JulianDay >= context.From && e.JulianDay < context.To).ToArray();

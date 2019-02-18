@@ -95,7 +95,7 @@ namespace ADK
 
             // Mean longitude of ascending node
             double Omega = 125.0445479 - 1934.1362891 * T + 0.0020754 * T2 + T3 / 467441.0 - T4 / 60616000.0;
-            
+
             // Mean elongation of the Moon
             double D = 297.8501921 + 445267.1114034 * T - 0.0018819 * T2 + T3 / 545868.0 - T4 / 113065000.0;
             D = Angle.ToRadians(Angle.To360(D));
@@ -116,7 +116,7 @@ namespace ADK
             double I = Angle.ToRadians(1.54242);
 
             double rho =
-                - 0.02752 * Math.Cos(M_)
+                -0.02752 * Math.Cos(M_)
                 - 0.02245 * Math.Sin(F)
                 + 0.00684 * Math.Cos(M_ - 2 * F)
                 - 0.00293 * Math.Cos(2 * F)
@@ -128,7 +128,7 @@ namespace ADK
                 + 0.00014 * Math.Cos(M_ + 2 * F - 2 * D);
 
             double sigma =
-                - 0.02816 * Math.Sin(M_)
+                -0.02816 * Math.Sin(M_)
                 + 0.02244 * Math.Cos(F)
                 - 0.00682 * Math.Sin(M_ - 2 * F)
                 - 0.00279 * Math.Sin(2 * F)
@@ -303,7 +303,55 @@ namespace ADK
             return new Libration() { l = l, b = b };
         }
 
-        private static void CalcParabolaVertex(double[] x, double[] y, out double xv, out double yv)
+        public static double NearestLibration(double jd, LibrationEdge edge, out double libration)
+        {
+            double P = edge == LibrationEdge.East || edge == LibrationEdge.West ?
+                27.554551 : // anomalistic period 
+                27.2122204; // draconic month
+
+            double jd0 = 0;
+            switch (edge)
+            {
+                case LibrationEdge.North:
+                    jd0 = 2451531.52094581;
+                    break;
+                case LibrationEdge.East:
+                    jd0 = 2451540.94370721;
+                    break;
+                case LibrationEdge.South:
+                    jd0 = 2451544.2522909;
+                    break;
+                case LibrationEdge.West:
+                    jd0 = 2451556.77519409;
+                    break;
+            }
+
+            double k = Math.Round((jd - jd0) / P);
+
+            double jdMean = jd0 + k * P;
+
+            double[] libr = new double[3];
+            double[] x = new[] { -0.5, 0, 0.5 };
+            double xv = double.MaxValue;
+            libration = 0;
+
+            while (Math.Abs(xv) > 1e-6)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    var values = Libration(jdMean + x[i], LunarMotion.GetCoordinates(jdMean + x[i]), Nutation.NutationElements(jdMean + x[i]).deltaPsi);
+                    libr[i] = (edge == LibrationEdge.East || edge == LibrationEdge.West) ? values.l : values.b;
+                }
+
+                FindParabolaVertex(x, libr, out xv, out libration);
+
+                jdMean += xv;
+            }
+
+            return jdMean;
+        }
+
+        private static void FindParabolaVertex(double[] x, double[] y, out double xv, out double yv)
         {
             double denom = (x[0] - x[1]) * (x[0] - x[2]) * (x[1] - x[2]);
             double A = (x[2] * (y[1] - y[0]) + x[1] * (y[0] - y[2]) + x[0] * (y[2] - y[1])) / denom;
@@ -312,17 +360,6 @@ namespace ADK
 
             xv = -B / (2 * A);
             yv = C - B * B / (4 * A);
-        }
-
-        public static bool IsMaximalLibration(double[] jd, double[] librations, out double jdMaximum, out double maxLibration)
-        {
-            double[] x = new[] { 0, jd[1] - jd[0], jd[2] - jd[0] };
-            double xMax = 0;
-            CalcParabolaVertex(x, librations, out xMax, out maxLibration);
-
-            jdMaximum = jd[0] + xMax;
-
-            return xMax >= x[0] && xMax < x[2];
         }
 
         /// <summary>
@@ -350,7 +387,7 @@ namespace ADK
             double jdMeanPhase = 2451550.09766 + 29.530588861 * k
                                             + 0.00015437 * T2
                                             - 0.000000150 * T3
-                                            + 0.00000000073 * 4;
+                                            + 0.00000000073 * T4;
 
             double M = 2.5534 + 29.10535670 * k
                              - 0.0000014 * T2
