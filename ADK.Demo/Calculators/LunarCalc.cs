@@ -372,30 +372,47 @@ namespace ADK.Demo.Calculators
             const double ANOMALISTIC_PERIOD = 27.55455;
 
             // Lunar phases. Can be calculated with synodic period.
-            for (double jd = context.From; jd < context.To; jd += SINODIC_PERIOD)
-            {
-                events.Add(new AstroEvent(LunarEphem.NearestPhase(jd, MoonPhase.NewMoon), "New Moon"));
-                events.Add(new AstroEvent(LunarEphem.NearestPhase(jd, MoonPhase.FirstQuarter), "First Quarter"));
-                events.Add(new AstroEvent(LunarEphem.NearestPhase(jd, MoonPhase.FullMoon), "Full Moon"));
-                events.Add(new AstroEvent(LunarEphem.NearestPhase(jd, MoonPhase.LastQuarter), "Last Quarter"));
-            }
+            //for (double jd = context.From; jd < context.To; jd += SINODIC_PERIOD)
+            //{
+            //    events.Add(new AstroEvent(LunarEphem.NearestPhase(jd, MoonPhase.NewMoon), "New Moon"));
+            //    events.Add(new AstroEvent(LunarEphem.NearestPhase(jd, MoonPhase.FirstQuarter), "First Quarter"));
+            //    events.Add(new AstroEvent(LunarEphem.NearestPhase(jd, MoonPhase.FullMoon), "Full Moon"));
+            //    events.Add(new AstroEvent(LunarEphem.NearestPhase(jd, MoonPhase.LastQuarter), "Last Quarter"));
+            //}
 
-            // Perigees ang apogees
-            for (double jd = context.From; jd < context.To; jd += ANOMALISTIC_PERIOD)
-            {
-                events.Add(new AstroEvent(LunarEphem.NearestApsis(jd, MoonApsis.Apogee), "Moon at apogee"));
-                events.Add(new AstroEvent(LunarEphem.NearestApsis(jd, MoonApsis.Perigee), "Moon at perigee"));
-            }
+            //// Perigees ang apogees
+            //for (double jd = context.From; jd < context.To; jd += ANOMALISTIC_PERIOD)
+            //{
+            //    events.Add(new AstroEvent(LunarEphem.NearestApsis(jd, MoonApsis.Apogee), "Moon at apogee"));
+            //    events.Add(new AstroEvent(LunarEphem.NearestApsis(jd, MoonApsis.Perigee), "Moon at perigee"));
+            //}
 
             // Maximal librations
 
 
             Queue<Tuple<double, Libration>> libr = new Queue<Tuple<double, Libration>>();
 
+            //for (double jd = context.From; jd < context.From + 30; jd += 1/24.0)
+            //{
+            //    SkyContext ctx = new SkyContext(jd, context.GeoLocation);
+
+            //    double day = jd - context.From;
+            //    double librationTopocentric = LibrationElements(ctx).l;
+            //    double librationMean = LunarEphem.Libration(jd, LunarMotion.GetCoordinates(jd), Nutation.NutationElements(jd).deltaPsi).l;
+
+            //    Console.WriteLine($"{day}; {librationMean}; {librationTopocentric}");
+
+            //}
+
+
             for (double jd = context.From; jd < context.To; jd++)
             {
-                SkyContext ctx = new SkyContext(jd, context.GeoLocation);
-                libr.Enqueue(new Tuple<double, Libration>(jd, LibrationElements(ctx)));
+                //SkyContext ctx = new SkyContext(jd, context.GeoLocation);
+
+
+                var librationMean = LunarEphem.Libration(jd, LunarMotion.GetCoordinates(jd), Nutation.NutationElements(jd).deltaPsi);
+
+                libr.Enqueue(new Tuple<double, Libration>(jd, librationMean));
                 if (libr.Count > 3)
                 {
                     libr.Dequeue();

@@ -182,7 +182,7 @@ namespace ADK
         /// </summary>
         /// <param name="jd">Julian Ephemeris Day</param>
         /// <param name="ecl">Geocentrical/topocentrical ecliptical coordinates of the Moon</param>
-        /// <param name="deltaPsi">utation in longitude, in degrees.</param>
+        /// <param name="deltaPsi">Nutation in longitude, in degrees.</param>
         /// <returns></returns>
         public static Libration Libration(double jd, CrdsEcliptical ecl, double deltaPsi)
         {
