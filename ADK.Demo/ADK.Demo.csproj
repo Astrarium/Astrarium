@@ -64,6 +64,7 @@
     <Compile Include="Calculators\SolarCalc.cs" />
     <Compile Include="Calculators\StarsReader.cs" />
     <Compile Include="Config\ConfigSectionHandler.cs" />
+    <Compile Include="AstroEventsConfig.cs" />
     <Compile Include="EphemerisConfig.cs" />
     <Compile Include="Formatting.cs" />
     <Compile Include="IInfoProvider.cs" />

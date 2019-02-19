@@ -188,7 +188,12 @@ namespace ADK.Demo.Calculators
             e.Add("RTS.Duration", (c, s) => RiseTransitSet(c).Duration);
         }
 
-        public override ICollection<AstroEvent> GetEvents(AstroEventsContext context)
+        public override void ConfigureAstroEvents(AstroEventsConfig config)
+        {
+            config.Add("Seasons", EventsSeasons);
+        }
+
+        public ICollection<AstroEvent> EventsSeasons(AstroEventsContext context)
         {
             List<AstroEvent> events = new List<AstroEvent>();
 
@@ -200,7 +205,7 @@ namespace ADK.Demo.Calculators
                 events.Add(new AstroEvent(SolarEphem.Season(jd, Season.Winter), "Winter Solstice"));
             }
 
-            return events.Where(e => e.JulianDay >= context.From && e.JulianDay < context.To).ToArray();
+            return events;
         }
 
         public override ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)

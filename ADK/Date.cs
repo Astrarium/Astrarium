@@ -448,9 +448,6 @@ namespace ADK
         /// <returns>Julian day corresponding to January 0.0 of a given year.</returns>
         public static double JulianDay0(int year)
         {
-            if (year < 1582)
-                throw new ArgumentException("Year should be in Gregorian calendar (greater or equal to 1582).", nameof(year));
-
             int Y = year - 1;
             int A = Y / 100;
             return (int)(365.25 * Y) - A + (A / 4) + 1721424.5;

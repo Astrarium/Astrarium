@@ -1,4 +1,5 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
 namespace ADK.Tests
 {
@@ -86,20 +87,83 @@ namespace ADK.Tests
         }
 
         /// <summary>
+        /// Expected libration data are taken from https://www.calsky.com/?moonevents=&tdt=2458533
+        /// </summary>
+        [TestMethod]
+        public void NearestLibration()
+        {
+            // 10 minutes
+            double timeAccuracy = TimeSpan.FromMinutes(10).TotalDays;
+
+            // 0.1 degree
+            double angleAccuracy = 1e-1;
+
+            // starting date
+            double jd0 = new Date(new DateTime(2019, 3, 1, 0, 0, 0, DateTimeKind.Utc)).ToJulianDay();
+
+            // libration angle value
+            double value = 0;
+
+            // Saturday 23 February 2019, 08:40 UTC, Max. Libration South: -6.715°
+            {
+                double jdMaxExpected = new Date(new DateTime(2019, 2, 23, 8, 40, 0, DateTimeKind.Utc)).ToJulianEphemerisDay();
+                double valueExpected = -6.715;
+
+                double jd = LunarEphem.NearestMaxLibration(jd0, LibrationEdge.South, out value);
+
+                Assert.AreEqual(jdMaxExpected, jd, timeAccuracy);
+                Assert.AreEqual(valueExpected, value, angleAccuracy);
+            }
+
+            // Monday 25 February 2019, 11:05 UTC, Max. Libration East: 7.770°
+            {
+                double jdMaxExpected = new Date(new DateTime(2019, 2, 25, 11, 05, 0, DateTimeKind.Utc)).ToJulianEphemerisDay();
+                double valueExpected = 7.770;
+
+                double jd = LunarEphem.NearestMaxLibration(jd0, LibrationEdge.East, out value);
+
+                Assert.AreEqual(jdMaxExpected, jd, timeAccuracy);
+                Assert.AreEqual(valueExpected, value, angleAccuracy);
+            }
+
+            // Sunday 09 March 2019, 21:15 UTC, Max. Libration North: +6.656°
+            {
+                double jdMaxExpected = new Date(new DateTime(2019, 3, 9, 21, 15, 0, DateTimeKind.Utc)).ToJulianEphemerisDay();
+                double valueExpected = 6.656;
+
+                double jd = LunarEphem.NearestMaxLibration(jd0, LibrationEdge.North, out value);
+
+                Assert.AreEqual(jdMaxExpected, jd, timeAccuracy);
+                Assert.AreEqual(valueExpected, value, angleAccuracy);
+            }
+
+            // Wednesday 13 March 2019, 07:23 UTC, Max. Libration West: -6.961°
+            {
+                double jdMaxExpected = new Date(new DateTime(2019, 3, 13, 7, 23, 0, DateTimeKind.Utc)).ToJulianEphemerisDay();
+                double valueExpected = -6.961;
+
+                double jd = LunarEphem.NearestMaxLibration(jd0, LibrationEdge.West, out value);
+
+                Assert.AreEqual(jdMaxExpected, jd, timeAccuracy);
+                Assert.AreEqual(valueExpected, value, angleAccuracy);
+            }
+        }
+
+        /// <summary>
         /// AA(II), p. 353, examples 49.a, 49.b.
         /// </summary>
         [TestMethod]
         public void NearestPhase()
         {
+            // 1 second error
+            double error = 1.0 / (24 * 60 * 60);
+
             {
                 // New Moon takes place in February 1977
                 Date date = new Date(1977, 2, 15);
                 double jd = date.ToJulianEphemerisDay();
 
                 double jdNewMoon = LunarEphem.NearestPhase(jd, MoonPhase.NewMoon);
-
-                // 1 second error
-                double error = 1.0 / (24 * 60 * 60);
 
                 Assert.AreEqual(2443192.65118, jdNewMoon, error);
             }
@@ -110,9 +174,6 @@ namespace ADK.Tests
                 double jd = date.ToJulianEphemerisDay();
 
                 double jdLastQuarter = LunarEphem.NearestPhase(jd, MoonPhase.LastQuarter);
-
-                // 1 second error
-                double error = 1.0 / (24 * 60 * 60);
 
                 Assert.AreEqual(2467636.49186, jdLastQuarter, error);
             }
@@ -127,12 +188,56 @@ namespace ADK.Tests
             Date date = new Date(1988, 10, 1);
             double jd = date.ToJulianEphemerisDay();
 
-            double jsApogee = LunarEphem.NearestApsis(jd, MoonApsis.Apogee);
+            double diameter = 0;
+            // TODO: check diameter
+            double jdApogee = LunarEphem.NearestApsis(jd, MoonApsis.Apogee, out diameter);
 
             // 1 minute error
             double error = 1.0 / (24 * 60);
 
-            Assert.AreEqual(2447442.3537, jsApogee, error);
+            Assert.AreEqual(2447442.3537, jdApogee, error);
+        }
+
+        /// <summary>
+        /// AA(II), p. 357, chapter 52.
+        /// </summary>
+        [TestMethod]
+        public void NearestDeclination()
+        {
+            // 1 minute error
+            double error = TimeSpan.FromMinutes(1).TotalDays;
+
+            // output declination value
+            double delta = 0;
+
+            // example 52.a
+            {
+                Date date = new Date(1988, 12, 15);
+                double jd = date.ToJulianEphemerisDay();
+                double jdMaxDeclination = LunarEphem.NearestMaxDeclination(jd, MoonDeclination.North, out delta);
+
+                Assert.AreEqual(2447518.3347, jdMaxDeclination, error);
+                Assert.AreEqual(28.1562, delta, 1e-4);
+            }
+
+            // example 52.b
+            {
+                Date date = new Date(2049, 4, 15);
+                double jd = date.ToJulianEphemerisDay();
+                double jdMaxDeclination = LunarEphem.NearestMaxDeclination(jd, MoonDeclination.South, out delta);
+                Assert.AreEqual(2469553.0834, jdMaxDeclination, error);
+                Assert.AreEqual(22.1384, delta, 1e-4);
+            }
+
+            // example 52.c
+            {
+                Date date = new Date(-4, 3, 15);
+                double jd = date.ToJulianEphemerisDay();
+                double jdMaxDeclination = LunarEphem.NearestMaxDeclination(jd, MoonDeclination.North, out delta);
+                // for the dates between -1000 and +500 maximal error in time will not exceed half an hour actually
+                Assert.AreEqual(1719672.1337, jdMaxDeclination, TimeSpan.FromMinutes(15).TotalDays);
+                Assert.AreEqual(28.9739, delta, 1e-4);
+            }
         }
     }
 }

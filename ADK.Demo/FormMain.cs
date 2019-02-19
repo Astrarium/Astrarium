@@ -75,7 +75,7 @@ namespace ADK.Demo
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
             
-            var events = sky.GetEvents(sky.Context.JulianDayMidnight, sky.Context.JulianDayMidnight + 30);
+            var events = sky.GetEvents(sky.Context.JulianDayMidnight, sky.Context.JulianDayMidnight + 365);
             watch.Stop();
             Console.WriteLine("ELASPSED ms: " + watch.ElapsedMilliseconds);
 

@@ -13,14 +13,16 @@ namespace ADK.Demo
     public class Sky
     {
         private delegate ICollection<SearchResultItem> SearchDelegate(string searchString, int maxCount = 50);
-        private delegate ICollection<AstroEvent> GetEventsDelegate(AstroEventsContext context);
+        //private delegate ICollection<AstroEvent> GetEventsDelegate(AstroEventsContext context);
+        private delegate void ConfigureEventsDelegate(AstroEventsConfig config);
         private delegate CelestialObjectInfo GetInfoDelegate<T>(SkyContext context, T body) where T : CelestialObject;
 
         private List<BaseCalc> Calculators = new List<BaseCalc>();
         private Dictionary<Type, EphemerisConfig> EphemConfigs = new Dictionary<Type, EphemerisConfig>();
         private Dictionary<Type, Delegate> InfoProviders = new Dictionary<Type, Delegate>();
         private Dictionary<Type, SearchDelegate> SearchProviders = new Dictionary<Type, SearchDelegate>();
-        private Dictionary<Type, GetEventsDelegate> EventProviders = new Dictionary<Type, GetEventsDelegate>();
+        //private Dictionary<Type, GetEventsDelegate> EventProviders = new Dictionary<Type, GetEventsDelegate>();
+        private List<AstroEventsConfig> EventConfigs = new List<AstroEventsConfig>();
 
         public SkyContext Context { get; private set; }
 
@@ -56,8 +58,16 @@ namespace ADK.Demo
                     SearchProviders[bodyType] = searchFunc;
 
                     // Astro events provider
-                    var eventsFunc = calcType.GetMethod(nameof(BaseCalc<CelestialObject>.GetEvents)).CreateDelegate(typeof(GetEventsDelegate), calc) as GetEventsDelegate;
-                    EventProviders[bodyType] = eventsFunc;
+                    //var eventsFunc = calcType.GetMethod(nameof(BaseCalc<CelestialObject>.GetEvents)).CreateDelegate(typeof(GetEventsDelegate), calc) as GetEventsDelegate;
+                    //EventProviders[bodyType] = eventsFunc;
+
+                    AstroEventsConfig eventsConfig = new AstroEventsConfig();
+                    var configEventsFunc = calcType.GetMethod(nameof(BaseCalc<CelestialObject>.ConfigureAstroEvents)).CreateDelegate(typeof(ConfigureEventsDelegate), calc) as ConfigureEventsDelegate;
+                    configEventsFunc.Invoke(eventsConfig);
+                    if (eventsConfig.Any())
+                    {
+                        EventConfigs.Add(eventsConfig);
+                    }
                 }
             }
         }
@@ -159,18 +169,24 @@ namespace ADK.Demo
         }
 
         public ICollection<AstroEvent> GetEvents(double jdFrom, double jdTo)
-        {
-            List<AstroEvent> events = new List<AstroEvent>();
-            foreach (var eventProvider in EventProviders.Values)
+        {            
+            var context = new AstroEventsContext()
             {
-                var providerEvents = eventProvider(new AstroEventsContext() { From = jdFrom, To = jdTo, GeoLocation = Context.GeoLocation });
-                if (providerEvents != null)
-                {
-                    events.AddRange(providerEvents);
-                }
-            }
+                From = jdFrom,
+                To = jdTo,
+                GeoLocation = Context.GeoLocation
+            };
 
-            return events.OrderBy(e => e.JulianDay).ToArray();
+            var events = new List<AstroEvent>();
+            foreach (var item in EventConfigs.SelectMany(c => c.Items))
+            {
+                events.AddRange(item.Formula.Invoke(context));
+            }
+            
+            return events
+                .OrderBy(e => e.JulianDay)
+                .Where(e => e.JulianDay >= context.From && e.JulianDay < context.To)
+                .ToArray();
         }
 
         public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)

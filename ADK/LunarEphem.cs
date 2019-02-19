@@ -3,10 +3,27 @@
 namespace ADK
 {
     /// <summary>
-    /// Provides methods for calculation of ephemerides of the Moon
+    /// Provides methods for calculation of ephemerides of the Moon.
     /// </summary>
     public static class LunarEphem
     {
+        /// <summary>
+        /// Period between two same successive lunar phases, in days.
+        /// </summary>
+        public const double SINODIC_PERIOD = 29.530588;
+
+        /// <summary>
+        /// The time that elapses between two passages of the Moon at its perigee/apogee, in days.
+        /// Librations in longitude have same periodicity too.
+        /// </summary>
+        public const double ANOMALISTIC_PERIOD = 27.55455;
+
+        /// <summary>
+        /// The period in which the Moon returns to the same node of its orbit, in days.
+        /// Librations in latitude have same periodicity too.
+        /// </summary>
+        public const double DRACONIC_PERIOD = 27.2122204;
+
         /// <summary>
         /// Calculates Moon horizontal equatorial parallax. 
         /// </summary>
@@ -303,54 +320,87 @@ namespace ADK
             return new Libration() { l = l, b = b };
         }
 
-        public static double NearestLibration(double jd, LibrationEdge edge, out double libration)
+        /// <summary>
+        /// Finds the instant of nearest maximal libration of the Moon
+        /// </summary>
+        /// <param name="jd">Julian day to start searching from</param>
+        /// <param name="edge">Libration edge, i.e. libration direction (north, south, east or west) to look for maximum value.</param>
+        /// <param name="angle">Output value of libration anglem in degrees. Note that the value can be negative for southern and western librations.</param>
+        /// <returns>Instant of maximal libration nearest to the starting date <paramref name="jd"/>, in julian days.</returns>
+        /// <remarks>
+        /// The method is based on calculation of mean instant (with known event periodicity and epoch instant), 
+        /// then iterative search is used to find the exact instant.
+        /// </remarks>
+        public static double NearestMaxLibration(double jd, LibrationEdge edge, out double angle)
         {
-            double P = edge == LibrationEdge.East || edge == LibrationEdge.West ?
-                27.554551 : // anomalistic period 
-                27.2122204; // draconic month
+            // resulting libration angle, should be initialized
+            angle = 0;
 
-            double jd0 = 0;
-            switch (edge)
-            {
-                case LibrationEdge.North:
-                    jd0 = 2451531.52094581;
-                    break;
-                case LibrationEdge.East:
-                    jd0 = 2451540.94370721;
-                    break;
-                case LibrationEdge.South:
-                    jd0 = 2451544.2522909;
-                    break;
-                case LibrationEdge.West:
-                    jd0 = 2451556.77519409;
-                    break;
-            }
+            // flag to distinguish longitude/latitude librations
+            bool isLongitudeLibration = edge == LibrationEdge.East || edge == LibrationEdge.West;
 
+            // periodicity, i.e. librations cycle duration in days
+            double P = isLongitudeLibration ? ANOMALISTIC_PERIOD : DRACONIC_PERIOD;
+
+            // libration dates closest to J2000.0 epoch, i.e. librations "epochs" in current context
+            double jd0 = new double[] { 2451531.52094581, 2451544.2522909, 2451540.94370721, 2451556.77519409 }[(int)edge];
+
+            // number of libration cycles passed since the epoch
             double k = Math.Round((jd - jd0) / P);
 
-            double jdMean = jd0 + k * P;
+            // mean date of nearest libration, needs to be corrected to find exact date
+            double jdLibration = jd0 + k * P;
 
-            double[] libr = new double[3];
+            // three values of libration angle to find the local extremum
+            double[] angles = new double[3];
+
+            // differences in julian days between three time instants
             double[] x = new[] { -0.5, 0, 0.5 };
-            double xv = double.MaxValue;
-            libration = 0;
 
-            while (Math.Abs(xv) > 1e-6)
+            // value of X at the extremum point (vertex of parabola)
+            double xv = double.MaxValue;
+
+            // accuracy, in day fractions (1 munute of time is enough)
+            double minute = TimeSpan.FromMinutes(1).TotalDays;
+
+            // iterative search for nearest libration
+            while (Math.Abs(xv) > minute)
             {
                 for (int i = 0; i < 3; i++)
                 {
-                    var values = Libration(jdMean + x[i], LunarMotion.GetCoordinates(jdMean + x[i]), Nutation.NutationElements(jdMean + x[i]).deltaPsi);
-                    libr[i] = (edge == LibrationEdge.East || edge == LibrationEdge.West) ? values.l : values.b;
+                    // julian day at the current point
+                    double jdx = jdLibration + x[i];
+
+                    // geocentric ecliptical coordinates of the Moon
+                    CrdsEcliptical ecl = LunarMotion.GetCoordinates(jdx);
+
+                    // nutation in longitude for the instant
+                    double deltaPsi = Nutation.NutationElements(jdx).deltaPsi;
+
+                    // libration angles for the given instant
+                    var libration = Libration(jdx, ecl, deltaPsi);
+
+                    // save angle to the array
+                    angles[i] = isLongitudeLibration ? libration.l : libration.b;
                 }
 
-                FindParabolaVertex(x, libr, out xv, out libration);
+                // find the local extremum with parabolic approximation
+                FindParabolaVertex(x, angles, out xv, out angle);
 
-                jdMean += xv;
+                // correct libration instant
+                jdLibration += xv;
             }
 
-            return jdMean;
+            return jdLibration;
         }
 
+        /// <summary>
+        /// Searches for parabola vertex point
+        /// </summary>
+        /// <param name="x">Array of x-coordinates of a parabolic function (3 points)</param>
+        /// <param name="y">Array of y-coordinates of a parabolic function (3 points)</param>
+        /// <param name="xv">Output value of x-coordinate of the vertex</param>
+        /// <param name="yv">Output value of y-coordinate of the vertex</param>
         private static void FindParabolaVertex(double[] x, double[] y, out double xv, out double yv)
         {
             double denom = (x[0] - x[1]) * (x[0] - x[2]) * (x[1] - x[2]);
@@ -567,7 +617,7 @@ namespace ADK
         /// <remarks>
         /// The method is taken from AA(II), chapter 50.
         /// </remarks>
-        public static double NearestApsis(double jd, MoonApsis apsis)
+        public static double NearestApsis(double jd, MoonApsis apsis, out double diameter)
         {
             Date d = new Date(jd);
             double year = d.Year + (Date.JulianEphemerisDay(d) - Date.JulianDay0(d.Year)) / 365.25;
@@ -579,7 +629,6 @@ namespace ADK
             double T2 = T * T;
             double T3 = T2 * T;
             double T4 = T3 * T;
-
 
             double jdMean = 2451534.6698 + 27.55454989 * k
                                       - 0.0006691 * T2
@@ -608,6 +657,7 @@ namespace ADK
             F = Angle.ToRadians(F);
 
             double terms = 0;
+            double parallax = 0;
 
             if (apsis == MoonApsis.Perigee)
             {
@@ -672,6 +722,58 @@ namespace ADK
                     Math.Sin(4 * D - 4 * F) * (+0.0005) +
                     Math.Sin(2 * D + 2 * M) * (+0.0005) +
                     Math.Sin(D - M) * (-0.0004);
+
+                parallax =
+                    3629.215
+                    + 63.224 * Math.Cos(2 * D)
+                    - 6.990 * Math.Cos(4 * D)
+                    + 2.834 * Math.Cos(2 * D - M)
+                    - 0.0071 * T * Math.Cos(2 * D - M)
+                    + 1.927 * Math.Cos(6 * D)
+                    - 1.263 * Math.Cos(D)
+                    - 0.702 * Math.Cos(8 * D)
+                    + 0.696 * Math.Cos(M)
+                    - 0.0017 * T * Math.Cos(M)
+                    - 0.690 * Math.Cos(2 * F)
+                    - 0.629 * Math.Cos(4 * D - M)
+                    + 0.0016 * T * Math.Cos(4 * D - M)
+                    - 0.392 * Math.Cos(2 * D - 2 * F)
+                    + 0.297 * Math.Cos(10 * D)
+                    + 0.260 * Math.Cos(6 * D - M)
+                    + 0.201 * Math.Cos(3 * D)
+                    - 0.161 * Math.Cos(2 * D + M)
+                    + 0.157 * Math.Cos(D + M)
+                    - 0.138 * Math.Cos(12 * D)
+                    - 0.127 * Math.Cos(8 * D - M)
+                    + 0.104 * Math.Cos(2 * D + 2 * F)
+                    + 0.104 * Math.Cos(2 * D - 2 * M)
+                    - 0.079 * Math.Cos(5 * D)
+                    + 0.068 * Math.Cos(14 * D)
+                    + 0.067 * Math.Cos(10 * D - M)
+                    + 0.054 * Math.Cos(4 * D + M)
+                    - 0.038 * Math.Cos(12 * D - M)
+                    - 0.038 * Math.Cos(4 * D - 2 * M)
+                    + 0.037 * Math.Cos(7 * D)
+                    - 0.037 * Math.Cos(4 * D + 2 * F)
+                    - 0.035 * Math.Cos(16 * D)
+                    - 0.030 * Math.Cos(3 * D + M)
+                    + 0.029 * Math.Cos(D - M)
+                    - 0.025 * Math.Cos(6 * D + M)
+                    + 0.023 * Math.Cos(2 * M)
+                    + 0.023 * Math.Cos(14 * D - M)
+                    - 0.023 * Math.Cos(2 * D + 2 * M)
+                    + 0.022 * Math.Cos(6 * D - 2 * M)
+                    - 0.021 * Math.Cos(2D - 2 * F - M)
+                    - 0.020 * Math.Cos(9 * D)
+                    + 0.019 * Math.Cos(18 * D)
+                    + 0.017 * Math.Cos(6 * D + 2 * F)
+                    + 0.014 * Math.Cos(2 * F - M)
+                    - 0.014 * Math.Cos(16 * D - M)
+                    + 0.013 * Math.Cos(4 * D - 2 * F)
+                    + 0.012 * Math.Cos(8 * D + M)
+                    + 0.011 * Math.Cos(11 * D)
+                    + 0.010 * Math.Cos(5 * D + M)
+                    - 0.010 * Math.Cos(20 * D);
             }
             else if (apsis == MoonApsis.Apogee)
             {
@@ -708,9 +810,169 @@ namespace ADK
                     Math.Sin(12 * D) * (+0.0003) +
                     Math.Sin(2 * D + 2 * F - M) * (+0.0003) +
                     Math.Sin(D - M) * (-0.0003);
+
+                parallax =
+                    3245.251
+                    - 9.147 * Math.Cos(2 * D)
+                    - 0.841 * Math.Cos(D)
+                    + 0.697 * Math.Cos(2 * F)
+                    - 0.656 * Math.Cos(M)
+                    + 0.0016 * T * Math.Cos(M)
+                    + 0.355 * Math.Cos(4 * D)
+                    + 0.159 * Math.Cos(2 * D - M)
+                    + 0.127 * Math.Cos(D + M)
+                    + 0.065 * Math.Cos(4 * D - M)
+                    + 0.052 * Math.Cos(6 * D)
+                    + 0.043 * Math.Cos(2 * D + M)
+                    + 0.031 * Math.Cos(2 * D + 2 * F)
+                    - 0.023 * Math.Cos(2 * D - 2 * F)
+                    + 0.022 * Math.Cos(2 * D - 2 * M)
+                    + 0.019 * Math.Cos(2 * D + 2 * M)
+                    - 0.016 * Math.Cos(2 * M)
+                    + 0.014 * Math.Cos(6 * D - M)
+                    + 0.010 * Math.Cos(8 * D);
             }
 
-            jdMean = jdMean + terms;
+            jdMean += terms;
+
+            double distance = 6378.14 / Math.Sin(Angle.ToRadians(parallax / 3600.0));
+            diameter = 2 * Semidiameter(distance) / 3600;
+
+            return jdMean;
+        }
+
+        /// <summary>
+        /// Finds the instant of nearest maximal declination (northern or southern) of the Moon
+        /// </summary>
+        /// <param name="jd">Julian day to start searching from</param>
+        /// <param name="declination">Declination direction to search, northern or southern.</param>
+        /// <param name="delta">Output value of the maximal declination value.</param>
+        /// <returns>Instant of maximal declination of the Moon nearest to the starting date <paramref name="jd"/>, in julian days.</returns>
+        /// <remarks>The method is taken from AA(II), chapter 52.</remarks>
+        public static double NearestMaxDeclination(double jd, MoonDeclination declination, out double delta)
+        {
+            Date d = new Date(jd);
+            double year = d.Year + (Date.JulianEphemerisDay(d) - Date.JulianDay0(d.Year)) / 365.25;
+            double k = Math.Round((year - 2000.03) * 13.3686);
+
+            double T = k / 1336.86;
+            double T2 = T * T;
+            double T3 = T2 * T;
+            double T4 = T3 * T;
+
+            double D = new[] { 152.2029, 345.6676 }[(int)declination] 
+                + 333.0705546 * k - 0.0004214 * T2 + 0.00000011 * T3;
+
+            double M = new[] { 14.8591, 1.3951 }[(int)declination] 
+                + 26.9281592 * k - 0.00003555 * T2 - 0.00000010 * T3;
+
+            double M_ = new[] { 4.6881, 186.2100 }[(int)declination] 
+                + 356.9562794 * k + 0.0103066 * T2 + 0.00001251 * T3;
+
+            double F = new[] { 325.8867, 145.1633 }[(int)declination] 
+                + 1.4467807 * k - 0.0020690 * T2 - 0.00000215 * T3;
+
+            double E = 1 - 0.002516 * T - 0.0000047 * T2;
+
+            D = Angle.To360(D);
+            M = Angle.To360(M);
+            M_ = Angle.To360(M_);
+            F = Angle.To360(F);
+
+            D = Angle.ToRadians(D);
+            M = Angle.ToRadians(M);
+            M_ = Angle.ToRadians(M_);
+            F = Angle.ToRadians(F);
+
+            double jdMean = new[] { 2451562.5897, 2451548.9289 }[(int)declination] 
+                + 27.321582247 * k + 0.000119804 * T2 - 0.000000141 * T3;
+
+            double[] cTime, cValue;
+            double[] aTime, aValue;
+            Func<double, double>[] fTime, fValue;
+
+            if (declination == MoonDeclination.North)
+            {
+                cTime = new[] { 0.8975, -0.4726, -0.1030, -0.0976, -0.0462, -0.0461, -0.0438, 0.0162 * E, -0.0157, 0.0145,
+                    0.0136, -0.0095, -0.0091, -0.0089, 0.0075, -0.0068, 0.0061, -0.0047, -0.0043 * E, -0.0040, -0.0037,
+                    0.0031, 0.0030, -0.0029, -0.0029 * E, -0.0027, 0.0024 * E, -0.0021, 0.0019, 0.0018, 0.0018, 0.0017,
+                    0.0017, -0.0014, 0.0013, 0.0013, 0.0012, 0.0011, -0.0011, 0.0010, 0.0010 * E, -0.0009, 0.0007, -0.0007 };
+                aTime = new[] { F, M_, 2 * F, 2 * D - M_, M_ - F, M_ + F, 2 * D, M, 3 * F, M_ + 2 * F, 2 * D - F,
+                    2 * D - M_ - F, 2 * D - M_ + F, 2 * D + F, 2 * M_, M_ - 2 * F, 2 * M_ - F, M_ + 3 * F, 2 * D - M - M_,
+                    M_ - 2 * F, 2 * D - 2 * M_, F, 2 * D + M_, M_ + 2 * F, 2 * D - M, M_ + F, M - M_, M_ - 3 * F, 2 * M_ + F,
+                    2 * D - 2 * M_ - F, 3 * F, M_ + 3 * F, 2 * M_, 2 * D - M_, 2 * D + M_ + F, M_, 3 * M_ + F, 2 * D - M_ + F,
+                    2 * D - 2 * M_, D + F, M + M_, 2 * D - 2 * F, 2 * M_ + F, 3 * M_ + F };
+                fTime = new Func<double, double>[] { Math.Cos, Math.Sin, Math.Sin, Math.Sin, Math.Cos, Math.Cos, Math.Sin,
+                    Math.Sin, Math.Cos, Math.Sin, Math.Cos, Math.Cos, Math.Cos, Math.Cos, Math.Sin, Math.Sin, Math.Cos,
+                    Math.Sin, Math.Sin, Math.Cos, Math.Sin, Math.Sin, Math.Sin, Math.Cos, Math.Sin, Math.Sin, Math.Sin,
+                    Math.Sin, Math.Sin, Math.Cos, Math.Sin, Math.Cos, Math.Cos, Math.Cos, Math.Cos, Math.Cos, Math.Sin,
+                    Math.Sin, Math.Cos, Math.Cos, Math.Sin, Math.Sin, Math.Cos, Math.Cos };
+
+                cValue = new[] {5.1093, 0.2658, 0.1448, -0.0322, 0.0133, 0.0125, -0.0124, -0.0101, 0.0097, -0.0087 * E,
+                    0.0074, 0.0067, 0.0063, 0.0060 * E, -0.0057, -0.0056, 0.0052, 0.0041, -0.0040, 0.0038, -0.0034,
+                    -0.0029, 0.0029, -0.0028 * E, -0.0028, -0.0023, -0.0021, 0.0019, 0.0018, 0.0017, 0.0015, 0.0014,
+                    -0.0012, -0.0012, -0.0010, -0.0010, 0.0006 };
+                aValue = new[]{F, 2 * F, 2 * D - F, 3 * F, 2 * D - 2 * F, 2 * D, M_ - F, M_ + 2 * F, F, 2 * D + M - F,
+                    M_ + 3 * F, D + F, M_ - 2 * F, 2 * D - M - F, 2 * D - M_ - F, M_ + F, M_ + 2 * F, 2 * M_ + F,
+                    M_ - 3 * F, 2 * M_ - F, M_ - 2 * F, 2 * M_, 3 * M_ + F, 2 * D + M - F, M_ - F, 3 * F, 2 * D + F,
+                    M_ + 3 * F, D + F, 2 * M_ - F, 3 * M_ + F, 2 * D + 2 * M_ + F, 2 * D - 2 * M_ - F, 2 * M_, M_, 2 * F, M_ + F };
+                fValue = new Func<double, double>[] {Math.Sin, Math.Cos, Math.Sin, Math.Sin, Math.Cos, Math.Cos,
+                    Math.Sin, Math.Sin, Math.Cos, Math.Sin, Math.Sin, Math.Sin, Math.Sin, Math.Sin, Math.Sin,
+                    Math.Cos, Math.Cos, Math.Cos, Math.Cos, Math.Cos, Math.Cos, Math.Sin, Math.Sin, Math.Cos,
+                    Math.Cos, Math.Cos, Math.Sin, Math.Cos, Math.Cos, Math.Sin, Math.Cos, Math.Cos, Math.Sin,
+                    Math.Cos, Math.Cos, Math.Sin, Math.Sin };
+            }
+            else
+            {
+                cTime = new[] {-0.8975, -0.4726, -0.1030, -0.0976, 0.0541, 0.0516, -0.0438, 0.0112 * E, 0.0157,
+                    0.0023, -0.0136, 0.0110, 0.0091, 0.0089, 0.0075, -0.0030, -0.0061, -0.0047, -0.0043 * E, 0.0040,
+                    -0.0037, -0.0031, 0.0030, 0.0029, -0.0029 * E, -0.0027, 0.0024 * E, -0.0021, -0.0019,
+                    -0.0006, -0.0018, -0.0017, 0.0017, 0.0014, -0.0013, -0.0013, 0.0012, 0.0011, 0.0011,
+                    0.0010, 0.0010 * E, -0.0009, -0.0007, -0.0007 };
+                aTime = new[] {F, M_, 2 * F, 2 * D - M_, M_ - F, M_ + F, 2 * D, M, 3 * F, M_ + 2 * F, 2 * D - F,
+                    2 * D - M_ - F, 2 * D - M_ + F, 2 * D + F, 2 * M_, M_ - 2 * F, 2 * M_ - F, M_ + 3 * F,
+                    2 * D - M - M_, M_ - 2 * F, 2 * D - 2 * M_, F, 2 * D + M_, M_ + 2 * F, 2 * D - M, M_ + F,
+                    M - M_, M_ - 3 * F, 2 * M_ + F, 2 * D - 2 * M_ - F, 3 * F, M_ + 3 * F, 2 * M_, 2 * D - M_,
+                    2 * D + M_ + F, M_, 3 * M_ + F, 2 * D - M_ + F, 2 * D - 2 * M_, D + F, M + M_, 2 * D - 2 * F,
+                    2 * M_ + F, 3 * M_ + F };
+                fTime = new Func<double, double>[] { Math.Cos, Math.Sin, Math.Sin, Math.Sin, Math.Cos, Math.Cos,
+                    Math.Sin, Math.Sin, Math.Cos, Math.Sin, Math.Cos, Math.Cos, Math.Cos, Math.Cos, Math.Sin,
+                    Math.Sin, Math.Cos, Math.Sin, Math.Sin, Math.Cos, Math.Sin, Math.Sin, Math.Sin, Math.Cos,
+                    Math.Sin, Math.Sin, Math.Sin, Math.Sin, Math.Sin, Math.Cos, Math.Sin, Math.Cos, Math.Cos,
+                    Math.Cos, Math.Cos, Math.Cos, Math.Sin, Math.Sin, Math.Cos, Math.Cos,
+                    Math.Sin, Math.Sin, Math.Cos, Math.Cos };
+
+                cValue = new[] {-5.1093, 0.2658, -0.1448, 0.0322, 0.0133, 0.0125, -0.0015, 0.0101, -0.0097,
+                    0.0087 * E, 0.0074, 0.0067, -0.0063, -0.0060 * E, 0.0057, -0.0056, -0.0052, -0.0041,
+                    -0.0040, -0.0038, 0.0034, -0.0029, 0.0029, 0.0028 * E, -0.0028, 0.0023, 0.0021, 0.0019,
+                    0.0018, -0.0017, 0.0015, 0.0014, 0.0012, -0.0012, 0.0010, -0.0010, 0.0037 };
+                aValue = new[] {F, 2 * F, 2 * D - F, 3 * F, 2 * D - 2 * F, 2 * D, M_ - F, M_ + 2 * F, F,
+                    2 * D + M - F, M_ + 3 * F, D + F, M_ - 2 * F, 2 * D - M - F, 2 * D - M_ - F,
+                    M_ + F, M_ + 2 * F, 2 * M_ + F, M_ - 3 * F, 2 * M_ - F, M_ - 2 * F, 2 * M_,
+                    3 * M_ + F, 2 * D + M - F, M_ - F, 3 * F, 2 * D + F, M_ + 3 * F, D + F, 2 * M_ - F,
+                    3 * M_ + F, 2 * D + 2 * M_ + F, 2 * D - 2 * M_ - F, 2 * M_, M_, 2 * F, M_ + F };
+                fValue = new Func<double, double>[] {Math.Sin, Math.Cos, Math.Sin, Math.Sin, Math.Cos,
+                    Math.Cos, Math.Sin, Math.Sin, Math.Cos, Math.Sin, Math.Sin, Math.Sin, Math.Sin,
+                    Math.Sin, Math.Sin, Math.Cos, Math.Cos, Math.Cos, Math.Cos, Math.Cos, Math.Cos,
+                    Math.Sin, Math.Sin, Math.Cos, Math.Cos, Math.Cos, Math.Sin, Math.Cos, Math.Cos,
+                    Math.Sin, Math.Cos, Math.Cos, Math.Sin, Math.Cos, Math.Cos, Math.Sin, Math.Sin };
+            }
+
+            double timeTerms = 0;
+            for (int i = 0; i < aTime.Length; i++)
+            {
+                timeTerms += cTime[i] * fTime[i](aTime[i]);
+            }
+
+            double valueTerms = 0;
+            for (int i = 0; i < aValue.Length; i++)
+            {
+                valueTerms += cValue[i] * fValue[i](aValue[i]);
+            }
+
+            jdMean += timeTerms;
+
+            delta = 23.6961 - 0.013004 * T + valueTerms;
 
             return jdMean;
         }
@@ -723,7 +985,7 @@ namespace ADK
         /// <remarks>
         /// This method based on calculation of the instant of new moon (see <see cref="NearestPhase(double, MoonPhase)"/> for details).
         /// If calculated nearest date of the new moon is in the future, then we should calculate the previous date of the new moon
-        /// by subtracting amount of days (synodic period of the Moon expressed in days, i.e. 29.5306) from the date of calculation.
+        /// by subtracting amount of days (synodic period of the Moon expressed in days, i.e. <see cref="SINODIC_PERIOD"/>) from the date of calculation.
         /// </remarks>
         // TODO: tests
         public static double Age(double jd)
@@ -731,7 +993,7 @@ namespace ADK
             double jdNM = NearestPhase(jd, MoonPhase.NewMoon);
             if (jd < jdNM)
             {
-                jdNM = NearestPhase(jd - 29.5306, MoonPhase.NewMoon);
+                jdNM = NearestPhase(jd - SINODIC_PERIOD, MoonPhase.NewMoon);
             }
             return jd - jdNM;
         }
