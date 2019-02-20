@@ -128,7 +128,7 @@ namespace ADK.Demo.Calculators
             return stars;
         }
 
-        public StarDetails GetStarDetails(Star s)
+        public StarDetails GetStarDetails(ushort hrNumber)
         {
             SanityCheck();
 
@@ -136,7 +136,7 @@ namespace ADK.Demo.Calculators
 
             using (var sr = new StreamReader(StarsDataFilePath, Encoding.Default))
             {
-                sr.BaseStream.Seek((s.Number - 1) * RecordLength, SeekOrigin.Begin);
+                sr.BaseStream.Seek((hrNumber - 1) * RecordLength, SeekOrigin.Begin);
                 string line = sr.ReadLine();
 
                 details.IsInfraredSource = line[41] == 'I';

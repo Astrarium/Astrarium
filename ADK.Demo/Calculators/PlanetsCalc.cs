@@ -14,7 +14,14 @@ namespace ADK.Demo.Calculators
         RingsAppearance SaturnRings { get; }
     }
 
-    public class PlanetsCalc : BaseCalc<Planet>, IPlanetsProvider
+    public interface IPlanetsCalc
+    {
+        float Magnitude(SkyContext ctx, int number);
+        CrdsEquatorial Equatorial(SkyContext ctx, int number);
+        string GetPlanetName(int number);
+    }
+
+    public class PlanetsCalc : BaseCalc<Planet>, IPlanetsCalc, IPlanetsProvider
     {
         private Planet[] planets = new Planet[8];
 
@@ -43,6 +50,11 @@ namespace ADK.Demo.Calculators
 
             planets[Planet.JUPITER - 1].Flattening = 0.064874f;
             planets[Planet.SATURN - 1].Flattening = 0.097962f;
+        }
+
+        public string GetPlanetName(int number)
+        {
+            return PlanetNames[number - 1];
         }
 
         /// <summary>
@@ -175,7 +187,7 @@ namespace ADK.Demo.Calculators
         /// <summary>
         /// Gets apparent topocentric coordinates of planet
         /// </summary>
-        private CrdsEquatorial Equatorial(SkyContext c, int p)
+        public CrdsEquatorial Equatorial(SkyContext c, int p)
         {
             return c.Get(Equatorial0, p).ToTopocentric(c.GeoLocation, c.SiderealTime, c.Get(Parallax, p));
         }
@@ -215,7 +227,7 @@ namespace ADK.Demo.Calculators
         /// <summary>
         /// Gets visible magnitude of the planet
         /// </summary>
-        private float Magnitude(SkyContext c, int p)
+        public float Magnitude(SkyContext c, int p)
         {
             float mag = PlanetEphem.Magnitude(p, c.Get(DistanceFromEarth, p), c.Get(DistanceFromSun, p), c.Get(PhaseAngle, p));
             if (p == Planet.SATURN)

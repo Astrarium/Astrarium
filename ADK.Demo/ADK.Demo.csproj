@@ -56,6 +56,10 @@
   <ItemGroup>
     <Compile Include="Calculators\DeepSkyCalc.cs" />
     <Compile Include="Calculators\BaseCalc.cs" />
+    <Compile Include="Calculators\ILunarCalc.cs" />
+    <Compile Include="Calculators\LunarEventsProvider.cs" />
+    <Compile Include="Calculators\PlanetsEventsProvider.cs" />
+    <Compile Include="Calculators\SolarEventsProvider.cs" />
     <Compile Include="Calculators\TrackCalc.cs" />
     <Compile Include="Calculators\MilkyWayCalc.cs" />
     <Compile Include="Calculators\ConstellationsCalc.cs" />

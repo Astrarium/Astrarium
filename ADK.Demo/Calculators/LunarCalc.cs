@@ -15,7 +15,7 @@ namespace ADK.Demo.Calculators
         Moon Moon { get; }
     }
 
-    public class LunarCalc : BaseCalc<Moon>, ILunarProvider
+    public class LunarCalc : BaseCalc<Moon>, ILunarProvider, ILunarCalc
     {
         public Moon Moon { get; private set; } = new Moon();
 
@@ -83,7 +83,7 @@ namespace ADK.Demo.Calculators
         /// Gets equatorial geocentrical coordinates of the Moon
         /// </summary>
         private CrdsEquatorial Equatorial0(SkyContext c)
-        {            
+        {
             return c.Get(Ecliptical0).ToEquatorial(c.Epsilon);
         }
 
@@ -98,7 +98,7 @@ namespace ADK.Demo.Calculators
         /// <summary>
         /// Gets visible semidiameter of the Moon, in seconds of arc 
         /// </summary>
-        private double Semidiameter(SkyContext c)
+        public double Semidiameter(SkyContext c)
         {
             return LunarEphem.Semidiameter(c.Get(Ecliptical0).Distance);
         }
@@ -106,7 +106,7 @@ namespace ADK.Demo.Calculators
         /// <summary>
         /// Gets euqatorial topocentric coordinates of the Moon
         /// </summary>
-        private CrdsEquatorial Equatorial(SkyContext c)
+        public CrdsEquatorial Equatorial(SkyContext c)
         {
             return c.Get(Equatorial0).ToTopocentric(c.GeoLocation, c.SiderealTime, c.Get(Parallax));
         }
@@ -170,7 +170,7 @@ namespace ADK.Demo.Calculators
         /// <summary>
         /// Gets phase of the Moon
         /// </summary>
-        private double Phase(SkyContext c)
+        public double Phase(SkyContext c)
         {
             return BasicEphem.Phase(c.Get(PhaseAngle));
         }
@@ -194,7 +194,7 @@ namespace ADK.Demo.Calculators
         /// <summary>
         /// Gets visual magnitude of the Moon
         /// </summary>
-        private double Magnitude(SkyContext c)
+        public double Magnitude(SkyContext c)
         {
             return LunarEphem.Magnitude(c.Get(PhaseAngle));
         }
@@ -268,7 +268,7 @@ namespace ADK.Demo.Calculators
             double jd = c.JulianDayMidnight;
             double theta0 = Date.ApparentSiderealTime(jd, c.NutationElements.deltaPsi, c.Epsilon);
 
-            CrdsEquatorial[] eq = new CrdsEquatorial[3];            
+            CrdsEquatorial[] eq = new CrdsEquatorial[3];
             double[] diff = new double[] { 0, 0.5, 1 };
 
             for (int i = 0; i < 3; i++)
@@ -359,158 +359,6 @@ namespace ADK.Demo.Calculators
                 return new[] { new SearchResultItem(Moon, "Moon") };
             else
                 return new SearchResultItem[0];
-        }
-
-        public override void ConfigureAstroEvents(AstroEventsConfig config)
-        {
-            config
-                .Add("Moon.Phases", EventsPhases)
-                .Add("Moon.Apsis", EventsApsis)
-                .Add("Moon.Librations", EventsLibrations)
-                .Add("Moon.MaxDeclinations", EventsMaxDeclinations);
-        }
-
-        /// <summary>
-        /// Calculates dates of lunar phases within specified range
-        /// </summary>
-        private ICollection<AstroEvent> EventsPhases(AstroEventsContext context)
-        {
-            List<AstroEvent> events = new List<AstroEvent>();
-            double jd = 0;
-
-            jd = context.From;
-            while (jd >= context.From && jd < context.To)
-            {
-                jd = LunarEphem.NearestPhase(jd, MoonPhase.NewMoon);
-                events.Add(new AstroEvent(jd, "New Moon"));
-                jd += LunarEphem.SINODIC_PERIOD;
-            }
-
-            jd = context.From;
-            while (jd >= context.From && jd < context.To)
-            {
-                jd = LunarEphem.NearestPhase(jd, MoonPhase.FirstQuarter);
-                events.Add(new AstroEvent(jd, "First Quarter"));
-                jd += LunarEphem.SINODIC_PERIOD;
-            }
-
-            jd = context.From;
-            while (jd >= context.From && jd < context.To)
-            {
-                jd = LunarEphem.NearestPhase(jd, MoonPhase.FullMoon);
-                events.Add(new AstroEvent(jd, "Full Moon"));
-                jd += LunarEphem.SINODIC_PERIOD;
-            }
-
-            jd = context.From;
-            while (jd >= context.From && jd < context.To)
-            {
-                jd = LunarEphem.NearestPhase(jd, MoonPhase.LastQuarter);
-                events.Add(new AstroEvent(jd, "Last Quarter"));
-                jd += LunarEphem.SINODIC_PERIOD;
-            }
-
-            return events;
-        }
-        
-        /// <summary>
-        /// Calculates dates of perigees and apogees within specified range
-        /// </summary>
-        private ICollection<AstroEvent> EventsApsis(AstroEventsContext context)
-        {
-            List<AstroEvent> events = new List<AstroEvent>();
-            double jd = 0;
-            double diameter = 0;
-
-            jd = context.From;
-            while (jd >= context.From && jd < context.To)
-            {
-                jd = LunarEphem.NearestApsis(jd, MoonApsis.Apogee, out diameter);
-                events.Add(new AstroEvent(jd, $"Moon at apogee ({Formatters.AngularDiameter.Format(diameter)})"));
-                jd += LunarEphem.ANOMALISTIC_PERIOD;
-            }
-
-            jd = context.From;
-            while (jd >= context.From && jd < context.To)
-            {
-                jd = LunarEphem.NearestApsis(jd, MoonApsis.Perigee, out diameter);
-                events.Add(new AstroEvent(jd, $"Moon at perigee ({Formatters.AngularDiameter.Format(diameter)})"));
-                jd += LunarEphem.ANOMALISTIC_PERIOD;
-            }
-
-            return events;
-        }
-
-        /// <summary>
-        /// Calculates dates of maximal librations within specified range
-        /// </summary>
-        private ICollection<AstroEvent> EventsLibrations(AstroEventsContext context)
-        {
-            List<AstroEvent> events = new List<AstroEvent>();
-            double jd = 0;
-            double librationAngle = 0;
-
-            jd = context.From;
-            while (jd >= context.From && jd < context.To)
-            {
-                jd = LunarEphem.NearestMaxLibration(jd, LibrationEdge.East, out librationAngle);
-                events.Add(new AstroEvent(jd, $"Maximal eastern libration of the Moon ({Formatters.LibrationLongitude.Format(librationAngle)})"));
-                jd += LunarEphem.ANOMALISTIC_PERIOD;
-            }
-
-            jd = context.From;
-            while (jd >= context.From && jd < context.To)
-            {
-                jd = LunarEphem.NearestMaxLibration(jd, LibrationEdge.West, out librationAngle);
-                events.Add(new AstroEvent(jd, $"Maximal western libration of the Moon ({Formatters.LibrationLongitude.Format(librationAngle)})"));
-                jd += LunarEphem.ANOMALISTIC_PERIOD;
-            }
-
-            jd = context.From;
-            while (jd >= context.From && jd < context.To)
-            {
-                jd = LunarEphem.NearestMaxLibration(jd, LibrationEdge.North, out librationAngle);
-                events.Add(new AstroEvent(jd, $"Maximal northern libration of the Moon ({Formatters.LibrationLatitude.Format(librationAngle)})"));
-                jd += LunarEphem.DRACONIC_PERIOD;
-            }
-
-            jd = context.From;
-            while (jd >= context.From && jd < context.To)
-            {
-                jd = LunarEphem.NearestMaxLibration(jd, LibrationEdge.South, out librationAngle);
-                events.Add(new AstroEvent(jd, $"Maximal southern libration of the Moon ({Formatters.LibrationLatitude.Format(librationAngle)})"));
-                jd += LunarEphem.DRACONIC_PERIOD;
-            }
-
-            return events;
-        }
-
-        /// <summary>
-        /// Calculates dates of maximal declinations of the Moon within specified range
-        /// </summary>
-        private ICollection<AstroEvent> EventsMaxDeclinations(AstroEventsContext context)
-        {
-            List<AstroEvent> events = new List<AstroEvent>();
-            double jd = 0;
-            double delta = 0;
-
-            jd = context.From;
-            while (jd >= context.From && jd < context.To)
-            {
-                jd = LunarEphem.NearestMaxDeclination(jd, MoonDeclination.North, out delta);
-                events.Add(new AstroEvent(jd, $"Maximal northern declination of the Moon ({Formatters.MoonDeclination.Format(delta)})"));
-                jd += LunarEphem.DRACONIC_PERIOD;
-            }
-
-            jd = context.From;
-            while (jd >= context.From && jd < context.To)
-            {
-                jd = LunarEphem.NearestMaxDeclination(jd, MoonDeclination.South, out delta);
-                events.Add(new AstroEvent(jd, $"Maximal southern declination of the Moon ({Formatters.MoonDeclination.Format(-delta)})"));
-                jd += LunarEphem.DRACONIC_PERIOD;
-            }
-
-            return events;
         }
     }
 }

@@ -16,7 +16,13 @@ namespace ADK.Demo.Calculators
         ICollection<Star> Stars { get; }
     }
 
-    public class StarsCalc : BaseCalc<Star>, IStarsProvider
+    public interface IStarsCalc
+    {
+        CrdsEquatorial Equatorial(SkyContext ctx, ushort hrNumber);
+        string GetPrimaryStarName(ushort hrNumber);
+    }
+
+    public class StarsCalc : BaseCalc<Star>, IStarsProvider, IStarsCalc
     {
         private readonly string STARS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Stars.dat");
         private readonly string NAMES_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/StarNames.dat");
@@ -47,7 +53,7 @@ namespace ADK.Demo.Calculators
             {
                 if (star != null)
                 {
-                    star.Horizontal = context.Get(Horizontal, star);
+                    star.Horizontal = context.Get(Horizontal, star.Number);
                 }
             }
         }
@@ -82,8 +88,10 @@ namespace ADK.Demo.Calculators
         /// <summary>
         /// Gets equatorial coordinates of a star for current epoch
         /// </summary>
-        private CrdsEquatorial Equatorial(SkyContext c, Star star)
+        public CrdsEquatorial Equatorial(SkyContext c, ushort hrNumber)
         {
+            Star star = Stars.ElementAt(hrNumber - 1);
+
             PrecessionalElements p = c.Get(GetPrecessionalElements);
             double years = c.Get(YearsSince2000);
 
@@ -114,18 +122,18 @@ namespace ADK.Demo.Calculators
         /// <summary>
         /// Gets apparent horizontal coordinates of star for given instant
         /// </summary>
-        private CrdsHorizontal Horizontal(SkyContext c, Star star)
+        private CrdsHorizontal Horizontal(SkyContext c, ushort hrNumber)
         {
-            return c.Get(Equatorial, star).ToHorizontal(c.GeoLocation, c.SiderealTime);
+            return c.Get(Equatorial, hrNumber).ToHorizontal(c.GeoLocation, c.SiderealTime);
         }
 
         /// <summary>
         /// Gets rise, transit and set info for the star
         /// </summary>
-        private RTS RiseTransitSet(SkyContext c, Star star)
+        private RTS RiseTransitSet(SkyContext c, ushort hrNumber)
         {
             double theta0 = Date.ApparentSiderealTime(c.JulianDayMidnight, c.NutationElements.deltaPsi, c.Epsilon);
-            var eq = c.Get(Equatorial, star); 
+            var eq = c.Get(Equatorial, hrNumber); 
             return Visibility.RiseTransitSet(eq, c.GeoLocation, theta0);
         }
 
@@ -140,57 +148,57 @@ namespace ADK.Demo.Calculators
         /// <summary>
         /// Gets equatorial coordinates of star for B1875 epoch
         /// </summary>
-        private CrdsEquatorial Equatorial1875(SkyContext c, Star s)
+        private CrdsEquatorial Equatorial1875(SkyContext c, ushort hrNumber)
         {
-            return Precession.GetEquatorialCoordinates(c.Get(Equatorial, s), c.Get(PrecessionalElements1875));
+            return Precession.GetEquatorialCoordinates(c.Get(Equatorial, hrNumber), c.Get(PrecessionalElements1875));
         }
 
         /// <summary>
         /// Gets constellation where the star is located
         /// </summary>
-        private string Constellation(SkyContext c, Star s)
+        private string Constellation(SkyContext c, ushort hrNumber)
         {
-            return Constellations.FindConstellation(c.Get(Equatorial1875, s));
+            return Constellations.FindConstellation(c.Get(Equatorial1875, hrNumber));
         }
 
         /// <summary>
         /// Gets detailed info about star
         /// </summary>
-        private StarDetails ReadStarDetails(SkyContext c, Star s)
+        private StarDetails ReadStarDetails(SkyContext c, ushort hrNumber)
         {
-            return DataReader.GetStarDetails(s);
+            return DataReader.GetStarDetails(hrNumber);
         }
 
         #endregion Ephemeris
 
         public override void ConfigureEphemeris(EphemerisConfig<Star> e)
         {
-            e.Add("RTS.Rise", (c, s) => c.Get(RiseTransitSet, s).Rise);
-            e.Add("RTS.Transit", (c, s) => c.Get(RiseTransitSet, s).Transit);
-            e.Add("RTS.Set", (c, s) => c.Get(RiseTransitSet, s).Set);
+            e.Add("RTS.Rise", (c, s) => c.Get(RiseTransitSet, s.Number).Rise);
+            e.Add("RTS.Transit", (c, s) => c.Get(RiseTransitSet, s.Number).Transit);
+            e.Add("RTS.Set", (c, s) => c.Get(RiseTransitSet, s.Number).Set);
         }
 
         public override CelestialObjectInfo GetInfo(SkyContext c, Star s)
         {
-            var rts = c.Get(RiseTransitSet, s);
-            var det = c.Get(ReadStarDetails, s);
+            var rts = c.Get(RiseTransitSet, s.Number);
+            var det = c.Get(ReadStarDetails, s.Number);
 
             var info = new CelestialObjectInfo();
             info.SetSubtitle("Star").SetTitle(string.Join(", ", GetStarNames(s)))
 
-            .AddRow("Constellation", c.Get(Constellation, s))
+            .AddRow("Constellation", c.Get(Constellation, s.Number))
 
             .AddHeader("Equatorial coordinates (current epoch)")
-            .AddRow("Equatorial.Alpha", c.Get(Equatorial, s).Alpha)
-            .AddRow("Equatorial.Delta", c.Get(Equatorial, s).Delta)
+            .AddRow("Equatorial.Alpha", c.Get(Equatorial, s.Number).Alpha)
+            .AddRow("Equatorial.Delta", c.Get(Equatorial, s.Number).Delta)
 
             .AddHeader("Equatorial coordinates (J2000.0 epoch)")
             .AddRow("Equatorial0.Alpha", s.Equatorial0.Alpha)
             .AddRow("Equatorial0.Delta", s.Equatorial0.Delta)
 
             .AddHeader("Horizontal coordinates")
-            .AddRow("Horizontal.Azimuth", c.Get(Horizontal, s).Azimuth)
-            .AddRow("Horizontal.Altitude", c.Get(Horizontal, s).Altitude)
+            .AddRow("Horizontal.Azimuth", c.Get(Horizontal, s.Number).Azimuth)
+            .AddRow("Horizontal.Altitude", c.Get(Horizontal, s.Number).Altitude)
 
             .AddHeader("Visibility")
             .AddRow("RTS.Rise", rts.Rise, c.JulianDayMidnight + rts.Rise)
@@ -333,6 +341,11 @@ namespace ADK.Demo.Calculators
             names.AddRange(constSynonyms);
 
             return names;
+        }
+
+        public string GetPrimaryStarName(ushort hrNumber)
+        {
+            return GetStarNames(Stars.ElementAt(hrNumber - 1)).First();
         }
 
         private ICollection<string> GetStarNames(Star s)

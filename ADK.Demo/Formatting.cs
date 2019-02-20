@@ -271,6 +271,7 @@ namespace ADK.Demo
         public static readonly IEphemFormatter CentralMeridian = new UnsignedDoubleFormatter(2, "\u00B0");
         public static readonly IEphemFormatter RotationAxis = new UnsignedDoubleFormatter(2, "\u00B0");
         public static readonly IEphemFormatter EarthDeclination = new SignedDoubleFormatter(2, "\u00B0");
+        public static readonly IEphemFormatter ConjunctionSeparation = new UnsignedDoubleFormatter(1, "\u00B0");
         public static readonly IEphemFormatter MoonDeclination = new SignedDoubleFormatter(3, "\u00B0");
         public static readonly IEphemFormatter SaturnRingsSize = new SmallAngleFormatter();
     }

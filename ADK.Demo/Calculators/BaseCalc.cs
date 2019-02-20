@@ -33,9 +33,13 @@ namespace ADK.Demo.Calculators
     public abstract class BaseCalc<T> : BaseCalc where T : CelestialObject
     {
         public virtual void ConfigureEphemeris(EphemerisConfig<T> config) { }
-        public virtual void ConfigureAstroEvents(AstroEventsConfig config) { }
         public virtual CelestialObjectInfo GetInfo(SkyContext context, T body) { return null; }
         public virtual ICollection<SearchResultItem> Search(string searchString, int maxCount = 50) { return null; }
+    }
+
+    public abstract class BaseAstroEventsProvider
+    {
+        public abstract void ConfigureAstroEvents(AstroEventsConfig config);
     }
 
     public class AstroEventsContext

@@ -15,6 +15,11 @@ namespace ADK.Demo
             JulianDay = jd;
             Text = text;
         }
+
+        public override string ToString()
+        {
+            return $"JD={JulianDay}: {Text}";
+        }
     }
 
     public struct SearchResultItem 

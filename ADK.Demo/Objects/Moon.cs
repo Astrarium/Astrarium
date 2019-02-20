@@ -60,6 +60,6 @@ namespace ADK.Demo.Objects
         /// <summary>
         /// Mean daily motion of the Moon, in degrees
         /// </summary>
-        public double AverageDailyMotion => 13.2;
+        public double AverageDailyMotion => LunarEphem.AVERAGE_DAILY_MOTION;
     }
 }

@@ -8,6 +8,11 @@ namespace ADK
     public static class LunarEphem
     {
         /// <summary>
+        /// Period that takes the Moon to return to a similar position among the stars, in days.
+        /// </summary>
+        public const double SIDEREAL_PERIOD = 27.321661;
+
+        /// <summary>
         /// Period between two same successive lunar phases, in days.
         /// </summary>
         public const double SINODIC_PERIOD = 29.530588;
@@ -23,6 +28,11 @@ namespace ADK
         /// Librations in latitude have same periodicity too.
         /// </summary>
         public const double DRACONIC_PERIOD = 27.2122204;
+
+        /// <summary>
+        /// Average apparent daily motion of the Moon, among the stars, in degrees per day.
+        /// </summary>
+        public const double AVERAGE_DAILY_MOTION = 360 / SIDEREAL_PERIOD;
 
         /// <summary>
         /// Calculates Moon horizontal equatorial parallax. 
@@ -385,31 +395,13 @@ namespace ADK
                 }
 
                 // find the local extremum with parabolic approximation
-                FindParabolaVertex(x, angles, out xv, out angle);
+                Interpolation.FindParabolaVertex(x, angles, out xv, out angle);
 
                 // correct libration instant
                 jdLibration += xv;
             }
 
             return jdLibration;
-        }
-
-        /// <summary>
-        /// Searches for parabola vertex point
-        /// </summary>
-        /// <param name="x">Array of x-coordinates of a parabolic function (3 points)</param>
-        /// <param name="y">Array of y-coordinates of a parabolic function (3 points)</param>
-        /// <param name="xv">Output value of x-coordinate of the vertex</param>
-        /// <param name="yv">Output value of y-coordinate of the vertex</param>
-        private static void FindParabolaVertex(double[] x, double[] y, out double xv, out double yv)
-        {
-            double denom = (x[0] - x[1]) * (x[0] - x[2]) * (x[1] - x[2]);
-            double A = (x[2] * (y[1] - y[0]) + x[1] * (y[0] - y[2]) + x[0] * (y[2] - y[1])) / denom;
-            double B = (x[2] * x[2] * (y[0] - y[1]) + x[1] * x[1] * (y[2] - y[0]) + x[0] * x[0] * (y[1] - y[2])) / denom;
-            double C = (x[1] * x[2] * (x[1] - x[2]) * y[0] + x[2] * x[0] * (x[2] - x[0]) * y[1] + x[0] * x[1] * (x[0] - x[1]) * y[2]) / denom;
-
-            xv = -B / (2 * A);
-            yv = C - B * B / (4 * A);
         }
 
         /// <summary>
@@ -976,6 +968,8 @@ namespace ADK
 
             return jdMean;
         }
+
+        
 
         /// <summary>
         /// Gets age of the Moon (time since last new moon in days)

@@ -37,5 +37,26 @@ namespace ADK
             double c = b - a;
             return y[1] + n / 2 * (a + b + n * c);
         }
+
+        /// <summary>
+        /// Searches for parabola vertex point
+        /// </summary>
+        /// <param name="x">Array of x-coordinates of a parabolic function (3 points)</param>
+        /// <param name="y">Array of y-coordinates of a parabolic function (3 points)</param>
+        /// <param name="xv">Output value of x-coordinate of the vertex</param>
+        /// <param name="yv">Output value of y-coordinate of the vertex</param>
+        // TODO: tests, add check for arrays ranges.
+        public static bool FindParabolaVertex(double[] x, double[] y, out double xv, out double yv)
+        {
+            double denom = (x[0] - x[1]) * (x[0] - x[2]) * (x[1] - x[2]);
+            double A = (x[2] * (y[1] - y[0]) + x[1] * (y[0] - y[2]) + x[0] * (y[2] - y[1])) / denom;
+            double B = (x[2] * x[2] * (y[0] - y[1]) + x[1] * x[1] * (y[2] - y[0]) + x[0] * x[0] * (y[1] - y[2])) / denom;
+            double C = (x[1] * x[2] * (x[1] - x[2]) * y[0] + x[2] * x[0] * (x[2] - x[0]) * y[1] + x[0] * x[1] * (x[0] - x[1]) * y[2]) / denom;
+
+            xv = -B / (2 * A);
+            yv = C - B * B / (4 * A);
+
+            return xv >= x[0] && xv < x[2];
+        }
     }
 }

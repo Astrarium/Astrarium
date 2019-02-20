@@ -67,6 +67,26 @@ namespace ADK
         }
 
         /// <summary>
+        /// Calculates angular separation between two points with equatorial coordinates
+        /// </summary>
+        /// <param name="p1">Equatorial coordinates of the first point</param>
+        /// <param name="p2">Equatorial coordinates of the second point</param>
+        /// <returns>Angular separation in degrees</returns>
+        public static double Separation(CrdsEquatorial p1, CrdsEquatorial p2)
+        {
+            double a1 = ToRadians(p1.Delta);
+            double a2 = ToRadians(p2.Delta);
+            double A1 = p1.Alpha;
+            double A2 = p2.Alpha;
+
+            double a = Math.Acos(
+                Math.Sin(a1) * Math.Sin(a2) +
+                Math.Cos(a1) * Math.Cos(a2) * Math.Cos(ToRadians(A1 - A2)));
+
+            return double.IsNaN(a) ? 0 : ToDegrees(a);
+        }
+
+        /// <summary>
         /// Calculates an intermediate point at any fraction along the great circle path 
         /// between two points with horizontal coordinates
         /// </summary>

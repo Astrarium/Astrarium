@@ -60,7 +60,20 @@ namespace ADK.Demo
             {                
                 kernel.Bind(rendererType).ToSelf().InSingletonScope();                
             }
-            
+
+            // collect all event provider implementations
+            // TODO: to support plugin system, we need to load assemblies 
+            // from the specific directory and search for providers there
+            Type[] eventProviderTypes = Assembly.GetExecutingAssembly()
+                .GetTypes()
+                .Where(t => typeof(BaseAstroEventsProvider).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
+                .ToArray();
+
+            foreach (Type eventProviderType in eventProviderTypes)
+            {
+                kernel.Bind(eventProviderType).ToSelf().InSingletonScope();
+            }
+
             var calculators = calcTypes
                 .Select(c => kernel.Get(c))
                 .Cast<BaseCalc>()
@@ -72,7 +85,12 @@ namespace ADK.Demo
                 .OrderBy(r => r.ZOrder)
                 .ToArray();
 
-            kernel.Bind<Sky>().ToConstant(new Sky(context, calculators));
+            var eventProviders = eventProviderTypes
+                .Select(c => kernel.Get(c))
+                .Cast<BaseAstroEventsProvider>()
+                .ToArray();
+
+            kernel.Bind<Sky>().ToConstant(new Sky(context, calculators, eventProviders));
             kernel.Bind<ISkyMap>().ToConstant(new SkyMap(context, renderers));
 
             Application.EnableVisualStyles();
