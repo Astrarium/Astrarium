@@ -72,7 +72,8 @@ namespace ADK.Demo
         /// <returns>Size (diameter) of a disk in screen pixels</returns>
         public static float GetDiskSize(this IMapContext map, double semidiameter, double minSize = 0)
         {
-            return (float)Math.Max(minSize, semidiameter / 3600.0 / map.ViewAngle * map.Width);
+            double maxSize = Math.Max(map.Width, map.Height);
+            return (float)Math.Max(minSize, semidiameter / 3600.0 / map.ViewAngle * maxSize);
         }
 
         /// <summary>

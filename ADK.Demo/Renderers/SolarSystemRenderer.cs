@@ -324,8 +324,10 @@ namespace ADK.Demo.Renderers
                     {
                         var rings = planetsProvider.SaturnRings;
 
+                        double maxSize = Math.Max(map.Width, map.Height);
+
                         // scale value to convert visible size of ring to screen pixels
-                        double scale = 1.0 / 3600 / map.ViewAngle * map.Width / 4;
+                        double scale = 1.0 / 3600 / map.ViewAngle * maxSize / 4;
 
                         // draw rings by halfs arcs, first half is farther one
                         for (int half = 0; half < 2; half++)

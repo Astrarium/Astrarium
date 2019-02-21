@@ -338,7 +338,8 @@ namespace ADK.Demo.Renderers
 
             private float GetDiameter(IMapContext map, double diam)
             {
-                return (float)(diam / 60 / map.ViewAngle * map.Width / 2);
+                double maxSize = Math.Max(map.Width, map.Height);
+                return (float)(diam / 60 / map.ViewAngle * maxSize / 2);
             }
         }
 
