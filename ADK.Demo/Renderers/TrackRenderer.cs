@@ -35,11 +35,12 @@ namespace ADK.Demo.Renderers
         public override void Render(IMapContext map)
         {
             var tracks = tracksProvider.Tracks;
+            double coeff = map.DiagonalCoefficient();
 
             foreach (var track in tracks)
             {
                 var segments = track.Points
-                    .Select(p => Angle.Separation(p.Horizontal, map.Center) < map.ViewAngle * 1.2 ? p : null)
+                    .Select(p => Angle.Separation(p.Horizontal, map.Center) < map.ViewAngle * coeff ? p : null)
                     .Split(p => p == null, true);
 
                 foreach (var segment in segments)
@@ -102,7 +103,8 @@ namespace ADK.Demo.Renderers
         {
             double trackStep = track.Step;
             double stepLabels = track.LabelsStep.TotalDays;
-            
+            double coeff = map.DiagonalCoefficient();
+
             int each = (int)(stepLabels / trackStep);
 
             double jd = track.From;
@@ -112,7 +114,7 @@ namespace ADK.Demo.Renderers
                 {
                     var tp = track.Points[i];
                     double ad = Angle.Separation(tp.Horizontal, map.Center);
-                    if (ad < map.ViewAngle * 1.2)
+                    if (ad < map.ViewAngle * coeff)
                     {
                         PointF p = map.Project(tp.Horizontal);
                         if (!map.IsOutOfScreen(p))

@@ -149,12 +149,13 @@ namespace ADK.Demo.Renderers
         private void DrawGrid(IMapContext map, Pen penGrid, CelestialGrid grid)
         {
             bool isAnyPoint = false;
+            double coeff = map.DiagonalCoefficient();
 
             // Azimuths 
             for (int j = 0; j < grid.Columns; j++)
             {
                 var segments = grid.Column(j)
-                    .Select(p => Angle.Separation(grid.ToHorizontal(p, map), map.Center) < map.ViewAngle * 1.2 ? p : null)
+                    .Select(p => Angle.Separation(grid.ToHorizontal(p, map), map.Center) < map.ViewAngle * coeff ? p : null)
                     .Split(p => p == null, true);
 
                 foreach (var segment in segments)
@@ -176,7 +177,7 @@ namespace ADK.Demo.Renderers
                     {
                         var coord = grid.FromHorizontal(map.Center, map);
                         coord.Longitude = segment[0].Longitude;
-                        coord.Latitude += -map.ViewAngle * 1.2 + k * (map.ViewAngle * 2 * 1.2);
+                        coord.Latitude += -map.ViewAngle * coeff + k * (map.ViewAngle * 2 * coeff);
                         coord.Latitude = Math.Min(coord.Latitude, 80);
                         coord.Latitude = Math.Max(coord.Latitude, -80);
                         var refHorizontal = grid.ToHorizontal(coord, map);
@@ -193,7 +194,7 @@ namespace ADK.Demo.Renderers
             for (int i = 0; i < grid.Rows; i++)
             {
                 var segments = grid.Row(i)
-                    .Select(p => Angle.Separation(grid.ToHorizontal(p, map), map.Center) < map.ViewAngle * 1.2 ? p : null)
+                    .Select(p => Angle.Separation(grid.ToHorizontal(p, map), map.Center) < map.ViewAngle * coeff ? p : null)
                     .Split(p => p == null, true).ToList();
 
                 // segment that starts with point "0 degrees"
@@ -240,7 +241,7 @@ namespace ADK.Demo.Renderers
                         for (int k = 0; k < 2; k++)
                         {
                             var coord = grid.FromHorizontal(map.Center, map);
-                            coord.Longitude += -map.ViewAngle * 1.2 + k * (map.ViewAngle * 1.2 * 2);
+                            coord.Longitude += -map.ViewAngle * coeff + k * (map.ViewAngle * coeff * 2);
                             coord.Latitude = segment[0].Latitude;
                             var refHorizontal = grid.ToHorizontal(coord, map);
                             refPoints[k] = map.Project(refHorizontal);
@@ -292,7 +293,7 @@ namespace ADK.Demo.Renderers
                     for (int k = 0; k < 2; k++)
                     {
                         var coord = grid.FromHorizontal(map.Center, map);
-                        coord.Longitude += -map.ViewAngle * 1.2 + k * (map.ViewAngle * 1.2 * 2);
+                        coord.Longitude += -map.ViewAngle * coeff + k * (map.ViewAngle * coeff * 2);
                         coord.Latitude = segment[0].Latitude;
                         var refHorizontal = grid.ToHorizontal(coord, map);
                         refPoints[k] = map.Project(refHorizontal);
@@ -328,7 +329,7 @@ namespace ADK.Demo.Renderers
                     {
                         var coord = grid.FromHorizontal(map.Center, map);
                         coord.Longitude = segment[0].Longitude;
-                        coord.Latitude += -map.ViewAngle * 1.2 + k * (map.ViewAngle * 2 * 1.2);
+                        coord.Latitude += -map.ViewAngle * coeff + k * (map.ViewAngle * 2 * coeff);
                         coord.Latitude = Math.Min(coord.Latitude, 80);
                         coord.Latitude = Math.Max(coord.Latitude, -80);
                         var refHorizontal = grid.ToHorizontal(coord, map);
@@ -413,10 +414,11 @@ namespace ADK.Demo.Renderers
         {
             if (settings.Get<bool>("LabelEquinoxPoints"))
             {
+                double coeff = map.DiagonalCoefficient();
                 for (int i = 0; i < 2; i++)
                 {
                     var h = LineEcliptic.ToHorizontal(LineEcliptic.Column(equinoxRA[i]).ElementAt(0), map);
-                    if (Angle.Separation(h, map.Center) < map.ViewAngle * 1.2)
+                    if (Angle.Separation(h, map.Center) < map.ViewAngle * coeff)
                     {
                         PointF p = map.Project(h);
 
@@ -434,11 +436,12 @@ namespace ADK.Demo.Renderers
             if (settings.Get<bool>("LabelLunarNodes"))
             {
                 double ascNode = lunarProvider.Moon.AscendingNode;
+                double coeff = map.DiagonalCoefficient();
 
                 for (int i = 0; i < 2; i++)
                 {
                     var h = LineEcliptic.ToHorizontal(new GridPoint(ascNode + (i > 0 ? 180 : 0), 0), map);
-                    if (Angle.Separation(h, map.Center) < map.ViewAngle * 1.2)
+                    if (Angle.Separation(h, map.Center) < map.ViewAngle * coeff)
                     {
                         PointF p = map.Project(h);
 
@@ -456,9 +459,10 @@ namespace ADK.Demo.Renderers
         {
             if (settings.Get<bool>("LabelHorizontalPoles"))
             {
+                double coeff = map.DiagonalCoefficient();
                 for (int i = 0; i < 2; i++)
                 {
-                    if (Angle.Separation(horizontalPoles[i], map.Center) < map.ViewAngle * 1.2)
+                    if (Angle.Separation(horizontalPoles[i], map.Center) < map.ViewAngle * coeff)
                     {
                         PointF p = map.Project(horizontalPoles[i]);
                         map.Graphics.DrawXCross(penGridHorizontal, p, 3);
@@ -472,10 +476,11 @@ namespace ADK.Demo.Renderers
         {
             if (settings.Get<bool>("LabelEquatorialPoles"))
             {
+                double coeff = map.DiagonalCoefficient();
                 for (int i = 0; i < 2; i++)
                 {
                     var h = GridEquatorial.ToHorizontal(polePoints[i], map);
-                    if (Angle.Separation(h, map.Center) < map.ViewAngle * 1.2)
+                    if (Angle.Separation(h, map.Center) < map.ViewAngle * coeff)
                     {
                         PointF p = map.Project(h);
                         map.Graphics.DrawXCross(penGridEquatorial, p, 3);

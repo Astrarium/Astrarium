@@ -237,7 +237,7 @@ namespace ADK.Demo.Calculators
             {
                 if (p != 3)
                 {
-                    SkyContext ctx = new SkyContext(context.From, context.GeoLocation);
+                    SkyContext ctx = new SkyContext(context.From, context.GeoLocation, true);
                     string planetName = planetsCalc.GetPlanetName(p);
 
                     double jd = context.From;
@@ -250,10 +250,8 @@ namespace ADK.Demo.Calculators
                         CrdsEquatorial eqMoon = ctx.Get(lunarCalc.Equatorial);
                         CrdsEquatorial eqPlanet = ctx.Get(planetsCalc.Equatorial, p);
 
-                        double phase = ctx.Get(lunarCalc.Phase);
                         double semidiameter = ctx.Get(lunarCalc.Semidiameter) / 3600;
                         double separation = Angle.Separation(eqMoon, eqPlanet);
-                        float magnitude = ctx.Get(planetsCalc.Magnitude, p);
 
                         // occultation
                         if (semidiameter >= separation)
@@ -263,8 +261,11 @@ namespace ADK.Demo.Calculators
                         // conjunction
                         else
                         {
+                            string phase = Formatters.Phase.Format(ctx.Get(lunarCalc.Phase));
+                            string magnitude = Formatters.Magnitude.Format(ctx.Get(planetsCalc.Magnitude, p));
+                            string ad = Formatters.ConjunctionSeparation.Format(separation);
                             string direction = eqMoon.Delta > eqPlanet.Delta ? "north" : "south";
-                            events.Add(new AstroEvent(jd, $"Moon (Φ={Formatters.Phase.Format(phase)}) passes {Formatters.ConjunctionSeparation.Format(separation)} {direction} to {planetName} ({Formatters.Magnitude.Format(magnitude)})"));
+                            events.Add(new AstroEvent(jd, $"Moon (Φ={phase}) passes {ad} {direction} to {planetName} ({magnitude})"));
                         }
 
                         jd += LunarEphem.SIDEREAL_PERIOD;

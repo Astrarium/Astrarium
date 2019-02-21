@@ -96,9 +96,10 @@ namespace ADK.Demo.Renderers
             bool isGround = settings.Get<bool>("Ground");
             bool useTextures = settings.Get<bool>("UseTextures");
             double ad = Angle.Separation(sun.Horizontal, map.Center);
+            double coeff = map.DiagonalCoefficient();
 
             if ((!isGround || sun.Horizontal.Altitude + sun.Semidiameter / 3600 > 0) && 
-                ad < 1.2 * map.ViewAngle + sun.Semidiameter / 3600)
+                ad < coeff * map.ViewAngle + sun.Semidiameter / 3600)
             {
                 PointF p = map.Project(sun.Horizontal);
 
@@ -139,9 +140,10 @@ namespace ADK.Demo.Renderers
             bool isGround = settings.Get<bool>("Ground");
             bool useTextures = settings.Get<bool>("UseTextures");
             double ad = Angle.Separation(moon.Horizontal, map.Center);
+            double coeff = map.DiagonalCoefficient();
 
             if ((!isGround || moon.Horizontal.Altitude + moon.Semidiameter / 3600 > 0) && 
-                ad < 1.2 * map.ViewAngle + moon.Semidiameter / 3600.0)
+                ad < coeff * map.ViewAngle + moon.Semidiameter / 3600.0)
             {
                 PointF p = map.Project(moon.Horizontal);
 
@@ -204,9 +206,10 @@ namespace ADK.Demo.Renderers
             double sdP = moon.EarthShadow.PenumbraRadius * 6378.0 / 1738.0 * moon.Semidiameter;
 
             bool isGround = settings.Get<bool>("Ground");
+            double coeff = map.DiagonalCoefficient();
 
             if ((!isGround || moon.EarthShadowCoordinates.Altitude + sdP / 3600 > 0) &&
-                ad < 1.2 * map.ViewAngle + sdP / 3600)
+                ad < coeff * map.ViewAngle + sdP / 3600)
             {
                 PointF p = map.Project(moon.EarthShadowCoordinates);
                 PointF pMoon = map.Project(moon.Horizontal);
@@ -286,9 +289,10 @@ namespace ADK.Demo.Renderers
             double ad = Angle.Separation(planet.Horizontal, map.Center);
             bool isGround = settings.Get<bool>("Ground");
             bool useTextures = settings.Get<bool>("UseTextures");
+            double coeff = map.DiagonalCoefficient();
 
             if ((!isGround || planet.Horizontal.Altitude + planet.Semidiameter / 3600 > 0) && 
-                ad < 1.2 * map.ViewAngle + planet.Semidiameter / 3600)
+                ad < coeff * map.ViewAngle + planet.Semidiameter / 3600)
             {
                 float size = map.GetPointSize(planet.Magnitude);
                 float diam = map.GetDiskSize(planet.Semidiameter);

@@ -75,7 +75,8 @@ namespace ADK.Demo.Renderers
                 penCluster.DashStyle = DashStyle.Dash;
             }
 
-            var deepSkies = allDeepSkies.Where(ds => !ds.Status.IsEmpty() && Angle.Separation(map.Center, ds.Horizontal) < map.ViewAngle * 1.2);
+            double coeff = map.DiagonalCoefficient();
+            var deepSkies = allDeepSkies.Where(ds => !ds.Status.IsEmpty() && Angle.Separation(map.Center, ds.Horizontal) < map.ViewAngle * coeff);
             if (isGround)
             {
                 deepSkies = deepSkies.Where(ds => ds.Horizontal.Altitude + ds.Semidiameter / 3600 > 0);

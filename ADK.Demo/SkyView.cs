@@ -103,7 +103,8 @@ namespace ADK.Demo
 
                     SkyMap.Antialias = Math.Sqrt(dx * dx + dy * dy) < 30;
 
-                    double f = SkyMap.Width / (SkyMap.ViewAngle * 2);
+                    double maxSize = Math.Max(SkyMap.Width, SkyMap.Height);
+                    double f = maxSize / (SkyMap.ViewAngle * 2);
 
                     if (Math.Abs(SkyMap.Center.Altitude) < 30 || SkyMap.ViewAngle > 80)
                     {

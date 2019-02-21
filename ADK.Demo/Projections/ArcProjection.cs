@@ -51,16 +51,20 @@ namespace ADK.Demo.Projections
             X = k * cos_d * sin_da;
             Y = k * (sin_d * cos_d0 - cos_d * sin_d0 * cos_da);
 
-            X = Angle.ToDegrees(X) / Map.ViewAngle * Map.Width / 2;
-            Y = Angle.ToDegrees(Y) / Map.ViewAngle * Map.Width / 2;
+            double maxSize = Math.Max(Map.Width, Map.Height);
+
+            X = Angle.ToDegrees(X) / Map.ViewAngle * maxSize / 2;
+            Y = Angle.ToDegrees(Y) / Map.ViewAngle * maxSize / 2;
 
             return new Point((int)(Map.Width / 2.0 + X), (int)(Map.Height / 2.0 - Y));
         }
 
         public CrdsHorizontal Invert(PointF p)
         {
-            double L = Angle.ToRadians((p.X - Map.Width / 2.0) * Map.ViewAngle / Map.Width * 2);
-            double M = Angle.ToRadians((-p.Y + Map.Height / 2.0) * Map.ViewAngle / Map.Width * 2);
+            double maxSize = Math.Max(Map.Width, Map.Height);
+
+            double L = Angle.ToRadians((p.X - Map.Width / 2.0) * Map.ViewAngle / maxSize * 2);
+            double M = Angle.ToRadians((-p.Y + Map.Height / 2.0) * Map.ViewAngle / maxSize * 2);
 
             double theta = Math.Sqrt(L * L + M * M);
 

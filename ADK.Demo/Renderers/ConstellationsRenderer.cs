@@ -17,8 +17,6 @@ namespace ADK.Demo.Renderers
         private Pen penBorder = new Pen(Color.FromArgb(64, 32, 32));
         private Brush brushLabel = new SolidBrush(Color.FromArgb(64, 32, 32));
 
-        private const double maxSeparation = 90 * 1.2;
-
         public ConstellationsRenderer(IConstellationsProvider constellationsProvider, IConstellationsBordersProvider bordersProvider, ISettings settings)
         {
             this.constellationsProvider = constellationsProvider;
@@ -49,6 +47,7 @@ namespace ADK.Demo.Renderers
             CrdsHorizontal h1, h2;
             var borders = bordersProvider.ConstBorders;
             bool isGround = settings.Get<bool>("Ground");
+            double coeff = map.DiagonalCoefficient();
 
             foreach (var block in borders)
             {
@@ -58,8 +57,8 @@ namespace ADK.Demo.Renderers
                     h2 = block.ElementAt(i + 1).Horizontal;
 
                     if ((!isGround || h1.Altitude >= 0 || h2.Altitude >= 0) &&
-                        Angle.Separation(map.Center, h1) < maxSeparation &&
-                        Angle.Separation(map.Center, h2) < maxSeparation)
+                        Angle.Separation(map.Center, h1) < 90 * coeff &&
+                        Angle.Separation(map.Center, h2) < 90 * coeff)
                     {
                         p1 = map.Project(h1);
                         p2 = map.Project(h2);
@@ -81,6 +80,7 @@ namespace ADK.Demo.Renderers
         {
             var constellations = constellationsProvider.Constellations;
             bool isGround = settings.Get<bool>("Ground");
+            double coeff = map.DiagonalCoefficient();
 
             StringFormat format = new StringFormat();
             format.LineAlignment = StringAlignment.Center;
@@ -93,7 +93,7 @@ namespace ADK.Demo.Renderers
             foreach (var c in constellations)
             {
                 var h = c.Label.Horizontal;                
-                if ((!isGround || h.Altitude > 0) && Angle.Separation(map.Center, h) < map.ViewAngle * 1.2)
+                if ((!isGround || h.Altitude > 0) && Angle.Separation(map.Center, h) < map.ViewAngle * coeff)
                 {
                     var p = map.Project(h);
 

@@ -21,6 +21,8 @@ namespace ADK.Demo.Renderers
 
         public override void Render(IMapContext map)
         {
+            double coeff = map.DiagonalCoefficient();
+
             if (settings.Get<bool>("Ground"))
             {
                 const int POINTS_COUNT = 64;
@@ -90,7 +92,7 @@ namespace ADK.Demo.Renderers
                 for (int i = 0; i < labels.Length; i++)
                 {
                     var h = new CrdsHorizontal(i * 360 / labels.Length, 0);
-                    if (Angle.Separation(h, map.Center) < map.ViewAngle * 1.2)
+                    if (Angle.Separation(h, map.Center) < map.ViewAngle * coeff)
                     {
                         PointF p = map.Project(h);
                         map.Graphics.DrawStringOpaque(labels[i], SystemFonts.DefaultFont, brushCardinalLabels, Brushes.Black, p, format);

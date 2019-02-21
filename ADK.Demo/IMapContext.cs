@@ -60,6 +60,11 @@ namespace ADK.Demo
 
     public static class MapContextExtensions
     {
+        public static double DiagonalCoefficient(this IMapContext map)
+        {
+            return Math.Sqrt(map.Width * map.Width + map.Height * map.Height) / Math.Max(map.Width, map.Height);
+        }
+
         /// <summary>
         /// Gets size of a disk (circle) representing a solar system object on sky map.
         /// </summary>

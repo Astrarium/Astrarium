@@ -11,13 +11,16 @@ namespace ADK.Demo
         private Dictionary<IntPtr, object> resultsCache = new Dictionary<IntPtr, object>();
         private Dictionary<IntPtr, object>[] argsCache = new Dictionary<IntPtr, object>[6];
 
-        public SkyContext(double jd, CrdsGeographical location)
+        public SkyContext(double jd, CrdsGeographical location) : this(jd, location, false) { }
+
+        public SkyContext(double jd, CrdsGeographical location, bool preferFast)
         {
             for (int i = 0; i < argsCache.Length; i++)
             {
                 argsCache[i] = new Dictionary<IntPtr, object>();
             }
 
+            PreferFastCalculation = preferFast;
             GeoLocation = location;
             JulianDay = jd;
         }
@@ -67,6 +70,11 @@ namespace ADK.Demo
                 ClearCache();
             }
         }
+
+        /// <summary>
+        /// Flag indicating fast calculation (low precision) is preferred
+        /// </summary>
+        public bool PreferFastCalculation { get; private set; }
 
         /// <summary>
         /// Apparent sidereal time at Greenwich (theta0), in degrees

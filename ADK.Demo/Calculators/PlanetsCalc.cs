@@ -62,7 +62,7 @@ namespace ADK.Demo.Calculators
         /// </summary>
         private CrdsHeliocentrical EarthHeliocentrial(SkyContext c)
         {
-            return PlanetPositions.GetPlanetCoordinates(Planet.EARTH, c.JulianDay);
+            return PlanetPositions.GetPlanetCoordinates(Planet.EARTH, c.JulianDay, !c.PreferFastCalculation);
         }
 
         /// <summary>
@@ -109,7 +109,7 @@ namespace ADK.Demo.Calculators
             while (Math.Abs(tau - tau0) > deltaTau)
             {
                 // Heliocentrical coordinates of planet
-                planetHeliocentrial = PlanetPositions.GetPlanetCoordinates(p, c.JulianDay - tau, highPrecision: true);
+                planetHeliocentrial = PlanetPositions.GetPlanetCoordinates(p, c.JulianDay - tau, !c.PreferFastCalculation);
 
                 // Ecliptical coordinates of planet
                 var planetEcliptical = planetHeliocentrial.ToRectangular(hEarth).ToEcliptical();

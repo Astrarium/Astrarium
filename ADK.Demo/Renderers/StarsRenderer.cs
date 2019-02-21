@@ -23,8 +23,6 @@ namespace ADK.Demo.Renderers
         private Pen penConLine;
         private Brush brushStarNames;
 
-        private const double maxSeparation = 90 * 1.2;
-
         private const int limitAllNames = 40;
         private const int limitBayerNames = 40;
         private const int limitProperNames = 20;
@@ -47,6 +45,7 @@ namespace ADK.Demo.Renderers
             Graphics g = map.Graphics;
             var allStars = starsProvider.Stars;
             bool isGround = settings.Get<bool>("Ground");
+            double coeff = map.DiagonalCoefficient();
 
             if (settings.Get<bool>("ConstLines"))
             {
@@ -58,8 +57,8 @@ namespace ADK.Demo.Renderers
                     h2 = allStars.ElementAt(line.Item2).Horizontal;
 
                     if ((!isGround || h1.Altitude > 0 || h2.Altitude > 0) && 
-                        Angle.Separation(map.Center, h1) < maxSeparation &&
-                        Angle.Separation(map.Center, h2) < maxSeparation)
+                        Angle.Separation(map.Center, h1) < 90 * coeff &&
+                        Angle.Separation(map.Center, h2) < 90 * coeff)
                     {
                         p1 = map.Project(h1);
                         p2 = map.Project(h2);
@@ -75,7 +74,7 @@ namespace ADK.Demo.Renderers
 
             if (settings.Get<bool>("Stars"))
             {
-                var stars = allStars.Where(s => s != null && Angle.Separation(map.Center, s.Horizontal) < map.ViewAngle * 1.2);
+                var stars = allStars.Where(s => s != null && Angle.Separation(map.Center, s.Horizontal) < map.ViewAngle * coeff);
                 if (isGround)
                 {
                     stars = stars.Where(s => s.Horizontal.Altitude >= 0);
