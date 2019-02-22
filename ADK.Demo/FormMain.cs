@@ -84,8 +84,6 @@ namespace ADK.Demo
             {
                 Console.WriteLine($"{Formatters.DateTime.Format(new Date(e.JulianDay, 3))} ({e.JulianDay}): {e.Text}");
             }
-            //map.Center = sky.Get<Moon>("Moon").Horizontal;
-            //map.ViewAngle = 3;
 
             skyView.SkyMap = skyMap;
         }

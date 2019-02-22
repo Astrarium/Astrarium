@@ -6,20 +6,12 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo
 {
-    public class SkyContext
+    public class SkyContext : Memoizer<SkyContext>
     {
-        private Dictionary<IntPtr, object> resultsCache = new Dictionary<IntPtr, object>();
-        private Dictionary<IntPtr, object>[] argsCache = new Dictionary<IntPtr, object>[6];
-
         public SkyContext(double jd, CrdsGeographical location) : this(jd, location, false) { }
 
         public SkyContext(double jd, CrdsGeographical location, bool preferFast)
         {
-            for (int i = 0; i < argsCache.Length; i++)
-            {
-                argsCache[i] = new Dictionary<IntPtr, object>();
-            }
-
             PreferFastCalculation = preferFast;
             GeoLocation = location;
             JulianDay = jd;
@@ -94,39 +86,64 @@ namespace ADK.Demo
         /// <summary>
         /// True obliquity of the ecliptic, in degrees
         /// </summary>
-        public double Epsilon { get; private set; }
+        public double Epsilon { get; private set; }        
+    }
 
-        public R Get<R>(Func<SkyContext, R> formula)
+    /// <summary>
+    /// Base class that implements memoization logic <see href="https://en.wikipedia.org/wiki/Memoization"/>.
+    /// </summary>
+    /// <typeparam name="TClass">Class that inherits the memoizer.</typeparam>
+    public abstract class Memoizer<TClass>
+    {
+        private Dictionary<IntPtr, object> resultsCache = new Dictionary<IntPtr, object>();
+        private Dictionary<IntPtr, object>[] argsCache = new Dictionary<IntPtr, object>[6];
+
+        protected Memoizer()
+        {
+            for (int i = 0; i < argsCache.Length; i++)
+            {
+                argsCache[i] = new Dictionary<IntPtr, object>();
+            }
+        }
+
+        /// <summary>
+        /// Calls the method with memoization logic. 
+        /// If the method has been called already with the same arguments values, 
+        /// cached method result will be returned instead of calling the method again.
+        /// </summary>
+        /// <typeparam name="R">Resulting type of the method.</typeparam>
+        /// <param name="formula">Method to be called.</param>
+        public R Get<R>(Func<TClass, R> formula)
         {
             return InvokeWithCache<R>(formula, this);
         }
 
-        public R Get<T1, R>(Func<SkyContext, T1, R> formula, T1 arg)
+        public R Get<T1, R>(Func<TClass, T1, R> formula, T1 arg)
         {
             return InvokeWithCache<R>(formula, this, arg);
         }
 
-        public R Get<T1, T2, R>(Func<SkyContext, T1, T2, R> formula, T1 arg1, T2 arg2)
+        public R Get<T1, T2, R>(Func<TClass, T1, T2, R> formula, T1 arg1, T2 arg2)
         {
             return InvokeWithCache<R>(formula, this, arg1, arg2);
         }
 
-        public R Get<T1, T2, T3, R>(Func<SkyContext, T1, T2, T3, R> formula, T1 arg1, T2 arg2, T3 arg3)
+        public R Get<T1, T2, T3, R>(Func<TClass, T1, T2, T3, R> formula, T1 arg1, T2 arg2, T3 arg3)
         {
             return InvokeWithCache<R>(formula, this, arg1, arg2, arg3);
         }
 
-        public R Get<T1, T2, T3, T4, R>(Func<SkyContext, T1, T2, T3, T4, R> formula, T1 arg1, T2 arg2, T3 arg3, T4 arg4)
+        public R Get<T1, T2, T3, T4, R>(Func<TClass, T1, T2, T3, T4, R> formula, T1 arg1, T2 arg2, T3 arg3, T4 arg4)
         {
             return InvokeWithCache<R>(formula, this, arg1, arg2, arg3, arg4);
         }
 
-        public R Get<T1, T2, T3, T4, T5, R>(Func<SkyContext, T1, T2, T3, T4, R> formula, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5)
+        public R Get<T1, T2, T3, T4, T5, R>(Func<TClass, T1, T2, T3, T4, R> formula, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5)
         {
             return InvokeWithCache<R>(formula, this, arg1, arg2, arg3, arg4, arg5);
         }
 
-        public R Get<T1, T2, T3, T4, T5, T6, R>(Func<SkyContext, T1, T2, T3, T4, R> formula, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6)
+        public R Get<T1, T2, T3, T4, T5, T6, R>(Func<TClass, T1, T2, T3, T4, R> formula, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6)
         {
             return InvokeWithCache<R>(formula, this, arg1, arg2, arg3, arg4, arg5, arg6);
         }
@@ -168,7 +185,7 @@ namespace ADK.Demo
             }
         }
 
-        private void ClearCache()
+        protected void ClearCache()
         {
             resultsCache.Clear();
             for (int i = 0; i < argsCache.Length; i++)

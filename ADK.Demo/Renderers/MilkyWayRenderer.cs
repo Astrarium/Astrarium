@@ -54,10 +54,17 @@ namespace ADK.Demo.Renderers
                         for (int j = 0; j < milkyWayProvider.MilkyWay[i].Count; j++)
                         {
                             var h = milkyWayProvider.MilkyWay[i][j].Horizontal;
-                            if (Angle.Separation(h, map.Center) < 90 * coeff)
+                            double ad = Angle.Separation(h, map.Center);
+
+                            if (ad < 90 * coeff)
                             {
                                 points.Add(map.Project(h));
                             }
+                            //else
+                            //{
+                            //    h = Angle.Intermediate(h, map.Center, 1 / (ad - 90));
+                            //    points.Add(map.Project(h));
+                            //}
                         }
 
                         if (points.Count >= 3)

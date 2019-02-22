@@ -87,6 +87,26 @@ namespace ADK
         }
 
         /// <summary>
+        /// Calculates angular separation between two points with ecliptical coordinates
+        /// </summary>
+        /// <param name="p1">Ecliptical coordinates of the first point</param>
+        /// <param name="p2">Ecliptical coordinates of the second point</param>
+        /// <returns>Angular separation in degrees</returns>
+        public static double Separation(CrdsEcliptical p1, CrdsEcliptical p2)
+        {
+            double a1 = ToRadians(p1.Beta);
+            double a2 = ToRadians(p2.Beta);
+            double A1 = p1.Lambda;
+            double A2 = p2.Lambda;
+
+            double a = Math.Acos(
+                Math.Sin(a1) * Math.Sin(a2) +
+                Math.Cos(a1) * Math.Cos(a2) * Math.Cos(ToRadians(A1 - A2)));
+
+            return double.IsNaN(a) ? 0 : ToDegrees(a);
+        }
+
+        /// <summary>
         /// Calculates an intermediate point at any fraction along the great circle path 
         /// between two points with horizontal coordinates
         /// </summary>

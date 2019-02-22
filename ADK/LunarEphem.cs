@@ -394,8 +394,15 @@ namespace ADK
                     angles[i] = isLongitudeLibration ? libration.l : libration.b;
                 }
 
-                // find the local extremum with parabolic approximation
-                Interpolation.FindParabolaVertex(x, angles, out xv, out angle);
+                // find the local extremum
+                if (angles[1] < 0)
+                {
+                    Interpolation.FindMinimum(x, angles, 1e-6, out xv, out angle);
+                }
+                else
+                {
+                    Interpolation.FindMaximum(x, angles, 1e-6, out xv, out angle);
+                }
 
                 // correct libration instant
                 jdLibration += xv;

@@ -42,7 +42,7 @@ namespace ADK.Demo.Calculators
         public abstract void ConfigureAstroEvents(AstroEventsConfig config);
     }
 
-    public class AstroEventsContext
+    public class AstroEventsContext : Memoizer<AstroEventsContext>
     {
         public CrdsGeographical GeoLocation { get; set; }
         public double From { get; set; }

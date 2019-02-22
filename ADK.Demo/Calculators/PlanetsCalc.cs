@@ -18,6 +18,8 @@ namespace ADK.Demo.Calculators
     {
         float Magnitude(SkyContext ctx, int number);
         CrdsEquatorial Equatorial(SkyContext ctx, int number);
+        CrdsEcliptical Ecliptical(SkyContext ctx, int number);
+        CrdsEcliptical SunEcliptical(SkyContext ctx);
         string GetPlanetName(int number);
     }
 
@@ -68,7 +70,7 @@ namespace ADK.Demo.Calculators
         /// <summary>
         /// Gets ecliptical coordinates of Sun
         /// </summary>
-        private CrdsEcliptical SunEcliptical(SkyContext c)
+        public CrdsEcliptical SunEcliptical(SkyContext c)
         {
             CrdsHeliocentrical hEarth = c.Get(EarthHeliocentrial);
             var sunEcliptical = new CrdsEcliptical(Angle.To360(hEarth.L + 180), -hEarth.B, hEarth.R);
@@ -124,7 +126,7 @@ namespace ADK.Demo.Calculators
         /// <summary>
         /// Gets ecliptical coordinates of Earth
         /// </summary>
-        private CrdsEcliptical Ecliptical(SkyContext c, int p)
+        public CrdsEcliptical Ecliptical(SkyContext c, int p)
         {
             // Heliocentrical coordinates of planet
             CrdsHeliocentrical heliocentrical = c.Get(Heliocentrical, p);
