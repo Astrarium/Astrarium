@@ -40,7 +40,7 @@ namespace ADK.Demo.Calculators
             return MutualConjunctions(context, 
                     d => d.Ecliptical.Lambda, 
                     d => d.Ecliptical.Beta)
-                .Select(c => new AstroEvent(c.JulianDay, $"{c.Planet1} ({c.Magnitude1}) in conjunction with {c.Planet2} ({c.Magnitude2}). Angular distance is {c.AngularDistance} ({c.Direction})"))
+                .Select(c => new AstroEvent(c.JulianDay, $"{c.Planet1} ({c.Magnitude1}) in conjunction ({c.AngularDistance} {c.Direction}) with {c.Planet2} ({c.Magnitude2})."))
                 .ToArray();
         }
 
