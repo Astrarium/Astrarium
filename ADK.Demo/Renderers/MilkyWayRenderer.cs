@@ -51,26 +51,15 @@ namespace ADK.Demo.Renderers
                     for (int i = 0; i < milkyWayProvider.MilkyWay.Count(); i++)
                     {
                         var points = new List<PointF>();
-                        bool isOutOfScreen = false;
 
                         for (int j = 0; j < milkyWayProvider.MilkyWay[i].Count; j++)
                         {
                             var h = milkyWayProvider.MilkyWay[i][j].Horizontal;
-                            double ad = Angle.Separation(h, map.Center);
-
-                            if (ad < 90 * coeff)
+                            double ad = Angle.Separation(h, map.Center);                            
+                            if (ad < 120 * coeff)
                             {
                                 points.Add(map.Project(h));
-                            }
-                            else
-                            {                                
-                                if (!isOutOfScreen && points.Any())
-                                {
-                                    h = Angle.Intermediate(map.Center, h, 90 * coeff / ad);
-                                    points.Add(map.Project(h));
-                                    isOutOfScreen = true;
-                                }   
-                            }
+                            }                            
                         }
 
                         if (points.Count >= 3)
