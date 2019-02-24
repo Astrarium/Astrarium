@@ -74,9 +74,9 @@ namespace ADK.Demo
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
-            //SkyContext ctx = new SkyContext(new Date(2005, 1, 1).ToJulianEphemerisDay(), sky.Context.GeoLocation);
+            SkyContext ctx = new SkyContext(new Date(2011, 9, 1).ToJulianEphemerisDay(), sky.Context.GeoLocation);
             
-            var events = sky.GetEvents(sky.Context.JulianDayMidnight, sky.Context.JulianDayMidnight + 365);
+            var events = sky.GetEvents(ctx.JulianDayMidnight, ctx.JulianDayMidnight + 365);
             watch.Stop();
             Console.WriteLine("ELASPSED ms: " + watch.ElapsedMilliseconds);
 

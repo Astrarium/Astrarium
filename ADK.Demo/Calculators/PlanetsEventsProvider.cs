@@ -9,10 +9,12 @@ namespace ADK.Demo.Calculators
     public class PlanetsEventsProvider : BaseAstroEventsProvider
     {
         private readonly IPlanetsCalc planetsCalc;
+        private readonly ISolarCalc solarCalc;
 
-        public PlanetsEventsProvider(IPlanetsCalc planetsCalc)
+        public PlanetsEventsProvider(IPlanetsCalc planetsCalc, ISolarCalc solarCalc)
         {
             this.planetsCalc = planetsCalc;
+            this.solarCalc = solarCalc;
         }
 
         public override void ConfigureAstroEvents(AstroEventsConfig config)
@@ -22,7 +24,10 @@ namespace ADK.Demo.Calculators
                .Add("Planets.ConjunctionsInEclipticalLongitude", ConjunctionsInEclipticalLongitude)
                .Add("Planets.MaximalMagnitude", MaximalMagnitude)
                .Add("Planets.CloseApproaches", CloseApproaches)
-               .Add("Planets.Stationaries", Stationaries);
+               .Add("Planets.Stationaries", Stationaries)
+               .Add("Planets.GreatestElongations", GreatestElongations)
+               .Add("Planets.Oppositions", Oppositions)
+               .Add("Planets.Conjunctions", Conjunctions);
         }
 
         private ICollection<AstroEvent> ConjunctionsInRightAscension(AstroEventsContext context)
@@ -40,7 +45,7 @@ namespace ADK.Demo.Calculators
             return MutualConjunctions(context, 
                     d => d.Ecliptical.Lambda, 
                     d => d.Ecliptical.Beta)
-                .Select(c => new AstroEvent(c.JulianDay, $"{c.Planet1} ({c.Magnitude1}) in conjunction ({c.AngularDistance} {c.Direction}) with {c.Planet2} ({c.Magnitude2})."))
+                .Select(c => new AstroEvent(c.JulianDay, $"{c.Planet1} ({c.Magnitude1}) in conjunction ({c.AngularDistance} {c.Direction}) with {c.Planet2} ({c.Magnitude2})"))
                 .ToArray();
         }
 
@@ -250,13 +255,10 @@ namespace ADK.Demo.Calculators
                         // If magnitude has minimum value at central point
                         if (m[1] > m[2] && m[2] < m[3])
                         {
-                            // ecliptical coordinates of the Sun
-                            var ecl = planetsCalc.SunEcliptical(new SkyContext(jd, context.GeoLocation, true));
-
                             // check that the planet is not in conjunction with the Sun. 
                             // 5 degrees is an empirical value of angluar separation to make sure that
                             // the planet has enough separation from the Sun
-                            if (Angle.Separation(ecl, data.ElementAt(day + 2)[p].Ecliptical) > 5)
+                            if (Math.Abs(data.ElementAt(day + 2)[p].Elongation) > 5)
                             {
                                 Interpolation.FindMinimum(t, m, 1e-6, out double t0, out double m0);
 
@@ -336,6 +338,173 @@ namespace ADK.Demo.Calculators
             return events;
         }
 
+        private ICollection<AstroEvent> GreatestElongations(AstroEventsContext context)
+        {
+            // resulting collection of events
+            List<AstroEvent> events = new List<AstroEvent>();
+
+            // planets ephemeris data for the requested period
+            ICollection<PlanetData[]> data = context.Get(PlanetEphemeris);
+
+            // current index in data array
+            int day = 0;
+
+            // current calculated value of Julian Day
+            double jd = context.From;
+
+            // Time shifts, in days, from starting point to each point in a range to be interpolated
+            double[] t = { 0, 1, 2, 3, 4 };
+
+            for (jd = context.From; jd < context.To; jd++)
+            {
+                // "el" is a planet elongation
+                double[] el = new double[5];
+
+                // p is a number of inner planet
+                for (int p = 1; p <= 2; p++)
+                {
+                    // "el" is a planet elongation (5 points)
+                    for (int i = 0; i < 5; i++)
+                    {
+                        el[i] = Math.Abs(data.ElementAt(day + i)[p].Elongation);
+                    }
+
+                    // If elongation has maxumum value at central point
+                    if (el[1] < el[2] && el[2] > el[3])
+                    {
+                        Interpolation.FindMaximum(t, el, 1e-6, out double t0, out double el0);
+
+                        string name = planetsCalc.GetPlanetName(p);
+                        string direction = data.ElementAt(day + 2)[p].Elongation > 0 ? "eastern" : "western";
+                        string elongation = Formatters.ConjunctionSeparation.Format(el0);
+                        events.Add(new AstroEvent(jd - 2 + t0, $"{name} in greatest {direction} elongation ({elongation})"));
+                    }                   
+                }
+
+                day++;
+            }
+
+            return events;
+        }
+
+        private ICollection<AstroEvent> Oppositions(AstroEventsContext context)
+        {
+            // resulting collection of events
+            List<AstroEvent> events = new List<AstroEvent>();
+
+            // planets ephemeris data for the requested period
+            ICollection<PlanetData[]> data = context.Get(PlanetEphemeris);
+
+            // current index in data array
+            int day = 0;
+
+            // current calculated value of Julian Day
+            double jd = context.From;
+
+            // Time shifts, in days, from starting point to each point in a range to be interpolated
+            double[] t = { 0, 1, 2, 3, 4 };
+
+            for (jd = context.From; jd < context.To; jd++)
+            {
+                // "diff" is a planet difference in longitude with the Sun
+                double[] diff = new double[5];
+
+                // p is a number of outer planet
+                for (int p = 4; p <= 8; p++)
+                {
+                    // "diff" is a planet difference in longitude with the Sun (5 points)
+                    for (int i = 0; i < 5; i++)
+                    {
+                        diff[i] = Math.Abs(data.ElementAt(day + i)[p].DiffInLongitude);
+                    }
+
+                    // If difference in longitude has maximum value at central point
+                    if (diff[2] > 170 && diff[1] < diff[2] && diff[2] > diff[3])
+                    {
+                        Interpolation.FindMaximum(t, diff, 1e-6, out double t0, out double diff0);
+                        string name = planetsCalc.GetPlanetName(p);
+                        events.Add(new AstroEvent(jd - 2 + t0, $"{name} at opposition"));
+                    }
+                }
+
+                day++;
+            }
+
+            return events;
+        }
+
+        private ICollection<AstroEvent> Conjunctions(AstroEventsContext context)
+        {
+            // resulting collection of events
+            List<AstroEvent> events = new List<AstroEvent>();
+
+            // planets ephemeris data for the requested period
+            ICollection<PlanetData[]> data = context.Get(PlanetEphemeris);
+
+            // current index in data array
+            int day = 0;
+
+            // current calculated value of Julian Day
+            double jd = context.From;
+
+            // Time shifts, in days, from starting point to each point in a range to be interpolated
+            double[] t = { 0, 1, 2, 3, 4 };
+
+            for (jd = context.From; jd < context.To; jd++)
+            {
+                // "diff" is a planet difference in longitude with the Sun
+                double[] diff = new double[5];
+
+                // p is a number of a planet
+                for (int p = 1; p <= 8; p++)
+                {
+                    // Skip Earth
+                    if (p != 3)
+                    {
+                        // "diff" is a planet difference in longitude with the Sun (5 points)
+                        for (int i = 0; i < 5; i++)
+                        {
+                            diff[i] = data.ElementAt(day + i)[p].DiffInLongitude;
+                        }
+                        
+                        if (Math.Abs(diff[2]) < 5 && diff[2] * diff[3] <= 0)
+                        {
+                            Interpolation.FindRoot(t, diff, 1e-6, out double t0);
+                            string name = planetsCalc.GetPlanetName(p);
+
+                            if (p < 3)
+                            {
+                                double jdConj = jd - 2 + t0;
+
+                                string conjType = data.ElementAt(day + 2)[p].Ecliptical.Distance < 1 ? "inferior" : "superior";
+                                
+                                var ctx = new SkyContext(jdConj, context.GeoLocation, false);
+                                double sd = solarCalc.Semidiameter(ctx) / 3600;
+                                double ad = Math.Abs(planetsCalc.Elongation(ctx, p));
+
+                                string text = $"{name} at {conjType} conjunction with Sun.";
+
+                                if (ad < sd)
+                                {
+                                    text += $" Transit across the Sun's disk.";
+                                }
+
+                                events.Add(new AstroEvent(jdConj, text));
+                            }
+                            else
+                            {
+                                events.Add(new AstroEvent(jd - 2 + t0, $"{name} at conjunction with Sun."));
+                            }
+                        }
+                    }
+                }
+
+                day++;
+            }
+
+            return events;
+        }
+
         private ICollection<PlanetData[]> PlanetEphemeris(AstroEventsContext context)
         {
             List<PlanetData[]> results = new List<PlanetData[]>();
@@ -348,6 +517,8 @@ namespace ADK.Demo.Calculators
 
             // current calculated value of Julian Day
             double jd = context.From;
+
+            double[] longitudes = new double[2];
 
             for (jd = context.From - 2; jd < context.To + 2; jd++)
             {
@@ -364,6 +535,29 @@ namespace ADK.Demo.Calculators
                         data[p].Equatorial = ctx.Get(planetsCalc.Equatorial, p);
                         data[p].Ecliptical = ctx.Get(planetsCalc.Ecliptical, p);
                         data[p].Magnitude = ctx.Get(planetsCalc.Magnitude, p);
+                        data[p].Elongation = ctx.Get(planetsCalc.Elongation, p);
+
+
+                        var rtsPlanet = Visibility.RiseTransitSet(ctx.Get(planetsCalc.Equatorial, p), ctx.GeoLocation, ctx.SiderealTime);
+
+                        var rtsSun = Visibility.RiseTransitSet(ctx.Get(solarCalc.Equatorial), ctx.GeoLocation, ctx.SiderealTime);
+
+                        if (rtsPlanet.Set > rtsSun.Set)
+                            data[p].Visibility = 24 * (rtsPlanet.Set - rtsSun.Set) + " evening";
+                        else if (rtsPlanet.Rise < rtsSun.Rise)
+                            data[p].Visibility = 24 * (rtsSun.Rise - rtsPlanet.Rise) + " morning";
+                        else
+                            data[p].Visibility = "night";
+
+                        longitudes[0] = data[p].Ecliptical.Lambda;
+                        longitudes[1] = ctx.Get(planetsCalc.SunEcliptical).Lambda;
+                        Angle.Align(longitudes);
+                        data[p].DiffInLongitude = longitudes[0] - longitudes[1];
+
+                        if (p == 1 && jd >= context.From && jd < context.To)
+                        {
+                            Console.WriteLine(new Date(jd, 3).ToString() + " " + data[p].Visibility);
+                        }
                     }
                 }
 
@@ -375,9 +569,32 @@ namespace ADK.Demo.Calculators
 
         private class PlanetData
         {
+            /// <summary>
+            /// Apparent equatorial coordinates
+            /// </summary>
             public CrdsEquatorial Equatorial { get; set; }
+
+            /// <summary>
+            /// Apparent ecliptical coordinates
+            /// </summary>
             public CrdsEcliptical Ecliptical { get; set; }
+
+            /// <summary>
+            /// Elongation angle
+            /// </summary>
+            public double Elongation { get; set; }
+
+            /// <summary>
+            /// Apparent magnitude
+            /// </summary>
             public float Magnitude { get; set; }
+
+            /// <summary>
+            /// Difference in longitude with the Sun
+            /// </summary>
+            public double DiffInLongitude { get; set; }
+
+            public string Visibility { get; set; }
         }
 
         private class Conjunction

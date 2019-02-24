@@ -17,6 +17,8 @@ namespace ADK.Demo.Calculators
     public interface IPlanetsCalc
     {
         float Magnitude(SkyContext ctx, int number);
+        double Elongation(SkyContext ctx, int number);
+        double PhaseAngle(SkyContext ctx, int number);
         CrdsEquatorial Equatorial(SkyContext ctx, int number);
         CrdsEcliptical Ecliptical(SkyContext ctx, int number);
         CrdsEcliptical SunEcliptical(SkyContext ctx);
@@ -205,17 +207,17 @@ namespace ADK.Demo.Calculators
         /// <summary>
         /// Gets elongation angle for the planet
         /// </summary>
-        private double Elongation(SkyContext c, int p)
+        public double Elongation(SkyContext c, int p)
         {
-            return BasicEphem.Elongation(c.Get(this.SunEcliptical), c.Get(Ecliptical, p));
+            return BasicEphem.Elongation(c.Get(SunEcliptical), c.Get(Ecliptical, p));
         }
 
         /// <summary>
         /// Gets phase angle for the planet
         /// </summary>
-        private double PhaseAngle(SkyContext c, int p)
+        public double PhaseAngle(SkyContext c, int p)
         {
-            return BasicEphem.PhaseAngle(c.Get(this.Elongation, p), c.Get(SunEcliptical).Distance, c.Get(DistanceFromEarth, p));
+            return BasicEphem.PhaseAngle(c.Get(Elongation, p), c.Get(SunEcliptical).Distance, c.Get(DistanceFromEarth, p));
         }
 
         /// <summary>
@@ -223,7 +225,7 @@ namespace ADK.Demo.Calculators
         /// </summary>
         private double Phase(SkyContext c, int p)
         {
-            return BasicEphem.Phase(c.Get(this.PhaseAngle, p));
+            return BasicEphem.Phase(c.Get(PhaseAngle, p));
         } 
 
         /// <summary>
@@ -283,6 +285,7 @@ namespace ADK.Demo.Calculators
                 p.Magnitude = context.Get(Magnitude, n);
                 p.Semidiameter = context.Get(Semidiameter, n);
                 p.Phase = context.Get(Phase, n);
+                p.Elongation = context.Get(Elongation, n);
                 p.Ecliptical = context.Get(Ecliptical, n);
 
                 if (p.Number == Planet.SATURN)
