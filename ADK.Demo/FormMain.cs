@@ -74,7 +74,7 @@ namespace ADK.Demo
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
-            SkyContext ctx = new SkyContext(new Date(2011, 9, 1).ToJulianEphemerisDay(), sky.Context.GeoLocation);
+            SkyContext ctx = new SkyContext(new Date(2019, 1, 1).ToJulianEphemerisDay(), sky.Context.GeoLocation);
             
             var events = sky.GetEvents(ctx.JulianDayMidnight, ctx.JulianDayMidnight + 365);
             watch.Stop();

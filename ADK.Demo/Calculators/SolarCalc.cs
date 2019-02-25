@@ -18,7 +18,6 @@ namespace ADK.Demo.Calculators
     public interface ISolarCalc
     {
         double Semidiameter(SkyContext c);
-        CrdsEquatorial Equatorial(SkyContext c);
     }
 
     public class SolarCalc : BaseCalc<Sun>, ISolarProvider, ISolarCalc
@@ -69,7 +68,7 @@ namespace ADK.Demo.Calculators
             return SolarEphem.Parallax(c.Get(Ecliptical).Distance);
         }
 
-        public CrdsEquatorial Equatorial(SkyContext c)
+        private CrdsEquatorial Equatorial(SkyContext c)
         {
             return c.Get(Equatorial0).ToTopocentric(c.GeoLocation, c.SiderealTime, c.Get(Parallax));
         }

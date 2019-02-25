@@ -536,27 +536,16 @@ namespace ADK.Demo.Calculators
                         data[p].Ecliptical = ctx.Get(planetsCalc.Ecliptical, p);
                         data[p].Magnitude = ctx.Get(planetsCalc.Magnitude, p);
                         data[p].Elongation = ctx.Get(planetsCalc.Elongation, p);
-
-
-                        var rtsPlanet = Visibility.RiseTransitSet(ctx.Get(planetsCalc.Equatorial, p), ctx.GeoLocation, ctx.SiderealTime);
-
-                        var rtsSun = Visibility.RiseTransitSet(ctx.Get(solarCalc.Equatorial), ctx.GeoLocation, ctx.SiderealTime);
-
-                        if (rtsPlanet.Set > rtsSun.Set)
-                            data[p].Visibility = 24 * (rtsPlanet.Set - rtsSun.Set) + " evening";
-                        else if (rtsPlanet.Rise < rtsSun.Rise)
-                            data[p].Visibility = 24 * (rtsSun.Rise - rtsPlanet.Rise) + " morning";
-                        else
-                            data[p].Visibility = "night";
+                        data[p].Visibility = ctx.Get(planetsCalc.VisibilityConditions, p);
 
                         longitudes[0] = data[p].Ecliptical.Lambda;
                         longitudes[1] = ctx.Get(planetsCalc.SunEcliptical).Lambda;
                         Angle.Align(longitudes);
                         data[p].DiffInLongitude = longitudes[0] - longitudes[1];
 
-                        if (p == 1 && jd >= context.From && jd < context.To)
+                        if (p == 5 && jd >= context.From && jd < context.To)
                         {
-                            Console.WriteLine(new Date(jd, 3).ToString() + " " + data[p].Visibility);
+                            Console.WriteLine(new Date(jd, 3).ToString() + " " + data[p].Visibility.Duration + " " + data[p].Visibility.Period);
                         }
                     }
                 }
@@ -566,6 +555,8 @@ namespace ADK.Demo.Calculators
 
             return results;
         }
+
+
 
         private class PlanetData
         {
@@ -594,7 +585,7 @@ namespace ADK.Demo.Calculators
             /// </summary>
             public double DiffInLongitude { get; set; }
 
-            public string Visibility { get; set; }
+            public PlanetVisibility Visibility { get; set; }
         }
 
         private class Conjunction
@@ -607,5 +598,7 @@ namespace ADK.Demo.Calculators
             public string Direction { get; set; }
             public string AngularDistance { get; set; }
         }
+
+
     }
 }

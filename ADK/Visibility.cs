@@ -113,7 +113,7 @@ namespace ADK
         /// <param name="location">Geographical location of the observation point.</param>
         /// <param name="theta0">Apparent sidereal time at Greenwich for local midnight of the desired date.</param>
         /// <returns>Instants of rising, transit and setting for the celestial body for the desired date.</returns>
-        public static RTS RiseTransitSet(CrdsEquatorial eq, CrdsGeographical location, double theta0)
+        public static RTS RiseTransitSet(CrdsEquatorial eq, CrdsGeographical location, double theta0, double sd = 0)
         {
             List<CrdsHorizontal> hor = new List<CrdsHorizontal>();
             for (int i = 0; i <= 24; i++)
@@ -147,20 +147,20 @@ namespace ADK
 
                 if (double.IsNaN(result.Rise) || double.IsNaN(result.Set))
                 {
-                    double r = SolveParabola(hor[i].Altitude, hor0.Altitude, hor[i + 1].Altitude);
+                    double r = SolveParabola(hor[i].Altitude + sd, hor0.Altitude + sd, hor[i + 1].Altitude + sd);
 
                     if (!double.IsNaN(r))
                     {
                         double t = (i + r) / 24.0;
                         sidTime = InterpolateSiderialTime(theta0, t);
 
-                        if (double.IsNaN(result.Rise) && hor[i].Altitude < 0 && hor[i + 1].Altitude > 0)
+                        if (double.IsNaN(result.Rise) && hor[i].Altitude + sd < 0 && hor[i + 1].Altitude + sd > 0)
                         {
                             result.Rise = t;
                             result.RiseAzimuth = eq.ToHorizontal(location, sidTime).Azimuth;
                         }
 
-                        if (double.IsNaN(result.Set) && hor[i].Altitude > 0 && hor[i + 1].Altitude < 0)
+                        if (double.IsNaN(result.Set) && hor[i].Altitude + sd > 0 && hor[i + 1].Altitude + sd < 0)
                         {
                             result.Set = t;
                             result.SetAzimuth = eq.ToHorizontal(location, sidTime).Azimuth;

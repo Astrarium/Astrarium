@@ -19,6 +19,7 @@ namespace ADK.Demo.Calculators
         float Magnitude(SkyContext ctx, int number);
         double Elongation(SkyContext ctx, int number);
         double PhaseAngle(SkyContext ctx, int number);
+        PlanetVisibility VisibilityConditions(SkyContext ctx, int number);
         CrdsEquatorial Equatorial(SkyContext ctx, int number);
         CrdsEcliptical Ecliptical(SkyContext ctx, int number);
         CrdsEcliptical SunEcliptical(SkyContext ctx);
@@ -87,6 +88,16 @@ namespace ADK.Demo.Calculators
             sunEcliptical += Aberration.AberrationEffect(sunEcliptical.Distance);
 
             return sunEcliptical;
+        }
+
+        /// <summary>
+        /// Gets equatorial coordinates of the Sun
+        /// </summary>
+        /// <param name="c"></param>
+        /// <returns></returns>
+        private CrdsEquatorial SunEquatorial(SkyContext c)
+        {
+            return c.Get(SunEcliptical).ToEquatorial(c.Epsilon);
         }
 
         /// <summary>
@@ -271,6 +282,49 @@ namespace ADK.Demo.Calculators
             return Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, parallax);
         }
 
+        public PlanetVisibility VisibilityConditions(SkyContext ctx, int p)
+        {
+            // minimal altitude of planet suitable for observations
+            double minAltitude = 5;
+
+            // planet visibility
+            var planet = Visibility.RiseTransitSet(ctx.Get(Equatorial, p), ctx.GeoLocation, ctx.SiderealTime, -minAltitude);
+
+            // Sun visibility
+            var sun = Visibility.RiseTransitSet(ctx.Get(SunEquatorial), ctx.GeoLocation, ctx.SiderealTime);
+
+            PlanetVisibility v = new PlanetVisibility();
+
+            v.Period = PlanetVisibilityPeriod.Invisible;
+
+
+            if (double.IsNaN(sun.Rise) || double.IsNaN(sun.Set) || double.IsNaN(planet.Rise) || double.IsNaN(planet.Set))
+            {
+                v.Period = PlanetVisibilityPeriod.Invisible;
+            }
+            else
+            {
+                if (planet.Rise < sun.Rise)
+                {
+                    v.Duration = (sun.Rise - planet.Rise) * 24;
+
+                    v.Period =  (v.Duration > 3) ?
+                        PlanetVisibilityPeriod.Night : 
+                        PlanetVisibilityPeriod.Morning;
+                }
+
+                else if (planet.Rise > sun.Rise)
+                {
+                    v.Duration = (planet.Rise - sun.Rise) * 24;
+                    v.Period = (v.Duration > 3) ?
+                        PlanetVisibilityPeriod.Night :
+                        PlanetVisibilityPeriod.Evening;
+                }
+            }
+
+            return v;
+        }
+
         public override void Calculate(SkyContext context)
         {
             foreach (var p in planets)
@@ -418,5 +472,25 @@ namespace ADK.Demo.Calculators
                 .Select(p => new SearchResultItem(p, p.Name))
                 .ToArray();
         }
+    }
+
+    public class PlanetVisibility
+    {
+        /// <summary>
+        /// Visibility duration, in hours
+        /// </summary>
+        public double Duration { get; set; }
+
+        public PlanetVisibilityPeriod Period { get; set; }
+    }
+
+    public enum PlanetVisibilityPeriod
+    {
+        Invisible,
+        Evening,
+        EveningNight,
+        Night,
+        NightMorning,
+        Morning
     }
 }
