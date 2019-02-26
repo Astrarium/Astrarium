@@ -543,7 +543,7 @@ namespace ADK.Demo.Calculators
                         Angle.Align(longitudes);
                         data[p].DiffInLongitude = longitudes[0] - longitudes[1];
 
-                        if (p == 5 && jd >= context.From && jd < context.To)
+                        if (p == 2 && jd >= context.From && jd < context.To)
                         {
                             Console.WriteLine(new Date(jd, 3).ToString() + " " + data[p].Visibility.Duration + " " + data[p].Visibility.Period);
                         }
