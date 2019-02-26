@@ -282,47 +282,90 @@ namespace ADK.Demo.Calculators
             return Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, parallax);
         }
 
+        private enum CircleSectorPointType
+        {
+            Sun,
+            Body
+        }
+
+        private class CircularSector
+        {
+            public CircularSector(double theta, double delta)
+            {
+                Theta = theta;
+                Delta = delta;
+            }
+
+            public double Theta { get; private set; }
+            public double Delta { get; private set; }
+        }
+
         public PlanetVisibility VisibilityConditions(SkyContext ctx, int p)
         {
             // minimal altitude of planet suitable for observations
             double minAltitude = 5;
 
-            // planet visibility
+            // calculate period when the planet is above horizon (5 degrees and higher)
             var planet = Visibility.RiseTransitSet(ctx.Get(Equatorial, p), ctx.GeoLocation, ctx.SiderealTime, -minAltitude);
 
-            // Sun visibility
+            // calculate period when the Sun is above horizon
             var sun = Visibility.RiseTransitSet(ctx.Get(SunEquatorial), ctx.GeoLocation, ctx.SiderealTime);
 
             PlanetVisibility v = new PlanetVisibility();
 
             v.Period = PlanetVisibilityPeriod.Invisible;
 
-
-            if (double.IsNaN(sun.Rise) || double.IsNaN(sun.Set) || double.IsNaN(planet.Rise) || double.IsNaN(planet.Set))
+            if (planet.TransitAltitude > 0 && sun.TransitAltitude < 0)
+            {
+                v.Period = PlanetVisibilityPeriod.Night;
+                v.Duration = planet.Duration * 24;
+            }
+            else if (planet.TransitAltitude < 0)
             {
                 v.Period = PlanetVisibilityPeriod.Invisible;
+                v.Duration = 0;
             }
             else
             {
-                if (planet.Rise < sun.Rise)
-                {
-                    v.Duration = (sun.Rise - planet.Rise) * 24;
+                // https://math.stackexchange.com/questions/494971/how-to-determine-the-number-of-degrees-overlap-between-two-circular-slices
 
-                    v.Period =  (v.Duration > 3) ?
-                        PlanetVisibilityPeriod.Night : 
-                        PlanetVisibilityPeriod.Morning;
+                // "Sun is below horizon" circle
+                var sunBelow = new CircularSector(Angle.To360((sun.Transit + 0.5) * 360), (1 - sun.Duration) * 180);
+
+                // "body is above horizon" circle
+                var bodyAbove = new CircularSector(planet.Transit * 360, planet.Duration * 180);
+
+                // angle between circle centers
+                double phi = Math.Abs(WrapAngle(sunBelow.Theta - bodyAbove.Theta));
+
+                // angle of overlap of 2 sectors
+                double overlap = sunBelow.Delta + bodyAbove.Delta - phi;
+
+                if (overlap < 0)
+                {
+                    v.Period = PlanetVisibilityPeriod.Invisible;
+                    v.Duration = 0;
                 }
-
-                else if (planet.Rise > sun.Rise)
+                else
                 {
-                    v.Duration = (planet.Rise - sun.Rise) * 24;
-                    v.Period = (v.Duration > 3) ?
-                        PlanetVisibilityPeriod.Night :
-                        PlanetVisibilityPeriod.Evening;
+                    v.Duration = overlap / 360 * 24;
+                    
+                    // TOD0: detect visibility period
+                    v.Period = PlanetVisibilityPeriod.Night;                    
                 }
             }
 
             return v;
+        }
+
+        private static double WrapAngle(double angle)
+        {               
+            if (angle < -180)
+                return angle + 360;
+            else if (angle > 180)
+                return angle - 360;
+            else
+                return angle;
         }
 
         public override void Calculate(SkyContext context)
@@ -485,7 +528,7 @@ namespace ADK.Demo.Calculators
     }
 
     public enum PlanetVisibilityPeriod
-    {
+    {        
         Invisible,
         Evening,
         EveningNight,
