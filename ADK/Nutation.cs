@@ -44,64 +44,6 @@ namespace ADK
             };
         }
 
-        /*
-        /// <summary>
-        /// Calculates the nutation in obliquity (Δε) for given date.
-        /// </summary>
-        /// <param name="jd">Julian Day, corresponding to the given date.</param>
-        /// <returns>Returns nutation in obliquity value in degrees.</returns>
-        /// The method is taken from AA(II), page 144.
-        /// Accuracy of the method is 0.1".
-        public static double NutationInObliquity(double jd)
-        {
-            double T = (jd - 2451545) / 36525.0;
-
-            // Longitude of the ascending node of Moon's mean orbit on the ecliptic, 
-            // measured from the mean equinox of the date: 
-            double Omega = 125.04452 - 1934.136261 * T;
-
-            // Mean longutude of Sun
-            double L = 280.4665 + 36000.7698 * T;
-
-            // Mean longitude of Moon
-            double L_ = 218.3165 + 481267.8813 * T;
-
-            double deltaEpsilon = 9.20 * Math.Cos(Angle.ToRadians(Omega)) + 0.57 * Math.Cos(Angle.ToRadians(2 * L)) + 0.10 * Math.Cos(Angle.ToRadians(2 * L_)) - 0.09 * Math.Cos(Angle.ToRadians(2 * Omega));
-
-            return deltaEpsilon / 3600.0;
-        }
-        */
-
-        /*
-        /// <summary>
-        /// Calculates the nutation in longitude (Δψ) for given date.
-        /// </summary>
-        /// <param name="jd">Julian Day, corresponding to the given date.</param>
-        /// <returns>Returns nutation in longitude value in degrees.</returns>
-        /// <remarks>
-        /// The method is taken from AA(II), page 144.
-        /// Accuracy of the method is 0.5".
-        /// </remarks>
-        public static double NutationInLongitude(double jd)
-        {
-            double T = (jd - 2451545) / 36525.0;
-
-            // Longitude of the ascending node of Moon's mean orbit on the ecliptic, 
-            // measured from the mean equinox of the date: 
-            double Omega = 125.04452 - 1934.136261 * T;
-
-            // Mean longutude of Sun
-            double L = 280.4665 + 36000.7698 * T;
-
-            // Mean longitude of Moon
-            double L_ = 218.3165 + 481267.8813 * T;
-
-            double deltaPsi = -17.20 * Math.Sin(Angle.ToRadians(Omega)) - 1.32 * Math.Sin(Angle.ToRadians(2 * L)) - 0.23 * Math.Sin(Angle.ToRadians(2 * L_)) + 0.21 * Math.Sin(Angle.ToRadians(2 * Omega));
-
-            return deltaPsi / 3600.0;
-        }
-        */
-
         /// <summary>
         /// Returns nutation corrections for ecliptical coordinates.
         /// </summary>

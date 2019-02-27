@@ -39,7 +39,7 @@ namespace ADK.Demo
 
             sky.Calculate();
 
-            //var moon = sky.Get<Moon>("Moon");
+            //var moon = sky.GetEphemeris()
             //var watch = System.Diagnostics.Stopwatch.StartNew();
             //var ephems = sky.GetEphemeris(moon, sky.Context.JulianDay, sky.Context.JulianDay + 365, new string[] { "RTS.Rise", "RTS.Transit", "RTS.Set", "RTS.RiseAzimuth", "RTS.TransitAltitude", "RTS.SetAzimuth"/*, "Equatorial.Alpha", "Equatorial.Delta"*/ });
             //watch.Stop();
@@ -72,18 +72,18 @@ namespace ADK.Demo
             //sky.AddTrack(mercuryTrack);
             //sky.AddTrack(moonTrack);
 
-            var watch = System.Diagnostics.Stopwatch.StartNew();
+            //var watch = System.Diagnostics.Stopwatch.StartNew();
 
-            SkyContext ctx = new SkyContext(new Date(2019, 1, 1).ToJulianEphemerisDay(), sky.Context.GeoLocation);
+            //SkyContext ctx = new SkyContext(new Date(2019, 1, 1).ToJulianEphemerisDay(), sky.Context.GeoLocation);
             
-            var events = sky.GetEvents(ctx.JulianDayMidnight, ctx.JulianDayMidnight + 365);
-            watch.Stop();
-            Console.WriteLine("ELASPSED ms: " + watch.ElapsedMilliseconds);
+            //var events = sky.GetEvents(ctx.JulianDayMidnight, ctx.JulianDayMidnight + 365);
+            //watch.Stop();
+            //Console.WriteLine("ELASPSED ms: " + watch.ElapsedMilliseconds);
 
-            foreach (var e in events)
-            {
-                Console.WriteLine($"{Formatters.DateTime.Format(new Date(e.JulianDay, 3))} ({e.JulianDay}): {e.Text}");
-            }
+            //foreach (var e in events)
+            //{
+            //    Console.WriteLine($"{Formatters.DateTime.Format(new Date(e.JulianDay, 3))} ({e.JulianDay}): {e.Text}");
+            //}
 
             skyView.SkyMap = skyMap;
         }
@@ -139,7 +139,6 @@ namespace ADK.Demo
                 sky.Calculate();
                 skyView.Invalidate();
             }
-
             else if (e.KeyCode == Keys.O)
             {
                 using (var frmSettings = new FormSettings(settings))
@@ -149,7 +148,6 @@ namespace ADK.Demo
                     settings.SettingValueChanged -= Settings_OnSettingChanged;
                 }
             }
-
             else if (e.KeyCode == Keys.F12)
             {
                 fullScreen = !fullScreen;
@@ -181,6 +179,17 @@ namespace ADK.Demo
                         }
                     }
                 }
+            }
+            else if (e.KeyCode == Keys.E)
+            {
+                var body = skyView.SkyMap.SelectedObject;
+                if (body != null)
+                {
+                    var ephem = sky.GetEphemeris(body, sky.Context.JulianDayMidnight, sky.Context.JulianDayMidnight + 365, 1, new[] {
+                        "Visibility.Duration",
+                        "Visibility.Period"
+                    });
+                }                
             }
         }
 

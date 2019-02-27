@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ADK
+﻿namespace ADK
 {
     /// <summary>
     /// Describes triplet of precessional elements 

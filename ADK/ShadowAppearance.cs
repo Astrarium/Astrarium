@@ -15,6 +15,9 @@
         /// </summary>
         public double UmbraRadius { get; private set; }
 
+        /// <summary>
+        /// Ratio of penumbra and umbra radii
+        /// </summary>
         public double Ratio
         {
             get

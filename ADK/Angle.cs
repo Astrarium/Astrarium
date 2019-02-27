@@ -44,21 +44,7 @@ namespace ADK
         /// <returns>Value expressed in degrees in range from 0 to 360</returns>
         public static double To360(double angle)
         {
-            return angle - 360 * (long)(angle / 360.0) + (angle < 0 ? 360 : 0);
-        }
-
-        /// <summary>
-        /// Normalizes angle value expressed in degrees to value in range from -180 to +180.
-        /// </summary>
-        /// <param name="angle">Angle value expressed in degrees.</param>
-        /// <returns>Value expressed in degrees in range from -180 to +180</returns>
-        public static double To180(double angle)
-        {
-            angle = To360(angle);
-            if (angle > 180)
-                return angle - 360;
-            else
-                return angle;
+            return (angle %= 360) >= 0 ? angle : (angle + 360);
         }
 
         /// <summary>
@@ -554,27 +540,52 @@ namespace ADK
 
     #endregion HMS
 
-    // TODO: description
+    #region AngleRange
+
+    /// <summary>
+    /// Defines a circular sector with two given angle values: position angle (start) and width (range), 
+    /// both expressed in degrees from 0 to 360.
+    /// </summary>
     public class AngleRange
     {
-        public AngleRange(double start, double sweep)
+        /// <summary>
+        /// Creates new instance of <see cref="AngleRange"/>.
+        /// </summary>
+        /// <param name="start">Starting position angle (start), in degrees.</param>
+        /// <param name="range">Sector width (range), in degrees.</param>
+        public AngleRange(double start, double range)
         {
-            Start = start;
-            Sweep = sweep;
+            Start = Angle.To360(start);
+            Range = Angle.To360(range);
         }
 
+        /// <summary>
+        /// Gets starting position angle (start), in degrees.
+        /// </summary>
         public double Start { get; private set; }
-        public double Sweep { get; private set; }
 
-        // https://stackoverflow.com/questions/48984436/finding-the-intersections-between-two-angle-ranges-segments
-        public static ICollection<AngleRange> Intersections(AngleRange r1, AngleRange r2)
+        /// <summary>
+        /// Gets sector width (range), in degrees.
+        /// </summary>
+        public double Range { get; private set; }
+
+        /// <summary>
+        /// Finds intersections (overlaps) of the range with second one.
+        /// </summary>
+        /// <param name="r">Second angle range to find overlaps with.</param>
+        /// <returns>Collection (max 2 items) of angle ranges which represent overlaps of two initial ranges.</returns>
+        /// <remarks>
+        /// The idea of this method is based on solution provided here:
+        /// <see href="https://stackoverflow.com/questions/48984436/finding-the-intersections-between-two-angle-ranges-segments"/>.
+        /// </remarks>
+        public ICollection<AngleRange> Overlaps(AngleRange r)
         {
             List<AngleRange> ranges = new List<AngleRange>();
 
-            double aStart = r1.Start;
-            double aSweep = r1.Sweep;
-            double bStart = r2.Start;
-            double bSweep = r2.Sweep;
+            double aStart = Start;
+            double aSweep = Range;
+            double bStart = r.Start;
+            double bSweep = r.Range;
 
             double greaterAngle;
             double greaterSweep;
@@ -608,4 +619,6 @@ namespace ADK
             return ranges;
         }
     }
+
+    #endregion AngleRange
 }

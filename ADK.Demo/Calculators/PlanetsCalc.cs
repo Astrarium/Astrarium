@@ -369,6 +369,9 @@ namespace ADK.Demo.Calculators
 
             e.Add("RTS.Set", (c, p) => c.Get(RiseTransitSet, p.Number).Set)
                .WithFormatter(Formatters.Time);
+
+            e.Add("Visibility.Duration", (c, p) => c.Get(Visibility, p.Number).Duration);
+            e.Add("Visibility.Period", (c, p) => c.Get(Visibility, p.Number).Period);
         }
 
         public override CelestialObjectInfo GetInfo(SkyContext c, Planet planet)

@@ -35,8 +35,8 @@ namespace ADK.Demo
             Default["Equatorial.Alpha"]         = RA;
             Default["Equatorial.Delta"]         = Dec;
             Default["Distance"]                 = Distance;
-            Default["DistanceFromSun"] = Distance;
-            Default["DistanceFromEarth"] = Distance;
+            Default["DistanceFromSun"]          = Distance;
+            Default["DistanceFromEarth"]        = Distance;
             Default["Ecliptical.Lambda"]        = Longitude;
             Default["Ecliptical.Beta"]          = Latitude;
             Default["Horizontal.Azimuth"]       = Longitude;
@@ -64,6 +64,8 @@ namespace ADK.Demo
             Default["Appearance.D"]             = EarthDeclination;
             Default["SaturnRings.a"]            = SaturnRingsSize;
             Default["SaturnRings.b"]            = SaturnRingsSize;
+            Default["Visibility.Duration"]      = VisibilityDuration;
+            Default["Visibility.Period"]        = VisibilityPeriod;
         }
 
         public static IEphemFormatter GetDefault(string key)
@@ -247,6 +249,38 @@ namespace ADK.Demo
             }
         }
 
+        private class VisibilityDurationFormatter : IEphemFormatter
+        {
+            public string Format(object value)
+            {
+                double duration = (double)value;
+                return duration > 0 ? $"{duration.ToString("0.0", CultureInfo.InvariantCulture)} h" : "—";
+            }
+        }
+
+        private class VisibilityPeriodFormatter : IEphemFormatter
+        {
+            public string Format(object value)
+            {
+                VisibilityPeriod p = (VisibilityPeriod)value;
+
+                if ((p & ADK.VisibilityPeriod.Morning) != 0)
+                {
+                    return "m";
+                }
+                else if ((p & ADK.VisibilityPeriod.Evening) != 0)
+                {
+                    return "e";
+                }
+                else if ((p & ADK.VisibilityPeriod.Night) != 0)
+                {
+                    return "n";
+                }
+                
+                return "";
+            }
+        }
+
         public static readonly IEphemFormatter Simple = new SimpleFormatter(); 
 
         public static readonly IEphemFormatter RA = new HMSAngleFormatter();
@@ -274,5 +308,7 @@ namespace ADK.Demo
         public static readonly IEphemFormatter ConjunctionSeparation = new UnsignedDoubleFormatter(1, "\u00B0");
         public static readonly IEphemFormatter MoonDeclination = new SignedDoubleFormatter(3, "\u00B0");
         public static readonly IEphemFormatter SaturnRingsSize = new SmallAngleFormatter();
+        public static readonly IEphemFormatter VisibilityDuration = new VisibilityDurationFormatter();
+        public static readonly IEphemFormatter VisibilityPeriod = new UnsignedDoubleFormatter(1, "h");
     }
 }

@@ -2,6 +2,8 @@
 
 namespace ADK
 {
+    // TODO: description, tests
+
     public static class Interpolation
     {
         public static double Lagrange(double[] x, double[] y, double x0)

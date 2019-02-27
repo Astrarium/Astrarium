@@ -218,7 +218,7 @@ namespace ADK
                 var r2 = new AngleRange(body.Rise * 360, body.Duration * 360);
 
                 // find the intersections of two ranges
-                var ranges = AngleRange.Intersections(r1, r2);
+                var ranges = r1.Overlaps(r2);
 
                 // no intersections of time ranges
                 if (!ranges.Any())
@@ -230,7 +230,7 @@ namespace ADK
                 else
                 {
 
-                    details.Duration = ranges.Sum(i => i.Sweep / 360 * 24);
+                    details.Duration = ranges.Sum(i => i.Range / 360 * 24);
 
                     // Evening time range, expressed in degrees
                     // Start is a sunset time, sweep (duration) is a timespan from sunset to midnight.
@@ -246,19 +246,19 @@ namespace ADK
 
                     foreach (var r in ranges)
                     {
-                        var isEvening = AngleRange.Intersections(r, rE);
+                        var isEvening = r.Overlaps(rE);
                         if (isEvening.Any())
                         {
                             details.Period |= VisibilityPeriod.Evening;
                         }
 
-                        var isNight = AngleRange.Intersections(r, rN);
+                        var isNight = r.Overlaps(rN);
                         if (isNight.Any())
                         {
                             details.Period |= VisibilityPeriod.Night;
                         }
 
-                        var isMorning = AngleRange.Intersections(r, rM);
+                        var isMorning = r.Overlaps(rM);
                         if (isMorning.Any())
                         {
                             details.Period |= VisibilityPeriod.Morning;
@@ -270,11 +270,13 @@ namespace ADK
             return details;
         }
 
+        // TODO: description
         private static double InterpolateSiderialTime(double theta0, double n)
         {
             return Angle.To360(theta0 + n * 360.98564736629);
         }
 
+        // TODO: description
         private static CrdsEquatorial InterpolateEq(double[] alpha, double[] delta, double n)
         {
             double[] x = new double[] { 0, 0.5, 1 };
@@ -284,6 +286,7 @@ namespace ADK
             return eq;
         }
 
+        // TODO: description
         private static double SolveParabola(double y1, double y2, double y3)
         {
             double a = 2 * y1 - 4 * y2 + 2 * y3;

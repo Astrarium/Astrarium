@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ADK
 {
+    /// <summary>
+    /// Provides methods for calculation of ephemerides of the Sun.
+    /// </summary>
     public static class SolarEphem
     {
         /// <summary>
