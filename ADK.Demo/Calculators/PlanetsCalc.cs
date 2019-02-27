@@ -19,7 +19,7 @@ namespace ADK.Demo.Calculators
         float Magnitude(SkyContext ctx, int number);
         double Elongation(SkyContext ctx, int number);
         double PhaseAngle(SkyContext ctx, int number);
-        PlanetVisibility VisibilityConditions(SkyContext ctx, int number);
+        VisibilityDetails Visibility(SkyContext ctx, int number);
         CrdsEquatorial Equatorial(SkyContext ctx, int number);
         CrdsEcliptical Ecliptical(SkyContext ctx, int number);
         CrdsEcliptical SunEcliptical(SkyContext ctx);
@@ -279,147 +279,12 @@ namespace ADK.Demo.Calculators
                 eq[i] = new SkyContext(jd + diff[i], c.GeoLocation).Get(Equatorial0, p);
             }
 
-            return Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, parallax);
+            return ADK.Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, parallax);
         }
 
-        private enum CircleSectorPointType
+        public VisibilityDetails Visibility(SkyContext ctx, int p)
         {
-            Sun,
-            Body
-        }
-
-        private class CircularSector
-        {
-            public CircularSector(double theta, double delta)
-            {
-                Theta = theta;
-                Delta = delta;
-            }
-
-            public double Theta { get; private set; }
-            public double Delta { get; private set; }
-        }
-
-        public PlanetVisibility VisibilityConditions(SkyContext ctx, int p)
-        {
-            // minimal altitude of planet suitable for observations
-            double minAltitude = 5;
-
-            double deltaAlt = 0.5;
-
-            // calculate period when the planet is above horizon (5 degrees and higher)
-            var planet = Visibility.RiseTransitSet(ctx.Get(Equatorial, p), ctx.GeoLocation, ctx.SiderealTime, -minAltitude);
-
-            // calculate period when the Sun is above horizon
-            var sun = Visibility.RiseTransitSet(ctx.Get(SunEquatorial), ctx.GeoLocation, ctx.SiderealTime);
-
-            PlanetVisibility v = new PlanetVisibility();
-
-            v.Period = PlanetVisibilityPeriod.Invisible;
-
-            if (planet.TransitAltitude > minAltitude + deltaAlt && sun.TransitAltitude < 0)
-            {
-                v.Period = PlanetVisibilityPeriod.All;
-                v.Duration = planet.Duration * 24;
-            }
-            else if (planet.TransitAltitude <= minAltitude + deltaAlt)
-            {
-                v.Period = PlanetVisibilityPeriod.Invisible;
-                v.Duration = 0;
-            }
-            else if (planet.TransitAltitude > minAltitude + deltaAlt)
-            {
-                // https://math.stackexchange.com/questions/494971/how-to-determine-the-number-of-degrees-overlap-between-two-circular-slices
-
-                // "Sun is below horizon" sector
-                var sector1 = new CircularSector(Angle.To360((sun.Transit + 0.5) * 360), (1 - sun.Duration) * 180);
-
-                // "body is above horizon" sector
-                var sector2 = new CircularSector(planet.Transit * 360, planet.Duration * 180);
-
-                // angle between sector medians
-                double phi = Math.Abs(WrapAngle(sector1.Theta - sector2.Theta));
-
-                // angle of overlap of 2 sectors
-                double overlap = sector1.Delta + sector2.Delta - phi;
-
-                if (overlap <= 0)
-                {
-                    v.Period = PlanetVisibilityPeriod.Invisible;
-                    v.Duration = 0;
-                }
-                else
-                {
-                    v.Duration = overlap / 360 * 24;
-                   
-                    double theta1 = Angle.ToRadians(sector1.Theta);
-                    double theta2 = Angle.ToRadians(sector2.Theta);
-                    
-                    // angle of mid of visibility
-                    double theta0 = Angle.ToDegrees(Math.Acos(Math.Cos(theta1) * Math.Cos(theta2) + Math.Sin(theta1) * Math.Sin(theta2)));
-
-                    // half of visibility duration, expressed in degrees
-                    double delta0 = overlap / 2;
-
-                    var sector0 = new CircularSector(theta0, delta0);
-
-                    // evening sector
-                    var sectorE = new CircularSector(sun.Set * 360 + (1 - sun.Set) * 360 / 2, (1 - sun.Set) * 360 / 2);
-
-                    // night sector
-                    var sectorN = new CircularSector(sun.Rise / 4 * 360, sun.Rise / 4 * 360);
-
-                    // morning sector
-                    var sectorM = new CircularSector(sun.Rise * 3.0 / 4 * 360, sun.Rise / 4 * 360);
-
-                    {
-                        double phi_ = Math.Abs(WrapAngle(sector0.Theta - sectorE.Theta));
-                        double overlap_ = sector0.Delta + sectorE.Delta - phi_;
-
-                        if (overlap_ >= 0)
-                        {
-                            v.Period |= PlanetVisibilityPeriod.Evening;
-                        }
-                    }
-
-                    {
-                        double phi_ = Math.Abs(WrapAngle(sector0.Theta - sectorN.Theta));
-                        double overlap_ = sector0.Delta + sectorN.Delta - phi_;
-
-                        if (overlap_ >= 0)
-                        {
-                            v.Period |= PlanetVisibilityPeriod.Night;
-                        }
-                    }
-
-                    {
-                        double phi_ = Math.Abs(WrapAngle(sector0.Theta - sectorM.Theta));
-                        double overlap_ = sector0.Delta + sectorM.Delta - phi_;
-
-                        if (overlap_ >= 0)
-                        {
-                            v.Period |= PlanetVisibilityPeriod.Morning;
-                        }
-                    }
-
-                    if (p == 2 && v.Period == PlanetVisibilityPeriod.Invisible)
-                    {
-
-                    }
-                }
-            }
-
-            return v;
-        }
-
-        private static double WrapAngle(double angle)
-        {               
-            if (angle < -180)
-                return angle + 360;
-            else if (angle > 180)
-                return angle - 360;
-            else
-                return angle;
+            return ADK.Visibility.Details(ctx.Get(Equatorial, p), ctx.Get(SunEquatorial), ctx.GeoLocation, ctx.SiderealTime, 5);
         }
 
         public override void Calculate(SkyContext context)
@@ -569,25 +434,5 @@ namespace ADK.Demo.Calculators
                 .Select(p => new SearchResultItem(p, p.Name))
                 .ToArray();
         }
-    }
-
-    public class PlanetVisibility
-    {
-        /// <summary>
-        /// Visibility duration, in hours
-        /// </summary>
-        public double Duration { get; set; }
-
-        public PlanetVisibilityPeriod Period { get; set; }
-    }
-
-    [Flags]
-    public enum PlanetVisibilityPeriod
-    {        
-        Invisible       = 0,
-        Evening         = 1,
-        Night           = 2,
-        Morning         = 4,
-        All             = 8
     }
 }

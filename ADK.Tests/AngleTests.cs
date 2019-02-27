@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Globalization;
+using System.Linq;
 
 namespace ADK.Tests
 {
@@ -14,6 +15,38 @@ namespace ADK.Tests
             Assert.AreEqual(183, Angle.To360(183));
             Assert.AreEqual(348, Angle.To360(-12));
             Assert.AreEqual(90, Angle.To360(-270));
+        }
+
+        [TestMethod]
+        public void To180()
+        {
+            Assert.AreEqual(-178, Angle.To180(182));
+            Assert.AreEqual(17, Angle.To180(17));
+            Assert.AreEqual(-2, Angle.To180(358));
+            Assert.AreEqual(-2, Angle.To180(-2));
+            Assert.AreEqual(5, Angle.To180(365));
+            Assert.AreEqual(10, Angle.To180(365 * 2));
+        }
+
+        [TestMethod]
+        public void AngleRangeIntersections()
+        {
+            {
+                var s1 = new AngleRange(314, 90);
+                var s2 = new AngleRange(345, 110);
+                var inters = AngleRange.Intersections(s1, s2);
+
+                Assert.AreEqual(1, inters.Count);
+                Assert.AreEqual(59, inters.ElementAt(0).Sweep);
+            }
+
+            {
+                var s1 = new AngleRange(0, 180);
+                var s2 = new AngleRange(75, 30);
+                var inters = AngleRange.Intersections(s1, s2);
+                Assert.AreEqual(1, inters.Count);
+                Assert.AreEqual(30, inters.ElementAt(0).Sweep);
+            }
         }
 
         [TestMethod]

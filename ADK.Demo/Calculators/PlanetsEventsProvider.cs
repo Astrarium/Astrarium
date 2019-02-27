@@ -27,7 +27,8 @@ namespace ADK.Demo.Calculators
                .Add("Planets.Stationaries", Stationaries)
                .Add("Planets.GreatestElongations", GreatestElongations)
                .Add("Planets.Oppositions", Oppositions)
-               .Add("Planets.Conjunctions", Conjunctions);
+               .Add("Planets.Conjunctions", Conjunctions)
+               .Add("Planets.VisibilityPeriods", VisibilityPeriods);
         }
 
         private ICollection<AstroEvent> ConjunctionsInRightAscension(AstroEventsContext context)
@@ -505,6 +506,58 @@ namespace ADK.Demo.Calculators
             return events;
         }
 
+        private ICollection<AstroEvent> VisibilityPeriods(AstroEventsContext context)
+        {
+            // resulting collection of events
+            List<AstroEvent> events = new List<AstroEvent>();
+
+            // planets ephemeris data for the requested period
+            ICollection<PlanetData[]> data = context.Get(PlanetEphemeris);
+
+            // current index in data array
+            int day = 0;
+
+            for (double jd = context.From; jd < context.To; jd++)
+            {
+                // p is a number of a planet
+                for (int p = 1; p <= 8; p++)
+                {
+                    // Skip Earth
+                    if (p != 3)
+                    {
+                        var vis = data.ElementAt(day + 2)[p].Visibility;
+                        var prev = data.ElementAt(day + 1)[p].Visibility;
+
+                        if (vis.Period != prev.Period)
+                        {
+                            string name = planetsCalc.GetPlanetName(p);
+                            if (vis.Period == VisibilityPeriod.Invisible)
+                            {
+                                events.Add(new AstroEvent(jd, $"{name}: end of visibility."));
+                            }
+
+                            if ((vis.Period & VisibilityPeriod.Morning) != 0)
+                            {
+                                events.Add(new AstroEvent(jd, $"{name}: begin of morning visibility."));
+                            }
+                            else if ((vis.Period & VisibilityPeriod.Evening) != 0)
+                            {
+                                events.Add(new AstroEvent(jd, $"{name}: begin of evening visibility."));
+                            }
+                            else if ((vis.Period & VisibilityPeriod.Night) != 0)
+                            {
+                                events.Add(new AstroEvent(jd, $"{name}: begin of night visibility."));
+                            }
+                        }
+                    }
+                }
+
+                day++;
+            }
+
+            return events;
+        }
+
         private ICollection<PlanetData[]> PlanetEphemeris(AstroEventsContext context)
         {
             List<PlanetData[]> results = new List<PlanetData[]>();
@@ -536,7 +589,7 @@ namespace ADK.Demo.Calculators
                         data[p].Ecliptical = ctx.Get(planetsCalc.Ecliptical, p);
                         data[p].Magnitude = ctx.Get(planetsCalc.Magnitude, p);
                         data[p].Elongation = ctx.Get(planetsCalc.Elongation, p);
-                        data[p].Visibility = ctx.Get(planetsCalc.VisibilityConditions, p);
+                        data[p].Visibility = ctx.Get(planetsCalc.Visibility, p);
 
                         longitudes[0] = data[p].Ecliptical.Lambda;
                         longitudes[1] = ctx.Get(planetsCalc.SunEcliptical).Lambda;
@@ -585,7 +638,7 @@ namespace ADK.Demo.Calculators
             /// </summary>
             public double DiffInLongitude { get; set; }
 
-            public PlanetVisibility Visibility { get; set; }
+            public VisibilityDetails Visibility { get; set; }
         }
 
         private class Conjunction

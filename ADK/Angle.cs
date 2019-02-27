@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
@@ -44,6 +45,20 @@ namespace ADK
         public static double To360(double angle)
         {
             return angle - 360 * (long)(angle / 360.0) + (angle < 0 ? 360 : 0);
+        }
+
+        /// <summary>
+        /// Normalizes angle value expressed in degrees to value in range from -180 to +180.
+        /// </summary>
+        /// <param name="angle">Angle value expressed in degrees.</param>
+        /// <returns>Value expressed in degrees in range from -180 to +180</returns>
+        public static double To180(double angle)
+        {
+            angle = To360(angle);
+            if (angle > 180)
+                return angle - 360;
+            else
+                return angle;
         }
 
         /// <summary>
@@ -538,4 +553,59 @@ namespace ADK
     }
 
     #endregion HMS
+
+    // TODO: description
+    public class AngleRange
+    {
+        public AngleRange(double start, double sweep)
+        {
+            Start = start;
+            Sweep = sweep;
+        }
+
+        public double Start { get; private set; }
+        public double Sweep { get; private set; }
+
+        // https://stackoverflow.com/questions/48984436/finding-the-intersections-between-two-angle-ranges-segments
+        public static ICollection<AngleRange> Intersections(AngleRange r1, AngleRange r2)
+        {
+            List<AngleRange> ranges = new List<AngleRange>();
+
+            double aStart = r1.Start;
+            double aSweep = r1.Sweep;
+            double bStart = r2.Start;
+            double bSweep = r2.Sweep;
+
+            double greaterAngle;
+            double greaterSweep;
+            double originAngle;
+            double originSweep;
+            if (aStart < bStart)
+            {
+                originAngle = aStart;
+                originSweep = aSweep;
+                greaterSweep = bSweep;
+                greaterAngle = bStart;
+            }
+            else
+            {
+                originAngle = bStart;
+                originSweep = bSweep;
+                greaterSweep = aSweep;
+                greaterAngle = aStart;
+            }
+            double greaterAngleRel = greaterAngle - originAngle;
+            if (greaterAngleRel < originSweep)
+            {
+                ranges.Add(new AngleRange(greaterAngle, Math.Min(greaterSweep, originSweep - greaterAngleRel)));
+            }
+            double rouno = greaterAngleRel + greaterSweep;
+            if (rouno > 360)
+            {
+                ranges.Add(new AngleRange(originAngle, Math.Min(rouno - 360, originSweep)));
+            }
+
+            return ranges;
+        }
+    }
 }
