@@ -180,12 +180,12 @@ namespace ADK
         }
 
         /// <summary>
-        /// Creates new date from julian day and UTC offset in hours
+        /// Creates new date from Julian Ephemeris Day and UTC offset in hours
         /// </summary>
-        /// <param name="jd">Julian Day to convert to local date</param>
+        /// <param name="jde">Julian Ephemeris Day to convert to local date</param>
         /// <param name="utcOffset">UTC offset in hours</param>
-        public Date(double jd, double utcOffset) :
-            this(jd + utcOffset / 24.0 - DeltaT(jd) / 86400)
+        public Date(double jde, double utcOffset) :
+            this(jde + utcOffset / 24.0 - DeltaT(jde) / 86400)
         { }
 
         #endregion Constructors
@@ -373,12 +373,25 @@ namespace ADK
         }
 
         /// <summary>
-        /// Converts the specified <see cref="Date"/> to Julian Day value.
+        /// Converts the specified <see cref="Date"/> instance to Julian Day value.
         /// </summary>
+        /// <param name="date"><see cref="Date"/> instance to convert to Julian Day.</param>
         /// <returns>Julian Day value.</returns>
         public static double JulianDay(Date date)
         {
             return JulianDay(date.Year, date.Month, date.Day);
+        }
+
+        /// <summary>
+        /// Converts <see cref="Date"/> instance to Julian Ephemeris Day value.
+        /// </summary>
+        /// <param name="date"><see cref="Date"/> instance to convert to Julian Ephemeris Day.</param>
+        /// <param name="utcOffset">UTC offset, in hours.</param>
+        /// <returns>Julian Ephemeris Day value.</returns>
+        public static double JulianDay(Date date, double utcOffset)
+        {
+            double jd = JulianDay(date.Year, date.Month, date.Day);
+            return jd - (utcOffset / 24.0 - DeltaT(jd) / 86400);
         }
 
         /// <summary>

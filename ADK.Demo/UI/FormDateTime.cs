@@ -31,31 +31,35 @@ namespace ADK.Demo.UI
         /// </summary>
         public double JulianDay { get; private set; }
 
+        public double UtcOffset { get; private set; }
+
         /// <summary>
         /// Initializes new instance of the dialog.
         /// </summary>
         /// <param name="d">Selected date and time.</param>
         /// <param name="options">Options for FormDateTime dialog.</param>
-        public FormDateTime(double jd, FormDateTimeOptions options = FormDateTimeOptions.All)
+        public FormDateTime(double jd, double utcOffset, FormDateTimeOptions options = FormDateTimeOptions.All)
         {
             InitializeComponent();
 
             if (options == FormDateTimeOptions.DateOnly ||
                 options == FormDateTimeOptions.MonthAndYearOnly)
             {
-                panTime.Visible = false;
-               
+                panControls.Controls.Remove(panTime);
+                
                 if (options == FormDateTimeOptions.MonthAndYearOnly)
                 {
-                    lblDay.Visible = false;
-                    updownDay.Visible = false;                    
+                    panDate.Controls.Remove(panDay);                 
                 }
             }
+
+            ClientSize = panControls.Size;
 
             cmbMonth.Items.Clear();
             cmbMonth.Items.AddRange(CultureInfo.InvariantCulture.DateTimeFormat.AbbreviatedMonthNames.Take(12).ToArray());
             cmbMonth.SelectedIndex = 0;
 
+            UtcOffset = utcOffset;
             JulianDay = jd;
 
             SetDate();
@@ -63,7 +67,7 @@ namespace ADK.Demo.UI
 
         private void SetDate()
         {
-            Date d = new Date(JulianDay);
+            Date d = new Date(JulianDay, UtcOffset);
 
             cmbMonth.SelectedIndex = d.Month - 1;
             updownDay.Value = (int)d.Day;
@@ -96,7 +100,9 @@ namespace ADK.Demo.UI
             int minute = Convert.ToInt32(updownMinute.Value);
             int second = Convert.ToInt32(updownSecond.Value);
 
-            JulianDay = Date.JulianDay(year, month, day, hour, minute, second);
+            Date date = new Date(year, month, day + TimeSpan.FromHours(hour).TotalDays + TimeSpan.FromMinutes(minute).TotalDays + TimeSpan.FromSeconds(second).TotalDays);
+            
+            JulianDay = Date.JulianDay(date, UtcOffset);
         }
 
         private void SetMaxDay()

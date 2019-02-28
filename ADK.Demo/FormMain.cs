@@ -111,17 +111,11 @@ namespace ADK.Demo
         {
             if (e.KeyCode == Keys.D)
             {
-                double jd = sky.Context.JulianDay;
-                double deltaT = Date.DeltaT(sky.Context.JulianDay) / 86400;
-                double tzone = 3.0 / 24;
-
-                using (var frmDateTime = new FormDateTime(jd + tzone - deltaT))
+                using (var frmDateTime = new FormDateTime(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset, FormDateTimeOptions.MonthAndYearOnly))
                 {
                     if (frmDateTime.ShowDialog(skyView) == DialogResult.OK)
                     {
-                        jd = frmDateTime.JulianDay;
-                        deltaT = Date.DeltaT(jd) / 86400;
-                        sky.Context.JulianDay = jd - tzone + deltaT;
+                        sky.Context.JulianDay = frmDateTime.JulianDay;
                         sky.Calculate();
                         skyView.Invalidate();
                     }
