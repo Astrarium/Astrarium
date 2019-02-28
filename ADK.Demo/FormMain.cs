@@ -111,7 +111,7 @@ namespace ADK.Demo
         {
             if (e.KeyCode == Keys.D)
             {
-                using (var frmDateTime = new FormDateTime(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset, FormDateTimeOptions.MonthAndYearOnly))
+                using (var frmDateTime = new FormDateTime(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset))
                 {
                     if (frmDateTime.ShowDialog(skyView) == DialogResult.OK)
                     {

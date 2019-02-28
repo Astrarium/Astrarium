@@ -31,6 +31,9 @@ namespace ADK.Demo.UI
         /// </summary>
         public double JulianDay { get; private set; }
 
+        /// <summary>
+        /// UTC offset, in hours
+        /// </summary>
         public double UtcOffset { get; private set; }
 
         /// <summary>
@@ -42,18 +45,22 @@ namespace ADK.Demo.UI
         {
             InitializeComponent();
 
+            ClientSize = new Size(panDate.Width, panDate.Height + panTime.Height + panButtons.Height);
+
             if (options == FormDateTimeOptions.DateOnly ||
                 options == FormDateTimeOptions.MonthAndYearOnly)
             {
-                panControls.Controls.Remove(panTime);
-                
+                panTime.Visible = false;
+
+                ClientSize = new Size(panDate.Width, panDate.Height + panButtons.Height);
+
                 if (options == FormDateTimeOptions.MonthAndYearOnly)
                 {
-                    panDate.Controls.Remove(panDay);                 
+                    panDay.Visible = false;                    
+                    panMonth.Width = panMonth.Right - panDay.Left;
+                    panMonth.Location = panDay.Location;
                 }
             }
-
-            ClientSize = panControls.Size;
 
             cmbMonth.Items.Clear();
             cmbMonth.Items.AddRange(CultureInfo.InvariantCulture.DateTimeFormat.AbbreviatedMonthNames.Take(12).ToArray());
