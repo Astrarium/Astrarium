@@ -77,9 +77,9 @@ namespace ADK.Demo.UI
                 }
             }
 
-            templateContent.Replace("{0}", ObjectInfo.Subtitle);
-            templateContent.Replace("{1}", ObjectInfo.Title);
-            templateContent.Replace("{2}", sb.ToString());
+            templateContent.Replace("{subtitle}", ObjectInfo.Subtitle);
+            templateContent.Replace("{title}", ObjectInfo.Title);
+            templateContent.Replace("{info}", sb.ToString());
 
             wbInfo.DocumentText = "";
             wbInfo.Document.Write(templateContent.ToString());

@@ -30,16 +30,18 @@
         {
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnOK = new System.Windows.Forms.Button();
-            this.lstCategories = new System.Windows.Forms.TreeView();
+            this.lstCategories = new ADK.Demo.UI.TreeViewEx();
             this.dtTo = new ADK.Demo.UI.DateTimeSelector();
             this.dtFrom = new ADK.Demo.UI.DateTimeSelector();
+            this.lblFrom = new System.Windows.Forms.Label();
+            this.lblEndDate = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // btnCancel
             // 
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(353, 424);
+            this.btnCancel.Location = new System.Drawing.Point(400, 427);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(72, 23);
             this.btnCancel.TabIndex = 10;
@@ -49,7 +51,8 @@
             // btnOK
             // 
             this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnOK.Location = new System.Drawing.Point(274, 424);
+            this.btnOK.Enabled = false;
+            this.btnOK.Location = new System.Drawing.Point(321, 427);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(72, 23);
             this.btnOK.TabIndex = 9;
@@ -59,29 +62,28 @@
             // 
             // lstCategories
             // 
+            this.lstCategories.AllowCollapse = false;
             this.lstCategories.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lstCategories.CheckBoxes = true;
             this.lstCategories.FullRowSelect = true;
-            this.lstCategories.Location = new System.Drawing.Point(13, 80);
+            this.lstCategories.Location = new System.Drawing.Point(13, 81);
             this.lstCategories.Name = "lstCategories";
             this.lstCategories.ShowLines = false;
             this.lstCategories.ShowPlusMinus = false;
             this.lstCategories.ShowRootLines = false;
-            this.lstCategories.Size = new System.Drawing.Size(412, 333);
+            this.lstCategories.Size = new System.Drawing.Size(459, 335);
             this.lstCategories.TabIndex = 14;
             this.lstCategories.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.lstCategories_AfterCheck);
-            this.lstCategories.BeforeCollapse += new System.Windows.Forms.TreeViewCancelEventHandler(this.lstCategories_BeforeCollapse);
-            this.lstCategories.NodeMouseDoubleClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.lstCategories_NodeMouseDoubleClick);
             // 
-            // drTo
+            // dtTo
             // 
             this.dtTo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.dtTo.DateFormat = ADK.Demo.UI.DateOptions.DateOnly;
             this.dtTo.JulianDay = 2458544.0400693328D;
-            this.dtTo.Location = new System.Drawing.Point(286, 44);
-            this.dtTo.Name = "drTo";
+            this.dtTo.Location = new System.Drawing.Point(333, 44);
+            this.dtTo.Name = "dtTo";
             this.dtTo.Size = new System.Drawing.Size(139, 22);
             this.dtTo.TabIndex = 13;
             this.dtTo.UtcOffset = 0D;
@@ -91,26 +93,49 @@
             this.dtFrom.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.dtFrom.DateFormat = ADK.Demo.UI.DateOptions.DateOnly;
             this.dtFrom.JulianDay = 2458544.0400689626D;
-            this.dtFrom.Location = new System.Drawing.Point(286, 12);
+            this.dtFrom.Location = new System.Drawing.Point(333, 12);
             this.dtFrom.Name = "dtFrom";
             this.dtFrom.Size = new System.Drawing.Size(139, 22);
             this.dtFrom.TabIndex = 12;
             this.dtFrom.UtcOffset = 0D;
             // 
+            // lblFrom
+            // 
+            this.lblFrom.AutoSize = true;
+            this.lblFrom.Location = new System.Drawing.Point(12, 17);
+            this.lblFrom.Name = "lblFrom";
+            this.lblFrom.Size = new System.Drawing.Size(53, 13);
+            this.lblFrom.TabIndex = 15;
+            this.lblFrom.Text = "Start date";
+            // 
+            // lblEndDate
+            // 
+            this.lblEndDate.AutoSize = true;
+            this.lblEndDate.Location = new System.Drawing.Point(12, 49);
+            this.lblEndDate.Name = "lblEndDate";
+            this.lblEndDate.Size = new System.Drawing.Size(50, 13);
+            this.lblEndDate.TabIndex = 16;
+            this.lblEndDate.Text = "End date";
+            // 
             // FormAlmanacSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(437, 459);
+            this.ClientSize = new System.Drawing.Size(484, 462);
+            this.Controls.Add(this.lblEndDate);
+            this.Controls.Add(this.lblFrom);
             this.Controls.Add(this.lstCategories);
             this.Controls.Add(this.dtTo);
             this.Controls.Add(this.dtFrom);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
+            this.MinimumSize = new System.Drawing.Size(400, 400);
             this.Name = "FormAlmanacSettings";
             this.ShowIcon = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Astronomical Phenomena";
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -119,6 +144,8 @@
         private System.Windows.Forms.Button btnOK;
         private DateTimeSelector dtFrom;
         private DateTimeSelector dtTo;
-        private System.Windows.Forms.TreeView lstCategories;
+        private TreeViewEx lstCategories;
+        private System.Windows.Forms.Label lblFrom;
+        private System.Windows.Forms.Label lblEndDate;
     }
 }

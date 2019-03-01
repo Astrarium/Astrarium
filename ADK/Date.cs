@@ -69,6 +69,17 @@ namespace ADK
         public double Day { get; private set; }
 
         /// <summary>
+        /// Gets time part of the date, in fractions of day. 0 means midnight, 0.5 is a noon.
+        /// </summary>
+        public double Time
+        {
+            get
+            {
+                return Day - (int)Day;
+            }
+        }
+
+        /// <summary>
         /// Hour of day. From 0 to 23.
         /// </summary>
         public int Hour

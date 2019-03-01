@@ -129,6 +129,12 @@
     <Compile Include="UI\DateTimeSelector.Designer.cs">
       <DependentUpon>DateTimeSelector.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\FormAlmanac.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\FormAlmanac.Designer.cs">
+      <DependentUpon>FormAlmanac.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\FormAlmanacSettings.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -166,6 +172,7 @@
     <Compile Include="UI\SelectorBase.Designer.cs">
       <DependentUpon>SelectorBase.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\TreeViewEx.cs" />
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
     </EmbeddedResource>
@@ -179,6 +186,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="UI\FormAlmanac.resx">
+      <DependentUpon>FormAlmanac.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\FormAlmanacSettings.resx">
       <DependentUpon>FormAlmanacSettings.cs</DependentUpon>
     </EmbeddedResource>
@@ -193,6 +203,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI\FormSettings.resx">
       <DependentUpon>FormSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\SelectorBase.resx">
+      <DependentUpon>SelectorBase.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Data\Borders.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -273,6 +286,7 @@
     <Content Include="Data\Moon.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <EmbeddedResource Include="UI\AlmanacTemplate.html" />
     <EmbeddedResource Include="UI\ObjectInfoTemplate.html" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

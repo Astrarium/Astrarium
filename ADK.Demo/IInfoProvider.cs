@@ -9,11 +9,13 @@ namespace ADK.Demo
     {
         public string Text { get; private set; }
         public double JulianDay { get; private set; }
+        public bool NoExactTime { get; private set; }
 
-        public AstroEvent(double jd, string text)
+        public AstroEvent(double jd, string text, bool noExactTime = false)
         {
             JulianDay = jd;
             Text = text;
+            NoExactTime = noExactTime;
         }
 
         public override string ToString()

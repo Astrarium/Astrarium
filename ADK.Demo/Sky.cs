@@ -185,7 +185,8 @@ namespace ADK.Demo
             }
             
             return events
-                .OrderBy(e => e.JulianDay)
+                .OrderBy(e => e.NoExactTime)
+                .ThenBy(e => e.JulianDay)
                 .Where(e => e.JulianDay >= context.From && e.JulianDay < context.To)
                 .ToArray();
         }

@@ -107,7 +107,7 @@ namespace ADK.Demo
                 Constellations.FindConstellation(eq1875);          
         }
 
-        private void skyView_KeyDown(object sender, KeyEventArgs e)
+        private async void skyView_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.D)
             {
@@ -183,10 +183,21 @@ namespace ADK.Demo
 
                 if (formAlmanacSettings.ShowDialog() == DialogResult.OK)
                 {
-                    var events = sky.GetEvents(
-                        formAlmanacSettings.JulianDayFrom, 
-                        formAlmanacSettings.JulianDayTo, 
-                        formAlmanacSettings.Categories);
+                    var events = await Task.Run(() =>
+                    {
+                        return sky.GetEvents(
+                            formAlmanacSettings.JulianDayFrom,
+                            formAlmanacSettings.JulianDayTo,
+                            formAlmanacSettings.Categories);
+                    });
+
+                    FormAlmanac formAlmanac = new FormAlmanac(events, sky.Context.GeoLocation.UtcOffset);
+                    if (formAlmanac.ShowDialog() == DialogResult.OK)
+                    {
+                        sky.Context.JulianDay = formAlmanac.JulianDay;
+                        sky.Calculate();
+                        skyView.Invalidate();
+                    }
                 }
 
                 //var body = skyView.SkyMap.SelectedObject;

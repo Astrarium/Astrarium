@@ -533,20 +533,20 @@ namespace ADK.Demo.Calculators
                             string name = planetsCalc.GetPlanetName(p);
                             if (vis.Period == VisibilityPeriod.Invisible)
                             {
-                                events.Add(new AstroEvent(jd, $"{name}: end of visibility."));
+                                events.Add(new AstroEvent(jd, $"{name}: end of visibility.", noExactTime: true));
                             }
 
                             if ((vis.Period & VisibilityPeriod.Morning) != 0)
                             {
-                                events.Add(new AstroEvent(jd, $"{name}: begin of morning visibility."));
+                                events.Add(new AstroEvent(jd, $"{name}: begin of morning visibility.", noExactTime: true));
                             }
                             else if ((vis.Period & VisibilityPeriod.Evening) != 0)
                             {
-                                events.Add(new AstroEvent(jd, $"{name}: begin of evening visibility."));
+                                events.Add(new AstroEvent(jd, $"{name}: begin of evening visibility.", noExactTime: true));
                             }
                             else if ((vis.Period & VisibilityPeriod.Night) != 0)
                             {
-                                events.Add(new AstroEvent(jd, $"{name}: begin of night visibility."));
+                                events.Add(new AstroEvent(jd, $"{name}: begin of night visibility.", noExactTime: true));
                             }
                         }
                     }

@@ -143,7 +143,7 @@ namespace ADK.Demo.UI
 
         private void parent_OnMouseDown(object sender, MouseEventArgs e)
         {
-            if (!RectangleToScreen(this.ClientRectangle).Contains(Cursor.Position))
+            if (!RectangleToScreen(ClientRectangle).Contains(Cursor.Position))
             {
                 Close();
             }
