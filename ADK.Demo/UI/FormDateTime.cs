@@ -12,13 +12,13 @@ using System.Windows.Forms;
 namespace ADK.Demo.UI
 {
     /// <summary>
-    /// Options for FormDateTime dialog
+    /// Options for displaying date values
     /// </summary>
-    public enum FormDateTimeOptions
+    public enum DateOptions
     {
-        All,
+        DateTime,
         DateOnly,
-        MonthAndYearOnly
+        MonthYear
     }
 
     /// <summary>
@@ -41,20 +41,20 @@ namespace ADK.Demo.UI
         /// </summary>
         /// <param name="d">Selected date and time.</param>
         /// <param name="options">Options for FormDateTime dialog.</param>
-        public FormDateTime(double jd, double utcOffset, FormDateTimeOptions options = FormDateTimeOptions.All)
+        public FormDateTime(double jd, double utcOffset, DateOptions options = DateOptions.DateTime)
         {
             InitializeComponent();
 
             ClientSize = new Size(panDate.Width, panDate.Height + panTime.Height + panButtons.Height);
 
-            if (options == FormDateTimeOptions.DateOnly ||
-                options == FormDateTimeOptions.MonthAndYearOnly)
+            if (options == DateOptions.DateOnly ||
+                options == DateOptions.MonthYear)
             {
                 panTime.Visible = false;
 
                 ClientSize = new Size(panDate.Width, panDate.Height + panButtons.Height);
 
-                if (options == FormDateTimeOptions.MonthAndYearOnly)
+                if (options == DateOptions.MonthYear)
                 {
                     panDay.Visible = false;                    
                     panMonth.Width = panMonth.Right - panDay.Left;

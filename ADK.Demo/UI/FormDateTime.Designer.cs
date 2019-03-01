@@ -40,40 +40,40 @@ namespace ADK.Demo.UI
             this.lblHour = new System.Windows.Forms.Label();
             this.lnkCurrentTime = new System.Windows.Forms.LinkLabel();
             this.panDay = new System.Windows.Forms.Panel();
+            this.updownDay = new System.Windows.Forms.NumericUpDownEx();
             this.lblDay = new System.Windows.Forms.Label();
             this.panYear = new System.Windows.Forms.Panel();
+            this.updownYear = new System.Windows.Forms.NumericUpDownEx();
             this.lblYear = new System.Windows.Forms.Label();
             this.panMonth = new System.Windows.Forms.Panel();
             this.cmbMonth = new System.Windows.Forms.ComboBox();
             this.lblMonth = new System.Windows.Forms.Label();
             this.panHour = new System.Windows.Forms.Panel();
+            this.updownHour = new System.Windows.Forms.NumericUpDownEx();
             this.panMinute = new System.Windows.Forms.Panel();
+            this.updownMinute = new System.Windows.Forms.NumericUpDownEx();
             this.lblMinute = new System.Windows.Forms.Label();
             this.panSecond = new System.Windows.Forms.Panel();
+            this.updownSecond = new System.Windows.Forms.NumericUpDownEx();
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.panTime = new System.Windows.Forms.Panel();
             this.panDate = new System.Windows.Forms.Panel();
             this.panButtons = new System.Windows.Forms.Panel();
-            this.updownHour = new System.Windows.Forms.NumericUpDownEx();
-            this.updownSecond = new System.Windows.Forms.NumericUpDownEx();
-            this.updownMinute = new System.Windows.Forms.NumericUpDownEx();
-            this.updownDay = new System.Windows.Forms.NumericUpDownEx();
-            this.updownYear = new System.Windows.Forms.NumericUpDownEx();
             this.panDay.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.updownDay)).BeginInit();
             this.panYear.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.updownYear)).BeginInit();
             this.panMonth.SuspendLayout();
             this.panHour.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.updownHour)).BeginInit();
             this.panMinute.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.updownMinute)).BeginInit();
             this.panSecond.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.updownSecond)).BeginInit();
             this.panTime.SuspendLayout();
             this.panDate.SuspendLayout();
             this.panButtons.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.updownHour)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.updownSecond)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.updownMinute)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.updownDay)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.updownYear)).BeginInit();
             this.SuspendLayout();
             // 
             // lblSecond
@@ -121,6 +121,34 @@ namespace ADK.Demo.UI
             this.panDay.Size = new System.Drawing.Size(75, 41);
             this.panDay.TabIndex = 39;
             // 
+            // updownDay
+            // 
+            this.updownDay.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.updownDay.Format = "D2";
+            this.updownDay.Location = new System.Drawing.Point(2, 18);
+            this.updownDay.Margin = new System.Windows.Forms.Padding(3, 3, 3, 10);
+            this.updownDay.Maximum = new decimal(new int[] {
+            31,
+            0,
+            0,
+            0});
+            this.updownDay.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.updownDay.Name = "updownDay";
+            this.updownDay.Sign = false;
+            this.updownDay.Size = new System.Drawing.Size(70, 20);
+            this.updownDay.TabIndex = 0;
+            this.updownDay.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.updownDay.ValueChanged += new System.EventHandler(this.CalendarDate_Changed);
+            // 
             // lblDay
             // 
             this.lblDay.AutoSize = true;
@@ -139,6 +167,27 @@ namespace ADK.Demo.UI
             this.panYear.Name = "panYear";
             this.panYear.Size = new System.Drawing.Size(75, 41);
             this.panYear.TabIndex = 40;
+            // 
+            // updownYear
+            // 
+            this.updownYear.Format = "D4";
+            this.updownYear.Location = new System.Drawing.Point(2, 18);
+            this.updownYear.Margin = new System.Windows.Forms.Padding(3, 3, 3, 10);
+            this.updownYear.Maximum = new decimal(new int[] {
+            9999,
+            0,
+            0,
+            0});
+            this.updownYear.Minimum = new decimal(new int[] {
+            3000,
+            0,
+            0,
+            -2147483648});
+            this.updownYear.Name = "updownYear";
+            this.updownYear.Sign = false;
+            this.updownYear.Size = new System.Drawing.Size(70, 20);
+            this.updownYear.TabIndex = 2;
+            this.updownYear.ValueChanged += new System.EventHandler(this.CalendarDate_Changed);
             // 
             // lblYear
             // 
@@ -192,6 +241,21 @@ namespace ADK.Demo.UI
             this.panHour.Size = new System.Drawing.Size(75, 41);
             this.panHour.TabIndex = 42;
             // 
+            // updownHour
+            // 
+            this.updownHour.Format = "D2";
+            this.updownHour.Location = new System.Drawing.Point(2, 18);
+            this.updownHour.Maximum = new decimal(new int[] {
+            23,
+            0,
+            0,
+            0});
+            this.updownHour.Name = "updownHour";
+            this.updownHour.Sign = false;
+            this.updownHour.Size = new System.Drawing.Size(70, 20);
+            this.updownHour.TabIndex = 3;
+            this.updownHour.ValueChanged += new System.EventHandler(this.CalendarDate_Changed);
+            // 
             // panMinute
             // 
             this.panMinute.Controls.Add(this.updownMinute);
@@ -200,6 +264,21 @@ namespace ADK.Demo.UI
             this.panMinute.Name = "panMinute";
             this.panMinute.Size = new System.Drawing.Size(75, 41);
             this.panMinute.TabIndex = 43;
+            // 
+            // updownMinute
+            // 
+            this.updownMinute.Format = "D2";
+            this.updownMinute.Location = new System.Drawing.Point(2, 18);
+            this.updownMinute.Maximum = new decimal(new int[] {
+            59,
+            0,
+            0,
+            0});
+            this.updownMinute.Name = "updownMinute";
+            this.updownMinute.Sign = false;
+            this.updownMinute.Size = new System.Drawing.Size(70, 20);
+            this.updownMinute.TabIndex = 4;
+            this.updownMinute.ValueChanged += new System.EventHandler(this.CalendarDate_Changed);
             // 
             // lblMinute
             // 
@@ -219,6 +298,21 @@ namespace ADK.Demo.UI
             this.panSecond.Name = "panSecond";
             this.panSecond.Size = new System.Drawing.Size(75, 41);
             this.panSecond.TabIndex = 44;
+            // 
+            // updownSecond
+            // 
+            this.updownSecond.Format = "D2";
+            this.updownSecond.Location = new System.Drawing.Point(2, 18);
+            this.updownSecond.Maximum = new decimal(new int[] {
+            59,
+            0,
+            0,
+            0});
+            this.updownSecond.Name = "updownSecond";
+            this.updownSecond.Sign = false;
+            this.updownSecond.Size = new System.Drawing.Size(70, 20);
+            this.updownSecond.TabIndex = 5;
+            this.updownSecond.ValueChanged += new System.EventHandler(this.CalendarDate_Changed);
             // 
             // btnOK
             // 
@@ -278,100 +372,6 @@ namespace ADK.Demo.UI
             this.panButtons.Size = new System.Drawing.Size(258, 46);
             this.panButtons.TabIndex = 49;
             // 
-            // updownHour
-            // 
-            this.updownHour.Format = "D2";
-            this.updownHour.Location = new System.Drawing.Point(2, 18);
-            this.updownHour.Maximum = new decimal(new int[] {
-            23,
-            0,
-            0,
-            0});
-            this.updownHour.Name = "updownHour";
-            this.updownHour.Sign = false;
-            this.updownHour.Size = new System.Drawing.Size(70, 20);
-            this.updownHour.TabIndex = 3;
-            this.updownHour.ValueChanged += new System.EventHandler(this.CalendarDate_Changed);
-            // 
-            // updownSecond
-            // 
-            this.updownSecond.Format = "D2";
-            this.updownSecond.Location = new System.Drawing.Point(2, 18);
-            this.updownSecond.Maximum = new decimal(new int[] {
-            59,
-            0,
-            0,
-            0});
-            this.updownSecond.Name = "updownSecond";
-            this.updownSecond.Sign = false;
-            this.updownSecond.Size = new System.Drawing.Size(70, 20);
-            this.updownSecond.TabIndex = 5;
-            this.updownSecond.ValueChanged += new System.EventHandler(this.CalendarDate_Changed);
-            // 
-            // updownMinute
-            // 
-            this.updownMinute.Format = "D2";
-            this.updownMinute.Location = new System.Drawing.Point(2, 18);
-            this.updownMinute.Maximum = new decimal(new int[] {
-            59,
-            0,
-            0,
-            0});
-            this.updownMinute.Name = "updownMinute";
-            this.updownMinute.Sign = false;
-            this.updownMinute.Size = new System.Drawing.Size(70, 20);
-            this.updownMinute.TabIndex = 4;
-            this.updownMinute.ValueChanged += new System.EventHandler(this.CalendarDate_Changed);
-            // 
-            // updownDay
-            // 
-            this.updownDay.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.updownDay.Format = "D2";
-            this.updownDay.Location = new System.Drawing.Point(2, 18);
-            this.updownDay.Margin = new System.Windows.Forms.Padding(3, 3, 3, 10);
-            this.updownDay.Maximum = new decimal(new int[] {
-            31,
-            0,
-            0,
-            0});
-            this.updownDay.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.updownDay.Name = "updownDay";
-            this.updownDay.Sign = false;
-            this.updownDay.Size = new System.Drawing.Size(70, 20);
-            this.updownDay.TabIndex = 0;
-            this.updownDay.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.updownDay.ValueChanged += new System.EventHandler(this.CalendarDate_Changed);
-            // 
-            // updownYear
-            // 
-            this.updownYear.Format = "D4";
-            this.updownYear.Location = new System.Drawing.Point(2, 18);
-            this.updownYear.Margin = new System.Windows.Forms.Padding(3, 3, 3, 10);
-            this.updownYear.Maximum = new decimal(new int[] {
-            9999,
-            0,
-            0,
-            0});
-            this.updownYear.Minimum = new decimal(new int[] {
-            3000,
-            0,
-            0,
-            -2147483648});
-            this.updownYear.Name = "updownYear";
-            this.updownYear.Sign = false;
-            this.updownYear.Size = new System.Drawing.Size(70, 20);
-            this.updownYear.TabIndex = 2;
-            this.updownYear.ValueChanged += new System.EventHandler(this.CalendarDate_Changed);
-            // 
             // FormDateTime
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -388,25 +388,25 @@ namespace ADK.Demo.UI
             this.Text = "Date and Time";
             this.panDay.ResumeLayout(false);
             this.panDay.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.updownDay)).EndInit();
             this.panYear.ResumeLayout(false);
             this.panYear.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.updownYear)).EndInit();
             this.panMonth.ResumeLayout(false);
             this.panMonth.PerformLayout();
             this.panHour.ResumeLayout(false);
             this.panHour.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.updownHour)).EndInit();
             this.panMinute.ResumeLayout(false);
             this.panMinute.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.updownMinute)).EndInit();
             this.panSecond.ResumeLayout(false);
             this.panSecond.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.updownSecond)).EndInit();
             this.panTime.ResumeLayout(false);
             this.panDate.ResumeLayout(false);
             this.panButtons.ResumeLayout(false);
             this.panButtons.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.updownHour)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.updownSecond)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.updownMinute)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.updownDay)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.updownYear)).EndInit();
             this.ResumeLayout(false);
 
         }

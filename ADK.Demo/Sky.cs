@@ -164,7 +164,12 @@ namespace ADK.Demo
             }
         }
 
-        public ICollection<AstroEvent> GetEvents(double jdFrom, double jdTo)
+        public ICollection<string> GetEventsCategories()
+        {
+            return EventConfigs.SelectMany(c => c.Items).Select(i => i.Key).Distinct().ToArray();
+        }
+
+        public ICollection<AstroEvent> GetEvents(double jdFrom, double jdTo, ICollection<string> categories)
         {            
             var context = new AstroEventsContext()
             {
@@ -174,7 +179,7 @@ namespace ADK.Demo
             };
 
             var events = new List<AstroEvent>();
-            foreach (var item in EventConfigs.SelectMany(c => c.Items))
+            foreach (var item in EventConfigs.SelectMany(c => c.Items).Where(i => categories.Contains(i.Key)))
             {
                 events.AddRange(item.Formula.Invoke(context));
             }

@@ -123,6 +123,18 @@
     <Compile Include="Calculators\StarsCalc.cs" />
     <Compile Include="Track.cs" />
     <Compile Include="UI\CustomListView.cs" />
+    <Compile Include="UI\DateTimeSelector.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\DateTimeSelector.Designer.cs">
+      <DependentUpon>DateTimeSelector.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\FormAlmanacSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\FormAlmanacSettings.Designer.cs">
+      <DependentUpon>FormAlmanacSettings.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\FormDateTime.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -148,6 +160,12 @@
       <DependentUpon>FormSettings.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\NumericUpDownEx.cs" />
+    <Compile Include="UI\SelectorBase.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\SelectorBase.Designer.cs">
+      <DependentUpon>SelectorBase.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
     </EmbeddedResource>
@@ -161,6 +179,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="UI\FormAlmanacSettings.resx">
+      <DependentUpon>FormAlmanacSettings.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\FormDateTime.resx">
       <DependentUpon>FormDateTime.cs</DependentUpon>
     </EmbeddedResource>

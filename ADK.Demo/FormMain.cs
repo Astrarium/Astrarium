@@ -176,14 +176,27 @@ namespace ADK.Demo
             }
             else if (e.KeyCode == Keys.E)
             {
-                var body = skyView.SkyMap.SelectedObject;
-                if (body != null)
+                FormAlmanacSettings formAlmanacSettings = new FormAlmanacSettings(
+                    sky.Context.JulianDayMidnight, 
+                    sky.Context.GeoLocation.UtcOffset, 
+                    sky.GetEventsCategories());
+
+                if (formAlmanacSettings.ShowDialog() == DialogResult.OK)
                 {
-                    var ephem = sky.GetEphemeris(body, sky.Context.JulianDayMidnight, sky.Context.JulianDayMidnight + 365, 1, new[] {
-                        "Visibility.Duration",
-                        "Visibility.Period"
-                    });
-                }                
+                    var events = sky.GetEvents(
+                        formAlmanacSettings.JulianDayFrom, 
+                        formAlmanacSettings.JulianDayTo, 
+                        formAlmanacSettings.Categories);
+                }
+
+                //var body = skyView.SkyMap.SelectedObject;
+                //if (body != null)
+                //{
+                //    var ephem = sky.GetEphemeris(body, sky.Context.JulianDayMidnight, sky.Context.JulianDayMidnight + 365, 1, new[] {
+                //        "Visibility.Duration",
+                //        "Visibility.Period"
+                //    });
+                //}                
             }
         }
 

@@ -249,6 +249,28 @@ namespace ADK.Demo
             }
         }
 
+        private class DateOnlyFormatter : IEphemFormatter
+        {
+            private readonly string[] months = CultureInfo.InvariantCulture.DateTimeFormat.AbbreviatedMonthNames.Take(12).ToArray();
+
+            public string Format(object value)
+            {
+                Date d = (Date)value;
+                return $"{(int)d.Day:00} {months[d.Month - 1]} {d.Year}";
+            }
+        }
+
+        private class MonthYearFormatter : IEphemFormatter
+        {
+            private readonly string[] months = CultureInfo.InvariantCulture.DateTimeFormat.MonthNames.Take(12).ToArray();
+
+            public string Format(object value)
+            {
+                Date d = (Date)value;
+                return $"{months[d.Month - 1]} {d.Year}";
+            }
+        }
+
         private class VisibilityDurationFormatter : IEphemFormatter
         {
             public string Format(object value)
@@ -302,6 +324,8 @@ namespace ADK.Demo
         public static readonly IEphemFormatter LibrationLatitude = new LibrationLatitudeFormatter();
         public static readonly IEphemFormatter LibrationLongitude = new LibrationLongitudeFormatter();
         public static readonly IEphemFormatter DateTime = new DateTimeFormatter();
+        public static readonly IEphemFormatter DateOnly = new DateOnlyFormatter();
+        public static readonly IEphemFormatter MonthYear = new MonthYearFormatter();
         public static readonly IEphemFormatter CentralMeridian = new UnsignedDoubleFormatter(2, "\u00B0");
         public static readonly IEphemFormatter RotationAxis = new UnsignedDoubleFormatter(2, "\u00B0");
         public static readonly IEphemFormatter EarthDeclination = new SignedDoubleFormatter(2, "\u00B0");
