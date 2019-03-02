@@ -102,7 +102,7 @@ namespace ADK.Demo
 
             var config = EphemConfigs[body.GetType()];
 
-            var item = config.FirstOrDefault(c => c.Key == ephemKey);
+            var item = config.FirstOrDefault(c => c.Category == ephemKey);
 
             if (item == null)
                 throw new Exception($"Unknown ephemeris key '{ephemKey}'. Check that corresponding ephemeris provider has required ephemeris key.");
@@ -124,30 +124,34 @@ namespace ADK.Demo
             return result;
         }
 
-        public List<Dictionary<string, object>> GetEphemeris(CelestialObject body, double from, double to, double step, ICollection<string> keys)
+        public List<List<Ephemeris>> GetEphemerides(CelestialObject body, double from, double to, double step, ICollection<string> categories)
         {
-            List<Dictionary<string, object>> result = new List<Dictionary<string, object>>();
+            List<List<Ephemeris>> ephemerides = new List<List<Ephemeris>>();
 
             var config = EphemConfigs[body.GetType()];
 
-            var itemsToBeCalled = config.Filter(keys);
+            var itemsToBeCalled = config.Filter(categories);
 
             for (double jd = from; jd < to; jd += step)
             {
                 var context = new SkyContext(jd, Context.GeoLocation);
 
-                Dictionary<string, object> ephemeris = new Dictionary<string, object>();
+                List<Ephemeris> ephemeris = new List<Ephemeris>();
 
                 foreach (var item in itemsToBeCalled)
                 {
-                    object value = item.Formula.DynamicInvoke(context, body);
-                    ephemeris.Add(item.Key, value);
+                    ephemeris.Add(new Ephemeris()
+                    {
+                        Key = item.Category,
+                        Value = item.Formula.DynamicInvoke(context, body),
+                        Formatter = item.Formatter ?? Formatters.GetDefault(item.Category)
+                    });
                 }
 
-                result.Add(ephemeris);
+                ephemerides.Add(ephemeris);
             }
 
-            return result;
+            return ephemerides;
         }
 
         public CelestialObjectInfo GetInfo(CelestialObject body)
@@ -171,7 +175,7 @@ namespace ADK.Demo
 
         public ICollection<string> GetEphemerisCategories(CelestialObject body)
         {
-            return EphemConfigs[body.GetType()].Where(c => c.IsAvailable?.Invoke(body) ?? true).Select(c => c.Key).Distinct().ToArray();
+            return EphemConfigs[body.GetType()].Where(c => c.IsAvailable?.Invoke(body) ?? true).Select(c => c.Category).Distinct().ToArray();
         }
 
         public ICollection<AstroEvent> GetEvents(double jdFrom, double jdTo, ICollection<string> categories)

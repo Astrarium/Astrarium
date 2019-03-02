@@ -20,9 +20,9 @@ namespace ADK.Demo
             return Items.GetEnumerator();
         }
 
-        public ICollection<EphemerisConfigItem> Filter(ICollection<string> keys)
+        public ICollection<EphemerisConfigItem> Filter(ICollection<string> categories)
         {
-            return Items.Where(i => keys.Contains(i.Key)).ToArray();
+            return Items.Where(i => categories.Contains(i.Category)).ToArray();
         }
     }
 
@@ -38,14 +38,14 @@ namespace ADK.Demo
 
     public abstract class EphemerisConfigItem
     {
-        public string Key { get; protected set; }
+        public string Category { get; protected set; }
         public Delegate Formula { get; protected set; }
         public IEphemFormatter Formatter { get; protected set; }
         public Func<CelestialObject, bool> IsAvailable { get; protected set; }
 
-        protected EphemerisConfigItem(string key, Delegate func)
+        protected EphemerisConfigItem(string category, Delegate func)
         {
-            Key = key;
+            Category = category;
             Formula = func;
         }
     }

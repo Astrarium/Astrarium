@@ -69,6 +69,7 @@
     <Compile Include="Calculators\StarsReader.cs" />
     <Compile Include="Config\ConfigSectionHandler.cs" />
     <Compile Include="AstroEventsConfig.cs" />
+    <Compile Include="Ephemeris.cs" />
     <Compile Include="EphemerisConfig.cs" />
     <Compile Include="Formatting.cs" />
     <Compile Include="IInfoProvider.cs" />
@@ -128,6 +129,12 @@
     </Compile>
     <Compile Include="UI\DateTimeSelector.Designer.cs">
       <DependentUpon>DateTimeSelector.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\FormEphemeris.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\FormEphemeris.Designer.cs">
+      <DependentUpon>FormEphemeris.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\FormAlmanac.cs">
       <SubType>Form</SubType>
@@ -192,6 +199,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="UI\FormEphemeris.resx">
+      <DependentUpon>FormEphemeris.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\FormAlmanac.resx">
       <DependentUpon>FormAlmanac.cs</DependentUpon>
     </EmbeddedResource>
@@ -295,6 +305,7 @@
     <Content Include="Data\Moon.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <EmbeddedResource Include="UI\EphemerisTemplate.html" />
     <EmbeddedResource Include="UI\AlmanacTemplate.html" />
     <EmbeddedResource Include="UI\ObjectInfoTemplate.html" />
   </ItemGroup>

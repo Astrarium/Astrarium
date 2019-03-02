@@ -347,8 +347,6 @@ namespace ADK.Demo.Calculators
             e.Add("Horizontal.Altitude", (c, p) => c.Get(Horizontal, p.Number).Altitude);
             e.Add("Horizontal.Azimuth", (c, p) => c.Get(Horizontal, p.Number).Azimuth);
 
-            e.Add("Equatorial", (c, p) => c.Get(Equatorial, p.Number));
-
             e.Add("Equatorial.Alpha", (c, p) => c.Get(Equatorial, p.Number).Alpha)
                 .WithFormatter(Formatters.RA);
 

@@ -29,6 +29,9 @@ namespace ADK.Demo
             Default["RTS.Rise"]                 = Time;
             Default["RTS.Transit"]              = Time;
             Default["RTS.Set"]                  = Time;
+            Default["RTS.RiseAzimuth"]          = IntAzimuth;
+            Default["RTS.TransitAltitude"]      = Altitude1d;
+            Default["RTS.SetAzimuth"]           = IntAzimuth;
             Default["RTS.Duration"]             = Duration;
             Default["Equatorial0.Alpha"]        = RA;
             Default["Equatorial0.Delta"]        = Dec;
@@ -198,7 +201,14 @@ namespace ADK.Demo
             public string Format(object value)
             {
                 double v = Convert.ToDouble(value);
-                return v.ToString(format, CultureInfo.InvariantCulture) + (units ?? "");
+                if (double.IsInfinity(v) || double.IsNaN(v))
+                {
+                    return "—";
+                }
+                else
+                {
+                    return v.ToString(format, CultureInfo.InvariantCulture) + (units ?? "");
+                }
             }
         }
 
@@ -216,7 +226,15 @@ namespace ADK.Demo
 
             public string Format(object value)
             {
-                return string.Format(CultureInfo.InvariantCulture, format, value) + (units ?? "");
+                if ((value is double && (double.IsInfinity((double)value) || double.IsNaN((double)value))) ||
+                    (value is float && (float.IsInfinity((float)value) || float.IsNaN((float)value))))
+                {
+                    return "—";
+                }
+                else
+                {
+                    return string.Format(CultureInfo.InvariantCulture, format, value) + (units ?? "");
+                }
             }
         }
 
@@ -311,8 +329,8 @@ namespace ADK.Demo
         public static readonly IEphemFormatter Longitude = new UnsignedAngleFormatter();
         public static readonly IEphemFormatter Time = new TimeFormatter();
         public static readonly IEphemFormatter Duration = new DurationFormatter();
-        public static readonly IEphemFormatter IntAzimuth = new UnsignedDoubleFormatter(0);
-        public static readonly IEphemFormatter Altitude1d = new SignedDoubleFormatter(1);
+        public static readonly IEphemFormatter IntAzimuth = new UnsignedDoubleFormatter(0, "\u00B0");
+        public static readonly IEphemFormatter Altitude1d = new SignedDoubleFormatter(1, "\u00B0");
         public static readonly IEphemFormatter Distance = new UnsignedDoubleFormatter(3, " a.u.");
         public static readonly IEphemFormatter Phase = new PhaseFormatter();
         public static readonly IEphemFormatter Magnitude = new SignedDoubleFormatter(2, " m");
@@ -333,6 +351,6 @@ namespace ADK.Demo
         public static readonly IEphemFormatter MoonDeclination = new SignedDoubleFormatter(3, "\u00B0");
         public static readonly IEphemFormatter SaturnRingsSize = new SmallAngleFormatter();
         public static readonly IEphemFormatter VisibilityDuration = new VisibilityDurationFormatter();
-        public static readonly IEphemFormatter VisibilityPeriod = new UnsignedDoubleFormatter(1, "h");
+        public static readonly IEphemFormatter VisibilityPeriod = new VisibilityPeriodFormatter();
     }
 }

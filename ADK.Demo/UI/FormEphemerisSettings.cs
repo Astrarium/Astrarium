@@ -57,7 +57,7 @@ namespace ADK.Demo.UI
         }
 
         /// <summary>
-        /// Gets or sets starting Julian Day for generating almanac
+        /// Gets starting Julian Day for generating ephemeris
         /// </summary>
         public double JulianDayFrom
         {
@@ -68,13 +68,24 @@ namespace ADK.Demo.UI
         }
 
         /// <summary>
-        /// Gets or sets finishing Julian Day for generating almanac
+        /// Gets finishing Julian Day for generating ephemeris
         /// </summary>
         public double JulianDayTo
         {
             get
             {
                 return dtTo.JulianDay;
+            }
+        }
+
+        /// <summary>
+        /// Gets step, in days, for generating ephemeris
+        /// </summary>
+        public double Step
+        {
+            get
+            {
+                return 1;
             }
         }
 

@@ -212,12 +212,23 @@ namespace ADK.Demo
                         sky.Context.GeoLocation.UtcOffset,
                         sky.GetEphemerisCategories(body));
 
-                    formEphemerisSettings.Show();
+                    if (formEphemerisSettings.ShowDialog() == DialogResult.OK)
+                    {
+                        var ephem = await Task.Run(() => sky.GetEphemerides(body, 
+                            formEphemerisSettings.JulianDayFrom,
+                            formEphemerisSettings.JulianDayTo,
+                            formEphemerisSettings.Step,
+                            formEphemerisSettings.Categories
+                        ));
 
-                    //var ephem = sky.GetEphemeris(body, sky.Context.JulianDayMidnight, sky.Context.JulianDayMidnight + 365, 1, new[] {
-                    //    "Visibility.Duration",
-                    //    "Visibility.Period"
-                    //});
+                        var formEphemeris = new FormEphemeris(ephem, 
+                            formEphemerisSettings.JulianDayFrom,
+                            formEphemerisSettings.JulianDayTo,
+                            formEphemerisSettings.Step, 
+                            sky.Context.GeoLocation.UtcOffset);
+
+                        formEphemeris.Show();
+                    }
                 }
             }
         }

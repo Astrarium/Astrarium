@@ -287,9 +287,16 @@ namespace ADK.Demo.Calculators
             e.Add("RTS.TransitAltitude", (c, m) => c.Get(RiseTransitSet).TransitAltitude);
             e.Add("RTS.Set", (c, m) => c.Get(RiseTransitSet).Set);
             e.Add("RTS.SetAzimuth", (c, m) => c.Get(RiseTransitSet).SetAzimuth);
-            e.Add("Equatorial", (c, m) => c.Get(Equatorial));
             e.Add("Equatorial.Alpha", (c, m) => c.Get(Equatorial).Alpha);
             e.Add("Equatorial.Delta", (c, m) => c.Get(Equatorial).Delta);
+            e.Add("Horizontal.Altitude", (c, m) => c.Get(Horizontal).Altitude);
+            e.Add("Horizontal.Azimuth", (c, m) => c.Get(Horizontal).Azimuth);
+            e.Add("Libration.Longitude", (c, m) => c.Get(LibrationElements).l);
+            e.Add("Libration.Latitude", (c, m) => c.Get(LibrationElements).b);
+            e.Add("Phase", (c, m) => c.Get(Phase));
+            e.Add("PhaseAngle", (c, m) => c.Get(PhaseAngle));
+            e.Add("Age", (c, m) => c.Get(Age));
+            e.Add("Magnitude", (c, m) => c.Get(Magnitude));
         }
 
         public override CelestialObjectInfo GetInfo(SkyContext c, Moon m)

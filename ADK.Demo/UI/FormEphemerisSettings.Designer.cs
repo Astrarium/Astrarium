@@ -35,6 +35,8 @@
             this.dtFrom = new ADK.Demo.UI.DateTimeSelector();
             this.lblFrom = new System.Windows.Forms.Label();
             this.lblEndDate = new System.Windows.Forms.Label();
+            this.lblBody = new System.Windows.Forms.Label();
+            this.lblStep = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // btnCancel
@@ -68,12 +70,12 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lstCategories.CheckBoxes = true;
             this.lstCategories.FullRowSelect = true;
-            this.lstCategories.Location = new System.Drawing.Point(13, 106);
+            this.lstCategories.Location = new System.Drawing.Point(13, 141);
             this.lstCategories.Name = "lstCategories";
             this.lstCategories.ShowLines = false;
             this.lstCategories.ShowPlusMinus = false;
             this.lstCategories.ShowRootLines = false;
-            this.lstCategories.Size = new System.Drawing.Size(459, 310);
+            this.lstCategories.Size = new System.Drawing.Size(459, 275);
             this.lstCategories.TabIndex = 14;
             this.lstCategories.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.lstCategories_AfterCheck);
             // 
@@ -82,7 +84,7 @@
             this.dtTo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.dtTo.DateFormat = ADK.Demo.UI.DateOptions.DateTime;
             this.dtTo.JulianDay = 2458544.0400693328D;
-            this.dtTo.Location = new System.Drawing.Point(333, 44);
+            this.dtTo.Location = new System.Drawing.Point(333, 77);
             this.dtTo.Name = "dtTo";
             this.dtTo.Size = new System.Drawing.Size(139, 22);
             this.dtTo.TabIndex = 13;
@@ -93,7 +95,7 @@
             this.dtFrom.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.dtFrom.DateFormat = ADK.Demo.UI.DateOptions.DateTime;
             this.dtFrom.JulianDay = 2458544.0400689626D;
-            this.dtFrom.Location = new System.Drawing.Point(333, 12);
+            this.dtFrom.Location = new System.Drawing.Point(333, 45);
             this.dtFrom.Name = "dtFrom";
             this.dtFrom.Size = new System.Drawing.Size(139, 22);
             this.dtFrom.TabIndex = 12;
@@ -102,7 +104,7 @@
             // lblFrom
             // 
             this.lblFrom.AutoSize = true;
-            this.lblFrom.Location = new System.Drawing.Point(12, 17);
+            this.lblFrom.Location = new System.Drawing.Point(12, 50);
             this.lblFrom.Name = "lblFrom";
             this.lblFrom.Size = new System.Drawing.Size(53, 13);
             this.lblFrom.TabIndex = 15;
@@ -111,17 +113,37 @@
             // lblEndDate
             // 
             this.lblEndDate.AutoSize = true;
-            this.lblEndDate.Location = new System.Drawing.Point(12, 49);
+            this.lblEndDate.Location = new System.Drawing.Point(12, 82);
             this.lblEndDate.Name = "lblEndDate";
             this.lblEndDate.Size = new System.Drawing.Size(50, 13);
             this.lblEndDate.TabIndex = 16;
             this.lblEndDate.Text = "End date";
+            // 
+            // lblBody
+            // 
+            this.lblBody.AutoSize = true;
+            this.lblBody.Location = new System.Drawing.Point(12, 19);
+            this.lblBody.Name = "lblBody";
+            this.lblBody.Size = new System.Drawing.Size(72, 13);
+            this.lblBody.TabIndex = 17;
+            this.lblBody.Text = "Celestial body";
+            // 
+            // lblStep
+            // 
+            this.lblStep.AutoSize = true;
+            this.lblStep.Location = new System.Drawing.Point(12, 114);
+            this.lblStep.Name = "lblStep";
+            this.lblStep.Size = new System.Drawing.Size(29, 13);
+            this.lblStep.TabIndex = 18;
+            this.lblStep.Text = "Step";
             // 
             // FormEphemerisSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(484, 462);
+            this.Controls.Add(this.lblStep);
+            this.Controls.Add(this.lblBody);
             this.Controls.Add(this.lblEndDate);
             this.Controls.Add(this.lblFrom);
             this.Controls.Add(this.lstCategories);
@@ -147,5 +169,7 @@
         private TreeViewEx lstCategories;
         private System.Windows.Forms.Label lblFrom;
         private System.Windows.Forms.Label lblEndDate;
+        private System.Windows.Forms.Label lblBody;
+        private System.Windows.Forms.Label lblStep;
     }
 }
