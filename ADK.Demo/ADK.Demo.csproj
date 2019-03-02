@@ -135,6 +135,12 @@
     <Compile Include="UI\FormAlmanac.Designer.cs">
       <DependentUpon>FormAlmanac.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\FormEphemerisSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\FormEphemerisSettings.Designer.cs">
+      <DependentUpon>FormEphemerisSettings.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\FormAlmanacSettings.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -188,6 +194,9 @@
     </Compile>
     <EmbeddedResource Include="UI\FormAlmanac.resx">
       <DependentUpon>FormAlmanac.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\FormEphemerisSettings.resx">
+      <DependentUpon>FormEphemerisSettings.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\FormAlmanacSettings.resx">
       <DependentUpon>FormAlmanacSettings.cs</DependentUpon>

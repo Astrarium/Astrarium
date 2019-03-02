@@ -356,10 +356,10 @@ namespace ADK.Demo.Calculators
                 .WithFormatter(Formatters.Dec);
 
             e.Add("SaturnRings.a", (c, p) => c.Get(GetSaturnRings, p.Number).a)
-                .AvailableIf((c, p) => p.Number == Planet.SATURN);
+                .AvailableIf(p => (p is Planet) && (p as Planet).Number == Planet.SATURN);
 
             e.Add("SaturnRings.b", (c, p) => c.Get(GetSaturnRings, p.Number).b)
-                .AvailableIf((c, p) => p.Number == Planet.SATURN);
+                .AvailableIf(p => (p is Planet) && (p as Planet).Number == Planet.SATURN);
 
             e.Add("RTS.Rise", (c, p) => c.Get(RiseTransitSet, p.Number).Rise)
                 .WithFormatter(Formatters.Time);

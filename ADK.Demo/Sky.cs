@@ -169,6 +169,11 @@ namespace ADK.Demo
             return EventConfigs.SelectMany(c => c.Items).Select(i => i.Key).Distinct().ToArray();
         }
 
+        public ICollection<string> GetEphemerisCategories(CelestialObject body)
+        {
+            return EphemConfigs[body.GetType()].Where(c => c.IsAvailable?.Invoke(body) ?? true).Select(c => c.Key).Distinct().ToArray();
+        }
+
         public ICollection<AstroEvent> GetEvents(double jdFrom, double jdTo, ICollection<string> categories)
         {            
             var context = new AstroEventsContext()

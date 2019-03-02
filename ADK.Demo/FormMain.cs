@@ -176,9 +176,9 @@ namespace ADK.Demo
             }
             else if (e.KeyCode == Keys.E)
             {
-                FormAlmanacSettings formAlmanacSettings = new FormAlmanacSettings(
-                    sky.Context.JulianDayMidnight, 
-                    sky.Context.GeoLocation.UtcOffset, 
+                var formAlmanacSettings = new FormAlmanacSettings(
+                    sky.Context.JulianDayMidnight,
+                    sky.Context.GeoLocation.UtcOffset,
                     sky.GetEventsCategories());
 
                 if (formAlmanacSettings.ShowDialog() == DialogResult.OK)
@@ -191,7 +191,7 @@ namespace ADK.Demo
                             formAlmanacSettings.Categories);
                     });
 
-                    FormAlmanac formAlmanac = new FormAlmanac(events, sky.Context.GeoLocation.UtcOffset);
+                    var formAlmanac = new FormAlmanac(events, sky.Context.GeoLocation.UtcOffset);
                     if (formAlmanac.ShowDialog() == DialogResult.OK)
                     {
                         sky.Context.JulianDay = formAlmanac.JulianDay;
@@ -200,14 +200,25 @@ namespace ADK.Demo
                     }
                 }
 
-                //var body = skyView.SkyMap.SelectedObject;
-                //if (body != null)
-                //{
-                //    var ephem = sky.GetEphemeris(body, sky.Context.JulianDayMidnight, sky.Context.JulianDayMidnight + 365, 1, new[] {
-                //        "Visibility.Duration",
-                //        "Visibility.Period"
-                //    });
-                //}                
+                             
+            }
+            else if (e.KeyCode == Keys.P)
+            {
+                var body = skyView.SkyMap.SelectedObject;
+                if (body != null)
+                {
+                    var formEphemerisSettings = new FormEphemerisSettings(
+                        sky.Context.JulianDayMidnight,
+                        sky.Context.GeoLocation.UtcOffset,
+                        sky.GetEphemerisCategories(body));
+
+                    formEphemerisSettings.Show();
+
+                    //var ephem = sky.GetEphemeris(body, sky.Context.JulianDayMidnight, sky.Context.JulianDayMidnight + 365, 1, new[] {
+                    //    "Visibility.Duration",
+                    //    "Visibility.Period"
+                    //});
+                }
             }
         }
 

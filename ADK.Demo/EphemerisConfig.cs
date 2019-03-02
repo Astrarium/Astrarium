@@ -41,7 +41,7 @@ namespace ADK.Demo
         public string Key { get; protected set; }
         public Delegate Formula { get; protected set; }
         public IEphemFormatter Formatter { get; protected set; }
-        public Delegate IsAvailable { get; protected set; }
+        public Func<CelestialObject, bool> IsAvailable { get; protected set; }
 
         protected EphemerisConfigItem(string key, Delegate func)
         {
@@ -64,7 +64,7 @@ namespace ADK.Demo
             return this;
         }
 
-        public EphemerisConfigItem<TCelestialObject, TResult> AvailableIf(Func<SkyContext, TCelestialObject, bool> condition)
+        public EphemerisConfigItem<TCelestialObject, TResult> AvailableIf(Func<CelestialObject, bool> condition)
         {
             IsAvailable = condition;
             return this;
