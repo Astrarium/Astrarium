@@ -10,8 +10,15 @@ using System.Threading.Tasks;
 
 namespace ADK.Demo
 {
-    public class Sky
+    public interface ISearcher
     {
+        ICollection<SearchResultItem> Search(string searchString, int maxCount = 50);
+        string GetObjectName(CelestialObject body);
+    }
+
+    public class Sky : ISearcher
+    {
+        private delegate string GetNameDelegate<T>(T body) where T : CelestialObject;
         private delegate ICollection<SearchResultItem> SearchDelegate(string searchString, int maxCount = 50);
         private delegate CelestialObjectInfo GetInfoDelegate<T>(SkyContext context, T body) where T : CelestialObject;
 
@@ -19,6 +26,7 @@ namespace ADK.Demo
         private Dictionary<Type, EphemerisConfig> EphemConfigs = new Dictionary<Type, EphemerisConfig>();
         private Dictionary<Type, Delegate> InfoProviders = new Dictionary<Type, Delegate>();
         private Dictionary<Type, SearchDelegate> SearchProviders = new Dictionary<Type, SearchDelegate>();
+        private Dictionary<Type, Delegate> NameProviders = new Dictionary<Type, Delegate>();
         private List<BaseAstroEventsProvider> EventProviders = new List<BaseAstroEventsProvider>();
         private List<AstroEventsConfig> EventConfigs = new List<AstroEventsConfig>();
 
@@ -48,6 +56,10 @@ namespace ADK.Demo
                     // Info provider
                     Type genericGetInfoFuncType = typeof(GetInfoDelegate<>).MakeGenericType(bodyType);
                     InfoProviders[bodyType] = calcType.GetMethod(nameof(BaseCalc<CelestialObject>.GetInfo)).CreateDelegate(genericGetInfoFuncType, calc) as Delegate;
+
+                    // Name provider
+                    Type genericGetNameFuncType = typeof(GetNameDelegate<>).MakeGenericType(bodyType);
+                    NameProviders[bodyType] = calcType.GetMethod(nameof(BaseCalc<CelestialObject>.GetName)).CreateDelegate(genericGetNameFuncType, calc) as Delegate;
 
                     // Search provider
                     var searchFunc = calcType.GetMethod(nameof(BaseCalc<CelestialObject>.Search)).CreateDelegate(typeof(SearchDelegate), calc) as SearchDelegate;
@@ -220,9 +232,18 @@ namespace ADK.Demo
             return results.Take(maxCount).OrderBy(r => r.Name).ToList();
         }
 
-        public ICollection<CelestialObject> CelestialObjects<T>(Func<T, bool> search = null) where T : CelestialObject
+        public string GetObjectName(CelestialObject body)
         {
-            return null;
+            Type bodyType = body.GetType();
+
+            if (NameProviders.ContainsKey(bodyType))
+            {
+                return (string)NameProviders[bodyType].DynamicInvoke(body);
+            }
+            else
+            {
+                return body.ToString();
+            }
         }
 
         //public void AddTrack(Track track)

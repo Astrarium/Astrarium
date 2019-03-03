@@ -150,7 +150,7 @@ namespace ADK.Demo
 
             else if (e.Control && e.KeyCode == Keys.F)
             {
-                using (var frmSearch = new FormSearch(sky.Search))
+                using (var frmSearch = new FormSearch(sky))
                 {
                     var result = frmSearch.ShowDialog();
                     if (result == DialogResult.OK)
@@ -207,27 +207,27 @@ namespace ADK.Demo
                 var body = skyView.SkyMap.SelectedObject;
                 if (body != null)
                 {
-                    var formEphemerisSettings = new FormEphemerisSettings(
-                        sky.Context.JulianDayMidnight,
-                        sky.Context.GeoLocation.UtcOffset,
-                        sky.GetEphemerisCategories(body));
-
-                    if (formEphemerisSettings.ShowDialog() == DialogResult.OK)
+                    using (var formEphemerisSettings = new FormEphemerisSettings(sky, body))
                     {
-                        var ephem = await Task.Run(() => sky.GetEphemerides(body, 
-                            formEphemerisSettings.JulianDayFrom,
-                            formEphemerisSettings.JulianDayTo,
-                            formEphemerisSettings.Step,
-                            formEphemerisSettings.Categories
-                        ));
+                        if (formEphemerisSettings.ShowDialog() == DialogResult.OK)
+                        {
+                            var ephem = await Task.Run(() => sky.GetEphemerides(
+                                formEphemerisSettings.SelectedObject,
+                                formEphemerisSettings.JulianDayFrom,
+                                formEphemerisSettings.JulianDayTo,
+                                formEphemerisSettings.Step,
+                                formEphemerisSettings.Categories
+                            ));
 
-                        var formEphemeris = new FormEphemeris(ephem, 
-                            formEphemerisSettings.JulianDayFrom,
-                            formEphemerisSettings.JulianDayTo,
-                            formEphemerisSettings.Step, 
-                            sky.Context.GeoLocation.UtcOffset);
-
-                        formEphemeris.Show();
+                            using (var formEphemeris = new FormEphemeris(ephem,
+                                formEphemerisSettings.JulianDayFrom,
+                                formEphemerisSettings.JulianDayTo,
+                                formEphemerisSettings.Step,
+                                sky.Context.GeoLocation.UtcOffset))
+                            {
+                                formEphemeris.Show();
+                            }
+                        }
                     }
                 }
             }
@@ -236,6 +236,16 @@ namespace ADK.Demo
         private void Settings_OnSettingChanged(string settingName, object settingValue)
         {
             skyView.Invalidate();
+        }
+
+        private void skyView_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right && e.Clicks == 1)
+            {
+                var body = skyView.SkyMap.FindObject(e.Location);
+                skyView.SkyMap.SelectedObject = body;
+                skyView.Invalidate();
+            }
         }
 
         private void skyView_DoubleClick(object sender, EventArgs e)
@@ -275,5 +285,7 @@ namespace ADK.Demo
                 this.FormBorderStyle = FormBorderStyle.Sizable;
             }
         }
+
+
     }
 }

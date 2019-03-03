@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.txtSearchString = new System.Windows.Forms.TextBox();
-            this.btnGoTo = new System.Windows.Forms.Button();
+            this.btnSelect = new System.Windows.Forms.Button();
             this.btnClose = new System.Windows.Forms.Button();
             this.lstResults = new ADK.Demo.UI.CustomListView();
             this.colNames = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -46,19 +46,19 @@
             this.txtSearchString.TextChanged += new System.EventHandler(this.txtSearchString_TextChanged);
             this.txtSearchString.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtSearchString_KeyDown);
             // 
-            // btnGoTo
+            // btnSelect
             // 
-            this.btnGoTo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnGoTo.AutoSize = true;
-            this.btnGoTo.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnGoTo.Enabled = false;
-            this.btnGoTo.Location = new System.Drawing.Point(363, 409);
-            this.btnGoTo.Name = "btnGoTo";
-            this.btnGoTo.Size = new System.Drawing.Size(81, 26);
-            this.btnGoTo.TabIndex = 3;
-            this.btnGoTo.Text = "&Go To Object";
-            this.btnGoTo.UseVisualStyleBackColor = true;
-            this.btnGoTo.Click += new System.EventHandler(this.btnGoTo_Click);
+            this.btnSelect.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnSelect.AutoSize = true;
+            this.btnSelect.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.btnSelect.Enabled = false;
+            this.btnSelect.Location = new System.Drawing.Point(363, 409);
+            this.btnSelect.Name = "btnSelect";
+            this.btnSelect.Size = new System.Drawing.Size(81, 26);
+            this.btnSelect.TabIndex = 3;
+            this.btnSelect.Text = "&Select";
+            this.btnSelect.UseVisualStyleBackColor = true;
+            this.btnSelect.Click += new System.EventHandler(this.btnSelect_Click);
             // 
             // btnClose
             // 
@@ -105,7 +105,7 @@
             this.ClientSize = new System.Drawing.Size(543, 447);
             this.ControlBox = false;
             this.Controls.Add(this.btnClose);
-            this.Controls.Add(this.btnGoTo);
+            this.Controls.Add(this.btnSelect);
             this.Controls.Add(this.lstResults);
             this.Controls.Add(this.txtSearchString);
             this.Name = "FormSearch";
@@ -124,7 +124,7 @@
         private System.Windows.Forms.TextBox txtSearchString;
         private CustomListView lstResults;
         private System.Windows.Forms.ColumnHeader colNames;
-        private System.Windows.Forms.Button btnGoTo;
+        private System.Windows.Forms.Button btnSelect;
         private System.Windows.Forms.Button btnClose;
     }
 }

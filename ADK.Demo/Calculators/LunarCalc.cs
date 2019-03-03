@@ -343,5 +343,10 @@ namespace ADK.Demo.Calculators
             else
                 return new SearchResultItem[0];
         }
+
+        public override string GetName(Moon m)
+        {
+            return "Moon";
+        }
     }
 }

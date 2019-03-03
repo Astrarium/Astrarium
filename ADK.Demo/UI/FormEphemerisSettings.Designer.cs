@@ -30,13 +30,14 @@
         {
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnOK = new System.Windows.Forms.Button();
-            this.lstCategories = new ADK.Demo.UI.TreeViewEx();
-            this.dtTo = new ADK.Demo.UI.DateTimeSelector();
-            this.dtFrom = new ADK.Demo.UI.DateTimeSelector();
             this.lblFrom = new System.Windows.Forms.Label();
             this.lblEndDate = new System.Windows.Forms.Label();
             this.lblBody = new System.Windows.Forms.Label();
             this.lblStep = new System.Windows.Forms.Label();
+            this.lstCategories = new ADK.Demo.UI.TreeViewEx();
+            this.dtTo = new ADK.Demo.UI.DateTimeSelector();
+            this.dtFrom = new ADK.Demo.UI.DateTimeSelector();
+            this.selCelestialBody = new ADK.Demo.UI.CelestialObjectSelector();
             this.SuspendLayout();
             // 
             // btnCancel
@@ -61,6 +62,42 @@
             this.btnOK.Text = "&OK";
             this.btnOK.UseVisualStyleBackColor = true;
             this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
+            // 
+            // lblFrom
+            // 
+            this.lblFrom.AutoSize = true;
+            this.lblFrom.Location = new System.Drawing.Point(12, 50);
+            this.lblFrom.Name = "lblFrom";
+            this.lblFrom.Size = new System.Drawing.Size(53, 13);
+            this.lblFrom.TabIndex = 15;
+            this.lblFrom.Text = "Start date";
+            // 
+            // lblEndDate
+            // 
+            this.lblEndDate.AutoSize = true;
+            this.lblEndDate.Location = new System.Drawing.Point(12, 82);
+            this.lblEndDate.Name = "lblEndDate";
+            this.lblEndDate.Size = new System.Drawing.Size(50, 13);
+            this.lblEndDate.TabIndex = 16;
+            this.lblEndDate.Text = "End date";
+            // 
+            // lblBody
+            // 
+            this.lblBody.AutoSize = true;
+            this.lblBody.Location = new System.Drawing.Point(12, 19);
+            this.lblBody.Name = "lblBody";
+            this.lblBody.Size = new System.Drawing.Size(72, 13);
+            this.lblBody.TabIndex = 17;
+            this.lblBody.Text = "Celestial body";
+            // 
+            // lblStep
+            // 
+            this.lblStep.AutoSize = true;
+            this.lblStep.Location = new System.Drawing.Point(12, 114);
+            this.lblStep.Name = "lblStep";
+            this.lblStep.Size = new System.Drawing.Size(29, 13);
+            this.lblStep.TabIndex = 18;
+            this.lblStep.Text = "Step";
             // 
             // lstCategories
             // 
@@ -101,47 +138,20 @@
             this.dtFrom.TabIndex = 12;
             this.dtFrom.UtcOffset = 0D;
             // 
-            // lblFrom
+            // selCelestialBody
             // 
-            this.lblFrom.AutoSize = true;
-            this.lblFrom.Location = new System.Drawing.Point(12, 50);
-            this.lblFrom.Name = "lblFrom";
-            this.lblFrom.Size = new System.Drawing.Size(53, 13);
-            this.lblFrom.TabIndex = 15;
-            this.lblFrom.Text = "Start date";
-            // 
-            // lblEndDate
-            // 
-            this.lblEndDate.AutoSize = true;
-            this.lblEndDate.Location = new System.Drawing.Point(12, 82);
-            this.lblEndDate.Name = "lblEndDate";
-            this.lblEndDate.Size = new System.Drawing.Size(50, 13);
-            this.lblEndDate.TabIndex = 16;
-            this.lblEndDate.Text = "End date";
-            // 
-            // lblBody
-            // 
-            this.lblBody.AutoSize = true;
-            this.lblBody.Location = new System.Drawing.Point(12, 19);
-            this.lblBody.Name = "lblBody";
-            this.lblBody.Size = new System.Drawing.Size(72, 13);
-            this.lblBody.TabIndex = 17;
-            this.lblBody.Text = "Celestial body";
-            // 
-            // lblStep
-            // 
-            this.lblStep.AutoSize = true;
-            this.lblStep.Location = new System.Drawing.Point(12, 114);
-            this.lblStep.Name = "lblStep";
-            this.lblStep.Size = new System.Drawing.Size(29, 13);
-            this.lblStep.TabIndex = 18;
-            this.lblStep.Text = "Step";
+            this.selCelestialBody.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.selCelestialBody.Location = new System.Drawing.Point(333, 12);
+            this.selCelestialBody.Name = "selCelestialBody";
+            this.selCelestialBody.Size = new System.Drawing.Size(139, 22);
+            this.selCelestialBody.TabIndex = 19;
             // 
             // FormEphemerisSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(484, 462);
+            this.Controls.Add(this.selCelestialBody);
             this.Controls.Add(this.lblStep);
             this.Controls.Add(this.lblBody);
             this.Controls.Add(this.lblEndDate);
@@ -171,5 +181,6 @@
         private System.Windows.Forms.Label lblEndDate;
         private System.Windows.Forms.Label lblBody;
         private System.Windows.Forms.Label lblStep;
+        private CelestialObjectSelector selCelestialBody;
     }
 }

@@ -36,8 +36,6 @@ namespace ADK.Demo
         }
     }
 
-    public delegate ICollection<SearchResultItem> SearchDelegate(string searchString, int maxCount);
-
     public class CelestialObjectInfo
     { 
         public string Title { get; private set; }

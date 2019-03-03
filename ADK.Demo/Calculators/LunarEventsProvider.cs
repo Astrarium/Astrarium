@@ -194,7 +194,7 @@ namespace ADK.Demo.Calculators
             foreach (ushort star in starsNumbers)
             {
                 SkyContext ctx = new SkyContext(context.From, context.GeoLocation);
-
+                
                 string starName = starsCalc.GetPrimaryStarName(star);
 
                 double jd = context.From;

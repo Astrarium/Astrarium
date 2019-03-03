@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ADK.Demo.Objects;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,20 +13,23 @@ namespace ADK.Demo.UI
 {
     public partial class FormEphemerisSettings : Form
     {
-        public FormEphemerisSettings(double jd, double utcOffset, ICollection<string> categories)
+        public FormEphemerisSettings(Sky sky, CelestialObject body)
         {
             InitializeComponent();
 
-            dtFrom.JulianDay = jd;
-            dtFrom.UtcOffset = utcOffset;
-            dtTo.JulianDay = jd + 30;
-            dtTo.UtcOffset = utcOffset;
-
-            BuildCategoriesTree(categories);
+            dtFrom.JulianDay = sky.Context.JulianDay;
+            dtFrom.UtcOffset = sky.Context.GeoLocation.UtcOffset;
+            dtTo.JulianDay = sky.Context.JulianDay + 30;
+            dtTo.UtcOffset = sky.Context.GeoLocation.UtcOffset;
+            selCelestialBody.Searcher = sky;
+            selCelestialBody.ValueChanged += () => BuildCategoriesTree(sky.GetEphemerisCategories(selCelestialBody.SelectedObject));
+            selCelestialBody.SelectedObject = body;
         }
 
         private void BuildCategoriesTree(ICollection<string> categories)
         {
+            lstCategories.Nodes.Clear();
+
             var groups = categories.GroupBy(cat => cat.Split('.').First());
 
             TreeNode root = new TreeNode("All");
@@ -54,6 +58,14 @@ namespace ADK.Demo.UI
         private void btnOK_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.OK;
+        }
+
+        public CelestialObject SelectedObject
+        {
+            get
+            {
+                return selCelestialBody.SelectedObject;
+            }
         }
 
         /// <summary>

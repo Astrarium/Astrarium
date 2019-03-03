@@ -319,6 +319,11 @@ namespace ADK.Demo.Calculators
             return names;
         }
 
+        public override string GetName(Star s)
+        {
+            return GetStarNames(s).First();
+        }
+
         public string GetPrimaryStarName(ushort hrNumber)
         {
             return GetStarNames(Stars.ElementAt(hrNumber - 1)).First();

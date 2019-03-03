@@ -213,6 +213,11 @@ namespace ADK.Demo.Calculators
                 .ToArray();
         }
 
+        public override string GetName(DeepSky ds)
+        {
+            return ds.AllNames.First();
+        }
+
         public override void Initialize()
         {
             // Load NGC/IC catalogs data

@@ -13,12 +13,12 @@ namespace ADK.Demo.UI
 {
     public partial class FormSearch : Form
     {
-        private SearchDelegate SearchDelegate;
+        private ISearcher Searcher;
 
-        public FormSearch(SearchDelegate searchDelegate)
+        public FormSearch(ISearcher searcher)
         {
             InitializeComponent();
-            SearchDelegate = searchDelegate;
+            Searcher = searcher;
         }
 
         /// <summary>
@@ -28,7 +28,7 @@ namespace ADK.Demo.UI
 
         private async void txtSearchString_TextChanged(object sender, EventArgs e)
         {
-            var results = await Task.Run(() => SearchDelegate(txtSearchString.Text, 50));
+            var results = await Task.Run(() => Searcher.Search(txtSearchString.Text));
             lstResults.BeginUpdate();
             lstResults.Items.Clear();
             foreach (var result in results)
@@ -91,14 +91,14 @@ namespace ADK.Demo.UI
             }
         }
 
-        private void btnGoTo_Click(object sender, EventArgs e)
+        private void btnSelect_Click(object sender, EventArgs e)
         {
             OnObjectSelected(sender, EventArgs.Empty);
         }
 
         private void lstResults_SelectedIndexChanged(object sender, EventArgs e)
         {
-            btnGoTo.Enabled = lstResults.Items.Count > 0 && lstResults.SelectedItems.Count > 0;
+            btnSelect.Enabled = lstResults.Items.Count > 0 && lstResults.SelectedItems.Count > 0;
         }
     }
 }

@@ -400,5 +400,10 @@ namespace ADK.Demo.Calculators
                 .Select(p => new SearchResultItem(p, p.Name))
                 .ToArray();
         }
+
+        public override string GetName(Planet p)
+        {
+            return p.Name;
+        }
     }
 }

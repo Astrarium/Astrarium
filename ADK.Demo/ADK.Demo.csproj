@@ -123,6 +123,12 @@
     <Compile Include="Objects\Star.cs" />
     <Compile Include="Calculators\StarsCalc.cs" />
     <Compile Include="Track.cs" />
+    <Compile Include="UI\CelestialObjectSelector.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\CelestialObjectSelector.Designer.cs">
+      <DependentUpon>CelestialObjectSelector.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\CustomListView.cs" />
     <Compile Include="UI\DateTimeSelector.cs">
       <SubType>UserControl</SubType>
