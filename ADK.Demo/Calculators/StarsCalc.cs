@@ -138,30 +138,6 @@ namespace ADK.Demo.Calculators
         }
 
         /// <summary>
-        /// Gets precessional elements for converting from current to B1875 epoch
-        /// </summary>
-        private PrecessionalElements PrecessionalElements1875(SkyContext c)
-        {
-            return Precession.ElementsFK5(c.JulianDay, Date.EPOCH_B1875);
-        }
-
-        /// <summary>
-        /// Gets equatorial coordinates of star for B1875 epoch
-        /// </summary>
-        private CrdsEquatorial Equatorial1875(SkyContext c, ushort hrNumber)
-        {
-            return Precession.GetEquatorialCoordinates(c.Get(Equatorial, hrNumber), c.Get(PrecessionalElements1875));
-        }
-
-        /// <summary>
-        /// Gets constellation where the star is located
-        /// </summary>
-        private string Constellation(SkyContext c, ushort hrNumber)
-        {
-            return Constellations.FindConstellation(c.Get(Equatorial1875, hrNumber));
-        }
-
-        /// <summary>
         /// Gets detailed info about star
         /// </summary>
         private StarDetails ReadStarDetails(SkyContext c, ushort hrNumber)
@@ -186,7 +162,7 @@ namespace ADK.Demo.Calculators
             var info = new CelestialObjectInfo();
             info.SetSubtitle("Star").SetTitle(string.Join(", ", GetStarNames(s)))
 
-            .AddRow("Constellation", c.Get(Constellation, s.Number))
+            .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial, s.Number), c.JulianDay))
 
             .AddHeader("Equatorial coordinates (current epoch)")
             .AddRow("Equatorial.Alpha", c.Get(Equatorial, s.Number).Alpha)

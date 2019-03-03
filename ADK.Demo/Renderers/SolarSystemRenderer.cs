@@ -351,27 +351,15 @@ namespace ADK.Demo.Renderers
                                         new RectangleF(0, h * textureRings.Height / 2f, textureRings.Width, textureRings.Height / 2f),
                                         GraphicsUnit.Pixel);
                                 }
+                                else
+                                {
+                                    DrawRingsUntextured(g, rings, half, scale);
+                                }
                             }
                             // do not use textures
                             else
                             {
-                                float startAngle = -180 * half + ((rings.B > 0) ? 180 : 0) - 1e-2f;
-
-                                // three rings
-                                for (int r = 0; r < 3; r++)
-                                {
-                                    float aOut = (float)(rings.GetRingSize(r, RingEdge.Outer, RingAxis.Major) * scale);
-                                    float bOut = (float)(rings.GetRingSize(r, RingEdge.Outer, RingAxis.Minor) * scale);
-
-                                    float aIn = (float)(rings.GetRingSize(r, RingEdge.Inner, RingAxis.Major) * scale);
-                                    float bIn = (float)(rings.GetRingSize(r, RingEdge.Inner, RingAxis.Minor) * scale);
-
-                                    GraphicsPath gp = new GraphicsPath();
-                                    gp.AddArc(-aOut, -bOut, aOut * 2, bOut * 2, startAngle, 180 + 1e-2f * 2);
-                                    gp.Reverse();
-                                    gp.AddArc(-aIn, -bIn, aIn * 2, bIn * 2, startAngle, 180 + 1e-2f * 2);
-                                    g.FillPath(brushRings[r], gp);
-                                }
+                                DrawRingsUntextured(g, rings, half, scale);
                             }
 
                             // draw planet disk after first half of rings
@@ -406,6 +394,27 @@ namespace ADK.Demo.Renderers
                     map.DrawObjectCaption(fontLabel, brushLabel, planet.Name, p, diam);
                     map.AddDrawnObject(planet, p);
                 }
+            }
+        }
+
+        private void DrawRingsUntextured(Graphics g, RingsAppearance rings, int half, double scale)
+        {
+            float startAngle = -180 * half + ((rings.B > 0) ? 180 : 0) - 1e-2f;
+
+            // three rings
+            for (int r = 0; r < 3; r++)
+            {
+                float aOut = (float)(rings.GetRingSize(r, RingEdge.Outer, RingAxis.Major) * scale);
+                float bOut = (float)(rings.GetRingSize(r, RingEdge.Outer, RingAxis.Minor) * scale);
+
+                float aIn = (float)(rings.GetRingSize(r, RingEdge.Inner, RingAxis.Major) * scale);
+                float bIn = (float)(rings.GetRingSize(r, RingEdge.Inner, RingAxis.Minor) * scale);
+
+                GraphicsPath gp = new GraphicsPath();
+                gp.AddArc(-aOut, -bOut, aOut * 2, bOut * 2, startAngle, 180 + 1e-2f * 2);
+                gp.Reverse();
+                gp.AddArc(-aIn, -bIn, aIn * 2, bIn * 2, startAngle, 180 + 1e-2f * 2);
+                g.FillPath(brushRings[r], gp);
             }
         }
 

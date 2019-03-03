@@ -120,7 +120,7 @@ namespace ADK.Demo
 
         private class SmallAngleFormatter : IEphemFormatter
         {
-            public string Format(object value)
+            public virtual string Format(object value)
             {
                 double angle = Convert.ToDouble(value);
                 var a = new DMS(angle);
@@ -137,6 +137,14 @@ namespace ADK.Demo
                 {
                     return string.Format(CultureInfo.InvariantCulture, "{0:0.##}\u2033", a.Seconds);
                 }
+            }
+        }
+
+        private class SaturnRingsFormatter : SmallAngleFormatter
+        {
+            public override string Format(object value)
+            {
+                return base.Format((double)value / 3600);
             }
         }
 
@@ -349,7 +357,7 @@ namespace ADK.Demo
         public static readonly IEphemFormatter EarthDeclination = new SignedDoubleFormatter(2, "\u00B0");
         public static readonly IEphemFormatter ConjunctionSeparation = new UnsignedDoubleFormatter(1, "\u00B0");
         public static readonly IEphemFormatter MoonDeclination = new SignedDoubleFormatter(3, "\u00B0");
-        public static readonly IEphemFormatter SaturnRingsSize = new SmallAngleFormatter();
+        public static readonly IEphemFormatter SaturnRingsSize = new SaturnRingsFormatter();
         public static readonly IEphemFormatter VisibilityDuration = new VisibilityDurationFormatter();
         public static readonly IEphemFormatter VisibilityPeriod = new VisibilityPeriodFormatter();
     }

@@ -316,57 +316,22 @@ namespace ADK.Demo.Calculators
             return PlanetEphem.SaturnRings(c.JulianDay, c.Get(Heliocentrical, p), c.Get(EarthHeliocentrial), c.Epsilon);
         }
 
-        /// <summary>
-        /// Gets precessional elements for converting from current to B1875 epoch
-        /// </summary>
-        private PrecessionalElements PrecessionalElements1875(SkyContext c)
-        {
-            return Precession.ElementsFK5(c.JulianDay, Date.EPOCH_B1875);
-        }
-
-        /// <summary>
-        /// Gets equatorial coordinates of planet for B1875 epoch
-        /// </summary>
-        private CrdsEquatorial Equatorial1875(SkyContext c, int p)
-        {
-            return Precession.GetEquatorialCoordinates(c.Get(Equatorial, p), c.Get(PrecessionalElements1875));
-        }
-
-        /// <summary>
-        /// Gets constellation where the planet is located for current context instant
-        /// </summary>
-        private string Constellation(SkyContext c, int p)
-        {
-            return Constellations.FindConstellation(c.Get(Equatorial1875, p));
-        }
-
         public override void ConfigureEphemeris(EphemerisConfig<Planet> e)
         {
             e.Add("Magnitude", (c, p) => c.Get(Magnitude, p.Number));
-
             e.Add("Horizontal.Altitude", (c, p) => c.Get(Horizontal, p.Number).Altitude);
             e.Add("Horizontal.Azimuth", (c, p) => c.Get(Horizontal, p.Number).Azimuth);
-
-            e.Add("Equatorial.Alpha", (c, p) => c.Get(Equatorial, p.Number).Alpha)
-                .WithFormatter(Formatters.RA);
-
-            e.Add("Equatorial.Delta", (c, p) => c.Get(Equatorial, p.Number).Delta)
-                .WithFormatter(Formatters.Dec);
-
+            e.Add("Equatorial.Alpha", (c, p) => c.Get(Equatorial, p.Number).Alpha);
+            e.Add("Equatorial.Delta", (c, p) => c.Get(Equatorial, p.Number).Delta);
             e.Add("SaturnRings.a", (c, p) => c.Get(GetSaturnRings, p.Number).a)
                 .AvailableIf(p => (p is Planet) && (p as Planet).Number == Planet.SATURN);
 
             e.Add("SaturnRings.b", (c, p) => c.Get(GetSaturnRings, p.Number).b)
                 .AvailableIf(p => (p is Planet) && (p as Planet).Number == Planet.SATURN);
 
-            e.Add("RTS.Rise", (c, p) => c.Get(RiseTransitSet, p.Number).Rise)
-                .WithFormatter(Formatters.Time);
-
-            e.Add("RTS.Transit", (c, p) => c.Get(RiseTransitSet, p.Number).Transit)
-                .WithFormatter(Formatters.Time);
-
-            e.Add("RTS.Set", (c, p) => c.Get(RiseTransitSet, p.Number).Set)
-               .WithFormatter(Formatters.Time);
+            e.Add("RTS.Rise", (c, p) => c.Get(RiseTransitSet, p.Number).Rise);
+            e.Add("RTS.Transit", (c, p) => c.Get(RiseTransitSet, p.Number).Transit);
+            e.Add("RTS.Set", (c, p) => c.Get(RiseTransitSet, p.Number).Set);
 
             e.Add("Visibility.Duration", (c, p) => c.Get(Visibility, p.Number).Duration);
             e.Add("Visibility.Period", (c, p) => c.Get(Visibility, p.Number).Period);
@@ -381,7 +346,7 @@ namespace ADK.Demo.Calculators
             var info = new CelestialObjectInfo();
             info.SetSubtitle("Planet").SetTitle(PlanetNames[p - 1])
 
-            .AddRow("Constellation", c.Get(Constellation, p))
+            .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial, p), c.JulianDay))
 
             .AddHeader("Equatorial coordinates (geocentrical)")
             .AddRow("Equatorial0.Alpha", c.Get(Equatorial0, p).Alpha)
@@ -417,8 +382,8 @@ namespace ADK.Demo.Calculators
             if (p == Planet.SATURN)
             {
                 info
-                .AddRow("SaturnRings.a", c.Get(GetSaturnRings, p).a / 3600)
-                .AddRow("SaturnRings.b", c.Get(GetSaturnRings, p).b / 3600);
+                .AddRow("SaturnRings.a", c.Get(GetSaturnRings, p).a)
+                .AddRow("SaturnRings.b", c.Get(GetSaturnRings, p).b);
             }
 
             info

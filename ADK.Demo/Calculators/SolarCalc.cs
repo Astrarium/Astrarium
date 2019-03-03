@@ -88,30 +88,6 @@ namespace ADK.Demo.Calculators
             return SolarEphem.CarringtonNumber(c.JulianDay);
         }
 
-        /// <summary>
-        /// Gets precessional elements for converting from current to B1875 epoch
-        /// </summary>
-        private PrecessionalElements PrecessionalElements1875(SkyContext c)
-        {
-            return Precession.ElementsFK5(c.JulianDay, Date.EPOCH_B1875);
-        }
-
-        /// <summary>
-        /// Gets equatorial coordinates for B1875 epoch
-        /// </summary>
-        private CrdsEquatorial Equatorial1875(SkyContext c)
-        {
-            return Precession.GetEquatorialCoordinates(c.Get(Equatorial), c.Get(PrecessionalElements1875));
-        }
-
-        /// <summary>
-        /// Gets constellation where the Sun is located for current context instant
-        /// </summary>
-        private string Constellation(SkyContext c)
-        {
-            return Constellations.FindConstellation(c.Get(Equatorial1875));
-        }
-
         private double Seasons(SkyContext c, Season s)
         {
             return SolarEphem.Season(c.JulianDay, s);
@@ -147,7 +123,7 @@ namespace ADK.Demo.Calculators
             var info = new CelestialObjectInfo();
             info.SetTitle("Sun")
 
-                .AddRow("Constellation", c.Get(Constellation))
+                .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial), c.JulianDay))
                 .AddHeader("Equatorial coordinates (geocentrical)")
                 .AddRow("Equatorial0.Alpha", c.Get(Equatorial0).Alpha)
                 .AddRow("Equatorial0.Delta", c.Get(Equatorial0).Delta)

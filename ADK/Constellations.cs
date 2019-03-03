@@ -55,6 +55,22 @@ namespace ADK
         }
 
         /// <summary>
+        /// Finds constellation name by point with specified equatorial coordinates for any epoch.
+        /// </summary>
+        /// <param name="eq">Equatorial coordinates of the point for any epoch.</param>
+        /// <param name="epoch">Epoch value, in Julian Days.</param>
+        /// <returns>International 3-letter code of a constellation.</returns>
+        /// <remarks>
+        /// Implementation is based on <see href="ftp://cdsarc.u-strasbg.fr/pub/cats/VI/42/"/>.
+        /// </remarks>
+        public static string FindConstellation(CrdsEquatorial eq, double epoch)
+        {
+            var pe = Precession.ElementsFK5(epoch, Date.EPOCH_B1875);
+            var eq1875 = Precession.GetEquatorialCoordinates(eq, pe);
+            return FindConstellation(eq1875);
+        }
+
+        /// <summary>
         /// Finds constellation name by point with specified equatorial coordinates for epoch B1875.
         /// </summary>
         /// <param name="eq1875">Equatorial coordinates of the point for epoch B1875.</param>

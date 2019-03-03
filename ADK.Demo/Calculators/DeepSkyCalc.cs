@@ -110,22 +110,6 @@ namespace ADK.Demo.Calculators
         }
 
         /// <summary>
-        /// Gets precessional elements for converting from current to B1875 epoch
-        /// </summary>
-        private PrecessionalElements PrecessionalElements1875(SkyContext c)
-        {
-            return Precession.ElementsFK5(c.JulianDay, Date.EPOCH_B1875);
-        }
-
-        /// <summary>
-        /// Gets equatorial coordinates of object for B1875 epoch
-        /// </summary>
-        private CrdsEquatorial Equatorial1875(SkyContext c, DeepSky ds)
-        {
-            return Precession.GetEquatorialCoordinates(c.Get(Equatorial, ds), c.Get(PrecessionalElements1875));
-        }
-
-        /// <summary>
         /// Gets rise, transit and set info for the deep sky object
         /// </summary>
         private RTS RiseTransitSet(SkyContext c, DeepSky ds)
@@ -133,14 +117,6 @@ namespace ADK.Demo.Calculators
             double theta0 = Date.ApparentSiderealTime(c.JulianDayMidnight, c.NutationElements.deltaPsi, c.Epsilon);
             var eq = c.Get(Equatorial, ds);
             return Visibility.RiseTransitSet(eq, c.GeoLocation, theta0);
-        }
-
-        /// <summary>
-        /// Gets constellation where the deep sky object is located
-        /// </summary>
-        private string Constellation(SkyContext c, DeepSky ds)
-        {
-            return Constellations.FindConstellation(c.Get(Equatorial1875, ds));
         }
 
         public override void ConfigureEphemeris(EphemerisConfig<DeepSky> e)
@@ -158,7 +134,7 @@ namespace ADK.Demo.Calculators
             var info = new CelestialObjectInfo();
             info.SetSubtitle(ds.Status.ToString())
             .SetTitle(string.Join(" / ", ds.AllNames))
-            .AddRow("Constellation", c.Get(Constellation, ds))
+            .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial, ds), c.JulianDay))
 
             .AddHeader("Equatorial coordinates (current epoch)")
             .AddRow("Equatorial.Alpha", c.Get(Equatorial, ds).Alpha)
