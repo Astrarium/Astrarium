@@ -219,14 +219,13 @@ namespace ADK.Demo
                                 formEphemerisSettings.Categories
                             ));
 
-                            using (var formEphemeris = new FormEphemeris(ephem,
+                            var formEphemeris = new FormEphemeris(ephem,
                                 formEphemerisSettings.JulianDayFrom,
                                 formEphemerisSettings.JulianDayTo,
                                 formEphemerisSettings.Step,
-                                sky.Context.GeoLocation.UtcOffset))
-                            {
-                                formEphemeris.Show();
-                            }
+                                sky.Context.GeoLocation.UtcOffset);
+
+                            formEphemeris.Show();
                         }
                     }
                 }

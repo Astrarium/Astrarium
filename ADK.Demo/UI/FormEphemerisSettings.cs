@@ -21,6 +21,7 @@ namespace ADK.Demo.UI
             dtFrom.UtcOffset = sky.Context.GeoLocation.UtcOffset;
             dtTo.JulianDay = sky.Context.JulianDay + 30;
             dtTo.UtcOffset = sky.Context.GeoLocation.UtcOffset;
+            selTimeInterval.TimeInterval = new TimeInterval(1, TimeIntervalUnit.Day);
             selCelestialBody.Searcher = sky;
             selCelestialBody.ValueChanged += () => BuildCategoriesTree(sky.GetEphemerisCategories(selCelestialBody.SelectedObject));
             selCelestialBody.SelectedObject = body;
@@ -97,7 +98,7 @@ namespace ADK.Demo.UI
         {
             get
             {
-                return 1;
+                return selTimeInterval.TimeInterval.TotalDays;
             }
         }
 

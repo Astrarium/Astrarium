@@ -41,7 +41,6 @@ namespace ADK.Demo.Renderers
         {
             if (settings.Get<bool>("MilkyWay"))
             {
-                double coeff = map.DiagonalCoefficient();
                 int alpha = Math.Min((int)(k * map.ViewAngle + b), 255);
                 if (alpha > maxAlpha)
                 {
@@ -55,8 +54,10 @@ namespace ADK.Demo.Renderers
                         for (int j = 0; j < milkyWayProvider.MilkyWay[i].Count; j++)
                         {
                             var h = milkyWayProvider.MilkyWay[i][j].Horizontal;
-                            double ad = Angle.Separation(h, map.Center);                            
-                            if (ad < 120 * coeff)
+                            double ad = Angle.Separation(h, map.Center);
+
+                            // 130 degrees value limit has been chosen experimentally
+                            if (ad < 130)
                             {
                                 points.Add(map.Project(h));
                             }                            

@@ -56,7 +56,6 @@ namespace ADK.Demo.UI
             this.panSecond = new System.Windows.Forms.Panel();
             this.updownSecond = new System.Windows.Forms.NumericUpDownEx();
             this.btnOK = new System.Windows.Forms.Button();
-            this.btnCancel = new System.Windows.Forms.Button();
             this.panTime = new System.Windows.Forms.Panel();
             this.panDate = new System.Windows.Forms.Panel();
             this.panButtons = new System.Windows.Forms.Panel();
@@ -317,24 +316,13 @@ namespace ADK.Demo.UI
             // btnOK
             // 
             this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnOK.Location = new System.Drawing.Point(95, 13);
+            this.btnOK.Location = new System.Drawing.Point(170, 13);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(72, 23);
             this.btnOK.TabIndex = 7;
             this.btnOK.Text = "&OK";
             this.btnOK.UseVisualStyleBackColor = true;
             this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
-            // 
-            // btnCancel
-            // 
-            this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(174, 13);
-            this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(72, 23);
-            this.btnCancel.TabIndex = 8;
-            this.btnCancel.Text = "&Cancel";
-            this.btnCancel.UseVisualStyleBackColor = true;
             // 
             // panTime
             // 
@@ -364,7 +352,6 @@ namespace ADK.Demo.UI
             // 
             this.panButtons.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.panButtons.Controls.Add(this.btnCancel);
             this.panButtons.Controls.Add(this.lnkCurrentTime);
             this.panButtons.Controls.Add(this.btnOK);
             this.panButtons.Location = new System.Drawing.Point(0, 108);
@@ -432,7 +419,6 @@ namespace ADK.Demo.UI
         private Panel panSecond;
         private NumericUpDownEx updownSecond;
         private Button btnOK;
-        private Button btnCancel;
         private Panel panTime;
         private Panel panDate;
         private Panel panButtons;

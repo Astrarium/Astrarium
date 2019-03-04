@@ -38,6 +38,7 @@
             this.dtTo = new ADK.Demo.UI.DateTimeSelector();
             this.dtFrom = new ADK.Demo.UI.DateTimeSelector();
             this.selCelestialBody = new ADK.Demo.UI.CelestialObjectSelector();
+            this.selTimeInterval = new ADK.Demo.UI.TimeIntervalSelector();
             this.SuspendLayout();
             // 
             // btnCancel
@@ -143,14 +144,25 @@
             this.selCelestialBody.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.selCelestialBody.Location = new System.Drawing.Point(333, 12);
             this.selCelestialBody.Name = "selCelestialBody";
+            this.selCelestialBody.Searcher = null;
+            this.selCelestialBody.SelectedObject = null;
             this.selCelestialBody.Size = new System.Drawing.Size(139, 22);
             this.selCelestialBody.TabIndex = 19;
+            // 
+            // selTimeInterval
+            // 
+            this.selTimeInterval.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.selTimeInterval.Location = new System.Drawing.Point(333, 110);
+            this.selTimeInterval.Name = "selTimeInterval";
+            this.selTimeInterval.Size = new System.Drawing.Size(139, 22);
+            this.selTimeInterval.TabIndex = 20;
             // 
             // FormEphemerisSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(484, 462);
+            this.Controls.Add(this.selTimeInterval);
             this.Controls.Add(this.selCelestialBody);
             this.Controls.Add(this.lblStep);
             this.Controls.Add(this.lblBody);
@@ -182,5 +194,6 @@
         private System.Windows.Forms.Label lblBody;
         private System.Windows.Forms.Label lblStep;
         private CelestialObjectSelector selCelestialBody;
+        private TimeIntervalSelector selTimeInterval;
     }
 }

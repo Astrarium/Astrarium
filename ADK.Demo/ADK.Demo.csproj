@@ -122,6 +122,7 @@
     </Compile>
     <Compile Include="Objects\Star.cs" />
     <Compile Include="Calculators\StarsCalc.cs" />
+    <Compile Include="TimeInterval.cs" />
     <Compile Include="Track.cs" />
     <Compile Include="UI\CelestialObjectSelector.cs">
       <SubType>UserControl</SubType>
@@ -184,12 +185,24 @@
     <Compile Include="UI\FormSettings.Designer.cs">
       <DependentUpon>FormSettings.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\FormTimeInterval.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\FormTimeInterval.Designer.cs">
+      <DependentUpon>FormTimeInterval.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\NumericUpDownEx.cs" />
     <Compile Include="UI\SelectorBase.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="UI\SelectorBase.Designer.cs">
       <DependentUpon>SelectorBase.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\TimeIntervalSelector.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\TimeIntervalSelector.Designer.cs">
+      <DependentUpon>TimeIntervalSelector.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\TreeViewEx.cs" />
     <EmbeddedResource Include="FormMain.resx">
@@ -228,6 +241,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI\FormSettings.resx">
       <DependentUpon>FormSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\FormTimeInterval.resx">
+      <DependentUpon>FormTimeInterval.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\SelectorBase.resx">
       <DependentUpon>SelectorBase.cs</DependentUpon>

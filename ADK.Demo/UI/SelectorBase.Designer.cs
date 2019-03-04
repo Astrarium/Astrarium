@@ -41,12 +41,14 @@ namespace ADK.Demo.UI
             // btnButton
             // 
             this.btnButton.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnButton.ForeColor = System.Drawing.SystemColors.GrayText;
             this.btnButton.Location = new System.Drawing.Point(121, 1);
             this.btnButton.Margin = new System.Windows.Forms.Padding(0);
             this.btnButton.Name = "btnButton";
             this.btnButton.Size = new System.Drawing.Size(21, 22);
             this.btnButton.TabIndex = 1;
             this.btnButton.TabStop = false;
+            this.btnButton.Text = "◢";
             this.btnButton.UseVisualStyleBackColor = true;
             this.btnButton.Click += new System.EventHandler(this.btnButton_Click);
             this.btnButton.Enter += new System.EventHandler(this.btnButton_Enter);
@@ -56,7 +58,9 @@ namespace ADK.Demo.UI
             this.lblText.ActiveLinkColor = System.Drawing.Color.RoyalBlue;
             this.lblText.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblText.BackColor = System.Drawing.SystemColors.Window;
             this.lblText.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.lblText.Cursor = System.Windows.Forms.Cursors.Default;
             this.lblText.LinkBehavior = System.Windows.Forms.LinkBehavior.NeverUnderline;
             this.lblText.LinkColor = System.Drawing.SystemColors.ControlText;
             this.lblText.Location = new System.Drawing.Point(0, 0);
