@@ -92,10 +92,26 @@ namespace ADK.Demo
 
             kernel.Bind<Sky>().ToConstant(new Sky(context, calculators, eventProviders));
             kernel.Bind<ISkyMap>().ToConstant(new SkyMap(context, renderers));
+            kernel.Bind<IViewManager>().ToConstant(new ViewManager(kernel));
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(kernel.Get<FormMain>());
+        }
+
+        private class ViewManager : IViewManager
+        {
+            IKernel kernel;
+
+            public ViewManager(IKernel kernel)
+            {
+                this.kernel = kernel;
+            }
+
+            public TForm GetForm<TForm>() where TForm : Form
+            {
+                return kernel.Get<TForm>();
+            }
         }
     }
 }

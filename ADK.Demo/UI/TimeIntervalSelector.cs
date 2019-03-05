@@ -27,9 +27,9 @@ namespace ADK.Demo.UI
             }
         }
 
-        private TimeInterval _TimeInterval = new TimeInterval(1, TimeIntervalUnit.Day);
+        private TimeSpan _TimeInterval = TimeSpan.FromDays(1);
         [Browsable(false)]
-        public TimeInterval TimeInterval
+        public TimeSpan TimeInterval
         {
             get
             {

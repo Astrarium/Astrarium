@@ -39,52 +39,55 @@ namespace ADK.Demo.Renderers
 
             foreach (var track in tracks)
             {
-                var segments = track.Points
-                    .Select(p => Angle.Separation(p.Horizontal, map.Center) < map.ViewAngle * coeff ? p : null)
-                    .Split(p => p == null, true);
-
-                foreach (var segment in segments)
+                if (track.Points.Any())
                 {
-                    var prevP = track.Points.Prev(segment.First());
-                    if (prevP != null)
+                    var segments = track.Points
+                        .Select(p => Angle.Separation(p.Horizontal, map.Center) < map.ViewAngle * coeff ? p : null)
+                        .Split(p => p == null, true);
+
+                    foreach (var segment in segments)
                     {
-                        segment.Insert(0, prevP);
+                        var prevP = track.Points.Prev(segment.First());
+                        if (prevP != null)
+                        {
+                            segment.Insert(0, prevP);
+                        }
+
+                        var nextP = track.Points.Next(segment.Last());
+                        if (nextP != null)
+                        {
+                            segment.Add(nextP);
+                        }
+
+                        PointF pBody = IsSegmentContainsBody(map, segment, track) ? map.Project(track.Body.Horizontal) : PointF.Empty;
+                        DrawTrackSegment(map, penTrack, segment.Select(p => map.Project(p.Horizontal)).ToArray(), pBody);
                     }
 
-                    var nextP = track.Points.Next(segment.Last());
-                    if (nextP != null)
+                    if (!segments.Any())
                     {
-                        segment.Add(nextP);
+                        var segment = new List<CelestialPoint>();
+                        var p0 = track.Points.OrderBy(p => Angle.Separation(p.Horizontal, map.Center)).First();
+                        segment.Add(p0);
+
+                        var p1 = track.Points.Prev(p0);
+                        var p2 = track.Points.Next(p0);
+
+                        if (p1 != null)
+                        {
+                            segment.Insert(0, p1);
+                        }
+
+                        if (p2 != null)
+                        {
+                            segment.Add(p2);
+                        }
+
+                        PointF pBody = IsSegmentContainsBody(map, segment, track) ? map.Project(track.Body.Horizontal) : PointF.Empty;
+                        DrawTrackSegment(map, penTrack, segment.Select(p => map.Project(p.Horizontal)).ToArray(), pBody);
                     }
 
-                    PointF pBody = IsSegmentContainsBody(map, segment, track) ? map.Project(track.Body.Horizontal) : PointF.Empty;
-                    DrawTrackSegment(map, penTrack, segment.Select(p => map.Project(p.Horizontal)).ToArray(), pBody);
+                    DrawLabels(map, track);
                 }
-
-                if (!segments.Any())
-                {
-                    var segment = new List<CelestialPoint>();
-                    var p0 = track.Points.OrderBy(p => Angle.Separation(p.Horizontal, map.Center)).First();
-                    segment.Add(p0);
-
-                    var p1 = track.Points.Prev(p0);
-                    var p2 = track.Points.Next(p0);
-
-                    if (p1 != null)
-                    {
-                        segment.Insert(0, p1);
-                    }
-
-                    if (p2 != null)
-                    {
-                        segment.Add(p2);
-                    }
-
-                    PointF pBody = IsSegmentContainsBody(map, segment, track) ? map.Project(track.Body.Horizontal) : PointF.Empty;
-                    DrawTrackSegment(map, penTrack, segment.Select(p => map.Project(p.Horizontal)).ToArray(), pBody);
-                }
-
-                DrawLabels(map, track);
             }
         }
 

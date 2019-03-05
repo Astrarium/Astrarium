@@ -68,6 +68,11 @@ namespace ADK.Demo
         /// </summary>
         public TimeSpan LabelsStep { get; set; }
 
+        /// <summary>
+        /// Gets smallest allowed labels step for the celestial body
+        /// </summary>
+        /// <param name="body">Celestial body to get smallest labels step. Should implement interface <see cref="IMovingObject"/>.</param>
+        /// <returns></returns>
         public static double SmallestLabelsStep(IMovingObject body)
         {
             // mean daily motion, in degrees

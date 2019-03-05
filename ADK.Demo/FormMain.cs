@@ -19,15 +19,17 @@ namespace ADK.Demo
 {
     public partial class FormMain : Form
     {
+        private IViewManager viewManager;
         private Sky sky;
         private ISkyMap skyMap;
         private Settings settings;
         private bool fullScreen = false;
 
-        public FormMain(Sky sky, ISkyMap skyMap, Settings settings)
+        public FormMain(IViewManager viewManager, Sky sky, ISkyMap skyMap, Settings settings)
         {
             InitializeComponent();
 
+            this.viewManager = viewManager;
             this.sky = sky;
             this.skyMap = skyMap;
             this.settings = settings;
@@ -200,7 +202,7 @@ namespace ADK.Demo
                     }
                 }
 
-                             
+
             }
             else if (e.KeyCode == Keys.P)
             {
@@ -228,6 +230,16 @@ namespace ADK.Demo
                             formEphemeris.Show();
                         }
                     }
+                }
+            }
+            else if (e.KeyCode == Keys.T)
+            {
+                var body = skyView.SkyMap.SelectedObject;
+                if (body != null)
+                {
+                    var formTrackSettings = viewManager.GetForm<FormTrackSettings>();
+                    formTrackSettings.Track = new Track() { Body = body, From = sky.Context.JulianDay, To = sky.Context.JulianDay + 30, LabelsStep = TimeSpan.FromDays(1) };
+                    formTrackSettings.ShowDialog();
                 }
             }
         }

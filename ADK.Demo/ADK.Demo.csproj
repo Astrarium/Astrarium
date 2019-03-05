@@ -74,6 +74,7 @@
     <Compile Include="Formatting.cs" />
     <Compile Include="IInfoProvider.cs" />
     <Compile Include="IMapContext.cs" />
+    <Compile Include="IViewManager.cs" />
     <Compile Include="Objects\CelestialObject.cs" />
     <Compile Include="Objects\CelestialPoint.cs" />
     <Compile Include="Objects\Constellation.cs" />
@@ -149,6 +150,12 @@
     <Compile Include="UI\FormAlmanac.Designer.cs">
       <DependentUpon>FormAlmanac.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\FormTrackSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\FormTrackSettings.Designer.cs">
+      <DependentUpon>FormTrackSettings.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\FormEphemerisSettings.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -223,6 +230,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI\FormAlmanac.resx">
       <DependentUpon>FormAlmanac.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\FormTrackSettings.resx">
+      <DependentUpon>FormTrackSettings.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\FormEphemerisSettings.resx">
       <DependentUpon>FormEphemerisSettings.cs</DependentUpon>

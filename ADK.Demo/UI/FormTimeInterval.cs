@@ -12,7 +12,7 @@ namespace ADK.Demo.UI
 {
     public partial class FormTimeInterval : Form
     {
-        public FormTimeInterval(TimeInterval timeInterval)
+        public FormTimeInterval(TimeSpan timeInterval)
         {
             InitializeComponent();
 
@@ -27,16 +27,45 @@ namespace ADK.Demo.UI
             TimeInterval = timeInterval;
         }
 
-        public TimeInterval TimeInterval
+        public TimeSpan TimeInterval
         {
             get
             {
-                return new TimeInterval((double)updInterval.Value, (TimeIntervalUnit)cmbUnit.SelectedIndex);
+                var value = (double)updInterval.Value;
+                switch (cmbUnit.SelectedIndex)
+                {
+                    case 0:
+                        return TimeSpan.FromSeconds(value);
+                    case 1:
+                        return TimeSpan.FromMinutes(value);
+                    case 2:
+                        return TimeSpan.FromHours(value);
+                    default:
+                        return TimeSpan.FromDays(value);
+                }
             }
             set
             {
-                cmbUnit.SelectedIndex = (int)(value.IntervalUnit);
-                updInterval.Value = (decimal)(value.IntervalValue);
+                if (value.TotalDays >= 1)
+                {
+                    cmbUnit.SelectedIndex = 3;
+                    updInterval.Value = (int)value.TotalDays;
+                }
+                else if (value.TotalHours >= 1)
+                {
+                    cmbUnit.SelectedIndex = 2;
+                    updInterval.Value = (int)value.TotalHours;
+                }
+                else if (value.TotalMinutes >= 1)
+                {
+                    cmbUnit.SelectedIndex = 1;
+                    updInterval.Value = (int)value.TotalMinutes;
+                }
+                else if (value.TotalSeconds >= 1)
+                {
+                    cmbUnit.SelectedIndex = 0;
+                    updInterval.Value = (int)value.TotalSeconds;
+                }
             }
         }
 

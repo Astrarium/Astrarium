@@ -245,20 +245,5 @@ namespace ADK.Demo
                 return body.ToString();
             }
         }
-
-        //public void AddTrack(Track track)
-        //{
-        //    if (!(track.Body is IMovingObject))
-        //        throw new Exception($"The '{track.Body.GetType()}' class should implement '{nameof(IMovingObject)}' interface.");
-
-        //    var positions = GetEphemeris<CrdsEquatorial>(track.Body, track.From, track.To, track.Step, "Equatorial");
-        //    foreach (var eq in positions)
-        //    {
-        //        track.Points.Add(new CelestialPoint() { Equatorial0 = eq });
-        //    }
-
-        //    Tracks.Add(track);
-        //    Calculate();
-        //}
     }
 }
