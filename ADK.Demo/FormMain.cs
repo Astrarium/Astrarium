@@ -152,7 +152,7 @@ namespace ADK.Demo
 
             else if (e.Control && e.KeyCode == Keys.F)
             {
-                using (var frmSearch = new FormSearch(sky))
+                using (var frmSearch = new FormSearch(sky, (b) => true))
                 {
                     var result = frmSearch.ShowDialog();
                     if (result == DialogResult.OK)
@@ -235,11 +235,14 @@ namespace ADK.Demo
             else if (e.KeyCode == Keys.T)
             {
                 var body = skyView.SkyMap.SelectedObject;
-                if (body != null)
+                if (body != null && body is IMovingObject)
                 {
                     var formTrackSettings = viewManager.GetForm<FormTrackSettings>();
                     formTrackSettings.Track = new Track() { Body = body, From = sky.Context.JulianDay, To = sky.Context.JulianDay + 30, LabelsStep = TimeSpan.FromDays(1) };
-                    formTrackSettings.ShowDialog();
+                    if (formTrackSettings.ShowDialog() == DialogResult.OK)
+                    {
+                        skyView.Invalidate();
+                    }
                 }
             }
         }

@@ -14,11 +14,13 @@ namespace ADK.Demo.UI
     public partial class FormSearch : Form
     {
         private ISearcher Searcher;
+        private Func<CelestialObject, bool> Filter;
 
-        public FormSearch(ISearcher searcher)
+        public FormSearch(ISearcher searcher, Func<CelestialObject, bool> filter)
         {
             InitializeComponent();
             Searcher = searcher;
+            Filter = filter;
         }
 
         /// <summary>
@@ -28,7 +30,7 @@ namespace ADK.Demo.UI
 
         private async void txtSearchString_TextChanged(object sender, EventArgs e)
         {
-            var results = await Task.Run(() => Searcher.Search(txtSearchString.Text));
+            var results = await Task.Run(() => Searcher.Search(txtSearchString.Text, Filter));
             lstResults.BeginUpdate();
             lstResults.Items.Clear();
             foreach (var result in results)

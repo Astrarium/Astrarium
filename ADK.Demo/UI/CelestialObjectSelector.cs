@@ -21,7 +21,7 @@ namespace ADK.Demo.UI
 
         private void CelestialObjectSelector_SelectorClicked(object sender, EventArgs e)
         {
-            FormSearch frmSearch = new FormSearch(Searcher);
+            FormSearch frmSearch = new FormSearch(Searcher, Filter);
             if (frmSearch.ShowDialog() == DialogResult.OK)
             {
                 SelectedObject = frmSearch.SelectedObject;
@@ -30,6 +30,9 @@ namespace ADK.Demo.UI
 
         [Browsable(false)]
         public ISearcher Searcher { get; set; }
+
+        [Browsable(false)]
+        public Func<CelestialObject, bool> Filter { get; set; }
 
         private CelestialObject _SelectedObject = null;
         [Browsable(false)]

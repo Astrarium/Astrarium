@@ -12,7 +12,7 @@ namespace ADK.Demo
 {
     public interface ISearcher
     {
-        ICollection<SearchResultItem> Search(string searchString, int maxCount = 50);
+        ICollection<SearchResultItem> Search(string searchString, Func<CelestialObject, bool> filter);
         string GetObjectName(CelestialObject body);
     }
 
@@ -212,8 +212,10 @@ namespace ADK.Demo
                 .ToArray();
         }
 
-        public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
+        public ICollection<SearchResultItem> Search(string searchString, Func<CelestialObject, bool> filter)
         {
+            int maxCount = 50;
+            var filterFunc = filter ?? ((b) => true);
             var results = new List<SearchResultItem>();
             if (!string.IsNullOrWhiteSpace(searchString))
             {               
@@ -221,7 +223,7 @@ namespace ADK.Demo
                 {
                     if (results.Count < maxCount)
                     {
-                        results.AddRange(searchProvider(searchString, maxCount));
+                        results.AddRange(searchProvider(searchString, maxCount).Where(r => filterFunc(r.Body)));
                     }
                     else
                     {

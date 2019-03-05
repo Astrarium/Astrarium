@@ -31,6 +31,7 @@ namespace ADK.Demo.UI
                 dtTo.UtcOffset = sky.Context.GeoLocation.UtcOffset;
                 selTimeInterval.TimeInterval = _Track.LabelsStep;
                 selCelestialBody.Searcher = sky;
+                selCelestialBody.Filter = (b) => b is IMovingObject;
                 selCelestialBody.SelectedObject = _Track.Body;
             }
         }
