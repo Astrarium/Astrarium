@@ -36,7 +36,6 @@ namespace Planetarium
         {
             InitializeComponent();
 
-
             sky.Initialize();
             map.Initialize();
 
@@ -50,14 +49,16 @@ namespace Planetarium
             skyView.MouseDoubleClick += skyView_DoubleClick;
             skyView.MouseClick += SkyView_MouseClick;
             skyView.MouseMove += skyView_MouseMove;
+            skyView.MouseWheel += SkyView_MouseWheel;
 
             Host.KeyDown += skyView_KeyDown;
-
             Host.Child = skyView;
-            
         }
 
-
+        private void SkyView_MouseWheel(object sender, WF.MouseEventArgs e)
+        {
+            skyView.Zoom(e.Delta);
+        }
 
         private void SkyView_MouseClick(object sender, WF.MouseEventArgs e)
         {
@@ -97,6 +98,8 @@ namespace Planetarium
 
         private void skyView_MouseMove(object sender, WF.MouseEventArgs e)
         {
+            skyView.Focus();
+
             var hor = skyView.SkyMap.Projection.Invert(e.Location);
 
             var eq = hor.ToEquatorial(sky.Context.GeoLocation, sky.Context.SiderealTime);
@@ -120,7 +123,18 @@ namespace Planetarium
 
         private async void skyView_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.D)
+            // Add = Zoom In
+            if (e.Key == Key.Add)
+            {
+                skyView.Zoom(1);
+            }
+
+            // Subtract = Zoom Out
+            else if (e.Key == Key.Subtract)
+            {
+                skyView.Zoom(-1);
+            }
+            else if (e.Key == Key.D)
             {
                 using (var frmDateTime = new FormDateTime(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset))
                 {

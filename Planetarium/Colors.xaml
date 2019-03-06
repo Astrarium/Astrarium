@@ -8,8 +8,13 @@
     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}">#305144</SolidColorBrush>
     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}">#B7C6C2</SolidColorBrush>
 
+    <Color x:Key="BorderColor">#B7C6C2</Color>
+    <Color x:Key="BorderHoverColor">#4e91fc</Color>
 
-    <SolidColorBrush x:Key="BorderColor" Color="#B7C6C2"/>
+    
+    
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
+    <SolidColorBrush x:Key="BorderHoverBrush" Color="{StaticResource BorderHoverColor}"/>
 
     <LinearGradientBrush x:Key="ControlBackground" EndPoint="0.5,1"  StartPoint="0.5,0">
         <GradientStop Color="{DynamicResource ControlLightColor}" Offset="0" />

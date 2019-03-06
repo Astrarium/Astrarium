@@ -9,7 +9,59 @@
         <Setter Property="Foreground" Value="{StaticResource TextColor}" />
     </Style>
 
-    <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource BaseControlStyle}" />
+    <!-- TextBox -->
+    <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource BaseControlStyle}">
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="CaretBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Border Name="PART_Border" 
+                            BorderThickness="1"
+                            Padding="4,2" 
+                            BorderBrush="{StaticResource BorderBrush}"  
+                            Background="{TemplateBinding Background}">
+                        <ScrollViewer Margin="0" x:Name="PART_ContentHost" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Duration="0:0:0.15" Storyboard.TargetName="PART_Border" Storyboard.TargetProperty="BorderBrush.Color" To="{StaticResource BorderHoverColor}" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Duration="0:0:0.15" Storyboard.TargetName="PART_Border" Storyboard.TargetProperty="BorderBrush.Color" To="{StaticResource BorderColor}" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+
+
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            </Trigger>
+            
+        </Style.Triggers>
+
+    </Style>
 
 
 
@@ -18,7 +70,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
-                    <Border Background="{TemplateBinding Background}" BorderBrush="{StaticResource BorderColor}" BorderThickness="1">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                 </ControlTemplate>
@@ -259,8 +311,7 @@
                     <ContentPresenter Margin="3"
                           Name="ContentSite" />
                     <ControlTemplate.Triggers>
-                        <Trigger Property="IsEnabled"
-                   Value="false">
+                        <Trigger Property="IsEnabled" Value="false">
                             <Setter Property="Foreground">
                                 <Setter.Value>
                                     <SolidColorBrush Color="{StaticResource DisabledForegroundColor}" />
@@ -280,6 +331,7 @@
         <Setter Property="OverridesDefaultStyle" Value="True" />
         <Setter Property="Grid.IsSharedSizeScope"  Value="true" />
         <Setter Property="HasDropShadow" Value="False" />
+                
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ContextMenu}">
@@ -289,15 +341,39 @@
                         </Border.BorderBrush>
                         <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
                     </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="HasDropShadow" Value="true">
-                            <Setter TargetName="Border" Property="Padding" Value="0,3,0,3" />
-                            <Setter TargetName="Border" Property="CornerRadius" Value="4" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+    
+    <!-- Menu Item -->
+    <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource BaseControlStyle}">
+        <Setter Property="OverridesDefaultStyle" Value="True"></Setter>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type MenuItem}">
+                    <Border x:Name="Border">
+                        <Grid>
+                            <ContentPresenter Margin="12,6,12,6" ContentSource="Header" RecognizesAccessKey="True" />
+                        </Grid>
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#305144" TargetName="Border" />
+                            <Setter Property="BorderThickness" Value="1"></Setter>
+                            <Setter Property="BorderBrush" Value="Gray"></Setter>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+
+
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        
+        
+
     </Style>
 
 </ResourceDictionary>
