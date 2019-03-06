@@ -71,6 +71,7 @@ namespace ADK.Demo
         {
             renderStopWatch.Restart();
 
+            g.Clear(Color.Black);
             g.PageUnit = GraphicsUnit.Display;
             g.SmoothingMode = Antialias ? SmoothingMode.HighQuality : SmoothingMode.HighSpeed;
             drawnPoints.Clear();

@@ -82,6 +82,7 @@ namespace ADK.Demo
             base.OnMouseUp(e);
             SkyMap.Antialias = true;
             Invalidate();
+            pOld = Point.Empty;
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
@@ -96,6 +97,11 @@ namespace ADK.Demo
 
                 if (e.Button == MouseButtons.Left && !shift)
                 {
+                    if (pOld == Point.Empty)
+                    {
+                        pOld = new Point(e.X, e.Y);
+                    }
+
                     pNew.X = e.X;
                     pNew.Y = e.Y;
                     double dx = pNew.X - pOld.X;

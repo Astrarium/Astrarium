@@ -152,29 +152,29 @@ namespace ADK.Demo
 
             else if (e.Control && e.KeyCode == Keys.F)
             {
-                using (var frmSearch = new FormSearch(sky, (b) => true))
+                var frmSearch = new FormSearch(sky, (b) => true);
+                
+                var result = frmSearch.ShowDialog();
+                if (result == DialogResult.OK)
                 {
-                    var result = frmSearch.ShowDialog();
-                    if (result == DialogResult.OK)
+                    bool show = true;
+                    var body = frmSearch.SelectedObject;
+                    if (settings.Get<bool>("Ground") && body.Horizontal.Altitude <= 0)
                     {
-                        bool show = true;
-                        var body = frmSearch.SelectedObject;
-                        if (settings.Get<bool>("Ground") && body.Horizontal.Altitude <= 0)
+                        show = false;
+                        if (DialogResult.Yes == MessageBox.Show("The object is under horizon at the moment. Do you want to switch off displaying the ground?", "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question))
                         {
-                            show = false;
-                            if (DialogResult.Yes == MessageBox.Show("The object is under horizon at the moment. Do you want to switch off displaying the ground?", "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question))
-                            {
-                                show = true;
-                                settings.Set("Ground", false);
-                            }
-                        }
-
-                        if (show)
-                        {
-                            skyView.SkyMap.GoToObject(body, TimeSpan.FromSeconds(1));
+                            show = true;
+                            settings.Set("Ground", false);
                         }
                     }
+
+                    if (show)
+                    {
+                        skyView.SkyMap.GoToObject(body, TimeSpan.FromSeconds(1));
+                    }
                 }
+                
             }
             else if (e.KeyCode == Keys.E)
             {
