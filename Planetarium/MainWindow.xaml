@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Planetarium"
         mc:Ignorable="d"
+        Style="{StaticResource {x:Type Window}}"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
         <Grid.RowDefinitions>
@@ -45,11 +46,11 @@
         </WindowsFormsHost>
         <StatusBar Grid.Row="2">
             
-            <TextBlock x:Name="lblConstellation">constellation</TextBlock>
+            <TextBlock x:Name="lblConstellation" Width="30" TextAlignment="Center">CON</TextBlock>
             <Separator></Separator>
-            <TextBlock x:Name="lblEquatorialCoordinates">eq coordinates</TextBlock>
+            <TextBlock x:Name="lblEquatorialCoordinates" Width="200">eq coordinates</TextBlock>
             <Separator></Separator>
-            <TextBlock x:Name="lblHorizontalCoordinates">hor coordinates</TextBlock>
+            <TextBlock x:Name="lblHorizontalCoordinates" Width="200">hor coordinates</TextBlock>
             <Separator></Separator>
             <TextBlock x:Name="lblViewAngle">fov</TextBlock>
         </StatusBar>

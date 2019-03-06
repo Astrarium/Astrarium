@@ -87,11 +87,9 @@
     </Style>
 
     <Style x:Key="{x:Static ToolBar.ButtonStyleKey}" TargetType="Button" BasedOn="{StaticResource BaseControlStyle}">
-
     </Style>
 
     <Style x:Key="{x:Static ToolBar.CheckBoxStyleKey}" TargetType="CheckBox" BasedOn="{StaticResource BaseControlStyle}">
-
     </Style>
 
     <Style x:Key="{x:Static ToolBar.ComboBoxStyleKey}" TargetType="ComboBox" BasedOn="{StaticResource BaseControlStyle}">
@@ -106,17 +104,17 @@
 
     </Style>
 
+
+
+    <!--<LinearGradientBrush x:Key="ButtonBackground" EndPoint="0,1" StartPoint="0,0">
+        <GradientStop Color="AliceBlue" Offset="0" />
+        <GradientStop Color="Green" Offset="1" />
+    </LinearGradientBrush>-->
+
     <LinearGradientBrush x:Key="ToolBarHorizontalBackground" EndPoint="0,1" StartPoint="0,0">
         <GradientStop Color="{StaticResource ControlLightColor}" Offset="0" />
         <GradientStop Color="{StaticResource ControlMediumColor}" Offset="1" />
     </LinearGradientBrush>
-
-    <LinearGradientBrush x:Key="ButtonBackground" EndPoint="0,1" StartPoint="0,0">
-        <GradientStop Color="AliceBlue" Offset="0" />
-        <GradientStop Color="Green" Offset="1" />
-    </LinearGradientBrush>
-
-    
 
 
     <SolidColorBrush x:Key="ToolBarButtonHover" Color="Green"/>
