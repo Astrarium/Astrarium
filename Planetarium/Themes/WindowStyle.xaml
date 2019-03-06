@@ -1,0 +1,92 @@
+﻿<ResourceDictionary 
+    x:Class="Planetarium.Themes.WindowStyle"    
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Style TargetType="{x:Type Window}">
+        <Setter Property="WindowChrome.WindowChrome">
+            <Setter.Value>
+                <WindowChrome CaptionHeight="30"
+                              CornerRadius="4"
+                              GlassFrameThickness="0"
+                              NonClientFrameEdges="None"
+                              ResizeBorderThickness="5"
+                              UseAeroCaptionButtons="False" />
+            </Setter.Value>
+        </Setter>
+
+        <Setter Property="BorderBrush" Value="Black" />
+        <Setter Property="Background" Value="Gray" />
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Window}">
+                    <Grid>
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="4,32,4,4">
+                            <AdornerDecorator>
+                                <ContentPresenter />
+                            </AdornerDecorator>
+                        </Border>
+ 
+
+                        <Grid Height="32"
+                            VerticalAlignment="Top">
+
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!--<StackPanel Orientation="Horizontal" Margin="5,0">
+                                <Button Content="A" Margin="0,0,5,0" VerticalAlignment="Center" Click="Button_Click" WindowChrome.IsHitTestVisibleInChrome="True"/>
+                                <Button Content="B" Margin="0,0,5,0" VerticalAlignment="Center" Click="Button_Click" WindowChrome.IsHitTestVisibleInChrome="True"/>
+                                <Button Content="C" Margin="0,0,5,0" VerticalAlignment="Center" Click="Button_Click" WindowChrome.IsHitTestVisibleInChrome="True"/>
+                                <Button Content="D" Margin="0,0,5,0" VerticalAlignment="Center" Click="Button_Click" WindowChrome.IsHitTestVisibleInChrome="True"/>
+                            </StackPanel>-->
+
+                            <TextBlock Margin="5,0,0,0"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Left"
+                                       FontSize="16"
+                                       Foreground="White"
+                                       Text="{TemplateBinding Title}" 
+                                       Grid.Column="1"/>
+
+                            <StackPanel Orientation="Horizontal"
+                                        Grid.Column="2">
+                                
+                                <Button x:Name="btnMinimize"
+                                    Width="15"
+                                    Margin="5"
+                                    VerticalContentAlignment="Bottom"
+                                    Click="MinimizeClick"
+                                    Content="_"
+                                    WindowChrome.IsHitTestVisibleInChrome="True" />
+
+                                <Button x:Name="btnRestore"
+                                    Width="15"
+                                    Margin="5"
+                                    Click="MaximizeRestoreClick"
+                                    Content="#"
+                                    WindowChrome.IsHitTestVisibleInChrome="True" />
+
+                                <Button x:Name="btnClose"
+                                    Width="15"
+                                    Margin="5"
+                                    Click="CloseClick"
+                                    Content="X"
+                                    WindowChrome.IsHitTestVisibleInChrome="True" />
+                            </StackPanel>
+                        </Grid>
+
+                    </Grid>
+
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>
