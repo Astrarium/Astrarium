@@ -10,7 +10,7 @@
     <!--#endregion-->
 
     <!--#region Colors-->
-    <Color x:Key="WindowBackgroundColor">#444444</Color>
+    <Color x:Key="WindowBackgroundColor">#333333</Color>
     <Color x:Key="WindowBorderColor">#1B1B1B</Color>
     
     
@@ -34,6 +34,9 @@
 
 
     <SolidColorBrush x:Key="ForegroundBrush" Color="{StaticResource ForegroundColor}"/>
+
+    <SolidColorBrush x:Key="LightBackgroundBrush" Color="{StaticResource LightBackgroundColor}" />
+
     <SolidColorBrush x:Key="MouseOverForegroundBrush" Color="{StaticResource MouseOverForegroundColor}"/>
 
     <SolidColorBrush x:Key="WindowBackgroundBrush" Color="{StaticResource WindowBackgroundColor}"/>
@@ -144,19 +147,36 @@
     <!--#endregion-->
 
     <!--#region FontStyle-->
-    <Style TargetType="{x:Type TextBlock}">
-        <Setter Property="FontFamily" Value="Calibri light"/>
-        <!--<Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>-->
-    </Style>
     <Style TargetType="{x:Type Control}">
         <Setter Property="FontFamily" Value="Calibri light"/>
         <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
+        <Setter Property="FontSize" Value="14" />
     </Style>
-    <Style TargetType="{x:Type Window}">
+
+    <!--#region Hyperlink -->
+    <Style TargetType="{x:Type Hyperlink}">
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Foreground" Value="#67AAE1" />
+            </Trigger>
+        </Style.Triggers>
+        <Setter Property="Foreground" Value="SteelBlue" />
+        <Setter Property="TextBlock.TextDecorations" Value="{x:Null}" />
+    </Style>
+    <!--#endregion -->
+
+    <!--#region TextBlock -->
+    <Style TargetType="{x:Type TextBlock}">
         <Setter Property="FontFamily" Value="Calibri light"/>
         <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
+        <Setter Property="FontSize" Value="14" />
+    </Style>
+    <!--#endregion -->
+    
+    <Style TargetType="{x:Type Window}" BasedOn="{StaticResource {x:Type Control}}">
         <Setter Property="Background" Value="{StaticResource WindowBackgroundBrush}"/>
     </Style>
+    
     <!-- Necessary for Blend designer for UserControls -->
     <Style TargetType="{x:Type UserControl}">
         <Setter Property="FontFamily" Value="Calibri light"/>
@@ -922,12 +942,12 @@
     <!--#endregion-->
 
     <!--#region TextBox-->
-    <Style BasedOn="{StaticResource {x:Type Control}}" TargetType="{x:Type TextBox}">
+    <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type Control}}">
         <Setter Property="Background" Value="{StaticResource TextBoxBackground}"/>
         <Setter Property="BorderBrush" Value="{StaticResource TextBoxBorder}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Padding" Value="2,2,2,1"/>
-        <Setter Property="Height" Value="21" />
+        <Setter Property="Height" Value="22" />
         <Setter Property="AllowDrop" Value="true"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="ScrollViewer.PanningMode" Value="VerticalFirst"/>
@@ -1259,7 +1279,7 @@
     </Style>
 
 
-    <Style TargetType="{x:Type Button}">
+    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Control}}">
         <Setter Property="FocusVisualStyle" Value="{StaticResource ButtonFocusVisual}"/>
         <Setter Property="Background" Value="{StaticResource ButtonBackground}"/>
         <Setter Property="BorderBrush" Value="{StaticResource ButtonBorder}"/>
@@ -1714,8 +1734,7 @@
             </Setter.Value>
         </Setter>
     </Style>
-    <Style TargetType="{x:Type CheckBox}">
-        <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"></Setter>
+    <Style TargetType="{x:Type CheckBox}" BasedOn="{StaticResource {x:Type Control}}">
         <Setter Property="Background" Value="{StaticResource CheckBoxFillNormal}"/>
         <Setter Property="BorderBrush" Value="{StaticResource CheckBoxStroke}"/>
         <Setter Property="FocusVisualStyle" Value="{StaticResource EmptyCheckBoxFocusVisual}"/>
@@ -1725,8 +1744,8 @@
                     <BulletDecorator Background="Transparent" SnapsToDevicePixels="true">
                         <BulletDecorator.Bullet>
                             <Border x:Name="CheckBoxBorder"
-                                        Height="12"
-										Width="12"
+                                        Height="14"
+										Width="14"
 										BorderBrush="{TemplateBinding BorderBrush}" 
 										BorderThickness="1"
 										Background="{TemplateBinding Background}">
@@ -1781,7 +1800,7 @@
             </Setter.Value>
         </Setter>
     </Style>
-    <Style TargetType="{x:Type RadioButton}">
+    <Style TargetType="{x:Type RadioButton}" BasedOn="{StaticResource {x:Type Control}}">
         <Setter Property="Foreground" Value="{StaticResource RadioButtonForeground}"/>
         <Setter Property="Background" Value="{StaticResource RadioButtonBackground}"/>
         <Setter Property="BorderBrush" Value="{StaticResource RadioButtonStroke}"/>
@@ -2164,8 +2183,7 @@
     </Style>
 
     <!-- Label -->
-    <Style TargetType="{x:Type Label}">
-        <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
+    <Style TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Control}}">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Padding" Value="5"/>
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
@@ -2966,7 +2984,7 @@
         <Setter Property="VerticalContentAlignment" Value="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="ScrollViewer.PanningMode" Value="Both"/>
-        <Setter Property="MinHeight" Value="21"/>
+        <Setter Property="MinHeight" Value="24"/>
         <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
         <Setter Property="Template" Value="{DynamicResource {ComponentResourceKey ResourceId=SubmenuItemTemplateKey, TypeInTargetAssembly={x:Type MenuItem}}}"/>
         <Style.Triggers>
@@ -3098,9 +3116,9 @@
 
     <!--#region GroupBox-->
     <BorderGapMaskConverter x:Key="BorderGapMaskConverter"/>
-    <Style TargetType="{x:Type GroupBox}">
+    <Style TargetType="{x:Type GroupBox}" BasedOn="{StaticResource {x:Type Control}}">
         <Setter Property="BorderBrush" Value="{StaticResource GroupBoxBorder}"/>
-        <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
+
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Template">
             <Setter.Value>

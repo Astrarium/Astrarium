@@ -67,6 +67,9 @@
     <Compile Include="Themes\WindowStyle.xaml.cs">
       <DependentUpon>WindowStyle.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\ObjectInfoWindow.xaml.cs">
+      <DependentUpon>ObjectInfoWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\TrackPropertiesWindow.xaml.cs">
       <DependentUpon>TrackPropertiesWindow.xaml</DependentUpon>
     </Compile>
@@ -87,6 +90,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Themes\WindowStyle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ObjectInfoWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

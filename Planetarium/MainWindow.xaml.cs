@@ -87,11 +87,12 @@ namespace Planetarium
                 var info = sky.GetInfo(body);
                 if (info != null)
                 {
-                    FormObjectInfo formInfo = new FormObjectInfo(info);
-                    var result = formInfo.ShowDialog();
-                    if (result == WF.DialogResult.OK)
+                    ObjectInfoWindow wObjectInfo = new ObjectInfoWindow() { Owner = this };
+                    wObjectInfo.SetObjectInfo(info);
+                    bool? dialogResult = wObjectInfo.ShowDialog();
+                    if (dialogResult != null && dialogResult.Value)
                     {
-                        sky.Context.JulianDay = formInfo.JulianDay;
+                        sky.Context.JulianDay = wObjectInfo.JulianDay;
                         sky.Calculate();
                         skyView.SkyMap.GoToObject(body, TimeSpan.Zero);
                     }

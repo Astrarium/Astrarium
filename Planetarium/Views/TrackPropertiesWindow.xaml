@@ -39,8 +39,6 @@
             <Label>Labels step</Label>
         </GroupBox>
 
-
-
         <StackPanel Grid.Row="5" Grid.ColumnSpan="2" 
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
