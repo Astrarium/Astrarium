@@ -11,6 +11,9 @@
 
     <!--#region Colors-->
     <Color x:Key="WindowBackgroundColor">#444444</Color>
+    <Color x:Key="WindowBorderColor">#1B1B1B</Color>
+    
+    
     <Color x:Key="DarkBackgroundColor">#333333</Color>
     <Color x:Key="LightBackgroundColor">#595959</Color>
     <Color x:Key="BackgroundColor">#3D3D3D</Color>
@@ -32,8 +35,10 @@
 
     <SolidColorBrush x:Key="ForegroundBrush" Color="{StaticResource ForegroundColor}"/>
     <SolidColorBrush x:Key="MouseOverForegroundBrush" Color="{StaticResource MouseOverForegroundColor}"/>
-    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="{StaticResource WindowBackgroundColor}"/>
 
+    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="{StaticResource WindowBackgroundColor}"/>
+    <SolidColorBrush x:Key="WindowBorderBrush" Color="{StaticResource WindowBorderColor}"/>
+    <SolidColorBrush x:Key="WindowTitleButtonHighlightBrush" Color="{StaticResource LightBackgroundColor}" />
     <SolidColorBrush x:Key="TabControlNormalBorderBrush" Color="{StaticResource WindowBackgroundColor}"/>
 
     <SolidColorBrush x:Key="TabItemHotBackground" Color="{StaticResource HotColor}"/>
@@ -51,6 +56,8 @@
     <SolidColorBrush x:Key="ScrollBarSelectedThumb" Color="#E5E5E5"/>
     <SolidColorBrush x:Key="CornerBorder" Color="{StaticResource DarkBackgroundColor}"/>
 
+
+    <SolidColorBrush x:Key="GroupBoxBorder" Color="{StaticResource DarkBackgroundColor}" />
     <SolidColorBrush x:Key="TextBoxBorder" Color="{StaticResource DarkBackgroundColor}" />
     <SolidColorBrush x:Key="TextBoxBackground" Color="{StaticResource DarkBackgroundColor}" />
     <SolidColorBrush x:Key="TextBoxDisabledForeground" Color="#8C8C8C" />
@@ -920,6 +927,7 @@
         <Setter Property="BorderBrush" Value="{StaticResource TextBoxBorder}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Padding" Value="2,2,2,1"/>
+        <Setter Property="Height" Value="21" />
         <Setter Property="AllowDrop" Value="true"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="ScrollViewer.PanningMode" Value="VerticalFirst"/>
@@ -931,7 +939,7 @@
 						BorderBrush="{TemplateBinding BorderBrush}" 
 						BorderThickness="{TemplateBinding BorderThickness}" 
 						Background="{TemplateBinding Background}"
-						CornerRadius="3"
+						CornerRadius="0"
 						SnapsToDevicePixels="true">
                         <ScrollViewer x:Name="PART_ContentHost" Padding="{TemplateBinding Padding}" 
 							            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
@@ -983,14 +991,14 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ToggleButton}">
                     <Border  
-						CornerRadius="3"             
+						CornerRadius="0"             
 						BorderBrush="{TemplateBinding BorderBrush}" 
 						Background="{TemplateBinding Background}" 
 						SnapsToDevicePixels="true">
                         <Border x:Name="PopUpButton"
 							HorizontalAlignment="Right"
 							Background="{DynamicResource ComboBoxButtonNormalBackground}"
-							CornerRadius="3"
+							CornerRadius="0"
 							Margin="1"
 							Width="15">
                             <Path x:Name="Arrow" Data="{StaticResource ComboBoxArrow}" 
@@ -1069,7 +1077,7 @@
 				BorderBrush="{TemplateBinding Background}" 
 				BorderThickness="{TemplateBinding BorderThickness}" 
 				Background="{TemplateBinding Background}" 
-				CornerRadius="3"
+				CornerRadius="0"
 				Grid.ColumnSpan="2"/>
             <TextBox x:Name="PART_EditableTextBox" />
             <ToggleButton Grid.Column="1" 
@@ -1267,7 +1275,7 @@
 						Background="{TemplateBinding Background}" 
 						BorderBrush="{TemplateBinding BorderBrush}"
 						BorderThickness="{TemplateBinding BorderThickness}"
-						CornerRadius="3">
+						CornerRadius="0">
                         <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
 							Margin="{TemplateBinding Padding}" 
 							RecognizesAccessKey="True" 
@@ -1292,6 +1300,29 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <Style x:Key="WindowTitleButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Width" Value="24" />
+        <Setter Property="Height" Value="24" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource WindowTitleButtonHighlightBrush}"/>
+                <Setter Property="Foreground" Value="White"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="WindowCloseTitleButton" TargetType="{x:Type Button}" BasedOn="{StaticResource WindowTitleButton}">
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="Red"/>
+                <Setter Property="Foreground" Value="White"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
     <!--#endregion-->
 
     <!--#region ToggleButton-->
@@ -1312,7 +1343,7 @@
 						Background="{TemplateBinding Background}" 
                         BorderThickness="{TemplateBinding BorderThickness}"
 						SnapsToDevicePixels="true"
-						CornerRadius="3">
+						CornerRadius="0">
                         <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
                                           Margin="{TemplateBinding Padding}" 
                                           RecognizesAccessKey="True" 
@@ -3068,7 +3099,7 @@
     <!--#region GroupBox-->
     <BorderGapMaskConverter x:Key="BorderGapMaskConverter"/>
     <Style TargetType="{x:Type GroupBox}">
-        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="{StaticResource GroupBoxBorder}"/>
         <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Template">

@@ -4,19 +4,20 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Style TargetType="{x:Type Window}">
+
+        <Setter Property="BorderBrush" Value="{StaticResource WindowBorderBrush}" />
+        <Setter Property="Background" Value="{StaticResource WindowBackgroundBrush}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
         <Setter Property="WindowChrome.WindowChrome">
             <Setter.Value>
                 <WindowChrome CaptionHeight="30"
-                              CornerRadius="4"
+                              CornerRadius="0"
                               GlassFrameThickness="0"
                               NonClientFrameEdges="None"
                               ResizeBorderThickness="5"
                               UseAeroCaptionButtons="False" />
             </Setter.Value>
         </Setter>
-
-        <Setter Property="BorderBrush" Value="Black" />
-        <Setter Property="Background" Value="Gray" />
 
         <Setter Property="Template">
             <Setter.Value>
@@ -29,7 +30,6 @@
                                 <ContentPresenter />
                             </AdornerDecorator>
                         </Border>
- 
 
                         <Grid Height="32"
                             VerticalAlignment="Top">
@@ -40,13 +40,6 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <!--<StackPanel Orientation="Horizontal" Margin="5,0">
-                                <Button Content="A" Margin="0,0,5,0" VerticalAlignment="Center" Click="Button_Click" WindowChrome.IsHitTestVisibleInChrome="True"/>
-                                <Button Content="B" Margin="0,0,5,0" VerticalAlignment="Center" Click="Button_Click" WindowChrome.IsHitTestVisibleInChrome="True"/>
-                                <Button Content="C" Margin="0,0,5,0" VerticalAlignment="Center" Click="Button_Click" WindowChrome.IsHitTestVisibleInChrome="True"/>
-                                <Button Content="D" Margin="0,0,5,0" VerticalAlignment="Center" Click="Button_Click" WindowChrome.IsHitTestVisibleInChrome="True"/>
-                            </StackPanel>-->
-
                             <TextBlock Margin="5,0,0,0"
                                        VerticalAlignment="Center"
                                        HorizontalAlignment="Left"
@@ -55,38 +48,42 @@
                                        Text="{TemplateBinding Title}" 
                                        Grid.Column="1"/>
 
-                            <StackPanel Orientation="Horizontal"
-                                        Grid.Column="2">
-                                
+                            <StackPanel Orientation="Horizontal" Grid.Column="2">
+
                                 <Button x:Name="btnMinimize"
-                                    Width="15"
-                                    Margin="5"
-                                    VerticalContentAlignment="Bottom"
+                                    Style="{StaticResource WindowTitleButton}"
+                                    Margin="0, 0, 8, 0"
                                     Click="MinimizeClick"
-                                    Content="_"
-                                    WindowChrome.IsHitTestVisibleInChrome="True" />
+                                    WindowChrome.IsHitTestVisibleInChrome="True">
+                                    <Grid>
+                                        <Path HorizontalAlignment="Center" VerticalAlignment="Bottom" SnapsToDevicePixels="True" Width="10" Height="2" Stretch="Fill" Fill="White" Data="F1 M 19,38L 57,38L 57,44L 19,44L 19,38 Z "/>
+                                    </Grid>
+                                </Button>
 
                                 <Button x:Name="btnRestore"
-                                    Width="15"
-                                    Margin="5"
+                                    Style="{StaticResource WindowTitleButton}"
+                                    Margin="0, 0, 8, 0"
                                     Click="MaximizeRestoreClick"
-                                    Content="#"
-                                    WindowChrome.IsHitTestVisibleInChrome="True" />
+                                    WindowChrome.IsHitTestVisibleInChrome="True">
+                                    <Grid>
+                                        <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="10" Height="10" Stretch="Fill" Fill="White" Data="F1 M 54,54L 54,40L 33,40L 33,54L 54,54 Z M 57,34L 57,57L 30,57L 30,34L 57,34 Z M 43,25L 22,25L 22,39L 27,39L 27,42L 19,42L 19,19L 46,19L 46,31L 43,31L 43,25 Z "/>
+                                    </Grid>
+                                </Button>
 
                                 <Button x:Name="btnClose"
-                                    Width="15"
-                                    Margin="5"
+                                    Style="{StaticResource WindowCloseTitleButton}"
+                                    Margin="0, 0, 4, 0"
                                     Click="CloseClick"
-                                    Content="X"
-                                    WindowChrome.IsHitTestVisibleInChrome="True" />
+                                    WindowChrome.IsHitTestVisibleInChrome="True">
+                                    <Grid>
+                                        <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="10" Height="10" Stretch="Fill" Fill="White" Data="F1 M 26.9166,22.1667L 37.9999,33.25L 49.0832,22.1668L 53.8332,26.9168L 42.7499,38L 53.8332,49.0834L 49.0833,53.8334L 37.9999,42.75L 26.9166,53.8334L 22.1666,49.0833L 33.25,38L 22.1667,26.9167L 26.9166,22.1667 Z "/>
+                                    </Grid>
+                                </Button>
                             </StackPanel>
                         </Grid>
-
                     </Grid>
-
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
-
 </ResourceDictionary>

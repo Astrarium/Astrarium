@@ -18,6 +18,9 @@ using System.Windows.Shapes;
 using ADK;
 using ADK.Demo.Config;
 using ADK.Demo.Objects;
+using System.Runtime.InteropServices;
+using System.Windows.Interop;
+using Planetarium.Views;
 
 namespace Planetarium
 {
@@ -260,6 +263,11 @@ namespace Planetarium
                 var body = skyView.SkyMap.SelectedObject;
                 if (body != null && body is IMovingObject)
                 {
+                    var wTrackProperties = new TrackPropertiesWindow() { Owner = this };
+                    wTrackProperties.ShowDialog();
+
+
+
                     /*
                     var formTrackSettings = viewManager.GetForm<FormTrackSettings>();
                     formTrackSettings.Track = new Track() { Body = body, From = sky.Context.JulianDay, To = sky.Context.JulianDay + 30, LabelsStep = TimeSpan.FromDays(1) };
@@ -284,5 +292,11 @@ namespace Planetarium
                 this.WindowState = WindowState.Maximized;
             }
         }
+
+        
     }
+
+    
+
+
 }
