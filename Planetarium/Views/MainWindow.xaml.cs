@@ -179,29 +179,33 @@ namespace Planetarium
 
             else if (e.Key == Key.F)
             {
-                using (var frmSearch = new FormSearch(sky, (b) => true))
-                {
-                    var result = frmSearch.ShowDialog();
-                    if (result == WF.DialogResult.OK)
-                    {
-                        bool show = true;
-                        var body = frmSearch.SelectedObject;
-                        if (settings.Get<bool>("Ground") && body.Horizontal.Altitude <= 0)
-                        {
-                            show = false;
-                            if (WF.DialogResult.Yes == WF.MessageBox.Show("The object is under horizon at the moment. Do you want to switch off displaying the ground?", "Question", WF.MessageBoxButtons.YesNo, WF.MessageBoxIcon.Question))
-                            {
-                                show = true;
-                                settings.Set("Ground", false);
-                            }
-                        }
+                var wSearch = new SearchWindow(sky) { Owner = this };
+                wSearch.ShowDialog();
 
-                        if (show)
-                        {
-                            skyView.SkyMap.GoToObject(body, TimeSpan.FromSeconds(1));
-                        }
-                    }
-                }
+
+                //using (var frmSearch = new FormSearch(sky, (b) => true))
+                //{
+                //    var result = frmSearch.ShowDialog();
+                //    if (result == WF.DialogResult.OK)
+                //    {
+                //        bool show = true;
+                //        var body = frmSearch.SelectedObject;
+                //        if (settings.Get<bool>("Ground") && body.Horizontal.Altitude <= 0)
+                //        {
+                //            show = false;
+                //            if (WF.DialogResult.Yes == WF.MessageBox.Show("The object is under horizon at the moment. Do you want to switch off displaying the ground?", "Question", WF.MessageBoxButtons.YesNo, WF.MessageBoxIcon.Question))
+                //            {
+                //                show = true;
+                //                settings.Set("Ground", false);
+                //            }
+                //        }
+
+                //        if (show)
+                //        {
+                //            skyView.SkyMap.GoToObject(body, TimeSpan.FromSeconds(1));
+                //        }
+                //    }
+                //}
             }
             else if (e.Key == Key.E)
             {

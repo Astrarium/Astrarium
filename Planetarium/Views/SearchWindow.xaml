@@ -1,0 +1,41 @@
+﻿<Window x:Class="Planetarium.Views.SearchWindow"
+xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:t="clr-namespace:Planetarium.Themes"
+        mc:Ignorable="d"
+        Title="Search" 
+        Width="600" Height="600"
+        MinWidth="300" MinHeight="300"
+        Style="{StaticResource {x:Type Window}}"
+        ShowInTaskbar="False"     
+        WindowStartupLocation="CenterOwner">
+    <Grid Margin="4 4 4 4">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <ListView Grid.Row="0"     
+            x:Name="lstResults"
+            ItemsSource="{Binding Path=SearchResults, Mode=OneWay}"
+            DisplayMemberPath="Name"
+            t:ListViewItemProperties.ListViewItemClick="{Binding ItemSelectedCommand}" 
+            SelectionMode="Single" 
+            VerticalContentAlignment="Top"
+            IsSynchronizedWithCurrentItem="True"
+            ScrollViewer.VerticalScrollBarVisibility="Visible"
+            ScrollViewer.CanContentScroll="False">
+           
+        </ListView>
+        <TextBox Grid.Row="1" Margin="0 4 0 4" Text="{Binding SearchString, UpdateSourceTrigger=PropertyChanged}" />
+        <StackPanel Grid.Row="2"                    
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right">
+            <Button MinWidth="80" Click="Button_Click">Close</Button>
+        </StackPanel>
+
+    </Grid>
+</Window>

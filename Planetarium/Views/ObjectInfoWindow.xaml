@@ -4,8 +4,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Object Info" Height="600" Width="600"
+        Title="Object Info" 
+        Width="600" Height="600"
+        MinWidth="300" MinHeight="300"
         Style="{StaticResource {x:Type Window}}"
+        ShowInTaskbar="False"     
         WindowStartupLocation="CenterOwner">
     <Grid Margin="4 4 4 4">
         <Grid.RowDefinitions>
