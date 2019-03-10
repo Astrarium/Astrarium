@@ -45,7 +45,7 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         </ListView>
         <TextBox x:Name="txtSearchString" Grid.Row="1" Margin="0 4 0 4" Text="{Binding SearchString, UpdateSourceTrigger=PropertyChanged}">
             <TextBox.Style>
-                <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+                <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource TextBoxStyle}">
                     <EventSetter Event="PreviewKeyDown" Handler="Controls_PreviewKeyDown" />
                 </Style>
             </TextBox.Style>
@@ -53,7 +53,9 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         <StackPanel Grid.Row="2"                    
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
-            <Button MinWidth="80" Click="SelectButton_Click" Margin="0 0 4 0" IsEnabled="{Binding SelectedItem, Converter={StaticResource NotNullToBoolConverter}, Mode=OneWay}">Select</Button>
+            <Button MinWidth="80" Click="SelectButton_Click" Margin="0 0 4 0" IsEnabled="{Binding SelectedItem, Converter={StaticResource NotNullToBoolConverter}, Mode=OneWay}">
+                Select
+            </Button>
             <Button MinWidth="80" Click="CloseButton_Click">Close</Button>
         </StackPanel>
 

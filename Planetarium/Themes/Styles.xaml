@@ -947,7 +947,7 @@
     <!--#endregion-->
 
     <!--#region TextBox-->
-    <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type Control}}">
+    <Style x:Key="TextBoxStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type Control}}">
         <Setter Property="Background" Value="{StaticResource TextBoxBackground}"/>
         <Setter Property="BorderBrush" Value="{StaticResource TextBoxBorder}"/>
         <Setter Property="BorderThickness" Value="1"/>
@@ -1283,6 +1283,8 @@
         </Setter>
     </Style>
 
+    
+
     <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Control}}">
         <Setter Property="FocusVisualStyle" Value="{StaticResource ButtonFocusVisual}"/>
         <Setter Property="Background" Value="{StaticResource ButtonBackground}"/>
@@ -1300,11 +1302,25 @@
 						BorderBrush="{TemplateBinding BorderBrush}"
 						BorderThickness="{TemplateBinding BorderThickness}"
 						CornerRadius="0">
-                        <ContentPresenter x:Name="contentPresenter" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-							Margin="{TemplateBinding Padding}" 
-							RecognizesAccessKey="True" 
+                        <ContentPresenter 
+                            x:Name="contentPresenter" 
+                            Content="{TemplateBinding Content}"
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"				
+                            Margin="{TemplateBinding Padding}" 
+                            TextElement.Foreground="{TemplateBinding Foreground}"
+                            TextBlock.Foreground="{TemplateBinding Foreground}"
 							SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
-							VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+							VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+                            <ContentPresenter.Resources>
+                                <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsEnabled" Value="false">
+                                            <Setter Property="Foreground" Value="{StaticResource DisabledButtonForeground}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ContentPresenter.Resources>
+                        </ContentPresenter>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="true">
