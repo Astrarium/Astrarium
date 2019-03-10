@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,14 +25,18 @@ namespace Planetarium.Views
     /// </summary>
     public partial class SearchWindow : Window
     {
+        public SearchWindowViewModel ViewModel { get; set; }
+
         public SearchWindow(Sky sky)
         {
             InitializeComponent();
 
             var source = (INotifyCollectionChanged)lstResults.ItemsSource;
-            DataContext = new SearchWindowViewModel(sky);
+            ViewModel = new SearchWindowViewModel(sky);
+            DataContext = ViewModel;
 
-            lstResults.ItemContainerGenerator.StatusChanged += ItemContainerGenerator_StatusChanged; ;
+            lstResults.ItemContainerGenerator.StatusChanged += ItemContainerGenerator_StatusChanged;
+            txtSearchString.Focus();
         }
 
         private void ItemContainerGenerator_StatusChanged(object sender, EventArgs e)
@@ -46,7 +51,7 @@ namespace Planetarium.Views
             }
         }
 
-        private class SearchWindowViewModel
+        public class SearchWindowViewModel
         {
             private string _SearchString = null;
             public string SearchString
@@ -66,11 +71,8 @@ namespace Planetarium.Views
 
             public ObservableCollection<SearchResultItem> SearchResults { get; set; } = new ObservableCollection<SearchResultItem>();
 
-            //public SearchResultItem SelectedItem { get; set; }
-            public int SelectedIndex { get; set; }
+            public SearchResultItem SelectedItem { get; set; }
             private ISearcher searcher;
-
-            public ICommand ItemSelectedCommand { get; private set; }
 
             public SearchWindowViewModel(ISearcher searcher)
             {
@@ -85,23 +87,54 @@ namespace Planetarium.Views
                 {
                     SearchResults.Add(item);
                 }
-
-                //SelectedItem = SearchResults.Any() ? SearchResults.First() : new SearchResultItem();
-            }
-
-
-            private void OnItemSelected()
-            {
-
             }
         }
 
-
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             Close();
         }
 
+        private void SelectButton_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = true;
+            Close();
+        }
 
+        private void ListViewItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            DialogResult = true;
+            Close();
+        }
+
+        private void Controls_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                if (lstResults.Items.Count > 0)
+                {
+                    DialogResult = true;
+                    Close();
+                }
+            }
+            else if (e.Key == Key.Up || e.Key == Key.Down)
+            {
+                e.Handled = true;
+
+                if (lstResults.Items.Count > 1)
+                {
+                    if (e.Key == Key.Up && lstResults.SelectedIndex > 0)
+                    {
+                        lstResults.SelectedIndex--;
+                    }
+                    else if (e.Key == Key.Down && lstResults.SelectedIndex < lstResults.Items.Count - 1)
+                    {
+                        lstResults.SelectedIndex++;
+                    }
+
+                    lstResults.ScrollIntoView(lstResults.SelectedItem);
+                }
+            }
+        }
     }
 }

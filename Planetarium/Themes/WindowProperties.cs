@@ -13,6 +13,10 @@ namespace Planetarium.Themes
         public static readonly DependencyProperty MinButtonVisibleProperty = DependencyProperty.RegisterAttached(
             "MinButtonVisible", typeof(Visibility), typeof(WindowProperties), new PropertyMetadata(Visibility.Visible));
 
+        public static readonly DependencyProperty MaxButtonVisibleProperty = DependencyProperty.RegisterAttached(
+            "MaxButtonVisible", typeof(Visibility), typeof(WindowProperties), new PropertyMetadata(Visibility.Visible));
+
+
         public static void SetMinButtonVisible(DependencyObject target, Visibility value)
         {
             target.SetValue(MinButtonVisibleProperty, value);
@@ -22,21 +26,15 @@ namespace Planetarium.Themes
         {
             return (Visibility)target.GetValue(MinButtonVisibleProperty);
         }
-    }
 
-    public class ListViewItemProperties : DependencyObject
-    {
-        public static readonly DependencyProperty ListViewItemClickProperty = DependencyProperty.RegisterAttached(
-            "ListViewItemClick", typeof(ICommand), typeof(ListViewItemProperties), new PropertyMetadata(null));
-
-        public static void SetListViewItemClick(DependencyObject target, ICommand value)
+        public static void SetMaxButtonVisible(DependencyObject target, Visibility value)
         {
-            target.SetValue(ListViewItemClickProperty, value);
+            target.SetValue(MaxButtonVisibleProperty, value);
         }
 
-        public static ICommand GetListViewItemClick(DependencyObject target)
+        public static Visibility GetMaxButtonVisible(DependencyObject target)
         {
-            return (ICommand)target.GetValue(ListViewItemClickProperty);
+            return (Visibility)target.GetValue(MaxButtonVisibleProperty);
         }
     }
 }

@@ -180,8 +180,30 @@ namespace Planetarium
             else if (e.Key == Key.F)
             {
                 var wSearch = new SearchWindow(sky) { Owner = this };
-                wSearch.ShowDialog();
+                bool? dialogResult = wSearch.ShowDialog();
 
+                if (dialogResult != null && dialogResult.Value)
+                {
+                    bool show = true;
+                    var body = wSearch.ViewModel.SelectedItem.Body;
+                    if (settings.Get<bool>("Ground") && body.Horizontal.Altitude <= 0)
+                    {
+                        show = false;
+
+                        
+
+                        if (MessageBoxResult.Yes == MessageBoxWindow.Show(this, "Question", "The object is under horizon at the moment. Do you want to switch off displaying the ground?", MessageBoxButton.YesNo))
+                        {
+                            show = true;
+                            settings.Set("Ground", false);
+                        }
+                    }
+
+                    if (show)
+                    {
+                        skyView.SkyMap.GoToObject(body, TimeSpan.FromSeconds(1));
+                    }
+                }
 
                 //using (var frmSearch = new FormSearch(sky, (b) => true))
                 //{

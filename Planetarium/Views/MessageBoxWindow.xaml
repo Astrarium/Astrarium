@@ -1,0 +1,31 @@
+﻿<Window x:Class="Planetarium.Views.MessageBoxWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"       
+        xmlns:t="clr-namespace:Planetarium.Themes"
+        mc:Ignorable="d"
+        Width="600" Height="200"
+        MinWidth="300" MinHeight="200"
+        Style="{StaticResource {x:Type Window}}"
+        ShowInTaskbar="False"
+        ResizeMode="NoResize"
+        t:WindowProperties.MinButtonVisible="Collapsed"
+        t:WindowProperties.MaxButtonVisible="Collapsed"
+        WindowStartupLocation="CenterOwner">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock Name="MessageContainer" TextWrapping="WrapWithOverflow" Margin="10"/>
+        <StackPanel Name="ButtonContainer" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
+            <StackPanel.Resources>
+                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                    <Setter Property="MinWidth" Value="80" />
+                    <Setter Property="Margin" Value="10,0,0,0"/>
+                </Style>
+            </StackPanel.Resources>
+        </StackPanel>
+    </Grid>
+</Window>

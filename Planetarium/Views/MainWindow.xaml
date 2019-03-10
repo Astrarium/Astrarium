@@ -41,9 +41,9 @@
         <StatusBar Grid.Row="2">
             <TextBlock x:Name="lblConstellation" Width="30" TextAlignment="Center">CON</TextBlock>
             <Separator></Separator>
-            <TextBlock x:Name="lblEquatorialCoordinates" Width="200">eq coordinates</TextBlock>
+            <TextBlock x:Name="lblEquatorialCoordinates" Width="220">eq coordinates</TextBlock>
             <Separator></Separator>
-            <TextBlock x:Name="lblHorizontalCoordinates" Width="200">hor coordinates</TextBlock>
+            <TextBlock x:Name="lblHorizontalCoordinates" Width="220">hor coordinates</TextBlock>
             <Separator></Separator>
             <TextBlock x:Name="lblViewAngle">fov</TextBlock>
         </StatusBar>

@@ -24,7 +24,7 @@ namespace ADK.Demo
         }
     }
 
-    public struct SearchResultItem 
+    public class SearchResultItem 
     {
         public string Name { get; private set; }
         public CelestialObject Body { get; private set; }

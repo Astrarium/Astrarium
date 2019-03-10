@@ -2,11 +2,14 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                    xmlns:darkBlendTheme="clr-namespace:DarkBlendTheme"
                     xmlns:t="clr-namespace:Planetarium.Themes"
                     mc:Ignorable="d">
 
     <!--#region Converters-->
+    <t:LeftMarginMultiplierConverter x:Key="LeftMarginMultiplierConverter" />
+    <t:NotNullToBoolConverter x:Key="NotNullToBoolConverter" />
+    <t:NotNullToVisibilityConverter x:Key="NotNullToVisibilityConverter" />
+    <t:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
     <BooleanToVisibilityConverter x:Key="bool2VisibilityConverter"/>
     <!--#endregion-->
 
@@ -14,10 +17,11 @@
     <Color x:Key="WindowBackgroundColor">#333333</Color>
     <Color x:Key="WindowBorderColor">#1B1B1B</Color>
     
-    
-    <Color x:Key="DarkBackgroundColor">#333333</Color>
+   
     <Color x:Key="LightBackgroundColor">#595959</Color>
-    <Color x:Key="BackgroundColor">#3D3D3D</Color>
+    <Color x:Key="MediumBackgroundColor">#3D3D3D</Color>
+    <Color x:Key="DarkBackgroundColor">#333333</Color>
+
     <Color x:Key="DisabledBackgroundColor">#424242</Color>
     <Color x:Key="LightDisabledBackgroundColor">#666666</Color>
 
@@ -52,10 +56,10 @@
     <SolidColorBrush x:Key="TabItemDisabledBorderBrush" Color="{StaticResource DarkBackgroundColor}"/>
 
     <SolidColorBrush x:Key="ScrollViewerBackground" Color="{StaticResource DarkBackgroundColor}" />
-    <SolidColorBrush x:Key="VerticalScrollBarBackground" Color="{StaticResource BackgroundColor}"/>
-    <SolidColorBrush x:Key="HorizontalScrollBarBackground" Color="{StaticResource BackgroundColor}" />
+    <SolidColorBrush x:Key="VerticalScrollBarBackground" Color="{StaticResource MediumBackgroundColor}"/>
+    <SolidColorBrush x:Key="HorizontalScrollBarBackground" Color="{StaticResource MediumBackgroundColor}" />
     <SolidColorBrush x:Key="VerticalScrollBarThumb" Color="#808080"/>
-    <SolidColorBrush x:Key="ScrollBarDisabledBackground" Color="{StaticResource BackgroundColor}"/>
+    <SolidColorBrush x:Key="ScrollBarDisabledBackground" Color="{StaticResource MediumBackgroundColor}"/>
     <SolidColorBrush x:Key="ScrollBarHotThumb" Color="#CCCCCC"/>
     <SolidColorBrush x:Key="ScrollBarSelectedThumb" Color="#E5E5E5"/>
     <SolidColorBrush x:Key="CornerBorder" Color="{StaticResource DarkBackgroundColor}"/>
@@ -79,8 +83,8 @@
     <SolidColorBrush x:Key="ButtonBorder" Color="{StaticResource DarkBackgroundColor}"/>
     <SolidColorBrush x:Key="PressedButtonBackground" Color="{StaticResource DisabledBackgroundColor}"/>
     <SolidColorBrush x:Key="MouseOverButtonBackground" Color="#AAAAAA"/>
-    <SolidColorBrush x:Key="DisabledButtonBackground" Color="{StaticResource LightDisabledBackgroundColor}"/>
-    <SolidColorBrush x:Key="DisabledButtonForeground" Color="{StaticResource DisabledBackgroundColor}"/>
+    <SolidColorBrush x:Key="DisabledButtonBackground" Color="{StaticResource MediumBackgroundColor}"/>
+    <SolidColorBrush x:Key="DisabledButtonForeground" Color="#8C8C8C"/>
 
     <SolidColorBrush x:Key="Expander.Background" Color="{StaticResource LightBackgroundColor}"/>
     <SolidColorBrush x:Key="Expander.MouseOver.Arrow.Stroke" Color="{StaticResource ForegroundColor}"/>
@@ -1279,7 +1283,6 @@
         </Setter>
     </Style>
 
-
     <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Control}}">
         <Setter Property="FocusVisualStyle" Value="{StaticResource ButtonFocusVisual}"/>
         <Setter Property="Background" Value="{StaticResource ButtonBackground}"/>
@@ -1297,7 +1300,7 @@
 						BorderBrush="{TemplateBinding BorderBrush}"
 						BorderThickness="{TemplateBinding BorderThickness}"
 						CornerRadius="0">
-                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                        <ContentPresenter x:Name="contentPresenter" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
 							Margin="{TemplateBinding Padding}" 
 							RecognizesAccessKey="True" 
 							SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
@@ -1887,11 +1890,6 @@
                         <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                           SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
                                           VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-
-                        <Border.InputBindings>
-                            <MouseBinding Gesture="LeftDoubleClick" Command="{TemplateBinding t:ListViewItemProperties.ListViewItemClick}" />
-                        </Border.InputBindings>
-                        
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsSelected" Value="true">
@@ -2289,7 +2287,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type TreeViewItem}">
                     <ControlTemplate.Resources>
-                        <darkBlendTheme:LeftMarginMultiplierConverter Length="15" x:Key="LengthConverter" />
+                        <t:LeftMarginMultiplierConverter Length="15" x:Key="LengthConverter" />
                     </ControlTemplate.Resources>
                     <StackPanel>
                         <Border Name="Bd"
