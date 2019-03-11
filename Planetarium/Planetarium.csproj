@@ -62,7 +62,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="CloseWindowCommand.cs" />
+    <Compile Include="ViewModelBase.cs" />
     <Compile Include="Themes\TreeViewItemExtensions.cs" />
     <Compile Include="Themes\WindowStyle.xaml.cs">
       <DependentUpon>WindowStyle.xaml</DependentUpon>
@@ -71,8 +71,9 @@
     <Compile Include="Themes\Converters.cs" />
     <Compile Include="IViewManager.cs" />
     <Compile Include="DelegateCommand.cs" />
-    <Compile Include="ViewModels\ObjectInfoWindowViewModel.cs" />
-    <Compile Include="ViewModels\SearchWindowViewModel.cs" />
+    <Compile Include="ViewModels\ObjectInfoVM.cs" />
+    <Compile Include="ViewModels\SearchVM.cs" />
+    <Compile Include="Views\IntegerTextBox.cs" />
     <Compile Include="Views\MessageBoxWindow.xaml.cs">
       <DependentUpon>MessageBoxWindow.xaml</DependentUpon>
     </Compile>

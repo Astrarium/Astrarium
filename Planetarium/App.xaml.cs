@@ -8,11 +8,9 @@ using Planetarium.ViewModels;
 using Planetarium.Views;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace Planetarium
@@ -109,11 +107,12 @@ namespace Planetarium
                 .Cast<BaseAstroEventsProvider>()
                 .ToArray();
 
-            kernel.Bind<Sky>().ToConstant(new Sky(context, calculators, eventProviders));
+            var sky = new Sky(context, calculators, eventProviders);
+
+            kernel.Bind<Sky, ISearcher>().ToConstant(sky).InSingletonScope();
             kernel.Bind<ISkyMap>().ToConstant(new SkyMap(context, renderers));
 
-            viewModelViewBindings.Add(typeof(SearchWindowViewModel), typeof(SearchWindow));
-            viewModelViewBindings.Add(typeof(ObjectInfoWindowViewModel), typeof(ObjectInfoWindow));
+            ResolveViewModelViewBindings();
 
             kernel.Bind<IViewManager>().ToConstant(this).InSingletonScope();
         }
@@ -123,35 +122,23 @@ namespace Planetarium
             Current.MainWindow = kernel.Get<MainWindow>();
         }
 
-        void IViewManager.ShowWindow<TViewModel>()
+        public void ShowWindow<TViewModel>() where TViewModel : ViewModelBase
         {
-            Show<TViewModel>(model: null, initAction: null, isDialog: true);
+            Show<TViewModel>(viewModel: null, isDialog: true);
         }
 
-        void IViewManager.ShowWindow<TViewModel>(Action<TViewModel> initAction) 
+        public bool? ShowDialog<TViewModel>() where TViewModel : ViewModelBase
         {
-            Show(model: null, initAction: initAction, isDialog: false);
+            return Show<TViewModel>(viewModel: null, isDialog: true);
         }
 
-        bool? IViewManager.ShowDialog<TModel>() 
+        public bool? Show<TViewModel>(TViewModel viewModel, bool isDialog) where TViewModel : ViewModelBase
         {
-            return Show<TModel>(model: null, initAction: null, isDialog: true);
-        }
-
-        bool? IViewManager.ShowDialog<TViewModel>(Action<TViewModel> initAction)
-        {
-            return Show<TViewModel>(model: null, initAction: initAction, isDialog: true);
-        }
-
-        private bool? Show<TViewModel>(TViewModel model, Action<TViewModel> initAction, bool isDialog) where TViewModel : class
-        {
-            if (model == null)
+            if (viewModel == null)
             {
-                model = kernel.Get<TViewModel>();
+                viewModel = CreateViewModel<TViewModel>();
             }
-            
-            initAction?.Invoke(model);
-
+          
             Type viewType = null;
             if (viewModelViewBindings.ContainsKey(typeof(TViewModel)))
             {
@@ -161,8 +148,31 @@ namespace Planetarium
             if (viewType != null)
             {
                 var window = kernel.Get(viewType) as Window;
-                window.DataContext = model;
+                window.DataContext = viewModel;
                 window.Owner = Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
+
+                Action<bool?> viewModelClosingHandler = null;
+                viewModelClosingHandler = (dialogResult) =>
+                {
+                    if (isDialog)
+                    {
+                        window.DialogResult = dialogResult;
+                    }
+                    else
+                    {
+                        window.Close();
+                    }
+
+                    if (viewModel is ViewModelBase)
+                    {
+                        (viewModel as ViewModelBase).Closing -= viewModelClosingHandler;
+                    }
+                };
+
+                if (viewModel is ViewModelBase)
+                {
+                    (viewModel as ViewModelBase).Closing += viewModelClosingHandler;
+                }
 
                 if (isDialog)
                 {
@@ -180,25 +190,59 @@ namespace Planetarium
             }
         }
 
-
-        void IViewManager.ShowWindow<TModel>(TModel model)
+        private void ResolveViewModelViewBindings()
         {
-            Show(model: model, initAction: null, isDialog: false);
+            Type[] viewModelTypes =
+                    Assembly.GetExecutingAssembly().GetTypes().Concat(
+                    Assembly.GetExecutingAssembly().GetReferencedAssemblies()
+                 .SelectMany(a => Assembly.Load(a).GetTypes()))
+                 .Where(t => typeof(ViewModelBase).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
+                 .ToArray();
+
+            Type[] viewTypes =
+                Assembly.GetExecutingAssembly().GetTypes().Concat(
+                Assembly.GetExecutingAssembly().GetReferencedAssemblies()
+                .SelectMany(a => Assembly.Load(a).GetTypes()))
+                .Where(t => typeof(Window).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
+                .ToArray();
+
+            foreach (Type viewModelType in viewModelTypes)
+            {
+                string viewModelName = viewModelType.Name;
+                if (viewModelName.EndsWith("VM"))
+                {
+                    viewModelName = viewModelName.Substring(0, viewModelName.Length - "VM".Length);
+                }
+                if (viewModelName.EndsWith("ViewModel"))
+                {
+                    viewModelName = viewModelName.Substring(0, viewModelName.Length - "ViewModel".Length);
+                }
+
+                Type viewType = viewTypes.FirstOrDefault(t =>
+                    t.Name == $"{viewModelName}" ||
+                    t.Name == $"{viewModelName}Window" ||
+                    t.Name == $"{viewModelName}View");
+
+                if (viewType != null)
+                {
+                    viewModelViewBindings.Add(viewModelType, viewType);
+                }
+            }
         }
 
-        void IViewManager.ShowWindow<TModel>(TModel model, Action<TModel> initAction)
+        public TViewModel CreateViewModel<TViewModel>() where TViewModel : ViewModelBase
         {
-            Show(model: model, initAction: initAction, isDialog: false);
+            return kernel.Get<TViewModel>();
         }
 
-        bool? IViewManager.ShowDialog<TModel>(TModel model)
+        public void ShowWindow<TViewModel>(TViewModel viewModel) where TViewModel : ViewModelBase
         {
-            return Show(model: model, initAction: null, isDialog: true);
+            Show(viewModel: viewModel, isDialog: false);
         }
 
-        bool? IViewManager.ShowDialog<TModel>(TModel model, Action<TModel> initAction)
+        public bool? ShowDialog<TViewModel>(TViewModel viewModel) where TViewModel : ViewModelBase
         {
-            return Show(model: model, initAction: initAction, isDialog: true);
+            return Show(viewModel: viewModel, isDialog: true);
         }
 
         MessageBoxResult IViewManager.ShowMessageBox(string caption, string text, MessageBoxButton buttons)
@@ -211,6 +255,7 @@ namespace Planetarium
             dialog.ShowDialog();
             return dialog.Result;
         }
+
 
     }
 }

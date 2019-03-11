@@ -17,9 +17,6 @@ namespace Planetarium.Themes
         public static readonly DependencyProperty MaxButtonVisibleProperty = DependencyProperty.RegisterAttached(
             "MaxButtonVisible", typeof(Visibility), typeof(WindowProperties), new PropertyMetadata(Visibility.Visible));
 
-        public static readonly DependencyProperty CloseCommandProperty = DependencyProperty.RegisterAttached(
-           "CloseCommand", typeof(CloseWindowCommand), typeof(WindowProperties), new PropertyMetadata(CloseCommandChanged));
-
         public static void SetMinButtonVisible(DependencyObject target, Visibility value)
         {
             target.SetValue(MinButtonVisibleProperty, value);
@@ -38,32 +35,6 @@ namespace Planetarium.Themes
         public static Visibility GetMaxButtonVisible(DependencyObject target)
         {
             return (Visibility)target.GetValue(MaxButtonVisibleProperty);
-        }
-
-        private static void CloseCommandChanged(DependencyObject target, DependencyPropertyChangedEventArgs e)
-        {
-            var window = target as Window;
-            (e.NewValue as CloseWindowCommand).OnExecuted += (dialogResult) =>
-            {
-                if (IsModal(window))
-                {
-                    window.DialogResult = dialogResult;
-                }
-                else
-                {
-                    window.Close();
-                }
-            };
-        }
-
-        public static bool IsModal(Window window)
-        {
-            return (bool)typeof(Window).GetField("_showingAsDialog", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(window);
-        }
-
-        public static void SetCloseCommand(Window target, CloseWindowCommand value)
-        {
-            target.SetValue(CloseCommandProperty, value);
         }
     }
 }

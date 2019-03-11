@@ -4,14 +4,12 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:v="clr-namespace:Planetarium.Views"
-        xmlns:t="clr-namespace:Planetarium.Themes"
         mc:Ignorable="d"
         Title="Object Info" 
         Width="600" Height="600"
         MinWidth="300" MinHeight="300"
         Style="{StaticResource {x:Type Window}}"
         ShowInTaskbar="False"
-        t:WindowProperties.CloseCommand="{Binding CloseCommand}"
         WindowStartupLocation="CenterOwner">
     <Grid Margin="4 4 4 4">
         <Grid.RowDefinitions>
@@ -22,8 +20,8 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Label x:Name="lblSubtitle" FontSize="8" Grid.Row="0" Padding="5 5 5 0" Content="{Binding Subtitle}" />
-        <Label x:Name="lblTitle" FontFamily="Times New Roman" FontWeight="Bold" Grid.Row="1" Content="{Binding Title}" />
+        <Label FontSize="8" Grid.Row="0" Padding="5 5 5 0" Content="{Binding Subtitle}" />
+        <Label FontFamily="Times New Roman" FontWeight="Bold" Grid.Row="1" Content="{Binding Title}" />
 
         <Separator Grid.Row="2" Height="1" Background="{StaticResource LightBackgroundBrush}" />
 

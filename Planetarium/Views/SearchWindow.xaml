@@ -45,7 +45,7 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         </ListView>
         <TextBox x:Name="txtSearchString" Grid.Row="1" Margin="0 4 0 4" Text="{Binding SearchString, UpdateSourceTrigger=PropertyChanged}">
             <TextBox.Style>
-                <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource TextBoxStyle}">
+                <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
                     <EventSetter Event="PreviewKeyDown" Handler="Controls_PreviewKeyDown" />
                 </Style>
             </TextBox.Style>

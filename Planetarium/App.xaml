@@ -3,22 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Planetarium">
     <Application.Resources>
-        
-
-
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-
                 <ResourceDictionary Source="Themes\Styles.xaml" />
                 <ResourceDictionary Source="Themes\WindowStyle.xaml" />
-
-                <!--<ResourceDictionary Source="Colors.xaml" />
-                <ResourceDictionary Source="Styles.xaml" />-->
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
-
-
-
-
     </Application.Resources>
 </Application>

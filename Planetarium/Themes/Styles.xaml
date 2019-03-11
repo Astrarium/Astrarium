@@ -3,6 +3,7 @@
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                     xmlns:t="clr-namespace:Planetarium.Themes"
+                    xmlns:v="clr-namespace:Planetarium.Views"
                     mc:Ignorable="d">
 
     <!--#region Converters-->
@@ -200,7 +201,7 @@
         <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
         <Setter Property="Padding" Value="6 1 6 1"/>
         <Setter Property="BorderBrush" Value="{StaticResource TabControlNormalBorderBrush}"/>
-        <Setter Property="Background" Value="{StaticResource ButtonNormalBackground}"/>
+        <Setter Property="Background" Value="{StaticResource WindowBackgroundBrush}"/>
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
         <Setter Property="VerticalContentAlignment" Value="Stretch"/>
         <Setter Property="Template">
@@ -952,7 +953,7 @@
     <!--#endregion-->
 
     <!--#region TextBox-->
-    <Style x:Key="TextBoxStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type Control}}">
+    <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type Control}}">
         <Setter Property="Background" Value="{StaticResource TextBoxBackground}"/>
         <Setter Property="BorderBrush" Value="{StaticResource TextBoxBorder}"/>
         <Setter Property="BorderThickness" Value="1"/>
@@ -1288,7 +1289,7 @@
         </Setter>
     </Style>
 
-    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Control}}">
+    <Style TargetType="{x:Type ButtonBase}" BasedOn="{StaticResource {x:Type Control}}">
         <Setter Property="FocusVisualStyle" Value="{StaticResource ButtonFocusVisual}"/>
         <Setter Property="Background" Value="{StaticResource ButtonBackground}"/>
         <Setter Property="BorderBrush" Value="{StaticResource ButtonBorder}"/>
@@ -1299,7 +1300,7 @@
         <Setter Property="Padding" Value="1"/>
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="{x:Type Button}">
+                <ControlTemplate TargetType="{x:Type ButtonBase}">
                     <Border 
 						Background="{TemplateBinding Background}" 
 						BorderBrush="{TemplateBinding BorderBrush}"
@@ -1335,7 +1336,9 @@
         </Setter>
     </Style>
 
-    <Style x:Key="WindowTitleButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type ButtonBase}}" />
+
+    <Style x:Key="WindowTitleButton" TargetType="{x:Type ButtonBase}" BasedOn="{StaticResource {x:Type ButtonBase}}">
         <Setter Property="Width" Value="24" />
         <Setter Property="Height" Value="24" />
         <Setter Property="Background" Value="Transparent" />
@@ -1348,7 +1351,7 @@
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="WindowCloseTitleButton" TargetType="{x:Type Button}" BasedOn="{StaticResource WindowTitleButton}">
+    <Style x:Key="WindowCloseTitleButton" TargetType="{x:Type ButtonBase}" BasedOn="{StaticResource WindowTitleButton}">
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="#D40000"/>
@@ -3527,7 +3530,7 @@
 
     <!-- Toolbar styles from https://docs.microsoft.com/en-us/dotnet/framework/wpf/controls/how-to-style-controls-on-a-toolbar -->
 	<Style x:Key="{x:Static ToolBar.SeparatorStyleKey}" TargetType="{x:Type Separator}" BasedOn="{StaticResource {x:Type Separator}}"/>
-	<Style x:Key="{x:Static ToolBar.ButtonStyleKey}" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}"/>
+    <Style x:Key="{x:Static ToolBar.ButtonStyleKey}" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type ButtonBase}}"/>
 	<Style x:Key="{x:Static ToolBar.CheckBoxStyleKey}" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource {x:Type CheckBox}}"/>
 	<Style x:Key="{x:Static ToolBar.MenuStyleKey}" TargetType="{x:Type Menu}" BasedOn="{StaticResource {x:Type Menu}}"/>
 	<Style x:Key="{x:Static ToolBar.RadioButtonStyleKey}" TargetType="{x:Type RadioButton}" BasedOn="{StaticResource {x:Type RadioButton}}"/>
@@ -3639,7 +3642,42 @@
 
     <!--#endregion-->
 
-    
-    
-    
+
+    <Style TargetType="{x:Type v:IntegerTextBox}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type v:IntegerTextBox}">
+                    <Grid Background="Transparent">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Name="tbmain" Grid.ColumnSpan="2" Grid.RowSpan="2" Text="{Binding Value, Mode=TwoWay, NotifyOnSourceUpdated=True, 
+                            NotifyOnValidationError=True, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type v:IntegerTextBox}}}" 
+                                                />
+                        <RepeatButton Style="{StaticResource {x:Type ButtonBase}}" Name="PART_UpButton" BorderThickness="0" Grid.Column="1" Grid.Row="0"
+                                      Width="14" Margin="{Binding Padding, ElementName=tbmain}">
+                            <Path Fill="{StaticResource ButtonForeground}" Data="M 0 3 L 6 3 L 3 0 Z"/>
+                        </RepeatButton>
+                        <RepeatButton Style="{StaticResource {x:Type ButtonBase}}" Name="PART_DownButton" BorderThickness="0" Grid.Column="1" Grid.Row="1"
+                                      Width="14" Margin="{Binding Padding, ElementName=tbmain}">
+                            <Path Fill="{StaticResource ButtonForeground}" Data="M 0 0 L 3 3 L 6 0 Z"/>
+                        </RepeatButton>
+
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver"  Value="False">
+                            <Setter Property="Visibility" TargetName="PART_UpButton" Value="Collapsed"/>
+                            <Setter Property="Visibility" TargetName="PART_DownButton" Value="Collapsed"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>

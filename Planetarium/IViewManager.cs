@@ -9,18 +9,14 @@ namespace Planetarium
 {
     public interface IViewManager
     {
-        void ShowWindow<TModel>() where TModel : class;
-        void ShowWindow<TModel>(Action<TModel> initAction) where TModel : class;
+        TViewModel CreateViewModel<TViewModel>() where TViewModel : ViewModelBase;
 
-        bool? ShowDialog<TModel>() where TModel : class;
-        bool? ShowDialog<TModel>(Action<TModel> initAction) where TModel : class;
+        void ShowWindow<TViewModel>() where TViewModel : ViewModelBase;
+        bool? ShowDialog<TViewModel>() where TViewModel : ViewModelBase;
 
-        void ShowWindow<TModel>(TModel model) where TModel : class;
-        void ShowWindow<TModel>(TModel model, Action<TModel> initAction) where TModel : class;
-
-        bool? ShowDialog<TModel>(TModel model) where TModel : class;
-        bool? ShowDialog<TModel>(TModel model, Action<TModel> initAction) where TModel : class;
-
+        void ShowWindow<TViewModel>(TViewModel viewModel) where TViewModel : ViewModelBase;
+        bool? ShowDialog<TViewModel>(TViewModel viewModel) where TViewModel : ViewModelBase;
+ 
         MessageBoxResult ShowMessageBox(string caption, string text, MessageBoxButton buttons);
     }
 }

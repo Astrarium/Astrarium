@@ -90,7 +90,7 @@ namespace Planetarium
                 var info = sky.GetInfo(body);
                 if (info != null)
                 {
-                    var model = new ObjectInfoWindowViewModel(info);
+                    var model = new ObjectInfoVM(info);
                     bool? dialogResult = viewManager.ShowDialog(model);
                     if (dialogResult ?? false)
                     {
@@ -181,8 +181,8 @@ namespace Planetarium
 
             else if (e.Key == Key.F)
             {
-                SearchWindowViewModel model = null;
-                bool? dialogResult = viewManager.ShowDialog<SearchWindowViewModel>(m => model = m);
+                SearchVM model = viewManager.CreateViewModel<SearchVM>();
+                bool? dialogResult = viewManager.ShowDialog(model);
                 
                 if (dialogResult != null && dialogResult.Value)
                 {
@@ -191,7 +191,6 @@ namespace Planetarium
                     if (settings.Get<bool>("Ground") && body.Horizontal.Altitude <= 0)
                     {
                         show = false;
-
                         if (viewManager.ShowMessageBox("Question", "The object is under horizon at the moment. Do you want to switch off displaying the ground?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                         {
                             show = true;

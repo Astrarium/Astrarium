@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:v="clr-namespace:Planetarium.Views"
         mc:Ignorable="d"
         Title="TrackPropertiesWindow" Height="330" Width="456.5"
         Style="{StaticResource {x:Type Window}}"
@@ -30,7 +31,7 @@
         <TextBox Grid.Row="1" Grid.Column="1">Value</TextBox>
 
         <Label Grid.Row="2" Grid.Column="0">End date</Label>
-        <TextBox Grid.Row="2" Grid.Column="1">Value</TextBox>
+        <v:IntegerTextBox Grid.Row="2" Grid.Column="1" />
 
         <GroupBox Grid.Row="3" Grid.ColumnSpan="2" Padding="0, 8, 0, 0">
             <GroupBox.Header>
@@ -45,6 +46,7 @@
             <Button MinWidth="80" Margin="0, 0, 8, 0">OK</Button>
             <Button MinWidth="80">Cancel</Button>
         </StackPanel>
+        
 
     </Grid>
 </Window>

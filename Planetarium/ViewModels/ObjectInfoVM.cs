@@ -9,7 +9,7 @@ using System.Windows.Input;
 
 namespace Planetarium.ViewModels
 {
-    public class ObjectInfoWindowViewModel
+    public class ObjectInfoVM : ViewModelBase
     {
         public string Title { get; private set; }
         public string Subtitle { get; private set; }
@@ -17,17 +17,18 @@ namespace Planetarium.ViewModels
         public ICommand LinkClickedCommand { get; private set; }
         public double JulianDay { get; private set; }
 
-        public CloseWindowCommand CloseCommand { get; private set; } = new CloseWindowCommand();
-
-        public ObjectInfoWindowViewModel(CelestialObjectInfo info)
+        public ObjectInfoVM(CelestialObjectInfo info)
         {
             Title = info.Title;
             Subtitle = info.Subtitle;
             InfoElements = info.InfoElements;
-            LinkClickedCommand = new DelegateCommand<double>(jd => {
-                JulianDay = jd;
-                CloseCommand.Execute(true);
-            });
+            LinkClickedCommand = new DelegateCommand<double>(SelectJulianDay);
+        }
+
+        private void SelectJulianDay(double jd)
+        {
+            JulianDay = jd;
+            Close(true);
         }
     }
 }
