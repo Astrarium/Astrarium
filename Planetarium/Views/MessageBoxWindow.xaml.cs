@@ -19,35 +19,38 @@ namespace Planetarium.Views
     /// </summary>
     public partial class MessageBoxWindow : Window
     {
-        private MessageBoxResult Result = MessageBoxResult.None;
+        public MessageBoxResult Result { get; private set; } = MessageBoxResult.None;
 
         public MessageBoxWindow()
         {
             InitializeComponent();
         }
-
-        private void AddButtons(MessageBoxButton buttons)
+        
+        public MessageBoxButton Buttons
         {
-            switch (buttons)
+            set
             {
-                case MessageBoxButton.OK:
-                    AddButton("OK", MessageBoxResult.OK);
-                    break;
-                case MessageBoxButton.OKCancel:
-                    AddButton("OK", MessageBoxResult.OK);
-                    AddButton("Cancel", MessageBoxResult.Cancel, isCancel: true);
-                    break;
-                case MessageBoxButton.YesNo:
-                    AddButton("Yes", MessageBoxResult.Yes);
-                    AddButton("No", MessageBoxResult.No);
-                    break;
-                case MessageBoxButton.YesNoCancel:
-                    AddButton("Yes", MessageBoxResult.Yes);
-                    AddButton("No", MessageBoxResult.No);
-                    AddButton("Cancel", MessageBoxResult.Cancel, isCancel: true);
-                    break;
-                default:
-                    throw new ArgumentException("Unknown button value", "buttons");
+                switch (value)
+                {
+                    case MessageBoxButton.OK:
+                        AddButton("OK", MessageBoxResult.OK);
+                        break;
+                    case MessageBoxButton.OKCancel:
+                        AddButton("OK", MessageBoxResult.OK);
+                        AddButton("Cancel", MessageBoxResult.Cancel, isCancel: true);
+                        break;
+                    case MessageBoxButton.YesNo:
+                        AddButton("Yes", MessageBoxResult.Yes);
+                        AddButton("No", MessageBoxResult.No);
+                        break;
+                    case MessageBoxButton.YesNoCancel:
+                        AddButton("Yes", MessageBoxResult.Yes);
+                        AddButton("No", MessageBoxResult.No);
+                        AddButton("Cancel", MessageBoxResult.Cancel, isCancel: true);
+                        break;
+                    default:
+                        throw new ArgumentException("Unknown button value", "buttons");
+                }
             }
         }
 
@@ -56,15 +59,6 @@ namespace Planetarium.Views
             var button = new Button() { Content = text, IsCancel = isCancel };
             button.Click += (o, args) => { Result = result; DialogResult = true; };
             ButtonContainer.Children.Add(button);
-        }
-
-        public static MessageBoxResult Show(Window owner, string caption, string message, MessageBoxButton buttons)
-        {
-            var dialog = new MessageBoxWindow() { Owner = owner, Title = caption };
-            dialog.MessageContainer.Text = message;
-            dialog.AddButtons(buttons);
-            dialog.ShowDialog();
-            return dialog.Result;
         }
     }
 }

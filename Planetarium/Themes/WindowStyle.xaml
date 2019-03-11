@@ -24,16 +24,28 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Window}">
                     <Grid>
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="4,32,4,4">
+                        <Border
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="4,32,4,4">
                             <AdornerDecorator>
                                 <ContentPresenter />
                             </AdornerDecorator>
+                            <Border.Style>
+                                <Style TargetType="{x:Type Border}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType=Window}}" Value="Maximized">
+                                            <Setter Property="Margin" Value="5,0,5,5" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType=Window}}" Value="Normal">
+                                            <Setter Property="Margin" Value="0" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
                         </Border>
 
-                        <Grid Height="32"
-                            VerticalAlignment="Top">
+                        <Grid Height="32" VerticalAlignment="Top">
 
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>

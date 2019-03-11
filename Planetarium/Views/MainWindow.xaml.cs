@@ -21,6 +21,7 @@ using ADK.Demo.Objects;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using Planetarium.Views;
+using Planetarium.ViewModels;
 
 namespace Planetarium
 {
@@ -32,10 +33,11 @@ namespace Planetarium
         private Sky sky;
         private SkyView skyView;
         private Settings settings;
+        private IViewManager viewManager;
 
         private bool fullScreen;
 
-        public MainWindow(ISkyMap map, Sky sky, Settings settings)
+        public MainWindow(ISkyMap map, Sky sky, Settings settings, IViewManager viewManager)
         {
             InitializeComponent();
 
@@ -46,6 +48,7 @@ namespace Planetarium
 
             this.sky = sky;
             this.settings = settings;
+            this.viewManager = viewManager;
             skyView = new SkyView();
             skyView.SkyMap = map;
 
@@ -87,12 +90,11 @@ namespace Planetarium
                 var info = sky.GetInfo(body);
                 if (info != null)
                 {
-                    ObjectInfoWindow wObjectInfo = new ObjectInfoWindow() { Owner = this };
-                    wObjectInfo.SetObjectInfo(info);
-                    bool? dialogResult = wObjectInfo.ShowDialog();
-                    if (dialogResult != null && dialogResult.Value)
+                    var model = new ObjectInfoWindowViewModel(info);
+                    bool? dialogResult = viewManager.ShowDialog(model);
+                    if (dialogResult ?? false)
                     {
-                        sky.Context.JulianDay = wObjectInfo.JulianDay;
+                        sky.Context.JulianDay = model.JulianDay;
                         sky.Calculate();
                         skyView.SkyMap.GoToObject(body, TimeSpan.Zero);
                     }
@@ -179,20 +181,18 @@ namespace Planetarium
 
             else if (e.Key == Key.F)
             {
-                var wSearch = new SearchWindow(sky) { Owner = this };
-                bool? dialogResult = wSearch.ShowDialog();
-
+                SearchWindowViewModel model = null;
+                bool? dialogResult = viewManager.ShowDialog<SearchWindowViewModel>(m => model = m);
+                
                 if (dialogResult != null && dialogResult.Value)
                 {
                     bool show = true;
-                    var body = wSearch.ViewModel.SelectedItem.Body;
+                    var body = model.SelectedItem.Body;
                     if (settings.Get<bool>("Ground") && body.Horizontal.Altitude <= 0)
                     {
                         show = false;
 
-                        
-
-                        if (MessageBoxResult.Yes == MessageBoxWindow.Show(this, "Question", "The object is under horizon at the moment. Do you want to switch off displaying the ground?", MessageBoxButton.YesNo))
+                        if (viewManager.ShowMessageBox("Question", "The object is under horizon at the moment. Do you want to switch off displaying the ground?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                         {
                             show = true;
                             settings.Set("Ground", false);
@@ -204,30 +204,6 @@ namespace Planetarium
                         skyView.SkyMap.GoToObject(body, TimeSpan.FromSeconds(1));
                     }
                 }
-
-                //using (var frmSearch = new FormSearch(sky, (b) => true))
-                //{
-                //    var result = frmSearch.ShowDialog();
-                //    if (result == WF.DialogResult.OK)
-                //    {
-                //        bool show = true;
-                //        var body = frmSearch.SelectedObject;
-                //        if (settings.Get<bool>("Ground") && body.Horizontal.Altitude <= 0)
-                //        {
-                //            show = false;
-                //            if (WF.DialogResult.Yes == WF.MessageBox.Show("The object is under horizon at the moment. Do you want to switch off displaying the ground?", "Question", WF.MessageBoxButtons.YesNo, WF.MessageBoxIcon.Question))
-                //            {
-                //                show = true;
-                //                settings.Set("Ground", false);
-                //            }
-                //        }
-
-                //        if (show)
-                //        {
-                //            skyView.SkyMap.GoToObject(body, TimeSpan.FromSeconds(1));
-                //        }
-                //    }
-                //}
             }
             else if (e.Key == Key.E)
             {

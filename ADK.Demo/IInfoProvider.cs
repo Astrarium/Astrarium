@@ -126,6 +126,7 @@ namespace ADK.Demo
         public IEphemFormatter Formatter { get; set; }
         public string Caption { get; set; }
         public object Value { get; set; }
+        public string StringValue { get { return Formatter.Format(Value); } }
     }
 
     public class InfoElementPropertyLink : InfoElementProperty

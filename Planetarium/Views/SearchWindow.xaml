@@ -20,7 +20,7 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 
         <TextBlock Grid.Row="0" Name="lstEmpty" 
             Text="No objects found" 
-            Foreground="{StaticResource DisabledButtonForeground}"
+            IsEnabled="False"
             Visibility="{Binding SelectedItem, Converter={StaticResource NullToVisibilityConverter}}" 
             TextAlignment="Center" 
             VerticalAlignment="Center" />

@@ -4,6 +4,8 @@ using ADK.Demo.Calculators;
 using ADK.Demo.Config;
 using ADK.Demo.Renderers;
 using Ninject;
+using Planetarium.ViewModels;
+using Planetarium.Views;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -18,9 +20,11 @@ namespace Planetarium
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App : Application
+    public partial class App : Application, IViewManager
     {
         IKernel kernel = new StandardKernel();
+
+        Dictionary<Type, Type> viewModelViewBindings = new Dictionary<Type, Type>();
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -28,6 +32,7 @@ namespace Planetarium
 
             ConfigureContainer();
             ComposeObjects();
+
             Current.MainWindow.Show();
         }
 
@@ -106,11 +111,106 @@ namespace Planetarium
 
             kernel.Bind<Sky>().ToConstant(new Sky(context, calculators, eventProviders));
             kernel.Bind<ISkyMap>().ToConstant(new SkyMap(context, renderers));
+
+            viewModelViewBindings.Add(typeof(SearchWindowViewModel), typeof(SearchWindow));
+            viewModelViewBindings.Add(typeof(ObjectInfoWindowViewModel), typeof(ObjectInfoWindow));
+
+            kernel.Bind<IViewManager>().ToConstant(this).InSingletonScope();
         }
 
         private void ComposeObjects()
         {
             Current.MainWindow = kernel.Get<MainWindow>();
         }
+
+        void IViewManager.ShowWindow<TViewModel>()
+        {
+            Show<TViewModel>(model: null, initAction: null, isDialog: true);
+        }
+
+        void IViewManager.ShowWindow<TViewModel>(Action<TViewModel> initAction) 
+        {
+            Show(model: null, initAction: initAction, isDialog: false);
+        }
+
+        bool? IViewManager.ShowDialog<TModel>() 
+        {
+            return Show<TModel>(model: null, initAction: null, isDialog: true);
+        }
+
+        bool? IViewManager.ShowDialog<TViewModel>(Action<TViewModel> initAction)
+        {
+            return Show<TViewModel>(model: null, initAction: initAction, isDialog: true);
+        }
+
+        private bool? Show<TViewModel>(TViewModel model, Action<TViewModel> initAction, bool isDialog) where TViewModel : class
+        {
+            if (model == null)
+            {
+                model = kernel.Get<TViewModel>();
+            }
+            
+            initAction?.Invoke(model);
+
+            Type viewType = null;
+            if (viewModelViewBindings.ContainsKey(typeof(TViewModel)))
+            {
+                viewType = viewModelViewBindings[typeof(TViewModel)];
+            }
+
+            if (viewType != null)
+            {
+                var window = kernel.Get(viewType) as Window;
+                window.DataContext = model;
+                window.Owner = Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
+
+                if (isDialog)
+                {
+                    return window.ShowDialog();
+                }
+                else
+                {
+                    window.Show();
+                    return null;
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+
+        void IViewManager.ShowWindow<TModel>(TModel model)
+        {
+            Show(model: model, initAction: null, isDialog: false);
+        }
+
+        void IViewManager.ShowWindow<TModel>(TModel model, Action<TModel> initAction)
+        {
+            Show(model: model, initAction: initAction, isDialog: false);
+        }
+
+        bool? IViewManager.ShowDialog<TModel>(TModel model)
+        {
+            return Show(model: model, initAction: null, isDialog: true);
+        }
+
+        bool? IViewManager.ShowDialog<TModel>(TModel model, Action<TModel> initAction)
+        {
+            return Show(model: model, initAction: initAction, isDialog: true);
+        }
+
+        MessageBoxResult IViewManager.ShowMessageBox(string caption, string text, MessageBoxButton buttons)
+        {
+            var dialog = kernel.Get<MessageBoxWindow>();
+            dialog.Owner = Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
+            dialog.Title = caption;
+            dialog.MessageContainer.Text = text;
+            dialog.Buttons = buttons;
+            dialog.ShowDialog();
+            return dialog.Result;
+        }
+
     }
 }

@@ -3,12 +3,15 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:v="clr-namespace:Planetarium.Views"
+        xmlns:t="clr-namespace:Planetarium.Themes"
         mc:Ignorable="d"
         Title="Object Info" 
         Width="600" Height="600"
         MinWidth="300" MinHeight="300"
         Style="{StaticResource {x:Type Window}}"
-        ShowInTaskbar="False"     
+        ShowInTaskbar="False"
+        t:WindowProperties.CloseCommand="{Binding CloseCommand}"
         WindowStartupLocation="CenterOwner">
     <Grid Margin="4 4 4 4">
         <Grid.RowDefinitions>
@@ -19,27 +22,21 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Label x:Name="lblSubtitle" FontSize="8" Grid.Row="0" Padding="5 5 5 0">SubTitle</Label>
-        <Label x:Name="lblTitle" FontFamily="Times New Roman" FontWeight="Bold" Grid.Row="1">Title</Label>
+        <Label x:Name="lblSubtitle" FontSize="8" Grid.Row="0" Padding="5 5 5 0" Content="{Binding Subtitle}" />
+        <Label x:Name="lblTitle" FontFamily="Times New Roman" FontWeight="Bold" Grid.Row="1" Content="{Binding Title}" />
 
         <Separator Grid.Row="2" Height="1" Background="{StaticResource LightBackgroundBrush}" />
-        
+
         <ScrollViewer
             Grid.Row="3"
             VerticalScrollBarVisibility="Auto"
             HorizontalScrollBarVisibility="Auto">
-
-            <Grid Name="tblInfo" Background="{StaticResource ScrollViewerBackground}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition MinWidth="100" Width="1" />
-                </Grid.ColumnDefinitions>
-                <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">Property</Label>
-                <Label Grid.Row="0" Grid.Column="1">
-                    <Hyperlink>Value</Hyperlink>
-                </Label>
-            </Grid>
-          
+            <v:ObjectInfoView 
+                DataContext="{Binding InfoElements}"
+                CellPadding="4 0 8 2"
+                HeaderPadding="4 16 4 4"
+                LinkCommand="{Binding DataContext.LinkClickedCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type v:ObjectInfoWindow}}}">
+            </v:ObjectInfoView>
         </ScrollViewer>
 
         <Separator Grid.Row="4" Height="1" Background="{StaticResource LightBackgroundBrush}" />

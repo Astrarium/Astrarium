@@ -25,15 +25,9 @@ namespace Planetarium.Views
     /// </summary>
     public partial class SearchWindow : Window
     {
-        public SearchWindowViewModel ViewModel { get; set; }
-
-        public SearchWindow(Sky sky)
+        public SearchWindow()
         {
             InitializeComponent();
-
-            var source = (INotifyCollectionChanged)lstResults.ItemsSource;
-            ViewModel = new SearchWindowViewModel(sky);
-            DataContext = ViewModel;
 
             lstResults.ItemContainerGenerator.StatusChanged += ItemContainerGenerator_StatusChanged;
             txtSearchString.Focus();
@@ -47,45 +41,6 @@ namespace Planetarium.Views
                 {
                     var item = lstResults.ItemContainerGenerator.ContainerFromIndex(0) as ListBoxItem;
                     item.IsSelected = true;
-                }
-            }
-        }
-
-        public class SearchWindowViewModel
-        {
-            private string _SearchString = null;
-            public string SearchString
-            {
-                get
-                {
-                    return _SearchString;
-                }
-                set
-                {
-                    _SearchString = value;
-                    DoSearch();
-                }
-            }
-
-            public Func<CelestialObject, bool> Filter { get; set; } = (b) => true;
-
-            public ObservableCollection<SearchResultItem> SearchResults { get; set; } = new ObservableCollection<SearchResultItem>();
-
-            public SearchResultItem SelectedItem { get; set; }
-            private ISearcher searcher;
-
-            public SearchWindowViewModel(ISearcher searcher)
-            {
-                this.searcher = searcher;
-            }
-
-            private async void DoSearch()
-            {
-                var results = await Task.Run(() => searcher.Search(SearchString, Filter));
-                SearchResults.Clear();
-                foreach (var item in results)
-                {
-                    SearchResults.Add(item);
                 }
             }
         }
