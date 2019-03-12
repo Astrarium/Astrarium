@@ -31,7 +31,7 @@
         <TextBox Grid.Row="1" Grid.Column="1">Value</TextBox>
 
         <Label Grid.Row="2" Grid.Column="0">End date</Label>
-        <v:IntegerTextBox Grid.Row="2" Grid.Column="1" />
+        <v:IntegerUpDown Grid.Row="2" Grid.Column="1" HideButtons="True" />
 
         <GroupBox Grid.Row="3" Grid.ColumnSpan="2" Padding="0, 8, 0, 0">
             <GroupBox.Header>

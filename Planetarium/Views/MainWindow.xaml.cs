@@ -142,14 +142,12 @@ namespace Planetarium
             }
             else if (e.Key == Key.D)
             {
-                using (var frmDateTime = new FormDateTime(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset))
+                var vm = new DateVM(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset);
+                if (viewManager.ShowDialog(vm) ?? false)
                 {
-                    if (frmDateTime.ShowDialog(skyView) == WF.DialogResult.OK)
-                    {
-                        sky.Context.JulianDay = frmDateTime.JulianDay;
-                        sky.Calculate();
-                        skyView.Invalidate();
-                    }
+                    sky.Context.JulianDay = vm.JulianDay;
+                    sky.Calculate();
+                    skyView.Invalidate();
                 }
             }
             else if (e.Key == Key.A)
@@ -166,6 +164,9 @@ namespace Planetarium
             }
             else if (e.Key == Key.O)
             {
+
+
+
                 using (var frmSettings = new FormSettings(settings))
                 {
                     settings.SettingValueChanged += Settings_OnSettingChanged;

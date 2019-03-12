@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -68,6 +69,23 @@ namespace Planetarium.Themes
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new System.NotImplementedException();
+        }
+    }
+
+    [ValueConversion(typeof(object), typeof(object))]
+    public class VisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (object.Equals(value, parameter))
+                return Visibility.Visible;
+            else
+                return Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 }

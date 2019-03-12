@@ -18,7 +18,7 @@ namespace Planetarium
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App : Application, IViewManager
+    public partial class App : Application
     {
         IKernel kernel = new StandardKernel();
 
@@ -112,150 +112,15 @@ namespace Planetarium
             kernel.Bind<Sky, ISearcher>().ToConstant(sky).InSingletonScope();
             kernel.Bind<ISkyMap>().ToConstant(new SkyMap(context, renderers));
 
-            ResolveViewModelViewBindings();
+            var viewManager = new ViewManager(t => kernel.Get(t));
 
-            kernel.Bind<IViewManager>().ToConstant(this).InSingletonScope();
+            kernel.Bind<IViewManager>().ToConstant(viewManager).InSingletonScope();
         }
 
         private void ComposeObjects()
         {
             Current.MainWindow = kernel.Get<MainWindow>();
         }
-
-        public void ShowWindow<TViewModel>() where TViewModel : ViewModelBase
-        {
-            Show<TViewModel>(viewModel: null, isDialog: true);
-        }
-
-        public bool? ShowDialog<TViewModel>() where TViewModel : ViewModelBase
-        {
-            return Show<TViewModel>(viewModel: null, isDialog: true);
-        }
-
-        public bool? Show<TViewModel>(TViewModel viewModel, bool isDialog) where TViewModel : ViewModelBase
-        {
-            if (viewModel == null)
-            {
-                viewModel = CreateViewModel<TViewModel>();
-            }
-          
-            Type viewType = null;
-            if (viewModelViewBindings.ContainsKey(typeof(TViewModel)))
-            {
-                viewType = viewModelViewBindings[typeof(TViewModel)];
-            }
-
-            if (viewType != null)
-            {
-                var window = kernel.Get(viewType) as Window;
-                window.DataContext = viewModel;
-                window.Owner = Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
-
-                Action<bool?> viewModelClosingHandler = null;
-                viewModelClosingHandler = (dialogResult) =>
-                {
-                    if (isDialog)
-                    {
-                        window.DialogResult = dialogResult;
-                    }
-                    else
-                    {
-                        window.Close();
-                    }
-
-                    if (viewModel is ViewModelBase)
-                    {
-                        (viewModel as ViewModelBase).Closing -= viewModelClosingHandler;
-                    }
-                };
-
-                if (viewModel is ViewModelBase)
-                {
-                    (viewModel as ViewModelBase).Closing += viewModelClosingHandler;
-                }
-
-                if (isDialog)
-                {
-                    return window.ShowDialog();
-                }
-                else
-                {
-                    window.Show();
-                    return null;
-                }
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        private void ResolveViewModelViewBindings()
-        {
-            Type[] viewModelTypes =
-                    Assembly.GetExecutingAssembly().GetTypes().Concat(
-                    Assembly.GetExecutingAssembly().GetReferencedAssemblies()
-                 .SelectMany(a => Assembly.Load(a).GetTypes()))
-                 .Where(t => typeof(ViewModelBase).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
-                 .ToArray();
-
-            Type[] viewTypes =
-                Assembly.GetExecutingAssembly().GetTypes().Concat(
-                Assembly.GetExecutingAssembly().GetReferencedAssemblies()
-                .SelectMany(a => Assembly.Load(a).GetTypes()))
-                .Where(t => typeof(Window).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
-                .ToArray();
-
-            foreach (Type viewModelType in viewModelTypes)
-            {
-                string viewModelName = viewModelType.Name;
-                if (viewModelName.EndsWith("VM"))
-                {
-                    viewModelName = viewModelName.Substring(0, viewModelName.Length - "VM".Length);
-                }
-                if (viewModelName.EndsWith("ViewModel"))
-                {
-                    viewModelName = viewModelName.Substring(0, viewModelName.Length - "ViewModel".Length);
-                }
-
-                Type viewType = viewTypes.FirstOrDefault(t =>
-                    t.Name == $"{viewModelName}" ||
-                    t.Name == $"{viewModelName}Window" ||
-                    t.Name == $"{viewModelName}View");
-
-                if (viewType != null)
-                {
-                    viewModelViewBindings.Add(viewModelType, viewType);
-                }
-            }
-        }
-
-        public TViewModel CreateViewModel<TViewModel>() where TViewModel : ViewModelBase
-        {
-            return kernel.Get<TViewModel>();
-        }
-
-        public void ShowWindow<TViewModel>(TViewModel viewModel) where TViewModel : ViewModelBase
-        {
-            Show(viewModel: viewModel, isDialog: false);
-        }
-
-        public bool? ShowDialog<TViewModel>(TViewModel viewModel) where TViewModel : ViewModelBase
-        {
-            return Show(viewModel: viewModel, isDialog: true);
-        }
-
-        MessageBoxResult IViewManager.ShowMessageBox(string caption, string text, MessageBoxButton buttons)
-        {
-            var dialog = kernel.Get<MessageBoxWindow>();
-            dialog.Owner = Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
-            dialog.Title = caption;
-            dialog.MessageContainer.Text = text;
-            dialog.Buttons = buttons;
-            dialog.ShowDialog();
-            return dialog.Result;
-        }
-
 
     }
 }

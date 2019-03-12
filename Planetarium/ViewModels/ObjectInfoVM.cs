@@ -22,7 +22,7 @@ namespace Planetarium.ViewModels
             Title = info.Title;
             Subtitle = info.Subtitle;
             InfoElements = info.InfoElements;
-            LinkClickedCommand = new DelegateCommand<double>(SelectJulianDay);
+            LinkClickedCommand = new Command<double>(SelectJulianDay);
         }
 
         private void SelectJulianDay(double jd)

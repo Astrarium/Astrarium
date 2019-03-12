@@ -62,6 +62,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ViewManager.cs" />
     <Compile Include="ViewModelBase.cs" />
     <Compile Include="Themes\TreeViewItemExtensions.cs" />
     <Compile Include="Themes\WindowStyle.xaml.cs">
@@ -70,10 +71,14 @@
     <Compile Include="Themes\WindowProperties.cs" />
     <Compile Include="Themes\Converters.cs" />
     <Compile Include="IViewManager.cs" />
-    <Compile Include="DelegateCommand.cs" />
+    <Compile Include="Commands.cs" />
+    <Compile Include="ViewModels\DateVM.cs" />
     <Compile Include="ViewModels\ObjectInfoVM.cs" />
     <Compile Include="ViewModels\SearchVM.cs" />
-    <Compile Include="Views\IntegerTextBox.cs" />
+    <Compile Include="Views\DateWindow.xaml.cs">
+      <DependentUpon>DateWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\IntegerUpDown.cs" />
     <Compile Include="Views\MessageBoxWindow.xaml.cs">
       <DependentUpon>MessageBoxWindow.xaml</DependentUpon>
     </Compile>
@@ -89,6 +94,10 @@
     <Compile Include="Views\TrackPropertiesWindow.xaml.cs">
       <DependentUpon>TrackPropertiesWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="Views\DateWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

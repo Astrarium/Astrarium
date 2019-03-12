@@ -11,7 +11,7 @@
         Style="{StaticResource {x:Type Window}}"
         ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner">
-    <Grid Margin="4 4 4 4">
+    <Grid Margin="4">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
