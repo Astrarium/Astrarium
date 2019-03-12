@@ -3,9 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:v="clr-namespace:Planetarium"
         mc:Ignorable="d"
         Style="{StaticResource {x:Type Window}}"
         MinHeight="300" MinWidth="300"
+        v:MainWindow.MousePosition="{Binding SkyMousePosition, Mode=OneWayToSource}"
         Title="Planetarium" Height="450" Width="800">
     <Grid>
         <Grid.RowDefinitions>
@@ -22,7 +24,7 @@
         </ToolBar>
 
         <DockPanel Grid.Row="1" LastChildFill="true">
-            <WindowsFormsHost x:Name="Host"  Background="Black">
+            <WindowsFormsHost x:Name="Host" Background="Black">
                 <WindowsFormsHost.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Context Menu Item 1" IsCheckable="True" IsChecked="True" />
@@ -39,13 +41,13 @@
             </WindowsFormsHost>
         </DockPanel>
         <StatusBar Grid.Row="2">
-            <TextBlock x:Name="lblConstellation" Width="30" TextAlignment="Center">CON</TextBlock>
+            <TextBlock x:Name="lblConstellation" Width="30" TextAlignment="Center" Text="{Binding MapConstellationNameString}" />
             <Separator></Separator>
-            <TextBlock x:Name="lblEquatorialCoordinates" Width="220">eq coordinates</TextBlock>
+            <TextBlock x:Name="lblEquatorialCoordinates" Width="220" Text="{Binding MapEquatorialCoordinatesString}" />
             <Separator></Separator>
-            <TextBlock x:Name="lblHorizontalCoordinates" Width="220">hor coordinates</TextBlock>
+            <TextBlock x:Name="lblHorizontalCoordinates" Width="220" Text="{Binding MapHorizontalCoordinatesString}" />
             <Separator></Separator>
-            <TextBlock x:Name="lblViewAngle">fov</TextBlock>
+            <TextBlock x:Name="lblViewAngle" Text="{Binding MapViewAngleString}" />
         </StatusBar>
 
     </Grid>

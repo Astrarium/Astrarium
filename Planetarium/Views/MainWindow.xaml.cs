@@ -22,6 +22,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using Planetarium.Views;
 using Planetarium.ViewModels;
+using System.Drawing;
 
 namespace Planetarium
 {
@@ -30,6 +31,19 @@ namespace Planetarium
     /// </summary>
     public partial class MainWindow : Window
     {
+        public static readonly DependencyProperty MousePositionProperty = DependencyProperty.RegisterAttached(
+            "MousePosition", typeof(PointF), typeof(MainWindow), new PropertyMetadata(PointF.Empty));
+
+        public static void SetMousePosition(DependencyObject target, PointF value)
+        {
+            target.SetValue(MousePositionProperty, value);
+        }
+
+        public static PointF GetMousePosition(DependencyObject target)
+        {
+            return (PointF)target.GetValue(MousePositionProperty);
+        }
+
         private Sky sky;
         private SkyView skyView;
         private Settings settings;
@@ -40,6 +54,8 @@ namespace Planetarium
         public MainWindow(ISkyMap map, Sky sky, Settings settings, IViewManager viewManager)
         {
             InitializeComponent();
+
+            DataContext = new MainVM(map, sky);
 
             sky.Initialize();
             map.Initialize();
@@ -104,22 +120,8 @@ namespace Planetarium
 
         private void skyView_MouseMove(object sender, WF.MouseEventArgs e)
         {
-            skyView.Focus();
-
-            var hor = skyView.SkyMap.Projection.Invert(e.Location);
-
-            var eq = hor.ToEquatorial(sky.Context.GeoLocation, sky.Context.SiderealTime);
-
-            // precessional elements for converting from current to B1875 epoch
-            var p1875 = Precession.ElementsFK5(sky.Context.JulianDay, Date.EPOCH_B1875);
-
-            // Equatorial coordinates for B1875 epoch
-            CrdsEquatorial eq1875 = Precession.GetEquatorialCoordinates(eq, p1875);
-
-            lblEquatorialCoordinates.Text = eq.ToString();
-            lblHorizontalCoordinates.Text = hor.ToString();
-            lblConstellation.Text = Constellations.FindConstellation(eq1875);
-            lblViewAngle.Text = skyView.SkyMap.ViewAngle.ToString();
+            //skyView.Focus();
+            SetMousePosition(this, e.Location);
         }
 
         private void Settings_OnSettingChanged(string settingName, object settingValue)
@@ -295,11 +297,5 @@ namespace Planetarium
                 this.WindowState = WindowState.Maximized;
             }
         }
-
-        
     }
-
-    
-
-
 }

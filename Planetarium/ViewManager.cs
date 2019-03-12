@@ -9,9 +9,20 @@ using System.Windows;
 
 namespace Planetarium
 {
+    /// <summary>
+    /// Default implementation of the <see cref="IViewManager"/> interface.
+    /// </summary>
     public class ViewManager : IViewManager
     {
+        /// <summary>
+        /// Dictionary of ViewModel <=> View types bindings.
+        /// </summary>
         private Dictionary<Type, Type> viewModelViewBindings = new Dictionary<Type, Type>();
+
+        /// <summary>
+        /// Factory method to create instances of requested types. 
+        /// IoC container method should be passed here.
+        /// </summary>
         private Func<Type, object> typeFactory;
 
         public ViewManager(Func<Type, object> typeFactory)

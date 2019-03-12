@@ -28,8 +28,10 @@
     <Color x:Key="LightDisabledBackgroundColor">#666666</Color>
 
     <Color x:Key="ForegroundColor">#EFEFEF</Color>
+    
     <Color x:Key="MouseOverForegroundColor">#EFEFEF</Color>
-
+    <Color x:Key="MouseOverBackgroundColor">#AAAAAA</Color>
+    
     <Color x:Key="HighlightColor">#294666</Color>
     <Color x:Key="HotColor">#525252</Color>
     <!--#endregion-->
@@ -87,7 +89,7 @@
     <SolidColorBrush x:Key="ButtonBackground" Color="{StaticResource LightBackgroundColor}"/>
     <SolidColorBrush x:Key="ButtonBorder" Color="{StaticResource DarkBackgroundColor}"/>
     <SolidColorBrush x:Key="PressedButtonBackground" Color="{StaticResource DisabledBackgroundColor}"/>
-    <SolidColorBrush x:Key="MouseOverButtonBackground" Color="#AAAAAA"/>
+    <SolidColorBrush x:Key="MouseOverButtonBackground" Color="{StaticResource MouseOverBackgroundColor}"/>
     <SolidColorBrush x:Key="DisabledButtonBackground" Color="{StaticResource MediumBackgroundColor}"/>
     <SolidColorBrush x:Key="DisabledButtonForeground" Color="#8C8C8C"/>
 
@@ -1324,6 +1326,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ButtonBase}">
                     <Border 
+                        x:Name="PART_Border"
 						Background="{TemplateBinding Background}" 
 						BorderBrush="{TemplateBinding BorderBrush}"
 						BorderThickness="{TemplateBinding BorderThickness}"
@@ -3663,7 +3666,6 @@
     </Style>
 
     <!--#endregion-->
-
 
     <Style TargetType="{x:Type v:IntegerUpDown}">
         <Setter Property="Height" Value="22" />

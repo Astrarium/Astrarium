@@ -73,6 +73,7 @@
     <Compile Include="IViewManager.cs" />
     <Compile Include="Commands.cs" />
     <Compile Include="ViewModels\DateVM.cs" />
+    <Compile Include="ViewModels\MainVM.cs" />
     <Compile Include="ViewModels\ObjectInfoVM.cs" />
     <Compile Include="ViewModels\SearchVM.cs" />
     <Compile Include="Views\DateWindow.xaml.cs">
