@@ -144,41 +144,41 @@ namespace ADK.Demo
             }
         }
 
-        public void Zoom(int delta)
-        {
-            double v = SkyMap.ViewAngle;
+        //public void Zoom(int delta)
+        //{
+        //    double v = SkyMap.ViewAngle;
 
-            if (delta < 0)
-            {
-                v *= 1.1;
-            }
-            else
-            {
-                v /= 1.1;
-            }
+        //    if (delta < 0)
+        //    {
+        //        v *= 1.1;
+        //    }
+        //    else
+        //    {
+        //        v /= 1.1;
+        //    }
 
-            if (v >= 90)
-            {
-                v = 90;
-            }
-            if (v < 1.0 / 1024.0)
-            {
-                v = 1.0 / 1024.0;
-            }
+        //    if (v >= 90)
+        //    {
+        //        v = 90;
+        //    }
+        //    if (v < 1.0 / 1024.0)
+        //    {
+        //        v = 1.0 / 1024.0;
+        //    }
 
-            SkyMap.ViewAngle = v;
-            Invalidate();
-        }
+        //    SkyMap.ViewAngle = v;
+        //    Invalidate();
+        //}
 
-        protected override void OnMouseWheel(MouseEventArgs e)
-        {
-            base.OnMouseWheel(e);
+        //protected override void OnMouseWheel(MouseEventArgs e)
+        //{
+        //    base.OnMouseWheel(e);
 
-            if (SkyMap != null)
-            {
-                Zoom(e.Delta);
-            }
-        }
+        //    if (SkyMap != null)
+        //    {
+        //        Zoom(e.Delta);
+        //    }
+        //}
 
         private void InvalidateWithDoEvents()
         {

@@ -52,6 +52,8 @@ namespace ADK.Demo
         /// <param name="g">Graphics to render the map.</param>
         void Render(Graphics g);
 
+        void Invalidate();
+
         void Initialize();
 
         bool Antialias { get; set; }

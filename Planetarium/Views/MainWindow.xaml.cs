@@ -7,22 +7,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using WF = System.Windows.Forms;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using ADK;
 using ADK.Demo.Config;
-using ADK.Demo.Objects;
-using System.Runtime.InteropServices;
-using System.Windows.Interop;
-using Planetarium.Views;
 using Planetarium.ViewModels;
 using System.Drawing;
+using System.Windows.Controls;
 
 namespace Planetarium
 {
@@ -44,258 +33,125 @@ namespace Planetarium
             return (PointF)target.GetValue(MousePositionProperty);
         }
 
-        private Sky sky;
-        private SkyView skyView;
-        private Settings settings;
-        private IViewManager viewManager;
+        public static readonly DependencyProperty MapKeyDownProperty = DependencyProperty.RegisterAttached(
+            "MapKeyDown", typeof(Command<Key>), typeof(MainWindow));
 
-        private bool fullScreen;
+        public static void SetMapKeyDown(DependencyObject target, Command<Key> value)
+        {
+            target.SetValue(MapKeyDownProperty, value);
+        }
+
+        public static Command<Key> GetMapKeyDown(DependencyObject target)
+        {
+            return (Command<Key>)target.GetValue(MapKeyDownProperty);
+        }
+
+        public static readonly DependencyProperty MapZoomProperty = DependencyProperty.RegisterAttached(
+            "MapZoom", typeof(Command<int>), typeof(MainWindow));
+
+        public static void SetMapZoom(DependencyObject target, Command<int> value)
+        {
+            target.SetValue(MapZoomProperty, value);
+        }
+
+        public static Command<int> GetMapZoom(DependencyObject target)
+        {
+            return (Command<int>)target.GetValue(MapZoomProperty);
+        }
+
+        public static readonly DependencyProperty MapDoubleClickProperty = DependencyProperty.RegisterAttached(
+            "MapDoubleClick", typeof(Command<PointF>), typeof(MainWindow));
+
+        public static void SetMapDoubleClick(DependencyObject target, Command<PointF> value)
+        {
+            target.SetValue(MapDoubleClickProperty, value);
+        }
+
+        public static Command<PointF> GetMapDoubleClick(DependencyObject target)
+        {
+            return (Command<PointF>)target.GetValue(MapDoubleClickProperty);
+        }
+
+        public static readonly DependencyProperty FullScreenProperty = DependencyProperty.RegisterAttached(
+            "FullScreen", typeof(bool), typeof(MainWindow), new FrameworkPropertyMetadata(false, (o, e) =>
+            {
+                Window window = (Window)o;
+                bool value = (bool)e.NewValue;
+                if (value)
+                {
+                    window.WindowState = WindowState.Maximized;
+                }
+                else
+                {
+                    window.WindowState = WindowState.Normal;
+                }
+            }));
+
+        public static void SetFullScreen(DependencyObject target, bool value)
+        {
+            target.SetValue(FullScreenProperty, value);
+        }
+
+        public static bool GetFullScreen(DependencyObject target)
+        {
+            return (bool)target.GetValue(FullScreenProperty);
+        }
+
+        public static readonly DependencyProperty MapRightClickProperty = DependencyProperty.RegisterAttached(
+            "MapRightClick", typeof(Command<PointF>), typeof(MainWindow));
+
+        public static void SetMapRightClick(DependencyObject target, Command<PointF> value)
+        {
+            target.SetValue(MapRightClickProperty, value);
+        }
+
+        public static Command<PointF> GetMapRightClick(DependencyObject target)
+        {
+            return (Command<PointF>)target.GetValue(MapRightClickProperty);
+        }
+
+        private SkyView skyView;
 
         public MainWindow(ISkyMap map, Sky sky, Settings settings, IViewManager viewManager)
         {
             InitializeComponent();
 
-            DataContext = new MainVM(map, sky);
+            DataContext = new MainVM(map, sky, viewManager, settings);
 
             sky.Initialize();
             map.Initialize();
 
             sky.Calculate();
 
-            this.sky = sky;
-            this.settings = settings;
-            this.viewManager = viewManager;
             skyView = new SkyView();
             skyView.SkyMap = map;
 
-            skyView.MouseDoubleClick += skyView_DoubleClick;
+            skyView.MouseDoubleClick += (o, e) => GetMapDoubleClick(this)?.Execute(new PointF((e as WF.MouseEventArgs).X, (e as WF.MouseEventArgs).Y));
             skyView.MouseClick += SkyView_MouseClick;
-            skyView.MouseMove += skyView_MouseMove;
-            skyView.MouseWheel += SkyView_MouseWheel;
+            skyView.MouseMove += (o, e) => SetMousePosition(this, new PointF(e.X, e.Y));
+            skyView.MouseWheel += (o, e) => GetMapZoom(this)?.Execute(e.Delta);
+            Host.KeyDown += (o, e) => GetMapKeyDown(this)?.Execute(e.Key);
 
-            Host.KeyDown += skyView_KeyDown;
             Host.Child = skyView;
-        }
-
-        private void SkyView_MouseWheel(object sender, WF.MouseEventArgs e)
-        {
-            skyView.Zoom(e.Delta);
+            Host.ContextMenu.DataContext = DataContext;
         }
 
         private void SkyView_MouseClick(object sender, WF.MouseEventArgs e)
         {
             if (e.Button == WF.MouseButtons.Right && e.Clicks == 1)
             {
-                var body = skyView.SkyMap.FindObject(e.Location);
-                skyView.SkyMap.SelectedObject = body;
-                skyView.Invalidate();
-                
+                GetMapRightClick(this)?.Execute(new PointF(e.X, e.Y));
+
                 // show context menu
+                
                 Host.ContextMenu.IsOpen = true;
             }
         }
 
-        private void skyView_DoubleClick(object sender, EventArgs e)
+        private void ContextMenu_Opened(object sender, RoutedEventArgs e)
         {
-            var me = e as WF.MouseEventArgs;
-            var body = skyView.SkyMap.FindObject(me.Location);
-            skyView.SkyMap.SelectedObject = body;
-            skyView.Invalidate();
-            if (body != null)
-            {
-                var info = sky.GetInfo(body);
-                if (info != null)
-                {
-                    var model = new ObjectInfoVM(info);
-                    bool? dialogResult = viewManager.ShowDialog(model);
-                    if (dialogResult ?? false)
-                    {
-                        sky.Context.JulianDay = model.JulianDay;
-                        sky.Calculate();
-                        skyView.SkyMap.GoToObject(body, TimeSpan.Zero);
-                    }
-                }
-            }
-        }
-
-        private void skyView_MouseMove(object sender, WF.MouseEventArgs e)
-        {
-            //skyView.Focus();
-            SetMousePosition(this, e.Location);
-        }
-
-        private void Settings_OnSettingChanged(string settingName, object settingValue)
-        {
-            skyView.Invalidate();
-        }
-
-        private async void skyView_KeyDown(object sender, KeyEventArgs e)
-        {
-            // Add = Zoom In
-            if (e.Key == Key.Add)
-            {
-                skyView.Zoom(1);
-            }
-
-            // Subtract = Zoom Out
-            else if (e.Key == Key.Subtract)
-            {
-                skyView.Zoom(-1);
-            }
-            else if (e.Key == Key.D)
-            {
-                var vm = new DateVM(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset);
-                if (viewManager.ShowDialog(vm) ?? false)
-                {
-                    sky.Context.JulianDay = vm.JulianDay;
-                    sky.Calculate();
-                    skyView.Invalidate();
-                }
-            }
-            else if (e.Key == Key.A)
-            {
-                sky.Context.JulianDay += 1;
-                sky.Calculate();
-                skyView.Invalidate();
-            }
-            else if (e.Key == Key.S)
-            {
-                sky.Context.JulianDay -= 1;
-                sky.Calculate();
-                skyView.Invalidate();
-            }
-            else if (e.Key == Key.O)
-            {
-
-
-
-                using (var frmSettings = new FormSettings(settings))
-                {
-                    settings.SettingValueChanged += Settings_OnSettingChanged;
-                    frmSettings.ShowDialog();
-                    settings.SettingValueChanged -= Settings_OnSettingChanged;
-                }
-            }
-            else if (e.Key == Key.F12)
-            {
-                fullScreen = !fullScreen;
-                ShowFullScreen(fullScreen);
-            }
-
-            else if (e.Key == Key.F)
-            {
-                SearchVM model = viewManager.CreateViewModel<SearchVM>();
-                bool? dialogResult = viewManager.ShowDialog(model);
-                
-                if (dialogResult != null && dialogResult.Value)
-                {
-                    bool show = true;
-                    var body = model.SelectedItem.Body;
-                    if (settings.Get<bool>("Ground") && body.Horizontal.Altitude <= 0)
-                    {
-                        show = false;
-                        if (viewManager.ShowMessageBox("Question", "The object is under horizon at the moment. Do you want to switch off displaying the ground?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
-                        {
-                            show = true;
-                            settings.Set("Ground", false);
-                        }
-                    }
-
-                    if (show)
-                    {
-                        skyView.SkyMap.GoToObject(body, TimeSpan.FromSeconds(1));
-                    }
-                }
-            }
-            else if (e.Key == Key.E)
-            {
-                var formAlmanacSettings = new FormAlmanacSettings(
-                    sky.Context.JulianDayMidnight,
-                    sky.Context.GeoLocation.UtcOffset,
-                    sky.GetEventsCategories());
-
-                if (formAlmanacSettings.ShowDialog() == WF.DialogResult.OK)
-                {
-                    var events = await Task.Run(() =>
-                    {
-                        return sky.GetEvents(
-                            formAlmanacSettings.JulianDayFrom,
-                            formAlmanacSettings.JulianDayTo,
-                            formAlmanacSettings.Categories);
-                    });
-
-                    var formAlmanac = new FormAlmanac(events, sky.Context.GeoLocation.UtcOffset);
-                    if (formAlmanac.ShowDialog() == WF.DialogResult.OK)
-                    {
-                        sky.Context.JulianDay = formAlmanac.JulianDay;
-                        sky.Calculate();
-                        skyView.Invalidate();
-                    }
-                }
-
-
-            }
-            else if (e.Key == Key.P)
-            {
-                var body = skyView.SkyMap.SelectedObject;
-                if (body != null)
-                {
-                    using (var formEphemerisSettings = new FormEphemerisSettings(sky, body))
-                    {
-                        if (formEphemerisSettings.ShowDialog() == WF.DialogResult.OK)
-                        {
-                            var ephem = await Task.Run(() => sky.GetEphemerides(
-                                formEphemerisSettings.SelectedObject,
-                                formEphemerisSettings.JulianDayFrom,
-                                formEphemerisSettings.JulianDayTo,
-                                formEphemerisSettings.Step,
-                                formEphemerisSettings.Categories
-                            ));
-
-                            var formEphemeris = new FormEphemeris(ephem,
-                                formEphemerisSettings.JulianDayFrom,
-                                formEphemerisSettings.JulianDayTo,
-                                formEphemerisSettings.Step,
-                                sky.Context.GeoLocation.UtcOffset);
-
-                            formEphemeris.Show();
-                        }
-                    }
-                }
-            }
-            else if (e.Key == Key.T)
-            {
-                var body = skyView.SkyMap.SelectedObject;
-                if (body != null && body is IMovingObject)
-                {
-                    var wTrackProperties = new TrackPropertiesWindow() { Owner = this };
-                    wTrackProperties.ShowDialog();
-
-
-
-                    /*
-                    var formTrackSettings = viewManager.GetForm<FormTrackSettings>();
-                    formTrackSettings.Track = new Track() { Body = body, From = sky.Context.JulianDay, To = sky.Context.JulianDay + 30, LabelsStep = TimeSpan.FromDays(1) };
-                    if (formTrackSettings.ShowDialog() == DialogResult.OK)
-                    {
-                        skyView.Invalidate();
-                    }
-                    */
-                }
-            }
-        }
-
-        private void ShowFullScreen(bool fullscreen)
-        {
-            if (fullscreen)
-            {
-                this.WindowState = WindowState.Normal;
-                
-            }
-            else
-            {
-                this.WindowState = WindowState.Maximized;
-            }
+            //ContextMenu menu = sender as ContextMenu;
+            //menu.DataContext = DataContext;
         }
     }
 }

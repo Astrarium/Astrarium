@@ -7,7 +7,12 @@
         mc:Ignorable="d"
         Style="{StaticResource {x:Type Window}}"
         MinHeight="300" MinWidth="300"
+        v:MainWindow.FullScreen="{Binding FullScreen, Mode=OneWay}"
         v:MainWindow.MousePosition="{Binding SkyMousePosition, Mode=OneWayToSource}"
+        v:MainWindow.MapKeyDown="{Binding MapKeyDownCommand}"
+        v:MainWindow.MapDoubleClick="{Binding MapDoubleClickCommand}"
+        v:MainWindow.MapRightClick="{Binding MapRightClickCommand}"
+        v:MainWindow.MapZoom="{Binding MapZoomCommand}"
         Title="Planetarium" Height="450" Width="800">
     <Grid>
         <Grid.RowDefinitions>
@@ -26,16 +31,26 @@
         <DockPanel Grid.Row="1" LastChildFill="true">
             <WindowsFormsHost x:Name="Host" Background="Black">
                 <WindowsFormsHost.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="Context Menu Item 1" IsCheckable="True" IsChecked="True" />
-                        <Separator />
-                        <MenuItem Header="Context Menu Item 2">
-                            <MenuItem Header="Subtem 1" />
-                            <MenuItem Header="Subtem 2" />
-                        </MenuItem>
-                        <MenuItem Header="Context Menu Item 3" />
-                        <MenuItem Header="Context Menu Item 4" />
-                        <MenuItem Header="Context Menu Item 5" />
+                    <ContextMenu ItemsSource="{Binding ContextMenuItems}" IsOpen="{Binding ContextMenuIsOpened}" >
+                        <ContextMenu.Resources>
+                            <ControlTemplate x:Key="MenuSeparatorTemplate">
+                                <Separator Style="{StaticResource {x:Static MenuItem.SeparatorStyleKey}}" />
+                            </ControlTemplate>
+                        </ContextMenu.Resources>
+                        <ContextMenu.ItemContainerStyle>
+                            <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
+                                <Setter Property="Header" Value="{Binding Header}" />
+                                <Setter Property="Command" Value="{Binding Command}" />
+                                <Setter Property="CommandParameter" Value="{Binding CommandParameter}" />
+                                <Setter Property="ItemsSource" Value="{Binding SubItems}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                        <Setter Property="Template" Value="{StaticResource MenuSeparatorTemplate}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ContextMenu.ItemContainerStyle>
                     </ContextMenu>
                 </WindowsFormsHost.ContextMenu>
             </WindowsFormsHost>

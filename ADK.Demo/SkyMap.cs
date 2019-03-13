@@ -106,7 +106,7 @@ namespace ADK.Demo
             }
         }
 
-        private void Invalidate()
+        public void Invalidate()
         {
             OnInvalidate?.Invoke();
         }
