@@ -74,6 +74,7 @@
     <Compile Include="Commands.cs" />
     <Compile Include="ViewModels\DateVM.cs" />
     <Compile Include="ViewModels\MainVM.cs" />
+    <Compile Include="ViewModels\MotionTrackVM.cs" />
     <Compile Include="ViewModels\ObjectInfoVM.cs" />
     <Compile Include="ViewModels\SearchVM.cs" />
     <Compile Include="Views\DateWindow.xaml.cs">
@@ -92,8 +93,8 @@
     <Compile Include="Views\SearchWindow.xaml.cs">
       <DependentUpon>SearchWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\TrackPropertiesWindow.xaml.cs">
-      <DependentUpon>TrackPropertiesWindow.xaml</DependentUpon>
+    <Compile Include="Views\MotionTrackWindow.xaml.cs">
+      <DependentUpon>MotionTrackWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="Views\DateWindow.xaml">
       <SubType>Designer</SubType>
@@ -135,7 +136,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\TrackPropertiesWindow.xaml">
+    <Page Include="Views\MotionTrackWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

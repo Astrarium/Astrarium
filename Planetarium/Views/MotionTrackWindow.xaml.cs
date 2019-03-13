@@ -17,9 +17,9 @@ namespace Planetarium.Views
     /// <summary>
     /// Interaction logic for TrackPropertiesWindow.xaml
     /// </summary>
-    public partial class TrackPropertiesWindow : Window
+    public partial class MotionTrackWindow : Window
     {
-        public TrackPropertiesWindow()
+        public MotionTrackWindow()
         {
             InitializeComponent();
         }

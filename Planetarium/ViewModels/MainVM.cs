@@ -17,9 +17,9 @@ using System.Windows.Input;
 namespace Planetarium.ViewModels
 {
     public class MainVM : ViewModelBase
-    {
-        private ISkyMap map;
+    { 
         private Sky sky;
+        public ISkyMap map;
         private IViewManager viewManager;
         private Settings settings;
 
@@ -33,12 +33,17 @@ namespace Planetarium.ViewModels
         public Command<int> MapZoomCommand { get; private set; }
         public Command<PointF> MapDoubleClickCommand { get; private set; }
         public Command<PointF> MapRightClickCommand { get; private set; }
+        public Command SearchObjectCommand { get; private set; }
+        public Command<PointF> CenterOnPointCommand { get; private set; }
+        public Command<CelestialObject> GetObjectInfoCommand { get; private set; }
+        public Command<CelestialObject> MotionTrackCommand { get; private set; }
 
         public bool ContextMenuIsOpened { get; set; }
         public ObservableCollection<ContextMenuItemVM> ContextMenuItems { get; private set; } = new ObservableCollection<ContextMenuItemVM>();
 
         public class ContextMenuItemVM
         {
+            public bool IsChecked { get; set; }
             public bool IsEnabled { get; set; } = true;
             public string Header { get; set; }
             public ICommand Command { get; set; }
@@ -72,10 +77,19 @@ namespace Planetarium.ViewModels
             this.viewManager = viewManager;
             this.settings = settings;
 
+            sky.Initialize();
+            this.map.Initialize();
+
+            sky.Calculate();
+
             MapKeyDownCommand = new Command<Key>(MapKeyDown);
             MapZoomCommand = new Command<int>(MapZoom);
             MapDoubleClickCommand = new Command<PointF>(MapDoubleClick);
             MapRightClickCommand = new Command<PointF>(MapRightClick);
+            SearchObjectCommand = new Command(SearchObject);
+            CenterOnPointCommand = new Command<PointF>(CenterOnPoint);
+            GetObjectInfoCommand = new Command<CelestialObject>(GetObjectInfo);
+            MotionTrackCommand = new Command<CelestialObject>(MotionTrack);
         }
 
         private void Zoom(int delta)
@@ -149,6 +163,10 @@ namespace Planetarium.ViewModels
                     settings.SettingValueChanged -= Settings_OnSettingChanged;
                 }
             }
+            else if (key == Key.I)
+            {
+                GetObjectInfo(map.SelectedObject);
+            }
             else if (key == Key.F12)
             {
                 FullScreen = true;
@@ -162,28 +180,7 @@ namespace Planetarium.ViewModels
 
             else if (key == Key.F)
             {
-                SearchVM model = viewManager.CreateViewModel<SearchVM>();
-                bool? dialogResult = viewManager.ShowDialog(model);
-
-                if (dialogResult != null && dialogResult.Value)
-                {
-                    bool show = true;
-                    var body = model.SelectedItem.Body;
-                    if (settings.Get<bool>("Ground") && body.Horizontal.Altitude <= 0)
-                    {
-                        show = false;
-                        if (viewManager.ShowMessageBox("Question", "The object is under horizon at the moment. Do you want to switch off displaying the ground?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
-                        {
-                            show = true;
-                            settings.Set("Ground", false);
-                        }
-                    }
-
-                    if (show)
-                    {
-                        map.GoToObject(body, TimeSpan.FromSeconds(1));
-                    }
-                }
+                SearchObject();
             }
             else if (key == Key.E)
             {
@@ -243,23 +240,7 @@ namespace Planetarium.ViewModels
             }
             else if (key == Key.T)
             {
-                var body = map.SelectedObject;
-                if (body != null && body is IMovingObject)
-                {
-                    //var wTrackProperties = new TrackPropertiesWindow() { Owner = this };
-                    //wTrackProperties.ShowDialog();
-
-
-
-                    /*
-                    var formTrackSettings = viewManager.GetForm<FormTrackSettings>();
-                    formTrackSettings.Track = new Track() { Body = body, From = sky.Context.JulianDay, To = sky.Context.JulianDay + 30, LabelsStep = TimeSpan.FromDays(1) };
-                    if (formTrackSettings.ShowDialog() == DialogResult.OK)
-                    {
-                        skyView.Invalidate();
-                    }
-                    */
-                }
+                MotionTrack(map.SelectedObject);
             }
         }
 
@@ -270,9 +251,108 @@ namespace Planetarium.ViewModels
 
         private void MapDoubleClick(PointF point)
         {
-            var body = map.FindObject(point);
-            map.SelectedObject = body;
+            map.SelectedObject = map.FindObject(point);
             map.Invalidate();
+            GetObjectInfo(map.SelectedObject);
+        }
+
+        private void MapRightClick(PointF point)
+        {
+            map.SelectedObject = map.FindObject(point);
+            map.Invalidate();
+
+            ContextMenuItems.Clear();
+            
+            ContextMenuItems.Add(new ContextMenuItemVM()
+            {
+                Header = "Object info...",
+                Command = MapDoubleClickCommand,
+                CommandParameter = point,
+                IsEnabled = map.SelectedObject != null
+            });
+
+            ContextMenuItems.Add(null);
+
+            ContextMenuItems.Add(new ContextMenuItemVM()
+            {
+                Header = "Center",
+                Command = CenterOnPointCommand,
+                CommandParameter = point
+            });
+            ContextMenuItems.Add(new ContextMenuItemVM()
+            {
+                Header = "Search object...",
+                Command = SearchObjectCommand
+            });
+            ContextMenuItems.Add(new ContextMenuItemVM()
+            {
+                Header = "Go to point..."
+            });
+            ContextMenuItems.Add(new ContextMenuItemVM()
+            {
+                Header = "Measure tool"
+            });
+            ContextMenuItems.Add(null);
+
+            ContextMenuItems.Add(new ContextMenuItemVM()
+            {
+                Header = "Object ephemerides...",
+                IsEnabled = map.SelectedObject != null && sky.GetEphemerisCategories(map.SelectedObject).Any(),
+            });
+
+            ContextMenuItems.Add(new ContextMenuItemVM()
+            {
+                Header = "Motion track...",
+                IsEnabled = map.SelectedObject != null && map.SelectedObject is IMovingObject,
+                Command = MotionTrackCommand,
+                CommandParameter = map.SelectedObject
+            });
+            ContextMenuItems.Add(null);
+
+            ContextMenuItems.Add(new ContextMenuItemVM()
+            {
+                Header = "Lock / Unlock",
+                IsEnabled = map.SelectedObject != null
+            });
+            
+            NotifyPropertyChanged(nameof(ContextMenuItems));
+            NotifyPropertyChanged(nameof(ContextMenuIsOpened));
+        }
+
+        private void SearchObject()
+        {
+            SearchVM model = viewManager.CreateViewModel<SearchVM>();
+            bool? dialogResult = viewManager.ShowDialog(model);
+
+            if (dialogResult != null && dialogResult.Value)
+            {
+                bool show = true;
+                var body = model.SelectedItem.Body;
+                if (settings.Get<bool>("Ground") && body.Horizontal.Altitude <= 0)
+                {
+                    show = false;
+                    if (viewManager.ShowMessageBox("Question", "The object is under horizon at the moment. Do you want to switch off displaying the ground?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                    {
+                        show = true;
+                        settings.Set("Ground", false);
+                    }
+                }
+
+                if (show)
+                {
+                    map.GoToObject(body, TimeSpan.FromSeconds(1));
+                }
+            }
+        }
+
+        private void CenterOnPoint(PointF point)
+        {
+            map.Center.Set(map.Projection.Invert(point));
+            map.Invalidate();
+        }
+
+        private void GetObjectInfo(CelestialObject body)
+        {
             if (body != null)
             {
                 var info = sky.GetInfo(body);
@@ -290,64 +370,24 @@ namespace Planetarium.ViewModels
             }
         }
 
-        private void MapRightClick(PointF point)
+        private void MotionTrack(CelestialObject body)
         {
-            var body = map.FindObject(point);
-            map.SelectedObject = body;
-            map.Invalidate();
+            if (body != null && body is IMovingObject)
+            {
+                viewManager.ShowDialog<MotionTrackVM>();
+               
 
-            ContextMenuItems.Clear();
-            
-            ContextMenuItems.Add(new ContextMenuItemVM()
-            {
-                Header = "Object info...",
-                Command = MapDoubleClickCommand,
-                CommandParameter = point,
-                IsEnabled = body != null
-            });
 
-            ContextMenuItems.Add(null);
 
-            ContextMenuItems.Add(new ContextMenuItemVM()
-            {
-                Header = "Center"
-            });
-            ContextMenuItems.Add(new ContextMenuItemVM()
-            {
-                Header = "Search object..."
-            });
-            ContextMenuItems.Add(new ContextMenuItemVM()
-            {
-                Header = "Go to point..."
-            });
-            ContextMenuItems.Add(new ContextMenuItemVM()
-            {
-                Header = "Measure tool"
-            });
-            ContextMenuItems.Add(null);
-
-            ContextMenuItems.Add(new ContextMenuItemVM()
-            {
-                Header = "Object ephemerides...",
-                IsEnabled = body != null && sky.GetEphemerisCategories(body).Any(),
-
-            });
-
-            ContextMenuItems.Add(new ContextMenuItemVM()
-            {
-                Header = "Motion track...",
-                IsEnabled = body != null && body is IMovingObject
-            });
-            ContextMenuItems.Add(null);
-
-            ContextMenuItems.Add(new ContextMenuItemVM()
-            {
-                Header = "Lock / Unlock",
-                IsEnabled = body != null
-            });
-            
-            NotifyPropertyChanged(nameof(ContextMenuItems));
-            NotifyPropertyChanged(nameof(ContextMenuIsOpened));
+                /*
+                var formTrackSettings = viewManager.GetForm<FormTrackSettings>();
+                formTrackSettings.Track = new Track() { Body = body, From = sky.Context.JulianDay, To = sky.Context.JulianDay + 30, LabelsStep = TimeSpan.FromDays(1) };
+                if (formTrackSettings.ShowDialog() == DialogResult.OK)
+                {
+                    skyView.Invalidate();
+                }
+                */
+            }
         }
 
         private void Settings_OnSettingChanged(string settingName, object settingValue)

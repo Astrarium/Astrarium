@@ -29,9 +29,8 @@ namespace Planetarium
             base.OnStartup(e);
 
             ConfigureContainer();
-            ComposeObjects();
 
-            Current.MainWindow.Show();
+            kernel.Get<IViewManager>().ShowWindow<MainVM>();
         }
 
         private void ConfigureContainer()
@@ -115,11 +114,6 @@ namespace Planetarium
             var viewManager = new ViewManager(t => kernel.Get(t));
 
             kernel.Bind<IViewManager>().ToConstant(viewManager).InSingletonScope();
-        }
-
-        private void ComposeObjects()
-        {
-            Current.MainWindow = kernel.Get<MainWindow>();
         }
 
     }

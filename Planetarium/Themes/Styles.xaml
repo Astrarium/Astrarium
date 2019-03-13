@@ -6,6 +6,8 @@
                     xmlns:v="clr-namespace:Planetarium.Views"
                     mc:Ignorable="d">
 
+    <PopupAnimation x:Key="{x:Static SystemParameters.MenuPopupAnimationKey}">None</PopupAnimation>
+    
     <!--#region Converters-->
     <t:LeftMarginMultiplierConverter x:Key="LeftMarginMultiplierConverter" />
     <t:NotNullToBoolConverter x:Key="NotNullToBoolConverter" />
@@ -2621,7 +2623,7 @@
         					Background="{StaticResource SubMenuBackgroundBrush}" 
         					Padding="{TemplateBinding Padding}" 
         					SnapsToDevicePixels="true">
-                        <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                        <ItemsPresenter />
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
@@ -3023,13 +3025,14 @@
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
+
     <Style TargetType="{x:Type MenuItem}">
         <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"></Setter>
         <Setter Property="HorizontalContentAlignment" Value="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
         <Setter Property="VerticalContentAlignment" Value="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="ScrollViewer.PanningMode" Value="Both"/>
-        <Setter Property="MinHeight" Value="24"/>
+        <Setter Property="MinHeight" Value="25"/>
         <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
         <Setter Property="Template" Value="{DynamicResource {ComponentResourceKey ResourceId=SubmenuItemTemplateKey, TypeInTargetAssembly={x:Type MenuItem}}}"/>
         <Style.Triggers>
@@ -3038,6 +3041,7 @@
                 <Setter Property="Padding" Value="7,6,8,3"/>
                 <Setter Property="Template" Value="{DynamicResource {ComponentResourceKey ResourceId=TopLevelHeaderTemplateKey, TypeInTargetAssembly={x:Type MenuItem}}}"/>
             </Trigger>
+
             <Trigger Property="Role" Value="TopLevelItem">
                 <Setter Property="Height" Value="25"/>
                 <Setter Property="Padding" Value="7,6,8,3"/>
@@ -3057,14 +3061,12 @@
     <!--#endregion-->
 
     <!--#region Separator-->
-    <Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="{x:Type Separator}">
+    <Style TargetType="{x:Type Separator}">
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Separator}">
-                    <Grid Margin="3,2,3,2" SnapsToDevicePixels="true" UseLayoutRounding="False">
-                        <Rectangle Fill="{StaticResource MenuSeparatorBrush}" Height="1"/>
-                    </Grid>
+                    <Rectangle SnapsToDevicePixels="true" Fill="{StaticResource MenuSeparatorBrush}" Height="1"/>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

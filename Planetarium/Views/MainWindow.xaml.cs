@@ -110,30 +110,18 @@ namespace Planetarium
             return (Command<PointF>)target.GetValue(MapRightClickProperty);
         }
 
-        private SkyView skyView;
-
-        public MainWindow(ISkyMap map, Sky sky, Settings settings, IViewManager viewManager)
+        public MainWindow(ISkyMap map)
         {
             InitializeComponent();
 
-            DataContext = new MainVM(map, sky, viewManager, settings);
-
-            sky.Initialize();
-            map.Initialize();
-
-            sky.Calculate();
-
-            skyView = new SkyView();
+            var skyView = new SkyView();
             skyView.SkyMap = map;
-
             skyView.MouseDoubleClick += (o, e) => GetMapDoubleClick(this)?.Execute(new PointF((e as WF.MouseEventArgs).X, (e as WF.MouseEventArgs).Y));
             skyView.MouseClick += SkyView_MouseClick;
-            skyView.MouseMove += (o, e) => SetMousePosition(this, new PointF(e.X, e.Y));
+            skyView.MouseMove += (o, e) => { skyView.Focus(); SetMousePosition(this, new PointF(e.X, e.Y)); };
             skyView.MouseWheel += (o, e) => GetMapZoom(this)?.Execute(e.Delta);
             Host.KeyDown += (o, e) => GetMapKeyDown(this)?.Execute(e.Key);
-
             Host.Child = skyView;
-            Host.ContextMenu.DataContext = DataContext;
         }
 
         private void SkyView_MouseClick(object sender, WF.MouseEventArgs e)
@@ -141,17 +129,16 @@ namespace Planetarium
             if (e.Button == WF.MouseButtons.Right && e.Clicks == 1)
             {
                 GetMapRightClick(this)?.Execute(new PointF(e.X, e.Y));
-
-                // show context menu
-                
                 Host.ContextMenu.IsOpen = true;
             }
         }
 
         private void ContextMenu_Opened(object sender, RoutedEventArgs e)
         {
-            //ContextMenu menu = sender as ContextMenu;
-            //menu.DataContext = DataContext;
+            if (Host.ContextMenu.DataContext == null)
+            {
+                Host.ContextMenu.DataContext = DataContext;
+            }
         }
     }
 }
