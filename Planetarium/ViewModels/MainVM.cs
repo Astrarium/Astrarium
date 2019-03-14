@@ -21,7 +21,7 @@ namespace Planetarium.ViewModels
         private Sky sky;
         public ISkyMap map;
         private IViewManager viewManager;
-        private Settings settings;
+        private ISettings settings;
 
         public bool FullScreen { get; private set; }
         public string MapEquatorialCoordinatesString { get; private set; }
@@ -70,15 +70,15 @@ namespace Planetarium.ViewModels
             }
         }
 
-        public MainVM(ISkyMap map, Sky sky, IViewManager viewManager, Settings settings)
+        public MainVM(Sky sky, ISkyMap map, ISettings settings, IViewManager viewManager)
         {
-            this.map = map;
             this.sky = sky;
-            this.viewManager = viewManager;
+            this.map = map;
             this.settings = settings;
+            this.viewManager = viewManager;
 
             sky.Initialize();
-            this.map.Initialize();
+            map.Initialize();
 
             sky.Calculate();
 

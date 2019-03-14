@@ -31,5 +31,13 @@ namespace ADK.Demo
         /// <param name="settingName"></param>
         /// <param name="value"></param>
         void Set(string settingName, object value);
+
+        event Action<string, object> SettingValueChanged;
+
+        bool IsChanged { get; }
+
+        void Save();
+        void Load();
+        void Reset();
     }
 }

@@ -14,6 +14,8 @@
     <t:NotNullToVisibilityConverter x:Key="NotNullToVisibilityConverter" />
     <t:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
     <t:VisibilityConverter x:Key="VisibilityConverter" />
+    <t:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" />
+    <t:InverseBoolToResizeModeConverter x:Key="InverseBoolToResizeModeConverter" />
     <BooleanToVisibilityConverter x:Key="bool2VisibilityConverter"/>
     <!--#endregion-->
 
@@ -3710,5 +3712,21 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+
+    <Style x:Key="StatusBarMenuItem" TargetType="{x:Type MenuItem}">
+
+        <!--<menu.ItemsPanel>
+            <ItemsPanelTemplate>
+                
+            </ItemsPanelTemplate>
+        </menu.ItemsPanel>-->
+
+        <Setter Property="MinHeight" Value="16" />
+        <Setter Property="Background" Value="Transparent" />
+
+
+    </Style>
+
 
 </ResourceDictionary>

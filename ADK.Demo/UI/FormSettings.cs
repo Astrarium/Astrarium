@@ -15,7 +15,7 @@ namespace ADK.Demo.UI
 {
     public partial class FormSettings : Form
     {
-        public Settings Settings { get; private set; }
+        public ISettings Settings { get; private set; }
 
         [DesignOnly(true)]
         public FormSettings()
@@ -23,7 +23,7 @@ namespace ADK.Demo.UI
             InitializeComponent();
         }
 
-        public FormSettings(Settings settings)
+        public FormSettings(ISettings settings)
         {
             InitializeComponent();
             Settings = settings;            

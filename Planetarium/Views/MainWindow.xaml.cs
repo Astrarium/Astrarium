@@ -12,6 +12,9 @@ using ADK.Demo.Config;
 using Planetarium.ViewModels;
 using System.Drawing;
 using System.Windows.Controls;
+using System.Runtime.InteropServices;
+using System.Windows.Interop;
+using Planetarium.Themes;
 
 namespace Planetarium
 {
@@ -75,15 +78,30 @@ namespace Planetarium
         public static readonly DependencyProperty FullScreenProperty = DependencyProperty.RegisterAttached(
             "FullScreen", typeof(bool), typeof(MainWindow), new FrameworkPropertyMetadata(false, (o, e) =>
             {
-                Window window = (Window)o;
+                MainWindow window = (MainWindow)o;
                 bool value = (bool)e.NewValue;
+                var handle = new WindowInteropHelper(window).Handle;
+                int width = (int)SystemParameters.PrimaryScreenWidth;
+                int height = (int)SystemParameters.PrimaryScreenHeight;
+                uint flags = SWP_SHOWWINDOW;
                 if (value)
                 {
-                    window.WindowState = WindowState.Maximized;
+                    if (window.WindowState != WindowState.Normal)
+                    {
+                        window.Left = 0;
+                        window.Top = 0;
+                        window.Width = width;
+                        window.Height = height;                        
+                    }
+
+                    window.SaveState();
+                    window.WindowState = WindowState.Normal;
+                    SetWindowPos(handle, HWND_TOPMOST, 0, 0, width, height, flags);
                 }
                 else
                 {
-                    window.WindowState = WindowState.Normal;
+                    window.RestoreState();
+                    SetWindowPos(handle, HWND_NOTOPMOST, window.LastSize.Left, window.LastSize.Top, window.LastSize.Width, window.LastSize.Height, flags);
                 }
             }));
 
@@ -110,6 +128,18 @@ namespace Planetarium
             return (Command<PointF>)target.GetValue(MapRightClickProperty);
         }
 
+        static readonly IntPtr HWND_TOPMOST = (IntPtr)(-1);
+        static readonly IntPtr HWND_NOTOPMOST = (IntPtr)(-2);
+        const uint SWP_NOSIZE = 0x0001;
+        const uint SWP_NOMOVE = 0x0002;
+        const uint SWP_SHOWWINDOW = 0x0040;
+        const uint SWP_NOACTIVATE = 0x0010;
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern int SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, uint uFlags);
+
+        private Rectangle LastSize;
+
         public MainWindow(ISkyMap map)
         {
             InitializeComponent();
@@ -122,6 +152,23 @@ namespace Planetarium
             skyView.MouseWheel += (o, e) => GetMapZoom(this)?.Execute(e.Delta);
             Host.KeyDown += (o, e) => GetMapKeyDown(this)?.Execute(e.Key);
             Host.Child = skyView;
+        }
+
+        private WindowState LastState;
+
+        private void SaveState()
+        {
+            LastState = WindowState;
+            LastSize = new Rectangle((int)Left, (int)Top, (int)Width, (int)Height);
+        }
+
+        private void RestoreState()
+        {
+            Left = LastSize.Left;
+            Top = LastSize.Top;
+            Width = LastSize.Width;
+            Height = LastSize.Height;
+            WindowState = LastState;
         }
 
         private void SkyView_MouseClick(object sender, WF.MouseEventArgs e)
