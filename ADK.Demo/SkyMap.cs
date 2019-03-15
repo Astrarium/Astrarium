@@ -48,7 +48,27 @@ namespace ADK.Demo
         public CrdsHorizontal Center { get; } = new CrdsHorizontal(0, 0);
         public bool Antialias { get; set; } = true;
 
-        public CelestialObject SelectedObject { get; set; }
+        private CelestialObject selectedObject;
+        public CelestialObject SelectedObject
+        {
+            get
+            {
+                return selectedObject;
+            }
+            set
+            {
+                if (value != selectedObject)
+                {
+                    selectedObject = value;
+                    SelectedObjectChanged?.Invoke(selectedObject);
+                }
+            }
+        }
+        /// <summary>
+        /// Occurs when selected celestial object is changed
+        /// </summary>
+        public event Action<CelestialObject> SelectedObjectChanged;
+
         public IProjection Projection { get; set; } = null;
         public event Action OnInvalidate;
 

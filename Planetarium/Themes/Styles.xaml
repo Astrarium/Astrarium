@@ -3028,6 +3028,11 @@
         </ControlTemplate.Triggers>
     </ControlTemplate>
 
+
+    <ControlTemplate x:Key="MenuSeparatorTemplate">
+        <Separator />
+    </ControlTemplate>
+
     <Style TargetType="{x:Type MenuItem}">
         <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"></Setter>
         <Setter Property="HorizontalContentAlignment" Value="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
@@ -3058,6 +3063,16 @@
                 <Setter Property="Height" Value="21"/>
                 <Setter Property="Padding" Value="2,4,2,2"/>
             </Trigger>
+
+
+           
+            <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                <Setter Property="MinHeight" Value="0" />
+                <Setter Property="Height" Value="5" />
+                <Setter Property="Template" Value="{StaticResource MenuSeparatorTemplate}" />
+            </DataTrigger>
+          
+
         </Style.Triggers>
     </Style>
     <!--#endregion-->
@@ -3713,20 +3728,13 @@
         </Setter>
     </Style>
 
-
     <Style x:Key="StatusBarMenuItem" TargetType="{x:Type MenuItem}">
-
-        <!--<menu.ItemsPanel>
-            <ItemsPanelTemplate>
-                
-            </ItemsPanelTemplate>
-        </menu.ItemsPanel>-->
-
         <Setter Property="MinHeight" Value="16" />
         <Setter Property="Background" Value="Transparent" />
-
-
     </Style>
 
+    <Style TargetType="{x:Type ToolTip}" BasedOn="{StaticResource {x:Type Control}}">
+        <Setter Property="Background" Value="{StaticResource WindowBackgroundBrush}" />
+    </Style>
 
 </ResourceDictionary>

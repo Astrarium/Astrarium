@@ -15,6 +15,7 @@ using System.Windows.Controls;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using Planetarium.Themes;
+using System.Windows.Forms;
 
 namespace Planetarium
 {
@@ -81,27 +82,28 @@ namespace Planetarium
                 MainWindow window = (MainWindow)o;
                 bool value = (bool)e.NewValue;
                 var handle = new WindowInteropHelper(window).Handle;
-                int width = (int)SystemParameters.PrimaryScreenWidth;
-                int height = (int)SystemParameters.PrimaryScreenHeight;
+                
                 uint flags = SWP_SHOWWINDOW;
                 if (value)
                 {
+                    var bounds = CurrentScreen(window).Bounds;
                     if (window.WindowState != WindowState.Normal)
                     {
-                        window.Left = 0;
-                        window.Top = 0;
-                        window.Width = width;
-                        window.Height = height;                        
+                        window.Left = bounds.Left;
+                        window.Top = bounds.Top;
+                        window.Width = bounds.Width;
+                        window.Height = bounds.Height;                        
                     }
 
                     window.SaveState();
                     window.WindowState = WindowState.Normal;
-                    SetWindowPos(handle, HWND_TOPMOST, 0, 0, width, height, flags);
+                    SetWindowPos(handle, HWND_TOPMOST, bounds.Left, bounds.Top, bounds.Width, bounds.Height, flags);
                 }
                 else
                 {
+                    var bounds = window.SavedBounds;
                     window.RestoreState();
-                    SetWindowPos(handle, HWND_NOTOPMOST, window.LastSize.Left, window.LastSize.Top, window.LastSize.Width, window.LastSize.Height, flags);
+                    SetWindowPos(handle, HWND_NOTOPMOST, bounds.Left, bounds.Top, bounds.Width, bounds.Height, flags);
                 }
             }));
 
@@ -128,17 +130,19 @@ namespace Planetarium
             return (Command<PointF>)target.GetValue(MapRightClickProperty);
         }
 
-        static readonly IntPtr HWND_TOPMOST = (IntPtr)(-1);
-        static readonly IntPtr HWND_NOTOPMOST = (IntPtr)(-2);
-        const uint SWP_NOSIZE = 0x0001;
-        const uint SWP_NOMOVE = 0x0002;
-        const uint SWP_SHOWWINDOW = 0x0040;
-        const uint SWP_NOACTIVATE = 0x0010;
+        private static readonly IntPtr HWND_TOPMOST = (IntPtr)(-1);
+        private static readonly IntPtr HWND_NOTOPMOST = (IntPtr)(-2);
+        private const uint SWP_SHOWWINDOW = 0x0040;
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        public static extern int SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, uint uFlags);
+        private static extern int SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int left, int top, int width, int height, uint flags);
 
-        private Rectangle LastSize;
+        private Rectangle SavedBounds;
+
+        public static Screen CurrentScreen(Window window)
+        {
+            return Screen.FromPoint(new System.Drawing.Point((int)window.Left, (int)window.Top));
+        }
 
         public MainWindow(ISkyMap map)
         {
@@ -159,15 +163,15 @@ namespace Planetarium
         private void SaveState()
         {
             LastState = WindowState;
-            LastSize = new Rectangle((int)Left, (int)Top, (int)Width, (int)Height);
+            SavedBounds = new Rectangle((int)Left, (int)Top, (int)Width, (int)Height);
         }
 
         private void RestoreState()
         {
-            Left = LastSize.Left;
-            Top = LastSize.Top;
-            Width = LastSize.Width;
-            Height = LastSize.Height;
+            Left = SavedBounds.Left;
+            Top = SavedBounds.Top;
+            Width = SavedBounds.Width;
+            Height = SavedBounds.Height;
             WindowState = LastState;
         }
 

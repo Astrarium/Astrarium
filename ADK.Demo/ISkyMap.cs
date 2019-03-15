@@ -42,6 +42,11 @@ namespace ADK.Demo
         CelestialObject SelectedObject { get; set; }
 
         /// <summary>
+        /// Occurs when selected celestial object is changed
+        /// </summary>
+        event Action<CelestialObject> SelectedObjectChanged;
+
+        /// <summary>
         /// Gets or sets projection which is used for converting celestial coordinates to the sky map plane.
         /// </summary>
         IProjection Projection { get; set; }

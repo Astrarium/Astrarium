@@ -18,10 +18,10 @@ namespace Planetarium.ViewModels
 {
     public class MainVM : ViewModelBase
     { 
-        private Sky sky;
-        public ISkyMap map;
-        private IViewManager viewManager;
-        private ISettings settings;
+        private readonly Sky sky;
+        private readonly ISkyMap map;
+        private readonly IViewManager viewManager;
+        private readonly ISettings settings;
 
         public bool FullScreen { get; private set; }
         public string MapEquatorialCoordinatesString { get; private set; }
@@ -37,18 +37,29 @@ namespace Planetarium.ViewModels
         public Command<PointF> CenterOnPointCommand { get; private set; }
         public Command<CelestialObject> GetObjectInfoCommand { get; private set; }
         public Command<CelestialObject> MotionTrackCommand { get; private set; }
+        public Command<CelestialObject> CenterOnObjectCommand { get; private set; }
+        public Command ClearObjectsHistoryCommand { get; private set; }
 
-        public bool ContextMenuIsOpened { get; set; }
-        public ObservableCollection<ContextMenuItemVM> ContextMenuItems { get; private set; } = new ObservableCollection<ContextMenuItemVM>();
+        public ObservableCollection<MenuItemVM> ContextMenuItems { get; private set; } = new ObservableCollection<MenuItemVM>();
+        public ObservableCollection<MenuItemVM> SelectedObjectsMenuItems { get; private set; } = new ObservableCollection<MenuItemVM>();
+        public string SelectedObjectName { get; private set; }
 
-        public class ContextMenuItemVM
+        public class MenuItemVM
         {
             public bool IsChecked { get; set; }
             public bool IsEnabled { get; set; } = true;
             public string Header { get; set; }
             public ICommand Command { get; set; }
             public object CommandParameter { get; set; }
-            public ObservableCollection<ContextMenuItemVM> SubItems { get; set; }
+            public ObservableCollection<MenuItemVM> SubItems { get; set; }
+        }
+
+        public class ObservableUniqueItemsCollection<T> : ObservableCollection<T>
+        {
+            public new void Add(T item)
+            {
+                base.Add(item);
+            }
         }
 
         public PointF SkyMousePosition
@@ -63,10 +74,11 @@ namespace Planetarium.ViewModels
                 MapConstellationNameString = Constellations.FindConstellation(eq, sky.Context.JulianDay);
                 MapViewAngleString = map.ViewAngle.ToString();
 
-                NotifyPropertyChanged(nameof(MapEquatorialCoordinatesString));
-                NotifyPropertyChanged(nameof(MapHorizontalCoordinatesString));
-                NotifyPropertyChanged(nameof(MapConstellationNameString));
-                NotifyPropertyChanged(nameof(MapViewAngleString));
+                NotifyPropertyChanged(
+                    nameof(MapEquatorialCoordinatesString), 
+                    nameof(MapHorizontalCoordinatesString), 
+                    nameof(MapConstellationNameString), 
+                    nameof(MapViewAngleString));
             }
         }
 
@@ -90,6 +102,53 @@ namespace Planetarium.ViewModels
             CenterOnPointCommand = new Command<PointF>(CenterOnPoint);
             GetObjectInfoCommand = new Command<CelestialObject>(GetObjectInfo);
             MotionTrackCommand = new Command<CelestialObject>(MotionTrack);
+            CenterOnObjectCommand = new Command<CelestialObject>(CenterOnObject);
+            ClearObjectsHistoryCommand = new Command(ClearObjectsHistory);
+
+            map.SelectedObjectChanged += Map_SelectedObjectChanged;
+        }
+
+        private void Map_SelectedObjectChanged(CelestialObject body)
+        {
+            if (body != null)
+            {
+                SelectedObjectName = sky.GetObjectName(body);
+
+                if (!SelectedObjectsMenuItems.Any())
+                {                    
+                    SelectedObjectsMenuItems.Add(new MenuItemVM()
+                    {
+                        Header = "Clear all",
+                        Command = ClearObjectsHistoryCommand
+                    });
+                    SelectedObjectsMenuItems.Add(null);
+                }
+
+                var existingItem = SelectedObjectsMenuItems.FirstOrDefault(i => i?.CommandParameter == body);
+                if (existingItem != null)
+                {
+                    SelectedObjectsMenuItems.Remove(existingItem);
+                }
+
+                SelectedObjectsMenuItems.Insert(2, new MenuItemVM()
+                {
+                    Command = CenterOnObjectCommand,
+                    CommandParameter = body,
+                    Header = SelectedObjectName
+                });
+
+                // 10 items of history + "clear all" + separator
+                if (SelectedObjectsMenuItems.Count > 12)
+                {
+                    SelectedObjectsMenuItems.RemoveAt(0);
+                }
+            }
+            else
+            {
+                SelectedObjectName = null;
+            }
+
+            NotifyPropertyChanged(nameof(SelectedObjectName));
         }
 
         private void Zoom(int delta)
@@ -169,15 +228,12 @@ namespace Planetarium.ViewModels
             }
             else if (key == Key.F12)
             {
-                FullScreen = true;
-                NotifyPropertyChanged(nameof(FullScreen));
+                SetFullScreen(true);
             }
             else if (key == Key.Escape)
             {
-                FullScreen = false;
-                NotifyPropertyChanged(nameof(FullScreen));
+                SetFullScreen(false);
             }
-
             else if (key == Key.F)
             {
                 SearchObject();
@@ -263,7 +319,7 @@ namespace Planetarium.ViewModels
 
             ContextMenuItems.Clear();
             
-            ContextMenuItems.Add(new ContextMenuItemVM()
+            ContextMenuItems.Add(new MenuItemVM()
             {
                 Header = "Object info...",
                 Command = MapDoubleClickCommand,
@@ -273,34 +329,34 @@ namespace Planetarium.ViewModels
 
             ContextMenuItems.Add(null);
 
-            ContextMenuItems.Add(new ContextMenuItemVM()
+            ContextMenuItems.Add(new MenuItemVM()
             {
                 Header = "Center",
                 Command = CenterOnPointCommand,
                 CommandParameter = point
             });
-            ContextMenuItems.Add(new ContextMenuItemVM()
+            ContextMenuItems.Add(new MenuItemVM()
             {
                 Header = "Search object...",
                 Command = SearchObjectCommand
             });
-            ContextMenuItems.Add(new ContextMenuItemVM()
+            ContextMenuItems.Add(new MenuItemVM()
             {
                 Header = "Go to point..."
             });
-            ContextMenuItems.Add(new ContextMenuItemVM()
+            ContextMenuItems.Add(new MenuItemVM()
             {
                 Header = "Measure tool"
             });
             ContextMenuItems.Add(null);
 
-            ContextMenuItems.Add(new ContextMenuItemVM()
+            ContextMenuItems.Add(new MenuItemVM()
             {
                 Header = "Object ephemerides...",
                 IsEnabled = map.SelectedObject != null && sky.GetEphemerisCategories(map.SelectedObject).Any(),
             });
 
-            ContextMenuItems.Add(new ContextMenuItemVM()
+            ContextMenuItems.Add(new MenuItemVM()
             {
                 Header = "Motion track...",
                 IsEnabled = map.SelectedObject != null && map.SelectedObject is IMovingObject,
@@ -309,40 +365,48 @@ namespace Planetarium.ViewModels
             });
             ContextMenuItems.Add(null);
 
-            ContextMenuItems.Add(new ContextMenuItemVM()
+            ContextMenuItems.Add(new MenuItemVM()
             {
                 Header = "Lock / Unlock",
                 IsEnabled = map.SelectedObject != null
             });
             
             NotifyPropertyChanged(nameof(ContextMenuItems));
-            NotifyPropertyChanged(nameof(ContextMenuIsOpened));
         }
 
         private void SearchObject()
         {
-            SearchVM model = viewManager.CreateViewModel<SearchVM>();
-            bool? dialogResult = viewManager.ShowDialog(model);
+            SearchVM vm = viewManager.CreateViewModel<SearchVM>();
+            bool? dialogResult = viewManager.ShowDialog(vm);
 
             if (dialogResult != null && dialogResult.Value)
             {
-                bool show = true;
-                var body = model.SelectedItem.Body;
-                if (settings.Get<bool>("Ground") && body.Horizontal.Altitude <= 0)
-                {
-                    show = false;
-                    if (viewManager.ShowMessageBox("Question", "The object is under horizon at the moment. Do you want to switch off displaying the ground?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
-                    {
-                        show = true;
-                        settings.Set("Ground", false);
-                    }
-                }
+                CenterOnObject(vm.SelectedItem.Body);
+            }
+        }
 
-                if (show)
+        private void CenterOnObject(CelestialObject body)
+        {
+            bool show = true;
+            if (settings.Get<bool>("Ground") && body.Horizontal.Altitude <= 0)
+            {
+                show = false;
+                if (viewManager.ShowMessageBox("Question", "The object is under horizon at the moment. Do you want to switch off displaying the ground?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
-                    map.GoToObject(body, TimeSpan.FromSeconds(1));
+                    show = true;
+                    settings.Set("Ground", false);
                 }
             }
+
+            if (show)
+            {
+                map.GoToObject(body, TimeSpan.FromSeconds(1));
+            }
+        }
+
+        private void ClearObjectsHistory()
+        {
+            SelectedObjectsMenuItems.Clear();
         }
 
         private void CenterOnPoint(PointF point)
@@ -388,6 +452,12 @@ namespace Planetarium.ViewModels
                 }
                 */
             }
+        }
+
+        private void SetFullScreen(bool isFullScreen)
+        {
+            FullScreen = isFullScreen;
+            NotifyPropertyChanged(nameof(FullScreen));
         }
 
         private void Settings_OnSettingChanged(string settingName, object settingValue)

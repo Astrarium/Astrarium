@@ -83,9 +83,7 @@ namespace Planetarium.ViewModels
             set
             {
                 _Year = value;
-                NotifyPropertyChanged(nameof(DaysCount));
-                NotifyPropertyChanged(nameof(Year));
-                NotifyPropertyChanged(nameof(JulianDay));
+                NotifyPropertyChanged(nameof(DaysCount), nameof(Year), nameof(JulianDay));
             }
         }
 
@@ -106,8 +104,7 @@ namespace Planetarium.ViewModels
             set
             {
                 _Day = value;
-                NotifyPropertyChanged(nameof(Day));
-                NotifyPropertyChanged(nameof(JulianDay));
+                NotifyPropertyChanged(nameof(Day), nameof(JulianDay));
             }
         }
 
@@ -128,9 +125,7 @@ namespace Planetarium.ViewModels
             set
             {
                 _SelectedMonth = value;
-                NotifyPropertyChanged(nameof(DaysCount));
-                NotifyPropertyChanged(nameof(SelectedMonth));
-                NotifyPropertyChanged(nameof(JulianDay));
+                NotifyPropertyChanged(nameof(DaysCount), nameof(SelectedMonth), nameof(JulianDay));
             }
         }
 
@@ -151,8 +146,7 @@ namespace Planetarium.ViewModels
             set
             {
                 _Hours = value;
-                NotifyPropertyChanged(nameof(Hours));
-                NotifyPropertyChanged(nameof(JulianDay));
+                NotifyPropertyChanged(nameof(Hours), nameof(JulianDay));
             }
         }
 
@@ -173,8 +167,7 @@ namespace Planetarium.ViewModels
             set
             {
                 _Minutes = value;
-                NotifyPropertyChanged(nameof(Minutes));
-                NotifyPropertyChanged(nameof(JulianDay));
+                NotifyPropertyChanged(nameof(Minutes), nameof(JulianDay));
             }
         }
 
@@ -195,8 +188,7 @@ namespace Planetarium.ViewModels
             set
             {
                 _Seconds = value;
-                NotifyPropertyChanged(nameof(Seconds));
-                NotifyPropertyChanged(nameof(JulianDay));
+                NotifyPropertyChanged(nameof(Seconds), nameof(JulianDay));
             }
         }
 

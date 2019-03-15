@@ -20,9 +20,7 @@ namespace Planetarium
     /// </summary>
     public partial class App : Application
     {
-        IKernel kernel = new StandardKernel();
-
-        Dictionary<Type, Type> viewModelViewBindings = new Dictionary<Type, Type>();
+        private IKernel kernel = new StandardKernel();
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -106,14 +104,9 @@ namespace Planetarium
                 .Cast<BaseAstroEventsProvider>()
                 .ToArray();
 
-            var sky = new Sky(context, calculators, eventProviders);
-
-            kernel.Bind<Sky, ISearcher>().ToConstant(sky).InSingletonScope();
-            kernel.Bind<ISkyMap>().ToConstant(new SkyMap(context, renderers));
-
-            var viewManager = new ViewManager(t => kernel.Get(t));
-
-            kernel.Bind<IViewManager>().ToConstant(viewManager).InSingletonScope();
+            kernel.Bind<Sky, ISearcher>().ToConstant(new Sky(context, calculators, eventProviders)).InSingletonScope();
+            kernel.Bind<ISkyMap>().ToConstant(new SkyMap(context, renderers)).InSingletonScope();
+            kernel.Bind<IViewManager>().ToConstant(new ViewManager(t => kernel.Get(t))).InSingletonScope();
         }
 
     }
