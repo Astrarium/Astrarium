@@ -5,20 +5,9 @@
     xmlns:t="clr-namespace:Planetarium.Themes">
 
     <Style TargetType="{x:Type Window}">
-
         <Setter Property="BorderBrush" Value="{StaticResource WindowBorderBrush}" />
         <Setter Property="Background" Value="{StaticResource WindowBackgroundBrush}" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
-        <Setter Property="WindowChrome.WindowChrome">
-            <Setter.Value>
-                <WindowChrome CaptionHeight="30"
-                              CornerRadius="0"
-                              GlassFrameThickness="0"
-                              NonClientFrameEdges="None"
-                              ResizeBorderThickness="5"
-                              UseAeroCaptionButtons="False" />
-            </Setter.Value>
-        </Setter>
 
         <Setter Property="Template">
             <Setter.Value>
@@ -26,8 +15,7 @@
                     <Grid>
                         <Border
                             Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="4,32,4,4">
+                            BorderBrush="{TemplateBinding BorderBrush}">
                             <AdornerDecorator>
                                 <ContentPresenter />
                             </AdornerDecorator>
@@ -40,12 +28,21 @@
                                         <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType=Window}}" Value="Normal">
                                             <Setter Property="Margin" Value="0" />
                                         </DataTrigger>
+                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(t:WindowProperties.IsFullScreen)}" Value="true">
+                                            <Setter Property="BorderThickness" Value="0" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(t:WindowProperties.IsFullScreen)}" Value="false">
+                                            <Setter Property="BorderThickness" Value="4,32,4,4" />
+                                        </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
                             </Border.Style>
                         </Border>
 
-                        <Grid Height="32" VerticalAlignment="Top">
+                        <Grid Height="32" VerticalAlignment="Top" 
+                              Visibility="{Binding RelativeSource={RelativeSource TemplatedParent}, 
+                              Path=(t:WindowProperties.IsFullScreen), 
+                              Converter={StaticResource InverseBoolToVisibilityConverter}}">
 
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -59,7 +56,7 @@
                                        FontSize="16"
                                        Foreground="White"
                                        Text="{TemplateBinding Title}" 
-                                       Grid.Column="1"/>
+                                       Grid.Column="1" />
 
                             <StackPanel Orientation="Horizontal" Grid.Column="2">
 
@@ -100,5 +97,29 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+
+        <Setter Property="WindowChrome.WindowChrome">
+            <Setter.Value>
+                <WindowChrome CaptionHeight="30"
+                              CornerRadius="0"
+                              GlassFrameThickness="0"
+                              NonClientFrameEdges="None"
+                              ResizeBorderThickness="5"
+                              UseAeroCaptionButtons="False" />
+            </Setter.Value>
+        </Setter>
+
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=(t:WindowProperties.IsFullScreen)}" Value="false">
+                <Setter Property="WindowChrome.CaptionHeight" Value="30" />
+                <Setter Property="WindowChrome.ResizeBorderThickness" Value="5" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=(t:WindowProperties.IsFullScreen)}" Value="true">
+                <Setter Property="WindowChrome.CaptionHeight" Value="0" />
+                <Setter Property="WindowChrome.ResizeBorderThickness" Value="0" />
+            </DataTrigger>
+
+        </Style.Triggers>
     </Style>
+
 </ResourceDictionary>

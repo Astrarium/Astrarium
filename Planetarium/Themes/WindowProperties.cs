@@ -17,6 +17,10 @@ namespace Planetarium.Themes
         public static readonly DependencyProperty MaxButtonVisibleProperty = DependencyProperty.RegisterAttached(
             "MaxButtonVisible", typeof(Visibility), typeof(WindowProperties), new PropertyMetadata(Visibility.Visible));
 
+        public static readonly DependencyProperty IsFullScreenProperty = DependencyProperty.RegisterAttached(
+            "IsFullScreen", typeof(bool), typeof(WindowProperties), new PropertyMetadata(false));
+
+
         public static void SetMinButtonVisible(DependencyObject target, Visibility value)
         {
             target.SetValue(MinButtonVisibleProperty, value);
@@ -35,6 +39,16 @@ namespace Planetarium.Themes
         public static Visibility GetMaxButtonVisible(DependencyObject target)
         {
             return (Visibility)target.GetValue(MaxButtonVisibleProperty);
+        }
+
+        public static void SetIsFullScreen(DependencyObject target, bool value)
+        {
+            target.SetValue(IsFullScreenProperty, value);
+        }
+
+        public static bool GetIsFullScreen(DependencyObject target)
+        {
+            return (bool)target.GetValue(IsFullScreenProperty);
         }
     }
 }

@@ -30,7 +30,7 @@ namespace Planetarium.ViewModels
         public string MapViewAngleString { get; private set; }
 
         public Command<Key> MapKeyDownCommand { get; private set; }
-        public Command<int> MapZoomCommand { get; private set; }
+        public Command<int> ZoomCommand { get; private set; }
         public Command<PointF> MapDoubleClickCommand { get; private set; }
         public Command<PointF> MapRightClickCommand { get; private set; }
         public Command SearchObjectCommand { get; private set; }
@@ -95,7 +95,7 @@ namespace Planetarium.ViewModels
             sky.Calculate();
 
             MapKeyDownCommand = new Command<Key>(MapKeyDown);
-            MapZoomCommand = new Command<int>(MapZoom);
+            ZoomCommand = new Command<int>(Zoom);
             MapDoubleClickCommand = new Command<PointF>(MapDoubleClick);
             MapRightClickCommand = new Command<PointF>(MapRightClick);
             SearchObjectCommand = new Command(SearchObject);
@@ -106,6 +106,13 @@ namespace Planetarium.ViewModels
             ClearObjectsHistoryCommand = new Command(ClearObjectsHistory);
 
             map.SelectedObjectChanged += Map_SelectedObjectChanged;
+            map.ViewAngleChanged += Map_ViewAngleChanged;
+        }
+
+        private void Map_ViewAngleChanged(double viewAngle)
+        {
+            MapViewAngleString = map.ViewAngle.ToString();
+            NotifyPropertyChanged(nameof(MapViewAngleString));
         }
 
         private void Map_SelectedObjectChanged(CelestialObject body)
@@ -145,7 +152,7 @@ namespace Planetarium.ViewModels
             }
             else
             {
-                SelectedObjectName = null;
+                SelectedObjectName = "<No object>";
             }
 
             NotifyPropertyChanged(nameof(SelectedObjectName));
@@ -176,7 +183,6 @@ namespace Planetarium.ViewModels
             map.ViewAngle = v;
             map.Invalidate();
         }
-
 
         private void MapKeyDown(Key key)
         {
@@ -298,11 +304,6 @@ namespace Planetarium.ViewModels
             {
                 MotionTrack(map.SelectedObject);
             }
-        }
-
-        private void MapZoom(int delta)
-        {
-            Zoom(delta);
         }
 
         private void MapDoubleClick(PointF point)

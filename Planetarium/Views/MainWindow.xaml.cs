@@ -16,6 +16,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using Planetarium.Themes;
 using System.Windows.Forms;
+using System.Windows.Shell;
 
 namespace Planetarium
 {
@@ -96,6 +97,8 @@ namespace Planetarium
                     }
 
                     window.SaveState();
+
+                    WindowProperties.SetIsFullScreen(window, true);
                     window.WindowState = WindowState.Normal;
                     SetWindowPos(handle, HWND_TOPMOST, bounds.Left, bounds.Top, bounds.Width, bounds.Height, flags);
                 }
@@ -103,6 +106,8 @@ namespace Planetarium
                 {
                     var bounds = window.SavedBounds;
                     window.RestoreState();
+
+                    WindowProperties.SetIsFullScreen(window, false);
                     SetWindowPos(handle, HWND_NOTOPMOST, bounds.Left, bounds.Top, bounds.Width, bounds.Height, flags);
                 }
             }));
@@ -137,8 +142,6 @@ namespace Planetarium
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         private static extern int SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int left, int top, int width, int height, uint flags);
 
-        private Rectangle SavedBounds;
-
         public static Screen CurrentScreen(Window window)
         {
             return Screen.FromPoint(new System.Drawing.Point((int)window.Left, (int)window.Top));
@@ -158,11 +161,12 @@ namespace Planetarium
             Host.Child = skyView;
         }
 
-        private WindowState LastState;
+        private Rectangle SavedBounds;
+        private WindowState SavedState;
 
         private void SaveState()
         {
-            LastState = WindowState;
+            SavedState = WindowState;
             SavedBounds = new Rectangle((int)Left, (int)Top, (int)Width, (int)Height);
         }
 
@@ -172,7 +176,7 @@ namespace Planetarium
             Top = SavedBounds.Top;
             Width = SavedBounds.Width;
             Height = SavedBounds.Height;
-            WindowState = LastState;
+            WindowState = SavedState;
         }
 
         private void SkyView_MouseClick(object sender, WF.MouseEventArgs e)

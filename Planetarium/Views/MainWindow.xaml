@@ -12,7 +12,7 @@
         v:MainWindow.MapKeyDown="{Binding MapKeyDownCommand}"
         v:MainWindow.MapDoubleClick="{Binding MapDoubleClickCommand}"
         v:MainWindow.MapRightClick="{Binding MapRightClickCommand}"
-        v:MainWindow.MapZoom="{Binding MapZoomCommand}"
+        v:MainWindow.MapZoom="{Binding ZoomCommand}"
         Title="Planetarium" Height="450" Width="800">
 
     <Grid>
@@ -61,23 +61,23 @@
             </WindowsFormsHost>
         </DockPanel>
         <StatusBar Grid.Row="2">
-            <TextBlock x:Name="lblConstellation" Width="30" TextAlignment="Center" Text="{Binding MapConstellationNameString}" />
+            <TextBlock Width="30" TextAlignment="Center" Text="{Binding MapConstellationNameString}" />
             <Separator />
-            <TextBlock x:Name="lblEquatorialCoordinates" Width="220" Text="{Binding MapEquatorialCoordinatesString}" />
+            <TextBlock Width="220" Text="{Binding MapEquatorialCoordinatesString}" />
             <Separator />
-            <TextBlock x:Name="lblHorizontalCoordinates" Width="220" Text="{Binding MapHorizontalCoordinatesString}" />
+            <TextBlock Width="220" Text="{Binding MapHorizontalCoordinatesString}" />
             <Separator />
-            <TextBlock x:Name="lblViewAngle" Text="{Binding MapViewAngleString}" MinWidth="100" />
+            <TextBlock Text="{Binding MapViewAngleString}" MinWidth="100" />
             <Separator />
 
             <StatusBarItem>
                 <Menu Background="Transparent">
-                    <MenuItem Style="{StaticResource StatusBarMenuItem}" Padding="0" Visibility="Visible" ItemsSource="{Binding SelectedObjectsMenuItems}" Header="{Binding Path=SelectedObjectName,FallbackValue='No selected object'}" ToolTip="Selected Object">
-                        <MenuItem.Icon>
-                            <Canvas Width="12" Height="12">
-                                <Path Width="12" Height="12" Fill="White" Stretch="Fill" Data="M17.9,17.39C17.64,16.59 16.89,16 16,16H15V13A1,1 0 0,0 14,12H8V10H10A1,1 0 0,0 11,9V7H13A2,2 0 0,0 15,5V4.59C17.93,5.77 20,8.64 20,12C20,14.08 19.2,15.97 17.9,17.39M11,19.93C7.05,19.44 4,16.08 4,12C4,11.38 4.08,10.78 4.21,10.21L9,15V16A2,2 0 0,0 11,18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z" />
-                            </Canvas>
-                        </MenuItem.Icon>
+                    <MenuItem Style="{StaticResource StatusBarMenuItem}" 
+                              Padding="0" 
+                              Visibility="Visible" 
+                              ItemsSource="{Binding SelectedObjectsMenuItems}" 
+                              Header="{Binding SelectedObjectName}" 
+                              ToolTip="Selected Object">
                         <MenuItem.ItemContainerStyle>
                             <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
                                 <Setter Property="IsChecked" Value="{Binding IsChecked}" />

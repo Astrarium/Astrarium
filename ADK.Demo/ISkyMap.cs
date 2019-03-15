@@ -32,6 +32,11 @@ namespace ADK.Demo
         double ViewAngle { get; set; }
 
         /// <summary>
+        /// Occurs when map's View Angle is changed.
+        /// </summary>
+        event Action<double> ViewAngleChanged;
+
+        /// <summary>
         /// Gets or sets horizontal coordinates of the central point of the canvas.
         /// </summary>
         CrdsHorizontal Center { get; }

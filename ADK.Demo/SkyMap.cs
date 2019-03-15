@@ -44,7 +44,28 @@ namespace ADK.Demo
 
         public int Width { get; set; }
         public int Height { get; set; }
-        public double ViewAngle { get; set; } = 90;
+
+        private double viewAngle = 90;
+        public double ViewAngle
+        {
+            get
+            {
+                return viewAngle;
+            }
+            set
+            {
+                viewAngle = value;
+                ViewAngleChanged?.Invoke(viewAngle);
+            }
+        }
+        
+        /// <summary>
+        /// Occurs when map's View Angle is changed.
+        /// </summary>
+        public event Action<double> ViewAngleChanged;
+
+
+
         public CrdsHorizontal Center { get; } = new CrdsHorizontal(0, 0);
         public bool Antialias { get; set; } = true;
 
