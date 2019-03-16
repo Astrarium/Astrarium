@@ -274,31 +274,11 @@ namespace Planetarium.ViewModels
             }
             else if (key == Key.P)
             {
-                //var body = map.SelectedObject;
-                //if (body != null)
-                //{
-                //    using (var formEphemerisSettings = new FormEphemerisSettings(sky, body))
-                //    {
-                //        if (formEphemerisSettings.ShowDialog() == WF.DialogResult.OK)
-                //        {
-                //            var ephem = await Task.Run(() => sky.GetEphemerides(
-                //                formEphemerisSettings.SelectedObject,
-                //                formEphemerisSettings.JulianDayFrom,
-                //                formEphemerisSettings.JulianDayTo,
-                //                formEphemerisSettings.Step,
-                //                formEphemerisSettings.Categories
-                //            ));
-
-                //            var formEphemeris = new FormEphemeris(ephem,
-                //                formEphemerisSettings.JulianDayFrom,
-                //                formEphemerisSettings.JulianDayTo,
-                //                formEphemerisSettings.Step,
-                //                sky.Context.GeoLocation.UtcOffset);
-
-                //            formEphemeris.Show();
-                //        }
-                //    }
-                //}
+                var body = map.SelectedObject;
+                if (body != null)
+                {
+                    GetObjectEphemeris(body);
+                }
             }
             else if (key == Key.T)
             {
@@ -373,6 +353,39 @@ namespace Planetarium.ViewModels
             });
             
             NotifyPropertyChanged(nameof(ContextMenuItems));
+        }
+
+        private async void GetObjectEphemeris(CelestialObject body)
+        {
+            using (var formEphemerisSettings = new FormEphemerisSettings(sky, body))
+            {
+                if (formEphemerisSettings.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    var ephem = await Task.Run(() => sky.GetEphemerides(
+                        formEphemerisSettings.SelectedObject,
+                        formEphemerisSettings.JulianDayFrom,
+                        formEphemerisSettings.JulianDayTo,
+                        formEphemerisSettings.Step,
+                        formEphemerisSettings.Categories
+                    ));
+
+                    var vm = new EphemerisVM();
+                    vm.SetEphemeris(ephem, formEphemerisSettings.JulianDayFrom,
+                        formEphemerisSettings.JulianDayTo,
+                        formEphemerisSettings.Step,
+                        sky.Context.GeoLocation.UtcOffset);
+
+                    viewManager.ShowDialog(vm);
+
+                    //var formEphemeris = new FormEphemeris(ephem,
+                    //    formEphemerisSettings.JulianDayFrom,
+                    //    formEphemerisSettings.JulianDayTo,
+                    //    formEphemerisSettings.Step,
+                    //    sky.Context.GeoLocation.UtcOffset);
+
+                    //formEphemeris.Show();
+                }
+            }
         }
 
         private void SearchObject()

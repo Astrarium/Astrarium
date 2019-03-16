@@ -74,11 +74,15 @@
     <Compile Include="Commands.cs" />
     <Compile Include="ViewModels\DateVM.cs" />
     <Compile Include="ViewModels\MainVM.cs" />
+    <Compile Include="ViewModels\EphemerisVM.cs" />
     <Compile Include="ViewModels\MotionTrackVM.cs" />
     <Compile Include="ViewModels\ObjectInfoVM.cs" />
     <Compile Include="ViewModels\SearchVM.cs" />
     <Compile Include="Views\DateWindow.xaml.cs">
       <DependentUpon>DateWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\EphemerisWindow.xaml.cs">
+      <DependentUpon>EphemerisWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\IntegerUpDown.cs" />
     <Compile Include="Views\MessageBoxWindow.xaml.cs">
@@ -97,6 +101,10 @@
       <DependentUpon>MotionTrackWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="Views\DateWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\EphemerisWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -2030,8 +2030,8 @@
                                 BorderThickness="0,1,0,1" Background="{TemplateBinding Background}">
                             <Grid>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition MaxHeight="7"/>
-                                    <RowDefinition/>
+                                    <RowDefinition MaxHeight="7" />
+                                    <RowDefinition />
                                 </Grid.RowDefinitions>
                                 <Border Padding="{TemplateBinding Padding}" Grid.RowSpan="2">
                                     <ContentPresenter x:Name="HeaderContent"
@@ -3389,6 +3389,7 @@
 														 BorderThickness="{TemplateBinding BorderThickness}"
 														 Background="{TemplateBinding Background}"
 														 Padding="{TemplateBinding Padding}">
+                        
                             <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                               RecognizesAccessKey="True"
                                               SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
@@ -3555,9 +3556,7 @@
                                 <ContentPresenter RecognizesAccessKey="True"
                                                   SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
                                                   VerticalAlignment="Center"/>
-                                <Control SnapsToDevicePixels="false"
-                                         Template="{Binding ValidationErrorTemplate, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}"
-                                         Visibility="{Binding (Validation.HasError), Converter={StaticResource bool2VisibilityConverter}, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}"/>
+
                             </StackPanel>
                         </Border>
                         <Thumb x:Name="PART_TopHeaderGripper" Style="{StaticResource RowHeaderGripperStyle}" VerticalAlignment="Top"/>
