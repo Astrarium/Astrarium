@@ -61,22 +61,22 @@
             </WindowsFormsHost>
         </DockPanel>
         <StatusBar Grid.Row="2">
-            <TextBlock Width="30" TextAlignment="Center" Text="{Binding MapConstellationNameString}" />
+            <TextBlock Width="30" TextAlignment="Center" Text="{Binding MapConstellationNameString, FallbackValue='Con'}" />
             <Separator />
-            <TextBlock Width="220" Text="{Binding MapEquatorialCoordinatesString}" />
+            <TextBlock Width="220" Text="{Binding MapEquatorialCoordinatesString, FallbackValue='Equatorial coordinates'}" />
             <Separator />
-            <TextBlock Width="220" Text="{Binding MapHorizontalCoordinatesString}" />
+            <TextBlock Width="220" Text="{Binding MapHorizontalCoordinatesString, FallbackValue='Horizontal coordinates'}" />
             <Separator />
-            <TextBlock Text="{Binding MapViewAngleString}" MinWidth="100" />
+            <TextBlock Text="{Binding MapViewAngleString, FallbackValue='Field of view'}" MinWidth="100" />
             <Separator />
 
             <StatusBarItem>
                 <Menu Background="Transparent">
                     <MenuItem Style="{StaticResource StatusBarMenuItem}" 
-                              Padding="0" 
+                              Padding="4 0"
                               Visibility="Visible" 
                               ItemsSource="{Binding SelectedObjectsMenuItems}" 
-                              Header="{Binding SelectedObjectName}" 
+                              Header="{Binding SelectedObjectName, FallbackValue='selected object'}" 
                               ToolTip="Selected Object">
                         <MenuItem.ItemContainerStyle>
                             <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
