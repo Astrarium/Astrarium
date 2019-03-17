@@ -3,9 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:v="clr-namespace:Planetarium.Views"
         mc:Ignorable="d"
-        Title="Object Info" 
+        Title="Object Ephemeris" 
         Width="600" Height="600"
         MinWidth="300" MinHeight="300"
         Style="{StaticResource {x:Type Window}}"
@@ -16,7 +15,7 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        
+
         <DataGrid 
             Grid.Row="0"
             VerticalScrollBarVisibility="Auto"
@@ -35,14 +34,6 @@
             RowHeaderWidth="0"
             AutoGeneratingColumn="DataGrid_AutoGeneratingColumn"
             ItemsSource="{Binding EphemerisTable.DefaultView}">
-            <DataGrid.Columns>
-                
-            </DataGrid.Columns>
-
-            
-                
-            
-
             <DataGrid.Resources>
                 <ResourceDictionary>
                     <Style x:Key="{x:Type DataGridCell}" TargetType="{x:Type DataGridCell}">
@@ -56,7 +47,6 @@
                         <Style.Triggers>
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter Property="Background" Value="{x:Null}" />
-                                
                             </Trigger>
                         </Style.Triggers>
                     </Style>
@@ -67,7 +57,6 @@
                         <Style.Triggers>
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter Property="Background" Value="{x:Null}" />
-                                
                             </Trigger>
                         </Style.Triggers>
                     </Style>
@@ -78,7 +67,8 @@
         <StackPanel Grid.Row="2"                    
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
-            <Button MinWidth="80">Close</Button>
+            <Button MinWidth="80" Width="Auto" Margin="4 0" Padding="8 2" Command="{Binding SaveToFileCommand}">Save to File...</Button>
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CloseCommand}">Close</Button>
         </StackPanel>
 
     </Grid>

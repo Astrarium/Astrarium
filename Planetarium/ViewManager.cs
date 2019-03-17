@@ -1,4 +1,5 @@
-﻿using Planetarium.Views;
+﻿using Microsoft.Win32;
+using Planetarium.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -154,7 +155,7 @@ namespace Planetarium
             return Show(viewModel: viewModel, isDialog: true);
         }
 
-        MessageBoxResult IViewManager.ShowMessageBox(string caption, string text, MessageBoxButton buttons)
+        public MessageBoxResult ShowMessageBox(string caption, string text, MessageBoxButton buttons)
         {
             var dialog = typeFactory(typeof(MessageBoxWindow)) as MessageBoxWindow;
             dialog.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
@@ -163,6 +164,15 @@ namespace Planetarium
             dialog.Buttons = buttons;
             dialog.ShowDialog();
             return dialog.Result;
+        }
+
+        public string ShowSaveFileDialog(string caption, string fileName, string extension, string filter)
+        {
+            var dialog = new SaveFileDialog();
+            dialog.FileName = fileName;
+            dialog.DefaultExt = extension;
+            dialog.Filter = filter;
+            return (dialog.ShowDialog() ?? false) ? dialog.FileName : null;
         }
     }
 }

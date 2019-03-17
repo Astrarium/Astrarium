@@ -31,5 +31,6 @@ namespace Planetarium
         bool? ShowDialog<TViewModel>(TViewModel viewModel) where TViewModel : ViewModelBase;
  
         MessageBoxResult ShowMessageBox(string caption, string text, MessageBoxButton buttons);
+        string ShowSaveFileDialog(string caption, string fileName, string extension, string filter);
     }
 }

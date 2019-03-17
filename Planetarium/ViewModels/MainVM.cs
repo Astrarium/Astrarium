@@ -304,7 +304,7 @@ namespace Planetarium.ViewModels
             
             ContextMenuItems.Add(new MenuItemVM()
             {
-                Header = "Object info...",
+                Header = "Object info",
                 Command = MapDoubleClickCommand,
                 CommandParameter = point,
                 IsEnabled = map.SelectedObject != null
@@ -335,7 +335,7 @@ namespace Planetarium.ViewModels
 
             ContextMenuItems.Add(new MenuItemVM()
             {
-                Header = "Object ephemerides...",
+                Header = "Object ephemeris",
                 IsEnabled = map.SelectedObject != null && sky.GetEphemerisCategories(map.SelectedObject).Any(),
                 Command = GetObjectEphemerisCommand,
                 CommandParameter = map.SelectedObject
@@ -343,7 +343,7 @@ namespace Planetarium.ViewModels
 
             ContextMenuItems.Add(new MenuItemVM()
             {
-                Header = "Motion track...",
+                Header = "Motion track",
                 IsEnabled = map.SelectedObject != null && map.SelectedObject is IMovingObject,
                 Command = MotionTrackCommand,
                 CommandParameter = map.SelectedObject
@@ -373,21 +373,15 @@ namespace Planetarium.ViewModels
                         formEphemerisSettings.Categories
                     ));
 
-                    var vm = new EphemerisVM();
-                    vm.SetEphemeris(ephem, formEphemerisSettings.JulianDayFrom,
+                    var vm = new EphemerisVM(
+                        viewManager,
+                        ephem, 
+                        formEphemerisSettings.JulianDayFrom,
                         formEphemerisSettings.JulianDayTo,
                         formEphemerisSettings.Step,
                         sky.Context.GeoLocation.UtcOffset);
 
                     viewManager.ShowDialog(vm);
-
-                    //var formEphemeris = new FormEphemeris(ephem,
-                    //    formEphemerisSettings.JulianDayFrom,
-                    //    formEphemerisSettings.JulianDayTo,
-                    //    formEphemerisSettings.Step,
-                    //    sky.Context.GeoLocation.UtcOffset);
-
-                    //formEphemeris.Show();
                 }
             }
         }
