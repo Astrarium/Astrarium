@@ -45,11 +45,7 @@
 
             <DataGrid.Resources>
                 <ResourceDictionary>
-
-                    
-
                     <Style x:Key="{x:Type DataGridCell}" TargetType="{x:Type DataGridCell}">
-                        <Setter Property="Height" Value="*" />
                         <Setter Property="Padding" Value="0" />
                         <Setter Property="Margin" Value="0" />
                         <!--<Setter Property="BorderBrush" Value="{x:Null}" />-->

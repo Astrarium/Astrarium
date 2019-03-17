@@ -36,6 +36,7 @@ namespace Planetarium.ViewModels
         public Command SearchObjectCommand { get; private set; }
         public Command<PointF> CenterOnPointCommand { get; private set; }
         public Command<CelestialObject> GetObjectInfoCommand { get; private set; }
+        public Command<CelestialObject> GetObjectEphemerisCommand { get; private set; }
         public Command<CelestialObject> MotionTrackCommand { get; private set; }
         public Command<CelestialObject> CenterOnObjectCommand { get; private set; }
         public Command ClearObjectsHistoryCommand { get; private set; }
@@ -101,6 +102,7 @@ namespace Planetarium.ViewModels
             SearchObjectCommand = new Command(SearchObject);
             CenterOnPointCommand = new Command<PointF>(CenterOnPoint);
             GetObjectInfoCommand = new Command<CelestialObject>(GetObjectInfo);
+            GetObjectEphemerisCommand = new Command<CelestialObject>(GetObjectEphemeris);
             MotionTrackCommand = new Command<CelestialObject>(MotionTrack);
             CenterOnObjectCommand = new Command<CelestialObject>(CenterOnObject);
             ClearObjectsHistoryCommand = new Command(ClearObjectsHistory);
@@ -335,6 +337,8 @@ namespace Planetarium.ViewModels
             {
                 Header = "Object ephemerides...",
                 IsEnabled = map.SelectedObject != null && sky.GetEphemerisCategories(map.SelectedObject).Any(),
+                Command = GetObjectEphemerisCommand,
+                CommandParameter = map.SelectedObject
             });
 
             ContextMenuItems.Add(new MenuItemVM()
