@@ -68,11 +68,9 @@ namespace Planetarium
                     {
                         window.DialogResult = dialogResult;
                     }
-                    else
-                    {
-                        window.Close();
-                    }
-
+                    
+                    window.Close();
+                    
                     if (viewModel is ViewModelBase)
                     {
                         (viewModel as ViewModelBase).Closing -= viewModelClosingHandler;

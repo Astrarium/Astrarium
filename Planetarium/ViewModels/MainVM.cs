@@ -375,6 +375,7 @@ namespace Planetarium.ViewModels
 
                     var vm = new EphemerisVM(
                         viewManager,
+                        sky.GetObjectName(body),
                         ephem, 
                         formEphemerisSettings.JulianDayFrom,
                         formEphemerisSettings.JulianDayTo,

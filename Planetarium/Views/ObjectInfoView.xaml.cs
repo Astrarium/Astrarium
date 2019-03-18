@@ -136,8 +136,6 @@ namespace Planetarium.Views
         private void LinkClicked(double jd)
         {
             LinkCommand?.Execute(jd);
-            //JulianDay = jd;
-            //DialogResult = true;
         }
     }
 }

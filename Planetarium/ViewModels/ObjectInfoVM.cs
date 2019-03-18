@@ -13,9 +13,11 @@ namespace Planetarium.ViewModels
     {
         public string Title { get; private set; }
         public string Subtitle { get; private set; }
-        public IList<InfoElement> InfoElements { get; private set; }
-        public ICommand LinkClickedCommand { get; private set; }
+        public IList<InfoElement> InfoElements { get; private set; }        
         public double JulianDay { get; private set; }
+
+        public ICommand LinkClickedCommand { get; private set; }
+        public ICommand CloseCommand { get; private set; }
 
         public ObjectInfoVM(CelestialObjectInfo info)
         {
@@ -23,6 +25,7 @@ namespace Planetarium.ViewModels
             Subtitle = info.Subtitle;
             InfoElements = info.InfoElements;
             LinkClickedCommand = new Command<double>(SelectJulianDay);
+            CloseCommand = new Command(Close);
         }
 
         private void SelectJulianDay(double jd)

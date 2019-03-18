@@ -12,16 +12,19 @@
         WindowStartupLocation="CenterOwner">
     <Grid Margin="4">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
+        <TextBlock Grid.Row="0" Padding="4" Text="{Binding Header}" />
+
         <DataGrid 
-            Grid.Row="0"
+            Grid.Row="1"
             VerticalScrollBarVisibility="Auto"
             HorizontalScrollBarVisibility="Auto"
             AutoGenerateColumns="True"
-            CanUserReorderColumns="False"
+            CanUserReorderColumns="True"
             CanUserSortColumns="False"
             CanUserResizeRows="False"
             IsReadOnly="True"
@@ -32,18 +35,28 @@
             BorderBrush="{StaticResource DataGridHeaderBorderBrush}"
             Margin="4"
             RowHeaderWidth="0"
+            ColumnHeaderHeight="32"
+            RowHeight="32"
             AutoGeneratingColumn="DataGrid_AutoGeneratingColumn"
-            ItemsSource="{Binding EphemerisTable.DefaultView}">
+            ItemsSource="{Binding EphemerisTable}">
             <DataGrid.Resources>
                 <ResourceDictionary>
                     <Style x:Key="{x:Type DataGridCell}" TargetType="{x:Type DataGridCell}">
                         <Setter Property="Padding" Value="0" />
                         <Setter Property="Margin" Value="0" />
-                        <!--<Setter Property="BorderBrush" Value="{x:Null}" />-->
-                        <Setter Property="BorderThickness" Value="0" />
                         <Setter Property="Background" Value="{x:Null}" />
                         <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
-                        
+                        <Setter Property="VerticalAlignment" Value="Stretch" />
+                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                    <Grid Background="{TemplateBinding Background}" >
+                                        <ContentPresenter VerticalAlignment="Center" Margin="4 0" />
+                                    </Grid>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
                         <Style.Triggers>
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter Property="Background" Value="{x:Null}" />
@@ -52,8 +65,7 @@
                     </Style>
                     <Style TargetType="{x:Type DataGridRow}">
                         <Setter Property="Background" Value="{x:Null}" />
-                        <Setter Property="Height" Value="30"/>
-                        <Setter Property="VerticalAlignment" Value="Center"/>
+                        <Setter Property="VerticalAlignment" Value="Center" />
                         <Style.Triggers>
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter Property="Background" Value="{x:Null}" />
@@ -64,7 +76,7 @@
             </DataGrid.Resources>
         </DataGrid>
 
-        <StackPanel Grid.Row="2"                    
+        <StackPanel Grid.Row="3"                    
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
             <Button MinWidth="80" Width="Auto" Margin="4 0" Padding="8 2" Command="{Binding SaveToFileCommand}">Save to File...</Button>

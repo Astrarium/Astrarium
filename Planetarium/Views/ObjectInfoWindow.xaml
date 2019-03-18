@@ -41,7 +41,7 @@
         <StackPanel Grid.Row="5"                    
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
-            <Button MinWidth="80" Click="Button_Click">Close</Button>
+            <Button MinWidth="80" Command="{Binding CloseCommand}">Close</Button>
         </StackPanel>
 
     </Grid>

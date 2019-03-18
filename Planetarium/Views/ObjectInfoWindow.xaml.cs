@@ -20,17 +20,9 @@ namespace Planetarium.Views
     /// </summary>
     public partial class ObjectInfoWindow : Window
     {
-        public double JulianDay { get; private set; }
-
         public ObjectInfoWindow()
         {
             InitializeComponent();
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = null;
-            Close();
         }
     }
 }
