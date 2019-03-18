@@ -271,8 +271,6 @@ namespace Planetarium.ViewModels
                 //        skyView.Invalidate();
                 //    }
                 //}
-
-
             }
             else if (key == Key.P)
             {
@@ -285,6 +283,10 @@ namespace Planetarium.ViewModels
             else if (key == Key.T)
             {
                 MotionTrack(map.SelectedObject);
+            }
+            else if (key == Key.B)
+            {
+                viewManager.ShowDialog<SettingsVM>();
             }
         }
 

@@ -49,6 +49,9 @@
     <SolidColorBrush x:Key="ForegroundBrush" Color="{StaticResource ForegroundColor}"/>
 
     <SolidColorBrush x:Key="LightBackgroundBrush" Color="{StaticResource LightBackgroundColor}" />
+    <SolidColorBrush x:Key="MediumBackgroundBrush" Color="{StaticResource MediumBackgroundColor}" />
+    <SolidColorBrush x:Key="DarkBackgroundBrush" Color="{StaticResource DarkBackgroundColor}" />
+
 
     <SolidColorBrush x:Key="MouseOverForegroundBrush" Color="{StaticResource MouseOverForegroundColor}"/>
 
@@ -3736,6 +3739,29 @@
 
     <Style TargetType="{x:Type ToolTip}" BasedOn="{StaticResource {x:Type Control}}">
         <Setter Property="Background" Value="{StaticResource WindowBackgroundBrush}" />
+    </Style>
+
+    <Style TargetType="{x:Type GridSplitter}" BasedOn="{StaticResource {x:Type Control}}">
+        <Setter Property="Background" Value="{StaticResource LightBackgroundBrush}" />
+        <Setter Property="Width" Value="5" />
+        <Setter Property="ShowsPreview" Value="False" />
+
+        <Setter Property="Control.Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Border BorderThickness="{TemplateBinding Border.BorderThickness}" BorderBrush="{TemplateBinding Border.BorderBrush}" Background="{TemplateBinding Panel.Background}">
+                        <Border>
+                            <Canvas Width="3" Height="19">
+                                <Ellipse Fill="{StaticResource MediumBackgroundBrush}" Width="3" Height="3" Canvas.Top="1"  />
+                                <Ellipse Fill="{StaticResource MediumBackgroundBrush}" Width="3" Height="3" Canvas.Top="7"  />
+                                <Ellipse Fill="{StaticResource MediumBackgroundBrush}" Width="3" Height="3" Canvas.Top="13"  />
+                            </Canvas>
+                        </Border>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
     </Style>
 
 </ResourceDictionary>
