@@ -286,7 +286,9 @@ namespace Planetarium.ViewModels
             }
             else if (key == Key.B)
             {
+                settings.SettingValueChanged += Settings_OnSettingChanged;
                 viewManager.ShowDialog<SettingsVM>();
+                settings.SettingValueChanged -= Settings_OnSettingChanged;                
             }
         }
 

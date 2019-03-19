@@ -14,7 +14,7 @@ using System.Xml.Serialization;
 
 namespace ADK.Demo.Config
 {
-    public class Settings : DynamicObject, ISettings
+    public class Settings : DynamicObject, ISettings, INotifyPropertyChanged
     {
         private readonly string SETTINGS_PATH = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ADK", "Settings.xml");
 
@@ -29,6 +29,7 @@ namespace ADK.Demo.Config
         private static Dictionary<string, Type> ShortTypeNames = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
 
         public event Action<string, object> SettingValueChanged;
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public bool IsChanged { get; private set; }
 
@@ -66,6 +67,7 @@ namespace ADK.Demo.Config
                     SettingsValues[settingName] = value;
                     IsChanged = true;
                     SettingValueChanged?.Invoke(settingName, value);
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(settingName));
                 }
             }
             else

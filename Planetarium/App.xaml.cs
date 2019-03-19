@@ -9,6 +9,7 @@ using Planetarium.Views;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
@@ -29,6 +30,7 @@ namespace Planetarium
             ConfigureContainer();
 
             kernel.Get<IViewManager>().ShowWindow<MainVM>();
+            //kernel.Get<IViewManager>().ShowWindow<SettingsVM>();
         }
 
         private void ConfigureContainer()
@@ -82,6 +84,47 @@ namespace Planetarium
                 .SelectMany(a => Assembly.Load(a).GetTypes())
                 .Where(t => typeof(BaseAstroEventsProvider).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
                 .ToArray();
+
+
+            var settings = kernel.Get<ISettings>();
+            SettingsConfig settingsConfig = new SettingsConfig();
+
+            settingsConfig.Add("Grids", "EquatorialGrid", true);
+            settingsConfig.Add<bool>("Grids", "LabelEquatorialPoles").EnabledWhenTrue("EquatorialGrid");
+
+            settingsConfig.Add("Grids", "HorizontalGrid", true);
+            settingsConfig.Add<bool>("Grids", "LabelHorizontalPoles").EnabledWhenTrue("HorizontalGrid");
+
+            settingsConfig.Add("Grids", "EclipticLine", true);
+            settingsConfig.Add<bool>("Grids", "LabelEquinoxPoints").EnabledWhenTrue("EclipticLine");
+            settingsConfig.Add<bool>("Grids", "LabelLunarNodes").EnabledWhenTrue("EclipticLine");
+
+            settingsConfig.Add("Grids", "EclipticColorNight", Color.FromArgb(0xC88080));
+
+            settingsConfig.Add("Grids", "GalacticEquator", true);
+            settingsConfig.Add("Grids", "MilkyWay", true);
+            settingsConfig.Add("Grids", "Ground", true);
+            settingsConfig.Add("Grids", "HorizonLine", true);
+            settingsConfig.Add("Grids", "LabelCardinalDirections", true).EnabledWhenTrue("HorizonLine");
+
+
+
+            settingsConfig.Add("Sun", "Sun", true);
+            settingsConfig.Add("Sun", "LabelSun", true).EnabledWhenTrue("Sun");
+            settingsConfig.Add("Sun", "TextureSun", true).EnabledWhenTrue("Sun");
+
+            settingsConfig.Add("Constellations", "ConstLabels", true);
+            settingsConfig.Add("Constellations", "ConstLabelsType", ConstellationsRenderer.LabelType.InternationalName).EnabledWhenTrue("ConstLabels");
+            settingsConfig.Add("Constellations", "ConstLines", true);
+            settingsConfig.Add("Constellations", "ConstBorders", true);
+
+            settingsConfig.Add("Stars", "Stars", true);
+            settingsConfig.Add("Stars", "StarsLabels", true).EnabledWhenTrue("Stars");
+            settingsConfig.Add("Stars", "StarsProperNames", true).EnabledWhenTrue("Stars");
+
+
+
+            kernel.Bind<ISettingsConfig, SettingsConfig>().ToConstant(settingsConfig).InSingletonScope();
 
             foreach (Type eventProviderType in eventProviderTypes)
             {

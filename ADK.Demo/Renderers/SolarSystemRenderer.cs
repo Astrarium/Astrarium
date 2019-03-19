@@ -92,7 +92,9 @@ namespace ADK.Demo.Renderers
         }
 
         private void RenderSun(IMapContext map, Sun sun)
-        {            
+        {
+            if (!settings.Get<bool>("Sun")) return;
+
             bool isGround = settings.Get<bool>("Ground");
             bool useTextures = settings.Get<bool>("UseTextures");
             double ad = Angle.Separation(sun.Horizontal, map.Center);

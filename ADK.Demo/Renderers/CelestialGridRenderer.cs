@@ -110,7 +110,7 @@ namespace ADK.Demo.Renderers
 
             Color colorGridEquatorial = Color.FromArgb(200, 0, 64, 64);
             Color colorGridHorizontal = settings.Get<Color>("HorizontalGrid.Color.Night");
-            Color colorLineEcliptic = settings.Get<Color>("Ecliptic.Color.Night");
+            Color colorLineEcliptic = settings.Get<Color>("EclipticColorNight");
             Color colorLineGalactic = Color.FromArgb(200, 64, 0, 64);
 
             penGridEquatorial.Color = colorGridEquatorial;
