@@ -79,6 +79,8 @@
     <Compile Include="ViewModels\SettingsVM.cs" />
     <Compile Include="ViewModels\ObjectInfoVM.cs" />
     <Compile Include="ViewModels\SearchVM.cs" />
+    <Compile Include="Views\FontPicker.cs" />
+    <Compile Include="Views\FilePathPicker.cs" />
     <Compile Include="Views\ColorPicker.cs" />
     <Compile Include="Views\DateWindow.xaml.cs">
       <DependentUpon>DateWindow.xaml</DependentUpon>

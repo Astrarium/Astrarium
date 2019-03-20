@@ -17,6 +17,7 @@
     <t:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" />
     <t:InverseBoolToResizeModeConverter x:Key="InverseBoolToResizeModeConverter" />
     <t:ColorConverter x:Key="ColorConverter" />
+    <t:FontToStringConverter x:Key="FontToStringConverter" />
     <BooleanToVisibilityConverter x:Key="bool2VisibilityConverter"/>
     <!--#endregion-->
 
@@ -39,7 +40,7 @@
     
     <Color x:Key="HighlightColor">#294666</Color>
     <Color x:Key="HotColor">#525252</Color>
-    <Color x:Key="HoverColor">#279AF7</Color>
+    <Color x:Key="HoverColor">#4875A5</Color>
     <!--#endregion-->
 
     <!--#region Brushes-->
@@ -974,8 +975,8 @@
         <Setter Property="Background" Value="{StaticResource TextBoxBackground}"/>
         <Setter Property="BorderBrush" Value="{StaticResource TextBoxBorder}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="2"/>
-        <Setter Property="Height" Value="22" />
+        <Setter Property="Padding" Value="2" />
+        <Setter Property="Height" Value="24" />
         <Setter Property="AllowDrop" Value="true"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="ScrollViewer.PanningMode" Value="VerticalFirst"/>
@@ -1767,10 +1768,10 @@
             <Setter.Value>
                 <ControlTemplate>
                     <Rectangle Margin="1" 
-									SnapsToDevicePixels="true" 
-									Stroke="{StaticResource CheckBoxStroke}" 
-									StrokeThickness="1" 
-									StrokeDashArray="1 2"/>
+						SnapsToDevicePixels="true" 
+						Stroke="{StaticResource CheckBoxStroke}" 
+						StrokeThickness="1" 
+						StrokeDashArray="1 2"/>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -1788,6 +1789,7 @@
             </Setter.Value>
         </Setter>
     </Style>
+    
     <Style TargetType="{x:Type CheckBox}" BasedOn="{StaticResource {x:Type Control}}">
         <Setter Property="Background" Value="{StaticResource CheckBoxFillNormal}"/>
         <Setter Property="BorderBrush" Value="{StaticResource CheckBoxStroke}"/>
@@ -1826,6 +1828,7 @@
                         <Trigger Property="IsEnabled" Value="false">
                             <Setter Property="Foreground" Value="{StaticResource CheckBoxDisabledForeground}"/>
                             <Setter Property="BorderBrush" TargetName="CheckBoxBorder" Value="{StaticResource CheckBoxDisabledStroke}"/>
+                            <Setter Property="Fill" TargetName="CheckMark" Value="{StaticResource CheckBoxDisabledForeground}" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter Property="BorderBrush" TargetName="CheckBoxBorder" Value="{StaticResource HoverBrush}"/>
@@ -1846,10 +1849,10 @@
             <Setter.Value>
                 <ControlTemplate>
                     <Rectangle Margin="14,0,0,0" 
-									SnapsToDevicePixels="true" 
-									Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" 
-									StrokeThickness="1" 
-									StrokeDashArray="1 2"/>
+						SnapsToDevicePixels="true" 
+						Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" 
+						StrokeThickness="1" 
+						StrokeDashArray="1 2" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -1892,6 +1895,7 @@
                         <Trigger Property="IsEnabled" Value="false">
                             <Setter Property="Foreground" Value="{StaticResource RadioButtonDisabledForeground}"/>
                             <Setter Property="BorderBrush" TargetName="RadioButtonBorder" Value="{StaticResource RadioButtonDisabledStroke}"/>
+                            <Setter Property="Background" TargetName="RadioMark" Value="{StaticResource RadioButtonDisabledForeground}" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter Property="BorderBrush" TargetName="RadioButtonBorder" Value="{StaticResource HoverBrush}"/>
@@ -3769,7 +3773,6 @@
     </Style>
 
     <Style TargetType="{x:Type v:ColorPicker}">
-        
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type v:ColorPicker}">
@@ -3783,7 +3786,7 @@
                             Cursor="Hand"
                             VerticalAlignment="Center"
                             Grid.Column="0" 
-                            Stroke="Transparent"
+                            Stroke="{StaticResource MediumBackgroundBrush}"
                             Width="16" Height="16">
                             <Ellipse.Fill>
                                 <SolidColorBrush Color="{Binding SelectedColor, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ColorConverter}}" />
@@ -3794,6 +3797,73 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="palette" Property="Stroke" Value="{StaticResource HoverBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type v:FilePathPicker}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type v:FilePathPicker}">
+                    <Grid Background="Transparent">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="24"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" Text="{TemplateBinding SelectedPath}" IsReadOnly="True" />
+                        <Button Name="Button" Grid.Column="1" BorderBrush="{StaticResource TextBoxBorder}" Height="{TemplateBinding Height}" Width="{TemplateBinding Height}">
+                            <Canvas Width="16" Height="16">
+                                <Path Name="Icon" Canvas.Left="1" Canvas.Top="1" Width="17.5" Height="17.5" Stretch="Fill" Fill="{StaticResource ButtonForeground}" Data="F1 M9.17 6l2 2H20v10H4V6h5.17M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z">
+                                    <Path.RenderTransform>
+                                        <ScaleTransform ScaleX="0.8" ScaleY="0.8"/>
+                                    </Path.RenderTransform>
+                                </Path>
+                            </Canvas>
+                        </Button>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter TargetName="Icon" Property="Fill" Value="{StaticResource DisabledButtonForeground}" />
+                            <Setter TargetName="Button" Property="Background" Value="{StaticResource TextBoxDisabledBackground}" />
+                            <Setter TargetName="Button" Property="BorderBrush" Value="{StaticResource TextBoxDisabledBackground}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type v:FontPicker}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type v:FontPicker}">
+                    <Grid Background="Transparent">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="24"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" 
+                                 IsReadOnly="True" 
+                                 Text="{TemplateBinding SelectedFont, Converter={StaticResource FontToStringConverter}}"                                  
+                                 FontFamily="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=SelectedFont.Name}" />
+                        <Button Name="Button" Grid.Column="1" BorderBrush="{StaticResource TextBoxBorder}" Height="{TemplateBinding Height}" Width="{TemplateBinding Height}">
+                            <Canvas Width="16" Height="16">
+                                <Path Name="Icon" Canvas.Left="1" Canvas.Top="1" Width="17.5" Height="17.5" Stretch="Fill" Fill="{StaticResource ButtonForeground}" Data="F1 M9 4v3h5v12h3V7h5V4H9zm-6 8h3v7h3v-7h3V9H3v3z">
+                                    <Path.RenderTransform>
+                                        <ScaleTransform ScaleX="0.8" ScaleY="0.8"/>
+                                    </Path.RenderTransform>
+                                </Path>
+                            </Canvas>
+                        </Button>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter TargetName="Icon" Property="Fill" Value="{StaticResource DisabledButtonForeground}" />
+                            <Setter TargetName="Button" Property="Background" Value="{StaticResource TextBoxDisabledBackground}" />
+                            <Setter TargetName="Button" Property="BorderBrush" Value="{StaticResource TextBoxDisabledBackground}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

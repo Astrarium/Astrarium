@@ -29,8 +29,8 @@ namespace Planetarium
 
             ConfigureContainer();
 
-            //kernel.Get<IViewManager>().ShowWindow<MainVM>();
-            kernel.Get<IViewManager>().ShowWindow<SettingsVM>();
+            kernel.Get<IViewManager>().ShowWindow<MainVM>();
+            //kernel.Get<IViewManager>().ShowWindow<SettingsVM>();
         }
 
         private void ConfigureContainer()
@@ -112,6 +112,19 @@ namespace Planetarium
             settingsConfig.Add("Sun", "Sun", true);
             settingsConfig.Add("Sun", "LabelSun", true).EnabledWhenTrue("Sun");
             settingsConfig.Add("Sun", "TextureSun", true).EnabledWhenTrue("Sun");
+            settingsConfig.Add("Sun", "TextureSunPath", "https://sohowww.nascom.nasa.gov/data/realtime/hmi_igr/1024/latest.jpg")
+                .EnabledWhenTrue("Sun")
+                .WithBuilder(typeof(FilePathSettingControlBuilder));
+
+            settingsConfig.Add("Sun", "TestSetting", "some value")
+                .EnabledWhenTrue("Sun");
+
+            settingsConfig.Add("Sun", "ConstLabelsType", ConstellationsRenderer.LabelType.InternationalName)
+                .EnabledWhenTrue("Sun")
+                .WithBuilder(typeof(DropdownSettingControlBuilder));
+
+            settingsConfig.Add("Sun", "testfont", System.Drawing.SystemFonts.DefaultFont)
+                .EnabledWhenTrue("Sun");
 
             settingsConfig.Add("Constellations", "ConstLabels", true);
             settingsConfig.Add("Constellations", "ConstLabelsType", ConstellationsRenderer.LabelType.InternationalName).EnabledWhenTrue("ConstLabels");

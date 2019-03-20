@@ -1,4 +1,5 @@
 ﻿using ADK.Demo;
+using Planetarium.Themes;
 using Planetarium.Views;
 using System;
 using System.Collections;
@@ -15,6 +16,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using static Planetarium.ViewModels.SettingsVM;
 
 namespace Planetarium.ViewModels
 {
@@ -37,7 +39,7 @@ namespace Planetarium.ViewModels
                 NotifyPropertyChanged(nameof(SectionContent));
             }
         }
-        public UIElement SectionContent { get; private set; } 
+        public UIElement SectionContent { get; private set; }
 
         public SettingsVM(ISettings settings, ISettingsConfig settingConfig)
         {
@@ -54,52 +56,7 @@ namespace Planetarium.ViewModels
 
                 foreach (var item in section)
                 {
-                    FrameworkElement control = null;
-
-                    if (item.Type == typeof(bool))
-                    {
-                        control = new CheckBox() { Content = item.Name };
-                        BindingOperations.SetBinding(control, CheckBox.IsCheckedProperty, new Binding(item.Name) { Source = settings });
-                    }
-                    else if (item.Type.IsEnum)
-                    {
-                        var radioGroup = new GroupBox() { Header = item.Name };
-                        var radioPanel = new StackPanel() { Orientation = Orientation.Vertical };
-
-                        Array values = Enum.GetValues(item.Type);
-                        foreach (var value in values)
-                        {
-                            RadioButton radio = new RadioButton()
-                            {
-                                Content = value.GetType()
-                                    .GetMember(value.ToString())
-                                    .FirstOrDefault()
-                                    ?.GetCustomAttribute<DescriptionAttribute>()
-                                    ?.Description,
-                                Margin = new Thickness(12, 0, 0, 4)
-                            };
-
-                            BindingOperations.SetBinding(radio, RadioButton.IsCheckedProperty, new Binding(item.Name)
-                            {
-                                Source = settings,
-                                Converter = new RadioButtonCheckedConverter(),
-                                ConverterParameter = value
-                            });
-
-                            radioPanel.Children.Add(radio);
-                        }
-
-                        radioGroup.Content = radioPanel;
-                        control = radioGroup;
-                    }
-                    else if (item.Type == typeof(Color))
-                    {
-                        var picker = new ColorPicker() { Caption = item.Name };
-                        BindingOperations.SetBinding(picker, ColorPicker.SelectedColorProperty, new Binding(item.Name) { Source = settings });
-                        control = picker;
-                    }
-
-
+                    FrameworkElement control = item.GetBuilder().Build(settings, item);
 
                     if (control != null && item.EnabledWhenCondition != null)
                     {
@@ -125,7 +82,7 @@ namespace Planetarium.ViewModels
 
                 SettingsSections.Add(new SettingsSectionVM() { Title = section.Key, Panel = panel });
             }
-            
+
             SelectedSection = SettingsSections.First();
         }
 
@@ -147,8 +104,6 @@ namespace Planetarium.ViewModels
                 return value.Equals(true) ? parameter : Binding.DoNothing;
             }
         }
-
-        
 
         public class FuncBinder : INotifyPropertyChanged
         {
@@ -200,6 +155,120 @@ namespace Planetarium.ViewModels
         }
     }
 
+    public abstract class SettingControlBuilder
+    {
+        public abstract FrameworkElement Build(ISettings settings, SettingConfigItem item);
+    }
+
+    public class BooleanSettingControlBuilder : SettingControlBuilder
+    {
+        public override FrameworkElement Build(ISettings settings, SettingConfigItem item)
+        {
+            var control = new CheckBox() { Content = item.Name };
+            BindingOperations.SetBinding(control, CheckBox.IsCheckedProperty, new Binding(item.Name) { Source = settings });
+            return control;
+        }
+    }
+
+    public class StringSettingControlBuilder : SettingControlBuilder
+    {
+        public override FrameworkElement Build(ISettings settings, SettingConfigItem item)
+        {
+            var container = new StackPanel() { Orientation = Orientation.Vertical };
+            container.Children.Add(new Label() { Content = item.Name });
+            var textbox = new TextBox();
+            BindingOperations.SetBinding(textbox, TextBox.TextProperty, new Binding(item.Name) { Source = settings });
+            container.Children.Add(textbox);
+            return container;
+        }
+    }
+
+    public class ColorSettingControlBuilder : SettingControlBuilder
+    {
+        public override FrameworkElement Build(ISettings settings, SettingConfigItem item)
+        {
+            var picker = new ColorPicker() { Caption = item.Name };
+            BindingOperations.SetBinding(picker, ColorPicker.SelectedColorProperty, new Binding(item.Name) { Source = settings });
+            return picker;
+        }
+    }
+
+    public class FilePathSettingControlBuilder : SettingControlBuilder
+    {
+        public override FrameworkElement Build(ISettings settings, SettingConfigItem item)
+        {
+            var container = new StackPanel() { Orientation = Orientation.Vertical };
+            container.Children.Add(new Label() { Content = item.Name });
+            var picker = new FilePathPicker() { Caption = item.Name };
+            BindingOperations.SetBinding(picker, FilePathPicker.SelectedPathProperty, new Binding(item.Name) { Source = settings });
+            container.Children.Add(picker);
+            return container;
+        }
+    }
+
+    public class EnumSettingControlBuilder : SettingControlBuilder
+    {
+        public override FrameworkElement Build(ISettings settings, SettingConfigItem item)
+        {
+            var radioGroup = new GroupBox() { Header = item.Name };
+            var radioPanel = new StackPanel() { Orientation = Orientation.Vertical };
+
+            Array values = Enum.GetValues(item.Type);
+            foreach (var value in values)
+            {
+                RadioButton radio = new RadioButton()
+                {
+                    Content = value.GetType()
+                        .GetMember(value.ToString())
+                        .FirstOrDefault()
+                        ?.GetCustomAttribute<DescriptionAttribute>()
+                        ?.Description,
+                    Margin = new Thickness(12, 0, 0, 4)
+                };
+
+                BindingOperations.SetBinding(radio, RadioButton.IsCheckedProperty, new Binding(item.Name)
+                {
+                    Source = settings,
+                    Converter = new RadioButtonCheckedConverter(),
+                    ConverterParameter = value
+                });
+
+                radioPanel.Children.Add(radio);
+            }
+
+            radioGroup.Content = radioPanel;
+            return radioGroup;
+        }
+    }
+
+    public class DropdownSettingControlBuilder : SettingControlBuilder
+    {
+        public override FrameworkElement Build(ISettings settings, SettingConfigItem item)
+        {
+            var panel = new StackPanel() { Orientation = Orientation.Vertical };
+            var comboBox = new ComboBox() { IsReadOnly = true };
+            comboBox.ItemsSource = Enum.GetValues(item.Type);
+            BindingOperations.SetBinding(comboBox, ComboBox.SelectedItemProperty, new Binding(item.Name) { Source = settings });
+            panel.Children.Add(new Label() { Content = item.Name });
+            panel.Children.Add(comboBox);
+
+            return panel;
+        }
+    }
+
+    public class FontSettingControlBuilder : SettingControlBuilder
+    {
+        public override FrameworkElement Build(ISettings settings, SettingConfigItem item)
+        {
+            var container = new StackPanel() { Orientation = Orientation.Vertical };
+            container.Children.Add(new Label() { Content = item.Name });
+            var picker = new FontPicker();
+            BindingOperations.SetBinding(picker, FontPicker.SelectedFontProperty, new Binding(item.Name) { Source = settings });
+            container.Children.Add(picker);
+            return container;
+        }
+    }
+
     public class SettingConfigItem
     {
         public string Name { get; private set; }
@@ -208,6 +277,7 @@ namespace Planetarium.ViewModels
         public object DefaultValue { get; private set; }
         public Func<ISettings, bool> EnabledWhenCondition { get; private set; }
         public Func<ISettings, bool> VisibleWhenCondition { get; private set; }
+        public SettingControlBuilder Builder { get; private set; }
 
         public SettingConfigItem(string section, string name, Type type, object defaultValue)
         {
@@ -251,6 +321,43 @@ namespace Planetarium.ViewModels
         {
             VisibleWhenCondition = (s) => !s.Get<bool>(settingName);
             return this;
+        }
+
+        public SettingConfigItem WithBuilder(Type builderType)
+        {
+            if (!typeof(SettingControlBuilder).IsAssignableFrom(builderType))
+                throw new ArgumentException($"Builder type should be derived from {nameof(SettingControlBuilder)} base type.");
+
+            if (builderType.IsAbstract)
+                throw new ArgumentException($"Builder type should not be an abstract class type.");
+
+            if (builderType.GetConstructor(Type.EmptyTypes) == null)
+                throw new ArgumentException($"Builder type should have public parameterless constructor.");
+
+            Builder = (SettingControlBuilder)Activator.CreateInstance(builderType);
+
+            return this;
+        }
+
+        public SettingControlBuilder GetBuilder()
+        {
+            if (Builder == null)
+            {
+                if (Type == typeof(bool))
+                    Builder = new BooleanSettingControlBuilder();
+                else if (Type == typeof(string))
+                    Builder = new StringSettingControlBuilder();
+                else if (Type.IsEnum)
+                    Builder = new EnumSettingControlBuilder();
+                else if (Type == typeof(Color))
+                    Builder = new ColorSettingControlBuilder();
+                else if (Type == typeof(Font))
+                    Builder = new FontSettingControlBuilder();
+                else
+                    throw new Exception($"There are no control builder defined for setting with type {Type.Name}");
+            }
+
+            return Builder;
         }
     }
 }
