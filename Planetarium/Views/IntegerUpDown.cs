@@ -28,7 +28,6 @@ namespace Planetarium.Views
         public readonly static DependencyProperty HideButtonsProperty = DependencyProperty.Register(
             "HideButtons", typeof(bool), typeof(IntegerUpDown), new UIPropertyMetadata(false));
 
-
         public int Maximum
         {
             get { return (int)GetValue(MaximumProperty); }

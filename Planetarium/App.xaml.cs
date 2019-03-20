@@ -29,8 +29,8 @@ namespace Planetarium
 
             ConfigureContainer();
 
-            kernel.Get<IViewManager>().ShowWindow<MainVM>();
-            //kernel.Get<IViewManager>().ShowWindow<SettingsVM>();
+            //kernel.Get<IViewManager>().ShowWindow<MainVM>();
+            kernel.Get<IViewManager>().ShowWindow<SettingsVM>();
         }
 
         private void ConfigureContainer()

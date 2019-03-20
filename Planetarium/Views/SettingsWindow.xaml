@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:v="clr-namespace:Planetarium.Views"
         mc:Ignorable="d"
         Title="Settings" 
         Width="800" Height="600"
@@ -42,8 +43,16 @@
                 HorizontalAlignment="Center" 
                 VerticalAlignment="Stretch" />
 
-            <ContentControl MinWidth="100" Grid.Column="2" Margin="8" Content="{Binding SectionContent}" />
+            <ScrollViewer
+                
+                MinWidth="100" 
+                Grid.Column="2" 
+                
+                VerticalScrollBarVisibility="Auto"
+                HorizontalScrollBarVisibility="Auto">
 
+                <ContentPresenter Margin="8" Content="{Binding SectionContent}" />
+            </ScrollViewer>
         </Grid>
 
         <StackPanel Grid.Row="1"                    

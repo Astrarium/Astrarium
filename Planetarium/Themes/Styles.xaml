@@ -16,6 +16,7 @@
     <t:VisibilityConverter x:Key="VisibilityConverter" />
     <t:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" />
     <t:InverseBoolToResizeModeConverter x:Key="InverseBoolToResizeModeConverter" />
+    <t:ColorConverter x:Key="ColorConverter" />
     <BooleanToVisibilityConverter x:Key="bool2VisibilityConverter"/>
     <!--#endregion-->
 
@@ -38,10 +39,13 @@
     
     <Color x:Key="HighlightColor">#294666</Color>
     <Color x:Key="HotColor">#525252</Color>
+    <Color x:Key="HoverColor">#279AF7</Color>
     <!--#endregion-->
 
     <!--#region Brushes-->
 
+    <SolidColorBrush x:Key="HoverBrush" Color="{StaticResource HoverColor}" />
+    
     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="{StaticResource HighlightColor}" />
     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="{StaticResource HighlightColor}" />
 
@@ -1351,6 +1355,7 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="true">
+                            <!--<Setter Property="BorderBrush" Value="{StaticResource HoverBrush}" />-->
                             <Setter Property="Background" Value="{StaticResource MouseOverButtonBackground}"/>
                             <Setter Property="Foreground" Value="{StaticResource MouseOverButtonForeground}"/>
                         </Trigger>
@@ -1823,7 +1828,7 @@
                             <Setter Property="BorderBrush" TargetName="CheckBoxBorder" Value="{StaticResource CheckBoxDisabledStroke}"/>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="BorderBrush" TargetName="CheckBoxBorder" Value="{StaticResource CheckBoxMouseOverStroke}"/>
+                            <Setter Property="BorderBrush" TargetName="CheckBoxBorder" Value="{StaticResource HoverBrush}"/>
                         </Trigger>
                         <Trigger Property="IsChecked" Value="false">
                             <Setter TargetName="CheckMark" Property="Visibility" Value="Collapsed"/>
@@ -1889,7 +1894,7 @@
                             <Setter Property="BorderBrush" TargetName="RadioButtonBorder" Value="{StaticResource RadioButtonDisabledStroke}"/>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="BorderBrush" TargetName="RadioButtonBorder" Value="{StaticResource RadioButtonMouseOverStroke}"/>
+                            <Setter Property="BorderBrush" TargetName="RadioButtonBorder" Value="{StaticResource HoverBrush}"/>
                         </Trigger>
                         <Trigger Property="IsChecked" Value="false">
                             <Setter TargetName="RadioMark" Property="Visibility" Value="Collapsed"/>
@@ -3761,7 +3766,39 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
 
+    <Style TargetType="{x:Type v:ColorPicker}">
+        
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type v:ColorPicker}">
+                    <Grid Background="Transparent">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Ellipse 
+                            Name="palette"
+                            Cursor="Hand"
+                            VerticalAlignment="Center"
+                            Grid.Column="0" 
+                            Stroke="Transparent"
+                            Width="16" Height="16">
+                            <Ellipse.Fill>
+                                <SolidColorBrush Color="{Binding SelectedColor, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ColorConverter}}" />
+                            </Ellipse.Fill>
+                        </Ellipse>
+                        <Label Grid.Column="1" Padding="2 0 0 0" Margin="0" Height="{TemplateBinding Height}" VerticalAlignment="Center" Content="{TemplateBinding Caption}" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="palette" Property="Stroke" Value="{StaticResource HoverBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
 </ResourceDictionary>

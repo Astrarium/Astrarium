@@ -122,4 +122,33 @@ namespace Planetarium.Themes
             throw new NotImplementedException();
         }
     }
+
+    public class ColorConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return Convert(value);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return Convert(value);
+        }
+
+        private object Convert(object value)
+        {
+            if (value is System.Windows.Media.Color)
+            {
+                var mediacolor = (System.Windows.Media.Color)value;
+                return System.Drawing.Color.FromArgb(mediacolor.A, mediacolor.R, mediacolor.G, mediacolor.B);
+            }
+            else if (value is System.Drawing.Color)
+            {
+                var color = (System.Drawing.Color)value;
+                return new System.Windows.Media.Color() { A = color.A, R = color.R, G = color.G, B = color.B };
+            }
+            else
+                throw new ArgumentException("Incorrect data type.");
+        }
+    }
 }

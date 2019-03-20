@@ -1,4 +1,5 @@
 ﻿using ADK.Demo;
+using Planetarium.Views;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -62,7 +63,8 @@ namespace Planetarium.ViewModels
                     }
                     else if (item.Type.IsEnum)
                     {
-                        var radioGroup = new StackPanel() { Orientation = Orientation.Vertical };
+                        var radioGroup = new GroupBox() { Header = item.Name };
+                        var radioPanel = new StackPanel() { Orientation = Orientation.Vertical };
 
                         Array values = Enum.GetValues(item.Type);
                         foreach (var value in values)
@@ -84,23 +86,20 @@ namespace Planetarium.ViewModels
                                 ConverterParameter = value
                             });
 
-                            radioGroup.Children.Add(radio);
+                            radioPanel.Children.Add(radio);
                         }
 
+                        radioGroup.Content = radioPanel;
                         control = radioGroup;
                     }
                     else if (item.Type == typeof(Color))
                     {
-                        //var colorGrid = new StackPanel() { Orientation = Orientation.Horizontal };
-                        //var picker = new ColorPicker();
-
-                        //BindingOperations.SetBinding(picker, ColorPicker.SelectedColorProperty, new Binding(item.Name) { Source = settings, Converter = new ColorConverter() });
-
-                        //colorGrid.Children.Add(new TextBlock() { Text = item.Name });
-                        //colorGrid.Children.Add(picker);
-
-                        //control = colorGrid;
+                        var picker = new ColorPicker() { Caption = item.Name };
+                        BindingOperations.SetBinding(picker, ColorPicker.SelectedColorProperty, new Binding(item.Name) { Source = settings });
+                        control = picker;
                     }
+
+
 
                     if (control != null && item.EnabledWhenCondition != null)
                     {
@@ -149,20 +148,7 @@ namespace Planetarium.ViewModels
             }
         }
 
-        public class ColorConverter : IValueConverter
-        {
-            public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-            {
-                var color = (Color)value;
-                return new System.Windows.Media.Color() { A = color.A, R = color.R, G = color.G, B = color.B };
-            }
-
-            public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-            {
-                var mediacolor = (System.Windows.Media.Color)value;
-                return Color.FromArgb(mediacolor.A, mediacolor.R, mediacolor.G, mediacolor.B);
-            }
-        }
+        
 
         public class FuncBinder : INotifyPropertyChanged
         {
