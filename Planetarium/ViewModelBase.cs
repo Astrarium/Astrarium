@@ -25,7 +25,7 @@ namespace Planetarium
         /// <summary>
         /// Closes the window associated with current ViewModel.
         /// </summary>
-        public void Close()
+        public virtual void Close()
         {
             Close(null);
         }

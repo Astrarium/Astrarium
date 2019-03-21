@@ -1,5 +1,4 @@
-﻿using ADK.Demo;
-using ADK.Demo.Objects;
+﻿using Planetarium.Objects;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;

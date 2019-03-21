@@ -1,22 +1,11 @@
-﻿using ADK.Demo;
-using ADK.Demo.UI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 using System.Windows;
-using WF = System.Windows.Forms;
 using System.Windows.Input;
-using ADK.Demo.Config;
-using Planetarium.ViewModels;
 using System.Drawing;
-using System.Windows.Controls;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using Planetarium.Themes;
-using System.Windows.Forms;
-using System.Windows.Shell;
+using WF = System.Windows.Forms;
 
 namespace Planetarium
 {
@@ -142,9 +131,9 @@ namespace Planetarium
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         private static extern int SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int left, int top, int width, int height, uint flags);
 
-        public static Screen CurrentScreen(Window window)
+        public static WF.Screen CurrentScreen(Window window)
         {
-            return Screen.FromPoint(new System.Drawing.Point((int)window.Left, (int)window.Top));
+            return WF.Screen.FromPoint(new System.Drawing.Point((int)window.Left, (int)window.Top));
         }
 
         public MainWindow(ISkyMap map)

@@ -62,6 +62,78 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AstroEventsConfig.cs" />
+    <Compile Include="Calculators\BaseCalc.cs" />
+    <Compile Include="Calculators\ConstellationsCalc.cs" />
+    <Compile Include="Calculators\DeepSkyCalc.cs" />
+    <Compile Include="Calculators\ILunarCalc.cs" />
+    <Compile Include="Calculators\LunarCalc.cs" />
+    <Compile Include="Calculators\LunarEventsProvider.cs" />
+    <Compile Include="Calculators\MilkyWayCalc.cs" />
+    <Compile Include="Calculators\PlanetsCalc.cs" />
+    <Compile Include="Calculators\PlanetsEventsProvider.cs" />
+    <Compile Include="Calculators\SolarCalc.cs" />
+    <Compile Include="Calculators\SolarEventsProvider.cs" />
+    <Compile Include="Calculators\StarsCalc.cs" />
+    <Compile Include="Calculators\StarsReader.cs" />
+    <Compile Include="Calculators\TrackCalc.cs" />
+    <Compile Include="CelestialGrid.cs" />
+    <Compile Include="Config\ControlBuilders\BooleanSettingControlBuilder.cs" />
+    <Compile Include="Config\ControlBuilders\ColorSettingControlBuilder.cs" />
+    <Compile Include="Config\ControlBuilders\DropdownSettingControlBuilder.cs" />
+    <Compile Include="Config\ControlBuilders\EnumSettingControlBuilder.cs" />
+    <Compile Include="Config\ControlBuilders\FilePathSettingControlBuilder.cs" />
+    <Compile Include="Config\ControlBuilders\FontSettingControlBuilder.cs" />
+    <Compile Include="Config\ControlBuilders\SettingControlBuilder.cs" />
+    <Compile Include="Config\ControlBuilders\StringSettingControlBuilder.cs" />
+    <Compile Include="Config\ISettings.cs" />
+    <Compile Include="Config\ISettingsConfig.cs" />
+    <Compile Include="Config\SavedSettings.cs" />
+    <Compile Include="Config\SettingConfigItem.cs" />
+    <Compile Include="Config\SettingsConfig.cs" />
+    <Compile Include="Config\Settings.cs" />
+    <Compile Include="Ephemeris.cs" />
+    <Compile Include="EphemerisConfig.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="Formatting.cs" />
+    <Compile Include="Geometry.cs" />
+    <Compile Include="IInfoProvider.cs" />
+    <Compile Include="IMapContext.cs" />
+    <Compile Include="ISkyMap.cs" />
+    <Compile Include="Objects\CelestialObject.cs" />
+    <Compile Include="Objects\CelestialPoint.cs" />
+    <Compile Include="Objects\Constellation.cs" />
+    <Compile Include="Objects\DeepSky.cs" />
+    <Compile Include="Objects\IMovingObject.cs" />
+    <Compile Include="Objects\Moon.cs" />
+    <Compile Include="Objects\Planet.cs" />
+    <Compile Include="Objects\SizeableCelestialObject.cs" />
+    <Compile Include="Objects\Star.cs" />
+    <Compile Include="Objects\Sun.cs" />
+    <Compile Include="Projections\ArcProjection.cs" />
+    <Compile Include="Projections\IProjection.cs" />
+    <Compile Include="Projections\SinProjection.cs" />
+    <Compile Include="Renderers\BaseRenderer.cs" />
+    <Compile Include="Renderers\CelestialGridRenderer.cs" />
+    <Compile Include="Renderers\ConstellationsRenderer.cs" />
+    <Compile Include="Renderers\DeepSkyRenderer.cs" />
+    <Compile Include="Renderers\GraphicsExtenstions.cs" />
+    <Compile Include="Renderers\GroundRenderer.cs" />
+    <Compile Include="Renderers\ImagesCache.cs" />
+    <Compile Include="Renderers\MilkyWayRenderer.cs" />
+    <Compile Include="Renderers\SolarSystemRenderer.cs" />
+    <Compile Include="Renderers\SolarTextureDownloader.cs" />
+    <Compile Include="Renderers\SphereRenderer.cs" />
+    <Compile Include="Renderers\StarsRenderer.cs" />
+    <Compile Include="Renderers\TrackRenderer.cs" />
+    <Compile Include="Sky.cs" />
+    <Compile Include="SkyContext.cs" />
+    <Compile Include="SkyMap.cs" />
+    <Compile Include="SkyView.cs" />
+    <Compile Include="SkyView.Designer.cs">
+      <DependentUpon>SkyView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Track.cs" />
     <Compile Include="ViewManager.cs" />
     <Compile Include="ViewModelBase.cs" />
     <Compile Include="Themes\TreeViewItemExtensions.cs" />
@@ -174,10 +246,50 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Data\Moon.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Data\Rings.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="Data\!Credits.md" />
+    <Content Include="Data\Alphabet.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="Data\Borders.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Conlabels.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Conlines.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Connames.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\MilkyWay.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\NGCIC.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\NGCICNames.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Outlines.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\StarNames.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Stars.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -185,17 +297,38 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ADK.Demo\ADK.Demo.csproj">
-      <Project>{31551388-2945-4E56-9EDC-FDD96C36538D}</Project>
-      <Name>ADK.Demo</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ADK\ADK.csproj">
       <Project>{0da17a1c-068e-4cce-82a4-646e137cc121}</Project>
       <Name>ADK</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Data\1.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Data\2.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Data\4.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Data\5.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Data\6.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Data\7.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Data\8.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

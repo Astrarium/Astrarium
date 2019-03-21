@@ -15,6 +15,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0">
@@ -55,11 +56,28 @@
             </ScrollViewer>
         </Grid>
 
-        <StackPanel Grid.Row="1"                    
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right">
-            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CloseCommand}">Close</Button>
-        </StackPanel>
+        <Separator Grid.Row="1" Margin="0" />
+
+        <Grid Grid.Row="2" Margin="0 4 0 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Button
+                Grid.Column="0"
+                MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding ResetCommand}"
+                Content="Reset to defaults">
+            </Button>
+            <StackPanel    
+                Grid.Column="1"
+                Orientation="Horizontal"
+                HorizontalAlignment="Right">
+                <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding SaveCommand}">Save</Button>
+                <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CloseCommand}">Close</Button>
+            </StackPanel>
+        </Grid>
+        
+        
 
     </Grid>
 
