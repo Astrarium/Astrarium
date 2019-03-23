@@ -90,6 +90,7 @@ namespace Planetarium.Views
         private void ShowSearchWindow(object sender, RoutedEventArgs e)
         {
             var vm = ViewManager.CreateViewModel<SearchVM>();
+            _TextBox.Focus();
             if (ViewManager.ShowDialog(vm) ?? false)
             {
                 SelectedBody = vm.SelectedItem.Body;

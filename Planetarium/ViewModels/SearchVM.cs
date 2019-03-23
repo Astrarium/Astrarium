@@ -87,6 +87,8 @@ namespace Planetarium.ViewModels
             {
                 SearchResults.Add(item);
             }
+
+            SelectedItem = SearchResults.Any() ? SearchResults[0] : null;
         }
     }
 }

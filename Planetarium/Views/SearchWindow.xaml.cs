@@ -67,6 +67,7 @@ namespace Planetarium.Views
                 if (lstResults.Items.Count > 0)
                 {
                     DialogResult = true;
+                    e.Handled = true;
                     Close();
                 }
             }
