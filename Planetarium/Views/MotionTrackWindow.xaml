@@ -21,17 +21,17 @@
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="150" />
+            <ColumnDefinition Width="160" />
         </Grid.ColumnDefinitions>
 
         <Label Grid.Row="0" Grid.Column="0">Celestial body</Label>
-        <TextBox Grid.Row="0" Grid.Column="1" Margin="0,2,0,1">Value</TextBox>
+        <v:CelestialObjectPicker Grid.Row="0" Grid.Column="1" Searcher="{Binding Searcher, Mode=OneTime}" ViewManager="{Binding ViewManager, Mode=OneTime}" SelectedBody="{Binding SelectedBody}" />
 
         <Label Grid.Row="1" Grid.Column="0">Start date</Label>
         <v:DatePicker Grid.Row="1" Grid.Column="1" Options="DateTime" ViewManager="{Binding ViewManager, Mode=OneTime}" JulianDay="{Binding JulianDayFrom}" UtcOffset="{Binding UtcOffset}" />
 
         <Label Grid.Row="2" Grid.Column="0">End date</Label>
-        <v:IntegerUpDown Grid.Row="2" Grid.Column="1" HideButtons="True" Margin="0,2,0,3" />
+        <v:DatePicker Grid.Row="2" Grid.Column="1" Options="DateTime" ViewManager="{Binding ViewManager, Mode=OneTime}" JulianDay="{Binding JulianDayTo}" UtcOffset="{Binding UtcOffset}" />
 
         <GroupBox Grid.Row="3" Grid.ColumnSpan="2" Padding="0, 8, 0, 0">
             <GroupBox.Header>

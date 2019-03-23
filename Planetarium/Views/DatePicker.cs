@@ -16,22 +16,18 @@ namespace Planetarium.Views
 {
     public class DatePicker : Control
     {
-        public DatePicker()
-        {
-
-        }
+        public DatePicker() { }
 
         public double JulianDay
         {
-            get {
-                return (double)GetValue(JulianDayProperty);
-            }
-            set {
-                SetValue(JulianDayProperty, value);
-            }
+            get { return (double)GetValue(JulianDayProperty); }
+            set { SetValue(JulianDayProperty, value); }
         }
         public readonly static DependencyProperty JulianDayProperty = DependencyProperty.Register(
-            "JulianDay", typeof(double), typeof(DatePicker), new FrameworkPropertyMetadata(Date.Now.ToJulianEphemerisDay(), (o, e) =>
+            nameof(JulianDay), 
+            typeof(double), 
+            typeof(DatePicker), 
+            new FrameworkPropertyMetadata(Date.Now.ToJulianEphemerisDay(), (o, e) =>
             {
                 DatePicker picker = (DatePicker)o;
                 picker.RaiseJulianDayChangedEvent(e);
@@ -45,17 +41,18 @@ namespace Planetarium.Views
         private void RaiseJulianDayChangedEvent(DependencyPropertyChangedEventArgs e)
         {
             JulianDayChanged?.Invoke(this, e);
+            var date = new Date(JulianDay, UtcOffset);
             switch (Options)
             {
                 default:
                 case DateOptions.DateTime:
-                    DateString = Formatters.DateTime.Format(new Date(JulianDay, UtcOffset));
+                    DateString = Formatters.DateTime.Format(date);
                     break;
                 case DateOptions.DateOnly:
-                    DateString = Formatters.DateOnly.Format(new Date(JulianDay, UtcOffset));
+                    DateString = Formatters.DateOnly.Format(date);
                     break;
                 case DateOptions.MonthYear:
-                    DateString = Formatters.MonthYear.Format(new Date(JulianDay, UtcOffset));
+                    DateString = Formatters.MonthYear.Format(date);
                     break;
             }
         }
@@ -66,7 +63,13 @@ namespace Planetarium.Views
             set { SetValue(OptionsProperty, value); }
         }
         public readonly static DependencyProperty OptionsProperty = DependencyProperty.Register(
-            "Options", typeof(DateOptions), typeof(DatePicker), new UIPropertyMetadata(DateOptions.DateTime));
+            nameof(Options), 
+            typeof(DateOptions), 
+            typeof(DatePicker), 
+            new FrameworkPropertyMetadata(DateOptions.DateTime, (o, e) => {
+                DatePicker picker = (DatePicker)o;
+                picker.RaiseJulianDayChangedEvent(e);
+            }));
 
         public double UtcOffset
         {
@@ -74,8 +77,13 @@ namespace Planetarium.Views
             set { SetValue(UtcOffsetProperty, value); }
         }
         public readonly static DependencyProperty UtcOffsetProperty = DependencyProperty.Register(
-            "UtcOffset", typeof(double), typeof(DatePicker), new UIPropertyMetadata(0.0));
-
+            nameof(UtcOffset), 
+            typeof(double), 
+            typeof(DatePicker), 
+            new FrameworkPropertyMetadata(0.0, (o, e) => {
+                DatePicker picker = (DatePicker)o;
+                picker.RaiseJulianDayChangedEvent(e);
+            }));
 
         public string DateString
         {
@@ -83,7 +91,9 @@ namespace Planetarium.Views
             private set { SetValue(DateStringProperty, value); }
         }
         public readonly static DependencyProperty DateStringProperty = DependencyProperty.Register(
-            "DateString", typeof(string), typeof(DatePicker));
+            nameof(DateString), 
+            typeof(string), 
+            typeof(DatePicker));
 
         public IViewManager ViewManager
         {
@@ -91,7 +101,10 @@ namespace Planetarium.Views
             set { SetValue(ViewManagerProperty, value); }
         }
         public readonly static DependencyProperty ViewManagerProperty = DependencyProperty.Register(
-            "ViewManager", typeof(IViewManager), typeof(DatePicker), new UIPropertyMetadata(null));
+            nameof(ViewManager), 
+            typeof(IViewManager), 
+            typeof(DatePicker), 
+            new UIPropertyMetadata(null));
 
         TextBox _TextBox;
         Button _Button;

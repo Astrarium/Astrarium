@@ -381,10 +381,8 @@ namespace Planetarium.ViewModels
 
         private void SearchObject()
         {
-            SearchVM vm = viewManager.CreateViewModel<SearchVM>();
-            bool? dialogResult = viewManager.ShowDialog(vm);
-
-            if (dialogResult != null && dialogResult.Value)
+            var vm = viewManager.CreateViewModel<SearchVM>();
+            if (viewManager.ShowDialog(vm) ?? false)
             {
                 CenterOnObject(vm.SelectedItem.Body);
             }
@@ -427,11 +425,10 @@ namespace Planetarium.ViewModels
                 var info = sky.GetInfo(body);
                 if (info != null)
                 {
-                    var model = new ObjectInfoVM(info);
-                    bool? dialogResult = viewManager.ShowDialog(model);
-                    if (dialogResult ?? false)
+                    var vm = new ObjectInfoVM(info);
+                    if (viewManager.ShowDialog(vm) ?? false)
                     {
-                        sky.Context.JulianDay = model.JulianDay;
+                        sky.Context.JulianDay = vm.JulianDay;
                         sky.Calculate();
                         map.GoToObject(body, TimeSpan.Zero);
                     }
@@ -444,6 +441,7 @@ namespace Planetarium.ViewModels
             if (body != null && body is IMovingObject)
             {
                 var vm = viewManager.CreateViewModel<MotionTrackVM>();
+                vm.SelectedBody = body;
                 vm.JulianDayFrom = sky.Context.JulianDay;
                 vm.JulianDayTo = sky.Context.JulianDay + 30;
                 vm.UtcOffset = sky.Context.GeoLocation.UtcOffset;
