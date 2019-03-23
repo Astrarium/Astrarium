@@ -21,17 +21,17 @@
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="120" />
+            <ColumnDefinition Width="150" />
         </Grid.ColumnDefinitions>
 
         <Label Grid.Row="0" Grid.Column="0">Celestial body</Label>
-        <TextBox Grid.Row="0" Grid.Column="1">Value</TextBox>
+        <TextBox Grid.Row="0" Grid.Column="1" Margin="0,2,0,1">Value</TextBox>
 
         <Label Grid.Row="1" Grid.Column="0">Start date</Label>
-        <TextBox Grid.Row="1" Grid.Column="1">Value</TextBox>
+        <v:DatePicker Grid.Row="1" Grid.Column="1" Options="DateTime" ViewManager="{Binding ViewManager, Mode=OneTime}" JulianDay="{Binding JulianDayFrom}" UtcOffset="{Binding UtcOffset}" />
 
         <Label Grid.Row="2" Grid.Column="0">End date</Label>
-        <v:IntegerUpDown Grid.Row="2" Grid.Column="1" HideButtons="True" />
+        <v:IntegerUpDown Grid.Row="2" Grid.Column="1" HideButtons="True" Margin="0,2,0,3" />
 
         <GroupBox Grid.Row="3" Grid.ColumnSpan="2" Padding="0, 8, 0, 0">
             <GroupBox.Header>
@@ -46,7 +46,7 @@
             <Button MinWidth="80" Margin="0, 0, 8, 0">OK</Button>
             <Button MinWidth="80">Cancel</Button>
         </StackPanel>
-        
+
 
     </Grid>
 </Window>

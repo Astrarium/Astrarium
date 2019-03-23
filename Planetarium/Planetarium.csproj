@@ -160,6 +160,7 @@
     <Compile Include="Views\EphemerisWindow.xaml.cs">
       <DependentUpon>EphemerisWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\DatePicker.cs" />
     <Compile Include="Views\IntegerUpDown.cs" />
     <Compile Include="Views\MessageBoxWindow.xaml.cs">
       <DependentUpon>MessageBoxWindow.xaml</DependentUpon>
@@ -294,11 +295,6 @@
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config">
-      <SubType>Designer</SubType>
     </None>
   </ItemGroup>
   <ItemGroup>

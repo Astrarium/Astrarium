@@ -220,12 +220,9 @@ namespace Planetarium.ViewModels
             }
             else if (key == Key.O)
             {
-                //using (var frmSettings = new FormSettings(settings))
-                //{
-                //    settings.SettingValueChanged += Settings_OnSettingChanged;
-                //    frmSettings.ShowDialog();
-                //    settings.SettingValueChanged -= Settings_OnSettingChanged;
-                //}
+                settings.SettingValueChanged += Settings_OnSettingChanged;
+                viewManager.ShowDialog<SettingsVM>();
+                settings.SettingValueChanged -= Settings_OnSettingChanged;
             }
             else if (key == Key.I)
             {
@@ -280,12 +277,6 @@ namespace Planetarium.ViewModels
             else if (key == Key.T)
             {
                 MotionTrack(map.SelectedObject);
-            }
-            else if (key == Key.B)
-            {
-                settings.SettingValueChanged += Settings_OnSettingChanged;
-                viewManager.ShowDialog<SettingsVM>();
-                settings.SettingValueChanged -= Settings_OnSettingChanged;                
             }
         }
 
@@ -452,7 +443,12 @@ namespace Planetarium.ViewModels
         {
             if (body != null && body is IMovingObject)
             {
-                viewManager.ShowDialog<MotionTrackVM>();
+                var vm = viewManager.CreateViewModel<MotionTrackVM>();
+                vm.JulianDayFrom = sky.Context.JulianDay;
+                vm.JulianDayTo = sky.Context.JulianDay + 30;
+                vm.UtcOffset = sky.Context.GeoLocation.UtcOffset;
+
+                viewManager.ShowDialog(vm);
                
 
 

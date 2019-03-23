@@ -115,13 +115,13 @@ namespace Planetarium.ViewModels
                 else if (MessageBoxResult.No == result)
                 {
                     settings.Load();
-                    base.Close();
+                }
+                else if (MessageBoxResult.Cancel == result)
+                {
+                    return;
                 }
             }
-            else
-            {
-                base.Close();
-            }
+            base.Close();
         }
 
         private void Save()
@@ -144,7 +144,7 @@ namespace Planetarium.ViewModels
             public StackPanel Panel { get; set; }
         }
 
-        class FuncBinder : INotifyPropertyChanged
+        private class FuncBinder : INotifyPropertyChanged
         {
             private Func<ISettings, bool> func;
             private ISettings settings;

@@ -3871,4 +3871,38 @@
         </Setter>
     </Style>
 
+    <Style TargetType="{x:Type v:DatePicker}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type v:DatePicker}">
+                    <Grid Background="Transparent">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="{Binding ElementName=TextBox, Path=Height}" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox Name="TextBox" Grid.Column="0" 
+                                 IsReadOnly="True" 
+                                 Text="{TemplateBinding DateString}" />
+                        <Button Name="Button" Grid.Column="1" BorderBrush="{StaticResource TextBoxBorder}" Height="{Binding ElementName=TextBox, Path=Height}" Width="{Binding ElementName=TextBox, Path=Height}">
+                            <Canvas Width="16" Height="16">
+                                <Path Name="Icon" Canvas.Left="1" Canvas.Top="1" Width="17.5" Height="17.5" Stretch="Fill" Fill="{StaticResource ButtonForeground}" Data="M9,10H7V12H9V10M13,10H11V12H13V10M17,10H15V12H17V10M19,3H18V1H16V3H8V1H6V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V8H19V19Z">
+                                    <Path.RenderTransform>
+                                        <ScaleTransform ScaleX="0.8" ScaleY="0.8"/>
+                                    </Path.RenderTransform>
+                                </Path>
+                            </Canvas>
+                        </Button>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter TargetName="Icon" Property="Fill" Value="{StaticResource DisabledButtonForeground}" />
+                            <Setter TargetName="Button" Property="Background" Value="{StaticResource TextBoxDisabledBackground}" />
+                            <Setter TargetName="Button" Property="BorderBrush" Value="{StaticResource TextBoxDisabledBackground}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>
