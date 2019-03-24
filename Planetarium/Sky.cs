@@ -16,7 +16,7 @@ namespace Planetarium
         string GetObjectName(CelestialObject body);
     }
 
-    public class Sky : ISearcher
+    public class Sky : ISearcher, IEphemerisProvider
     {
         private delegate string GetNameDelegate<T>(T body) where T : CelestialObject;
         private delegate ICollection<SearchResultItem> SearchDelegate(string searchString, int maxCount = 50);

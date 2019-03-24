@@ -30,19 +30,13 @@ namespace Planetarium.Views
             typeof(CelestialObjectPicker), 
             new FrameworkPropertyMetadata(null, (o, e) =>
             {
-                CelestialObjectPicker picker = (CelestialObjectPicker)o;
-                picker.RaiseSelectedBodyChangedEvent(e);
+                var searcher = (ISearcher)o.GetValue(SearcherProperty);
+                o.SetValue(SelectedBodyNameProperty, searcher.GetObjectName((CelestialObject)e.NewValue));
             })
             {
                 BindsTwoWayByDefault = true,
                 DefaultUpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
             });
-
-        public event EventHandler<DependencyPropertyChangedEventArgs> SelectedBodyChanged;
-        private void RaiseSelectedBodyChangedEvent(DependencyPropertyChangedEventArgs e)
-        {
-            SelectedBodyChanged?.Invoke(this, e);
-        }
 
         public ISearcher Searcher
         {
@@ -76,6 +70,18 @@ namespace Planetarium.Views
             typeof(CelestialObjectPicker), 
             new UIPropertyMetadata(null));
 
+        public Func<CelestialObject, bool> Filter
+        {
+            get { return (Func<CelestialObject, bool>)GetValue(FilterProperty); }
+            set { SetValue(FilterProperty, value); }
+        }
+
+        public readonly static DependencyProperty FilterProperty = DependencyProperty.Register(
+           nameof(Filter),
+           typeof(Func<CelestialObject, bool>),
+           typeof(CelestialObjectPicker),
+           new UIPropertyMetadata((Func<CelestialObject, bool>)(c => true)));
+
         TextBox _TextBox;
         Button _Button;
 
@@ -90,11 +96,11 @@ namespace Planetarium.Views
         private void ShowSearchWindow(object sender, RoutedEventArgs e)
         {
             var vm = ViewManager.CreateViewModel<SearchVM>();
+            vm.Filter = Filter;
             _TextBox.Focus();
             if (ViewManager.ShowDialog(vm) ?? false)
             {
                 SelectedBody = vm.SelectedItem.Body;
-                SelectedBodyName = vm.SelectedItem.Name;
             }
         }
     }

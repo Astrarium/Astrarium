@@ -20,7 +20,7 @@ namespace Planetarium.ViewModels
         /// <summary>
         /// Filter used by searching.
         /// </summary>
-        private readonly Func<CelestialObject, bool> filter = (b) => true;
+        public Func<CelestialObject, bool> Filter = (b) => true;
 
         /// <summary>
         /// Creates new instance of the ViewModel.
@@ -81,7 +81,7 @@ namespace Planetarium.ViewModels
         /// </summary>
         private async void DoSearch()
         {
-            var results = await Task.Run(() => searcher.Search(SearchString, filter));
+            var results = await Task.Run(() => searcher.Search(SearchString, Filter));
             SearchResults.Clear();
             foreach (var item in results)
             {

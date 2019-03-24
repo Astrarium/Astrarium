@@ -142,7 +142,7 @@ namespace Planetarium
                 .Cast<BaseAstroEventsProvider>()
                 .ToArray();
 
-            kernel.Bind<Sky, ISearcher>().ToConstant(new Sky(context, calculators, eventProviders)).InSingletonScope();
+            kernel.Bind<Sky, ISearcher, IEphemerisProvider>().ToConstant(new Sky(context, calculators, eventProviders)).InSingletonScope();
             kernel.Bind<ISkyMap>().ToConstant(new SkyMap(context, renderers)).InSingletonScope();
             kernel.Bind<IViewManager>().ToConstant(new ViewManager(t => kernel.Get(t))).InSingletonScope();
         }

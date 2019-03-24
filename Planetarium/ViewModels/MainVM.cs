@@ -446,19 +446,11 @@ namespace Planetarium.ViewModels
                 vm.JulianDayTo = sky.Context.JulianDay + 30;
                 vm.UtcOffset = sky.Context.GeoLocation.UtcOffset;
 
-                viewManager.ShowDialog(vm);
-               
-
-
-
-                /*
-                var formTrackSettings = viewManager.GetForm<FormTrackSettings>();
-                formTrackSettings.Track = new Track() { Body = body, From = sky.Context.JulianDay, To = sky.Context.JulianDay + 30, LabelsStep = TimeSpan.FromDays(1) };
-                if (formTrackSettings.ShowDialog() == DialogResult.OK)
+                if (viewManager.ShowDialog(vm) ?? false)
                 {
-                    skyView.Invalidate();
+                    sky.Calculate();
+                    map.Invalidate();
                 }
-                */
             }
         }
 

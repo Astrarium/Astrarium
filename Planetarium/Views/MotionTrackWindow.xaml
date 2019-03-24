@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:v="clr-namespace:Planetarium.Views"
         mc:Ignorable="d"
-        Title="TrackPropertiesWindow" Height="330" Width="456.5"
+        Title="Motion Track" Height="330" Width="456.5"
         Style="{StaticResource {x:Type Window}}"
         WindowStartupLocation="CenterOwner">
     <Grid Margin="16">
@@ -17,6 +17,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
@@ -25,7 +26,7 @@
         </Grid.ColumnDefinitions>
 
         <Label Grid.Row="0" Grid.Column="0">Celestial body</Label>
-        <v:CelestialObjectPicker Grid.Row="0" Grid.Column="1" Searcher="{Binding Searcher, Mode=OneTime}" ViewManager="{Binding ViewManager, Mode=OneTime}" SelectedBody="{Binding SelectedBody}" />
+        <v:CelestialObjectPicker Grid.Row="0" Grid.Column="1" Searcher="{Binding Searcher, Mode=OneTime}" ViewManager="{Binding ViewManager, Mode=OneTime}" SelectedBody="{Binding SelectedBody, Mode=TwoWay}" Filter="{Binding Filter, Mode=OneTime}" />
 
         <Label Grid.Row="1" Grid.Column="0">Start date</Label>
         <v:DatePicker Grid.Row="1" Grid.Column="1" Options="DateTime" ViewManager="{Binding ViewManager, Mode=OneTime}" JulianDay="{Binding JulianDayFrom}" UtcOffset="{Binding UtcOffset}" />
@@ -40,11 +41,15 @@
             <Label>Labels step</Label>
         </GroupBox>
 
-        <StackPanel Grid.Row="5" Grid.ColumnSpan="2" 
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right">
-            <Button MinWidth="80" Margin="0, 0, 8, 0">OK</Button>
-            <Button MinWidth="80">Cancel</Button>
+        <Separator Grid.Row="5" Grid.ColumnSpan="2" />
+
+        <StackPanel    
+            Grid.Row="6"
+            Grid.ColumnSpan="2"
+            Orientation="Horizontal"
+            HorizontalAlignment="Right">
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding OkCommand}">OK</Button>
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CancelCommand}">Cancel</Button>
         </StackPanel>
 
 

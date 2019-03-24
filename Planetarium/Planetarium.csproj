@@ -97,6 +97,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Formatting.cs" />
     <Compile Include="Geometry.cs" />
+    <Compile Include="IEphemerisProvider.cs" />
     <Compile Include="IInfoProvider.cs" />
     <Compile Include="IMapContext.cs" />
     <Compile Include="ISkyMap.cs" />
