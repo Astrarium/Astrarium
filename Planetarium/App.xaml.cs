@@ -26,7 +26,18 @@ namespace Planetarium
 
             ConfigureContainer();
 
+            Dispatcher.UnhandledException += (s, ea) =>
+            {
+                kernel.Get<IViewManager>().ShowMessageBox("Error", $"An unhandled exception occurred:\n\n{ea.Exception.Message}\nStack trace:\n\n{ea.Exception.StackTrace}", MessageBoxButton.OK);
+                ea.Handled = true;
+            };
+
             kernel.Get<IViewManager>().ShowWindow<MainVM>();
+        }
+
+        private void Dispatcher_UnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         private void ConfigureContainer()

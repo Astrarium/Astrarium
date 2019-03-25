@@ -17,20 +17,12 @@ namespace Planetarium.Renderers
         private readonly ITracksProvider tracksProvider;
 
         private Font fontLabel;
-        private Color colorLabel;
-        private Color colorTrack;
-        private Brush brushLabel;
-        private Pen penTrack;
 
         public TrackRenderer(ITracksProvider tracksProvider)
         {
             this.tracksProvider = tracksProvider;
 
             fontLabel = new Font("Arial", 8);
-            colorTrack = Color.FromArgb(100, 100, 100);
-            colorLabel = Color.FromArgb(100, 100, 100);
-            penTrack = new Pen(colorTrack);
-            brushLabel = new SolidBrush(colorLabel);
         }
 
         public override void Render(IMapContext map)
@@ -42,6 +34,8 @@ namespace Planetarium.Renderers
             {
                 if (track.Points.Any())
                 {
+                    var penTrack = new Pen(new SolidBrush(track.Color));
+
                     var segments = track.Points
                         .Select(p => Angle.Separation(p.Horizontal, map.Center) < map.ViewAngle * coeff ? p : null)
                         .Split(p => p == null, true);
@@ -87,7 +81,10 @@ namespace Planetarium.Renderers
                         DrawTrackSegment(map, penTrack, segment.Select(p => map.Project(p.Horizontal)).ToArray(), pBody);
                     }
 
-                    DrawLabels(map, track);
+                    if (track.DrawLabels)
+                    {
+                        DrawLabels(map, track);
+                    }
                 }
             }
         }
@@ -105,6 +102,7 @@ namespace Planetarium.Renderers
 
         private void DrawLabels(IMapContext map, Track track)
         {
+            var brushLabel = new SolidBrush(track.Color);
             double trackStep = track.Step;
             double stepLabels = track.LabelsStep.TotalDays;
             double coeff = map.DiagonalCoefficient();

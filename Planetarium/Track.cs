@@ -1,6 +1,7 @@
 ﻿using Planetarium.Objects;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -67,6 +68,16 @@ namespace Planetarium
         /// To check this, compare desired value with <see cref="SmallestLabelsStep(IMovingObject)"/> result.
         /// </summary>
         public TimeSpan LabelsStep { get; set; }
+
+        /// <summary>
+        /// Track color
+        /// </summary>
+        public Color Color { get; set; }
+
+        /// <summary>
+        /// Flag indicating is it required to draw track labels or not
+        /// </summary>
+        public bool DrawLabels { get; set; }
 
         /// <summary>
         /// Gets smallest allowed labels step for the celestial body

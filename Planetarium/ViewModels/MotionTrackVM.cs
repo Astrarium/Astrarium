@@ -3,6 +3,7 @@ using Planetarium.Calculators;
 using Planetarium.Objects;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -49,6 +50,8 @@ namespace Planetarium.ViewModels
         public double JulianDayFrom { get; set; }
         public double JulianDayTo { get; set; }
         public double UtcOffset { get; set; }
+        public Color TrackColor { get; set; }
+        public bool DrawLabels { get; set; }
 
         public void Ok()
         {
@@ -57,23 +60,28 @@ namespace Planetarium.ViewModels
                 Body = SelectedBody,
                 From = JulianDayFrom,
                 To = JulianDayTo,
-                LabelsStep = TimeSpan.FromDays(1)
+                LabelsStep = TimeSpan.FromDays(1),
+                Color = TrackColor,
+                DrawLabels = DrawLabels
             });
             Close(true);
         }
 
         private void AddTrack(Track track)
         {
-            if (!(track.Body is IMovingObject))
-                throw new Exception($"The '{track.Body.GetType()}' class should implement '{nameof(IMovingObject)}' interface.");
-
-            TracksProvider.Tracks.Add(track);
+            var categories = EphemerisProvider.GetEphemerisCategories(track.Body);
+            if (!(categories.Contains("Equatorial.Alpha") && categories.Contains("Equatorial.Delta")))
+            {
+                throw new Exception($"Ephemeris provider for type {track.Body.GetType().Name} does not provide \"Equatorial.Alpha\" and \"Equatorial.Delta\" ephemeris.");
+            }
 
             var positions = EphemerisProvider.GetEphemerides(track.Body, track.From, track.To, track.Step, new[] { "Equatorial.Alpha", "Equatorial.Delta" });
             foreach (var eq in positions)
             {
                 track.Points.Add(new CelestialPoint() { Equatorial0 = new CrdsEquatorial((double)eq[0].Value, (double)eq[1].Value) });
             }
+
+            TracksProvider.Tracks.Add(track);
         }
     }
 }

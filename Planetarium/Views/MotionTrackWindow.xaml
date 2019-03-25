@@ -8,9 +8,10 @@
         Title="Motion Track" Height="330" Width="456.5"
         Style="{StaticResource {x:Type Window}}"
         WindowStartupLocation="CenterOwner">
-    <Grid Margin="16">
+    <Grid Margin="4">
 
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -34,17 +35,21 @@
         <Label Grid.Row="2" Grid.Column="0">End date</Label>
         <v:DatePicker Grid.Row="2" Grid.Column="1" Options="DateTime" ViewManager="{Binding ViewManager, Mode=OneTime}" JulianDay="{Binding JulianDayTo}" UtcOffset="{Binding UtcOffset}" />
 
-        <GroupBox Grid.Row="3" Grid.ColumnSpan="2" Padding="0, 8, 0, 0">
+
+        <v:ColorPicker Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Caption="Track color" SelectedColor="{Binding TrackColor}" />
+
+
+        <GroupBox Grid.Row="4" Grid.ColumnSpan="2" Padding="0, 8, 0, 0">
             <GroupBox.Header>
-                <CheckBox>Show labels</CheckBox>
+                <CheckBox IsChecked="{Binding DrawLabels}">Show labels</CheckBox>
             </GroupBox.Header>
             <Label>Labels step</Label>
         </GroupBox>
 
-        <Separator Grid.Row="5" Grid.ColumnSpan="2" />
+        <Separator Grid.Row="6" Grid.ColumnSpan="2" />
 
         <StackPanel    
-            Grid.Row="6"
+            Grid.Row="7"
             Grid.ColumnSpan="2"
             Orientation="Horizontal"
             HorizontalAlignment="Right">
