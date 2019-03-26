@@ -179,4 +179,18 @@ namespace Planetarium.Themes
             throw new NotImplementedException();
         }
     }
+
+    public class ColorToStringConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var color = (System.Drawing.Color)value;
+            return color.Name;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

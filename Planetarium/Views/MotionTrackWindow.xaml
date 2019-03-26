@@ -35,9 +35,11 @@
         <Label Grid.Row="2" Grid.Column="0">End date</Label>
         <v:DatePicker Grid.Row="2" Grid.Column="1" Options="DateTime" ViewManager="{Binding ViewManager, Mode=OneTime}" JulianDay="{Binding JulianDayTo}" UtcOffset="{Binding UtcOffset}" />
 
-
-        <v:ColorPicker Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Caption="Track color" SelectedColor="{Binding TrackColor}" />
-
+        <Label Grid.Row="3" Grid.Column="0">Track Color</Label>
+        <Border Grid.Row="3" Grid.Column="1" Height="24" BorderBrush="{StaticResource TextBoxBorder}" BorderThickness="1">
+            <v:ColorPicker VerticalAlignment="Center" Caption="{Binding RelativeSource={RelativeSource Self}, Path=SelectedColor, Converter={StaticResource ColorToStringConverter}}" Grid.Row="3" Margin="4 0 0 0" Grid.Column="1" SelectedColor="{Binding TrackColor}" />
+        </Border>
+        
 
         <GroupBox Grid.Row="4" Grid.ColumnSpan="2" Padding="0, 8, 0, 0">
             <GroupBox.Header>

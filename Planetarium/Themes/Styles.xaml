@@ -18,6 +18,7 @@
     <t:InverseBoolToResizeModeConverter x:Key="InverseBoolToResizeModeConverter" />
     <t:ColorConverter x:Key="ColorConverter" />
     <t:FontToStringConverter x:Key="FontToStringConverter" />
+    <t:ColorToStringConverter x:Key="ColorToStringConverter" />
     <BooleanToVisibilityConverter x:Key="bool2VisibilityConverter"/>
     <!--#endregion-->
 
@@ -3776,14 +3777,13 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type v:ColorPicker}">
-                    <Grid Background="Transparent">
+                    <Grid Background="Transparent" Cursor="Hand">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Ellipse 
                             Name="palette"
-                            Cursor="Hand"
                             VerticalAlignment="Center"
                             Grid.Column="0" 
                             Stroke="{StaticResource MediumBackgroundBrush}"
@@ -3813,8 +3813,8 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="24"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" Text="{TemplateBinding SelectedPath}" IsReadOnly="True" />
-                        <Button Name="Button" Grid.Column="1" BorderBrush="{StaticResource TextBoxBorder}" Height="{TemplateBinding Height}" Width="{TemplateBinding Height}">
+                        <TextBox Name="TextBox" Grid.Column="0" Text="{TemplateBinding SelectedPath}" IsReadOnly="True" />
+                        <Button Name="Button" Grid.Column="1" BorderBrush="{StaticResource TextBoxBorder}" Height="{Binding ElementName=TextBox, Path=Height}" Width="{Binding ElementName=TextBox, Path=Height}">
                             <Canvas Width="16" Height="16">
                                 <Path Name="Icon" Canvas.Left="1" Canvas.Top="1" Width="17.5" Height="17.5" Stretch="Fill" Fill="{StaticResource ButtonForeground}" Data="F1 M9.17 6l2 2H20v10H4V6h5.17M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z">
                                     <Path.RenderTransform>
@@ -3845,11 +3845,12 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="24"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" 
+                        <TextBox Name="TextBox"
+                                 Grid.Column="0" 
                                  IsReadOnly="True" 
                                  Text="{TemplateBinding SelectedFont, Converter={StaticResource FontToStringConverter}}"                                  
                                  FontFamily="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=SelectedFont.Name}" />
-                        <Button Name="Button" Grid.Column="1" BorderBrush="{StaticResource TextBoxBorder}" Height="{TemplateBinding Height}" Width="{TemplateBinding Height}">
+                        <Button Name="Button" Grid.Column="1" BorderBrush="{StaticResource TextBoxBorder}" Height="{Binding ElementName=TextBox, Path=Height}" Width="{Binding ElementName=TextBox, Path=Height}">
                             <Canvas Width="16" Height="16">
                                 <Path Name="Icon" Canvas.Left="1" Canvas.Top="1" Width="17.5" Height="17.5" Stretch="Fill" Fill="{StaticResource ButtonForeground}" Data="F1 M9 4v3h5v12h3V7h5V4H9zm-6 8h3v7h3v-7h3V9H3v3z">
                                     <Path.RenderTransform>
