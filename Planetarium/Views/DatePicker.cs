@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
+using System.Windows.Documents;
 using System.Windows.Input;
 
 namespace Planetarium.Views
@@ -23,6 +24,7 @@ namespace Planetarium.Views
             get { return (double)GetValue(JulianDayProperty); }
             set { SetValue(JulianDayProperty, value); }
         }
+
         public readonly static DependencyProperty JulianDayProperty = DependencyProperty.Register(
             nameof(JulianDay), 
             typeof(double), 
@@ -106,15 +108,13 @@ namespace Planetarium.Views
             typeof(DatePicker), 
             new UIPropertyMetadata(null));
 
-        TextBox _TextBox;
-        Button _Button;
+        Hyperlink _Link;
 
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
-            _TextBox = Template.FindName("TextBox", this) as TextBox;
-            _Button = Template.FindName("Button", this) as Button;
-            _Button.Click += ShowDateWindow;
+            _Link = Template.FindName("Link", this) as Hyperlink;
+            _Link.Click += ShowDateWindow;
         }
 
         private void ShowDateWindow(object sender, RoutedEventArgs e)

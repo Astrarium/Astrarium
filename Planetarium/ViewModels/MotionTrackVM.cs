@@ -50,7 +50,7 @@ namespace Planetarium.ViewModels
         public double JulianDayFrom { get; set; }
         public double JulianDayTo { get; set; }
         public double UtcOffset { get; set; }
-        public Color TrackColor { get; set; }
+        public Color TrackColor { get; set; } = Color.DimGray;
         public bool DrawLabels { get; set; }
 
         public void Ok()

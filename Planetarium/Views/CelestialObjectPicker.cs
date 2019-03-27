@@ -12,6 +12,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Documents;
 
 namespace Planetarium.Views
 {
@@ -82,22 +83,19 @@ namespace Planetarium.Views
            typeof(CelestialObjectPicker),
            new UIPropertyMetadata((Func<CelestialObject, bool>)(c => true)));
 
-        TextBox _TextBox;
-        Button _Button;
+        Hyperlink _Link;
 
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
-            _TextBox = Template.FindName("TextBox", this) as TextBox;
-            _Button = Template.FindName("Button", this) as Button;
-            _Button.Click += ShowSearchWindow;
+            _Link = Template.FindName("Link", this) as Hyperlink;
+            _Link.Click += ShowSearchWindow;
         }
 
         private void ShowSearchWindow(object sender, RoutedEventArgs e)
         {
             var vm = ViewManager.CreateViewModel<SearchVM>();
             vm.Filter = Filter;
-            _TextBox.Focus();
             if (ViewManager.ShowDialog(vm) ?? false)
             {
                 SelectedBody = vm.SelectedItem.Body;
