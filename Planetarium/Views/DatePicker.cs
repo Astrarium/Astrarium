@@ -95,7 +95,7 @@ namespace Planetarium.Views
         public readonly static DependencyProperty DateStringProperty = DependencyProperty.Register(
             nameof(DateString), 
             typeof(string), 
-            typeof(DatePicker));
+            typeof(DatePicker), new PropertyMetadata("01 Jan 2000"));
 
         public IViewManager ViewManager
         {
@@ -108,17 +108,9 @@ namespace Planetarium.Views
             typeof(DatePicker), 
             new UIPropertyMetadata(null));
 
-        Hyperlink _Link;
-
-        public override void OnApplyTemplate()
+        protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
         {
-            base.OnApplyTemplate();
-            _Link = Template.FindName("Link", this) as Hyperlink;
-            _Link.Click += ShowDateWindow;
-        }
-
-        private void ShowDateWindow(object sender, RoutedEventArgs e)
-        {
+            base.OnMouseLeftButtonDown(e);
             var vm = new DateVM(JulianDay, UtcOffset, Options);
             if (ViewManager.ShowDialog(vm) ?? false)
             {

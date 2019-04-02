@@ -58,7 +58,8 @@ namespace Planetarium.Views
         public readonly static DependencyProperty SelectedBodyNameProperty = DependencyProperty.Register(
             nameof(SelectedBodyName), 
             typeof(string), 
-            typeof(CelestialObjectPicker));
+            typeof(CelestialObjectPicker),
+            new PropertyMetadata("Not set"));
 
         public IViewManager ViewManager
         {
@@ -83,17 +84,9 @@ namespace Planetarium.Views
            typeof(CelestialObjectPicker),
            new UIPropertyMetadata((Func<CelestialObject, bool>)(c => true)));
 
-        Hyperlink _Link;
-
-        public override void OnApplyTemplate()
+        protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
         {
-            base.OnApplyTemplate();
-            _Link = Template.FindName("Link", this) as Hyperlink;
-            _Link.Click += ShowSearchWindow;
-        }
-
-        private void ShowSearchWindow(object sender, RoutedEventArgs e)
-        {
+            base.OnMouseLeftButtonDown(e);
             var vm = ViewManager.CreateViewModel<SearchVM>();
             vm.Filter = Filter;
             if (ViewManager.ShowDialog(vm) ?? false)
