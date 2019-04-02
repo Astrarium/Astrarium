@@ -4,6 +4,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes\Converters.xaml" />
                 <ResourceDictionary Source="Themes\Styles.xaml" />
                 <ResourceDictionary Source="Themes\WindowStyle.xaml" />
             </ResourceDictionary.MergedDictionaries>

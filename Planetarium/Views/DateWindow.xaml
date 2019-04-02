@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:v="clr-namespace:Planetarium.Views"
+        xmlns:c="clr-namespace:Planetarium.Controls"
         xmlns:t="clr-namespace:Planetarium.Themes"
         xmlns:vm="clr-namespace:Planetarium.ViewModels"
         mc:Ignorable="d"
@@ -37,19 +37,19 @@
             <Label Grid.Column="1" Grid.Row="0">Month</Label>
             <Label Grid.Column="2" Grid.Row="0">Year</Label>
 
-            <v:IntegerUpDown Height="26" Margin="3" Grid.Column="0" Grid.Row="1" Minimum="1" Maximum="{Binding DaysCount}" Value="{Binding Day}" />
+            <c:IntegerUpDown Height="26" Margin="3" Grid.Column="0" Grid.Row="1" Minimum="1" Maximum="{Binding DaysCount}" Value="{Binding Day}" />
             <ComboBox Height="22" Margin="3" Grid.Column="1" Grid.Row="1" 
                   ItemsSource="{Binding ShortMonthsNames}"
                   SelectedIndex="{Binding SelectedMonth}" />
-            <v:IntegerUpDown Height="26" Margin="3" Grid.Column="2" Grid.Row="1" Minimum="-9999" Maximum="9999" Value="{Binding Year}" />
+            <c:IntegerUpDown Height="26" Margin="3" Grid.Column="2" Grid.Row="1" Minimum="-9999" Maximum="9999" Value="{Binding Year}" />
 
             <Label Grid.Column="0" Grid.Row="2" VerticalAlignment="Bottom">Hours</Label>
             <Label Grid.Column="1" Grid.Row="2" VerticalAlignment="Bottom">Minutes</Label>
             <Label Grid.Column="2" Grid.Row="2" VerticalAlignment="Bottom">Seconds</Label>
 
-            <v:IntegerUpDown Height="26" Margin="3" Grid.Column="0" Grid.Row="3" Maximum="23" Value="{Binding Hours}" />
-            <v:IntegerUpDown Height="26" Margin="3" Grid.Column="1" Grid.Row="3" Maximum="59" Value="{Binding Minutes}" />
-            <v:IntegerUpDown Height="26" Margin="3" Grid.Column="2" Grid.Row="3" Maximum="59" Value="{Binding Seconds}" />
+            <c:IntegerUpDown Height="26" Margin="3" Grid.Column="0" Grid.Row="3" Maximum="23" Value="{Binding Hours}" />
+            <c:IntegerUpDown Height="26" Margin="3" Grid.Column="1" Grid.Row="3" Maximum="59" Value="{Binding Minutes}" />
+            <c:IntegerUpDown Height="26" Margin="3" Grid.Column="2" Grid.Row="3" Maximum="59" Value="{Binding Seconds}" />
         </Grid>
 
         <!-- Date Only Layout -->
@@ -70,11 +70,11 @@
             <Label Grid.Column="1" Grid.Row="0">Month</Label>
             <Label Grid.Column="2" Grid.Row="0">Year</Label>
 
-            <v:IntegerUpDown Height="26" Margin="3" Grid.Column="0" Grid.Row="1" Minimum="1" Maximum="{Binding DaysCount}" Value="{Binding Day}" />
+            <c:IntegerUpDown Height="26" Margin="3" Grid.Column="0" Grid.Row="1" Minimum="1" Maximum="{Binding DaysCount}" Value="{Binding Day}" />
             <ComboBox Height="22" Margin="3" Grid.Column="1" Grid.Row="1" 
                   ItemsSource="{Binding ShortMonthsNames}"
                   SelectedIndex="{Binding SelectedMonth}" />
-            <v:IntegerUpDown Height="26" Margin="3" Grid.Column="2" Grid.Row="1" Minimum="-9999" Maximum="9999" Value="{Binding Year}" />
+            <c:IntegerUpDown Height="26" Margin="3" Grid.Column="2" Grid.Row="1" Minimum="-9999" Maximum="9999" Value="{Binding Year}" />
 
         </Grid>
 
@@ -97,7 +97,7 @@
             <ComboBox Height="22" Margin="3" Grid.Column="0" Grid.Row="1" 
                   ItemsSource="{Binding FullMonthsNames}"
                   SelectedIndex="{Binding SelectedMonth}" />
-            <v:IntegerUpDown Height="26" Margin="3" Grid.Column="1" Grid.Row="1" Minimum="-9999" Maximum="9999" Value="{Binding Year}" />
+            <c:IntegerUpDown Height="26" Margin="3" Grid.Column="1" Grid.Row="1" Minimum="-9999" Maximum="9999" Value="{Binding Year}" />
 
         </Grid>
         

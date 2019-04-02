@@ -1,4 +1,4 @@
-﻿using Planetarium.Views;
+﻿using Planetarium.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;

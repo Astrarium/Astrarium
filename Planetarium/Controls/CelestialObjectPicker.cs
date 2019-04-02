@@ -1,5 +1,4 @@
-﻿using ADK;
-using Planetarium.Objects;
+﻿using Planetarium.Objects;
 using Planetarium.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -9,22 +8,19 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
-using System.Windows.Documents;
 
-namespace Planetarium.Views
+namespace Planetarium.Controls
 {
     public class CelestialObjectPicker : Control
     {
-        public CelestialObjectPicker() { }
-
         public CelestialObject SelectedBody
         {
             get { return (CelestialObject)GetValue(SelectedBodyProperty); }
             set { SetValue(SelectedBodyProperty, value); }
         }
+
         public readonly static DependencyProperty SelectedBodyProperty = DependencyProperty.Register(
             nameof(SelectedBody), 
             typeof(CelestialObject), 

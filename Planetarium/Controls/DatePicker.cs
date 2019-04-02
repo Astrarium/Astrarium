@@ -13,7 +13,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 
-namespace Planetarium.Views
+namespace Planetarium.Controls
 {
     public class DatePicker : Control
     {

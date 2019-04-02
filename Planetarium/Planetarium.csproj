@@ -152,18 +152,18 @@
     <Compile Include="ViewModels\SettingsVM.cs" />
     <Compile Include="ViewModels\ObjectInfoVM.cs" />
     <Compile Include="ViewModels\SearchVM.cs" />
-    <Compile Include="Views\CelestialObjectPicker.cs" />
-    <Compile Include="Views\FontPicker.cs" />
-    <Compile Include="Views\FilePathPicker.cs" />
-    <Compile Include="Views\ColorPicker.cs" />
+    <Compile Include="Controls\CelestialObjectPicker.cs" />
+    <Compile Include="Controls\FontPicker.cs" />
+    <Compile Include="Controls\FilePathPicker.cs" />
+    <Compile Include="Controls\ColorPicker.cs" />
     <Compile Include="Views\DateWindow.xaml.cs">
       <DependentUpon>DateWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\EphemerisWindow.xaml.cs">
       <DependentUpon>EphemerisWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\DatePicker.cs" />
-    <Compile Include="Views\IntegerUpDown.cs" />
+    <Compile Include="Controls\DatePicker.cs" />
+    <Compile Include="Controls\IntegerUpDown.cs" />
     <Compile Include="Views\MessageBoxWindow.xaml.cs">
       <DependentUpon>MessageBoxWindow.xaml</DependentUpon>
     </Compile>
@@ -182,6 +182,10 @@
     <Compile Include="Views\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="Themes\Converters.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\DateWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

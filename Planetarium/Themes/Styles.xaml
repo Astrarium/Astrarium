@@ -3,42 +3,22 @@
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                     xmlns:t="clr-namespace:Planetarium.Themes"
-                    xmlns:v="clr-namespace:Planetarium.Views"
+                    xmlns:c="clr-namespace:Planetarium.Controls"
                     mc:Ignorable="d">
 
     <PopupAnimation x:Key="{x:Static SystemParameters.MenuPopupAnimationKey}">None</PopupAnimation>
     
-    <!--#region Converters-->
-    <t:LeftMarginMultiplierConverter x:Key="LeftMarginMultiplierConverter" />
-    <t:NotNullToBoolConverter x:Key="NotNullToBoolConverter" />
-    <t:NotNullToVisibilityConverter x:Key="NotNullToVisibilityConverter" />
-    <t:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
-    <t:VisibilityConverter x:Key="VisibilityConverter" />
-    <t:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" />
-    <t:InverseBoolToResizeModeConverter x:Key="InverseBoolToResizeModeConverter" />
-    <t:ColorConverter x:Key="ColorConverter" />
-    <t:FontToStringConverter x:Key="FontToStringConverter" />
-    <t:ColorToStringConverter x:Key="ColorToStringConverter" />
-    <BooleanToVisibilityConverter x:Key="bool2VisibilityConverter"/>
-    <!--#endregion-->
-
     <!--#region Colors-->
     <Color x:Key="WindowBackgroundColor">#333333</Color>
     <Color x:Key="WindowBorderColor">#1B1B1B</Color>
-    
-   
     <Color x:Key="LightBackgroundColor">#595959</Color>
     <Color x:Key="MediumBackgroundColor">#3D3D3D</Color>
     <Color x:Key="DarkBackgroundColor">#333333</Color>
-
     <Color x:Key="DisabledBackgroundColor">#424242</Color>
     <Color x:Key="LightDisabledBackgroundColor">#666666</Color>
-
     <Color x:Key="ForegroundColor">#EFEFEF</Color>
-    
     <Color x:Key="MouseOverForegroundColor">#EFEFEF</Color>
     <Color x:Key="MouseOverBackgroundColor">#AAAAAA</Color>
-    
     <Color x:Key="HighlightColor">#294666</Color>
     <Color x:Key="HotColor">#525252</Color>
     <Color x:Key="HoverColor">#4875A5</Color>
@@ -171,12 +151,13 @@
     <Geometry x:Key="ExpanderToggleButtonArrow">M5,-0 L9,5 1,5 z</Geometry>
     <!--#endregion-->
 
-    <!--#region FontStyle-->
+    <!--#region Control-->
     <Style TargetType="{x:Type Control}">
         <Setter Property="FontFamily" Value="Calibri light"/>
         <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
         <Setter Property="FontSize" Value="14" />
     </Style>
+    <!--#endregion-->
 
     <!--#region Hyperlink -->
     <Style TargetType="{x:Type Hyperlink}">
@@ -3700,11 +3681,11 @@
 
     <!--#endregion-->
 
-    <Style TargetType="{x:Type v:IntegerUpDown}">
+    <Style TargetType="{x:Type c:IntegerUpDown}">
         <Setter Property="Height" Value="22" />
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="{x:Type v:IntegerUpDown}">
+                <ControlTemplate TargetType="{x:Type c:IntegerUpDown}">
                     <Grid Background="Transparent">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
@@ -3715,7 +3696,7 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBox Name="PART_TextBox" Height="22" Grid.ColumnSpan="2" Grid.RowSpan="2" Text="{Binding Value, Mode=TwoWay, NotifyOnSourceUpdated=True, 
-                            NotifyOnValidationError=True, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type v:IntegerUpDown}}}" 
+                            NotifyOnValidationError=True, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type c:IntegerUpDown}}}" 
                                                 />
                         <RepeatButton Style="{StaticResource {x:Type ButtonBase}}" Name="PART_UpButton" BorderThickness="0" Grid.Column="1" Grid.Row="0"
                                       Width="14" Margin="0,3,0,0">
@@ -3773,10 +3754,10 @@
         </Setter>
     </Style>
 
-    <Style TargetType="{x:Type v:ColorPicker}" BasedOn="{StaticResource {x:Type Control}}">
+    <Style TargetType="{x:Type c:ColorPicker}" BasedOn="{StaticResource {x:Type Control}}">
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="{x:Type v:ColorPicker}">
+                <ControlTemplate TargetType="{x:Type c:ColorPicker}">
                     <Grid Background="Transparent">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -3806,10 +3787,10 @@
         </Setter>
     </Style>
 
-    <Style TargetType="{x:Type v:FilePathPicker}">
+    <Style TargetType="{x:Type c:FilePathPicker}">
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="{x:Type v:FilePathPicker}">
+                <ControlTemplate TargetType="{x:Type c:FilePathPicker}">
                     <Grid Background="Transparent">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -3838,10 +3819,10 @@
         </Setter>
     </Style>
 
-    <Style TargetType="{x:Type v:FontPicker}">
+    <Style TargetType="{x:Type c:FontPicker}">
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="{x:Type v:FontPicker}">
+                <ControlTemplate TargetType="{x:Type c:FontPicker}">
                     <Grid Background="Transparent">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -3874,10 +3855,10 @@
         </Setter>
     </Style>
 
-    <Style TargetType="{x:Type v:DatePicker}">
+    <Style TargetType="{x:Type c:DatePicker}">
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="{x:Type v:DatePicker}">
+                <ControlTemplate TargetType="{x:Type c:DatePicker}">
                     <Grid Background="Transparent">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -3905,10 +3886,10 @@
         </Setter>
     </Style>
 
-    <Style TargetType="{x:Type v:CelestialObjectPicker}">
+    <Style TargetType="{x:Type c:CelestialObjectPicker}">
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="{x:Type v:CelestialObjectPicker}">
+                <ControlTemplate TargetType="{x:Type c:CelestialObjectPicker}">
                     <Grid Background="Transparent">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>

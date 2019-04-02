@@ -9,7 +9,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using WF = System.Windows.Forms;
 
-namespace Planetarium.Views
+namespace Planetarium.Controls
 {
     public class ColorPicker : Control
     {
