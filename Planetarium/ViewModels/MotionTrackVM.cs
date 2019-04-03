@@ -52,6 +52,7 @@ namespace Planetarium.ViewModels
         public double UtcOffset { get; set; }
         public Color TrackColor { get; set; } = Color.DimGray;
         public bool DrawLabels { get; set; }
+        public TimeSpan LabelsStep { get; set; } = TimeSpan.FromDays(1);
 
         public void Ok()
         {
@@ -60,7 +61,7 @@ namespace Planetarium.ViewModels
                 Body = SelectedBody,
                 From = JulianDayFrom,
                 To = JulianDayTo,
-                LabelsStep = TimeSpan.FromDays(1),
+                LabelsStep = LabelsStep,
                 Color = TrackColor,
                 DrawLabels = DrawLabels
             });
