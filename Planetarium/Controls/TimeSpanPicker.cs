@@ -61,10 +61,10 @@ namespace Planetarium.Controls
         {
             base.OnMouseLeftButtonDown(e);
             var vm = new TimeSpanVM();
-            vm.TimeInterval = TimeSpan;
+            vm.TimeSpan = TimeSpan;
             if (ViewManager.ShowDialog(vm) ?? false)
             {
-                TimeSpan = vm.TimeInterval;
+                TimeSpan = vm.TimeSpan;
             }
         }
 
