@@ -60,6 +60,8 @@ namespace Planetarium.ViewModels
 
         public ObservableCollection<Node> Children { get; } = new ObservableCollection<Node>();
 
+        public event EventHandler<bool?> CheckedChanged;
+
         public bool? IsChecked
         {
             get { return isChecked; }
@@ -69,6 +71,7 @@ namespace Planetarium.ViewModels
                 {
                     isChecked = value;
                     RaisePropertyChanged(nameof(IsChecked));
+                    CheckedChanged?.Invoke(this, isChecked);
                     if (value != null)
                     {
                         AllChildren(this).ToList().ForEach(c => c.IsChecked = value);

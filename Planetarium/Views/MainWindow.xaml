@@ -63,9 +63,9 @@
         <StatusBar Grid.Row="2">
             <TextBlock Width="30" TextAlignment="Center" Text="{Binding MapConstellationNameString, FallbackValue='Con'}" />
             <Separator />
-            <TextBlock Width="220" Text="{Binding MapEquatorialCoordinatesString, FallbackValue='Equatorial coordinates'}" />
+            <TextBlock Width="240" Text="{Binding MapEquatorialCoordinatesString, FallbackValue='Equatorial coordinates'}" />
             <Separator />
-            <TextBlock Width="220" Text="{Binding MapHorizontalCoordinatesString, FallbackValue='Horizontal coordinates'}" />
+            <TextBlock Width="240" Text="{Binding MapHorizontalCoordinatesString, FallbackValue='Horizontal coordinates'}" />
             <Separator />
             <TextBlock Text="{Binding MapViewAngleString, FallbackValue='Field of view'}" MinWidth="100" />
             <Separator />

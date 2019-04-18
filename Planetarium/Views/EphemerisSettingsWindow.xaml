@@ -6,7 +6,7 @@
         xmlns:c="clr-namespace:Planetarium.Controls"
         xmlns:vm="clr-namespace:Planetarium.ViewModels"
         mc:Ignorable="d"
-        Title="Ephemeris Settings" 
+        Title="Celestial Body Ephemeris" 
         Height="350" Width="400"
         MinHeight="300" MinWidth="400"
         Style="{StaticResource {x:Type Window}}"
@@ -28,9 +28,7 @@
             <RowDefinition Height="28"/>
             <RowDefinition Height="28"/>
             <RowDefinition Height="28"/>
-            <RowDefinition Height="28"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
@@ -51,27 +49,39 @@
         <Label Grid.Row="3" Grid.Column="0">Step</Label>
         <c:TimeSpanPicker Grid.Row="3" Grid.Column="1" TimeSpan="{Binding Step}" />
 
-        <Label Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">Categories</Label>
-        
-        <TreeView Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" 
-                  ScrollViewer.VerticalScrollBarVisibility="Auto"
-                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                  ItemsSource="{Binding Nodes}">
-            <TreeView.ItemContainerStyle>
-                <Style TargetType="{x:Type TreeViewItem}">
-                    <Setter Property="IsExpanded" Value="True"/>
-                </Style>
-            </TreeView.ItemContainerStyle>
-        </TreeView>
-
-        <Separator Grid.Row="6" Grid.ColumnSpan="2" />
+        <GroupBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
+            <GroupBox.Header>
+                <Label>Ephemeris</Label>
+            </GroupBox.Header>
+            <GroupBox.Content>
+                <Grid>
+                    <TextBlock 
+                        Text="Please choose a celestial body" 
+                        IsEnabled="False"
+                        Visibility="{Binding SelectedBody, Converter={StaticResource NullToVisibilityConverter}}" 
+                        TextAlignment="Center" 
+                        VerticalAlignment="Center" />
+                    <TreeView 
+                        Visibility="{Binding SelectedBody, Converter={StaticResource NotNullToVisibilityConverter}}" 
+                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                        ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                        ItemsSource="{Binding Nodes}">
+                        <TreeView.ItemContainerStyle>
+                            <Style TargetType="{x:Type TreeViewItem}">
+                                <Setter Property="IsExpanded" Value="True"/>
+                            </Style>
+                        </TreeView.ItemContainerStyle>
+                    </TreeView>
+                </Grid>
+            </GroupBox.Content>
+        </GroupBox>
 
         <StackPanel    
-            Grid.Row="7"
+            Grid.Row="5"
             Grid.ColumnSpan="2"
             Orientation="Horizontal"
             HorizontalAlignment="Right">
-            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding OkCommand}">OK</Button>
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding OkCommand}" IsEnabled="{Binding OkButtonEnabled}">OK</Button>
             <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CancelCommand}">Cancel</Button>
         </StackPanel>
     </Grid>

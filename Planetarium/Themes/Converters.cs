@@ -185,14 +185,7 @@ namespace Planetarium.Themes
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var color = (System.Drawing.Color)value;
-            if (color.IsNamedColor)
-            {
-                return color.Name;
-            }
-            else
-            {
-                return string.Format("#{3}{0:X2}{3}{1:X2}{3}{2:X2}", color.R, color.G, color.B, "\u200a");
-            }
+            return string.Format("#{3}{0:X2}{3}{1:X2}{3}{2:X2}", color.R, color.G, color.B, "\u200a");
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

@@ -1,4 +1,5 @@
 ﻿using ADK;
+using Planetarium.Objects;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -17,22 +18,30 @@ namespace Planetarium.ViewModels
         public Command CloseCommand { get; private set; }
 
         private readonly IViewManager viewManager;
+        private readonly Sky sky;
 
-        public EphemerisVM(IViewManager viewManager, string bodyName, List<List<Ephemeris>> ephem, double from, double to, double step, double utcOffset)
+        public EphemerisVM(IViewManager viewManager, Sky sky)
         {
             this.viewManager = viewManager;
+            this.sky = sky;
 
             SaveToFileCommand = new Command(SaveToFile);
             CloseCommand = new Command(Close);
+        }
 
-            Header = $"Ephemeris of {bodyName}\nStart date: {Formatters.DateTime.Format(new Date(from, utcOffset))}\nEnd date: {Formatters.DateTime.Format(new Date(to, utcOffset))}\nStep: {step}";
+        public void SetData(CelestialObject body, double jdFrom, double jdTo, double step, List<List<Ephemeris>> ephemeris)
+        {
+            string bodyName = sky.GetObjectName(body);
+            double utcOffset = sky.Context.GeoLocation.UtcOffset;
+
+            Header = $"Ephemeris of {bodyName}\nStart date: {Formatters.DateTime.Format(new Date(jdFrom, utcOffset))}\nEnd date: {Formatters.DateTime.Format(new Date(jdTo, utcOffset))}\nStep: {step}";
 
             var table = new DataTable();
-            table.Columns.AddRange(ephem[0].Select(e => new DataColumn() { Caption = e.Key, ColumnName = e.Key }).ToArray());
+            table.Columns.AddRange(ephemeris[0].Select(e => new DataColumn() { Caption = e.Key, ColumnName = e.Key }).ToArray());
 
-            for (int i = 0; i < ephem.Count; i++)
+            for (int i = 0; i < ephemeris.Count; i++)
             {
-                table.Rows.Add(ephem[i].Select(e => e.Formatter.Format(e.Value)).ToArray());
+                table.Rows.Add(ephemeris[i].Select(e => e.Formatter.Format(e.Value)).ToArray());
             }
 
             EphemerisTable = table;

@@ -28,6 +28,8 @@ namespace Planetarium.ViewModels
             {
                 _SelectedBody = value;
                 BuildCategoriesTree();
+                NotifyPropertyChanged(nameof(SelectedBody));
+                NotifyPropertyChanged(nameof(OkButtonEnabled));
             }
         }
 
@@ -36,7 +38,7 @@ namespace Planetarium.ViewModels
             get
             {
                 return
-                    getAllNodesRecursively(Nodes.First())
+                    AllNodes(Nodes.First())
                         .Where(n => n.IsChecked ?? false)
                         .Select(n => n.Text);
             }
@@ -46,16 +48,24 @@ namespace Planetarium.ViewModels
         public double JulianDayTo { get; set; }
         public double Step { get; set; } = 1;
 
-        private IEnumerable<Node> getAllNodesRecursively(Node node)
+        private IEnumerable<Node> AllNodes(Node node)
         {
             yield return node;
 
             foreach (Node child in node.Children)
             {
-                foreach (Node n in getAllNodesRecursively(child))
+                foreach (Node n in AllNodes(child))
                 {
                     yield return n;
                 }
+            }
+        }
+
+        public bool OkButtonEnabled
+        {
+            get
+            {
+                return Nodes.Any() && Nodes.First().IsChecked != false;
             }
         }
 
@@ -83,6 +93,7 @@ namespace Planetarium.ViewModels
                 var groups = categories.GroupBy(cat => cat.Split('.').First());
 
                 Node root = new Node() { Text = "All" };
+                root.CheckedChanged += Root_CheckedChanged;
 
                 foreach (var group in groups)
                 {
@@ -101,6 +112,11 @@ namespace Planetarium.ViewModels
 
                 Nodes.Add(root);
             }
+        }
+
+        private void Root_CheckedChanged(object sender, bool? e)
+        {
+            NotifyPropertyChanged(nameof(OkButtonEnabled));
         }
     }
 }
