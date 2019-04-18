@@ -27,24 +27,19 @@ namespace Planetarium.Controls
             typeof(CelestialObjectPicker), 
             new FrameworkPropertyMetadata(null, (o, e) =>
             {
-                var searcher = (ISearcher)o.GetValue(SearcherProperty);
-                o.SetValue(SelectedBodyNameProperty, searcher.GetObjectName((CelestialObject)e.NewValue));
+                var picker = o as CelestialObjectPicker;
+                o.SetValue(SelectedBodyNameProperty, picker.Searcher.GetObjectName((CelestialObject)e.NewValue));
             })
             {
                 BindsTwoWayByDefault = true,
                 DefaultUpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
             });
 
-        public ISearcher Searcher
-        {
-            get { return (ISearcher)GetValue(SearcherProperty); }
-            set { SetValue(SearcherProperty, value); }
-        }
+        [DependecyInjection]
+        public ISearcher Searcher { get; private set; }
 
-        public readonly static DependencyProperty SearcherProperty = DependencyProperty.Register(
-            nameof(Searcher), 
-            typeof(ISearcher), 
-            typeof(CelestialObjectPicker));
+        [DependecyInjection]
+        public IViewManager ViewManager { get; private set; }
 
         public string SelectedBodyName
         {
@@ -56,17 +51,6 @@ namespace Planetarium.Controls
             typeof(string), 
             typeof(CelestialObjectPicker),
             new PropertyMetadata("Not set"));
-
-        public IViewManager ViewManager
-        {
-            get { return (IViewManager)GetValue(ViewManagerProperty); }
-            set { SetValue(ViewManagerProperty, value); }
-        }
-        public readonly static DependencyProperty ViewManagerProperty = DependencyProperty.Register(
-            nameof(ViewManager), 
-            typeof(IViewManager), 
-            typeof(CelestialObjectPicker), 
-            new UIPropertyMetadata(null));
 
         public Func<CelestialObject, bool> Filter
         {

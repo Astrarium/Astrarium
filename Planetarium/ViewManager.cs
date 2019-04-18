@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using Planetarium.Controls;
 using Planetarium.Views;
 using System;
 using System.Collections.Generic;
@@ -7,6 +8,8 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace Planetarium
 {
@@ -58,6 +61,18 @@ namespace Planetarium
             if (viewType != null)
             {
                 var window = typeFactory(viewType) as Window;
+
+                var controls = FindChildren<Control>(window);
+                foreach (var control in controls)
+                {
+                    var injectionProps = control.GetType().GetProperties().Where(p => p.GetCustomAttribute<DependecyInjectionAttribute>() != null);
+                    foreach (var prop in injectionProps)
+                    {
+                        var value = typeFactory(prop.PropertyType);
+                        prop.SetValue(control, value);
+                    }
+                }
+
                 window.DataContext = viewModel;
                 window.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
 
@@ -95,6 +110,26 @@ namespace Planetarium
             else
             {
                 return null;
+            }
+        }
+
+        private IEnumerable<T> FindChildren<T>(DependencyObject depObj) where T : DependencyObject
+        {
+            if (depObj != null)
+            {
+                var children = LogicalTreeHelper.GetChildren(depObj).OfType<DependencyObject>();
+                foreach (var child in children)
+                {
+                    if (child != null && child is T)
+                    {
+                        yield return (T)child;
+                    }
+
+                    foreach (T childOfChild in FindChildren<T>(child))
+                    {
+                        yield return childOfChild;
+                    }
+                }
             }
         }
 

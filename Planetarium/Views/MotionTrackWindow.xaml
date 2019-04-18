@@ -10,13 +10,13 @@
         MinHeight="300" MinWidth="400"
         Style="{StaticResource {x:Type Window}}"
         WindowStartupLocation="CenterOwner">
-    <Grid Margin="4">
+    <Grid Margin="4" SnapsToDevicePixels="True">
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="28"/>
+            <RowDefinition Height="28"/>
+            <RowDefinition Height="28"/>
+            <RowDefinition Height="28"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
@@ -29,13 +29,13 @@
         </Grid.ColumnDefinitions>
 
         <Label Grid.Row="0" Grid.Column="0">Celestial body</Label>
-        <c:CelestialObjectPicker Grid.Row="0" Grid.Column="1" Searcher="{Binding Searcher, Mode=OneTime}" ViewManager="{Binding ViewManager, Mode=OneTime}" SelectedBody="{Binding SelectedBody, Mode=TwoWay}" Filter="{Binding Filter, Mode=OneTime}" />
+        <c:CelestialObjectPicker Grid.Row="0" Grid.Column="1" SelectedBody="{Binding SelectedBody, Mode=TwoWay}" Filter="{Binding Filter, Mode=OneTime}" />
 
         <Label Grid.Row="1" Grid.Column="0">Start date</Label>
-        <c:DatePicker Grid.Row="1" Grid.Column="1" Options="DateTime" ViewManager="{Binding ViewManager, Mode=OneTime}" JulianDay="{Binding JulianDayFrom}" UtcOffset="{Binding UtcOffset}" />
+        <c:DatePicker Grid.Row="1" Grid.Column="1" Options="DateTime" JulianDay="{Binding JulianDayFrom}" UtcOffset="{Binding UtcOffset}" />
 
         <Label Grid.Row="2" Grid.Column="0">End date</Label>
-        <c:DatePicker Grid.Row="2" Grid.Column="1" Options="DateTime" ViewManager="{Binding ViewManager, Mode=OneTime}" JulianDay="{Binding JulianDayTo}" UtcOffset="{Binding UtcOffset}" />
+        <c:DatePicker Grid.Row="2" Grid.Column="1" Options="DateTime" JulianDay="{Binding JulianDayTo}" UtcOffset="{Binding UtcOffset}" />
 
         <Label Grid.Row="3" Grid.Column="0">Track Color</Label>
         <c:ColorPicker Grid.Row="3" Grid.Column="1" Caption="{Binding RelativeSource={RelativeSource Self}, Path=SelectedColor, Converter={StaticResource ColorToStringConverter}}" SelectedColor="{Binding TrackColor}" />
@@ -51,7 +51,7 @@
                         <ColumnDefinition Width="160" />
                     </Grid.ColumnDefinitions>
                     <Label Grid.Column="0">Labels step</Label>
-                    <c:TimeSpanPicker Grid.Column="1" ViewManager="{Binding ViewManager, Mode=OneTime}" TimeSpan="{Binding LabelsStep}" Margin="6 0 0 0"  />
+                    <c:TimeSpanPicker Grid.Column="1" TimeSpan="{Binding LabelsStep}" Margin="6 0 0 0"  />
                 </Grid>
             </GroupBox.Content>
         </GroupBox>

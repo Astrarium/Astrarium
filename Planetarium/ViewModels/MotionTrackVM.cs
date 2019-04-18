@@ -15,21 +15,17 @@ namespace Planetarium.ViewModels
         public Command OkCommand { get; private set; }
         public Command CancelCommand { get; private set; }
 
-        public MotionTrackVM(IViewManager viewManager, ISearcher searcher, IEphemerisProvider ephemerisProvider, ITracksProvider tracksProvider)
+        public MotionTrackVM(IEphemerisProvider ephemerisProvider, ITracksProvider tracksProvider)
         {
-            ViewManager = viewManager;
-            Searcher = searcher;
-            EphemerisProvider = ephemerisProvider;
-            TracksProvider = tracksProvider;
+            this.ephemerisProvider = ephemerisProvider;
+            this.tracksProvider = tracksProvider;
 
             OkCommand = new Command(Ok);
             CancelCommand = new Command(Close);
         }
 
-        public IViewManager ViewManager { get; private set; }
-        public ISearcher Searcher { get; private set; }
-        public ITracksProvider TracksProvider { get; private set; }
-        public IEphemerisProvider EphemerisProvider { get; private set; }
+        private readonly ITracksProvider tracksProvider;
+        private readonly IEphemerisProvider ephemerisProvider;
 
         private CelestialObject _SelectedBody;
         public CelestialObject SelectedBody
@@ -70,19 +66,19 @@ namespace Planetarium.ViewModels
 
         private void AddTrack(Track track)
         {
-            var categories = EphemerisProvider.GetEphemerisCategories(track.Body);
+            var categories = ephemerisProvider.GetEphemerisCategories(track.Body);
             if (!(categories.Contains("Equatorial.Alpha") && categories.Contains("Equatorial.Delta")))
             {
                 throw new Exception($"Ephemeris provider for type {track.Body.GetType().Name} does not provide \"Equatorial.Alpha\" and \"Equatorial.Delta\" ephemeris.");
             }
 
-            var positions = EphemerisProvider.GetEphemerides(track.Body, track.From, track.To, track.Step, new[] { "Equatorial.Alpha", "Equatorial.Delta" });
+            var positions = ephemerisProvider.GetEphemerides(track.Body, track.From, track.To, track.Step, new[] { "Equatorial.Alpha", "Equatorial.Delta" });
             foreach (var eq in positions)
             {
                 track.Points.Add(new CelestialPoint() { Equatorial0 = new CrdsEquatorial((double)eq[0].Value, (double)eq[1].Value) });
             }
 
-            TracksProvider.Tracks.Add(track);
+            tracksProvider.Tracks.Add(track);
         }
     }
 }

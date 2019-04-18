@@ -92,6 +92,7 @@
     <Compile Include="Config\SettingConfigItem.cs" />
     <Compile Include="Config\SettingsConfig.cs" />
     <Compile Include="Config\Settings.cs" />
+    <Compile Include="Controls\DependecyInjectionAttribute.cs" />
     <Compile Include="Controls\TimeSpanPicker.cs" />
     <Compile Include="Ephemeris.cs" />
     <Compile Include="EphemerisConfig.cs" />
