@@ -147,6 +147,8 @@
     <Compile Include="Themes\Converters.cs" />
     <Compile Include="IViewManager.cs" />
     <Compile Include="Commands.cs" />
+    <Compile Include="ViewModels\EphemerisSettingsVM.cs" />
+    <Compile Include="ViewModels\Node.cs" />
     <Compile Include="ViewModels\TimeSpanVM.cs" />
     <Compile Include="ViewModels\DateVM.cs" />
     <Compile Include="ViewModels\MainVM.cs" />
@@ -159,6 +161,9 @@
     <Compile Include="Controls\FontPicker.cs" />
     <Compile Include="Controls\FilePathPicker.cs" />
     <Compile Include="Controls\ColorPicker.cs" />
+    <Compile Include="Views\EphemerisSettingsWindow.xaml.cs">
+      <DependentUpon>EphemerisSettingsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\TimeSpanWindow.xaml.cs">
       <DependentUpon>TimeSpanWindow.xaml</DependentUpon>
     </Compile>
@@ -191,6 +196,10 @@
     <Page Include="Themes\Converters.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\EphemerisSettingsWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\TimeSpanWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

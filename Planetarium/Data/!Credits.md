@@ -13,3 +13,7 @@ Under Creative Commons Attribution 4.0 International license (https://www.iau.or
 
 NGC/IC catalogs data are taken from http://www.klima-luft.de/steinicke/index_e.htm
 (c) Dr. Wolfgang Steinicke, under condition: any non-commercial use of data is free
+
+Dark application theme is based on WpfExpressionBlendTheme
+(c) Dan Pristupov https://github.com/DanPristupov/WpfExpressionBlendTheme 
+Under MIT license

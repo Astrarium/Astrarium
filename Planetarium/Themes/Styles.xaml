@@ -142,6 +142,7 @@
     <Geometry x:Key="MenuScrollUpArrowGeometry">M-2.2,10.9 L-0.7,12.4 3.7,8 8,12.4 9.5,10.9 3.7,5 z</Geometry>
     <Geometry x:Key="Checkmark">M1.0E-41,4.2 L0,2.1 2.5,4.5 6.7,4.4E-47 6.7,2.3 2.5,6.7 z</Geometry>
     <Geometry x:Key="CheckBoxCheckmark">M7.2,5 L5.5,7.16 4.16,6.3 3.5,6.7 5.5,8.4 8.6,5.25 C8.6,5.25 8,4.7 7.22,5</Geometry>
+    <RectangleGeometry x:Key="CheckBoxUndefinedCheckmark" Rect="0,0,25,25" />
     <Geometry x:Key="RightArrow">M 0,0 L 4,3.5 L 0,7 Z</Geometry>
     <Geometry x:Key="ExpanderNormalArrow">M 1,1.5 L 4.5,5 L 8,1.5</Geometry>
     <Geometry x:Key="ExpanderCheckedArrow">M 1,4.5  L 4.5,1  L 8,4.5</Geometry>
@@ -1817,6 +1818,12 @@
                         </Trigger>
                         <Trigger Property="IsChecked" Value="false">
                             <Setter TargetName="CheckMark" Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="true">
+                            <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="{x:Null}">
+                            <Setter TargetName="CheckMark" Property="Data" Value="{StaticResource CheckBoxUndefinedCheckmark}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

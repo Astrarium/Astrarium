@@ -20,7 +20,7 @@ namespace Planetarium
             return Items.GetEnumerator();
         }
 
-        public ICollection<EphemerisConfigItem> Filter(ICollection<string> categories)
+        public ICollection<EphemerisConfigItem> Filter(IEnumerable<string> categories)
         {
             return Items.Where(i => categories.Contains(i.Category)).ToArray();
         }

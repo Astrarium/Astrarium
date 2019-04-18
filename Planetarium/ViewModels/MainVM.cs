@@ -353,6 +353,32 @@ namespace Planetarium.ViewModels
 
         private async void GetObjectEphemeris(CelestialObject body)
         {
+            var vmConfig = viewManager.CreateViewModel<EphemerisSettingsVM>();
+            vmConfig.SelectedBody = body;
+            vmConfig.JulianDayFrom = sky.Context.JulianDay;
+            vmConfig.JulianDayTo = sky.Context.JulianDay + 30;
+            if (viewManager.ShowDialog(vmConfig) ?? false)
+            {
+                var ephem = await Task.Run(() => sky.GetEphemerides(
+                    vmConfig.SelectedBody,
+                    vmConfig.JulianDayFrom,
+                    vmConfig.JulianDayTo,
+                    vmConfig.Step,
+                    vmConfig.Categories
+                ));
+
+                var vm = new EphemerisVM(
+                    viewManager,
+                    sky.GetObjectName(body),
+                    ephem,
+                    vmConfig.JulianDayFrom,
+                    vmConfig.JulianDayTo,
+                    vmConfig.Step,
+                    sky.Context.GeoLocation.UtcOffset);
+
+                viewManager.ShowWindow(vm);
+            }
+
             //using (var formEphemerisSettings = new FormEphemerisSettings(sky, body))
             //{
             //    if (formEphemerisSettings.ShowDialog() == System.Windows.Forms.DialogResult.OK)
@@ -378,6 +404,7 @@ namespace Planetarium.ViewModels
             //    }
             //}
         }
+
 
         private void SearchObject()
         {

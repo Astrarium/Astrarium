@@ -136,7 +136,7 @@ namespace Planetarium
             return result;
         }
 
-        public List<List<Ephemeris>> GetEphemerides(CelestialObject body, double from, double to, double step, ICollection<string> categories)
+        public List<List<Ephemeris>> GetEphemerides(CelestialObject body, double from, double to, double step, IEnumerable<string> categories)
         {
             List<List<Ephemeris>> ephemerides = new List<List<Ephemeris>>();
 
