@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -31,6 +32,15 @@ namespace Planetarium
         bool? ShowDialog<TViewModel>(TViewModel viewModel) where TViewModel : ViewModelBase;
  
         MessageBoxResult ShowMessageBox(string caption, string text, MessageBoxButton buttons);
+
+        /// <summary>
+        /// Shows window with progress bar
+        /// </summary>
+        /// <param name="caption">Window title</param>
+        /// <param name="text">Text displayed above the progress bar</param>
+        /// <param name="tokenSource">Cancellation token source instance. Use <see cref="CancellationTokenSource.Cancel()"/> to close the window.</param>
+        /// <param name="progress">Progress instance. Can be null for indeterminate progress bar.</param>
+        void ShowProgress(string caption, string text, CancellationTokenSource tokenSource, Progress<double> progress = null);
         string ShowSaveFileDialog(string caption, string fileName, string extension, string filter);
     }
 }

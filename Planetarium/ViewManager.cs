@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -37,15 +38,15 @@ namespace Planetarium
 
         public void ShowWindow<TViewModel>() where TViewModel : ViewModelBase
         {
-            Show<TViewModel>(viewModel: null, isDialog: true);
+            Show<TViewModel>(viewModel: null, isDialog: false);
         }
 
         public bool? ShowDialog<TViewModel>() where TViewModel : ViewModelBase
         {
-            return Show<TViewModel>(viewModel: null, isDialog: true);
+            return Show<TViewModel>(viewModel: null, isDialog: false);
         }
 
-        public bool? Show<TViewModel>(TViewModel viewModel, bool isDialog) where TViewModel : ViewModelBase
+        private bool? Show<TViewModel>(TViewModel viewModel, bool isDialog = false) where TViewModel : ViewModelBase
         {
             if (viewModel == null)
             {
@@ -74,7 +75,11 @@ namespace Planetarium
                 }
 
                 window.DataContext = viewModel;
-                window.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
+
+                if (window.GetType() != typeof(MainWindow))
+                {
+                    window.Owner = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
+                }
 
                 Action<bool?> viewModelClosingHandler = null;
                 viewModelClosingHandler = (dialogResult) =>
@@ -197,6 +202,17 @@ namespace Planetarium
             dialog.Buttons = buttons;
             dialog.ShowDialog();
             return dialog.Result;
+        }
+
+        public void ShowProgress(string caption, string text, CancellationTokenSource tokenSource, Progress<double> progress = null)
+        {
+            var dialog = typeFactory(typeof(ProgressWindow)) as ProgressWindow;
+            dialog.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
+            dialog.Title = caption;
+            dialog.Text = text;
+            dialog.CancellationTokenSource = tokenSource;
+            dialog.Progress = progress;
+            dialog.Show();
         }
 
         public string ShowSaveFileDialog(string caption, string fileName, string extension, string filter)

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 
 namespace Planetarium
 {
@@ -169,7 +170,7 @@ namespace Planetarium
                 }
                 else
                 {
-                    return TimeSpan.FromHours(v * 24).ToString(@"hh\:mm");
+                    return System.TimeSpan.FromHours(v * 24).ToString(@"hh\:mm");
                 }
             }
         }
@@ -189,7 +190,7 @@ namespace Planetarium
                 }
                 else
                 {
-                    var ts = TimeSpan.FromHours(v * 24);
+                    var ts = System.TimeSpan.FromHours(v * 24);
                     return $"{ts.Hours:D2}h {ts.Minutes:D2}m";
                 }
             }
@@ -315,18 +316,57 @@ namespace Planetarium
 
                 if ((p & ADK.VisibilityPeriod.Morning) != 0)
                 {
-                    return "m";
+                    return "Morning";
                 }
                 else if ((p & ADK.VisibilityPeriod.Evening) != 0)
                 {
-                    return "e";
+                    return "Evening";
                 }
                 else if ((p & ADK.VisibilityPeriod.Night) != 0)
                 {
-                    return "n";
+                    return "Night";
                 }
                 
                 return "";
+            }
+        }
+
+        private class TimeSpanFormatter : IEphemFormatter
+        {
+            public string Format(object value)
+            {
+                var timeSpan = (TimeSpan)value;
+
+                int d = timeSpan.Days;
+                int h = timeSpan.Hours;
+                int m = timeSpan.Minutes;
+                int s = timeSpan.Seconds;
+
+                var text = new StringBuilder();
+
+                if (d > 0)
+                {
+                    text.Append(d)
+                        .Append("d").Append(" ");
+                }
+                if (h > 0 || (text.Length > 0 && (m > 0 || s > 0)))
+                {
+                    text.Append(text.Length > 0 ? $"{h:D2}" : $"{h}")
+                        .Append("h").Append(" ");
+
+                }
+                if (m > 0 || (text.Length > 0 && (s > 0)))
+                {
+                    text.Append(text.Length > 0 ? $"{m:D2}" : $"{m}")
+                        .Append("m").Append(" ");
+                }
+                if (s > 0)
+                {
+                    text.Append(text.Length > 0 ? $"{s:D2}" : $"{s}")
+                        .Append("s");
+                }
+
+                return text.ToString().Trim();
             }
         }
 
@@ -361,5 +401,6 @@ namespace Planetarium
         public static readonly IEphemFormatter SaturnRingsSize = new SaturnRingsFormatter();
         public static readonly IEphemFormatter VisibilityDuration = new VisibilityDurationFormatter();
         public static readonly IEphemFormatter VisibilityPeriod = new VisibilityPeriodFormatter();
+        public static readonly IEphemFormatter TimeSpan = new TimeSpanFormatter();
     }
 }

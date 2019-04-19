@@ -4,23 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:c="clr-namespace:Planetarium.Controls"
-        xmlns:vm="clr-namespace:Planetarium.ViewModels"
         mc:Ignorable="d"
-        Title="Celestial Body Ephemeris" 
+        Title="Celestial body ephemerides" 
         Height="350" Width="400"
         MinHeight="300" MinWidth="400"
         Style="{StaticResource {x:Type Window}}"
         WindowStartupLocation="CenterOwner">
 
-    <Window.Resources>
-        <HierarchicalDataTemplate DataType="{x:Type vm:Node}" ItemsSource="{Binding Children}">
-            <CheckBox IsChecked="{Binding IsChecked, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Content="{Binding Text}" />
-        </HierarchicalDataTemplate>
-        <Style TargetType="TreeViewItem" BasedOn="{StaticResource {x:Type TreeViewItem}}">
-            <Setter Property="IsExpanded" Value="{Binding Path=IsExpanded, Mode=TwoWay}" />
-        </Style>
-    </Window.Resources>
-    
     <Grid Margin="4" SnapsToDevicePixels="True">
 
         <Grid.RowDefinitions>
@@ -38,7 +28,7 @@
         </Grid.ColumnDefinitions>
 
         <Label Grid.Row="0" Grid.Column="0">Celestial body</Label>
-        <c:CelestialObjectPicker Grid.Row="0" Grid.Column="1" SelectedBody="{Binding SelectedBody, Mode=TwoWay}" Filter="{Binding Filter, Mode=OneTime}" />
+        <c:CelestialObjectPicker Grid.Row="0" Grid.Column="1" SelectedBody="{Binding SelectedBody, Mode=TwoWay}" />
 
         <Label Grid.Row="1" Grid.Column="0">Start date</Label>
         <c:DatePicker Grid.Row="1" Grid.Column="1" Options="DateTime" JulianDay="{Binding JulianDayFrom}" UtcOffset="{Binding UtcOffset}" />
@@ -49,9 +39,9 @@
         <Label Grid.Row="3" Grid.Column="0">Step</Label>
         <c:TimeSpanPicker Grid.Row="3" Grid.Column="1" TimeSpan="{Binding Step}" />
 
-        <GroupBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
+        <GroupBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="0 0 0 4">
             <GroupBox.Header>
-                <Label>Ephemeris</Label>
+                <Label>Ephemerides</Label>
             </GroupBox.Header>
             <GroupBox.Content>
                 <Grid>
@@ -63,14 +53,7 @@
                         VerticalAlignment="Center" />
                     <TreeView 
                         Visibility="{Binding SelectedBody, Converter={StaticResource NotNullToVisibilityConverter}}" 
-                        ScrollViewer.VerticalScrollBarVisibility="Auto"
-                        ScrollViewer.HorizontalScrollBarVisibility="Auto"
                         ItemsSource="{Binding Nodes}">
-                        <TreeView.ItemContainerStyle>
-                            <Style TargetType="{x:Type TreeViewItem}">
-                                <Setter Property="IsExpanded" Value="True"/>
-                            </Style>
-                        </TreeView.ItemContainerStyle>
                     </TreeView>
                 </Grid>
             </GroupBox.Content>

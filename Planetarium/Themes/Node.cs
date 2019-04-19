@@ -6,13 +6,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Planetarium.ViewModels
+namespace Planetarium.Themes
 {
     public class Node : INotifyPropertyChanged
     {
         public Node()
         {
             Children.CollectionChanged += Children_CollectionChanged;
+        }
+
+        public Node(string text) : this()
+        {
+            Text = text;
+        }
+
+        public Node(string text, string id) : this()
+        {
+            Text = text;
+            Id = id;
         }
 
         private IEnumerable<Node> AllChildren(Node node)
@@ -54,24 +65,25 @@ namespace Planetarium.ViewModels
             }
         }
 
-        private string text;
-        private bool? isChecked = true;
-        private bool isExpanded = true;
+
+        
+        
 
         public ObservableCollection<Node> Children { get; } = new ObservableCollection<Node>();
 
         public event EventHandler<bool?> CheckedChanged;
 
+        private bool? _IsChecked = true;
         public bool? IsChecked
         {
-            get { return isChecked; }
+            get { return _IsChecked; }
             set
             {
-                if (value != isChecked)
+                if (value != _IsChecked)
                 {
-                    isChecked = value;
+                    _IsChecked = value;
                     RaisePropertyChanged(nameof(IsChecked));
-                    CheckedChanged?.Invoke(this, isChecked);
+                    CheckedChanged?.Invoke(this, _IsChecked);
                     if (value != null)
                     {
                         AllChildren(this).ToList().ForEach(c => c.IsChecked = value);
@@ -80,27 +92,31 @@ namespace Planetarium.ViewModels
             }
         }
 
+        public string Id { get; set; }
+
+        private string _Text;
         public string Text
         {
-            get { return text; }
+            get { return _Text; }
             set
             {
-                if (value != text)
+                if (value != _Text)
                 {
-                    text = value;
+                    _Text = value;
                     RaisePropertyChanged(nameof(Text));
                 }
             }
         }
 
+        private bool _IsExpanded = true;
         public bool IsExpanded
         {
-            get { return isExpanded; }
+            get { return _IsExpanded; }
             set
             {
-                if (value != isExpanded)
+                if (value != _IsExpanded)
                 {
-                    isExpanded = value;
+                    _IsExpanded = value;
                     RaisePropertyChanged(nameof(IsExpanded));
                 }
             }

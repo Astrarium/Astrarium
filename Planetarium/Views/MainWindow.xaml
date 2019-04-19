@@ -67,7 +67,7 @@
             <Separator />
             <TextBlock Width="240" Text="{Binding MapHorizontalCoordinatesString, FallbackValue='Horizontal coordinates'}" />
             <Separator />
-            <TextBlock Text="{Binding MapViewAngleString, FallbackValue='Field of view'}" MinWidth="100" />
+            <TextBlock Width="100" Text="{Binding MapViewAngleString, FallbackValue='Field of view'}"  />
             <Separator />
 
             <StatusBarItem>

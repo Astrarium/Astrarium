@@ -1800,6 +1800,7 @@
                         <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
 												Margin="{TemplateBinding Padding}" 
 												RecognizesAccessKey="True" 
+                                          
 												SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
 												VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                     </BulletDecorator>
@@ -2319,9 +2320,10 @@
     <Style TargetType="{x:Type TreeViewItem}">
         <Setter Property="Background" Value="Transparent"/>
 		<Setter Property="MinHeight" Value="21"/>
-        <Setter Property="HorizontalContentAlignment" Value="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
         <Setter Property="VerticalContentAlignment" Value="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
-        <Setter Property="Padding" Value="2,4,2,3"/>
+        <Setter Property="IsExpanded" Value="{Binding Path=IsExpanded, Mode=TwoWay}" />
+        <Setter Property="Padding" Value="2,2,2,2"/>
         <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
         <Setter Property="FocusVisualStyle" Value="{StaticResource TreeViewItemFocusVisual}"/>
         <Setter Property="Template">
@@ -2375,18 +2377,18 @@
                             </MultiTrigger.Conditions>
                             <Setter TargetName="PART_Header" Property="MinHeight" Value="21"/>
                         </MultiTrigger>
-                        <Trigger Property="IsSelected" Value="true">
+                        <!--<Trigger Property="IsSelected" Value="true">
                             <Setter TargetName="Bd" Property="Background" Value="{StaticResource SelectedListItem}"/>
                             <Setter Property="Foreground" Value="{StaticResource SelectedListItemForeground}"/>
                             <Setter Property="Style" TargetName="Expander" Value="{DynamicResource TreeViewSelectedToggleButtonStyle}"/>
-                        </Trigger>
-                        <MultiTrigger>
+                        </Trigger>-->
+                        <!--<MultiTrigger>
                             <MultiTrigger.Conditions>
                                 <Condition Property="IsMouseOver" SourceName="Bd" Value="true"/>
                                 <Condition Property="IsSelected" Value="false"/>
                             </MultiTrigger.Conditions>
                             <Setter Property="Background" TargetName="Bd" Value="{StaticResource MouseOverListItem}"/>
-                        </MultiTrigger>
+                        </MultiTrigger>-->
                         <!--<MultiTrigger>
                             <MultiTrigger.Conditions>
                                 <Condition Property="IsSelected" Value="true"/>
@@ -3952,5 +3954,64 @@
             </Setter.Value>
         </Setter>
     </Style>
+    
+    
+    <!-- Progress bar -->
+    <Style TargetType="{x:Type ProgressBar}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ProgressBar}">
+                    <Grid MinHeight="2" MinWidth="200" Background="{StaticResource WindowBorderBrush}">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Determinate" />
+                                <VisualState x:Name="Indeterminate"/>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <Border x:Name="PART_Track" BorderThickness="1">
+                            <Border.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource BorderMediumColor}" />
+                            </Border.BorderBrush>
+                        </Border>
+                        <Border x:Name="PART_Indicator"
+                              BorderThickness="1"
+                              HorizontalAlignment="Left"
+                              Margin="1"
+                              Background="{StaticResource HoverBrush}">
+
+                            <Border Visibility="{TemplateBinding Property=IsIndeterminate, Converter={StaticResource bool2VisibilityConverter}}" x:Name="DiagonalDecorator" Width="5000">
+                                <Border.Background>
+                                    <DrawingBrush TileMode="Tile" Stretch="None" Viewbox="0,0,1,1" Viewport="0,0,36,34" ViewportUnits="Absolute">
+                                        <DrawingBrush.RelativeTransform>
+                                            <TranslateTransform X="0" Y="0" />
+                                        </DrawingBrush.RelativeTransform>
+                                        <DrawingBrush.Drawing>
+                                            <GeometryDrawing Brush="#55000000" Geometry="M0,0 18,0 36,34 18,34 Z" />
+                                        </DrawingBrush.Drawing>
+                                    </DrawingBrush>
+                                </Border.Background>
+                                <Border.Triggers>
+                                    <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation
+                                                    Storyboard.TargetProperty="(Border.Background).(DrawingBrush.RelativeTransform).(TranslateTransform.X)"
+                                                    From="0" To=".36" RepeatBehavior="Forever" Duration="0:0:18" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </EventTrigger>
+                                </Border.Triggers>
+                            </Border>
+
+                        </Border>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <HierarchicalDataTemplate DataType="{x:Type t:Node}" ItemsSource="{Binding Children}">
+        <CheckBox IsChecked="{Binding IsChecked, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Content="{Binding Text}" />
+    </HierarchicalDataTemplate>
 
 </ResourceDictionary>

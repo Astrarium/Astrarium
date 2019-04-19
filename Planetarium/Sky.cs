@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Planetarium
@@ -94,49 +95,44 @@ namespace Planetarium
             }
         }
 
-        public T GetEphemeris<T>(CelestialObject body, double jd, string ephemKey)
-        {
-            return GetEphemeris<T>(body, jd, jd + 1, 2, ephemKey).First();
-        }
+        //public ICollection<T> GetEphemeris<T>(CelestialObject body, double from, double to, double step, string ephemKey)
+        //{
+        //    Type bodyType = body.GetType();
 
-        public ICollection<T> GetEphemeris<T>(CelestialObject body, double from, double to, double step, string ephemKey)
-        {
-            Type bodyType = body.GetType();
+        //    if (body == null)
+        //        throw new ArgumentNullException("Celestial body should not be null.", nameof(body));
 
-            if (body == null)
-                throw new ArgumentNullException("Celestial body should not be null.", nameof(body));
+        //    if (string.IsNullOrWhiteSpace(ephemKey))
+        //        throw new ArgumentException("Ephemeris key should not be null or empty.", nameof(body));
 
-            if (string.IsNullOrWhiteSpace(ephemKey))
-                throw new ArgumentException("Ephemeris key should not be null or empty.", nameof(body));
+        //    if (!EphemConfigs.ContainsKey(bodyType))
+        //        throw new ArgumentException($"Object of type '{bodyType}' does not have configured ephemeris provider.", nameof(body));
 
-            if (!EphemConfigs.ContainsKey(bodyType))
-                throw new ArgumentException($"Object of type '{bodyType}' does not have configured ephemeris provider.", nameof(body));
+        //    var config = EphemConfigs[body.GetType()];
 
-            var config = EphemConfigs[body.GetType()];
+        //    var item = config.FirstOrDefault(c => c.Category == ephemKey);
 
-            var item = config.FirstOrDefault(c => c.Category == ephemKey);
+        //    if (item == null)
+        //        throw new Exception($"Unknown ephemeris key '{ephemKey}'. Check that corresponding ephemeris provider has required ephemeris key.");
 
-            if (item == null)
-                throw new Exception($"Unknown ephemeris key '{ephemKey}'. Check that corresponding ephemeris provider has required ephemeris key.");
+        //    List<T> result = new List<T>();
 
-            List<T> result = new List<T>();
+        //    for (double jd = from; jd <= to; jd += step)
+        //    {
+        //        var context = new SkyContext(jd, Context.GeoLocation);
 
-            for (double jd = from; jd <= to; jd += step)
-            {
-                var context = new SkyContext(jd, Context.GeoLocation);
+        //        object value = item.Formula.DynamicInvoke(context, body);
 
-                object value = item.Formula.DynamicInvoke(context, body);
+        //        if (!(value is T))
+        //            throw new Exception($"Ephemeris with key '{ephemKey}' has type {value.GetType()} but requested cast to {typeof(T)}.");
 
-                if (!(value is T))
-                    throw new Exception($"Ephemeris with key '{ephemKey}' has type {value.GetType()} but requested cast to {typeof(T)}.");
+        //        result.Add((T)value);
+        //    }
 
-                result.Add((T)value);
-            }
+        //    return result;
+        //}
 
-            return result;
-        }
-
-        public List<List<Ephemeris>> GetEphemerides(CelestialObject body, double from, double to, double step, IEnumerable<string> categories)
+        public List<List<Ephemeris>> GetEphemerides(CelestialObject body, double from, double to, double step, IEnumerable<string> categories, CancellationToken? cancelToken = null, IProgress<double> progress = null)
         {
             List<List<Ephemeris>> ephemerides = new List<List<Ephemeris>>();
 
@@ -146,6 +142,15 @@ namespace Planetarium
 
             for (double jd = from; jd < to; jd += step)
             {
+                if (cancelToken != null && cancelToken.Value.IsCancellationRequested)
+                {
+                    break;
+                }
+                else
+                {
+                    progress?.Report((jd - from) / (to - from) * 100);
+                }
+
                 var context = new SkyContext(jd, Context.GeoLocation);
 
                 List<Ephemeris> ephemeris = new List<Ephemeris>();

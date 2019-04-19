@@ -70,7 +70,7 @@ namespace Planetarium.Controls
 
         private static string TimeSpanToString(TimeSpan timeSpan)
         {
-            return $"{timeSpan.Days}d {timeSpan.Hours:D2}h {timeSpan.Minutes:D2}m {timeSpan.Seconds:D2}s";
+            return Formatters.TimeSpan.Format(timeSpan);
         }
     }
 }

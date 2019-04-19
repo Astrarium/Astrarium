@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -70,7 +71,7 @@ namespace Planetarium.ViewModels
                 MapEquatorialCoordinatesString = eq.ToString();
                 MapHorizontalCoordinatesString = hor.ToString();
                 MapConstellationNameString = Constellations.FindConstellation(eq, sky.Context.JulianDay);
-                MapViewAngleString = map.ViewAngle.ToString();
+                MapViewAngleString = Formatters.AngularDiameter.Format(map.ViewAngle);
 
                 NotifyPropertyChanged(
                     nameof(MapEquatorialCoordinatesString), 
@@ -110,7 +111,7 @@ namespace Planetarium.ViewModels
 
         private void Map_ViewAngleChanged(double viewAngle)
         {
-            MapViewAngleString = map.ViewAngle.ToString();
+            MapViewAngleString = Formatters.AngularDiameter.Format(map.ViewAngle);
             NotifyPropertyChanged(nameof(MapViewAngleString));
         }
 
@@ -298,7 +299,7 @@ namespace Planetarium.ViewModels
             
             ContextMenuItems.Add(new MenuItemVM()
             {
-                Header = "Object info",
+                Header = "Info",
                 Command = MapDoubleClickCommand,
                 CommandParameter = point,
                 IsEnabled = map.SelectedObject != null
@@ -329,7 +330,7 @@ namespace Planetarium.ViewModels
 
             ContextMenuItems.Add(new MenuItemVM()
             {
-                Header = "Object ephemeris",
+                Header = "Ephemerides",
                 IsEnabled = map.SelectedObject != null && sky.GetEphemerisCategories(map.SelectedObject).Any(),
                 Command = GetObjectEphemerisCommand,
                 CommandParameter = map.SelectedObject
@@ -361,18 +362,28 @@ namespace Planetarium.ViewModels
             es.JulianDayTo = sky.Context.JulianDay + 30;
             if (viewManager.ShowDialog(es) ?? false)
             {
+                var tokenSource = new CancellationTokenSource();
+                var progress = new Progress<double>();
+
+                viewManager.ShowProgress("Please wait", "Calculating ephemerides...", tokenSource, progress);
+
                 var ephem = await Task.Run(() => sky.GetEphemerides(
                     es.SelectedBody,
                     es.JulianDayFrom,
                     es.JulianDayTo,
-                    es.Step,
-                    es.Categories
+                    es.Step.TotalDays,
+                    es.Categories,
+                    tokenSource.Token,
+                    progress
                 ));
 
-                var vm = viewManager.CreateViewModel<EphemerisVM>();
-                vm.SetData(es.SelectedBody, es.JulianDayFrom, es.JulianDayTo, es.Step, ephem);
-
-                viewManager.ShowWindow(vm);
+                if (!tokenSource.IsCancellationRequested)
+                {
+                    tokenSource.Cancel();
+                    var vm = viewManager.CreateViewModel<EphemerisVM>();
+                    vm.SetData(es.SelectedBody, es.JulianDayFrom, es.JulianDayTo, es.Step, ephem);
+                    viewManager.ShowWindow(vm);
+                }
             }
         }
 
