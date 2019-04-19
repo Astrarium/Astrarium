@@ -272,6 +272,29 @@ namespace ADK
             return new CrdsEquatorial(alpha_, delta_);
         }
 
+        public static CrdsEquatorial ToEquatorial(this CrdsRectangular m, CrdsEquatorial planet, double P, double semidiameter)
+        {
+            // convert to polar coordinates
+
+            // radius-vector of moon, in planet's equatorial radii
+            double r = Math.Sqrt(m.X * m.X + m.Y * m.Y);
+
+            // rotation angle
+            double theta = Angle.ToDegrees(Math.Atan2(m.Y, m.X));
+
+            // rotate with position angle of the planet
+            theta += P;
+
+            // convert back to rectangular coordinates, but rotated with P angle:
+            double x = r * Math.Cos(Angle.ToRadians(theta));
+            double y = r * Math.Sin(Angle.ToRadians(theta));
+
+            double dAlpha = x * semidiameter / 3600;
+            double dDelta = y * semidiameter / 3600;
+
+            return new CrdsEquatorial(planet.Alpha - dAlpha, planet.Delta + dDelta);
+        }
+
         public static CrdsHorizontal WithRefraction(this CrdsHorizontal h0)
         {
             //if (h0.Altitude < 0) return h0;

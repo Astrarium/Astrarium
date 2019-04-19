@@ -82,6 +82,12 @@ namespace Planetarium.Renderers
 
                 RenderPlanet(map, p);
 
+                if (p.Number == Planet.JUPITER)
+                {
+                    var moons = planetsProvider.JupiterMoons;
+                    RenderJupiterMoons(map, p, moons);
+                }
+
                 if (!isSunRendered)
                 {
                     RenderSun(map, sun);
@@ -397,6 +403,79 @@ namespace Planetarium.Renderers
                     
                     map.DrawObjectCaption(fontLabel, brushLabel, planet.Name, p, diam);
                     map.AddDrawnObject(planet, p);
+                }
+            }
+        }
+
+        private void RenderJupiterMoons(IMapContext map, Planet jupiter, ICollection<Satellite> moons)
+        {
+            bool isGround = settings.Get<bool>("Ground");
+            bool useTextures = settings.Get<bool>("UseTextures");
+            double coeff = map.DiagonalCoefficient();
+
+            foreach (var moon in moons)
+            {
+                double ad = Angle.Separation(moon.Horizontal, map.Center);
+
+                if ((!isGround || moon.Horizontal.Altitude + moon.Semidiameter / 3600 > 0) &&
+                    ad < coeff * map.ViewAngle + moon.Semidiameter / 3600)
+                {
+                    {
+                        PointF p = map.Project(moon.Horizontal);
+
+
+                        float rotation = map.GetRotationTowardsNorth(jupiter.Equatorial) + 360 - (float)jupiter.Appearance.P;
+
+                        map.Graphics.TranslateTransform(p.X, p.Y);
+                        map.Graphics.RotateTransform(rotation);
+
+                        float size = map.GetDiskSize(moon.Semidiameter, 2);
+
+                        //if (useTextures && size > 10)
+                        //{
+                        //    Image imageSun = imagesCache.RequestImage("Sun", true, SunImageProvider, map.Redraw);
+                        //    if (imageSun != null)
+                        //    {
+                        //        map.Graphics.FillEllipse(penSun.Brush, -size / 2, -size / 2, size, size);
+                        //        map.Graphics.DrawImage(imageSun, -size / 2, -size / 2, size, size);
+                        //    }
+                        //    else
+                        //    {
+                        //        map.Graphics.FillEllipse(penSun.Brush, -size / 2, -size / 2, size, size);
+                        //    }
+                        //}
+                        //else
+                        {
+                            map.Graphics.FillEllipse(penSun.Brush, -size / 2, -size / 2, size, size);
+
+
+
+                        }
+
+                        map.Graphics.ResetTransform();
+
+                        map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, size);
+                        map.AddDrawnObject(moon, p);
+                    }
+
+
+
+                    // classical method
+                    {
+                        PointF p = map.Project(jupiter.Horizontal);
+
+                        float rotation = map.GetRotationTowardsNorth(jupiter.Equatorial) + 360 - (float)jupiter.Appearance.P;
+
+                        map.Graphics.TranslateTransform(p.X, p.Y);
+                        map.Graphics.RotateTransform(rotation);
+
+                        float size = map.GetDiskSize(jupiter.Semidiameter, 2) / 2;
+
+                        map.Graphics.FillEllipse(Brushes.Red, (float)(size * moon.Planetocentric.X) - 1, -(float)(size * moon.Planetocentric.Y) - 1, 2, 2);
+
+                        map.Graphics.ResetTransform();
+                    }
+
                 }
             }
         }

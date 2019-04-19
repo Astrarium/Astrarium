@@ -11,6 +11,7 @@ namespace Planetarium.Calculators
 {
     public interface IPlanetsProvider
     {
+        ICollection<Satellite> JupiterMoons { get; }
         ICollection<Planet> Planets { get; }
         RingsAppearance SaturnRings { get; }
     }
@@ -30,9 +31,10 @@ namespace Planetarium.Calculators
     public class PlanetsCalc : BaseCalc<Planet>, IPlanetsCalc, IPlanetsProvider
     {
         private Planet[] planets = new Planet[8];
+        private Satellite[] jupiterMoons = new Satellite[4];
 
         public ICollection<Planet> Planets => planets;
-
+        public ICollection<Satellite> JupiterMoons => jupiterMoons;
         public RingsAppearance SaturnRings { get; private set; } = new RingsAppearance();
 
         private string[] PlanetNames = new string[]
@@ -52,6 +54,11 @@ namespace Planetarium.Calculators
             for (int i = 0; i < planets.Length; i++)
             {
                 planets[i] = new Planet() { Number = i + 1, Name = PlanetNames[i] };
+            }
+
+            for (int i = 0; i < JupiterMoons.Count; i++)
+            {
+                jupiterMoons[i] = new Satellite() { Name = (i + 1).ToString() };
             }
 
             planets[Planet.JUPITER - 1].Flattening = 0.064874f;
@@ -305,6 +312,18 @@ namespace Planetarium.Calculators
                 p.Elongation = context.Get(Elongation, n);
                 p.Ecliptical = context.Get(Ecliptical, n);
 
+                if (p.Number == Planet.JUPITER)
+                {
+                    int i = 0;
+                    foreach (var jm in JupiterMoons)
+                    {
+                        jm.Planetocentric = context.Get(GetJupiterMoon, i);
+                        jm.Equatorial = jm.Planetocentric.ToEquatorial(p.Equatorial, p.Appearance.P, p.Semidiameter);
+                        jm.Horizontal = jm.Equatorial.ToHorizontal(context.GeoLocation, context.SiderealTime);
+                        i++;
+                    }
+                }
+
                 if (p.Number == Planet.SATURN)
                 {
                     SaturnRings = context.Get(GetSaturnRings, n);
@@ -315,6 +334,18 @@ namespace Planetarium.Calculators
         private RingsAppearance GetSaturnRings(SkyContext c, int p)
         {
             return PlanetEphem.SaturnRings(c.JulianDay, c.Get(Heliocentrical, p), c.Get(EarthHeliocentrial), c.Epsilon);
+        }
+
+        private CrdsRectangular GetJupiterMoon(SkyContext c, int m)
+        {
+            switch (m)
+            {
+                case 0: return new CrdsRectangular(-3.4502, 0.2137, 0);
+                case 1: return new CrdsRectangular(7.4418, 0.2753, 0);
+                case 2: return new CrdsRectangular(1.2011, 0.5900, 0);
+                case 3: return new CrdsRectangular(7.0720, 1.0291, 0);
+            }
+            return new CrdsRectangular();
         }
 
         public override void ConfigureEphemeris(EphemerisConfig<Planet> e)
