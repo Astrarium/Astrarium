@@ -476,6 +476,23 @@ namespace Planetarium.Renderers
                         map.Graphics.ResetTransform();
                     }
 
+
+                    // equatorial plane axis
+                    {
+                        PointF p = map.Project(jupiter.Horizontal);
+
+                        float rotation = map.GetRotationTowardsNorth(jupiter.Equatorial) + 360 - (float)jupiter.Appearance.P;
+
+                        map.Graphics.TranslateTransform(p.X, p.Y);
+                        map.Graphics.RotateTransform(rotation);
+
+                        float size = map.GetDiskSize(jupiter.Semidiameter, 2) / 2;
+
+                        map.Graphics.DrawLine(Pens.Red, new PointF(-10 * size, 0), new PointF(10 * size, 0));
+                        map.Graphics.DrawLine(Pens.Red, new PointF(0, -3 * size), new PointF(0, 3 * size));
+
+                        map.Graphics.ResetTransform();
+                    }
                 }
             }
         }

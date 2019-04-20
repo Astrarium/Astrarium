@@ -192,7 +192,16 @@ namespace Planetarium
 
         public ICollection<string> GetEphemerisCategories(CelestialObject body)
         {
-            return EphemConfigs[body.GetType()].Where(c => c.IsAvailable?.Invoke(body) ?? true).Select(c => c.Category).Distinct().ToArray();
+            var type = body.GetType();
+            if (EphemConfigs.ContainsKey(type))
+            {
+                return EphemConfigs[type].Where(c => c.IsAvailable?.Invoke(body) ?? true).Select(c => c.Category).Distinct().ToArray();
+            }
+            else
+            {
+                return new string[0];
+            }
+            
         }
 
         public ICollection<AstroEvent> GetEvents(double jdFrom, double jdTo, ICollection<string> categories)

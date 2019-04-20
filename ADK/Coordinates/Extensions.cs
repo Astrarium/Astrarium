@@ -289,7 +289,7 @@ namespace ADK
             double x = r * Math.Cos(Angle.ToRadians(theta));
             double y = r * Math.Sin(Angle.ToRadians(theta));
 
-            double dAlpha = x * semidiameter / 3600;
+            double dAlpha = (1 / Math.Cos(Angle.ToRadians(planet.Delta))) * x * semidiameter / 3600;
             double dDelta = y * semidiameter / 3600;
 
             return new CrdsEquatorial(planet.Alpha - dAlpha, planet.Delta + dDelta);
