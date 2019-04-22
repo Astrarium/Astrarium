@@ -11,7 +11,7 @@ namespace Planetarium.Calculators
 {
     public interface IPlanetsProvider
     {
-        ICollection<Satellite> JupiterMoons { get; }
+        ICollection<JupiterMoon> JupiterMoons { get; }
         ICollection<Planet> Planets { get; }
         RingsAppearance SaturnRings { get; }
     }
@@ -28,13 +28,13 @@ namespace Planetarium.Calculators
         string GetPlanetName(int number);
     }
 
-    public class PlanetsCalc : BaseCalc<Planet>, IPlanetsCalc, IPlanetsProvider
+    public class PlanetsCalc : BaseCalc, ICelestialObjectCalc<Planet>, ICelestialObjectCalc<JupiterMoon>, IPlanetsCalc, IPlanetsProvider
     {
         private Planet[] planets = new Planet[8];
-        private Satellite[] jupiterMoons = new Satellite[4];
+        private JupiterMoon[] jupiterMoons = new JupiterMoon[4];
 
         public ICollection<Planet> Planets => planets;
-        public ICollection<Satellite> JupiterMoons => jupiterMoons;
+        public ICollection<JupiterMoon> JupiterMoons => jupiterMoons;
         public RingsAppearance SaturnRings { get; private set; } = new RingsAppearance();
 
         private string[] PlanetNames = new string[]
@@ -49,6 +49,8 @@ namespace Planetarium.Calculators
             "Neptune"
         };
 
+        private string[] JuipterMoonNames = new string[] { "Io", "Europa", "Ganymede", "Callisto" };
+
         public PlanetsCalc()
         {
             for (int i = 0; i < planets.Length; i++)
@@ -58,7 +60,7 @@ namespace Planetarium.Calculators
 
             for (int i = 0; i < JupiterMoons.Count; i++)
             {
-                jupiterMoons[i] = new Satellite() { Name = (i + 1).ToString() };
+                jupiterMoons[i] = new JupiterMoon() { Number = i + 1, Name = JuipterMoonNames[i] };
             }
 
             planets[Planet.JUPITER - 1].Flattening = 0.064874f;
@@ -314,13 +316,12 @@ namespace Planetarium.Calculators
 
                 if (p.Number == Planet.JUPITER)
                 {
-                    int i = 0;
-                    foreach (var jm in JupiterMoons)
+                    foreach (var j in JupiterMoons)
                     {
-                        jm.Planetocentric = context.Get(GetJupiterMoon, i);
-                        jm.Equatorial = jm.Planetocentric.ToEquatorial(p.Equatorial, p.Appearance.P, p.Semidiameter);
-                        jm.Horizontal = jm.Equatorial.ToHorizontal(context.GeoLocation, context.SiderealTime);
-                        i++;
+                        int m = j.Number;
+                        j.Planetocentric = context.Get(JupiterMoonPlanetocentric, m);
+                        j.Equatorial = context.Get(JupiterMoonEquatorial, m);
+                        j.Horizontal = context.Get(JupiterMoonHorizontal, m);
                     }
                 }
 
@@ -336,19 +337,33 @@ namespace Planetarium.Calculators
             return PlanetEphem.SaturnRings(c.JulianDay, c.Get(Heliocentrical, p), c.Get(EarthHeliocentrial), c.Epsilon);
         }
 
-        private CrdsRectangular GetJupiterMoon(SkyContext c, int m)
+        private CrdsRectangular JupiterMoonPlanetocentric(SkyContext c, int m)
         {
             switch (m)
             {
-                case 0: return new CrdsRectangular(-3.4502, 0.2137, 0);
-                case 1: return new CrdsRectangular(7.4418, 0.2753, 0);
-                case 2: return new CrdsRectangular(1.2011, 0.5900, 0);
-                case 3: return new CrdsRectangular(7.0720, 1.0291, 0);
+                case 1: return new CrdsRectangular(-3.4502, 0.2137, 0);
+                case 2: return new CrdsRectangular(7.4418, 0.2753, 0);
+                case 3: return new CrdsRectangular(1.2011, 0.5900, 0);
+                case 4: return new CrdsRectangular(7.0720, 1.0291, 0);
             }
             return new CrdsRectangular();
         }
 
-        public override void ConfigureEphemeris(EphemerisConfig<Planet> e)
+        private CrdsEquatorial JupiterMoonEquatorial(SkyContext c, int m)
+        {
+            CrdsEquatorial jupiterEq = c.Get(Equatorial, Planet.JUPITER);
+            CrdsRectangular planetocentric = c.Get(JupiterMoonPlanetocentric, m);
+            PlanetAppearance appearance = c.Get(Appearance, Planet.JUPITER);
+            double semidiameter = c.Get(Semidiameter, Planet.JUPITER);
+            return planetocentric.ToEquatorial(jupiterEq, appearance.P, semidiameter);            
+        }
+
+        private CrdsHorizontal JupiterMoonHorizontal(SkyContext c, int m)
+        {
+            return c.Get(JupiterMoonEquatorial, m).ToHorizontal(c.GeoLocation, c.SiderealTime);
+        }
+
+        public void ConfigureEphemeris(EphemerisConfig<Planet> e)
         {
             e.Add("Magnitude", (c, p) => c.Get(Magnitude, p.Number));
             e.Add("Horizontal.Altitude", (c, p) => c.Get(Horizontal, p.Number).Altitude);
@@ -369,14 +384,20 @@ namespace Planetarium.Calculators
             e.Add("Visibility.Period", (c, p) => c.Get(Visibility, p.Number).Period);
         }
 
-        public override CelestialObjectInfo GetInfo(SkyContext c, Planet planet)
+        public void ConfigureEphemeris(EphemerisConfig<JupiterMoon> e)
+        {
+            e.Add("Rectangular.X", (c, j) => c.Get(JupiterMoonPlanetocentric, j.Number).X);
+            e.Add("Rectangular.Y", (c, j) => c.Get(JupiterMoonPlanetocentric, j.Number).Y);
+        }
+
+        public CelestialObjectInfo GetInfo(SkyContext c, Planet planet)
         {
             int p = planet.Number;
 
             var rts = c.Get(RiseTransitSet, p);
 
             var info = new CelestialObjectInfo();
-            info.SetSubtitle("Planet").SetTitle(PlanetNames[p - 1])
+            info.SetSubtitle("Planet").SetTitle(GetName(planet))
 
             .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial, p), c.JulianDay))
 
@@ -426,16 +447,58 @@ namespace Planetarium.Calculators
             return info;
         }
 
-        public override ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
+        public CelestialObjectInfo GetInfo(SkyContext c, JupiterMoon moon)
         {
-            return planets.Where(p => p.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
-                .Select(p => new SearchResultItem(p, p.Name))
-                .ToArray();
+            int p = Planet.JUPITER;
+            int m = moon.Number;
+
+            var rts = c.Get(RiseTransitSet, p);
+
+            var info = new CelestialObjectInfo();
+            info.SetSubtitle("Satellite of Jupiter").SetTitle(GetName(moon))
+
+            .AddRow("Constellation", Constellations.FindConstellation(c.Get(JupiterMoonEquatorial, m), c.JulianDay))
+
+            .AddHeader("Equatorial coordinates (topocentrical)")
+            .AddRow("Equatorial.Alpha", c.Get(JupiterMoonEquatorial, m).Alpha)
+            .AddRow("Equatorial.Delta", c.Get(JupiterMoonEquatorial, m).Delta)
+
+            .AddHeader("Horizontal coordinates")
+            .AddRow("Horizontal.Azimuth", c.Get(JupiterMoonHorizontal, m).Azimuth)
+            .AddRow("Horizontal.Altitude", c.Get(JupiterMoonHorizontal, m).Altitude)
+
+            .AddHeader("Rectangular planetocentric coordinates")
+            .AddRow("Rectangular.X", c.Get(JupiterMoonPlanetocentric, m).X)
+            .AddRow("Rectangular.Y", c.Get(JupiterMoonPlanetocentric, m).Y)
+
+            .AddHeader("Visibility")
+            .AddRow("RTS.Rise", rts.Rise, c.JulianDayMidnight + rts.Rise)
+            .AddRow("RTS.Transit", rts.Transit, c.JulianDayMidnight + rts.Transit)
+            .AddRow("RTS.Set", rts.Set, c.JulianDayMidnight + rts.Set)
+            .AddRow("RTS.Duration", rts.Duration);
+
+            return info;
         }
 
-        public override string GetName(Planet p)
+        public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
+        {
+            var s1 = planets.Where(p => p.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
+                .Select(p => new SearchResultItem(p, p.Name));
+
+            var s2 = jupiterMoons.Where(m => m.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
+                .Select(p => new SearchResultItem(p, p.Name));
+
+            return s1.Concat(s2).ToArray();
+        }
+
+        public string GetName(Planet p)
         {
             return p.Name;
+        }
+
+        public string GetName(JupiterMoon m)
+        {
+            return m.Name;
         }
     }
 }

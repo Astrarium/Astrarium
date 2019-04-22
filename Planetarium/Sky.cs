@@ -26,7 +26,7 @@ namespace Planetarium
         private List<BaseCalc> Calculators = new List<BaseCalc>();
         private Dictionary<Type, EphemerisConfig> EphemConfigs = new Dictionary<Type, EphemerisConfig>();
         private Dictionary<Type, Delegate> InfoProviders = new Dictionary<Type, Delegate>();
-        private Dictionary<Type, SearchDelegate> SearchProviders = new Dictionary<Type, SearchDelegate>();
+        private List<SearchDelegate> SearchProviders = new List<SearchDelegate>();
         private Dictionary<Type, Delegate> NameProviders = new Dictionary<Type, Delegate>();
         private List<BaseAstroEventsProvider> EventProviders = new List<BaseAstroEventsProvider>();
         private List<AstroEventsConfig> EventConfigs = new List<AstroEventsConfig>();
@@ -40,15 +40,17 @@ namespace Planetarium
                 calc.Initialize();
 
                 Type calcType = calc.GetType();
-                Type calcBaseType = calcType.BaseType;
 
-                if (calcBaseType.IsGenericType && calcBaseType.GetGenericTypeDefinition() == typeof(BaseCalc<>))
+                IEnumerable<Type> genericCalcTypes = calcType.GetInterfaces().Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICelestialObjectCalc<>));
+
+                foreach (Type genericCalcType in genericCalcTypes)
                 {
-                    Type bodyType = calcBaseType.GetGenericArguments().First();
+                    Type bodyType = genericCalcType.GetGenericArguments().First();
+                    Type concreteCalc = typeof(ICelestialObjectCalc<>).MakeGenericType(bodyType);
 
                     // Ephemeris configs
                     EphemerisConfig config = Activator.CreateInstance(typeof(EphemerisConfig<>).MakeGenericType(bodyType)) as EphemerisConfig;
-                    calcType.GetMethod(nameof(BaseCalc<CelestialObject>.ConfigureEphemeris)).Invoke(calc, new object[] { config });
+                    concreteCalc.GetMethod(nameof(ICelestialObjectCalc<CelestialObject>.ConfigureEphemeris)).Invoke(calc, new object[] { config });
                     if (config.Any())
                     {
                         EphemConfigs[bodyType] = config;
@@ -56,15 +58,18 @@ namespace Planetarium
 
                     // Info provider
                     Type genericGetInfoFuncType = typeof(GetInfoDelegate<>).MakeGenericType(bodyType);
-                    InfoProviders[bodyType] = calcType.GetMethod(nameof(BaseCalc<CelestialObject>.GetInfo)).CreateDelegate(genericGetInfoFuncType, calc) as Delegate;
+                    InfoProviders[bodyType] = concreteCalc.GetMethod(nameof(ICelestialObjectCalc<CelestialObject>.GetInfo)).CreateDelegate(genericGetInfoFuncType, calc) as Delegate;
 
                     // Name provider
                     Type genericGetNameFuncType = typeof(GetNameDelegate<>).MakeGenericType(bodyType);
-                    NameProviders[bodyType] = calcType.GetMethod(nameof(BaseCalc<CelestialObject>.GetName)).CreateDelegate(genericGetNameFuncType, calc) as Delegate;
+                    NameProviders[bodyType] = concreteCalc.GetMethod(nameof(ICelestialObjectCalc<CelestialObject>.GetName)).CreateDelegate(genericGetNameFuncType, calc) as Delegate;
 
                     // Search provider
-                    var searchFunc = calcType.GetMethod(nameof(BaseCalc<CelestialObject>.Search)).CreateDelegate(typeof(SearchDelegate), calc) as SearchDelegate;
-                    SearchProviders[bodyType] = searchFunc;
+                    var searchFunc = concreteCalc.GetMethod(nameof(ICelestialObjectCalc<CelestialObject>.Search)).CreateDelegate(typeof(SearchDelegate), calc) as SearchDelegate;
+                    if (!SearchProviders.Contains(searchFunc))
+                    {
+                        SearchProviders.Add(searchFunc);
+                    }
                 }
             }
 
@@ -233,7 +238,7 @@ namespace Planetarium
             var results = new List<SearchResultItem>();
             if (!string.IsNullOrWhiteSpace(searchString))
             {               
-                foreach (var searchProvider in SearchProviders.Values)
+                foreach (var searchProvider in SearchProviders)
                 {
                     if (results.Count < maxCount)
                     {

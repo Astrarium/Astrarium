@@ -110,7 +110,7 @@
     <Compile Include="Objects\IMovingObject.cs" />
     <Compile Include="Objects\Moon.cs" />
     <Compile Include="Objects\Planet.cs" />
-    <Compile Include="Objects\Satellite.cs" />
+    <Compile Include="Objects\JupiterMoon.cs" />
     <Compile Include="Objects\SizeableCelestialObject.cs" />
     <Compile Include="Objects\Star.cs" />
     <Compile Include="Objects\Sun.cs" />

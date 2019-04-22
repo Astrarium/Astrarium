@@ -7,26 +7,31 @@ using System.Threading.Tasks;
 
 namespace Planetarium.Objects
 {
-    public class Satellite : SizeableCelestialObject
+    public class JupiterMoon : SizeableCelestialObject
     {
         /// <summary>
-        /// Apparent equatorial coordinates of the satellite
+        /// Apparent equatorial coordinates of the Galilean moon
         /// </summary>
         public CrdsEquatorial Equatorial { get; set; }
 
         /// <summary>
-        /// Planetocentric rectangular coordinates of the satellite
+        /// Planetocentric rectangular coordinates of the Galilean moon
         /// </summary>
         public CrdsRectangular Planetocentric { get; set; }
 
         /// <summary>
-        /// Planetocentric rectangular coordinates of the satellite shadow
+        /// Planetocentric rectangular coordinates of the Galilean moon shadow
         /// </summary>
         public CrdsRectangular Shadow { get; set; }
 
         /// <summary>
-        /// Name of the satellite
+        /// Name of the Galilean moon
         /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// Number of the Galilean moon (1 to 4)
+        /// </summary>
+        public int Number { get; set; }
     }
 }

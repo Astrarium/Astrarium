@@ -20,7 +20,7 @@ namespace Planetarium.Calculators
     /// <summary>
     /// Calculates coordinates of Deep Sky objects
     /// </summary>
-    public class DeepSkyCalc : BaseCalc<DeepSky>, IDeepSkyProvider
+    public class DeepSkyCalc : BaseCalc, ICelestialObjectCalc<DeepSky>, IDeepSkyProvider
     {
         private static string LOCATION = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         private static string NGCIC_FILE = Path.Combine(LOCATION, "Data/NGCIC.dat");
@@ -120,14 +120,14 @@ namespace Planetarium.Calculators
             return Visibility.RiseTransitSet(eq, c.GeoLocation, theta0);
         }
 
-        public override void ConfigureEphemeris(EphemerisConfig<DeepSky> e)
+        public void ConfigureEphemeris(EphemerisConfig<DeepSky> e)
         {
             e.Add("RTS.Rise", (c, ds) => c.Get(RiseTransitSet, ds).Rise);
             e.Add("RTS.Transit", (c, ds) => c.Get(RiseTransitSet, ds).Transit);
             e.Add("RTS.Set", (c, ds) => c.Get(RiseTransitSet, ds).Set);
         }
 
-        public override CelestialObjectInfo GetInfo(SkyContext c, DeepSky ds)
+        public CelestialObjectInfo GetInfo(SkyContext c, DeepSky ds)
         {
             var rts = c.Get(RiseTransitSet, ds);
             var det = c.Get(ReadDeepSkyDetails, ds);
@@ -206,7 +206,7 @@ namespace Planetarium.Calculators
             return info;
         }
 
-        public override ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
+        public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
         {           
             return DeepSkies.Where(ds => ds.AllNames.Any(name => name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
                 .Take(maxCount)
@@ -214,7 +214,7 @@ namespace Planetarium.Calculators
                 .ToArray();
         }
 
-        public override string GetName(DeepSky ds)
+        public string GetName(DeepSky ds)
         {
             return ds.AllNames.First();
         }

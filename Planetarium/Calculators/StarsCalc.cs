@@ -23,7 +23,7 @@ namespace Planetarium.Calculators
         string GetPrimaryStarName(ushort hrNumber);
     }
 
-    public class StarsCalc : BaseCalc<Star>, IStarsProvider, IStarsCalc
+    public class StarsCalc : BaseCalc, ICelestialObjectCalc<Star>, IStarsProvider, IStarsCalc
     {
         private readonly string STARS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Stars.dat");
         private readonly string NAMES_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/StarNames.dat");
@@ -148,14 +148,14 @@ namespace Planetarium.Calculators
 
         #endregion Ephemeris
 
-        public override void ConfigureEphemeris(EphemerisConfig<Star> e)
+        public void ConfigureEphemeris(EphemerisConfig<Star> e)
         {
             e.Add("RTS.Rise", (c, s) => c.Get(RiseTransitSet, s.Number).Rise);
             e.Add("RTS.Transit", (c, s) => c.Get(RiseTransitSet, s.Number).Transit);
             e.Add("RTS.Set", (c, s) => c.Get(RiseTransitSet, s.Number).Set);
         }
 
-        public override CelestialObjectInfo GetInfo(SkyContext c, Star s)
+        public CelestialObjectInfo GetInfo(SkyContext c, Star s)
         {
             var rts = c.Get(RiseTransitSet, s.Number);
             var det = c.Get(ReadStarDetails, s.Number);
@@ -194,7 +194,7 @@ namespace Planetarium.Calculators
         }
 
         private static Regex regexSpaceRemover = new Regex("[ ]{2,}", RegexOptions.None);
-        public override ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
+        public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
         {
             searchString = regexSpaceRemover.Replace(searchString, " ").Trim();
 
@@ -320,7 +320,7 @@ namespace Planetarium.Calculators
             return names;
         }
 
-        public override string GetName(Star s)
+        public string GetName(Star s)
         {
             return GetStarNames(s).First();
         }

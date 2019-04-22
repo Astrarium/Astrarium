@@ -16,7 +16,7 @@ namespace Planetarium.Calculators
         Moon Moon { get; }
     }
 
-    public class LunarCalc : BaseCalc<Moon>, ILunarProvider, ILunarCalc
+    public class LunarCalc : BaseCalc, ICelestialObjectCalc<Moon>, ILunarProvider, ILunarCalc
     {
         public Moon Moon { get; private set; } = new Moon();
 
@@ -256,7 +256,7 @@ namespace Planetarium.Calculators
             return Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, c.Get(Parallax), c.Get(Semidiameter) / 3600);
         }
 
-        public override void ConfigureEphemeris(EphemerisConfig<Moon> e)
+        public void ConfigureEphemeris(EphemerisConfig<Moon> e)
         {
             e.Add("RTS.Rise", (c, m) => c.Get(RiseTransitSet).Rise);
             e.Add("RTS.RiseAzimuth", (c, m) => c.Get(RiseTransitSet).RiseAzimuth);
@@ -276,7 +276,7 @@ namespace Planetarium.Calculators
             e.Add("Magnitude", (c, m) => c.Get(Magnitude));
         }
 
-        public override CelestialObjectInfo GetInfo(SkyContext c, Moon m)
+        public CelestialObjectInfo GetInfo(SkyContext c, Moon m)
         {
             var rts = c.Get(RiseTransitSet);
             var jdNM = c.Get(NearestPhase, MoonPhase.NewMoon);
@@ -337,7 +337,7 @@ namespace Planetarium.Calculators
             return info;
         }
 
-        public override ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
+        public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
         {
             if ("Moon".StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
                 return new[] { new SearchResultItem(Moon, "Moon") };
@@ -345,7 +345,7 @@ namespace Planetarium.Calculators
                 return new SearchResultItem[0];
         }
 
-        public override string GetName(Moon m)
+        public string GetName(Moon m)
         {
             return "Moon";
         }

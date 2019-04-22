@@ -407,7 +407,7 @@ namespace Planetarium.Renderers
             }
         }
 
-        private void RenderJupiterMoons(IMapContext map, Planet jupiter, ICollection<Satellite> moons)
+        private void RenderJupiterMoons(IMapContext map, Planet jupiter, ICollection<JupiterMoon> moons)
         {
             bool isGround = settings.Get<bool>("Ground");
             bool useTextures = settings.Get<bool>("UseTextures");
@@ -457,8 +457,6 @@ namespace Planetarium.Renderers
                         map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, size);
                         map.AddDrawnObject(moon, p);
                     }
-
-
 
                     // classical method
                     {

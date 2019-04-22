@@ -28,15 +28,15 @@ namespace Planetarium.Calculators
     }
 
     /// <summary>
-    /// Base class for all modules which perform astronomical calculations for specific class of celestial bodies.
+    /// Base interface for all modules which perform astronomical calculations for specific class of celestial bodies.
     /// </summary>
     /// <typeparam name="T">Type of celestial body</typeparam>
-    public abstract class BaseCalc<T> : BaseCalc where T : CelestialObject
+    public interface ICelestialObjectCalc<T> where T : CelestialObject
     {
-        public virtual void ConfigureEphemeris(EphemerisConfig<T> config) { }
-        public virtual CelestialObjectInfo GetInfo(SkyContext context, T body) { return null; }
-        public virtual ICollection<SearchResultItem> Search(string searchString, int maxCount = 50) { return null; }
-        public virtual string GetName(T body) { return body.ToString(); }
+        void ConfigureEphemeris(EphemerisConfig<T> config);
+        CelestialObjectInfo GetInfo(SkyContext context, T body);
+        ICollection<SearchResultItem> Search(string searchString, int maxCount = 50);
+        string GetName(T body);
     }
 
     public abstract class BaseAstroEventsProvider
