@@ -448,11 +448,26 @@ namespace Planetarium.Renderers
                             map.Graphics.TranslateTransform(p.X, p.Y);
                             map.Graphics.RotateTransform(rotation);
 
-                            map.Graphics.FillEllipse(Brushes.Wheat, -diam / 2, -diam / 2, diam, diam);
-
-                            if (diam > 2)
+                            if (useTextures)
                             {
-                                map.Graphics.DrawEllipse(Pens.Black, -diam / 2, -diam / 2, diam, diam);
+                                Image texturePlanet = imagesCache.RequestImage($"5-{moon.Number}", new LonLatShift($"5-{moon.Number}", 0, 0), PlanetTextureProvider, map.Redraw);
+                                if (texturePlanet != null)
+                                {
+                                    map.Graphics.DrawImage(texturePlanet, -diam / 2 * 1.01f, -diam / 2 * 1.01f, diam * 1.01f, diam * 1.01f);
+                                    map.Graphics.FillEllipse(GetVolumeBrush(diam), -diam / 2 - 1, -diam / 2 - 1, diam + 2, diam + 2);
+                                }
+                                else
+                                {
+                                    map.Graphics.FillEllipse(Brushes.Wheat, -diam / 2, -diam / 2, diam, diam);
+                                }
+                            }
+                            else
+                            {
+                                map.Graphics.FillEllipse(Brushes.Wheat, -diam / 2, -diam / 2, diam, diam);
+                                if (diam > 2)
+                                {
+                                    map.Graphics.DrawEllipse(Pens.Black, -diam / 2, -diam / 2, diam, diam);
+                                }
                             }
 
                             map.Graphics.ResetTransform();

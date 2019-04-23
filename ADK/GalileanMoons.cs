@@ -107,7 +107,7 @@ namespace ADK
             double GAMMA = 0.33033 * Math.Sin(Angle.ToRadians(163.679 + 0.0010512 * t)) +
                 0.03439 * Math.Sin(Angle.ToRadians(34.486 - 0.0161731 * t));
 
-            // Small libraton:
+            // Phase of small libraton:
             double PHI_lambda = Angle.ToRadians(199.6766 + 0.17379190 * t);
 
             // Longitude of the node of the equator of Jupiter on the ecliptic:
