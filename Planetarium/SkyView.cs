@@ -96,7 +96,7 @@ namespace Planetarium
             {
                 bool shift = (ModifierKeys & Keys.Shift) != Keys.None;
 
-                if (e.Button == MouseButtons.Left && !shift)
+                if (e.Button == MouseButtons.Left && !shift && SkyMap.LockedObject == null)
                 {
                     if (pOld == Point.Empty)
                     {
@@ -144,42 +144,6 @@ namespace Planetarium
                 }
             }
         }
-
-        //public void Zoom(int delta)
-        //{
-        //    double v = SkyMap.ViewAngle;
-
-        //    if (delta < 0)
-        //    {
-        //        v *= 1.1;
-        //    }
-        //    else
-        //    {
-        //        v /= 1.1;
-        //    }
-
-        //    if (v >= 90)
-        //    {
-        //        v = 90;
-        //    }
-        //    if (v < 1.0 / 1024.0)
-        //    {
-        //        v = 1.0 / 1024.0;
-        //    }
-
-        //    SkyMap.ViewAngle = v;
-        //    Invalidate();
-        //}
-
-        //protected override void OnMouseWheel(MouseEventArgs e)
-        //{
-        //    base.OnMouseWheel(e);
-
-        //    if (SkyMap != null)
-        //    {
-        //        Zoom(e.Delta);
-        //    }
-        //}
 
         private void InvalidateWithDoEvents()
         {

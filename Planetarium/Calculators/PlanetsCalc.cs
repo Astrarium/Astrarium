@@ -320,8 +320,13 @@ namespace Planetarium.Calculators
                     {
                         int m = j.Number;
                         j.Planetocentric = context.Get(JupiterMoonPlanetocentric, m);
+                        j.Shadow = context.Get(JupiterMoonShadowPlanetocentric, m);
                         j.Equatorial = context.Get(JupiterMoonEquatorial, m);
                         j.Horizontal = context.Get(JupiterMoonHorizontal, m);
+                        j.ShadowEquatorial = context.Get(JupiterMoonShadowEquatorial, m);
+                        j.ShadowHorizontal = context.Get(JupiterMoonShadowHorizontal, m);
+                        j.ShadowSemidiameter = context.Get(JupiterMoonShadowSemidiameter, m);
+                        j.Semidiameter = context.Get(JupiterMoonSemidiameter, m);
                     }
                 }
 
@@ -339,14 +344,19 @@ namespace Planetarium.Calculators
 
         private CrdsRectangular JupiterMoonPlanetocentric(SkyContext c, int m)
         {
-            switch (m)
-            {
-                case 1: return new CrdsRectangular(-3.4502, 0.2137, 0);
-                case 2: return new CrdsRectangular(7.4418, 0.2753, 0);
-                case 3: return new CrdsRectangular(1.2011, 0.5900, 0);
-                case 4: return new CrdsRectangular(7.0720, 1.0291, 0);
-            }
-            return new CrdsRectangular();
+            return c.Get(JupiterMoonsPlanetocentric)[m - 1, 0];
+        }
+
+        private CrdsRectangular JupiterMoonShadowPlanetocentric(SkyContext c, int m)
+        {
+            return c.Get(JupiterMoonsPlanetocentric)[m - 1, 1];
+        }
+
+        private CrdsRectangular[,] JupiterMoonsPlanetocentric(SkyContext c)
+        {
+            CrdsHeliocentrical earth = c.Get(EarthHeliocentrial);
+            CrdsHeliocentrical jupiter = c.Get(Heliocentrical, Planet.JUPITER);
+            return GalileanMoons.Positions(c.JulianDay, earth, jupiter);
         }
 
         private CrdsEquatorial JupiterMoonEquatorial(SkyContext c, int m)
@@ -358,9 +368,47 @@ namespace Planetarium.Calculators
             return planetocentric.ToEquatorial(jupiterEq, appearance.P, semidiameter);            
         }
 
+        private CrdsEquatorial JupiterMoonShadowEquatorial(SkyContext c, int m)
+        {
+            CrdsEquatorial jupiterEq = c.Get(Equatorial, Planet.JUPITER);
+            CrdsRectangular planetocentric = c.Get(JupiterMoonShadowPlanetocentric, m);
+            PlanetAppearance appearance = c.Get(Appearance, Planet.JUPITER);
+            double semidiameter = c.Get(Semidiameter, Planet.JUPITER);
+            return planetocentric.ToEquatorial(jupiterEq, appearance.P, semidiameter);
+        }
+
         private CrdsHorizontal JupiterMoonHorizontal(SkyContext c, int m)
         {
             return c.Get(JupiterMoonEquatorial, m).ToHorizontal(c.GeoLocation, c.SiderealTime);
+        }
+
+        private CrdsHorizontal JupiterMoonShadowHorizontal(SkyContext c, int m)
+        {
+            return c.Get(JupiterMoonShadowEquatorial, m).ToHorizontal(c.GeoLocation, c.SiderealTime);
+        }
+
+        private double JupiterMoonSemidiameter(SkyContext c, int m)
+        {
+            // distance from Earth to Jupiter, in a.u.
+            double r = c.Get(DistanceFromEarth, Planet.JUPITER);
+
+            // planetocentric z-coordinate of moon
+            double z = c.Get(JupiterMoonPlanetocentric, m).Z;
+
+            // visible moon semidiameter
+            return GalileanMoons.MoonSemidiameter(r, z, m - 1);
+        }
+
+        private double JupiterMoonShadowSemidiameter(SkyContext c, int m)
+        {
+            // distance from Sun to Jupiter, in a.u.
+            double R = c.Get(Ecliptical, Planet.JUPITER).Distance;
+
+            // distance from Earth to Jupiter, in a.u.
+            double r = c.Get(DistanceFromEarth, Planet.JUPITER);
+
+            // visible shadow semidiameter
+            return GalileanMoons.ShadowSemidiameter(R, r, m - 1);
         }
 
         public void ConfigureEphemeris(EphemerisConfig<Planet> e)
@@ -475,7 +523,16 @@ namespace Planetarium.Calculators
             .AddRow("RTS.Rise", rts.Rise, c.JulianDayMidnight + rts.Rise)
             .AddRow("RTS.Transit", rts.Transit, c.JulianDayMidnight + rts.Transit)
             .AddRow("RTS.Set", rts.Set, c.JulianDayMidnight + rts.Set)
-            .AddRow("RTS.Duration", rts.Duration);
+            .AddRow("RTS.Duration", rts.Duration)
+
+            .AddHeader("Appearance")
+            .AddRow("Phase", c.Get(Phase, p))
+            .AddRow("PhaseAngle", c.Get(PhaseAngle, p))
+            //.AddRow("Magnitude", c.Get(Magnitude, p))
+            //.AddRow("DistanceFromEarth", c.Get(DistanceFromEarth, p))
+            //.AddRow("DistanceFromSun", c.Get(DistanceFromSun, p))
+            //.AddRow("HorizontalParallax", c.Get(Parallax, p))
+            .AddRow("AngularDiameter", c.Get(JupiterMoonSemidiameter, m) * 2 / 3600.0);
 
             return info;
         }

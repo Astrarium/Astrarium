@@ -84,6 +84,12 @@ namespace Planetarium
                 }
             }
         }
+
+        /// <summary>
+        /// Locked Object. If it set, map moving is denied and it always centered on this body. 
+        /// </summary>
+        public CelestialObject LockedObject { get; set; }
+
         /// <summary>
         /// Occurs when selected celestial object is changed
         /// </summary>
@@ -121,6 +127,12 @@ namespace Planetarium
             bool needDrawSelectedObject = true;
 
             mapContext.Graphics = g;
+
+            if (LockedObject != null)
+            {
+                Center.Altitude = LockedObject.Horizontal.Altitude;
+                Center.Azimuth = LockedObject.Horizontal.Azimuth;
+            }
 
             foreach (var renderer in renderers)
             {
@@ -214,10 +226,7 @@ namespace Planetarium
         }
 
         private bool DrawSelectedObject(Graphics g)
-        {           
-            // screen diagonal, in pixels
-            double diag = Math.Sqrt(Width * Width / 4 + Height * Height / 4);
-
+        {
             if (SelectedObject != null && drawnObjects.Contains(SelectedObject))
             {
                 var body = SelectedObject;

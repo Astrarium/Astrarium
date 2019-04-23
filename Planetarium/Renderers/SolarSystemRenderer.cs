@@ -82,12 +82,6 @@ namespace Planetarium.Renderers
 
                 RenderPlanet(map, p);
 
-                if (p.Number == Planet.JUPITER)
-                {
-                    var moons = planetsProvider.JupiterMoons;
-                    RenderJupiterMoons(map, p, moons);
-                }
-
                 if (!isSunRendered)
                 {
                     RenderSun(map, sun);
@@ -294,7 +288,14 @@ namespace Planetarium.Renderers
         }
 
         private void RenderPlanet(IMapContext map, Planet planet)
-        {
+        {            
+            if (planet.Number == Planet.JUPITER)
+            {
+                // render moons behind Jupiter
+                var moons = planetsProvider.JupiterMoons.Where(m => m.Planetocentric.Z >= 0).OrderByDescending(m => m.Planetocentric.Z);
+                RenderJupiterMoons(map, planet, moons);
+            }
+
             Graphics g = map.Graphics;
             double ad = Angle.Separation(planet.Horizontal, map.Center);
             bool isGround = settings.Get<bool>("Ground");
@@ -403,11 +404,24 @@ namespace Planetarium.Renderers
                     
                     map.DrawObjectCaption(fontLabel, brushLabel, planet.Name, p, diam);
                     map.AddDrawnObject(planet, p);
+
+                    if (planet.Number == Planet.JUPITER)
+                    {
+                        // render shadows on Jupiter
+                        RenderJupiterMoonShadow(map, planet, planet);
+                    }
                 }
+            }
+
+            // render moons over Jupiter
+            if (planet.Number == Planet.JUPITER)
+            {
+                var moons = planetsProvider.JupiterMoons.Where(m => m.Planetocentric.Z < 0).OrderByDescending(m => m.Planetocentric.Z);
+                RenderJupiterMoons(map, planet, moons);
             }
         }
 
-        private void RenderJupiterMoons(IMapContext map, Planet jupiter, ICollection<JupiterMoon> moons)
+        private void RenderJupiterMoons(IMapContext map, Planet jupiter, IEnumerable<JupiterMoon> moons)
         {
             bool isGround = settings.Get<bool>("Ground");
             bool useTextures = settings.Get<bool>("UseTextures");
@@ -420,77 +434,92 @@ namespace Planetarium.Renderers
                 if ((!isGround || moon.Horizontal.Altitude + moon.Semidiameter / 3600 > 0) &&
                     ad < coeff * map.ViewAngle + moon.Semidiameter / 3600)
                 {
-                    {
+                    {                        
+                        float diam = map.GetDiskSize(moon.Semidiameter);
+
                         PointF p = map.Project(moon.Horizontal);
+                        PointF pJupiter = map.Project(jupiter.Horizontal);
 
-
-                        float rotation = map.GetRotationTowardsNorth(jupiter.Equatorial) + 360 - (float)jupiter.Appearance.P;
-
-                        map.Graphics.TranslateTransform(p.X, p.Y);
-                        map.Graphics.RotateTransform(rotation);
-
-                        float size = map.GetDiskSize(moon.Semidiameter, 2);
-
-                        //if (useTextures && size > 10)
-                        //{
-                        //    Image imageSun = imagesCache.RequestImage("Sun", true, SunImageProvider, map.Redraw);
-                        //    if (imageSun != null)
-                        //    {
-                        //        map.Graphics.FillEllipse(penSun.Brush, -size / 2, -size / 2, size, size);
-                        //        map.Graphics.DrawImage(imageSun, -size / 2, -size / 2, size, size);
-                        //    }
-                        //    else
-                        //    {
-                        //        map.Graphics.FillEllipse(penSun.Brush, -size / 2, -size / 2, size, size);
-                        //    }
-                        //}
-                        //else
+                        // satellite should be rendered as disk
+                        if ((int)diam > 0)
                         {
-                            map.Graphics.FillEllipse(penSun.Brush, -size / 2, -size / 2, size, size);
+                            float rotation = map.GetRotationTowardsNorth(jupiter.Equatorial) + 360 - (float)jupiter.Appearance.P;
 
+                            map.Graphics.TranslateTransform(p.X, p.Y);
+                            map.Graphics.RotateTransform(rotation);
 
+                            map.Graphics.FillEllipse(Brushes.Wheat, -diam / 2, -diam / 2, diam, diam);
 
+                            if (diam > 2)
+                            {
+                                map.Graphics.DrawEllipse(Pens.Black, -diam / 2, -diam / 2, diam, diam);
+                            }
+
+                            map.Graphics.ResetTransform();
+
+                            map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, diam);
+                            map.AddDrawnObject(moon, p);
+
+                            // render shadows on the moon
+                            RenderJupiterMoonShadow(map, jupiter, moon, moon.Planetocentric.Z);
                         }
+                        // satellite is distant enough from the Jupiter
+                        else if (Geometry.DistanceBetweenPoints(p, pJupiter) >= 5)
+                        {
+                            map.Graphics.TranslateTransform(p.X, p.Y);
+                            map.Graphics.FillEllipse(Brushes.Wheat, -1, -1, 2, 2);
 
-                        map.Graphics.ResetTransform();
+                            map.Graphics.ResetTransform();
 
-                        map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, size);
-                        map.AddDrawnObject(moon, p);
+                            map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, 2);
+                            map.AddDrawnObject(moon, p);
+                        }
                     }
+                }
+            }
+        }
 
-                    // classical method
-                    {
-                        PointF p = map.Project(jupiter.Horizontal);
+        private void RenderJupiterMoonShadow(IMapContext map, Planet jupiter, SizeableCelestialObject eclipsedBody, double z = 0)
+        {
+            bool isGround = settings.Get<bool>("Ground");
+            double coeff = map.DiagonalCoefficient();
 
-                        float rotation = map.GetRotationTowardsNorth(jupiter.Equatorial) + 360 - (float)jupiter.Appearance.P;
+            // collect moons than can produce a shadow
+            var ecliptingMoons = planetsProvider.JupiterMoons
+                
+                // moon should be closer than eclipsed body
+                .Where(m => m.Planetocentric.Z < z)
 
-                        map.Graphics.TranslateTransform(p.X, p.Y);
-                        map.Graphics.RotateTransform(rotation);
+                // angular separation should be less than distance between shadow and eclipsed body centers
+                .Where(m => Angle.Separation(eclipsedBody.Horizontal, m.ShadowHorizontal) * 3600 <= eclipsedBody.Semidiameter + m.ShadowSemidiameter);
 
-                        float size = map.GetDiskSize(jupiter.Semidiameter, 2) / 2;
+            foreach (var moon in ecliptingMoons)
+            {
+                // umbra size, in pixels
+                float szU = map.GetDiskSize(moon.ShadowSemidiameter);
 
-                        map.Graphics.FillEllipse(Brushes.Red, (float)(size * moon.Planetocentric.X) - 1, -(float)(size * moon.Planetocentric.Y) - 1, 2, 2);
+                // elipsed body size, in pixels
+                float szB = map.GetDiskSize(eclipsedBody.Semidiameter);
 
-                        map.Graphics.ResetTransform();
-                    }
+                // centers of umbra and eclipsed body
+                PointF pJupiter = map.Project(jupiter.Horizontal);
+                PointF p = map.Project(moon.ShadowHorizontal);
+                PointF pBody = map.Project(eclipsedBody.Horizontal);
 
+                // shadow has enough size to be rendered
+                if ((int)szU > 0)
+                {
+                    var gpB = new GraphicsPath();
+                    var gpP = new GraphicsPath();
+                    var gpU = new GraphicsPath();
 
-                    // equatorial plane axis
-                    {
-                        PointF p = map.Project(jupiter.Horizontal);
+                    gpU.AddEllipse(p.X - szU / 2, p.Y - szU / 2, szU, szU);
+                    gpB.AddEllipse(pBody.X - szB / 2 - 0.5f, pBody.Y - szB / 2 - 0.5f, szB + 1, szB + 1);
 
-                        float rotation = map.GetRotationTowardsNorth(jupiter.Equatorial) + 360 - (float)jupiter.Appearance.P;
+                    var regionU = new Region(gpU);
+                    regionU.Intersect(gpB);
 
-                        map.Graphics.TranslateTransform(p.X, p.Y);
-                        map.Graphics.RotateTransform(rotation);
-
-                        float size = map.GetDiskSize(jupiter.Semidiameter, 2) / 2;
-
-                        map.Graphics.DrawLine(Pens.Red, new PointF(-10 * size, 0), new PointF(10 * size, 0));
-                        map.Graphics.DrawLine(Pens.Red, new PointF(0, -3 * size), new PointF(0, 3 * size));
-
-                        map.Graphics.ResetTransform();
-                    }
+                    map.Graphics.FillRegion(Brushes.Black, regionU);                    
                 }
             }
         }

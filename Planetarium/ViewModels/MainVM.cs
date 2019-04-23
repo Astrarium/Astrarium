@@ -36,6 +36,7 @@ namespace Planetarium.ViewModels
         public Command<CelestialObject> GetObjectInfoCommand { get; private set; }
         public Command<CelestialObject> GetObjectEphemerisCommand { get; private set; }
         public Command<CelestialObject> MotionTrackCommand { get; private set; }
+        public Command<CelestialObject> LockOnObjectCommand { get; private set; }
         public Command<CelestialObject> CenterOnObjectCommand { get; private set; }
         public Command ClearObjectsHistoryCommand { get; private set; }
 
@@ -102,6 +103,7 @@ namespace Planetarium.ViewModels
             GetObjectInfoCommand = new Command<CelestialObject>(GetObjectInfo);
             GetObjectEphemerisCommand = new Command<CelestialObject>(GetObjectEphemeris);
             MotionTrackCommand = new Command<CelestialObject>(MotionTrack);
+            LockOnObjectCommand = new Command<CelestialObject>(LockOnObject);
             CenterOnObjectCommand = new Command<CelestialObject>(CenterOnObject);
             ClearObjectsHistoryCommand = new Command(ClearObjectsHistory);
 
@@ -348,7 +350,9 @@ namespace Planetarium.ViewModels
             ContextMenuItems.Add(new MenuItemVM()
             {
                 Header = "Lock / Unlock",
-                IsEnabled = map.SelectedObject != null
+                IsEnabled = map.SelectedObject != null,
+                Command = LockOnObjectCommand,
+                CommandParameter = map.SelectedObject
             });
             
             NotifyPropertyChanged(nameof(ContextMenuItems));
@@ -413,6 +417,19 @@ namespace Planetarium.ViewModels
             {
                 map.GoToObject(body, TimeSpan.FromSeconds(1));
             }
+        }
+
+        private void LockOnObject(CelestialObject body)
+        {
+            if (map.LockedObject != body)
+            {
+                map.LockedObject = body;
+            }
+            else
+            {
+                map.LockedObject = null;
+            }
+            map.Invalidate();
         }
 
         private void ClearObjectsHistory()

@@ -46,6 +46,11 @@ namespace Planetarium
         CelestialObject SelectedObject { get; set; }
 
         /// <summary>
+        /// Locked Object. If it set, map moving is denied and it always centered on this body. 
+        /// </summary>
+        CelestialObject LockedObject { get; set; }
+
+        /// <summary>
         /// Occurs when selected celestial object is changed
         /// </summary>
         event Action<CelestialObject> SelectedObjectChanged;
