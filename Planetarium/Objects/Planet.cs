@@ -48,6 +48,8 @@ namespace Planetarium.Objects
         /// </summary>
         public float Magnitude { get; set; }
 
+        public double Distance { get; set; }
+
         /// <summary>
         /// Planet appearance parameters
         /// </summary>

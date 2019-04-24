@@ -408,7 +408,7 @@ namespace Planetarium.Renderers
                     if (planet.Number == Planet.JUPITER)
                     {
                         // render shadows on Jupiter
-                        RenderJupiterMoonShadow(map, planet, planet);
+                        RenderJupiterMoonShadow(map, planet);
                     }
                 }
             }
@@ -476,7 +476,7 @@ namespace Planetarium.Renderers
                             map.AddDrawnObject(moon, p);
 
                             // render shadows on the moon
-                            RenderJupiterMoonShadow(map, jupiter, moon, moon.Planetocentric.Z);
+                            RenderJupiterMoonShadow(map, moon, moon.Shadow);
                         }
                         // satellite is distant enough from the Jupiter
                         else if (Geometry.DistanceBetweenPoints(p, pJupiter) >= 5)
@@ -494,48 +494,85 @@ namespace Planetarium.Renderers
             }
         }
 
-        private void RenderJupiterMoonShadow(IMapContext map, Planet jupiter, SizeableCelestialObject eclipsedBody, double z = 0)
+        private void RenderJupiterMoonShadow(IMapContext map, SizeableCelestialObject eclipsedBody, CrdsRectangular rect = null)
         {
             bool isGround = settings.Get<bool>("Ground");
             double coeff = map.DiagonalCoefficient();
 
+            if (rect == null)
+            {
+                rect = new CrdsRectangular();
+            }
+
+            Planet jupiter = planetsProvider.Planets.ElementAt(Planet.JUPITER - 1);
+
             // collect moons than can produce a shadow
             var ecliptingMoons = planetsProvider.JupiterMoons
-                
-                // moon should be closer than eclipsed body
-                .Where(m => m.Planetocentric.Z < z)
 
-                // angular separation should be less than distance between shadow and eclipsed body centers
-                .Where(m => Angle.Separation(eclipsedBody.Horizontal, m.ShadowHorizontal) * 3600 <= eclipsedBody.Semidiameter + m.ShadowSemidiameter);
+                // moon should be closer than eclipsed body
+                .Where(m => m.Shadow.Z < rect.Z);
+
+            // angular separation should be less than distance between shadow and eclipsed body centers
+            //.Where(m => Angle.Separation(eclipsedBody.Horizontal, m.ShadowHorizontal) * 3600 <= eclipsedBody.Semidiameter + m.ShadowSemidiameter);
+
+            float rotation = map.GetRotationTowardsNorth(jupiter.Equatorial) + 360 - (float)jupiter.Appearance.P;
 
             foreach (var moon in ecliptingMoons)
             {
+                // distance to eclipsed body, in km (TODO)
+                double distance = jupiter.Ecliptical.Distance * 149597870;
+
+                // umbra radius, in arcseconds
+                double[] umbraSemidiameter = GalileanMoons.UmbraSemidiameter(distance, jupiter.Distance, moon.Number - 1, moon.Shadow, rect);
+
                 // umbra size, in pixels
-                float szU = map.GetDiskSize(moon.ShadowSemidiameter);
+                float szU = map.GetDiskSize(umbraSemidiameter[0]);
+                float szP = map.GetDiskSize(umbraSemidiameter[1]);
 
                 // elipsed body size, in pixels
                 float szB = map.GetDiskSize(eclipsedBody.Semidiameter);
+                
+                // coordinates of shadow relative to eclipsed body
+                CrdsRectangular shadowRelative = moon.Shadow - rect;
 
-                // centers of umbra and eclipsed body
-                PointF pJupiter = map.Project(jupiter.Horizontal);
-                PointF p = map.Project(moon.ShadowHorizontal);
+                // Jupiter radius, in pixels
+                float sd = map.GetDiskSize(jupiter.Semidiameter) / 2;
+
+                // Center of eclipsed body
                 PointF pBody = map.Project(eclipsedBody.Horizontal);
 
+                // Center of shadow
+                PointF p = new PointF((float)shadowRelative.X * sd, -(float)shadowRelative.Y * sd);
+
+                map.Graphics.TranslateTransform(pBody.X, pBody.Y);
+                map.Graphics.RotateTransform(rotation);
+
                 // shadow has enough size to be rendered
-                if ((int)szU > 0)
+                if ((int)szP > 0)
                 {
                     var gpB = new GraphicsPath();
                     var gpP = new GraphicsPath();
                     var gpU = new GraphicsPath();
 
                     gpU.AddEllipse(p.X - szU / 2, p.Y - szU / 2, szU, szU);
-                    gpB.AddEllipse(pBody.X - szB / 2 - 0.5f, pBody.Y - szB / 2 - 0.5f, szB + 1, szB + 1);
+                    gpP.AddEllipse(p.X - szP / 2, p.Y - szP / 2, szP, szP);
+
+                    gpB.AddEllipse(- szB / 2 - 0.5f, - szB / 2 - 0.5f, szB + 1, szB + 1);
 
                     var regionU = new Region(gpU);
                     regionU.Intersect(gpB);
 
-                    map.Graphics.FillRegion(Brushes.Black, regionU);                    
+                    var regionP = new Region(gpP);
+                    regionP.Intersect(gpB);
+
+                    map.Graphics.FillRegion(Brushes.Gray, regionP);
+                    map.Graphics.FillRegion(Brushes.Black, regionU);
+
+                    //map.Graphics.FillPath(Brushes.Red, gpU);
+                    map.DrawObjectCaption(fontLabel, brushLabel, moon.Name + " shadow", p, 2);
                 }
+
+                map.Graphics.ResetTransform();
             }
         }
 

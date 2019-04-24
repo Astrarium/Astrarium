@@ -24,15 +24,6 @@ namespace Planetarium.Objects
         /// </summary>
         public CrdsRectangular Shadow { get; set; }
 
-        public CrdsEquatorial ShadowEquatorial { get; set; }
-
-        public CrdsHorizontal ShadowHorizontal { get; set; }
-
-        /// <summary>
-        /// Visible shadow semidiameter, in seconds of arc
-        /// </summary>
-        public double ShadowSemidiameter { get; set; }
-
         /// <summary>
         /// Name of the Galilean moon
         /// </summary>

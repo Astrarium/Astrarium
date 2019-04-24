@@ -18,5 +18,25 @@ namespace ADK
             Y = y;
             Z = z;
         }
+
+        public static CrdsRectangular operator +(CrdsRectangular lhs, CrdsRectangular rhs)
+        {
+            return new CrdsRectangular()
+            {
+                X = lhs.X + rhs.X,
+                Y = lhs.Y + rhs.Y,
+                Z = lhs.Z + rhs.Z,
+            };
+        }
+
+        public static CrdsRectangular operator -(CrdsRectangular lhs, CrdsRectangular rhs)
+        {
+            return new CrdsRectangular()
+            {
+                X = lhs.X - rhs.X,
+                Y = lhs.Y - rhs.Y,
+                Z = lhs.Z - rhs.Z,
+            };
+        }
     }
 }
