@@ -22,6 +22,8 @@ namespace Planetarium
             InitializeComponent();
             DoubleBuffered = true;
             Cursor = Cursors.Cross;
+            ForeColor = Color.White;
+            BackColor = Color.Black;
         }
 
         [Description("Gets or sets ISkyMap object to be rendered in the control.")]
@@ -45,12 +47,25 @@ namespace Planetarium
         {
             if (DesignMode || SkyMap == null)
             {
-                pe.Graphics.DrawString("SkyView", SystemFonts.DefaultFont, Brushes.White, 10, 10);
+                pe.Graphics.DrawString("SkyView", Font, new SolidBrush(ForeColor), 10, 10);
                 System.Diagnostics.Trace.WriteLine("OnPaint");
             }
             else
             {
                 SkyMap.Render(pe.Graphics);
+
+                if (SkyMap.LockedObject != null && Cursor == Cursors.No)
+                {
+                    var format = new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+                    string text = "Map locked";
+                    PointF center = new PointF(Width / 2, Height / 2);
+                    var size = pe.Graphics.MeasureString(text, Font, center, format);
+                    int margin = 4;
+                    var box = new Rectangle((int)(center.X - size.Width / 2 - margin), (int)(center.Y - size.Height / 2 - margin), (int)size.Width + 2 * margin, (int)size.Height + 2 * margin);
+                    pe.Graphics.FillRectangle(new SolidBrush(BackColor), box);
+                    pe.Graphics.DrawRectangle(new Pen(Color.FromArgb(100, ForeColor)), box); 
+                    pe.Graphics.DrawString(text, Font, new SolidBrush(ForeColor), center, format);
+                }
             }
         }
 
@@ -142,8 +157,6 @@ namespace Planetarium
 
                         pOld.X = pNew.X;
                         pOld.Y = pNew.Y;
-
-                        Invalidate();
                     }
                     else
                     {
@@ -152,6 +165,8 @@ namespace Planetarium
                             Cursor = Cursors.No;
                         }
                     }
+
+                    Invalidate();
                 }
             }
         }
