@@ -56,22 +56,22 @@ namespace ADK
         //    return d / JR * PlanetEphem.Semidiameter(5, r);           
         //}
 
-        public static double[] UmbraSemidiameter(double distance, double delta, int moonIndex, CrdsRectangular moon, CrdsRectangular eclipsedBody)
+        public static double[] Shadows(double distanceFromEarth, double distanceFromSun, int moonIndex, CrdsRectangular moon, CrdsRectangular eclipsedBody)
         {
             // distance between bodies, in km
-            double d = Sqrt(Pow(moon.X - eclipsedBody.X, 2) /*+ Pow(moon.Y - eclipsedBody.Y, 2)*/ + Pow(moon.Z - eclipsedBody.Z, 2)) * JR;
+            double d = Sqrt(Pow(moon.X - eclipsedBody.X, 2) + Pow(moon.Y - eclipsedBody.Y, 2) + Pow(moon.Z - eclipsedBody.Z, 2)) * JR;
 
             // distance between Sun and moon
             double D = 
                 // distance from Sun to Jupiter, in km
-                delta * AU 
+                distanceFromSun * AU 
                 // distance from Jupiter to moon, projected on the light direction
                 + moon.Z * JR;
 
             // umbra radius in km
             double[] u = ShadowSizes(MR[moonIndex], D, d);
 
-            return u.Select(v => ToDegrees(Atan2(v, distance)) * 3600).ToArray();            
+            return u.Select(v => ToDegrees(Atan2(v, distanceFromEarth * AU)) * 3600).ToArray();            
         }
 
         private static double[] ShadowSizes(double r, double D, double d)
@@ -90,6 +90,8 @@ namespace ADK
 
             double T = D / (1 + r / R);
             double t = D - T;
+
+            //double p = (R / T * (t + d) + u) / 2;
 
             double p = R / T * (t + d);
 

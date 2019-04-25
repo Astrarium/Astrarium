@@ -82,6 +82,7 @@ namespace Planetarium
         {
             base.OnMouseUp(e);
             SkyMap.Antialias = true;
+            Cursor = Cursors.Cross;
             Invalidate();
             pOld = Point.Empty;
         }
@@ -96,51 +97,61 @@ namespace Planetarium
             {
                 bool shift = (ModifierKeys & Keys.Shift) != Keys.None;
 
-                if (e.Button == MouseButtons.Left && !shift && SkyMap.LockedObject == null)
+                if (e.Button == MouseButtons.Left && !shift)
                 {
-                    if (pOld == Point.Empty)
+                    if (SkyMap.LockedObject == null)
                     {
-                        pOld = new Point(e.X, e.Y);
-                    }
+                        if (pOld == Point.Empty)
+                        {
+                            pOld = new Point(e.X, e.Y);
+                        }
 
-                    pNew.X = e.X;
-                    pNew.Y = e.Y;
-                    double dx = pNew.X - pOld.X;
-                    double dy = pNew.Y - pOld.Y;
+                        pNew.X = e.X;
+                        pNew.Y = e.Y;
+                        double dx = pNew.X - pOld.X;
+                        double dy = pNew.Y - pOld.Y;
 
-                    SkyMap.Antialias = Math.Sqrt(dx * dx + dy * dy) < 30;
+                        SkyMap.Antialias = Math.Sqrt(dx * dx + dy * dy) < 30;
 
-                    double maxSize = Math.Max(SkyMap.Width, SkyMap.Height);
-                    double f = maxSize / (SkyMap.ViewAngle * 2);
+                        double maxSize = Math.Max(SkyMap.Width, SkyMap.Height);
+                        double f = maxSize / (SkyMap.ViewAngle * 2);
 
-                    if (Math.Abs(SkyMap.Center.Altitude) < 30 || SkyMap.ViewAngle > 80)
-                    {
-                        SkyMap.Center.Azimuth = (SkyMap.Center.Azimuth - dx / f + 360) % 360;
+                        if (Math.Abs(SkyMap.Center.Altitude) < 30 || SkyMap.ViewAngle > 80)
+                        {
+                            SkyMap.Center.Azimuth = (SkyMap.Center.Azimuth - dx / f + 360) % 360;
+                        }
+                        else
+                        {
+                            CrdsHorizontal cpNew = SkyMap.Projection.Invert(pNew);
+                            CrdsHorizontal cpOld = SkyMap.Projection.Invert(pOld);
+                            double da = Math.Abs(cpNew.Azimuth - cpOld.Azimuth);
+                            da = Math.Abs(da) * Math.Sign(dx);
+                            SkyMap.Center.Azimuth -= da;
+                            SkyMap.Center.Azimuth %= 360;
+                        }
+
+                        SkyMap.Center.Altitude += dy / f;
+
+                        if (SkyMap.Center.Altitude > 90) SkyMap.Center.Altitude = 90;
+                        if (SkyMap.Center.Altitude < -90) SkyMap.Center.Altitude = -90;
+
+                        if (double.IsNaN(SkyMap.Center.Azimuth))
+                        {
+                            SkyMap.Center.Azimuth = 0;
+                        }
+
+                        pOld.X = pNew.X;
+                        pOld.Y = pNew.Y;
+
+                        Invalidate();
                     }
                     else
                     {
-                        CrdsHorizontal cpNew = SkyMap.Projection.Invert(pNew);
-                        CrdsHorizontal cpOld = SkyMap.Projection.Invert(pOld);
-                        double da = Math.Abs(cpNew.Azimuth - cpOld.Azimuth);
-                        da = Math.Abs(da) * Math.Sign(dx);
-                        SkyMap.Center.Azimuth -= da;
-                        SkyMap.Center.Azimuth %= 360;
+                        if (Cursor != Cursors.No)
+                        {
+                            Cursor = Cursors.No;
+                        }
                     }
-
-                    SkyMap.Center.Altitude += dy / f;
-
-                    if (SkyMap.Center.Altitude > 90) SkyMap.Center.Altitude = 90;
-                    if (SkyMap.Center.Altitude < -90) SkyMap.Center.Altitude = -90;
-
-                    if (double.IsNaN(SkyMap.Center.Azimuth))
-                    {
-                        SkyMap.Center.Azimuth = 0;
-                    }
-
-                    pOld.X = pNew.X;
-                    pOld.Y = pNew.Y;
-
-                    Invalidate();
                 }
             }
         }

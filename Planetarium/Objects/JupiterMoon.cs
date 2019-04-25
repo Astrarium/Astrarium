@@ -20,7 +20,7 @@ namespace Planetarium.Objects
         public CrdsRectangular Planetocentric { get; set; }
 
         /// <summary>
-        /// Planetocentric rectangular coordinates of the Galilean moon shadow
+        /// Planetocentric rectangular coordinates of the Galilean moon, as seen from Sun
         /// </summary>
         public CrdsRectangular Shadow { get; set; }
 

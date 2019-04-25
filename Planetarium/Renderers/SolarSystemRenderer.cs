@@ -33,6 +33,8 @@ namespace Planetarium.Renderers
         private Color clrPenumbraGrayDark = Color.FromArgb(200, clrShadow);
         private Color clrUmbraGray = Color.FromArgb(230, clrShadow);
         private Color clrUmbraRed = Color.FromArgb(200, 50, 0, 0);
+        private Color clrJupiterMoonShadowLight = Color.FromArgb(128, 0, 0, 0);
+        private Color clrJupiterMoonShadowDark = Color.FromArgb(64, 0, 0, 0);
         private static Color clrShadowOutline = Color.FromArgb(100, 50, 0);
         private Pen penShadowOutline = new Pen(clrShadowOutline);
         private Brush brushShadowLabel = new SolidBrush(clrShadowOutline);
@@ -504,36 +506,14 @@ namespace Planetarium.Renderers
                 rect = new CrdsRectangular();
             }
 
-            Planet jupiter = planetsProvider.Planets.ElementAt(Planet.JUPITER - 1);
-
             // collect moons than can produce a shadow
-            var ecliptingMoons = planetsProvider.JupiterMoons
+            var ecliptingMoons = planetsProvider.JupiterMoons.Where(m => m.Shadow.Z < rect.Z);
 
-                // moon should be closer than eclipsed body
-                .Where(m => m.Shadow.Z < rect.Z);
-
-            // angular separation should be less than distance between shadow and eclipsed body centers
-            //.Where(m => Angle.Separation(eclipsedBody.Horizontal, m.ShadowHorizontal) * 3600 <= eclipsedBody.Semidiameter + m.ShadowSemidiameter);
-
-            float rotation = map.GetRotationTowardsNorth(jupiter.Equatorial) + 360 - (float)jupiter.Appearance.P;
-
-            foreach (var moon in ecliptingMoons)
+            if (ecliptingMoons.Any())
             {
-                // distance to eclipsed body, in km (TODO)
-                double distance = jupiter.Ecliptical.Distance * 149597870;
+                Planet jupiter = planetsProvider.Planets.ElementAt(Planet.JUPITER - 1);
 
-                // umbra radius, in arcseconds
-                double[] umbraSemidiameter = GalileanMoons.UmbraSemidiameter(distance, jupiter.Distance, moon.Number - 1, moon.Shadow, rect);
-
-                // umbra size, in pixels
-                float szU = map.GetDiskSize(umbraSemidiameter[0]);
-                float szP = map.GetDiskSize(umbraSemidiameter[1]);
-
-                // elipsed body size, in pixels
-                float szB = map.GetDiskSize(eclipsedBody.Semidiameter);
-                
-                // coordinates of shadow relative to eclipsed body
-                CrdsRectangular shadowRelative = moon.Shadow - rect;
+                float rotation = map.GetRotationTowardsNorth(jupiter.Equatorial) + 360 - (float)jupiter.Appearance.P;
 
                 // Jupiter radius, in pixels
                 float sd = map.GetDiskSize(jupiter.Semidiameter) / 2;
@@ -541,38 +521,86 @@ namespace Planetarium.Renderers
                 // Center of eclipsed body
                 PointF pBody = map.Project(eclipsedBody.Horizontal);
 
-                // Center of shadow
-                PointF p = new PointF((float)shadowRelative.X * sd, -(float)shadowRelative.Y * sd);
+                // elipsed body size, in pixels
+                float szB = map.GetDiskSize(eclipsedBody.Semidiameter);
 
-                map.Graphics.TranslateTransform(pBody.X, pBody.Y);
-                map.Graphics.RotateTransform(rotation);
-
-                // shadow has enough size to be rendered
-                if ((int)szP > 0)
+                foreach (var moon in ecliptingMoons)
                 {
-                    var gpB = new GraphicsPath();
-                    var gpP = new GraphicsPath();
-                    var gpU = new GraphicsPath();
+                    // umbra and penumbra radii, in acrseconds
+                    double[] shadows = GalileanMoons.Shadows(jupiter.Ecliptical.Distance, jupiter.Distance, moon.Number - 1, moon.Shadow, rect);
 
-                    gpU.AddEllipse(p.X - szU / 2, p.Y - szU / 2, szU, szU);
-                    gpP.AddEllipse(p.X - szP / 2, p.Y - szP / 2, szP, szP);
+                    // umbra and penumbra size, in pixels
+                    float szU = map.GetDiskSize(shadows[0]);
+                    float szP = map.GetDiskSize(shadows[1]);
 
-                    gpB.AddEllipse(- szB / 2 - 0.5f, - szB / 2 - 0.5f, szB + 1, szB + 1);
+                    // coordinates of shadow relative to eclipsed body
+                    CrdsRectangular shadowRelative = moon.Shadow - rect;
 
-                    var regionU = new Region(gpU);
-                    regionU.Intersect(gpB);
+                    // Center of shadow
+                    PointF p = new PointF((float)shadowRelative.X * sd, -(float)shadowRelative.Y * sd);
 
-                    var regionP = new Region(gpP);
-                    regionP.Intersect(gpB);
+                    map.Graphics.TranslateTransform(pBody.X, pBody.Y);
+                    map.Graphics.RotateTransform(rotation);
 
-                    map.Graphics.FillRegion(Brushes.Gray, regionP);
-                    map.Graphics.FillRegion(Brushes.Black, regionU);
+                    // shadow has enough size to be rendered
+                    if ((int)szP > 0)
+                    {
+                        var gpB = new GraphicsPath();
+                        var gpP = new GraphicsPath();
+                        var gpU = new GraphicsPath();
 
-                    //map.Graphics.FillPath(Brushes.Red, gpU);
-                    map.DrawObjectCaption(fontLabel, brushLabel, moon.Name + " shadow", p, 2);
+                        gpU.AddEllipse(p.X - szU / 2, p.Y - szU / 2, szU, szU);
+                        gpP.AddEllipse(p.X - szP / 2, p.Y - szP / 2, szP, szP);
+                        gpB.AddEllipse(-szB / 2 - 0.5f, -szB / 2 - 0.5f, szB + 1, szB + 1);
+
+                        var regionP = new Region(gpP);
+                        regionP.Intersect(gpB);
+
+                        if (!regionP.IsEmpty(map.Graphics))
+                        {
+                            float f1 = 1 - (szU + szP) / 2 / szP;
+                            float f2 = 1 - szU / szP;
+
+                            var brushP = new PathGradientBrush(gpP);
+                            brushP.CenterPoint = p;
+                            brushP.CenterColor = clrJupiterMoonShadowLight;
+
+                            brushP.InterpolationColors = new ColorBlend()
+                            {
+                                Colors = new[]
+                                {
+                                    Color.Transparent,
+                                    clrJupiterMoonShadowDark,
+                                    clrJupiterMoonShadowLight,
+                                    clrJupiterMoonShadowLight
+                                },
+                                Positions = new float[] { 0, f1, f2, 1 }
+                            };
+
+                            var regionU = new Region(gpU);
+                            regionU.Intersect(gpB);
+
+                            var brushU = new SolidBrush(clrJupiterMoonShadowLight);
+
+                            map.Graphics.FillRegion(brushP, regionP);
+                            map.Graphics.FillRegion(brushU, regionU);
+
+                            // outline circles
+                            if (settings.Get<bool>("JupiterMoonsShadowOutline") && szP > 20)
+                            {
+                                map.Graphics.DrawEllipse(penShadowOutline, p.X - (szP + szU) / 4, p.Y - (szP + szU) / 4, (szP + szU) / 2, (szP + szU) / 2);
+                                map.Graphics.DrawEllipse(penShadowOutline, p.X - szU / 2, p.Y - szU / 2, szU, szU);
+
+                                PointF[] points = new PointF[] { new PointF(p.X, p.Y) };
+                                map.Graphics.TransformPoints(CoordinateSpace.Page, CoordinateSpace.World, points);
+                                map.Graphics.ResetTransform();
+                                map.DrawObjectCaption(fontShadowLabel, brushShadowLabel, $"Shadow of {moon.Name}", points[0], szP);
+                            }
+                        }
+                    }
+
+                    map.Graphics.ResetTransform();
                 }
-
-                map.Graphics.ResetTransform();
             }
         }
 
