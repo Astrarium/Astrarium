@@ -43,7 +43,7 @@ namespace Planetarium
 
         public bool? ShowDialog<TViewModel>() where TViewModel : ViewModelBase
         {
-            return Show<TViewModel>(viewModel: null, isDialog: false);
+            return Show<TViewModel>(viewModel: null, isDialog: true);
         }
 
         private bool? Show<TViewModel>(TViewModel viewModel, bool isDialog = false) where TViewModel : ViewModelBase

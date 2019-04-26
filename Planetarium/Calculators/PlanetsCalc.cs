@@ -320,8 +320,8 @@ namespace Planetarium.Calculators
                     foreach (var j in JupiterMoons)
                     {
                         int m = j.Number;
-                        j.Planetocentric = context.Get(JupiterMoonPlanetocentric, m);
-                        j.Shadow = context.Get(JupiterMoonShadowPlanetocentric, m);
+                        j.Rectangular = context.Get(JupiterMoonRectangular, m);
+                        j.RectangularS = context.Get(JupiterMoonRectangularS, m);
                         j.Equatorial = context.Get(JupiterMoonEquatorial, m);
                         j.Horizontal = context.Get(JupiterMoonHorizontal, m);
                         j.Semidiameter = context.Get(JupiterMoonSemidiameter, m);
@@ -340,17 +340,17 @@ namespace Planetarium.Calculators
             return PlanetEphem.SaturnRings(c.JulianDay, c.Get(Heliocentrical, p), c.Get(EarthHeliocentrial), c.Epsilon);
         }
 
-        private CrdsRectangular JupiterMoonPlanetocentric(SkyContext c, int m)
+        private CrdsRectangular JupiterMoonRectangular(SkyContext c, int m)
         {
-            return c.Get(JupiterMoonsPlanetocentric)[m - 1, 0];
+            return c.Get(JupiterMoonsPositions)[m - 1, 0];
         }
 
-        private CrdsRectangular JupiterMoonShadowPlanetocentric(SkyContext c, int m)
+        private CrdsRectangular JupiterMoonRectangularS(SkyContext c, int m)
         {
-            return c.Get(JupiterMoonsPlanetocentric)[m - 1, 1];
+            return c.Get(JupiterMoonsPositions)[m - 1, 1];
         }
 
-        private CrdsRectangular[,] JupiterMoonsPlanetocentric(SkyContext c)
+        private CrdsRectangular[,] JupiterMoonsPositions(SkyContext c)
         {
             CrdsHeliocentrical earth = c.Get(EarthHeliocentrial);
             CrdsHeliocentrical jupiter = c.Get(Heliocentrical, Planet.JUPITER);
@@ -360,12 +360,11 @@ namespace Planetarium.Calculators
         private CrdsEquatorial JupiterMoonEquatorial(SkyContext c, int m)
         {
             CrdsEquatorial jupiterEq = c.Get(Equatorial, Planet.JUPITER);
-            CrdsRectangular planetocentric = c.Get(JupiterMoonPlanetocentric, m);
+            CrdsRectangular planetocentric = c.Get(JupiterMoonRectangular, m);
             PlanetAppearance appearance = c.Get(Appearance, Planet.JUPITER);
             double semidiameter = c.Get(Semidiameter, Planet.JUPITER);
             return planetocentric.ToEquatorial(jupiterEq, appearance.P, semidiameter);            
         }
-
 
         private CrdsHorizontal JupiterMoonHorizontal(SkyContext c, int m)
         {
@@ -378,7 +377,7 @@ namespace Planetarium.Calculators
             double r = c.Get(DistanceFromEarth, Planet.JUPITER);
 
             // planetocentric z-coordinate of moon
-            double z = c.Get(JupiterMoonPlanetocentric, m).Z;
+            double z = c.Get(JupiterMoonRectangular, m).Z;
 
             // visible moon semidiameter
             return GalileanMoons.MoonSemidiameter(r, z, m - 1);
@@ -407,8 +406,8 @@ namespace Planetarium.Calculators
 
         public void ConfigureEphemeris(EphemerisConfig<JupiterMoon> e)
         {
-            e.Add("Rectangular.X", (c, j) => c.Get(JupiterMoonPlanetocentric, j.Number).X);
-            e.Add("Rectangular.Y", (c, j) => c.Get(JupiterMoonPlanetocentric, j.Number).Y);
+            e.Add("Rectangular.X", (c, j) => c.Get(JupiterMoonRectangular, j.Number).X);
+            e.Add("Rectangular.Y", (c, j) => c.Get(JupiterMoonRectangular, j.Number).Y);
         }
 
         public CelestialObjectInfo GetInfo(SkyContext c, Planet planet)
@@ -489,8 +488,8 @@ namespace Planetarium.Calculators
             .AddRow("Horizontal.Altitude", c.Get(JupiterMoonHorizontal, m).Altitude)
 
             .AddHeader("Rectangular planetocentric coordinates")
-            .AddRow("Rectangular.X", c.Get(JupiterMoonPlanetocentric, m).X)
-            .AddRow("Rectangular.Y", c.Get(JupiterMoonPlanetocentric, m).Y)
+            .AddRow("Rectangular.X", c.Get(JupiterMoonRectangular, m).X)
+            .AddRow("Rectangular.Y", c.Get(JupiterMoonRectangular, m).Y)
 
             .AddHeader("Visibility")
             .AddRow("RTS.Rise", rts.Rise, c.JulianDayMidnight + rts.Rise)

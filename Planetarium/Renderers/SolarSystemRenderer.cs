@@ -33,6 +33,7 @@ namespace Planetarium.Renderers
         private Color clrPenumbraGrayDark = Color.FromArgb(200, clrShadow);
         private Color clrUmbraGray = Color.FromArgb(230, clrShadow);
         private Color clrUmbraRed = Color.FromArgb(200, 50, 0, 0);
+        private Color clrJupiterShadow = Color.FromArgb(200, 0, 0, 0);
         private Color clrJupiterMoonShadowLight = Color.FromArgb(128, 0, 0, 0);
         private Color clrJupiterMoonShadowDark = Color.FromArgb(64, 0, 0, 0);
         private static Color clrShadowOutline = Color.FromArgb(100, 50, 0);
@@ -294,7 +295,7 @@ namespace Planetarium.Renderers
             if (planet.Number == Planet.JUPITER)
             {
                 // render moons behind Jupiter
-                var moons = planetsProvider.JupiterMoons.Where(m => m.Planetocentric.Z >= 0).OrderByDescending(m => m.Planetocentric.Z);
+                var moons = planetsProvider.JupiterMoons.Where(m => m.Rectangular.Z >= 0).OrderByDescending(m => m.Rectangular.Z);
                 RenderJupiterMoons(map, planet, moons);
             }
 
@@ -418,7 +419,7 @@ namespace Planetarium.Renderers
             // render moons over Jupiter
             if (planet.Number == Planet.JUPITER)
             {
-                var moons = planetsProvider.JupiterMoons.Where(m => m.Planetocentric.Z < 0).OrderByDescending(m => m.Planetocentric.Z);
+                var moons = planetsProvider.JupiterMoons.Where(m => m.Rectangular.Z < 0).OrderByDescending(m => m.Rectangular.Z);
                 RenderJupiterMoons(map, planet, moons);
             }
         }
@@ -474,20 +475,26 @@ namespace Planetarium.Renderers
 
                             map.Graphics.ResetTransform();
 
+                            // render another moon shadows on the moon
+                            RenderJupiterMoonShadow(map, moon, moon.RectangularS);
+
+                            // render Jupiter shadow on the moon
+                            if (moon.IsEclipsedByJupiter) RenderJupiterShadow(map, moon);
+
                             map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, diam);
                             map.AddDrawnObject(moon, p);
-
-                            // render shadows on the moon
-                            RenderJupiterMoonShadow(map, moon, moon.Shadow);
                         }
                         // satellite is distant enough from the Jupiter
+                        // but too small to be drawn as disk
                         else if (Geometry.DistanceBetweenPoints(p, pJupiter) >= 5)
                         {
-                            map.Graphics.TranslateTransform(p.X, p.Y);
-                            map.Graphics.FillEllipse(Brushes.Wheat, -1, -1, 2, 2);
-
-                            map.Graphics.ResetTransform();
-
+                            // do not draw moon point if eclipsed
+                            if (!moon.IsEclipsedByJupiter)
+                            {
+                                map.Graphics.TranslateTransform(p.X, p.Y);
+                                map.Graphics.FillEllipse(Brushes.Wheat, -1, -1, 2, 2);
+                                map.Graphics.ResetTransform();
+                            }
                             map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, 2);
                             map.AddDrawnObject(moon, p);
                         }
@@ -496,18 +503,61 @@ namespace Planetarium.Renderers
             }
         }
 
+        private void RenderJupiterShadow(IMapContext map, JupiterMoon moon)
+        {
+            Planet jupiter = planetsProvider.Planets.ElementAt(Planet.JUPITER - 1);
+
+            float rotation = map.GetRotationTowardsNorth(jupiter.Equatorial) + 360 - (float)jupiter.Appearance.P;
+
+            float diam = map.GetDiskSize(jupiter.Semidiameter);
+            float diamEquat = diam;
+            float diamPolar = (1 - jupiter.Flattening) * diam;
+
+            // Jupiter radius, in pixels
+            float sd = diam / 2;
+
+            // Center of eclipsed moon
+            PointF pMoon = map.Project(moon.Horizontal);
+
+            // elipsed moon size, in pixels
+            float szB = map.GetDiskSize(moon.Semidiameter);
+
+            // Center of shadow
+            PointF p = new PointF(-(float)moon.RectangularS.X * sd, (float)moon.RectangularS.Y * sd);
+
+            map.Graphics.TranslateTransform(pMoon.X, pMoon.Y);
+            map.Graphics.RotateTransform(rotation);
+
+            var gpM = new GraphicsPath();
+            var gpU = new GraphicsPath();
+
+            gpU.AddEllipse(p.X - diamEquat / 2 - 1, p.Y - diamPolar / 2 - 1, diamEquat + 2, diamPolar + 2);
+            gpM.AddEllipse(-szB / 2 - 0.5f, -szB / 2 - 0.5f, szB + 1, szB + 1);
+
+            var regionU = new Region(gpU);
+            regionU.Intersect(gpM);
+
+            if (!regionU.IsEmpty(map.Graphics))
+            {
+                map.Graphics.FillRegion(new SolidBrush(clrJupiterShadow), regionU);
+            }
+
+            map.Graphics.ResetTransform();
+            if (!regionU.IsEmpty(map.Graphics))
+            {
+                map.DrawObjectCaption(fontShadowLabel, brushShadowLabel, "Eclipsed by Jupiter", pMoon, szB);
+            }
+        }
+
         private void RenderJupiterMoonShadow(IMapContext map, SizeableCelestialObject eclipsedBody, CrdsRectangular rect = null)
         {
-            bool isGround = settings.Get<bool>("Ground");
-            double coeff = map.DiagonalCoefficient();
-
             if (rect == null)
             {
                 rect = new CrdsRectangular();
             }
 
             // collect moons than can produce a shadow
-            var ecliptingMoons = planetsProvider.JupiterMoons.Where(m => m.Shadow.Z < rect.Z);
+            var ecliptingMoons = planetsProvider.JupiterMoons.Where(m => m.RectangularS.Z < rect.Z);
 
             if (ecliptingMoons.Any())
             {
@@ -527,14 +577,14 @@ namespace Planetarium.Renderers
                 foreach (var moon in ecliptingMoons)
                 {
                     // umbra and penumbra radii, in acrseconds
-                    double[] shadows = GalileanMoons.Shadows(jupiter.Ecliptical.Distance, jupiter.Distance, moon.Number - 1, moon.Shadow, rect);
+                    var shadow = GalileanMoons.Shadow(jupiter.Ecliptical.Distance, jupiter.Distance, moon.Number - 1, moon.RectangularS, rect);
 
                     // umbra and penumbra size, in pixels
-                    float szU = map.GetDiskSize(shadows[0]);
-                    float szP = map.GetDiskSize(shadows[1]);
+                    float szU = map.GetDiskSize(shadow.Umbra);
+                    float szP = map.GetDiskSize(shadow.Penumbra);
 
                     // coordinates of shadow relative to eclipsed body
-                    CrdsRectangular shadowRelative = moon.Shadow - rect;
+                    CrdsRectangular shadowRelative = moon.RectangularS - rect;
 
                     // Center of shadow
                     PointF p = new PointF((float)shadowRelative.X * sd, -(float)shadowRelative.Y * sd);
@@ -634,7 +684,8 @@ namespace Planetarium.Renderers
 
             if (useTextures)
             {
-                Image texturePlanet = imagesCache.RequestImage(planet.Number.ToString(), new LonLatShift(planet.Number.ToString(), planet.Appearance.CM, planet.Appearance.D), PlanetTextureProvider, map.Redraw);
+                double grs = planet.Number == Planet.JUPITER ? PlanetEphem.GreatRedSpotLongitude(map.JulianDay) + 750.0 / 2048.0 * 360 - 180 : 0;
+                Image texturePlanet = imagesCache.RequestImage(planet.Number.ToString(), new LonLatShift(planet.Number.ToString(), planet.Appearance.CM - grs, planet.Appearance.D), PlanetTextureProvider, map.Redraw);
                 if (texturePlanet != null)
                 {
                     g.DrawImage(texturePlanet, -diamEquat / 2 * 1.01f, -diamPolar / 2 * 1.01f, diamEquat * 1.01f, diamPolar * 1.01f);
@@ -653,9 +704,12 @@ namespace Planetarium.Renderers
 
         private void DrawRotationAxis(Graphics g, float diam)
         {
-            var p1 = new PointF(0, -(diam / 2 + 10));
-            var p2 = new PointF(0, diam / 2 + 10);
-            g.DrawLine(Pens.Gray, p1, p2);
+            if (settings.Get<bool>("ShowRotationAxis"))
+            {
+                var p1 = new PointF(0, -(diam / 2 + 10));
+                var p2 = new PointF(0, diam / 2 + 10);
+                g.DrawLine(Pens.Gray, p1, p2);
+            }
         }
 
         private Image PlanetTextureProvider(LonLatShift token)

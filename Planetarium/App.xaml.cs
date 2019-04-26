@@ -80,6 +80,7 @@ namespace Planetarium
             settingsConfig.Add("UseTextures", true).WithSection("Misc");
 
             settingsConfig.Add("JupiterMoonsShadowOutline", true).WithSection("Planets");
+            settingsConfig.Add("ShowRotationAxis", false).WithSection("Planets");
 
             kernel.Bind<ISettingsConfig, SettingsConfig>().ToConstant(settingsConfig).InSingletonScope();
 

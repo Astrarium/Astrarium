@@ -17,12 +17,12 @@ namespace Planetarium.Objects
         /// <summary>
         /// Planetocentric rectangular coordinates of the Galilean moon
         /// </summary>
-        public CrdsRectangular Planetocentric { get; set; }
+        public CrdsRectangular Rectangular { get; set; }
 
         /// <summary>
         /// Planetocentric rectangular coordinates of the Galilean moon, as seen from Sun
         /// </summary>
-        public CrdsRectangular Shadow { get; set; }
+        public CrdsRectangular RectangularS { get; set; }
 
         /// <summary>
         /// Name of the Galilean moon
@@ -33,5 +33,14 @@ namespace Planetarium.Objects
         /// Number of the Galilean moon (1 to 4)
         /// </summary>
         public int Number { get; set; }
+
+        public bool IsEclipsedByJupiter
+        {
+            get
+            {
+                return
+                    RectangularS.Z > 0 && RectangularS.X * RectangularS.X + RectangularS.Y * RectangularS.Y * 1.14784224788 <= 1.1;
+            }
+        }
     }
 }

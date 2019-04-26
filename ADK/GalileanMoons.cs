@@ -21,11 +21,6 @@ namespace ADK
         private static readonly double[] MR = { 3643.0 / 2, 3122.0 / 2, 5262.0 / 2, 4821.0 / 2 };
 
         /// <summary>
-        /// Moons orbits semi-major axis, in km
-        /// </summary>
-        private static readonly double[] A = { 421700, 670900, 1070400, 1882700 };
-
-        /// <summary>
         /// Jupiter radius, in km
         /// </summary>
         private const double JR = 71492;
@@ -35,28 +30,7 @@ namespace ADK
         /// </summary>
         private const double SR = 6.955e5;
 
-        ///// <summary>
-        ///// Gets visible semidiameter of Galilean moon shadow, in seconds of arc
-        ///// </summary>
-        ///// <param name="R">Distance Sun-Jupiter centers, in a.u.</param>
-        ///// <param name="r">Distance Earth-Jupiter centers, in a.u.</param>
-        ///// <param name="i">Galilean moon index, from 0 (Io) to 3 (Callisto)</param>
-        ///// <returns></returns>
-        //public static double ShadowSemidiameter(double R, double r, int i)
-        //{
-        //    // moon mean distances from Sun to galilean moons
-        //    double x = R * AU - A[i];
-
-        //    // distance moon - Jupiter surface
-        //    double y = A[i] - JR;
-
-        //    double z = (MR[i] * x) / (SR - MR[i]) - y;
-        //    double d = (MR[i] * z) / (y + z);
-
-        //    return d / JR * PlanetEphem.Semidiameter(5, r);           
-        //}
-
-        public static double[] Shadows(double distanceFromEarth, double distanceFromSun, int moonIndex, CrdsRectangular moon, CrdsRectangular eclipsedBody)
+        public static GalileanMoonShadowAppearance Shadow(double distanceFromEarth, double distanceFromSun, int moonIndex, CrdsRectangular moon, CrdsRectangular eclipsedBody)
         {
             // distance between bodies, in km
             double d = Sqrt(Pow(moon.X - eclipsedBody.X, 2) + Pow(moon.Y - eclipsedBody.Y, 2) + Pow(moon.Z - eclipsedBody.Z, 2)) * JR;
@@ -68,34 +42,51 @@ namespace ADK
                 // distance from Jupiter to moon, projected on the light direction
                 + moon.Z * JR;
 
-            // umbra radius in km
-            double[] u = ShadowSizes(MR[moonIndex], D, d);
-
-            return u.Select(v => ToDegrees(Atan2(v, distanceFromEarth * AU)) * 3600).ToArray();            
+            return Shadow(MR[moonIndex], D, d, distanceFromEarth);
         }
 
-        private static double[] ShadowSizes(double r, double D, double d)
+        /// <summary>
+        /// Calculates appearance of shadow
+        /// </summary>
+        /// <param name="r">radius (in km) of the moon that casts the shadow</param>
+        /// <param name="D">distance (in km) from light source (Sun) to the moon that casts the shadow</param>
+        /// <param name="d">distance (in km) from the moon that casts the shadow to eclipsed body surface (projection plane)</param>
+        /// <param name="d0">distance (in km) from Earth to projection plane</param>
+        private static GalileanMoonShadowAppearance Shadow(double r, double D, double d, double d0)
         {
-            // Solar radius, in km
-            double R = 6.955e5;
+            // Focal distance, in km, is a distance from light source (i.e. Sun) to focal point.
+            // Focal point is a vertex of shadow cone, where moon shadow decreases to the single point.
+            double F = D * SR / (SR - r);
 
-            // Focal distance, in km
-            double F = D * R / (R - r);
+            // Tangent of angle theta. 
+            // Theta angle is a visible semidiameter of the Sun from focal point
+            double tanTheta = SR / F;
 
-            double tanTheta = R / F;
-
+            // Distance from focal point to eclipsed body surface (projection plane), in km
             double f = F - D - d;
 
+            // Umbra radius on the eclipsed body surface (projection plane), in km
             double u = f * tanTheta;
 
-            double T = D / (1 + r / R);
+            // F0 - is an intercrossing point
+            // It's a point between light source (Sun) and the moon that casts the shadow
+            // where sun rays from top and bottom of solar disk cross each other
+            // So, T + t = D
+
+            // Distance from the light source center (Sun) to intercrossing point, in km
+            double T = D / (1 + r / SR);
+
+            // Distance from intercrossing point to the moon that casts the shadow, in km
             double t = D - T;
 
-            //double p = (R / T * (t + d) + u) / 2;
+            // Penumbra radius on the eclipsed body surface (projection plane), in km
+            double p = SR / T * (t + d);
 
-            double p = R / T * (t + d);
-
-            return new double[] { u, p };
+            return new GalileanMoonShadowAppearance()
+            {
+                Umbra = ToDegrees(Atan2(u, d0 * AU)) * 3600,
+                Penumbra = ToDegrees(Atan2(p, d0 * AU)) * 3600,
+            };
         }
 
         /// <summary>
