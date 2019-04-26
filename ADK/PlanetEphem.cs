@@ -186,9 +186,32 @@ namespace ADK
             double K = Angle.ToDegrees(Math.Atan2(sinK, cosK));
 
             // planetographic longitude of the central meridian
-            a.CM = Angle.To360(Math.Sign(W) * (W - K));
+            a.CM = planet == 5 ? 
+                JupiterCM2(jd) : 
+                Angle.To360(Math.Sign(W) * (W - K));
             
             return a;
+        }
+
+        /// <summary>
+        /// Calculates longitude of Central Meridian of Jupiter in System II.
+        /// </summary>
+        /// <param name="jd">Julian Day</param>
+        /// <returns>Longitude of Central Meridian of Jupiter in System II, in degrees.</returns>
+        /// <remarks>
+        /// This method is based on formula described here: <see href="https://www.projectpluto.com/grs_form.htm"/>
+        /// </remarks>
+        private static double JupiterCM2(double jd)
+        {
+            double jup_mean = (jd - 2455636.938) * 360.0 / 4332.89709;
+            double eqn_center = 5.55 * Math.Sin(Angle.ToRadians(jup_mean));
+            double angle = (jd - 2451870.628) * 360.0 / 398.884 - eqn_center;
+            double correction = 11 * Math.Sin(Angle.ToRadians(angle))
+                                + 5 * Math.Cos(Angle.ToRadians(angle))
+                                - 1.25 * Math.Cos(Angle.ToRadians(jup_mean)) - eqn_center;
+
+            double cm = 181.62 + 870.1869147 * jd + correction;
+            return Angle.To360(cm);
         }
 
         /// <summary>
