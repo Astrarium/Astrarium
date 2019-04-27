@@ -78,6 +78,7 @@
     <Compile Include="Calculators\StarsReader.cs" />
     <Compile Include="Calculators\TrackCalc.cs" />
     <Compile Include="CelestialGrid.cs" />
+    <Compile Include="Config\ControlBuilders\GRSSettingBuilder.cs" />
     <Compile Include="Config\ControlBuilders\BooleanSettingControlBuilder.cs" />
     <Compile Include="Config\ControlBuilders\ColorSettingControlBuilder.cs" />
     <Compile Include="Config\ControlBuilders\DropdownSettingControlBuilder.cs" />

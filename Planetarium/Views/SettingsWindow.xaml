@@ -36,7 +36,7 @@
                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
                 ScrollViewer.CanContentScroll="False">
             </ListView>
-            
+
             <GridSplitter 
                 Grid.Column="1" 
                 ShowsPreview="False"   
@@ -44,13 +44,10 @@
                 VerticalAlignment="Stretch" />
 
             <ScrollViewer
-                
                 MinWidth="100" 
                 Grid.Column="2" 
-                
                 VerticalScrollBarVisibility="Auto"
                 HorizontalScrollBarVisibility="Auto">
-
                 <ContentPresenter Margin="8" Content="{Binding SectionContent}" />
             </ScrollViewer>
         </Grid>
@@ -75,9 +72,5 @@
                 <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CloseCommand}">Close</Button>
             </StackPanel>
         </Grid>
-        
-        
-
     </Grid>
-
 </Window>

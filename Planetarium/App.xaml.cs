@@ -2,6 +2,7 @@
 using Ninject;
 using Planetarium.Calculators;
 using Planetarium.Config;
+using Planetarium.Config.ControlBuilders;
 using Planetarium.Renderers;
 using Planetarium.ViewModels;
 using System;
@@ -81,6 +82,16 @@ namespace Planetarium
 
             settingsConfig.Add("JupiterMoonsShadowOutline", true).WithSection("Planets");
             settingsConfig.Add("ShowRotationAxis", false).WithSection("Planets");
+
+            settingsConfig.Add("GRSLongitude", 
+                new GreatRedSpotSettings()
+                {
+                    Epoch = 2456901.5,
+                    MonthlyDrift = 1.25,
+                    Longitude = 216
+                })
+                .WithSection("Planets")
+                .WithBuilder(typeof(GRSSettingBuilder));
 
             kernel.Bind<ISettingsConfig, SettingsConfig>().ToConstant(settingsConfig).InSingletonScope();
 
