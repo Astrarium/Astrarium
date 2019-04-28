@@ -16,6 +16,7 @@ namespace Planetarium.Config
         public Func<ISettings, bool> EnabledWhenCondition { get; private set; }
         public Func<ISettings, bool> VisibleWhenCondition { get; private set; }
         public SettingControlBuilder Builder { get; private set; }
+        public Type ControlType { get; private set; }
 
         public SettingConfigItem(string name, Type type, object defaultValue)
         {

@@ -3689,7 +3689,7 @@
     <!--#endregion-->
 
     <Style TargetType="{x:Type c:IntegerUpDown}">
-        <Setter Property="Height" Value="22" />
+        <Setter Property="Height" Value="26" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type c:IntegerUpDown}">

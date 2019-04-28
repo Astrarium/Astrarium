@@ -11,7 +11,7 @@ namespace Planetarium.Config.ControlBuilders
 {
     public class DropdownSettingControlBuilder : SettingControlBuilder
     {
-        public override FrameworkElement Build(ISettings settings, SettingConfigItem item)
+        public override FrameworkElement Build(ISettings settings, SettingConfigItem item, IViewManager viewManager)
         {
             var panel = new StackPanel() { Orientation = Orientation.Vertical };
             var comboBox = new ComboBox() { IsReadOnly = true };

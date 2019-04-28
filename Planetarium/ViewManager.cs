@@ -62,18 +62,7 @@ namespace Planetarium
             if (viewType != null)
             {
                 var window = typeFactory(viewType) as Window;
-
-                var controls = FindChildren<Control>(window);
-                foreach (var control in controls)
-                {
-                    var injectionProps = control.GetType().GetProperties().Where(p => p.GetCustomAttribute<DependecyInjectionAttribute>() != null);
-                    foreach (var prop in injectionProps)
-                    {
-                        var value = typeFactory(prop.PropertyType);
-                        prop.SetValue(control, value);
-                    }
-                }
-
+                InjectDependencies(window);
                 window.DataContext = viewModel;
 
                 if (window.GetType() != typeof(MainWindow))
@@ -115,6 +104,26 @@ namespace Planetarium
             else
             {
                 return null;
+            }
+        }
+
+        private void InjectDependencies(DependencyObject depObj)
+        {
+            InjectProperties(depObj);
+            var controls = FindChildren<Control>(depObj);
+            foreach (var control in controls)
+            {
+                InjectProperties(control);                
+            }
+        } 
+
+        private void InjectProperties(DependencyObject depObj)
+        {
+            var injectionProps = depObj.GetType().GetProperties().Where(p => p.GetCustomAttribute<DependecyInjectionAttribute>() != null);
+            foreach (var prop in injectionProps)
+            {
+                var value = typeFactory(prop.PropertyType);
+                prop.SetValue(depObj, value);
             }
         }
 
@@ -181,6 +190,13 @@ namespace Planetarium
         public TViewModel CreateViewModel<TViewModel>() where TViewModel : ViewModelBase
         {
             return typeFactory(typeof(TViewModel)) as TViewModel;
+        }
+
+        public TControl CreateControl<TControl>() where TControl : FrameworkElement
+        {
+            TControl control = typeFactory(typeof(TControl)) as TControl;
+            InjectDependencies(control);
+            return control;
         }
 
         public void ShowWindow<TViewModel>(TViewModel viewModel) where TViewModel : ViewModelBase

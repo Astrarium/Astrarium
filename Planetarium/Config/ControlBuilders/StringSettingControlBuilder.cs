@@ -11,7 +11,7 @@ namespace Planetarium.Config.ControlBuilders
 {
     public class StringSettingControlBuilder : SettingControlBuilder
     {
-        public override FrameworkElement Build(ISettings settings, SettingConfigItem item)
+        public override FrameworkElement Build(ISettings settings, SettingConfigItem item, IViewManager viewManager)
         {
             var container = new StackPanel() { Orientation = Orientation.Vertical };
             container.Children.Add(new Label() { Content = item.Name });

@@ -11,7 +11,7 @@ namespace Planetarium.Config.ControlBuilders
 {
     public class BooleanSettingControlBuilder : SettingControlBuilder
     {
-        public override FrameworkElement Build(ISettings settings, SettingConfigItem item)
+        public override FrameworkElement Build(ISettings settings, SettingConfigItem item, IViewManager viewManager)
         {
             var control = new CheckBox() { Content = item.Name };
             BindingOperations.SetBinding(control, CheckBox.IsCheckedProperty, new Binding(item.Name) { Source = settings });

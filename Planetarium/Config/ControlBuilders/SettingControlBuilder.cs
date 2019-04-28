@@ -9,6 +9,6 @@ namespace Planetarium.Config.ControlBuilders
 {
     public abstract class SettingControlBuilder
     {
-        public abstract FrameworkElement Build(ISettings settings, SettingConfigItem item);
+        public abstract FrameworkElement Build(ISettings settings, SettingConfigItem item, IViewManager viewManager);
     }
 }

@@ -14,7 +14,7 @@ namespace Planetarium.Config.ControlBuilders
 {
     public class EnumSettingControlBuilder : SettingControlBuilder
     {
-        public override FrameworkElement Build(ISettings settings, SettingConfigItem item)
+        public override FrameworkElement Build(ISettings settings, SettingConfigItem item, IViewManager viewManager)
         {
             var radioGroup = new GroupBox() { Header = item.Name };
             var radioPanel = new StackPanel() { Orientation = Orientation.Vertical };

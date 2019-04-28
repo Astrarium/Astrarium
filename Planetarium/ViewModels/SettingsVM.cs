@@ -73,7 +73,7 @@ namespace Planetarium.ViewModels
                         throw new Exception($"There are no control builder defined for setting with type {item.Type.Name}");
                     }
 
-                    FrameworkElement control = builder.Build(settings, item);
+                    FrameworkElement control = builder.Build(settings, item, viewManager);
 
                     if (control != null && item.EnabledWhenCondition != null)
                     {
@@ -96,6 +96,8 @@ namespace Planetarium.ViewModels
                         panel.Children.Add(control);
                     }
                 }
+
+                
 
                 SettingsSections.Add(new SettingsSectionVM() { Title = section.Key, Panel = panel });
             }
