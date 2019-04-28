@@ -23,6 +23,7 @@ namespace Planetarium.Config.ControlBuilders
 
             grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(0, GridUnitType.Auto) });
             grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(1, GridUnitType.Auto) });
+            grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(2, GridUnitType.Auto) });
 
             var labelEpoch = new Label() { Content = "Epoch:" };
             var datePicker = viewManager.CreateControl<Controls.DatePicker>();
@@ -33,17 +34,16 @@ namespace Planetarium.Config.ControlBuilders
             });
             
             var labelLongitude = new Label() { Content = "Longitude at Epoch:" };
+            labelLongitude.SetValue(Grid.ColumnProperty, 0);
+            labelLongitude.SetValue(Grid.RowProperty, 1);
 
             labelEpoch.SetValue(Grid.ColumnProperty, 0);
             labelEpoch.SetValue(Grid.RowProperty, 0);
             datePicker.SetValue(Grid.ColumnProperty, 1);
             datePicker.SetValue(Grid.RowProperty, 0);
 
-            labelLongitude.SetValue(Grid.ColumnProperty, 0);
-            labelLongitude.SetValue(Grid.RowProperty, 1);
-
-            var updLongitude = new IntegerUpDown() { Minimum = 0, Maximum = 359 };
-            BindingOperations.SetBinding(updLongitude, IntegerUpDown.ValueProperty, new Binding(item.Name + "." + "Longitude")
+            var updLongitude = new NumericUpDown() { Minimum = 0, Maximum = 359 };
+            BindingOperations.SetBinding(updLongitude, NumericUpDown.ValueProperty, new Binding(item.Name + "." + "Longitude")
             {
                 Source = settings
             });
@@ -51,10 +51,29 @@ namespace Planetarium.Config.ControlBuilders
             updLongitude.SetValue(Grid.ColumnProperty, 1);
             updLongitude.SetValue(Grid.RowProperty, 1);
 
+
+            var labelDrift = new Label() { Content = "Monthly Drift:" };
+            labelDrift.SetValue(Grid.ColumnProperty, 0);
+            labelDrift.SetValue(Grid.RowProperty, 2);
+
+
+
+            var updDrift= new NumericUpDown() { Minimum = 0, Maximum = 359 };
+            BindingOperations.SetBinding(updDrift, NumericUpDown.ValueProperty, new Binding(item.Name + "." + "MonthlyDrift")
+            {
+                Source = settings
+            });
+
+            updDrift.SetValue(Grid.ColumnProperty, 1);
+            updDrift.SetValue(Grid.RowProperty, 2);
+
+
             grid.Children.Add(labelEpoch);
             grid.Children.Add(datePicker);
             grid.Children.Add(labelLongitude);
             grid.Children.Add(updLongitude);
+            grid.Children.Add(labelDrift);
+            grid.Children.Add(updDrift);
 
             groupBox.Content = grid;
             return groupBox;

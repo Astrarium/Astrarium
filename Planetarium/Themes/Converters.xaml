@@ -4,7 +4,8 @@
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                     xmlns:t="clr-namespace:Planetarium.Themes"
                     mc:Ignorable="d">
-    
+
+    <t:NumericConverter x:Key="NumericConverter"/>
     <t:LeftMarginMultiplierConverter x:Key="LeftMarginMultiplierConverter" />
     <t:NotNullToBoolConverter x:Key="NotNullToBoolConverter" />
     <t:NotNullToVisibilityConverter x:Key="NotNullToVisibilityConverter" />

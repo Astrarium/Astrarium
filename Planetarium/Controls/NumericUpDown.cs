@@ -12,9 +12,9 @@ using System.Windows.Input;
 
 namespace Planetarium.Controls
 {
-    public class IntegerUpDown : Control
+    public class NumericUpDown : Control
     {
-        public IntegerUpDown()
+        public NumericUpDown()
         {
             
         }
@@ -26,48 +26,48 @@ namespace Planetarium.Controls
         }
 
         public readonly static DependencyProperty HideButtonsProperty = DependencyProperty.Register(
-            "HideButtons", typeof(bool), typeof(IntegerUpDown), new UIPropertyMetadata(false));
+            "HideButtons", typeof(bool), typeof(NumericUpDown), new UIPropertyMetadata(false));
 
-        public int Maximum
+        public decimal Maximum
         {
-            get { return (int)GetValue(MaximumProperty); }
+            get { return (decimal)GetValue(MaximumProperty); }
             set { SetValue(MaximumProperty, value); }
         }
         public readonly static DependencyProperty MaximumProperty = DependencyProperty.Register(
-            "Maximum", typeof(int), typeof(IntegerUpDown), new UIPropertyMetadata(100, (o, e) => {
-                IntegerUpDown tb = (IntegerUpDown)o;
-                int maximum = (int)e.NewValue;
+            "Maximum", typeof(decimal), typeof(NumericUpDown), new UIPropertyMetadata((decimal)100, (o, e) => {
+                NumericUpDown tb = (NumericUpDown)o;
+                decimal maximum = (decimal)e.NewValue;
                 if (tb.Value > maximum)
                 {
                     tb.Value = maximum;
                 }
             }));
 
-        public int Minimum
+        public decimal Minimum
         {
-            get { return (int)GetValue(MinimumProperty); }
+            get { return (decimal)GetValue(MinimumProperty); }
             set { SetValue(MinimumProperty, value); }
         }
         public readonly static DependencyProperty MinimumProperty = DependencyProperty.Register(
-            "Minimum", typeof(int), typeof(IntegerUpDown), new UIPropertyMetadata(0, (o, e) =>
+            "Minimum", typeof(decimal), typeof(NumericUpDown), new UIPropertyMetadata((decimal)0, (o, e) =>
             {
-                IntegerUpDown tb = (IntegerUpDown)o;
-                int minimum = (int)e.NewValue;
+                NumericUpDown tb = (NumericUpDown)o;
+                decimal minimum = (decimal)e.NewValue;
                 if (tb.Value < minimum)
                 {
                     tb.Value = minimum;
                 }
             }));
 
-        public int Value
+        public decimal Value
         {
-            get { return (int)GetValue(ValueProperty); }
+            get { return (decimal)GetValue(ValueProperty); }
             set { SetCurrentValue(ValueProperty, value); }
         }
         public readonly static DependencyProperty ValueProperty = DependencyProperty.Register(
-            "Value", typeof(int), typeof(IntegerUpDown), new FrameworkPropertyMetadata(0, (o, e) =>
+            "Value", typeof(decimal), typeof(NumericUpDown), new FrameworkPropertyMetadata((decimal)0, (o, e) =>
             {
-                IntegerUpDown tb = (IntegerUpDown)o;
+                NumericUpDown tb = (NumericUpDown)o;
                 tb.RaiseValueChangedEvent(e);
             })
             {
@@ -81,13 +81,13 @@ namespace Planetarium.Controls
             ValueChanged?.Invoke(this, e);
         }
 
-        public int Step
+        public decimal Step
         {
-            get { return (int)GetValue(StepProperty); }
+            get { return (decimal)GetValue(StepProperty); }
             set { SetValue(StepProperty, value); }
         }
         public readonly static DependencyProperty StepProperty = DependencyProperty.Register(
-            "Step", typeof(int), typeof(IntegerUpDown), new UIPropertyMetadata(1));
+            "Step", typeof(decimal), typeof(NumericUpDown), new UIPropertyMetadata((decimal)1));
 
         TextBox _TextBox;
         RepeatButton _UpButton;
@@ -133,7 +133,7 @@ namespace Planetarium.Controls
 
         protected virtual bool OnValidateText(string text)
         {
-            bool isMatch = int.TryParse(text, out int result);
+            bool isMatch = decimal.TryParse(text, out decimal result);
             if (isMatch)
             {
                 isMatch = (result >= Minimum && result <= Maximum);

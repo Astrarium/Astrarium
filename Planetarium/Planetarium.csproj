@@ -94,6 +94,7 @@
     <Compile Include="Config\SettingsConfig.cs" />
     <Compile Include="Config\Settings.cs" />
     <Compile Include="Controls\DependecyInjectionAttribute.cs" />
+    <Compile Include="Controls\NumericUpDown.cs" />
     <Compile Include="Controls\TimeSpanPicker.cs" />
     <Compile Include="Ephemeris.cs" />
     <Compile Include="EphemerisConfig.cs" />
@@ -179,7 +180,6 @@
       <DependentUpon>EphemerisWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\DatePicker.cs" />
-    <Compile Include="Controls\IntegerUpDown.cs" />
     <Compile Include="Views\MessageBoxWindow.xaml.cs">
       <DependentUpon>MessageBoxWindow.xaml</DependentUpon>
     </Compile>

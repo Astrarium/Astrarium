@@ -37,19 +37,19 @@
             <Label Grid.Column="1" Grid.Row="0">Month</Label>
             <Label Grid.Column="2" Grid.Row="0">Year</Label>
 
-            <c:IntegerUpDown Margin="3" Grid.Column="0" Grid.Row="1" Minimum="1" Maximum="{Binding DaysCount}" Value="{Binding Day}" />
+            <c:NumericUpDown Margin="3" Grid.Column="0" Grid.Row="1" Minimum="1" Maximum="{Binding DaysCount}" Value="{Binding Day, Converter={StaticResource NumericConverter}}" />
             <ComboBox Height="22" Margin="3" Grid.Column="1" Grid.Row="1" 
                   ItemsSource="{Binding ShortMonthsNames}"
                   SelectedIndex="{Binding SelectedMonth}" />
-            <c:IntegerUpDown Margin="3" Grid.Column="2" Grid.Row="1" Minimum="-9999" Maximum="9999" Value="{Binding Year}" />
+            <c:NumericUpDown Margin="3" Grid.Column="2" Grid.Row="1" Minimum="-9999" Maximum="9999" Value="{Binding Year}" />
 
             <Label Grid.Column="0" Grid.Row="2" VerticalAlignment="Bottom">Hours</Label>
             <Label Grid.Column="1" Grid.Row="2" VerticalAlignment="Bottom">Minutes</Label>
             <Label Grid.Column="2" Grid.Row="2" VerticalAlignment="Bottom">Seconds</Label>
 
-            <c:IntegerUpDown Margin="3" Grid.Column="0" Grid.Row="3" Maximum="23" Value="{Binding Hours}" />
-            <c:IntegerUpDown Margin="3" Grid.Column="1" Grid.Row="3" Maximum="59" Value="{Binding Minutes}" />
-            <c:IntegerUpDown Margin="3" Grid.Column="2" Grid.Row="3" Maximum="59" Value="{Binding Seconds}" />
+            <c:NumericUpDown Margin="3" Grid.Column="0" Grid.Row="3" Maximum="23" Value="{Binding Hours, Converter={StaticResource NumericConverter}}" />
+            <c:NumericUpDown Margin="3" Grid.Column="1" Grid.Row="3" Maximum="59" Value="{Binding Minutes, Converter={StaticResource NumericConverter}}" />
+            <c:NumericUpDown Margin="3" Grid.Column="2" Grid.Row="3" Maximum="59" Value="{Binding Seconds, Converter={StaticResource NumericConverter}}" />
         </Grid>
 
         <!-- Date Only Layout -->
@@ -70,11 +70,11 @@
             <Label Grid.Column="1" Grid.Row="0">Month</Label>
             <Label Grid.Column="2" Grid.Row="0">Year</Label>
 
-            <c:IntegerUpDown Margin="3" Grid.Column="0" Grid.Row="1" Minimum="1" Maximum="{Binding DaysCount}" Value="{Binding Day}" />
+            <c:NumericUpDown Margin="3" Grid.Column="0" Grid.Row="1" Minimum="1" Maximum="{Binding DaysCount}" Value="{Binding Day, Converter={StaticResource NumericConverter}}" />
             <ComboBox Height="22" Margin="3" Grid.Column="1" Grid.Row="1" 
                   ItemsSource="{Binding ShortMonthsNames}"
                   SelectedIndex="{Binding SelectedMonth}" />
-            <c:IntegerUpDown Margin="3" Grid.Column="2" Grid.Row="1" Minimum="-9999" Maximum="9999" Value="{Binding Year}" />
+            <c:NumericUpDown Margin="3" Grid.Column="2" Grid.Row="1" Minimum="-9999" Maximum="9999" Value="{Binding Year, Converter={StaticResource NumericConverter}}" />
 
         </Grid>
 
@@ -97,7 +97,7 @@
             <ComboBox Height="22" Margin="3" Grid.Column="0" Grid.Row="1" 
                   ItemsSource="{Binding FullMonthsNames}"
                   SelectedIndex="{Binding SelectedMonth}" />
-            <c:IntegerUpDown Margin="3" Grid.Column="1" Grid.Row="1" Minimum="-9999" Maximum="9999" Value="{Binding Year}" />
+            <c:NumericUpDown Margin="3" Grid.Column="1" Grid.Row="1" Minimum="-9999" Maximum="9999" Value="{Binding Year, Converter={StaticResource NumericConverter}}" />
 
         </Grid>
         

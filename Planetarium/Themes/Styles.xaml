@@ -3688,11 +3688,11 @@
 
     <!--#endregion-->
 
-    <Style TargetType="{x:Type c:IntegerUpDown}">
+    <Style TargetType="{x:Type c:NumericUpDown}">
         <Setter Property="Height" Value="26" />
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="{x:Type c:IntegerUpDown}">
+                <ControlTemplate TargetType="{x:Type c:NumericUpDown}">
                     <Grid Background="Transparent">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
@@ -3703,7 +3703,7 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBox Name="PART_TextBox" Height="22" Grid.ColumnSpan="2" Grid.RowSpan="2" Text="{Binding Value, Mode=TwoWay, NotifyOnSourceUpdated=True, 
-                            NotifyOnValidationError=True, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type c:IntegerUpDown}}}" 
+                            NotifyOnValidationError=True, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type c:NumericUpDown}}}" 
                                                 />
                         <RepeatButton Style="{StaticResource {x:Type ButtonBase}}" Name="PART_UpButton" BorderThickness="0" Grid.Column="1" Grid.Row="0"
                                       Width="14" Margin="0,3,0,0">

@@ -12,6 +12,32 @@ using System.Windows.Data;
 
 namespace Planetarium.Themes
 {
+    [ValueConversion(typeof(decimal), typeof(int))]
+    [ValueConversion(typeof(int), typeof(decimal))]
+    public class NumericConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is int && targetType == typeof(decimal))
+            {
+                return (decimal)((int)value);
+            }
+            else if (value is decimal && targetType == typeof(int))
+            {
+                return (int)((decimal)value);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return Convert(value, targetType, parameter, culture);
+        }
+    }
+
     [ValueConversion(typeof(object), typeof(bool))]
     public class NotNullToBoolConverter : IValueConverter
     {
