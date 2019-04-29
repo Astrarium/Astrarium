@@ -3702,9 +3702,14 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Name="PART_TextBox" Height="22" Grid.ColumnSpan="2" Grid.RowSpan="2" Text="{Binding Value, Mode=TwoWay, NotifyOnSourceUpdated=True, 
-                            NotifyOnValidationError=True, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type c:NumericUpDown}}}" 
-                                                />
+                        <TextBox Name="PART_TextBox" Height="22" Grid.ColumnSpan="2" Grid.RowSpan="2">
+                            <TextBox.Text>
+                                <MultiBinding Converter="{StaticResource NumericUpDownTextConverter}">
+                                    <Binding Path="Value" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType={x:Type c:NumericUpDown}}" Mode="TwoWay" NotifyOnSourceUpdated="True" NotifyOnValidationError="True" />
+                                    <Binding Path="DecimalPlaces" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType={x:Type c:NumericUpDown}}"/>
+                                </MultiBinding>
+                            </TextBox.Text>
+                        </TextBox>
                         <RepeatButton Style="{StaticResource {x:Type ButtonBase}}" Name="PART_UpButton" BorderThickness="0" Grid.Column="1" Grid.Row="0"
                                       Width="14" Margin="0,3,0,0">
                             <Path Fill="{StaticResource ButtonForeground}" Data="M 0 3 L 6 3 L 3 0 Z"/>

@@ -97,7 +97,7 @@
             <ComboBox Height="22" Margin="3" Grid.Column="0" Grid.Row="1" 
                   ItemsSource="{Binding FullMonthsNames}"
                   SelectedIndex="{Binding SelectedMonth}" />
-            <c:NumericUpDown Margin="3" Grid.Column="1" Grid.Row="1" Minimum="-9999" Maximum="9999" Value="{Binding Year, Converter={StaticResource NumericConverter}}" />
+            <c:NumericUpDown Margin="3" Grid.Column="1" Grid.Row="1" Minimum="-9999" Maximum="9999" Value="{Binding Year, Converter={StaticResource NumericConverter}}" DecimalPlaces="0" />
 
         </Grid>
         

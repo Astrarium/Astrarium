@@ -15,11 +15,6 @@ namespace Planetarium.Controls
 {
     public class NumericUpDown : Control
     {
-        public NumericUpDown()
-        {
-            
-        }
-
         public bool HideButtons
         {
             get { return (bool)GetValue(HideButtonsProperty); }
@@ -88,11 +83,6 @@ namespace Planetarium.Controls
         private void RaiseValueChangedEvent(DependencyPropertyChangedEventArgs e)
         {
             ValueChanged?.Invoke(this, e);
-
-            if (DecimalPlaces > 0 && _TextBox != null)
-            {
-                _TextBox.Text = string.Format(CultureInfo.InvariantCulture, $"{{0:0.{new string('0', (int)DecimalPlaces)}}}", Value);
-            }
         }
 
         public decimal Step
@@ -116,16 +106,7 @@ namespace Planetarium.Controls
             _DownButton.Click += Decrement;
             _TextBox.PreviewTextInput += TextBox_PreviewTextInput;
             _TextBox.PreviewKeyDown += TextBox_PreviewKeyDown;
-            _TextBox.LostFocus += _TextBox_LostFocus;
             DataObject.AddPastingHandler(_TextBox, new DataObjectPastingEventHandler(TextBox_PreviewPaste));
-        }
-
-        private void _TextBox_LostFocus(object sender, RoutedEventArgs e)
-        {
-            if (DecimalPlaces > 0 && _TextBox != null)
-            {
-                _TextBox.Text = string.Format(CultureInfo.InvariantCulture, $"{{0:0.{new string('0', (int)DecimalPlaces)}}}", Value);
-            }
         }
 
         private void TextBox_PreviewPaste(object sender, DataObjectPastingEventArgs e)

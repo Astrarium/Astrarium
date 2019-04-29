@@ -51,14 +51,11 @@ namespace Planetarium.Config.ControlBuilders
             updLongitude.SetValue(Grid.ColumnProperty, 1);
             updLongitude.SetValue(Grid.RowProperty, 1);
 
-
             var labelDrift = new Label() { Content = "Monthly Drift:" };
             labelDrift.SetValue(Grid.ColumnProperty, 0);
             labelDrift.SetValue(Grid.RowProperty, 2);
 
-
-
-            var updDrift= new NumericUpDown() { Minimum = 0, Maximum = 359, Step = 0.1m, DecimalPlaces = 2 };
+            var updDrift = new NumericUpDown() { Minimum = 0, Maximum = 359, Step = 0.01m, DecimalPlaces = 2 };
             BindingOperations.SetBinding(updDrift, NumericUpDown.ValueProperty, new Binding(item.Name + "." + "MonthlyDrift")
             {
                 Source = settings
@@ -66,7 +63,6 @@ namespace Planetarium.Config.ControlBuilders
 
             updDrift.SetValue(Grid.ColumnProperty, 1);
             updDrift.SetValue(Grid.RowProperty, 2);
-
 
             grid.Children.Add(labelEpoch);
             grid.Children.Add(datePicker);

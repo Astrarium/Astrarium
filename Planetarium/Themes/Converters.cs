@@ -27,14 +27,41 @@ namespace Planetarium.Themes
                 return (int)((decimal)value);
             }
             else
-            {
                 throw new NotImplementedException();
-            }
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return Convert(value, targetType, parameter, culture);
+        }
+    }
+
+    public class NumericUpDownTextConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values[0] is decimal && targetType == typeof(string))
+            {
+                decimal value = (decimal)values[0];
+                uint decimalPlaces = (uint)values[1];
+
+                if (value > 0)
+                    return string.Format(CultureInfo.InvariantCulture, $"{{0:0.{new string('0', (int)decimalPlaces)}}}", (decimal)value);
+                else
+                    return ((int)value).ToString();
+            }
+            else
+            {
+                return "";
+            }
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            if (string.IsNullOrEmpty((string)value))
+                return new object[] { 0 };
+            else
+                return new object[] { decimal.Parse(value as string, NumberStyles.Float, CultureInfo.InvariantCulture) };
         }
     }
 

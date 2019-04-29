@@ -5,6 +5,7 @@
                     xmlns:t="clr-namespace:Planetarium.Themes"
                     mc:Ignorable="d">
 
+    <t:NumericUpDownTextConverter x:Key="NumericUpDownTextConverter" />
     <t:NumericConverter x:Key="NumericConverter"/>
     <t:LeftMarginMultiplierConverter x:Key="LeftMarginMultiplierConverter" />
     <t:NotNullToBoolConverter x:Key="NotNullToBoolConverter" />
