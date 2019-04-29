@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -59,6 +60,14 @@ namespace Planetarium.Controls
                 }
             }));
 
+        public uint DecimalPlaces
+        {
+            get { return (uint)GetValue(DecimalPlacesProperty); }
+            set { SetValue(DecimalPlacesProperty, value); }
+        }
+        public readonly static DependencyProperty DecimalPlacesProperty = DependencyProperty.Register(
+            "DecimalPlaces", typeof(uint), typeof(NumericUpDown), new UIPropertyMetadata((uint)2));
+
         public decimal Value
         {
             get { return (decimal)GetValue(ValueProperty); }
@@ -79,6 +88,11 @@ namespace Planetarium.Controls
         private void RaiseValueChangedEvent(DependencyPropertyChangedEventArgs e)
         {
             ValueChanged?.Invoke(this, e);
+
+            if (DecimalPlaces > 0 && _TextBox != null)
+            {
+                _TextBox.Text = string.Format(CultureInfo.InvariantCulture, $"{{0:0.{new string('0', (int)DecimalPlaces)}}}", Value);
+            }
         }
 
         public decimal Step
@@ -102,7 +116,16 @@ namespace Planetarium.Controls
             _DownButton.Click += Decrement;
             _TextBox.PreviewTextInput += TextBox_PreviewTextInput;
             _TextBox.PreviewKeyDown += TextBox_PreviewKeyDown;
+            _TextBox.LostFocus += _TextBox_LostFocus;
             DataObject.AddPastingHandler(_TextBox, new DataObjectPastingEventHandler(TextBox_PreviewPaste));
+        }
+
+        private void _TextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (DecimalPlaces > 0 && _TextBox != null)
+            {
+                _TextBox.Text = string.Format(CultureInfo.InvariantCulture, $"{{0:0.{new string('0', (int)DecimalPlaces)}}}", Value);
+            }
         }
 
         private void TextBox_PreviewPaste(object sender, DataObjectPastingEventArgs e)
@@ -133,18 +156,21 @@ namespace Planetarium.Controls
 
         protected virtual bool OnValidateText(string text)
         {
-            bool isMatch = decimal.TryParse(text, out decimal result);
+            var numberStyles = (DecimalPlaces == 0) ? NumberStyles.Integer : NumberStyles.Float;
+            bool isMatch = decimal.TryParse(text, numberStyles, CultureInfo.InvariantCulture, out decimal result);
             if (isMatch)
             {
                 isMatch = (result >= Minimum && result <= Maximum);
             }
-
             return isMatch;
         }
 
         private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            e.Handled = !OnValidateText(FullText(e.Text));
+            if (DecimalPlaces == 0 && !e.Text.All(c => char.IsNumber(c)))
+                e.Handled = true;
+            else 
+                e.Handled = !OnValidateText(FullText(e.Text));
         }
 
         private string FullText(string newText)

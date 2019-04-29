@@ -42,7 +42,7 @@ namespace Planetarium.Config.ControlBuilders
             datePicker.SetValue(Grid.ColumnProperty, 1);
             datePicker.SetValue(Grid.RowProperty, 0);
 
-            var updLongitude = new NumericUpDown() { Minimum = 0, Maximum = 359 };
+            var updLongitude = new NumericUpDown() { Minimum = 0, Maximum = 359, DecimalPlaces = 0 };
             BindingOperations.SetBinding(updLongitude, NumericUpDown.ValueProperty, new Binding(item.Name + "." + "Longitude")
             {
                 Source = settings
@@ -58,7 +58,7 @@ namespace Planetarium.Config.ControlBuilders
 
 
 
-            var updDrift= new NumericUpDown() { Minimum = 0, Maximum = 359 };
+            var updDrift= new NumericUpDown() { Minimum = 0, Maximum = 359, Step = 0.1m, DecimalPlaces = 2 };
             BindingOperations.SetBinding(updDrift, NumericUpDown.ValueProperty, new Binding(item.Name + "." + "MonthlyDrift")
             {
                 Source = settings
