@@ -86,9 +86,9 @@ namespace Planetarium
             settingsConfig.Add("GRSLongitude", 
                 new GreatRedSpotSettings()
                 {
-                    Epoch = 2456901.5,
-                    MonthlyDrift = 1.25,
-                    Longitude = 216
+                    Epoch = 2458150.5000179596,
+                    MonthlyDrift = 2,
+                    Longitude = 283
                 })
                 .WithSection("Planets")
                 .WithBuilder(typeof(GRSSettingBuilder));
