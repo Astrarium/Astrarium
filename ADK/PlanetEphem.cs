@@ -285,20 +285,10 @@ namespace ADK
             return rings;
         }
 
-        public static double GreatRedSpotLongitude(double jd, GreatRedSpotSettings settings = null)
+        public static double GreatRedSpotLongitude(double jd, double jd0, double longitude0, double monthlyDrift)
         {
-            if (settings == null)
-            {
-                settings = new GreatRedSpotSettings()
-                {
-                    Epoch = 2456901.5,
-                    MonthlyDrift = 1.25,
-                    Longitude = 216
-                };
-            }
-
             // Based on https://github.com/Stellarium/stellarium/blob/24a28f335f5277374cd387a1eda9ca7c7eaa507e/src/core/modules/Planet.cpp#L1145
-            return Angle.To360(settings.Longitude + settings.MonthlyDrift * 12 * (jd - settings.Epoch) / 365.25);
+            return Angle.To360(longitude0 + monthlyDrift * 12 * (jd - jd0) / 365.25);
         }
     }
 

@@ -681,10 +681,11 @@ namespace Planetarium.Renderers
             float diamEquat = diam;
             float diamPolar = (1 - planet.Flattening) * diam;
             bool useTextures = settings.Get<bool>("UseTextures");
+            var grsSettings = settings.Get<GreatRedSpotSettings>("GRSLongitude");
 
             if (useTextures)
             {
-                double grs = planet.Number == Planet.JUPITER ? PlanetEphem.GreatRedSpotLongitude(map.JulianDay) : 0;
+                double grs = planet.Number == Planet.JUPITER ? PlanetEphem.GreatRedSpotLongitude(map.JulianDay, grsSettings.Epoch, grsSettings.Longitude, grsSettings.MonthlyDrift) : 0;
                 Image texturePlanet = imagesCache.RequestImage(planet.Number.ToString(), new LonLatShift(planet.Number.ToString(), planet.Appearance.CM - grs, planet.Appearance.D), PlanetTextureProvider, map.Redraw);
                 if (texturePlanet != null)
                 {
