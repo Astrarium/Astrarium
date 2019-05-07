@@ -91,6 +91,14 @@
                     </MenuItem>
                 </Menu>
             </StatusBarItem>
+
+            <Separator />
+            <StatusBarItem HorizontalAlignment="Right">
+                <Hyperlink Command="{Binding SetDateCommand}">
+                    <TextBlock Width="Auto" TextAlignment="Right" Text="{Binding DateString, FallbackValue='Date'}" />
+                </Hyperlink>
+            </StatusBarItem>
+            
         </StatusBar>
     </Grid>
 </Window>

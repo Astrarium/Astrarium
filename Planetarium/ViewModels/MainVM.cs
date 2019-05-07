@@ -26,11 +26,13 @@ namespace Planetarium.ViewModels
         public string MapHorizontalCoordinatesString { get; private set; }
         public string MapConstellationNameString { get; private set; }
         public string MapViewAngleString { get; private set; }
+        public string DateString { get { return Formatters.DateTime.Format(new Date(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset)); } }
 
         public Command<Key> MapKeyDownCommand { get; private set; }
         public Command<int> ZoomCommand { get; private set; }
         public Command<PointF> MapDoubleClickCommand { get; private set; }
         public Command<PointF> MapRightClickCommand { get; private set; }
+        public Command SetDateCommand { get; private set; }
         public Command SearchObjectCommand { get; private set; }
         public Command<PointF> CenterOnPointCommand { get; private set; }
         public Command<CelestialObject> GetObjectInfoCommand { get; private set; }
@@ -98,6 +100,7 @@ namespace Planetarium.ViewModels
             ZoomCommand = new Command<int>(Zoom);
             MapDoubleClickCommand = new Command<PointF>(MapDoubleClick);
             MapRightClickCommand = new Command<PointF>(MapRightClick);
+            SetDateCommand = new Command(SetDate);
             SearchObjectCommand = new Command(SearchObject);
             CenterOnPointCommand = new Command<PointF>(CenterOnPoint);
             GetObjectInfoCommand = new Command<CelestialObject>(GetObjectInfo);
@@ -201,13 +204,7 @@ namespace Planetarium.ViewModels
             }
             else if (key == Key.D)
             {
-                var vm = new DateVM(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset);
-                if (viewManager.ShowDialog(vm) ?? false)
-                {
-                    sky.Context.JulianDay = vm.JulianDay;
-                    sky.Calculate();
-                    map.Invalidate();
-                }
+                SetDate();
             }
             else if (key == Key.A)
             {
@@ -476,6 +473,18 @@ namespace Planetarium.ViewModels
                     sky.Calculate();
                     map.Invalidate();
                 }
+            }
+        }
+
+        private void SetDate()
+        {
+            var vm = new DateVM(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset);
+            if (viewManager.ShowDialog(vm) ?? false)
+            {
+                sky.Context.JulianDay = vm.JulianDay;
+                sky.Calculate();
+                map.Invalidate();
+                NotifyPropertyChanged(nameof(DateString));
             }
         }
 
