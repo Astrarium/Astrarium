@@ -260,7 +260,17 @@ namespace Planetarium.ViewModels
                         sky.Context.JulianDayMidnight + 30,
                         sky.GetEventsCategories());
 
-                MessageBox.Show(events.Count.ToString());
+                var vm = viewManager.CreateViewModel<PhenomenaVM>();
+                vm.AstroEvents = events;
+                
+                if (viewManager.ShowDialog(vm) ?? false)
+                {
+                    //sky.Context.JulianDay = vm.JulianDay;
+                    //sky.Calculate();
+                    //map.GoToObject(body, TimeSpan.Zero);
+                }
+
+                //MessageBox.Show(events.Count.ToString());
 
                 //var formAlmanacSettings = new FormAlmanacSettings(
                 //    sky.Context.JulianDayMidnight,
