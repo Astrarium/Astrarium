@@ -191,58 +191,76 @@ namespace Planetarium.ViewModels
 
         private void MapKeyDown(Key key)
         {
-            // Add = Zoom In
+            // "+" = Zoom In
             if (key == Key.Add)
             {
                 Zoom(1);
             }
-
-            // Subtract = Zoom Out
+            // "-" = Zoom Out
             else if (key == Key.Subtract)
             {
                 Zoom(-1);
             }
+            // "D" = [D]ate
             else if (key == Key.D)
             {
                 SetDate();
             }
+            // "A" = [A]dd
             else if (key == Key.A)
             {
                 sky.Context.JulianDay += 1;
                 sky.Calculate();
                 map.Invalidate();
             }
+            // "S" = [S]ubtract
             else if (key == Key.S)
             {
                 sky.Context.JulianDay -= 1;
                 sky.Calculate();
                 map.Invalidate();
             }
+            // "O" = [O]ptions
             else if (key == Key.O)
             {
                 settings.SettingValueChanged += Settings_OnSettingChanged;
                 viewManager.ShowDialog<SettingsVM>();
                 settings.SettingValueChanged -= Settings_OnSettingChanged;
             }
+            // "I" = [I]nfo
             else if (key == Key.I)
             {
                 GetObjectInfo(map.SelectedObject);
             }
+            // "F12" = Full Screen On
             else if (key == Key.F12)
             {
                 SetFullScreen(true);
             }
+            // "Esc" = Full Screen Off
             else if (key == Key.Escape)
             {
                 SetFullScreen(false);
             }
+            // "F" = [F]ind
             else if (key == Key.F)
             {
                 SearchObject();
             }
+            // "E" = [E]phemerides
             else if (key == Key.E)
             {
                 GetObjectEphemeris(map.SelectedObject);
+            }
+            // "P" = [P]henomena
+            else if (key == Key.P)
+            {
+                var events = sky.GetEvents(
+                        sky.Context.JulianDayMidnight,
+                        sky.Context.JulianDayMidnight + 30,
+                        sky.GetEventsCategories());
+
+                MessageBox.Show(events.Count.ToString());
 
                 //var formAlmanacSettings = new FormAlmanacSettings(
                 //    sky.Context.JulianDayMidnight,
@@ -268,14 +286,7 @@ namespace Planetarium.ViewModels
                 //    }
                 //}
             }
-            else if (key == Key.P)
-            {
-                var body = map.SelectedObject;
-                if (body != null)
-                {
-                    GetObjectEphemeris(body);
-                }
-            }
+            // "T" = [T]rack
             else if (key == Key.T)
             {
                 MotionTrack(map.SelectedObject);
