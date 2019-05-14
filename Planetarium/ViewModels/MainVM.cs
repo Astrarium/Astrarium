@@ -266,20 +266,8 @@ namespace Planetarium.ViewModels
             // "P" = [P]henomena
             else if (key == Key.P)
             {
-                var events = sky.GetEvents(
-                        sky.Context.JulianDayMidnight,
-                        sky.Context.JulianDayMidnight + 30,
-                        sky.GetEventsCategories());
-
-                var vm = viewManager.CreateViewModel<PhenomenaVM>();
-                vm.SetEvents(events);
-
-                if (viewManager.ShowDialog(vm) ?? false)
-                {
-                    sky.Context.JulianDay = vm.JulianDay;
-                    sky.Calculate();
-                    map.Invalidate();
-                }
+                CalculatePhenomena();
+                
 
                 //MessageBox.Show(events.Count.ToString());
 
@@ -418,6 +406,38 @@ namespace Planetarium.ViewModels
                     viewManager.ShowWindow(vm);
                 }
             }
+        }
+
+        private async void CalculatePhenomena()
+        {
+            var ps = viewManager.CreateViewModel<PhenomenaSettingsVM>();
+            ps.JulianDayFrom = sky.Context.JulianDay;
+            ps.JulianDayTo = sky.Context.JulianDay + 30;
+            if (viewManager.ShowDialog(ps) ?? false)
+            {
+                var tokenSource = new CancellationTokenSource();
+
+                viewManager.ShowProgress("Please wait", "Calculating phenomena...", tokenSource);
+
+                var events = await Task.Run(() => sky.GetEvents(
+                        ps.JulianDayFrom,
+                        ps.JulianDayTo,
+                        ps.Categories,
+                        tokenSource.Token));
+               
+                if (!tokenSource.IsCancellationRequested)
+                {
+                    tokenSource.Cancel();
+                    var vm = viewManager.CreateViewModel<PhenomenaVM>();
+                    vm.SetEvents(events);
+                    if (viewManager.ShowDialog(vm) ?? false)
+                    {
+                        sky.Context.JulianDay = vm.JulianDay;
+                        sky.Calculate();
+                        map.Invalidate();
+                    }
+                }
+            }    
         }
 
         private void SearchObject()

@@ -100,43 +100,6 @@ namespace Planetarium
             }
         }
 
-        //public ICollection<T> GetEphemeris<T>(CelestialObject body, double from, double to, double step, string ephemKey)
-        //{
-        //    Type bodyType = body.GetType();
-
-        //    if (body == null)
-        //        throw new ArgumentNullException("Celestial body should not be null.", nameof(body));
-
-        //    if (string.IsNullOrWhiteSpace(ephemKey))
-        //        throw new ArgumentException("Ephemeris key should not be null or empty.", nameof(body));
-
-        //    if (!EphemConfigs.ContainsKey(bodyType))
-        //        throw new ArgumentException($"Object of type '{bodyType}' does not have configured ephemeris provider.", nameof(body));
-
-        //    var config = EphemConfigs[body.GetType()];
-
-        //    var item = config.FirstOrDefault(c => c.Category == ephemKey);
-
-        //    if (item == null)
-        //        throw new Exception($"Unknown ephemeris key '{ephemKey}'. Check that corresponding ephemeris provider has required ephemeris key.");
-
-        //    List<T> result = new List<T>();
-
-        //    for (double jd = from; jd <= to; jd += step)
-        //    {
-        //        var context = new SkyContext(jd, Context.GeoLocation);
-
-        //        object value = item.Formula.DynamicInvoke(context, body);
-
-        //        if (!(value is T))
-        //            throw new Exception($"Ephemeris with key '{ephemKey}' has type {value.GetType()} but requested cast to {typeof(T)}.");
-
-        //        result.Add((T)value);
-        //    }
-
-        //    return result;
-        //}
-
         public List<List<Ephemeris>> GetEphemerides(CelestialObject body, double from, double to, double step, IEnumerable<string> categories, CancellationToken? cancelToken = null, IProgress<double> progress = null)
         {
             List<List<Ephemeris>> ephemerides = new List<List<Ephemeris>>();
@@ -209,7 +172,7 @@ namespace Planetarium
             
         }
 
-        public ICollection<AstroEvent> GetEvents(double jdFrom, double jdTo, ICollection<string> categories)
+        public ICollection<AstroEvent> GetEvents(double jdFrom, double jdTo, IEnumerable<string> categories, CancellationToken? cancelToken = null)
         {            
             var context = new AstroEventsContext()
             {
@@ -221,12 +184,18 @@ namespace Planetarium
             var events = new List<AstroEvent>();
             foreach (var item in EventConfigs.SelectMany(c => c.Items).Where(i => categories.Contains(i.Key)))
             {
-                events.AddRange(item.Formula.Invoke(context));
+                if (cancelToken != null && cancelToken.Value.IsCancellationRequested)
+                {
+                    break;
+                }
+                else
+                {
+                    events.AddRange(item.Formula.Invoke(context));
+                }
             }
             
             return events
-                .OrderBy(e => e.NoExactTime)
-                .ThenBy(e => e.JulianDay)
+                .OrderBy(e => e.NoExactTime ? e.JulianDay + 1 : e.JulianDay)
                 .Where(e => e.JulianDay >= context.From && e.JulianDay < context.To)
                 .ToArray();
         }

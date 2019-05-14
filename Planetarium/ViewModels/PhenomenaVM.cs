@@ -32,8 +32,9 @@ namespace Planetarium.ViewModels
 
         public void SetEvents(ICollection<AstroEvent> events)
         {
-            Events = events.Select(e => new AstroEventVM() { JulianDay = e.JulianDay, Text = e.Text, NoExactTime = e.NoExactTime, Time = Formatters.TimeOnly.Format(new Date(e.JulianDay, sky.Context.GeoLocation.UtcOffset)) })
-                .GroupBy(e => Formatters.DateOnly.Format(new Date(e.JulianDay, sky.Context.GeoLocation.UtcOffset)));
+            Events = events
+                .Select(e => new AstroEventVM(e, sky.Context.GeoLocation.UtcOffset))
+                .GroupBy(e => e.Date);
         }
 
         private void SaveToFile()
@@ -54,9 +55,20 @@ namespace Planetarium.ViewModels
 
     public class AstroEventVM
     {
+        public string Date { get; set; }
         public string Time { get; set; }
         public double JulianDay { get; set; }
         public string Text { get; set; }
         public bool NoExactTime { get; set; }
+
+        public AstroEventVM(AstroEvent e, double utcOffset)
+        {
+            var date = new Date(e.JulianDay, utcOffset);
+            JulianDay = e.JulianDay;
+            Text = e.Text;
+            NoExactTime = e.NoExactTime;
+            Date = Formatters.DateOnly.Format(date);
+            Time = Formatters.TimeOnly.Format(date);
+        }
     }
 }
