@@ -288,6 +288,15 @@ namespace Planetarium
             }
         }
 
+        private class TimeOnlyFormatter : IEphemFormatter
+        {
+            public string Format(object value)
+            {
+                Date d = (Date)value;
+                return $"{d.Hour:00}:{d.Minute:00}";
+            }
+        }
+
         private class MonthYearFormatter : IEphemFormatter
         {
             private readonly string[] months = CultureInfo.InvariantCulture.DateTimeFormat.MonthNames.Take(12).ToArray();
@@ -392,6 +401,7 @@ namespace Planetarium
         public static readonly IEphemFormatter LibrationLongitude = new LibrationLongitudeFormatter();
         public static readonly IEphemFormatter DateTime = new DateTimeFormatter();
         public static readonly IEphemFormatter DateOnly = new DateOnlyFormatter();
+        public static readonly IEphemFormatter TimeOnly = new TimeOnlyFormatter();
         public static readonly IEphemFormatter MonthYear = new MonthYearFormatter();
         public static readonly IEphemFormatter CentralMeridian = new UnsignedDoubleFormatter(2, "\u00B0");
         public static readonly IEphemFormatter RotationAxis = new UnsignedDoubleFormatter(2, "\u00B0");

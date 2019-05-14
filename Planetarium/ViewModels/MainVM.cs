@@ -26,7 +26,7 @@ namespace Planetarium.ViewModels
         public string MapHorizontalCoordinatesString { get; private set; }
         public string MapConstellationNameString { get; private set; }
         public string MapViewAngleString { get; private set; }
-        public string DateString { get { return Formatters.DateTime.Format(new Date(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset)); } }
+        public string DateString { get; private set; }
 
         public Command<Key> MapKeyDownCommand { get; private set; }
         public Command<int> ZoomCommand { get; private set; }
@@ -110,8 +110,19 @@ namespace Planetarium.ViewModels
             CenterOnObjectCommand = new Command<CelestialObject>(CenterOnObject);
             ClearObjectsHistoryCommand = new Command(ClearObjectsHistory);
 
+            sky.Context.JulianDayChanged += Sky_JulianDayChanged;
             map.SelectedObjectChanged += Map_SelectedObjectChanged;
             map.ViewAngleChanged += Map_ViewAngleChanged;
+
+            Sky_JulianDayChanged(sky.Context.JulianDay);
+            Map_SelectedObjectChanged(map.SelectedObject);
+            Map_ViewAngleChanged(map.ViewAngle);
+        }
+
+        private void Sky_JulianDayChanged(double jd)
+        {
+            DateString = Formatters.DateTime.Format(new Date(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset));
+            NotifyPropertyChanged(nameof(DateString));
         }
 
         private void Map_ViewAngleChanged(double viewAngle)
@@ -261,13 +272,13 @@ namespace Planetarium.ViewModels
                         sky.GetEventsCategories());
 
                 var vm = viewManager.CreateViewModel<PhenomenaVM>();
-                vm.AstroEvents = events;
-                
+                vm.SetEvents(events);
+
                 if (viewManager.ShowDialog(vm) ?? false)
                 {
-                    //sky.Context.JulianDay = vm.JulianDay;
-                    //sky.Calculate();
-                    //map.GoToObject(body, TimeSpan.Zero);
+                    sky.Context.JulianDay = vm.JulianDay;
+                    sky.Calculate();
+                    map.Invalidate();
                 }
 
                 //MessageBox.Show(events.Count.ToString());
@@ -505,7 +516,6 @@ namespace Planetarium.ViewModels
                 sky.Context.JulianDay = vm.JulianDay;
                 sky.Calculate();
                 map.Invalidate();
-                NotifyPropertyChanged(nameof(DateString));
             }
         }
 

@@ -16,24 +16,39 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <ListBox  
+        <ScrollViewer
             Grid.Row="0"
-            BorderThickness="1"
-            BorderBrush="{StaticResource DataGridHeaderBorderBrush}"
-            Margin="4"
-            ItemsSource="{Binding AstroEvents}">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Height="Auto">
-                        <TextBlock Text="{Binding JulianDay}" />
-                        <TextBlock Text="{Binding Text}" Height="Auto" />
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-
-        </ListBox>
-
-        <StackPanel Grid.Row="2"                    
+            HorizontalScrollBarVisibility="Auto"
+            VerticalScrollBarVisibility="Auto">
+            <ItemsControl              
+                Margin="4"
+                ItemsSource="{Binding Events}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Height="Auto" Margin="0 12 0 0">
+                            <TextBlock Text="{Binding Key}" />
+                            <ItemsControl
+                                ItemsSource="{Binding}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <WrapPanel Orientation="Horizontal" Height="Auto" Margin="0 4 0 0">
+                                            <TextBlock Visibility="{Binding NoExactTime, Converter={StaticResource InverseBoolToVisibilityConverter}}" Padding="0 0 4 0" FontWeight="Bold">
+                                                <Hyperlink Command="{Binding DataContext.SetJulianDayCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding JulianDay}">                                                 
+                                                    <Run Text="{Binding Time}"/>
+                                                </Hyperlink>
+                                            </TextBlock>
+                                            <TextBlock Text="{Binding Text}" />
+                                        </WrapPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+        
+        <StackPanel Grid.Row="1"                    
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
             <Button MinWidth="80" Width="Auto" Margin="4 0" Padding="8 2" Command="{Binding SaveToFileCommand}">Save to File...</Button>
