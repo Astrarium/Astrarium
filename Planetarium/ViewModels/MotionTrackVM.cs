@@ -15,8 +15,9 @@ namespace Planetarium.ViewModels
         public Command OkCommand { get; private set; }
         public Command CancelCommand { get; private set; }
 
-        public MotionTrackVM(IEphemerisProvider ephemerisProvider, ITracksProvider tracksProvider)
+        public MotionTrackVM(IViewManager viewManager, IEphemerisProvider ephemerisProvider, ITracksProvider tracksProvider)
         {
+            this.viewManager = viewManager;
             this.ephemerisProvider = ephemerisProvider;
             this.tracksProvider = tracksProvider;
 
@@ -24,6 +25,7 @@ namespace Planetarium.ViewModels
             CancelCommand = new Command(Close);
         }
 
+        private readonly IViewManager viewManager;
         private readonly ITracksProvider tracksProvider;
         private readonly IEphemerisProvider ephemerisProvider;
 
@@ -52,7 +54,7 @@ namespace Planetarium.ViewModels
 
         public void Ok()
         {
-            AddTrack(new Track()
+            var track = new Track()
             {
                 Body = SelectedBody,
                 From = JulianDayFrom,
@@ -60,7 +62,27 @@ namespace Planetarium.ViewModels
                 LabelsStep = LabelsStep,
                 Color = TrackColor,
                 DrawLabels = DrawLabels
-            });
+            };
+
+            if (JulianDayFrom > JulianDayTo)
+            {
+                viewManager.ShowMessageBox("Warning", "Wrong date range:\nend date should be greater than start date.", System.Windows.MessageBoxButton.OK);
+                return;
+            }
+
+            if (LabelsStep.TotalDays < track.SmallestLabelsStep())
+            {
+                viewManager.ShowMessageBox("Warning", "Wrong labels step value:\nit's too small to calculate the track.", System.Windows.MessageBoxButton.OK);
+                return;
+            }
+
+            if ((JulianDayTo - JulianDayFrom) / track.Step > 10000)
+            {
+                viewManager.ShowMessageBox("Warning", "Step value and date range mismatch:\nresulting track data is too large. Please increase the step or reduce the date range.", System.Windows.MessageBoxButton.OK);
+                return;
+            }
+
+            AddTrack(track);
             Close(true);
         }
 

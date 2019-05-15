@@ -36,7 +36,7 @@ namespace Planetarium
             get
             {
                 // smallest labels step = default calculation step
-                double step = SmallestLabelsStep(Body as IMovingObject);
+                double step = SmallestLabelsStep();
 
                 // labels step, in days
                 double labelsStep = LabelsStep.TotalDays;
@@ -84,10 +84,10 @@ namespace Planetarium
         /// </summary>
         /// <param name="body">Celestial body to get smallest labels step. Should implement interface <see cref="IMovingObject"/>.</param>
         /// <returns></returns>
-        public static double SmallestLabelsStep(IMovingObject body)
+        public double SmallestLabelsStep()
         {
             // mean daily motion, in degrees
-            double dailyMotion = (body as IMovingObject).AverageDailyMotion;
+            double dailyMotion = (Body as IMovingObject).AverageDailyMotion;
 
             // recommended calculation step, in days
             return dailyMotion > 1 ? 1 / dailyMotion : 1;
