@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -15,6 +16,8 @@ namespace Planetarium.Renderers
     /// </summary>
     public class SolarTextureDownloader
     {
+        public static readonly string TempPath = Path.GetTempPath();
+
         public static readonly string SunImagesPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ADK", "SunImages");
 
         public SolarTextureDownloader()
@@ -34,27 +37,35 @@ namespace Planetarium.Renderers
 
         public Image Download(string url)
         {
-            string imageFile = Path.Combine(SunImagesPath, Path.GetFileName(url));
+            // path to the source image (BMP) dowloaded from the web, located in the temp directory
+            string bmpImageFile = Path.Combine(TempPath, Path.GetFileName(url));
+
+            // path to cached destination image (PNG), cropped and with transparent background
+            string pngImageFile = Path.Combine(SunImagesPath, Path.GetFileNameWithoutExtension(url) + ".png");
 
             try
             {
-                if (!File.Exists(imageFile))
+                // if image is already in cache, return it
+                if (File.Exists(pngImageFile))
                 {
-                    // Download latest Solar image from provided URL
-                    using (var client = new WebClient())
-                    {
-                        ServicePointManager.Expect100Continue = true;
-                        ServicePointManager.SecurityProtocol =
-                            SecurityProtocolType.Tls |
-                            SecurityProtocolType.Tls11 |
-                            SecurityProtocolType.Tls12 |
-                            SecurityProtocolType.Ssl3;
-                        client.DownloadFile(new Uri(url), imageFile);
-                    }
+                    return Image.FromFile(pngImageFile);
                 }
 
+                // download latest Solar image from provided URL
+                using (var client = new WebClient())
+                {
+                    ServicePointManager.Expect100Continue = true;
+                    ServicePointManager.SecurityProtocol =
+                        SecurityProtocolType.Tls |
+                        SecurityProtocolType.Tls11 |
+                        SecurityProtocolType.Tls12 |
+                        SecurityProtocolType.Ssl3;
+
+                    client.DownloadFile(new Uri(url), bmpImageFile);
+                }
+                
                 // Prepare resulting circle image with transparent background
-                using (var image = (Bitmap)Image.FromFile(imageFile))
+                using (var image = (Bitmap)Image.FromFile(bmpImageFile))
                 {
                     // default value of crop factor
                     float cropFactor = 0.93f;
@@ -77,7 +88,7 @@ namespace Planetarium.Renderers
                     Image result = new Bitmap(
                         (int)(image.Width * cropFactor),
                         (int)(image.Height * cropFactor),
-                        System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                        PixelFormat.Format32bppArgb);
 
                     using (var g = Graphics.FromImage(result))
                     {
@@ -104,6 +115,9 @@ namespace Planetarium.Renderers
                         }
                     }
 
+                    // save in cache folder
+                    result.Save(pngImageFile, ImageFormat.Png);
+
                     return result;
                 }
             }
@@ -111,6 +125,21 @@ namespace Planetarium.Renderers
             {
                 // TODO: log
                 return null;
+            }
+            finally
+            {
+                // cleanup: delete source image, if exists
+                if (File.Exists(bmpImageFile))
+                {
+                    try
+                    {
+                        File.Delete(bmpImageFile);
+                    }
+                    catch
+                    {
+                        // TODO: log
+                    }
+                }
             }
         }
     }
