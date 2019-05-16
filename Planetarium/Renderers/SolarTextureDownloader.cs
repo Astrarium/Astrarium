@@ -15,26 +15,65 @@ namespace Planetarium.Renderers
     /// </summary>
     public class SolarTextureDownloader
     {
-        public Image Download(string url, float cropFactor)
+        public static readonly string SunImagesPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ADK", "SunImages");
+
+        public SolarTextureDownloader()
         {
-            string tempFile = Path.Combine(Path.GetTempPath(), "Sun.jpg");
+            if (!Directory.Exists(SunImagesPath))
+            {
+                try
+                {
+                    Directory.CreateDirectory(SunImagesPath);
+                }
+                catch
+                {
+                    // TODO: log
+                }
+            }
+        }
+
+        public Image Download(string url)
+        {
+            string imageFile = Path.Combine(SunImagesPath, Path.GetFileName(url));
+
             try
             {
-                // Download latest Solar image from provided URL
-                using (var client = new WebClient())
+                if (!File.Exists(imageFile))
                 {
-                    ServicePointManager.Expect100Continue = true;
-                    ServicePointManager.SecurityProtocol =
-                        SecurityProtocolType.Tls |
-                        SecurityProtocolType.Tls11 |
-                        SecurityProtocolType.Tls12 |
-                        SecurityProtocolType.Ssl3;
-                    client.DownloadFile(new Uri(url), tempFile);
+                    // Download latest Solar image from provided URL
+                    using (var client = new WebClient())
+                    {
+                        ServicePointManager.Expect100Continue = true;
+                        ServicePointManager.SecurityProtocol =
+                            SecurityProtocolType.Tls |
+                            SecurityProtocolType.Tls11 |
+                            SecurityProtocolType.Tls12 |
+                            SecurityProtocolType.Ssl3;
+                        client.DownloadFile(new Uri(url), imageFile);
+                    }
                 }
 
                 // Prepare resulting circle image with transparent background
-                using (var image = Image.FromFile(tempFile))
+                using (var image = (Bitmap)Image.FromFile(imageFile))
                 {
+                    // default value of crop factor
+                    float cropFactor = 0.93f;
+
+                    // find first non-black pixel position
+                    for (int x = 0; x < image.Width / 2; x++)
+                    {
+                        var color = image.GetPixel(x, image.Height / 2);
+                        if (color.A > 20)
+                        {
+                            int grayscaled = (color.R + color.G + color.B) / 3;
+                            if (grayscaled > 20)
+                            {
+                                cropFactor = 1 - 2 * (float)(x + 2) / image.Width;
+                                break;
+                            }
+                        }
+                    }
+
                     Image result = new Bitmap(
                         (int)(image.Width * cropFactor),
                         (int)(image.Height * cropFactor),
@@ -70,18 +109,8 @@ namespace Planetarium.Renderers
             }
             catch
             {
+                // TODO: log
                 return null;
-            }
-            finally
-            {
-                if (File.Exists(tempFile))
-                {
-                    try
-                    {
-                        File.Delete(tempFile);
-                    }
-                    catch { }
-                }
             }
         }
     }

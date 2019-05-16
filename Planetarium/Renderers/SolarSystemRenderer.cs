@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Planetarium.Renderers
 {
@@ -119,7 +120,10 @@ namespace Planetarium.Renderers
 
                 if (useTextures && size > 10)
                 {
-                    Image imageSun = imagesCache.RequestImage("Sun", true, SunImageProvider, map.Redraw);
+                    Date date = new Date(map.JulianDay);
+                    DateTime dt = new DateTime(date.Year, date.Month, (int)date.Day, 0, 0, 0, DateTimeKind.Utc);
+
+                    Image imageSun = imagesCache.RequestImage("Sun", dt, SunImageProvider, map.Redraw);
                     if (imageSun != null)
                     {
                         map.Graphics.FillEllipse(penSun.Brush, -size / 2, -size / 2, size, size);
@@ -453,6 +457,7 @@ namespace Planetarium.Renderers
 
                             if (useTextures)
                             {
+                                // TODO take into account moon rotation
                                 Image texturePlanet = imagesCache.RequestImage($"5-{moon.Number}", new LonLatShift($"5-{moon.Number}", 0, 0), PlanetTextureProvider, map.Redraw);
                                 if (texturePlanet != null)
                                 {
@@ -735,10 +740,12 @@ namespace Planetarium.Renderers
             });
         }
 
-        private Image SunImageProvider(bool token)
+        private Image SunImageProvider(DateTime date)
         {
-            string url = settings.Get<string>("TextureSunPath");
-            return solarTextureDownloader.Download(url, 0.93f);
+            string template = settings.Get<string>("TextureSunPath");
+            string format = Regex.Replace(template, "{([^}]*)}", match => "{0:" + match.Groups[1].Value + "}");
+            string url = string.Format(format, date);// ;
+            return solarTextureDownloader.Download(url);
         }
 
         private Brush GetPlanetColor(int planet)

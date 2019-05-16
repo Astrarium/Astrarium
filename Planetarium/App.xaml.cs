@@ -63,7 +63,7 @@ namespace Planetarium
             settingsConfig.Add("LabelSun", true).EnabledWhenTrue("Sun").WithSection("Sun");
             settingsConfig.Add("SunLabelFont", new Font("Arial", 12)).EnabledWhen(s => s.Get<bool>("Sun") && s.Get<bool>("LabelSun")).WithSection("Sun");
             settingsConfig.Add("TextureSun", true).EnabledWhenTrue("Sun").WithSection("Sun");
-            settingsConfig.Add("TextureSunPath", "https://sohowww.nascom.nasa.gov/data/realtime/hmi_igr/1024/latest.jpg").EnabledWhen(s => s.Get<bool>("Sun") && s.Get<bool>("TextureSun")).WithSection("Sun");
+            settingsConfig.Add("TextureSunPath", "https://soho.nascom.nasa.gov/data/REPROCESSING/Completed/{yyyy}/hmiigr/{yyyy}{MM}{dd}/{yyyy}{MM}{dd}_0000_hmiigr_512.jpg").EnabledWhen(s => s.Get<bool>("Sun") && s.Get<bool>("TextureSun")).WithSection("Sun");
 
             settingsConfig.Add("ConstLabels", true).WithSection("Constellations");
             settingsConfig.Add("ConstLabelsType", ConstellationsRenderer.LabelType.InternationalName).EnabledWhenTrue("ConstLabels").WithSection("Constellations");
