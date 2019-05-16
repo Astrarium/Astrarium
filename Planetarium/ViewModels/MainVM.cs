@@ -267,33 +267,26 @@ namespace Planetarium.ViewModels
             else if (key == Key.P)
             {
                 CalculatePhenomena();
-                
+            }
+            // "L" = [L]ocation
+            else if (key == Key.L)
+            {
+                var vm = viewManager.CreateViewModel<LocationVM>();
+                if (viewManager.ShowDialog(vm) ?? false)
+                {
+                    sky.Context.GeoLocation = new CrdsGeographical(vm.ObserverLocation);
+                    settings.Set("ObserverLocation", new LocationSettings()
+                    {
+                        Latitude = vm.ObserverLocation.Latitude,
+                        Longitude = vm.ObserverLocation.Longitude,
+                        Elevation = vm.ObserverLocation.Elevation,
+                        UtcOffset = vm.ObserverLocation.UtcOffset
+                    });
+                    settings.Save();
 
-                //MessageBox.Show(events.Count.ToString());
-
-                //var formAlmanacSettings = new FormAlmanacSettings(
-                //    sky.Context.JulianDayMidnight,
-                //    sky.Context.GeoLocation.UtcOffset,
-                //    sky.GetEventsCategories());
-
-                //if (formAlmanacSettings.ShowDialog() == WF.DialogResult.OK)
-                //{
-                //    var events = await Task.Run(() =>
-                //    {
-                //        return sky.GetEvents(
-                //            formAlmanacSettings.JulianDayFrom,
-                //            formAlmanacSettings.JulianDayTo,
-                //            formAlmanacSettings.Categories);
-                //    });
-
-                //    var formAlmanac = new FormAlmanac(events, sky.Context.GeoLocation.UtcOffset);
-                //    if (formAlmanac.ShowDialog() == WF.DialogResult.OK)
-                //    {
-                //        sky.Context.JulianDay = formAlmanac.JulianDay;
-                //        sky.Calculate();
-                //        skyView.Invalidate();
-                //    }
-                //}
+                    sky.Calculate();
+                    map.Invalidate();
+                }
             }
             // "T" = [T]rack
             else if (key == Key.T)

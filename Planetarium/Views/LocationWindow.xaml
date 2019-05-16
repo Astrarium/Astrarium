@@ -1,0 +1,43 @@
+﻿<Window x:Class="Planetarium.Views.LocationWindow"
+xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:v="clr-namespace:Planetarium.Views"
+        mc:Ignorable="d"
+        Title="Search" 
+        Width="600" Height="600"
+        MinWidth="512" MinHeight="300"
+        Style="{StaticResource {x:Type Window}}"
+        ShowInTaskbar="False"     
+        WindowStartupLocation="CenterOwner">
+
+    <Grid Margin="4 4 4 4">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBox x:Name="txtSearchString" Grid.Row="0" Margin="0 4 0 4" Text="{Binding SearchString, UpdateSourceTrigger=PropertyChanged}">
+            <TextBox.Style>
+                <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+                    <EventSetter Event="PreviewKeyDown" Handler="TextBox_PreviewKeyDown" />
+                </Style>
+            </TextBox.Style>
+        </TextBox>
+
+        <v:EarthMapView MinWidth="512" MinHeight="256" Grid.Row="1" SunHourAngle="{Binding SunHourAngle}" SunDeclination="{Binding SunDeclination}" ObserverLocation="{Binding ObserverLocation}"></v:EarthMapView>
+
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right">
+            <Button MinWidth="80" Margin="0 0 4 0" Command="{Binding OkCommand}">
+                Select
+            </Button>
+            <Button MinWidth="80" Command="{Binding CancelCommand}">Close</Button>
+        </StackPanel>
+
+    </Grid>
+</Window>

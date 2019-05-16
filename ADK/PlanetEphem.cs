@@ -1,10 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Globalization;
-using System.IO;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
-using System.Text;
 
 namespace ADK
 {
@@ -290,66 +284,5 @@ namespace ADK
             // Based on https://github.com/Stellarium/stellarium/blob/24a28f335f5277374cd387a1eda9ca7c7eaa507e/src/core/modules/Planet.cpp#L1145
             return Angle.To360(longitude0 + monthlyDrift * 12 * (jd - jd0) / 365.25);
         }
-    }
-
-    [TypeConverter(typeof(GreatRedSpotSettingsConverter))]
-    [DataContract]
-    public class GreatRedSpotSettings
-    {
-        [DataMember]
-        public double Epoch { get; set; }
-
-        [DataMember]
-        public double MonthlyDrift { get; set; }
-
-        [DataMember]
-        public double Longitude { get; set; }
-    }
-
-    public class GreatRedSpotSettingsConverter : TypeConverter
-    {
-        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
-        {
-            return sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
-        }
-
-        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
-        {
-            var casted = value as string;
-            return casted != null
-                ? FromJson(casted)
-                : base.ConvertFrom(context, culture, value);
-        }
-        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
-        {
-            var casted = value as GreatRedSpotSettings;
-            return destinationType == typeof(string) && casted != null
-                ? ToJson(casted)
-                : base.ConvertTo(context, culture, value, destinationType);
-        }
-
-        private string ToJson(GreatRedSpotSettings grsSettings)
-        {
-            using (var ms = new MemoryStream())
-            {
-                ser.WriteObject(ms, grsSettings);
-                ms.Flush();
-                ms.Position = 0;
-                using (var sr = new StreamReader(ms))
-                {
-                    return sr.ReadToEnd();
-                }
-            }
-        }
-
-        private GreatRedSpotSettings FromJson(string json)
-        {
-            using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(json)))
-            {
-                return ser.ReadObject(ms) as GreatRedSpotSettings;
-            }
-        }
-
-        private static readonly DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(GreatRedSpotSettings));
     }
 }

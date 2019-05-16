@@ -41,6 +41,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -87,6 +88,7 @@
     <Compile Include="Config\ControlBuilders\FontSettingControlBuilder.cs" />
     <Compile Include="Config\ControlBuilders\SettingControlBuilder.cs" />
     <Compile Include="Config\ControlBuilders\StringSettingControlBuilder.cs" />
+    <Compile Include="Config\GreatRedSpotSettings.cs" />
     <Compile Include="Config\ISettings.cs" />
     <Compile Include="Config\ISettingsConfig.cs" />
     <Compile Include="Config\SavedSettings.cs" />
@@ -154,6 +156,7 @@
     <Compile Include="ViewModels\EphemerisSettingsVM.cs" />
     <Compile Include="Themes\Node.cs" />
     <Compile Include="ViewModels\PhenomenaVM.cs" />
+    <Compile Include="ViewModels\LocationVM.cs" />
     <Compile Include="ViewModels\TimeSpanVM.cs" />
     <Compile Include="ViewModels\DateVM.cs" />
     <Compile Include="ViewModels\MainVM.cs" />
@@ -166,6 +169,9 @@
     <Compile Include="Controls\FontPicker.cs" />
     <Compile Include="Controls\FilePathPicker.cs" />
     <Compile Include="Controls\ColorPicker.cs" />
+    <Compile Include="Views\EarthMapView.xaml.cs">
+      <DependentUpon>EarthMapView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\PhenomenaSettingsWindow.xaml.cs">
       <DependentUpon>PhenomenaSettingsWindow.xaml</DependentUpon>
     </Compile>
@@ -177,6 +183,9 @@
     </Compile>
     <Compile Include="Views\ProgressWindow.xaml.cs">
       <DependentUpon>ProgressWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LocationWindow.xaml.cs">
+      <DependentUpon>LocationWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\TimeSpanWindow.xaml.cs">
       <DependentUpon>TimeSpanWindow.xaml</DependentUpon>
@@ -210,6 +219,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\EarthMapView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\PhenomenaSettingsWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -223,6 +236,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\ProgressWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LocationWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -387,6 +404,11 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Data\5-4.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\Earth.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

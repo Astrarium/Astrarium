@@ -44,6 +44,9 @@ namespace ADK
         public CrdsGeographical(DMS latitude, DMS longitude, double utcOffset = 0, double elevation = 0) 
             : this(latitude.ToDecimalAngle(), longitude.ToDecimalAngle(), utcOffset, elevation) { }
 
+        public CrdsGeographical(CrdsGeographical other)
+            : this(other.Latitude, other.Longitude, other.UtcOffset, other.Elevation) { }
+
         /// <summary>
         /// Calculates terms needed for calculation of parallax effect.
         /// </summary>
