@@ -1,20 +1,16 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
-using System.Xml.Serialization;
 
 namespace Planetarium.Config
 {
     public class Settings : DynamicObject, ISettings, INotifyPropertyChanged
     {
-        private readonly string SETTINGS_PATH = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ADK", "Settings.xml");
+        private readonly string SETTINGS_PATH = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ADK", "Settings.json");
 
         /// <summary>
         /// Contains settings values
@@ -101,31 +97,30 @@ namespace Planetarium.Config
 
         private void Load(Stream stream)
         {
-            using (XmlReader reader = XmlReader.Create(stream))
+            using (StreamReader reader = new StreamReader(stream))
+            using (JsonTextReader jsonReader = new JsonTextReader(reader))
             {
-                XmlSerializer serializer = new XmlSerializer(typeof(SavedSettings));
-                var settingsTree = (SavedSettings)serializer.Deserialize(reader);
+                JsonSerializer ser = new JsonSerializer();
+                var settingsTree = ser.Deserialize<SavedSettings>(jsonReader);
                 Load(settingsTree);
             }
         }
 
         private void Load(SavedSettings settingsTree)
         {
-            foreach (var setting in settingsTree.Settings)
+            foreach (var setting in settingsTree)
             {
                 var type = AppDomain.CurrentDomain.GetAssemblies()
                     .SelectMany(a => a.GetTypes())
-                    .FirstOrDefault(t => t.FullName.Equals(setting.Type));
+                    .FirstOrDefault(t => t.Equals(setting.Value.GetType()));
 
                 if (type != null)
                 {
-                    var converter = TypeDescriptor.GetConverter(type);
-
-                    Set(setting.Name, converter.ConvertFromString(setting.Value));
+                    Set(setting.Name, setting.Value);
                 }
                 else
                 {
-                    throw new FileFormatException($"Setting `{setting.Name}` has unknown type `{setting.Type}`.");
+                    throw new FileFormatException($"Setting `{setting.Name}` has unknown type `{setting.Value.GetType()}`.");
                 }
             }
             IsChanged = false;
@@ -142,19 +137,18 @@ namespace Planetarium.Config
 
         private void Save(Stream stream)
         {
-            using (XmlWriter writer = XmlWriter.Create(stream))
+            using (StreamWriter writer = new StreamWriter(stream))
+            using (JsonTextWriter jsonWriter = new JsonTextWriter(writer))
             {
-                XmlSerializer serializer = new XmlSerializer(typeof(SavedSettings));
                 SavedSettings saved = new SavedSettings();
                 foreach (var s in SettingsValues)
                 {
-                    var converter = TypeDescriptor.GetConverter(s.Value.GetType());
-                    string stringValue = converter != null ? converter.ConvertToString(s.Value) : s.Value.ToString();
-                    saved.Settings.Add(new SavedSetting() { Name = s.Key, Value = stringValue, Type = s.Value.GetType().FullName });
+                    saved.Add(new SavedSetting() { Name = s.Key, Value = s.Value });
                 }
 
-                serializer.Serialize(writer, saved);
-                IsChanged = false;
+                JsonSerializer ser = new JsonSerializer() { Formatting = Formatting.Indented };
+                ser.Serialize(jsonWriter, saved);
+                jsonWriter.Flush();
             }
         }
     }

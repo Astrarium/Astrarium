@@ -279,10 +279,17 @@ namespace ADK
             return rings;
         }
 
-        public static double GreatRedSpotLongitude(double jd, double jd0, double longitude0, double monthlyDrift)
+        public static double GreatRedSpotLongitude(double jd, GreatRedSpotSettings grs)
         {
             // Based on https://github.com/Stellarium/stellarium/blob/24a28f335f5277374cd387a1eda9ca7c7eaa507e/src/core/modules/Planet.cpp#L1145
-            return Angle.To360(longitude0 + monthlyDrift * 12 * (jd - jd0) / 365.25);
+            return Angle.To360(grs.Longitude + grs.MonthlyDrift * 12 * (jd - grs.Epoch) / 365.25);
         }
+    }
+
+    public class GreatRedSpotSettings
+    {
+        public double Epoch { get; set; }
+        public double MonthlyDrift { get; set; }
+        public double Longitude { get; set; }
     }
 }

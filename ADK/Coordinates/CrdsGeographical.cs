@@ -32,6 +32,8 @@ namespace ADK
         /// </summary>
         public double UtcOffset { get; set; }
 
+        public CrdsGeographical() { }
+
         public CrdsGeographical(double latitude, double longitude, double utcOffset = 0, double elevation = 0)
         {
             Latitude = latitude;

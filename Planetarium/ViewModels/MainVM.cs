@@ -275,15 +275,8 @@ namespace Planetarium.ViewModels
                 if (viewManager.ShowDialog(vm) ?? false)
                 {
                     sky.Context.GeoLocation = new CrdsGeographical(vm.ObserverLocation);
-                    settings.Set("ObserverLocation", new LocationSettings()
-                    {
-                        Latitude = vm.ObserverLocation.Latitude,
-                        Longitude = vm.ObserverLocation.Longitude,
-                        Elevation = vm.ObserverLocation.Elevation,
-                        UtcOffset = vm.ObserverLocation.UtcOffset
-                    });
+                    settings.Set("ObserverLocation", vm.ObserverLocation);
                     settings.Save();
-
                     sky.Calculate();
                     map.Invalidate();
                 }

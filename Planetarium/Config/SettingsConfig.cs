@@ -61,10 +61,9 @@ namespace Planetarium.Config
         public SavedSettings GetDefaultSettings()
         {
             SavedSettings settings = new SavedSettings();
-            Items.ForEach(i => settings.Settings.Add(new SavedSetting() {
+            Items.ForEach(i => settings.Add(new SavedSetting() {
                 Name = i.Name,
-                Type = i.Type.FullName,
-                Value = TypeDescriptor.GetConverter(i.Type).ConvertToString(i.DefaultValue)
+                Value = i.DefaultValue
             }));
             return settings;
         }
