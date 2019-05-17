@@ -98,6 +98,7 @@
     <Compile Include="Config\SettingsConfig.cs" />
     <Compile Include="Config\Settings.cs" />
     <Compile Include="Controls\DependecyInjectionAttribute.cs" />
+    <Compile Include="Controls\EarthMapCanvas.cs" />
     <Compile Include="Controls\NumericUpDown.cs" />
     <Compile Include="Controls\TimeSpanPicker.cs" />
     <Compile Include="Ephemeris.cs" />
@@ -172,9 +173,6 @@
     <Compile Include="Controls\FontPicker.cs" />
     <Compile Include="Controls\FilePathPicker.cs" />
     <Compile Include="Controls\ColorPicker.cs" />
-    <Compile Include="Views\EarthMapView.xaml.cs">
-      <DependentUpon>EarthMapView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\PhenomenaSettingsWindow.xaml.cs">
       <DependentUpon>PhenomenaSettingsWindow.xaml</DependentUpon>
     </Compile>
@@ -219,10 +217,6 @@
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="Themes\Converters.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\EarthMapView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
