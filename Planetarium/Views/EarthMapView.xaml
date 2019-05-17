@@ -9,7 +9,7 @@
              d:DesignHeight="256" d:DesignWidth="512">
     <Grid>
         <WindowsFormsHost Background="Black">
-            <wf:PictureBox x:Name="picMap" MouseMove="picMap_MouseMove" MouseDown="picMap_MouseDown" Paint="picMap_Paint"></wf:PictureBox>
+            <wf:PictureBox x:Name="picMap" MouseWheel="PicMap_MouseWheel" MouseMove="picMap_MouseMove" MouseDown="picMap_MouseDown" Paint="picMap_Paint"></wf:PictureBox>
         </WindowsFormsHost>
     </Grid>
 </UserControl>

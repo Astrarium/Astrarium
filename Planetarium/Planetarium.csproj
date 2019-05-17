@@ -108,6 +108,7 @@
     <Compile Include="IEphemerisProvider.cs" />
     <Compile Include="IInfoProvider.cs" />
     <Compile Include="IMapContext.cs" />
+    <Compile Include="ISettings.cs" />
     <Compile Include="ISkyMap.cs" />
     <Compile Include="Objects\CelestialObject.cs" />
     <Compile Include="Objects\CelestialPoint.cs" />

@@ -99,13 +99,15 @@ namespace Planetarium.Views
                 float width = g.ClipBounds.Width;
                 float height = g.ClipBounds.Height;
 
-                float scale = Math.Min(width / earthMap.Width, height / earthMap.Height);
+
+
+                float scale = (float)Zoom * Math.Min(width / earthMap.Width, height / earthMap.Height);
 
                 ScaledWidth = (int)(earthMap.Width * scale);
                 ScaledHeight = (int)(earthMap.Height * scale);
 
                 OriginX = ((int)width - ScaledWidth) / 2;
-                OriginY = ((int)height - ScaledHeight) / 2;
+                OriginY = 0; //((int)height - ScaledHeight) / 2;
 
                 g.DrawImage(earthMap, OriginX, OriginY, ScaledWidth, ScaledHeight);
             }
@@ -177,6 +179,8 @@ namespace Planetarium.Views
             p.Y = (float)((y0 - (int)Math.Round(SunDeclination)) / 180.0 * ScaledHeight);
 
             if (p.X > ScaledWidth) p.X -= ScaledWidth;
+            if (p.X < 0) p.X += ScaledWidth;
+
 
             g.FillEllipse(sunBrush, p.X - diam / 2, p.Y - diam / 2, diam, diam);
         }
@@ -221,6 +225,36 @@ namespace Planetarium.Views
 
                 picMap.Invalidate();
             }
+        }
+
+        private double Zoom = 1;
+
+        private void PicMap_MouseWheel(object sender, WF.MouseEventArgs e)
+        {
+            double v = Zoom;
+            int delta = e.Delta;
+
+            if (delta > 0)
+            {
+                v *= 1.1;
+            }
+            else
+            {
+                v /= 1.1;
+            }
+
+            if (v >= 4)
+            {
+                v = 4;
+            }
+            if (v < 1)
+            {
+                v = 1;
+            }
+
+            Zoom = v;
+
+            picMap.Invalidate();
         }
     }
 }
