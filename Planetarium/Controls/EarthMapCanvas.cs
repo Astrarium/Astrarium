@@ -28,7 +28,7 @@ namespace Planetarium.Controls
         private double OriginX = 0;
         private double OriginY = 0;
 
-        private BitmapImage earthMap;
+        private BitmapSource earthMap;
         private Point lastMousePosition;
         private Pen scrollerPen = new Pen(new SolidColorBrush(Color.FromArgb(100, 0, 0, 0)), 6);
         private Pen transparentPen = new Pen(Brushes.Transparent, 0);
@@ -64,14 +64,26 @@ namespace Planetarium.Controls
         {
             if (!DesignerProperties.GetIsInDesignMode(this))
             {
-                earthMap = new BitmapImage();
-                earthMap.BeginInit();
-                earthMap.CacheOption = BitmapCacheOption.None;
-                earthMap.UriSource = new Uri(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data", "Earth.jpg"));
-                earthMap.EndInit();
+                Uri uri = new Uri(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data", "Earth.jpg"));
+                BitmapDecoder dec = BitmapDecoder.Create(uri, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);                
+                earthMap = dec.Frames[0];
+                earthMap.Freeze();
+                dec = null;
+
+                Loaded += (s, e) => { // only at this point the control is ready
+                    Window.GetWindow(this) // get the parent window
+                          .Closing += (s1, e1) => Dispose(); //disposing logic here
+                };
             }
 
             ClipToBounds = true;
+        }
+
+        private void Dispose()
+        {
+            earthMap = null;
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
 
         protected override void OnRender(DrawingContext dc)
@@ -300,8 +312,7 @@ namespace Planetarium.Controls
             if (Lat == -90) Lat += 1.0 / 3600.0;
             if (Lat == 90) Lat -= 1.0 / 3600.0;
 
-            ObserverLocation.Latitude = Lat;
-            ObserverLocation.Longitude = Lon;
+            ObserverLocation = new CrdsGeographical(Lat, Lon, ObserverLocation.UtcOffset, ObserverLocation.Elevation);
 
             InvalidateVisual();
         }

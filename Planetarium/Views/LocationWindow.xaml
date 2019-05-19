@@ -7,7 +7,7 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:c="clr-namespace:Planetarium.Controls"
         mc:Ignorable="d"
         Title="Search" 
-        Width="536" Height="600"
+        Width="536" Height="550"
         ResizeMode="NoResize"
         Style="{StaticResource {x:Type Window}}"
         ShowInTaskbar="False" 
@@ -36,9 +36,82 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
             Grid.Row="1" Width="512" Height="256"  Margin="0 4 0 4"
             SunHourAngle="{Binding SunHourAngle}"
             SunDeclination="{Binding SunDeclination}"
-            ObserverLocation="{Binding ObserverLocation}">
+            ObserverLocation="{Binding ObserverLocation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
         </c:EarthMapCanvas>
 
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <GroupBox Header="Latitude" Grid.Column="0" Margin="0 0 2 0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="26" />
+                        <RowDefinition Height="26" />
+                    </Grid.RowDefinitions>
+
+                    <Label Grid.Column="0">Degrees</Label>
+                    <Label Grid.Column="1">Minutes</Label>
+                    <Label Grid.Column="2">Seconds</Label>
+                    <RadioButton Grid.Column="3" VerticalAlignment="Center" Margin="4">N</RadioButton>
+
+                    <c:NumericUpDown Margin="3 0" Grid.Column="0" Grid.Row="1" Minimum="0" Maximum="89" Value="{Binding LatitudeDegrees, Converter={StaticResource NumericConverter}}" DecimalPlaces="0" />
+                    <c:NumericUpDown Margin="3 0" Grid.Column="1" Grid.Row="1" Minimum="0" Maximum="59" Value="{Binding LatitudeMinutes, Converter={StaticResource NumericConverter}}" DecimalPlaces="0" />
+                    <c:NumericUpDown Margin="3 0" Grid.Column="2" Grid.Row="1" Minimum="0" Maximum="59" Value="{Binding LatitudeSeconds, Converter={StaticResource NumericConverter}}" DecimalPlaces="0" />
+                    <RadioButton Grid.Column="3" Grid.Row="1" VerticalAlignment="Center" Margin="4">S</RadioButton>
+
+                </Grid>
+            </GroupBox>
+
+            <GroupBox Header="Longitude" Grid.Column="1" Margin="2 0 0 0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="26" />
+                        <RowDefinition Height="26" />
+                    </Grid.RowDefinitions>
+
+                    <Label Grid.Column="0">Degrees</Label>
+                    <Label Grid.Column="1">Minutes</Label>
+                    <Label Grid.Column="2">Seconds</Label>
+                    <RadioButton Grid.Column="3" VerticalAlignment="Center" Margin="4">E</RadioButton>
+
+                    <c:NumericUpDown Margin="3 0" Grid.Column="0" Grid.Row="1" Minimum="0" Maximum="179" Value="0" DecimalPlaces="0" />
+                    <c:NumericUpDown Margin="3 0" Grid.Column="1" Grid.Row="1" Minimum="0" Maximum="59" Value="0" DecimalPlaces="0" />
+                    <c:NumericUpDown Margin="3 0" Grid.Column="2" Grid.Row="1" Minimum="0" Maximum="59" Value="0" DecimalPlaces="0" />
+                    <RadioButton Grid.Column="3" Grid.Row="1" VerticalAlignment="Center" Margin="4">W</RadioButton>
+
+                </Grid>
+            </GroupBox>
+
+            <GroupBox Header="Location Name" Grid.Row="1" Grid.Column="0" Margin="0 0 2 0">
+                <TextBox Margin="4 10 4 10" Height="24"></TextBox>
+            </GroupBox>
+
+            <GroupBox Header="Time Zone" Grid.Row="1" Grid.Column="1" Margin="2 0 0 0">
+                <ComboBox Margin="4 10 4 10" Height="24"></ComboBox>
+            </GroupBox>
+
+        </Grid>
+        
         <StackPanel Grid.Row="3"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
