@@ -66,12 +66,12 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     <Label Grid.Column="0">Degrees</Label>
                     <Label Grid.Column="1">Minutes</Label>
                     <Label Grid.Column="2">Seconds</Label>
-                    <RadioButton Grid.Column="3" VerticalAlignment="Center" Margin="4">N</RadioButton>
+                    <RadioButton Grid.Column="3" VerticalAlignment="Center" Margin="4" IsChecked="{Binding LatitudeNorth}">N</RadioButton>
 
                     <c:NumericUpDown Margin="3 0" Grid.Column="0" Grid.Row="1" Minimum="0" Maximum="89" Value="{Binding LatitudeDegrees, Converter={StaticResource NumericConverter}}" DecimalPlaces="0" />
                     <c:NumericUpDown Margin="3 0" Grid.Column="1" Grid.Row="1" Minimum="0" Maximum="59" Value="{Binding LatitudeMinutes, Converter={StaticResource NumericConverter}}" DecimalPlaces="0" />
                     <c:NumericUpDown Margin="3 0" Grid.Column="2" Grid.Row="1" Minimum="0" Maximum="59" Value="{Binding LatitudeSeconds, Converter={StaticResource NumericConverter}}" DecimalPlaces="0" />
-                    <RadioButton Grid.Column="3" Grid.Row="1" VerticalAlignment="Center" Margin="4">S</RadioButton>
+                    <RadioButton Grid.Column="3" Grid.Row="1" VerticalAlignment="Center" Margin="4" IsChecked="{Binding LatitudeSouth}">S</RadioButton>
 
                 </Grid>
             </GroupBox>
@@ -92,12 +92,12 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     <Label Grid.Column="0">Degrees</Label>
                     <Label Grid.Column="1">Minutes</Label>
                     <Label Grid.Column="2">Seconds</Label>
-                    <RadioButton Grid.Column="3" VerticalAlignment="Center" Margin="4">E</RadioButton>
+                    <RadioButton Grid.Column="3" VerticalAlignment="Center" Margin="4" IsChecked="{Binding LongitudeEast}">E</RadioButton>
 
-                    <c:NumericUpDown Margin="3 0" Grid.Column="0" Grid.Row="1" Minimum="0" Maximum="179" Value="0" DecimalPlaces="0" />
-                    <c:NumericUpDown Margin="3 0" Grid.Column="1" Grid.Row="1" Minimum="0" Maximum="59" Value="0" DecimalPlaces="0" />
-                    <c:NumericUpDown Margin="3 0" Grid.Column="2" Grid.Row="1" Minimum="0" Maximum="59" Value="0" DecimalPlaces="0" />
-                    <RadioButton Grid.Column="3" Grid.Row="1" VerticalAlignment="Center" Margin="4">W</RadioButton>
+                    <c:NumericUpDown Margin="3 0" Grid.Column="0" Grid.Row="1" Minimum="0" Maximum="179" Value="{Binding LongitudeDegrees, Converter={StaticResource NumericConverter}}" DecimalPlaces="0" />
+                    <c:NumericUpDown Margin="3 0" Grid.Column="1" Grid.Row="1" Minimum="0" Maximum="59" Value="{Binding LongitudeMinutes, Converter={StaticResource NumericConverter}}" DecimalPlaces="0" />
+                    <c:NumericUpDown Margin="3 0" Grid.Column="2" Grid.Row="1" Minimum="0" Maximum="59" Value="{Binding LongitudeSeconds, Converter={StaticResource NumericConverter}}" DecimalPlaces="0" />
+                    <RadioButton Grid.Column="3" Grid.Row="1" VerticalAlignment="Center" Margin="4" IsChecked="{Binding LongitudeWest}">W</RadioButton>
 
                 </Grid>
             </GroupBox>

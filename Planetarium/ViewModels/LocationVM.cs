@@ -31,11 +31,21 @@ namespace Planetarium.ViewModels
                     nameof(ObserverLocation), 
                     nameof(LatitudeDegrees),
                     nameof(LatitudeMinutes),
-                    nameof(LatitudeSeconds));
+                    nameof(LatitudeSeconds),
+                    nameof(LatitudeNorth),
+                    nameof(LatitudeSouth),
+                    nameof(LongitudeDegrees),
+                    nameof(LongitudeMinutes),
+                    nameof(LongitudeSeconds),
+                    nameof(LongitudeEast),
+                    nameof(LongitudeWest)
+                );
             }
         }
         public double SunHourAngle { get; set; }
         public double SunDeclination { get; set; }
+
+        #region Latitude properties
 
         public int LatitudeDegrees
         {
@@ -47,7 +57,7 @@ namespace Planetarium.ViewModels
             {
                 var latitude = new DMS(ObserverLocation.Latitude);
                 latitude.Degrees = (uint)value;
-                ObserverLocation = new CrdsGeographical(latitude.ToDecimalAngle(), ObserverLocation.Longitude);      
+                ObserverLocation = new CrdsGeographical(latitude.ToDecimalAngle(), ObserverLocation.Longitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation);      
             }
         }
 
@@ -61,7 +71,7 @@ namespace Planetarium.ViewModels
             {
                 var latitude = new DMS(ObserverLocation.Latitude);
                 latitude.Minutes = (uint)value;
-                ObserverLocation = new CrdsGeographical(latitude.ToDecimalAngle(), ObserverLocation.Longitude);
+                ObserverLocation = new CrdsGeographical(latitude.ToDecimalAngle(), ObserverLocation.Longitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation);
             }
         }
 
@@ -75,9 +85,117 @@ namespace Planetarium.ViewModels
             {
                 var latitude = new DMS(ObserverLocation.Latitude);
                 latitude.Seconds = (uint)value;
-                ObserverLocation = new CrdsGeographical(latitude.ToDecimalAngle(), ObserverLocation.Longitude);
+                ObserverLocation = new CrdsGeographical(latitude.ToDecimalAngle(), ObserverLocation.Longitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation);
             }
         }
+
+        public bool LatitudeNorth
+        {
+            get
+            {
+                return ObserverLocation.Latitude >= 0;
+            }
+            set
+            {
+                if (value != (ObserverLocation.Latitude >= 0))
+                {
+                    ObserverLocation = new CrdsGeographical(-ObserverLocation.Latitude, ObserverLocation.Longitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation);
+                }
+            }
+        }
+
+        public bool LatitudeSouth
+        {
+            get
+            {
+                return ObserverLocation.Latitude < 0;
+            }
+            set
+            {
+                if (value != (ObserverLocation.Latitude < 0))
+                {
+                    ObserverLocation = new CrdsGeographical(-ObserverLocation.Latitude, ObserverLocation.Longitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation);
+                }
+            }
+        }
+
+        #endregion Latitude properties
+
+        #region Longitude properties
+
+        public int LongitudeDegrees
+        {
+            get
+            {
+                return (int)(new DMS(ObserverLocation.Longitude).Degrees);
+            }
+            set
+            {
+                var longitude = new DMS(ObserverLocation.Longitude);
+                longitude.Degrees = (uint)value;
+                ObserverLocation = new CrdsGeographical(ObserverLocation.Latitude, longitude.ToDecimalAngle(), ObserverLocation.UtcOffset, ObserverLocation.Elevation);
+            }
+        }
+
+        public int LongitudeMinutes
+        {
+            get
+            {
+                return (int)(new DMS(ObserverLocation.Longitude).Minutes);
+            }
+            set
+            {
+                var longitude = new DMS(ObserverLocation.Longitude);
+                longitude.Minutes = (uint)value;
+                ObserverLocation = new CrdsGeographical(ObserverLocation.Latitude, longitude.ToDecimalAngle(), ObserverLocation.UtcOffset, ObserverLocation.Elevation);
+            }
+        }
+
+        public int LongitudeSeconds
+        {
+            get
+            {
+                return (int)(new DMS(ObserverLocation.Longitude).Seconds);
+            }
+            set
+            {
+                var longitude = new DMS(ObserverLocation.Longitude);
+                longitude.Seconds = (uint)value;
+                ObserverLocation = new CrdsGeographical(ObserverLocation.Latitude, longitude.ToDecimalAngle(), ObserverLocation.UtcOffset, ObserverLocation.Elevation);
+            }
+        }
+
+        public bool LongitudeEast
+        {
+            get
+            {
+                return ObserverLocation.Longitude <= 0;
+            }
+            set
+            {
+                if (value != (ObserverLocation.Longitude <= 0))
+                {
+                    ObserverLocation = new CrdsGeographical(ObserverLocation.Latitude, -ObserverLocation.Longitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation);
+                }
+            }
+        }
+
+        public bool LongitudeWest
+        {
+            get
+            {
+                return ObserverLocation.Longitude > 0;
+            }
+            set
+            {
+                if (value != (ObserverLocation.Longitude > 0))
+                {
+                    ObserverLocation = new CrdsGeographical(ObserverLocation.Latitude, -ObserverLocation.Longitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation);
+                }
+            }
+        }
+
+        #endregion Longitude properties
 
         public LocationVM(Sky sky, ISolarProvider solarProvider)
         {
