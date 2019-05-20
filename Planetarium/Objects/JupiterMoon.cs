@@ -25,6 +25,11 @@ namespace Planetarium.Objects
         public CrdsRectangular RectangularS { get; set; }
 
         /// <summary>
+        /// Longitude of central meridian
+        /// </summary>
+        public double CM { get; set; }
+
+        /// <summary>
         /// Name of the Galilean moon
         /// </summary>
         public string Name { get; set; }

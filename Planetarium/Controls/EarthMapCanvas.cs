@@ -22,7 +22,6 @@ namespace Planetarium.Controls
         public readonly static DependencyProperty ObserverLocationProperty = DependencyProperty.Register(nameof(ObserverLocation), typeof(CrdsGeographical), typeof(EarthMapCanvas), new FrameworkPropertyMetadata(new CrdsGeographical(0, 0), null) { AffectsRender = true });
         public readonly static DependencyProperty SunEquatorialProperty = DependencyProperty.Register(nameof(SunDeclination), typeof(double), typeof(EarthMapCanvas), new FrameworkPropertyMetadata(null) { AffectsRender = true });
 
-
         private double MaxScale = 20;
         private double Zoom = 1;
         private double OriginX = 0;
@@ -75,8 +74,15 @@ namespace Planetarium.Controls
                           .Closing += (s1, e1) => Dispose(); //disposing logic here
                 };
             }
-
+          
             ClipToBounds = true;
+        }
+
+        protected override void OnPreviewMouseMove(MouseEventArgs e)
+        {
+            base.OnPreviewMouseMove(e);
+            FocusVisualStyle = null;
+            Focus();
         }
 
         private void Dispose()

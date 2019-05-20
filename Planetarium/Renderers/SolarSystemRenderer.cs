@@ -458,7 +458,7 @@ namespace Planetarium.Renderers
                             if (useTextures)
                             {
                                 // TODO take into account moon rotation
-                                Image texturePlanet = imagesCache.RequestImage($"5-{moon.Number}", new LonLatShift($"5-{moon.Number}", 0, 0), PlanetTextureProvider, map.Redraw);
+                                Image texturePlanet = imagesCache.RequestImage($"5-{moon.Number}", new LonLatShift($"5-{moon.Number}", moon.CM, jupiter.Appearance.D), PlanetTextureProvider, map.Redraw);
                                 if (texturePlanet != null)
                                 {
                                     map.Graphics.DrawImage(texturePlanet, -diam / 2 * 1.01f, -diam / 2 * 1.01f, diam * 1.01f, diam * 1.01f);

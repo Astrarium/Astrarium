@@ -33,11 +33,44 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         </TextBox>
 
         <c:EarthMapCanvas 
+            Visibility="{Binding IsFocused, ElementName=txtSearchString, Converter={StaticResource InverseBoolToVisibilityConverter}}"
+            Focusable="True"
             Grid.Row="1" Width="512" Height="256"  Margin="0 4 0 4"
             SunHourAngle="{Binding SunHourAngle}"
             SunDeclination="{Binding SunDeclination}"
             ObserverLocation="{Binding ObserverLocation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
         </c:EarthMapCanvas>
+
+        <ListView Grid.Row="1" 
+            Width="512" Height="256"
+            Margin="0 4 0 4"
+            x:Name="lstResults"
+            ItemsSource="{Binding Path=SearchResults, Mode=OneWay}"
+            SelectionMode="Single" 
+            Visibility="{Binding IsFocused, ElementName=txtSearchString, Converter={StaticResource bool2VisibilityConverter}}"
+            VerticalContentAlignment="Top"
+            IsSynchronizedWithCurrentItem="True"
+                  Style="{x:Null}"
+            ScrollViewer.VerticalScrollBarVisibility="Visible"
+            ScrollViewer.CanContentScroll="False">
+
+            <ListView.View>
+                <GridView>
+                    <GridView.Columns>
+                        <GridViewColumn Header="1" Width="Auto" DisplayMemberBinding="{Binding Path=Name}" />
+                        <GridViewColumn Header="2" Width="50" DisplayMemberBinding="{Binding Path=Country}" />
+                        <GridViewColumn Header="3" Width="100" DisplayMemberBinding="{Binding Path=Names}" />
+                    </GridView.Columns>
+                </GridView>
+            </ListView.View>
+            
+            <!--<ListView.ItemContainerStyle>
+                <Style TargetType="{x:Type ListViewItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                    <EventSetter Event="MouseDoubleClick" Handler="ListViewItem_MouseDoubleClick" />
+                    <EventSetter Event="PreviewKeyDown" Handler="Controls_PreviewKeyDown" />
+                </Style>
+            </ListView.ItemContainerStyle>-->
+        </ListView>
 
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>

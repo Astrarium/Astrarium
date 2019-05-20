@@ -348,15 +348,17 @@ namespace Planetarium.ViewModels
                 Command = MotionTrackCommand,
                 CommandParameter = map.SelectedObject
             });
-            ContextMenuItems.Add(null);
-
-            ContextMenuItems.Add(new MenuItemVM()
+            
+            if (map.LockedObject != null || map.SelectedObject != null)
             {
-                Header = "Lock / Unlock",
-                IsEnabled = map.SelectedObject != null,
-                Command = LockOnObjectCommand,
-                CommandParameter = map.SelectedObject
-            });
+                ContextMenuItems.Add(null);
+                ContextMenuItems.Add(new MenuItemVM()
+                {
+                    Header = map.SelectedObject != null ? "Lock" : "Unlock",
+                    Command = LockOnObjectCommand,
+                    CommandParameter = map.SelectedObject
+                });
+            }
             
             NotifyPropertyChanged(nameof(ContextMenuItems));
         }
@@ -437,21 +439,31 @@ namespace Planetarium.ViewModels
 
         private void CenterOnObject(CelestialObject body)
         {
-            bool show = true;
             if (settings.Get<bool>("Ground") && body.Horizontal.Altitude <= 0)
             {
-                show = false;
                 if (viewManager.ShowMessageBox("Question", "The object is under horizon at the moment. Do you want to switch off displaying the ground?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
-                    show = true;
                     settings.Set("Ground", false);
+                }
+                else
+                {
+                    return;
                 }
             }
 
-            if (show)
+            if (map.LockedObject != null && map.LockedObject != body)
             {
-                map.GoToObject(body, TimeSpan.FromSeconds(1));
+                if (viewManager.ShowMessageBox("Question", "The map is locked on different celestial body. Do you want to unlock the map?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                {
+                    map.LockedObject = null;
+                }
+                else
+                {
+                    return;
+                }
             }
+            
+            map.GoToObject(body, TimeSpan.FromSeconds(1));
         }
 
         private void LockOnObject(CelestialObject body)

@@ -325,6 +325,7 @@ namespace Planetarium.Calculators
                         j.Equatorial = context.Get(JupiterMoonEquatorial, m);
                         j.Horizontal = context.Get(JupiterMoonHorizontal, m);
                         j.Semidiameter = context.Get(JupiterMoonSemidiameter, m);
+                        j.CM = context.Get(JupiterMoonCentralMeridian, m);
                     }
                 }
 
@@ -381,6 +382,14 @@ namespace Planetarium.Calculators
 
             // visible moon semidiameter
             return GalileanMoons.MoonSemidiameter(r, z, m - 1);
+        }
+
+        private double JupiterMoonCentralMeridian(SkyContext c, int m)
+        {
+            // planetocentric rectangular coordinates of the moon
+            CrdsRectangular r = c.Get(JupiterMoonRectangular, m);
+
+            return GalileanMoons.MoonCentralMeridian(r, m - 1);
         }
 
         public void ConfigureEphemeris(EphemerisConfig<Planet> e)
@@ -504,7 +513,8 @@ namespace Planetarium.Calculators
             //.AddRow("DistanceFromEarth", c.Get(DistanceFromEarth, p))
             //.AddRow("DistanceFromSun", c.Get(DistanceFromSun, p))
             //.AddRow("HorizontalParallax", c.Get(Parallax, p))
-            .AddRow("AngularDiameter", c.Get(JupiterMoonSemidiameter, m) * 2 / 3600.0);
+            .AddRow("AngularDiameter", c.Get(JupiterMoonSemidiameter, m) * 2 / 3600.0)
+            .AddRow("Appearance.CM", c.Get(JupiterMoonCentralMeridian, m));
 
             return info;
         }

@@ -101,6 +101,20 @@ namespace ADK
             return ToDegrees(Atan2(MR[i], r * AU + z * JR)) * 3600;
         }
 
+        /// <summary>
+        /// Gets longitude of central meridian of Galilean moon
+        /// </summary>
+        /// <param name="r">Planetocentric rectangular coordinates of the moon</param>
+        /// <param name="i">Galilean moon index, from 0 (Io) to 3 (Callisto)</param>
+        /// <returns></returns>
+        public static double MoonCentralMeridian(CrdsRectangular r, int i)
+        {
+            // distance from Juputer, in Jupiter equatorial radii
+            double distance = Sqrt(r.X * r.X + r.Y * r.Y + r.Z * r.Z);
+
+            return To360(ToDegrees(Atan2(r.Z / distance, r.X / distance)) + 270);
+        }
+
         public static CrdsRectangular[,] Positions(double jd, CrdsHeliocentrical earth, CrdsHeliocentrical jupiter)
         {
             CrdsRectangular[,] positions = new CrdsRectangular[4, 2];
