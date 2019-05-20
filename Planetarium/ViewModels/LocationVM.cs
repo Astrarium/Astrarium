@@ -19,6 +19,10 @@ namespace Planetarium.ViewModels
     {
         public Command OkCommand { get; private set; }
         public Command CancelCommand { get; private set; }
+        public Command EndSearchModeCommand { get; private set; }
+        public Command SelectItemCommand { get; private set; }
+
+        private CrdsGeographical _SavedLocation;
 
         private CrdsGeographical _ObserverLocation;
         public CrdsGeographical ObserverLocation
@@ -47,6 +51,7 @@ namespace Planetarium.ViewModels
         }
         public double SunHourAngle { get; set; }
         public double SunDeclination { get; set; }
+        public bool SearchMode { get; set; }
 
         #region Search properties
 
@@ -54,6 +59,21 @@ namespace Planetarium.ViewModels
         /// Collection of found items.
         /// </summary>
         public ObservableCollection<LocationSearchItem> SearchResults { get; private set; } = new ObservableCollection<LocationSearchItem>();
+
+        private LocationSearchItem _SelectedItem;
+        public LocationSearchItem SelectedItem
+        {
+            get { return _SelectedItem; }
+            set
+            {
+                _SelectedItem = value;
+                if (_SelectedItem != null)
+                {
+                    ObserverLocation = _SelectedItem.Location;
+                }
+                NotifyPropertyChanged(nameof(SelectedItem));
+            }
+        }
 
         /// <summary>
         /// Backing field for <see cref="SearchString"/>.
@@ -70,10 +90,24 @@ namespace Planetarium.ViewModels
                 return _SearchString;
             }
             set
-            {
+            {                
                 _SearchString = value;
-                NotifyPropertyChanged(nameof(SearchString));
-                DoSearch();
+                bool searchMode = SearchMode;
+                SearchMode = !string.IsNullOrWhiteSpace(_SearchString);
+                NotifyPropertyChanged(nameof(SearchString), nameof(SearchMode));
+                if (SearchMode)
+                {
+                    if (!searchMode)
+                    {
+                        _SavedLocation = new CrdsGeographical(ObserverLocation);
+                    }
+                    DoSearch();
+                }
+
+                if (!SearchMode && searchMode)
+                {
+                    ObserverLocation = new CrdsGeographical(_SavedLocation);
+                }
             }
         }
 
@@ -87,7 +121,8 @@ namespace Planetarium.ViewModels
             foreach (var item in results)
             {
                 SearchResults.Add(item);
-            }            
+            }
+            SelectedItem = SearchResults.Any() ? SearchResults[0] : null;
         }
 
         private List<LocationSearchItem> Search(string searchString)
@@ -121,11 +156,16 @@ namespace Planetarium.ViewModels
                     var name = names.FirstOrDefault(s => s.Replace("\'", "").StartsWith(searchString, StringComparison.InvariantCultureIgnoreCase));
                     if (name != null)
                     {
+                        double latitude = double.Parse(chunks[4], CultureInfo.InvariantCulture);
+                        double longitude = double.Parse(chunks[5], CultureInfo.InvariantCulture);
+                        double elevation = double.Parse(string.IsNullOrWhiteSpace(chunks[15]) ? "0" : chunks[15], CultureInfo.InvariantCulture);
+
                         results.Add(new LocationSearchItem
                         {
                             Name = name,
                             Country = chunks[8],
-                            Names = string.Join(", ", names.Distinct().Except(new[] { name }).ToArray())
+                            Names = string.Join(", ", names.Distinct().Except(new[] { name }).ToArray()),
+                            Location = new CrdsGeographical(latitude, -longitude, 0, elevation)
                         });
 
                         if (results.Count == 10)
@@ -304,11 +344,23 @@ namespace Planetarium.ViewModels
 
             OkCommand = new Command(Ok);
             CancelCommand = new Command(Close);
+            EndSearchModeCommand = new Command(EndSearchMode);
+            SelectItemCommand = new Command(SelectItem);
         }
 
-        public void Ok()
+        private void Ok()
         {
             Close(true);
+        }
+
+        private void EndSearchMode()
+        {
+            SearchString = null;            
+        }
+
+        private void SelectItem()
+        {
+
         }
     }
 
@@ -317,5 +369,6 @@ namespace Planetarium.ViewModels
         public string Name { get; set; }
         public string Country { get; set; }
         public string Names { get; set; }
+        public CrdsGeographical Location { get; set; }
     }
 }

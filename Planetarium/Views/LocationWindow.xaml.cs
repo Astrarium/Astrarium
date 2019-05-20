@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Planetarium.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -27,10 +28,21 @@ namespace Planetarium.Views
         {
             InitializeComponent();
         }
+    }
 
-        private void TextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+    public class LocationsListVisibilityConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
+            var a = (ICollection<LocationSearchItem>)values[0];
+            object b = values[1];
 
+            return a != null && a.Any() ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 }

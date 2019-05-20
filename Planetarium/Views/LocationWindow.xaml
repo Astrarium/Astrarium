@@ -4,6 +4,7 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:t="clr-namespace:Planetarium.Themes"
+        xmlns:v="clr-namespace:Planetarium.Views"
         xmlns:c="clr-namespace:Planetarium.Controls"
         mc:Ignorable="d"
         Title="Search" 
@@ -15,6 +16,10 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         t:WindowProperties.MinButtonVisible="Collapsed"
         t:WindowProperties.MaxButtonVisible="Collapsed">
 
+    <Window.Resources>
+        <v:LocationsListVisibilityConverter x:Key="LocationsListVisibilityConverter" />
+    </Window.Resources>
+    
     <Grid Margin="4 4 4 4">
 
         <Grid.RowDefinitions>
@@ -24,16 +29,21 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBox x:Name="txtSearchString" Grid.Row="0" Margin="0 4 0 4" Text="{Binding SearchString, UpdateSourceTrigger=PropertyChanged}">
-            <TextBox.Style>
-                <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
-                    <EventSetter Event="PreviewKeyDown" Handler="TextBox_PreviewKeyDown" />
-                </Style>
-            </TextBox.Style>
-        </TextBox>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
 
+            <TextBox x:Name="txtSearchString" Margin="0 4 0 4" Text="{Binding SearchString, UpdateSourceTrigger=PropertyChanged}" />
+            <Button Grid.Column="1" Margin="3 3 1 3" Width="26" Height="26" VerticalContentAlignment="Center" Command="{Binding EndSearchModeCommand}" Visibility="{Binding SearchMode, Converter={StaticResource bool2VisibilityConverter}}">
+                <Grid>
+                    <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="8" Height="8" Stretch="Fill" Fill="White" Data="F1 M 26.9166,22.1667L 37.9999,33.25L 49.0832,22.1668L 53.8332,26.9168L 42.7499,38L 53.8332,49.0834L 49.0833,53.8334L 37.9999,42.75L 26.9166,53.8334L 22.1666,49.0833L 33.25,38L 22.1667,26.9167L 26.9166,22.1667 Z "/>
+                </Grid>
+            </Button>
+        </Grid>
+        
         <c:EarthMapCanvas 
-            Visibility="{Binding IsFocused, ElementName=txtSearchString, Converter={StaticResource InverseBoolToVisibilityConverter}}"
             Focusable="True"
             Grid.Row="1" Width="512" Height="256"  Margin="0 4 0 4"
             SunHourAngle="{Binding SunHourAngle}"
@@ -45,24 +55,41 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
             Width="512" Height="256"
             Margin="0 4 0 4"
             x:Name="lstResults"
+            Opacity="0.9"
             ItemsSource="{Binding Path=SearchResults, Mode=OneWay}"
-            SelectionMode="Single" 
-            Visibility="{Binding IsFocused, ElementName=txtSearchString, Converter={StaticResource bool2VisibilityConverter}}"
+            SelectedItem="{Binding SelectedItem}"
+            SelectionMode="Single"
+            Visibility="{Binding SearchMode, Converter={StaticResource bool2VisibilityConverter}}"
             VerticalContentAlignment="Top"
             IsSynchronizedWithCurrentItem="True"
-                  Style="{x:Null}"
             ScrollViewer.VerticalScrollBarVisibility="Visible"
             ScrollViewer.CanContentScroll="False">
 
+            <ListView.Resources>
+                <Style TargetType="{x:Type ListView}" BasedOn="{StaticResource ListViewWithGridViewStyle}">
+                    <Setter Property="ItemContainerStyle">
+                        <Setter.Value>
+                            <Style TargetType="ListViewItem" BasedOn="{StaticResource ListViewItemGridViewStyle}">
+
+                            </Style>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ListView.Resources>
+
             <ListView.View>
-                <GridView>
+                <GridView ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}">
                     <GridView.Columns>
-                        <GridViewColumn Header="1" Width="Auto" DisplayMemberBinding="{Binding Path=Name}" />
-                        <GridViewColumn Header="2" Width="50" DisplayMemberBinding="{Binding Path=Country}" />
-                        <GridViewColumn Header="3" Width="100" DisplayMemberBinding="{Binding Path=Names}" />
+                        <GridViewColumn Header="Name" Width="200" DisplayMemberBinding="{Binding Path=Name}" />
+                        <GridViewColumn Header="Country" Width="40" DisplayMemberBinding="{Binding Path=Country}" />
+                        <GridViewColumn Header="Other names" Width="Auto" DisplayMemberBinding="{Binding Path=Names}" />
                     </GridView.Columns>
                 </GridView>
             </ListView.View>
+
+            <ListView.InputBindings>
+                <MouseBinding Gesture="LeftDoubleClick" Command="{Binding SelectItemCommand}" />
+            </ListView.InputBindings>
             
             <!--<ListView.ItemContainerStyle>
                 <Style TargetType="{x:Type ListViewItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
