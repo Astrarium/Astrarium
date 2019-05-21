@@ -93,7 +93,7 @@ namespace Planetarium
                 .WithSection("Planets")
                 .WithBuilder(typeof(GRSSettingBuilder));
 
-            settingsConfig.Add("ObserverLocation", new CrdsGeographical(56.3333, -44, +3, 80));
+            settingsConfig.Add("ObserverLocation", new CrdsGeographical(56.3333, -44, +3, 80, "Europe/Moscow", "Nizhny Novgorod"));
 
             kernel.Bind<ISettingsConfig, SettingsConfig>().ToConstant(settingsConfig).InSingletonScope();
 
@@ -104,11 +104,9 @@ namespace Planetarium
 
             kernel.Get<Settings>().Load();
 
-            var loc = settings.Get<CrdsGeographical>("ObserverLocation");
-
             SkyContext context = new SkyContext(
                 new Date(DateTime.Now).ToJulianEphemerisDay(),
-                new CrdsGeographical(loc.Latitude, loc.Longitude, loc.UtcOffset, loc.Elevation));
+                new CrdsGeographical(settings.Get<CrdsGeographical>("ObserverLocation")));
 
             var alltypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes());
 

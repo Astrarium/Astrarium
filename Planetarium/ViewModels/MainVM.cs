@@ -110,16 +110,16 @@ namespace Planetarium.ViewModels
             CenterOnObjectCommand = new Command<CelestialObject>(CenterOnObject);
             ClearObjectsHistoryCommand = new Command(ClearObjectsHistory);
 
-            sky.Context.JulianDayChanged += Sky_JulianDayChanged;
+            sky.Context.ContextChanged += Sky_ContextChanged;
             map.SelectedObjectChanged += Map_SelectedObjectChanged;
             map.ViewAngleChanged += Map_ViewAngleChanged;
 
-            Sky_JulianDayChanged(sky.Context.JulianDay);
+            Sky_ContextChanged();
             Map_SelectedObjectChanged(map.SelectedObject);
             Map_ViewAngleChanged(map.ViewAngle);
         }
 
-        private void Sky_JulianDayChanged(double jd)
+        private void Sky_ContextChanged()
         {
             DateString = Formatters.DateTime.Format(new Date(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset));
             NotifyPropertyChanged(nameof(DateString));

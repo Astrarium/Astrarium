@@ -8,14 +8,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace Planetarium.Views
 {
@@ -27,22 +19,6 @@ namespace Planetarium.Views
         public LocationWindow()
         {
             InitializeComponent();
-        }
-    }
-
-    public class LocationsListVisibilityConverter : IMultiValueConverter
-    {
-        public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            var a = (ICollection<LocationSearchItem>)values[0];
-            object b = values[1];
-
-            return a != null && a.Any() ? Visibility.Visible : Visibility.Collapsed;
-        }
-
-        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, System.Globalization.CultureInfo culture)
-        {
-            throw new NotImplementedException();
         }
     }
 }

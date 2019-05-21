@@ -1,5 +1,6 @@
 ﻿using ADK;
 using Planetarium.Calculators;
+using Planetarium.Config;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -20,7 +21,7 @@ namespace Planetarium.ViewModels
         public Command OkCommand { get; private set; }
         public Command CancelCommand { get; private set; }
         public Command EndSearchModeCommand { get; private set; }
-        public Command SelectItemCommand { get; private set; }
+        public Command SelectLocationCommand { get; private set; }
 
         private CrdsGeographical _SavedLocation;
 
@@ -45,7 +46,9 @@ namespace Planetarium.ViewModels
                     nameof(LongitudeMinutes),
                     nameof(LongitudeSeconds),
                     nameof(LongitudeEast),
-                    nameof(LongitudeWest)
+                    nameof(LongitudeWest),
+                    nameof(TimeZone),
+                    nameof(LocationName)
                 );
             }
         }
@@ -71,7 +74,7 @@ namespace Planetarium.ViewModels
                 {
                     ObserverLocation = _SelectedItem.Location;
                 }
-                NotifyPropertyChanged(nameof(SelectedItem));
+                NotifyPropertyChanged(nameof(SelectedItem), nameof(TimeZone));
             }
         }
 
@@ -159,13 +162,14 @@ namespace Planetarium.ViewModels
                         double latitude = double.Parse(chunks[4], CultureInfo.InvariantCulture);
                         double longitude = double.Parse(chunks[5], CultureInfo.InvariantCulture);
                         double elevation = double.Parse(string.IsNullOrWhiteSpace(chunks[15]) ? "0" : chunks[15], CultureInfo.InvariantCulture);
+                        TimeZoneItem timeZone = TimeZones.FirstOrDefault(tz => tz.TimeZoneId.Equals(chunks[17], StringComparison.InvariantCultureIgnoreCase));
 
                         results.Add(new LocationSearchItem
                         {
                             Name = name,
                             Country = chunks[8],
                             Names = string.Join(", ", names.Distinct().Except(new[] { name }).ToArray()),
-                            Location = new CrdsGeographical(latitude, -longitude, 0, elevation)
+                            Location = new CrdsGeographical(latitude, -longitude, timeZone.UtcOffset, elevation, timeZone.TimeZoneId, name)
                         });
 
                         if (results.Count == 10)
@@ -196,7 +200,7 @@ namespace Planetarium.ViewModels
             {
                 var latitude = new DMS(ObserverLocation.Latitude);
                 latitude.Degrees = (uint)value;
-                ObserverLocation = new CrdsGeographical(latitude.ToDecimalAngle(), ObserverLocation.Longitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation);      
+                ObserverLocation = new CrdsGeographical(latitude.ToDecimalAngle(), ObserverLocation.Longitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.TimeZoneId, ObserverLocation.LocationName);      
             }
         }
 
@@ -210,7 +214,7 @@ namespace Planetarium.ViewModels
             {
                 var latitude = new DMS(ObserverLocation.Latitude);
                 latitude.Minutes = (uint)value;
-                ObserverLocation = new CrdsGeographical(latitude.ToDecimalAngle(), ObserverLocation.Longitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation);
+                ObserverLocation = new CrdsGeographical(latitude.ToDecimalAngle(), ObserverLocation.Longitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.TimeZoneId, ObserverLocation.LocationName);
             }
         }
 
@@ -224,7 +228,7 @@ namespace Planetarium.ViewModels
             {
                 var latitude = new DMS(ObserverLocation.Latitude);
                 latitude.Seconds = (uint)value;
-                ObserverLocation = new CrdsGeographical(latitude.ToDecimalAngle(), ObserverLocation.Longitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation);
+                ObserverLocation = new CrdsGeographical(latitude.ToDecimalAngle(), ObserverLocation.Longitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.TimeZoneId, ObserverLocation.LocationName);
             }
         }
 
@@ -238,7 +242,7 @@ namespace Planetarium.ViewModels
             {
                 if (value != (ObserverLocation.Latitude >= 0))
                 {
-                    ObserverLocation = new CrdsGeographical(-ObserverLocation.Latitude, ObserverLocation.Longitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation);
+                    ObserverLocation = new CrdsGeographical(-ObserverLocation.Latitude, ObserverLocation.Longitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.TimeZoneId, ObserverLocation.LocationName);
                 }
             }
         }
@@ -253,7 +257,7 @@ namespace Planetarium.ViewModels
             {
                 if (value != (ObserverLocation.Latitude < 0))
                 {
-                    ObserverLocation = new CrdsGeographical(-ObserverLocation.Latitude, ObserverLocation.Longitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation);
+                    ObserverLocation = new CrdsGeographical(-ObserverLocation.Latitude, ObserverLocation.Longitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.TimeZoneId, ObserverLocation.LocationName);
                 }
             }
         }
@@ -272,7 +276,7 @@ namespace Planetarium.ViewModels
             {
                 var longitude = new DMS(ObserverLocation.Longitude);
                 longitude.Degrees = (uint)value;
-                ObserverLocation = new CrdsGeographical(ObserverLocation.Latitude, longitude.ToDecimalAngle(), ObserverLocation.UtcOffset, ObserverLocation.Elevation);
+                ObserverLocation = new CrdsGeographical(ObserverLocation.Latitude, longitude.ToDecimalAngle(), ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.TimeZoneId, ObserverLocation.LocationName);
             }
         }
 
@@ -286,7 +290,7 @@ namespace Planetarium.ViewModels
             {
                 var longitude = new DMS(ObserverLocation.Longitude);
                 longitude.Minutes = (uint)value;
-                ObserverLocation = new CrdsGeographical(ObserverLocation.Latitude, longitude.ToDecimalAngle(), ObserverLocation.UtcOffset, ObserverLocation.Elevation);
+                ObserverLocation = new CrdsGeographical(ObserverLocation.Latitude, longitude.ToDecimalAngle(), ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.TimeZoneId, ObserverLocation.LocationName);
             }
         }
 
@@ -300,7 +304,7 @@ namespace Planetarium.ViewModels
             {
                 var longitude = new DMS(ObserverLocation.Longitude);
                 longitude.Seconds = (uint)value;
-                ObserverLocation = new CrdsGeographical(ObserverLocation.Latitude, longitude.ToDecimalAngle(), ObserverLocation.UtcOffset, ObserverLocation.Elevation);
+                ObserverLocation = new CrdsGeographical(ObserverLocation.Latitude, longitude.ToDecimalAngle(), ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.TimeZoneId, ObserverLocation.LocationName);
             }
         }
 
@@ -314,7 +318,7 @@ namespace Planetarium.ViewModels
             {
                 if (value != (ObserverLocation.Longitude <= 0))
                 {
-                    ObserverLocation = new CrdsGeographical(ObserverLocation.Latitude, -ObserverLocation.Longitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation);
+                    ObserverLocation = new CrdsGeographical(ObserverLocation.Latitude, -ObserverLocation.Longitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.TimeZoneId, ObserverLocation.LocationName);
                 }
             }
         }
@@ -329,12 +333,48 @@ namespace Planetarium.ViewModels
             {
                 if (value != (ObserverLocation.Longitude > 0))
                 {
-                    ObserverLocation = new CrdsGeographical(ObserverLocation.Latitude, -ObserverLocation.Longitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation);
+                    ObserverLocation = new CrdsGeographical(ObserverLocation.Latitude, -ObserverLocation.Longitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.TimeZoneId, ObserverLocation.LocationName);
                 }
             }
         }
 
         #endregion Longitude properties
+
+
+        #region TimeZone properties
+
+        public ObservableCollection<TimeZoneItem> TimeZones { get; private set; } = new ObservableCollection<TimeZoneItem>();
+
+        public TimeZoneItem TimeZone
+        {
+            get
+            {
+                return TimeZones.FirstOrDefault(tz => tz.TimeZoneId.Equals(ObserverLocation.TimeZoneId, StringComparison.InvariantCultureIgnoreCase));
+            }
+            set
+            {
+                if (value != null)
+                {
+                    ObserverLocation = new CrdsGeographical(ObserverLocation.Latitude, ObserverLocation.Longitude, value.UtcOffset, ObserverLocation.Elevation, value.TimeZoneId, ObserverLocation.LocationName);
+                }
+                NotifyPropertyChanged(nameof(TimeZone));
+            }
+        }
+
+        public string LocationName
+        {
+            get
+            {
+                return ObserverLocation.LocationName;
+            }
+            set
+            {
+                ObserverLocation.LocationName = value;
+                NotifyPropertyChanged(nameof(LocationName));
+            }
+        }
+
+        #endregion
 
         public LocationVM(Sky sky, ISolarProvider solarProvider)
         {
@@ -345,7 +385,26 @@ namespace Planetarium.ViewModels
             OkCommand = new Command(Ok);
             CancelCommand = new Command(Close);
             EndSearchModeCommand = new Command(EndSearchMode);
-            SelectItemCommand = new Command(SelectItem);
+            SelectLocationCommand = new Command(SelectLocation);
+
+            string line;
+            string filePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data", "TimeZones.dat");
+            using (StreamReader file = new StreamReader(filePath))
+            {
+                while ((line = file.ReadLine()) != null)
+                {
+                    // skip first and empty lines
+                    if (line.StartsWith("CountryCode") ||
+                        string.IsNullOrWhiteSpace(line))
+                    {
+                        continue;
+                    }
+
+                    string[] chunks = line.Split('\t');
+                    TimeZones.Add(new TimeZoneItem() { TimeZoneId = chunks[1], UtcOffset = double.Parse(chunks[4], CultureInfo.InvariantCulture) });
+                }
+                file.Close();
+            }
         }
 
         private void Ok()
@@ -358,9 +417,10 @@ namespace Planetarium.ViewModels
             SearchString = null;            
         }
 
-        private void SelectItem()
+        private void SelectLocation()
         {
-
+            _SavedLocation = new CrdsGeographical(ObserverLocation);
+            EndSearchMode();
         }
     }
 
@@ -370,5 +430,18 @@ namespace Planetarium.ViewModels
         public string Country { get; set; }
         public string Names { get; set; }
         public CrdsGeographical Location { get; set; }
+    }
+
+    public class TimeZoneItem
+    {
+        public string TimeZoneId { get; set; }
+        public double UtcOffset { get; set; }
+        public string Name
+        {
+            get
+            {
+                return $"UTC{(UtcOffset >= 0 ? "+" : "-")}{TimeSpan.FromHours(UtcOffset).ToString("hh\\:mm")} ({TimeZoneId.Replace('_', ' ')})";
+            }
+        }
     }
 }

@@ -60,15 +60,12 @@
     <SolidColorBrush x:Key="ScrollBarHotThumb" Color="#CCCCCC"/>
     <SolidColorBrush x:Key="ScrollBarSelectedThumb" Color="#E5E5E5"/>
     <SolidColorBrush x:Key="CornerBorder" Color="{StaticResource DarkBackgroundColor}"/>
-
-
     <SolidColorBrush x:Key="GroupBoxBorder" Color="{StaticResource LightBackgroundColor}" />
     <SolidColorBrush x:Key="TextBoxBorder" Color="{StaticResource LightBackgroundColor}" />
-
     <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="{StaticResource LightBackgroundColor}" />
-    
     <SolidColorBrush x:Key="TextBoxBackground" Color="{StaticResource DarkBackgroundColor}" />
     <SolidColorBrush x:Key="TextBoxDisabledForeground" Color="#8C8C8C" />
+    <SolidColorBrush x:Key="TextBoxHintForeground" Color="{StaticResource LightBackgroundColor}" />
     <SolidColorBrush x:Key="TextBoxDisabledBackground" Color="{StaticResource DisabledBackgroundColor}" />
     <SolidColorBrush x:Key="InactiveSelectionHighlightBrush" Color="#335C85"/>
 

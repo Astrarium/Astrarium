@@ -97,9 +97,11 @@
     <Compile Include="Config\SettingConfigItem.cs" />
     <Compile Include="Config\SettingsConfig.cs" />
     <Compile Include="Config\Settings.cs" />
+    <Compile Include="Controls\BindableListView.cs" />
     <Compile Include="Controls\DependecyInjectionAttribute.cs" />
     <Compile Include="Controls\EarthMapCanvas.cs" />
     <Compile Include="Controls\NumericUpDown.cs" />
+    <Compile Include="Controls\PlaceholderedTextBox.cs" />
     <Compile Include="Controls\TimeSpanPicker.cs" />
     <Compile Include="Ephemeris.cs" />
     <Compile Include="EphemerisConfig.cs" />
@@ -356,6 +358,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Data\Stars.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\TimeZones.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />

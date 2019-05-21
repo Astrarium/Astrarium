@@ -23,44 +23,69 @@ namespace ADK
         /// </summary>
         public double Elevation { get; set; }
 
-        public double RhoCosPhi { get; private set; }
+        /// <summary>
+        /// Term needed for calculation of parallax effect.
+        /// </summary>
+        /// <remarks>
+        /// Taken from from PAWC, p.66.
+        /// </remarks>
+        public double RhoCosPhi
+        {
+            get
+            {
+                double latitude = Angle.ToRadians(Latitude);
+                double u = Math.Atan(0.99664719 * Math.Tan(latitude));
+                return Math.Cos(u) + Elevation / 6378140.0 * Math.Cos(latitude);               
+            }
+        }
 
-        public double RhoSinPhi { get; private set; }
+        /// <summary>
+        /// Term needed for calculation of parallax effect.
+        /// </summary>
+        /// <remarks>
+        /// Taken from from PAWC, p.66.
+        /// </remarks>
+        public double RhoSinPhi
+        {
+            get
+            {
+                double latitude = Angle.ToRadians(Latitude);
+                double u = Math.Atan(0.99664719 * Math.Tan(latitude));
+                return 0.99664719 * Math.Sin(u) + Elevation / 6378140.0 * Math.Sin(latitude);
+            }
+        }
 
         /// <summary>
         /// Utc offset, in hours
         /// </summary>
         public double UtcOffset { get; set; }
 
+        /// <summary>
+        /// Time Zone Id
+        /// </summary>
+        public string TimeZoneId { get; set; }
+
+        /// <summary>
+        /// Name of the location
+        /// </summary>
+        public string LocationName { get; set; }
+
         public CrdsGeographical() { }
 
-        public CrdsGeographical(double latitude, double longitude, double utcOffset = 0, double elevation = 0)
+        public CrdsGeographical(double latitude, double longitude, double utcOffset = 0, double elevation = 0, string timeZoneId = null, string locationName = null)
         {
             Latitude = latitude;
             Longitude = longitude;
             UtcOffset = utcOffset;
             Elevation = elevation;
-            CalculateParallaxTerms();
+            TimeZoneId = timeZoneId;
+            LocationName = locationName;
         }
 
         public CrdsGeographical(DMS latitude, DMS longitude, double utcOffset = 0, double elevation = 0) 
             : this(latitude.ToDecimalAngle(), longitude.ToDecimalAngle(), utcOffset, elevation) { }
 
         public CrdsGeographical(CrdsGeographical other)
-            : this(other.Latitude, other.Longitude, other.UtcOffset, other.Elevation) { }
-
-        /// <summary>
-        /// Calculates terms needed for calculation of parallax effect.
-        /// </summary>
-        /// <remarks>
-        /// This method is taken from PAWC, p.66.
-        /// </remarks>
-        private void CalculateParallaxTerms()
-        {
-            double latitude = Angle.ToRadians(Latitude);
-            double u = Math.Atan(0.99664719 * Math.Tan(latitude));
-            RhoCosPhi = Math.Cos(u) + Elevation / 6378140.0 * Math.Cos(latitude);
-            RhoSinPhi = 0.99664719 * Math.Sin(u) + Elevation / 6378140.0 * Math.Sin(latitude);
-        }
+            : this(other.Latitude, other.Longitude, other.UtcOffset, other.Elevation, other.TimeZoneId, other.LocationName) { }
     }
 }

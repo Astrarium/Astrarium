@@ -11,7 +11,7 @@ namespace Planetarium
     {
         public SkyContext(double jd, CrdsGeographical location) : this(jd, location, false) { }
 
-        public event Action<double> JulianDayChanged;
+        public event Action ContextChanged;
 
         public SkyContext(double jd, CrdsGeographical location, bool preferFast)
         {
@@ -36,7 +36,7 @@ namespace Planetarium
                 Epsilon = Date.TrueObliquity(_JulianDay, NutationElements.deltaEpsilon);
                 SiderealTime = Date.ApparentSiderealTime(_JulianDay, NutationElements.deltaPsi, Epsilon);
                 ClearCache();
-                JulianDayChanged?.Invoke(_JulianDay);
+                ContextChanged?.Invoke();
             }
         }
 
@@ -64,6 +64,7 @@ namespace Planetarium
             {
                 _GeoLocation = value;
                 ClearCache();
+                ContextChanged?.Invoke();
             }
         }
 
