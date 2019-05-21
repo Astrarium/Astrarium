@@ -138,12 +138,12 @@ namespace Planetarium.ViewModels
                 SelectedObjectName = sky.GetObjectName(body);
 
                 if (!SelectedObjectsMenuItems.Any())
-                {                    
+                {          
                     SelectedObjectsMenuItems.Add(new MenuItemVM()
                     {
                         Header = "Clear all",
                         Command = ClearObjectsHistoryCommand
-                    });
+                    });                    
                     SelectedObjectsMenuItems.Add(null);
                 }
 
@@ -161,7 +161,7 @@ namespace Planetarium.ViewModels
                 });
 
                 // 10 items of history + "clear all" + separator
-                if (SelectedObjectsMenuItems.Count > 12)
+                if (SelectedObjectsMenuItems.Count > 13)
                 {
                     SelectedObjectsMenuItems.RemoveAt(0);
                 }
@@ -349,16 +349,14 @@ namespace Planetarium.ViewModels
                 CommandParameter = map.SelectedObject
             });
             
-            if (map.LockedObject != null || map.SelectedObject != null)
+            ContextMenuItems.Add(null);
+            ContextMenuItems.Add(new MenuItemVM()
             {
-                ContextMenuItems.Add(null);
-                ContextMenuItems.Add(new MenuItemVM()
-                {
-                    Header = map.SelectedObject != null ? "Lock" : "Unlock",
-                    Command = LockOnObjectCommand,
-                    CommandParameter = map.SelectedObject
-                });
-            }
+                Header = map.LockedObject != null ? "Unlock" : "Lock",
+                IsEnabled = map.LockedObject != null || map.SelectedObject != null,
+                Command = LockOnObjectCommand,
+                CommandParameter = map.SelectedObject
+            });
             
             NotifyPropertyChanged(nameof(ContextMenuItems));
         }

@@ -133,6 +133,7 @@ namespace Planetarium.Config
             {
                 Save(stream);
             }
+            IsChanged = false;
         }
 
         private void Save(Stream stream)

@@ -6,9 +6,9 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:t="clr-namespace:Planetarium.Themes"
         xmlns:c="clr-namespace:Planetarium.Controls"
         mc:Ignorable="d"
-        Title="Search" 
-        Width="536" Height="550"
-        MinWidth="536" MinHeight="550"
+        Title="Location" 
+        Width="536" Height="520"
+        ResizeMode="NoResize"
         Style="{StaticResource {x:Type Window}}"
         ShowInTaskbar="False" 
         WindowStartupLocation="CenterOwner"
@@ -95,6 +95,13 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                 </GridView>
             </ListView.View>
         </c:BindableListView>
+
+        <TextBlock Grid.Row="1" Name="lstEmpty" 
+            Text="No locations found" 
+            IsEnabled="False"
+            Visibility="{Binding NoResults, Converter={StaticResource bool2VisibilityConverter}}" 
+            TextAlignment="Center" 
+            VerticalAlignment="Center" />
 
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>

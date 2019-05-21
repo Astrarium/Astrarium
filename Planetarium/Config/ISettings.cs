@@ -23,12 +23,29 @@ namespace Planetarium.Config
         /// <param name="value"></param>
         void Set(string settingName, object value);
 
+        /// <summary>
+        /// Raised when setting has been changed
+        /// </summary>
         event Action<string, object> SettingValueChanged;
 
+        /// <summary>
+        /// Gets value indicating settings have been modified
+        /// </summary>
         bool IsChanged { get; }
 
+        /// <summary>
+        /// Saves settings values to persistent storage
+        /// </summary>
         void Save();
+
+        /// <summary>
+        /// Loads settings values from persistent storage
+        /// </summary>
         void Load();
+
+        /// <summary>
+        /// Reverts settings values to defaults
+        /// </summary>
         void Reset();
     }
 }

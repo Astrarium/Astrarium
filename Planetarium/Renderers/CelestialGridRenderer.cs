@@ -140,7 +140,7 @@ namespace Planetarium.Renderers
                 DrawEquinoxLabels(map);
                 DrawLunarNodes(map);
             }
-            if (settings.Get<bool>("HorizonLine"))
+            if (settings.Get<bool>("HorizonLine") && !settings.Get<bool>("Ground"))
             {
                 DrawGrid(map, penGridHorizontal, LineHorizon);
             }
