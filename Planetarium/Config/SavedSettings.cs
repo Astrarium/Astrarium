@@ -57,7 +57,7 @@ namespace Planetarium.Config
 
             jObject["Name"] = savedSetting.Name;
             jObject["Type"] = JToken.FromObject(GetShortTypeName(type));
-            jObject["Value"] = JToken.FromObject(savedSetting.Value);
+            jObject["Value"] = JToken.FromObject(savedSetting.Value, serializer);
 
             jObject.WriteTo(writer);
         }

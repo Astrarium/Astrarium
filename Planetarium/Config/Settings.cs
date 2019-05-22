@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -147,9 +148,18 @@ namespace Planetarium.Config
                     saved.Add(new SavedSetting() { Name = s.Key, Value = s.Value });
                 }
 
-                JsonSerializer ser = new JsonSerializer() { Formatting = Formatting.Indented };
+                JsonSerializer ser = new JsonSerializer() { Formatting = Formatting.Indented, ContractResolver = new WritablePropertiesOnlyResolver() };
                 ser.Serialize(jsonWriter, saved);
                 jsonWriter.Flush();
+            }
+        }
+
+        private class WritablePropertiesOnlyResolver : DefaultContractResolver
+        {
+            protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
+            {
+                IList<JsonProperty> props = base.CreateProperties(type, memberSerialization);
+                return props.Where(p => p.Writable).ToList();
             }
         }
     }
