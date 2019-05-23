@@ -108,6 +108,26 @@ namespace ADK
         }
 
         /// <summary>
+        /// Calculates angular separation between two points with geographical coordinates
+        /// </summary>
+        /// <param name="p1">Geographical coordinates of the first point</param>
+        /// <param name="p2">Geographical coordinates of the second point</param>
+        /// <returns>Angular separation in degrees</returns>
+        public static double Separation(CrdsGeographical p1, CrdsGeographical p2)
+        {
+            double a1 = ToRadians(p1.Latitude);
+            double a2 = ToRadians(p2.Latitude);
+            double A1 = To360(p1.Longitude);
+            double A2 = To360(p2.Longitude);
+
+            double a = Math.Acos(
+                Math.Sin(a1) * Math.Sin(a2) +
+                Math.Cos(a1) * Math.Cos(a2) * Math.Cos(ToRadians(A1 - A2)));
+
+            return double.IsNaN(a) ? 0 : ToDegrees(a);
+        }
+
+        /// <summary>
         /// Calculates an intermediate point at any fraction along the great circle path 
         /// between two points with horizontal coordinates
         /// </summary>

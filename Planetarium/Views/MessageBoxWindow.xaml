@@ -18,7 +18,7 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <TextBlock Name="MessageContainer" TextWrapping="WrapWithOverflow" Margin="10"/>
+        <TextBlock Name="MessageContainer" TextWrapping="WrapWithOverflow" Margin="10" FontSize="16" />
         <StackPanel Name="ButtonContainer" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
             <StackPanel.Resources>
                 <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">

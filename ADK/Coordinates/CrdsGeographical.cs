@@ -87,5 +87,10 @@ namespace ADK
 
         public CrdsGeographical(CrdsGeographical other)
             : this(other.Latitude, other.Longitude, other.UtcOffset, other.Elevation, other.TimeZoneId, other.LocationName) { }
+
+        public override string ToString()
+        {
+            return $"Latitude: {new DMS(Latitude)}; Longitude:{new DMS(Longitude)}";
+        }
     }
 }
