@@ -787,19 +787,19 @@ namespace Planetarium.Renderers
             switch (planet)
             {
                 case 1:
-                    return Brushes.LightGray;
+                    return new SolidBrush(Color.FromArgb(132, 131, 131));
                 case 2:
-                    return new SolidBrush(Color.FromArgb(229, 216, 200));
+                    return new SolidBrush(Color.FromArgb(228, 189, 127));
                 case 4:
-                    return new SolidBrush(Color.FromArgb(215, 96, 53));
+                    return new SolidBrush(Color.FromArgb(183, 98, 71));
                 case 5:
-                    return new SolidBrush(Color.FromArgb(194, 170, 144));
+                    return new SolidBrush(Color.FromArgb(166, 160, 149));
                 case 6:
-                    return Brushes.LightYellow;
+                    return new SolidBrush(Color.FromArgb(207, 192, 162));
                 case 7:
-                    return Brushes.LightGreen;
+                    return new SolidBrush(Color.FromArgb(155, 202, 209));
                 case 8:
-                    return Brushes.LightSkyBlue;
+                    return new SolidBrush(Color.FromArgb(54, 79, 167));
                 default:
                     return Brushes.White;
             }
