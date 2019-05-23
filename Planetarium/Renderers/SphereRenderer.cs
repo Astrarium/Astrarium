@@ -124,7 +124,7 @@ namespace Planetarium.Renderers
             ImageBrush globeBrush = new ImageBrush(new BitmapImage(new Uri(textureFilePath, UriKind.RelativeOrAbsolute)));
             Material globeMaterial = new DiffuseMaterial(globeBrush);
 
-            MeshGeometry3D globeMesh = MakeSphere(globe, globeMaterial, 1, 0, 0, 0, 64, 64);
+            MakeSphere(globe, globeMaterial, 1, 0, 0, 0, 64, 64);
 
             // Add the group of models to a ModelVisual3D.
             ModelVisual3D visual = new ModelVisual3D();
@@ -216,6 +216,7 @@ namespace Planetarium.Renderers
                 enc.Frames.Add(BitmapFrame.Create(bitmapsource));
                 enc.Save(stream);
 
+                //return new Bitmap(stream);
                 using (var tempBitmap = new Bitmap(stream))
                 {
                     // According to MSDN, one "must keep the stream open for the lifetime of the Bitmap."

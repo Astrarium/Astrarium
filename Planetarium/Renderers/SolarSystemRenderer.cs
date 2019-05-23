@@ -692,10 +692,13 @@ namespace Planetarium.Renderers
             bool useTextures = settings.Get<bool>("UseTextures");
             var grsSettings = settings.Get<GreatRedSpotSettings>("GRSLongitude");
 
+            g.FillEllipse(GetPlanetColor(planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
+
             if (useTextures)
             {
                 double grs = planet.Number == Planet.JUPITER ? PlanetEphem.GreatRedSpotLongitude(map.JulianDay, grsSettings) : 0;
                 Image texturePlanet = imagesCache.RequestImage(planet.Number.ToString(), new LonLatShift(planet.Number.ToString(), planet.Appearance.CM - grs, planet.Appearance.D), PlanetTextureProvider, map.Redraw);
+
                 if (texturePlanet != null)
                 {
                     g.DrawImage(texturePlanet, -diamEquat / 2 * 1.01f, -diamPolar / 2 * 1.01f, diamEquat * 1.01f, diamPolar * 1.01f);
@@ -706,14 +709,6 @@ namespace Planetarium.Renderers
                         g.DrawImage(textureVolume, -diamEquat / 2 * 1.01f, -diamPolar / 2 * 1.01f, diamEquat * 1.01f, diamPolar * 1.01f);
                     }
                 }
-                else
-                {
-                    g.FillEllipse(GetPlanetColor(planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
-                }
-            }
-            else
-            {
-                g.FillEllipse(GetPlanetColor(planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
             }
         }
 
@@ -796,9 +791,9 @@ namespace Planetarium.Renderers
                 case 2:
                     return new SolidBrush(Color.FromArgb(229, 216, 200));
                 case 4:
-                    return Brushes.DarkRed;
+                    return new SolidBrush(Color.FromArgb(215, 96, 53));
                 case 5:
-                    return Brushes.LightYellow;
+                    return new SolidBrush(Color.FromArgb(194, 170, 144));
                 case 6:
                     return Brushes.LightYellow;
                 case 7:

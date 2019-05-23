@@ -13,9 +13,9 @@ namespace Planetarium.Config.ControlBuilders
     {
         public override FrameworkElement Build(ISettings settings, SettingConfigItem item, IViewManager viewManager)
         {
-            var container = new StackPanel() { Orientation = Orientation.Vertical };
+            var container = new StackPanel() { Orientation = Orientation.Vertical, HorizontalAlignment = HorizontalAlignment.Stretch };
             container.Children.Add(new Label() { Content = item.Name });
-            var textbox = new TextBox();
+            var textbox = new TextBox() { HorizontalAlignment = HorizontalAlignment.Stretch, HorizontalContentAlignment = HorizontalAlignment.Stretch };
             BindingOperations.SetBinding(textbox, TextBox.TextProperty, new Binding(item.Name) { Source = settings });
             container.Children.Add(textbox);
             return container;
