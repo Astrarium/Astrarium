@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -457,12 +458,15 @@ namespace Planetarium.Renderers
 
                             if (useTextures)
                             {
-                                // TODO take into account moon rotation
-                                Image texturePlanet = imagesCache.RequestImage($"5-{moon.Number}", new LonLatShift($"5-{moon.Number}", moon.CM, jupiter.Appearance.D), PlanetTextureProvider, map.Redraw);
-                                if (texturePlanet != null)
+                                Image texture = imagesCache.RequestImage($"5-{moon.Number}", new LonLatShift($"5-{moon.Number}", moon.CM, jupiter.Appearance.D), PlanetTextureProvider, map.Redraw);
+                                if (texture != null)
                                 {
-                                    map.Graphics.DrawImage(texturePlanet, -diam / 2 * 1.01f, -diam / 2 * 1.01f, diam * 1.01f, diam * 1.01f);
-                                    map.Graphics.FillEllipse(GetVolumeBrush(diam), -diam / 2 - 1, -diam / 2 - 1, diam + 2, diam + 2);
+                                    map.Graphics.DrawImage(texture, -diam / 2 * 1.01f, -diam / 2 * 1.01f, diam * 1.01f, diam * 1.01f);
+                                    Image textureVolume = imagesCache.RequestImage("volume", 0, VolumeTextureProvider, map.Redraw);
+                                    if (textureVolume != null)
+                                    {
+                                        map.Graphics.DrawImage(textureVolume, -diam / 2 - 1, -diam / 2 - 1, diam + 2, diam + 2);
+                                    }
                                 }
                                 else
                                 {
@@ -695,7 +699,12 @@ namespace Planetarium.Renderers
                 if (texturePlanet != null)
                 {
                     g.DrawImage(texturePlanet, -diamEquat / 2 * 1.01f, -diamPolar / 2 * 1.01f, diamEquat * 1.01f, diamPolar * 1.01f);
-                    g.FillEllipse(GetVolumeBrush(diam, planet.Flattening), -diamEquat / 2 - 1, -diamPolar / 2 - 1, diamEquat + 2, diamPolar + 2);
+
+                    Image textureVolume = imagesCache.RequestImage("volume", 0, VolumeTextureProvider, map.Redraw);
+                    if (textureVolume != null)
+                    {
+                        g.DrawImage(textureVolume, -diamEquat / 2 * 1.01f, -diamPolar / 2 * 1.01f, diamEquat * 1.01f, diamPolar * 1.01f);
+                    }
                 }
                 else
                 {
@@ -727,6 +736,36 @@ namespace Planetarium.Renderers
                 OutputImageSize = 1024,
                 TextureFilePath = $"Data\\{token.TextureName}.jpg"
             });
+        }
+
+        private Image VolumeTextureProvider(int token)
+        {
+            float diam = 1024;
+            Image texture = new Bitmap((int)diam, (int)diam, PixelFormat.Format32bppArgb);
+
+            using (var g = Graphics.FromImage(texture))
+            {
+                using (GraphicsPath gpVolume = new GraphicsPath())
+                {
+                    gpVolume.AddEllipse(-diam / 2, -diam / 2, diam * 2, diam * 2);
+
+                    PathGradientBrush brushVolume = new PathGradientBrush(gpVolume);
+                    brushVolume.CenterPoint = new PointF(diam / 2, diam / 2);
+                    brushVolume.CenterColor = Color.Black;
+                    brushVolume.SetSigmaBellShape(0.3f, 1);
+
+                    List<Color> clrs = new List<Color>();
+                    for (int i = 0; i < gpVolume.PathPoints.Length; i++)
+                    {
+                        clrs.Add(Color.Transparent);
+                    }
+                    brushVolume.SurroundColors = clrs.ToArray();
+
+                    g.FillEllipse(brushVolume, 0, 0, diam, diam);
+                }
+            }
+
+            return texture;
         }
 
         private Image MoonTextureProvider(LonLatShift token)
@@ -854,42 +893,20 @@ namespace Planetarium.Renderers
 
             return gp;
         }
-
-        private PathGradientBrush GetVolumeBrush(float size, float flattening = 0)
-        {
-            float sizeEquat = size;
-            float sizePolar = (1 - flattening) * size;
-
-            GraphicsPath gpVolume = new GraphicsPath();
-            gpVolume.AddEllipse(-sizeEquat, -sizePolar, sizeEquat * 2, sizePolar * 2);
-
-            PathGradientBrush brushVolume = new PathGradientBrush(gpVolume);
-            brushVolume.CenterPoint = new PointF(0, 0);
-            brushVolume.CenterColor = Color.Black;
-            brushVolume.SetSigmaBellShape(0.3f, 1);
-
-            List<Color> clrs = new List<Color>();
-            for (int i = 0; i < gpVolume.PathPoints.Length; i++)
-            {
-                clrs.Add(Color.Transparent);
-            }
-            brushVolume.SurroundColors = clrs.ToArray();
-
-            return brushVolume;
-        }
-
         
         private struct LonLatShift
         {
             public string TextureName { get; private set; }
             public double Longitude { get; private set; }
             public double Latitude { get; private set; }
+            public double Flattening { get; private set; }
 
-            public LonLatShift(string name, double longitude, double latitude)
+            public LonLatShift(string name, double longitude, double latitude, double flattening = 1)
             {
                 TextureName = name;
                 Longitude = longitude;
                 Latitude = latitude;
+                Flattening = flattening;
             }
 
             public override bool Equals(object obj)

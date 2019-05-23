@@ -29,7 +29,10 @@ namespace Planetarium.Renderers
         public uint OutputImageSize { get; set; }
 
         public double LatitudeShift { get; set; }
+
         public double LongutudeShift { get; set; }
+
+        public double Flattening { get; set; }
     }
 
 
