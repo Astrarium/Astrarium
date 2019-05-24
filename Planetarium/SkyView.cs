@@ -84,6 +84,7 @@ namespace Planetarium
         {
             base.OnMouseUp(e);          
             SkyMap.Antialias = true;
+            SkyMap.IsDragging = false;
             Cursor = Cursors.Cross;
             Invalidate();
             pOld = Point.Empty;
@@ -99,7 +100,6 @@ namespace Planetarium
         protected override void OnMouseEnter(EventArgs e)
         {
             base.OnMouseEnter(e);
-            SkyMap.MousePosition = SkyMap.Center;
             Invalidate();
         }
 
@@ -117,6 +117,8 @@ namespace Planetarium
 
                 if (e.Button == MouseButtons.Left && !shift)
                 {
+                    SkyMap.IsDragging = true;
+
                     if (SkyMap.LockedObject == null)
                     {
                         if (pOld == Point.Empty)
@@ -163,17 +165,16 @@ namespace Planetarium
                     }
                     else
                     {
-                        SkyMap.MousePosition = null;
                         if (Cursor != Cursors.No)
                         {
                             Cursor = Cursors.No;
                         }
                     }
-
                     Invalidate();
                 }
                 else
                 {
+                    SkyMap.IsDragging = false;
                     if (SkyMap.MeasureOrigin != null)
                     {
                         Invalidate();

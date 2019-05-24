@@ -41,6 +41,8 @@ namespace Planetarium
         /// </summary>
         CelestialObject LockedObject { get; }
 
+        bool IsDragging { get; }
+
         /// <summary>
         /// Origin of measure tool. Not null if measure tool is on.
         /// </summary>

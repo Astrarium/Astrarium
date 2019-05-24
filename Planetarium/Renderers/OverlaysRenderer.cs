@@ -26,10 +26,10 @@ namespace Planetarium.Renderers
 
         private void DrawLockedText(IMapContext map)
         {
-            if (map.LockedObject != null && map.MousePosition == null)
+            if (map.LockedObject != null && map.IsDragging)
             {
                 var format = new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                string text = $"Map locked on {searcher.GetObjectName(map.LockedObject)}";
+                string text = $"Map locked on: {searcher.GetObjectName(map.LockedObject)}";
 
                 PointF center = new PointF(map.Width / 2, map.Height / 2);
                 var size = map.Graphics.MeasureString(text, fontLockMessage, center, format);

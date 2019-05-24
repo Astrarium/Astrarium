@@ -67,6 +67,7 @@ namespace Planetarium
 
         public CrdsHorizontal Center { get; } = new CrdsHorizontal(0, 0);
         public bool Antialias { get; set; } = true;
+        public bool IsDragging { get; set; }
 
         private CelestialObject selectedObject;
         public CelestialObject SelectedObject
@@ -284,6 +285,7 @@ namespace Planetarium
             public CrdsHorizontal MousePosition => map.MousePosition;
             public CrdsHorizontal MeasureOrigin => map.MeasureOrigin;
             public CelestialObject LockedObject => map.LockedObject;
+            public bool IsDragging => map.IsDragging;
 
             public PointF Project(CrdsHorizontal hor)
             {

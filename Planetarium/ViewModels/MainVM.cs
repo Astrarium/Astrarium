@@ -356,7 +356,7 @@ namespace Planetarium.ViewModels
             ContextMenuItems.Add(null);
             ContextMenuItems.Add(new MenuItemVM()
             {
-                Header = map.LockedObject != null ? "Unlock" : "Lock",
+                Header = map.LockedObject != null ? (map.SelectedObject != null && map.SelectedObject != map.LockedObject ? "Lock" : "Unlock") : "Lock",
                 IsEnabled = map.LockedObject != null || map.SelectedObject != null,
                 Command = LockOnObjectCommand,
                 CommandParameter = map.SelectedObject

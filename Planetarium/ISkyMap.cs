@@ -50,6 +50,8 @@ namespace Planetarium
         /// </summary>
         CelestialObject LockedObject { get; set; }
 
+        bool IsDragging { get; set; }
+
         /// <summary>
         /// Occurs when selected celestial object is changed
         /// </summary>
