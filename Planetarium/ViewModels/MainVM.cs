@@ -33,6 +33,7 @@ namespace Planetarium.ViewModels
         public Command<PointF> MapDoubleClickCommand { get; private set; }
         public Command<PointF> MapRightClickCommand { get; private set; }
         public Command SetDateCommand { get; private set; }
+        public Command SelectLocationCommand { get; private set; }
         public Command SearchObjectCommand { get; private set; }
         public Command<PointF> CenterOnPointCommand { get; private set; }
         public Command<CelestialObject> GetObjectInfoCommand { get; private set; }
@@ -42,6 +43,7 @@ namespace Planetarium.ViewModels
         public Command<PointF> MeasureToolCommand { get; private set; }
         public Command<CelestialObject> CenterOnObjectCommand { get; private set; }
         public Command ClearObjectsHistoryCommand { get; private set; }
+        public Command ChangeSettingsCommand { get; private set; }
 
         public ObservableCollection<MenuItemVM> ContextMenuItems { get; private set; } = new ObservableCollection<MenuItemVM>();
         public ObservableCollection<MenuItemVM> SelectedObjectsMenuItems { get; private set; } = new ObservableCollection<MenuItemVM>();
@@ -102,6 +104,7 @@ namespace Planetarium.ViewModels
             MapDoubleClickCommand = new Command<PointF>(MapDoubleClick);
             MapRightClickCommand = new Command<PointF>(MapRightClick);
             SetDateCommand = new Command(SetDate);
+            SelectLocationCommand = new Command(SelectLocation);
             SearchObjectCommand = new Command(SearchObject);
             CenterOnPointCommand = new Command<PointF>(CenterOnPoint);
             GetObjectInfoCommand = new Command<CelestialObject>(GetObjectInfo);
@@ -111,6 +114,7 @@ namespace Planetarium.ViewModels
             MeasureToolCommand = new Command<PointF>(MeasureTool);
             CenterOnObjectCommand = new Command<CelestialObject>(CenterOnObject);
             ClearObjectsHistoryCommand = new Command(ClearObjectsHistory);
+            ChangeSettingsCommand = new Command(ChangeSettings);
 
             sky.Context.ContextChanged += Sky_ContextChanged;
             map.SelectedObjectChanged += Map_SelectedObjectChanged;
@@ -236,9 +240,7 @@ namespace Planetarium.ViewModels
             // "O" = [O]ptions
             else if (key == Key.O)
             {
-                settings.SettingValueChanged += Settings_OnSettingChanged;
-                viewManager.ShowDialog<SettingsVM>();
-                settings.SettingValueChanged -= Settings_OnSettingChanged;
+                ChangeSettings();
             }
             // "I" = [I]nfo
             else if (key == Key.I)
@@ -273,15 +275,7 @@ namespace Planetarium.ViewModels
             // "L" = [L]ocation
             else if (key == Key.L)
             {
-                var vm = viewManager.CreateViewModel<LocationVM>();
-                if (viewManager.ShowDialog(vm) ?? false)
-                {
-                    sky.Context.GeoLocation = new CrdsGeographical(vm.ObserverLocation);
-                    settings.Set("ObserverLocation", vm.ObserverLocation);
-                    settings.Save();
-                    sky.Calculate();
-                    map.Invalidate();
-                }
+                SelectLocation();
             }
             // "T" = [T]rack
             else if (key == Key.T)
@@ -439,6 +433,13 @@ namespace Planetarium.ViewModels
             }
         }
 
+        private void ChangeSettings()
+        {
+            settings.SettingValueChanged += Settings_OnSettingChanged;
+            viewManager.ShowDialog<SettingsVM>();
+            settings.SettingValueChanged -= Settings_OnSettingChanged;
+        }
+
         private void CenterOnObject(CelestialObject body)
         {
             if (settings.Get<bool>("Ground") && body.Horizontal.Altitude <= 0)
@@ -555,6 +556,19 @@ namespace Planetarium.ViewModels
             if (viewManager.ShowDialog(vm) ?? false)
             {
                 sky.Context.JulianDay = vm.JulianDay;
+                sky.Calculate();
+                map.Invalidate();
+            }
+        }
+
+        private void SelectLocation()
+        {
+            var vm = viewManager.CreateViewModel<LocationVM>();
+            if (viewManager.ShowDialog(vm) ?? false)
+            {
+                sky.Context.GeoLocation = new CrdsGeographical(vm.ObserverLocation);
+                settings.Set("ObserverLocation", vm.ObserverLocation);
+                settings.Save();
                 sky.Calculate();
                 map.Invalidate();
             }
