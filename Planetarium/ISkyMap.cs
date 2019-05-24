@@ -56,6 +56,13 @@ namespace Planetarium
         event Action<CelestialObject> SelectedObjectChanged;
 
         /// <summary>
+        /// Origin of measure tool. Not null if measure tool is on.
+        /// </summary>
+        CrdsHorizontal MeasureOrigin { get; set; }
+
+        CrdsHorizontal MousePosition { get; set; }
+
+        /// <summary>
         /// Gets or sets projection which is used for converting celestial coordinates to the sky map plane.
         /// </summary>
         IProjection Projection { get; set; }

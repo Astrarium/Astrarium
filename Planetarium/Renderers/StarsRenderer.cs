@@ -192,7 +192,7 @@ namespace Planetarium.Renderers
         public override void Initialize()
         {
             string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/ConLines.dat");
-            string[] parsed_line = new string[2];
+            string[] chunks = null;
             int from, to;
             string line = "";
 
@@ -201,9 +201,9 @@ namespace Planetarium.Renderers
                 while (line != null && !sr.EndOfStream)
                 {
                     line = sr.ReadLine();
-                    parsed_line = line.Split(',');
-                    from = Convert.ToInt32(parsed_line[0]) - 1;
-                    to = Convert.ToInt32(parsed_line[1]) - 1;
+                    chunks = line.Split(',');
+                    from = Convert.ToInt32(chunks[0]) - 1;
+                    to = Convert.ToInt32(chunks[1]) - 1;
                     ConLines.Add(new Tuple<int, int>(from, to));
                 }
             }

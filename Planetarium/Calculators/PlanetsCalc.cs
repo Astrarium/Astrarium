@@ -1,4 +1,5 @@
 ﻿using ADK;
+using Planetarium.Config;
 using Planetarium.Objects;
 using System;
 using System.Collections;
@@ -14,6 +15,7 @@ namespace Planetarium.Calculators
         ICollection<JupiterMoon> JupiterMoons { get; }
         ICollection<Planet> Planets { get; }
         RingsAppearance SaturnRings { get; }
+        double GreatRedSpotLongitude { get; }
     }
 
     public interface IPlanetsCalc
@@ -30,12 +32,14 @@ namespace Planetarium.Calculators
 
     public class PlanetsCalc : BaseCalc, ICelestialObjectCalc<Planet>, ICelestialObjectCalc<JupiterMoon>, IPlanetsCalc, IPlanetsProvider
     {
+        private ISettings settings;
         private Planet[] planets = new Planet[8];
         private JupiterMoon[] jupiterMoons = new JupiterMoon[4];
 
         public ICollection<Planet> Planets => planets;
         public ICollection<JupiterMoon> JupiterMoons => jupiterMoons;
         public RingsAppearance SaturnRings { get; private set; } = new RingsAppearance();
+        public double GreatRedSpotLongitude { get; private set; }
 
         private string[] PlanetNames = new string[]
         {
@@ -51,8 +55,10 @@ namespace Planetarium.Calculators
 
         private string[] JuipterMoonNames = new string[] { "Io", "Europa", "Ganymede", "Callisto" };
 
-        public PlanetsCalc()
+        public PlanetsCalc(ISettings settings)
         {
+            this.settings = settings;
+
             for (int i = 0; i < planets.Length; i++)
             {
                 planets[i] = new Planet() { Number = i + 1, Name = PlanetNames[i] };
@@ -327,6 +333,8 @@ namespace Planetarium.Calculators
                         j.Semidiameter = context.Get(JupiterMoonSemidiameter, m);
                         j.CM = context.Get(JupiterMoonCentralMeridian, m);
                     }
+
+                    GreatRedSpotLongitude = context.Get(JupiterGreatRedSpotLongitude);
                 }
 
                 if (p.Number == Planet.SATURN)
@@ -392,6 +400,12 @@ namespace Planetarium.Calculators
             return GalileanMoons.MoonCentralMeridian(r, m - 1);
         }
 
+        private double JupiterGreatRedSpotLongitude(SkyContext c)
+        {
+            var grsSettings = settings.Get<GreatRedSpotSettings>("GRSLongitude");
+            return PlanetEphem.GreatRedSpotLongitude(c.JulianDay, grsSettings);
+        }
+
         public void ConfigureEphemeris(EphemerisConfig<Planet> e)
         {
             e.Add("Magnitude", (c, p) => c.Get(Magnitude, p.Number));
@@ -399,11 +413,15 @@ namespace Planetarium.Calculators
             e.Add("Horizontal.Azimuth", (c, p) => c.Get(Horizontal, p.Number).Azimuth);
             e.Add("Equatorial.Alpha", (c, p) => c.Get(Equatorial, p.Number).Alpha);
             e.Add("Equatorial.Delta", (c, p) => c.Get(Equatorial, p.Number).Delta);
+
             e.Add("SaturnRings.a", (c, p) => c.Get(GetSaturnRings, p.Number).a)
                 .AvailableIf(p => (p is Planet) && (p as Planet).Number == Planet.SATURN);
 
             e.Add("SaturnRings.b", (c, p) => c.Get(GetSaturnRings, p.Number).b)
                 .AvailableIf(p => (p is Planet) && (p as Planet).Number == Planet.SATURN);
+
+            e.Add("GRSLongitude", (c, p) => c.Get(JupiterGreatRedSpotLongitude))
+                .AvailableIf(p => (p is Planet) && (p as Planet).Number == Planet.JUPITER);
 
             e.Add("RTS.Rise", (c, p) => c.Get(RiseTransitSet, p.Number).Rise);
             e.Add("RTS.Transit", (c, p) => c.Get(RiseTransitSet, p.Number).Transit);
@@ -417,6 +435,7 @@ namespace Planetarium.Calculators
         {
             e.Add("Rectangular.X", (c, j) => c.Get(JupiterMoonRectangular, j.Number).X);
             e.Add("Rectangular.Y", (c, j) => c.Get(JupiterMoonRectangular, j.Number).Y);
+            e.Add("Rectangular.Z", (c, j) => c.Get(JupiterMoonRectangular, j.Number).Z);
         }
 
         public CelestialObjectInfo GetInfo(SkyContext c, Planet planet)
@@ -467,6 +486,10 @@ namespace Planetarium.Calculators
                 .AddRow("SaturnRings.a", c.Get(GetSaturnRings, p).a)
                 .AddRow("SaturnRings.b", c.Get(GetSaturnRings, p).b);
             }
+            else if (p == Planet.JUPITER)
+            {
+                info.AddRow("GRSLongitude", c.Get(JupiterGreatRedSpotLongitude));
+            }
 
             info
             .AddRow("Appearance.CM", c.Get(Appearance, p).CM)
@@ -499,6 +522,7 @@ namespace Planetarium.Calculators
             .AddHeader("Rectangular planetocentric coordinates")
             .AddRow("Rectangular.X", c.Get(JupiterMoonRectangular, m).X)
             .AddRow("Rectangular.Y", c.Get(JupiterMoonRectangular, m).Y)
+            .AddRow("Rectangular.Z", c.Get(JupiterMoonRectangular, m).Z)
 
             .AddHeader("Visibility")
             .AddRow("RTS.Rise", rts.Rise, c.JulianDayMidnight + rts.Rise)

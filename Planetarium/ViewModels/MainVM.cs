@@ -39,6 +39,7 @@ namespace Planetarium.ViewModels
         public Command<CelestialObject> GetObjectEphemerisCommand { get; private set; }
         public Command<CelestialObject> MotionTrackCommand { get; private set; }
         public Command<CelestialObject> LockOnObjectCommand { get; private set; }
+        public Command<PointF> MeasureToolCommand { get; private set; }
         public Command<CelestialObject> CenterOnObjectCommand { get; private set; }
         public Command ClearObjectsHistoryCommand { get; private set; }
 
@@ -107,6 +108,7 @@ namespace Planetarium.ViewModels
             GetObjectEphemerisCommand = new Command<CelestialObject>(GetObjectEphemeris);
             MotionTrackCommand = new Command<CelestialObject>(MotionTrack);
             LockOnObjectCommand = new Command<CelestialObject>(LockOnObject);
+            MeasureToolCommand = new Command<PointF>(MeasureTool);
             CenterOnObjectCommand = new Command<CelestialObject>(CenterOnObject);
             ClearObjectsHistoryCommand = new Command(ClearObjectsHistory);
 
@@ -329,7 +331,9 @@ namespace Planetarium.ViewModels
             });
             ContextMenuItems.Add(new MenuItemVM()
             {
-                Header = "Measure tool"
+                Header = "Measure tool",
+                Command = MeasureToolCommand,
+                CommandParameter = point
             });
             ContextMenuItems.Add(null);
 
@@ -485,6 +489,27 @@ namespace Planetarium.ViewModels
         private void CenterOnPoint(PointF point)
         {
             map.Center.Set(map.Projection.Invert(point));
+            map.Invalidate();
+        }
+
+        private void MeasureTool(PointF point)
+        {
+            if (map.MeasureOrigin == null)
+            {
+                if (map.SelectedObject != null)
+                {
+                    map.MeasureOrigin = map.SelectedObject.Horizontal;
+                }
+                else
+                {
+                    map.MeasureOrigin = map.Projection.Invert(point);
+                }
+            }
+            else
+            {
+                map.MeasureOrigin = null;
+            }
+
             map.Invalidate();
         }
 

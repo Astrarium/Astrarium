@@ -91,6 +91,13 @@ namespace Planetarium
         public CelestialObject LockedObject { get; set; }
 
         /// <summary>
+        /// Origin of measure tool. Not null if measure tool is on.
+        /// </summary>
+        public CrdsHorizontal MeasureOrigin { get; set; }
+
+        public CrdsHorizontal MousePosition { get; set; }
+
+        /// <summary>
         /// Occurs when selected celestial object is changed
         /// </summary>
         public event Action<CelestialObject> SelectedObjectChanged;
@@ -274,6 +281,9 @@ namespace Planetarium
             public double Epsilon => skyContext.Epsilon;
             public CrdsGeographical GeoLocation => skyContext.GeoLocation;
             public double SiderealTime => skyContext.SiderealTime;
+            public CrdsHorizontal MousePosition => map.MousePosition;
+            public CrdsHorizontal MeasureOrigin => map.MeasureOrigin;
+            public CelestialObject LockedObject => map.LockedObject;
 
             public PointF Project(CrdsHorizontal hor)
             {

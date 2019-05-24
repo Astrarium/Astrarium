@@ -24,6 +24,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -134,6 +135,7 @@
     <Compile Include="Renderers\GroundRenderer.cs" />
     <Compile Include="Renderers\ImagesCache.cs" />
     <Compile Include="Renderers\MilkyWayRenderer.cs" />
+    <Compile Include="Renderers\OverlaysRenderer.cs" />
     <Compile Include="Renderers\SolarSystemRenderer.cs" />
     <Compile Include="Renderers\SolarTextureDownloader.cs" />
     <Compile Include="Renderers\SphereRenderer.cs" />

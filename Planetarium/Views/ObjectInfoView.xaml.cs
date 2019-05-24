@@ -99,7 +99,7 @@ namespace Planetarium.Views
                             Hyperlink link = new Hyperlink() { FontFamily = fontFamily, FontSize = fontSize };
                             link.Inlines.Add(formatter.Format(p.Value));
                             link.Click += (s, e) => LinkClicked(p.JulianDay);
-                            var cellValue = new TextBlock(link) { Padding = CellPadding };
+                            var cellValue = new TextBlock(link) { Padding = CellPadding, VerticalAlignment = VerticalAlignment.Center };
                             tblInfo.Children.Add(cellValue);
                             Grid.SetRow(cellValue, r);
                             Grid.SetColumn(cellValue, 1);
@@ -115,7 +115,7 @@ namespace Planetarium.Views
                             Grid.SetRow(cellCaption, r);
                             Grid.SetColumn(cellCaption, 0);
 
-                            var cellValue = new TextBlock() { Text = formatter.Format(p.Value), Padding = CellPadding, FontFamily = fontFamily, FontSize = fontSize };
+                            var cellValue = new TextBlock() { Text = formatter.Format(p.Value), Padding = CellPadding, FontFamily = fontFamily, FontSize = fontSize, VerticalAlignment = VerticalAlignment.Center };
                             tblInfo.Children.Add(cellValue);
                             Grid.SetRow(cellValue, r);
                             Grid.SetColumn(cellValue, 1);

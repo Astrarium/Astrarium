@@ -53,19 +53,6 @@ namespace Planetarium
             else
             {
                 SkyMap.Render(pe.Graphics);
-
-                if (SkyMap.LockedObject != null && Cursor == Cursors.No)
-                {
-                    var format = new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                    string text = "Map locked";
-                    PointF center = new PointF(Width / 2, Height / 2);
-                    var size = pe.Graphics.MeasureString(text, Font, center, format);
-                    int margin = 4;
-                    var box = new Rectangle((int)(center.X - size.Width / 2 - margin), (int)(center.Y - size.Height / 2 - margin), (int)size.Width + 2 * margin, (int)size.Height + 2 * margin);
-                    pe.Graphics.FillRectangle(new SolidBrush(BackColor), box);
-                    pe.Graphics.DrawRectangle(new Pen(Color.FromArgb(100, ForeColor)), box); 
-                    pe.Graphics.DrawString(text, Font, new SolidBrush(ForeColor), center, format);
-                }
             }
         }
 
@@ -95,11 +82,25 @@ namespace Planetarium
 
         protected override void OnMouseUp(MouseEventArgs e)
         {
-            base.OnMouseUp(e);
+            base.OnMouseUp(e);          
             SkyMap.Antialias = true;
             Cursor = Cursors.Cross;
             Invalidate();
             pOld = Point.Empty;
+        }
+
+        protected override void OnMouseLeave(EventArgs e)
+        {
+            base.OnMouseLeave(e);            
+            SkyMap.MousePosition = null;
+            Invalidate();
+        }
+
+        protected override void OnMouseEnter(EventArgs e)
+        {
+            base.OnMouseEnter(e);
+            SkyMap.MousePosition = SkyMap.Center;
+            Invalidate();
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
@@ -111,6 +112,8 @@ namespace Planetarium
             if (SkyMap != null)
             {
                 bool shift = (ModifierKeys & Keys.Shift) != Keys.None;
+
+                SkyMap.MousePosition = SkyMap.Projection.Invert(new PointF(e.X, e.Y));
 
                 if (e.Button == MouseButtons.Left && !shift)
                 {
@@ -160,6 +163,7 @@ namespace Planetarium
                     }
                     else
                     {
+                        SkyMap.MousePosition = null;
                         if (Cursor != Cursors.No)
                         {
                             Cursor = Cursors.No;
@@ -167,6 +171,13 @@ namespace Planetarium
                     }
 
                     Invalidate();
+                }
+                else
+                {
+                    if (SkyMap.MeasureOrigin != null)
+                    {
+                        Invalidate();
+                    }
                 }
             }
         }

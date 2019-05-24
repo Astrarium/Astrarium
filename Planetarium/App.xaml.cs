@@ -158,18 +158,19 @@ namespace Planetarium
                 .Cast<BaseCalc>()
                 .ToArray();
 
-            var renderers = rendererTypes
-                .Select(r => kernel.Get(r))
-                .Cast<BaseRenderer>()
-                .OrderBy(r => r.ZOrder)
-                .ToArray();
-
             var eventProviders = eventProviderTypes
                 .Select(c => kernel.Get(c))
                 .Cast<BaseAstroEventsProvider>()
                 .ToArray();
 
             kernel.Bind<Sky, ISearcher, IEphemerisProvider>().ToConstant(new Sky(context, calculators, eventProviders)).InSingletonScope();
+
+            var renderers = rendererTypes
+                .Select(r => kernel.Get(r))
+                .Cast<BaseRenderer>()
+                .OrderBy(r => r.ZOrder)
+                .ToArray();
+
             kernel.Bind<ISkyMap>().ToConstant(new SkyMap(context, renderers)).InSingletonScope();
             kernel.Bind<IViewManager>().ToConstant(new ViewManager(t => kernel.Get(t))).InSingletonScope();
         }

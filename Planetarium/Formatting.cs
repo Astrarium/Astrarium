@@ -71,6 +71,10 @@ namespace Planetarium
             Default["SaturnRings.b"]            = SaturnRingsSize;
             Default["Visibility.Duration"]      = VisibilityDuration;
             Default["Visibility.Period"]        = VisibilityPeriod;
+            Default["Rectangular.X"]            = Rectangular;
+            Default["Rectangular.Y"]            = Rectangular;
+            Default["Rectangular.Z"]            = Rectangular;
+            Default["GRSLongitude"]             = GRSLongitude;
         }
 
         public static IEphemFormatter GetDefault(string key)
@@ -412,5 +416,8 @@ namespace Planetarium
         public static readonly IEphemFormatter VisibilityDuration = new VisibilityDurationFormatter();
         public static readonly IEphemFormatter VisibilityPeriod = new VisibilityPeriodFormatter();
         public static readonly IEphemFormatter TimeSpan = new TimeSpanFormatter();
+        public static readonly IEphemFormatter Rectangular = new SignedDoubleFormatter(3);
+        public static readonly IEphemFormatter GRSLongitude = new UnsignedDoubleFormatter(2, "\u00B0");
+        public static readonly IEphemFormatter MeasuredAngle = new SmallAngleFormatter();
     }
 }

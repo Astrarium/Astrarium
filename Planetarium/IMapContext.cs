@@ -36,6 +36,18 @@ namespace Planetarium
         /// </summary>
         CrdsHorizontal Center { get; }
 
+        /// <summary>
+        /// Gets celestial object the map is locked on
+        /// </summary>
+        CelestialObject LockedObject { get; }
+
+        /// <summary>
+        /// Origin of measure tool. Not null if measure tool is on.
+        /// </summary>
+        CrdsHorizontal MeasureOrigin { get; }
+
+        CrdsHorizontal MousePosition { get; }
+
         void AddDrawnObject(CelestialObject obj, PointF p);
 
         /// <summary>

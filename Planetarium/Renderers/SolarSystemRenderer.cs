@@ -465,7 +465,7 @@ namespace Planetarium.Renderers
                                     Image textureVolume = imagesCache.RequestImage("volume", 0, VolumeTextureProvider, map.Redraw);
                                     if (textureVolume != null)
                                     {
-                                        map.Graphics.DrawImage(textureVolume, -diam / 2 - 1, -diam / 2 - 1, diam + 2, diam + 2);
+                                        map.Graphics.DrawImage(textureVolume, -diam / 2 * 1.01f, -diam / 2 * 1.01f, diam * 1.01f, diam * 1.01f);
                                     }
                                 }
                                 else
@@ -690,13 +690,12 @@ namespace Planetarium.Renderers
             float diamEquat = diam;
             float diamPolar = (1 - planet.Flattening) * diam;
             bool useTextures = settings.Get<bool>("UseTextures");
-            var grsSettings = settings.Get<GreatRedSpotSettings>("GRSLongitude");
-
+           
             g.FillEllipse(GetPlanetColor(planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
 
             if (useTextures)
             {
-                double grs = planet.Number == Planet.JUPITER ? PlanetEphem.GreatRedSpotLongitude(map.JulianDay, grsSettings) : 0;
+                double grs = planet.Number == Planet.JUPITER ? planetsProvider.GreatRedSpotLongitude : 0;
                 Image texturePlanet = imagesCache.RequestImage(planet.Number.ToString(), new LonLatShift(planet.Number.ToString(), planet.Appearance.CM - grs, planet.Appearance.D), PlanetTextureProvider, map.Redraw);
 
                 if (texturePlanet != null)
