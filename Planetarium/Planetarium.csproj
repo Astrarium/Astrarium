@@ -68,6 +68,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AstroEventsConfig.cs" />
+    <Compile Include="Calculators\AsteroidsCalculator.cs" />
+    <Compile Include="Calculators\AsteroidsReader.cs" />
     <Compile Include="Calculators\BaseCalc.cs" />
     <Compile Include="Calculators\ConstellationsCalc.cs" />
     <Compile Include="Calculators\DeepSkyCalc.cs" />
@@ -113,6 +115,7 @@
     <Compile Include="IInfoProvider.cs" />
     <Compile Include="IMapContext.cs" />
     <Compile Include="ISkyMap.cs" />
+    <Compile Include="Objects\Asteroid.cs" />
     <Compile Include="Objects\CelestialObject.cs" />
     <Compile Include="Objects\CelestialPoint.cs" />
     <Compile Include="Objects\Constellation.cs" />
@@ -314,6 +317,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="Data\Asteroids.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Data\Cities.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

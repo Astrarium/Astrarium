@@ -48,7 +48,7 @@
                 <MenuItem Width="Auto" Style="{StaticResource StatusBarMenuItem}" Header="Settings">
                     <MenuItem Header="Date and Time" Command="{Binding SetDateCommand}" />
                     <MenuItem Header="Observer Location" Command="{Binding SelectLocationCommand}" />
-                    <Separator Height="1" />
+                    <Separator Template="{StaticResource MenuSeparatorTemplate}" />
                     <MenuItem Header="Settings..." Command="{Binding ChangeSettingsCommand}" />
                 </MenuItem>
             </Menu>
