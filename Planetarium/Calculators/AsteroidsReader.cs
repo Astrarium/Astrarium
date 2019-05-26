@@ -12,6 +12,12 @@ namespace Planetarium.Calculators
 {
     public class AsteroidsReader
     {
+        /// <summary>
+        /// Reads asteroids orbital elements written in MPC format.
+        /// Description of the format can be found at <see href="https://www.minorplanetcenter.net/iau/info/MPOrbitFormat.html"/>.
+        /// </summary>
+        /// <param name="file">Full path to the file with orbital elements.</param>
+        /// <returns>Collection of <see cref="Asteroid"/> items.</returns>
         public ICollection<Asteroid> Read(string file)
         {
             List<Asteroid> asteroids = new List<Asteroid>();
@@ -44,6 +50,14 @@ namespace Planetarium.Calculators
             return asteroids;
         }
 
+        /// <summary>
+        /// Reads date written in packed form.
+        /// Description of packed format can be found at <see href="https://www.minorplanetcenter.net/iau/info/PackedDes.html"/>.
+        /// </summary>
+        /// <param name="line">Line of orbital elements in MPC format.</param>
+        /// <param name="from">Starting column (character index + 1) in the line</param>
+        /// <param name="to">Ending column (character index + 1) in the line</param>
+        /// <returns>Julian day corresponding to encoded date.</returns>
         private double ReadDate(string line, int from, int to)
         {
             string strValue = Read<string>(line, from, to);

@@ -45,5 +45,18 @@ namespace ADK
         /// Semimajor axis, AU
         /// </summary>
         public double a { get; set; }
+
+        public OrbitalElements() { }
+
+        public OrbitalElements(OrbitalElements other)
+        {
+            Epoch = other.Epoch;
+            M = other.M;
+            omega = other.omega;
+            Omega = other.Omega;
+            i = other.i;
+            e = other.e;
+            a = other.a;
+        }
     }
 }

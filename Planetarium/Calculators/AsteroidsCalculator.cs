@@ -11,14 +11,14 @@ namespace Planetarium.Calculators
 {
     public class AsteroidsCalculator : BaseCalc
     {
-        private readonly string DATA_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Asteroids.dat");
+        private readonly string ORBITAL_ELEMENTS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Asteroids.dat");
 
         private AsteroidsReader reader = new AsteroidsReader();
         private ICollection<Asteroid> asteroids;
 
         public override void Initialize()
         {
-            asteroids = reader.Read(DATA_FILE);
+            asteroids = reader.Read(ORBITAL_ELEMENTS_FILE);
         }
 
         public override void Calculate(SkyContext context)
