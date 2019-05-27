@@ -28,5 +28,10 @@ namespace Planetarium.Objects
         /// Slope parameter
         /// </summary>
         public double G { get; set; }
+
+        /// <summary>
+        /// Magnitude of asteroid
+        /// </summary>
+        public float Magnitude { get; set; }
     }
 }

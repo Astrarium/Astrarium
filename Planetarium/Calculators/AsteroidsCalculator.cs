@@ -1,4 +1,5 @@
-﻿using Planetarium.Objects;
+﻿using ADK;
+using Planetarium.Objects;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,21 +10,105 @@ using System.Threading.Tasks;
 
 namespace Planetarium.Calculators
 {
-    public class AsteroidsCalculator : BaseCalc
+    public interface IAsteroidsProvider
+    {
+        ICollection<Asteroid> Asteroids { get; }
+    }
+
+    public class AsteroidsCalculator : BaseCalc, IAsteroidsProvider
     {
         private readonly string ORBITAL_ELEMENTS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Asteroids.dat");
 
         private AsteroidsReader reader = new AsteroidsReader();
-        private ICollection<Asteroid> asteroids;
+
+        public ICollection<Asteroid> Asteroids { get; private set; }
 
         public override void Initialize()
         {
-            asteroids = reader.Read(ORBITAL_ELEMENTS_FILE);
+            Asteroids = reader.Read(ORBITAL_ELEMENTS_FILE);
         }
 
-        public override void Calculate(SkyContext context)
+        public override void Calculate(SkyContext c)
         {
+            for (int i = 0; i < Asteroids.Count; i++)
+            {
+                // final difference to stop iteration process, 1 second of time
+                double deltaTau = TimeSpan.FromSeconds(1).TotalDays;
+
+                // time taken by the light to reach the Earth
+                double tau = 0;
+
+                // previous value of tau to calculate the difference
+                double tau0 = 1;
+
+                // Rectangular coordinates of asteroid
+                CrdsRectangular rect = null;
+
+                // Rectangular coordinates of sun
+                var sun = c.Get(SunRectangular);
+
+                double ksi = 0, eta = 0, zeta = 0, Delta = 0;
+
+                // Iterative process to find heliocentrical coordinates of planet
+                while (Math.Abs(tau - tau0) > deltaTau)
+                {
+                    // Rectangular coordinates of asteroid
+                    rect = MinorBodyPositions.GetRectangularCoordinates(Asteroids.ElementAt(i).Orbit, c.JulianDay - tau, c.Epsilon);
+
+                    ksi = sun.X + rect.X;
+                    eta = sun.Y + rect.Y;
+                    zeta = sun.Z + rect.Z;
+
+                    // Distance to the Earth
+                    Delta = Math.Sqrt(ksi * ksi + eta * eta + zeta * zeta);
+
+                    tau0 = tau;
+                    tau = PlanetPositions.LightTimeEffect(Delta);
+                }
+
+                double alpha = Angle.ToDegrees(Math.Atan2(eta, ksi));
+                double delta = Angle.ToDegrees(Math.Asin(zeta / Delta));
+
+                var eq = new CrdsEquatorial(alpha, delta);
+
+                // Nutation effect
+                var eq1 = Nutation.NutationEffect(eq, c.NutationElements, c.Epsilon);
+
+                // Aberration effect
+                var eq2 = Aberration.AberrationEffect(eq, c.AberrationElements, c.Epsilon);
+
+                // Apparent coordinates of the object
+                eq += eq1 + eq2;
+
+                // Apparent horizontal coordinates
+                Asteroids.ElementAt(i).Horizontal = eq.ToHorizontal(c.GeoLocation, c.SiderealTime);
+
+                Asteroids.ElementAt(i).Magnitude = 1;
+            }
+        }
+
+
+        /// <summary>
+        /// Gets rectangular coordinates of Sun
+        /// </summary>
+        private CrdsRectangular SunRectangular(SkyContext c)
+        {
+            CrdsHeliocentrical hEarth = PlanetPositions.GetPlanetCoordinates(Planet.EARTH, c.JulianDay, !c.PreferFastCalculation);
             
+            var eSun = new CrdsEcliptical(Angle.To360(hEarth.L + 180), -hEarth.B, hEarth.R);
+
+            // Corrected solar coordinates to FK5 system
+            eSun += PlanetPositions.CorrectionForFK5(c.JulianDay, eSun);
+
+            // NO correction for nutation and aberration should be performed here (ch. 26, p. 171)
+
+            // Add nutation effect to ecliptical coordinates of the Sun
+            //sunEcliptical += Nutation.NutationEffect(c.NutationElements.deltaPsi);
+
+            // Add aberration effect, so we have an final ecliptical coordinates of the Sun 
+            //sunEcliptical += Aberration.AberrationEffect(sunEcliptical.Distance);
+
+            return eSun.ToRectangular(c.Epsilon);
         }
     }
 }

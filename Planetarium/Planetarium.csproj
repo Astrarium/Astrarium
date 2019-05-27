@@ -142,6 +142,7 @@
     <Compile Include="Renderers\SolarSystemRenderer.cs" />
     <Compile Include="Renderers\SolarTextureDownloader.cs" />
     <Compile Include="Renderers\SphereRenderer.cs" />
+    <Compile Include="Renderers\AsteroidsRenderer.cs" />
     <Compile Include="Renderers\StarsRenderer.cs" />
     <Compile Include="Renderers\TrackRenderer.cs" />
     <Compile Include="Sky.cs" />
