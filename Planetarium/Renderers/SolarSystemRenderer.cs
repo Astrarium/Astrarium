@@ -441,72 +441,70 @@ namespace Planetarium.Renderers
 
                 if ((!isGround || moon.Horizontal.Altitude + moon.Semidiameter / 3600 > 0) &&
                     ad < coeff * map.ViewAngle + moon.Semidiameter / 3600)
-                {
-                    {                        
-                        float diam = map.GetDiskSize(moon.Semidiameter);
+                {                  
+                    float diam = map.GetDiskSize(moon.Semidiameter);
 
-                        PointF p = map.Project(moon.Horizontal);
-                        PointF pJupiter = map.Project(jupiter.Horizontal);
+                    PointF p = map.Project(moon.Horizontal);
+                    PointF pJupiter = map.Project(jupiter.Horizontal);
 
-                        // satellite should be rendered as disk
-                        if ((int)diam > 0)
+                    // satellite should be rendered as disk
+                    if ((int)diam > 0)
+                    {
+                        float rotation = map.GetRotationTowardsNorth(jupiter.Equatorial) + 360 - (float)jupiter.Appearance.P;
+
+                        map.Graphics.TranslateTransform(p.X, p.Y);
+                        map.Graphics.RotateTransform(rotation);
+
+                        if (useTextures)
                         {
-                            float rotation = map.GetRotationTowardsNorth(jupiter.Equatorial) + 360 - (float)jupiter.Appearance.P;
-
-                            map.Graphics.TranslateTransform(p.X, p.Y);
-                            map.Graphics.RotateTransform(rotation);
-
-                            if (useTextures)
+                            Image texture = imagesCache.RequestImage($"5-{moon.Number}", new LonLatShift($"5-{moon.Number}", moon.CM, jupiter.Appearance.D), PlanetTextureProvider, map.Redraw);
+                            if (texture != null)
                             {
-                                Image texture = imagesCache.RequestImage($"5-{moon.Number}", new LonLatShift($"5-{moon.Number}", moon.CM, jupiter.Appearance.D), PlanetTextureProvider, map.Redraw);
-                                if (texture != null)
+                                map.Graphics.DrawImage(texture, -diam / 2 * 1.01f, -diam / 2 * 1.01f, diam * 1.01f, diam * 1.01f);
+                                Image textureVolume = imagesCache.RequestImage("volume", 0, VolumeTextureProvider, map.Redraw);
+                                if (textureVolume != null)
                                 {
-                                    map.Graphics.DrawImage(texture, -diam / 2 * 1.01f, -diam / 2 * 1.01f, diam * 1.01f, diam * 1.01f);
-                                    Image textureVolume = imagesCache.RequestImage("volume", 0, VolumeTextureProvider, map.Redraw);
-                                    if (textureVolume != null)
-                                    {
-                                        map.Graphics.DrawImage(textureVolume, -diam / 2 * 1.01f, -diam / 2 * 1.01f, diam * 1.01f, diam * 1.01f);
-                                    }
-                                }
-                                else
-                                {
-                                    map.Graphics.FillEllipse(Brushes.Wheat, -diam / 2, -diam / 2, diam, diam);
+                                    map.Graphics.DrawImage(textureVolume, -diam / 2 * 1.01f, -diam / 2 * 1.01f, diam * 1.01f, diam * 1.01f);
                                 }
                             }
                             else
                             {
                                 map.Graphics.FillEllipse(Brushes.Wheat, -diam / 2, -diam / 2, diam, diam);
-                                if (diam > 2)
-                                {
-                                    map.Graphics.DrawEllipse(Pens.Black, -diam / 2, -diam / 2, diam, diam);
-                                }
                             }
-
-                            map.Graphics.ResetTransform();
-
-                            // render another moon shadows on the moon
-                            RenderJupiterMoonShadow(map, moon, moon.RectangularS);
-
-                            // render Jupiter shadow on the moon
-                            if (moon.IsEclipsedByJupiter) RenderJupiterShadow(map, moon);
-
-                            map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, diam);
-                            map.AddDrawnObject(moon, p);
                         }
-                        // satellite is distant enough from the Jupiter
-                        // but too small to be drawn as disk
-                        else if (Geometry.DistanceBetweenPoints(p, pJupiter) >= 5)
+                        else
                         {
-                            // do not draw moon point if eclipsed
-                            if (!moon.IsEclipsedByJupiter)
+                            map.Graphics.FillEllipse(Brushes.Wheat, -diam / 2, -diam / 2, diam, diam);
+                            if (diam > 2)
                             {
-                                map.Graphics.TranslateTransform(p.X, p.Y);
-                                map.Graphics.FillEllipse(Brushes.Wheat, -1, -1, 2, 2);
-                                map.Graphics.ResetTransform();
+                                map.Graphics.DrawEllipse(Pens.Black, -diam / 2, -diam / 2, diam, diam);
                             }
-                            map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, 2);
-                            map.AddDrawnObject(moon, p);
                         }
+
+                        map.Graphics.ResetTransform();
+
+                        // render another moon shadows on the moon
+                        RenderJupiterMoonShadow(map, moon, moon.RectangularS);
+
+                        // render Jupiter shadow on the moon
+                        if (moon.IsEclipsedByJupiter) RenderJupiterShadow(map, moon);
+
+                        map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, diam);
+                        map.AddDrawnObject(moon, p);
+                    }
+                    // satellite is distant enough from the Jupiter
+                    // but too small to be drawn as disk
+                    else if (Geometry.DistanceBetweenPoints(p, pJupiter) >= 5)
+                    {
+                        // do not draw moon point if eclipsed
+                        if (!moon.IsEclipsedByJupiter)
+                        {
+                            map.Graphics.TranslateTransform(p.X, p.Y);
+                            map.Graphics.FillEllipse(Brushes.Wheat, -1, -1, 2, 2);
+                            map.Graphics.ResetTransform();
+                        }
+                        map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, 2);
+                        map.AddDrawnObject(moon, p);
                     }
                 }
             }

@@ -59,7 +59,17 @@ namespace Planetarium
                 ViewAngleChanged?.Invoke(viewAngle);
             }
         }
-        
+
+        /// <summary>
+        /// Minimal allowed field of view, in degrees
+        /// </summary>
+        public double MinViewAngle => 1.0 / 1024;
+
+        /// <summary>
+        /// Max allowed field of view, in degrees
+        /// </summary>
+        public double MaxViewAngle => 90;
+
         /// <summary>
         /// Occurs when map's View Angle is changed.
         /// </summary>
@@ -198,7 +208,7 @@ namespace Planetarium
             double sd = (body is SizeableCelestialObject) ?
                         (body as SizeableCelestialObject).Semidiameter / 3600 : 0;
 
-            double viewAngleTarget = sd == 0 ? 1 : sd * 10;
+            double viewAngleTarget = sd == 0 ? 1 : Math.Max(sd * 10, MinViewAngle);
 
             if (animationDuration.Equals(TimeSpan.Zero))
             {

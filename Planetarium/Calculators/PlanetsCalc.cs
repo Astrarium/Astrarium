@@ -298,9 +298,18 @@ namespace Planetarium.Calculators
             return ADK.Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, parallax);
         }
 
-        public VisibilityDetails Visibility(SkyContext ctx, int p)
+        public VisibilityDetails Visibility(SkyContext c, int p)
         {
-            return ADK.Visibility.Details(ctx.Get(Equatorial, p), ctx.Get(SunEquatorial), ctx.GeoLocation, ctx.SiderealTime, 5);
+            double jd = c.JulianDayMidnight;
+            double theta0 = Date.ApparentSiderealTime(jd, c.NutationElements.deltaPsi, c.Epsilon);
+            double parallax = c.Get(Parallax, p);
+
+            var ctx = new SkyContext(jd, c.GeoLocation);
+            
+            var eq = ctx.Get(Equatorial, p);
+            var eqSun = ctx.Get(SunEquatorial);
+
+            return ADK.Visibility.Details(eq, eqSun, c.GeoLocation, theta0, 5);
         }
 
         public override void Calculate(SkyContext context)
@@ -443,6 +452,7 @@ namespace Planetarium.Calculators
             int p = planet.Number;
 
             var rts = c.Get(RiseTransitSet, p);
+            var vis = c.Get(Visibility, p);
 
             var info = new CelestialObjectInfo();
             info.SetSubtitle("Planet").SetTitle(GetName(planet))
@@ -469,7 +479,11 @@ namespace Planetarium.Calculators
             .AddRow("RTS.Rise", rts.Rise, c.JulianDayMidnight + rts.Rise)
             .AddRow("RTS.Transit", rts.Transit, c.JulianDayMidnight + rts.Transit)
             .AddRow("RTS.Set", rts.Set, c.JulianDayMidnight + rts.Set)
-            .AddRow("RTS.Duration", rts.Duration)
+
+            .AddRow("Visibility.Period", vis.Period)
+            .AddRow("Visibility.Begin", vis.Begin, c.JulianDayMidnight + vis.Begin)
+            .AddRow("Visibility.End", vis.End, c.JulianDayMidnight + vis.End)
+            .AddRow("Visibility.Duration", vis.Duration)
 
             .AddHeader("Appearance")
             .AddRow("Phase", c.Get(Phase, p))

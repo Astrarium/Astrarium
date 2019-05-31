@@ -1,4 +1,5 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
 namespace ADK.Tests
 {
@@ -20,6 +21,6 @@ namespace ADK.Tests
             Assert.AreEqual(47.1378, oe.i, 1e-3);
             Assert.AreEqual(151.4783, oe.omega, 1e-3);
             Assert.AreEqual(48.6030, oe.Omega, 1e-3);
-        }        
+        }
     }
 }

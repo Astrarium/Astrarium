@@ -16,18 +16,31 @@ namespace Planetarium.Calculators
         /// Reads asteroids orbital elements written in MPC format.
         /// Description of the format can be found at <see href="https://www.minorplanetcenter.net/iau/info/MPOrbitFormat.html"/>.
         /// </summary>
-        /// <param name="file">Full path to the file with orbital elements.</param>
+        /// <param name="orbitalElementsFile">Full path to the file with orbital elements.</param>
         /// <returns>Collection of <see cref="Asteroid"/> items.</returns>
-        public ICollection<Asteroid> Read(string file)
+        public ICollection<Asteroid> Read(string orbitalElementsFile, string sizesFile)
         {
             List<Asteroid> asteroids = new List<Asteroid>();
+            var sizes = new Dictionary<int, float>();
 
             string line = "";
-            using (var sr = new StreamReader(file, Encoding.Default))
+
+            using (var sr = new StreamReader(sizesFile, Encoding.Default))
             {
                 while (line != null && !sr.EndOfStream)
                 {
                     line = sr.ReadLine();
+                    string[] chunks = line.Split(',');
+                    sizes.Add(int.Parse(chunks[0].Trim()), float.Parse(chunks[1].Trim(), CultureInfo.InvariantCulture));
+                }
+            }
+
+            using (var sr = new StreamReader(orbitalElementsFile, Encoding.Default))
+            {
+                while (line != null && !sr.EndOfStream)
+                {
+                    line = sr.ReadLine();
+                    int number = Read<int>(line, 1, 7);
                     asteroids.Add(new Asteroid()
                     {
                         H = Read<double>(line, 9, 13),
@@ -40,9 +53,11 @@ namespace Planetarium.Calculators
                             Omega = Read<double>(line, 49, 57),
                             i = Read<double>(line, 60, 68),
                             e = Read<double>(line, 71, 79),
-                            a = Read<double>(line, 93, 103)                            
+                            a = Read<double>(line, 93, 103)
                         },
-                        Name = Read<string>(line, 167, 194)
+                        AverageDailyMotion = Read<double>(line, 81, 91),
+                        Name = Read<string>(line, 167, 194),
+                        PhysicalDiameter = sizes.ContainsKey(number) ? sizes[number] : 0
                     });
                 }
             }

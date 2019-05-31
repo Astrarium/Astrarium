@@ -225,23 +225,31 @@ namespace ADK
                 {
                     details.Period = VisibilityPeriod.Invisible;
                     details.Duration = 0;
+                    details.Begin = double.NaN;
+                    details.End = double.NaN;
                 }
                 // the body is observable during the day
                 else
                 {
-
+                    // duration of visibility
                     details.Duration = ranges.Sum(i => i.Range / 360 * 24);
 
+                    // beginning of visibility
+                    details.Begin = ranges.First().Start / 360;
+
+                    // end of visibility
+                    details.End = (details.Begin + details.Duration / 24) % 1;
+
                     // Evening time range, expressed in degrees
-                    // Start is a sunset time, sweep (duration) is a timespan from sunset to midnight.
+                    // Start is a sunset time, range is a timespan from sunset to midnight.
                     var rE = new AngleRange(sun.Set * 360, (1 - sun.Set) * 360);
 
                     // Night time range, expressed in degrees
-                    // Start is a midnight time, sweep (duration) is a half of timespan from midnight to sunrise
+                    // Start is a midnight time, range is a half of timespan from midnight to sunrise
                     var rN = new AngleRange(0, sun.Rise / 2 * 360);
 
                     // Morning time range, expressed in degrees
-                    // Start is a half of time from midnight to sunrise, sweep (duration) is a time to sunrise
+                    // Start is a half of time from midnight to sunrise, range is a time to sunrise
                     var rM = new AngleRange(sun.Rise / 2 * 360, sun.Rise / 2 * 360);
 
                     foreach (var r in ranges)

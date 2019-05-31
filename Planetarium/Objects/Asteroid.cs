@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Planetarium.Objects
 {
-    public class Asteroid : SizeableCelestialObject
+    public class Asteroid : SizeableCelestialObject, IMovingObject
     {
         /// <summary>
         /// Name or readable designation of the minor planet
@@ -33,5 +33,12 @@ namespace Planetarium.Objects
         /// Magnitude of asteroid
         /// </summary>
         public float Magnitude { get; set; }
+
+        /// <summary>
+        /// Physical diameter, in km, if available
+        /// </summary>
+        public float PhysicalDiameter { get; set; }
+
+        public double AverageDailyMotion { get; set; }
     }
 }

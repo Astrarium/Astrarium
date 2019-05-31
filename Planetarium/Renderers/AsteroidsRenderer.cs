@@ -17,6 +17,7 @@ namespace Planetarium.Renderers
     public class AsteroidsRenderer : BaseRenderer
     {
         private Font fontNames;
+        private Brush brushNames;
         private readonly IAsteroidsProvider asteroidsProvider;
         private readonly ISettings settings;
 
@@ -26,6 +27,7 @@ namespace Planetarium.Renderers
             this.settings = settings;
 
             fontNames = new Font("Arial", 8);
+            brushNames = new SolidBrush(Color.FromArgb(10, 44, 37));
         }
 
         public override void Render(IMapContext map)
@@ -33,32 +35,76 @@ namespace Planetarium.Renderers
             Graphics g = map.Graphics;
             var allAsteroids = asteroidsProvider.Asteroids;
             bool isGround = settings.Get<bool>("Ground");
+            bool useTextures = settings.Get<bool>("UseTextures");
             double coeff = map.DiagonalCoefficient();
 
-            if (settings.Get<bool>("Stars"))
+            //if (settings.Get<bool>("Asteroids"))
             {
                 var asteroids = allAsteroids.Where(a => Angle.Separation(map.Center, a.Horizontal) < map.ViewAngle * coeff);
-                if (isGround)
-                {
-                    asteroids = asteroids.Where(a => a.Horizontal.Altitude >= 0);
-                }
 
                 foreach (var a in asteroids)
                 {
-                    float diam = map.GetPointSize(a.Magnitude);
-                    if ((int)diam > 0)
+                    double ad = Angle.Separation(a.Horizontal, map.Center);
+
+                    if ((!isGround || a.Horizontal.Altitude + a.Semidiameter / 3600 > 0) &&
+                        ad < coeff * map.ViewAngle + a.Semidiameter / 3600)
                     {
-                        PointF p = map.Project(a.Horizontal);
-                        if (!map.IsOutOfScreen(p))
+                        float diam = map.GetDiskSize(a.Semidiameter);
+
+
+                        // asteroid should be rendered as disk
+                        if ((int)diam > 0)
                         {
-                            g.FillEllipse(Brushes.White, p.X - diam / 2, p.Y - diam / 2, diam, diam);
-                            map.DrawObjectCaption(fontNames, Brushes.Gray, a.Name, p, diam);
+                            PointF p = map.Project(a.Horizontal);
+
+                            if (useTextures)
+                            {
+                                using (GraphicsPath gpVolume = new GraphicsPath())
+                                {
+                                    gpVolume.AddEllipse(p.X - diam / 2, p.Y - diam / 2, diam, diam);
+
+                                    PathGradientBrush brushVolume = new PathGradientBrush(gpVolume);
+                                    brushVolume.CenterPoint = new PointF(p.X, p.Y);
+                                    brushVolume.CenterColor = Color.Black;
+                                    brushVolume.SetSigmaBellShape(0.0f, 0.5f);
+
+                                    List<Color> clrs = new List<Color>();
+                                    for (int i = 0; i < gpVolume.PathPoints.Length; i++)
+                                    {
+                                        clrs.Add(Color.Transparent);
+                                    }
+                                    brushVolume.SurroundColors = clrs.ToArray();
+
+                                    map.Graphics.FillEllipse(new SolidBrush(Color.FromArgb(100, 100, 100)), p.X - diam / 2, p.Y - diam / 2, diam, diam);
+                                    map.Graphics.FillPath(brushVolume, gpVolume);
+                                }
+                            }
+                            else
+                            {
+                                map.Graphics.FillEllipse(new SolidBrush(Color.FromArgb(100, 100, 100)), p.X - diam / 2, p.Y - diam / 2, diam, diam);
+                            }
+
+                            map.DrawObjectCaption(fontNames, brushNames, a.Name, p, diam);
                             map.AddDrawnObject(a, p);
+                            continue;
+                        }
+
+                        // asteroid should be rendered as point
+                        float size = map.GetPointSize(a.Magnitude);
+                        if ((int)size > 0)
+                        {
+                            PointF p = map.Project(a.Horizontal);
+
+                            if (!map.IsOutOfScreen(p))
+                            {
+                                g.FillEllipse(Brushes.White, p.X - size / 2, p.Y - size / 2, size, size);
+                                map.DrawObjectCaption(fontNames, brushNames, a.Name, p, size);
+                                map.AddDrawnObject(a, p);
+                                continue;
+                            }
                         }
                     }
                 }
-
-                
             }
         }
        

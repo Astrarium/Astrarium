@@ -41,7 +41,7 @@ namespace ADK
         /// <param name="delta">Declination value, in decimal degrees.</param>
         public CrdsEquatorial(double alpha, double delta)
         {
-            Alpha = alpha;
+            Alpha = Angle.To360(alpha);
             Delta = delta;
         }
 

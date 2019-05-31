@@ -71,6 +71,8 @@ namespace Planetarium
             Default["SaturnRings.b"]            = SaturnRingsSize;
             Default["Visibility.Duration"]      = VisibilityDuration;
             Default["Visibility.Period"]        = VisibilityPeriod;
+            Default["Visibility.Begin"]         = Time;
+            Default["Visibility.End"]           = Time;
             Default["Rectangular.X"]            = Rectangular;
             Default["Rectangular.Y"]            = Rectangular;
             Default["Rectangular.Z"]            = Rectangular;
@@ -327,20 +329,27 @@ namespace Planetarium
             {
                 VisibilityPeriod p = (VisibilityPeriod)value;
 
+                List<string> visibility = new List<string>();
+
+                if ((p & ADK.VisibilityPeriod.Evening) != 0)
+                {
+                    visibility.Add("Evening");
+                }
+                if ((p & ADK.VisibilityPeriod.Night) != 0)
+                {
+                    visibility.Add("Night");
+                }
                 if ((p & ADK.VisibilityPeriod.Morning) != 0)
                 {
-                    return "Morning";
+                    visibility.Add("Morning");
                 }
-                else if ((p & ADK.VisibilityPeriod.Evening) != 0)
-                {
-                    return "Evening";
-                }
-                else if ((p & ADK.VisibilityPeriod.Night) != 0)
-                {
-                    return "Night";
-                }
-                
-                return "";
+
+                if (visibility.Count == 3)
+                    return "Whole night";
+                else if (visibility.Any())
+                    return string.Join(", ", visibility);
+                else
+                    return "Invisible";
             }
         }
 

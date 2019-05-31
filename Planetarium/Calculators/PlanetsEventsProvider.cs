@@ -597,6 +597,7 @@ namespace Planetarium.Calculators
                         Angle.Align(longitudes);
                         data[p].DiffInLongitude = longitudes[0] - longitudes[1];
 
+                        // TODO: what is it?
                         if (p == 2 && jd >= context.From && jd < context.To)
                         {
                             Console.WriteLine(new Date(jd, 3).ToString() + " " + data[p].Visibility.Duration + " " + data[p].Visibility.Period);

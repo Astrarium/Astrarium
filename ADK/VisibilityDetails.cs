@@ -16,6 +16,16 @@ namespace ADK
         /// Visibility period (period of day when the body is observable) 
         /// </summary>
         public VisibilityPeriod Period { get; set; }
+
+        /// <summary>
+        /// Begin of visibility, in fractions of day
+        /// </summary>
+        public double Begin { get; set; }
+
+        /// <summary>
+        /// End of visibility, in fractions of day
+        /// </summary>
+        public double End { get; set; }
     }
 
     /// <summary>

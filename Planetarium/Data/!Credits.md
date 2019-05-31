@@ -17,3 +17,6 @@ NGC/IC catalogs data are taken from http://www.klima-luft.de/steinicke/index_e.h
 Dark application theme is based on WpfExpressionBlendTheme
 (c) Dan Pristupov https://github.com/DanPristupov/WpfExpressionBlendTheme 
 Under MIT license
+
+Physical diameters of asteroids are extracted with Small-Body Database Search Engine
+https://ssd.jpl.nasa.gov/sbdb_query.cgi

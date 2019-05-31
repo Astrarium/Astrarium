@@ -193,13 +193,13 @@ namespace Planetarium.ViewModels
                 v /= 1.1;
             }
 
-            if (v >= 90)
+            if (v >= map.MaxViewAngle)
             {
-                v = 90;
+                v = map.MaxViewAngle;
             }
-            if (v < 1.0 / 1024.0)
+            if (v < map.MinViewAngle)
             {
-                v = 1.0 / 1024.0;
+                v = map.MinViewAngle;
             }
 
             map.ViewAngle = v;

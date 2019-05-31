@@ -321,6 +321,9 @@
     <None Include="Data\Asteroids.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Data\AsteroidsSizes.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Data\Cities.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
