@@ -134,7 +134,27 @@ namespace ADK.Tests
         [TestMethod]
         public void Separation()
         {
-            throw new NotImplementedException(); 
+            // Example 17.a, AA(II)
+            {
+                var c1 = new CrdsEquatorial(213.9154, 19.1825);
+                var c2 = new CrdsEquatorial(201.2983, -11.1614);
+                Assert.AreEqual(32.7930, Angle.Separation(c1, c2), 1e-4);
+            }
+            {
+                var c1 = new CrdsEcliptical(213.9154, 19.1825);
+                var c2 = new CrdsEcliptical(201.2983, -11.1614);
+                Assert.AreEqual(32.7930, Angle.Separation(c1, c2), 1e-4);
+            }
+            {
+                var c1 = new CrdsGeographical(213.9154, 19.1825);
+                var c2 = new CrdsGeographical(201.2983, -11.1614);
+                Assert.AreEqual(32.7930, Angle.Separation(c1, c2), 1e-4);
+            }
+            {
+                var c1 = new CrdsHorizontal(213.9154, 19.1825);
+                var c2 = new CrdsHorizontal(201.2983, -11.1614);
+                Assert.AreEqual(32.7930, Angle.Separation(c1, c2), 1e-4);
+            }
         }
 
         [TestMethod]

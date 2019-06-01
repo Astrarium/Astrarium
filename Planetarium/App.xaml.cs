@@ -93,7 +93,7 @@ namespace Planetarium
                 .WithSection("Planets")
                 .WithBuilder(typeof(GRSSettingBuilder));
 
-            settingsConfig.Add("ObserverLocation", new CrdsGeographical(56.3333, -44, +3, 80, "Europe/Moscow", "Nizhny Novgorod"));
+            settingsConfig.Add("ObserverLocation", new CrdsGeographical(-44, 56.3333, +3, 80, "Europe/Moscow", "Nizhny Novgorod"));
 
             kernel.Bind<ISettingsConfig, SettingsConfig>().ToConstant(settingsConfig).InSingletonScope();
 

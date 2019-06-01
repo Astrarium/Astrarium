@@ -318,7 +318,7 @@ namespace Planetarium.Controls
             if (Lat == -90) Lat += 1.0 / 3600.0;
             if (Lat == 90) Lat -= 1.0 / 3600.0;
 
-            ObserverLocation = new CrdsGeographical(Lat, Lon, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.TimeZoneId, "");
+            ObserverLocation = new CrdsGeographical(Lon, Lat, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.TimeZoneId, "");
 
             InvalidateVisual();
         }

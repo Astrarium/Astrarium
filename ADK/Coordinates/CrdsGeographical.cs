@@ -72,7 +72,7 @@ namespace ADK
 
         public CrdsGeographical() { }
 
-        public CrdsGeographical(double latitude, double longitude, double utcOffset = 0, double elevation = 0, string timeZoneId = null, string locationName = null)
+        public CrdsGeographical(double longitude, double latitude, double utcOffset = 0, double elevation = 0, string timeZoneId = null, string locationName = null)
         {
             Latitude = latitude;
             Longitude = longitude;
@@ -82,11 +82,11 @@ namespace ADK
             LocationName = locationName;
         }
 
-        public CrdsGeographical(DMS latitude, DMS longitude, double utcOffset = 0, double elevation = 0) 
-            : this(latitude.ToDecimalAngle(), longitude.ToDecimalAngle(), utcOffset, elevation) { }
+        public CrdsGeographical(DMS longitude, DMS latitude, double utcOffset = 0, double elevation = 0)
+            : this(longitude.ToDecimalAngle(), latitude.ToDecimalAngle(), utcOffset, elevation) { }
 
         public CrdsGeographical(CrdsGeographical other)
-            : this(other.Latitude, other.Longitude, other.UtcOffset, other.Elevation, other.TimeZoneId, other.LocationName) { }
+            : this(other.Longitude, other.Latitude, other.UtcOffset, other.Elevation, other.TimeZoneId, other.LocationName) { }
 
         public override string ToString()
         {

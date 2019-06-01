@@ -53,7 +53,6 @@ namespace ADK
         /// <param name="p1">Horizontal coordinates of the first point</param>
         /// <param name="p2">Horizontal coordinates of the second point</param>
         /// <returns>Angular separation in degrees</returns>
-        /// TODO: tests
         public static double Separation(CrdsHorizontal p1, CrdsHorizontal p2)
         {
             double a1 = ToRadians(p1.Altitude);
@@ -74,7 +73,6 @@ namespace ADK
         /// <param name="p1">Equatorial coordinates of the first point</param>
         /// <param name="p2">Equatorial coordinates of the second point</param>
         /// <returns>Angular separation in degrees</returns>
-        /// TODO: tests
         public static double Separation(CrdsEquatorial p1, CrdsEquatorial p2)
         {
             double a1 = ToRadians(p1.Delta);
@@ -95,7 +93,6 @@ namespace ADK
         /// <param name="p1">Ecliptical coordinates of the first point</param>
         /// <param name="p2">Ecliptical coordinates of the second point</param>
         /// <returns>Angular separation in degrees</returns>
-        /// TODO: tests
         public static double Separation(CrdsEcliptical p1, CrdsEcliptical p2)
         {
             double a1 = ToRadians(p1.Beta);
@@ -116,7 +113,6 @@ namespace ADK
         /// <param name="p1">Geographical coordinates of the first point</param>
         /// <param name="p2">Geographical coordinates of the second point</param>
         /// <returns>Angular separation in degrees</returns>
-        /// TODO: tests
         public static double Separation(CrdsGeographical p1, CrdsGeographical p2)
         {
             double a1 = ToRadians(p1.Latitude);

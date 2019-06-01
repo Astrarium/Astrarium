@@ -18,7 +18,7 @@ namespace ADK.Tests
                     new CrdsEquatorial(new HMS("02h 50m 37.273s"), new DMS("+18° 46' 50.47''"))
                 };
 
-                CrdsGeographical location = new CrdsGeographical(42.3333, 71.0833);
+                CrdsGeographical location = new CrdsGeographical(71.0833, 42.3333);
 
                 var rts = Visibility.RiseTransitSet(eq, location, 177.74208, 0, 0);
 
@@ -34,7 +34,7 @@ namespace ADK.Tests
             {
                 var eq = new CrdsEquatorial(new HMS("16h 28m 41s"), new DMS("-26° 24' 30''"));
 
-                CrdsGeographical location = new CrdsGeographical(42.3333, 71.0833);
+                CrdsGeographical location = new CrdsGeographical(71.0833, 42.3333);
 
                 var rts = Visibility.RiseTransitSet(eq, location, 177.74208);
 

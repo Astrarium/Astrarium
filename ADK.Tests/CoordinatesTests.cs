@@ -21,7 +21,7 @@ namespace ADK.Tests
             var eq = new CrdsEquatorial(new HMS("23h 09m 16.641s"), new DMS("-6* 43' 11.61''"));
 
             // Geographical coordinates of US Naval Observatory at Washington, DC
-            var geo = new CrdsGeographical(new DMS("+38* 55' 17''"), new DMS("+77* 03' 56''"));
+            var geo = new CrdsGeographical(new DMS("+77* 03' 56''"), new DMS("+38* 55' 17''"));
 
             // Date of observation
             var jd = new Date(new DateTime(1987, 4, 10, 19, 21, 0, DateTimeKind.Utc)).ToJulianDay();
@@ -57,7 +57,7 @@ namespace ADK.Tests
             var hor = new CrdsHorizontal(68.0337, 15.1249);
 
             // Geographical coordinates of US Naval Observatory at Washington, DC
-            var geo = new CrdsGeographical(new DMS("+38* 55' 17''"), new DMS("+77* 03' 56''"));
+            var geo = new CrdsGeographical(new DMS("+77* 03' 56''"), new DMS("+38* 55' 17''"));
 
             // Date of observation
             var jd = new Date(new DateTime(1987, 4, 10, 19, 21, 0, DateTimeKind.Utc)).ToJulianDay();
@@ -167,7 +167,7 @@ namespace ADK.Tests
             CrdsEquatorial eq = new CrdsEquatorial(339.530208, -15.771083);
 
             // Palomar Observatory coordinates, see example 11.a
-            CrdsGeographical geo = new CrdsGeographical(new DMS("+33* 21' 22''").ToDecimalAngle(), new HMS("7h 47m 27s").ToDecimalAngle(), 1706);
+            CrdsGeographical geo = new CrdsGeographical(new HMS("7h 47m 27s").ToDecimalAngle(), new DMS("+33* 21' 22''").ToDecimalAngle(), 1706);
 
             // Equatoria horizontal parallax 
             double pi = 23.592 / 3600;
