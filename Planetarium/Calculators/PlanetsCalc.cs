@@ -22,6 +22,7 @@ namespace Planetarium.Calculators
     {
         float Magnitude(SkyContext ctx, int number);
         double Elongation(SkyContext ctx, int number);
+        double LongitudeDifference(SkyContext ctx, int number);
         double PhaseAngle(SkyContext ctx, int number);
         VisibilityDetails Visibility(SkyContext ctx, int number);
         CrdsEquatorial Equatorial(SkyContext ctx, int number);
@@ -237,6 +238,14 @@ namespace Planetarium.Calculators
         public double Elongation(SkyContext c, int p)
         {
             return BasicEphem.Elongation(c.Get(SunEcliptical), c.Get(Ecliptical, p));
+        }
+
+        /// <summary>
+        /// Gets difference between planet and Sun's ecliptical longitudes
+        /// </summary>
+        public double LongitudeDifference(SkyContext c, int p)
+        {
+            return BasicEphem.LongitudeDifference(c.Get(SunEcliptical).Lambda, c.Get(Ecliptical, p).Lambda);
         }
 
         /// <summary>

@@ -47,6 +47,14 @@ namespace ADK
             return Math.Sign(b - s) * Angle.ToDegrees(Math.Acos(Math.Cos(beta) * Math.Cos(lambda - lambda0)));
         }
 
+        // TODO: docs, tests
+        public static double LongitudeDifference(double eclipticalLongitudeSun, double eclipticalLongitudeBody)
+        {
+            double[] longitudes = new[] { eclipticalLongitudeBody, eclipticalLongitudeSun };
+            Angle.Align(longitudes);
+            return longitudes[0] - longitudes[1];
+        }
+
         /// <summary>
         /// Calculates phase angle of celestial body
         /// </summary>

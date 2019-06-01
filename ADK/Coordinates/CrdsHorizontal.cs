@@ -70,5 +70,15 @@ namespace ADK
         {
             return $"Az: {new DMS(Azimuth)}; Alt:{new DMS(Altitude)}";
         }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is CrdsHorizontal)
+            {
+                var h = obj as CrdsHorizontal;
+                return h.Altitude == Altitude && h.Azimuth == h.Azimuth;
+            }
+            return false;
+        }
     }
 }

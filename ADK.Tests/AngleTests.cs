@@ -130,5 +130,41 @@ namespace ADK.Tests
             Func<DMS, string> formatter = (DMS dms) => string.Format(CultureInfo.InvariantCulture, "{0:#}° {1:D2}' {2:0.##}''", dms.Degrees, dms.Minutes, dms.Seconds);
             Assert.AreEqual("4° 27' 40.39''", new DMS(4, 27, 40.386).ToString(formatter));
         }
+
+        [TestMethod]
+        public void Separation()
+        {
+            throw new NotImplementedException(); 
+        }
+
+        [TestMethod]
+        public void Intermediate()
+        {
+            CrdsHorizontal h1 = new CrdsHorizontal(5, 52);
+            CrdsHorizontal h2 = new CrdsHorizontal(-120, 37);
+
+            var expected = new CrdsHorizontal[]
+            {
+                new CrdsHorizontal(5, 52),
+                new CrdsHorizontal(-9.924971, 59.60085),
+                new CrdsHorizontal(-31.666402, 64.65469),
+                new CrdsHorizontal(-58.557896, 65.51770),
+                new CrdsHorizontal(-82.746574, 61.80095),
+                new CrdsHorizontal(-99.938739, 54.93700),
+                new CrdsHorizontal(-111.623334, 46.39746),
+                new CrdsHorizontal(-120.000000, 37.00000)
+            };
+
+            for (int i = 0; i <= 7; i++)
+            {
+                var h = Angle.Intermediate(h1, h2, i / 7.0);
+
+                var altExpected = expected[i].Altitude;
+                var azExpected = expected[i].Azimuth;
+
+                Assert.AreEqual(altExpected, h.Altitude, 1e-5);
+                Assert.AreEqual(azExpected, h.Azimuth, 1e-5);
+            }
+        }
     }
 }

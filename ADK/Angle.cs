@@ -53,6 +53,7 @@ namespace ADK
         /// <param name="p1">Horizontal coordinates of the first point</param>
         /// <param name="p2">Horizontal coordinates of the second point</param>
         /// <returns>Angular separation in degrees</returns>
+        /// TODO: tests
         public static double Separation(CrdsHorizontal p1, CrdsHorizontal p2)
         {
             double a1 = ToRadians(p1.Altitude);
@@ -73,6 +74,7 @@ namespace ADK
         /// <param name="p1">Equatorial coordinates of the first point</param>
         /// <param name="p2">Equatorial coordinates of the second point</param>
         /// <returns>Angular separation in degrees</returns>
+        /// TODO: tests
         public static double Separation(CrdsEquatorial p1, CrdsEquatorial p2)
         {
             double a1 = ToRadians(p1.Delta);
@@ -93,6 +95,7 @@ namespace ADK
         /// <param name="p1">Ecliptical coordinates of the first point</param>
         /// <param name="p2">Ecliptical coordinates of the second point</param>
         /// <returns>Angular separation in degrees</returns>
+        /// TODO: tests
         public static double Separation(CrdsEcliptical p1, CrdsEcliptical p2)
         {
             double a1 = ToRadians(p1.Beta);
@@ -113,6 +116,7 @@ namespace ADK
         /// <param name="p1">Geographical coordinates of the first point</param>
         /// <param name="p2">Geographical coordinates of the second point</param>
         /// <returns>Angular separation in degrees</returns>
+        /// TODO: tests
         public static double Separation(CrdsGeographical p1, CrdsGeographical p2)
         {
             double a1 = ToRadians(p1.Latitude);
@@ -141,7 +145,6 @@ namespace ADK
         /// Formula is taken from <see href="http://www.movable-type.co.uk/scripts/latlong.html"/>
         /// that is originally based on <see cref="http://www.edwilliams.org/avform.htm#Intermediate"/>.
         /// </remarks>
-        /// TODO: tests
         public static CrdsHorizontal Intermediate(CrdsHorizontal p1, CrdsHorizontal p2, double fraction)
         {
             if (fraction < 0 || fraction > 1)
@@ -176,6 +179,7 @@ namespace ADK
             return new CrdsHorizontal(ToDegrees(az), ToDegrees(alt));
         }
 
+        // TODO: tests
         public static void Align(double[] array)
         {
             for (int i = 0; i < array.Length - 1; i++)

@@ -417,7 +417,7 @@ namespace Planetarium.Calculators
                     // "diff" is a planet difference in longitude with the Sun (5 points)
                     for (int i = 0; i < 5; i++)
                     {
-                        diff[i] = Math.Abs(data.ElementAt(day + i)[p].DiffInLongitude);
+                        diff[i] = Math.Abs(data.ElementAt(day + i)[p].LongitudeDifference);
                     }
 
                     // If difference in longitude has maximum value at central point
@@ -466,7 +466,7 @@ namespace Planetarium.Calculators
                         // "diff" is a planet difference in longitude with the Sun (5 points)
                         for (int i = 0; i < 5; i++)
                         {
-                            diff[i] = data.ElementAt(day + i)[p].DiffInLongitude;
+                            diff[i] = data.ElementAt(day + i)[p].LongitudeDifference;
                         }
                         
                         if (Math.Abs(diff[2]) < 5 && diff[2] * diff[3] <= 0)
@@ -571,9 +571,7 @@ namespace Planetarium.Calculators
 
             // current calculated value of Julian Day
             double jd = context.From;
-
-            double[] longitudes = new double[2];
-
+            
             for (jd = context.From - 2; jd < context.To + 2; jd++)
             {
                 ctx.JulianDay = jd;
@@ -591,17 +589,7 @@ namespace Planetarium.Calculators
                         data[p].Magnitude = ctx.Get(planetsCalc.Magnitude, p);
                         data[p].Elongation = ctx.Get(planetsCalc.Elongation, p);
                         data[p].Visibility = ctx.Get(planetsCalc.Visibility, p);
-
-                        longitudes[0] = data[p].Ecliptical.Lambda;
-                        longitudes[1] = ctx.Get(planetsCalc.SunEcliptical).Lambda;
-                        Angle.Align(longitudes);
-                        data[p].DiffInLongitude = longitudes[0] - longitudes[1];
-
-                        // TODO: what is it?
-                        if (p == 2 && jd >= context.From && jd < context.To)
-                        {
-                            Console.WriteLine(new Date(jd, 3).ToString() + " " + data[p].Visibility.Duration + " " + data[p].Visibility.Period);
-                        }
+                        data[p].LongitudeDifference = ctx.Get(planetsCalc.LongitudeDifference, p);
                     }
                 }
 
@@ -610,8 +598,6 @@ namespace Planetarium.Calculators
 
             return results;
         }
-
-
 
         private class PlanetData
         {
@@ -638,8 +624,11 @@ namespace Planetarium.Calculators
             /// <summary>
             /// Difference in longitude with the Sun
             /// </summary>
-            public double DiffInLongitude { get; set; }
+            public double LongitudeDifference { get; set; }
 
+            /// <summary>
+            /// Visibility details
+            /// </summary>
             public VisibilityDetails Visibility { get; set; }
         }
 
@@ -653,7 +642,5 @@ namespace Planetarium.Calculators
             public string Direction { get; set; }
             public string AngularDistance { get; set; }
         }
-
-
     }
 }
