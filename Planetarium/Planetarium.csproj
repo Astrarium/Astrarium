@@ -84,6 +84,7 @@
     <Compile Include="Calculators\StarsCalc.cs" />
     <Compile Include="Calculators\StarsReader.cs" />
     <Compile Include="Calculators\TrackCalc.cs" />
+    <Compile Include="Calculators\Tycho2Calculator.cs" />
     <Compile Include="CelestialGrid.cs" />
     <Compile Include="Config\ControlBuilders\GRSSettingBuilder.cs" />
     <Compile Include="Config\ControlBuilders\BooleanSettingControlBuilder.cs" />
@@ -127,9 +128,11 @@
     <Compile Include="Objects\SizeableCelestialObject.cs" />
     <Compile Include="Objects\Star.cs" />
     <Compile Include="Objects\Sun.cs" />
+    <Compile Include="Objects\Tycho2Star.cs" />
     <Compile Include="Projections\ArcProjection.cs" />
     <Compile Include="Projections\IProjection.cs" />
     <Compile Include="Projections\SinProjection.cs" />
+    <Compile Include="Renderers\Tycho2Renderer.cs" />
     <Compile Include="Renderers\BaseRenderer.cs" />
     <Compile Include="Renderers\CelestialGridRenderer.cs" />
     <Compile Include="Renderers\ConstellationsRenderer.cs" />

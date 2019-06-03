@@ -98,30 +98,47 @@ namespace Planetarium
         /// <returns>Size (diameter) of a point in screen pixels</returns>
         public static float GetPointSize(this IMapContext map, float mag)
         {
-            float maxMag = 0;
-            float MAG_LIMIT_NARROW_ANGLE = 7f;
-            const float MAG_LIMIT_WIDE_ANGLE = 5.5f;
+            float mag0 = 8;
+            float maxSize = 5;
 
-            const float NARROW_ANGLE = 2;
-            const float WIDE_ANGLE = 90;
+            if (map.ViewAngle <= 90) { mag0 = 8.0f; }
+            if (map.ViewAngle <= 70) {mag0 = 8.5f; }
+            if (map.ViewAngle < 50) {mag0 = 9.0f; }
+            if (map.ViewAngle < 30) {mag0 = 9.5f; }
+            if (map.ViewAngle < 20) {mag0 = 10.0f; }
+            if (map.ViewAngle < 15) {mag0 = 10.5f; }
+            if (map.ViewAngle < 10) {mag0 = 11.0f; }
+            if (map.ViewAngle < 5) {mag0 = 11.5f; }
+            if (map.ViewAngle < 2) {mag0 = 12.0f; }
 
-            float K = (MAG_LIMIT_NARROW_ANGLE - MAG_LIMIT_WIDE_ANGLE) / (NARROW_ANGLE - WIDE_ANGLE);
-            float B = MAG_LIMIT_WIDE_ANGLE - K * WIDE_ANGLE;
-
-            float minMag = K * (float)map.ViewAngle + B;
-
-            if (map.ViewAngle < 2 && mag > minMag)
+            if (map.ViewAngle < 2 && mag > mag0)
+            {
+                // if star is faint than drawing limit and FOV is small enough, 
+                // draw it as single point
                 return 1;
+            }
+            else
+            {
+                // drawing diameter if star with 'mag0' magnitude, in pixels
+                float size0 = 1;
 
-            if (mag > minMag)
-                return 0;
+                // drawing area of star with 'mag0' magnitude, in square pixels
+                float area0 = 3.1415f * (size0 / 2) * (size0 / 2);
 
-            if (mag <= maxMag)
-                mag = maxMag;
+                // drawing area of star with 'mag' magnitude, according to Pogson formula
+                double area = Math.Pow(10, (mag - mag0) / -2.5) * area0;
 
-            float range = minMag - maxMag;
+                // drawing size of star with 'mag' magnitude
+                float size = (float)(Math.Sqrt(area) / 3.1415);
 
-            return (range - mag + 1);
+                // do not exceed drawing size
+                size = Math.Min(maxSize, size);
+
+                // compensate faint stars on the drawing limit edge
+                if (size > 0.9 && size < 1) size = 1;
+
+                return size;
+            }
         }
 
         /// <summary>
