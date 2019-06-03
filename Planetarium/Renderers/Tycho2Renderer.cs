@@ -36,7 +36,7 @@ namespace Planetarium.Renderers
             bool isGround = settings.Get<bool>("Ground");
             double coeff = map.DiagonalCoefficient();
 
-            if (map.ViewAngle <= 5 && settings.Get<bool>("Stars"))
+            if (map.ViewAngle <= 15 && settings.Get<bool>("Stars"))
             {
                 PrecessionalElements pe = Precession.ElementsFK5(map.JulianDay, Date.EPOCH_J2000);
 
@@ -46,7 +46,7 @@ namespace Planetarium.Renderers
 
                 double years = (map.JulianDay - Date.EPOCH_J2000) / 365.25;
 
-                var stars = tycho2.GetStarsAtCircle(eqCenter, map.ViewAngle * coeff, years);
+                var stars = tycho2.GetStarsAtCircle(eqCenter, map.ViewAngle * coeff, years, map.MagLimit());
 
                 SkyContext context = new SkyContext(map.JulianDay, map.GeoLocation);
 

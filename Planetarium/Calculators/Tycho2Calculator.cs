@@ -13,7 +13,7 @@ namespace Planetarium.Calculators
 {
     public interface ITycho2Catalog
     {
-        ICollection<Tycho2Star> GetStarsAtCircle(CrdsEquatorial eq, double angle, double years);
+        ICollection<Tycho2Star> GetStarsAtCircle(CrdsEquatorial eq, double angle, double years, float magLimit);
         CrdsHorizontal GetCoordinates(SkyContext context, Tycho2Star star);
     }
 
@@ -85,7 +85,7 @@ namespace Planetarium.Calculators
             }
         }
 
-        public ICollection<Tycho2Star> GetStarsAtCircle(CrdsEquatorial eq, double angle, double years)
+        public ICollection<Tycho2Star> GetStarsAtCircle(CrdsEquatorial eq, double angle, double years, float magLimit)
         {
             double ang = angle + SEGMENT_WIDTH / 2.0;
 
@@ -95,7 +95,7 @@ namespace Planetarium.Calculators
 
             foreach (Tycho2Region region in regions)
             {
-                stars.AddRange(GetStarsInRegion(region, eq, angle, years));
+                stars.AddRange(GetStarsInRegion(region, eq, ang, years, magLimit));
             }
 
             return stars;
@@ -116,7 +116,7 @@ namespace Planetarium.Calculators
             return hor;
         }
 
-        private ICollection<Tycho2Star> GetStarsInRegion(Tycho2Region region, CrdsEquatorial eq, double angle, double years)
+        private ICollection<Tycho2Star> GetStarsInRegion(Tycho2Region region, CrdsEquatorial eq, double angle, double years, float magLimit)
         {
             _Catalog.BaseStream.Seek(CATALOG_RECORD_LEN * (region.FirstStarId - 1), SeekOrigin.Begin);
 
@@ -127,7 +127,7 @@ namespace Planetarium.Calculators
 
             for (int i = 0; i < count; i++)
             {
-                Tycho2Star star = ParseStarData(buffer, i * CATALOG_RECORD_LEN, eq, angle, years);
+                Tycho2Star star = ParseStarData(buffer, i * CATALOG_RECORD_LEN, eq, angle, years, magLimit);
                 if (star != null)
                 {
                     stars.Add(star);
@@ -157,29 +157,37 @@ namespace Planetarium.Calculators
         /// pmDec = 4
         /// mag   = 4
         /// </remarks>
-        private Tycho2Star ParseStarData(byte[] buffer, int offset, CrdsEquatorial eqCenter, double angle, double years)
+        private Tycho2Star ParseStarData(byte[] buffer, int offset, CrdsEquatorial eqCenter, double angle, double years, float magLimit)
         {
-            // Star coordinates at epoch J2000.0 
-            var eq0 = new CrdsEquatorial(
-                BitConverter.ToDouble(buffer, offset + 5),
-                BitConverter.ToDouble(buffer, offset + 13));
-
-            // Take into account proper motion
-            var pm = new CrdsEquatorial(
-                BitConverter.ToSingle(buffer, offset + 21) * years / 3600000.0,
-                BitConverter.ToSingle(buffer, offset + 25) * years / 3600000.0);
-
-            eq0 += pm;
-
-            if (Angle.Separation(eq0, eqCenter) <= angle)
+            float mag = BitConverter.ToSingle(buffer, offset + 29);
+            if (mag <= magLimit)
             {
-                Tycho2Star star = new Tycho2Star();
-                star.Equatorial0 = eq0;
-                star.Tyc1 = BitConverter.ToInt16(buffer, offset);
-                star.Tyc2 = BitConverter.ToInt16(buffer, offset + 2);
-                star.Tyc3 = (char)buffer[offset + 4];
-                star.Magnitude = BitConverter.ToSingle(buffer, offset + 29);
-                return star;
+                // Star coordinates at epoch J2000.0 
+                var eq0 = new CrdsEquatorial(
+                    BitConverter.ToDouble(buffer, offset + 5),
+                    BitConverter.ToDouble(buffer, offset + 13));
+
+                // Take into account proper motion
+                var pm = new CrdsEquatorial(
+                    BitConverter.ToSingle(buffer, offset + 21) * years / 3600000.0,
+                    BitConverter.ToSingle(buffer, offset + 25) * years / 3600000.0);
+
+                eq0 += pm;
+
+                if (Angle.Separation(eq0, eqCenter) <= angle)
+                {
+                    Tycho2Star star = new Tycho2Star();
+                    star.Equatorial0 = eq0;
+                    star.Tyc1 = BitConverter.ToInt16(buffer, offset);
+                    star.Tyc2 = BitConverter.ToInt16(buffer, offset + 2);
+                    star.Tyc3 = (char)buffer[offset + 4];
+                    star.Magnitude = mag;
+                    return star;
+                }
+                else
+                {
+                    return null;
+                }
             }
             else
             {

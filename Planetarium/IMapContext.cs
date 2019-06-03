@@ -90,6 +90,15 @@ namespace Planetarium
             return (float)Math.Max(minSize, semidiameter / 3600.0 / map.ViewAngle * maxSize);
         }
 
+        public static float MagLimit(this IMapContext map)
+        {
+            // Magnitude limit, depends on current FOV
+            // Empiric formula, coefficients found with https://mycurvefit.com/
+            float mag0 = (float)(7.943453 + 4.211224 * Math.Pow(Math.E, -0.032269 * map.ViewAngle));
+
+            return mag0;
+        }
+
         /// <summary>
         /// Gets size of a point (small filled circle) representing a star or a planet
         /// or any other celestial object on sky map, depending of its magnitude.
@@ -98,20 +107,11 @@ namespace Planetarium
         /// <returns>Size (diameter) of a point in screen pixels</returns>
         public static float GetPointSize(this IMapContext map, float mag)
         {
-            float mag0 = 8;
             float maxSize = 5;
 
-            if (map.ViewAngle <= 90) { mag0 = 8.0f; }
-            if (map.ViewAngle <= 70) {mag0 = 8.5f; }
-            if (map.ViewAngle < 50) {mag0 = 9.0f; }
-            if (map.ViewAngle < 30) {mag0 = 9.5f; }
-            if (map.ViewAngle < 20) {mag0 = 10.0f; }
-            if (map.ViewAngle < 15) {mag0 = 10.5f; }
-            if (map.ViewAngle < 10) {mag0 = 11.0f; }
-            if (map.ViewAngle < 5) {mag0 = 11.5f; }
-            if (map.ViewAngle < 2) {mag0 = 12.0f; }
+            float mag0 = map.MagLimit();
 
-            if (map.ViewAngle < 2 && mag > mag0)
+            if (map.ViewAngle < 0.1 && mag > mag0)
             {
                 // if star is faint than drawing limit and FOV is small enough, 
                 // draw it as single point
