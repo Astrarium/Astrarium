@@ -14,7 +14,7 @@ namespace Planetarium.Calculators
     public interface ITycho2Catalog
     {
         ICollection<Tycho2Star> GetStarsAtCircle(CrdsEquatorial eq, double angle, double years, float magLimit);
-        CrdsHorizontal GetCoordinates(SkyContext context, Tycho2Star star);
+        CrdsHorizontal GetHorizontalCoordinates(SkyContext context, Tycho2Star star);
     }
 
     public class Tycho2Calculator : BaseCalc, ICelestialObjectCalc<Tycho2Star>, ITycho2Catalog
@@ -101,29 +101,54 @@ namespace Planetarium.Calculators
             return stars;
         }
 
-        public CrdsHorizontal GetCoordinates(SkyContext context, Tycho2Star star)
+        private PrecessionalElements GetPrecessionalelements(SkyContext context)
         {
-            var pe = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
+            return Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
+        }
 
+        private CrdsEquatorial GetEquatorialCoordinates(SkyContext context, Tycho2Star star)
+        {
+            PrecessionalElements pe = context.Get(GetPrecessionalelements);
+            CrdsEquatorial eq = Precession.GetEquatorialCoordinates(star.Equatorial, pe);
+            return eq +
+                Nutation.NutationEffect(eq, context.NutationElements, context.Epsilon) +
+                Aberration.AberrationEffect(eq, context.AberrationElements, context.Epsilon);
+        }
+
+        public CrdsHorizontal GetHorizontalCoordinates(SkyContext context, Tycho2Star star)
+        {
+            PrecessionalElements pe = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
             CrdsEquatorial eq = Precession.GetEquatorialCoordinates(star.Equatorial, pe);
 
             eq = eq +
                 Nutation.NutationEffect(eq, context.NutationElements, context.Epsilon) +
                 Aberration.AberrationEffect(eq, context.AberrationElements, context.Epsilon);
 
-            CrdsHorizontal hor = eq.ToHorizontal(context.GeoLocation, context.SiderealTime);
+            return eq.ToHorizontal(context.GeoLocation, context.SiderealTime);
+        }
 
-            return hor;
+        /// <summary>
+        /// Gets rise, transit and set info for the star
+        /// </summary>
+        private RTS RiseTransitSet(SkyContext c, Tycho2Star star)
+        {
+            double theta0 = Date.ApparentSiderealTime(c.JulianDayMidnight, c.NutationElements.deltaPsi, c.Epsilon);
+            var eq = c.Get(GetEquatorialCoordinates, star);
+            return Visibility.RiseTransitSet(eq, c.GeoLocation, theta0);
         }
 
         private ICollection<Tycho2Star> GetStarsInRegion(Tycho2Region region, CrdsEquatorial eq, double angle, double years, float magLimit)
         {
+            // seek reading position 
             _Catalog.BaseStream.Seek(CATALOG_RECORD_LEN * (region.FirstStarId - 1), SeekOrigin.Begin);
 
+            // count of records in current region
             int count = (int)(region.LastStarId - region.FirstStarId);
-            var stars = new List<Tycho2Star>();
 
+            // read region in memory for fast access
             byte[] buffer = _Catalog.ReadBytes(CATALOG_RECORD_LEN * count);
+
+            var stars = new List<Tycho2Star>();
 
             for (int i = 0; i < count; i++)
             {
@@ -144,13 +169,15 @@ namespace Planetarium.Calculators
         /// <param name="offset">Offset value to read the star record</param>
         /// <param name="eqCenter">Equatorial coordinates of map center, for current epoch</param>
         /// <param name="angle">Maximal angular separation between map center and star coorinates (both coordinates for current epoch)</param>        
+        /// <param name="years">Number of years since epoch (needed for correction of star position due to proper motion)</param>
+        /// <param name="magLimit">Mgnitude limit</param>
         /// <remarks>
         /// Record format:
         /// [Tyc1][Tyc2][Tyc3][RA][Dec][PmRA][PmDec][Mag]
         /// [   2][   2][   1][ 8][  8][   4][    4][  4]
         /// </remarks>
         private Tycho2Star ParseStarData(byte[] buffer, int offset, CrdsEquatorial eqCenter, double angle, double years, float magLimit)
-        {           
+        {
             float mag = BitConverter.ToSingle(buffer, offset + 29);
             if (mag <= magLimit)
             {
@@ -192,14 +219,43 @@ namespace Planetarium.Calculators
             
         }
 
-        public void ConfigureEphemeris(EphemerisConfig<Tycho2Star> config)
+        public void ConfigureEphemeris(EphemerisConfig<Tycho2Star> e)
         {
-            // TODO
+            e.Add("Equatorial.Alpha", (c, s) => c.Get(GetEquatorialCoordinates, s).Alpha);
+            e.Add("Equatorial.Delta", (c, s) => c.Get(GetEquatorialCoordinates, s).Delta);
+            e.Add("Horizontal.Azimuth", (c, s) => c.Get(GetHorizontalCoordinates, s).Azimuth);
+            e.Add("Horizontal.Altitude", (c, s) => c.Get(GetHorizontalCoordinates, s).Altitude);
+            e.Add("RTS.Rise", (c, s) => c.Get(RiseTransitSet, s).Rise);
+            e.Add("RTS.Transit", (c, s) => c.Get(RiseTransitSet, s).Transit);
+            e.Add("RTS.Set", (c, s) => c.Get(RiseTransitSet, s).Set);
         }
 
-        public CelestialObjectInfo GetInfo(SkyContext context, Tycho2Star body)
+        public CelestialObjectInfo GetInfo(SkyContext c, Tycho2Star s)
         {
-            throw new NotImplementedException();
+            var rts = c.Get(RiseTransitSet, s);
+
+            var info = new CelestialObjectInfo();
+            info.SetSubtitle("Star").SetTitle(s.ToString())
+
+            .AddRow("Constellation", Constellations.FindConstellation(c.Get(GetEquatorialCoordinates, s), c.JulianDay))
+
+            .AddHeader("Equatorial coordinates (current epoch)")
+            .AddRow("Equatorial.Alpha", c.Get(GetEquatorialCoordinates, s).Alpha)
+            .AddRow("Equatorial.Delta", c.Get(GetEquatorialCoordinates, s).Delta)
+
+            .AddHeader("Horizontal coordinates")
+            .AddRow("Horizontal.Azimuth", c.Get(GetHorizontalCoordinates, s).Azimuth)
+            .AddRow("Horizontal.Altitude", c.Get(GetHorizontalCoordinates, s).Altitude)
+
+            .AddHeader("Visibility")
+            .AddRow("RTS.Rise", rts.Rise, c.JulianDayMidnight + rts.Rise)
+            .AddRow("RTS.Transit", rts.Transit, c.JulianDayMidnight + rts.Transit)
+            .AddRow("RTS.Set", rts.Set, c.JulianDayMidnight + rts.Set)
+
+            .AddHeader("Properties")
+            .AddRow("Magnitude", s.Magnitude);
+
+            return info;
         }
 
         public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)

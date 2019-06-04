@@ -56,7 +56,7 @@ namespace Planetarium.Renderers
                     
                     if ((int)size > 0)
                     {                        
-                        star.Horizontal = context.Get(tycho2.GetCoordinates, star);
+                        star.Horizontal = context.Get(tycho2.GetHorizontalCoordinates, star);
 
                         if (!isGround || star.Horizontal.Altitude > 0)
                         {

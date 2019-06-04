@@ -45,5 +45,15 @@ namespace Planetarium.Objects
         {
             return string.Format("TYC {0}-{1}-{2}", Tyc1, Tyc2, Tyc3);
         }
+
+        //public override bool Equals(object obj)
+        //{
+        //    if (obj is Tycho2Star)
+        //    {
+        //        Tycho2Star star = obj as Tycho2Star;
+        //        return star.ToString() == ToString();
+        //    }
+        //    return false;
+        //}
     }
 }
