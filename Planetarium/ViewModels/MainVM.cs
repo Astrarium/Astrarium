@@ -153,7 +153,7 @@ namespace Planetarium.ViewModels
                     SelectedObjectsMenuItems.Add(null);
                 }
 
-                var existingItem = SelectedObjectsMenuItems.FirstOrDefault(i => i?.CommandParameter == body);
+                var existingItem = SelectedObjectsMenuItems.FirstOrDefault(i => body.Equals(i?.CommandParameter));
                 if (existingItem != null)
                 {
                     SelectedObjectsMenuItems.Remove(existingItem);

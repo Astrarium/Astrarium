@@ -13,7 +13,7 @@ namespace Planetarium.Calculators
 {
     public interface ITycho2Catalog
     {
-        ICollection<Tycho2Star> GetStarsAtCircle(CrdsEquatorial eq, double angle, double years, float magLimit);
+        ICollection<Tycho2Star> GetStarsAtCircle(CrdsEquatorial eq, double angle, double years, Func<float, bool> magFilter);
         CrdsHorizontal GetHorizontalCoordinates(SkyContext context, Tycho2Star star);
     }
 
@@ -85,7 +85,7 @@ namespace Planetarium.Calculators
             }
         }
 
-        public ICollection<Tycho2Star> GetStarsAtCircle(CrdsEquatorial eq, double angle, double years, float magLimit)
+        public ICollection<Tycho2Star> GetStarsAtCircle(CrdsEquatorial eq, double angle, double years, Func<float, bool> magFilter)
         {
             double ang = angle + SEGMENT_WIDTH / 2.0;
 
@@ -95,7 +95,7 @@ namespace Planetarium.Calculators
 
             foreach (Tycho2Region region in regions)
             {
-                stars.AddRange(GetStarsInRegion(region, eq, ang, years, magLimit));
+                stars.AddRange(GetStarsInRegion(region, eq, ang, years, magFilter));
             }
 
             return stars;
@@ -137,7 +137,7 @@ namespace Planetarium.Calculators
             return Visibility.RiseTransitSet(eq, c.GeoLocation, theta0);
         }
 
-        private ICollection<Tycho2Star> GetStarsInRegion(Tycho2Region region, CrdsEquatorial eq, double angle, double years, float magLimit)
+        private ICollection<Tycho2Star> GetStarsInRegion(Tycho2Region region, CrdsEquatorial eq, double angle, double years, Func<float, bool> magFilter)
         {
             // seek reading position 
             _Catalog.BaseStream.Seek(CATALOG_RECORD_LEN * (region.FirstStarId - 1), SeekOrigin.Begin);
@@ -152,7 +152,7 @@ namespace Planetarium.Calculators
 
             for (int i = 0; i < count; i++)
             {
-                Tycho2Star star = ParseStarData(buffer, i * CATALOG_RECORD_LEN, eq, angle, years, magLimit);
+                Tycho2Star star = ParseStarData(buffer, i * CATALOG_RECORD_LEN, eq, angle, years, magFilter);
                 if (star != null)
                 {
                     stars.Add(star);
@@ -176,10 +176,10 @@ namespace Planetarium.Calculators
         /// [Tyc1][Tyc2][Tyc3][RA][Dec][PmRA][PmDec][Mag]
         /// [   2][   2][   1][ 8][  8][   4][    4][  4]
         /// </remarks>
-        private Tycho2Star ParseStarData(byte[] buffer, int offset, CrdsEquatorial eqCenter, double angle, double years, float magLimit)
+        private Tycho2Star ParseStarData(byte[] buffer, int offset, CrdsEquatorial eqCenter, double angle, double years, Func<float, bool> magFilter)
         {
             float mag = BitConverter.ToSingle(buffer, offset + 29);
-            if (mag <= magLimit)
+            if (magFilter(mag))
             {
                 // Star coordinates at epoch J2000.0 
                 var eq = new CrdsEquatorial(

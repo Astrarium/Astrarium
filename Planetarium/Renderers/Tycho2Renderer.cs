@@ -30,6 +30,17 @@ namespace Planetarium.Renderers
             brushNames = new SolidBrush(Color.FromArgb(64, 64, 64));
         }
 
+        private bool MagFilter(IMapContext map, float mag)
+        {
+            if (mag > map.MagLimit())
+                return false;
+
+            if ((int)map.GetPointSize(mag) == 0)
+                return false;
+
+            return true;
+        }
+
         public override void Render(IMapContext map)
         {
             Graphics g = map.Graphics;            
@@ -46,7 +57,7 @@ namespace Planetarium.Renderers
 
                 double years = (map.JulianDay - Date.EPOCH_J2000) / 365.25;
 
-                var stars = tycho2.GetStarsAtCircle(eqCenter, map.ViewAngle * coeff, years, map.MagLimit());
+                var stars = tycho2.GetStarsAtCircle(eqCenter, map.ViewAngle * coeff, years, m => MagFilter(map, m));
 
                 SkyContext context = new SkyContext(map.JulianDay, map.GeoLocation);
 
@@ -54,25 +65,20 @@ namespace Planetarium.Renderers
                 {
                     float size = map.GetPointSize(star.Magnitude);
                     
-                    if ((int)size > 0)
-                    {                        
-                        star.Horizontal = context.Get(tycho2.GetHorizontalCoordinates, star);
+                    star.Horizontal = context.Get(tycho2.GetHorizontalCoordinates, star);
 
-                        if (!isGround || star.Horizontal.Altitude > 0)
+                    if (!isGround || star.Horizontal.Altitude > 0)
+                    {
+                        PointF p = map.Project(star.Horizontal);
+                        if (!map.IsOutOfScreen(p))
                         {
-                            PointF p = map.Project(star.Horizontal);
+                            g.FillEllipse(Brushes.White, p.X - size / 2, p.Y - size / 2, size, size);
 
-                            if (!map.IsOutOfScreen(p))
+                            if (map.ViewAngle <= 1)
                             {
-                                g.FillEllipse(Brushes.White, p.X - size / 2, p.Y - size / 2, size, size);
-
-                                if (map.ViewAngle <= 1)
-                                {
-                                    map.DrawObjectCaption(fontNames, brushNames, star.ToString(), p, size);
-                                }
-                                map.AddDrawnObject(star, p);
-                                continue;
+                                map.DrawObjectCaption(fontNames, brushNames, star.ToString(), p, size);
                             }
+                            map.AddDrawnObject(star, p);
                         }
                     }
                 }
