@@ -91,7 +91,7 @@ namespace Planetarium.Calculators
 
             var regions = _Index.Where(reg => Angle.Separation(eq, new CrdsEquatorial((reg.RAmax + reg.RAmin) / 2.0, (reg.DECmax + reg.DECmin) / 2.0)) <= ang);
 
-            List<Tycho2Star> stars = new List<Tycho2Star>();
+            var stars = new List<Tycho2Star>();
 
             foreach (Tycho2Region region in regions)
             {
@@ -105,7 +105,7 @@ namespace Planetarium.Calculators
         {
             var pe = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
 
-            CrdsEquatorial eq = Precession.GetEquatorialCoordinates(star.Equatorial0, pe);
+            CrdsEquatorial eq = Precession.GetEquatorialCoordinates(star.Equatorial, pe);
 
             eq = eq +
                 Nutation.NutationEffect(eq, context.NutationElements, context.Epsilon) +
@@ -121,7 +121,7 @@ namespace Planetarium.Calculators
             _Catalog.BaseStream.Seek(CATALOG_RECORD_LEN * (region.FirstStarId - 1), SeekOrigin.Begin);
 
             int count = (int)(region.LastStarId - region.FirstStarId);
-            List<Tycho2Star> stars = new List<Tycho2Star>();
+            var stars = new List<Tycho2Star>();
 
             byte[] buffer = _Catalog.ReadBytes(CATALOG_RECORD_LEN * count);
 
@@ -140,30 +140,22 @@ namespace Planetarium.Calculators
         /// <summary>
         /// Reads data from catalog file as <see cref="Tycho2Star" /> instance. 
         /// </summary>
-        /// <param name="buffer"></param>
-        /// <param name="offset"></param>
-        /// <param name="starId"></param>
-        /// <param name="eqCenter"></param>
-        /// <param name="angle"></param>
+        /// <param name="buffer">Binary buffer with stars data</param>
+        /// <param name="offset">Offset value to read the star record</param>
+        /// <param name="eqCenter">Equatorial coordinates of map center, for current epoch</param>
+        /// <param name="angle">Maximal angular separation between map center and star coorinates (both coordinates for current epoch)</param>        
         /// <remarks>
-        /// Data in file saved in form:
-        /// 
-        /// Tyc1  = 2 bytes = 
-        /// Tyc2  = 2
-        /// Tyc3  = 1
-        /// ra    = 8
-        /// dec   = 8
-        /// pmRA  = 4
-        /// pmDec = 4
-        /// mag   = 4
+        /// Record format:
+        /// [Tyc1][Tyc2][Tyc3][RA][Dec][PmRA][PmDec][Mag]
+        /// [   2][   2][   1][ 8][  8][   4][    4][  4]
         /// </remarks>
         private Tycho2Star ParseStarData(byte[] buffer, int offset, CrdsEquatorial eqCenter, double angle, double years, float magLimit)
-        {
+        {           
             float mag = BitConverter.ToSingle(buffer, offset + 29);
             if (mag <= magLimit)
             {
                 // Star coordinates at epoch J2000.0 
-                var eq0 = new CrdsEquatorial(
+                var eq = new CrdsEquatorial(
                     BitConverter.ToDouble(buffer, offset + 5),
                     BitConverter.ToDouble(buffer, offset + 13));
 
@@ -172,12 +164,12 @@ namespace Planetarium.Calculators
                     BitConverter.ToSingle(buffer, offset + 21) * years / 3600000.0,
                     BitConverter.ToSingle(buffer, offset + 25) * years / 3600000.0);
 
-                eq0 += pm;
+                eq += pm;
 
-                if (Angle.Separation(eq0, eqCenter) <= angle)
+                if (Angle.Separation(eq, eqCenter) <= angle)
                 {
                     Tycho2Star star = new Tycho2Star();
-                    star.Equatorial0 = eq0;
+                    star.Equatorial = eq;
                     star.Tyc1 = BitConverter.ToInt16(buffer, offset);
                     star.Tyc2 = BitConverter.ToInt16(buffer, offset + 2);
                     star.Tyc3 = (char)buffer[offset + 4];

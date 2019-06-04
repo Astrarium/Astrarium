@@ -90,13 +90,17 @@ namespace Planetarium
             return (float)Math.Max(minSize, semidiameter / 3600.0 / map.ViewAngle * maxSize);
         }
 
+        /// <summary>
+        /// Calculates magnitude limit depending on current field of view (zoom level).
+        /// </summary>
+        /// <param name="map">IMapContext instance</param>
+        /// <returns>Magnitude limit</returns>
+        /// <remarks>
+        /// This method based on empiric formula, coefficients found with https://mycurvefit.com/
+        /// </remarks>
         public static float MagLimit(this IMapContext map)
         {
-            // Magnitude limit, depends on current FOV
-            // Empiric formula, coefficients found with https://mycurvefit.com/
-            float mag0 = (float)(7.943453 + 4.211224 * Math.Pow(Math.E, -0.032269 * map.ViewAngle));
-
-            return mag0;
+            return (float)(7.943453 + 4.211224 * Math.Pow(Math.E, -0.032269 * map.ViewAngle));
         }
 
         /// <summary>
@@ -107,8 +111,10 @@ namespace Planetarium
         /// <returns>Size (diameter) of a point in screen pixels</returns>
         public static float GetPointSize(this IMapContext map, float mag)
         {
+            // maximal allowed drawing diameter, in pixels  
             float maxSize = 5;
 
+            // current magnitude limit
             float mag0 = map.MagLimit();
 
             if (map.ViewAngle < 0.1 && mag > mag0)
