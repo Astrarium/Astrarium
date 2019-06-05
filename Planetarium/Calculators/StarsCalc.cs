@@ -194,7 +194,7 @@ namespace Planetarium.Calculators
         }
 
         private static Regex regexSpaceRemover = new Regex("[ ]{2,}", RegexOptions.None);
-        public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
+        public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)
         {
             searchString = regexSpaceRemover.Replace(searchString, " ").Trim();
 

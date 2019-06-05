@@ -170,7 +170,7 @@ namespace Planetarium.Calculators
             e.Add("RTS.Duration", (c, s) => RiseTransitSet(c).Duration);
         }
 
-        public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
+        public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)
         {
             if (CultureInfo.InvariantCulture.CompareInfo.IndexOf("Sun", searchString, CompareOptions.IgnoreCase) >= 0)
                 return new[] { new SearchResultItem(Sun, "Sun") };

@@ -112,7 +112,7 @@ namespace Planetarium
         public static float GetPointSize(this IMapContext map, float mag)
         {
             // maximal allowed drawing diameter, in pixels  
-            float maxSize = 5;
+            float maxSize = 7;
 
             // current magnitude limit
             float mag0 = map.MagLimit();

@@ -280,7 +280,7 @@ namespace Planetarium.Calculators
             return info;
         }
 
-        public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
+        public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)
         {
             return Asteroids
                 .Where(a => IsAsteroidNameMatch(a, searchString))

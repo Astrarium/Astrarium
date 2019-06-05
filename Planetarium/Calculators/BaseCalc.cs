@@ -35,7 +35,7 @@ namespace Planetarium.Calculators
     {
         void ConfigureEphemeris(EphemerisConfig<T> config);
         CelestialObjectInfo GetInfo(SkyContext context, T body);
-        ICollection<SearchResultItem> Search(string searchString, int maxCount = 50);
+        ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50);
         string GetName(T body);
     }
 

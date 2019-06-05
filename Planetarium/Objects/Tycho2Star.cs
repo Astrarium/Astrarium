@@ -1,9 +1,4 @@
 ﻿using ADK;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Planetarium.Objects
 {
@@ -16,6 +11,15 @@ namespace Planetarium.Objects
         /// Equatorial coordinates of the star at current epoch
         /// </summary>
         public CrdsEquatorial Equatorial { get; set; }
+
+        /// <summary>
+        /// Equatorial coordinates of the at J2000.0 epoch
+        /// </summary>
+        public CrdsEquatorial Equatorial0 { get; set; }
+
+        public float PmRA { get; set; }
+
+        public float PmDec { get; set; }
 
         /// <summary>
         /// Tycho2 star designation number, first part
@@ -57,6 +61,15 @@ namespace Planetarium.Objects
                     star.Tyc3 == Tyc3;
             }
             return false;
+        }
+
+        public override int GetHashCode()
+        {
+            int hash = 17;
+            hash = hash * 23 + Tyc1.GetHashCode();
+            hash = hash * 23 + Tyc2.GetHashCode();
+            hash = hash * 23 + Tyc3.GetHashCode();
+            return hash;
         }
     }
 }

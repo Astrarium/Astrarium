@@ -20,7 +20,7 @@ namespace Planetarium
     public class Sky : ISearcher, IEphemerisProvider
     {
         private delegate string GetNameDelegate<T>(T body) where T : CelestialObject;
-        private delegate ICollection<SearchResultItem> SearchDelegate(string searchString, int maxCount = 50);
+        private delegate ICollection<SearchResultItem> SearchDelegate(SkyContext context, string searchString, int maxCount = 50);
         private delegate CelestialObjectInfo GetInfoDelegate<T>(SkyContext context, T body) where T : CelestialObject;
 
         private List<BaseCalc> Calculators = new List<BaseCalc>();
@@ -211,7 +211,7 @@ namespace Planetarium
                 {
                     if (results.Count < maxCount)
                     {
-                        results.AddRange(searchProvider(searchString, maxCount).Where(r => filterFunc(r.Body)));
+                        results.AddRange(searchProvider(Context, searchString, maxCount).Where(r => filterFunc(r.Body)));
                     }
                     else
                     {

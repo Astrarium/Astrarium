@@ -13,8 +13,14 @@ namespace Planetarium.Calculators
 {
     public interface ITycho2Catalog
     {
-        ICollection<Tycho2Star> GetStarsAtCircle(CrdsEquatorial eq, double angle, double years, Func<float, bool> magFilter);
-        CrdsHorizontal GetHorizontalCoordinates(SkyContext context, Tycho2Star star);
+        /// <summary>
+        /// Gets stars in specified circular area
+        /// </summary>
+        /// <param name="eq">Equatorial coordinates of area center, at epoch J2000.0</param>
+        /// <param name="angle">Area radius, in degrees</param>
+        /// <param name="magFilter">Magnitude filter function, returns true if star is visible and should be included in results</param>
+        /// <returns>Collection of <see cref="Tycho2Star"/> objects</returns>
+        ICollection<Tycho2Star> GetStars(SkyContext context, CrdsEquatorial eq, double angle, Func<float, bool> magFilter);
     }
 
     public class Tycho2Calculator : BaseCalc, ICelestialObjectCalc<Tycho2Star>, ITycho2Catalog
@@ -24,24 +30,54 @@ namespace Planetarium.Calculators
         /// </summary>
         private class Tycho2Region
         {
+            /// <summary>
+            /// First record id for this region (numeric 1-based index) in data file
+            /// </summary>
             public long FirstStarId { get; set; }
+
+            /// <summary>
+            /// Last record id for this region (numeric 1-based index) in data file
+            /// </summary>
             public long LastStarId { get; set; }
+
+            /// <summary>
+            /// Minimal Right Ascention of stars in this region
+            /// </summary>
             public float RAmin { get; set; }
+
+            /// <summary>
+            /// Maximal Right Ascention of stars in this region
+            /// </summary>
             public float RAmax { get; set; }
+
+            /// <summary>
+            /// Minimal Declination of stars in this region
+            /// </summary>
             public float DECmin { get; set; }
+
+            /// <summary>
+            /// Maximal Declination of stars in this region
+            /// </summary>
             public float DECmax { get; set; }
         }
 
-        private static List<Tycho2Region> _Index = new List<Tycho2Region>();
-        private static BinaryReader _Catalog;
+        /// <summary>
+        /// Parsed index file: collection of star regions
+        /// </summary>
+        private ICollection<Tycho2Region> IndexRegions = new List<Tycho2Region>();
 
         /// <summary>
-        /// Length of catalog record
+        /// Binary Reader for accessing catalog data
+        /// </summary>
+        private BinaryReader CatalogReader;
+
+        /// <summary>
+        /// Length of catalog record, in bytes
         /// </summary>
         private const int CATALOG_RECORD_LEN = 33;
 
         /// <summary>
-        /// Width of segment of celestial sphere (in degrees) that's defined by Tycho2Region structure  
+        /// Width of segment of celestial sphere (in degrees) that's defined by <see cref="Tycho2Region"/>.   
         /// </summary>
         private const double SEGMENT_WIDTH = 3.75;
 
@@ -62,22 +98,22 @@ namespace Planetarium.Calculators
                 while (!sr.EndOfStream)
                 {
                     string line = sr.ReadLine();
-                    string[] parced = line.Split(';');
+                    string[] chunks = line.Split(';');
                     Tycho2Region region = new Tycho2Region();
-                    region.FirstStarId = Convert.ToInt64(parced[0].Trim());
-                    region.LastStarId = Convert.ToInt64(parced[1].Trim());
-                    region.RAmin = Convert.ToSingle(parced[2].Trim(), CultureInfo.InvariantCulture);
-                    region.RAmax = Convert.ToSingle(parced[3].Trim(), CultureInfo.InvariantCulture);
-                    region.DECmin = Convert.ToSingle(parced[4].Trim(), CultureInfo.InvariantCulture);
-                    region.DECmax = Convert.ToSingle(parced[5].Trim(), CultureInfo.InvariantCulture);
+                    region.FirstStarId = Convert.ToInt64(chunks[0].Trim());
+                    region.LastStarId = Convert.ToInt64(chunks[1].Trim());
+                    region.RAmin = Convert.ToSingle(chunks[2].Trim(), CultureInfo.InvariantCulture);
+                    region.RAmax = Convert.ToSingle(chunks[3].Trim(), CultureInfo.InvariantCulture);
+                    region.DECmin = Convert.ToSingle(chunks[4].Trim(), CultureInfo.InvariantCulture);
+                    region.DECmax = Convert.ToSingle(chunks[5].Trim(), CultureInfo.InvariantCulture);
 
-                    _Index.Add(region);
+                    IndexRegions.Add(region);
                 }
 
                 sr.Close();
 
                 // Open Tycho2 catalog file
-                _Catalog = new BinaryReader(File.Open(catalogFile, FileMode.Open));
+                CatalogReader = new BinaryReader(File.Open(catalogFile, FileMode.Open));
             }
             catch (Exception ex)
             {
@@ -85,46 +121,61 @@ namespace Planetarium.Calculators
             }
         }
 
-        public ICollection<Tycho2Star> GetStarsAtCircle(CrdsEquatorial eq, double angle, double years, Func<float, bool> magFilter)
+        public ICollection<Tycho2Star> GetStars(SkyContext context, CrdsEquatorial eq, double angle, Func<float, bool> magFilter)
         {
             double ang = angle + SEGMENT_WIDTH / 2.0;
 
-            var regions = _Index.Where(reg => Angle.Separation(eq, new CrdsEquatorial((reg.RAmax + reg.RAmin) / 2.0, (reg.DECmax + reg.DECmin) / 2.0)) <= ang);
+            var regions = IndexRegions.Where(r => Angle.Separation(eq, new CrdsEquatorial((r.RAmax + r.RAmin) / 2.0, (r.DECmax + r.DECmin) / 2.0)) <= ang);
 
             var stars = new List<Tycho2Star>();
 
-            foreach (Tycho2Region region in regions)
+            foreach (Tycho2Region r in regions)
             {
-                stars.AddRange(GetStarsInRegion(region, eq, ang, years, magFilter));
+                stars.AddRange(GetStarsInRegion(context, r, eq, ang, magFilter));
             }
 
             return stars;
         }
 
-        private PrecessionalElements GetPrecessionalelements(SkyContext context)
+        private PrecessionalElements GetPrecessionalElements(SkyContext context)
         {
             return Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
         }
 
         private CrdsEquatorial GetEquatorialCoordinates(SkyContext context, Tycho2Star star)
         {
-            PrecessionalElements pe = context.Get(GetPrecessionalelements);
-            CrdsEquatorial eq = Precession.GetEquatorialCoordinates(star.Equatorial, pe);
-            return eq +
-                Nutation.NutationEffect(eq, context.NutationElements, context.Epsilon) +
-                Aberration.AberrationEffect(eq, context.AberrationElements, context.Epsilon);
+            PrecessionalElements p = context.Get(GetPrecessionalElements);
+            double years = context.Get(YearsSinceEpoch);
+                       
+            // Take into account effect of proper motion:
+            // now coordinates are for the mean equinox of J2000.0,
+            // but for epoch of the target date
+            var eq = star.Equatorial0 + new CrdsEquatorial(star.PmRA * years / 3600000, star.PmDec * years / 3600000);
+
+            // Equatorial coordinates for the mean equinox and epoch of the target date
+            CrdsEquatorial eq1 = Precession.GetEquatorialCoordinates(eq, p);
+
+            // Nutation effect
+            var eqN = Nutation.NutationEffect(eq1, context.NutationElements, context.Epsilon);
+
+            // Aberration effect
+            var eqA = Aberration.AberrationEffect(eq1, context.AberrationElements, context.Epsilon);
+
+            // Apparent coordinates of the star
+            eq1 += eqN + eqA;
+
+            return eq1;
         }
 
-        public CrdsHorizontal GetHorizontalCoordinates(SkyContext context, Tycho2Star star)
+        /// <summary>
+        /// Calculates horizontal geocentric coordinates of star for current epoch
+        /// </summary>
+        /// <param name="context"><see cref="SkyContext"/> instance</param>
+        /// <param name="star"><see cref="Tycho2Star"/> object</param>
+        /// <returns>Horizontal geocentric coordinates of star for current epoch</returns>
+        private CrdsHorizontal GetHorizontalCoordinates(SkyContext context, Tycho2Star star)
         {
-            PrecessionalElements pe = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
-            CrdsEquatorial eq = Precession.GetEquatorialCoordinates(star.Equatorial, pe);
-
-            eq = eq +
-                Nutation.NutationEffect(eq, context.NutationElements, context.Epsilon) +
-                Aberration.AberrationEffect(eq, context.AberrationElements, context.Epsilon);
-
-            return eq.ToHorizontal(context.GeoLocation, context.SiderealTime);
+            return context.Get(GetEquatorialCoordinates, star).ToHorizontal(context.GeoLocation, context.SiderealTime);
         }
 
         /// <summary>
@@ -137,22 +188,52 @@ namespace Planetarium.Calculators
             return Visibility.RiseTransitSet(eq, c.GeoLocation, theta0);
         }
 
-        private ICollection<Tycho2Star> GetStarsInRegion(Tycho2Region region, CrdsEquatorial eq, double angle, double years, Func<float, bool> magFilter)
+        private double YearsSinceEpoch(SkyContext context)
+        {
+            return (context.JulianDay - Date.EPOCH_J2000) / 365.25;
+        }
+
+        private ICollection<Tycho2Star> GetStarsInRegion(SkyContext context, Tycho2Region region, CrdsEquatorial eq, double angle, Func<float, bool> magFilter)
         {
             // seek reading position 
-            _Catalog.BaseStream.Seek(CATALOG_RECORD_LEN * (region.FirstStarId - 1), SeekOrigin.Begin);
+            CatalogReader.BaseStream.Seek(CATALOG_RECORD_LEN * (region.FirstStarId - 1), SeekOrigin.Begin);
 
             // count of records in current region
             int count = (int)(region.LastStarId - region.FirstStarId);
 
             // read region in memory for fast access
-            byte[] buffer = _Catalog.ReadBytes(CATALOG_RECORD_LEN * count);
+            byte[] buffer = CatalogReader.ReadBytes(CATALOG_RECORD_LEN * count);
 
             var stars = new List<Tycho2Star>();
 
             for (int i = 0; i < count; i++)
             {
-                Tycho2Star star = ParseStarData(buffer, i * CATALOG_RECORD_LEN, eq, angle, years, magFilter);
+                Tycho2Star star = ParseStarData(context, buffer, i * CATALOG_RECORD_LEN, eq, angle, magFilter);
+                if (star != null)
+                {
+                    stars.Add(star);
+                }
+            }
+
+            return stars;
+        }
+
+        private ICollection<Tycho2Star> GetStarsInRegion(Tycho2Region region, SkyContext context, short? tyc2, string tyc3)
+        {
+            // seek reading position 
+            CatalogReader.BaseStream.Seek(CATALOG_RECORD_LEN * (region.FirstStarId - 1), SeekOrigin.Begin);
+
+            // count of records in current region
+            int count = (int)(region.LastStarId - region.FirstStarId);
+
+            // read region in memory for fast access
+            byte[] buffer = CatalogReader.ReadBytes(CATALOG_RECORD_LEN * count);
+
+            var stars = new List<Tycho2Star>();
+
+            for (int i = 0; i < count && stars.Count < 50; i++)
+            {
+                Tycho2Star star = ParseStarData(context, buffer, i * CATALOG_RECORD_LEN, tyc2, tyc3);
                 if (star != null)
                 {
                     stars.Add(star);
@@ -167,46 +248,110 @@ namespace Planetarium.Calculators
         /// </summary>
         /// <param name="buffer">Binary buffer with stars data</param>
         /// <param name="offset">Offset value to read the star record</param>
-        /// <param name="eqCenter">Equatorial coordinates of map center, for current epoch</param>
-        /// <param name="angle">Maximal angular separation between map center and star coorinates (both coordinates for current epoch)</param>        
-        /// <param name="years">Number of years since epoch (needed for correction of star position due to proper motion)</param>
-        /// <param name="magLimit">Mgnitude limit</param>
+        /// <param name="eqCenter">Equatorial coordinates of map center, for J2000.0 epoch</param>
+        /// <param name="angle">Maximal angular separation between map center and star coorinates (both coordinates for J2000.0 epoch)</param>        
         /// <remarks>
         /// Record format:
         /// [Tyc1][Tyc2][Tyc3][RA][Dec][PmRA][PmDec][Mag]
         /// [   2][   2][   1][ 8][  8][   4][    4][  4]
         /// </remarks>
-        private Tycho2Star ParseStarData(byte[] buffer, int offset, CrdsEquatorial eqCenter, double angle, double years, Func<float, bool> magFilter)
+        private Tycho2Star ParseStarData(SkyContext context, byte[] buffer, int offset, CrdsEquatorial eqCenter, double angle, Func<float, bool> magFilter)
         {
             float mag = BitConverter.ToSingle(buffer, offset + 29);
             if (magFilter(mag))
             {
+                Tycho2Star star = new Tycho2Star();
+
+                star.Tyc1 = BitConverter.ToInt16(buffer, offset);
+                star.Tyc2 = BitConverter.ToInt16(buffer, offset + 2);
+                star.Tyc3 = (char)buffer[offset + 4];
+                star.Magnitude = mag;
+
                 // Star coordinates at epoch J2000.0 
-                var eq = new CrdsEquatorial(
+                star.Equatorial0 = new CrdsEquatorial(
                     BitConverter.ToDouble(buffer, offset + 5),
                     BitConverter.ToDouble(buffer, offset + 13));
 
-                // Take into account proper motion
-                var pm = new CrdsEquatorial(
-                    BitConverter.ToSingle(buffer, offset + 21) * years / 3600000.0,
-                    BitConverter.ToSingle(buffer, offset + 25) * years / 3600000.0);
-
-                eq += pm;
-
-                if (Angle.Separation(eq, eqCenter) <= angle)
+                if (Angle.Separation(star.Equatorial0, eqCenter) <= angle)
                 {
-                    Tycho2Star star = new Tycho2Star();
-                    star.Equatorial = eq;
-                    star.Tyc1 = BitConverter.ToInt16(buffer, offset);
-                    star.Tyc2 = BitConverter.ToInt16(buffer, offset + 2);
-                    star.Tyc3 = (char)buffer[offset + 4];
-                    star.Magnitude = mag;
+                    // Proper motion
+                    star.PmRA = BitConverter.ToSingle(buffer, offset + 21);
+                    star.PmDec = BitConverter.ToSingle(buffer, offset + 25);
+
+                    // current equatorial coordinates
+                    star.Equatorial = context.Get(GetEquatorialCoordinates, star);
+
+                    star.Horizontal = context.Get(GetHorizontalCoordinates, star);
                     return star;
                 }
                 else
                 {
                     return null;
                 }
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        private Tycho2Star ParseStarData(SkyContext context, byte[] buffer, int offset, short? tyc2, string tyc3)
+        {
+            short t1 = BitConverter.ToInt16(buffer, offset);
+            short t2 = BitConverter.ToInt16(buffer, offset + 2);
+            char t3 = (char)buffer[offset + 4];
+
+            if ((tyc2 == null || tyc2.Value == t2) &&
+                (string.IsNullOrEmpty(tyc3) || tyc3[0] == t3))
+            {
+                float mag = BitConverter.ToSingle(buffer, offset + 29);
+
+                PrecessionalElements p = context.Get(GetPrecessionalElements);
+                double years = context.Get(YearsSinceEpoch);
+
+                // Initial coodinates for J2000 epoch
+                var eq0 = new CrdsEquatorial(
+                    BitConverter.ToDouble(buffer, offset + 5),
+                    BitConverter.ToDouble(buffer, offset + 13));
+
+                // Take into account effect of proper motion:
+                // now coordinates are for the mean equinox of J2000.0,
+                // but for epoch of the target date
+                var pm = new CrdsEquatorial(
+                    BitConverter.ToSingle(buffer, offset + 21) * years / 3600000.0,
+                    BitConverter.ToSingle(buffer, offset + 25) * years / 3600000.0);
+
+                eq0.Alpha += pm.Alpha;
+                eq0.Delta += pm.Delta;
+
+                // Equatorial coordinates for the mean equinox and epoch of the target date
+                CrdsEquatorial eq = Precession.GetEquatorialCoordinates(eq0, p);
+
+                // Nutation effect
+                var eq1 = Nutation.NutationEffect(eq, context.NutationElements, context.Epsilon);
+
+                // Aberration effect
+                var eq2 = Aberration.AberrationEffect(eq, context.AberrationElements, context.Epsilon);
+
+                // Apparent coordinates of the star
+                eq += eq1 + eq2;
+
+                
+
+                
+
+                
+
+                eq += pm;
+
+                Tycho2Star star = new Tycho2Star();
+                star.Equatorial = eq;
+                star.Tyc1 = t1;
+                star.Tyc2 = t2;
+                star.Tyc3 = t3;
+                star.Magnitude = mag;
+                star.Horizontal = context.Get(GetHorizontalCoordinates, star);
+                return star;
             }
             else
             {
@@ -223,6 +368,8 @@ namespace Planetarium.Calculators
         {
             e.Add("Equatorial.Alpha", (c, s) => c.Get(GetEquatorialCoordinates, s).Alpha);
             e.Add("Equatorial.Delta", (c, s) => c.Get(GetEquatorialCoordinates, s).Delta);
+            e.Add("Equatorial0.Alpha", (c, s) => s.Equatorial0.Alpha);
+            e.Add("Equatorial0.Delta", (c, s) => s.Equatorial0.Delta);
             e.Add("Horizontal.Azimuth", (c, s) => c.Get(GetHorizontalCoordinates, s).Azimuth);
             e.Add("Horizontal.Altitude", (c, s) => c.Get(GetHorizontalCoordinates, s).Altitude);
             e.Add("RTS.Rise", (c, s) => c.Get(RiseTransitSet, s).Rise);
@@ -237,15 +384,19 @@ namespace Planetarium.Calculators
             var info = new CelestialObjectInfo();
             info.SetSubtitle("Star").SetTitle(s.ToString())
 
-            .AddRow("Constellation", Constellations.FindConstellation(c.Get(GetEquatorialCoordinates, s), c.JulianDay))
+            .AddRow("Constellation", Constellations.FindConstellation(s.Equatorial, c.JulianDay))
 
             .AddHeader("Equatorial coordinates (current epoch)")
-            .AddRow("Equatorial.Alpha", c.Get(GetEquatorialCoordinates, s).Alpha)
-            .AddRow("Equatorial.Delta", c.Get(GetEquatorialCoordinates, s).Delta)
+            .AddRow("Equatorial.Alpha", s.Equatorial.Alpha)
+            .AddRow("Equatorial.Delta", s.Equatorial.Delta)
+
+            .AddHeader("Equatorial coordinates (J2000.0 epoch)")
+            .AddRow("Equatorial.Alpha", s.Equatorial0.Alpha)
+            .AddRow("Equatorial.Delta", s.Equatorial0.Delta)
 
             .AddHeader("Horizontal coordinates")
-            .AddRow("Horizontal.Azimuth", c.Get(GetHorizontalCoordinates, s).Azimuth)
-            .AddRow("Horizontal.Altitude", c.Get(GetHorizontalCoordinates, s).Altitude)
+            .AddRow("Horizontal.Azimuth", s.Horizontal.Azimuth)
+            .AddRow("Horizontal.Altitude", s.Horizontal.Altitude)
 
             .AddHeader("Visibility")
             .AddRow("RTS.Rise", rts.Rise, c.JulianDayMidnight + rts.Rise)
@@ -258,28 +409,28 @@ namespace Planetarium.Calculators
             return info;
         }
 
-        public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
+        private readonly Regex searchRegex = new Regex("tyc\\s*(?<tyc1>\\d+)((\\s*-\\s*|\\s+)(?<tyc2>\\d+)((\\s*-\\s*|\\s+)(?<tyc3>\\d+))?)?");
+
+        public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)
         {
-            List<SearchResultItem> items = new List<SearchResultItem>();
-
-            Regex regex = new Regex("tyc\\s*(\\d+)(\\s*-\\s*|\\s+)(\\d+)(\\s*-\\s*|\\s+)(\\d+)");
-
-            if (regex.IsMatch(searchString.ToLowerInvariant()))
+            if (searchRegex.IsMatch(searchString.ToLowerInvariant()))
             {
-                var match = regex.Match(searchString.ToLowerInvariant());
+                var match = searchRegex.Match(searchString.ToLowerInvariant());
 
-                int tyc1 = int.Parse(match.Groups[1].Value);
-                int tyc2 = int.Parse(match.Groups[3].Value);
-                string tyc3 = match.Groups[5].Value;
+                int tyc1 = int.Parse(match.Groups["tyc1"].Value);
+                short? tyc2 = match.Groups["tyc2"].Success ? short.Parse(match.Groups["tyc2"].Value) : (short?)null;
+                string tyc3 = match.Groups["tyc3"].Value;
 
                 if (tyc1 > 0 && tyc1 <= 9537)
                 {
-                    Tycho2Region region = _Index[tyc1 - 1];
-                    //List<Tycho2Star> stars = GetStarsInRegion(region, tyc2, tyc3);
+                    Tycho2Region region = IndexRegions.ElementAt(tyc1 - 1);
+                    var stars = GetStarsInRegion(region, context, tyc2, tyc3);
+
+                    return stars.Take(maxCount).Select(s => new SearchResultItem(s, s.ToString())).ToList();
                 }
             }
 
-            return items;
+            return new List<SearchResultItem>();
         }
 
         public string GetName(Tycho2Star star)

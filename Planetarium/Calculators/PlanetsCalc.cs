@@ -566,7 +566,7 @@ namespace Planetarium.Calculators
             return info;
         }
 
-        public ICollection<SearchResultItem> Search(string searchString, int maxCount = 50)
+        public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)
         {
             var s1 = planets.Where(p => p.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
                 .Select(p => new SearchResultItem(p, p.Name));

@@ -55,23 +55,19 @@ namespace Planetarium.Renderers
 
                 CrdsEquatorial eqCenter = Precession.GetEquatorialCoordinates(eqCenter0, pe);
 
-                double years = (map.JulianDay - Date.EPOCH_J2000) / 365.25;
-
-                var stars = tycho2.GetStarsAtCircle(eqCenter, map.ViewAngle * coeff, years, m => MagFilter(map, m));
-
                 SkyContext context = new SkyContext(map.JulianDay, map.GeoLocation);
 
+                var stars = tycho2.GetStars(context, eqCenter, map.ViewAngle * coeff, m => MagFilter(map, m));
+             
                 foreach (var star in stars)
                 {
-                    float size = map.GetPointSize(star.Magnitude);
-                    
-                    star.Horizontal = context.Get(tycho2.GetHorizontalCoordinates, star);
-
                     if (!isGround || star.Horizontal.Altitude > 0)
                     {
                         PointF p = map.Project(star.Horizontal);
                         if (!map.IsOutOfScreen(p))
                         {
+                            float size = map.GetPointSize(star.Magnitude);
+
                             g.FillEllipse(Brushes.White, p.X - size / 2, p.Y - size / 2, size, size);
 
                             if (map.ViewAngle <= 1)
@@ -85,6 +81,6 @@ namespace Planetarium.Renderers
             }
         }
        
-        public override int ZOrder => 601;
+        public override int ZOrder => 599;
     }
 }
