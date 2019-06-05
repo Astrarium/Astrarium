@@ -260,29 +260,14 @@ namespace Planetarium.Calculators
             float mag = BitConverter.ToSingle(buffer, offset + 29);
             if (magFilter(mag))
             {
-                Tycho2Star star = new Tycho2Star();
-
-                star.Tyc1 = BitConverter.ToInt16(buffer, offset);
-                star.Tyc2 = BitConverter.ToInt16(buffer, offset + 2);
-                star.Tyc3 = (char)buffer[offset + 4];
-                star.Magnitude = mag;
-
                 // Star coordinates at epoch J2000.0 
-                star.Equatorial0 = new CrdsEquatorial(
+                var eq0 = new CrdsEquatorial(
                     BitConverter.ToDouble(buffer, offset + 5),
                     BitConverter.ToDouble(buffer, offset + 13));
 
-                if (Angle.Separation(star.Equatorial0, eqCenter) <= angle)
+                if (Angle.Separation(eq0, eqCenter) <= angle)
                 {
-                    // Proper motion
-                    star.PmRA = BitConverter.ToSingle(buffer, offset + 21);
-                    star.PmDec = BitConverter.ToSingle(buffer, offset + 25);
-
-                    // current equatorial coordinates
-                    star.Equatorial = context.Get(GetEquatorialCoordinates, star);
-
-                    star.Horizontal = context.Get(GetHorizontalCoordinates, star);
-                    return star;
+                    return ReadStar(context, buffer, offset);
                 }
                 else
                 {
@@ -297,66 +282,39 @@ namespace Planetarium.Calculators
 
         private Tycho2Star ParseStarData(SkyContext context, byte[] buffer, int offset, short? tyc2, string tyc3)
         {
-            short t1 = BitConverter.ToInt16(buffer, offset);
             short t2 = BitConverter.ToInt16(buffer, offset + 2);
             char t3 = (char)buffer[offset + 4];
 
-            if ((tyc2 == null || tyc2.Value == t2) &&
-                (string.IsNullOrEmpty(tyc3) || tyc3[0] == t3))
+            if ((tyc2 == null || tyc2.Value == t2) && (string.IsNullOrEmpty(tyc3) || tyc3[0] == t3))
             {
-                float mag = BitConverter.ToSingle(buffer, offset + 29);
-
-                PrecessionalElements p = context.Get(GetPrecessionalElements);
-                double years = context.Get(YearsSinceEpoch);
-
-                // Initial coodinates for J2000 epoch
-                var eq0 = new CrdsEquatorial(
-                    BitConverter.ToDouble(buffer, offset + 5),
-                    BitConverter.ToDouble(buffer, offset + 13));
-
-                // Take into account effect of proper motion:
-                // now coordinates are for the mean equinox of J2000.0,
-                // but for epoch of the target date
-                var pm = new CrdsEquatorial(
-                    BitConverter.ToSingle(buffer, offset + 21) * years / 3600000.0,
-                    BitConverter.ToSingle(buffer, offset + 25) * years / 3600000.0);
-
-                eq0.Alpha += pm.Alpha;
-                eq0.Delta += pm.Delta;
-
-                // Equatorial coordinates for the mean equinox and epoch of the target date
-                CrdsEquatorial eq = Precession.GetEquatorialCoordinates(eq0, p);
-
-                // Nutation effect
-                var eq1 = Nutation.NutationEffect(eq, context.NutationElements, context.Epsilon);
-
-                // Aberration effect
-                var eq2 = Aberration.AberrationEffect(eq, context.AberrationElements, context.Epsilon);
-
-                // Apparent coordinates of the star
-                eq += eq1 + eq2;
-
-                
-
-                
-
-                
-
-                eq += pm;
-
-                Tycho2Star star = new Tycho2Star();
-                star.Equatorial = eq;
-                star.Tyc1 = t1;
-                star.Tyc2 = t2;
-                star.Tyc3 = t3;
-                star.Magnitude = mag;
-                star.Horizontal = context.Get(GetHorizontalCoordinates, star);
-                return star;
+                return ReadStar(context, buffer, offset);
             }
             else
             {
                 return null;
             }
+        }
+
+        private Tycho2Star ReadStar(SkyContext context, byte[] buffer, int offset)
+        {
+            Tycho2Star star = new Tycho2Star();
+
+            star.Equatorial0 = new CrdsEquatorial(
+            BitConverter.ToDouble(buffer, offset + 5),
+            BitConverter.ToDouble(buffer, offset + 13));
+            star.Tyc1 = BitConverter.ToInt16(buffer, offset);
+            star.Tyc2 = BitConverter.ToInt16(buffer, offset + 2);
+            star.Tyc3 = (char)buffer[offset + 4];
+            star.Magnitude = BitConverter.ToSingle(buffer, offset + 29);
+            star.PmRA = BitConverter.ToSingle(buffer, offset + 21);
+            star.PmDec = BitConverter.ToSingle(buffer, offset + 25);
+
+            // current equatorial coordinates
+            star.Equatorial = context.Get(GetEquatorialCoordinates, star);
+
+            // current horizontal coordinates
+            star.Horizontal = context.Get(GetHorizontalCoordinates, star);
+            return star;
         }
 
         public override void Calculate(SkyContext context)
