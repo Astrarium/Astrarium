@@ -32,6 +32,9 @@ namespace Planetarium.Renderers
 
         private bool MagFilter(IMapContext map, float mag)
         {
+            if (map.ViewAngle < 3)
+                return true;
+
             if (mag > map.MagLimit())
                 return false;
 

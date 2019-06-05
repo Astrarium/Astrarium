@@ -117,7 +117,7 @@ namespace Planetarium
             // current magnitude limit
             float mag0 = map.MagLimit();
 
-            if (map.ViewAngle < 0.1 && mag > mag0)
+            if (map.ViewAngle < 3 && mag > mag0)
             {
                 // if star is faint than drawing limit and FOV is small enough, 
                 // draw it as single point

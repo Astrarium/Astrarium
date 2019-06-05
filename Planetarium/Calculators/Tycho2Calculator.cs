@@ -282,6 +282,7 @@ namespace Planetarium.Calculators
 
         private Tycho2Star ParseStarData(SkyContext context, byte[] buffer, int offset, short? tyc2, string tyc3)
         {
+            short t1 = BitConverter.ToInt16(buffer, offset);
             short t2 = BitConverter.ToInt16(buffer, offset + 2);
             char t3 = (char)buffer[offset + 4];
 
