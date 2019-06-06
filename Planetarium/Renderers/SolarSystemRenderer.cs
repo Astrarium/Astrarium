@@ -313,7 +313,7 @@ namespace Planetarium.Renderers
             if ((!isGround || planet.Horizontal.Altitude + planet.Semidiameter / 3600 > 0) && 
                 ad < coeff * map.ViewAngle + planet.Semidiameter / 3600)
             {
-                float size = map.GetPointSize(planet.Magnitude);
+                float size = map.GetPointSize(planet.Magnitude, maxDrawingSize: 7);
                 float diam = map.GetDiskSize(planet.Semidiameter);
 
                 // diameter is to small to render as planet disk, 
@@ -503,6 +503,7 @@ namespace Planetarium.Renderers
                             map.Graphics.FillEllipse(Brushes.Wheat, -1, -1, 2, 2);
                             map.Graphics.ResetTransform();
                         }
+
                         map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, 2);
                         map.AddDrawnObject(moon, p);
                     }

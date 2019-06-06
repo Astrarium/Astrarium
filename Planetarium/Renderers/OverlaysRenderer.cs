@@ -11,6 +11,7 @@ namespace Planetarium.Renderers
     public class OverlaysRenderer : BaseRenderer
     {
         private Font fontLockMessage = new Font("Arial", 8);
+        private Font fontDiagnosticText = new Font("Monospace", 8);
         private readonly ISearcher searcher;
 
         public OverlaysRenderer(ISearcher searcher)
@@ -22,6 +23,7 @@ namespace Planetarium.Renderers
         {
             DrawLockedText(map);
             DrawMeasureTool(map);
+            DrawDiagnostic(map);
         }
 
         private void DrawLockedText(IMapContext map)
@@ -66,6 +68,11 @@ namespace Planetarium.Renderers
                     map.Graphics.DrawString(Formatters.MeasuredAngle.Format(angle), fontLockMessage, Brushes.White, p.X + 5, p.Y + 5);
                 }
             }
+        }
+
+        private void DrawDiagnostic(IMapContext map)
+        {
+            map.Graphics.DrawString($"FOV: {Formatters.MeasuredAngle.Format(map.ViewAngle)}\nMag limit: {Formatters.Magnitude.Format(map.MagLimit())}\nFPS: {map.FPS}", fontDiagnosticText, Brushes.Red, new PointF(10, 10));
         }
 
         public override int ZOrder => 1000;

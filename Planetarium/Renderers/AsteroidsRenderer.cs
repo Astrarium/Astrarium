@@ -90,7 +90,7 @@ namespace Planetarium.Renderers
                         }
 
                         // asteroid should be rendered as point
-                        float size = map.GetPointSize(a.Magnitude);
+                        float size = map.GetPointSize(a.Magnitude, maxDrawingSize: 3);
                         if ((int)size > 0)
                         {
                             PointF p = map.Project(a.Horizontal);

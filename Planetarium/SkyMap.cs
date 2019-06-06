@@ -78,6 +78,7 @@ namespace Planetarium
         public CrdsHorizontal Center { get; } = new CrdsHorizontal(0, 0);
         public bool Antialias { get; set; } = true;
         public bool IsDragging { get; set; }
+        public int FPS { get; private set; }
 
         private CelestialObject selectedObject;
         public CelestialObject SelectedObject
@@ -166,6 +167,8 @@ namespace Planetarium
 
             // Calculate mean time of rendering with Cumulative Moving Average formula
             meanRenderTime = (renderStopWatch.ElapsedMilliseconds + rendersCount * meanRenderTime) / (rendersCount + 1);
+
+            FPS = (int)(1000f / renderStopWatch.ElapsedMilliseconds);
         }
 
         public void Initialize()
@@ -296,6 +299,7 @@ namespace Planetarium
             public CrdsHorizontal MeasureOrigin => map.MeasureOrigin;
             public CelestialObject LockedObject => map.LockedObject;
             public bool IsDragging => map.IsDragging;
+            public int FPS => map.FPS;
 
             public PointF Project(CrdsHorizontal hor)
             {

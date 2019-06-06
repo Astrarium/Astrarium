@@ -43,6 +43,8 @@ namespace Planetarium
 
         bool IsDragging { get; }
 
+        int FPS { get; }
+
         /// <summary>
         /// Origin of measure tool. Not null if measure tool is on.
         /// </summary>
@@ -96,11 +98,12 @@ namespace Planetarium
         /// <param name="map">IMapContext instance</param>
         /// <returns>Magnitude limit</returns>
         /// <remarks>
-        /// This method based on empiric formula, coefficients found with https://mycurvefit.com/
+        /// This method based on empiric formula, coefficients found with https://www.wolframalpha.com
         /// </remarks>
         public static float MagLimit(this IMapContext map)
         {
-            return (float)(7.943453 + 4.211224 * Math.Pow(Math.E, -0.032269 * map.ViewAngle));
+            // log fit {90,6},{45,6.5},{20,7.3},{8,9},{4,10.5}
+            return (float)(-1.44995 * Math.Log(0.000230685 * map.ViewAngle));
         }
 
         /// <summary>
@@ -108,43 +111,19 @@ namespace Planetarium
         /// or any other celestial object on sky map, depending of its magnitude.
         /// </summary>
         /// <param name="mag">Magnitude of a celestial body</param>
+        /// <param name="maxDrawingSize">Maximal allowed drawing diameter, in pixels</param>
         /// <returns>Size (diameter) of a point in screen pixels</returns>
-        public static float GetPointSize(this IMapContext map, float mag)
+        public static float GetPointSize(this IMapContext map, float mag, float maxDrawingSize = 0)
         {
-            // maximal allowed drawing diameter, in pixels  
-            float maxSize = 7;
-
             // current magnitude limit
             float mag0 = map.MagLimit();
 
-            if (map.ViewAngle < 3 && mag > mag0)
-            {
-                // if star is faint than drawing limit and FOV is small enough, 
-                // draw it as single point
-                return 1;
-            }
+            if (mag > mag0)
+                return 0;
+            else if (maxDrawingSize != 0)
+                return Math.Min(maxDrawingSize, mag0 - mag);
             else
-            {
-                // drawing diameter if star with 'mag0' magnitude, in pixels
-                float size0 = 1;
-
-                // drawing area of star with 'mag0' magnitude, in square pixels
-                float area0 = 3.1415f * (size0 / 2) * (size0 / 2);
-
-                // drawing area of star with 'mag' magnitude, according to Pogson formula
-                double area = Math.Pow(10, (mag - mag0) / -2.5) * area0;
-
-                // drawing size of star with 'mag' magnitude
-                float size = (float)(Math.Sqrt(area) / 3.1415);
-
-                // do not exceed drawing size
-                size = Math.Min(maxSize, size);
-
-                // compensate faint stars on the drawing limit edge
-                if (size > 0.9 && size < 1) size = 1;
-
-                return size;
-            }
+                return mag0 - mag;
         }
 
         /// <summary>

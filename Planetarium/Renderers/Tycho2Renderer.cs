@@ -32,9 +32,6 @@ namespace Planetarium.Renderers
 
         private bool MagFilter(IMapContext map, float mag)
         {
-            if (map.ViewAngle < 3)
-                return true;
-
             if (mag > map.MagLimit())
                 return false;
 
@@ -50,7 +47,7 @@ namespace Planetarium.Renderers
             bool isGround = settings.Get<bool>("Ground");
             double coeff = map.DiagonalCoefficient();
 
-            if (map.ViewAngle <= 15 && settings.Get<bool>("Stars"))
+            if (map.MagLimit() > 8 && settings.Get<bool>("Stars"))
             {
                 PrecessionalElements pe = Precession.ElementsFK5(map.JulianDay, Date.EPOCH_J2000);
 
@@ -73,7 +70,7 @@ namespace Planetarium.Renderers
 
                             g.FillEllipse(Brushes.White, p.X - size / 2, p.Y - size / 2, size, size);
 
-                            if (map.ViewAngle <= 1)
+                            if (map.ViewAngle < 1 && size > 3)
                             {
                                 map.DrawObjectCaption(fontNames, brushNames, star.ToString(), p, size);
                             }
