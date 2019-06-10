@@ -206,6 +206,24 @@ namespace Planetarium.ViewModels
             map.Invalidate();
         }
 
+        private void SetUserMagLimit(int delta)
+        {
+            if (delta == 0)
+            {
+                map.UserMagLimit = null;
+            }
+            else
+            {
+                if (map.UserMagLimit == null)
+                {
+                    map.UserMagLimit = map.MagLimit;
+                }
+                map.UserMagLimit += delta * 0.1f;
+                map.UserMagLimit = Math.Min(map.UserMagLimit.Value, map.MagLimit);
+            }
+            map.Invalidate();
+        }
+
         private void MapKeyDown(Key key)
         {
             // "+" = Zoom In
@@ -217,6 +235,21 @@ namespace Planetarium.ViewModels
             else if (key == Key.Subtract)
             {
                 Zoom(-1);
+            }
+            // "<" = Decrease magnitude limit 
+            else if (key == Key.OemComma)
+            {
+                SetUserMagLimit(-1);
+            }
+            // ">" = Increase magnitude limit 
+            else if (key == Key.OemPeriod)
+            {
+                SetUserMagLimit(1);
+            }
+            // ">" = Reset magnitude limit 
+            else if (key == Key.Oem2)
+            {
+                SetUserMagLimit(0);
             }
             // "D" = [D]ate
             else if (key == Key.D)

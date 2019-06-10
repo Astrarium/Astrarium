@@ -72,7 +72,7 @@ namespace Planetarium.Renderers
 
         private void DrawDiagnostic(IMapContext map)
         {
-            map.Graphics.DrawString($"FOV: {Formatters.MeasuredAngle.Format(map.ViewAngle)}\nMag limit: {Formatters.Magnitude.Format(map.MagLimit())}\nFPS: {map.FPS}", fontDiagnosticText, Brushes.Red, new PointF(10, 10));
+            map.Graphics.DrawString($"FOV: {Formatters.MeasuredAngle.Format(map.ViewAngle)}\nMag limit: {Formatters.Magnitude.Format(map.MagLimit)}\nFPS: {map.FPS}", fontDiagnosticText, Brushes.Red, new PointF(10, 10));
         }
 
         public override int ZOrder => 1000;

@@ -32,7 +32,7 @@ namespace Planetarium.Renderers
 
         private bool MagFilter(IMapContext map, float mag)
         {
-            if (mag > map.MagLimit())
+            if (mag > map.MagLimit)
                 return false;
 
             if ((int)map.GetPointSize(mag) == 0)
@@ -47,7 +47,7 @@ namespace Planetarium.Renderers
             bool isGround = settings.Get<bool>("Ground");
             double coeff = map.DiagonalCoefficient();
 
-            if (map.MagLimit() > 8 && settings.Get<bool>("Stars"))
+            if (map.MagLimit > 8 && settings.Get<bool>("Stars"))
             {
                 PrecessionalElements pe = Precession.ElementsFK5(map.JulianDay, Date.EPOCH_J2000);
 

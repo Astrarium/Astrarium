@@ -46,6 +46,8 @@ namespace Planetarium
         public int Width { get; set; }
         public int Height { get; set; }
 
+        public float? UserMagLimit { get; set; }
+
         private double viewAngle = 90;
         public double ViewAngle
         {
@@ -57,6 +59,28 @@ namespace Planetarium
             {
                 viewAngle = value;
                 ViewAngleChanged?.Invoke(viewAngle);
+            }
+        }
+
+        /// <summary>
+        /// Gets magnitude limit depending on current field of view (zoom level).
+        /// </summary>
+        /// <param name="map">IMapContext instance</param>
+        /// <returns>Magnitude limit</returns>
+        /// <remarks>
+        /// This method based on empiric formula, coefficients found with https://www.wolframalpha.com
+        /// </remarks>
+        public float MagLimit
+        {
+            get
+            {
+                // log fit {90,6},{45,6.5},{20,7.3},{8,9},{4,10.5}
+                float magLimit = (float)(-1.44995 * Math.Log(0.000230685 * ViewAngle));
+
+                if (UserMagLimit != null)
+                    return Math.Min(magLimit, UserMagLimit.Value);
+                else
+                    return magLimit;
             }
         }
 
@@ -290,6 +314,7 @@ namespace Planetarium
             public int Width => map.Width;
             public int Height => map.Height;
             public double ViewAngle => map.ViewAngle;
+            public float MagLimit => map.MagLimit;
             public CrdsHorizontal Center => map.Center;
             public double JulianDay => skyContext.JulianDay;
             public double Epsilon => skyContext.Epsilon;

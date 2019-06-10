@@ -32,6 +32,11 @@ namespace Planetarium
         double ViewAngle { get; }
 
         /// <summary>
+        /// Gets limiting magnitude set by user
+        /// </summary>
+        float MagLimit { get; }
+
+        /// <summary>
         /// Gets horizontal coordinates of the central point of the canvas.
         /// </summary>
         CrdsHorizontal Center { get; }
@@ -93,20 +98,6 @@ namespace Planetarium
         }
 
         /// <summary>
-        /// Calculates magnitude limit depending on current field of view (zoom level).
-        /// </summary>
-        /// <param name="map">IMapContext instance</param>
-        /// <returns>Magnitude limit</returns>
-        /// <remarks>
-        /// This method based on empiric formula, coefficients found with https://www.wolframalpha.com
-        /// </remarks>
-        public static float MagLimit(this IMapContext map)
-        {
-            // log fit {90,6},{45,6.5},{20,7.3},{8,9},{4,10.5}
-            return (float)(-1.44995 * Math.Log(0.000230685 * map.ViewAngle));
-        }
-
-        /// <summary>
         /// Gets size of a point (small filled circle) representing a star or a planet
         /// or any other celestial object on sky map, depending of its magnitude.
         /// </summary>
@@ -116,7 +107,7 @@ namespace Planetarium
         public static float GetPointSize(this IMapContext map, float mag, float maxDrawingSize = 0)
         {
             // current magnitude limit
-            float mag0 = map.MagLimit();
+            float mag0 = map.MagLimit;
 
             if (mag > mag0)
                 return 0;

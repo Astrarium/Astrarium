@@ -25,6 +25,10 @@ namespace Planetarium
         /// </summary>
         int Height { get; set; }
 
+        float MagLimit { get; }
+
+        float? UserMagLimit { get; set; }
+
         /// <summary>
         /// Gets or sets current field of view, in degrees
         /// </summary>
