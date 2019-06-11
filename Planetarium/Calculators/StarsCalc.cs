@@ -71,7 +71,7 @@ namespace Planetarium.Calculators
         #region Ephemeris
 
         /// <summary>
-        /// Gets number of years since J2000.0
+        /// Gets number of years (with fractions) since J2000.0 epoch
         /// </summary>
         private double YearsSince2000(SkyContext c)
         {
@@ -79,7 +79,7 @@ namespace Planetarium.Calculators
         }
 
         /// <summary>
-        /// Gets precessional elements to convert euqtorial coordinates of stars to current epoch 
+        /// Gets precessional elements to convert equatorial coordinates of stars to current epoch 
         /// </summary>
         private PrecessionalElements GetPrecessionalElements(SkyContext c)
         {

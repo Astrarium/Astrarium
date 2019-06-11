@@ -51,13 +51,13 @@ namespace Planetarium.Renderers
             {
                 PrecessionalElements pe = Precession.ElementsFK5(map.JulianDay, Date.EPOCH_J2000);
 
-                var eqCenter0 = map.Center.ToEquatorial(map.GeoLocation, map.SiderealTime);
+                var eq0 = map.Center.ToEquatorial(map.GeoLocation, map.SiderealTime);
 
-                CrdsEquatorial eqCenter = Precession.GetEquatorialCoordinates(eqCenter0, pe);
+                CrdsEquatorial eq = Precession.GetEquatorialCoordinates(eq0, pe);
 
                 SkyContext context = new SkyContext(map.JulianDay, map.GeoLocation);
 
-                var stars = tycho2.GetStars(context, eqCenter, map.ViewAngle * coeff, m => MagFilter(map, m));
+                var stars = tycho2.GetStars(context, eq, map.ViewAngle * coeff, m => MagFilter(map, m));
              
                 foreach (var star in stars)
                 {
