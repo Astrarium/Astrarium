@@ -35,16 +35,6 @@ namespace Planetarium
         double ViewAngle { get; set; }
 
         /// <summary>
-        /// Minimal allowed field of view, in degrees
-        /// </summary>
-        double MinViewAngle { get; }
-
-        /// <summary>
-        /// Max allowed field of view, in degrees
-        /// </summary>
-        double MaxViewAngle { get; }
-
-        /// <summary>
         /// Occurs when map's View Angle is changed.
         /// </summary>
         event Action<double> ViewAngleChanged;

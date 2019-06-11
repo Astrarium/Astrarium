@@ -16,6 +16,16 @@ namespace Planetarium
     public class SkyMap : ISkyMap
     {
         /// <summary>
+        /// Minimal allowed field of view, in degrees
+        /// </summary>
+        private const double MIN_VIEW_ANGLE = 1.0 / 1024;
+
+        /// <summary>
+        /// Max allowed field of view, in degrees
+        /// </summary>
+        private const double MAX_VIEW_ANGLE = 90;
+
+        /// <summary>
         /// Stopwatch to measure rendering time
         /// </summary>
         private Stopwatch renderStopWatch = new Stopwatch();
@@ -58,7 +68,17 @@ namespace Planetarium
             set
             {
                 viewAngle = value;
+                if (value >= MAX_VIEW_ANGLE)
+                {
+                    viewAngle = MAX_VIEW_ANGLE;
+                }
+                if (value < MIN_VIEW_ANGLE)
+                {
+                    viewAngle = MIN_VIEW_ANGLE;
+                }
+
                 ViewAngleChanged?.Invoke(viewAngle);
+                Invalidate();
             }
         }
 
@@ -83,16 +103,6 @@ namespace Planetarium
                     return magLimit;
             }
         }
-
-        /// <summary>
-        /// Minimal allowed field of view, in degrees
-        /// </summary>
-        public double MinViewAngle => 1.0 / 1024;
-
-        /// <summary>
-        /// Max allowed field of view, in degrees
-        /// </summary>
-        public double MaxViewAngle => 90;
 
         /// <summary>
         /// Occurs when map's View Angle is changed.
@@ -235,13 +245,12 @@ namespace Planetarium
             double sd = (body is SizeableCelestialObject) ?
                         (body as SizeableCelestialObject).Semidiameter / 3600 : 0;
 
-            double viewAngleTarget = sd == 0 ? 1 : Math.Max(sd * 10, MinViewAngle);
+            double viewAngleTarget = sd == 0 ? 1 : Math.Max(sd * 10, MIN_VIEW_ANGLE);
 
             if (animationDuration.Equals(TimeSpan.Zero))
             {
                 Center.Set(body.Horizontal);
                 ViewAngle = viewAngleTarget;
-                Invalidate();
             }
             else
             {
@@ -259,7 +268,6 @@ namespace Planetarium
                 {
                     Center.Set(Angle.Intermediate(centerOriginal, body.Horizontal, i / steps));
                     ViewAngle = Math.Min(90, Interpolation.Lagrange(x, y, i));
-                    Invalidate();
                 }
             }            
         }

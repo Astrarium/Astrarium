@@ -182,28 +182,7 @@ namespace Planetarium.ViewModels
 
         private void Zoom(int delta)
         {
-            double v = map.ViewAngle;
-
-            if (delta < 0)
-            {
-                v *= 1.1;
-            }
-            else
-            {
-                v /= 1.1;
-            }
-
-            if (v >= map.MaxViewAngle)
-            {
-                v = map.MaxViewAngle;
-            }
-            if (v < map.MinViewAngle)
-            {
-                v = map.MinViewAngle;
-            }
-
-            map.ViewAngle = v;
-            map.Invalidate();
+            map.ViewAngle *= Math.Pow(1.1, -delta / 120);
         }
 
         private void SetUserMagLimit(int delta)
@@ -246,7 +225,7 @@ namespace Planetarium.ViewModels
             {
                 SetUserMagLimit(1);
             }
-            // ">" = Reset magnitude limit 
+            // "/" = Reset magnitude limit 
             else if (key == Key.Oem2)
             {
                 SetUserMagLimit(0);
