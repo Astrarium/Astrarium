@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace Planetarium.Objects
 {
-    public class Asteroid : SizeableCelestialObject, IMovingObject
+    public class Comet : SizeableCelestialObject, IMovingObject
     {
         /// <summary>
-        /// Name or readable designation of the minor planet
+        /// Name or readable designation of the comet
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// Orbital elements of the minor planet
+        /// Orbital elements of the comet
         /// </summary>
         public OrbitalElements Orbit { get; set; }
 
@@ -30,16 +30,11 @@ namespace Planetarium.Objects
         public double G { get; set; }
 
         /// <summary>
-        /// Magnitude of asteroid
+        /// Magnitude of comet
         /// </summary>
         public float Magnitude { get; set; }
 
-        /// <summary>
-        /// Physical diameter, in km, if available
-        /// </summary>
-        public float PhysicalDiameter { get; set; }
-
-        // Average daily motion of asteroid
+        // Average daily motion of comet
         public double AverageDailyMotion { get; set; }
     }
 }
