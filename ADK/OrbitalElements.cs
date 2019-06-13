@@ -46,6 +46,11 @@ namespace ADK
         /// </summary>
         public double a { get; set; }
 
+        /// <summary>
+        /// Perihelion distance, AU
+        /// </summary>
+        public double q { get; set; }
+
         public OrbitalElements() { }
 
         public OrbitalElements(OrbitalElements other)
@@ -57,6 +62,7 @@ namespace ADK
             i = other.i;
             e = other.e;
             a = other.a;
+            q = other.q;
         }
     }
 }

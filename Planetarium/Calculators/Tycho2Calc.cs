@@ -23,7 +23,7 @@ namespace Planetarium.Calculators
         ICollection<Tycho2Star> GetStars(SkyContext context, CrdsEquatorial eq, double angle, Func<float, bool> magFilter);
     }
 
-    public class Tycho2Calculator : BaseCalc, ICelestialObjectCalc<Tycho2Star>, ITycho2Catalog
+    public class Tycho2Calc : BaseCalc, ICelestialObjectCalc<Tycho2Star>, ITycho2Catalog
     {
         /// <summary>
         /// Represents a single record from Tycho2 index file.

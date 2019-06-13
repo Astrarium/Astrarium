@@ -36,11 +36,8 @@ namespace Planetarium.Calculators
                     // orbital eccentricity
                     double e = Read<double>(line, 42, 49);
 
-                    // semimajor axis, in AU
-                    double a = q / (1 - e);
-
                     // mean motion, degrees/day
-                    double n = 0.9856076686 / (a * Math.Sqrt(a));
+                    double n = 1; // TODO: ?
 
                     int y = Read<int>(line, 15, 18);
                     int m = Read<int>(line, 20, 21);
@@ -61,7 +58,7 @@ namespace Planetarium.Calculators
                             Omega = Read<double>(line, 62, 69),
                             i = Read<double>(line, 72, 79),
                             e = e,
-                            a = a
+                            q = q
                         },
                         AverageDailyMotion = n,
                         Name = Read<string>(line, 103, 158)

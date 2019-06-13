@@ -68,8 +68,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AstroEventsConfig.cs" />
-    <Compile Include="Calculators\AsteroidsCalculator.cs" />
-    <Compile Include="Calculators\CometsCalculator.cs" />
+    <Compile Include="Calculators\AsteroidsCalc.cs" />
+    <Compile Include="Calculators\CometsCalc.cs" />
     <Compile Include="Calculators\CometsReader.cs" />
     <Compile Include="Calculators\AsteroidsReader.cs" />
     <Compile Include="Calculators\BaseCalc.cs" />
@@ -79,6 +79,7 @@
     <Compile Include="Calculators\LunarCalc.cs" />
     <Compile Include="Calculators\LunarEventsProvider.cs" />
     <Compile Include="Calculators\MilkyWayCalc.cs" />
+    <Compile Include="Calculators\MinorBodyCalc.cs" />
     <Compile Include="Calculators\PlanetsCalc.cs" />
     <Compile Include="Calculators\PlanetsEventsProvider.cs" />
     <Compile Include="Calculators\SolarCalc.cs" />
@@ -86,7 +87,7 @@
     <Compile Include="Calculators\StarsCalc.cs" />
     <Compile Include="Calculators\StarsReader.cs" />
     <Compile Include="Calculators\TrackCalc.cs" />
-    <Compile Include="Calculators\Tycho2Calculator.cs" />
+    <Compile Include="Calculators\Tycho2Calc.cs" />
     <Compile Include="CelestialGrid.cs" />
     <Compile Include="Config\ControlBuilders\GRSSettingBuilder.cs" />
     <Compile Include="Config\ControlBuilders\BooleanSettingControlBuilder.cs" />
@@ -135,6 +136,7 @@
     <Compile Include="Projections\ArcProjection.cs" />
     <Compile Include="Projections\IProjection.cs" />
     <Compile Include="Projections\SinProjection.cs" />
+    <Compile Include="Renderers\CometsRenderer.cs" />
     <Compile Include="Renderers\Tycho2Renderer.cs" />
     <Compile Include="Renderers\BaseRenderer.cs" />
     <Compile Include="Renderers\CelestialGridRenderer.cs" />
