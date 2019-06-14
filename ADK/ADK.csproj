@@ -15,8 +15,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Data\Constells.dat" />
     <EmbeddedResource Include="Data\ELP.bin" />
-    <EmbeddedResource Include="Data\VSOP87.HP.bin" />
-    <EmbeddedResource Include="Data\VSOP87.LP.bin" />
+    <EmbeddedResource Include="Data\VSOP87D.bin" />
   </ItemGroup>
 
 </Project>

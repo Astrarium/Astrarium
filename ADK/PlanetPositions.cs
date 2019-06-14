@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
 namespace ADK
@@ -33,30 +34,23 @@ namespace ADK
         /// namely VSOP87D series are used in the implementation.
         /// See <see href="ftp://ftp.imcce.fr/pub/ephem/planets/vsop87/" />
         /// </remarks>
-        private static List<Term>[,,] TermsHP = null;
+        private static List<Term>[,,] Terms = null;
 
         /// <summary>
-        /// VSOP87 terms to calculate Low-Precision planet positions
+        /// Number of terms for calculating low-precision planet positions
         /// </summary>
-        /// <remarks>
-        /// These values are taken from AA2 book, Appendix III.
-        /// </remarks>
-        private static List<Term>[,,] TermsLP = null;
+        private static int[,,] LPTermsCount = null;
           
         /// <summary>
         /// Loads VSOP terms from file if not loaded yet
         /// </summary>
-        private static void Initialize(bool highPrecision)
+        private static void Initialize()
         {
             // high precision
-            if (highPrecision && TermsHP == null)
+            if (Terms == null)
             {
-                TermsHP = new List<Term>[PLANETS_COUNT, SERIES_COUNT, POWERS_COUNT];
-            }
-            // low precision
-            else if (!highPrecision && TermsLP == null)
-            {
-                TermsLP = new List<Term>[PLANETS_COUNT, SERIES_COUNT, POWERS_COUNT];
+                Terms = new List<Term>[PLANETS_COUNT, SERIES_COUNT, POWERS_COUNT];
+                LPTermsCount = new int[PLANETS_COUNT, SERIES_COUNT, POWERS_COUNT];
             }
             // already initialized
             else
@@ -64,7 +58,7 @@ namespace ADK
                 return;
             }
 
-            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"ADK.Data.VSOP87.{(highPrecision ? "HP" : "LP")}.bin"))
+            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"ADK.Data.VSOP87D.bin"))
             using (var reader = new BinaryReader(stream))
             {
                 while (reader.BaseStream.Position != reader.BaseStream.Length)
@@ -76,28 +70,44 @@ namespace ADK
 
                     double A, B, C;
 
-                    if (highPrecision)
-                    {
-                        TermsHP[p, t, power] = new List<Term>();
-                    }
-                    else
-                    {
-                        TermsLP[p, t, power] = new List<Term>();
-                    }
+                    Terms[p, t, power] = new List<Term>();
 
                     for (int i = 0; i < count; i++)
                     {
                         A = reader.ReadDouble();
                         B = reader.ReadDouble();
                         C = reader.ReadDouble();
+                        Terms[p, t, power].Add(new Term(A, B, C));
+                    }
 
-                        if (highPrecision)
+                    // sort terms by A coefficient descending
+                    Terms[p, t, power].Sort((x, y) => Math.Sign(y.A - x.A));
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        // L, B
+                        if (t < 2)
                         {
-                            TermsHP[p, t, power].Add(new Term(A, B, C));
+                            // maximal error in seconds of arc
+                            // calculated by rule descibed in AA(II), p. 220 (Accuracy of the results)
+                            double err = Angle.ToDegrees(2 * Math.Sqrt(i + 1) * Terms[p, t, power][i].A) * 3600;
+                            if (err < 1)
+                            {
+                                LPTermsCount[p, t, power] = i;
+                                break;
+                            }
                         }
+                        // R
                         else
                         {
-                            TermsLP[p, t, power].Add(new Term(A, B, C));
+                            // maximal error in AU
+                            // calculated by rule descibed in AA(II), p. 220 (Accuracy of the results)
+                            double err = 2 * Math.Sqrt(i + 1) * Terms[p, t, power][i].A;
+                            if (err < 1e-8)
+                            {
+                                LPTermsCount[p, t, power] = i;
+                                break;
+                            }
                         }
                     }
                 }
@@ -112,7 +122,7 @@ namespace ADK
         /// <returns>Returns heliocentric coordinates of the planet for given date.</returns>
         public static CrdsHeliocentrical GetPlanetCoordinates(int planet, double jde, bool highPrecision = true)
         {
-            Initialize(highPrecision);
+            Initialize();
 
             const int L = 0;
             const int B = 1;
@@ -131,43 +141,50 @@ namespace ADK
             double[] b = new double[6];
             double[] r = new double[6];
 
-            List<Term>[,,] terms = highPrecision ? TermsHP : TermsLP;
-
             for (int j = 0; j < 6; j++)
             {
                 l[j] = 0;
-                for (int i = 0; i < terms[p, L, j]?.Count; i++)
+                for (int i = 0; i < Terms[p, L, j]?.Count; i++)
                 {
-                    l[j] += terms[p, L, j][i].A * Math.Cos(terms[p, L, j][i].B + terms[p, L, j][i].C * t);
+                    if (!highPrecision && i > LPTermsCount[p, L, j])
+                    {
+                        break;
+                    }
+
+                    l[j] += Terms[p, L, j][i].A * Math.Cos(Terms[p, L, j][i].B + Terms[p, L, j][i].C * t);
                 }
                 b[j] = 0;
-                for (int i = 0; i < terms[p, B, j]?.Count; i++)
+                for (int i = 0; i < Terms[p, B, j]?.Count; i++)
                 {
-                    b[j] += terms[p, B, j][i].A * Math.Cos(terms[p, B, j][i].B + terms[p, B, j][i].C * t);
+                    if (!highPrecision && i > LPTermsCount[p, B, j])
+                    {
+                        break;
+                    }
+
+                    b[j] += Terms[p, B, j][i].A * Math.Cos(Terms[p, B, j][i].B + Terms[p, B, j][i].C * t);
                 }
                 r[j] = 0;
-                for (int i = 0; i < terms[p, R, j]?.Count; i++)
+                for (int i = 0; i < Terms[p, R, j]?.Count; i++)
                 {
-                    r[j] += terms[p, R, j][i].A * Math.Cos(terms[p, R, j][i].B + terms[p, R, j][i].C * t);
+                    if (!highPrecision && i > LPTermsCount[p, R, j])
+                    {
+                        break;
+                    }
+
+                    r[j] += Terms[p, R, j][i].A * Math.Cos(Terms[p, R, j][i].B + Terms[p, R, j][i].C * t);
                 }
             }
 
-            // Dimension coefficient.
-            // Should be applied for the shortened VSOP87 formulae listed in AA book
-            // because "A" coefficient expressed in 1e-8 radian for longitude and latitude and in 1e-8 AU for radius vector
-            // Original (high-precision) version of VSOP has "A" expressed in radians and AU respectively.
-            double d = highPrecision ? 1 : 1e-8;
-
             CrdsHeliocentrical result = new CrdsHeliocentrical();
 
-            result.L = (l[0] + l[1] * t + l[2] * t2 + l[3] * t3 + l[4] * t4 + l[5] * t5) * d;
+            result.L = l[0] + l[1] * t + l[2] * t2 + l[3] * t3 + l[4] * t4 + l[5] * t5;
             result.L = Angle.ToDegrees(result.L);
             result.L = Angle.To360(result.L);
 
-            result.B = (b[0] + b[1] * t + b[2] * t2 + b[3] * t3 + b[4] * t4 + b[5] * t5) * d;
+            result.B = b[0] + b[1] * t + b[2] * t2 + b[3] * t3 + b[4] * t4 + b[5] * t5;
             result.B = Angle.ToDegrees(result.B);
                 
-            result.R = (r[0] + r[1] * t + r[2] * t2 + r[3] * t3 + r[4] * t4 + r[5] * t5) * d;
+            result.R = r[0] + r[1] * t + r[2] * t2 + r[3] * t3 + r[4] * t4 + r[5] * t5;
 
             return result;
         }

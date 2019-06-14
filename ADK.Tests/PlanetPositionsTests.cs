@@ -49,7 +49,7 @@ namespace ADK.Tests
 
                     double L = Angle.ToDegrees(Double.Parse(values[1], numericFormat));
                     double B = Angle.ToDegrees(Double.Parse(values[2], numericFormat));
-                    double R = Double.Parse(values[3], numericFormat);
+                    double R = double.Parse(values[3], numericFormat);
 
                     testData.Add(new VSOP87DTestData(planet, jd, L, B, R));
                 }
@@ -59,14 +59,6 @@ namespace ADK.Tests
         [TestMethod]
         public void GetPlanetCoordinatesLP()
         {
-            // Example 32.a from AA
-            {
-                CrdsHeliocentrical crds = PlanetPositions.GetPlanetCoordinates(2, 2448976.5, highPrecision: false);
-                Assert.AreEqual(26.11428, crds.L, 1e-5);
-                Assert.AreEqual(-2.62070, crds.B, 1e-5);
-                Assert.AreEqual(0.724603, crds.R, 1e-6);
-            }
-
             // Test low-precision implementation from AA2 book
             foreach (VSOP87DTestData testValue in testData)
             {
@@ -76,14 +68,14 @@ namespace ADK.Tests
                 double deltaB = Math.Abs(testValue.B - crds.B) * SECONDS_IN_DEGREE;
                 double deltaR = Math.Abs(testValue.R - crds.R);
 
-                // difference in L should be less than 4" of arc
-                Assert.IsTrue(deltaL < 4);
+                // difference in L should be less than 2" of arc
+                Assert.IsTrue(deltaL < 2);
 
-                // difference in B should be less than 4" of arc
-                Assert.IsTrue(deltaB < 4);
+                // difference in B should be less than 2" of arc
+                Assert.IsTrue(deltaB < 2);
 
-                // difference in R should be less than 1e-3 AU
-                Assert.IsTrue(deltaR < 1e-3);
+                // difference in R should be less than 1e-5 AU
+                Assert.IsTrue(deltaR < 1e-5);
             }
         }
 
@@ -121,45 +113,25 @@ namespace ADK.Tests
             // get Earth coordinates
             CrdsHeliocentrical crds = PlanetPositions.GetPlanetCoordinates(3, jde, highPrecision: false);
 
-            Assert.AreEqual(19.907372, crds.L, 1e-6);
-            Assert.AreEqual(-0.644, crds.B * 3600, 1e-3);
-            Assert.AreEqual(0.99760775, crds.R, 1e-8);
-
             // transform to ecliptical coordinates of the Sun
             CrdsEcliptical ecl = new CrdsEcliptical(Angle.To360(crds.L + 180), -crds.B, crds.R);
 
             // get FK5 system correction
             CrdsEcliptical corr = PlanetPositions.CorrectionForFK5(jde, ecl);
-            Assert.AreEqual(-0.09033, corr.Lambda * 3600, 1e-5);
-            Assert.AreEqual(-0.023, corr.Beta * 3600, 1e-3);
 
             // correct solar coordinates to FK5 system
             ecl += corr;
-
-            Assert.AreEqual(199.907347, ecl.Lambda, 1e-6);
-            Assert.AreEqual(0.62, ecl.Beta * 3600, 1e-2);
-            Assert.AreEqual(0.99760775, ecl.Distance, 1e-8);
 
             var nutation = Nutation.NutationElements(jde);
 
             // True obliquity
             double epsilon = Date.TrueObliquity(jde, nutation.deltaEpsilon);
 
-            // accuracy is 0.5"
-            Assert.AreEqual(15.908, nutation.deltaPsi * 3600, 0.5);
-
-            // accuracyis 0.1"        
-            Assert.AreEqual(-0.308, nutation.deltaEpsilon * 3600, 0.1);
-
-            // accuracy is 0.1"
-            Assert.AreEqual(23.4401443, epsilon, 0.1 / 3600.0);
-
             // add nutation effect
             ecl += Nutation.NutationEffect(nutation.deltaPsi);
 
             // calculate aberration effect 
             CrdsEcliptical aberration = Aberration.AberrationEffect(ecl.Distance);
-            Assert.AreEqual(-20.539, aberration.Lambda * 3600.0, 1e-3);
 
             // add aberration effect 
             ecl += aberration;
@@ -188,76 +160,24 @@ namespace ADK.Tests
             {
                 CrdsHeliocentrical hEarth = PlanetPositions.GetPlanetCoordinates(3, jde - tau, highPrecision: false);
 
-                if (i == 0)
-                {
-                    Assert.AreEqual(88.35704, hEarth.L, 1e-5);
-                    Assert.AreEqual(0.00014, hEarth.B, 1e-5);
-                    Assert.AreEqual(0.983824, hEarth.R, 1e-6);
-                }
-                else
-                {
-                    Assert.AreEqual(88.35168, hEarth.L, 1e-5);
-                    Assert.AreEqual(0.00014, hEarth.B, 1e-5);
-                    Assert.AreEqual(0.983825, hEarth.R, 1e-6);
-                }
-
                 CrdsHeliocentrical hVenus = PlanetPositions.GetPlanetCoordinates(2, jde - tau, highPrecision: false);
-                if (i == 0)
-                {
-                    Assert.AreEqual(26.11428, hVenus.L, 1e-5);
-                    Assert.AreEqual(-2.62070, hVenus.B, 1e-5);
-                    Assert.AreEqual(0.724603, hVenus.R, 1e-6);
-                }
-                else
-                {
-                    Assert.AreEqual(26.10588, hVenus.L, 1e-5);
-                    Assert.AreEqual(-2.62102, hVenus.B, 1e-5);
-                    Assert.AreEqual(0.724604, hVenus.R, 1e-6);
-                }
 
                 var rect = hVenus.ToRectangular(hEarth);
-                if (i == 0)
-                {
-                    Assert.AreEqual(0.621746, rect.X, 1e-6);
-                    Assert.AreEqual(-0.664810, rect.Y, 1e-6);
-                    Assert.AreEqual(-0.033134, rect.Z, 1e-6);
-                }
-                else
-                {
-                    Assert.AreEqual(0.621702, rect.X, 1e-6);
-                    Assert.AreEqual(-0.664903, rect.Y, 1e-6);
-                    Assert.AreEqual(-0.033138, rect.Z, 1e-6);
-                }
 
                 ecl = rect.ToEcliptical();
                
                 tau = PlanetPositions.LightTimeEffect(ecl.Distance);
-
-                if (i == 0)
-                {
-                    Assert.AreEqual(0.910845, ecl.Distance, 1e-6);
-                    Assert.AreEqual(0.0052606, tau, 1e-7);
-                }
             }
-
-            Assert.AreEqual(313.07684, ecl.Lambda, 1e-5);
-            Assert.AreEqual(-2.08489, ecl.Beta, 1e-5);
 
             // Correction for FK5 system
             CrdsEcliptical corr = PlanetPositions.CorrectionForFK5(jde, ecl);            
-            Assert.AreEqual(-0.09027, corr.Lambda * 3600, 1e-5);
-            Assert.AreEqual(0.05535, corr.Beta * 3600, 1e-5);
-
             ecl += corr;
-            Assert.AreEqual(313.07682, ecl.Lambda, 1e-5);
-            Assert.AreEqual(-2.08488, ecl.Beta, 1e-5);
-
             ecl += Nutation.NutationEffect(16.749 / 3600.0);
 
             CrdsEquatorial eq = ecl.ToEquatorial(23.439669);
 
-            Assert.AreEqual(new HMS("21h 04m 41.48s"), new HMS(eq.Alpha));
-            Assert.AreEqual(new DMS("-18* 53' 16.91''"), new DMS(eq.Delta));
+            Assert.AreEqual(new HMS("21h 04m 41.459s"), new HMS(eq.Alpha));
+            Assert.AreEqual(new DMS("-18* 53' 16.66''"), new DMS(eq.Delta));
         }
 
         /// <summary>
