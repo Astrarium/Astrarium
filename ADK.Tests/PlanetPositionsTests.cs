@@ -31,14 +31,17 @@ namespace ADK.Tests
 
             var lines = ReadLinesFromResource("ADK.Tests.Data.VSOP87.chk", Encoding.ASCII).ToList();
 
-            Regex regexHeader = new Regex(@"^VSOP87D\s+([\w]+)\s*JD([\w\d\.]+).*$");
+            Regex regexHeader = new Regex(@"^VSOP87[BD]\s+([\w]+)\s*JD([\w\d\.]+).*$");
             Regex regexValues = new Regex(@"^\s*l\s+([-\d.]+)\s+rad\s+b\s+([-\d.]+)\s+rad\s+r\s+([\d.]+)\s+au\s*$");
 
             for (int i = 0; i < lines.Count; i++)
             {
                 string header = lines[i].Trim();
-                if (header.StartsWith("VSOP87D"))
+
+                if (header.StartsWith("VSOP87B") || header.StartsWith("VSOP87D"))
                 {
+                    bool isEpochOfDate = header.StartsWith("VSOP87D");
+
                     string[] chunks = regexHeader.Match(header).Groups.Cast<Group>().Select(g => g.Value).ToArray();
 
                     int planet = GetPlanet(FirstCharToUpper(chunks[1].ToLower()));
@@ -51,7 +54,7 @@ namespace ADK.Tests
                     double B = Angle.ToDegrees(Double.Parse(values[2], numericFormat));
                     double R = double.Parse(values[3], numericFormat);
 
-                    testData.Add(new VSOP87DTestData(planet, jd, L, B, R));
+                    testData.Add(new VSOP87DTestData(isEpochOfDate, planet, jd, L, B, R));
                 }
             }
         }
@@ -62,7 +65,7 @@ namespace ADK.Tests
             // Test low-precision implementation from AA2 book
             foreach (VSOP87DTestData testValue in testData)
             {
-                CrdsHeliocentrical crds = PlanetPositions.GetPlanetCoordinates(testValue.Planet, testValue.JDE, highPrecision: false);
+                CrdsHeliocentrical crds = PlanetPositions.GetPlanetCoordinates(testValue.Planet, testValue.JDE, highPrecision: false, epochOfDate: testValue.IsEpochOfDate);
 
                 double deltaL = Math.Abs(testValue.L - crds.L) * SECONDS_IN_DEGREE;
                 double deltaB = Math.Abs(testValue.B - crds.B) * SECONDS_IN_DEGREE;
@@ -85,7 +88,7 @@ namespace ADK.Tests
             // Test high-precision implementation from original VSOP87 theory.
             foreach (VSOP87DTestData testValue in testData)
             {
-                CrdsHeliocentrical crds = PlanetPositions.GetPlanetCoordinates(testValue.Planet, testValue.JDE, highPrecision: true);
+                CrdsHeliocentrical crds = PlanetPositions.GetPlanetCoordinates(testValue.Planet, testValue.JDE, highPrecision: true, epochOfDate: testValue.IsEpochOfDate);
 
                 double deltaL = Math.Abs(testValue.L - crds.L) * SECONDS_IN_DEGREE;
                 double deltaB = Math.Abs(testValue.B - crds.B) * SECONDS_IN_DEGREE;
@@ -227,7 +230,7 @@ namespace ADK.Tests
             CrdsEquatorial eq = ecl.ToEquatorial(23.439669);
 
             Assert.AreEqual(new HMS("21h 04m 41.454s"), new HMS(eq.Alpha));
-            Assert.AreEqual(new DMS("-18* 53' 16.82''"), new DMS(eq.Delta));
+            Assert.AreEqual(new DMS("-18* 53' 16.84''"), new DMS(eq.Delta));
         }
 
         /// <summary>
@@ -275,6 +278,11 @@ namespace ADK.Tests
         private class VSOP87DTestData
         {
             /// <summary>
+            /// Flag indicating that test data is for epoch of date
+            /// </summary>
+            public bool IsEpochOfDate { get; private set; }
+
+            /// <summary>
             /// Planet ordering number (1 = Mercury, 2 = Venus etc.)
             /// </summary>
             public int Planet { get; private set; }
@@ -302,13 +310,15 @@ namespace ADK.Tests
             /// <summary>
             /// Creates new test data
             /// </summary>
+            /// <param name="isEpochOfDate">Test data is for epoch of date</param>
             /// <param name="planet">Planet</param>
             /// <param name="jde">Julian Ephemeris Day</param>
             /// <param name="L">L value</param>
             /// <param name="B">B value</param>
             /// <param name="R">R value</param>
-            public VSOP87DTestData(int planet, double jde, double L, double B, double R)
+            public VSOP87DTestData(bool isEpochOfDate, int planet, double jde, double L, double B, double R)
             {
+                IsEpochOfDate = isEpochOfDate;
                 Planet = planet;
                 JDE = jde;
                 this.L = L;

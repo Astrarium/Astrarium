@@ -12,6 +12,11 @@ namespace ADK
     public static class PlanetPositions
     {
         /// <summary>
+        /// Epochs count
+        /// </summary>
+        private const int EPOCHS_COUNT = 2;
+
+        /// <summary>
         /// Total number of planets
         /// </summary>
         private const int PLANETS_COUNT = 8;
@@ -34,12 +39,12 @@ namespace ADK
         /// namely VSOP87D series are used in the implementation.
         /// See <see href="ftp://ftp.imcce.fr/pub/ephem/planets/vsop87/" />
         /// </remarks>
-        private static List<Term>[,,] Terms = null;
+        private static List<Term>[,,,] Terms = null;
 
         /// <summary>
         /// Number of terms for calculating low-precision planet positions
         /// </summary>
-        private static int[,,] LPTermsCount = null;
+        private static int[,,,] LPTermsCount = null;
           
         /// <summary>
         /// Loads VSOP terms from file if not loaded yet
@@ -49,8 +54,8 @@ namespace ADK
             // high precision
             if (Terms == null)
             {
-                Terms = new List<Term>[PLANETS_COUNT, SERIES_COUNT, POWERS_COUNT];
-                LPTermsCount = new int[PLANETS_COUNT, SERIES_COUNT, POWERS_COUNT];
+                Terms = new List<Term>[EPOCHS_COUNT, PLANETS_COUNT, SERIES_COUNT, POWERS_COUNT];
+                LPTermsCount = new int[EPOCHS_COUNT, PLANETS_COUNT, SERIES_COUNT, POWERS_COUNT];
             }
             // already initialized
             else
@@ -58,55 +63,59 @@ namespace ADK
                 return;
             }
 
-            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"ADK.Data.VSOP87D.bin"))
-            using (var reader = new BinaryReader(stream))
+            for (int e = 0; e < 2; e++)
             {
-                while (reader.BaseStream.Position != reader.BaseStream.Length)
+                using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"ADK.Data.VSOP87{(e == 0 ? "B" : "D")}.bin"))
+                using (var reader = new BinaryReader(stream))
                 {
-                    int p = reader.ReadInt32();
-                    int t = reader.ReadInt32();
-                    int power = reader.ReadInt32();
-                    int count = reader.ReadInt32();
-
-                    double A, B, C;
-
-                    Terms[p, t, power] = new List<Term>();
-
-                    for (int i = 0; i < count; i++)
+                    while (reader.BaseStream.Position != reader.BaseStream.Length)
                     {
-                        A = reader.ReadDouble();
-                        B = reader.ReadDouble();
-                        C = reader.ReadDouble();
-                        Terms[p, t, power].Add(new Term(A, B, C));
-                    }
+                        int p = reader.ReadInt32();
+                        int t = reader.ReadInt32();
+                        int power = reader.ReadInt32();
+                        int count = reader.ReadInt32();
 
-                    // sort terms by A coefficient descending
-                    Terms[p, t, power].Sort((x, y) => Math.Sign(y.A - x.A));
+                        double A, B, C;
 
-                    for (int i = 0; i < count; i++)
-                    {
-                        // L, B
-                        if (t < 2)
+                        Terms[e, p, t, power] = new List<Term>();
+
+                        for (int i = 0; i < count; i++)
                         {
-                            // maximal error in seconds of arc
-                            // calculated by rule descibed in AA(II), p. 220 (Accuracy of the results)
-                            double err = Angle.ToDegrees(2 * Math.Sqrt(i + 1) * Terms[p, t, power][i].A) * 3600;
-                            if (err < 1)
-                            {
-                                LPTermsCount[p, t, power] = i;
-                                break;
-                            }
+                            A = reader.ReadDouble();
+                            B = reader.ReadDouble();
+                            C = reader.ReadDouble();
+                            Terms[e, p, t, power].Add(new Term(A, B, C));
                         }
-                        // R
-                        else
+
+                        // sort terms by A coefficient descending
+                        Terms[e, p, t, power].Sort((x, y) => Math.Sign(y.A - x.A));
+                        LPTermsCount[e, p, t, power] = count;
+
+                        for (int i = 0; i < count; i++)
                         {
-                            // maximal error in AU
-                            // calculated by rule descibed in AA(II), p. 220 (Accuracy of the results)
-                            double err = 2 * Math.Sqrt(i + 1) * Terms[p, t, power][i].A;
-                            if (err < 1e-8)
+                            // L, B
+                            if (t < 2)
                             {
-                                LPTermsCount[p, t, power] = i;
-                                break;
+                                // maximal error in seconds of arc
+                                // calculated by rule descibed in AA(II), p. 220 (Accuracy of the results)
+                                double err = Angle.ToDegrees(2 * Math.Sqrt(i + 1) * Terms[e, p, t, power][i].A) * 3600;
+                                if (err < 1)
+                                {
+                                    LPTermsCount[e, p, t, power] = i;
+                                    break;
+                                }
+                            }
+                            // R
+                            else
+                            {
+                                // maximal error in AU
+                                // calculated by rule descibed in AA(II), p. 220 (Accuracy of the results)
+                                double err = 2 * Math.Sqrt(i + 1) * Terms[e, p, t, power][i].A;
+                                if (err < 1e-8)
+                                {
+                                    LPTermsCount[e, p, t, power] = i;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -120,7 +129,7 @@ namespace ADK
         /// <param name="planet">Planet serial number - from 1 (Mercury) to 8 (Neptune) to calculate heliocentrical coordinates.</param>
         /// <param name="jde">Julian Ephemeris Day</param>
         /// <returns>Returns heliocentric coordinates of the planet for given date.</returns>
-        public static CrdsHeliocentrical GetPlanetCoordinates(int planet, double jde, bool highPrecision = true)
+        public static CrdsHeliocentrical GetPlanetCoordinates(int planet, double jde, bool highPrecision = true, bool epochOfDate = true)
         {
             Initialize();
 
@@ -129,6 +138,7 @@ namespace ADK
             const int R = 2;
 
             int p = planet - 1;
+            int e = epochOfDate ? 1 : 0;
 
             double t = (jde - 2451545.0) / 365250.0;
 
@@ -144,34 +154,34 @@ namespace ADK
             for (int j = 0; j < 6; j++)
             {
                 l[j] = 0;
-                for (int i = 0; i < Terms[p, L, j]?.Count; i++)
+                for (int i = 0; i < Terms[e, p, L, j]?.Count; i++)
                 {
-                    if (!highPrecision && i > LPTermsCount[p, L, j])
+                    if (!highPrecision && i > LPTermsCount[e, p, L, j])
                     {
                         break;
                     }
 
-                    l[j] += Terms[p, L, j][i].A * Math.Cos(Terms[p, L, j][i].B + Terms[p, L, j][i].C * t);
+                    l[j] += Terms[e, p, L, j][i].A * Math.Cos(Terms[e, p, L, j][i].B + Terms[e, p, L, j][i].C * t);
                 }
                 b[j] = 0;
-                for (int i = 0; i < Terms[p, B, j]?.Count; i++)
+                for (int i = 0; i < Terms[e, p, B, j]?.Count; i++)
                 {
-                    if (!highPrecision && i > LPTermsCount[p, B, j])
+                    if (!highPrecision && i > LPTermsCount[e, p, B, j])
                     {
                         break;
                     }
 
-                    b[j] += Terms[p, B, j][i].A * Math.Cos(Terms[p, B, j][i].B + Terms[p, B, j][i].C * t);
+                    b[j] += Terms[e, p, B, j][i].A * Math.Cos(Terms[e, p, B, j][i].B + Terms[e, p, B, j][i].C * t);
                 }
                 r[j] = 0;
-                for (int i = 0; i < Terms[p, R, j]?.Count; i++)
+                for (int i = 0; i < Terms[e, p, R, j]?.Count; i++)
                 {
-                    if (!highPrecision && i > LPTermsCount[p, R, j])
+                    if (!highPrecision && i > LPTermsCount[e, p, R, j])
                     {
                         break;
                     }
 
-                    r[j] += Terms[p, R, j][i].A * Math.Cos(Terms[p, R, j][i].B + Terms[p, R, j][i].C * t);
+                    r[j] += Terms[e, p, R, j][i].A * Math.Cos(Terms[e, p, R, j][i].B + Terms[e, p, R, j][i].C * t);
                 }
             }
 
