@@ -69,10 +69,10 @@ namespace Planetarium.Calculators
             e.Add("Magnitude", (c, p) => c.Get(Magnitude, asteroids.IndexOf(p)));
             e.Add("Horizontal.Altitude", (c, p) => c.Get(Horizontal, asteroids.IndexOf(p)).Altitude);
             e.Add("Horizontal.Azimuth", (c, p) => c.Get(Horizontal, asteroids.IndexOf(p)).Azimuth);
-            e.Add("Equatorial.Alpha", (c, p) => c.Get(Equatorial, asteroids.IndexOf(p)).Alpha);
-            e.Add("Equatorial.Delta", (c, p) => c.Get(Equatorial, asteroids.IndexOf(p)).Delta);
-            e.Add("Equatorial0.Alpha", (c, p) => c.Get(Equatorial0, asteroids.IndexOf(p)).Alpha);
-            e.Add("Equatorial0.Delta", (c, p) => c.Get(Equatorial0, asteroids.IndexOf(p)).Delta);
+            e.Add("Equatorial.Alpha", (c, p) => c.Get(EquatorialT, asteroids.IndexOf(p)).Alpha);
+            e.Add("Equatorial.Delta", (c, p) => c.Get(EquatorialT, asteroids.IndexOf(p)).Delta);
+            e.Add("Equatorial0.Alpha", (c, p) => c.Get(EquatorialG, asteroids.IndexOf(p)).Alpha);
+            e.Add("Equatorial0.Delta", (c, p) => c.Get(EquatorialG, asteroids.IndexOf(p)).Delta);
 
             e.Add("RTS.Rise", (c, p) => c.Get(RiseTransitSet, asteroids.IndexOf(p)).Rise);
             e.Add("RTS.Transit", (c, p) => c.Get(RiseTransitSet, asteroids.IndexOf(p)).Transit);
@@ -88,15 +88,15 @@ namespace Planetarium.Calculators
             var info = new CelestialObjectInfo();
 
             info.SetSubtitle("Minor planet").SetTitle(GetName(body))
-            .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial, i), c.JulianDay))
+            .AddRow("Constellation", Constellations.FindConstellation(c.Get(EquatorialT, i), c.JulianDay))
 
             .AddHeader("Equatorial coordinates (topocentrical)")
-            .AddRow("Equatorial.Alpha", c.Get(Equatorial, i).Alpha)
-            .AddRow("Equatorial.Delta", c.Get(Equatorial, i).Delta)
+            .AddRow("Equatorial.Alpha", c.Get(EquatorialT, i).Alpha)
+            .AddRow("Equatorial.Delta", c.Get(EquatorialT, i).Delta)
 
             .AddHeader("Equatorial coordinates (geocentrical)")
-            .AddRow("Equatorial0.Alpha", c.Get(Equatorial0, i).Alpha)
-            .AddRow("Equatorial0.Delta", c.Get(Equatorial0, i).Delta)
+            .AddRow("Equatorial0.Alpha", c.Get(EquatorialG, i).Alpha)
+            .AddRow("Equatorial0.Delta", c.Get(EquatorialG, i).Delta)
 
             .AddHeader("Horizontal coordinates")
             .AddRow("Horizontal.Azimuth", c.Get(Horizontal, i).Azimuth)

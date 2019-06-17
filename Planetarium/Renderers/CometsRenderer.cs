@@ -51,8 +51,6 @@ namespace Planetarium.Renderers
                     {
                         float diam = map.GetDiskSize(c.Semidiameter);
 
-                        
-
                         // comet should be rendered as point
                         float size = map.GetPointSize(c.Magnitude, maxDrawingSize: 3);
                         if ((int)size > 0)

@@ -94,7 +94,10 @@ namespace Planetarium.Calculators
             return Precession.ElementsFK5(Date.EPOCH_J2000, c.JulianDay);
         }
 
-        protected CrdsEquatorial Equatorial0(SkyContext c, int i)
+        /// <summary>
+        /// Gets equatorial geocentrical coordinates for J2000 epoch
+        /// </summary>
+        protected CrdsEquatorial EquatorialJ2000(SkyContext c, int i)
         {
             var Delta = c.Get(DistanceFromEarth, i);
             var rAsteroid = c.Get(Rectangular, i);
@@ -107,9 +110,19 @@ namespace Planetarium.Calculators
             double alpha = Angle.ToDegrees(Math.Atan2(y, x));
             double delta = Angle.ToDegrees(Math.Asin(z / Delta));
 
-            var eq0 = new CrdsEquatorial(alpha, delta);
+            return new CrdsEquatorial(alpha, delta);
+        }
 
+        /// <summary>
+        /// Gets equatorial geocentrical coordinates for current epoch
+        /// </summary>
+        protected CrdsEquatorial EquatorialG(SkyContext c, int i)
+        {
+            // Precessinal elements to convert between epochs
             var pe = c.Get(GetPrecessionalElements);
+
+            // Equatorial geocentrical coordinates for J2000 epoch
+            var eq0 = c.Get(EquatorialJ2000, i);
 
             // Equatorial coordinates for the mean equinox and epoch of the target date
             CrdsEquatorial eq = Precession.GetEquatorialCoordinates(eq0, pe);
@@ -134,16 +147,19 @@ namespace Planetarium.Calculators
             return PlanetEphem.Parallax(c.Get(DistanceFromEarth, i));
         }
 
-        protected CrdsEquatorial Equatorial(SkyContext c, int i)
+        /// <summary>
+        /// Gets equatorial topocentric coordinates of minor body
+        /// </summary>
+        protected CrdsEquatorial EquatorialT(SkyContext c, int i)
         {
-            var eq0 = c.Get(Equatorial0, i);
+            var eq0 = c.Get(EquatorialG, i);
             var parallax = c.Get(Parallax, i);
             return eq0.ToTopocentric(c.GeoLocation, c.SiderealTime, parallax);
         }
 
         protected CrdsHorizontal Horizontal(SkyContext c, int i)
         {
-            var eq = c.Get(Equatorial, i);
+            var eq = c.Get(EquatorialT, i);
             return eq.ToHorizontal(c.GeoLocation, c.SiderealTime);
         }
 
@@ -183,7 +199,7 @@ namespace Planetarium.Calculators
 
             for (int i = 0; i < 3; i++)
             {
-                eq[i] = new SkyContext(jd + diff[i], c.GeoLocation).Get(Equatorial0, a);
+                eq[i] = new SkyContext(jd + diff[i], c.GeoLocation).Get(EquatorialG, a);
             }
 
             return Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, parallax);

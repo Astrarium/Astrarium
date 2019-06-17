@@ -134,7 +134,8 @@ namespace ADK
         /// <param name="jd">Target epoch</param>
         private static OrbitalPosition EllipticMotion(OrbitalElements oe, double jd)
         {
-            double n = 0.9856076686 / (oe.a * Sqrt(oe.a));
+            double a = oe.a == 0 ? oe.q / (1 - oe.e) : oe.a;
+            double n = 0.9856076686 / (a * Sqrt(a));
             double nd = jd - oe.Epoch;
             double M = oe.M + n * nd;
 
@@ -143,7 +144,7 @@ namespace ADK
             return new OrbitalPosition()
             {
                 v = TrueAnomaly(oe.e, E),
-                r = oe.a * (1 - oe.e * Cos(ToRadians(E)))
+                r = a * (1 - oe.e * Cos(ToRadians(E)))
             }; 
         }
 
