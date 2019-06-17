@@ -86,6 +86,14 @@ namespace Planetarium.Calculators
             return Math.Sqrt(r.X * r.X + r.Y * r.Y + r.Z * r.Z);
         }
 
+        /// <summary>
+        /// Gets precessional elements to convert equatorial coordinates of minor body to current epoch 
+        /// </summary>
+        private PrecessionalElements GetPrecessionalElements(SkyContext c)
+        {
+            return Precession.ElementsFK5(Date.EPOCH_J2000, c.JulianDay);
+        }
+
         protected CrdsEquatorial Equatorial0(SkyContext c, int i)
         {
             var Delta = c.Get(DistanceFromEarth, i);
@@ -99,7 +107,12 @@ namespace Planetarium.Calculators
             double alpha = Angle.ToDegrees(Math.Atan2(y, x));
             double delta = Angle.ToDegrees(Math.Asin(z / Delta));
 
-            var eq = new CrdsEquatorial(alpha, delta);
+            var eq0 = new CrdsEquatorial(alpha, delta);
+
+            var pe = c.Get(GetPrecessionalElements);
+
+            // Equatorial coordinates for the mean equinox and epoch of the target date
+            CrdsEquatorial eq = Precession.GetEquatorialCoordinates(eq0, pe);
 
             // Nutation effect
             var eq1 = Nutation.NutationEffect(eq, c.NutationElements, c.Epsilon);
@@ -135,11 +148,11 @@ namespace Planetarium.Calculators
         }
 
         /// <summary>
-        /// Gets rectangular coordinates of Sun
+        /// Gets rectangular coordinates of Sun for J2000.0 epoch
         /// </summary>
         protected CrdsRectangular SunRectangular(SkyContext c)
         {
-            CrdsHeliocentrical hEarth = PlanetPositions.GetPlanetCoordinates(Planet.EARTH, c.JulianDay, !c.PreferFastCalculation);
+            CrdsHeliocentrical hEarth = PlanetPositions.GetPlanetCoordinates(Planet.EARTH, c.JulianDay, !c.PreferFastCalculation, false);
 
             var eSun = new CrdsEcliptical(Angle.To360(hEarth.L + 180), -hEarth.B, hEarth.R);
 

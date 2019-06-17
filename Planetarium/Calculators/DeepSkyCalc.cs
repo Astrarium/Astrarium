@@ -73,7 +73,7 @@ namespace Planetarium.Calculators
         }
 
         /// <summary>
-        /// Gets precessional elements to convert euqtorial coordinates of stars to current epoch 
+        /// Gets precessional elements to convert equatorial coordinates of stars to current epoch 
         /// </summary>
         private PrecessionalElements GetPrecessionalElements(SkyContext c)
         {

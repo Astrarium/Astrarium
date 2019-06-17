@@ -71,12 +71,8 @@ namespace ADK
             return oe;
         }
 
-        public static CrdsRectangular GetRectangularCoordinates(OrbitalElements oe0, double jd, double epsilon)
+        public static CrdsRectangular GetRectangularCoordinates(OrbitalElements oe, double jd, double epsilon)
         {
-            OrbitalElements oe = Reduction(oe0, Date.EPOCH_J2000, jd);
-
-            //var oe = oe0;
-
             double Omega = ToRadians(oe.Omega);
             epsilon = ToRadians(epsilon);
             double i = ToRadians(oe.i);
