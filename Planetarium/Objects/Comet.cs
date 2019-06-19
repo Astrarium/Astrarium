@@ -36,5 +36,10 @@ namespace Planetarium.Objects
 
         // Average daily motion of comet
         public double AverageDailyMotion { get; set; }
+
+        /// <summary>
+        /// Comet tail length, in AU
+        /// </summary>
+        public float Tail { get; set; }
     }
 }

@@ -34,6 +34,8 @@ namespace Planetarium.Calculators
             {
                 comets[i].Horizontal = c.Get(Horizontal, i);
                 comets[i].Magnitude = c.Get(Magnitude, i);
+                comets[i].Tail = c.Get(Appearance, i).Tail;
+                comets[i].Semidiameter = c.Get(Appearance, i).Coma;
             }
         }
 
@@ -48,6 +50,15 @@ namespace Planetarium.Calculators
             var r = c.Get(DistanceFromSun, i);
             return (float)(comets[i].H + 5 * Math.Log10(delta) + comets[i].G * Math.Log(r));
         } 
+
+        private CometAppearance Appearance(SkyContext c, int i)
+        {
+            double H = comets[i].H;
+            double K = comets[i].G;
+            double r = c.Get(DistanceFromSun, i);
+            double delta = c.Get(DistanceFromEarth, i);
+            return MinorBodyEphem.CometAppearance(H, K, r, delta);
+        }
 
         public void ConfigureEphemeris(EphemerisConfig<Comet> e)
         {

@@ -51,18 +51,27 @@ namespace Planetarium.Renderers
                     {
                         float diam = map.GetDiskSize(c.Semidiameter);
 
-                        // comet should be rendered as point
-                        float size = map.GetPointSize(c.Magnitude, maxDrawingSize: 3);
-                        if ((int)size > 0)
+                        if (diam > 5)
                         {
                             PointF p = map.Project(c.Horizontal);
 
-                            if (!map.IsOutOfScreen(p))
+                            g.FillEllipse(Brushes.Azure, p.X - diam / 2, p.Y - diam / 2, diam, diam);
+                        }
+                        else
+                        {
+                            // comet should be rendered as point
+                            float size = map.GetPointSize(c.Magnitude, maxDrawingSize: 3);
+                            if ((int)size > 0)
                             {
-                                g.FillEllipse(Brushes.White, p.X - size / 2, p.Y - size / 2, size, size);
-                                map.DrawObjectCaption(fontNames, brushNames, c.Name, p, size);
-                                map.AddDrawnObject(c, p);
-                                continue;
+                                PointF p = map.Project(c.Horizontal);
+
+                                if (!map.IsOutOfScreen(p))
+                                {
+                                    g.FillEllipse(Brushes.White, p.X - size / 2, p.Y - size / 2, size, size);
+                                    map.DrawObjectCaption(fontNames, brushNames, c.Name, p, size);
+                                    map.AddDrawnObject(c, p);
+                                    continue;
+                                }
                             }
                         }
                     }

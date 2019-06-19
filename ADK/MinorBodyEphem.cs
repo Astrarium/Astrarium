@@ -26,10 +26,10 @@ namespace ADK
         /// <returns>Returns visible magnitude of the asteroid</returns>
         // TODO: tests
         public static float Magnitude(double G,
-                                        double H,
-                                        double beta,
-                                        double r,
-                                        double delta)
+                                    double H,
+                                    double beta,
+                                    double r,
+                                    double delta)
         {
             if (beta > 120)
             {
@@ -64,6 +64,47 @@ namespace ADK
                 return 0;
             else
                 return ToDegrees(Atan2(d / 2, r * AU)) * 3600;
+        }
+
+        /// <summary>
+        /// Calculates details of comet appearance (tail length and coma diameter)
+        /// </summary>
+        /// <param name="H">Absolute magnitude of the comet</param>
+        /// <param name="K">Phase coefficient of the comet</param>
+        /// <param name="r">Distance from comet to the Sun (in a.u.)</param>
+        /// <param name="delta">Distance from comet to the Earth (in a.u.)</param>
+        /// <returns>Returns details of comet appearance</returns>
+        /// <remarks>
+        /// See https://www.projectpluto.com/update7b.htm#comet_tail_formula
+        /// also see book : Hunting and Imaging Comets, M.Mobberley, pages 258-259
+        /// </remarks>
+        // TODO: tests
+        public static CometAppearance CometAppearance(double H,
+                                                    double K,
+                                                    double r,
+                                                    double delta)
+        {
+            double mhelio = H + K * Log10(r);
+            double log10Lo = -0.0075 * mhelio * mhelio - 0.19 * mhelio + 2.10;
+            double log10Do = -0.0033 * mhelio * mhelio - 0.07 * mhelio + 3.25;
+            double Lo = Pow(10, log10Lo);
+            double Do = Pow(10, log10Do);
+
+            // tail length, in millions of kilometers
+            double L = Lo * (1 - Pow(10, -4 * r)) * (1 - Pow(10, -2 * r));
+            
+            // coma diameter, in thousands of kilometers
+            double D = Do * (1 - Pow(10, -2 * r)) * (1 - Pow(10, -r));
+            
+            // translate sizes to a.u.
+            D = D * 1e3 / AU;
+            L = L * 1e6 / AU;
+
+            return new CometAppearance()
+            {
+                Coma = (float)ToDegrees(Atan(D / (2 * delta))) * 3600,
+                Tail = (float)L
+            };
         }
     }
 }
