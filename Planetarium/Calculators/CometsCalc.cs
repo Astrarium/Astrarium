@@ -34,8 +34,9 @@ namespace Planetarium.Calculators
             {
                 comets[i].Horizontal = c.Get(Horizontal, i);
                 comets[i].Magnitude = c.Get(Magnitude, i);
-                comets[i].Tail = c.Get(Appearance, i).Tail;
+                comets[i].TailLength = c.Get(Appearance, i).Tail;
                 comets[i].Semidiameter = c.Get(Appearance, i).Coma;
+                comets[i].TailHorizontal = c.Get(TailHorizontal, i);
             }
         }
 
@@ -58,6 +59,49 @@ namespace Planetarium.Calculators
             double r = c.Get(DistanceFromSun, i);
             double delta = c.Get(DistanceFromEarth, i);
             return MinorBodyEphem.CometAppearance(H, K, r, delta);
+        }
+
+        /// <summary>
+        /// Gets equatorial coordinates of comet tail end
+        /// </summary>
+        private CrdsEquatorial TailEquatorial(SkyContext c, int i)
+        {
+            var rBody = c.Get(Rectangular, i);
+            var rSun = c.Get(SunRectangular);
+
+            // distance from Sun
+            double r = Math.Sqrt(rBody.X * rBody.X + rBody.Y * rBody.Y + rBody.Z * rBody.Z);
+
+            double k = (r + c.Get(Appearance, i).Tail) / r;
+
+            double x = rSun.X + k * rBody.X;
+            double y = rSun.Y + k * rBody.Y;
+            double z = rSun.Z + k * rBody.Z;
+
+            // distance from Earth of tail end
+            double Delta = Math.Sqrt(x * x + y * y + z * z);
+
+            double alpha = Angle.ToDegrees(Math.Atan2(y, x));
+            double delta = Angle.ToDegrees(Math.Asin(z / Delta));
+
+            // geocentric equatoral for J2000.0
+            var eq0 = new CrdsEquatorial(alpha, delta);
+
+            // Precessinal elements to convert between epochs
+            var pe = c.Get(GetPrecessionalElements);
+
+            // Equatorial coordinates for the mean equinox and epoch of the target date
+            // No nutation an aberration corrections here, because we do not need high precision
+            return Precession.GetEquatorialCoordinates(eq0, pe);
+        }
+
+        /// <summary>
+        /// Calculates horizontal coordinates of comet tail end
+        /// </summary>
+        private CrdsHorizontal TailHorizontal(SkyContext c, int i)
+        {
+            var eq = c.Get(TailEquatorial, i);
+            return eq.ToHorizontal(c.GeoLocation, c.SiderealTime);
         }
 
         public void ConfigureEphemeris(EphemerisConfig<Comet> e)

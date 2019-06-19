@@ -26,6 +26,9 @@ namespace Planetarium.Calculators
 
         protected abstract OrbitalElements OrbitalElements(SkyContext c, int i);
 
+        /// <summary>
+        /// Gets rectangular heliocentric coordinates of minor body
+        /// </summary>
         protected CrdsRectangular Rectangular(SkyContext c, int i)
         {
             // final difference to stop iteration process, 1 second of time
@@ -89,7 +92,7 @@ namespace Planetarium.Calculators
         /// <summary>
         /// Gets precessional elements to convert equatorial coordinates of minor body to current epoch 
         /// </summary>
-        private PrecessionalElements GetPrecessionalElements(SkyContext c)
+        protected PrecessionalElements GetPrecessionalElements(SkyContext c)
         {
             return Precession.ElementsFK5(Date.EPOCH_J2000, c.JulianDay);
         }

@@ -54,7 +54,9 @@ namespace Planetarium.Renderers
                         if (diam > 5)
                         {
                             PointF p = map.Project(c.Horizontal);
+                            PointF pTail = map.Project(c.TailHorizontal);
 
+                            g.DrawLine(Pens.Azure, p, pTail);
                             g.FillEllipse(Brushes.Azure, p.X - diam / 2, p.Y - diam / 2, diam, diam);
                         }
                         else

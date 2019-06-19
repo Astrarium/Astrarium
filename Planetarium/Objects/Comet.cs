@@ -40,6 +40,11 @@ namespace Planetarium.Objects
         /// <summary>
         /// Comet tail length, in AU
         /// </summary>
-        public float Tail { get; set; }
+        public float TailLength { get; set; }
+
+        /// <summary>
+        /// Visible horizontal coordinates of comet tail end
+        /// </summary>
+        public CrdsHorizontal TailHorizontal { get; set; }
     }
 }
