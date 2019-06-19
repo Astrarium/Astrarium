@@ -37,7 +37,7 @@ namespace Planetarium.Calculators
             // previous value of tau to calculate the difference
             double tau0 = 1;
 
-            // Rectangular coordinates of asteroid
+            // Rectangular coordinates of minor body
             CrdsRectangular rect = null;
 
             // Rectangular coordinates of the Sun
@@ -48,10 +48,10 @@ namespace Planetarium.Calculators
 
             double ksi = 0, eta = 0, zeta = 0, Delta = 0;
 
-            // Iterative process to find rectangular coordinates of asteroid
+            // Iterative process to find rectangular coordinates of minor body
             while (Math.Abs(tau - tau0) > deltaTau)
             {
-                // Rectangular coordinates of asteroid
+                // Rectangular coordinates of minor body
                 rect = MinorBodyPositions.GetRectangularCoordinates(orbit, c.JulianDay - tau, c.Epsilon);
 
                 ksi = sun.X + rect.X;
@@ -70,12 +70,12 @@ namespace Planetarium.Calculators
 
         protected double DistanceFromEarth(SkyContext c, int i)
         {
-            var rAsteroid = c.Get(Rectangular, i);
+            var rBody = c.Get(Rectangular, i);
             var rSun = c.Get(SunRectangular);
 
-            double x = rSun.X + rAsteroid.X;
-            double y = rSun.Y + rAsteroid.Y;
-            double z = rSun.Z + rAsteroid.Z;
+            double x = rSun.X + rBody.X;
+            double y = rSun.Y + rBody.Y;
+            double z = rSun.Z + rBody.Z;
 
             return Math.Sqrt(x * x + y * y + z * z);
         }
@@ -94,18 +94,25 @@ namespace Planetarium.Calculators
             return Precession.ElementsFK5(Date.EPOCH_J2000, c.JulianDay);
         }
 
+        protected CrdsEquatorial EquatorialJ2000T(SkyContext c, int i)
+        {
+            var eq0 = c.Get(EquatorialJ2000, i);
+            var parallax = c.Get(Parallax, i);
+            return eq0.ToTopocentric(c.GeoLocation, c.SiderealTime, parallax);
+        }
+
         /// <summary>
         /// Gets equatorial geocentrical coordinates for J2000 epoch
         /// </summary>
         protected CrdsEquatorial EquatorialJ2000(SkyContext c, int i)
         {
             var Delta = c.Get(DistanceFromEarth, i);
-            var rAsteroid = c.Get(Rectangular, i);
+            var rBody = c.Get(Rectangular, i);
             var rSun = c.Get(SunRectangular);
 
-            double x = rSun.X + rAsteroid.X;
-            double y = rSun.Y + rAsteroid.Y;
-            double z = rSun.Z + rAsteroid.Z;
+            double x = rSun.X + rBody.X;
+            double y = rSun.Y + rBody.Y;
+            double z = rSun.Z + rBody.Z;
 
             double alpha = Angle.ToDegrees(Math.Atan2(y, x));
             double delta = Angle.ToDegrees(Math.Asin(z / Delta));
@@ -140,7 +147,7 @@ namespace Planetarium.Calculators
         }
 
         /// <summary>
-        /// Gets horizontal parallax of asteroid
+        /// Gets horizontal parallax of minor body
         /// </summary>
         protected double Parallax(SkyContext c, int i)
         {
