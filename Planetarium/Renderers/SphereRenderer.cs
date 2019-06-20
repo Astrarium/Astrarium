@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Windows.Controls;
+using System.Windows.Forms.Integration;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
@@ -83,6 +85,8 @@ namespace Planetarium.Renderers
 
             Viewport3D viewport = new Viewport3D();
 
+        
+
             // Give the camera its initial position.
             camera.FieldOfView = 5.8;
             viewport.Camera = camera;
@@ -112,9 +116,6 @@ namespace Planetarium.Renderers
             AmbientLight ambientLight = new AmbientLight(Colors.White);
 
             group.Children.Add(ambientLight);
-
-            //DirectionalLight directional_light = new DirectionalLight(Colors.Red, new Vector3D(-x, -y, -z));
-            //group.Children.Add(directional_light);
 
             // Create the model.
             // Globe. Place it in a new model so we can transform it.
@@ -210,20 +211,24 @@ namespace Planetarium.Renderers
 
         private Bitmap ToWinFormsBitmap(BitmapSource bitmapsource)
         {
-            using (MemoryStream stream = new MemoryStream())
-            {
-                var enc = new PngBitmapEncoder();
-                enc.Frames.Add(BitmapFrame.Create(bitmapsource));
-                enc.Save(stream);
+            Bitmap bmp = new Bitmap(
+                bitmapsource.PixelWidth,
+                bitmapsource.PixelHeight,
+                System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
 
-                //return new Bitmap(stream);
-                using (var tempBitmap = new Bitmap(stream))
-                {
-                    // According to MSDN, one "must keep the stream open for the lifetime of the Bitmap."
-                    // So we return a copy of the new bitmap, allowing us to dispose both the bitmap and the stream.
-                    return new Bitmap(tempBitmap);
-                }
-            }
+            BitmapData data = bmp.LockBits(
+                new Rectangle(Point.Empty, bmp.Size),
+                ImageLockMode.WriteOnly,
+                System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+
+            bitmapsource.CopyPixels(
+                System.Windows.Int32Rect.Empty,
+                data.Scan0,
+                data.Height * data.Stride,
+                data.Stride);
+
+            bmp.UnlockBits(data);
+            return bmp;
         }
     }
 }
