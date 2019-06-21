@@ -45,6 +45,7 @@ namespace Planetarium.ViewModels
 
         public Func<CelestialObject, bool> Filter { get; } = body => body is IMovingObject;
 
+        public Guid TrackId { get; set; }
         public double JulianDayFrom { get; set; }
         public double JulianDayTo { get; set; }
         public double UtcOffset { get; set; }
@@ -56,6 +57,7 @@ namespace Planetarium.ViewModels
         {
             var track = new Track()
             {
+                Id = TrackId,
                 Body = SelectedBody,
                 From = JulianDayFrom,
                 To = JulianDayTo,
@@ -63,6 +65,12 @@ namespace Planetarium.ViewModels
                 Color = TrackColor,
                 DrawLabels = DrawLabels
             };
+
+            if (track.Body == null)
+            {
+                viewManager.ShowMessageBox("Warning", "Please specify a celestial body.", System.Windows.MessageBoxButton.OK);
+                return;
+            }
 
             if (JulianDayFrom > JulianDayTo)
             {
@@ -82,11 +90,11 @@ namespace Planetarium.ViewModels
                 return;
             }
 
-            AddTrack(track);
+            AddOrEditTrack(track);
             Close(true);
         }
 
-        private void AddTrack(Track track)
+        private void AddOrEditTrack(Track track)
         {
             var categories = ephemerisProvider.GetEphemerisCategories(track.Body);
             if (!(categories.Contains("Equatorial.Alpha") && categories.Contains("Equatorial.Delta")))
@@ -100,7 +108,15 @@ namespace Planetarium.ViewModels
                 track.Points.Add(new CelestialPoint() { Equatorial0 = new CrdsEquatorial((double)eq[0].Value, (double)eq[1].Value) });
             }
 
-            tracksProvider.Tracks.Add(track);
+            int index = tracksProvider.Tracks.FindIndex(t => t.Id == track.Id);
+            if (index > -1)
+            {
+                tracksProvider.Tracks[index] = track;
+            }
+            else
+            {
+                tracksProvider.Tracks.Add(track);
+            }            
         }
     }
 }

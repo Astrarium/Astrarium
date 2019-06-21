@@ -40,7 +40,7 @@ namespace Planetarium.Controls
                 {
                     if (SelectedItem != null)
                     {
-                        MouseDoubleClickCommand.Execute(SelectedItem);
+                        MouseDoubleClickCommand?.Execute(SelectedItem);
                     }
                 }
                 obj = VisualTreeHelper.GetParent(obj);

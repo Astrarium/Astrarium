@@ -1,4 +1,5 @@
 ﻿using ADK;
+using Planetarium.Calculators;
 using Planetarium.Config;
 using Planetarium.Objects;
 using System;
@@ -19,6 +20,7 @@ namespace Planetarium.ViewModels
         private readonly Sky sky;
         private readonly ISkyMap map;
         private readonly IViewManager viewManager;
+        private readonly ITracksProvider tracksProvider;
         private readonly ISettings settings;
 
         public bool FullScreen { get; private set; }
@@ -87,9 +89,10 @@ namespace Planetarium.ViewModels
             }
         }
 
-        public MainVM(Sky sky, ISkyMap map, ISettings settings, IViewManager viewManager)
+        public MainVM(Sky sky, ITracksProvider tracksProvider, ISkyMap map, ISettings settings, IViewManager viewManager)
         {
             this.sky = sky;
+            this.tracksProvider = tracksProvider;
             this.map = map;
             this.settings = settings;
             this.viewManager = viewManager;
@@ -117,6 +120,7 @@ namespace Planetarium.ViewModels
             ChangeSettingsCommand = new Command(ChangeSettings);
 
             sky.Context.ContextChanged += Sky_ContextChanged;
+            sky.Calculated += () => map.Invalidate();
             map.SelectedObjectChanged += Map_SelectedObjectChanged;
             map.ViewAngleChanged += Map_ViewAngleChanged;
 
@@ -240,14 +244,12 @@ namespace Planetarium.ViewModels
             {
                 sky.Context.JulianDay += 1;
                 sky.Calculate();
-                map.Invalidate();
             }
             // "S" = [S]ubtract
             else if (key == Key.S)
             {
                 sky.Context.JulianDay -= 1;
                 sky.Calculate();
-                map.Invalidate();
             }
             // "O" = [O]ptions
             else if (key == Key.O)
@@ -430,7 +432,6 @@ namespace Planetarium.ViewModels
                     {
                         sky.Context.JulianDay = vm.JulianDay;
                         sky.Calculate();
-                        map.Invalidate();
                     }
                 }
             }    
@@ -545,10 +546,11 @@ namespace Planetarium.ViewModels
         }
 
         private void MotionTrack(CelestialObject body)
-        {
+        {   
             if (body != null && body is IMovingObject)
             {
                 var vm = viewManager.CreateViewModel<MotionTrackVM>();
+                vm.TrackId = Guid.NewGuid();
                 vm.SelectedBody = body;
                 vm.JulianDayFrom = sky.Context.JulianDay;
                 vm.JulianDayTo = sky.Context.JulianDay + 30;
@@ -557,7 +559,14 @@ namespace Planetarium.ViewModels
                 if (viewManager.ShowDialog(vm) ?? false)
                 {
                     sky.Calculate();
-                    map.Invalidate();
+                }
+            }
+            else
+            {
+                var vm = viewManager.CreateViewModel<TracksListVM>();
+                if (viewManager.ShowDialog(vm) ?? false)
+                {
+                    sky.Calculate();
                 }
             }
         }
@@ -569,7 +578,6 @@ namespace Planetarium.ViewModels
             {
                 sky.Context.JulianDay = vm.JulianDay;
                 sky.Calculate();
-                map.Invalidate();
             }
         }
 
@@ -582,7 +590,6 @@ namespace Planetarium.ViewModels
                 settings.Set("ObserverLocation", vm.ObserverLocation);
                 settings.Save();
                 sky.Calculate();
-                map.Invalidate();
             }
         }
 

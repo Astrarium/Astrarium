@@ -17,6 +17,6 @@
     <t:ColorConverter x:Key="ColorConverter" />
     <t:FontToStringConverter x:Key="FontToStringConverter" />
     <t:ColorToStringConverter x:Key="ColorToStringConverter" />
-    <BooleanToVisibilityConverter x:Key="bool2VisibilityConverter"/>
+    <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     
 </ResourceDictionary>

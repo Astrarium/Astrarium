@@ -171,6 +171,7 @@
     <Compile Include="Themes\Converters.cs" />
     <Compile Include="IViewManager.cs" />
     <Compile Include="Commands.cs" />
+    <Compile Include="ViewModels\TracksListVM.cs" />
     <Compile Include="ViewModels\PhenomenaSettingsVM.cs" />
     <Compile Include="ViewModels\EphemerisSettingsVM.cs" />
     <Compile Include="Themes\Node.cs" />
@@ -188,6 +189,9 @@
     <Compile Include="Controls\FontPicker.cs" />
     <Compile Include="Controls\FilePathPicker.cs" />
     <Compile Include="Controls\ColorPicker.cs" />
+    <Compile Include="Views\TracksListWindow.xaml.cs">
+      <DependentUpon>TracksListWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\PhenomenaSettingsWindow.xaml.cs">
       <DependentUpon>PhenomenaSettingsWindow.xaml</DependentUpon>
     </Compile>
@@ -234,6 +238,10 @@
     <Page Include="Themes\Converters.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\TracksListWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\PhenomenaSettingsWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

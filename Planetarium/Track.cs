@@ -14,6 +14,11 @@ namespace Planetarium
     public class Track
     {
         /// <summary>
+        /// Unique track identifier, used internally
+        /// </summary>
+        public Guid Id { get; set; }
+
+        /// <summary>
         /// Celestial body the track belongs to
         /// </summary>
         public CelestialObject Body { get; set; }

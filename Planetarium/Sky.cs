@@ -33,6 +33,8 @@ namespace Planetarium
 
         public SkyContext Context { get; private set; }
 
+        public event Action Calculated;
+
         public void Initialize()
         {
             foreach (var calc in Calculators)
@@ -98,6 +100,7 @@ namespace Planetarium
             {
                 calc.Calculate(Context);
             }
+            Calculated?.Invoke();
         }
 
         public List<List<Ephemeris>> GetEphemerides(CelestialObject body, double from, double to, double step, IEnumerable<string> categories, CancellationToken? cancelToken = null, IProgress<double> progress = null)

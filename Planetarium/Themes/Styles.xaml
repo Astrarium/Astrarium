@@ -3981,7 +3981,7 @@
                               Margin="1"
                               Background="{StaticResource HoverBrush}">
 
-                            <Border Visibility="{TemplateBinding Property=IsIndeterminate, Converter={StaticResource bool2VisibilityConverter}}" x:Name="DiagonalDecorator" Width="5000">
+                            <Border Visibility="{TemplateBinding Property=IsIndeterminate, Converter={StaticResource BoolToVisibilityConverter}}" x:Name="DiagonalDecorator" Width="5000">
                                 <Border.Background>
                                     <DrawingBrush TileMode="Tile" Stretch="None" Viewbox="0,0,1,1" Viewport="0,0,36,34" ViewportUnits="Absolute">
                                         <DrawingBrush.RelativeTransform>
