@@ -55,7 +55,7 @@
         </DockPanel>
 
         <ToolBar Grid.Row="1" ToolBarTray.IsLocked="True">
-            <ToggleButton Width="22" Height="22" VerticalAlignment="Bottom" Margin="2 0 0 0">
+            <ToggleButton Width="22" Height="22" VerticalAlignment="Bottom" Margin="2 0 0 0" SnapsToDevicePixels="True">
                 <Canvas Width="16" Height="16">
                     <Path Canvas.Left="1" Canvas.Top="1" Width="17.5" Height="17.5" Stretch="Fill" Fill="White" Data="F1 M 38,23.5C 38.8643,23.5 39.7109,23.5756 40.5337,23.7206L 42.6275,18.5381L 48.1901,20.787L 46.0964,25.9692C 47.6473,27.0149 48.9851,28.3527 50.0308,29.9036L 55.213,27.8099L 57.4619,33.3725L 52.2794,35.4664C 52.4244,36.2891 52.5,37.1357 52.5,38C 52.5,38.8643 52.4244,39.7109 52.2794,40.5337L 57.4619,42.6275L 55.213,48.1901L 50.0308,46.0964C 49.0795,47.5073 47.8865,48.7418 46.5112,49.7405L 48.7844,54.8462L 43.3041,57.2891L 41.0307,52.1828C 40.0533,52.3906 39.0394,52.5 38,52.5C 37.1357,52.5 36.2891,52.4244 35.4664,52.2794L 33.3725,57.462L 27.8099,55.213L 29.9036,50.0309C 28.3527,48.9851 27.0149,47.6473 25.9691,46.0964L 20.787,48.1901L 18.538,42.6275L 23.7206,40.5336C 23.5756,39.7109 23.5,38.8643 23.5,38C 23.5,37.1357 23.5756,36.2891 23.7206,35.4664L 18.538,33.3725L 20.787,27.8099L 25.9691,29.9036C 26.9205,28.4927 28.1135,27.2582 29.4889,26.2594L 27.2157,21.1537L 32.6959,18.7109L 34.9694,23.8172C 35.9468,23.6094 36.9606,23.5 38,23.5 Z M 38,28C 32.4771,28 28,32.4772 28,38C 28,43.5229 32.4771,48 38,48C 43.5228,48 48,43.5229 48,38C 48,32.4772 43.5228,28 38,28 Z ">
                         <Path.RenderTransform>
@@ -64,15 +64,161 @@
                     </Path>
                 </Canvas>
             </ToggleButton>
-            <ToggleButton Width="22" Height="22" VerticalAlignment="Bottom" Margin="2 0 0 0">
+            <ToggleButton Width="22" Height="22" VerticalAlignment="Bottom" Margin="2 0 0 0" SnapsToDevicePixels="True">
                 <Canvas Width="16" Height="16">
-                    <Path Canvas.Left="1" Canvas.Top="1" Width="17.5" Height="17.5" Stretch="Fill" Fill="White" Data="F1 M 38,23.5C 38.8643,23.5 39.7109,23.5756 40.5337,23.7206L 42.6275,18.5381L 48.1901,20.787L 46.0964,25.9692C 47.6473,27.0149 48.9851,28.3527 50.0308,29.9036L 55.213,27.8099L 57.4619,33.3725L 52.2794,35.4664C 52.4244,36.2891 52.5,37.1357 52.5,38C 52.5,38.8643 52.4244,39.7109 52.2794,40.5337L 57.4619,42.6275L 55.213,48.1901L 50.0308,46.0964C 49.0795,47.5073 47.8865,48.7418 46.5112,49.7405L 48.7844,54.8462L 43.3041,57.2891L 41.0307,52.1828C 40.0533,52.3906 39.0394,52.5 38,52.5C 37.1357,52.5 36.2891,52.4244 35.4664,52.2794L 33.3725,57.462L 27.8099,55.213L 29.9036,50.0309C 28.3527,48.9851 27.0149,47.6473 25.9691,46.0964L 20.787,48.1901L 18.538,42.6275L 23.7206,40.5336C 23.5756,39.7109 23.5,38.8643 23.5,38C 23.5,37.1357 23.5756,36.2891 23.7206,35.4664L 18.538,33.3725L 20.787,27.8099L 25.9691,29.9036C 26.9205,28.4927 28.1135,27.2582 29.4889,26.2594L 27.2157,21.1537L 32.6959,18.7109L 34.9694,23.8172C 35.9468,23.6094 36.9606,23.5 38,23.5 Z M 38,28C 32.4771,28 28,32.4772 28,38C 28,43.5229 32.4771,48 38,48C 43.5228,48 48,43.5229 48,38C 48,32.4772 43.5228,28 38,28 Z ">
-                        <Path.RenderTransform>
-                            <ScaleTransform ScaleX="0.8" ScaleY="0.8"/>
-                        </Path.RenderTransform>
+                    <Path Canvas.Left="-3" Canvas.Top="-3" Width="22" Height="22" Stretch="UniformToFill" Fill="White" Data="F1 M100,125z M0,0z M49.22,55.04C49.53,54.85,50.02,54.62,50.31,54.519L73.74,46 75.88,51.87 49.94,61.3C50.02,61.92 50.02,63.08 49.94,63.7 49.28,70.57 43.17,75.6 36.3,74.94 29.43,74.28 24.4,68.17 25.06,61.3 25.72,54.43 31.83,49.4 38.7,50.06L48.13,24.12 54,26.26 45.48,49.69C45.38,49.98 45.15,50.47 44.96,50.78 45.17,50.47 45.51,50.06 45.73,49.85L71.88,23.71 76.29,28.12 50.15,54.27C49.94,54.49,49.53,54.83,49.22,55.04z M43.75,62.5C43.75,59.05 40.95,56.25 37.5,56.25 34.05,56.25 31.25,59.05 31.25,62.5 31.25,65.95 34.05,68.75 37.5,68.75 40.95,68.75 43.75,65.95 43.75,62.5z">
                     </Path>
                 </Canvas>
             </ToggleButton>
+            <ToggleButton Width="22" Height="22" VerticalAlignment="Bottom" Margin="2 0 0 0" SnapsToDevicePixels="True">
+                <Canvas Width="16" Height="16">
+                    <Path Canvas.Left="1" Canvas.Top="1" Width="14" Height="14" Stretch="UniformToFill" Fill="White" Data="F1 M20,25z M0,0z M19.3,0.7C17.5,-1 14,0.8 11.8,2.2 11.3,2.1 10.6,2 10,2 5.6,2 2,5.6 2,10 2,10.6 2.1,11.3 2.2,11.9 -0.0999999999999996,15.4 -0.6,18 0.7,19.3 1.1,19.7 1.7,20 2.6,20 3.5,20 4.7,19.7 6.3,18.9 6.9,18.6 7.5,18.2 8.1,17.8 8.8,17.9 9.4,18 10,18 14.4,18 18,14.4 18,10 18,9.4 17.9,8.8 17.8,8.2 18.2,7.6 18.6,6.9 18.9,6.4 20.6,3 20,1.5 19.3,0.7z M5.4,17.1C3.2,18.2 2.3,18 2.1,17.9 1.8,17.6 1.9,16.4 3.1,14.2 3.8,15.3 4.7,16.2 5.8,16.9 5.7,16.9 5.5,17 5.4,17.1z M7.8,15.6C5.6,14.7 4,12.5 4,10 4,6.7 6.7,4 10,4 12.5,4 14.7,5.6 15.6,7.8 14.6,9.2 13.4,10.6 12,12 10.6,13.4 9.2,14.6 7.8,15.6z M10.6,16C11.5,15.2 12.5,14.4 13.4,13.5 14.3,12.6 15.2,11.6 16,10.7 15.7,13.4 13.4,15.7 10.6,16z M17.1,5.4C17,5.6 16.9,5.7 16.8,5.9 16.1,4.8 15.2,3.9 14.1,3.2 16.3,1.9 17.6,1.9 17.8,2.2 18,2.3 18.2,3.2 17.1,5.4z">
+                    </Path>
+                </Canvas>
+            </ToggleButton>
+            <ToggleButton Width="22" Height="22" VerticalAlignment="Bottom" Margin="2 0 0 0" SnapsToDevicePixels="True">
+                <Canvas Width="16" Height="16">
+                    <Path Stroke="White" StrokeThickness="0.3" Width="16" Height="16" Stretch="UniformToFill" Fill="White" Data="F1 M100,125z M0,0z M50,12.5C29.3,12.5 12.5,29.3 12.5,50 12.5,70.7 29.3,87.5 50,87.5 70.7,87.5 87.5,70.7 87.5,50 87.5,29.3 70.7,12.5 50,12.5z M54.5,19.1C55.5,19.2 56.1,20.3 55.7,21.2 54.7,23.4 52.5,25 50,25 47.5,25 45.2,23.4 44.3,21.2 43.9,20.3 44.5,19.2 45.5,19.1 47,18.9 48.5,18.8 50,18.8 51.5,18.8 53,18.9 54.5,19.1z M37.8,78.8C34.7,77.5 31.9,75.7 29.4,73.5 28.8,73 28.7,72.1 29.2,71.5 30.7,69.3 33.6,68.2 36.4,69.1 37.9,69.6 39.1,70.7 39.9,72.1 40.9,74.1 40.8,76.4 39.8,78.1 39.4,78.8 38.6,79.1 37.8,78.8z M50,81.2C49.2,81.2 48.3,81.2 47.5,81.1 46.5,81 45.8,80 46.2,79 46.7,77.7 46.9,76.3 46.9,74.9 46.9,68 41.3,62.4 34.4,62.4 31,62.4 27.9,63.8 25.6,66.1 24.9,66.8 23.7,66.7 23.1,65.8 20.3,61.1 18.8,55.7 18.8,49.9 18.8,37.7 25.8,27.1 36.1,21.9 36.9,21.5 38,21.9 38.3,22.8 40,27.6 44.7,31.1 50.1,31.1 55.5,31.1 60.2,27.6 61.9,22.8 62.2,21.9 63.2,21.5 64.1,21.9 74.3,27 81.4,37.6 81.4,49.9 81.2,67.2 67.2,81.2 50,81.2z" />
+                    <Path Stroke="White" StrokeThickness="0.3" Width="16" Height="16" Stretch="UniformToFill" Fill="White" Data="F1 M100,125z M0,0z M62.5,40.6C55.6,40.6 50,46.2 50,53.1 50,60 55.6,65.6 62.5,65.6 69.4,65.6 75,60 75,53.1 75,46.2 69.4,40.6 62.5,40.6z M62.5,59.4C59.1,59.4 56.3,56.6 56.3,53.2 56.3,49.8 59.1,47 62.5,47 65.9,47 68.7,49.8 68.7,53.2 68.7,56.6 65.9,59.4 62.5,59.4z"></Path>
+                    <Path Stroke="White" StrokeThickness="0.3" Width="16" Height="16" Stretch="UniformToFill" Fill="White" Data="F1 M100,125z M0,0z M36,35.6C34.5,34.7 32.6,35.2 31.7,36.7 30.8,38.2 31.3,40.1 32.8,41 33.8,41.6 34.4,42.6 34.4,43.7 34.4,45.4 33,46.8 31.3,46.8 30.7,46.8 30.2,46.7 29.7,46.4 28.2,45.5 26.3,46.1 25.4,47.6 24.5,49.1 25.1,51 26.6,51.9 28,52.7 29.6,53.1 31.3,53.1 36.5,53.1 40.7,48.9 40.7,43.7 40.6,40.4 38.8,37.3 36,35.6z"></Path>
+                </Canvas>
+            </ToggleButton>
+            
+            <ToggleButton Width="22" Height="22" VerticalAlignment="Bottom" Margin="2 0 0 0" SnapsToDevicePixels="True" ToolTip="Equatorial Grid">
+                <Canvas Width="16" Height="16">
+                    <Image Canvas.Left="2" Canvas.Top="2" Stretch="UniformToFill" Width="12" Height="12">
+                        <Image.Source>
+                            <DrawingImage>
+                                <DrawingImage.Drawing>
+                                    <DrawingGroup ClipGeometry="M0,0 V124.99999625 H99.999997 V0 H0 Z">
+                                        <DrawingGroup.Transform>
+                                            <TranslateTransform X="108.56974792480469" Y="23.345035552978516" />
+                                        </DrawingGroup.Transform>
+                                        <DrawingGroup Transform="-0.8660254,-0.5,-0.5,0.8660254,0,0">
+                                            <GeometryDrawing Geometry="F1 M99.999997,124.99999625z M0,0z M-66.105132,61.654461A21.23278,42.499748,0,0,1,-84.49326,40.404587A21.23278,42.499748,0,0,1,-84.49326,-2.0951616A21.23278,42.499748,0,0,1,-66.105133,-23.345036">
+                                                <GeometryDrawing.Pen>
+                                                    <Pen Brush="White" Thickness="6" StartLineCap="Round" EndLineCap="Round" LineJoin="Miter" MiterLimit="1" />
+                                                </GeometryDrawing.Pen>
+                                            </GeometryDrawing>
+                                        </DrawingGroup>
+                                        <DrawingGroup Transform="-0.8660254,-0.5,-0.5,0.8660254,0,0">
+                                            <GeometryDrawing Geometry="F1 M99.999997,124.99999625z M0,0z M-66.105132,61.654461A42.464619,42.499748,0,0,1,-102.88057,40.404587A42.464619,42.499748,0,0,1,-102.88057,-2.0951616A42.464619,42.499748,0,0,1,-66.105132,-23.345036">
+                                                <GeometryDrawing.Pen>
+                                                    <Pen Brush="White" Thickness="6" StartLineCap="Round" EndLineCap="Round" LineJoin="Miter" MiterLimit="1" />
+                                                </GeometryDrawing.Pen>
+                                            </GeometryDrawing>
+                                        </DrawingGroup>
+                                        <DrawingGroup Transform="-0.8660254,-0.5,-0.5,0.8660254,0,0">
+                                            <GeometryDrawing Geometry="F1 M99.999997,124.99999625z M0,0z M-66.105133,-23.345036A21.23278,42.499748,0,0,1,-44.872353,19.154713A21.23278,42.499748,0,0,1,-66.105132,61.654461">
+                                                <GeometryDrawing.Pen>
+                                                    <Pen Brush="White" Thickness="6" StartLineCap="Round" EndLineCap="Round" LineJoin="Miter" MiterLimit="1" />
+                                                </GeometryDrawing.Pen>
+                                            </GeometryDrawing>
+                                        </DrawingGroup>
+                                        <DrawingGroup Transform="-0.8660254,-0.5,-0.5,0.8660254,0,0">
+                                            <GeometryDrawing Geometry="F1 M99.999997,124.99999625z M0,0z M-32.905697,45.652874A33.199436,0.00094443891,0,0,1,-49.505415,45.653692A33.199436,0.00094443891,0,0,1,-82.704852,45.653692A33.199436,0.00094443891,0,0,1,-99.304569,45.652874">
+                                                <GeometryDrawing.Pen>
+                                                    <Pen Brush="White" Thickness="6" StartLineCap="Round" EndLineCap="Round" LineJoin="Miter" MiterLimit="1" />
+                                                </GeometryDrawing.Pen>
+                                            </GeometryDrawing>
+                                        </DrawingGroup>
+                                        <DrawingGroup Transform="-0.8660254,-0.5,-0.5,0.8660254,0,0">
+                                            <GeometryDrawing Geometry="F1 M99.999997,124.99999625z M0,0z M-24.706108,28.611797A41.399025,0.00094443891,0,0,1,-45.405621,28.612615A41.399025,0.00094443891,0,0,1,-86.804647,28.612615A41.399025,0.00094443891,0,0,1,-107.50416,28.611797">
+                                                <GeometryDrawing.Pen>
+                                                    <Pen Brush="White" Thickness="6" StartLineCap="Round" EndLineCap="Round" LineJoin="Miter" MiterLimit="1" />
+                                                </GeometryDrawing.Pen>
+                                            </GeometryDrawing>
+                                        </DrawingGroup>
+                                        <DrawingGroup Transform="-0.8660254,-0.5,-0.5,0.8660254,0,0">
+                                            <GeometryDrawing Geometry="F1 M99.999997,124.99999625z M0,0z M-24.706108,9.6976252A41.399025,0.00094443891,0,0,1,-45.405621,9.6984431A41.399025,0.00094443891,0,0,1,-86.804647,9.6984431A41.399025,0.00094443891,0,0,1,-107.50416,9.6976252">
+                                                <GeometryDrawing.Pen>
+                                                    <Pen Brush="White" Thickness="6" StartLineCap="Round" EndLineCap="Round" LineJoin="Miter" MiterLimit="1" />
+                                                </GeometryDrawing.Pen>
+                                            </GeometryDrawing>
+                                        </DrawingGroup>
+                                        <DrawingGroup Transform="-0.8660254,-0.5,-0.5,0.8660254,0,0">
+                                            <GeometryDrawing Geometry="F1 M99.999997,124.99999625z M0,0z M-32.905697,-7.343452A33.199436,0.00094443891,0,0,1,-49.505415,-7.3426341A33.199436,0.00094443891,0,0,1,-82.704852,-7.3426341A33.199436,0.00094443891,0,0,1,-99.304569,-7.343452">
+                                                <GeometryDrawing.Pen>
+                                                    <Pen Brush="White" Thickness="6" StartLineCap="Round" EndLineCap="Round" LineJoin="Miter" MiterLimit="1" />
+                                                </GeometryDrawing.Pen>
+                                            </GeometryDrawing>
+                                        </DrawingGroup>
+                                        <DrawingGroup Transform="-0.8660254,-0.5,-0.5,0.8660254,0,0">
+                                            <GeometryDrawing>
+                                                <GeometryDrawing.Pen>
+                                                    <Pen Brush="White" Thickness="6" StartLineCap="Round" EndLineCap="Round" LineJoin="Miter" MiterLimit="1" />
+                                                </GeometryDrawing.Pen>
+                                                <GeometryDrawing.Geometry>
+                                                    <EllipseGeometry RadiusX="42.4637" RadiusY="42.4997" Center="-66.1051,19.1547" />
+                                                </GeometryDrawing.Geometry>
+                                            </GeometryDrawing>
+                                        </DrawingGroup>
+                                    </DrawingGroup>
+                                </DrawingImage.Drawing>
+                            </DrawingImage>
+                        </Image.Source>
+                    </Image>
+                </Canvas>
+            </ToggleButton>
+
+            <ToggleButton Width="22" Height="22" VerticalAlignment="Bottom" Margin="2 0 0 0" SnapsToDevicePixels="True" ToolTip="Horizontal Grid">
+                <Canvas Width="16" Height="16" SnapsToDevicePixels="True">
+                    <Image Canvas.Left="2" Canvas.Top="2" Stretch="UniformToFill" Width="12" Height="12" SnapsToDevicePixels="True">
+                        <Image.Source>
+                            <DrawingImage>
+                                <DrawingImage.Drawing>
+                                    <DrawingGroup ClipGeometry="M0,0 V124.99999625 H99.999997 V0 H0 Z">
+                                        <GeometryDrawing Geometry="F1 M99.999997,124.99999625z M0,0z M50.717927,92.499748A21.23278,42.499748,0,0,1,32.329799,71.249875A21.23278,42.499748,0,0,1,32.329799,28.750126A21.23278,42.499748,0,0,1,50.717926,7.5002518">
+                                            <GeometryDrawing.Pen>
+                                                <Pen Brush="White" Thickness="6" StartLineCap="Round" EndLineCap="Round" LineJoin="Miter" MiterLimit="1" />
+                                            </GeometryDrawing.Pen>
+                                        </GeometryDrawing>
+                                        <GeometryDrawing Geometry="F1 M99.999997,124.99999625z M0,0z M50.717927,92.499748A42.464619,42.499748,0,0,1,13.942488,71.249875A42.464619,42.499748,0,0,1,13.942488,28.750126A42.464619,42.499748,0,0,1,50.717927,7.5002518">
+                                            <GeometryDrawing.Pen>
+                                                <Pen Brush="White" Thickness="6" StartLineCap="Round" EndLineCap="Round" LineJoin="Miter" MiterLimit="1" />
+                                            </GeometryDrawing.Pen>
+                                        </GeometryDrawing>
+                                        <GeometryDrawing Geometry="F1 M99.999997,124.99999625z M0,0z M50.717926,7.5002518A21.23278,42.499748,0,0,1,71.950706,50A21.23278,42.499748,0,0,1,50.717927,92.499748">
+                                            <GeometryDrawing.Pen>
+                                                <Pen Brush="White" Thickness="6" StartLineCap="Round" EndLineCap="Round" LineJoin="Miter" MiterLimit="1" />
+                                            </GeometryDrawing.Pen>
+                                        </GeometryDrawing>
+                                        <GeometryDrawing Geometry="F1 M99.999997,124.99999625z M0,0z M83.917362,76.498161A33.199436,0.00094443891,0,0,1,67.317644,76.498979A33.199436,0.00094443891,0,0,1,34.118207,76.498979A33.199436,0.00094443891,0,0,1,17.51849,76.498161">
+                                            <GeometryDrawing.Pen>
+                                                <Pen Brush="White" Thickness="6" StartLineCap="Round" EndLineCap="Round" LineJoin="Miter" MiterLimit="1" />
+                                            </GeometryDrawing.Pen>
+                                        </GeometryDrawing>
+                                        <GeometryDrawing Geometry="F1 M99.999997,124.99999625z M0,0z M92.116951,59.457081A41.399025,0.00094443891,0,0,1,71.417438,59.457899A41.399025,0.00094443891,0,0,1,30.018412,59.457899A41.399025,0.00094443891,0,0,1,9.31890110000001,59.457081">
+                                            <GeometryDrawing.Pen>
+                                                <Pen Brush="White" Thickness="6" StartLineCap="Round" EndLineCap="Round" LineJoin="Miter" MiterLimit="1" />
+                                            </GeometryDrawing.Pen>
+                                        </GeometryDrawing>
+                                        <GeometryDrawing Geometry="F1 M99.999997,124.99999625z M0,0z M92.116951,40.542912A41.399025,0.00094443891,0,0,1,71.417438,40.543729A41.399025,0.00094443891,0,0,1,30.018412,40.543729A41.399025,0.00094443891,0,0,1,9.31890110000001,40.542912">
+                                            <GeometryDrawing.Pen>
+                                                <Pen Brush="White" Thickness="6" StartLineCap="Round" EndLineCap="Round" LineJoin="Miter" MiterLimit="1" />
+                                            </GeometryDrawing.Pen>
+                                        </GeometryDrawing>
+                                        <GeometryDrawing Geometry="F1 M99.999997,124.99999625z M0,0z M83.917362,23.501835A33.199436,0.00094443891,0,0,1,67.317644,23.502653A33.199436,0.00094443891,0,0,1,34.118207,23.502653A33.199436,0.00094443891,0,0,1,17.51849,23.501835">
+                                            <GeometryDrawing.Pen>
+                                                <Pen Brush="White" Thickness="6" StartLineCap="Round" EndLineCap="Round" LineJoin="Miter" MiterLimit="1" />
+                                            </GeometryDrawing.Pen>
+                                        </GeometryDrawing>
+                                        <GeometryDrawing>
+                                            <GeometryDrawing.Pen>
+                                                <Pen Brush="White" Thickness="6" StartLineCap="Round" EndLineCap="Round" LineJoin="Miter" MiterLimit="1" />
+                                            </GeometryDrawing.Pen>
+                                            <GeometryDrawing.Geometry>
+                                                <EllipseGeometry RadiusX="42.4637" RadiusY="42.4997" Center="50.7179,50" />
+                                            </GeometryDrawing.Geometry>
+                                        </GeometryDrawing>
+                                    </DrawingGroup>
+                                </DrawingImage.Drawing>
+                            </DrawingImage>
+                        </Image.Source>
+                    </Image>
+                </Canvas>
+            </ToggleButton>
+
         </ToolBar>
 
         <DockPanel Grid.Row="2" LastChildFill="true">

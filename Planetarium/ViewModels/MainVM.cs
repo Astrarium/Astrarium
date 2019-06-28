@@ -20,7 +20,6 @@ namespace Planetarium.ViewModels
         private readonly Sky sky;
         private readonly ISkyMap map;
         private readonly IViewManager viewManager;
-        private readonly ITracksProvider tracksProvider;
         private readonly ISettings settings;
 
         public bool FullScreen { get; private set; }
@@ -89,10 +88,9 @@ namespace Planetarium.ViewModels
             }
         }
 
-        public MainVM(Sky sky, ITracksProvider tracksProvider, ISkyMap map, ISettings settings, IViewManager viewManager)
+        public MainVM(Sky sky, ISkyMap map, ISettings settings, IViewManager viewManager)
         {
             this.sky = sky;
-            this.tracksProvider = tracksProvider;
             this.map = map;
             this.settings = settings;
             this.viewManager = viewManager;

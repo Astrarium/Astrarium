@@ -34,7 +34,6 @@ namespace Planetarium.Calculators
             {
                 comets[i].Horizontal = c.Get(Horizontal, i);
                 comets[i].Magnitude = c.Get(Magnitude, i);
-                comets[i].TailLength = c.Get(Appearance, i).Tail;
                 comets[i].Semidiameter = c.Get(Appearance, i).Coma;
                 comets[i].TailHorizontal = c.Get(TailHorizontal, i);
             }
