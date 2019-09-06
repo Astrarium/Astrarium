@@ -43,6 +43,15 @@ namespace Planetarium
         /// <param name="tokenSource">Cancellation token source instance. Use <see cref="CancellationTokenSource.Cancel()"/> to close the window.</param>
         /// <param name="progress">Progress instance. Can be null for indeterminate progress bar.</param>
         void ShowProgress(string caption, string text, CancellationTokenSource tokenSource, Progress<double> progress = null);
+
+        /// <summary>
+        /// Shows file save dialog.
+        /// </summary>
+        /// <param name="caption">Dialog title</param>
+        /// <param name="fileName">Default file name</param>
+        /// <param name="extension">Default file extension</param>
+        /// <param name="filter">Alowed files extensions filter</param>
+        /// <returns>File name and path, if user pressed OK, null otherwise.</returns>
         string ShowSaveFileDialog(string caption, string fileName, string extension, string filter);
     }
 }

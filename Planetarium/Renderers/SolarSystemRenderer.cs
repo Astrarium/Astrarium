@@ -72,7 +72,7 @@ namespace Planetarium.Renderers
             // Flag indicated Sun is already rendered
             bool isSunRendered = false;
 
-            // Get all planets esxept Earth, and sort them by distance from Earth (most distant planet is first)
+            // Get all planets except Earth, and sort them by distance from Earth (most distant planet is first)
             var planets = planetsProvider.Planets
                 .Where(p => p.Number != Planet.EARTH)
                 .OrderByDescending(p => p.Ecliptical.Distance);

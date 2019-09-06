@@ -568,7 +568,7 @@ namespace Planetarium.Calculators
 
         public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)
         {
-            var s1 = planets.Where(p => p.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
+            var s1 = planets.Where(p => p.Number != Planet.EARTH && p.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
                 .Select(p => new SearchResultItem(p, p.Name));
 
             var s2 = jupiterMoons.Where(m => m.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))

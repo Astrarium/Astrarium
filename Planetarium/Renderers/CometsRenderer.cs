@@ -27,7 +27,7 @@ namespace Planetarium.Renderers
             this.settings = settings;
 
             fontNames = new Font("Arial", 8);
-            brushNames = new SolidBrush(Color.FromArgb(10, 44, 37));
+            brushNames = new SolidBrush(Color.FromArgb(78, 84, 99));
         }
 
         public override void Render(IMapContext map)
@@ -44,36 +44,49 @@ namespace Planetarium.Renderers
 
                 foreach (var c in comets)
                 {
-                    double ad = Angle.Separation(c.Horizontal, map.Center);
+                    float size = map.GetPointSize(c.Magnitude, maxDrawingSize: 3);
 
-                    if ((!isGround || c.Horizontal.Altitude + c.Semidiameter / 3600 > 0) &&
-                        ad < coeff * map.ViewAngle + c.Semidiameter / 3600)
+                    if ((int)size > 0)
                     {
-                        float diam = map.GetDiskSize(c.Semidiameter);
+                        double ad = Angle.Separation(c.Horizontal, map.Center);
 
-                        if (diam > 5)
+                        if ((!isGround || c.Horizontal.Altitude + c.Semidiameter / 3600 > 0) &&
+                            ad < coeff * map.ViewAngle + c.Semidiameter / 3600)
                         {
+                            float diam = map.GetDiskSize(c.Semidiameter);
+
                             PointF p = map.Project(c.Horizontal);
-                            PointF pTail = map.Project(c.TailHorizontal);
+                            PointF t = map.Project(c.TailHorizontal);
 
-                            g.DrawLine(Pens.Azure, p, pTail);
-                            g.FillEllipse(Brushes.Azure, p.X - diam / 2, p.Y - diam / 2, diam, diam);
-                        }
-                        else
-                        {
-                            // comet should be rendered as point
-                            float size = map.GetPointSize(c.Magnitude, maxDrawingSize: 3);
-                            if ((int)size > 0)
+                            double tail = Geometry.DistanceBetweenPoints(p, t);
+
+                            if (diam > 5 || tail > 10)
                             {
-                                PointF p = map.Project(c.Horizontal);
-
-                                if (!map.IsOutOfScreen(p))
+                                using (var gpComet = new GraphicsPath())
                                 {
-                                    g.FillEllipse(Brushes.White, p.X - size / 2, p.Y - size / 2, size, size);
-                                    map.DrawObjectCaption(fontNames, brushNames, c.Name, p, size);
-                                    map.AddDrawnObject(c, p);
-                                    continue;
+                                    double rotation = Math.Atan2(t.Y - p.Y, t.X - p.X) + Math.PI / 2;
+                                    gpComet.StartFigure();
+                                    gpComet.AddArc(p.X - diam / 2, p.Y - diam / 2, diam, diam, (float)Angle.ToDegrees(rotation), 180);
+                                    gpComet.AddLines(new PointF[] { gpComet.PathPoints[gpComet.PathPoints.Length - 1], t, gpComet.PathPoints[0] });
+                                    gpComet.CloseAllFigures();
+                                    using (var brushComet = new PathGradientBrush(gpComet))
+                                    {
+                                        brushComet.CenterPoint = p;
+                                        brushComet.CenterColor = Color.FromArgb(100, 191, 209, 255);
+                                        brushComet.SurroundColors = gpComet.PathPoints.Select(pp => Color.Transparent).ToArray();
+                                        g.FillPath(brushComet, gpComet);
+                                    }
                                 }
+
+                                map.DrawObjectCaption(fontNames, brushNames, c.Name, p, diam);
+                                map.AddDrawnObject(c, p);
+                            }
+                            else if (!map.IsOutOfScreen(p))
+                            {
+                                g.FillEllipse(Brushes.White, p.X - size / 2, p.Y - size / 2, size, size);
+                                map.DrawObjectCaption(fontNames, brushNames, c.Name, p, size);
+                                map.AddDrawnObject(c, p);
+                                continue;
                             }
                         }
                     }

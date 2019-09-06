@@ -113,8 +113,8 @@ namespace Planetarium.Calculators
             e.Add("Parallax", (c, p) => c.Get(Parallax, comets.IndexOf(p)));
             e.Add("Horizontal.Altitude", (c, p) => c.Get(Horizontal, comets.IndexOf(p)).Altitude);
             e.Add("Horizontal.Azimuth", (c, p) => c.Get(Horizontal, comets.IndexOf(p)).Azimuth);
-            e.Add("EquatorialT.Alpha", (c, p) => c.Get(EquatorialT, comets.IndexOf(p)).Alpha);
-            e.Add("EquatorialT.Delta", (c, p) => c.Get(EquatorialT, comets.IndexOf(p)).Delta);
+            e.Add("Equatorial.Alpha", (c, p) => c.Get(EquatorialT, comets.IndexOf(p)).Alpha);
+            e.Add("Equatorial.Delta", (c, p) => c.Get(EquatorialT, comets.IndexOf(p)).Delta);
             e.Add("Equatorial0.Alpha", (c, p) => c.Get(EquatorialJ2000, comets.IndexOf(p)).Alpha);
             e.Add("Equatorial0.Delta", (c, p) => c.Get(EquatorialJ2000, comets.IndexOf(p)).Delta);
             e.Add("Equatorial0T.Alpha", (c, p) => c.Get(EquatorialJ2000T, comets.IndexOf(p)).Alpha).WithFormatter(Formatters.RA);
