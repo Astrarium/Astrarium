@@ -1,4 +1,5 @@
 ﻿using ADK;
+using Planetarium.Types;
 
 namespace Planetarium.Calculators
 {

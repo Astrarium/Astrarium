@@ -67,12 +67,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="AstroEventsConfig.cs" />
     <Compile Include="Calculators\AsteroidsCalc.cs" />
     <Compile Include="Calculators\CometsCalc.cs" />
     <Compile Include="Calculators\CometsReader.cs" />
     <Compile Include="Calculators\AsteroidsReader.cs" />
-    <Compile Include="Calculators\BaseCalc.cs" />
     <Compile Include="Calculators\ConstellationsCalc.cs" />
     <Compile Include="Calculators\DeepSkyCalc.cs" />
     <Compile Include="Calculators\ILunarCalc.cs" />
@@ -87,7 +85,6 @@
     <Compile Include="Calculators\StarsCalc.cs" />
     <Compile Include="Calculators\StarsReader.cs" />
     <Compile Include="Calculators\TrackCalc.cs" />
-    <Compile Include="Calculators\Tycho2Calc.cs" />
     <Compile Include="CelestialGrid.cs" />
     <Compile Include="Config\ControlBuilders\GRSSettingBuilder.cs" />
     <Compile Include="Config\ControlBuilders\BooleanSettingControlBuilder.cs" />
@@ -98,7 +95,6 @@
     <Compile Include="Config\ControlBuilders\FontSettingControlBuilder.cs" />
     <Compile Include="Config\ControlBuilders\SettingControlBuilder.cs" />
     <Compile Include="Config\ControlBuilders\StringSettingControlBuilder.cs" />
-    <Compile Include="Config\ISettings.cs" />
     <Compile Include="Config\ISettingsConfig.cs" />
     <Compile Include="Config\SavedSettings.cs" />
     <Compile Include="Config\SettingConfigItem.cs" />
@@ -111,34 +107,23 @@
     <Compile Include="Controls\PlaceholderedTextBox.cs" />
     <Compile Include="Controls\TimeSpanPicker.cs" />
     <Compile Include="Ephemeris.cs" />
-    <Compile Include="EphemerisConfig.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="Formatting.cs" />
     <Compile Include="Geometry.cs" />
     <Compile Include="IEphemerisProvider.cs" />
-    <Compile Include="IInfoProvider.cs" />
-    <Compile Include="IMapContext.cs" />
     <Compile Include="ISkyMap.cs" />
     <Compile Include="Objects\Comet.cs" />
     <Compile Include="Objects\Asteroid.cs" />
-    <Compile Include="Objects\CelestialObject.cs" />
-    <Compile Include="Objects\CelestialPoint.cs" />
     <Compile Include="Objects\Constellation.cs" />
     <Compile Include="Objects\DeepSky.cs" />
-    <Compile Include="Objects\IMovingObject.cs" />
     <Compile Include="Objects\Moon.cs" />
     <Compile Include="Objects\Planet.cs" />
     <Compile Include="Objects\JupiterMoon.cs" />
-    <Compile Include="Objects\SizeableCelestialObject.cs" />
     <Compile Include="Objects\Star.cs" />
     <Compile Include="Objects\Sun.cs" />
-    <Compile Include="Objects\Tycho2Star.cs" />
     <Compile Include="Projections\ArcProjection.cs" />
     <Compile Include="Projections\IProjection.cs" />
     <Compile Include="Projections\SinProjection.cs" />
     <Compile Include="Renderers\CometsRenderer.cs" />
-    <Compile Include="Renderers\Tycho2Renderer.cs" />
-    <Compile Include="Renderers\BaseRenderer.cs" />
     <Compile Include="Renderers\CelestialGridRenderer.cs" />
     <Compile Include="Renderers\ConstellationsRenderer.cs" />
     <Compile Include="Renderers\DeepSkyRenderer.cs" />
@@ -154,7 +139,6 @@
     <Compile Include="Renderers\StarsRenderer.cs" />
     <Compile Include="Renderers\TrackRenderer.cs" />
     <Compile Include="Sky.cs" />
-    <Compile Include="SkyContext.cs" />
     <Compile Include="SkyMap.cs" />
     <Compile Include="SkyView.cs" />
     <Compile Include="SkyView.Designer.cs">
@@ -408,6 +392,10 @@
     <ProjectReference Include="..\ADK\ADK.csproj">
       <Project>{0da17a1c-068e-4cce-82a4-646e137cc121}</Project>
       <Name>ADK</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Planetarium.Types\Planetarium.Types.csproj">
+      <Project>{098854d6-dfd9-4a4a-8657-ce0323db0db2}</Project>
+      <Name>Planetarium.Types</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

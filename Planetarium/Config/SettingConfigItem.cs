@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Planetarium.Config.ControlBuilders;
+using Planetarium.Types;
 
 namespace Planetarium.Config
 {

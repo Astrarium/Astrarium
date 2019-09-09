@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 
-namespace Planetarium.Config
+namespace Planetarium.Types
 {
     /// <summary>
     /// Defines methods to access to application settings

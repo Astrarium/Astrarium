@@ -2,6 +2,7 @@
 using Planetarium.Objects;
 using Planetarium.Projections;
 using Planetarium.Renderers;
+using Planetarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

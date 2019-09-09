@@ -1,4 +1,5 @@
 ﻿using Planetarium.Objects;
+using Planetarium.Types;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;

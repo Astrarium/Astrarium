@@ -1,14 +1,13 @@
-﻿using Planetarium.Calculators;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Planetarium
+namespace Planetarium.Types
 {
     public class AstroEventsConfig : IEnumerable<AstroEventsConfigItem>
     {
-        internal List<AstroEventsConfigItem> Items { get; } = new List<AstroEventsConfigItem>();
+        protected List<AstroEventsConfigItem> Items { get; } = new List<AstroEventsConfigItem>();
 
         public IEnumerator<AstroEventsConfigItem> GetEnumerator()
         {

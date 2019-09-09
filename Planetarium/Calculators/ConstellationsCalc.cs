@@ -6,6 +6,7 @@ using System.Text;
 using System.Linq;
 using Planetarium.Objects;
 using ADK;
+using Planetarium.Types;
 
 namespace Planetarium.Calculators
 {

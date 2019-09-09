@@ -4,9 +4,11 @@ using Planetarium.Calculators;
 using Planetarium.Config;
 using Planetarium.Config.ControlBuilders;
 using Planetarium.Renderers;
+using Planetarium.Types;
 using Planetarium.ViewModels;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.IO;
@@ -119,7 +121,23 @@ namespace Planetarium
                 new Date(DateTime.Now).ToJulianEphemerisDay(),
                 new CrdsGeographical(settings.Get<CrdsGeographical>("ObserverLocation")));
 
-            var alltypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes());
+            // TODO: consider more proper way to load plugins
+            string homeFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            IEnumerable<string> pluginPaths = Directory.EnumerateFiles(homeFolder, "*.dll");
+
+            foreach (string path in pluginPaths)
+            {
+                try
+                {
+                    Assembly.LoadFrom(path);
+                }
+                catch (Exception ex)
+                {
+                    // TODO: log
+                }
+            }
+
+            var alltypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes());
 
             // collect all calculators implementations
             // TODO: to support plugin system, we need to load assemblies 

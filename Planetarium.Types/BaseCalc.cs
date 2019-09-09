@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Planetarium.Calculators
+namespace Planetarium.Types
 {
     /// <summary>
     /// Base class for all modules which perform astronomical calculations.

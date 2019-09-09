@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using Planetarium.Types;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

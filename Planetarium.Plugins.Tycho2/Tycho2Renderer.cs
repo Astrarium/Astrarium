@@ -1,18 +1,15 @@
 ﻿using ADK;
-using Planetarium.Calculators;
-using Planetarium.Config;
-using Planetarium.Objects;
+using Planetarium.Renderers;
+using Planetarium.Types;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Planetarium.Renderers
+namespace Planetarium.Plugins.Tycho2
 {
     public class Tycho2Renderer : BaseRenderer
     {

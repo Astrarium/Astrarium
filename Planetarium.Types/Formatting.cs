@@ -5,7 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 
-namespace Planetarium
+namespace Planetarium.Types
 {
     public interface IEphemFormatter
     {

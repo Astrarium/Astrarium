@@ -1,5 +1,6 @@
 ﻿using ADK;
 using Planetarium.Config;
+using Planetarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Drawing;

@@ -2,6 +2,7 @@
 using Planetarium.Calculators;
 using Planetarium.Config;
 using Planetarium.Objects;
+using Planetarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

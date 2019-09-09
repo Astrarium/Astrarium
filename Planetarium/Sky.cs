@@ -1,5 +1,6 @@
 ﻿using Planetarium.Calculators;
 using Planetarium.Objects;
+using Planetarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -158,7 +159,7 @@ namespace Planetarium
 
         public ICollection<string> GetEventsCategories()
         {
-            return EventConfigs.SelectMany(c => c.Items).Select(i => i.Key).Distinct().ToArray();
+            return EventConfigs.SelectMany(c => c).Select(i => i.Key).Distinct().ToArray();
         }
 
         public ICollection<string> GetEphemerisCategories(CelestialObject body)
@@ -185,7 +186,7 @@ namespace Planetarium
             };
 
             var events = new List<AstroEvent>();
-            foreach (var item in EventConfigs.SelectMany(c => c.Items).Where(i => categories.Contains(i.Key)))
+            foreach (var item in EventConfigs.SelectMany(c => c).Where(i => categories.Contains(i.Key)))
             {
                 if (cancelToken != null && cancelToken.Value.IsCancellationRequested)
                 {

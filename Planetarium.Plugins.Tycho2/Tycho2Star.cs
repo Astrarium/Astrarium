@@ -1,11 +1,12 @@
 ﻿using ADK;
+using Planetarium.Objects;
 
-namespace Planetarium.Objects
+namespace Planetarium.Plugins.Tycho2
 {
     /// <summary>
     /// Represents single star from Tycho2 star catalog
     /// </summary>
-    public class Tycho2Star :  CelestialObject
+    public class Tycho2Star : CelestialObject
     {
         /// <summary>
         /// Equatorial coordinates of the star at current epoch
