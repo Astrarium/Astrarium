@@ -7,5 +7,5 @@ using System.Threading.Tasks;
 namespace Planetarium.Controls
 {
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-    public class DependecyInjectionAttribute : Attribute { }
+    public class DependencyInjectionAttribute : Attribute { }
 }

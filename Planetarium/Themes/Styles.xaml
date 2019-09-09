@@ -1406,23 +1406,32 @@
                                           VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                     </Border>
                     <ControlTemplate.Triggers>
-                        <MultiTrigger>
+                        <!--<MultiTrigger>
                             <MultiTrigger.Conditions>
                                 <Condition Property="IsChecked" Value="false"/>
                                 <Condition Property="IsMouseOver" Value="true"/>
                             </MultiTrigger.Conditions>
-                        </MultiTrigger>
-                        <Trigger Property="IsMouseOver" Value="true">
-                            <Setter Property="Background" Value="{StaticResource MouseOverButtonBackground}"/>
-                            <Setter Property="Foreground" Value="{StaticResource MouseOverButtonForeground}"/>
-                        </Trigger>
+                        </MultiTrigger>-->
+
+
                         <Trigger Property="IsEnabled" Value="false">
                             <Setter Property="Foreground" Value="{StaticResource DisabledButtonForeground}"/>
                             <Setter Property="Background" Value="{StaticResource DisabledButtonBackground}"/>
                         </Trigger>
-                        <Trigger Property="IsChecked" Value="true">
+
+                        <Trigger Property="IsChecked" Value="false">
                             <Setter Property="Background" Value="{StaticResource PressedButtonBackground}"/>
                             <Setter Property="Foreground" Value="{StaticResource ButtonForeground}"/>
+                        </Trigger>
+
+                        <Trigger Property="IsChecked" Value="true">
+                            <Setter Property="Background" Value="{StaticResource ButtonBackground}"/>
+                            <Setter Property="Foreground" Value="{StaticResource ButtonForeground}"/>
+                        </Trigger>
+
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter Property="Background" Value="{StaticResource MouseOverButtonBackground}"/>
+                            <Setter Property="Foreground" Value="{StaticResource MouseOverButtonForeground}"/>
                         </Trigger>
 
                     </ControlTemplate.Triggers>

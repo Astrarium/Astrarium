@@ -37,8 +37,10 @@ namespace Planetarium.Renderers
             bool isGround = settings.Get<bool>("Ground");
             bool useTextures = settings.Get<bool>("UseTextures");
             double coeff = map.DiagonalCoefficient();
+            bool drawAsteroids = settings.Get<bool>("Asteroids");
+            bool drawLabels = settings.Get<bool>("AsteroidsLabels");
 
-            //if (settings.Get<bool>("Asteroids"))
+            if (drawAsteroids)
             {
                 var asteroids = allAsteroids.Where(a => Angle.Separation(map.Center, a.Horizontal) < map.ViewAngle * coeff);
 
@@ -84,7 +86,11 @@ namespace Planetarium.Renderers
                                 map.Graphics.FillEllipse(new SolidBrush(Color.FromArgb(100, 100, 100)), p.X - diam / 2, p.Y - diam / 2, diam, diam);
                             }
 
-                            map.DrawObjectCaption(fontNames, brushNames, a.Name, p, diam);
+                            if (drawLabels)
+                            {
+                                map.DrawObjectCaption(fontNames, brushNames, a.Name, p, diam);
+                            }
+
                             map.AddDrawnObject(a, p);
                             continue;
                         }
@@ -98,7 +104,12 @@ namespace Planetarium.Renderers
                             if (!map.IsOutOfScreen(p))
                             {
                                 g.FillEllipse(Brushes.White, p.X - size / 2, p.Y - size / 2, size, size);
-                                map.DrawObjectCaption(fontNames, brushNames, a.Name, p, size);
+
+                                if (drawLabels)
+                                {
+                                    map.DrawObjectCaption(fontNames, brushNames, a.Name, p, size);
+                                }
+
                                 map.AddDrawnObject(a, p);
                                 continue;
                             }

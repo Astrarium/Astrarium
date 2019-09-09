@@ -30,10 +30,10 @@ namespace Planetarium.Controls
                 DefaultUpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
             });
 
-        [DependecyInjection]
+        [DependencyInjection]
         public ISearcher Searcher { get; private set; }
 
-        [DependecyInjection]
+        [DependencyInjection]
         public IViewManager ViewManager { get; private set; }
 
         public string SelectedBodyName

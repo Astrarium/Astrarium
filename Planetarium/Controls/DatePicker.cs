@@ -97,7 +97,7 @@ namespace Planetarium.Controls
             typeof(string), 
             typeof(DatePicker), new PropertyMetadata("01 Jan 2000"));
 
-        [DependecyInjection]
+        [DependencyInjection]
         public IViewManager ViewManager { get; private set; }
 
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)

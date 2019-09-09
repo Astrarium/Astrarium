@@ -12,6 +12,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace Planetarium.ViewModels
 {
@@ -50,6 +52,8 @@ namespace Planetarium.ViewModels
         public ObservableCollection<MenuItemVM> SelectedObjectsMenuItems { get; private set; } = new ObservableCollection<MenuItemVM>();
         public string SelectedObjectName { get; private set; }
 
+        public ObservableCollection<ToolbarItemVM> ToolbarItems { get; private set; } = new ObservableCollection<ToolbarItemVM>();
+
         public class MenuItemVM
         {
             public bool IsChecked { get; set; }
@@ -59,6 +63,8 @@ namespace Planetarium.ViewModels
             public object CommandParameter { get; set; }
             public ObservableCollection<MenuItemVM> SubItems { get; set; }
         }
+
+
 
         public class ObservableUniqueItemsCollection<T> : ObservableCollection<T>
         {
@@ -121,10 +127,20 @@ namespace Planetarium.ViewModels
             sky.Calculated += () => map.Invalidate();
             map.SelectedObjectChanged += Map_SelectedObjectChanged;
             map.ViewAngleChanged += Map_ViewAngleChanged;
+            settings.SettingValueChanged += (s, v) => map.Invalidate();
 
             Sky_ContextChanged();
             Map_SelectedObjectChanged(map.SelectedObject);
             Map_ViewAngleChanged(map.ViewAngle);
+
+
+            ToolbarItems.Add(new ToolbarToggleButtonVM("Equatorial Grid", "IconEquatorialGrid", settings, "EquatorialGrid"));
+            ToolbarItems.Add(new ToolbarToggleButtonVM("Horizontal Grid", "IconHorizontalGrid", settings, "HorizontalGrid"));
+            ToolbarItems.Add(new ToolbarToggleButtonVM("Ground", "IconGround", settings, "Ground"));
+            ToolbarItems.Add(new ToolbarToggleButtonVM("Planets", "IconPlanet", settings, "Planets"));
+            ToolbarItems.Add(new ToolbarToggleButtonVM("Asteroids","IconAsteroid",settings, "Asteroids"));
+            ToolbarItems.Add(new ToolbarToggleButtonVM("Comets", "IconComet", settings, "Comets"));
+            ToolbarItems.Add(new ToolbarToggleButtonVM("Deep Sky Objects","IconDeepSky", settings, "DeepSky"));
         }
 
         private void Sky_ContextChanged()
@@ -446,9 +462,7 @@ namespace Planetarium.ViewModels
 
         private void ChangeSettings()
         {
-            settings.SettingValueChanged += Settings_OnSettingChanged;
             viewManager.ShowDialog<SettingsVM>();
-            settings.SettingValueChanged -= Settings_OnSettingChanged;
         }
 
         private void CenterOnObject(CelestialObject body)
@@ -595,11 +609,6 @@ namespace Planetarium.ViewModels
         {
             FullScreen = isFullScreen;
             NotifyPropertyChanged(nameof(FullScreen));
-        }
-
-        private void Settings_OnSettingChanged(string settingName, object settingValue)
-        {
-            map.Invalidate();
         }
     }
 }

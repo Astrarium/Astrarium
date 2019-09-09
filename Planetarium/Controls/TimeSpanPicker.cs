@@ -54,7 +54,7 @@ namespace Planetarium.Controls
             typeof(TimeSpanPicker),
             new FrameworkPropertyMetadata(TimeSpanToString(TimeSpan.FromDays(1))));
 
-        [DependecyInjection]
+        [DependencyInjection]
         public IViewManager ViewManager { get; private set; }
 
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)

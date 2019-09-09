@@ -6,11 +6,16 @@ using Planetarium.Config.ControlBuilders;
 using Planetarium.Renderers;
 using Planetarium.ViewModels;
 using System;
+using System.Collections;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Resources;
 using System.Windows;
+using System.Windows.Baml2006;
+using System.Xaml;
 
 namespace Planetarium
 {
@@ -80,6 +85,7 @@ namespace Planetarium
 
             settingsConfig.Add("UseTextures", true).WithSection("Misc");
 
+            settingsConfig.Add("Planets", true).WithSection("Planets");
             settingsConfig.Add("JupiterMoonsShadowOutline", true).WithSection("Planets");
             settingsConfig.Add("ShowRotationAxis", false).WithSection("Planets");
 
@@ -92,6 +98,11 @@ namespace Planetarium
                 })
                 .WithSection("Planets")
                 .WithBuilder(typeof(GRSSettingBuilder));
+
+            settingsConfig.Add("Comets", true).WithSection("Comets");
+            settingsConfig.Add("CometsLabels", true).WithSection("Comets");
+            settingsConfig.Add("Asteroids", true).WithSection("Asteroids");
+            settingsConfig.Add("AsteroidsLabels", true).WithSection("Asteroids");
 
             settingsConfig.Add("ObserverLocation", new CrdsGeographical(-44, 56.3333, +3, 80, "Europe/Moscow", "Nizhny Novgorod"));
 
@@ -173,6 +184,22 @@ namespace Planetarium
 
             kernel.Bind<ISkyMap>().ToConstant(new SkyMap(context, renderers)).InSingletonScope();
             kernel.Bind<IViewManager>().ToConstant(new ViewManager(t => kernel.Get(t))).InSingletonScope();
+        }
+
+        private static T LoadBaml<T>(Stream stream)
+        {
+            var reader = new Baml2006Reader(stream);
+            var writer = new XamlObjectWriter(reader.SchemaContext);
+            while (reader.Read())
+            {
+                writer.WriteNode(reader);
+            }
+
+            if (writer.Result is T)
+            {
+                return (T)writer.Result;
+            }
+            else { return default(T); }
         }
 
     }

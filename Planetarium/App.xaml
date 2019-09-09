@@ -7,6 +7,7 @@
                 <ResourceDictionary Source="Themes\Converters.xaml" />
                 <ResourceDictionary Source="Themes\Styles.xaml" />
                 <ResourceDictionary Source="Themes\WindowStyle.xaml" />
+                <ResourceDictionary Source="Themes\Images.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

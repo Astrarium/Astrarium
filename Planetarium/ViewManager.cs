@@ -119,7 +119,7 @@ namespace Planetarium
 
         private void InjectProperties(DependencyObject depObj)
         {
-            var injectionProps = depObj.GetType().GetProperties().Where(p => p.GetCustomAttribute<DependecyInjectionAttribute>() != null);
+            var injectionProps = depObj.GetType().GetProperties().Where(p => p.GetCustomAttribute<DependencyInjectionAttribute>() != null);
             foreach (var prop in injectionProps)
             {
                 var value = typeFactory(prop.PropertyType);

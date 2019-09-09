@@ -1,11 +1,12 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace Planetarium.Config
 {
     /// <summary>
     /// Defines methods to access to application settings
     /// </summary>
-    public interface ISettings
+    public interface ISettings : INotifyPropertyChanged
     {
         /// <summary>
         /// Gets setting with specified name and casts its value to desired type.

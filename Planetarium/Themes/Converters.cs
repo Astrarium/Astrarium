@@ -246,4 +246,17 @@ namespace Planetarium.Themes
             throw new NotImplementedException();
         }
     }
+
+    public class ImageKeyToImageConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return Application.Current.Resources[value];
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

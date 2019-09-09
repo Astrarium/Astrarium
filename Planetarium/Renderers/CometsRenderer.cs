@@ -37,8 +37,10 @@ namespace Planetarium.Renderers
             bool isGround = settings.Get<bool>("Ground");
             bool useTextures = settings.Get<bool>("UseTextures");
             double coeff = map.DiagonalCoefficient();
+            bool drawComets = settings.Get<bool>("Comets");
+            bool drawLabels = settings.Get<bool>("AsteroidsLabels");
 
-            //if (settings.Get<bool>("Comets"))
+            if (drawComets)
             {
                 var comets = allComets.Where(a => Angle.Separation(map.Center, a.Horizontal) < map.ViewAngle * coeff);
 
@@ -78,13 +80,19 @@ namespace Planetarium.Renderers
                                     }
                                 }
 
-                                map.DrawObjectCaption(fontNames, brushNames, c.Name, p, diam);
+                                if (drawLabels)
+                                {
+                                    map.DrawObjectCaption(fontNames, brushNames, c.Name, p, diam);
+                                }
                                 map.AddDrawnObject(c, p);
                             }
                             else if (!map.IsOutOfScreen(p))
                             {
                                 g.FillEllipse(Brushes.White, p.X - size / 2, p.Y - size / 2, size, size);
-                                map.DrawObjectCaption(fontNames, brushNames, c.Name, p, size);
+                                if (drawLabels)
+                                {
+                                    map.DrawObjectCaption(fontNames, brushNames, c.Name, p, size);
+                                }
                                 map.AddDrawnObject(c, p);
                                 continue;
                             }

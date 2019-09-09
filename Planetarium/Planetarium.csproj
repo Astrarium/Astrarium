@@ -171,6 +171,7 @@
     <Compile Include="Themes\Converters.cs" />
     <Compile Include="IViewManager.cs" />
     <Compile Include="Commands.cs" />
+    <Compile Include="ViewModels\ToolbarItemVM.cs" />
     <Compile Include="ViewModels\TracksListVM.cs" />
     <Compile Include="ViewModels\PhenomenaSettingsVM.cs" />
     <Compile Include="ViewModels\EphemerisSettingsVM.cs" />
@@ -235,6 +236,10 @@
     <Compile Include="Views\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="Themes\Images.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Themes\Converters.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

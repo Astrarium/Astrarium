@@ -296,7 +296,12 @@ namespace Planetarium.Renderers
         }
 
         private void RenderPlanet(IMapContext map, Planet planet)
-        {            
+        {
+            if (!settings.Get<bool>("Planets"))
+            {
+                return;
+            }
+
             if (planet.Number == Planet.JUPITER)
             {
                 // render moons behind Jupiter
