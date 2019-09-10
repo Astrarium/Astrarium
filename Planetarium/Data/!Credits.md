@@ -44,3 +44,5 @@ Application uses icons and/or theirs modifications from following sources:
 * Sun icon created by [Lucid Formation](https://thenounproject.com/lucidformation) from the Noun Project: <https://thenounproject.com/search/?q=horizon&i=126195> under the the Creative Commons Attribution license
 
 * Galaxy icon created by [Hannah Strobel](https://thenounproject.com/Mylillian) from the Noun Project: <https://thenounproject.com/search/?q=galaxy&i=22802> under the the Creative Commons Attribution license
+* Stars icon created by [Travis Avery](https://thenounproject.com/travisavery) from the Noun Project: <https://thenounproject.com/search/?q=star&i=2335992> under the the Creative Commons Attribution license
+* Constellation icon created by y [BomSymbols](https://thenounproject.com/korawan_m) from he Noun Project: <https://thenounproject.com/search/?q=constellation&i=937185> under the the Creative Commons Attribution license

@@ -23,6 +23,11 @@ namespace Planetarium.ViewModels
         public string ImageKey { get; set; }
     }
 
+    public class ToolbarSeparatorVM : ToolbarItemVM
+    {
+
+    }
+
     public class ToolbarToggleButtonVM : ToolbarItemVM
     {
         public ToolbarToggleButtonVM(string buttonName, string imageKey, object bindingObject, string bindingProperty)

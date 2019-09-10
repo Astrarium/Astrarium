@@ -102,9 +102,13 @@ namespace Planetarium
                 .WithBuilder(typeof(GRSSettingBuilder));
 
             settingsConfig.Add("Comets", true).WithSection("Comets");
-            settingsConfig.Add("CometsLabels", true).WithSection("Comets");
+            settingsConfig.Add("CometsLabels", true).WithSection("Comets").EnabledWhenTrue("Comets");
             settingsConfig.Add("Asteroids", true).WithSection("Asteroids");
-            settingsConfig.Add("AsteroidsLabels", true).WithSection("Asteroids");
+            settingsConfig.Add("AsteroidsLabels", true).WithSection("Asteroids").EnabledWhenTrue("Asteroids");
+
+            settingsConfig.Add("DeepSky", true).WithSection("Deep Sky");
+            settingsConfig.Add("DeepSkyLabels", true).WithSection("Deep Sky").EnabledWhenTrue("DeepSky");
+            settingsConfig.Add("DeepSkyOutlines", true).WithSection("Deep Sky").EnabledWhenTrue("DeepSky");
 
             settingsConfig.Add("ObserverLocation", new CrdsGeographical(-44, 56.3333, +3, 80, "Europe/Moscow", "Nizhny Novgorod"));
 

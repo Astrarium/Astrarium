@@ -118,7 +118,7 @@ namespace Planetarium.Plugins.Tycho2
             }
             catch (Exception ex)
             {
-
+                // TODO: log
             }
         }
 

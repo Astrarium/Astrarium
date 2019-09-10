@@ -65,6 +65,11 @@ namespace Planetarium.Renderers
 
         public override void Render(IMapContext map)
         {
+            if (!settings.Get<bool>("DeepSky"))
+            {
+                return;
+            }
+
             var allDeepSkies = deepSkyProvider.DeepSkies;
             bool isGround = settings.Get<bool>("Ground");
 
@@ -87,13 +92,13 @@ namespace Planetarium.Renderers
 
             foreach (var ds in deepSkies)
             {
-                drawingHandlers[ds.Status].Draw(map, ds);
+                drawingHandlers[ds.Status].Draw(map, settings, ds);
             }
         }
 
         private interface IDrawingStrategy
         {
-            void Draw(IMapContext map, DeepSky ds);
+            void Draw(IMapContext map, ISettings settings, DeepSky ds);
         }
 
         private class GalaxyDrawingStrategy : BaseDrawingStrategy
@@ -120,11 +125,11 @@ namespace Planetarium.Renderers
         {
             public GalacticNebulaDrawingStrategy(DeepSkyRenderer renderer) : base(renderer) { }
 
-            public override void Draw(IMapContext map, DeepSky ds)
+            public override void Draw(IMapContext map, ISettings settings, DeepSky ds)
             {
                 if (map.ViewAngle <= Renderer.minZoom)
                 {
-                    base.Draw(map, ds);
+                    base.Draw(map, settings, ds);
                 }
             }
 
@@ -149,11 +154,11 @@ namespace Planetarium.Renderers
         {
             public PlanetaryNebulaDrawingStrategy(DeepSkyRenderer renderer) : base(renderer) { }
 
-            public override void Draw(IMapContext map, DeepSky ds)
+            public override void Draw(IMapContext map, ISettings settings, DeepSky ds)
             {
                 if (map.ViewAngle <= Renderer.minZoom)
                 {
-                    base.Draw(map, ds);
+                    base.Draw(map, settings, ds);
                 }
             }
 
@@ -177,11 +182,11 @@ namespace Planetarium.Renderers
         {
             public ClusterDrawingStrategy(DeepSkyRenderer renderer) : base(renderer) { }
 
-            public override void Draw(IMapContext map, DeepSky ds)
+            public override void Draw(IMapContext map, ISettings settings, DeepSky ds)
             {
                 if (map.ViewAngle <= Renderer.minZoom)
                 {
-                    base.Draw(map, ds);
+                    base.Draw(map, settings, ds);
                 }
             }
 
@@ -210,7 +215,7 @@ namespace Planetarium.Renderers
                 Renderer = renderer;
             }
 
-            public void Draw(IMapContext map, DeepSky ds)
+            public void Draw(IMapContext map, ISettings settings, DeepSky ds)
             {
                 // Do nothing
             }
@@ -229,7 +234,7 @@ namespace Planetarium.Renderers
                 Renderer = renderer;
             }
 
-            public virtual void Draw(IMapContext map, DeepSky ds)
+            public virtual void Draw(IMapContext map, ISettings settings, DeepSky ds)
             {
                 PointF p = map.Project(ds.Horizontal);
 
@@ -243,7 +248,7 @@ namespace Planetarium.Renderers
                     if (diamA > 10)
                     {
                         float diamB = GetDiameter(map, ds.SizeB);
-                        if (ds.Outline != null)
+                        if (ds.Outline != null && settings.Get<bool>("DeepSkyOutlines"))
                         {
                             DrawOutline(map, ds.Outline);
                         }
@@ -257,7 +262,7 @@ namespace Planetarium.Renderers
                         }
                         map.AddDrawnObject(ds, p);
 
-                        if (map.ViewAngle <= Renderer.limitLabels)
+                        if (map.ViewAngle <= Renderer.limitLabels && settings.Get<bool>("DeepSkyLabels"))
                         {
                             map.DrawObjectCaption(Renderer.fontCaption, Renderer.brushCaption, ds.DisplayName, p, Math.Min(diamA, diamB));
                         }
@@ -269,7 +274,7 @@ namespace Planetarium.Renderers
                     float diamA = GetDiameter(map, ds.SizeA);
                     if (diamA > 10)
                     {
-                        if (ds.Outline != null)
+                        if (ds.Outline != null && settings.Get<bool>("DeepSkyOutlines"))
                         {
                             DrawOutline(map, ds.Outline);
                         }
@@ -283,7 +288,7 @@ namespace Planetarium.Renderers
                         }
                         map.AddDrawnObject(ds, p);
 
-                        if (map.ViewAngle <= Renderer.limitLabels)
+                        if (map.ViewAngle <= Renderer.limitLabels && settings.Get<bool>("DeepSkyLabels"))
                         {
                             map.DrawObjectCaption(Renderer.fontCaption, Renderer.brushCaption, ds.DisplayName, p, diamA);
                         }
@@ -295,7 +300,7 @@ namespace Planetarium.Renderers
                     float size = map.GetPointSize(ds.Mag == null ? 15 : ds.Mag.Value);
                     if ((int)size > 0)
                     {
-                        if (ds.Outline != null)
+                        if (ds.Outline != null && settings.Get<bool>("DeepSkyOutlines"))
                         {
                             DrawOutline(map, ds.Outline);
                         }
@@ -307,7 +312,7 @@ namespace Planetarium.Renderers
                         }
                         map.AddDrawnObject(ds, p);
 
-                        if (map.ViewAngle <= Renderer.limitLabels)
+                        if (map.ViewAngle <= Renderer.limitLabels && settings.Get<bool>("DeepSkyLabels"))
                         {
                             map.DrawObjectCaption(Renderer.fontCaption, Renderer.brushCaption, ds.DisplayName, p, 0);
                         }
