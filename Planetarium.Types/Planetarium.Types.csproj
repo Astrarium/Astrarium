@@ -8,4 +8,9 @@
     <ProjectReference Include="..\ADK\ADK.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System.Windows" />
+  </ItemGroup>
+
 </Project>

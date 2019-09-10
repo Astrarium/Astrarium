@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Planetarium
+namespace Planetarium.Types
 {
     /// <summary>
     /// Base class for all ViewModels.

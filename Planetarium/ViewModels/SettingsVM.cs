@@ -97,9 +97,7 @@ namespace Planetarium.ViewModels
                         panel.Children.Add(control);
                     }
                 }
-
-                
-
+               
                 SettingsSections.Add(new SettingsSectionVM() { Title = section.Key, Panel = panel });
             }
 

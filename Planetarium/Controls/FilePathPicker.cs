@@ -18,6 +18,12 @@ namespace Planetarium.Controls
 
         }
 
+        public enum PickerMode
+        {
+            File = 0,
+            Directory = 1
+        }
+
         public string SelectedPath
         {
             get
@@ -29,6 +35,8 @@ namespace Planetarium.Controls
                 SetValue(SelectedPathProperty, value);
             }
         }
+
+        public PickerMode Mode { get; set; } = PickerMode.File;
 
         public readonly static DependencyProperty SelectedPathProperty = DependencyProperty.Register(
             nameof(SelectedPath), typeof(string), typeof(FilePathPicker), new FrameworkPropertyMetadata(string.Empty)
@@ -57,10 +65,21 @@ namespace Planetarium.Controls
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new WF.OpenFileDialog();
-            if (WF.DialogResult.OK == dialog.ShowDialog())
+            if (Mode == PickerMode.File)
             {
-                SelectedPath = dialog.FileName;
+                var dialog = new WF.OpenFileDialog();
+                if (WF.DialogResult.OK == dialog.ShowDialog())
+                {
+                    SelectedPath = dialog.FileName;
+                }
+            }
+            else if (Mode == PickerMode.Directory)
+            {
+                var dialog = new WF.FolderBrowserDialog();
+                if (WF.DialogResult.OK == dialog.ShowDialog())
+                {
+                    SelectedPath = dialog.SelectedPath;
+                }
             }
         }
     }

@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace Planetarium
+namespace Planetarium.Types
 {
     /// <summary>
     /// Defines methods to work with views (Windows and MessageBoxes) and ViewModels.

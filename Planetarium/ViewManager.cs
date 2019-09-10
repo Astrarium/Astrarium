@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32;
 using Planetarium.Controls;
+using Planetarium.Types;
 using Planetarium.Views;
 using System;
 using System.Collections.Generic;

@@ -112,6 +112,10 @@ namespace Planetarium
 
             settingsConfig.Add("ObserverLocation", new CrdsGeographical(-44, 56.3333, +3, 80, "Europe/Moscow", "Nizhny Novgorod"));
 
+            settingsConfig.Add("Tycho2", true).WithSection("Tycho 2");
+            settingsConfig.Add("Tycho2Path", "").WithSection("Tycho 2")
+                .WithBuilder(typeof(FolderPathSettingControlBuilder)).EnabledWhenTrue("Tycho2");
+
             kernel.Bind<ISettingsConfig, SettingsConfig>().ToConstant(settingsConfig).InSingletonScope();
 
             var settings = new Settings();

@@ -82,15 +82,21 @@ namespace Planetarium.Plugins.Tycho2
         /// </summary>
         private const double SEGMENT_DIAM = 3.75;
 
+        private readonly ISettings Settings;
+
+        public Tycho2Calc(ISettings settings)
+        {
+            Settings = settings;
+        }
+
         public override void Initialize()
         {
-            // TODO take from settings
-            string folder = "D:\\Tycho2";
+            string catalogLocation = Settings.Get<string>("Tycho2Path");
 
             try
             {
-                string indexFile = Path.Combine(folder, "tycho2.idx");
-                string catalogFile = Path.Combine(folder, "tycho2.dat");
+                string indexFile = Path.Combine(catalogLocation, "tycho2.idx");
+                string catalogFile = Path.Combine(catalogLocation, "tycho2.dat");
 
                 // Read Tycho2 index file and load it into memory.
 

@@ -44,7 +44,7 @@ namespace Planetarium.Plugins.Tycho2
             bool isGround = settings.Get<bool>("Ground");
             double coeff = map.DiagonalCoefficient();
 
-            if (map.MagLimit > 8 && settings.Get<bool>("Stars"))
+            if (map.MagLimit > 8 && settings.Get<bool>("Stars") && settings.Get<bool>("Tycho2"))
             {
                 PrecessionalElements pe = Precession.ElementsFK5(map.JulianDay, Date.EPOCH_J2000);
 
