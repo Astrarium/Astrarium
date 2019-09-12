@@ -448,13 +448,34 @@ namespace Planetarium.Renderers
                 if ((!isGround || moon.Horizontal.Altitude + moon.Semidiameter / 3600 > 0) &&
                     ad < coeff * map.ViewAngle + moon.Semidiameter / 3600)
                 {                  
-                    float diam = map.GetDiskSize(moon.Semidiameter);
-
                     PointF p = map.Project(moon.Horizontal);
                     PointF pJupiter = map.Project(jupiter.Horizontal);
 
-                    // satellite should be rendered as disk
-                    if ((int)diam > 0)
+                    float size = map.GetPointSize(moon.Magnitude, 2);
+                    float diam = map.GetDiskSize(moon.Semidiameter);
+
+                    // diameter is to small to render moon disk, 
+                    // but point size caclulated from magnitude is enough to be drawn
+                    if (size > diam && (int)size > 0)
+                    {
+                        // do not draw moon point if eclipsed
+                        if (!moon.IsEclipsedByJupiter)
+                        {
+                            // satellite is distant enough from the Jupiter
+                            // but too small to be drawn as disk
+                            if (Geometry.DistanceBetweenPoints(p, pJupiter) >= 5)
+                            {
+                                map.Graphics.TranslateTransform(p.X, p.Y);
+                                map.Graphics.FillEllipse(Brushes.Wheat, -size / 2, -size / 2, size, size);
+                                map.Graphics.ResetTransform();
+
+                                map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, 2);
+                                map.AddDrawnObject(moon, p);
+                            }                                                       
+                        }
+                    }
+                    // moon should be rendered as disk
+                    else if (diam >= size && (int)diam > 0)
                     {
                         float rotation = map.GetRotationTowardsNorth(jupiter.Equatorial) + 360 - (float)jupiter.Appearance.P;
 
@@ -496,21 +517,6 @@ namespace Planetarium.Renderers
                         if (moon.IsEclipsedByJupiter) RenderJupiterShadow(map, moon);
 
                         map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, diam);
-                        map.AddDrawnObject(moon, p);
-                    }
-                    // satellite is distant enough from the Jupiter
-                    // but too small to be drawn as disk
-                    else if (Geometry.DistanceBetweenPoints(p, pJupiter) >= 5)
-                    {
-                        // do not draw moon point if eclipsed
-                        if (!moon.IsEclipsedByJupiter)
-                        {
-                            map.Graphics.TranslateTransform(p.X, p.Y);
-                            map.Graphics.FillEllipse(Brushes.Wheat, -1, -1, 2, 2);
-                            map.Graphics.ResetTransform();
-                        }
-
-                        map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, 2);
                         map.AddDrawnObject(moon, p);
                     }
                 }

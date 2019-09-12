@@ -39,6 +39,11 @@ namespace Planetarium.Objects
         /// </summary>
         public int Number { get; set; }
 
+        /// <summary>
+        /// Apparent magnitude
+        /// </summary>
+        public float Magnitude { get; set; }
+
         public bool IsEclipsedByJupiter
         {
             get

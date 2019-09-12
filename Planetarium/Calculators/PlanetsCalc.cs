@@ -351,6 +351,7 @@ namespace Planetarium.Calculators
                         j.Horizontal = context.Get(JupiterMoonHorizontal, m);
                         j.Semidiameter = context.Get(JupiterMoonSemidiameter, m);
                         j.CM = context.Get(JupiterMoonCentralMeridian, m);
+                        j.Magnitude = context.Get(JupiterMoonMagnitude, m);
                     }
 
                     GreatRedSpotLongitude = context.Get(JupiterGreatRedSpotLongitude);
@@ -417,6 +418,13 @@ namespace Planetarium.Calculators
             CrdsRectangular r = c.Get(JupiterMoonRectangular, m);
 
             return GalileanMoons.MoonCentralMeridian(r, m - 1);
+        }
+
+        private float JupiterMoonMagnitude(SkyContext c, int m)
+        {
+            double r = c.Get(DistanceFromEarth, Planet.JUPITER);
+            double R = c.Get(DistanceFromSun, Planet.JUPITER);
+            return GalileanMoons.Magnitude(r, R, m - 1);
         }
 
         private double JupiterGreatRedSpotLongitude(SkyContext c)
@@ -557,7 +565,7 @@ namespace Planetarium.Calculators
             .AddHeader("Appearance")
             .AddRow("Phase", c.Get(Phase, p))
             .AddRow("PhaseAngle", c.Get(PhaseAngle, p))
-            //.AddRow("Magnitude", c.Get(Magnitude, p))
+            .AddRow("Magnitude", c.Get(JupiterMoonMagnitude, m))
             //.AddRow("DistanceFromEarth", c.Get(DistanceFromEarth, p))
             //.AddRow("DistanceFromSun", c.Get(DistanceFromSun, p))
             //.AddRow("HorizontalParallax", c.Get(Parallax, p))
