@@ -12,11 +12,7 @@ using System.Threading.Tasks;
 
 namespace Planetarium
 {
-    public interface ISearcher
-    {
-        ICollection<SearchResultItem> Search(string searchString, Func<CelestialObject, bool> filter);
-        string GetObjectName(CelestialObject body);
-    }
+
 
     public class Sky : ISearcher, IEphemerisProvider
     {

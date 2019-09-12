@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Planetarium.Themes
+namespace Planetarium.Types.Themes
 {
     public class Node : INotifyPropertyChanged
     {

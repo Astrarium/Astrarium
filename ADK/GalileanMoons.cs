@@ -21,6 +21,14 @@ namespace ADK
         private static readonly double[] MR = { 3643.0 / 2, 3122.0 / 2, 5262.0 / 2, 4821.0 / 2 };
 
         /// <summary>
+        /// Moons absolute magnitudes
+        /// </summary>
+        /// <remarks>
+        /// Data taken from: https://promenade.imcce.fr/en/pages1/101.html
+        /// </remarks>
+        private static readonly double[] MH = { 2.0, 2.3, 1.6, 2.7 };
+
+        /// <summary>
         /// Jupiter radius, in km
         /// </summary>
         private const double JR = 71492;

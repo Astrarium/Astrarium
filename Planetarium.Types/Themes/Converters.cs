@@ -10,7 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 
-namespace Planetarium.Themes
+namespace Planetarium.Types.Themes
 {
     [ValueConversion(typeof(decimal), typeof(int))]
     [ValueConversion(typeof(int), typeof(decimal))]

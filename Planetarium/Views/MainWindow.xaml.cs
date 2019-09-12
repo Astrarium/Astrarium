@@ -4,7 +4,7 @@ using System.Windows.Input;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
-using Planetarium.Themes;
+using Planetarium.Types.Themes;
 using WF = System.Windows.Forms;
 
 namespace Planetarium

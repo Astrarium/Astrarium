@@ -1,8 +1,8 @@
 ﻿<ResourceDictionary 
-    x:Class="Planetarium.Themes.WindowStyle"    
+    x:Class="Planetarium.Types.Themes.WindowStyle"    
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:t="clr-namespace:Planetarium.Themes">
+    xmlns:t="clr-namespace:Planetarium.Types.Themes">
 
     <Style TargetType="{x:Type Window}">
         <Setter Property="BorderBrush" Value="{StaticResource WindowBorderBrush}" />

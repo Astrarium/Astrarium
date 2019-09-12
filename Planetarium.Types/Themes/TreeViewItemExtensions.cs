@@ -9,7 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 
-namespace Planetarium.Themes
+namespace Planetarium.Types.Themes
 {
     public static class TreeViewItemExtensions
     {

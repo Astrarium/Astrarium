@@ -1,4 +1,4 @@
-﻿using Planetarium.Themes;
+﻿using Planetarium.Types.Themes;
 using Planetarium.Types;
 using System;
 using System.Collections.Generic;

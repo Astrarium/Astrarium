@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:c="clr-namespace:Planetarium.Controls"
-        xmlns:t="clr-namespace:Planetarium.Themes"
+        xmlns:t="clr-namespace:Planetarium.Types.Themes"
         mc:Ignorable="d"
         Title="Time Span" Height="169.165" Width="270.5"
         Style="{StaticResource {x:Type Window}}"

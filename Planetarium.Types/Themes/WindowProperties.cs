@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
-namespace Planetarium.Themes
+namespace Planetarium.Types.Themes
 {
     public class WindowProperties : DependencyObject
     {

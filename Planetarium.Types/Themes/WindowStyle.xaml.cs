@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Shell;
 
-namespace Planetarium.Themes
+namespace Planetarium.Types.Themes
 {
     public partial class WindowStyle : ResourceDictionary
     {
