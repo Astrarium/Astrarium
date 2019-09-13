@@ -17,8 +17,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
 
-
-
   <ItemGroup>
     <Page Include="..\Planetarium.Types\Themes\*.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -31,4 +29,10 @@
   </Page>
   </ItemGroup>
 
+  <ItemGroup>
+    <Page Include="..\Planetarium.Types\Config\Controls\*.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  
 </Project>

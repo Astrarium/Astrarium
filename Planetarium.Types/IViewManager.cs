@@ -22,6 +22,8 @@ namespace Planetarium.Types
 
         TControl CreateControl<TControl>() where TControl : FrameworkElement;
 
+        FrameworkElement CreateControl(Type controlType);
+
         /// <summary>
         /// Shows window by its ViewModel type. 
         /// Calling this method automatically creates instance of the ViewModel and attaches it to DataContext property. />

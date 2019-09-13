@@ -13,7 +13,7 @@ namespace Planetarium.Config.ControlBuilders
 {
     public class FontSettingControlBuilder : SettingControlBuilder
     {
-        public override FrameworkElement Build(ISettings settings, SettingConfigItem item, IViewManager viewManager)
+        public override FrameworkElement Build(ISettings settings, SettingItem item, IViewManager viewManager)
         {
             var container = new StackPanel() { Orientation = Orientation.Vertical };
             container.Children.Add(new Label() { Content = item.Name });

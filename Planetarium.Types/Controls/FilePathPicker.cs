@@ -36,8 +36,6 @@ namespace Planetarium.Controls
             }
         }
 
-        public PickerMode Mode { get; set; } = PickerMode.File;
-
         public readonly static DependencyProperty SelectedPathProperty = DependencyProperty.Register(
             nameof(SelectedPath), typeof(string), typeof(FilePathPicker), new FrameworkPropertyMetadata(string.Empty)
             {
@@ -53,6 +51,14 @@ namespace Planetarium.Controls
         }
 
         public readonly static DependencyProperty CaptionProperty = DependencyProperty.Register(nameof(Caption), typeof(string), typeof(FilePathPicker), new UIPropertyMetadata(null));
+
+        public PickerMode Mode
+        {
+            get { return (PickerMode)GetValue(ModeProperty); }
+            set { SetValue(ModeProperty, value); }
+        }
+
+        public readonly static DependencyProperty ModeProperty = DependencyProperty.Register(nameof(Mode), typeof(PickerMode), typeof(FilePathPicker), new UIPropertyMetadata(null));
 
         Button _Button;
         

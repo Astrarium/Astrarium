@@ -5,6 +5,7 @@ using Planetarium.Config;
 using Planetarium.Config.ControlBuilders;
 using Planetarium.Renderers;
 using Planetarium.Types;
+using Planetarium.Types.Config.Controls;
 using Planetarium.ViewModels;
 using System;
 using System.Collections;
@@ -50,76 +51,16 @@ namespace Planetarium
 
         private void ConfigureContainer()
         {
-            SettingsConfig settingsConfig = new SettingsConfig();
+            SettingsConfig settingsConfig = new SettingsConfig();         
 
-            settingsConfig.Add("EquatorialGrid", true).WithSection("Grid");
-            settingsConfig.Add("LabelEquatorialPoles", false).EnabledWhenTrue("EquatorialGrid").WithSection("Grid");
-
-            settingsConfig.Add("HorizontalGrid", true).WithSection("Grid");
-            settingsConfig.Add("LabelHorizontalPoles", false).EnabledWhenTrue("HorizontalGrid").WithSection("Grid");
-            settingsConfig.Add("EclipticLine", true).WithSection("Grid");
-            settingsConfig.Add("LabelEquinoxPoints", false).EnabledWhenTrue("EclipticLine").WithSection("Grid");
-            settingsConfig.Add("LabelLunarNodes", false).EnabledWhenTrue("EclipticLine").WithSection("Grid");
-            settingsConfig.Add("GalacticEquator", true).WithSection("Grid");
-            settingsConfig.Add("MilkyWay", true).WithSection("Grid");
-            settingsConfig.Add("Ground", true).WithSection("Grid");
-            settingsConfig.Add("HorizonLine", true).WithSection("Grid");
-            settingsConfig.Add("LabelCardinalDirections", true).EnabledWhenTrue("HorizonLine").WithSection("Grid");
-
-            settingsConfig.Add("Sun", true).WithSection("Sun");
-            settingsConfig.Add("LabelSun", true).EnabledWhenTrue("Sun").WithSection("Sun");
-            settingsConfig.Add("SunLabelFont", new Font("Arial", 12)).EnabledWhen(s => s.Get<bool>("Sun") && s.Get<bool>("LabelSun")).WithSection("Sun");
-            settingsConfig.Add("TextureSun", true).EnabledWhenTrue("Sun").WithSection("Sun");
-            settingsConfig.Add("TextureSunPath", "https://soho.nascom.nasa.gov/data/REPROCESSING/Completed/{yyyy}/hmiigr/{yyyy}{MM}{dd}/{yyyy}{MM}{dd}_0000_hmiigr_512.jpg").EnabledWhen(s => s.Get<bool>("Sun") && s.Get<bool>("TextureSun")).WithSection("Sun");
-
-            settingsConfig.Add("ConstLabels", true).WithSection("Constellations");
-            settingsConfig.Add("ConstLabelsType", ConstellationsRenderer.LabelType.InternationalName).EnabledWhenTrue("ConstLabels").WithSection("Constellations");
-            settingsConfig.Add("ConstLines", true).WithSection("Constellations");
-            settingsConfig.Add("ConstBorders", true).WithSection("Constellations");
-
-            settingsConfig.Add("Stars", true).WithSection("Stars");
-            settingsConfig.Add("StarsLabels", true).EnabledWhenTrue("Stars").WithSection("Stars");
-            settingsConfig.Add("StarsProperNames", true).EnabledWhen(s => s.Get<bool>("Stars") && s.Get<bool>("StarsLabels")).WithSection("Stars");
-
-            settingsConfig.Add("EclipticColorNight", Color.FromArgb(0xC8, 0x80, 0x80, 0x00)).WithSection("Colors");
-            settingsConfig.Add("HorizontalGridColorNight", Color.FromArgb(0xC8, 0x00, 0x40, 0x00)).WithSection("Colors");
-            settingsConfig.Add("CardinalDirectionsColor", Color.FromArgb(0x00, 0x99, 0x99)).WithSection("Colors");
-
-            settingsConfig.Add("UseTextures", true).WithSection("Misc");
-
-            settingsConfig.Add("Planets", true).WithSection("Planets");
-            settingsConfig.Add("JupiterMoonsShadowOutline", true).WithSection("Planets");
-            settingsConfig.Add("ShowRotationAxis", false).WithSection("Planets");
-
-            settingsConfig.Add("GRSLongitude", 
-                new GreatRedSpotSettings()
-                {
-                    Epoch = 2458150.5000179596,
-                    MonthlyDrift = 2,
-                    Longitude = 283
-                })
-                .WithSection("Planets")
-                .WithBuilder(typeof(GRSSettingBuilder));
-
-            settingsConfig.Add("Comets", true).WithSection("Comets");
-            settingsConfig.Add("CometsLabels", true).WithSection("Comets").EnabledWhenTrue("Comets");
-            settingsConfig.Add("Asteroids", true).WithSection("Asteroids");
-            settingsConfig.Add("AsteroidsLabels", true).WithSection("Asteroids").EnabledWhenTrue("Asteroids");
-
-            settingsConfig.Add("DeepSky", true).WithSection("Deep Sky");
-            settingsConfig.Add("DeepSkyLabels", true).WithSection("Deep Sky").EnabledWhenTrue("DeepSky");
-            settingsConfig.Add("DeepSkyOutlines", true).WithSection("Deep Sky").EnabledWhenTrue("DeepSky");
-
-            settingsConfig.Add("ObserverLocation", new CrdsGeographical(-44, 56.3333, +3, 80, "Europe/Moscow", "Nizhny Novgorod"));
-
-            settingsConfig.Add("Tycho2", true).WithSection("Tycho 2");
-            settingsConfig.Add("Tycho2Path", "").WithSection("Tycho 2")
-                .WithBuilder(typeof(FolderPathSettingControlBuilder)).EnabledWhenTrue("Tycho2");
-
-            kernel.Bind<ISettingsConfig, SettingsConfig>().ToConstant(settingsConfig).InSingletonScope();
+            
+            kernel.Bind<SettingsConfig>().ToConstant(settingsConfig).InSingletonScope();
 
             var settings = new Settings();
-            settings.SetDefaults(settingsConfig.GetDefaultSettings());
+
+            
+
+            //settings.SetDefaults(settingsConfig.GetDefaultSettings());
 
             kernel.Bind<ISettings, Settings>().ToConstant(settings).InSingletonScope();
 
@@ -146,6 +87,30 @@ namespace Planetarium
             }
 
             var alltypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes());
+
+
+            // collect all plugins implementations
+            // TODO: to support plugin system, we need to load assemblies 
+            // from the specific directory and search for plugin there
+            Type[] pluginTypes = alltypes
+                .Where(t => typeof(AbstractPlugin).IsAssignableFrom(t) && !t.IsAbstract)
+                .ToArray();
+
+            foreach (Type pluginType in pluginTypes)
+            {
+                kernel.Bind(pluginType).ToSelf().InSingletonScope();
+                var plugin = kernel.Get(pluginType) as AbstractPlugin;
+                foreach (SettingItem item in plugin.SettingItems)
+                {
+                    settingsConfig.SettingItems.Add(item);
+                }
+            }
+
+            // set settings defaults 
+            foreach (SettingItem item in settingsConfig.SettingItems)
+            {
+                settings.Set(item.Name, item.DefaultValue);
+            }
 
             // collect all calculators implementations
             // TODO: to support plugin system, we need to load assemblies 
@@ -211,22 +176,5 @@ namespace Planetarium
             kernel.Bind<ISkyMap>().ToConstant(new SkyMap(context, renderers)).InSingletonScope();
             kernel.Bind<IViewManager>().ToConstant(new ViewManager(t => kernel.Get(t))).InSingletonScope();
         }
-
-        private static T LoadBaml<T>(Stream stream)
-        {
-            var reader = new Baml2006Reader(stream);
-            var writer = new XamlObjectWriter(reader.SchemaContext);
-            while (reader.Read())
-            {
-                writer.WriteNode(reader);
-            }
-
-            if (writer.Result is T)
-            {
-                return (T)writer.Result;
-            }
-            else { return default(T); }
-        }
-
     }
 }

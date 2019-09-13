@@ -14,7 +14,7 @@ namespace Planetarium.Config.ControlBuilders
 {
     public class GRSSettingBuilder : SettingControlBuilder
     {
-        public override FrameworkElement Build(ISettings settings, SettingConfigItem item, IViewManager viewManager)
+        public override FrameworkElement Build(ISettings settings, SettingItem item, IViewManager viewManager)
         {
             var groupBox = new GroupBox() { Header = item.Name };
             var grid = new Grid();

@@ -200,6 +200,13 @@ namespace Planetarium
             return control;
         }
 
+        public FrameworkElement CreateControl(Type controlType)
+        {
+            FrameworkElement control = typeFactory(controlType) as FrameworkElement;
+            InjectDependencies(control);
+            return control;
+        }
+
         public void ShowWindow<TViewModel>(TViewModel viewModel) where TViewModel : ViewModelBase
         {
             Show(viewModel: viewModel, isDialog: false);

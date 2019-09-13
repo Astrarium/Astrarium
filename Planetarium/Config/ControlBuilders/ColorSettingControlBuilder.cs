@@ -12,7 +12,7 @@ namespace Planetarium.Config.ControlBuilders
 {
     public class ColorSettingControlBuilder : SettingControlBuilder
     {
-        public override FrameworkElement Build(ISettings settings, SettingConfigItem item, IViewManager viewManager)
+        public override FrameworkElement Build(ISettings settings, SettingItem item, IViewManager viewManager)
         {
             var picker = new ColorPicker() { Caption = item.Name };
             BindingOperations.SetBinding(picker, ColorPicker.SelectedColorProperty, new Binding(item.Name) { Source = settings });

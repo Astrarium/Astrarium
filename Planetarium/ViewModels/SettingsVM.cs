@@ -18,10 +18,11 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using Planetarium.Types.Config.Controls;
 
 namespace Planetarium.ViewModels
 {
-    public class SettingsVM : ViewModelBase
+    internal class SettingsVM : ViewModelBase
     {
         public ICommand CloseCommand { get; private set; }
         public ICommand ResetCommand { get; private set; }
@@ -48,7 +49,7 @@ namespace Planetarium.ViewModels
         }
         public UIElement SectionContent { get; private set; }
 
-        public SettingsVM(ISettings settings, ISettingsConfig settingConfig, IViewManager viewManager)
+        public SettingsVM(ISettings settings, SettingsConfig settingConfig, IViewManager viewManager)
         {
             this.settings = settings;
             this.viewManager = viewManager;
@@ -59,40 +60,23 @@ namespace Planetarium.ViewModels
 
             SettingsSections = new ObservableCollection<SettingsSectionVM>();
 
-            var sections = settingConfig.Where(c => !string.IsNullOrEmpty(c.Section)).GroupBy(c => c.Section);
+            var sections = settingConfig.SettingItems.Where(c => !string.IsNullOrEmpty(c.Section)).GroupBy(c => c.Section);
 
             foreach (var section in sections)
             {
                 StackPanel panel = new StackPanel();
                 panel.Orientation = Orientation.Vertical;
 
-                foreach (var item in section)
+                foreach (SettingItem item in section)
                 {
-                    SettingControlBuilder builder = item.Builder ?? settingConfig.GetBuilder(item.Type);                    
-                    if (builder == null)
-                    {
-                        throw new Exception($"There are no control builder defined for setting with type {item.Type.Name}");
-                    }
+                    Type controlType = item.Section != null ? 
+                        (item.ControlType ?? GetDefaultControlType(item.DefaultValue.GetType())) : 
+                        null;
 
-                    FrameworkElement control = builder.Build(settings, item, viewManager);
-
-                    if (control != null && item.EnabledWhenCondition != null)
+                    if (controlType != null)
                     {
-                        var binding = new Binding(nameof(FuncBinder.Value));
-                        binding.Source = new FuncBinder(settings, item.EnabledWhenCondition);
-                        BindingOperations.SetBinding(control, UIElement.IsEnabledProperty, binding);
-                    }
-
-                    if (control != null && item.VisibleWhenCondition != null)
-                    {
-                        var binding = new Binding(nameof(FuncBinder.Value));
-                        binding.Source = new FuncBinder(settings, item.VisibleWhenCondition);
-                        binding.Converter = new BooleanToVisibilityConverter();
-                        BindingOperations.SetBinding(control, UIElement.VisibilityProperty, binding);
-                    }
-
-                    if (control != null)
-                    {
+                        FrameworkElement control = viewManager.CreateControl(controlType);
+                        control.DataContext = new SettingVM(settings, item.Name, item.EnabledCondition);
                         control.Margin = new Thickness(0, 0, 0, 4);
                         panel.Children.Add(control);
                     }
@@ -139,10 +123,80 @@ namespace Planetarium.ViewModels
             }
         }
 
-        public class SettingsSectionVM
+        private Type GetDefaultControlType(Type settingType)
+        {
+            if (settingType == typeof(bool))
+                return typeof(CheckboxSettingControl);
+
+            if (settingType.IsEnum)
+                return typeof(EnumSettingControl);
+
+            return null;
+        }
+
+        internal class SettingsSectionVM
         {
             public string Title { get; set; }
             public StackPanel Panel { get; set; }
+        }
+
+        internal class SettingVM : ViewModelBase
+        {
+            /// <summary>
+            /// ISettings object to bind to 
+            /// </summary>
+            private ISettings settings;
+
+            /// <summary>
+            /// Name of the setting
+            /// </summary>
+            public string SettingName { get; set; }
+
+            /// <summary>
+            /// Setting value
+            /// </summary>
+            public object SettingValue
+            {
+                get
+                {
+                    return settings.Get<object>(SettingName);
+                }
+                set
+                {
+                    settings.Set(SettingName, value);
+                    NotifyPropertyChanged(nameof(SettingValue));
+                }
+            }
+
+            private Func<ISettings, bool> isEnabledCondition;
+            internal Func<ISettings, bool> IsEnabledCondition
+            {
+                get { return isEnabledCondition; }
+                set
+                {
+                    isEnabledCondition = value;
+                    Settings_SettingValueChanged(null, null);
+                }
+            }
+
+            public bool IsEnabled { get; private set; } = true;
+
+            public SettingVM(ISettings settings, string name, Func<ISettings, bool> isEnabledCondition)
+            {
+                this.settings = settings;
+                this.settings.SettingValueChanged += Settings_SettingValueChanged;
+                SettingName = name;
+                IsEnabledCondition = isEnabledCondition;
+            }
+
+            private void Settings_SettingValueChanged(string propertyName, object propertyValue)
+            {
+                if (isEnabledCondition != null)
+                {
+                    IsEnabled = isEnabledCondition.Invoke(settings);
+                    NotifyPropertyChanged(nameof(IsEnabled));
+                }
+            }
         }
 
         private class FuncBinder : INotifyPropertyChanged

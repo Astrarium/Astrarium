@@ -15,12 +15,12 @@ namespace Planetarium.Config.ControlBuilders
 {
     public class EnumSettingControlBuilder : SettingControlBuilder
     {
-        public override FrameworkElement Build(ISettings settings, SettingConfigItem item, IViewManager viewManager)
+        public override FrameworkElement Build(ISettings settings, SettingItem item, IViewManager viewManager)
         {
             var radioGroup = new GroupBox() { Header = item.Name };
             var radioPanel = new StackPanel() { Orientation = Orientation.Vertical };
 
-            Array values = Enum.GetValues(item.Type);
+            Array values = Enum.GetValues(item.DefaultValue.GetType());
             foreach (var value in values)
             {
                 RadioButton radio = new RadioButton()

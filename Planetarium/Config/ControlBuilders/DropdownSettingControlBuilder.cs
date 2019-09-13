@@ -12,11 +12,11 @@ namespace Planetarium.Config.ControlBuilders
 {
     public class DropdownSettingControlBuilder : SettingControlBuilder
     {
-        public override FrameworkElement Build(ISettings settings, SettingConfigItem item, IViewManager viewManager)
+        public override FrameworkElement Build(ISettings settings, SettingItem item, IViewManager viewManager)
         {
             var panel = new StackPanel() { Orientation = Orientation.Vertical };
             var comboBox = new ComboBox() { IsReadOnly = true };
-            comboBox.ItemsSource = Enum.GetValues(item.Type);
+            comboBox.ItemsSource = Enum.GetValues(item.DefaultValue.GetType());
             BindingOperations.SetBinding(comboBox, ComboBox.SelectedItemProperty, new Binding(item.Name) { Source = settings });
             panel.Children.Add(new Label() { Content = item.Name });
             panel.Children.Add(comboBox);
