@@ -4,10 +4,8 @@
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                     xmlns:t="clr-namespace:Planetarium.Types.Themes"
                     mc:Ignorable="d">
-
     <t:EnumValueToEnumCollectionConverter x:Key="EnumValueToEnumCollectionConverter" />
     <t:EnumValueToEnumDescriptionConverter x:Key="EnumValueToEnumDescriptionConverter" />
-    
     <t:NumericUpDownTextConverter x:Key="NumericUpDownTextConverter" />
     <t:NumericConverter x:Key="NumericConverter"/>
     <t:LeftMarginMultiplierConverter x:Key="LeftMarginMultiplierConverter" />
@@ -22,6 +20,4 @@
     <t:ColorToStringConverter x:Key="ColorToStringConverter" />
     <t:ImageKeyToImageConverter x:Key="ImageKeyToImageConverter" />
     <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
-    <t:RadioButtonCheckedConverter x:Key="RadioButtonCheckedConverter" />
-
 </ResourceDictionary>

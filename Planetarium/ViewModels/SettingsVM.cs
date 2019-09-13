@@ -1,5 +1,4 @@
 ﻿using Planetarium.Config;
-using Planetarium.Config.ControlBuilders;
 using Planetarium.Types.Themes;
 using Planetarium.Types;
 using Planetarium.Views;
@@ -131,6 +130,12 @@ namespace Planetarium.ViewModels
             if (settingType.IsEnum)
                 return typeof(EnumSettingControl);
 
+            if (settingType == typeof(Font))
+                return typeof(FontPickerSettingControl);
+
+            if (settingType == typeof(Color))
+                return typeof(ColorPickerSettingControl);
+
             return null;
         }
 
@@ -164,7 +169,6 @@ namespace Planetarium.ViewModels
                 set
                 {
                     settings.Set(SettingName, value);
-                    NotifyPropertyChanged(nameof(SettingValue));
                 }
             }
 

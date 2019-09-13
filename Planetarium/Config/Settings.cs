@@ -19,16 +19,16 @@ namespace Planetarium.Config
         /// </summary>
         private Dictionary<string, object> SettingsValues = new Dictionary<string, object>();
 
-        private SavedSettings Defaults = new SavedSettings();
+        //private SavedSettings Defaults = new SavedSettings();
 
         public event Action<string, object> SettingValueChanged;
         public event PropertyChangedEventHandler PropertyChanged;
         public bool IsChanged { get; private set; }
 
-        public void SetDefaults(SavedSettings defaults)
-        {
-            Defaults = defaults;
-        }
+        //public void SetDefaults(SavedSettings defaults)
+        //{
+        //    Defaults = defaults;
+        //}
 
         public T Get<T>(string settingName, T defaultValue = default(T))
         {
@@ -82,12 +82,12 @@ namespace Planetarium.Config
         /// </summary>
         public void Reset()
         {
-            Load(Defaults);
+            //Load(Defaults);
         }
 
         public void Load()
         {
-            Reset();
+            //Reset();
             if (File.Exists(SETTINGS_PATH))
             {
                 using (var stream = new FileStream(SETTINGS_PATH, FileMode.Open))

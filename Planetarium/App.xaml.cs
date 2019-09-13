@@ -1,11 +1,8 @@
 ﻿using ADK;
 using Ninject;
-using Planetarium.Calculators;
 using Planetarium.Config;
-using Planetarium.Config.ControlBuilders;
 using Planetarium.Renderers;
 using Planetarium.Types;
-using Planetarium.Types.Config.Controls;
 using Planetarium.ViewModels;
 using System;
 using System.Collections;
@@ -17,8 +14,6 @@ using System.Linq;
 using System.Reflection;
 using System.Resources;
 using System.Windows;
-using System.Windows.Baml2006;
-using System.Xaml;
 
 namespace Planetarium
 {
@@ -56,19 +51,6 @@ namespace Planetarium
             
             kernel.Bind<SettingsConfig>().ToConstant(settingsConfig).InSingletonScope();
 
-            var settings = new Settings();
-
-            
-
-            //settings.SetDefaults(settingsConfig.GetDefaultSettings());
-
-            kernel.Bind<ISettings, Settings>().ToConstant(settings).InSingletonScope();
-
-            kernel.Get<Settings>().Load();
-
-            SkyContext context = new SkyContext(
-                new Date(DateTime.Now).ToJulianEphemerisDay(),
-                new CrdsGeographical(settings.Get<CrdsGeographical>("ObserverLocation")));
 
             // TODO: consider more proper way to load plugins
             string homeFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
@@ -106,11 +88,20 @@ namespace Planetarium
                 }
             }
 
+            var settings = new Settings();
+            
             // set settings defaults 
             foreach (SettingItem item in settingsConfig.SettingItems)
             {
                 settings.Set(item.Name, item.DefaultValue);
             }
+
+            //settings.SetDefaults(settingsConfig.GetDefaultSettings());
+           
+            settings.Load();
+
+            kernel.Bind<ISettings, Settings>().ToConstant(settings).InSingletonScope();
+
 
             // collect all calculators implementations
             // TODO: to support plugin system, we need to load assemblies 
@@ -164,6 +155,10 @@ namespace Planetarium
                 .Select(c => kernel.Get(c))
                 .Cast<BaseAstroEventsProvider>()
                 .ToArray();
+
+            SkyContext context = new SkyContext(
+                new Date(DateTime.Now).ToJulianEphemerisDay(),
+                new CrdsGeographical(settings.Get<CrdsGeographical>("ObserverLocation")));
 
             kernel.Bind<Sky, ISearcher, IEphemerisProvider>().ToConstant(new Sky(context, calculators, eventProviders)).InSingletonScope();
 
