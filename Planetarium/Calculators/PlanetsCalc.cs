@@ -424,7 +424,8 @@ namespace Planetarium.Calculators
         {
             double r = c.Get(DistanceFromEarth, Planet.JUPITER);
             double R = c.Get(DistanceFromSun, Planet.JUPITER);
-            return GalileanMoons.Magnitude(r, R, m - 1);
+            double p = c.Get(Phase, Planet.JUPITER);
+            return GalileanMoons.Magnitude(r, R, p, m - 1);
         }
 
         private double JupiterGreatRedSpotLongitude(SkyContext c)
@@ -463,6 +464,7 @@ namespace Planetarium.Calculators
             e.Add("Rectangular.X", (c, j) => c.Get(JupiterMoonRectangular, j.Number).X);
             e.Add("Rectangular.Y", (c, j) => c.Get(JupiterMoonRectangular, j.Number).Y);
             e.Add("Rectangular.Z", (c, j) => c.Get(JupiterMoonRectangular, j.Number).Z);
+            e.Add("Magnitude", (c, j) => c.Get(JupiterMoonMagnitude, j.Number));
         }
 
         public CelestialObjectInfo GetInfo(SkyContext c, Planet planet)

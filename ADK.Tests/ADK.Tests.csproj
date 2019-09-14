@@ -8,14 +8,16 @@
   <ItemGroup>
     <None Remove="Data\Constells.chk" />
     <None Remove="Data\DeltaT.chk" />
+    <None Remove="Data\GalileanMoonsMag.chk" />
     <None Remove="VSOP87.chk" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Data\Constells.chk" />
     <EmbeddedResource Include="Data\DeltaT.chk">
-      <CopyToOutputDirectory></CopyToOutputDirectory>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="Data\GalileanMoonsMag.chk" />
     <EmbeddedResource Include="Data\VSOP87.chk">
       <CopyToOutputDirectory></CopyToOutputDirectory>
     </EmbeddedResource>

@@ -42,24 +42,12 @@ namespace ADK
         /// Calculates visible magnitude of Galilean moon
         /// </summary>
         /// <param name="r">Distance Earth-Jupiter centers, in a.u.</param>
+        /// <param name="R">Distance Sun-Jupiter centers, in a.u.</param>
+        /// <param name="phase">Galilean moon phase (the same as Jupiter phase in approximation).</param>
         /// <param name="i">Galilean moon index, from 0 (Io) to 3 (Callisto)</param>
-        public static float Magnitude(double r, double R, int moonIndex)
+        public static float Magnitude(double r, double R, double phase, int moonIndex)
         {
-            // TODO: check formulae. Do not work :(
-
-            // absolute magnitude
-            double H = MH[moonIndex];
-
-            //double cosA = (r * r + R * R - 1) / (2 * r * R);
-
-            //double phaseAngle = ToDegrees(Acos(cosA));
-
-            // phase integral 
-            //double qa = 2.0 / 3.0 * ((1 - phaseAngle / PI) * Cos(phaseAngle) + 1.0 / PI * Sin(phaseAngle));
-
-            double m = H + 2.5 * Log10(R * r); // - 2.5 * Log10(qa);
-
-            return (float)m;
+            return (float)(5 * Log10(r * R / Sqrt(phase)) + MH[moonIndex] - 3.5);
         }
 
         public static GalileanMoonShadowAppearance Shadow(double distanceFromEarth, double distanceFromSun, int moonIndex, CrdsRectangular moon, CrdsRectangular eclipsedBody)
