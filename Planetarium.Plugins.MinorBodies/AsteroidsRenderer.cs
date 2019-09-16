@@ -1,7 +1,7 @@
 ﻿using ADK;
-using Planetarium.Calculators;
 using Planetarium.Config;
 using Planetarium.Objects;
+using Planetarium.Plugins.MinorBodies;
 using Planetarium.Types;
 using System;
 using System.Collections.Generic;

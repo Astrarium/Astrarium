@@ -59,7 +59,7 @@ namespace Planetarium.ViewModels
 
             SettingsSections = new ObservableCollection<SettingsSectionVM>();
 
-            var sections = settingConfig.SettingItems.Where(c => !string.IsNullOrEmpty(c.Section)).GroupBy(c => c.Section);
+            var sections = settingConfig.Where(c => !string.IsNullOrEmpty(c.Section)).GroupBy(c => c.Section);
 
             foreach (var section in sections)
             {

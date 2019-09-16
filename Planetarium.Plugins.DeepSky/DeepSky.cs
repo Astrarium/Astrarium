@@ -1,11 +1,12 @@
 ﻿using ADK;
+using Planetarium.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Planetarium.Objects
+namespace Planetarium.Plugins.DeepSky
 {
     public class DeepSky : SizeableCelestialObject
     {

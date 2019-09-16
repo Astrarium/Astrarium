@@ -7,25 +7,26 @@
              xmlns:controls="clr-namespace:Planetarium.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid IsEnabled="{Binding IsEnabled}">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+    <GroupBox Header="Great Red Spot of Jupiter" IsEnabled="{Binding IsEnabled}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-        <Label Content="Epoch:" Grid.Column="0" Grid.Row="0" />
-        <controls:DatePicker Options="MonthYear" JulianDay="{Binding SettingValue.Epoch}" Grid.Column="1" Grid.Row="0" />
+            <Label Content="Epoch:" Grid.Column="0" Grid.Row="0" />
+            <controls:DatePicker Options="MonthYear" JulianDay="{Binding SettingValue.Epoch}" Grid.Column="1" Grid.Row="0" />
 
-        <Label Content="Longitude at epoch:" Grid.Column="0" Grid.Row="1" />
-        <controls:NumericUpDown Grid.Column="1" Grid.Row="1" Minimum="0" Maximum="359" DecimalPlaces="0" Value="{Binding SettingValue.Longitude}" />
+            <Label Content="Longitude at epoch:" Grid.Column="0" Grid.Row="1" />
+            <controls:NumericUpDown Grid.Column="1" Grid.Row="1" Minimum="0" Maximum="359" DecimalPlaces="0" Value="{Binding SettingValue.Longitude}" />
 
-        <Label Content="Monthly drift:" Grid.Column="0" Grid.Row="2" />
-        <controls:NumericUpDown Grid.Column="1" Grid.Row="2" Minimum="0" Maximum="359" Step="0.01" DecimalPlaces="2" Value="{Binding SettingValue.MonthlyDrift}" />
-
-    </Grid>
+            <Label Content="Monthly drift:" Grid.Column="0" Grid.Row="2" />
+            <controls:NumericUpDown Grid.Column="1" Grid.Row="2" Minimum="0" Maximum="359" Step="0.01" DecimalPlaces="2" Value="{Binding SettingValue.MonthlyDrift}" />
+        </Grid>
+    </GroupBox>
 </UserControl>

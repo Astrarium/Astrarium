@@ -40,7 +40,6 @@ namespace ADK
         /// <param name="distance">Distance between Moon and Earth centers, in kilometers.</param>
         /// <returns>Returns value of parallax in degrees.</returns>
         /// <remarks>Taken from AA(II), page 390</remarks>
-        // TODO: test
         public static double Parallax(double distance)
         {
             return Angle.ToDegrees(Math.Asin(6378.14 / distance));
@@ -126,10 +125,6 @@ namespace ADK
             // Mean elongation of the Moon
             double D = 297.8501921 + 445267.1114034 * T - 0.0018819 * T2 + T3 / 545868.0 - T4 / 113065000.0;
             D = Angle.ToRadians(Angle.To360(D));
-
-            // Sun's mean anomaly
-            double M = 357.5291092 + 35999.0502909 * T - 0.0001536 * T2 + T3 / 24490000.0;
-            M = Angle.ToRadians(Angle.To360(M));
 
             // Moon's mean anomaly
             double M_ = 134.9633964 + 477198.8675055 * T + 0.0087414 * T2 + T3 / 69699.0 - T4 / 14712000.0;

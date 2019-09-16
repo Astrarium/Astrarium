@@ -8,9 +8,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Planetarium.Calculators
+namespace Planetarium.Plugins.MinorBodies
 {
-    public class AsteroidsReader
+    internal class AsteroidsReader
     {
         /// <summary>
         /// Reads asteroids orbital elements written in MPC format.

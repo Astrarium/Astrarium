@@ -31,7 +31,7 @@ https://ssd.jpl.nasa.gov/sbdb_query.cgi
 
 Application uses icons and/or theirs modifications from following sources:
 
-* Asteroid icon created by by [Adrien Coquet](https://thenounproject.com/coquet_adrien) from the Noun Project: <https://thenounproject.com/search/?q=asteroid&i=2103706> under the the Creative Commons Attribution license
+* Asteroid icon created by [Adrien Coquet](https://thenounproject.com/coquet_adrien) from the Noun Project: <https://thenounproject.com/search/?q=asteroid&i=2103706> under the the Creative Commons Attribution license
 * Comet icon created by [Valerio Poltrini](https://thenounproject.com/valeriopoltrini)i from the Noun Project: <https://thenounproject.com/search/?q=comet&i=60988> under the the Creative Commons Attribution license
 * Sphere icon created by [Gonzalo Bravo](https://thenounproject.com/webposible) from the Noun Project: <https://thenounproject.com/search/?q=sphere&i=470602> under the the Creative Commons Attribution license
 * Sphere icon created by [Gonzalo Bravo](https://thenounproject.com/webposible) from the Noun Project: <https://thenounproject.com/search/?q=sphere&i=470812> under the the Creative Commons Attribution license
@@ -39,4 +39,5 @@ Application uses icons and/or theirs modifications from following sources:
 * Sun icon created by [Lucid Formation](https://thenounproject.com/lucidformation) from the Noun Project: <https://thenounproject.com/search/?q=horizon&i=126195> under the the Creative Commons Attribution license
 * Galaxy icon created by [Hannah Strobel](https://thenounproject.com/Mylillian) from the Noun Project: <https://thenounproject.com/search/?q=galaxy&i=22802> under the the Creative Commons Attribution license
 * Stars icon created by [Travis Avery](https://thenounproject.com/travisavery) from the Noun Project: <https://thenounproject.com/search/?q=star&i=2335992> under the the Creative Commons Attribution license
-* Constellation icon created by y [BomSymbols](https://thenounproject.com/korawan_m) from he Noun Project: <https://thenounproject.com/search/?q=constellation&i=937185> under the the Creative Commons Attribution license
+* Constellation icon created by [BomSymbols](https://thenounproject.com/korawan_m) from he Noun Project: <https://thenounproject.com/search/?q=constellation&i=937185> under the the Creative Commons Attribution license
+* Land icon created by [Adrien Coquet](https://thenounproject.com/korawan_m) from he Noun Project: <https://https://thenounproject.com/search/?q=land&i=1941494> under the the Creative Commons Attribution license

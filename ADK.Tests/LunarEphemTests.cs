@@ -208,7 +208,7 @@ namespace ADK.Tests
             double error = TimeSpan.FromMinutes(1).TotalDays;
 
             // output declination value
-            double delta = 0;
+            double delta;
 
             // example 52.a
             {

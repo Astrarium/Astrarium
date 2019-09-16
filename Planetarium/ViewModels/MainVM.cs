@@ -65,8 +65,6 @@ namespace Planetarium.ViewModels
             public ObservableCollection<MenuItemVM> SubItems { get; set; }
         }
 
-
-
         public class ObservableUniqueItemsCollection<T> : ObservableCollection<T>
         {
             public new void Add(T item)
@@ -95,7 +93,7 @@ namespace Planetarium.ViewModels
             }
         }
 
-        public MainVM(Sky sky, ISkyMap map, ISettings settings, IViewManager viewManager)
+        public MainVM(Sky sky, ISkyMap map, ISettings settings, IViewManager viewManager, ToolbarButtonsConfig toolbarButtonsConfig)
         {
             this.sky = sky;
             this.map = map;
@@ -133,21 +131,16 @@ namespace Planetarium.ViewModels
             Sky_ContextChanged();
             Map_SelectedObjectChanged(map.SelectedObject);
             Map_ViewAngleChanged(map.ViewAngle);
-
-
-            ToolbarItems.Add(new ToolbarToggleButtonVM("Equatorial Grid", "IconEquatorialGrid", settings, "EquatorialGrid"));
-            ToolbarItems.Add(new ToolbarToggleButtonVM("Horizontal Grid", "IconHorizontalGrid", settings, "HorizontalGrid"));
-            ToolbarItems.Add(new ToolbarToggleButtonVM("Ground", "IconGround", settings, "Ground"));
-            ToolbarItems.Add(new ToolbarSeparatorVM());
-
-            ToolbarItems.Add(new ToolbarToggleButtonVM("Constellation Lines", "IconConstLines", settings, "ConstLines"));
-            ToolbarItems.Add(new ToolbarSeparatorVM());
-
-            ToolbarItems.Add(new ToolbarToggleButtonVM("Stars", "IconStars", settings, "Stars"));
-            ToolbarItems.Add(new ToolbarToggleButtonVM("Planets", "IconPlanet", settings, "Planets"));
-            ToolbarItems.Add(new ToolbarToggleButtonVM("Asteroids","IconAsteroid", settings, "Asteroids"));
-            ToolbarItems.Add(new ToolbarToggleButtonVM("Comets", "IconComet", settings, "Comets"));
-            ToolbarItems.Add(new ToolbarToggleButtonVM("Deep Sky Objects", "IconDeepSky", settings, "DeepSky"));
+         
+            var toolbarGroups = toolbarButtonsConfig.GroupBy(b => b.Group);
+            foreach (var group in toolbarGroups)
+            {
+                foreach (var button in group)
+                {
+                    ToolbarItems.Add(new ToolbarToggleButtonVM(button.ButtonTooltip, button.ImageKey, button.BindableObject, button.BindablePropertyName));
+                }
+                ToolbarItems.Add(new ToolbarSeparatorVM());
+            }
         }
 
         private void Sky_ContextChanged()

@@ -7,14 +7,18 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ADK", "ADK\ADK.csproj", "{0
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ADK.Tests", "ADK.Tests\ADK.Tests.csproj", "{B8E35F4C-4324-48DE-97DB-6C9D083D59B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Planetarium", "Planetarium\Planetarium.csproj", "{BD5D4668-0D89-4A08-A669-739FF47CA03B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Planetarium", "Planetarium\Planetarium.csproj", "{BD5D4668-0D89-4A08-A669-739FF47CA03B}"
 	ProjectSection(ProjectDependencies) = postProject
 		{58EA126A-1037-4976-B212-8DBAE98B7D78} = {58EA126A-1037-4976-B212-8DBAE98B7D78}
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Planetarium.Types", "Planetarium.Types\Planetarium.Types.csproj", "{098854D6-DFD9-4A4A-8657-CE0323DB0DB2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Planetarium.Plugins.Tycho2", "Planetarium.Plugins.Tycho2\Planetarium.Plugins.Tycho2.csproj", "{58EA126A-1037-4976-B212-8DBAE98B7D78}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Planetarium.Plugins.Tycho2", "Planetarium.Plugins.Tycho2\Planetarium.Plugins.Tycho2.csproj", "{58EA126A-1037-4976-B212-8DBAE98B7D78}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Planetarium.Plugins.MinorBodies", "Planetarium.Plugins.MinorBodies\Planetarium.Plugins.MinorBodies.csproj", "{9CF722AF-7050-49B7-9BCE-0AC45C85177E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Planetarium.Plugins.DeepSky", "Planetarium.Plugins.DeepSky\Planetarium.Plugins.DeepSky.csproj", "{AB24287B-143D-4EC6-B7FA-E2B1446F5B61}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,6 +46,14 @@ Global
 		{58EA126A-1037-4976-B212-8DBAE98B7D78}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{58EA126A-1037-4976-B212-8DBAE98B7D78}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{58EA126A-1037-4976-B212-8DBAE98B7D78}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9CF722AF-7050-49B7-9BCE-0AC45C85177E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CF722AF-7050-49B7-9BCE-0AC45C85177E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CF722AF-7050-49B7-9BCE-0AC45C85177E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CF722AF-7050-49B7-9BCE-0AC45C85177E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB24287B-143D-4EC6-B7FA-E2B1446F5B61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB24287B-143D-4EC6-B7FA-E2B1446F5B61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB24287B-143D-4EC6-B7FA-E2B1446F5B61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB24287B-143D-4EC6-B7FA-E2B1446F5B61}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

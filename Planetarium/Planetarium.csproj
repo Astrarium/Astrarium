@@ -41,7 +41,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ADK\ADK.csproj" />
+    <ProjectReference Include="..\Planetarium.Plugins.DeepSky\Planetarium.Plugins.DeepSky.csproj" />
     <ProjectReference Include="..\Planetarium.Types\Planetarium.Types.csproj" />
+    <ProjectReference Include="..\Planetarium.Plugins.MinorBodies\Planetarium.Plugins.MinorBodies.csproj" />
     <ProjectReference Include="..\Planetarium.Plugins.Tycho2\Planetarium.Plugins.Tycho2.csproj" />
   </ItemGroup>
 
@@ -99,19 +101,10 @@
     <None Update="Data\Alphabet.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\Asteroids.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\AsteroidsSizes.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="Data\Borders.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\Cities.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\Comets.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\Conlabels.dat">
@@ -130,15 +123,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\Moon.jpg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\NGCIC.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\NGCICNames.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\Outlines.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\Rings.png">

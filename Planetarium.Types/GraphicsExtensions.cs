@@ -11,7 +11,7 @@ namespace Planetarium.Renderers
     /// <summary>
     /// Set of extensions for <see cref="Graphics"/> class.
     /// </summary>
-    public static class GraphicsExtenstions
+    public static class GraphicsExtensions
     {
         public static void DrawXCross(this Graphics g, Pen pen, PointF p, float size)
         {

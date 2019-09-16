@@ -164,10 +164,10 @@ namespace Planetarium.Calculators
         private ICollection<AstroEvent> MaxDeclinations(AstroEventsContext context)
         {
             List<AstroEvent> events = new List<AstroEvent>();
-            double jd = 0;
-            double delta = 0;
 
-            jd = context.From;
+            double jd = context.From;
+            double delta;
+
             while (jd < context.To)
             {
                 jd = LunarEphem.NearestMaxDeclination(jd, MoonDeclination.North, out delta);

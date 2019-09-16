@@ -1,7 +1,6 @@
 ﻿using ADK;
-using Planetarium.Calculators;
-using Planetarium.Config;
 using Planetarium.Objects;
+using Planetarium.Renderers;
 using Planetarium.Types;
 using System;
 using System.Collections.Generic;
@@ -13,7 +12,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Planetarium.Renderers
+namespace Planetarium.Plugins.DeepSky
 {
     public class DeepSkyRenderer : BaseRenderer
     {

@@ -46,10 +46,15 @@ namespace Planetarium
 
         private void ConfigureContainer()
         {
-            SettingsConfig settingsConfig = new SettingsConfig();         
+            var settings = new Settings();
+            kernel.Bind<ISettings, Settings>().ToConstant(settings).InSingletonScope();
 
-            
-            kernel.Bind<SettingsConfig>().ToConstant(settingsConfig).InSingletonScope();
+            kernel.Bind<SettingsConfig>().ToSelf().InSingletonScope();
+            kernel.Bind<ToolbarButtonsConfig>().ToSelf().InSingletonScope();
+
+            SettingsConfig settingsConfig = kernel.Get<SettingsConfig>();
+            ToolbarButtonsConfig toolbarButtonsConfig = kernel.Get<ToolbarButtonsConfig>();
+
 
 
             // TODO: consider more proper way to load plugins
@@ -70,7 +75,6 @@ namespace Planetarium
 
             var alltypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes());
 
-
             // collect all plugins implementations
             // TODO: to support plugin system, we need to load assemblies 
             // from the specific directory and search for plugin there
@@ -82,26 +86,21 @@ namespace Planetarium
             {
                 kernel.Bind(pluginType).ToSelf().InSingletonScope();
                 var plugin = kernel.Get(pluginType) as AbstractPlugin;
-                foreach (SettingItem item in plugin.SettingItems)
-                {
-                    settingsConfig.SettingItems.Add(item);
-                }
+
+                // add settings configurations
+                settingsConfig.AddRange(plugin.SettingItems);
+
+                // add configured toolbar buttons
+                toolbarButtonsConfig.AddRange(plugin.ToolbarItems);
             }
 
-            var settings = new Settings();
-            
             // set settings defaults 
-            foreach (SettingItem item in settingsConfig.SettingItems)
+            foreach (SettingItem item in settingsConfig)
             {
                 settings.Set(item.Name, item.DefaultValue);
             }
-
-            //settings.SetDefaults(settingsConfig.GetDefaultSettings());
-           
+          
             settings.Load();
-
-            kernel.Bind<ISettings, Settings>().ToConstant(settings).InSingletonScope();
-
 
             // collect all calculators implementations
             // TODO: to support plugin system, we need to load assemblies 

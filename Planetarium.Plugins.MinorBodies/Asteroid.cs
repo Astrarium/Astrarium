@@ -1,21 +1,22 @@
 ﻿using ADK;
+using Planetarium.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Planetarium.Objects
+namespace Planetarium.Plugins.MinorBodies
 {
-    public class Comet : SizeableCelestialObject, IMovingObject
+    public class Asteroid : SizeableCelestialObject, IMovingObject
     {
         /// <summary>
-        /// Name or readable designation of the comet
+        /// Name or readable designation of the minor planet
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// Orbital elements of the comet
+        /// Orbital elements of the minor planet
         /// </summary>
         public OrbitalElements Orbit { get; set; }
 
@@ -30,16 +31,16 @@ namespace Planetarium.Objects
         public double G { get; set; }
 
         /// <summary>
-        /// Magnitude of comet
+        /// Magnitude of asteroid
         /// </summary>
         public float Magnitude { get; set; }
 
-        // Average daily motion of comet
-        public double AverageDailyMotion { get; set; }
-
         /// <summary>
-        /// Visible horizontal coordinates of comet tail end
+        /// Physical diameter, in km, if available
         /// </summary>
-        public CrdsHorizontal TailHorizontal { get; set; }
+        public float PhysicalDiameter { get; set; }
+
+        // Average daily motion of asteroid
+        public double AverageDailyMotion { get; set; }
     }
 }

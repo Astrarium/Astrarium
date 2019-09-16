@@ -3,50 +3,36 @@ using Planetarium.Types.Config.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media;
 
 namespace Planetarium.Types
 {
-    public class AbstractSettingsConfig
+    public abstract class AbstractPlugin
     {
         public ICollection<SettingItem> SettingItems { get; } = new List<SettingItem>();
+        public ICollection<ToolbarButton> ToolbarItems { get; } = new List<ToolbarButton>();
 
-        protected void AddSetting<T>(string name, T defaultValue)
+        protected void AddSetting(SettingItem setting)
         {
-            AddSetting(name, defaultValue, null, null, null);
+            SettingItems.Add(setting);
         }
 
-        protected void AddSetting<T>(string name, T defaultValue, string sectionName)
+        protected void AddToolbarItem(ToolbarButton button)
         {
-            AddSetting(name, defaultValue, sectionName, null, null);
+            ToolbarItems.Add(button);
         }
 
-        protected void AddSetting<T>(string name, T defaultValue, string sectionName, Type controlType)
+        protected void ExportResourceDictionaries(params string[] names)
         {
-            AddSetting(name, defaultValue, sectionName, controlType, null);
-        }
-
-        protected void AddSetting<T>(string name, T defaultValue, string sectionName, Func<ISettings, bool> enabledCondition)
-        {
-            AddSetting(name, defaultValue, sectionName, null, enabledCondition);
-        }
-
-        protected void AddSetting<T>(string name, T defaultValue, string sectionName, Type controlType, Func<ISettings, bool> enabledCondition)
-        {
-            SettingItems.Add(new SettingItem()
+            string assemblyName = Assembly.GetAssembly(GetType()).FullName;
+            foreach (string name in names)
             {
-                Name = name,
-                DefaultValue = defaultValue,
-                Section = sectionName,
-                ControlType = controlType,
-                EnabledCondition = enabledCondition
-            });
+                Application.Current.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri($"/{assemblyName};component/{name}", UriKind.Relative) });
+            }
         }
-    }
-
-    public abstract class AbstractPlugin : AbstractSettingsConfig
-    {
-        
     }
 }

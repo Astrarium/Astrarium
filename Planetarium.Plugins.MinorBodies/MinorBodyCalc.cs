@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Planetarium.Calculators
+namespace Planetarium.Plugins.MinorBodies
 {
     public abstract class MinorBodyCalc : BaseCalc
     {
@@ -179,7 +179,7 @@ namespace Planetarium.Calculators
         /// </summary>
         protected CrdsRectangular SunRectangular(SkyContext c)
         {
-            CrdsHeliocentrical hEarth = PlanetPositions.GetPlanetCoordinates(Planet.EARTH, c.JulianDay, !c.PreferFastCalculation, false);
+            CrdsHeliocentrical hEarth = PlanetPositions.GetPlanetCoordinates(3, c.JulianDay, !c.PreferFastCalculation, false);
 
             var eSun = new CrdsEcliptical(Angle.To360(hEarth.L + 180), -hEarth.B, hEarth.R);
 

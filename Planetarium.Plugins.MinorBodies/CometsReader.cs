@@ -8,9 +8,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Planetarium.Calculators
+namespace Planetarium.Plugins.MinorBodies
 {
-    public class CometsReader
+    internal class CometsReader
     {
         /// <summary>
         /// Reads comets orbital elements written in MPC format.
