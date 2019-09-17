@@ -1,12 +1,4 @@
 ﻿using Planetarium.Types;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Planetarium.Renderers
 {
@@ -18,5 +10,6 @@ namespace Planetarium.Renderers
         public abstract void Render(IMapContext map);
         public virtual void Initialize() { }
         public virtual int ZOrder => 0;
+        public virtual string Name => GetType().Name;
     }
 }

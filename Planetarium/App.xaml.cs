@@ -99,6 +99,8 @@ namespace Planetarium
             {
                 settings.Set(item.Name, item.DefaultValue);
             }
+
+            
           
             settings.Load();
 
@@ -127,6 +129,8 @@ namespace Planetarium
             Type[] rendererTypes = alltypes
                 .Where(t => typeof(BaseRenderer).IsAssignableFrom(t) && !t.IsAbstract)
                 .ToArray();
+
+
 
             foreach (Type rendererType in rendererTypes)
             {
@@ -161,11 +165,12 @@ namespace Planetarium
 
             kernel.Bind<Sky, ISearcher, IEphemerisProvider>().ToConstant(new Sky(context, calculators, eventProviders)).InSingletonScope();
 
-            var renderers = rendererTypes
+            RenderersCollection renderers = new RenderersCollection(rendererTypes
                 .Select(r => kernel.Get(r))
                 .Cast<BaseRenderer>()
-                .OrderBy(r => r.ZOrder)
-                .ToArray();
+                .OrderBy(r => r.ZOrder));
+
+            settings.Set("RenderingOrder", renderers.Select(r => new RendererDescription(r)).ToList());
 
             kernel.Bind<ISkyMap>().ToConstant(new SkyMap(context, renderers)).InSingletonScope();
             kernel.Bind<IViewManager>().ToConstant(new ViewManager(t => kernel.Get(t))).InSingletonScope();

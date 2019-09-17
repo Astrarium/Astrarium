@@ -65,6 +65,8 @@ namespace Planetarium.Config
 
             // setting without editor in settings window
             Add(new SettingItem("ObserverLocation", new CrdsGeographical(-44, 56.3333, +3, 80, "Europe/Moscow", "Nizhny Novgorod")));
+
+            Add(new SettingItem("RenderingOrder", new List<RendererDescription>(), "Rendering", typeof(RenderersListSettingControl)));
         }
     }
 }
