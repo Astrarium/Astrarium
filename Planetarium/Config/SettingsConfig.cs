@@ -63,10 +63,12 @@ namespace Planetarium.Config
             }, "Planets", typeof(GRSSettingControl), s => s.Get<bool>("Planets")));
 
 
-            // setting without editor in settings window
+            // Default observer location.
+            // Has no section, so not displayed in settings window.
             Add(new SettingItem("ObserverLocation", new CrdsGeographical(-44, 56.3333, +3, 80, "Europe/Moscow", "Nizhny Novgorod")));
 
-            Add(new SettingItem("RenderingOrder", new List<RendererDescription>(), "Rendering", typeof(RenderersListSettingControl)));
+            // Default rendering order for BaseRenderer descendants.
+            Add(new SettingItem("RenderingOrder", new RenderingOrder(), "Rendering", typeof(RenderersListSettingControl)));
         }
     }
 }

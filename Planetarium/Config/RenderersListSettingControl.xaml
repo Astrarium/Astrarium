@@ -6,24 +6,52 @@
              xmlns:c="clr-namespace:Planetarium.Controls;assembly=Planetarium.Types"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <c:BindableListView ItemsSource="{Binding SettingValue}">
-        <ListView.Resources>
-            <Style TargetType="{x:Type c:BindableListView}" BasedOn="{StaticResource ListViewWithGridViewStyle}">
-                <Setter Property="ItemContainerStyle">
-                    <Setter.Value>
-                        <Style TargetType="ListViewItem" BasedOn="{StaticResource ListViewItemGridViewStyle}" />
-                    </Setter.Value>
-                </Setter>
-            </Style>
-        </ListView.Resources>
 
-        <ListView.View>
-            <GridView ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}">
-                <GridView.Columns>
-                    <GridViewColumn Header="Renderer" Width="Auto" DisplayMemberBinding="{Binding Path=Name}" />
-                </GridView.Columns>
-            </GridView>
-        </ListView.View>
+    <Grid>
 
-    </c:BindableListView>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="50" />
+            <ColumnDefinition Width="50" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <ListView 
+            x:Name="List" 
+            Grid.Row="0" 
+            Grid.ColumnSpan="3"
+            DisplayMemberPath="Name"
+            SelectionMode="Single" 
+            IsSynchronizedWithCurrentItem="True"
+            ScrollViewer.VerticalScrollBarVisibility="Visible"
+            ScrollViewer.CanContentScroll="False"
+            ItemsSource="{Binding SettingValue}">
+            
+            <ListView.Resources>
+                <Style TargetType="{x:Type c:BindableListView}" BasedOn="{StaticResource ListViewWithGridViewStyle}">
+                    <Setter Property="ItemContainerStyle">
+                        <Setter.Value>
+                            <Style TargetType="ListViewItem" BasedOn="{StaticResource ListViewItemGridViewStyle}" />
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ListView.Resources>
+
+            <ListView.View>
+                <GridView ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}">
+                    <GridView.Columns>
+                        <GridViewColumn Header="Renderer" Width="Auto" DisplayMemberBinding="{Binding Path=Name}" />
+                    </GridView.Columns>
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+        <Button Grid.Row="1" Grid.Column="0" Content="UP" Click="UpButton_Click" />
+        <Button Grid.Row="1" Grid.Column="1" Content="Down" Click="DownButton_Click" />
+    </Grid>
+    
 </UserControl>

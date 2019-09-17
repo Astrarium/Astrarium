@@ -5,6 +5,7 @@ using Planetarium.Renderers;
 using Planetarium.Types;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -52,7 +53,7 @@ namespace Planetarium
         /// </summary>
         private ICollection<RectangleF> labels = new List<RectangleF>();
 
-        private readonly List<BaseRenderer> renderers = new List<BaseRenderer>();
+        private readonly RenderersCollection renderers = null;
 
         public int Width { get; set; }
         public int Height { get; set; }
@@ -159,12 +160,12 @@ namespace Planetarium
 
         private MapContext mapContext = null;
 
-        public SkyMap(SkyContext skyContext, ICollection<BaseRenderer> renderers)
+        internal SkyMap(SkyContext skyContext, RenderersCollection renderers)
         {
             Projection = new ArcProjection(this);
 
-            this.renderers.AddRange(renderers);
-            this.mapContext = new MapContext(this, skyContext);
+            this.renderers = renderers;
+            this.mapContext = new MapContext(this, skyContext);           
         }
 
         public void Render(Graphics g)

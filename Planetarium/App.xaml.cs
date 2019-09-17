@@ -165,15 +165,25 @@ namespace Planetarium
 
             kernel.Bind<Sky, ISearcher, IEphemerisProvider>().ToConstant(new Sky(context, calculators, eventProviders)).InSingletonScope();
 
-            RenderersCollection renderers = new RenderersCollection(rendererTypes
-                .Select(r => kernel.Get(r))
-                .Cast<BaseRenderer>()
-                .OrderBy(r => r.ZOrder));
+            RenderingOrder renderingOrder = settings.Get<RenderingOrder>("RenderingOrder");
 
-            settings.Set("RenderingOrder", renderers.Select(r => new RendererDescription(r)).ToList());
+            RenderersCollection renderers = new RenderersCollection(rendererTypes.Select(r => kernel.Get(r)).Cast<BaseRenderer>());
+            renderers.Sort(renderingOrder);
+
+            renderingOrder = new RenderingOrder(renderers.Select(r => new RenderingOrderItem(r)));
+
+            settings.Set("RenderingOrder", renderingOrder);
 
             kernel.Bind<ISkyMap>().ToConstant(new SkyMap(context, renderers)).InSingletonScope();
             kernel.Bind<IViewManager>().ToConstant(new ViewManager(t => kernel.Get(t))).InSingletonScope();
+
+            renderingOrder.CollectionChanged += (s, e) =>
+            {
+                renderers.Sort(renderingOrder);
+
+                kernel.Get<ISkyMap>().Invalidate();
+                
+            };
         }
     }
 }

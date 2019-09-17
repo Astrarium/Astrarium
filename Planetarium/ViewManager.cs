@@ -31,7 +31,7 @@ namespace Planetarium
         /// </summary>
         private Func<Type, object> typeFactory;
 
-        public ViewManager(Func<Type, object> typeFactory)
+        internal ViewManager(Func<Type, object> typeFactory)
         {
             this.typeFactory = typeFactory;
             ResolveViewModelViewBindings();
