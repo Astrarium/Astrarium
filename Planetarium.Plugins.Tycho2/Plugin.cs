@@ -29,6 +29,13 @@ namespace Planetarium.Plugins.Tycho2
             ));
 
             #endregion Settings
+
+            #region Exports
+
+            ExportCalculators(typeof(Tycho2Calc));
+            ExportRenderers(typeof(Tycho2Renderer));
+
+            #endregion
         }
     }
 }

@@ -24,35 +24,35 @@ namespace Planetarium.Config
         {
             InitializeComponent();
 
-            //Style itemContainerStyle = new Style(typeof(ListBoxItem));
-            //itemContainerStyle.Setters.Add(new Setter(ListBoxItem.AllowDropProperty, true));
-            //itemContainerStyle.Setters.Add(new EventSetter(ListBoxItem.PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler(s_PreviewMouseLeftButtonDown)));
-            //itemContainerStyle.Setters.Add(new EventSetter(ListBoxItem.DropEvent, new DragEventHandler(listbox1_Drop)));
-            //List.ItemContainerStyle = itemContainerStyle;
+            Style itemContainerStyle = new Style(typeof(ListBoxItem), (Style)FindResource("ListBoxItemStyle"));
+            itemContainerStyle.Setters.Add(new Setter(AllowDropProperty, true));
+            itemContainerStyle.Setters.Add(new EventSetter(PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler(PreviewMouseLeftButtonDownHandler)));
+            itemContainerStyle.Setters.Add(new EventSetter(DropEvent, new DragEventHandler(DropHandler)));
+            List.ItemContainerStyle = itemContainerStyle;
         }
 
-        //void s_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        //{
+        private void PreviewMouseLeftButtonDownHandler(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is ListBoxItem)
+            {
+                ListBoxItem draggedItem = sender as ListBoxItem;
+                DragDrop.DoDragDrop(draggedItem, draggedItem.DataContext, DragDropEffects.Move);
+                draggedItem.IsSelected = true;
+            }
+        }
 
-        //    if (sender is ListBoxItem)
-        //    {
-        //        ListBoxItem draggedItem = sender as ListBoxItem;
-        //        DragDrop.DoDragDrop(draggedItem, draggedItem.DataContext, DragDropEffects.Move);
-        //        draggedItem.IsSelected = true;
-        //    }
-        //}
+        private void DropHandler(object sender, DragEventArgs e)
+        {
+            var renderingOrder = List.ItemsSource as RenderingOrder;
 
-        //void listbox1_Drop(object sender, DragEventArgs e)
-        //{
-        //    RenderingOrderItem droppedData = e.Data.GetData(typeof(RenderingOrderItem)) as RenderingOrderItem;
-        //    RenderingOrderItem target = ((ListBoxItem)(sender)).DataContext as RenderingOrderItem;
+            string fromItem = e.Data.GetData(typeof(string)) as string;
+            string toItem = ((ListBoxItem)sender).DataContext as string;
 
-        //    int removedIdx = List.Items.IndexOf(droppedData);
-        //    int targetIdx = List.Items.IndexOf(target);
-
-        //    var renderingOrder = List.ItemsSource as RenderingOrder;
-        //    renderingOrder.Move(removedIdx, targetIdx);
-        //}
+            int oldIndex = List.Items.IndexOf(fromItem);
+            int newIndex = List.Items.IndexOf(toItem);
+            
+            renderingOrder.Move(oldIndex, newIndex);
+        }
 
         private void UpButton_Click(object sender, RoutedEventArgs e)
         {

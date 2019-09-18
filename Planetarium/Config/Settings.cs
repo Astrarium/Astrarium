@@ -129,8 +129,15 @@ namespace Planetarium.Config
             using (JsonTextReader jsonReader = new JsonTextReader(reader))
             {
                 JsonSerializer ser = new JsonSerializer();
-                var settingsTree = ser.Deserialize<SavedSettings>(jsonReader);
-                Load(settingsTree);
+                try
+                {
+                    var settingsTree = ser.Deserialize<SavedSettings>(jsonReader);
+                    Load(settingsTree);
+                }
+                catch (Exception ex)
+                {
+                    // TODO: log
+                }
             }
         }
 

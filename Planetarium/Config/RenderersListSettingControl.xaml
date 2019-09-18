@@ -42,7 +42,7 @@
 
                 <Separator />
 
-                <TextBlock Margin="4" TextWrapping="WrapWithOverflow" HorizontalAlignment="Left" Text="Arrange layers according to desired rendering order. Topmost items rendered first. Use Up and Down buttons or drag and drop to arrange items." MaxWidth="500" />
+                <TextBlock Margin="4" TextWrapping="WrapWithOverflow" HorizontalAlignment="Left" Text="Arrange layers according to desired rendering order. Upper items rendered first. Use Up and Down buttons or drag and drop to arrange items." MaxWidth="500" />
                 
                 <StackPanel Orientation="Horizontal">
                     <Button Width="50" Margin="2" Content="UP" Click="UpButton_Click" />
