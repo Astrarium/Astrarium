@@ -84,7 +84,7 @@ namespace Planetarium
             }
         }
 
-        public Sky(SkyContext context, ICollection<BaseCalc> calculators, ICollection<BaseAstroEventsProvider> eventProviders)
+        public Sky(SkyContext context, CalculatorsCollection calculators, AstroEventProvidersCollection eventProviders)
         {
             Calculators.AddRange(calculators);
             EventProviders.AddRange(eventProviders);

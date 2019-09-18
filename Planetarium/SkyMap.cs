@@ -160,7 +160,7 @@ namespace Planetarium
 
         private MapContext mapContext = null;
 
-        internal SkyMap(SkyContext skyContext, RenderersCollection renderers, ISettings settings)
+        public SkyMap(SkyContext skyContext, RenderersCollection renderers, ISettings settings)
         {
             Projection = new ArcProjection(this);
 

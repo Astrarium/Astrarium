@@ -55,8 +55,6 @@ namespace Planetarium
             SettingsConfig settingsConfig = kernel.Get<SettingsConfig>();
             ToolbarButtonsConfig toolbarButtonsConfig = kernel.Get<ToolbarButtonsConfig>();
 
-
-
             // TODO: consider more proper way to load plugins
             string homeFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             IEnumerable<string> pluginPaths = Directory.EnumerateFiles(homeFolder, "*.dll");
@@ -148,28 +146,30 @@ namespace Planetarium
                 kernel.Bind(eventProviderType).ToSelf().InSingletonScope();
             }
 
-            var calculators = calcTypes
+            var calculators = new CalculatorsCollection(calcTypes
                 .Select(c => kernel.Get(c))
-                .Cast<BaseCalc>()
-                .ToArray();
+                .Cast<BaseCalc>());
 
-            var eventProviders = eventProviderTypes
+            var eventProviders = new AstroEventProvidersCollection(eventProviderTypes
                 .Select(c => kernel.Get(c))
-                .Cast<BaseAstroEventsProvider>()
-                .ToArray();
+                .Cast<BaseAstroEventsProvider>());
 
             SkyContext context = new SkyContext(
                 new Date(DateTime.Now).ToJulianEphemerisDay(),
                 new CrdsGeographical(settings.Get<CrdsGeographical>("ObserverLocation")));
 
-            kernel.Bind<Sky, ISearcher, IEphemerisProvider>().ToConstant(new Sky(context, calculators, eventProviders)).InSingletonScope();
-           
-            RenderersCollection renderers = new RenderersCollection(rendererTypes.Select(r => kernel.Get(r)).Cast<BaseRenderer>());
-            
-            kernel.Bind<ISkyMap>().ToConstant(new SkyMap(context, renderers, settings)).InSingletonScope();
+            kernel.Bind<SkyContext>().ToConstant(context).WhenInjectedInto<ISkyMap>().InSingletonScope();
+            kernel.Bind<SkyContext>().ToConstant(context).WhenInjectedInto<Sky>().InSingletonScope();
+            kernel.Bind<CalculatorsCollection>().ToConstant(calculators).InSingletonScope();
+            kernel.Bind<AstroEventProvidersCollection>().ToConstant(eventProviders).InSingletonScope();
+
+            kernel.Bind<ISkyMap>().To<SkyMap>().InSingletonScope();
+            kernel.Bind<Sky, ISearcher, IEphemerisProvider>().To<Sky>().InSingletonScope();
+
+            var renderers = new RenderersCollection(rendererTypes.Select(r => kernel.Get(r)).Cast<BaseRenderer>());
+            kernel.Bind<RenderersCollection>().ToConstant(renderers).InSingletonScope();
+
             kernel.Bind<IViewManager>().ToConstant(new ViewManager(t => kernel.Get(t))).InSingletonScope();
-           
-            
         }
     }
 }
