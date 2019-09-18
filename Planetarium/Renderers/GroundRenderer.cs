@@ -20,7 +20,7 @@ namespace Planetarium.Renderers
             this.settings = settings;
         }
 
-        public override int ZOrder => 800;
+        public override RendererOrder Order => RendererOrder.Terrestrial;
 
         public override void Render(IMapContext map)
         {

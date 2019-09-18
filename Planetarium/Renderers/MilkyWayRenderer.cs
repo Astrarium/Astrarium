@@ -76,6 +76,6 @@ namespace Planetarium.Renderers
             }
         }
 
-        public override int ZOrder => 100;
+        public override RendererOrder Order => RendererOrder.Background;
     }
 }

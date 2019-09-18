@@ -63,7 +63,7 @@ namespace Planetarium.Renderers
             penShadowOutline.DashStyle = DashStyle.Dot;
         }
 
-        public override int ZOrder => 700;
+        public override RendererOrder Order => RendererOrder.SolarSystem;
 
         public override void Render(IMapContext map)
         {

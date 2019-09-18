@@ -90,7 +90,7 @@ namespace Planetarium.Renderers
             }
         }
 
-        public override int ZOrder => 500;
+        public override RendererOrder Order => RendererOrder.SolarSystem - 1;
 
         private bool IsSegmentContainsBody(IMapContext map, ICollection<CelestialPoint> segment, Track track)
         {

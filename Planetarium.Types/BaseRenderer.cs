@@ -9,7 +9,18 @@ namespace Planetarium.Renderers
     {
         public abstract void Render(IMapContext map);
         public virtual void Initialize() { }
-        public virtual int ZOrder => 0;
-        public virtual string Name => GetType().Name;
+        public abstract RendererOrder Order { get; }
+    }
+
+    public enum RendererOrder
+    {
+        Background = 0,
+        Grids = 1,
+        DeepSpace = 2,
+        Stars = 3,
+        SolarSystem = 4,
+        EarthOrbit = 5,
+        Terrestrial = 6,
+        Foreground = 7
     }
 }

@@ -18,9 +18,9 @@ namespace Planetarium.Config
         /// </summary>
         public SettingsConfig()
         {
-            Add(new SettingItem("EquatorialGrid", true, "Grids"));
+            Add(new SettingItem("EquatorialGrid", false, "Grids"));
             Add(new SettingItem("LabelEquatorialPoles", true, "Grids", s => s.Get<bool>("EquatorialGrid")));
-            Add(new SettingItem("HorizontalGrid", true, "Grids"));
+            Add(new SettingItem("HorizontalGrid", false, "Grids"));
             Add(new SettingItem("LabelHorizontalPoles", true, "Grids", s => s.Get<bool>("HorizontalGrid")));
             Add(new SettingItem("EclipticLine", true, "Grids"));
             Add(new SettingItem("LabelEquinoxPoints", false, "Grids", s => s.Get<bool>("EclipticLine")));
@@ -66,9 +66,6 @@ namespace Planetarium.Config
             // Default observer location.
             // Has no section, so not displayed in settings window.
             Add(new SettingItem("ObserverLocation", new CrdsGeographical(-44, 56.3333, +3, 80, "Europe/Moscow", "Nizhny Novgorod")));
-
-            // Default rendering order for BaseRenderer descendants.
-            Add(new SettingItem("RenderingOrder", new RenderingOrder(), "Rendering", typeof(RenderersListSettingControl)));
         }
     }
 }

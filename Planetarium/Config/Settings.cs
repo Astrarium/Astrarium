@@ -3,6 +3,7 @@ using Newtonsoft.Json.Serialization;
 using Planetarium.Types;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Dynamic;
 using System.IO;
@@ -59,6 +60,13 @@ namespace Planetarium.Config
             {
                 SettingsValues[settingName] = value;
             }
+
+            if (value is INotifyCollectionChanged)
+            {
+                var collection = (INotifyCollectionChanged)value;
+                collection.CollectionChanged -= HandleObservableCollectionChanged;
+                collection.CollectionChanged += HandleObservableCollectionChanged;
+            }
         }
 
         public override bool TryGetMember(GetMemberBinder binder, out object result)
@@ -94,6 +102,24 @@ namespace Planetarium.Config
                 {
                     Load(stream);
                 }
+            }
+        }
+
+        private void HandleObservableCollectionChanged(object value, NotifyCollectionChangedEventArgs e)
+        {
+            string settingName = SettingsValues.FirstOrDefault(x => x.Value == value).Key;
+            IsChanged = true;
+
+            var settingValueChangedInvocationList = SettingValueChanged.GetInvocationList();
+            foreach (var item in settingValueChangedInvocationList)
+            {
+                (item as Action<string, object>).BeginInvoke(settingName, value, null, null);
+            }
+
+            var propertyChangedInvocationList = PropertyChanged.GetInvocationList();
+            foreach (var item in propertyChangedInvocationList)
+            {
+                (item as PropertyChangedEventHandler).BeginInvoke(this, new PropertyChangedEventArgs(settingName), null, null);
             }
         }
 

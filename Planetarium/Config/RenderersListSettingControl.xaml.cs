@@ -31,28 +31,28 @@ namespace Planetarium.Config
             //List.ItemContainerStyle = itemContainerStyle;
         }
 
-        void s_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
+        //void s_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        //{
 
-            if (sender is ListBoxItem)
-            {
-                ListBoxItem draggedItem = sender as ListBoxItem;
-                DragDrop.DoDragDrop(draggedItem, draggedItem.DataContext, DragDropEffects.Move);
-                draggedItem.IsSelected = true;
-            }
-        }
+        //    if (sender is ListBoxItem)
+        //    {
+        //        ListBoxItem draggedItem = sender as ListBoxItem;
+        //        DragDrop.DoDragDrop(draggedItem, draggedItem.DataContext, DragDropEffects.Move);
+        //        draggedItem.IsSelected = true;
+        //    }
+        //}
 
-        void listbox1_Drop(object sender, DragEventArgs e)
-        {
-            RenderingOrderItem droppedData = e.Data.GetData(typeof(RenderingOrderItem)) as RenderingOrderItem;
-            RenderingOrderItem target = ((ListBoxItem)(sender)).DataContext as RenderingOrderItem;
+        //void listbox1_Drop(object sender, DragEventArgs e)
+        //{
+        //    RenderingOrderItem droppedData = e.Data.GetData(typeof(RenderingOrderItem)) as RenderingOrderItem;
+        //    RenderingOrderItem target = ((ListBoxItem)(sender)).DataContext as RenderingOrderItem;
 
-            int removedIdx = List.Items.IndexOf(droppedData);
-            int targetIdx = List.Items.IndexOf(target);
+        //    int removedIdx = List.Items.IndexOf(droppedData);
+        //    int targetIdx = List.Items.IndexOf(target);
 
-            var renderingOrder = List.ItemsSource as RenderingOrder;
-            renderingOrder.Move(removedIdx, targetIdx);
-        }
+        //    var renderingOrder = List.ItemsSource as RenderingOrder;
+        //    renderingOrder.Move(removedIdx, targetIdx);
+        //}
 
         private void UpButton_Click(object sender, RoutedEventArgs e)
         {

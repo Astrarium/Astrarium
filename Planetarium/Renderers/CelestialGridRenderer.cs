@@ -147,7 +147,7 @@ namespace Planetarium.Renderers
             }
         }
 
-        public override int ZOrder => 400;
+        public override RendererOrder Order => RendererOrder.Grids;
 
         private void DrawGrid(IMapContext map, Pen penGrid, CelestialGrid grid)
         {

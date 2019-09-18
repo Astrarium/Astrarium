@@ -94,14 +94,15 @@ namespace Planetarium
                 toolbarButtonsConfig.AddRange(plugin.ToolbarItems);
             }
 
+            // Default rendering order for BaseRenderer descendants.
+            settingsConfig.Add(new SettingItem("RenderingOrder", new RenderingOrder(), "Rendering", typeof(RenderersListSettingControl)));
+
             // set settings defaults 
             foreach (SettingItem item in settingsConfig)
             {
                 settings.Set(item.Name, item.DefaultValue);
             }
-
             
-          
             settings.Load();
 
             // collect all calculators implementations
@@ -129,8 +130,6 @@ namespace Planetarium
             Type[] rendererTypes = alltypes
                 .Where(t => typeof(BaseRenderer).IsAssignableFrom(t) && !t.IsAbstract)
                 .ToArray();
-
-
 
             foreach (Type rendererType in rendererTypes)
             {
@@ -164,26 +163,13 @@ namespace Planetarium
                 new CrdsGeographical(settings.Get<CrdsGeographical>("ObserverLocation")));
 
             kernel.Bind<Sky, ISearcher, IEphemerisProvider>().ToConstant(new Sky(context, calculators, eventProviders)).InSingletonScope();
-
-            RenderingOrder renderingOrder = settings.Get<RenderingOrder>("RenderingOrder");
-
+           
             RenderersCollection renderers = new RenderersCollection(rendererTypes.Select(r => kernel.Get(r)).Cast<BaseRenderer>());
-            renderers.Sort(renderingOrder);
-
-            renderingOrder = new RenderingOrder(renderers.Select(r => new RenderingOrderItem(r)));
-
-            settings.Set("RenderingOrder", renderingOrder);
-
-            kernel.Bind<ISkyMap>().ToConstant(new SkyMap(context, renderers)).InSingletonScope();
+            
+            kernel.Bind<ISkyMap>().ToConstant(new SkyMap(context, renderers, settings)).InSingletonScope();
             kernel.Bind<IViewManager>().ToConstant(new ViewManager(t => kernel.Get(t))).InSingletonScope();
-
-            renderingOrder.CollectionChanged += (s, e) =>
-            {
-                renderers.Sort(renderingOrder);
-
-                kernel.Get<ISkyMap>().Invalidate();
-                
-            };
+           
+            
         }
     }
 }

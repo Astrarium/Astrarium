@@ -119,7 +119,7 @@ namespace Planetarium.Renderers
                 }
             }
         }
-       
-        public override int ZOrder => 699;
+
+        public override RendererOrder Order => RendererOrder.SolarSystem;
     }
 }

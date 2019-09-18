@@ -38,7 +38,7 @@ namespace Planetarium.Renderers
             }
         }
 
-        public override int ZOrder => 300;
+        public override RendererOrder Order => RendererOrder.Grids;
 
         /// <summary>
         /// Renders constellation borders on the map

@@ -24,7 +24,6 @@
             x:Name="List" 
             Grid.Row="0" 
             Grid.ColumnSpan="3"
-            DisplayMemberPath="Name"
             SelectionMode="Single" 
             IsSynchronizedWithCurrentItem="True"
             ScrollViewer.VerticalScrollBarVisibility="Visible"
@@ -44,7 +43,7 @@
             <ListView.View>
                 <GridView ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}">
                     <GridView.Columns>
-                        <GridViewColumn Header="Renderer" Width="Auto" DisplayMemberBinding="{Binding Path=Name}" />
+                        <GridViewColumn Header="Renderer" Width="Auto" DisplayMemberBinding="{Binding}" />
                     </GridView.Columns>
                 </GridView>
             </ListView.View>

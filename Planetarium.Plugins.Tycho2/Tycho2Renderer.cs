@@ -77,7 +77,7 @@ namespace Planetarium.Plugins.Tycho2
                 }
             }
         }
-       
-        public override int ZOrder => 599;
+
+        public override RendererOrder Order => RendererOrder.Stars;
     }
 }

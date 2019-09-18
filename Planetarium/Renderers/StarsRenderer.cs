@@ -210,6 +210,6 @@ namespace Planetarium.Renderers
             }
         }
 
-        public override int ZOrder => 600;
+        public override RendererOrder Order => RendererOrder.Stars;
     }
 }

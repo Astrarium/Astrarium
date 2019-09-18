@@ -350,6 +350,6 @@ namespace Planetarium.Plugins.DeepSky
             }
         }
 
-        public override int ZOrder => 200;
+        public override RendererOrder Order => RendererOrder.DeepSpace;
     }
 }

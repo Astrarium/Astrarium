@@ -10,28 +10,42 @@ namespace Planetarium
 {
     internal class RenderersCollection : List<BaseRenderer>
     {
-        private RenderingOrder Order;
+        public RenderersCollection() : base() { }
+        public RenderersCollection(IEnumerable<BaseRenderer> renderers) : base(renderers) { }
 
-        private Comparison<BaseRenderer> comparison;
-
-        public RenderersCollection() : this(new BaseRenderer[] { })
+        public void Sort(IEnumerable<string> order)
         {
-
+            Sort(new RenderersOrderComparer(order));
         }
 
-        public RenderersCollection(IEnumerable<BaseRenderer> renderers) : base(renderers)
+        private class RenderersOrderComparer : IComparer<BaseRenderer>
         {
-            comparison = new Comparison<BaseRenderer>((r1, r2) => {
-                int i1 = Order.IndexOf(Order.FirstOrDefault(ro => ro.RendererType == r1.GetType().FullName));
-                int i2 = Order.IndexOf(Order.FirstOrDefault(ro => ro.RendererType == r2.GetType().FullName));
-                return i1 - i2;
-            });
+            private IList<string> Order;
+
+            public RenderersOrderComparer(IEnumerable<string> order)
+            {
+                Order = new List<string>(order);
+            }
+
+            public int Compare(BaseRenderer r1, BaseRenderer r2)
+            {
+                int i1 = GetOrderIndex(r1);
+                int i2 = GetOrderIndex(r2);
+                if (i1 == -1 && i2 == -1)
+                {
+                    return r1.Order - r2.Order;
+                }
+                else
+                {
+                    return i1 - i2;
+                }
+            }
+
+            private int GetOrderIndex(BaseRenderer renderer)
+            {
+                return Order.IndexOf(Order.FirstOrDefault(ro => ro == renderer.GetType().FullName));
+            }
         }
 
-        public void Sort(RenderingOrder order)
-        {
-            Order = order;
-            Sort(comparison);
-        }
     }
 }

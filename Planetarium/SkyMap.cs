@@ -160,12 +160,33 @@ namespace Planetarium
 
         private MapContext mapContext = null;
 
-        internal SkyMap(SkyContext skyContext, RenderersCollection renderers)
+        internal SkyMap(SkyContext skyContext, RenderersCollection renderers, ISettings settings)
         {
             Projection = new ArcProjection(this);
 
             this.renderers = renderers;
-            this.mapContext = new MapContext(this, skyContext);           
+            this.mapContext = new MapContext(this, skyContext);
+
+            // get saved rendering orders
+            RenderingOrder renderingOrder = settings.Get<RenderingOrder>("RenderingOrder");
+
+            // sort renderers according saving orders
+            renderers.Sort(renderingOrder);
+
+            // build rendering order based on existing renderers
+            renderingOrder = new RenderingOrder(renderers.Select(r => r.GetType().FullName));
+
+            // save actual rendering order
+            settings.Set("RenderingOrder", renderingOrder);
+
+            settings.SettingValueChanged += (name, value) =>
+            {
+                if (name == "RenderingOrder")
+                {
+                    renderers.Sort(settings.Get<RenderingOrder>("RenderingOrder"));
+                    Invalidate();
+                }
+            };
         }
 
         public void Render(Graphics g)
