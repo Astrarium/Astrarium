@@ -22,6 +22,11 @@ namespace Planetarium.Plugins.Tycho2
         /// <param name="magFilter">Magnitude filter function, returns true if star is visible and should be included in results</param>
         /// <returns>Collection of <see cref="Tycho2Star"/> objects</returns>
         ICollection<Tycho2Star> GetStars(SkyContext context, CrdsEquatorial eq, double angle, Func<float, bool> magFilter);
+
+        /// <summary>
+        /// Gets or sets Tycho2Star object that the map is locked on
+        /// </summary>
+        Tycho2Star LockedStar { get; set; }
     }
 
     public class Tycho2Calc : BaseCalc, ICelestialObjectCalc<Tycho2Star>, ITycho2Catalog
@@ -98,6 +103,8 @@ namespace Planetarium.Plugins.Tycho2
             Logger = logger;
         }
 
+        public Tycho2Star LockedStar { get; set; }
+        
         public override void Initialize()
         {
             string catalogLocation = Settings.Get<string>("Tycho2Path");
@@ -142,6 +149,15 @@ namespace Planetarium.Plugins.Tycho2
             {
                 Logger.Error($"Unable to initialize Tycho2 calculator: {ex}");
             }
+        }
+
+        private void CalculateCoordinates(SkyContext c, Tycho2Star star)
+        {
+            // current equatorial coordinates
+            star.Equatorial = c.Get(Equatorial, star);
+
+            // current horizontal coordinates
+            star.Horizontal = c.Get(Horizontal, star);
         }
 
         public ICollection<Tycho2Star> GetStars(SkyContext c, CrdsEquatorial eq, double angle, Func<float, bool> magFilter)
@@ -344,17 +360,17 @@ namespace Planetarium.Plugins.Tycho2
             star.PmRA = BitConverter.ToSingle(buffer, offset + 21);
             star.PmDec = BitConverter.ToSingle(buffer, offset + 25);
 
-            // current equatorial coordinates
-            star.Equatorial = c.Get(Equatorial, star);
+            CalculateCoordinates(c, star);
 
-            // current horizontal coordinates
-            star.Horizontal = c.Get(Horizontal, star);
             return star;
         }
 
         public override void Calculate(SkyContext context)
         {
-            // Do nothing here
+            if (LockedStar != null)
+            {
+                CalculateCoordinates(context, LockedStar);
+            }
         }
 
         public void ConfigureEphemeris(EphemerisConfig<Tycho2Star> e)

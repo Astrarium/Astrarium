@@ -54,8 +54,10 @@ namespace Planetarium.Plugins.Tycho2
 
                 SkyContext context = new SkyContext(map.JulianDay, map.GeoLocation);
 
+                tycho2.LockedStar = map.LockedObject as Tycho2Star;
+
                 var stars = tycho2.GetStars(context, eq, map.ViewAngle * coeff, m => MagFilter(map, m));
-             
+
                 foreach (var star in stars)
                 {
                     if (!isGround || star.Horizontal.Altitude > 0)

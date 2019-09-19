@@ -33,10 +33,10 @@ namespace Planetarium.Config
             Add(new SettingItem("LabelCardinalDirections", true, "Grids", s => s.Get<bool>("HorizonLine")));
 
             Add(new SettingItem("Sun", true, "Sun"));
-            Add(new SettingItem("LabelSun", true, "Sun", s => s.Get<bool>("Sun")));
-            Add(new SettingItem("SunLabelFont", new Font("Arial", 12), "Sun", s => s.Get<bool>("Sun") && s.Get<bool>("LabelSun")));
-            Add(new SettingItem("TextureSun", true, "Sun", s => s.Get<bool>("Sun")));
-            Add(new SettingItem("TextureSunPath", "https://soho.nascom.nasa.gov/data/REPROCESSING/Completed/{yyyy}/hmiigr/{yyyy}{MM}{dd}/{yyyy}{MM}{dd}_0000_hmiigr_512.jpg", "Sun", s => s.Get<bool>("Sun") && s.Get<bool>("TextureSun")));
+            Add(new SettingItem("SunLabel", true, "Sun", s => s.Get<bool>("Sun")));
+            Add(new SettingItem("SunLabelFont", new Font("Arial", 12), "Sun", s => s.Get<bool>("Sun") && s.Get<bool>("SunLabel")));
+            Add(new SettingItem("SunTexture", true, "Sun", s => s.Get<bool>("Sun")));
+            Add(new SettingItem("SunTexturePath", "https://soho.nascom.nasa.gov/data/REPROCESSING/Completed/{yyyy}/hmiigr/{yyyy}{MM}{dd}/{yyyy}{MM}{dd}_0000_hmiigr_512.jpg", "Sun", s => s.Get<bool>("Sun") && s.Get<bool>("TextureSun")));
 
             Add(new SettingItem("ConstLabels", true, "Constellations"));
             Add(new SettingItem("ConstLabelsType", ConstellationsRenderer.LabelType.InternationalName, "Constellations", s => s.Get<bool>("ConstLabels")));

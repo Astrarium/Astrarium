@@ -105,7 +105,7 @@ namespace Planetarium.Renderers
             if (!settings.Get<bool>("Sun")) return;
 
             bool isGround = settings.Get<bool>("Ground");
-            bool useTextures = settings.Get<bool>("UseTextures");
+            bool useTextures = settings.Get<bool>("SunTexture");
             double ad = Angle.Separation(sun.Horizontal, map.Center);
             double coeff = map.DiagonalCoefficient();
 
@@ -144,7 +144,11 @@ namespace Planetarium.Renderers
 
                 map.Graphics.ResetTransform();
 
-                map.DrawObjectCaption(fontLabel, brushLabel, "Sun", p, size);
+                if (settings.Get<bool>("SunLabel"))
+                {
+                    map.DrawObjectCaption(fontLabel, brushLabel, "Sun", p, size);
+                }
+
                 map.AddDrawnObject(sun, p);
             }
         }
@@ -787,7 +791,7 @@ namespace Planetarium.Renderers
 
         private Image SunImageProvider(DateTime date)
         {
-            string template = settings.Get<string>("TextureSunPath");
+            string template = settings.Get<string>("SunTexturePath");
             string format = Regex.Replace(template, "{([^}]*)}", match => "{0:" + match.Groups[1].Value + "}");
             string url = string.Format(format, date);// ;
             return solarTextureDownloader.Download(url);
