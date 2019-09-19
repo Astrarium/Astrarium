@@ -28,7 +28,7 @@ namespace Planetarium.Plugins.DeepSky
 
             #endregion Toolbar Integration
 
-            #region Export resources
+            #region Exports
 
             ExportResourceDictionaries("Images.xaml");
 

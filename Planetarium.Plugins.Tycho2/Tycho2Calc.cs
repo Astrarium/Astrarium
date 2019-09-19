@@ -82,17 +82,32 @@ namespace Planetarium.Plugins.Tycho2
         /// </summary>
         private const double SEGMENT_DIAM = 3.75;
 
+        /// <summary>
+        /// Settings instance
+        /// </summary>
         private readonly ISettings Settings;
 
-        public Tycho2Calc(ISettings settings)
+        /// <summary>
+        /// Logger instance
+        /// </summary>
+        private readonly ILogger Logger;
+
+        public Tycho2Calc(ISettings settings, ILogger logger)
         {
             Settings = settings;
+            Logger = logger;
         }
 
         public override void Initialize()
         {
             string catalogLocation = Settings.Get<string>("Tycho2Path");
 
+            if (string.IsNullOrEmpty(catalogLocation))
+            {
+                Logger.Warn("Unable to initialize Tycho2 calculator, catalog location is not set.");
+                return;
+            }
+            
             try
             {
                 string indexFile = Path.Combine(catalogLocation, "tycho2.idx");
@@ -100,21 +115,22 @@ namespace Planetarium.Plugins.Tycho2
 
                 // Read Tycho2 index file and load it into memory.
 
+                // TODO: it's better to convert string format to binary.
                 StreamReader sr = new StreamReader(indexFile);
 
                 while (!sr.EndOfStream)
                 {
                     string line = sr.ReadLine();
                     string[] chunks = line.Split(';');
-                    Tycho2Region region = new Tycho2Region();
-                    region.FirstStarId = Convert.ToInt64(chunks[0].Trim());
-                    region.LastStarId = Convert.ToInt64(chunks[1].Trim());
-                    region.RAmin = Convert.ToSingle(chunks[2].Trim(), CultureInfo.InvariantCulture);
-                    region.RAmax = Convert.ToSingle(chunks[3].Trim(), CultureInfo.InvariantCulture);
-                    region.DECmin = Convert.ToSingle(chunks[4].Trim(), CultureInfo.InvariantCulture);
-                    region.DECmax = Convert.ToSingle(chunks[5].Trim(), CultureInfo.InvariantCulture);
-
-                    IndexRegions.Add(region);
+                    IndexRegions.Add(new Tycho2Region()
+                    {
+                        FirstStarId = Convert.ToInt64(chunks[0].Trim()),
+                        LastStarId = Convert.ToInt64(chunks[1].Trim()),
+                        RAmin = Convert.ToSingle(chunks[2].Trim(), CultureInfo.InvariantCulture),
+                        RAmax = Convert.ToSingle(chunks[3].Trim(), CultureInfo.InvariantCulture),
+                        DECmin = Convert.ToSingle(chunks[4].Trim(), CultureInfo.InvariantCulture),
+                        DECmax = Convert.ToSingle(chunks[5].Trim(), CultureInfo.InvariantCulture)
+                    });
                 }
 
                 sr.Close();
@@ -124,7 +140,7 @@ namespace Planetarium.Plugins.Tycho2
             }
             catch (Exception ex)
             {
-                // TODO: log
+                Logger.Error($"Unable to initialize Tycho2 calculator: {ex}");
             }
         }
 

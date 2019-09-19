@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Planetarium.Config
 {
@@ -30,6 +31,13 @@ namespace Planetarium.Config
         //{
         //    Defaults = defaults;
         //}
+
+        private ILogger Logger;
+
+        public Settings(ILogger logger)
+        {
+            Logger = logger;
+        }
 
         public T Get<T>(string settingName, T defaultValue = default(T))
         {
@@ -95,13 +103,16 @@ namespace Planetarium.Config
 
         public void Load()
         {
-            //Reset();
             if (File.Exists(SETTINGS_PATH))
             {
                 using (var stream = new FileStream(SETTINGS_PATH, FileMode.Open))
                 {
                     Load(stream);
                 }
+            }
+            else
+            {
+                Logger.Info($"Setting file {SETTINGS_PATH} not found, skip loading settings.");
             }
         }
 
@@ -136,7 +147,7 @@ namespace Planetarium.Config
                 }
                 catch (Exception ex)
                 {
-                    // TODO: log
+                    Logger.Error(ex.ToString());
                 }
             }
         }

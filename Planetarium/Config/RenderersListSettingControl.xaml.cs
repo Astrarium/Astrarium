@@ -24,7 +24,7 @@ namespace Planetarium.Config
         {
             InitializeComponent();
 
-            Style itemContainerStyle = new Style(typeof(ListBoxItem), (Style)FindResource("ListBoxItemStyle"));
+            Style itemContainerStyle = new Style(typeof(ListBoxItem), (Style)Application.Current.TryFindResource(typeof(ListBoxItem)));
             itemContainerStyle.Setters.Add(new Setter(AllowDropProperty, true));
             itemContainerStyle.Setters.Add(new EventSetter(PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler(PreviewMouseLeftButtonDownHandler)));
             itemContainerStyle.Setters.Add(new EventSetter(DropEvent, new DragEventHandler(DropHandler)));

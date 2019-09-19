@@ -39,6 +39,7 @@
   </ItemGroup>
   
   <ItemGroup>
+    <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="Ninject" Version="3.3.4" />
   </ItemGroup>
@@ -146,6 +147,9 @@
     </None>
     <None Update="Data\TimeZones.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Views\SplashScreenWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
     </None>
   </ItemGroup>
 

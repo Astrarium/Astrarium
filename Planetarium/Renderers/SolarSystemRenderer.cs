@@ -50,15 +50,16 @@ namespace Planetarium.Renderers
             new SolidBrush(Color.FromArgb(32, 0, 0, 0))
         };
 
-        private SolarTextureDownloader solarTextureDownloader = new SolarTextureDownloader();
+        private readonly SolarTextureDownloader solarTextureDownloader = null;
         private SphereRenderer sphereRenderer = new SphereRenderer();
         private ImagesCache imagesCache = new ImagesCache();
 
-        public SolarSystemRenderer(ILunarProvider lunarProvider, ISolarProvider solarProvider, IPlanetsProvider planetsProvider, ISettings settings)
+        public SolarSystemRenderer(ILunarProvider lunarProvider, ISolarProvider solarProvider, IPlanetsProvider planetsProvider, SolarTextureDownloader solarTextureDownloader, ISettings settings)
         {
             this.solarProvider = solarProvider;
             this.lunarProvider = lunarProvider;
             this.planetsProvider = planetsProvider;
+            this.solarTextureDownloader = solarTextureDownloader;
             this.settings = settings;
             penShadowOutline.DashStyle = DashStyle.Dot;
         }

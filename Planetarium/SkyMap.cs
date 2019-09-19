@@ -210,9 +210,9 @@ namespace Planetarium
                 Center.Azimuth = LockedObject.Horizontal.Azimuth;
             }
 
-            foreach (var renderer in renderers)
+            for (int i = 0; i < renderers.Count(); i++)
             {
-                renderer.Render(mapContext);
+                renderers.ElementAt(i).Render(mapContext);
                 if (needDrawSelectedObject)
                 {
                     needDrawSelectedObject = !DrawSelectedObject(g);

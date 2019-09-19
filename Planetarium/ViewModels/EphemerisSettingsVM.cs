@@ -1,7 +1,6 @@
 ﻿using Planetarium.Objects;
 using Planetarium.Types.Themes;
 using Planetarium.Types;
-using Planetarium.Types.Themes;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

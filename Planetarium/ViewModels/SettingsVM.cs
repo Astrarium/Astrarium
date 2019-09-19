@@ -94,24 +94,25 @@ namespace Planetarium.ViewModels
                 var result = viewManager.ShowMessageBox("Warning", "You have unsaved changes in program options. Do you want to apply them?", MessageBoxButton.YesNoCancel);
                 if (MessageBoxResult.Yes == result)
                 {
-                    settings.Save();                    
+                    base.Close();
+                    settings.Save();
                 }
                 else if (MessageBoxResult.No == result)
                 {
+                    base.Close();
                     settings.Load();
                 }
-                else if (MessageBoxResult.Cancel == result)
-                {
-                    return;
-                }
             }
-            base.Close();
+            else
+            {
+                base.Close();
+            }
         }
 
         private void Save()
         {
             settings.Save();
-            Close();
+            base.Close();
         }
 
         private void Reset()

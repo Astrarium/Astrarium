@@ -2,6 +2,7 @@
 using Planetarium.Config;
 using Planetarium.Objects;
 using Planetarium.Plugins.MinorBodies;
+using Planetarium.Renderers;
 using Planetarium.Types;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Planetarium.Renderers
+namespace Planetarium.Plugins.MinorBodies
 {
     public class AsteroidsRenderer : BaseRenderer
     {

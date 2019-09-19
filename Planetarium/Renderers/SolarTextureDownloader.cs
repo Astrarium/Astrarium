@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Planetarium.Types;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -16,21 +17,23 @@ namespace Planetarium.Renderers
     /// </summary>
     public class SolarTextureDownloader
     {
-        public static readonly string TempPath = Path.GetTempPath();
+        private static readonly string TempPath = Path.GetTempPath();
+        private static readonly string SunImagesPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ADK", "SunImages");
+        private readonly ILogger logger;
 
-        public static readonly string SunImagesPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ADK", "SunImages");
-
-        public SolarTextureDownloader()
+        public SolarTextureDownloader(ILogger logger)
         {
+            this.logger = logger;
+
             if (!Directory.Exists(SunImagesPath))
             {
                 try
                 {
                     Directory.CreateDirectory(SunImagesPath);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // TODO: log
+                    logger.Error($"Unable to create directory for sun images: {SunImagesPath}, Details: {ex}");
                 }
             }
         }
@@ -121,9 +124,9 @@ namespace Planetarium.Renderers
                     return result;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // TODO: log
+                logger.Error($"Unable to download file from {url}, exception: {ex}");
                 return null;
             }
             finally
@@ -135,9 +138,9 @@ namespace Planetarium.Renderers
                     {
                         File.Delete(bmpImageFile);
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // TODO: log
+                        logger.Error($"Unable to delete file {bmpImageFile}, exception: {ex}");
                     }
                 }
             }
