@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Planetarium.Plugins.MinorBodies
@@ -173,13 +174,26 @@ namespace Planetarium.Plugins.MinorBodies
         public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)
         {
             return Comets
-                .Where(c => c.Name.Contains(searchString))
+                .Where(c => GetNames(c.Name).Any(n => n.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
                 .Select(p => new SearchResultItem(p, p.Name)).ToArray();
         }
 
         public string GetName(Comet body)
         {
             return body.Name;
+        }
+
+        private string[] GetNames(string name)
+        {
+            var match = Regex.Match(name, "^(.+)\\((.+)\\)$");
+            if (match.Success)
+            {
+                return new string[] { match.Groups[1].Value.Trim(), match.Groups[2].Value.Trim() };
+            }
+            else
+            {
+                return name.Split('/').Select(n => n.Trim()).ToArray();
+            }
         }
     }
 }

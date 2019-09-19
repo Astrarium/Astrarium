@@ -12,8 +12,6 @@ using System.Threading.Tasks;
 
 namespace Planetarium
 {
-
-
     public class Sky : ISearcher, IEphemerisProvider
     {
         private delegate string GetNameDelegate<T>(T body) where T : CelestialObject;

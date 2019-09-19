@@ -42,6 +42,7 @@ namespace Planetarium.ViewModels
         public Command<PointF> CenterOnPointCommand { get; private set; }
         public Command<CelestialObject> GetObjectInfoCommand { get; private set; }
         public Command<CelestialObject> GetObjectEphemerisCommand { get; private set; }
+        public Command CalculatePhenomenaCommand { get; private set; }
         public Command<CelestialObject> MotionTrackCommand { get; private set; }
         public Command<CelestialObject> LockOnObjectCommand { get; private set; }
         public Command<PointF> MeasureToolCommand { get; private set; }
@@ -115,6 +116,7 @@ namespace Planetarium.ViewModels
             CenterOnPointCommand = new Command<PointF>(CenterOnPoint);
             GetObjectInfoCommand = new Command<CelestialObject>(GetObjectInfo);
             GetObjectEphemerisCommand = new Command<CelestialObject>(GetObjectEphemeris);
+            CalculatePhenomenaCommand = new Command(CalculatePhenomena);
             MotionTrackCommand = new Command<CelestialObject>(MotionTrack);
             LockOnObjectCommand = new Command<CelestialObject>(LockOnObject);
             MeasureToolCommand = new Command<PointF>(MeasureTool);
