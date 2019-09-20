@@ -42,12 +42,25 @@
 
                 <Separator />
 
-                <TextBlock Margin="4" TextWrapping="WrapWithOverflow" HorizontalAlignment="Left" Text="Arrange layers according to desired rendering order. Upper items rendered first. Use Up and Down buttons or drag and drop to arrange items." MaxWidth="500" />
-                
                 <StackPanel Orientation="Horizontal">
-                    <Button Width="50" Margin="2" Content="UP" Click="UpButton_Click" />
-                    <Button Width="50" Margin="2" Content="Down" Click="DownButton_Click" />
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="2">
+                        <Button Width="28" Height="28" Margin="2" Click="UpButton_Click" ToolTip="Up">
+                            <Button.Content>
+                                <Path Width="12" Height="12" Data="M14,20H10V11L6.5,14.5L4.08,12.08L12,4.16L19.92,12.08L17.5,14.5L14,11V20Z" Stretch="UniformToFill" Fill="{StaticResource ButtonForeground}"  HorizontalAlignment="Center" SnapsToDevicePixels="True" VerticalAlignment="Center" />
+                            </Button.Content>
+                        </Button>
+                        <Button Width="28" Height="28" Margin="2" Click="DownButton_Click" ToolTip="Down">
+                            <Button.Content>
+                                <Path Width="12" Height="12" Data="M10,4H14V13L17.5,9.5L19.92,11.92L12,19.84L4.08,11.92L6.5,9.5L10,13V4Z" Stretch="UniformToFill" Fill="{StaticResource ButtonForeground}"  HorizontalAlignment="Center" SnapsToDevicePixels="True" VerticalAlignment="Center" />
+                            </Button.Content>
+                        </Button>
+                    </StackPanel>
+
+                    <TextBlock Foreground="{StaticResource DisabledMenuForeground}" Padding="8 0 0 8" TextWrapping="WrapWithOverflow" HorizontalAlignment="Left" Text="Arrange layers according to desired rendering order. Upper items rendered first. Use Up and Down buttons or drag and drop to arrange items." MaxWidth="380" />
                 </StackPanel>
+
+
+                                
             </StackPanel>
         </GroupBox>
        
