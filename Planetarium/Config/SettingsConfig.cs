@@ -27,11 +27,6 @@ namespace Planetarium.Config
             Add(new SettingItem("LabelLunarNodes", false, "Grids", s => s.Get<bool>("EclipticLine")));
             Add(new SettingItem("GalacticEquator", true, "Grids"));
 
-            Add(new SettingItem("MilkyWay", true, "Grids"));
-            Add(new SettingItem("Ground", true, "Grids"));
-            Add(new SettingItem("HorizonLine", true, "Grids"));
-            Add(new SettingItem("LabelCardinalDirections", true, "Grids", s => s.Get<bool>("HorizonLine")));
-
             Add(new SettingItem("Sun", true, "Sun"));
             Add(new SettingItem("SunLabel", true, "Sun", s => s.Get<bool>("Sun")));
             Add(new SettingItem("SunLabelFont", new Font("Arial", 12), "Sun", s => s.Get<bool>("Sun") && s.Get<bool>("SunLabel")));

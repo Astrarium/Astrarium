@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Planetarium.Plugins.MilkyWay
+namespace Planetarium.Plugins.Horizon
 {
     public class Plugin : AbstractPlugin
     {
@@ -14,7 +14,9 @@ namespace Planetarium.Plugins.MilkyWay
         {
             #region Settings
 
-            AddSetting(new SettingItem("MilkyWay", true, "Grids"));
+            AddSetting(new SettingItem("Ground", true, "Grids"));
+            AddSetting(new SettingItem("HorizonLine", true, "Grids"));
+            AddSetting(new SettingItem("LabelCardinalDirections", true, "Grids", s => s.Get<bool>("HorizonLine")));
 
             #endregion Settings
         }

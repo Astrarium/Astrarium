@@ -18,13 +18,7 @@ namespace Planetarium.Calculators
         ICollection<Star> Stars { get; }
     }
 
-    public interface IStarsCalc
-    {
-        CrdsEquatorial Equatorial(SkyContext ctx, ushort hrNumber);
-        string GetPrimaryStarName(ushort hrNumber);
-    }
-
-    public class StarsCalc : BaseCalc, ICelestialObjectCalc<Star>, IStarsProvider, IStarsCalc
+    public class StarsCalc : BaseCalc, ICelestialObjectCalc<Star>, IStarsProvider
     {
         private readonly string STARS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Stars.dat");
         private readonly string NAMES_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/StarNames.dat");

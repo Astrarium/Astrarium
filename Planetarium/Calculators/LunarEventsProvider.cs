@@ -11,24 +11,22 @@ namespace Planetarium.Calculators
     public class LunarEventsProvider : BaseAstroEventsProvider
     {
         private readonly ILunarCalc lunarCalc = null;
-        private readonly IStarsCalc starsCalc = null;
         private readonly IPlanetsCalc planetsCalc = null;
 
-        // BSC catalogue numbers of brightest stars that can be in conjunction with Moon
-        private readonly ushort[] starsNumbers = new ushort[]
+        // Bright stars that can be in conjunction with Moon
+        private readonly ConjunctedStar[] stars = new ConjunctedStar[]
         {
-            1165, // Alcyone (Pleiades)
-            1457, // Aldebaran
-            2990, // Pollux
-            3982, // Regul
-            5056, // Spica
-            6134  // Antares
+            new ConjunctedStar("Pleiades", "03h 47m 29.1s", "+24° 06' 18''", 19.35f, -43.11f),
+            //new ConjunctedStar("Aldebaran", "", "", 0, 0),
+            //new ConjunctedStar("Pollux", "", "", 0, 0),
+            //new ConjunctedStar("Regul", "", "", 0, 0),
+            //new ConjunctedStar("Spica", "", "", 0, 0),
+            new ConjunctedStar("Antares", "16h 29m 24.4s", "-26° 25' 55''", -10.16f, -23.21f),
         };
 
-        public LunarEventsProvider(ILunarCalc lunarCalc, IStarsCalc starsCalc, IPlanetsCalc planetsCalc)
+        public LunarEventsProvider(ILunarCalc lunarCalc, IPlanetsCalc planetsCalc)
         {
             this.lunarCalc = lunarCalc;
-            this.starsCalc = starsCalc;
             this.planetsCalc = planetsCalc;
         }
 
@@ -193,12 +191,10 @@ namespace Planetarium.Calculators
         {
             List<AstroEvent> events = new List<AstroEvent>();
 
-            foreach (ushort star in starsNumbers)
+            foreach (ConjunctedStar star in stars)
             {
                 SkyContext ctx = new SkyContext(context.From, context.GeoLocation);
-                
-                string starName = starsCalc.GetPrimaryStarName(star);
-
+                                
                 double jd = context.From;
                 while (jd < context.To)
                 {
@@ -207,7 +203,7 @@ namespace Planetarium.Calculators
                     jd = NearestPassWithStar(ctx, star);
 
                     CrdsEquatorial eqMoon = ctx.Get(lunarCalc.Equatorial);
-                    CrdsEquatorial eqStar = ctx.Get(starsCalc.Equatorial, star);
+                    CrdsEquatorial eqStar = ctx.Get(StarEquatorial, star);
 
                     double semidiameter = ctx.Get(lunarCalc.Semidiameter) / 3600;
                     double separation = Angle.Separation(eqMoon, eqStar);
@@ -215,13 +211,13 @@ namespace Planetarium.Calculators
                     // occultation
                     if (semidiameter >= separation)
                     {
-                        events.Add(new AstroEvent(jd, $"Moon occults star {starName}"));
+                        events.Add(new AstroEvent(jd, $"Moon occults {star.Name}"));
                     }
                     // conjunction
                     else
                     {
                         string direction = eqMoon.Delta > eqStar.Delta ? "north" : "south";
-                        events.Add(new AstroEvent(jd, $"Moon passes {Formatters.ConjunctionSeparation.Format(separation)} {direction} to star {starName}"));
+                        events.Add(new AstroEvent(jd, $"Moon passes {Formatters.ConjunctionSeparation.Format(separation)} {direction} to {star.Name}"));
                     }
 
                     jd += LunarEphem.SIDEREAL_PERIOD;
@@ -278,14 +274,14 @@ namespace Planetarium.Calculators
             return events;
         }
 
-        private double NearestPassWithStar(SkyContext ctx, ushort star)
+        private double NearestPassWithStar(SkyContext ctx, ConjunctedStar star)
         {
             double minute = TimeSpan.FromMinutes(1).TotalDays;
             double days = double.MaxValue;
             while (Math.Abs(days) > minute)
             {
                 CrdsEquatorial eqMoon = ctx.Get(lunarCalc.Equatorial);
-                CrdsEquatorial eqStar = ctx.Get(starsCalc.Equatorial, star);
+                CrdsEquatorial eqStar = ctx.Get(StarEquatorial, star);
 
                 double[] alpha = new[] { eqMoon.Alpha, eqStar.Alpha };
                 Angle.Align(alpha);
@@ -316,6 +312,47 @@ namespace Planetarium.Calculators
             }
 
             return ctx.JulianDay;
+        }
+
+        private PrecessionalElements PrecessionalElements(SkyContext c)
+        {
+            return Precession.ElementsFK5(Date.EPOCH_J2000, c.JulianDay);
+        }
+
+        private CrdsEquatorial StarEquatorial(SkyContext c, ConjunctedStar star)
+        {
+            PrecessionalElements p = c.Get(PrecessionalElements);
+
+            // Number of years, with fractions, since J2000 epoch
+            double years = (c.JulianDay - Date.EPOCH_J2000) / 365.25;
+
+            // Initial coodinates for J2000 epoch
+            CrdsEquatorial eq0 = new CrdsEquatorial(star.Equatorial0);
+
+            // Take into account effect of proper motion:
+            // now coordinates are for the mean equinox of J2000.0,
+            // but for epoch of the target date
+            eq0.Alpha += star.PmAlpha * years / 3600.0;
+            eq0.Delta += star.PmDelta * years / 3600.0;
+
+            // Equatorial coordinates for the mean equinox and epoch of the target date
+            // without aberration and nutation corrections
+            return Precession.GetEquatorialCoordinates(eq0, p);
+        }
+
+        private class ConjunctedStar
+        {
+            public string Name { get; private set; }
+            public CrdsEquatorial Equatorial0 { get; private set; }
+            public float PmAlpha { get; private set; }
+            public float PmDelta { get; private set; }
+            public ConjunctedStar(string name, string ra, string dec, float pmAlpha, float pmDelta)
+            {
+                Name = name;
+                Equatorial0 = new CrdsEquatorial(new HMS(ra), new DMS(dec));
+                PmAlpha = pmAlpha;
+                PmDelta = pmDelta;
+            }
         }
     }
 }

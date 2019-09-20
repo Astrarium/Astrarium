@@ -1,5 +1,5 @@
 ﻿using ADK;
-using Planetarium.Config;
+using Planetarium.Renderers;
 using Planetarium.Types;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Planetarium.Renderers
+namespace Planetarium.Plugins.Horizon
 {
     public class GroundRenderer : BaseRenderer
     {
@@ -84,6 +84,26 @@ namespace Planetarium.Renderers
 
                         map.Graphics.FillPath(brushGround, gp);
                     }
+                }
+            }
+            else if (settings.Get<bool>("HorizonLine"))
+            {
+                const int POINTS_COUNT = 64;
+                PointF[] hor = new PointF[POINTS_COUNT];
+                double step = 2 * map.ViewAngle / (POINTS_COUNT - 1);
+
+                for (int i = 0; i < POINTS_COUNT; i++)
+                {
+                    var h = new CrdsHorizontal(map.Center.Azimuth - map.ViewAngle + step * i, 0);
+                    hor[i] = map.Project(h);
+                }
+                if (hor[0].X >= 0) hor[0].X = -1;
+                if (hor[POINTS_COUNT - 1].X <= map.Width) hor[POINTS_COUNT - 1].X = map.Width + 1;
+
+                if (hor.Any(h => !map.IsOutOfScreen(h)))
+                {
+                    Pen penHorizonLine = new Pen(Color.FromArgb(0xC8, 0x00, 0x40, 0x00), 2);
+                    map.Graphics.DrawCurve(penHorizonLine, hor);
                 }
             }
 

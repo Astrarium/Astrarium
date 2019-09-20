@@ -57,6 +57,7 @@
     <ProjectReference Include="..\Planetarium.Plugins.MinorBodies\Planetarium.Plugins.MinorBodies.csproj" />
     <ProjectReference Include="..\Planetarium.Plugins.Tycho2\Planetarium.Plugins.Tycho2.csproj" />
     <ProjectReference Include="..\Planetarium.Plugins.MilkyWay\Planetarium.Plugins.MilkyWay.csproj" />
+    <ProjectReference Include="..\Planetarium.Plugins.Horizon\Planetarium.Plugins.Horizon.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -12,7 +12,6 @@ namespace Planetarium.Renderers
 {
     public class CelestialGridRenderer : BaseRenderer
     {
-        private readonly ILunarProvider lunarProvider;
         private readonly ISettings settings;
 
         private PrecessionalElements peFrom1950 = null;
@@ -22,7 +21,6 @@ namespace Planetarium.Renderers
         private CelestialGrid LineGalactic = new CelestialGrid("Galactic", 1, 24);
         private CelestialGrid GridHorizontal = new CelestialGrid("Horizontal", 17, 24);
         private CelestialGrid GridEquatorial = new CelestialGrid("Equatorial", 17, 24);
-        private CelestialGrid LineHorizon = new CelestialGrid("Horizon", 1, 24);
 
         private Pen penGridEquatorial = null;
         private Pen penGridHorizontal = null;
@@ -42,9 +40,8 @@ namespace Planetarium.Renderers
         private string[] equatorialLabels = new string[] { "NCP", "SCP" };
         private GridPoint[] polePoints = new GridPoint[] { new GridPoint(0, 90), new GridPoint(0, -90) };
 
-        public CelestialGridRenderer(ILunarProvider lunarProvider, ISettings settings)
+        public CelestialGridRenderer(ISettings settings)
         {
-            this.lunarProvider = lunarProvider;
             this.settings = settings;
 
             penGridEquatorial = new Pen(Brushes.Transparent);
@@ -100,10 +97,6 @@ namespace Planetarium.Renderers
                 var eq = new CrdsEquatorial(c.Longitude, c.Latitude);
                 return eq.ToHorizontal(ctx.GeoLocation, ctx.SiderealTime);
             };
-
-            // Hozizon line            
-            LineHorizon.FromHorizontal = (h, ctx) => new GridPoint(h.Azimuth, h.Altitude);
-            LineHorizon.ToHorizontal = (c, ctx) => new CrdsHorizontal(c.Longitude, c.Latitude);
         }
 
         public override void Render(IMapContext map)
@@ -140,10 +133,6 @@ namespace Planetarium.Renderers
                 DrawGrid(map, penLineEcliptic, LineEcliptic);
                 DrawEquinoxLabels(map);
                 DrawLunarNodes(map);
-            }
-            if (settings.Get<bool>("HorizonLine") && !settings.Get<bool>("Ground"))
-            {
-                DrawGrid(map, penGridHorizontal, LineHorizon);
             }
         }
 
@@ -437,8 +426,8 @@ namespace Planetarium.Renderers
         private void DrawLunarNodes(IMapContext map)
         {
             if (settings.Get<bool>("LabelLunarNodes"))
-            {
-                double ascNode = lunarProvider.Moon.AscendingNode;
+            {               
+                double ascNode = LunarEphem.TrueAscendingNode(map.JulianDay);
                 double coeff = map.DiagonalCoefficient();
 
                 for (int i = 0; i < 2; i++)
