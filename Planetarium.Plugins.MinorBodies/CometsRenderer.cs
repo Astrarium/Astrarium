@@ -62,7 +62,7 @@ namespace Planetarium.Plugins.MinorBodies
                             PointF p = map.Project(c.Horizontal);
                             PointF t = map.Project(c.TailHorizontal);
 
-                            double tail = Geometry.DistanceBetweenPoints(p, t);
+                            double tail = map.DistanceBetweenPoints(p, t);
 
                             if (diam > 5 || tail > 10)
                             {

@@ -97,13 +97,16 @@ namespace Planetarium.Plugins.Tycho2
         /// </summary>
         private readonly ILogger Logger;
 
+        /// <summary>
+        /// Gets or sets Tycho2Star object that the map is locked on
+        /// </summary>
+        public Tycho2Star LockedStar { get; set; }
+
         public Tycho2Calc(ISettings settings, ILogger logger)
         {
             Settings = settings;
             Logger = logger;
         }
-
-        public Tycho2Star LockedStar { get; set; }
         
         public override void Initialize()
         {
@@ -422,10 +425,9 @@ namespace Planetarium.Plugins.Tycho2
 
         public ICollection<SearchResultItem> Search(SkyContext c, string searchString, int maxCount = 50)
         {
-            if (searchRegex.IsMatch(searchString.ToLowerInvariant()))
-            {
-                var match = searchRegex.Match(searchString.ToLowerInvariant());
-
+            var match = searchRegex.Match(searchString.ToLowerInvariant());
+            if (match.Success)
+            {           
                 int tyc1 = int.Parse(match.Groups["tyc1"].Value);
                 short? tyc2 = match.Groups["tyc2"].Success ? short.Parse(match.Groups["tyc2"].Value) : (short?)null;
                 string tyc3 = match.Groups["tyc3"].Value;

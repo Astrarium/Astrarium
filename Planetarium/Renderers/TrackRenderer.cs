@@ -144,7 +144,7 @@ namespace Planetarium.Renderers
             // Two points can be simply drawn as a line
             else if (points.Length == 2)
             {
-                points = ShiftToAncorPoint(points, pBody);
+                points = ShiftToAncorPoint(map, points, pBody);
                 map.Graphics.DrawLine(penGrid, points[0], points[1]);
             }
             // interpolation is needed
@@ -169,7 +169,7 @@ namespace Planetarium.Renderers
                     gp.Flatten();
                     scaledPoints = gp.PathPoints.Select(p => new PointF(p.X / f, p.Y / f)).ToArray();
 
-                    var segments = scaledPoints.Select(p => Geometry.DistanceBetweenPoints(p, origin) < diag * 3 ? p : PointF.Empty)
+                    var segments = scaledPoints.Select(p => map.DistanceBetweenPoints(p, origin) < diag * 3 ? p : PointF.Empty)
                         .Split(p => p == PointF.Empty, true);
 
                     foreach (var segment in segments)
@@ -194,7 +194,7 @@ namespace Planetarium.Renderers
 
                     if (!segments.Any())
                     {
-                        var p0 = scaledPoints.OrderBy(p => Geometry.DistanceBetweenPoints(p, origin)).First();
+                        var p0 = scaledPoints.OrderBy(p => map.DistanceBetweenPoints(p, origin)).First();
                         var p1 = scaledPoints.Prev(p0);
                         var p2 = scaledPoints.Next(p0);
 
@@ -215,7 +215,7 @@ namespace Planetarium.Renderers
             // draw the curve in regular way
             else
             {
-                map.Graphics.DrawCurve(penGrid, ShiftToAncorPoint(points, pBody));
+                map.Graphics.DrawCurve(penGrid, ShiftToAncorPoint(map, points, pBody));
             }
         }
 
@@ -226,13 +226,13 @@ namespace Planetarium.Renderers
         /// <param name="p0">Ancor point. All curve or line points will be corrected, 
         /// so the shifted curve (or line) will intersect the ancor point.</param>
         /// <returns>Corrected points of the curve (or line)</returns>
-        private PointF[] ShiftToAncorPoint(PointF[] points, PointF p0)
+        private PointF[] ShiftToAncorPoint(IMapContext map, PointF[] points, PointF p0)
         {
             if (p0 != PointF.Empty)
             {
-                PointF proj = GetProjectedPoint(points, p0);
+                PointF proj = GetProjectedPoint(map, points, p0);
 
-                if (Geometry.DistanceBetweenPoints(proj, p0) > 1)
+                if (map.DistanceBetweenPoints(proj, p0) > 1)
                 {
                     float dx = p0.X - proj.X;
                     float dy = p0.Y - proj.Y;
@@ -250,9 +250,9 @@ namespace Planetarium.Renderers
         /// <param name="points">Points of the curve (or the line)</param>
         /// <param name="p0">Some point to find the nearest one on the curve (on the line), i.e. projection.</param>
         /// <returns>Nearest point on the curve (or the line), i.e. projection of the point p0.</returns>
-        private PointF GetProjectedPoint(PointF[] points, PointF p0)
+        private PointF GetProjectedPoint(IMapContext map, PointF[] points, PointF p0)
         {
-            PointF[] nearest = points.OrderBy(n => Geometry.DistanceBetweenPoints(n, p0)).Take(2).ToArray();
+            PointF[] nearest = points.OrderBy(n => map.DistanceBetweenPoints(n, p0)).Take(2).ToArray();
 
             PointF p1 = nearest[0];
             PointF p2 = nearest[1];

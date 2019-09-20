@@ -375,10 +375,10 @@ namespace Planetarium.Renderers
                 PointF pEnd = points[points.Length - 1];
 
                 // Get angle between middle and last points of the curve
-                double alpha = Geometry.AngleBetweenVectors(pMid, pStart, pEnd);
+                double alpha = map.AngleBetweenVectors(pMid, pStart, pEnd);
 
-                double d1 = Geometry.DistanceBetweenPoints(pStart, origin);
-                double d2 = Geometry.DistanceBetweenPoints(pEnd, origin);
+                double d1 = map.DistanceBetweenPoints(pStart, origin);
+                double d2 = map.DistanceBetweenPoints(pEnd, origin);
 
                 // It's almost a straight line
                 if (alpha > 179)
@@ -406,7 +406,7 @@ namespace Planetarium.Renderers
                 }
             }
 
-            if (points.All(p => Geometry.DistanceBetweenPoints(p, origin) < r * 60))
+            if (points.All(p => map.DistanceBetweenPoints(p, origin) < r * 60))
             {
                 // Draw the curve in regular way
                 map.Graphics.DrawCurve(penGrid, points);

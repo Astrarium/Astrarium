@@ -1,6 +1,5 @@
 ﻿using ADK;
-using Planetarium.Calculators;
-using Planetarium.Config;
+using Planetarium.Renderers;
 using Planetarium.Types;
 using System;
 using System.Collections.Generic;
@@ -8,7 +7,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 
-namespace Planetarium.Renderers
+namespace Planetarium.Plugins.MilkyWay
 {
     /// <summary>
     /// Renders Milky Way filled outline on the map

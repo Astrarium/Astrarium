@@ -468,7 +468,7 @@ namespace Planetarium.Renderers
                         {
                             // satellite is distant enough from the Jupiter
                             // but too small to be drawn as disk
-                            if (Geometry.DistanceBetweenPoints(p, pJupiter) >= 5)
+                            if (map.DistanceBetweenPoints(p, pJupiter) >= 5)
                             {
                                 map.Graphics.TranslateTransform(p.X, p.Y);
                                 map.Graphics.FillEllipse(Brushes.Wheat, -size / 2, -size / 2, size, size);

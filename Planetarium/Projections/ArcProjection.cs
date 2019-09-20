@@ -1,4 +1,5 @@
 ﻿using ADK;
+using Planetarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -14,9 +15,9 @@ namespace Planetarium.Projections
     /// </summary>
     public class ArcProjection : IProjection
     {
-        private readonly ISkyMap Map = null;
+        private readonly IMapContext Map = null;
 
-        public ArcProjection(ISkyMap map)
+        public ArcProjection(IMapContext map)
         {
             Map = map;
         }
@@ -109,9 +110,9 @@ namespace Planetarium.Projections
 
             Point origin = new Point((int)(Map.Width / 2.0), (int)(Map.Height / 2.0));
 
-            double edgeToCenter = Geometry.DistanceBetweenPoints(origin, pEdge);
+            double edgeToCenter = Map.DistanceBetweenPoints(origin, pEdge);
 
-            double currentToCenter = Geometry.DistanceBetweenPoints(origin, p);
+            double currentToCenter = Map.DistanceBetweenPoints(origin, p);
 
             bool correctionNeeded = Math.Abs(Map.Center.Altitude) == 90 || currentToCenter > edgeToCenter;
 
@@ -120,11 +121,11 @@ namespace Planetarium.Projections
                 // projected coordinates of a horizontal grid pole (zenith or nadir point)
                 PointF pole = Project(new CrdsHorizontal(0, 90 * (Map.Center.Altitude > 0 ? 1 : -1)));
 
-                double angleWhole = 360 - Geometry.AngleBetweenVectors(pole, pLeftEdge, pRightEdge);
+                double angleWhole = 360 - Map.AngleBetweenVectors(pole, pLeftEdge, pRightEdge);
 
-                double angleLeft = Geometry.AngleBetweenVectors(pole, p, pLeftEdge);
+                double angleLeft = Map.AngleBetweenVectors(pole, p, pLeftEdge);
 
-                double angleRight = Geometry.AngleBetweenVectors(pole, p, pRightEdge);
+                double angleRight = Map.AngleBetweenVectors(pole, p, pRightEdge);
 
                 int shiftSign = angleLeft < angleRight ? -1 : 1;
 
@@ -144,7 +145,7 @@ namespace Planetarium.Projections
 
                 PointF pCorrected = new PointF(0, 0);
 
-                double distOriginal = Geometry.DistanceBetweenPoints(p, pEdge);
+                double distOriginal = Map.DistanceBetweenPoints(p, pEdge);
                 double distCorrected = 0;
 
                 int iterations = 0;
@@ -156,7 +157,7 @@ namespace Planetarium.Projections
                     // corrected coordinates of a projected point
                     pCorrected = Project(hor);
 
-                    distCorrected = Geometry.DistanceBetweenPoints(pCorrected, pEdge);
+                    distCorrected = Map.DistanceBetweenPoints(pCorrected, pEdge);
 
                     if (distCorrected > 0)
                     {
@@ -164,7 +165,7 @@ namespace Planetarium.Projections
                     }
                     iterations++;
                 }
-                while (Geometry.DistanceBetweenPoints(p, pCorrected) > 2 && iterations < 5);
+                while (Map.DistanceBetweenPoints(p, pCorrected) > 2 && iterations < 5);
             }
 
             return hor;

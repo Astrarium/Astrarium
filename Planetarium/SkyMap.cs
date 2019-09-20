@@ -161,11 +161,11 @@ namespace Planetarium
         private MapContext mapContext = null;
 
         public SkyMap(SkyContext skyContext, RenderersCollection renderers, ISettings settings)
-        {
-            Projection = new ArcProjection(this);
-
+        {           
             this.renderers = renderers;
             this.mapContext = new MapContext(this, skyContext);
+
+            Projection = new ArcProjection(mapContext);
 
             // get saved rendering orders
             RenderingOrder renderingOrder = settings.Get<RenderingOrder>("RenderingOrder");
@@ -179,6 +179,7 @@ namespace Planetarium
             // save actual rendering order
             settings.Set("RenderingOrder", renderingOrder);
 
+            // redraw if rendering order changed
             settings.SettingValueChanged += (name, value) =>
             {
                 if (name == "RenderingOrder")
@@ -254,7 +255,7 @@ namespace Planetarium
 
                 PointF p = Projection.Project(body.Horizontal);
 
-                if (Geometry.DistanceBetweenPoints(p, point) <= size / 2)
+                if (mapContext.DistanceBetweenPoints(p, point) <= size / 2)
                 {
                     return body;
                 }                
