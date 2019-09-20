@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using Planetarium.Objects;
+using Planetarium.Types;
 
 namespace Planetarium
 {

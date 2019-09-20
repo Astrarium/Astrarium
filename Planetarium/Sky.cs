@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Planetarium
 {
-    public class Sky : ISearcher, IEphemerisProvider
+    public class Sky : ISearcher, IEphemerisProvider, ISky
     {
         private delegate string GetNameDelegate<T>(T body) where T : CelestialObject;
         private delegate ICollection<SearchResultItem> SearchDelegate(SkyContext context, string searchString, int maxCount = 50);
@@ -78,7 +78,7 @@ namespace Planetarium
                 if (eventsConfig.Any())
                 {
                     EventConfigs.Add(eventsConfig);
-                }     
+                }
             }
         }
 
@@ -167,11 +167,11 @@ namespace Planetarium
             {
                 return new string[0];
             }
-            
+
         }
 
         public ICollection<AstroEvent> GetEvents(double jdFrom, double jdTo, IEnumerable<string> categories, CancellationToken? cancelToken = null)
-        {            
+        {
             var context = new AstroEventsContext()
             {
                 From = jdFrom,
@@ -191,7 +191,7 @@ namespace Planetarium
                     events.AddRange(item.Formula.Invoke(context));
                 }
             }
-            
+
             return events
                 .OrderBy(e => e.NoExactTime ? e.JulianDay + 1 : e.JulianDay)
                 .Where(e => e.JulianDay >= context.From && e.JulianDay < context.To)
@@ -204,7 +204,7 @@ namespace Planetarium
             var filterFunc = filter ?? ((b) => true);
             var results = new List<SearchResultItem>();
             if (!string.IsNullOrWhiteSpace(searchString))
-            {               
+            {
                 foreach (var searchProvider in SearchProviders)
                 {
                     if (results.Count < maxCount)

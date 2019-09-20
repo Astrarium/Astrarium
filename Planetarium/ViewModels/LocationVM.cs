@@ -492,7 +492,7 @@ namespace Planetarium.ViewModels
         /// <summary>
         /// Creates new instance of <see cref="LocationVM"/>
         /// </summary>
-        public LocationVM(Sky sky, ISolarProvider solarProvider)
+        public LocationVM(ISky sky, ISolarProvider solarProvider)
         {
             ObserverLocation = new CrdsGeographical(sky.Context.GeoLocation);
             SunHourAngle = Coordinates.HourAngle(sky.Context.SiderealTime, 0, solarProvider.Sun.Equatorial.Alpha);

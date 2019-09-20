@@ -19,9 +19,9 @@ namespace Planetarium.ViewModels
         public Command CloseCommand { get; private set; }
 
         private readonly IViewManager viewManager;
-        private readonly Sky sky;
+        private readonly ISky sky;
 
-        public EphemerisVM(IViewManager viewManager, Sky sky)
+        public EphemerisVM(IViewManager viewManager, ISky sky)
         {
             this.viewManager = viewManager;
             this.sky = sky;

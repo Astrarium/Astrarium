@@ -15,7 +15,7 @@ namespace Planetarium.ViewModels
 {
     public class TracksListVM : ViewModelBase
     {
-        private readonly Sky sky;
+        private readonly ISky sky;
         private readonly IViewManager viewManager;
         private readonly ITracksProvider tracksProvider;
 
@@ -43,7 +43,7 @@ namespace Planetarium.ViewModels
             }
         }
 
-        public TracksListVM(Sky sky, ITracksProvider tracksProvider, IViewManager viewManager)
+        public TracksListVM(ISky sky, ITracksProvider tracksProvider, IViewManager viewManager)
         {
             this.sky = sky;            
             this.tracksProvider = tracksProvider;

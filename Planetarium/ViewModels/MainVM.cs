@@ -20,7 +20,7 @@ namespace Planetarium.ViewModels
 {
     public class MainVM : ViewModelBase
     { 
-        private readonly Sky sky;
+        private readonly ISky sky;
         private readonly ISkyMap map;
         private readonly IViewManager viewManager;
         private readonly ISettings settings;
@@ -94,7 +94,7 @@ namespace Planetarium.ViewModels
             }
         }
 
-        public MainVM(Sky sky, ISkyMap map, ISettings settings, IViewManager viewManager, ToolbarButtonsConfig toolbarButtonsConfig)
+        public MainVM(ISky sky, ISkyMap map, ISettings settings, IViewManager viewManager, ToolbarButtonsConfig toolbarButtonsConfig)
         {
             this.sky = sky;
             this.map = map;

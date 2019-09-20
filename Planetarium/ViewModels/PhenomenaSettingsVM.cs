@@ -12,7 +12,7 @@ namespace Planetarium.ViewModels
 {
     public class PhenomenaSettingsVM : ViewModelBase
     {
-        private readonly Sky sky;
+        private readonly ISky sky;
         private readonly IViewManager viewManager;
 
         public ObservableCollection<Node> Nodes { get; private set; } = new ObservableCollection<Node>();
@@ -42,7 +42,7 @@ namespace Planetarium.ViewModels
             }
         }
 
-        public PhenomenaSettingsVM(Sky sky, IViewManager viewManager)
+        public PhenomenaSettingsVM(ISky sky, IViewManager viewManager)
         {
             this.sky = sky;
             this.viewManager = viewManager;

@@ -192,13 +192,15 @@ namespace Planetarium
                 new Date(DateTime.Now).ToJulianEphemerisDay(),
                 new CrdsGeographical(settings.Get<CrdsGeographical>("ObserverLocation")));
 
+            kernel.Bind<ISkyMap>().To<SkyMap>().InSingletonScope();
+            kernel.Bind<Sky, ISky, ISearcher, IEphemerisProvider>().To<Sky>().InSingletonScope();
+
             kernel.Bind<SkyContext>().ToConstant(context).WhenInjectedInto<ISkyMap>().InSingletonScope();
             kernel.Bind<SkyContext>().ToConstant(context).WhenInjectedInto<Sky>().InSingletonScope();
             kernel.Bind<CalculatorsCollection>().ToConstant(calculators).InSingletonScope();
             kernel.Bind<AstroEventProvidersCollection>().ToConstant(eventProviders).InSingletonScope();
 
-            kernel.Bind<ISkyMap>().To<SkyMap>().InSingletonScope();
-            kernel.Bind<Sky, ISearcher, IEphemerisProvider>().To<Sky>().InSingletonScope();
+
 
 
             progress.Report($"Creating renderers");

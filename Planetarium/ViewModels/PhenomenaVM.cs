@@ -22,9 +22,9 @@ namespace Planetarium.ViewModels
 
         private ICollection<AstroEvent> events;
         private readonly IViewManager viewManager;
-        private readonly Sky sky;
+        private readonly ISky sky;
         
-        public PhenomenaVM(IViewManager viewManager, Sky sky)
+        public PhenomenaVM(IViewManager viewManager, ISky sky)
         {
             this.viewManager = viewManager;
             this.sky = sky;
