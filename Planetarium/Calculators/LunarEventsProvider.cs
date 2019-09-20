@@ -16,12 +16,12 @@ namespace Planetarium.Calculators
         // Bright stars that can be in conjunction with Moon
         private readonly ConjunctedStar[] stars = new ConjunctedStar[]
         {
-            new ConjunctedStar("Pleiades", "03h 47m 29.1s", "+24° 06' 18''", 19.35f, -43.11f),
-            //new ConjunctedStar("Aldebaran", "", "", 0, 0),
-            //new ConjunctedStar("Pollux", "", "", 0, 0),
-            //new ConjunctedStar("Regul", "", "", 0, 0),
-            //new ConjunctedStar("Spica", "", "", 0, 0),
-            new ConjunctedStar("Antares", "16h 29m 24.4s", "-26° 25' 55''", -10.16f, -23.21f),
+            new ConjunctedStar("Pleiades", "03h 47m 29.1s", "+24° 06' 18''", 0.019f, -0.046f),
+            new ConjunctedStar("Aldebaran", "04h 35m 55.2s", "+16° 30' 33''", 0.063f, -0.19f),
+            new ConjunctedStar("Pollux", "07h 45m 19.4s", "+28° 01' 35''", -0.628f, -0.046f),
+            new ConjunctedStar("Regul", "10h 08m 22.3s", "+11° 58' 02''", -0.248f, 0.006f),
+            new ConjunctedStar("Spica", "13h 25m 11.6s", "-11° 09' 41''", -0.041f, -0.028f),
+            new ConjunctedStar("Antares", "16h 29m 24.4s", "-26° 25' 55''", 0.01f, -0.02f)
         };
 
         public LunarEventsProvider(ILunarCalc lunarCalc, IPlanetsCalc planetsCalc)
