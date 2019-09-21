@@ -372,7 +372,7 @@ namespace Planetarium.Calculators
                         el[i] = Math.Abs(data.ElementAt(day + i)[p].Elongation);
                     }
 
-                    // If elongation has maxumum value at central point
+                    // If elongation has maximum value at central point
                     if (el[1] < el[2] && el[2] > el[3])
                     {
                         Interpolation.FindMaximum(t, el, 1e-6, out double t0, out double el0);

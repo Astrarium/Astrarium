@@ -84,7 +84,7 @@ namespace Planetarium.Plugins.MinorBodies
             return Math.Sqrt(x * x + y * y + z * z);
         }
 
-        protected double DistanceFromSun(SkyContext c, int i)
+        public double DistanceFromSun(SkyContext c, int i)
         {
             var r = c.Get(Rectangular, i);
             return Math.Sqrt(r.X * r.X + r.Y * r.Y + r.Z * r.Z);
