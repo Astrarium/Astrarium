@@ -72,5 +72,17 @@ namespace ADK.Tests
                 Assert.AreEqual(new Date(new DateTime(1991, 12, 22, 8, 54, 38, DateTimeKind.Utc)).ToJulianEphemerisDay(), jd, error);
             }
         }
+
+        /// <summary>
+        /// AA(II), example 25.a
+        /// </summary>
+        [TestMethod]
+        public void Ecliptical()
+        {
+            var ecl = SolarEphem.Ecliptical(2448908.5);
+
+            Assert.AreEqual(new DMS("199* 54' 32.19''"), new DMS(ecl.Lambda));
+            Assert.AreEqual(0.99766, ecl.Distance, 1e-5);
+        }
     }
 }

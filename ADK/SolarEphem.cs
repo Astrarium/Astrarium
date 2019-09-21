@@ -1,4 +1,6 @@
 ﻿using System;
+using static System.Math;
+using static ADK.Angle;
 
 namespace ADK
 {
@@ -115,35 +117,82 @@ namespace ADK
 
             double T = (jd0 - 2451545.0) / 36525.0;
             double W = 35999.373 * T - 2.47;
-            double delta_lambda = 1 + 0.0334 * Math.Cos(Angle.ToRadians(W)) + 0.0007 * Math.Cos(Angle.ToRadians(2 * W));
+            double delta_lambda = 1 + 0.0334 * Cos(ToRadians(W)) + 0.0007 * Cos(ToRadians(2 * W));
 
             double S =
-                485 * Math.Cos(Angle.ToRadians(324.96 + 1934.136 * T)) +
-                203 * Math.Cos(Angle.ToRadians(337.23 + 32964.467 * T)) +
-                199 * Math.Cos(Angle.ToRadians(342.08 + 20.186 * T)) +
-                182 * Math.Cos(Angle.ToRadians(27.85 + 445267.112 * T)) +
-                156 * Math.Cos(Angle.ToRadians(73.14 + 45036.886 * T)) +
-                136 * Math.Cos(Angle.ToRadians(171.52 + 22518.443 * T)) +
-                77 * Math.Cos(Angle.ToRadians(222.54 + 65928.934 * T)) +
-                74 * Math.Cos(Angle.ToRadians(296.72 + 3034.906 * T)) +
-                70 * Math.Cos(Angle.ToRadians(243.58 + 9037.513 * T)) +
-                58 * Math.Cos(Angle.ToRadians(119.81 + 33718.147 * T)) +
-                52 * Math.Cos(Angle.ToRadians(297.17 + 150.678 * T)) +
-                50 * Math.Cos(Angle.ToRadians(21.02 + 2281.226 * T)) +
-                45 * Math.Cos(Angle.ToRadians(247.54 + 29929.562 * T)) +
-                44 * Math.Cos(Angle.ToRadians(325.15 + 31555.956 * T)) +
-                29 * Math.Cos(Angle.ToRadians(60.93 + 4443.417 * T)) +
-                18 * Math.Cos(Angle.ToRadians(155.12 + 67555.328 * T)) +
-                17 * Math.Cos(Angle.ToRadians(288.79 + 4562.452 * T)) +
-                16 * Math.Cos(Angle.ToRadians(198.04 + 62894.029 * T)) +
-                14 * Math.Cos(Angle.ToRadians(199.76 + 31436.921 * T)) +
-                12 * Math.Cos(Angle.ToRadians(95.39 + 14577.848 * T)) +
-                12 * Math.Cos(Angle.ToRadians(287.11 + 31931.756 * T)) +
-                12 * Math.Cos(Angle.ToRadians(320.81 + 34777.259 * T)) +
-                9 * Math.Cos(Angle.ToRadians(227.73 + 1222.114 * T)) +
-                8 * Math.Cos(Angle.ToRadians(15.45 + 16859.074 * T));
+                485 * Cos(ToRadians(324.96 + 1934.136 * T)) +
+                203 * Cos(ToRadians(337.23 + 32964.467 * T)) +
+                199 * Cos(ToRadians(342.08 + 20.186 * T)) +
+                182 * Cos(ToRadians(27.85 + 445267.112 * T)) +
+                156 * Cos(ToRadians(73.14 + 45036.886 * T)) +
+                136 * Cos(ToRadians(171.52 + 22518.443 * T)) +
+                77 * Cos(ToRadians(222.54 + 65928.934 * T)) +
+                74 * Cos(ToRadians(296.72 + 3034.906 * T)) +
+                70 * Cos(ToRadians(243.58 + 9037.513 * T)) +
+                58 * Cos(ToRadians(119.81 + 33718.147 * T)) +
+                52 * Cos(ToRadians(297.17 + 150.678 * T)) +
+                50 * Cos(ToRadians(21.02 + 2281.226 * T)) +
+                45 * Cos(ToRadians(247.54 + 29929.562 * T)) +
+                44 * Cos(ToRadians(325.15 + 31555.956 * T)) +
+                29 * Cos(ToRadians(60.93 + 4443.417 * T)) +
+                18 * Cos(ToRadians(155.12 + 67555.328 * T)) +
+                17 * Cos(ToRadians(288.79 + 4562.452 * T)) +
+                16 * Cos(ToRadians(198.04 + 62894.029 * T)) +
+                14 * Cos(ToRadians(199.76 + 31436.921 * T)) +
+                12 * Cos(ToRadians(95.39 + 14577.848 * T)) +
+                12 * Cos(ToRadians(287.11 + 31931.756 * T)) +
+                12 * Cos(ToRadians(320.81 + 34777.259 * T)) +
+                9 * Cos(ToRadians(227.73 + 1222.114 * T)) +
+                8 * Cos(ToRadians(15.45 + 16859.074 * T));
 
             return jd0 + (0.00001 * S) / delta_lambda;
+        }
+
+        /// <summary>
+        /// Calculates low-accuracy  geocentric position of the Sun expressed in ecliptical coordinates.
+        /// </summary>
+        /// <param name="jd"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Method is taken from AA(II), chapter 25. 
+        /// </remarks>
+        public static CrdsEcliptical Ecliptical(double jd)
+        {
+            double T = (jd - 2451545.0) / 36525.0;
+            double T2 = T * T;
+
+            // eccentricity of the Earth's orbit
+            double e = 0.016708634 - 0.000042037 * T - 0.0000001267 * T2;
+            
+            // geometric true longitude of the Sun
+            double L0 = 280.46646 + 36000.76983 * T + 0.0003032 * T2;
+
+            // mean anomaly of the Sun
+            double M = 357.52911 + 35999.05029 * T - 0.0001537 * T2;
+            M = ToRadians(M);
+
+            // Sun's equation of the center
+            double C = (1.914602 - 0.004817 * T - 0.000014 * T2) * Sin(M)
+                + (0.019993 - 0.000101 * T) * Sin(2 * M)
+                + 0.000289 * Sin(3 * M);
+
+            // True longitude of the Sun (⊙)
+            double TL = L0 + C;
+
+            // True anomaly of the Sun
+            double v = ToDegrees(M) + C;
+
+            // Sun's radius-vector
+            double R = 1.000_001_018 * (1 - e * e) / (1 + e * Cos(ToRadians(v)));
+            
+            // Longitude of the ascending node of the Moon's mean orbit
+            double Omega = 125.04 - 1934.136 * T;
+            Omega = ToRadians(Omega);
+
+            // Apparent longitude of the Sun
+            double lambda = To360(TL - 0.00569 - 0.00478 * Sin(Omega));
+
+            return new CrdsEcliptical(lambda, 0, R);
         }
     }
 }

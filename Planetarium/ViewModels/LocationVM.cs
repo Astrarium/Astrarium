@@ -494,12 +494,10 @@ namespace Planetarium.ViewModels
         /// </summary>
         public LocationVM(ISky sky)
         {
+            CrdsEquatorial eqSun = SolarEphem.Ecliptical(sky.Context.JulianDay).ToEquatorial(sky.Context.Epsilon);
             ObserverLocation = new CrdsGeographical(sky.Context.GeoLocation);
-            SunHourAngle = Coordinates.HourAngle(sky.Context.SiderealTime, 0, /*solarProvider.Sun.Equatorial.Alpha*/ 0);
-
-            // TODO: calculate solar declination
-            SunDeclination = 0; // solarProvider.Sun.Equatorial.Delta;
-
+            SunHourAngle = Coordinates.HourAngle(sky.Context.SiderealTime, 0, eqSun.Alpha);
+            SunDeclination = eqSun.Delta; 
 
             OkCommand = new Command(Ok);
             CancelCommand = new Command(Close);
