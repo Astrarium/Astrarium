@@ -149,7 +149,7 @@ namespace ADK
         }
 
         /// <summary>
-        /// Calculates low-accuracy  geocentric position of the Sun expressed in ecliptical coordinates.
+        /// Calculates low-accuracy geocentric position of the Sun expressed in ecliptical coordinates.
         /// </summary>
         /// <param name="jd"></param>
         /// <returns></returns>

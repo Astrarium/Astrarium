@@ -30,7 +30,7 @@ namespace Planetarium.Plugins.MinorBodies
                 {
                     line = sr.ReadLine();
 
-                    // perihelion distance, iin AU
+                    // perihelion distance, in AU
                     double q = Read<double>(line, 31, 39);
 
                     // orbital eccentricity

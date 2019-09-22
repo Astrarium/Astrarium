@@ -81,15 +81,13 @@ namespace Planetarium.ViewModels
             foreach (var group in groups)
             {
                 Node node = new Node() { Text = group.Key };
-
-                if (group.Count() > 1)
+                foreach (var item in group)
                 {
-                    foreach (var item in group)
+                    if (item != group.Key)
                     {
                         node.Children.Add(new Node(item, item));
                     }
                 }
-
                 root.Children.Add(node);
             }
 
