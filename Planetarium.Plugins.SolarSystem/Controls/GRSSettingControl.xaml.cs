@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Planetarium.Types.Config.Controls
+namespace Planetarium.Plugins.SolarSystem.Controls
 {
     /// <summary>
     /// Interaction logic for GRSSettingControl.xaml

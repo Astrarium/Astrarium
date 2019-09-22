@@ -18,21 +18,6 @@ namespace Planetarium.Config
         /// </summary>
         public SettingsConfig()
         {
-            Add(new SettingItem("EquatorialGrid", false, "Grids"));
-            Add(new SettingItem("LabelEquatorialPoles", true, "Grids", s => s.Get<bool>("EquatorialGrid")));
-            Add(new SettingItem("HorizontalGrid", false, "Grids"));
-            Add(new SettingItem("LabelHorizontalPoles", true, "Grids", s => s.Get<bool>("HorizontalGrid")));
-            Add(new SettingItem("EclipticLine", true, "Grids"));
-            Add(new SettingItem("LabelEquinoxPoints", false, "Grids", s => s.Get<bool>("EclipticLine")));
-            Add(new SettingItem("LabelLunarNodes", false, "Grids", s => s.Get<bool>("EclipticLine")));
-            Add(new SettingItem("GalacticEquator", true, "Grids"));
-
-            Add(new SettingItem("Sun", true, "Sun"));
-            Add(new SettingItem("SunLabel", true, "Sun", s => s.Get<bool>("Sun")));
-            Add(new SettingItem("SunLabelFont", new Font("Arial", 12), "Sun", s => s.Get<bool>("Sun") && s.Get<bool>("SunLabel")));
-            Add(new SettingItem("SunTexture", true, "Sun", s => s.Get<bool>("Sun")));
-            Add(new SettingItem("SunTexturePath", "https://soho.nascom.nasa.gov/data/REPROCESSING/Completed/{yyyy}/hmiigr/{yyyy}{MM}{dd}/{yyyy}{MM}{dd}_0000_hmiigr_512.jpg", "Sun", s => s.Get<bool>("Sun") && s.Get<bool>("TextureSun")));
-
             Add(new SettingItem("ConstLabels", true, "Constellations"));
             Add(new SettingItem("ConstLabelsType", ConstellationsRenderer.LabelType.InternationalName, "Constellations", s => s.Get<bool>("ConstLabels")));
             Add(new SettingItem("ConstLines", true, "Constellations"));
@@ -41,22 +26,6 @@ namespace Planetarium.Config
             Add(new SettingItem("Stars", true, "Stars"));
             Add(new SettingItem("StarsLabels", true, "Stars", s => s.Get<bool>("Stars")));
             Add(new SettingItem("StarsProperNames", true, "Stars", s => s.Get<bool>("Stars") && s.Get<bool>("StarsLabels")));
-            Add(new SettingItem("EclipticColorNight", Color.FromArgb(0xC8, 0x80, 0x80, 0x00), "Colors"));
-            Add(new SettingItem("HorizontalGridColorNight", Color.FromArgb(0xC8, 0x00, 0x40, 0x00), "Colors"));
-            Add(new SettingItem("CardinalDirectionsColor", Color.FromArgb(0x00, 0x99, 0x99), "Colors"));
-
-            Add(new SettingItem("Planets", true, "Planets"));
-            Add(new SettingItem("UseTextures", true, "Planets", s => s.Get<bool>("Planets")));
-            Add(new SettingItem("JupiterMoonsShadowOutline", true, "Planets", s => s.Get<bool>("Planets")));
-            Add(new SettingItem("ShowRotationAxis", true, "Planets", s => s.Get<bool>("Planets")));
-
-            Add(new SettingItem("GRSLongitude", new GreatRedSpotSettings()
-            {
-                Epoch = 2458150.5000179596,
-                MonthlyDrift = 2,
-                Longitude = 283
-            }, "Planets", typeof(GRSSettingControl), s => s.Get<bool>("Planets")));
-
 
             // Default observer location.
             // Has no section, so not displayed in settings window.
