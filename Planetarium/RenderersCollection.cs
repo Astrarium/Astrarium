@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Planetarium
 {
-    public class RenderersCollection : List<BaseRenderer>
+    internal class RenderersCollection : List<BaseRenderer>
     {
         public RenderersCollection() : base() { }
         public RenderersCollection(IEnumerable<BaseRenderer> renderers) : base(renderers) { }

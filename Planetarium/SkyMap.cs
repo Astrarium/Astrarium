@@ -53,7 +53,7 @@ namespace Planetarium
         /// </summary>
         private ICollection<RectangleF> labels = new List<RectangleF>();
 
-        private readonly RenderersCollection renderers = null;
+        private readonly RenderersCollection Renderers = new RenderersCollection();
 
         public int Width { get; set; }
         public int Height { get; set; }
@@ -143,6 +143,9 @@ namespace Planetarium
         /// </summary>
         public CrdsHorizontal MeasureOrigin { get; set; }
 
+        /// <summary>
+        /// Current coordinates of mouse, converted to Horizontal coordinates on the map
+        /// </summary>
         public CrdsHorizontal MousePosition { get; set; }
 
         /// <summary>
@@ -150,7 +153,12 @@ namespace Planetarium
         /// </summary>
         public event Action<CelestialObject> SelectedObjectChanged;
 
+        /// <summary>
+        /// Projection used to render the map
+        /// </summary>
         public IProjection Projection { get; set; } = null;
+
+
         public event Action OnInvalidate;
 
         /// <summary>
@@ -158,20 +166,32 @@ namespace Planetarium
         /// </summary>
         private ICollection<CelestialObject> drawnObjects = new List<CelestialObject>();
 
+        /// <summary>
+        /// <see cref="MapContext"/> instance
+        /// </summary>
         private MapContext mapContext = null;
 
-        public SkyMap(SkyContext skyContext, RenderersCollection renderers, ISettings settings)
+        private ISettings settings = null;
+
+        public SkyMap(ISettings settings)
         {
-            this.renderers = renderers;
-            this.mapContext = new MapContext(this, skyContext);
+            this.settings = settings;
+        }
+
+        public void Initialize(SkyContext skyContext, ICollection<BaseRenderer> renderers)
+        {
+            mapContext = new MapContext(this, skyContext);
 
             Projection = new ArcProjection(mapContext);
+
+            Renderers.AddRange(renderers);
+            Renderers.ForEach(r => r.Initialize());
 
             // get saved rendering orders
             RenderingOrder renderingOrder = settings.Get<RenderingOrder>("RenderingOrder");
 
             // sort renderers according saving orders
-            renderers.Sort(renderingOrder.Select(r => r.RendererTypeName));
+            Renderers.Sort(renderingOrder.Select(r => r.RendererTypeName));
 
             // build rendering order based on existing renderers
             renderingOrder = new RenderingOrder(renderers.Select(r => new RenderingOrderItem(r)));
@@ -184,7 +204,7 @@ namespace Planetarium
             {
                 if (name == "RenderingOrder")
                 {
-                    renderers.Sort(settings.Get<RenderingOrder>("RenderingOrder").Select(r => r.RendererTypeName));
+                    Renderers.Sort(settings.Get<RenderingOrder>("RenderingOrder").Select(r => r.RendererTypeName));
                     Invalidate();
                 }
             };
@@ -211,9 +231,9 @@ namespace Planetarium
                 Center.Azimuth = LockedObject.Horizontal.Azimuth;
             }
 
-            for (int i = 0; i < renderers.Count(); i++)
+            for (int i = 0; i < Renderers.Count(); i++)
             {
-                renderers.ElementAt(i).Render(mapContext);
+                Renderers.ElementAt(i).Render(mapContext);
                 if (needDrawSelectedObject)
                 {
                     needDrawSelectedObject = !DrawSelectedObject(g);
@@ -227,14 +247,6 @@ namespace Planetarium
             meanRenderTime = (renderStopWatch.ElapsedMilliseconds + rendersCount * meanRenderTime) / (rendersCount + 1);
 
             FPS = (int)(1000f / renderStopWatch.ElapsedMilliseconds);
-        }
-
-        public void Initialize()
-        {
-            foreach (var renderer in renderers)
-            {
-                renderer.Initialize();
-            }
         }
 
         public void Invalidate()

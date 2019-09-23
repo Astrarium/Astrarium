@@ -18,8 +18,7 @@ namespace Planetarium.Types
         ICollection<AstroEvent> GetEvents(double jdFrom, double jdTo, IEnumerable<string> categories, CancellationToken? cancelToken = null);
         ICollection<string> GetEventsCategories();
         CelestialObjectInfo GetInfo(CelestialObject body);
-        string GetObjectName(CelestialObject body);
-        void Initialize(SkyContext context, ICollection<BaseCalc> calculators, ICollection<BaseAstroEventsProvider> eventProviders);
+        string GetObjectName(CelestialObject body);        
         ICollection<SearchResultItem> Search(string searchString, Func<CelestialObject, bool> filter);
     }
 }

@@ -29,6 +29,8 @@ namespace Planetarium
 
         float? UserMagLimit { get; set; }
 
+        int FPS { get; }
+
         /// <summary>
         /// Gets or sets current field of view, in degrees
         /// </summary>
@@ -81,13 +83,13 @@ namespace Planetarium
 
         void Invalidate();
 
-        void Initialize();
-
         bool Antialias { get; set; }
 
         CelestialObject FindObject(PointF point);
 
         void GoToObject(CelestialObject body, TimeSpan animationDuration);
+
+        void AddDrawnObject(CelestialObject obj, PointF p);
 
         event Action OnInvalidate;
     }
