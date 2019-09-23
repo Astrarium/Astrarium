@@ -161,7 +161,7 @@ namespace Planetarium
         private MapContext mapContext = null;
 
         public SkyMap(SkyContext skyContext, RenderersCollection renderers, ISettings settings)
-        {           
+        {
             this.renderers = renderers;
             this.mapContext = new MapContext(this, skyContext);
 
@@ -171,10 +171,10 @@ namespace Planetarium
             RenderingOrder renderingOrder = settings.Get<RenderingOrder>("RenderingOrder");
 
             // sort renderers according saving orders
-            renderers.Sort(renderingOrder);
+            renderers.Sort(renderingOrder.Select(r => r.RendererTypeName));
 
             // build rendering order based on existing renderers
-            renderingOrder = new RenderingOrder(renderers.Select(r => r.GetType().FullName));
+            renderingOrder = new RenderingOrder(renderers.Select(r => new RenderingOrderItem(r)));
 
             // save actual rendering order
             settings.Set("RenderingOrder", renderingOrder);
@@ -184,7 +184,7 @@ namespace Planetarium
             {
                 if (name == "RenderingOrder")
                 {
-                    renderers.Sort(settings.Get<RenderingOrder>("RenderingOrder"));
+                    renderers.Sort(settings.Get<RenderingOrder>("RenderingOrder").Select(r => r.RendererTypeName));
                     Invalidate();
                 }
             };

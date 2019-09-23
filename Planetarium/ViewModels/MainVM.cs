@@ -101,7 +101,6 @@ namespace Planetarium.ViewModels
             this.settings = settings;
             this.viewManager = viewManager;
 
-            sky.Initialize();
             map.Initialize();
 
             sky.Calculate();

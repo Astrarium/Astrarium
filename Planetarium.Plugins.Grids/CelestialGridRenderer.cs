@@ -137,6 +137,8 @@ namespace Planetarium.Plugins.Grids
 
         public override RendererOrder Order => RendererOrder.Grids;
 
+        public override string Name => "Grids and Lines";
+
         private void DrawGrid(IMapContext map, Pen penGrid, CelestialGrid grid)
         {
             bool isAnyPoint = false;

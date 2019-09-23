@@ -1,4 +1,5 @@
-﻿using Planetarium.Renderers;
+﻿using Newtonsoft.Json;
+using Planetarium.Renderers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,9 +9,48 @@ using System.Threading.Tasks;
 
 namespace Planetarium
 {    
-    internal class RenderingOrder : ObservableCollection<string>
+    public class RenderingOrder : ObservableCollection<RenderingOrderItem>
     {
         public RenderingOrder() : base() { }
-        public RenderingOrder(IEnumerable<string> items) : base(items) { }
+        public RenderingOrder(IEnumerable<RenderingOrderItem> items) : base(items) { }
+    }
+
+    [JsonConverter(typeof(RenderingOrderItemConverter))]
+    public class RenderingOrderItem
+    {
+        /// <summary>
+        /// Full name of the renderer type
+        /// </summary>
+        public string RendererTypeName { get; private set; }
+
+        /// <summary>
+        /// Displayable renderer name
+        /// </summary>
+        [JsonIgnore]
+        public string Name { get; private set; }
+
+        public RenderingOrderItem(string name)
+        {
+            RendererTypeName = name;
+        }
+
+        public RenderingOrderItem(BaseRenderer renderer)
+        {
+            RendererTypeName = renderer.GetType().FullName;
+            Name = renderer.Name;
+        }
+    }
+
+    public class RenderingOrderItemConverter : JsonConverter<RenderingOrderItem>
+    {
+        public override RenderingOrderItem ReadJson(JsonReader reader, Type objectType, RenderingOrderItem existingValue, bool hasExistingValue, JsonSerializer serializer)
+        {
+            return new RenderingOrderItem((string)reader.Value);
+        }
+
+        public override void WriteJson(JsonWriter writer, RenderingOrderItem value, JsonSerializer serializer)
+        {
+            writer.WriteValue(value.RendererTypeName);
+        }
     }
 }

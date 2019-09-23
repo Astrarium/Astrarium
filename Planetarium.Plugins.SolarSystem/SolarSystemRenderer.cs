@@ -66,6 +66,8 @@ namespace Planetarium.Renderers
 
         public override RendererOrder Order => RendererOrder.SolarSystem;
 
+        public override string Name => "Sun, Moon and Planets";
+
         public override void Render(IMapContext map)
         {
             Sun sun = solarProvider.Sun;

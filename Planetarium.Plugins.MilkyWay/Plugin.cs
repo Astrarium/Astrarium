@@ -10,7 +10,7 @@ namespace Planetarium.Plugins.MilkyWay
 {
     public class Plugin : AbstractPlugin
     {
-        public Plugin()
+        public Plugin(ISky sky)
         {
             #region Settings
 

@@ -81,5 +81,7 @@ namespace Planetarium.Plugins.Tycho2
         }
 
         public override RendererOrder Order => RendererOrder.Stars;
+
+        public override string Name => "Tycho 2 Star Catalogue";
     }
 }

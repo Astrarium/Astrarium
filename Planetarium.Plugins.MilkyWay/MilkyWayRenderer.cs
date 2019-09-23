@@ -76,5 +76,7 @@ namespace Planetarium.Plugins.MilkyWay
         }
 
         public override RendererOrder Order => RendererOrder.Background;
+
+        public override string Name => "Milky Way";
     }
 }

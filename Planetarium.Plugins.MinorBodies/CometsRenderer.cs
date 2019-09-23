@@ -105,5 +105,7 @@ namespace Planetarium.Plugins.MinorBodies
         }
 
         public override RendererOrder Order => RendererOrder.SolarSystem;
+
+        public override string Name => "Comets";
     }
 }

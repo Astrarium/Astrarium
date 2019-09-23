@@ -18,20 +18,24 @@ namespace Planetarium
         private delegate ICollection<SearchResultItem> SearchDelegate(SkyContext context, string searchString, int maxCount = 50);
         private delegate CelestialObjectInfo GetInfoDelegate<T>(SkyContext context, T body) where T : CelestialObject;
 
-        private List<BaseCalc> Calculators = new List<BaseCalc>();
         private Dictionary<Type, EphemerisConfig> EphemConfigs = new Dictionary<Type, EphemerisConfig>();
         private Dictionary<Type, Delegate> InfoProviders = new Dictionary<Type, Delegate>();
         private List<SearchDelegate> SearchProviders = new List<SearchDelegate>();
         private Dictionary<Type, Delegate> NameProviders = new Dictionary<Type, Delegate>();
-        private List<BaseAstroEventsProvider> EventProviders = new List<BaseAstroEventsProvider>();
         private List<AstroEventsConfig> EventConfigs = new List<AstroEventsConfig>();
 
+        private List<BaseCalc> Calculators = new List<BaseCalc>();
+        private List<BaseAstroEventsProvider> EventProviders = new List<BaseAstroEventsProvider>();
         public SkyContext Context { get; private set; }
 
         public event Action Calculated;
 
-        public void Initialize()
+        public void Initialize(SkyContext context, ICollection<BaseCalc> calculators, ICollection<BaseAstroEventsProvider> eventProviders)
         {
+            Context = context;
+            Calculators.AddRange(calculators);
+            EventProviders.AddRange(eventProviders);
+            
             foreach (var calc in Calculators)
             {
                 calc.Initialize();
@@ -80,13 +84,6 @@ namespace Planetarium
                     EventConfigs.Add(eventsConfig);
                 }
             }
-        }
-
-        public Sky(SkyContext context, CalculatorsCollection calculators, AstroEventProvidersCollection eventProviders)
-        {
-            Calculators.AddRange(calculators);
-            EventProviders.AddRange(eventProviders);
-            Context = context;
         }
 
         public void Calculate()

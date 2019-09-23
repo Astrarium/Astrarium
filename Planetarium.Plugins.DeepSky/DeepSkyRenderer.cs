@@ -351,5 +351,7 @@ namespace Planetarium.Plugins.DeepSky
         }
 
         public override RendererOrder Order => RendererOrder.DeepSpace;
+
+        public override string Name => "Deep Sky Objects";
     }
 }

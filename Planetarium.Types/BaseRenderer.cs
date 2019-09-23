@@ -10,6 +10,7 @@ namespace Planetarium.Renderers
         public abstract void Render(IMapContext map);
         public virtual void Initialize() { }
         public abstract RendererOrder Order { get; }
+        public abstract string Name { get; }
     }
 
     public enum RendererOrder

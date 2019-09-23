@@ -70,6 +70,8 @@ namespace Planetarium
 
             kernel.Bind<ISettings, Settings>().To<Settings>().InSingletonScope();
 
+            kernel.Bind<Sky, ISky, ISearcher, IEphemerisProvider>().To<Sky>().InSingletonScope();
+
             kernel.Bind<SettingsConfig>().ToSelf().InSingletonScope();
             kernel.Bind<ToolbarButtonsConfig>().ToSelf().InSingletonScope();
 
@@ -134,6 +136,12 @@ namespace Planetarium
 
             settings.Load();
 
+            SkyContext context = new SkyContext(
+                new Date(DateTime.Now).ToJulianEphemerisDay(),
+                new CrdsGeographical(settings.Get<CrdsGeographical>("ObserverLocation")));
+
+            kernel.Bind<SkyContext>().ToConstant(context).WhenInjectedInto<ISkyMap>().InSingletonScope();
+            
             var assemblyTypes = Assembly.GetExecutingAssembly().GetTypes();
 
             // collect all calculators types
@@ -178,36 +186,29 @@ namespace Planetarium
 
             progress.Report($"Creating calculators");
 
-            var calculators = new CalculatorsCollection(calcTypes
+            var calculators = calcTypes
                 .Select(c => kernel.Get(c))
-                .Cast<BaseCalc>());
+                .Cast<BaseCalc>()
+                .ToArray();
 
             progress.Report($"Creating event providers");
 
-            var eventProviders = new AstroEventProvidersCollection(eventProviderTypes
+            var eventProviders = eventProviderTypes
                 .Select(c => kernel.Get(c))
-                .Cast<BaseAstroEventsProvider>());
+                .Cast<BaseAstroEventsProvider>()
+                .ToArray();
 
-            SkyContext context = new SkyContext(
-                new Date(DateTime.Now).ToJulianEphemerisDay(),
-                new CrdsGeographical(settings.Get<CrdsGeographical>("ObserverLocation")));
+            
 
             kernel.Bind<ISkyMap>().To<SkyMap>().InSingletonScope();
-            kernel.Bind<Sky, ISky, ISearcher, IEphemerisProvider>().To<Sky>().InSingletonScope();
-
-            kernel.Bind<SkyContext>().ToConstant(context).WhenInjectedInto<ISkyMap>().InSingletonScope();
-            kernel.Bind<SkyContext>().ToConstant(context).WhenInjectedInto<Sky>().InSingletonScope();
-            kernel.Bind<CalculatorsCollection>().ToConstant(calculators).InSingletonScope();
-            kernel.Bind<AstroEventProvidersCollection>().ToConstant(eventProviders).InSingletonScope();
-
-
-
 
             progress.Report($"Creating renderers");
 
             var renderers = new RenderersCollection(rendererTypes.Select(r => kernel.Get(r)).Cast<BaseRenderer>());
             kernel.Bind<RenderersCollection>().ToConstant(renderers).InSingletonScope();
-           
+
+            kernel.Get<Sky>().Initialize(context, calculators, eventProviders);
+
             logger.Debug("Application container has been configured.");
 
             progress.Report($"Initializing shell");

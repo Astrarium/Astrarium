@@ -13,7 +13,7 @@ namespace Planetarium.Calculators
         private readonly ILunarCalc lunarCalc = null;
         private readonly IPlanetsCalc planetsCalc = null;
 
-        // Bright stars that can be in conjunction with Moon
+        // Bright stars which can be in conjunction with Moon
         private readonly ConjunctedStar[] stars = new ConjunctedStar[]
         {
             new ConjunctedStar("Pleiades", "03h 47m 29.1s", "+24° 06' 18''", 0.019f, -0.046f),

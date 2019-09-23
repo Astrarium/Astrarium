@@ -45,8 +45,8 @@ namespace Planetarium.Config
         {
             var renderingOrder = List.ItemsSource as RenderingOrder;
 
-            string fromItem = e.Data.GetData(typeof(string)) as string;
-            string toItem = ((ListBoxItem)sender).DataContext as string;
+            var fromItem = e.Data.GetData(typeof(RenderingOrderItem)) as RenderingOrderItem;
+            var toItem = ((ListBoxItem)sender).DataContext as RenderingOrderItem;
 
             int oldIndex = List.Items.IndexOf(fromItem);
             int newIndex = List.Items.IndexOf(toItem);

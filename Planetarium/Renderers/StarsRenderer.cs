@@ -211,5 +211,7 @@ namespace Planetarium.Renderers
         }
 
         public override RendererOrder Order => RendererOrder.Stars;
+
+        public override string Name => "Bright Stars Catalogue";
     }
 }

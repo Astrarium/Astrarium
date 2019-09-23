@@ -13,13 +13,13 @@
             <StackPanel Orientation="Vertical">
                 
                 <ListView 
-                x:Name="List" 
-            
-                SelectionMode="Single" 
-                IsSynchronizedWithCurrentItem="True"
-                ScrollViewer.VerticalScrollBarVisibility="Visible"
-                ScrollViewer.CanContentScroll="False"
-                ItemsSource="{Binding SettingValue}">
+                    x:Name="List" 
+                    SelectionMode="Single" 
+                    IsSynchronizedWithCurrentItem="True"
+                    ScrollViewer.VerticalScrollBarVisibility="Visible"
+                    ScrollViewer.CanContentScroll="False"
+                    ItemsSource="{Binding SettingValue}"
+                    DisplayMemberPath="Name">
 
                     <ListView.Resources>
                         <Style TargetType="{x:Type c:BindableListView}" BasedOn="{StaticResource ListViewWithGridViewStyle}">
@@ -34,7 +34,7 @@
                     <ListView.View>
                         <GridView ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}">
                             <GridView.Columns>
-                                <GridViewColumn Header="Renderer" Width="Auto" DisplayMemberBinding="{Binding}" />
+                                <GridViewColumn Header="Renderer" Width="Auto" DisplayMemberBinding="{Binding Name}" />
                             </GridView.Columns>
                         </GridView>
                     </ListView.View>

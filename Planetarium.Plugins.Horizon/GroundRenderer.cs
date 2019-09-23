@@ -22,6 +22,8 @@ namespace Planetarium.Plugins.Horizon
 
         public override RendererOrder Order => RendererOrder.Terrestrial;
 
+        public override string Name => "Ground and Horizon";
+
         public override void Render(IMapContext map)
         {
             double coeff = map.DiagonalCoefficient();

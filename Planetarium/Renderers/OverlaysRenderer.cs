@@ -77,5 +77,7 @@ namespace Planetarium.Renderers
         }
 
         public override RendererOrder Order => RendererOrder.Foreground;
+
+        public override string Name => "Overlays";
     }
 }

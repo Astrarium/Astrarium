@@ -40,6 +40,8 @@ namespace Planetarium.Renderers
 
         public override RendererOrder Order => RendererOrder.Grids;
 
+        public override string Name => "Constellations";
+
         /// <summary>
         /// Renders constellation borders on the map
         /// </summary>

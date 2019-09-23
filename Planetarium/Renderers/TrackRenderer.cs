@@ -92,6 +92,8 @@ namespace Planetarium.Renderers
 
         public override RendererOrder Order => RendererOrder.SolarSystem - 1;
 
+        public override string Name => "Tracks";
+
         private bool IsSegmentContainsBody(IMapContext map, ICollection<CelestialPoint> segment, Track track)
         {
             int firstIndex = track.Points.IndexOf(segment.First());

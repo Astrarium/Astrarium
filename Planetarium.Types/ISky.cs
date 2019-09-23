@@ -19,7 +19,7 @@ namespace Planetarium.Types
         ICollection<string> GetEventsCategories();
         CelestialObjectInfo GetInfo(CelestialObject body);
         string GetObjectName(CelestialObject body);
-        void Initialize();
+        void Initialize(SkyContext context, ICollection<BaseCalc> calculators, ICollection<BaseAstroEventsProvider> eventProviders);
         ICollection<SearchResultItem> Search(string searchString, Func<CelestialObject, bool> filter);
     }
 }
