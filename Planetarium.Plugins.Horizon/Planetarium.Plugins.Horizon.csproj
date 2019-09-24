@@ -10,8 +10,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Images.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Include="Images.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ADK\ADK.csproj" />
     <ProjectReference Include="..\Planetarium.Types\Planetarium.Types.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
 
 </Project>

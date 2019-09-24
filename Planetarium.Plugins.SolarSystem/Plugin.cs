@@ -33,6 +33,8 @@ namespace Planetarium.Plugins.SolarSystem
             #endregion Settings
 
             AddToolbarItem(new ToolbarButton("Planets", "IconPlanet", settings, "Planets", "Objects"));
+
+            ExportResourceDictionaries("Images.xaml");
         }
     }
 }

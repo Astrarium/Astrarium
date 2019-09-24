@@ -28,6 +28,8 @@ namespace Planetarium.Plugins.Grids
 
             AddToolbarItem(new ToolbarButton("Equatorial Grid", "IconEquatorialGrid", settings, "EquatorialGrid", "Grids"));
             AddToolbarItem(new ToolbarButton("Horizontal Grid", "IconHorizontalGrid", settings, "HorizontalGrid", "Grids"));
+
+            ExportResourceDictionaries("Images.xaml");
         }
     }
 }
