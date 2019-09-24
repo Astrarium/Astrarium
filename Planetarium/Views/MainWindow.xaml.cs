@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using Planetarium.Types.Themes;
 using WF = System.Windows.Forms;
+using Planetarium.Types;
 
 namespace Planetarium
 {

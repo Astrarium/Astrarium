@@ -50,6 +50,7 @@ namespace Planetarium.ViewModels
         public Command ClearObjectsHistoryCommand { get; private set; }
         public Command ChangeSettingsCommand { get; private set; }
 
+        private ContextMenuItemsConfig contextMenuItemsConfig;
         public ObservableCollection<MenuItemVM> ContextMenuItems { get; private set; } = new ObservableCollection<MenuItemVM>();
         public ObservableCollection<MenuItemVM> SelectedObjectsMenuItems { get; private set; } = new ObservableCollection<MenuItemVM>();
         public string SelectedObjectName { get; private set; }
@@ -94,7 +95,7 @@ namespace Planetarium.ViewModels
             }
         }
 
-        public MainVM(ISky sky, ISkyMap map, ISettings settings, IViewManager viewManager, ToolbarButtonsConfig toolbarButtonsConfig)
+        public MainVM(ISky sky, ISkyMap map, ISettings settings, IViewManager viewManager, ToolbarButtonsConfig toolbarButtonsConfig, ContextMenuItemsConfig contextMenuItemsConfig)
         {
             this.sky = sky;
             this.map = map;
@@ -114,7 +115,6 @@ namespace Planetarium.ViewModels
             GetObjectInfoCommand = new Command<CelestialObject>(GetObjectInfo);
             GetObjectEphemerisCommand = new Command<CelestialObject>(GetObjectEphemeris);
             CalculatePhenomenaCommand = new Command(CalculatePhenomena);
-            //MotionTrackCommand = new Command<CelestialObject>(MotionTrack);
             LockOnObjectCommand = new Command<CelestialObject>(LockOnObject);
             MeasureToolCommand = new Command<PointF>(MeasureTool);
             CenterOnObjectCommand = new Command<CelestialObject>(CenterOnObject);
@@ -140,6 +140,8 @@ namespace Planetarium.ViewModels
                 }
                 ToolbarItems.Add(new ToolbarSeparatorVM());
             }
+
+            this.contextMenuItemsConfig = contextMenuItemsConfig;
         }
 
         private void Sky_ContextChanged()
@@ -366,13 +368,16 @@ namespace Planetarium.ViewModels
                 CommandParameter = map.SelectedObject
             });
 
-            ContextMenuItems.Add(new MenuItemVM()
+            // dynamic menu items from plugins
+            foreach (var configItem in contextMenuItemsConfig)
             {
-                Header = "Motion track",
-                IsEnabled = map.SelectedObject != null && map.SelectedObject is IMovingObject,
-                Command = MotionTrackCommand,
-                CommandParameter = map.SelectedObject
-            });
+                ContextMenuItems.Add(new MenuItemVM()
+                {
+                    Header = configItem.Text,
+                    IsEnabled = configItem.EnabledCondition(),
+                    Command = new Command(configItem.Action)
+                });
+            }
             
             ContextMenuItems.Add(null);
             ContextMenuItems.Add(new MenuItemVM()
@@ -555,32 +560,6 @@ namespace Planetarium.ViewModels
                 }
             }
         }
-
-        //private void MotionTrack(CelestialObject body)
-        //{   
-        //    if (body != null && body is IMovingObject)
-        //    {
-        //        var vm = viewManager.CreateViewModel<MotionTrackVM>();
-        //        vm.TrackId = Guid.NewGuid();
-        //        vm.SelectedBody = body;
-        //        vm.JulianDayFrom = sky.Context.JulianDay;
-        //        vm.JulianDayTo = sky.Context.JulianDay + 30;
-        //        vm.UtcOffset = sky.Context.GeoLocation.UtcOffset;
-
-        //        if (viewManager.ShowDialog(vm) ?? false)
-        //        {
-        //            sky.Calculate();
-        //        }
-        //    }
-        //    else
-        //    {
-        //        var vm = viewManager.CreateViewModel<TracksListVM>();
-        //        if (viewManager.ShowDialog(vm) ?? false)
-        //        {
-        //            sky.Calculate();
-        //        }
-        //    }
-        //}
 
         private void SetDate()
         {

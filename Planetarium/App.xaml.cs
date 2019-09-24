@@ -32,8 +32,8 @@ namespace Planetarium
         {
             base.OnStartup(e);
 
-            kernel.Bind<IViewManager>().ToConstant(new ViewManager(t => kernel.Get(t))).InSingletonScope();
-            viewManager = kernel.Get<IViewManager>();
+            kernel.Bind<IViewManager, ViewManager>().ToConstant(new ViewManager(t => kernel.Get(t))).InSingletonScope();
+            viewManager = kernel.Get<ViewManager>();
 
             var splashVM = new SplashScreenVM();
             viewManager.ShowWindow(splashVM);
@@ -75,9 +75,11 @@ namespace Planetarium
 
             kernel.Bind<SettingsConfig>().ToSelf().InSingletonScope();
             kernel.Bind<ToolbarButtonsConfig>().ToSelf().InSingletonScope();
+            kernel.Bind<ContextMenuItemsConfig>().ToSelf().InSingletonScope();
 
             SettingsConfig settingsConfig = kernel.Get<SettingsConfig>();
             ToolbarButtonsConfig toolbarButtonsConfig = kernel.Get<ToolbarButtonsConfig>();
+            ContextMenuItemsConfig contextMenuItemsConfig = kernel.Get<ContextMenuItemsConfig>();
             ICollection<AbstractPlugin> plugins = new List<AbstractPlugin>();
 
             // TODO: consider more proper way to load plugins
@@ -118,6 +120,9 @@ namespace Planetarium
 
                 // add configured toolbar buttons
                 toolbarButtonsConfig.AddRange(plugin.ToolbarItems);
+
+                // add configured context menu items
+                contextMenuItemsConfig.AddRange(plugin.ContextMenuItems);
 
                 plugins.Add(plugin);
             }

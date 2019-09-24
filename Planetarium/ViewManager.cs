@@ -34,7 +34,6 @@ namespace Planetarium
         internal ViewManager(Func<Type, object> typeFactory)
         {
             this.typeFactory = typeFactory;
-            ResolveViewModelViewBindings();
         }
 
         public void ShowWindow<TViewModel>() where TViewModel : ViewModelBase
@@ -59,6 +58,10 @@ namespace Planetarium
             {
                 viewType = viewModelViewBindings[typeof(TViewModel)];
             }
+            else
+            {
+                viewType = ResolveVVMBindings(typeof(TViewModel));
+            }            
 
             if (viewType != null)
             {
@@ -148,19 +151,15 @@ namespace Planetarium
             }
         }
 
-        private void ResolveViewModelViewBindings()
+        private Type ResolveVVMBindings(Type type)
         {
-            Type[] viewModelTypes =
-                    Assembly.GetExecutingAssembly().GetTypes().Concat(
-                    Assembly.GetExecutingAssembly().GetReferencedAssemblies()
-                 .SelectMany(a => Assembly.Load(a).GetTypes()))
+            var assembly = type.Assembly;
+
+            Type[] viewModelTypes = assembly.GetTypes()
                  .Where(t => typeof(ViewModelBase).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
                  .ToArray();
 
-            Type[] viewTypes =
-                Assembly.GetExecutingAssembly().GetTypes().Concat(
-                Assembly.GetExecutingAssembly().GetReferencedAssemblies()
-                .SelectMany(a => Assembly.Load(a).GetTypes()))
+            Type[] viewTypes = assembly.GetTypes()
                 .Where(t => typeof(Window).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
                 .ToArray();
 
@@ -186,6 +185,15 @@ namespace Planetarium
                     viewModelViewBindings.Add(viewModelType, viewType);
                 }
             }
+
+            if (viewModelViewBindings.ContainsKey(type))
+            {
+                return viewModelViewBindings[type];
+            }
+            else
+            {
+                return null;
+            }            
         }
 
         public TViewModel CreateViewModel<TViewModel>() where TViewModel : ViewModelBase

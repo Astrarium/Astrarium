@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Planetarium.Projections
+namespace Planetarium.Types
 {
     public interface IProjection
     {

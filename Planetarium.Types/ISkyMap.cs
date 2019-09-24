@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using ADK;
 using Planetarium.Objects;
-using Planetarium.Projections;
+using Planetarium.Types;
 
-namespace Planetarium
+namespace Planetarium.Types
 {
     /// <summary>
     /// Defines an interface of Sky Map canvas to render celestial map.

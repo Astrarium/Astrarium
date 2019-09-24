@@ -13,9 +13,11 @@ namespace Planetarium.Types
     {
         private List<SettingItem> settingItems = new List<SettingItem>();
         private List<ToolbarButton> toolbarItems = new List<ToolbarButton>();
+        private List<ContextMenuItem> contextMenuItems = new List<ContextMenuItem>();
 
         public IEnumerable<SettingItem> SettingItems => settingItems;
         public IEnumerable<ToolbarButton> ToolbarItems => toolbarItems;
+        public IEnumerable<ContextMenuItem> ContextMenuItems => contextMenuItems;
 
         public IEnumerable<Type> Renderers
         {
@@ -49,6 +51,11 @@ namespace Planetarium.Types
         protected void AddToolbarItem(ToolbarButton button)
         {
             toolbarItems.Add(button);
+        }
+
+        protected void AddContextMenuItem(ContextMenuItem item)
+        {
+            contextMenuItems.Add(item);
         }
 
         protected void ExportResourceDictionaries(params string[] names)
