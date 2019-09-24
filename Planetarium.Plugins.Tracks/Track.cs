@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Planetarium
+namespace Planetarium.Plugins.Tracks
 {
     /// <summary>
     /// Describes motion track of celestial body

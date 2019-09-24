@@ -55,6 +55,7 @@
     <ProjectReference Include="..\Planetarium.Plugins.DeepSky\Planetarium.Plugins.DeepSky.csproj" />
     <ProjectReference Include="..\Planetarium.Plugins.Grids\Planetarium.Plugins.Grids.csproj" />
     <ProjectReference Include="..\Planetarium.Plugins.SolarSystem\Planetarium.Plugins.SolarSystem.csproj" />
+    <ProjectReference Include="..\Planetarium.Plugins.Tracks\Planetarium.Plugins.Tracks.csproj" />
     <ProjectReference Include="..\Planetarium.Types\Planetarium.Types.csproj" />
     <ProjectReference Include="..\Planetarium.Plugins.MinorBodies\Planetarium.Plugins.MinorBodies.csproj" />
     <ProjectReference Include="..\Planetarium.Plugins.Tycho2\Planetarium.Plugins.Tycho2.csproj" />

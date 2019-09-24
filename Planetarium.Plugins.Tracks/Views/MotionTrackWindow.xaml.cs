@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace Planetarium.Views
+namespace Planetarium.Plugins.Tracks.Views
 {
     /// <summary>
     /// Interaction logic for TrackPropertiesWindow.xaml

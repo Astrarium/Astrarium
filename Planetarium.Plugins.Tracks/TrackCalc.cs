@@ -9,7 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Planetarium.Calculators
+namespace Planetarium.Plugins.Tracks
 {
     public interface ITracksProvider
     {

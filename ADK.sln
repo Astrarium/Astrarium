@@ -24,9 +24,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Planetarium.Plugins.MilkyWa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Planetarium.Plugins.Horizon", "Planetarium.Plugins.Horizon\Planetarium.Plugins.Horizon.csproj", "{5C274D19-935F-4582-9273-B6A0E0790E5A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Planetarium.Plugins.SolarSystem", "Planetarium.Plugins.SolarSystem\Planetarium.Plugins.SolarSystem.csproj", "{F739AA16-72B5-452F-890B-A16AB65ACDA9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Planetarium.Plugins.SolarSystem", "Planetarium.Plugins.SolarSystem\Planetarium.Plugins.SolarSystem.csproj", "{F739AA16-72B5-452F-890B-A16AB65ACDA9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Planetarium.Plugins.Grids", "Planetarium.Plugins.Grids\Planetarium.Plugins.Grids.csproj", "{5B94F55F-7DEF-4B41-B679-2099F9EC1F69}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Planetarium.Plugins.Grids", "Planetarium.Plugins.Grids\Planetarium.Plugins.Grids.csproj", "{5B94F55F-7DEF-4B41-B679-2099F9EC1F69}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Planetarium.Plugins.Tracks", "Planetarium.Plugins.Tracks\Planetarium.Plugins.Tracks.csproj", "{B2B0E9E1-7C22-492A-89E5-1852B8B63EB6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -78,6 +80,10 @@ Global
 		{5B94F55F-7DEF-4B41-B679-2099F9EC1F69}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B94F55F-7DEF-4B41-B679-2099F9EC1F69}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5B94F55F-7DEF-4B41-B679-2099F9EC1F69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2B0E9E1-7C22-492A-89E5-1852B8B63EB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2B0E9E1-7C22-492A-89E5-1852B8B63EB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2B0E9E1-7C22-492A-89E5-1852B8B63EB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2B0E9E1-7C22-492A-89E5-1852B8B63EB6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

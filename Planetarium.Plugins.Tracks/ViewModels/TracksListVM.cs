@@ -1,6 +1,6 @@
 ﻿using ADK;
-using Planetarium.Calculators;
 using Planetarium.Objects;
+using Planetarium.Plugins.Tracks;
 using Planetarium.Types;
 using System;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace Planetarium.ViewModels
+namespace Planetarium.Plugins.Tracks.ViewModels
 {
     public class TracksListVM : ViewModelBase
     {

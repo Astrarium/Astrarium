@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace Planetarium.Views
+namespace Planetarium.Plugins.Tracks.Views
 {
     /// <summary>
     /// Interaction logic for TracksListWindow.xaml

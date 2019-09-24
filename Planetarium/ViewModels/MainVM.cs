@@ -114,7 +114,7 @@ namespace Planetarium.ViewModels
             GetObjectInfoCommand = new Command<CelestialObject>(GetObjectInfo);
             GetObjectEphemerisCommand = new Command<CelestialObject>(GetObjectEphemeris);
             CalculatePhenomenaCommand = new Command(CalculatePhenomena);
-            MotionTrackCommand = new Command<CelestialObject>(MotionTrack);
+            //MotionTrackCommand = new Command<CelestialObject>(MotionTrack);
             LockOnObjectCommand = new Command<CelestialObject>(LockOnObject);
             MeasureToolCommand = new Command<PointF>(MeasureTool);
             CenterOnObjectCommand = new Command<CelestialObject>(CenterOnObject);
@@ -305,10 +305,10 @@ namespace Planetarium.ViewModels
                 SelectLocation();
             }
             // "T" = [T]rack
-            else if (key == Key.T)
-            {
-                MotionTrack(map.SelectedObject);
-            }
+            //else if (key == Key.T)
+            //{
+            //    MotionTrack(map.SelectedObject);
+            //}
         }
 
         private void MapDoubleClick(PointF point)
@@ -556,31 +556,31 @@ namespace Planetarium.ViewModels
             }
         }
 
-        private void MotionTrack(CelestialObject body)
-        {   
-            if (body != null && body is IMovingObject)
-            {
-                var vm = viewManager.CreateViewModel<MotionTrackVM>();
-                vm.TrackId = Guid.NewGuid();
-                vm.SelectedBody = body;
-                vm.JulianDayFrom = sky.Context.JulianDay;
-                vm.JulianDayTo = sky.Context.JulianDay + 30;
-                vm.UtcOffset = sky.Context.GeoLocation.UtcOffset;
+        //private void MotionTrack(CelestialObject body)
+        //{   
+        //    if (body != null && body is IMovingObject)
+        //    {
+        //        var vm = viewManager.CreateViewModel<MotionTrackVM>();
+        //        vm.TrackId = Guid.NewGuid();
+        //        vm.SelectedBody = body;
+        //        vm.JulianDayFrom = sky.Context.JulianDay;
+        //        vm.JulianDayTo = sky.Context.JulianDay + 30;
+        //        vm.UtcOffset = sky.Context.GeoLocation.UtcOffset;
 
-                if (viewManager.ShowDialog(vm) ?? false)
-                {
-                    sky.Calculate();
-                }
-            }
-            else
-            {
-                var vm = viewManager.CreateViewModel<TracksListVM>();
-                if (viewManager.ShowDialog(vm) ?? false)
-                {
-                    sky.Calculate();
-                }
-            }
-        }
+        //        if (viewManager.ShowDialog(vm) ?? false)
+        //        {
+        //            sky.Calculate();
+        //        }
+        //    }
+        //    else
+        //    {
+        //        var vm = viewManager.CreateViewModel<TracksListVM>();
+        //        if (viewManager.ShowDialog(vm) ?? false)
+        //        {
+        //            sky.Calculate();
+        //        }
+        //    }
+        //}
 
         private void SetDate()
         {

@@ -1,6 +1,6 @@
 ﻿using ADK;
-using Planetarium.Calculators;
 using Planetarium.Objects;
+using Planetarium.Renderers;
 using Planetarium.Types;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 
-namespace Planetarium.Renderers
+namespace Planetarium.Plugins.Tracks
 {
     /// <summary>
     /// Renders celestial bodies motion tracks on the map
