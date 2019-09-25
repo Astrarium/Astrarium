@@ -73,7 +73,7 @@ namespace Planetarium.Plugins.Tycho2
                             {
                                 map.DrawObjectCaption(fontNames, brushNames, star.ToString(), p, size);
                             }
-                            map.AddDrawnObject(star, p);
+                            map.AddDrawnObject(star);
                         }
                     }
                 }

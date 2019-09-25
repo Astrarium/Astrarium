@@ -27,10 +27,6 @@ namespace Planetarium.Types
 
         float MagLimit { get; }
 
-        float? UserMagLimit { get; set; }
-
-        int FPS { get; }
-
         /// <summary>
         /// Gets or sets current field of view, in degrees
         /// </summary>
@@ -56,21 +52,17 @@ namespace Planetarium.Types
         /// </summary>
         CelestialObject LockedObject { get; set; }
 
-        bool IsDragging { get; set; }
-
-        bool RenderOnMouseMove { get; }
-
         /// <summary>
         /// Occurs when selected celestial object is changed
         /// </summary>
         event Action<CelestialObject> SelectedObjectChanged;
 
-        CrdsHorizontal MousePosition { get; set; }
+        CrdsHorizontal MousePosition { get; }
 
         /// <summary>
         /// Gets or sets projection which is used for converting celestial coordinates to the sky map plane.
         /// </summary>
-        IProjection Projection { get; set; }
+        IProjection Projection { get; }
         
         /// <summary>
         /// Renders the celestial map on provided Graphics object
@@ -80,13 +72,11 @@ namespace Planetarium.Types
 
         void Invalidate();
 
-        bool Antialias { get; set; }
-
         CelestialObject FindObject(PointF point);
 
         void GoToObject(CelestialObject body, TimeSpan animationDuration);
 
-        void AddDrawnObject(CelestialObject obj, PointF p);
+        void AddDrawnObject(CelestialObject obj);
 
         event Action OnInvalidate;
     }

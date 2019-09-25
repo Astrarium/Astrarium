@@ -93,7 +93,7 @@ namespace Planetarium.Plugins.MinorBodies
                                 map.DrawObjectCaption(fontNames, brushNames, a.Name, p, diam);
                             }
 
-                            map.AddDrawnObject(a, p);
+                            map.AddDrawnObject(a);
                             continue;
                         }
 
@@ -112,7 +112,7 @@ namespace Planetarium.Plugins.MinorBodies
                                     map.DrawObjectCaption(fontNames, brushNames, a.Name, p, size);
                                 }
 
-                                map.AddDrawnObject(a, p);
+                                map.AddDrawnObject(a);
                                 continue;
                             }
                         }

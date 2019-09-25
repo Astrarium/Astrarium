@@ -92,7 +92,7 @@ namespace Planetarium.Renderers
                         if (!map.IsOutOfScreen(p))
                         {
                             g.FillEllipse(GetColor(star.Color), p.X - diam / 2, p.Y - diam / 2, diam, diam);                                
-                            map.AddDrawnObject(star, p);
+                            map.AddDrawnObject(star);
                         }
                     }
                 }

@@ -151,7 +151,7 @@ namespace Planetarium.Renderers
                     map.DrawObjectCaption(fontLabel, brushLabel, "Sun", p, size);
                 }
 
-                map.AddDrawnObject(sun, p);
+                map.AddDrawnObject(sun);
             }
         }
 
@@ -211,7 +211,7 @@ namespace Planetarium.Renderers
                 map.Graphics.ResetTransform();
 
                 map.DrawObjectCaption(fontLabel, brushLabel, "Moon", p, size);
-                map.AddDrawnObject(moon, p);
+                map.AddDrawnObject(moon);
             }
         }
 
@@ -337,7 +337,7 @@ namespace Planetarium.Renderers
                     g.FillEllipse(GetPlanetColor(planet.Number), p.X - size / 2, p.Y - size / 2, size, size);
 
                     map.DrawObjectCaption(fontLabel, brushLabel, planet.Name, p, size);
-                    map.AddDrawnObject(planet, p);
+                    map.AddDrawnObject(planet);
                 }
 
                 // planet should be rendered as disk
@@ -424,7 +424,7 @@ namespace Planetarium.Renderers
                     }
                     
                     map.DrawObjectCaption(fontLabel, brushLabel, planet.Name, p, diam);
-                    map.AddDrawnObject(planet, p);
+                    map.AddDrawnObject(planet);
 
                     if (planet.Number == Planet.JUPITER)
                     {
@@ -477,7 +477,7 @@ namespace Planetarium.Renderers
                                 map.Graphics.ResetTransform();
 
                                 map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, 2);
-                                map.AddDrawnObject(moon, p);
+                                map.AddDrawnObject(moon);
                             }                                                       
                         }
                     }
@@ -524,7 +524,7 @@ namespace Planetarium.Renderers
                         if (moon.IsEclipsedByJupiter) RenderJupiterShadow(map, moon);
 
                         map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, diam);
-                        map.AddDrawnObject(moon, p);
+                        map.AddDrawnObject(moon);
                     }
                 }
             }

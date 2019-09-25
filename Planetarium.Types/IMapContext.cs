@@ -52,7 +52,7 @@ namespace Planetarium.Types
 
         CrdsHorizontal MousePosition { get; }
 
-        void AddDrawnObject(CelestialObject obj, PointF p);
+        void AddDrawnObject(CelestialObject obj);
 
         /// <summary>
         /// Projects horizontal coordinates to the point on the map

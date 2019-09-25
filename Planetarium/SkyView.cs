@@ -28,8 +28,8 @@ namespace Planetarium
         }
 
         [Description("Gets or sets ISkyMap object to be rendered in the control.")]
-        private ISkyMap mSkyMap = null;
-        public ISkyMap SkyMap
+        private SkyMap mSkyMap = null;
+        public SkyMap SkyMap
         {
             get { return mSkyMap; }
             set

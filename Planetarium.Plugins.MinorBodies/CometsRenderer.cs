@@ -86,7 +86,7 @@ namespace Planetarium.Plugins.MinorBodies
                                 {
                                     map.DrawObjectCaption(fontNames, brushNames, c.Name, p, diam);
                                 }
-                                map.AddDrawnObject(c, p);
+                                map.AddDrawnObject(c);
                             }
                             else if (!map.IsOutOfScreen(p))
                             {
@@ -95,7 +95,7 @@ namespace Planetarium.Plugins.MinorBodies
                                 {
                                     map.DrawObjectCaption(fontNames, brushNames, c.Name, p, size);
                                 }
-                                map.AddDrawnObject(c, p);
+                                map.AddDrawnObject(c);
                                 continue;
                             }
                         }

@@ -259,7 +259,7 @@ namespace Planetarium.Plugins.DeepSky
                             DrawEllipticObject(map.Graphics, diamA, diamB);
                             map.Graphics.ResetTransform();
                         }
-                        map.AddDrawnObject(ds, p);
+                        map.AddDrawnObject(ds);
 
                         if (map.ViewAngle <= Renderer.limitLabels && settings.Get<bool>("DeepSkyLabels"))
                         {
@@ -285,7 +285,7 @@ namespace Planetarium.Plugins.DeepSky
                             DrawRoundObject(map.Graphics, diamA);
                             map.Graphics.ResetTransform();
                         }
-                        map.AddDrawnObject(ds, p);
+                        map.AddDrawnObject(ds);
 
                         if (map.ViewAngle <= Renderer.limitLabels && settings.Get<bool>("DeepSkyLabels"))
                         {
@@ -309,7 +309,7 @@ namespace Planetarium.Plugins.DeepSky
                             DrawPointObject(map.Graphics, size);
                             map.Graphics.ResetTransform();
                         }
-                        map.AddDrawnObject(ds, p);
+                        map.AddDrawnObject(ds);
 
                         if (map.ViewAngle <= Renderer.limitLabels && settings.Get<bool>("DeepSkyLabels"))
                         {

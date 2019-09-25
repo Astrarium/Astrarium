@@ -137,7 +137,7 @@ namespace Planetarium
             return WF.Screen.FromPoint(new System.Drawing.Point((int)window.Left, (int)window.Top));
         }
 
-        public MainWindow(ISkyMap map)
+        public MainWindow(SkyMap map)
         {
             InitializeComponent();
 

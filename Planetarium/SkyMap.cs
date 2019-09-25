@@ -44,11 +44,6 @@ namespace Planetarium
         private long rendersCount = 0;
 
         /// <summary>
-        /// Collection of points of celestial bodies centers drawn on the map
-        /// </summary>
-        private ICollection<PointF> drawnPoints = new List<PointF>();
-
-        /// <summary>
         /// Collection of bounding rectangles of labels displayed on the map
         /// </summary>
         private ICollection<RectangleF> labels = new List<RectangleF>();
@@ -57,8 +52,6 @@ namespace Planetarium
 
         public int Width { get; set; }
         public int Height { get; set; }
-
-        public float? UserMagLimit { get; set; }
 
         private double viewAngle = 90;
         public double ViewAngle
@@ -97,12 +90,7 @@ namespace Planetarium
             get
             {
                 // log fit {90,6},{45,6.5},{20,7.3},{8,9},{4,10.5}
-                float magLimit = (float)(-1.44995 * Math.Log(0.000230685 * ViewAngle));
-
-                if (UserMagLimit != null)
-                    return Math.Min(magLimit, UserMagLimit.Value);
-                else
-                    return magLimit;
+                return (float)(-1.44995 * Math.Log(0.000230685 * ViewAngle));
             }
         }
 
@@ -219,7 +207,6 @@ namespace Planetarium
             g.Clear(Color.Black);
             g.PageUnit = GraphicsUnit.Display;
             g.SmoothingMode = Antialias ? SmoothingMode.HighQuality : SmoothingMode.HighSpeed;
-            drawnPoints.Clear();
             drawnObjects.Clear();
             labels.Clear();
 
@@ -310,10 +297,9 @@ namespace Planetarium
             }            
         }
 
-        public void AddDrawnObject(CelestialObject obj, PointF p)
+        public void AddDrawnObject(CelestialObject obj)
         {
             drawnObjects.Add(obj);
-            drawnPoints.Add(p);
         }
 
         private bool DrawSelectedObject(Graphics g)
@@ -357,6 +343,7 @@ namespace Planetarium
             }
 
             public Graphics Graphics { get; set; }
+
             public int Width => map.Width;
             public int Height => map.Height;
             public double ViewAngle => map.ViewAngle;
@@ -376,9 +363,9 @@ namespace Planetarium
                 return map.Projection.Project(hor);
             }
 
-            public void AddDrawnObject(CelestialObject obj, PointF p)
+            public void AddDrawnObject(CelestialObject obj)
             {
-                map.AddDrawnObject(obj, p);
+                map.AddDrawnObject(obj);
             }
 
             public void DrawObjectCaption(Font font, Brush brush, string caption, PointF p, float size)
@@ -393,7 +380,7 @@ namespace Planetarium
                         float dx = x == 0 ? s : -s - b.Width;
                         float dy = y == 0 ? s : -s - b.Height;
                         RectangleF r = new RectangleF(p.X + dx, p.Y + dy, b.Width, b.Height);
-                        if (!map.labels.Any(l => l.IntersectsWith(r)) && !map.drawnPoints.Any(v => r.Contains(v)))
+                        if (!map.labels.Any(l => l.IntersectsWith(r)) /*&& !map.drawnObjects.Select(body => Project(body.Horizontal)).Any(v => r.Contains(v))*/)
                         {
                             Graphics.DrawString(caption, font, brush, r.Location);
                             map.labels.Add(r);
