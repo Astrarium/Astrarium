@@ -58,15 +58,12 @@ namespace Planetarium.Types
 
         bool IsDragging { get; set; }
 
+        bool RenderOnMouseMove { get; }
+
         /// <summary>
         /// Occurs when selected celestial object is changed
         /// </summary>
         event Action<CelestialObject> SelectedObjectChanged;
-
-        /// <summary>
-        /// Origin of measure tool. Not null if measure tool is on.
-        /// </summary>
-        CrdsHorizontal MeasureOrigin { get; set; }
 
         CrdsHorizontal MousePosition { get; set; }
 

@@ -50,11 +50,6 @@ namespace Planetarium.Types
 
         int FPS { get; }
 
-        /// <summary>
-        /// Origin of measure tool. Not null if measure tool is on.
-        /// </summary>
-        CrdsHorizontal MeasureOrigin { get; }
-
         CrdsHorizontal MousePosition { get; }
 
         void AddDrawnObject(CelestialObject obj, PointF p);

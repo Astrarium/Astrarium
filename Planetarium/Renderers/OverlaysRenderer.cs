@@ -46,29 +46,7 @@ namespace Planetarium.Renderers
 
         private void DrawMeasureTool(IMapContext map)
         {
-            if (map.MeasureOrigin != null && map.MousePosition != null)
-            {
-                double coeff = map.DiagonalCoefficient();
-
-                List<PointF> points = new List<PointF>();
-                for (int f = 0; f <= 10; f++)
-                {
-                    CrdsHorizontal h = Angle.Intermediate(map.MousePosition, map.MeasureOrigin, f / 10.0);
-                    points.Add(map.Project(h));
-                    if (Angle.Separation(h, map.Center) > map.ViewAngle * coeff)
-                    { 
-                        break;
-                    }
-                }
-
-                if (points.Count > 1)
-                {
-                    map.Graphics.DrawCurve(Pens.White, points.ToArray());
-                    double angle = Angle.Separation(map.MousePosition, map.MeasureOrigin);
-                    PointF p = map.Project(map.MousePosition);
-                    map.Graphics.DrawString(Formatters.MeasuredAngle.Format(angle), fontLockMessage, Brushes.White, p.X + 5, p.Y + 5);
-                }
-            }
+            
         }
 
         private void DrawDiagnostic(IMapContext map)

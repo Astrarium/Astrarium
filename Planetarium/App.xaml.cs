@@ -108,6 +108,48 @@ namespace Planetarium
                 .Where(t => typeof(AbstractPlugin).IsAssignableFrom(t) && !t.IsAbstract)
                 .ToArray();
 
+            var assemblyTypes = Assembly.GetExecutingAssembly().GetTypes();
+
+            // collect all calculators types
+            Type[] calcTypes = assemblyTypes
+                .Where(t => typeof(BaseCalc).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
+                .Concat(pluginTypes.SelectMany(p => AbstractPlugin.Calculators(p)))
+                .ToArray();
+
+            foreach (Type calcType in calcTypes)
+            {
+                var types = calcType.GetInterfaces().ToList();
+                if (types.Any())
+                {
+                    // each interface that calculator implements
+                    // should be bound to the calc instance
+                    types.Add(calcType);
+                    kernel.Bind(types.ToArray()).To(calcType).InSingletonScope();
+                }
+            }
+
+            // collect all renderers types
+            Type[] rendererTypes = assemblyTypes
+                .Where(t => typeof(BaseRenderer).IsAssignableFrom(t) && !t.IsAbstract)
+                .Concat(pluginTypes.SelectMany(p => AbstractPlugin.Renderers(p)))
+                .ToArray();
+
+            foreach (Type rendererType in rendererTypes)
+            {
+                kernel.Bind(rendererType).ToSelf().InSingletonScope();
+            }
+
+            // collect all event provider implementations
+            Type[] eventProviderTypes = assemblyTypes
+                .Where(t => typeof(BaseAstroEventsProvider).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
+                .Concat(pluginTypes.SelectMany(p => AbstractPlugin.AstroEventProviders(p)))
+                .ToArray();
+
+            foreach (Type eventProviderType in eventProviderTypes)
+            {
+                kernel.Bind(eventProviderType).ToSelf().InSingletonScope();
+            }
+
             foreach (Type pluginType in pluginTypes)
             {
                 progress.Report($"Creating plugin {pluginType}");
@@ -145,48 +187,6 @@ namespace Planetarium
             SkyContext context = new SkyContext(
                 new Date(DateTime.Now).ToJulianEphemerisDay(),
                 new CrdsGeographical(settings.Get<CrdsGeographical>("ObserverLocation")));
-                       
-            var assemblyTypes = Assembly.GetExecutingAssembly().GetTypes();
-
-            // collect all calculators types
-            Type[] calcTypes = assemblyTypes
-                .Where(t => typeof(BaseCalc).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
-                .Concat(plugins.SelectMany(p => p.Calculators))
-                .ToArray();
-
-            foreach (Type calcType in calcTypes)
-            {
-                var types = calcType.GetInterfaces().ToList();
-                if (types.Any())
-                {
-                    // each interface that calculator implements
-                    // should be bound to the calc instance
-                    types.Add(calcType);
-                    kernel.Bind(types.ToArray()).To(calcType).InSingletonScope();
-                }
-            }
-
-            // collect all renderers types
-            Type[] rendererTypes = assemblyTypes
-                .Where(t => typeof(BaseRenderer).IsAssignableFrom(t) && !t.IsAbstract)
-                .Concat(plugins.SelectMany(p => p.Renderers))
-                .ToArray();
-
-            foreach (Type rendererType in rendererTypes)
-            {
-                kernel.Bind(rendererType).ToSelf().InSingletonScope();
-            }
-
-            // collect all event provider implementations
-            Type[] eventProviderTypes = assemblyTypes
-                .Where(t => typeof(BaseAstroEventsProvider).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
-                .Concat(plugins.SelectMany(p => p.AstroEventProviders))
-                .ToArray();
-
-            foreach (Type eventProviderType in eventProviderTypes)
-            {
-                kernel.Bind(eventProviderType).ToSelf().InSingletonScope();
-            }
 
             progress.Report($"Creating calculators");
 
@@ -201,9 +201,6 @@ namespace Planetarium
                 .Select(c => kernel.Get(c))
                 .Cast<BaseAstroEventsProvider>()
                 .ToArray();
-
-            
-            
 
             progress.Report($"Creating renderers");
 

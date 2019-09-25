@@ -94,7 +94,7 @@ namespace Planetarium
         protected override void OnMouseLeave(EventArgs e)
         {
             base.OnMouseLeave(e);            
-            SkyMap.MousePosition = null;
+            //SkyMap.MousePosition = null;
             Invalidate();
         }
 
@@ -176,7 +176,7 @@ namespace Planetarium
                 else
                 {
                     SkyMap.IsDragging = false;
-                    if (SkyMap.MeasureOrigin != null)
+                    if (SkyMap.RenderOnMouseMove)
                     {
                         Invalidate();
                     }

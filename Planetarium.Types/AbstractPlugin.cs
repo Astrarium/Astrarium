@@ -19,28 +19,19 @@ namespace Planetarium.Types
         public IEnumerable<ToolbarButton> ToolbarItems => toolbarItems;
         public IEnumerable<ContextMenuItem> ContextMenuItems => contextMenuItems;
 
-        public IEnumerable<Type> Renderers
-        {
-            get
-            {
-                return GetType().Assembly.GetTypes().Where(t => typeof(BaseRenderer).IsAssignableFrom(t) && !t.IsAbstract);
-            }
+        public static IEnumerable<Type> Renderers(Type pluginType)
+        {            
+            return pluginType.Assembly.GetTypes().Where(t => typeof(BaseRenderer).IsAssignableFrom(t) && !t.IsAbstract);
         }
 
-        public IEnumerable<Type> Calculators
+        public static IEnumerable<Type> Calculators(Type pluginType)
         {
-            get
-            {
-                return GetType().Assembly.GetTypes().Where(t => typeof(BaseCalc).IsAssignableFrom(t) && !t.IsAbstract);
-            }
+            return pluginType.Assembly.GetTypes().Where(t => typeof(BaseCalc).IsAssignableFrom(t) && !t.IsAbstract);
         }
 
-        public IEnumerable<Type> AstroEventProviders
+        public static IEnumerable<Type> AstroEventProviders(Type pluginType)
         {
-            get
-            {
-                return GetType().Assembly.GetTypes().Where(t => typeof(BaseAstroEventsProvider).IsAssignableFrom(t) && !t.IsAbstract);
-            }
+            return pluginType.Assembly.GetTypes().Where(t => typeof(BaseAstroEventsProvider).IsAssignableFrom(t) && !t.IsAbstract);
         }
 
         protected void AddSetting(SettingItem setting)

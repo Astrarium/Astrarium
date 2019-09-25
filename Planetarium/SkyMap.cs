@@ -139,11 +139,6 @@ namespace Planetarium
         public CelestialObject LockedObject { get; set; }
 
         /// <summary>
-        /// Origin of measure tool. Not null if measure tool is on.
-        /// </summary>
-        public CrdsHorizontal MeasureOrigin { get; set; }
-
-        /// <summary>
         /// Current coordinates of mouse, converted to Horizontal coordinates on the map
         /// </summary>
         public CrdsHorizontal MousePosition { get; set; }
@@ -158,6 +153,13 @@ namespace Planetarium
         /// </summary>
         public IProjection Projection { get; set; } = null;
 
+        public bool RenderOnMouseMove
+        {
+            get
+            {
+                return Renderers.Any(r => r.NeedRenderOnMouseMove);
+            }
+        }
 
         public event Action OnInvalidate;
 
@@ -365,7 +367,6 @@ namespace Planetarium
             public CrdsGeographical GeoLocation => skyContext.GeoLocation;
             public double SiderealTime => skyContext.SiderealTime;
             public CrdsHorizontal MousePosition => map.MousePosition;
-            public CrdsHorizontal MeasureOrigin => map.MeasureOrigin;
             public CelestialObject LockedObject => map.LockedObject;
             public bool IsDragging => map.IsDragging;
             public int FPS => map.FPS;
