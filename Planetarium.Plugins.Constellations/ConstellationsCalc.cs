@@ -8,24 +8,14 @@ using Planetarium.Objects;
 using ADK;
 using Planetarium.Types;
 
-namespace Planetarium.Calculators
-{
-    public interface IConstellationsProvider
-    {
-        List<Constellation> Constellations { get; }
-    }
-
-    public interface IConstellationsBordersProvider
-    {
-        List<List<CelestialPoint>> ConstBorders { get; }
-    }
-
-    public class ConstellationsCalc : BaseCalc, IConstellationsProvider, IConstellationsBordersProvider
+namespace Planetarium.Plugins.Constellations
+{   
+    public class ConstellationsCalc : BaseCalc
     {
         /// <summary>
         /// Constellations
         /// </summary>
-        public List<Constellation> Constellations { get; private set; } = new List<Constellation>();
+        public List<ConstellationLabel> ConstLabels { get; private set; } = new List<ConstellationLabel>();
 
         /// <summary>
         /// Constellations borders coordinates
@@ -48,13 +38,13 @@ namespace Planetarium.Calculators
                 }
             }
 
-            foreach (var c in Constellations)
+            foreach (var c in ConstLabels)
             {
                 // Equatorial coordinates for the mean equinox and epoch of the target date
-                var eq = Precession.GetEquatorialCoordinates(c.Label.Equatorial0, p);
+                var eq = Precession.GetEquatorialCoordinates(c.Equatorial0, p);
 
                 // Apparent horizontal coordinates
-                c.Label.Horizontal = eq.ToHorizontal(context.GeoLocation, context.SiderealTime);
+                c.Horizontal = eq.ToHorizontal(context.GeoLocation, context.SiderealTime);
             }
         }
 
@@ -62,7 +52,6 @@ namespace Planetarium.Calculators
         {
             LoadBordersData();
             LoadLabelsData();
-            LoadConstNames();
         }
 
         /// <summary>
@@ -103,35 +92,11 @@ namespace Planetarium.Calculators
                 while (sr.BaseStream.Position != sr.BaseStream.Length)
                 {
                     string code = sr.ReadString();                
-                    Constellations.Add(new Constellation()
+                    ConstLabels.Add(new ConstellationLabel()
                     {
-                        Code = code,
-                        Label = new CelestialPoint()
-                        {
-                            Equatorial0 = new CrdsEquatorial(sr.ReadSingle(), sr.ReadSingle())
-                        }
+                        Code = code.Substring(0, 3),
+                        Equatorial0 = new CrdsEquatorial(sr.ReadSingle(), sr.ReadSingle())
                     });
-                }
-            }
-        }
-
-        /// <summary>
-        /// Loads constellation labels data
-        /// </summary>
-        private void LoadConstNames()
-        {
-            string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Connames.dat");
-            string line = "";
-            using (var sr = new StreamReader(file, Encoding.Default))
-            {               
-                while (line != null && !sr.EndOfStream)
-                {
-                    line = sr.ReadLine();
-                    var chunks = line.Split(';');
-                    string code = chunks[0].Trim().ToUpper();
-                    var constellation = Constellations.First(c => c.Code == code);
-                    constellation.Name = chunks[1].Trim();
-                    constellation.Genitive = chunks[2].Trim();
                 }
             }
         }

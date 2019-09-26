@@ -11,13 +11,7 @@ namespace Planetarium
     {
         public ToolbarButtonsConfig(ISettings settings)
         {
-            // default toolbar buttons going here
-
-            Add(new ToolbarButton("Constellation Lines", "IconConstLines", settings, "ConstLines", "Constellations"));
-            Add(new ToolbarButton("Constellation Borders", "IconConstBorders", settings, "ConstBorders", "Constellations"));
-
-            Add(new ToolbarButton("Stars", "IconStars", settings, "Stars", "Objects"));
-            
+            // default toolbar buttons going here        
         }
     }
 }

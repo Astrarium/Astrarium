@@ -3,6 +3,7 @@ using Planetarium.Objects;
 using Planetarium.Types;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -23,6 +24,7 @@ namespace Planetarium
         private List<SearchDelegate> SearchProviders = new List<SearchDelegate>();
         private Dictionary<Type, Delegate> NameProviders = new Dictionary<Type, Delegate>();
         private List<AstroEventsConfig> EventConfigs = new List<AstroEventsConfig>();
+        private Dictionary<string, Constellation> Constellations = new Dictionary<string, Constellation>();
 
         private List<BaseCalc> Calculators = new List<BaseCalc>();
         private List<BaseAstroEventsProvider> EventProviders = new List<BaseAstroEventsProvider>();
@@ -82,6 +84,35 @@ namespace Planetarium
                 if (eventsConfig.Any())
                 {
                     EventConfigs.Add(eventsConfig);
+                }
+            }
+
+            LoadConstNames();
+        }
+
+        /// <summary>
+        /// Loads constellation labels data
+        /// </summary>
+        private void LoadConstNames()
+        {
+            string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Connames.dat");
+            string line = "";
+            using (var sr = new StreamReader(file, Encoding.Default))
+            {
+                while (line != null && !sr.EndOfStream)
+                {
+                    line = sr.ReadLine();
+                    var chunks = line.Split(';');
+                    string code = chunks[0].Trim().ToUpper();                    
+                    string name = chunks[1].Trim();
+                    string genitive = chunks[2].Trim();
+
+                    Constellations.Add(code, new Constellation()
+                    {
+                        Code = code,
+                        LatinName = name,
+                        LatinGenitiveName = genitive
+                    });
                 }
             }
         }
@@ -228,6 +259,19 @@ namespace Planetarium
             else
             {
                 return body.ToString();
+            }
+        }
+
+        public Constellation GetConstellation(string code)
+        {
+            code = code.ToUpper();
+            if (Constellations.ContainsKey(code))
+            {
+                return Constellations[code];
+            }
+            else
+            {
+                return null;
             }
         }
     }

@@ -7,7 +7,6 @@
                 <ResourceDictionary Source="pack://application:,,,/Planetarium.Types;component/Themes/Converters.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/Planetarium.Types;component/Themes/Styles.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/Planetarium.Types;component/Themes/WindowStyle.xaml" />
-                <ResourceDictionary Source="Themes\Images.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

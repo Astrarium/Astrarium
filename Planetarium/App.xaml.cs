@@ -118,14 +118,8 @@ namespace Planetarium
 
             foreach (Type calcType in calcTypes)
             {
-                var types = calcType.GetInterfaces().ToList();
-                if (types.Any())
-                {
-                    // each interface that calculator implements
-                    // should be bound to the calc instance
-                    types.Add(calcType);
-                    kernel.Bind(types.ToArray()).To(calcType).InSingletonScope();
-                }
+                var types = new[] { calcType }.Concat(calcType.GetInterfaces()).ToArray();
+                kernel.Bind(types).To(calcType).InSingletonScope();
             }
 
             // collect all renderers types
@@ -136,6 +130,7 @@ namespace Planetarium
 
             foreach (Type rendererType in rendererTypes)
             {
+                var types = new[] { rendererType }.Concat(rendererType.GetInterfaces()).ToArray();
                 kernel.Bind(rendererType).ToSelf().InSingletonScope();
             }
 

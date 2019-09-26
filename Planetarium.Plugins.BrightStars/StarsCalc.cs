@@ -11,7 +11,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace Planetarium.Calculators
+namespace Planetarium.Plugins.BrightStars
 {
     public interface IStarsProvider
     {
@@ -36,11 +36,14 @@ namespace Planetarium.Calculators
         /// </summary>
         private StarsReader DataReader = new StarsReader();
 
-        private IConstellationsProvider ConstellationsProvider;
+        /// <summary>
+        /// Function to get constellation info
+        /// </summary>
+        private Func<string, Constellation> GetConstellation;
 
-        public StarsCalc(IConstellationsProvider constellationsProvider)
+        public StarsCalc(ISky sky)
         {
-            ConstellationsProvider = constellationsProvider;
+            GetConstellation = sky.GetConstellation;
         }
 
         public override void Calculate(SkyContext context)
@@ -212,13 +215,17 @@ namespace Planetarium.Calculators
             if (!string.IsNullOrEmpty(conCode))
             {
                 constSynonyms.Add(conCode);
-                var constellation = ConstellationsProvider.Constellations.FirstOrDefault(c => c.Code.StartsWith(conCode, StringComparison.OrdinalIgnoreCase));
+                var constellation = GetConstellation(conCode);
                 if (constellation != null)
                 {
-                    constSynonyms.Add(constellation.Genitive);
-                    constSynonyms.Add(constellation.Name);
+                    constSynonyms.Add(constellation.LatinGenitiveName);
+                    constSynonyms.Add(constellation.LatinName);
+                    constSynonyms.Add(constellation.LocalGenitiveName);
+                    constSynonyms.Add(constellation.LocalName);
                 }
             }
+
+            constSynonyms = constSynonyms.Where(c => c != null).ToList();
 
             if (s.ProperName != null)
             {
@@ -333,7 +340,7 @@ namespace Planetarium.Calculators
 
             if (!string.IsNullOrEmpty(conName))
             {
-                conName = ConstellationsProvider.Constellations.FirstOrDefault(c => c.Code.StartsWith(conName, StringComparison.OrdinalIgnoreCase)).Genitive;
+                conName = GetConstellation(conName).LatinGenitiveName;
             }
 
             if (s.ProperName != null)
@@ -353,7 +360,7 @@ namespace Planetarium.Calculators
                 string[] varName = s.VariableName.Split(' ');
                 if (varName.Length > 1)
                 {
-                    conName = ConstellationsProvider.Constellations.FirstOrDefault(c => c.Code.StartsWith(varName[1], StringComparison.OrdinalIgnoreCase)).Genitive;
+                    conName = GetConstellation(varName[1]).LatinGenitiveName;
                     names.Add($"{varName[0]} {conName}");
                 }
                 else

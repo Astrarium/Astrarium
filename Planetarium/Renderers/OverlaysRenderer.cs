@@ -23,7 +23,6 @@ namespace Planetarium.Renderers
         public override void Render(IMapContext map)
         {
             DrawLockedText(map);
-            DrawMeasureTool(map);
             DrawDiagnostic(map);
         }
 
@@ -42,11 +41,6 @@ namespace Planetarium.Renderers
                 map.Graphics.DrawRectangle(new Pen(Color.FromArgb(100, Color.White)), box);
                 map.Graphics.DrawString(text, fontLockMessage, new SolidBrush(Color.White), center, format);
             }
-        }
-
-        private void DrawMeasureTool(IMapContext map)
-        {
-            
         }
 
         private void DrawDiagnostic(IMapContext map)

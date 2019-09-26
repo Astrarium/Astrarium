@@ -30,7 +30,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Planetarium.Plugins.Grids",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Planetarium.Plugins.Tracks", "Planetarium.Plugins.Tracks\Planetarium.Plugins.Tracks.csproj", "{B2B0E9E1-7C22-492A-89E5-1852B8B63EB6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Planetarium.Plugins.MeasureTool", "Planetarium.Plugins.MeasureTool\Planetarium.Plugins.MeasureTool.csproj", "{1FDDAC1F-94DC-49F6-9438-B0B93FCF70E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Planetarium.Plugins.MeasureTool", "Planetarium.Plugins.MeasureTool\Planetarium.Plugins.MeasureTool.csproj", "{1FDDAC1F-94DC-49F6-9438-B0B93FCF70E7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Planetarium.Plugins.Constellations", "Planetarium.Plugins.Constellations\Planetarium.Plugins.Constellations.csproj", "{02AAB521-B50D-47C5-B01B-77C5F506A890}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Planetarium.Plugins.BrightStars", "Planetarium.Plugins.BrightStars\Planetarium.Plugins.BrightStars.csproj", "{F6C83D37-02D7-41A3-B9E9-C5DE0C29F0CA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -90,6 +94,14 @@ Global
 		{1FDDAC1F-94DC-49F6-9438-B0B93FCF70E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1FDDAC1F-94DC-49F6-9438-B0B93FCF70E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1FDDAC1F-94DC-49F6-9438-B0B93FCF70E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02AAB521-B50D-47C5-B01B-77C5F506A890}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02AAB521-B50D-47C5-B01B-77C5F506A890}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02AAB521-B50D-47C5-B01B-77C5F506A890}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02AAB521-B50D-47C5-B01B-77C5F506A890}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6C83D37-02D7-41A3-B9E9-C5DE0C29F0CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6C83D37-02D7-41A3-B9E9-C5DE0C29F0CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6C83D37-02D7-41A3-B9E9-C5DE0C29F0CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6C83D37-02D7-41A3-B9E9-C5DE0C29F0CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

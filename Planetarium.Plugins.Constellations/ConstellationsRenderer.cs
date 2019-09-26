@@ -1,29 +1,27 @@
 ﻿using ADK;
-using Planetarium.Calculators;
-using Planetarium.Config;
+using Planetarium.Renderers;
 using Planetarium.Types;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 
-namespace Planetarium.Renderers
+namespace Planetarium.Plugins.Constellations
 {
     public class ConstellationsRenderer : BaseRenderer
     {
-        private readonly IConstellationsBordersProvider bordersProvider;
-        private readonly IConstellationsProvider constellationsProvider;
+        private readonly ConstellationsCalc constellationsCalc;
         private readonly ISettings settings;
+        private readonly Func<string, Constellation> GetConstellation;
 
         private Pen penBorder = new Pen(Color.FromArgb(64, 32, 32));
         private Brush brushLabel = new SolidBrush(Color.FromArgb(64, 32, 32));
 
-        public ConstellationsRenderer(IConstellationsProvider constellationsProvider, IConstellationsBordersProvider bordersProvider, ISettings settings)
+        public ConstellationsRenderer(ConstellationsCalc constellationsCalc, ISky sky, ISettings settings)
         {
-            this.constellationsProvider = constellationsProvider;
-            this.bordersProvider = bordersProvider;
+            this.constellationsCalc = constellationsCalc;
             this.settings = settings;
+            GetConstellation = sky.GetConstellation;
         }
 
         public override void Render(IMapContext map)
@@ -49,7 +47,7 @@ namespace Planetarium.Renderers
         {
             PointF p1, p2;
             CrdsHorizontal h1, h2;
-            var borders = bordersProvider.ConstBorders;
+            var borders = constellationsCalc.ConstBorders;
             bool isGround = settings.Get<bool>("Ground");
             double coeff = map.DiagonalCoefficient();
 
@@ -82,7 +80,7 @@ namespace Planetarium.Renderers
         /// </summary>
         private void RenderConstLabels(IMapContext map)
         {
-            var constellations = constellationsProvider.Constellations;
+            var constellations = constellationsCalc.ConstLabels;
             bool isGround = settings.Get<bool>("Ground");
             double coeff = map.DiagonalCoefficient();
 
@@ -96,20 +94,23 @@ namespace Planetarium.Renderers
 
             foreach (var c in constellations)
             {
-                var h = c.Label.Horizontal;                
+                var h = c.Horizontal;                
                 if ((!isGround || h.Altitude > 0) && Angle.Separation(map.Center, h) < map.ViewAngle * coeff)
                 {
                     var p = map.Project(h);
-
+                    var constellation = GetConstellation(c.Code);
                     string label = null;
                     switch (labelType)
                     {
                         case LabelType.InternationalCode:
-                            label = c.Code;
+                            label = constellation.Code;
+                            break;
+                        case LabelType.LocalName:
+                            label = constellation.LocalName;
                             break;
                         case LabelType.InternationalName:
                         default:
-                            label = c.Name;
+                            label = constellation.LatinName;
                             break;
                     }
 
@@ -125,6 +126,9 @@ namespace Planetarium.Renderers
 
             [Description("International Abbreviation")]
             InternationalCode = 1,
+
+            [Description("Local Name")]
+            LocalName = 2
         }
     }
 }

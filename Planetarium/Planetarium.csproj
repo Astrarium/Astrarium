@@ -52,6 +52,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ADK\ADK.csproj" />
+    <ProjectReference Include="..\Planetarium.Plugins.BrightStars\Planetarium.Plugins.BrightStars.csproj" />
+    <ProjectReference Include="..\Planetarium.Plugins.Constellations\Planetarium.Plugins.Constellations.csproj" />
     <ProjectReference Include="..\Planetarium.Plugins.DeepSky\Planetarium.Plugins.DeepSky.csproj" />
     <ProjectReference Include="..\Planetarium.Plugins.Grids\Planetarium.Plugins.Grids.csproj" />
     <ProjectReference Include="..\Planetarium.Plugins.MeasureTool\Planetarium.Plugins.MeasureTool.csproj" />
@@ -82,28 +84,7 @@
     <None Update="Data\!Credits.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\Alphabet.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\Borders.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="Data\Cities.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\Conlabels.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\Conlines.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\Connames.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\StarNames.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\Stars.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\TimeZones.dat">

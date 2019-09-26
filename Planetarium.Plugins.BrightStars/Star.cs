@@ -1,4 +1,5 @@
 ﻿using ADK;
+using Planetarium.Objects;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,7 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Planetarium.Objects
+namespace Planetarium.Plugins.BrightStars
 {
     public class Star : CelestialObject
     {
