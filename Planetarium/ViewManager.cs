@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using Planetarium.Controls;
 using Planetarium.Types;
+using Planetarium.Types.Controls;
 using Planetarium.Views;
 using System;
 using System.Collections.Generic;
@@ -66,8 +67,8 @@ namespace Planetarium
             if (viewType != null)
             {
                 var window = typeFactory(viewType) as Window;
-                InjectDependencies(window);
                 window.DataContext = viewModel;
+                InjectViewManager(window);
 
                 if (window.GetType() != typeof(MainWindow))
                 {
@@ -108,26 +109,6 @@ namespace Planetarium
             else
             {
                 return null;
-            }
-        }
-
-        private void InjectDependencies(DependencyObject depObj)
-        {
-            InjectProperties(depObj);
-            var controls = FindChildren<Control>(depObj);
-            foreach (var control in controls)
-            {
-                InjectProperties(control);                
-            }
-        } 
-
-        private void InjectProperties(DependencyObject depObj)
-        {
-            var injectionProps = depObj.GetType().GetProperties().Where(p => p.GetCustomAttribute<DependencyInjectionAttribute>() != null);
-            foreach (var prop in injectionProps)
-            {
-                var value = typeFactory(prop.PropertyType);
-                prop.SetValue(depObj, value);
             }
         }
 
@@ -196,23 +177,25 @@ namespace Planetarium
             }            
         }
 
-        public TViewModel CreateViewModel<TViewModel>() where TViewModel : ViewModelBase
+        private void InjectViewManager(DependencyObject obj)
         {
-            return typeFactory(typeof(TViewModel)) as TViewModel;
-        }
-
-        public TControl CreateControl<TControl>() where TControl : FrameworkElement
-        {
-            TControl control = typeFactory(typeof(TControl)) as TControl;
-            InjectDependencies(control);
-            return control;
+            var controls = FindChildren<PlanetariumControl>(obj);
+            foreach (var control in controls)
+            {
+                control.ViewManager = this;
+            }
         }
 
         public FrameworkElement CreateControl(Type controlType)
         {
-            FrameworkElement control = typeFactory(controlType) as FrameworkElement;
-            InjectDependencies(control);
-            return control;
+            var frameworkElement = Activator.CreateInstance(controlType) as FrameworkElement;
+            InjectViewManager(frameworkElement);
+            return frameworkElement;
+        }
+
+        public TViewModel CreateViewModel<TViewModel>() where TViewModel : ViewModelBase
+        {
+            return typeFactory(typeof(TViewModel)) as TViewModel;
         }
 
         public void ShowWindow<TViewModel>(TViewModel viewModel) where TViewModel : ViewModelBase

@@ -9,9 +9,7 @@ namespace Planetarium.Types
     public interface ISky
     {
         SkyContext Context { get; }
-
         event Action Calculated;
-
         void Calculate();
         List<List<Ephemeris>> GetEphemerides(CelestialObject body, double from, double to, double step, IEnumerable<string> categories, CancellationToken? cancelToken = null, IProgress<double> progress = null);
         ICollection<string> GetEphemerisCategories(CelestialObject body);

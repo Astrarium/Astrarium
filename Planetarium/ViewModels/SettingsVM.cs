@@ -18,6 +18,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using Planetarium.Types.Config.Controls;
+using Planetarium.Types.Controls;
 
 namespace Planetarium.ViewModels
 {

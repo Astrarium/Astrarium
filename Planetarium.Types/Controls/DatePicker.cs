@@ -1,5 +1,6 @@
 ﻿using ADK;
 using Planetarium.Types;
+using Planetarium.Types.Controls;
 using Planetarium.ViewModels;
 using System;
 using System.Windows;
@@ -9,7 +10,7 @@ using System.Windows.Input;
 
 namespace Planetarium.Controls
 {
-    public class DatePicker : Control
+    public class DatePicker : PlanetariumControl
     {
         public DatePicker() { }
 
@@ -90,9 +91,6 @@ namespace Planetarium.Controls
             nameof(DateString), 
             typeof(string), 
             typeof(DatePicker), new PropertyMetadata("01 Jan 2000"));
-
-        [DependencyInjection]
-        public IViewManager ViewManager { get; private set; }
 
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
         {

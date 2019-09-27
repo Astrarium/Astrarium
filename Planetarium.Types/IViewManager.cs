@@ -12,15 +12,13 @@ namespace Planetarium.Types
     /// Defines methods to work with views (Windows and MessageBoxes) and ViewModels.
     /// </summary>
     public interface IViewManager
-    {
+    {        
         /// <summary>
         /// Creates new ViewModel by its type.
         /// </summary>
         /// <typeparam name="TViewModel">Type of the ViewModel.</typeparam>
         /// <returns>Instance of ViewModel type <typeparamref name="TViewModel"/>.</returns>
         TViewModel CreateViewModel<TViewModel>() where TViewModel : ViewModelBase;
-
-        TControl CreateControl<TControl>() where TControl : FrameworkElement;
 
         FrameworkElement CreateControl(Type controlType);
 

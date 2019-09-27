@@ -15,7 +15,6 @@ namespace Planetarium
 {
     public class Sky : ISky
     {
-        private delegate string GetNameDelegate<T>(T body) where T : CelestialObject;
         private delegate ICollection<SearchResultItem> SearchDelegate(SkyContext context, string searchString, int maxCount = 50);
         private delegate CelestialObjectInfo GetInfoDelegate<T>(SkyContext context, T body) where T : CelestialObject;
 

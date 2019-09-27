@@ -1,4 +1,5 @@
 ﻿using Planetarium.Types;
+using Planetarium.Types.Controls;
 using Planetarium.ViewModels;
 using System;
 using System.Windows;
@@ -8,13 +9,8 @@ using System.Windows.Input;
 
 namespace Planetarium.Controls
 {
-    public class TimeSpanPicker : Control
+    public class TimeSpanPicker : PlanetariumControl
     {
-        public TimeSpanPicker()
-        {
-            
-        }
-
         public TimeSpan TimeSpan
         {
             get { return (TimeSpan)GetValue(TimeSpanProperty); }
@@ -46,9 +42,6 @@ namespace Planetarium.Controls
             typeof(string),
             typeof(TimeSpanPicker),
             new FrameworkPropertyMetadata(TimeSpanToString(TimeSpan.FromDays(1))));
-
-        [DependencyInjection]
-        public IViewManager ViewManager { get; private set; }
 
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
         {

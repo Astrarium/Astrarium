@@ -58,7 +58,6 @@ namespace Planetarium
                 viewManager.ShowMessageBox("Error", message, MessageBoxButton.OK);
                 ea.Handled = true;                
             };
-
         }
 
         private void ConfigureContainer(IProgress<string> progress)
