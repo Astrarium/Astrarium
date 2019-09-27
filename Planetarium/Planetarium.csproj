@@ -23,6 +23,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="..\Planetarium\Localization.txt"></EmbeddedResource>
+  </ItemGroup>
+  
+  <ItemGroup>
     <Page Include="..\Planetarium\Views\*.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -34,5 +34,9 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="..\Planetarium.Types\Localization\Localization.txt"></EmbeddedResource>
+  </ItemGroup>
   
 </Project>

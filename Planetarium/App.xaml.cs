@@ -16,6 +16,7 @@ using System.Reflection;
 using System.Resources;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Markup;
 
 namespace Planetarium
 {
