@@ -122,5 +122,21 @@ namespace Planetarium.Plugins.BrightStars
         /// Star color, i.e. spectral class
         /// </summary>
         public char Color { get; set; }
+
+        /// <summary>
+        /// Gets array of star names
+        /// </summary>
+        public override string[] Names
+        {
+            get
+            {
+                return GetNames(this).ToArray();
+            }
+        }
+
+        /// <summary>
+        /// External function to get star names
+        /// </summary>
+        internal static Func<Star, ICollection<string>> GetNames { get; set; }
     }
 }

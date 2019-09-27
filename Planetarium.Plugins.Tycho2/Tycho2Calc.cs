@@ -443,10 +443,5 @@ namespace Planetarium.Plugins.Tycho2
 
             return new List<SearchResultItem>();
         }
-
-        public string GetName(Tycho2Star star)
-        {
-            return star.ToString();
-        }
     }
 }

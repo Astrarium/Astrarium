@@ -46,10 +46,6 @@ namespace Planetarium.Types
         /// </summary>
         CelestialObject LockedObject { get; }
 
-        bool IsDragging { get; }
-
-        int FPS { get; }
-
         CrdsHorizontal MousePosition { get; }
 
         void AddDrawnObject(CelestialObject obj);

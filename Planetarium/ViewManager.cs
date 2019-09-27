@@ -18,7 +18,7 @@ namespace Planetarium
     /// <summary>
     /// Default implementation of the <see cref="IViewManager"/> interface.
     /// </summary>
-    public class ViewManager : IViewManager
+    internal class ViewManager : IViewManager
     {
         /// <summary>
         /// Dictionary of ViewModel <=> View types bindings.

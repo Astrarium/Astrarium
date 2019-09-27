@@ -48,7 +48,11 @@ namespace Planetarium
         /// </summary>
         private ICollection<RectangleF> labels = new List<RectangleF>();
 
-        private readonly RenderersCollection Renderers = new RenderersCollection();
+        private readonly RenderersCollection renderers = new RenderersCollection();
+
+        private Font fontDiagnosticText = new Font("Monospace", 8);
+
+        private Font fontLockMessage = new Font("Arial", 8);
 
         public int Width { get; set; }
         public int Height { get; set; }
@@ -102,7 +106,6 @@ namespace Planetarium
         public CrdsHorizontal Center { get; } = new CrdsHorizontal(0, 0);
         public bool Antialias { get; set; } = true;
         public bool IsDragging { get; set; }
-        public int FPS { get; private set; }
 
         private CelestialObject selectedObject;
         public CelestialObject SelectedObject
@@ -145,7 +148,7 @@ namespace Planetarium
         {
             get
             {
-                return Renderers.Any(r => r.NeedRenderOnMouseMove);
+                return renderers.Any(r => r.NeedRenderOnMouseMove);
             }
         }
 
@@ -174,14 +177,14 @@ namespace Planetarium
 
             Projection = new ArcProjection(mapContext);
 
-            Renderers.AddRange(renderers);
-            Renderers.ForEach(r => r.Initialize());
+            this.renderers.AddRange(renderers);
+            this.renderers.ForEach(r => r.Initialize());
 
             // get saved rendering orders
             RenderingOrder renderingOrder = settings.Get<RenderingOrder>("RenderingOrder");
 
             // sort renderers according saving orders
-            Renderers.Sort(renderingOrder.Select(r => r.RendererTypeName));
+            this.renderers.Sort(renderingOrder.Select(r => r.RendererTypeName));
 
             // build rendering order based on existing renderers
             renderingOrder = new RenderingOrder(renderers.Select(r => new RenderingOrderItem(r)));
@@ -194,7 +197,7 @@ namespace Planetarium
             {
                 if (name == "RenderingOrder")
                 {
-                    Renderers.Sort(settings.Get<RenderingOrder>("RenderingOrder").Select(r => r.RendererTypeName));
+                    this.renderers.Sort(settings.Get<RenderingOrder>("RenderingOrder").Select(r => r.RendererTypeName));
                     Invalidate();
                 }
             };
@@ -220,9 +223,9 @@ namespace Planetarium
                 Center.Azimuth = LockedObject.Horizontal.Azimuth;
             }
 
-            for (int i = 0; i < Renderers.Count(); i++)
+            for (int i = 0; i < renderers.Count(); i++)
             {
-                Renderers.ElementAt(i).Render(mapContext);
+                renderers.ElementAt(i).Render(mapContext);
                 if (needDrawSelectedObject)
                 {
                     needDrawSelectedObject = !DrawSelectedObject(g);
@@ -232,10 +235,28 @@ namespace Planetarium
             renderStopWatch.Stop();
             rendersCount++;
 
+            int fps = (int)(1000f / renderStopWatch.ElapsedMilliseconds);
+
             // Calculate mean time of rendering with Cumulative Moving Average formula
             meanRenderTime = (renderStopWatch.ElapsedMilliseconds + rendersCount * meanRenderTime) / (rendersCount + 1);
 
-            FPS = (int)(1000f / renderStopWatch.ElapsedMilliseconds);
+            // Locked object
+            if (LockedObject != null && IsDragging)
+            {
+                var format = new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+                string text = $"Map is locked on {LockedObject.Names.First()}";
+
+                PointF center = new PointF(Width / 2, Height / 2);
+                var size = g.MeasureString(text, fontLockMessage, center, format);
+                int margin = 4;
+                var box = new Rectangle((int)(center.X - size.Width / 2 - margin), (int)(center.Y - size.Height / 2 - margin), (int)size.Width + 2 * margin, (int)size.Height + 2 * margin);
+                g.FillRectangle(new SolidBrush(Color.Black), box);
+                g.DrawRectangle(new Pen(Color.FromArgb(100, Color.White)), box);
+                g.DrawString(text, fontLockMessage, new SolidBrush(Color.White), center, format);
+            }
+
+            // Diagnostic info
+            g.DrawString($"FOV: {Formatters.MeasuredAngle.Format(ViewAngle)}\nMag limit: {Formatters.Magnitude.Format(MagLimit)}\nFPS: {fps}", fontDiagnosticText, Brushes.Red, new PointF(10, 10));
         }
 
         public void Invalidate()
@@ -355,8 +376,6 @@ namespace Planetarium
             public double SiderealTime => skyContext.SiderealTime;
             public CrdsHorizontal MousePosition => map.MousePosition;
             public CelestialObject LockedObject => map.LockedObject;
-            public bool IsDragging => map.IsDragging;
-            public int FPS => map.FPS;
 
             public PointF Project(CrdsHorizontal hor)
             {
@@ -380,7 +399,7 @@ namespace Planetarium
                         float dx = x == 0 ? s : -s - b.Width;
                         float dy = y == 0 ? s : -s - b.Height;
                         RectangleF r = new RectangleF(p.X + dx, p.Y + dy, b.Width, b.Height);
-                        if (!map.labels.Any(l => l.IntersectsWith(r)) /*&& !map.drawnObjects.Select(body => Project(body.Horizontal)).Any(v => r.Contains(v))*/)
+                        if (!map.labels.Any(l => l.IntersectsWith(r)))
                         {
                             Graphics.DrawString(caption, font, brush, r.Location);
                             map.labels.Add(r);

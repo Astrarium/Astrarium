@@ -44,6 +44,11 @@ namespace Planetarium.Objects
         /// </summary>
         public float Magnitude { get; set; }
 
+        /// <summary>
+        /// Gets Galilean moon names
+        /// </summary>
+        public override string[] Names => new[] { Name };
+
         public bool IsEclipsedByJupiter
         {
             get

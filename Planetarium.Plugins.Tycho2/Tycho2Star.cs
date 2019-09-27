@@ -43,6 +43,11 @@ namespace Planetarium.Plugins.Tycho2
         public float Magnitude { get; set; }
 
         /// <summary>
+        /// Gets star names
+        /// </summary>
+        public override string[] Names => new[] { ToString() };
+
+        /// <summary>
         /// Gets Tycho2 star designation name
         /// </summary>
         /// <returns></returns>

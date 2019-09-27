@@ -135,7 +135,7 @@ namespace Planetarium.Plugins.MinorBodies
             var rts = c.Get(RiseTransitSet, i);
 
             var info = new CelestialObjectInfo();
-            info.SetSubtitle("Comet").SetTitle(GetName(comet))
+            info.SetSubtitle("Comet").SetTitle(comet.Names.First())
 
             .AddRow("Constellation", Constellations.FindConstellation(c.Get(EquatorialT, i), c.JulianDay))
 
@@ -176,11 +176,6 @@ namespace Planetarium.Plugins.MinorBodies
             return Comets
                 .Where(c => GetNames(c.Name).Any(n => n.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
                 .Select(p => new SearchResultItem(p, p.Name)).ToArray();
-        }
-
-        public string GetName(Comet body)
-        {
-            return body.Name;
         }
 
         private string[] GetNames(string name)

@@ -87,6 +87,9 @@
     <None Update="Data\Cities.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Data\ConNames.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\TimeZones.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -32,7 +32,7 @@ namespace Planetarium.ViewModels
 
         public void SetData(CelestialObject body, double jdFrom, double jdTo, TimeSpan step, List<List<Ephemeris>> ephemeris)
         {
-            string bodyName = sky.GetObjectName(body);
+            string bodyName = body.Names.First();
             double utcOffset = sky.Context.GeoLocation.UtcOffset;
 
             string headerTemplate = "Ephemerides of {0}\nStart date: {1}\nEnd date: {2}\nStep: {3}";

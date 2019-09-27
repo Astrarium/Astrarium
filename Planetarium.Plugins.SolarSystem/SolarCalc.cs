@@ -178,10 +178,5 @@ namespace Planetarium.Calculators
             else
                 return new SearchResultItem[0];
         }
-
-        public string GetName(Sun m)
-        {
-            return "Sun";
-        }
     }
 }

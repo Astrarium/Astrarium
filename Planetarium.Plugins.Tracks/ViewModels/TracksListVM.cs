@@ -65,7 +65,7 @@ namespace Planetarium.Plugins.Tracks.ViewModels
             var tracks = tracksProvider.Tracks.Select(t => new TrackListItemVM()
             {
                 Track = t,
-                Body = sky.GetObjectName(t.Body),
+                Body = t.Body.Names.First(),
                 StartDate = JulianDayToString(t.From),
                 EndDate = JulianDayToString(t.To),
                 Color = t.Color                

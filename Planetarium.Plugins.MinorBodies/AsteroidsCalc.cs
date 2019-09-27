@@ -88,7 +88,7 @@ namespace Planetarium.Plugins.MinorBodies
 
             var info = new CelestialObjectInfo();
 
-            info.SetSubtitle("Minor planet").SetTitle(GetName(body))
+            info.SetSubtitle("Minor planet").SetTitle(body.Names.First())
             .AddRow("Constellation", Constellations.FindConstellation(c.Get(EquatorialT, i), c.JulianDay))
 
             .AddHeader("Equatorial coordinates (topocentrical)")
@@ -145,11 +145,6 @@ namespace Planetarium.Plugins.MinorBodies
             }
 
             return a.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase);
-        }
-
-        public string GetName(Asteroid body)
-        {
-            return body.Name;
         }
     }
 }

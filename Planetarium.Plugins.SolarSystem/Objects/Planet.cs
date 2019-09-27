@@ -48,7 +48,12 @@ namespace Planetarium.Objects
         /// </summary>
         public float Magnitude { get; set; }
 
-        public double Distance { get; set; }
+        public double DistanceFromSun { get; set; }
+
+        /// <summary>
+        /// Gets planet names
+        /// </summary>
+        public override string[] Names => new[] { Name };
 
         /// <summary>
         /// Planet appearance parameters

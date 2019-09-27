@@ -159,7 +159,7 @@ namespace Planetarium.ViewModels
         {
             if (body != null)
             {
-                SelectedObjectName = sky.GetObjectName(body);
+                SelectedObjectName = body.Names.First();
 
                 if (!SelectedObjectsMenuItems.Any())
                 {          

@@ -108,12 +108,9 @@ namespace Planetarium
                 .Where(t => typeof(AbstractPlugin).IsAssignableFrom(t) && !t.IsAbstract)
                 .ToArray();
 
-            var assemblyTypes = Assembly.GetExecutingAssembly().GetTypes();
-
             // collect all calculators types
-            Type[] calcTypes = assemblyTypes
-                .Where(t => typeof(BaseCalc).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
-                .Concat(pluginTypes.SelectMany(p => AbstractPlugin.Calculators(p)))
+            Type[] calcTypes = pluginTypes
+                .SelectMany(p => AbstractPlugin.Calculators(p))
                 .ToArray();
 
             foreach (Type calcType in calcTypes)
@@ -123,9 +120,8 @@ namespace Planetarium
             }
 
             // collect all renderers types
-            Type[] rendererTypes = assemblyTypes
-                .Where(t => typeof(BaseRenderer).IsAssignableFrom(t) && !t.IsAbstract)
-                .Concat(pluginTypes.SelectMany(p => AbstractPlugin.Renderers(p)))
+            Type[] rendererTypes = pluginTypes
+                .SelectMany(p => AbstractPlugin.Renderers(p))
                 .ToArray();
 
             foreach (Type rendererType in rendererTypes)
@@ -135,9 +131,8 @@ namespace Planetarium
             }
 
             // collect all event provider implementations
-            Type[] eventProviderTypes = assemblyTypes
-                .Where(t => typeof(BaseAstroEventsProvider).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
-                .Concat(pluginTypes.SelectMany(p => AbstractPlugin.AstroEventProviders(p)))
+            Type[] eventProviderTypes = pluginTypes
+                .SelectMany(p => AbstractPlugin.AstroEventProviders(p))
                 .ToArray();
 
             foreach (Type eventProviderType in eventProviderTypes)

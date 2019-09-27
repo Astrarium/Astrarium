@@ -604,7 +604,7 @@ namespace Planetarium.Renderers
                 foreach (var moon in ecliptingMoons)
                 {
                     // umbra and penumbra radii, in acrseconds
-                    var shadow = GalileanMoons.Shadow(jupiter.Ecliptical.Distance, jupiter.Distance, moon.Number - 1, moon.RectangularS, rect);
+                    var shadow = GalileanMoons.Shadow(jupiter.Ecliptical.Distance, jupiter.DistanceFromSun, moon.Number - 1, moon.RectangularS, rect);
 
                     // umbra and penumbra size, in pixels
                     float szU = map.GetDiskSize(shadow.Umbra);

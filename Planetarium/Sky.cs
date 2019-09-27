@@ -22,7 +22,6 @@ namespace Planetarium
         private Dictionary<Type, EphemerisConfig> EphemConfigs = new Dictionary<Type, EphemerisConfig>();
         private Dictionary<Type, Delegate> InfoProviders = new Dictionary<Type, Delegate>();
         private List<SearchDelegate> SearchProviders = new List<SearchDelegate>();
-        private Dictionary<Type, Delegate> NameProviders = new Dictionary<Type, Delegate>();
         private List<AstroEventsConfig> EventConfigs = new List<AstroEventsConfig>();
         private Dictionary<string, Constellation> Constellations = new Dictionary<string, Constellation>();
 
@@ -62,11 +61,7 @@ namespace Planetarium
                     // Info provider
                     Type genericGetInfoFuncType = typeof(GetInfoDelegate<>).MakeGenericType(bodyType);
                     InfoProviders[bodyType] = concreteCalc.GetMethod(nameof(ICelestialObjectCalc<CelestialObject>.GetInfo)).CreateDelegate(genericGetInfoFuncType, calc) as Delegate;
-
-                    // Name provider
-                    Type genericGetNameFuncType = typeof(GetNameDelegate<>).MakeGenericType(bodyType);
-                    NameProviders[bodyType] = concreteCalc.GetMethod(nameof(ICelestialObjectCalc<CelestialObject>.GetName)).CreateDelegate(genericGetNameFuncType, calc) as Delegate;
-
+                    
                     // Search provider
                     var searchFunc = concreteCalc.GetMethod(nameof(ICelestialObjectCalc<CelestialObject>.Search)).CreateDelegate(typeof(SearchDelegate), calc) as SearchDelegate;
                     if (!SearchProviders.Contains(searchFunc))
@@ -93,9 +88,10 @@ namespace Planetarium
         /// <summary>
         /// Loads constellation labels data
         /// </summary>
+        // TODO: move to reader
         private void LoadConstNames()
         {
-            string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Connames.dat");
+            string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/ConNames.dat");
             string line = "";
             using (var sr = new StreamReader(file, Encoding.Default))
             {
@@ -247,21 +243,7 @@ namespace Planetarium
             }
             return results.Take(maxCount).OrderBy(r => r.Name).ToList();
         }
-
-        public string GetObjectName(CelestialObject body)
-        {
-            Type bodyType = body.GetType();
-
-            if (NameProviders.ContainsKey(bodyType))
-            {
-                return (string)NameProviders[bodyType].DynamicInvoke(body);
-            }
-            else
-            {
-                return body.ToString();
-            }
-        }
-
+       
         public Constellation GetConstellation(string code)
         {
             code = code.ToUpper();

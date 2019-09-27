@@ -29,7 +29,7 @@ namespace Planetarium.Plugins.MinorBodies
                 cometsCalc.Comets.Where(c =>
                     c.Orbit.Epoch >= context.From &&
                     c.Orbit.Epoch <= context.To)
-                    .Select(c => new AstroEvent(c.Orbit.Epoch, $"Comet {cometsCalc.GetName(c)} at perihelion"))
+                    .Select(c => new AstroEvent(c.Orbit.Epoch, $"Comet {c.Names.First()} at perihelion"))
                     .ToArray();
         }
     }

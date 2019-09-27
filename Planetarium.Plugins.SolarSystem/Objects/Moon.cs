@@ -62,5 +62,10 @@ namespace Planetarium.Objects
         /// Mean daily motion of the Moon, in degrees
         /// </summary>
         public double AverageDailyMotion => LunarEphem.AVERAGE_DAILY_MOTION;
+
+        /// <summary>
+        /// Gets Moon names
+        /// </summary>
+        public override string[] Names => new[] { "Moon" };
     }
 }

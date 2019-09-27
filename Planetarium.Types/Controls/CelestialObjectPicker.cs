@@ -2,6 +2,7 @@
 using Planetarium.Types;
 using Planetarium.ViewModels;
 using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -24,7 +25,7 @@ namespace Planetarium.Controls
             new FrameworkPropertyMetadata(null, (o, e) =>
             {
                 var picker = o as CelestialObjectPicker;
-                o.SetValue(SelectedBodyNameProperty, picker.Searcher.GetObjectName((CelestialObject)e.NewValue));
+                o.SetValue(SelectedBodyNameProperty, ((CelestialObject)e.NewValue).Names.First());
             })
             {
                 BindsTwoWayByDefault = true,

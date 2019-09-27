@@ -42,5 +42,10 @@ namespace Planetarium.Plugins.MinorBodies
         /// Visible horizontal coordinates of comet tail end
         /// </summary>
         public CrdsHorizontal TailHorizontal { get; set; }
+
+        /// <summary>
+        /// Gets comet names
+        /// </summary>
+        public override string[] Names => new[] { Name };
     }
 }

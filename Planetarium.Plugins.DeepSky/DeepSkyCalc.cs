@@ -133,7 +133,7 @@ namespace Planetarium.Plugins.DeepSky
 
             var info = new CelestialObjectInfo();
             info.SetSubtitle(ds.Status.ToString())
-            .SetTitle(string.Join(" / ", ds.AllNames))
+            .SetTitle(string.Join(" / ", ds.Names))
             .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial, ds), c.JulianDay))
 
             .AddHeader("Equatorial coordinates (current epoch)")
@@ -207,15 +207,10 @@ namespace Planetarium.Plugins.DeepSky
 
         public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)
         {           
-            return DeepSkies.Where(ds => ds.AllNames.Any(name => name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
+            return DeepSkies.Where(ds => ds.Names.Any(name => name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
                 .Take(maxCount)
-                .Select(ds => new SearchResultItem(ds, string.Join(", ", ds.AllNames)))
+                .Select(ds => new SearchResultItem(ds, string.Join(", ", ds.Names)))
                 .ToArray();
-        }
-
-        public string GetName(DeepSky ds)
-        {
-            return ds.AllNames.First();
         }
 
         public override void Initialize()
@@ -318,7 +313,7 @@ namespace Planetarium.Plugins.DeepSky
                         outline = new List<CelestialPoint>();
 
                         string name = line.Substring(2).Trim().ToUpper();
-                        var ds = DeepSkies.FirstOrDefault(d => d.AllNames.Any(n => n.Replace(" ", "").Equals(name)));
+                        var ds = DeepSkies.FirstOrDefault(d => d.Names.Any(n => n.Replace(" ", "").Equals(name)));
                         if (ds != null && ds.Status != DeepSkyStatus.Galaxy)
                         {
                             ds.Outline = outline;

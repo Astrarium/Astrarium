@@ -42,5 +42,10 @@ namespace Planetarium.Plugins.MinorBodies
 
         // Average daily motion of asteroid
         public double AverageDailyMotion { get; set; }
+
+        /// <summary>
+        /// Gets array of asteroid names
+        /// </summary>
+        public override string[] Names => new[] { Name };
     }
 }

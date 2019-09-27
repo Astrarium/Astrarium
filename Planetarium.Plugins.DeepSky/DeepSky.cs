@@ -95,7 +95,7 @@ namespace Planetarium.Plugins.DeepSky
         /// <summary>
         /// Gets array of all deep sky object names 
         /// </summary>
-        public string[] AllNames
+        public override string[] Names
         {
             get
             {

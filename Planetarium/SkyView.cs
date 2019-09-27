@@ -13,7 +13,7 @@ using System.Windows.Forms;
 namespace Planetarium
 {
     [DesignerCategory("code")]
-    public partial class SkyView : Control
+    internal partial class SkyView : Control
     {
         private Point pOld;
         private Point pNew;
@@ -49,7 +49,6 @@ namespace Planetarium
             if (DesignMode || SkyMap == null)
             {
                 pe.Graphics.DrawString("SkyView", Font, new SolidBrush(ForeColor), 10, 10);
-                System.Diagnostics.Trace.WriteLine("OnPaint");
             }
             else
             {

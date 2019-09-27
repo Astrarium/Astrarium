@@ -334,7 +334,7 @@ namespace Planetarium.Calculators
                 p.Horizontal = context.Get(Horizontal, n);
                 p.Appearance = context.Get(Appearance, n);
                 p.Magnitude = context.Get(Magnitude, n);
-                p.Distance = context.Get(DistanceFromSun, n);
+                p.DistanceFromSun = context.Get(DistanceFromSun, n);
                 p.Semidiameter = context.Get(Semidiameter, n);
                 p.Phase = context.Get(Phase, n);
                 p.Elongation = context.Get(Elongation, n);
@@ -475,7 +475,7 @@ namespace Planetarium.Calculators
             var vis = c.Get(Visibility, p);
 
             var info = new CelestialObjectInfo();
-            info.SetSubtitle("Planet").SetTitle(GetName(planet))
+            info.SetSubtitle("Planet").SetTitle(planet.Names.First())
 
             .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial, p), c.JulianDay))
 
@@ -541,7 +541,7 @@ namespace Planetarium.Calculators
             var rts = c.Get(RiseTransitSet, p);
 
             var info = new CelestialObjectInfo();
-            info.SetSubtitle("Satellite of Jupiter").SetTitle(GetName(moon))
+            info.SetSubtitle("Satellite of Jupiter").SetTitle(moon.Names.First())
 
             .AddRow("Constellation", Constellations.FindConstellation(c.Get(JupiterMoonEquatorial, m), c.JulianDay))
 
@@ -586,16 +586,6 @@ namespace Planetarium.Calculators
                 .Select(p => new SearchResultItem(p, p.Name));
 
             return s1.Concat(s2).ToArray();
-        }
-
-        public string GetName(Planet p)
-        {
-            return p.Name;
-        }
-
-        public string GetName(JupiterMoon m)
-        {
-            return m.Name;
         }
     }
 }

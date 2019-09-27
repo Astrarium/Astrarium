@@ -44,6 +44,7 @@ namespace Planetarium.Plugins.BrightStars
         public StarsCalc(ISky sky)
         {
             GetConstellation = sky.GetConstellation;
+            Star.GetNames = GetStarNames;
         }
 
         public override void Calculate(SkyContext context)
@@ -62,8 +63,8 @@ namespace Planetarium.Plugins.BrightStars
             DataReader.StarsDataFilePath = STARS_FILE;
             DataReader.StarsNamesFilePath = NAMES_FILE;
             DataReader.AlphabetFilePath = ALPHABET_FILE;
-            Stars = DataReader.ReadStars();
-            Alphabet = DataReader.ReadAlphabet();
+            Stars = DataReader.ReadStars();            
+            Alphabet = DataReader.ReadAlphabet();            
         }
 
         #region Ephemeris
@@ -159,7 +160,7 @@ namespace Planetarium.Plugins.BrightStars
             var det = c.Get(ReadStarDetails, s.Number);
 
             var info = new CelestialObjectInfo();
-            info.SetSubtitle("Star").SetTitle(string.Join(", ", GetStarNames(s)))
+            info.SetSubtitle("Star").SetTitle(string.Join(", ", s.Names))
 
             .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial, s.Number), c.JulianDay))
 
@@ -200,7 +201,7 @@ namespace Planetarium.Plugins.BrightStars
                 GetStarNamesForSearch(s)
                 .Any(name => name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
                 .Take(maxCount)
-                .Select(s => new SearchResultItem(s, string.Join(", ", GetStarNames(s))))
+                .Select(s => new SearchResultItem(s, string.Join(", ", s.Names)))
                 .ToArray();
         }
 
@@ -320,16 +321,6 @@ namespace Planetarium.Plugins.BrightStars
             names.AddRange(constSynonyms);
 
             return names;
-        }
-
-        public string GetName(Star s)
-        {
-            return GetStarNames(s).First();
-        }
-
-        public string GetPrimaryStarName(ushort hrNumber)
-        {
-            return GetStarNames(Stars.ElementAt(hrNumber - 1)).First();
         }
 
         private ICollection<string> GetStarNames(Star s)

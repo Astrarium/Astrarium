@@ -36,7 +36,6 @@ namespace Planetarium.Types
         void ConfigureEphemeris(EphemerisConfig<T> config);
         CelestialObjectInfo GetInfo(SkyContext context, T body);
         ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50);
-        string GetName(T body);
     }
 
     public abstract class BaseAstroEventsProvider

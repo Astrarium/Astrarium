@@ -46,6 +46,5 @@ namespace Planetarium
                 return Order.IndexOf(Order.FirstOrDefault(ro => ro == renderer.GetType().FullName));
             }
         }
-
     }
 }
