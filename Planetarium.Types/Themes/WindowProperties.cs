@@ -23,7 +23,6 @@ namespace Planetarium.Types.Themes
         public static readonly DependencyProperty IsFullScreenProperty = DependencyProperty.RegisterAttached(
             "IsFullScreen", typeof(bool), typeof(WindowProperties), new PropertyMetadata(false));
 
-
         public static void SetMinButtonVisible(DependencyObject target, Visibility value)
         {
             target.SetValue(MinButtonVisibleProperty, value);

@@ -9,7 +9,7 @@ namespace Planetarium.Renderers
     {
         public abstract void Render(IMapContext map);
         public virtual void Initialize() { }
-        public virtual bool NeedRenderOnMouseMove { get; } = false;
+        public virtual bool NeedRenderOnMouseMove => false;
         public abstract RendererOrder Order { get; }
         public abstract string Name { get; }
     }

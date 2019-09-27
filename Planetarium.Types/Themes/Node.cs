@@ -65,10 +65,6 @@ namespace Planetarium.Types.Themes
             }
         }
 
-
-        
-        
-
         public ObservableCollection<Node> Children { get; } = new ObservableCollection<Node>();
 
         public event EventHandler<bool?> CheckedChanged;

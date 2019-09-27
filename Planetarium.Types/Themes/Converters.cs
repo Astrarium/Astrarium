@@ -14,9 +14,9 @@ namespace Planetarium.Types.Themes
 {
     [ValueConversion(typeof(decimal), typeof(int))]
     [ValueConversion(typeof(int), typeof(decimal))]
-    public class NumericConverter : IValueConverter
+    public class NumericConverter : ConverterBase
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is int && targetType == typeof(decimal))
             {
@@ -30,7 +30,7 @@ namespace Planetarium.Types.Themes
                 throw new NotImplementedException();
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return Convert(value, targetType, parameter, culture);
         }
@@ -66,52 +66,52 @@ namespace Planetarium.Types.Themes
     }
 
     [ValueConversion(typeof(object), typeof(bool))]
-    public class NotNullToBoolConverter : IValueConverter
+    public class NotNullToBoolConverter : ConverterBase
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return value != null;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return value;
         }
     }
 
     [ValueConversion(typeof(bool), typeof(Visibility))]
-    public class NotNullToVisibilityConverter : IValueConverter
+    public class NotNullToVisibilityConverter : ConverterBase
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return value != null ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return value;
         }
     }
 
     [ValueConversion(typeof(bool), typeof(Visibility))]
-    public class NullToVisibilityConverter : IValueConverter
+    public class NullToVisibilityConverter : ConverterBase
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return value == null ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return value;
         }
     }
 
-    public class LeftMarginMultiplierConverter : IValueConverter
+    public class LeftMarginMultiplierConverter : ConverterBase
     {
         public double Length { get; set; }
 
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var item = value as TreeViewItem;
             if (item == null)
@@ -119,72 +119,52 @@ namespace Planetarium.Types.Themes
 
             return new Thickness(Length * item.GetDepth(), 0, 0, 0);
         }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new System.NotImplementedException();
-        }
     }
 
     [ValueConversion(typeof(object), typeof(object))]
-    public class VisibilityConverter : IValueConverter
+    public class VisibilityConverter : ConverterBase
     {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public override object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             if (object.Equals(value, parameter))
                 return Visibility.Visible;
             else
                 return Visibility.Collapsed;
         }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
     }
 
     [ValueConversion(typeof(bool), typeof(Visibility))]
-    public class InverseBoolToVisibilityConverter : IValueConverter
+    public class InverseBoolToVisibilityConverter : ConverterBase
     {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public override object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             if ((bool)value)
                 return Visibility.Collapsed;
             else
                 return Visibility.Visible;
         }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
     }
 
     [ValueConversion(typeof(bool), typeof(ResizeMode))]
-    public class InverseBoolToResizeModeConverter : IValueConverter
+    public class InverseBoolToResizeModeConverter : ConverterBase
     {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public override object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             if ((bool)value)
                 return ResizeMode.NoResize;
             else
                 return ResizeMode.CanResize;
         }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
     }
 
-    public class ColorConverter : IValueConverter
+    public class ColorConverter : ConverterBase
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return Convert(value);
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return Convert(value);
         }
@@ -206,74 +186,58 @@ namespace Planetarium.Types.Themes
         }
     }
 
-    public class FontToStringConverter : IValueConverter
+    public class FontToStringConverter : ConverterBase
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var font = (System.Drawing.Font)value;
             return font.Name;
         }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
     }
 
-    public class ColorToStringConverter : IValueConverter
+    public class ColorToStringConverter : ConverterBase
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var color = (System.Drawing.Color)value;
             return string.Format("#{3}{0:X2}{3}{1:X2}{3}{2:X2}", color.R, color.G, color.B, "\u200a");
         }
+    }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    public class ColorToString : ConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            var color = (System.Drawing.Color)value;
+            return string.Format("#{3}{0:X2}{3}{1:X2}{3}{2:X2}", color.R, color.G, color.B, "\u200a");
         }
     }
 
-    public class ImageKeyToImageConverter : IValueConverter
+    public class ImageKeyToImageConverter : ConverterBase
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return Application.Current.Resources[value];
         }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
     }
 
-    public class EnumValueToEnumCollectionConverter : IValueConverter
+    public class EnumValueToEnumCollectionConverter : ConverterBase
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return Enum.GetValues(value.GetType());
         }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
     }
 
-    public class EnumValueToEnumDescriptionConverter : IValueConverter
+    public class EnumValueToEnumDescriptionConverter : ConverterBase
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return value?.GetType()
                 ?.GetMember(value.ToString())
                 ?.FirstOrDefault()
                 ?.GetCustomAttribute<DescriptionAttribute>()
                 ?.Description;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
         }
     }
 }

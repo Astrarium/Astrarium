@@ -3789,7 +3789,7 @@
                             StrokeThickness="2"
                             Width="16" Height="16">
                             <Ellipse.Fill>
-                                <SolidColorBrush Color="{Binding SelectedColor, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ColorConverter}}" />
+                                <SolidColorBrush Color="{Binding SelectedColor, RelativeSource={RelativeSource TemplatedParent}, Converter={t:ColorConverter}}" />
                             </Ellipse.Fill>
                         </Ellipse>
                         <Label Grid.Column="1" Padding="2 0 0 0" Margin="0" Height="{TemplateBinding Height}" VerticalAlignment="Center" Content="{TemplateBinding Caption}" Foreground="{TemplateBinding Foreground}" />
