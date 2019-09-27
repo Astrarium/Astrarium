@@ -5,13 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Planetarium
+namespace Planetarium.Types
 {
-    public interface ISearcher
-    {
-        ICollection<SearchResultItem> Search(string searchString, Func<CelestialObject, bool> filter);
-    }
-
     public class SearchResultItem
     {
         public string Name { get; private set; }

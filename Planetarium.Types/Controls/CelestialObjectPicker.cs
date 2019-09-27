@@ -33,9 +33,6 @@ namespace Planetarium.Controls
             });
 
         [DependencyInjection]
-        public ISearcher Searcher { get; private set; }
-
-        [DependencyInjection]
         public IViewManager ViewManager { get; private set; }
 
         public string SelectedBodyName

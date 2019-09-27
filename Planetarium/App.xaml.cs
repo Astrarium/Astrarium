@@ -70,7 +70,7 @@ namespace Planetarium
 
             kernel.Bind<ISettings, Settings>().To<Settings>().InSingletonScope();
 
-            kernel.Bind<Sky, ISky, ISearcher>().To<Sky>().InSingletonScope();
+            kernel.Bind<Sky, ISky>().To<Sky>().InSingletonScope();
             kernel.Bind<ISkyMap, SkyMap>().To<SkyMap>().InSingletonScope();
 
             kernel.Bind<SettingsConfig>().ToSelf().InSingletonScope();

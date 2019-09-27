@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Planetarium
 {
-    public class Sky : ISearcher, ISky
+    public class Sky : ISky
     {
         private delegate string GetNameDelegate<T>(T body) where T : CelestialObject;
         private delegate ICollection<SearchResultItem> SearchDelegate(SkyContext context, string searchString, int maxCount = 50);

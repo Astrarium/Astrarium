@@ -24,8 +24,6 @@ namespace Planetarium.Types
         }
     }
 
-
-
     public class CelestialObjectInfo
     { 
         public string Title { get; private set; }

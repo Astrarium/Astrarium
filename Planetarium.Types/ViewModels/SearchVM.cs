@@ -14,9 +14,9 @@ namespace Planetarium.ViewModels
     public class SearchVM : ViewModelBase
     {
         /// <summary>
-        /// Searcher instance. Injected by IoC container.
+        /// Sky instance. Injected by IoC container.
         /// </summary>
-        private readonly ISearcher searcher;
+        private readonly ISky sky;
 
         /// <summary>
         /// Filter used by searching.
@@ -26,10 +26,10 @@ namespace Planetarium.ViewModels
         /// <summary>
         /// Creates new instance of the ViewModel.
         /// </summary>
-        /// <param name="searcher"></param>
-        public SearchVM(ISearcher searcher)
+        /// <param name="sky"></param>
+        public SearchVM(ISky sky)
         {
-            this.searcher = searcher;
+            this.sky = sky;
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace Planetarium.ViewModels
         /// </summary>
         private async void DoSearch()
         {
-            var results = await Task.Run(() => searcher.Search(SearchString, Filter));
+            var results = await Task.Run(() => sky.Search(SearchString, Filter));
             SearchResults.Clear();
             foreach (var item in results)
             {
