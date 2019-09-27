@@ -9,7 +9,7 @@ using System.Windows.Markup;
 
 namespace Planetarium.Types.Themes
 {
-    public abstract class ConverterBase : MarkupExtension, IValueConverter
+    public abstract class ValueConverterBase : MarkupExtension, IValueConverter
     {
         /// <summary>
         /// Must be implemented in inheritor.
@@ -20,6 +20,25 @@ namespace Planetarium.Types.Themes
         /// Override if needed.
         /// </summary>
         public virtual object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+
+        #region MarkupExtension members
+
+        public override object ProvideValue(IServiceProvider serviceProvider)
+        {
+            return this;
+        }
+
+        #endregion
+    }
+
+    public abstract class MultiValueConverterBase : MarkupExtension, IMultiValueConverter
+    {
+        public abstract object Convert(object[] values, Type targetType, object parameter, CultureInfo culture);
+
+        public virtual object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }

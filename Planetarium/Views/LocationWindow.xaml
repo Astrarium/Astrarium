@@ -46,7 +46,7 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                 </TextBlock.Style>
             </TextBlock>
 
-            <Button Grid.Column="1" Margin="3 3 1 3" Width="26" Height="26" VerticalContentAlignment="Center" Command="{Binding EndSearchModeCommand}" Visibility="{Binding SearchMode, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Button Grid.Column="1" Margin="3 3 1 3" Width="26" Height="26" VerticalContentAlignment="Center" Command="{Binding EndSearchModeCommand}" Visibility="{Binding SearchMode, Converter={t:BoolToVisibilityConverter}}">
                 <Grid>
                     <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="8" Height="8" Stretch="Fill" Fill="White" Data="F1 M 26.9166,22.1667L 37.9999,33.25L 49.0832,22.1668L 53.8332,26.9168L 42.7499,38L 53.8332,49.0834L 49.0833,53.8334L 37.9999,42.75L 26.9166,53.8334L 22.1666,49.0833L 33.25,38L 22.1667,26.9167L 26.9166,22.1667 Z "/>
                 </Grid>
@@ -70,7 +70,7 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
             SelectedItem="{Binding SelectedItem}"                            
             MouseDoubleClickCommand="{Binding SelectLocationCommand}"
             SelectionMode="Single"
-            Visibility="{Binding SearchMode, Converter={StaticResource BoolToVisibilityConverter}}"
+            Visibility="{Binding SearchMode, Converter={t:BoolToVisibilityConverter}}"
             VerticalContentAlignment="Top"
             IsSynchronizedWithCurrentItem="True"
             ScrollViewer.VerticalScrollBarVisibility="Visible"
@@ -100,7 +100,7 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         <TextBlock Grid.Row="1" Name="lstEmpty" 
             Text="No locations found" 
             IsEnabled="False"
-            Visibility="{Binding NoResults, Converter={StaticResource BoolToVisibilityConverter}}" 
+            Visibility="{Binding NoResults, Converter={t:BoolToVisibilityConverter}}" 
             TextAlignment="Center" 
             VerticalAlignment="Center" />
 
@@ -133,9 +133,9 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     <Label Grid.Column="2">Seconds</Label>
                     <RadioButton Grid.Column="3" VerticalAlignment="Center" Margin="4" IsChecked="{Binding LatitudeNorth}">N</RadioButton>
 
-                    <c:NumericUpDown Margin="3 0" Grid.Column="0" Grid.Row="1" Minimum="0" Maximum="89" Value="{Binding LatitudeDegrees, Converter={StaticResource NumericConverter}}" DecimalPlaces="0" />
-                    <c:NumericUpDown Margin="3 0" Grid.Column="1" Grid.Row="1" Minimum="0" Maximum="59" Value="{Binding LatitudeMinutes, Converter={StaticResource NumericConverter}}" DecimalPlaces="0" />
-                    <c:NumericUpDown Margin="3 0" Grid.Column="2" Grid.Row="1" Minimum="0" Maximum="59" Value="{Binding LatitudeSeconds, Converter={StaticResource NumericConverter}}" DecimalPlaces="0" />
+                    <c:NumericUpDown Margin="3 0" Grid.Column="0" Grid.Row="1" Minimum="0" Maximum="89" Value="{Binding LatitudeDegrees, Converter={t:NumericConverter}}" DecimalPlaces="0" />
+                    <c:NumericUpDown Margin="3 0" Grid.Column="1" Grid.Row="1" Minimum="0" Maximum="59" Value="{Binding LatitudeMinutes, Converter={t:NumericConverter}}" DecimalPlaces="0" />
+                    <c:NumericUpDown Margin="3 0" Grid.Column="2" Grid.Row="1" Minimum="0" Maximum="59" Value="{Binding LatitudeSeconds, Converter={t:NumericConverter}}" DecimalPlaces="0" />
                     <RadioButton Grid.Column="3" Grid.Row="1" VerticalAlignment="Center" Margin="4" IsChecked="{Binding LatitudeSouth}">S</RadioButton>
 
                 </Grid>
@@ -159,9 +159,9 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     <Label Grid.Column="2">Seconds</Label>
                     <RadioButton Grid.Column="3" VerticalAlignment="Center" Margin="4" IsChecked="{Binding LongitudeEast}">E</RadioButton>
 
-                    <c:NumericUpDown Margin="3 0" Grid.Column="0" Grid.Row="1" Minimum="0" Maximum="179" Value="{Binding LongitudeDegrees, Converter={StaticResource NumericConverter}}" DecimalPlaces="0" />
-                    <c:NumericUpDown Margin="3 0" Grid.Column="1" Grid.Row="1" Minimum="0" Maximum="59" Value="{Binding LongitudeMinutes, Converter={StaticResource NumericConverter}}" DecimalPlaces="0" />
-                    <c:NumericUpDown Margin="3 0" Grid.Column="2" Grid.Row="1" Minimum="0" Maximum="59" Value="{Binding LongitudeSeconds, Converter={StaticResource NumericConverter}}" DecimalPlaces="0" />
+                    <c:NumericUpDown Margin="3 0" Grid.Column="0" Grid.Row="1" Minimum="0" Maximum="179" Value="{Binding LongitudeDegrees, Converter={t:NumericConverter}}" DecimalPlaces="0" />
+                    <c:NumericUpDown Margin="3 0" Grid.Column="1" Grid.Row="1" Minimum="0" Maximum="59" Value="{Binding LongitudeMinutes, Converter={t:NumericConverter}}" DecimalPlaces="0" />
+                    <c:NumericUpDown Margin="3 0" Grid.Column="2" Grid.Row="1" Minimum="0" Maximum="59" Value="{Binding LongitudeSeconds, Converter={t:NumericConverter}}" DecimalPlaces="0" />
                     <RadioButton Grid.Column="3" Grid.Row="1" VerticalAlignment="Center" Margin="4" IsChecked="{Binding LongitudeWest}">W</RadioButton>
 
                 </Grid>

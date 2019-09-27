@@ -14,7 +14,7 @@ namespace Planetarium.Types.Themes
 {
     [ValueConversion(typeof(decimal), typeof(int))]
     [ValueConversion(typeof(int), typeof(decimal))]
-    public class NumericConverter : ConverterBase
+    public class NumericConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -36,9 +36,24 @@ namespace Planetarium.Types.Themes
         }
     }
 
-    public class NumericUpDownTextConverter : IMultiValueConverter
+    public class BoolToVisibilityConverter : ValueConverterBase
     {
-        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is bool)
+            {
+                return (bool)value ? Visibility.Visible : Visibility.Collapsed;
+            }
+            else
+            {
+                throw new ArgumentException("value is not boolean");
+            }
+        }
+    }
+
+    public class NumericUpDownTextConverter : MultiValueConverterBase
+    {
+        public override object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
             if (values[0] is decimal && targetType == typeof(string))
             {
@@ -56,7 +71,7 @@ namespace Planetarium.Types.Themes
             }
         }
 
-        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        public override object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
         {
             if (string.IsNullOrEmpty((string)value))
                 return new object[] { 0 };
@@ -66,7 +81,7 @@ namespace Planetarium.Types.Themes
     }
 
     [ValueConversion(typeof(object), typeof(bool))]
-    public class NotNullToBoolConverter : ConverterBase
+    public class NotNullToBoolConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -80,7 +95,7 @@ namespace Planetarium.Types.Themes
     }
 
     [ValueConversion(typeof(bool), typeof(Visibility))]
-    public class NotNullToVisibilityConverter : ConverterBase
+    public class NotNullToVisibilityConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -94,7 +109,7 @@ namespace Planetarium.Types.Themes
     }
 
     [ValueConversion(typeof(bool), typeof(Visibility))]
-    public class NullToVisibilityConverter : ConverterBase
+    public class NullToVisibilityConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -107,7 +122,7 @@ namespace Planetarium.Types.Themes
         }
     }
 
-    public class LeftMarginMultiplierConverter : ConverterBase
+    public class LeftMarginMultiplierConverter : ValueConverterBase
     {
         public double Length { get; set; }
 
@@ -122,7 +137,7 @@ namespace Planetarium.Types.Themes
     }
 
     [ValueConversion(typeof(object), typeof(object))]
-    public class VisibilityConverter : ConverterBase
+    public class VisibilityConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
@@ -134,7 +149,7 @@ namespace Planetarium.Types.Themes
     }
 
     [ValueConversion(typeof(bool), typeof(Visibility))]
-    public class InverseBoolToVisibilityConverter : ConverterBase
+    public class InverseBoolToVisibilityConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
@@ -146,7 +161,7 @@ namespace Planetarium.Types.Themes
     }
 
     [ValueConversion(typeof(bool), typeof(ResizeMode))]
-    public class InverseBoolToResizeModeConverter : ConverterBase
+    public class InverseBoolToResizeModeConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
@@ -157,7 +172,7 @@ namespace Planetarium.Types.Themes
         }
     }
 
-    public class ColorConverter : ConverterBase
+    public class ColorConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -186,7 +201,7 @@ namespace Planetarium.Types.Themes
         }
     }
 
-    public class FontToStringConverter : ConverterBase
+    public class FontToStringConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -195,7 +210,7 @@ namespace Planetarium.Types.Themes
         }
     }
 
-    public class ColorToStringConverter : ConverterBase
+    public class ColorToStringConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -204,7 +219,7 @@ namespace Planetarium.Types.Themes
         }
     }
 
-    public class ColorToString : ConverterBase
+    public class ColorToString : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -213,7 +228,7 @@ namespace Planetarium.Types.Themes
         }
     }
 
-    public class ImageKeyToImageConverter : ConverterBase
+    public class ImageKeyToImageConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -221,7 +236,7 @@ namespace Planetarium.Types.Themes
         }
     }
 
-    public class EnumValueToEnumCollectionConverter : ConverterBase
+    public class EnumValueToEnumCollectionConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -229,7 +244,7 @@ namespace Planetarium.Types.Themes
         }
     }
 
-    public class EnumValueToEnumDescriptionConverter : ConverterBase
+    public class EnumValueToEnumDescriptionConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

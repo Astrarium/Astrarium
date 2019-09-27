@@ -32,7 +32,7 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
             SelectionMode="Single"
             VerticalContentAlignment="Top"
             IsSynchronizedWithCurrentItem="True"
-            Visibility="{Binding NoTracks, Converter={StaticResource InverseBoolToVisibilityConverter}}"
+            Visibility="{Binding NoTracks, Converter={t:InverseBoolToVisibilityConverter}}"
             ScrollViewer.VerticalScrollBarVisibility="Visible"
             ScrollViewer.CanContentScroll="False">
             <ListView.Resources>
@@ -51,7 +51,7 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                         <GridViewColumn Header="Body" Width="200" DisplayMemberBinding="{Binding Path=Body}" />
                         <GridViewColumn Header="Start Date" Width="Auto" DisplayMemberBinding="{Binding Path=StartDate}" />
                         <GridViewColumn Header="End Date" Width="Auto" DisplayMemberBinding="{Binding Path=EndDate}" />
-                        <GridViewColumn Header="Color" Width="Auto" DisplayMemberBinding="{Binding Path=Color, Converter={StaticResource ColorToStringConverter}}" />
+                        <GridViewColumn Header="Color" Width="Auto" DisplayMemberBinding="{Binding Path=Color, Converter={t:ColorToStringConverter}}" />
                     </GridView.Columns>
                 </GridView>
             </ListView.View>
@@ -60,7 +60,7 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         <TextBlock Grid.Row="0" Name="lstEmpty" 
             Text="No tracks" 
             IsEnabled="False"
-            Visibility="{Binding NoTracks, Converter={StaticResource BoolToVisibilityConverter}}" 
+            Visibility="{Binding NoTracks, Converter={t:BoolToVisibilityConverter}}" 
             TextAlignment="Center" 
             VerticalAlignment="Center" />
 
@@ -75,12 +75,12 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                         <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="10" Height="10" Stretch="Fill" Fill="White" Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
                     </Grid>
                 </Button>
-                <Button Width="22" Height="22" Margin="0 0 4 0" Command="{Binding EditSelectedTrackCommand}" IsEnabled="{Binding SelectedTrack, Converter={StaticResource NotNullToBoolConverter}}" ToolTip="Edit track">
+                <Button Width="22" Height="22" Margin="0 0 4 0" Command="{Binding EditSelectedTrackCommand}" IsEnabled="{Binding SelectedTrack, Converter={t:NotNullToBoolConverter}}" ToolTip="Edit track">
                     <Grid>
                         <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="10" Height="10" Stretch="Fill" Fill="White" Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
                     </Grid>
                 </Button>
-                <Button Width="22" Height="22" Margin="0 0 4 0" Command="{Binding DeleteSelectedTrackCommand}" IsEnabled="{Binding SelectedTrack, Converter={StaticResource NotNullToBoolConverter}}" ToolTip="Delete track">
+                <Button Width="22" Height="22" Margin="0 0 4 0" Command="{Binding DeleteSelectedTrackCommand}" IsEnabled="{Binding SelectedTrack, Converter={t:NotNullToBoolConverter}}" ToolTip="Delete track">
                     <Grid>
                         <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="10" Height="10" Stretch="Fill" Fill="White" Data="F1 M 26.9166,22.1667L 37.9999,33.25L 49.0832,22.1668L 53.8332,26.9168L 42.7499,38L 53.8332,49.0834L 49.0833,53.8334L 37.9999,42.75L 26.9166,53.8334L 22.1666,49.0833L 33.25,38L 22.1667,26.9167L 26.9166,22.1667 Z "/>
                     </Grid>

@@ -2335,14 +2335,11 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type TreeViewItem}">
-                    <ControlTemplate.Resources>
-                        <t:LeftMarginMultiplierConverter Length="15" x:Key="LengthConverter" />
-                    </ControlTemplate.Resources>
                     <StackPanel>
                         <Border Name="Bd"
                                       Background="{TemplateBinding Background}"
                                       Padding="{TemplateBinding Padding}">
-                            <Grid Margin="{Binding Converter={StaticResource LengthConverter},
+                            <Grid Margin="{Binding Converter={t:LeftMarginMultiplierConverter Length=15},
                                          RelativeSource={RelativeSource TemplatedParent}}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="15"/>
@@ -3710,7 +3707,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBox Name="PART_TextBox" Height="22" Grid.ColumnSpan="2" Grid.RowSpan="2">
                             <TextBox.Text>
-                                <MultiBinding Converter="{StaticResource NumericUpDownTextConverter}">
+                                <MultiBinding Converter="{t:NumericUpDownTextConverter}">
                                     <Binding Path="Value" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType={x:Type c:NumericUpDown}}" Mode="TwoWay" NotifyOnSourceUpdated="True" NotifyOnValidationError="True" />
                                     <Binding Path="DecimalPlaces" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType={x:Type c:NumericUpDown}}"/>
                                 </MultiBinding>
@@ -3849,7 +3846,7 @@
                         <TextBox Name="TextBox"
                                  Grid.Column="0" 
                                  IsReadOnly="True" 
-                                 Text="{TemplateBinding SelectedFont, Converter={StaticResource FontToStringConverter}}"                                  
+                                 Text="{TemplateBinding SelectedFont, Converter={t:FontToStringConverter}}"                                  
                                  FontFamily="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=SelectedFont.Name}" />
                         <Button Name="Button" Grid.Column="1" BorderBrush="{StaticResource TextBoxBorder}" Height="{Binding ElementName=TextBox, Path=Height}" Width="{Binding ElementName=TextBox, Path=Height}">
                             <Canvas Width="16" Height="16">
@@ -3990,7 +3987,7 @@
                               Margin="1"
                               Background="{StaticResource HoverBrush}">
 
-                            <Border Visibility="{TemplateBinding Property=IsIndeterminate, Converter={StaticResource BoolToVisibilityConverter}}" x:Name="DiagonalDecorator" Width="5000">
+                            <Border Visibility="{TemplateBinding Property=IsIndeterminate, Converter={t:BoolToVisibilityConverter}}" x:Name="DiagonalDecorator" Width="5000">
                                 <Border.Background>
                                     <DrawingBrush TileMode="Tile" Stretch="None" Viewbox="0,0,1,1" Viewport="0,0,36,34" ViewportUnits="Absolute">
                                         <DrawingBrush.RelativeTransform>

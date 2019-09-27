@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:v="clr-namespace:Planetarium"
         xmlns:vm="clr-namespace:Planetarium.ViewModels"
+        xmlns:t="clr-namespace:Planetarium.Types.Themes;assembly=Planetarium.Types"
         mc:Ignorable="d"
         Style="{StaticResource {x:Type Window}}"
         MinHeight="300" MinWidth="300"
@@ -70,7 +71,7 @@
                                     <SolidColorBrush Color="White" />
                                 </Rectangle.Fill>
                                 <Rectangle.OpacityMask>
-                                    <ImageBrush AlignmentX="Left" AlignmentY="Top" ImageSource="{Binding ImageKey, Converter={StaticResource ImageKeyToImageConverter}}"  Stretch="UniformToFill" />
+                                    <ImageBrush AlignmentX="Left" AlignmentY="Top" ImageSource="{Binding ImageKey, Converter={t:ImageKeyToImageConverter}}"  Stretch="UniformToFill" />
                                 </Rectangle.OpacityMask>
                             </Rectangle>
                         </Button.Content>
@@ -85,7 +86,7 @@
                                     <SolidColorBrush Color="White" />
                                 </Rectangle.Fill>
                                 <Rectangle.OpacityMask>
-                                    <ImageBrush  AlignmentX="Left" AlignmentY="Top" ImageSource="{Binding ImageKey, Converter={StaticResource ImageKeyToImageConverter}}"  Stretch="UniformToFill" />
+                                    <ImageBrush  AlignmentX="Left" AlignmentY="Top" ImageSource="{Binding ImageKey, Converter={t:ImageKeyToImageConverter}}"  Stretch="UniformToFill" />
                                 </Rectangle.OpacityMask>
                             </Rectangle>
                         </ToggleButton.Content>

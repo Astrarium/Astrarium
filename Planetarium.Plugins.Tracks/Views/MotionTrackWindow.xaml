@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:c="clr-namespace:Planetarium.Controls;assembly=Planetarium.Types"
+        xmlns:t="clr-namespace:Planetarium.Types.Themes;assembly=Planetarium.Types"
         mc:Ignorable="d"
         Title="Motion Track" 
         Height="350" Width="400"
@@ -38,7 +39,7 @@
         <c:DatePicker Grid.Row="2" Grid.Column="1" Options="DateTime" JulianDay="{Binding JulianDayTo}" UtcOffset="{Binding UtcOffset}" />
 
         <Label Grid.Row="3" Grid.Column="0">Track Color</Label>
-        <c:ColorPicker Grid.Row="3" Grid.Column="1" Caption="{Binding RelativeSource={RelativeSource Self}, Path=SelectedColor, Converter={StaticResource ColorToStringConverter}}" SelectedColor="{Binding TrackColor}" />
+        <c:ColorPicker Grid.Row="3" Grid.Column="1" Caption="{Binding RelativeSource={RelativeSource Self}, Path=SelectedColor, Converter={t:ColorToStringConverter}}" SelectedColor="{Binding TrackColor}" />
 
         <GroupBox Grid.Row="4" Grid.ColumnSpan="2" Padding="0, 8, 0, 0" Margin="0 4 0 0">
             <GroupBox.Header>

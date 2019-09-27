@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:c="clr-namespace:Planetarium.Controls;assembly=Planetarium.Types"
+        xmlns:t="clr-namespace:Planetarium.Types.Themes;assembly=Planetarium.Types"
         mc:Ignorable="d"
         Title="Celestial body ephemerides" 
         Height="350" Width="400"
@@ -48,11 +49,11 @@
                     <TextBlock 
                         Text="Please choose a celestial body" 
                         IsEnabled="False"
-                        Visibility="{Binding SelectedBody, Converter={StaticResource NullToVisibilityConverter}}" 
+                        Visibility="{Binding SelectedBody, Converter={t:NullToVisibilityConverter}}" 
                         TextAlignment="Center" 
                         VerticalAlignment="Center" />
                     <TreeView 
-                        Visibility="{Binding SelectedBody, Converter={StaticResource NotNullToVisibilityConverter}}" 
+                        Visibility="{Binding SelectedBody, Converter={t:NotNullToVisibilityConverter}}" 
                         ItemsSource="{Binding Nodes}">
                     </TreeView>
                 </Grid>

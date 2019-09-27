@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:t="clr-namespace:Planetarium.Types.Themes;assembly=Planetarium.Types"
         mc:Ignorable="d"
         Title="Phenomena" 
         Width="600" Height="600"
@@ -33,7 +34,7 @@
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <WrapPanel Orientation="Horizontal" Height="Auto" Margin="0 4 0 0">
-                                            <TextBlock Visibility="{Binding NoExactTime, Converter={StaticResource InverseBoolToVisibilityConverter}}" Padding="0 0 4 0" FontWeight="Bold">
+                                            <TextBlock Visibility="{Binding NoExactTime, Converter={t:InverseBoolToVisibilityConverter}}" Padding="0 0 4 0" FontWeight="Bold">
                                                 <Hyperlink Command="{Binding DataContext.SetJulianDayCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding JulianDay}">                                                 
                                                     <Run Text="{Binding Time}"/>
                                                 </Hyperlink>
