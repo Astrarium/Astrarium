@@ -9,11 +9,11 @@ using System.Windows.Markup;
 
 namespace Planetarium.Types.Localization
 {
-    public class Loc : MarkupExtension
+    public class Text : MarkupExtension
     {
         static Dictionary<string, string> LocalizationStrings = new Dictionary<string, string>();
 
-        static Loc()
+        static Text()
         {
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().Where(p => !p.IsDynamic))
             {
@@ -68,10 +68,9 @@ namespace Planetarium.Types.Localization
             }
         }
 
-
         private string resourceKey;
 
-        public Loc(string resourceKey)
+        public Text(string resourceKey)
         {
             this.resourceKey = resourceKey;
         }

@@ -58,7 +58,7 @@
             <Button MinWidth="80" Click="SelectButton_Click" Margin="0 0 4 0" IsEnabled="{Binding SelectedItem, Converter={t:NotNullToBoolConverter}, Mode=OneWay}">
                 Select
             </Button>
-            <Button MinWidth="80" Click="CloseButton_Click" Content="{loc:Loc Open}" />
+            <Button MinWidth="80" Click="CloseButton_Click" Content="{loc:Text Close}" />
         </StackPanel>
 
     </Grid>
