@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Markup;
 
@@ -11,28 +13,98 @@ namespace Planetarium.Types.Localization
 {
     public class Text : MarkupExtension
     {
-        static Dictionary<string, string> LocalizationStrings = new Dictionary<string, string>();
+        private static Dictionary<string, string> LocalizationStrings = new Dictionary<string, string>();
+
+        public static string Get(string key)
+        {
+            if (LocalizationStrings.ContainsKey(key))
+                return LocalizationStrings[key];
+            else
+                return $"?{key}";
+        }
+
+        public static string FileName { get; set; } = "Translation";
+        public static string FileExtension { get; set; } = "txt";
+
+        public static void SetLocale(CultureInfo culture)
+        {
+            CultureInfo.DefaultThreadCurrentCulture = culture;
+            CultureInfo.DefaultThreadCurrentUICulture = culture;
+            LoadLocalizationStrings();
+        }
+
+        public static CultureInfo[] GetLocales()
+        {
+            Regex regex = new Regex($"^.*\\.{FileName}-(.+)\\.{FileExtension}$");
+
+            var resourceNames = AppDomain.CurrentDomain.GetAssemblies().Where(p => !p.IsDynamic).Distinct().SelectMany(a => a.GetManifestResourceNames().Where(rn => regex.IsMatch(rn)));
+            
+            return resourceNames
+                .Select(rn => regex.Match(rn).Groups[1].Value)
+                .Select(lang =>
+                {
+                    try
+                    {
+                        return CultureInfo.GetCultureInfo(lang);
+                    }
+                    catch
+                    {
+                        return null;
+
+                    }
+                })
+                .Where(ci => ci != null).ToArray();
+        } 
 
         static Text()
         {
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().Where(p => !p.IsDynamic))
+            LoadLocalizationStrings();
+        }
+
+        private static void LoadLocalizationStrings()
+        {
+            LocalizationStrings.Clear();
+
+            string[] commentSigns = new string[] { "\\\\", "#", "-", ";", "!" };
+
+            string[] localizationFiles = GetCurrentLocales()
+                .Select(c => $"{FileName}-{c}.{FileExtension}")
+                .Concat(new[] { $"{FileName}.{FileExtension}" }).ToArray();
+
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().Where(p => !p.IsDynamic).Distinct())
             {
-                string[] resourceNames = assembly.GetManifestResourceNames();
+                string[] resourceNames = assembly.GetManifestResourceNames()
+                    .Where(rn => localizationFiles.Any(lf => rn.Equals(lf) || rn.EndsWith($".{lf}"))).ToArray();
+
                 foreach (string resourceName in resourceNames)
                 {
-                    if (resourceName.EndsWith("Localization.txt"))
+                    using (Stream stream = assembly.GetManifestResourceStream(resourceName))
                     {
-                        string[] lines = ReadAllResourceLines(assembly, resourceName);
-                        if (lines != null)
+                        if (stream != null)
                         {
-                            foreach (string line in lines)
+                            using (StreamReader reader = new StreamReader(stream))
                             {
-                                try
+                                string line;
+                                while ((line = reader.ReadLine()) != null)
                                 {
-                                    string[] val = line.Split('=');
-                                    LocalizationStrings[val[0].Trim()] = val[1].Trim();
+                                    line = line.Trim();
+                                    if (!string.IsNullOrEmpty(line) &&
+                                        commentSigns.All(comment => !line.StartsWith(comment)))
+                                    {
+                                        string[] keyValue = line.Split(new[] { '=' }, 2);
+
+                                        if (keyValue.Length == 2)
+                                        {
+                                            string key = keyValue[0].Trim();
+                                            string value = keyValue[1].Trim();
+
+                                            if (!LocalizationStrings.ContainsKey(key))
+                                            {
+                                                LocalizationStrings[key] = value;
+                                            }
+                                        }
+                                    }
                                 }
-                                catch { }
                             }
                         }
                     }
@@ -40,33 +112,21 @@ namespace Planetarium.Types.Localization
             }
         }
 
-        private static string[] ReadAllResourceLines(Assembly assembly, string resourceName)
+        private static string[] GetCurrentLocales()
         {
-            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+            List<string> cultures = new List<string>();
+            CultureInfo culture = CultureInfo.CurrentUICulture;
+            do
             {
-                if (stream != null)
-                {
-                    using (StreamReader reader = new StreamReader(stream))
-                    {
-                        return EnumerateLines(reader).ToArray();
-                    }
-                }
-                else
-                {
-                    return null;
-                }
+                cultures.Add(culture.Name);
+                culture = culture.Parent;
             }
+            while (!string.IsNullOrEmpty(culture.Name));
+
+            return cultures.ToArray();
         }
 
-        private static IEnumerable<string> EnumerateLines(TextReader reader)
-        {
-            string line;
-
-            while ((line = reader.ReadLine()) != null)
-            {
-                yield return line;
-            }
-        }
+        #region MarkupExtension
 
         private string resourceKey;
 
@@ -77,14 +137,9 @@ namespace Planetarium.Types.Localization
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
-            if (LocalizationStrings.ContainsKey(resourceKey))
-            {
-                return LocalizationStrings[resourceKey];
-            }
-            else
-            {
-                return $"?{{{resourceKey}}}";
-            }
+            return Get(resourceKey);
         }
+
+        #endregion MarkupExtension
     }
 }

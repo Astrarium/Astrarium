@@ -236,7 +236,7 @@ namespace Planetarium.ViewModels
             SetCurrentDateCommand = new Command(SetCurrentDate);
             SelectDateCommand = new Command(SelectDate);
 
-            var dateTimeFormat = CultureInfo.InvariantCulture.DateTimeFormat;
+            var dateTimeFormat = CultureInfo.CurrentCulture.DateTimeFormat;
             ShortMonthsNames = dateTimeFormat.AbbreviatedMonthNames.Take(12).ToArray();
             FullMonthsNames = dateTimeFormat.MonthNames.Take(12).ToArray();
 

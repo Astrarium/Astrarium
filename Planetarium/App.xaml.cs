@@ -4,12 +4,14 @@ using Planetarium.Config;
 using Planetarium.Logging;
 using Planetarium.Renderers;
 using Planetarium.Types;
+using Planetarium.Types.Localization;
 using Planetarium.ViewModels;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -99,6 +101,11 @@ namespace Planetarium
                     logger.Error($"Unable to load plugin assembly with path {path}. {ex})");
                 }
             }
+
+            var locales = Text.GetLocales();
+
+            // set current system locale
+            Text.SetLocale(CultureInfo.GetCultureInfo("ru"));
 
             // collect all plugins implementations
             // TODO: to support plugin system, we need to load assemblies 

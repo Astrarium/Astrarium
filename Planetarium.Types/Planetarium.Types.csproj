@@ -36,7 +36,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="..\Planetarium.Types\Localization\Localization.txt"></EmbeddedResource>
+    <None Remove="Translations\Translation-en.txt" />
+    <None Remove="Translations\Translation-ru.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Translations\Translation-en.txt" />
+    <EmbeddedResource Include="Translations\Translation-ru.txt" />
+    <EmbeddedResource Include="Translations\Translation.txt"></EmbeddedResource>
   </ItemGroup>
   
 </Project>

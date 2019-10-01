@@ -1,4 +1,5 @@
 ﻿using ADK;
+using Planetarium.Types.Localization;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -274,7 +275,7 @@ namespace Planetarium.Types
 
         private class DateTimeFormatter : IEphemFormatter
         {
-            private readonly string[] months = CultureInfo.InvariantCulture.DateTimeFormat.AbbreviatedMonthNames.Take(12).ToArray();
+            private readonly string[] months = CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames.Take(12).ToArray();
 
             public string Format(object value)
             {
@@ -285,7 +286,7 @@ namespace Planetarium.Types
 
         private class DateOnlyFormatter : IEphemFormatter
         {
-            private readonly string[] months = CultureInfo.InvariantCulture.DateTimeFormat.AbbreviatedMonthNames.Take(12).ToArray();
+            private readonly string[] months = CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames.Take(12).ToArray();
 
             public string Format(object value)
             {
@@ -305,7 +306,7 @@ namespace Planetarium.Types
 
         private class MonthYearFormatter : IEphemFormatter
         {
-            private readonly string[] months = CultureInfo.InvariantCulture.DateTimeFormat.MonthNames.Take(12).ToArray();
+            private readonly string[] months = CultureInfo.CurrentCulture.DateTimeFormat.MonthNames.Take(12).ToArray();
 
             public string Format(object value)
             {

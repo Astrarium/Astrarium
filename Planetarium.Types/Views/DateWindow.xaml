@@ -6,8 +6,9 @@
         xmlns:c="clr-namespace:Planetarium.Controls"
         xmlns:t="clr-namespace:Planetarium.Types.Themes"
         xmlns:vm="clr-namespace:Planetarium.ViewModels"
+        xmlns:loc="clr-namespace:Planetarium.Types.Localization"
         mc:Ignorable="d"
-        Title="Date and Time" Height="234" Width="270.5"
+        Title="{loc:Text DateWindow.Title}" Height="234" Width="270.5"
         Style="{StaticResource {x:Type Window}}"
         ResizeMode="NoResize"
         SizeToContent="Height"
@@ -33,9 +34,9 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <Label Grid.Column="0" Grid.Row="0">Day</Label>
-            <Label Grid.Column="1" Grid.Row="0">Month</Label>
-            <Label Grid.Column="2" Grid.Row="0">Year</Label>
+            <Label Grid.Column="0" Grid.Row="0" Content="{loc:Text DateWindow.Day}" />
+            <Label Grid.Column="1" Grid.Row="0" Content="{loc:Text DateWindow.Month}" />
+            <Label Grid.Column="2" Grid.Row="0" Content="{loc:Text DateWindow.Year}" />
 
             <c:NumericUpDown Margin="3" Grid.Column="0" Grid.Row="1" Minimum="1" Maximum="{Binding DaysCount}" Value="{Binding Day, Converter={t:NumericConverter}}" DecimalPlaces="0" />
             <ComboBox Height="22" Margin="3" Grid.Column="1" Grid.Row="1" 
@@ -43,9 +44,9 @@
                   SelectedIndex="{Binding SelectedMonth}" />
             <c:NumericUpDown Margin="3" Grid.Column="2" Grid.Row="1" Minimum="-9999" Maximum="9999" Value="{Binding Year}" DecimalPlaces="0" />
 
-            <Label Grid.Column="0" Grid.Row="2" VerticalAlignment="Bottom">Hours</Label>
-            <Label Grid.Column="1" Grid.Row="2" VerticalAlignment="Bottom">Minutes</Label>
-            <Label Grid.Column="2" Grid.Row="2" VerticalAlignment="Bottom">Seconds</Label>
+            <Label Grid.Column="0" Grid.Row="2" VerticalAlignment="Bottom" Content="{loc:Text DateWindow.Hours}" />
+            <Label Grid.Column="1" Grid.Row="2" VerticalAlignment="Bottom" Content="{loc:Text DateWindow.Minutes}" />
+            <Label Grid.Column="2" Grid.Row="2" VerticalAlignment="Bottom" Content="{loc:Text DateWindow.Seconds}" />
 
             <c:NumericUpDown Margin="3" Grid.Column="0" Grid.Row="3" Maximum="23" Value="{Binding Hours, Converter={t:NumericConverter}}" DecimalPlaces="0" />
             <c:NumericUpDown Margin="3" Grid.Column="1" Grid.Row="3" Maximum="59" Value="{Binding Minutes, Converter={t:NumericConverter}}" DecimalPlaces="0" />
@@ -113,7 +114,9 @@
                 <Label Grid.Column="0"
                     Padding="0"
                     VerticalAlignment="Center">
-                    <Hyperlink Command="{Binding SetCurrentDateCommand}">Set current</Hyperlink>
+                    <Hyperlink Command="{Binding SetCurrentDateCommand}">
+                        <Run Text="{loc:Text DateWindow.SetCurrent}" />
+                    </Hyperlink>
                 </Label>
 
                 <Button 
@@ -123,7 +126,7 @@
                     Height="22" 
                     VerticalAlignment="Center" 
                     Command="{Binding SelectDateCommand}"
-                    Content="Select">
+                    Content="{loc:Text DateWindow.Select}">
                 </Button>
             </Grid>
 
