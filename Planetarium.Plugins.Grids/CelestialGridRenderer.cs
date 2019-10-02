@@ -1,6 +1,7 @@
 ﻿using ADK;
 using Planetarium.Renderers;
 using Planetarium.Types;
+using Planetarium.Types.Localization;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -137,7 +138,7 @@ namespace Planetarium.Plugins.Grids
 
         public override RendererOrder Order => RendererOrder.Grids;
 
-        public override string Name => "Grids and Lines";
+        public override string Name => Text.Get("CelestialGridRenderer.Name");
 
         private void DrawGrid(IMapContext map, Pen penGrid, CelestialGrid grid)
         {

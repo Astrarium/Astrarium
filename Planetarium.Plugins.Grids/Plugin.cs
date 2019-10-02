@@ -1,6 +1,7 @@
 ﻿using Planetarium.Config;
 using Planetarium.Types;
 using Planetarium.Types.Config.Controls;
+using Planetarium.Types.Localization;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -26,8 +27,8 @@ namespace Planetarium.Plugins.Grids
             AddSetting(new SettingItem("EclipticColorNight", Color.FromArgb(0xC8, 0x80, 0x80, 0x00), "Colors"));
             AddSetting(new SettingItem("HorizontalGridColorNight", Color.FromArgb(0xC8, 0x00, 0x40, 0x00), "Colors"));
 
-            AddToolbarItem(new ToolbarButton("Equatorial Grid", "IconEquatorialGrid", settings, "EquatorialGrid", "Grids"));
-            AddToolbarItem(new ToolbarButton("Horizontal Grid", "IconHorizontalGrid", settings, "HorizontalGrid", "Grids"));
+            AddToolbarItem(new ToolbarButton(Text.Get("Settings.EquatorialGrid"), "IconEquatorialGrid", settings, "EquatorialGrid", "Grids"));
+            AddToolbarItem(new ToolbarButton(Text.Get("Settings.HorizontalGrid"), "IconHorizontalGrid", settings, "HorizontalGrid", "Grids"));
 
             ExportResourceDictionaries("Images.xaml");
         }

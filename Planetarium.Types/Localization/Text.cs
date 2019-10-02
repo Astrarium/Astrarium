@@ -7,6 +7,8 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Data;
 using System.Windows.Markup;
 
 namespace Planetarium.Types.Localization
@@ -25,6 +27,7 @@ namespace Planetarium.Types.Localization
 
         public static string FileName { get; set; } = "Translation";
         public static string FileExtension { get; set; } = "txt";
+        public static string DefaultLanguage { get; set; } = "en";
 
         public static void SetLocale(CultureInfo culture)
         {
@@ -37,23 +40,19 @@ namespace Planetarium.Types.Localization
         {
             Regex regex = new Regex($"^.*\\.{FileName}-(.+)\\.{FileExtension}$");
 
-            var resourceNames = AppDomain.CurrentDomain.GetAssemblies().Where(p => !p.IsDynamic).Distinct().SelectMany(a => a.GetManifestResourceNames().Where(rn => regex.IsMatch(rn)));
+            var resourceNames = AppDomain.CurrentDomain.GetAssemblies()
+                .Where(p => !p.IsDynamic).Distinct()
+                .SelectMany(a => a.GetManifestResourceNames()
+                .Where(rn => regex.IsMatch(rn)));
             
             return resourceNames
                 .Select(rn => regex.Match(rn).Groups[1].Value)
                 .Select(lang =>
                 {
-                    try
-                    {
-                        return CultureInfo.GetCultureInfo(lang);
-                    }
-                    catch
-                    {
-                        return null;
-
-                    }
+                    try { return CultureInfo.GetCultureInfo(lang); }
+                    catch { return null; }
                 })
-                .Where(ci => ci != null).ToArray();
+                .Where(ci => ci != null).Distinct().ToArray();
         } 
 
         static Text()
@@ -68,39 +67,46 @@ namespace Planetarium.Types.Localization
             string[] commentSigns = new string[] { "\\\\", "#", "-", ";", "!" };
 
             string[] localizationFiles = GetCurrentLocales()
-                .Select(c => $"{FileName}-{c}.{FileExtension}")
-                .Concat(new[] { $"{FileName}.{FileExtension}" }).ToArray();
+                .Concat(new[] { DefaultLanguage })
+                .Distinct()
+                .Select(c => $"{FileName}-{c}.{FileExtension}").ToArray();
 
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().Where(p => !p.IsDynamic).Distinct())
             {
-                string[] resourceNames = assembly.GetManifestResourceNames()
-                    .Where(rn => localizationFiles.Any(lf => rn.Equals(lf) || rn.EndsWith($".{lf}"))).ToArray();
-
-                foreach (string resourceName in resourceNames)
+                foreach (string lf in localizationFiles)
                 {
-                    using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+                    string resourceName = assembly.GetManifestResourceNames().FirstOrDefault(rn => rn.EndsWith($".{lf}"));
+                    if (resourceName != null)
                     {
-                        if (stream != null)
+                        using (Stream stream = assembly.GetManifestResourceStream(resourceName))
                         {
-                            using (StreamReader reader = new StreamReader(stream))
+                            if (stream != null)
                             {
-                                string line;
-                                while ((line = reader.ReadLine()) != null)
+                                using (StreamReader reader = new StreamReader(stream))
                                 {
-                                    line = line.Trim();
-                                    if (!string.IsNullOrEmpty(line) &&
-                                        commentSigns.All(comment => !line.StartsWith(comment)))
+                                    string line;
+                                    while ((line = reader.ReadLine()) != null)
                                     {
-                                        string[] keyValue = line.Split(new[] { '=' }, 2);
-
-                                        if (keyValue.Length == 2)
+                                        line = line.Trim();
+                                        if (!string.IsNullOrEmpty(line) &&
+                                            commentSigns.All(comment => !line.StartsWith(comment)))
                                         {
-                                            string key = keyValue[0].Trim();
-                                            string value = keyValue[1].Trim();
+                                            string[] keyValue = line.Split(new[] { '=' }, 2, StringSplitOptions.RemoveEmptyEntries);
 
-                                            if (!LocalizationStrings.ContainsKey(key))
+                                            if (keyValue.Length == 2)
                                             {
-                                                LocalizationStrings[key] = value;
+                                                string key = keyValue[0].Trim();
+                                                string value = keyValue[1].Trim();
+
+                                                if (!LocalizationStrings.ContainsKey(key))
+                                                {
+                                                    try
+                                                    {
+                                                        value = Regex.Unescape(value);
+                                                    }
+                                                    catch { }
+                                                    LocalizationStrings[key] = value;
+                                                }
                                             }
                                         }
                                     }

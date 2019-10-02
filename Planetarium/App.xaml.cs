@@ -102,11 +102,6 @@ namespace Planetarium
                 }
             }
 
-            var locales = Text.GetLocales();
-
-            // set current system locale
-            Text.SetLocale(CultureInfo.GetCultureInfo("ru"));
-
             // collect all plugins implementations
             // TODO: to support plugin system, we need to load assemblies 
             // from the specific directory and search for plugin there
@@ -180,6 +175,14 @@ namespace Planetarium
             progress.Report($"Loading settings");
 
             settings.Load();
+
+            string language = settings.Get<string>("Language");
+            var availableLocales = Text.GetLocales();//.Select(loc => $"{loc.NativeName} / {loc.EnglishName}").ToArray();
+            var savedLocale = availableLocales.FirstOrDefault(loc => loc.Name == language);
+            if (savedLocale != null)
+            {
+                Text.SetLocale(savedLocale);
+            }
 
             SkyContext context = new SkyContext(
                 new Date(DateTime.Now).ToJulianEphemerisDay(),

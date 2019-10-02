@@ -23,7 +23,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Translations\Translation.txt"></EmbeddedResource>
+    <EmbeddedResource Include="Translations\Translation-ru.txt" />
+    <EmbeddedResource Include="Translations\Translation-en.txt"></EmbeddedResource>
   </ItemGroup>
   
   <ItemGroup>
@@ -41,6 +42,7 @@
   <ItemGroup>
     <None Remove="Config\RenderersListSettingControl.xaml" />
     <None Remove="Translation.txt" />
+    <None Remove="Translations\Translation-ru.txt" />
   </ItemGroup>
   
   <ItemGroup>
@@ -51,6 +53,9 @@
   
   <ItemGroup>
     <Page Include="Config\RenderersListSettingControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Config\LanguageSettingControl.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
@@ -86,6 +91,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Config\LanguageSettingControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
     <None Update="Data\!Credits.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

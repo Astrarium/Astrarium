@@ -19,6 +19,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using Planetarium.Types.Config.Controls;
 using Planetarium.Types.Controls;
+using Planetarium.Types.Localization;
 
 namespace Planetarium.ViewModels
 {
@@ -158,6 +159,17 @@ namespace Planetarium.ViewModels
             /// Name of the setting
             /// </summary>
             public string SettingName { get; set; }
+
+            /// <summary>
+            /// Title of the setting (i.e. displayable name)
+            /// </summary>
+            public string SettingTitle
+            {
+                get
+                {
+                    return Text.Get($"Settings.{SettingName}");
+                }
+            }
 
             /// <summary>
             /// Setting value

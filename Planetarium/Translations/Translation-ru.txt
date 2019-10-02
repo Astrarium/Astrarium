@@ -1,0 +1,7 @@
+﻿ApplicationLanguage = Язык программы
+
+# Rendering order control
+RenderingOrderSettingTitle = Порядок отрисовки
+RenderingOrderHint = Отсортируйте слои в соответствии с желаемым порядком отрисовки. Верхние элементы будут отрисованы первыми. Используйте кнопки Вверх и Вниз для сортировки, либо перетаскивайте элементы мышью.
+RenderingOrderUpButton = Вверх
+RenderingOrderDownButton = Вниз

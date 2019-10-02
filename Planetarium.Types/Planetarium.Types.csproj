@@ -43,7 +43,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Translations\Translation-en.txt" />
     <EmbeddedResource Include="Translations\Translation-ru.txt" />
-    <EmbeddedResource Include="Translations\Translation.txt"></EmbeddedResource>
   </ItemGroup>
   
 </Project>

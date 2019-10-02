@@ -18,6 +18,9 @@ namespace Planetarium.Config
         /// </summary>
         public SettingsConfig()
         {
+            // Default language
+            Add(new SettingItem("Language", "en", "UI", typeof(LanguageSettingControl)));
+
             // Default observer location.
             // Has no section, so not displayed in settings window.
             Add(new SettingItem("ObserverLocation", new CrdsGeographical(-44, 56.3333, +3, 80, "Europe/Moscow", "Nizhny Novgorod")));

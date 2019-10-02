@@ -1,0 +1,12 @@
+﻿# General
+CelestialGridRenderer.Name		= Grids and Lines
+
+# Settings
+Settings.EquatorialGrid			= Equatorial grid
+Settings.LabelEquatorialPoles	= Label equatorial poles
+Settings.HorizontalGrid			= Horizontal grid
+Settings.LabelHorizontalPoles	= Label horizontal poles (Zenith & Nadir)
+Settings.EclipticLine			= Ecliptic
+Settings.LabelEquinoxPoints		= Label equinox points
+Settings.LabelLunarNodes		= Label lunar nodes
+Settings.GalacticEquator		= Galactic equator
