@@ -34,10 +34,10 @@ namespace Planetarium.Plugins.Grids
         private string[] equinoxLabels = new string[] { "\u2648", "\u264E" };
         private int[] equinoxRA = new int[] { 0, 12 };
 
-        private string[] horizontalLabels = new string[] { "Zenith", "Nadir" };
+        private string[] horizontalLabels = new string[] { Text.Get("CelestialGridRenderer.Zenith"), Text.Get("CelestialGridRenderer.Nadir") };
         private CrdsHorizontal[] horizontalPoles = new CrdsHorizontal[2] { new CrdsHorizontal(0, 90), new CrdsHorizontal(0, -90) };
 
-        private string[] equatorialLabels = new string[] { "NCP", "SCP" };
+        private string[] equatorialLabels = new string[] { Text.Get("CelestialGridRenderer.NCP"), Text.Get("CelestialGridRenderer.SCP") };
         private GridPoint[] polePoints = new GridPoint[] { new GridPoint(0, 90), new GridPoint(0, -90) };
 
         public CelestialGridRenderer(ISettings settings)

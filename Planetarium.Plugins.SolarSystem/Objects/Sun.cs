@@ -1,4 +1,5 @@
 ﻿using ADK;
+using Planetarium.Types.Localization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,6 +28,11 @@ namespace Planetarium.Objects
         /// <summary>
         /// Gets Sun names
         /// </summary>
-        public override string[] Names => new[] { "Sun" };
+        public override string[] Names => new[] { Name };
+
+        /// <summary>
+        /// Primary name
+        /// </summary>
+        public string Name { get; private set; } = Text.Get("Sun.Name");
     }
 }

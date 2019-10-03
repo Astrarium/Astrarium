@@ -39,8 +39,14 @@ namespace Planetarium.Objects
         /// </summary>
         public float Flattening { get; set; }
 
+        /// <summary>
+        /// Current elongation angle.
+        /// </summary>
         public double Elongation { get; set; }
 
+        /// <summary>
+        /// Current phas of the planet.
+        /// </summary>
         public double Phase { get; set; }
 
         /// <summary>
@@ -48,6 +54,9 @@ namespace Planetarium.Objects
         /// </summary>
         public float Magnitude { get; set; }
 
+        /// <summary>
+        /// Distance from Sun, in AU
+        /// </summary>
         public double DistanceFromSun { get; set; }
 
         /// <summary>
@@ -70,13 +79,13 @@ namespace Planetarium.Objects
         /// </summary>
         public static readonly double[] DAILY_MOTIONS = new[] { 1.3833, 1.2, 0, 0.542, 0.0831, 0.0336, 0.026666, 0.006668 };
 
-        public const int MERCURY = 1;
-        public const int VENUS = 2;
-        public const int EARTH = 3;
-        public const int MARS = 4;
-        public const int JUPITER = 5;
-        public const int SATURN = 6;
-        public const int URANUS = 7;
-        public const int NEPTUNE = 8;
+        public const int MERCURY    = 1;
+        public const int VENUS      = 2;
+        public const int EARTH      = 3;
+        public const int MARS       = 4;
+        public const int JUPITER    = 5;
+        public const int SATURN     = 6;
+        public const int URANUS     = 7;
+        public const int NEPTUNE    = 8;
     }
 }

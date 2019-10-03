@@ -3,6 +3,7 @@ using Planetarium.Calculators;
 using Planetarium.Config;
 using Planetarium.Objects;
 using Planetarium.Types;
+using Planetarium.Types.Localization;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -66,7 +67,7 @@ namespace Planetarium.Renderers
 
         public override RendererOrder Order => RendererOrder.SolarSystem;
 
-        public override string Name => "Sun, Moon and Planets";
+        public override string Name => Text.Get("SolarSystemRenderer.Name");
 
         public override void Render(IMapContext map)
         {
@@ -148,7 +149,7 @@ namespace Planetarium.Renderers
 
                 if (settings.Get<bool>("SunLabel"))
                 {
-                    map.DrawObjectCaption(fontLabel, brushLabel, "Sun", p, size);
+                    map.DrawObjectCaption(fontLabel, brushLabel, sun.Name, p, size);
                 }
 
                 map.AddDrawnObject(sun);
@@ -210,7 +211,7 @@ namespace Planetarium.Renderers
                 map.Graphics.FillPath(brushShadow, shadow);
                 map.Graphics.ResetTransform();
 
-                map.DrawObjectCaption(fontLabel, brushLabel, "Moon", p, size);
+                map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, size);
                 map.AddDrawnObject(moon);
             }
         }
@@ -296,7 +297,7 @@ namespace Planetarium.Renderers
                         map.Graphics.ResetTransform();
                         if (map.ViewAngle <= 10)
                         {
-                            map.DrawObjectCaption(fontShadowLabel, brushShadowLabel, "Earth shadow", p, szP);
+                            map.DrawObjectCaption(fontShadowLabel, brushShadowLabel, Text.Get("EarthShadow.Label"), p, szP);
                         }
                     }
                 }

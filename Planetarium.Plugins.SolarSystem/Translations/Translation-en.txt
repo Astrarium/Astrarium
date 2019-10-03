@@ -1,0 +1,20 @@
+﻿# General
+SolarSystemRenderer.Name		= Sun, Moon, and Planets
+Sun.Name						= Sun
+Moon.Name						= Moon
+Mercury.Name					= Mercury
+Venus.Name						= Venus
+Earth.Name						= Earth
+Mars.Name						= Mars
+Jupiter.Name					= Jupiter
+Saturn.Name						= Saturn
+Uranus.Name						= Uranus
+Neptune.Name					= Neptune
+Io.Name							= Io
+Europa.Name						= Europa
+Ganymede.Name					= Ganymede
+Callisto.Name					= Callisto
+
+EarthShadow.Label				= Earth shadow
+
+# Settings

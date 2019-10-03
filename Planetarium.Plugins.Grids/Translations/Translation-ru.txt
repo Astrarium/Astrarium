@@ -1,5 +1,9 @@
 ﻿# Settings
 CelestialGridRenderer.Name		= Линии и координатные сетки
+CelestialGridRenderer.Zenith	= Зенит
+CelestialGridRenderer.Nadir		= Надир
+CelestialGridRenderer.NCP		= С.П.
+CelestialGridRenderer.SCP		= Ю.П.
 
 Settings.EquatorialGrid			= Экваториальная сетка
 Settings.LabelEquatorialPoles	= Показывать экваториальные полюса

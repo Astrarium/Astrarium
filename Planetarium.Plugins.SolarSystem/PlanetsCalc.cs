@@ -2,6 +2,7 @@
 using Planetarium.Config;
 using Planetarium.Objects;
 using Planetarium.Types;
+using Planetarium.Types.Localization;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -45,17 +46,17 @@ namespace Planetarium.Calculators
 
         private string[] PlanetNames = new string[]
         {
-            "Mercury",
-            "Venus",
-            "Earth",
-            "Mars",
-            "Jupiter",
-            "Saturn",
-            "Uranus",
-            "Neptune"
+            Text.Get("Mercury.Name"),
+            Text.Get("Venus.Name"),
+            Text.Get("Earth.Name"),
+            Text.Get("Mars.Name"),
+            Text.Get("Jupiter.Name"),
+            Text.Get("Saturn.Name"),
+            Text.Get("Uranus.Name"),
+            Text.Get("Neptune.Name")
         };
 
-        private string[] JuipterMoonNames = new string[] { "Io", "Europa", "Ganymede", "Callisto" };
+        private string[] JuipterMoonNames = new string[] { Text.Get("Io.Name"), Text.Get("Europa.Name"), Text.Get("Ganymede.Name"), Text.Get("Callisto.Name") };
 
         public PlanetsCalc(ISettings settings)
         {

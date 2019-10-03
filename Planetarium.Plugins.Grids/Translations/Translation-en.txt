@@ -1,5 +1,9 @@
 ﻿# General
 CelestialGridRenderer.Name		= Grids and Lines
+CelestialGridRenderer.Zenith	= Zenith
+CelestialGridRenderer.Nadir		= Nadir
+CelestialGridRenderer.NCP		= NCP
+CelestialGridRenderer.SCP		= SCP
 
 # Settings
 Settings.EquatorialGrid			= Equatorial grid

@@ -340,8 +340,8 @@ namespace Planetarium.Calculators
 
         public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)
         {
-            if ("Moon".StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
-                return new[] { new SearchResultItem(Moon, "Moon") };
+            if (Moon.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
+                return new[] { new SearchResultItem(Moon, Moon.Name) };
             else
                 return new SearchResultItem[0];
         }

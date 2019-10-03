@@ -173,8 +173,8 @@ namespace Planetarium.Calculators
 
         public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)
         {
-            if (CultureInfo.InvariantCulture.CompareInfo.IndexOf("Sun", searchString, CompareOptions.IgnoreCase) >= 0)
-                return new[] { new SearchResultItem(Sun, "Sun") };
+            if (CultureInfo.InvariantCulture.CompareInfo.IndexOf(Sun.Name, searchString, CompareOptions.IgnoreCase) >= 0)
+                return new[] { new SearchResultItem(Sun, Sun.Name) };
             else
                 return new SearchResultItem[0];
         }
