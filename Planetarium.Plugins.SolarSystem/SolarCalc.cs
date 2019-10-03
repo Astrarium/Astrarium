@@ -123,7 +123,7 @@ namespace Planetarium.Calculators
             var jdWinter = c.Get(Seasons, Season.Winter);
 
             var info = new CelestialObjectInfo();
-            info.SetTitle("Sun")
+            info.SetTitle(Sun.Name)
 
                 .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial), c.JulianDay))
                 .AddHeader("Equatorial coordinates (geocentrical)")
@@ -173,7 +173,7 @@ namespace Planetarium.Calculators
 
         public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)
         {
-            if (CultureInfo.InvariantCulture.CompareInfo.IndexOf(Sun.Name, searchString, CompareOptions.IgnoreCase) >= 0)
+            if (Sun.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
                 return new[] { new SearchResultItem(Sun, Sun.Name) };
             else
                 return new SearchResultItem[0];

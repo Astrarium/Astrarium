@@ -15,4 +15,7 @@ Europa.Name						= Европа
 Ganymede.Name					= Ганимед
 Callisto.Name					= Каллисто
 
+EarthShadow.Label				= Тень Земли
+EclipsedByJupiter				= В тени Юпитера
+
 # Settings

@@ -187,7 +187,7 @@ namespace Planetarium
             this.renderers.Sort(renderingOrder.Select(r => r.RendererTypeName));
 
             // build rendering order based on existing renderers
-            renderingOrder = new RenderingOrder(renderers.Select(r => new RenderingOrderItem(r)));
+            renderingOrder = new RenderingOrder(this.renderers.Select(r => new RenderingOrderItem(r)));
 
             // save actual rendering order
             settings.Set("RenderingOrder", renderingOrder);

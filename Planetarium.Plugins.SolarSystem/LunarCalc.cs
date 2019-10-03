@@ -288,7 +288,7 @@ namespace Planetarium.Calculators
             var jdPerigee = c.Get(NearestApsis, MoonApsis.Perigee);
 
             var info = new CelestialObjectInfo();
-            info.SetTitle("Moon")
+            info.SetTitle(Moon.Name)
 
                 .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial), c.JulianDay))
 
@@ -344,11 +344,6 @@ namespace Planetarium.Calculators
                 return new[] { new SearchResultItem(Moon, Moon.Name) };
             else
                 return new SearchResultItem[0];
-        }
-
-        public string GetName(Moon m)
-        {
-            return "Moon";
         }
     }
 }

@@ -573,7 +573,7 @@ namespace Planetarium.Renderers
             map.Graphics.ResetTransform();
             if (!regionU.IsEmpty(map.Graphics))
             {
-                map.DrawObjectCaption(fontShadowLabel, brushShadowLabel, "Eclipsed by Jupiter", pMoon, szB);
+                map.DrawObjectCaption(fontShadowLabel, brushShadowLabel, Text.Get("EclipsedByJupiter"), pMoon, szB);
             }
         }
 

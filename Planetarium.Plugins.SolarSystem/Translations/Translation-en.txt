@@ -16,5 +16,6 @@ Ganymede.Name					= Ganymede
 Callisto.Name					= Callisto
 
 EarthShadow.Label				= Earth shadow
+EclipsedByJupiter				= Eclipsed by Jupiter
 
 # Settings
