@@ -172,6 +172,8 @@ namespace Planetarium
                 settings.Set(item.Name, item.DefaultValue);
             }
 
+            settings.Save("Defaults");
+
             progress.Report($"Loading settings");
 
             settings.Load();

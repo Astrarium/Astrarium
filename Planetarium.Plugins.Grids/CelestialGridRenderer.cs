@@ -138,8 +138,6 @@ namespace Planetarium.Plugins.Grids
 
         public override RendererOrder Order => RendererOrder.Grids;
 
-        public override string Name => Text.Get("CelestialGridRenderer.Name");
-
         private void DrawGrid(IMapContext map, Pen penGrid, CelestialGrid grid)
         {
             bool isAnyPoint = false;

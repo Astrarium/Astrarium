@@ -38,8 +38,6 @@ namespace Planetarium.Plugins.Constellations
 
         public override RendererOrder Order => RendererOrder.Grids;
 
-        public override string Name => "Constellations";
-
         /// <summary>
         /// Renders constellation borders on the map
         /// </summary>

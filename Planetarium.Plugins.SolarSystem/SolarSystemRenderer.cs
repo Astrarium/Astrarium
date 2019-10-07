@@ -2,6 +2,7 @@
 using Planetarium.Calculators;
 using Planetarium.Config;
 using Planetarium.Objects;
+using Planetarium.Renderers;
 using Planetarium.Types;
 using Planetarium.Types.Localization;
 using System;
@@ -12,7 +13,7 @@ using System.Drawing.Imaging;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace Planetarium.Renderers
+namespace Planetarium.Plugins.SolarSystem
 {
     /// <summary>
     /// Draws solar system objects (Sun, Moon and planets) on the map.
@@ -66,8 +67,6 @@ namespace Planetarium.Renderers
         }
 
         public override RendererOrder Order => RendererOrder.SolarSystem;
-
-        public override string Name => Text.Get("SolarSystemRenderer.Name");
 
         public override void Render(IMapContext map)
         {

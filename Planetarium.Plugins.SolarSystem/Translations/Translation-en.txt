@@ -1,5 +1,6 @@
 ﻿# General
-SolarSystemRenderer.Name		= Sun, Moon, and Planets
+Planetarium.Plugins.SolarSystem.SolarSystemRenderer.Name = Sun, Moon, and Planets
+
 Sun.Name						= Sun
 Moon.Name						= Moon
 Mercury.Name					= Mercury

@@ -44,9 +44,8 @@ namespace Planetarium.Types
         /// </summary>
         void Load();
 
-        /// <summary>
-        /// Reverts settings values to defaults
-        /// </summary>
-        void Reset();
+        void Save(string snapshotName);
+
+        void Load(string snapshotName);
     }
 }

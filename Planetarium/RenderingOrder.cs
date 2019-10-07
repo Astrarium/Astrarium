@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Planetarium.Renderers;
+using Planetarium.Types.Localization;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -27,7 +28,13 @@ namespace Planetarium
         /// Displayable renderer name
         /// </summary>
         [JsonIgnore]
-        public string Name { get; private set; }
+        public string Name
+        {
+            get
+            {
+                return Text.Get($"{RendererTypeName}.Name");
+            }
+        }
 
         public RenderingOrderItem(string name)
         {
@@ -37,7 +44,6 @@ namespace Planetarium
         public RenderingOrderItem(BaseRenderer renderer)
         {
             RendererTypeName = renderer.GetType().FullName;
-            Name = renderer.Name;
         }
     }
 

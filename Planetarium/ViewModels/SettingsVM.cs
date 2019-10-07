@@ -87,6 +87,8 @@ namespace Planetarium.ViewModels
             }
 
             SelectedSection = SettingsSections.First();
+
+            this.settings.Save("Current");
         }
 
         public override void Close()
@@ -102,7 +104,7 @@ namespace Planetarium.ViewModels
                 else if (MessageBoxResult.No == result)
                 {
                     base.Close();
-                    settings.Load();
+                    settings.Load("Current");
                 }
             }
             else
@@ -121,7 +123,7 @@ namespace Planetarium.ViewModels
         {
             if (MessageBoxResult.Yes == viewManager.ShowMessageBox("Warning", "Do you really want to reset settings to default values?", MessageBoxButton.YesNo))
             {
-                settings.Reset();
+                settings.Load("Defaults");
             }
         }
 
@@ -215,28 +217,6 @@ namespace Planetarium.ViewModels
                     NotifyPropertyChanged(nameof(IsEnabled));
                 }
             }
-        }
-
-        private class FuncBinder : INotifyPropertyChanged
-        {
-            private Func<ISettings, bool> func;
-            private ISettings settings;
-
-            public event PropertyChangedEventHandler PropertyChanged;
-
-            public FuncBinder(ISettings settings, Func<ISettings, bool> func)
-            {
-                this.settings = settings;
-                this.func = func;
-                this.settings.SettingValueChanged += Settings_SettingValueChanged;
-            }
-
-            private void Settings_SettingValueChanged(string arg1, object arg2)
-            {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
-            }
-
-            public bool Value { get { return func(settings); } }
         }
     }
 }

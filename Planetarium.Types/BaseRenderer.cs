@@ -11,7 +11,6 @@ namespace Planetarium.Renderers
         public virtual void Initialize() { }
         public virtual bool NeedRenderOnMouseMove => false;
         public abstract RendererOrder Order { get; }
-        public abstract string Name { get; }
     }
 
     public enum RendererOrder

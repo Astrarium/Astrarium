@@ -1,5 +1,6 @@
 ﻿# General
-SolarSystemRenderer.Name		= Солнце, Луна и планеты
+Planetarium.Plugins.SolarSystem.SolarSystemRenderer.Name = Солнце, Луна и планеты
+
 Sun.Name						= Солнце
 Moon.Name						= Луна
 Mercury.Name					= Меркурий

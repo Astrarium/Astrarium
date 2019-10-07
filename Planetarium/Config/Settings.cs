@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Planetarium.Config
@@ -21,16 +22,46 @@ namespace Planetarium.Config
         /// </summary>
         private Dictionary<string, object> SettingsValues = new Dictionary<string, object>();
 
-        //private SavedSettings Defaults = new SavedSettings();
-
         public event Action<string, object> SettingValueChanged;
         public event PropertyChangedEventHandler PropertyChanged;
-        public bool IsChanged { get; private set; }
 
-        //public void SetDefaults(SavedSettings defaults)
-        //{
-        //    Defaults = defaults;
-        //}
+        private Dictionary<string, string> snapshots = new Dictionary<string, string>();
+
+        public bool IsChanged
+        {
+            get
+            {
+                if (!snapshots.ContainsKey("Current"))
+                {
+                    return false;
+                }
+                else
+                {
+                    string currentCache = Serialize();
+                    return !currentCache.Equals(snapshots["Current"]);
+                }
+            }
+        }
+
+        public void Save(string snapshotName)
+        {
+            snapshots[snapshotName] = Serialize();
+        }
+
+        public void Load(string snapshotName)
+        {
+            if (snapshots.ContainsKey(snapshotName))
+            {
+                using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(snapshots[snapshotName])))
+                {
+                    Load(stream);
+                }
+            }
+            else
+            {
+                Load();
+            }
+        }
 
         private ILogger Logger;
 
@@ -59,7 +90,6 @@ namespace Planetarium.Config
                 if (!oldValue.Equals(value))
                 {
                     SettingsValues[settingName] = value;
-                    IsChanged = true;
                     SettingValueChanged?.Invoke(settingName, value);
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(settingName));
                 }
@@ -98,7 +128,7 @@ namespace Planetarium.Config
         /// </summary>
         public void Reset()
         {
-            //Load(Defaults);
+            Load("Defaults");
         }
 
         public void Load()
@@ -119,8 +149,6 @@ namespace Planetarium.Config
         private void HandleObservableCollectionChanged(object value, NotifyCollectionChangedEventArgs e)
         {
             string settingName = SettingsValues.FirstOrDefault(x => x.Value == value).Key;
-            IsChanged = true;
-
             var settingValueChangedInvocationList = SettingValueChanged.GetInvocationList();
             foreach (var item in settingValueChangedInvocationList)
             {
@@ -169,7 +197,6 @@ namespace Planetarium.Config
                     throw new FileFormatException($"Setting `{setting.Name}` has unknown type `{setting.Value.GetType()}`.");
                 }
             }
-            IsChanged = false;
         }
 
         public void Save()
@@ -179,7 +206,6 @@ namespace Planetarium.Config
             {
                 Save(stream);
             }
-            IsChanged = false;
         }
 
         private void Save(Stream stream)
@@ -197,6 +223,17 @@ namespace Planetarium.Config
                 ser.Serialize(jsonWriter, saved);
                 jsonWriter.Flush();
             }
+        }
+
+        private string Serialize()
+        {
+            SavedSettings saved = new SavedSettings();
+            foreach (var s in SettingsValues)
+            {
+                saved.Add(new SavedSetting() { Name = s.Key, Value = s.Value });
+            }
+
+            return JsonConvert.SerializeObject(saved, new JsonSerializerSettings() { ContractResolver = new WritablePropertiesOnlyResolver() });            
         }
 
         private class WritablePropertiesOnlyResolver : DefaultContractResolver

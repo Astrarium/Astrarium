@@ -1,5 +1,6 @@
 ﻿# General
-CelestialGridRenderer.Name		= Grids and Lines
+Planetarium.Plugins.Grids.CelestialGridRenderer.Name = Grids and Lines
+
 CelestialGridRenderer.Zenith	= Zenith
 CelestialGridRenderer.Nadir		= Nadir
 CelestialGridRenderer.NCP		= NCP

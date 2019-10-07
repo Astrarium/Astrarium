@@ -26,11 +26,6 @@ namespace Planetarium.Plugins.MeasureTool
         public override RendererOrder Order => RendererOrder.Foreground;
 
         /// <summary>
-        /// Displayable renderer name
-        /// </summary>
-        public override string Name => "Measure Tool";
-
-        /// <summary>
         /// Flag indicating the ruler is on
         /// </summary>
         public bool IsMeasureToolOn { get; set; }
