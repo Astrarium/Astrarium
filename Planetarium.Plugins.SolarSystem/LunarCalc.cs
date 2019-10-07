@@ -12,12 +12,7 @@ using System.Threading.Tasks;
 
 namespace Planetarium.Calculators
 {
-    public interface ILunarProvider
-    {
-        Moon Moon { get; }
-    }
-
-    public class LunarCalc : BaseCalc, ICelestialObjectCalc<Moon>, ILunarProvider, ILunarCalc
+    public class LunarCalc : BaseCalc, ICelestialObjectCalc<Moon>
     {
         public Moon Moon { get; private set; } = new Moon();
 
@@ -326,14 +321,14 @@ namespace Planetarium.Calculators
                 .AddRow("Libration.Longitude", c.Get(LibrationElements).l)
 
                 .AddHeader("Nearest phases")
-                .AddRow("MoonPhases.NewMoon", new Date(jdNM, c.GeoLocation.UtcOffset), jdNM)
-                .AddRow("MoonPhases.FirstQuarter", new Date(jdFQ, c.GeoLocation.UtcOffset), jdFQ)
-                .AddRow("MoonPhases.FullMoon", new Date(jdFM, c.GeoLocation.UtcOffset), jdFM)
-                .AddRow("MoonPhases.LastQuarter", new Date(jdLQ, c.GeoLocation.UtcOffset), jdLQ)
+                .AddRow("MoonPhases.NewMoon", c.GetDate(jdNM), jdNM)
+                .AddRow("MoonPhases.FirstQuarter", c.GetDate(jdFQ), jdFQ)
+                .AddRow("MoonPhases.FullMoon", c.GetDate(jdFM), jdFM)
+                .AddRow("MoonPhases.LastQuarter", c.GetDate(jdLQ), jdLQ)
 
                 .AddHeader("Nearest apsides")
-                .AddRow("MoonApsides.Apogee", new Date(jdApogee, c.GeoLocation.UtcOffset), jdApogee)
-                .AddRow("MoonApsides.Perigee", new Date(jdPerigee, c.GeoLocation.UtcOffset), jdPerigee);
+                .AddRow("MoonApsides.Apogee", c.GetDate(jdApogee), jdApogee)
+                .AddRow("MoonApsides.Perigee", c.GetDate(jdPerigee), jdPerigee);
 
             return info;
         }

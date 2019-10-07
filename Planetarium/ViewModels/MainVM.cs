@@ -514,14 +514,14 @@ namespace Planetarium.ViewModels
 
         private void SelectLocation()
         {
-            var vm = viewManager.CreateViewModel<LocationVM>();
+            var vm = viewManager.CreateViewModel<LocationVM>();       
             if (viewManager.ShowDialog(vm) ?? false)
             {
                 sky.Context.GeoLocation = new CrdsGeographical(vm.ObserverLocation);
                 settings.Set("ObserverLocation", vm.ObserverLocation);
                 settings.Save();
                 sky.Calculate();
-            }
+            }            
         }
 
         private void SetFullScreen(bool isFullScreen)

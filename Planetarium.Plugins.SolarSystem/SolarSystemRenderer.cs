@@ -20,9 +20,9 @@ namespace Planetarium.Plugins.SolarSystem
     /// </summary>
     public class SolarSystemRenderer : BaseRenderer
     {
-        private readonly ISolarProvider solarProvider;
-        private readonly ILunarProvider lunarProvider;
-        private readonly IPlanetsProvider planetsProvider;
+        private readonly SolarCalc solarCalc;
+        private readonly LunarCalc lunarCalc;
+        private readonly PlanetsCalc planetsCalc;
         private readonly ISettings settings;
 
         private Font fontLabel = new Font("Arial", 8);
@@ -56,11 +56,11 @@ namespace Planetarium.Plugins.SolarSystem
         private SphereRenderer sphereRenderer = new SphereRenderer();
         private ImagesCache imagesCache = new ImagesCache();
 
-        public SolarSystemRenderer(ILunarProvider lunarProvider, ISolarProvider solarProvider, IPlanetsProvider planetsProvider, SolarTextureDownloader solarTextureDownloader, ISettings settings)
+        public SolarSystemRenderer(LunarCalc lunarCalc, SolarCalc solarCalc, PlanetsCalc planetsCalc, SolarTextureDownloader solarTextureDownloader, ISettings settings)
         {
-            this.solarProvider = solarProvider;
-            this.lunarProvider = lunarProvider;
-            this.planetsProvider = planetsProvider;
+            this.solarCalc = solarCalc;
+            this.lunarCalc = lunarCalc;
+            this.planetsCalc = planetsCalc;
             this.solarTextureDownloader = solarTextureDownloader;
             this.settings = settings;
             penShadowOutline.DashStyle = DashStyle.Dot;
@@ -70,14 +70,14 @@ namespace Planetarium.Plugins.SolarSystem
 
         public override void Render(IMapContext map)
         {
-            Sun sun = solarProvider.Sun;
-            Moon moon = lunarProvider.Moon;
+            Sun sun = solarCalc.Sun;
+            Moon moon = lunarCalc.Moon;
 
             // Flag indicated Sun is already rendered
             bool isSunRendered = false;
 
             // Get all planets except Earth, and sort them by distance from Earth (most distant planet is first)
-            var planets = planetsProvider.Planets
+            var planets = planetsCalc.Planets
                 .Where(p => p.Number != Planet.EARTH)
                 .OrderByDescending(p => p.Ecliptical.Distance);
 
@@ -313,7 +313,7 @@ namespace Planetarium.Plugins.SolarSystem
             if (planet.Number == Planet.JUPITER)
             {
                 // render moons behind Jupiter
-                var moons = planetsProvider.JupiterMoons.Where(m => m.Rectangular.Z >= 0).OrderByDescending(m => m.Rectangular.Z);
+                var moons = planetsCalc.JupiterMoons.Where(m => m.Rectangular.Z >= 0).OrderByDescending(m => m.Rectangular.Z);
                 RenderJupiterMoons(map, planet, moons);
             }
 
@@ -354,7 +354,7 @@ namespace Planetarium.Plugins.SolarSystem
 
                     if (planet.Number == Planet.SATURN)
                     {
-                        var rings = planetsProvider.SaturnRings;
+                        var rings = planetsCalc.SaturnRings;
 
                         double maxSize = Math.Max(map.Width, map.Height);
 
@@ -437,7 +437,7 @@ namespace Planetarium.Plugins.SolarSystem
             // render moons over Jupiter
             if (planet.Number == Planet.JUPITER)
             {
-                var moons = planetsProvider.JupiterMoons.Where(m => m.Rectangular.Z < 0).OrderByDescending(m => m.Rectangular.Z);
+                var moons = planetsCalc.JupiterMoons.Where(m => m.Rectangular.Z < 0).OrderByDescending(m => m.Rectangular.Z);
                 RenderJupiterMoons(map, planet, moons);
             }
         }
@@ -532,7 +532,7 @@ namespace Planetarium.Plugins.SolarSystem
 
         private void RenderJupiterShadow(IMapContext map, JupiterMoon moon)
         {
-            Planet jupiter = planetsProvider.Planets.ElementAt(Planet.JUPITER - 1);
+            Planet jupiter = planetsCalc.Planets.ElementAt(Planet.JUPITER - 1);
 
             float rotation = map.GetRotationTowardsNorth(jupiter.Equatorial) + 360 - (float)jupiter.Appearance.P;
 
@@ -584,11 +584,11 @@ namespace Planetarium.Plugins.SolarSystem
             }
 
             // collect moons than can produce a shadow
-            var ecliptingMoons = planetsProvider.JupiterMoons.Where(m => m.RectangularS.Z < rect.Z);
+            var ecliptingMoons = planetsCalc.JupiterMoons.Where(m => m.RectangularS.Z < rect.Z);
 
             if (ecliptingMoons.Any())
             {
-                Planet jupiter = planetsProvider.Planets.ElementAt(Planet.JUPITER - 1);
+                Planet jupiter = planetsCalc.Planets.ElementAt(Planet.JUPITER - 1);
 
                 float rotation = map.GetRotationTowardsNorth(jupiter.Equatorial) + 360 - (float)jupiter.Appearance.P;
 
@@ -671,7 +671,7 @@ namespace Planetarium.Plugins.SolarSystem
                                 PointF[] points = new PointF[] { new PointF(p.X, p.Y) };
                                 map.Graphics.TransformPoints(CoordinateSpace.Page, CoordinateSpace.World, points);
                                 map.Graphics.ResetTransform();
-                                map.DrawObjectCaption(fontShadowLabel, brushShadowLabel, $"Shadow of {moon.Name}", points[0], szP);
+                                map.DrawObjectCaption(fontShadowLabel, brushShadowLabel, Text.Get(moon.ShadowName), points[0], szP);
                             }
                         }
                     }
@@ -713,7 +713,7 @@ namespace Planetarium.Plugins.SolarSystem
 
             if (useTextures)
             {
-                double grs = planet.Number == Planet.JUPITER ? planetsProvider.GreatRedSpotLongitude : 0;
+                double grs = planet.Number == Planet.JUPITER ? planetsCalc.GreatRedSpotLongitude : 0;
                 Image texturePlanet = imagesCache.RequestImage(planet.Number.ToString(), new LonLatShift(planet.Number.ToString(), planet.Appearance.CM - grs, planet.Appearance.D), PlanetTextureProvider, map.Redraw);
 
                 if (texturePlanet != null)

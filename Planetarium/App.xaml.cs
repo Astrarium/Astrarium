@@ -179,8 +179,7 @@ namespace Planetarium
             settings.Load();
 
             string language = settings.Get<string>("Language");
-            var availableLocales = Text.GetLocales();//.Select(loc => $"{loc.NativeName} / {loc.EnglishName}").ToArray();
-            var savedLocale = availableLocales.FirstOrDefault(loc => loc.Name == language);
+            var savedLocale = Text.GetLocales().FirstOrDefault(loc => loc.Name == language);
             if (savedLocale != null)
             {
                 Text.SetLocale(savedLocale);

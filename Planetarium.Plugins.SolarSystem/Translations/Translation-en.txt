@@ -15,8 +15,23 @@ Io.Name							= Io
 Europa.Name						= Europa
 Ganymede.Name					= Ganymede
 Callisto.Name					= Callisto
-
+Io.Shadow						= Shadow of Io
+Europa.Shadow					= Shadow of Europa
+Ganymede.Shadow					= Shadow of Ganymede
+Callisto.Shadow					= Shadow of Callisto
 EarthShadow.Label				= Earth shadow
 EclipsedByJupiter				= Eclipsed by Jupiter
 
 # Settings
+Settings.Sun						= Sun
+Settings.SunLabel					= Sun label
+Settings.SunTexture					= Use texture for the Sun
+Settings.SunTexturePath				= Web URL for the Sun texture
+Settings.Planets					= Planets
+Settings.UseTextures				= Use textures
+Settings.JupiterMoonsShadowOutline	= Show outlines of Jupiter moons shadows
+Settings.ShowRotationAxis			= Show rotation axis
+Settings.GRSLongitude				= GRS of Jupiter
+Settings.GRSLongitude.Epoch			= Epoch
+Settings.GRSLongitude.Longitude		= Longitude at epoch
+Settings.GRSLongitude.MonthlyDrift	= Drift, in degrees per month

@@ -12,28 +12,7 @@ using System.Text;
 
 namespace Planetarium.Calculators
 {
-    public interface IPlanetsProvider
-    {
-        ICollection<JupiterMoon> JupiterMoons { get; }
-        ICollection<Planet> Planets { get; }
-        RingsAppearance SaturnRings { get; }
-        double GreatRedSpotLongitude { get; }
-    }
-
-    public interface IPlanetsCalc
-    {
-        float Magnitude(SkyContext ctx, int number);
-        double Elongation(SkyContext ctx, int number);
-        double LongitudeDifference(SkyContext ctx, int number);
-        double PhaseAngle(SkyContext ctx, int number);
-        VisibilityDetails Visibility(SkyContext ctx, int number);
-        CrdsEquatorial Equatorial(SkyContext ctx, int number);
-        CrdsEcliptical Ecliptical(SkyContext ctx, int number);
-        CrdsEcliptical SunEcliptical(SkyContext ctx);
-        string GetPlanetName(int number);
-    }
-
-    public class PlanetsCalc : BaseCalc, ICelestialObjectCalc<Planet>, ICelestialObjectCalc<JupiterMoon>, IPlanetsCalc, IPlanetsProvider
+    public class PlanetsCalc : BaseCalc, ICelestialObjectCalc<Planet>, ICelestialObjectCalc<JupiterMoon>
     {
         private ISettings settings;
         private Planet[] planets = new Planet[8];
@@ -58,6 +37,8 @@ namespace Planetarium.Calculators
 
         private string[] JuipterMoonNames = new string[] { Text.Get("Io.Name"), Text.Get("Europa.Name"), Text.Get("Ganymede.Name"), Text.Get("Callisto.Name") };
 
+        private string[] ShadowNames = new string[] { Text.Get("Io.Shadow"), Text.Get("Europa.Shadow"), Text.Get("Ganymede.Shadow"), Text.Get("Callisto.Shadow") };
+
         public PlanetsCalc(ISettings settings)
         {
             this.settings = settings;
@@ -69,7 +50,7 @@ namespace Planetarium.Calculators
 
             for (int i = 0; i < JupiterMoons.Count; i++)
             {
-                jupiterMoons[i] = new JupiterMoon() { Number = i + 1, Name = JuipterMoonNames[i] };
+                jupiterMoons[i] = new JupiterMoon() { Number = i + 1, Name = JuipterMoonNames[i], ShadowName = ShadowNames[i] };
             }
 
             planets[Planet.JUPITER - 1].Flattening = 0.064874f;

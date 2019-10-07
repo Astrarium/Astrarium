@@ -124,6 +124,7 @@ namespace Planetarium.ViewModels
             if (MessageBoxResult.Yes == viewManager.ShowMessageBox("Warning", "Do you really want to reset settings to default values?", MessageBoxButton.YesNo))
             {
                 settings.Load("Defaults");
+                Save();
             }
         }
 

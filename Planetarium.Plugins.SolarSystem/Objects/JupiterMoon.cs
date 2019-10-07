@@ -35,6 +35,11 @@ namespace Planetarium.Objects
         public string Name { get; set; }
 
         /// <summary>
+        /// Name of moon shadow
+        /// </summary>
+        public string ShadowName { get; set; }
+
+        /// <summary>
         /// Number of the Galilean moon (1 to 4)
         /// </summary>
         public int Number { get; set; }

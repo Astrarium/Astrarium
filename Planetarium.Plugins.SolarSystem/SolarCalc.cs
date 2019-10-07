@@ -12,17 +12,7 @@ using System.Threading.Tasks;
 
 namespace Planetarium.Calculators
 {
-    public interface ISolarProvider
-    {
-        Sun Sun { get; }
-    }
-
-    public interface ISolarCalc
-    {
-        double Semidiameter(SkyContext c);
-    }
-
-    public class SolarCalc : BaseCalc, ICelestialObjectCalc<Sun>, ISolarProvider, ISolarCalc
+    public class SolarCalc : BaseCalc, ICelestialObjectCalc<Sun>
     {
         public Sun Sun { get; private set; } = new Sun();
 
@@ -155,10 +145,10 @@ namespace Planetarium.Calculators
                 .AddRow("CRN", c.Get(CarringtonNumber))
 
                 .AddHeader("Seasons")
-                .AddRow("Seasons.Spring", new Date(jdSpring, c.GeoLocation.UtcOffset), jdSpring)
-                .AddRow("Seasons.Summer", new Date(jdSummer, c.GeoLocation.UtcOffset), jdSummer)
-                .AddRow("Seasons.Autumn", new Date(jdAutumn, c.GeoLocation.UtcOffset), jdAutumn)
-                .AddRow("Seasons.Winter", new Date(jdWinter, c.GeoLocation.UtcOffset), jdWinter);
+                .AddRow("Seasons.Spring", c.GetDate(jdSpring), jdSpring)
+                .AddRow("Seasons.Summer", c.GetDate(jdSummer), jdSummer)
+                .AddRow("Seasons.Autumn", c.GetDate(jdAutumn), jdAutumn)
+                .AddRow("Seasons.Winter", c.GetDate(jdWinter), jdWinter);
 
             return info;
         }

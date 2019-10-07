@@ -123,14 +123,6 @@ namespace Planetarium.Config
             return true;
         }
 
-        /// <summary>
-        /// Loads default settings
-        /// </summary>
-        public void Reset()
-        {
-            Load("Defaults");
-        }
-
         public void Load()
         {
             if (File.Exists(SETTINGS_PATH))

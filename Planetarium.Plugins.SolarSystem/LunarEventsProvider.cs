@@ -10,8 +10,8 @@ namespace Planetarium.Calculators
 {
     public class LunarEventsProvider : BaseAstroEventsProvider
     {
-        private readonly ILunarCalc lunarCalc = null;
-        private readonly IPlanetsCalc planetsCalc = null;
+        private readonly LunarCalc lunarCalc = null;
+        private readonly PlanetsCalc planetsCalc = null;
 
         // Bright stars which can be in conjunction with Moon
         private readonly ConjunctedStar[] stars = new ConjunctedStar[]
@@ -24,7 +24,7 @@ namespace Planetarium.Calculators
             new ConjunctedStar("Antares", "16h 29m 24.4s", "-26° 25' 55''", 0.01f, -0.02f)
         };
 
-        public LunarEventsProvider(ILunarCalc lunarCalc, IPlanetsCalc planetsCalc)
+        public LunarEventsProvider(LunarCalc lunarCalc, PlanetsCalc planetsCalc)
         {
             this.lunarCalc = lunarCalc;
             this.planetsCalc = planetsCalc;

@@ -91,7 +91,17 @@ namespace Planetarium.Types
         /// <summary>
         /// True obliquity of the ecliptic, in degrees
         /// </summary>
-        public double Epsilon { get; private set; }        
+        public double Epsilon { get; private set; }
+
+        /// <summary>
+        /// Gets date corresponding to specified Julian Day
+        /// </summary>
+        /// <param name="jd">Julian Day to convert to the date</param>
+        /// <returns><see cref="Date"/> instance</returns>
+        public Date GetDate(double jd)
+        {
+            return new Date(jd, GeoLocation.UtcOffset);
+        }
     }
 
     /// <summary>

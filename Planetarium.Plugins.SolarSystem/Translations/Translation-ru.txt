@@ -15,8 +15,23 @@ Io.Name							= Ио
 Europa.Name						= Европа
 Ganymede.Name					= Ганимед
 Callisto.Name					= Каллисто
-
+Io.Shadow						= Тень Ио
+Europa.Shadow					= Тень Европы
+Ganymede.Shadow					= Тень Ганимеда
+Callisto.Shadow					= Тень Каллисто
 EarthShadow.Label				= Тень Земли
 EclipsedByJupiter				= В тени Юпитера
 
 # Settings
+Settings.Sun						= Солнце
+Settings.SunLabel					= Отображать название Солнца
+Settings.SunTexture					= Использовать текстуру
+Settings.SunTexturePath				= Путь для получения текстуры
+Settings.Planets					= Планеты
+Settings.UseTextures				= Использовать текстуры
+Settings.JupiterMoonsShadowOutline	= Показывать контуры теней спутников Юпитера
+Settings.ShowRotationAxis			= Показывать оси вращения
+Settings.GRSLongitude				= БКП Юпитера
+Settings.GRSLongitude.Epoch			= Эпоха
+Settings.GRSLongitude.Longitude		= Долгота на эпоху
+Settings.GRSLongitude.MonthlyDrift	= Дрейф, в градусах в месяц

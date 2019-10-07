@@ -30,10 +30,10 @@ namespace Planetarium.Config
             EnabledCondition = enabledCondition;
         }
 
-        public string Name { get; set; }
-        public object DefaultValue { get; set; }
-        public string Section { get; set; }
-        public Func<ISettings, bool> EnabledCondition { get; set; }
-        public Type ControlType { get; set; }
+        public string Name { get; protected set; }
+        public object DefaultValue { get; private set; }
+        public string Section { get; private set; }
+        public Func<ISettings, bool> EnabledCondition { get; private set; }
+        public Type ControlType { get; private set; }
     }
 }

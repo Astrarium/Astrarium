@@ -10,10 +10,10 @@ namespace Planetarium.Calculators
 {
     public class PlanetsEventsProvider : BaseAstroEventsProvider
     {
-        private readonly IPlanetsCalc planetsCalc;
-        private readonly ISolarCalc solarCalc;
+        private readonly PlanetsCalc planetsCalc;
+        private readonly SolarCalc solarCalc;
 
-        public PlanetsEventsProvider(IPlanetsCalc planetsCalc, ISolarCalc solarCalc)
+        public PlanetsEventsProvider(PlanetsCalc planetsCalc, SolarCalc solarCalc)
         {
             this.planetsCalc = planetsCalc;
             this.solarCalc = solarCalc;

@@ -177,6 +177,8 @@ namespace Planetarium.ViewModels
             }
         }
 
+        private string _LastSearchString = null;
+
         /// <summary>
         /// Searches for geographical locations asynchronously.
         /// </summary>
@@ -206,60 +208,55 @@ namespace Planetarium.ViewModels
                 return results;
             }
 
-            if (_FileReader == null)
-            {
-                var stringPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data", "Cities.dat");
-                var fileStream = File.OpenRead(stringPath);
-                _FileReader = new StreamReader(fileStream, Encoding.UTF8);
-            }
 
-            _FileReader.BaseStream.Seek(0, SeekOrigin.Begin);
+            var stringPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data", "Cities.dat");
+            FileStream _FileStream = File.OpenRead(stringPath);
 
-            string line = null;
-            try
+            using (var fileReader = new StreamReader(_FileStream, Encoding.UTF8))
             {
-                while ((line = _FileReader.ReadLine()) != null)
+                _LastSearchString = searchString;
+
+                string line = null;
+                try
                 {
-                    string[] chunks = line.Split('\t');
-
-                    var names = new List<string>();
-                    names.Add(chunks[1]);
-                    names.AddRange(chunks[3].Split(','));
-                    var name = names.FirstOrDefault(s => s.Replace("\'", "").StartsWith(searchString, StringComparison.InvariantCultureIgnoreCase));
-                    if (name != null)
+                    while ((line = fileReader.ReadLine()) != null && searchString.Equals(_LastSearchString))
                     {
-                        double latitude = double.Parse(chunks[4], CultureInfo.InvariantCulture);
-                        double longitude = double.Parse(chunks[5], CultureInfo.InvariantCulture);
-                        double elevation = double.Parse(string.IsNullOrWhiteSpace(chunks[15]) ? "0" : chunks[15], CultureInfo.InvariantCulture);
-                        TimeZoneItem timeZone = TimeZones.FirstOrDefault(tz => tz.TimeZoneId.Equals(chunks[17], StringComparison.InvariantCultureIgnoreCase));
+                        string[] chunks = line.Split('\t');
 
-                        results.Add(new LocationSearchItem
+                        var names = new List<string>();
+                        names.Add(chunks[1]);
+                        names.AddRange(chunks[3].Split(','));
+                        var name = names.FirstOrDefault(s => s.Replace("\'", "").StartsWith(searchString, StringComparison.InvariantCultureIgnoreCase));
+                        if (name != null)
                         {
-                            Name = name,
-                            Country = chunks[8],
-                            Names = string.Join(", ", names.Distinct().Except(new[] { name }).ToArray()),
-                            Location = new CrdsGeographical(-longitude, latitude, timeZone.UtcOffset, elevation, timeZone.TimeZoneId, name)
-                        });
+                            double latitude = double.Parse(chunks[4], CultureInfo.InvariantCulture);
+                            double longitude = double.Parse(chunks[5], CultureInfo.InvariantCulture);
+                            double elevation = double.Parse(string.IsNullOrWhiteSpace(chunks[15]) ? "0" : chunks[15], CultureInfo.InvariantCulture);
+                            TimeZoneItem timeZone = TimeZones.FirstOrDefault(tz => tz.TimeZoneId.Equals(chunks[17], StringComparison.InvariantCultureIgnoreCase));
 
-                        if (results.Count == 10)
-                        {
-                            break;
+                            results.Add(new LocationSearchItem
+                            {
+                                Name = name,
+                                Country = chunks[8],
+                                Names = string.Join(", ", names.Distinct().Except(new[] { name }).ToArray()),
+                                Location = new CrdsGeographical(-longitude, latitude, timeZone.UtcOffset, elevation, timeZone.TimeZoneId, name)
+                            });
+
+                            if (results.Count == 10)
+                            {
+                                break;
+                            }
                         }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
+                catch (Exception ex)
+                {
 
-            }
+                }
 
-            return results.OrderBy(r => r.Name).ToList();
+                return results.OrderBy(r => r.Name).ToList();
+            }
         }
-
-        /// <summary>
-        /// StreamReader for reading locations from file
-        /// </summary>
-        private StreamReader _FileReader;
 
         #endregion Search properties
 
