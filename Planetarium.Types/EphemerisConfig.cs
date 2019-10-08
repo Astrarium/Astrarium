@@ -6,23 +6,25 @@ using System.Linq;
 
 namespace Planetarium.Types
 {
-    public abstract class EphemerisConfig : IEnumerable<EphemerisConfigItem>
+    public abstract class EphemerisConfig
     {
-        internal List<EphemerisConfigItem> Items { get; } = new List<EphemerisConfigItem>();
-
-        public IEnumerator<EphemerisConfigItem> GetEnumerator()
-        {
-            return Items.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return Items.GetEnumerator();
-        }
+        protected List<EphemerisConfigItem> Items { get; } = new List<EphemerisConfigItem>();
 
         public ICollection<EphemerisConfigItem> Filter(IEnumerable<string> categories)
         {
             return Items.Where(i => categories.Contains(i.Category)).ToArray();
+        }
+
+        public bool IsEmpty
+        {
+            get { return !Items.Any(); }
+        }
+
+        public ICollection<string> GetCategories(CelestialObject body)
+        {
+            return Items
+                .Where(c => (bool?)c.IsAvailable?.DynamicInvoke(body) ?? true)
+                .Select(c => c.Category).Distinct().ToArray();
         }
     }
 
@@ -32,7 +34,7 @@ namespace Planetarium.Types
         {
             get
             {
-                return Items.FirstOrDefault(i => i.Category == key).Formula as Func<SkyContext, T, object>;
+                return Items.FirstOrDefault(i => i.Category == key)?.Formula as Func<SkyContext, T, object>;
             }
             set
             {
@@ -44,7 +46,7 @@ namespace Planetarium.Types
         {
             get
             {
-                return Items.FirstOrDefault(i => i.Category == key).Formula as Func<SkyContext, T, object>;
+                return Items.FirstOrDefault(i => i.Category == key)?.Formula as Func<SkyContext, T, object>;
             }
             set
             {
@@ -56,7 +58,7 @@ namespace Planetarium.Types
         {
             get
             {
-                return Items.FirstOrDefault(i => i.Category == key).Formula as Func<SkyContext, T, object>;
+                return Items.FirstOrDefault(i => i.Category == key)?.Formula as Func<SkyContext, T, object>;
             }
             set
             {
@@ -91,26 +93,13 @@ namespace Planetarium.Types
             Formula = func;
             IsAvailable = availableIf;
         }
+
+        internal EphemerisConfigItem(string category, Delegate func, IEphemFormatter formatter, Delegate availableIf)
+        {
+            Category = category;
+            Formula = func;
+            Formatter = formatter;
+            IsAvailable = availableIf;
+        }
     }
-
-    //public class EphemerisConfigItem<TCelestialObject> : EphemerisConfigItem where TCelestialObject : CelestialObject
-    //{
-    //    public EphemerisConfigItem(string key, Func<SkyContext, TCelestialObject, object> formula)
-    //        : base(key, formula)
-    //    {
-
-    //    }
-
-    //    public EphemerisConfigItem(string key, Func<SkyContext, TCelestialObject, object> formula, IEphemFormatter formatter)
-    //        : base(key, formula)
-    //    {
-    //        Formatter = formatter;
-    //    }
-
-    //    public EphemerisConfigItem(string key, Func<SkyContext, TCelestialObject, object> formula, Func<TCelestialObject, bool> availableIf)
-    //        : base(key, formula)
-    //    {
-    //        IsAvailable = availableIf;
-    //    }        
-    //}
 }

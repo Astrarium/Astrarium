@@ -18,7 +18,7 @@ namespace Planetarium.Plugins.MinorBodies
         }
 
         public override void ConfigureAstroEvents(AstroEventsConfig c)
-        {
+        {            
             c["Comets.PerihelionPassages"] = PerihelionPassages;
         }
 

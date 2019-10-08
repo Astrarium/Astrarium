@@ -52,7 +52,7 @@ namespace Planetarium
                     // Ephemeris configs
                     EphemerisConfig config = Activator.CreateInstance(typeof(EphemerisConfig<>).MakeGenericType(bodyType)) as EphemerisConfig;
                     concreteCalc.GetMethod(nameof(ICelestialObjectCalc<CelestialObject>.ConfigureEphemeris)).Invoke(calc, new object[] { config });
-                    if (config.Any())
+                    if (!config.IsEmpty)
                     {
                         EphemConfigs[bodyType] = config;
                     }
@@ -184,13 +184,12 @@ namespace Planetarium
             var type = body.GetType();
             if (EphemConfigs.ContainsKey(type))
             {
-                return EphemConfigs[type].Where(c => (bool?)c.IsAvailable?.DynamicInvoke(body) ?? true).Select(c => c.Category).Distinct().ToArray();
+                return EphemConfigs[type].GetCategories(body);
             }
             else
             {
                 return new string[0];
             }
-
         }
 
         public ICollection<AstroEvent> GetEvents(double jdFrom, double jdTo, IEnumerable<string> categories, CancellationToken? cancelToken = null)
