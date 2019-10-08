@@ -184,7 +184,7 @@ namespace Planetarium
             var type = body.GetType();
             if (EphemConfigs.ContainsKey(type))
             {
-                return EphemConfigs[type].Where(c => c.IsAvailable?.Invoke(body) ?? true).Select(c => c.Category).Distinct().ToArray();
+                return EphemConfigs[type].Where(c => (bool?)c.IsAvailable?.DynamicInvoke(body) ?? true).Select(c => c.Category).Distinct().ToArray();
             }
             else
             {

@@ -13,12 +13,7 @@ using System.Threading.Tasks;
 
 namespace Planetarium.Plugins.BrightStars
 {
-    public interface IStarsProvider
-    {
-        ICollection<Star> Stars { get; }
-    }
-
-    public class StarsCalc : BaseCalc, ICelestialObjectCalc<Star>, IStarsProvider
+    public class StarsCalc : BaseCalc, ICelestialObjectCalc<Star>
     {
         private readonly string STARS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Stars.dat");
         private readonly string NAMES_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/StarNames.dat");
@@ -149,9 +144,9 @@ namespace Planetarium.Plugins.BrightStars
 
         public void ConfigureEphemeris(EphemerisConfig<Star> e)
         {
-            e.Add("RTS.Rise", (c, s) => c.Get(RiseTransitSet, s.Number).Rise);
-            e.Add("RTS.Transit", (c, s) => c.Get(RiseTransitSet, s.Number).Transit);
-            e.Add("RTS.Set", (c, s) => c.Get(RiseTransitSet, s.Number).Set);
+            e["RTS.Rise"] = (c, s) => c.Get(RiseTransitSet, s.Number).Rise;
+            e["RTS.Transit"] = (c, s) => c.Get(RiseTransitSet, s.Number).Transit;
+            e["RTS.Set"] = (c, s) => c.Get(RiseTransitSet, s.Number).Set;
         }
 
         public CelestialObjectInfo GetInfo(SkyContext c, Star s)

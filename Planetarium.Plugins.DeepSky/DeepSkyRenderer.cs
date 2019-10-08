@@ -36,12 +36,12 @@ namespace Planetarium.Plugins.DeepSky
 
         private Dictionary<DeepSkyStatus, IDrawingStrategy> drawingHandlers = null;
 
-        private readonly IDeepSkyProvider deepSkyProvider;
+        private readonly DeepSkyCalc deepSkyCalc;
         private readonly ISettings settings;
 
-        public DeepSkyRenderer(IDeepSkyProvider deepSkyProvider, ISettings settings)
+        public DeepSkyRenderer(DeepSkyCalc deepSkyCalc, ISettings settings)
         {
-            this.deepSkyProvider = deepSkyProvider;
+            this.deepSkyCalc = deepSkyCalc;
             this.settings = settings;
 
             k = -(minAlpha - maxAlpha) / (maxZoom - minZoom);
@@ -69,7 +69,7 @@ namespace Planetarium.Plugins.DeepSky
                 return;
             }
 
-            var allDeepSkies = deepSkyProvider.DeepSkies;
+            var allDeepSkies = deepSkyCalc.DeepSkies;
             bool isGround = settings.Get<bool>("Ground");
 
             int alpha = Math.Max(0, Math.Min((int)(k * map.ViewAngle + b), 255));

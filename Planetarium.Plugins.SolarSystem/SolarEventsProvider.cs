@@ -10,9 +10,9 @@ namespace Planetarium.Calculators
 {
     public class SolarEventsProvider : BaseAstroEventsProvider
     {
-        public override void ConfigureAstroEvents(AstroEventsConfig config)
+        public override void ConfigureAstroEvents(AstroEventsConfig phenomena)
         {
-            config.Add("Seasons", EventsSeasons);
+            phenomena["Seasons"] = EventsSeasons;
         }
 
         public ICollection<AstroEvent> EventsSeasons(AstroEventsContext context)

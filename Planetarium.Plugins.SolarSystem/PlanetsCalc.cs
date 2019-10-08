@@ -23,6 +23,9 @@ namespace Planetarium.Calculators
         public RingsAppearance SaturnRings { get; private set; } = new RingsAppearance();
         public double GreatRedSpotLongitude { get; private set; }
 
+        private readonly Func<Planet, bool> IsSaturn = p => p.Number == Planet.SATURN;
+        private readonly Func<Planet, bool> IsJupiter = p => p.Number == Planet.JUPITER;
+
         private string[] PlanetNames = new string[]
         {
             Text.Get("Mercury.Name"),
@@ -418,35 +421,27 @@ namespace Planetarium.Calculators
 
         public void ConfigureEphemeris(EphemerisConfig<Planet> e)
         {
-            e.Add("Magnitude", (c, p) => c.Get(Magnitude, p.Number));
-            e.Add("Horizontal.Altitude", (c, p) => c.Get(Horizontal, p.Number).Altitude);
-            e.Add("Horizontal.Azimuth", (c, p) => c.Get(Horizontal, p.Number).Azimuth);
-            e.Add("Equatorial.Alpha", (c, p) => c.Get(Equatorial, p.Number).Alpha);
-            e.Add("Equatorial.Delta", (c, p) => c.Get(Equatorial, p.Number).Delta);
-
-            e.Add("SaturnRings.a", (c, p) => c.Get(GetSaturnRings, p.Number).a)
-                .AvailableIf(p => (p is Planet) && (p as Planet).Number == Planet.SATURN);
-
-            e.Add("SaturnRings.b", (c, p) => c.Get(GetSaturnRings, p.Number).b)
-                .AvailableIf(p => (p is Planet) && (p as Planet).Number == Planet.SATURN);
-
-            e.Add("GRSLongitude", (c, p) => c.Get(JupiterGreatRedSpotLongitude))
-                .AvailableIf(p => (p is Planet) && (p as Planet).Number == Planet.JUPITER);
-
-            e.Add("RTS.Rise", (c, p) => c.Get(RiseTransitSet, p.Number).Rise);
-            e.Add("RTS.Transit", (c, p) => c.Get(RiseTransitSet, p.Number).Transit);
-            e.Add("RTS.Set", (c, p) => c.Get(RiseTransitSet, p.Number).Set);
-
-            e.Add("Visibility.Duration", (c, p) => c.Get(Visibility, p.Number).Duration);
-            e.Add("Visibility.Period", (c, p) => c.Get(Visibility, p.Number).Period);
+            e["Magnitude"] = (c, p) => c.Get(Magnitude, p.Number);
+            e["Horizontal.Altitude"] = (c, p) => c.Get(Horizontal, p.Number).Altitude;
+            e["Horizontal.Azimuth"] = (c, p) => c.Get(Horizontal, p.Number).Azimuth;
+            e["Equatorial.Alpha"] = (c, p) => c.Get(Equatorial, p.Number).Alpha;
+            e["Equatorial.Delta"] = (c, p) => c.Get(Equatorial, p.Number).Delta;
+            e["SaturnRings.a", IsSaturn] = (c, p) => c.Get(GetSaturnRings, p.Number).a;
+            e["SaturnRings.b", IsSaturn] = (c, p) => c.Get(GetSaturnRings, p.Number).b;
+            e["GRSLongitude", IsJupiter] = (c, p) => c.Get(JupiterGreatRedSpotLongitude);
+            e["RTS.Rise"] = (c, p) => c.Get(RiseTransitSet, p.Number).Rise;
+            e["RTS.Transit"] = (c, p) => c.Get(RiseTransitSet, p.Number).Transit;
+            e["RTS.Set"] = (c, p) => c.Get(RiseTransitSet, p.Number).Set;
+            e["Visibility.Duration"] = (c, p) => c.Get(Visibility, p.Number).Duration;
+            e["Visibility.Period"] = (c, p) => c.Get(Visibility, p.Number).Period;
         }
 
         public void ConfigureEphemeris(EphemerisConfig<JupiterMoon> e)
         {
-            e.Add("Rectangular.X", (c, j) => c.Get(JupiterMoonRectangular, j.Number).X);
-            e.Add("Rectangular.Y", (c, j) => c.Get(JupiterMoonRectangular, j.Number).Y);
-            e.Add("Rectangular.Z", (c, j) => c.Get(JupiterMoonRectangular, j.Number).Z);
-            e.Add("Magnitude", (c, j) => c.Get(JupiterMoonMagnitude, j.Number));
+            e["Rectangular.X"] = (c, j) => c.Get(JupiterMoonRectangular, j.Number).X;
+            e["Rectangular.Y"] = (c, j) => c.Get(JupiterMoonRectangular, j.Number).Y;
+            e["Rectangular.Z"] = (c, j) => c.Get(JupiterMoonRectangular, j.Number).Z;
+            e["Magnitude"] = (c, j) => c.Get(JupiterMoonMagnitude, j.Number);
         }
 
         public CelestialObjectInfo GetInfo(SkyContext c, Planet planet)
@@ -508,9 +503,9 @@ namespace Planetarium.Calculators
             }
 
             info
-            .AddRow("Appearance.CM", c.Get(Appearance, p).CM)
-            .AddRow("Appearance.P", c.Get(Appearance, p).P)
-            .AddRow("Appearance.D", c.Get(Appearance, p).D);
+                .AddRow("Appearance.CM", c.Get(Appearance, p).CM)
+                .AddRow("Appearance.P", c.Get(Appearance, p).P)
+                .AddRow("Appearance.D", c.Get(Appearance, p).D);
 
             return info;
         }

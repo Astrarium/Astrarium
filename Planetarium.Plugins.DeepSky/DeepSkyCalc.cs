@@ -11,15 +11,10 @@ using System.Text;
 
 namespace Planetarium.Plugins.DeepSky
 {
-    public interface IDeepSkyProvider
-    {
-        ICollection<DeepSky> DeepSkies { get; }
-    }
-
     /// <summary>
     /// Calculates coordinates of Deep Sky objects
     /// </summary>
-    public class DeepSkyCalc : BaseCalc, ICelestialObjectCalc<DeepSky>, IDeepSkyProvider
+    public class DeepSkyCalc : BaseCalc, ICelestialObjectCalc<DeepSky>
     {
         private static string LOCATION = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         private static string NGCIC_FILE = Path.Combine(LOCATION, "Data/NGCIC.dat");
@@ -121,9 +116,9 @@ namespace Planetarium.Plugins.DeepSky
 
         public void ConfigureEphemeris(EphemerisConfig<DeepSky> e)
         {
-            e.Add("RTS.Rise", (c, ds) => c.Get(RiseTransitSet, ds).Rise);
-            e.Add("RTS.Transit", (c, ds) => c.Get(RiseTransitSet, ds).Transit);
-            e.Add("RTS.Set", (c, ds) => c.Get(RiseTransitSet, ds).Set);
+            e["RTS.Rise"] = (c, ds) => c.Get(RiseTransitSet, ds).Rise;
+            e["RTS.Transit"] = (c, ds) => c.Get(RiseTransitSet, ds).Transit;
+            e["RTS.Set"] = (c, ds) => c.Get(RiseTransitSet, ds).Set;
         }
 
         public CelestialObjectInfo GetInfo(SkyContext c, DeepSky ds)

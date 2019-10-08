@@ -12,12 +12,7 @@ using System.Threading.Tasks;
 
 namespace Planetarium.Plugins.MinorBodies
 {
-    public interface ICometsProvider
-    {
-        ICollection<Comet> Comets { get; }
-    }
-
-    public class CometsCalc : MinorBodyCalc, ICelestialObjectCalc<Comet>, ICometsProvider
+    public class CometsCalc : MinorBodyCalc, ICelestialObjectCalc<Comet>
     {
         private readonly string ORBITAL_ELEMENTS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Comets.dat");
         private readonly CometsReader reader = new CometsReader();
@@ -107,25 +102,25 @@ namespace Planetarium.Plugins.MinorBodies
 
         public void ConfigureEphemeris(EphemerisConfig<Comet> e)
         {
-            e.Add("Magnitude", (c, p) => c.Get(Magnitude, comets.IndexOf(p)));
-            e.Add("Phase", (c, p) => c.Get(Phase, comets.IndexOf(p)));
-            e.Add("PhaseAngle", (c, p) => c.Get(PhaseAngle, comets.IndexOf(p)));
-            e.Add("DistanceFromEarth", (c, p) => c.Get(DistanceFromEarth, comets.IndexOf(p)));
-            e.Add("DistanceFromSun", (c, p) => c.Get(DistanceFromSun, comets.IndexOf(p)));
-            e.Add("Parallax", (c, p) => c.Get(Parallax, comets.IndexOf(p)));
-            e.Add("Horizontal.Altitude", (c, p) => c.Get(Horizontal, comets.IndexOf(p)).Altitude);
-            e.Add("Horizontal.Azimuth", (c, p) => c.Get(Horizontal, comets.IndexOf(p)).Azimuth);
-            e.Add("Equatorial.Alpha", (c, p) => c.Get(EquatorialT, comets.IndexOf(p)).Alpha);
-            e.Add("Equatorial.Delta", (c, p) => c.Get(EquatorialT, comets.IndexOf(p)).Delta);
-            e.Add("Equatorial0.Alpha", (c, p) => c.Get(EquatorialJ2000, comets.IndexOf(p)).Alpha);
-            e.Add("Equatorial0.Delta", (c, p) => c.Get(EquatorialJ2000, comets.IndexOf(p)).Delta);
-            e.Add("Equatorial0T.Alpha", (c, p) => c.Get(EquatorialJ2000T, comets.IndexOf(p)).Alpha).WithFormatter(Formatters.RA);
-            e.Add("Equatorial0T.Delta", (c, p) => c.Get(EquatorialJ2000T, comets.IndexOf(p)).Delta).WithFormatter(Formatters.Dec);
-            e.Add("EquatorialG.Alpha", (c, p) => c.Get(EquatorialG, comets.IndexOf(p)).Alpha);
-            e.Add("EquatorialG.Delta", (c, p) => c.Get(EquatorialG, comets.IndexOf(p)).Delta);           
-            e.Add("RTS.Rise", (c, p) => c.Get(RiseTransitSet, comets.IndexOf(p)).Rise);
-            e.Add("RTS.Transit", (c, p) => c.Get(RiseTransitSet, comets.IndexOf(p)).Transit);
-            e.Add("RTS.Set", (c, p) => c.Get(RiseTransitSet, comets.IndexOf(p)).Set);            
+            e["Magnitude"] = (c, p) => c.Get(Magnitude, comets.IndexOf(p));
+            e["Phase"] = (c, p) => c.Get(Phase, comets.IndexOf(p));
+            e["PhaseAngle"] = (c, p) => c.Get(PhaseAngle, comets.IndexOf(p));
+            e["DistanceFromEarth"] = (c, p) => c.Get(DistanceFromEarth, comets.IndexOf(p));
+            e["DistanceFromSun"] = (c, p) => c.Get(DistanceFromSun, comets.IndexOf(p));
+            e["Parallax"] = (c, p) => c.Get(Parallax, comets.IndexOf(p));
+            e["Horizontal.Altitude"] = (c, p) => c.Get(Horizontal, comets.IndexOf(p)).Altitude;
+            e["Horizontal.Azimuth"] = (c, p) => c.Get(Horizontal, comets.IndexOf(p)).Azimuth;
+            e["Equatorial.Alpha"] = (c, p) => c.Get(EquatorialT, comets.IndexOf(p)).Alpha;
+            e["Equatorial.Delta"] = (c, p) => c.Get(EquatorialT, comets.IndexOf(p)).Delta;
+            e["Equatorial0.Alpha"] = (c, p) => c.Get(EquatorialJ2000, comets.IndexOf(p)).Alpha;
+            e["Equatorial0.Delta"] = (c, p) => c.Get(EquatorialJ2000, comets.IndexOf(p)).Delta;
+            e["Equatorial0T.Alpha", Formatters.RA] = (c, p) => c.Get(EquatorialJ2000T, comets.IndexOf(p)).Alpha;
+            e["Equatorial0T.Delta", Formatters.Dec] = (c, p) => c.Get(EquatorialJ2000T, comets.IndexOf(p)).Delta;
+            e["EquatorialG.Alpha"] = (c, p) => c.Get(EquatorialG, comets.IndexOf(p)).Alpha;
+            e["EquatorialG.Delta"] = (c, p) => c.Get(EquatorialG, comets.IndexOf(p)).Delta;           
+            e["RTS.Rise"] = (c, p) => c.Get(RiseTransitSet, comets.IndexOf(p)).Rise;
+            e["RTS.Transit"] = (c, p) => c.Get(RiseTransitSet, comets.IndexOf(p)).Transit;
+            e["RTS.Set"] = (c, p) => c.Get(RiseTransitSet, comets.IndexOf(p)).Set;            
         }
 
         public CelestialObjectInfo GetInfo(SkyContext c, Comet comet)

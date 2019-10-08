@@ -30,15 +30,14 @@ namespace Planetarium.Calculators
             this.planetsCalc = planetsCalc;
         }
 
-        public override void ConfigureAstroEvents(AstroEventsConfig config)
+        public override void ConfigureAstroEvents(AstroEventsConfig c)
         {
-            config
-                .Add("Moon.Phases", Phases)
-                .Add("Moon.Apsis", Apsis)
-                .Add("Moon.Librations", MaxLibrations)
-                .Add("Moon.MaxDeclinations", MaxDeclinations)
-                .Add("Moon.ConjWithStars", ConjunctionsWithStars)
-                .Add("Moon.ConjWithPlanets", ConjuntionsWithPlanets);
+            c["Moon.Phases"] = Phases;
+            c["Moon.Apsis"] = Apsis;
+            c["Moon.Librations"] = MaxLibrations;
+            c["Moon.MaxDeclinations"] = MaxDeclinations;
+            c["Moon.ConjWithStars"] = ConjunctionsWithStars;
+            c["Moon.ConjWithPlanets"] = ConjuntionsWithPlanets;
         }
 
         /// <summary>

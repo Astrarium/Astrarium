@@ -15,7 +15,7 @@ namespace Planetarium.Plugins.BrightStars
 {
     public class StarsRenderer : BaseRenderer
     {
-        private readonly IStarsProvider starsProvider;
+        private readonly StarsCalc starsCalc;
         private readonly ISettings settings;
 
         private ICollection<Tuple<int, int>> ConLines = new List<Tuple<int, int>>();
@@ -30,9 +30,9 @@ namespace Planetarium.Plugins.BrightStars
         private const int limitFlamsteedNames = 10;
         private const int limitVarNames = 5;
 
-        public StarsRenderer(IStarsProvider starsProvider, ISettings settings)
+        public StarsRenderer(StarsCalc starsCalc, ISettings settings)
         {
-            this.starsProvider = starsProvider;
+            this.starsCalc = starsCalc;
             this.settings = settings;
 
             fontStarNames = new Font("Arial", 8);
@@ -44,7 +44,7 @@ namespace Planetarium.Plugins.BrightStars
         public override void Render(IMapContext map)
         {
             Graphics g = map.Graphics;
-            var allStars = starsProvider.Stars;
+            var allStars = starsCalc.Stars;
             bool isGround = settings.Get<bool>("Ground");
             double coeff = map.DiagonalCoefficient();
 

@@ -20,12 +20,12 @@ namespace Planetarium.Plugins.MinorBodies
     {
         private Font fontNames;
         private Brush brushNames;
-        private readonly IAsteroidsProvider asteroidsProvider;
+        private readonly AsteroidsCalc asteroidsCalc;
         private readonly ISettings settings;
 
-        public AsteroidsRenderer(IAsteroidsProvider asteroidsProvider, ISettings settings)
+        public AsteroidsRenderer(AsteroidsCalc asteroidsCalc, ISettings settings)
         {
-            this.asteroidsProvider = asteroidsProvider;
+            this.asteroidsCalc = asteroidsCalc;
             this.settings = settings;
 
             fontNames = new Font("Arial", 8);
@@ -35,7 +35,7 @@ namespace Planetarium.Plugins.MinorBodies
         public override void Render(IMapContext map)
         {
             Graphics g = map.Graphics;
-            var allAsteroids = asteroidsProvider.Asteroids;
+            var allAsteroids = asteroidsCalc.Asteroids;
             bool isGround = settings.Get<bool>("Ground");
             bool useTextures = settings.Get<bool>("UseTextures");
             double coeff = map.DiagonalCoefficient();

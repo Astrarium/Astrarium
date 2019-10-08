@@ -20,12 +20,12 @@ namespace Planetarium.Plugins.MinorBodies
     {
         private Font fontNames;
         private Brush brushNames;
-        private readonly ICometsProvider cometsProvider;
+        private readonly CometsCalc cometsCalc;
         private readonly ISettings settings;
 
-        public CometsRenderer(ICometsProvider cometsProvider, ISettings settings)
+        public CometsRenderer(CometsCalc cometsCalc, ISettings settings)
         {
-            this.cometsProvider = cometsProvider;
+            this.cometsCalc = cometsCalc;
             this.settings = settings;
 
             fontNames = new Font("Arial", 8);
@@ -35,7 +35,7 @@ namespace Planetarium.Plugins.MinorBodies
         public override void Render(IMapContext map)
         {
             Graphics g = map.Graphics;
-            var allComets = cometsProvider.Comets;
+            var allComets = cometsCalc.Comets;
             bool isGround = settings.Get<bool>("Ground");
             bool useTextures = settings.Get<bool>("UseTextures");
             double coeff = map.DiagonalCoefficient();

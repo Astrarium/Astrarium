@@ -14,7 +14,7 @@ namespace Planetarium.Plugins.MilkyWay
     /// </summary>
     public class MilkyWayRenderer : BaseRenderer
     {
-        private readonly IMilkyWayProvider milkyWayProvider;
+        private readonly MilkyWayCalc milkyWayCalc;
         private readonly ISettings settings;
 
         /// <summary>
@@ -29,9 +29,9 @@ namespace Planetarium.Plugins.MilkyWay
         private double k;
         private double b;
 
-        public MilkyWayRenderer(IMilkyWayProvider milkyWayProvider, ISettings settings)
+        public MilkyWayRenderer(MilkyWayCalc milkyWayCalc, ISettings settings)
         {
-            this.milkyWayProvider = milkyWayProvider;
+            this.milkyWayCalc = milkyWayCalc;
             this.settings = settings;
 
             k = -(minAlpha - maxAlpha) / (maxZoom - minZoom);
@@ -48,13 +48,13 @@ namespace Planetarium.Plugins.MilkyWay
                     var smoothing = map.Graphics.SmoothingMode;
                     map.Graphics.SmoothingMode = SmoothingMode.None;
 
-                    for (int i = 0; i < milkyWayProvider.MilkyWay.Count(); i++)
+                    for (int i = 0; i < milkyWayCalc.MilkyWay.Count(); i++)
                     {
                         var points = new List<PointF>();
 
-                        for (int j = 0; j < milkyWayProvider.MilkyWay[i].Count; j++)
+                        for (int j = 0; j < milkyWayCalc.MilkyWay[i].Count; j++)
                         {
-                            var h = milkyWayProvider.MilkyWay[i][j].Horizontal;
+                            var h = milkyWayCalc.MilkyWay[i][j].Horizontal;
                             double ad = Angle.Separation(h, map.Center);
 
                             // 130 degrees value limit has been chosen experimentally

@@ -155,10 +155,10 @@ namespace Planetarium.Calculators
 
         public void ConfigureEphemeris(EphemerisConfig<Sun> e)
         {
-            e.Add("RTS.Rise", (c, s) => RiseTransitSet(c).Rise);
-            e.Add("RTS.Transit", (c, s) => RiseTransitSet(c).Transit);
-            e.Add("RTS.Set", (c, s) => RiseTransitSet(c).Set);
-            e.Add("RTS.Duration", (c, s) => RiseTransitSet(c).Duration);
+            e["RTS.Rise"] = (ctx, sun) => ctx.Get(RiseTransitSet).Rise;
+            e["RTS.Transit"] = (ctx, sun) => ctx.Get(RiseTransitSet).Transit;
+            e["RTS.Set"] = (ctx, sun) => ctx.Get(RiseTransitSet).Set;
+            e["RTS.Duration"] = (ctx, sun) => ctx.Get(RiseTransitSet).Duration;
         }
 
         public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)

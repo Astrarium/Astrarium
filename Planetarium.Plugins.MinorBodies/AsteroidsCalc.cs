@@ -12,12 +12,7 @@ using System.Threading.Tasks;
 
 namespace Planetarium.Plugins.MinorBodies
 {
-    public interface IAsteroidsProvider
-    {
-        ICollection<Asteroid> Asteroids { get; }
-    }
-
-    public class AsteroidsCalc : MinorBodyCalc, ICelestialObjectCalc<Asteroid>, IAsteroidsProvider
+    public class AsteroidsCalc : MinorBodyCalc, ICelestialObjectCalc<Asteroid>
     {
         private readonly string ORBITAL_ELEMENTS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Asteroids.dat");
         private readonly string SIZES_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/AsteroidsSizes.dat");
@@ -67,17 +62,16 @@ namespace Planetarium.Plugins.MinorBodies
 
         public void ConfigureEphemeris(EphemerisConfig<Asteroid> e)
         {
-            e.Add("Magnitude", (c, p) => c.Get(Magnitude, asteroids.IndexOf(p)));
-            e.Add("Horizontal.Altitude", (c, p) => c.Get(Horizontal, asteroids.IndexOf(p)).Altitude);
-            e.Add("Horizontal.Azimuth", (c, p) => c.Get(Horizontal, asteroids.IndexOf(p)).Azimuth);
-            e.Add("Equatorial.Alpha", (c, p) => c.Get(EquatorialT, asteroids.IndexOf(p)).Alpha);
-            e.Add("Equatorial.Delta", (c, p) => c.Get(EquatorialT, asteroids.IndexOf(p)).Delta);
-            e.Add("Equatorial0.Alpha", (c, p) => c.Get(EquatorialG, asteroids.IndexOf(p)).Alpha);
-            e.Add("Equatorial0.Delta", (c, p) => c.Get(EquatorialG, asteroids.IndexOf(p)).Delta);
-
-            e.Add("RTS.Rise", (c, p) => c.Get(RiseTransitSet, asteroids.IndexOf(p)).Rise);
-            e.Add("RTS.Transit", (c, p) => c.Get(RiseTransitSet, asteroids.IndexOf(p)).Transit);
-            e.Add("RTS.Set", (c, p) => c.Get(RiseTransitSet, asteroids.IndexOf(p)).Set);
+            e["Magnitude"] = (c, p) => c.Get(Magnitude, asteroids.IndexOf(p));
+            e["Horizontal.Altitude"] = (c, p) => c.Get(Horizontal, asteroids.IndexOf(p)).Altitude;
+            e["Horizontal.Azimuth"] = (c, p) => c.Get(Horizontal, asteroids.IndexOf(p)).Azimuth;
+            e["Equatorial.Alpha"] = (c, p) => c.Get(EquatorialT, asteroids.IndexOf(p)).Alpha;
+            e["Equatorial.Delta"] = (c, p) => c.Get(EquatorialT, asteroids.IndexOf(p)).Delta;
+            e["Equatorial0.Alpha"] = (c, p) => c.Get(EquatorialG, asteroids.IndexOf(p)).Alpha;
+            e["Equatorial0.Delta"] = (c, p) => c.Get(EquatorialG, asteroids.IndexOf(p)).Delta;
+            e["RTS.Rise"] = (c, p) => c.Get(RiseTransitSet, asteroids.IndexOf(p)).Rise;
+            e["RTS.Transit"] = (c, p) => c.Get(RiseTransitSet, asteroids.IndexOf(p)).Transit;
+            e["RTS.Set"] = (c, p) => c.Get(RiseTransitSet, asteroids.IndexOf(p)).Set;
         }
 
         public CelestialObjectInfo GetInfo(SkyContext c, Asteroid body)

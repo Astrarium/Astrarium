@@ -12,15 +12,10 @@ using System.Threading.Tasks;
 
 namespace Planetarium.Plugins.MilkyWay
 {
-    public interface IMilkyWayProvider
-    {
-        List<List<CelestialPoint>> MilkyWay { get; }
-    }
-
     /// <summary>
     /// Calculates coordinates of Milky Way outline points to be rendered on map
     /// </summary>
-    public class MilkyWayCalc : BaseCalc, IMilkyWayProvider
+    public class MilkyWayCalc : BaseCalc
     {
         /// <summary>
         /// Outline points

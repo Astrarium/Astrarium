@@ -17,10 +17,9 @@ namespace Planetarium.Plugins.MinorBodies
             this.cometsCalc = cometsCalc;
         }
 
-        public override void ConfigureAstroEvents(AstroEventsConfig config)
+        public override void ConfigureAstroEvents(AstroEventsConfig c)
         {
-            config
-               .Add("Comets.PerihelionPassages", PerihelionPassages);
+            c["Comets.PerihelionPassages"] = PerihelionPassages;
         }
 
         private ICollection<AstroEvent> PerihelionPassages(AstroEventsContext context)

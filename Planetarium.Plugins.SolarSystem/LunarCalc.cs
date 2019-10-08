@@ -254,22 +254,22 @@ namespace Planetarium.Calculators
 
         public void ConfigureEphemeris(EphemerisConfig<Moon> e)
         {
-            e.Add("RTS.Rise", (c, m) => c.Get(RiseTransitSet).Rise);
-            e.Add("RTS.RiseAzimuth", (c, m) => c.Get(RiseTransitSet).RiseAzimuth);
-            e.Add("RTS.Transit", (c, m) => c.Get(RiseTransitSet).Transit);
-            e.Add("RTS.TransitAltitude", (c, m) => c.Get(RiseTransitSet).TransitAltitude);
-            e.Add("RTS.Set", (c, m) => c.Get(RiseTransitSet).Set);
-            e.Add("RTS.SetAzimuth", (c, m) => c.Get(RiseTransitSet).SetAzimuth);
-            e.Add("Equatorial.Alpha", (c, m) => c.Get(Equatorial).Alpha);
-            e.Add("Equatorial.Delta", (c, m) => c.Get(Equatorial).Delta);
-            e.Add("Horizontal.Altitude", (c, m) => c.Get(Horizontal).Altitude);
-            e.Add("Horizontal.Azimuth", (c, m) => c.Get(Horizontal).Azimuth);
-            e.Add("Libration.Longitude", (c, m) => c.Get(LibrationElements).l);
-            e.Add("Libration.Latitude", (c, m) => c.Get(LibrationElements).b);
-            e.Add("Phase", (c, m) => c.Get(Phase));
-            e.Add("PhaseAngle", (c, m) => c.Get(PhaseAngle));
-            e.Add("Age", (c, m) => c.Get(Age));
-            e.Add("Magnitude", (c, m) => c.Get(Magnitude));
+            e["RTS.Rise"] = (c, m) => c.Get(RiseTransitSet).Rise;
+            e["RTS.RiseAzimuth"] = (c, m) => c.Get(RiseTransitSet).RiseAzimuth;
+            e["RTS.Transit"] = (c, m) => c.Get(RiseTransitSet).Transit;
+            e["RTS.TransitAltitude"] = (c, m) => c.Get(RiseTransitSet).TransitAltitude;
+            e["RTS.Set"] = (c, m) => c.Get(RiseTransitSet).Set;
+            e["RTS.SetAzimuth"] = (c, m) => c.Get(RiseTransitSet).SetAzimuth;
+            e["Equatorial.Alpha"] = (c, m) => c.Get(Equatorial).Alpha;
+            e["Equatorial.Delta"] = (c, m) => c.Get(Equatorial).Delta;
+            e["Horizontal.Altitude"] = (c, m) => c.Get(Horizontal).Altitude;
+            e["Horizontal.Azimuth"] = (c, m) => c.Get(Horizontal).Azimuth;
+            e["Libration.Longitude"] = (c, m) => c.Get(LibrationElements).l;
+            e["Libration.Latitude"] = (c, m) => c.Get(LibrationElements).b;
+            e["Phase"] = (c, m) => c.Get(Phase);
+            e["PhaseAngle"] = (c, m) => c.Get(PhaseAngle);
+            e["Age"] = (c, m) => c.Get(Age);
+            e["Magnitude"] = (c, m) => c.Get(Magnitude);
         }
 
         public CelestialObjectInfo GetInfo(SkyContext c, Moon m)

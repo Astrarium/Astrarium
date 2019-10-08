@@ -24,10 +24,16 @@ namespace Planetarium.Types
             return Items.Where(i => keys.Contains(i.Key)).ToArray();
         }
 
-        public AstroEventsConfig Add(string key, Func<AstroEventsContext, ICollection<AstroEvent>> formula)
+        public Func<AstroEventsContext, ICollection<AstroEvent>> this[string key]
         {
-            Items.Add(new AstroEventsConfigItem(key, formula));
-            return this;
+            get
+            {
+                return Items.FirstOrDefault(i => i.Key == key)?.Formula;
+            }
+            set
+            {
+                Items.Add(new AstroEventsConfigItem(key, value));
+            }
         }
     }
 

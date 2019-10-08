@@ -378,15 +378,15 @@ namespace Planetarium.Plugins.Tycho2
 
         public void ConfigureEphemeris(EphemerisConfig<Tycho2Star> e)
         {
-            e.Add("Equatorial.Alpha", (c, s) => c.Get(Equatorial, s).Alpha);
-            e.Add("Equatorial.Delta", (c, s) => c.Get(Equatorial, s).Delta);
-            e.Add("Equatorial0.Alpha", (c, s) => s.Equatorial0.Alpha);
-            e.Add("Equatorial0.Delta", (c, s) => s.Equatorial0.Delta);
-            e.Add("Horizontal.Azimuth", (c, s) => c.Get(Horizontal, s).Azimuth);
-            e.Add("Horizontal.Altitude", (c, s) => c.Get(Horizontal, s).Altitude);
-            e.Add("RTS.Rise", (c, s) => c.Get(RiseTransitSet, s).Rise);
-            e.Add("RTS.Transit", (c, s) => c.Get(RiseTransitSet, s).Transit);
-            e.Add("RTS.Set", (c, s) => c.Get(RiseTransitSet, s).Set);
+            e["Equatorial.Alpha"] = (c, s) => c.Get(Equatorial, s).Alpha;
+            e["Equatorial.Delta"] = (c, s) => c.Get(Equatorial, s).Delta;
+            e["Equatorial0.Alpha"] = (c, s) => s.Equatorial0.Alpha;
+            e["Equatorial0.Delta"] = (c, s) => s.Equatorial0.Delta;
+            e["Horizontal.Azimuth"] = (c, s) => c.Get(Horizontal, s).Azimuth;
+            e["Horizontal.Altitude"] = (c, s) => c.Get(Horizontal, s).Altitude;
+            e["RTS.Rise"] = (c, s) => c.Get(RiseTransitSet, s).Rise;
+            e["RTS.Transit"] = (c, s) => c.Get(RiseTransitSet, s).Transit;
+            e["RTS.Set"] = (c, s) => c.Get(RiseTransitSet, s).Set;
         }
 
         public CelestialObjectInfo GetInfo(SkyContext c, Tycho2Star s)
