@@ -21,6 +21,8 @@ namespace Planetarium.Plugins.Horizon
 
             AddSetting(new SettingItem("CardinalDirectionsColor", Color.FromArgb(0x00, 0x99, 0x99), "Colors"));
 
+            AddSetting(new SettingItem("ColorGround", new SkyColor() { Night = Color.FromArgb(4, 10, 10), Day = Color.FromArgb(116, 185, 139), Red = Color.FromArgb(50, 0, 0), White = Color.White }));
+
             #endregion Settings
 
             AddToolbarItem(new ToolbarButton("Ground", "IconGround", settings, "Ground", "Grids"));

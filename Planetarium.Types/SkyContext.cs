@@ -94,6 +94,12 @@ namespace Planetarium.Types
         public double Epsilon { get; private set; }
 
         /// <summary>
+        /// Value indicating degree of lightness, from 0 to 1 inclusive.
+        /// 0 value means totally dark sky, 1 is a day, values between are different dusk degrees.
+        /// </summary>
+        public float DayLightFactor { get; set; }
+
+        /// <summary>
         /// Gets date corresponding to specified Julian Day
         /// </summary>
         /// <param name="jd">Julian Day to convert to the date</param>

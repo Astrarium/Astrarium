@@ -37,6 +37,18 @@ namespace Planetarium.Types
         float MagLimit { get; }
 
         /// <summary>
+        /// Value indicating degree of lightness, from 0 to 1 inclusive.
+        /// Used for proper rendering of objects with day/night color schema enabled.
+        /// 0 value means totally dark sky, 1 is a day, values between are different dusk degrees.
+        /// </summary>
+        float DayLightFactor { get; }
+
+        /// <summary>
+        /// Gets current color schema
+        /// </summary>
+        ColorSchema Schema { get; }
+
+        /// <summary>
         /// Gets horizontal coordinates of the central point of the canvas.
         /// </summary>
         CrdsHorizontal Center { get; }
@@ -264,6 +276,50 @@ namespace Planetarium.Types
             }
 
             return crosses.ToArray();
+        }
+
+        public static Color GetColor(this IMapContext map, SkyColor color)
+        {
+            switch (map.Schema)
+            {
+                default:
+                case ColorSchema.Night:
+                    return color.Night;
+                case ColorSchema.Red:
+                    return color.Red;
+                case ColorSchema.White:
+                    return color.White;
+                case ColorSchema.Day:
+                    return map.GetDayNightColor(color.Night, color.Day);
+            }
+        }
+
+        private static Color GetDayNightColor(this IMapContext map, Color night, Color day)
+        {
+            float factor = map.DayLightFactor;
+
+            if (factor == 0)
+                return night;
+            else if (factor == 1)
+                return day;
+            else
+            {
+                int rMax = day.R;
+                int rMin = night.R;
+                int gMax = day.G;
+                int gMin = night.G;
+                int bMax = day.B;
+                int bMin = night.B;
+                int aMax = day.A;
+                int aMin = night.A;
+
+                int a = aMin + (int)((aMax - aMin) * factor);
+                int r = rMin + (int)((rMax - rMin) * factor);
+                int g = gMin + (int)((gMax - gMin) * factor);
+                int b = bMin + (int)((bMax - bMin) * factor);
+
+                return Color.FromArgb(a, r, g, b);
+            }
         }
 
         private static PointF[] EdgeCrosspoints(IMapContext map, PointF p1, PointF p2)

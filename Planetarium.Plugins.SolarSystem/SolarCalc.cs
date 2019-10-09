@@ -22,6 +22,7 @@ namespace Planetarium.Calculators
             Sun.Horizontal = c.Get(Horizontal);
             Sun.Ecliptical = c.Get(Ecliptical);
             Sun.Semidiameter = c.Get(Semidiameter);
+            c.DayLightFactor = c.Get(DaylightFactor);
         }
 
         private CrdsEcliptical Ecliptical(SkyContext c)
@@ -73,6 +74,24 @@ namespace Planetarium.Calculators
         public double Semidiameter(SkyContext c)
         {
             return SolarEphem.Semidiameter(c.Get(Ecliptical).Distance);
+        }
+
+        private float DaylightFactor(SkyContext c)
+        {
+            // TODO: consider eclipses case here!
+            
+            double alt = c.Get(Horizontal).Altitude;
+
+            // Absolute value of solar altitude 
+            // at the end of Nautical twilight / beginning of Astronomical twilight
+            const double nightAlt = 12;
+
+            if (alt >= 0)
+                return 1;
+            else if (alt < 0 && alt > -nightAlt)
+                return 1 - (float)(-alt / nightAlt);
+            else
+                return 0;
         }
 
         private double CarringtonNumber(SkyContext c)

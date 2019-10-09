@@ -17,11 +17,6 @@ namespace Planetarium.Plugins.MilkyWay
         private readonly MilkyWayCalc milkyWayCalc;
         private readonly ISettings settings;
 
-        /// <summary>
-        /// Primary color to fill outline
-        /// </summary>
-        private Color colorMilkyWay = Color.FromArgb(20, 20, 20);
-
         private double minAlpha = 255;
         private double maxAlpha = 10;
         private double minZoom = 90;
@@ -47,6 +42,7 @@ namespace Planetarium.Plugins.MilkyWay
                 {
                     var smoothing = map.Graphics.SmoothingMode;
                     map.Graphics.SmoothingMode = SmoothingMode.None;
+                    alpha = (int)(alpha * (1 - map.DayLightFactor));
 
                     for (int i = 0; i < milkyWayCalc.MilkyWay.Count(); i++)
                     {
@@ -66,7 +62,8 @@ namespace Planetarium.Plugins.MilkyWay
 
                         if (points.Count >= 3)
                         {
-                            map.Graphics.FillPolygon(new SolidBrush(Color.FromArgb(alpha, colorMilkyWay)), points.ToArray(), FillMode.Winding);
+                            Color color = map.GetColor(new SkyColor(alpha, settings.Get<SkyColor>("ColorMilkyWay")));
+                            map.Graphics.FillPolygon(new SolidBrush(color), points.ToArray(), FillMode.Winding);
                         }
                     }
 

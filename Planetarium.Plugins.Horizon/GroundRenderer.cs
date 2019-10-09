@@ -14,6 +14,7 @@ namespace Planetarium.Plugins.Horizon
     public class GroundRenderer : BaseRenderer
     {
         private readonly ISettings settings;
+        private readonly Font fontCardinalLabels = new Font("Arial", 12);
 
         public GroundRenderer(ISettings settings)
         {
@@ -31,7 +32,7 @@ namespace Planetarium.Plugins.Horizon
                 const int POINTS_COUNT = 64;
                 PointF[] hor = new PointF[POINTS_COUNT];
                 double step = 2 * map.ViewAngle / (POINTS_COUNT - 1);
-                SolidBrush brushGround = new SolidBrush(Color.FromArgb(4, 10, 10));
+                SolidBrush brushGround = new SolidBrush(map.GetColor(settings.Get<SkyColor>("ColorGround")));
 
                 // Bottom part of ground shape
 
@@ -118,7 +119,10 @@ namespace Planetarium.Plugins.Horizon
                     if (Angle.Separation(h, map.Center) < map.ViewAngle * coeff)
                     {
                         PointF p = map.Project(h);
-                        map.Graphics.DrawStringOpaque(labels[i], SystemFonts.DefaultFont, brushCardinalLabels, Brushes.Black, p, format);
+                        using (var gp = new GraphicsPath())
+                        {
+                            map.Graphics.DrawString(labels[i], fontCardinalLabels, brushCardinalLabels, p, format);
+                        }                        
                     }
                 }
             }

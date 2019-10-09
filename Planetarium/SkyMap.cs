@@ -180,6 +180,8 @@ namespace Planetarium
             this.renderers.AddRange(renderers);
             this.renderers.ForEach(r => r.Initialize());
 
+            Schema = settings.Get<ColorSchema>("Schema");
+
             // get saved rendering orders
             RenderingOrder renderingOrder = settings.Get<RenderingOrder>("RenderingOrder");
 
@@ -191,31 +193,39 @@ namespace Planetarium
 
             // save actual rendering order
             settings.Set("RenderingOrder", renderingOrder);
-
-            // redraw if rendering order changed
+            
             settings.SettingValueChanged += (name, value) =>
             {
+                // redraw if rendering order changed
                 if (name == "RenderingOrder")
                 {
                     this.renderers.Sort(settings.Get<RenderingOrder>("RenderingOrder").Select(r => r.RendererTypeName));
                     Invalidate();
                 }
+
+                if (name == "Schema")
+                {
+                    Schema = settings.Get<ColorSchema>("Schema");
+                    Invalidate();
+                }
             };
         }
+
+        public ColorSchema Schema { get; private set; } = ColorSchema.Night;
 
         public void Render(Graphics g)
         {
             renderStopWatch.Restart();
 
-            g.Clear(Color.Black);
+            mapContext.Graphics = g;
+
+            g.Clear(mapContext.GetColor(settings.Get<SkyColor>("ColorSky")));
             g.PageUnit = GraphicsUnit.Display;
             g.SmoothingMode = Antialias ? SmoothingMode.HighQuality : SmoothingMode.HighSpeed;
             drawnObjects.Clear();
             labels.Clear();
 
             bool needDrawSelectedObject = true;
-
-            mapContext.Graphics = g;
 
             if (LockedObject != null)
             {
@@ -256,7 +266,7 @@ namespace Planetarium
             }
 
             // Diagnostic info
-            g.DrawString($"FOV: {Formatters.MeasuredAngle.Format(ViewAngle)}\nMag limit: {Formatters.Magnitude.Format(MagLimit)}\nFPS: {fps}", fontDiagnosticText, Brushes.Red, new PointF(10, 10));
+            g.DrawString($"FOV: {Formatters.MeasuredAngle.Format(ViewAngle)}\nMag limit: {Formatters.Magnitude.Format(MagLimit)}\nFPS: {fps}\nDaylight factor: {mapContext.DayLightFactor:F2}", fontDiagnosticText, Brushes.Red, new PointF(10, 10));
         }
 
         public void Invalidate()
@@ -374,6 +384,8 @@ namespace Planetarium
             public double Epsilon => skyContext.Epsilon;
             public CrdsGeographical GeoLocation => skyContext.GeoLocation;
             public double SiderealTime => skyContext.SiderealTime;
+            public float DayLightFactor => skyContext.DayLightFactor;
+            public ColorSchema Schema => map.Schema;
             public CrdsHorizontal MousePosition => map.MousePosition;
             public CelestialObject LockedObject => map.LockedObject;
 

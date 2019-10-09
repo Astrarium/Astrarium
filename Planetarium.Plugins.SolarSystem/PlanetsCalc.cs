@@ -545,9 +545,6 @@ namespace Planetarium.Calculators
             .AddRow("Phase", c.Get(Phase, p))
             .AddRow("PhaseAngle", c.Get(PhaseAngle, p))
             .AddRow("Magnitude", c.Get(JupiterMoonMagnitude, m))
-            //.AddRow("DistanceFromEarth", c.Get(DistanceFromEarth, p))
-            //.AddRow("DistanceFromSun", c.Get(DistanceFromSun, p))
-            //.AddRow("HorizontalParallax", c.Get(Parallax, p))
             .AddRow("AngularDiameter", c.Get(JupiterMoonSemidiameter, m) * 2 / 3600.0)
             .AddRow("Appearance.CM", c.Get(JupiterMoonCentralMeridian, m));
 
