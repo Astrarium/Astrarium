@@ -46,6 +46,8 @@ namespace Planetarium.Plugins.Tycho2
 
             if (map.MagLimit > 8 && settings.Get<bool>("Stars") && settings.Get<bool>("Tycho2"))
             {
+                Brush brushStar = GetColor(map);
+
                 PrecessionalElements pe = Precession.ElementsFK5(map.JulianDay, Date.EPOCH_J2000);
 
                 var eq0 = map.Center.ToEquatorial(map.GeoLocation, map.SiderealTime);
@@ -67,7 +69,7 @@ namespace Planetarium.Plugins.Tycho2
                         {
                             float size = map.GetPointSize(star.Magnitude);
 
-                            g.FillEllipse(Brushes.White, p.X - size / 2, p.Y - size / 2, size, size);
+                            g.FillEllipse(brushStar, p.X - size / 2, p.Y - size / 2, size, size);
 
                             if (map.ViewAngle < 1 && size > 3)
                             {
@@ -81,5 +83,19 @@ namespace Planetarium.Plugins.Tycho2
         }
 
         public override RendererOrder Order => RendererOrder.Stars;
+
+        private Brush GetColor(IMapContext map)
+        {
+            switch (map.Schema)
+            {
+                default:
+                case ColorSchema.Night:
+                    return Brushes.White;
+                case ColorSchema.Red:
+                    return Brushes.DarkRed;
+                case ColorSchema.White:
+                    return Brushes.Black;
+            }            
+        }
     }
 }

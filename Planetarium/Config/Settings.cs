@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using Planetarium.Types;
 using System;
@@ -15,44 +16,73 @@ namespace Planetarium.Config
 {
     public class Settings : DynamicObject, ISettings, INotifyPropertyChanged
     {
+        /// <summary>
+        /// Path to store apllication settings
+        /// </summary>
         private readonly string SETTINGS_PATH = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ADK", "Settings.json");
 
         /// <summary>
         /// Contains settings values
         /// </summary>
-        private Dictionary<string, object> SettingsValues = new Dictionary<string, object>();
+        private readonly Dictionary<string, object> SettingsValues = new Dictionary<string, object>();
 
+        /// <summary>
+        /// Saved states of settings values
+        /// </summary>
+        private readonly Dictionary<string, string> Snapshots = new Dictionary<string, string>();
+
+        /// <summary>
+        /// Logger instance
+        /// </summary>
+        private readonly ILogger Logger;
+
+        /// <summary>
+        /// Raised when setting is changed
+        /// </summary>
         public event Action<string, object> SettingValueChanged;
+
+        /// <summary>
+        /// Raised when property value is changed
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private Dictionary<string, string> snapshots = new Dictionary<string, string>();
+        public Settings(ILogger logger)
+        {
+            Logger = logger;
+        }
 
+        /// <summary>
+        /// Gets value indicating whether any setting was changed or not
+        /// </summary>
         public bool IsChanged
         {
             get
             {
-                if (!snapshots.ContainsKey("Current"))
+                if (!Snapshots.ContainsKey("Current"))
                 {
                     return false;
                 }
                 else
                 {
-                    string currentCache = Serialize();
-                    return !currentCache.Equals(snapshots["Current"]);
+                    return !ToString().Equals(Snapshots["Current"]);
                 }
             }
         }
 
+        /// <summary>
+        /// Saves snapshot with specified name
+        /// </summary>
+        /// <param name="snapshotName">Name of shapshot</param>
         public void Save(string snapshotName)
         {
-            snapshots[snapshotName] = Serialize();
+            Snapshots[snapshotName] = ToString();
         }
 
         public void Load(string snapshotName)
         {
-            if (snapshots.ContainsKey(snapshotName))
+            if (Snapshots.ContainsKey(snapshotName))
             {
-                using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(snapshots[snapshotName])))
+                using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(Snapshots[snapshotName])))
                 {
                     Load(stream);
                 }
@@ -61,13 +91,6 @@ namespace Planetarium.Config
             {
                 Load();
             }
-        }
-
-        private ILogger Logger;
-
-        public Settings(ILogger logger)
-        {
-            Logger = logger;
         }
 
         public T Get<T>(string settingName, T defaultValue = default(T))
@@ -160,10 +183,10 @@ namespace Planetarium.Config
             using (JsonTextReader jsonReader = new JsonTextReader(reader))
             {
                 JsonSerializer ser = new JsonSerializer();
-                ser.Converters.Add(new SettingValueConverter(SettingsValues.ToDictionary(s => s.Key, s => s.Value.GetType())));
+                ser.Converters.Add(new SettingsJsonConverter(SettingsValues.ToDictionary(s => s.Key, s => s.Value.GetType())));
                 try
                 {
-                    Load(ser.Deserialize<SavedSettings>(jsonReader));
+                    Load(ser.Deserialize<Dictionary<string, object>>(jsonReader));
                 }
                 catch (Exception ex)
                 {
@@ -172,22 +195,11 @@ namespace Planetarium.Config
             }
         }
 
-        private void Load(SavedSettings settingsTree)
+        private void Load(IDictionary<string, object> savedSettings)
         {
-            foreach (var setting in settingsTree)
+            foreach (var savedSetting in savedSettings)
             {
-                var type = AppDomain.CurrentDomain.GetAssemblies()
-                    .SelectMany(a => a.GetTypes())
-                    .FirstOrDefault(t => t.Equals(setting.Value.GetType()));
-
-                if (type != null)
-                {
-                    Set(setting.Name, setting.Value);
-                }
-                else
-                {
-                    throw new FileFormatException($"Setting `{setting.Name}` has unknown type `{setting.Value.GetType()}`.");
-                }
+                Set(savedSetting.Key, savedSetting.Value);
             }
         }
 
@@ -203,29 +215,14 @@ namespace Planetarium.Config
         private void Save(Stream stream)
         {
             using (StreamWriter writer = new StreamWriter(stream))
-            using (JsonTextWriter jsonWriter = new JsonTextWriter(writer))
             {
-                var saved = new SavedSettings();
-                foreach (var s in SettingsValues)
-                {
-                    saved.Add(new SavedSetting() { Name = s.Key, Value = s.Value });
-                }
-
-                JsonSerializer ser = new JsonSerializer() { Formatting = Formatting.Indented, ContractResolver = new WritablePropertiesOnlyResolver() };
-                ser.Serialize(jsonWriter, saved);
-                jsonWriter.Flush();
+                writer.Write(ToString());
             }
         }
 
-        private string Serialize()
+        public override string ToString()
         {
-            var saved = new SavedSettings();
-            foreach (var s in SettingsValues)
-            {
-                saved.Add(new SavedSetting() { Name = s.Key, Value = s.Value });
-            }
-
-            return JsonConvert.SerializeObject(saved, new JsonSerializerSettings() { ContractResolver = new WritablePropertiesOnlyResolver() });            
+            return JsonConvert.SerializeObject(SettingsValues, new JsonSerializerSettings() { Formatting = Formatting.Indented, ContractResolver = new WritablePropertiesOnlyResolver() });            
         }
 
         private class WritablePropertiesOnlyResolver : DefaultContractResolver
@@ -234,6 +231,36 @@ namespace Planetarium.Config
             {
                 IList<JsonProperty> props = base.CreateProperties(type, memberSerialization);
                 return props.Where(p => p.Writable).ToList();
+            }
+        }
+
+        private class SettingsJsonConverter : JsonConverter
+        {
+            private IDictionary<string, Type> settingsTypes;
+
+            public SettingsJsonConverter(IDictionary<string, Type> settingsTypes)
+            {
+                this.settingsTypes = settingsTypes;
+            }
+
+            public override bool CanConvert(Type objectType)
+            {
+                return typeof(object) == objectType;
+            }
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+            {
+                JToken jObject = JToken.ReadFrom(reader);
+
+                string name = reader.Path;
+                Type type = settingsTypes[name];
+
+                return jObject.ToObject(type);
+            }
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+
             }
         }
     }
