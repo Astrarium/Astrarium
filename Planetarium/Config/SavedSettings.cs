@@ -15,8 +15,7 @@ namespace Planetarium.Config
     {
 
     }
-
-    [JsonConverter(typeof(SettingValueConverter))]
+   
     public class SavedSetting
     {
         public string Name { get; set; }
@@ -25,23 +24,28 @@ namespace Planetarium.Config
 
     public class SettingValueConverter : JsonConverter
     {
+        private IDictionary<string, Type> settingsTypes;
+
+        public SettingValueConverter(IDictionary<string, Type> settingsTypes)
+        {
+            this.settingsTypes = settingsTypes;
+        }
+
         public override bool CanConvert(Type objectType)
         {
-            return objectType == typeof(SettingValueConverter);
+            return objectType == typeof(SavedSetting);
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             JToken jObject = JToken.ReadFrom(reader);
-            
-            string typeName = jObject["Type"].ToObject<string>();
-            Type type = AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(a => a.GetTypes())
-                .FirstOrDefault(t => GetShortTypeName(t) == typeName);
+
+            string name = jObject["Name"].ToObject<string>();
+            Type type = settingsTypes[name];
 
             SavedSetting result = new SavedSetting();
 
-            result.Name = jObject["Name"].ToObject<string>();
+            result.Name = name;
             result.Value = jObject["Value"].ToObject(type);
 
             return result;
@@ -53,18 +57,10 @@ namespace Planetarium.Config
 
             JObject jObject = new JObject();
 
-            Type type = savedSetting.Value.GetType();
-
             jObject["Name"] = savedSetting.Name;
-            jObject["Type"] = JToken.FromObject(GetShortTypeName(type));
             jObject["Value"] = JToken.FromObject(savedSetting.Value, serializer);
 
             jObject.WriteTo(writer);
-        }
-
-        private string GetShortTypeName(Type type)
-        {
-            return $"{type.FullName}, {type.Assembly.GetName().Name}";
         }
     }
 }

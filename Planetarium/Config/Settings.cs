@@ -160,6 +160,7 @@ namespace Planetarium.Config
             using (JsonTextReader jsonReader = new JsonTextReader(reader))
             {
                 JsonSerializer ser = new JsonSerializer();
+                ser.Converters.Add(new SettingValueConverter(SettingsValues.ToDictionary(s => s.Key, s => s.Value.GetType())));
                 try
                 {
                     Load(ser.Deserialize<SavedSettings>(jsonReader));
@@ -204,7 +205,7 @@ namespace Planetarium.Config
             using (StreamWriter writer = new StreamWriter(stream))
             using (JsonTextWriter jsonWriter = new JsonTextWriter(writer))
             {
-                SavedSettings saved = new SavedSettings();
+                var saved = new SavedSettings();
                 foreach (var s in SettingsValues)
                 {
                     saved.Add(new SavedSetting() { Name = s.Key, Value = s.Value });
@@ -218,7 +219,7 @@ namespace Planetarium.Config
 
         private string Serialize()
         {
-            SavedSettings saved = new SavedSettings();
+            var saved = new SavedSettings();
             foreach (var s in SettingsValues)
             {
                 saved.Add(new SavedSetting() { Name = s.Key, Value = s.Value });
