@@ -36,8 +36,9 @@ namespace Planetarium.Plugins.BrightStars
             this.settings = settings;
 
             fontStarNames = new Font("Arial", 8);
-            penConLine = new Pen(new SolidBrush(Color.FromArgb(64, 64, 64)));
+            penConLine = new Pen(new SolidBrush(Color.Transparent));
             penConLine.DashStyle = DashStyle.Dot;
+
             brushStarNames = new SolidBrush(Color.FromArgb(64, 64, 64));
         }
 
@@ -47,11 +48,13 @@ namespace Planetarium.Plugins.BrightStars
             var allStars = starsCalc.Stars;
             bool isGround = settings.Get<bool>("Ground");
             double coeff = map.DiagonalCoefficient();
-
+            
             if (settings.Get<bool>("ConstLines"))
             {
                 PointF p1, p2;
                 CrdsHorizontal h1, h2;
+                penConLine.Brush = new SolidBrush(map.GetColor(settings.Get<SkyColor>("ColorConstLines")));
+
                 foreach (var line in ConLines)
                 {
                     h1 = allStars.ElementAt(line.Item1).Horizontal;
@@ -73,7 +76,7 @@ namespace Planetarium.Plugins.BrightStars
                 }
             }
 
-            if (settings.Get<bool>("Stars"))
+            if (settings.Get<bool>("Stars") && !(map.Schema == ColorSchema.Day && map.DayLightFactor == 1))
             {
                 var stars = allStars.Where(s => s != null && Angle.Separation(map.Center, s.Horizontal) < map.ViewAngle * coeff);
                 if (isGround)
@@ -89,7 +92,7 @@ namespace Planetarium.Plugins.BrightStars
                         PointF p = map.Project(star.Horizontal);
                         if (!map.IsOutOfScreen(p))
                         {
-                            g.FillEllipse(GetColor(star.Color), p.X - diam / 2, p.Y - diam / 2, diam, diam);                                
+                            g.FillEllipse(GetColor(map, star.Color), p.X - diam / 2, p.Y - diam / 2, diam, diam);                                
                             map.AddDrawnObject(star);
                         }
                     }
@@ -113,8 +116,11 @@ namespace Planetarium.Plugins.BrightStars
             }
         }
 
-        private Brush GetColor(char spClass)
+        private Brush GetColor(IMapContext map, char spClass)
         {
+            if (map.Schema == ColorSchema.White)
+                return Brushes.Black;
+
             switch (spClass)
             {
                 case 'O':

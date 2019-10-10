@@ -42,7 +42,11 @@ namespace Planetarium.Plugins.MilkyWay
                 {
                     var smoothing = map.Graphics.SmoothingMode;
                     map.Graphics.SmoothingMode = SmoothingMode.None;
-                    alpha = (int)(alpha * (1 - map.DayLightFactor));
+
+                    if (map.Schema == ColorSchema.Day)
+                    {
+                        alpha = (int)(alpha * (1 - map.DayLightFactor));
+                    }
 
                     for (int i = 0; i < milkyWayCalc.MilkyWay.Count(); i++)
                     {

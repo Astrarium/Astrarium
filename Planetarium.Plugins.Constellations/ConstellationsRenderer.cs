@@ -14,9 +14,6 @@ namespace Planetarium.Plugins.Constellations
         private readonly ISettings settings;
         private readonly Func<string, Constellation> GetConstellation;
 
-        private Pen penBorder = new Pen(Color.FromArgb(64, 32, 32));
-        private Brush brushLabel = new SolidBrush(Color.FromArgb(64, 32, 32));
-
         public ConstellationsRenderer(ConstellationsCalc constellationsCalc, ISky sky, ISettings settings)
         {
             this.constellationsCalc = constellationsCalc;
@@ -48,6 +45,8 @@ namespace Planetarium.Plugins.Constellations
             var borders = constellationsCalc.ConstBorders;
             bool isGround = settings.Get<bool>("Ground");
             double coeff = map.DiagonalCoefficient();
+
+            Pen penBorder = new Pen(map.GetColor(settings.Get<SkyColor>("ColorConstBorders")));
 
             foreach (var block in borders)
             {
@@ -89,6 +88,7 @@ namespace Planetarium.Plugins.Constellations
             int fontSize = Math.Min((int)(800 / map.ViewAngle), 32);
             Font font = new Font(FontFamily.GenericSansSerif, fontSize);
             LabelType labelType = settings.Get<LabelType>("ConstLabelsType");
+            Brush brushLabel = new SolidBrush(map.GetColor(settings.Get<SkyColor>("ColorConstLabels")));
 
             foreach (var c in constellations)
             {

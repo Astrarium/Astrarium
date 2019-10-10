@@ -30,6 +30,10 @@ namespace Planetarium.Plugins.SolarSystem
                 Longitude = 283
             }, "Planets", typeof(GRSSettingControl), s => s.Get<bool>("Planets")));
 
+            // Colors
+
+            AddSetting(new SettingItem("ColorSun", new SkyColor() { Night = Color.FromArgb(250, 210, 10), Day = Color.FromArgb(255, 255, 200), White = Color.White, Red = Color.FromArgb(100, 0, 0) }));
+
             #endregion Settings
 
             AddToolbarItem(new ToolbarButton(Text.Get("Settings.Planets"), "IconPlanet", settings, "Planets", "Objects"));

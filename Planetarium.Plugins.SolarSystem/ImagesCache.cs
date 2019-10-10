@@ -29,6 +29,11 @@ namespace Planetarium.Renderers
             worker.Start();
         }
 
+        public void Clear()
+        {
+            cache.Clear();
+        }
+
         public Image RequestImage<T>(string key, T token, Func<T, Image> getImage, Action onComplete = null)
         {
             if (cache.ContainsKey(key))

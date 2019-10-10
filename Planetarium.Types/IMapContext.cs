@@ -152,12 +152,24 @@ namespace Planetarium.Types
             // current magnitude limit
             float mag0 = map.MagLimit;
 
+            float size;
             if (mag > mag0)
-                return 0;
+                size = 0;
             else if (maxDrawingSize != 0)
-                return Math.Min(maxDrawingSize, mag0 - mag);
+                size = Math.Min(maxDrawingSize, mag0 - mag);
             else
-                return mag0 - mag;
+                size = mag0 - mag;
+            
+            if (map.Schema == ColorSchema.Day)
+            {
+                size *= 1 - map.DayLightFactor;
+            }
+            else if (map.Schema == ColorSchema.White)
+            {
+                size *= 2;
+            }
+
+            return size;
         }
 
         /// <summary>

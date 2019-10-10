@@ -28,8 +28,6 @@ namespace Planetarium.Plugins.SolarSystem
         private Font fontLabel = new Font("Arial", 8);
         private Font fontShadowLabel = new Font("Arial", 8);
 
-        private Pen penSun = new Pen(Color.FromArgb(250, 210, 10));
-        private Brush brushShadow = new SolidBrush(Color.FromArgb(200, 0, 0, 0));
         private Brush brushLabel = Brushes.DimGray;
 
         private static Color clrShadow = Color.FromArgb(10, 10, 10);
@@ -123,25 +121,28 @@ namespace Planetarium.Plugins.SolarSystem
 
                 float size = map.GetDiskSize(sun.Semidiameter, 10);
 
-                if (useTextures && size > 10)
+                SkyColor colorSun = settings.Get<SkyColor>("ColorSun");
+
+                if (map.Schema == ColorSchema.Night && useTextures && size > 10)
                 {
                     Date date = new Date(map.JulianDay);
                     DateTime dt = new DateTime(date.Year, date.Month, (int)date.Day, 0, 0, 0, DateTimeKind.Utc);
-
+                    Brush brushSun = new SolidBrush(colorSun.Night);
                     Image imageSun = imagesCache.RequestImage("Sun", dt, SunImageProvider, map.Redraw);
+                    map.Graphics.FillEllipse(brushSun, -size / 2, -size / 2, size, size);
                     if (imageSun != null)
                     {
-                        map.Graphics.FillEllipse(penSun.Brush, -size / 2, -size / 2, size, size);
                         map.Graphics.DrawImage(imageSun, -size / 2, -size / 2, size, size);
-                    }
-                    else
-                    {
-                        map.Graphics.FillEllipse(penSun.Brush, -size / 2, -size / 2, size, size);
                     }
                 }
                 else
                 {
-                    map.Graphics.FillEllipse(penSun.Brush, -size / 2, -size / 2, size, size);
+                    Brush brushSun = new SolidBrush(map.GetColor(colorSun));
+                    map.Graphics.FillEllipse(brushSun, -size / 2, -size / 2, size, size);
+                    if (map.Schema == ColorSchema.White)
+                    {
+                        map.Graphics.DrawEllipse(new Pen(Color.Black, 1), -size / 2, -size / 2, size, size);
+                    }
                 }
 
                 map.Graphics.ResetTransform();
@@ -181,7 +182,7 @@ namespace Planetarium.Plugins.SolarSystem
 
                 if (useTextures && size > 10)
                 {
-                    Image textureMoon = imagesCache.RequestImage("Moon", new LonLatShift("Moon", moon.Libration.l, moon.Libration.b), MoonTextureProvider, map.Redraw);
+                    Image textureMoon = imagesCache.RequestImage("Moon", new PlanetTextureToken("Moon", moon.Libration.l, moon.Libration.b), MoonTextureProvider, map.Redraw);
                     if (textureMoon != null)
                     {
                         map.Graphics.FillEllipse(Brushes.Gray, -size / 2, -size / 2, size, size);
@@ -207,12 +208,17 @@ namespace Planetarium.Plugins.SolarSystem
                 // shadowed part of disk
                 map.Graphics.TranslateTransform(p.X, p.Y);
                 map.Graphics.RotateTransform(rotation);
-                map.Graphics.FillPath(brushShadow, shadow);
+                map.Graphics.FillPath(GetShadowBrush(map), shadow);
                 map.Graphics.ResetTransform();
 
                 map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, size);
                 map.AddDrawnObject(moon);
             }
+        }
+
+        private Brush GetShadowBrush(IMapContext map)
+        {
+            return new SolidBrush(Color.FromArgb(220, map.GetColor(settings.Get<SkyColor>("ColorSky"))));
         }
 
         private void RenderEarthShadow(IMapContext map, Moon moon)
@@ -419,7 +425,7 @@ namespace Planetarium.Plugins.SolarSystem
 
                         g.TranslateTransform(p.X, p.Y);
                         g.RotateTransform(rotation);
-                        g.FillPath(brushShadow, shadow);
+                        g.FillPath(GetShadowBrush(map), shadow);
                         g.ResetTransform();
                     }
                     
@@ -491,11 +497,11 @@ namespace Planetarium.Plugins.SolarSystem
 
                         if (useTextures)
                         {
-                            Image texture = imagesCache.RequestImage($"5-{moon.Number}", new LonLatShift($"5-{moon.Number}", moon.CM, jupiter.Appearance.D), PlanetTextureProvider, map.Redraw);
+                            Image texture = imagesCache.RequestImage($"5-{moon.Number}", new PlanetTextureToken($"5-{moon.Number}", moon.CM, jupiter.Appearance.D), PlanetTextureProvider, map.Redraw);
                             if (texture != null)
                             {
                                 map.Graphics.DrawImage(texture, -diam / 2 * 1.01f, -diam / 2 * 1.01f, diam * 1.01f, diam * 1.01f);
-                                Image textureVolume = imagesCache.RequestImage("volume", 0, VolumeTextureProvider, map.Redraw);
+                                Image textureVolume = imagesCache.RequestImage("volume", map.GetColor(settings.Get<SkyColor>("ColorSky")), VolumeTextureProvider, map.Redraw);
                                 if (textureVolume != null)
                                 {
                                     map.Graphics.DrawImage(textureVolume, -diam / 2 * 1.01f, -diam / 2 * 1.01f, diam * 1.01f, diam * 1.01f);
@@ -671,7 +677,7 @@ namespace Planetarium.Plugins.SolarSystem
                                 PointF[] points = new PointF[] { new PointF(p.X, p.Y) };
                                 map.Graphics.TransformPoints(CoordinateSpace.Page, CoordinateSpace.World, points);
                                 map.Graphics.ResetTransform();
-                                map.DrawObjectCaption(fontShadowLabel, brushShadowLabel, Text.Get(moon.ShadowName), points[0], szP);
+                                map.DrawObjectCaption(fontShadowLabel, brushShadowLabel, moon.ShadowName, points[0], szP);
                             }
                         }
                     }
@@ -714,13 +720,13 @@ namespace Planetarium.Plugins.SolarSystem
             if (useTextures)
             {
                 double grs = planet.Number == Planet.JUPITER ? planetsCalc.GreatRedSpotLongitude : 0;
-                Image texturePlanet = imagesCache.RequestImage(planet.Number.ToString(), new LonLatShift(planet.Number.ToString(), planet.Appearance.CM - grs, planet.Appearance.D), PlanetTextureProvider, map.Redraw);
+                Image texturePlanet = imagesCache.RequestImage(planet.Number.ToString(), new PlanetTextureToken(planet.Number.ToString(), planet.Appearance.CM - grs, planet.Appearance.D), PlanetTextureProvider, map.Redraw);
 
                 if (texturePlanet != null)
                 {
                     g.DrawImage(texturePlanet, -diamEquat / 2 * 1.01f, -diamPolar / 2 * 1.01f, diamEquat * 1.01f, diamPolar * 1.01f);
 
-                    Image textureVolume = imagesCache.RequestImage("volume", 0, VolumeTextureProvider, map.Redraw);
+                    Image textureVolume = imagesCache.RequestImage("volume", map.GetColor(settings.Get<SkyColor>("ColorSky")), VolumeTextureProvider, map.Redraw);
                     if (textureVolume != null)
                     {
                         g.DrawImage(textureVolume, -diamEquat / 2 * 1.01f, -diamPolar / 2 * 1.01f, diamEquat * 1.01f, diamPolar * 1.01f);
@@ -739,7 +745,7 @@ namespace Planetarium.Plugins.SolarSystem
             }
         }
 
-        private Image PlanetTextureProvider(LonLatShift token)
+        private Image PlanetTextureProvider(PlanetTextureToken token)
         {
             return sphereRenderer.Render(new RendererOptions()
             {
@@ -750,7 +756,7 @@ namespace Planetarium.Plugins.SolarSystem
             });
         }
 
-        private Image VolumeTextureProvider(int token)
+        private Image VolumeTextureProvider(Color color)
         {
             float diam = 1024;
             Image texture = new Bitmap((int)diam, (int)diam, PixelFormat.Format32bppArgb);
@@ -763,7 +769,7 @@ namespace Planetarium.Plugins.SolarSystem
 
                     PathGradientBrush brushVolume = new PathGradientBrush(gpVolume);
                     brushVolume.CenterPoint = new PointF(diam / 2, diam / 2);
-                    brushVolume.CenterColor = Color.Black;
+                    brushVolume.CenterColor = color;
                     brushVolume.SetSigmaBellShape(0.3f, 1);
 
                     List<Color> clrs = new List<Color>();
@@ -780,7 +786,7 @@ namespace Planetarium.Plugins.SolarSystem
             return texture;
         }
 
-        private Image MoonTextureProvider(LonLatShift token)
+        private Image MoonTextureProvider(PlanetTextureToken token)
         {
             return sphereRenderer.Render(new RendererOptions()
             {
@@ -795,7 +801,7 @@ namespace Planetarium.Plugins.SolarSystem
         {
             string template = settings.Get<string>("SunTexturePath");
             string format = Regex.Replace(template, "{([^}]*)}", match => "{0:" + match.Groups[1].Value + "}");
-            string url = string.Format(format, date);// ;
+            string url = string.Format(format, date);
             return solarTextureDownloader.Download(url);
         }
 
@@ -906,14 +912,14 @@ namespace Planetarium.Plugins.SolarSystem
             return gp;
         }
         
-        private struct LonLatShift
+        private struct PlanetTextureToken
         {
             public string TextureName { get; private set; }
             public double Longitude { get; private set; }
             public double Latitude { get; private set; }
             public double Flattening { get; private set; }
 
-            public LonLatShift(string name, double longitude, double latitude, double flattening = 1)
+            public PlanetTextureToken(string name, double longitude, double latitude, double flattening = 1)
             {
                 TextureName = name;
                 Longitude = longitude;
@@ -923,10 +929,10 @@ namespace Planetarium.Plugins.SolarSystem
 
             public override bool Equals(object obj)
             {
-                if (obj is LonLatShift)
+                if (obj is PlanetTextureToken)
                 {
-                    LonLatShift other = (LonLatShift)obj;
-                    return
+                    PlanetTextureToken other = (PlanetTextureToken)obj;
+                    return                        
                         Math.Abs(Longitude - other.Longitude) < 1 &&
                         Math.Abs(Latitude - other.Latitude) < 1;
                 }

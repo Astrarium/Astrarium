@@ -26,7 +26,7 @@ namespace Planetarium.Config
             Add(new SettingItem("ObserverLocation", new CrdsGeographical(-44, 56.3333, +3, 80, "Europe/Moscow", "Nizhny Novgorod")));
 
             // Default color schema
-            Add(new SettingItem("Schema", ColorSchema.Night));
+            Add(new SettingItem("Schema", ColorSchema.Night, "Colors"));
 
             // Sky colors
             Add(new SettingItem("ColorSky", new SkyColor() { Night = Color.Black, Day = Color.FromArgb(116, 184, 254), Red = Color.Black, White = Color.White }));
