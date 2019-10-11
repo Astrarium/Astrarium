@@ -22,8 +22,8 @@ namespace Planetarium.Plugins.Constellations
             
             AddSetting(new SettingItem("ConstBorders", true, "Constellations"));
 
-            AddSetting(new SettingItem("ColorConstBorders", new SkyColor() { Night = Color.FromArgb(64, 32, 32), Day = Color.FromArgb(146, 200, 255), Red = Color.FromArgb(100, 0, 0), White = Color.FromArgb(100, 100, 100) }));
-            AddSetting(new SettingItem("ColorConstLabels", new SkyColor() { Night = Color.FromArgb(64, 32, 32), Day = Color.FromArgb(146, 200, 255), Red = Color.FromArgb(100, 0, 0), White = Color.FromArgb(100, 100, 100) }));
+            AddSetting(new SettingItem("ColorConstBorders", new SkyColor() { Night = Color.FromArgb(64, 32, 32), Day = Color.FromArgb(146, 200, 255), White = Color.FromArgb(150, 150, 150) }));
+            AddSetting(new SettingItem("ColorConstLabels", new SkyColor() { Night = Color.FromArgb(64, 32, 32), Day = Color.FromArgb(146, 200, 255), White = Color.FromArgb(150, 150, 150) }));
             
             #endregion Settings
 

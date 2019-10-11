@@ -11,6 +11,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace Planetarium.Plugins.SolarSystem
@@ -27,8 +28,7 @@ namespace Planetarium.Plugins.SolarSystem
 
         private Font fontLabel = new Font("Arial", 8);
         private Font fontShadowLabel = new Font("Arial", 8);
-
-        private Brush brushLabel = Brushes.DimGray;
+        private Brush brushLabel;
 
         private static Color clrShadow = Color.FromArgb(10, 10, 10);
         private Color clrPenumbraTransp = Color.Transparent;
@@ -68,6 +68,8 @@ namespace Planetarium.Plugins.SolarSystem
 
         public override void Render(IMapContext map)
         {
+            brushLabel = new SolidBrush(map.GetColor(settings.Get<SkyColor>("ColorSolarSystemLabel")));
+
             Sun sun = solarCalc.Sun;
             Moon moon = lunarCalc.Moon;
 
@@ -108,6 +110,13 @@ namespace Planetarium.Plugins.SolarSystem
             bool useTextures = settings.Get<bool>("SunTexture");
             double ad = Angle.Separation(sun.Horizontal, map.Center);
             double coeff = map.DiagonalCoefficient();
+            SkyColor colorSun = settings.Get<SkyColor>("ColorSun");
+            Color clrSun = map.GetColor(colorSun);
+
+            if (map.Schema == ColorSchema.Day)
+            {
+                DrawHalo(map, sun, clrSun);
+            }
 
             if ((!isGround || sun.Horizontal.Altitude + sun.Semidiameter / 3600 > 0) && 
                 ad < coeff * map.ViewAngle + sun.Semidiameter / 3600)
@@ -120,8 +129,6 @@ namespace Planetarium.Plugins.SolarSystem
                 map.Graphics.RotateTransform(inc);
 
                 float size = map.GetDiskSize(sun.Semidiameter, 10);
-
-                SkyColor colorSun = settings.Get<SkyColor>("ColorSun");
 
                 if (map.Schema == ColorSchema.Night && useTextures && size > 10)
                 {
@@ -137,7 +144,7 @@ namespace Planetarium.Plugins.SolarSystem
                 }
                 else
                 {
-                    Brush brushSun = new SolidBrush(map.GetColor(colorSun));
+                    Brush brushSun = new SolidBrush(clrSun);
                     map.Graphics.FillEllipse(brushSun, -size / 2, -size / 2, size, size);
                     if (map.Schema == ColorSchema.White)
                     {
@@ -153,6 +160,28 @@ namespace Planetarium.Plugins.SolarSystem
                 }
 
                 map.AddDrawnObject(sun);
+            }
+        }
+
+        private void DrawHalo(IMapContext map, Sun sun, Color colorSun)
+        {
+            int size = (int)(Math.Sin(Angle.ToRadians(Math.Min(90, 10 * sun.Horizontal.Altitude))) * 100);
+            if (!settings.Get<bool>("Ground"))
+            {
+                size = 200;
+            }
+
+            if (size > 0)
+            {
+                using (var halo = new GraphicsPath())
+                {
+                    PointF p = map.Project(sun.Horizontal);                  
+                    halo.AddEllipse(p.X - size, p.Y - size, 2 * size, 2 * size);
+                    var brush = new PathGradientBrush(halo);
+                    brush.CenterColor = colorSun;
+                    brush.SurroundColors = new Color[] { Color.Transparent };
+                    map.Graphics.FillPath(brush, halo);
+                }
             }
         }
 

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Planetarium.Types
 {
     /// <summary>
-    /// Holds 4 colors used to draw objects on sky map.
+    /// Holds 3 colors used to draw objects on sky map.
     /// Each color corresponds to own color schema (see <see cref="ColorSchema"/>).
     /// Current value of color schema can be obtained from <see cref="IMapContext.Schema"/>.
     /// </summary>
@@ -23,11 +23,6 @@ namespace Planetarium.Types
         /// Color for <see cref="ColorSchema.Day"/>
         /// </summary>
         public Color Day { get; set; }
-
-        /// <summary>
-        /// Color for <see cref="ColorSchema.Red"/>
-        /// </summary>
-        public Color Red { get; set; }
 
         /// <summary>
         /// Color for <see cref="ColorSchema.White"/>
@@ -49,7 +44,6 @@ namespace Planetarium.Types
         {
             Night = Color.FromArgb(alpha, other.Night);
             Day = Color.FromArgb(alpha, other.Day);
-            Red = Color.FromArgb(alpha, other.Red);
             White = Color.FromArgb(alpha, other.White);
         }
     }

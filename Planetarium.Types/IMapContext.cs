@@ -298,12 +298,18 @@ namespace Planetarium.Types
                 case ColorSchema.Night:
                     return color.Night;
                 case ColorSchema.Red:
-                    return color.Red;
+                    return map.GetNightModeColor(color.Night);
                 case ColorSchema.White:
                     return color.White;
                 case ColorSchema.Day:
                     return map.GetDayNightColor(color.Night, color.Day);
             }
+        }
+
+        private static Color GetNightModeColor(this IMapContext map, Color night)
+        {
+            int red = (int)(0.299 * night.R + 0.587 * night.G + 0.114 * night.B);
+            return Color.FromArgb(night.A, red, 0, 0);
         }
 
         private static Color GetDayNightColor(this IMapContext map, Color night, Color day)

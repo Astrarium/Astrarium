@@ -32,7 +32,8 @@ namespace Planetarium.Plugins.SolarSystem
 
             // Colors
 
-            AddSetting(new SettingItem("ColorSun", new SkyColor() { Night = Color.FromArgb(250, 210, 10), Day = Color.FromArgb(255, 255, 200), White = Color.White, Red = Color.FromArgb(100, 0, 0) }));
+            AddSetting(new SettingItem("ColorSun", new SkyColor() { Night = Color.FromArgb(250, 210, 10), Day = Color.FromArgb(255, 255, 200), White = Color.White }));
+            AddSetting(new SettingItem("ColorSolarSystemLabel", new SkyColor() { Night = Color.DimGray, Day = Color.FromArgb(255, 255, 255), White = Color.DimGray }));
 
             #endregion Settings
 

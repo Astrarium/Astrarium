@@ -22,6 +22,7 @@ namespace Planetarium.Plugins.BrightStars
 
         private Font fontStarNames;
         private Pen penConLine;
+        private SkyColor starColor;
         private Brush brushStarNames;
 
         private const int limitAllNames = 40;
@@ -38,8 +39,7 @@ namespace Planetarium.Plugins.BrightStars
             fontStarNames = new Font("Arial", 8);
             penConLine = new Pen(new SolidBrush(Color.Transparent));
             penConLine.DashStyle = DashStyle.Dot;
-
-            brushStarNames = new SolidBrush(Color.FromArgb(64, 64, 64));
+            starColor = new SkyColor() { Night = Color.White, Day = Color.Transparent, White = Color.Black };
         }
 
         public override void Render(IMapContext map)
@@ -92,7 +92,13 @@ namespace Planetarium.Plugins.BrightStars
                         PointF p = map.Project(star.Horizontal);
                         if (!map.IsOutOfScreen(p))
                         {
-                            g.FillEllipse(GetColor(map, star.Color), p.X - diam / 2, p.Y - diam / 2, diam, diam);                                
+                            if (map.Schema == ColorSchema.White)
+                            {
+                                g.FillEllipse(Brushes.White, p.X - diam / 2 - 1, p.Y - diam / 2 - 1, diam + 2, diam + 2);
+                            }
+
+                            g.FillEllipse(new SolidBrush(GetColor(map, star.Color)), p.X - diam / 2, p.Y - diam / 2, diam, diam);;
+
                             map.AddDrawnObject(star);
                         }
                     }
@@ -100,6 +106,8 @@ namespace Planetarium.Plugins.BrightStars
 
                 if (settings.Get<bool>("StarsLabels") && map.ViewAngle <= limitAllNames)
                 {
+                    brushStarNames = new SolidBrush(map.GetColor(settings.Get<SkyColor>("ColorStarsLabels")));
+
                     foreach (var star in stars)
                     {
                         float diam = map.GetPointSize(star.Mag);
@@ -116,31 +124,37 @@ namespace Planetarium.Plugins.BrightStars
             }
         }
 
-        private Brush GetColor(IMapContext map, char spClass)
+        private Color GetColor(IMapContext map, char spClass)
         {
-            if (map.Schema == ColorSchema.White)
-                return Brushes.Black;
-
             switch (spClass)
             {
                 case 'O':
                 case 'W':
-                    return Brushes.LightBlue;
+                    starColor.Night = Color.LightBlue;
+                    break;
                 case 'B':
-                    return Brushes.LightCyan;
+                    starColor.Night = Color.LightCyan;
+                    break;
                 case 'A':
-                    return Brushes.White;
+                    starColor.Night = Color.White;
+                    break;
                 case 'F':
-                    return Brushes.LightYellow;
+                    starColor.Night = Color.LightYellow;
+                    break;
                 case 'G':
-                    return Brushes.Yellow;
+                    starColor.Night = Color.Yellow;
+                    break;
                 case 'K':
-                    return Brushes.Orange;
+                    starColor.Night = Color.Orange;
+                    break;
                 case 'M':
-                    return Brushes.OrangeRed;
+                    starColor.Night = Color.OrangeRed;
+                    break;
                 default:
-                    return Brushes.White;
+                    starColor.Night = Color.White;
+                    break;
             }
+            return map.GetColor(starColor);
         }
 
         /// <summary>
@@ -148,6 +162,8 @@ namespace Planetarium.Plugins.BrightStars
         /// </summary>
         private void DrawStarName(IMapContext map, PointF point, Star s, float diam)
         {
+
+
             // Star has proper name
             if (map.ViewAngle < limitProperNames && settings.Get<bool>("StarsProperNames") && s.ProperName != null)
             {
