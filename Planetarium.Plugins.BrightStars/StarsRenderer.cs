@@ -126,6 +126,11 @@ namespace Planetarium.Plugins.BrightStars
 
         private Color GetColor(IMapContext map, char spClass)
         {
+            if (map.Schema == ColorSchema.White)
+            {
+                return Color.Black;
+            }
+
             switch (spClass)
             {
                 case 'O':

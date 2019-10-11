@@ -171,14 +171,16 @@ namespace Planetarium.Plugins.SolarSystem
                 size = 200;
             }
 
-            if (size > 0)
+            int alpha = (int)(Angle.ToRadians(Math.Min(90, sun.Horizontal.Altitude)) * 255);
+
+            if (size > 0 && alpha > 0)
             {
                 using (var halo = new GraphicsPath())
                 {
                     PointF p = map.Project(sun.Horizontal);                  
                     halo.AddEllipse(p.X - size, p.Y - size, 2 * size, 2 * size);
                     var brush = new PathGradientBrush(halo);
-                    brush.CenterColor = colorSun;
+                    brush.CenterColor = Color.FromArgb(alpha, colorSun);
                     brush.SurroundColors = new Color[] { Color.Transparent };
                     map.Graphics.FillPath(brush, halo);
                 }
