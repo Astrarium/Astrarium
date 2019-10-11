@@ -21,10 +21,11 @@ namespace Planetarium.Plugins.SolarSystem
     /// </summary>
     public class SolarSystemRenderer : BaseRenderer
     {
-        private readonly SolarCalc solarCalc;
-        private readonly LunarCalc lunarCalc;
         private readonly PlanetsCalc planetsCalc;
         private readonly ISettings settings;
+
+        private readonly Sun sun;
+        private readonly Moon moon;
 
         private Font fontLabel = new Font("Arial", 8);
         private Font fontShadowLabel = new Font("Arial", 8);
@@ -56,9 +57,10 @@ namespace Planetarium.Plugins.SolarSystem
 
         public SolarSystemRenderer(LunarCalc lunarCalc, SolarCalc solarCalc, PlanetsCalc planetsCalc, SolarTextureDownloader solarTextureDownloader, ISettings settings)
         {
-            this.solarCalc = solarCalc;
-            this.lunarCalc = lunarCalc;
             this.planetsCalc = planetsCalc;
+            this.sun = solarCalc.Sun;
+            this.moon = lunarCalc.Moon;
+
             this.solarTextureDownloader = solarTextureDownloader;
             this.settings = settings;
             penShadowOutline.DashStyle = DashStyle.Dot;
@@ -69,9 +71,6 @@ namespace Planetarium.Plugins.SolarSystem
         public override void Render(IMapContext map)
         {
             brushLabel = new SolidBrush(map.GetColor(settings.Get<SkyColor>("ColorSolarSystemLabel")));
-
-            Sun sun = solarCalc.Sun;
-            Moon moon = lunarCalc.Moon;
 
             // Flag indicated Sun is already rendered
             bool isSunRendered = false;
@@ -85,7 +84,7 @@ namespace Planetarium.Plugins.SolarSystem
             {
                 if (!isSunRendered && p.Ecliptical.Distance < sun.Ecliptical.Distance)
                 {
-                    RenderSun(map, sun);
+                    RenderSun(map);
                     isSunRendered = true;
                 }
 
@@ -93,16 +92,22 @@ namespace Planetarium.Plugins.SolarSystem
 
                 if (!isSunRendered)
                 {
-                    RenderSun(map, sun);
+                    RenderSun(map);
                     isSunRendered = true;
                 }
             }
 
-            RenderMoon(map, moon);
-            RenderEarthShadow(map, moon);
+            RenderMoon(map);
+
+            if (map.Schema == ColorSchema.Day)
+            {
+                DrawHalo(map);
+            }
+
+            RenderEarthShadow(map);
         }
 
-        private void RenderSun(IMapContext map, Sun sun)
+        private void RenderSun(IMapContext map)
         {
             if (!settings.Get<bool>("Sun")) return;
 
@@ -112,11 +117,6 @@ namespace Planetarium.Plugins.SolarSystem
             double coeff = map.DiagonalCoefficient();
             SkyColor colorSun = settings.Get<SkyColor>("ColorSun");
             Color clrSun = map.GetColor(colorSun);
-
-            if (map.Schema == ColorSchema.Day)
-            {
-                DrawHalo(map, sun, clrSun);
-            }
 
             if ((!isGround || sun.Horizontal.Altitude + sun.Semidiameter / 3600 > 0) && 
                 ad < coeff * map.ViewAngle + sun.Semidiameter / 3600)
@@ -163,31 +163,28 @@ namespace Planetarium.Plugins.SolarSystem
             }
         }
 
-        private void DrawHalo(IMapContext map, Sun sun, Color colorSun)
+        private void DrawHalo(IMapContext map)
         {
-            int size = (int)(Math.Sin(Angle.ToRadians(Math.Min(90, 10 * sun.Horizontal.Altitude))) * 100);
-            if (!settings.Get<bool>("Ground"))
-            {
-                size = 200;
-            }
+            int alpha = (int)(map.DayLightFactor * 255);
+            int size = (int)(map.DayLightFactor * 100);
 
-            int alpha = (int)(Angle.ToRadians(Math.Min(90, sun.Horizontal.Altitude)) * 255);
-
-            if (size > 0 && alpha > 0)
+            if (settings.Get<bool>("Ground") && size > 0 && alpha > 0)
             {
                 using (var halo = new GraphicsPath())
                 {
+                    SkyColor colorSun = settings.Get<SkyColor>("ColorSun");
+                    Color clrSun = map.GetColor(colorSun);
                     PointF p = map.Project(sun.Horizontal);                  
                     halo.AddEllipse(p.X - size, p.Y - size, 2 * size, 2 * size);
                     var brush = new PathGradientBrush(halo);
-                    brush.CenterColor = Color.FromArgb(alpha, colorSun);
+                    brush.CenterColor = Color.FromArgb(alpha, clrSun);
                     brush.SurroundColors = new Color[] { Color.Transparent };
                     map.Graphics.FillPath(brush, halo);
                 }
             }
         }
 
-        private void RenderMoon(IMapContext map, Moon moon)
+        private void RenderMoon(IMapContext map)
         {
             bool isGround = settings.Get<bool>("Ground");
             bool useTextures = settings.Get<bool>("UseTextures");
@@ -252,7 +249,7 @@ namespace Planetarium.Plugins.SolarSystem
             return new SolidBrush(Color.FromArgb(220, map.GetColor(settings.Get<SkyColor>("ColorSky"))));
         }
 
-        private void RenderEarthShadow(IMapContext map, Moon moon)
+        private void RenderEarthShadow(IMapContext map)
         {
             // here and below suffixes meanings are: "M" = Moon, "P" = penumbra, "U" = umbra
 
