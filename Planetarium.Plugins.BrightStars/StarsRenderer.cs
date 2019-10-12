@@ -22,7 +22,7 @@ namespace Planetarium.Plugins.BrightStars
 
         private Font fontStarNames;
         private Pen penConLine;
-        private SkyColor starColor;
+        private Color starColor;
         private Brush brushStarNames;
 
         private const int limitAllNames = 40;
@@ -39,7 +39,7 @@ namespace Planetarium.Plugins.BrightStars
             fontStarNames = new Font("Arial", 8);
             penConLine = new Pen(new SolidBrush(Color.Transparent));
             penConLine.DashStyle = DashStyle.Dot;
-            starColor = new SkyColor() { Night = Color.White, Day = Color.Transparent, White = Color.Black };
+            starColor = Color.White;
         }
 
         public override void Render(IMapContext map)
@@ -53,7 +53,7 @@ namespace Planetarium.Plugins.BrightStars
             {
                 PointF p1, p2;
                 CrdsHorizontal h1, h2;
-                penConLine.Brush = new SolidBrush(map.GetColor(settings.Get<SkyColor>("ColorConstLines")));
+                penConLine.Brush = new SolidBrush(map.GetColor(settings.Get<Color>("ColorConstLines")));
 
                 foreach (var line in ConLines)
                 {
@@ -106,7 +106,7 @@ namespace Planetarium.Plugins.BrightStars
 
                 if (settings.Get<bool>("StarsLabels") && map.ViewAngle <= limitAllNames)
                 {
-                    brushStarNames = new SolidBrush(map.GetColor(settings.Get<SkyColor>("ColorStarsLabels")));
+                    brushStarNames = new SolidBrush(map.GetColor(settings.Get<Color>("ColorStarsLabels")));
 
                     foreach (var star in stars)
                     {
@@ -135,31 +135,31 @@ namespace Planetarium.Plugins.BrightStars
             {
                 case 'O':
                 case 'W':
-                    starColor.Night = Color.LightBlue;
+                    starColor = Color.LightBlue;
                     break;
                 case 'B':
-                    starColor.Night = Color.LightCyan;
+                    starColor = Color.LightCyan;
                     break;
                 case 'A':
-                    starColor.Night = Color.White;
+                    starColor = Color.White;
                     break;
                 case 'F':
-                    starColor.Night = Color.LightYellow;
+                    starColor = Color.LightYellow;
                     break;
                 case 'G':
-                    starColor.Night = Color.Yellow;
+                    starColor = Color.Yellow;
                     break;
                 case 'K':
-                    starColor.Night = Color.Orange;
+                    starColor = Color.Orange;
                     break;
                 case 'M':
-                    starColor.Night = Color.OrangeRed;
+                    starColor = Color.OrangeRed;
                     break;
                 default:
-                    starColor.Night = Color.White;
+                    starColor = Color.White;
                     break;
             }
-            return map.GetColor(starColor);
+            return map.GetColor(starColor, Color.Transparent);
         }
 
         /// <summary>
@@ -167,8 +167,6 @@ namespace Planetarium.Plugins.BrightStars
         /// </summary>
         private void DrawStarName(IMapContext map, PointF point, Star s, float diam)
         {
-
-
             // Star has proper name
             if (map.ViewAngle < limitProperNames && settings.Get<bool>("StarsProperNames") && s.ProperName != null)
             {

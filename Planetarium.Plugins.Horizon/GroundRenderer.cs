@@ -32,7 +32,7 @@ namespace Planetarium.Plugins.Horizon
                 const int POINTS_COUNT = 64;
                 PointF[] hor = new PointF[POINTS_COUNT];
                 double step = 2 * map.ViewAngle / (POINTS_COUNT - 1);
-                SolidBrush brushGround = new SolidBrush(map.GetColor(settings.Get<SkyColor>("ColorGround")));
+                SolidBrush brushGround = new SolidBrush(map.GetColor(settings.Get<Color>("ColorGround"), Color.FromArgb(116, 185, 139)));
 
                 // Bottom part of ground shape
 
@@ -104,7 +104,7 @@ namespace Planetarium.Plugins.Horizon
 
                 if (hor.Any(h => !map.IsOutOfScreen(h)))
                 {
-                    Pen penHorizonLine = new Pen(map.GetColor(settings.Get<SkyColor>("ColorHorizon")), 2);
+                    Pen penHorizonLine = new Pen(map.GetColor(settings.Get<Color>("ColorHorizon")), 2);
                     map.Graphics.DrawCurve(penHorizonLine, hor);
                 }
             }

@@ -106,7 +106,7 @@ namespace Planetarium.Plugins.Grids
 
             Color colorGridEquatorial = Color.FromArgb(200, 0, 64, 64);
             Color colorGridHorizontal = settings.Get<Color>("HorizontalGridColorNight");
-            Color colorLineEcliptic = map.GetColor(settings.Get<SkyColor>("ColorEcliptic"));
+            Color colorLineEcliptic = map.GetColor(settings.Get<Color>("ColorEcliptic"));
             Color colorLineGalactic = Color.FromArgb(200, 64, 0, 64);
 
             penGridEquatorial.Color = colorGridEquatorial;

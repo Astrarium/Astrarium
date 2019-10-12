@@ -290,20 +290,35 @@ namespace Planetarium.Types
             return crosses.ToArray();
         }
 
-        public static Color GetColor(this IMapContext map, SkyColor color)
+        public static Color GetColor(this IMapContext map, Color colorNight)
         {
             switch (map.Schema)
             {
                 default:
                 case ColorSchema.Night:
-                    return color.Night;
+                    return colorNight;
                 case ColorSchema.Red:
-                    return GetNightModeColor(color.Night);
+                    return GetNightModeColor(colorNight);
                 case ColorSchema.White:
-                    //return color.White;
-                    return GetWhiteMapColor(color.Night);
+                    return GetWhiteMapColor(colorNight);
                 case ColorSchema.Day:
-                    return GetDayNightColor(map.DayLightFactor, color.Night, color.Day);
+                    return GetDayNightColor(map.DayLightFactor, colorNight, GetDaylightColor(colorNight));
+            }
+        }
+
+        public static Color GetColor(this IMapContext map, Color colorNight, Color colorDay)
+        {
+            switch (map.Schema)
+            {
+                default:
+                case ColorSchema.Night:
+                    return colorNight;
+                case ColorSchema.Red:
+                    return GetNightModeColor(colorNight);
+                case ColorSchema.White:
+                    return GetWhiteMapColor(colorNight);
+                case ColorSchema.Day:
+                    return GetDayNightColor(map.DayLightFactor, colorNight, GetDaylightColor(colorDay));
             }
         }
 
@@ -317,6 +332,22 @@ namespace Planetarium.Types
         {
             int brightness = 255 - GetBrightness(night);
             return Color.FromArgb(night.A, brightness, brightness, brightness);
+        }
+
+        
+        private static Color COLOR_DAY_SKY = Color.FromArgb(116, 184, 255);
+
+        private static Color GetDaylightColor(Color night)
+        {
+            float brightness = GetBrightness(night) / 255f;
+
+            return Color.FromArgb(
+                (int)(COLOR_DAY_SKY.R + brightness * (255 - COLOR_DAY_SKY.R)),
+                (int)(COLOR_DAY_SKY.G + brightness * (255 - COLOR_DAY_SKY.G)),
+                (int)(COLOR_DAY_SKY.B + brightness * (255 - COLOR_DAY_SKY.B))
+                );
+
+            //return Color.FromArgb(night.A, brightness, brightness, brightness);
         }
 
         private static int GetBrightness(Color night)

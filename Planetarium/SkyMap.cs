@@ -215,58 +215,65 @@ namespace Planetarium
 
         public void Render(Graphics g)
         {
-            renderStopWatch.Restart();
-
-            mapContext.Graphics = g;
-
-            g.Clear(mapContext.GetColor(settings.Get<SkyColor>("ColorSky")));
-            g.PageUnit = GraphicsUnit.Display;
-            g.SmoothingMode = Antialias ? SmoothingMode.HighQuality : SmoothingMode.HighSpeed;
-            drawnObjects.Clear();
-            labels.Clear();
-
-            bool needDrawSelectedObject = true;
-
-            if (LockedObject != null)
+            try
             {
-                Center.Altitude = LockedObject.Horizontal.Altitude;
-                Center.Azimuth = LockedObject.Horizontal.Azimuth;
-            }
+                renderStopWatch.Restart();
 
-            for (int i = 0; i < renderers.Count(); i++)
-            {
-                renderers.ElementAt(i).Render(mapContext);
-                if (needDrawSelectedObject)
+                mapContext.Graphics = g;
+
+                g.Clear(mapContext.GetColor(settings.Get<Color>("ColorSky"), Color.FromArgb(116, 184, 255)));
+                g.PageUnit = GraphicsUnit.Display;
+                g.SmoothingMode = Antialias ? SmoothingMode.HighQuality : SmoothingMode.HighSpeed;
+                drawnObjects.Clear();
+                labels.Clear();
+
+                bool needDrawSelectedObject = true;
+
+                if (LockedObject != null)
                 {
-                    needDrawSelectedObject = !DrawSelectedObject(g);
+                    Center.Altitude = LockedObject.Horizontal.Altitude;
+                    Center.Azimuth = LockedObject.Horizontal.Azimuth;
                 }
+
+                for (int i = 0; i < renderers.Count(); i++)
+                {
+                    renderers.ElementAt(i).Render(mapContext);
+                    if (needDrawSelectedObject)
+                    {
+                        needDrawSelectedObject = !DrawSelectedObject(g);
+                    }
+                }
+
+                renderStopWatch.Stop();
+                rendersCount++;
+
+                int fps = (int)(1000f / renderStopWatch.ElapsedMilliseconds);
+
+                // Calculate mean time of rendering with Cumulative Moving Average formula
+                meanRenderTime = (renderStopWatch.ElapsedMilliseconds + rendersCount * meanRenderTime) / (rendersCount + 1);
+
+                // Locked object
+                if (LockedObject != null && IsDragging)
+                {
+                    var format = new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+                    string text = $"Map is locked on {LockedObject.Names.First()}";
+
+                    PointF center = new PointF(Width / 2, Height / 2);
+                    var size = g.MeasureString(text, fontLockMessage, center, format);
+                    int margin = 4;
+                    var box = new Rectangle((int)(center.X - size.Width / 2 - margin), (int)(center.Y - size.Height / 2 - margin), (int)size.Width + 2 * margin, (int)size.Height + 2 * margin);
+                    g.FillRectangle(new SolidBrush(Color.Black), box);
+                    g.DrawRectangle(new Pen(Color.FromArgb(100, Color.White)), box);
+                    g.DrawString(text, fontLockMessage, new SolidBrush(Color.White), center, format);
+                }
+
+                // Diagnostic info
+                g.DrawString($"FOV: {Formatters.MeasuredAngle.Format(ViewAngle)}\nMag limit: {Formatters.Magnitude.Format(MagLimit)}\nFPS: {fps}\nDaylight factor: {mapContext.DayLightFactor:F2}", fontDiagnosticText, Brushes.Red, new PointF(10, 10));
             }
-
-            renderStopWatch.Stop();
-            rendersCount++;
-
-            int fps = (int)(1000f / renderStopWatch.ElapsedMilliseconds);
-
-            // Calculate mean time of rendering with Cumulative Moving Average formula
-            meanRenderTime = (renderStopWatch.ElapsedMilliseconds + rendersCount * meanRenderTime) / (rendersCount + 1);
-
-            // Locked object
-            if (LockedObject != null && IsDragging)
+            catch (Exception ex)
             {
-                var format = new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                string text = $"Map is locked on {LockedObject.Names.First()}";
-
-                PointF center = new PointF(Width / 2, Height / 2);
-                var size = g.MeasureString(text, fontLockMessage, center, format);
-                int margin = 4;
-                var box = new Rectangle((int)(center.X - size.Width / 2 - margin), (int)(center.Y - size.Height / 2 - margin), (int)size.Width + 2 * margin, (int)size.Height + 2 * margin);
-                g.FillRectangle(new SolidBrush(Color.Black), box);
-                g.DrawRectangle(new Pen(Color.FromArgb(100, Color.White)), box);
-                g.DrawString(text, fontLockMessage, new SolidBrush(Color.White), center, format);
+                g.DrawString($"Error:\n{ex}", fontDiagnosticText, Brushes.Red, new RectangleF(10, 10, Width - 20, Height - 20));
             }
-
-            // Diagnostic info
-            g.DrawString($"FOV: {Formatters.MeasuredAngle.Format(ViewAngle)}\nMag limit: {Formatters.Magnitude.Format(MagLimit)}\nFPS: {fps}\nDaylight factor: {mapContext.DayLightFactor:F2}", fontDiagnosticText, Brushes.Red, new PointF(10, 10));
         }
 
         public void Invalidate()
