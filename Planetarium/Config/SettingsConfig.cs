@@ -21,9 +21,6 @@ namespace Planetarium.Config
 
             // Default color schema
             Add(new SettingItem("Schema", ColorSchema.Night, "Colors"));
-
-            // Sky colors
-            Add(new SettingItem("ColorSky", Color.Black));
         }
     }
 }

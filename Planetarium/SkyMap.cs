@@ -221,7 +221,7 @@ namespace Planetarium
 
                 mapContext.Graphics = g;
 
-                g.Clear(mapContext.GetColor(settings.Get<Color>("ColorSky"), Color.FromArgb(116, 184, 255)));
+                g.Clear(mapContext.GetSkyColor());
                 g.PageUnit = GraphicsUnit.Display;
                 g.SmoothingMode = Antialias ? SmoothingMode.HighQuality : SmoothingMode.HighSpeed;
                 drawnObjects.Clear();

@@ -31,9 +31,10 @@ namespace Planetarium.Plugins.SolarSystem
         private Font fontShadowLabel = new Font("Arial", 8);
         private Brush brushLabel;
 
-        private static Color colorSunDaylight = Color.FromArgb(255, 255, 200);
-
+        private readonly Color clrSunDaylight = Color.FromArgb(255, 255, 200);
+        private readonly Color clrSunNight = Color.FromArgb(250, 210, 10);
         private static Color clrShadow = Color.FromArgb(10, 10, 10);
+
         private Color clrPenumbraTransp = Color.Transparent;
         private Color clrPenumbraGrayLight = Color.FromArgb(100, clrShadow);
         private Color clrPenumbraGrayDark = Color.FromArgb(200, clrShadow);
@@ -118,8 +119,7 @@ namespace Planetarium.Plugins.SolarSystem
             double ad = Angle.Separation(sun.Horizontal, map.Center);
             double coeff = map.DiagonalCoefficient();
 
-            Color colorSunNight = settings.Get<Color>("ColorSun");
-            Color colorSun = map.GetColor(colorSunNight, colorSunDaylight);
+            Color colorSun = map.GetColor(clrSunNight, clrSunDaylight);
 
             if ((!isGround || sun.Horizontal.Altitude + sun.Semidiameter / 3600 > 0) && 
                 ad < coeff * map.ViewAngle + sun.Semidiameter / 3600)
@@ -137,7 +137,7 @@ namespace Planetarium.Plugins.SolarSystem
                 {
                     Date date = new Date(map.JulianDay);
                     DateTime dt = new DateTime(date.Year, date.Month, (int)date.Day, 0, 0, 0, DateTimeKind.Utc);
-                    Brush brushSun = new SolidBrush(colorSunNight);
+                    Brush brushSun = new SolidBrush(clrSunNight);
                     Image imageSun = imagesCache.RequestImage("Sun", dt, SunImageProvider, map.Redraw);
                     map.Graphics.FillEllipse(brushSun, -size / 2, -size / 2, size, size);
                     if (imageSun != null)
@@ -178,7 +178,7 @@ namespace Planetarium.Plugins.SolarSystem
                     PointF p = map.Project(sun.Horizontal);                  
                     halo.AddEllipse(p.X - size, p.Y - size, 2 * size, 2 * size);
                     var brush = new PathGradientBrush(halo);
-                    brush.CenterColor = Color.FromArgb(alpha, colorSunDaylight);
+                    brush.CenterColor = Color.FromArgb(alpha, clrSunDaylight);
                     brush.SurroundColors = new Color[] { Color.Transparent };
                     map.Graphics.FillPath(brush, halo);
                 }
@@ -247,7 +247,7 @@ namespace Planetarium.Plugins.SolarSystem
 
         private Brush GetShadowBrush(IMapContext map)
         {
-            return new SolidBrush(Color.FromArgb(220, map.GetColor(settings.Get<Color>("ColorSky"))));
+            return new SolidBrush(Color.FromArgb(220, map.GetSkyColor()));
         }
 
         private void RenderEarthShadow(IMapContext map)
@@ -530,7 +530,7 @@ namespace Planetarium.Plugins.SolarSystem
                             if (texture != null)
                             {
                                 map.Graphics.DrawImage(texture, -diam / 2 * 1.01f, -diam / 2 * 1.01f, diam * 1.01f, diam * 1.01f);
-                                Image textureVolume = imagesCache.RequestImage("volume", map.GetColor(settings.Get<Color>("ColorSky")), VolumeTextureProvider, map.Redraw);
+                                Image textureVolume = imagesCache.RequestImage("volume", map.GetSkyColor(), VolumeTextureProvider, map.Redraw);
                                 if (textureVolume != null)
                                 {
                                     map.Graphics.DrawImage(textureVolume, -diam / 2 * 1.01f, -diam / 2 * 1.01f, diam * 1.01f, diam * 1.01f);
@@ -755,7 +755,7 @@ namespace Planetarium.Plugins.SolarSystem
                 {
                     g.DrawImage(texturePlanet, -diamEquat / 2 * 1.01f, -diamPolar / 2 * 1.01f, diamEquat * 1.01f, diamPolar * 1.01f);
 
-                    Image textureVolume = imagesCache.RequestImage("volume", map.GetColor(settings.Get<Color>("ColorSky")), VolumeTextureProvider, map.Redraw);
+                    Image textureVolume = imagesCache.RequestImage("volume", map.GetSkyColor(), VolumeTextureProvider, map.Redraw);
                     if (textureVolume != null)
                     {
                         g.DrawImage(textureVolume, -diamEquat / 2 * 1.01f, -diamPolar / 2 * 1.01f, diamEquat * 1.01f, diamPolar * 1.01f);

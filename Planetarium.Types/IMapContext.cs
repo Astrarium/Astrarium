@@ -302,7 +302,7 @@ namespace Planetarium.Types
                 case ColorSchema.White:
                     return GetWhiteMapColor(colorNight);
                 case ColorSchema.Day:
-                    return GetDayNightColor(map.DayLightFactor, colorNight, GetDaylightColor(colorNight));
+                    return GetIntermediateColor(map.DayLightFactor, colorNight, GetDaylightColor(colorNight));
             }
         }
 
@@ -318,7 +318,7 @@ namespace Planetarium.Types
                 case ColorSchema.White:
                     return GetWhiteMapColor(colorNight);
                 case ColorSchema.Day:
-                    return GetDayNightColor(map.DayLightFactor, colorNight, GetDaylightColor(colorDay));
+                    return GetIntermediateColor(map.DayLightFactor, colorNight, colorDay);
             }
         }
 
@@ -334,7 +334,11 @@ namespace Planetarium.Types
             return Color.FromArgb(night.A, brightness, brightness, brightness);
         }
 
-        
+        public static Color GetSkyColor(this IMapContext map)
+        {
+            return map.GetColor(Color.Black);
+        }
+
         private static Color COLOR_DAY_SKY = Color.FromArgb(116, 184, 255);
 
         private static Color GetDaylightColor(Color night)
@@ -346,8 +350,6 @@ namespace Planetarium.Types
                 (int)(COLOR_DAY_SKY.G + brightness * (255 - COLOR_DAY_SKY.G)),
                 (int)(COLOR_DAY_SKY.B + brightness * (255 - COLOR_DAY_SKY.B))
                 );
-
-            //return Color.FromArgb(night.A, brightness, brightness, brightness);
         }
 
         private static int GetBrightness(Color night)
@@ -355,22 +357,22 @@ namespace Planetarium.Types
             return (int)(0.299 * night.R + 0.587 * night.G + 0.114 * night.B);
         }
 
-        private static Color GetDayNightColor(float factor, Color night, Color day)
+        private static Color GetIntermediateColor(float factor, Color from, Color to)
         {
             if (factor == 0)
-                return night;
+                return from;
             else if (factor == 1)
-                return day;
+                return to;
             else
             {
-                int rMax = day.R;
-                int rMin = night.R;
-                int gMax = day.G;
-                int gMin = night.G;
-                int bMax = day.B;
-                int bMin = night.B;
-                int aMax = day.A;
-                int aMin = night.A;
+                int rMax = to.R;
+                int rMin = from.R;
+                int gMax = to.G;
+                int gMin = from.G;
+                int bMax = to.B;
+                int bMin = from.B;
+                int aMax = to.A;
+                int aMin = from.A;
 
                 int a = aMin + (int)((aMax - aMin) * factor);
                 int r = rMin + (int)((rMax - rMin) * factor);
