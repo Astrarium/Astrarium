@@ -114,7 +114,7 @@ namespace Planetarium.Plugins.Horizon
 
             if (settings.Get<bool>("LabelCardinalDirections"))
             {
-                Brush brushCardinalLabels = new SolidBrush(settings.Get<Color>("CardinalDirectionsColor"));
+                Brush brushCardinalLabels = new SolidBrush(map.GetColor(settings.Get<Color>("ColorCardinalDirections")));
                 string[] labels = new string[] { "S", "SW", "W", "NW", "N", "NE", "E", "SE" };
                 StringFormat format = new StringFormat() { LineAlignment = StringAlignment.Center, Alignment = StringAlignment.Center };
                 for (int i = 0; i < labels.Length; i++)

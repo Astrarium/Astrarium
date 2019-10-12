@@ -32,7 +32,7 @@ namespace Planetarium.Plugins.SolarSystem
 
             // Colors
 
-            AddSetting(new SettingItem("ColorSolarSystemLabel", Color.DimGray));
+            AddSetting(new SettingItem("ColorSolarSystemLabel", Color.DimGray, "Colors"));
 
             #endregion Settings
 

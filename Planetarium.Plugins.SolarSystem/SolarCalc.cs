@@ -78,8 +78,6 @@ namespace Planetarium.Calculators
 
         private float DaylightFactor(SkyContext c)
         {
-            // TODO: consider eclipses case here!
-            
             double alt = c.Get(Horizontal).Altitude;
 
             // Absolute value of solar altitude 

@@ -22,8 +22,8 @@ namespace Planetarium.Plugins.BrightStars
             AddSetting(new SettingItem("StarsProperNames", true, "Stars", s => s.Get<bool>("Stars") && s.Get<bool>("StarsLabels")));
             AddSetting(new SettingItem("ConstLines", true, "Constellations"));
 
-            AddSetting(new SettingItem("ColorConstLines", Color.FromArgb(64, 64, 64)));
-            AddSetting(new SettingItem("ColorStarsLabels", Color.FromArgb(64, 64, 64)));
+            AddSetting(new SettingItem("ColorConstLines", Color.FromArgb(64, 64, 64), "Colors"));
+            AddSetting(new SettingItem("ColorStarsLabels", Color.FromArgb(64, 64, 64), "Colors"));
 
             #endregion Settings
 

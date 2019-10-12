@@ -17,7 +17,7 @@ namespace Planetarium.Plugins.MilkyWay
 
             AddSetting(new SettingItem("MilkyWay", true, "Grids"));
 
-            AddSetting(new SettingItem("ColorMilkyWay", Color.FromArgb(20, 20, 20)));
+            AddSetting(new SettingItem("ColorMilkyWay", Color.FromArgb(20, 20, 20), "Colors"));
 
             #endregion Settings
         }

@@ -46,7 +46,8 @@ namespace Planetarium.Plugins.SolarSystem
         private static Color clrShadowOutline = Color.FromArgb(100, 50, 0);
         private Pen penShadowOutline = new Pen(clrShadowOutline);
         private Brush brushShadowLabel = new SolidBrush(clrShadowOutline);
-        
+        private ImageAttributes adjustImageToRedAttr;
+
         private Brush[] brushRings = new Brush[] 
         {
             new SolidBrush(Color.FromArgb(200, 224, 224, 195)),
@@ -67,6 +68,18 @@ namespace Planetarium.Plugins.SolarSystem
             this.solarTextureDownloader = solarTextureDownloader;
             this.settings = settings;
             penShadowOutline.DashStyle = DashStyle.Dot;
+
+            float[][] colorMatrixElements = {
+                new float[] {0.3f, 0, 0, 0, 0},
+                new float[] {0.3f, 0, 0, 0, 0},
+                new float[] {0.3f, 0, 0, 0, 0},
+                new float[] {0, 0, 0, 1, 0},
+                new float[] {0, 0, 0, 0, 0}
+            };
+            ColorMatrix colorMatrix = new ColorMatrix(colorMatrixElements);
+
+            ImageAttributes adjustImageToRedAttr = new ImageAttributes();
+            adjustImageToRedAttr.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
         }
 
         public override RendererOrder Order => RendererOrder.SolarSystem;
@@ -168,20 +181,22 @@ namespace Planetarium.Plugins.SolarSystem
 
         private void DrawHalo(IMapContext map)
         {
-            int alpha = (int)(map.DayLightFactor * 255);
             int size = (int)(map.DayLightFactor * 100);
+            float sunSize = map.GetDiskSize(sun.Semidiameter);
+            int alpha = (int)(map.DayLightFactor * (1 - sunSize / (2 * size)) * 255);
 
-            if (settings.Get<bool>("Ground") && size > 0 && alpha > 0)
+            if (settings.Get<bool>("Ground") && size > 0 && alpha > 0 && 2 * size > sunSize)
             {
                 using (var halo = new GraphicsPath())
                 {
                     PointF p = map.Project(sun.Horizontal);                  
                     halo.AddEllipse(p.X - size, p.Y - size, 2 * size, 2 * size);
                     var brush = new PathGradientBrush(halo);
+                    brush.CenterPoint = p;
                     brush.CenterColor = Color.FromArgb(alpha, clrSunDaylight);
                     brush.SurroundColors = new Color[] { Color.Transparent };
                     map.Graphics.FillPath(brush, halo);
-                }
+                }                
             }
         }
 
@@ -212,20 +227,31 @@ namespace Planetarium.Plugins.SolarSystem
                 if (useTextures && size > 10)
                 {
                     Image textureMoon = imagesCache.RequestImage("Moon", new PlanetTextureToken("Moon", moon.Libration.l, moon.Libration.b), MoonTextureProvider, map.Redraw);
+                    Brush brushMoon = Brushes.Gray;
                     if (textureMoon != null)
                     {
-                        map.Graphics.FillEllipse(Brushes.Gray, -size / 2, -size / 2, size, size);
-                        map.Graphics.DrawImage(textureMoon, -size / 2 * 1.01f, -size / 2 * 1.01f, size * 1.01f, size * 1.01f);
+                        brushMoon = new SolidBrush(map.GetColor(Color.Gray));
+                        map.Graphics.FillEllipse(brushMoon, -size / 2, -size / 2, size, size);
+
+                        if (map.Schema == ColorSchema.Red)
+                        {
+                            map.Graphics.DrawImage(textureMoon, new Rectangle((int)(-size / 2 * 1.01f), (int)(-size / 2 * 1.01f), (int)(size * 1.01f), (int)(size * 1.01f)), 0, 0, textureMoon.Width, textureMoon.Height, GraphicsUnit.Pixel, adjustImageToRedAttr);
+                        }
+                        else
+                        {
+                            map.Graphics.DrawImage(textureMoon, -size / 2 * 1.01f, -size / 2 * 1.01f, size * 1.01f, size * 1.01f);
+                        }
                     }
                     else
                     {
-                        map.Graphics.FillEllipse(Brushes.Gray, -size / 2, -size / 2, size, size);
+                        map.Graphics.FillEllipse(brushMoon, -size / 2, -size / 2, size, size);
                     }
                 }
                 else
                 {
                     // Moon disk
-                    map.Graphics.FillEllipse(Brushes.Gray, -size / 2, -size / 2, size, size);
+                    SolidBrush brushMoon = new SolidBrush(map.GetColor(Color.Gray));
+                    map.Graphics.FillEllipse(brushMoon, -size / 2, -size / 2, size, size);
                 }
 
                 map.Graphics.ResetTransform();

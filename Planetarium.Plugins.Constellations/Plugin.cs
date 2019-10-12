@@ -22,8 +22,8 @@ namespace Planetarium.Plugins.Constellations
             
             AddSetting(new SettingItem("ConstBorders", true, "Constellations"));
 
-            AddSetting(new SettingItem("ColorConstBorders", Color.FromArgb(64, 32, 32)));
-            AddSetting(new SettingItem("ColorConstLabels", Color.FromArgb(64, 32, 32)));
+            AddSetting(new SettingItem("ColorConstBorders", Color.FromArgb(64, 32, 32), "Colors"));
+            AddSetting(new SettingItem("ColorConstLabels", Color.FromArgb(64, 32, 32), "Colors"));
             
             #endregion Settings
 
