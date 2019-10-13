@@ -340,24 +340,44 @@ namespace Planetarium.Types
             return map.GetColor(Color.Black);
         }
 
-        private static ImageAttributes adjustImageToRedAttr;
-        private static ImageAttributes GetImageAttributes()
+        //private static ImageAttributes adjustImageToRedAttr;
+        private static ImageAttributes GetImageAttributes(ColorSchema schema)
         {
-            if (adjustImageToRedAttr == null)
+            if (schema == ColorSchema.Red)
             {
-                float[][] colorMatrixElements = {
+                float[][] matrix = {
                     new float[] {0.3f, 0, 0, 0, 0},
                     new float[] {0.3f, 0, 0, 0, 0},
                     new float[] {0.3f, 0, 0, 0, 0},
                     new float[] {0, 0, 0, 1, 0},
                     new float[] {0, 0, 0, 0, 0}
                 };
-                ColorMatrix colorMatrix = new ColorMatrix(colorMatrixElements);
-                adjustImageToRedAttr = new ImageAttributes();
-                adjustImageToRedAttr.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
-            }
+                var colorMatrix = new ColorMatrix(matrix);
+                var attr = new ImageAttributes();
+                attr.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
 
-            return adjustImageToRedAttr;
+                return attr;
+            }
+            else if (schema == ColorSchema.White)
+            {
+                float[][] matrix = {
+                    new float[] { 0.299f, 0.299f, 0.299f, 0, 0},
+                    new float[] { 0.587f, 0.587f, 0.587f, 0, 0},
+                    new float[] { 0.114f, 0.114f, 0.114f, 0, 0},
+                    new float[] {0, 0, 0, 1, 0},
+                    new float[] { 0, 0, 0, 0, 1 }
+                };
+
+                var colorMatrix = new ColorMatrix(matrix);
+                var attr = new ImageAttributes();
+                attr.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+
+                return attr;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public static void DrawImage(this IMapContext map, Image image, float x, float y, float width, float height)
@@ -368,14 +388,7 @@ namespace Planetarium.Types
         public static void DrawImage(this IMapContext map, Image image, RectangleF destRect, RectangleF srcRect)
         {
             Rectangle destRect2 = new Rectangle((int)destRect.X, (int)destRect.Y, (int)destRect.Width, (int)destRect.Height);
-            if (map.Schema == ColorSchema.Red)
-            {                
-                map.Graphics.DrawImage(image, destRect2, (int)srcRect.X, (int)srcRect.Y, (int)srcRect.Width, (int)srcRect.Height, GraphicsUnit.Pixel, GetImageAttributes());
-            }
-            else
-            {
-                map.Graphics.DrawImage(image, destRect2, srcRect, GraphicsUnit.Pixel);
-            }
+            map.Graphics.DrawImage(image, destRect2, (int)srcRect.X, (int)srcRect.Y, (int)srcRect.Width, (int)srcRect.Height, GraphicsUnit.Pixel, GetImageAttributes(map.Schema));
         }
 
         private static Color COLOR_DAY_SKY = Color.FromArgb(116, 184, 255);

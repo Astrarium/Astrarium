@@ -147,11 +147,15 @@ namespace Planetarium.Plugins.SolarSystem
                 }
                 else
                 {
-                    Brush brushSun = new SolidBrush(colorSun);
-                    map.Graphics.FillEllipse(brushSun, -size / 2, -size / 2, size, size);
                     if (map.Schema == ColorSchema.White)
                     {
-                        map.Graphics.DrawEllipse(new Pen(Color.Black, 1), -size / 2, -size / 2, size, size);
+                        map.Graphics.FillEllipse(Brushes.White, -size / 2, -size / 2, size, size);
+                        map.Graphics.DrawEllipse(Pens.Black, -size / 2, -size / 2, size, size);
+                    }
+                    else
+                    {
+                        Brush brushSun = new SolidBrush(colorSun);
+                        map.Graphics.FillEllipse(brushSun, -size / 2, -size / 2, size, size);
                     }
                 }
 
@@ -743,7 +747,7 @@ namespace Planetarium.Plugins.SolarSystem
             float diamPolar = (1 - planet.Flattening) * diam;
             bool useTextures = settings.Get<bool>("UseTextures");
 
-            if (!(useTextures && map.Schema == ColorSchema.Red))
+            if (!(useTextures && (map.Schema == ColorSchema.Red || map.Schema == ColorSchema.White)))
             {
                 g.FillEllipse(GetPlanetColor(map, planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
             }
@@ -763,6 +767,8 @@ namespace Planetarium.Plugins.SolarSystem
 
         private void DrawVolume(IMapContext map, float diam, float flattening)
         {
+            if (map.Schema == ColorSchema.White) return;
+
             Graphics g = map.Graphics;
             float diamEquat = diam * 1.01f;
             float diamPolar = (1 - flattening) * diam * 1.01f;

@@ -119,7 +119,7 @@ namespace Planetarium.Calculators
         /// <summary>
         /// Gets local horizontal coordinates of the Moon
         /// </summary>
-        private CrdsHorizontal Horizontal(SkyContext c)
+        public CrdsHorizontal Horizontal(SkyContext c)
         {
             return c.Get(Equatorial).ToHorizontal(c.GeoLocation, c.SiderealTime);
         }
