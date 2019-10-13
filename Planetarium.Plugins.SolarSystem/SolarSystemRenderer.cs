@@ -46,7 +46,6 @@ namespace Planetarium.Plugins.SolarSystem
         private static Color clrShadowOutline = Color.FromArgb(100, 50, 0);
         private Pen penShadowOutline = new Pen(clrShadowOutline);
         private Brush brushShadowLabel = new SolidBrush(clrShadowOutline);
-        private ImageAttributes adjustImageToRedAttr;
 
         private Brush[] brushRings = new Brush[] 
         {
@@ -68,18 +67,6 @@ namespace Planetarium.Plugins.SolarSystem
             this.solarTextureDownloader = solarTextureDownloader;
             this.settings = settings;
             penShadowOutline.DashStyle = DashStyle.Dot;
-
-            float[][] colorMatrixElements = {
-                new float[] {0.3f, 0, 0, 0, 0},
-                new float[] {0.3f, 0, 0, 0, 0},
-                new float[] {0.3f, 0, 0, 0, 0},
-                new float[] {0, 0, 0, 1, 0},
-                new float[] {0, 0, 0, 0, 0}
-            };
-            ColorMatrix colorMatrix = new ColorMatrix(colorMatrixElements);
-
-            ImageAttributes adjustImageToRedAttr = new ImageAttributes();
-            adjustImageToRedAttr.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
         }
 
         public override RendererOrder Order => RendererOrder.SolarSystem;
@@ -224,23 +211,15 @@ namespace Planetarium.Plugins.SolarSystem
                 // drawing size
                 float size = map.GetDiskSize(moon.Semidiameter, 10);
 
+                SolidBrush brushMoon = new SolidBrush(map.GetColor(Color.Gray));
+
                 if (useTextures && size > 10)
                 {
                     Image textureMoon = imagesCache.RequestImage("Moon", new PlanetTextureToken("Moon", moon.Libration.l, moon.Libration.b), MoonTextureProvider, map.Redraw);
-                    Brush brushMoon = Brushes.Gray;
                     if (textureMoon != null)
                     {
-                        brushMoon = new SolidBrush(map.GetColor(Color.Gray));
                         map.Graphics.FillEllipse(brushMoon, -size / 2, -size / 2, size, size);
-
-                        if (map.Schema == ColorSchema.Red)
-                        {
-                            map.Graphics.DrawImage(textureMoon, new Rectangle((int)(-size / 2 * 1.01f), (int)(-size / 2 * 1.01f), (int)(size * 1.01f), (int)(size * 1.01f)), 0, 0, textureMoon.Width, textureMoon.Height, GraphicsUnit.Pixel, adjustImageToRedAttr);
-                        }
-                        else
-                        {
-                            map.Graphics.DrawImage(textureMoon, -size / 2 * 1.01f, -size / 2 * 1.01f, size * 1.01f, size * 1.01f);
-                        }
+                        map.DrawImage(textureMoon, -size / 2 * 1.01f, -size / 2 * 1.01f, size * 1.01f, size * 1.01f);                        
                     }
                     else
                     {
@@ -250,7 +229,6 @@ namespace Planetarium.Plugins.SolarSystem
                 else
                 {
                     // Moon disk
-                    SolidBrush brushMoon = new SolidBrush(map.GetColor(Color.Gray));
                     map.Graphics.FillEllipse(brushMoon, -size / 2, -size / 2, size, size);
                 }
 

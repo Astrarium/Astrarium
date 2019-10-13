@@ -3,6 +3,7 @@ using Planetarium.Objects;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -159,7 +160,7 @@ namespace Planetarium.Types
                 size = Math.Min(maxDrawingSize, mag0 - mag);
             else
                 size = mag0 - mag;
-            
+
             if (map.Schema == ColorSchema.Day)
             {
                 size *= 1 - map.DayLightFactor;
@@ -337,6 +338,39 @@ namespace Planetarium.Types
         public static Color GetSkyColor(this IMapContext map)
         {
             return map.GetColor(Color.Black);
+        }
+
+        private static ImageAttributes adjustImageToRedAttr;
+        private static ImageAttributes GetImageAttributes()
+        {
+            if (adjustImageToRedAttr == null)
+            {
+                float[][] colorMatrixElements = {
+                    new float[] {0.3f, 0, 0, 0, 0},
+                    new float[] {0.3f, 0, 0, 0, 0},
+                    new float[] {0.3f, 0, 0, 0, 0},
+                    new float[] {0, 0, 0, 1, 0},
+                    new float[] {0, 0, 0, 0, 0}
+                };
+                ColorMatrix colorMatrix = new ColorMatrix(colorMatrixElements);
+                adjustImageToRedAttr = new ImageAttributes();
+                adjustImageToRedAttr.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+            }
+
+            return adjustImageToRedAttr;
+        }
+
+        public static void DrawImage(this IMapContext map, Image image, float x, float y, float width, float height)
+        {
+            if (map.Schema == ColorSchema.Red)
+            {                
+                Rectangle destRect = new Rectangle((int)x, (int)y, (int)width, (int)height);
+                map.Graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, GetImageAttributes());
+            }
+            else
+            {
+                map.Graphics.DrawImage(image, x, y, width, height);
+            }
         }
 
         private static Color COLOR_DAY_SKY = Color.FromArgb(116, 184, 255);
