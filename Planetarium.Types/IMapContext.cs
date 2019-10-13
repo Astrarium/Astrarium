@@ -362,14 +362,19 @@ namespace Planetarium.Types
 
         public static void DrawImage(this IMapContext map, Image image, float x, float y, float width, float height)
         {
+            map.DrawImage(image, new RectangleF(x, y, width, height), new Rectangle(0, 0, image.Width, image.Height));
+        }
+
+        public static void DrawImage(this IMapContext map, Image image, RectangleF destRect, RectangleF srcRect)
+        {
+            Rectangle destRect2 = new Rectangle((int)destRect.X, (int)destRect.Y, (int)destRect.Width, (int)destRect.Height);
             if (map.Schema == ColorSchema.Red)
             {                
-                Rectangle destRect = new Rectangle((int)x, (int)y, (int)width, (int)height);
-                map.Graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, GetImageAttributes());
+                map.Graphics.DrawImage(image, destRect2, (int)srcRect.X, (int)srcRect.Y, (int)srcRect.Width, (int)srcRect.Height, GraphicsUnit.Pixel, GetImageAttributes());
             }
             else
             {
-                map.Graphics.DrawImage(image, x, y, width, height);
+                map.Graphics.DrawImage(image, destRect2, srcRect, GraphicsUnit.Pixel);
             }
         }
 
