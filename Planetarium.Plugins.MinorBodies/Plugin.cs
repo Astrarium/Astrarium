@@ -2,6 +2,7 @@
 using Planetarium.Types;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,6 +20,9 @@ namespace Planetarium.Plugins.MinorBodies
 
             AddSetting(new SettingItem("Asteroids", true, "Asteroids"));
             AddSetting(new SettingItem("AsteroidsLabels", true, "Asteroids", s => s.Get<bool>("Asteroids")));
+
+            AddSetting(new SettingItem("ColorAsteroidsLabels", Color.FromArgb(10, 44, 37), "Colors"));
+            AddSetting(new SettingItem("ColorCometsLabels", Color.FromArgb(78, 84, 99), "Colors"));
 
             #endregion Settings
 

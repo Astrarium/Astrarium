@@ -22,17 +22,13 @@ namespace Planetarium.Plugins.DeepSky
         private double minZoom = 50;
         private double maxZoom = 0.1;
 
-        private int lastAlpha = -1;
         private double k;
         private double b;
 
-        private Pen penCluster;
-        private Pen penNebula;
+        private Pen penOutlineDashed;
+        private Pen penOutlineSolid;
         private Font fontCaption = new Font("Arial", 7);
-
-        private Color colorOutline = Color.FromArgb(50, 50, 50);
-        private Brush brushCaption = new SolidBrush(Color.FromArgb(0, 64, 128));
-        private Brush brushOutline = new SolidBrush(Color.FromArgb(20, 20, 20));
+        private Brush brushCaption;
 
         private Dictionary<DeepSkyStatus, IDrawingStrategy> drawingHandlers = null;
 
@@ -71,17 +67,15 @@ namespace Planetarium.Plugins.DeepSky
 
             var allDeepSkies = deepSkyCalc.DeepSkies;
             bool isGround = settings.Get<bool>("Ground");
+            brushCaption = new SolidBrush(map.GetColor(settings.Get<Color>("ColorDeepSkyLabel")));
 
             int alpha = Math.Max(0, Math.Min((int)(k * map.ViewAngle + b), 255));
-
-            if (lastAlpha != alpha)
-            {
-                lastAlpha = alpha;
-                penNebula = new Pen(Color.FromArgb(alpha, colorOutline));
-                penCluster = new Pen(Color.FromArgb(alpha, colorOutline));
-                penCluster.DashStyle = DashStyle.Dash;
-            }
-
+            
+            Color colorOutline = map.GetColor(settings.Get<Color>("ColorDeepSkyOutline"));
+            penOutlineSolid = new Pen(Color.FromArgb(alpha, colorOutline));
+            penOutlineDashed = new Pen(Color.FromArgb(alpha, colorOutline));
+            penOutlineDashed.DashStyle = DashStyle.Dash;
+            
             double coeff = map.DiagonalCoefficient();
             var deepSkies = allDeepSkies.Where(ds => !ds.Status.IsEmpty() && Angle.Separation(map.Center, ds.Horizontal) < map.ViewAngle * coeff);
             if (isGround)
@@ -106,17 +100,17 @@ namespace Planetarium.Plugins.DeepSky
 
             protected override void DrawEllipticObject(Graphics g, float diamA, float diamB)
             {
-                g.DrawEllipse(Renderer.penNebula, -diamA / 2, -diamB / 2, diamA, diamB);
+                g.DrawEllipse(Renderer.penOutlineSolid, -diamA / 2, -diamB / 2, diamA, diamB);
             }
 
             protected override void DrawPointObject(Graphics g, float size)
             {
-                g.FillEllipse(Brushes.DimGray, -size / 2, - size / 2, size, size);
+                g.FillEllipse(Renderer.penOutlineSolid.Brush, -size / 2, - size / 2, size, size);
             }
 
             protected override void DrawRoundObject(Graphics g, float diamA)
             {
-                g.DrawEllipse(Renderer.penNebula, -diamA / 2, -diamA / 2, diamA, diamA);
+                g.DrawEllipse(Renderer.penOutlineSolid, -diamA / 2, -diamA / 2, diamA, diamA);
             }
         }
 
@@ -134,18 +128,18 @@ namespace Planetarium.Plugins.DeepSky
 
             protected override void DrawEllipticObject(Graphics g, float diamA, float diamB)
             {
-                g.DrawRoundedRectangle(Renderer.penNebula, -diamA / 2, -diamB / 2, diamA, diamB, Math.Min(diamA, diamB) / 3);
+                g.DrawRoundedRectangle(Renderer.penOutlineSolid, -diamA / 2, -diamB / 2, diamA, diamB, Math.Min(diamA, diamB) / 3);
             }
 
             protected override void DrawPointObject(Graphics g, float size)
             {
-                g.FillEllipse(Brushes.DimGray, -size / 2, -size / 2, size, size);
+                g.FillEllipse(Renderer.penOutlineSolid.Brush, -size / 2, -size / 2, size, size);
             }
 
             protected override void DrawRoundObject(Graphics g, float diamA)
             {
                 diamA /= 1.15f;
-                g.DrawRoundedRectangle(Renderer.penNebula, -diamA / 2, -diamA / 2, diamA, diamA, diamA / 3);
+                g.DrawRoundedRectangle(Renderer.penOutlineSolid, -diamA / 2, -diamA / 2, diamA, diamA, diamA / 3);
             }
         }
 
@@ -163,17 +157,17 @@ namespace Planetarium.Plugins.DeepSky
 
             protected override void DrawEllipticObject(Graphics g, float diamA, float diamB)
             {
-                g.DrawEllipse(Renderer.penNebula, -diamA / 2, -diamB / 2, diamA, diamB);
+                g.DrawEllipse(Renderer.penOutlineSolid, -diamA / 2, -diamB / 2, diamA, diamB);
             }
 
             protected override void DrawPointObject(Graphics g, float size)
             {
-                g.FillEllipse(Brushes.DimGray, -size / 2, -size / 2, size, size);
+                g.FillEllipse(Renderer.penOutlineSolid.Brush, -size / 2, -size / 2, size, size);
             }
 
             protected override void DrawRoundObject(Graphics g, float diamA)
             {
-                g.DrawEllipse(Renderer.penNebula, -diamA / 2, -diamA / 2, diamA, diamA);
+                g.DrawEllipse(Renderer.penOutlineSolid, -diamA / 2, -diamA / 2, diamA, diamA);
             }
         }
 
@@ -191,17 +185,17 @@ namespace Planetarium.Plugins.DeepSky
 
             protected override void DrawEllipticObject(Graphics g, float diamA, float diamB)
             {
-                g.DrawEllipse(Renderer.penCluster, -diamA / 2, -diamB / 2, diamA, diamB);
+                g.DrawEllipse(Renderer.penOutlineDashed, -diamA / 2, -diamB / 2, diamA, diamB);
             }
 
             protected override void DrawPointObject(Graphics g, float size)
             {
-                g.FillEllipse(Brushes.DimGray, -size / 2, -size / 2, size, size);
+                g.FillEllipse(Renderer.penOutlineSolid.Brush, -size / 2, -size / 2, size, size);
             }
 
             protected override void DrawRoundObject(Graphics g, float diamA)
             {
-                g.DrawEllipse(Renderer.penCluster, -diamA / 2, -diamA / 2, diamA, diamA);
+                g.DrawEllipse(Renderer.penOutlineDashed, -diamA / 2, -diamA / 2, diamA, diamA);
             }
         }
 
@@ -337,7 +331,7 @@ namespace Planetarium.Plugins.DeepSky
                         gp.AddLine(p1, p2);
                     }
 
-                    map.Graphics.DrawPath(Renderer.penNebula, gp);
+                    map.Graphics.DrawPath(Renderer.penOutlineSolid, gp);
 
                     return gp;
                 }

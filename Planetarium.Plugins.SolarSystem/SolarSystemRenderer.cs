@@ -178,15 +178,37 @@ namespace Planetarium.Plugins.SolarSystem
 
             if (settings.Get<bool>("Ground") && size > 0 && alpha > 0 && 2 * size > sunSize)
             {
+                bool isEclipse = sun.Horizontal.Altitude > 0 && map.DayLightFactor < 1;
+
                 using (var halo = new GraphicsPath())
                 {
                     PointF p = map.Project(sun.Horizontal);                  
                     halo.AddEllipse(p.X - size, p.Y - size, 2 * size, 2 * size);
-                    var brush = new PathGradientBrush(halo);
-                    brush.CenterPoint = p;
-                    brush.CenterColor = Color.FromArgb(alpha, clrSunDaylight);
-                    brush.SurroundColors = new Color[] { Color.Transparent };
-                    map.Graphics.FillPath(brush, halo);
+
+                    Region reg = new Region(halo);
+
+                    using (GraphicsPath gpMoon = new GraphicsPath())
+                    {
+                        if (isEclipse)
+                        {
+                            PointF pMoon = map.Project(moon.Horizontal);
+                            float szMoon = map.GetDiskSize(moon.Semidiameter, 10) / 2;
+                            gpMoon.AddEllipse(pMoon.X - szMoon, pMoon.Y - szMoon, 2 * szMoon, 2 * szMoon);
+                            reg.Exclude(gpMoon);
+                        }
+
+                        var brush = new PathGradientBrush(halo);
+                        brush.CenterPoint = p;
+                        brush.CenterColor = Color.FromArgb(alpha, clrSunDaylight);
+                        brush.SurroundColors = new Color[] { Color.Transparent };
+                        
+                        map.Graphics.FillRegion(brush, reg);
+
+                        if (isEclipse)
+                        {
+                            map.Graphics.FillPath(new SolidBrush(Color.FromArgb((int)(alpha * map.DayLightFactor), brush.CenterColor)), gpMoon);
+                        }
+                    }
                 }                
             }
         }

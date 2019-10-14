@@ -104,8 +104,8 @@ namespace Planetarium.Plugins.Grids
             peFrom1950 = Precession.ElementsFK5(Date.EPOCH_B1950, map.JulianDay);
             peTo1950 = Precession.ElementsFK5(map.JulianDay, Date.EPOCH_B1950);
 
-            Color colorGridEquatorial = Color.FromArgb(200, 0, 64, 64);
-            Color colorGridHorizontal = settings.Get<Color>("HorizontalGridColorNight");
+            Color colorGridEquatorial = map.GetColor(settings.Get<Color>("ColorEquatorialGrid"));
+            Color colorGridHorizontal = map.GetColor(settings.Get<Color>("ColorHorizontalGrid"));
             Color colorLineEcliptic = map.GetColor(settings.Get<Color>("ColorEcliptic"));
             Color colorLineGalactic = map.GetColor(settings.Get<Color>("ColorGalacticEquator"));
 

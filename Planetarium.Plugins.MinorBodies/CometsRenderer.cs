@@ -19,7 +19,6 @@ namespace Planetarium.Plugins.MinorBodies
     public class CometsRenderer : BaseRenderer
     {
         private Font fontNames;
-        private Brush brushNames;
         private readonly CometsCalc cometsCalc;
         private readonly ISettings settings;
 
@@ -29,7 +28,6 @@ namespace Planetarium.Plugins.MinorBodies
             this.settings = settings;
 
             fontNames = new Font("Arial", 8);
-            brushNames = new SolidBrush(Color.FromArgb(78, 84, 99));
         }
 
         public override void Render(IMapContext map)
@@ -41,6 +39,7 @@ namespace Planetarium.Plugins.MinorBodies
             double coeff = map.DiagonalCoefficient();
             bool drawComets = settings.Get<bool>("Comets");
             bool drawLabels = settings.Get<bool>("AsteroidsLabels");
+            Brush brushNames = new SolidBrush(map.GetColor(settings.Get<Color>("ColorCometsLabels")));
 
             if (drawComets)
             {
@@ -76,7 +75,7 @@ namespace Planetarium.Plugins.MinorBodies
                                     using (var brushComet = new PathGradientBrush(gpComet))
                                     {
                                         brushComet.CenterPoint = p;
-                                        brushComet.CenterColor = Color.FromArgb(100, 191, 209, 255);
+                                        brushComet.CenterColor = map.GetColor(Color.FromArgb(100, 191, 209, 255));
                                         brushComet.SurroundColors = gpComet.PathPoints.Select(pp => Color.Transparent).ToArray();
                                         g.FillPath(brushComet, gpComet);
                                     }
@@ -90,7 +89,7 @@ namespace Planetarium.Plugins.MinorBodies
                             }
                             else if (!map.IsOutOfScreen(p))
                             {
-                                g.FillEllipse(Brushes.White, p.X - size / 2, p.Y - size / 2, size, size);
+                                g.FillEllipse(new SolidBrush(map.GetColor(Color.White)), p.X - size / 2, p.Y - size / 2, size, size);
                                 if (drawLabels)
                                 {
                                     map.DrawObjectCaption(fontNames, brushNames, c.Name, p, size);

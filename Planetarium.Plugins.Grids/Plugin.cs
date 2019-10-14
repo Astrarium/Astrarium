@@ -27,7 +27,8 @@ namespace Planetarium.Plugins.Grids
             AddSetting(new SettingItem("ColorEcliptic", Color.FromArgb(0xC8, 0x80, 0x80, 0x00), "Colors"));
             AddSetting(new SettingItem("ColorGalacticEquator", Color.FromArgb(200, 64, 0, 64), "Colors"));
 
-            AddSetting(new SettingItem("HorizontalGridColorNight", Color.FromArgb(0xC8, 0x00, 0x40, 0x00), "Colors"));
+            AddSetting(new SettingItem("ColorHorizontalGrid", Color.FromArgb(0xC8, 0x00, 0x40, 0x00), "Colors"));
+            AddSetting(new SettingItem("ColorEquatorialGrid", Color.FromArgb(200, 0, 64, 64), "Colors"));
 
             AddToolbarItem(new ToolbarButton(Text.Get("Settings.EquatorialGrid"), "IconEquatorialGrid", settings, "EquatorialGrid", "Grids"));
             AddToolbarItem(new ToolbarButton(Text.Get("Settings.HorizontalGrid"), "IconHorizontalGrid", settings, "HorizontalGrid", "Grids"));
