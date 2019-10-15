@@ -68,7 +68,7 @@
                         <Button.Content>
                             <Rectangle Margin="2" Width="18" Height="18">
                                 <Rectangle.Fill>
-                                    <SolidColorBrush Color="{DynamicResource ForegroundColor}" />
+                                    <SolidColorBrush Color="{DynamicResource ColorForeground}" />
                                 </Rectangle.Fill>
                                 <Rectangle.OpacityMask>
                                     <ImageBrush AlignmentX="Left" AlignmentY="Top" ImageSource="{Binding ImageKey, Converter={t:ImageKeyToImageConverter}}"  Stretch="UniformToFill" />
@@ -83,7 +83,7 @@
                         <ToggleButton.Content>
                             <Rectangle Margin="2" Width="18" Height="18">
                                 <Rectangle.Fill>
-                                    <SolidColorBrush Color="{DynamicResource ForegroundColor}" />
+                                    <SolidColorBrush Color="{DynamicResource ColorForeground}" />
                                 </Rectangle.Fill>
                                 <Rectangle.OpacityMask>
                                     <ImageBrush  AlignmentX="Left" AlignmentY="Top" ImageSource="{Binding ImageKey, Converter={t:ImageKeyToImageConverter}}"  Stretch="UniformToFill" />
