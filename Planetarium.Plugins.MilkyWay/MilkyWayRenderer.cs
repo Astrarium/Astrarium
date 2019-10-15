@@ -68,7 +68,7 @@ namespace Planetarium.Plugins.MilkyWay
 
                         if (points.Count >= 3)
                         {
-                            Color color = Color.FromArgb(alpha, map.GetColor(settings.Get<Color>("ColorMilkyWay")));
+                            Color color = Color.FromArgb(alpha, map.GetColor("ColorMilkyWay"));
                             map.Graphics.FillPolygon(new SolidBrush(color), points.ToArray(), FillMode.Winding);
                         }
                     }

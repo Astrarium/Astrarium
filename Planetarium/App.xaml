@@ -4,6 +4,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/Planetarium.Types;component/Themes/ColorsDefault.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/Planetarium.Types;component/Themes/Styles.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/Planetarium.Types;component/Themes/WindowStyle.xaml" />
             </ResourceDictionary.MergedDictionaries>

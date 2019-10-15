@@ -107,14 +107,14 @@ namespace Planetarium.Plugins.Horizon
 
                 if (hor.Any(h => !map.IsOutOfScreen(h)))
                 {
-                    Pen penHorizonLine = new Pen(map.GetColor(settings.Get<Color>("ColorHorizon")), 2);
+                    Pen penHorizonLine = new Pen(map.GetColor("ColorHorizon"), 2);
                     map.Graphics.DrawCurve(penHorizonLine, hor);
                 }
             }
 
             if (settings.Get<bool>("LabelCardinalDirections"))
             {
-                Brush brushCardinalLabels = new SolidBrush(map.GetColor(settings.Get<Color>("ColorCardinalDirections")));
+                Brush brushCardinalLabels = new SolidBrush(map.GetColor("ColorCardinalDirections"));
                 string[] labels = new string[] { "S", "SW", "W", "NW", "N", "NE", "E", "SE" };
                 StringFormat format = new StringFormat() { LineAlignment = StringAlignment.Center, Alignment = StringAlignment.Center };
                 for (int i = 0; i < labels.Length; i++)

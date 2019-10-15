@@ -53,7 +53,7 @@ namespace Planetarium.Plugins.BrightStars
             {
                 PointF p1, p2;
                 CrdsHorizontal h1, h2;
-                penConLine.Brush = new SolidBrush(map.GetColor(settings.Get<Color>("ColorConstLines")));
+                penConLine.Brush = new SolidBrush(map.GetColor("ColorConstLines"));
 
                 foreach (var line in ConLines)
                 {
@@ -106,7 +106,7 @@ namespace Planetarium.Plugins.BrightStars
 
                 if (settings.Get<bool>("StarsLabels") && map.ViewAngle <= limitAllNames)
                 {
-                    brushStarNames = new SolidBrush(map.GetColor(settings.Get<Color>("ColorStarsLabels")));
+                    brushStarNames = new SolidBrush(map.GetColor("ColorStarsLabels"));
 
                     foreach (var star in stars)
                     {

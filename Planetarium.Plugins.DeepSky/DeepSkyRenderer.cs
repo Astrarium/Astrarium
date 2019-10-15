@@ -67,11 +67,11 @@ namespace Planetarium.Plugins.DeepSky
 
             var allDeepSkies = deepSkyCalc.DeepSkies;
             bool isGround = settings.Get<bool>("Ground");
-            brushCaption = new SolidBrush(map.GetColor(settings.Get<Color>("ColorDeepSkyLabel")));
+            brushCaption = new SolidBrush(map.GetColor("ColorDeepSkyLabel"));
 
             int alpha = Math.Max(0, Math.Min((int)(k * map.ViewAngle + b), 255));
             
-            Color colorOutline = map.GetColor(settings.Get<Color>("ColorDeepSkyOutline"));
+            Color colorOutline = map.GetColor("ColorDeepSkyOutline");
             penOutlineSolid = new Pen(Color.FromArgb(alpha, colorOutline));
             penOutlineDashed = new Pen(Color.FromArgb(alpha, colorOutline));
             penOutlineDashed.DashStyle = DashStyle.Dash;

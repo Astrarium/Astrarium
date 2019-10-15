@@ -22,6 +22,8 @@ namespace Planetarium.Plugins.MinorBodies
         private readonly CometsCalc cometsCalc;
         private readonly ISettings settings;
 
+        private readonly Color colorComet = Color.FromArgb(100, 191, 209, 255);
+
         public CometsRenderer(CometsCalc cometsCalc, ISettings settings)
         {
             this.cometsCalc = cometsCalc;
@@ -39,7 +41,7 @@ namespace Planetarium.Plugins.MinorBodies
             double coeff = map.DiagonalCoefficient();
             bool drawComets = settings.Get<bool>("Comets");
             bool drawLabels = settings.Get<bool>("AsteroidsLabels");
-            Brush brushNames = new SolidBrush(map.GetColor(settings.Get<Color>("ColorCometsLabels")));
+            Brush brushNames = new SolidBrush(map.GetColor("ColorCometsLabels"));
 
             if (drawComets)
             {
@@ -75,7 +77,7 @@ namespace Planetarium.Plugins.MinorBodies
                                     using (var brushComet = new PathGradientBrush(gpComet))
                                     {
                                         brushComet.CenterPoint = p;
-                                        brushComet.CenterColor = map.GetColor(Color.FromArgb(100, 191, 209, 255));
+                                        brushComet.CenterColor = map.GetColor(colorComet);
                                         brushComet.SurroundColors = gpComet.PathPoints.Select(pp => Color.Transparent).ToArray();
                                         g.FillPath(brushComet, gpComet);
                                     }

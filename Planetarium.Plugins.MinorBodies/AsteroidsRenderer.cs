@@ -22,6 +22,8 @@ namespace Planetarium.Plugins.MinorBodies
         private readonly AsteroidsCalc asteroidsCalc;
         private readonly ISettings settings;
 
+        private readonly Color colorAsteroid = Color.FromArgb(100, 100, 100);
+
         public AsteroidsRenderer(AsteroidsCalc asteroidsCalc, ISettings settings)
         {
             this.asteroidsCalc = asteroidsCalc;
@@ -35,11 +37,10 @@ namespace Planetarium.Plugins.MinorBodies
             Graphics g = map.Graphics;
             var allAsteroids = asteroidsCalc.Asteroids;
             bool isGround = settings.Get<bool>("Ground");
-            bool useTextures = settings.Get<bool>("UseTextures");
             double coeff = map.DiagonalCoefficient();
             bool drawAsteroids = settings.Get<bool>("Asteroids");
             bool drawLabels = settings.Get<bool>("AsteroidsLabels");
-            Brush brushNames = new SolidBrush(map.GetColor(settings.Get<Color>("ColorAsteroidsLabels")));
+            Brush brushNames = new SolidBrush(map.GetColor("ColorAsteroidsLabels"));
 
             if (drawAsteroids)
             {
@@ -58,11 +59,8 @@ namespace Planetarium.Plugins.MinorBodies
                         if ((int)diam > 0)
                         {
                             PointF p = map.Project(a.Horizontal);
-                            map.Graphics.FillEllipse(new SolidBrush(map.GetColor(Color.FromArgb(100, 100, 100))), p.X - diam / 2, p.Y - diam / 2, diam, diam);
-                            if (useTextures)
-                            {
-                                DrawVolume(map, diam, 0);
-                            }
+                            map.Graphics.FillEllipse(new SolidBrush(map.GetColor(colorAsteroid)), p.X - diam / 2, p.Y - diam / 2, diam, diam);
+                            DrawVolume(map, diam, 0);
 
                             if (drawLabels)
                             {

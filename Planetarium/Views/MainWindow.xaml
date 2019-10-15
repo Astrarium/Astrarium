@@ -15,7 +15,7 @@
         v:MainWindow.MapDoubleClick="{Binding MapDoubleClickCommand}"
         v:MainWindow.MapRightClick="{Binding MapRightClickCommand}"
         v:MainWindow.MapZoom="{Binding ZoomCommand}"
-        Title="Planetarium" Height="450" Width="800">
+        Title="Astrarium" Height="450" Width="800">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -68,7 +68,7 @@
                         <Button.Content>
                             <Rectangle Margin="2" Width="18" Height="18">
                                 <Rectangle.Fill>
-                                    <SolidColorBrush Color="White" />
+                                    <SolidColorBrush Color="{DynamicResource ForegroundColor}" />
                                 </Rectangle.Fill>
                                 <Rectangle.OpacityMask>
                                     <ImageBrush AlignmentX="Left" AlignmentY="Top" ImageSource="{Binding ImageKey, Converter={t:ImageKeyToImageConverter}}"  Stretch="UniformToFill" />
@@ -83,7 +83,7 @@
                         <ToggleButton.Content>
                             <Rectangle Margin="2" Width="18" Height="18">
                                 <Rectangle.Fill>
-                                    <SolidColorBrush Color="White" />
+                                    <SolidColorBrush Color="{DynamicResource ForegroundColor}" />
                                 </Rectangle.Fill>
                                 <Rectangle.OpacityMask>
                                     <ImageBrush  AlignmentX="Left" AlignmentY="Top" ImageSource="{Binding ImageKey, Converter={t:ImageKeyToImageConverter}}"  Stretch="UniformToFill" />

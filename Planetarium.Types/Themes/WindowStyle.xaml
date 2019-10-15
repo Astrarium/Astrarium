@@ -50,7 +50,7 @@
                                        VerticalAlignment="Center"
                                        HorizontalAlignment="Left"
                                        FontSize="16"
-                                       Foreground="White"
+                                       Foreground="{DynamicResource ForegroundBrush}"
                                        Text="{TemplateBinding Title}" 
                                        Grid.Column="1" />
 

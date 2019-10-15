@@ -428,6 +428,104 @@ namespace Planetarium
                 }
             }
 
+            public Color GetColor(string colorName)
+            {
+                return GetColor(map.settings.Get<Color>(colorName));
+            }
+
+            public Color GetColor(Color colorNight)
+            {
+                switch (Schema)
+                {
+                    default:
+                    case ColorSchema.Night:
+                        return colorNight;
+                    case ColorSchema.Red:
+                        return GetNightModeColor(colorNight);
+                    case ColorSchema.White:
+                        return GetWhiteMapColor(colorNight);
+                    case ColorSchema.Day:
+                        return GetIntermediateColor(DayLightFactor, colorNight, GetDaylightColor(colorNight));
+                }
+            }
+
+            public Color GetColor(Color colorNight, Color colorDay)
+            {
+                switch (Schema)
+                {
+                    default:
+                    case ColorSchema.Night:
+                        return colorNight;
+                    case ColorSchema.Red:
+                        return GetNightModeColor(colorNight);
+                    case ColorSchema.White:
+                        return GetWhiteMapColor(colorNight);
+                    case ColorSchema.Day:
+                        return GetIntermediateColor(DayLightFactor, colorNight, colorDay);
+                }
+            }
+
+            private Color GetNightModeColor(Color night)
+            {
+                int brightness = GetBrightness(night);
+                return Color.FromArgb(night.A, brightness, 0, 0);
+            }
+
+            private Color GetWhiteMapColor(Color night)
+            {
+                int brightness = 255 - GetBrightness(night);
+                return Color.FromArgb(night.A, brightness, brightness, brightness);
+            }
+
+            public Color GetSkyColor()
+            {
+                return GetColor(Color.Black);
+            }
+
+            private Color COLOR_DAY_SKY = Color.FromArgb(116, 184, 255);
+
+            private Color GetDaylightColor(Color night)
+            {
+                float brightness = GetBrightness(night) / 255f;
+
+                return Color.FromArgb(
+                    (int)(COLOR_DAY_SKY.R + brightness * (255 - COLOR_DAY_SKY.R)),
+                    (int)(COLOR_DAY_SKY.G + brightness * (255 - COLOR_DAY_SKY.G)),
+                    (int)(COLOR_DAY_SKY.B + brightness * (255 - COLOR_DAY_SKY.B))
+                    );
+            }
+
+            private int GetBrightness(Color night)
+            {
+                return (int)(0.299 * night.R + 0.587 * night.G + 0.114 * night.B);
+            }
+
+            private Color GetIntermediateColor(float factor, Color from, Color to)
+            {
+                if (factor == 0)
+                    return from;
+                else if (factor == 1)
+                    return to;
+                else
+                {
+                    int rMax = to.R;
+                    int rMin = from.R;
+                    int gMax = to.G;
+                    int gMin = from.G;
+                    int bMax = to.B;
+                    int bMin = from.B;
+                    int aMax = to.A;
+                    int aMin = from.A;
+
+                    int a = aMin + (int)((aMax - aMin) * factor);
+                    int r = rMin + (int)((rMax - rMin) * factor);
+                    int g = gMin + (int)((gMax - gMin) * factor);
+                    int b = bMin + (int)((bMax - bMin) * factor);
+
+                    return Color.FromArgb(a, r, g, b);
+                }
+            }
+
             public void Redraw()
             {
                 map.Invalidate();

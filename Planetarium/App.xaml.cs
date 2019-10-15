@@ -63,6 +63,11 @@ namespace Planetarium
             };
         }
 
+        private void SetColorSchema(ColorSchema schema)
+        {
+            Current.Resources.MergedDictionaries[0].Source = new Uri($@"pack://application:,,,/Planetarium.Types;component/Themes/Colors{(schema == ColorSchema.Red ? "Red" : "Default")}.xaml");
+        }
+
         private void ConfigureContainer(IProgress<string> progress)
         {
             logger.Debug("Configuring application container...");
@@ -185,6 +190,8 @@ namespace Planetarium
                 Text.SetLocale(savedLocale);
             }
 
+            SetColorSchema(settings.Get<ColorSchema>("Schema"));
+
             SkyContext context = new SkyContext(
                 new Date(DateTime.Now).ToJulianEphemerisDay(),
                 new CrdsGeographical(settings.Get<CrdsGeographical>("ObserverLocation")));
@@ -214,6 +221,14 @@ namespace Planetarium
             logger.Debug("Application container has been configured.");
 
             progress.Report($"Initializing shell");
+
+            settings.SettingValueChanged += (settingName, value) =>
+            {
+                if (settingName == "Schema")
+                {
+                    SetColorSchema((ColorSchema)value);
+                }
+            };
         }
     }
 }

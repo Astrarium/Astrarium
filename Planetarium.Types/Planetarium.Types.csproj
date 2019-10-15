@@ -44,5 +44,11 @@
     <EmbeddedResource Include="Translations\Translation-en.txt" />
     <EmbeddedResource Include="Translations\Translation-ru.txt" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Themes\ColorsDefault.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+  </ItemGroup>
   
 </Project>

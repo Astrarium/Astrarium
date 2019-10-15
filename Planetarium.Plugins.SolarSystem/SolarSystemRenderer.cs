@@ -73,7 +73,7 @@ namespace Planetarium.Plugins.SolarSystem
 
         public override void Render(IMapContext map)
         {
-            brushLabel = new SolidBrush(map.GetColor(settings.Get<Color>("ColorSolarSystemLabel")));
+            brushLabel = new SolidBrush(map.GetColor("ColorSolarSystemLabel"));
 
             // Flag indicated Sun is already rendered
             bool isSunRendered = false;
