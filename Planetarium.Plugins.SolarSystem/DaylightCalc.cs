@@ -40,6 +40,11 @@ namespace Planetarium.Plugins.SolarSystem
                 // Angular separation between Sun and Moon disks, in arcseconds
                 double delta = Angle.Separation(hSun, hMoon) * 3600.0;
 
+                if (delta < Math.Abs(sdSun - sdMoon))
+                {
+                    return 0;
+                }
+
                 // Solar eclipse (disks are overlapping)
                 if (delta <= sdSun + sdMoon)
                 {
@@ -60,7 +65,7 @@ namespace Planetarium.Plugins.SolarSystem
                     // area of Sun disk
                     double ss = Math.PI * r1 * r1;
 
-                    double percentage = s / ss;
+                    double percentage = Math.Abs(s / ss);
 
                     if (percentage <= 0.1)
                     {
