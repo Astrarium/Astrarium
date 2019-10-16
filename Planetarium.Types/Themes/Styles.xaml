@@ -1319,6 +1319,7 @@
     <Style x:Key="WindowTitleButton" TargetType="{x:Type ButtonBase}" BasedOn="{StaticResource {x:Type ButtonBase}}">
         <Setter Property="Width" Value="24" />
         <Setter Property="Height" Value="24" />
+        <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="Transparent" />
         <Style.Triggers>
@@ -1731,6 +1732,7 @@
     <Style TargetType="{x:Type CheckBox}" BasedOn="{StaticResource {x:Type Control}}">
         <Setter Property="Background" Value="{StaticResource CheckBoxFillNormal}"/>
         <Setter Property="BorderBrush" Value="{StaticResource CheckBoxStroke}"/>
+        <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}" />
         <Setter Property="FocusVisualStyle" Value="{StaticResource EmptyCheckBoxFocusVisual}"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -1748,7 +1750,7 @@
 											Height="Auto" 
 											Width="Auto" 
 											Stretch="Fill" 
-											Fill="{StaticResource ButtonForeground}"
+											Fill="{TemplateBinding Foreground}"
 											Margin="1,1.007,1,1"/>
                             </Border>
                         </BulletDecorator.Bullet>
@@ -2525,36 +2527,43 @@
 
     <!--#region Menu-->
     <Style TargetType="{x:Type Menu}">
-        <Setter Property="Background" Value="{DynamicResource MenuBackground}"/>
+        <Setter Property="Background" Value="{StaticResource MenuBackground}"/>
         <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Menu}">
-                    <Border BorderBrush="{TemplateBinding BorderBrush}" 
-        					BorderThickness="{TemplateBinding BorderThickness}" 
-        					Background="{TemplateBinding Background}" 
-        					Padding="{TemplateBinding Padding}" 
+                    <Grid>
+                        <Rectangle 
+                            Stroke="{TemplateBinding BorderBrush}" 
+        					StrokeThickness="{TemplateBinding BorderThickness}" 
+        					Fill="{TemplateBinding Background}" 
+        					Margin="{TemplateBinding Padding}" 
         					SnapsToDevicePixels="true">
+                        </Rectangle>
                         <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
-                    </Border>
+                    </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
     <Style TargetType="{x:Type ContextMenu}">
-        <Setter Property="Background" Value="{DynamicResource MenuBackground}"/>
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="BorderBrush" Value="{StaticResource SubMenuBorderBrush}" />
+        <Setter Property="Background" Value="{StaticResource MenuBackground}"/>
         <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ContextMenu}">
-                    <Border BorderBrush="{DynamicResource SubMenuBorderBrush}" 
-        					BorderThickness="{TemplateBinding BorderThickness}" 
-        					Background="{DynamicResource SubMenuBackgroundBrush}" 
-        					Padding="{TemplateBinding Padding}" 
-        					SnapsToDevicePixels="true">
+                    <Grid>
+                        <Rectangle
+                            Stroke="{TemplateBinding BorderBrush}" 
+        					StrokeThickness="{TemplateBinding BorderThickness}" 
+        					Fill="{TemplateBinding Background}" 
+        					Margin="{TemplateBinding Padding}" 
+        					SnapsToDevicePixels="true" />
                         <ItemsPresenter />
-                    </Border>
+                    </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -2563,7 +2572,7 @@
     <ControlTemplate x:Key="{ComponentResourceKey ResourceId=SubmenuItemTemplateKey, TypeInTargetAssembly={x:Type MenuItem}}" TargetType="{x:Type MenuItem}">
         <Grid SnapsToDevicePixels="true">
             <Rectangle x:Name="Bg" 
-                           Fill="{TemplateBinding Background}" 
+                           Fill="Red" 
                            Stroke="{TemplateBinding BorderBrush}" 
                            StrokeThickness="1"/>
             <Rectangle x:Name="InnerBorder" Margin="1"/>
