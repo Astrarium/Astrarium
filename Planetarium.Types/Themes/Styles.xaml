@@ -55,7 +55,7 @@
     <SolidColorBrush x:Key="ButtonForeground" Color="{DynamicResource ColorForeground}"/>
     <SolidColorBrush x:Key="MouseOverButtonForeground" Color="#1B1B1B"/>
     <SolidColorBrush x:Key="ButtonBackground" Color="{DynamicResource ColorControlBackground}"/>
-    <SolidColorBrush x:Key="ButtonBorder" Color="{DynamicResource ColorWindowBackground}"/>
+    <SolidColorBrush x:Key="ButtonBorder" Color="{DynamicResource ColorWindowBorder}"/>
     <SolidColorBrush x:Key="PressedButtonBackground" Color="{DynamicResource ColorControlDarkBackground}"/>
     <SolidColorBrush x:Key="MouseOverButtonBackground" Color="{DynamicResource ColorControlLightBackground}"/>
     <SolidColorBrush x:Key="DisabledButtonBackground" Color="{DynamicResource ColorControlDarkBackground}"/>
@@ -96,7 +96,7 @@
     <SolidColorBrush x:Key="SubMenuBorderBrush" Color="{DynamicResource ColorControlLightBackground}"/>
     <SolidColorBrush x:Key="SubMenuRepeatButtonBrush" Color="{DynamicResource ColorControlBackground}"/>
     <SolidColorBrush x:Key="SubMenuHoverRepeatButtonBrush" Color="#7F7F7F"/>
-    <SolidColorBrush x:Key="MenuSeparatorBrush" Color="#4C4C4C"/>
+    <SolidColorBrush x:Key="MenuSeparatorBrush" Color="{DynamicResource ColorControlBackground}"/>
 
     <SolidColorBrush x:Key="GridViewColumnHeaderBackground" Color="{DynamicResource ColorWindowBackground}" />
     <SolidColorBrush x:Key="GridViewColumnHeaderBorderBackground" Color="{DynamicResource ColorControlDarkBackground}" />
@@ -1279,12 +1279,11 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ButtonBase}">
-                    <Border 
-                        x:Name="PART_Border"
-						Background="{TemplateBinding Background}" 
-						BorderBrush="{TemplateBinding BorderBrush}"
-						BorderThickness="{TemplateBinding BorderThickness}"
-						CornerRadius="0">
+                    <Grid>
+                        <Rectangle
+                            Fill="{TemplateBinding Background}" 
+                            Stroke="{TemplateBinding BorderBrush}"
+                            StrokeThickness="{TemplateBinding BorderThickness}" />
                         <ContentPresenter 
                             x:Name="contentPresenter" 
                             Content="{TemplateBinding Content}"
@@ -1295,7 +1294,7 @@
 							SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
 							VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
                         </ContentPresenter>
-                    </Border>
+                    </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="true">
                             <Setter Property="Background" Value="{StaticResource MouseOverButtonBackground}"/>
@@ -1354,40 +1353,36 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ToggleButton}">
-                    <Border  
-						BorderBrush="{TemplateBinding BorderBrush}" 
-						Background="{TemplateBinding Background}" 
-                        BorderThickness="{TemplateBinding BorderThickness}"
-						SnapsToDevicePixels="true"
-						CornerRadius="0">
+                    <Grid>
+                        <Rectangle  
+						    Stroke="{TemplateBinding BorderBrush}" 
+						    Fill="{TemplateBinding Background}" 
+                            StrokeThickness="{TemplateBinding BorderThickness}"
+						    SnapsToDevicePixels="true">
+                        </Rectangle>
                         <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
-                                          Margin="{TemplateBinding Padding}" 
-                                          RecognizesAccessKey="True" 
-                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
-                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                    </Border>
+                            Margin="{TemplateBinding Padding}" 
+                            RecognizesAccessKey="True" 
+                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Grid>
                     <ControlTemplate.Triggers>
-
                         <Trigger Property="IsEnabled" Value="false">
                             <Setter Property="Foreground" Value="{StaticResource DisabledButtonForeground}"/>
                             <Setter Property="Background" Value="{StaticResource DisabledButtonBackground}"/>
                         </Trigger>
-
                         <Trigger Property="IsChecked" Value="false">
                             <Setter Property="Background" Value="{StaticResource PressedButtonBackground}"/>
                             <Setter Property="Foreground" Value="{StaticResource ButtonForeground}"/>
                         </Trigger>
-
                         <Trigger Property="IsChecked" Value="true">
                             <Setter Property="Background" Value="{StaticResource ButtonBackground}"/>
                             <Setter Property="Foreground" Value="{StaticResource ButtonForeground}"/>
                         </Trigger>
-
                         <Trigger Property="IsMouseOver" Value="true">
                             <Setter Property="Background" Value="{StaticResource MouseOverButtonBackground}"/>
                             <Setter Property="Foreground" Value="{StaticResource MouseOverButtonForeground}"/>
                         </Trigger>
-
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
@@ -1866,8 +1861,6 @@
             </Setter.Value>
         </Setter>
     </Style>
-
-    
     
     <Style x:Key="ListViewItemStyle" TargetType="{x:Type ListViewItem}">
         <Setter Property="SnapsToDevicePixels" Value="True"/>
@@ -1930,14 +1923,14 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ListView}">
-                    <Border x:Name="Bd" BorderBrush="{TemplateBinding BorderBrush}" 
-                            BorderThickness="{TemplateBinding BorderThickness}" 
-                            Background="{TemplateBinding Background}" 
-                            Padding="1" SnapsToDevicePixels="true">
-                        <ScrollViewer Focusable="false" Padding="{TemplateBinding Padding}">
-                            <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
-                        </ScrollViewer>
-                    </Border>
+                    <ScrollViewer
+                            x:Name="Bd"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            Background="{TemplateBinding Background}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Focusable="false" Padding="{TemplateBinding Padding}">
+                        <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                    </ScrollViewer>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsEnabled" Value="false">
                             <Setter Property="TextElement.Foreground" TargetName="Bd" Value="{StaticResource DisabledMenuForeground}"/>
@@ -1945,7 +1938,6 @@
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
                                 <Condition Property="IsGrouping" Value="true"/>
-                                <!--<Condition Property="VirtualizingPanel.IsVirtualizingWhenGrouping" Value="false"/>-->
                             </MultiTrigger.Conditions>
                             <Setter Property="ScrollViewer.CanContentScroll" Value="false"/>
                         </MultiTrigger>
@@ -3015,11 +3007,12 @@
 
     <!--#region Separator-->
     <Style TargetType="{x:Type Separator}">
-        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="BorderBrush" Value="{StaticResource MenuSeparatorBrush}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Separator}">
-                    <Rectangle SnapsToDevicePixels="true" Fill="{StaticResource MenuSeparatorBrush}" Height="1"/>
+                    <Rectangle SnapsToDevicePixels="true" Fill="{TemplateBinding BorderBrush}" Height="1"/>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
