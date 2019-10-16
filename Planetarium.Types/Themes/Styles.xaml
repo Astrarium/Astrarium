@@ -2572,7 +2572,7 @@
     <ControlTemplate x:Key="{ComponentResourceKey ResourceId=SubmenuItemTemplateKey, TypeInTargetAssembly={x:Type MenuItem}}" TargetType="{x:Type MenuItem}">
         <Grid SnapsToDevicePixels="true">
             <Rectangle x:Name="Bg" 
-                           Fill="Red" 
+                           Fill="{TemplateBinding Background}" 
                            Stroke="{TemplateBinding BorderBrush}" 
                            StrokeThickness="1"/>
             <Rectangle x:Name="InnerBorder" Margin="1"/>
