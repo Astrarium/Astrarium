@@ -6,7 +6,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     
-    <Grid Name="tblInfo" Background="{StaticResource ScrollViewerBackground}">
+    <Grid Name="tblInfo">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition MinWidth="100" Width="Auto" />
