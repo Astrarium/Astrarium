@@ -26,7 +26,7 @@
         </Grid.RowDefinitions>
 
         <DockPanel Grid.Row="0" Height="22">
-            <Menu VerticalAlignment="Center">
+            <Menu x:Name="Menu" VerticalAlignment="Center">
                 <MenuItem Width="Auto" Style="{StaticResource StatusBarMenuItem}" Header="Map">
                     <MenuItem Header="New">
                         <MenuItem Header="File1" />

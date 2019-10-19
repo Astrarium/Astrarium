@@ -174,6 +174,11 @@ namespace Planetarium
             if (e.Button == WF.MouseButtons.Right && e.Clicks == 1)
             {
                 GetMapRightClick(this)?.Execute(new PointF(e.X, e.Y));
+                
+                // setting placement target is needed to update context menu colors:
+                // see https://github.com/MahApps/MahApps.Metro/issues/2244
+                Host.ContextMenu.PlacementTarget = Host;
+
                 Host.ContextMenu.IsOpen = true;
             }
         }
