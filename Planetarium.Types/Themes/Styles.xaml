@@ -83,7 +83,7 @@
     <SolidColorBrush x:Key="ListBackground" Color="{DynamicResource ColorWindowBackground}"/>
     <SolidColorBrush x:Key="SelectedListItem" Color="{DynamicResource ColorSelection}"/>
     <SolidColorBrush x:Key="SelectedListItemForeground" Color="{DynamicResource ColorWindowBackground}"/>
-    <SolidColorBrush x:Key="MouseOverListItem" Color="#4A4A4A"/>
+    <SolidColorBrush x:Key="MouseOverListItem" Color="{DynamicResource ColorControlDarkBackground}"/>
 
     <SolidColorBrush x:Key="TreeViewBackground" Color="{DynamicResource ColorWindowBackground}"/>
     <SolidColorBrush x:Key="TreeViewDisabledForeground" Color="{DynamicResource ColorControlBackground}"/>
@@ -95,7 +95,6 @@
     <SolidColorBrush x:Key="MenuItemPressedFill" Color="{DynamicResource ColorSelection}"/>
     <SolidColorBrush x:Key="SubMenuBorderBrush" Color="{DynamicResource ColorControlLightBackground}"/>
     <SolidColorBrush x:Key="SubMenuRepeatButtonBrush" Color="{DynamicResource ColorControlBackground}"/>
-    <SolidColorBrush x:Key="SubMenuHoverRepeatButtonBrush" Color="#7F7F7F"/>
     <SolidColorBrush x:Key="MenuSeparatorBrush" Color="{DynamicResource ColorControlLightBackground}"/>
 
     <SolidColorBrush x:Key="GridViewColumnHeaderBackground" Color="{DynamicResource ColorWindowBackground}" />
@@ -112,8 +111,7 @@
     <SolidColorBrush x:Key="DataGridRowSelectedBrush" Color="{DynamicResource ColorSelection}"/>
     <SolidColorBrush x:Key="GridLinesBrush" Color="{DynamicResource ColorControlBackground}"/>
     <SolidColorBrush x:Key="{x:Static DataGrid.FocusBorderBrushKey}" Color="Red"/>
-    
-    <PopupAnimation x:Key="{x:Static SystemParameters.MenuPopupAnimationKey}">None</PopupAnimation>
+   
     
     <Geometry x:Key="MenuScrollDownArrowGeometry">M-0.7,5.2 L-2.2,6.7 3.6,12.6 9.5,6.7 8,5.2 3.6,9.6 z</Geometry>
     <Geometry x:Key="MenuScrollUpArrowGeometry">M-2.2,10.9 L-0.7,12.4 3.7,8 8,12.4 9.5,10.9 3.7,5 z</Geometry>
@@ -2577,7 +2575,6 @@
 
     <!-- New menu styles -->
 
-
     <Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="{x:Type Separator}">
         <Setter Property="Height" Value="1" />
         <Setter Property="Margin" Value="0,4,0,4" />
@@ -2591,6 +2588,8 @@
         </Setter>
     </Style>
 
+    
+    
     <!-- TopLevelHeader -->
     <ControlTemplate x:Key="{x:Static MenuItem.TopLevelHeaderTemplateKey}" TargetType="{x:Type MenuItem}">
         <c:BorderFix x:Name="Border" Background="{TemplateBinding Background}">
@@ -2646,8 +2645,8 @@
 
     <!-- SubmenuItem -->
     <ControlTemplate x:Key="{x:Static MenuItem.SubmenuItemTemplateKey}" TargetType="{x:Type MenuItem}">
-        <c:BorderFix x:Name="Border" BorderThickness="1">
-            <Grid>
+        <c:BorderFix x:Name="Border" BorderThickness="1" >
+            <Grid VerticalAlignment="Center">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" SharedSizeGroup="Icon" />
                     <ColumnDefinition Width="*" />
@@ -2709,40 +2708,25 @@
     </ControlTemplate>
 
     <ControlTemplate x:Key="{x:Static MenuItem.SubmenuHeaderTemplateKey}" TargetType="{x:Type MenuItem}">
-        <Border x:Name="Border" Background="{TemplateBinding Background}">
-            <Grid>
+        <Border x:Name="Border" Background="{TemplateBinding Background}" MinHeight="{TemplateBinding MinHeight}">
+            <Grid VerticalAlignment="Center">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"
-                          SharedSizeGroup="Icon" />
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="Icon" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto"
-                          SharedSizeGroup="Shortcut" />
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="Shortcut" />
                     <ColumnDefinition Width="13" />
                 </Grid.ColumnDefinitions>
-                <ContentPresenter x:Name="Icon"
-                        Margin="6,0,6,0"
-                        VerticalAlignment="Center"
-                        ContentSource="Icon" />
-                <ContentPresenter x:Name="HeaderHost"
-                        Grid.Column="1"
-                        ContentSource="Header"
-                        RecognizesAccessKey="True" />
-                <TextBlock x:Name="InputGestureText"
-                 Grid.Column="2"
-                 Text="{TemplateBinding InputGestureText}"
-                 Margin="5,2,2,2"
-                 DockPanel.Dock="Right" />
-                <Path Grid.Column="3"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Data="M 0 0 L 0 7 L 4 3.5 Z"
-                    Fill="{TemplateBinding Foreground}" />
-                <Popup x:Name="Popup"
-                     Placement="Right"
-                     HorizontalOffset="-4"
-                     IsOpen="{TemplateBinding IsSubmenuOpen}"
-                     Focusable="False"
-                     PopupAnimation="Fade">
+                <ContentPresenter x:Name="Icon" Margin="6,0,6,0" VerticalAlignment="Center" ContentSource="Icon" />
+                <ContentPresenter x:Name="HeaderHost" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True" />
+                <TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" Margin="5,2,2,2" DockPanel.Dock="Right" />
+                <Path Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 0 7 L 4 3.5 Z" Fill="{TemplateBinding Foreground}" />
+                <Popup 
+                    x:Name="Popup" 
+                    Placement="Right" 
+                    HorizontalOffset="0" 
+                    IsOpen="{TemplateBinding IsSubmenuOpen}" 
+                    Focusable="False" 
+                    PopupAnimation="Fade">
                     <c:BorderFix x:Name="SubmenuBorder"
                         SnapsToDevicePixels="True"
                         Background="{TemplateBinding Background}"
@@ -2765,11 +2749,14 @@
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
-
+    
     <!-- MenuItem Style -->
     <Style x:Key="{x:Type MenuItem}" TargetType="{x:Type MenuItem}">
         <Setter Property="OverridesDefaultStyle" Value="True" />
         <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="MinHeight" Value="28" />
+        <Setter Property="MinWidth" Value="120" />
+        <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="BorderBrush" Value="{StaticResource SubMenuBorderBrush}" />
         <Setter Property="Background" Value="{StaticResource MenuBackground}" />
         <Style.Triggers>
@@ -2787,6 +2774,21 @@
             <Trigger Property="Role" Value="SubmenuItem">
                 <Setter Property="Template" Value="{StaticResource {x:Static MenuItem.SubmenuItemTemplateKey}}" />
             </Trigger>
+
+            <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                <Setter Property="MinHeight" Value="1" />
+                <Setter Property="Height" Value="5" />
+                <Setter Property="Margin" Value="0,2,0,2" />
+                <Setter Property="BorderBrush" Value="{StaticResource MenuSeparatorBrush}" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate>
+                            <Separator />
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </DataTrigger>
+
         </Style.Triggers>
     </Style>
 
