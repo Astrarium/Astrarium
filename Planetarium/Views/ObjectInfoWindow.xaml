@@ -23,7 +23,7 @@
         <Label FontSize="8" Grid.Row="0" Padding="5 5 5 0" Content="{Binding Subtitle}" />
         <Label FontFamily="Times New Roman" FontWeight="Bold" Grid.Row="1" Content="{Binding Title}" />
 
-        <Separator Grid.Row="2" Height="1" Background="{StaticResource LightBackgroundBrush}" />
+        <Separator Grid.Row="2" Height="1" />
 
         <ScrollViewer
             Grid.Row="3"
@@ -37,7 +37,7 @@
             </v:ObjectInfoView>
         </ScrollViewer>
 
-        <Separator Grid.Row="4" Height="1" Background="{StaticResource LightBackgroundBrush}" />
+        <Separator Grid.Row="4" Height="1" />
         <StackPanel Grid.Row="5"                    
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">

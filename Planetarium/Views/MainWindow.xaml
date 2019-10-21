@@ -27,9 +27,9 @@
 
         <DockPanel Grid.Row="0" Height="22">
             <Menu x:Name="Menu" VerticalAlignment="Center">
-                <MenuItem Width="Auto" Style="{StaticResource StatusBarMenuItem}" Header="Map">
+                <MenuItem Width="Auto" Header="Map">
                     <MenuItem Header="New">
-                        <MenuItem Header="File1" />
+                        <MenuItem Header="File1" IsCheckable="True" IsChecked="True" InputGestureText="Ctrl+A"  />
                         <MenuItem Header="File2" />
                         <MenuItem Header="File3" />
                     </MenuItem>
@@ -37,18 +37,18 @@
                     <MenuItem Header="Save"/>
                 </MenuItem>
 
-                <MenuItem Width="Auto" Style="{StaticResource StatusBarMenuItem}" Header="View">
+                <MenuItem Width="Auto" Header="View">
                 </MenuItem>
 
-                <MenuItem Width="Auto" Style="{StaticResource StatusBarMenuItem}" Header="Tools">
-                    <MenuItem Header="Search object" Command="{Binding SearchObjectCommand}" />
+                <MenuItem Width="Auto" Header="Tools">
+                    <MenuItem Header="Search object" Command="{Binding SearchObjectCommand}" IsChecked="True" InputGestureText="Ctrl+A" />
                     <MenuItem Header="Ephemerides" Command="{Binding GetObjectEphemerisCommand}" />
                     <MenuItem Header="Astronomical phenomena" Command="{Binding CalculatePhenomenaCommand}" />
                 </MenuItem>
 
-                <MenuItem Width="Auto" Style="{StaticResource StatusBarMenuItem}" Header="Settings">
-                    <MenuItem Header="Date and Time" Command="{Binding SetDateCommand}" />
-                    <MenuItem Header="Observer Location" Command="{Binding SelectLocationCommand}" />
+                <MenuItem Width="Auto" Header="Settings">
+                    <MenuItem Header="Date and Time" Command="{Binding SetDateCommand}" IsChecked="True" InputGestureText="Ctrl+A" />
+                    <MenuItem Header="Observer Location" Command="{Binding SelectLocationCommand}" InputGestureText="Ctrl+B" />
                     <Separator />
                     <MenuItem Header="Settings" Command="{Binding ChangeSettingsCommand}" />
                 </MenuItem>
@@ -147,8 +147,7 @@
 
             <StatusBarItem>
                 <Menu Background="Transparent">
-                    <MenuItem Style="{StaticResource StatusBarMenuItem}" 
-                              Padding="4 0"
+                    <MenuItem 
                               Visibility="Visible" 
                               ItemsSource="{Binding SelectedObjectsMenuItems}" 
                               Header="{Binding SelectedObjectName, FallbackValue='selected object'}" 

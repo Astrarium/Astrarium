@@ -10,8 +10,8 @@
         AllowsTransparency="True"
         Height="70"
         Width="400"
-        BorderBrush="{StaticResource WindowBorderBrush}"
-        Background="{StaticResource WindowBackgroundBrush}">
+        BorderBrush="{StaticResource BrushWindowBorder}"
+        Background="{StaticResource BrushWindowBackground}">
 
     <Window.Resources>
         <ResourceDictionary>

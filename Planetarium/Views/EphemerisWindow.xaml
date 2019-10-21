@@ -42,7 +42,7 @@
                         <Setter Property="Padding" Value="0" />
                         <Setter Property="Margin" Value="0" />
                         <Setter Property="Background" Value="{x:Null}" />
-                        <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
+                        <Setter Property="Foreground" Value="{StaticResource BrushForeground}"/>
                         <Setter Property="VerticalAlignment" Value="Stretch" />
                         <Setter Property="VerticalContentAlignment" Value="Center" />
                         <Setter Property="Template">

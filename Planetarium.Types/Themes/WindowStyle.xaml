@@ -5,9 +5,9 @@
     xmlns:t="clr-namespace:Planetarium.Types.Themes">
 
     <Style TargetType="{x:Type Window}">
-        <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource WindowBorderBrush}" />
-        <Setter Property="Background" Value="{StaticResource WindowBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource BrushForeground}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BrushWindowBorder}" />
+        <Setter Property="Background" Value="{StaticResource BrushWindowBackground}" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
         <Setter Property="Template">
             <Setter.Value>
