@@ -30,7 +30,7 @@ namespace Planetarium.Plugins.MeasureTool
             this.map = map;
             this.renderer = renderer;
 
-            AddContextMenuItem(new ContextMenuItem("Measure Tool", SwitchMeasureTool, () => true, () => true));
+            AddContextMenuItem(new ContextMenuItem("Measure Tool", SwitchMeasureTool, () => true, () => true, () => renderer.IsMeasureToolOn));
         }
 
         private void SwitchMeasureTool()

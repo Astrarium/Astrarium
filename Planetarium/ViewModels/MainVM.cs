@@ -59,6 +59,7 @@ namespace Planetarium.ViewModels
 
         public class MenuItemVM
         {
+            public bool IsCheckable { get; set; } = false;
             public bool IsChecked { get; set; }
             public bool IsEnabled { get; set; } = true;
             public string Header { get; set; }
@@ -336,6 +337,8 @@ namespace Planetarium.ViewModels
                 {
                     Header = configItem.Text,
                     IsEnabled = configItem.EnabledCondition(),
+                    IsCheckable = configItem.CheckedCondition != null,
+                    IsChecked = configItem.CheckedCondition != null ? configItem.CheckedCondition() : false,
                     Command = new Command(configItem.Action)
                 });
             }

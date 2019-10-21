@@ -1788,7 +1788,7 @@
                             <Setter Property="BorderBrush" TargetName="CheckBoxBorder" Value="{StaticResource BrushHighlight}"/>
                         </Trigger>
                         <Trigger Property="IsChecked" Value="false">
-                            <Setter TargetName="CheckMark" Property="Visibility" Value="Collapsed"/>
+                            <Setter TargetName="CheckMark" Property="Visibility" Value="Collapsed" />
                         </Trigger>
                         <Trigger Property="IsChecked" Value="{x:Null}">
                             <Setter TargetName="CheckMark" Property="Data" Value="{StaticResource CheckBoxUndefinedCheckmark}"/>
@@ -2674,10 +2674,11 @@
                         Grid.Column="1"
                         ContentSource="Header"
                         RecognizesAccessKey="True" />
+                
                 <TextBlock x:Name="InputGestureText"
                     VerticalAlignment="Center"
                     Grid.Column="2"
-                    Foreground="{TemplateBinding Foreground}"
+                    Foreground="{TemplateBinding Label.Foreground}"
                      Text="{TemplateBinding InputGestureText}"
                      Margin="12,0,0,3"
                      DockPanel.Dock="Right" />
@@ -2690,12 +2691,14 @@
             </Trigger>
             <Trigger Property="IsChecked" Value="true">
                 <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
+                <Setter TargetName="CheckMark" Property="Fill" Value="{StaticResource BrushForeground}" />
             </Trigger>
             <Trigger Property="IsCheckable" Value="true">
                 <Setter TargetName="Icon" Property="Visibility" Value="Hidden" />
             </Trigger>
             <Trigger Property="IsHighlighted" Value="true">
                 <Setter Property="Background" TargetName="Border" Value="{StaticResource SelectedListItem}" />
+                <Setter Property="Foreground" TargetName="InputGestureText" Value="{StaticResource BrushForeground}" />
             </Trigger>
             <Trigger Property="IsEnabled" Value="false">
                 <Setter Property="Foreground" Value="{StaticResource SubMenuBorderBrush}" />
@@ -2714,8 +2717,8 @@
                 </Grid.ColumnDefinitions>
                 <ContentPresenter x:Name="Icon" Margin="6,0,6,0" VerticalAlignment="Center" ContentSource="Icon" />
                 <ContentPresenter x:Name="HeaderHost" Margin="17 0 0 0" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True" />
-                <TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" Foreground="{TemplateBinding Foreground}" Margin="5,2,2,2" DockPanel.Dock="Right" />
-                <Path Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 0 7 L 4 3.5 Z" Fill="{TemplateBinding Foreground}" />
+                <TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" Foreground="{TemplateBinding Label.Foreground}" VerticalAlignment="Center" Margin="3,0,0,3" DockPanel.Dock="Right" />
+                <Path Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 0 7 L 4 3.5 Z" Fill="{TemplateBinding Foreground}" Margin="12,0,0,3" />
                 <Popup 
                     x:Name="Popup" 
                     Placement="Right" 
@@ -2739,6 +2742,7 @@
             </Trigger>
             <Trigger Property="IsHighlighted" Value="true">
                 <Setter Property="Background" TargetName="Border" Value="{StaticResource SelectedListItem}" />
+                <Setter Property="Foreground" TargetName="InputGestureText" Value="{StaticResource BrushForeground}" />
             </Trigger>
             <Trigger Property="IsEnabled" Value="false">
                 <Setter Property="Foreground" Value="{StaticResource SubMenuBorderBrush}" />
@@ -2748,6 +2752,8 @@
     
     <!-- MenuItem Style -->
     <Style x:Key="{x:Type MenuItem}" TargetType="{x:Type MenuItem}">
+        <Setter Property="Foreground" Value="{StaticResource BrushForeground}" />
+        <Setter Property="Label.Foreground" Value="{StaticResource BrushControlLightBackground}" />
         <Setter Property="OverridesDefaultStyle" Value="True" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="MinHeight" Value="28" />
@@ -3195,7 +3201,7 @@
         </Setter>
         <Style.Triggers>
             <Trigger Property="IsSelected" Value="True">
-                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Background" Value="{StaticResource BrushControlDarkBackground}" />
                 <Setter Property="Foreground" Value="Black"/>
                 <Setter Property="BorderBrush" Value="Transparent"/>
             </Trigger>

@@ -28,7 +28,7 @@
         <DockPanel Grid.Row="0" Height="22">
             <Menu x:Name="Menu" VerticalAlignment="Center">
                 <MenuItem Width="Auto" Header="Map">
-                    <MenuItem Header="New">
+                    <MenuItem Header="New" InputGestureText="Ctrl+A">
                         <MenuItem Header="File1" IsCheckable="True" IsChecked="True" InputGestureText="Ctrl+A"  />
                         <MenuItem Header="File2" />
                         <MenuItem Header="File3" />

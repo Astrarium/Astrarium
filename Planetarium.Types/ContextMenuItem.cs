@@ -14,13 +14,15 @@ namespace Planetarium.Types
         public Action Action { get; private set; }
         public Func<bool> EnabledCondition { get; private set; }
         public Func<bool> VisibleCondition { get; private set; }
+        public Func<bool> CheckedCondition { get; private set; }
 
-        public ContextMenuItem(string text, Action action, Func<bool> enabledCondition, Func<bool> visibleCondition)
+        public ContextMenuItem(string text, Action action, Func<bool> enabledCondition, Func<bool> visibleCondition, Func<bool> checkedCondition = null)
         {
             Text = text;
             Action = action;
             EnabledCondition = enabledCondition;
             VisibleCondition = visibleCondition;
+            CheckedCondition = checkedCondition;
         }
     }
 }
