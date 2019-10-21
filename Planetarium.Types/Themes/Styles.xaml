@@ -1712,6 +1712,9 @@
     <!--#endregion-->
 
     <!--#region CheckBox-->
+    
+    <!-- TODO: styling -->
+    
     <Style x:Key="EmptyCheckBoxFocusVisual">
         <Setter Property="Control.Template">
             <Setter.Value>
@@ -1749,7 +1752,7 @@
                 <ControlTemplate TargetType="{x:Type CheckBox}">
                     <BulletDecorator Background="Transparent" SnapsToDevicePixels="true">
                         <BulletDecorator.Bullet>
-                            <Border x:Name="CheckBoxBorder"
+                            <c:BorderFix x:Name="CheckBoxBorder"
                                         Height="14"
 										Width="14"
 										BorderBrush="{TemplateBinding BorderBrush}" 
@@ -1762,7 +1765,7 @@
 											Stretch="Fill" 
 											Fill="{TemplateBinding Foreground}"
 											Margin="1,1.007,1,1"/>
-                            </Border>
+                            </c:BorderFix>
                         </BulletDecorator.Bullet>
                         <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
 												Margin="{TemplateBinding Padding}" 
@@ -1799,6 +1802,8 @@
     <!--#endregion-->
 
     <!--#region RadioButton-->
+    
+    <!-- TODO: styling! -->
     <Style x:Key="RadioFocusVisual">
         <Setter Property="Control.Template">
             <Setter.Value>
@@ -1812,6 +1817,7 @@
             </Setter.Value>
         </Setter>
     </Style>
+    
     <Style TargetType="{x:Type RadioButton}" BasedOn="{StaticResource {x:Type Control}}">
         <Setter Property="Foreground" Value="{StaticResource RadioButtonForeground}"/>
         <Setter Property="Background" Value="{StaticResource RadioButtonBackground}"/>
@@ -1822,18 +1828,19 @@
                 <ControlTemplate TargetType="{x:Type RadioButton}">
                     <BulletDecorator Background="Transparent">
                         <BulletDecorator.Bullet>
-                            <Border x:Name="RadioButtonBorder"
+                            <Grid>
+                                <Ellipse x:Name="RadioButtonBorder"
                                     Width="16"
-                                    Height="16"
-                                    CornerRadius="7"
-                                    BorderThickness="1"
-                                    BorderBrush="Transparent"
-                                    Background="{TemplateBinding Background}">
+                                    Height="16"                                    
+                                    StrokeThickness="1"
+                                    Stroke="Transparent"
+                                    Fill="{TemplateBinding Background}" />
                                 <Ellipse x:Name="RadioMark"
+                                        Margin="5"
                                         Width="6"
                                         Height="6"
                                         Fill="{TemplateBinding Foreground}"/>
-                            </Border>
+                            </Grid>
                         </BulletDecorator.Bullet>
                         <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                           Margin="{TemplateBinding Padding}"
@@ -1847,11 +1854,11 @@
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="false">
                             <Setter Property="Foreground" Value="{StaticResource RadioButtonDisabledForeground}"/>
-                            <Setter Property="BorderBrush" TargetName="RadioButtonBorder" Value="{StaticResource RadioButtonDisabledStroke}"/>
+                            <Setter Property="Stroke" TargetName="RadioButtonBorder" Value="{StaticResource RadioButtonDisabledStroke}"/>
                             <Setter Property="Fill" TargetName="RadioMark" Value="{StaticResource RadioButtonDisabledForeground}" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="BorderBrush" TargetName="RadioButtonBorder" Value="{StaticResource BrushHighlight}"/>
+                            <Setter Property="Stroke" TargetName="RadioButtonBorder" Value="{StaticResource BrushHighlight}"/>
                         </Trigger>
                         <Trigger Property="IsChecked" Value="false">
                             <Setter TargetName="RadioMark" Property="Visibility" Value="Collapsed"/>
@@ -1864,6 +1871,9 @@
     <!--#endregion-->
 
     <!--#region ListView-->
+    
+    
+    <!-- TODO: styling -->
     <Style x:Key="FocusVisual">
         <Setter Property="Control.Template">
             <Setter.Value>
@@ -3444,6 +3454,7 @@
     </Style>
 
     <Style TargetType="{x:Type c:ColorPicker}" BasedOn="{StaticResource {x:Type Control}}">
+        <Setter Property="BorderBrush" Value="{StaticResource BrushControlBackground}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type c:ColorPicker}">
@@ -3456,8 +3467,8 @@
                             Name="palette"
                             VerticalAlignment="Center"
                             Grid.Column="0" 
-                            Stroke="{StaticResource BrushControlLightBackground}"
-                            StrokeThickness="2"
+                            Stroke="{TemplateBinding BorderBrush}"
+                            StrokeThickness="1"
                             Width="16" Height="16">
                             <Ellipse.Fill>
                                 <SolidColorBrush Color="{Binding SelectedColor, RelativeSource={RelativeSource TemplatedParent}, Converter={t:ColorConverter}}" />

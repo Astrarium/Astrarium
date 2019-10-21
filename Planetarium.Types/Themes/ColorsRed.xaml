@@ -13,7 +13,7 @@
     <Color x:Key="ColorControlLightBackground">#800000</Color>
     <Color x:Key="ColorControlDarkBackground">#3D0000</Color>
     <Color x:Key="ColorSelection">#800000</Color>
-    <Color x:Key="ColorHighlight">#480000</Color>
+    <Color x:Key="ColorHighlight">#800000</Color>
 
     <!--#endregion-->
 
