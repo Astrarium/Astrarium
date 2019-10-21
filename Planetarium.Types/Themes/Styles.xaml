@@ -8,6 +8,9 @@
 
     <!--#region Brushes-->
 
+
+    <SolidColorBrush x:Key="BrushControlBackground" Color="{DynamicResource ColorControlBackground}" />
+
     <SolidColorBrush x:Key="HoverBrush" Color="{DynamicResource ColorHighlight}" />
     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="{DynamicResource ColorSelection}" />
     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="{DynamicResource ColorSelection}" />
@@ -53,9 +56,8 @@
     <SolidColorBrush x:Key="ButtonNormalBorder" Color="#4C4C4C"/>
 
     <SolidColorBrush x:Key="ButtonForeground" Color="{DynamicResource ColorForeground}"/>
-    <SolidColorBrush x:Key="MouseOverButtonForeground" Color="#1B1B1B"/>
     <SolidColorBrush x:Key="ButtonBackground" Color="{DynamicResource ColorControlBackground}"/>
-    <SolidColorBrush x:Key="ButtonBorder" Color="{DynamicResource ColorWindowBorder}"/>
+    <SolidColorBrush x:Key="ButtonBorder" Color="{DynamicResource ColorForeground}"/>
     <SolidColorBrush x:Key="PressedButtonBackground" Color="{DynamicResource ColorControlDarkBackground}"/>
     <SolidColorBrush x:Key="MouseOverButtonBackground" Color="{DynamicResource ColorControlLightBackground}"/>
     <SolidColorBrush x:Key="DisabledButtonBackground" Color="{DynamicResource ColorControlDarkBackground}"/>
@@ -1290,7 +1292,7 @@
     <Style TargetType="{x:Type ButtonBase}" BasedOn="{StaticResource {x:Type Control}}">
         <Setter Property="FocusVisualStyle" Value="{StaticResource ButtonFocusVisual}"/>
         <Setter Property="Background" Value="{StaticResource ButtonBackground}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource ButtonBorder}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource ButtonBackground}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Foreground" Value="{StaticResource ButtonForeground}"/>
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
@@ -1318,7 +1320,7 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="true">
                             <Setter Property="Background" Value="{StaticResource MouseOverButtonBackground}"/>
-                            <Setter Property="Foreground" Value="{StaticResource MouseOverButtonForeground}"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource MouseOverButtonBackground}"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="true">
                             <Setter Property="Background" Value="{StaticResource PressedButtonBackground}"/>
@@ -1363,10 +1365,11 @@
 
     <!--#region ToggleButton-->
     <Style TargetType="{x:Type ToggleButton}">
+        <Setter Property="SnapsToDevicePixels" Value="true" />
         <Setter Property="FocusVisualStyle" Value="{StaticResource ButtonFocusVisual}"/>
         <Setter Property="Background" Value="{StaticResource ButtonBackground}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource ButtonBorder}"/>
-        <Setter Property="BorderThickness" Value="1"></Setter>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"></Setter>
         <Setter Property="Foreground" Value="{StaticResource ButtonForeground}"/>
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -1402,7 +1405,6 @@
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="true">
                             <Setter Property="Background" Value="{StaticResource MouseOverButtonBackground}"/>
-                            <Setter Property="Foreground" Value="{StaticResource MouseOverButtonForeground}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -2578,7 +2580,7 @@
     <Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="{x:Type Separator}">
         <Setter Property="Height" Value="1" />
         <Setter Property="Margin" Value="0,4,0,4" />
-        <Setter Property="BorderBrush" Value="{StaticResource MenuSeparatorBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BrushControlBackground}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Separator}">
@@ -2618,7 +2620,7 @@
             </Trigger>
             <Trigger Property="IsHighlighted" Value="true">
                 <Setter TargetName="Border" Property="BorderBrush" Value="Transparent" />
-                <Setter Property="Background" TargetName="Border" Value="{StaticResource HoverBrush}" />
+                <Setter Property="Background" TargetName="Border" Value="{StaticResource SelectedListItem}" />
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">
                 <Setter Property="Foreground" Value="{StaticResource LightBackgroundBrush}" />
@@ -2635,7 +2637,7 @@
         </c:BorderFix>
         <ControlTemplate.Triggers>
             <Trigger Property="IsHighlighted" Value="true">
-                <Setter Property="Background" TargetName="Border" Value="{StaticResource MenuItemSelectionFill}" />
+                <Setter Property="Background" TargetName="Border" Value="{StaticResource SelectedListItem}" />
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">
                 <Setter Property="Foreground" Value="{StaticResource LightBackgroundBrush}" />
@@ -2699,7 +2701,7 @@
                 <Setter TargetName="Icon" Property="Visibility" Value="Hidden" />
             </Trigger>
             <Trigger Property="IsHighlighted" Value="true">
-                <Setter Property="Background" TargetName="Border" Value="{StaticResource MenuItemSelectionFill}" />
+                <Setter Property="Background" TargetName="Border" Value="{StaticResource SelectedListItem}" />
             </Trigger>
             <Trigger Property="IsEnabled" Value="false">
                 <Setter Property="Foreground" Value="{StaticResource SubMenuBorderBrush}" />
@@ -2742,7 +2744,7 @@
                 <Setter TargetName="Icon" Property="Visibility" Value="Hidden" />
             </Trigger>
             <Trigger Property="IsHighlighted" Value="true">
-                <Setter Property="Background" TargetName="Border" Value="{StaticResource MenuItemSelectionFill}" />
+                <Setter Property="Background" TargetName="Border" Value="{StaticResource SelectedListItem}" />
             </Trigger>
             <Trigger Property="IsEnabled" Value="false">
                 <Setter Property="Foreground" Value="{StaticResource SubMenuBorderBrush}" />
@@ -2792,19 +2794,13 @@
         </Style.Triggers>
     </Style>
 
-
-    <!--ScrollViewer for a MenuItem-->
-    <MenuScrollingVisibilityConverter x:Key="MenuScrollingVisibilityConverter" />
-
-   
-
     <!--#endregion-->
 
     <!--#region Separator-->
     <Style TargetType="{x:Type Separator}">
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderBrush" Value="{StaticResource MenuSeparatorBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BrushControlBackground}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Separator}">
@@ -2874,18 +2870,18 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsSelected" Value="true">
-                            <Setter Property="Background" TargetName="Bd" Value="{DynamicResource SelectedListItem}"/>
-                            <Setter Property="Foreground" Value="{DynamicResource SelectedListItemForeground}"/>
+                            <Setter Property="Background" TargetName="Bd" Value="{StaticResource SelectedListItem}"/>
+                            <Setter Property="Foreground" Value="{StaticResource SelectedListItemForeground}"/>
                         </Trigger>
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
                                 <Condition Property="IsMouseOver" Value="true"/>
                                 <Condition Property="IsSelected" Value="false"/>
                             </MultiTrigger.Conditions>
-                            <Setter Property="Background" TargetName="Bd" Value="{DynamicResource MouseOverListItem}"/>
+                            <Setter Property="Background" TargetName="Bd" Value="{StaticResource MouseOverListItem}"/>
                         </MultiTrigger>
                         <Trigger Property="IsEnabled" Value="false">
-                            <Setter Property="Foreground" Value="{DynamicResource DisabledMenuForeground}"/>
+                            <Setter Property="Foreground" Value="{StaticResource DisabledMenuForeground}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -3164,10 +3160,10 @@
                                 <Condition Property="IsMouseOver" Value="true"/>
                                 <Condition Property="IsSelected" Value="false"/>
                             </MultiTrigger.Conditions>
-                            <Setter Property="Background" TargetName="DGR_Border" Value="{DynamicResource MouseOverListItem}"/>
+                            <Setter Property="Background" TargetName="DGR_Border" Value="{StaticResource MouseOverListItem}"/>
                         </MultiTrigger>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="DGR_Border" Property="Background" Value="{DynamicResource DataGridRowSelectedBrush}" />
+                            <Setter TargetName="DGR_Border" Property="Background" Value="{StaticResource DataGridRowSelectedBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -3404,11 +3400,11 @@
                         </TextBox>
                         <RepeatButton Style="{StaticResource {x:Type ButtonBase}}" Name="PART_UpButton" BorderThickness="0" Grid.Column="1" Grid.Row="0"
                                       Width="14" Margin="0,3,0,0">
-                            <Path Fill="{DynamicResource ButtonForeground}" Data="M 0 3 L 6 3 L 3 0 Z"/>
+                            <Path Fill="{TemplateBinding Foreground}" Data="M 0 3 L 6 3 L 3 0 Z"/>
                         </RepeatButton>
                         <RepeatButton Style="{StaticResource {x:Type ButtonBase}}" Name="PART_DownButton" BorderThickness="0" Grid.Column="1" Grid.Row="1"
                                       Width="14" Margin="0,0,0,3">
-                            <Path Fill="{DynamicResource ButtonForeground}" Data="M 0 0 L 3 3 L 6 0 Z"/>
+                            <Path Fill="{TemplateBinding Foreground}" Data="M 0 0 L 3 3 L 6 0 Z"/>
                         </RepeatButton>
 
                     </Grid>
