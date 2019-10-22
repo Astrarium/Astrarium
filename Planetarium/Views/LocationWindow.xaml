@@ -32,7 +32,7 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
             </Grid.ColumnDefinitions>
 
             <TextBox x:Name="txtSearchString" Margin="0 4 0 4" Text="{Binding SearchString, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock IsHitTestVisible="False" Text="Type to search for location name" Height="26" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Left" Padding="8 4 4 4" Foreground="{StaticResource TextBoxHintForeground}">
+            <TextBlock IsHitTestVisible="False" Text="Type to search for location name" Height="26" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Left" Padding="8 4 4 4" Foreground="{StaticResource BrushControlLightBackground}">
                 <TextBlock.Style>
                     <Style TargetType="{x:Type TextBlock}">
                         <Setter Property="Visibility" Value="Collapsed"/>
