@@ -49,6 +49,7 @@
                 VerticalScrollBarVisibility="Auto"
                 HorizontalScrollBarVisibility="Auto">
                 <ContentPresenter Margin="8" Content="{Binding SectionContent}" />
+
             </ScrollViewer>
         </Grid>
 

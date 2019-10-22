@@ -22,7 +22,7 @@ namespace Planetarium.Types.Localization
             if (LocalizationStrings.ContainsKey(key))
                 return LocalizationStrings[key];
             else
-                return $"?{key}";
+                return $"{{{key}}}";
         }
 
         public static string FileName { get; set; } = "Translation";
