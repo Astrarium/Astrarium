@@ -9,6 +9,7 @@
     <SolidColorBrush x:Key="BrushForeground" Color="{DynamicResource ColorForeground}" />
     <SolidColorBrush x:Key="BrushWindowBackground" Color="{DynamicResource ColorWindowBackground}" />
     <SolidColorBrush x:Key="BrushWindowBorder" Color="{DynamicResource ColorWindowBorder}" />
+    <SolidColorBrush x:Key="BrushWindowTitle" Color="{DynamicResource ColorWindowTitle}" />
     <SolidColorBrush x:Key="BrushControlBackground" Color="{DynamicResource ColorControlBackground}" />
     <SolidColorBrush x:Key="BrushControlLightBackground" Color="{DynamicResource ColorControlLightBackground}" />
     <SolidColorBrush x:Key="BrushControlDarkBackground" Color="{DynamicResource ColorControlDarkBackground}" />
@@ -1241,11 +1242,15 @@
         <Setter Property="Width" Value="24" />
         <Setter Property="Height" Value="24" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Background" Value="{StaticResource BrushWindowBorder}" />
         <Setter Property="BorderBrush" Value="Transparent" />
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{StaticResource BrushControlLightBackground}"/>
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <SolidColorBrush Color="{DynamicResource ColorWindowBackground}" Opacity="0.5" />
+                    </Setter.Value>
+                </Setter>
                 <Setter Property="Foreground" Value="{StaticResource BrushForeground}"/>
             </Trigger>
         </Style.Triggers>
@@ -1630,6 +1635,7 @@
                         </Trigger>
                         <Trigger Property="IsPressed" Value="true">
                             <Setter Property="Background" TargetName="HeaderBorder" Value="{StaticResource BrushSelection}"/>
+
                             <Setter Property="Visibility" TargetName="PART_HeaderGripper" Value="Hidden"/>
                             <Setter Property="Margin" TargetName="HeaderContent" Value="1,1,0,0"/>
                         </Trigger>
@@ -2240,6 +2246,7 @@
         <ControlTemplate.Triggers>
             <Trigger Property="IsHighlighted" Value="true">
                 <Setter Property="Background" TargetName="Border" Value="{StaticResource BrushSelection}" />
+
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">
                 <Setter Property="Foreground" Value="{StaticResource BrushControlLightBackground}" />
@@ -2301,6 +2308,7 @@
             <Trigger Property="IsHighlighted" Value="true">
                 <Setter Property="Background" TargetName="Border" Value="{StaticResource BrushSelection}" />
                 <Setter Property="Foreground" TargetName="InputGestureText" Value="{StaticResource BrushForeground}" />
+
             </Trigger>
             <Trigger Property="IsEnabled" Value="false">
                 <Setter Property="Foreground" Value="{StaticResource BrushControlLightBackground}" />
@@ -2345,6 +2353,7 @@
             <Trigger Property="IsHighlighted" Value="true">
                 <Setter Property="Background" TargetName="Border" Value="{StaticResource BrushSelection}" />
                 <Setter Property="Foreground" TargetName="InputGestureText" Value="{StaticResource BrushForeground}" />
+
             </Trigger>
             <Trigger Property="IsEnabled" Value="false">
                 <Setter Property="Foreground" Value="{StaticResource BrushControlLightBackground}" />
@@ -2772,8 +2781,8 @@
         </Setter>
         <Style.Triggers>
             <Trigger Property="IsSelected" Value="True">
-                <Setter Property="Background" Value="{DynamicResource BrushSelection}"/>
-                <Setter Property="Foreground" Value="Black"/>
+                <Setter Property="Background" Value="{StaticResource BrushSelection}"/>
+                <Setter Property="Foreground" Value="{StaticResource BrushForeground}"/>
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -2813,6 +2822,7 @@
                     <Condition Property="Selector.IsSelectionActive" Value="false"/>
                 </MultiTrigger.Conditions>
                 <Setter Property="Background" Value="{StaticResource BrushSelection}"/>
+
             </MultiTrigger>
             <Trigger Property="IsEnabled" Value="false">
                 <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>

@@ -10,8 +10,11 @@
     <!-- Window background -->
     <Color x:Key="ColorWindowBackground">#F6F6F6</Color>
 
-    <!-- Window border and title -->
-    <Color x:Key="ColorWindowBorder">#ababab</Color>
+    <!-- Window border and title background -->
+    <Color x:Key="ColorWindowBorder">#1E2772</Color>
+
+    <!-- Window title text -->
+    <Color x:Key="ColorWindowTitle">#ffffff</Color>
 
     <!-- Buttons background, dropdowns buttons, toolbar buttons, dividers, splitters -->
     <Color x:Key="ColorControlBackground">#cccccc</Color>
@@ -23,9 +26,9 @@
     <Color x:Key="ColorControlDarkBackground">#eeeeee</Color>
 
     <!-- Selected list items background, hovered menu items -->
-    <Color x:Key="ColorSelection">#a3d7ff</Color>
+    <Color x:Key="ColorSelection">#9BA7FF</Color>
 
     <!-- Hovered checkbox and radiobutton outline -->
-    <Color x:Key="ColorHighlight">#9cccff</Color>
+    <Color x:Key="ColorHighlight">#9BA7FF</Color>
 
 </ResourceDictionary>
