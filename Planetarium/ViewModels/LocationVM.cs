@@ -80,6 +80,11 @@ namespace Planetarium.ViewModels
         }
 
         /// <summary>
+        /// Flag indicating night mode is on
+        /// </summary>
+        public bool IsNightMode { get; private set; }
+
+        /// <summary>
         /// Current hour angle of the Sun at Greenwich
         /// </summary>
         public double SunHourAngle { get; private set; }
@@ -489,12 +494,13 @@ namespace Planetarium.ViewModels
         /// <summary>
         /// Creates new instance of <see cref="LocationVM"/>
         /// </summary>
-        public LocationVM(ISky sky)
+        public LocationVM(ISky sky, ISettings settings)
         {
             CrdsEquatorial eqSun = SolarEphem.Ecliptical(sky.Context.JulianDay).ToEquatorial(sky.Context.Epsilon);
             ObserverLocation = new CrdsGeographical(sky.Context.GeoLocation);
             SunHourAngle = Coordinates.HourAngle(sky.Context.SiderealTime, 0, eqSun.Alpha);
-            SunDeclination = eqSun.Delta; 
+            SunDeclination = eqSun.Delta;
+            IsNightMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
 
             OkCommand = new Command(Ok);
             CancelCommand = new Command(Close);

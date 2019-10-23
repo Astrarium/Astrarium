@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing.Imaging;
+using System.IO;
 //using System.Drawing;
 using System.Linq;
 using System.Reflection;
@@ -21,6 +23,7 @@ namespace Planetarium.Controls
         public readonly static DependencyProperty SunHourAngleProperty = DependencyProperty.Register(nameof(SunHourAngle), typeof(double), typeof(EarthMapCanvas), new FrameworkPropertyMetadata(null) { AffectsRender = true });
         public readonly static DependencyProperty ObserverLocationProperty = DependencyProperty.Register(nameof(ObserverLocation), typeof(CrdsGeographical), typeof(EarthMapCanvas), new FrameworkPropertyMetadata(new CrdsGeographical(0, 0), null) { AffectsRender = true });
         public readonly static DependencyProperty SunEquatorialProperty = DependencyProperty.Register(nameof(SunDeclination), typeof(double), typeof(EarthMapCanvas), new FrameworkPropertyMetadata(null) { AffectsRender = true });
+        public readonly static DependencyProperty IsNightModeProperty = DependencyProperty.Register(nameof(IsNightMode), typeof(bool), typeof(EarthMapCanvas), new FrameworkPropertyMetadata(null) { AffectsRender = true });
 
         private double MaxScale = 20;
         private double Zoom = 1;
@@ -59,23 +62,66 @@ namespace Planetarium.Controls
             set { SetValue(SunEquatorialProperty, value); }
         }
 
+        public bool IsNightMode
+        {
+            get { return (bool)GetValue(IsNightModeProperty); }
+            set { SetValue(IsNightModeProperty, value); }
+        }
+
         public EarthMapCanvas()
         {
             if (!DesignerProperties.GetIsInDesignMode(this))
             {
-                Uri uri = new Uri(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data", "Earth.jpg"));
-                BitmapDecoder dec = BitmapDecoder.Create(uri, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);                
-                earthMap = dec.Frames[0];
-                earthMap.Freeze();
-                dec = null;
-
                 Loaded += (s, e) => { // only at this point the control is ready
+
+                    earthMap = GetEarthMap();
+                    earthMap.Freeze();
+
+                    InvalidateVisual();
+
                     Window.GetWindow(this) // get the parent window
                           .Closing += (s1, e1) => Dispose(); //disposing logic here
                 };
             }
           
             ClipToBounds = true;
+        }
+
+        private BitmapSource GetEarthMap()
+        {
+            var bitmap = System.Drawing.Image.FromFile(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data", "Earth.jpg"));
+            if (IsNightMode)
+            {
+                using (var g = System.Drawing.Graphics.FromImage(bitmap))
+                {
+                    var attr = new ImageAttributes();
+                    float[][] matrix = {
+                        new float[] {0.3f, 0, 0, 0, 0},
+                        new float[] {0.3f, 0, 0, 0, 0},
+                        new float[] {0.3f, 0, 0, 0, 0},
+                        new float[] {0, 0, 0, 1, 0},
+                        new float[] {0, 0, 0, 0, 0}
+                    };
+
+                    var colorMatrix = new ColorMatrix(matrix);
+                    attr.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+                    g.DrawImage(bitmap, new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), 0, 0, bitmap.Width, bitmap.Height, System.Drawing.GraphicsUnit.Pixel, attr);
+                    return ConvertBitmap(new System.Drawing.Bitmap(bitmap));
+                }
+            }
+            else
+            {
+                return ConvertBitmap(new System.Drawing.Bitmap(bitmap));
+            }           
+        }
+
+        private BitmapSource ConvertBitmap(System.Drawing.Bitmap source)
+        {
+            return System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                          source.GetHbitmap(),
+                          IntPtr.Zero,
+                          Int32Rect.Empty,
+                          BitmapSizeOptions.FromEmptyOptions());
         }
 
         protected override void OnPreviewMouseMove(MouseEventArgs e)

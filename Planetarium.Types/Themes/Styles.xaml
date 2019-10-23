@@ -836,6 +836,7 @@
 
     <!--#region TextBox-->
     <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type Control}}">
+        <Setter Property="CaretBrush" Value="{StaticResource BrushForeground}" />
         <Setter Property="Background" Value="{StaticResource BrushWindowBackground}"/>
         <Setter Property="BorderBrush" Value="{StaticResource BrushControlBackground}"/>
         <Setter Property="BorderThickness" Value="1"/>
@@ -1186,8 +1187,8 @@
     <Style TargetType="{x:Type ButtonBase}" BasedOn="{StaticResource {x:Type Control}}">
         <Setter Property="FocusVisualStyle" Value="{StaticResource ButtonFocusVisual}"/>
         <Setter Property="Background" Value="{StaticResource BrushControlBackground}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource BrushControlBackground}"/>
-        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Foreground" Value="{StaticResource BrushForeground}"/>
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -1197,9 +1198,10 @@
                 <ControlTemplate TargetType="{x:Type ButtonBase}">
                     <Grid>
                         <Rectangle
-                            Fill="{TemplateBinding Background}" 
-                            Stroke="{TemplateBinding BorderBrush}"
-                            StrokeThickness="{TemplateBinding BorderThickness}" />
+                            x:Name="Border"
+                            Fill="{TemplateBinding Background}"
+                            Stroke="Transparent"
+                            StrokeThickness="0" />
                         <ContentPresenter 
                             x:Name="contentPresenter" 
                             Content="{TemplateBinding Content}"
@@ -1214,7 +1216,10 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="true">
                             <Setter Property="Background" Value="{StaticResource BrushControlLightBackground}"/>
-                            <Setter Property="BorderBrush" Value="{StaticResource BrushControlLightBackground}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="true">
+                            <Setter Property="Stroke" TargetName="Border" Value="{StaticResource BrushHighlight}" />
+                            <Setter Property="StrokeThickness" TargetName="Border" Value="1" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="true">
                             <Setter Property="Background" Value="{StaticResource BrushControlDarkBackground}"/>
@@ -1263,25 +1268,21 @@
         <Setter Property="FocusVisualStyle" Value="{StaticResource ButtonFocusVisual}"/>
         <Setter Property="Background" Value="{StaticResource BrushControlBackground}"/>
         <Setter Property="BorderBrush" Value="Transparent"/>
-        <Setter Property="BorderThickness" Value="0"></Setter>
+        <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Foreground" Value="{StaticResource BrushForeground}"/>
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
-        <Setter Property="Padding" Value="1"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ToggleButton}">
-                    <Grid>
-                        <Rectangle  
-						    Stroke="{TemplateBinding BorderBrush}" 
-						    Fill="{TemplateBinding Background}" 
-                            StrokeThickness="{TemplateBinding BorderThickness}"
-						    SnapsToDevicePixels="true">
-                        </Rectangle>
+                    <Grid Margin="1">
+                        <Rectangle
+                            x:Name="Border"
+                            Fill="{TemplateBinding Background}" 
+                            SnapsToDevicePixels="True" />
                         <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
-                            Margin="{TemplateBinding Padding}" 
                             RecognizesAccessKey="True" 
-                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
+                            SnapsToDevicePixels="True" 
                             VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                     </Grid>
                     <ControlTemplate.Triggers>
@@ -1296,6 +1297,10 @@
                         <Trigger Property="IsChecked" Value="true">
                             <Setter Property="Background" Value="{StaticResource BrushControlBackground}"/>
                             <Setter Property="Foreground" Value="{StaticResource BrushForeground}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="true">
+                            <Setter Property="Stroke" TargetName="Border" Value="{StaticResource BrushHighlight}" />
+                            <Setter Property="StrokeThickness" TargetName="Border" Value="1" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="true">
                             <Setter Property="Background" Value="{StaticResource BrushControlLightBackground}"/>

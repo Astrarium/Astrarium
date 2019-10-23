@@ -5,27 +5,27 @@
                     mc:Ignorable="d">
     
     <!-- Captions, icons, etc. -->
-    <Color x:Key="ColorForeground">#EFEFEF</Color>
+    <Color x:Key="ColorForeground">#404040</Color>
 
     <!-- Window background -->
-    <Color x:Key="ColorWindowBackground">#333333</Color>
+    <Color x:Key="ColorWindowBackground">#F6F6F6</Color>
 
     <!-- Window border and title -->
-    <Color x:Key="ColorWindowBorder">#1B1B1B</Color>
+    <Color x:Key="ColorWindowBorder">#ababab</Color>
 
     <!-- Buttons background, dropdowns buttons, toolbar buttons, dividers, splitters -->
-    <Color x:Key="ColorControlBackground">#595959</Color>
+    <Color x:Key="ColorControlBackground">#cccccc</Color>
 
     <!-- Hovered buttons, scrollbar scroller, inactive checkmarks -->
-    <Color x:Key="ColorControlLightBackground">#808080</Color>
+    <Color x:Key="ColorControlLightBackground">#bbbbbb</Color>
 
     <!-- Scrollbar background, disable tabs background-->
-    <Color x:Key="ColorControlDarkBackground">#3D3D3D</Color>
+    <Color x:Key="ColorControlDarkBackground">#eeeeee</Color>
 
     <!-- Selected list items background, hovered menu items -->
-    <Color x:Key="ColorSelection">#294666</Color>
+    <Color x:Key="ColorSelection">#a3d7ff</Color>
 
     <!-- Hovered checkbox and radiobutton outline -->
-    <Color x:Key="ColorHighlight">#4875A5</Color>
+    <Color x:Key="ColorHighlight">#9cccff</Color>
 
 </ResourceDictionary>
