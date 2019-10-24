@@ -17,7 +17,7 @@
                     x:Name="List" 
                     SelectionMode="Single" 
                     IsSynchronizedWithCurrentItem="True"
-                    ScrollViewer.VerticalScrollBarVisibility="Visible"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"
                     ScrollViewer.CanContentScroll="False"
                     ItemsSource="{Binding SettingValue}"
                     DisplayMemberPath="Name">
