@@ -20,6 +20,7 @@
     <Compile Include="..\Planetarium\**\*.cs" Exclude="..\Planetarium\obj\**" />
     <None Include="..\Planetarium\**\*.settings" />
     <EmbeddedResource Include="..\Planetarium\**\*.resx" />
+    <EmbeddedResource Include="..\Planetarium\Cursors\*.cur" />
   </ItemGroup>
 
   <ItemGroup>

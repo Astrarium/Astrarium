@@ -64,9 +64,23 @@ namespace Planetarium
             };
         }
 
+        protected override void OnExit(ExitEventArgs e)
+        {
+            CursorsHelper.SetSystemCursors();
+            base.OnExit(e);
+        }
+
         private void SetColorSchema(ColorSchema schema)
         {
             Current.Resources.MergedDictionaries[0].Source = new Uri($@"pack://application:,,,/Planetarium.Types;component/Themes/Colors{(schema == ColorSchema.Red ? "Red" : "Default")}.xaml");
+            if (schema == ColorSchema.Red)
+            {
+                CursorsHelper.SetCustomCursors();
+            }
+            else
+            {
+                CursorsHelper.SetSystemCursors();
+            }
         }
 
         private void ConfigureContainer(IProgress<string> progress)

@@ -262,9 +262,10 @@ namespace Planetarium
                     var size = g.MeasureString(text, fontLockMessage, center, format);
                     int margin = 4;
                     var box = new Rectangle((int)(center.X - size.Width / 2 - margin), (int)(center.Y - size.Height / 2 - margin), (int)size.Width + 2 * margin, (int)size.Height + 2 * margin);
-                    g.FillRectangle(new SolidBrush(Color.Black), box);
-                    g.DrawRectangle(new Pen(Color.FromArgb(100, Color.White)), box);
-                    g.DrawString(text, fontLockMessage, new SolidBrush(Color.White), center, format);
+
+                    g.FillRectangle(new SolidBrush(mapContext.GetColor(Color.Black)), box);
+                    g.DrawRectangle(new Pen(Color.FromArgb(100, mapContext.GetColor(Color.White))), box);
+                    g.DrawString(text, fontLockMessage, new SolidBrush(mapContext.GetColor(Color.White)), center, format);
                 }
 
                 // Diagnostic info
