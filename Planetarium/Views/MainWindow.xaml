@@ -29,7 +29,7 @@
             <Menu x:Name="Menu" VerticalAlignment="Center">
                 <MenuItem Width="Auto" Header="Map">
                     <MenuItem Header="New">
-                        <MenuItem Header="File1" IsCheckable="True" IsChecked="True" InputGestureText="Ctrl+A"  />
+                        <MenuItem Header="File1" InputGestureText="Ctrl+A"  />
                         <MenuItem Header="File2" />
                         <MenuItem Header="File3" />
                     </MenuItem>
@@ -41,13 +41,13 @@
                 </MenuItem>
 
                 <MenuItem Width="Auto" Header="Tools">
-                    <MenuItem Header="Search object" Command="{Binding SearchObjectCommand}" IsChecked="True" InputGestureText="Ctrl+A" />
+                    <MenuItem Header="Search object" Command="{Binding SearchObjectCommand}" InputGestureText="Ctrl+A" />
                     <MenuItem Header="Ephemerides" Command="{Binding GetObjectEphemerisCommand}" />
                     <MenuItem Header="Astronomical phenomena" Command="{Binding CalculatePhenomenaCommand}" />
                 </MenuItem>
 
                 <MenuItem Width="Auto" Header="Settings">
-                    <MenuItem Header="Date and Time" Command="{Binding SetDateCommand}" IsChecked="True" InputGestureText="Ctrl+A" />
+                    <MenuItem Header="Date and Time" Command="{Binding SetDateCommand}" InputGestureText="Ctrl+A" />
                     <MenuItem Header="Observer Location" Command="{Binding SelectLocationCommand}" InputGestureText="Ctrl+B" />
                     <Separator />
                     <MenuItem Header="Settings" Command="{Binding ChangeSettingsCommand}" />

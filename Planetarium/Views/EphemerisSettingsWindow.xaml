@@ -6,7 +6,7 @@
         xmlns:c="clr-namespace:Planetarium.Controls;assembly=Planetarium.Types"
         xmlns:t="clr-namespace:Planetarium.Types.Themes;assembly=Planetarium.Types"
         mc:Ignorable="d"
-        Title="Celestial body ephemerides" 
+        Title="Ephemerides" 
         Height="350" Width="400"
         MinHeight="300" MinWidth="400"
         Style="{StaticResource {x:Type Window}}"
