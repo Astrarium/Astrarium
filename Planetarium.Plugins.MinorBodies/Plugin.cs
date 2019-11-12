@@ -28,8 +28,8 @@ namespace Planetarium.Plugins.MinorBodies
 
             #region Toolbar Integration
 
-            AddToolbarItem(new ToolbarButton("Asteroids", "IconAsteroid", settings, "Asteroids", "Objects"));
-            AddToolbarItem(new ToolbarButton("Comets", "IconComet", settings, "Comets", "Objects"));
+            AddToolbarItem(new ToolbarToggleButton("Asteroids", "IconAsteroid", new SimpleBinding(settings, "Asteroids"), "Objects"));
+            AddToolbarItem(new ToolbarToggleButton("Comets", "IconComet", new SimpleBinding(settings, "Comets"), "Objects"));
 
             #endregion Toolbar Integration
 

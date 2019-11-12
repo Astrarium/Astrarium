@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Planetarium
 {
-    public class ToolbarButtonsConfig : List<ToolbarButton>
+    public class ToolbarButtonsConfig : List<ToolbarButtonBase>
     {
         public ToolbarButtonsConfig(ISettings settings)
         {

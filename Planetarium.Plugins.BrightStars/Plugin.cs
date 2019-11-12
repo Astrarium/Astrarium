@@ -27,8 +27,8 @@ namespace Planetarium.Plugins.BrightStars
 
             #endregion Settings
 
-            AddToolbarItem(new ToolbarButton("Stars", "IconStars", settings, "Stars", "Objects"));
-            AddToolbarItem(new ToolbarButton("Constellation Lines", "IconConstLines", settings, "ConstLines", "Constellations"));
+            AddToolbarItem(new ToolbarToggleButton("Stars", "IconStars", new SimpleBinding(settings, "Stars"), "Objects"));
+            AddToolbarItem(new ToolbarToggleButton("Constellation Lines", "IconConstLines", new SimpleBinding(settings, "ConstLines"), "Constellations"));
 
             ExportResourceDictionaries("Images.xaml");
         }

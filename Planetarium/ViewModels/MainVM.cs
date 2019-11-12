@@ -55,7 +55,7 @@ namespace Planetarium.ViewModels
         public ObservableCollection<MenuItemVM> SelectedObjectsMenuItems { get; private set; } = new ObservableCollection<MenuItemVM>();
         public string SelectedObjectName { get; private set; }
 
-        public ObservableCollection<ToolbarItemVM> ToolbarItems { get; private set; } = new ObservableCollection<ToolbarItemVM>();
+        public ObservableCollection<ToolbarItem> ToolbarItems { get; private set; } = new ObservableCollection<ToolbarItem>();
 
         public class MenuItemVM
         {
@@ -136,9 +136,9 @@ namespace Planetarium.ViewModels
             {
                 foreach (var button in group)
                 {
-                    ToolbarItems.Add(new ToolbarToggleButtonVM(button.ButtonTooltip, button.ImageKey, button.BindableObject, button.BindablePropertyName));
+                    ToolbarItems.Add(button);
                 }
-                ToolbarItems.Add(new ToolbarSeparatorVM());
+                ToolbarItems.Add(new ToolbarSeparator());
             }
 
             this.contextMenuItemsConfig = contextMenuItemsConfig;

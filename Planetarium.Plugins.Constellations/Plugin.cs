@@ -29,7 +29,7 @@ namespace Planetarium.Plugins.Constellations
 
             #region Toolbar Integration
             
-            AddToolbarItem(new ToolbarButton("Constellation Borders", "IconConstBorders", settings, "ConstBorders", "Constellations"));
+            AddToolbarItem(new ToolbarToggleButton("Constellation Borders", "IconConstBorders", new SimpleBinding(settings, "ConstBorders"), "Constellations"));
 
             #endregion Toolbar Integration
 

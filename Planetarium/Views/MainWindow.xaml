@@ -3,18 +3,18 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:v="clr-namespace:Planetarium"
-        xmlns:vm="clr-namespace:Planetarium.ViewModels"
-        xmlns:t="clr-namespace:Planetarium.Types.Themes;assembly=Planetarium.Types"
+        xmlns:a="clr-namespace:Planetarium"
+        xmlns:t="clr-namespace:Planetarium.Types;assembly=Planetarium.Types"
+        xmlns:s="clr-namespace:Planetarium.Types.Themes;assembly=Planetarium.Types"
         mc:Ignorable="d"
         Style="{StaticResource {x:Type Window}}"
         MinHeight="300" MinWidth="300"
-        v:MainWindow.FullScreen="{Binding FullScreen, Mode=OneWay}"
-        v:MainWindow.MousePosition="{Binding SkyMousePosition, Mode=OneWayToSource}"
-        v:MainWindow.MapKeyDown="{Binding MapKeyDownCommand}"
-        v:MainWindow.MapDoubleClick="{Binding MapDoubleClickCommand}"
-        v:MainWindow.MapRightClick="{Binding MapRightClickCommand}"
-        v:MainWindow.MapZoom="{Binding ZoomCommand}"
+        a:MainWindow.FullScreen="{Binding FullScreen, Mode=OneWay}"
+        a:MainWindow.MousePosition="{Binding SkyMousePosition, Mode=OneWayToSource}"
+        a:MainWindow.MapKeyDown="{Binding MapKeyDownCommand}"
+        a:MainWindow.MapDoubleClick="{Binding MapDoubleClickCommand}"
+        a:MainWindow.MapRightClick="{Binding MapRightClickCommand}"
+        a:MainWindow.MapZoom="{Binding ZoomCommand}"
         Title="Astrarium" Height="450" Width="800">
 
     <Grid>
@@ -64,14 +64,14 @@
                 </DataTemplate>
 
                 <DataTemplate x:Key="ToolbarButtonTemplate">
-                    <Button ToolTip="{Binding ButtonName}" Command="{Binding ButtonCommand}" SnapsToDevicePixels="True">
+                    <Button ToolTip="{Binding Tooltip}" Command="{Binding ButtonCommand}" SnapsToDevicePixels="True">
                         <Button.Content>
                             <Rectangle Margin="2" Width="18" Height="18">
                                 <Rectangle.Fill>
                                     <SolidColorBrush Color="{DynamicResource ColorForeground}" />
                                 </Rectangle.Fill>
                                 <Rectangle.OpacityMask>
-                                    <ImageBrush AlignmentX="Left" AlignmentY="Top" ImageSource="{Binding ImageKey, Converter={t:ImageKeyToImageConverter}}"  Stretch="UniformToFill" />
+                                    <ImageBrush AlignmentX="Left" AlignmentY="Top" ImageSource="{Binding ImageKey, Converter={s:ImageKeyToImageConverter}}"  Stretch="UniformToFill" />
                                 </Rectangle.OpacityMask>
                             </Rectangle>
                         </Button.Content>
@@ -79,14 +79,14 @@
                 </DataTemplate>
 
                 <DataTemplate x:Key="ToolbarToggleButtonTemplate">
-                    <ToggleButton ToolTip="{Binding ButtonName}" IsChecked="{Binding IsChecked}" SnapsToDevicePixels="True">
+                    <ToggleButton ToolTip="{Binding Tooltip}" IsChecked="{Binding IsChecked}" SnapsToDevicePixels="True">
                         <ToggleButton.Content>
                             <Rectangle Margin="2" Width="18" Height="18">
                                 <Rectangle.Fill>
                                     <SolidColorBrush Color="{DynamicResource ColorForeground}" />
                                 </Rectangle.Fill>
                                 <Rectangle.OpacityMask>
-                                    <ImageBrush  AlignmentX="Left" AlignmentY="Top" ImageSource="{Binding ImageKey, Converter={t:ImageKeyToImageConverter}}"  Stretch="UniformToFill" />
+                                    <ImageBrush  AlignmentX="Left" AlignmentY="Top" ImageSource="{Binding ImageKey, Converter={s:ImageKeyToImageConverter}}"  Stretch="UniformToFill" />
                                 </Rectangle.OpacityMask>
                             </Rectangle>
                         </ToggleButton.Content>
@@ -100,13 +100,13 @@
                         <ContentControl.Style>
                             <Style TargetType="ContentControl">
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Type}" Value="{x:Type vm:ToolbarSeparatorVM}">
+                                    <DataTrigger Binding="{Binding Type}" Value="{x:Type t:ToolbarSeparator}">
                                         <Setter Property="ContentTemplate" Value="{StaticResource ToolbarSeparatorTemplate}" />
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding Type}" Value="{x:Type vm:ToolbarButtonVM}">
+                                    <DataTrigger Binding="{Binding Type}" Value="{x:Type t:ToolbarButton}">
                                         <Setter Property="ContentTemplate" Value="{StaticResource ToolbarButtonTemplate}" />
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding Type}" Value="{x:Type vm:ToolbarToggleButtonVM}">
+                                    <DataTrigger Binding="{Binding Type}" Value="{x:Type t:ToolbarToggleButton}">
                                         <Setter Property="ContentTemplate" Value="{StaticResource ToolbarToggleButtonTemplate}" />
                                     </DataTrigger>
                                 </Style.Triggers>

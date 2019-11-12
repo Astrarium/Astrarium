@@ -34,7 +34,10 @@ namespace Planetarium.Types.Localization
             CultureInfo.DefaultThreadCurrentCulture = culture;
             CultureInfo.DefaultThreadCurrentUICulture = culture;
             LoadLocalizationStrings();
+            LocaleChanged?.Invoke();
         }
+
+        public static event Action LocaleChanged;
 
         public static CultureInfo[] GetLocales()
         {

@@ -12,11 +12,11 @@ namespace Planetarium.Types
     public abstract class AbstractPlugin
     {
         private List<SettingItem> settingItems = new List<SettingItem>();
-        private List<ToolbarButton> toolbarItems = new List<ToolbarButton>();
+        private List<ToolbarButtonBase> toolbarItems = new List<ToolbarButtonBase>();
         private List<ContextMenuItem> contextMenuItems = new List<ContextMenuItem>();
 
         public IEnumerable<SettingItem> SettingItems => settingItems;
-        public IEnumerable<ToolbarButton> ToolbarItems => toolbarItems;
+        public IEnumerable<ToolbarButtonBase> ToolbarItems => toolbarItems;
         public IEnumerable<ContextMenuItem> ContextMenuItems => contextMenuItems;
 
         public static IEnumerable<Type> Renderers(Type pluginType)
@@ -39,7 +39,7 @@ namespace Planetarium.Types
             settingItems.Add(setting);
         }
 
-        protected void AddToolbarItem(ToolbarButton button)
+        protected void AddToolbarItem(ToolbarButtonBase button)
         {
             toolbarItems.Add(button);
         }
