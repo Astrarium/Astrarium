@@ -10,9 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Images.xaml" />
+    <EmbeddedResource Include="Translations\Translation-en.txt" />
+    <EmbeddedResource Include="Translations\Translation-ru.txt" />
   </ItemGroup>
-
+  
   <ItemGroup>
     <Page Include="Images.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -25,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="System.Xaml" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsBase" />

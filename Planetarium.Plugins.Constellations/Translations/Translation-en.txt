@@ -1,0 +1,12 @@
+﻿# General
+Planetarium.Plugins.Constellations.ConstellationsRenderer.Name = Constellations
+
+# Settings
+Settings.ConstBorders						= Constellations Borders
+Settings.ConstLabels						= Constellations Labels
+Settings.ConstLabelsType					= Labels Type
+Settings.ConstLabelsType.InternationalName	= Latin Name
+Settings.ConstLabelsType.InternationalCode	= IAU Code
+Settings.ConstLabelsType.LocalName			= English Name
+Settings.ColorConstBorders					= Constellations Borders
+Settings.ColorConstLabels					= Constellations Labels

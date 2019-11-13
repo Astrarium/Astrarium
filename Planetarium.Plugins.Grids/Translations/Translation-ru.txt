@@ -6,6 +6,7 @@ CelestialGridRenderer.Nadir		= Надир
 CelestialGridRenderer.NCP		= С.П.
 CelestialGridRenderer.SCP		= Ю.П.
 
+# Settings
 Settings.EquatorialGrid			= Экваториальная сетка
 Settings.LabelEquatorialPoles	= Показывать экваториальные полюса
 Settings.HorizontalGrid			= Горизонтальная сетка

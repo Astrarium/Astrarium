@@ -36,7 +36,7 @@ namespace Planetarium.Plugins.SolarSystem
 
             #endregion Settings
 
-            AddToolbarItem(new ToolbarToggleButton(Text.Get("Settings.Planets"), "IconPlanet", new SimpleBinding(settings, "Planets"), "Objects"));
+            AddToolbarItem(new ToolbarToggleButton("Settings.Planets", "IconPlanet", new SimpleBinding(settings, "Planets"), "Objects"));
 
             ExportResourceDictionaries("Images.xaml");
         }

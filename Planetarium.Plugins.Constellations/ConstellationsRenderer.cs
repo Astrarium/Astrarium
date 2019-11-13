@@ -118,13 +118,13 @@ namespace Planetarium.Plugins.Constellations
 
         public enum LabelType
         {
-            [Description("International Name")]
+            [Description("Settings.ConstLabelsType.InternationalName")]
             InternationalName = 0,
 
-            [Description("International Abbreviation")]
+            [Description("Settings.ConstLabelsType.InternationalCode")]
             InternationalCode = 1,
 
-            [Description("Local Name")]
+            [Description("Settings.ConstLabelsType.LocalName")]
             LocalName = 2
         }
     }

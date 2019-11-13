@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Planetarium.Types.Localization;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
@@ -253,8 +254,9 @@ namespace Planetarium.Types.Themes
                ?.FirstOrDefault();
 
             return
-                memberInfo?.GetCustomAttribute<DescriptionAttribute>()
-                ?.Description ?? memberInfo.Name;
+                Text.Get(
+                    memberInfo?.GetCustomAttribute<DescriptionAttribute>()
+                    ?.Description ?? memberInfo.Name);
         }
     }
 }

@@ -8,15 +8,16 @@
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net451|AnyCPU'">
     <OutputPath>..\Planetarium\bin\$(Configuration)\</OutputPath>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="Images.xaml" />
-  </ItemGroup>
-
+  
   <ItemGroup>
     <Page Include="Images.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Translations\Translation-en.txt" />
+    <EmbeddedResource Include="Translations\Translation-ru.txt" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,6 +45,7 @@
     <None Update="Data\Stars.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+
   </ItemGroup>
 
 </Project>

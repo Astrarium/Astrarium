@@ -1,0 +1,9 @@
+﻿# General
+Planetarium.Plugins.BrightStars.StarsRenderer.Name = Bright Stars
+
+# Settings
+Settings.Stars				= Stars
+Settings.StarsLabels		= Stars Labels
+Settings.StarsProperNames	= Proper Names
+Settings.ConstLines			= Constellations Lines
+

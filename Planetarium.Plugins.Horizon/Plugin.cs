@@ -24,7 +24,7 @@ namespace Planetarium.Plugins.Horizon
 
             #endregion Settings
 
-            AddToolbarItem(new ToolbarToggleButton("Ground", "IconGround", new SimpleBinding(settings, "Ground"), "Grids"));
+            AddToolbarItem(new ToolbarToggleButton("Settings.Ground", "IconGround", new SimpleBinding(settings, "Ground"), "Grids"));
 
             ExportResourceDictionaries("Images.xaml");
         }

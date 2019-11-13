@@ -1,0 +1,12 @@
+﻿# General
+Planetarium.Plugins.Constellations.ConstellationsRenderer.Name = Созвездия
+
+# Settings
+Settings.ConstBorders						= Границы созвездий
+Settings.ConstLabels						= Названия созвездий
+Settings.ConstLabelsType					= Тип подписей
+Settings.ConstLabelsType.InternationalName	= Латинское название
+Settings.ConstLabelsType.InternationalCode	= Международный код
+Settings.ConstLabelsType.LocalName			= Русское название
+Settings.ColorConstBorders					= Границы созвездий
+Settings.ColorConstLabels					= Названия созвездий

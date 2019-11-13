@@ -10,13 +10,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Images.xaml" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Page Include="Images.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Translations\Translation-en.txt" />
+    <EmbeddedResource Include="Translations\Translation-ru.txt" />
   </ItemGroup>
 
   <ItemGroup>

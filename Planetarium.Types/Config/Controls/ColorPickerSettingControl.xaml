@@ -6,6 +6,6 @@
              mc:Ignorable="d" 
              xmlns:controls="clr-namespace:Planetarium.Controls">
 
-    <controls:ColorPicker Caption="{Binding SettingName}" SelectedColor="{Binding SettingValue}" IsEnabled="{Binding IsEnabled}" />
+    <controls:ColorPicker Caption="{Binding SettingTitle, FallbackValue='Color setting'}" SelectedColor="{Binding SettingValue}" IsEnabled="{Binding IsEnabled}" />
 
 </UserControl>

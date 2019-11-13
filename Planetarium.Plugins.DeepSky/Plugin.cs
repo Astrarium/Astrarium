@@ -28,7 +28,7 @@ namespace Planetarium.Plugins.DeepSky
 
             #region Toolbar Integration
 
-            AddToolbarItem(new ToolbarToggleButton("Deep Sky Objects", "IconDeepSky", new SimpleBinding(settings, "DeepSky"), "Objects"));
+            AddToolbarItem(new ToolbarToggleButton("Settings.DeepSky", "IconDeepSky", new SimpleBinding(settings, "DeepSky"), "Objects"));
 
             #endregion Toolbar Integration
 

@@ -1,6 +1,7 @@
 ﻿using ADK;
 using Planetarium.Renderers;
 using Planetarium.Types;
+using Planetarium.Types.Localization;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -18,6 +19,8 @@ namespace Planetarium.Plugins.Horizon
 
         private readonly Color colorGroundNight = Color.FromArgb(4, 10, 10);
         private readonly Color colorGroundDay = Color.FromArgb(116, 185, 139);
+
+        private readonly string[] cardinalDirections = new string[] { "S", "SW", "W", "NW", "N", "NE", "E", "SE" };
 
         public GroundRenderer(ISettings settings)
         {
@@ -115,18 +118,17 @@ namespace Planetarium.Plugins.Horizon
             if (settings.Get<bool>("LabelCardinalDirections"))
             {
                 Brush brushCardinalLabels = new SolidBrush(map.GetColor("ColorCardinalDirections"));
-                string[] labels = new string[] { "S", "SW", "W", "NW", "N", "NE", "E", "SE" };
                 StringFormat format = new StringFormat() { LineAlignment = StringAlignment.Center, Alignment = StringAlignment.Center };
-                for (int i = 0; i < labels.Length; i++)
+                for (int i = 0; i < cardinalDirections.Length; i++)
                 {
-                    var h = new CrdsHorizontal(i * 360 / labels.Length, 0);
+                    var h = new CrdsHorizontal(i * 360 / cardinalDirections.Length, 0);
                     if (Angle.Separation(h, map.Center) < map.ViewAngle * coeff)
                     {                       
                         PointF p = map.Project(h);
                         p.Y += fontCardinalLabels[i % 2].Height;
                         using (var gp = new GraphicsPath())
                         {
-                            map.Graphics.DrawString(labels[i], fontCardinalLabels[i % 2], brushCardinalLabels, p, format);
+                            map.Graphics.DrawString(Text.Get($"CardinalDirections.{cardinalDirections[i]}"), fontCardinalLabels[i % 2], brushCardinalLabels, p, format);
                         }                        
                     }
                 }

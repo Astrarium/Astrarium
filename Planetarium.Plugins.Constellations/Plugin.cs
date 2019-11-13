@@ -17,11 +17,10 @@ namespace Planetarium.Plugins.Constellations
         {
             #region Settings
 
+            AddSetting(new SettingItem("ConstBorders", true, "Constellations"));
             AddSetting(new SettingItem("ConstLabels", true, "Constellations"));
             AddSetting(new SettingItem("ConstLabelsType", ConstellationsRenderer.LabelType.InternationalName, "Constellations", s => s.Get<bool>("ConstLabels")));
-            
-            AddSetting(new SettingItem("ConstBorders", true, "Constellations"));
-
+           
             AddSetting(new SettingItem("ColorConstBorders", Color.FromArgb(64, 32, 32), "Colors"));
             AddSetting(new SettingItem("ColorConstLabels", Color.FromArgb(64, 32, 32), "Colors"));
             
@@ -29,7 +28,7 @@ namespace Planetarium.Plugins.Constellations
 
             #region Toolbar Integration
             
-            AddToolbarItem(new ToolbarToggleButton("Constellation Borders", "IconConstBorders", new SimpleBinding(settings, "ConstBorders"), "Constellations"));
+            AddToolbarItem(new ToolbarToggleButton("Settings.ConstBorders", "IconConstBorders", new SimpleBinding(settings, "ConstBorders"), "Constellations"));
 
             #endregion Toolbar Integration
 
