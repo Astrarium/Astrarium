@@ -26,7 +26,6 @@ namespace Planetarium.Config
         {
             InitializeComponent();
             cmbCultures.ItemsSource = Text.GetLocales();
-            cmbCultures.SelectionChanged += (s, e) => Text.SetLocale(e.AddedItems[0] as CultureInfo);
         }
     }
 }

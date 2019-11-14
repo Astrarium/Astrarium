@@ -75,8 +75,7 @@ namespace Planetarium.Types.Localization
                                 PropertyInfo prop = targetProperty as PropertyInfo;
                                 prop.SetValue(targetObject, text, null);
                             }
-                        }
-                        
+                        }                        
                     }
                 }
 
@@ -196,18 +195,12 @@ namespace Planetarium.Types.Localization
             this.resourceKey = resourceKey;
         }
 
-        ~Text()
-        {
-
-        } 
-
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
             IProvideValueTarget target = serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget;
             
             if (target != null)
             {
-
                 LocalizedObjectsRefs.Add(new LocalizedObjectHolder()
                 {
                     ObjectReference = new WeakReference(target.TargetObject),

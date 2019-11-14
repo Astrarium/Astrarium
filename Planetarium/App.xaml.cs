@@ -83,6 +83,15 @@ namespace Planetarium
             }
         }
 
+        private void SetLanguage(string language)
+        {            
+            var locale = Text.GetLocales().FirstOrDefault(loc => loc.Name == language);
+            if (locale != null)
+            {
+                Text.SetLocale(locale);
+            }
+        }
+
         private void ConfigureContainer(IProgress<string> progress)
         {
             logger.Debug("Configuring application container...");
@@ -198,13 +207,7 @@ namespace Planetarium
 
             settings.Load();
 
-            string language = settings.Get<string>("Language");
-            var savedLocale = Text.GetLocales().FirstOrDefault(loc => loc.Name == language);
-            if (savedLocale != null)
-            {
-                Text.SetLocale(savedLocale);
-            }
-
+            SetLanguage(settings.Get<string>("Language"));
             SetColorSchema(settings.Get<ColorSchema>("Schema"));
 
             SkyContext context = new SkyContext(
@@ -242,6 +245,10 @@ namespace Planetarium
                 if (settingName == "Schema")
                 {
                     SetColorSchema((ColorSchema)value);
+                }
+                else if (settingName == "Language")
+                {
+                    SetLanguage((string)value);
                 }
             };
         }
