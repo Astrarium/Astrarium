@@ -48,8 +48,14 @@
                 Grid.Column="2" 
                 VerticalScrollBarVisibility="Auto"
                 HorizontalScrollBarVisibility="Auto">
-                <ContentPresenter Margin="8" Content="{Binding SectionContent}" />
-
+                <StackPanel Orientation="Vertical" Margin="8">
+                    <ItemsControl  
+                       Width="Auto" 
+                       Height="Auto"
+                       ItemTemplateSelector="{Binding ControlSelector}"
+                       ItemsSource="{Binding SelectedSection}">
+                    </ItemsControl>
+                </StackPanel>
             </ScrollViewer>
         </Grid>
 

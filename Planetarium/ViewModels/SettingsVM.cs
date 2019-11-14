@@ -46,12 +46,12 @@ namespace Planetarium.ViewModels
                 if (value != null)
                 {
                     selectedSection = value;
-                    SectionContent = selectedSection.Panel;
-                    NotifyPropertyChanged(nameof(SectionContent));
+                    NotifyPropertyChanged(nameof(SelectedSection));
                 }
             }
         }
-        public UIElement SectionContent { get; private set; }
+
+        public ConfigControlTemplateSelector ControlSelector { get; private set; }
 
         public SettingsVM(ISettings settings, SettingsConfig settingConfig, IViewManager viewManager)
         {
@@ -63,13 +63,13 @@ namespace Planetarium.ViewModels
             SaveCommand = new Command(Save);
 
             SettingsSections = new ObservableCollection<SettingsSectionVM>();
+            ControlSelector = new ConfigControlTemplateSelector(viewManager);
 
             var sections = settingConfig.Where(c => !string.IsNullOrEmpty(c.Section)).GroupBy(c => c.Section);
 
             foreach (var section in sections)
             {
-                StackPanel panel = new StackPanel();
-                panel.Orientation = Orientation.Vertical;
+                var sectionVM = new SettingsSectionVM() { Title = section.Key };
 
                 foreach (SettingItem item in section)
                 {
@@ -79,17 +79,14 @@ namespace Planetarium.ViewModels
 
                     if (controlType != null)
                     {
-                        FrameworkElement control = viewManager.CreateControl(controlType);
-                        control.DataContext = new SettingVM(settings, item.Name, item.EnabledCondition);
-                        control.Margin = new Thickness(0, 0, 0, 4);
-                        panel.Children.Add(control);
+                        sectionVM.Add(new SettingVM(settings, item.Name, item.EnabledCondition, controlType));
                     }
                 }
-               
-                SettingsSections.Add(new SettingsSectionVM() { Title = section.Key, Panel = panel });
+
+                SettingsSections.Add(sectionVM);
             }
 
-            SelectedSection = SettingsSections.First();
+            SelectedSection = SettingsSections.FirstOrDefault();
 
             this.settings.Save("Current");
         }
@@ -154,10 +151,9 @@ namespace Planetarium.ViewModels
             return null;
         }
 
-        internal class SettingsSectionVM
+        internal class SettingsSectionVM : List<SettingVM>
         {
             public string Title { get; set; }
-            public StackPanel Panel { get; set; }
         }
 
         internal class SettingVM : ViewModelBase
@@ -211,11 +207,14 @@ namespace Planetarium.ViewModels
 
             public bool IsEnabled { get; private set; } = true;
 
-            public SettingVM(ISettings settings, string name, Func<ISettings, bool> isEnabledCondition)
+            public Type ControlType { get; private set; }
+
+            public SettingVM(ISettings settings, string name, Func<ISettings, bool> isEnabledCondition, Type controlType)
             {
                 this.settings = settings;
                 this.settings.SettingValueChanged += Settings_SettingValueChanged;
                 SettingName = name;
+                ControlType = controlType;
                 IsEnabledCondition = isEnabledCondition;
                 Text.LocaleChanged += () => NotifyPropertyChanged(nameof(SettingTitle));
             }
@@ -227,6 +226,25 @@ namespace Planetarium.ViewModels
                     IsEnabled = isEnabledCondition.Invoke(settings);
                     NotifyPropertyChanged(nameof(IsEnabled));
                 }
+            }
+        }
+
+        internal class ConfigControlTemplateSelector : DataTemplateSelector
+        {
+            private IViewManager viewManager;
+
+            public ConfigControlTemplateSelector(IViewManager viewManager)
+            {
+                this.viewManager = viewManager;
+            }
+
+            public override DataTemplate SelectTemplate(object item, DependencyObject container)
+            {
+                SettingVM setting = (SettingVM)item;
+                var controlFactory = new FrameworkElementFactory(setting.ControlType);
+                controlFactory.SetValue(FrameworkElement.DataContextProperty, item);
+                controlFactory.SetValue(FrameworkElement.MarginProperty, new Thickness(0, 0, 0, 4));
+                return new DataTemplate() { VisualTree = controlFactory };
             }
         }
     }
