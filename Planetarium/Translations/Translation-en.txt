@@ -6,3 +6,6 @@ RenderingOrderSettingTitle = Rendering Order
 RenderingOrderHint = Arrange layers according to desired rendering order. Upper items rendered first. Use Up and Down buttons or drag and drop to arrange items.
 RenderingOrderUpButton = Up
 RenderingOrderDownButton = Down
+
+# Menu
+Menu.Settings = Settings

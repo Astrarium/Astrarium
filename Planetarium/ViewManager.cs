@@ -49,8 +49,11 @@ namespace Planetarium
 
         private bool? Show<TViewModel>(TViewModel viewModel, bool isDialog = false) where TViewModel : ViewModelBase
         {
+            bool needDisposeModel = false;
+
             if (viewModel == null)
             {
+                needDisposeModel = true;
                 viewModel = CreateViewModel<TViewModel>();
             }
 
@@ -84,10 +87,15 @@ namespace Planetarium
                     }
                     
                     window.Close();
-                    
+
                     if (viewModel is ViewModelBase)
                     {
                         (viewModel as ViewModelBase).Closing -= viewModelClosingHandler;
+                    }
+
+                    if (needDisposeModel)
+                    {
+                        viewModel.Dispose();
                     }
                 };
 

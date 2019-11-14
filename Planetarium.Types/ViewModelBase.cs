@@ -10,7 +10,7 @@ namespace Planetarium.Types
     /// <summary>
     /// Base class for all ViewModels.
     /// </summary>
-    public abstract class ViewModelBase : INotifyPropertyChanged
+    public abstract class ViewModelBase : INotifyPropertyChanged, IDisposable
     {
         /// <summary>
         /// Raises when the window or dialog associated with current ViewModel is going to be closed.
@@ -49,6 +49,14 @@ namespace Planetarium.Types
             {
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(pn));
             }
+        }
+        
+        /// <summary>
+        /// Disposes allocated resources
+        /// </summary>
+        public virtual void Dispose()
+        {
+
         }
     }
 }

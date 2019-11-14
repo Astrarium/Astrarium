@@ -6,6 +6,7 @@
         xmlns:a="clr-namespace:Planetarium"
         xmlns:t="clr-namespace:Planetarium.Types;assembly=Planetarium.Types"
         xmlns:s="clr-namespace:Planetarium.Types.Themes;assembly=Planetarium.Types"
+        xmlns:loc="clr-namespace:Planetarium.Types.Localization;assembly=Planetarium.Types"
         mc:Ignorable="d"
         Style="{StaticResource {x:Type Window}}"
         MinHeight="300" MinWidth="300"
@@ -46,7 +47,7 @@
                     <MenuItem Header="Astronomical phenomena" Command="{Binding CalculatePhenomenaCommand}" />
                 </MenuItem>
 
-                <MenuItem Width="Auto" Header="Settings">
+                <MenuItem Width="Auto" Header="{loc:Text Menu.Settings}">
                     <MenuItem Header="Date and Time" Command="{Binding SetDateCommand}" InputGestureText="Ctrl+A" />
                     <MenuItem Header="Observer Location" Command="{Binding SelectLocationCommand}" InputGestureText="Ctrl+B" />
                     <Separator />

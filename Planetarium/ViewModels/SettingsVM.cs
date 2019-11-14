@@ -42,10 +42,13 @@ namespace Planetarium.ViewModels
                 return selectedSection;
             }
             set
-            {
-                selectedSection = value;
-                SectionContent = selectedSection.Panel;
-                NotifyPropertyChanged(nameof(SectionContent));
+            {                
+                if (value != null)
+                {
+                    selectedSection = value;
+                    SectionContent = selectedSection.Panel;
+                    NotifyPropertyChanged(nameof(SectionContent));
+                }
             }
         }
         public UIElement SectionContent { get; private set; }
@@ -111,6 +114,12 @@ namespace Planetarium.ViewModels
             {
                 base.Close();
             }
+        }
+
+        public override void Dispose()
+        {
+            // need to utilizate settings controls
+            SettingsSections.Clear();
         }
 
         private void Save()
@@ -208,6 +217,7 @@ namespace Planetarium.ViewModels
                 this.settings.SettingValueChanged += Settings_SettingValueChanged;
                 SettingName = name;
                 IsEnabledCondition = isEnabledCondition;
+                Text.LocaleChanged += () => NotifyPropertyChanged(nameof(SettingTitle));
             }
 
             private void Settings_SettingValueChanged(string propertyName, object propertyValue)

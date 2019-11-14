@@ -17,6 +17,8 @@ namespace Planetarium.Types.Localization
     {
         private static Dictionary<string, string> LocalizationStrings = new Dictionary<string, string>();
 
+        private static List<LocalizedObjectHolder> LocalizedObjectsRefs = new List<LocalizedObjectHolder>();
+
         public static string Get(string key)
         {
             if (LocalizationStrings.ContainsKey(key))
@@ -29,12 +31,62 @@ namespace Planetarium.Types.Localization
         public static string FileExtension { get; set; } = "txt";
         public static string DefaultLanguage { get; set; } = "en";
 
+        private static CultureInfo currentCulture = null;
+
         public static void SetLocale(CultureInfo culture)
         {
-            CultureInfo.DefaultThreadCurrentCulture = culture;
-            CultureInfo.DefaultThreadCurrentUICulture = culture;
-            LoadLocalizationStrings();
-            LocaleChanged?.Invoke();
+            if (!culture.Equals(currentCulture))
+            {
+                CultureInfo.DefaultThreadCurrentCulture = culture;
+                CultureInfo.DefaultThreadCurrentUICulture = culture;
+                LoadLocalizationStrings();
+                LocaleChanged?.Invoke();
+                currentCulture = culture;
+
+                foreach (var lo in LocalizedObjectsRefs)
+                {
+                    WeakReference wr = lo.ObjectReference;
+
+                    if (wr.IsAlive)
+                    {                        
+                        object targetObject = lo.ObjectReference.Target;
+                        object targetProperty = lo.Property;
+                        string text = Get(lo.ResourceKey);
+
+                        if (targetObject != null)
+                        {
+                            if (targetProperty is DependencyProperty)
+                            {
+                                DependencyObject obj = targetObject as DependencyObject;
+                                DependencyProperty prop = targetProperty as DependencyProperty;
+
+                                Action updateAction = () => obj.SetValue(prop, text);
+
+                                // Check whether the target object can be accessed from the
+                                // current thread, and use Dispatcher.Invoke if it can't
+
+                                if (obj.CheckAccess())
+                                    updateAction();
+                                else
+                                    obj.Dispatcher.Invoke(updateAction);
+                            }
+                            else // _targetProperty is PropertyInfo
+                            {
+                                PropertyInfo prop = targetProperty as PropertyInfo;
+                                prop.SetValue(targetObject, text, null);
+                            }
+                        }
+                        
+                    }
+                }
+
+                var refs = LocalizedObjectsRefs.Where(lo => lo.ObjectReference.IsAlive).ToList();
+
+                System.Diagnostics.Trace.WriteLine("Live refs: " + refs.Count);
+
+                LocalizedObjectsRefs.Clear();
+                LocalizedObjectsRefs.AddRange(refs);
+            }
         }
 
         public static event Action LocaleChanged;
@@ -144,11 +196,37 @@ namespace Planetarium.Types.Localization
             this.resourceKey = resourceKey;
         }
 
+        ~Text()
+        {
+
+        } 
+
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
+            IProvideValueTarget target = serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget;
+            
+            if (target != null)
+            {
+
+                LocalizedObjectsRefs.Add(new LocalizedObjectHolder()
+                {
+                    ObjectReference = new WeakReference(target.TargetObject),
+                    Property = target.TargetProperty,
+                    ResourceKey = resourceKey
+                });
+            }
+            
             return Get(resourceKey);
         }
 
+        
         #endregion MarkupExtension
+
+        private class LocalizedObjectHolder
+        {
+            public WeakReference ObjectReference { get; set; }
+            public object Property { get; set; }
+            public string ResourceKey { get; set; }
+        }
     }
 }
