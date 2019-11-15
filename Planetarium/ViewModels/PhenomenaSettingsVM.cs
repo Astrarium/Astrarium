@@ -13,7 +13,6 @@ namespace Planetarium.ViewModels
     public class PhenomenaSettingsVM : ViewModelBase
     {
         private readonly ISky sky;
-        private readonly IViewManager viewManager;
 
         public ObservableCollection<Node> Nodes { get; private set; } = new ObservableCollection<Node>();
         public Command OkCommand { get; private set; }
@@ -42,10 +41,9 @@ namespace Planetarium.ViewModels
             }
         }
 
-        public PhenomenaSettingsVM(ISky sky, IViewManager viewManager)
+        public PhenomenaSettingsVM(ISky sky)
         {
             this.sky = sky;
-            this.viewManager = viewManager;
 
             UtcOffset = sky.Context.GeoLocation.UtcOffset;
 
@@ -59,7 +57,7 @@ namespace Planetarium.ViewModels
         {
             if (JulianDayFrom > JulianDayTo)
             {
-                viewManager.ShowMessageBox("Warning", "Wrong date range:\nend date should be greater than start date.", System.Windows.MessageBoxButton.OK);
+                ViewManager.ShowMessageBox("Warning", "Wrong date range:\nend date should be greater than start date.", System.Windows.MessageBoxButton.OK);
                 return;
             }
 

@@ -1,7 +1,6 @@
 ﻿using Microsoft.Win32;
 using Planetarium.Controls;
 using Planetarium.Types;
-using Planetarium.Types.Controls;
 using Planetarium.Views;
 using System;
 using System.Collections.Generic;
@@ -19,7 +18,7 @@ namespace Planetarium
     /// <summary>
     /// Default implementation of the <see cref="IViewManager"/> interface.
     /// </summary>
-    internal class ViewManager : IViewManager
+    internal class DefaultViewManager : IViewManager
     {
         /// <summary>
         /// Dictionary of ViewModel <=> View types bindings.
@@ -32,7 +31,7 @@ namespace Planetarium
         /// </summary>
         private Func<Type, object> typeFactory;
 
-        internal ViewManager(Func<Type, object> typeFactory)
+        internal DefaultViewManager(Func<Type, object> typeFactory)
         {
             this.typeFactory = typeFactory;
         }
@@ -71,7 +70,6 @@ namespace Planetarium
             {
                 var window = typeFactory(viewType) as Window;
                 window.DataContext = viewModel;
-                InjectViewManager(window);
 
                 if (window.GetType() != typeof(MainWindow))
                 {
@@ -183,22 +181,6 @@ namespace Planetarium
             {
                 return null;
             }            
-        }
-
-        private void InjectViewManager(DependencyObject obj)
-        {
-            var controls = FindChildren<PlanetariumControl>(obj);
-            foreach (var control in controls)
-            {
-                control.ViewManager = this;
-            }
-        }
-
-        public FrameworkElement CreateControl(Type controlType)
-        {
-            var frameworkElement = Activator.CreateInstance(controlType) as FrameworkElement;
-            InjectViewManager(frameworkElement);
-            return frameworkElement;
         }
 
         public TViewModel CreateViewModel<TViewModel>() where TViewModel : ViewModelBase

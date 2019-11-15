@@ -21,12 +21,10 @@ namespace Planetarium.ViewModels
         public IEnumerable<IGrouping<string, AstroEventVM>> Events { get; private set; }
 
         private ICollection<AstroEvent> events;
-        private readonly IViewManager viewManager;
         private readonly ISky sky;
         
-        public PhenomenaVM(IViewManager viewManager, ISky sky)
+        public PhenomenaVM(ISky sky)
         {
-            this.viewManager = viewManager;
             this.sky = sky;
 
             SaveToFileCommand = new Command(SaveToFile);
@@ -44,7 +42,7 @@ namespace Planetarium.ViewModels
 
         private void SaveToFile()
         {
-            var file = viewManager.ShowSaveFileDialog("Save to file", "Phenomena", ".csv", "Text files (*.txt)|*.txt|Comma-separated files (*.csv)|*.csv");
+            var file = ViewManager.ShowSaveFileDialog("Save to file", "Phenomena", ".csv", "Text files (*.txt)|*.txt|Comma-separated files (*.csv)|*.csv");
             if (file != null)
             {
                 IAstroEventsWriter writer = null;
@@ -63,7 +61,7 @@ namespace Planetarium.ViewModels
 
                 writer?.Write(events);
 
-                viewManager.ShowMessageBox("Information", "Export has been successfully completed.", MessageBoxButton.OK);
+                ViewManager.ShowMessageBox("Information", "Export has been successfully completed.", MessageBoxButton.OK);
             }
         }
 

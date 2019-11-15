@@ -16,7 +16,6 @@ namespace Planetarium.Plugins.Tracks.ViewModels
     public class TracksListVM : ViewModelBase
     {
         private readonly ISky sky;
-        private readonly IViewManager viewManager;
         private readonly ITracksProvider tracksProvider;
 
         public Command OkCommand { get; private set; }
@@ -43,11 +42,10 @@ namespace Planetarium.Plugins.Tracks.ViewModels
             }
         }
 
-        public TracksListVM(ISky sky, ITracksProvider tracksProvider, IViewManager viewManager)
+        public TracksListVM(ISky sky, ITracksProvider tracksProvider)
         {
             this.sky = sky;            
             this.tracksProvider = tracksProvider;
-            this.viewManager = viewManager;
 
             CancelCommand = new Command(Close);
             SelectTrackCommand = new Command<TrackListItemVM>(SelectTrack);
@@ -109,7 +107,7 @@ namespace Planetarium.Plugins.Tracks.ViewModels
 
         private void DeleteSelectedTrack()
         {
-            if (viewManager.ShowMessageBox("Question", "Do you really want to delete the selected track?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            if (ViewManager.ShowMessageBox("Question", "Do you really want to delete the selected track?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
                 tracksProvider.Tracks.Remove(SelectedTrack.Track);
                 sky.Calculate();
@@ -119,7 +117,7 @@ namespace Planetarium.Plugins.Tracks.ViewModels
 
         private void EditTrack(Track t)
         {
-            var vm = viewManager.CreateViewModel<MotionTrackVM>();
+            var vm = ViewManager.CreateViewModel<MotionTrackVM>();
             vm.TrackId = t.Id;
             vm.LabelsStep = t.LabelsStep;
             vm.DrawLabels = t.DrawLabels;
@@ -129,7 +127,7 @@ namespace Planetarium.Plugins.Tracks.ViewModels
             vm.UtcOffset = sky.Context.GeoLocation.UtcOffset;
             vm.TrackColor = t.Color;
 
-            if (viewManager.ShowDialog(vm) ?? false)
+            if (ViewManager.ShowDialog(vm) ?? false)
             {
                 sky.Calculate();
                 LoadList();

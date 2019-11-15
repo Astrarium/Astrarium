@@ -13,7 +13,6 @@ namespace Planetarium.ViewModels
     public class EphemerisSettingsVM : ViewModelBase
     {
         private readonly ISky sky;
-        private readonly IViewManager viewManager;
 
         public ObservableCollection<Node> Nodes { get; private set; } = new ObservableCollection<Node>();
         public Command OkCommand { get; private set; }
@@ -59,10 +58,9 @@ namespace Planetarium.ViewModels
             }
         }
 
-        public EphemerisSettingsVM(ISky sky, IViewManager viewManager)
+        public EphemerisSettingsVM(ISky sky)
         {
             this.sky = sky;
-            this.viewManager = viewManager;
 
             UtcOffset = sky.Context.GeoLocation.UtcOffset;
 
@@ -74,19 +72,19 @@ namespace Planetarium.ViewModels
         {
             if (JulianDayFrom > JulianDayTo)
             {
-                viewManager.ShowMessageBox("Warning", "Wrong date range:\nend date should be greater than start date.", System.Windows.MessageBoxButton.OK);
+                ViewManager.ShowMessageBox("Warning", "Wrong date range:\nend date should be greater than start date.", System.Windows.MessageBoxButton.OK);
                 return;
             }
 
             if (Step < TimeSpan.FromSeconds(1))
             {
-                viewManager.ShowMessageBox("Warning", "Wrong step value:\nit's too small to calculate ephemerides.", System.Windows.MessageBoxButton.OK);
+                ViewManager.ShowMessageBox("Warning", "Wrong step value:\nit's too small to calculate ephemerides.", System.Windows.MessageBoxButton.OK);
                 return;
             }
 
             if ((JulianDayTo - JulianDayFrom) / Step.TotalDays > 10000)
             {
-                viewManager.ShowMessageBox("Warning", "Step value and date range mismatch:\nresulting ephemeris table is too large. Please increase the calculation step or reduce the date range.", System.Windows.MessageBoxButton.OK);
+                ViewManager.ShowMessageBox("Warning", "Step value and date range mismatch:\nresulting ephemeris table is too large. Please increase the calculation step or reduce the date range.", System.Windows.MessageBoxButton.OK);
                 return;
             }
 

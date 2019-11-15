@@ -12,15 +12,13 @@ namespace Planetarium.Plugins.Tracks
 {
     public class Plugin : AbstractPlugin
     {
-        private IViewManager viewManager;
         private ISky sky;
         private ISkyMap map;
 
-        public Plugin(ISky sky, ISkyMap map, IViewManager viewManager)
+        public Plugin(ISky sky, ISkyMap map)
         {
             this.sky = sky;
             this.map = map;
-            this.viewManager = viewManager;
 
             AddContextMenuItem(new ContextMenuItem("Motion track", ShowMotionTrackWindow, IsMotionTrackEnabled, () => true));
         }
@@ -37,22 +35,22 @@ namespace Planetarium.Plugins.Tracks
 
             if (IsMotionTrackEnabled())
             {
-                var vm = viewManager.CreateViewModel<MotionTrackVM>();
+                var vm = ViewManager.CreateViewModel<MotionTrackVM>();
                 vm.TrackId = Guid.NewGuid();
                 vm.SelectedBody = body;
                 vm.JulianDayFrom = sky.Context.JulianDay;
                 vm.JulianDayTo = sky.Context.JulianDay + 30;
                 vm.UtcOffset = sky.Context.GeoLocation.UtcOffset;
 
-                if (viewManager.ShowDialog(vm) ?? false)
+                if (ViewManager.ShowDialog(vm) ?? false)
                 {
                     sky.Calculate();
                 }
             }
             else
             {
-                var vm = viewManager.CreateViewModel<TracksListVM>();
-                if (viewManager.ShowDialog(vm) ?? false)
+                var vm = ViewManager.CreateViewModel<TracksListVM>();
+                if (ViewManager.ShowDialog(vm) ?? false)
                 {
                     sky.Calculate();
                 }

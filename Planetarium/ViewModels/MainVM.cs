@@ -22,7 +22,6 @@ namespace Planetarium.ViewModels
     { 
         private readonly ISky sky;
         private readonly ISkyMap map;
-        private readonly IViewManager viewManager;
         private readonly ISettings settings;
 
         public bool FullScreen { get; private set; }
@@ -96,12 +95,11 @@ namespace Planetarium.ViewModels
             }
         }
 
-        public MainVM(ISky sky, ISkyMap map, ISettings settings, IViewManager viewManager, ToolbarButtonsConfig toolbarButtonsConfig, ContextMenuItemsConfig contextMenuItemsConfig)
+        public MainVM(ISky sky, ISkyMap map, ISettings settings, ToolbarButtonsConfig toolbarButtonsConfig, ContextMenuItemsConfig contextMenuItemsConfig)
         {
             this.sky = sky;
             this.map = map;
             this.settings = settings;
-            this.viewManager = viewManager;
 
             sky.Calculate();
 
@@ -358,16 +356,16 @@ namespace Planetarium.ViewModels
 
         private async void GetObjectEphemeris(CelestialObject body)
         {
-            var es = viewManager.CreateViewModel<EphemerisSettingsVM>();
+            var es = ViewManager.CreateViewModel<EphemerisSettingsVM>();
             es.SelectedBody = body;
             es.JulianDayFrom = sky.Context.JulianDay;
             es.JulianDayTo = sky.Context.JulianDay + 30;
-            if (viewManager.ShowDialog(es) ?? false)
+            if (ViewManager.ShowDialog(es) ?? false)
             {
                 var tokenSource = new CancellationTokenSource();
                 var progress = new Progress<double>();
 
-                viewManager.ShowProgress("Please wait", "Calculating ephemerides...", tokenSource, progress);
+                ViewManager.ShowProgress("Please wait", "Calculating ephemerides...", tokenSource, progress);
 
                 var ephem = await Task.Run(() => sky.GetEphemerides(
                     es.SelectedBody,
@@ -382,23 +380,23 @@ namespace Planetarium.ViewModels
                 if (!tokenSource.IsCancellationRequested)
                 {
                     tokenSource.Cancel();
-                    var vm = viewManager.CreateViewModel<EphemerisVM>();
+                    var vm = ViewManager.CreateViewModel<EphemerisVM>();
                     vm.SetData(es.SelectedBody, es.JulianDayFrom, es.JulianDayTo, es.Step, ephem);
-                    viewManager.ShowWindow(vm);
+                    ViewManager.ShowWindow(vm);
                 }
             }
         }
 
         private async void CalculatePhenomena()
         {
-            var ps = viewManager.CreateViewModel<PhenomenaSettingsVM>();
+            var ps = ViewManager.CreateViewModel<PhenomenaSettingsVM>();
             ps.JulianDayFrom = sky.Context.JulianDay;
             ps.JulianDayTo = sky.Context.JulianDay + 30;
-            if (viewManager.ShowDialog(ps) ?? false)
+            if (ViewManager.ShowDialog(ps) ?? false)
             {
                 var tokenSource = new CancellationTokenSource();
 
-                viewManager.ShowProgress("Please wait", "Calculating phenomena...", tokenSource);
+                ViewManager.ShowProgress("Please wait", "Calculating phenomena...", tokenSource);
 
                 var events = await Task.Run(() => sky.GetEvents(
                         ps.JulianDayFrom,
@@ -409,9 +407,9 @@ namespace Planetarium.ViewModels
                 if (!tokenSource.IsCancellationRequested)
                 {
                     tokenSource.Cancel();
-                    var vm = viewManager.CreateViewModel<PhenomenaVM>();
+                    var vm = ViewManager.CreateViewModel<PhenomenaVM>();
                     vm.SetEvents(events);
-                    if (viewManager.ShowDialog(vm) ?? false)
+                    if (ViewManager.ShowDialog(vm) ?? false)
                     {
                         sky.Context.JulianDay = vm.JulianDay;
                         sky.Calculate();
@@ -422,8 +420,8 @@ namespace Planetarium.ViewModels
 
         private void SearchObject()
         {
-            var vm = viewManager.CreateViewModel<SearchVM>();
-            if (viewManager.ShowDialog(vm) ?? false)
+            var vm = ViewManager.CreateViewModel<SearchVM>();
+            if (ViewManager.ShowDialog(vm) ?? false)
             {
                 CenterOnObject(vm.SelectedItem.Body);
             }
@@ -431,14 +429,14 @@ namespace Planetarium.ViewModels
 
         private void ChangeSettings()
         {
-            viewManager.ShowDialog<SettingsVM>();
+            ViewManager.ShowDialog<SettingsVM>();
         }
 
         private void CenterOnObject(CelestialObject body)
         {
             if (settings.Get<bool>("Ground") && body.Horizontal.Altitude <= 0)
             {
-                if (viewManager.ShowMessageBox("Question", "The object is under horizon at the moment. Do you want to switch off displaying the ground?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                if (ViewManager.ShowMessageBox("Question", "The object is under horizon at the moment. Do you want to switch off displaying the ground?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
                     settings.Set("Ground", false);
                 }
@@ -450,7 +448,7 @@ namespace Planetarium.ViewModels
 
             if (map.LockedObject != null && map.LockedObject != body)
             {
-                if (viewManager.ShowMessageBox("Question", "The map is locked on different celestial body. Do you want to unlock the map?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                if (ViewManager.ShowMessageBox("Question", "The map is locked on different celestial body. Do you want to unlock the map?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
                     map.LockedObject = null;
                 }
@@ -495,7 +493,7 @@ namespace Planetarium.ViewModels
                 if (info != null)
                 {
                     var vm = new ObjectInfoVM(info);
-                    if (viewManager.ShowDialog(vm) ?? false)
+                    if (ViewManager.ShowDialog(vm) ?? false)
                     {
                         sky.Context.JulianDay = vm.JulianDay;
                         sky.Calculate();
@@ -508,7 +506,7 @@ namespace Planetarium.ViewModels
         private void SetDate()
         {
             var vm = new DateVM(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset);
-            if (viewManager.ShowDialog(vm) ?? false)
+            if (ViewManager.ShowDialog(vm) ?? false)
             {
                 sky.Context.JulianDay = vm.JulianDay;
                 sky.Calculate();
@@ -517,8 +515,8 @@ namespace Planetarium.ViewModels
 
         private void SelectLocation()
         {
-            var vm = viewManager.CreateViewModel<LocationVM>();       
-            if (viewManager.ShowDialog(vm) ?? false)
+            var vm = ViewManager.CreateViewModel<LocationVM>();       
+            if (ViewManager.ShowDialog(vm) ?? false)
             {
                 sky.Context.GeoLocation = new CrdsGeographical(vm.ObserverLocation);
                 settings.Set("ObserverLocation", vm.ObserverLocation);

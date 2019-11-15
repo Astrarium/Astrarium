@@ -1,6 +1,5 @@
 ﻿using Planetarium.Objects;
 using Planetarium.Types;
-using Planetarium.Types.Controls;
 using Planetarium.ViewModels;
 using System;
 using System.Linq;
@@ -11,7 +10,7 @@ using System.Windows.Input;
 
 namespace Planetarium.Controls
 {
-    public class CelestialObjectPicker : PlanetariumControl
+    public class CelestialObjectPicker : Control
     {
         public CelestialObject SelectedBody
         {

@@ -30,17 +30,15 @@ namespace Planetarium
     {
         private IKernel kernel = new StandardKernel();
         private ILogger logger = new Logger();
-        private IViewManager viewManager;
 
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
-            kernel.Bind<IViewManager, ViewManager>().ToConstant(new ViewManager(t => kernel.Get(t))).InSingletonScope();
-            viewManager = kernel.Get<ViewManager>();
+            ViewManager.SetImplementation(new DefaultViewManager(t => kernel.Get(t)));
 
             var splashVM = new SplashScreenVM();
-            viewManager.ShowWindow(splashVM);
+            ViewManager.ShowWindow(splashVM);
 
             //in order to ensure the UI stays responsive, we need to
             //do the work on a different thread
@@ -50,7 +48,7 @@ namespace Planetarium
 
                 Dispatcher.Invoke(() =>
                 {
-                    viewManager.ShowWindow<MainVM>();
+                    ViewManager.ShowWindow<MainVM>();
                     splashVM.Close();
                 });
             });
@@ -59,7 +57,7 @@ namespace Planetarium
             {
                 string message = $"An unhandled exception occurred:\n\n{ea.Exception.Message}\nStack trace:\n\n{ea.Exception.StackTrace}";
                 logger.Error(message);
-                viewManager.ShowMessageBox("Error", message, MessageBoxButton.OK);
+                ViewManager.ShowMessageBox("Error", message, MessageBoxButton.OK);
                 ea.Handled = true;                
             };
         }

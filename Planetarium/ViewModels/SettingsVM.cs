@@ -18,7 +18,6 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using Planetarium.Types.Config.Controls;
-using Planetarium.Types.Controls;
 using Planetarium.Types.Localization;
 
 namespace Planetarium.ViewModels
@@ -32,7 +31,6 @@ namespace Planetarium.ViewModels
         public ObservableCollection<SettingsSectionVM> SettingsSections { get; private set; }
 
         private readonly ISettings settings;
-        private readonly IViewManager viewManager;
 
         private SettingsSectionVM selectedSection;
         public SettingsSectionVM SelectedSection
@@ -53,17 +51,16 @@ namespace Planetarium.ViewModels
 
         public ConfigControlTemplateSelector ControlSelector { get; private set; }
 
-        public SettingsVM(ISettings settings, SettingsConfig settingConfig, IViewManager viewManager)
+        public SettingsVM(ISettings settings, SettingsConfig settingConfig)
         {
             this.settings = settings;
-            this.viewManager = viewManager;
 
             CloseCommand = new Command(Close);
             ResetCommand = new Command(Reset);
             SaveCommand = new Command(Save);
 
             SettingsSections = new ObservableCollection<SettingsSectionVM>();
-            ControlSelector = new ConfigControlTemplateSelector(viewManager);
+            ControlSelector = new ConfigControlTemplateSelector();
 
             var sections = settingConfig.Where(c => !string.IsNullOrEmpty(c.Section)).GroupBy(c => c.Section);
 
@@ -95,7 +92,7 @@ namespace Planetarium.ViewModels
         {
             if (settings.IsChanged)
             {
-                var result = viewManager.ShowMessageBox("Warning", "You have unsaved changes in program options. Do you want to apply them?", MessageBoxButton.YesNoCancel);
+                var result = ViewManager.ShowMessageBox("Warning", "You have unsaved changes in program options. Do you want to apply them?", MessageBoxButton.YesNoCancel);
                 if (MessageBoxResult.Yes == result)
                 {
                     base.Close();
@@ -127,7 +124,7 @@ namespace Planetarium.ViewModels
 
         private void Reset()
         {
-            if (MessageBoxResult.Yes == viewManager.ShowMessageBox("Warning", "Do you really want to reset settings to default values?", MessageBoxButton.YesNo))
+            if (MessageBoxResult.Yes == ViewManager.ShowMessageBox("Warning", "Do you really want to reset settings to default values?", MessageBoxButton.YesNo))
             {
                 settings.Load("Defaults");
                 Save();
@@ -231,13 +228,6 @@ namespace Planetarium.ViewModels
 
         internal class ConfigControlTemplateSelector : DataTemplateSelector
         {
-            private IViewManager viewManager;
-
-            public ConfigControlTemplateSelector(IViewManager viewManager)
-            {
-                this.viewManager = viewManager;
-            }
-
             public override DataTemplate SelectTemplate(object item, DependencyObject container)
             {
                 SettingVM setting = (SettingVM)item;

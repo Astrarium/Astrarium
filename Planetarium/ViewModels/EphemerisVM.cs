@@ -18,12 +18,10 @@ namespace Planetarium.ViewModels
         public Command SaveToFileCommand { get; private set; }
         public Command CloseCommand { get; private set; }
 
-        private readonly IViewManager viewManager;
         private readonly ISky sky;
 
-        public EphemerisVM(IViewManager viewManager, ISky sky)
+        public EphemerisVM(ISky sky)
         {
-            this.viewManager = viewManager;
             this.sky = sky;
 
             SaveToFileCommand = new Command(SaveToFile);
@@ -63,10 +61,10 @@ namespace Planetarium.ViewModels
 
         private void SaveToFile()
         {
-            var result = viewManager.ShowSaveFileDialog("Save to file", "Ephemerides", ".csv", "Text files (*.txt)|*.txt|Comma-separated files (*.csv)|*.csv");
+            var result = ViewManager.ShowSaveFileDialog("Save to file", "Ephemerides", ".csv", "Text files (*.txt)|*.txt|Comma-separated files (*.csv)|*.csv");
             if (result != null)
             {
-                
+                // TODO: implement it
             }
         }
     }

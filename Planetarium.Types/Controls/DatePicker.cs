@@ -1,6 +1,5 @@
 ﻿using ADK;
 using Planetarium.Types;
-using Planetarium.Types.Controls;
 using Planetarium.ViewModels;
 using System;
 using System.Windows;
@@ -10,7 +9,7 @@ using System.Windows.Input;
 
 namespace Planetarium.Controls
 {
-    public class DatePicker : PlanetariumControl
+    public class DatePicker : Control
     {
         public DatePicker() { }
 

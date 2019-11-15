@@ -20,8 +20,6 @@ namespace Planetarium.Types
         /// <returns>Instance of ViewModel type <typeparamref name="TViewModel"/>.</returns>
         TViewModel CreateViewModel<TViewModel>() where TViewModel : ViewModelBase;
 
-        FrameworkElement CreateControl(Type controlType);
-
         /// <summary>
         /// Shows window by its ViewModel type. 
         /// Calling this method automatically creates instance of the ViewModel and attaches it to DataContext property. />

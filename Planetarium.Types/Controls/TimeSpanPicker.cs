@@ -1,5 +1,4 @@
 ﻿using Planetarium.Types;
-using Planetarium.Types.Controls;
 using Planetarium.ViewModels;
 using System;
 using System.Windows;
@@ -9,7 +8,7 @@ using System.Windows.Input;
 
 namespace Planetarium.Controls
 {
-    public class TimeSpanPicker : PlanetariumControl
+    public class TimeSpanPicker : Control
     {
         public TimeSpan TimeSpan
         {

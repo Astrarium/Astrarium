@@ -16,9 +16,8 @@ namespace Planetarium.Plugins.Tracks.ViewModels
         public Command OkCommand { get; private set; }
         public Command CancelCommand { get; private set; }
 
-        public MotionTrackVM(IViewManager viewManager, ISky sky, ITracksProvider tracksProvider)
+        public MotionTrackVM(ISky sky, ITracksProvider tracksProvider)
         {
-            this.viewManager = viewManager;
             this.sky = sky;
             this.tracksProvider = tracksProvider;
 
@@ -26,7 +25,6 @@ namespace Planetarium.Plugins.Tracks.ViewModels
             CancelCommand = new Command(Close);
         }
 
-        private readonly IViewManager viewManager;
         private readonly ISky sky;
         private readonly ITracksProvider tracksProvider;
 
@@ -69,25 +67,25 @@ namespace Planetarium.Plugins.Tracks.ViewModels
 
             if (track.Body == null)
             {
-                viewManager.ShowMessageBox("Warning", "Please specify a celestial body.", System.Windows.MessageBoxButton.OK);
+                ViewManager.ShowMessageBox("Warning", "Please specify a celestial body.", System.Windows.MessageBoxButton.OK);
                 return;
             }
 
             if (JulianDayFrom > JulianDayTo)
             {
-                viewManager.ShowMessageBox("Warning", "Wrong date range:\nend date should be greater than start date.", System.Windows.MessageBoxButton.OK);
+                ViewManager.ShowMessageBox("Warning", "Wrong date range:\nend date should be greater than start date.", System.Windows.MessageBoxButton.OK);
                 return;
             }
 
             if (LabelsStep.TotalDays < track.SmallestLabelsStep())
             {
-                viewManager.ShowMessageBox("Warning", "Wrong labels step value:\nit's too small to calculate the track.", System.Windows.MessageBoxButton.OK);
+                ViewManager.ShowMessageBox("Warning", "Wrong labels step value:\nit's too small to calculate the track.", System.Windows.MessageBoxButton.OK);
                 return;
             }
 
             if ((JulianDayTo - JulianDayFrom) / track.Step > 10000)
             {
-                viewManager.ShowMessageBox("Warning", "Step value and date range mismatch:\nresulting track data is too large. Please increase the step or reduce the date range.", System.Windows.MessageBoxButton.OK);
+                ViewManager.ShowMessageBox("Warning", "Step value and date range mismatch:\nresulting track data is too large. Please increase the step or reduce the date range.", System.Windows.MessageBoxButton.OK);
                 return;
             }
 
