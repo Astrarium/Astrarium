@@ -45,8 +45,8 @@ namespace Planetarium.Types
             Default["DistanceFromEarth"]        = Distance;
             Default["Ecliptical.Lambda"]        = Longitude;
             Default["Ecliptical.Beta"]          = Latitude;
-            Default["Horizontal.Azimuth"]       = Longitude;
-            Default["Horizontal.Altitude"]      = Latitude;
+            Default["Horizontal.Azimuth"]       = Azimuth;
+            Default["Horizontal.Altitude"]      = Altitude;
             Default["Magnitude"]                = Magnitude;
             Default["PhaseAngle"]               = PhaseAngle;
             Default["Phase"]                    = Phase;
@@ -397,6 +397,8 @@ namespace Planetarium.Types
 
         public static readonly IEphemFormatter RA = new HMSAngleFormatter();
         public static readonly IEphemFormatter Dec = new SignedAngleFormatter();
+        public static readonly IEphemFormatter Altitude = new SignedAngleFormatter();
+        public static readonly IEphemFormatter Azimuth = new UnsignedAngleFormatter();
         public static readonly IEphemFormatter Latitude = new SignedAngleFormatter();
         public static readonly IEphemFormatter Longitude = new UnsignedAngleFormatter();
         public static readonly IEphemFormatter Time = new TimeFormatter();

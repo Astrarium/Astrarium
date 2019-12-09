@@ -10,7 +10,7 @@ namespace Planetarium.Types.Themes
 {
     public class Node : INotifyPropertyChanged
     {
-        public Node()
+        private Node()
         {
             Children.CollectionChanged += Children_CollectionChanged;
         }

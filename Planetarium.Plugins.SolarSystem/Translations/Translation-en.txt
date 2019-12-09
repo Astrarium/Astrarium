@@ -1,6 +1,7 @@
 ﻿# General
 Planetarium.Plugins.SolarSystem.SolarSystemRenderer.Name = Sun, Moon, and Planets
 
+# Names and labels
 Sun.Name						= Sun
 Moon.Name						= Moon
 Mercury.Name					= Mercury
@@ -21,6 +22,26 @@ Ganymede.Shadow					= Shadow of Ganymede
 Callisto.Shadow					= Shadow of Callisto
 EarthShadow.Label				= Earth shadow
 EclipsedByJupiter				= Eclipsed by Jupiter
+
+# Ephemeris
+Planet.Magnitude				= Visual magnitude
+Planet.Horizontal				= Horizontal topocentric coordinates
+Planet.Horizontal.Altitude		= Altitude
+Planet.Horizontal.Azimuth		= Azimuth
+Planet.Equatorial				= Equatorial topocentric coordinates
+Planet.Equatorial.Alpha			= Right Ascension
+Planet.Equatorial.Delta			= Declination
+Planet.SaturnRings				= Rings
+Planet.SaturnRings.a			= Major axis
+Planet.SaturnRings.b			= Minor axis
+Planet.GRSLongitude				= Great Red Spot longitude
+Planet.RTS						= Visibility
+Planet.RTS.Rise					= Rise
+Planet.RTS.Transit				= Transit
+Planet.RTS.Set					= Set
+Planet.Visibility				= Visibility conditions
+Planet.Visibility.Duration		= Duration
+Planet.Visibility.Period		= Period
 
 # Settings
 Settings.Sun						= Sun

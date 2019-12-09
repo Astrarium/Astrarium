@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Planetarium.Types.Localization;
 
 namespace Planetarium.ViewModels
 {
@@ -46,7 +47,7 @@ namespace Planetarium.ViewModels
                 return
                     AllNodes(Nodes.First())
                         .Where(n => n.IsChecked ?? false)
-                        .Select(n => n.Text);
+                        .Select(n => n.Id);
             }
         }
 
@@ -105,15 +106,17 @@ namespace Planetarium.ViewModels
                 Node root = new Node("All");
                 root.CheckedChanged += Root_CheckedChanged;
 
+                string selectedBodyTypeName = SelectedBody.GetType().Name;
+
                 foreach (var group in groups)
                 {
-                    Node node = new Node() { Text = group.Key };
+                    Node node = new Node(Text.Get($"{selectedBodyTypeName}.{group.Key}"), group.Key);
 
                     if (group.Count() > 1)
                     {
                         foreach (var item in group)
                         {
-                            node.Children.Add(new Node(item, item));
+                            node.Children.Add(new Node(Text.Get($"{selectedBodyTypeName}.{item}"), item));
                         }
                     }
 
