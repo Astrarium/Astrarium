@@ -1,6 +1,7 @@
 ﻿# General
 Planetarium.Plugins.SolarSystem.SolarSystemRenderer.Name = Солнце, Луна и планеты
 
+# Names and labels
 Sun.Name						= Солнце
 Moon.Name						= Луна
 Mercury.Name					= Меркурий
@@ -21,6 +22,28 @@ Ganymede.Shadow					= Тень Ганимеда
 Callisto.Shadow					= Тень Каллисто
 EarthShadow.Label				= Тень Земли
 EclipsedByJupiter				= В тени Юпитера
+
+# Ephemeris
+Planet.Magnitude				= Видимая звёздная величина
+Planet.Horizontal				= Горизонтальные топоцентрические координаты
+Planet.Horizontal.Altitude		= Высота
+Planet.Horizontal.Azimuth		= Азимут
+Planet.Equatorial				= Экваториальные топоцентрические координаты
+Planet.Equatorial.Alpha			= Прямое восхождение
+Planet.Equatorial.Delta			= Склонение
+Planet.SaturnRings				= Кольца
+Planet.SaturnRings.a			= Большая ось
+Planet.SaturnRings.b			= Малая ось
+Planet.GRSLongitude				= Долгота БКП 
+Planet.RTS						= Видимость
+Planet.RTS.Rise					= Восход
+Planet.RTS.Transit				= Кульминация
+Planet.RTS.Set					= Заход
+Planet.Visibility				= Условия видимости
+Planet.Visibility.Begin			= Начало
+Planet.Visibility.End			= Окончание
+Planet.Visibility.Duration		= Продолжительность
+Planet.Visibility.Period		= Период видимости
 
 # Settings
 Settings.Sun						= Солнце

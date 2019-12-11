@@ -40,6 +40,8 @@ Planet.RTS.Rise					= Rise
 Planet.RTS.Transit				= Transit
 Planet.RTS.Set					= Set
 Planet.Visibility				= Visibility conditions
+Planet.Visibility.Begin			= Begin
+Planet.Visibility.End			= End
 Planet.Visibility.Duration		= Duration
 Planet.Visibility.Period		= Period
 

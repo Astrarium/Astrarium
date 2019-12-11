@@ -1,4 +1,5 @@
 ﻿using Planetarium.Objects;
+using Planetarium.Types.Localization;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -31,9 +32,18 @@ namespace Planetarium.Types
 
         public IList<InfoElement> InfoElements { get; } = new List<InfoElement>();
 
+        public CelestialObject CelestialBody { get; private set; }
+        public SkyContext Context { get; private set; }
+
         public CelestialObjectInfo()
         {
             
+        }
+
+        public CelestialObjectInfo(SkyContext context, CelestialObject body)
+        {
+            Context = context;
+            CelestialBody = body;
         }
 
         public CelestialObjectInfo SetTitle(string title)
@@ -63,6 +73,26 @@ namespace Planetarium.Types
             {
                 Caption = key,
                 Value = value
+            });
+            return this;
+        }
+
+        public CelestialObjectInfo AddRow(string key)
+        {
+            InfoElements.Add(new InfoElementProperty()
+            {
+                Caption = key,
+                NeedCalculate = true
+            });
+            return this;
+        }
+
+        public CelestialObjectInfo AddClickableRow(string key)
+        {
+            InfoElements.Add(new InfoElementPropertyLink()
+            {
+                Caption = key,
+                NeedCalculate = true,                
             });
             return this;
         }
@@ -114,6 +144,7 @@ namespace Planetarium.Types
         public IEphemFormatter Formatter { get; set; }
         public string Caption { get; set; }
         public object Value { get; set; }
+        public bool NeedCalculate { get; set; }
         public string StringValue { get { return Formatter.Format(Value); } }
     }
 

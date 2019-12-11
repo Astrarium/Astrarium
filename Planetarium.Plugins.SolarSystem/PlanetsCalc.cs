@@ -443,15 +443,13 @@ namespace Planetarium.Calculators
             e["Rectangular.Z"] = (c, j) => c.Get(JupiterMoonRectangular, j.Number).Z;
             e["Magnitude"] = (c, j) => c.Get(JupiterMoonMagnitude, j.Number);
         }
-
+       
         public CelestialObjectInfo GetInfo(SkyContext c, Planet planet)
         {
             int p = planet.Number;
 
-            var rts = c.Get(RiseTransitSet, p);
-            var vis = c.Get(Visibility, p);
-
-            var info = new CelestialObjectInfo();
+            var info = new CelestialObjectInfo(c, planet);
+           
             info.SetSubtitle("Planet").SetTitle(planet.Names.First())
 
             .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial, p), c.JulianDay))
@@ -469,23 +467,23 @@ namespace Planetarium.Calculators
             .AddRow("Ecliptical.Beta", c.Get(Ecliptical, p).Beta)
 
             .AddHeader(Text.Get("Planet.Horizontal"))
-            .AddRow(Text.Get("Planet.Horizontal.Azimuth"), c.Get(Horizontal, p).Azimuth, Formatters.Azimuth)
-            .AddRow(Text.Get("Planet.Horizontal.Altitude"), c.Get(Horizontal, p).Altitude, Formatters.Altitude)
+            .AddRow("Horizontal.Azimuth")
+            .AddRow("Horizontal.Altitude")
 
             .AddHeader(Text.Get("Planet.RTS"))
-            .AddRow(Text.Get("Planet.RTS.Rise"), rts.Rise, c.JulianDayMidnight + rts.Rise, Formatters.Time)
-            .AddRow(Text.Get("Planet.RTS.Transit"), rts.Transit, c.JulianDayMidnight + rts.Transit, Formatters.Time)
-            .AddRow(Text.Get("Planet.RTS.Set"), rts.Set, c.JulianDayMidnight + rts.Set, Formatters.Time)
+            .AddClickableRow("RTS.Rise")
+            .AddClickableRow("RTS.Transit")
+            .AddClickableRow("RTS.Set")
 
             .AddHeader(Text.Get("Planet.Visibility"))
-            .AddRow(Text.Get("Planet.Visibility.Period"), vis.Period, Formatters.VisibilityPeriod)
-            .AddRow(Text.Get("Planet.Visibility.Begin"), vis.Begin, c.JulianDayMidnight + vis.Begin, Formatters.Time)
-            .AddRow(Text.Get("Planet.Visibility.End"), vis.End, c.JulianDayMidnight + vis.End, Formatters.Time)
-            .AddRow(Text.Get("Planet.Visibility.Duration"), vis.Duration, Formatters.VisibilityDuration)
+            .AddRow("Visibility.Period")
+            .AddRow("Visibility.Begin")
+            .AddRow("Visibility.End")
+            .AddRow("Visibility.Duration")
 
-            .AddHeader("Appearance")
-            .AddRow("Phase", c.Get(Phase, p))
-            .AddRow("PhaseAngle", c.Get(PhaseAngle, p))
+            .AddHeader(Text.Get("Planet.Appearance"))
+            .AddRow(Text.Get("Planet.Phase"), c.Get(Phase, p), Formatters.Phase)
+            .AddRow(Text.Get("Planet.PhaseAngle"), c.Get(PhaseAngle, p), Formatters.PhaseAngle)
             .AddRow("Magnitude", c.Get(Magnitude, p))
             .AddRow("DistanceFromEarth", c.Get(DistanceFromEarth, p))
             .AddRow("DistanceFromSun", c.Get(DistanceFromSun, p))

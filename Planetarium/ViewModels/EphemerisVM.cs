@@ -1,6 +1,7 @@
 ﻿using ADK;
 using Planetarium.Objects;
 using Planetarium.Types;
+using Planetarium.Types.Localization;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -31,6 +32,7 @@ namespace Planetarium.ViewModels
         public void SetData(CelestialObject body, double jdFrom, double jdTo, TimeSpan step, List<List<Ephemeris>> ephemeris)
         {
             string bodyName = body.Names.First();
+            string bodyTypeName = body.GetType().Name;
             double utcOffset = sky.Context.GeoLocation.UtcOffset;
 
             string headerTemplate = "Ephemerides of {0}\nStart date: {1}\nEnd date: {2}\nStep: {3}";
@@ -43,7 +45,7 @@ namespace Planetarium.ViewModels
            
             var table = new DataTable();
             table.Columns.Add(new DataColumn() { Caption = "Date", ColumnName = "Date" });
-            table.Columns.AddRange(ephemeris[0].Select(e => new DataColumn() { Caption = e.Key, ColumnName = e.Key }).ToArray());
+            table.Columns.AddRange(ephemeris[0].Select(e => new DataColumn() { Caption = Text.Get($"{bodyTypeName}.{e.Key}"), ColumnName = e.Key }).ToArray());
 
             for (int i = 0; i < ephemeris.Count; i++)
             {

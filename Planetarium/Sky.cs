@@ -1,6 +1,7 @@
 ﻿using Planetarium.Calculators;
 using Planetarium.Objects;
 using Planetarium.Types;
+using Planetarium.Types.Localization;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -166,7 +167,29 @@ namespace Planetarium
 
             if (InfoProviders.ContainsKey(bodyType))
             {
-                return (CelestialObjectInfo)InfoProviders[bodyType].DynamicInvoke(Context, body);
+                var ephem = GetEphemerides(body, Context.JulianDay, Context.JulianDay + 1, 1, GetEphemerisCategories(body)).First();
+
+                var info = (CelestialObjectInfo)InfoProviders[bodyType].DynamicInvoke(Context, body);
+
+                foreach (var elem in info.InfoElements.OfType<InfoElementProperty>().Where(e => e.NeedCalculate))
+                {
+                    string key = elem.Caption;
+                    elem.Caption = Text.Get($"{body.GetType().Name}.{key}");
+
+                    var ep = ephem.FirstOrDefault(e => e.Key == key);
+
+                    if (ep != null)
+                    {
+                        elem.Value = ep.Value;
+                        elem.Formatter = ep.Formatter;
+                        if (elem is InfoElementPropertyLink)
+                        {
+                            (elem as InfoElementPropertyLink).JulianDay = Context.JulianDayMidnight + (double)ep.Value;
+                        }
+                    }
+                }
+
+                return info;
             }
             else
             {

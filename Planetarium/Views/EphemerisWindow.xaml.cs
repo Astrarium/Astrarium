@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,7 +27,10 @@ namespace Planetarium.Views
 
         private void DataGrid_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
         {
-            e.Column = new DataGridTextColumn() { Header = e.PropertyName, Binding = new Binding("[" + e.PropertyName + "]") };
+            var column = e.Column as DataGridTextColumn;
+            var dataTable = ((sender as DataGrid).ItemsSource as DataView).Table;
+            column.Binding = new Binding("[" + e.PropertyName + "]");            
+            column.Header = dataTable.Columns[e.PropertyName].Caption;
         }
     }
 }
