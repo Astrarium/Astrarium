@@ -149,12 +149,14 @@ namespace Planetarium.Plugins.BrightStars
             e["RTS.Set"] = (c, s) => c.Get(RiseTransitSet, s.Number).Set;
         }
 
-        public CelestialObjectInfo GetInfo(SkyContext c, Star s)
+        public void GetInfo(CelestialObjectInfo<Star> info)
         {
+            Star s = info.Body;
+            SkyContext c = info.Context;
+
             var rts = c.Get(RiseTransitSet, s.Number);
             var det = c.Get(ReadStarDetails, s.Number);
 
-            var info = new CelestialObjectInfo();
             info.SetSubtitle("Star").SetTitle(string.Join(", ", s.Names))
 
             .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial, s.Number), c.JulianDay))
@@ -183,8 +185,6 @@ namespace Planetarium.Plugins.BrightStars
             .AddRow("SpectralClass", det.SpectralClass)
             .AddRow("Pecularity", det.Pecularity)
             .AddRow("Radial velocity", det.RadialVelocity + " km/s");
-
-            return info;
         }
 
         private static Regex regexSpaceRemover = new Regex("[ ]{2,}", RegexOptions.None);

@@ -293,6 +293,21 @@ namespace Planetarium.Calculators
             return ADK.Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, parallax);
         }
 
+        private Date Rise(SkyContext c, int p)
+        {
+            return new Date(c.JulianDayMidnight + c.Get(RiseTransitSet, p).Rise, c.GeoLocation.UtcOffset);
+        }
+
+        private Date Transit(SkyContext c, int p)
+        {
+            return new Date(c.JulianDayMidnight + c.Get(RiseTransitSet, p).Transit, c.GeoLocation.UtcOffset);
+        }
+
+        private Date Set(SkyContext c, int p)
+        {
+            return new Date(c.JulianDayMidnight + c.Get(RiseTransitSet, p).Set, c.GeoLocation.UtcOffset);
+        }
+
         public VisibilityDetails Visibility(SkyContext c, int p)
         {
             double jd = c.JulianDayMidnight;
@@ -421,18 +436,34 @@ namespace Planetarium.Calculators
 
         public void ConfigureEphemeris(EphemerisConfig<Planet> e)
         {
-            e["Magnitude"] = (c, p) => c.Get(Magnitude, p.Number);
-            e["Horizontal.Altitude"] = (c, p) => c.Get(Horizontal, p.Number).Altitude;
-            e["Horizontal.Azimuth"] = (c, p) => c.Get(Horizontal, p.Number).Azimuth;
+            e["Constellation"] = (c, p) => Constellations.FindConstellation(c.Get(Equatorial, p.Number), c.JulianDay);
             e["Equatorial.Alpha"] = (c, p) => c.Get(Equatorial, p.Number).Alpha;
             e["Equatorial.Delta"] = (c, p) => c.Get(Equatorial, p.Number).Delta;
+            e["Equatorial0.Alpha"] = (c, p) => c.Get(Equatorial0, p.Number).Alpha;
+            e["Equatorial0.Delta"] = (c, p) => c.Get(Equatorial0, p.Number).Delta;
+            e["Ecliptical.Lambda"] = (c, p) => c.Get(Ecliptical, p.Number).Lambda;
+            e["Ecliptical.Beta"] = (c, p) => c.Get(Ecliptical, p.Number).Beta;
+            e["Horizontal.Altitude"] = (c, p) => c.Get(Horizontal, p.Number).Altitude;
+            e["Horizontal.Azimuth"] = (c, p) => c.Get(Horizontal, p.Number).Azimuth;
+            e["Magnitude"] = (c, p) => c.Get(Magnitude, p.Number);
+            e["Phase"] = (c, p) => c.Get(Phase, p.Number);
+            e["PhaseAngle"] = (c, p) => c.Get(PhaseAngle, p.Number);
+            e["DistanceFromEarth"] = (c, p) => c.Get(DistanceFromEarth, p.Number);
+            e["DistanceFromSun"] = (c, p) => c.Get(DistanceFromSun, p.Number);
+            e["HorizontalParallax"] = (c, p) => c.Get(Parallax, p.Number);
+            e["AngularDiameter"] = (c, p) => c.Get(Semidiameter, p.Number) * 2 / 3600.0;
+            e["Appearance.CM"] = (c, p) => c.Get(Appearance, p.Number).CM;
+            e["Appearance.D"] = (c, p) => c.Get(Appearance, p.Number).D;
+            e["Appearance.P"] = (c, p) => c.Get(Appearance, p.Number).P;
             e["SaturnRings.a", IsSaturn] = (c, p) => c.Get(GetSaturnRings, p.Number).a;
             e["SaturnRings.b", IsSaturn] = (c, p) => c.Get(GetSaturnRings, p.Number).b;
             e["GRSLongitude", IsJupiter] = (c, p) => c.Get(JupiterGreatRedSpotLongitude);
-            e["RTS.Rise"] = (c, p) => c.Get(RiseTransitSet, p.Number).Rise;
-            e["RTS.Transit"] = (c, p) => c.Get(RiseTransitSet, p.Number).Transit;
-            e["RTS.Set"] = (c, p) => c.Get(RiseTransitSet, p.Number).Set;
+            e["RTS.Rise"] = (c, p) => c.Get(Rise, p.Number);
+            e["RTS.Transit"] = (c, p) => c.Get(Transit, p.Number);
+            e["RTS.Set"] = (c, p) => c.Get(Set, p.Number);
+            e["Visibility.Begin"] = (c, p) => c.Get(Visibility, p.Number).Begin;
             e["Visibility.Duration"] = (c, p) => c.Get(Visibility, p.Number).Duration;
+            e["Visibility.End"] = (c, p) => c.Get(Visibility, p.Number).End;
             e["Visibility.Period"] = (c, p) => c.Get(Visibility, p.Number).Period;
         }
 
@@ -444,79 +475,77 @@ namespace Planetarium.Calculators
             e["Magnitude"] = (c, j) => c.Get(JupiterMoonMagnitude, j.Number);
         }
        
-        public CelestialObjectInfo GetInfo(SkyContext c, Planet planet)
+        public void GetInfo(CelestialObjectInfo<Planet> info)
         {
-            int p = planet.Number;
-
-            var info = new CelestialObjectInfo(c, planet);
-           
-            info.SetSubtitle("Planet").SetTitle(planet.Names.First())
-
-            .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial, p), c.JulianDay))
-
-            .AddHeader("Equatorial coordinates (geocentrical)")
-            .AddRow("Equatorial0.Alpha", c.Get(Equatorial0, p).Alpha)
-            .AddRow("Equatorial0.Delta", c.Get(Equatorial0, p).Delta)
-
-            .AddHeader(Text.Get("Planet.Equatorial"))
-            .AddRow(Text.Get("Planet.Equatorial.Alpha"), c.Get(Equatorial, p).Alpha, Formatters.RA)
-            .AddRow(Text.Get("Planet.Equatorial.Delta"), c.Get(Equatorial, p).Delta, Formatters.Dec)
-
-            .AddHeader("Ecliptical coordinates")
-            .AddRow("Ecliptical.Lambda", c.Get(Ecliptical, p).Lambda)
-            .AddRow("Ecliptical.Beta", c.Get(Ecliptical, p).Beta)
-
-            .AddHeader(Text.Get("Planet.Horizontal"))
-            .AddRow("Horizontal.Azimuth")
-            .AddRow("Horizontal.Altitude")
-
-            .AddHeader(Text.Get("Planet.RTS"))
-            .AddClickableRow("RTS.Rise")
-            .AddClickableRow("RTS.Transit")
-            .AddClickableRow("RTS.Set")
-
-            .AddHeader(Text.Get("Planet.Visibility"))
-            .AddRow("Visibility.Period")
-            .AddRow("Visibility.Begin")
-            .AddRow("Visibility.End")
-            .AddRow("Visibility.Duration")
-
-            .AddHeader(Text.Get("Planet.Appearance"))
-            .AddRow(Text.Get("Planet.Phase"), c.Get(Phase, p), Formatters.Phase)
-            .AddRow(Text.Get("Planet.PhaseAngle"), c.Get(PhaseAngle, p), Formatters.PhaseAngle)
-            .AddRow("Magnitude", c.Get(Magnitude, p))
-            .AddRow("DistanceFromEarth", c.Get(DistanceFromEarth, p))
-            .AddRow("DistanceFromSun", c.Get(DistanceFromSun, p))
-            .AddRow("HorizontalParallax", c.Get(Parallax, p))
-            .AddRow("AngularDiameter", c.Get(Semidiameter, p) * 2 / 3600.0);
-
-            if (p == Planet.SATURN)
-            {
-                info
-                .AddRow("SaturnRings.a", c.Get(GetSaturnRings, p).a)
-                .AddRow("SaturnRings.b", c.Get(GetSaturnRings, p).b);
-            }
-            else if (p == Planet.JUPITER)
-            {
-                info.AddRow("GRSLongitude", c.Get(JupiterGreatRedSpotLongitude));
-            }
-
             info
-                .AddRow("Appearance.CM", c.Get(Appearance, p).CM)
-                .AddRow("Appearance.P", c.Get(Appearance, p).P)
-                .AddRow("Appearance.D", c.Get(Appearance, p).D);
+                .SetSubtitle("Planet")
+                .SetTitle(info.Body.Names.First())
 
-            return info;
+                .AddRow("Constellation")
+
+                .AddHeader("Equatorial coordinates (geocentrical)")
+                .AddRow("Equatorial0.Alpha")
+                .AddRow("Equatorial0.Delta")
+
+                .AddHeader(Text.Get("Planet.Equatorial"))
+                .AddRow("Equatorial.Alpha")
+                .AddRow("Equatorial.Delta")
+
+                .AddHeader(Text.Get("Planet.Ecliptical"))
+                .AddRow("Ecliptical.Lambda")
+                .AddRow("Ecliptical.Beta")
+
+                .AddHeader(Text.Get("Planet.Horizontal"))
+                .AddRow("Horizontal.Azimuth")
+                .AddRow("Horizontal.Altitude")
+
+                .AddHeader(Text.Get("Planet.RTS"))
+                .AddRow("RTS.Rise")
+                .AddRow("RTS.Transit")
+                .AddRow("RTS.Set")
+
+                .AddHeader(Text.Get("Planet.Visibility"))
+                .AddRow("Visibility.Period")
+                .AddRow("Visibility.Begin")
+                .AddRow("Visibility.End")
+                .AddRow("Visibility.Duration")
+
+                .AddHeader(Text.Get("Planet.Appearance"))
+                .AddRow("Phase")
+                .AddRow("PhaseAngle")
+                .AddRow("Magnitude")
+                .AddRow("DistanceFromEarth")
+                .AddRow("DistanceFromSun")
+                .AddRow("HorizontalParallax")
+                .AddRow("AngularDiameter")
+                .AddRow("Appearance.CM")
+                .AddRow("Appearance.P")
+                .AddRow("Appearance.D");
+
+                if (info.Body.Number == Planet.SATURN)
+                {
+                    info
+                        .AddHeader(Text.Get("SaturnRings"))
+                        .AddRow("SaturnRings.a")
+                        .AddRow("SaturnRings.b");
+                }
+                else if (info.Body.Number == Planet.JUPITER)
+                {
+                    info
+                        .AddRow("GRSLongitude");
+                }
         }
 
-        public CelestialObjectInfo GetInfo(SkyContext c, JupiterMoon moon)
+        public void GetInfo(CelestialObjectInfo<JupiterMoon> info)
         {
             int p = Planet.JUPITER;
+            JupiterMoon moon = info.Body;
             int m = moon.Number;
+            SkyContext c = info.Context;
 
             var rts = c.Get(RiseTransitSet, p);
 
-            var info = new CelestialObjectInfo();
+
             info.SetSubtitle("Satellite of Jupiter").SetTitle(moon.Names.First())
 
             .AddRow("Constellation", Constellations.FindConstellation(c.Get(JupiterMoonEquatorial, m), c.JulianDay))
@@ -546,8 +575,6 @@ namespace Planetarium.Calculators
             .AddRow("Magnitude", c.Get(JupiterMoonMagnitude, m))
             .AddRow("AngularDiameter", c.Get(JupiterMoonSemidiameter, m) * 2 / 3600.0)
             .AddRow("Appearance.CM", c.Get(JupiterMoonCentralMeridian, m));
-
-            return info;
         }
 
         public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)

@@ -1,4 +1,5 @@
-﻿using Planetarium.Types;
+﻿using ADK;
+using Planetarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -116,10 +117,23 @@ namespace Planetarium.Views
                             Grid.SetRow(cellCaption, r);
                             Grid.SetColumn(cellCaption, 0);
 
-                            var cellValue = new TextBlock() { Text = formatter.Format(p.Value), Padding = CellPadding, FontFamily = fontFamily, FontSize = fontSize, VerticalAlignment = VerticalAlignment.Center };
-                            tblInfo.Children.Add(cellValue);
-                            Grid.SetRow(cellValue, r);
-                            Grid.SetColumn(cellValue, 1);
+                            if (p.Value is Date date && date != null)
+                            { 
+                                Hyperlink link = new Hyperlink() { FontFamily = fontFamily, FontSize = fontSize };
+                                link.Inlines.Add(formatter.Format(p.Value));
+                                //link.Click += (s, e) => LinkClicked(date.ToJulianDay());
+                                var cellValue = new TextBlock(link) { Padding = CellPadding, VerticalAlignment = VerticalAlignment.Center };
+                                tblInfo.Children.Add(cellValue);
+                                Grid.SetRow(cellValue, r);
+                                Grid.SetColumn(cellValue, 1);
+                            }
+                            else
+                            {
+                                var cellValue = new TextBlock() { Text = formatter.Format(p.Value), Padding = CellPadding, FontFamily = fontFamily, FontSize = fontSize, VerticalAlignment = VerticalAlignment.Center };
+                                tblInfo.Children.Add(cellValue);
+                                Grid.SetRow(cellValue, r);
+                                Grid.SetColumn(cellValue, 1);
+                            }
                         }
                         break;
 

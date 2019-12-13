@@ -104,15 +104,16 @@ namespace Planetarium.Calculators
             return Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, c.Get(Parallax), c.Get(Semidiameter) / 3600.0);
         }
 
-        public CelestialObjectInfo GetInfo(SkyContext c, Sun sun)
+        public void GetInfo(CelestialObjectInfo<Sun> info)
         {
+            SkyContext c = info.Context;
+
             var rts = c.Get(RiseTransitSet);
             var jdSpring = c.Get(Seasons, Season.Spring);
             var jdSummer = c.Get(Seasons, Season.Summer);
             var jdAutumn = c.Get(Seasons, Season.Autumn);
             var jdWinter = c.Get(Seasons, Season.Winter);
 
-            var info = new CelestialObjectInfo();
             info.SetTitle(Sun.Name)
 
                 .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial), c.JulianDay))
@@ -149,8 +150,6 @@ namespace Planetarium.Calculators
                 .AddRow("Seasons.Summer", c.GetDate(jdSummer), jdSummer)
                 .AddRow("Seasons.Autumn", c.GetDate(jdAutumn), jdAutumn)
                 .AddRow("Seasons.Winter", c.GetDate(jdWinter), jdWinter);
-
-            return info;
         }
 
         public void ConfigureEphemeris(EphemerisConfig<Sun> e)

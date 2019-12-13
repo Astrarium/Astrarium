@@ -74,13 +74,13 @@ namespace Planetarium.Plugins.MinorBodies
             e["RTS.Set"] = (c, p) => c.Get(RiseTransitSet, asteroids.IndexOf(p)).Set;
         }
 
-        public CelestialObjectInfo GetInfo(SkyContext c, Asteroid body)
+        public void GetInfo(CelestialObjectInfo<Asteroid> info)
         {
+            Asteroid body = info.Body;
             int i = asteroids.IndexOf(body);
+            SkyContext c = info.Context;
 
             var rts = c.Get(RiseTransitSet, i);
-
-            var info = new CelestialObjectInfo();
 
             info.SetSubtitle("Minor planet").SetTitle(body.Names.First())
             .AddRow("Constellation", Constellations.FindConstellation(c.Get(EquatorialT, i), c.JulianDay))
@@ -115,8 +115,6 @@ namespace Planetarium.Plugins.MinorBodies
             .AddRow("RTS.Rise", rts.Rise, c.JulianDayMidnight + rts.Rise)
             .AddRow("RTS.Transit", rts.Transit, c.JulianDayMidnight + rts.Transit)
             .AddRow("RTS.Set", rts.Set, c.JulianDayMidnight + rts.Set);
-
-            return info;
         }
 
         public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)

@@ -170,14 +170,24 @@ namespace Planetarium.Types
         {
             public string Format(object value)
             {
-                double v = (double)value;
-                if (double.IsInfinity(v) || double.IsNaN(v))
+                if (value is double v)
+                { 
+                    if (double.IsInfinity(v) || double.IsNaN(v))
+                    {
+                        return "—";
+                    }
+                    else
+                    {
+                        return System.TimeSpan.FromHours(v * 24).ToString(@"hh\:mm");
+                    }
+                }
+                else if (value is Date date)
                 {
-                    return "—";
+                    return System.TimeSpan.FromHours(date.Time * 24).ToString(@"hh\:mm");
                 }
                 else
                 {
-                    return System.TimeSpan.FromHours(v * 24).ToString(@"hh\:mm");
+                    return "?";
                 }
             }
         }

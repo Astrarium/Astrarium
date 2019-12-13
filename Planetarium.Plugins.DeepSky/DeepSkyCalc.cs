@@ -121,12 +121,13 @@ namespace Planetarium.Plugins.DeepSky
             e["RTS.Set"] = (c, ds) => c.Get(RiseTransitSet, ds).Set;
         }
 
-        public CelestialObjectInfo GetInfo(SkyContext c, DeepSky ds)
+        public void GetInfo(CelestialObjectInfo<DeepSky> info)
         {
+            DeepSky ds = info.Body;
+            SkyContext c = info.Context;
             var rts = c.Get(RiseTransitSet, ds);
             var det = c.Get(ReadDeepSkyDetails, ds);
 
-            var info = new CelestialObjectInfo();
             info.SetSubtitle(ds.Status.ToString())
             .SetTitle(string.Join(" / ", ds.Names))
             .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial, ds), c.JulianDay))
@@ -196,8 +197,6 @@ namespace Planetarium.Plugins.DeepSky
             {
                 info.AddRow("Remarks", det.Remarks);
             }
-
-            return info;
         }
 
         public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)

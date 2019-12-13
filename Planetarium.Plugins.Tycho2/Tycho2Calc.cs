@@ -389,11 +389,13 @@ namespace Planetarium.Plugins.Tycho2
             e["RTS.Set"] = (c, s) => c.Get(RiseTransitSet, s).Set;
         }
 
-        public CelestialObjectInfo GetInfo(SkyContext c, Tycho2Star s)
+        public void GetInfo(CelestialObjectInfo<Tycho2Star> info)
         {
+            SkyContext c = info.Context;
+            Tycho2Star s = info.Body;
+
             var rts = c.Get(RiseTransitSet, s);
 
-            var info = new CelestialObjectInfo();
             info.SetSubtitle("Star").SetTitle(s.ToString())
 
             .AddRow("Constellation", Constellations.FindConstellation(s.Equatorial, c.JulianDay))
@@ -417,8 +419,6 @@ namespace Planetarium.Plugins.Tycho2
 
             .AddHeader("Properties")
             .AddRow("Magnitude", s.Magnitude);
-
-            return info;
         }
 
         private readonly Regex searchRegex = new Regex("tyc\\s*(?<tyc1>\\d+)((\\s*-\\s*|\\s+)(?<tyc2>\\d+)((\\s*-\\s*|\\s+)(?<tyc3>\\d+))?)?");

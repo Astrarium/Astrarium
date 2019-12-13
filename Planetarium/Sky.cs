@@ -17,7 +17,7 @@ namespace Planetarium
     public class Sky : ISky
     {
         private delegate ICollection<SearchResultItem> SearchDelegate(SkyContext context, string searchString, int maxCount = 50);
-        private delegate CelestialObjectInfo GetInfoDelegate<T>(SkyContext context, T body) where T : CelestialObject;
+        private delegate void GetInfoDelegate<T>(CelestialObjectInfo<T> body) where T : CelestialObject;
 
         private Dictionary<Type, EphemerisConfig> EphemConfigs = new Dictionary<Type, EphemerisConfig>();
         private Dictionary<Type, Delegate> InfoProviders = new Dictionary<Type, Delegate>();
@@ -169,25 +169,10 @@ namespace Planetarium
             {
                 var ephem = GetEphemerides(body, Context.JulianDay, Context.JulianDay + 1, 1, GetEphemerisCategories(body)).First();
 
-                var info = (CelestialObjectInfo)InfoProviders[bodyType].DynamicInvoke(Context, body);
+                var infoType = typeof(CelestialObjectInfo<>).MakeGenericType(bodyType);
+                var info = (CelestialObjectInfo)Activator.CreateInstance(infoType, Context, body, ephem);
 
-                foreach (var elem in info.InfoElements.OfType<InfoElementProperty>().Where(e => e.NeedCalculate))
-                {
-                    string key = elem.Caption;
-                    elem.Caption = Text.Get($"{body.GetType().Name}.{key}");
-
-                    var ep = ephem.FirstOrDefault(e => e.Key == key);
-
-                    if (ep != null)
-                    {
-                        elem.Value = ep.Value;
-                        elem.Formatter = ep.Formatter;
-                        if (elem is InfoElementPropertyLink)
-                        {
-                            (elem as InfoElementPropertyLink).JulianDay = Context.JulianDayMidnight + (double)ep.Value;
-                        }
-                    }
-                }
+                InfoProviders[bodyType].DynamicInvoke(info);
 
                 return info;
             }

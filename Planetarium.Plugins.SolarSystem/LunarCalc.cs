@@ -272,8 +272,11 @@ namespace Planetarium.Calculators
             e["Magnitude"] = (c, m) => c.Get(Magnitude);
         }
 
-        public CelestialObjectInfo GetInfo(SkyContext c, Moon m)
+        public void GetInfo(CelestialObjectInfo<Moon> info)
         {
+            SkyContext c = info.Context;
+            Moon = info.Body;
+
             var rts = c.Get(RiseTransitSet);
             var jdNM = c.Get(NearestPhase, MoonPhase.NewMoon);
             var jdFQ = c.Get(NearestPhase, MoonPhase.FirstQuarter);
@@ -282,7 +285,6 @@ namespace Planetarium.Calculators
             var jdApogee = c.Get(NearestApsis, MoonApsis.Apogee);
             var jdPerigee = c.Get(NearestApsis, MoonApsis.Perigee);
 
-            var info = new CelestialObjectInfo();
             info.SetTitle(Moon.Name)
 
                 .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial), c.JulianDay))
@@ -329,8 +331,6 @@ namespace Planetarium.Calculators
                 .AddHeader("Nearest apsides")
                 .AddRow("MoonApsides.Apogee", c.GetDate(jdApogee), jdApogee)
                 .AddRow("MoonApsides.Perigee", c.GetDate(jdPerigee), jdPerigee);
-
-            return info;
         }
 
         public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)

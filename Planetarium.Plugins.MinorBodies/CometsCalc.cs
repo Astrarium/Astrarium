@@ -123,13 +123,14 @@ namespace Planetarium.Plugins.MinorBodies
             e["RTS.Set"] = (c, p) => c.Get(RiseTransitSet, comets.IndexOf(p)).Set;            
         }
 
-        public CelestialObjectInfo GetInfo(SkyContext c, Comet comet)
+        public void GetInfo(CelestialObjectInfo<Comet> info)
         {
+            Comet comet = info.Body;
             int i = comets.IndexOf(comet);
+            SkyContext c = info.Context;
 
             var rts = c.Get(RiseTransitSet, i);
 
-            var info = new CelestialObjectInfo();
             info.SetSubtitle("Comet").SetTitle(comet.Names.First())
 
             .AddRow("Constellation", Constellations.FindConstellation(c.Get(EquatorialT, i), c.JulianDay))
@@ -162,8 +163,6 @@ namespace Planetarium.Plugins.MinorBodies
             .AddRow("DistanceFromEarth", c.Get(DistanceFromEarth, i))
             .AddRow("DistanceFromSun", c.Get(DistanceFromSun, i))
             .AddRow("HorizontalParallax", c.Get(Parallax, i));
-
-            return info;
         }
 
         public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)

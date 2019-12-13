@@ -34,7 +34,7 @@ namespace Planetarium.Types
     public interface ICelestialObjectCalc<T> where T : CelestialObject
     {
         void ConfigureEphemeris(EphemerisConfig<T> config);
-        CelestialObjectInfo GetInfo(SkyContext context, T body);
+        void GetInfo(CelestialObjectInfo<T> info);
         ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50);
     }
 
