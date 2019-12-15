@@ -292,22 +292,7 @@ namespace Planetarium.Calculators
 
             return ADK.Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, parallax);
         }
-
-        private Date Rise(SkyContext c, int p)
-        {
-            return new Date(c.JulianDayMidnight + c.Get(RiseTransitSet, p).Rise, c.GeoLocation.UtcOffset);
-        }
-
-        private Date Transit(SkyContext c, int p)
-        {
-            return new Date(c.JulianDayMidnight + c.Get(RiseTransitSet, p).Transit, c.GeoLocation.UtcOffset);
-        }
-
-        private Date Set(SkyContext c, int p)
-        {
-            return new Date(c.JulianDayMidnight + c.Get(RiseTransitSet, p).Set, c.GeoLocation.UtcOffset);
-        }
-
+      
         public VisibilityDetails Visibility(SkyContext c, int p)
         {
             double jd = c.JulianDayMidnight;
@@ -458,9 +443,10 @@ namespace Planetarium.Calculators
             e["SaturnRings.a", IsSaturn] = (c, p) => c.Get(GetSaturnRings, p.Number).a;
             e["SaturnRings.b", IsSaturn] = (c, p) => c.Get(GetSaturnRings, p.Number).b;
             e["GRSLongitude", IsJupiter] = (c, p) => c.Get(JupiterGreatRedSpotLongitude);
-            e["RTS.Rise"] = (c, p) => c.Get(Rise, p.Number);
-            e["RTS.Transit"] = (c, p) => c.Get(Transit, p.Number);
-            e["RTS.Set"] = (c, p) => c.Get(Set, p.Number);
+            e["RTS.Rise"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, p.Number).Rise);
+            e["RTS.Transit"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, p.Number).Transit);
+            e["RTS.Set"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, p.Number).Set);
+            e["RTS.Duration"] = (c, p) => c.Get(RiseTransitSet, p.Number).Duration;
             e["Visibility.Begin"] = (c, p) => c.Get(Visibility, p.Number).Begin;
             e["Visibility.Duration"] = (c, p) => c.Get(Visibility, p.Number).Duration;
             e["Visibility.End"] = (c, p) => c.Get(Visibility, p.Number).End;
@@ -469,10 +455,27 @@ namespace Planetarium.Calculators
 
         public void ConfigureEphemeris(EphemerisConfig<JupiterMoon> e)
         {
-            e["Rectangular.X"] = (c, j) => c.Get(JupiterMoonRectangular, j.Number).X;
-            e["Rectangular.Y"] = (c, j) => c.Get(JupiterMoonRectangular, j.Number).Y;
-            e["Rectangular.Z"] = (c, j) => c.Get(JupiterMoonRectangular, j.Number).Z;
-            e["Magnitude"] = (c, j) => c.Get(JupiterMoonMagnitude, j.Number);
+            e["Constellation"] = (c, jm) => Constellations.FindConstellation(c.Get(JupiterMoonEquatorial, jm.Number), c.JulianDay);
+            e["Equatorial.Alpha"] = (c, jm) => c.Get(JupiterMoonEquatorial, jm.Number).Alpha;
+            e["Equatorial.Delta"] = (c, jm) => c.Get(JupiterMoonEquatorial, jm.Number).Delta;
+
+            e["Horizontal.Altitude"] = (c, jm) => c.Get(JupiterMoonHorizontal, jm.Number).Altitude;
+            e["Horizontal.Azimuth"] = (c, jm) => c.Get(JupiterMoonHorizontal, jm.Number).Azimuth;
+
+            e["Rectangular.X"] = (c, jm) => c.Get(JupiterMoonRectangular, jm.Number).X;
+            e["Rectangular.Y"] = (c, jm) => c.Get(JupiterMoonRectangular, jm.Number).Y;
+            e["Rectangular.Z"] = (c, jm) => c.Get(JupiterMoonRectangular, jm.Number).Z;
+            e["Magnitude"] = (c, jm) => c.Get(JupiterMoonMagnitude, jm.Number);
+
+            e["Phase"] = (c, jm) => c.Get(Phase, jm.Number);
+            e["PhaseAngle"] = (c, jm) => c.Get(PhaseAngle, jm.Number);
+            e["AngularDiameter"] = (c, jm) => c.Get(JupiterMoonSemidiameter, jm.Number) * 2 / 3600.0;
+            e["Appearance.CM"] = (c, jm) => c.Get(JupiterMoonCentralMeridian, jm.Number);
+
+            e["RTS.Rise"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, Planet.JUPITER).Rise);
+            e["RTS.Transit"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, Planet.JUPITER).Transit);
+            e["RTS.Set"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, Planet.JUPITER).Set);
+            e["RTS.Duration"] = (c, p) => c.Get(RiseTransitSet, Planet.JUPITER).Duration;
         }
        
         public void GetInfo(CelestialObjectInfo<Planet> info)
@@ -503,6 +506,7 @@ namespace Planetarium.Calculators
                 .AddRow("RTS.Rise")
                 .AddRow("RTS.Transit")
                 .AddRow("RTS.Set")
+                .AddRow("RTS.Duration")
 
                 .AddHeader(Text.Get("Planet.Visibility"))
                 .AddRow("Visibility.Period")
@@ -538,43 +542,35 @@ namespace Planetarium.Calculators
 
         public void GetInfo(CelestialObjectInfo<JupiterMoon> info)
         {
-            int p = Planet.JUPITER;
-            JupiterMoon moon = info.Body;
-            int m = moon.Number;
-            SkyContext c = info.Context;
+            info.SetSubtitle("Satellite of Jupiter").SetTitle(info.Body.Names.First())
 
-            var rts = c.Get(RiseTransitSet, p);
-
-
-            info.SetSubtitle("Satellite of Jupiter").SetTitle(moon.Names.First())
-
-            .AddRow("Constellation", Constellations.FindConstellation(c.Get(JupiterMoonEquatorial, m), c.JulianDay))
+            .AddRow("Constellation")
 
             .AddHeader("Equatorial coordinates (topocentrical)")
-            .AddRow("Equatorial.Alpha", c.Get(JupiterMoonEquatorial, m).Alpha)
-            .AddRow("Equatorial.Delta", c.Get(JupiterMoonEquatorial, m).Delta)
+            .AddRow("Equatorial.Alpha")
+            .AddRow("Equatorial.Delta")
 
             .AddHeader("Horizontal coordinates")
-            .AddRow("Horizontal.Azimuth", c.Get(JupiterMoonHorizontal, m).Azimuth)
-            .AddRow("Horizontal.Altitude", c.Get(JupiterMoonHorizontal, m).Altitude)
+            .AddRow("Horizontal.Azimuth")
+            .AddRow("Horizontal.Altitude")
 
             .AddHeader("Rectangular planetocentric coordinates")
-            .AddRow("Rectangular.X", c.Get(JupiterMoonRectangular, m).X)
-            .AddRow("Rectangular.Y", c.Get(JupiterMoonRectangular, m).Y)
-            .AddRow("Rectangular.Z", c.Get(JupiterMoonRectangular, m).Z)
+            .AddRow("Rectangular.X")
+            .AddRow("Rectangular.Y")
+            .AddRow("Rectangular.Z")
 
             .AddHeader("Visibility")
-            .AddRow("RTS.Rise", rts.Rise, c.JulianDayMidnight + rts.Rise)
-            .AddRow("RTS.Transit", rts.Transit, c.JulianDayMidnight + rts.Transit)
-            .AddRow("RTS.Set", rts.Set, c.JulianDayMidnight + rts.Set)
-            .AddRow("RTS.Duration", rts.Duration)
+            .AddRow("RTS.Rise")
+            .AddRow("RTS.Transit")
+            .AddRow("RTS.Set")
+            .AddRow("RTS.Duration")
 
             .AddHeader("Appearance")
-            .AddRow("Phase", c.Get(Phase, p))
-            .AddRow("PhaseAngle", c.Get(PhaseAngle, p))
-            .AddRow("Magnitude", c.Get(JupiterMoonMagnitude, m))
-            .AddRow("AngularDiameter", c.Get(JupiterMoonSemidiameter, m) * 2 / 3600.0)
-            .AddRow("Appearance.CM", c.Get(JupiterMoonCentralMeridian, m));
+            .AddRow("Phase")
+            .AddRow("PhaseAngle")
+            .AddRow("Magnitude")
+            .AddRow("AngularDiameter")
+            .AddRow("Appearance.CM");
         }
 
         public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)

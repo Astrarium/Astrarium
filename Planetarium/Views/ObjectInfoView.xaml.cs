@@ -121,7 +121,7 @@ namespace Planetarium.Views
                             { 
                                 Hyperlink link = new Hyperlink() { FontFamily = fontFamily, FontSize = fontSize };
                                 link.Inlines.Add(formatter.Format(p.Value));
-                                //link.Click += (s, e) => LinkClicked(date.ToJulianDay());
+                                link.Click += (s, e) => LinkClicked(date.ToJulianEphemerisDay());
                                 var cellValue = new TextBlock(link) { Padding = CellPadding, VerticalAlignment = VerticalAlignment.Center };
                                 tblInfo.Children.Add(cellValue);
                                 Grid.SetRow(cellValue, r);

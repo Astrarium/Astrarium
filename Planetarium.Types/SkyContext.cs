@@ -108,6 +108,16 @@ namespace Planetarium.Types
         {
             return new Date(jd, GeoLocation.UtcOffset);
         }
+
+        /// <summary>
+        /// Gets date corresponding to specified time of a day, expressed by fractions of a day (0 means noon, 0.5 is afternoon). 
+        /// </summary>
+        /// <param name="jd">Julian Day to convert to the date</param>
+        /// <returns><see cref="Date"/> instance</returns>
+        public Date GetDateFromTime(double dayFraction)
+        {
+            return new Date(JulianDayMidnight + dayFraction, GeoLocation.UtcOffset);
+        }
     }
 
     /// <summary>

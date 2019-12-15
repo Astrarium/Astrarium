@@ -190,6 +190,8 @@ namespace ADK
             if (Month <= 2) Year = C - 4715;
         }
 
+        public double UtcOffset { get; private set; }
+
         /// <summary>
         /// Creates new date from Julian Ephemeris Day and UTC offset in hours
         /// </summary>
@@ -197,7 +199,9 @@ namespace ADK
         /// <param name="utcOffset">UTC offset in hours</param>
         public Date(double jde, double utcOffset) :
             this(jde + utcOffset / 24.0 - DeltaT(jde) / 86400)
-        { }
+        {
+            UtcOffset = utcOffset;
+        }
 
         #endregion Constructors
 
@@ -296,7 +300,7 @@ namespace ADK
         /// <returns>Julian Day value.</returns>
         public double ToJulianDay()
         {
-            return JulianDay(this);
+            return JulianDay(this) - UtcOffset / 24.0;
         }
 
         /// <summary>
@@ -305,7 +309,7 @@ namespace ADK
         /// <returns>Julian Ephemeris Day (JDE) value.</returns>
         public double ToJulianEphemerisDay()
         {
-            return JulianEphemerisDay(this);
+            return JulianEphemerisDay(this) - UtcOffset / 24.0;
         }
 
         /// <summary>
