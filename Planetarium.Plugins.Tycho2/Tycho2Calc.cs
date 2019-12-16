@@ -378,47 +378,47 @@ namespace Planetarium.Plugins.Tycho2
 
         public void ConfigureEphemeris(EphemerisConfig<Tycho2Star> e)
         {
+            e["Constellation"] = (c, s) => Constellations.FindConstellation(s.Equatorial, c.JulianDay);
             e["Equatorial.Alpha"] = (c, s) => c.Get(Equatorial, s).Alpha;
             e["Equatorial.Delta"] = (c, s) => c.Get(Equatorial, s).Delta;
             e["Equatorial0.Alpha"] = (c, s) => s.Equatorial0.Alpha;
             e["Equatorial0.Delta"] = (c, s) => s.Equatorial0.Delta;
             e["Horizontal.Azimuth"] = (c, s) => c.Get(Horizontal, s).Azimuth;
             e["Horizontal.Altitude"] = (c, s) => c.Get(Horizontal, s).Altitude;
-            e["RTS.Rise"] = (c, s) => c.Get(RiseTransitSet, s).Rise;
-            e["RTS.Transit"] = (c, s) => c.Get(RiseTransitSet, s).Transit;
-            e["RTS.Set"] = (c, s) => c.Get(RiseTransitSet, s).Set;
+            e["RTS.Rise"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet, s).Rise);
+            e["RTS.Transit"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet, s).Transit);
+            e["RTS.Set"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet, s).Set);
+            e["RTS.Duration"] = (c, s) => c.Get(RiseTransitSet, s).Duration;
         }
 
         public void GetInfo(CelestialObjectInfo<Tycho2Star> info)
         {
-            SkyContext c = info.Context;
-            Tycho2Star s = info.Body;
+            info
+            .SetTitle(info.Body.ToString())
+            .SetSubtitle("Star")
 
-            var rts = c.Get(RiseTransitSet, s);
-
-            info.SetSubtitle("Star").SetTitle(s.ToString())
-
-            .AddRow("Constellation", Constellations.FindConstellation(s.Equatorial, c.JulianDay))
+            .AddRow("Constellation")
 
             .AddHeader("Equatorial coordinates (current epoch)")
-            .AddRow("Equatorial.Alpha", s.Equatorial.Alpha)
-            .AddRow("Equatorial.Delta", s.Equatorial.Delta)
+            .AddRow("Equatorial.Alpha")
+            .AddRow("Equatorial.Delta")
 
             .AddHeader("Equatorial coordinates (J2000.0 epoch)")
-            .AddRow("Equatorial.Alpha", s.Equatorial0.Alpha)
-            .AddRow("Equatorial.Delta", s.Equatorial0.Delta)
+            .AddRow("Equatorial.Alpha")
+            .AddRow("Equatorial.Delta")
 
             .AddHeader("Horizontal coordinates")
-            .AddRow("Horizontal.Azimuth", s.Horizontal.Azimuth)
-            .AddRow("Horizontal.Altitude", s.Horizontal.Altitude)
+            .AddRow("Horizontal.Azimuth")
+            .AddRow("Horizontal.Altitude")
 
             .AddHeader("Visibility")
-            .AddRow("RTS.Rise", rts.Rise, c.JulianDayMidnight + rts.Rise)
-            .AddRow("RTS.Transit", rts.Transit, c.JulianDayMidnight + rts.Transit)
-            .AddRow("RTS.Set", rts.Set, c.JulianDayMidnight + rts.Set)
+            .AddRow("RTS.Rise")
+            .AddRow("RTS.Transit")
+            .AddRow("RTS.Set")
+            .AddRow("RTS.Duration")
 
             .AddHeader("Properties")
-            .AddRow("Magnitude", s.Magnitude);
+            .AddRow("Magnitude", info.Body.Magnitude);
         }
 
         private readonly Regex searchRegex = new Regex("tyc\\s*(?<tyc1>\\d+)((\\s*-\\s*|\\s+)(?<tyc2>\\d+)((\\s*-\\s*|\\s+)(?<tyc3>\\d+))?)?");

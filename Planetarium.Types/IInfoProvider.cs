@@ -127,34 +127,22 @@ namespace Planetarium.Types
             return this;
         }
 
-        public CelestialObjectInfo<T> AddRow(string key, object value, IEphemFormatter formatter)
+        public CelestialObjectInfo<T> AddRow(string text, object value, IEphemFormatter formatter)
         {
             InfoElements.Add(new InfoElementProperty()
             {
-                Caption = key,
+                Caption = text,
                 Value = value,
                 Formatter = formatter
             });
             return this;
         }
-
-        public CelestialObjectInfo<T> AddRow(string key, object value, double jd, IEphemFormatter formatter)
+     
+        public CelestialObjectInfo<T> AddRow(string text, object value, double jd)
         {
             InfoElements.Add(new InfoElementPropertyLink()
             {
-                Caption = key,
-                Value = value,
-                JulianDay = jd,
-                Formatter = formatter
-            });
-            return this;
-        }
-
-        public CelestialObjectInfo<T> AddRow(string key, object value, double jd)
-        {
-            InfoElements.Add(new InfoElementPropertyLink()
-            {
-                Caption = key,
+                Caption = text,
                 Value = value,
                 JulianDay = jd
             });

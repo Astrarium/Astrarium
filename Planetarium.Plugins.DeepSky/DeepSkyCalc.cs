@@ -116,54 +116,62 @@ namespace Planetarium.Plugins.DeepSky
 
         public void ConfigureEphemeris(EphemerisConfig<DeepSky> e)
         {
-            e["RTS.Rise"] = (c, ds) => c.Get(RiseTransitSet, ds).Rise;
-            e["RTS.Transit"] = (c, ds) => c.Get(RiseTransitSet, ds).Transit;
-            e["RTS.Set"] = (c, ds) => c.Get(RiseTransitSet, ds).Set;
+            e["Constellation"] = (c, ds) => Constellations.FindConstellation(c.Get(Equatorial, ds), c.JulianDay);
+            e["Equatorial.Alpha"] = (c, ds) => c.Get(Equatorial, ds).Alpha;
+            e["Equatorial.Delta"] = (c, ds) => c.Get(Equatorial, ds).Delta;
+            e["Equatorial0.Alpha"] = (c, ds) => ds.Equatorial0.Alpha;
+            e["Equatorial0.Delta"] = (c, ds) => ds.Equatorial0.Delta;
+            e["Horizontal.Altitude"] = (c, ds) => c.Get(Horizontal, ds).Altitude;
+            e["Horizontal.Azimuth"] = (c, ds) => c.Get(Horizontal, ds).Azimuth;
+            e["RTS.Rise"] = (c, ds) => c.GetDateFromTime(c.Get(RiseTransitSet, ds).Rise);
+            e["RTS.Transit"] = (c, ds) => c.GetDateFromTime(c.Get(RiseTransitSet, ds).Transit);
+            e["RTS.Set"] = (c, ds) => c.GetDateFromTime(c.Get(RiseTransitSet, ds).Set);
+            e["RTS.Duration"] = (c, ds) => c.Get(RiseTransitSet, ds).Duration;
         }
 
         public void GetInfo(CelestialObjectInfo<DeepSky> info)
         {
             DeepSky ds = info.Body;
             SkyContext c = info.Context;
-            var rts = c.Get(RiseTransitSet, ds);
-            var det = c.Get(ReadDeepSkyDetails, ds);
+           
+            var details = c.Get(ReadDeepSkyDetails, ds);
 
             info.SetSubtitle(ds.Status.ToString())
             .SetTitle(string.Join(" / ", ds.Names))
-            .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial, ds), c.JulianDay))
+            .AddRow("Constellation")
 
             .AddHeader("Equatorial coordinates (current epoch)")
-            .AddRow("Equatorial.Alpha", c.Get(Equatorial, ds).Alpha)
-            .AddRow("Equatorial.Delta", c.Get(Equatorial, ds).Delta)
+            .AddRow("Equatorial.Alpha")
+            .AddRow("Equatorial.Delta")
 
             .AddHeader("Equatorial coordinates (J2000.0 epoch)")
-            .AddRow("Equatorial0.Alpha", ds.Equatorial0.Alpha)
-            .AddRow("Equatorial0.Delta", ds.Equatorial0.Delta)
+            .AddRow("Equatorial0.Alpha")
+            .AddRow("Equatorial0.Delta")
 
             .AddHeader("Horizontal coordinates")
-            .AddRow("Horizontal.Azimuth", c.Get(Horizontal, ds).Azimuth)
-            .AddRow("Horizontal.Altitude", c.Get(Horizontal, ds).Altitude)
+            .AddRow("Horizontal.Azimuth")
+            .AddRow("Horizontal.Altitude")
 
             .AddHeader("Visibility")
-            .AddRow("RTS.Rise", rts.Rise, c.JulianDayMidnight + rts.Rise)
-            .AddRow("RTS.Transit", rts.Transit, c.JulianDayMidnight + rts.Transit)
-            .AddRow("RTS.Set", rts.Set, c.JulianDayMidnight + rts.Set)
-            .AddRow("RTS.Duration", rts.Duration)
+            .AddRow("RTS.Rise")
+            .AddRow("RTS.Transit")
+            .AddRow("RTS.Set")
+            .AddRow("RTS.Duration")
 
             .AddHeader("Properties");
 
-            info.AddRow("DeepSky.Type", det.ObjectType);
+            info.AddRow("DeepSky.Type", details.ObjectType);
             if (ds.Mag != null)
             {
                 info.AddRow("Visual Magnitude", ds.Mag, Formatters.Magnitude);
             }
-            if (det.PhotoMagnitude != null)
+            if (details.PhotoMagnitude != null)
             {
-                info.AddRow("Photographic Magnitude", det.PhotoMagnitude, Formatters.Magnitude);
+                info.AddRow("Photographic Magnitude", details.PhotoMagnitude, Formatters.Magnitude);
             }
-            if (det.SurfaceBrightness != null)
+            if (details.SurfaceBrightness != null)
             {
-                info.AddRow("Surface brightness", det.SurfaceBrightness, Formatters.SurfaceBrightness);
+                info.AddRow("Surface brightness", details.SurfaceBrightness, Formatters.SurfaceBrightness);
             }
 
             if (ds.SizeA > 0)
@@ -180,22 +188,22 @@ namespace Planetarium.Plugins.DeepSky
                 info.AddRow("Position angle", ds.PA, Formatters.RotationAxis);
             }
 
-            if (det.Identifiers.Any() || det.PGC != null)
+            if (details.Identifiers.Any() || details.PGC != null)
             {
                 info.AddHeader("Designations");
-                if (det.Identifiers.Any())
+                if (details.Identifiers.Any())
                 {
-                    info.AddRow("Other catalogs identifiers", string.Join(", ", det.Identifiers));
+                    info.AddRow("Other catalogs identifiers", string.Join(", ", details.Identifiers));
                 }
-                if (det.PGC != null)
+                if (details.PGC != null)
                 {
-                    info.AddRow("PGC catalog number", string.Join(", ", det.PGC));
+                    info.AddRow("PGC catalog number", string.Join(", ", details.PGC));
                 }
             }
 
-            if (!string.IsNullOrEmpty(det.Remarks))
+            if (!string.IsNullOrEmpty(details.Remarks))
             {
-                info.AddRow("Remarks", det.Remarks);
+                info.AddRow("Remarks", details.Remarks);
             }
         }
 
