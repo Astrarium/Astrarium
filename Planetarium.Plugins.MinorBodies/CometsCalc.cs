@@ -102,6 +102,8 @@ namespace Planetarium.Plugins.MinorBodies
 
         public void ConfigureEphemeris(EphemerisConfig<Comet> e)
         {
+            
+
             e["Constellation"] = (c, p) => Constellations.FindConstellation(c.Get(EquatorialT, comets.IndexOf(p)), c.JulianDay);
             e["Magnitude"] = (c, p) => c.Get(Magnitude, comets.IndexOf(p));
             e["Phase"] = (c, p) => c.Get(Phase, comets.IndexOf(p));

@@ -149,11 +149,31 @@ namespace Planetarium.Types
             return InvokeWithCache<R>(formula, this);
         }
 
+        /// <summary>
+        /// Calls the method with memoization logic. 
+        /// If the method has been called already with the same arguments values, 
+        /// cached method result will be returned instead of calling the method again.
+        /// </summary>
+        /// <typeparam name="R">Resulting type of the method.</typeparam>
+        /// <typeparam name="T1">Type of the first argument of the method.</typeparam>
+        /// <param name="formula">Method to be called.</param>
+        /// <param name="arg">first argument of the method.</param>
         public R Get<T1, R>(Func<TClass, T1, R> formula, T1 arg)
         {
             return InvokeWithCache<R>(formula, this, arg);
         }
 
+        /// <summary>
+        /// Calls the method with memoization logic. 
+        /// If the method has been called already with the same arguments values, 
+        /// cached method result will be returned instead of calling the method again.
+        /// </summary>
+        /// <typeparam name="R">Resulting type of the method.</typeparam>
+        /// <typeparam name="T1">Type of the first argument of the method.</typeparam>
+        /// <typeparam name="T2">Type of the second argument of the method.</typeparam>
+        /// <param name="formula">Method to be called.</param>
+        /// <param name="arg1">first argument of the method.</param>
+        /// <param name="arg2">Second argument of the method.</param>
         public R Get<T1, T2, R>(Func<TClass, T1, T2, R> formula, T1 arg1, T2 arg2)
         {
             return InvokeWithCache<R>(formula, this, arg1, arg2);
