@@ -10,7 +10,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Planetarium.Calculators
+namespace Planetarium.Plugins.SolarSystem
 {
     public class SolarCalc : BaseCalc, ICelestialObjectCalc<Sun>
     {
@@ -80,9 +80,9 @@ namespace Planetarium.Calculators
             return SolarEphem.CarringtonNumber(c.JulianDay);
         }
 
-        private double Seasons(SkyContext c, Season s)
+        private Date Seasons(SkyContext c, Season s)
         {
-            return SolarEphem.Season(c.JulianDay, s);
+            return c.GetDate(SolarEphem.Season(c.JulianDay, s));
         }
 
         /// <summary>
@@ -106,58 +106,67 @@ namespace Planetarium.Calculators
 
         public void GetInfo(CelestialObjectInfo<Sun> info)
         {
-            SkyContext c = info.Context;
-
-            var rts = c.Get(RiseTransitSet);
-            var jdSpring = c.Get(Seasons, Season.Spring);
-            var jdSummer = c.Get(Seasons, Season.Summer);
-            var jdAutumn = c.Get(Seasons, Season.Autumn);
-            var jdWinter = c.Get(Seasons, Season.Winter);
-
             info.SetTitle(Sun.Name)
 
-                .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial), c.JulianDay))
-                .AddHeader("Equatorial coordinates (geocentrical)")
-                .AddRow("Equatorial0.Alpha", c.Get(Equatorial0).Alpha)
-                .AddRow("Equatorial0.Delta", c.Get(Equatorial0).Delta)
+            .AddRow("Constellation")
+            .AddHeader("Equatorial coordinates (geocentrical)")
+            .AddRow("Equatorial0.Alpha")
+            .AddRow("Equatorial0.Delta")
 
-                .AddHeader("Equatorial coordinates (topocentrical)")
-                .AddRow("Equatorial.Alpha", c.Get(Equatorial).Alpha)
-                .AddRow("Equatorial.Delta", c.Get(Equatorial).Delta)
+            .AddHeader("Equatorial coordinates (topocentrical)")
+            .AddRow("Equatorial.Alpha")
+            .AddRow("Equatorial.Delta")
 
-                .AddHeader("Ecliptical coordinates")
-                .AddRow("Ecliptical.Lambda", c.Get(Ecliptical).Lambda)
-                .AddRow("Ecliptical.Beta", c.Get(Ecliptical).Beta)
+            .AddHeader("Ecliptical coordinates")
+            .AddRow("Ecliptical.Lambda")
+            .AddRow("Ecliptical.Beta")
 
-                .AddHeader("Horizontal coordinates")
-                .AddRow("Horizontal.Azimuth", c.Get(Horizontal).Azimuth)
-                .AddRow("Horizontal.Altitude", c.Get(Horizontal).Altitude)
+            .AddHeader("Horizontal coordinates")
+            .AddRow("Horizontal.Azimuth")
+            .AddRow("Horizontal.Altitude")
 
-                .AddHeader("Visibility")
-                .AddRow("RTS.Rise", rts.Rise, c.JulianDayMidnight + rts.Rise)
-                .AddRow("RTS.Transit", rts.Transit, c.JulianDayMidnight + rts.Transit)
-                .AddRow("RTS.Set", rts.Set, c.JulianDayMidnight + rts.Set)
-                .AddRow("RTS.Duration", rts.Duration)
+            .AddHeader("Visibility")
+            .AddRow("RTS.Rise")
+            .AddRow("RTS.Transit")
+            .AddRow("RTS.Set")
+            .AddRow("RTS.Duration")
 
-                .AddHeader("Appearance")
-                .AddRow("Distance", c.Get(Ecliptical).Distance)
-                .AddRow("HorizontalParallax", c.Get(Parallax))
-                .AddRow("AngularDiameter", c.Get(Semidiameter) * 2 / 3600.0)
-                .AddRow("CRN", c.Get(CarringtonNumber))
+            .AddHeader("Appearance")
+            .AddRow("Distance")
+            .AddRow("HorizontalParallax")
+            .AddRow("AngularDiameter")
+            .AddRow("CRN")
 
-                .AddHeader("Seasons")
-                .AddRow("Seasons.Spring", c.GetDate(jdSpring), jdSpring)
-                .AddRow("Seasons.Summer", c.GetDate(jdSummer), jdSummer)
-                .AddRow("Seasons.Autumn", c.GetDate(jdAutumn), jdAutumn)
-                .AddRow("Seasons.Winter", c.GetDate(jdWinter), jdWinter);
+            .AddHeader("Seasons")
+            .AddRow("Seasons.Spring")
+            .AddRow("Seasons.Summer")
+            .AddRow("Seasons.Autumn")
+            .AddRow("Seasons.Winter");
         }
 
         public void ConfigureEphemeris(EphemerisConfig<Sun> e)
         {
-            e["RTS.Rise"] = (ctx, sun) => ctx.Get(RiseTransitSet).Rise;
-            e["RTS.Transit"] = (ctx, sun) => ctx.Get(RiseTransitSet).Transit;
-            e["RTS.Set"] = (ctx, sun) => ctx.Get(RiseTransitSet).Set;
-            e["RTS.Duration"] = (ctx, sun) => ctx.Get(RiseTransitSet).Duration;
+            e["Constellation"] = (c, s) => Constellations.FindConstellation(c.Get(Equatorial), c.JulianDay);
+            e["Equatorial0.Alpha"] = (c, s) => c.Get(Equatorial0).Alpha;
+            e["Equatorial0.Delta"] = (c, s) => c.Get(Equatorial0).Delta;
+            e["Equatorial.Alpha"] = (c, s) => c.Get(Equatorial).Alpha;
+            e["Equatorial.Delta"] = (c, s) => c.Get(Equatorial).Delta;
+            e["Ecliptical.Lambda"] = (c, s) => c.Get(Ecliptical).Lambda;
+            e["Ecliptical.Beta"] = (c, s) => c.Get(Ecliptical).Beta;
+            e["Horizontal.Altitude"] = (c, s) => c.Get(Horizontal).Altitude;
+            e["Horizontal.Azimuth"] = (c, s) => c.Get(Horizontal).Azimuth;
+            e["RTS.Rise"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet).Rise);
+            e["RTS.Transit"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet).Transit);
+            e["RTS.Set"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet).Set);
+            e["RTS.Duration"] = (c, s) => c.Get(RiseTransitSet).Duration;
+            e["Distance"] = (c, s) => c.Get(Ecliptical).Distance;
+            e["HorizontalParallax"] = (c, x) => c.Get(Parallax);
+            e["AngularDiameter"] = (c, x) => c.Get(Semidiameter) * 2 / 3600.0;
+            e["CRN"] = (c, s) => c.Get(CarringtonNumber);
+            e["Seasons.Spring"] = (c, x) => c.Get(Seasons, Season.Spring);
+            e["Seasons.Summer"] = (c, x) => c.Get(Seasons, Season.Summer);
+            e["Seasons.Autumn"] = (c, x) => c.Get(Seasons, Season.Autumn);
+            e["Seasons.Winter"] = (c, x) => c.Get(Seasons, Season.Winter);
         }
 
         public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)

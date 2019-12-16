@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Planetarium.Calculators
+namespace Planetarium.Plugins.SolarSystem
 {
     public class PlanetsEventsProvider : BaseAstroEventsProvider
     {

@@ -101,6 +101,11 @@ namespace Planetarium.Types
             return AddRow(key, value, null);
         }
 
+        /// <summary>
+        /// Adds row about ephemeris value with specified key
+        /// </summary>
+        /// <param name="key">Unique ephemeris key</param>
+        /// <returns>CelestialObjectInfo instance</returns>
         public CelestialObjectInfo<T> AddRow(string key)
         {
             var ep = Ephemeris.FirstOrDefault(e => e.Key == key);

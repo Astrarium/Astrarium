@@ -102,12 +102,13 @@ namespace Planetarium.Plugins.MinorBodies
 
         public void ConfigureEphemeris(EphemerisConfig<Comet> e)
         {
+            e["Constellation"] = (c, p) => Constellations.FindConstellation(c.Get(EquatorialT, comets.IndexOf(p)), c.JulianDay);
             e["Magnitude"] = (c, p) => c.Get(Magnitude, comets.IndexOf(p));
             e["Phase"] = (c, p) => c.Get(Phase, comets.IndexOf(p));
             e["PhaseAngle"] = (c, p) => c.Get(PhaseAngle, comets.IndexOf(p));
             e["DistanceFromEarth"] = (c, p) => c.Get(DistanceFromEarth, comets.IndexOf(p));
             e["DistanceFromSun"] = (c, p) => c.Get(DistanceFromSun, comets.IndexOf(p));
-            e["Parallax"] = (c, p) => c.Get(Parallax, comets.IndexOf(p));
+            e["HorizontalParallax"] = (c, p) => c.Get(Parallax, comets.IndexOf(p));
             e["Horizontal.Altitude"] = (c, p) => c.Get(Horizontal, comets.IndexOf(p)).Altitude;
             e["Horizontal.Azimuth"] = (c, p) => c.Get(Horizontal, comets.IndexOf(p)).Azimuth;
             e["Equatorial.Alpha"] = (c, p) => c.Get(EquatorialT, comets.IndexOf(p)).Alpha;
@@ -116,53 +117,55 @@ namespace Planetarium.Plugins.MinorBodies
             e["Equatorial0.Delta"] = (c, p) => c.Get(EquatorialJ2000, comets.IndexOf(p)).Delta;
             e["Equatorial0T.Alpha", Formatters.RA] = (c, p) => c.Get(EquatorialJ2000T, comets.IndexOf(p)).Alpha;
             e["Equatorial0T.Delta", Formatters.Dec] = (c, p) => c.Get(EquatorialJ2000T, comets.IndexOf(p)).Delta;
-            e["EquatorialG.Alpha"] = (c, p) => c.Get(EquatorialG, comets.IndexOf(p)).Alpha;
-            e["EquatorialG.Delta"] = (c, p) => c.Get(EquatorialG, comets.IndexOf(p)).Delta;           
-            e["RTS.Rise"] = (c, p) => c.Get(RiseTransitSet, comets.IndexOf(p)).Rise;
-            e["RTS.Transit"] = (c, p) => c.Get(RiseTransitSet, comets.IndexOf(p)).Transit;
-            e["RTS.Set"] = (c, p) => c.Get(RiseTransitSet, comets.IndexOf(p)).Set;            
+            e["EquatorialG.Alpha", Formatters.RA] = (c, p) => c.Get(EquatorialG, comets.IndexOf(p)).Alpha;
+            e["EquatorialG.Delta", Formatters.Dec] = (c, p) => c.Get(EquatorialG, comets.IndexOf(p)).Delta;           
+            e["RTS.Rise"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, comets.IndexOf(p)).Rise);
+            e["RTS.Transit"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, comets.IndexOf(p)).Transit);
+            e["RTS.Set"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, comets.IndexOf(p)).Set);
+            e["RTS.Duration"] = (c, p) => c.Get(RiseTransitSet, comets.IndexOf(p)).Duration;
         }
 
         public void GetInfo(CelestialObjectInfo<Comet> info)
         {
-            Comet comet = info.Body;
-            int i = comets.IndexOf(comet);
-            SkyContext c = info.Context;
+            info
+            .SetTitle(info.Body.Names.First())
+            .SetSubtitle("Comet")
 
-            var rts = c.Get(RiseTransitSet, i);
-
-            info.SetSubtitle("Comet").SetTitle(comet.Names.First())
-
-            .AddRow("Constellation", Constellations.FindConstellation(c.Get(EquatorialT, i), c.JulianDay))
-
-            .AddHeader("Equatorial coordinates (J2000.0)")
-            .AddRow("Equatorial0.Alpha", c.Get(EquatorialJ2000, i).Alpha)
-            .AddRow("Equatorial0.Delta", c.Get(EquatorialJ2000, i).Delta)
-
-            .AddHeader("Equatorial coordinates (geocentrical)")
-            .AddRow("Equatorial0.Alpha", c.Get(EquatorialG, i).Alpha)
-            .AddRow("Equatorial0.Delta", c.Get(EquatorialG, i).Delta)
-
-            .AddHeader("Equatorial coordinates (topocentrical)")
-            .AddRow("Equatorial.Alpha", c.Get(EquatorialT, i).Alpha)
-            .AddRow("Equatorial.Delta", c.Get(EquatorialT, i).Delta)
+            .AddRow("Constellation")
 
             .AddHeader("Horizontal coordinates")
-            .AddRow("Horizontal.Azimuth", c.Get(Horizontal, i).Azimuth)
-            .AddRow("Horizontal.Altitude", c.Get(Horizontal, i).Altitude)
+            .AddRow("Horizontal.Azimuth")
+            .AddRow("Horizontal.Altitude")
+
+            .AddHeader("Equatorial coordinates (topocentrical)")
+            .AddRow("Equatorial.Alpha")
+            .AddRow("Equatorial.Delta")
+
+            .AddHeader("Equatorial coordinates (geocentrical)")
+            .AddRow("EquatorialG.Alpha")
+            .AddRow("EquatorialG.Delta")
+
+            .AddHeader("Equatorial coordinates (topocentrical, J2000.0)")
+            .AddRow("Equatorial0T.Alpha")
+            .AddRow("Equatorial0T.Delta")
+
+            .AddHeader("Equatorial coordinates (J2000.0)")
+            .AddRow("Equatorial0.Alpha")
+            .AddRow("Equatorial0.Delta")
 
             .AddHeader("Visibility")
-            .AddRow("RTS.Rise", rts.Rise, c.JulianDayMidnight + rts.Rise)
-            .AddRow("RTS.Transit", rts.Transit, c.JulianDayMidnight + rts.Transit)
-            .AddRow("RTS.Set", rts.Set, c.JulianDayMidnight + rts.Set)
+            .AddRow("RTS.Rise")
+            .AddRow("RTS.Transit")
+            .AddRow("RTS.Set")
+            .AddRow("RTS.Duration")
 
             .AddHeader("Appearance")
-            .AddRow("Phase", c.Get(Phase, i))
-            .AddRow("PhaseAngle", c.Get(PhaseAngle, i))
-            .AddRow("Magnitude", c.Get(Magnitude, i))
-            .AddRow("DistanceFromEarth", c.Get(DistanceFromEarth, i))
-            .AddRow("DistanceFromSun", c.Get(DistanceFromSun, i))
-            .AddRow("HorizontalParallax", c.Get(Parallax, i));
+            .AddRow("Phase")
+            .AddRow("PhaseAngle")
+            .AddRow("Magnitude")
+            .AddRow("DistanceFromEarth")
+            .AddRow("DistanceFromSun")
+            .AddRow("HorizontalParallax");
         }
 
         public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)

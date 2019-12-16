@@ -1,6 +1,7 @@
 ﻿using ADK;
 using Planetarium.Objects;
 using Planetarium.Types;
+using Planetarium.Types.Localization;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -10,7 +11,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Planetarium.Calculators
+namespace Planetarium.Plugins.SolarSystem
 {
     public class LunarCalc : BaseCalc, ICelestialObjectCalc<Moon>
     {
@@ -175,9 +176,9 @@ namespace Planetarium.Calculators
         /// <summary>
         /// Gets nearest phase date
         /// </summary>
-        private double NearestPhase(SkyContext c, MoonPhase p)
+        private Date NearestPhase(SkyContext c, MoonPhase p)
         {
-            return LunarEphem.NearestPhase(c.JulianDay, p);
+            return c.GetDate(LunarEphem.NearestPhase(c.JulianDay, p));
         }
 
         /// <summary>
@@ -191,9 +192,9 @@ namespace Planetarium.Calculators
         /// <summary>
         /// Gets nearest apsis date
         /// </summary>
-        private double NearestApsis(SkyContext c, MoonApsis a)
+        private Date NearestApsis(SkyContext c, MoonApsis a)
         {
-            return LunarEphem.NearestApsis(c.JulianDay, a, out double diameter);
+            return c.GetDate(LunarEphem.NearestApsis(c.JulianDay, a, out double diameter));
         }
 
         /// <summary>
@@ -254,83 +255,87 @@ namespace Planetarium.Calculators
 
         public void ConfigureEphemeris(EphemerisConfig<Moon> e)
         {
-            e["RTS.Rise"] = (c, m) => c.Get(RiseTransitSet).Rise;
+            e["Constellation"] = (c, m) => Constellations.FindConstellation(c.Get(Equatorial), c.JulianDay);
+            e["RTS.Rise"] = (c, m) => c.GetDateFromTime(c.Get(RiseTransitSet).Rise);
             e["RTS.RiseAzimuth"] = (c, m) => c.Get(RiseTransitSet).RiseAzimuth;
-            e["RTS.Transit"] = (c, m) => c.Get(RiseTransitSet).Transit;
+            e["RTS.Transit"] = (c, m) => c.GetDateFromTime(c.Get(RiseTransitSet).Transit);
             e["RTS.TransitAltitude"] = (c, m) => c.Get(RiseTransitSet).TransitAltitude;
-            e["RTS.Set"] = (c, m) => c.Get(RiseTransitSet).Set;
+            e["RTS.Set"] = (c, m) => c.GetDateFromTime(c.Get(RiseTransitSet).Set);
             e["RTS.SetAzimuth"] = (c, m) => c.Get(RiseTransitSet).SetAzimuth;
+            e["RTS.Duration"] = (c, m) => c.Get(RiseTransitSet).Duration;
             e["Equatorial.Alpha"] = (c, m) => c.Get(Equatorial).Alpha;
             e["Equatorial.Delta"] = (c, m) => c.Get(Equatorial).Delta;
+            e["Equatorial0.Alpha"] = (c, m) => c.Get(Equatorial0).Alpha;
+            e["Equatorial0.Delta"] = (c, m) => c.Get(Equatorial0).Delta;
             e["Horizontal.Altitude"] = (c, m) => c.Get(Horizontal).Altitude;
             e["Horizontal.Azimuth"] = (c, m) => c.Get(Horizontal).Azimuth;
-            e["Libration.Longitude"] = (c, m) => c.Get(LibrationElements).l;
-            e["Libration.Latitude"] = (c, m) => c.Get(LibrationElements).b;
+            e["Ecliptical.Lambda"] = (c, m) => c.Get(Ecliptical0).Lambda;
+            e["Ecliptical.Beta"] = (c, m) => c.Get(Ecliptical0).Beta;
             e["Phase"] = (c, m) => c.Get(Phase);
             e["PhaseAngle"] = (c, m) => c.Get(PhaseAngle);
             e["Age"] = (c, m) => c.Get(Age);
             e["Magnitude"] = (c, m) => c.Get(Magnitude);
+            e["Distance", new LunarDistanceFormatter()] = (c, m) => (int)c.Get(Ecliptical0).Distance;
+            e["HorizontalParallax"] = (c, m) => c.Get(Parallax);
+            e["AngularDiameter"] = (c, m) => c.Get(Semidiameter) * 2 / 3600.0;
+            e["Libration.Latitude", new LibrationLatitudeFormatter()] = (c, m) => c.Get(LibrationElements).b;
+            e["Libration.Longitude", new LibrationLongitudeFormatter()] = (c, m) => c.Get(LibrationElements).l;
+            e["MoonPhases.NewMoon", Formatters.DateTime] = (c, m) => c.Get(NearestPhase, MoonPhase.NewMoon);
+            e["MoonPhases.FirstQuarter", Formatters.DateTime] = (c, m) => c.Get(NearestPhase, MoonPhase.FirstQuarter);
+            e["MoonPhases.FullMoon", Formatters.DateTime] = (c, m) => c.Get(NearestPhase, MoonPhase.FullMoon);
+            e["MoonPhases.LastQuarter", Formatters.DateTime] = (c, m) => c.Get(NearestPhase, MoonPhase.LastQuarter);
+            e["MoonApsis.Apogee", Formatters.DateTime] = (c, m) => c.Get(NearestApsis, MoonApsis.Apogee);
+            e["MoonApsis.Perigee", Formatters.DateTime] = (c, m) => c.Get(NearestApsis, MoonApsis.Perigee);
         }
 
         public void GetInfo(CelestialObjectInfo<Moon> info)
         {
-            SkyContext c = info.Context;
-            Moon = info.Body;
+            info.SetTitle(info.Body.Name)
 
-            var rts = c.Get(RiseTransitSet);
-            var jdNM = c.Get(NearestPhase, MoonPhase.NewMoon);
-            var jdFQ = c.Get(NearestPhase, MoonPhase.FirstQuarter);
-            var jdFM = c.Get(NearestPhase, MoonPhase.FullMoon);
-            var jdLQ = c.Get(NearestPhase, MoonPhase.LastQuarter);
-            var jdApogee = c.Get(NearestApsis, MoonApsis.Apogee);
-            var jdPerigee = c.Get(NearestApsis, MoonApsis.Perigee);
+            .AddRow("Constellation")
 
-            info.SetTitle(Moon.Name)
+            .AddHeader("Equatorial coordinates (geocentrical)")
+            .AddRow("Equatorial0.Alpha")
+            .AddRow("Equatorial0.Delta")
 
-                .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial), c.JulianDay))
+            .AddHeader("Equatorial coordinates (topocentrical)")
+            .AddRow("Equatorial.Alpha")
+            .AddRow("Equatorial.Delta")
 
-                .AddHeader("Equatorial coordinates (geocentrical)")
-                .AddRow("Equatorial0.Alpha", c.Get(Equatorial0).Alpha)
-                .AddRow("Equatorial0.Delta", c.Get(Equatorial0).Delta)
+            .AddHeader("Ecliptical coordinates")
+            .AddRow("Ecliptical.Lambda")
+            .AddRow("Ecliptical.Beta")
 
-                .AddHeader("Equatorial coordinates (topocentrical)")
-                .AddRow("Equatorial.Alpha", c.Get(Equatorial).Alpha)
-                .AddRow("Equatorial.Delta", c.Get(Equatorial).Delta)
+            .AddHeader("Horizontal coordinates")
+            .AddRow("Horizontal.Azimuth")
+            .AddRow("Horizontal.Altitude")
 
-                .AddHeader("Ecliptical coordinates")
-                .AddRow("Ecliptical.Lambda", c.Get(Ecliptical0).Lambda)
-                .AddRow("Ecliptical.Beta", c.Get(Ecliptical0).Beta)
+            .AddHeader("Visibility")
+            .AddRow("RTS.Rise")
+            .AddRow("RTS.Transit")
+            .AddRow("RTS.Set")
+            .AddRow("RTS.Duration")
 
-                .AddHeader("Horizontal coordinates")
-                .AddRow("Horizontal.Azimuth", c.Get(Horizontal).Azimuth)
-                .AddRow("Horizontal.Altitude", c.Get(Horizontal).Altitude)
+            .AddHeader("Appearance")
+            .AddRow("Phase")
+            .AddRow("PhaseAngle")
+            .AddRow("Age")
+            .AddRow("Magnitude")
+            .AddRow("Distance")
+            .AddRow("HorizontalParallax")
+            .AddRow("AngularDiameter")
+            .AddRow("Libration.Latitude")
+            .AddRow("Libration.Longitude")
 
-                .AddHeader("Visibility")
-                .AddRow("RTS.Rise", rts.Rise, c.JulianDayMidnight + rts.Rise)
-                .AddRow("RTS.Transit", rts.Transit, c.JulianDayMidnight + rts.Transit)
-                .AddRow("RTS.Set", rts.Set, c.JulianDayMidnight + rts.Set)
-                .AddRow("RTS.Duration", rts.Duration)
+            .AddHeader("Nearest phases")
+            .AddRow("MoonPhases.NewMoon")
+            .AddRow("MoonPhases.FirstQuarter")
+            .AddRow("MoonPhases.FullMoon")
+            .AddRow("MoonPhases.LastQuarter")
 
-                .AddHeader("Appearance")
-                .AddRow("Phase", c.Get(Phase))
-                .AddRow("PhaseAngle", c.Get(PhaseAngle))
-                .AddRow("Age", c.Get(Age))
-                .AddRow("Magnitude", c.Get(Magnitude))
-                .AddRow("Distance", (int)c.Get(Ecliptical0).Distance + " km", Formatters.Simple)
-                .AddRow("HorizontalParallax", c.Get(Parallax))
-                .AddRow("AngularDiameter", c.Get(Semidiameter) * 2 / 3600.0)
-                .AddRow("Libration.Latitude", c.Get(LibrationElements).b)
-                .AddRow("Libration.Longitude", c.Get(LibrationElements).l)
-
-                .AddHeader("Nearest phases")
-                .AddRow("MoonPhases.NewMoon", c.GetDate(jdNM), jdNM)
-                .AddRow("MoonPhases.FirstQuarter", c.GetDate(jdFQ), jdFQ)
-                .AddRow("MoonPhases.FullMoon", c.GetDate(jdFM), jdFM)
-                .AddRow("MoonPhases.LastQuarter", c.GetDate(jdLQ), jdLQ)
-
-                .AddHeader("Nearest apsides")
-                .AddRow("MoonApsides.Apogee", c.GetDate(jdApogee), jdApogee)
-                .AddRow("MoonApsides.Perigee", c.GetDate(jdPerigee), jdPerigee);
+            .AddHeader("Nearest apsides")
+            .AddRow("MoonApsis.Apogee")
+            .AddRow("MoonApsis.Perigee");
         }
 
         public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)

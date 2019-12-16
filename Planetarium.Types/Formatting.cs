@@ -52,24 +52,14 @@ namespace Planetarium.Types
             Default["Phase"]                    = Phase;
             Default["Age"]                      = Age;
             Default["HorizontalParallax"]       = HorizontalParallax;
-            Default["AngularDiameter"]          = AngularDiameter;
-            Default["Libration.Latitude"]       = LibrationLatitude;
-            Default["Libration.Longitude"]      = LibrationLongitude;
-            Default["MoonPhases.NewMoon"]       = DateTime;
-            Default["MoonPhases.FirstQuarter"]  = DateTime;
-            Default["MoonPhases.FullMoon"]      = DateTime;
-            Default["MoonPhases.LastQuarter"]   = DateTime;
-            Default["MoonApsides.Apogee"]       = DateTime;
-            Default["MoonApsides.Perigee"]      = DateTime;
+            Default["AngularDiameter"]          = AngularDiameter;          
             Default["Seasons.Spring"]           = DateTime;
             Default["Seasons.Summer"]           = DateTime;
             Default["Seasons.Autumn"]           = DateTime;
             Default["Seasons.Winter"]           = DateTime;
             Default["Appearance.CM"]            = CentralMeridian;
             Default["Appearance.P"]             = RotationAxis;
-            Default["Appearance.D"]             = EarthDeclination;
-            Default["SaturnRings.a"]            = SaturnRingsSize;
-            Default["SaturnRings.b"]            = SaturnRingsSize;
+            Default["Appearance.D"]             = EarthDeclination;            
             Default["Visibility.Duration"]      = VisibilityDuration;
             Default["Visibility.Period"]        = VisibilityPeriod;
             Default["Visibility.Begin"]         = Time;
@@ -77,7 +67,11 @@ namespace Planetarium.Types
             Default["Rectangular.X"]            = Rectangular;
             Default["Rectangular.Y"]            = Rectangular;
             Default["Rectangular.Z"]            = Rectangular;
-            Default["GRSLongitude"]             = GRSLongitude;
+
+
+            Default["SaturnRings.a"] = SaturnRingsSize;
+            Default["SaturnRings.b"] = SaturnRingsSize;
+            Default["GRSLongitude"]  = GRSLongitude;
         }
 
         public static IEphemFormatter GetDefault(string key)
@@ -268,24 +262,6 @@ namespace Planetarium.Types
             }
         }
 
-        private class LibrationLatitudeFormatter : IEphemFormatter
-        {
-            public string Format(object value)
-            {
-                double libration = Convert.ToDouble(value);
-                return $"{Math.Abs(libration).ToString("0.0", CultureInfo.InvariantCulture)}\u00B0 {(libration > 0 ? "N" : "S")}";
-            }
-        }
-
-        private class LibrationLongitudeFormatter : IEphemFormatter
-        {
-            public string Format(object value)
-            {
-                double libration = Convert.ToDouble(value);
-                return $"{Math.Abs(libration).ToString("0.0", CultureInfo.InvariantCulture)}\u00B0 {(libration > 0 ? "E" : "W")}";
-            }
-        }
-
         private class DateTimeFormatter : IEphemFormatter
         {
             private readonly string[] months = CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames.Take(12).ToArray();
@@ -426,8 +402,6 @@ namespace Planetarium.Types
         public static readonly IEphemFormatter Age = new UnsignedDoubleFormatter(2, " d");
         public static readonly IEphemFormatter HorizontalParallax = new SmallAngleFormatter();
         public static readonly IEphemFormatter AngularDiameter = new SmallAngleFormatter();
-        public static readonly IEphemFormatter LibrationLatitude = new LibrationLatitudeFormatter();
-        public static readonly IEphemFormatter LibrationLongitude = new LibrationLongitudeFormatter();
         public static readonly IEphemFormatter DateTime = new DateTimeFormatter();
         public static readonly IEphemFormatter DateOnly = new DateOnlyFormatter();
         public static readonly IEphemFormatter TimeOnly = new TimeOnlyFormatter();

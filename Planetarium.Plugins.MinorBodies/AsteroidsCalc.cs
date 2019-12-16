@@ -62,59 +62,64 @@ namespace Planetarium.Plugins.MinorBodies
 
         public void ConfigureEphemeris(EphemerisConfig<Asteroid> e)
         {
-            e["Magnitude"] = (c, p) => c.Get(Magnitude, asteroids.IndexOf(p));
+            e["Constellation"] = (c, a) => Constellations.FindConstellation(c.Get(EquatorialT, asteroids.IndexOf(a)), c.JulianDay);            
             e["Horizontal.Altitude"] = (c, p) => c.Get(Horizontal, asteroids.IndexOf(p)).Altitude;
             e["Horizontal.Azimuth"] = (c, p) => c.Get(Horizontal, asteroids.IndexOf(p)).Azimuth;
             e["Equatorial.Alpha"] = (c, p) => c.Get(EquatorialT, asteroids.IndexOf(p)).Alpha;
             e["Equatorial.Delta"] = (c, p) => c.Get(EquatorialT, asteroids.IndexOf(p)).Delta;
             e["Equatorial0.Alpha"] = (c, p) => c.Get(EquatorialG, asteroids.IndexOf(p)).Alpha;
             e["Equatorial0.Delta"] = (c, p) => c.Get(EquatorialG, asteroids.IndexOf(p)).Delta;
-            e["RTS.Rise"] = (c, p) => c.Get(RiseTransitSet, asteroids.IndexOf(p)).Rise;
-            e["RTS.Transit"] = (c, p) => c.Get(RiseTransitSet, asteroids.IndexOf(p)).Transit;
-            e["RTS.Set"] = (c, p) => c.Get(RiseTransitSet, asteroids.IndexOf(p)).Set;
+            e["RTS.Rise"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, asteroids.IndexOf(p)).Rise);
+            e["RTS.Transit"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, asteroids.IndexOf(p)).Transit);
+            e["RTS.Set"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, asteroids.IndexOf(p)).Set);
+            e["RTS.Duration"] = (c, p) => c.Get(RiseTransitSet, asteroids.IndexOf(p)).Duration;
+            e["DistanceFromEarth"] = (c, a) => c.Get(DistanceFromEarth, asteroids.IndexOf(a));
+            e["DistanceFromSun"] = (c, a) => c.Get(DistanceFromSun, asteroids.IndexOf(a));
+            e["Phase"] = (c, a) => c.Get(Phase, asteroids.IndexOf(a));
+            e["PhaseAngle"] = (c, a) => c.Get(PhaseAngle, asteroids.IndexOf(a));
+            e["Magnitude"] = (c, p) => c.Get(Magnitude, asteroids.IndexOf(p));
+            e["HorizontalParallax"] = (c, a) => c.Get(Parallax, asteroids.IndexOf(a));
+            e["AngularDiameter", a => a.PhysicalDiameter > 0] = (c, a) => c.Get(Semidiameter, asteroids.IndexOf(a)) * 2 / 3600.0;
         }
 
         public void GetInfo(CelestialObjectInfo<Asteroid> info)
         {
-            Asteroid body = info.Body;
-            int i = asteroids.IndexOf(body);
-            SkyContext c = info.Context;
-
-            var rts = c.Get(RiseTransitSet, i);
-
-            info.SetSubtitle("Minor planet").SetTitle(body.Names.First())
-            .AddRow("Constellation", Constellations.FindConstellation(c.Get(EquatorialT, i), c.JulianDay))
+            info
+            .SetTitle(info.Body.Names.First())
+            .SetSubtitle("Minor planet")
+            .AddRow("Constellation")
 
             .AddHeader("Equatorial coordinates (topocentrical)")
-            .AddRow("Equatorial.Alpha", c.Get(EquatorialT, i).Alpha)
-            .AddRow("Equatorial.Delta", c.Get(EquatorialT, i).Delta)
+            .AddRow("Equatorial.Alpha")
+            .AddRow("Equatorial.Delta")
 
             .AddHeader("Equatorial coordinates (geocentrical)")
-            .AddRow("Equatorial0.Alpha", c.Get(EquatorialG, i).Alpha)
-            .AddRow("Equatorial0.Delta", c.Get(EquatorialG, i).Delta)
+            .AddRow("Equatorial0.Alpha")
+            .AddRow("Equatorial0.Delta")
 
             .AddHeader("Horizontal coordinates")
-            .AddRow("Horizontal.Azimuth", c.Get(Horizontal, i).Azimuth)
-            .AddRow("Horizontal.Altitude", c.Get(Horizontal, i).Altitude)
+            .AddRow("Horizontal.Azimuth")
+            .AddRow("Horizontal.Altitude")
 
             .AddHeader("Appearance")
-            .AddRow("Phase", c.Get(Phase, i))
-            .AddRow("PhaseAngle", c.Get(PhaseAngle, i))
-            .AddRow("Magnitude", c.Get(Magnitude, i))
-            .AddRow("DistanceFromEarth", c.Get(DistanceFromEarth, i))
-            .AddRow("DistanceFromSun", c.Get(DistanceFromSun, i))
-            .AddRow("HorizontalParallax", c.Get(Parallax, i));
+            .AddRow("Phase")
+            .AddRow("PhaseAngle")
+            .AddRow("Magnitude")
+            .AddRow("DistanceFromEarth")
+            .AddRow("DistanceFromSun")
+            .AddRow("HorizontalParallax");
 
-            if (body.PhysicalDiameter > 0)
+            if (info.Body.PhysicalDiameter > 0)
             { 
-                info.AddRow("AngularDiameter", c.Get(Semidiameter, i) * 2 / 3600.0);
+                info.AddRow("AngularDiameter");
             }
 
             info
             .AddHeader("Visibility")
-            .AddRow("RTS.Rise", rts.Rise, c.JulianDayMidnight + rts.Rise)
-            .AddRow("RTS.Transit", rts.Transit, c.JulianDayMidnight + rts.Transit)
-            .AddRow("RTS.Set", rts.Set, c.JulianDayMidnight + rts.Set);
+            .AddRow("RTS.Rise")
+            .AddRow("RTS.Transit")
+            .AddRow("RTS.Set")
+            .AddRow("RTS.Duration");
         }
 
         public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)

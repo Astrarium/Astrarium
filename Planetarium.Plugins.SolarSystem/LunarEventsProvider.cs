@@ -1,4 +1,5 @@
 ﻿using ADK;
+using Planetarium.Plugins.SolarSystem;
 using Planetarium.Types;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Planetarium.Calculators
+namespace Planetarium.Plugins.SolarSystem
 {
     public class LunarEventsProvider : BaseAstroEventsProvider
     {
@@ -124,7 +125,7 @@ namespace Planetarium.Calculators
             while (jd < context.To)
             {
                 jd = LunarEphem.NearestMaxLibration(jd, LibrationEdge.East, out librationAngle);
-                events.Add(new AstroEvent(jd, $"Maximal eastern libration of the Moon ({Formatters.LibrationLongitude.Format(librationAngle)})"));
+                events.Add(new AstroEvent(jd, $"Maximal eastern libration of the Moon ({new LibrationLongitudeFormatter().Format(librationAngle)})"));
                 jd += LunarEphem.ANOMALISTIC_PERIOD;
             }
 
@@ -132,7 +133,7 @@ namespace Planetarium.Calculators
             while (jd < context.To)
             {
                 jd = LunarEphem.NearestMaxLibration(jd, LibrationEdge.West, out librationAngle);
-                events.Add(new AstroEvent(jd, $"Maximal western libration of the Moon ({Formatters.LibrationLongitude.Format(librationAngle)})"));
+                events.Add(new AstroEvent(jd, $"Maximal western libration of the Moon ({new LibrationLongitudeFormatter().Format(librationAngle)})"));
                 jd += LunarEphem.ANOMALISTIC_PERIOD;
             }
 
@@ -140,7 +141,7 @@ namespace Planetarium.Calculators
             while (jd < context.To)
             {
                 jd = LunarEphem.NearestMaxLibration(jd, LibrationEdge.North, out librationAngle);
-                events.Add(new AstroEvent(jd, $"Maximal northern libration of the Moon ({Formatters.LibrationLatitude.Format(librationAngle)})"));
+                events.Add(new AstroEvent(jd, $"Maximal northern libration of the Moon ({new LibrationLatitudeFormatter().Format(librationAngle)})"));
                 jd += LunarEphem.DRACONIC_PERIOD;
             }
 
@@ -148,7 +149,7 @@ namespace Planetarium.Calculators
             while (jd < context.To)
             {
                 jd = LunarEphem.NearestMaxLibration(jd, LibrationEdge.South, out librationAngle);
-                events.Add(new AstroEvent(jd, $"Maximal southern libration of the Moon ({Formatters.LibrationLatitude.Format(librationAngle)})"));
+                events.Add(new AstroEvent(jd, $"Maximal southern libration of the Moon ({new LibrationLatitudeFormatter().Format(librationAngle)})"));
                 jd += LunarEphem.DRACONIC_PERIOD;
             }
 
