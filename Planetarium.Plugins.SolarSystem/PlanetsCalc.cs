@@ -447,9 +447,9 @@ namespace Planetarium.Calculators
             e["RTS.Transit"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, p.Number).Transit);
             e["RTS.Set"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, p.Number).Set);
             e["RTS.Duration"] = (c, p) => c.Get(RiseTransitSet, p.Number).Duration;
-            e["Visibility.Begin"] = (c, p) => c.Get(Visibility, p.Number).Begin;
+            e["Visibility.Begin"] = (c, p) => c.GetDateFromTime(c.Get(Visibility, p.Number).Begin);            
+            e["Visibility.End"] = (c, p) => c.GetDateFromTime(c.Get(Visibility, p.Number).End);
             e["Visibility.Duration"] = (c, p) => c.Get(Visibility, p.Number).Duration;
-            e["Visibility.End"] = (c, p) => c.Get(Visibility, p.Number).End;
             e["Visibility.Period"] = (c, p) => c.Get(Visibility, p.Number).Period;
         }
 

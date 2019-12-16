@@ -117,7 +117,7 @@ namespace Planetarium.Views
                             Grid.SetRow(cellCaption, r);
                             Grid.SetColumn(cellCaption, 0);
 
-                            if (p.Value is Date date && date != null)
+                            if (p.Value is Date date && date != null && !double.IsInfinity(date.Day) && !double.IsNaN(date.Day))
                             { 
                                 Hyperlink link = new Hyperlink() { FontFamily = fontFamily, FontSize = fontSize };
                                 link.Inlines.Add(formatter.Format(p.Value));
