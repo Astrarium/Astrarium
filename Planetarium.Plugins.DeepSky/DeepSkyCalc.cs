@@ -116,11 +116,6 @@ namespace Planetarium.Plugins.DeepSky
 
         public void ConfigureEphemeris(EphemerisConfig<DeepSky> e)
         {
-            e["Constellation"] = (c, ds) => Constellations.FindConstellation(c.Get(Equatorial, ds), c.JulianDay);
-            e["Equatorial.Alpha"] = (c, ds) => c.Get(Equatorial, ds).Alpha;
-            e["Equatorial.Delta"] = (c, ds) => c.Get(Equatorial, ds).Delta;
-            e["Equatorial0.Alpha"] = (c, ds) => ds.Equatorial0.Alpha;
-            e["Equatorial0.Delta"] = (c, ds) => ds.Equatorial0.Delta;
             e["Horizontal.Altitude"] = (c, ds) => c.Get(Horizontal, ds).Altitude;
             e["Horizontal.Azimuth"] = (c, ds) => c.Get(Horizontal, ds).Azimuth;
             e["RTS.Rise"] = (c, ds) => c.GetDateFromTime(c.Get(RiseTransitSet, ds).Rise);
@@ -132,25 +127,25 @@ namespace Planetarium.Plugins.DeepSky
         public void GetInfo(CelestialObjectInfo<DeepSky> info)
         {
             DeepSky ds = info.Body;
-            SkyContext c = info.Context;
-           
-            var details = c.Get(ReadDeepSkyDetails, ds);
+            SkyContext c = info.Context;           
+            DeepSkyInfo details = c.Get(ReadDeepSkyDetails, ds);
+            string constellation = Constellations.FindConstellation(c.Get(Equatorial, ds), c.JulianDay);
 
             info.SetSubtitle(ds.Status.ToString())
             .SetTitle(string.Join(" / ", ds.Names))
-            .AddRow("Constellation")
+            .AddRow("Constellation", constellation)
 
             .AddHeader("Equatorial coordinates (current epoch)")
-            .AddRow("Equatorial.Alpha")
-            .AddRow("Equatorial.Delta")
+            .AddRow("Equatorial.Alpha", ds.Equatorial.Alpha)
+            .AddRow("Equatorial.Delta", ds.Equatorial.Delta)
 
             .AddHeader("Equatorial coordinates (J2000.0 epoch)")
-            .AddRow("Equatorial0.Alpha")
-            .AddRow("Equatorial0.Delta")
+            .AddRow("Equatorial0.Alpha", ds.Equatorial0.Alpha)
+            .AddRow("Equatorial0.Delta", ds.Equatorial0.Delta)
 
             .AddHeader("Horizontal coordinates")
-            .AddRow("Horizontal.Azimuth")
-            .AddRow("Horizontal.Altitude")
+            .AddRow("Horizontal.Azimuth", ds.Horizontal.Azimuth)
+            .AddRow("Horizontal.Altitude", ds.Horizontal.Altitude)
 
             .AddHeader("Visibility")
             .AddRow("RTS.Rise")
@@ -163,15 +158,15 @@ namespace Planetarium.Plugins.DeepSky
             info.AddRow("DeepSky.Type", details.ObjectType);
             if (ds.Mag != null)
             {
-                info.AddRow("Visual Magnitude", ds.Mag, Formatters.Magnitude);
+                info.AddRow("VisualMagnitude", ds.Mag, Formatters.Magnitude);
             }
             if (details.PhotoMagnitude != null)
             {
-                info.AddRow("Photographic Magnitude", details.PhotoMagnitude, Formatters.Magnitude);
+                info.AddRow("PhotoMagnitude", details.PhotoMagnitude, Formatters.Magnitude);
             }
             if (details.SurfaceBrightness != null)
             {
-                info.AddRow("Surface brightness", details.SurfaceBrightness, Formatters.SurfaceBrightness);
+                info.AddRow("Brightness", details.SurfaceBrightness, Formatters.SurfaceBrightness);
             }
 
             if (ds.SizeA > 0)

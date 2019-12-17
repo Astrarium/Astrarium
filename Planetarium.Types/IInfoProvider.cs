@@ -63,12 +63,22 @@ namespace Planetarium.Types
 
     public class CelestialObjectInfo<T> : CelestialObjectInfo where T : CelestialObject
     {
+        /// <summary>
+        /// Celestial body to get information about
+        /// </summary>
         public T Body { get; private set; }
+
+        /// <summary>
+        /// Context instance
+        /// </summary>
         public SkyContext Context { get; private set; }
 
-        private List<Ephemeris> Ephemeris { get; set; }
+        /// <summary>
+        /// Collection of body ephemeris for given instant
+        /// </summary>
+        private IEnumerable<Ephemeris> Ephemeris { get; set; }
 
-        public CelestialObjectInfo(SkyContext context, T body, List<Ephemeris> ephemeris)
+        public CelestialObjectInfo(SkyContext context, T body, IEnumerable<Ephemeris> ephemeris)
         {           
             Context = context;
             Body = body;
@@ -127,24 +137,13 @@ namespace Planetarium.Types
             return this;
         }
 
-        public CelestialObjectInfo<T> AddRow(string text, object value, IEphemFormatter formatter)
+        public CelestialObjectInfo<T> AddRow(string key, object value, IEphemFormatter formatter)
         {
             InfoElements.Add(new InfoElementProperty()
             {
-                Caption = text,
+                Caption = Text.Get($"{Body.GetType().Name}.{key}"),
                 Value = value,
-                Formatter = formatter
-            });
-            return this;
-        }
-     
-        public CelestialObjectInfo<T> AddRow(string text, object value, double jd)
-        {
-            InfoElements.Add(new InfoElementPropertyLink()
-            {
-                Caption = text,
-                Value = value,
-                JulianDay = jd
+                Formatter = formatter ?? Formatters.GetDefault(key)
             });
             return this;
         }
@@ -163,10 +162,5 @@ namespace Planetarium.Types
         public string Caption { get; set; }
         public object Value { get; set; }
         public string StringValue { get { return Formatter.Format(Value); } }
-    }
-
-    public class InfoElementPropertyLink : InfoElementProperty
-    {
-        public double JulianDay { get; set; }
     }
 }

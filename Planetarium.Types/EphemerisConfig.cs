@@ -32,10 +32,7 @@ namespace Planetarium.Types
     {
         public Func<SkyContext, T, object> this[string key]
         {
-            get
-            {
-                return Items.FirstOrDefault(i => i.Category == key)?.Formula as Func<SkyContext, T, object>;
-            }
+            get => GetByKey(key);
             set
             {
                 Items.Add(new EphemerisConfigItem(key, value));
@@ -44,10 +41,7 @@ namespace Planetarium.Types
 
         public Func<SkyContext, T, object> this[string key, IEphemFormatter formatter]
         {
-            get
-            {
-                return Items.FirstOrDefault(i => i.Category == key)?.Formula as Func<SkyContext, T, object>;
-            }
+            get => GetByKey(key);
             set
             {
                 Items.Add(new EphemerisConfigItem(key, value, formatter));
@@ -56,14 +50,25 @@ namespace Planetarium.Types
 
         public Func<SkyContext, T, object> this[string key, Func<T, bool> availableIf]
         {
-            get
-            {
-                return Items.FirstOrDefault(i => i.Category == key)?.Formula as Func<SkyContext, T, object>;
-            }
+            get => GetByKey(key);
             set
             {
                 Items.Add(new EphemerisConfigItem(key, value, availableIf));
             }
+        }
+
+        public Func<SkyContext, T, object> this[string key, Func<T, bool> availableIf, IEphemFormatter formatter]
+        {
+            get => GetByKey(key);
+            set
+            {
+                Items.Add(new EphemerisConfigItem(key, value, formatter, availableIf));
+            }
+        }
+
+        private Func<SkyContext, T, object> GetByKey(string key)
+        {
+            return Items.FirstOrDefault(i => i.Category == key)?.Formula as Func<SkyContext, T, object>;
         }
     }
 

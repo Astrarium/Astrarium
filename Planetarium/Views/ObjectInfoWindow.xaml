@@ -33,6 +33,7 @@
                 DataContext="{Binding InfoElements}"
                 CellPadding="4 0 8 2"
                 HeaderPadding="4 16 4 4"
+                HeaderBackground="{StaticResource BrushControlDarkBackground}"
                 LinkCommand="{Binding DataContext.LinkClickedCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type v:ObjectInfoWindow}}}">
             </v:ObjectInfoView>
         </ScrollViewer>

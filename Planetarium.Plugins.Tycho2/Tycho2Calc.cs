@@ -378,11 +378,6 @@ namespace Planetarium.Plugins.Tycho2
 
         public void ConfigureEphemeris(EphemerisConfig<Tycho2Star> e)
         {
-            e["Constellation"] = (c, s) => Constellations.FindConstellation(s.Equatorial, c.JulianDay);
-            e["Equatorial.Alpha"] = (c, s) => c.Get(Equatorial, s).Alpha;
-            e["Equatorial.Delta"] = (c, s) => c.Get(Equatorial, s).Delta;
-            e["Equatorial0.Alpha"] = (c, s) => s.Equatorial0.Alpha;
-            e["Equatorial0.Delta"] = (c, s) => s.Equatorial0.Delta;
             e["Horizontal.Azimuth"] = (c, s) => c.Get(Horizontal, s).Azimuth;
             e["Horizontal.Altitude"] = (c, s) => c.Get(Horizontal, s).Altitude;
             e["RTS.Rise"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet, s).Rise);
@@ -393,19 +388,23 @@ namespace Planetarium.Plugins.Tycho2
 
         public void GetInfo(CelestialObjectInfo<Tycho2Star> info)
         {
+            Tycho2Star s = info.Body;
+            SkyContext c = info.Context;
+            string constellation = Constellations.FindConstellation(s.Equatorial, c.JulianDay);
+
             info
-            .SetTitle(info.Body.ToString())
+            .SetTitle(s.ToString())
             .SetSubtitle("Star")
 
-            .AddRow("Constellation")
+            .AddRow("Constellation", constellation)
 
             .AddHeader("Equatorial coordinates (current epoch)")
-            .AddRow("Equatorial.Alpha")
-            .AddRow("Equatorial.Delta")
+            .AddRow("Equatorial.Alpha", c.Get(Equatorial, s).Alpha)
+            .AddRow("Equatorial.Delta", c.Get(Equatorial, s).Delta)
 
             .AddHeader("Equatorial coordinates (J2000.0 epoch)")
-            .AddRow("Equatorial.Alpha")
-            .AddRow("Equatorial.Delta")
+            .AddRow("Equatorial0.Alpha", s.Equatorial0.Alpha)
+            .AddRow("Equatorial0.Delta", s.Equatorial0.Delta)
 
             .AddHeader("Horizontal coordinates")
             .AddRow("Horizontal.Azimuth")
@@ -418,7 +417,7 @@ namespace Planetarium.Plugins.Tycho2
             .AddRow("RTS.Duration")
 
             .AddHeader("Properties")
-            .AddRow("Magnitude", info.Body.Magnitude);
+            .AddRow("Magnitude", s.Magnitude);
         }
 
         private readonly Regex searchRegex = new Regex("tyc\\s*(?<tyc1>\\d+)((\\s*-\\s*|\\s+)(?<tyc2>\\d+)((\\s*-\\s*|\\s+)(?<tyc3>\\d+))?)?");

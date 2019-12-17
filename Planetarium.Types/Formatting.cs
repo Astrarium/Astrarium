@@ -76,8 +76,7 @@ namespace Planetarium.Types
 
         public static IEphemFormatter GetDefault(string key)
         {
-            IEphemFormatter formatter = null;
-            Default.TryGetValue(key, out formatter);
+            Default.TryGetValue(key, out IEphemFormatter formatter);
             if (formatter == null)
             {
                 formatter = Simple;

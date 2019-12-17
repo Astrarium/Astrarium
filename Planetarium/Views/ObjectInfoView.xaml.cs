@@ -28,6 +28,9 @@ namespace Planetarium.Views
         public static readonly DependencyProperty HeaderPaddingProperty =
             DependencyProperty.Register("HeaderPadding", typeof(Thickness), typeof(ObjectInfoView), new PropertyMetadata(new Thickness(4, 16, 4, 4)));
 
+        public static readonly DependencyProperty HeaderBackgroundProperty =
+            DependencyProperty.Register("HeaderBackground", typeof(Brush), typeof(ObjectInfoView), new PropertyMetadata(Brushes.Transparent));
+
         public static readonly DependencyProperty LinkCommandProperty =
                     DependencyProperty.Register("LinkCommand", typeof(ICommand), typeof(ObjectInfoView));
 
@@ -41,6 +44,12 @@ namespace Planetarium.Views
         {
             get { return (Thickness)GetValue(HeaderPaddingProperty); }
             set { SetValue(HeaderPaddingProperty, value); }
+        }
+
+        public Brush HeaderBackground
+        {
+            get { return (Brush)GetValue(HeaderBackgroundProperty); }
+            set { SetValue(HeaderBackgroundProperty, value); }
         }
 
         public ICommand LinkCommand
@@ -81,30 +90,11 @@ namespace Planetarium.Views
                 {
                     case InfoElementHeader h:
                         {
-                            var cell = new TextBlock() { Text = h.Text, Padding = HeaderPadding, FontWeight = FontWeights.Bold };
+                            var cell = new TextBlock() { Text = h.Text, Margin = HeaderPadding, FontWeight = FontWeights.Bold, Background = HeaderBackground };
                             tblInfo.Children.Add(cell);
                             Grid.SetRow(cell, r);
                             Grid.SetColumn(cell, 0);
                             Grid.SetColumnSpan(cell, 2);
-                        }
-                        break;
-
-                    case InfoElementPropertyLink p when !double.IsNaN(p.JulianDay):
-                        {
-                            formatter = p.Formatter ?? Formatters.GetDefault(p.Caption);
-
-                            var cellCaption = new TextBlock() { Text = p.Caption, Padding = CellPadding };
-                            tblInfo.Children.Add(cellCaption);
-                            Grid.SetRow(cellCaption, r);
-                            Grid.SetColumn(cellCaption, 0);
-
-                            Hyperlink link = new Hyperlink() { FontFamily = fontFamily, FontSize = fontSize };
-                            link.Inlines.Add(formatter.Format(p.Value));
-                            link.Click += (s, e) => LinkClicked(p.JulianDay);
-                            var cellValue = new TextBlock(link) { Padding = CellPadding, VerticalAlignment = VerticalAlignment.Center };
-                            tblInfo.Children.Add(cellValue);
-                            Grid.SetRow(cellValue, r);
-                            Grid.SetColumn(cellValue, 1);
                         }
                         break;
 

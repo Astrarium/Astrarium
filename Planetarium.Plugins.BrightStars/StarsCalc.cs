@@ -144,20 +144,23 @@ namespace Planetarium.Plugins.BrightStars
 
         public void ConfigureEphemeris(EphemerisConfig<Star> e)
         {
-            e["RTS.Rise"] = (c, s) => c.Get(RiseTransitSet, s.Number).Rise;
-            e["RTS.Transit"] = (c, s) => c.Get(RiseTransitSet, s.Number).Transit;
-            e["RTS.Set"] = (c, s) => c.Get(RiseTransitSet, s.Number).Set;
+            e["RTS.Rise"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet, s.Number).Rise);
+            e["RTS.Transit"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet, s.Number).Transit);
+            e["RTS.Set"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet, s.Number).Set);
+            e["RTS.Duration"] = (c, s) => c.Get(RiseTransitSet, s.Number).Duration;
+            e["Horizontal.Azimuth"] = (c, s) =>c.Get(Horizontal, s.Number).Azimuth;
+            e["Horizontal.Altitude"] = (c, s) => c.Get(Horizontal, s.Number).Altitude;
         }
 
         public void GetInfo(CelestialObjectInfo<Star> info)
         {
             Star s = info.Body;
             SkyContext c = info.Context;
+            StarDetails details = c.Get(ReadStarDetails, s.Number);
 
-            var rts = c.Get(RiseTransitSet, s.Number);
-            var det = c.Get(ReadStarDetails, s.Number);
-
-            info.SetSubtitle("Star").SetTitle(string.Join(", ", s.Names))
+            info
+            .SetTitle(string.Join(", ", s.Names))
+            .SetSubtitle("Star")
 
             .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial, s.Number), c.JulianDay))
 
@@ -170,21 +173,21 @@ namespace Planetarium.Plugins.BrightStars
             .AddRow("Equatorial0.Delta", s.Equatorial0.Delta)
 
             .AddHeader("Horizontal coordinates")
-            .AddRow("Horizontal.Azimuth", c.Get(Horizontal, s.Number).Azimuth)
-            .AddRow("Horizontal.Altitude", c.Get(Horizontal, s.Number).Altitude)
+            .AddRow("Horizontal.Azimuth")
+            .AddRow("Horizontal.Altitude")
 
             .AddHeader("Visibility")
-            .AddRow("RTS.Rise", rts.Rise, c.JulianDayMidnight + rts.Rise)
-            .AddRow("RTS.Transit", rts.Transit, c.JulianDayMidnight + rts.Transit)
-            .AddRow("RTS.Set", rts.Set, c.JulianDayMidnight + rts.Set)
-            .AddRow("RTS.Duration", rts.Duration)
+            .AddRow("RTS.Rise")
+            .AddRow("RTS.Transit")
+            .AddRow("RTS.Set")
+            .AddRow("RTS.Duration")
 
             .AddHeader("Properties")
             .AddRow("Magnitude", s.Mag)
-            .AddRow("Is Infrared Source", det.IsInfraredSource)
-            .AddRow("SpectralClass", det.SpectralClass)
-            .AddRow("Pecularity", det.Pecularity)
-            .AddRow("Radial velocity", det.RadialVelocity + " km/s");
+            .AddRow("Is Infrared Source", details.IsInfraredSource)
+            .AddRow("SpectralClass", details.SpectralClass)
+            .AddRow("Pecularity", details.Pecularity)
+            .AddRow("Radial velocity", details.RadialVelocity + " km/s");
         }
 
         private static Regex regexSpaceRemover = new Regex("[ ]{2,}", RegexOptions.None);
