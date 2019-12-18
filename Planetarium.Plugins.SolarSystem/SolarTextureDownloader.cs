@@ -1,6 +1,7 @@
 ﻿using Planetarium.Types;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -19,12 +20,9 @@ namespace Planetarium.Renderers
     {
         private static readonly string TempPath = Path.GetTempPath();
         private static readonly string SunImagesPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ADK", "SunImages");
-        private readonly ILogger logger;
 
-        public SolarTextureDownloader(ILogger logger)
+        public SolarTextureDownloader()
         {
-            this.logger = logger;
-
             if (!Directory.Exists(SunImagesPath))
             {
                 try
@@ -33,7 +31,7 @@ namespace Planetarium.Renderers
                 }
                 catch (Exception ex)
                 {
-                    logger.Error($"Unable to create directory for sun images: {SunImagesPath}, Details: {ex}");
+                    Trace.TraceError($"Unable to create directory for sun images: {SunImagesPath}, Details: {ex}");
                 }
             }
         }
@@ -126,7 +124,7 @@ namespace Planetarium.Renderers
             }
             catch (Exception ex)
             {
-                logger.Error($"Unable to download file from {url}, exception: {ex}");
+                Trace.TraceError($"Unable to download file from {url}, exception: {ex}");
                 return null;
             }
             finally
@@ -140,7 +138,7 @@ namespace Planetarium.Renderers
                     }
                     catch (Exception ex)
                     {
-                        logger.Error($"Unable to delete file {bmpImageFile}, exception: {ex}");
+                        Trace.TraceError($"Unable to delete file {bmpImageFile}, exception: {ex}");
                     }
                 }
             }

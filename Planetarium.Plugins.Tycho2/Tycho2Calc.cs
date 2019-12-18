@@ -3,6 +3,7 @@ using Planetarium.Objects;
 using Planetarium.Types;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -93,19 +94,13 @@ namespace Planetarium.Plugins.Tycho2
         private readonly ISettings Settings;
 
         /// <summary>
-        /// Logger instance
-        /// </summary>
-        private readonly ILogger Logger;
-
-        /// <summary>
         /// Gets or sets Tycho2Star object that the map is locked on
         /// </summary>
         public Tycho2Star LockedStar { get; set; }
 
-        public Tycho2Calc(ISettings settings, ILogger logger)
+        public Tycho2Calc(ISettings settings)
         {
             Settings = settings;
-            Logger = logger;
         }
         
         public override void Initialize()
@@ -114,7 +109,7 @@ namespace Planetarium.Plugins.Tycho2
 
             if (string.IsNullOrEmpty(catalogLocation))
             {
-                Logger.Warn("Unable to initialize Tycho2 calculator, catalog location is not set.");
+                Trace.TraceWarning("Unable to initialize Tycho2 calculator, catalog location is not set.");
                 return;
             }
             
@@ -150,7 +145,7 @@ namespace Planetarium.Plugins.Tycho2
             }
             catch (Exception ex)
             {
-                Logger.Error($"Unable to initialize Tycho2 calculator: {ex}");
+                Trace.TraceError($"Unable to initialize Tycho2 calculator: {ex}");
             }
         }
 

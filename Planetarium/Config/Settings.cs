@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
@@ -32,11 +33,6 @@ namespace Planetarium.Config
         private readonly Dictionary<string, string> Snapshots = new Dictionary<string, string>();
 
         /// <summary>
-        /// Logger instance
-        /// </summary>
-        private readonly ILogger Logger;
-
-        /// <summary>
         /// Raised when setting is changed
         /// </summary>
         public event Action<string, object> SettingValueChanged;
@@ -45,11 +41,6 @@ namespace Planetarium.Config
         /// Raised when property value is changed
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
-
-        public Settings(ILogger logger)
-        {
-            Logger = logger;
-        }
 
         /// <summary>
         /// Gets value indicating whether any setting was changed or not
@@ -157,7 +148,7 @@ namespace Planetarium.Config
             }
             else
             {
-                Logger.Info($"Setting file {SETTINGS_PATH} not found, skip loading settings.");
+                Trace.TraceInformation($"Setting file {SETTINGS_PATH} not found, skip loading settings.");
             }
         }
 
@@ -190,7 +181,7 @@ namespace Planetarium.Config
                 }
                 catch (Exception ex)
                 {
-                    Logger.Error(ex.ToString());
+                    Trace.TraceError(ex.ToString());
                 }
             }
         }

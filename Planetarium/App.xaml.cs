@@ -10,6 +10,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
@@ -29,7 +30,6 @@ namespace Planetarium
     public partial class App : Application
     {
         private IKernel kernel = new StandardKernel();
-        private ILogger logger = new Logger();
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -56,7 +56,7 @@ namespace Planetarium
             Dispatcher.UnhandledException += (s, ea) =>
             {
                 string message = $"An unhandled exception occurred:\n\n{ea.Exception.Message}\nStack trace:\n\n{ea.Exception.StackTrace}";
-                logger.Error(message);
+                Trace.TraceError(message);
                 ViewManager.ShowMessageBox("Error", message, MessageBoxButton.OK);
                 ea.Handled = true;                
             };
@@ -92,10 +92,11 @@ namespace Planetarium
 
         private void ConfigureContainer(IProgress<string> progress)
         {
-            logger.Debug("Configuring application container...");
-
             // use single logger for whole application
-            kernel.Bind<ILogger>().ToConstant(logger).InSingletonScope();
+            kernel.Bind<Logger>().ToSelf().InSingletonScope();
+            kernel.Get<Logger>();
+
+            Trace.TraceInformation("Configuring application container...");
 
             kernel.Bind<ISettings, Settings>().To<Settings>().InSingletonScope();
 
@@ -125,7 +126,7 @@ namespace Planetarium
                 }
                 catch (Exception ex)
                 {
-                    logger.Error($"Unable to load plugin assembly with path {path}. {ex})");
+                    Trace.TraceError($"Unable to load plugin assembly with path {path}. {ex})");
                 }
             }
 
@@ -234,7 +235,7 @@ namespace Planetarium
 
             kernel.Get<SkyMap>().Initialize(context, renderers);
 
-            logger.Debug("Application container has been configured.");
+            Trace.TraceInformation("Application container has been configured.");
 
             progress.Report($"Initializing shell");
 

@@ -24,7 +24,6 @@ EarthShadow.Label				= Earth shadow
 EclipsedByJupiter				= Eclipsed by Jupiter
 
 # Ephemeris
-Planet.Magnitude				= Visual magnitude
 Planet.Horizontal				= Horizontal topocentric coordinates
 Planet.Horizontal.Altitude		= Altitude
 Planet.Horizontal.Azimuth		= Azimuth
@@ -39,11 +38,13 @@ Planet.RTS						= Visibility
 Planet.RTS.Rise					= Rise
 Planet.RTS.Transit				= Transit
 Planet.RTS.Set					= Set
-Planet.Visibility				= Visibility conditions
+Planet.RTS.Duration				= Above horizon
+Planet.Visibility				= Observation conditions
 Planet.Visibility.Begin			= Begin
 Planet.Visibility.End			= End
 Planet.Visibility.Duration		= Duration
 Planet.Visibility.Period		= Period
+Planet.Magnitude				= Visual magnitude
 
 # Settings
 Settings.Sun						= Sun

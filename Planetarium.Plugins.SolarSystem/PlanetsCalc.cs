@@ -486,21 +486,21 @@ namespace Planetarium.Plugins.SolarSystem
 
                 .AddRow("Constellation")
 
-                .AddHeader("Equatorial coordinates (geocentrical)")
-                .AddRow("Equatorial0.Alpha")
-                .AddRow("Equatorial0.Delta")
+                .AddHeader(Text.Get("Planet.Horizontal"))
+                .AddRow("Horizontal.Azimuth")
+                .AddRow("Horizontal.Altitude")
 
                 .AddHeader(Text.Get("Planet.Equatorial"))
                 .AddRow("Equatorial.Alpha")
                 .AddRow("Equatorial.Delta")
 
+                .AddHeader(Text.Get("Planet.Equatorial0"))
+                .AddRow("Equatorial0.Alpha")
+                .AddRow("Equatorial0.Delta")
+
                 .AddHeader(Text.Get("Planet.Ecliptical"))
                 .AddRow("Ecliptical.Lambda")
                 .AddRow("Ecliptical.Beta")
-
-                .AddHeader(Text.Get("Planet.Horizontal"))
-                .AddRow("Horizontal.Azimuth")
-                .AddRow("Horizontal.Altitude")
 
                 .AddHeader(Text.Get("Planet.RTS"))
                 .AddRow("RTS.Rise")
