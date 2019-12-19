@@ -33,7 +33,7 @@ namespace Planetarium.Logging
         {
             Hierarchy hierarchy = (Hierarchy)LogManager.GetRepository();
 
-            PatternLayout patternLayout = new PatternLayout("%date [%-5level] %message%newline");
+            PatternLayout patternLayout = new PatternLayout("[%-5level] [%date] %message%newline");
             patternLayout.ActivateOptions();
 
             RollingFileAppender fileAppender = new RollingFileAppender()
