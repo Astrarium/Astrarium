@@ -16,13 +16,15 @@ namespace Planetarium.Logging
     /// </summary>
     public class Logger : TraceListener
     {
+        /// <summary>
+        /// Path to log file
+        /// </summary>
         private readonly string LOG_PATH = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ADK", "Planetarium.log");
-
 
         /// <summary>
         /// log4net logger instance 
         /// </summary>
-        private ILog logger;
+        private readonly ILog logger;
 
         /// <summary>
         /// Creates new logger
@@ -31,7 +33,7 @@ namespace Planetarium.Logging
         {
             Hierarchy hierarchy = (Hierarchy)LogManager.GetRepository();
 
-            PatternLayout patternLayout = new PatternLayout("%date [%thread] %-5level - %message%newline");
+            PatternLayout patternLayout = new PatternLayout("%date [%-5level] %message%newline");
             patternLayout.ActivateOptions();
 
             RollingFileAppender fileAppender = new RollingFileAppender()
@@ -57,28 +59,9 @@ namespace Planetarium.Logging
             Trace.Listeners.Add(this);
         }
 
-        public static Level Convert(TraceEventType eventType)
-        {
-            switch (eventType)
-            {
-                case TraceEventType.Verbose:
-                    return Level.Debug;
-                case TraceEventType.Information:
-                    return Level.Info;
-                case TraceEventType.Warning:
-                    return Level.Warn;
-                case TraceEventType.Error:
-                    return Level.Error;
-                case TraceEventType.Critical:
-                    return Level.Fatal;
-                default:
-                    throw new ArgumentException(string.Format("LogLevel does not support value {0}.", eventType), "logLevel");
-            }
-        }
-
         public override void Write(string message)
         {
-            logger.Debug(message);
+            WriteToLog(TraceEventType.Verbose, message);
         }
 
         public override void WriteLine(string message)
@@ -96,17 +79,11 @@ namespace Planetarium.Logging
             TraceEvent(eventCache, source, eventType, id, message, new object[0]);
         }
 
-        public override void TraceEvent(
-       TraceEventCache eventCache,
-       string source,
-       TraceEventType eventType, int id,
-       string format,
-       params Object[] args)
+        public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string format, params object[] args)
         {
             if (ShouldTrace(eventCache, source, eventType, id, format, args, null, null))
             {
-                var level = Convert(eventType);
-                logger.Logger.Log(this.GetType(), level, string.Format(format, args), null);
+                WriteToLog(eventType, string.Format(format, args));
             }
         }
 
@@ -124,29 +101,43 @@ namespace Planetarium.Logging
                 {
                     message = string.Join(", ", data);
                 }
-                var level = Convert(eventType);
 
-                logger.Logger.Log(this.GetType(), level, message, null);
+                WriteToLog(eventType, message);
             }
         }
 
         public override void TraceTransfer(TraceEventCache eventCache, string source, int id, string message, Guid relatedActivityId)
         {
-            TraceEvent(eventCache, source, TraceEventType.Information, id,
-                message + ", relatedActivityId=" + relatedActivityId, new object[0]);
+            TraceEvent(eventCache, source, TraceEventType.Information, id, $"{message}, relatedActivityId={relatedActivityId}", new object[0]);
         }
 
-        private bool ShouldTrace(
-       TraceEventCache cache,
-       string source,
-       TraceEventType eventType,
-       int id,
-       string formatOrMessage,
-       object[] args,
-       object data1,
-       object[] data)
+        private bool ShouldTrace(TraceEventCache cache, string source, TraceEventType eventType, int id, string formatOrMessage, object[] args, object data1, object[] data)
         {
-            return ((Filter == null) || Filter.ShouldTrace(cache, source, eventType, id, formatOrMessage, args, data1, data));
+            return (Filter == null) || Filter.ShouldTrace(cache, source, eventType, id, formatOrMessage, args, data1, data);
+        }
+
+        private void WriteToLog(TraceEventType eventType, string message)
+        {
+            switch (eventType)
+            {
+                case TraceEventType.Verbose:
+                    logger.Debug(message);
+                    break;
+                case TraceEventType.Information:
+                    logger.Info(message);
+                    break;
+                case TraceEventType.Warning:
+                    logger.Warn(message);
+                    break;
+                case TraceEventType.Error:
+                    logger.Error(message);
+                    break;
+                case TraceEventType.Critical:
+                    logger.Fatal(message);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

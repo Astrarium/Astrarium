@@ -96,7 +96,7 @@ namespace Planetarium
             kernel.Bind<Logger>().ToSelf().InSingletonScope();
             kernel.Get<Logger>();
 
-            Trace.TraceInformation("Configuring application container...");
+            Debug.WriteLine("Configuring application container...");
 
             kernel.Bind<ISettings, Settings>().To<Settings>().InSingletonScope();
 
@@ -235,7 +235,7 @@ namespace Planetarium
 
             kernel.Get<SkyMap>().Initialize(context, renderers);
 
-            Trace.TraceInformation("Application container has been configured.");
+            Debug.Write("Application container has been configured.");
 
             progress.Report($"Initializing shell");
 

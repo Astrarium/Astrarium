@@ -148,7 +148,7 @@ namespace Planetarium.Config
             }
             else
             {
-                Trace.TraceInformation($"Setting file {SETTINGS_PATH} not found, skip loading settings.");
+                Debug.Write($"Setting file {SETTINGS_PATH} not found, skip loading settings.");
             }
         }
 
@@ -181,7 +181,7 @@ namespace Planetarium.Config
                 }
                 catch (Exception ex)
                 {
-                    Trace.TraceError(ex.ToString());
+                    Trace.Fail(ex.ToString());
                 }
             }
         }

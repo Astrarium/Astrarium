@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -80,8 +81,6 @@ namespace Planetarium.Types.Localization
                 }
 
                 var refs = LocalizedObjectsRefs.Where(lo => lo.ObjectReference.IsAlive).ToList();
-
-                System.Diagnostics.Trace.WriteLine("Live refs: " + refs.Count);
 
                 LocalizedObjectsRefs.Clear();
                 LocalizedObjectsRefs.AddRange(refs);
