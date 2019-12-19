@@ -181,7 +181,7 @@ namespace Planetarium.Config
                 }
                 catch (Exception ex)
                 {
-                    Trace.Fail(ex.ToString());
+                    Trace.TraceError(ex.ToString());
                 }
             }
         }
