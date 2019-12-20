@@ -1,4 +1,5 @@
 ﻿using ADK;
+using Planetarium.Types.Localization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,15 +10,20 @@ namespace Planetarium.Objects
 {
     public class Planet : SizeableCelestialObject, IMovingObject
     {
+        public Planet(int number)
+        {
+            Number = number;
+        }
+
         /// <summary>
         /// Serial number of the planet, from 1 (Mercury) to 8 (Neptune).
         /// </summary>
-        public int Number { get; set; }
+        public int Number { get; private set; }
 
         /// <summary>
         /// Planet name
         /// </summary>
-        public string Name { get; set; }
+        public string Name => Text.Get($"Planet.{Number}.Name");
 
         /// <summary>
         /// Geocentrical equatorial coordinates

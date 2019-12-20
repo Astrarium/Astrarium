@@ -33,6 +33,6 @@ namespace Planetarium.Objects
         /// <summary>
         /// Primary name
         /// </summary>
-        public string Name { get; private set; } = Text.Get("Sun.Name");
+        public string Name => Text.Get("Sun.Name");
     }
 }

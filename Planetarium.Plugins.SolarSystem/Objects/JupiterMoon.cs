@@ -1,4 +1,5 @@
 ﻿using ADK;
+using Planetarium.Types.Localization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,11 @@ namespace Planetarium.Objects
 {
     public class JupiterMoon : SizeableCelestialObject
     {
+        public JupiterMoon(int number)
+        {
+            Number = number;
+        }
+
         /// <summary>
         /// Apparent equatorial coordinates of the Galilean moon
         /// </summary>
@@ -32,17 +38,17 @@ namespace Planetarium.Objects
         /// <summary>
         /// Name of the Galilean moon
         /// </summary>
-        public string Name { get; set; }
+        public string Name => Text.Get($"JupiterMoon.{Number}.Name");
 
         /// <summary>
         /// Name of moon shadow
         /// </summary>
-        public string ShadowName { get; set; }
+        public string ShadowName => Text.Get($"JupiterMoon.{Number}.Shadow");
 
         /// <summary>
         /// Number of the Galilean moon (1 to 4)
         /// </summary>
-        public int Number { get; set; }
+        public int Number { get; private set; }
 
         /// <summary>
         /// Apparent magnitude

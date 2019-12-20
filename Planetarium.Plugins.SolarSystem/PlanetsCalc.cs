@@ -26,34 +26,18 @@ namespace Planetarium.Plugins.SolarSystem
         private readonly Func<Planet, bool> IsSaturn = p => p.Number == Planet.SATURN;
         private readonly Func<Planet, bool> IsJupiter = p => p.Number == Planet.JUPITER;
 
-        private string[] PlanetNames = new string[]
-        {
-            Text.Get("Mercury.Name"),
-            Text.Get("Venus.Name"),
-            Text.Get("Earth.Name"),
-            Text.Get("Mars.Name"),
-            Text.Get("Jupiter.Name"),
-            Text.Get("Saturn.Name"),
-            Text.Get("Uranus.Name"),
-            Text.Get("Neptune.Name")
-        };
-
-        private string[] JuipterMoonNames = new string[] { Text.Get("Io.Name"), Text.Get("Europa.Name"), Text.Get("Ganymede.Name"), Text.Get("Callisto.Name") };
-
-        private string[] ShadowNames = new string[] { Text.Get("Io.Shadow"), Text.Get("Europa.Shadow"), Text.Get("Ganymede.Shadow"), Text.Get("Callisto.Shadow") };
-
         public PlanetsCalc(ISettings settings)
         {
             this.settings = settings;
 
             for (int i = 0; i < planets.Length; i++)
             {
-                planets[i] = new Planet() { Number = i + 1, Name = PlanetNames[i] };
+                planets[i] = new Planet(i + 1);
             }
 
             for (int i = 0; i < JupiterMoons.Count; i++)
             {
-                jupiterMoons[i] = new JupiterMoon() { Number = i + 1, Name = JuipterMoonNames[i], ShadowName = ShadowNames[i] };
+                jupiterMoons[i] = new JupiterMoon(i + 1);
             }
 
             planets[Planet.JUPITER - 1].Flattening = 0.064874f;
@@ -62,7 +46,7 @@ namespace Planetarium.Plugins.SolarSystem
 
         public string GetPlanetName(int number)
         {
-            return PlanetNames[number - 1];
+            return planets[number - 1].Name;
         }
 
         /// <summary>
