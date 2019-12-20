@@ -45,7 +45,7 @@ namespace Planetarium.Controls
                     DateString = Formatters.DateTime.Format(date);
                     break;
                 case DateOptions.DateOnly:
-                    DateString = Formatters.DateOnly.Format(date);
+                    DateString = Formatters.Date.Format(date);
                     break;
                 case DateOptions.MonthYear:
                     DateString = Formatters.MonthYear.Format(date);

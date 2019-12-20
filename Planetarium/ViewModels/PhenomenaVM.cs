@@ -86,8 +86,8 @@ namespace Planetarium.ViewModels
             JulianDay = e.JulianDay;
             Text = e.Text;
             NoExactTime = e.NoExactTime;
-            Date = Formatters.DateOnly.Format(date);
-            Time = Formatters.TimeOnly.Format(date);
+            Date = Formatters.Date.Format(date);
+            Time = Formatters.Time.Format(date);
         }
     }
 
@@ -114,8 +114,8 @@ namespace Planetarium.ViewModels
                 foreach (var e in events)
                 {
                     var date = new Date(e.JulianDay, utcOffset);
-                    string dateString = Formatters.DateOnly.Format(date);
-                    string timeString = e.NoExactTime ? "     " : Formatters.TimeOnly.Format(date);
+                    string dateString = Formatters.Date.Format(date);
+                    string timeString = e.NoExactTime ? "     " : Formatters.Time.Format(date);
                     writer.WriteLine($"{dateString} {timeString} {e.Text}");
                 }
                 writer.Flush();
@@ -142,8 +142,8 @@ namespace Planetarium.ViewModels
                 foreach (var e in events)
                 {
                     var date = new Date(e.JulianDay, utcOffset);
-                    string dateTimeString = Formatters.DateOnly.Format(date);
-                    if (!e.NoExactTime) dateTimeString += $" {Formatters.TimeOnly.Format(date)}";
+                    string dateTimeString = Formatters.Date.Format(date);
+                    if (!e.NoExactTime) dateTimeString += $" {Formatters.Time.Format(date)}";
                     writer.WriteLine($"\"{e.JulianDay}\",\"{dateTimeString}\",\"{e.Text}\"");
                 }
                 writer.Flush();

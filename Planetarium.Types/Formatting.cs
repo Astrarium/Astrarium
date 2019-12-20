@@ -261,45 +261,35 @@ namespace Planetarium.Types
             }
         }
 
-        private class DateTimeFormatter : IEphemFormatter
+        private abstract class AbstractDateFormatter
         {
-            private readonly string[] months = CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames.Take(12).ToArray();
+            protected string[] Months => CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames.Take(12).ToArray();
+        }
 
+        private class DateTimeFormatter : AbstractDateFormatter, IEphemFormatter
+        {
             public string Format(object value)
             {
                 Date d = (Date)value;
-                return $"{(int)d.Day:00} {months[d.Month-1]} {d.Year} {d.Hour:00}:{d.Minute:00}";
+                return $"{(int)d.Day:00} {Months[d.Month-1]} {d.Year} {d.Hour:00}:{d.Minute:00}";
             }
         }
 
-        private class DateOnlyFormatter : IEphemFormatter
+        private class DateFormatter : AbstractDateFormatter, IEphemFormatter
         {
-            private readonly string[] months = CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames.Take(12).ToArray();
-
             public string Format(object value)
             {
                 Date d = (Date)value;
-                return $"{(int)d.Day:00} {months[d.Month - 1]} {d.Year}";
+                return $"{(int)d.Day:00} {Months[d.Month - 1]} {d.Year}";
             }
         }
 
-        private class TimeOnlyFormatter : IEphemFormatter
+        private class MonthYearFormatter : AbstractDateFormatter, IEphemFormatter
         {
             public string Format(object value)
             {
                 Date d = (Date)value;
-                return $"{d.Hour:00}:{d.Minute:00}";
-            }
-        }
-
-        private class MonthYearFormatter : IEphemFormatter
-        {
-            private readonly string[] months = CultureInfo.CurrentCulture.DateTimeFormat.MonthNames.Take(12).ToArray();
-
-            public string Format(object value)
-            {
-                Date d = (Date)value;
-                return $"{months[d.Month - 1]} {d.Year}";
+                return $"{Months[d.Month - 1]} {d.Year}";
             }
         }
 
@@ -402,8 +392,7 @@ namespace Planetarium.Types
         public static readonly IEphemFormatter HorizontalParallax = new SmallAngleFormatter();
         public static readonly IEphemFormatter AngularDiameter = new SmallAngleFormatter();
         public static readonly IEphemFormatter DateTime = new DateTimeFormatter();
-        public static readonly IEphemFormatter DateOnly = new DateOnlyFormatter();
-        public static readonly IEphemFormatter TimeOnly = new TimeOnlyFormatter();
+        public static readonly IEphemFormatter Date = new DateFormatter();
         public static readonly IEphemFormatter MonthYear = new MonthYearFormatter();
         public static readonly IEphemFormatter CentralMeridian = new UnsignedDoubleFormatter(2, "\u00B0");
         public static readonly IEphemFormatter RotationAxis = new UnsignedDoubleFormatter(2, "\u00B0");
