@@ -2919,6 +2919,7 @@
 
     <Style TargetType="{x:Type c:NumericUpDown}">
         <Setter Property="Height" Value="26" />
+        <Setter Property="Foreground" Value="{StaticResource BrushForeground}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type c:NumericUpDown}">
@@ -2958,6 +2959,11 @@
                             <Setter Property="Visibility" TargetName="PART_UpButton" Value="Collapsed"/>
                             <Setter Property="Visibility" TargetName="PART_DownButton" Value="Collapsed"/>
                         </MultiTrigger>
+
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{StaticResource BrushControlLightBackground}" />
+                        </Trigger>
+                        
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>

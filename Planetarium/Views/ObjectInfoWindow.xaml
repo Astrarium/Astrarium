@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:v="clr-namespace:Planetarium.Views"
+        xmlns:loc="clr-namespace:Planetarium.Types.Localization;assembly=Planetarium.Types"
         mc:Ignorable="d"
         Title="Object Info" 
         Width="600" Height="600"
@@ -42,7 +43,7 @@
         <StackPanel Grid.Row="5"                    
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
-            <Button MinWidth="80" Command="{Binding CloseCommand}">Close</Button>
+            <Button MinWidth="80" Command="{Binding CloseCommand}" Content="{loc:Text Close}" />
         </StackPanel>
 
     </Grid>

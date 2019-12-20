@@ -96,7 +96,7 @@ namespace Planetarium.Plugins.Constellations
                 {
                     var p = map.Project(h);
                     var constellation = GetConstellation(c.Code);
-                    string label = null;
+                    string label;
                     switch (labelType)
                     {
                         case LabelType.InternationalCode:
@@ -116,6 +116,9 @@ namespace Planetarium.Plugins.Constellations
             }
         }
 
+        /// <summary>
+        /// Type of constellation label
+        /// </summary>
         public enum LabelType
         {
             [Description("Settings.ConstLabelsType.InternationalName")]

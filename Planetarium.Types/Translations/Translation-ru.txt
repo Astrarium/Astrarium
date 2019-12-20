@@ -1,5 +1,13 @@
-﻿# DateWindow
+﻿# Common
+OK						= OK
+Yes						= Да
+No						= Нет
+Cancel					= Отмена
+Open					= Открыть
+Close					= Закрыть
+Save					= Сохранить
 
+# DateWindow
 DateWindow.Title		= Дата и время
 DateWindow.Day			= День
 DateWindow.Month		= Месяц
@@ -9,3 +17,10 @@ DateWindow.Minutes		= Минуты
 DateWindow.Seconds		= Секунды
 DateWindow.SetCurrent	= Установить текущее
 DateWindow.Select		= Выбрать
+
+# Settings
+Settings.Schema			= Цветовая схема
+Settings.Schema.Night	= Ночь
+Settings.Schema.Day		= День и Ночь
+Settings.Schema.Red		= Красная
+Settings.Schema.White	= Карта

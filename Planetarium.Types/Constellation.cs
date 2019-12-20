@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Planetarium.Types.Localization;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -29,11 +30,11 @@ namespace Planetarium.Types
         /// <summary>
         /// Local constellation name (depends on selected UI language)
         /// </summary>
-        public string LocalName { get; set; }
+        public string LocalName => Text.Get($"ConName.{Code}");
 
         /// <summary>
         /// Local constellation name, genitive form (depends on selected UI language)
         /// </summary>
-        public string LocalGenitiveName { get; set; }
+        public string LocalGenitiveName => Text.Get($"ConGenName.{Code}");
     }
 }

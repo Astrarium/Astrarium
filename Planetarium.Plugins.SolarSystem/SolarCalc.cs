@@ -1,6 +1,7 @@
 ﻿using ADK;
 using Planetarium.Objects;
 using Planetarium.Types;
+using Planetarium.Types.Localization;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -14,6 +15,10 @@ namespace Planetarium.Plugins.SolarSystem
 {
     public class SolarCalc : BaseCalc, ICelestialObjectCalc<Sun>
     {
+        private const double TWILIGHT_ASTRONOMICAL  = 18;
+        private const double TWILIGHT_NAUTICAL      = 12;
+        private const double TWILIGHT_CIVIL         = 6;
+
         public Sun Sun { get; private set; } = new Sun();
 
         public override void Calculate(SkyContext c)
@@ -104,40 +109,67 @@ namespace Planetarium.Plugins.SolarSystem
             return Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, c.Get(Parallax), c.Get(Semidiameter) / 3600.0);
         }
 
+        /// <summary>
+        /// Gets twilight information
+        /// </summary>
+        private RTS Twilight(SkyContext c, double altitude)
+        {
+            double jd = c.JulianDayMidnight;
+            double theta0 = Date.ApparentSiderealTime(jd, c.NutationElements.deltaPsi, c.Epsilon);
+
+            CrdsEquatorial[] eq = new CrdsEquatorial[3];
+            double[] diff = new double[] { 0, 0.5, 1 };
+
+            for (int i = 0; i < 3; i++)
+            {
+                eq[i] = new SkyContext(jd + diff[i], c.GeoLocation).Get(Equatorial0);
+            }
+
+            return Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, c.Get(Parallax), altitude);
+        }
+
         public void GetInfo(CelestialObjectInfo<Sun> info)
         {
             info.SetTitle(Sun.Name)
 
             .AddRow("Constellation")
-            .AddHeader("Equatorial coordinates (geocentrical)")
+            .AddHeader(Text.Get("Sun.Equatorial0"))
             .AddRow("Equatorial0.Alpha")
             .AddRow("Equatorial0.Delta")
 
-            .AddHeader("Equatorial coordinates (topocentrical)")
+            .AddHeader(Text.Get("Sun.Equatorial"))
             .AddRow("Equatorial.Alpha")
             .AddRow("Equatorial.Delta")
 
-            .AddHeader("Ecliptical coordinates")
+            .AddHeader(Text.Get("Sun.Ecliptical"))
             .AddRow("Ecliptical.Lambda")
             .AddRow("Ecliptical.Beta")
 
-            .AddHeader("Horizontal coordinates")
+            .AddHeader(Text.Get("Sun.Horizontal"))
             .AddRow("Horizontal.Azimuth")
             .AddRow("Horizontal.Altitude")
 
-            .AddHeader("Visibility")
+            .AddHeader(Text.Get("Sun.RTS"))
             .AddRow("RTS.Rise")
             .AddRow("RTS.Transit")
             .AddRow("RTS.Set")
             .AddRow("RTS.Duration")
 
-            .AddHeader("Appearance")
+            .AddHeader(Text.Get("Sun.Twilight"))
+            .AddRow("Twilight.Astronomical.Dawn")
+            .AddRow("Twilight.Nautical.Dawn")
+            .AddRow("Twilight.Civil.Dawn")
+            .AddRow("Twilight.Civil.Dust")
+            .AddRow("Twilight.Nautical.Dust")
+            .AddRow("Twilight.Astronomical.Dust")            
+
+            .AddHeader(Text.Get("Sun.Appearance"))
             .AddRow("Distance")
             .AddRow("HorizontalParallax")
             .AddRow("AngularDiameter")
             .AddRow("CRN")
 
-            .AddHeader("Seasons")
+            .AddHeader(Text.Get("Sun.Seasons"))
             .AddRow("Seasons.Spring")
             .AddRow("Seasons.Summer")
             .AddRow("Seasons.Autumn")
@@ -159,6 +191,12 @@ namespace Planetarium.Plugins.SolarSystem
             e["RTS.Transit"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet).Transit);
             e["RTS.Set"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet).Set);
             e["RTS.Duration"] = (c, s) => c.Get(RiseTransitSet).Duration;
+            e["Twilight.Astronomical.Dawn", Formatters.Time] = (c, s) => c.GetDateFromTime(c.Get(Twilight, TWILIGHT_ASTRONOMICAL).Rise);
+            e["Twilight.Astronomical.Dust", Formatters.Time] = (c, s) => c.GetDateFromTime(c.Get(Twilight, TWILIGHT_ASTRONOMICAL).Set);
+            e["Twilight.Nautical.Dawn", Formatters.Time] = (c, s) => c.GetDateFromTime(c.Get(Twilight, TWILIGHT_NAUTICAL).Rise);
+            e["Twilight.Nautical.Dust", Formatters.Time] = (c, s) => c.GetDateFromTime(c.Get(Twilight, TWILIGHT_NAUTICAL).Set);
+            e["Twilight.Civil.Dawn", Formatters.Time] = (c, s) => c.GetDateFromTime(c.Get(Twilight, TWILIGHT_CIVIL).Rise);
+            e["Twilight.Civil.Dust", Formatters.Time] = (c, s) => c.GetDateFromTime(c.Get(Twilight, TWILIGHT_CIVIL).Set);
             e["Distance"] = (c, s) => c.Get(Ecliptical).Distance;
             e["HorizontalParallax"] = (c, x) => c.Get(Parallax);
             e["AngularDiameter"] = (c, x) => c.Get(Semidiameter) * 2 / 3600.0;
