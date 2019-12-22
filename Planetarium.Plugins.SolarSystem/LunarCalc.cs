@@ -198,6 +198,14 @@ namespace Planetarium.Plugins.SolarSystem
         }
 
         /// <summary>
+        /// Gets nearest greatest lunar declination date
+        /// </summary>
+        private Date NearestMaxDeclination(SkyContext c, MoonDeclination d)
+        {
+            return c.GetDate(LunarEphem.NearestMaxDeclination(c.JulianDay, d, out double delta));
+        }
+
+        /// <summary>
         /// Gets longitude of true ascending node of lunar orbit
         /// </summary>
         private double AscendingNode(SkyContext c)
@@ -286,6 +294,8 @@ namespace Planetarium.Plugins.SolarSystem
             e["MoonPhases.LastQuarter", Formatters.DateTime] = (c, m) => c.Get(NearestPhase, MoonPhase.LastQuarter);
             e["MoonApsis.Apogee", Formatters.DateTime] = (c, m) => c.Get(NearestApsis, MoonApsis.Apogee);
             e["MoonApsis.Perigee", Formatters.DateTime] = (c, m) => c.Get(NearestApsis, MoonApsis.Perigee);
+            e["MoonMaxDeclinations.North", Formatters.DateTime] = (c, m) => c.Get(NearestMaxDeclination, MoonDeclination.North);
+            e["MoonMaxDeclinations.South", Formatters.DateTime] = (c, m) => c.Get(NearestMaxDeclination, MoonDeclination.South);
         }
 
         public void GetInfo(CelestialObjectInfo<Moon> info)
@@ -335,7 +345,11 @@ namespace Planetarium.Plugins.SolarSystem
 
             .AddHeader("Nearest apsides")
             .AddRow("MoonApsis.Apogee")
-            .AddRow("MoonApsis.Perigee");
+            .AddRow("MoonApsis.Perigee")
+
+            .AddHeader("Nearest max declinations")
+            .AddRow("MoonMaxDeclinations.North")
+            .AddRow("MoonMaxDeclinations.South");
         }
 
         public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)
