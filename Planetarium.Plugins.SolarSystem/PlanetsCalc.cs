@@ -530,26 +530,26 @@ namespace Planetarium.Plugins.SolarSystem
 
             .AddRow("Constellation")
 
-            .AddHeader("Equatorial coordinates (topocentrical)")
-            .AddRow("Equatorial.Alpha")
-            .AddRow("Equatorial.Delta")
-
-            .AddHeader("Horizontal coordinates")
+            .AddHeader(Text.Get("JupiterMoon.Horizontal"))
             .AddRow("Horizontal.Azimuth")
             .AddRow("Horizontal.Altitude")
 
-            .AddHeader("Rectangular planetocentric coordinates")
+            .AddHeader(Text.Get("JupiterMoon.Equatorial"))
+            .AddRow("Equatorial.Alpha")
+            .AddRow("Equatorial.Delta")
+
+            .AddHeader(Text.Get("JupiterMoon.Rectangular"))
             .AddRow("Rectangular.X")
             .AddRow("Rectangular.Y")
             .AddRow("Rectangular.Z")
 
-            .AddHeader("Visibility")
+            .AddHeader(Text.Get("JupiterMoon.RTS"))
             .AddRow("RTS.Rise")
             .AddRow("RTS.Transit")
             .AddRow("RTS.Set")
             .AddRow("RTS.Duration")
 
-            .AddHeader("Appearance")
+            .AddHeader(Text.Get("JupiterMoon.Appearance"))
             .AddRow("Phase")
             .AddRow("PhaseAngle")
             .AddRow("Magnitude")
