@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:loc="clr-namespace:Planetarium.Types.Localization;assembly=Planetarium.Types"
         mc:Ignorable="d"
         Title="Settings" 
         Width="800" Height="600"
@@ -75,8 +76,8 @@
                 Grid.Column="1"
                 Orientation="Horizontal"
                 HorizontalAlignment="Right">
-                <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding SaveCommand}">Save</Button>
-                <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CloseCommand}">Close</Button>
+                <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding SaveCommand}" Content="{loc:Text Save}" />
+                <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CloseCommand}" Content="{loc:Text Close}" />
             </StackPanel>
         </Grid>
     </Grid>

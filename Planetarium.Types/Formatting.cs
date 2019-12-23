@@ -235,7 +235,7 @@ namespace Planetarium.Types
             }
         }
 
-        private class SignedDoubleFormatter : IEphemFormatter
+        public class SignedDoubleFormatter : IEphemFormatter
         {
             private readonly string format = null;
             private readonly string units = null;
@@ -398,7 +398,6 @@ namespace Planetarium.Types
         public static readonly IEphemFormatter RotationAxis = new UnsignedDoubleFormatter(2, "\u00B0");
         public static readonly IEphemFormatter EarthDeclination = new SignedDoubleFormatter(2, "\u00B0");
         public static readonly IEphemFormatter ConjunctionSeparation = new UnsignedDoubleFormatter(1, "\u00B0");
-        public static readonly IEphemFormatter MoonDeclination = new SignedDoubleFormatter(3, "\u00B0");
         public static readonly IEphemFormatter SaturnRingsSize = new SaturnRingsFormatter();
         public static readonly IEphemFormatter VisibilityDuration = new VisibilityDurationFormatter();
         public static readonly IEphemFormatter VisibilityPeriod = new VisibilityPeriodFormatter();

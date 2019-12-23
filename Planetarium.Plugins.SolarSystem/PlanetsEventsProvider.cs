@@ -19,17 +19,17 @@ namespace Planetarium.Plugins.SolarSystem
             this.solarCalc = solarCalc;
         }
 
-        public override void ConfigureAstroEvents(AstroEventsConfig phenomena)
+        public override void ConfigureAstroEvents(AstroEventsConfig c)
         {
-            phenomena["Planets.ConjunctionsInRightAscension"] = ConjunctionsInRightAscension;
-            phenomena["Planets.ConjunctionsInEclipticalLongitude"] = ConjunctionsInEclipticalLongitude;
-            phenomena["Planets.MaximalMagnitude"] = MaximalMagnitude;
-            phenomena["Planets.CloseApproaches"] = CloseApproaches;
-            phenomena["Planets.Stationaries"] = Stationaries;
-            phenomena["Planets.GreatestElongations"] = GreatestElongations;
-            phenomena["Planets.Oppositions"] = Oppositions;
-            phenomena["Planets.Conjunctions"] = Conjunctions;
-            phenomena["Planets.VisibilityPeriods"] = VisibilityPeriods;
+            c["Planets.ConjunctionsInRightAscension"] = ConjunctionsInRightAscension;
+            c["Planets.ConjunctionsInEclipticalLongitude"] = ConjunctionsInEclipticalLongitude;
+            c["Planets.MaximalMagnitude"] = MaximalMagnitude;
+            c["Planets.CloseApproaches"] = CloseApproaches;
+            c["Planets.Stationaries"] = Stationaries;
+            c["Planets.GreatestElongations"] = GreatestElongations;
+            c["Planets.Oppositions"] = Oppositions;
+            c["Planets.Conjunctions"] = Conjunctions;
+            c["Planets.VisibilityPeriods"] = VisibilityPeriods;
         }
 
         private ICollection<AstroEvent> ConjunctionsInRightAscension(AstroEventsContext context)

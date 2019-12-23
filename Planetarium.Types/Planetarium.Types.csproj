@@ -44,5 +44,9 @@
     <EmbeddedResource Include="Translations\Translation-en.txt" />
     <EmbeddedResource Include="Translations\Translation-ru.txt" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+  </ItemGroup>
   
 </Project>

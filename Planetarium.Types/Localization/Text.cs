@@ -28,6 +28,21 @@ namespace Planetarium.Types.Localization
                 return $"{{{key}}}";
         }
 
+        public static string Get(string key, params (string key, string value)[] args)
+        {
+            if (LocalizationStrings.ContainsKey(key))
+            {
+                string format = LocalizationStrings[key];
+                foreach (var arg in args)
+                {
+                    format = format.Replace($"{{{arg.key}}}", arg.value);
+                }
+                return format;
+            }
+            else
+                return $"{{{key}}}";
+        }
+
         public static string FileName { get; set; } = "Translation";
         public static string FileExtension { get; set; } = "txt";
         public static string DefaultLanguage { get; set; } = "en";

@@ -72,6 +72,6 @@ namespace Planetarium.Objects
         /// <summary>
         /// Primary name
         /// </summary>
-        public string Name { get; private set; } = Text.Get("Moon.Name");
+        public string Name => Text.Get("Moon.Name");
     }
 }
