@@ -215,8 +215,10 @@ namespace Planetarium.Plugins.SolarSystem
 
         private void RenderMoon(IMapContext map)
         {
+            if (!settings.Get<bool>("Moon")) return;
+
             bool isGround = settings.Get<bool>("Ground");
-            bool useTextures = settings.Get<bool>("UseTextures");
+            bool useTextures = settings.Get<bool>("MoonTexture");
             double ad = Angle.Separation(moon.Horizontal, map.Center);
             double coeff = map.DiagonalCoefficient();
 
@@ -270,7 +272,11 @@ namespace Planetarium.Plugins.SolarSystem
                 map.Graphics.FillPath(GetShadowBrush(map), shadow);
                 map.Graphics.ResetTransform();
 
-                map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, size);
+                if (settings.Get<bool>("MoonLabel"))
+                {
+                    map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, size);
+                }
+
                 map.AddDrawnObject(moon);
             }
         }
@@ -353,15 +359,18 @@ namespace Planetarium.Plugins.SolarSystem
                     }
 
                     // outline circles
-                    if (settings.Get<bool>("EarthShadowOutline"))
+                    if (settings.Get<bool>("EarthShadowOutline") && map.ViewAngle > 0.5)
                     {
+                        var brush = new SolidBrush(map.GetColor(clrShadowOutline));
+                        var pen = new Pen(brush) { DashStyle = DashStyle.Dot };
+
                         map.Graphics.TranslateTransform(p.X, p.Y);
-                        map.Graphics.DrawEllipse(penShadowOutline, -szP / 2, -szP / 2, szP, szP);
-                        map.Graphics.DrawEllipse(penShadowOutline, -szU / 2, -szU / 2, szU, szU);
+                        map.Graphics.DrawEllipse(pen, -szP / 2, -szP / 2, szP, szP);
+                        map.Graphics.DrawEllipse(pen, -szU / 2, -szU / 2, szU, szU);
                         map.Graphics.ResetTransform();
                         if (map.ViewAngle <= 10)
                         {
-                            map.DrawObjectCaption(fontShadowLabel, brushShadowLabel, Text.Get("EarthShadow.Label"), p, szP);
+                            map.DrawObjectCaption(fontShadowLabel, brush, Text.Get("EarthShadow.Label"), p, szP);
                         }
                     }
                 }
@@ -836,7 +845,7 @@ namespace Planetarium.Plugins.SolarSystem
             {
                 LatitudeShift = token.Latitude,
                 LongutudeShift = 180 - token.Longitude,
-                OutputImageSize = 1024,
+                OutputImageSize = 1014,
                 TextureFilePath = "Data\\Moon.jpg"
             });
         }

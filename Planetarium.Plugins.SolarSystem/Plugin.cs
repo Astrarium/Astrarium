@@ -23,6 +23,11 @@ namespace Planetarium.Plugins.SolarSystem
             AddSetting(new SettingItem("JupiterMoonsShadowOutline", true, "Planets", s => s.Get<bool>("Planets")));
             AddSetting(new SettingItem("ShowRotationAxis", true, "Planets", s => s.Get<bool>("Planets")));
 
+            AddSetting(new SettingItem("Moon", true, "Moon"));
+            AddSetting(new SettingItem("MoonLabel", true, "Moon", s => s.Get<bool>("Moon")));
+            AddSetting(new SettingItem("MoonTexture", true, "Moon", s => s.Get<bool>("Moon")));
+            AddSetting(new SettingItem("EarthShadowOutline", false, "Moon"));
+
             AddSetting(new SettingItem("GRSLongitude", new GreatRedSpotSettings()
             {
                 Epoch = 2458150.5000179596,
