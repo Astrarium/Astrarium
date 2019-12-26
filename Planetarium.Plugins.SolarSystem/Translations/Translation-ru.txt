@@ -212,6 +212,27 @@ MoonEvents.ConjWithPlanets.Conj.North = северу
 MoonEvents.ConjWithPlanets.Conj.South = югу
 MoonEvents.ConjWithPlanets.Conj		= Луна (Φ={moonPhase}) проходит в {angularDistance} к {direction} от {planetName} ({planetMagnitude})
 
+SunEvents							= Солнце
+SunEvents.Seasons					= Времена года
+SunEvents.Seasons.Spring			= Весеннее равноденствие
+SunEvents.Seasons.Summer			= Летнее солнцестояние
+SunEvents.Seasons.Autumn			= Осеннее равноденствие
+SunEvents.Seasons.Winter			= Зимнее солнцестояние
+
+PlanetEvents						= Планеты
+PlanetEvents.ConjunctionsInRightAscension	= Взаимные соединения по прямому восхождению
+PlanetEvents.ConjunctionsInEclipticalLongitude	= Взаимные соединения по долготе
+PlanetEvents.CloseApproaches		= Взаимные сближения
+PlanetEvents.MaximalMagnitude		= Максимумы блеска
+PlanetEvents.Stationaries			= Стояния
+PlanetEvents.GreatestElongations	= Наибольшие элонгации (для внутренних планет)
+PlanetEvents.Oppositions			= Противостояния (для внешних планет)
+PlanetEvents.Conjunctions			= Соединения с Солнцем
+PlanetEvents.VisibilityPeriods		= Условия видимости
+
+PlanetEvents.ConjunctionsInRightAscension.Conj	= {planetName1} ({planetMagnitude1}) проходит в {angularDistance} к {direction} от {planetName2} ({planetMagnitude2})
+PlanetEvents.ConjunctionsInRightAscension.Conj.North = северу
+PlanetEvents.ConjunctionsInRightAscension.Conj.South = югу
 # Settings
 Settings.Sun						= Солнце
 Settings.SunLabel					= Отображать название Солнца

@@ -1,5 +1,6 @@
 ﻿using ADK;
 using Planetarium.Types;
+using Planetarium.Types.Localization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace Planetarium.Calculators
     {
         public override void ConfigureAstroEvents(AstroEventsConfig phenomena)
         {
-            phenomena["Seasons"] = EventsSeasons;
+            phenomena["SunEvents.Seasons"] = EventsSeasons;
         }
 
         public ICollection<AstroEvent> EventsSeasons(AstroEventsContext context)
@@ -21,10 +22,10 @@ namespace Planetarium.Calculators
 
             for (double jd = context.From; jd < context.To; jd += 365)
             {
-                events.Add(new AstroEvent(SolarEphem.Season(jd, Season.Spring), "Vernal Equinox"));
-                events.Add(new AstroEvent(SolarEphem.Season(jd, Season.Summer), "Summer Solstice"));
-                events.Add(new AstroEvent(SolarEphem.Season(jd, Season.Autumn), "Autumnal Equinox"));
-                events.Add(new AstroEvent(SolarEphem.Season(jd, Season.Winter), "Winter Solstice"));
+                events.Add(new AstroEvent(SolarEphem.Season(jd, Season.Spring), Text.Get("SunEvents.Seasons.Spring")));
+                events.Add(new AstroEvent(SolarEphem.Season(jd, Season.Summer), Text.Get("SunEvents.Seasons.Summer")));
+                events.Add(new AstroEvent(SolarEphem.Season(jd, Season.Autumn), Text.Get("SunEvents.Seasons.Autumn")));
+                events.Add(new AstroEvent(SolarEphem.Season(jd, Season.Winter), Text.Get("SunEvents.Seasons.Winter")));
             }
 
             return events;

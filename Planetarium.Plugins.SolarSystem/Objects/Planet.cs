@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Planetarium.Objects
 {
-    public class Planet : SizeableCelestialObject, IMovingObject
+    public class Planet : SolarSystemObject, IMovingObject
     {
         public Planet(int number)
         {
@@ -34,11 +34,6 @@ namespace Planetarium.Objects
         /// Apparent topocentrical equatorial coordinates
         /// </summary>
         public CrdsEquatorial Equatorial { get; set; }
-
-        /// <summary>
-        /// Ecliptical corrdinates
-        /// </summary>
-        public CrdsEcliptical Ecliptical { get; set; }
 
         /// <summary>
         /// Planet flattening. 0 means ideal sphere.

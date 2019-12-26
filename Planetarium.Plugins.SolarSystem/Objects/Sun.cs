@@ -8,17 +8,12 @@ using System.Threading.Tasks;
 
 namespace Planetarium.Objects
 {
-    public class Sun : SizeableCelestialObject, IMovingObject
+    public class Sun : SolarSystemObject, IMovingObject
     {
         /// <summary>
         /// Apparent topocentrical equatorial coordinates
         /// </summary>
         public CrdsEquatorial Equatorial { get; set; }
-
-        /// <summary>
-        /// Ecliptical coordinates
-        /// </summary>
-        public CrdsEcliptical Ecliptical { get; set; }
 
         /// <summary>
         /// Average daily motion of the Sun

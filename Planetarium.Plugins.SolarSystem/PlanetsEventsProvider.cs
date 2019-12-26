@@ -1,5 +1,6 @@
 ﻿using ADK;
 using Planetarium.Types;
+using Planetarium.Types.Localization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,24 +22,30 @@ namespace Planetarium.Plugins.SolarSystem
 
         public override void ConfigureAstroEvents(AstroEventsConfig c)
         {
-            c["Planets.ConjunctionsInRightAscension"] = ConjunctionsInRightAscension;
-            c["Planets.ConjunctionsInEclipticalLongitude"] = ConjunctionsInEclipticalLongitude;
-            c["Planets.MaximalMagnitude"] = MaximalMagnitude;
-            c["Planets.CloseApproaches"] = CloseApproaches;
-            c["Planets.Stationaries"] = Stationaries;
-            c["Planets.GreatestElongations"] = GreatestElongations;
-            c["Planets.Oppositions"] = Oppositions;
-            c["Planets.Conjunctions"] = Conjunctions;
-            c["Planets.VisibilityPeriods"] = VisibilityPeriods;
+            c["PlanetEvents.ConjunctionsInRightAscension"] = ConjunctionsInRightAscension;
+            c["PlanetEvents.ConjunctionsInEclipticalLongitude"] = ConjunctionsInEclipticalLongitude;
+            c["PlanetEvents.CloseApproaches"] = CloseApproaches;
+            c["PlanetEvents.MaximalMagnitude"] = MaximalMagnitude;
+            c["PlanetEvents.Stationaries"] = Stationaries;
+            c["PlanetEvents.GreatestElongations"] = GreatestElongations;
+            c["PlanetEvents.Oppositions"] = Oppositions;
+            c["PlanetEvents.Conjunctions"] = Conjunctions;
+            c["PlanetEvents.VisibilityPeriods"] = VisibilityPeriods;
         }
 
         private ICollection<AstroEvent> ConjunctionsInRightAscension(AstroEventsContext context)
         {
             return
-                MutualConjunctions(context, 
-                    d => d.Equatorial.Alpha, 
+                MutualConjunctions(context,
+                    d => d.Equatorial.Alpha,
                     d => d.Equatorial.Delta)
-                .Select(c => new AstroEvent(c.JulianDay, $"{c.Planet1} ({c.Magnitude1}) passes {c.AngularDistance} {c.Direction} to {c.Planet2} ({c.Magnitude2})"))
+                .Select(c => new AstroEvent(c.JulianDay, Text.Get("PlanetEvents.ConjunctionsInRightAscension.Conj", 
+                    ("planetName1", c.Planet1), 
+                    ("planetMagnitude1", c.Magnitude1), 
+                    ("angularDistance", c.AngularDistance), 
+                    ("direction", Text.Get($"PlanetEvents.ConjunctionsInRightAscension.Conj.{c.Direction}")), 
+                    ("planetName2", c.Planet2), 
+                    ("planetMagnitude2", c.Magnitude2))))
                 .ToArray();
         }
 
@@ -129,7 +136,7 @@ namespace Planetarium.Plugins.SolarSystem
                                 conj.Planet2 = planetsCalc.GetPlanetName(p2);
 
                                 // passage direction
-                                conj.Direction = latitude(data.ElementAt(day + 2)[p1]) > latitude(data.ElementAt(day + 2)[p2]) ? "north" : "south";
+                                conj.Direction = latitude(data.ElementAt(day + 2)[p1]) < latitude(data.ElementAt(day + 2)[p2]) ? "North" : "South";
 
                                 // find the angular distance at the "zero point"
                                 conj.AngularDistance = Formatters.ConjunctionSeparation.Format(Math.Abs(Interpolation.Lagrange(t, d, t0)));

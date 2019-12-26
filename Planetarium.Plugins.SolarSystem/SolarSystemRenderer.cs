@@ -75,29 +75,19 @@ namespace Planetarium.Plugins.SolarSystem
         {
             brushLabel = new SolidBrush(map.GetColor("ColorSolarSystemLabel"));
 
-            // Flag indicated Sun is already rendered
-            bool isSunRendered = false;
-
-            // Get all planets except Earth, and sort them by distance from Earth (most distant planet is first)
-            var planets = planetsCalc.Planets
+            var bodies = planetsCalc.Planets
                 .Where(p => p.Number != Planet.EARTH)
-                .OrderByDescending(p => p.Ecliptical.Distance);
+                .Cast<SolarSystemObject>()
+                .Concat(new[] { sun })
+                .OrderByDescending(body => body.Ecliptical.Distance)
+                .ToArray();
 
-            foreach (Planet p in planets)
+            foreach (var body in bodies)
             {
-                if (!isSunRendered && p.Ecliptical.Distance < sun.Ecliptical.Distance)
-                {
-                    RenderSun(map);
-                    isSunRendered = true;
-                }
-
-                RenderPlanet(map, p);
-
-                if (!isSunRendered)
-                {
-                    RenderSun(map);
-                    isSunRendered = true;
-                }
+                if (body is Planet planet)
+                    RenderPlanet(map, planet);
+                else
+                    RenderSun(map);                
             }
 
             RenderMoon(map);
