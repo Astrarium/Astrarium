@@ -44,11 +44,6 @@ namespace Planetarium.Plugins.SolarSystem
             planets[Planet.SATURN - 1].Flattening = 0.097962f;
         }
 
-        public string GetPlanetName(int number)
-        {
-            return planets[number - 1].Name;
-        }
-
         /// <summary>
         /// Get heliocentrical coordinates of Earth
         /// </summary>

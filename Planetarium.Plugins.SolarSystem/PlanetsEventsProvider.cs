@@ -39,12 +39,15 @@ namespace Planetarium.Plugins.SolarSystem
                 MutualConjunctions(context,
                     d => d.Equatorial.Alpha,
                     d => d.Equatorial.Delta)
-                .Select(c => new AstroEvent(c.JulianDay, Text.Get("PlanetEvents.ConjunctionsInRightAscension.Conj", 
-                    ("planetName1", c.Planet1), 
+                .Select(c => new AstroEvent(c.JulianDay, 
+                    Text.Get("PlanetEvents.ConjunctionsInRightAscension.Text", 
+                    ("planetName1", GetPlanetName(c.Planet1)),
+                    ("planetGenitiveName1", GetPlanetGenitiveName(c.Planet1)),
                     ("planetMagnitude1", c.Magnitude1), 
                     ("angularDistance", c.AngularDistance), 
-                    ("direction", Text.Get($"PlanetEvents.ConjunctionsInRightAscension.Conj.{c.Direction}")), 
-                    ("planetName2", c.Planet2), 
+                    ("direction", Text.Get($"PlanetEvents.ConjunctionsInRightAscension.Text.{c.Direction}")), 
+                    ("planetName2", GetPlanetName(c.Planet2)),
+                    ("planetGenitiveName2", GetPlanetGenitiveName(c.Planet2)),
                     ("planetMagnitude2", c.Magnitude2))))
                 .ToArray();
         }
@@ -54,7 +57,16 @@ namespace Planetarium.Plugins.SolarSystem
             return MutualConjunctions(context, 
                     d => d.Ecliptical.Lambda, 
                     d => d.Ecliptical.Beta)
-                .Select(c => new AstroEvent(c.JulianDay, $"{c.Planet1} ({c.Magnitude1}) in conjunction ({c.AngularDistance} {c.Direction}) with {c.Planet2} ({c.Magnitude2})"))
+                .Select(c => new AstroEvent(c.JulianDay,
+                    Text.Get("PlanetEvents.ConjunctionsInEclipticalLongitude.Text",
+                    ("planetName1", GetPlanetName(c.Planet1)),
+                    ("planetGenitiveName1", GetPlanetGenitiveName(c.Planet1)),
+                    ("planetMagnitude1", c.Magnitude1),
+                    ("angularDistance", c.AngularDistance),
+                    ("direction", Text.Get($"PlanetEvents.ConjunctionsInEclipticalLongitude.Text.{c.Direction}")),
+                    ("planetName2", GetPlanetName(c.Planet2)),
+                    ("planetGenitiveName2", GetPlanetGenitiveName(c.Planet2)),
+                    ("planetMagnitude2", c.Magnitude2))))
                 .ToArray();
         }
 
@@ -132,8 +144,8 @@ namespace Planetarium.Plugins.SolarSystem
                                 conj.JulianDay = jd - 2 + t0;
 
                                 // planet names
-                                conj.Planet1 = planetsCalc.GetPlanetName(p1);
-                                conj.Planet2 = planetsCalc.GetPlanetName(p2);
+                                conj.Planet1 = p1;
+                                conj.Planet2 = p2;
 
                                 // passage direction
                                 conj.Direction = latitude(data.ElementAt(day + 2)[p1]) < latitude(data.ElementAt(day + 2)[p2]) ? "North" : "South";
@@ -200,10 +212,6 @@ namespace Planetarium.Plugins.SolarSystem
                             {
                                 Interpolation.FindMinimum(t, ad, 1e-6, out double t0, out double ad0);
 
-                                // planet names
-                                string name1 = planetsCalc.GetPlanetName(p1);
-                                string name2 = planetsCalc.GetPlanetName(p2);
-
                                 // find the exact value of angular distance at extremum point
                                 var ctx = new SkyContext(jd - 2 + t0, context.GeoLocation, true);
                                 ad0 = Angle.Separation(ctx.Get(planetsCalc.Ecliptical, p1), ctx.Get(planetsCalc.Ecliptical, p2));
@@ -215,7 +223,15 @@ namespace Planetarium.Plugins.SolarSystem
                                 // magnitude of the second planet
                                 string mag2 = Formatters.Magnitude.Format(data.ElementAt(day + 2)[p2].Magnitude);
 
-                                events.Add(new AstroEvent(jd - 2 + t0, $"{name1} ({mag1}) has minimum angular separation ({dist}) with {name2} ({mag2})"));
+                                events.Add(new AstroEvent(jd - 2 + t0,
+                                    Text.Get("PlanetEvents.CloseApproaches.Text",
+                                    ("planetName1", GetPlanetName(p1)),
+                                    ("planetGenitiveName1", GetPlanetGenitiveName(p1)),
+                                    ("planetMagnitude1", mag1),
+                                    ("angularDistance", dist),
+                                    ("planetName2", GetPlanetName(p2)),
+                                    ("planetGenitiveName2", GetPlanetGenitiveName(p2)),
+                                    ("planetMagnitude2", mag2))));
                             }
                         }
                     }
@@ -272,9 +288,12 @@ namespace Planetarium.Plugins.SolarSystem
                                 Interpolation.FindMinimum(t, m, 1e-6, out double t0, out double m0);
 
                                 string mag = Formatters.Magnitude.Format(m0);
-                                string name = planetsCalc.GetPlanetName(p);
+                                string name = GetPlanetName(p);
 
-                                events.Add(new AstroEvent(jd - 2 + t0, $"{name} has maximal brightness ({mag})"));
+                                events.Add(new AstroEvent(jd - 2 + t0,
+                                    Text.Get("PlanetEvents.MaximalMagnitude.Text",
+                                        ("planetName", name),
+                                        ("planetMagnitude", mag))));
                             }
                         }
                     }
@@ -328,15 +347,19 @@ namespace Planetarium.Plugins.SolarSystem
                         {
                             Interpolation.FindMinimum(t, lon, 1e-6, out double t0, out double lon0);
 
-                            string name = planetsCalc.GetPlanetName(p);
-                            events.Add(new AstroEvent(jd - 2 + t0, $"Stationary of {name}. Planet gets apparent prograde motion."));
+                            events.Add(new AstroEvent(jd - 2 + t0,
+                                Text.Get("PlanetEvents.Stationaries.ProgradeText",
+                                    ("planetName", GetPlanetName(p)),
+                                    ("planetGenitiveName", GetPlanetGenitiveName(p)))));
                         }
                         else if (lon[1] < lon[2] && lon[2] > lon[3])
                         {
                             Interpolation.FindMaximum(t, lon, 1e-6, out double t0, out double lon0);
 
-                            string name = planetsCalc.GetPlanetName(p);
-                            events.Add(new AstroEvent(jd - 2 + t0, $"Stationary of {name}. Planet gets apparent retrograde motion."));
+                            events.Add(new AstroEvent(jd - 2 + t0,
+                                Text.Get("PlanetEvents.Stationaries.RetrogradeText",
+                                    ("planetName", GetPlanetName(p)),
+                                    ("planetGenitiveName", GetPlanetGenitiveName(p)))));
                         }
                     }
                 }
@@ -383,10 +406,15 @@ namespace Planetarium.Plugins.SolarSystem
                     {
                         Interpolation.FindMaximum(t, el, 1e-6, out double t0, out double el0);
 
-                        string name = planetsCalc.GetPlanetName(p);
-                        string direction = data.ElementAt(day + 2)[p].Elongation > 0 ? "eastern" : "western";
+                        string direction = data.ElementAt(day + 2)[p].Elongation > 0 ? "East" : "West";
                         string elongation = Formatters.ConjunctionSeparation.Format(el0);
-                        events.Add(new AstroEvent(jd - 2 + t0, $"{name} in greatest {direction} elongation ({elongation})"));
+                        events.Add(new AstroEvent(jd - 2 + t0,
+                            Text.Get("PlanetEvents.GreatestElongations.Text",
+                                ("planetName", GetPlanetName(p)),
+                                ("planetGenitiveName", GetPlanetGenitiveName(p)),
+                                ("direction", Text.Get($"PlanetEvents.GreatestElongations.{direction}")),
+                                ("elongation", elongation))
+                            ));
                     }                   
                 }
 
@@ -431,8 +459,11 @@ namespace Planetarium.Plugins.SolarSystem
                     if (diff[2] > 170 && diff[1] < diff[2] && diff[2] > diff[3])
                     {
                         Interpolation.FindMaximum(t, diff, 1e-6, out double t0, out double diff0);
-                        string name = planetsCalc.GetPlanetName(p);
-                        events.Add(new AstroEvent(jd - 2 + t0, $"{name} at opposition"));
+       
+                        events.Add(new AstroEvent(jd - 2 + t0,
+                            Text.Get("PlanetEvents.Oppositions.Text",
+                                ("planetName", GetPlanetName(p)),
+                                ("planetGenitiveName", GetPlanetGenitiveName(p)))));
                     }
                 }
 
@@ -479,31 +510,35 @@ namespace Planetarium.Plugins.SolarSystem
                         if (Math.Abs(diff[2]) < 5 && diff[2] * diff[3] <= 0)
                         {
                             Interpolation.FindRoot(t, diff, 1e-6, out double t0);
-                            string name = planetsCalc.GetPlanetName(p);
+                            double jdConj = jd - 2 + t0;
+                            string text;
 
                             if (p < 3)
-                            {
-                                double jdConj = jd - 2 + t0;
-
-                                string conjType = data.ElementAt(day + 2)[p].Ecliptical.Distance < 1 ? "inferior" : "superior";
+                            {                                
+                                string conjType = data.ElementAt(day + 2)[p].Ecliptical.Distance < 1 ? 
+                                    "Inferior" : "Superior";
                                 
                                 var ctx = new SkyContext(jdConj, context.GeoLocation, false);
                                 double sd = solarCalc.Semidiameter(ctx) / 3600;
                                 double ad = Math.Abs(planetsCalc.Elongation(ctx, p));
 
-                                string text = $"{name} at {conjType} conjunction with Sun.";
+                                text = Text.Get($"PlanetEvents.Conjunctions.{conjType}", 
+                                    ("planetName", GetPlanetName(p)),
+                                    ("planetGenitiveName", GetPlanetGenitiveName(p)));
 
                                 if (ad < sd)
                                 {
-                                    text += $" Transit across the Sun's disk.";
+                                    text = $"{text}{Text.Get("PlanetEvents.Conjunctions.Transit")}";
                                 }
-
-                                events.Add(new AstroEvent(jdConj, text));
                             }
                             else
                             {
-                                events.Add(new AstroEvent(jd - 2 + t0, $"{name} at conjunction with Sun."));
+                                text = Text.Get($"PlanetEvents.Conjunctions.Text",
+                                    ("planetName", GetPlanetName(p)),
+                                    ("planetGenitiveName", GetPlanetGenitiveName(p)));
                             }
+
+                            events.Add(new AstroEvent(jdConj, text));
                         }
                     }
                 }
@@ -538,23 +573,33 @@ namespace Planetarium.Plugins.SolarSystem
 
                         if (vis.Period != prev.Period)
                         {
-                            string name = planetsCalc.GetPlanetName(p);
+                            string text = null;
+                           
                             if (vis.Period == VisibilityPeriod.Invisible)
                             {
-                                events.Add(new AstroEvent(jd, $"{name}: end of visibility.", noExactTime: true));
+                                text = "PlanetEvents.VisibilityPeriods.End";
                             }
 
                             if ((vis.Period & VisibilityPeriod.Morning) != 0)
                             {
-                                events.Add(new AstroEvent(jd, $"{name}: begin of morning visibility.", noExactTime: true));
+                                text = "PlanetEvents.VisibilityPeriods.BeginMorning";
                             }
                             else if ((vis.Period & VisibilityPeriod.Evening) != 0)
                             {
-                                events.Add(new AstroEvent(jd, $"{name}: begin of evening visibility.", noExactTime: true));
+                                text = "PlanetEvents.VisibilityPeriods.BeginEvening";
                             }
                             else if ((vis.Period & VisibilityPeriod.Night) != 0)
                             {
-                                events.Add(new AstroEvent(jd, $"{name}: begin of night visibility.", noExactTime: true));
+                                text = "PlanetEvents.VisibilityPeriods.BeginNight";
+                            }
+
+                            if (text != null)
+                            {
+                                events.Add(new AstroEvent(jd, 
+                                    Text.Get(text,
+                                        ("planetName", GetPlanetName(p)),
+                                        ("planetGenitiveName", GetPlanetGenitiveName(p))
+                                ), noExactTime: true));
                             }
                         }
                     }
@@ -606,6 +651,16 @@ namespace Planetarium.Plugins.SolarSystem
             return results;
         }
 
+        private string GetPlanetName(int planetNumber)
+        {
+            return Text.Get($"Planet.{planetNumber}.Name");
+        }
+
+        private string GetPlanetGenitiveName(int planetNumber)
+        {
+            return Text.Get($"Planet.{planetNumber}.GenitiveName");
+        }
+
         private class PlanetData
         {
             /// <summary>
@@ -642,8 +697,8 @@ namespace Planetarium.Plugins.SolarSystem
         private class Conjunction
         {
             public double JulianDay { get; set; }
-            public string Planet1 { get; set; }
-            public string Planet2 { get; set; }
+            public int Planet1 { get; set; }
+            public int Planet2 { get; set; }
             public string Magnitude1 { get; set; }
             public string Magnitude2 { get; set; }
             public string Direction { get; set; }
