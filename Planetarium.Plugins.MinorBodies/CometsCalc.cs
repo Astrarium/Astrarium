@@ -98,6 +98,19 @@ namespace Planetarium.Plugins.MinorBodies
             return eq.ToHorizontal(ctx.GeoLocation, ctx.SiderealTime);
         }
 
+        /// <summary>
+        /// Calculates visible length of comet tail, in degrees of arc
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <param name="c"></param>
+        /// <returns></returns>
+        internal double TailVisibleLength(SkyContext ctx, Comet c)
+        {
+            var eqComet = ctx.Get(EquatorialT, c);
+            var eqTail = ctx.Get(TailEquatorial, c);
+            return Angle.Separation(eqComet, eqTail);
+        }
+
         public void ConfigureEphemeris(EphemerisConfig<Comet> e)
         {
             e["Constellation"] = (c, p) => Constellations.FindConstellation(c.Get(EquatorialT, p), c.JulianDay);
