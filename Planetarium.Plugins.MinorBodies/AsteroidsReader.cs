@@ -18,10 +18,11 @@ namespace Planetarium.Plugins.MinorBodies
         /// </summary>
         /// <param name="orbitalElementsFile">Full path to the file with orbital elements.</param>
         /// <returns>Collection of <see cref="Asteroid"/> items.</returns>
-        public ICollection<Asteroid> Read(string orbitalElementsFile, string sizesFile)
+        public ICollection<Asteroid> Read(string orbitalElementsFile, string sizesFile, string brightnessFile)
         {
             List<Asteroid> asteroids = new List<Asteroid>();
             var sizes = new Dictionary<int, float>();
+            var brightness = new Dictionary<int, float?>();
 
             string line = "";
 
@@ -32,6 +33,16 @@ namespace Planetarium.Plugins.MinorBodies
                     line = sr.ReadLine();
                     string[] chunks = line.Split(',');
                     sizes.Add(int.Parse(chunks[0].Trim()), float.Parse(chunks[1].Trim(), CultureInfo.InvariantCulture));
+                }
+            }
+
+            using (var sr = new StreamReader(brightnessFile, Encoding.Default))
+            {
+                while (line != null && !sr.EndOfStream)
+                {
+                    line = sr.ReadLine();
+                    string[] chunks = line.Split(',');
+                    brightness.Add(int.Parse(chunks[0].Trim()), float.Parse(chunks[1].Trim(), CultureInfo.InvariantCulture));
                 }
             }
 
@@ -57,7 +68,8 @@ namespace Planetarium.Plugins.MinorBodies
                         },
                         AverageDailyMotion = Read<double>(line, 81, 91),
                         Name = Read<string>(line, 167, 194),
-                        PhysicalDiameter = sizes.ContainsKey(number) ? sizes[number] : 0
+                        PhysicalDiameter = sizes.ContainsKey(number) ? sizes[number] : 0,
+                        MaxBrightness = brightness.ContainsKey(number) ? brightness[number] : null
                     });
                 }
             }

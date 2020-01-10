@@ -16,6 +16,8 @@ namespace Planetarium.Plugins.MinorBodies
     {
         private readonly string ORBITAL_ELEMENTS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Asteroids.dat");
         private readonly string SIZES_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/AsteroidsSizes.dat");
+        private readonly string BRIGHTNESS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/AsteroidsBright.dat");
+
         private readonly Regex asteroidNameRegex = new Regex("\\((\\d+)\\)\\s*(\\w+)");
         private readonly AsteroidsReader reader = new AsteroidsReader();
         private readonly List<Asteroid> asteroids = new List<Asteroid>();
@@ -24,7 +26,7 @@ namespace Planetarium.Plugins.MinorBodies
 
         public override void Initialize()
         {
-            asteroids.AddRange(reader.Read(ORBITAL_ELEMENTS_FILE, SIZES_FILE));
+            asteroids.AddRange(reader.Read(ORBITAL_ELEMENTS_FILE, SIZES_FILE, BRIGHTNESS_FILE));
         }
 
         public override void Calculate(SkyContext c)
@@ -42,7 +44,7 @@ namespace Planetarium.Plugins.MinorBodies
             return a.Orbit;
         }
 
-        private float Magnitude(SkyContext c, Asteroid a)
+        public float Magnitude(SkyContext c, Asteroid a)
         {
             double delta = c.Get(DistanceFromEarth, a);
             double r = c.Get(DistanceFromSun, a);

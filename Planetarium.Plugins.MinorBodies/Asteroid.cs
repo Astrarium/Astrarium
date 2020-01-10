@@ -40,7 +40,14 @@ namespace Planetarium.Plugins.MinorBodies
         /// </summary>
         public float PhysicalDiameter { get; set; }
 
-        // Average daily motion of asteroid
+        /// <summary>
+        /// Maximal possible brightness (visual magnitude)
+        /// </summary>
+        public float? MaxBrightness { get; set; }
+
+        /// <summary>
+        /// Average daily motion of asteroid
+        /// </summary>
         public double AverageDailyMotion { get; set; }
 
         /// <summary>

@@ -35,6 +35,12 @@
     <None Update="Data\Asteroids.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Data\AsteroidsBright.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\AsteroidsBrightest.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\AsteroidsSizes.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
