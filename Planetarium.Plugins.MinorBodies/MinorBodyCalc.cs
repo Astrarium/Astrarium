@@ -30,7 +30,7 @@ namespace Planetarium.Plugins.MinorBodies
         /// <summary>
         /// Gets rectangular heliocentric coordinates of minor body
         /// </summary>
-        protected CrdsRectangular Rectangular(SkyContext c, T body)
+        protected CrdsRectangular RectangularH(SkyContext c, T body)
         {
             // final difference to stop iteration process, 1 second of time
             double deltaTau = TimeSpan.FromSeconds(1).TotalDays;
@@ -72,22 +72,37 @@ namespace Planetarium.Plugins.MinorBodies
             return rect;
         }
 
-        protected double DistanceFromEarth(SkyContext c, T body)
+        /// <summary>
+        /// Gets rectangular geocentric coordinates of minor body
+        /// </summary>
+        public CrdsRectangular RectangularG(SkyContext c, T body)
         {
-            var rBody = c.Get(Rectangular, body);
+            var rBody = c.Get(RectangularH, body);
             var rSun = c.Get(SunRectangular);
 
             double x = rSun.X + rBody.X;
             double y = rSun.Y + rBody.Y;
             double z = rSun.Z + rBody.Z;
 
-            return Math.Sqrt(x * x + y * y + z * z);
+            return new CrdsRectangular(x, y, z);
+        }
+
+        protected double DistanceFromEarth(SkyContext c, T body)
+        {
+            var r = c.Get(RectangularG, body);
+            return Math.Sqrt(r.X * r.X + r.Y * r.Y + r.Z * r.Z);
         }
 
         public double DistanceFromSun(SkyContext c, T body)
         {
-            var r = c.Get(Rectangular, body);
+            var r = c.Get(RectangularH, body);
             return Math.Sqrt(r.X * r.X + r.Y * r.Y + r.Z * r.Z);
+        }
+
+        public CrdsEcliptical Ecliptical(SkyContext c, T body)
+        {             
+            var r = c.Get(RectangularG, body);
+            return r.ToEcliptical();
         }
 
         /// <summary>
@@ -111,7 +126,7 @@ namespace Planetarium.Plugins.MinorBodies
         protected CrdsEquatorial EquatorialJ2000(SkyContext c, T body)
         {
             var Delta = c.Get(DistanceFromEarth, body);
-            var rBody = c.Get(Rectangular, body);
+            var rBody = c.Get(RectangularH, body);
             var rSun = c.Get(SunRectangular);
 
             double x = rSun.X + rBody.X;
@@ -179,6 +194,15 @@ namespace Planetarium.Plugins.MinorBodies
         /// </summary>
         protected CrdsRectangular SunRectangular(SkyContext c)
         {
+            var eSun = c.Get(SunEcliptical);
+            return eSun.ToRectangular(c.Epsilon);
+        }
+
+        /// <summary>
+        /// Gets ecliptical coordinates of Sun for J2000.0 epoch
+        /// </summary>
+        private CrdsEcliptical SunEcliptical(SkyContext c)
+        {
             CrdsHeliocentrical hEarth = PlanetPositions.GetPlanetCoordinates(3, c.JulianDay, !c.PreferFastCalculation, false);
 
             var eSun = new CrdsEcliptical(Angle.To360(hEarth.L + 180), -hEarth.B, hEarth.R);
@@ -187,7 +211,15 @@ namespace Planetarium.Plugins.MinorBodies
             // NO correction for nutation and aberration should be performed here (ch. 26, p. 171)
             eSun += PlanetPositions.CorrectionForFK5(c.JulianDay, eSun);
 
-            return eSun.ToRectangular(c.Epsilon);
+            return eSun;
+        }
+
+        /// <summary>
+        /// Gets difference between ecliptical longitudes of the Sun and minor body
+        /// </summary>
+        public double LongitudeDifference(SkyContext c, T body)
+        {
+            return BasicEphem.LongitudeDifference(c.Get(SunEcliptical).Lambda, c.Get(Ecliptical, body).Lambda);
         }
 
         protected double EarthDistanceFromSun(SkyContext c)

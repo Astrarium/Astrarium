@@ -60,7 +60,7 @@ namespace Planetarium.Plugins.MinorBodies
         /// </summary>
         private CrdsEquatorial TailEquatorial(SkyContext ctx, Comet c)
         {
-            var rBody = ctx.Get(Rectangular, c);
+            var rBody = ctx.Get(RectangularH, c);
             var rSun = ctx.Get(SunRectangular);
 
             // distance from Sun
@@ -130,6 +130,8 @@ namespace Planetarium.Plugins.MinorBodies
             e["Equatorial0T.Delta", Formatters.Dec] = (c, p) => c.Get(EquatorialJ2000T, p).Delta;
             e["EquatorialG.Alpha", Formatters.RA] = (c, p) => c.Get(EquatorialG, p).Alpha;
             e["EquatorialG.Delta", Formatters.Dec] = (c, p) => c.Get(EquatorialG, p).Delta;           
+            e["Ecliptical.Lambda"] = (c, p) => c.Get(Ecliptical, p).Lambda;
+            e["Ecliptical.Beta"] = (c, p) => c.Get(Ecliptical, p).Beta;
             e["RTS.Rise"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, p).Rise);
             e["RTS.Transit"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, p).Transit);
             e["RTS.Set"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, p).Set);
@@ -163,6 +165,10 @@ namespace Planetarium.Plugins.MinorBodies
             .AddHeader("Equatorial coordinates (J2000.0)")
             .AddRow("Equatorial0.Alpha")
             .AddRow("Equatorial0.Delta")
+
+            .AddHeader("Ecliptical coordinates")
+            .AddRow("Ecliptical.Lambda")
+            .AddRow("Ecliptical.Beta")
 
             .AddHeader("Visibility")
             .AddRow("RTS.Rise")

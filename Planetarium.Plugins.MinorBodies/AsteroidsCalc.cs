@@ -63,9 +63,11 @@ namespace Planetarium.Plugins.MinorBodies
             e["Horizontal.Altitude"] = (c, a) => c.Get(Horizontal, a).Altitude;
             e["Horizontal.Azimuth"] = (c, a) => c.Get(Horizontal, a).Azimuth;
             e["Equatorial.Alpha"] = (c, a) => c.Get(EquatorialT, a).Alpha;
-            e["Equatorial.Delta"] = (c, a) => c.Get(EquatorialT, a).Delta;
+            e["Equatorial.Delta"] = (c, a) => c.Get(EquatorialT, a).Delta;            
             e["Equatorial0.Alpha"] = (c, a) => c.Get(EquatorialG, a).Alpha;
             e["Equatorial0.Delta"] = (c, a) => c.Get(EquatorialG, a).Delta;
+            e["Ecliptical.Lambda"] = (c, a) => c.Get(Ecliptical, a).Lambda;
+            e["Ecliptical.Beta"] = (c, a) => c.Get(Ecliptical, a).Beta;
             e["RTS.Rise"] = (c, a) => c.GetDateFromTime(c.Get(RiseTransitSet, a).Rise);
             e["RTS.Transit"] = (c, a) => c.GetDateFromTime(c.Get(RiseTransitSet, a).Transit);
             e["RTS.Set"] = (c, a) => c.GetDateFromTime(c.Get(RiseTransitSet, a).Set);
@@ -93,6 +95,10 @@ namespace Planetarium.Plugins.MinorBodies
             .AddHeader("Equatorial coordinates (geocentrical)")
             .AddRow("Equatorial0.Alpha")
             .AddRow("Equatorial0.Delta")
+
+            .AddHeader("Ecliptical coordinates ")
+            .AddRow("Ecliptical.Lambda")
+            .AddRow("Ecliptical.Beta")
 
             .AddHeader("Horizontal coordinates")
             .AddRow("Horizontal.Azimuth")
