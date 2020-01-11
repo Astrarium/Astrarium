@@ -1,0 +1,11 @@
+﻿# General
+Planetarium.Plugins.MinorBodies.AsteroidsRenderer.Name = Asteroids
+Planetarium.Plugins.MinorBodies.CometsRenderer.Name = Comets
+
+# Phenomena
+AsteroidsEvents										= Asteroids
+AsteroidsEvents.Oppositions							= Oppositions
+AsteroidsEvents.Opposition.Text						= Asteroid {AsteroidName} ({AsteroidMagnitude}) in opposition
+CometsEvents										= Comets
+CometsEvents.PerihelionPassages						= Perihelion passages
+CometsEvents.PerihelionPassage.Text					= Comet {CometName} passes perihelion

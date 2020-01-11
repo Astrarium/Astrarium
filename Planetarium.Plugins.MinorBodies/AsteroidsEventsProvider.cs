@@ -20,7 +20,7 @@ namespace Planetarium.Plugins.MinorBodies
 
         public override void ConfigureAstroEvents(AstroEventsConfig c)
         {
-            c["Asteroids.Oppositions"] = Oppositions;
+            c["AsteroidsEvents.Oppositions"] = Oppositions;
         }
 
         private ICollection<AstroEvent> Oppositions(AstroEventsContext context)
@@ -66,7 +66,12 @@ namespace Planetarium.Plugins.MinorBodies
                         // take events for asteroids that brighter than 10.0m
                         if (mag <= 10)
                         {
-                            events.Add(new AstroEvent(jdOpposition, $"Asteroid {a.Name} ({Formatters.Magnitude.Format(mag)}) in opposition"));
+                            events.Add(new AstroEvent(jdOpposition, 
+                                Text.Get("AsteroidsEvents.Opposition.Text", 
+                                    ("AsteroidName", a.Name), 
+                                    ("AsteroidMagnitude", Formatters.Magnitude.Format(mag)))
+                                )
+                            );
                         }
                     }
 
@@ -108,11 +113,6 @@ namespace Planetarium.Plugins.MinorBodies
             /// Julian Day
             /// </summary>
             public double JulianDay { get; set; }
-
-            /// <summary>
-            /// Magnitude
-            /// </summary>
-            public float Magnitude { get; set; }
 
             /// <summary>
             /// Asteroid 

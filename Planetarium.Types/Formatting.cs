@@ -385,7 +385,7 @@ namespace Planetarium.Types
         public static readonly IEphemFormatter Altitude1d = new SignedDoubleFormatter(1, "\u00B0");
         public static readonly IEphemFormatter Distance = new UnsignedDoubleFormatter(3, " a.u.");
         public static readonly IEphemFormatter Phase = new PhaseFormatter();
-        public static readonly IEphemFormatter Magnitude = new SignedDoubleFormatter(2, " m");
+        public static readonly IEphemFormatter Magnitude = new SignedDoubleFormatter(2, "ᵐ");
         public static readonly IEphemFormatter SurfaceBrightness = new SignedDoubleFormatter(2, " mag/sq.arcsec");
         public static readonly IEphemFormatter PhaseAngle = new UnsignedDoubleFormatter(2, "\u00B0");
         public static readonly IEphemFormatter Age = new UnsignedDoubleFormatter(2, " d");

@@ -20,7 +20,7 @@ namespace Planetarium.Plugins.MinorBodies
 
         public override void ConfigureAstroEvents(AstroEventsConfig c)
         {
-            c["Comets.PerihelionPassages"] = PerihelionPassages;
+            c["CometsEvents.PerihelionPassages"] = PerihelionPassages;
         }
 
         private ICollection<AstroEvent> PerihelionPassages(AstroEventsContext context)
@@ -29,7 +29,7 @@ namespace Planetarium.Plugins.MinorBodies
                 cometsCalc.Comets.Where(c =>
                     c.Orbit.Epoch >= context.From &&
                     c.Orbit.Epoch <= context.To)
-                    .Select(c => new AstroEvent(c.Orbit.Epoch, $"Comet {c.Names.First()} at perihelion"))
+                    .Select(c => new AstroEvent(c.Orbit.Epoch, Text.Get("CometsEvents.PerihelionPassage.Text", ("CometName", c.Name))))
                     .ToArray();
         }
     }

@@ -1,0 +1,11 @@
+﻿# General
+Planetarium.Plugins.MinorBodies.AsteroidsRenderer.Name = Астероиды
+Planetarium.Plugins.MinorBodies.CometsRenderer.Name = Кометы
+
+# Phenomena
+AsteroidsEvents										= Астероиды
+AsteroidsEvents.Oppositions							= Противостояния
+AsteroidsEvents.Opposition.Text						= Астероид {AsteroidName} ({AsteroidMagnitude}) в противостоянии
+CometsEvents										= Кометы
+CometsEvents.PerihelionPassages						= Прохождения перигелия
+CometsEvents.PerihelionPassage.Text					= Комета {CometName} проходит перигелий
