@@ -1,6 +1,7 @@
 ﻿using ADK;
 using Planetarium.Objects;
 using Planetarium.Types;
+using Planetarium.Types.Localization;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,10 +15,6 @@ namespace Planetarium.Plugins.MinorBodies
 {
     public class AsteroidsCalc : MinorBodyCalc<Asteroid>, ICelestialObjectCalc<Asteroid>
     {
-        private readonly string ORBITAL_ELEMENTS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Asteroids.dat");
-        private readonly string SIZES_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/AsteroidsSizes.dat");
-        private readonly string BRIGHTNESS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/AsteroidsBright.dat");
-
         private readonly Regex asteroidNameRegex = new Regex("\\((\\d+)\\)\\s*(\\w+)");
         private readonly AsteroidsReader reader = new AsteroidsReader();
         private readonly List<Asteroid> asteroids = new List<Asteroid>();
@@ -26,7 +23,7 @@ namespace Planetarium.Plugins.MinorBodies
 
         public override void Initialize()
         {
-            asteroids.AddRange(reader.Read(ORBITAL_ELEMENTS_FILE, SIZES_FILE, BRIGHTNESS_FILE));
+            asteroids.AddRange(reader.Read());
         }
 
         public override void Calculate(SkyContext c)
@@ -74,6 +71,10 @@ namespace Planetarium.Plugins.MinorBodies
             e["RTS.Transit"] = (c, a) => c.GetDateFromTime(c.Get(RiseTransitSet, a).Transit);
             e["RTS.Set"] = (c, a) => c.GetDateFromTime(c.Get(RiseTransitSet, a).Set);
             e["RTS.Duration"] = (c, a) => c.Get(RiseTransitSet, a).Duration;
+            e["Visibility.Begin"] = (c, a) => c.GetDateFromTime(c.Get(Visibility, a).Begin);
+            e["Visibility.End"] = (c, a) => c.GetDateFromTime(c.Get(Visibility, a).End);
+            e["Visibility.Duration"] = (c, a) => c.Get(Visibility, a).Duration;
+            e["Visibility.Period"] = (c, a) => c.Get(Visibility, a).Period;
             e["DistanceFromEarth"] = (c, a) => c.Get(DistanceFromEarth, a);
             e["DistanceFromSun"] = (c, a) => c.Get(DistanceFromSun, a);
             e["Phase"] = (c, a) => c.Get(Phase, a);
@@ -90,23 +91,23 @@ namespace Planetarium.Plugins.MinorBodies
             .SetSubtitle("Minor planet")
             .AddRow("Constellation")
 
-            .AddHeader("Equatorial coordinates (topocentrical)")
+            .AddHeader(Text.Get("Asteroid.Equatorial"))
             .AddRow("Equatorial.Alpha")
             .AddRow("Equatorial.Delta")
 
-            .AddHeader("Equatorial coordinates (geocentrical)")
+            .AddHeader(Text.Get("Asteroid.Equatorial0"))
             .AddRow("Equatorial0.Alpha")
             .AddRow("Equatorial0.Delta")
 
-            .AddHeader("Ecliptical coordinates ")
+            .AddHeader(Text.Get("Asteroid.Ecliptical"))
             .AddRow("Ecliptical.Lambda")
             .AddRow("Ecliptical.Beta")
 
-            .AddHeader("Horizontal coordinates")
+            .AddHeader(Text.Get("Asteroid.Horizontal"))
             .AddRow("Horizontal.Azimuth")
             .AddRow("Horizontal.Altitude")
 
-            .AddHeader("Appearance")
+            .AddHeader(Text.Get("Asteroid.Appearance"))
             .AddRow("Phase")
             .AddRow("PhaseAngle")
             .AddRow("Magnitude")
@@ -120,11 +121,18 @@ namespace Planetarium.Plugins.MinorBodies
             }
 
             info
-            .AddHeader("Visibility")
+            .AddHeader(Text.Get("Asteroid.RTS"))
             .AddRow("RTS.Rise")
             .AddRow("RTS.Transit")
             .AddRow("RTS.Set")
             .AddRow("RTS.Duration");
+
+            info
+            .AddHeader(Text.Get("Asteroid.Visibility"))
+            .AddRow("Visibility.Begin")
+            .AddRow("Visibility.End")
+            .AddRow("Visibility.Duration")
+            .AddRow("Visibility.Period");
         }
 
         public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)

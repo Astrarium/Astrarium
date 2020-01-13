@@ -2,6 +2,39 @@
 Planetarium.Plugins.MinorBodies.AsteroidsRenderer.Name = Asteroids
 Planetarium.Plugins.MinorBodies.CometsRenderer.Name = Comets
 
+# Ephemeris
+Asteroid.Constellation								= Constellation
+Asteroid.Equatorial0								= Equatorial geocentric coordinates
+Asteroid.Equatorial0.Alpha							= Right Ascension (α₀)
+Asteroid.Equatorial0.Delta							= Declination (δ₀)
+Asteroid.Equatorial									= Equatorial topocentric coordinates
+Asteroid.Equatorial.Alpha							= Right Ascension (α)
+Asteroid.Equatorial.Delta							= Declination (δ)
+Asteroid.Ecliptical									= Ecliptical coordinates
+Asteroid.Ecliptical.Lambda							= Ecliptical longitude (λ)
+Asteroid.Ecliptical.Beta							= Ecliptical latitude (β)
+Asteroid.Horizontal									= Horizontal topocentric coordinates
+Asteroid.Horizontal.Altitude						= Altitude (h)
+Asteroid.Horizontal.Azimuth							= Azimuth (A)
+Asteroid.RTS										= Visibility
+Asteroid.RTS.Rise									= Rise
+Asteroid.RTS.Transit								= Transit
+Asteroid.RTS.Set									= Set
+Asteroid.RTS.Duration								= Duration
+Asteroid.Visibility									= Observation conditions
+Asteroid.Visibility.Begin							= Begin
+Asteroid.Visibility.End								= End
+Asteroid.Visibility.Duration						= Duration
+Asteroid.Visibility.Period							= Period
+Asteroid.Appearance									= Appearance
+Asteroid.Magnitude									= Visual magnitude (m)
+Asteroid.Phase										= Phase (Φ)
+Asteroid.PhaseAngle									= Phase angle (β)
+Asteroid.DistanceFromEarth							= Distance from Earth (Δ)
+Asteroid.DistanceFromSun							= Distance from Sun (r)
+Asteroid.HorizontalParallax							= Horizontal parallax (π)
+Asteroid.AngularDiameter							= Angular diameter (d)
+
 # Phenomena
 AsteroidsEvents										= Asteroids
 AsteroidsEvents.Oppositions							= Oppositions

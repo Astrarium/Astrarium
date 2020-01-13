@@ -113,6 +113,9 @@ namespace Planetarium.Plugins.MinorBodies
             return Precession.ElementsFK5(Date.EPOCH_J2000, c.JulianDay);
         }
 
+        /// <summary>
+        /// Gets equatorial topocentrical coordinates for J2000.0 epoch
+        /// </summary>
         protected CrdsEquatorial EquatorialJ2000T(SkyContext c, T body)
         {
             var eq0 = c.Get(EquatorialJ2000, body);
@@ -183,6 +186,9 @@ namespace Planetarium.Plugins.MinorBodies
             return eq0.ToTopocentric(c.GeoLocation, c.SiderealTime, parallax);
         }
 
+        /// <summary>
+        /// Gets horizontal coordinates of minor body
+        /// </summary>
         protected CrdsHorizontal Horizontal(SkyContext c, T body)
         {
             var eq = c.Get(EquatorialT, body);
@@ -214,6 +220,11 @@ namespace Planetarium.Plugins.MinorBodies
             return eSun;
         }
 
+        private CrdsEquatorial SunEquatorial(SkyContext c)
+        {
+            return c.Get(SunEcliptical).ToEquatorial(c.Epsilon);
+        }
+
         /// <summary>
         /// Gets difference between ecliptical longitudes of the Sun and minor body
         /// </summary>
@@ -222,6 +233,9 @@ namespace Planetarium.Plugins.MinorBodies
             return BasicEphem.LongitudeDifference(c.Get(SunEcliptical).Lambda, c.Get(Ecliptical, body).Lambda);
         }
 
+        /// <summary>
+        /// Gets Earth's distance from the Sun, in a.u.
+        /// </summary>
         protected double EarthDistanceFromSun(SkyContext c)
         {
             var r = c.Get(SunRectangular);
@@ -229,7 +243,7 @@ namespace Planetarium.Plugins.MinorBodies
         }
 
         /// <summary>
-        /// Gets rise, transit and set info for the planet
+        /// Gets rise, transit and set info for the minor body
         /// </summary>
         protected RTS RiseTransitSet(SkyContext c, T body)
         {
@@ -245,7 +259,21 @@ namespace Planetarium.Plugins.MinorBodies
                 eq[i] = new SkyContext(jd + diff[i], c.GeoLocation).Get(EquatorialG, body);
             }
 
-            return Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, parallax);
+            return ADK.Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, parallax);
+        }
+
+        protected VisibilityDetails Visibility(SkyContext c, T body)
+        {
+            double jd = c.JulianDayMidnight;
+            double theta0 = Date.ApparentSiderealTime(jd, c.NutationElements.deltaPsi, c.Epsilon);
+            double parallax = c.Get(Parallax, body);
+
+            var ctx = new SkyContext(jd, c.GeoLocation);
+
+            var eq = ctx.Get(EquatorialJ2000T, body);
+            var eqSun = ctx.Get(SunEquatorial);
+
+            return ADK.Visibility.Details(eq, eqSun, c.GeoLocation, theta0, 5);
         }
     }
 }

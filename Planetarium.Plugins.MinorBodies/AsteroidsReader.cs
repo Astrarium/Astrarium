@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,13 +13,16 @@ namespace Planetarium.Plugins.MinorBodies
 {
     internal class AsteroidsReader
     {
+        private readonly string ORBITAL_ELEMENTS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Asteroids.dat");
+        private readonly string SIZES_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/AsteroidsSizes.dat");
+        private readonly string BRIGHTNESS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/AsteroidsBright.dat");
+
         /// <summary>
         /// Reads asteroids orbital elements written in MPC format.
         /// Description of the format can be found at <see href="https://www.minorplanetcenter.net/iau/info/MPOrbitFormat.html"/>.
         /// </summary>
-        /// <param name="orbitalElementsFile">Full path to the file with orbital elements.</param>
         /// <returns>Collection of <see cref="Asteroid"/> items.</returns>
-        public ICollection<Asteroid> Read(string orbitalElementsFile, string sizesFile, string brightnessFile)
+        public ICollection<Asteroid> Read()
         {
             List<Asteroid> asteroids = new List<Asteroid>();
             var sizes = new Dictionary<int, float>();
@@ -26,7 +30,7 @@ namespace Planetarium.Plugins.MinorBodies
 
             string line = "";
 
-            using (var sr = new StreamReader(sizesFile, Encoding.Default))
+            using (var sr = new StreamReader(SIZES_FILE, Encoding.Default))
             {
                 while (line != null && !sr.EndOfStream)
                 {
@@ -36,7 +40,7 @@ namespace Planetarium.Plugins.MinorBodies
                 }
             }
 
-            using (var sr = new StreamReader(brightnessFile, Encoding.Default))
+            using (var sr = new StreamReader(BRIGHTNESS_FILE, Encoding.Default))
             {
                 while (line != null && !sr.EndOfStream)
                 {
@@ -46,7 +50,7 @@ namespace Planetarium.Plugins.MinorBodies
                 }
             }
 
-            using (var sr = new StreamReader(orbitalElementsFile, Encoding.Default))
+            using (var sr = new StreamReader(ORBITAL_ELEMENTS_FILE, Encoding.Default))
             {
                 while (line != null && !sr.EndOfStream)
                 {
