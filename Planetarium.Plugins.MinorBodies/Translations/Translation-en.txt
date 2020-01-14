@@ -35,6 +35,37 @@ Asteroid.DistanceFromSun							= Distance from Sun (r)
 Asteroid.HorizontalParallax							= Horizontal parallax (π)
 Asteroid.AngularDiameter							= Angular diameter (d)
 
+Comet.Constellation									= Constellation
+Comet.Equatorial									= Equatorial topocentrical coordinates
+Comet.Equatorial.Alpha								= Right Ascension
+Comet.Equatorial.Delta								= Declination
+Comet.EquatorialG									= Equatorial geocentrical coordinates
+Comet.EquatorialG.Alpha								= Right Ascension
+Comet.EquatorialG.Delta								= Declination
+Comet.Equatorial0T									= Equatorial topocentrical coordinates J2000.0
+Comet.Equatorial0T.Alpha							= Right Ascension
+Comet.Equatorial0T.Delta							= Declination
+Comet.Equatorial0									= Equatorial geocentrical coordinates J2000.0
+Comet.Equatorial0.Alpha								= Right Ascension
+Comet.Equatorial0.Delta								= Declination
+Comet.Ecliptical									= Ecliptical coordinates
+Comet.Ecliptical.Lambda								= Ecliptical longitude
+Comet.Ecliptical.Beta								= Ecliptical latitude
+Comet.Horizontal									= Horizontal topocentrical coordinates
+Comet.Horizontal.Altitude							= Altitude
+Comet.Horizontal.Azimuth							= Azimuth
+Comet.RTS											= Visibility
+Comet.RTS.Rise										= Rise
+Comet.RTS.Transit									= Transit
+Comet.RTS.Set										= Set
+Comet.RTS.Duration									= Duration
+Comet.Appearance									= Appearance
+Comet.Magnitude										= Visual magnitude
+Comet.DistanceFromEarth								= Distance from Earth
+Comet.DistanceFromSun								= Distance from Sun
+Comet.HorizontalParallax							= Horizontal parallax 
+Comet.AngularDiameter								= Angular diameter of coma
+
 # Phenomena
 AsteroidsEvents										= Asteroids
 AsteroidsEvents.Oppositions							= Oppositions

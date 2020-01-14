@@ -219,6 +219,7 @@ namespace Planetarium.Renderers
                 data.Stride);
 
             bmp.UnlockBits(data);
+
             return bmp;
         }
     }

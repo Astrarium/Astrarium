@@ -224,6 +224,8 @@ namespace Planetarium
                 g.Clear(mapContext.GetSkyColor());
                 g.PageUnit = GraphicsUnit.Display;
                 g.SmoothingMode = Antialias ? SmoothingMode.HighQuality : SmoothingMode.HighSpeed;
+                // TODO: take appropriate value
+                g.InterpolationMode = InterpolationMode.NearestNeighbor;
                 drawnObjects.Clear();
                 labels.Clear();
 

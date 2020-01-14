@@ -48,8 +48,8 @@ namespace Planetarium.Plugins.MinorBodies
                 var comets = allComets.Where(a => Angle.Separation(map.Center, a.Horizontal) < map.ViewAngle * coeff);
 
                 foreach (var c in comets)
-                {
-                    float size = map.GetPointSize(c.Magnitude, maxDrawingSize: 3);
+                {                   
+                    float size = map.GetPointSize(Math.Min(16, c.Magnitude), maxDrawingSize: 3);
 
                     if ((int)size > 0)
                     {

@@ -82,7 +82,6 @@ namespace Planetarium.Plugins.MinorBodies
             return events;
         }
 
-        // TODO: take only brightest asteroids!
         private ICollection<AsteroidData> AsteroidEphemeris(AstroEventsContext context)
         {
             List<AsteroidData> results = new List<AsteroidData>();

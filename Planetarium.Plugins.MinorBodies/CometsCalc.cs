@@ -1,6 +1,7 @@
 ﻿using ADK;
 using Planetarium.Objects;
 using Planetarium.Types;
+using Planetarium.Types.Localization;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -101,9 +102,6 @@ namespace Planetarium.Plugins.MinorBodies
         /// <summary>
         /// Calculates visible length of comet tail, in degrees of arc
         /// </summary>
-        /// <param name="ctx"></param>
-        /// <param name="c"></param>
-        /// <returns></returns>
         internal double TailVisibleLength(SkyContext ctx, Comet c)
         {
             var eqComet = ctx.Get(EquatorialT, c);
@@ -115,8 +113,7 @@ namespace Planetarium.Plugins.MinorBodies
         {
             e["Constellation"] = (c, p) => Constellations.FindConstellation(c.Get(EquatorialT, p), c.JulianDay);
             e["Magnitude"] = (c, p) => c.Get(Magnitude,p);
-            e["Phase"] = (c, p) => c.Get(Phase, p);
-            e["PhaseAngle"] = (c, p) => c.Get(PhaseAngle, p);
+            e["AngularDiameter"] = (c, p) => c.Get(Appearance, p).Coma / 3600f;
             e["DistanceFromEarth"] = (c, p) => c.Get(DistanceFromEarth, p);
             e["DistanceFromSun"] = (c, p) => c.Get(DistanceFromSun, p);
             e["HorizontalParallax"] = (c, p) => c.Get(Parallax, p);
@@ -146,39 +143,38 @@ namespace Planetarium.Plugins.MinorBodies
 
             .AddRow("Constellation")
 
-            .AddHeader("Horizontal coordinates")
+            .AddHeader(Text.Get("Comet.Horizontal"))
             .AddRow("Horizontal.Azimuth")
             .AddRow("Horizontal.Altitude")
 
-            .AddHeader("Equatorial coordinates (topocentrical)")
+            .AddHeader(Text.Get("Comet.Equatorial"))
             .AddRow("Equatorial.Alpha")
             .AddRow("Equatorial.Delta")
 
-            .AddHeader("Equatorial coordinates (geocentrical)")
+            .AddHeader(Text.Get("Comet.EquatorialG"))
             .AddRow("EquatorialG.Alpha")
             .AddRow("EquatorialG.Delta")
 
-            .AddHeader("Equatorial coordinates (topocentrical, J2000.0)")
+            .AddHeader(Text.Get("Comet.Equatorial0T"))
             .AddRow("Equatorial0T.Alpha")
             .AddRow("Equatorial0T.Delta")
 
-            .AddHeader("Equatorial coordinates (J2000.0)")
+            .AddHeader(Text.Get("Comet.Equatorial0"))
             .AddRow("Equatorial0.Alpha")
             .AddRow("Equatorial0.Delta")
 
-            .AddHeader("Ecliptical coordinates")
+            .AddHeader(Text.Get("Comet.Ecliptical"))
             .AddRow("Ecliptical.Lambda")
             .AddRow("Ecliptical.Beta")
 
-            .AddHeader("Visibility")
+            .AddHeader(Text.Get("Comet.RTS"))
             .AddRow("RTS.Rise")
             .AddRow("RTS.Transit")
             .AddRow("RTS.Set")
             .AddRow("RTS.Duration")
 
-            .AddHeader("Appearance")
-            .AddRow("Phase")
-            .AddRow("PhaseAngle")
+            .AddHeader(Text.Get("Comet.Appearance"))
+            .AddRow("AngularDiameter")
             .AddRow("Magnitude")
             .AddRow("DistanceFromEarth")
             .AddRow("DistanceFromSun")
