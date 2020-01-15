@@ -1,6 +1,7 @@
 ﻿using ADK;
 using Planetarium.Objects;
 using Planetarium.Types;
+using Planetarium.Types.Localization;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -164,30 +165,38 @@ namespace Planetarium.Plugins.BrightStars
 
             .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial, s.Number), c.JulianDay))
 
-            .AddHeader("Equatorial coordinates (current epoch)")
+            .AddHeader(Text.Get("Star.Equatorial"))
             .AddRow("Equatorial.Alpha", c.Get(Equatorial, s.Number).Alpha)
             .AddRow("Equatorial.Delta", c.Get(Equatorial, s.Number).Delta)
 
-            .AddHeader("Equatorial coordinates (J2000.0 epoch)")
+            .AddHeader(Text.Get("Star.Equatorial0"))
             .AddRow("Equatorial0.Alpha", s.Equatorial0.Alpha)
             .AddRow("Equatorial0.Delta", s.Equatorial0.Delta)
 
-            .AddHeader("Horizontal coordinates")
+            .AddHeader(Text.Get("Star.Horizontal"))
             .AddRow("Horizontal.Azimuth")
             .AddRow("Horizontal.Altitude")
 
-            .AddHeader("Visibility")
+            .AddHeader(Text.Get("Star.RTS"))
             .AddRow("RTS.Rise")
             .AddRow("RTS.Transit")
             .AddRow("RTS.Set")
             .AddRow("RTS.Duration")
 
-            .AddHeader("Properties")
+            .AddHeader(Text.Get("Star.Properties"))
             .AddRow("Magnitude", s.Mag)
-            .AddRow("Is Infrared Source", details.IsInfraredSource)
-            .AddRow("SpectralClass", details.SpectralClass)
-            .AddRow("Pecularity", details.Pecularity)
-            .AddRow("Radial velocity", details.RadialVelocity + " km/s");
+            .AddRow("IsInfraredSource", details.IsInfraredSource)
+            .AddRow("SpectralClass", details.SpectralClass);
+
+            if (!string.IsNullOrEmpty(details.Pecularity))
+            {
+                info.AddRow("Pecularity", details.Pecularity);
+            }
+
+            if (details.RadialVelocity != null)
+            {
+                info.AddRow("RadialVelocity", details.RadialVelocity + " km/s");
+            }
         }
 
         private static Regex regexSpaceRemover = new Regex("[ ]{2,}", RegexOptions.None);
