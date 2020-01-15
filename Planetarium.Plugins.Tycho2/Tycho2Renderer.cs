@@ -14,7 +14,6 @@ namespace Planetarium.Plugins.Tycho2
     public class Tycho2Renderer : BaseRenderer
     {
         private Font fontNames;
-        private Brush brushNames;
         private readonly ITycho2Catalog tycho2;
         private readonly ISettings settings;
 
@@ -24,7 +23,6 @@ namespace Planetarium.Plugins.Tycho2
             this.settings = settings;
 
             fontNames = new Font("Arial", 6);
-            brushNames = new SolidBrush(Color.FromArgb(64, 64, 64));
         }
 
         private bool MagFilter(IMapContext map, float mag)
@@ -43,6 +41,7 @@ namespace Planetarium.Plugins.Tycho2
             Graphics g = map.Graphics;            
             bool isGround = settings.Get<bool>("Ground");
             double coeff = map.DiagonalCoefficient();
+            Brush brushNames = new SolidBrush(map.GetColor("ColorStarsLabels"));
 
             if (map.MagLimit > 8 && settings.Get<bool>("Stars") && settings.Get<bool>("Tycho2"))
             {
@@ -57,6 +56,7 @@ namespace Planetarium.Plugins.Tycho2
                 SkyContext context = new SkyContext(map.JulianDay, map.GeoLocation);
 
                 tycho2.LockedStar = map.LockedObject as Tycho2Star;
+                tycho2.SelectedStar = map.SelectedObject as Tycho2Star;
 
                 var stars = tycho2.GetStars(context, eq, map.ViewAngle * coeff, m => MagFilter(map, m));
 

@@ -3,6 +3,7 @@ using Planetarium.Objects;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
@@ -58,6 +59,8 @@ namespace Planetarium.Types
         /// Gets celestial object the map is locked on
         /// </summary>
         CelestialObject LockedObject { get; }
+
+        CelestialObject SelectedObject { get; }
 
         CrdsHorizontal MousePosition { get; }
 
@@ -342,10 +345,18 @@ namespace Planetarium.Types
 
         public static void DrawImage(this IMapContext map, Image image, RectangleF destRect, RectangleF srcRect)
         {
+            var gs = map.Graphics.Save();
+
+            map.Graphics.SmoothingMode = SmoothingMode.HighSpeed;
+            map.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+            map.Graphics.PixelOffsetMode = PixelOffsetMode.HighSpeed;
+            map.Graphics.CompositingQuality = CompositingQuality.HighSpeed;
+
             Rectangle destRect2 = new Rectangle((int)destRect.X, (int)destRect.Y, (int)destRect.Width, (int)destRect.Height);
             map.Graphics.DrawImage(image, destRect2, (int)srcRect.X, (int)srcRect.Y, (int)srcRect.Width, (int)srcRect.Height, GraphicsUnit.Pixel, GetImageAttributes(map.Schema));
-        }
 
+            map.Graphics.Restore(gs);
+        }
 
         private static PointF[] EdgeCrosspoints(IMapContext map, PointF p1, PointF p2)
         {

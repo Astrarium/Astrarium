@@ -28,6 +28,11 @@ namespace Planetarium.Plugins.Tycho2
         /// Gets or sets Tycho2Star object that the map is locked on
         /// </summary>
         Tycho2Star LockedStar { get; set; }
+
+        /// <summary>
+        /// Gets or sets Tycho2Star object that currently selected
+        /// </summary>
+        Tycho2Star SelectedStar { get; set; }
     }
 
     public class Tycho2Calc : BaseCalc, ICelestialObjectCalc<Tycho2Star>, ITycho2Catalog
@@ -97,6 +102,11 @@ namespace Planetarium.Plugins.Tycho2
         /// Gets or sets Tycho2Star object that the map is locked on
         /// </summary>
         public Tycho2Star LockedStar { get; set; }
+
+        /// <summary>
+        /// Gets or sets Tycho2Star object that currently selected
+        /// </summary>
+        public Tycho2Star SelectedStar { get; set; }
 
         public Tycho2Calc(ISettings settings)
         {
@@ -368,6 +378,11 @@ namespace Planetarium.Plugins.Tycho2
             if (LockedStar != null)
             {
                 CalculateCoordinates(context, LockedStar);
+            }
+
+            if (SelectedStar != null)
+            {
+                CalculateCoordinates(context, SelectedStar);
             }
         }
 

@@ -224,8 +224,6 @@ namespace Planetarium
                 g.Clear(mapContext.GetSkyColor());
                 g.PageUnit = GraphicsUnit.Display;
                 g.SmoothingMode = Antialias ? SmoothingMode.HighQuality : SmoothingMode.HighSpeed;
-                // TODO: take appropriate value
-                g.InterpolationMode = InterpolationMode.NearestNeighbor;
                 drawnObjects.Clear();
                 labels.Clear();
 
@@ -398,6 +396,7 @@ namespace Planetarium
             public ColorSchema Schema => map.Schema;
             public CrdsHorizontal MousePosition => map.MousePosition;
             public CelestialObject LockedObject => map.LockedObject;
+            public CelestialObject SelectedObject => map.SelectedObject;
 
             public PointF Project(CrdsHorizontal hor)
             {

@@ -237,7 +237,7 @@ namespace Planetarium.Plugins.SolarSystem
                     if (textureMoon != null)
                     {
                         map.Graphics.FillEllipse(brushMoon, -size / 2, -size / 2, size, size);
-                        map.DrawImage(textureMoon, -size / 2 * 1.01f, -size / 2 * 1.01f, size * 1.01f, size * 1.01f);                        
+                        map.DrawImage(textureMoon, -size / 2, -size / 2, size, size);                        
                     }
                     else
                     {
@@ -780,7 +780,7 @@ namespace Planetarium.Plugins.SolarSystem
 
                 if (texturePlanet != null)
                 {
-                    map.DrawImage(texturePlanet, -diamEquat / 2 * 1.01f, -diamPolar / 2 * 1.01f, diamEquat * 1.01f, diamPolar * 1.01f);
+                    map.DrawImage(texturePlanet, -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
                     DrawVolume(map, diam, planet.Flattening);
                 }
             }
@@ -835,7 +835,7 @@ namespace Planetarium.Plugins.SolarSystem
             {
                 LatitudeShift = token.Latitude,
                 LongutudeShift = 180 - token.Longitude,
-                OutputImageSize = 1014,
+                OutputImageSize = 1024,
                 TextureFilePath = "Data\\Moon.jpg"
             });
         }

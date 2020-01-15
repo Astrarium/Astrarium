@@ -79,7 +79,7 @@ namespace Planetarium.Renderers
             Viewport3D viewport = new Viewport3D();
 
             // Give the camera its initial position.
-            camera.FieldOfView = 5.8;
+            camera.FieldOfView = 5.75;
             viewport.Camera = camera;
 
             // The camera's current location.
