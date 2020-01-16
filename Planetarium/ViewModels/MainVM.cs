@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -55,6 +56,17 @@ namespace Planetarium.ViewModels
         public string SelectedObjectName { get; private set; }
 
         public ObservableCollection<ToolbarItem> ToolbarItems { get; private set; } = new ObservableCollection<ToolbarItem>();
+
+        private bool dateTimeSync = false;
+        public bool DateTimeSync 
+        { 
+            get { return dateTimeSync; }
+            set 
+            { 
+                dateTimeSync = value;
+                NotifyPropertyChanged(nameof(DateTimeSync));
+            } 
+        }
 
         public class MenuItemVM
         {
@@ -140,11 +152,28 @@ namespace Planetarium.ViewModels
             }
 
             this.contextMenuItemsConfig = contextMenuItemsConfig;
+
+            new Thread(() =>
+            {
+                do
+                {
+                    if (dateTimeSync)
+                    {
+                        sky.Context.JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
+                        sky.Calculate();
+                    }
+                    Thread.Sleep(1000);
+                }
+                while (true);
+            })
+            { IsBackground = true }.Start();
         }
 
         private void Sky_ContextChanged()
         {
-            DateString = Formatters.DateTime.Format(new Date(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset));
+            var months = CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames.Take(12).ToArray();
+            var d = new Date(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset);
+            DateString = $"{(int)d.Day:00} {months[d.Month - 1]} {d.Year} {d.Hour:00}:{d.Minute:00}:{d.Second:00}";
             NotifyPropertyChanged(nameof(DateString));
         }
 

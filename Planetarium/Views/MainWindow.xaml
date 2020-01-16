@@ -168,12 +168,33 @@
             </StatusBarItem>
 
             <Separator />
+
             <StatusBarItem HorizontalAlignment="Right">
-                <Hyperlink Command="{Binding SetDateCommand}">
-                    <TextBlock Width="Auto" TextAlignment="Right" Text="{Binding DateString, FallbackValue='Date'}" />
-                </Hyperlink>
+                <StackPanel Orientation="Horizontal">
+                    <ToggleButton Width="17" Height="17" VerticalContentAlignment="Center" ToolTip="Sync Date and Time"
+                        IsChecked="{Binding DateTimeSync}" Margin="0 0 4 0">
+                        <Image Stretch="UniformToFill" Height="15">
+                            <Image.Source>
+                                <DrawingImage>
+                                    <DrawingImage.Drawing>
+                                        <DrawingGroup ClipGeometry="M0,0 V125 H100 V0 H0 Z">
+                                            <DrawingGroup Opacity="1">
+                                                <GeometryDrawing Brush="{StaticResource BrushForeground}" Geometry="F1 M100,125z M0,0z M76.5,41.64L24,41.64C19.39,41.64,15.65,45.39,15.66,50L15.66,86.65C15.66,91.26,19.41,95,24.02,95L76,94.97C80.61,94.97,84.35,91.23,84.34,86.62L84.34,49.96C84.34,45.53,80.87,41.91,76.5,41.64z" />
+                                                <GeometryDrawing Brush="{StaticResource BrushForeground}" Geometry="F1 M100,125z M0,0z M31.397,37.907C33.189,37.907,34.642,36.453,34.641,34.661L34.636,29.328C34.632,20.861 41.518,13.968 49.985,13.964 58.452,13.96 65.345,20.846 65.349,29.313L65.354,34.667C65.356,36.457,66.807,37.908,68.598,37.908L71.074,37.908C72.867,37.908,74.319,36.454,74.318,34.662L74.313,29.308C74.304,15.897 63.389,4.993 49.979,5 36.569,5.007 25.665,15.921 25.672,29.332L25.677,34.667C25.679,36.457,27.13,37.908,28.921,37.908L31.397,37.908z" />
+                                            </DrawingGroup>
+                                        </DrawingGroup>
+                                    </DrawingImage.Drawing>
+                                </DrawingImage>
+                            </Image.Source>
+                        </Image>
+                    </ToggleButton>
+                    <TextBlock>
+                        <Hyperlink Command="{Binding SetDateCommand}"> 
+                            <TextBlock Width="Auto" TextAlignment="Right" Text="{Binding DateString, FallbackValue='Date'}" />
+                        </Hyperlink>
+                    </TextBlock>
+                </StackPanel>
             </StatusBarItem>
-            
         </StatusBar>
     </Grid>
 </Window>
