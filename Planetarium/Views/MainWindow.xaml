@@ -16,8 +16,27 @@
         a:MainWindow.MapDoubleClick="{Binding MapDoubleClickCommand}"
         a:MainWindow.MapRightClick="{Binding MapRightClickCommand}"
         a:MainWindow.MapZoom="{Binding ZoomCommand}"
-        Title="Astrarium" Height="450" Width="800">
+        Title="Astrarium" Height="450" Width="850">
 
+    <Window.Resources>
+        <ResourceDictionary>
+            <DrawingImage x:Key="ImageLock">
+                <DrawingImage.Drawing>
+                    <DrawingGroup ClipGeometry="M0,0 V125 H100 V0 H0 Z">
+                        <GeometryDrawing Brush="{StaticResource BrushForeground}" Geometry="F1 M100,125z M0,0z M50.00049,14.06006C38.51611,14.06006,29.17237,23.40283,29.17237,34.88721L29.17237,41.73682 24.41163,41.73682C22.20265,41.73682,20.41163,43.52784,20.41163,45.73682L20.41163,81.93994C20.41163,84.14892,22.20265,85.93994,24.41163,85.93994L75.58839,85.93994C77.79737,85.93994,79.58839,84.14892,79.58839,81.93994L79.58839,45.73682C79.58839,43.52784,77.79737,41.73682,75.58839,41.73682L70.82765,41.73682 70.82765,34.88721C70.82764,23.40283,61.48486,14.06006,50.00049,14.06006z M37.17236,34.88721C37.17236,27.81397 42.92724,22.06006 50.00048,22.06006 57.07372,22.06006 62.82763,27.81397 62.82763,34.88721L62.82763,41.73682 37.17236,41.73682 37.17236,34.88721z M71.58838,49.73682L71.58838,77.93994 28.41162,77.93994 28.41162,49.73682 71.58838,49.73682z" />
+                    </DrawingGroup>
+                </DrawingImage.Drawing>
+            </DrawingImage>
+            <DrawingImage x:Key="ImageUnlock">
+                <DrawingImage.Drawing>
+                    <DrawingGroup ClipGeometry="M0,0 V125 H100 V0 H0 Z">
+                        <GeometryDrawing Brush="{StaticResource BrushForeground}" Geometry="F1 M100,125z M0,0z M66.82764,40.61035C69.03662,40.61035,70.82764,38.81933,70.82764,36.61035L70.82764,25.76172C70.82764,14.27734 61.48487,4.9336 50.00049,4.9336 38.51611,4.9336 29.17237,14.27735 29.17237,25.76172L29.17237,50.8623 24.41163,50.8623C22.20265,50.8623,20.41163,52.65332,20.41163,54.8623L20.41163,91.0664C20.41163,93.27538,22.20265,95.0664,24.41163,95.0664L75.58839,95.0664C77.79737,95.0664,79.58839,93.27538,79.58839,91.0664L79.58839,54.8623C79.58839,52.65332,77.79737,50.8623,75.58839,50.8623L37.17236,50.8623 37.17236,25.76172C37.17236,18.68848 42.92724,12.9336 50.00048,12.9336 57.07372,12.9336 62.82763,18.68848 62.82763,25.76172L62.82763,36.61035C62.82764,38.81934,64.61865,40.61035,66.82764,40.61035z M71.58838,58.8623L71.58838,87.0664 28.41162,87.0664 28.41162,58.8623 71.58838,58.8623z" />
+                    </DrawingGroup>
+                </DrawingImage.Drawing>
+            </DrawingImage>
+        </ResourceDictionary>
+    </Window.Resources>
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -169,30 +188,69 @@
 
             <Separator />
 
-            <StatusBarItem HorizontalAlignment="Right">
+            <!-- Date and Time controls -->
+            <StatusBarItem HorizontalAlignment="Right" HorizontalContentAlignment="Right">
                 <StackPanel Orientation="Horizontal">
-                    <ToggleButton Width="17" Height="17" VerticalContentAlignment="Center" ToolTip="Sync Date and Time"
-                        IsChecked="{Binding DateTimeSync}" Margin="0 0 4 0">
-                        <Image Stretch="UniformToFill" Height="15">
-                            <Image.Source>
-                                <DrawingImage>
-                                    <DrawingImage.Drawing>
-                                        <DrawingGroup ClipGeometry="M0,0 V125 H100 V0 H0 Z">
-                                            <DrawingGroup Opacity="1">
-                                                <GeometryDrawing Brush="{StaticResource BrushForeground}" Geometry="F1 M100,125z M0,0z M76.5,41.64L24,41.64C19.39,41.64,15.65,45.39,15.66,50L15.66,86.65C15.66,91.26,19.41,95,24.02,95L76,94.97C80.61,94.97,84.35,91.23,84.34,86.62L84.34,49.96C84.34,45.53,80.87,41.91,76.5,41.64z" />
-                                                <GeometryDrawing Brush="{StaticResource BrushForeground}" Geometry="F1 M100,125z M0,0z M31.397,37.907C33.189,37.907,34.642,36.453,34.641,34.661L34.636,29.328C34.632,20.861 41.518,13.968 49.985,13.964 58.452,13.96 65.345,20.846 65.349,29.313L65.354,34.667C65.356,36.457,66.807,37.908,68.598,37.908L71.074,37.908C72.867,37.908,74.319,36.454,74.318,34.662L74.313,29.308C74.304,15.897 63.389,4.993 49.979,5 36.569,5.007 25.665,15.921 25.672,29.332L25.677,34.667C25.679,36.457,27.13,37.908,28.921,37.908L31.397,37.908z" />
-                                            </DrawingGroup>
-                                        </DrawingGroup>
-                                    </DrawingImage.Drawing>
-                                </DrawingImage>
-                            </Image.Source>
-                        </Image>
+                    
+                    <!-- Sync Date and Time toggler -->
+                    <ToggleButton Width="17" Height="17" VerticalContentAlignment="Center" IsChecked="{Binding DateTimeSync}" Margin="0 0 4 0">
+                        <ToggleButton.Style>
+                            <Style TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource {x:Type ToggleButton}}">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                            <Border x:Name="Border">
+                                                <Image x:Name="LockedIcon" Stretch="UniformToFill" Height="13" Width="13" Margin="0 1 0 0" VerticalAlignment="Center" Source="{StaticResource ResourceKey=ImageUnlock}" />
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter TargetName="LockedIcon" Property="Source" Value="{StaticResource ResourceKey=ImageLock}" />
+                                                    <Setter TargetName="Border" Property="Background" Value="{StaticResource BrushControlBackground}"/>
+                                                </Trigger>
+                                                <Trigger Property="IsChecked" Value="False">
+                                                    <Setter TargetName="LockedIcon" Property="Source" Value="{StaticResource ResourceKey=ImageUnlock}" />
+                                                    <Setter TargetName="Border" Property="Background" Value="Transparent"/>
+                                                </Trigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Border" Property="Background" Value="{StaticResource BrushSelection}"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter Property="ToolTip" Value="Date Time Sync: On" />
+                                    </Trigger>
+                                    <Trigger Property="IsChecked" Value="False">
+                                        <Setter Property="ToolTip" Value="Date Time Sync: Off" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ToggleButton.Style>
                     </ToggleButton>
-                    <TextBlock>
-                        <Hyperlink Command="{Binding SetDateCommand}"> 
-                            <TextBlock Width="Auto" TextAlignment="Right" Text="{Binding DateString, FallbackValue='Date'}" />
-                        </Hyperlink>
-                    </TextBlock>
+
+                    <!-- Date and Time picker button -->
+                    <Button Width="Auto" Command="{Binding SetDateCommand}" IsEnabled="{Binding DateTimeSync, Converter={s:InverseBoolConverter}}">
+                        <Button.Style>
+                            <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type Button}">
+                                            <Border x:Name="Border" Padding="4 0 4 0">
+                                                <TextBlock Text="{Binding DateString, FallbackValue='01 Jan 2000 00:00:00'}" />
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Border" Property="Background" Value="{StaticResource BrushSelection}"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                    </Button>
                 </StackPanel>
             </StatusBarItem>
         </StatusBar>

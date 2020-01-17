@@ -1223,7 +1223,7 @@
                         </Trigger>
                         <Trigger Property="IsPressed" Value="true">
                             <Setter Property="Stroke" TargetName="Border" Value="{StaticResource BrushHighlight}" />
-                            <Setter Property="StrokeThickness" TargetName="Border" Value="1" />
+                            <!--<Setter Property="StrokeThickness" TargetName="Border" Value="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=BorderThickness}" />-->
                         </Trigger>
                         <Trigger Property="IsPressed" Value="true">
                             <Setter Property="Background" Value="{StaticResource BrushControlDarkBackground}"/>
@@ -1239,7 +1239,9 @@
         </Setter>
     </Style>
 
-    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type ButtonBase}}" />
+    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type ButtonBase}}">
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
 
     <Style x:Key="WindowTitleButton" TargetType="{x:Type ButtonBase}" BasedOn="{StaticResource {x:Type ButtonBase}}">
         <Setter Property="Width" Value="24" />
@@ -1308,7 +1310,7 @@
                         </Trigger>
                         <Trigger Property="IsPressed" Value="true">
                             <Setter Property="Stroke" TargetName="Border" Value="{StaticResource BrushHighlight}" />
-                            <Setter Property="StrokeThickness" TargetName="Border" Value="1" />
+                            <Setter Property="StrokeThickness" TargetName="Border" Value="0" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="true">
                             <Setter Property="Background" Value="{StaticResource BrushControlLightBackground}"/>
@@ -2839,7 +2841,6 @@
         <Setter Property="Visibility" Value="Hidden" />
     </Style>
     
-
     <Style x:Key="ToolBarThumbStyle" TargetType="{x:Type Thumb}">
         <Setter Property="Template">
             <Setter.Value>

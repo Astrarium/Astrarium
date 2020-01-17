@@ -173,6 +173,15 @@ namespace Planetarium.Types.Themes
         }
     }
 
+    [ValueConversion(typeof(bool), typeof(bool))]
+    public class InverseBoolConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return !(bool)value;
+        }
+    }
+
     public class ColorConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)

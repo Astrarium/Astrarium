@@ -57,13 +57,22 @@ namespace Planetarium.ViewModels
 
         public ObservableCollection<ToolbarItem> ToolbarItems { get; private set; } = new ObservableCollection<ToolbarItem>();
 
+        private ManualResetEvent dateTimeSyncResetEvent = new ManualResetEvent(false);
         private bool dateTimeSync = false;
         public bool DateTimeSync 
         { 
             get { return dateTimeSync; }
-            set 
-            { 
+            set
+            {
                 dateTimeSync = value;
+                if (dateTimeSync) 
+                { 
+                    dateTimeSyncResetEvent.Set(); 
+                }
+                else 
+                { 
+                    dateTimeSyncResetEvent.Reset(); 
+                }
                 NotifyPropertyChanged(nameof(DateTimeSync));
             } 
         }
@@ -157,12 +166,11 @@ namespace Planetarium.ViewModels
             {
                 do
                 {
-                    if (dateTimeSync)
-                    {
-                        sky.Context.JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
-                        sky.Calculate();
-                    }
-                    Thread.Sleep(1000);
+                    dateTimeSyncResetEvent.WaitOne();
+                    sky.Context.JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
+                    sky.Calculate();
+                    // TODO: Move sleep value to settings
+                    // Thread.Sleep(0);
                 }
                 while (true);
             })
