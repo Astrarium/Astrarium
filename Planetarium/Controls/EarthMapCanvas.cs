@@ -251,7 +251,7 @@ namespace Planetarium.Controls
             if (p.X > ScaledWidth) p.X -= ScaledWidth;
             if (p.X < 0) p.X += ScaledWidth;
 
-            dc.DrawEllipse(sunBrush, transparentPen, p, radius, radius);
+            dc.DrawEllipse(IsNightMode ? Brushes.Red : sunBrush, transparentPen, p, radius, radius);
         }
 
         /// <summary>

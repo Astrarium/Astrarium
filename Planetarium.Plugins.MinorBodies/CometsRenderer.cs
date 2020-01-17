@@ -48,18 +48,16 @@ namespace Planetarium.Plugins.MinorBodies
                 var comets = allComets.Where(a => Angle.Separation(map.Center, a.Horizontal) < map.ViewAngle * coeff);
 
                 foreach (var c in comets)
-                {                   
-                    float size = map.GetPointSize(Math.Min(16, c.Magnitude), maxDrawingSize: 3);
+                {
+                    float diam = map.GetDiskSize(c.Semidiameter);
 
-                    if ((int)size > 0)
+                    if (diam > 5)
                     {
                         double ad = Angle.Separation(c.Horizontal, map.Center);
 
                         if ((!isGround || c.Horizontal.Altitude + c.Semidiameter / 3600 > 0) &&
                             ad < coeff * map.ViewAngle + c.Semidiameter / 3600)
                         {
-                            float diam = map.GetDiskSize(c.Semidiameter);
-
                             PointF p = map.Project(c.Horizontal);
                             PointF t = map.Project(c.TailHorizontal);
 
@@ -71,13 +69,29 @@ namespace Planetarium.Plugins.MinorBodies
                                 {
                                     double rotation = Math.Atan2(t.Y - p.Y, t.X - p.X) + Math.PI / 2;
                                     gpComet.StartFigure();
-                                    gpComet.AddArc(p.X - diam / 2, p.Y - diam / 2, diam, diam, (float)Angle.ToDegrees(rotation), 180);
-                                    gpComet.AddLines(new PointF[] { gpComet.PathPoints[gpComet.PathPoints.Length - 1], t, gpComet.PathPoints[0] });
+                                    
+                                    // tail is long enough
+                                    if (tail > diam)
+                                    {
+                                        gpComet.AddArc(p.X - diam / 2, p.Y - diam / 2, diam, diam, (float)Angle.ToDegrees(rotation), 180);
+                                        gpComet.AddLines(new PointF[] { gpComet.PathPoints[gpComet.PathPoints.Length - 1], t, gpComet.PathPoints[0] });
+                                    }
+                                    // draw coma only
+                                    else
+                                    {
+                                        gpComet.AddEllipse(p.X - diam / 2, p.Y - diam / 2, diam, diam);
+                                    }
+
                                     gpComet.CloseAllFigures();
                                     using (var brushComet = new PathGradientBrush(gpComet))
                                     {
                                         brushComet.CenterPoint = p;
-                                        brushComet.CenterColor = map.GetColor(colorComet);
+                                        int alpha = 100;
+                                        if (c.Magnitude >= map.MagLimit)
+                                        {
+                                            alpha -= (int)(100 * (c.Magnitude - map.MagLimit) / c.Magnitude);
+                                        }
+                                        brushComet.CenterColor = map.GetColor(Color.FromArgb(alpha, colorComet));
                                         brushComet.SurroundColors = gpComet.PathPoints.Select(pp => Color.Transparent).ToArray();
                                         g.FillPath(brushComet, gpComet);
                                     }
@@ -88,17 +102,7 @@ namespace Planetarium.Plugins.MinorBodies
                                     map.DrawObjectCaption(fontNames, brushNames, c.Name, p, diam);
                                 }
                                 map.AddDrawnObject(c);
-                            }
-                            else if (!map.IsOutOfScreen(p))
-                            {
-                                g.FillEllipse(new SolidBrush(map.GetColor(Color.White)), p.X - size / 2, p.Y - size / 2, size, size);
-                                if (drawLabels)
-                                {
-                                    map.DrawObjectCaption(fontNames, brushNames, c.Name, p, size);
-                                }
-                                map.AddDrawnObject(c);
-                                continue;
-                            }
+                            }                            
                         }
                     }
                 }
