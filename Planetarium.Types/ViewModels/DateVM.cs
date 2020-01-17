@@ -65,6 +65,10 @@ namespace Planetarium.ViewModels
                 Date date = new Date(Year, SelectedMonth + 1, Day + TimeSpan.FromHours(Hours).TotalDays + TimeSpan.FromMinutes(Minutes).TotalDays + TimeSpan.FromSeconds(Seconds).TotalDays);
                 return Date.JulianDay(date, UtcOffset);
             }
+            set
+            {
+                SetJulianDay(value);
+            }
         }
 
         /// <summary>
