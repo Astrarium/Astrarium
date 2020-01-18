@@ -65,13 +65,35 @@ namespace Planetarium.Controls
 
         public decimal Value
         {
-            get { return (decimal)GetValue(ValueProperty); }
-            set { SetCurrentValue(ValueProperty, value); }
+            get 
+            {
+                decimal value = (decimal)GetValue(ValueProperty);
+                if (value > Maximum)
+                    value = Maximum;
+                if (value < Minimum)
+                    value = Minimum;
+                return value; 
+            }
+            set 
+            {
+                if (value > Maximum)
+                    value = Maximum;
+                if (value < Minimum)
+                    value = Minimum;
+                SetCurrentValue(ValueProperty, value); 
+            }
         }
         public readonly static DependencyProperty ValueProperty = DependencyProperty.Register(
             "Value", typeof(decimal), typeof(NumericUpDown), new FrameworkPropertyMetadata((decimal)0, (o, e) =>
             {
+                decimal value = (decimal)e.NewValue;
                 NumericUpDown tb = (NumericUpDown)o;
+
+                if (value > tb.Maximum)
+                    tb.Value = tb.Maximum;
+                if (value < tb.Minimum)
+                    tb.Value = tb.Minimum;
+
                 tb.RaiseValueChangedEvent(e);
             })
             {
@@ -104,9 +126,15 @@ namespace Planetarium.Controls
             _DownButton = Template.FindName("PART_DownButton", this) as RepeatButton;
             _UpButton.Click += Increment;
             _DownButton.Click += Decrement;
+            _TextBox.LostFocus += TextBox_LostFocus;
             _TextBox.PreviewTextInput += TextBox_PreviewTextInput;
             _TextBox.PreviewKeyDown += TextBox_PreviewKeyDown;
             DataObject.AddPastingHandler(_TextBox, new DataObjectPastingEventHandler(TextBox_PreviewPaste));
+        }
+
+        private void TextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            _TextBox.Text = Value.ToString(CultureInfo.InvariantCulture);
         }
 
         private void TextBox_PreviewPaste(object sender, DataObjectPastingEventArgs e)
@@ -139,10 +167,6 @@ namespace Planetarium.Controls
         {
             var numberStyles = (DecimalPlaces == 0) ? NumberStyles.Integer : NumberStyles.Float;
             bool isMatch = decimal.TryParse(text, numberStyles, CultureInfo.InvariantCulture, out decimal result);
-            if (isMatch)
-            {
-                isMatch = (result >= Minimum && result <= Maximum);
-            }
             return isMatch;
         }
 

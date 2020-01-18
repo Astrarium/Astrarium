@@ -25,7 +25,7 @@ namespace Planetarium.Types.Themes
             }
             else if (value is decimal && targetType == typeof(int))
             {
-                return (int)((decimal)value);
+                return (int)Math.Min(int.MaxValue, (decimal)value);
             }
             else
                 throw new NotImplementedException();
