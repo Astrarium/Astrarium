@@ -12,12 +12,20 @@ namespace Planetarium.Types
         public string Text { get; private set; }
         public double JulianDay { get; private set; }
         public bool NoExactTime { get; private set; }
+        public CelestialObject Body { get; private set; }
 
         public AstroEvent(double jd, string text, bool noExactTime = false)
         {
             JulianDay = jd;
             Text = text;
             NoExactTime = noExactTime;
+        }
+
+        public AstroEvent(double jd, string text, CelestialObject body)
+        {
+            JulianDay = jd;
+            Text = text;
+            Body = body;
         }
 
         public override string ToString()

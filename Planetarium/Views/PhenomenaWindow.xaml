@@ -36,7 +36,7 @@
                                     <DataTemplate>
                                         <WrapPanel Orientation="Horizontal" Height="Auto" Margin="0 4 0 0">
                                             <TextBlock Visibility="{Binding NoExactTime, Converter={t:InverseBoolToVisibilityConverter}}" Padding="0 0 4 0" FontWeight="Bold">
-                                                <Hyperlink Command="{Binding DataContext.SetJulianDayCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding JulianDay}">                                                 
+                                                <Hyperlink Command="{Binding DataContext.SelectAstroEventCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding}">                                                 
                                                     <Run Text="{Binding Time}"/>
                                                 </Hyperlink>
                                             </TextBlock>

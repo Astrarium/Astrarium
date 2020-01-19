@@ -263,7 +263,8 @@ namespace Planetarium.Types
 
         private abstract class AbstractDateFormatter
         {
-            protected string[] Months => CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames.Take(12).ToArray();
+            protected static string[] AbbreviatedMonthNames => CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames.Take(12).ToArray();
+            protected static string[] MonthNames => CultureInfo.CurrentCulture.DateTimeFormat.MonthNames.Take(12).ToArray();
         }
 
         private class DateTimeFormatter : AbstractDateFormatter, IEphemFormatter
@@ -271,7 +272,7 @@ namespace Planetarium.Types
             public string Format(object value)
             {
                 Date d = (Date)value;
-                return $"{(int)d.Day:00} {Months[d.Month-1]} {d.Year} {d.Hour:00}:{d.Minute:00}";
+                return $"{(int)d.Day:00} {AbbreviatedMonthNames[d.Month-1]} {d.Year} {d.Hour:00}:{d.Minute:00}";
             }
         }
 
@@ -280,7 +281,7 @@ namespace Planetarium.Types
             public string Format(object value)
             {
                 Date d = (Date)value;
-                return $"{(int)d.Day:00} {Months[d.Month - 1]} {d.Year}";
+                return $"{(int)d.Day:00} {AbbreviatedMonthNames[d.Month - 1]} {d.Year}";
             }
         }
 
@@ -289,7 +290,7 @@ namespace Planetarium.Types
             public string Format(object value)
             {
                 Date d = (Date)value;
-                return $"{Months[d.Month - 1]} {d.Year}";
+                return $"{MonthNames[d.Month - 1]} {d.Year}";
             }
         }
 

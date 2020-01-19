@@ -450,6 +450,10 @@ namespace Planetarium.ViewModels
                     {
                         sky.Context.JulianDay = vm.JulianDay;
                         sky.Calculate();
+                        if (vm.Body != null) 
+                        {
+                            map.GoToObject(vm.Body, TimeSpan.Zero);
+                        }
                     }
                 }
             }    

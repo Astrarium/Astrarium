@@ -16,8 +16,9 @@ namespace Planetarium.ViewModels
     {
         public Command SaveToFileCommand { get; private set; }
         public Command CloseCommand { get; private set; }
-        public Command<double> SetJulianDayCommand { get; private set; }
+        public Command<AstroEventVM> SelectAstroEventCommand { get; private set; }
         public double JulianDay { get; private set; }
+        public CelestialObject Body { get; private set; }
         public IEnumerable<IGrouping<string, AstroEventVM>> Events { get; private set; }
 
         private ICollection<AstroEvent> events;
@@ -29,7 +30,7 @@ namespace Planetarium.ViewModels
 
             SaveToFileCommand = new Command(SaveToFile);
             CloseCommand = new Command(Close);
-            SetJulianDayCommand = new Command<double>(SetJulianDay);
+            SelectAstroEventCommand = new Command<AstroEventVM>(SelectAstroEvent);
         }
 
         public void SetEvents(ICollection<AstroEvent> events)
@@ -65,9 +66,10 @@ namespace Planetarium.ViewModels
             }
         }
 
-        private void SetJulianDay(double jd)
+        private void SelectAstroEvent(AstroEventVM ev)
         {
-            JulianDay = jd;
+            JulianDay = ev.JulianDay;
+            Body = ev.Body;
             Close(true);
         }
     }
@@ -79,6 +81,7 @@ namespace Planetarium.ViewModels
         public double JulianDay { get; set; }
         public string Text { get; set; }
         public bool NoExactTime { get; set; }
+        public CelestialObject Body { get; set; }
 
         public AstroEventVM(AstroEvent e, double utcOffset)
         {
@@ -86,6 +89,7 @@ namespace Planetarium.ViewModels
             JulianDay = e.JulianDay;
             Text = e.Text;
             NoExactTime = e.NoExactTime;
+            Body = e.Body;
             Date = Formatters.Date.Format(date);
             Time = Formatters.Time.Format(date);
         }

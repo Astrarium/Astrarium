@@ -57,7 +57,7 @@ namespace Planetarium.Plugins.SolarSystem
             while (jd < context.To)
             {
                 jd = LunarEphem.NearestPhase(jd, MoonPhase.NewMoon);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Phases.NewMoon")));
+                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Phases.NewMoon"), lunarCalc.Moon));
                 jd += LunarEphem.SINODIC_PERIOD;
             }
 
@@ -65,7 +65,7 @@ namespace Planetarium.Plugins.SolarSystem
             while (jd < context.To)
             {
                 jd = LunarEphem.NearestPhase(jd, MoonPhase.FirstQuarter);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Phases.FirstQuarter")));
+                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Phases.FirstQuarter"), lunarCalc.Moon));
                 jd += LunarEphem.SINODIC_PERIOD;
             }
 
@@ -73,7 +73,7 @@ namespace Planetarium.Plugins.SolarSystem
             while (jd < context.To)
             {
                 jd = LunarEphem.NearestPhase(jd, MoonPhase.FullMoon);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Phases.FullMoon")));
+                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Phases.FullMoon"), lunarCalc.Moon));
                 jd += LunarEphem.SINODIC_PERIOD;
             }
 
@@ -81,7 +81,7 @@ namespace Planetarium.Plugins.SolarSystem
             while (jd < context.To)
             {
                 jd = LunarEphem.NearestPhase(jd, MoonPhase.LastQuarter);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Phases.LastQuarter")));
+                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Phases.LastQuarter"), lunarCalc.Moon));
                 jd += LunarEphem.SINODIC_PERIOD;
             }
 

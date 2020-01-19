@@ -1,5 +1,6 @@
 ﻿using ADK;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -126,14 +127,14 @@ namespace Planetarium.Types
     /// <typeparam name="TClass">Class that inherits the memoizer.</typeparam>
     public abstract class Memoizer<TClass>
     {
-        private Dictionary<IntPtr, object> resultsCache = new Dictionary<IntPtr, object>();
-        private Dictionary<IntPtr, object>[] argsCache = new Dictionary<IntPtr, object>[6];
+        private ConcurrentDictionary<IntPtr, object> resultsCache = new ConcurrentDictionary<IntPtr, object>();
+        private ConcurrentDictionary<IntPtr, object>[] argsCache = new ConcurrentDictionary<IntPtr, object>[6];
 
         protected Memoizer()
         {
             for (int i = 0; i < argsCache.Length; i++)
             {
-                argsCache[i] = new Dictionary<IntPtr, object>();
+                argsCache[i] = new ConcurrentDictionary<IntPtr, object>();
             }
         }
 

@@ -89,7 +89,7 @@ namespace ADK
                         break;
                 }
             }
-            if (year >= 1000 && year <= 3000)
+            else if (year >= 1000 && year <= 3000)
             {
                 double Y = (year - 2000) / 1000.0;
                 double Y2 = Y * Y;
@@ -113,6 +113,10 @@ namespace ADK
                     default:
                         break;
                 }
+            }
+            else
+            {
+                throw new ArgumentException("Method valid only for years in range -1000 to 3000.", nameof(jd));
             }
 
             double T = (jd0 - 2451545.0) / 36525.0;
