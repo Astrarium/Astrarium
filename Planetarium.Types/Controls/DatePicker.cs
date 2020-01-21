@@ -1,6 +1,5 @@
 ﻿using ADK;
 using Planetarium.Types;
-using Planetarium.ViewModels;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -94,10 +93,10 @@ namespace Planetarium.Controls
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
         {
             base.OnMouseLeftButtonDown(e);
-            var vm = new DateVM(JulianDay, UtcOffset, Options);
-            if (ViewManager.ShowDialog(vm) ?? false)
+            double? jd = ViewManager.ShowDateDialog(JulianDay, UtcOffset, Options);
+            if (jd != null)
             {
-                JulianDay = vm.JulianDay;
+                JulianDay = jd.Value;
             }
         }
     }

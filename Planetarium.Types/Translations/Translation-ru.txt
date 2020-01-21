@@ -7,17 +7,6 @@ Open					= Открыть
 Close					= Закрыть
 Save					= Сохранить
 
-# DateWindow
-DateWindow.Title		= Дата и время
-DateWindow.Day			= День
-DateWindow.Month		= Месяц
-DateWindow.Year			= Год
-DateWindow.Hours		= Часы
-DateWindow.Minutes		= Минуты
-DateWindow.Seconds		= Секунды
-DateWindow.SetCurrent	= Установить текущее
-DateWindow.Select		= Выбрать
-
 # Settings
 Settings.Schema			= Цветовая схема
 Settings.Schema.Night	= Ночь

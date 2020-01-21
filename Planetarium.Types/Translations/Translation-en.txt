@@ -1,24 +1,4 @@
-﻿# Common
-OK						= OK
-Yes						= Yes
-No						= No
-Cancel					= Cancel
-Open					= Open
-Close					= Close
-Save					= Save
-
-# DateWindow
-DateWindow.Title		= Date and Time
-DateWindow.Day			= Day
-DateWindow.Month		= Month
-DateWindow.Year			= Year
-DateWindow.Hours		= Hours
-DateWindow.Minutes		= Minutes
-DateWindow.Seconds		= Seconds
-DateWindow.SetCurrent	= Set current
-DateWindow.Select		= Select
-
-# Settings
+﻿# Settings
 Settings.Schema			= Color schema
 Settings.Schema.Night	= Night
 Settings.Schema.Day		= Day&Night

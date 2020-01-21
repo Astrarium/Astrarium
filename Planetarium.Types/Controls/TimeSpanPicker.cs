@@ -1,5 +1,4 @@
 ﻿using Planetarium.Types;
-using Planetarium.ViewModels;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -45,11 +44,10 @@ namespace Planetarium.Controls
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
         {
             base.OnMouseLeftButtonDown(e);
-            var vm = new TimeSpanVM();
-            vm.TimeSpan = TimeSpan;
-            if (ViewManager.ShowDialog(vm) ?? false)
+            var timeSpan = ViewManager.ShowTimeSpanDialog(TimeSpan);
+            if (timeSpan != null)
             {
-                TimeSpan = vm.TimeSpan;
+                TimeSpan = timeSpan.Value;
             }
         }
 

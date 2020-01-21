@@ -1,6 +1,8 @@
 ﻿using Microsoft.Win32;
 using Planetarium.Controls;
+using Planetarium.Objects;
 using Planetarium.Types;
+using Planetarium.ViewModels;
 using Planetarium.Views;
 using System;
 using System.Collections.Generic;
@@ -10,6 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using WF = System.Windows.Forms;
 using System.Windows.Controls;
 using System.Windows.Media;
 
@@ -223,10 +226,79 @@ namespace Planetarium
         public string ShowSaveFileDialog(string caption, string fileName, string extension, string filter)
         {
             var dialog = new SaveFileDialog();
+            dialog.Title = caption;
             dialog.FileName = fileName;
             dialog.DefaultExt = extension;
             dialog.Filter = filter;
             return (dialog.ShowDialog() ?? false) ? dialog.FileName : null;
+        }
+
+        public string ShowOpenFileDialog(string caption, string filter)
+        {
+            var dialog = new OpenFileDialog();
+            dialog.Title = caption;
+            dialog.Filter = filter;
+            return (dialog.ShowDialog() ?? false) ? dialog.FileName : null;
+        }
+
+        public string ShowOpenFolderDialog(string caption)
+        {
+            var dialog = new WF.FolderBrowserDialog();
+            dialog.Description = caption;
+            if (WF.DialogResult.OK == dialog.ShowDialog())
+            {
+                return dialog.SelectedPath;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public double? ShowDateDialog(double jd, double utcOffset, DateOptions displayMode = DateOptions.DateTime)
+        {
+            var vm = new DateVM(jd, utcOffset, displayMode);
+            if (ShowDialog(vm) ?? false)
+            {
+                return vm.JulianDay;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public CelestialObject ShowSearchDialog(Func<CelestialObject, bool> filter = null)
+        {
+            var vm = CreateViewModel<SearchVM>();
+            if (filter != null)
+            {
+                vm.Filter = filter;
+            }
+
+            if (ViewManager.ShowDialog(vm) ?? false)
+            {
+                return vm.SelectedItem.Body;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public TimeSpan? ShowTimeSpanDialog(TimeSpan timeSpan)
+        {
+            var vm = CreateViewModel<TimeSpanVM>();
+            vm.TimeSpan = timeSpan;
+
+            if (ViewManager.ShowDialog(vm) ?? false)
+            {
+                return vm.TimeSpan;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

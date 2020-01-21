@@ -20,7 +20,7 @@ using System.Windows.Media.Imaging;
 namespace Planetarium.ViewModels
 {
     public class MainVM : ViewModelBase
-    { 
+    {
         private readonly ISky sky;
         private readonly ISkyMap map;
         private readonly ISettings settings;
@@ -57,26 +57,6 @@ namespace Planetarium.ViewModels
 
         public ObservableCollection<ToolbarItem> ToolbarItems { get; private set; } = new ObservableCollection<ToolbarItem>();
 
-        private ManualResetEvent dateTimeSyncResetEvent = new ManualResetEvent(false);
-        private bool dateTimeSync = false;
-        public bool DateTimeSync 
-        { 
-            get { return dateTimeSync; }
-            set
-            {
-                dateTimeSync = value;
-                if (dateTimeSync) 
-                { 
-                    dateTimeSyncResetEvent.Set(); 
-                }
-                else 
-                { 
-                    dateTimeSyncResetEvent.Reset(); 
-                }
-                NotifyPropertyChanged(nameof(DateTimeSync));
-            } 
-        }
-
         public class MenuItemVM
         {
             public bool IsCheckable { get; set; } = false;
@@ -109,11 +89,17 @@ namespace Planetarium.ViewModels
                 MapViewAngleString = Formatters.AngularDiameter.Format(map.ViewAngle);
 
                 NotifyPropertyChanged(
-                    nameof(MapEquatorialCoordinatesString), 
-                    nameof(MapHorizontalCoordinatesString), 
-                    nameof(MapConstellationNameString), 
+                    nameof(MapEquatorialCoordinatesString),
+                    nameof(MapHorizontalCoordinatesString),
+                    nameof(MapConstellationNameString),
                     nameof(MapViewAngleString));
             }
+        }
+
+        public bool DateTimeSync
+        {
+            get { return sky.DateTimeSync; }
+            set { sky.DateTimeSync = value; }
         }
 
         public MainVM(ISky sky, ISkyMap map, ISettings settings, ToolbarButtonsConfig toolbarButtonsConfig, ContextMenuItemsConfig contextMenuItemsConfig)
@@ -142,6 +128,7 @@ namespace Planetarium.ViewModels
 
             sky.Context.ContextChanged += Sky_ContextChanged;
             sky.Calculated += () => map.Invalidate();
+            sky.DateTimeSyncChanged += () => NotifyPropertyChanged(nameof(DateTimeSync));
             map.SelectedObjectChanged += Map_SelectedObjectChanged;
             map.ViewAngleChanged += Map_ViewAngleChanged;
             settings.SettingValueChanged += (s, v) => map.Invalidate();
@@ -160,21 +147,7 @@ namespace Planetarium.ViewModels
                 ToolbarItems.Add(new ToolbarSeparator());
             }
 
-            this.contextMenuItemsConfig = contextMenuItemsConfig;
-
-            new Thread(() =>
-            {
-                do
-                {
-                    dateTimeSyncResetEvent.WaitOne();
-                    sky.Context.JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
-                    sky.Calculate();
-                    // TODO: Move sleep value to settings
-                    // Thread.Sleep(0);
-                }
-                while (true);
-            })
-            { IsBackground = true }.Start();
+            this.contextMenuItemsConfig = contextMenuItemsConfig;            
         }
 
         private void Sky_ContextChanged()
@@ -448,8 +421,7 @@ namespace Planetarium.ViewModels
                     vm.SetEvents(events);
                     if (ViewManager.ShowDialog(vm) ?? false)
                     {
-                        sky.Context.JulianDay = vm.JulianDay;
-                        sky.Calculate();
+                        sky.SetDate(vm.JulianDay);                        
                         if (vm.Body != null) 
                         {
                             map.GoToObject(vm.Body, TimeSpan.Zero);
@@ -461,10 +433,10 @@ namespace Planetarium.ViewModels
 
         private void SearchObject()
         {
-            var vm = ViewManager.CreateViewModel<SearchVM>();
-            if (ViewManager.ShowDialog(vm) ?? false)
+            CelestialObject body = ViewManager.ShowSearchDialog();
+            if (body != null)
             {
-                CenterOnObject(vm.SelectedItem.Body);
+                CenterOnObject(body);
             }
         }
 
@@ -536,8 +508,7 @@ namespace Planetarium.ViewModels
                     var vm = new ObjectInfoVM(info);
                     if (ViewManager.ShowDialog(vm) ?? false)
                     {
-                        sky.Context.JulianDay = vm.JulianDay;
-                        sky.Calculate();
+                        sky.SetDate(vm.JulianDay);
                         map.GoToObject(body, TimeSpan.Zero);
                     }
                 }
@@ -546,11 +517,10 @@ namespace Planetarium.ViewModels
 
         private void SetDate()
         {
-            var vm = new DateVM(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset);
-            if (ViewManager.ShowDialog(vm) ?? false)
+            double? jd = ViewManager.ShowDateDialog(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset);
+            if (jd != null)
             {
-                sky.Context.JulianDay = vm.JulianDay;
-                sky.Calculate();
+                sky.SetDate(jd.Value);
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Planetarium.Objects;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -80,6 +81,38 @@ namespace Planetarium.Types
         public static string ShowSaveFileDialog(string caption, string fileName, string extension, string filter)
         {
             return viewManager.ShowSaveFileDialog(caption, fileName, extension, filter);
+        }
+
+        public static string ShowOpenFileDialog(string caption, string filter)
+        {
+            return viewManager.ShowOpenFileDialog(caption, filter);
+        }
+
+        public static string ShowOpenFolderDialog(string caption)
+        {
+            return viewManager.ShowOpenFolderDialog(caption);
+        }
+
+        /// <summary>
+        /// Shows date and time dialog
+        /// </summary>
+        /// <param name="jd">Julian day selected by default</param>
+        /// <param name="utcOffset">UTC offset, in hours</param>
+        /// <param name="displayMode">Dialog options</param>
+        /// <returns>Julian day selected, or null</returns>
+        public static double? ShowDateDialog(double jd, double utcOffset, DateOptions displayMode = DateOptions.DateTime)
+        {
+            return viewManager.ShowDateDialog(jd, utcOffset, displayMode);
+        }
+
+        public static CelestialObject ShowSearchDialog(Func<CelestialObject, bool> filter = null)
+        {
+            return viewManager.ShowSearchDialog(filter);
+        }
+
+        public static TimeSpan? ShowTimeSpanDialog(TimeSpan timeSpan)
+        {
+            return viewManager.ShowTimeSpanDialog(timeSpan);
         }
     }
 }

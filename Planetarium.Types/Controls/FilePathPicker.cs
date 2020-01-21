@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Planetarium.Types;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -73,18 +74,20 @@ namespace Planetarium.Controls
         {
             if (Mode == PickerMode.File)
             {
-                var dialog = new WF.OpenFileDialog();
-                if (WF.DialogResult.OK == dialog.ShowDialog())
-                {
-                    SelectedPath = dialog.FileName;
+                // TODO: take caption and filter from control properties
+                string path = ViewManager.ShowOpenFileDialog("Open file", "*.*");
+                if (!string.IsNullOrEmpty(path))
+                { 
+                    SelectedPath = path;
                 }
             }
             else if (Mode == PickerMode.Directory)
             {
-                var dialog = new WF.FolderBrowserDialog();
-                if (WF.DialogResult.OK == dialog.ShowDialog())
+                // TODO: take caption from control properties
+                string path = ViewManager.ShowOpenFolderDialog("Choose folder");
+                if (!string.IsNullOrEmpty(path))
                 {
-                    SelectedPath = dialog.SelectedPath;
+                    SelectedPath = path;
                 }
             }
         }

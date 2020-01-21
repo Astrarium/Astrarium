@@ -1,4 +1,5 @@
-﻿using Planetarium.Calculators;
+﻿using ADK;
+using Planetarium.Calculators;
 using Planetarium.Objects;
 using Planetarium.Types;
 using Planetarium.Types.Localization;
@@ -30,6 +31,45 @@ namespace Planetarium
         public SkyContext Context { get; private set; }
 
         public event Action Calculated;
+        public event Action DateTimeSyncChanged;
+
+        private ManualResetEvent dateTimeSyncResetEvent = new ManualResetEvent(false);
+        private bool dateTimeSync = false;
+        public bool DateTimeSync
+        {
+            get { return dateTimeSync; }
+            set
+            {
+                if (dateTimeSync != value)
+                {
+                    dateTimeSync = value;
+                    if (dateTimeSync)
+                    {
+                        dateTimeSyncResetEvent.Set();
+                    }
+                    else
+                    {
+                        dateTimeSyncResetEvent.Reset();
+                    }
+                    DateTimeSyncChanged?.Invoke();
+                }
+            }
+        }
+
+        public Sky()
+        {
+            new Thread(() =>
+            {
+                do
+                {
+                    dateTimeSyncResetEvent.WaitOne();
+                    Context.JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
+                    Calculate();
+                }
+                while (true);
+            })
+            { IsBackground = true }.Start();
+        }
 
         public void Initialize(SkyContext context, ICollection<BaseCalc> calculators, ICollection<BaseAstroEventsProvider> eventProviders)
         {
@@ -111,6 +151,13 @@ namespace Planetarium
                     });
                 }
             }
+        }
+
+        public void SetDate(double jd)
+        {
+            DateTimeSync = false;
+            Context.JulianDay = jd;
+            Calculate();
         }
 
         public void Calculate()

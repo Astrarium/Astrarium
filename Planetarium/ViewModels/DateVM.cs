@@ -250,14 +250,4 @@ namespace Planetarium.ViewModels
             SetJulianDay(jd);
         }
     }
-
-    /// <summary>
-    /// Options for displaying date values
-    /// </summary>
-    public enum DateOptions
-    {
-        DateTime,
-        DateOnly,
-        MonthYear
-    }
 }

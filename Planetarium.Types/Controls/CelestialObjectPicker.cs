@@ -1,6 +1,5 @@
 ﻿using Planetarium.Objects;
 using Planetarium.Types;
-using Planetarium.ViewModels;
 using System;
 using System.Linq;
 using System.Windows;
@@ -58,11 +57,10 @@ namespace Planetarium.Controls
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
         {
             base.OnMouseLeftButtonDown(e);
-            var vm = ViewManager.CreateViewModel<SearchVM>();
-            vm.Filter = Filter;
-            if (ViewManager.ShowDialog(vm) ?? false)
+            CelestialObject body = ViewManager.ShowSearchDialog(Filter);
+            if (body != null)
             {
-                SelectedBody = vm.SelectedItem.Body;
+                SelectedBody = body;
             }
         }
     }
