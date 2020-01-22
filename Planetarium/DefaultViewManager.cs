@@ -241,31 +241,17 @@ namespace Planetarium
             return (dialog.ShowDialog() ?? false) ? dialog.FileName : null;
         }
 
-        public string ShowOpenFolderDialog(string caption)
+        public string ShowSelectFolderDialog(string caption)
         {
             var dialog = new WF.FolderBrowserDialog();
             dialog.Description = caption;
-            if (WF.DialogResult.OK == dialog.ShowDialog())
-            {
-                return dialog.SelectedPath;
-            }
-            else
-            {
-                return null;
-            }
+            return (WF.DialogResult.OK == dialog.ShowDialog()) ? dialog.SelectedPath : null;
         }
 
         public double? ShowDateDialog(double jd, double utcOffset, DateOptions displayMode = DateOptions.DateTime)
         {
             var vm = new DateVM(jd, utcOffset, displayMode);
-            if (ShowDialog(vm) ?? false)
-            {
-                return vm.JulianDay;
-            }
-            else
-            {
-                return null;
-            }
+            return (ShowDialog(vm) ?? false) ? (double?)vm.JulianDay : null;
         }
 
         public CelestialObject ShowSearchDialog(Func<CelestialObject, bool> filter = null)
@@ -276,29 +262,14 @@ namespace Planetarium
                 vm.Filter = filter;
             }
 
-            if (ViewManager.ShowDialog(vm) ?? false)
-            {
-                return vm.SelectedItem.Body;
-            }
-            else
-            {
-                return null;
-            }
+            return (ShowDialog(vm) ?? false) ? vm.SelectedItem.Body : null;
         }
 
         public TimeSpan? ShowTimeSpanDialog(TimeSpan timeSpan)
         {
             var vm = CreateViewModel<TimeSpanVM>();
             vm.TimeSpan = timeSpan;
-
-            if (ViewManager.ShowDialog(vm) ?? false)
-            {
-                return vm.TimeSpan;
-            }
-            else
-            {
-                return null;
-            }
+            return (ShowDialog(vm) ?? false) ? (TimeSpan?)vm.TimeSpan : null;
         }
     }
 }

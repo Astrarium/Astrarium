@@ -84,7 +84,7 @@ namespace Planetarium.Controls
             else if (Mode == PickerMode.Directory)
             {
                 // TODO: take caption from control properties
-                string path = ViewManager.ShowOpenFolderDialog("Choose folder");
+                string path = ViewManager.ShowSelectFolderDialog("Choose folder");
                 if (!string.IsNullOrEmpty(path))
                 {
                     SelectedPath = path;

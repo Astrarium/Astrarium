@@ -25,13 +25,35 @@ namespace Planetarium.Types
         /// Shows window by its ViewModel type. 
         /// Calling this method automatically creates instance of the ViewModel and attaches it to DataContext property. />
         /// </summary>
-        /// <typeparam name="TViewModel"></typeparam>
         void ShowWindow<TViewModel>() where TViewModel : ViewModelBase;
+
+        /// <summary>
+        /// Shows dialog window by its ViewModel type.
+        /// Calling this method automatically creates instance of the ViewModel and attaches it to DataContext property. />
+        /// </summary>
+        /// <returns>Dialog result (true or false) or null, if dialog has been canceled</returns>
         bool? ShowDialog<TViewModel>() where TViewModel : ViewModelBase;
 
+        /// <summary>
+        /// Shows window by its ViewModel instance. 
+        /// Calling this method automatically attaches passed ViewModel instance to DataContext property.
+        /// </summary>
         void ShowWindow<TViewModel>(TViewModel viewModel) where TViewModel : ViewModelBase;
+
+        /// <summary>
+        /// Shows dialog window by its ViewModel instance. 
+        /// Calling this method automatically attaches passed ViewModel instance to DataContext property.
+        /// </summary>
+        /// <returns>Dialog result (true or false) or null, if dialog has been canceled</returns>
         bool? ShowDialog<TViewModel>(TViewModel viewModel) where TViewModel : ViewModelBase;
- 
+
+        /// <summary>
+        /// Shows message box dialog
+        /// </summary>
+        /// <param name="caption">Window title</param>
+        /// <param name="text">Message text</param>
+        /// <param name="buttons">Buttons set</param>
+        /// <returns>MessageBoxResult selected by user</returns>
         MessageBoxResult ShowMessageBox(string caption, string text, MessageBoxButton buttons);
 
         /// <summary>
@@ -44,7 +66,7 @@ namespace Planetarium.Types
         void ShowProgress(string caption, string text, CancellationTokenSource tokenSource, Progress<double> progress = null);
 
         /// <summary>
-        /// Shows file save dialog.
+        /// Shows save file dialog
         /// </summary>
         /// <param name="caption">Dialog title</param>
         /// <param name="fileName">Default file name</param>
@@ -53,9 +75,20 @@ namespace Planetarium.Types
         /// <returns>File name and path, if user pressed OK, null otherwise.</returns>
         string ShowSaveFileDialog(string caption, string fileName, string extension, string filter);
 
+        /// <summary>
+        /// Shows open file dialog
+        /// </summary>
+        /// <param name="caption">Dialog title</param>
+        /// <param name="filter">Alowed files extensions filter</param>
+        /// <returns>File name and path, if user pressed OK, null otherwise.</returns>
         string ShowOpenFileDialog(string caption, string filter);
 
-        string ShowOpenFolderDialog(string caption);
+        /// <summary>
+        /// Shows folder picker dialog
+        /// </summary>
+        /// <param name="caption">Dialog title</param>
+        /// <returns>Selected folder full path, if user pressed OK, null otherwise.</returns>
+        string ShowSelectFolderDialog(string caption);
 
         /// <summary>
         /// Shows date and time dialog
@@ -66,8 +99,18 @@ namespace Planetarium.Types
         /// <returns>Julian day selected, or null</returns>
         double? ShowDateDialog(double jd, double utcOffset, DateOptions displayMode = DateOptions.DateTime);
 
+        /// <summary>
+        /// Shows search celestial object window
+        /// </summary>
+        /// <param name="filter">Predicate function to filder celestial objects</param>
+        /// <returns>Celestial object picked by user, or null if no object picked</returns>
         CelestialObject ShowSearchDialog(Func<CelestialObject, bool> filter = null);
 
+        /// <summary>
+        /// Shows dialog to select a time span
+        /// </summary>
+        /// <param name="timeSpan">Time span selected by default</param>
+        /// <returns></returns>
         TimeSpan? ShowTimeSpanDialog(TimeSpan timeSpan);
     }
 }
