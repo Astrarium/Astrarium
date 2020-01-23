@@ -237,7 +237,14 @@ namespace Planetarium
 
                 for (int i = 0; i < renderers.Count(); i++)
                 {
-                    renderers.ElementAt(i).Render(mapContext);
+                    try
+                    {
+                        renderers.ElementAt(i).Render(mapContext);
+                    }
+                    catch (Exception ex)
+                    {
+                        g.DrawString($"Error:\n{ex}", fontDiagnosticText, Brushes.Red, new RectangleF(10, 10, Width - 20, Height - 20));
+                    }
                     if (needDrawSelectedObject)
                     {
                         needDrawSelectedObject = !DrawSelectedObject(g);

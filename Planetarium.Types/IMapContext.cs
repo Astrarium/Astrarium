@@ -273,25 +273,25 @@ namespace Planetarium.Types
             List<PointF> crosses = new List<PointF>();
 
             PointF c1 = LinesIntersection(p1, p2, p00, pW0);
-            if (c1.Y == 0 && c1.X >= 0 && c1.X <= width)
+            if (Math.Abs(c1.Y) < 1 && c1.X >= 0 && c1.X <= width)
             {
                 crosses.Add(c1);
             }
 
             PointF c2 = LinesIntersection(p1, p2, pW0, pWH);
-            if (c2.X == width && c2.Y >= 0 && c2.Y <= height)
+            if (Math.Abs(c2.X - width) < 1 && c2.Y >= 0 && c2.Y <= height)
             {
                 crosses.Add(c2);
             }
 
             PointF c3 = LinesIntersection(p1, p2, p0H, pWH);
-            if (c3.Y == height && c3.X >= 0 && c3.X <= width)
+            if (Math.Abs(c3.Y - height) < 1 && c3.X >= 0 && c3.X <= width)
             {
                 crosses.Add(c3);
             }
 
             PointF c4 = LinesIntersection(p1, p2, p00, p0H);
-            if (c4.X == 0 && c4.Y >= 0 && c4.Y <= height)
+            if (Math.Abs(c4.X) < 1 && c4.Y >= 0 && c4.Y <= height)
             {
                 crosses.Add(c4);
             }
