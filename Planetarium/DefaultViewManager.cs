@@ -243,9 +243,11 @@ namespace Planetarium
 
         public string ShowSelectFolderDialog(string caption)
         {
-            var dialog = new WF.FolderBrowserDialog();
-            dialog.Description = caption;
-            return (WF.DialogResult.OK == dialog.ShowDialog()) ? dialog.SelectedPath : null;
+            //var dialog = new WF.FolderBrowserDialog();
+            //dialog.Description = caption;
+            //return (WF.DialogResult.OK == dialog.ShowDialog()) ? dialog.SelectedPath : null;
+            var vm = new SelectFolderVM();
+            return (ShowDialog(vm) ?? false) ? "" : null;
         }
 
         public double? ShowDateDialog(double jd, double utcOffset, DateOptions displayMode = DateOptions.DateTime)

@@ -1,12 +1,19 @@
 ﻿<Application x:Class="Planetarium.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:Planetarium.Controls">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/Planetarium.Types;component/Themes/ColorsDefault.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/Planetarium.Types;component/Themes/Styles.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/Planetarium.Types;component/Themes/WindowStyle.xaml" />
+
+
+                <ResourceDictionary>
+
+                    <Style TargetType="{x:Type c:FoldersTreeView}" BasedOn="{StaticResource {x:Type TreeView}}"></Style>
+                </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
