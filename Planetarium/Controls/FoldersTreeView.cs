@@ -28,14 +28,14 @@ namespace Planetarium.Controls
                 {
                     var paths = SubPaths(value);
 
-                    TreeViewItem currentItem = this.Items[0] as TreeViewItem;
+                    FoldersTreeViewItem currentItem = this.Items[0] as FoldersTreeViewItem;
 
                     bool needSelect = true;
 
                     foreach (var path in paths)
                     {
                         currentItem.IsExpanded = true;
-                        var childItem = currentItem.Items.OfType<TreeViewItem>().FirstOrDefault(i => path.Equals((i.Tag as FolderInfo)?.Path, StringComparison.OrdinalIgnoreCase));
+                        var childItem = currentItem.Items.OfType<FoldersTreeViewItem>().FirstOrDefault(i => path.Equals((i.Tag as FolderInfo)?.Path, StringComparison.OrdinalIgnoreCase));
 
                         if (childItem != null)
                         {
@@ -85,13 +85,9 @@ namespace Planetarium.Controls
             }
         }
 
-
-        public override void OnApplyTemplate()
+        protected override void OnInitialized(EventArgs e)
         {
-            base.OnApplyTemplate();
-
-            //System.Windows.Forms.FolderBrowserDialog dlg = new System.Windows.Forms.FolderBrowserDialog();
-            //dlg.ShowDialog();
+            base.OnInitialized(e);
 
             var myComputer = CreateItem(new FolderInfo() { Title = Environment.MachineName, Icon = GetMyComputerIcon() });
 
@@ -110,11 +106,14 @@ namespace Planetarium.Controls
 
             this.Items.Add(myComputer);
             myComputer.IsExpanded = true;
+
+            Background = System.Windows.Media.Brushes.Transparent;
+            BorderThickness = new Thickness(0);
         }
 
         void folder_Expanded(object sender, RoutedEventArgs e)
         {
-            TreeViewItem item = (TreeViewItem)sender;
+            FoldersTreeViewItem item = (FoldersTreeViewItem)sender;
             if (item.Items.Count == 1 && item.Items[0] == null)
             {
                 item.Items.Clear();
@@ -133,9 +132,9 @@ namespace Planetarium.Controls
             }
         }
 
-        private TreeViewItem CreateItem(FolderInfo folderInfo)
+        private FoldersTreeViewItem CreateItem(FolderInfo folderInfo)
         {
-            TreeViewItem subitem = new TreeViewItem();
+            FoldersTreeViewItem subitem = new FoldersTreeViewItem();
 
             subitem.Header = folderInfo.Title;
             subitem.Tag = folderInfo;
@@ -154,8 +153,8 @@ namespace Planetarium.Controls
         protected override void OnSelectedItemChanged(RoutedPropertyChangedEventArgs<object> e)
         {
             base.OnSelectedItemChanged(e);
- 
-            TreeViewItem temp = (TreeViewItem)this.SelectedItem;
+
+            FoldersTreeViewItem temp = (FoldersTreeViewItem)this.SelectedItem;
 
             var folderInfo = temp.Tag as FolderInfo;
             selectedImagePath = folderInfo.Path;
@@ -258,5 +257,10 @@ namespace Planetarium.Controls
                 Icon = GetIcon(Path);
             }
         }
+    }
+
+    public class FoldersTreeViewItem : TreeViewItem
+    {
+
     }
 }
