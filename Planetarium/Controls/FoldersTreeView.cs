@@ -85,10 +85,8 @@ namespace Planetarium.Controls
             }
         }
 
-        protected override void OnInitialized(EventArgs e)
+        public FoldersTreeView()
         {
-            base.OnInitialized(e);
-
             var myComputer = CreateItem(new FolderInfo() { Title = Environment.MachineName, Icon = GetMyComputerIcon() });
 
             myComputer.Items.Add(CreateItem(new FolderInfo(Environment.SpecialFolder.Desktop)));
@@ -105,8 +103,13 @@ namespace Planetarium.Controls
             }
 
             this.Items.Add(myComputer);
-            myComputer.IsExpanded = true;
+        }
 
+        public override void OnApplyTemplate()
+        {
+            base.OnApplyTemplate();
+
+            (this.Items[0] as TreeViewItem).IsExpanded = true;
             Background = System.Windows.Media.Brushes.Transparent;
             BorderThickness = new Thickness(0);
         }
@@ -134,21 +137,19 @@ namespace Planetarium.Controls
 
         private FoldersTreeViewItem CreateItem(FolderInfo folderInfo)
         {
-            FoldersTreeViewItem subitem = new FoldersTreeViewItem();
+            var item = new FoldersTreeViewItem();
 
-            subitem.Header = folderInfo.Title;
-            subitem.Tag = folderInfo;
-            //subitem.FontWeight = FontWeights.Normal;
+            item.Header = folderInfo.Title;
+            item.Tag = folderInfo;
+            item.Expanded += new RoutedEventHandler(folder_Expanded);
 
             if (folderInfo.Path != null)
             {
-                subitem.Items.Add(null);
+                item.Items.Add(null);
             }
-            subitem.Expanded += new RoutedEventHandler(folder_Expanded);
-
-            return subitem;
+            
+            return item;
         }
-
 
         protected override void OnSelectedItemChanged(RoutedPropertyChangedEventArgs<object> e)
         {
@@ -159,7 +160,6 @@ namespace Planetarium.Controls
             var folderInfo = temp.Tag as FolderInfo;
             selectedImagePath = folderInfo.Path;
             // TODO: notify property changed
-
         }
 
         const uint FILE_ATTRIBUTE_NORMAL = 0x00000080;
@@ -211,7 +211,7 @@ namespace Planetarium.Controls
             SHFILEINFO shinfo = new SHFILEINFO();
             SHGetFileInfo(fileName, 0, ref shinfo, (uint)Marshal.SizeOf(shinfo), SHGFI_ICON | SHGFI_SMALLICON);
 
-            Icon icon = (Icon)System.Drawing.Icon.FromHandle(shinfo.hIcon).Clone();
+            Icon icon = (Icon)Icon.FromHandle(shinfo.hIcon).Clone();
             DestroyIcon(shinfo.hIcon);
             return ToImageSource(icon);
         }
@@ -224,19 +224,17 @@ namespace Planetarium.Controls
             SHFILEINFO shinfo = new SHFILEINFO();
             SHGetFileInfo(pidl, 0, ref shinfo, (uint)Marshal.SizeOf(shinfo), SHGFI_PIDL | SHGFI_ICON | SHGFI_SMALLICON);
 
-            Icon icon = (Icon)System.Drawing.Icon.FromHandle(shinfo.hIcon).Clone();
+            Icon icon = (Icon)Icon.FromHandle(shinfo.hIcon).Clone();
             DestroyIcon(shinfo.hIcon);
             return ToImageSource(icon);
         }
 
-        static ImageSource ToImageSource(Icon icon)
+        private static ImageSource ToImageSource(Icon icon)
         {
-            ImageSource imageSource = Imaging.CreateBitmapSourceFromHIcon(
+             return Imaging.CreateBitmapSourceFromHIcon(
                 icon.Handle,
                 Int32Rect.Empty,
                 BitmapSizeOptions.FromEmptyOptions());
-
-            return imageSource;
         }
 
         class FolderInfo

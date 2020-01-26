@@ -16,12 +16,7 @@
                             <Setter.Value>
                                 <DataTemplate>
                                     <StackPanel x:Name="item" Orientation="Horizontal">
-                                        <Image Width="16" Height="16" Stretch="Fill" 
-                                       Source="{Binding 
-                                       RelativeSource={RelativeSource 
-                                       Mode=FindAncestor, 
-                                       AncestorType={x:Type TreeViewItem}}, 
-                                       Path=Tag.Icon}" />
+                                        <Image Width="16" Height="16" Stretch="Fill" Source="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type TreeViewItem}}, Path=Tag.Icon}" />
                                         <TextBlock Text="{Binding}" Margin="6 0 2 0" />
                                     </StackPanel>
                                 </DataTemplate>

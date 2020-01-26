@@ -15,7 +15,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <c:FoldersTreeView />
+        <c:FoldersTreeView  />
 
         <StackPanel    
             Grid.Row="1"
