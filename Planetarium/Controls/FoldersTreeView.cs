@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -15,52 +16,85 @@ namespace Planetarium.Controls
 {
     public class FoldersTreeView : TreeView
     {
-        private string selectedImagePath = null;
-        public string SelectedImagePath
+        public readonly static DependencyProperty SelectedPathProperty = DependencyProperty.Register(
+            nameof(SelectedPath), typeof(string), typeof(FoldersTreeView),new FrameworkPropertyMetadata(null, (d, e) => {
+
+                TreeView treeView = d as TreeView;
+                string value = e.NewValue as string;
+
+                var paths = SubPaths(value);
+
+                FoldersTreeViewItem currentItem = treeView.Items[0] as FoldersTreeViewItem;
+
+                bool needSelect = true;
+
+                foreach (var path in paths)
+                {
+                    currentItem.IsExpanded = true;
+                    var childItem = currentItem.Items.OfType<FoldersTreeViewItem>().FirstOrDefault(i => path.Equals((i.Tag as FolderInfo)?.Path, StringComparison.OrdinalIgnoreCase));
+
+                    if (childItem != null)
+                    {
+                        currentItem = childItem;
+                    }
+                    else
+                    {
+                        needSelect = false;
+                    }
+                }
+
+                if (needSelect)
+                {
+                    currentItem.IsSelected = true;
+                    currentItem.BringIntoView();
+                    treeView.Focus();
+
+                    // TODO: notify property changed
+                }
+
+            })
+            {
+                BindsTwoWayByDefault = true,
+                DefaultUpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                AffectsRender = true
+            }, TrySetPathValue);
+
+        private static bool TrySetPathValue(object value)
+        {
+            string path = value as string;
+
+            if (string.IsNullOrEmpty(path))
+            {
+                return true;
+            }
+            else
+            {
+                try
+                {
+                    return Directory.Exists(path as string);
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+            
+        }
+
+        //private string selectedPath = null;
+        public string SelectedPath
         {
             get
             {
-                return selectedImagePath;
+                return (string)GetValue(SelectedPathProperty);
             }
             set
             {
-                if (Directory.Exists(value))
-                {
-                    var paths = SubPaths(value);
-
-                    FoldersTreeViewItem currentItem = this.Items[0] as FoldersTreeViewItem;
-
-                    bool needSelect = true;
-
-                    foreach (var path in paths)
-                    {
-                        currentItem.IsExpanded = true;
-                        var childItem = currentItem.Items.OfType<FoldersTreeViewItem>().FirstOrDefault(i => path.Equals((i.Tag as FolderInfo)?.Path, StringComparison.OrdinalIgnoreCase));
-
-                        if (childItem != null)
-                        {
-                            currentItem = childItem;
-                        }
-                        else
-                        {
-                            needSelect = false;
-                        }
-                    }
-
-                    if (needSelect)
-                    {
-                        currentItem.IsSelected = true;
-                        currentItem.BringIntoView();
-                        this.Focus();
-
-                        selectedImagePath = value;
-                        // TODO: notify property changed
-                    }
-                }
+                SetValue(SelectedPathProperty, value);
             }
         }
 
-        private string[] SubPaths(string path)
+        private static string[] SubPaths(string path)
         {
             try
             {
@@ -123,8 +157,8 @@ namespace Planetarium.Controls
                 try
                 {
                     var folderInfo = item.Tag as FolderInfo;
-                    foreach (string s in Directory.GetDirectories(folderInfo.Path))
-                    {
+                    foreach (string s in GetDirectories(folderInfo.Path))
+                    {                        
                         item.Items.Add(CreateItem(new FolderInfo() { Title = Path.GetFileName(s), Path = s, Icon = GetIcon(s) }));
                     }
                 }
@@ -133,6 +167,14 @@ namespace Planetarium.Controls
 
                 }
             }
+        }
+
+        private string[] GetDirectories(string dir)
+        {
+            return new DirectoryInfo(dir).GetDirectories()
+                //.Where(f => !f.Attributes.HasFlag(FileAttributes.System | FileAttributes.Hidden))
+                .Select(f => f.FullName)
+                .ToArray();
         }
 
         private FoldersTreeViewItem CreateItem(FolderInfo folderInfo)
@@ -157,9 +199,18 @@ namespace Planetarium.Controls
 
             FoldersTreeViewItem temp = (FoldersTreeViewItem)this.SelectedItem;
 
-            var folderInfo = temp.Tag as FolderInfo;
-            selectedImagePath = folderInfo.Path;
-            // TODO: notify property changed
+            if (temp != null)
+            {
+
+                var folderInfo = temp.Tag as FolderInfo;
+
+
+                SelectedPath = folderInfo.Path;
+
+                //SetValue(SelectedPathProperty, folderInfo.Path);
+                //selectedPath = folderInfo.Path;
+                // TODO: notify property changed
+            }
         }
 
         const uint FILE_ATTRIBUTE_NORMAL = 0x00000080;
@@ -198,7 +249,7 @@ namespace Planetarium.Controls
             SHFILEINFO shfi = new SHFILEINFO();
             if (IntPtr.Zero != SHGetFileInfo(path, FILE_ATTRIBUTE_NORMAL, ref shfi, (uint)Marshal.SizeOf(typeof(SHFILEINFO)), SHGFI_DISPLAYNAME))
             {
-                return shfi.szDisplayName;
+                return string.IsNullOrWhiteSpace(shfi.szDisplayName) ? Path.GetFileName(path) : shfi.szDisplayName;
             }
             else
             {

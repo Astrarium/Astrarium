@@ -15,7 +15,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <c:FoldersTreeView  />
+        <c:FoldersTreeView SelectedPath="C:\Users\Acrux\Desktop"  />
 
         <StackPanel    
             Grid.Row="1"
