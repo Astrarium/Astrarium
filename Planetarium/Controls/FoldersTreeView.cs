@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
@@ -17,13 +18,61 @@ namespace Planetarium.Controls
     public class FoldersTreeView : TreeView
     {
         public readonly static DependencyProperty SelectedPathProperty = DependencyProperty.Register(
-            nameof(SelectedPath), typeof(string), typeof(FoldersTreeView),new FrameworkPropertyMetadata(null, (d, e) => {
-
+            nameof(SelectedPath), 
+            typeof(string), 
+            typeof(FoldersTreeView),
+            new FrameworkPropertyMetadata(null, (d, e) => 
+            {
                 TreeView treeView = d as TreeView;
-                string value = e.NewValue as string;
+                string newValue = e.NewValue as string;
+                string oldValue = e.OldValue as string;
+
+                if (newValue != oldValue && ValidatePath(newValue))
+                {
+                    SelectPath(treeView, newValue);
+                }
+            })
+            {
+                BindsTwoWayByDefault = true,
+                DefaultUpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                AffectsRender = true
+            });
+
+        private static bool ValidatePath(object value)
+        {
+            string path = value as string;
+            if (string.IsNullOrEmpty(path))
+            {
+                return true;
+            }
+            else
+            {
+                try
+                {
+                    return Directory.Exists(path);
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
+
+        private static void SelectPath(TreeView treeView, string value)
+        {
+            if (value == null)
+            {
+                TreeViewItem item = treeView.SelectedItem as TreeViewItem;
+                if (item != null)
+                {
+                    item.IsSelected = false;
+                }
+            }
+            else
+            {
+                value = NormalizePath(value);
 
                 var paths = SubPaths(value);
-
                 FoldersTreeViewItem currentItem = treeView.Items[0] as FoldersTreeViewItem;
 
                 bool needSelect = true;
@@ -45,52 +94,53 @@ namespace Planetarium.Controls
 
                 if (needSelect)
                 {
+                    //currentItem.IsExpanded = true;
                     currentItem.IsSelected = true;
+
+                    MethodInfo selectMethod = typeof(TreeViewItem).GetMethod("Select", BindingFlags.NonPublic | BindingFlags.Instance);
+
+                    selectMethod.Invoke(currentItem, new object[] { true });
+
                     currentItem.BringIntoView();
-                    treeView.Focus();
+                    //treeView.Focus();
 
                     // TODO: notify property changed
                 }
+            }
+        }
 
-            })
-            {
-                BindsTwoWayByDefault = true,
-                DefaultUpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-                AffectsRender = true
-            }, TrySetPathValue);
-
-        private static bool TrySetPathValue(object value)
+        private static string NormalizePath(string path)
         {
-            string path = value as string;
-
-            if (string.IsNullOrEmpty(path))
+            if (Directory.GetParent(path) == null)
             {
-                return true;
+                return path;
             }
             else
             {
-                try
-                {
-                    return Directory.Exists(path as string);
-                }
-                catch
-                {
-                    return false;
-                }
+                return Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
             }
-            
         }
 
-        //private string selectedPath = null;
         public string SelectedPath
         {
             get
             {
-                return (string)GetValue(SelectedPathProperty);
+                string value = (string)GetValue(SelectedPathProperty);
+                if (ValidatePath(value))
+                {
+                    return value;
+                }
+                else
+                {
+                    return null;
+                }
             }
             set
             {
-                SetValue(SelectedPathProperty, value);
+                if (ValidatePath(value))
+                {
+                    SetValue(SelectedPathProperty, value);
+                }
             }
         }
 
@@ -98,7 +148,6 @@ namespace Planetarium.Controls
         {
             try
             {
-
                 var paths = new List<string>() { path };
 
                 do
@@ -146,6 +195,11 @@ namespace Planetarium.Controls
             (this.Items[0] as TreeViewItem).IsExpanded = true;
             Background = System.Windows.Media.Brushes.Transparent;
             BorderThickness = new Thickness(0);
+
+            if (ValidatePath(SelectedPath))
+            {
+                SelectPath(this, SelectedPath);
+            }
         }
 
         void folder_Expanded(object sender, RoutedEventArgs e)
@@ -206,10 +260,6 @@ namespace Planetarium.Controls
 
 
                 SelectedPath = folderInfo.Path;
-
-                //SetValue(SelectedPathProperty, folderInfo.Path);
-                //selectedPath = folderInfo.Path;
-                // TODO: notify property changed
             }
         }
 
