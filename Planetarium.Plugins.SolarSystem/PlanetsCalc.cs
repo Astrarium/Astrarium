@@ -12,14 +12,16 @@ using System.Text;
 
 namespace Planetarium.Plugins.SolarSystem
 {
-    public class PlanetsCalc : BaseCalc, ICelestialObjectCalc<Planet>, ICelestialObjectCalc<JupiterMoon>
+    public class PlanetsCalc : BaseCalc, ICelestialObjectCalc<Planet>, ICelestialObjectCalc<JupiterMoon>, ICelestialObjectCalc<UranusMoon>
     {
         private ISettings settings;
         private Planet[] planets = new Planet[8];
         private JupiterMoon[] jupiterMoons = new JupiterMoon[4];
+        private UranusMoon[] uranusMoons = new UranusMoon[5];
 
         public ICollection<Planet> Planets => planets;
         public ICollection<JupiterMoon> JupiterMoons => jupiterMoons;
+        public ICollection<UranusMoon> UranusMoons => uranusMoons;
         public RingsAppearance SaturnRings { get; private set; } = new RingsAppearance();
         public double GreatRedSpotLongitude { get; private set; }
 
@@ -38,6 +40,11 @@ namespace Planetarium.Plugins.SolarSystem
             for (int i = 0; i < JupiterMoons.Count; i++)
             {
                 jupiterMoons[i] = new JupiterMoon(i + 1);
+            }
+
+            for (int i = 0; i < UranusMoons.Count; i++)
+            {
+                uranusMoons[i] = new UranusMoon(i + 1);
             }
 
             planets[Planet.JUPITER - 1].Flattening = 0.064874f;
@@ -325,6 +332,18 @@ namespace Planetarium.Plugins.SolarSystem
                 {
                     SaturnRings = context.Get(GetSaturnRings, n);
                 }
+
+                if (p.Number == Planet.URANUS)
+                {
+                    foreach (var u in uranusMoons)
+                    {
+                        int m = u.Number;
+                        u.Rectangular = context.Get(UranusMoonRectangular, m);
+                        u.Equatorial = context.Get(UranusMoonEquatorial, m);
+                        u.Horizontal = context.Get(UranusMoonHorizontal, m);
+                        //u.Semidiameter = context.Get(UranusMoonSemidiameter, m);
+                    }
+                }
             }
         }
 
@@ -397,6 +416,39 @@ namespace Planetarium.Plugins.SolarSystem
             var grsSettings = settings.Get<GreatRedSpotSettings>("GRSLongitude");
             return PlanetEphem.GreatRedSpotLongitude(c.JulianDay, grsSettings);
         }
+
+        private CrdsRectangular UranusMoonRectangular(SkyContext c, int m)
+        {
+            return c.Get(UranusMoonsPositions)[m - 1];
+        }
+
+        private CrdsRectangular[] UranusMoonsPositions(SkyContext c)
+        {
+            var app = c.Get(Appearance, Planet.URANUS);            
+            return UranianMoons.Positions(c.JulianDay, app.D, app.P);
+        }
+
+        private CrdsEquatorial UranusMoonEquatorial(SkyContext c, int m)
+        {
+            CrdsEquatorial uranusEq = c.Get(Equatorial, Planet.URANUS);
+            CrdsRectangular planetocentric = c.Get(UranusMoonRectangular, m);
+            PlanetAppearance appearance = c.Get(Appearance, Planet.URANUS);
+            double semidiameter = c.Get(Semidiameter, Planet.URANUS);
+            return planetocentric.ToEquatorial(uranusEq, appearance.P, semidiameter);
+        }
+
+        private CrdsHorizontal UranusMoonHorizontal(SkyContext c, int m)
+        {
+            return c.Get(UranusMoonEquatorial, m).ToHorizontal(c.GeoLocation, c.SiderealTime);
+        }
+
+
+
+
+
+
+
+
 
         public void ConfigureEphemeris(EphemerisConfig<Planet> e)
         {
@@ -561,6 +613,59 @@ namespace Planetarium.Plugins.SolarSystem
                 .Select(p => new SearchResultItem(p, p.Name));
 
             return s1.Concat(s2).ToArray();
+        }
+
+        public void ConfigureEphemeris(EphemerisConfig<UranusMoon> e)
+        {
+            e["Constellation"] = (c, um) => Constellations.FindConstellation(c.Get(UranusMoonEquatorial, um.Number), c.JulianDay);
+            e["Equatorial.Alpha"] = (c, um) => c.Get(UranusMoonEquatorial, um.Number).Alpha;
+            e["Equatorial.Delta"] = (c, um) => c.Get(UranusMoonEquatorial, um.Number).Delta;
+
+            e["Horizontal.Altitude"] = (c, um) => c.Get(UranusMoonHorizontal, um.Number).Altitude;
+            e["Horizontal.Azimuth"] = (c, um) => c.Get(UranusMoonHorizontal, um.Number).Azimuth;
+
+            e["Rectangular.X"] = (c, um) => c.Get(UranusMoonRectangular, um.Number).X;
+            e["Rectangular.Y"] = (c, um) => c.Get(UranusMoonRectangular, um.Number).Y;
+            e["Rectangular.Z"] = (c, um) => c.Get(UranusMoonRectangular, um.Number).Z;
+            //e["Magnitude"] = (c, um) => c.Get(UranusMoonMagnitude, um.Number);
+
+            e["RTS.Rise"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, Planet.URANUS).Rise);
+            e["RTS.Transit"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, Planet.URANUS).Transit);
+            e["RTS.Set"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, Planet.URANUS).Set);
+            e["RTS.Duration"] = (c, p) => c.Get(RiseTransitSet, Planet.URANUS).Duration;
+        }
+
+        public void GetInfo(CelestialObjectInfo<UranusMoon> info)
+        {
+            info.SetSubtitle("Satellite of Uranus").SetTitle(info.Body.Names.First())
+
+            .AddRow("Constellation")
+
+            .AddHeader(Text.Get("UranusMoon.Horizontal"))
+            .AddRow("Horizontal.Azimuth")
+            .AddRow("Horizontal.Altitude")
+
+            .AddHeader(Text.Get("UranusMoon.Equatorial"))
+            .AddRow("Equatorial.Alpha")
+            .AddRow("Equatorial.Delta")
+
+            .AddHeader(Text.Get("UranusMoon.Rectangular"))
+            .AddRow("Rectangular.X")
+            .AddRow("Rectangular.Y")
+            .AddRow("Rectangular.Z")
+
+            .AddHeader(Text.Get("UranusMoon.RTS"))
+            .AddRow("RTS.Rise")
+            .AddRow("RTS.Transit")
+            .AddRow("RTS.Set")
+            .AddRow("RTS.Duration");
+
+            //.AddHeader(Text.Get("UranusMoon.Appearance"))
+            //.AddRow("Phase")
+            //.AddRow("PhaseAngle")
+            //.AddRow("Magnitude")
+            //.AddRow("AngularDiameter")
+            //.AddRow("Appearance.CM");
         }
     }
 }

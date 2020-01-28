@@ -381,6 +381,13 @@ namespace Planetarium.Plugins.SolarSystem
                 RenderJupiterMoons(map, planet, moons);
             }
 
+            if (planet.Number == Planet.URANUS)
+            {
+                // render moons behind Uranus
+                var moons = planetsCalc.UranusMoons.Where(m => m.Rectangular.Z >= 0).OrderByDescending(m => m.Rectangular.Z);
+                RenderUranusMoons(map, planet, moons);
+            }
+
             Graphics g = map.Graphics;
             double ad = Angle.Separation(planet.Horizontal, map.Center);
             bool isGround = settings.Get<bool>("Ground");
@@ -408,12 +415,17 @@ namespace Planetarium.Plugins.SolarSystem
                 else if (diam >= size && (int)diam > 0)
                 {
                     PointF p = map.Project(planet.Horizontal);
+                    
+
+                    float northRot = map.GetRotationTowardsNorth(planet.Equatorial);
+                    g.TranslateTransform(p.X, p.Y);
+                    g.RotateTransform(northRot);
+                    DrawNorthDirection(g, diam);
+                    g.ResetTransform();
 
                     float rotation = map.GetRotationTowardsNorth(planet.Equatorial) + 360 - (float)planet.Appearance.P;
-
                     g.TranslateTransform(p.X, p.Y);
                     g.RotateTransform(rotation);
-
                     DrawRotationAxis(g, diam);
 
                     if (planet.Number == Planet.SATURN)
@@ -502,6 +514,13 @@ namespace Planetarium.Plugins.SolarSystem
             {
                 var moons = planetsCalc.JupiterMoons.Where(m => m.Rectangular.Z < 0).OrderByDescending(m => m.Rectangular.Z);
                 RenderJupiterMoons(map, planet, moons);
+            }
+
+            // render moons over Uranus
+            if (planet.Number == Planet.URANUS)
+            {
+                var moons = planetsCalc.UranusMoons.Where(m => m.Rectangular.Z < 0).OrderByDescending(m => m.Rectangular.Z);
+                RenderUranusMoons(map, planet, moons);
             }
         }
 
@@ -740,6 +759,81 @@ namespace Planetarium.Plugins.SolarSystem
             }
         }
 
+        private void RenderUranusMoons(IMapContext map, Planet uranus, IEnumerable<UranusMoon> moons)
+        {
+            bool isGround = settings.Get<bool>("Ground");
+            bool useTextures = settings.Get<bool>("UseTextures");
+            double coeff = map.DiagonalCoefficient();
+
+            foreach (var moon in moons)
+            {
+                double ad = Angle.Separation(moon.Horizontal, map.Center);
+
+                if ((!isGround || moon.Horizontal.Altitude + moon.Semidiameter / 3600 > 0) &&
+                    ad < coeff * map.ViewAngle + moon.Semidiameter / 3600)
+                {
+                    PointF p = map.Project(moon.Horizontal);
+                    PointF pUranus = map.Project(uranus.Horizontal);
+
+                    float size = map.GetPointSize(moon.Magnitude, 2);
+                    float diam = map.GetDiskSize(moon.Semidiameter);
+
+                    // diameter is to small to render moon disk, 
+                    // but point size caclulated from magnitude is enough to be drawn
+                    if (size > diam && (int)size > 0)
+                    {
+                        // satellite is distant enough from the Uranus
+                        // but too small to be drawn as disk
+                        if (map.DistanceBetweenPoints(p, pUranus) >= 5)
+                        {
+                            map.Graphics.TranslateTransform(p.X, p.Y);
+                            map.Graphics.FillEllipse(new SolidBrush(map.GetColor(Color.Wheat)), -size / 2, -size / 2, size, size);
+                            map.Graphics.ResetTransform();
+
+                            map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, 2);
+                            map.AddDrawnObject(moon);
+                        }
+                        
+                    }
+                    // moon should be rendered as disk
+                    else if (diam >= size && (int)diam > 0)
+                    {
+                        float rotation = map.GetRotationTowardsNorth(uranus.Equatorial) + 360 - (float)uranus.Appearance.P;
+
+                        map.Graphics.TranslateTransform(p.X, p.Y);
+                        map.Graphics.RotateTransform(rotation);
+
+                        //if (useTextures)
+                        //{
+                        //    Image texture = imagesCache.RequestImage($"5-{moon.Number}", new PlanetTextureToken($"5-{moon.Number}", moon.CM, uranus.Appearance.D), PlanetTextureProvider, map.Redraw);
+                        //    if (texture != null)
+                        //    {
+                        //        map.DrawImage(texture, -diam / 2 * 1.01f, -diam / 2 * 1.01f, diam * 1.01f, diam * 1.01f);
+                        //        DrawVolume(map, diam, 0);
+                        //    }
+                        //    else
+                        //    {
+                        //        map.Graphics.FillEllipse(new SolidBrush(map.GetColor(Color.Wheat)), -diam / 2, -diam / 2, diam, diam);
+                        //    }
+                        //}
+                        //else
+                        {
+                            map.Graphics.FillEllipse(new SolidBrush(map.GetColor(Color.Wheat)), -diam / 2, -diam / 2, diam, diam);
+                            if (diam > 2)
+                            {
+                                map.Graphics.DrawEllipse(new Pen(map.GetSkyColor()), -diam / 2, -diam / 2, diam, diam);
+                            }
+                        }
+
+                        map.Graphics.ResetTransform();
+
+                        map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, diam);
+                        map.AddDrawnObject(moon);
+                    }
+                }
+            }
+        }
+
         private void DrawRingsUntextured(Graphics g, RingsAppearance rings, int half, double scale)
         {
             float startAngle = -180 * half + ((rings.B > 0) ? 180 : 0) - 1e-2f;
@@ -815,6 +909,16 @@ namespace Planetarium.Plugins.SolarSystem
                 var p1 = new PointF(0, -(diam / 2 + 10));
                 var p2 = new PointF(0, diam / 2 + 10);
                 g.DrawLine(Pens.Gray, p1, p2);
+            }
+        }
+
+        private void DrawNorthDirection(Graphics g, float diam)
+        {
+            if (settings.Get<bool>("ShowRotationAxis"))
+            {
+                var p1 = new PointF(0, -(diam / 2 + 3 * diam));
+                var p2 = new PointF(0, diam / 2 + 3 * diam);
+                g.DrawLine(Pens.Red, p1, p2);
             }
         }
 

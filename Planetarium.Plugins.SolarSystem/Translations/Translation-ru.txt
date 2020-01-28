@@ -30,6 +30,11 @@ JupiterMoon.3.Shadow			= Тень Ганимеда
 JupiterMoon.4.Shadow			= Тень Каллисто
 EarthShadow.Label				= Тень Земли
 EclipsedByJupiter				= В тени Юпитера
+UranusMoon.1.Name				= Миранда
+UranusMoon.2.Name				= Ариэль
+UranusMoon.3.Name				= Умбриэль
+UranusMoon.4.Name				= Титания
+UranusMoon.5.Name				= Оберон
 
 # Ephemeris
 Planet.Constellation			= В созвездии
