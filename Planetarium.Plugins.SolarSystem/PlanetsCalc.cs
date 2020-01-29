@@ -126,7 +126,7 @@ namespace Planetarium.Plugins.SolarSystem
         }
 
         /// <summary>
-        /// Gets ecliptical coordinates of Earth
+        /// Gets ecliptical coordinates of planet
         /// </summary>
         public CrdsEcliptical Ecliptical(SkyContext c, int p)
         {
@@ -429,27 +429,28 @@ namespace Planetarium.Plugins.SolarSystem
             return UranianMoons.Positions(c.JulianDay, earth, uranus);
         }
 
+        private CrdsEcliptical UranusMoonEcliptical(SkyContext c, int m)
+        {
+            var ecliptical = c.Get(UranusMoonRectangular, m).ToEcliptical();
+
+            // Correction for FK5 system
+            ecliptical += PlanetPositions.CorrectionForFK5(c.JulianDay, ecliptical);
+
+            // Take nutation into account
+            ecliptical += Nutation.NutationEffect(c.NutationElements.deltaPsi);
+
+            return ecliptical;
+        }
+
         private CrdsEquatorial UranusMoonEquatorial(SkyContext c, int m)
         {
-            CrdsEquatorial uranusEq = c.Get(Equatorial, Planet.URANUS);
-            CrdsRectangular planetocentric = c.Get(UranusMoonRectangular, m);
-            PlanetAppearance appearance = c.Get(Appearance, Planet.URANUS);
-            double semidiameter = c.Get(Semidiameter, Planet.URANUS);
-            return planetocentric.ToEquatorial(uranusEq, appearance.P, semidiameter);
+            return c.Get(UranusMoonEcliptical, m).ToEquatorial(c.Epsilon);            
         }
 
         private CrdsHorizontal UranusMoonHorizontal(SkyContext c, int m)
         {
             return c.Get(UranusMoonEquatorial, m).ToHorizontal(c.GeoLocation, c.SiderealTime);
         }
-
-
-
-
-
-
-
-
 
         public void ConfigureEphemeris(EphemerisConfig<Planet> e)
         {

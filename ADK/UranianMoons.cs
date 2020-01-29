@@ -381,21 +381,28 @@ namespace ADK
 
             for (int i = 0; i < MOONS_COUNT; i++)
             {
-                // Rectangular coordinates of satellite (i)
-                CrdsRectangular rect = new CrdsRectangular();
-                rect.X = rectUranus.X + gust86Rect[i].X;
-                rect.Y = rectUranus.Y + gust86Rect[i].Y;
-                rect.Z = rectUranus.Z + gust86Rect[i].Z;
-
-                var ecl = rect.ToEcliptical();
-                double distance = ecl.Distance;
-
-                // Apparent rectangular coordinates of satellite (i)
                 moons[i] = new CrdsRectangular(
-                    (eclUranus.Lambda - ecl.Lambda) / angular,
-                    (ecl.Beta - eclUranus.Beta) / angular,
-                    (distance - distanceUranus) / (2 * 25559 / AU)
+                    rectUranus.X + gust86Rect[i].X,
+                    rectUranus.Y + gust86Rect[i].Y,
+                    rectUranus.Z + gust86Rect[i].Z
                 );
+
+
+                // Rectangular coordinates of satellite (i)
+                //CrdsRectangular rect = new CrdsRectangular();
+                //rect.X = rectUranus.X + gust86Rect[i].X;
+                //rect.Y = rectUranus.Y + gust86Rect[i].Y;
+                //rect.Z = rectUranus.Z + gust86Rect[i].Z;
+
+                //var ecl = rect.ToEcliptical();
+                //double distance = ecl.Distance;
+
+                //// Apparent rectangular coordinates of satellite (i)
+                //moons[i] = new CrdsRectangular(
+                //    (eclUranus.Lambda - ecl.Lambda) / angular,
+                //    (ecl.Beta - eclUranus.Beta) / angular,
+                //    (distance - distanceUranus) / (2 * 25559 / AU)
+                //);
 
 
                 //// radius-vector of moon, in planet's equatorial radii
