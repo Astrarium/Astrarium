@@ -386,39 +386,6 @@ namespace ADK
                     rectUranus.Y + gust86Rect[i].Y,
                     rectUranus.Z + gust86Rect[i].Z
                 );
-
-
-                // Rectangular coordinates of satellite (i)
-                //CrdsRectangular rect = new CrdsRectangular();
-                //rect.X = rectUranus.X + gust86Rect[i].X;
-                //rect.Y = rectUranus.Y + gust86Rect[i].Y;
-                //rect.Z = rectUranus.Z + gust86Rect[i].Z;
-
-                //var ecl = rect.ToEcliptical();
-                //double distance = ecl.Distance;
-
-                //// Apparent rectangular coordinates of satellite (i)
-                //moons[i] = new CrdsRectangular(
-                //    (eclUranus.Lambda - ecl.Lambda) / angular,
-                //    (ecl.Beta - eclUranus.Beta) / angular,
-                //    (distance - distanceUranus) / (2 * 25559 / AU)
-                //);
-
-
-                //// radius-vector of moon, in planet's equatorial radii
-                //double r = Sqrt(moons[i].X * moons[i].X + moons[i].Y * moons[i].Y);
-
-                //// rotation angle
-                //double theta = ToDegrees(Atan2(moons[i].Y, moons[i].X));
-
-                //// rotate with position angle of the planet
-                //theta += 98 + 90;
-
-                //// convert back to rectangular coordinates, but rotated with P angle:
-                //moons[i].X = r * Cos(ToRadians(theta));
-                //moons[i].Y = r * Sin(ToRadians(theta));
-
-
             }
 
             return moons;

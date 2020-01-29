@@ -419,7 +419,38 @@ namespace Planetarium.Plugins.SolarSystem
 
         private CrdsRectangular UranusMoonRectangular(SkyContext c, int m)
         {
-            return c.Get(UranusMoonsPositions)[m - 1];
+            CrdsEquatorial moonEq = c.Get(UranusMoonEquatorial, m);
+            CrdsEcliptical moonEcl = c.Get(UranusMoonEcliptical, m);
+            CrdsEquatorial uranusEq = c.Get(Equatorial, Planet.URANUS);
+            CrdsEcliptical uranusEcl = c.Get(Ecliptical, Planet.URANUS);
+            
+            double sd = c.Get(Semidiameter, Planet.URANUS) / 3600;
+            double P = c.Get(Appearance, Planet.URANUS).P;
+
+            double[] alpha = new double[] { moonEq.Alpha, uranusEq.Alpha };
+            Angle.Align(alpha);
+
+            double[] delta = new double[] { moonEq.Delta, uranusEq.Delta };
+
+            double x = (alpha[0] - alpha[1]) * Math.Cos(Angle.ToRadians(uranusEq.Delta)) / sd;
+            double y = (delta[0] - delta[1]) / sd;
+
+            // radius-vector of moon, in planet's equatorial radii
+            double r = Math.Sqrt(x * x + y * y);
+
+            // rotation angle
+            double theta = Angle.ToDegrees(Math.Atan2(x, y));
+
+            // rotate with position angle of the planet
+            theta -= P;
+
+            // convert back to rectangular coordinates, but rotated with P angle:
+            y = r * Math.Cos(Angle.ToRadians(theta));
+            x = -r * Math.Sin(Angle.ToRadians(theta));
+
+            double z = (moonEcl.Distance - uranusEcl.Distance) / (2 * 25559 / 149597870.0);
+
+            return new CrdsRectangular(x, y, z);
         }
 
         private CrdsRectangular[] UranusMoonsPositions(SkyContext c)
@@ -431,7 +462,7 @@ namespace Planetarium.Plugins.SolarSystem
 
         private CrdsEcliptical UranusMoonEcliptical(SkyContext c, int m)
         {
-            var ecliptical = c.Get(UranusMoonRectangular, m).ToEcliptical();
+            var ecliptical = c.Get(UranusMoonsPositions)[m - 1].ToEcliptical();
 
             // Correction for FK5 system
             ecliptical += PlanetPositions.CorrectionForFK5(c.JulianDay, ecliptical);
