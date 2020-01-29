@@ -424,8 +424,9 @@ namespace Planetarium.Plugins.SolarSystem
 
         private CrdsRectangular[] UranusMoonsPositions(SkyContext c)
         {
-            var app = c.Get(Appearance, Planet.URANUS);            
-            return UranianMoons.Positions(c.JulianDay, app.D, app.P);
+            CrdsHeliocentrical earth = c.Get(EarthHeliocentrial);
+            CrdsHeliocentrical uranus = c.Get(Heliocentrical, Planet.URANUS);
+            return UranianMoons.Positions(c.JulianDay, earth, uranus);
         }
 
         private CrdsEquatorial UranusMoonEquatorial(SkyContext c, int m)

@@ -17,7 +17,7 @@ namespace ADK.Tests
             double de = -45.64;
             double pa = 254.6;
 
-            var pos = UranianMoons.Positions(jd, de, pa);
+            //var pos = UranianMoons.Positions(jd, de, pa);
         }
     }
 }
