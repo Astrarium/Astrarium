@@ -423,7 +423,7 @@ namespace Planetarium.Plugins.SolarSystem
             CrdsEcliptical moonEcl = c.Get(UranusMoonEcliptical, m);
             CrdsEquatorial uranusEq = c.Get(Equatorial, Planet.URANUS);
             CrdsEcliptical uranusEcl = c.Get(Ecliptical, Planet.URANUS);
-            
+
             double sd = c.Get(Semidiameter, Planet.URANUS) / 3600;
             double P = c.Get(Appearance, Planet.URANUS).P;
 
@@ -448,7 +448,11 @@ namespace Planetarium.Plugins.SolarSystem
             y = r * Math.Cos(Angle.ToRadians(theta));
             x = -r * Math.Sin(Angle.ToRadians(theta));
 
-            double z = (moonEcl.Distance - uranusEcl.Distance) / (2 * 25559 / 149597870.0);
+            const double URANUS_RADIUS = 25559;
+            const double AU = 149597870;
+
+            // z is expressed in Uranus equatorial radii
+            double z = (moonEcl.Distance - uranusEcl.Distance) / (2 * URANUS_RADIUS / AU);
 
             return new CrdsRectangular(x, y, z);
         }

@@ -272,9 +272,20 @@ namespace ADK
             return new CrdsEquatorial(alpha_, delta_);
         }
 
+        /// <summary>
+        /// Converts rectangular planetocentrical coordinates of satellite to equatorial coordinates as seen from Earth
+        /// </summary>
+        /// <param name="m">Rectangular planetocentrical coordinates of satellite</param>
+        /// <param name="planet">Equatorial coordinates of parent planet (as seen from Earth)</param>
+        /// <param name="P">Position angle of parent planet</param>
+        /// <param name="semidiameter">Visible semidiameter of parent planet, in seconds of arc.</param>
+        /// <returns>Equatorial coordinates of satellite as seen from Earth</returns>
+        /// <remarks>
+        /// The method is taken from geometrical drawing (own work)
+        /// </remarks>
         public static CrdsEquatorial ToEquatorial(this CrdsRectangular m, CrdsEquatorial planet, double P, double semidiameter)
         {
-            // convert to polar coordinates
+            // convert rectangular planetocentrical coordinates to planetocentrical polar coordinates
 
             // radius-vector of moon, in planet's equatorial radii
             double r = Math.Sqrt(m.X * m.X + m.Y * m.Y);
@@ -289,10 +300,14 @@ namespace ADK
             double x = r * Math.Cos(Angle.ToRadians(theta));
             double y = r * Math.Sin(Angle.ToRadians(theta));
 
+            // delta of RA
             double dAlpha = (1 / Math.Cos(Angle.ToRadians(planet.Delta))) * x * semidiameter / 3600;
-            double dDelta = y * semidiameter / 3600;
+            
+            // delta of Declination
+            // negative sign because positive delta means southward direction
+            double dDelta = -y * semidiameter / 3600;
 
-            return new CrdsEquatorial(planet.Alpha - dAlpha, planet.Delta + dDelta);
+            return new CrdsEquatorial(planet.Alpha - dAlpha, planet.Delta - dDelta);
         }
 
         public static CrdsHorizontal WithRefraction(this CrdsHorizontal h0)
