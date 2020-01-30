@@ -161,8 +161,6 @@ namespace ADK
             double W = Angle.To360(cW[planet - 1][0] + cW[planet - 1][1] * d + cW[planet - 1][2] * T);
 
             double delta = Angle.ToRadians(eq.Delta);
-            double alpha = Angle.ToRadians(eq.Alpha);
-
             double delta0 = Angle.ToRadians(eq0.Delta);
             double dAlpha0 = Angle.ToRadians(eq0.Alpha - eq.Alpha);
 
