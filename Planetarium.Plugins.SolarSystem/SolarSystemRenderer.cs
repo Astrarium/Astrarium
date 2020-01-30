@@ -100,6 +100,11 @@ namespace Planetarium.Plugins.SolarSystem
             RenderEarthShadow(map);
         }
 
+        public override bool OnMouseMove(CrdsHorizontal mouse)
+        {
+            return Angle.Separation(mouse, moon.Horizontal) < moon.Semidiameter / 3600;
+        }
+
         private void RenderSun(IMapContext map)
         {
             if (!settings.Get<bool>("Sun")) return;
@@ -268,6 +273,12 @@ namespace Planetarium.Plugins.SolarSystem
                 }
 
                 map.AddDrawnObject(moon);
+
+                if (Angle.Separation(map.MousePosition, moon.Horizontal) < moon.Semidiameter / 3600)
+                {
+                    PointF mouse = map.Project(map.MousePosition);
+                    map.Graphics.DrawString("Moon", fontLabel, brushLabel, mouse);
+                }
             }
         }
 

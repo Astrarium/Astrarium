@@ -130,9 +130,32 @@ namespace Planetarium
         public CelestialObject LockedObject { get; set; }
 
         /// <summary>
+        /// Backing field for <see cref="MousePosition"/> property.
+        /// </summary>
+        private CrdsHorizontal mousePosition = new CrdsHorizontal(0, 0);
+
+        /// <summary>
+        /// Last result of needRedraw flag
+        /// </summary>
+        private bool lastNeedRedraw = false;
+
+        /// <summary>
         /// Current coordinates of mouse, converted to Horizontal coordinates on the map
         /// </summary>
-        public CrdsHorizontal MousePosition { get; set; }
+        public CrdsHorizontal MousePosition 
+        { 
+            get { return mousePosition; } 
+            set 
+            { 
+                mousePosition = value;
+                bool needRedraw = renderers.Any(r => r.OnMouseMove(mousePosition));
+                if (!IsDragging && (needRedraw || lastNeedRedraw))
+                {
+                    lastNeedRedraw = needRedraw;
+                    Invalidate();
+                }
+            }
+        }
 
         /// <summary>
         /// Occurs when selected celestial object is changed
@@ -143,15 +166,7 @@ namespace Planetarium
         /// Projection used to render the map
         /// </summary>
         public IProjection Projection { get; set; } = null;
-
-        public bool RenderOnMouseMove
-        {
-            get
-            {
-                return renderers.Any(r => r.NeedRenderOnMouseMove);
-            }
-        }
-
+              
         public event Action OnInvalidate;
 
         /// <summary>

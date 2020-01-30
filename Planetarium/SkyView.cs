@@ -113,12 +113,11 @@ namespace Planetarium
             {
                 bool shift = (ModifierKeys & Keys.Shift) != Keys.None;
 
+                SkyMap.IsDragging = e.Button == MouseButtons.Left && !shift;
                 SkyMap.MousePosition = SkyMap.Projection.Invert(new PointF(e.X, e.Y));
 
-                if (e.Button == MouseButtons.Left && !shift)
+                if (SkyMap.IsDragging)
                 {
-                    SkyMap.IsDragging = true;
-
                     if (SkyMap.LockedObject == null)
                     {
                         if (pOld == Point.Empty)
@@ -171,14 +170,6 @@ namespace Planetarium
                         }
                     }
                     Invalidate();
-                }
-                else
-                {
-                    SkyMap.IsDragging = false;
-                    if (SkyMap.RenderOnMouseMove)
-                    {
-                        Invalidate();
-                    }
                 }
             }
         }

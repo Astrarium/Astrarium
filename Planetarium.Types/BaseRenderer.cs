@@ -1,4 +1,5 @@
-﻿using Planetarium.Types;
+﻿using ADK;
+using Planetarium.Types;
 
 namespace Planetarium.Renderers
 {
@@ -9,8 +10,17 @@ namespace Planetarium.Renderers
     {
         public abstract void Render(IMapContext map);
         public virtual void Initialize() { }
-        public virtual bool NeedRenderOnMouseMove => false;
         public abstract RendererOrder Order { get; }
+
+        /// <summary>
+        /// The function is called each time when position of mouse is changed.
+        /// Mouse position, converted to horizontal coordinates on map, is passed as parameter.
+        /// The function should return true if repaint of map is required, 
+        /// otherwise it should return false (default behaviour).
+        /// </summary>
+        /// <param name="mouse">Current mouse position on sky map</param>
+        /// <returns>True if repaint of map is required, otherwise false.</returns>
+        public virtual bool OnMouseMove(CrdsHorizontal mouse) { return false; }
     }
 
     public enum RendererOrder
