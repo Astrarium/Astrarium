@@ -5,13 +5,10 @@ using Planetarium.Renderers;
 using Planetarium.Types;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Planetarium
 {
@@ -105,8 +102,7 @@ namespace Planetarium
 
         public CrdsHorizontal Center { get; } = new CrdsHorizontal(0, 0);
         public bool Antialias { get; set; } = true;
-        public bool IsDragging { get; set; }
-
+       
         private CelestialObject selectedObject;
         public CelestialObject SelectedObject
         {
@@ -140,7 +136,8 @@ namespace Planetarium
         private bool lastNeedRedraw = false;
 
         /// <summary>
-        /// Current coordinates of mouse, converted to Horizontal coordinates on the map
+        /// Gets or sets current coordinates of mouse, converted to Horizontal coordinates on the map.
+        /// Setting new value can raise redraw of map
         /// </summary>
         public CrdsHorizontal MousePosition 
         { 
@@ -148,14 +145,16 @@ namespace Planetarium
             set 
             { 
                 mousePosition = value;
-                bool needRedraw = renderers.Any(r => r.OnMouseMove(mousePosition));
-                if (!IsDragging && (needRedraw || lastNeedRedraw))
+                bool needRedraw = renderers.Any(r => r.OnMouseMove(mousePosition, MouseButton));
+                if (MouseButton == MouseButton.None && (needRedraw || lastNeedRedraw))
                 {
                     lastNeedRedraw = needRedraw;
                     Invalidate();
                 }
             }
         }
+
+        public MouseButton MouseButton { get; set; }
 
         /// <summary>
         /// Occurs when selected celestial object is changed
@@ -275,7 +274,7 @@ namespace Planetarium
                 meanRenderTime = (renderStopWatch.ElapsedMilliseconds + rendersCount * meanRenderTime) / (rendersCount + 1);
 
                 // Locked object
-                if (LockedObject != null && IsDragging)
+                if (LockedObject != null && MouseButton == MouseButton.Left)
                 {
                     var format = new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
                     string text = $"Map is locked on {LockedObject.Names.First()}";
@@ -417,6 +416,7 @@ namespace Planetarium
             public float DayLightFactor => skyContext.DayLightFactor;
             public ColorSchema Schema => map.Schema;
             public CrdsHorizontal MousePosition => map.MousePosition;
+            public MouseButton MouseButton => map.MouseButton;
             public CelestialObject LockedObject => map.LockedObject;
             public CelestialObject SelectedObject => map.SelectedObject;
 

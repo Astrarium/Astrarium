@@ -64,6 +64,8 @@ namespace Planetarium.Types
 
         CrdsHorizontal MousePosition { get; }
 
+        MouseButton MouseButton { get; }
+
         void AddDrawnObject(CelestialObject obj);
 
         /// <summary>

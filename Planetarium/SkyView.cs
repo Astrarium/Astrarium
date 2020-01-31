@@ -75,16 +75,20 @@ namespace Planetarium
 
             if (e.Button == MouseButtons.Left && !shift)
             {
+                SkyMap.MouseButton = MouseButton.Left;
                 pOld.X = e.X;
                 pOld.Y = e.Y;
             }
+
+            SkyMap.MousePosition = SkyMap.Projection.Invert(new PointF(e.X, e.Y));
         }
 
         protected override void OnMouseUp(MouseEventArgs e)
         {
             base.OnMouseUp(e);          
             SkyMap.Antialias = true;
-            SkyMap.IsDragging = false;
+            SkyMap.MouseButton = MouseButton.None;
+            SkyMap.MousePosition = SkyMap.Projection.Invert(new PointF(e.X, e.Y));
             Cursor = Cursors.Cross;
             Invalidate();
             pOld = Point.Empty;
@@ -111,12 +115,22 @@ namespace Planetarium
 
             if (SkyMap != null)
             {
-                bool shift = (ModifierKeys & Keys.Shift) != Keys.None;
+                switch (e.Button)
+                {
+                    case MouseButtons.Left:
+                        SkyMap.MouseButton = MouseButton.Left;
+                        break;
+                    case MouseButtons.Right:
+                        SkyMap.MouseButton = MouseButton.Right;
+                        break;
+                    default:
+                        SkyMap.MouseButton = MouseButton.None;
+                        break;
+                }
 
-                SkyMap.IsDragging = e.Button == MouseButtons.Left && !shift;
-                SkyMap.MousePosition = SkyMap.Projection.Invert(new PointF(e.X, e.Y));
+                CrdsHorizontal newMousePosition = SkyMap.Projection.Invert(new PointF(e.X, e.Y));
 
-                if (SkyMap.IsDragging)
+                if (SkyMap.MouseButton == MouseButton.Left)
                 {
                     if (SkyMap.LockedObject == null)
                     {
@@ -169,7 +183,13 @@ namespace Planetarium
                             Cursor = Cursors.No;
                         }
                     }
+
+                    SkyMap.MousePosition = newMousePosition;
                     Invalidate();
+                }
+                else
+                {
+                    SkyMap.MousePosition = newMousePosition;
                 }
             }
         }

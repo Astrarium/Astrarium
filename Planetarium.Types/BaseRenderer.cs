@@ -20,7 +20,7 @@ namespace Planetarium.Renderers
         /// </summary>
         /// <param name="mouse">Current mouse position on sky map</param>
         /// <returns>True if repaint of map is required, otherwise false.</returns>
-        public virtual bool OnMouseMove(CrdsHorizontal mouse) { return false; }
+        public virtual bool OnMouseMove(CrdsHorizontal mouse, MouseButton mouseButton) { return false; }
     }
 
     public enum RendererOrder

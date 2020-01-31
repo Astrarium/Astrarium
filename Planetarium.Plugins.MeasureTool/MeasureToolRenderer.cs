@@ -38,7 +38,7 @@ namespace Planetarium.Plugins.MeasureTool
         /// <summary>
         /// Map should be renderer on MouseMove only if measure tool is on
         /// </summary>
-        public override bool OnMouseMove(CrdsHorizontal mouse)
+        public override bool OnMouseMove(CrdsHorizontal mouse, MouseButton mouseButton)
         {
             return IsMeasureToolOn;
         }
