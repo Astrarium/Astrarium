@@ -276,10 +276,72 @@ namespace Planetarium.Plugins.SolarSystem
 
                 if (map.MouseButton == MouseButton.None && Angle.Separation(map.MousePosition, moon.Horizontal) < moon.Semidiameter / 3600)
                 {
-                    PointF mouse = map.Project(map.MousePosition);
-                    map.Graphics.DrawString("Moon", fontLabel, brushLabel, mouse);
+                    //PointF mouse = map.Project(map.MousePosition);
+                    //map.Graphics.DrawString("Moon", fontLabel, brushLabel, mouse);
+
+                    CrdsGeographical platoCoords = new CrdsGeographical(-9.38, 51.62);
+                    // ;
+                    double theta = Angle.ToRadians(90 - platoCoords.Latitude); // [0...180]
+                    double phi = Angle.ToRadians(Angle.To360(platoCoords.Longitude)); // [0...360]
+
+                    // decart system
+                    double x = Math.Sin(theta) * Math.Cos(phi);
+                    double y = Math.Sin(theta) * Math.Sin(phi);
+                    double z = Math.Cos(theta);
+                    double[] v = new double[] { x, y, z }; 
+
+                    // rotate around Z axis (longitude / phi)
+                    double aZ = Angle.ToRadians(moon.Libration.l);
+                    double[,] mZ = new double[3, 3] { { Math.Cos(aZ), -Math.Sin(aZ), 0 }, { Math.Sin(aZ), Math.Cos(aZ), 0 }, { 0, 0, 1 } };
+                    Rotate(v, mZ);
+
+                    // rotate around Y axis (latitude / theta)
+                    double aY = Angle.ToRadians(moon.Libration.b);
+                    double[,] mY = new double[3, 3] { { Math.Cos(aY), 0, Math.Sin(aY) }, { 0, 1, 0 }, { -Math.Sin(aY), 0, Math.Cos(aY) } };
+                    Rotate(v, mY);
+
+                    x = v[0];
+                    y = v[1];
+                    z = v[2];
+
+                    // back to spherical
+                    theta = 90 - Angle.ToDegrees(Math.Atan(Math.Sqrt(x * x + y * y) / z));
+                    phi = Angle.ToDegrees(Math.Atan2(y, x));
+
+                    CrdsGeographical moonCenter = new CrdsGeographical(0, 0);
+
+                    double sep =51.62;// Angle.Separation(new CrdsGeographical(phi, theta), moonCenter);
+                    if (sep < 90)
+                    {
+                        float s = (float)Math.Sin(Angle.ToRadians(sep)) * map.GetDiskSize(moon.Semidiameter, 10);
+
+                        map.Graphics.TranslateTransform(p.X, p.Y);
+                        map.Graphics.RotateTransform(axisRotation);
+                        map.Graphics.DrawEllipse(Pens.Red, -s / 2, -s / 2, s, s);
+
+                        s = map.GetDiskSize(moon.Semidiameter, 10);
+                        map.Graphics.DrawEllipse(Pens.Red, -s / 2, -s / 2, s, s);
+
+                        map.Graphics.ResetTransform();
+                    }
                 }
             }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="v"></param>
+        /// <param name="m">First index: row, second: column</param>
+        private void Rotate(double[] v, double[,] m)
+        {
+            double x = v[0] * m[0, 0] + v[1] * m[1, 0] + v[2] * m[2, 0];
+            double y = v[0] * m[0, 1] + v[1] * m[1, 1] + v[2] * m[2, 1];
+            double z = v[0] * m[0, 2] + v[1] * m[1, 2] + v[2] * m[2, 2];
+
+            v[0] = x;
+            v[1] = y;
+            v[2] = z;
         }
 
         private Brush GetShadowBrush(IMapContext map)
@@ -1103,8 +1165,8 @@ namespace Planetarium.Plugins.SolarSystem
                 {
                     PlanetTextureToken other = (PlanetTextureToken)obj;
                     return                        
-                        Math.Abs(Longitude - other.Longitude) < 1 &&
-                        Math.Abs(Latitude - other.Latitude) < 1;
+                        Math.Abs(Longitude - other.Longitude) < 0.01 &&
+                        Math.Abs(Latitude - other.Latitude) < 0.01;
                 }
                 else
                 {
