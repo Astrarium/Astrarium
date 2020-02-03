@@ -162,8 +162,7 @@ namespace Planetarium.Plugins.SolarSystem
         /// </summary>
         private Libration LibrationElements(SkyContext c)
         {
-            return new Libration() { l = 0, b = 0 };
-            //return LunarEphem.Libration(c.JulianDay, c.Get(Ecliptical), c.NutationElements.deltaPsi);
+            return LunarEphem.Libration(c.JulianDay, c.Get(Ecliptical), c.NutationElements.deltaPsi);
         }
 
         /// <summary>
