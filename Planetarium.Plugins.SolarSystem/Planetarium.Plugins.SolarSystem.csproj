@@ -92,9 +92,6 @@
     <None Update="Data\LunarFeatures.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\LunarFeatures.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="Data\Moon.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
