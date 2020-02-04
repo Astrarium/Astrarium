@@ -208,20 +208,26 @@ namespace Planetarium.Plugins.SolarSystem
             }
         }
 
-        private CrdsGeographical[] craters = new CrdsGeographical[]
+        private class SurfaceFeature
         {
-            new CrdsGeographical(-9.38, 51.62), // Plato
-            new CrdsGeographical(-20.08, 9.62), // Copernicus
-            new CrdsGeographical(-11.22, -43.3) // Tycho
+            public CrdsGeographical Coordinates { get; private set; }
+            public string Name { get; private set; }
+            public float Diameter { get; private set; }
 
-            //new CrdsGeographical(0, -45),
-            //new CrdsGeographical(0, 45),
-            //new CrdsGeographical(45, 45), 
-            //new CrdsGeographical(-45, -45),
-            //new CrdsGeographical(-45, 0),
-            //new CrdsGeographical(45, 0),
-            //new CrdsGeographical(0, 45),
-            //new CrdsGeographical(0, 0),
+            public SurfaceFeature(string name, double longitude, double latitude, double diameter)
+            {
+                Name = name;
+                Coordinates = new CrdsGeographical(longitude, latitude);
+                Diameter = (float)diameter;
+            } 
+        }
+
+        private SurfaceFeature[] features = new SurfaceFeature[]
+        {
+            new SurfaceFeature("Plato", -9.38, 51.62, 100.68), 
+            new SurfaceFeature("Copernicus", -20.08, 9.62, 96.07), 
+            new SurfaceFeature("Tycho", -11.22, -43.3, 85.29),
+            new SurfaceFeature("Mare Crisium", 59.1, 16.18, 555.92)
         };
 
         private void RenderMoon(IMapContext map)
@@ -294,12 +300,12 @@ namespace Planetarium.Plugins.SolarSystem
 
                 if (map.MouseButton == MouseButton.None && Angle.Separation(map.MousePosition, moon.Horizontal) < moon.Semidiameter / 3600)
                 {
-                    foreach (CrdsGeographical craterCoords in craters) 
+                    foreach (var feature in features) 
                     {
-                        double theta = Angle.ToRadians(90 - craterCoords.Latitude); // [0...180]
-                        double phi = Angle.ToRadians(Angle.To360(craterCoords.Longitude)); // [0...360]
+                        double theta = Angle.ToRadians(90 - feature.Coordinates.Latitude); // [0...180]
+                        double phi = Angle.ToRadians(Angle.To360(feature.Coordinates.Longitude)); // [0...360]
 
-                        // decart system
+                        // Cartesian coordinates
                         double x = Math.Sin(theta) * Math.Cos(phi);
                         double y = Math.Sin(theta) * Math.Sin(phi);
                         double z = Math.Cos(theta);
@@ -323,33 +329,47 @@ namespace Planetarium.Plugins.SolarSystem
                         theta = 90 - Angle.ToDegrees(Math.Acos(z / Math.Sqrt(x * x + y * y + z * z)));
                         phi = Angle.ToDegrees(Math.Atan2(y, x));
 
-                        CrdsGeographical moonCenter = new CrdsGeographical(0, 0);
-
-                        double sep = Angle.Separation(new CrdsGeographical(phi, theta), moonCenter);
+                        // angular separation between visible center of the body disk and center of the feature
+                        // expressed in degrees of arc, from 0 (center) to 90 (disk edge)
+                        double sep = Angle.Separation(new CrdsGeographical(phi, theta), new CrdsGeographical(0, 0));
                         if (sep < 90)
                         {
-                            // X,Y expressed in eq. radii
-                            double Y = -Math.Sin(Angle.ToRadians(theta));
-                            double X = Math.Cos(Angle.ToRadians(theta)) * Math.Sin(Angle.ToRadians(phi));
-
-
+                            // radius of celestial body disk, in pixels
                             float r = map.GetDiskSize(moon.Semidiameter, 10) / 2;
 
-                            // rotated coordinates
-                            double X_ = r * (X * Math.Cos(Angle.ToRadians(axisRotation)) - Y * Math.Sin(Angle.ToRadians(axisRotation)));
-                            double Y_ = r * (X * Math.Sin(Angle.ToRadians(axisRotation)) + Y * Math.Cos(Angle.ToRadians(axisRotation)));
+                            // convert to orthographic polar coordinates 
+                            float Y = r * (float)(-Math.Sin(Angle.ToRadians(theta)));
+                            float X = r * (float)(Math.Cos(Angle.ToRadians(theta)) * Math.Sin(Angle.ToRadians(phi)));
 
+                            
+
+                            // polar coordinates rotated around of visible center of the body disk
+                            float X_ = (float)(X * Math.Cos(Angle.ToRadians(axisRotation)) - Y * Math.Sin(Angle.ToRadians(axisRotation)));
+                            float Y_ = (float)(X * Math.Sin(Angle.ToRadians(axisRotation)) + Y * Math.Cos(Angle.ToRadians(axisRotation)));
+
+                            // distance, in pixels, between center of the feature and current mouse position
                             var d = Math.Sqrt(Math.Pow(pMouse.X - X_ - p.X, 2) + Math.Pow(pMouse.Y - Y_ - p.Y, 2));
 
-                            map.Graphics.TranslateTransform(p.X, p.Y);
-                            //map.Graphics.RotateTransform(axisRotation);
+                            // feature outline radius, in pixels
+                            float featureRadius = feature.Diameter / 3474 * r;
 
-                            //if (d < 5)
+                            if (d < featureRadius)
                             {
-                                map.Graphics.FillEllipse(Brushes.Red, (float)(X_) - 1, (float)(Y_) - 1, 3, 3);
+                                // visible flattening of feature outline,
+                                // depends on angular distance between feature and visible center of the body disk
+                                float f = (float)Math.Cos(Angle.ToRadians(sep));
+
+                                // draw feature outline
+                                map.Graphics.TranslateTransform(p.X + X_, p.Y + Y_);
+                                map.Graphics.RotateTransform(axisRotation + 90 + (float)Angle.ToDegrees(Math.Atan2(Y, X)));
+                                map.Graphics.DrawEllipse(Pens.Yellow, -featureRadius, -featureRadius * f, featureRadius * 2, featureRadius * f * 2);
+                                map.Graphics.ResetTransform();
+
+                                // draw feature label
+                                map.Graphics.TranslateTransform(p.X, p.Y);
+                                map.Graphics.DrawStringOpaque(feature.Name, fontLabel, Brushes.Yellow, Brushes.Black, new PointF( X_ + featureRadius + 3, Y_ + featureRadius + 3));
+                                map.Graphics.ResetTransform();
                             }
-                            map.Graphics.ResetTransform();
-                            
                         }
                     }
                 }
@@ -366,7 +386,6 @@ namespace Planetarium.Plugins.SolarSystem
             double x = v[0] * m[0, 0] + v[1] * m[1, 0] + v[2] * m[2, 0];
             double y = v[0] * m[0, 1] + v[1] * m[1, 1] + v[2] * m[2, 1];
             double z = v[0] * m[0, 2] + v[1] * m[1, 2] + v[2] * m[2, 2];
-
             v[0] = x;
             v[1] = y;
             v[2] = z;
