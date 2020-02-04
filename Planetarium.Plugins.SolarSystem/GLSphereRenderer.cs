@@ -19,7 +19,7 @@ namespace Planetarium.Renderers
     /// </remarks>
     internal class GLSphereRenderer : ISphereRenderer
     {
-        //private GameWindow window;
+        private GameWindow window;
 
         private Bitmap GraphicsContextToBitmap(int size)
         {
@@ -37,19 +37,12 @@ namespace Planetarium.Renderers
 
         public Image Render(RendererOptions options)
         {
-            GameWindow window = null ;
-
             if (window == null)
             {
                 int size = 1024;
                 window = new GameWindow(size, size, new GraphicsMode(new ColorFormat(8, 8, 8, 8), 24, 0, 0, ColorFormat.Empty, 1), "", GameWindowFlags.Default, DisplayDevice.Default, 3, 0, GraphicsContextFlags.Default);
                 window.Visible = false;
             }
-            
-            //if (GraphicsContext.CurrentContext?.IsCurrent == false)
-            //{
-            //    window.MakeCurrent();
-            //}
 
             GL.ClearColor(Color.Transparent);
 

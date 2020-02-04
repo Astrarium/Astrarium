@@ -213,6 +213,15 @@ namespace Planetarium.Plugins.SolarSystem
             new CrdsGeographical(-9.38, 51.62), // Plato
             new CrdsGeographical(-20.08, 9.62), // Copernicus
             new CrdsGeographical(-11.22, -43.3) // Tycho
+
+            //new CrdsGeographical(0, -45),
+            //new CrdsGeographical(0, 45),
+            //new CrdsGeographical(45, 45), 
+            //new CrdsGeographical(-45, -45),
+            //new CrdsGeographical(-45, 0),
+            //new CrdsGeographical(45, 0),
+            //new CrdsGeographical(0, 45),
+            //new CrdsGeographical(0, 0),
         };
 
         private void RenderMoon(IMapContext map)
@@ -281,6 +290,8 @@ namespace Planetarium.Plugins.SolarSystem
 
                 map.AddDrawnObject(moon);
 
+                PointF pMouse = map.Project(map.MousePosition);
+
                 if (map.MouseButton == MouseButton.None && Angle.Separation(map.MousePosition, moon.Horizontal) < moon.Semidiameter / 3600)
                 {
                     foreach (CrdsGeographical craterCoords in craters) 
@@ -309,25 +320,36 @@ namespace Planetarium.Plugins.SolarSystem
                         z = v[2];
 
                         // back to spherical
-                        theta = 90 - Angle.ToDegrees(Math.Atan(Math.Sqrt(x * x + y * y) / z));
+                        theta = 90 - Angle.ToDegrees(Math.Acos(z / Math.Sqrt(x * x + y * y + z * z)));
                         phi = Angle.ToDegrees(Math.Atan2(y, x));
 
                         CrdsGeographical moonCenter = new CrdsGeographical(0, 0);
 
                         double sep = Angle.Separation(new CrdsGeographical(phi, theta), moonCenter);
-                        //if (sep < 90)
+                        if (sep < 90)
                         {
                             // X,Y expressed in eq. radii
                             double Y = -Math.Sin(Angle.ToRadians(theta));
                             double X = Math.Cos(Angle.ToRadians(theta)) * Math.Sin(Angle.ToRadians(phi));
 
+
                             float r = map.GetDiskSize(moon.Semidiameter, 10) / 2;
 
-                            map.Graphics.TranslateTransform(p.X, p.Y);
-                            map.Graphics.RotateTransform(axisRotation);
-                            map.Graphics.FillEllipse(Brushes.Red, (float)(X * r) - 1, (float)(Y * r) - 1, 3, 3);
+                            // rotated coordinates
+                            double X_ = r * (X * Math.Cos(Angle.ToRadians(axisRotation)) - Y * Math.Sin(Angle.ToRadians(axisRotation)));
+                            double Y_ = r * (X * Math.Sin(Angle.ToRadians(axisRotation)) + Y * Math.Cos(Angle.ToRadians(axisRotation)));
 
+                            var d = Math.Sqrt(Math.Pow(pMouse.X - X_ - p.X, 2) + Math.Pow(pMouse.Y - Y_ - p.Y, 2));
+
+                            map.Graphics.TranslateTransform(p.X, p.Y);
+                            //map.Graphics.RotateTransform(axisRotation);
+
+                            //if (d < 5)
+                            {
+                                map.Graphics.FillEllipse(Brushes.Red, (float)(X_) - 1, (float)(Y_) - 1, 3, 3);
+                            }
                             map.Graphics.ResetTransform();
+                            
                         }
                     }
                 }
