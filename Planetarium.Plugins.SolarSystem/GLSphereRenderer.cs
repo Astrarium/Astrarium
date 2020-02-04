@@ -19,7 +19,7 @@ namespace Planetarium.Renderers
     /// </remarks>
     internal class GLSphereRenderer : ISphereRenderer
     {
-        private GameWindow window;
+        //private GameWindow window;
 
         private Bitmap GraphicsContextToBitmap(int size)
         {
@@ -31,11 +31,14 @@ namespace Planetarium.Renderers
             GL.ReadPixels(0, 0, size, size, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
             GL.Finish();
             bitmap.UnlockBits(data);
+            bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
             return bitmap;
         }
 
         public Image Render(RendererOptions options)
         {
+            GameWindow window = null ;
+
             if (window == null)
             {
                 int size = 1024;
@@ -43,10 +46,10 @@ namespace Planetarium.Renderers
                 window.Visible = false;
             }
             
-            if (GraphicsContext.CurrentContext?.IsCurrent == false)
-            {
-                window.MakeCurrent();
-            }
+            //if (GraphicsContext.CurrentContext?.IsCurrent == false)
+            //{
+            //    window.MakeCurrent();
+            //}
 
             GL.ClearColor(Color.Transparent);
 
@@ -62,12 +65,12 @@ namespace Planetarium.Renderers
 
                 GL.MatrixMode(MatrixMode.Projection);
                 GL.LoadIdentity();
-                GL.Scale(1, -1, 1);
+       
                 GL.Ortho(-crds, crds, -crds, crds, -crds, crds);
 
-                GL.Rotate(-90 + options.LongutudeShift, new Vector3d(0, 1, 0));
-                GL.Rotate(options.LatitudeShift, new Vector3d(0, 0, 1));
-                GL.Rotate(-90, new Vector3d(1, 0, 0));                
+                GL.Rotate(90, new Vector3d(0, 0, 1));
+                GL.Rotate(90 - options.LatitudeShift, new Vector3d(0, 1, 0));                
+                GL.Rotate(-options.LongutudeShift, new Vector3d(0, 0, 1));                
 
                 GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
                 GL.Viewport(0, 0, size, size);

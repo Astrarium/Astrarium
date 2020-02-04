@@ -949,7 +949,7 @@ namespace Planetarium.Plugins.SolarSystem
             if (useTextures)
             {
                 double grs = planet.Number == Planet.JUPITER ? planetsCalc.GreatRedSpotLongitude : 0;
-                Image texturePlanet = imagesCache.RequestImage(planet.Number.ToString(), new PlanetTextureToken(planet.Number.ToString(), planet.Appearance.CM - grs, planet.Appearance.D), PlanetTextureProvider, map.Redraw);
+                Image texturePlanet = imagesCache.RequestImage(planet.Number.ToString(), new PlanetTextureToken(planet.Number.ToString(), grs - planet.Appearance.CM, planet.Appearance.D), PlanetTextureProvider, map.Redraw);
 
                 if (texturePlanet != null)
                 {
@@ -1006,7 +1006,7 @@ namespace Planetarium.Plugins.SolarSystem
             return sphereRenderer.Render(new RendererOptions()
             {
                 LatitudeShift = token.Latitude,
-                LongutudeShift = 180 + token.Longitude,
+                LongutudeShift = token.Longitude,
                 OutputImageSize = 1024,
                 TextureFilePath = $"Data\\{token.TextureName}.jpg"
             });
@@ -1017,7 +1017,7 @@ namespace Planetarium.Plugins.SolarSystem
             return sphereRenderer.Render(new RendererOptions()
             {
                 LatitudeShift = token.Latitude,
-                LongutudeShift = 180 - token.Longitude,
+                LongutudeShift = token.Longitude,
                 OutputImageSize = 1024,
                 TextureFilePath = "Data\\Moon.jpg"
             });

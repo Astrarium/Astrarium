@@ -56,11 +56,9 @@ namespace Planetarium.Renderers
             Viewport3D viewport = new Viewport3D();
 
             // Give the camera its initial position.
-            //camera.FieldOfView = 5.75;
             viewport.Camera = camera;
 
             // The camera's current location.
-
             string textureFilePath = options.TextureFilePath;
             int size = (int)options.OutputImageSize;
             double cameraPhi = ToRadians(options.LatitudeShift);
@@ -143,10 +141,8 @@ namespace Planetarium.Renderers
                 double theta = 0;
                 for (int t = 0; t <= thetaCount; t++)
                 {
-                    mesh.Positions.Add(new Point3D(
-                        cx + r1 * Math.Cos(theta), cy + y1, cz + -r1 * Math.Sin(theta)));
-                    mesh.TextureCoordinates.Add(new System.Windows.Point(
-                        (double)t / thetaCount, (double)p / phiCount));
+                    mesh.Positions.Add(new Point3D(cx + r1 * Math.Cos(theta), cy + y1, cz + -r1 * Math.Sin(theta)));
+                    mesh.TextureCoordinates.Add(new System.Windows.Point((double)t / thetaCount, (double)p / phiCount));
                     theta += dtheta;
                 }
                 phi1 -= dphi;
