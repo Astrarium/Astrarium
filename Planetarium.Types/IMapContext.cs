@@ -83,7 +83,7 @@ namespace Planetarium.Types
 
         double SiderealTime { get; }
 
-        void DrawObjectCaption(Font font, Brush brush, string caption, PointF p, float size);
+        void DrawObjectCaption(Font font, Brush brush, string caption, PointF p, float size, StringFormat format = null);
 
         void Redraw();
 

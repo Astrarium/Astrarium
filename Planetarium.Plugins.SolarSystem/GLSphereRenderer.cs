@@ -25,8 +25,8 @@ namespace Planetarium.Renderers
         {
             GL.Flush();
             Bitmap bitmap = new Bitmap(size, size);
-            Rectangle Rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
-            BitmapData data = bitmap.LockBits(Rect, ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            Rectangle rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
+            BitmapData data = bitmap.LockBits(rect, ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             GL.PixelStore(PixelStoreParameter.PackRowLength, data.Stride / 4);
             GL.ReadPixels(0, 0, size, size, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
             GL.Finish();
@@ -55,7 +55,6 @@ namespace Planetarium.Renderers
                 data = sourceBitmap.LockBits(rect, ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
                 double crds = 1;
                 GL.Viewport(0, 0, size, size);
-
                 GL.MatrixMode(MatrixMode.Projection);
                 GL.LoadIdentity();
        

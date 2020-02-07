@@ -10,19 +10,13 @@ using System.Threading.Tasks;
 
 namespace Planetarium.Plugins.SolarSystem
 {
-    internal class LunarFeaturesReader
-    {
-        private readonly string FEATURES_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/LunarFeatures.dat");
-
-        public ICollection<SurfaceFeature> Read()
+    internal class SurfaceFeaturesReader
+    {        
+        public ICollection<SurfaceFeature> Read(string file)
         {
-            List<SurfaceFeature> features = new List<SurfaceFeature>();
-            
+            List<SurfaceFeature> features = new List<SurfaceFeature>();            
             string line = "";
-
-            //CrdsGeographical center = new CrdsGeographical(0, 0);
-
-            using (var sr = new StreamReader(FEATURES_FILE, Encoding.Default))
+            using (var sr = new StreamReader(file, Encoding.UTF8))
             {
                 while (line != null && !sr.EndOfStream)
                 {

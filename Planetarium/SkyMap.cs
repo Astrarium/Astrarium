@@ -430,23 +430,43 @@ namespace Planetarium
                 map.AddDrawnObject(obj);
             }
 
-            public void DrawObjectCaption(Font font, Brush brush, string caption, PointF p, float size)
+            public void DrawObjectCaption(Font font, Brush brush, string caption, PointF p, float size, StringFormat format = null)
             {
-                SizeF b = Graphics.MeasureString(caption, font);
-
-                float s = size > 5 ? (size / 2.8284f + 2) : 1;
-                for (int x = 0; x < 2; x++)
+                if (format != null)
                 {
-                    for (int y = 0; y < 2; y++)
+                    SizeF b = Graphics.MeasureString(caption, font, p, format);
+                    RectangleF r = new RectangleF(p.X, p.Y, b.Width, b.Height);
+
+                    if (format.Alignment == StringAlignment.Center)
+                        r.X = p.X - b.Width / 2;
+                    if (format.Alignment == StringAlignment.Far)
+                        r.X = p.X - b.Width / 2;
+
+                    if (format.LineAlignment == StringAlignment.Center)
+                        r.Y = p.Y - b.Height / 2;
+                    if (format.LineAlignment == StringAlignment.Far)
+                        r.Y = p.Y - b.Height / 2;
+
+                    Graphics.DrawString(caption, font, brush, p, format);
+                    map.labels.Add(r);
+                }
+                else
+                {
+                    SizeF b = Graphics.MeasureString(caption, font);
+                    float s = size > 5 ? (size / 2.8284f + 2) : 1;
+                    for (int x = 0; x < 2; x++)
                     {
-                        float dx = x == 0 ? s : -s - b.Width;
-                        float dy = y == 0 ? s : -s - b.Height;
-                        RectangleF r = new RectangleF(p.X + dx, p.Y + dy, b.Width, b.Height);
-                        if (!map.labels.Any(l => l.IntersectsWith(r)))
+                        for (int y = 0; y < 2; y++)
                         {
-                            Graphics.DrawString(caption, font, brush, r.Location);
-                            map.labels.Add(r);
-                            return;
+                            float dx = x == 0 ? s : -s - b.Width;
+                            float dy = y == 0 ? s : -s - b.Height;
+                            RectangleF r = new RectangleF(p.X + dx, p.Y + dy, b.Width, b.Height);
+                            if (!map.labels.Any(l => l.IntersectsWith(r)))
+                            {
+                                Graphics.DrawString(caption, font, brush, r.Location);
+                                map.labels.Add(r);
+                                return;
+                            }
                         }
                     }
                 }
