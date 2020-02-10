@@ -341,7 +341,7 @@ namespace Planetarium.Plugins.SolarSystem
                         u.Rectangular = context.Get(UranusMoonRectangular, m);
                         u.Equatorial = context.Get(UranusMoonEquatorial, m);
                         u.Horizontal = context.Get(UranusMoonHorizontal, m);
-                        //u.Semidiameter = context.Get(UranusMoonSemidiameter, m);
+                        u.Semidiameter = context.Get(UranusMoonSemidiameter, m);
                     }
                 }
             }
@@ -485,6 +485,12 @@ namespace Planetarium.Plugins.SolarSystem
         private CrdsHorizontal UranusMoonHorizontal(SkyContext c, int m)
         {
             return c.Get(UranusMoonEquatorial, m).ToHorizontal(c.GeoLocation, c.SiderealTime);
+        }
+
+        private double UranusMoonSemidiameter(SkyContext c, int m)
+        {
+            var distance = c.Get(UranusMoonEcliptical, m).Distance;
+            return UranianMoons.Semidiameter(m, distance);
         }
 
         public void ConfigureEphemeris(EphemerisConfig<Planet> e)
@@ -649,7 +655,10 @@ namespace Planetarium.Plugins.SolarSystem
             var s2 = jupiterMoons.Where(m => m.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
                 .Select(p => new SearchResultItem(p, p.Name));
 
-            return s1.Concat(s2).ToArray();
+            var s3 = uranusMoons.Where(m => m.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
+                .Select(p => new SearchResultItem(p, p.Name));
+
+            return s1.Concat(s2).Concat(s3).ToArray();
         }
 
         public void ConfigureEphemeris(EphemerisConfig<UranusMoon> e)

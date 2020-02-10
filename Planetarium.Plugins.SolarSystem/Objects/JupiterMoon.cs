@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Planetarium.Objects
 {
-    public class JupiterMoon : SizeableCelestialObject
+    public class JupiterMoon : Satellite
     {
         public JupiterMoon(int number)
         {
@@ -31,14 +31,9 @@ namespace Planetarium.Objects
         public CrdsRectangular RectangularS { get; set; }
 
         /// <summary>
-        /// Longitude of central meridian
-        /// </summary>
-        public double CM { get; set; }
-
-        /// <summary>
         /// Name of the Galilean moon
         /// </summary>
-        public string Name => Text.Get($"JupiterMoon.{Number}.Name");
+        public override string Name => Text.Get($"JupiterMoon.{Number}.Name");
 
         /// <summary>
         /// Name of moon shadow
@@ -46,21 +41,11 @@ namespace Planetarium.Objects
         public string ShadowName => Text.Get($"JupiterMoon.{Number}.Shadow");
 
         /// <summary>
-        /// Number of the Galilean moon (1 to 4)
-        /// </summary>
-        public int Number { get; private set; }
-
-        /// <summary>
-        /// Apparent magnitude
-        /// </summary>
-        public float Magnitude { get; set; }
-
-        /// <summary>
         /// Gets Galilean moon names
         /// </summary>
         public override string[] Names => new[] { Name };
 
-        public bool IsEclipsedByJupiter
+        public override bool IsEclipsedByPlanet
         {
             get
             {

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Planetarium.Objects
 {
-    public class UranusMoon : SizeableCelestialObject
+    public class UranusMoon : Satellite
     {
         public UranusMoon(int number)
         {
@@ -28,21 +28,13 @@ namespace Planetarium.Objects
         /// <summary>
         /// Name of the moon
         /// </summary>
-        public string Name => Text.Get($"UranusMoon.{Number}.Name");
-
-        /// <summary>
-        /// Number of the moon (1 to 5)
-        /// </summary>
-        public int Number { get; private set; }
-
-        /// <summary>
-        /// Apparent magnitude
-        /// </summary>
-        public float Magnitude { get; set; }
+        public override string Name => Text.Get($"UranusMoon.{Number}.Name");
 
         /// <summary>
         /// Gets moon names
         /// </summary>
         public override string[] Names => new[] { Name };
+
+        public override bool IsEclipsedByPlanet => false;
     }
 }
