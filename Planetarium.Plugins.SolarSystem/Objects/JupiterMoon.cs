@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Planetarium.Objects
 {
-    public class JupiterMoon : Satellite
+    public class JupiterMoon : PlanetMoon
     {
         public JupiterMoon(int number)
         {
@@ -44,6 +44,8 @@ namespace Planetarium.Objects
         /// Gets Galilean moon names
         /// </summary>
         public override string[] Names => new[] { Name };
+
+        public override double DistanceFromEarth { get; internal set; }
 
         public override bool IsEclipsedByPlanet
         {

@@ -16,6 +16,11 @@ namespace Planetarium.Objects
         public CrdsEquatorial Equatorial { get; set; }
 
         /// <summary>
+        /// Ecliptical coordinates
+        /// </summary>
+        public CrdsEcliptical Ecliptical { get; set; }
+
+        /// <summary>
         /// Average daily motion of the Sun
         /// </summary>
         public double AverageDailyMotion => 0.985555;
@@ -24,6 +29,11 @@ namespace Planetarium.Objects
         /// Gets Sun names
         /// </summary>
         public override string[] Names => new[] { Name };
+
+        /// <summary>
+        /// Distance from Earth
+        /// </summary>
+        public override double DistanceFromEarth { get => Ecliptical.Distance; internal set { } }
 
         /// <summary>
         /// Primary name

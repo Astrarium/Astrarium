@@ -36,6 +36,11 @@ namespace Planetarium.Objects
         public CrdsEquatorial Equatorial { get; set; }
 
         /// <summary>
+        /// Ecliptical coordinates
+        /// </summary>
+        public CrdsEcliptical Ecliptical { get; set; }
+
+        /// <summary>
         /// Planet flattening. 0 means ideal sphere.
         /// </summary>
         public float Flattening { get; set; }
@@ -59,6 +64,11 @@ namespace Planetarium.Objects
         /// Distance from Sun, in AU
         /// </summary>
         public double DistanceFromSun { get; set; }
+
+        /// <summary>
+        /// Distance from Earth, in AU
+        /// </summary>
+        public override double DistanceFromEarth { get => Ecliptical.Distance; internal set { } }
 
         /// <summary>
         /// Gets planet names

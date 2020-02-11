@@ -7,18 +7,8 @@ using System.Threading.Tasks;
 
 namespace Planetarium.Objects
 {
-    public abstract class Satellite : SizeableCelestialObject
+    public abstract class PlanetMoon : SolarSystemObject
     {
-        /// <summary>
-        /// Apparent equatorial coordinates of the moon
-        /// </summary>
-        //public CrdsEquatorial Equatorial { get; }
-
-        /// <summary>
-        /// Planetocentric rectangular coordinates of the moon
-        /// </summary>
-        //public CrdsRectangular Rectangular { get; }
-
         /// <summary>
         /// Longitude of central meridian
         /// </summary>

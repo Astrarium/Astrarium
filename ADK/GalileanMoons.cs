@@ -122,12 +122,22 @@ namespace ADK
         }
 
         /// <summary>
+        /// Gets distance from Galilean moon to Earth, expressed in AU
+        /// </summary>
+        /// <param name="r">Distance Earth-Jupiter centers, in a.u.</param>
+        /// <param name="z">Planetocentric z-coordinate of moon, expressed in units of Jupiter equatorial radii, negative if moon is closer to the Earth than Jupiter</param>
+        /// <returns></returns>
+        public static double DistanceFromEarth(double r, double z)
+        {
+            return (r * AU + z * JR) / AU;
+        }
+
+        /// <summary>
         /// Gets longitude of central meridian of Galilean moon
         /// </summary>
         /// <param name="r">Planetocentric rectangular coordinates of the moon</param>
-        /// <param name="i">Galilean moon index, from 0 (Io) to 3 (Callisto)</param>
         /// <returns></returns>
-        public static double MoonCentralMeridian(CrdsRectangular r, int i)
+        public static double MoonCentralMeridian(CrdsRectangular r)
         {
             // distance from Juputer, in Jupiter equatorial radii
             double distance = Sqrt(r.X * r.X + r.Y * r.Y + r.Z * r.Z);

@@ -89,15 +89,31 @@ namespace Planetarium.Plugins.SolarSystem
                 .Where(p => p.Number != Planet.EARTH)
                 .Cast<SolarSystemObject>()
                 .Concat(new[] { sun })
-                .OrderByDescending(body => body.Ecliptical.Distance)
+                .Concat(planetsCalc.JupiterMoons)
+                .Concat(planetsCalc.UranusMoons)
+                .OrderByDescending(body => body.DistanceFromEarth)
                 .ToArray();
 
             foreach (var body in bodies)
             {
                 if (body is Planet planet)
+                {
                     RenderPlanet(map, planet);
-                else
-                    RenderSun(map);                
+                }
+                else if (body is JupiterMoon jm)
+                {
+                    RenderPlanetMoon(map, planetsCalc.Planets.ElementAt(Planet.JUPITER - 1), jm);
+                    RenderJupiterMoonShadow(map, jm, jm.RectangularS);
+                    RenderJupiterShadow(map, jm);
+                }
+                else if (body is UranusMoon um)
+                {
+                    RenderPlanetMoon(map, planetsCalc.Planets.ElementAt(Planet.URANUS - 1), um, hasTexture: false);
+                }
+                else if (body is Sun)
+                {
+                    RenderSun(map);
+                }
             }
 
             RenderMoon(map);
@@ -539,31 +555,6 @@ namespace Planetarium.Plugins.SolarSystem
                 return;
             }
 
-            // render moons behind Jupiter
-            if (planet.Number == Planet.JUPITER)
-            {
-                foreach (var moon in planetsCalc.JupiterMoons.Where(m => m.Rectangular.Z >= 0).OrderByDescending(m => m.Rectangular.Z))
-                {
-                    if (RenderPlanetMoon(map, planet, moon))
-                    {
-                        // render another moon shadows on the moon
-                        RenderJupiterMoonShadow(map, moon, moon.RectangularS);
-
-                        // render Jupiter shadow on the moon
-                        if (moon.IsEclipsedByPlanet) RenderJupiterShadow(map, moon);
-                    }
-                }
-            }
-
-            // render moons behind Uranus
-            if (planet.Number == Planet.URANUS)
-            {
-                foreach (var moon in planetsCalc.UranusMoons.Where(m => m.Rectangular.Z >= 0).OrderByDescending(m => m.Rectangular.Z))
-                {
-                    RenderPlanetMoon(map, planet, moon);
-                }
-            }
-
             Graphics g = map.Graphics;
             double ad = Angle.Separation(planet.Horizontal, map.Center);
             bool isGround = settings.Get<bool>("Ground");
@@ -683,34 +674,9 @@ namespace Planetarium.Plugins.SolarSystem
                     }
                 }
             }
-
-            // render moons over Jupiter
-            if (planet.Number == Planet.JUPITER)
-            {
-                foreach (var moon in planetsCalc.JupiterMoons.Where(m => m.Rectangular.Z < 0).OrderByDescending(m => m.Rectangular.Z))
-                {
-                    if (RenderPlanetMoon(map, planet, moon))
-                    {
-                        // render another moon shadows on the moon
-                        RenderJupiterMoonShadow(map, moon, moon.RectangularS);
-
-                        // render Jupiter shadow on the moon
-                        if (moon.IsEclipsedByPlanet) RenderJupiterShadow(map, moon);
-                    }
-                }               
-            }
-
-            // render moons over Uranus
-            if (planet.Number == Planet.URANUS)
-            {
-                foreach (var moon in planetsCalc.UranusMoons.Where(m => m.Rectangular.Z < 0).OrderByDescending(m => m.Rectangular.Z))
-                {
-                    RenderPlanetMoon(map, planet, moon);
-                }
-            }
         }
 
-        private bool RenderPlanetMoon(IMapContext map, Planet planet, Satellite moon)
+        private void RenderPlanetMoon(IMapContext map, Planet planet, PlanetMoon moon, bool hasTexture = true)
         {
             bool isGround = settings.Get<bool>("Ground");
             bool useTextures = settings.Get<bool>("UseTextures");
@@ -754,42 +720,41 @@ namespace Planetarium.Plugins.SolarSystem
                     map.Graphics.TranslateTransform(p.X, p.Y);
                     map.Graphics.RotateTransform(rotation);
 
-                    if (useTextures)
+                    if (hasTexture && useTextures)
                     {
                         Image texture = imagesCache.RequestImage($"{planet.Number}-{moon.Number}", new PlanetTextureToken($"{planet.Number}-{moon.Number}", moon.CM, planet.Appearance.D), PlanetTextureProvider, map.Redraw);
                         if (texture != null)
                         {
-                            map.DrawImage(texture, -diam / 2 * 1.01f, -diam / 2 * 1.01f, diam * 1.01f, diam * 1.01f);
-                            DrawVolume(map, diam, 0);
+                            map.DrawImage(texture, -diam / 2 * 1.01f, -diam / 2 * 1.01f, diam * 1.01f, diam * 1.01f);                            
                         }
                         else
                         {
-                            map.Graphics.FillEllipse(new SolidBrush(map.GetColor(Color.Wheat)), -diam / 2, -diam / 2, diam, diam);
+                            map.Graphics.FillEllipse(new SolidBrush(map.GetColor(Color.Gray)), -diam / 2, -diam / 2, diam, diam);
                         }
+                        DrawVolume(map, diam, 0);
                     }
                     else
                     {
-                        map.Graphics.FillEllipse(new SolidBrush(map.GetColor(Color.Wheat)), -diam / 2, -diam / 2, diam, diam);
+                        map.Graphics.FillEllipse(new SolidBrush(map.GetColor(Color.Gray)), -diam / 2, -diam / 2, diam, diam);
                         if (diam > 2)
                         {
                             map.Graphics.DrawEllipse(new Pen(map.GetSkyColor()), -diam / 2, -diam / 2, diam, diam);
                         }
+                        DrawVolume(map, diam, 0);
                     }
 
                     map.Graphics.ResetTransform();
                     
                     map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, diam);
                     map.AddDrawnObject(moon);
-
-                    return true;
                 }
             }
-
-            return false;
         }
 
         private void RenderJupiterShadow(IMapContext map, JupiterMoon moon)
         {
+            if (!moon.IsEclipsedByPlanet) return;
+
             Planet jupiter = planetsCalc.Planets.ElementAt(Planet.JUPITER - 1);
 
             float rotation = map.GetRotationTowardsNorth(jupiter.Equatorial) + 360 - (float)jupiter.Appearance.P;
@@ -970,6 +935,7 @@ namespace Planetarium.Plugins.SolarSystem
             if (!(useTextures && (map.Schema == ColorSchema.Red || map.Schema == ColorSchema.White)))
             {
                 g.FillEllipse(GetPlanetColor(map, planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
+                DrawVolume(map, diam, planet.Flattening);
             }
 
             if (useTextures)

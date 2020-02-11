@@ -11,8 +11,8 @@ namespace Planetarium.Objects
     public abstract class SolarSystemObject : SizeableCelestialObject
     {
         /// <summary>
-        /// Ecliptical coordinates
+        /// Distance from Earth, in AU
         /// </summary>
-        public CrdsEcliptical Ecliptical { get; set; }
+        public abstract double DistanceFromEarth { get; internal set; }
     }
 }

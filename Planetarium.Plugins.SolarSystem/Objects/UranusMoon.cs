@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Planetarium.Objects
 {
-    public class UranusMoon : Satellite
+    public class UranusMoon : PlanetMoon
     {
         public UranusMoon(int number)
         {
@@ -34,6 +34,8 @@ namespace Planetarium.Objects
         /// Gets moon names
         /// </summary>
         public override string[] Names => new[] { Name };
+
+        public override double DistanceFromEarth { get; internal set; }
 
         public override bool IsEclipsedByPlanet => false;
     }
