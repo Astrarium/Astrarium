@@ -141,7 +141,7 @@ namespace Planetarium.Plugins.SolarSystem
             bool useTextures = settings.Get<bool>("SunTexture");
             double ad = Angle.Separation(sun.Horizontal, map.Center);
             double coeff = map.DiagonalCoefficient();
-
+            Graphics g = map.Graphics;
             Color colorSun = map.GetColor(clrSunNight, clrSunDaylight);
 
             if ((!isGround || sun.Horizontal.Altitude + sun.Semidiameter / 3600 > 0) && 
@@ -151,8 +151,8 @@ namespace Planetarium.Plugins.SolarSystem
 
                 float inc = map.GetRotationTowardsNorth(sun.Equatorial);
 
-                map.Graphics.TranslateTransform(p.X, p.Y);
-                map.Graphics.RotateTransform(inc);
+                g.TranslateTransform(p.X, p.Y);
+                g.RotateTransform(inc);
 
                 float size = map.GetDiskSize(sun.Semidiameter, 10);
 
@@ -162,27 +162,27 @@ namespace Planetarium.Plugins.SolarSystem
                     DateTime dt = new DateTime(date.Year, date.Month, (int)date.Day, 0, 0, 0, DateTimeKind.Utc);
                     Brush brushSun = new SolidBrush(clrSunNight);
                     Image imageSun = imagesCache.RequestImage("Sun", dt, SunImageProvider, map.Redraw);
-                    map.Graphics.FillEllipse(brushSun, -size / 2, -size / 2, size, size);
+                    g.FillEllipse(brushSun, -size / 2, -size / 2, size, size);
                     if (imageSun != null)
                     {
-                        map.Graphics.DrawImage(imageSun, -size / 2, -size / 2, size, size);
+                        g.DrawImage(imageSun, -size / 2, -size / 2, size, size);
                     }
                 }
                 else
                 {
                     if (map.Schema == ColorSchema.White)
                     {
-                        map.Graphics.FillEllipse(Brushes.White, -size / 2, -size / 2, size, size);
-                        map.Graphics.DrawEllipse(Pens.Black, -size / 2, -size / 2, size, size);
+                        g.FillEllipse(Brushes.White, -size / 2, -size / 2, size, size);
+                        g.DrawEllipse(Pens.Black, -size / 2, -size / 2, size, size);
                     }
                     else
                     {
                         Brush brushSun = new SolidBrush(colorSun);
-                        map.Graphics.FillEllipse(brushSun, -size / 2, -size / 2, size, size);
+                        g.FillEllipse(brushSun, -size / 2, -size / 2, size, size);
                     }
                 }
 
-                map.Graphics.ResetTransform();
+                g.ResetTransform();
 
                 if (settings.Get<bool>("SunLabel"))
                 {
@@ -198,6 +198,7 @@ namespace Planetarium.Plugins.SolarSystem
             int size = (int)(map.DayLightFactor * 100);
             float sunSize = map.GetDiskSize(sun.Semidiameter);
             int alpha = (int)(map.DayLightFactor * (1 - sunSize / (2 * size)) * 255);
+            Graphics g = map.Graphics;
 
             if (settings.Get<bool>("Ground") && size > 0 && alpha > 0 && 2 * size > sunSize)
             {
@@ -225,11 +226,11 @@ namespace Planetarium.Plugins.SolarSystem
                         brush.CenterColor = Color.FromArgb(alpha, clrSunDaylight);
                         brush.SurroundColors = new Color[] { Color.Transparent };
                         
-                        map.Graphics.FillRegion(brush, reg);
+                        g.FillRegion(brush, reg);
 
                         if (isEclipse)
                         {
-                            map.Graphics.FillPath(new SolidBrush(Color.FromArgb((int)(alpha * map.DayLightFactor), brush.CenterColor)), gpMoon);
+                            g.FillPath(new SolidBrush(Color.FromArgb((int)(alpha * map.DayLightFactor), brush.CenterColor)), gpMoon);
                         }
                     }
                 }                
@@ -244,6 +245,7 @@ namespace Planetarium.Plugins.SolarSystem
             bool useTextures = settings.Get<bool>("MoonTexture");
             double ad = Angle.Separation(moon.Horizontal, map.Center);
             double coeff = map.DiagonalCoefficient();
+            Graphics g = map.Graphics;
 
             if ((!isGround || moon.Horizontal.Altitude + moon.Semidiameter / 3600 > 0) && 
                 ad < coeff * map.ViewAngle + moon.Semidiameter / 3600.0)
@@ -256,8 +258,8 @@ namespace Planetarium.Plugins.SolarSystem
                 // axis rotation is negated because measured counter-clockwise
                 float axisRotation = (float)(inc - moon.PAaxis);
 
-                map.Graphics.TranslateTransform(p.X, p.Y);
-                map.Graphics.RotateTransform(axisRotation);
+                g.TranslateTransform(p.X, p.Y);
+                g.RotateTransform(axisRotation);
 
                 // drawing size
                 float size = map.GetDiskSize(moon.Semidiameter, 10);
@@ -269,31 +271,38 @@ namespace Planetarium.Plugins.SolarSystem
                     Image textureMoon = imagesCache.RequestImage("Moon", new PlanetTextureToken("Moon", moon.Libration.l, moon.Libration.b), MoonTextureProvider, map.Redraw);
                     if (textureMoon != null)
                     {
-                        map.Graphics.FillEllipse(brushMoon, -size / 2, -size / 2, size, size);
-                        map.DrawImage(textureMoon, -size / 2 * 0.998f, -size / 2 * 0.998f, size * 0.998f, size * 0.998f);
+                        var gs = g.Save();
+                        using (GraphicsPath gp = new GraphicsPath())
+                        {
+                            gp.AddEllipse(-size / 2, -size / 2, size, size);
+                            g.SetClip(gp);
+                        }
+                        g.FillEllipse(brushMoon, -size / 2, -size / 2, size, size);
+                        map.DrawImage(textureMoon, -size / 2, -size / 2, size, size);
+                        g.Restore(gs);
                     }
                     else
                     {
-                        map.Graphics.FillEllipse(brushMoon, -size / 2, -size / 2, size, size);
+                        g.FillEllipse(brushMoon, -size / 2, -size / 2, size, size);
                     }
                 }
                 else
                 {
                     // Moon disk
-                    map.Graphics.FillEllipse(brushMoon, -size / 2, -size / 2, size, size);
+                    g.FillEllipse(brushMoon, -size / 2, -size / 2, size, size);
                 }
 
-                map.Graphics.ResetTransform();
+                g.ResetTransform();
 
                 float phase = (float)moon.Phase * Math.Sign(moon.Elongation);
                 float rotation = map.GetRotationTowardsEclipticPole(moon.Ecliptical0);
                 GraphicsPath shadow = GetPhaseShadow(phase, size + 1);
 
                 // shadowed part of disk
-                map.Graphics.TranslateTransform(p.X, p.Y);
-                map.Graphics.RotateTransform(rotation);
-                map.Graphics.FillPath(GetShadowBrush(map), shadow);
-                map.Graphics.ResetTransform();
+                g.TranslateTransform(p.X, p.Y);
+                g.RotateTransform(rotation);
+                g.FillPath(GetShadowBrush(map), shadow);
+                g.ResetTransform();
 
                 if (settings.Get<bool>("MoonLabel"))
                 {
@@ -309,6 +318,7 @@ namespace Planetarium.Plugins.SolarSystem
         private void DrawSurfaceFeatures(IMapContext map, ICollection<SurfaceFeature> features, SizeableCelestialObject body, float bodyDiameter, float axisRotation, double latitudeShift, double longitudeShift, Color featuresColor)
         {
             PointF pMouse = map.Project(map.MousePosition);
+            Graphics g = map.Graphics;
 
             if (map.MouseButton == MouseButton.None && Angle.Separation(map.MousePosition, body.Horizontal) < body.Semidiameter / 3600)
             {
@@ -355,10 +365,10 @@ namespace Planetarium.Plugins.SolarSystem
                                     // draw feature outline (for craters only)
                                     if (feature.TypeCode == "AA")
                                     {
-                                        map.Graphics.TranslateTransform(p.X + pFeature.X, p.Y + pFeature.Y);
-                                        map.Graphics.RotateTransform(90 + (float)Angle.ToDegrees(Math.Atan2(pFeature.Y, pFeature.X)));
-                                        map.Graphics.DrawEllipse(pen, -featureRadius, -featureRadius * f, featureRadius * 2, featureRadius * f * 2);
-                                        map.Graphics.ResetTransform();
+                                        g.TranslateTransform(p.X + pFeature.X, p.Y + pFeature.Y);
+                                        g.RotateTransform(90 + (float)Angle.ToDegrees(Math.Atan2(pFeature.Y, pFeature.X)));
+                                        g.DrawEllipse(pen, -featureRadius, -featureRadius * f, featureRadius * 2, featureRadius * f * 2);
+                                        g.ResetTransform();
                                         labelDist = featureRadius * 2;
                                     }
 
@@ -376,13 +386,13 @@ namespace Planetarium.Plugins.SolarSystem
                                     // fill central dot
                                     else if (feature.TypeCode != "AA")
                                     {
-                                        map.Graphics.TranslateTransform(p.X + pFeature.X, p.Y + pFeature.Y);
-                                        map.Graphics.FillEllipse(brush, -1, -1, 3, 3);
-                                        map.Graphics.ResetTransform();
+                                        g.TranslateTransform(p.X + pFeature.X, p.Y + pFeature.Y);
+                                        g.FillEllipse(brush, -1, -1, 3, 3);
+                                        g.ResetTransform();
                                     }
 
                                     // draw feature label
-                                    map.Graphics.ResetTransform();
+                                    g.ResetTransform();
                                     map.DrawObjectCaption(fontLabel, brush, feature.Name, new PointF(p.X + pFeature.X, p.Y + pFeature.Y), labelDist, format);                        
                                 }
                             }
@@ -469,6 +479,7 @@ namespace Planetarium.Plugins.SolarSystem
 
             bool isGround = settings.Get<bool>("Ground");
             double coeff = map.DiagonalCoefficient();
+            Graphics g = map.Graphics;
 
             if ((!isGround || moon.EarthShadowCoordinates.Altitude + sdP / 3600 > 0) &&
                 ad < coeff * map.ViewAngle + sdP / 3600)
@@ -525,8 +536,8 @@ namespace Planetarium.Plugins.SolarSystem
                         regionP.Intersect(gpM);
                         regionU.Intersect(gpM);
 
-                        map.Graphics.FillRegion(brushP, regionP);
-                        map.Graphics.FillRegion(brushU, regionU);
+                        g.FillRegion(brushP, regionP);
+                        g.FillRegion(brushU, regionU);
                     }
 
                     // outline circles
@@ -535,10 +546,10 @@ namespace Planetarium.Plugins.SolarSystem
                         var brush = new SolidBrush(map.GetColor(clrShadowOutline));
                         var pen = new Pen(brush) { DashStyle = DashStyle.Dot };
 
-                        map.Graphics.TranslateTransform(p.X, p.Y);
-                        map.Graphics.DrawEllipse(pen, -szP / 2, -szP / 2, szP, szP);
-                        map.Graphics.DrawEllipse(pen, -szU / 2, -szU / 2, szU, szU);
-                        map.Graphics.ResetTransform();
+                        g.TranslateTransform(p.X, p.Y);
+                        g.DrawEllipse(pen, -szP / 2, -szP / 2, szP, szP);
+                        g.DrawEllipse(pen, -szU / 2, -szU / 2, szU, szU);
+                        g.ResetTransform();
                         if (map.ViewAngle <= 10)
                         {
                             map.DrawObjectCaption(fontShadowLabel, brush, Text.Get("EarthShadow.Label"), p, szP);
@@ -682,6 +693,7 @@ namespace Planetarium.Plugins.SolarSystem
             bool useTextures = settings.Get<bool>("UseTextures");
             double coeff = map.DiagonalCoefficient();
             double ad = Angle.Separation(moon.Horizontal, map.Center);
+            Graphics g = map.Graphics;
 
             if ((!isGround || moon.Horizontal.Altitude + moon.Semidiameter / 3600 > 0) &&
                 ad < coeff * map.ViewAngle + moon.Semidiameter / 3600)
@@ -703,9 +715,9 @@ namespace Planetarium.Plugins.SolarSystem
                         // but too small to be drawn as disk
                         if (map.DistanceBetweenPoints(p, pPlanet) >= 5)
                         {
-                            map.Graphics.TranslateTransform(p.X, p.Y);
-                            map.Graphics.FillEllipse(new SolidBrush(map.GetColor(Color.Wheat)), -size / 2, -size / 2, size, size);
-                            map.Graphics.ResetTransform();
+                            g.TranslateTransform(p.X, p.Y);
+                            g.FillEllipse(new SolidBrush(map.GetColor(Color.Wheat)), -size / 2, -size / 2, size, size);
+                            g.ResetTransform();
 
                             map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, 2);
                             map.AddDrawnObject(moon);
@@ -717,33 +729,40 @@ namespace Planetarium.Plugins.SolarSystem
                 {
                     float rotation = map.GetRotationTowardsNorth(planet.Equatorial) + 360 - (float)planet.Appearance.P;
 
-                    map.Graphics.TranslateTransform(p.X, p.Y);
-                    map.Graphics.RotateTransform(rotation);
+                    g.TranslateTransform(p.X, p.Y);
+                    g.RotateTransform(rotation);
 
                     if (hasTexture && useTextures)
                     {
                         Image texture = imagesCache.RequestImage($"{planet.Number}-{moon.Number}", new PlanetTextureToken($"{planet.Number}-{moon.Number}", moon.CM, planet.Appearance.D), PlanetTextureProvider, map.Redraw);
                         if (texture != null)
                         {
-                            map.DrawImage(texture, -diam / 2 * 1.01f, -diam / 2 * 1.01f, diam * 1.01f, diam * 1.01f);                            
+                            var gs = g.Save();
+                            using (GraphicsPath gp = new GraphicsPath())
+                            {
+                                gp.AddEllipse(-diam / 2, -diam / 2, diam, diam);
+                                g.SetClip(gp);
+                            }
+                            map.DrawImage(texture, -diam / 2, -diam / 2, diam, diam);
+                            g.Restore(gs);
                         }
                         else
                         {
-                            map.Graphics.FillEllipse(new SolidBrush(map.GetColor(Color.Gray)), -diam / 2, -diam / 2, diam, diam);
+                            g.FillEllipse(new SolidBrush(map.GetColor(Color.Gray)), -diam / 2, -diam / 2, diam, diam);
                         }
                         DrawVolume(map, diam, 0);
                     }
                     else
                     {
-                        map.Graphics.FillEllipse(new SolidBrush(map.GetColor(Color.Gray)), -diam / 2, -diam / 2, diam, diam);
+                        g.FillEllipse(new SolidBrush(map.GetColor(Color.Gray)), -diam / 2, -diam / 2, diam, diam);
                         if (diam > 2)
                         {
-                            map.Graphics.DrawEllipse(new Pen(map.GetSkyColor()), -diam / 2, -diam / 2, diam, diam);
+                            g.DrawEllipse(new Pen(map.GetSkyColor()), -diam / 2, -diam / 2, diam, diam);
                         }
                         DrawVolume(map, diam, 0);
                     }
 
-                    map.Graphics.ResetTransform();
+                    g.ResetTransform();
                     
                     map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, diam);
                     map.AddDrawnObject(moon);
@@ -775,8 +794,10 @@ namespace Planetarium.Plugins.SolarSystem
             // Center of shadow
             PointF p = new PointF(-(float)moon.RectangularS.X * sd, (float)moon.RectangularS.Y * sd);
 
-            map.Graphics.TranslateTransform(pMoon.X, pMoon.Y);
-            map.Graphics.RotateTransform(rotation);
+            Graphics g = map.Graphics;
+
+            g.TranslateTransform(pMoon.X, pMoon.Y);
+            g.RotateTransform(rotation);
 
             var gpM = new GraphicsPath();
             var gpU = new GraphicsPath();
@@ -789,10 +810,10 @@ namespace Planetarium.Plugins.SolarSystem
 
             if (!regionU.IsEmpty(map.Graphics))
             {
-                map.Graphics.FillRegion(new SolidBrush(clrJupiterShadow), regionU);
+                g.FillRegion(new SolidBrush(clrJupiterShadow), regionU);
             }
 
-            map.Graphics.ResetTransform();
+            g.ResetTransform();
             if (!regionU.IsEmpty(map.Graphics))
             {
                 map.DrawObjectCaption(fontShadowLabel, brushShadowLabel, Text.Get("EclipsedByJupiter"), pMoon, szB);
@@ -808,6 +829,7 @@ namespace Planetarium.Plugins.SolarSystem
 
             // collect moons than can produce a shadow
             var ecliptingMoons = planetsCalc.JupiterMoons.Where(m => m.RectangularS.Z < rect.Z);
+            Graphics g = map.Graphics;
 
             if (ecliptingMoons.Any())
             {
@@ -839,8 +861,8 @@ namespace Planetarium.Plugins.SolarSystem
                     // Center of shadow
                     PointF p = new PointF((float)shadowRelative.X * sd, -(float)shadowRelative.Y * sd);
 
-                    map.Graphics.TranslateTransform(pBody.X, pBody.Y);
-                    map.Graphics.RotateTransform(rotation);
+                    g.TranslateTransform(pBody.X, pBody.Y);
+                    g.RotateTransform(rotation);
 
                     // shadow has enough size to be rendered
                     if ((int)szP > 0)
@@ -882,24 +904,24 @@ namespace Planetarium.Plugins.SolarSystem
 
                             var brushU = new SolidBrush(clrJupiterMoonShadowLight);
 
-                            map.Graphics.FillRegion(brushP, regionP);
-                            map.Graphics.FillRegion(brushU, regionU);
+                            g.FillRegion(brushP, regionP);
+                            g.FillRegion(brushU, regionU);
 
                             // outline circles
                             if (settings.Get<bool>("JupiterMoonsShadowOutline") && szP > 20)
                             {
-                                map.Graphics.DrawEllipse(penShadowOutline, p.X - (szP + szU) / 4, p.Y - (szP + szU) / 4, (szP + szU) / 2, (szP + szU) / 2);
-                                map.Graphics.DrawEllipse(penShadowOutline, p.X - szU / 2, p.Y - szU / 2, szU, szU);
+                                g.DrawEllipse(penShadowOutline, p.X - (szP + szU) / 4, p.Y - (szP + szU) / 4, (szP + szU) / 2, (szP + szU) / 2);
+                                g.DrawEllipse(penShadowOutline, p.X - szU / 2, p.Y - szU / 2, szU, szU);
 
                                 PointF[] points = new PointF[] { new PointF(p.X, p.Y) };
-                                map.Graphics.TransformPoints(CoordinateSpace.Page, CoordinateSpace.World, points);
-                                map.Graphics.ResetTransform();
+                                g.TransformPoints(CoordinateSpace.Page, CoordinateSpace.World, points);
+                                g.ResetTransform();
                                 map.DrawObjectCaption(fontShadowLabel, brushShadowLabel, moon.ShadowName, points[0], szP);
                             }
                         }
                     }
 
-                    map.Graphics.ResetTransform();
+                    g.ResetTransform();
                 }
             }
         }
@@ -935,7 +957,6 @@ namespace Planetarium.Plugins.SolarSystem
             if (!(useTextures && (map.Schema == ColorSchema.Red || map.Schema == ColorSchema.White)))
             {
                 g.FillEllipse(GetPlanetColor(map, planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
-                DrawVolume(map, diam, planet.Flattening);
             }
 
             if (useTextures)
@@ -945,7 +966,15 @@ namespace Planetarium.Plugins.SolarSystem
 
                 if (texturePlanet != null)
                 {
+                    var gs = g.Save();                    
+                    using (GraphicsPath gp = new GraphicsPath())
+                    {
+                        gp.AddEllipse(-diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);                        
+                        g.SetClip(gp);
+                    }
+                    g.FillEllipse(GetPlanetColor(map, planet.Number), -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
                     map.DrawImage(texturePlanet, -diamEquat / 2, -diamPolar / 2, diamEquat, diamPolar);
+                    g.Restore(gs);
                     DrawVolume(map, diam, planet.Flattening);
                 }
             }
@@ -955,21 +984,21 @@ namespace Planetarium.Plugins.SolarSystem
         {
             if (map.Schema == ColorSchema.White) return;
 
-            Graphics g = map.Graphics;
-            float diamEquat = diam * 1.01f;
-            float diamPolar = (1 - flattening) * diam * 1.01f;
-
-            using (GraphicsPath gpVolume = new GraphicsPath())
+            Image textureVolume = imagesCache.RequestImage("volume", map.GetSkyColor(), VolumeTextureProvider, map.Redraw);
+            if (textureVolume != null)
             {
-                gpVolume.AddEllipse(-diamEquat, -diamPolar, 2 * diamEquat, 2 * diamPolar);
-                using (PathGradientBrush brushVolume = new PathGradientBrush(gpVolume))
+                float diamEquat = diam;
+                float diamPolar = (1 - flattening) * diam;
+                Graphics g = map.Graphics;                
+
+                var gs = g.Save();
+                using (GraphicsPath gp = new GraphicsPath())
                 {
-                    brushVolume.CenterPoint = new PointF(0, 0);
-                    brushVolume.CenterColor = map.GetSkyColor();
-                    brushVolume.SetSigmaBellShape(0.3f, 1);
-                    brushVolume.SurroundColors = new Color[] { Color.Transparent };
-                    g.FillEllipse(brushVolume, -diamEquat / 2 - 1, -diamPolar / 2 - 1, diamEquat + 2, diamPolar + 2);
+                    gp.AddEllipse(-diamEquat / 2 - 1, -diamPolar / 2 - 1, diamEquat + 2, diamPolar + 2);
+                    g.SetClip(gp);
                 }
+                map.DrawImage(textureVolume, -diamEquat / 2 * 1.2f, -diamPolar / 2 * 1.2f, diamEquat * 1.2f, diamPolar * 1.2f);
+                g.Restore(gs);
             }
         }
 
@@ -1011,6 +1040,28 @@ namespace Planetarium.Plugins.SolarSystem
             string format = Regex.Replace(template, "{([^}]*)}", match => "{0:" + match.Groups[1].Value + "}");
             string url = string.Format(format, date);
             return solarTextureDownloader.Download(url);
+        }
+
+        private Image VolumeTextureProvider(Color skyColor)
+        {
+            Bitmap bitmap = new Bitmap(256, 256);
+            using (var g = Graphics.FromImage(bitmap))
+            {
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                using (GraphicsPath gpVolume = new GraphicsPath())
+                {
+                    gpVolume.AddEllipse(-128, -128, 512, 512);
+                    using (PathGradientBrush brushVolume = new PathGradientBrush(gpVolume))
+                    {
+                        brushVolume.CenterPoint = new PointF(128, 128);
+                        brushVolume.CenterColor = skyColor;
+                        brushVolume.SetSigmaBellShape(0.3f, 1);
+                        brushVolume.SurroundColors = new Color[] { Color.Transparent };
+                        g.FillEllipse(brushVolume, 0, 0, 256, 256);
+                    }
+                }
+            }
+            return bitmap;
         }
 
         private Brush GetPlanetColor(IMapContext map, int planet)
