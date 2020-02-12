@@ -39,8 +39,10 @@ namespace Planetarium.Renderers
         {
             if (window == null)
             {
-                int size = 1024;
+                int size = 1;
                 window = new GameWindow(size, size, new GraphicsMode(new ColorFormat(8, 8, 8, 8), 24, 0, 0, ColorFormat.Empty, 1), "", GameWindowFlags.Default, DisplayDevice.Default, 3, 0, GraphicsContextFlags.Default);
+                window.Visible = false;
+                window.WindowState = WindowState.Fullscreen;
                 window.Visible = false;
             }
 
@@ -48,9 +50,9 @@ namespace Planetarium.Renderers
 
             using (Bitmap sourceBitmap = new Bitmap(options.TextureFilePath))
             {
-                int size = (int)options.OutputImageSize;
                 BitmapData data;
-
+                int size = (int)options.OutputImageSize;
+                window.ClientSize = new Size(size, size);
                 Rectangle rect = new Rectangle(0, 0, sourceBitmap.Width, sourceBitmap.Height);
                 data = sourceBitmap.LockBits(rect, ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
                 double crds = 1;
@@ -71,7 +73,7 @@ namespace Planetarium.Renderers
 
                 GL.DepthMask(true);
                 GL.Enable(EnableCap.DepthTest);
-                GL.ClearDepth(1.0f);
+                //GL.ClearDepth(1.0f);
                 GL.DepthFunc(DepthFunction.Lequal);
 
                 int nx, ny;

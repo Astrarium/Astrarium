@@ -1029,7 +1029,7 @@ namespace Planetarium.Plugins.SolarSystem
             {
                 LatitudeShift = token.Latitude,
                 LongutudeShift = token.Longitude,
-                OutputImageSize = 1024,
+                OutputImageSize = 2048,
                 TextureFilePath = "Data\\Moon.jpg"
             });
         }
