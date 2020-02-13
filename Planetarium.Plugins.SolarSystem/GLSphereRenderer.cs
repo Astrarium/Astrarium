@@ -40,10 +40,7 @@ namespace Planetarium.Renderers
             if (window == null)
             {
                 int size = 1;
-                window = new GameWindow(size, size, new GraphicsMode(new ColorFormat(8, 8, 8, 8), 24, 0, 0, ColorFormat.Empty, 1), "", GameWindowFlags.Default, DisplayDevice.Default, 3, 0, GraphicsContextFlags.Default);
-                window.Visible = false;
-                window.WindowState = WindowState.Fullscreen;
-                window.Visible = false;
+                window = new GameWindow(size, size, new GraphicsMode(new ColorFormat(8, 8, 8, 8), 24, 0, 0, ColorFormat.Empty, 1), "", GameWindowFlags.Default, DisplayDevice.Default, 3, 0, GraphicsContextFlags.Offscreen) { WindowState = WindowState.Fullscreen, Visible = false };
             }
 
             GL.ClearColor(Color.Transparent);

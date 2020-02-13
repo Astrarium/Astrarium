@@ -33,8 +33,8 @@ namespace Planetarium.Plugins.SolarSystem
 
             return features;
 
+            //var center = new CrdsGeographical(0, 0);
             //features = features.OrderByDescending(f => f.Diameter).Where(f => Angle.Separation(f.Coordinates, center) <= 98).ToList();
-
             //using (var sw = new StreamWriter("D:\\LunarFeatures.dat"))
             //{
             //    foreach (var feature in features)
@@ -44,7 +44,6 @@ namespace Planetarium.Plugins.SolarSystem
             //    sw.Flush();
             //    sw.Close();
             //}
-
             //return features;
         }
     }

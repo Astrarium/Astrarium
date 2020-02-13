@@ -16,12 +16,12 @@ namespace Planetarium.Renderers
     /// <summary>
     /// This class is responsible for downloading latest solar images from web URL. 
     /// </summary>
-    public class SolarTextureDownloader
+    internal class SolarTextureDownloader
     {
         private static readonly string TempPath = Path.GetTempPath();
         private static readonly string SunImagesPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ADK", "SunImages");
 
-        public SolarTextureDownloader()
+        internal SolarTextureDownloader()
         {
             if (!Directory.Exists(SunImagesPath))
             {

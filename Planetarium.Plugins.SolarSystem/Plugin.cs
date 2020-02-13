@@ -3,6 +3,7 @@ using Planetarium.Config;
 using Planetarium.Plugins.SolarSystem.Controls;
 using Planetarium.Types;
 using Planetarium.Types.Localization;
+using System.ComponentModel;
 using System.Drawing;
 
 namespace Planetarium.Plugins.SolarSystem
@@ -26,7 +27,8 @@ namespace Planetarium.Plugins.SolarSystem
             AddSetting(new SettingItem("Moon", true, "Moon"));
             AddSetting(new SettingItem("MoonLabel", true, "Moon", s => s.Get<bool>("Moon")));
             AddSetting(new SettingItem("MoonTexture", true, "Moon", s => s.Get<bool>("Moon")));
-            AddSetting(new SettingItem("EarthShadowOutline", false, "Moon"));
+            AddSetting(new SettingItem("MoonTextureQuality", TextureQuality.Normal, "Moon", s => s.Get<bool>("Moon") && s.Get<bool>("MoonTexture")));
+            AddSetting(new SettingItem("EarthShadowOutline", false, "Moon", s => s.Get<bool>("Moon")));
 
             AddSetting(new SettingItem("GRSLongitude", new GreatRedSpotSettings()
             {
@@ -44,6 +46,18 @@ namespace Planetarium.Plugins.SolarSystem
             AddToolbarItem(new ToolbarToggleButton("Settings.Planets", "IconPlanet", new SimpleBinding(settings, "Planets"), "Objects"));
 
             ExportResourceDictionaries("Images.xaml");
+        }
+
+        public enum TextureQuality
+        {
+            [Description("Low")]
+            Low = 2,
+
+            [Description("Normal")]
+            Normal = 4,
+
+            [Description("High")]
+            High = 8
         }
     }
 }

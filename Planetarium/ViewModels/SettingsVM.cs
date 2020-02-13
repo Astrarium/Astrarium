@@ -136,6 +136,9 @@ namespace Planetarium.ViewModels
             if (settingType == typeof(bool))
                 return typeof(CheckboxSettingControl);
 
+            if (settingType == typeof(string))
+                return typeof(TextboxSettingControl);
+
             if (settingType.IsEnum)
                 return typeof(EnumSettingControl);
 

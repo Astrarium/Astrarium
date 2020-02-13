@@ -15,6 +15,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using static Planetarium.Plugins.SolarSystem.Plugin;
 
 namespace Planetarium.Plugins.SolarSystem
 {
@@ -47,7 +48,7 @@ namespace Planetarium.Plugins.SolarSystem
         private Color clrJupiterMoonShadowLight = Color.FromArgb(128, 0, 0, 0);
         private Color clrJupiterMoonShadowDark = Color.FromArgb(64, 0, 0, 0);
         private static Color clrShadowOutline = Color.FromArgb(100, 50, 0);
-        private Pen penShadowOutline = new Pen(clrShadowOutline);
+        private Pen penShadowOutline = new Pen(clrShadowOutline) { DashStyle = DashStyle.Dot };
         private Brush brushShadowLabel = new SolidBrush(clrShadowOutline);
 
         private Brush[] brushRings = new Brush[] 
@@ -57,22 +58,20 @@ namespace Planetarium.Plugins.SolarSystem
             new SolidBrush(Color.FromArgb(32, 0, 0, 0))
         };
 
-        private readonly SolarTextureDownloader solarTextureDownloader = null;
-        private ISphereRenderer sphereRenderer = new GLSphereRenderer();
-        private ImagesCache imagesCache = new ImagesCache();
-        private ICollection<SurfaceFeature> lunarFeatures;
-        private ICollection<SurfaceFeature> martianFeatures;
+        private readonly SolarTextureDownloader solarTextureDownloader = new SolarTextureDownloader();
+        private readonly ISphereRenderer sphereRenderer = new GLSphereRenderer();
+        private readonly ImagesCache imagesCache = new ImagesCache();
+        private readonly ICollection<SurfaceFeature> lunarFeatures;
+        private readonly ICollection<SurfaceFeature> martianFeatures;
 
-        public SolarSystemRenderer(LunarCalc lunarCalc, SolarCalc solarCalc, PlanetsCalc planetsCalc, SolarTextureDownloader solarTextureDownloader, ISettings settings)
+        public SolarSystemRenderer(LunarCalc lunarCalc, SolarCalc solarCalc, PlanetsCalc planetsCalc, ISettings settings)
         {
             this.planetsCalc = planetsCalc;
+            this.settings = settings;
+
             this.sun = solarCalc.Sun;
             this.moon = lunarCalc.Moon;
             this.mars = planetsCalc.Planets.ElementAt(Planet.MARS - 1);
-
-            this.solarTextureDownloader = solarTextureDownloader;
-            this.settings = settings;
-            penShadowOutline.DashStyle = DashStyle.Dot;
 
             var featuresReader = new SurfaceFeaturesReader();
             lunarFeatures = featuresReader.Read(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/LunarFeatures.dat"));
@@ -124,6 +123,7 @@ namespace Planetarium.Plugins.SolarSystem
             }
 
             RenderEarthShadow(map);
+            DrawLunarSurfaceFeatures(map);
         }
 
         public override bool OnMouseMove(CrdsHorizontal mouse, MouseButton mouseButton)
@@ -243,6 +243,7 @@ namespace Planetarium.Plugins.SolarSystem
 
             bool isGround = settings.Get<bool>("Ground");
             bool useTextures = settings.Get<bool>("MoonTexture");
+            string textureName = $"Moon-{(int)settings.Get<TextureQuality>("MoonTextureQuality")}k";
             double ad = Angle.Separation(moon.Horizontal, map.Center);
             double coeff = map.DiagonalCoefficient();
             Graphics g = map.Graphics;
@@ -268,7 +269,7 @@ namespace Planetarium.Plugins.SolarSystem
 
                 if (useTextures && size > 10)
                 {
-                    Image textureMoon = imagesCache.RequestImage("Moon", new PlanetTextureToken("Moon", moon.Libration.l, moon.Libration.b), MoonTextureProvider, map.Redraw);
+                    Image textureMoon = imagesCache.RequestImage("Moon", new PlanetTextureToken(textureName, moon.Libration.l, moon.Libration.b), MoonTextureProvider, map.Redraw);
                     if (textureMoon != null)
                     {
                         var gs = g.Save();
@@ -310,18 +311,28 @@ namespace Planetarium.Plugins.SolarSystem
                 }
 
                 map.AddDrawnObject(moon);
-
-                DrawSurfaceFeatures(map, lunarFeatures, moon, 3474, axisRotation, moon.Libration.b, moon.Libration.l, map.GetColor(Color.AntiqueWhite));
             }
         }
 
-        private void DrawSurfaceFeatures(IMapContext map, ICollection<SurfaceFeature> features, SizeableCelestialObject body, float bodyDiameter, float axisRotation, double latitudeShift, double longitudeShift, Color featuresColor)
+        private void DrawLunarSurfaceFeatures(IMapContext map)
         {
-            PointF pMouse = map.Project(map.MousePosition);
-            Graphics g = map.Graphics;
+            float rotation = map.GetRotationTowardsNorth(moon.Equatorial) - (float)moon.PAaxis;
+            DrawSurfaceFeatures(map, lunarFeatures, moon, 3474, rotation, moon.Libration.b, moon.Libration.l, map.GetColor(Color.AntiqueWhite));
+        }
 
+        private void DrawMartianSurfaceFeatures(IMapContext map)
+        {
+            float rotation = map.GetRotationTowardsNorth(mars.Equatorial) - (float)mars.Appearance.P;
+            DrawSurfaceFeatures(map, martianFeatures, mars, 6779, rotation, mars.Appearance.D, -mars.Appearance.CM, map.GetColor(Color.Wheat));
+        }
+
+        private void DrawSurfaceFeatures(IMapContext map, ICollection<SurfaceFeature> features, SizeableCelestialObject body, float bodyDiameter, float axisRotation, double latitudeShift, double longitudeShift, Color featuresColor)
+        {           
             if (map.MouseButton == MouseButton.None && Angle.Separation(map.MousePosition, body.Horizontal) < body.Semidiameter / 3600)
             {
+                PointF pMouse = map.Project(map.MousePosition);
+                Graphics g = map.Graphics;
+
                 // radius of celestial body disk, in pixels
                 float r = map.GetDiskSize(body.Semidiameter, 10) / 2;
 
@@ -332,69 +343,74 @@ namespace Planetarium.Plugins.SolarSystem
                     Brush brush = new SolidBrush(featuresColor);
                     Pen pen = new Pen(featuresColor);
 
-                    foreach (var feature in features) 
+                    // minimal diameter of feature, in pixels, that is allowed to be drawn on current magnification
+                    const float minDiameterPx = 5;
+
+                    // minimal diameter of feature, converted to km
+                    float minDiameterKm = bodyDiameter / (2 * r) * minDiameterPx;
+
+                    // visible coordinates of body disk center, assume as zero point 
+                    CrdsGeographical c = new CrdsGeographical(0, 0);
+
+                    foreach (var feature in features.TakeWhile(f => f.Diameter > minDiameterKm)) 
                     {
                         // feature outline radius, in pixels
-                        float featureRadius = feature.Diameter / bodyDiameter * r;
+                        float fr = feature.Diameter / bodyDiameter * r;
 
-                        // do not draw small features
-                        if (featureRadius > 2.5)
+                        // visible coordinates of the feature
+                        CrdsGeographical v = GetVisibleFeatureCoordinates(feature.Latitude, feature.Longitude, latitudeShift, longitudeShift);
+
+                        // angular separation between visible center of the body disk and center of the feature
+                        // expressed in degrees of arc, from 0 (center) to 90 (disk edge)
+                        double sep = Angle.Separation(v, c);
+                        if (sep < 85)
                         {
-                            // visible coordinates of the feature
-                            var v = GetVisibleFeatureCoordinates(feature.Coordinates, latitudeShift, longitudeShift);
+                            PointF pFeature = GetCartesianFeatureCoordinates(r, v, axisRotation);
 
-                            // angular separation between visible center of the body disk and center of the feature
-                            // expressed in degrees of arc, from 0 (center) to 90 (disk edge)
-                            double sep = Angle.Separation(v, new CrdsGeographical(0, 0));
-                            if (sep < 85)
+                            // distance, in pixels, between center of the feature and current mouse position
+                            double d = Math.Sqrt(Math.Pow(pMouse.X - pFeature.X - p.X, 2) + Math.Pow(pMouse.Y - pFeature.Y - p.Y, 2));
+
+                            if (fr > 100 || d < fr)
                             {
-                                PointF pFeature = GetCartesianFeatureCoordinates(r, v, axisRotation);
+                                // visible flattening of feature outline,
+                                // depends on angular distance between feature and visible center of the body disk
+                                float f = (float)Math.Cos(Angle.ToRadians(sep));
 
-                                // distance, in pixels, between center of the feature and current mouse position
-                                var d = Math.Sqrt(Math.Pow(pMouse.X - pFeature.X - p.X, 2) + Math.Pow(pMouse.Y - pFeature.Y - p.Y, 2));
+                                float labelDist = 3;
+                                StringFormat format = null;
 
-                                if (featureRadius > 100 || d < featureRadius)
+                                // draw feature outline (for craters only)
+                                if (feature.TypeCode == "AA")
                                 {
-                                    // visible flattening of feature outline,
-                                    // depends on angular distance between feature and visible center of the body disk
-                                    float f = (float)Math.Cos(Angle.ToRadians(sep));
-
-                                    float labelDist = 3;
-                                    StringFormat format = null;
-
-                                    // draw feature outline (for craters only)
-                                    if (feature.TypeCode == "AA")
-                                    {
-                                        g.TranslateTransform(p.X + pFeature.X, p.Y + pFeature.Y);
-                                        g.RotateTransform(90 + (float)Angle.ToDegrees(Math.Atan2(pFeature.Y, pFeature.X)));
-                                        g.DrawEllipse(pen, -featureRadius, -featureRadius * f, featureRadius * 2, featureRadius * f * 2);
-                                        g.ResetTransform();
-                                        labelDist = featureRadius * 2;
-                                    }
-
-                                    // center label for maria, oceanus, sinus and lacus 
-                                    if (feature.TypeCode == "ME" ||
-                                        feature.TypeCode == "OC" ||
-                                        feature.TypeCode == "SI" ||
-                                        feature.TypeCode == "LC" ||
-                                        feature.TypeCode == "PA")
-                                    {
-                                        format = new StringFormat();
-                                        format.Alignment = StringAlignment.Center;
-                                        format.LineAlignment = StringAlignment.Center;
-                                    }
-                                    // fill central dot
-                                    else if (feature.TypeCode != "AA")
-                                    {
-                                        g.TranslateTransform(p.X + pFeature.X, p.Y + pFeature.Y);
-                                        g.FillEllipse(brush, -1, -1, 3, 3);
-                                        g.ResetTransform();
-                                    }
-
-                                    // draw feature label
+                                    g.TranslateTransform(p.X + pFeature.X, p.Y + pFeature.Y);
+                                    g.RotateTransform(90 + (float)Angle.ToDegrees(Math.Atan2(pFeature.Y, pFeature.X)));
+                                    g.DrawEllipse(pen, -fr, -fr * f, fr * 2, fr * f * 2);
                                     g.ResetTransform();
-                                    map.DrawObjectCaption(fontLabel, brush, feature.Name, new PointF(p.X + pFeature.X, p.Y + pFeature.Y), labelDist, format);                        
+                                    labelDist = fr * 2;
                                 }
+
+                                // center label for maria, oceanus, sinus, lacus, palus 
+                                if (feature.TypeCode == "ME" ||
+                                    feature.TypeCode == "OC" ||
+                                    feature.TypeCode == "SI" ||
+                                    feature.TypeCode == "LC" ||
+                                    feature.TypeCode == "PA")
+                                {
+                                    format = new StringFormat();
+                                    format.Alignment = StringAlignment.Center;
+                                    format.LineAlignment = StringAlignment.Center;
+                                }
+                                // fill central dot
+                                else if (feature.TypeCode != "AA")
+                                {
+                                    g.TranslateTransform(p.X + pFeature.X, p.Y + pFeature.Y);
+                                    g.FillEllipse(brush, -1, -1, 3, 3);
+                                    g.ResetTransform();
+                                }
+
+                                // draw feature label
+                                g.ResetTransform();
+                                map.DrawObjectCaption(fontLabel, brush, feature.Name, new PointF(p.X + pFeature.X, p.Y + pFeature.Y), labelDist, format);                        
                             }
                         }
                     }
@@ -415,10 +431,10 @@ namespace Planetarium.Plugins.SolarSystem
             return new PointF(X_, Y_);
         }
 
-        private CrdsGeographical GetVisibleFeatureCoordinates(CrdsGeographical coordinates, double latitudeShift, double longitudeShift)
+        private CrdsGeographical GetVisibleFeatureCoordinates(double latitude, double longitude, double latitudeShift, double longitudeShift)
         {
-            double theta = Angle.ToRadians(90 - coordinates.Latitude); // [0...180]
-            double phi = Angle.ToRadians(Angle.To360(coordinates.Longitude)); // [0...360]
+            double theta = Angle.ToRadians(90 - latitude); // [0...180]
+            double phi = Angle.ToRadians(Angle.To360(longitude)); // [0...360]
 
             // Cartesian coordinates
             double x = Math.Sin(theta) * Math.Cos(phi);
@@ -674,8 +690,7 @@ namespace Planetarium.Plugins.SolarSystem
 
                     if (planet.Number == Planet.MARS)
                     {
-                        rotation = map.GetRotationTowardsNorth(planet.Equatorial) - (float)planet.Appearance.P;
-                        DrawSurfaceFeatures(map, martianFeatures, planet, 6779, rotation, planet.Appearance.D, -planet.Appearance.CM, map.GetColor(Color.Wheat));
+                        DrawMartianSurfaceFeatures(map);
                     }
 
                     if (planet.Number == Planet.JUPITER)
@@ -1025,12 +1040,27 @@ namespace Planetarium.Plugins.SolarSystem
 
         private Image MoonTextureProvider(PlanetTextureToken token)
         {
+            uint imageSize;
+            switch (token.TextureName)
+            {
+                case "Moon-2k":
+                    imageSize = 1024;
+                    break;
+                default:
+                case "Moon-4k":
+                    imageSize = 2048;
+                    break;
+                case "Moon-8k":
+                    imageSize = 4096;
+                    break;
+            }
+
             return sphereRenderer.Render(new RendererOptions()
             {
                 LatitudeShift = token.Latitude,
                 LongutudeShift = token.Longitude,
-                OutputImageSize = 2048,
-                TextureFilePath = "Data\\Moon.jpg"
+                OutputImageSize = imageSize,
+                TextureFilePath = $"Data\\{token.TextureName}.jpg"
             });
         }
 
@@ -1188,22 +1218,20 @@ namespace Planetarium.Plugins.SolarSystem
             public string TextureName { get; private set; }
             public double Longitude { get; private set; }
             public double Latitude { get; private set; }
-            public double Flattening { get; private set; }
 
-            public PlanetTextureToken(string name, double longitude, double latitude, double flattening = 1)
+            public PlanetTextureToken(string name, double longitude, double latitude)
             {
                 TextureName = name;
                 Longitude = longitude;
                 Latitude = latitude;
-                Flattening = flattening;
             }
 
             public override bool Equals(object obj)
             {
-                if (obj is PlanetTextureToken)
+                if (obj is PlanetTextureToken other)
                 {
-                    PlanetTextureToken other = (PlanetTextureToken)obj;
-                    return                        
+                    return 
+                        TextureName.Equals(other.TextureName) &&
                         Math.Abs(Longitude - other.Longitude) < 0.01 &&
                         Math.Abs(Latitude - other.Latitude) < 0.01;
                 }
