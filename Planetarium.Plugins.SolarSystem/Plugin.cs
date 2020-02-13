@@ -17,7 +17,7 @@ namespace Planetarium.Plugins.SolarSystem
             AddSetting(new SettingItem("Sun", true, "Sun"));
             AddSetting(new SettingItem("SunLabel", true, "Sun", s => s.Get("Sun")));
             AddSetting(new SettingItem("SunTexture", true, "Sun", s => s.Get("Sun")));
-            AddSetting(new SettingItem("SunTexturePath", "https://soho.nascom.nasa.gov/data/REPROCESSING/Completed/{yyyy}/hmiigr/{yyyy}{MM}{dd}/{yyyy}{MM}{dd}_0000_hmiigr_512.jpg", "Sun", s => s.Get("Sun") && s.Get("TextureSun")));
+            AddSetting(new SettingItem("SunTexturePath", "https://soho.nascom.nasa.gov/data/REPROCESSING/Completed/{yyyy}/hmiigr/{yyyy}{MM}{dd}/{yyyy}{MM}{dd}_0000_hmiigr_512.jpg", "Sun", s => s.Get("Sun") && s.Get("SunTexture")));
 
             AddSetting(new SettingItem("Planets", true, "Planets"));
             AddSetting(new SettingItem("PlanetsTextures", true, "Planets", s => s.Get("Planets")));

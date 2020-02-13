@@ -19,7 +19,7 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
-  
+    
   <ItemGroup>
     <None Remove="Images.xaml" />
     <None Remove="Translations\Translation-en.txt" />
