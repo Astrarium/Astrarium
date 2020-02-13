@@ -147,6 +147,8 @@ namespace Planetarium
             skyView.MouseClick += SkyView_MouseClick;
             skyView.MouseMove += (o, e) => { skyView.Focus(); SetMousePosition(this, new PointF(e.X, e.Y)); };
             skyView.MouseWheel += (o, e) => GetMapZoom(this)?.Execute(e.Delta);
+            skyView.LostFocus += (o, e) => this.Activate();
+
             Host.KeyDown += (o, e) => GetMapKeyDown(this)?.Execute(e.Key);
             Host.Child = skyView;
         }
