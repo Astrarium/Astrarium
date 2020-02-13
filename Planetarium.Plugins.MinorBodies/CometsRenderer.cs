@@ -36,11 +36,11 @@ namespace Planetarium.Plugins.MinorBodies
         {
             Graphics g = map.Graphics;
             var allComets = cometsCalc.Comets;
-            bool isGround = settings.Get<bool>("Ground");
-            bool useTextures = settings.Get<bool>("UseTextures");
+            bool isGround = settings.Get("Ground");
+            bool useTextures = settings.Get("PlanetsTextures");
             double coeff = map.DiagonalCoefficient();
-            bool drawComets = settings.Get<bool>("Comets");
-            bool drawLabels = settings.Get<bool>("AsteroidsLabels");
+            bool drawComets = settings.Get("Comets");
+            bool drawLabels = settings.Get("AsteroidsLabels");
             Brush brushNames = new SolidBrush(map.GetColor("ColorCometsLabels"));
 
             if (drawComets)

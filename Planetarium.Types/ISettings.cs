@@ -9,12 +9,20 @@ namespace Planetarium.Types
     public interface ISettings : INotifyPropertyChanged
     {
         /// <summary>
+        /// Gets boolean setting with specified name.
+        /// </summary>
+        /// <param name="settingName">Unique name of setting</param>
+        /// <param name="defaultValue">Default value of the setting</param>
+        /// <returns>Setting value.</returns>
+        bool Get(string settingName, bool defaultValue = false);
+
+        /// <summary>
         /// Gets setting with specified name and casts its value to desired type.
         /// </summary>
         /// <typeparam name="T">Type of setting value</typeparam>
         /// <param name="settingName">Unique name of setting</param>
         /// <param name="defaultValue">Default value of the setting</param>
-        /// <returns>Setting value, of defailt value for type <typeparamref name="T"/>.</returns>
+        /// <returns>Setting value, of default value for type <typeparamref name="T"/>.</returns>
         T Get<T>(string settingName, T defaultValue = default(T));
 
         /// <summary>

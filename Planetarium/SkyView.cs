@@ -53,6 +53,7 @@ namespace Planetarium
             else
             {
                 SkyMap.Render(pe.Graphics);
+                Select();
             }
         }
 
@@ -110,8 +111,6 @@ namespace Planetarium
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
-
-            Select();
 
             if (SkyMap != null)
             {

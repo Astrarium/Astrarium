@@ -135,10 +135,10 @@ namespace Planetarium.Plugins.SolarSystem
 
         private void RenderSun(IMapContext map)
         {
-            if (!settings.Get<bool>("Sun")) return;
+            if (!settings.Get("Sun")) return;
 
-            bool isGround = settings.Get<bool>("Ground");
-            bool useTextures = settings.Get<bool>("SunTexture");
+            bool isGround = settings.Get("Ground");
+            bool useTextures = settings.Get("SunTexture");
             double ad = Angle.Separation(sun.Horizontal, map.Center);
             double coeff = map.DiagonalCoefficient();
             Graphics g = map.Graphics;
@@ -184,7 +184,7 @@ namespace Planetarium.Plugins.SolarSystem
 
                 g.ResetTransform();
 
-                if (settings.Get<bool>("SunLabel"))
+                if (settings.Get("SunLabel"))
                 {
                     map.DrawObjectCaption(fontLabel, brushLabel, sun.Name, p, size);
                 }
@@ -200,7 +200,7 @@ namespace Planetarium.Plugins.SolarSystem
             int alpha = (int)(map.DayLightFactor * (1 - sunSize / (2 * size)) * 255);
             Graphics g = map.Graphics;
 
-            if (settings.Get<bool>("Ground") && size > 0 && alpha > 0 && 2 * size > sunSize)
+            if (settings.Get("Ground") && size > 0 && alpha > 0 && 2 * size > sunSize)
             {
                 bool isEclipse = sun.Horizontal.Altitude > 0 && map.DayLightFactor < 1;
 
@@ -239,18 +239,23 @@ namespace Planetarium.Plugins.SolarSystem
 
         private void RenderMoon(IMapContext map)
         {
-            if (!settings.Get<bool>("Moon")) return;
+            if (!settings.Get("Moon")) return;
 
-            bool isGround = settings.Get<bool>("Ground");
-            bool useTextures = settings.Get<bool>("MoonTexture");
-            string textureName = $"Moon-{(int)settings.Get<TextureQuality>("MoonTextureQuality")}k";
+            bool isGround = settings.Get("Ground");
             double ad = Angle.Separation(moon.Horizontal, map.Center);
             double coeff = map.DiagonalCoefficient();
-            Graphics g = map.Graphics;
-
+            
             if ((!isGround || moon.Horizontal.Altitude + moon.Semidiameter / 3600 > 0) && 
                 ad < coeff * map.ViewAngle + moon.Semidiameter / 3600.0)
             {
+                // drawing size
+                float size = map.GetDiskSize(moon.Semidiameter, 10);
+
+                Graphics g = map.Graphics;
+                bool useTextures = settings.Get("MoonTexture");
+                int q = Math.Min((int)settings.Get<TextureQuality>("MoonTextureQuality"), size < 256 ? 2 : (size < 1024 ? 4 : 8));
+                string textureName = $"Moon-{q}k";
+
                 PointF p = map.Project(moon.Horizontal);
 
                 double inc = map.GetRotationTowardsNorth(moon.Equatorial);
@@ -261,9 +266,6 @@ namespace Planetarium.Plugins.SolarSystem
 
                 g.TranslateTransform(p.X, p.Y);
                 g.RotateTransform(axisRotation);
-
-                // drawing size
-                float size = map.GetDiskSize(moon.Semidiameter, 10);
 
                 SolidBrush brushMoon = new SolidBrush(map.GetColor(Color.Gray));
 
@@ -305,7 +307,7 @@ namespace Planetarium.Plugins.SolarSystem
                 g.FillPath(GetShadowBrush(map), shadow);
                 g.ResetTransform();
 
-                if (settings.Get<bool>("MoonLabel"))
+                if (settings.Get("MoonLabel"))
                 {
                     map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, size);
                 }
@@ -316,19 +318,27 @@ namespace Planetarium.Plugins.SolarSystem
 
         private void DrawLunarSurfaceFeatures(IMapContext map)
         {
-            float rotation = map.GetRotationTowardsNorth(moon.Equatorial) - (float)moon.PAaxis;
-            DrawSurfaceFeatures(map, lunarFeatures, moon, 3474, rotation, moon.Libration.b, moon.Libration.l, map.GetColor(Color.AntiqueWhite));
+            if (settings.Get("Moon") && settings.Get("MoonTexture") && settings.Get("MoonSurfaceFeatures"))
+            {
+                float rotation = map.GetRotationTowardsNorth(moon.Equatorial) - (float)moon.PAaxis;
+                DrawSurfaceFeatures(map, lunarFeatures, moon, 3474, rotation, moon.Libration.b, moon.Libration.l, map.GetColor(Color.AntiqueWhite));
+            }
         }
 
         private void DrawMartianSurfaceFeatures(IMapContext map)
         {
-            float rotation = map.GetRotationTowardsNorth(mars.Equatorial) - (float)mars.Appearance.P;
-            DrawSurfaceFeatures(map, martianFeatures, mars, 6779, rotation, mars.Appearance.D, -mars.Appearance.CM, map.GetColor(Color.Wheat));
+            if (settings.Get("Planets") && settings.Get("PlanetsTextures") && settings.Get("PlanetsSurfaceFeatures"))
+            {
+                float rotation = map.GetRotationTowardsNorth(mars.Equatorial) - (float)mars.Appearance.P;
+                DrawSurfaceFeatures(map, martianFeatures, mars, 6779, rotation, mars.Appearance.D, -mars.Appearance.CM, map.GetColor(Color.Wheat));
+            }
         }
 
         private void DrawSurfaceFeatures(IMapContext map, ICollection<SurfaceFeature> features, SizeableCelestialObject body, float bodyDiameter, float axisRotation, double latitudeShift, double longitudeShift, Color featuresColor)
-        {           
-            if (map.MouseButton == MouseButton.None && Angle.Separation(map.MousePosition, body.Horizontal) < body.Semidiameter / 3600)
+        {
+            if (map.MouseButton == MouseButton.None &&
+                Angle.Separation(map.MousePosition, body.Horizontal) < body.Semidiameter / 3600 &&
+                (!settings.Get("Ground") || body.Horizontal.Altitude + body.Semidiameter / 3600 > 0))
             {
                 PointF pMouse = map.Project(map.MousePosition);
                 Graphics g = map.Graphics;
@@ -493,7 +503,7 @@ namespace Planetarium.Plugins.SolarSystem
             // semidiameter of penumbra in seconds of arc
             double sdP = moon.EarthShadow.PenumbraRadius * 6378.0 / 1738.0 * moon.Semidiameter;
 
-            bool isGround = settings.Get<bool>("Ground");
+            bool isGround = settings.Get("Ground");
             double coeff = map.DiagonalCoefficient();
             Graphics g = map.Graphics;
 
@@ -557,7 +567,7 @@ namespace Planetarium.Plugins.SolarSystem
                     }
 
                     // outline circles
-                    if (settings.Get<bool>("EarthShadowOutline") && map.ViewAngle > 0.5)
+                    if (settings.Get("EarthShadowOutline") && map.ViewAngle > 0.5)
                     {
                         var brush = new SolidBrush(map.GetColor(clrShadowOutline));
                         var pen = new Pen(brush) { DashStyle = DashStyle.Dot };
@@ -577,15 +587,15 @@ namespace Planetarium.Plugins.SolarSystem
 
         private void RenderPlanet(IMapContext map, Planet planet)
         {
-            if (!settings.Get<bool>("Planets"))
+            if (!settings.Get("Planets"))
             {
                 return;
             }
 
             Graphics g = map.Graphics;
             double ad = Angle.Separation(planet.Horizontal, map.Center);
-            bool isGround = settings.Get<bool>("Ground");
-            bool useTextures = settings.Get<bool>("UseTextures");
+            bool isGround = settings.Get("Ground");
+            bool useTextures = settings.Get("PlanetsTextures");
             double coeff = map.DiagonalCoefficient();
 
             if ((!isGround || planet.Horizontal.Altitude + planet.Semidiameter / 3600 > 0) &&
@@ -704,8 +714,8 @@ namespace Planetarium.Plugins.SolarSystem
 
         private void RenderPlanetMoon(IMapContext map, Planet planet, PlanetMoon moon, bool hasTexture = true)
         {
-            bool isGround = settings.Get<bool>("Ground");
-            bool useTextures = settings.Get<bool>("UseTextures");
+            bool isGround = settings.Get("Ground");
+            bool useTextures = settings.Get("PlanetsTextures");
             double coeff = map.DiagonalCoefficient();
             double ad = Angle.Separation(moon.Horizontal, map.Center);
             Graphics g = map.Graphics;
@@ -923,7 +933,7 @@ namespace Planetarium.Plugins.SolarSystem
                             g.FillRegion(brushU, regionU);
 
                             // outline circles
-                            if (settings.Get<bool>("JupiterMoonsShadowOutline") && szP > 20)
+                            if (settings.Get("JupiterMoonsShadowOutline") && szP > 20)
                             {
                                 g.DrawEllipse(penShadowOutline, p.X - (szP + szU) / 4, p.Y - (szP + szU) / 4, (szP + szU) / 2, (szP + szU) / 2);
                                 g.DrawEllipse(penShadowOutline, p.X - szU / 2, p.Y - szU / 2, szU, szU);
@@ -967,7 +977,7 @@ namespace Planetarium.Plugins.SolarSystem
             Graphics g = map.Graphics;
             float diamEquat = diam;
             float diamPolar = (1 - planet.Flattening) * diam;
-            bool useTextures = settings.Get<bool>("UseTextures");
+            bool useTextures = settings.Get("PlanetsTextures");
 
             if (!(useTextures && (map.Schema == ColorSchema.Red || map.Schema == ColorSchema.White)))
             {
@@ -1019,7 +1029,7 @@ namespace Planetarium.Plugins.SolarSystem
 
         private void DrawRotationAxis(Graphics g, float diam)
         {
-            if (settings.Get<bool>("ShowRotationAxis"))
+            if (settings.Get("ShowRotationAxis"))
             {
                 var p1 = new PointF(0, -(diam / 2 + 10));
                 var p2 = new PointF(0, diam / 2 + 10);

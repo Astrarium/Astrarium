@@ -15,27 +15,30 @@ namespace Planetarium.Plugins.SolarSystem
             #region Settings
 
             AddSetting(new SettingItem("Sun", true, "Sun"));
-            AddSetting(new SettingItem("SunLabel", true, "Sun", s => s.Get<bool>("Sun")));
-            AddSetting(new SettingItem("SunTexture", true, "Sun", s => s.Get<bool>("Sun")));
-            AddSetting(new SettingItem("SunTexturePath", "https://soho.nascom.nasa.gov/data/REPROCESSING/Completed/{yyyy}/hmiigr/{yyyy}{MM}{dd}/{yyyy}{MM}{dd}_0000_hmiigr_512.jpg", "Sun", s => s.Get<bool>("Sun") && s.Get<bool>("TextureSun")));
+            AddSetting(new SettingItem("SunLabel", true, "Sun", s => s.Get("Sun")));
+            AddSetting(new SettingItem("SunTexture", true, "Sun", s => s.Get("Sun")));
+            AddSetting(new SettingItem("SunTexturePath", "https://soho.nascom.nasa.gov/data/REPROCESSING/Completed/{yyyy}/hmiigr/{yyyy}{MM}{dd}/{yyyy}{MM}{dd}_0000_hmiigr_512.jpg", "Sun", s => s.Get("Sun") && s.Get("TextureSun")));
 
             AddSetting(new SettingItem("Planets", true, "Planets"));
-            AddSetting(new SettingItem("UseTextures", true, "Planets", s => s.Get<bool>("Planets")));
-            AddSetting(new SettingItem("JupiterMoonsShadowOutline", true, "Planets", s => s.Get<bool>("Planets")));
-            AddSetting(new SettingItem("ShowRotationAxis", true, "Planets", s => s.Get<bool>("Planets")));
+            AddSetting(new SettingItem("PlanetsTextures", true, "Planets", s => s.Get("Planets")));
+            AddSetting(new SettingItem("PlanetsSurfaceFeatures", true, "Planets", s => s.Get("Planets") && s.Get("PlanetsTextures")));
+
+            AddSetting(new SettingItem("JupiterMoonsShadowOutline", true, "Planets", s => s.Get("Planets")));
+            AddSetting(new SettingItem("ShowRotationAxis", true, "Planets", s => s.Get("Planets")));
 
             AddSetting(new SettingItem("Moon", true, "Moon"));
-            AddSetting(new SettingItem("MoonLabel", true, "Moon", s => s.Get<bool>("Moon")));
-            AddSetting(new SettingItem("MoonTexture", true, "Moon", s => s.Get<bool>("Moon")));
-            AddSetting(new SettingItem("MoonTextureQuality", TextureQuality.Normal, "Moon", s => s.Get<bool>("Moon") && s.Get<bool>("MoonTexture")));
-            AddSetting(new SettingItem("EarthShadowOutline", false, "Moon", s => s.Get<bool>("Moon")));
+            AddSetting(new SettingItem("MoonLabel", true, "Moon", s => s.Get("Moon")));
+            AddSetting(new SettingItem("MoonTexture", true, "Moon", s => s.Get("Moon")));
+            AddSetting(new SettingItem("MoonTextureQuality", TextureQuality.Normal, "Moon", s => s.Get("Moon") && s.Get("MoonTexture")));
+            AddSetting(new SettingItem("MoonSurfaceFeatures", true, "Moon", s => s.Get("Moon") && s.Get("MoonTexture")));
+            AddSetting(new SettingItem("EarthShadowOutline", false, "Moon", s => s.Get("Moon")));
 
             AddSetting(new SettingItem("GRSLongitude", new GreatRedSpotSettings()
             {
                 Epoch = 2458150.5000179596,
                 MonthlyDrift = 2,
                 Longitude = 283
-            }, "Planets", typeof(GRSSettingControl), s => s.Get<bool>("Planets")));
+            }, "Planets", typeof(GRSSettingControl), s => s.Get("Planets")));
 
             // Colors
 

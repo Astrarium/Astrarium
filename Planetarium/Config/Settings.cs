@@ -84,6 +84,11 @@ namespace Planetarium.Config
             }
         }
 
+        public bool Get(string settingName, bool defaultValue = false)
+        {
+            return Get<bool>(settingName, defaultValue);
+        }
+
         public T Get<T>(string settingName, T defaultValue = default(T))
         {
             if (SettingsValues.ContainsKey(settingName))
