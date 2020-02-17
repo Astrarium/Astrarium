@@ -8,7 +8,10 @@ using System.Threading.Tasks;
 
 namespace Planetarium.Objects
 {
-    public class JupiterMoon : PlanetMoon
+    /// <summary>
+    /// Contains coordinates and visual appearance data for the Galilean moon of Jupiter for given instant of time.
+    /// </summary>
+    public class JupiterMoon : SizeableCelestialObject, IPlanetMoon, ISolarSystemObject
     {
         public JupiterMoon(int number)
         {
@@ -18,22 +21,22 @@ namespace Planetarium.Objects
         /// <summary>
         /// Apparent equatorial coordinates of the Galilean moon
         /// </summary>
-        public CrdsEquatorial Equatorial { get; set; }
+        public CrdsEquatorial Equatorial { get; internal set; }
 
         /// <summary>
         /// Planetocentric rectangular coordinates of the Galilean moon
         /// </summary>
-        public CrdsRectangular Rectangular { get; set; }
+        public CrdsRectangular Rectangular { get; internal set; }
 
         /// <summary>
         /// Planetocentric rectangular coordinates of the Galilean moon, as seen from Sun
         /// </summary>
-        public CrdsRectangular RectangularS { get; set; }
+        public CrdsRectangular RectangularS { get; internal set; }
 
         /// <summary>
         /// Name of the Galilean moon
         /// </summary>
-        public override string Name => Text.Get($"JupiterMoon.{Number}.Name");
+        public string Name => Text.Get($"JupiterMoon.{Number}.Name");
 
         /// <summary>
         /// Name of moon shadow
@@ -45,9 +48,24 @@ namespace Planetarium.Objects
         /// </summary>
         public override string[] Names => new[] { Name };
 
-        public override double DistanceFromEarth { get; internal set; }
+        public double DistanceFromEarth { get; internal set; }
 
-        public override bool IsEclipsedByPlanet
+        /// <summary>
+        /// Number of the moon
+        /// </summary>
+        public int Number { get; private set; }
+
+        /// <summary>
+        /// Longitude of central meridian
+        /// </summary>
+        public double CM { get; internal set; }
+
+        /// <summary>
+        /// Apparent magnitude
+        /// </summary>
+        public float Magnitude { get; internal set; }
+
+        public bool IsEclipsedByPlanet
         {
             get
             {

@@ -7,28 +7,31 @@ using System.Threading.Tasks;
 
 namespace Planetarium.Objects
 {
-    public abstract class PlanetMoon : SolarSystemObject
+    internal interface IPlanetMoon
     {
         /// <summary>
         /// Longitude of central meridian
         /// </summary>
-        public double CM { get; set; }
+        double CM { get; }
 
         /// <summary>
         /// Name of the moon
         /// </summary>
-        public abstract string Name { get; }
+        string Name { get; }
 
         /// <summary>
         /// Number of the moon
         /// </summary>
-        public int Number { get; protected set; }
+        int Number { get; }
 
         /// <summary>
         /// Apparent magnitude
         /// </summary>
-        public float Magnitude { get; set;  }
+        float Magnitude { get;  }
 
-        public abstract bool IsEclipsedByPlanet { get; }
+        /// <summary>
+        /// Flag indicating the moon is eclipsed by parent planet
+        /// </summary>
+        bool IsEclipsedByPlanet { get; }
     }
 }

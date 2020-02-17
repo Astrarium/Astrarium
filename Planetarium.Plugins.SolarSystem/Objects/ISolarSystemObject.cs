@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace Planetarium.Objects
 {
-    public abstract class SolarSystemObject : SizeableCelestialObject
+    public interface ISolarSystemObject
     {
         /// <summary>
         /// Distance from Earth, in AU
         /// </summary>
-        public abstract double DistanceFromEarth { get; internal set; }
+        double DistanceFromEarth { get; }
     }
 }

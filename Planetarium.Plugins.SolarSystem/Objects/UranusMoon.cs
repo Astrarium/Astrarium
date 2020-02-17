@@ -8,12 +8,20 @@ using System.Threading.Tasks;
 
 namespace Planetarium.Objects
 {
-    public class UranusMoon : PlanetMoon
+    /// <summary>
+    /// Contains coordinates and visual appearance data for the large moon of Uranus for given instant of time.
+    /// </summary>
+    public class UranusMoon : SizeableCelestialObject, IPlanetMoon, ISolarSystemObject
     {
         public UranusMoon(int number)
         {
             Number = number;
         }
+
+        /// <summary>
+        /// Moon index, 1-based
+        /// </summary>
+        public int Number { get; private set; }
 
         /// <summary>
         /// Apparent equatorial coordinates of the moon
@@ -26,17 +34,27 @@ namespace Planetarium.Objects
         public CrdsRectangular Rectangular { get; set; }
 
         /// <summary>
+        /// Longitude of central meridian
+        /// </summary>
+        public double CM { get; internal set; }
+
+        /// <summary>
+        /// Apparent magnitude
+        /// </summary>
+        public float Magnitude { get; internal set; }
+
+        /// <summary>
         /// Name of the moon
         /// </summary>
-        public override string Name => Text.Get($"UranusMoon.{Number}.Name");
+        public string Name => Text.Get($"UranusMoon.{Number}.Name");
 
         /// <summary>
         /// Gets moon names
         /// </summary>
         public override string[] Names => new[] { Name };
 
-        public override double DistanceFromEarth { get; internal set; }
+        public double DistanceFromEarth { get; internal set; }
 
-        public override bool IsEclipsedByPlanet => false;
+        public bool IsEclipsedByPlanet => false;
     }
 }

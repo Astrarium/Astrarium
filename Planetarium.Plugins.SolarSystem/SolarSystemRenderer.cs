@@ -86,9 +86,10 @@ namespace Planetarium.Plugins.SolarSystem
 
             var bodies = planetsCalc.Planets
                 .Where(p => p.Number != Planet.EARTH)
-                .Cast<SolarSystemObject>()
+                .Cast<ISolarSystemObject>()
                 .Concat(new[] { sun })
                 .Concat(planetsCalc.JupiterMoons)
+                .Concat(planetsCalc.SaturnMoons)
                 .Concat(planetsCalc.UranusMoons)
                 .OrderByDescending(body => body.DistanceFromEarth)
                 .ToArray();
@@ -104,6 +105,10 @@ namespace Planetarium.Plugins.SolarSystem
                     RenderPlanetMoon(map, planetsCalc.Planets.ElementAt(Planet.JUPITER - 1), jm);
                     RenderJupiterMoonShadow(map, jm, jm.RectangularS);
                     RenderJupiterShadow(map, jm);
+                }
+                else if (body is SaturnMoon sm)
+                {
+                    RenderPlanetMoon(map, planetsCalc.Planets.ElementAt(Planet.SATURN - 1), sm, hasTexture: false);
                 }
                 else if (body is UranusMoon um)
                 {
@@ -712,7 +717,7 @@ namespace Planetarium.Plugins.SolarSystem
             }
         }
 
-        private void RenderPlanetMoon(IMapContext map, Planet planet, PlanetMoon moon, bool hasTexture = true)
+        private void RenderPlanetMoon<TPlanetMoon>(IMapContext map, Planet planet, TPlanetMoon moon, bool hasTexture = true) where TPlanetMoon : SizeableCelestialObject, IPlanetMoon
         {
             bool isGround = settings.Get("Ground");
             bool useTextures = settings.Get("PlanetsTextures");

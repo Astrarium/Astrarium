@@ -28,6 +28,15 @@ JupiterMoon.1.Shadow			= Тень Ио
 JupiterMoon.2.Shadow			= Тень Европы
 JupiterMoon.3.Shadow			= Тень Ганимеда
 JupiterMoon.4.Shadow			= Тень Каллисто
+SaturnMoon.1.Name				= Мимас
+SaturnMoon.2.Name				= Энцелад
+SaturnMoon.3.Name				= Тефия
+SaturnMoon.4.Name				= Диона
+SaturnMoon.5.Name				= Рея
+SaturnMoon.6.Name				= Титан
+SaturnMoon.7.Name				= Гиперион
+SaturnMoon.8.Name				= Япет
+
 EarthShadow.Label				= Тень Земли
 EclipsedByJupiter				= В тени Юпитера
 UranusMoon.1.Name				= Миранда

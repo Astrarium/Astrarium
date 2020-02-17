@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Planetarium.Objects
 {
-    public class Sun : SolarSystemObject, IMovingObject
+    public class Sun : SizeableCelestialObject, ISolarSystemObject, IMovingObject
     {
         /// <summary>
         /// Apparent topocentrical equatorial coordinates
@@ -33,7 +33,7 @@ namespace Planetarium.Objects
         /// <summary>
         /// Distance from Earth
         /// </summary>
-        public override double DistanceFromEarth { get => Ecliptical.Distance; internal set { } }
+        public double DistanceFromEarth => Ecliptical.Distance; 
 
         /// <summary>
         /// Primary name

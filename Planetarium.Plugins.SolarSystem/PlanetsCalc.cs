@@ -12,15 +12,17 @@ using System.Text;
 
 namespace Planetarium.Plugins.SolarSystem
 {
-    public partial class PlanetsCalc : BaseCalc, ICelestialObjectCalc<Planet>, ICelestialObjectCalc<JupiterMoon>, ICelestialObjectCalc<UranusMoon>
+    public partial class PlanetsCalc : BaseCalc, ICelestialObjectCalc<Planet>, ICelestialObjectCalc<JupiterMoon>, ICelestialObjectCalc<SaturnMoon>, ICelestialObjectCalc<UranusMoon>
     {
         private ISettings settings;
         private Planet[] planets = new Planet[8];
         private JupiterMoon[] jupiterMoons = new JupiterMoon[4];
+        private SaturnMoon[] saturnMoons = new SaturnMoon[8];
         private UranusMoon[] uranusMoons = new UranusMoon[5];
 
         public ICollection<Planet> Planets => planets;
         public ICollection<JupiterMoon> JupiterMoons => jupiterMoons;
+        public ICollection<SaturnMoon> SaturnMoons => saturnMoons;
         public ICollection<UranusMoon> UranusMoons => uranusMoons;
         public RingsAppearance SaturnRings { get; private set; } = new RingsAppearance();
         public double GreatRedSpotLongitude { get; private set; }
@@ -40,6 +42,11 @@ namespace Planetarium.Plugins.SolarSystem
             for (int i = 0; i < JupiterMoons.Count; i++)
             {
                 jupiterMoons[i] = new JupiterMoon(i + 1);
+            }
+
+            for (int i = 0; i < SaturnMoons.Count; i++)
+            {
+                saturnMoons[i] = new SaturnMoon(i + 1);
             }
 
             for (int i = 0; i < UranusMoons.Count; i++)
@@ -89,6 +96,17 @@ namespace Planetarium.Plugins.SolarSystem
 
                 if (p.Number == Planet.SATURN)
                 {
+                    foreach (var j in SaturnMoons)
+                    {
+                        int m = j.Number;
+                        j.Rectangular = context.Get(SaturnMoonRectangular, m);
+                        j.Equatorial = context.Get(SaturnMoonEquatorial, m);
+                        j.Horizontal = context.Get(SaturnMoonHorizontal, m);
+                        j.Semidiameter = context.Get(SaturnMoonSemidiameter, m);
+                        j.Magnitude = context.Get(SaturnMoonMagnitude, m);
+                        j.DistanceFromEarth = context.Get(SaturnMoonDistanceFromEarth, m);
+                    }
+
                     SaturnRings = context.Get(GetSaturnRings, n);
                 }
 
@@ -115,10 +133,13 @@ namespace Planetarium.Plugins.SolarSystem
             var s2 = jupiterMoons.Where(m => m.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
                 .Select(p => new SearchResultItem(p, p.Name));
 
-            var s3 = uranusMoons.Where(m => m.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
+            var s3 = saturnMoons.Where(m => m.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
                 .Select(p => new SearchResultItem(p, p.Name));
 
-            return s1.Concat(s2).Concat(s3).ToArray();
+            var s4 = uranusMoons.Where(m => m.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
+                .Select(p => new SearchResultItem(p, p.Name));
+
+            return s1.Concat(s2).Concat(s3).Concat(s4).ToArray();
         }
     }
 }

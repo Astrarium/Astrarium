@@ -8,7 +8,10 @@ using System.Threading.Tasks;
 
 namespace Planetarium.Objects
 {
-    public class Planet : SolarSystemObject, IMovingObject
+    /// <summary>
+    /// Contains coordinates and visual appearance data for the major planet for given instant of time.
+    /// </summary>
+    public class Planet : SizeableCelestialObject, ISolarSystemObject, IMovingObject
     {
         public Planet(int number)
         {
@@ -68,7 +71,7 @@ namespace Planetarium.Objects
         /// <summary>
         /// Distance from Earth, in AU
         /// </summary>
-        public override double DistanceFromEarth { get => Ecliptical.Distance; internal set { } }
+        public double DistanceFromEarth => Ecliptical.Distance;
 
         /// <summary>
         /// Gets planet names
