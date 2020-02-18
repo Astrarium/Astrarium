@@ -72,9 +72,14 @@ namespace Planetarium.Plugins.SolarSystem
             return ecliptical;
         }
 
-        private CrdsEquatorial UranusMoon_Equatorial(SkyContext c, int m)
+        private CrdsEquatorial UranusMoon_Equatorial0(SkyContext c, int m)
         {
             return c.Get(UranusMoon_Ecliptical, m).ToEquatorial(c.Epsilon);
+        }
+
+        private CrdsEquatorial UranusMoon_Equatorial(SkyContext c, int m)
+        {
+            return c.Get(UranusMoon_Equatorial0, m).ToTopocentric(c.GeoLocation, c.SiderealTime, c.Get(Planet_Parallax, Planet.URANUS));
         }
 
         private CrdsHorizontal UranusMoon_Horizontal(SkyContext c, int m)

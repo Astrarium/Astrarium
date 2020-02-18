@@ -72,9 +72,14 @@ namespace Planetarium.Plugins.SolarSystem
             return ecliptical;
         }
 
-        private CrdsEquatorial MarsMoon_Equatorial(SkyContext c, int m)
+        private CrdsEquatorial MarsMoon_Equatorial0(SkyContext c, int m)
         {
             return c.Get(MarsMoon_Ecliptical, m).ToEquatorial(c.Epsilon);
+        }
+
+        private CrdsEquatorial MarsMoon_Equatorial(SkyContext c, int m)
+        {
+            return c.Get(MarsMoon_Equatorial0, m).ToTopocentric(c.GeoLocation, c.SiderealTime, c.Get(Planet_Parallax, Planet.MARS));
         }
 
         private CrdsHorizontal MarsMoon_Horizontal(SkyContext c, int m)

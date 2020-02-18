@@ -20,6 +20,8 @@ Planet.5.GenitiveName			= Юпитера
 Planet.6.GenitiveName			= Сатурна
 Planet.7.GenitiveName			= Урана
 Planet.8.GenitiveName			= Нептуна
+MarsMoon.1.Name					= Фобос
+MarsMoon.2.Name					= Деймос
 JupiterMoon.1.Name				= Ио
 JupiterMoon.2.Name				= Европа
 JupiterMoon.3.Name				= Ганимед
@@ -36,14 +38,13 @@ SaturnMoon.5.Name				= Рея
 SaturnMoon.6.Name				= Титан
 SaturnMoon.7.Name				= Гиперион
 SaturnMoon.8.Name				= Япет
-
-EarthShadow.Label				= Тень Земли
-EclipsedByJupiter				= В тени Юпитера
 UranusMoon.1.Name				= Миранда
 UranusMoon.2.Name				= Ариэль
 UranusMoon.3.Name				= Умбриэль
 UranusMoon.4.Name				= Титания
 UranusMoon.5.Name				= Оберон
+EarthShadow.Label				= Тень Земли
+EclipsedByJupiter				= В тени Юпитера
 
 # Ephemeris
 Planet.Constellation			= В созвездии

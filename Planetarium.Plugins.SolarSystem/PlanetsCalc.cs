@@ -90,30 +90,30 @@ namespace Planetarium.Plugins.SolarSystem
 
                 if (p.Number == Planet.MARS)
                 {
-                    foreach (var s in marsMoons)
+                    foreach (var m in marsMoons)
                     {
-                        int m = s.Number;
-                        s.Rectangular = context.Get(MarsMoon_Rectangular, m);
-                        s.Equatorial = context.Get(MarsMoon_Equatorial, m);
-                        s.Horizontal = context.Get(MarsMoon_Horizontal, m);
-                        s.Semidiameter = context.Get(MarsMoon_Semidiameter, m);
-                        s.DistanceFromEarth = context.Get(MarsMoon_Ecliptical, m).Distance;
+                        int mn = m.Number;
+                        m.Rectangular = context.Get(MarsMoon_Rectangular, mn);
+                        m.Equatorial = context.Get(MarsMoon_Equatorial, mn);
+                        m.Horizontal = context.Get(MarsMoon_Horizontal, mn);
+                        m.Semidiameter = context.Get(MarsMoon_Semidiameter, mn);
+                        m.DistanceFromEarth = context.Get(MarsMoon_Ecliptical, mn).Distance;
                     }
                 }
 
                 if (p.Number == Planet.JUPITER)
                 {
-                    foreach (var j in JupiterMoons)
+                    foreach (var m in JupiterMoons)
                     {
-                        int m = j.Number;
-                        j.Rectangular = context.Get(JupiterMoon_Rectangular, m);
-                        j.RectangularS = context.Get(JupiterMoonShadow_Rectangular, m);
-                        j.Equatorial = context.Get(JupiterMoon_Equatorial, m);
-                        j.Horizontal = context.Get(JupiterMoon_Horizontal, m);
-                        j.Semidiameter = context.Get(JupiterMoon_Semidiameter, m);
-                        j.CM = context.Get(JupiterMoon_CentralMeridian, m);
-                        j.Magnitude = context.Get(JupiterMoon_Magnitude, m);
-                        j.DistanceFromEarth = context.Get(JupiterMoon_DistanceFromEarth, m);
+                        int mn = m.Number;
+                        m.Rectangular = context.Get(JupiterMoon_Rectangular, mn);
+                        m.RectangularS = context.Get(JupiterMoonShadow_Rectangular, mn);
+                        m.Equatorial = context.Get(JupiterMoon_Equatorial, mn);
+                        m.Horizontal = context.Get(JupiterMoon_Horizontal, mn);
+                        m.Semidiameter = context.Get(JupiterMoon_Semidiameter, mn);
+                        m.CM = context.Get(JupiterMoon_CentralMeridian, mn);
+                        m.Magnitude = context.Get(JupiterMoon_Magnitude, mn);
+                        m.DistanceFromEarth = context.Get(JupiterMoon_DistanceFromEarth, mn);
                     }
 
                     GreatRedSpotLongitude = context.Get(Jupiter_GreatRedSpotLongitude);
@@ -121,15 +121,15 @@ namespace Planetarium.Plugins.SolarSystem
 
                 if (p.Number == Planet.SATURN)
                 {
-                    foreach (var j in SaturnMoons)
+                    foreach (var m in SaturnMoons)
                     {
-                        int m = j.Number;
-                        j.Rectangular = context.Get(SaturnMoon_Rectangular, m);
-                        j.Equatorial = context.Get(SaturnMoon_Equatorial, m);
-                        j.Horizontal = context.Get(SaturnMoon_Horizontal, m);
-                        j.Semidiameter = context.Get(SaturnMoon_Semidiameter, m);
-                        j.Magnitude = context.Get(SaturnMoon_Magnitude, m);
-                        j.DistanceFromEarth = context.Get(SaturnMoon_DistanceFromEarth, m);
+                        int mn = m.Number;
+                        m.Rectangular = context.Get(SaturnMoon_Rectangular, mn);
+                        m.Equatorial = context.Get(SaturnMoon_Equatorial, mn);
+                        m.Horizontal = context.Get(SaturnMoon_Horizontal, mn);
+                        m.Semidiameter = context.Get(SaturnMoon_Semidiameter, mn);
+                        m.Magnitude = context.Get(SaturnMoon_Magnitude, mn);
+                        m.DistanceFromEarth = context.Get(SaturnMoon_DistanceFromEarth, mn);
                     }
 
                     SaturnRings = context.Get(Saturn_RingsAppearance, n);
@@ -137,14 +137,14 @@ namespace Planetarium.Plugins.SolarSystem
 
                 if (p.Number == Planet.URANUS)
                 {
-                    foreach (var u in uranusMoons)
+                    foreach (var m in uranusMoons)
                     {
-                        int m = u.Number;
-                        u.Rectangular = context.Get(UranusMoon_Rectangular, m);
-                        u.Equatorial = context.Get(UranusMoon_Equatorial, m);
-                        u.Horizontal = context.Get(UranusMoon_Horizontal, m);
-                        u.Semidiameter = context.Get(UranusMoon_Semidiameter, m);
-                        u.DistanceFromEarth = context.Get(UranusMoon_Ecliptical, m).Distance;
+                        int mn = m.Number;
+                        m.Rectangular = context.Get(UranusMoon_Rectangular, mn);
+                        m.Equatorial = context.Get(UranusMoon_Equatorial, mn);
+                        m.Horizontal = context.Get(UranusMoon_Horizontal, mn);
+                        m.Semidiameter = context.Get(UranusMoon_Semidiameter, mn);
+                        m.DistanceFromEarth = context.Get(UranusMoon_Ecliptical, mn).Distance;
                     }
                 }
             }

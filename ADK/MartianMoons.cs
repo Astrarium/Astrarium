@@ -38,7 +38,7 @@ namespace ADK
             double tau = PlanetPositions.LightTimeEffect(distanceMars);
 
             // ESAPHODEI model
-            double t = jd - 2451545.0 + 6491.5;
+            double t = jd - 2451545.0 + 6491.5 - tau;
 
             GenerateMarsSatToVSOP87(t, ref mars_sat_to_vsop87);
 
