@@ -43,7 +43,7 @@ namespace ADK
         public static float Magnitude(double r, double R, double phase, int moonIndex)
         {
             // TODO: not correct, modify this
-            return (float)(5 * Log10(r * R / Sqrt(phase)) + MH[moonIndex] - 3.5);
+            return (float)(5 * Log10(r * R / Sqrt(phase)) + MH[moonIndex] - 0.75);
         }
 
         /// <summary>

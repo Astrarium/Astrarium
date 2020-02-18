@@ -34,9 +34,6 @@ namespace ADK
             // Distance from Earth to Uranus, in AU
             double distanceUranus = eclUranus.Distance;
 
-            // Angular radius of Uranus, in degrees
-            double angular = PlanetEphem.Semidiameter(7, distanceUranus) / 3600.0;
-
             // light-time effect
             double tau = PlanetPositions.LightTimeEffect(distanceUranus);
 

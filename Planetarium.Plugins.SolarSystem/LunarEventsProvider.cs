@@ -247,7 +247,7 @@ namespace Planetarium.Plugins.SolarSystem
                         jd = NearestPassWithPlanet(ctx, p);
 
                         CrdsEquatorial eqMoon = ctx.Get(lunarCalc.Equatorial);
-                        CrdsEquatorial eqPlanet = ctx.Get(planetsCalc.Equatorial, p);
+                        CrdsEquatorial eqPlanet = ctx.Get(planetsCalc.Planet_Equatorial, p);
 
                         double semidiameter = ctx.Get(lunarCalc.Semidiameter) / 3600;
                         double separation = Angle.Separation(eqMoon, eqPlanet);
@@ -262,7 +262,7 @@ namespace Planetarium.Plugins.SolarSystem
                         else
                         {
                             string moonPhase = Formatters.Phase.Format(ctx.Get(lunarCalc.Phase));
-                            string planetMagnitude = Formatters.Magnitude.Format(ctx.Get(planetsCalc.Magnitude, p));
+                            string planetMagnitude = Formatters.Magnitude.Format(ctx.Get(planetsCalc.Planet_Magnitude, p));
                             string angularDistance = Formatters.ConjunctionSeparation.Format(separation);
                             string direction = eqMoon.Delta > eqPlanet.Delta ? Text.Get("MoonEvents.ConjWithPlanets.Conj.North") : Text.Get("MoonEvents.ConjWithPlanets.Conj.South");
                             events.Add(new AstroEvent(jd, Text.Get("MoonEvents.ConjWithPlanets.Conj", ("moonPhase", moonPhase), ("angularDistance", angularDistance), ("direction", direction), ("planetName", planetName), ("planetMagnitude", planetMagnitude))));
@@ -303,7 +303,7 @@ namespace Planetarium.Plugins.SolarSystem
             while (Math.Abs(days) > minute)
             {
                 CrdsEquatorial eqMoon = ctx.Get(lunarCalc.Equatorial);
-                CrdsEquatorial eqPlanet = ctx.Get(planetsCalc.Equatorial, planet);
+                CrdsEquatorial eqPlanet = ctx.Get(planetsCalc.Planet_Equatorial, planet);
 
                 double[] alpha = new[] { eqMoon.Alpha, eqPlanet.Alpha };
                 Angle.Align(alpha);

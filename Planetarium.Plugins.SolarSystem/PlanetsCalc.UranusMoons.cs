@@ -12,15 +12,15 @@ namespace Planetarium.Plugins.SolarSystem
 {
     public partial class PlanetsCalc
     {
-        private CrdsRectangular UranusMoonRectangular(SkyContext c, int m)
+        private CrdsRectangular UranusMoon_Rectangular(SkyContext c, int m)
         {
-            CrdsEquatorial moonEq = c.Get(UranusMoonEquatorial, m);
-            CrdsEcliptical moonEcl = c.Get(UranusMoonEcliptical, m);
-            CrdsEquatorial uranusEq = c.Get(Equatorial, Planet.URANUS);
-            CrdsEcliptical uranusEcl = c.Get(Ecliptical, Planet.URANUS);
+            CrdsEquatorial moonEq = c.Get(UranusMoon_Equatorial, m);
+            CrdsEcliptical moonEcl = c.Get(UranusMoon_Ecliptical, m);
+            CrdsEquatorial uranusEq = c.Get(Planet_Equatorial, Planet.URANUS);
+            CrdsEcliptical uranusEcl = c.Get(Planet_Ecliptical, Planet.URANUS);
 
-            double sd = c.Get(Semidiameter, Planet.URANUS) / 3600;
-            double P = c.Get(Appearance, Planet.URANUS).P;
+            double sd = c.Get(Planet_Semidiameter, Planet.URANUS) / 3600;
+            double P = c.Get(Planet_Appearance, Planet.URANUS).P;
 
             double[] alpha = new double[] { moonEq.Alpha, uranusEq.Alpha };
             Angle.Align(alpha);
@@ -52,16 +52,16 @@ namespace Planetarium.Plugins.SolarSystem
             return new CrdsRectangular(x, y, z);
         }
 
-        private CrdsRectangular[] UranusMoonsPositions(SkyContext c)
+        private CrdsRectangular[] UranusMoons_Positions(SkyContext c)
         {
-            CrdsHeliocentrical earth = c.Get(EarthHeliocentrial);
-            CrdsHeliocentrical uranus = c.Get(Heliocentrical, Planet.URANUS);
+            CrdsHeliocentrical earth = c.Get(Earth_Heliocentrial);
+            CrdsHeliocentrical uranus = c.Get(Planet_Heliocentrical, Planet.URANUS);
             return UranianMoons.Positions(c.JulianDay, earth, uranus);
         }
 
-        private CrdsEcliptical UranusMoonEcliptical(SkyContext c, int m)
+        private CrdsEcliptical UranusMoon_Ecliptical(SkyContext c, int m)
         {
-            var ecliptical = c.Get(UranusMoonsPositions)[m - 1].ToEcliptical();
+            var ecliptical = c.Get(UranusMoons_Positions)[m - 1].ToEcliptical();
 
             // Correction for FK5 system
             ecliptical += PlanetPositions.CorrectionForFK5(c.JulianDay, ecliptical);
@@ -72,40 +72,40 @@ namespace Planetarium.Plugins.SolarSystem
             return ecliptical;
         }
 
-        private CrdsEquatorial UranusMoonEquatorial(SkyContext c, int m)
+        private CrdsEquatorial UranusMoon_Equatorial(SkyContext c, int m)
         {
-            return c.Get(UranusMoonEcliptical, m).ToEquatorial(c.Epsilon);
+            return c.Get(UranusMoon_Ecliptical, m).ToEquatorial(c.Epsilon);
         }
 
-        private CrdsHorizontal UranusMoonHorizontal(SkyContext c, int m)
+        private CrdsHorizontal UranusMoon_Horizontal(SkyContext c, int m)
         {
-            return c.Get(UranusMoonEquatorial, m).ToHorizontal(c.GeoLocation, c.SiderealTime);
+            return c.Get(UranusMoon_Equatorial, m).ToHorizontal(c.GeoLocation, c.SiderealTime);
         }
 
-        private double UranusMoonSemidiameter(SkyContext c, int m)
+        private double UranusMoon_Semidiameter(SkyContext c, int m)
         {
-            var distance = c.Get(UranusMoonEcliptical, m).Distance;
+            var distance = c.Get(UranusMoon_Ecliptical, m).Distance;
             return UranianMoons.Semidiameter(m, distance);
         }
 
         public void ConfigureEphemeris(EphemerisConfig<UranusMoon> e)
         {
-            e["Constellation"] = (c, um) => Constellations.FindConstellation(c.Get(UranusMoonEquatorial, um.Number), c.JulianDay);
-            e["Equatorial.Alpha"] = (c, um) => c.Get(UranusMoonEquatorial, um.Number).Alpha;
-            e["Equatorial.Delta"] = (c, um) => c.Get(UranusMoonEquatorial, um.Number).Delta;
+            e["Constellation"] = (c, um) => Constellations.FindConstellation(c.Get(UranusMoon_Equatorial, um.Number), c.JulianDay);
+            e["Equatorial.Alpha"] = (c, um) => c.Get(UranusMoon_Equatorial, um.Number).Alpha;
+            e["Equatorial.Delta"] = (c, um) => c.Get(UranusMoon_Equatorial, um.Number).Delta;
 
-            e["Horizontal.Altitude"] = (c, um) => c.Get(UranusMoonHorizontal, um.Number).Altitude;
-            e["Horizontal.Azimuth"] = (c, um) => c.Get(UranusMoonHorizontal, um.Number).Azimuth;
+            e["Horizontal.Altitude"] = (c, um) => c.Get(UranusMoon_Horizontal, um.Number).Altitude;
+            e["Horizontal.Azimuth"] = (c, um) => c.Get(UranusMoon_Horizontal, um.Number).Azimuth;
 
-            e["Rectangular.X"] = (c, um) => c.Get(UranusMoonRectangular, um.Number).X;
-            e["Rectangular.Y"] = (c, um) => c.Get(UranusMoonRectangular, um.Number).Y;
-            e["Rectangular.Z"] = (c, um) => c.Get(UranusMoonRectangular, um.Number).Z;
+            e["Rectangular.X"] = (c, um) => c.Get(UranusMoon_Rectangular, um.Number).X;
+            e["Rectangular.Y"] = (c, um) => c.Get(UranusMoon_Rectangular, um.Number).Y;
+            e["Rectangular.Z"] = (c, um) => c.Get(UranusMoon_Rectangular, um.Number).Z;
             //e["Magnitude"] = (c, um) => c.Get(UranusMoonMagnitude, um.Number);
 
-            e["RTS.Rise"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, Planet.URANUS).Rise);
-            e["RTS.Transit"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, Planet.URANUS).Transit);
-            e["RTS.Set"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, Planet.URANUS).Set);
-            e["RTS.Duration"] = (c, p) => c.Get(RiseTransitSet, Planet.URANUS).Duration;
+            e["RTS.Rise"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, Planet.URANUS).Rise);
+            e["RTS.Transit"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, Planet.URANUS).Transit);
+            e["RTS.Set"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, Planet.URANUS).Set);
+            e["RTS.Duration"] = (c, p) => c.Get(Planet_RiseTransitSet, Planet.URANUS).Duration;
         }
 
         public void GetInfo(CelestialObjectInfo<UranusMoon> info)

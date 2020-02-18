@@ -15,7 +15,7 @@ namespace Planetarium.Plugins.SolarSystem
         /// <summary>
         /// Get heliocentrical coordinates of Earth
         /// </summary>
-        private CrdsHeliocentrical EarthHeliocentrial(SkyContext c)
+        private CrdsHeliocentrical Earth_Heliocentrial(SkyContext c)
         {
             return PlanetPositions.GetPlanetCoordinates(Planet.EARTH, c.JulianDay, !c.PreferFastCalculation);
         }
@@ -23,9 +23,9 @@ namespace Planetarium.Plugins.SolarSystem
         /// <summary>
         /// Gets ecliptical coordinates of Sun
         /// </summary>
-        public CrdsEcliptical SunEcliptical(SkyContext c)
+        public CrdsEcliptical Sun_Ecliptical(SkyContext c)
         {
-            CrdsHeliocentrical hEarth = c.Get(EarthHeliocentrial);
+            CrdsHeliocentrical hEarth = c.Get(Earth_Heliocentrial);
             var sunEcliptical = new CrdsEcliptical(Angle.To360(hEarth.L + 180), -hEarth.B, hEarth.R);
 
             // Corrected solar coordinates to FK5 system
@@ -45,15 +45,15 @@ namespace Planetarium.Plugins.SolarSystem
         /// </summary>
         /// <param name="c"></param>
         /// <returns></returns>
-        private CrdsEquatorial SunEquatorial(SkyContext c)
+        private CrdsEquatorial Sun_Equatorial(SkyContext c)
         {
-            return c.Get(SunEcliptical).ToEquatorial(c.Epsilon);
+            return c.Get(Sun_Ecliptical).ToEquatorial(c.Epsilon);
         }
 
         /// <summary>
         /// Gets heliocentrical coordinates of planet
         /// </summary>
-        private CrdsHeliocentrical Heliocentrical(SkyContext c, int p)
+        private CrdsHeliocentrical Planet_Heliocentrical(SkyContext c, int p)
         {
             // final difference to stop iteration process, 1 second of time
             double deltaTau = TimeSpan.FromSeconds(1).TotalDays;
@@ -68,7 +68,7 @@ namespace Planetarium.Plugins.SolarSystem
             CrdsHeliocentrical planetHeliocentrial = null;
 
             // Heliocentrical coordinates of Earth
-            CrdsHeliocentrical hEarth = c.Get(EarthHeliocentrial);
+            CrdsHeliocentrical hEarth = c.Get(Earth_Heliocentrial);
 
             // Iterative process to find heliocentrical coordinates of planet
             while (Math.Abs(tau - tau0) > deltaTau)
@@ -89,13 +89,13 @@ namespace Planetarium.Plugins.SolarSystem
         /// <summary>
         /// Gets ecliptical coordinates of planet
         /// </summary>
-        public CrdsEcliptical Ecliptical(SkyContext c, int p)
+        public CrdsEcliptical Planet_Ecliptical(SkyContext c, int p)
         {
             // Heliocentrical coordinates of planet
-            CrdsHeliocentrical heliocentrical = c.Get(Heliocentrical, p);
+            CrdsHeliocentrical heliocentrical = c.Get(Planet_Heliocentrical, p);
 
             // Heliocentrical coordinates of Earth
-            CrdsHeliocentrical hEarth = c.Get(EarthHeliocentrial);
+            CrdsHeliocentrical hEarth = c.Get(Earth_Heliocentrial);
 
             // Ecliptical coordinates of planet
             var ecliptical = heliocentrical.ToRectangular(hEarth).ToEcliptical();
@@ -112,100 +112,100 @@ namespace Planetarium.Plugins.SolarSystem
         /// <summary>
         /// Gets geocentrical equatorial coordinates of planet
         /// </summary>
-        private CrdsEquatorial Equatorial0(SkyContext c, int p)
+        private CrdsEquatorial Planet_Equatorial0(SkyContext c, int p)
         {
-            return c.Get(Ecliptical, p).ToEquatorial(c.Epsilon);
+            return c.Get(Planet_Ecliptical, p).ToEquatorial(c.Epsilon);
         }
 
         /// <summary>
         /// Gets distance from Earth to planet
         /// </summary>
-        private double DistanceFromEarth(SkyContext c, int p)
+        private double Planet_DistanceFromEarth(SkyContext c, int p)
         {
-            return c.Get(Ecliptical, p).Distance;
+            return c.Get(Planet_Ecliptical, p).Distance;
         }
 
         /// <summary>
         /// Gets distance from planet to Sun
         /// </summary>
-        private double DistanceFromSun(SkyContext c, int p)
+        private double Planet_DistanceFromSun(SkyContext c, int p)
         {
-            return c.Get(Heliocentrical, p).R;
+            return c.Get(Planet_Heliocentrical, p).R;
         }
 
         /// <summary>
         /// Gets visible semidianeter of planet
         /// </summary>
-        private double Semidiameter(SkyContext c, int p)
+        private double Planet_Semidiameter(SkyContext c, int p)
         {
-            return PlanetEphem.Semidiameter(p, c.Get(DistanceFromEarth, p));
+            return PlanetEphem.Semidiameter(p, c.Get(Planet_DistanceFromEarth, p));
         }
 
         /// <summary>
         /// Gets horizontal parallax of planet
         /// </summary>
-        private double Parallax(SkyContext c, int p)
+        private double Planet_Parallax(SkyContext c, int p)
         {
-            return PlanetEphem.Parallax(c.Get(DistanceFromEarth, p));
+            return PlanetEphem.Parallax(c.Get(Planet_DistanceFromEarth, p));
         }
 
         /// <summary>
         /// Gets apparent topocentric coordinates of planet
         /// </summary>
-        public CrdsEquatorial Equatorial(SkyContext c, int p)
+        public CrdsEquatorial Planet_Equatorial(SkyContext c, int p)
         {
-            return c.Get(Equatorial0, p).ToTopocentric(c.GeoLocation, c.SiderealTime, c.Get(Parallax, p));
+            return c.Get(Planet_Equatorial0, p).ToTopocentric(c.GeoLocation, c.SiderealTime, c.Get(Planet_Parallax, p));
         }
 
         /// <summary>
         /// Gets apparent horizontal coordinates of planet
         /// </summary>
-        private CrdsHorizontal Horizontal(SkyContext c, int p)
+        private CrdsHorizontal Planet_Horizontal(SkyContext c, int p)
         {
-            return c.Get(Equatorial, p).ToHorizontal(c.GeoLocation, c.SiderealTime);
+            return c.Get(Planet_Equatorial, p).ToHorizontal(c.GeoLocation, c.SiderealTime);
         }
 
         /// <summary>
         /// Gets elongation angle for the planet
         /// </summary>
-        public double Elongation(SkyContext c, int p)
+        public double Planet_Elongation(SkyContext c, int p)
         {
-            return BasicEphem.Elongation(c.Get(SunEcliptical), c.Get(Ecliptical, p));
+            return BasicEphem.Elongation(c.Get(Sun_Ecliptical), c.Get(Planet_Ecliptical, p));
         }
 
         /// <summary>
         /// Gets difference between planet and Sun's ecliptical longitudes
         /// </summary>
-        public double LongitudeDifference(SkyContext c, int p)
+        public double Planet_LongitudeDifference(SkyContext c, int p)
         {
-            return BasicEphem.LongitudeDifference(c.Get(SunEcliptical).Lambda, c.Get(Ecliptical, p).Lambda);
+            return BasicEphem.LongitudeDifference(c.Get(Sun_Ecliptical).Lambda, c.Get(Planet_Ecliptical, p).Lambda);
         }
 
         /// <summary>
         /// Gets phase angle for the planet
         /// </summary>
-        public double PhaseAngle(SkyContext c, int p)
+        public double Planet_PhaseAngle(SkyContext c, int p)
         {
-            return BasicEphem.PhaseAngle(c.Get(Elongation, p), c.Get(SunEcliptical).Distance, c.Get(DistanceFromEarth, p));
+            return BasicEphem.PhaseAngle(c.Get(Planet_Elongation, p), c.Get(Sun_Ecliptical).Distance, c.Get(Planet_DistanceFromEarth, p));
         }
 
         /// <summary>
         /// Gets phase for the planet
         /// </summary>
-        private double Phase(SkyContext c, int p)
+        private double Planet_Phase(SkyContext c, int p)
         {
-            return BasicEphem.Phase(c.Get(PhaseAngle, p));
+            return BasicEphem.Phase(c.Get(Planet_PhaseAngle, p));
         }
 
         /// <summary>
         /// Gets visible magnitude of the planet
         /// </summary>
-        public float Magnitude(SkyContext c, int p)
+        public float Planet_Magnitude(SkyContext c, int p)
         {
-            float mag = PlanetEphem.Magnitude(p, c.Get(DistanceFromEarth, p), c.Get(DistanceFromSun, p), c.Get(PhaseAngle, p));
+            float mag = PlanetEphem.Magnitude(p, c.Get(Planet_DistanceFromEarth, p), c.Get(Planet_DistanceFromSun, p), c.Get(Planet_PhaseAngle, p));
             if (p == Planet.SATURN)
             {
-                var saturnRings = PlanetEphem.SaturnRings(c.JulianDay, c.Get(Heliocentrical, p), c.Get(EarthHeliocentrial), c.Epsilon);
+                var saturnRings = PlanetEphem.SaturnRings(c.JulianDay, c.Get(Planet_Heliocentrical, p), c.Get(Earth_Heliocentrial), c.Epsilon);
                 mag += saturnRings.GetRingsMagnitude();
             }
 
@@ -215,88 +215,88 @@ namespace Planetarium.Plugins.SolarSystem
         /// <summary>
         /// Gets visual appearance for the planet
         /// </summary>
-        private PlanetAppearance Appearance(SkyContext c, int p)
+        private PlanetAppearance Planet_Appearance(SkyContext c, int p)
         {
-            return PlanetEphem.PlanetAppearance(c.JulianDay, p, c.Get(Equatorial0, p), c.Get(DistanceFromEarth, p));
-        }
-
-        private double JupiterGreatRedSpotLongitude(SkyContext c)
-        {
-            var grsSettings = settings.Get<GreatRedSpotSettings>("GRSLongitude");
-            return PlanetEphem.GreatRedSpotLongitude(c.JulianDay, grsSettings);
-        }
-
-        private RingsAppearance GetSaturnRings(SkyContext c, int p)
-        {
-            return PlanetEphem.SaturnRings(c.JulianDay, c.Get(Heliocentrical, p), c.Get(EarthHeliocentrial), c.Epsilon);
+            return PlanetEphem.PlanetAppearance(c.JulianDay, p, c.Get(Planet_Equatorial0, p), c.Get(Planet_DistanceFromEarth, p));
         }
 
         /// <summary>
         /// Gets rise, transit and set info for the planet
         /// </summary>
-        private RTS RiseTransitSet(SkyContext c, int p)
+        private RTS Planet_RiseTransitSet(SkyContext c, int p)
         {
             double jd = c.JulianDayMidnight;
             double theta0 = Date.ApparentSiderealTime(jd, c.NutationElements.deltaPsi, c.Epsilon);
-            double parallax = c.Get(Parallax, p);
+            double parallax = c.Get(Planet_Parallax, p);
 
             CrdsEquatorial[] eq = new CrdsEquatorial[3];
             double[] diff = new double[] { 0, 0.5, 1 };
 
             for (int i = 0; i < 3; i++)
             {
-                eq[i] = new SkyContext(jd + diff[i], c.GeoLocation).Get(Equatorial0, p);
+                eq[i] = new SkyContext(jd + diff[i], c.GeoLocation).Get(Planet_Equatorial0, p);
             }
 
-            return ADK.Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, parallax);
+            return Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, parallax);
         }
 
-        public VisibilityDetails Visibility(SkyContext c, int p)
+        public VisibilityDetails Planet_Visibility(SkyContext c, int p)
         {
             double jd = c.JulianDayMidnight;
             double theta0 = Date.ApparentSiderealTime(jd, c.NutationElements.deltaPsi, c.Epsilon);
-            double parallax = c.Get(Parallax, p);
+            double parallax = c.Get(Planet_Parallax, p);
 
             var ctx = new SkyContext(jd, c.GeoLocation);
 
-            var eq = ctx.Get(Equatorial, p);
-            var eqSun = ctx.Get(SunEquatorial);
+            var eq = ctx.Get(Planet_Equatorial, p);
+            var eqSun = ctx.Get(Sun_Equatorial);
 
-            return ADK.Visibility.Details(eq, eqSun, c.GeoLocation, theta0, 5);
+            return Visibility.Details(eq, eqSun, c.GeoLocation, theta0, 5);
+        }
+
+        private double Jupiter_GreatRedSpotLongitude(SkyContext c)
+        {
+            var grsSettings = settings.Get<GreatRedSpotSettings>("GRSLongitude");
+            return PlanetEphem.GreatRedSpotLongitude(c.JulianDay, grsSettings);
+        }
+
+        private RingsAppearance Saturn_RingsAppearance(SkyContext c, int p)
+        {
+            return PlanetEphem.SaturnRings(c.JulianDay, c.Get(Planet_Heliocentrical, p), c.Get(Earth_Heliocentrial), c.Epsilon);
         }
 
         public void ConfigureEphemeris(EphemerisConfig<Planet> e)
         {
-            e["Constellation"] = (c, p) => Constellations.FindConstellation(c.Get(Equatorial, p.Number), c.JulianDay);
-            e["Equatorial.Alpha"] = (c, p) => c.Get(Equatorial, p.Number).Alpha;
-            e["Equatorial.Delta"] = (c, p) => c.Get(Equatorial, p.Number).Delta;
-            e["Equatorial0.Alpha"] = (c, p) => c.Get(Equatorial0, p.Number).Alpha;
-            e["Equatorial0.Delta"] = (c, p) => c.Get(Equatorial0, p.Number).Delta;
-            e["Ecliptical.Lambda"] = (c, p) => c.Get(Ecliptical, p.Number).Lambda;
-            e["Ecliptical.Beta"] = (c, p) => c.Get(Ecliptical, p.Number).Beta;
-            e["Horizontal.Altitude"] = (c, p) => c.Get(Horizontal, p.Number).Altitude;
-            e["Horizontal.Azimuth"] = (c, p) => c.Get(Horizontal, p.Number).Azimuth;
-            e["Magnitude"] = (c, p) => c.Get(Magnitude, p.Number);
-            e["Phase"] = (c, p) => c.Get(Phase, p.Number);
-            e["PhaseAngle"] = (c, p) => c.Get(PhaseAngle, p.Number);
-            e["DistanceFromEarth"] = (c, p) => c.Get(DistanceFromEarth, p.Number);
-            e["DistanceFromSun"] = (c, p) => c.Get(DistanceFromSun, p.Number);
-            e["HorizontalParallax"] = (c, p) => c.Get(Parallax, p.Number);
-            e["AngularDiameter"] = (c, p) => c.Get(Semidiameter, p.Number) * 2 / 3600.0;
-            e["Appearance.CM"] = (c, p) => c.Get(Appearance, p.Number).CM;
-            e["Appearance.D"] = (c, p) => c.Get(Appearance, p.Number).D;
-            e["Appearance.P"] = (c, p) => c.Get(Appearance, p.Number).P;
-            e["SaturnRings.a", IsSaturn] = (c, p) => c.Get(GetSaturnRings, p.Number).a;
-            e["SaturnRings.b", IsSaturn] = (c, p) => c.Get(GetSaturnRings, p.Number).b;
-            e["GRSLongitude", IsJupiter] = (c, p) => c.Get(JupiterGreatRedSpotLongitude);
-            e["RTS.Rise"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, p.Number).Rise);
-            e["RTS.Transit"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, p.Number).Transit);
-            e["RTS.Set"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, p.Number).Set);
-            e["RTS.Duration"] = (c, p) => c.Get(RiseTransitSet, p.Number).Duration;
-            e["Visibility.Begin"] = (c, p) => c.GetDateFromTime(c.Get(Visibility, p.Number).Begin);
-            e["Visibility.End"] = (c, p) => c.GetDateFromTime(c.Get(Visibility, p.Number).End);
-            e["Visibility.Duration"] = (c, p) => c.Get(Visibility, p.Number).Duration;
-            e["Visibility.Period"] = (c, p) => c.Get(Visibility, p.Number).Period;
+            e["Constellation"] = (c, p) => Constellations.FindConstellation(c.Get(Planet_Equatorial, p.Number), c.JulianDay);
+            e["Equatorial.Alpha"] = (c, p) => c.Get(Planet_Equatorial, p.Number).Alpha;
+            e["Equatorial.Delta"] = (c, p) => c.Get(Planet_Equatorial, p.Number).Delta;
+            e["Equatorial0.Alpha"] = (c, p) => c.Get(Planet_Equatorial0, p.Number).Alpha;
+            e["Equatorial0.Delta"] = (c, p) => c.Get(Planet_Equatorial0, p.Number).Delta;
+            e["Ecliptical.Lambda"] = (c, p) => c.Get(Planet_Ecliptical, p.Number).Lambda;
+            e["Ecliptical.Beta"] = (c, p) => c.Get(Planet_Ecliptical, p.Number).Beta;
+            e["Horizontal.Altitude"] = (c, p) => c.Get(Planet_Horizontal, p.Number).Altitude;
+            e["Horizontal.Azimuth"] = (c, p) => c.Get(Planet_Horizontal, p.Number).Azimuth;
+            e["Magnitude"] = (c, p) => c.Get(Planet_Magnitude, p.Number);
+            e["Phase"] = (c, p) => c.Get(Planet_Phase, p.Number);
+            e["PhaseAngle"] = (c, p) => c.Get(Planet_PhaseAngle, p.Number);
+            e["DistanceFromEarth"] = (c, p) => c.Get(Planet_DistanceFromEarth, p.Number);
+            e["DistanceFromSun"] = (c, p) => c.Get(Planet_DistanceFromSun, p.Number);
+            e["HorizontalParallax"] = (c, p) => c.Get(Planet_Parallax, p.Number);
+            e["AngularDiameter"] = (c, p) => c.Get(Planet_Semidiameter, p.Number) * 2 / 3600.0;
+            e["Appearance.CM"] = (c, p) => c.Get(Planet_Appearance, p.Number).CM;
+            e["Appearance.D"] = (c, p) => c.Get(Planet_Appearance, p.Number).D;
+            e["Appearance.P"] = (c, p) => c.Get(Planet_Appearance, p.Number).P;
+            e["SaturnRings.a", IsSaturn] = (c, p) => c.Get(Saturn_RingsAppearance, p.Number).a;
+            e["SaturnRings.b", IsSaturn] = (c, p) => c.Get(Saturn_RingsAppearance, p.Number).b;
+            e["GRSLongitude", IsJupiter] = (c, p) => c.Get(Jupiter_GreatRedSpotLongitude);
+            e["RTS.Rise"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, p.Number).Rise);
+            e["RTS.Transit"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, p.Number).Transit);
+            e["RTS.Set"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, p.Number).Set);
+            e["RTS.Duration"] = (c, p) => c.Get(Planet_RiseTransitSet, p.Number).Duration;
+            e["Visibility.Begin"] = (c, p) => c.GetDateFromTime(c.Get(Planet_Visibility, p.Number).Begin);
+            e["Visibility.End"] = (c, p) => c.GetDateFromTime(c.Get(Planet_Visibility, p.Number).End);
+            e["Visibility.Duration"] = (c, p) => c.Get(Planet_Visibility, p.Number).Duration;
+            e["Visibility.Period"] = (c, p) => c.Get(Planet_Visibility, p.Number).Period;
         }
 
         public void GetInfo(CelestialObjectInfo<Planet> info)

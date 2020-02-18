@@ -214,7 +214,7 @@ namespace Planetarium.Plugins.SolarSystem
 
                                 // find the exact value of angular distance at extremum point
                                 var ctx = new SkyContext(jd - 2 + t0, context.GeoLocation, true);
-                                ad0 = Angle.Separation(ctx.Get(planetsCalc.Ecliptical, p1), ctx.Get(planetsCalc.Ecliptical, p2));
+                                ad0 = Angle.Separation(ctx.Get(planetsCalc.Planet_Ecliptical, p1), ctx.Get(planetsCalc.Planet_Ecliptical, p2));
                                 string dist = Formatters.ConjunctionSeparation.Format(ad0);
 
                                 // magnitude of the first planet
@@ -520,7 +520,7 @@ namespace Planetarium.Plugins.SolarSystem
                                 
                                 var ctx = new SkyContext(jdConj, context.GeoLocation, false);
                                 double sd = solarCalc.Semidiameter(ctx) / 3600;
-                                double ad = Math.Abs(planetsCalc.Elongation(ctx, p));
+                                double ad = Math.Abs(planetsCalc.Planet_Elongation(ctx, p));
 
                                 text = Text.Get($"PlanetEvents.Conjunctions.{conjType}", 
                                     ("planetName", GetPlanetName(p)),
@@ -636,12 +636,12 @@ namespace Planetarium.Plugins.SolarSystem
                     if (p != 3)
                     {
                         data[p] = new PlanetData();
-                        data[p].Equatorial = ctx.Get(planetsCalc.Equatorial, p);
-                        data[p].Ecliptical = ctx.Get(planetsCalc.Ecliptical, p);
-                        data[p].Magnitude = ctx.Get(planetsCalc.Magnitude, p);
-                        data[p].Elongation = ctx.Get(planetsCalc.Elongation, p);
-                        data[p].Visibility = ctx.Get(planetsCalc.Visibility, p);
-                        data[p].LongitudeDifference = ctx.Get(planetsCalc.LongitudeDifference, p);
+                        data[p].Equatorial = ctx.Get(planetsCalc.Planet_Equatorial, p);
+                        data[p].Ecliptical = ctx.Get(planetsCalc.Planet_Ecliptical, p);
+                        data[p].Magnitude = ctx.Get(planetsCalc.Planet_Magnitude, p);
+                        data[p].Elongation = ctx.Get(planetsCalc.Planet_Elongation, p);
+                        data[p].Visibility = ctx.Get(planetsCalc.Planet_Visibility, p);
+                        data[p].LongitudeDifference = ctx.Get(planetsCalc.Planet_LongitudeDifference, p);
                     }
                 }
 

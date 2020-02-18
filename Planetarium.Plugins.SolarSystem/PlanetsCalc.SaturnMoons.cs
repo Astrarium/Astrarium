@@ -12,81 +12,81 @@ namespace Planetarium.Plugins.SolarSystem
 {
     public partial class PlanetsCalc
     {
-        private CrdsRectangular SaturnMoonRectangular(SkyContext c, int m)
+        private CrdsRectangular SaturnMoon_Rectangular(SkyContext c, int m)
         {
-            return c.Get(SaturnMoonsPositions)[m - 1];
+            return c.Get(SaturnMoons_Positions)[m - 1];
         }
 
-        private CrdsRectangular[] SaturnMoonsPositions(SkyContext c)
+        private CrdsRectangular[] SaturnMoons_Positions(SkyContext c)
         {
-            CrdsHeliocentrical earth = c.Get(EarthHeliocentrial);
-            CrdsHeliocentrical saturn = c.Get(Heliocentrical, Planet.SATURN);
+            CrdsHeliocentrical earth = c.Get(Earth_Heliocentrial);
+            CrdsHeliocentrical saturn = c.Get(Planet_Heliocentrical, Planet.SATURN);
             return SaturnianMoons.Positions(c.JulianDay, earth, saturn);
         }
 
-        private CrdsEquatorial SaturnMoonEquatorial(SkyContext c, int m)
+        private CrdsEquatorial SaturnMoon_Equatorial(SkyContext c, int m)
         {
-            CrdsEquatorial saturnEq = c.Get(Equatorial, Planet.SATURN);
-            CrdsRectangular planetocentric = c.Get(SaturnMoonRectangular, m);
-            PlanetAppearance appearance = c.Get(Appearance, Planet.SATURN);
-            double semidiameter = c.Get(Semidiameter, Planet.SATURN);
+            CrdsEquatorial saturnEq = c.Get(Planet_Equatorial, Planet.SATURN);
+            CrdsRectangular planetocentric = c.Get(SaturnMoon_Rectangular, m);
+            PlanetAppearance appearance = c.Get(Planet_Appearance, Planet.SATURN);
+            double semidiameter = c.Get(Planet_Semidiameter, Planet.SATURN);
             return planetocentric.ToEquatorial(saturnEq, appearance.P, semidiameter);
         }
 
-        private CrdsHorizontal SaturnMoonHorizontal(SkyContext c, int m)
+        private CrdsHorizontal SaturnMoon_Horizontal(SkyContext c, int m)
         {
-            return c.Get(SaturnMoonEquatorial, m).ToHorizontal(c.GeoLocation, c.SiderealTime);
+            return c.Get(SaturnMoon_Equatorial, m).ToHorizontal(c.GeoLocation, c.SiderealTime);
         }
 
-        private double SaturnMoonSemidiameter(SkyContext c, int m)
+        private double SaturnMoon_Semidiameter(SkyContext c, int m)
         {
             // distance from Earth to  Saturn, in a.u.
-            double r = c.Get(DistanceFromEarth, Planet.SATURN);
+            double r = c.Get(Planet_DistanceFromEarth, Planet.SATURN);
 
             // planetocentric z-coordinate of moon
-            double z = c.Get(SaturnMoonRectangular, m).Z;
+            double z = c.Get(SaturnMoon_Rectangular, m).Z;
 
             // visible moon semidiameter
             return SaturnianMoons.MoonSemidiameter(r, z, m - 1);
         }
 
-        private float SaturnMoonMagnitude(SkyContext c, int m)
+        private float SaturnMoon_Magnitude(SkyContext c, int m)
         {
-            double r = c.Get(DistanceFromEarth, Planet.SATURN);
-            double R = c.Get(DistanceFromSun, Planet.SATURN);
-            double p = c.Get(Phase, Planet.SATURN);
+            double r = c.Get(Planet_DistanceFromEarth, Planet.SATURN);
+            double R = c.Get(Planet_DistanceFromSun, Planet.SATURN);
+            double p = c.Get(Planet_Phase, Planet.SATURN);
             return SaturnianMoons.Magnitude(r, R, p, m - 1);
         }
 
-        private double SaturnMoonDistanceFromEarth(SkyContext c, int m)
+        private double SaturnMoon_DistanceFromEarth(SkyContext c, int m)
         {
-            double r = c.Get(DistanceFromEarth, Planet.SATURN);
-            double z = c.Get(SaturnMoonRectangular, m).Z;
+            double r = c.Get(Planet_DistanceFromEarth, Planet.SATURN);
+            double z = c.Get(SaturnMoon_Rectangular, m).Z;
             return SaturnianMoons.DistanceFromEarth(r, z);
         }
 
         public void ConfigureEphemeris(EphemerisConfig<SaturnMoon> e)
         {
-            e["Constellation"] = (c, sm) => Constellations.FindConstellation(c.Get(SaturnMoonEquatorial, sm.Number), c.JulianDay);
-            e["Equatorial.Alpha"] = (c, sm) => c.Get(SaturnMoonEquatorial, sm.Number).Alpha;
-            e["Equatorial.Delta"] = (c, sm) => c.Get(SaturnMoonEquatorial, sm.Number).Delta;
+            e["Constellation"] = (c, sm) => Constellations.FindConstellation(c.Get(SaturnMoon_Equatorial, sm.Number), c.JulianDay);
+            e["Equatorial.Alpha"] = (c, sm) => c.Get(SaturnMoon_Equatorial, sm.Number).Alpha;
+            e["Equatorial.Delta"] = (c, sm) => c.Get(SaturnMoon_Equatorial, sm.Number).Delta;
 
-            e["Horizontal.Altitude"] = (c, sm) => c.Get(SaturnMoonHorizontal, sm.Number).Altitude;
-            e["Horizontal.Azimuth"] = (c, sm) => c.Get(SaturnMoonHorizontal, sm.Number).Azimuth;
+            e["Horizontal.Altitude"] = (c, sm) => c.Get(SaturnMoon_Horizontal, sm.Number).Altitude;
+            e["Horizontal.Azimuth"] = (c, sm) => c.Get(SaturnMoon_Horizontal, sm.Number).Azimuth;
 
-            e["Rectangular.X"] = (c, sm) => c.Get(SaturnMoonRectangular, sm.Number).X;
-            e["Rectangular.Y"] = (c, sm) => c.Get(SaturnMoonRectangular, sm.Number).Y;
-            e["Rectangular.Z"] = (c, sm) => c.Get(SaturnMoonRectangular, sm.Number).Z;
-            e["Magnitude"] = (c, sm) => c.Get(SaturnMoonMagnitude, sm.Number);
+            e["Rectangular.X"] = (c, sm) => c.Get(SaturnMoon_Rectangular, sm.Number).X;
+            e["Rectangular.Y"] = (c, sm) => c.Get(SaturnMoon_Rectangular, sm.Number).Y;
+            e["Rectangular.Z"] = (c, sm) => c.Get(SaturnMoon_Rectangular, sm.Number).Z;
+            e["Magnitude"] = (c, sm) => c.Get(SaturnMoon_Magnitude, sm.Number);
 
-            e["Phase"] = (c, sm) => c.Get(Phase, sm.Number);
-            e["PhaseAngle"] = (c, sm) => c.Get(PhaseAngle, sm.Number);
-            e["AngularDiameter"] = (c, sm) => c.Get(SaturnMoonSemidiameter, sm.Number) * 2 / 3600.0;
+            e["Phase"] = (c, sm) => c.Get(Planet_Phase, sm.Number);
+            e["PhaseAngle"] = (c, sm) => c.Get(Planet_PhaseAngle, sm.Number);
+            e["AngularDiameter"] = (c, sm) => c.Get(SaturnMoon_Semidiameter, sm.Number) * 2 / 3600.0;
 
-            e["RTS.Rise"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, Planet.SATURN).Rise);
-            e["RTS.Transit"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, Planet.SATURN).Transit);
-            e["RTS.Set"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, Planet.SATURN).Set);
-            e["RTS.Duration"] = (c, p) => c.Get(RiseTransitSet, Planet.SATURN).Duration;
+            e["RTS.Rise"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, Planet.SATURN).Rise);
+            e["RTS.Transit"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, Planet.SATURN).Transit);
+            e["RTS.Set"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, Planet.SATURN).Set);
+            e["RTS.Duration"] = (c, p) => c.Get(Planet_RiseTransitSet, Planet.SATURN).Duration;
         }
 
         public void GetInfo(CelestialObjectInfo<SaturnMoon> info)

@@ -88,6 +88,7 @@ namespace Planetarium.Plugins.SolarSystem
                 .Where(p => p.Number != Planet.EARTH)
                 .Cast<ISolarSystemObject>()
                 .Concat(new[] { sun })
+                .Concat(planetsCalc.MarsMoons)
                 .Concat(planetsCalc.JupiterMoons)
                 .Concat(planetsCalc.SaturnMoons)
                 .Concat(planetsCalc.UranusMoons)
@@ -99,6 +100,10 @@ namespace Planetarium.Plugins.SolarSystem
                 if (body is Planet planet)
                 {
                     RenderPlanet(map, planet);
+                }
+                else if (body is MarsMoon mm)
+                {
+                    RenderPlanetMoon(map, planetsCalc.Planets.ElementAt(Planet.MARS - 1), mm, hasTexture: false);
                 }
                 else if (body is JupiterMoon jm)
                 {
