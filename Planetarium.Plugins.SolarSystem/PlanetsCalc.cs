@@ -17,7 +17,8 @@ namespace Planetarium.Plugins.SolarSystem
         ICelestialObjectCalc<MarsMoon>, 
         ICelestialObjectCalc<JupiterMoon>, 
         ICelestialObjectCalc<SaturnMoon>, 
-        ICelestialObjectCalc<UranusMoon>
+        ICelestialObjectCalc<UranusMoon>,
+        ICelestialObjectCalc<NeptuneMoon>
     {
         private ISettings settings;
         private Planet[] planets = new Planet[8];
@@ -25,12 +26,14 @@ namespace Planetarium.Plugins.SolarSystem
         private MarsMoon[] marsMoons = new MarsMoon[2];
         private SaturnMoon[] saturnMoons = new SaturnMoon[8];
         private UranusMoon[] uranusMoons = new UranusMoon[5];
+        private NeptuneMoon[] neptuneMoons = new NeptuneMoon[1];
 
         public ICollection<Planet> Planets => planets;
         public ICollection<MarsMoon> MarsMoons => marsMoons;
         public ICollection<JupiterMoon> JupiterMoons => jupiterMoons;
         public ICollection<SaturnMoon> SaturnMoons => saturnMoons;
         public ICollection<UranusMoon> UranusMoons => uranusMoons;
+        public ICollection<NeptuneMoon> NeptuneMoons => neptuneMoons;
         public RingsAppearance SaturnRings { get; private set; } = new RingsAppearance();
         public double GreatRedSpotLongitude { get; private set; }
 
@@ -64,6 +67,11 @@ namespace Planetarium.Plugins.SolarSystem
             for (int i = 0; i < UranusMoons.Count; i++)
             {
                 uranusMoons[i] = new UranusMoon(i + 1);
+            }
+
+            for (int i = 0; i < NeptuneMoons.Count; i++)
+            {
+                neptuneMoons[i] = new NeptuneMoon(i + 1);
             }
 
             planets[Planet.JUPITER - 1].Flattening = 0.064874f;
@@ -145,6 +153,17 @@ namespace Planetarium.Plugins.SolarSystem
                         m.Horizontal = context.Get(UranusMoon_Horizontal, mn);
                         m.Semidiameter = context.Get(UranusMoon_Semidiameter, mn);
                         m.DistanceFromEarth = context.Get(UranusMoon_Ecliptical, mn).Distance;
+                    }
+                }
+
+                if (p.Number == Planet.NEPTUNE)
+                {
+                    foreach (var m in neptuneMoons)
+                    {
+                        int mn = m.Number;
+                        m.DistanceFromEarth = context.Get(NeptuneMoon_Ecliptical).Distance;
+                        m.Equatorial = context.Get(NeptuneMoon_Equatorial);
+                        m.Horizontal = context.Get(NeptuneMoon_Horizontal);
                     }
                 }
             }

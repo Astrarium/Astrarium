@@ -92,6 +92,7 @@ namespace Planetarium.Plugins.SolarSystem
                 .Concat(planetsCalc.JupiterMoons)
                 .Concat(planetsCalc.SaturnMoons)
                 .Concat(planetsCalc.UranusMoons)
+                .Concat(planetsCalc.NeptuneMoons)
                 .OrderByDescending(body => body.DistanceFromEarth)
                 .ToArray();
 
@@ -118,6 +119,10 @@ namespace Planetarium.Plugins.SolarSystem
                 else if (body is UranusMoon um)
                 {
                     RenderPlanetMoon(map, planetsCalc.Planets.ElementAt(Planet.URANUS - 1), um, hasTexture: false);
+                }
+                else if (body is NeptuneMoon nm)
+                {
+                    RenderPlanetMoon(map, planetsCalc.Planets.ElementAt(Planet.NEPTUNE - 1), nm, hasTexture: false);
                 }
                 else if (body is Sun)
                 {
