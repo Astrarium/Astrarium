@@ -31,9 +31,9 @@ namespace ADK
             PrecessionalElements pe1950 = Precession.ElementsFK5(jd, Date.EPOCH_J1950);
             CrdsEquatorial eqNeptune1950 = Precession.GetEquatorialCoordinates(eq, pe1950);
 
-
             const double t0 = 2433282.5;     // 1.0 Jan 1950                
             const double a = 0.0023683;      // semimajor axis of Triton, in a.u.
+
             const double n = 61.2588532;     // nodal mean motiom, degrees per day
             const double lambda0 = 200.913;  // longitude from ascending node through the invariable plane at epoch
             const double i = 158.996;        // inclination of orbit to the invariable plane
@@ -72,8 +72,11 @@ namespace ADK
                 r;
 
             // radial component, positive away from observer
-            // converted to degrees, then to arcseconds, then to 
-            double x = ToDegrees(d.Values[0, 0]) * 3600 / 16.283 * 0.0023683;
+            // converted to degrees
+            double x = ToDegrees(d.Values[0, 0]);
+
+            // semimajor axis, expressed in degrees, as visible from Earth
+            double theta = ToDegrees(Atan(a / neptune.Distance));
 
             // offsets values in degrees           
             double dAlphaCosDelta = ToDegrees(d.Values[1, 0]);
@@ -90,7 +93,7 @@ namespace ADK
 
             CrdsEcliptical eclTriton = eqTriton.ToEcliptical(epsilon);
 
-            eclTriton.Distance = neptune.Distance + x;
+            eclTriton.Distance = neptune.Distance + x / theta * a;
             return eclTriton;
         }
 

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Planetarium.Objects
 {
-    public class NeptuneMoon : SizeableCelestialObject, IPlanetMoon, ISolarSystemObject
+    public class NeptuneMoon : SizeableCelestialObject, IPlanetMoon, ISolarSystemObject, IMovingObject
     {
         public NeptuneMoon(int number)
         {
@@ -54,5 +54,7 @@ namespace Planetarium.Objects
         public double DistanceFromEarth { get; internal set; }
 
         public bool IsEclipsedByPlanet => false;
+
+        public double AverageDailyMotion => 0.006668;
     }
 }

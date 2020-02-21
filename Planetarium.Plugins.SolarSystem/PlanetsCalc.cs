@@ -186,7 +186,10 @@ namespace Planetarium.Plugins.SolarSystem
             var s5 = uranusMoons.Where(m => m.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
                 .Select(p => new SearchResultItem(p, p.Name));
 
-            return s1.Concat(s2).Concat(s3).Concat(s4).Concat(s5).ToArray();
+            var s6 = neptuneMoons.Where(m => m.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
+                .Select(p => new SearchResultItem(p, p.Name));
+
+            return s1.Concat(s2).Concat(s3).Concat(s4).Concat(s5).Concat(s6).ToArray();
         }
     }
 }
