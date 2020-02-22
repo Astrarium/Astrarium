@@ -73,6 +73,12 @@ namespace Planetarium.Plugins.SolarSystem
             return new CrdsRectangular(x, y, z);
         }
 
+        private double NeptuneMoon_Semidiameter(SkyContext c)
+        {
+            var ecl = c.Get(NeptuneMoon_Ecliptical);
+            return NeptunianMoons.TritonSemidiameter(ecl.Distance);
+        }
+
         public void ConfigureEphemeris(EphemerisConfig<NeptuneMoon> e)
         {
             e["Constellation"] = (c, jm) => Constellations.FindConstellation(c.Get(NeptuneMoon_Equatorial), c.JulianDay);

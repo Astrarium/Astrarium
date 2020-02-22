@@ -10,6 +10,10 @@ namespace ADK
 {
     public static class NeptunianMoons
     {
+        /// <summary>
+        /// 1 a.u. (astronomical unit) in km
+        /// </summary>
+        private const double AU = 149597870;
 
         // Triton motion, Harris:
         // http://articles.adsabs.harvard.edu/cgi-bin/nph-iarticle_query?1984NASCP2330..357H&defaultprint=YES&filetype=.pdf
@@ -95,6 +99,18 @@ namespace ADK
 
             eclTriton.Distance = neptune.Distance + x / theta * a;
             return eclTriton;
+        }
+
+        /// <summary>
+        /// Gets visible semidiameter of Triton, in seconds of arc 
+        /// </summary>
+        /// <param name="distance">Distance from Earth, in a.u.</param>
+        /// <returns>
+        /// Visible semidiameter of Triton, in seconds of arc
+        /// </returns>
+        public static double TritonSemidiameter(double distance) 
+        {
+            return ToDegrees(Atan(1354.0 / (distance * AU))) * 3600;
         }
 
         /// <summary>
