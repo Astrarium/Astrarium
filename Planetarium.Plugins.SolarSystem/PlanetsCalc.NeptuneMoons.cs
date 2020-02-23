@@ -15,6 +15,7 @@ namespace Planetarium.Plugins.SolarSystem
         private CrdsEcliptical NeptuneMoon_Ecliptical(SkyContext c)
         {
             var eclNeptune = c.Get(Planet_Ecliptical, Planet.NEPTUNE);
+
             return NeptunianMoons.TritonPosition(c.JulianDay, eclNeptune);
         }
 
@@ -90,6 +91,8 @@ namespace Planetarium.Plugins.SolarSystem
             e["Rectangular.X"] = (c, jm) => c.Get(NeptuneMoon_Rectangular).X;
             e["Rectangular.Y"] = (c, jm) => c.Get(NeptuneMoon_Rectangular).Y;
             e["Rectangular.Z"] = (c, jm) => c.Get(NeptuneMoon_Rectangular).Z;
+
+            e["AngularDiameter"] = (c, nm) => c.Get(NeptuneMoon_Semidiameter) * 2 / 3600.0;
         }
 
         public void GetInfo(CelestialObjectInfo<NeptuneMoon> info)
@@ -109,7 +112,9 @@ namespace Planetarium.Plugins.SolarSystem
             .AddHeader(Text.Get("NeptuneMoon.Rectangular"))
             .AddRow("Rectangular.X")
             .AddRow("Rectangular.Y")
-            .AddRow("Rectangular.Z");
+            .AddRow("Rectangular.Z")
+
+            .AddRow("AngularDiameter");
 
             //.AddHeader(Text.Get("NeptuneMoon.RTS"))
             //.AddRow("RTS.Rise")

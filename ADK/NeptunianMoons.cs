@@ -30,8 +30,8 @@ namespace ADK
             NutationElements ne = Nutation.NutationElements(jd);
             double epsilon = Date.TrueObliquity(jd, ne.deltaEpsilon);
 
+            // convert current coordinates to J1950 epoch, as algorithm requires
             CrdsEquatorial eq = neptune.ToEquatorial(epsilon);
-
             PrecessionalElements pe1950 = Precession.ElementsFK5(jd, Date.EPOCH_J1950);
             CrdsEquatorial eqNeptune1950 = Precession.GetEquatorialCoordinates(eq, pe1950);
 
@@ -47,10 +47,23 @@ namespace ADK
                                              // of the orbit through the invariable plane
             
             const double OmegaDot = 0.57806; // nodal precision rate, degrees per year
-            const double ap = 297.813;       // 1950.0 RA of the pole of the invariable plane
-            const double dp = 41.185;        // 1950.0 Declination of the pole of the invariable plane
 
+            // Calculate J2000.0 RA and Declination of the pole of the invariable plane
+            // These formulae are taken from the book: 
+            // Seidelmann, P. K.: Explanatory Supplement to The Astronomical Almanac, 
+            // University Science Book, Mill Valley (California), 1992,
+            // Chapter 6 "Orbital Ephemerides and Rings of Satellites", page 373, 6.61-1 Triton
+            double T = (jd - 2451545.0) / 36525.0;
+            double N = ToRadians(359.28 + 54.308 * T);
+            double ap = 298.72 + 2.58 * Sin(N) - 0.04 * Sin(2 * N); 
+            double dp = 42.63 - 1.90 * Cos(N) + 0.01 * Cos(2 * N);
 
+            // Convert pole coordinates to J1950
+            CrdsEquatorial eqPole1950 = Precession.GetEquatorialCoordinates(new CrdsEquatorial(ap, dp), pe1950);
+            ap = eqPole1950.Alpha;
+            dp = eqPole1950.Delta;
+
+            // take light-time effect into account
             double tau = PlanetPositions.LightTimeEffect(neptune.Distance);
 
             double lambda = To360(lambda0 + n * (jd - t0 - tau));
@@ -92,12 +105,15 @@ namespace ADK
 
             CrdsEquatorial eqTriton1950 = new CrdsEquatorial(alpha, delta);
 
+            // convert J1950 equatorial coordinates to current epoch
+            // and to ecliptical
             PrecessionalElements pe = Precession.ElementsFK5(Date.EPOCH_J1950, jd);
             CrdsEquatorial eqTriton = Precession.GetEquatorialCoordinates(eqTriton1950, pe);
-
             CrdsEcliptical eclTriton = eqTriton.ToEcliptical(epsilon);
 
+            // calculate distance to Earth
             eclTriton.Distance = neptune.Distance + x / theta * a;
+
             return eclTriton;
         }
 
