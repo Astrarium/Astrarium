@@ -37,8 +37,9 @@ namespace Planetarium.Plugins.SolarSystem
         public RingsAppearance SaturnRings { get; private set; } = new RingsAppearance();
         public double GreatRedSpotLongitude { get; private set; }
 
-        private readonly Func<Planet, bool> IsSaturn = p => p.Number == Planet.SATURN;
+        private readonly Func<Planet, bool> IsMars = p => p.Number == Planet.MARS;
         private readonly Func<Planet, bool> IsJupiter = p => p.Number == Planet.JUPITER;
+        private readonly Func<Planet, bool> IsSaturn = p => p.Number == Planet.SATURN;
 
         public PlanetsCalc(ISettings settings)
         {

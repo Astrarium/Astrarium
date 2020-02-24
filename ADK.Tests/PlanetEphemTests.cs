@@ -70,5 +70,36 @@ namespace ADK.Tests
             // difference in longitude shoould be about 2.62 (see page 96).
             Assert.AreEqual(2.62, cm, 1e-2);
         }
+
+        [TestMethod]
+        public void MarsDate()
+        { 
+            // 9 May 1945
+            {
+                var d = new MartianDate(2431584.5);
+                Assert.AreEqual(485, Math.Ceiling(d.Sol));
+                Assert.AreEqual(9, d.Month);
+                Assert.AreEqual(-5, d.Year);
+                Assert.AreEqual(250.2, d.Ls, 1e-1);
+            }
+
+            // 12 Apr 1961
+            {
+                var d = new MartianDate(2437401.5);
+                Assert.AreEqual(129, Math.Ceiling(d.Sol));
+                Assert.AreEqual(3, d.Month);
+                Assert.AreEqual(4, d.Year);
+                Assert.AreEqual(60.7, d.Ls, 1e-1);
+            }
+
+            // 24 Feb 2020
+            {
+                var d = new MartianDate(2458903.5);
+                Assert.AreEqual(329, Math.Ceiling(d.Sol));
+                Assert.AreEqual(6, d.Month);
+                Assert.AreEqual(35, d.Year);
+                Assert.AreEqual(155.7, d.Ls, 1e-1);
+            }
+        }
     }
 }

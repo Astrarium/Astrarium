@@ -284,6 +284,98 @@ namespace ADK
         }
     }
 
+    /// <summary>
+    /// Represents Martian Date
+    /// </summary>
+    /// <remarks>
+    /// Based on algorithms from 
+    /// http://www-mars.lmd.jussieu.fr/mars/time/martian_time.html
+    /// </remarks>
+    public class MartianDate
+    {
+        /// <summary>
+        /// Martian year number
+        /// </summary>
+        public int Year { get; private set; }
+
+        /// <summary>
+        /// Martian month number, from 1 to 12
+        /// </summary>
+        public int Month { get; private set; }
+
+        /// <summary>
+        /// Martian day, or sol
+        /// </summary>
+        public double Sol { get; private set; }
+
+        /// <summary>
+        /// Areocentric longitude of Sun, measured from 0 (Martian vernal equinox)
+        /// </summary>
+        public double Ls { get; private set; }
+
+        /// <summary>
+        /// Creates new instance of Martian Date from Julian Day value
+        /// </summary>
+        /// <param name="jd">Julian Day value</param>
+        public MartianDate(double jd)
+        {
+            const double jd0 = 2442765.667;             // Initial epoch 
+                                                        // 19 Dec 1975 4:00:00, such that Ls=0
+                                                        // and the begining of Martian Year "12"
+
+            const double earthDay = 86400.0;            // Duration of Earth day, in seconds
+            const double marsDay = 88775.245;           // Duration of Martian day, in seconds
+            const double marsYear = 668.60;             // Number of sols in a Martian year 
+
+            // Number of sols since epoch
+            double sols = (jd - jd0) * earthDay / marsDay;
+
+            Sol = sols % marsYear;
+
+            if (Sol < 0)
+            {
+                Sol += marsYear;
+            }
+
+            Year = (int)Math.Floor(sols / marsYear) + 12;
+            Ls = CalculateLs(Sol);
+            Month = 1 + (int)Math.Floor(Ls / 30.0);
+        }
+
+        private static double CalculateLs(double sol)
+        {
+            const double periDate = 485.35;             // perihelion date
+            const double e = 0.09340;                   // orbital ecentricity
+            const double timePeri = 1.90258341759902;   // 2*Pi*(1-Ls(perihelion)/360); Ls(perihelion)=250.99
+            const double marsYear = 668.60;             // Number of sols in a Martian year 
+
+            double zz = (sol - periDate) / marsYear;
+            double zanom = 2.0 * Math.PI * (zz - Math.Round(zz));
+            
+            // Mean anomaly
+            double M = Math.Abs(zanom);
+
+            // Eccentric anomaly
+            double E = M + e * Math.Sin(M);
+
+            // Solve Kepler equation
+
+            double zdx;
+            do
+            {
+                zdx = -(E - e * Math.Sin(E) - M) / (1.0 - e * Math.Cos(E));
+                E = E + zdx;
+            } while (zdx > 1e-7);
+
+            if (zanom < 0) E = -E;
+
+            // True anomaly 
+            double zteta = 2.0 * Math.Atan(Math.Sqrt((1.0 + e) / (1.0 - e)) * Math.Tan(E / 2.0));
+
+            return Angle.To360(Angle.ToDegrees(zteta - timePeri));
+        }
+    }
+
     public class GreatRedSpotSettings
     {
         public double Epoch { get; set; }

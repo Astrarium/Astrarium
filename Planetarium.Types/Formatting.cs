@@ -209,7 +209,7 @@ namespace Planetarium.Types
             }
         }
 
-        private class UnsignedDoubleFormatter : IEphemFormatter
+        public class UnsignedDoubleFormatter : IEphemFormatter
         {
             private readonly string format = null;
             private readonly string units = null;

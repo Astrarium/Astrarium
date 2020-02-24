@@ -263,6 +263,11 @@ namespace Planetarium.Plugins.SolarSystem
             return Visibility.Details(eq, eqSun, c.GeoLocation, theta0, 5);
         }
 
+        private MartianDate Mars_Calendar(SkyContext c)
+        {
+            return new MartianDate(c.JulianDay);
+        }
+
         private double Jupiter_GreatRedSpotLongitude(SkyContext c)
         {
             var grsSettings = settings.Get<GreatRedSpotSettings>("GRSLongitude");
@@ -295,9 +300,13 @@ namespace Planetarium.Plugins.SolarSystem
             e["Appearance.CM"] = (c, p) => c.Get(Planet_Appearance, p.Number).CM;
             e["Appearance.D"] = (c, p) => c.Get(Planet_Appearance, p.Number).D;
             e["Appearance.P"] = (c, p) => c.Get(Planet_Appearance, p.Number).P;
+            e["MartianCalendar.Year", IsMars] = (c, p) => c.Get(Mars_Calendar).Year;
+            e["MartianCalendar.Month", IsMars] = (c, p) => c.Get(Mars_Calendar).Month;
+            e["MartianCalendar.Sol", IsMars] = (c, p) => Math.Ceiling(c.Get(Mars_Calendar).Sol);
+            e["MartianCalendar.Ls", IsMars, new Formatters.UnsignedDoubleFormatter(2, "\u00B0")] = (c, p) => c.Get(Mars_Calendar).Ls;
+            e["GRSLongitude", IsJupiter] = (c, p) => c.Get(Jupiter_GreatRedSpotLongitude);
             e["SaturnRings.a", IsSaturn] = (c, p) => c.Get(Saturn_RingsAppearance, p.Number).a;
             e["SaturnRings.b", IsSaturn] = (c, p) => c.Get(Saturn_RingsAppearance, p.Number).b;
-            e["GRSLongitude", IsJupiter] = (c, p) => c.Get(Jupiter_GreatRedSpotLongitude);
             e["RTS.Rise"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, p.Number).Rise);
             e["RTS.Transit"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, p.Number).Transit);
             e["RTS.Set"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, p.Number).Set);
@@ -356,17 +365,26 @@ namespace Planetarium.Plugins.SolarSystem
                 .AddRow("Appearance.P")
                 .AddRow("Appearance.D");
 
-            if (info.Body.Number == Planet.SATURN)
+            if (IsMars(info.Body))
+            {
+                info
+                    .AddHeader(Text.Get("Planet.MartianCalendar"))
+                    .AddRow("MartianCalendar.Year")
+                    .AddRow("MartianCalendar.Month")
+                    .AddRow("MartianCalendar.Sol")
+                    .AddRow("MartianCalendar.Ls");
+            }
+            else if (IsJupiter(info.Body))
+            {
+                info
+                    .AddRow("GRSLongitude");
+            }
+            else if (IsSaturn(info.Body))
             {
                 info
                     .AddHeader(Text.Get("SaturnRings"))
                     .AddRow("SaturnRings.a")
                     .AddRow("SaturnRings.b");
-            }
-            else if (info.Body.Number == Planet.JUPITER)
-            {
-                info
-                    .AddRow("GRSLongitude");
             }
         }
     }
