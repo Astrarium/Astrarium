@@ -31,5 +31,20 @@ namespace Planetarium.Renderers
         /// Angle of texture rotation in longitude, in degrees
         /// </summary>
         public double LongutudeShift { get; set; }
+
+        /// <summary>
+        /// Flag indicating polar caps rendering is needed
+        /// </summary>
+        public bool RenderPolarCaps { get; set; }
+
+        /// <summary>
+        /// Radius of northern polar cap, in degrees
+        /// </summary>
+        public double NorthernPolarCap { get; set; }
+
+        /// <summary>
+        /// Radius of southern polar cap, in degrees
+        /// </summary>
+        public double SouthernPolarCap { get; set; }
     }
 }

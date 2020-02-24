@@ -16,7 +16,7 @@ namespace ADK.Tests
 
             CrdsHeliocentrical earth = PlanetPositions.GetPlanetCoordinates(3, jd, true);
             CrdsHeliocentrical saturn = PlanetPositions.GetPlanetCoordinates(6, jd, true);
-           
+
             RingsAppearance rings = PlanetEphem.SaturnRings(jd, saturn, earth, 23.43971);
 
             Assert.AreEqual(35.87, rings.a, 1e-2);
@@ -55,7 +55,7 @@ namespace ADK.Tests
 
             // Geocentric coordinates of Mars
             CrdsEquatorial eq = new CrdsEquatorial(187.4042, -0.6522);
- 
+
             // 0 in this case means no light-time effect
             PlanetAppearance a = PlanetEphem.PlanetAppearance(jd, 4, eq, 0);
 
@@ -73,7 +73,7 @@ namespace ADK.Tests
 
         [TestMethod]
         public void MarsDate()
-        { 
+        {
             // 9 May 1945
             {
                 var d = new MartianDate(2431584.5);

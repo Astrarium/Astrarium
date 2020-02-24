@@ -268,6 +268,12 @@ namespace Planetarium.Plugins.SolarSystem
             return new MartianDate(c.JulianDay);
         }
 
+        private double Mars_PolarCap(SkyContext c, PolarCap cap)
+        {
+            double ls = c.Get(Mars_Calendar).Ls;
+            return PlanetEphem.MarsPolarCapRadius(ls, cap);
+        }
+
         private double Jupiter_GreatRedSpotLongitude(SkyContext c)
         {
             var grsSettings = settings.Get<GreatRedSpotSettings>("GRSLongitude");
@@ -304,6 +310,8 @@ namespace Planetarium.Plugins.SolarSystem
             e["MartianCalendar.Month", IsMars] = (c, p) => c.Get(Mars_Calendar).Month;
             e["MartianCalendar.Sol", IsMars] = (c, p) => Math.Ceiling(c.Get(Mars_Calendar).Sol);
             e["MartianCalendar.Ls", IsMars, new Formatters.UnsignedDoubleFormatter(2, "\u00B0")] = (c, p) => c.Get(Mars_Calendar).Ls;
+            e["PolarCaps.North", IsMars, new Formatters.UnsignedDoubleFormatter(1, "\u00B0")] = (c, p) => c.Get(Mars_PolarCap, PolarCap.Northern);
+            e["PolarCaps.South", IsMars, new Formatters.UnsignedDoubleFormatter(1, "\u00B0")] = (c, p) => c.Get(Mars_PolarCap, PolarCap.Southern);
             e["GRSLongitude", IsJupiter] = (c, p) => c.Get(Jupiter_GreatRedSpotLongitude);
             e["SaturnRings.a", IsSaturn] = (c, p) => c.Get(Saturn_RingsAppearance, p.Number).a;
             e["SaturnRings.b", IsSaturn] = (c, p) => c.Get(Saturn_RingsAppearance, p.Number).b;
@@ -373,6 +381,11 @@ namespace Planetarium.Plugins.SolarSystem
                     .AddRow("MartianCalendar.Month")
                     .AddRow("MartianCalendar.Sol")
                     .AddRow("MartianCalendar.Ls");
+
+                info
+                    .AddHeader(Text.Get("Planet.PolarCaps"))
+                    .AddRow("PolarCaps.North")
+                    .AddRow("PolarCaps.South");
             }
             else if (IsJupiter(info.Body))
             {

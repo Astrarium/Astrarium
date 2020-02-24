@@ -47,6 +47,14 @@ namespace Planetarium.Renderers
 
             using (Bitmap sourceBitmap = new Bitmap(options.TextureFilePath))
             {
+                if (options.RenderPolarCaps)
+                {
+                    using (Graphics g = Graphics.FromImage(sourceBitmap))
+                    {
+                        //g.FillRectangle(Brushes.Red, 0, 0, sourceBitmap.Width, sourceBitmap.Height);
+                    }
+                }
+
                 BitmapData data;
                 int size = (int)options.OutputImageSize;
                 window.ClientSize = new Size(size, size);

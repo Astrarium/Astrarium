@@ -282,6 +282,43 @@ namespace ADK
             // Based on https://github.com/Stellarium/stellarium/blob/24a28f335f5277374cd387a1eda9ca7c7eaa507e/src/core/modules/Planet.cpp#L1145
             return Angle.To360(grs.Longitude + grs.MonthlyDrift * 12 * (jd - grs.Epoch) / 365.25);
         }
+
+        /// <summary>
+        /// Calculates radius of Martian polar cap, in degrees of latitude,
+        /// depending on areocentric longitude of Sun.
+        /// </summary>
+        /// <param name="ls">Areocentric longitude of Sun</param>
+        /// <param name="cap">Northern or southern cap</param>
+        /// <returns>Radius of Martian polar cap, in degrees of latitude</returns>
+        /// <remarks>
+        /// The method is based on following simple assumtions:
+        ///   1. Polar cap size changes by sine law
+        ///   2. Radius of polar cap is between:
+        ///     - 7...40 degrees for northern cap
+        ///     - 0...30 degrees for southern cap
+        ///   3. Maximal width of NPC is around Ls = 345 degrees
+        ///   4. Maximal width of SPC is around Ls = 165 degrees
+        /// Refs:
+        /// https://www.sciencedirect.com/science/article/abs/pii/S0019103509003133
+        /// http://www.alpo-astronomy.org/jbeish/Observing_Mars_3.html
+        /// </remarks>
+        public static double MarsPolarCapRadius(double ls, PolarCap cap)
+        {
+            double LsMax = cap == PolarCap.Northern ? 345 : 165;
+            double Wmax = cap == PolarCap.Northern ? 40 : 30;
+            double Wmin = cap == PolarCap.Northern ? 7 : 0;
+
+            return ((-Math.Cos((ls + 180 - LsMax) / 180.0 * Math.PI) + 1.0) / 2.0) * (Wmax - Wmin) + Wmin;
+        }
+    }
+
+    /// <summary>
+    /// Polar cap: northern or southern
+    /// </summary>
+    public enum PolarCap
+    {
+        Northern = 0,
+        Southern = 1
     }
 
     /// <summary>
