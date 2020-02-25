@@ -12,32 +12,32 @@ namespace Planetarium.Plugins.SolarSystem
 {
     public partial class PlanetsCalc
     {       
-        private CrdsEcliptical NeptuneMoon_Ecliptical(SkyContext c)
+        private CrdsEcliptical NeptuneMoon_Ecliptical(SkyContext c, int m)
         {
             var eclNeptune = c.Get(Planet_Ecliptical, Planet.NEPTUNE);
 
             return NeptunianMoons.TritonPosition(c.JulianDay, eclNeptune);
         }
 
-        private CrdsEquatorial NeptuneMoon_Equatorial0(SkyContext c)
+        private CrdsEquatorial NeptuneMoon_Equatorial0(SkyContext c, int m)
         {
-            return c.Get(NeptuneMoon_Ecliptical).ToEquatorial(c.Epsilon);
+            return c.Get(NeptuneMoon_Ecliptical, m).ToEquatorial(c.Epsilon);
         }
 
-        private CrdsEquatorial NeptuneMoon_Equatorial(SkyContext c)
+        private CrdsEquatorial NeptuneMoon_Equatorial(SkyContext c, int m)
         {
-            return c.Get(NeptuneMoon_Equatorial0).ToTopocentric(c.GeoLocation, c.SiderealTime, c.Get(Planet_Parallax, Planet.NEPTUNE));
+            return c.Get(NeptuneMoon_Equatorial0, m).ToTopocentric(c.GeoLocation, c.SiderealTime, c.Get(Planet_Parallax, Planet.NEPTUNE));
         }
 
-        private CrdsHorizontal NeptuneMoon_Horizontal(SkyContext c)
+        private CrdsHorizontal NeptuneMoon_Horizontal(SkyContext c, int m)
         {
-            return c.Get(NeptuneMoon_Equatorial).ToHorizontal(c.GeoLocation, c.SiderealTime);
+            return c.Get(NeptuneMoon_Equatorial, m).ToHorizontal(c.GeoLocation, c.SiderealTime);
         }
 
-        private CrdsRectangular NeptuneMoon_Rectangular(SkyContext c)
+        private CrdsRectangular NeptuneMoon_Rectangular(SkyContext c, int m)
         {
-            CrdsEquatorial moonEq = c.Get(NeptuneMoon_Equatorial);
-            CrdsEcliptical moonEcl = c.Get(NeptuneMoon_Ecliptical);
+            CrdsEquatorial moonEq = c.Get(NeptuneMoon_Equatorial, m);
+            CrdsEcliptical moonEcl = c.Get(NeptuneMoon_Ecliptical, m);
             CrdsEquatorial neptuneEq = c.Get(Planet_Equatorial, Planet.NEPTUNE);
             CrdsEcliptical neptuneEcl = c.Get(Planet_Ecliptical, Planet.NEPTUNE);
 
@@ -74,25 +74,23 @@ namespace Planetarium.Plugins.SolarSystem
             return new CrdsRectangular(x, y, z);
         }
 
-        private double NeptuneMoon_Semidiameter(SkyContext c)
+        private double NeptuneMoon_Semidiameter(SkyContext c, int m)
         {
-            var ecl = c.Get(NeptuneMoon_Ecliptical);
+            var ecl = c.Get(NeptuneMoon_Ecliptical, m);
             return NeptunianMoons.TritonSemidiameter(ecl.Distance);
         }
 
         public void ConfigureEphemeris(EphemerisConfig<NeptuneMoon> e)
         {
-            e["Constellation"] = (c, jm) => Constellations.FindConstellation(c.Get(NeptuneMoon_Equatorial), c.JulianDay);
-            e["Equatorial.Alpha"] = (c, jm) => c.Get(NeptuneMoon_Equatorial).Alpha;
-            e["Equatorial.Delta"] = (c, jm) => c.Get(NeptuneMoon_Equatorial).Delta;
-
-            e["Horizontal.Altitude"] = (c, jm) => c.Get(NeptuneMoon_Horizontal).Altitude;
-            e["Horizontal.Azimuth"] = (c, jm) => c.Get(NeptuneMoon_Horizontal).Azimuth;
-            e["Rectangular.X"] = (c, jm) => c.Get(NeptuneMoon_Rectangular).X;
-            e["Rectangular.Y"] = (c, jm) => c.Get(NeptuneMoon_Rectangular).Y;
-            e["Rectangular.Z"] = (c, jm) => c.Get(NeptuneMoon_Rectangular).Z;
-
-            e["AngularDiameter"] = (c, nm) => c.Get(NeptuneMoon_Semidiameter) * 2 / 3600.0;
+            e["Constellation"] = (c, nm) => Constellations.FindConstellation(c.Get(NeptuneMoon_Equatorial, nm.Number), c.JulianDay);
+            e["Equatorial.Alpha"] = (c, nm) => c.Get(NeptuneMoon_Equatorial, nm.Number).Alpha;
+            e["Equatorial.Delta"] = (c, nm) => c.Get(NeptuneMoon_Equatorial, nm.Number).Delta;
+            e["Horizontal.Altitude"] = (c, nm) => c.Get(NeptuneMoon_Horizontal, nm.Number).Altitude;
+            e["Horizontal.Azimuth"] = (c, nm) => c.Get(NeptuneMoon_Horizontal, nm.Number).Azimuth;
+            e["Rectangular.X"] = (c, nm) => c.Get(NeptuneMoon_Rectangular, nm.Number).X;
+            e["Rectangular.Y"] = (c, nm) => c.Get(NeptuneMoon_Rectangular, nm.Number).Y;
+            e["Rectangular.Z"] = (c, nm) => c.Get(NeptuneMoon_Rectangular, nm.Number).Z;
+            e["AngularDiameter"] = (c, nm) => c.Get(NeptuneMoon_Semidiameter, nm.Number) * 2 / 3600.0;
         }
 
         public void GetInfo(CelestialObjectInfo<NeptuneMoon> info)

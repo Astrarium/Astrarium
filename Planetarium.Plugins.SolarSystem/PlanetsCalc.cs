@@ -166,10 +166,11 @@ namespace Planetarium.Plugins.SolarSystem
                 {
                     foreach (var m in neptuneMoons)
                     {
-                        m.Equatorial = context.Get(NeptuneMoon_Equatorial);
-                        m.Horizontal = context.Get(NeptuneMoon_Horizontal);
-                        m.Semidiameter = context.Get(NeptuneMoon_Semidiameter);
-                        m.DistanceFromEarth = context.Get(NeptuneMoon_Ecliptical).Distance;                        
+                        int mn = m.Number;
+                        m.Equatorial = context.Get(NeptuneMoon_Equatorial, mn);
+                        m.Horizontal = context.Get(NeptuneMoon_Horizontal, mn);
+                        m.Semidiameter = context.Get(NeptuneMoon_Semidiameter, mn);
+                        m.DistanceFromEarth = context.Get(NeptuneMoon_Ecliptical, mn).Distance;                        
                     }
                 }
             }

@@ -129,6 +129,33 @@ namespace ADK
             return ToDegrees(Atan(1354.0 / (distance * AU))) * 3600;
         }
 
+        // http://adsabs.harvard.edu/full/1981AJ.....86.1728M
+        public static CrdsEcliptical NereidPosition(double jd, CrdsEcliptical neptune)
+        {
+            const double a0 = 0.036868;
+            const double e0 = 0.74515;
+            const double I0 = 10.041;
+            const double Omega0 = 329.3;
+            const double psi0 = 282.9; // omega0
+            const double M0 = 358.91;
+            const double n = 0.999552;
+
+            double T = (jd - 2433680.5) / 36525.0;
+            double t = (jd - 2433680.5) / 365.25;
+
+            double psi = ToRadians(To360(psi0 + 2.68 * T));
+            double twoTheta = ToRadians(To360(107.4 + 0.01196 * t));
+
+            double omega = ToRadians(To360((psi0 + 2.68 * T - 19.25 * Sin(2 * psi) + 3.23 * Sin(4 * psi) - 0.725 * Sin(6 * psi) - 0.351 * Sin(twoTheta) - 0.7 * Sin(2 * omega - twoTheta))));
+
+            double e = e0 - 0.006 * Cos(2 * psi) + 0.056 * Cos(2 * omega - twoTheta);
+
+            double M = M0 + n * t - 0.38 * Sin(2 * psi) + 1.0 * Sin(2);
+
+
+            return null;
+        }
+
         /// <summary>
         /// Helper class to perform basic matrix operations
         /// </summary>
