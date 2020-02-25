@@ -114,6 +114,9 @@ namespace ADK
             // calculate distance to Earth
             eclTriton.Distance = neptune.Distance + x / theta * a;
 
+            // TODO: temp
+            NereidPosition(jd, neptune);
+
             return eclTriton;
         }
 
@@ -146,14 +149,39 @@ namespace ADK
             double psi = ToRadians(To360(psi0 + 2.68 * T));
             double twoTheta = ToRadians(To360(107.4 + 0.01196 * t));
 
-            double omega = ToRadians(To360((psi0 + 2.68 * T - 19.25 * Sin(2 * psi) + 3.23 * Sin(4 * psi) - 0.725 * Sin(6 * psi) - 0.351 * Sin(twoTheta) - 0.7 * Sin(2 * omega - twoTheta))));
+            Func<double, double> omegaEquation = (om) => To360((psi0 + 2.68 * T - 19.25 * Sin(2 * psi) + 3.23 * Sin(4 * psi) - 0.725 * Sin(6 * psi) - 0.351 * Sin(twoTheta) - 0.7 * Sin(2 * ToRadians(om) - twoTheta))) - om;
 
-            double e = e0 - 0.006 * Cos(2 * psi) + 0.056 * Cos(2 * omega - twoTheta);
+            double omega = FindRoots(omegaEquation, 0, 360, 1e-8);
+            omega = ToRadians(omega);
 
-            double M = M0 + n * t - 0.38 * Sin(2 * psi) + 1.0 * Sin(2);
+            double e = e0 - 0.006 * Cos(2 * psi) + 0.0056 * Cos(2 * omega - twoTheta);
+
+            double M = To360(M0 + n * t - 0.38 * Sin(2 * psi) + 1.0 * Sin(2 * omega - twoTheta));
 
 
             return null;
+        }
+
+        private static double FindRoots(Func<double, double> func, double a, double b, double eps)
+        {
+            double dx;
+            while (b - a > eps)
+            {
+                dx = (b - a) / 2;
+                double xi = a + dx;
+
+                if (func(a) * func(xi) < 0)
+                {
+                    b = xi;
+                }
+                else
+                {
+                    a = xi;
+                }
+            }
+
+            
+            return (b - a < eps) ? (a + b) / 2 : FindRoots(func, a, b, eps);
         }
 
         /// <summary>
