@@ -294,7 +294,7 @@ namespace ADK
         /// The method is based on following simple assumtions:
         ///   1. Polar cap size changes by sine law
         ///   2. Radius of polar cap is between:
-        ///     - 7...40 degrees for northern cap
+        ///     - 7...30 degrees for northern cap
         ///     - 0...30 degrees for southern cap
         ///   3. Maximal width of NPC is around Ls = 345 degrees
         ///   4. Maximal width of SPC is around Ls = 165 degrees
@@ -305,7 +305,7 @@ namespace ADK
         public static double MarsPolarCapRadius(double ls, PolarCap cap)
         {
             double LsMax = cap == PolarCap.Northern ? 345 : 165;
-            double Wmax = cap == PolarCap.Northern ? 40 : 30;
+            double Wmax = 30;
             double Wmin = cap == PolarCap.Northern ? 7 : 0;
 
             return ((-Math.Cos((ls + 180 - LsMax) / 180.0 * Math.PI) + 1.0) / 2.0) * (Wmax - Wmin) + Wmin;

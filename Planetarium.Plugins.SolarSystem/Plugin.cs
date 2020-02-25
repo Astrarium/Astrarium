@@ -22,6 +22,7 @@ namespace Planetarium.Plugins.SolarSystem
             AddSetting(new SettingItem("Planets", true, "Planets"));
             AddSetting(new SettingItem("PlanetsTextures", true, "Planets", s => s.Get("Planets")));
             AddSetting(new SettingItem("PlanetsSurfaceFeatures", true, "Planets", s => s.Get("Planets") && s.Get("PlanetsTextures")));
+            AddSetting(new SettingItem("PlanetsMartianPolarCaps", true, "Planets", s => s.Get("Planets") && s.Get("PlanetsTextures")));
 
             AddSetting(new SettingItem("JupiterMoonsShadowOutline", true, "Planets", s => s.Get("Planets")));
             AddSetting(new SettingItem("ShowRotationAxis", true, "Planets", s => s.Get("Planets")));

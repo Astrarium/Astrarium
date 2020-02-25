@@ -1001,8 +1001,21 @@ namespace Planetarium.Plugins.SolarSystem
 
             if (useTextures)
             {
-                double grs = planet.Number == Planet.JUPITER ? planetsCalc.GreatRedSpotLongitude : 0;
-                Image texturePlanet = imagesCache.RequestImage(planet.Number.ToString(), new PlanetTextureToken(planet.Number.ToString(), grs - planet.Appearance.CM, planet.Appearance.D), PlanetTextureProvider, map.Redraw);
+                PlanetTextureToken token;
+                if (planet.Number == Planet.MARS && settings.Get("PlanetsMartianPolarCaps"))
+                {
+                    token = new PlanetTextureToken(planet.Number.ToString(), -planet.Appearance.CM, planet.Appearance.D, planetsCalc.MarsNPCWidth, planetsCalc.MarsSPCWidth);
+                }
+                else if (planet.Number == Planet.JUPITER)
+                {
+                    token = new PlanetTextureToken(planet.Number.ToString(), planetsCalc.GreatRedSpotLongitude - planet.Appearance.CM, planet.Appearance.D);
+                }
+                else
+                {
+                    token = new PlanetTextureToken(planet.Number.ToString(), -planet.Appearance.CM, planet.Appearance.D);
+                }
+
+                Image texturePlanet = imagesCache.RequestImage(planet.Number.ToString(), token, PlanetTextureProvider, map.Redraw);
 
                 if (texturePlanet != null)
                 {
@@ -1059,6 +1072,9 @@ namespace Planetarium.Plugins.SolarSystem
                 LatitudeShift = token.Latitude,
                 LongutudeShift = token.Longitude,
                 OutputImageSize = 1024,
+                RenderPolarCaps = token.RenderPolarCaps,
+                NorthernPolarCap = token.NorthernPolarCap,
+                SouthernPolarCap = token.SouthernPolarCap,
                 TextureFilePath = $"Data\\{token.TextureName}.jpg"
             });
         }
@@ -1243,12 +1259,40 @@ namespace Planetarium.Plugins.SolarSystem
             public string TextureName { get; private set; }
             public double Longitude { get; private set; }
             public double Latitude { get; private set; }
+            
+            /// <summary>
+            /// Flag indicating polar caps rendering is needed
+            /// </summary>
+            public bool RenderPolarCaps { get; private set; }
+
+            /// <summary>
+            /// Radius of northern polar cap, in degrees
+            /// </summary>
+            public double NorthernPolarCap { get; private set; }
+
+            /// <summary>
+            /// Radius of southern polar cap, in degrees
+            /// </summary>
+            public double SouthernPolarCap { get; private set; }
 
             public PlanetTextureToken(string name, double longitude, double latitude)
             {
                 TextureName = name;
                 Longitude = longitude;
                 Latitude = latitude;
+                RenderPolarCaps = false;
+                NorthernPolarCap = 0;
+                SouthernPolarCap = 0;
+            }
+
+            public PlanetTextureToken(string name, double longitude, double latitude, double northernPolarCap, double southernPolarCap)
+            {
+                TextureName = name;
+                Longitude = longitude;
+                Latitude = latitude;
+                RenderPolarCaps = true;
+                NorthernPolarCap = northernPolarCap;
+                SouthernPolarCap = southernPolarCap;
             }
 
             public override bool Equals(object obj)
@@ -1257,6 +1301,9 @@ namespace Planetarium.Plugins.SolarSystem
                 {
                     return 
                         TextureName.Equals(other.TextureName) &&
+                        RenderPolarCaps == other.RenderPolarCaps &&
+                        Math.Abs(NorthernPolarCap - other.NorthernPolarCap) < 1 &&
+                        Math.Abs(SouthernPolarCap - other.SouthernPolarCap) < 1 &&
                         Math.Abs(Longitude - other.Longitude) < 0.01 &&
                         Math.Abs(Latitude - other.Latitude) < 0.01;
                 }

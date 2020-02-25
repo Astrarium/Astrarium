@@ -36,6 +36,8 @@ namespace Planetarium.Plugins.SolarSystem
         public ICollection<NeptuneMoon> NeptuneMoons => neptuneMoons;
         public RingsAppearance SaturnRings { get; private set; } = new RingsAppearance();
         public double GreatRedSpotLongitude { get; private set; }
+        public double MarsNPCWidth { get; private set; }
+        public double MarsSPCWidth { get; private set; }
 
         private readonly Func<Planet, bool> IsMars = p => p.Number == Planet.MARS;
         private readonly Func<Planet, bool> IsJupiter = p => p.Number == Planet.JUPITER;
@@ -108,6 +110,9 @@ namespace Planetarium.Plugins.SolarSystem
                         m.Semidiameter = context.Get(MarsMoon_Semidiameter, mn);
                         m.DistanceFromEarth = context.Get(MarsMoon_Ecliptical, mn).Distance;
                     }
+
+                    MarsNPCWidth = context.Get(Mars_PolarCap, PolarCap.Northern);
+                    MarsSPCWidth = context.Get(Mars_PolarCap, PolarCap.Southern);
                 }
 
                 if (p.Number == Planet.JUPITER)

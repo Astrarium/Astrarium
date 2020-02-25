@@ -4,6 +4,7 @@ using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
@@ -47,11 +48,24 @@ namespace Planetarium.Renderers
 
             using (Bitmap sourceBitmap = new Bitmap(options.TextureFilePath))
             {
+                // render martian polar caps
                 if (options.RenderPolarCaps)
                 {
                     using (Graphics g = Graphics.FromImage(sourceBitmap))
                     {
-                        //g.FillRectangle(Brushes.Red, 0, 0, sourceBitmap.Width, sourceBitmap.Height);
+                        const float df = 2.5f / 180f;
+                        {
+                            float f = (float)(options.NorthernPolarCap / 180.0);
+                            var br = new LinearGradientBrush(new Point(0, 0), new PointF(0, sourceBitmap.Height), Color.White, Color.Transparent);
+                            br.Blend = new Blend(4) { Factors = new float[] { 0, 0, 1, 1 }, Positions = new float[] { 0, Math.Max(0, f - df), Math.Min(1, f + df), 1 } };
+                            g.FillRectangle(br, 0, 0, sourceBitmap.Width, sourceBitmap.Height);
+                        }
+                        {
+                            float f = (float)((180 - options.SouthernPolarCap) / 180.0);
+                            var br = new LinearGradientBrush(new Point(0, 0), new PointF(0, sourceBitmap.Height), Color.Transparent, Color.White);
+                            br.Blend = new Blend(4) { Factors = new float[] { 0, 0, 1, 1 }, Positions = new float[] { 0, Math.Max(0, f - df), Math.Min(1, f + df), 1 } };
+                            g.FillRectangle(br, 0, 0, sourceBitmap.Width, sourceBitmap.Height);
+                        }
                     }
                 }
 
