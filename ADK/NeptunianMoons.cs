@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Math;
@@ -16,6 +19,8 @@ namespace ADK
                 return TritonPosition(jd, neptune);
             else if (index == 2)
                 return NereidPosition(jd, neptune);
+            else if (index == 3)
+                return NereidPositionJPL(jd, neptune);
             else
                 throw new ArgumentException("Incorrect moon index");
         }
@@ -139,6 +144,85 @@ namespace ADK
             return ToDegrees(Atan(1354.0 / (distance * AU))) * 3600;
         }
 
+        private class NereidPositionData
+        {
+            public double Jd { get; set; }
+            public double X { get; set; }
+            public double Y { get; set; }
+        }
+
+        private static List<NereidPositionData> NereidPositions = new List<NereidPositionData>();
+
+        private static void LoadJPLData()
+        {
+            if (IsInitialized) return;
+
+            string line = "";
+
+            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"ADK.Data.Nereid"))
+            using (var sr = new StreamReader(stream))
+            {
+                while (line != null && !sr.EndOfStream)
+                {
+                    line = sr.ReadLine();
+
+                    double jd = double.Parse(line.Substring(19, 17), CultureInfo.InvariantCulture);
+                    double X = double.Parse(line.Substring(62, 8), CultureInfo.InvariantCulture);
+                    double Y = double.Parse(line.Substring(71, 8), CultureInfo.InvariantCulture);
+
+                    NereidPositionData pd = new NereidPositionData()
+                    {
+                        Jd = jd,
+                        X = X,
+                        Y = Y
+                    };
+
+                    NereidPositions.Add(pd);
+                }
+            }
+
+            IsInitialized = true;
+        }
+
+        private static bool IsInitialized = false;
+
+        private static CrdsEcliptical NereidPositionJPL(double jd, CrdsEcliptical neptune)
+        {
+            LoadJPLData();
+
+            var pos = NereidPositions.FirstOrDefault(np => Abs(np.Jd - jd) < 1);
+
+            if (pos != null)
+            {
+                NutationElements ne = Nutation.NutationElements(jd);
+                double epsilon = Date.TrueObliquity(jd, ne.deltaEpsilon);
+
+                
+                CrdsEquatorial eqNeptune = neptune.ToEquatorial(epsilon);
+               
+
+                // offsets values in degrees           
+                double dAlphaCosDelta = pos.X / 3600;
+                double dDelta = pos.Y / 3600;
+
+                double delta = eqNeptune.Delta + dDelta;
+                double dAlpha = dAlphaCosDelta / Cos(ToRadians(eqNeptune.Delta));
+                double alpha = eqNeptune.Alpha + dAlpha;
+
+                var eqNereid = new CrdsEquatorial(alpha, delta);
+
+                CrdsEcliptical eclNereid = eqNereid.ToEcliptical(epsilon);
+                eclNereid.Distance = neptune.Distance;
+
+                return eclNereid;
+            }
+
+            return null;
+
+
+
+        }
+
         // http://adsabs.harvard.edu/full/1981AJ.....86.1728M
         private static CrdsEcliptical NereidPosition(double jd, CrdsEcliptical neptune)
         {
@@ -167,7 +251,7 @@ namespace ADK
             // take light-time effect into account
             double tau = PlanetPositions.LightTimeEffect(neptune.Distance);
 
-            double t = jd - jd0 - tau; // in days
+            double t = jd - tau - jd0; // in days
             double T = t / 36525.0; // in Julian centuries
 
             double psi = ToRadians(To360(psi0 + 2.68 * T));
@@ -185,13 +269,13 @@ namespace ADK
             double M = To360(M0 + n * t - 0.38 * Sin(2 * psi) + 1.0 * Sin(2 * omega - twoTheta));
 
             double cosI = Cos(ToRadians(I0)) - 9.4e-3 * Cos(2 * psi);
-            double I = ToDegrees(Acos(cosI));
+            double I = Acos(cosI);
 
             // eccentric anomaly
-            double E = SolveKepler(M, e);
+            double E = ToRadians(SolveKepler(M, e));
 
-            double X = a * (Cos(ToRadians(E)) - e);
-            double Y = a * Sqrt(1 - e * e) * Sin(ToRadians(E));
+            double X = a * (Cos(E) - e);
+            double Y = a * Sqrt(1 - e * e) * Sin(E);
 
             Matrix d =
                 Matrix.Ry(ToRadians(-eqNeptune1950.Delta)) *
@@ -199,7 +283,7 @@ namespace ADK
                 Matrix.Rz(ToRadians(OmegaN)) *
                 Matrix.Rx(ToRadians(-gamma)) *
                 Matrix.Rz(ToRadians(-Omega)) *
-                Matrix.Rx(ToRadians(-I)) *
+                Matrix.Rx(-I) *
                 Matrix.Rz(-omega) *
                 new Matrix(new double[,] { { X / neptune.Distance }, { Y / neptune.Distance }, { 0 } });
 

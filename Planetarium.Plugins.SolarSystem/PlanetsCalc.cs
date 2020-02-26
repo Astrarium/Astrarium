@@ -26,7 +26,7 @@ namespace Planetarium.Plugins.SolarSystem
         private MarsMoon[] marsMoons = new MarsMoon[2];
         private SaturnMoon[] saturnMoons = new SaturnMoon[8];
         private UranusMoon[] uranusMoons = new UranusMoon[5];
-        private NeptuneMoon[] neptuneMoons = new NeptuneMoon[2];
+        private NeptuneMoon[] neptuneMoons = new NeptuneMoon[3];
 
         public ICollection<Planet> Planets => planets;
         public ICollection<MarsMoon> MarsMoons => marsMoons;
