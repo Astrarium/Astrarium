@@ -15,8 +15,7 @@ namespace Planetarium.Plugins.SolarSystem
         private CrdsEcliptical NeptuneMoon_Ecliptical(SkyContext c, int m)
         {
             var eclNeptune = c.Get(Planet_Ecliptical, Planet.NEPTUNE);
-
-            return NeptunianMoons.TritonPosition(c.JulianDay, eclNeptune);
+            return NeptunianMoons.Position(c.JulianDay, eclNeptune, m);
         }
 
         private CrdsEquatorial NeptuneMoon_Equatorial0(SkyContext c, int m)
