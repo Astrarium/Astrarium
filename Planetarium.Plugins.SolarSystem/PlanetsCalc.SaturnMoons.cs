@@ -54,8 +54,7 @@ namespace Planetarium.Plugins.SolarSystem
         {
             double r = c.Get(Planet_DistanceFromEarth, Planet.SATURN);
             double R = c.Get(Planet_DistanceFromSun, Planet.SATURN);
-            double p = c.Get(Planet_Phase, Planet.SATURN);
-            return SaturnianMoons.Magnitude(r, R, p, m - 1);
+            return SaturnianMoons.Magnitude(r, R, m - 1);
         }
 
         private double SaturnMoon_DistanceFromEarth(SkyContext c, int m)
@@ -79,8 +78,8 @@ namespace Planetarium.Plugins.SolarSystem
             e["Rectangular.Z"] = (c, sm) => c.Get(SaturnMoon_Rectangular, sm.Number).Z;
             e["Magnitude"] = (c, sm) => c.Get(SaturnMoon_Magnitude, sm.Number);
 
-            e["Phase"] = (c, sm) => c.Get(Planet_Phase, sm.Number);
-            e["PhaseAngle"] = (c, sm) => c.Get(Planet_PhaseAngle, sm.Number);
+            e["Phase"] = (c, sm) => c.Get(Planet_Phase, Planet.SATURN);
+            e["PhaseAngle"] = (c, sm) => c.Get(Planet_PhaseAngle, Planet.SATURN);
             e["AngularDiameter"] = (c, sm) => c.Get(SaturnMoon_Semidiameter, sm.Number) * 2 / 3600.0;
 
             e["RTS.Rise"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, Planet.SATURN).Rise);

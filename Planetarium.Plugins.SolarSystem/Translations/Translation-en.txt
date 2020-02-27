@@ -43,6 +43,8 @@ UranusMoon.2.Name				= Ariel
 UranusMoon.3.Name				= Umbriel
 UranusMoon.4.Name				= Titania
 UranusMoon.5.Name				= Oberon
+NeptuneMoon.1.Name				= Triton
+NeptuneMoon.2.Name				= Nereid
 EarthShadow.Label				= Earth shadow
 EclipsedByJupiter				= Eclipsed by Jupiter
 

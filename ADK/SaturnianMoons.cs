@@ -23,10 +23,7 @@ namespace ADK
         /// <summary>
         /// Moons absolute magnitudes
         /// </summary>
-        /// <remarks>
-        /// Data taken from: https://en.wikipedia.org/wiki/Moons_of_Saturn
-        /// </remarks>
-        private static readonly double[] MH = { 4.2, 1.7, 0.3, 0.4, -0.2, -1.3, 4.8, 0.6 };
+        private static readonly double[] MH = { 3.3, 2.2, 0.7, 0.8, 0.1, -1.2, 4.8, 1.5 };
 
         /// <summary>
         /// Saturn equatorial radius, in km
@@ -38,12 +35,10 @@ namespace ADK
         /// </summary>
         /// <param name="r">Distance Earth-Saturn centers, in a.u.</param>
         /// <param name="R">Distance Sun-Saturn centers, in a.u.</param>
-        /// <param name="phase">Saturnian moon phase (the same as Saturn phase in approximation).</param>
-        /// <param name="i">Saturnian moon index, 0-based</param>
-        public static float Magnitude(double r, double R, double phase, int moonIndex)
+        /// <param name="moonIndex">Saturnian moon index, 0-based</param>
+        public static float Magnitude(double r, double R, int moonIndex)
         {
-            // TODO: not correct, modify this
-            return (float)(5 * Log10(r * R / Sqrt(phase)) + MH[moonIndex] - 0.75);
+            return (float)(MH[moonIndex] + 5 * Log10(r * R));
         }
 
         /// <summary>

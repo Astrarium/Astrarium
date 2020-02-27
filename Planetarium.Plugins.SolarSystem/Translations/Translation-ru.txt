@@ -43,6 +43,8 @@ UranusMoon.2.Name				= Ариэль
 UranusMoon.3.Name				= Умбриэль
 UranusMoon.4.Name				= Титания
 UranusMoon.5.Name				= Оберон
+NeptuneMoon.1.Name				= Тритон
+NeptuneMoon.2.Name				= Нереида
 EarthShadow.Label				= Тень Земли
 EclipsedByJupiter				= В тени Юпитера
 

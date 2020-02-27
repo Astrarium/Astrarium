@@ -93,6 +93,13 @@ namespace Planetarium.Plugins.SolarSystem
             return UranianMoons.Semidiameter(m, distance);
         }
 
+        private float UranusMoon_Magnitude(SkyContext c, int m)
+        {
+            var distanceFromEarth = c.Get(Planet_DistanceFromEarth, Planet.URANUS);
+            var distanceFromSun = c.Get(Planet_DistanceFromSun, Planet.URANUS);
+            return UranianMoons.Magnitude(distanceFromEarth, distanceFromSun, m - 1);
+        }
+
         public void ConfigureEphemeris(EphemerisConfig<UranusMoon> e)
         {
             e["Constellation"] = (c, um) => Constellations.FindConstellation(c.Get(UranusMoon_Equatorial, um.Number), c.JulianDay);
@@ -105,7 +112,9 @@ namespace Planetarium.Plugins.SolarSystem
             e["Rectangular.X"] = (c, um) => c.Get(UranusMoon_Rectangular, um.Number).X;
             e["Rectangular.Y"] = (c, um) => c.Get(UranusMoon_Rectangular, um.Number).Y;
             e["Rectangular.Z"] = (c, um) => c.Get(UranusMoon_Rectangular, um.Number).Z;
-            //e["Magnitude"] = (c, um) => c.Get(UranusMoonMagnitude, um.Number);
+
+            e["AngularDiameter"] = (c, um) => c.Get(UranusMoon_Semidiameter, um.Number) * 2 / 3600.0;
+            e["Magnitude"] = (c, um) => c.Get(UranusMoon_Magnitude, um.Number);
 
             e["RTS.Rise"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, Planet.URANUS).Rise);
             e["RTS.Transit"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, Planet.URANUS).Transit);
@@ -136,13 +145,13 @@ namespace Planetarium.Plugins.SolarSystem
             .AddRow("RTS.Rise")
             .AddRow("RTS.Transit")
             .AddRow("RTS.Set")
-            .AddRow("RTS.Duration");
+            .AddRow("RTS.Duration")
 
-            //.AddHeader(Text.Get("UranusMoon.Appearance"))
+            .AddHeader(Text.Get("UranusMoon.Appearance"))
             //.AddRow("Phase")
             //.AddRow("PhaseAngle")
-            //.AddRow("Magnitude")
-            //.AddRow("AngularDiameter")
+            .AddRow("Magnitude")
+            .AddRow("AngularDiameter");
             //.AddRow("Appearance.CM");
         }
     }

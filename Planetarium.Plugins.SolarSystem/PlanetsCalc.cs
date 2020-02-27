@@ -26,7 +26,7 @@ namespace Planetarium.Plugins.SolarSystem
         private MarsMoon[] marsMoons = new MarsMoon[2];
         private SaturnMoon[] saturnMoons = new SaturnMoon[8];
         private UranusMoon[] uranusMoons = new UranusMoon[5];
-        private NeptuneMoon[] neptuneMoons = new NeptuneMoon[3];
+        private NeptuneMoon[] neptuneMoons = new NeptuneMoon[2];
 
         public ICollection<Planet> Planets => planets;
         public ICollection<MarsMoon> MarsMoons => marsMoons;
@@ -158,6 +158,7 @@ namespace Planetarium.Plugins.SolarSystem
                         m.Equatorial = context.Get(UranusMoon_Equatorial, mn);
                         m.Horizontal = context.Get(UranusMoon_Horizontal, mn);
                         m.Semidiameter = context.Get(UranusMoon_Semidiameter, mn);
+                        m.Magnitude = context.Get(UranusMoon_Magnitude, mn);
                         m.DistanceFromEarth = context.Get(UranusMoon_Ecliptical, mn).Distance;
                     }
                 }
@@ -170,6 +171,7 @@ namespace Planetarium.Plugins.SolarSystem
                         m.Equatorial = context.Get(NeptuneMoon_Equatorial, mn);
                         m.Horizontal = context.Get(NeptuneMoon_Horizontal, mn);
                         m.Semidiameter = context.Get(NeptuneMoon_Semidiameter, mn);
+                        m.Magnitude = context.Get(NeptuneMoon_Magnitude, mn);
                         m.DistanceFromEarth = context.Get(NeptuneMoon_Ecliptical, mn).Distance;                        
                     }
                 }

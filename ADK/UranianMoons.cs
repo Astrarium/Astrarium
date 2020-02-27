@@ -21,6 +21,19 @@ namespace ADK
             return ToDegrees(Atan2(d[index - 1] / 2.0, AU)) / distance * 3600.0;
         }
 
+        private static double[] MH = new double[] { 3.6, 1.45, 2.10, 2.10, 1.02, 1.23 };
+
+        /// <summary>
+        /// Calculates visible magnitude of Uranian moon
+        /// </summary>
+        /// <param name="r">Distance Earth-Uranus centers, in a.u.</param>
+        /// <param name="R">Distance Sun-Uranus centers, in a.u.</param>
+        /// <param name="moonIndex">Uranian moon index, 0-based</param>
+        public static float Magnitude(double r, double R, int moonIndex)
+        {
+            return (float)(MH[moonIndex] + 5 * Log10(r * R));
+        }
+
         public static CrdsRectangular[] Positions(double jd, CrdsHeliocentrical earth, CrdsHeliocentrical uranus)
         {
             CrdsRectangular[] moons = new CrdsRectangular[MOONS_COUNT];

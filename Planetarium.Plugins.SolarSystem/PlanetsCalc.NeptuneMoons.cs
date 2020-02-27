@@ -76,7 +76,14 @@ namespace Planetarium.Plugins.SolarSystem
         private double NeptuneMoon_Semidiameter(SkyContext c, int m)
         {
             var ecl = c.Get(NeptuneMoon_Ecliptical, m);
-            return NeptunianMoons.TritonSemidiameter(ecl.Distance);
+            return NeptunianMoons.Semidiameter(ecl.Distance, m);
+        }
+
+        private float NeptuneMoon_Magnitude(SkyContext c, int m)
+        {
+            var delta = c.Get(Planet_DistanceFromEarth, Planet.NEPTUNE);
+            double r = c.Get(Planet_DistanceFromSun, Planet.NEPTUNE);
+            return NeptunianMoons.Magnitude(delta, r, m);
         }
 
         public void ConfigureEphemeris(EphemerisConfig<NeptuneMoon> e)
@@ -90,6 +97,7 @@ namespace Planetarium.Plugins.SolarSystem
             e["Rectangular.Y"] = (c, nm) => c.Get(NeptuneMoon_Rectangular, nm.Number).Y;
             e["Rectangular.Z"] = (c, nm) => c.Get(NeptuneMoon_Rectangular, nm.Number).Z;
             e["AngularDiameter"] = (c, nm) => c.Get(NeptuneMoon_Semidiameter, nm.Number) * 2 / 3600.0;
+            e["Magnitude"] = (c, nm) => c.Get(NeptuneMoon_Magnitude, nm.Number);
         }
 
         public void GetInfo(CelestialObjectInfo<NeptuneMoon> info)
@@ -111,8 +119,8 @@ namespace Planetarium.Plugins.SolarSystem
             .AddRow("Rectangular.Y")
             .AddRow("Rectangular.Z")
 
+            .AddRow("Magnitude")
             .AddRow("AngularDiameter");
-
             //.AddHeader(Text.Get("NeptuneMoon.RTS"))
             //.AddRow("RTS.Rise")
             //.AddRow("RTS.Transit")

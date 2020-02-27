@@ -10,8 +10,6 @@ namespace ADK.Tests
     [TestClass]
     public class GalileanMoonsTests : TestClassBase
     {
-
-
         [TestMethod]
         public void Magnitude()
         {
