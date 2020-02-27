@@ -93,6 +93,13 @@ namespace Planetarium.Plugins.SolarSystem
             return MartianMoons.Semidiameter(m, distance);
         }
 
+        private float MarsMoon_Magnitude(SkyContext c, int m)
+        {
+            var r = c.Get(Planet_DistanceFromEarth, Planet.MARS);
+            var R = c.Get(Planet_DistanceFromSun, Planet.MARS);
+            return MartianMoons.Magnitude(r, R, m);
+        }
+
         public void ConfigureEphemeris(EphemerisConfig<MarsMoon> e)
         {
             e["Constellation"] = (c, um) => Constellations.FindConstellation(c.Get(MarsMoon_Equatorial, um.Number), c.JulianDay);
@@ -105,7 +112,8 @@ namespace Planetarium.Plugins.SolarSystem
             e["Rectangular.X"] = (c, um) => c.Get(MarsMoon_Rectangular, um.Number).X;
             e["Rectangular.Y"] = (c, um) => c.Get(MarsMoon_Rectangular, um.Number).Y;
             e["Rectangular.Z"] = (c, um) => c.Get(MarsMoon_Rectangular, um.Number).Z;
-            //e["Magnitude"] = (c, um) => c.Get(MarsMoon_Magnitude, um.Number);
+            e["Magnitude"] = (c, um) => c.Get(MarsMoon_Magnitude, um.Number);
+            e["AngularDiameter"] = (c, um) => c.Get(MarsMoon_Semidiameter, um.Number) * 2 / 3600.0;
 
             e["RTS.Rise"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, Planet.MARS).Rise);
             e["RTS.Transit"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, Planet.MARS).Transit);
@@ -136,13 +144,13 @@ namespace Planetarium.Plugins.SolarSystem
             .AddRow("RTS.Rise")
             .AddRow("RTS.Transit")
             .AddRow("RTS.Set")
-            .AddRow("RTS.Duration");
+            .AddRow("RTS.Duration")
 
-            //.AddHeader(Text.Get("MarsMoon.Appearance"))
+            .AddHeader(Text.Get("MarsMoon.Appearance"))
             //.AddRow("Phase")
             //.AddRow("PhaseAngle")
-            //.AddRow("Magnitude")
-            //.AddRow("AngularDiameter")
+            .AddRow("Magnitude")
+            .AddRow("AngularDiameter");
             //.AddRow("Appearance.CM");
         }
     }

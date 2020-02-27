@@ -21,6 +21,19 @@ namespace ADK
             return ToDegrees(Atan2(d[index - 1] / 2.0, AU)) / distance * 3600.0;
         }
 
+        private static double[] MH = new double[] { 11.8, 12.89 };
+
+        /// <summary>
+        /// Calculates visible magnitude of Martian moon
+        /// </summary>
+        /// <param name="r">Distance Earth-Mars centers, in a.u.</param>
+        /// <param name="R">Distance Sun-Mars centers, in a.u.</param>
+        /// <param name="moonIndex">Martian moon index, 1-based</param>
+        public static float Magnitude(double r, double R, int moonIndex)
+        {
+            return (float)(MH[moonIndex - 1] + 5 * Log10(r * R));
+        }
+
         public static CrdsRectangular[] Positions(double jd, CrdsHeliocentrical earth, CrdsHeliocentrical mars)
         {
             CrdsRectangular[] moons = new CrdsRectangular[MOONS_COUNT];
