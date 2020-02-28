@@ -26,6 +26,39 @@ namespace ADK
                 return TritonPosition(jd, neptune);
             else if (index == 2)
                 return NereidPosition(jd, neptune);
+            else if (index == 3)
+                return GenericPosition(jd, new Orbit() {
+                    jd0 = 2451545.00000, // 2000 Jan. 1.50 TT
+                    M0 = 216.692, // Mean anomaly (mean value) 
+                    n = 0.9996276, // Longitude rate(mean value)
+                    e = 0.7507, // 	Eccentricity (mean value)
+                    a = 5513818.0 / 149597870.0,
+                    i = 7.090,
+                    omega0 = 281.117,
+                    Pw = 8091.45 * 365.25,
+                    Pnode = 9455.73 * 365.25,
+                    node0 = 335.570,
+                    RA = 269.302,
+                    Dec = 69.117
+                }, neptune);
+
+            else if (index == 4)
+                return GenericPosition(jd, new Orbit()
+                {
+                    jd0 = 2451545.00000, // 2000 Jan. 1.50 TT
+                    M0 = 352.257, // Mean anomaly (mean value) 
+                    n = 61.2572638, // Longitude rate(mean value)
+                    e = 0.0, // 	Eccentricity (mean value)
+                    a = 354759.0 / 149597870.0,
+                    i = 156.865,
+                    omega0 = 66.142,
+                    Pw = 386.371 * 365.25,
+                    Pnode = 687.446 * 365.25,
+                    node0 = 177.608,
+                    RA = 299.456,
+                    Dec = 43.414
+                }, neptune);
+
             else
                 throw new ArgumentException("Incorrect moon index", nameof(index));
         }
@@ -33,7 +66,7 @@ namespace ADK
         /// <summary>
         /// Moon mean radius, in km
         /// </summary>
-        private static double[] MOON_RADIUS = new double[] { 1354.0, 170.0 };
+        private static double[] MOON_RADIUS = new double[] { 1354.0, 170.0, 170.0, 1354.0 };
 
         /// <summary>
         /// Gets visible semidiameter of Neptunian moon, in seconds of arc 
@@ -45,23 +78,23 @@ namespace ADK
         /// </returns>
         public static double Semidiameter(double distance, int index)
         {
-            if (index == 1 || index == 2)
+            if (index == 1 || index == 2 || index == 3 || index == 4)
                 return ToDegrees(Atan(MOON_RADIUS[index - 1] / (distance * 149597870.0))) * 3600;
             else
                 throw new ArgumentException("Incorrect moon index", nameof(index));
         }
-  
+
         /// <summary>
         /// Absolute magnitudes
         /// </summary>
-        private static double[] MOON_MAGNIUDE = new double[] { -1.24, 4.0 };
+        private static double[] MOON_MAGNIUDE = new double[] { -1.24, 4.0, 4.0, -1.24 };
 
         public static float Magnitude(double Delta, double r, int index)
         {
-            if (index == 1 || index == 2)
+            if (index == 1 || index == 2 || index == 3 || index == 4)
                 return (float)(MOON_MAGNIUDE[index - 1] + 5 * Math.Log10(r * Delta));
             else
-                throw new ArgumentException("Incorrect moon index", nameof(index));            
+                throw new ArgumentException("Incorrect moon index", nameof(index));
         }
 
         /// <summary>
@@ -96,14 +129,14 @@ namespace ADK
             const double t0 = 2433282.5;     // 1.0 Jan 1950                
             const double a = 0.0023683;      // semimajor axis of Triton, in a.u.
 
-            const double n = 61.2588532;     // nodal mean motiom, degrees per day
+            const double n = 61.2588532;     // nodal mean motion, degrees per day
             const double lambda0 = 200.913;  // longitude from ascending node through the invariable plane at epoch
             const double i = 158.996;        // inclination of orbit to the invariable plane
 
             const double Omega0 = 151.401;   // angle from the intersection of invariable plane with the earth's 
                                              // equatorial plane of 1950.0 to the ascending node 
                                              // of the orbit through the invariable plane
-            
+
             const double OmegaDot = 0.57806; // nodal precision rate, degrees per year
 
             // Calculate J2000.0 RA and Declination of the pole of the invariable plane
@@ -113,7 +146,7 @@ namespace ADK
             // Chapter 6 "Orbital Ephemerides and Rings of Satellites", page 373, 6.61-1 Triton
             double T = (jd - 2451545.0) / 36525.0;
             double N = ToRadians(359.28 + 54.308 * T);
-            double ap = 298.72 + 2.58 * Sin(N) - 0.04 * Sin(2 * N); 
+            double ap = 298.72 + 2.58 * Sin(N) - 0.04 * Sin(2 * N);
             double dp = 42.63 - 1.90 * Cos(N) + 0.01 * Cos(2 * N);
 
             // Convert pole coordinates to J1950
@@ -128,12 +161,12 @@ namespace ADK
             double omega = Omega0 + OmegaDot * (jd - t0 - tau) / 365.25;
 
             // cartesian state vector of Triton
-            var r = 
-                Matrix.R3(ToRadians(-ap - 90)) * 
-                Matrix.R1(ToRadians(dp - 90)) * 
-                Matrix.R3(ToRadians(-omega)) * 
-                Matrix.R1(ToRadians(-i)) * 
-                new Matrix(new [,] { { a * Cos(ToRadians(lambda)) }, { a * Sin(ToRadians(lambda)) }, { 0 } });
+            var r =
+                Matrix.R3(ToRadians(-ap - 90)) *
+                Matrix.R1(ToRadians(dp - 90)) *
+                Matrix.R3(ToRadians(-omega)) *
+                Matrix.R1(ToRadians(-i)) *
+                new Matrix(new[,] { { a * Cos(ToRadians(lambda)) }, { a * Sin(ToRadians(lambda)) }, { 0 } });
 
             // normalize by distance to Neptune
             r.Values[0, 0] /= neptune.Distance;
@@ -141,9 +174,9 @@ namespace ADK
             r.Values[2, 0] /= neptune.Distance;
 
             // offsets vector
-            var d = 
-                Matrix.R2(ToRadians(-eqNeptune1950.Delta)) * 
-                Matrix.R3(ToRadians(eqNeptune1950.Alpha)) * 
+            var d =
+                Matrix.R2(ToRadians(-eqNeptune1950.Delta)) *
+                Matrix.R3(ToRadians(eqNeptune1950.Alpha)) *
                 r;
 
             // radial component, positive away from observer
@@ -219,7 +252,7 @@ namespace ADK
             const double i0 = 10.041;           // Inclination of the orbit for jd0 epoch, in degrees
             const double Omega0 = 329.3;        // Longitude of the node of the orbit for jd0 epoch, in degrees
             const double M0 = 358.91;           // Mean anomaly for jd0 epoch, in degrees
-            const double n =  360.0 / 360.1362; // Mean motion, in degrees per day
+            const double n = 360.0 / 360.1362; // Mean motion, in degrees per day
             const double OmegaN = 3.552;        // Longitude of ascending node of the orbit of Neptune, for J1950.0 epoch, in degrees
             const double gamma = 22.313;        // Inclination of the orbit of Neptune, for J1950.0 epoch, in degrees
 
@@ -294,6 +327,88 @@ namespace ADK
             eclNereid.Distance = neptune.Distance + x / theta * a;
 
             return eclNereid;
+        }
+
+        class Orbit
+        {
+            public double jd0 { get; set; }
+            public double M0 { get; set; }
+            public double n { get; set; }
+            public double e { get; set; }
+            public double a { get; set; }
+            public double i { get; set; }
+            public double omega0 { get; set; }
+            public double Pw { get; set; }
+            public double Pnode { get; set; }
+            public double node0 { get; set; }
+            public double RA { get; set; }
+            public double Dec { get; set; }
+        }
+
+        private static CrdsEcliptical GenericPosition(double jd, Orbit orbit, CrdsEcliptical neptune)
+        {
+            NutationElements ne = Nutation.NutationElements(jd);
+            double epsilon = Date.TrueObliquity(jd, ne.deltaEpsilon);
+
+            // convert current coordinates to epoch, as algorithm requires
+            CrdsEquatorial eq = neptune.ToEquatorial(epsilon);
+            PrecessionalElements peEpoch = Precession.ElementsFK5(jd, orbit.jd0);
+            CrdsEquatorial eqNeptuneEpoch = Precession.GetEquatorialCoordinates(eq, peEpoch);
+
+            // take light-time effect into account
+            double tau = PlanetPositions.LightTimeEffect(neptune.Distance);
+
+            double t = (jd - tau - orbit.jd0);
+
+            double M = To360(orbit.M0 + orbit.n * t);
+
+            double omega = To360(orbit.omega0 + t * 360.0 / orbit.Pw);
+            double node = To360(orbit.node0 + t * 360.0 / orbit.Pnode);
+
+            // Find eccentric anomaly by solving Kepler equation
+            double E = SolveKepler(M, orbit.e);
+
+            double X = orbit.a * (Cos(E) - orbit.e);
+            double Y = orbit.a * Sqrt(1 - orbit.e * orbit.e) * Sin(E);
+
+            // cartesian state vector of satellite
+            var d =
+                Matrix.R2(ToRadians(-eqNeptuneEpoch.Delta)) *
+                Matrix.R3(ToRadians(eqNeptuneEpoch.Alpha)) *
+                Matrix.R3(ToRadians(-orbit.RA - 90)) *
+                Matrix.R1(ToRadians(orbit.Dec - 90)) *
+                Matrix.R3(ToRadians(-node)) *
+                Matrix.R1(ToRadians(-orbit.i)) *
+                Matrix.R3(ToRadians(-omega)) *
+                new Matrix(new double[,] { { X / neptune.Distance }, { Y / neptune.Distance }, { 0 } });
+
+            // radial component, positive away from observer
+            // converted to degrees
+            double x = ToDegrees(d.Values[0, 0]);
+
+            // semimajor axis, expressed in degrees, as visible from Earth
+            double theta = ToDegrees(Atan(orbit.a / neptune.Distance));
+
+            // offsets values in degrees           
+            double dAlphaCosDelta = ToDegrees(d.Values[1, 0]);
+            double dDelta = ToDegrees(d.Values[2, 0]);
+
+            double delta = eqNeptuneEpoch.Delta + dDelta;
+            double dAlpha = dAlphaCosDelta / Cos(ToRadians(eqNeptuneEpoch.Delta));
+            double alpha = eqNeptuneEpoch.Alpha + dAlpha;
+
+            CrdsEquatorial eqSatelliteEpoch = new CrdsEquatorial(alpha, delta);
+
+            // convert jd0 equatorial coordinates to current epoch
+            // and to ecliptical
+            PrecessionalElements pe = Precession.ElementsFK5(orbit.jd0, jd);
+            CrdsEquatorial eqSatellite = Precession.GetEquatorialCoordinates(eqSatelliteEpoch, pe);
+            CrdsEcliptical eclSatellite = eqSatellite.ToEcliptical(epsilon);
+
+            // calculate distance to Earth
+            eclSatellite.Distance = neptune.Distance + x / theta * orbit.a;
+
+            return eclSatellite;
         }
 
         /// <summary>
