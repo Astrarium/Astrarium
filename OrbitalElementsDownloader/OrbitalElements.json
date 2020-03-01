@@ -1,0 +1,56 @@
+﻿[
+  {
+    "names": {
+      "en": "Naiad"
+    },
+    "satellite": 3,
+    "planet": 8,
+    "Pw": 0.289,
+    "Pnode": 0.575
+  },
+  {
+    "names": {
+      "en": "Thalassa"
+    },
+    "satellite": 4,
+    "planet": 8,
+    "Pw": 0.327,
+    "Pnode": 0.654
+  },
+  {
+    "names": {
+      "en": "Despina"
+    },
+    "satellite": 5,
+    "planet": 8,
+    "Pw": 0.387,
+    "Pnode": 0.774
+  },
+  {
+    "names": {
+      "en": "Galatea"
+    },
+    "satellite": 6,
+    "planet": 8,
+	"Pw": 0.690,
+    "Pnode": 1.380
+  },
+  {
+    "names": {
+      "en": "Larissa"
+    },
+    "satellite": 7,
+    "planet": 8,
+	"Pw": 1.257,
+	"Pnode": 2.516
+  },
+  {
+    "names": {
+      "en": "Proteus"
+    },
+    "satellite": 8,
+    "planet": 8,
+	"Pw": 6.380,
+	"Pnode": 12.727
+  }
+]

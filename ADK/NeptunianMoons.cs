@@ -35,7 +35,7 @@ namespace ADK
             // https://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&COMMAND='802'&CENTER='500@899'&MAKE_EPHEM='YES'&TABLE_TYPE='ELEMENTS'&START_TIME='2020-02-01'&STOP_TIME='2020-02-02'&STEP_SIZE='2 d'&OUT_UNITS='AU-D'&REF_PLANE='ECLIPTIC'&REF_SYSTEM='J2000'&TP_TYPE='ABSOLUTE'&CSV_FORMAT='YES'&OBJ_DATA='YES'
 
             // Nereid, ecliptical plane
-            return GenericPosition(jd, new Orbit()
+            return GenericSatellite.Position(jd, new GenericSatelliteOrbit()
                 {
                     jd0 = 2458880.500000000, // = A.D. 2020 - Feb - 01 00:00:00.0000 TDB
                     M0 = 3.494900228078851E+02, // Mean anomaly (mean value) 
@@ -102,7 +102,7 @@ namespace ADK
 
 
 
-                return GenericPosition(jd, new Orbit()
+                return GenericSatellite.Position(jd, new GenericSatelliteOrbit()
                 {
                     jd0 = 2458880.500000000, // = A.D. 2020 - Feb - 01 00:00:00.0000 TDB
                     M0 = 1.436799437841057E+01, // Mean anomaly (mean value) 
@@ -137,7 +137,7 @@ namespace ADK
 
                 Display/Output [change] : 	plain text 
                 */
-                return GenericPosition(jd, new Orbit()
+                return GenericSatellite.Position(jd, new GenericSatelliteOrbit()
                 {
                     jd0 = 2458880.500000000, // = A.D. 2020 - Feb - 01 00:00:00.0000 TDB
                     M0 = 1.996144109815055E+02, // Mean anomaly (mean value) 
@@ -431,130 +431,6 @@ namespace ADK
             return eclNereid;
         }
 
-        class Orbit
-        {
-            /// <summary>
-            /// Orbital elements epoch
-            /// </summary>
-            public double jd0 { get; set; }
-
-            /// <summary>
-            /// Mean anomaly at epoch, degrees
-            /// </summary>
-            public double M0 { get; set; }
-
-            /// <summary>
-            /// Mean motion, degrees/day  
-            /// </summary>
-            public double n { get; set; }
-
-            /// <summary>
-            /// Eccentricity
-            /// </summary>
-            public double e { get; set; }
-
-            /// <summary>
-            /// Semi-major axis, au
-            /// </summary>
-            public double a { get; set; }
-
-            /// <summary>
-            /// Inclination w.r.t XY-plane, degrees
-            /// </summary>
-            public double i { get; set; }
-
-            /// <summary>
-            /// Argument of perifocus, degrees
-            /// </summary>
-            public double omega0 { get; set; }
-
-            /// <summary>
-            /// Longitude of Ascending Node, degrees
-            /// </summary>
-            public double node0 { get; set; }
-
-            /// <summary>
-            /// Argument of periapsis precession period (mean value), years
-            /// From https://ssd.jpl.nasa.gov/?sat_elem
-            /// </summary>
-            public double Pw { get; set; }
-
-            /// <summary>
-            /// Longitude of the ascending node precession period (mean value), years
-            /// From https://ssd.jpl.nasa.gov/?sat_elem
-            /// </summary>
-            public double Pnode { get; set; }
-        }
-
-        private static CrdsEcliptical GenericPosition(double jd, Orbit orbit, CrdsEcliptical neptune)
-        {
-            NutationElements ne = Nutation.NutationElements(jd);
-            double epsilon = Date.TrueObliquity(jd, ne.deltaEpsilon);
-
-            // convert current coordinates to epoch, as algorithm requires
-            CrdsEquatorial eq = neptune.ToEquatorial(epsilon);
-            PrecessionalElements peEpoch = Precession.ElementsFK5(jd, Date.EPOCH_J2000);
-            CrdsEquatorial eqNeptuneEpoch = Precession.GetEquatorialCoordinates(eq, peEpoch);
-
-            // take light-time effect into account
-            double tau = PlanetPositions.LightTimeEffect(neptune.Distance);
-
-            double t = (jd - tau - orbit.jd0);
-
-            double M = To360(orbit.M0 + orbit.n * t);
-
-            double omega = To360(orbit.omega0 + t * 360.0 / orbit.Pw);
-            double node = To360(orbit.node0 + t * 360.0 / orbit.Pnode);
-
-            // Find eccentric anomaly by solving Kepler equation
-            double E = SolveKepler(M, orbit.e);
-
-            double X = orbit.a * (Cos(E) - orbit.e);
-            double Y = orbit.a * Sqrt(1 - orbit.e * orbit.e) * Sin(E);
-
-            // ecliptical pole
-            CrdsEquatorial pole = new CrdsEcliptical(0, 90).ToEquatorial(epsilon);
-
-            // cartesian state vector of satellite
-            var d =
-                Matrix.R2(ToRadians(-eqNeptuneEpoch.Delta)) *
-                Matrix.R3(ToRadians(eqNeptuneEpoch.Alpha)) *
-                Matrix.R3(ToRadians(-pole.Alpha - 90)) *
-                Matrix.R1(ToRadians(pole.Delta - 90)) *
-                Matrix.R3(ToRadians(-node)) *
-                Matrix.R1(ToRadians(-orbit.i)) *
-                Matrix.R3(ToRadians(-omega)) *
-                new Matrix(new double[,] { { X / neptune.Distance }, { Y / neptune.Distance }, { 0 } });
-
-            // radial component, positive away from observer
-            // converted to degrees
-            double x = ToDegrees(d.Values[0, 0]);
-
-            // semimajor axis, expressed in degrees, as visible from Earth
-            double theta = ToDegrees(Atan(orbit.a / neptune.Distance));
-
-            // offsets values in degrees           
-            double dAlphaCosDelta = ToDegrees(d.Values[1, 0]);
-            double dDelta = ToDegrees(d.Values[2, 0]);
-
-            double delta = eqNeptuneEpoch.Delta + dDelta;
-            double dAlpha = dAlphaCosDelta / Cos(ToRadians(eqNeptuneEpoch.Delta));
-            double alpha = eqNeptuneEpoch.Alpha + dAlpha;
-
-            CrdsEquatorial eqSatelliteEpoch = new CrdsEquatorial(alpha, delta);
-
-            // convert jd0 equatorial coordinates to current epoch
-            // and to ecliptical
-            PrecessionalElements pe = Precession.ElementsFK5(Date.EPOCH_J2000, jd);
-            CrdsEquatorial eqSatellite = Precession.GetEquatorialCoordinates(eqSatelliteEpoch, pe);
-            CrdsEcliptical eclSatellite = eqSatellite.ToEcliptical(epsilon);
-
-            // calculate distance to Earth
-            eclSatellite.Distance = neptune.Distance + x / theta * orbit.a;
-
-            return eclSatellite;
-        }
-
         /// <summary>
         /// Solves Kepler equation
         /// </summary>
@@ -574,7 +450,6 @@ namespace ADK
             } while (Abs(E1 - E0) >= 1e-9);
             return E1;
         }
-
 
         private class SatellitePositionData
         {
@@ -684,116 +559,6 @@ namespace ADK
                 }
             }
             return (a + b) / 2;
-        }
-
-        /// <summary>
-        /// Helper class to perform basic matrix operations
-        /// </summary>
-        /// <remarks>
-        /// See info about rotation matrix: https://www.astro.rug.nl/software/kapteyn/celestialbackground.html
-        /// </remarks>
-        private class Matrix
-        {
-            /// <summary>
-            /// Matrix values
-            /// </summary>
-            public double[,] Values { get; private set; }
-
-            /// <summary>
-            /// Creates new matrix from two-dimensional double array
-            /// </summary>
-            /// <param name="values"></param>
-            public Matrix(double[,] values)
-            {
-                Values = values;
-            }
-
-            /// <summary>
-            /// Multiplies two matrices
-            /// </summary>
-            /// <param name="A">Left operand</param>
-            /// <param name="B">right operand</param>
-            /// <returns>New matrix as a multiplication of left and right operands</returns>
-            public static Matrix operator *(Matrix A, Matrix B)
-            {
-                int rA = A.Values.GetLength(0);
-                int cA = A.Values.GetLength(1);
-                int rB = B.Values.GetLength(0);
-                int cB = B.Values.GetLength(1);
-                double temp = 0;
-                double[,] r = new double[rA, cB];
-                if (cA != rB)
-                {
-                    throw new ArgumentException("Unable to multiply matrices");
-                }
-                else
-                {
-                    for (int i = 0; i < rA; i++)
-                    {
-                        for (int j = 0; j < cB; j++)
-                        {
-                            temp = 0;
-                            for (int k = 0; k < cA; k++)
-                            {
-                                temp += A.Values[i, k] * B.Values[k, j];
-                            }
-                            r[i, j] = temp;
-                        }
-                    }
-                    return new Matrix(r);
-                }
-            }
-
-            /// <summary>
-            /// Gets R1(a) rotation matrix 
-            /// </summary>
-            /// <param name="a">Angle of rotation, in radians</param>
-            /// <returns>
-            /// R1(a) rotation matrix
-            /// </returns>
-            public static Matrix R1(double a)
-            {
-                return new Matrix(
-                    new double[3, 3] {
-                        { 1, 0, 0 },
-                        { 0, Cos(a), Sin(a) },
-                        { 0, -Sin(a), Cos(a) }
-                    });
-            }
-
-            /// <summary>
-            /// Gets R2(a) rotation matrix 
-            /// </summary>
-            /// <param name="a">Angle of rotation, in radians</param>
-            /// <returns>
-            /// R2(a) rotation matrix
-            /// </returns>
-            public static Matrix R2(double a)
-            {
-                return new Matrix(
-                    new double[3, 3] {
-                        { Cos(a), 0, -Sin(a) },
-                        { 0, 1, 0 },
-                        { Sin(a), 0, Cos(a) }
-                    });
-            }
-
-            /// <summary>
-            /// Gets R3(a) rotation matrix 
-            /// </summary>
-            /// <param name="a">Angle of rotation, in radians</param>
-            /// <returns>
-            /// R3(a) rotation matrix
-            /// </returns>
-            public static Matrix R3(double a)
-            {
-                return new Matrix(
-                    new double[3, 3] {
-                        { Cos(a), Sin(a), 0 },
-                        { -Sin(a), Cos(a), 0 },
-                        { 0, 0, 1 }
-                    });
-            }
         }
     }
 }
