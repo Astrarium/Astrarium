@@ -1,7 +1,31 @@
 ﻿[
+
+  /* Satellites of Jupiter */
+
   {
     "names": {
-      "en": "Naiad"
+      "en": "Io JPL"
+    },
+    "satellite": 1,
+    "planet": 5,
+    "Pw": 1.625,
+    "Pnode": 7.420
+  },
+  {
+    "names": {
+      "en": "Europa JPL"
+    },
+    "satellite": 1,
+    "planet": 5,
+    "Pw": 1.394,
+    "Pnode": 30.184
+  },
+
+
+  {
+    "names": {
+      "en": "Naiad",
+      "ru": "Наяда"
     },
     "satellite": 3,
     "planet": 8,
@@ -10,7 +34,8 @@
   },
   {
     "names": {
-      "en": "Thalassa"
+      "en": "Thalassa",
+      "ru": "Таласса"
     },
     "satellite": 4,
     "planet": 8,
@@ -19,7 +44,8 @@
   },
   {
     "names": {
-      "en": "Despina"
+      "en": "Despina",
+      "ru": "Деспина"
     },
     "satellite": 5,
     "planet": 8,
@@ -28,29 +54,32 @@
   },
   {
     "names": {
-      "en": "Galatea"
+      "en": "Galatea",
+      "ru": "Галатея"
     },
     "satellite": 6,
     "planet": 8,
-	"Pw": 0.690,
+    "Pw": 0.690,
     "Pnode": 1.380
   },
   {
     "names": {
-      "en": "Larissa"
+      "en": "Larissa",
+      "ru": "Ларисса"
     },
     "satellite": 7,
     "planet": 8,
-	"Pw": 1.257,
-	"Pnode": 2.516
+    "Pw": 1.257,
+    "Pnode": 2.516
   },
   {
     "names": {
-      "en": "Proteus"
+      "en": "Proteus",
+      "ru": "Протей"
     },
     "satellite": 8,
     "planet": 8,
-	"Pw": 6.380,
-	"Pnode": 12.727
+    "Pw": 6.380,
+    "Pnode": 12.727
   }
 ]

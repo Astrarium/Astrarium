@@ -22,143 +22,10 @@ namespace ADK
         /// <returns></returns>
         public static CrdsEcliptical Position(double jd, CrdsEcliptical neptune, int index)
         {
-            double epsilon = Date.MeanObliquity(jd);
-            CrdsEquatorial eq = new CrdsEcliptical(0, 90).ToEquatorial(epsilon);
-
             if (index == 1)
                 return TritonPosition(jd, neptune);
             else if (index == 2)
                 return NereidPosition(jd, neptune);
-            else if (index == 3)
-
-            // Sample request for NASA JPL Horizons:
-            // https://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&COMMAND='802'&CENTER='500@899'&MAKE_EPHEM='YES'&TABLE_TYPE='ELEMENTS'&START_TIME='2020-02-01'&STOP_TIME='2020-02-02'&STEP_SIZE='2 d'&OUT_UNITS='AU-D'&REF_PLANE='ECLIPTIC'&REF_SYSTEM='J2000'&TP_TYPE='ABSOLUTE'&CSV_FORMAT='YES'&OBJ_DATA='YES'
-
-            // Nereid, ecliptical plane
-            return GenericSatellite.Position(jd, new GenericSatelliteOrbit()
-                {
-                    jd0 = 2458880.500000000, // = A.D. 2020 - Feb - 01 00:00:00.0000 TDB
-                    M0 = 3.494900228078851E+02, // Mean anomaly (mean value) 
-                    n = 9.959605978733523E-01, // Longitude rate(mean value)
-                    e = 7.456407980998859E-01, // 	Eccentricity (mean value)
-                    a = 3.694755294409791E-02,
-                    i = 5.065310902937719E+00,
-                    omega0 = 2.966067788105880E+02,
-                    node0 = 3.196007803495440E+02, 
-
-
-                    Pw = 8091.45 * 365.25,
-                    Pnode = 9455.73 * 365.25,
-                }, neptune);
-
-            else if (index == 4)
-            {
-                //// Triton. this works
-                ///*
-                //Ephemeris Type [change] : 	ELEMENTS
-                //Target Body [change] : 	Triton (NI) [801]
-                //Center [change] : 	Neptune (body center) [500@899]
-                //Time Span [change] : 	Start=2020-02-26, Stop=2020-02-27, Step=1 d
-                //Table Settings [change] : 	reference plane=BODY EQUATOR
-                //                            reference plane :body mean equator and node of date
-                //                            reference system: ICRF/J2000.0
-                //                            TP type: absolute
-                //Display/Output [change] : 	plain text
-                // */
-
-                //return GenericPosition(jd, new Orbit()
-                //{
-                //    epoch = Date.EPOCH_J2000, // Reference plane epoch
-                //    jd0 = 2458905.500000000, // 2458905.500000000 = A.D. 2020-Feb-26 00:00:00.0000 TDB 
-                //    M0 = 7.601340053048488, // Mean anomaly (mean value) 
-                //    n = 6.125501503540979E+01, // Longitude rate(mean value)
-                //    e = 1.434252567539511E-05, // 	Eccentricity (mean value)
-                //    a = 2.371462440229666E-03, // Semimajor axis, in a.u.
-                //    i = 1.568078930495086E+02, // inclination w.r.t XY-plane (degrees)
-                //    omega0 = 2.256026385336725E+02, // Argument of Perifocus (degrees)                    
-                //    node0 = 1.883768954266065E+02, // Longitude of Ascending Node, in degrees
-
-                //    // from https://ssd.jpl.nasa.gov/?sat_elem
-                //    Pw = 386.371 * 365.25, //  Argument of periapsis precession period (mean value)
-                //    Pnode = 687.446 * 365.25, // Longitude of the ascending node precession period(mean value)
-                //    RA = 299.456, // Right ascension and ...
-                //    Dec = 43.414 // Declination of the Laplace plane pole with respect to the ICRF.
-                //}, neptune);
-
-
-                // Triton. This also works
-                // (ecliptical plane is used)
-                /*
-                Ephemeris Type [change] : 	ELEMENTS
-                Target Body [change] : 	Triton (NI) [801]
-                Center [change] : 	Neptune (body center) [500@899]
-                Time Span [change] : 	Start=2020-02-26, Stop=2020-02-27, Step=1 d
-                Table Settings [change] : 	reference plane=BODY EQUATOR
-                                            reference plane : ecliptic and mean equinox of reference epoch
-                                            reference system: ICRF/J2000.0
-                                            TP type: absolute
-                Display/Output [change] : 	plain text
-                 */
-
-
-
-                return GenericSatellite.Position(jd, new GenericSatelliteOrbit()
-                {
-                    jd0 = 2458880.500000000, // = A.D. 2020 - Feb - 01 00:00:00.0000 TDB
-                    M0 = 1.436799437841057E+01, // Mean anomaly (mean value) 
-                    n = 6.125483834432863E+01, // Longitude rate(mean value)
-                    e = 2.482410002230766E-05, // 	Eccentricity (mean value)
-                    a = 2.371467000588459E-03, // Semimajor axis, in a.u.
-                    i = 1.293222253304781E+02, // inclination w.r.t XY-plane (degrees)
-                    omega0 = 1.371144230594285E+02, // Argument of Perifocus (degrees)                    
-                    node0 = 2.210794005845409E+02, // Longitude of Ascending Node, in degrees
-
-                    // from https://ssd.jpl.nasa.gov/?sat_elem
-                    Pw = 386.371 * 365.25, //  Argument of periapsis precession period (mean value)
-                    Pnode = 687.446 * 365.25, // Longitude of the ascending node precession period(mean value)
-                }, neptune);
-
-            }
-
-            // Sao
-            else if (index == 5)
-            {
-
-
-                // This works
-
-                /*
-                Ephemeris Type [change] : 	ELEMENTS
-                Target Body [change] : 	Sao (2002N2) [811]
-                Center [change] : 	Neptune (body center) [500@899]
-                Time Span [change] : 	Start=2020-02-01, Stop=2020-03-21, Step=1 d
-                Table Settings [change] : 	
-                                     reference plane : ecliptic and mean equinox of reference epoch
-
-                Display/Output [change] : 	plain text 
-                */
-                return GenericSatellite.Position(jd, new GenericSatelliteOrbit()
-                {
-                    jd0 = 2458880.500000000, // = A.D. 2020 - Feb - 01 00:00:00.0000 TDB
-                    M0 = 1.996144109815055E+02, // Mean anomaly (mean value) 
-                    n = 1.230714845743210E-01, // Longitude rate(mean value)
-                    e = 1.335775826732659E-01, // 	Eccentricity (mean value)
-                    a = 1.489277032908810E-01, // Semimajor axis, in a.u.
-                    i = 5.265635714761137E+01, // inclination w.r.t XY-plane (degrees)
-                    omega0 = 6.476950956637903E+01, // Argument of Perifocus (degrees)                    
-                    node0 = 6.021474467002238E+01, // Longitude of Ascending Node, in degrees
-
-                    // from https://ssd.jpl.nasa.gov/?sat_elem
-                    Pw = 436880.78 * 365.25, //  Argument of periapsis precession period (mean value)
-                    Pnode = 5382.39 * 365.25, // Longitude of the ascending node precession period(mean value)
-                }, neptune);
-            }
-            else if (index == 6)
-            {
-                return SatellitePositionJPL(jd, neptune);
-            }
-
-
             else
                 throw new ArgumentException("Incorrect moon index", nameof(index));
         }
@@ -166,7 +33,7 @@ namespace ADK
         /// <summary>
         /// Moon mean radius, in km
         /// </summary>
-        private static double[] MOON_RADIUS = new double[] { 1354.0, 170.0, 170.0, 1354.0 };
+        private static double[] MOON_RADIUS = new double[] { 1354.0, 170.0 };
 
         /// <summary>
         /// Gets visible semidiameter of Neptunian moon, in seconds of arc 
@@ -178,25 +45,23 @@ namespace ADK
         /// </returns>
         public static double Semidiameter(double distance, int index)
         {
-            if (index == 1 || index == 2 || index == 3 || index == 4)
+            if (index == 1 || index == 2)
                 return ToDegrees(Atan(MOON_RADIUS[index - 1] / (distance * 149597870.0))) * 3600;
             else
-                return 1;
-                //throw new ArgumentException("Incorrect moon index", nameof(index));
+                throw new ArgumentException("Incorrect moon index", nameof(index));
         }
 
         /// <summary>
         /// Absolute magnitudes
         /// </summary>
-        private static double[] MOON_MAGNIUDE = new double[] { -1.24, 4.0, 4.0, -1.24 };
+        private static double[] MOON_MAGNIUDE = new double[] { -1.24, 4.0 };
 
         public static float Magnitude(double Delta, double r, int index)
         {
-            if (index == 1 || index == 2 || index == 3 || index == 4)
+            if (index == 1 || index == 2)
                 return (float)(MOON_MAGNIUDE[index - 1] + 5 * Math.Log10(r * Delta));
             else
-                return 1;//
-                //throw new ArgumentException("Incorrect moon index", nameof(index));
+                throw new ArgumentException("Incorrect moon index", nameof(index));
         }
 
         /// <summary>
@@ -449,89 +314,6 @@ namespace ADK
                 E1 = M_ + e * Sin(E0);
             } while (Abs(E1 - E0) >= 1e-9);
             return E1;
-        }
-
-        private class SatellitePositionData
-        {
-            public double Jd { get; set; }
-            public double X { get; set; }
-            public double Y { get; set; }
-        }
-
-        private static List<SatellitePositionData> SatellitePositions = new List<SatellitePositionData>();
-
-        private static void LoadJPLData()
-        {
-            if (IsInitialized) return;
-
-            string line = "";
-
-            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"ADK.Data.Satellite.txt"))
-            using (var sr = new StreamReader(stream))
-            {
-                while (line != null && !sr.EndOfStream)
-                {
-                    line = sr.ReadLine();
-
-                    double jd = double.Parse(line.Substring(19, 17), CultureInfo.InvariantCulture);
-                    double X = double.Parse(line.Substring(40, 10), CultureInfo.InvariantCulture);
-                    double Y = double.Parse(line.Substring(49, 10), CultureInfo.InvariantCulture);
-
-                    SatellitePositionData pd = new SatellitePositionData()
-                    {
-                        Jd = jd,
-                        X = X,
-                        Y = Y
-                    };
-
-                    SatellitePositions.Add(pd);
-                }
-            }
-
-            IsInitialized = true;
-        }
-
-        private static bool IsInitialized = false;
-
-        private static CrdsEcliptical SatellitePositionJPL(double jd, CrdsEcliptical planet)
-        {
-            LoadJPLData();
-
-            var pos0 = SatellitePositions.LastOrDefault(np => np.Jd < jd);
-            var pos1 = SatellitePositions.FirstOrDefault(np => np.Jd >= jd);
-
-            if (pos0 != null && pos1 != null)
-            {
-                NutationElements ne = Nutation.NutationElements(jd);
-                double epsilon = Date.TrueObliquity(jd, ne.deltaEpsilon);
-
-                double dt = pos1.Jd - pos0.Jd;
-                double x = pos0.X + (jd - pos0.Jd) / dt * (pos1.X - pos0.X);
-                double y = pos0.Y + (jd - pos0.Jd) / dt * (pos1.Y - pos0.Y);
-
-                CrdsEquatorial eqPlanet = planet.ToEquatorial(epsilon);
-
-
-                // offsets values in degrees           
-                double dAlphaCosDelta = x / 3600;
-                double dDelta = y / 3600;
-
-                double delta = eqPlanet.Delta + dDelta;
-                double dAlpha = dAlphaCosDelta / Cos(ToRadians(eqPlanet.Delta));
-                double alpha = eqPlanet.Alpha + dAlpha;
-
-                var eqSatellite = new CrdsEquatorial(alpha, delta);
-
-                CrdsEcliptical eclSatellite = eqSatellite.ToEcliptical(epsilon);
-                eclSatellite.Distance = planet.Distance;
-
-                return eclSatellite;
-            }
-
-            return null;
-
-
-
         }
 
         /// <summary>

@@ -93,6 +93,7 @@ namespace Planetarium.Plugins.SolarSystem
                 .Concat(planetsCalc.SaturnMoons)
                 .Concat(planetsCalc.UranusMoons)
                 .Concat(planetsCalc.NeptuneMoons)
+                .Concat(planetsCalc.GenericMoons)
                 .OrderByDescending(body => body.DistanceFromEarth)
                 .ToArray();
 
@@ -123,6 +124,10 @@ namespace Planetarium.Plugins.SolarSystem
                 else if (body is NeptuneMoon nm)
                 {
                     RenderPlanetMoon(map, planetsCalc.Planets.ElementAt(Planet.NEPTUNE - 1), nm, hasTexture: false);
+                }
+                else if (body is GenericMoon gm)
+                {
+                    RenderPlanetMoon(map, planetsCalc.Planets.ElementAt(gm.Data.planet - 1), gm, hasTexture: false);
                 }
                 else if (body is Sun)
                 {
@@ -741,7 +746,7 @@ namespace Planetarium.Plugins.SolarSystem
                 PointF p = map.Project(moon.Horizontal);
                 PointF pPlanet = map.Project(planet.Horizontal);
 
-                float size = map.GetPointSize(moon.Magnitude, 2);
+                float size = 1; // map.GetPointSize(moon.Magnitude, 2);
                 float diam = map.GetDiskSize(moon.Semidiameter);
 
                 // diameter is to small to render moon disk, 

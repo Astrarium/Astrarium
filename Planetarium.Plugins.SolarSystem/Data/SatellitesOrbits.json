@@ -1,0 +1,108 @@
+﻿[
+  /* Satellites of Jupiter */
+  {
+    "names": {
+      "en": "Amalthea",
+      "ru": "Амальтея"
+    },
+    "satellite": 5,
+    "planet": 5,
+    "Pw": 0.196,
+    "Pnode": 0.393
+  },
+
+  {
+    "names": {
+      "en": "Himalia",
+      "ru": "Гималия"
+    },
+    "satellite": 6,
+    "planet": 5,
+    "Pw": 139.38,
+    "Pnode": 292.57
+  },
+  {
+    "names": {
+      "en": "Himalia JPL",
+      "ru": "Гималия JPL"
+    },
+    "jpl": true,
+    "satellite": 6,
+    "planet": 5,
+    "Pw": 139.38,
+    "Pnode": 292.57
+  },
+
+  /* Satellites of Neptune */
+  {
+    "names": {
+      "en": "Naiad",
+      "ru": "Наяда"
+    },
+    "satellite": 3,
+    "planet": 8,
+    "Pw": 0.289,
+    "Pnode": 0.575
+  },
+  {
+    "names": {
+      "en": "Naiad JPL",
+      "ru": "Наяда JPL"
+    },
+    "jpl":  true,
+    "satellite": 3,
+    "planet": 8,
+    "Pw": 0.289,
+    "Pnode": 0.575
+  },
+  {
+    "names": {
+      "en": "Thalassa",
+      "ru": "Таласса"
+    },
+    "satellite": 4,
+    "planet": 8,
+    "Pw": 0.327,
+    "Pnode": 0.654
+  },
+  {
+    "names": {
+      "en": "Despina",
+      "ru": "Деспина"
+    },
+    "satellite": 5,
+    "planet": 8,
+    "Pw": 0.387,
+    "Pnode": 0.774
+  },
+  {
+    "names": {
+      "en": "Galatea",
+      "ru": "Галатея"
+    },
+    "satellite": 6,
+    "planet": 8,
+    "Pw": 0.690,
+    "Pnode": 1.380
+  },
+  {
+    "names": {
+      "en": "Larissa",
+      "ru": "Ларисса"
+    },
+    "satellite": 7,
+    "planet": 8,
+    "Pw": 1.257,
+    "Pnode": 2.516
+  },
+  {
+    "names": {
+      "en": "Proteus",
+      "ru": "Протей"
+    },
+    "satellite": 8,
+    "planet": 8,
+    "Pw": 6.380,
+    "Pnode": 12.727
+  }
+]

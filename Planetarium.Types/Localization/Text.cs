@@ -43,6 +43,15 @@ namespace Planetarium.Types.Localization
                 return $"{{{key}}}";
         }
 
+        public static string Get(IDictionary<string, string> localizations)
+        {
+            string key = localizations.Keys.FirstOrDefault(k => k == currentCulture.Name);
+            if (!string.IsNullOrEmpty(key))
+                return localizations[key];
+            else
+                return localizations.First().Value;
+        }
+
         public static string FileName { get; set; } = "Translation";
         public static string FileExtension { get; set; } = "txt";
         public static string DefaultLanguage { get; set; } = "en";

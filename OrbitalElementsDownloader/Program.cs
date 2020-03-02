@@ -165,7 +165,7 @@ namespace OrbitalElementsDownloader
             {
                 radiusLine = radiusLine.Substring(radiusLine.IndexOf("Radius"));
                 List<string> radiusItems = radiusLine.Split(new[] { '=' }, StringSplitOptions.RemoveEmptyEntries).Select(item => item.Trim()).ToList();
-                string radius = radiusItems.ElementAt(1).Split(' ').First();
+                string radius = radiusItems.ElementAt(1).Split(' ').First().Split('x').First();
                 orbit.radius = double.Parse(radius, CultureInfo.InvariantCulture);
             }
         }

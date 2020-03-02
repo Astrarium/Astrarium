@@ -1,4 +1,5 @@
 ﻿using ADK;
+using Newtonsoft.Json;
 using Planetarium.Config;
 using Planetarium.Objects;
 using Planetarium.Types;
@@ -7,7 +8,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace Planetarium.Plugins.SolarSystem
@@ -18,7 +21,8 @@ namespace Planetarium.Plugins.SolarSystem
         ICelestialObjectCalc<JupiterMoon>, 
         ICelestialObjectCalc<SaturnMoon>, 
         ICelestialObjectCalc<UranusMoon>,
-        ICelestialObjectCalc<NeptuneMoon>
+        ICelestialObjectCalc<NeptuneMoon>,
+        ICelestialObjectCalc<GenericMoon>
     {
         private ISettings settings;
         private Planet[] planets = new Planet[8];
@@ -26,14 +30,16 @@ namespace Planetarium.Plugins.SolarSystem
         private MarsMoon[] marsMoons = new MarsMoon[2];
         private SaturnMoon[] saturnMoons = new SaturnMoon[8];
         private UranusMoon[] uranusMoons = new UranusMoon[5];
-        private NeptuneMoon[] neptuneMoons = new NeptuneMoon[6];
+        private NeptuneMoon[] neptuneMoons = new NeptuneMoon[2];
+        private List<GenericMoon> genericMoons = new List<GenericMoon>();
 
-        public ICollection<Planet> Planets => planets;
-        public ICollection<MarsMoon> MarsMoons => marsMoons;
-        public ICollection<JupiterMoon> JupiterMoons => jupiterMoons;
-        public ICollection<SaturnMoon> SaturnMoons => saturnMoons;
-        public ICollection<UranusMoon> UranusMoons => uranusMoons;
-        public ICollection<NeptuneMoon> NeptuneMoons => neptuneMoons;
+        public IReadOnlyCollection<Planet> Planets => planets;
+        public IReadOnlyCollection<MarsMoon> MarsMoons => marsMoons;
+        public IReadOnlyCollection<JupiterMoon> JupiterMoons => jupiterMoons;
+        public IReadOnlyCollection<SaturnMoon> SaturnMoons => saturnMoons;
+        public IReadOnlyCollection<UranusMoon> UranusMoons => uranusMoons;
+        public IReadOnlyCollection<NeptuneMoon> NeptuneMoons => neptuneMoons;
+        public IReadOnlyCollection<GenericMoon> GenericMoons => genericMoons;
         public RingsAppearance SaturnRings { get; private set; } = new RingsAppearance();
         public double GreatRedSpotLongitude { get; private set; }
         public double MarsNPCWidth { get; private set; }
@@ -75,6 +81,25 @@ namespace Planetarium.Plugins.SolarSystem
             for (int i = 0; i < NeptuneMoons.Count; i++)
             {
                 neptuneMoons[i] = new NeptuneMoon(i + 1);
+            }
+
+            var orbits = new OrbitalElementsDownloader().Download();
+
+            /*
+            using (StreamReader file = File.OpenText(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/SatellitesOrbits.dat")))
+            {
+                JsonSerializer serializer = new JsonSerializer();
+                var orbits = (List<GenericMoonData>)serializer.Deserialize(file, typeof(List<GenericMoonData>));
+                foreach (var orbit in orbits)
+                {
+                    genericMoons.Add(new GenericMoon() { Data = orbit });
+                }
+            }
+            */
+
+            foreach (var orbit in orbits)
+            {
+                genericMoons.Add(new GenericMoon() { Data = orbit });
             }
 
             planets[Planet.JUPITER - 1].Flattening = 0.064874f;
@@ -171,9 +196,18 @@ namespace Planetarium.Plugins.SolarSystem
                         m.Equatorial = context.Get(NeptuneMoon_Equatorial, mn);
                         m.Horizontal = context.Get(NeptuneMoon_Horizontal, mn);
                         m.Semidiameter = context.Get(NeptuneMoon_Semidiameter, mn);
-                        m.Magnitude = 1;// context.Get(NeptuneMoon_Magnitude, mn);
+                        m.Magnitude = context.Get(NeptuneMoon_Magnitude, mn);
                         m.DistanceFromEarth = context.Get(NeptuneMoon_Ecliptical, mn).Distance;                        
                     }
+                }
+
+                foreach (var m in genericMoons)
+                {
+                    m.Equatorial = context.Get(GenericMoon_Equatorial, m.Id);
+                    m.Horizontal = context.Get(GenericMoon_Horizontal, m.Id);
+                    m.Semidiameter = context.Get(GenericMoon_Semidiameter, m.Id);
+                    m.Magnitude = context.Get(GenericMoon_Magnitude, m.Id);
+                    m.DistanceFromEarth = context.Get(GenericMoon_Ecliptical, m.Id).Distance;
                 }
             }
         }
@@ -198,7 +232,10 @@ namespace Planetarium.Plugins.SolarSystem
             var s6 = neptuneMoons.Where(m => m.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
                 .Select(p => new SearchResultItem(p, p.Name));
 
-            return s1.Concat(s2).Concat(s3).Concat(s4).Concat(s5).Concat(s6).ToArray();
+            var s7 = genericMoons.Where(m => m.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
+                .Select(p => new SearchResultItem(p, p.Name));
+
+            return s1.Concat(s2).Concat(s3).Concat(s4).Concat(s5).Concat(s6).Concat(s7).ToArray();
         }
     }
 }
