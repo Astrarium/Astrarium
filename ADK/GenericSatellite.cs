@@ -20,11 +20,14 @@ namespace ADK
             PrecessionalElements peEpoch = Precession.ElementsFK5(jd, Date.EPOCH_J2000);
             CrdsEquatorial eqPlanetEpoch = Precession.GetEquatorialCoordinates(eq, peEpoch);
 
-            double distance0 = 100;
+            // ecliptical pole
+            CrdsEquatorial pole = new CrdsEcliptical(0, 90).ToEquatorial(epsilon);
+            
+            double distance0;
             double distance = planet.Distance;
 
-            CrdsEcliptical eclSatellite = null;
-            while (Math.Abs(distance - distance0) > 1e-5)
+            CrdsEcliptical eclSatellite;
+            do
             {
                 distance0 = distance;
 
@@ -43,9 +46,6 @@ namespace ADK
 
                 double X = orbit.a * (Cos(E) - orbit.e);
                 double Y = orbit.a * Sqrt(1 - orbit.e * orbit.e) * Sin(E);
-
-                // ecliptical pole
-                CrdsEquatorial pole = new CrdsEcliptical(0, 90).ToEquatorial(epsilon);
 
                 // cartesian state vector of satellite
                 var d =
@@ -70,7 +70,7 @@ namespace ADK
                 double dDelta = ToDegrees(d.Values[2, 0]);
 
                 double delta = eqPlanetEpoch.Delta + dDelta;
-                double dAlpha = dAlphaCosDelta / Cos(ToRadians(eqPlanetEpoch.Delta));
+                double dAlpha = dAlphaCosDelta / Cos(ToRadians(delta));
                 double alpha = eqPlanetEpoch.Alpha + dAlpha;
 
                 CrdsEquatorial eqSatelliteEpoch = new CrdsEquatorial(alpha, delta);
@@ -82,8 +82,10 @@ namespace ADK
                 eclSatellite = eqSatellite.ToEcliptical(epsilon);
 
                 // calculate distance to Earth
-                distance = planet.Distance + x / theta * orbit.a;                
+                distance = planet.Distance + x / theta * orbit.a;
+
             }
+            while (Abs(distance - distance0) > 1e-6);
 
             eclSatellite.Distance = distance;
 

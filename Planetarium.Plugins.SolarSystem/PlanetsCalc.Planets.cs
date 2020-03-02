@@ -109,15 +109,6 @@ namespace Planetarium.Plugins.SolarSystem
             return ecliptical;
         }
 
-        private CrdsEquatorial Planet_Equatorial1950(SkyContext c, int p)
-        {
-            var eq = c.Get(Planet_Equatorial0, p);
-
-            var pe = Precession.ElementsFK5(c.JulianDay, Date.EPOCH_J1950);
-
-            return Precession.GetEquatorialCoordinates(eq, pe);
-        }
-
         /// <summary>
         /// Gets geocentrical equatorial coordinates of planet
         /// </summary>

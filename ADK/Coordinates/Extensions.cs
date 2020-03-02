@@ -113,7 +113,7 @@ namespace ADK
             double Y = Math.Sin(alpha) * Math.Cos(epsilon) + Math.Tan(delta) * Math.Sin(epsilon);
             double X = Math.Cos(alpha);
             
-            ecl.Lambda = Angle.ToDegrees(Math.Atan2(Y, X));
+            ecl.Lambda = Angle.To360(Angle.ToDegrees(Math.Atan2(Y, X)));
             ecl.Beta = Angle.ToDegrees(Math.Asin(Math.Sin(delta) * Math.Cos(epsilon) - Math.Cos(delta) * Math.Sin(epsilon) * Math.Sin(alpha)));
 
             return ecl;
