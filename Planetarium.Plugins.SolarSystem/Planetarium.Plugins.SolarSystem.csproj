@@ -108,7 +108,7 @@
     <None Update="Data\Moon.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\SatellitesOrbits.json">
+    <None Update="Data\SatellitesOrbits.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\Rings.png">

@@ -25,7 +25,7 @@ namespace ADK
         private static sbyte[,] ArgsLR = new sbyte[60, 4];
 
         /// <summary>
-        /// Coefficient of the ine of the argument for longitude (Σl) and distance (Σr)
+        /// Coefficient of the sine of the argument for longitude (Σl) and distance (Σr)
         /// </summary>
         private static int[] SinCoeffLR = new int[60];
 
@@ -75,10 +75,13 @@ namespace ADK
         /// <param name="jd">Julian Day.</param>
         /// <returns>Geocentric ecliptical coordinates of the Moon, referred to mean equinox of the date.</returns>
         /// <remarks>
-        /// This method is taked from AA(II), chapter 47, 
+        /// This method is taken from AA(II), chapter 47, 
         /// and based on the Charpont ELP-2000/82 lunar theory.
         /// Accuracy of the method is 10" in longitude and 4" in latitude.
         /// </remarks>
+        // TODO: use full ELP2000/82 theory:
+        // http://totaleclipse.eu/Astronomy/ELP2000.html
+        // http://cdsarc.u-strasbg.fr/viz-bin/cat/VI/79
         public static CrdsEcliptical GetCoordinates(double jd)
         {
             Initialize();

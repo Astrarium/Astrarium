@@ -34,7 +34,7 @@ namespace ADK
                 // take light-time effect into account
                 double tau = PlanetPositions.LightTimeEffect(distance);
 
-                double t = (jd - tau - orbit.jd0);
+                double t = jd - tau - orbit.jd0;
 
                 double M = To360(orbit.M0 + orbit.n * t);
 

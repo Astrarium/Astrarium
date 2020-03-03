@@ -82,5 +82,17 @@ namespace ADK
             ecl.Distance = lhs.Distance;
             return ecl;
         }
+
+        /// <summary>
+        /// Subtracts corrections to ecliptical coordinates
+        /// </summary>
+        public static CrdsEcliptical operator -(CrdsEcliptical lhs, CrdsEcliptical rhs)
+        {
+            CrdsEcliptical ecl = new CrdsEcliptical();
+            ecl.Lambda = Angle.To360(lhs.Lambda - rhs.Lambda);
+            ecl.Beta = lhs.Beta - rhs.Beta;
+            ecl.Distance = lhs.Distance;
+            return ecl;
+        }
     }
 }

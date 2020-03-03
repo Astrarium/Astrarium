@@ -83,20 +83,8 @@ namespace Planetarium.Plugins.SolarSystem
                 neptuneMoons[i] = new NeptuneMoon(i + 1);
             }
 
-            var orbits = new OrbitalElementsDownloader().Download();
-
-            /*
-            using (StreamReader file = File.OpenText(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/SatellitesOrbits.dat")))
-            {
-                JsonSerializer serializer = new JsonSerializer();
-                var orbits = (List<GenericMoonData>)serializer.Deserialize(file, typeof(List<GenericMoonData>));
-                foreach (var orbit in orbits)
-                {
-                    genericMoons.Add(new GenericMoon() { Data = orbit });
-                }
-            }
-            */
-
+            var manager = new OrbitalElementsManager();
+            var orbits = manager.Download();
             foreach (var orbit in orbits)
             {
                 genericMoons.Add(new GenericMoon() { Data = orbit });

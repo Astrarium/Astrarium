@@ -219,7 +219,7 @@ namespace ADK
             const double i0 = 10.041;           // Inclination of the orbit for jd0 epoch, in degrees
             const double Omega0 = 329.3;        // Longitude of the node of the orbit for jd0 epoch, in degrees
             const double M0 = 358.91;           // Mean anomaly for jd0 epoch, in degrees
-            const double n = 360.0 / 360.1362; // Mean motion, in degrees per day
+            const double n = 360.0 / 360.1362;  // Mean motion, in degrees per day
             const double OmegaN = 3.552;        // Longitude of ascending node of the orbit of Neptune, for J1950.0 epoch, in degrees
             const double gamma = 22.313;        // Inclination of the orbit of Neptune, for J1950.0 epoch, in degrees
 

@@ -10,7 +10,6 @@
     "Pw": 0.196,
     "Pnode": 0.393
   },
-
   {
     "names": {
       "en": "Himalia",
@@ -18,19 +17,18 @@
     },
     "satellite": 6,
     "planet": 5,
-    "Pw": 139.38,
-    "Pnode": 292.57
+    "Pw": 266.1934,
+    "Pnode": 292.564
   },
   {
     "names": {
-      "en": "Himalia JPL",
-      "ru": "Гималия JPL"
+      "en": "Elara",
+      "ru": "Элара"
     },
-    "jpl": true,
-    "satellite": 6,
+    "satellite": 7,
     "planet": 5,
-    "Pw": 139.38,
-    "Pnode": 292.57
+    "Pw": 128.07,
+    "Pnode": 265.30
   },
 
   /* Satellites of Neptune */
@@ -39,17 +37,6 @@
       "en": "Naiad",
       "ru": "Наяда"
     },
-    "satellite": 3,
-    "planet": 8,
-    "Pw": 0.289,
-    "Pnode": 0.575
-  },
-  {
-    "names": {
-      "en": "Naiad JPL",
-      "ru": "Наяда JPL"
-    },
-    "jpl":  true,
     "satellite": 3,
     "planet": 8,
     "Pw": 0.289,

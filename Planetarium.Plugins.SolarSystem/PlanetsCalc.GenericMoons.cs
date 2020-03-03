@@ -69,6 +69,7 @@ namespace Planetarium.Plugins.SolarSystem
                 var endDateStr = $"{endDate.Year:D4}-{endDate.Month:D2}-{(int)(endDate.Day):D2}";
 
                 List<SatellitePositionData> positions = null;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
                 WebRequest request = WebRequest.Create($"https://ssd.jpl.nasa.gov/horizons_batch.cgi?batch='1'&COMMAND='{(orbit.planet * 100 + orbit.satellite)}'&CENTER='500@399'&MAKE_EPHEM='YES'&TABLE_TYPE='OBSERVER'&START_TIME='{startDateStr}'&STOP_TIME='{endDateStr}'&STEP_SIZE='1 h'&CAL_FORMAT='JD'&APPARENT='AIRLESS'&REF_SYSTEM='J2000'&CSV_FORMAT='YES'&OBJ_DATA='NO'&QUANTITIES='6'");
                 using (var response = (HttpWebResponse)request.GetResponse())
                 using (var receiveStream = response.GetResponseStream())

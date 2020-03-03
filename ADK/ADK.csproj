@@ -7,7 +7,6 @@
   <ItemGroup>
     <None Remove="Data\Constells.dat" />
     <None Remove="Data\ELP.bin" />
-    <None Remove="Data\Satellite.txt" />
     <None Remove="Data\VSOP87B.bin" />
     <None Remove="VSOP87.bin" />
     <None Remove="VSOP87.HP.bin" />
@@ -17,7 +16,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Data\Constells.dat" />
     <EmbeddedResource Include="Data\ELP.bin" />
-    <EmbeddedResource Include="Data\Satellite.txt" />
     <EmbeddedResource Include="Data\VSOP87D.bin" />
   </ItemGroup>
 
