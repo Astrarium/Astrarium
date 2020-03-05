@@ -59,7 +59,7 @@ namespace Planetarium.Plugins.SolarSystem
             var moon = genericMoons.FirstOrDefault(gm => gm.Id == id);
             var eclPlanet = c.Get(Planet_Ecliptical, moon.Planet);
             var orbit = moon.Data;
-            
+
             if (orbit.jpl)
             {
                 var startDate = new Date(c.JulianDay);
@@ -77,7 +77,7 @@ namespace Planetarium.Plugins.SolarSystem
                 {
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
-                         positions = ParsePositions(reader.ReadToEnd());
+                        positions = ParsePositions(reader.ReadToEnd());
                     }
                 }
 

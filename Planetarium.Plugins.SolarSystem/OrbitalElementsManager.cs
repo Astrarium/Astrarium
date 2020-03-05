@@ -77,7 +77,7 @@ namespace Planetarium.Plugins.SolarSystem
 
             DateTime today = DateTime.Today;
             double jdToday = new Date(today).ToJulianDay();
-            if (orbits != null && orbits.Any(orb => Math.Abs(jdToday - orb.jd0) >= 1))
+            if (orbits != null && orbits.Any(orb => Math.Abs(jdToday - orb.jd) >= 1))
             {
                 Debug.WriteLine("Orbital elements are obsolete, downloading from web.");
 
@@ -89,7 +89,7 @@ namespace Planetarium.Plugins.SolarSystem
                 int count = 0;
                 foreach (var orbit in orbits)
                 {
-                    string url = $"https://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&COMMAND='{(orbit.planet * 100 + orbit.satellite)}'&CENTER='500@{(orbit.planet * 100 + 99)}'&MAKE_EPHEM='YES'&TABLE_TYPE='ELEMENTS'&START_TIME='{startDate}'&STOP_TIME='{endDate}'&STEP_SIZE='2 d'&OUT_UNITS='AU-D'&REF_PLANE='ECLIPTIC'&REF_SYSTEM='J2000'&TP_TYPE='ABSOLUTE'&CSV_FORMAT='YES'&OBJ_DATA='YES'";
+                    string url = $"https://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&COMMAND='{(orbit.planet * 100 + orbit.satellite)}'&CENTER='500@{(orbit.planet * 100 + 99)}'&MAKE_EPHEM='YES'&TABLE_TYPE='ELEMENTS'&START_TIME='{startDate}'&STOP_TIME='{endDate}'&STEP_SIZE='1 d'&OUT_UNITS='AU-D'&REF_PLANE='ECLIPTIC'&REF_SYSTEM='J2000'&TP_TYPE='ABSOLUTE'&CSV_FORMAT='YES'&OBJ_DATA='YES'";
                     try
                     {
                         var request = WebRequest.Create(url);
@@ -144,20 +144,40 @@ namespace Planetarium.Plugins.SolarSystem
             List<string> lines = response.Split('\n').ToList();
             string soeMarker = lines.FirstOrDefault(ln => ln == "$$SOE");
             int soeMarkerIndex = lines.IndexOf(soeMarker);
+            
             string header = lines[soeMarkerIndex - 2];
-            string orbitLine = lines[soeMarkerIndex + 1];
 
             List<string> headerItems = header.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(item => item.Trim()).ToList();
-            List<string> orbitItems = orbitLine.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(item => item.Trim()).ToList();
 
-            orbit.jd0 = double.Parse(orbitItems[headerItems.IndexOf("JDTDB")], CultureInfo.InvariantCulture);
-            orbit.e = double.Parse(orbitItems[headerItems.IndexOf("EC")], CultureInfo.InvariantCulture);
-            orbit.i = double.Parse(orbitItems[headerItems.IndexOf("IN")], CultureInfo.InvariantCulture);
-            orbit.node0 = double.Parse(orbitItems[headerItems.IndexOf("OM")], CultureInfo.InvariantCulture);
-            orbit.omega0 = double.Parse(orbitItems[headerItems.IndexOf("W")], CultureInfo.InvariantCulture);
-            orbit.n = double.Parse(orbitItems[headerItems.IndexOf("N")], CultureInfo.InvariantCulture);
-            orbit.M0 = double.Parse(orbitItems[headerItems.IndexOf("MA")], CultureInfo.InvariantCulture);
-            orbit.a = double.Parse(orbitItems[headerItems.IndexOf("A")], CultureInfo.InvariantCulture);
+            int dateIndex = headerItems.IndexOf(headerItems.FirstOrDefault(item => item.StartsWith("Calendar Date")));
+
+            List<double> day1 = lines[soeMarkerIndex + 1].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select((item, ind) => ind != dateIndex ? double.Parse(item.Trim(), CultureInfo.InvariantCulture) : 0).ToList();
+            List<double> day2 = lines[soeMarkerIndex + 2].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select((item, ind) => ind != dateIndex ? double.Parse(item.Trim(), CultureInfo.InvariantCulture) : 0).ToList();
+
+            orbit.jd = day1[headerItems.IndexOf("JDTDB")];
+            orbit.e = day1[headerItems.IndexOf("EC")];
+            orbit.i = day1[headerItems.IndexOf("IN")];
+            orbit.Om = day1[headerItems.IndexOf("OM")];
+            orbit.w = day1[headerItems.IndexOf("W")];
+            orbit.n = day1[headerItems.IndexOf("N")];
+            orbit.M = day1[headerItems.IndexOf("MA")];
+            orbit.a = day1[headerItems.IndexOf("A")];
+
+            double[] Omega = new double[] { orbit.Om, day2[headerItems.IndexOf("OM")] };
+            double[] w = new double[] { orbit.w, day2[headerItems.IndexOf("W")] };
+            double[] MA = new double[] { orbit.M, day2[headerItems.IndexOf("MA")] };
+
+            Angle.Align(Omega);
+            Angle.Align(w);
+           
+            orbit.POm = 360.0 / (Omega[1] - Omega[0]) / 365.25;
+            orbit.Pw = 360.0 / (w[1] - w[0]) / 365.25;
+
+            MA[0] = MA[0] + orbit.n % 360;
+
+            // add correction to mean motion
+            Angle.Align(MA);
+            orbit.n += MA[1] - MA[0];
 
             string magLine = lines.FirstOrDefault(ln => ln.Contains("V(1,0)"));
             if (!string.IsNullOrEmpty(magLine))

@@ -6,9 +6,16 @@
       "ru": "Амальтея"
     },
     "satellite": 5,
+    "planet": 5
+  },
+  {
+    "names": {
+      "en": "Amalthea JPL",
+      "ru": "Амальтея JPL"
+    },
+    "satellite": 5,
     "planet": 5,
-    "Pw": 0.196,
-    "Pnode": 0.393
+    "jpl": true
   },
   {
     "names": {
@@ -16,9 +23,7 @@
       "ru": "Гималия"
     },
     "satellite": 6,
-    "planet": 5,
-    "Pw": 266.1934,
-    "Pnode": 292.564
+    "planet": 5
   },
   {
     "names": {
@@ -26,9 +31,7 @@
       "ru": "Элара"
     },
     "satellite": 7,
-    "planet": 5,
-    "Pw": 128.07,
-    "Pnode": 265.30
+    "planet": 5
   },
 
   /* Satellites of Neptune */
@@ -38,19 +41,26 @@
       "ru": "Наяда"
     },
     "satellite": 3,
-    "planet": 8,
-    "Pw": 0.289,
-    "Pnode": 0.575
+    "planet": 8
   },
+
+  {
+    "names": {
+      "en": "Naiad JPL",
+      "ru": "Наяда JPL"
+    },
+    "jpl": true,
+    "satellite": 3,
+    "planet": 8
+  },
+
   {
     "names": {
       "en": "Thalassa",
       "ru": "Таласса"
     },
     "satellite": 4,
-    "planet": 8,
-    "Pw": 0.327,
-    "Pnode": 0.654
+    "planet": 8
   },
   {
     "names": {
@@ -58,19 +68,26 @@
       "ru": "Деспина"
     },
     "satellite": 5,
-    "planet": 8,
-    "Pw": 0.387,
-    "Pnode": 0.774
+    "planet": 8
   },
+
+  {
+    "names": {
+      "en": "Despina JPL",
+      "ru": "Деспина JPL"
+    },
+    "jpl": true,
+    "satellite": 5,
+    "planet": 8
+  },
+
   {
     "names": {
       "en": "Galatea",
       "ru": "Галатея"
     },
     "satellite": 6,
-    "planet": 8,
-    "Pw": 0.690,
-    "Pnode": 1.380
+    "planet": 8
   },
   {
     "names": {
@@ -78,9 +95,7 @@
       "ru": "Ларисса"
     },
     "satellite": 7,
-    "planet": 8,
-    "Pw": 1.257,
-    "Pnode": 2.516
+    "planet": 8
   },
   {
     "names": {
@@ -88,8 +103,24 @@
       "ru": "Протей"
     },
     "satellite": 8,
-    "planet": 8,
-    "Pw": 6.380,
-    "Pnode": 12.727
+    "planet": 8
+  },
+
+  {
+    "names": {
+      "en": "Nereid Generic",
+      "ru": "Нереида Generic"
+    },
+    "satellite": 2,
+    "planet": 8
+  },
+  {
+    "names": {
+      "en": "Nereid JPL",
+      "ru": "Нереида JPL"
+    },
+    "jpl": true,
+    "satellite": 2,
+    "planet": 8
   }
 ]

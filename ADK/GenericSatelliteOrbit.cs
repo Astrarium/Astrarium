@@ -11,12 +11,12 @@ namespace ADK
         /// <summary>
         /// Orbital elements epoch
         /// </summary>
-        public double jd0 { get; set; }
+        public double jd { get; set; }
 
         /// <summary>
         /// Mean anomaly at epoch, degrees
         /// </summary>
-        public double M0 { get; set; }
+        public double M { get; set; }
 
         /// <summary>
         /// Mean motion, degrees/day  
@@ -39,25 +39,23 @@ namespace ADK
         public double i { get; set; }
 
         /// <summary>
-        /// Argument of perifocus, degrees
+        /// Argument of periapsis at epoch, degrees
         /// </summary>
-        public double omega0 { get; set; }
+        public double w { get; set; }
 
         /// <summary>
-        /// Longitude of Ascending Node, degrees
+        /// Longitude of the ascending node at epoch, degrees
         /// </summary>
-        public double node0 { get; set; }
+        public double Om { get; set; }
 
         /// <summary>
-        /// Argument of periapsis precession period (mean value), years
-        /// From https://ssd.jpl.nasa.gov/?sat_elem
+        /// Argument of periapsis precession period, years
         /// </summary>
         public double Pw { get; set; }
 
         /// <summary>
-        /// Longitude of the ascending node precession period (mean value), years
-        /// From https://ssd.jpl.nasa.gov/?sat_elem
+        /// Longitude of the ascending node precession period, years
         /// </summary>
-        public double Pnode { get; set; }
+        public double POm { get; set; }
     }
 }

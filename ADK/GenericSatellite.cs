@@ -34,12 +34,12 @@ namespace ADK
                 // take light-time effect into account
                 double tau = PlanetPositions.LightTimeEffect(distance);
 
-                double t = jd - tau - orbit.jd0;
+                double t = jd - tau - orbit.jd;
 
-                double M = To360(orbit.M0 + orbit.n * t);
+                double M = To360(orbit.M + orbit.n * t);
 
-                double omega = To360(orbit.omega0 + t * 360.0 / (orbit.Pw * 365.25));
-                double node = To360(orbit.node0 + t * 360.0 / (orbit.Pnode * 365.25));
+                double omega = To360(orbit.w + t * 360.0 / (orbit.Pw * 365.25));
+                double node = To360(orbit.Om + t * 360.0 / (orbit.POm * 365.25));
 
                 // Find eccentric anomaly by solving Kepler equation
                 double E = SolveKepler(M, orbit.e);
