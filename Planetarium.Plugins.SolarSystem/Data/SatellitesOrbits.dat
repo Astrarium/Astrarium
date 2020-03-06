@@ -1,157 +1,420 @@
 ﻿[
-  /* Satellites of Jupiter */
-  {
-    "names": {
-      "en": "Amalthea",
-      "ru": "Амальтея"
-    },
-    "planet": 5,
-    "satellite": 5
-  },
-  {
-    "names": {
-      "en": "Himalia",
-      "ru": "Гималия"
-    },
-    "planet": 5,
-    "satellite": 6
-  },
-  {
-    "names": {
-      "en": "Elara",
-      "ru": "Элара"
-    },
-    "planet": 5,
-    "satellite": 7
-  },
-  {
-    "names": {
-      "en": "Pasiphae",
-      "ru": "Пасифе"
-    },
-    "planet": 5,
-    "satellite": 8
-  },
-  {
-    "names": {
-      "en": "Sinope",
-      "ru": "Синопе"
-    },
-    "planet": 5,
-    "satellite": 9
-  },
-  {
-    "names": {
-      "en": "Lysithea",
-      "ru": "Лиситея"
-    },
-    "planet": 5,
-    "satellite": 10
-  },
-  {
-    "names": {
-      "en": "Carme",
-      "ru": "Карме"
-    },
-    "planet": 5,
-    "satellite": 11
-  },
-  {
-    "names": {
-      "en": "Ananke",
-      "ru": "Ананке"
-    },
-    "planet": 5,
-    "satellite": 12
-  },
-  {
-    "names": {
-      "en": "Leda",
-      "ru": "Леда"
-    },
-    "planet": 5,
-    "satellite": 13
-  },
-  {
-    "names": {
-      "en": "Thebe",
-      "ru": "Фива"
-    },
-    "planet": 5,
-    "satellite": 14
-  },  
-  {
-    "names": {
-      "en": "Adrastea",
-      "ru": "Адрастея"
-    },
-    "planet": 5,
-    "satellite": 15
-  },    
-  {
-    "names": {
-      "en": "Metis",
-      "ru": "Метида"
-    },
-    "planet": 5,
-    "satellite": 16
-  },     
-  {
-    "names": {
-      "en": "Callirrhoe",
-      "ru": "Каллирое"
-    },
-    "planet": 5,
-    "satellite": 17
-  }, 
-
-  /* Satellites of Neptune */
-  {
-    "names": {
-      "en": "Naiad",
-      "ru": "Наяда"
-    },
-    "satellite": 3,
-    "planet": 8
-  },
-  {
-    "names": {
-      "en": "Thalassa",
-      "ru": "Таласса"
-    },
-    "satellite": 4,
-    "planet": 8
-  },
-  {
-    "names": {
-      "en": "Despina",
-      "ru": "Деспина"
-    },
-    "satellite": 5,
-    "planet": 8
-  },
-  {
-    "names": {
-      "en": "Galatea",
-      "ru": "Галатея"
-    },
-    "satellite": 6,
-    "planet": 8
-  },
-  {
-    "names": {
-      "en": "Larissa",
-      "ru": "Ларисса"
-    },
-    "satellite": 7,
-    "planet": 8
-  },
-  {
-    "names": {
-      "en": "Proteus",
-      "ru": "Протей"
-    },
-    "satellite": 8,
-    "planet": 8
-  }
+   {
+      "names":{
+         "en":"Amalthea",
+         "ru":"Амальтея"
+      },
+      "planet":5,
+      "satellite":5
+   },
+   {
+      "names":{
+         "en":"Himalia",
+         "ru":"Гималия"
+      },
+      "planet":5,
+      "satellite":6
+   },
+   {
+      "names":{
+         "en":"Elara",
+         "ru":"Элара"
+      },
+      "planet":5,
+      "satellite":7
+   },
+   {
+      "names":{
+         "en":"Pasiphae",
+         "ru":"Пасифе"
+      },
+      "planet":5,
+      "satellite":8
+   },
+   {
+      "names":{
+         "en":"Sinope",
+         "ru":"Синопе"
+      },
+      "planet":5,
+      "satellite":9
+   },
+   {
+      "names":{
+         "en":"Lysithea",
+         "ru":"Лиситея"
+      },
+      "planet":5,
+      "satellite":10
+   },
+   {
+      "names":{
+         "en":"Carme",
+         "ru":"Карме"
+      },
+      "planet":5,
+      "satellite":11
+   },
+   {
+      "names":{
+         "en":"Ananke",
+         "ru":"Ананке"
+      },
+      "planet":5,
+      "satellite":12
+   },
+   {
+      "names":{
+         "en":"Leda",
+         "ru":"Леда"
+      },
+      "planet":5,
+      "satellite":13
+   },
+   {
+      "names":{
+         "en":"Thebe",
+         "ru":"Фива"
+      },
+      "planet":5,
+      "satellite":14
+   },
+   {
+      "names":{
+         "en":"Adrastea",
+         "ru":"Адрастея"
+      },
+      "planet":5,
+      "satellite":15
+   },
+   {
+      "names":{
+         "en":"Metis",
+         "ru":"Метида"
+      },
+      "planet":5,
+      "satellite":16
+   },
+   {
+      "names":{
+         "en":"Callirrhoe",
+         "ru":"Каллирое"
+      },
+      "planet":5,
+      "satellite":17
+   },
+   {
+      "names":{
+         "en":"Themisto",
+		 "ru":"Фемисто"
+      },
+      "planet":5,
+      "satellite":18
+   },
+   {
+      "names":{
+         "en":"Megaclite",
+ 		 "ru":"Мегаклите"
+      },
+      "planet":5,
+      "satellite":19
+   },
+   {
+      "names":{
+         "en":"Taygete",
+ 		 "ru":"Тайгете"
+      },
+      "planet":5,
+      "satellite":20
+   },
+   {
+      "names":{
+         "en":"Chaldene",
+         "ru":"Халдене"
+      },
+      "planet":5,
+      "satellite":21
+   },
+   {
+      "names":{
+         "en":"Harpalyke",
+         "ru":"Гарпалике"
+      },
+      "planet":5,
+      "satellite":22
+   },
+   {
+      "names":{
+         "en":"Kalyke",
+         "ru":"Калике"
+      },
+      "planet":5,
+      "satellite":23
+   },
+   {
+      "names":{
+         "en":"Iocaste",
+         "ru":"Иокасте"
+      },
+      "planet":5,
+      "satellite":24
+   },
+   {
+      "names":{
+         "en":"Erinome",
+         "ru":"Эриноме"
+      },
+      "planet":5,
+      "satellite":25
+   },
+   {
+      "names":{
+         "en":"Isonoe",
+         "ru":"Исоное"
+      },
+      "planet":5,
+      "satellite":26
+   },
+   {
+      "names":{
+         "en":"Praxidike",
+         "ru":"Праксидике"
+      },
+      "planet":5,
+      "satellite":27
+   },
+   {
+      "names":{
+         "en":"Autonoe",
+         "ru":"Автоное"
+      },
+      "planet":5,
+      "satellite":28
+   },
+   {
+      "names":{
+         "en":"Thyone",
+         "ru":"Тионе"
+      },
+      "planet":5,
+      "satellite":29
+   },
+   {
+      "names":{
+         "en":"Hermippe",
+         "ru":"Гермиппе"
+      },
+      "planet":5,
+      "satellite":30
+   },
+   {
+      "names":{
+         "en":"Aitne",
+         "ru":"Этне"
+      },
+      "planet":5,
+      "satellite":31
+   },
+   {
+      "names":{
+         "en":"Eurydome",
+         "ru":"Эвридоме"
+      },
+      "planet":5,
+      "satellite":32
+   },
+   {
+      "names":{
+         "en":"Euanthe",
+         "ru":"Эванте"
+      },
+      "planet":5,
+      "satellite":33
+   },
+   {
+      "names":{
+         "en":"Euporie",
+         "ru":"Эвпорие"
+      },
+      "planet":5,
+      "satellite":34
+   },
+   {
+      "names":{
+         "en":"Orthosie",
+         "ru":"Ортозие"
+      },
+      "planet":5,
+      "satellite":35
+   },
+   {
+      "names":{
+         "en":"Sponde",
+         "ru":"Спонде"
+      },
+      "planet":5,
+      "satellite":36
+   },
+   {
+      "names":{
+         "en":"Kale",
+         "ru":"Кале"
+      },
+      "planet":5,
+      "satellite":37
+   },
+   {
+      "names":{
+         "en":"Pasithee",
+         "ru":"Пазифее"
+      },
+      "planet":5,
+      "satellite":38
+   },
+   {
+      "names":{
+         "en":"Hegemone",
+         "ru":"Гегемоне"
+      },
+      "planet":5,
+      "satellite":39
+   },
+   {
+      "names":{
+         "en":"Mneme",
+         "ru":"Мнеме"
+      },
+      "planet":5,
+      "satellite":40
+   },
+   {
+      "names":{
+         "en":"Aoede",
+         "ru":"Аойде"
+      },
+      "planet":5,
+      "satellite":41
+   },
+   {
+      "names":{
+         "en":"Thelxinoe",
+         "ru":"Тельксиное"
+      },
+      "planet":5,
+      "satellite":42
+   },
+   {
+      "names":{
+         "en":"Arche",
+         "ru":"Архе"
+      },
+      "planet":5,
+      "satellite":43
+   },
+   {
+      "names":{
+         "en":"Kallichore",
+         "ru":"Каллихоре"
+      },
+      "planet":5,
+      "satellite":44
+   },
+   {
+      "names":{
+         "en":"Helike",
+         "ru":"Гелике"
+      },
+      "planet":5,
+      "satellite":45
+   },
+   {
+      "names":{
+         "en":"Carpo",
+         "ru":"Карпо"
+      },
+      "planet":5,
+      "satellite":46
+   },
+   {
+      "names":{
+         "en":"Eukelade",
+         "ru":"Эвкеладе"
+      },
+      "planet":5,
+      "satellite":47
+   },
+   {
+      "names":{
+         "en":"Cyllene",
+         "ru":"Киллене"
+      },
+      "planet":5,
+      "satellite":48
+   },
+   {
+      "names":{
+         "en":"Kore",
+         "ru":"Коре"
+      },
+      "planet":5,
+      "satellite":49
+   },
+   {
+      "names":{
+         "en":"Herse",
+         "ru":"Герсе"
+      },
+      "planet":5,
+      "satellite":50
+   },
+   
+   
+   {
+      "names":{
+         "en":"Naiad",
+         "ru":"Наяда"
+      },
+      "satellite":3,
+      "planet":8
+   },
+   {
+      "names":{
+         "en":"Thalassa",
+         "ru":"Таласса"
+      },
+      "satellite":4,
+      "planet":8
+   },
+   {
+      "names":{
+         "en":"Despina",
+         "ru":"Деспина"
+      },
+      "satellite":5,
+      "planet":8
+   },
+   {
+      "names":{
+         "en":"Galatea",
+         "ru":"Галатея"
+      },
+      "satellite":6,
+      "planet":8
+   },
+   {
+      "names":{
+         "en":"Larissa",
+         "ru":"Ларисса"
+      },
+      "satellite":7,
+      "planet":8
+   },
+   {
+      "names":{
+         "en":"Proteus",
+         "ru":"Протей"
+      },
+      "satellite":8,
+      "planet":8
+   }
 ]

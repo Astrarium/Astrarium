@@ -144,10 +144,18 @@ namespace Planetarium.Plugins.SolarSystem
         private float GenericMoon_Magnitude(SkyContext c, int id)
         {
             var moon = genericMoons.FirstOrDefault(gm => gm.Id == id);
-            var delta = c.Get(Planet_DistanceFromEarth, moon.Planet);
-            double r = c.Get(Planet_DistanceFromSun, moon.Planet);
-            var mag0 = moon.Data.mag;
-            return GenericSatellite.Magnitude(mag0, delta, r);
+            if (moon.Data.mag == 0)
+            {
+                // consider more proper way to caclulate magnitude
+                return 20;
+            }
+            else
+            {
+                var delta = c.Get(Planet_DistanceFromEarth, moon.Planet);
+                double r = c.Get(Planet_DistanceFromSun, moon.Planet);
+                var mag0 = moon.Data.mag;
+                return GenericSatellite.Magnitude(mag0, delta, r);
+            }
         }
 
         public void ConfigureEphemeris(EphemerisConfig<GenericMoon> e)

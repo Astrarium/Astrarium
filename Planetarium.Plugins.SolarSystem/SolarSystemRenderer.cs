@@ -746,7 +746,7 @@ namespace Planetarium.Plugins.SolarSystem
                 PointF p = map.Project(moon.Horizontal);
                 PointF pPlanet = map.Project(planet.Horizontal);
 
-                float size = 1; // map.GetPointSize(moon.Magnitude, 2);
+                float size = map.GetPointSize(moon.Magnitude, 2);
                 float diam = map.GetDiskSize(moon.Semidiameter);
 
                 // diameter is to small to render moon disk, 
