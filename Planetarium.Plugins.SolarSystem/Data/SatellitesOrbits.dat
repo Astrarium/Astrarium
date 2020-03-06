@@ -5,34 +5,105 @@
       "en": "Amalthea",
       "ru": "Амальтея"
     },
-    "satellite": 5,
-    "planet": 5
-  },
-  {
-    "names": {
-      "en": "Amalthea JPL",
-      "ru": "Амальтея JPL"
-    },
-    "satellite": 5,
     "planet": 5,
-    "jpl": true
+    "satellite": 5
   },
   {
     "names": {
       "en": "Himalia",
       "ru": "Гималия"
     },
-    "satellite": 6,
-    "planet": 5
+    "planet": 5,
+    "satellite": 6
   },
   {
     "names": {
       "en": "Elara",
       "ru": "Элара"
     },
-    "satellite": 7,
-    "planet": 5
+    "planet": 5,
+    "satellite": 7
   },
+  {
+    "names": {
+      "en": "Pasiphae",
+      "ru": "Пасифе"
+    },
+    "planet": 5,
+    "satellite": 8
+  },
+  {
+    "names": {
+      "en": "Sinope",
+      "ru": "Синопе"
+    },
+    "planet": 5,
+    "satellite": 9
+  },
+  {
+    "names": {
+      "en": "Lysithea",
+      "ru": "Лиситея"
+    },
+    "planet": 5,
+    "satellite": 10
+  },
+  {
+    "names": {
+      "en": "Carme",
+      "ru": "Карме"
+    },
+    "planet": 5,
+    "satellite": 11
+  },
+  {
+    "names": {
+      "en": "Ananke",
+      "ru": "Ананке"
+    },
+    "planet": 5,
+    "satellite": 12
+  },
+  {
+    "names": {
+      "en": "Leda",
+      "ru": "Леда"
+    },
+    "planet": 5,
+    "satellite": 13
+  },
+  {
+    "names": {
+      "en": "Thebe",
+      "ru": "Фива"
+    },
+    "planet": 5,
+    "satellite": 14
+  },  
+  {
+    "names": {
+      "en": "Adrastea",
+      "ru": "Адрастея"
+    },
+    "planet": 5,
+    "satellite": 15
+  },    
+  {
+    "names": {
+      "en": "Metis",
+      "ru": "Метида"
+    },
+    "planet": 5,
+    "satellite": 16
+  },     
+  {
+    "names": {
+      "en": "Callirrhoe",
+      "ru": "Каллирое"
+    },
+    "planet": 5,
+    "satellite": 17
+  }, 
 
   /* Satellites of Neptune */
   {
@@ -43,17 +114,6 @@
     "satellite": 3,
     "planet": 8
   },
-
-  {
-    "names": {
-      "en": "Naiad JPL",
-      "ru": "Наяда JPL"
-    },
-    "jpl": true,
-    "satellite": 3,
-    "planet": 8
-  },
-
   {
     "names": {
       "en": "Thalassa",
@@ -70,17 +130,6 @@
     "satellite": 5,
     "planet": 8
   },
-
-  {
-    "names": {
-      "en": "Despina JPL",
-      "ru": "Деспина JPL"
-    },
-    "jpl": true,
-    "satellite": 5,
-    "planet": 8
-  },
-
   {
     "names": {
       "en": "Galatea",
@@ -103,24 +152,6 @@
       "ru": "Протей"
     },
     "satellite": 8,
-    "planet": 8
-  },
-
-  {
-    "names": {
-      "en": "Nereid Generic",
-      "ru": "Нереида Generic"
-    },
-    "satellite": 2,
-    "planet": 8
-  },
-  {
-    "names": {
-      "en": "Nereid JPL",
-      "ru": "Нереида JPL"
-    },
-    "jpl": true,
-    "satellite": 2,
     "planet": 8
   }
 ]
