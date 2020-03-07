@@ -40,9 +40,12 @@ namespace Planetarium
                     mSkyMap.Width = Width;
                     mSkyMap.Height = Height;
                     mSkyMap.OnInvalidate += InvalidateWithDoEvents;
+                    mSkyMap.OnRedraw += () => Invoke(Redraw);
                 }
             }
         }
+
+        public event Action Redraw;
 
         protected override void OnPaint(PaintEventArgs pe)
         {
@@ -53,7 +56,6 @@ namespace Planetarium
             else
             {
                 SkyMap.Render(pe.Graphics);
-                Select();
             }
         }
 

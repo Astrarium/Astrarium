@@ -168,6 +168,8 @@ namespace Planetarium
               
         public event Action OnInvalidate;
 
+        public event Action OnRedraw;
+
         /// <summary>
         /// Collection of celestial objects drawn on the map
         /// </summary>
@@ -573,6 +575,7 @@ namespace Planetarium
             public void Redraw()
             {
                 map.Invalidate();
+                map.OnRedraw();
             }
         }
     }

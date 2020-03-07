@@ -180,7 +180,7 @@ namespace Planetarium.Plugins.SolarSystem
             orbit.n += MA[1] - MA[0];
 
             string magLine = lines.FirstOrDefault(ln => ln.Contains("V(1,0)"));
-            if (!string.IsNullOrEmpty(magLine))
+            if (orbit.mag == 0 && !string.IsNullOrEmpty(magLine))
             {
                 magLine = magLine.Substring(magLine.IndexOf("V(1,0)"));
                 List<string> magItems = magLine.Split(new[] { '=' }, StringSplitOptions.RemoveEmptyEntries).Select(item => item.Trim()).ToList();
@@ -189,7 +189,7 @@ namespace Planetarium.Plugins.SolarSystem
             }
 
             string radiusLine = lines.FirstOrDefault(ln => ln.Contains("Radius"));
-            if (!string.IsNullOrEmpty(radiusLine))
+            if (orbit.radius == 0 && !string.IsNullOrEmpty(radiusLine))
             {
                 radiusLine = radiusLine.Substring(radiusLine.IndexOf("Radius"));
                 List<string> radiusItems = radiusLine.Split(new[] { '=' }, StringSplitOptions.RemoveEmptyEntries).Select(item => item.Trim()).ToList();
