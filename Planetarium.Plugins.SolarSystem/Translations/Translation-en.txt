@@ -20,6 +20,7 @@ Planet.5.GenitiveName			= Jupiter
 Planet.6.GenitiveName			= Saturn
 Planet.7.GenitiveName			= Uranus
 Planet.8.GenitiveName			= Neptune
+Pluto.Name						= Pluto
 MarsMoon.1.Name					= Phobos
 MarsMoon.2.Name					= Deimos
 JupiterMoon.1.Name				= Io

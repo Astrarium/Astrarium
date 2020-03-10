@@ -57,7 +57,7 @@ namespace Planetarium.Plugins.SolarSystem
         private CrdsEcliptical GenericMoon_Ecliptical(SkyContext c, int id)
         {
             var moon = genericMoons.FirstOrDefault(gm => gm.Id == id);
-            var eclPlanet = c.Get(Planet_Ecliptical, moon.Planet);
+            var eclPlanet = moon.Planet == 9 ? c.Get(Pluto_Ecliptical) : c.Get(Planet_Ecliptical, moon.Planet);
             var orbit = moon.Data;
 
             if (orbit.jpl)
@@ -126,7 +126,8 @@ namespace Planetarium.Plugins.SolarSystem
         private CrdsEquatorial GenericMoon_Equatorial(SkyContext c, int id)
         {
             var moon = genericMoons.FirstOrDefault(gm => gm.Id == id);
-            return c.Get(GenericMoon_Equatorial0, id).ToTopocentric(c.GeoLocation, c.SiderealTime, c.Get(Planet_Parallax, moon.Planet));
+            double parallax = moon.Planet == 9 ? c.Get(Pluto_Parallax) : c.Get(Planet_Parallax, moon.Planet);
+            return c.Get(GenericMoon_Equatorial0, id).ToTopocentric(c.GeoLocation, c.SiderealTime, parallax);
         }
 
         private CrdsHorizontal GenericMoon_Horizontal(SkyContext c, int id)

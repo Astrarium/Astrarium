@@ -1,6 +1,7 @@
 ﻿using ADK;
 using Newtonsoft.Json;
 using Planetarium.Objects;
+using Planetarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,8 +19,12 @@ namespace Planetarium.Plugins.SolarSystem
     {
         private static readonly string OrbitalElementsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ADK", "OrbitalElements");
 
-        internal OrbitalElementsManager()
+        private ISettings settings;
+
+        internal OrbitalElementsManager(ISettings settings)
         {
+            this.settings = settings;
+
             if (!Directory.Exists(OrbitalElementsPath))
             {
                 try
@@ -33,12 +38,12 @@ namespace Planetarium.Plugins.SolarSystem
             }
         }
 
-        internal List<GenericMoonData> Download()
+        internal List<GenericMoonData> Load()
         {
-            JsonSerializer serializer = new JsonSerializer();
             List<GenericMoonData> orbits = null;
-
+            JsonSerializer serializer = new JsonSerializer();
             string cachedFilePath = Path.Combine(OrbitalElementsPath, "SatellitesOrbits.dat");
+
             if (File.Exists(cachedFilePath))
             {
                 Debug.WriteLine("Cached orbital elements file exists, try to parse");
@@ -75,76 +80,78 @@ namespace Planetarium.Plugins.SolarSystem
                 }
             }
 
-            DateTime today = DateTime.Today;
-            double jdToday = new Date(today).ToJulianDay();
-            if (orbits != null && orbits.Any(orb => Math.Abs(jdToday - orb.jd) >= 1))
+            if (settings.Get("GenericMoonsAutoUpdate"))
             {
-                Debug.WriteLine("Orbital elements are obsolete, downloading from web.");
-
-                string startDate = today.ToString("yyyy-MM-dd");
-                string endDate = today.AddDays(2).ToString("yyyy-MM-dd");
-
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-
-                int count = 0;
-                foreach (var orbit in orbits)
+                Task.Run(() =>
                 {
-                    string url = $"https://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&COMMAND='{(orbit.planet * 100 + orbit.satellite)}'&CENTER='500@{(orbit.planet * 100 + 99)}'&MAKE_EPHEM='YES'&TABLE_TYPE='ELEMENTS'&START_TIME='{startDate}'&STOP_TIME='{endDate}'&STEP_SIZE='1 d'&OUT_UNITS='AU-D'&REF_PLANE='ECLIPTIC'&REF_SYSTEM='J2000'&TP_TYPE='ABSOLUTE'&CSV_FORMAT='YES'&OBJ_DATA='YES'";
-                    try
+                    DateTime today = DateTime.Today;
+                    double jdToday = new Date(today).ToJulianDay();
+
+                    Debug.WriteLine("Orbital elements are obsolete, downloading from web.");
+
+                    string startDate = today.ToString("yyyy-MM-dd");
+                    string endDate = today.AddDays(2).ToString("yyyy-MM-dd");
+
+                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+                    foreach (var orbit in orbits)
                     {
-                        var request = WebRequest.Create(url);
-                        using (var response = (HttpWebResponse)request.GetResponse())
-                        using (var receiveStream = response.GetResponseStream())
-                        using (var reader = new StreamReader(receiveStream))
+                        string url = $"https://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&COMMAND='{(orbit.planet * 100 + orbit.satellite)}'&CENTER='500@{(orbit.planet * 100 + 99)}'&MAKE_EPHEM='YES'&TABLE_TYPE='ELEMENTS'&START_TIME='{startDate}'&STOP_TIME='{endDate}'&STEP_SIZE='1 d'&OUT_UNITS='AU-D'&REF_PLANE='ECLIPTIC'&REF_SYSTEM='J2000'&TP_TYPE='ABSOLUTE'&CSV_FORMAT='YES'&OBJ_DATA='YES'";
+                        try
                         {
-                            if (response.StatusCode == HttpStatusCode.OK)
+                            var request = WebRequest.Create(url);
+                            using (var response = (HttpWebResponse)(request.GetResponse()))
+                            using (var receiveStream = response.GetResponseStream())
+                            using (var reader = new StreamReader(receiveStream))
                             {
-                                ParseOrbit(orbit, reader.ReadToEnd());
-                                count++;
-                            }
-                            else
-                            {
-                                Trace.TraceError($"Unable to download orbital elements from url: {url}, status code: {response.StatusCode}");
+                                if (response.StatusCode == HttpStatusCode.OK)
+                                {
+                                    ParseOrbit(orbit, reader.ReadToEnd());
+                                }
+                                else
+                                {
+                                    Trace.TraceError($"Unable to download orbital elements from url: {url}, status code: {response.StatusCode}");
+                                }
                             }
                         }
+                        catch (Exception ex)
+                        {
+                            Trace.TraceError($"Unable to download orbital elements from url: {url}, Details: {ex}");
+                        }
+                    }
+
+                    Debug.WriteLine($"{orbits.Count} orbital elements downloaded.");
+                    Debug.WriteLine("Saving orbital elements to cache...");
+
+                    try
+                    {
+                        using (StreamWriter file = File.CreateText(cachedFilePath))
+                        {
+                            serializer.Formatting = Formatting.Indented;
+                            serializer.Serialize(file, orbits);
+                        }
+                        Debug.WriteLine("Orbital elements saved to cache.");
                     }
                     catch (Exception ex)
                     {
-                        Trace.TraceError($"Unable to download orbital elements from url: {url}, Details: {ex}");
+                        Trace.TraceError($"Unable to save orbital elements to cache, Details: {ex}");
                     }
-                }
-
-                Debug.WriteLine($"{count}/{orbits.Count} orbital elements downloaded.");
-
-                Debug.WriteLine("Saving orbital elements to cache...");
-                try
-                {
-                    using (StreamWriter file = File.CreateText(cachedFilePath))
-                    {
-                        serializer.Formatting = Formatting.Indented;
-                        serializer.Serialize(file, orbits);
-                    }
-                    Debug.WriteLine("Orbital elements saved to cache.");
-                }
-                catch (Exception ex)
-                {
-                    Trace.TraceError($"Unable to save orbital elements to cache, Details: {ex}");
-                }
-            }
-            else
-            {
-                Debug.WriteLine("Orbital elements are up to date.");
+                });
             }
 
             return orbits;
         }
 
-        static void ParseOrbit(GenericMoonData orbit, string response)
+        private void ParseOrbit(GenericMoonData orbit, string response)
         {
             List<string> lines = response.Split('\n').ToList();
             string soeMarker = lines.FirstOrDefault(ln => ln == "$$SOE");
+
+            if (soeMarker == null) 
+                throw new Exception($"Unable to parse ephemeris data for satellite {orbit.names.First().Value}");
+
             int soeMarkerIndex = lines.IndexOf(soeMarker);
-            
+
             string header = lines[soeMarkerIndex - 2];
 
             List<string> headerItems = header.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(item => item.Trim()).ToList();
@@ -169,7 +176,7 @@ namespace Planetarium.Plugins.SolarSystem
 
             Angle.Align(Omega);
             Angle.Align(w);
-           
+
             orbit.POm = 360.0 / (Omega[1] - Omega[0]) / 365.25;
             orbit.Pw = 360.0 / (w[1] - w[0]) / 365.25;
 

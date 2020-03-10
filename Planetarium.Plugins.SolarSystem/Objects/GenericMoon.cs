@@ -31,7 +31,7 @@ namespace Planetarium.Objects
         public int Planet => Data.planet;
 
         /// <summary>
-        /// Moon number, 1-based
+        /// Moon id, used internally for calculation
         /// </summary>
         public int Id => Data.planet * 100 + Data.satellite + (Data.jpl ? 1000 : 0);
 

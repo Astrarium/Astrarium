@@ -17,6 +17,7 @@ namespace Planetarium.Plugins.SolarSystem
 {
     public partial class PlanetsCalc : BaseCalc, 
         ICelestialObjectCalc<Planet>, 
+        ICelestialObjectCalc<Pluto>,
         ICelestialObjectCalc<MarsMoon>, 
         ICelestialObjectCalc<JupiterMoon>, 
         ICelestialObjectCalc<SaturnMoon>, 
@@ -26,6 +27,7 @@ namespace Planetarium.Plugins.SolarSystem
     {
         private ISettings settings;
         private Planet[] planets = new Planet[8];
+        private Pluto pluto = new Pluto();
         private JupiterMoon[] jupiterMoons = new JupiterMoon[4];
         private MarsMoon[] marsMoons = new MarsMoon[2];
         private SaturnMoon[] saturnMoons = new SaturnMoon[8];
@@ -34,6 +36,7 @@ namespace Planetarium.Plugins.SolarSystem
         private List<GenericMoon> genericMoons = new List<GenericMoon>();
 
         public IReadOnlyCollection<Planet> Planets => planets;
+        public Pluto Pluto => pluto;
         public IReadOnlyCollection<MarsMoon> MarsMoons => marsMoons;
         public IReadOnlyCollection<JupiterMoon> JupiterMoons => jupiterMoons;
         public IReadOnlyCollection<SaturnMoon> SaturnMoons => saturnMoons;
@@ -83,8 +86,7 @@ namespace Planetarium.Plugins.SolarSystem
                 neptuneMoons[i] = new NeptuneMoon(i + 1);
             }
 
-            var manager = new OrbitalElementsManager();
-            var orbits = manager.Download();
+            var orbits = new OrbitalElementsManager(settings).Load();
             foreach (var orbit in orbits)
             {
                 genericMoons.Add(new GenericMoon() { Data = orbit });
@@ -198,10 +200,18 @@ namespace Planetarium.Plugins.SolarSystem
                     m.DistanceFromEarth = context.Get(GenericMoon_Ecliptical, m.Id).Distance;
                 }
             }
+
+            pluto.Equatorial = context.Get(Pluto_Equatorial);
+            pluto.Horizontal = context.Get(Pluto_Horizontal);
+            pluto.Appearance = context.Get(Pluto_Appearance);
+            pluto.Semidiameter = context.Get(Pluto_Semidiameter);
+            pluto.Magnitude = context.Get(Pluto_Magnitude);
+            pluto.DistanceFromEarth = context.Get(Pluto_DistanceFromEarth);
+            pluto.Ecliptical = context.Get(Pluto_Ecliptical);
         }
        
         public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)
-        {
+        {           
             var s1 = planets.Where(p => p.Number != Planet.EARTH && p.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
                 .Select(p => new SearchResultItem(p, p.Name));
 
@@ -223,7 +233,10 @@ namespace Planetarium.Plugins.SolarSystem
             var s7 = genericMoons.Where(m => m.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
                 .Select(p => new SearchResultItem(p, p.Name));
 
-            return s1.Concat(s2).Concat(s3).Concat(s4).Concat(s5).Concat(s6).Concat(s7).ToArray();
+            var s8 = new[] { pluto }.Where(p => p.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
+                .Select(p => new SearchResultItem(p, p.Name));
+
+            return s1.Concat(s2).Concat(s3).Concat(s4).Concat(s5).Concat(s6).Concat(s7).Concat(s8).ToArray();
         }
     }
 }

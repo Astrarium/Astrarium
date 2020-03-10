@@ -6,7 +6,7 @@ using System.Text;
 namespace ADK.Tests
 {
     [TestClass]
-    public class PlutoTests
+    public class PlutoPositionTests
     {
         /// <summary>
         /// Example 27.a, AA(II), page 266
@@ -31,7 +31,7 @@ namespace ADK.Tests
 
             while (Math.Abs(tau - tau0) > deltaTau)
             {
-                posPluto = Pluto.Position(jd - tau);
+                posPluto = PlutoPosition.Position(jd - tau);
 
                 if (iteration == 1)
                 {

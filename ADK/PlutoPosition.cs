@@ -12,7 +12,7 @@ namespace ADK
     /// Contains methods for calculating positions and ephemerides of Pluto, former 9th planet, 
     /// now the largest dwarf planet in Solar system.
     /// </summary>
-    public static class Pluto
+    public static class PlutoPosition
     {
         /// <summary>
         /// Gets heliocentrical coordinates of Pluto
@@ -46,6 +46,16 @@ namespace ADK
             r += 40.7241346;
 
             return new CrdsHeliocentrical() { L = l, B = b, R = r };
+        }
+
+        public static double Semidiameter(double distance)
+        {
+            return ToDegrees(Atan(1188.3 / (distance * 149597870.0))) * 3600;
+        }
+
+        public static float Magnitude(double Delta, double r)
+        {
+            return (float)(-0.4 + 5 * Math.Log10(r * Delta));
         }
 
         private static PlutoTerm[] terms = new PlutoTerm[]

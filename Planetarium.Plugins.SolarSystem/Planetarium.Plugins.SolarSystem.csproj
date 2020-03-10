@@ -87,6 +87,9 @@
     <None Update="Data\8.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Data\9.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\Earth.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

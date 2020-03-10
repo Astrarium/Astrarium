@@ -30,6 +30,7 @@ namespace Planetarium.Plugins.SolarSystem
         private readonly Sun sun;
         private readonly Moon moon;
         private readonly Planet mars;
+        private readonly Pluto pluto;
 
         private Font fontLabel = new Font("Arial", 8);
         private Font fontShadowLabel = new Font("Arial", 8);
@@ -72,6 +73,7 @@ namespace Planetarium.Plugins.SolarSystem
             this.sun = solarCalc.Sun;
             this.moon = lunarCalc.Moon;
             this.mars = planetsCalc.Planets.ElementAt(Planet.MARS - 1);
+            this.pluto = planetsCalc.Pluto;
 
             var featuresReader = new SurfaceFeaturesReader();
             lunarFeatures = featuresReader.Read(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/LunarFeatures.dat"));
@@ -87,6 +89,7 @@ namespace Planetarium.Plugins.SolarSystem
             var bodies = planetsCalc.Planets
                 .Where(p => p.Number != Planet.EARTH)
                 .Cast<ISolarSystemObject>()
+                .Concat(new[] { pluto })
                 .Concat(new[] { sun })
                 .Concat(planetsCalc.MarsMoons)
                 .Concat(planetsCalc.JupiterMoons)
@@ -102,6 +105,10 @@ namespace Planetarium.Plugins.SolarSystem
                 if (body is Planet planet)
                 {
                     RenderPlanet(map, planet);
+                }
+                if (body is Pluto pluto)
+                {
+                    RenderPlanet(map, pluto);
                 }
                 else if (body is MarsMoon mm)
                 {
@@ -125,9 +132,16 @@ namespace Planetarium.Plugins.SolarSystem
                 {
                     RenderPlanetMoon(map, planetsCalc.Planets.ElementAt(Planet.NEPTUNE - 1), nm, hasTexture: false);
                 }
-                else if (body is GenericMoon gm)
+                else if (settings.Get("GenericMoons") && body is GenericMoon gm)
                 {
-                    RenderPlanetMoon(map, planetsCalc.Planets.ElementAt(gm.Data.planet - 1), gm, hasTexture: false);
+                    if (gm.Data.planet == 9)
+                    {
+                        RenderPlanetMoon(map, planetsCalc.Pluto, gm, hasTexture: false);
+                    }
+                    else
+                    {
+                        RenderPlanetMoon(map, planetsCalc.Planets.ElementAt(gm.Data.planet - 1), gm, hasTexture: false);
+                    }
                 }
                 else if (body is Sun)
                 {
@@ -605,7 +619,7 @@ namespace Planetarium.Plugins.SolarSystem
             }
         }
 
-        private void RenderPlanet(IMapContext map, Planet planet)
+        private void RenderPlanet<TPlanet>(IMapContext map, TPlanet planet) where TPlanet : SizeableCelestialObject, IPlanet
         {
             if (!settings.Get("Planets"))
             {
@@ -732,8 +746,11 @@ namespace Planetarium.Plugins.SolarSystem
             }
         }
 
-        private void RenderPlanetMoon<TPlanetMoon>(IMapContext map, Planet planet, TPlanetMoon moon, bool hasTexture = true) where TPlanetMoon : SizeableCelestialObject, IPlanetMoon
+        private void RenderPlanetMoon<TPlanet, TPlanetMoon>(IMapContext map, TPlanet planet, TPlanetMoon moon, bool hasTexture = true) where TPlanet : SizeableCelestialObject, IPlanet where TPlanetMoon : SizeableCelestialObject, IPlanetMoon
         {
+            if (!settings.Get("Planets")) return;
+            if (!settings.Get("PlanetMoons")) return;
+
             bool isGround = settings.Get("Ground");
             bool useTextures = settings.Get("PlanetsTextures");
             double coeff = map.DiagonalCoefficient();
@@ -992,7 +1009,7 @@ namespace Planetarium.Plugins.SolarSystem
             }
         }
 
-        private void DrawPlanetGlobe(IMapContext map, Planet planet, float diam)
+        private void DrawPlanetGlobe<TPlanet>(IMapContext map, TPlanet planet, float diam) where TPlanet : SizeableCelestialObject, IPlanet
         {
             Graphics g = map.Graphics;
             float diamEquat = diam;

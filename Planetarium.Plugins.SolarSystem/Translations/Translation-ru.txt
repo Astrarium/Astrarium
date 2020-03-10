@@ -12,6 +12,7 @@ Planet.5.Name					= Юпитер
 Planet.6.Name					= Сатурн
 Planet.7.Name					= Уран
 Planet.8.Name					= Нептун
+Pluto.Name						= Плутон
 Planet.1.GenitiveName			= Меркурия
 Planet.2.GenitiveName			= Венеры
 Planet.3.GenitiveName			= Земли
