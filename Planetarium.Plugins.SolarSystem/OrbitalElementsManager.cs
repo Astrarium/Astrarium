@@ -184,7 +184,11 @@ namespace Planetarium.Plugins.SolarSystem
 
             // add correction to mean motion
             Angle.Align(MA);
-            orbit.n += MA[1] - MA[0];
+            double dn = MA[1] - MA[0];
+            if (orbit.n + dn > 0)
+            {
+                orbit.n += dn;
+            }
 
             string magLine = lines.FirstOrDefault(ln => ln.Contains("V(1,0)"));
             if (orbit.mag == 0 && !string.IsNullOrEmpty(magLine))

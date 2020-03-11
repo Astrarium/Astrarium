@@ -101,5 +101,6 @@ namespace Planetarium.Objects
         public const int SATURN     = 6;
         public const int URANUS     = 7;
         public const int NEPTUNE    = 8;
+        public const int PLUTO      = 9;
     }
 }

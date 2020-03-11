@@ -1053,6 +1053,10 @@ namespace Planetarium.Plugins.SolarSystem
                     DrawVolume(map, diam, planet.Flattening);
                 }
             }
+            else
+            {
+                DrawVolume(map, diam, planet.Flattening);
+            }
         }
 
         private void DrawVolume(IMapContext map, float diam, float flattening)
@@ -1184,8 +1188,11 @@ namespace Planetarium.Plugins.SolarSystem
                 case 8:
                     color = Color.FromArgb(54, 79, 167);
                     break;
+                case 9:
+                    color = Color.FromArgb(207, 192, 162);
+                    break;
                 default:
-                    color = Color.White;
+                    color = Color.Gray;
                     break;
             }
 

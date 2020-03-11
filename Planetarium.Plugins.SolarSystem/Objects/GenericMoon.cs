@@ -10,11 +10,6 @@ namespace Planetarium.Objects
 {
     public class GenericMoon : SizeableCelestialObject, IPlanetMoon, ISolarSystemObject, IMovingObject
     {
-        public GenericMoon()
-        {
-
-        }
-
         /// <summary>
         /// Contains data about orbit and main physical characteristics of the satellite
         /// </summary>

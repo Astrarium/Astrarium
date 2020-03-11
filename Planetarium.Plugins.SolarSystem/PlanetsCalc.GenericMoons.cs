@@ -57,7 +57,7 @@ namespace Planetarium.Plugins.SolarSystem
         private CrdsEcliptical GenericMoon_Ecliptical(SkyContext c, int id)
         {
             var moon = genericMoons.FirstOrDefault(gm => gm.Id == id);
-            var eclPlanet = moon.Planet == 9 ? c.Get(Pluto_Ecliptical) : c.Get(Planet_Ecliptical, moon.Planet);
+            var eclPlanet = moon.Planet == Planet.PLUTO ? c.Get(Pluto_Ecliptical) : c.Get(Planet_Ecliptical, moon.Planet);
             var orbit = moon.Data;
 
             if (orbit.jpl)
@@ -126,7 +126,7 @@ namespace Planetarium.Plugins.SolarSystem
         private CrdsEquatorial GenericMoon_Equatorial(SkyContext c, int id)
         {
             var moon = genericMoons.FirstOrDefault(gm => gm.Id == id);
-            double parallax = moon.Planet == 9 ? c.Get(Pluto_Parallax) : c.Get(Planet_Parallax, moon.Planet);
+            double parallax = moon.Planet == Planet.PLUTO ? c.Get(Pluto_Parallax) : c.Get(Planet_Parallax, moon.Planet);
             return c.Get(GenericMoon_Equatorial0, id).ToTopocentric(c.GeoLocation, c.SiderealTime, parallax);
         }
 
@@ -145,18 +145,10 @@ namespace Planetarium.Plugins.SolarSystem
         private float GenericMoon_Magnitude(SkyContext c, int id)
         {
             var moon = genericMoons.FirstOrDefault(gm => gm.Id == id);
-            if (moon.Data.mag == 0)
-            {
-                // consider more proper way to caclulate magnitude
-                return 20;
-            }
-            else
-            {
-                var delta = c.Get(Planet_DistanceFromEarth, moon.Planet);
-                double r = c.Get(Planet_DistanceFromSun, moon.Planet);
-                var mag0 = moon.Data.mag;
-                return GenericSatellite.Magnitude(mag0, delta, r);
-            }
+            var delta = moon.Planet == Planet.PLUTO ? c.Get(Pluto_DistanceFromEarth) : c.Get(Planet_DistanceFromEarth, moon.Planet);
+            double r = moon.Planet == Planet.PLUTO ? c.Get(Pluto_DistanceFromSun) : c.Get(Planet_DistanceFromSun, moon.Planet);
+            var mag0 = moon.Data.mag;
+            return GenericSatellite.Magnitude(mag0, delta, r);
         }
 
         public void ConfigureEphemeris(EphemerisConfig<GenericMoon> e)
