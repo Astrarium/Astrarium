@@ -124,7 +124,9 @@ namespace Planetarium.Plugins.SolarSystem
 
         public void GetInfo(CelestialObjectInfo<UranusMoon> info)
         {
-            info.SetSubtitle("Satellite of Uranus").SetTitle(info.Body.Names.First())
+            info
+            .SetSubtitle(Text.Get("Satellite.Subtitle", ("planetName", Text.Get($"Planet.7.GenitiveName"))))
+            .SetTitle(info.Body.Names.First())
 
             .AddRow("Constellation")
 

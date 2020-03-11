@@ -1,4 +1,5 @@
-﻿using Planetarium.Types.Localization;
+﻿using Planetarium.Objects;
+using Planetarium.Types.Localization;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -266,6 +267,27 @@ namespace Planetarium.Types.Themes
                 Text.Get(
                     memberInfo?.GetCustomAttribute<DescriptionAttribute>()
                     ?.Description ?? memberInfo.Name);
+        }
+    }
+
+    public class CelestialObjectToIconConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            CelestialObject body = value as CelestialObject;
+            if (body != null)
+            {
+                string key = new[] { body.GetType() }
+                     .Concat(body.GetType().GetInterfaces())
+                     .Select(inf => $"Icon{inf.Name}")
+                     .FirstOrDefault(k => Application.Current.Resources.Contains(k));
+
+                if (key != null)
+                {
+                    return Application.Current.Resources[key];
+                }                
+            }
+            return null;
         }
     }
 }

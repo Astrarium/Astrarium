@@ -165,7 +165,7 @@ namespace Planetarium.Plugins.SolarSystem
         public void GetInfo(CelestialObjectInfo<GenericMoon> info)
         {
             info
-            .SetSubtitle($"Satellite of planet {info.Body.Data.planet}")
+            .SetSubtitle(Text.Get("Satellite.Subtitle", ("planetName", Text.Get($"Planet.{info.Body.Data.planet}.GenitiveName"))))
             .SetTitle(info.Body.Names.First())
 
             .AddRow("Constellation")

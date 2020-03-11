@@ -16,7 +16,7 @@ namespace Planetarium.Objects
         /// <summary>
         /// Pluto name
         /// </summary>
-        public string Name => Text.Get($"Pluto.Name");
+        public string Name => Text.Get($"Planet.9.Name");
 
         /// <summary>
         /// Apparent topocentrical equatorial coordinates

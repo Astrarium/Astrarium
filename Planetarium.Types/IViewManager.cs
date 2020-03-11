@@ -88,7 +88,7 @@ namespace Planetarium.Types
         /// </summary>
         /// <param name="caption">Dialog title</param>
         /// <returns>Selected folder full path, if user pressed OK, null otherwise.</returns>
-        string ShowSelectFolderDialog(string caption);
+        string ShowSelectFolderDialog(string caption, string path);
 
         /// <summary>
         /// Shows date and time dialog

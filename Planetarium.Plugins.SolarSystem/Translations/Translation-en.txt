@@ -12,6 +12,7 @@ Planet.5.Name					= Jupiter
 Planet.6.Name					= Saturn
 Planet.7.Name					= Uranus
 Planet.8.Name					= Neptune
+Planet.9.Name					= Pluto
 Planet.1.GenitiveName			= Mercury
 Planet.2.GenitiveName			= Venus
 Planet.3.GenitiveName			= Earth
@@ -20,7 +21,7 @@ Planet.5.GenitiveName			= Jupiter
 Planet.6.GenitiveName			= Saturn
 Planet.7.GenitiveName			= Uranus
 Planet.8.GenitiveName			= Neptune
-Pluto.Name						= Pluto
+Planet.9.GenitiveName			= Pluto
 MarsMoon.1.Name					= Phobos
 MarsMoon.2.Name					= Deimos
 JupiterMoon.1.Name				= Io
@@ -48,6 +49,7 @@ NeptuneMoon.1.Name				= Triton
 NeptuneMoon.2.Name				= Nereid
 EarthShadow.Label				= Earth shadow
 EclipsedByJupiter				= Eclipsed by Jupiter
+Satellite.Subtitle				= Satellite of {planetName}
 
 # Ephemeris
 Planet.Horizontal				= Horizontal topocentric coordinates

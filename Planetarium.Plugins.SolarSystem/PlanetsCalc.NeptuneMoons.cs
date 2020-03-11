@@ -102,7 +102,9 @@ namespace Planetarium.Plugins.SolarSystem
 
         public void GetInfo(CelestialObjectInfo<NeptuneMoon> info)
         {
-            info.SetSubtitle("Satellite of Neptune").SetTitle(info.Body.Names.First())
+            info
+            .SetSubtitle(Text.Get("Satellite.Subtitle", ("planetName", Text.Get($"Planet.8.GenitiveName"))))
+            .SetTitle(info.Body.Names.First())
 
             .AddRow("Constellation")
 

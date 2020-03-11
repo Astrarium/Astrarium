@@ -29,6 +29,8 @@ namespace Planetarium.Plugins.Tycho2
             ));
 
             #endregion Settings
+
+            ExportResourceDictionaries("Images.xaml");
         }
     }
 }

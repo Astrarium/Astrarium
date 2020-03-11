@@ -12,7 +12,7 @@ Planet.5.Name					= Юпитер
 Planet.6.Name					= Сатурн
 Planet.7.Name					= Уран
 Planet.8.Name					= Нептун
-Pluto.Name						= Плутон
+Planet.9.Name					= Плутон
 Planet.1.GenitiveName			= Меркурия
 Planet.2.GenitiveName			= Венеры
 Planet.3.GenitiveName			= Земли
@@ -21,6 +21,7 @@ Planet.5.GenitiveName			= Юпитера
 Planet.6.GenitiveName			= Сатурна
 Planet.7.GenitiveName			= Урана
 Planet.8.GenitiveName			= Нептуна
+Planet.9.GenitiveName			= Плутона
 MarsMoon.1.Name					= Фобос
 MarsMoon.2.Name					= Деймос
 JupiterMoon.1.Name				= Ио
@@ -48,6 +49,7 @@ NeptuneMoon.1.Name				= Тритон
 NeptuneMoon.2.Name				= Нереида
 EarthShadow.Label				= Тень Земли
 EclipsedByJupiter				= В тени Юпитера
+Satellite.Subtitle				= Спутник {planetName}
 
 # Ephemeris
 Planet.Constellation			= В созвездии

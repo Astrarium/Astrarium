@@ -21,9 +21,10 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Label FontSize="8" Grid.Row="0" Padding="5 5 5 0" Content="{Binding Subtitle}" />
-        <Label FontFamily="Times New Roman" FontWeight="Bold" Grid.Row="1" Content="{Binding Title}" />
 
+        <Label FontFamily="Times New Roman" Padding="5 5 5 0" FontWeight="Bold" Grid.Row="0" Content="{Binding Title}" />
+        <Label FontSize="8" Grid.Row="1" Content="{Binding Subtitle}" />
+        
         <Separator Grid.Row="2" Height="1" />
 
         <ScrollViewer

@@ -90,8 +90,8 @@ namespace Planetarium.Plugins.SolarSystem
             e["Rectangular.Z"] = (c, jm) => c.Get(JupiterMoon_Rectangular, jm.Number).Z;
             e["Magnitude"] = (c, jm) => c.Get(JupiterMoon_Magnitude, jm.Number);
 
-            e["Phase"] = (c, jm) => c.Get(Planet_Phase, jm.Number);
-            e["PhaseAngle"] = (c, jm) => c.Get(Planet_PhaseAngle, jm.Number);
+            e["Phase"] = (c, jm) => c.Get(Planet_Phase, Planet.JUPITER);
+            e["PhaseAngle"] = (c, jm) => c.Get(Planet_PhaseAngle, Planet.JUPITER);
             e["AngularDiameter"] = (c, jm) => c.Get(JupiterMoon_Semidiameter, jm.Number) * 2 / 3600.0;
             e["Appearance.CM"] = (c, jm) => c.Get(JupiterMoon_CentralMeridian, jm.Number);
 
@@ -103,7 +103,9 @@ namespace Planetarium.Plugins.SolarSystem
 
         public void GetInfo(CelestialObjectInfo<JupiterMoon> info)
         {
-            info.SetSubtitle("Satellite of Jupiter").SetTitle(info.Body.Names.First())
+            info
+            .SetSubtitle(Text.Get("Satellite.Subtitle", ("planetName", Text.Get($"Planet.5.GenitiveName"))))
+            .SetTitle(info.Body.Names.First())
 
             .AddRow("Constellation")
 

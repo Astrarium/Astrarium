@@ -14,4 +14,18 @@
     <ProjectReference Include="..\Planetarium.Types\Planetarium.Types.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Page Include="Images.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System.Windows" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+
 </Project>

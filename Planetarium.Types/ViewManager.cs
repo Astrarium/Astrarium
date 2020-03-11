@@ -88,9 +88,9 @@ namespace Planetarium.Types
             return viewManager.ShowOpenFileDialog(caption, filter);
         }
 
-        public static string ShowSelectFolderDialog(string caption)
+        public static string ShowSelectFolderDialog(string caption, string path)
         {
-            return viewManager.ShowSelectFolderDialog(caption);
+            return viewManager.ShowSelectFolderDialog(caption, path);
         }
 
         /// <summary>

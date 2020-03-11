@@ -15,7 +15,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <c:FoldersTreeView SelectedPath="C:\" />
+        <c:FoldersTreeView SelectedPath="{Binding SelectedPath}" />
 
         <StackPanel    
             Grid.Row="1"

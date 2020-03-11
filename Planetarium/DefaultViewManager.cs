@@ -241,13 +241,14 @@ namespace Planetarium
             return (dialog.ShowDialog() ?? false) ? dialog.FileName : null;
         }
 
-        public string ShowSelectFolderDialog(string caption)
+        public string ShowSelectFolderDialog(string caption, string path)
         {
             //var dialog = new WF.FolderBrowserDialog();
             //dialog.Description = caption;
             //return (WF.DialogResult.OK == dialog.ShowDialog()) ? dialog.SelectedPath : null;
             var vm = new SelectFolderVM();
-            return (ShowDialog(vm) ?? false) ? "" : null;
+            vm.SelectedPath = path;
+            return (ShowDialog(vm) ?? false) ? vm.SelectedPath : null;
         }
 
         public double? ShowDateDialog(double jd, double utcOffset, DateOptions displayMode = DateOptions.DateTime)
