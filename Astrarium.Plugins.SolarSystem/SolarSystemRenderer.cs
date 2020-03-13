@@ -644,8 +644,10 @@ namespace Astrarium.Plugins.SolarSystem
                 {
                     PointF p = map.Project(planet.Horizontal);
                     g.FillEllipse(GetPlanetColor(map, planet.Number), p.X - size / 2, p.Y - size / 2, size, size);
-
-                    map.DrawObjectCaption(fontLabel, brushLabel, planet.Name, p, size);
+                    if (settings.Get("PlanetsLabels"))
+                    {
+                        map.DrawObjectCaption(fontLabel, brushLabel, planet.Name, p, size);
+                    }
                     map.AddDrawnObject(planet);
                 }
 
@@ -729,7 +731,10 @@ namespace Astrarium.Plugins.SolarSystem
                         g.ResetTransform();
                     }
 
-                    map.DrawObjectCaption(fontLabel, brushLabel, planet.Name, p, diam);
+                    if (settings.Get("PlanetsLabels"))
+                    {
+                        map.DrawObjectCaption(fontLabel, brushLabel, planet.Name, p, diam);                       
+                    }
                     map.AddDrawnObject(planet);
 
                     if (planet.Number == Planet.MARS)

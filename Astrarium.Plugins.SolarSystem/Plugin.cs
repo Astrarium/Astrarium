@@ -20,6 +20,7 @@ namespace Astrarium.Plugins.SolarSystem
             AddSetting(new SettingItem("SunTexturePath", "https://soho.nascom.nasa.gov/data/REPROCESSING/Completed/{yyyy}/hmiigr/{yyyy}{MM}{dd}/{yyyy}{MM}{dd}_0000_hmiigr_512.jpg", "Sun", s => s.Get("Sun") && s.Get("SunTexture")));
 
             AddSetting(new SettingItem("Planets", true, "Planets"));
+            AddSetting(new SettingItem("PlanetsLabels", true, "Planets", s => s.Get("Planets")));
             AddSetting(new SettingItem("PlanetsTextures", true, "Planets", s => s.Get("Planets")));
             AddSetting(new SettingItem("PlanetsSurfaceFeatures", true, "Planets", s => s.Get("Planets") && s.Get("PlanetsTextures")));
             AddSetting(new SettingItem("PlanetsMartianPolarCaps", true, "Planets", s => s.Get("Planets") && s.Get("PlanetsTextures")));
@@ -59,13 +60,13 @@ namespace Astrarium.Plugins.SolarSystem
 
         public enum TextureQuality
         {
-            [Description("Low")]
+            [Description("Settings.MoonTextureQuality.Low")]
             Low = 2,
 
-            [Description("Normal")]
+            [Description("Settings.MoonTextureQuality.Normal")]
             Normal = 4,
 
-            [Description("High")]
+            [Description("Settings.MoonTextureQuality.High")]
             High = 8
         }
     }
