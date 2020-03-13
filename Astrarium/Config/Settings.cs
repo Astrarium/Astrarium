@@ -20,7 +20,7 @@ namespace Astrarium.Config
         /// <summary>
         /// Path to store apllication settings
         /// </summary>
-        private readonly string SETTINGS_PATH = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium.Algorithms", "Settings.json");
+        private readonly string SETTINGS_PATH = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Settings.json");
 
         /// <summary>
         /// Contains settings values

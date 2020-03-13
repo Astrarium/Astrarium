@@ -17,7 +17,7 @@ namespace Astrarium.Plugins.SolarSystem
 {
     internal class OrbitalElementsManager
     {
-        private static readonly string OrbitalElementsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium.Algorithms", "OrbitalElements");
+        private static readonly string OrbitalElementsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "OrbitalElements");
 
         private ISettings settings;
 

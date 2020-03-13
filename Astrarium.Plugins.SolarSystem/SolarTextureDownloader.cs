@@ -19,7 +19,7 @@ namespace Astrarium.Renderers
     internal class SolarTextureDownloader
     {
         private static readonly string TempPath = Path.GetTempPath();
-        private static readonly string SunImagesPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium.Algorithms", "SunImages");
+        private static readonly string SunImagesPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "SunImages");
 
         internal SolarTextureDownloader()
         {

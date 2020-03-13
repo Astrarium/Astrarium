@@ -19,7 +19,7 @@ namespace Astrarium.Logging
         /// <summary>
         /// Path to log file
         /// </summary>
-        private readonly string LOG_PATH = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium.Algorithms", "Astrarium.log");
+        private readonly string LOG_PATH = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Astrarium.log");
 
         /// <summary>
         /// log4net logger instance 
