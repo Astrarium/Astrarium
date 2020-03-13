@@ -8,6 +8,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AssemblyName>Planetarium</AssemblyName>
     <RootNamespace>Planetarium</RootNamespace>
+    <ApplicationIcon>Astrarium.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -45,7 +46,7 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
-
+  
   <ItemGroup>
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />

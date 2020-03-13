@@ -3,73 +3,164 @@
 
     <DrawingImage x:Key="IconSun">
         <DrawingImage.Drawing>
-            <DrawingGroup ClipGeometry="M0,0 V125 H100 V0 H0 Z">
-                <DrawingGroup.Transform>
-                    <TranslateTransform X="1004.8607" Y="1049.874" />
-                </DrawingGroup.Transform>
-                <DrawingGroup Opacity="1" Transform="1,0,0,1,0,-952.36216">
-                    <DrawingGroup Transform="-0.70710678,0.70710678,-0.70710678,-0.70710678,0,0">
-                        <GeometryDrawing Brush="White">
-                            <GeometryDrawing.Geometry>
-                                <EllipseGeometry RadiusX="27.3121" RadiusY="27.3121" Center="673.4218,-744.1324" />
-                            </GeometryDrawing.Geometry>
-                        </GeometryDrawing>
-                    </DrawingGroup>
-                    <DrawingGroup Transform="-0.70710678,0.70710678,-0.70710678,-0.70710678,0,0">
-                        <GeometryDrawing Brush="#FF000000">
-                            <GeometryDrawing.Geometry>
-                                <RectangleGeometry RadiusX="2.4985" RadiusY="2.4985" Rect="670.9232,-791.6442,4.997,14.9911" />
-                            </GeometryDrawing.Geometry>
-                        </GeometryDrawing>
-                    </DrawingGroup>
-                    <DrawingGroup Transform="-0.70710678,0.70710678,-0.70710678,-0.70710678,0,0">
-                        <GeometryDrawing Brush="White">
-                            <GeometryDrawing.Geometry>
-                                <RectangleGeometry RadiusX="2.4985" RadiusY="2.4985" Rect="670.9232,-711.6117,4.997,14.9911" />
-                            </GeometryDrawing.Geometry>
-                        </GeometryDrawing>
-                    </DrawingGroup>
-                    <DrawingGroup Transform="-0.70710678,-0.70710678,0.70710678,-0.70710678,0,0">
-                        <GeometryDrawing Brush="White">
-                            <GeometryDrawing.Geometry>
-                                <RectangleGeometry RadiusX="2.4985" RadiusY="2.4985" Rect="-746.631,-720.9335,4.997,14.9911" />
-                            </GeometryDrawing.Geometry>
-                        </GeometryDrawing>
-                    </DrawingGroup>
-                    <DrawingGroup Transform="-0.70710678,-0.70710678,0.70710678,-0.70710678,0,0">
-                        <GeometryDrawing Brush="White">
-                            <GeometryDrawing.Geometry>
-                                <RectangleGeometry RadiusX="2.4985" RadiusY="2.4985" Rect="-746.631,-640.9011,4.997,14.9911" />
-                            </GeometryDrawing.Geometry>
-                        </GeometryDrawing>
-                    </DrawingGroup>
-                    <DrawingGroup Transform="-1,0,0,-1,0,0">
-                        <GeometryDrawing Brush="White">
-                            <GeometryDrawing.Geometry>
-                                <RectangleGeometry RadiusX="2.4985" RadiusY="2.4985" Rect="-52.4985,-969.8414,4.997,14.9911" />
-                            </GeometryDrawing.Geometry>
-                        </GeometryDrawing>
-                    </DrawingGroup>
-                    <DrawingGroup Transform="-1,0,0,-1,0,0">
-                        <GeometryDrawing Brush="White">
-                            <GeometryDrawing.Geometry>
-                                <RectangleGeometry RadiusX="2.4985" RadiusY="2.4985" Rect="-52.4985,-1049.874,4.997,14.9911" />
-                            </GeometryDrawing.Geometry>
-                        </GeometryDrawing>
-                    </DrawingGroup>
-                    <DrawingGroup Transform="0,-1,1,0,0,0">
-                        <GeometryDrawing Brush="White">
-                            <GeometryDrawing.Geometry>
-                                <RectangleGeometry RadiusX="2.4985" RadiusY="2.4985" Rect="-1004.8607,82.5207,4.997,14.9911" />
-                            </GeometryDrawing.Geometry>
-                        </GeometryDrawing>
-                    </DrawingGroup>
-                    <DrawingGroup Transform="0,-1,1,0,0,0">
-                        <GeometryDrawing Brush="White">
-                            <GeometryDrawing.Geometry>
-                                <RectangleGeometry RadiusX="2.4985" RadiusY="2.4985" Rect="-1004.8607,2.4882,4.997,14.9911" />
-                            </GeometryDrawing.Geometry>
-                        </GeometryDrawing>
+            <DrawingGroup ClipGeometry="M0,0 V520 H520 V0 H0 Z">
+                <DrawingGroup Opacity="1">
+                    <DrawingGroup Opacity="1">
+                        <DrawingGroup Opacity="1">
+                            <DrawingGroup Opacity="1">
+                                <GeometryDrawing Brush="White" Geometry="F1 M520,520z M0,0z M358.88,358.88C413.49,304.27 413.49,215.73 358.88,161.12 304.27,106.51 215.73,106.51 161.12,161.12 106.51,215.73 106.51,304.27 161.12,358.88 215.73,413.49 304.27,413.49 358.88,358.88z" />
+                                <DrawingGroup Opacity="1">
+                                    <GeometryDrawing Geometry="F1 M520,520z M0,0z M358.88,358.88C413.49,304.27 413.49,215.73 358.88,161.12 304.27,106.51 215.73,106.51 161.12,161.12 106.51,215.73 106.51,304.27 161.12,358.88 215.73,413.49 304.27,413.49 358.88,358.88z">
+                                        <GeometryDrawing.Brush>
+                                            <SolidColorBrush Color="White" Opacity="0" />
+                                        </GeometryDrawing.Brush>
+                                        <GeometryDrawing.Pen>
+                                            <Pen Thickness="1" StartLineCap="Flat" EndLineCap="Flat" LineJoin="Miter">
+                                                <Pen.Brush>
+                                                    <SolidColorBrush Color="White" Opacity="0" />
+                                                </Pen.Brush>
+                                            </Pen>
+                                        </GeometryDrawing.Pen>
+                                    </GeometryDrawing>
+                                </DrawingGroup>
+                            </DrawingGroup>
+                            <DrawingGroup Opacity="1">
+                                <GeometryDrawing Brush="White" Geometry="F1 M520,520z M0,0z M432.01,432.01C425.98,438.04 419.95,438.04 413.92,432.01 392.21,410.3 380.15,398.24 377.74,395.83 371.71,389.8 371.71,383.77 377.74,377.74 377.74,377.74 377.74,377.74 377.74,377.74 383.77,371.71 389.8,371.71 395.83,377.74 417.54,399.45 429.6,411.51 432.01,413.92 438.04,419.95 438.04,425.98 432.01,432.01 432.01,432.01 432.01,432.01 432.01,432.01z" />
+                                <DrawingGroup Opacity="1">
+                                    <GeometryDrawing Geometry="F1 M520,520z M0,0z M432.01,432.01C425.98,438.04 419.95,438.04 413.92,432.01 392.21,410.3 380.15,398.24 377.74,395.83 371.71,389.8 371.71,383.77 377.74,377.74 377.74,377.74 377.74,377.74 377.74,377.74 383.77,371.71 389.8,371.71 395.83,377.74 417.54,399.45 429.6,411.51 432.01,413.92 438.04,419.95 438.04,425.98 432.01,432.01 432.01,432.01 432.01,432.01 432.01,432.01z">
+                                        <GeometryDrawing.Brush>
+                                            <SolidColorBrush Color="White" Opacity="0" />
+                                        </GeometryDrawing.Brush>
+                                        <GeometryDrawing.Pen>
+                                            <Pen Thickness="1" StartLineCap="Flat" EndLineCap="Flat" LineJoin="Miter">
+                                                <Pen.Brush>
+                                                    <SolidColorBrush Color="White" Opacity="0" />
+                                                </Pen.Brush>
+                                            </Pen>
+                                        </GeometryDrawing.Pen>
+                                    </GeometryDrawing>
+                                </DrawingGroup>
+                            </DrawingGroup>
+                            <DrawingGroup Opacity="1">
+                                <GeometryDrawing Brush="White" Geometry="F1 M520,520z M0,0z M142.26,142.26C136.23,148.29 130.2,148.29 124.17,142.26 102.46,120.55 90.4,108.49 87.99,106.08 81.96,100.05 81.96,94.02 87.99,87.99 87.99,87.99 87.99,87.99 87.99,87.99 94.02,81.96 100.05,81.96 106.08,87.99 127.79,109.7 139.85,121.76 142.26,124.17 148.29,130.2 148.29,136.23 142.26,142.26 142.26,142.26 142.26,142.26 142.26,142.26z" />
+                                <DrawingGroup Opacity="1">
+                                    <GeometryDrawing Geometry="F1 M520,520z M0,0z M142.26,142.26C136.23,148.29 130.2,148.29 124.17,142.26 102.46,120.55 90.4,108.49 87.99,106.08 81.96,100.05 81.96,94.02 87.99,87.99 87.99,87.99 87.99,87.99 87.99,87.99 94.02,81.96 100.05,81.96 106.08,87.99 127.79,109.7 139.85,121.76 142.26,124.17 148.29,130.2 148.29,136.23 142.26,142.26 142.26,142.26 142.26,142.26 142.26,142.26z">
+                                        <GeometryDrawing.Brush>
+                                            <SolidColorBrush Color="White" Opacity="0" />
+                                        </GeometryDrawing.Brush>
+                                        <GeometryDrawing.Pen>
+                                            <Pen Thickness="1" StartLineCap="Flat" EndLineCap="Flat" LineJoin="Miter">
+                                                <Pen.Brush>
+                                                    <SolidColorBrush Color="White" Opacity="0" />
+                                                </Pen.Brush>
+                                            </Pen>
+                                        </GeometryDrawing.Pen>
+                                    </GeometryDrawing>
+                                </DrawingGroup>
+                            </DrawingGroup>
+                            <DrawingGroup Opacity="1">
+                                <GeometryDrawing Brush="White" Geometry="F1 M520,520z M0,0z M87.99,432.01C81.96,425.98 81.96,419.95 87.99,413.92 109.7,392.21 121.76,380.15 124.17,377.74 130.2,371.71 136.23,371.71 142.26,377.74 142.26,377.74 142.26,377.74 142.26,377.74 148.29,383.77 148.29,389.8 142.26,395.83 120.55,417.54 108.49,429.6 106.08,432.01 100.05,438.04 94.02,438.04 87.99,432.01 87.99,432.01 87.99,432.01 87.99,432.01z" />
+                                <DrawingGroup Opacity="1">
+                                    <GeometryDrawing Geometry="F1 M520,520z M0,0z M87.99,432.01C81.96,425.98 81.96,419.95 87.99,413.92 109.7,392.21 121.76,380.15 124.17,377.74 130.2,371.71 136.23,371.71 142.26,377.74 142.26,377.74 142.26,377.74 142.26,377.74 148.29,383.77 148.29,389.8 142.26,395.83 120.55,417.54 108.49,429.6 106.08,432.01 100.05,438.04 94.02,438.04 87.99,432.01 87.99,432.01 87.99,432.01 87.99,432.01z">
+                                        <GeometryDrawing.Brush>
+                                            <SolidColorBrush Color="White" Opacity="0" />
+                                        </GeometryDrawing.Brush>
+                                        <GeometryDrawing.Pen>
+                                            <Pen Thickness="1" StartLineCap="Flat" EndLineCap="Flat" LineJoin="Miter">
+                                                <Pen.Brush>
+                                                    <SolidColorBrush Color="White" Opacity="0" />
+                                                </Pen.Brush>
+                                            </Pen>
+                                        </GeometryDrawing.Pen>
+                                    </GeometryDrawing>
+                                </DrawingGroup>
+                            </DrawingGroup>
+                            <DrawingGroup Opacity="1">
+                                <GeometryDrawing Brush="White" Geometry="F1 M520,520z M0,0z M377.74,142.26C371.71,136.23 371.71,130.2 377.74,124.17 399.45,102.46 411.51,90.4 413.92,87.99 419.95,81.96 425.98,81.96 432.01,87.99 432.01,87.99 432.01,87.99 432.01,87.99 438.04,94.02 438.04,100.05 432.01,106.08 410.3,127.79 398.24,139.85 395.83,142.26 389.8,148.29 383.77,148.29 377.74,142.26 377.74,142.26 377.74,142.26 377.74,142.26z" />
+                                <DrawingGroup Opacity="1">
+                                    <GeometryDrawing Geometry="F1 M520,520z M0,0z M377.74,142.26C371.71,136.23 371.71,130.2 377.74,124.17 399.45,102.46 411.51,90.4 413.92,87.99 419.95,81.96 425.98,81.96 432.01,87.99 432.01,87.99 432.01,87.99 432.01,87.99 438.04,94.02 438.04,100.05 432.01,106.08 410.3,127.79 398.24,139.85 395.83,142.26 389.8,148.29 383.77,148.29 377.74,142.26 377.74,142.26 377.74,142.26 377.74,142.26z">
+                                        <GeometryDrawing.Brush>
+                                            <SolidColorBrush Color="White" Opacity="0" />
+                                        </GeometryDrawing.Brush>
+                                        <GeometryDrawing.Pen>
+                                            <Pen Thickness="1" StartLineCap="Flat" EndLineCap="Flat" LineJoin="Miter">
+                                                <Pen.Brush>
+                                                    <SolidColorBrush Color="White" Opacity="0" />
+                                                </Pen.Brush>
+                                            </Pen>
+                                        </GeometryDrawing.Pen>
+                                    </GeometryDrawing>
+                                </DrawingGroup>
+                            </DrawingGroup>
+                            <DrawingGroup Opacity="1">
+                                <GeometryDrawing Brush="White" Geometry="F1 M520,520z M0,0z M260,93.49C251.47,93.49 247.21,89.23 247.21,80.7 247.21,50 247.21,32.94 247.21,29.53 247.21,21 251.47,16.74 260,16.74 260,16.74 260,16.74 260,16.74 268.53,16.74 272.79,21 272.79,29.53 272.79,60.23 272.79,77.29 272.79,80.7 272.79,89.23 268.53,93.49 260,93.49 260,93.49 260,93.49 260,93.49z" />
+                                <DrawingGroup Opacity="1">
+                                    <GeometryDrawing Geometry="F1 M520,520z M0,0z M260,93.49C251.47,93.49 247.21,89.23 247.21,80.7 247.21,50 247.21,32.94 247.21,29.53 247.21,21 251.47,16.74 260,16.74 260,16.74 260,16.74 260,16.74 268.53,16.74 272.79,21 272.79,29.53 272.79,60.23 272.79,77.29 272.79,80.7 272.79,89.23 268.53,93.49 260,93.49 260,93.49 260,93.49 260,93.49z">
+                                        <GeometryDrawing.Brush>
+                                            <SolidColorBrush Color="White" Opacity="0" />
+                                        </GeometryDrawing.Brush>
+                                        <GeometryDrawing.Pen>
+                                            <Pen Thickness="1" StartLineCap="Flat" EndLineCap="Flat" LineJoin="Miter">
+                                                <Pen.Brush>
+                                                    <SolidColorBrush Color="White" Opacity="0" />
+                                                </Pen.Brush>
+                                            </Pen>
+                                        </GeometryDrawing.Pen>
+                                    </GeometryDrawing>
+                                </DrawingGroup>
+                            </DrawingGroup>
+                            <DrawingGroup Opacity="1">
+                                <GeometryDrawing Brush="White" Geometry="F1 M520,520z M0,0z M260,503.26C251.47,503.26 247.21,499 247.21,490.47 247.21,459.77 247.21,442.71 247.21,439.3 247.21,430.77 251.47,426.51 260,426.51 260,426.51 260,426.51 260,426.51 268.53,426.51 272.79,430.77 272.79,439.3 272.79,470 272.79,487.06 272.79,490.47 272.79,499 268.53,503.26 260,503.26 260,503.26 260,503.26 260,503.26z" />
+                                <DrawingGroup Opacity="1">
+                                    <GeometryDrawing Geometry="F1 M520,520z M0,0z M260,503.26C251.47,503.26 247.21,499 247.21,490.47 247.21,459.77 247.21,442.71 247.21,439.3 247.21,430.77 251.47,426.51 260,426.51 260,426.51 260,426.51 260,426.51 268.53,426.51 272.79,430.77 272.79,439.3 272.79,470 272.79,487.06 272.79,490.47 272.79,499 268.53,503.26 260,503.26 260,503.26 260,503.26 260,503.26z">
+                                        <GeometryDrawing.Brush>
+                                            <SolidColorBrush Color="White" Opacity="0" />
+                                        </GeometryDrawing.Brush>
+                                        <GeometryDrawing.Pen>
+                                            <Pen Thickness="1" StartLineCap="Flat" EndLineCap="Flat" LineJoin="Miter">
+                                                <Pen.Brush>
+                                                    <SolidColorBrush Color="White" Opacity="0" />
+                                                </Pen.Brush>
+                                            </Pen>
+                                        </GeometryDrawing.Pen>
+                                    </GeometryDrawing>
+                                </DrawingGroup>
+                            </DrawingGroup>
+                            <DrawingGroup Opacity="1">
+                                <GeometryDrawing Brush="White" Geometry="F1 M520,520z M0,0z M426.51,260C426.51,251.47 430.77,247.21 439.3,247.21 470,247.21 487.06,247.21 490.47,247.21 499,247.21 503.26,251.47 503.26,260 503.26,260 503.26,260 503.26,260 503.26,268.53 499,272.79 490.47,272.79 459.77,272.79 442.71,272.79 439.3,272.79 430.77,272.79 426.51,268.53 426.51,260 426.51,260 426.51,260 426.51,260z" />
+                                <DrawingGroup Opacity="1">
+                                    <GeometryDrawing Geometry="F1 M520,520z M0,0z M426.51,260C426.51,251.47 430.77,247.21 439.3,247.21 470,247.21 487.06,247.21 490.47,247.21 499,247.21 503.26,251.47 503.26,260 503.26,260 503.26,260 503.26,260 503.26,268.53 499,272.79 490.47,272.79 459.77,272.79 442.71,272.79 439.3,272.79 430.77,272.79 426.51,268.53 426.51,260 426.51,260 426.51,260 426.51,260z">
+                                        <GeometryDrawing.Brush>
+                                            <SolidColorBrush Color="White" Opacity="0" />
+                                        </GeometryDrawing.Brush>
+                                        <GeometryDrawing.Pen>
+                                            <Pen Thickness="1" StartLineCap="Flat" EndLineCap="Flat" LineJoin="Miter">
+                                                <Pen.Brush>
+                                                    <SolidColorBrush Color="White" Opacity="0" />
+                                                </Pen.Brush>
+                                            </Pen>
+                                        </GeometryDrawing.Pen>
+                                    </GeometryDrawing>
+                                </DrawingGroup>
+                            </DrawingGroup>
+                            <DrawingGroup Opacity="1">
+                                <GeometryDrawing Brush="White" Geometry="F1 M520,520z M0,0z M16.74,260C16.74,251.47 21,247.21 29.53,247.21 60.23,247.21 77.29,247.21 80.7,247.21 89.23,247.21 93.49,251.47 93.49,260 93.49,260 93.49,260 93.49,260 93.49,268.53 89.23,272.79 80.7,272.79 50,272.79 32.94,272.79 29.53,272.79 21,272.79 16.74,268.53 16.74,260 16.74,260 16.74,260 16.74,260z" />
+                                <DrawingGroup Opacity="1">
+                                    <GeometryDrawing Geometry="F1 M520,520z M0,0z M16.74,260C16.74,251.47 21,247.21 29.53,247.21 60.23,247.21 77.29,247.21 80.7,247.21 89.23,247.21 93.49,251.47 93.49,260 93.49,260 93.49,260 93.49,260 93.49,268.53 89.23,272.79 80.7,272.79 50,272.79 32.94,272.79 29.53,272.79 21,272.79 16.74,268.53 16.74,260 16.74,260 16.74,260 16.74,260z">
+                                        <GeometryDrawing.Brush>
+                                            <SolidColorBrush Color="White" Opacity="0" />
+                                        </GeometryDrawing.Brush>
+                                        <GeometryDrawing.Pen>
+                                            <Pen Thickness="1" StartLineCap="Flat" EndLineCap="Flat" LineJoin="Miter">
+                                                <Pen.Brush>
+                                                    <SolidColorBrush Color="White" Opacity="0" />
+                                                </Pen.Brush>
+                                            </Pen>
+                                        </GeometryDrawing.Pen>
+                                    </GeometryDrawing>
+                                </DrawingGroup>
+                            </DrawingGroup>
+                        </DrawingGroup>
                     </DrawingGroup>
                 </DrawingGroup>
             </DrawingGroup>
@@ -78,29 +169,86 @@
 
     <DrawingImage x:Key="IconMoon">
         <DrawingImage.Drawing>
-            <DrawingGroup ClipGeometry="M0,0 V40 H32 V0 H0 Z">
-                <GeometryDrawing Brush="White" Geometry="F1 M32,40z M0,0z M24.524,19.094C23.28,19.767 21.872,20.122 20.452,20.122 15.724,20.122 11.878,16.275 11.878,11.548 11.878,10.128 12.233,8.72 12.906,7.476 13.376,6.606 12.423,5.65 11.552,6.12 8.128,7.964 6,11.529 6,15.426 6,21.257 10.743,26 16.574,26 20.47,26 24.036,23.872 25.881,20.448 26.351,19.571 25.388,18.622 24.524,19.094z" />
+            <DrawingGroup ClipGeometry="M0,0 V520 H520 V0 H0 Z">
+                <DrawingGroup Opacity="1">
+                    <GeometryDrawing Brush="White" Geometry="F1 M520,520z M0,0z M348.98,327.69C254.44,327.69 177.53,250.77 177.53,156.25 177.53,127.86 184.63,99.7 198.09,74.83 207.49,57.43 188.43,38.32 171.02,47.71 102.55,84.59 60,155.87 60,233.79 60,350.39 154.84,445.22 271.43,445.22 349.34,445.22 420.64,402.67 457.53,334.21 466.93,316.67 447.67,297.7 430.4,307.14 405.52,320.59 377.37,327.69 348.98,327.69z" />
+                    <DrawingGroup Opacity="1">
+                        <GeometryDrawing Geometry="F1 M520,520z M0,0z M348.98,327.69C254.44,327.69 177.53,250.77 177.53,156.25 177.53,127.86 184.63,99.7 198.09,74.83 207.49,57.43 188.43,38.32 171.02,47.71 102.55,84.59 60,155.87 60,233.79 60,350.39 154.84,445.22 271.43,445.22 349.34,445.22 420.64,402.67 457.53,334.21 466.93,316.67 447.67,297.7 430.4,307.14 405.52,320.59 377.37,327.69 348.98,327.69z">
+                            <GeometryDrawing.Brush>
+                                <SolidColorBrush Color="White" Opacity="0" />
+                            </GeometryDrawing.Brush>
+                            <GeometryDrawing.Pen>
+                                <Pen Thickness="1" StartLineCap="Flat" EndLineCap="Flat" LineJoin="Miter">
+                                    <Pen.Brush>
+                                        <SolidColorBrush Color="White" Opacity="0" />
+                                    </Pen.Brush>
+                                </Pen>
+                            </GeometryDrawing.Pen>
+                        </GeometryDrawing>
+                    </DrawingGroup>
+                </DrawingGroup>
             </DrawingGroup>
         </DrawingImage.Drawing>
     </DrawingImage>
 
     <DrawingImage x:Key="IconPlanet">
         <DrawingImage.Drawing>
-            <DrawingGroup ClipGeometry="M0,0 V25 H20 V0 H0 Z">
-                <DrawingGroup.Transform>
-                    <TranslateTransform X="0.00416667852550745" Y="0" />
-                </DrawingGroup.Transform>
-                <GeometryDrawing Brush="White" Geometry="F1 M20,25z M0,0z M19.3,0.7C17.5,-1 14,0.8 11.8,2.2 11.3,2.1 10.6,2 10,2 5.6,2 2,5.6 2,10 2,10.6 2.1,11.3 2.2,11.9 -0.0999999999999996,15.4 -0.6,18 0.7,19.3 1.1,19.7 1.7,20 2.6,20 3.5,20 4.7,19.7 6.3,18.9 6.9,18.6 7.5,18.2 8.1,17.8 8.8,17.9 9.4,18 10,18 14.4,18 18,14.4 18,10 18,9.4 17.9,8.8 17.8,8.2 18.2,7.6 18.6,6.9 18.9,6.4 20.6,3 20,1.5 19.3,0.7z M5.4,17.1C3.2,18.2 2.3,18 2.1,17.9 1.8,17.6 1.9,16.4 3.1,14.2 3.8,15.3 4.7,16.2 5.8,16.9 5.7,16.9 5.5,17 5.4,17.1z M7.8,15.6C5.6,14.7 4,12.5 4,10 4,6.7 6.7,4 10,4 12.5,4 14.7,5.6 15.6,7.8 14.6,9.2 13.4,10.6 12,12 10.6,13.4 9.2,14.6 7.8,15.6z M10.6,16C11.5,15.2 12.5,14.4 13.4,13.5 14.3,12.6 15.2,11.6 16,10.7 15.7,13.4 13.4,15.7 10.6,16z M17.1,5.4C17,5.6 16.9,5.7 16.8,5.9 16.1,4.8 15.2,3.9 14.1,3.2 16.3,1.9 17.6,1.9 17.8,2.2 18,2.3 18.2,3.2 17.1,5.4z" />
+            <DrawingGroup ClipGeometry="M0,0 V520 H520 V0 H0 Z">
+                <DrawingGroup Opacity="1">
+                    <DrawingGroup Opacity="1">
+                        <DrawingGroup Opacity="1">
+                            <GeometryDrawing Brush="White" Geometry="F1 M520,520z M0,0z M329.42,98.8C319.14,95 304.61,90.52 291.87,88.5 198.47,73.71 109.94,138.03 95.14,231.44 93.12,244.17 92.89,259.37 93,272.44 32.4,339.01 13.05,392.53 36.27,424.49 43.42,434.33 55.15,442.72 74.26,445.74 93.36,448.77 119.85,446.44 156.5,434.83 170.25,430.48 184.33,424.01 198.41,417.53 212.94,422.01 225.34,426.15 238.08,428.17 331.49,442.96 420.02,378.64 434.81,285.23 436.83,272.5 436.72,259.42 436.62,246.35 447.13,234.96 457.97,221.44 466.02,211.84 513.54,145.37 505.85,111.51 493.68,92.17 461.18,50.03 380.83,76.48 329.42,98.8z M70.7,399.48C65.34,392.1 71.5,366.96 104.37,324.3 115.53,350 131.61,372.13 152.61,390.69 150.49,390.36 145.91,391.81 143.45,393.59 93.05,409.55 74.61,402.28 70.7,399.48z M137.6,238.16C148.7,168.1 215.09,119.86 285.15,130.96 338.22,139.37 379.55,180.73 391.26,230.46 365.32,256.82 335.14,282.5 300.71,307.52 266.28,332.53 232.53,353.3 199.44,369.82 155.76,343.32 129.19,291.23 137.6,238.16z M325.39,344.07C347.52,327.99 369.99,309.79 390,293.37 374.55,349.68 317.99,390.77 257.54,387.73 279.34,373.77 303.25,360.15 325.39,344.07z M423.12,194.16C411.96,168.45 395.88,146.32 374.88,127.76 425.96,107.56 453.55,111.93 456.79,118.97 460.7,121.77 461.92,141.55 431.17,184.55 428.37,188.46 425.92,190.25 423.12,194.16z" />
+                            <DrawingGroup Opacity="1">
+                                <GeometryDrawing Geometry="F1 M520,520z M0,0z M329.42,98.8C319.14,95 304.61,90.52 291.87,88.5 198.47,73.71 109.94,138.03 95.14,231.44 93.12,244.17 92.89,259.37 93,272.44 32.4,339.01 13.05,392.53 36.27,424.49 43.42,434.33 55.15,442.72 74.26,445.74 93.36,448.77 119.85,446.44 156.5,434.83 170.25,430.48 184.33,424.01 198.41,417.53 212.94,422.01 225.34,426.15 238.08,428.17 331.49,442.96 420.02,378.64 434.81,285.23 436.83,272.5 436.72,259.42 436.62,246.35 447.13,234.96 457.97,221.44 466.02,211.84 513.54,145.37 505.85,111.51 493.68,92.17 461.18,50.03 380.83,76.48 329.42,98.8z M70.7,399.48C65.34,392.1 71.5,366.96 104.37,324.3 115.53,350 131.61,372.13 152.61,390.69 150.49,390.36 145.91,391.81 143.45,393.59 93.05,409.55 74.61,402.28 70.7,399.48z M137.6,238.16C148.7,168.1 215.09,119.86 285.15,130.96 338.22,139.37 379.55,180.73 391.26,230.46 365.32,256.82 335.14,282.5 300.71,307.52 266.28,332.53 232.53,353.3 199.44,369.82 155.76,343.32 129.19,291.23 137.6,238.16z M325.39,344.07C347.52,327.99 369.99,309.79 390,293.37 374.55,349.68 317.99,390.77 257.54,387.73 279.34,373.77 303.25,360.15 325.39,344.07z M423.12,194.16C411.96,168.45 395.88,146.32 374.88,127.76 425.96,107.56 453.55,111.93 456.79,118.97 460.7,121.77 461.92,141.55 431.17,184.55 428.37,188.46 425.92,190.25 423.12,194.16z">
+                                    <GeometryDrawing.Brush>
+                                        <SolidColorBrush Color="White" Opacity="0" />
+                                    </GeometryDrawing.Brush>
+                                </GeometryDrawing>
+                            </DrawingGroup>
+                        </DrawingGroup>
+                    </DrawingGroup>
+                </DrawingGroup>
             </DrawingGroup>
         </DrawingImage.Drawing>
     </DrawingImage>
 
     <DrawingImage x:Key="IconIPlanetMoon">
         <DrawingImage.Drawing>
-            <DrawingGroup ClipGeometry="M0,0 V125 H100 V0 H0 Z">
-                <DrawingGroup Opacity="1" Transform="1,0,0,1,0,-952.36218">
-                    <GeometryDrawing Brush="White" Geometry="F0 M100,125z M0,0z M43.25515,971.85232C22.70465,971.85232 5.99515,988.5508 5.99515,1009.102 5.99515,1029.6626 22.70465,1046.362 43.25515,1046.362 63.80565,1046.362 80.51485,1029.6626 80.51485,1009.102 80.51815,1008.8381 80.46855,1008.5737 80.36985,1008.329 80.27115,1008.0843 80.12345,1007.8594 79.93795,1007.6717 79.75255,1007.4839 79.52955,1007.3334 79.28615,1007.2317 79.04265,1007.13 78.77885,1007.0771 78.51495,1007.0771 78.25115,1007.0771 77.98735,1007.1301 77.74385,1007.2317 77.50045,1007.3334 77.27745,1007.4839 77.09205,1007.6717 76.90655,1007.8594 76.75885,1008.0843 76.66015,1008.329 76.56145,1008.5737 76.51185,1008.8381 76.51515,1009.102 76.51515,1027.5013 61.64465,1042.3623 43.25515,1042.3623 24.86565,1042.3623 9.99484960000002,1027.5013 9.99484960000002,1009.102 9.99484960000002,990.71323 24.86565,975.85201 43.25515,975.85201 43.51905,975.85501 43.78345,975.80581 44.02825,975.70711 44.27305,975.60841 44.49795,975.46073 44.68565,975.2753 44.87345,975.08987 45.02405,974.86687 45.12575,974.62337 45.22755,974.37987 45.28045,974.11607 45.28045,973.85217 45.28045,973.58826 45.22755,973.32446 45.12575,973.08096 45.02405,972.83746 44.87345,972.61446 44.68565,972.42903 44.49795,972.2436 44.27305,972.0959 44.02825,971.99722 43.78345,971.89852 43.51905,971.84898 43.25515,971.85232z" />
-                    <GeometryDrawing Brush="White" Geometry="F0 M100,125z M0,0z M72.38515,958.36232C60.46525,958.36232 50.76515,968.06217 50.76515,979.98201 50.76515,991.89286 60.46525,1001.592 72.38515,1001.592 84.29595,1001.592 94.00485,991.89409 94.00485,979.98201 94.00485,968.06094 84.29595,958.36232 72.38515,958.36232z" />
+            <DrawingGroup ClipGeometry="M0,0 V510 H510 V0 H0 Z">
+
+                <DrawingGroup Opacity="1">
+                    <GeometryDrawing Brush="White" Geometry="F1 M510,510z M0,0z M55,285.63C55,379.08 130.94,454.97 224.34,454.97 317.75,454.97 393.69,379.08 393.69,285.63 393.7,284.43 393.48,283.23 393.03,282.12 392.58,281.01 391.91,279.98 391.07,279.13 390.22,278.28 389.21,277.59 388.1,277.13 387,276.67 385.8,276.43 384.6,276.43 383.4,276.43 382.2,276.67 381.09,277.13 379.99,277.59 378.97,278.28 378.13,279.13 377.29,279.98 376.62,281.01 376.17,282.12 375.72,283.23 375.5,284.43 375.51,285.63 375.51,369.25 307.92,436.8 224.34,436.8 140.77,436.8 73.18,369.25 73.18,285.63 73.18,202.06 140.77,134.51 224.34,134.51 225.54,134.53 226.75,134.3 227.86,133.86 228.97,133.41 229.99,132.74 230.85,131.89 231.7,131.05 232.38,130.04 232.85,128.93 233.31,127.82 233.55,126.62 233.55,125.42 233.55,124.23 233.31,123.03 232.85,121.92 232.38,120.81 231.7,119.8 230.85,118.96 229.99,118.11 228.97,117.44 227.86,116.99 226.75,116.55 225.54,116.32 224.34,116.34 130.94,116.34 55,192.23 55,285.63z" />
+                    <DrawingGroup Opacity="1">
+                        <GeometryDrawing Geometry="F1 M510,510z M0,0z M55,285.63C55,379.08 130.94,454.97 224.34,454.97 317.75,454.97 393.69,379.08 393.69,285.63 393.7,284.43 393.48,283.23 393.03,282.12 392.58,281.01 391.91,279.98 391.07,279.13 390.22,278.28 389.21,277.59 388.1,277.13 387,276.67 385.8,276.43 384.6,276.43 383.4,276.43 382.2,276.67 381.09,277.13 379.99,277.59 378.97,278.28 378.13,279.13 377.29,279.98 376.62,281.01 376.17,282.12 375.72,283.23 375.5,284.43 375.51,285.63 375.51,369.25 307.92,436.8 224.34,436.8 140.77,436.8 73.18,369.25 73.18,285.63 73.18,202.06 140.77,134.51 224.34,134.51 225.54,134.53 226.75,134.3 227.86,133.86 228.97,133.41 229.99,132.74 230.85,131.89 231.7,131.05 232.38,130.04 232.85,128.93 233.31,127.82 233.55,126.62 233.55,125.42 233.55,124.23 233.31,123.03 232.85,121.92 232.38,120.81 231.7,119.8 230.85,118.96 229.99,118.11 228.97,117.44 227.86,116.99 226.75,116.55 225.54,116.32 224.34,116.34 130.94,116.34 55,192.23 55,285.63z">
+                            <GeometryDrawing.Brush>
+                                <SolidColorBrush Color="White" Opacity="0" />
+                            </GeometryDrawing.Brush>
+                            <GeometryDrawing.Pen>
+                                <Pen Thickness="1" StartLineCap="Flat" EndLineCap="Flat" LineJoin="Miter">
+                                    <Pen.Brush>
+                                        <SolidColorBrush Color="White" Opacity="0" />
+                                    </Pen.Brush>
+                                </Pen>
+                            </GeometryDrawing.Pen>
+                        </GeometryDrawing>
+                    </DrawingGroup>
+                </DrawingGroup>
+                <DrawingGroup Opacity="1">
+                    <GeometryDrawing Brush="White" Geometry="F1 M510,510z M0,0z M258.48,153.28C258.48,207.42 302.56,251.5 356.74,251.5 410.87,251.5 455,207.42 455,153.28 455,99.1 410.87,55.02 356.74,55.02 302.56,55.02 258.48,99.11 258.48,153.28z" />
+                    <DrawingGroup Opacity="1">
+                        <GeometryDrawing Geometry="F1 M510,510z M0,0z M258.48,153.28C258.48,207.42 302.56,251.5 356.74,251.5 410.87,251.5 455,207.42 455,153.28 455,99.1 410.87,55.02 356.74,55.02 302.56,55.02 258.48,99.11 258.48,153.28z">
+                            <GeometryDrawing.Brush>
+                                <SolidColorBrush Color="White" Opacity="0" />
+                            </GeometryDrawing.Brush>
+                            <GeometryDrawing.Pen>
+                                <Pen Thickness="1" StartLineCap="Flat" EndLineCap="Flat" LineJoin="Miter">
+                                    <Pen.Brush>
+                                        <SolidColorBrush Color="White" Opacity="0" />
+                                    </Pen.Brush>
+                                </Pen>
+                            </GeometryDrawing.Pen>
+                        </GeometryDrawing>
+                    </DrawingGroup>
                 </DrawingGroup>
             </DrawingGroup>
         </DrawingImage.Drawing>
@@ -108,15 +256,159 @@
 
     <DrawingImage x:Key="IconPluto">
         <DrawingImage.Drawing>
-            <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+            <DrawingGroup ClipGeometry="M0,0 V512 H512 V0 H0 Z">
                 <DrawingGroup Opacity="1">
-                    <DrawingGroup.Transform>
-                        <ScaleTransform ScaleX="1.2" ScaleY="1.2" CenterX="-30" CenterY="120" />
-                    </DrawingGroup.Transform>
-                    <GeometryDrawing Brush="White" Geometry="F1 M100,100z M0,0z M67.7,48.7L62.4,38.1C61.8,36.8,60.8,35.8,59.5,35.1L49.4,29.5C47.7,28.6,45.7,28.3,43.9,28.9L36.9,31.1C36.7,31.2,36.5,31.2,36.3,31.2L28,30.3C26.2,30.1,24.4,30.6,22.9,31.7L12.5,39.7C11,40.8,10,42.6,9.8,44.4L8.6,53.5C8.6,53.7,8.5,54,8.4,54.2L4.3,60.5C3.1,62.3,2.8,64.6,3.6,66.7L8.1,79.7C8.4,80.5,8.8,81.3,9.4,81.9L17.4,91.4C18.7,92.9,20.6,93.9,22.6,93.9L33.8,94.2C34,94.2,34.2,94.2,34.4,94.3L40.4,96.8C41.3,97.2 42.2,97.4 43.2,97.4 44.3,97.4 45.5,97.1 46.5,96.6L57.6,90.7C58.2,90.4,58.8,90,59.3,89.5L67.4,81.4C68.2,80.6,68.8,79.6,69.2,78.5L71.6,70.6C71.7,70.3,71.8,70,71.8,69.7L73.3,60.5C73.6,58.7,73.2,56.9,72.2,55.4L67.7,48.7z M66.3,69L63.9,76.9C63.8,77.1,63.7,77.4,63.5,77.6L55.4,85.7C55.3,85.8,55.2,85.9,55,86L43.9,91.9C43.5,92.1,43,92.1,42.5,92L36.5,89.5C35.7,89.2,34.8,89,33.9,88.9L22.7,88.6C22.2,88.6,21.8,88.4,21.5,88L13.5,78.5C13.4,78.4,13.3,78.2,13.2,78L8.7,65C8.5,64.5,8.6,64,8.9,63.6L13,57.3C13.6,56.4,14,55.4,14.1,54.3L15.3,45.2C15.4,44.8,15.6,44.4,15.9,44.1L26.3,36.1C26.6,35.9 26.9,35.8 27.3,35.8 27.4,35.8 27.4,35.8 27.5,35.8L35.7,36.7C36.7,36.8,37.6,36.7,38.6,36.4L45.6,34.2C46,34.1,46.5,34.1,46.8,34.3L56.9,39.9C57.2,40.1,57.4,40.3,57.5,40.6L62.8,51.2C62.9,51.5,63.1,51.7,63.3,52L67.7,58.5C67.9,58.8,68,59.2,67.9,59.6L66.3,69z" />
-                    <GeometryDrawing Brush="White" Geometry="F1 M100,100z M0,0z M25.5,44.7C23.8,46.4 22.9,48.6 22.9,50.9 22.9,53.2 23.8,55.4 25.5,57.1 27.2,58.8 29.5,59.7 31.7,59.7 33.9,59.7 36.2,58.8 37.9,57.1 39.6,55.4 40.5,53.2 40.5,50.9 40.5,48.6 39.6,46.4 37.9,44.7 34.6,41.4 28.8,41.4 25.5,44.7z M34,53.2C32.7,54.5 30.7,54.5 29.4,53.2 28.8,52.6 28.4,51.8 28.4,50.9 28.4,50 28.7,49.2 29.4,48.6 30,48 30.8,47.6 31.7,47.6 32.6,47.6 33.4,47.9 34,48.6L34,48.6C34.6,49.2 35,50 35,50.9 35,51.7 34.6,52.6 34,53.2z" />
-                    <GeometryDrawing Brush="White" Geometry="F1 M100,100z M0,0z M24.3,67.9C22.6,69.6 21.7,71.8 21.7,74.1 21.7,76.4 22.6,78.6 24.3,80.3 26,82 28.3,82.9 30.5,82.9 32.7,82.9 35,82 36.7,80.3 38.4,78.6 39.3,76.4 39.3,74.1 39.3,71.8 38.4,69.6 36.7,67.9 33.4,64.6 27.6,64.6 24.3,67.9z M32.8,76.4C31.5,77.7 29.4,77.7 28.2,76.4 27.6,75.8 27.2,75 27.2,74.1 27.2,73.2 27.5,72.4 28.2,71.8 28.8,71.2 29.6,70.8 30.5,70.8 31.4,70.8 32.2,71.1 32.8,71.8L32.8,71.8C33.4,72.4 33.8,73.2 33.8,74.1 33.8,75 33.5,75.8 32.8,76.4z" />
-                    <GeometryDrawing Brush="White" Geometry="F1 M100,100z M0,0z M44.9,57.2C41.5,60.6 41.5,66.2 44.9,69.6 46.6,71.3 48.9,72.2 51.1,72.2 53.3,72.2 55.6,71.3 57.3,69.6 60.7,66.2 60.7,60.6 57.3,57.2 54,53.9 48.2,53.9 44.9,57.2z M53.4,65.7C52.1,67 50,67 48.8,65.7 47.5,64.4 47.5,62.3 48.8,61.1 49.4,60.5 50.2,60.1 51.1,60.1 52,60.1 52.8,60.4 53.4,61.1 54.7,62.4 54.7,64.5 53.4,65.7z" />
+                    <GeometryDrawing Brush="White" Geometry="F1 M512,512z M0,0z M181.76,127.67C181.76,135.86 194.56,143.03 203.78,143.03 212.99,143.03 224.26,131.76 224.26,123.57 224.26,115.38 211.97,108.72 202.75,108.72 193.54,108.72 181.76,119.47 181.76,127.67z" />
+                    <DrawingGroup Opacity="1">
+                        <GeometryDrawing Geometry="F1 M512,512z M0,0z M181.76,127.67C181.76,135.86 194.56,143.03 203.78,143.03 212.99,143.03 224.26,131.76 224.26,123.57 224.26,115.38 211.97,108.72 202.75,108.72 193.54,108.72 181.76,119.47 181.76,127.67z">
+                            <GeometryDrawing.Brush>
+                                <SolidColorBrush Color="White" Opacity="0" />
+                            </GeometryDrawing.Brush>
+                            <GeometryDrawing.Pen>
+                                <Pen Thickness="1" StartLineCap="Flat" EndLineCap="Flat" LineJoin="Miter">
+                                    <Pen.Brush>
+                                        <SolidColorBrush Color="White" Opacity="0" />
+                                    </Pen.Brush>
+                                </Pen>
+                            </GeometryDrawing.Pen>
+                        </GeometryDrawing>
+                    </DrawingGroup>
+                </DrawingGroup>
+                <DrawingGroup Opacity="1">
+                    <GeometryDrawing Brush="White" Geometry="F1 M512,512z M0,0z M259.58,188.08C247.71,188.08 238.08,197.71 238.08,209.59 238.08,221.46 247.71,231.09 259.58,231.09 271.46,231.09 281.09,221.46 281.09,209.59 281.09,197.71 271.46,188.08 259.58,188.08z" />
+                    <DrawingGroup Opacity="1">
+                        <GeometryDrawing Geometry="F1 M512,512z M0,0z M259.58,188.08C247.71,188.08 238.08,197.71 238.08,209.59 238.08,221.46 247.71,231.09 259.58,231.09 271.46,231.09 281.09,221.46 281.09,209.59 281.09,197.71 271.46,188.08 259.58,188.08z">
+                            <GeometryDrawing.Brush>
+                                <SolidColorBrush Color="White" Opacity="0" />
+                            </GeometryDrawing.Brush>
+                            <GeometryDrawing.Pen>
+                                <Pen Thickness="1" StartLineCap="Flat" EndLineCap="Flat" LineJoin="Miter">
+                                    <Pen.Brush>
+                                        <SolidColorBrush Color="White" Opacity="0" />
+                                    </Pen.Brush>
+                                </Pen>
+                            </GeometryDrawing.Pen>
+                        </GeometryDrawing>
+                    </DrawingGroup>
+                </DrawingGroup>
+                <DrawingGroup Opacity="1">
+                    <GeometryDrawing Brush="White" Geometry="F1 M512,512z M0,0z M81.92,259.25C81.92,298.16 112.13,347.31 143.87,347.31 175.1,347.31 200.19,305.33 200.19,266.42 200.19,227.51 163.84,190.13 132.61,190.13 101.38,190.13 81.92,220.34 81.92,259.25z" />
+                    <DrawingGroup Opacity="1">
+                        <GeometryDrawing Geometry="F1 M512,512z M0,0z M81.92,259.25C81.92,298.16 112.13,347.31 143.87,347.31 175.1,347.31 200.19,305.33 200.19,266.42 200.19,227.51 163.84,190.13 132.61,190.13 101.38,190.13 81.92,220.34 81.92,259.25z">
+                            <GeometryDrawing.Brush>
+                                <SolidColorBrush Color="White" Opacity="0" />
+                            </GeometryDrawing.Brush>
+                            <GeometryDrawing.Pen>
+                                <Pen Thickness="1" StartLineCap="Flat" EndLineCap="Flat" LineJoin="Miter">
+                                    <Pen.Brush>
+                                        <SolidColorBrush Color="White" Opacity="0" />
+                                    </Pen.Brush>
+                                </Pen>
+                            </GeometryDrawing.Pen>
+                        </GeometryDrawing>
+                    </DrawingGroup>
+                </DrawingGroup>
+                <DrawingGroup Opacity="1">
+                    <GeometryDrawing Brush="White" Geometry="F1 M512,512z M0,0z M256,422.58C256,432.31 266.24,439.99 279.04,439.99 291.84,439.99 306.69,433.33 306.69,423.6 306.69,413.87 291.84,400.56 279.04,400.56 266.24,400.56 256,412.85 256,422.58z" />
+                    <DrawingGroup Opacity="1">
+                        <GeometryDrawing Geometry="F1 M512,512z M0,0z M256,422.58C256,432.31 266.24,439.99 279.04,439.99 291.84,439.99 306.69,433.33 306.69,423.6 306.69,413.87 291.84,400.56 279.04,400.56 266.24,400.56 256,412.85 256,422.58z">
+                            <GeometryDrawing.Brush>
+                                <SolidColorBrush Color="White" Opacity="0" />
+                            </GeometryDrawing.Brush>
+                            <GeometryDrawing.Pen>
+                                <Pen Thickness="1" StartLineCap="Flat" EndLineCap="Flat" LineJoin="Miter">
+                                    <Pen.Brush>
+                                        <SolidColorBrush Color="White" Opacity="0" />
+                                    </Pen.Brush>
+                                </Pen>
+                            </GeometryDrawing.Pen>
+                        </GeometryDrawing>
+                    </DrawingGroup>
+                </DrawingGroup>
+                <DrawingGroup Opacity="1">
+                    <GeometryDrawing Brush="White" Geometry="F1 M512,512z M0,0z M382.98,242.87C382.98,262.32 390.66,286.39 404.48,286.39 418.3,286.39 434.18,262.32 434.18,242.87 434.18,223.41 422.4,201.39 408.58,201.39 394.24,201.39 382.98,223.41 382.98,242.87z" />
+                    <DrawingGroup Opacity="1">
+                        <GeometryDrawing Geometry="F1 M512,512z M0,0z M382.98,242.87C382.98,262.32 390.66,286.39 404.48,286.39 418.3,286.39 434.18,262.32 434.18,242.87 434.18,223.41 422.4,201.39 408.58,201.39 394.24,201.39 382.98,223.41 382.98,242.87z">
+                            <GeometryDrawing.Brush>
+                                <SolidColorBrush Color="White" Opacity="0" />
+                            </GeometryDrawing.Brush>
+                            <GeometryDrawing.Pen>
+                                <Pen Thickness="1" StartLineCap="Flat" EndLineCap="Flat" LineJoin="Miter">
+                                    <Pen.Brush>
+                                        <SolidColorBrush Color="White" Opacity="0" />
+                                    </Pen.Brush>
+                                </Pen>
+                            </GeometryDrawing.Pen>
+                        </GeometryDrawing>
+                    </DrawingGroup>
+                </DrawingGroup>
+                <DrawingGroup Opacity="1">
+                    <GeometryDrawing Brush="White" Geometry="F1 M512,512z M0,0z M140.29,382.13C135.68,390.83 142.34,404.15 156.16,411.83 169.47,418.99 184.83,417.97 189.44,408.75 194.05,400.05 190.98,384.69 177.66,377.52 164.35,370.35 144.9,373.43 140.29,382.13z" />
+                    <DrawingGroup Opacity="1">
+                        <GeometryDrawing Geometry="F1 M512,512z M0,0z M140.29,382.13C135.68,390.83 142.34,404.15 156.16,411.83 169.47,418.99 184.83,417.97 189.44,408.75 194.05,400.05 190.98,384.69 177.66,377.52 164.35,370.35 144.9,373.43 140.29,382.13z">
+                            <GeometryDrawing.Brush>
+                                <SolidColorBrush Color="White" Opacity="0" />
+                            </GeometryDrawing.Brush>
+                            <GeometryDrawing.Pen>
+                                <Pen Thickness="1" StartLineCap="Flat" EndLineCap="Flat" LineJoin="Miter">
+                                    <Pen.Brush>
+                                        <SolidColorBrush Color="White" Opacity="0" />
+                                    </Pen.Brush>
+                                </Pen>
+                            </GeometryDrawing.Pen>
+                        </GeometryDrawing>
+                    </DrawingGroup>
+                </DrawingGroup>
+                <DrawingGroup Opacity="1">
+                    <GeometryDrawing Brush="White" Geometry="F1 M512,512z M0,0z M257.54,309.43C257.54,327.35 270.85,342.19 287.74,342.19 304.13,342.19 330.24,327.35 330.24,309.43 330.24,290.99 316.93,276.66 300.03,276.66 283.65,276.66 257.54,291.51 257.54,309.43z" />
+                    <DrawingGroup Opacity="1">
+                        <GeometryDrawing Geometry="F1 M512,512z M0,0z M257.54,309.43C257.54,327.35 270.85,342.19 287.74,342.19 304.13,342.19 330.24,327.35 330.24,309.43 330.24,290.99 316.93,276.66 300.03,276.66 283.65,276.66 257.54,291.51 257.54,309.43z">
+                            <GeometryDrawing.Brush>
+                                <SolidColorBrush Color="White" Opacity="0" />
+                            </GeometryDrawing.Brush>
+                            <GeometryDrawing.Pen>
+                                <Pen Thickness="1" StartLineCap="Flat" EndLineCap="Flat" LineJoin="Miter">
+                                    <Pen.Brush>
+                                        <SolidColorBrush Color="White" Opacity="0" />
+                                    </Pen.Brush>
+                                </Pen>
+                            </GeometryDrawing.Pen>
+                        </GeometryDrawing>
+                    </DrawingGroup>
+                </DrawingGroup>
+                <DrawingGroup Opacity="1">
+                    <GeometryDrawing Brush="White" Geometry="F1 M512,512z M0,0z M33.79,254.13C33.79,376.5 133.63,476.34 256,476.34 378.37,476.34 478.21,376.5 478.21,254.13 477.7,131.76 378.37,31.92 256,31.92 133.12,31.92 33.79,131.76 33.79,254.13z M412.16,339.63C407.55,350.9 407.55,364.21 414.72,368.82 379.39,417.97 321.54,450.74 256,450.74 147.97,450.74 60.42,363.19 60.42,255.15 60.42,221.36 69.12,189.62 83.97,161.97 96.26,168.11 113.15,163.51 123.9,150.19 135.68,135.35 144.9,113.33 132.61,103.6 156.16,84.15 184.32,70.83 215.04,64.18 219.65,69.3 230.91,72.37 244.22,72.37 261.63,72.37 284.67,69.3 285.18,62.13 379.39,75.44 451.58,156.34 451.58,254.13 451.58,278.71 446.98,302.26 438.78,323.76 437.76,323.25 437.25,322.74 436.74,322.74 428.54,319.15 417.28,326.32 412.16,339.63z" />
+                    <DrawingGroup Opacity="1">
+                        <GeometryDrawing Geometry="F1 M512,512z M0,0z M33.79,254.13C33.79,376.5 133.63,476.34 256,476.34 378.37,476.34 478.21,376.5 478.21,254.13 477.7,131.76 378.37,31.92 256,31.92 133.12,31.92 33.79,131.76 33.79,254.13z M412.16,339.63C407.55,350.9 407.55,364.21 414.72,368.82 379.39,417.97 321.54,450.74 256,450.74 147.97,450.74 60.42,363.19 60.42,255.15 60.42,221.36 69.12,189.62 83.97,161.97 96.26,168.11 113.15,163.51 123.9,150.19 135.68,135.35 144.9,113.33 132.61,103.6 156.16,84.15 184.32,70.83 215.04,64.18 219.65,69.3 230.91,72.37 244.22,72.37 261.63,72.37 284.67,69.3 285.18,62.13 379.39,75.44 451.58,156.34 451.58,254.13 451.58,278.71 446.98,302.26 438.78,323.76 437.76,323.25 437.25,322.74 436.74,322.74 428.54,319.15 417.28,326.32 412.16,339.63z">
+                            <GeometryDrawing.Brush>
+                                <SolidColorBrush Color="White" Opacity="0" />
+                            </GeometryDrawing.Brush>
+                            <GeometryDrawing.Pen>
+                                <Pen Thickness="1" StartLineCap="Flat" EndLineCap="Flat" LineJoin="Miter">
+                                    <Pen.Brush>
+                                        <SolidColorBrush Color="White" Opacity="0" />
+                                    </Pen.Brush>
+                                </Pen>
+                            </GeometryDrawing.Pen>
+                        </GeometryDrawing>
+                    </DrawingGroup>
+                </DrawingGroup>
+                <DrawingGroup Opacity="1">
+                    <GeometryDrawing Brush="White" Geometry="F1 M512,512z M0,0z M312.83,145.07C324.1,160.43 351.23,165.04 363.52,156.34 376.32,147.12 377.34,127.15 366.08,111.79 354.82,95.92 335.87,90.8 323.07,100.02 310.27,109.23 301.57,129.71 312.83,145.07z" />
+                    <DrawingGroup Opacity="1">
+                        <GeometryDrawing Geometry="F1 M512,512z M0,0z M312.83,145.07C324.1,160.43 351.23,165.04 363.52,156.34 376.32,147.12 377.34,127.15 366.08,111.79 354.82,95.92 335.87,90.8 323.07,100.02 310.27,109.23 301.57,129.71 312.83,145.07z">
+                            <GeometryDrawing.Brush>
+                                <SolidColorBrush Color="White" Opacity="0" />
+                            </GeometryDrawing.Brush>
+                            <GeometryDrawing.Pen>
+                                <Pen Thickness="1" StartLineCap="Flat" EndLineCap="Flat" LineJoin="Miter">
+                                    <Pen.Brush>
+                                        <SolidColorBrush Color="White" Opacity="0" />
+                                    </Pen.Brush>
+                                </Pen>
+                            </GeometryDrawing.Pen>
+                        </GeometryDrawing>
+                    </DrawingGroup>
                 </DrawingGroup>
             </DrawingGroup>
         </DrawingImage.Drawing>

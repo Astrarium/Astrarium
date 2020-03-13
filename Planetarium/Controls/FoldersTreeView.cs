@@ -172,6 +172,7 @@ namespace Planetarium.Controls
         {
             var myComputer = CreateItem(new FolderInfo() { Title = Environment.MachineName, Icon = GetMyComputerIcon() });
 
+            /*
             myComputer.Items.Add(CreateItem(new FolderInfo(Environment.SpecialFolder.Desktop)));
             myComputer.Items.Add(CreateItem(new FolderInfo(Environment.SpecialFolder.Recent)));
             myComputer.Items.Add(CreateItem(new FolderInfo(Environment.SpecialFolder.Favorites)));
@@ -179,6 +180,7 @@ namespace Planetarium.Controls
             myComputer.Items.Add(CreateItem(new FolderInfo(Environment.SpecialFolder.MyMusic)));
             myComputer.Items.Add(CreateItem(new FolderInfo(Environment.SpecialFolder.MyPictures)));
             myComputer.Items.Add(CreateItem(new FolderInfo(Environment.SpecialFolder.MyVideos)));
+            */
 
             foreach (string s in Directory.GetLogicalDrives())
             {

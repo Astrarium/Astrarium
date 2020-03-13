@@ -50,6 +50,8 @@ namespace Planetarium.Plugins.SolarSystem
 
             #endregion Settings
 
+            AddToolbarItem(new ToolbarToggleButton("Settings.Sun", "IconSun", new SimpleBinding(settings, "Sun"), "Objects"));
+            AddToolbarItem(new ToolbarToggleButton("Settings.Moon", "IconMoon", new SimpleBinding(settings, "Moon"), "Objects"));
             AddToolbarItem(new ToolbarToggleButton("Settings.Planets", "IconPlanet", new SimpleBinding(settings, "Planets"), "Objects"));
 
             ExportResourceDictionaries("Images.xaml");
