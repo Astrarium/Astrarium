@@ -1,0 +1,17 @@
+﻿# General
+Astrarium.Plugins.Grids.CelestialGridRenderer.Name = Grids and Lines
+
+CelestialGridRenderer.Zenith	= Zenith
+CelestialGridRenderer.Nadir		= Nadir
+CelestialGridRenderer.NCP		= NCP
+CelestialGridRenderer.SCP		= SCP
+
+# Settings
+Settings.EquatorialGrid			= Equatorial grid
+Settings.LabelEquatorialPoles	= Label equatorial poles
+Settings.HorizontalGrid			= Horizontal grid
+Settings.LabelHorizontalPoles	= Label horizontal poles (Zenith & Nadir)
+Settings.EclipticLine			= Ecliptic
+Settings.LabelEquinoxPoints		= Label equinox points
+Settings.LabelLunarNodes		= Label lunar nodes
+Settings.GalacticEquator		= Galactic equator

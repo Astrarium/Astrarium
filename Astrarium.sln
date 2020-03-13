@@ -1,0 +1,112 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28729.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Algorithms", "Astrarium.Algorithms\Astrarium.Algorithms.csproj", "{0DA17A1C-068E-4CCE-82A4-646E137CC121}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Algorithms.Tests", "Astrarium.Algorithms.Tests\Astrarium.Algorithms.Tests.csproj", "{B8E35F4C-4324-48DE-97DB-6C9D083D59B1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium", "Astrarium\Astrarium.csproj", "{BD5D4668-0D89-4A08-A669-739FF47CA03B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{58EA126A-1037-4976-B212-8DBAE98B7D78} = {58EA126A-1037-4976-B212-8DBAE98B7D78}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Types", "Astrarium.Types\Astrarium.Types.csproj", "{098854D6-DFD9-4A4A-8657-CE0323DB0DB2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.Tycho2", "Astrarium.Plugins.Tycho2\Astrarium.Plugins.Tycho2.csproj", "{58EA126A-1037-4976-B212-8DBAE98B7D78}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.MinorBodies", "Astrarium.Plugins.MinorBodies\Astrarium.Plugins.MinorBodies.csproj", "{9CF722AF-7050-49B7-9BCE-0AC45C85177E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.DeepSky", "Astrarium.Plugins.DeepSky\Astrarium.Plugins.DeepSky.csproj", "{AB24287B-143D-4EC6-B7FA-E2B1446F5B61}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.MilkyWay", "Astrarium.Plugins.MilkyWay\Astrarium.Plugins.MilkyWay.csproj", "{DBC267BF-13CF-4E44-AD9E-570325756BF2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.Horizon", "Astrarium.Plugins.Horizon\Astrarium.Plugins.Horizon.csproj", "{5C274D19-935F-4582-9273-B6A0E0790E5A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.SolarSystem", "Astrarium.Plugins.SolarSystem\Astrarium.Plugins.SolarSystem.csproj", "{F739AA16-72B5-452F-890B-A16AB65ACDA9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.Grids", "Astrarium.Plugins.Grids\Astrarium.Plugins.Grids.csproj", "{5B94F55F-7DEF-4B41-B679-2099F9EC1F69}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.Tracks", "Astrarium.Plugins.Tracks\Astrarium.Plugins.Tracks.csproj", "{B2B0E9E1-7C22-492A-89E5-1852B8B63EB6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.MeasureTool", "Astrarium.Plugins.MeasureTool\Astrarium.Plugins.MeasureTool.csproj", "{1FDDAC1F-94DC-49F6-9438-B0B93FCF70E7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.Constellations", "Astrarium.Plugins.Constellations\Astrarium.Plugins.Constellations.csproj", "{02AAB521-B50D-47C5-B01B-77C5F506A890}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.BrightStars", "Astrarium.Plugins.BrightStars\Astrarium.Plugins.BrightStars.csproj", "{F6C83D37-02D7-41A3-B9E9-C5DE0C29F0CA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0DA17A1C-068E-4CCE-82A4-646E137CC121}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DA17A1C-068E-4CCE-82A4-646E137CC121}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DA17A1C-068E-4CCE-82A4-646E137CC121}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DA17A1C-068E-4CCE-82A4-646E137CC121}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8E35F4C-4324-48DE-97DB-6C9D083D59B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8E35F4C-4324-48DE-97DB-6C9D083D59B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8E35F4C-4324-48DE-97DB-6C9D083D59B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8E35F4C-4324-48DE-97DB-6C9D083D59B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD5D4668-0D89-4A08-A669-739FF47CA03B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD5D4668-0D89-4A08-A669-739FF47CA03B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD5D4668-0D89-4A08-A669-739FF47CA03B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD5D4668-0D89-4A08-A669-739FF47CA03B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{098854D6-DFD9-4A4A-8657-CE0323DB0DB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{098854D6-DFD9-4A4A-8657-CE0323DB0DB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{098854D6-DFD9-4A4A-8657-CE0323DB0DB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{098854D6-DFD9-4A4A-8657-CE0323DB0DB2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58EA126A-1037-4976-B212-8DBAE98B7D78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58EA126A-1037-4976-B212-8DBAE98B7D78}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58EA126A-1037-4976-B212-8DBAE98B7D78}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58EA126A-1037-4976-B212-8DBAE98B7D78}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9CF722AF-7050-49B7-9BCE-0AC45C85177E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CF722AF-7050-49B7-9BCE-0AC45C85177E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CF722AF-7050-49B7-9BCE-0AC45C85177E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CF722AF-7050-49B7-9BCE-0AC45C85177E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB24287B-143D-4EC6-B7FA-E2B1446F5B61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB24287B-143D-4EC6-B7FA-E2B1446F5B61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB24287B-143D-4EC6-B7FA-E2B1446F5B61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB24287B-143D-4EC6-B7FA-E2B1446F5B61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBC267BF-13CF-4E44-AD9E-570325756BF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBC267BF-13CF-4E44-AD9E-570325756BF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBC267BF-13CF-4E44-AD9E-570325756BF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBC267BF-13CF-4E44-AD9E-570325756BF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C274D19-935F-4582-9273-B6A0E0790E5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C274D19-935F-4582-9273-B6A0E0790E5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C274D19-935F-4582-9273-B6A0E0790E5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C274D19-935F-4582-9273-B6A0E0790E5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F739AA16-72B5-452F-890B-A16AB65ACDA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F739AA16-72B5-452F-890B-A16AB65ACDA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F739AA16-72B5-452F-890B-A16AB65ACDA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F739AA16-72B5-452F-890B-A16AB65ACDA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B94F55F-7DEF-4B41-B679-2099F9EC1F69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B94F55F-7DEF-4B41-B679-2099F9EC1F69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B94F55F-7DEF-4B41-B679-2099F9EC1F69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B94F55F-7DEF-4B41-B679-2099F9EC1F69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2B0E9E1-7C22-492A-89E5-1852B8B63EB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2B0E9E1-7C22-492A-89E5-1852B8B63EB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2B0E9E1-7C22-492A-89E5-1852B8B63EB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2B0E9E1-7C22-492A-89E5-1852B8B63EB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FDDAC1F-94DC-49F6-9438-B0B93FCF70E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FDDAC1F-94DC-49F6-9438-B0B93FCF70E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FDDAC1F-94DC-49F6-9438-B0B93FCF70E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FDDAC1F-94DC-49F6-9438-B0B93FCF70E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02AAB521-B50D-47C5-B01B-77C5F506A890}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02AAB521-B50D-47C5-B01B-77C5F506A890}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02AAB521-B50D-47C5-B01B-77C5F506A890}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02AAB521-B50D-47C5-B01B-77C5F506A890}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6C83D37-02D7-41A3-B9E9-C5DE0C29F0CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6C83D37-02D7-41A3-B9E9-C5DE0C29F0CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6C83D37-02D7-41A3-B9E9-C5DE0C29F0CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6C83D37-02D7-41A3-B9E9-C5DE0C29F0CA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2B0ACB31-F877-4BB0-B6DF-D6FB19069CE6}
+	EndGlobalSection
+EndGlobal

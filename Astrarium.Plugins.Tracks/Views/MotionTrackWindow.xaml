@@ -1,0 +1,71 @@
+﻿<Window x:Class="Astrarium.Plugins.Tracks.Views.MotionTrackWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:c="clr-namespace:Astrarium.Controls;assembly=Astrarium.Types"
+        xmlns:t="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+        mc:Ignorable="d"
+        Title="Motion Track" 
+        Height="350" Width="400"
+        MinHeight="300" MinWidth="400"
+        Style="{StaticResource {x:Type Window}}"
+        WindowStartupLocation="CenterOwner">
+    <Grid Margin="4" SnapsToDevicePixels="True">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="28"/>
+            <RowDefinition Height="28"/>
+            <RowDefinition Height="28"/>
+            <RowDefinition Height="28"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="160" />
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Row="0" Grid.Column="0">Celestial body</Label>
+        <c:CelestialObjectPicker Grid.Row="0" Grid.Column="1" SelectedBody="{Binding SelectedBody, Mode=TwoWay}" Filter="{Binding Filter, Mode=OneTime}" />
+
+        <Label Grid.Row="1" Grid.Column="0">Start date</Label>
+        <c:DatePicker Grid.Row="1" Grid.Column="1" Options="DateTime" JulianDay="{Binding JulianDayFrom}" UtcOffset="{Binding UtcOffset}" />
+
+        <Label Grid.Row="2" Grid.Column="0">End date</Label>
+        <c:DatePicker Grid.Row="2" Grid.Column="1" Options="DateTime" JulianDay="{Binding JulianDayTo}" UtcOffset="{Binding UtcOffset}" />
+
+        <Label Grid.Row="3" Grid.Column="0">Track Color</Label>
+        <c:ColorPicker Grid.Row="3" Grid.Column="1" Caption="{Binding RelativeSource={RelativeSource Self}, Path=SelectedColor, Converter={t:ColorToStringConverter}}" SelectedColor="{Binding TrackColor}" />
+
+        <GroupBox Grid.Row="4" Grid.ColumnSpan="2" Padding="0, 8, 0, 0" Margin="0 4 0 0">
+            <GroupBox.Header>
+                <CheckBox Name="ShowLabels" Margin="2 0 0 0" IsChecked="{Binding DrawLabels}">Show labels</CheckBox>
+            </GroupBox.Header>
+            <GroupBox.Content>
+                <Grid IsEnabled="{Binding IsChecked, ElementName=ShowLabels}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="160" />
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0">Labels step</Label>
+                    <c:TimeSpanPicker Grid.Column="1" TimeSpan="{Binding LabelsStep}" Margin="6 0 0 0"  />
+                </Grid>
+            </GroupBox.Content>
+        </GroupBox>
+
+        <Separator Grid.Row="6" Grid.ColumnSpan="2" />
+
+        <StackPanel    
+            Grid.Row="7"
+            Grid.ColumnSpan="2"
+            Orientation="Horizontal"
+            HorizontalAlignment="Right">
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding OkCommand}">OK</Button>
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CancelCommand}">Cancel</Button>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,12 @@
+﻿<UserControl x:Class="Astrarium.Types.Config.Controls.FolderPickerSettingControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Astrarium.Types.Config.Controls"
+             xmlns:controls="clr-namespace:Astrarium.Controls"             
+             mc:Ignorable="d">
+
+        <controls:FilePathPicker Mode="Directory" Caption="{Binding SettingName, FallbackValue='File Path'}" SelectedPath="{Binding SettingValue}" IsEnabled="{Binding IsEnabled}" />
+
+</UserControl>

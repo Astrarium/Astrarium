@@ -1,0 +1,31 @@
+﻿# General
+Astrarium.Plugins.BrightStars.StarsRenderer.Name = Яркие звёзды
+
+# Settings
+Settings.Stars				= Звёзды
+Settings.StarsLabels		= Названия звёзд
+Settings.StarsProperNames	= Собственные имена звёзд
+Settings.ConstLines			= Линии созвездий
+
+# Ephemeris
+Star.Constellation			= Созвездие
+Star.Equatorial				= Экваториальные координаты (на текущую эпоху)
+Star.Equatorial.Alpha		= Прямое восхождение (α)
+Star.Equatorial.Delta		= Склонение (δ)
+Star.Equatorial0			= Экваториальные координаты (на эпоху J2000.0)
+Star.Equatorial0.Alpha		= Прямое восхождение (α₀)
+Star.Equatorial0.Delta		= Склонение (δ₀)
+Star.Horizontal				= Горизонтальные координаты
+Star.Horizontal.Altitude	= Высота (h)
+Star.Horizontal.Azimuth		= Азимут (A)
+Star.RTS					= Видимость
+Star.RTS.Rise				= Восход
+Star.RTS.Transit			= Кульминация
+Star.RTS.Set				= Заход
+Star.RTS.Duration			= Над горизонтом
+Star.Properties				= Характеристики
+Star.Magnitude				= Звёздная величина
+Star.IsInfraredSource		= Является инфракрасным источником
+Star.SpectralClass			= Спектральный класс
+Star.Pecularity				= Пекулярность
+Star.RadialVelocity			= Радиальная скорость
