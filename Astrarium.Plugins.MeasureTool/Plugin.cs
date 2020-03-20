@@ -30,7 +30,13 @@ namespace Astrarium.Plugins.MeasureTool
             this.map = map;
             this.renderer = renderer;
 
-            AddContextMenuItem(new ContextMenuItem("Measure Tool", SwitchMeasureTool, () => true, () => true, () => renderer.IsMeasureToolOn));
+            var menuItem = new MenuItem("Measure Tool")
+            {
+                Command = new Command(SwitchMeasureTool)
+            };
+            menuItem.AddBinding(new SimpleBinding(renderer, nameof(renderer.IsMeasureToolOn), "IsChecked"));
+
+            AddContextMenuItem(menuItem);
         }
 
         private void SwitchMeasureTool()

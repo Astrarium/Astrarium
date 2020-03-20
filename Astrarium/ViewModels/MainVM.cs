@@ -3,9 +3,11 @@ using Astrarium.Calculators;
 using Astrarium.Config;
 using Astrarium.Objects;
 using Astrarium.Types;
+using Astrarium.Types.Localization;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
@@ -51,22 +53,12 @@ namespace Astrarium.ViewModels
         public Command ChangeSettingsCommand { get; private set; }
 
         private ContextMenuItemsConfig contextMenuItemsConfig;
-        public ObservableCollection<MenuItemVM> ContextMenuItems { get; private set; } = new ObservableCollection<MenuItemVM>();
-        public ObservableCollection<MenuItemVM> SelectedObjectsMenuItems { get; private set; } = new ObservableCollection<MenuItemVM>();
+        public ObservableCollection<MenuItem> MainMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
+        public ObservableCollection<MenuItem> ContextMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
+        public ObservableCollection<MenuItem> SelectedObjectsMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
         public string SelectedObjectName { get; private set; }
 
         public ObservableCollection<ToolbarItem> ToolbarItems { get; private set; } = new ObservableCollection<ToolbarItem>();
-
-        public class MenuItemVM
-        {
-            public bool IsCheckable { get; set; } = false;
-            public bool IsChecked { get; set; }
-            public bool IsEnabled { get; set; } = true;
-            public string Header { get; set; }
-            public ICommand Command { get; set; }
-            public object CommandParameter { get; set; }
-            public ObservableCollection<MenuItemVM> SubItems { get; set; }
-        }
 
         public class ObservableUniqueItemsCollection<T> : ObservableCollection<T>
         {
@@ -147,7 +139,28 @@ namespace Astrarium.ViewModels
                 ToolbarItems.Add(new ToolbarSeparator());
             }
 
-            this.contextMenuItemsConfig = contextMenuItemsConfig;            
+            this.contextMenuItemsConfig = contextMenuItemsConfig;
+
+            MainMenuItems.Add(new MenuItem("Map"));
+
+            var menuView = new MenuItem("View") 
+            {
+                SubItems = new ObservableCollection<MenuItem>(Enum.GetValues(typeof(ColorSchema))
+                    .Cast<ColorSchema>()
+                    .Select(s =>
+                    {
+                        MenuItem menuItem = new MenuItem($"Settings.Schema.{s}");
+                        menuItem.Command = new Command(() => menuItem.IsChecked = true);
+                        menuItem.AddBinding(new SimpleBinding(settings, "Schema", "IsChecked")
+                        {
+                            SourceToTargetConverter = (schema) => (ColorSchema)schema == s,
+                            TargetToSourceConverter = (isChecked) => (bool)isChecked ? s : settings.Get<ColorSchema>("Schema")
+                        });
+                        return menuItem;
+                    }))
+            };
+           
+            MainMenuItems.Add(menuView);
         }
 
         private void Sky_ContextChanged()
@@ -171,12 +184,8 @@ namespace Astrarium.ViewModels
                 SelectedObjectName = body.Names.First();
 
                 if (!SelectedObjectsMenuItems.Any())
-                {          
-                    SelectedObjectsMenuItems.Add(new MenuItemVM()
-                    {
-                        Header = "Clear all",
-                        Command = ClearObjectsHistoryCommand
-                    });                    
+                {
+                    SelectedObjectsMenuItems.Add(new MenuItem("Clear all", ClearObjectsHistoryCommand));                
                     SelectedObjectsMenuItems.Add(null);
                 }
 
@@ -186,12 +195,7 @@ namespace Astrarium.ViewModels
                     SelectedObjectsMenuItems.Remove(existingItem);
                 }
 
-                SelectedObjectsMenuItems.Insert(2, new MenuItemVM()
-                {
-                    Command = CenterOnObjectCommand,
-                    CommandParameter = body,
-                    Header = SelectedObjectName
-                });
+                SelectedObjectsMenuItems.Insert(2, new MenuItem(SelectedObjectName, CenterOnObjectCommand, body));
 
                 // 10 items of history + "clear all" + separator
                 if (SelectedObjectsMenuItems.Count > 13)
@@ -301,10 +305,9 @@ namespace Astrarium.ViewModels
             map.Invalidate();
 
             ContextMenuItems.Clear();
-            
-            ContextMenuItems.Add(new MenuItemVM()
+
+            ContextMenuItems.Add(new MenuItem("Info")
             {
-                Header = "Info",
                 Command = MapDoubleClickCommand,
                 CommandParameter = point,
                 IsEnabled = map.SelectedObject != null
@@ -312,50 +315,27 @@ namespace Astrarium.ViewModels
 
             ContextMenuItems.Add(null);
 
-            ContextMenuItems.Add(new MenuItemVM()
-            {
-                Header = "Center",
-                Command = CenterOnPointCommand,
-                CommandParameter = point
-            });
-            ContextMenuItems.Add(new MenuItemVM()
-            {
-                Header = "Search object...",
-                Command = SearchObjectCommand
-            });
-            ContextMenuItems.Add(new MenuItemVM()
-            {
-                Header = "Go to point..."
-            });
+            ContextMenuItems.Add(new MenuItem("Center", CenterOnPointCommand, point));
+            ContextMenuItems.Add(new MenuItem("Search object...", SearchObjectCommand));
+            ContextMenuItems.Add(new MenuItem("Go to point..."));
 
             ContextMenuItems.Add(null);
 
-            ContextMenuItems.Add(new MenuItemVM()
+            ContextMenuItems.Add(new MenuItem("Ephemerides", GetObjectEphemerisCommand, map.SelectedObject)
             {
-                Header = "Ephemerides",
-                IsEnabled = map.SelectedObject != null && sky.GetEphemerisCategories(map.SelectedObject).Any(),
-                Command = GetObjectEphemerisCommand,
-                CommandParameter = map.SelectedObject
+                IsEnabled = map.SelectedObject != null && sky.GetEphemerisCategories(map.SelectedObject).Any()
             });
 
             // dynamic menu items from plugins
             foreach (var configItem in contextMenuItemsConfig)
             {
-                ContextMenuItems.Add(new MenuItemVM()
-                {
-                    Header = configItem.Text,
-                    IsEnabled = configItem.EnabledCondition(),
-                    IsCheckable = configItem.CheckedCondition != null,
-                    IsChecked = configItem.CheckedCondition != null ? configItem.CheckedCondition() : false,
-                    Command = new Command(configItem.Action)
-                });
+                ContextMenuItems.Add(configItem);
             }
             
             ContextMenuItems.Add(null);
 
-            ContextMenuItems.Add(new MenuItemVM()
+            ContextMenuItems.Add(new MenuItem(map.LockedObject != null ? (map.SelectedObject != null && map.SelectedObject != map.LockedObject ? "Lock" : "Unlock") : "Lock")
             {
-                Header = map.LockedObject != null ? (map.SelectedObject != null && map.SelectedObject != map.LockedObject ? "Lock" : "Unlock") : "Lock",
                 IsEnabled = map.LockedObject != null || map.SelectedObject != null,
                 Command = LockOnObjectCommand,
                 CommandParameter = map.SelectedObject

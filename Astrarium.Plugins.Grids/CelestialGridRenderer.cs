@@ -416,7 +416,7 @@ namespace Astrarium.Plugins.Grids
 
                         var hint = map.Graphics.TextRenderingHint;
                         map.Graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
-                        map.Graphics.DrawStringOpaque(equinoxLabels[i], fontEquinoxLabel, penLineEcliptic.Brush, Brushes.Black, p);
+                        map.Graphics.DrawStringOpaque(equinoxLabels[i], fontEquinoxLabel, penLineEcliptic.Brush, new SolidBrush(map.GetSkyColor()), p);
                         map.Graphics.TextRenderingHint = hint;
                     }
                 }
@@ -440,7 +440,7 @@ namespace Astrarium.Plugins.Grids
                         var hint = map.Graphics.TextRenderingHint;
                         map.Graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
                         map.Graphics.FillEllipse(penLineEcliptic.Brush, p.X - 1.5f, p.Y - 1.5f, 3, 3);
-                        map.Graphics.DrawStringOpaque(nodesLabels[i], fontNodeLabel, penLineEcliptic.Brush, Brushes.Black, p);
+                        map.Graphics.DrawStringOpaque(nodesLabels[i], fontNodeLabel, penLineEcliptic.Brush, new SolidBrush(map.GetSkyColor()), p);
                         map.Graphics.TextRenderingHint = hint;
                     }
                 }

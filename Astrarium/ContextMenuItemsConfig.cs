@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Astrarium
 {
-    public class ContextMenuItemsConfig : List<ContextMenuItem>
+    public class ContextMenuItemsConfig : List<MenuItem>
     {
 
     }

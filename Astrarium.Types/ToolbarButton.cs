@@ -48,7 +48,7 @@ namespace Astrarium.Types
             IsCheckedBinding = isCheckedBinding;
             IsCheckedBinding.Source.PropertyChanged += (o, e) =>
             {
-                if (e.PropertyName == isCheckedBinding.PropertyName)
+                if (e.PropertyName == isCheckedBinding.SourcePropertyName)
                 {
                     NotifyPropertyChanged(nameof(IsChecked));
                 }
@@ -62,16 +62,16 @@ namespace Astrarium.Types
             get
             {
                 if (IsCheckedBinding.Source is ISettings)
-                    return (IsCheckedBinding.Source as ISettings).Get<bool>(IsCheckedBinding.PropertyName);
+                    return (IsCheckedBinding.Source as ISettings).Get<bool>(IsCheckedBinding.SourcePropertyName);
                 else
-                    return (bool)IsCheckedBinding.Source.GetType().GetProperty(IsCheckedBinding.PropertyName).GetValue(IsCheckedBinding.Source);
+                    return (bool)IsCheckedBinding.Source.GetType().GetProperty(IsCheckedBinding.SourcePropertyName).GetValue(IsCheckedBinding.Source);
             }
             set
             {
                 if (IsCheckedBinding.Source is ISettings)
-                    (IsCheckedBinding.Source as ISettings).Set(IsCheckedBinding.PropertyName, value);
+                    (IsCheckedBinding.Source as ISettings).Set(IsCheckedBinding.SourcePropertyName, value);
                 else
-                    IsCheckedBinding.Source.GetType().GetProperty(IsCheckedBinding.PropertyName).SetValue(IsCheckedBinding.Source, value);
+                    IsCheckedBinding.Source.GetType().GetProperty(IsCheckedBinding.SourcePropertyName).SetValue(IsCheckedBinding.Source, value);
 
                 NotifyPropertyChanged(nameof(IsChecked));
             }

@@ -4,13 +4,14 @@ using Astrarium.Plugins.Tracks.ViewModels;
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Tracks
 {
-    public class Plugin : AbstractPlugin
+    public class Plugin : AbstractPlugin, INotifyPropertyChanged
     {
         private ISky sky;
         private ISkyMap map;
@@ -20,20 +21,32 @@ namespace Astrarium.Plugins.Tracks
             this.sky = sky;
             this.map = map;
 
-            AddContextMenuItem(new ContextMenuItem("Motion track", ShowMotionTrackWindow, IsMotionTrackEnabled, () => true));
+            this.map.SelectedObjectChanged += (o) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsMotionTrackEnabled)));
+
+            var menuItem = new MenuItem("Motion track") 
+            { 
+               Command = new Command(ShowMotionTrackWindow)
+            };
+            menuItem.AddBinding(new SimpleBinding(this, nameof(IsMotionTrackEnabled), "IsEnabled"));
+            AddContextMenuItem(menuItem);
         }
 
-        private bool IsMotionTrackEnabled()
+        public bool IsMotionTrackEnabled
         {
-            var body = map.SelectedObject;
-            return body != null && body is IMovingObject;
+            get
+            {
+                var body = map.SelectedObject;
+                return body != null && body is IMovingObject;
+            }
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         private void ShowMotionTrackWindow()
         {
             var body = map.SelectedObject;
 
-            if (IsMotionTrackEnabled())
+            if (IsMotionTrackEnabled)
             {
                 var vm = ViewManager.CreateViewModel<MotionTrackVM>();
                 vm.TrackId = Guid.NewGuid();

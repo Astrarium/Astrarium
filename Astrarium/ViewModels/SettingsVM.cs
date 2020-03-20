@@ -114,6 +114,7 @@ namespace Astrarium.ViewModels
         {
             // need to utilizate settings controls
             SettingsSections.Clear();
+            base.Dispose();
         }
 
         private void Save()

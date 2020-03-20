@@ -28,8 +28,8 @@ namespace Astrarium.Plugins.Constellations
 
             #region Toolbar Integration
             
-            AddToolbarItem(new ToolbarToggleButton("Settings.ConstBorders", "IconConstBorders", new SimpleBinding(settings, "ConstBorders"), "Constellations"));
-            AddToolbarItem(new ToolbarToggleButton("Settings.ConstLabels", "IconConstLabels", new SimpleBinding(settings, "ConstLabels"), "Constellations"));
+            AddToolbarItem(new ToolbarToggleButton("Settings.ConstBorders", "IconConstBorders", new SimpleBinding(settings, "ConstBorders", "IsChecked"), "Constellations"));
+            AddToolbarItem(new ToolbarToggleButton("Settings.ConstLabels", "IconConstLabels", new SimpleBinding(settings, "ConstLabels", "IsChecked"), "Constellations"));
 
             #endregion Toolbar Integration
 

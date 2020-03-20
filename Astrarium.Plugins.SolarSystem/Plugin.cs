@@ -51,9 +51,9 @@ namespace Astrarium.Plugins.SolarSystem
 
             #endregion Settings
 
-            AddToolbarItem(new ToolbarToggleButton("Settings.Sun", "IconSun", new SimpleBinding(settings, "Sun"), "Objects"));
-            AddToolbarItem(new ToolbarToggleButton("Settings.Moon", "IconMoon", new SimpleBinding(settings, "Moon"), "Objects"));
-            AddToolbarItem(new ToolbarToggleButton("Settings.Planets", "IconPlanet", new SimpleBinding(settings, "Planets"), "Objects"));
+            AddToolbarItem(new ToolbarToggleButton("Settings.Sun", "IconSun", new SimpleBinding(settings, "Sun", "IsChecked"), "Objects"));
+            AddToolbarItem(new ToolbarToggleButton("Settings.Moon", "IconMoon", new SimpleBinding(settings, "Moon", "IsChecked"), "Objects"));
+            AddToolbarItem(new ToolbarToggleButton("Settings.Planets", "IconPlanet", new SimpleBinding(settings, "Planets", "IsChecked"), "Objects"));
 
             ExportResourceDictionaries("Images.xaml");
         }

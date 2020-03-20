@@ -28,8 +28,8 @@ namespace Astrarium.Plugins.MinorBodies
 
             #region Toolbar Integration
 
-            AddToolbarItem(new ToolbarToggleButton("Settings.Asteroids", "IconAsteroid", new SimpleBinding(settings, "Asteroids"), "Objects"));
-            AddToolbarItem(new ToolbarToggleButton("Settings.Comets", "IconComet", new SimpleBinding(settings, "Comets"), "Objects"));
+            AddToolbarItem(new ToolbarToggleButton("Settings.Asteroids", "IconAsteroid", new SimpleBinding(settings, "Asteroids", "IsChecked"), "Objects"));
+            AddToolbarItem(new ToolbarToggleButton("Settings.Comets", "IconComet", new SimpleBinding(settings, "Comets", "IsChecked"), "Objects"));
 
             #endregion Toolbar Integration
 

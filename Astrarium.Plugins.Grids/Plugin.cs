@@ -31,8 +31,8 @@ namespace Astrarium.Plugins.Grids
             AddSetting(new SettingItem("ColorHorizontalGrid", Color.FromArgb(0xC8, 0x00, 0x40, 0x00), "Colors"));
             AddSetting(new SettingItem("ColorEquatorialGrid", Color.FromArgb(200, 0, 64, 64), "Colors"));
 
-            AddToolbarItem(new ToolbarToggleButton("Settings.EquatorialGrid", "IconEquatorialGrid", new SimpleBinding(settings, "EquatorialGrid"), "Grids"));
-            AddToolbarItem(new ToolbarToggleButton("Settings.HorizontalGrid", "IconHorizontalGrid", new SimpleBinding(settings, "HorizontalGrid"), "Grids"));
+            AddToolbarItem(new ToolbarToggleButton("Settings.EquatorialGrid", "IconEquatorialGrid", new SimpleBinding(settings, "EquatorialGrid", "IsChecked"), "Grids"));
+            AddToolbarItem(new ToolbarToggleButton("Settings.HorizontalGrid", "IconHorizontalGrid", new SimpleBinding(settings, "HorizontalGrid", "IsChecked"), "Grids"));
 
             ExportResourceDictionaries("Images.xaml");
         }

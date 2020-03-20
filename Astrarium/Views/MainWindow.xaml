@@ -46,8 +46,8 @@
         </Grid.RowDefinitions>
 
         <DockPanel Grid.Row="0" Height="22">
-            <Menu x:Name="Menu" VerticalAlignment="Center">
-                <MenuItem Width="Auto" Header="Map">
+            <Menu x:Name="Menu" VerticalAlignment="Center" ItemsSource="{Binding MainMenuItems}">
+                <!--<MenuItem Width="Auto" Header="Map">
                     <MenuItem Header="New">
                         <MenuItem Header="File1" InputGestureText="Ctrl+A"  />
                         <MenuItem Header="File2" />
@@ -71,7 +71,22 @@
                     <MenuItem Header="Observer Location" Command="{Binding SelectLocationCommand}" InputGestureText="Ctrl+B" />
                     <Separator />
                     <MenuItem Header="Settings" Command="{Binding ChangeSettingsCommand}" />
-                </MenuItem>
+                </MenuItem>-->
+
+                
+                <Menu.ItemContainerStyle>
+                    <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                        <Setter Property="IsChecked" Value="{Binding IsChecked}" />
+                        <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
+                        <Setter Property="Visibility" Value="{Binding IsVisible, Converter={s:BoolToVisibilityConverter}}" />
+                        <Setter Property="Header" Value="{Binding Header}" />
+                        <Setter Property="InputGestureText" Value="{Binding InputGestureText}" />
+                        <Setter Property="Command" Value="{Binding Command}" />
+                        <Setter Property="CommandParameter" Value="{Binding CommandParameter}" />
+                        <Setter Property="ItemsSource" Value="{Binding SubItems}" />
+                    </Style>
+                </Menu.ItemContainerStyle>
+                
             </Menu>
         </DockPanel>
 
@@ -145,6 +160,7 @@
                             <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
                                 <Setter Property="IsChecked" Value="{Binding IsChecked}" />
                                 <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
+                                <Setter Property="Visibility" Value="{Binding IsVisible, Converter={s:BoolToVisibilityConverter}}" />
                                 <Setter Property="Header" Value="{Binding Header}" />
                                 <Setter Property="Command" Value="{Binding Command}" />
                                 <Setter Property="CommandParameter" Value="{Binding CommandParameter}" />
@@ -176,6 +192,7 @@
                             <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
                                 <Setter Property="IsChecked" Value="{Binding IsChecked}" />
                                 <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
+                                <Setter Property="Visibility" Value="{Binding IsVisible, Converter={s:BoolToVisibilityConverter}}" />
                                 <Setter Property="Header" Value="{Binding Header}" />
                                 <Setter Property="Command" Value="{Binding Command}" />
                                 <Setter Property="CommandParameter" Value="{Binding CommandParameter}" />

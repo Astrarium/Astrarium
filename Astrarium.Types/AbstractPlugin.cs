@@ -13,11 +13,11 @@ namespace Astrarium.Types
     {
         private List<SettingItem> settingItems = new List<SettingItem>();
         private List<ToolbarButtonBase> toolbarItems = new List<ToolbarButtonBase>();
-        private List<ContextMenuItem> contextMenuItems = new List<ContextMenuItem>();
+        private List<MenuItem> contextMenuItems = new List<MenuItem>();
 
         public IEnumerable<SettingItem> SettingItems => settingItems;
         public IEnumerable<ToolbarButtonBase> ToolbarItems => toolbarItems;
-        public IEnumerable<ContextMenuItem> ContextMenuItems => contextMenuItems;
+        public IEnumerable<MenuItem> ContextMenuItems => contextMenuItems;
 
         public static IEnumerable<Type> Renderers(Type pluginType)
         {            
@@ -44,7 +44,7 @@ namespace Astrarium.Types
             toolbarItems.Add(button);
         }
 
-        protected void AddContextMenuItem(ContextMenuItem item)
+        protected void AddContextMenuItem(MenuItem item)
         {
             contextMenuItems.Add(item);
         }

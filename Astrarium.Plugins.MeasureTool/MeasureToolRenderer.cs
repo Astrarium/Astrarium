@@ -3,6 +3,7 @@ using Astrarium.Renderers;
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -13,7 +14,7 @@ namespace Astrarium.Plugins.MeasureTool
     /// <summary>
     /// Renders ruler tool over the celestial map
     /// </summary>
-    public class MeasureToolRenderer : BaseRenderer
+    public class MeasureToolRenderer : BaseRenderer, INotifyPropertyChanged
     {
         /// <summary>
         /// Font to print angular separation value
@@ -26,14 +27,32 @@ namespace Astrarium.Plugins.MeasureTool
         public override RendererOrder Order => RendererOrder.Foreground;
 
         /// <summary>
+        /// Backing field for IsMeasureToolOn property.
+        /// </summary>
+        private bool _IsMeasureToolOn = false;
+
+        /// <summary>
         /// Flag indicating the ruler is on
         /// </summary>
-        public bool IsMeasureToolOn { get; set; }
+        public bool IsMeasureToolOn 
+        {
+            get { return _IsMeasureToolOn; } 
+            set 
+            { 
+                _IsMeasureToolOn = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsMeasureToolOn)));
+            } 
+        }
 
         /// <summary>
         /// Measure tool origin
         /// </summary>
         public CrdsHorizontal MeasureOrigin { get; set; }
+
+        /// <summary>
+        /// Fired when property value changed
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
         /// Map should be renderer on MouseMove only if measure tool is on
