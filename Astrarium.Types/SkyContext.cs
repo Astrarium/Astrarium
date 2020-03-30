@@ -1,5 +1,4 @@
 ﻿using Astrarium.Algorithms;
-using Astrarium.Algorithms;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

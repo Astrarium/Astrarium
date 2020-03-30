@@ -7,8 +7,8 @@
                     xmlns:c="clr-namespace:Astrarium.Controls"
                     mc:Ignorable="d">
 
-    <FontFamily x:Key="FontFamily">Calibri light</FontFamily>
-    <sys:Double x:Key="FontSize">14</sys:Double>
+    <FontFamily x:Key="FontFamily">pack://application:,,,/Astrarium.Types;component/Themes/#Noto Sans</FontFamily>
+    <sys:Double x:Key="FontSize">12.7</sys:Double>
     
     <SolidColorBrush x:Key="BrushForeground" Color="{DynamicResource ColorForeground}" />
     <SolidColorBrush x:Key="BrushWindowBackground" Color="{DynamicResource ColorWindowBackground}" />

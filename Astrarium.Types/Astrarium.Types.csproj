@@ -32,6 +32,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Fonts\**" />
+    <EmbeddedResource Remove="Fonts\**" />
+    <None Remove="Fonts\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Themes\NotoSans-Regular.ttf" />
+    <None Remove="Themes\OpenSans.ttf" />
+    <None Remove="Themes\Roboto.ttf" />
     <None Remove="Translations\Translation-en.txt" />
     <None Remove="Translations\Translation-ru.txt" />
   </ItemGroup>
@@ -47,6 +56,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Astrarium.Algorithms\Astrarium.Algorithms.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Themes\NotoSans-Regular.ttf" />
   </ItemGroup>
   
 </Project>

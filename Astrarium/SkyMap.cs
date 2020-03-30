@@ -5,6 +5,7 @@ using Astrarium.Renderers;
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -50,6 +51,8 @@ namespace Astrarium
         private Font fontDiagnosticText = new Font("Monospace", 8);
 
         private Font fontLockMessage = new Font("Arial", 8);
+
+        
 
         public int Width { get; set; }
         public int Height { get; set; }
@@ -116,6 +119,7 @@ namespace Astrarium
                 {
                     selectedObject = value;
                     SelectedObjectChanged?.Invoke(selectedObject);
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedObject)));
                 }
             }
         }
@@ -169,6 +173,7 @@ namespace Astrarium
         public event Action OnInvalidate;
 
         public event Action OnRedraw;
+        public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
         /// Collection of celestial objects drawn on the map

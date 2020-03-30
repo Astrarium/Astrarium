@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -13,7 +14,7 @@ namespace Astrarium.Types
     /// <summary>
     /// Defines an interface of Sky Map canvas to render celestial map.
     /// </summary>
-    public interface ISkyMap
+    public interface ISkyMap : INotifyPropertyChanged
     {
         /// <summary>
         /// Gets or sets width of the canvas, in pixels
