@@ -29,16 +29,16 @@ namespace Astrarium
         }
 
         public static readonly DependencyProperty MapKeyDownProperty = DependencyProperty.RegisterAttached(
-            "MapKeyDown", typeof(Command<Key>), typeof(MainWindow));
+            "MapKeyDown", typeof(Command<KeyEventArgs>), typeof(MainWindow));
 
-        public static void SetMapKeyDown(DependencyObject target, Command<Key> value)
+        public static void SetMapKeyDown(DependencyObject target, Command<KeyEventArgs> value)
         {
             target.SetValue(MapKeyDownProperty, value);
         }
 
-        public static Command<Key> GetMapKeyDown(DependencyObject target)
+        public static Command<KeyEventArgs> GetMapKeyDown(DependencyObject target)
         {
-            return (Command<Key>)target.GetValue(MapKeyDownProperty);
+            return (Command<KeyEventArgs>)target.GetValue(MapKeyDownProperty);
         }
 
         public static readonly DependencyProperty MapZoomProperty = DependencyProperty.RegisterAttached(
@@ -151,7 +151,7 @@ namespace Astrarium
 
             //skyView.LostFocus += (o, e) => this.Activate();
 
-            Host.KeyDown += (o, e) => GetMapKeyDown(this)?.Execute(e.Key);
+            Host.KeyDown += (o, e) => GetMapKeyDown(this)?.Execute(e);
             Host.Child = skyView;
         }
 

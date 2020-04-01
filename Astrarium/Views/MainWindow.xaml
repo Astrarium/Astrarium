@@ -163,6 +163,7 @@
                                 <Setter Property="Visibility" Value="{Binding IsVisible, Converter={s:BoolToVisibilityConverter}}" />
                                 <Setter Property="Header" Value="{Binding Header}" />
                                 <Setter Property="Command" Value="{Binding Command}" />
+                                <Setter Property="InputGestureText" Value="{Binding InputGestureText}" />
                                 <Setter Property="CommandParameter" Value="{Binding CommandParameter}" />
                                 <Setter Property="ItemsSource" Value="{Binding SubItems}" />
                             </Style>

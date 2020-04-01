@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace Astrarium.Plugins.MeasureTool
 {
@@ -32,7 +33,8 @@ namespace Astrarium.Plugins.MeasureTool
 
             var menuItem = new MenuItem("Measure Tool")
             {
-                Command = new Command(SwitchMeasureTool)
+                Command = new Command(SwitchMeasureTool),
+                HotKey = new KeyGesture(Key.M, ModifierKeys.Control, "Ctrl+M")
             };
             menuItem.AddBinding(new SimpleBinding(renderer, nameof(renderer.IsMeasureToolOn), "IsChecked"));
 

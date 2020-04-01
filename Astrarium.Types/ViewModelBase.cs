@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Data;
 
 namespace Astrarium.Types
 {
@@ -42,7 +43,7 @@ namespace Astrarium.Types
         /// <summary>
         /// Notifies subscribers about changing property or properties. 
         /// </summary>
-        /// <param name="propertyName">Cahnged property name(s).</param>
+        /// <param name="propertyName">Changed property name(s).</param>
         protected void NotifyPropertyChanged(params string[] propertyName)
         {
             foreach (string pn in propertyName)

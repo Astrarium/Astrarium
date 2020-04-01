@@ -29,7 +29,7 @@ namespace Astrarium.ViewModels
         public string MapViewAngleString { get; private set; }
         public string DateString { get; private set; }
 
-        public Command<Key> MapKeyDownCommand { get; private set; }
+        public Command<KeyEventArgs> MapKeyDownCommand { get; private set; }
         public Command<int> ZoomCommand { get; private set; }
         public Command<PointF> MapDoubleClickCommand { get; private set; }
         public Command<PointF> MapRightClickCommand { get; private set; }
@@ -96,7 +96,7 @@ namespace Astrarium.ViewModels
 
             sky.Calculate();
 
-            MapKeyDownCommand = new Command<Key>(MapKeyDown);
+            MapKeyDownCommand = new Command<KeyEventArgs>(MapKeyDown);
             ZoomCommand = new Command<int>(Zoom);
             MapDoubleClickCommand = new Command<PointF>(MapDoubleClick);
             MapRightClickCommand = new Command<PointF>(MapRightClick);
@@ -143,12 +143,12 @@ namespace Astrarium.ViewModels
                     .Cast<ColorSchema>()
                     .Select(s =>
                     {
-                        MenuItem menuItem = new MenuItem($"Settings.Schema.{s}");
+                        MenuItem menuItem = new MenuItem($"$Settings.Schema.{s}");
                         menuItem.Command = new Command(() => menuItem.IsChecked = true);
                         menuItem.AddBinding(new SimpleBinding(settings, "Schema", "IsChecked")
                         {
                             SourceToTargetConverter = (schema) => (ColorSchema)schema == s,
-                            TargetToSourceConverter = (isChecked) => (bool)isChecked ? s : settings.Get<ColorSchema>("Schema")
+                            TargetToSourceConverter = (isChecked) => (bool)isChecked ? s : settings.Get<ColorSchema>("Schema"),                            
                         });
                         return menuItem;
                     }))
@@ -156,9 +156,34 @@ namespace Astrarium.ViewModels
 
             MainMenuItems.Add(menuView);
 
+            var menuTools = new MenuItem("Tools")
+            {
+                SubItems = new ObservableCollection<MenuItem>()
+                {
+                    new MenuItem("Search object", SearchObjectCommand) { HotKey = new KeyGesture(Key.F, ModifierKeys.Control, "Ctrl+F") },
+                    new MenuItem("Astronomical phenomena", CalculatePhenomenaCommand) { HotKey = new KeyGesture(Key.P, ModifierKeys.Control, "Ctrl+P") },
+                    new MenuItem("Ephemerides", GetObjectEphemerisCommand) { HotKey = new KeyGesture(Key.E, ModifierKeys.Control, "Ctrl+E") }
+                }
+            };
+
+            MainMenuItems.Add(menuTools);
+
+            var menuOptions = new MenuItem("Options")
+            {
+                SubItems = new ObservableCollection<MenuItem>()
+                {
+                    new MenuItem("Date & Time", SetDateCommand) { HotKey = new KeyGesture(Key.D, ModifierKeys.Control, "Ctrl+D") },
+                    new MenuItem("Observer location", SelectLocationCommand) { HotKey = new KeyGesture(Key.L, ModifierKeys.Control, "Ctrl+L") },
+                    null,
+                    new MenuItem("Settings", ChangeSettingsCommand) { HotKey = new KeyGesture(Key.O, ModifierKeys.Control, "Ctrl+O") }
+                }
+            };
+            MainMenuItems.Add(menuOptions);
+
             // Context menu
 
             var menuInfo = new MenuItem("Info", GetObjectInfoCommand);
+            menuInfo.HotKey = new KeyGesture(Key.I, ModifierKeys.Control);
             menuInfo.AddBinding(new SimpleBinding(map, nameof(map.SelectedObject), nameof(MenuItem.CommandParameter)));
             menuInfo.AddBinding(new SimpleBinding(map, nameof(map.SelectedObject), nameof(MenuItem.IsEnabled))
             {
@@ -176,6 +201,7 @@ namespace Astrarium.ViewModels
             ContextMenuItems.Add(null);
 
             var menuEphemerides = new MenuItem("Ephemerides", GetObjectEphemerisCommand);
+            menuEphemerides.HotKey = new KeyGesture(Key.E, ModifierKeys.Control, "Ctrl+E");
             menuEphemerides.AddBinding(new SimpleBinding(map, nameof(map.SelectedObject), nameof(MenuItem.IsEnabled))
             {
                 SourceToTargetConverter = (o) => map.SelectedObject != null && sky.GetEphemerisCategories(map.SelectedObject).Any()
@@ -257,81 +283,97 @@ namespace Astrarium.ViewModels
         {
             map.ViewAngle *= Math.Pow(1.1, -delta / 120);
         }
-
-        private void MapKeyDown(Key key)
+       
+        private IEnumerable<MenuItem> GetMenuItems(IEnumerable<MenuItem> items)
         {
-            // "+" = Zoom In
-            if (key == Key.Add)
+            foreach (var childNode in items.Where(i => i != null))
             {
-                Zoom(1);
+                yield return childNode;
+                               
+                foreach (var child in GetMenuItems(childNode.SubItems ?? new ObservableCollection<MenuItem>()))
+                    yield return child;
             }
-            // "-" = Zoom Out
-            else if (key == Key.Subtract)
+        }
+
+        private void MapKeyDown(KeyEventArgs args)
+        {
+            var item = GetMenuItems(MainMenuItems.Concat(ContextMenuItems)).FirstOrDefault(i => i.HotKey != null && i.HotKey.Matches(null, args));
+            if (item != null)
             {
-                Zoom(-1);
+                item.Command.Execute(item.CommandParameter);
             }
-            // "D" = [D]ate
-            else if (key == Key.D)
+            else
             {
-                SetDate();
+                Key key = args.Key;
+
+                // "+" = Zoom In
+                if (key == Key.Add)
+                {
+                    Zoom(1);
+                }
+                // "-" = Zoom Out
+                else if (key == Key.Subtract)
+                {
+                    Zoom(-1);
+                }
+                // "D" = [D]ate
+                //else if (key == Key.D)
+                //{
+                //    SetDate();
+                //}
+                // "A" = [A]dd
+                else if (key == Key.A)
+                {
+                    sky.Context.JulianDay += 1;
+                    sky.Calculate();
+                }
+                // "S" = [S]ubtract
+                else if (key == Key.S)
+                {
+                    sky.Context.JulianDay -= 1;
+                    sky.Calculate();
+                }
+                // "O" = [O]ptions
+                //else if (key == Key.O)
+                //{
+                //    ChangeSettings();
+                //}
+                // "I" = [I]nfo
+                //else if (key == Key.I)
+                //{
+                //    GetObjectInfo(map.SelectedObject);
+                //}
+                // "F12" = Full Screen On
+                else if (key == Key.F12)
+                {
+                    SetFullScreen(true);
+                }
+                // "Esc" = Full Screen Off
+                else if (key == Key.Escape)
+                {
+                    SetFullScreen(false);
+                }
+                // "F" = [F]ind
+                else if (key == Key.F)
+                {
+                    SearchObject();
+                }
+                // "P" = [P]henomena
+                else if (key == Key.P)
+                {
+                    CalculatePhenomena();
+                }
+                // "L" = [L]ocation
+                //else if (key == Key.L)
+                //{
+                //    SelectLocation();
+                //}
+                // "T" = [T]rack
+                //else if (key == Key.T)
+                //{
+                //    MotionTrack(map.SelectedObject);
+                //}
             }
-            // "A" = [A]dd
-            else if (key == Key.A)
-            {
-                sky.Context.JulianDay += 1;
-                sky.Calculate();
-            }
-            // "S" = [S]ubtract
-            else if (key == Key.S)
-            {
-                sky.Context.JulianDay -= 1;
-                sky.Calculate();
-            }
-            // "O" = [O]ptions
-            else if (key == Key.O)
-            {
-                ChangeSettings();
-            }
-            // "I" = [I]nfo
-            else if (key == Key.I)
-            {
-                GetObjectInfo(map.SelectedObject);
-            }
-            // "F12" = Full Screen On
-            else if (key == Key.F12)
-            {
-                SetFullScreen(true);
-            }
-            // "Esc" = Full Screen Off
-            else if (key == Key.Escape)
-            {
-                SetFullScreen(false);
-            }
-            // "F" = [F]ind
-            else if (key == Key.F)
-            {
-                SearchObject();
-            }
-            // "E" = [E]phemerides
-            else if (key == Key.E)
-            {
-                GetObjectEphemeris();
-            }
-            // "P" = [P]henomena
-            else if (key == Key.P)
-            {
-                CalculatePhenomena();
-            }
-            // "L" = [L]ocation
-            else if (key == Key.L)
-            {
-                SelectLocation();
-            }
-            // "T" = [T]rack
-            //else if (key == Key.T)
-            //{
-            //    MotionTrack(map.SelectedObject);
-            //}
         }
 
         private void MapDoubleClick(PointF point)

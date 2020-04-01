@@ -6,13 +6,14 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 
 namespace Astrarium.Types
 {
     public class MenuItem : ViewModelBase
-    {       
+    {
         public MenuItem(string title)
         {
             this.Header = title;
@@ -60,14 +61,38 @@ namespace Astrarium.Types
 
         public string Header
         {
-            get => Text.Get(GetValue<string>(nameof(Header), null));
+            get 
+            {
+                string title = GetValue<string>(nameof(Header), null);
+                if (title.StartsWith("$"))
+                {
+                    return Text.Get(title.Substring(1));
+                }
+                else
+                {
+                    return title;
+                }
+            }
             set => SetValue(nameof(Header), value);
         }
 
         public string InputGestureText
         {
-            get => GetValue<string>(nameof(InputGestureText), null);
-            set => SetValue(nameof(InputGestureText), value);
+            get
+            {
+                var gesture = GetValue<KeyGesture>(nameof(HotKey), null);
+                return gesture?.DisplayString;
+            }
+        }
+
+        public KeyGesture HotKey
+        {
+            get => GetValue<KeyGesture>(nameof(HotKey), null);
+            set
+            { 
+                SetValue(nameof(HotKey), value);
+                NotifyPropertyChanged(nameof(InputGestureText));
+            }
         }
 
         public ICommand Command
