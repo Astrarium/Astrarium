@@ -48,7 +48,37 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Margin="12,0,0,0"
+                            <Menu Grid.Column="0" Width="30" Height="30" Background="Transparent" Visibility="{TemplateBinding t:WindowProperties.CompactMenuVisible}" WindowChrome.IsHitTestVisibleInChrome="True">
+                                <MenuItem Background="Transparent" Width="28" Height="28" Margin="2" ItemsSource="{TemplateBinding t:WindowProperties.CompactMenu}">
+                                    <MenuItem.Header>
+                                        <Image Stretch="Uniform">
+                                            <Image.Source>
+                                                <DrawingImage>
+                                                    <DrawingImage.Drawing>
+                                                        <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                                                            <GeometryDrawing Brush="{StaticResource BrushForeground}" Geometry="F1 M100,100z M0,0z M92.5,25L7.5,25C6.11928813,25,5,23.8807119,5,22.5L5,17.5C5,16.1192881,6.11928813,15,7.5,15L92.5,15C93.8807119,15,95,16.1192881,95,17.5L95,22.5C95,23.8807119,93.8807119,25,92.5,25z M95,52.5L95,47.5C95,46.1192881,93.8807119,45,92.5,45L7.5,45C6.11928813,45,5,46.1192881,5,47.5L5,52.5C5,53.8807119,6.11928813,55,7.5,55L92.5,55C93.8807119,55,95,53.8807119,95,52.5z M95,82.5L95,77.5C95,76.1192881,93.8807119,75,92.5,75L7.5,75C6.11928813,75,5,76.1192881,5,77.5L5,82.5C5,83.8807119,6.11928813,85,7.5,85L92.5,85C93.8807119,85,95,83.8807119,95,82.5z" />
+                                                        </DrawingGroup>
+                                                    </DrawingImage.Drawing>
+                                                </DrawingImage>
+                                            </Image.Source>
+                                        </Image>
+                                    </MenuItem.Header>
+                                    <MenuItem.ItemContainerStyle>
+                                        <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                            <Setter Property="IsChecked" Value="{Binding IsChecked}" />
+                                            <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
+                                            <Setter Property="Visibility" Value="{Binding IsVisible, Converter={t:BoolToVisibilityConverter}}" />
+                                            <Setter Property="Header" Value="{Binding Header}" />
+                                            <Setter Property="InputGestureText" Value="{Binding InputGestureText}" />
+                                            <Setter Property="Command" Value="{Binding Command}" />
+                                            <Setter Property="CommandParameter" Value="{Binding CommandParameter}" />
+                                            <Setter Property="ItemsSource" Value="{Binding SubItems}" />
+                                        </Style>
+                                    </MenuItem.ItemContainerStyle>
+                                </MenuItem>
+                            </Menu>
+
+                            <TextBlock Margin="8,0,0,0"
                                        VerticalAlignment="Center"
                                        HorizontalAlignment="Left"
                                        FontSize="16"

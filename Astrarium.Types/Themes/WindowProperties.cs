@@ -23,6 +23,12 @@ namespace Astrarium.Types.Themes
         public static readonly DependencyProperty IsFullScreenProperty = DependencyProperty.RegisterAttached(
             "IsFullScreen", typeof(bool), typeof(WindowProperties), new PropertyMetadata(false));
 
+        public static readonly DependencyProperty CompactMenuProperty = DependencyProperty.RegisterAttached(
+            "CompactMenu", typeof(object), typeof(WindowProperties), new PropertyMetadata(null));
+
+        public static readonly DependencyProperty CompactMenuVisibleProperty = DependencyProperty.RegisterAttached(
+            "CompactMenuVisible", typeof(Visibility), typeof(WindowProperties), new PropertyMetadata(Visibility.Collapsed));
+
         public static void SetMinButtonVisible(DependencyObject target, Visibility value)
         {
             target.SetValue(MinButtonVisibleProperty, value);
@@ -61,6 +67,26 @@ namespace Astrarium.Types.Themes
         public static bool GetIsFullScreen(DependencyObject target)
         {
             return (bool)target.GetValue(IsFullScreenProperty);
+        }
+
+        public static void SetCompactMenu(DependencyObject target, object value)
+        {
+            target.SetValue(CompactMenuProperty, value);
+        }
+
+        public static object GetCompactMenu(DependencyObject target)
+        {
+            return target.GetValue(CompactMenuProperty);
+        }
+
+        public static void SetCompactMenuVisible(DependencyObject target, Visibility value)
+        {
+            target.SetValue(CompactMenuVisibleProperty, value);
+        }
+
+        public static Visibility GetCompactMenuVisible(DependencyObject target)
+        {
+            return (Visibility)target.GetValue(CompactMenuVisibleProperty);
         }
     }
 }

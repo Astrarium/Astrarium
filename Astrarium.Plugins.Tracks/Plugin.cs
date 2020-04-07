@@ -11,24 +11,27 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Tracks
 {
-    public class Plugin : AbstractPlugin, INotifyPropertyChanged
+    public class Plugin : AbstractPlugin
     {
-        private ISky sky;
-        private ISkyMap map;
+        private readonly ISky sky;
+        private readonly ISkyMap map;
+        private readonly TrackCalc trackCalc;
 
-        public Plugin(ISky sky, ISkyMap map)
+        public Plugin(ISky sky, ISkyMap map, TrackCalc trackCalc)
         {
             this.sky = sky;
             this.map = map;
+            this.trackCalc = trackCalc;
 
-            this.map.SelectedObjectChanged += (o) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsMotionTrackEnabled)));
+            this.map.SelectedObjectChanged += (o) => NotifyPropertyChanged(nameof(IsMotionTrackEnabled));
 
-            var menuItem = new MenuItem("Motion track") 
-            { 
-               Command = new Command(ShowMotionTrackWindow)
-            };
-            menuItem.AddBinding(new SimpleBinding(this, nameof(IsMotionTrackEnabled), "IsEnabled"));
-            AddContextMenuItem(menuItem);
+            var menuTrack = new MenuItem("Motion track", new Command(ShowMotionTrackWindow));
+            menuTrack.AddBinding(new SimpleBinding(this, nameof(IsMotionTrackEnabled), nameof(MenuItem.IsEnabled)));
+            AddContextMenuItem(menuTrack);
+
+            var menuTracksList = new MenuItem("Motion tracks", new Command(ShowTracksListWindow));
+
+            AddMainMenuItem(menuTracksList);
         }
 
         public bool IsMotionTrackEnabled
@@ -40,25 +43,27 @@ namespace Astrarium.Plugins.Tracks
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
         private void ShowMotionTrackWindow()
         {
             var body = map.SelectedObject;
+            var vm = ViewManager.CreateViewModel<MotionTrackVM>();
+            vm.TrackId = Guid.NewGuid();
+            vm.SelectedBody = body;
+            vm.JulianDayFrom = sky.Context.JulianDay;
+            vm.JulianDayTo = sky.Context.JulianDay + 30;
+            vm.UtcOffset = sky.Context.GeoLocation.UtcOffset;
 
+            if (ViewManager.ShowDialog(vm) ?? false)
+            {
+                sky.Calculate();
+            }
+        }
+
+        private void ShowTracksListWindow()
+        {
             if (IsMotionTrackEnabled)
             {
-                var vm = ViewManager.CreateViewModel<MotionTrackVM>();
-                vm.TrackId = Guid.NewGuid();
-                vm.SelectedBody = body;
-                vm.JulianDayFrom = sky.Context.JulianDay;
-                vm.JulianDayTo = sky.Context.JulianDay + 30;
-                vm.UtcOffset = sky.Context.GeoLocation.UtcOffset;
-
-                if (ViewManager.ShowDialog(vm) ?? false)
-                {
-                    sky.Calculate();
-                }
+                ShowMotionTrackWindow();
             }
             else
             {

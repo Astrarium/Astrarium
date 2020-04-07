@@ -6,7 +6,7 @@ namespace Astrarium.Renderers
     /// <summary>
     /// Base class for all renderer classes which implement drawing logic of sky map.
     /// </summary>
-    public abstract class BaseRenderer
+    public abstract class BaseRenderer : PropertyChangedBase
     {
         public abstract void Render(IMapContext map);
         public virtual void Initialize() { }

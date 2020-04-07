@@ -11,7 +11,7 @@ namespace Astrarium.Types
     /// <summary>
     /// Base class for all modules which perform astronomical calculations.
     /// </summary>
-    public abstract class BaseCalc
+    public abstract class BaseCalc : PropertyChangedBase
     {
         /// <summary>
         /// Performs starting initialization of the calculator.

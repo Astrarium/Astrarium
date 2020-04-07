@@ -16,7 +16,7 @@ namespace Astrarium.Plugins.Tracks.ViewModels
     public class TracksListVM : ViewModelBase
     {
         private readonly ISky sky;
-        private readonly ITracksProvider tracksProvider;
+        private readonly TrackCalc trackCalc;
 
         public Command OkCommand { get; private set; }
         public Command CancelCommand { get; private set; }
@@ -42,10 +42,10 @@ namespace Astrarium.Plugins.Tracks.ViewModels
             }
         }
 
-        public TracksListVM(ISky sky, ITracksProvider tracksProvider)
+        public TracksListVM(ISky sky, TrackCalc trackCalc)
         {
             this.sky = sky;            
-            this.tracksProvider = tracksProvider;
+            this.trackCalc = trackCalc;
 
             CancelCommand = new Command(Close);
             SelectTrackCommand = new Command<TrackListItemVM>(SelectTrack);
@@ -60,7 +60,7 @@ namespace Astrarium.Plugins.Tracks.ViewModels
         {
             Guid? selectedTrackId = SelectedTrack?.Track.Id;
 
-            var tracks = tracksProvider.Tracks.Select(t => new TrackListItemVM()
+            var tracks = trackCalc.Tracks.Select(t => new TrackListItemVM()
             {
                 Track = t,
                 Body = t.Body.Names.First(),
@@ -109,7 +109,7 @@ namespace Astrarium.Plugins.Tracks.ViewModels
         {
             if (ViewManager.ShowMessageBox("Question", "Do you really want to delete the selected track?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
-                tracksProvider.Tracks.Remove(SelectedTrack.Track);
+                trackCalc.Tracks.Remove(SelectedTrack.Track);
                 sky.Calculate();
                 LoadList();
             }

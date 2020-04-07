@@ -6,7 +6,6 @@
         xmlns:a="clr-namespace:Astrarium"
         xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
         xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
-        xmlns:loc="clr-namespace:Astrarium.Types.Localization;assembly=Astrarium.Types"
         mc:Ignorable="d"
         Style="{StaticResource {x:Type Window}}"
         MinHeight="300" MinWidth="300"
@@ -16,6 +15,8 @@
         a:MainWindow.MapDoubleClick="{Binding MapDoubleClickCommand}"
         a:MainWindow.MapRightClick="{Binding MapRightClickCommand}"
         a:MainWindow.MapZoom="{Binding ZoomCommand}"
+        s:WindowProperties.CompactMenu="{Binding MainMenuItems}"
+        s:WindowProperties.CompactMenuVisible="{Binding IsCompactMenu, Converter={s:BoolToVisibilityConverter}}"
         Title="Astrarium" Height="450" Width="850">
 
     <Window.Resources>
@@ -45,35 +46,8 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <DockPanel Grid.Row="0" Height="22">
-            <Menu x:Name="Menu" VerticalAlignment="Center" ItemsSource="{Binding MainMenuItems}">
-                <!--<MenuItem Width="Auto" Header="Map">
-                    <MenuItem Header="New">
-                        <MenuItem Header="File1" InputGestureText="Ctrl+A"  />
-                        <MenuItem Header="File2" />
-                        <MenuItem Header="File3" />
-                    </MenuItem>
-                    <MenuItem Header="Open"/>
-                    <MenuItem Header="Save"/>
-                </MenuItem>
-
-                <MenuItem Width="Auto" Header="View">
-                </MenuItem>
-
-                <MenuItem Width="Auto" Header="Tools">
-                    <MenuItem Header="Search object" Command="{Binding SearchObjectCommand}" InputGestureText="Ctrl+A" />
-                    <MenuItem Header="Ephemerides" Command="{Binding GetObjectEphemerisCommand}" />
-                    <MenuItem Header="Astronomical phenomena" Command="{Binding CalculatePhenomenaCommand}" />
-                </MenuItem>
-
-                <MenuItem Width="Auto" Header="{loc:Text Menu.Settings}">
-                    <MenuItem Header="Date and Time" Command="{Binding SetDateCommand}" InputGestureText="Ctrl+A" />
-                    <MenuItem Header="Observer Location" Command="{Binding SelectLocationCommand}" InputGestureText="Ctrl+B" />
-                    <Separator />
-                    <MenuItem Header="Settings" Command="{Binding ChangeSettingsCommand}" />
-                </MenuItem>-->
-
-                
+        <DockPanel Grid.Row="0">
+            <Menu x:Name="Menu" VerticalAlignment="Center" ItemsSource="{Binding MainMenuItems}" Visibility="{Binding IsCompactMenu, Converter={s:InverseBoolToVisibilityConverter}}">
                 <Menu.ItemContainerStyle>
                     <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
                         <Setter Property="IsChecked" Value="{Binding IsChecked}" />
@@ -86,11 +60,10 @@
                         <Setter Property="ItemsSource" Value="{Binding SubItems}" />
                     </Style>
                 </Menu.ItemContainerStyle>
-                
             </Menu>
         </DockPanel>
 
-        <ToolBar Grid.Row="1" ToolBarTray.IsLocked="True" ItemsSource="{Binding ToolbarItems}" SnapsToDevicePixels="True">
+        <ToolBar Grid.Row="1" ToolBarTray.IsLocked="True" ItemsSource="{Binding ToolbarItems}" SnapsToDevicePixels="True" Visibility="{Binding IsToolbarVisible, Converter={s:BoolToVisibilityConverter}}">
 
             <ToolBar.Resources>
 
@@ -151,7 +124,7 @@
                 </DataTemplate>
             </ToolBar.ItemTemplate>
         </ToolBar>
-        
+
         <DockPanel Grid.Row="2" LastChildFill="true">
             <WindowsFormsHost x:Name="Host" Background="Black">
                 <WindowsFormsHost.ContextMenu>
@@ -172,7 +145,7 @@
                 </WindowsFormsHost.ContextMenu>
             </WindowsFormsHost>
         </DockPanel>
-        <StatusBar Grid.Row="3">
+        <StatusBar Grid.Row="3" Visibility="{Binding IsStatusBarVisible, Converter={s:BoolToVisibilityConverter}}">
             <TextBlock Width="30" TextAlignment="Center" Text="{Binding MapConstellationNameString, FallbackValue='Con'}" />
             <Separator />
             <TextBlock Width="240" Text="{Binding MapEquatorialCoordinatesString, FallbackValue='Equatorial coordinates'}" />

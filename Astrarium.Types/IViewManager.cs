@@ -1,6 +1,7 @@
 ﻿using Astrarium.Objects;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Printing;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -89,6 +90,18 @@ namespace Astrarium.Types
         /// <param name="caption">Dialog title</param>
         /// <returns>Selected folder full path, if user pressed OK, null otherwise.</returns>
         string ShowSelectFolderDialog(string caption, string path);
+
+        /// <summary>
+        /// Shows print dialog
+        /// </summary>
+        /// <returns>Dialog result (true or false)</returns>
+        bool ShowPrintDialog(PrintDocument document);
+
+        /// <summary>
+        /// Shows print preview dialog
+        /// </summary>
+        /// <returns>Dialog result (true or false)</returns>
+        bool ShowPrintPreviewDialog(PrintDocument document);
 
         /// <summary>
         /// Shows date and time dialog

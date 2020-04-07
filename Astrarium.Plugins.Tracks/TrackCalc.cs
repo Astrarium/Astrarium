@@ -2,6 +2,8 @@
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -11,17 +13,12 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Tracks
 {
-    public interface ITracksProvider
-    {
-        List<Track> Tracks { get; }
-    }
-
     /// <summary>
     /// Calculates coordinates of motion tracks of celestial bodies
     /// </summary>
-    public class TrackCalc : BaseCalc, ITracksProvider
+    public class TrackCalc : BaseCalc
     {
-        public List<Track> Tracks { get; } = new List<Track>();
+        public ObservableCollection<Track> Tracks { get; } = new ObservableCollection<Track>();
 
         public override void Calculate(SkyContext context)
         {

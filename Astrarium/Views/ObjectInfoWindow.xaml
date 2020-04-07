@@ -6,7 +6,7 @@
         xmlns:v="clr-namespace:Astrarium.Views"
         xmlns:loc="clr-namespace:Astrarium.Types.Localization;assembly=Astrarium.Types"
         mc:Ignorable="d"
-        Title="Object Info" 
+        Title="{loc:Text ObjectInfoWindow.Title}" 
         Width="600" Height="600"
         MinWidth="300" MinHeight="300"
         Style="{StaticResource {x:Type Window}}"

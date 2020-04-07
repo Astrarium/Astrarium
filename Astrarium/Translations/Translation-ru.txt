@@ -19,7 +19,10 @@ DateWindow.Seconds		= Секунды
 DateWindow.SetCurrent	= Установить текущее
 DateWindow.Select		= Выбрать
 
-ApplicationLanguage = Язык программы
+# ObjectInfoWindow
+ObjectInfoWindow.Title	= Информация об объекте
+
+ApplicationLanguage		= Язык программы
 
 # Rendering order control
 RenderingOrderSettingTitle = Порядок отрисовки

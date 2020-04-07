@@ -6,7 +6,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.Drawing.Printing;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -46,13 +49,34 @@ namespace Astrarium.ViewModels
         public Command<CelestialObject> CenterOnObjectCommand { get; private set; }
         public Command ClearObjectsHistoryCommand { get; private set; }
         public Command ChangeSettingsCommand { get; private set; }
+        public Command SaveAsImageCommand { get; private set; }
+        public Command PrintCommand { get; private set; }
+        public Command PrintPreviewCommand { get; private set; }
+        public Command ExitAppCommand { get; private set; }
 
         public ObservableCollection<MenuItem> MainMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
         public ObservableCollection<MenuItem> ContextMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
         public ObservableCollection<MenuItem> SelectedObjectsMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
         public string SelectedObjectName { get; private set; }
-
         public ObservableCollection<ToolbarItem> ToolbarItems { get; private set; } = new ObservableCollection<ToolbarItem>();
+        
+        public bool IsCompactMenu
+        {
+            get => GetValue<bool>(nameof(IsCompactMenu));
+            set => SetValue(nameof(IsCompactMenu), value);
+        }
+
+        public bool IsToolbarVisible
+        {
+            get => GetValue<bool>(nameof(IsToolbarVisible));
+            set => SetValue(nameof(IsToolbarVisible), value);
+        }
+
+        public bool IsStatusBarVisible
+        {
+            get => GetValue<bool>(nameof(IsStatusBarVisible));
+            set => SetValue(nameof(IsStatusBarVisible), value);
+        }
 
         public class ObservableUniqueItemsCollection<T> : ObservableCollection<T>
         {
@@ -88,7 +112,7 @@ namespace Astrarium.ViewModels
             set { sky.DateTimeSync = value; }
         }
 
-        public MainVM(ISky sky, ISkyMap map, ISettings settings, ToolbarButtonsConfig toolbarButtonsConfig, ContextMenuItemsConfig contextMenuItemsConfig)
+        public MainVM(ISky sky, ISkyMap map, ISettings settings, ToolbarButtonsConfig toolbarButtonsConfig, MainMenuItems mainMenuItems, ContextMenuItems contextMenuItems)
         {
             this.sky = sky;
             this.map = map;
@@ -111,6 +135,10 @@ namespace Astrarium.ViewModels
             CenterOnObjectCommand = new Command<CelestialObject>(CenterOnObject);
             ClearObjectsHistoryCommand = new Command(ClearObjectsHistory);
             ChangeSettingsCommand = new Command(ChangeSettings);
+            SaveAsImageCommand = new Command(SaveAsImage);
+            PrintCommand = new Command(Print);
+            PrintPreviewCommand = new Command(PrintPreview);
+            ExitAppCommand = new Command(Application.Current.Shutdown);
 
             sky.Context.ContextChanged += Sky_ContextChanged;
             sky.Calculated += () => map.Invalidate();
@@ -118,6 +146,10 @@ namespace Astrarium.ViewModels
             map.SelectedObjectChanged += Map_SelectedObjectChanged;
             map.ViewAngleChanged += Map_ViewAngleChanged;
             settings.SettingValueChanged += (s, v) => map.Invalidate();
+
+            AddBinding(new SimpleBinding(settings, "IsToolbarVisible", nameof(IsToolbarVisible)));
+            AddBinding(new SimpleBinding(settings, "IsCompactMenu", nameof(IsCompactMenu)));
+            AddBinding(new SimpleBinding(settings, "IsStatusBarVisible", nameof(IsStatusBarVisible)));
 
             Sky_ContextChanged();
             Map_SelectedObjectChanged(map.SelectedObject);
@@ -135,7 +167,18 @@ namespace Astrarium.ViewModels
 
             // Main window menu
 
-            MainMenuItems.Add(new MenuItem("Map"));
+            MainMenuItems.Add(new MenuItem("Map")
+            {
+                SubItems = new ObservableCollection<MenuItem>()
+                {
+                    new MenuItem("Save as image...", SaveAsImageCommand),
+                    null,
+                    new MenuItem("Print...", PrintCommand),
+                    new MenuItem("Print preview...", PrintPreviewCommand),
+                    null,
+                    new MenuItem("Exit", ExitAppCommand)
+                }
+            });
 
             var menuView = new MenuItem("View")
             {
@@ -162,9 +205,14 @@ namespace Astrarium.ViewModels
                 {
                     new MenuItem("Search object", SearchObjectCommand) { HotKey = new KeyGesture(Key.F, ModifierKeys.Control, "Ctrl+F") },
                     new MenuItem("Astronomical phenomena", CalculatePhenomenaCommand) { HotKey = new KeyGesture(Key.P, ModifierKeys.Control, "Ctrl+P") },
-                    new MenuItem("Ephemerides", GetObjectEphemerisCommand) { HotKey = new KeyGesture(Key.E, ModifierKeys.Control, "Ctrl+E") }
+                    new MenuItem("Ephemerides", GetObjectEphemerisCommand) { HotKey = new KeyGesture(Key.E, ModifierKeys.Control, "Ctrl+E") }                
                 }
             };
+
+            foreach (var mainItem in mainMenuItems)
+            {
+                menuTools.SubItems.Add(mainItem);
+            }
 
             MainMenuItems.Add(menuTools);
 
@@ -175,7 +223,7 @@ namespace Astrarium.ViewModels
                     new MenuItem("Date & Time", SetDateCommand) { HotKey = new KeyGesture(Key.D, ModifierKeys.Control, "Ctrl+D") },
                     new MenuItem("Observer location", SelectLocationCommand) { HotKey = new KeyGesture(Key.L, ModifierKeys.Control, "Ctrl+L") },
                     null,
-                    new MenuItem("Settings", ChangeSettingsCommand) { HotKey = new KeyGesture(Key.O, ModifierKeys.Control, "Ctrl+O") }
+                    new MenuItem("$Menu.Settings", ChangeSettingsCommand) { HotKey = new KeyGesture(Key.O, ModifierKeys.Control, "Ctrl+O") }
                 }
             };
             MainMenuItems.Add(menuOptions);
@@ -210,7 +258,7 @@ namespace Astrarium.ViewModels
             ContextMenuItems.Add(menuEphemerides);
 
             // dynamic menu items from plugins
-            foreach (var configItem in contextMenuItemsConfig)
+            foreach (var configItem in contextMenuItems)
             {
                 ContextMenuItems.Add(configItem);
             }
@@ -333,16 +381,6 @@ namespace Astrarium.ViewModels
                     sky.Context.JulianDay -= 1;
                     sky.Calculate();
                 }
-                // "O" = [O]ptions
-                //else if (key == Key.O)
-                //{
-                //    ChangeSettings();
-                //}
-                // "I" = [I]nfo
-                //else if (key == Key.I)
-                //{
-                //    GetObjectInfo(map.SelectedObject);
-                //}
                 // "F12" = Full Screen On
                 else if (key == Key.F12)
                 {
@@ -363,16 +401,6 @@ namespace Astrarium.ViewModels
                 {
                     CalculatePhenomena();
                 }
-                // "L" = [L]ocation
-                //else if (key == Key.L)
-                //{
-                //    SelectLocation();
-                //}
-                // "T" = [T]rack
-                //else if (key == Key.T)
-                //{
-                //    MotionTrack(map.SelectedObject);
-                //}
             }
         }
 
@@ -468,6 +496,69 @@ namespace Astrarium.ViewModels
         private void ChangeSettings()
         {
             ViewManager.ShowDialog<SettingsVM>();
+        }
+
+        private void SaveAsImage()
+        {
+            var formats = new Dictionary<string, ImageFormat>()
+            {
+                ["Bitmap (*.bmp)|*.bmp"] = ImageFormat.Bmp,
+                ["Portable Network Graphics (*.png)|*.png"] = ImageFormat.Png,
+                ["Graphics Interchange Format (*.gif)|*.gif"] = ImageFormat.Gif,
+                ["Joint Photographic Experts Group (*.jpg)|*.jpg"] = ImageFormat.Jpeg
+            };
+
+            string fileName = ViewManager.ShowSaveFileDialog("Save as image", "Map", formats.Keys.First(), string.Join("|", formats.Keys));
+            if (fileName != null)
+            {
+                using (Image img = new Bitmap(map.Width, map.Height))
+                using (Graphics g = Graphics.FromImage(img))
+                {
+                    map.Render(g);
+                    string key = formats.Keys.FirstOrDefault(k => k.Split('|')[1].Substring(1).Equals(Path.GetExtension(fileName))) ?? formats.Keys.First();
+                    img.Save(fileName, formats[key]);
+                }
+            }
+        }
+
+        private PrintDocument CreatePrintDocument()
+        {
+            var document = new PrintDocument()
+            {
+                DocumentName = "Map",
+                DefaultPageSettings = new PageSettings() 
+                { 
+                    Landscape = true 
+                }
+            };
+            document.PrintPage += new PrintPageEventHandler(PrintHandler);
+            return document;
+        }
+
+        private void PrintHandler(object sender, PrintPageEventArgs e)
+        {
+            int oldWidth = map.Width;
+            int oldHeight = map.Height;
+            map.Width = e.PageSettings.Bounds.Width - 1;
+            map.Height = e.PageSettings.Bounds.Height - 1;           
+            map.Render(e.Graphics);
+            map.Width = oldWidth;
+            map.Height = oldHeight;
+        }
+
+        private void Print()
+        {
+            var document = CreatePrintDocument();
+            if (ViewManager.ShowPrintDialog(document))
+            {
+                document.Print();
+            }
+        }
+
+        private void PrintPreview()
+        {
+            var document = CreatePrintDocument();
+            ViewManager.ShowPrintPreviewDialog(document);
         }
 
         private void CenterOnObject(CelestialObject body)

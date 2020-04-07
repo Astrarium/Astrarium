@@ -15,20 +15,17 @@ namespace Astrarium.Plugins.Tracks
     /// </summary>
     public class TrackRenderer : BaseRenderer
     {
-        private readonly ITracksProvider tracksProvider;
+        private readonly TrackCalc trackCalc;
+        private readonly Font fontLabel = new Font("Arial", 8);
 
-        private Font fontLabel;
-
-        public TrackRenderer(ITracksProvider tracksProvider)
+        public TrackRenderer(TrackCalc trackCalc)
         {
-            this.tracksProvider = tracksProvider;
-
-            fontLabel = new Font("Arial", 8);
+            this.trackCalc = trackCalc;
         }
 
         public override void Render(IMapContext map)
         {
-            var tracks = tracksProvider.Tracks;
+            var tracks = trackCalc.Tracks;
             double coeff = map.DiagonalCoefficient();
 
             foreach (var track in tracks)

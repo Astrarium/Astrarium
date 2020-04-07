@@ -11,17 +11,12 @@ namespace Astrarium.Types
     /// <summary>
     /// Base class for all ViewModels.
     /// </summary>
-    public abstract class ViewModelBase : INotifyPropertyChanged, IDisposable
+    public abstract class ViewModelBase : PropertyChangedBase, IDisposable
     {
         /// <summary>
         /// Raises when the window or dialog associated with current ViewModel is going to be closed.
         /// </summary>
         public event Action<bool?> Closing;
-
-        /// <summary>
-        /// Raised when the ViewModel property is changed.
-        /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
         /// Closes the window associated with current ViewModel.
@@ -38,18 +33,6 @@ namespace Astrarium.Types
         public void Close(bool? dialogResult)
         {
             Closing?.Invoke(dialogResult);
-        }
-
-        /// <summary>
-        /// Notifies subscribers about changing property or properties. 
-        /// </summary>
-        /// <param name="propertyName">Changed property name(s).</param>
-        protected void NotifyPropertyChanged(params string[] propertyName)
-        {
-            foreach (string pn in propertyName)
-            {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(pn));
-            }
         }
         
         /// <summary>

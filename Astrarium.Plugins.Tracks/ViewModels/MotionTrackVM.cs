@@ -13,20 +13,20 @@ namespace Astrarium.Plugins.Tracks.ViewModels
 {
     public class MotionTrackVM : ViewModelBase
     {
+        private readonly ISky sky;
+        private readonly TrackCalc trackCalc;
+
         public Command OkCommand { get; private set; }
         public Command CancelCommand { get; private set; }
 
-        public MotionTrackVM(ISky sky, ITracksProvider tracksProvider)
+        public MotionTrackVM(ISky sky, TrackCalc trackCalc)
         {
             this.sky = sky;
-            this.tracksProvider = tracksProvider;
+            this.trackCalc = trackCalc;
 
             OkCommand = new Command(Ok);
             CancelCommand = new Command(Close);
         }
-
-        private readonly ISky sky;
-        private readonly ITracksProvider tracksProvider;
 
         private CelestialObject _SelectedBody;
         public CelestialObject SelectedBody
@@ -107,14 +107,15 @@ namespace Astrarium.Plugins.Tracks.ViewModels
                 track.Points.Add(new CelestialPoint() { Equatorial0 = new CrdsEquatorial((double)eq[0].Value, (double)eq[1].Value) });
             }
 
-            int index = tracksProvider.Tracks.FindIndex(t => t.Id == track.Id);
-            if (index > -1)
+            Track existing = trackCalc.Tracks.FirstOrDefault(t => t.Id == track.Id);            
+            if (existing != null)
             {
-                tracksProvider.Tracks[index] = track;
+                int index = trackCalc.Tracks.IndexOf(existing);
+                trackCalc.Tracks[index] = track;
             }
             else
             {
-                tracksProvider.Tracks.Add(track);
+                trackCalc.Tracks.Add(track);
             }            
         }
     }

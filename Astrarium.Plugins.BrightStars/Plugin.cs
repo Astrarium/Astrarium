@@ -20,6 +20,8 @@ namespace Astrarium.Plugins.BrightStars
             AddSetting(new SettingItem("Stars", true, "Stars"));
             AddSetting(new SettingItem("StarsLabels", true, "Stars", s => s.Get<bool>("Stars")));
             AddSetting(new SettingItem("StarsProperNames", true, "Stars", s => s.Get<bool>("Stars") && s.Get<bool>("StarsLabels")));
+            AddSetting(new SettingItem("StarsColors", true, "Stars", s => s.Get<bool>("Stars")));
+
             AddSetting(new SettingItem("ConstLines", true, "Constellations"));
 
             AddSetting(new SettingItem("ColorConstLines", Color.FromArgb(64, 64, 64), "Colors"));

@@ -15,6 +15,7 @@ using System.Windows;
 using WF = System.Windows.Forms;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Drawing.Printing;
 
 namespace Astrarium
 {
@@ -241,14 +242,30 @@ namespace Astrarium
             return (dialog.ShowDialog() ?? false) ? dialog.FileName : null;
         }
 
+        public bool ShowPrintDialog(PrintDocument document)
+        {
+            var dialog = new WF.PrintDialog(); 
+            dialog.Document = document;
+            dialog.UseEXDialog = true;
+            return dialog.ShowDialog() == WF.DialogResult.OK;
+        }
+
+        public bool ShowPrintPreviewDialog(PrintDocument document)
+        {
+            var dialog = new WF.PrintPreviewDialog();
+            dialog.Document = document;
+            dialog.ShowIcon = false;
+            return dialog.ShowDialog() == WF.DialogResult.OK;
+        }
+
         public string ShowSelectFolderDialog(string caption, string path)
         {
-            //var dialog = new WF.FolderBrowserDialog();
-            //dialog.Description = caption;
-            //return (WF.DialogResult.OK == dialog.ShowDialog()) ? dialog.SelectedPath : null;
-            var vm = new SelectFolderVM();
-            vm.SelectedPath = path;
-            return (ShowDialog(vm) ?? false) ? vm.SelectedPath : null;
+            var dialog = new WF.FolderBrowserDialog();
+            dialog.Description = caption;
+            return (WF.DialogResult.OK == dialog.ShowDialog()) ? dialog.SelectedPath : null;
+            //var vm = new SelectFolderVM();
+            //vm.SelectedPath = path;
+            //return (ShowDialog(vm) ?? false) ? vm.SelectedPath : null;
         }
 
         public double? ShowDateDialog(double jd, double utcOffset, DateOptions displayMode = DateOptions.DateTime)

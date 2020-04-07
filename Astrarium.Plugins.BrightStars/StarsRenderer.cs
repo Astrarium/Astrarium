@@ -131,34 +131,42 @@ namespace Astrarium.Plugins.BrightStars
                 return Color.Black;
             }
 
-            switch (spClass)
+            if (settings.Get("StarsColors"))
             {
-                case 'O':
-                case 'W':
-                    starColor = Color.LightBlue;
-                    break;
-                case 'B':
-                    starColor = Color.LightCyan;
-                    break;
-                case 'A':
-                    starColor = Color.White;
-                    break;
-                case 'F':
-                    starColor = Color.LightYellow;
-                    break;
-                case 'G':
-                    starColor = Color.Yellow;
-                    break;
-                case 'K':
-                    starColor = Color.Orange;
-                    break;
-                case 'M':
-                    starColor = Color.OrangeRed;
-                    break;
-                default:
-                    starColor = Color.White;
-                    break;
+                switch (spClass)
+                {
+                    case 'O':
+                    case 'W':
+                        starColor = Color.LightBlue;
+                        break;
+                    case 'B':
+                        starColor = Color.LightCyan;
+                        break;
+                    case 'A':
+                        starColor = Color.White;
+                        break;
+                    case 'F':
+                        starColor = Color.LightYellow;
+                        break;
+                    case 'G':
+                        starColor = Color.Yellow;
+                        break;
+                    case 'K':
+                        starColor = Color.Orange;
+                        break;
+                    case 'M':
+                        starColor = Color.OrangeRed;
+                        break;
+                    default:
+                        starColor = Color.White;
+                        break;
+                }
             }
+            else
+            {
+                starColor = Color.White;
+            }
+           
             return map.GetColor(starColor, Color.Transparent);
         }
 

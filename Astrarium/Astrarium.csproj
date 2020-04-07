@@ -54,6 +54,20 @@
   </ItemGroup>
   
   <ItemGroup>
+    <None Remove="Astrarium.ico" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Content Include="Logo\128.png" />
+    <Content Include="Logo\16.png" />
+    <Content Include="Logo\24.png" />
+    <Content Include="Logo\256.png" />
+    <Content Include="Logo\32.png" />
+    <Content Include="Logo\48.png" />
+    <Resource Include="Logo\64.png" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Ninject" Version="3.3.4" />
@@ -87,6 +101,10 @@
     <Reference Include="UIAutomationProvider" />
     <Reference Include="WindowsBase" />
     <Reference Include="WindowsFormsIntegration" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Astrarium.ico" />
   </ItemGroup>
 
   <ItemGroup>

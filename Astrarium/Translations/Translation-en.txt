@@ -19,6 +19,9 @@ DateWindow.Seconds		= Seconds
 DateWindow.SetCurrent	= Set current
 DateWindow.Select		= Select
 
+# ObjectInfoWindow
+ObjectInfoWindow.Title	= Object Info
+
 ApplicationLanguage = Application Language
 
 # Rendering order control

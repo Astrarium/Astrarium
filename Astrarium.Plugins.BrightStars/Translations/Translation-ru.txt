@@ -5,6 +5,7 @@ Astrarium.Plugins.BrightStars.StarsRenderer.Name = Яркие звёзды
 Settings.Stars				= Звёзды
 Settings.StarsLabels		= Названия звёзд
 Settings.StarsProperNames	= Собственные имена звёзд
+Settings.StarsColors		= Цвета звёзд
 Settings.ConstLines			= Линии созвездий
 
 # Ephemeris

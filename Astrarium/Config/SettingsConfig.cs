@@ -14,6 +14,15 @@ namespace Astrarium.Config
         {
             // Default language
             Add(new SettingItem("Language", "en", "UI", typeof(LanguageSettingControl)));
+            
+            // Type of application menu
+            Add(new SettingItem("IsCompactMenu", false, "UI"));
+
+            // Toolbar visibility
+            Add(new SettingItem("IsToolbarVisible", true, "UI"));
+
+            // Status bar visibility
+            Add(new SettingItem("IsStatusBarVisible", true, "UI"));
 
             // Default observer location.
             // Has no section, so not displayed in settings window.

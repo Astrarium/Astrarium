@@ -1,6 +1,7 @@
 ﻿using Astrarium.Objects;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Printing;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -91,6 +92,16 @@ namespace Astrarium.Types
         public static string ShowSelectFolderDialog(string caption, string path)
         {
             return viewManager.ShowSelectFolderDialog(caption, path);
+        }
+
+        public static bool ShowPrintDialog(PrintDocument document)
+        {
+            return viewManager.ShowPrintDialog(document);
+        }
+
+        public static bool ShowPrintPreviewDialog(PrintDocument document)
+        {
+            return viewManager.ShowPrintPreviewDialog(document);
         }
 
         /// <summary>
