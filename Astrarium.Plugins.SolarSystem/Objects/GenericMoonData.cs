@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Astrarium.Objects
+namespace Astrarium.Plugins.SolarSystem.Objects
 {
     public class GenericMoonData : GenericSatelliteOrbit
     {

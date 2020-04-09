@@ -1,17 +1,9 @@
 ﻿using Astrarium.Algorithms;
-using Newtonsoft.Json;
-using Astrarium.Config;
-using Astrarium.Objects;
 using Astrarium.Types;
-using Astrarium.Types.Localization;
+using Astrarium.Plugins.SolarSystem.Objects;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 
 namespace Astrarium.Plugins.SolarSystem
 {

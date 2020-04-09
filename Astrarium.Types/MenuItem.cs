@@ -12,20 +12,14 @@ using System.Windows.Media;
 
 namespace Astrarium.Types
 {
+    /// <summary>
+    /// Represents ViewModel for single menu item
+    /// </summary>
     public class MenuItem : ViewModelBase
     {
-        public MenuItem(string title)
-        {
-            this.Header = title;
-            Text.LocaleChanged += () => NotifyPropertyChanged(nameof(Header));
-        }
+        public MenuItem(string title) : this(title, null) { }
 
-        public MenuItem(string title, ICommand command)
-        {
-            this.Header = title;
-            this.Command = command;
-            Text.LocaleChanged += () => NotifyPropertyChanged(nameof(Header));
-        }
+        public MenuItem(string title, ICommand command) : this(title, command, null) { }
 
         public MenuItem(string title, ICommand command, object commandParameter)
         {
@@ -57,6 +51,12 @@ namespace Astrarium.Types
         {
             get => GetValue<bool>(nameof(IsVisible), true);
             set => SetValue(nameof(IsVisible), value);
+        }
+
+        public string IconKey
+        {
+            get => GetValue<string>(nameof(IconKey), null);
+            set => SetValue(nameof(IconKey), value);
         }
 
         public string Header

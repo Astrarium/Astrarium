@@ -74,19 +74,64 @@
   </ItemGroup>
       
   <ItemGroup>
-    <ProjectReference Include="..\Astrarium.Algorithms\Astrarium.Algorithms.csproj" />
-    <ProjectReference Include="..\Astrarium.Plugins.BrightStars\Astrarium.Plugins.BrightStars.csproj" />
-    <ProjectReference Include="..\Astrarium.Plugins.Constellations\Astrarium.Plugins.Constellations.csproj" />
-    <ProjectReference Include="..\Astrarium.Plugins.DeepSky\Astrarium.Plugins.DeepSky.csproj" />
-    <ProjectReference Include="..\Astrarium.Plugins.Grids\Astrarium.Plugins.Grids.csproj" />
-    <ProjectReference Include="..\Astrarium.Plugins.Horizon\Astrarium.Plugins.Horizon.csproj" />
-    <ProjectReference Include="..\Astrarium.Plugins.MeasureTool\Astrarium.Plugins.MeasureTool.csproj" />
-    <ProjectReference Include="..\Astrarium.Plugins.MilkyWay\Astrarium.Plugins.MilkyWay.csproj" />
-    <ProjectReference Include="..\Astrarium.Plugins.MinorBodies\Astrarium.Plugins.MinorBodies.csproj" />
-    <ProjectReference Include="..\Astrarium.Plugins.SolarSystem\Astrarium.Plugins.SolarSystem.csproj" />
-    <ProjectReference Include="..\Astrarium.Plugins.Tracks\Astrarium.Plugins.Tracks.csproj" />
-    <ProjectReference Include="..\Astrarium.Plugins.Tycho2\Astrarium.Plugins.Tycho2.csproj" />
+    <ProjectReference Include="..\Astrarium.Plugins.BrightStars\Astrarium.Plugins.BrightStars.csproj">
+      <Private>false</Private>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\Astrarium.Plugins.Constellations\Astrarium.Plugins.Constellations.csproj">
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <Private>false</Private>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\Astrarium.Plugins.DeepSky\Astrarium.Plugins.DeepSky.csproj">
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Astrarium.Plugins.Grids\Astrarium.Plugins.Grids.csproj">
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Astrarium.Plugins.Horizon\Astrarium.Plugins.Horizon.csproj">
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Astrarium.Plugins.MeasureTool\Astrarium.Plugins.MeasureTool.csproj">
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Astrarium.Plugins.MilkyWay\Astrarium.Plugins.MilkyWay.csproj">
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Astrarium.Plugins.MinorBodies\Astrarium.Plugins.MinorBodies.csproj">
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Astrarium.Plugins.SolarSystem\Astrarium.Plugins.SolarSystem.csproj">
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Astrarium.Plugins.Tracks\Astrarium.Plugins.Tracks.csproj">
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Astrarium.Plugins.Tycho2\Astrarium.Plugins.Tycho2.csproj">
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+    
     <ProjectReference Include="..\Astrarium.Types\Astrarium.Types.csproj" />
+    <ProjectReference Include="..\Astrarium.Algorithms\Astrarium.Algorithms.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -115,6 +160,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\ConNames.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Earth.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\TimeZones.dat">

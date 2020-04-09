@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace Astrarium.Renderers
+namespace Astrarium.Plugins.SolarSystem
 {
     public interface ISphereRenderer
     {

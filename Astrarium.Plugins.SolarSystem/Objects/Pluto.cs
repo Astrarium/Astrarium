@@ -1,4 +1,5 @@
 ﻿using Astrarium.Algorithms;
+using Astrarium.Objects;
 using Astrarium.Types.Localization;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Astrarium.Objects
+namespace Astrarium.Plugins.SolarSystem.Objects
 {
     /// <summary>
     /// Contains coordinates and visual appearance data for dwarf planet Pluto.

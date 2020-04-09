@@ -6,12 +6,18 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net451|AnyCPU'">
-    <OutputPath>..\Astrarium\bin\$(Configuration)\</OutputPath>
+    <OutputPath>..\Astrarium\bin\Debug\Plugins\Astrarium.Plugins.SolarSystem</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Astrarium.Algorithms\Astrarium.Algorithms.csproj" />
-    <ProjectReference Include="..\Astrarium.Types\Astrarium.Types.csproj" />
+    <ProjectReference Include="..\Astrarium.Algorithms\Astrarium.Algorithms.csproj">
+      <Private>false</Private>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+    </ProjectReference>
+    <ProjectReference Include="..\Astrarium.Types\Astrarium.Types.csproj">
+      <Private>false</Private>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+    </ProjectReference>
   </ItemGroup>
   
   <ItemGroup>
@@ -33,7 +39,7 @@
   
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="OpenTK" Version="3.1.0" />
+    <PackageReference Include="OpenTK" Version="3.2.0" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
   
@@ -88,9 +94,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\9.jpg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\Earth.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\LunarFeatures.dat">

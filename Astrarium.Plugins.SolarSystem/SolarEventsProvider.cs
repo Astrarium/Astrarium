@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Astrarium.Calculators
+namespace Astrarium.Plugins.SolarSystem
 {
     public class SolarEventsProvider : BaseAstroEventsProvider
     {

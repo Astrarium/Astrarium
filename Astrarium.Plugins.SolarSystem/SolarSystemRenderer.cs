@@ -1,7 +1,6 @@
 ﻿using Astrarium.Algorithms;
-using Astrarium.Calculators;
-using Astrarium.Config;
 using Astrarium.Objects;
+using Astrarium.Plugins.SolarSystem.Objects;
 using Astrarium.Renderers;
 using Astrarium.Types;
 using Astrarium.Types.Localization;
@@ -9,11 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using static Astrarium.Plugins.SolarSystem.Plugin;
 
@@ -65,6 +62,8 @@ namespace Astrarium.Plugins.SolarSystem
         private readonly ICollection<SurfaceFeature> lunarFeatures;
         private readonly ICollection<SurfaceFeature> martianFeatures;
 
+        private readonly string dataPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data");
+
         public SolarSystemRenderer(LunarCalc lunarCalc, SolarCalc solarCalc, PlanetsCalc planetsCalc, ISettings settings)
         {
             this.planetsCalc = planetsCalc;
@@ -76,8 +75,8 @@ namespace Astrarium.Plugins.SolarSystem
             this.pluto = planetsCalc.Pluto;
 
             var featuresReader = new SurfaceFeaturesReader();
-            lunarFeatures = featuresReader.Read(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/LunarFeatures.dat"));
-            martianFeatures = featuresReader.Read(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/MartianFeatures.dat"));
+            lunarFeatures = featuresReader.Read(Path.Combine(dataPath, "LunarFeatures.dat"));
+            martianFeatures = featuresReader.Read(Path.Combine(dataPath, "MartianFeatures.dat"));
         }
 
         public override RendererOrder Order => RendererOrder.SolarSystem;
@@ -1106,7 +1105,7 @@ namespace Astrarium.Plugins.SolarSystem
                 RenderPolarCaps = token.RenderPolarCaps,
                 NorthernPolarCap = token.NorthernPolarCap,
                 SouthernPolarCap = token.SouthernPolarCap,
-                TextureFilePath = $"Data\\{token.TextureName}.jpg"
+                TextureFilePath = Path.Combine(dataPath, $"{token.TextureName}.jpg")
             });
         }
 
@@ -1132,7 +1131,7 @@ namespace Astrarium.Plugins.SolarSystem
                 LatitudeShift = token.Latitude,
                 LongutudeShift = token.Longitude,
                 OutputImageSize = imageSize,
-                TextureFilePath = $"Data\\{token.TextureName}.jpg"
+                TextureFilePath = Path.Combine(dataPath, $"{token.TextureName}.jpg")
             });
         }
 

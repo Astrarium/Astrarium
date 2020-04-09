@@ -116,7 +116,7 @@ namespace Astrarium
 
             // TODO: consider more proper way to load plugins
             string homeFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-            IEnumerable<string> pluginPaths = Directory.EnumerateFiles(homeFolder, "*.dll");
+            IEnumerable<string> pluginPaths = Directory.EnumerateFiles(homeFolder, "*.dll", SearchOption.AllDirectories);
 
             progress.Report("Loading plugins");
 

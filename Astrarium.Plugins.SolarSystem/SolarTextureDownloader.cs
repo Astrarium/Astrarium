@@ -11,7 +11,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Astrarium.Renderers
+namespace Astrarium.Plugins.SolarSystem
 {
     /// <summary>
     /// This class is responsible for downloading latest solar images from web URL. 

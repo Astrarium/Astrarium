@@ -2182,9 +2182,7 @@
         </Setter>
     </Style>
 
-
     <!-- New menu styles -->
-
     <Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="{x:Type Separator}">
         <Setter Property="Height" Value="1" />
         <Setter Property="Margin" Value="0,4,0,4" />
@@ -2198,8 +2196,6 @@
         </Setter>
     </Style>
 
-    
-    
     <!-- TopLevelHeader -->
     <ControlTemplate x:Key="{x:Static MenuItem.TopLevelHeaderTemplateKey}" TargetType="{x:Type MenuItem}">
         <c:BorderFix x:Name="Border" Background="{TemplateBinding Background}" VerticalAlignment="Center">
@@ -2247,7 +2243,6 @@
         <ControlTemplate.Triggers>
             <Trigger Property="IsHighlighted" Value="true">
                 <Setter Property="Background" TargetName="Border" Value="{StaticResource BrushSelection}" />
-
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">
                 <Setter Property="Foreground" Value="{StaticResource BrushControlLightBackground}" />
@@ -2265,33 +2260,26 @@
                     <ColumnDefinition Width="Auto" SharedSizeGroup="Shortcut" />
                     <ColumnDefinition Width="13" />
                 </Grid.ColumnDefinitions>
-                <ContentPresenter x:Name="Icon"
-                        Margin="6,0,6,0"
-                        VerticalAlignment="Center"
-                        ContentSource="Icon" />
-
-
+                <Image x:Name="Icon" Source="{TemplateBinding Icon}" Margin="0 0 10 0" Height="20" Width="20" VerticalAlignment="Center" HorizontalAlignment="Center" />
                 <Path x:Name="CheckMark"  
-                      Visibility="Hidden"
+                        Visibility="Hidden"
                         Data="{StaticResource Checkmark}" 
 						Height="10" 
 						Width="12" 
 						Stretch="Uniform" 
 						Fill="{TemplateBinding Foreground}"
 						Margin="8 3 8 5"/>
-
                 <ContentPresenter x:Name="HeaderHost"
                         Grid.Column="1"
                         ContentSource="Header"
                         RecognizesAccessKey="True" />
-                
                 <TextBlock x:Name="InputGestureText"
-                    VerticalAlignment="Center"
-                    Grid.Column="2"
-                    Foreground="{TemplateBinding Label.Foreground}"
-                     Text="{TemplateBinding InputGestureText}"
-                     Margin="12,0,0,3"
-                     DockPanel.Dock="Right" />
+                        VerticalAlignment="Center"
+                        Grid.Column="2"
+                        Foreground="{TemplateBinding Label.Foreground}"
+                        Text="{TemplateBinding InputGestureText}"
+                        Margin="12,0,0,3"
+                        DockPanel.Dock="Right" />
             </Grid>
         </c:BorderFix>
         <ControlTemplate.Triggers>
@@ -2300,6 +2288,7 @@
                 <Setter TargetName="Icon" Property="Visibility" Value="Hidden" />
             </Trigger>
             <Trigger Property="IsChecked" Value="true">
+                <Setter TargetName="Icon" Property="Visibility" Value="Hidden" />
                 <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
                 <Setter TargetName="CheckMark" Property="Fill" Value="{StaticResource BrushForeground}" />
             </Trigger>
@@ -2309,7 +2298,6 @@
             <Trigger Property="IsHighlighted" Value="true">
                 <Setter Property="Background" TargetName="Border" Value="{StaticResource BrushSelection}" />
                 <Setter Property="Foreground" TargetName="InputGestureText" Value="{StaticResource BrushForeground}" />
-
             </Trigger>
             <Trigger Property="IsEnabled" Value="false">
                 <Setter Property="Foreground" Value="{StaticResource BrushControlLightBackground}" />
@@ -2326,8 +2314,8 @@
                     <ColumnDefinition Width="Auto" SharedSizeGroup="Shortcut" />
                     <ColumnDefinition Width="32" />
                 </Grid.ColumnDefinitions>
-                <ContentPresenter x:Name="Icon" Margin="6,0,6,0" VerticalAlignment="Center" ContentSource="Icon" />
-                <ContentPresenter x:Name="HeaderHost" Margin="17 0 0 0" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True" />
+                <Image x:Name="Icon" Source="{TemplateBinding Icon}" Margin="0 0 11 0" Height="20" Width="20" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                <ContentPresenter x:Name="HeaderHost" Margin="0 0 0 0" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True" />
                 <Path Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 0 7 L 4 3.5 Z" Fill="{TemplateBinding Foreground}" Margin="12,0,0,3" />
                 <Popup 
                     x:Name="Popup" 

@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Astrarium.Renderers
+namespace Astrarium.Plugins.SolarSystem
 {
     /// <summary>
     /// Class for rendering spherical images of celestial objects.

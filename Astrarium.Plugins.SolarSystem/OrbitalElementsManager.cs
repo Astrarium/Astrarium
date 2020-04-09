@@ -12,6 +12,7 @@ using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Astrarium.Plugins.SolarSystem.Objects;
 
 namespace Astrarium.Plugins.SolarSystem
 {

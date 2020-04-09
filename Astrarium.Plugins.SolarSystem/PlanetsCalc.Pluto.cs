@@ -1,5 +1,5 @@
 ﻿using Astrarium.Algorithms;
-using Astrarium.Objects;
+using Astrarium.Plugins.SolarSystem.Objects;
 using Astrarium.Types;
 using Astrarium.Types.Localization;
 using System;

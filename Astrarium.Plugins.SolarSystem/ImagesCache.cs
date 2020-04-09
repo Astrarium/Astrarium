@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Threading;
 
-namespace Astrarium.Renderers
+namespace Astrarium.Plugins.SolarSystem
 {
     public class ImagesCache
     {

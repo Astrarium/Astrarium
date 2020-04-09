@@ -243,7 +243,7 @@ namespace Astrarium.Types.Themes
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return Application.Current.Resources[value];
+            return value != null ? Application.Current.Resources[value] : null;
         }
     }
 

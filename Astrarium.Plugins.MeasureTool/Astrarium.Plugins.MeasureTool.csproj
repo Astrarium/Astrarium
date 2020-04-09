@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net451|AnyCPU'">
-    <OutputPath>..\Astrarium\bin\$(Configuration)\</OutputPath>
+    <OutputPath>..\Astrarium\bin\Debug\Plugins\Astrarium.Plugins.MeasureTool</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,8 +14,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Astrarium.Algorithms\Astrarium.Algorithms.csproj" />
-    <ProjectReference Include="..\Astrarium.Types\Astrarium.Types.csproj" />
+    <ProjectReference Include="..\Astrarium.Algorithms\Astrarium.Algorithms.csproj">
+      <Private>false</Private>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+    </ProjectReference>
+    <ProjectReference Include="..\Astrarium.Types\Astrarium.Types.csproj">
+      <Private>false</Private>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
