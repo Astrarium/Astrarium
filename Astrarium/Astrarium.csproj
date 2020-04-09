@@ -170,4 +170,12 @@
     </None>
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="if /I &quot;$(ConfigurationName)&quot; == &quot;Release&quot; (&#xD;&#xA;cd &quot;$(TargetDir)&quot;&#xD;&#xA;del $(TargetFileName).config&#xD;&#xA;del /s *.pdb&#xD;&#xA;del /s /a:H Thumbs.db&#xD;&#xA;)" />
+  </Target>
+
+  <Target Name="PostClean" AfterTargets="Clean">
+    <Exec Command="rmdir &quot;$(TargetDir)&quot; /S /Q&#xD;&#xA;" />
+  </Target>
+
 </Project>
