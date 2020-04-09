@@ -9,6 +9,10 @@
     <OutputPath>..\Astrarium\bin\Debug\Plugins\Astrarium.Plugins.Horizon</OutputPath>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net451|AnyCPU'">
+    <OutputPath>..\Astrarium\bin\Release\Plugins\Astrarium.Plugins.Horizon</OutputPath>
+  </PropertyGroup>
+
   <ItemGroup>
     <EmbeddedResource Include="Translations\Translation-en.txt" />
     <EmbeddedResource Include="Translations\Translation-ru.txt" />

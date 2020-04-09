@@ -9,6 +9,10 @@
     <OutputPath>..\Astrarium\bin\Debug\Plugins\Astrarium.Plugins.Tracks</OutputPath>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net451|AnyCPU'">
+    <OutputPath>..\Astrarium\bin\Release\Plugins\Astrarium.Plugins.Tracks</OutputPath>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="Views\MotionTrackWindow.xaml" />
     <None Remove="Views\TracksListWindow.xaml" />

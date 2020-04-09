@@ -9,6 +9,10 @@
     <OutputPath>..\Astrarium\bin\Debug\Plugins\Astrarium.Plugins.MinorBodies</OutputPath>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net451|AnyCPU'">
+    <OutputPath>..\Astrarium\bin\Debug\Release\Astrarium.Plugins.MinorBodies</OutputPath>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="Images.xaml" />
     <None Remove="Translations\Translation-en.txt" />

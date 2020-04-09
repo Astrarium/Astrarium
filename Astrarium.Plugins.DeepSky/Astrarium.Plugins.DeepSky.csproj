@@ -9,6 +9,10 @@
     <OutputPath>..\Astrarium\bin\Debug\Plugins\Astrarium.Plugins.DeepSky</OutputPath>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net451|AnyCPU'">
+    <OutputPath>..\Astrarium\bin\Release\Plugins\Astrarium.Plugins.DeepSky</OutputPath>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="Images.xaml" />
   </ItemGroup>

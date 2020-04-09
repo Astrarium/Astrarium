@@ -8,6 +8,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net451|AnyCPU'">
     <OutputPath>..\Astrarium\bin\Debug\Plugins\Astrarium.Plugins.BrightStars</OutputPath>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net451|AnyCPU'">
+    <OutputPath>..\Astrarium\bin\Release\Plugins\Astrarium.Plugins.BrightStars</OutputPath>
+  </PropertyGroup>
   
   <ItemGroup>
     <Page Include="Images.xaml">

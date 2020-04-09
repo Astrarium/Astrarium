@@ -9,6 +9,10 @@
     <OutputPath>..\Astrarium\bin\Debug\Plugins\Astrarium.Plugins.MilkyWay</OutputPath>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net451|AnyCPU'">
+    <OutputPath>..\Astrarium\bin\Release\Plugins\Astrarium.Plugins.MilkyWay</OutputPath>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Astrarium.Algorithms\Astrarium.Algorithms.csproj">
       <Private>false</Private>

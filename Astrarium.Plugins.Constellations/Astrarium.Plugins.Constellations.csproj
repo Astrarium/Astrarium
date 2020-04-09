@@ -9,6 +9,10 @@
     <OutputPath>..\Astrarium\bin\Debug\Plugins\Astrarium.Plugins.Constellations</OutputPath>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net451|AnyCPU'">
+    <OutputPath>..\Astrarium\bin\Release\Plugins\Astrarium.Plugins.Constellations</OutputPath>
+  </PropertyGroup>
+
   <ItemGroup>
     <Page Include="Images.xaml">
       <Generator>MSBuild:Compile</Generator>
