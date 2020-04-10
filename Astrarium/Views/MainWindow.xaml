@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:a="clr-namespace:Astrarium"
+        xmlns:c="clr-namespace:Astrarium.Controls"
         xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
         xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
         mc:Ignorable="d"
@@ -37,7 +38,7 @@
             </DrawingImage>
         </ResourceDictionary>
     </Window.Resources>
-    
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -63,69 +64,98 @@
             </Menu>
         </DockPanel>
 
-        <ToolBar Grid.Row="1" ToolBarTray.IsLocked="True" ItemsSource="{Binding ToolbarItems}" SnapsToDevicePixels="True" Visibility="{Binding IsToolbarVisible, Converter={s:BoolToVisibilityConverter}}">
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            
+            <ToolBar Grid.Column="0" ToolBarTray.IsLocked="True" ItemsSource="{Binding ToolbarItems}" SnapsToDevicePixels="True" Visibility="{Binding IsToolbarVisible, Converter={s:BoolToVisibilityConverter}}" Grid.ColumnSpan="2">
 
-            <ToolBar.Resources>
+                <ToolBar.Resources>
 
-                <DataTemplate x:Key="ToolbarSeparatorTemplate">
-                    <Grid Width="6" Height="18" />
-                </DataTemplate>
+                    <DataTemplate x:Key="ToolbarSeparatorTemplate">
+                        <Grid Width="6" Height="18" />
+                    </DataTemplate>
 
-                <DataTemplate x:Key="ToolbarButtonTemplate">
-                    <Button ToolTip="{Binding Tooltip}" Command="{Binding ButtonCommand}" SnapsToDevicePixels="True">
-                        <Button.Content>
-                            <Rectangle Margin="2" Width="18" Height="18">
-                                <Rectangle.Fill>
-                                    <SolidColorBrush Color="{DynamicResource ColorForeground}" />
-                                </Rectangle.Fill>
-                                <Rectangle.OpacityMask>
-                                    <ImageBrush AlignmentX="Left" AlignmentY="Top" ImageSource="{Binding ImageKey, Converter={s:ImageKeyToImageConverter}}"  Stretch="UniformToFill" />
-                                </Rectangle.OpacityMask>
-                            </Rectangle>
-                        </Button.Content>
-                    </Button>
-                </DataTemplate>
+                    <DataTemplate x:Key="ToolbarButtonTemplate">
+                        <Button ToolTip="{Binding Tooltip}" Command="{Binding ButtonCommand}" SnapsToDevicePixels="True">
+                            <Button.Content>
+                                <Rectangle Margin="2" Width="18" Height="18">
+                                    <Rectangle.Fill>
+                                        <SolidColorBrush Color="{DynamicResource ColorForeground}" />
+                                    </Rectangle.Fill>
+                                    <Rectangle.OpacityMask>
+                                        <ImageBrush AlignmentX="Left" AlignmentY="Top" ImageSource="{Binding ImageKey, Converter={s:ImageKeyToImageConverter}}"  Stretch="UniformToFill" />
+                                    </Rectangle.OpacityMask>
+                                </Rectangle>
+                            </Button.Content>
+                        </Button>
+                    </DataTemplate>
 
-                <DataTemplate x:Key="ToolbarToggleButtonTemplate">
-                    <ToggleButton ToolTip="{Binding Tooltip}" IsChecked="{Binding IsChecked}" SnapsToDevicePixels="True">
-                        <ToggleButton.Content>
-                            <Rectangle Margin="2" Width="18" Height="18">
-                                <Rectangle.Fill>
-                                    <SolidColorBrush Color="{DynamicResource ColorForeground}" />
-                                </Rectangle.Fill>
-                                <Rectangle.OpacityMask>
-                                    <ImageBrush  AlignmentX="Left" AlignmentY="Top" ImageSource="{Binding ImageKey, Converter={s:ImageKeyToImageConverter}}"  Stretch="UniformToFill" />
-                                </Rectangle.OpacityMask>
-                            </Rectangle>
-                        </ToggleButton.Content>
-                    </ToggleButton>
-                </DataTemplate>
-            </ToolBar.Resources>
+                    <DataTemplate x:Key="ToolbarToggleButtonTemplate">
+                        <ToggleButton ToolTip="{Binding Tooltip}" IsChecked="{Binding IsChecked}" SnapsToDevicePixels="True">
+                            <ToggleButton.Content>
+                                <Rectangle Margin="2" Width="18" Height="18">
+                                    <Rectangle.Fill>
+                                        <SolidColorBrush Color="{DynamicResource ColorForeground}" />
+                                    </Rectangle.Fill>
+                                    <Rectangle.OpacityMask>
+                                        <ImageBrush AlignmentX="Left" AlignmentY="Top" ImageSource="{Binding ImageKey, Converter={s:ImageKeyToImageConverter}}"  Stretch="UniformToFill" />
+                                    </Rectangle.OpacityMask>
+                                </Rectangle>
+                            </ToggleButton.Content>
+                        </ToggleButton>
+                    </DataTemplate>
+                </ToolBar.Resources>
 
-            <ToolBar.ItemTemplate>
-                <DataTemplate>
-                    <ContentControl Content="{Binding}">
-                        <ContentControl.Style>
-                            <Style TargetType="ContentControl">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Type}" Value="{x:Type t:ToolbarSeparator}">
-                                        <Setter Property="ContentTemplate" Value="{StaticResource ToolbarSeparatorTemplate}" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Type}" Value="{x:Type t:ToolbarButton}">
-                                        <Setter Property="ContentTemplate" Value="{StaticResource ToolbarButtonTemplate}" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Type}" Value="{x:Type t:ToolbarToggleButton}">
-                                        <Setter Property="ContentTemplate" Value="{StaticResource ToolbarToggleButtonTemplate}" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ContentControl.Style>
-                    </ContentControl>
-                </DataTemplate>
-            </ToolBar.ItemTemplate>
-        </ToolBar>
+                <ToolBar.ItemTemplate>
+                    <DataTemplate>
+                        <ContentControl Content="{Binding}">
+                            <ContentControl.Style>
+                                <Style TargetType="ContentControl">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Type}" Value="{x:Type t:ToolbarSeparator}">
+                                            <Setter Property="ContentTemplate" Value="{StaticResource ToolbarSeparatorTemplate}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Type}" Value="{x:Type t:ToolbarButton}">
+                                            <Setter Property="ContentTemplate" Value="{StaticResource ToolbarButtonTemplate}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Type}" Value="{x:Type t:ToolbarToggleButton}">
+                                            <Setter Property="ContentTemplate" Value="{StaticResource ToolbarToggleButtonTemplate}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ContentControl.Style>
+                        </ContentControl>
+                    </DataTemplate>
+                </ToolBar.ItemTemplate>
+            </ToolBar>
 
-        <DockPanel Grid.Row="2" LastChildFill="true">
+            <c:AutoCompleteTextBox 
+                Grid.Column="1"
+                Watermark="Search..."
+                HorizontalAlignment="Left"
+                Text=""
+                DisplayMember="Body.Names[0]"
+                IconPlacement="Right"
+                Height="22"
+                Width="150"                
+                SelectedItem="{Binding SearchResult, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}"
+                Provider="{Binding SearchProvider}">
+                <c:AutoCompleteTextBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Path=Body.Names[0]}"></TextBlock>
+                    </DataTemplate>
+                </c:AutoCompleteTextBox.ItemTemplate>
+            </c:AutoCompleteTextBox>
+
+        </Grid>
+
+        <DockPanel Grid.Row="2" LastChildFill="true" Grid.ColumnSpan="2">
             <WindowsFormsHost x:Name="Host" Background="Black">
                 <WindowsFormsHost.ContextMenu>
                     <ContextMenu ItemsSource="{Binding ContextMenuItems}" Opened="ContextMenu_Opened">
@@ -145,7 +175,7 @@
                 </WindowsFormsHost.ContextMenu>
             </WindowsFormsHost>
         </DockPanel>
-        <StatusBar Grid.Row="3" Visibility="{Binding IsStatusBarVisible, Converter={s:BoolToVisibilityConverter}}">
+        <StatusBar Grid.Row="3" Visibility="{Binding IsStatusBarVisible, Converter={s:BoolToVisibilityConverter}}" Grid.ColumnSpan="2">
             <TextBlock Width="30" TextAlignment="Center" Text="{Binding MapConstellationNameString, FallbackValue='Con'}" />
             <Separator />
             <TextBlock Width="240" Text="{Binding MapEquatorialCoordinatesString, FallbackValue='Equatorial coordinates'}" />
@@ -182,7 +212,7 @@
             <!-- Date and Time controls -->
             <StatusBarItem HorizontalAlignment="Right" HorizontalContentAlignment="Right">
                 <StackPanel Orientation="Horizontal">
-                    
+
                     <!-- Sync Date and Time toggler -->
                     <ToggleButton Width="17" Height="17" VerticalContentAlignment="Center" IsChecked="{Binding DateTimeSync}" Margin="0 0 4 0">
                         <ToggleButton.Style>

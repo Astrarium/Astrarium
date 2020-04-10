@@ -19,7 +19,7 @@ namespace Astrarium.Config
         public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             CultureInfo cultureInfo = value as CultureInfo;
-            return cultureInfo.Name; // + " / " + cultureInfo.EnglishName;
+            return cultureInfo.Name;
         }
     }
 
@@ -28,7 +28,7 @@ namespace Astrarium.Config
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             CultureInfo cultureInfo = value as CultureInfo;
-            return cultureInfo.NativeName + " / " + cultureInfo.EnglishName;
+            return cultureInfo.NativeName;
         }
     }
 }

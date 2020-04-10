@@ -29,7 +29,7 @@ namespace Astrarium
     /// </summary>
     public partial class App : Application
     {
-        private IKernel kernel = new StandardKernel();
+      private IKernel kernel = new StandardKernel();
 
         protected override void OnStartup(StartupEventArgs e)
         {

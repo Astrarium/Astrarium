@@ -1,7 +1,10 @@
 ﻿using Astrarium.Algorithms;
+using Astrarium.Controls;
 using Astrarium.Objects;
 using Astrarium.Types;
+using Astrarium.Types.Localization;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -59,7 +62,10 @@ namespace Astrarium.ViewModels
         public ObservableCollection<MenuItem> SelectedObjectsMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
         public string SelectedObjectName { get; private set; }
         public ObservableCollection<ToolbarItem> ToolbarItems { get; private set; } = new ObservableCollection<ToolbarItem>();
-        
+        public ISuggestionProvider SearchProvider { get; private set; }
+
+        public SearchResultItem SearchResult { get; set; }
+
         public bool IsCompactMenu
         {
             get => GetValue<bool>(nameof(IsCompactMenu));
@@ -78,11 +84,18 @@ namespace Astrarium.ViewModels
             set => SetValue(nameof(IsStatusBarVisible), value);
         }
 
-        public class ObservableUniqueItemsCollection<T> : ObservableCollection<T>
+        public class SearchSuggestionProvider : ISuggestionProvider
         {
-            public new void Add(T item)
+            private readonly ISky sky;
+
+            public SearchSuggestionProvider(ISky sky)
             {
-                base.Add(item);
+                this.sky = sky;
+            }
+
+            public IEnumerable GetSuggestions(string filter)
+            {
+                return sky.Search(filter, body => true);                
             }
         }
 
@@ -139,6 +152,7 @@ namespace Astrarium.ViewModels
             PrintCommand = new Command(Print);
             PrintPreviewCommand = new Command(PrintPreview);
             ExitAppCommand = new Command(Application.Current.Shutdown);
+            SearchProvider = new SearchSuggestionProvider(sky);
 
             sky.Context.ContextChanged += Sky_ContextChanged;
             sky.Calculated += () => map.Invalidate();
@@ -222,6 +236,20 @@ namespace Astrarium.ViewModels
                 {
                     new MenuItem("Date & Time", SetDateCommand) { HotKey = new KeyGesture(Key.D, ModifierKeys.Control, "Ctrl+D") },
                     new MenuItem("Observer location", SelectLocationCommand) { HotKey = new KeyGesture(Key.L, ModifierKeys.Control, "Ctrl+L") },
+                    null,
+                    new MenuItem("Language")
+                    {
+                        SubItems = new ObservableCollection<MenuItem>(Text.GetLocales().Select(loc => {
+                            var menuItem = new MenuItem(loc.NativeName);
+                            menuItem.Command = new Command(() => menuItem.IsChecked = true);
+                            menuItem.AddBinding(new SimpleBinding(settings, "Language", nameof(MenuItem.IsChecked)) 
+                            {
+                                SourceToTargetConverter = (lang) => (string)lang == loc.Name,
+                                TargetToSourceConverter = (isChecked) => (bool)isChecked ? loc.Name : settings.Get<string>("Language"),
+                            });
+                            return menuItem;
+                        }))
+                    },
                     null,
                     new MenuItem("$Menu.Settings", ChangeSettingsCommand) { HotKey = new KeyGesture(Key.O, ModifierKeys.Control, "Ctrl+O") }
                 }
