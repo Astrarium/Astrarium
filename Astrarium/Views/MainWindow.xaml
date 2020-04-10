@@ -47,6 +47,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
+        <!-- MAIN MENU -->
         <DockPanel Grid.Row="0">
             <Menu x:Name="Menu" VerticalAlignment="Center" ItemsSource="{Binding MainMenuItems}" Visibility="{Binding IsCompactMenu, Converter={s:InverseBoolToVisibilityConverter}}">
                 <Menu.ItemContainerStyle>
@@ -64,23 +65,15 @@
             </Menu>
         </DockPanel>
 
-        <Grid Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            
-            <ToolBar Grid.Column="0" ToolBarTray.IsLocked="True" ItemsSource="{Binding ToolbarItems}" SnapsToDevicePixels="True" Visibility="{Binding IsToolbarVisible, Converter={s:BoolToVisibilityConverter}}" Grid.ColumnSpan="2">
-
+        <!-- TOOLBAR -->
+        <DockPanel Grid.Row="1">
+            <ToolBar ToolBarTray.IsLocked="True" ItemsSource="{Binding ToolbarItems}" SnapsToDevicePixels="True" Visibility="{Binding IsToolbarVisible, Converter={s:BoolToVisibilityConverter}}" Grid.ColumnSpan="2">
                 <ToolBar.Resources>
-
+                    
                     <DataTemplate x:Key="ToolbarSeparatorTemplate">
                         <Grid Width="6" Height="18" />
                     </DataTemplate>
-
+                    
                     <DataTemplate x:Key="ToolbarButtonTemplate">
                         <Button ToolTip="{Binding Tooltip}" Command="{Binding ButtonCommand}" SnapsToDevicePixels="True">
                             <Button.Content>
@@ -136,25 +129,35 @@
             </ToolBar>
 
             <c:AutoCompleteTextBox 
-                Grid.Column="1"
                 Watermark="Search..."
-                HorizontalAlignment="Left"
-                Text=""
                 DisplayMember="Body.Names[0]"
-                IconPlacement="Right"
+                BorderThickness="0"
+                HorizontalAlignment="Right" 
+                IconPlacement="Right"                
                 Height="22"
-                Width="150"                
-                SelectedItem="{Binding SearchResult, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}"
+                Margin="4"
+                Width="150"                                
+                SelectionCommit="{Binding QuickSearchCommand}"
                 Provider="{Binding SearchProvider}">
                 <c:AutoCompleteTextBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding Path=Body.Names[0]}"></TextBlock>
+                        <StackPanel Orientation="Horizontal">
+                            <Rectangle Margin="2" Width="16" Height="16">
+                                <Rectangle.Fill>
+                                    <SolidColorBrush Color="{DynamicResource ColorControlLightBackground}" />
+                                </Rectangle.Fill>
+                                <Rectangle.OpacityMask>
+                                    <ImageBrush ImageSource="{Binding Body, Converter={s:CelestialObjectToIconConverter}}" Stretch="Uniform" />
+                                </Rectangle.OpacityMask>
+                            </Rectangle>
+                            <TextBlock Padding="4 0 0 0" Text="{Binding Name}" VerticalAlignment="Center"/>
+                        </StackPanel>
                     </DataTemplate>
                 </c:AutoCompleteTextBox.ItemTemplate>
             </c:AutoCompleteTextBox>
+        </DockPanel>
 
-        </Grid>
-
+        <!-- MAP -->
         <DockPanel Grid.Row="2" LastChildFill="true" Grid.ColumnSpan="2">
             <WindowsFormsHost x:Name="Host" Background="Black">
                 <WindowsFormsHost.ContextMenu>
@@ -175,6 +178,8 @@
                 </WindowsFormsHost.ContextMenu>
             </WindowsFormsHost>
         </DockPanel>
+        
+        <!-- STATUS BAR -->
         <StatusBar Grid.Row="3" Visibility="{Binding IsStatusBarVisible, Converter={s:BoolToVisibilityConverter}}" Grid.ColumnSpan="2">
             <TextBlock Width="30" TextAlignment="Center" Text="{Binding MapConstellationNameString, FallbackValue='Con'}" />
             <Separator />

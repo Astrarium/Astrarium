@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -12,14 +13,21 @@ using System.Windows.Threading;
 
 namespace Astrarium.Controls
 {
+    /// <remarks>
+    /// The control code and logic are based on AutoCompleteTextBox control,
+    /// https://github.com/quicoli/WPF-AutoComplete-TextBox
+    /// Copyright (c) 2016 Paulo Roberto Quicoli
+    /// Under the MIT License
+    /// </remarks>
     [TemplatePart(Name = PartEditor, Type = typeof(TextBox))]
     [TemplatePart(Name = PartPopup, Type = typeof(Popup))]
+    [TemplatePart(Name = PartEmptySearch, Type = typeof(Popup))]
     [TemplatePart(Name = PartSelector, Type = typeof(Selector))]
     public class AutoCompleteTextBox : Control
     {
         public const string PartEditor = "PART_Editor";
         public const string PartPopup = "PART_Popup";
-
+        public const string PartEmptySearch = "PART_EmptySearch";
         public const string PartSelector = "PART_Selector";
         public static readonly DependencyProperty DelayProperty = DependencyProperty.Register("Delay", typeof(int), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(200));
         public static readonly DependencyProperty DisplayMemberProperty = DependencyProperty.Register("DisplayMember", typeof(string), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(string.Empty));
@@ -27,6 +35,7 @@ namespace Astrarium.Controls
         public static readonly DependencyProperty IconProperty = DependencyProperty.Register("Icon", typeof(object), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(null));
         public static readonly DependencyProperty IconVisibilityProperty = DependencyProperty.Register("IconVisibility", typeof(Visibility), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(Visibility.Visible));
         public static readonly DependencyProperty IsDropDownOpenProperty = DependencyProperty.Register("IsDropDownOpen", typeof(bool), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(false));
+        public static readonly DependencyProperty IsEmptySearchProperty = DependencyProperty.Register("IsEmptySearch", typeof(bool), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(false));
         public static readonly DependencyProperty IsLoadingProperty = DependencyProperty.Register("IsLoading", typeof(bool), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(false));
         public static readonly DependencyProperty IsReadOnlyProperty = DependencyProperty.Register("IsReadOnly", typeof(bool), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(false));
         public static readonly DependencyProperty ItemTemplateProperty = DependencyProperty.Register("ItemTemplate", typeof(DataTemplate), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(null));
@@ -38,14 +47,22 @@ namespace Astrarium.Controls
         public static readonly DependencyProperty MaxLengthProperty = DependencyProperty.Register("MaxLength", typeof(int), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(0));
         public static readonly DependencyProperty CharacterCasingProperty = DependencyProperty.Register("CharacterCasing", typeof(CharacterCasing), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(CharacterCasing.Normal));
         public static readonly DependencyProperty MaxPopUpHeightProperty = DependencyProperty.Register("MaxPopUpHeight", typeof(int), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(600));
-
         public static readonly DependencyProperty WatermarkProperty = DependencyProperty.Register("Watermark", typeof(string), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(string.Empty));
-
+        public static readonly DependencyProperty SelectionCommitProperty = DependencyProperty.Register("SelectionCommit", typeof(ICommand), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(null));
         public static readonly DependencyProperty SuggestionBackgroundProperty = DependencyProperty.Register("SuggestionBackground", typeof(Brush), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(Brushes.White));
         private bool _isUpdatingText;
-        private bool _selectionCancelled;
+        private bool _isSelectionCommit;
+        private string _filter;
 
         private SuggestionsAdapter _suggestionsAdapter;
+        private BindingEvaluator _bindingEvaluator;
+        private SelectionAdapter _selectionAdapter;
+        private DispatcherTimer _fetchTimer;
+
+        private TextBox _editor;
+        private Selector _itemsSelector;
+        private Popup _popup;
+        private Popup _emptySearch;
 
         static AutoCompleteTextBox()
         {
@@ -57,8 +74,6 @@ namespace Astrarium.Controls
             get => (int)GetValue(MaxPopUpHeightProperty);
             set => SetValue(MaxPopUpHeightProperty, value);
         }
-
-        public BindingEvaluator BindingEvaluator { get; set; }
 
         public CharacterCasing CharacterCasing
         {
@@ -84,12 +99,6 @@ namespace Astrarium.Controls
             set => SetValue(DisplayMemberProperty, value);
         }
 
-        public TextBox Editor { get; set; }
-
-        public DispatcherTimer FetchTimer { get; set; }
-
-        public string Filter { get; set; }
-
         public object Icon
         {
             get => GetValue(IconProperty);
@@ -114,6 +123,12 @@ namespace Astrarium.Controls
             set => SetValue(IsDropDownOpenProperty, value);
         }
 
+        public bool IsEmptySearch
+        {
+            get => (bool)GetValue(IsEmptySearchProperty);
+            set => SetValue(IsEmptySearchProperty, value);
+        }
+
         public bool IsLoading
         {
             get => (bool)GetValue(IsLoadingProperty);
@@ -125,8 +140,6 @@ namespace Astrarium.Controls
             get => (bool)GetValue(IsReadOnlyProperty);
             set => SetValue(IsReadOnlyProperty, value);
         }
-
-        public Selector ItemsSelector { get; set; }
 
         public DataTemplate ItemTemplate
         {
@@ -140,13 +153,17 @@ namespace Astrarium.Controls
             set => SetValue(ItemTemplateSelectorProperty, value);
         }
 
+        public ICommand SelectionCommit
+        {
+            get => (ICommand)GetValue(SelectionCommitProperty);
+            set => SetValue(SelectionCommitProperty, value);
+        }
+
         public object LoadingContent
         {
             get => GetValue(LoadingContentProperty);
             set => SetValue(LoadingContentProperty, value);
         }
-
-        public Popup Popup { get; set; }
 
         public ISuggestionProvider Provider
         {
@@ -160,8 +177,6 @@ namespace Astrarium.Controls
             set => SetValue(SelectedItemProperty, value);
         }
 
-        public SelectionAdapter SelectionAdapter { get; set; }
-
         public string Text
         {
             get => (string)GetValue(TextProperty);
@@ -173,22 +188,65 @@ namespace Astrarium.Controls
             get => (string)GetValue(WatermarkProperty);
             set => SetValue(WatermarkProperty, value);
         }
+
         public Brush SuggestionBackground
         {
             get => (Brush)GetValue(SuggestionBackgroundProperty);
             set => SetValue(SuggestionBackgroundProperty, value);
         }
 
-        public static void OnSelectedItemChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        public override void OnApplyTemplate()
         {
-            AutoCompleteTextBox act = null;
-            act = d as AutoCompleteTextBox;
+            base.OnApplyTemplate();
+
+            _editor = Template.FindName(PartEditor, this) as TextBox;
+            _popup = Template.FindName(PartPopup, this) as Popup;
+            _emptySearch = Template.FindName(PartEmptySearch, this) as Popup;
+            _itemsSelector = Template.FindName(PartSelector, this) as Selector;
+            _bindingEvaluator = new BindingEvaluator(new Binding(DisplayMember));
+
+            if (_editor != null)
+            {
+                _editor.TextChanged += OnEditorTextChanged;
+                _editor.PreviewKeyDown += OnEditorKeyDown;
+                _editor.LostFocus += OnEditorLostFocus;
+                _editor.GotFocus += OnEditorGotFocus;
+                _editor.IsKeyboardFocusWithinChanged += OnEditorIsKeyboardFocusWithinChanged;
+
+                if (SelectedItem != null)
+                {
+                    _isUpdatingText = true;
+                    _editor.Text = _bindingEvaluator.Evaluate(SelectedItem);
+                    _isUpdatingText = false;
+                }
+            }
+
+            GotFocus += AutoCompleteTextBox_GotFocus;
+
+            if (_popup != null)
+            {
+                _popup.StaysOpen = false;
+                _popup.Opened += OnPopupOpened;
+            }
+            if (_itemsSelector != null)
+            {
+                _selectionAdapter = new SelectionAdapter(_itemsSelector);
+                _selectionAdapter.Commit += OnSelectionAdapterCommit;
+                _selectionAdapter.Cancel += OnSelectionAdapterCancel;
+                _selectionAdapter.SelectionChanged += OnSelectionAdapterSelectionChanged;
+                _itemsSelector.PreviewMouseDown += ItemsSelector_PreviewMouseDown;
+            }
+        }
+
+        private static void OnSelectedItemChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            AutoCompleteTextBox act = d as AutoCompleteTextBox;
             if (act != null)
             {
-                if (act.Editor != null & !act._isUpdatingText)
+                if (act._editor != null & !act._isUpdatingText)
                 {
                     act._isUpdatingText = true;
-                    act.Editor.Text = act.BindingEvaluator.Evaluate(e.NewValue);
+                    act._editor.Text = act._bindingEvaluator.Evaluate(e.NewValue);
                     act._isUpdatingText = false;
                 }
             }
@@ -196,77 +254,41 @@ namespace Astrarium.Controls
 
         private void ScrollToSelectedItem()
         {
-            if (ItemsSelector is ListBox listBox && listBox.SelectedItem != null)
+            if (_itemsSelector is ListBox listBox && listBox.SelectedItem != null)
                 listBox.ScrollIntoView(listBox.SelectedItem);
         }
 
-        public override void OnApplyTemplate()
+        private void OnEditorIsKeyboardFocusWithinChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            base.OnApplyTemplate();
-
-            Editor = Template.FindName(PartEditor, this) as TextBox;
-            Popup = Template.FindName(PartPopup, this) as Popup;
-            ItemsSelector = Template.FindName(PartSelector, this) as Selector;
-            BindingEvaluator = new BindingEvaluator(new Binding(DisplayMember));
-
-            if (Editor != null)
-            {
-                Editor.TextChanged += OnEditorTextChanged;
-                Editor.PreviewKeyDown += OnEditorKeyDown;
-                Editor.LostFocus += OnEditorLostFocus;
-                Editor.GotFocus += OnEditorGotFocus;
-
-                if (SelectedItem != null)
-                {
-                    _isUpdatingText = true;
-                    Editor.Text = BindingEvaluator.Evaluate(SelectedItem);
-                    _isUpdatingText = false;
-                }
-
-            }
-
-            GotFocus += AutoCompleteTextBox_GotFocus;
-
-            if (Popup != null)
-            {
-                Popup.StaysOpen = false;
-                Popup.Opened += OnPopupOpened;
-                Popup.Closed += OnPopupClosed;
-            }
-            if (ItemsSelector != null)
-            {
-                SelectionAdapter = new SelectionAdapter(ItemsSelector);
-                SelectionAdapter.Commit += OnSelectionAdapterCommit;
-                SelectionAdapter.Cancel += OnSelectionAdapterCancel;
-                SelectionAdapter.SelectionChanged += OnSelectionAdapterSelectionChanged;
-                ItemsSelector.PreviewMouseDown += ItemsSelector_PreviewMouseDown;
-            }
+            _editor?.Clear();
         }
 
         private void OnEditorGotFocus(object sender, RoutedEventArgs e)
         {
-            Editor.Text = null;
+            _editor?.Clear();
         }
 
         private void ItemsSelector_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             if ((e.OriginalSource as FrameworkElement)?.DataContext == null)
                 return;
-            if (!ItemsSelector.Items.Contains(((FrameworkElement)e.OriginalSource)?.DataContext))
+            if (!_itemsSelector.Items.Contains(((FrameworkElement)e.OriginalSource)?.DataContext))
                 return;
-            ItemsSelector.SelectedItem = ((FrameworkElement)e.OriginalSource)?.DataContext;
+            _itemsSelector.SelectedItem = ((FrameworkElement)e.OriginalSource)?.DataContext;
             OnSelectionAdapterCommit();
         }
+
         private void AutoCompleteTextBox_GotFocus(object sender, RoutedEventArgs e)
         {
-            Editor?.Focus();
+            _editor?.Clear();
+            _editor?.Focus();
         }
 
         private string GetDisplayText(object dataItem)
         {
-            if (BindingEvaluator == null)
+            if (_bindingEvaluator == null)
             {
-                BindingEvaluator = new BindingEvaluator(new Binding(DisplayMember));
+                _bindingEvaluator = new BindingEvaluator(new Binding(DisplayMember));
             }
             if (dataItem == null)
             {
@@ -276,17 +298,22 @@ namespace Astrarium.Controls
             {
                 return dataItem.ToString();
             }
-            return BindingEvaluator.Evaluate(dataItem);
+            return _bindingEvaluator.Evaluate(dataItem);
         }
 
         private void OnEditorKeyDown(object sender, KeyEventArgs e)
         {
-            if (SelectionAdapter != null)
+            if (_selectionAdapter != null)
             {
                 if (IsDropDownOpen)
-                    SelectionAdapter.HandleKeyDown(e);
+                    _selectionAdapter.HandleKeyDown(e);
                 else
                     IsDropDownOpen = e.Key == Key.Down || e.Key == Key.Up;
+            }
+
+            if (e.Key == Key.Escape)
+            {
+                _editor.Clear();
             }
         }
 
@@ -296,99 +323,103 @@ namespace Astrarium.Controls
             {
                 IsDropDownOpen = false;
             }
+            IsEmptySearch = false;
+            _editor.Clear();
         }
 
         private void OnEditorTextChanged(object sender, TextChangedEventArgs e)
         {
             if (_isUpdatingText)
                 return;
-            if (FetchTimer == null)
+            if (_fetchTimer == null)
             {
-                FetchTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(Delay) };
-                FetchTimer.Tick += OnFetchTimerTick;
+                _fetchTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(Delay) };
+                _fetchTimer.Tick += OnFetchTimerTick;
             }
-            FetchTimer.IsEnabled = false;
-            FetchTimer.Stop();
+            _fetchTimer.IsEnabled = false;
+            _fetchTimer.Stop();
             SetSelectedItem(null);
-            if (Editor.Text.Length > 0)
+            if (_editor.Text.Length > 0)
             {
-                FetchTimer.IsEnabled = true;
-                FetchTimer.Start();
+                _fetchTimer.IsEnabled = true;
+                _fetchTimer.Start();
             }
             else
             {
                 IsDropDownOpen = false;
+                IsEmptySearch = false;
             }
         }
 
         private void OnFetchTimerTick(object sender, EventArgs e)
         {
-            FetchTimer.IsEnabled = false;
-            FetchTimer.Stop();
-            if (Provider != null && ItemsSelector != null)
+            _fetchTimer.IsEnabled = false;
+            _fetchTimer.Stop();
+            if (Provider != null && _itemsSelector != null)
             {
-                Filter = Editor.Text;
+                _filter = _editor.Text;
                 if (_suggestionsAdapter == null)
                 {
                     _suggestionsAdapter = new SuggestionsAdapter(this);
                 }
-                _suggestionsAdapter.GetSuggestions(Filter);
-            }
-        }
-
-        private void OnPopupClosed(object sender, EventArgs e)
-        {
-            if (!_selectionCancelled)
-            {
-                OnSelectionAdapterCommit();
+                _suggestionsAdapter.GetSuggestions(_filter);
             }
         }
 
         private void OnPopupOpened(object sender, EventArgs e)
         {
-            _selectionCancelled = false;
-            ItemsSelector.SelectedItem = SelectedItem;
+            _itemsSelector.SelectedItem = SelectedItem;
         }
 
         private void OnSelectionAdapterCancel()
         {
             _isUpdatingText = true;
-            Editor.Text = SelectedItem == null ? Filter : GetDisplayText(SelectedItem);
-            Editor.SelectionStart = Editor.Text.Length;
-            Editor.SelectionLength = 0;
+            _editor.Text = SelectedItem == null ? _filter : GetDisplayText(SelectedItem);
             _isUpdatingText = false;
             IsDropDownOpen = false;
-            _selectionCancelled = true;
+            IsEmptySearch = false;
         }
 
         private void OnSelectionAdapterCommit()
-        {
-            if (ItemsSelector.SelectedItem != null)
+        {   
+            if (!_isSelectionCommit && _itemsSelector.SelectedItem != null)
             {
+                _isSelectionCommit = true;
+
+                var item = _itemsSelector.SelectedItem;
+
                 _isUpdatingText = true;
-                Editor.Text = GetDisplayText(ItemsSelector.SelectedItem);
-                SetSelectedItem(ItemsSelector.SelectedItem);
+                //_editor.Text = GetDisplayText(item);
+                _editor.Clear();
+
+                SetSelectedItem(item);
+                
                 _isUpdatingText = false;
                 IsDropDownOpen = false;
+                IsEmptySearch = false;
+
+                var comm = GetValue(SelectionCommitProperty) as ICommand;
+                if (comm != null && item != null)
+                {
+                    comm.Execute(item);
+                }
+
+                _isSelectionCommit = false;
             }
         }
 
         private void OnSelectionAdapterSelectionChanged()
         {
             _isUpdatingText = true;
-            Editor.Text = ItemsSelector.SelectedItem == null ? Filter : GetDisplayText(ItemsSelector.SelectedItem);
-            Editor.SelectionStart = Editor.Text.Length;
-            Editor.SelectionLength = 0;
+            _editor.Text = _itemsSelector.SelectedItem == null ? _filter : GetDisplayText(_itemsSelector.SelectedItem);
+            _editor.SelectionStart = _editor.Text.Length;
+            _editor.SelectionLength = 0;
             ScrollToSelectedItem();
             _isUpdatingText = false;
         }
 
         private void SetSelectedItem(object item)
         {
-            if (item != null)
-            {
-                Debug.WriteLine("SetSelectedItem");
-            }
             _isUpdatingText = true;
             SelectedItem = item;
             _isUpdatingText = false;
@@ -407,14 +438,8 @@ namespace Astrarium.Controls
             {
                 _filter = searchText;
                 _actb.IsLoading = true;
-                _actb.IsDropDownOpen = true;
-                _actb.ItemsSelector.ItemsSource = null;
-                ParameterizedThreadStart thInfo = GetSuggestionsAsync;
-                Thread th = new Thread(thInfo);
-                th.Start(new object[] {
-            searchText,
-            _actb.Provider
-        });
+                _actb._itemsSelector.ItemsSource = null;
+                new Thread(GetSuggestionsAsync).Start(new object[] { searchText, _actb.Provider });
             }
 
             private void DisplaySuggestions(IEnumerable suggestions, string filter)
@@ -423,13 +448,19 @@ namespace Astrarium.Controls
                 {
                     return;
                 }
-                if (_actb.IsDropDownOpen)
+                if (_actb.IsLoading)
                 {
                     _actb.IsLoading = false;
-                    _actb.ItemsSelector.ItemsSource = suggestions;
-                    _actb.IsDropDownOpen = _actb.ItemsSelector.HasItems;
-                }
+                    _actb._itemsSelector.ItemsSource = suggestions;
+                    _actb.IsDropDownOpen = _actb._itemsSelector.HasItems;
 
+                    if (_actb._itemsSelector.HasItems)
+                    {
+                        _actb._itemsSelector.SelectedIndex = 0;
+                    }
+
+                    _actb.IsEmptySearch = !_actb.IsDropDownOpen;
+                }
             }
 
             private void GetSuggestionsAsync(object param)
@@ -445,113 +476,109 @@ namespace Astrarium.Controls
                 }
             }
         }
+
+        private class BindingEvaluator : FrameworkElement
+        {
+            public static readonly DependencyProperty ValueProperty = DependencyProperty.Register("Value", typeof(string), typeof(BindingEvaluator), new FrameworkPropertyMetadata(string.Empty));
+
+            public BindingEvaluator(Binding binding)
+            {
+                ValueBinding = binding;
+            }
+
+            public string Value
+            {
+                get => (string)GetValue(ValueProperty);
+                set => SetValue(ValueProperty, value);
+            }
+
+            public Binding ValueBinding { get; set; }
+
+            public string Evaluate(object dataItem)
+            {
+                DataContext = dataItem;
+                SetBinding(ValueProperty, ValueBinding);
+                return Value;
+            }
+        }
+
+        private class SelectionAdapter
+        {
+            public SelectionAdapter(Selector selector)
+            {
+                SelectorControl = selector;
+                SelectorControl.PreviewMouseUp += OnSelectorMouseDown;
+            }
+
+            public delegate void CancelEventHandler();
+            public delegate void CommitEventHandler();
+            public delegate void SelectionChangedEventHandler();
+
+            public event CancelEventHandler Cancel;
+            public event CommitEventHandler Commit;
+            public event SelectionChangedEventHandler SelectionChanged;
+
+            public Selector SelectorControl { get; set; }
+
+            public void HandleKeyDown(KeyEventArgs key)
+            {
+                switch (key.Key)
+                {
+                    case Key.Down:
+                        IncrementSelection();
+                        break;
+                    case Key.Up:
+                        DecrementSelection();
+                        break;
+                    case Key.Enter:
+                        Commit?.Invoke();
+                        break;
+                    case Key.Escape:
+                        Cancel?.Invoke();
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            private void DecrementSelection()
+            {
+                if (SelectorControl.SelectedIndex == -1)
+                {
+                    SelectorControl.SelectedIndex = SelectorControl.Items.Count - 1;
+                }
+                else
+                {
+                    SelectorControl.SelectedIndex -= 1;
+                }
+
+                SelectionChanged?.Invoke();
+            }
+
+            private void IncrementSelection()
+            {
+                if (SelectorControl.SelectedIndex == SelectorControl.Items.Count - 1)
+                {
+                    SelectorControl.SelectedIndex = -1;
+                }
+                else
+                {
+                    SelectorControl.SelectedIndex += 1;
+                }
+
+                SelectionChanged?.Invoke();
+            }
+
+            private void OnSelectorMouseDown(object sender, MouseButtonEventArgs e)
+            {
+                Commit?.Invoke();
+            }
+        }
     }
 
     public interface ISuggestionProvider
     {
         IEnumerable GetSuggestions(string filter);
-    }
-
-    public class SelectionAdapter
-    {
-        public SelectionAdapter(Selector selector)
-        {
-            SelectorControl = selector;
-            SelectorControl.PreviewMouseUp += OnSelectorMouseDown;
-        }
-
-        public delegate void CancelEventHandler();
-
-        public delegate void CommitEventHandler();
-
-        public delegate void SelectionChangedEventHandler();
-
-        public event CancelEventHandler Cancel;
-        public event CommitEventHandler Commit;
-        public event SelectionChangedEventHandler SelectionChanged;
-
-        public Selector SelectorControl { get; set; }
-
-        public void HandleKeyDown(KeyEventArgs key)
-        {
-            switch (key.Key)
-            {
-                case Key.Down:
-                    IncrementSelection();
-                    break;
-                case Key.Up:
-                    DecrementSelection();
-                    break;
-                case Key.Enter:
-                    Commit?.Invoke();
-                    break;
-                case Key.Escape:
-                    Cancel?.Invoke();
-                    break;
-                case Key.Tab:
-                    Commit?.Invoke();
-                    break;
-            }
-        }
-
-        private void DecrementSelection()
-        {
-            if (SelectorControl.SelectedIndex == -1)
-            {
-                SelectorControl.SelectedIndex = SelectorControl.Items.Count - 1;
-            }
-            else
-            {
-                SelectorControl.SelectedIndex -= 1;
-            }
-
-            SelectionChanged?.Invoke();
-        }
-
-        private void IncrementSelection()
-        {
-            if (SelectorControl.SelectedIndex == SelectorControl.Items.Count - 1)
-            {
-                SelectorControl.SelectedIndex = -1;
-            }
-            else
-            {
-                SelectorControl.SelectedIndex += 1;
-            }
-
-            SelectionChanged?.Invoke();
-        }
-
-        private void OnSelectorMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            Commit?.Invoke();
-        }
-    }
-
-    public class BindingEvaluator : FrameworkElement
-    {
-        public static readonly DependencyProperty ValueProperty = DependencyProperty.Register("Value", typeof(string), typeof(BindingEvaluator), new FrameworkPropertyMetadata(string.Empty));
-
-        public BindingEvaluator(Binding binding)
-        {
-            ValueBinding = binding;
-        }
-
-        public string Value
-        {
-            get => (string)GetValue(ValueProperty);
-
-            set => SetValue(ValueProperty, value);
-        }
-
-        public Binding ValueBinding { get; set; }
-
-        public string Evaluate(object dataItem)
-        {
-            DataContext = dataItem;
-            SetBinding(ValueProperty, ValueBinding);
-            return Value;
-        }
     }
 
     public enum IconPlacement

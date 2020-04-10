@@ -57,14 +57,14 @@ namespace Astrarium.ViewModels
         public Command PrintPreviewCommand { get; private set; }
         public Command ExitAppCommand { get; private set; }
 
+        public Command<SearchResultItem> QuickSearchCommand { get; private set; }
+
         public ObservableCollection<MenuItem> MainMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
         public ObservableCollection<MenuItem> ContextMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
         public ObservableCollection<MenuItem> SelectedObjectsMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
         public string SelectedObjectName { get; private set; }
         public ObservableCollection<ToolbarItem> ToolbarItems { get; private set; } = new ObservableCollection<ToolbarItem>();
         public ISuggestionProvider SearchProvider { get; private set; }
-
-        public SearchResultItem SearchResult { get; set; }
 
         public bool IsCompactMenu
         {
@@ -95,7 +95,7 @@ namespace Astrarium.ViewModels
 
             public IEnumerable GetSuggestions(string filter)
             {
-                return sky.Search(filter, body => true);                
+                return sky.Search(filter, body => true, 10);                
             }
         }
 
@@ -140,6 +140,7 @@ namespace Astrarium.ViewModels
             SetDateCommand = new Command(SetDate);
             SelectLocationCommand = new Command(SelectLocation);
             SearchObjectCommand = new Command(SearchObject);
+            QuickSearchCommand = new Command<SearchResultItem>(sr => CenterOnObject(sr.Body));
             CenterOnPointCommand = new Command(CenterOnPoint);
             GetObjectInfoCommand = new Command<CelestialObject>(GetObjectInfo);
             GetObjectEphemerisCommand = new Command(GetObjectEphemeris);

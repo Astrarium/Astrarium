@@ -681,7 +681,7 @@ namespace Astrarium.Plugins.SolarSystem
                                 // half of source image: 0 = top, 1 = bottom
                                 int h = (half + (rings.B > 0 ? 0 : 1)) % 2;
 
-                                Image textureRings = imagesCache.RequestImage("Rings", true, t => Image.FromFile("Data\\Rings.png", true), map.Redraw);
+                                Image textureRings = imagesCache.RequestImage("Rings", true, t => Image.FromFile(Path.Combine(dataPath, "Rings.png"), true), map.Redraw);
                                 if (textureRings != null)
                                 {
                                     map.DrawImage(textureRings,

@@ -274,9 +274,8 @@ namespace Astrarium
                 .ToArray();
         }
 
-        public ICollection<SearchResultItem> Search(string searchString, Func<CelestialObject, bool> filter)
+        public ICollection<SearchResultItem> Search(string searchString, Func<CelestialObject, bool> filter, int maxCount = 50)
         {
-            int maxCount = 50;
             var filterFunc = filter ?? ((b) => true);
             var results = new List<SearchResultItem>();
             if (!string.IsNullOrWhiteSpace(searchString))
