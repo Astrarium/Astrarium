@@ -28,7 +28,7 @@ namespace Astrarium.Plugins.DeepSky
 
             #region Toolbar Integration
 
-            AddToolbarItem(new ToolbarToggleButton("Settings.DeepSky", "IconDeepSky", new SimpleBinding(settings, "DeepSky", "IsChecked"), "Objects"));
+            AddToolbarItem(new ToolbarToggleButton("IconDeepSky", "$Settings.DeepSky", new SimpleBinding(settings, "DeepSky", "IsChecked"), "Objects"));
 
             #endregion Toolbar Integration
 

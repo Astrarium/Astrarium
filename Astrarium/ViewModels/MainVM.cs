@@ -28,7 +28,6 @@ namespace Astrarium.ViewModels
         private readonly ISkyMap map;
         private readonly ISettings settings;
 
-        public bool FullScreen { get; private set; }
         public string MapEquatorialCoordinatesString { get; private set; }
         public string MapHorizontalCoordinatesString { get; private set; }
         public string MapConstellationNameString { get; private set; }
@@ -65,6 +64,12 @@ namespace Astrarium.ViewModels
         public string SelectedObjectName { get; private set; }
         public ObservableCollection<ToolbarItem> ToolbarItems { get; private set; } = new ObservableCollection<ToolbarItem>();
         public ISuggestionProvider SearchProvider { get; private set; }
+
+        public bool FullScreen
+        {
+            get => GetValue<bool>(nameof(FullScreen));
+            set => SetValue(nameof(FullScreen), value);
+        }
 
         public bool IsCompactMenu
         {
@@ -177,7 +182,7 @@ namespace Astrarium.ViewModels
                 {
                     ToolbarItems.Add(button);
                 }
-                ToolbarItems.Add(new ToolbarSeparator());
+                ToolbarItems.Add(null);
             }
 
             // Main window menu
@@ -195,13 +200,16 @@ namespace Astrarium.ViewModels
                 }
             });
 
-            var menuView = new MenuItem("View")
+            var menuView = new MenuItem("View");
+            menuView.SubItems = new ObservableCollection<MenuItem>();
+
+            var menuColorSchema = new MenuItem("Color Schema")
             {
                 SubItems = new ObservableCollection<MenuItem>(Enum.GetValues(typeof(ColorSchema))
                     .Cast<ColorSchema>()
                     .Select(s =>
                     {
-                        MenuItem menuItem = new MenuItem($"$Settings.Schema.{s}");
+                        var menuItem = new MenuItem($"$Settings.Schema.{s}");
                         menuItem.Command = new Command(() => menuItem.IsChecked = true);
                         menuItem.AddBinding(new SimpleBinding(settings, "Schema", "IsChecked")
                         {
@@ -211,6 +219,52 @@ namespace Astrarium.ViewModels
                         return menuItem;
                     }))
             };
+            menuView.SubItems.Add(menuColorSchema);
+
+            menuView.SubItems.Add(null);
+
+            foreach (var group in toolbarGroups)
+            {
+                var menuGroup = new MenuItem(group.Key);
+                foreach (var button in group.OfType<ToolbarToggleButton>())
+                {
+                    var binding = button.Bindings.FirstOrDefault(b => b.TargetPropertyName == nameof(ToolbarToggleButton.IsChecked));
+                    if (binding != null)
+                    {
+                        var menuItem = new MenuItem(button.Tooltip);
+                        menuItem.Command = new Command(() => menuItem.IsChecked = !menuItem.IsChecked);
+                        menuItem.AddBinding(new SimpleBinding(binding.Source, binding.SourcePropertyName, nameof(MenuItem.IsChecked)));
+                        menuGroup.SubItems.Add(menuItem);
+                    }
+                }
+
+                menuView.SubItems.Add(menuGroup);
+            }
+
+            menuView.SubItems.Add(null);
+
+            var menuCompact = new MenuItem("Compact menu");
+            menuCompact.Command = new Command(() => menuCompact.IsChecked = !menuCompact.IsChecked);
+            menuCompact.AddBinding(new SimpleBinding(settings, "IsCompactMenu", nameof(MenuItem.IsChecked)));
+            menuView.SubItems.Add(menuCompact);
+
+            var menuToolbar = new MenuItem("Toolbar");
+            menuToolbar.Command = new Command(() => menuToolbar.IsChecked = !menuToolbar.IsChecked);
+            menuToolbar.AddBinding(new SimpleBinding(settings, "IsToolbarVisible", nameof(MenuItem.IsChecked)));
+            menuView.SubItems.Add(menuToolbar);
+
+            var menuStatusbar = new MenuItem("Statusbar");
+            menuStatusbar.Command = new Command(() => menuStatusbar.IsChecked = !menuStatusbar.IsChecked);
+            menuStatusbar.AddBinding(new SimpleBinding(settings, "IsStatusBarVisible", nameof(MenuItem.IsChecked)));
+            menuView.SubItems.Add(menuStatusbar);
+
+            menuView.SubItems.Add(null);
+
+            var menuFullScreen = new MenuItem("Full Screen");
+            menuFullScreen.Command = new Command(() => menuFullScreen.IsChecked = !menuFullScreen.IsChecked);
+            menuFullScreen.AddBinding(new SimpleBinding(this, nameof(FullScreen), nameof(MenuItem.IsChecked)));
+            menuFullScreen.HotKey = new KeyGesture(Key.F12, ModifierKeys.None, "F12");
+            menuView.SubItems.Add(menuFullScreen);
 
             MainMenuItems.Add(menuView);
 
@@ -386,18 +440,13 @@ namespace Astrarium.ViewModels
                 // "+" = Zoom In
                 if (key == Key.Add)
                 {
-                    Zoom(1);
+                    Zoom(120);
                 }
                 // "-" = Zoom Out
                 else if (key == Key.Subtract)
                 {
-                    Zoom(-1);
+                    Zoom(-120);
                 }
-                // "D" = [D]ate
-                //else if (key == Key.D)
-                //{
-                //    SetDate();
-                //}
                 // "A" = [A]dd
                 else if (key == Key.A)
                 {
@@ -409,26 +458,6 @@ namespace Astrarium.ViewModels
                 {
                     sky.Context.JulianDay -= 1;
                     sky.Calculate();
-                }
-                // "F12" = Full Screen On
-                else if (key == Key.F12)
-                {
-                    SetFullScreen(true);
-                }
-                // "Esc" = Full Screen Off
-                else if (key == Key.Escape)
-                {
-                    SetFullScreen(false);
-                }
-                // "F" = [F]ind
-                else if (key == Key.F)
-                {
-                    SearchObject();
-                }
-                // "P" = [P]henomena
-                else if (key == Key.P)
-                {
-                    CalculatePhenomena();
                 }
             }
         }
@@ -679,12 +708,6 @@ namespace Astrarium.ViewModels
                 settings.Save();
                 sky.Calculate();
             }            
-        }
-
-        private void SetFullScreen(bool isFullScreen)
-        {
-            FullScreen = isFullScreen;
-            NotifyPropertyChanged(nameof(FullScreen));
         }
     }
 }

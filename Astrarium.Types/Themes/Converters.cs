@@ -14,6 +14,23 @@ using System.Windows.Data;
 
 namespace Astrarium.Types.Themes
 {
+    public class LocalizedTextConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is string)
+            {
+                string text = (string)value;
+                return text.StartsWith("$") ? Text.Get(text.Substring(1)) : text;
+            }
+            else
+            {
+                throw new ArgumentException("value is not string");
+            }
+        }
+    }
+
+
     [ValueConversion(typeof(decimal), typeof(int))]
     [ValueConversion(typeof(int), typeof(decimal))]
     public class NumericConverter : ValueConverterBase

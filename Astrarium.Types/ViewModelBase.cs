@@ -54,6 +54,8 @@ namespace Astrarium.Types
             binding.Source.PropertyChanged += SourcePropertyChangedHandler;
         }
 
+        public IReadOnlyCollection<SimpleBinding> Bindings => bindings;
+
         private void SourcePropertyChangedHandler(object sender, PropertyChangedEventArgs e)
         {
             var binding = bindings.FirstOrDefault(b => b.Source == sender && b.SourcePropertyName == e.PropertyName);

@@ -18,63 +18,56 @@ namespace Astrarium.Types
 
     public abstract class ToolbarButtonBase : ToolbarItem
     {
-        public string ButtonName { get; set; }
-        public string Group { get; protected set; }
+        public string Group
+        {
+            get => GetValue<string>(nameof(Group), null);
+            set => SetValue(nameof(Group), value);
+        }
     }
 
     public class ToolbarButton : ToolbarButtonBase
     {
-        public ICommand ButtonCommand { get; set; }
-    }
+        public ICommand Command
+        {
+            get => GetValue<ICommand>(nameof(Command), null);
+            set => SetValue(nameof(Command), value);
+        }
 
-    public class ToolbarSeparator : ToolbarItem
-    {
-
+        public object CommandParameter
+        {
+            get => GetValue<object>(nameof(CommandParameter), null);
+            set => SetValue(nameof(CommandParameter), value);
+        }
     }
 
     public class ToolbarToggleButton : ToolbarButtonBase
     {
-        public string TooltipKey { get; private set; }
-        public string ImageKey { get; private set; }
-        public string Tooltip => Text.Get(TooltipKey);
-        public SimpleBinding IsCheckedBinding { get; private set; }
-       
-        public ToolbarToggleButton(string tooltipKey, string imageKey, SimpleBinding isCheckedBinding, string group)
+        public string ImageKey
         {
-            TooltipKey = tooltipKey;
+            get => GetValue<string>(nameof(ImageKey), null);
+            set => SetValue(nameof(ImageKey), value);
+        }
+       
+        public ToolbarToggleButton(string imageKey, string toolTip, SimpleBinding binding, string group)
+        {
+            Tooltip = toolTip;
             ImageKey = imageKey;
-            Group = group;
-
-            IsCheckedBinding = isCheckedBinding;
-            IsCheckedBinding.Source.PropertyChanged += (o, e) =>
-            {
-                if (e.PropertyName == isCheckedBinding.SourcePropertyName)
-                {
-                    NotifyPropertyChanged(nameof(IsChecked));
-                }
-            };
-
+            Group = group;          
             Text.LocaleChanged += () => NotifyPropertyChanged(nameof(Tooltip));
+
+            AddBinding(binding);
         }
 
         public bool IsChecked
         {
-            get
-            {
-                if (IsCheckedBinding.Source is ISettings)
-                    return (IsCheckedBinding.Source as ISettings).Get<bool>(IsCheckedBinding.SourcePropertyName);
-                else
-                    return (bool)IsCheckedBinding.Source.GetType().GetProperty(IsCheckedBinding.SourcePropertyName).GetValue(IsCheckedBinding.Source);
-            }
-            set
-            {
-                if (IsCheckedBinding.Source is ISettings)
-                    (IsCheckedBinding.Source as ISettings).Set(IsCheckedBinding.SourcePropertyName, value);
-                else
-                    IsCheckedBinding.Source.GetType().GetProperty(IsCheckedBinding.SourcePropertyName).SetValue(IsCheckedBinding.Source, value);
+            get => GetValue<bool>(nameof(IsChecked));
+            set => SetValue(nameof(IsChecked), value);
+        }
 
-                NotifyPropertyChanged(nameof(IsChecked));
-            }
+        public string Tooltip
+        {
+            get => GetValue<string>(nameof(Tooltip), null);
+            set => SetValue(nameof(Tooltip), value);
         }
     }
 }

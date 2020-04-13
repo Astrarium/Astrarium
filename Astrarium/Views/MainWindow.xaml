@@ -55,7 +55,7 @@
                         <Setter Property="IsChecked" Value="{Binding IsChecked}" />
                         <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
                         <Setter Property="Visibility" Value="{Binding IsVisible, Converter={s:BoolToVisibilityConverter}}" />
-                        <Setter Property="Header" Value="{Binding Header}" />
+                        <Setter Property="Header" Value="{Binding Header, Converter={s:LocalizedTextConverter}}" />
                         <Setter Property="InputGestureText" Value="{Binding InputGestureText}" />
                         <Setter Property="Command" Value="{Binding Command}" />
                         <Setter Property="CommandParameter" Value="{Binding CommandParameter}" />
@@ -66,16 +66,16 @@
         </DockPanel>
 
         <!-- TOOLBAR -->
-        <DockPanel Grid.Row="1">
-            <ToolBar ToolBarTray.IsLocked="True" ItemsSource="{Binding ToolbarItems}" SnapsToDevicePixels="True" Visibility="{Binding IsToolbarVisible, Converter={s:BoolToVisibilityConverter}}" Grid.ColumnSpan="2">
+        <DockPanel Grid.Row="1" Visibility="{Binding IsToolbarVisible, Converter={s:BoolToVisibilityConverter}}">
+            <ToolBar ToolBarTray.IsLocked="True" ItemsSource="{Binding ToolbarItems}" SnapsToDevicePixels="True">
                 <ToolBar.Resources>
-                    
+
                     <DataTemplate x:Key="ToolbarSeparatorTemplate">
                         <Grid Width="6" Height="18" />
                     </DataTemplate>
-                    
+
                     <DataTemplate x:Key="ToolbarButtonTemplate">
-                        <Button ToolTip="{Binding Tooltip}" Command="{Binding ButtonCommand}" SnapsToDevicePixels="True">
+                        <Button ToolTip="{Binding Tooltip, Converter={s:LocalizedTextConverter}}" Command="{Binding Command}" CommandParameter="{Binding CommandParameter}" SnapsToDevicePixels="True">
                             <Button.Content>
                                 <Rectangle Margin="2" Width="18" Height="18">
                                     <Rectangle.Fill>
@@ -90,7 +90,7 @@
                     </DataTemplate>
 
                     <DataTemplate x:Key="ToolbarToggleButtonTemplate">
-                        <ToggleButton ToolTip="{Binding Tooltip}" IsChecked="{Binding IsChecked}" SnapsToDevicePixels="True">
+                        <ToggleButton ToolTip="{Binding Tooltip, Converter={s:LocalizedTextConverter}}" IsChecked="{Binding IsChecked}" SnapsToDevicePixels="True">
                             <ToggleButton.Content>
                                 <Rectangle Margin="2" Width="18" Height="18">
                                     <Rectangle.Fill>
@@ -111,7 +111,7 @@
                             <ContentControl.Style>
                                 <Style TargetType="ContentControl">
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Type}" Value="{x:Type t:ToolbarSeparator}">
+                                        <DataTrigger Binding="{Binding}" Value="{x:Null}">
                                             <Setter Property="ContentTemplate" Value="{StaticResource ToolbarSeparatorTemplate}" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding Type}" Value="{x:Type t:ToolbarButton}">
@@ -167,7 +167,7 @@
                                 <Setter Property="IsChecked" Value="{Binding IsChecked}" />
                                 <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
                                 <Setter Property="Visibility" Value="{Binding IsVisible, Converter={s:BoolToVisibilityConverter}}" />
-                                <Setter Property="Header" Value="{Binding Header}" />
+                                <Setter Property="Header" Value="{Binding Header, Converter={s:LocalizedTextConverter}}" />
                                 <Setter Property="Command" Value="{Binding Command}" />
                                 <Setter Property="InputGestureText" Value="{Binding InputGestureText}" />
                                 <Setter Property="CommandParameter" Value="{Binding CommandParameter}" />
@@ -202,7 +202,7 @@
                                 <Setter Property="IsChecked" Value="{Binding IsChecked}" />
                                 <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
                                 <Setter Property="Visibility" Value="{Binding IsVisible, Converter={s:BoolToVisibilityConverter}}" />
-                                <Setter Property="Header" Value="{Binding Header}" />
+                                <Setter Property="Header" Value="{Binding Header, Converter={s:LocalizedTextConverter}}" />
                                 <Setter Property="Command" Value="{Binding Command}" />
                                 <Setter Property="CommandParameter" Value="{Binding CommandParameter}" />
                                 <Setter Property="ItemsSource" Value="{Binding SubItems}" />

@@ -26,6 +26,7 @@ namespace Astrarium.Types
             this.Header = title;
             this.Command = command;
             this.CommandParameter = commandParameter;
+            this.SubItems = new ObservableCollection<MenuItem>();
             Text.LocaleChanged += () => NotifyPropertyChanged(nameof(Header));
         }
 
@@ -61,18 +62,7 @@ namespace Astrarium.Types
 
         public string Header
         {
-            get 
-            {
-                string title = GetValue<string>(nameof(Header), null);
-                if (title.StartsWith("$"))
-                {
-                    return Text.Get(title.Substring(1));
-                }
-                else
-                {
-                    return title;
-                }
-            }
+            get => GetValue<string>(nameof(Header), null);
             set => SetValue(nameof(Header), value);
         }
 
@@ -109,7 +99,7 @@ namespace Astrarium.Types
 
         public ObservableCollection<MenuItem> SubItems
         {
-            get => GetValue<ObservableCollection<MenuItem>>(nameof(SubItems), null);
+            get => GetValue(nameof(SubItems), new ObservableCollection<MenuItem>());
             set => SetValue(nameof(SubItems), value);
         }
     }
