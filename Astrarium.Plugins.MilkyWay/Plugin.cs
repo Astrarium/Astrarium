@@ -15,9 +15,8 @@ namespace Astrarium.Plugins.MilkyWay
         {
             #region Settings
 
-            AddSetting(new SettingItem("MilkyWay", true, "Grids"));
-
-            AddSetting(new SettingItem("ColorMilkyWay", Color.FromArgb(20, 20, 20), "Colors"));
+            SettingItems.Add("Grids", new SettingItem("MilkyWay", true, "Grids"));
+            SettingItems.Add("Colors", new SettingItem("ColorMilkyWay", Color.FromArgb(20, 20, 20), "Colors"));
 
             #endregion Settings
         }

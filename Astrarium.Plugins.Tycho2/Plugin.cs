@@ -15,12 +15,9 @@ namespace Astrarium.Plugins.Tycho2
         {
             #region Settings
 
-            AddSetting(new SettingItem(
-                "Tycho2", 
-                defaultValue: true, 
-                sectionName: "Tycho 2"));                             // setting is placed into "Tycho 2" section 
+            SettingItems.Add("Tycho 2", new SettingItem("Tycho2", defaultValue: true, sectionName: "Tycho 2"));
 
-            AddSetting(new SettingItem(
+            SettingItems.Add("Tycho 2", new SettingItem(
                 "Tycho2Path", 
                 defaultValue: "", 
                 sectionName: "Tycho 2",                              // setting is placed into "Tycho 2" section

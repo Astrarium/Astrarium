@@ -15,14 +15,14 @@ namespace Astrarium.Plugins.MinorBodies
         {
             #region Settings
 
-            AddSetting(new SettingItem("Comets", true, "Comets"));
-            AddSetting(new SettingItem("CometsLabels", true, "Comets", s => s.Get<bool>("Comets")));
+            SettingItems.Add("Comets", new SettingItem("Comets", true, "Comets"));
+            SettingItems.Add("Comets", new SettingItem("CometsLabels", true, "Comets", s => s.Get<bool>("Comets")));
 
-            AddSetting(new SettingItem("Asteroids", true, "Asteroids"));
-            AddSetting(new SettingItem("AsteroidsLabels", true, "Asteroids", s => s.Get<bool>("Asteroids")));
+            SettingItems.Add("Asteroids", new SettingItem("Asteroids", true, "Asteroids"));
+            SettingItems.Add("Asteroids", new SettingItem("AsteroidsLabels", true, "Asteroids", s => s.Get<bool>("Asteroids")));
 
-            AddSetting(new SettingItem("ColorAsteroidsLabels", Color.FromArgb(10, 44, 37), "Colors"));
-            AddSetting(new SettingItem("ColorCometsLabels", Color.FromArgb(78, 84, 99), "Colors"));
+            SettingItems.Add("Colors", new SettingItem("ColorAsteroidsLabels", Color.FromArgb(10, 44, 37), "Colors"));
+            SettingItems.Add("Colors", new SettingItem("ColorCometsLabels", Color.FromArgb(78, 84, 99), "Colors"));
 
             #endregion Settings
 

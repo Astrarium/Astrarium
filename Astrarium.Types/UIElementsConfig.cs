@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Types
 {
-    public class UIElementsConfig<TGroup, TUIElement>
+    public class UIElementsConfig<TGroup, TUIElement> 
     {
         private List<Tuple<TGroup, TUIElement>> items = new List<Tuple<TGroup, TUIElement>>();
 
@@ -21,6 +21,6 @@ namespace Astrarium.Types
         }
 
         public IEnumerable<TGroup> Groups => items.Select(i => i.Item1).Distinct();
-        public IEnumerable<TUIElement> this[TGroup group] => items.Where(i => i.Item1.Equals(group)).Select(i => i.Item2);
+        public IEnumerable<TUIElement> this[TGroup group] => items.Where(i => Equals(group, i.Item1)).Select(i => i.Item2);
     }
 }

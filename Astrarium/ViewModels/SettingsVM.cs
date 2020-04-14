@@ -51,7 +51,7 @@ namespace Astrarium.ViewModels
 
         public ConfigControlTemplateSelector ControlSelector { get; private set; }
 
-        public SettingsVM(ISettings settings, SettingsConfig settingConfig)
+        public SettingsVM(ISettings settings, UIElementsIntegration uiIntegration)
         {
             this.settings = settings;
 
@@ -62,13 +62,11 @@ namespace Astrarium.ViewModels
             SettingsSections = new ObservableCollection<SettingsSectionVM>();
             ControlSelector = new ConfigControlTemplateSelector();
 
-            var sections = settingConfig.Where(c => !string.IsNullOrEmpty(c.Section)).GroupBy(c => c.Section);
-
-            foreach (var section in sections)
+            foreach (var section in uiIntegration.SettingItems.Groups.Where(g => g != null))
             {
-                var sectionVM = new SettingsSectionVM() { Title = section.Key };
+                var sectionVM = new SettingsSectionVM() { Title = section };
 
-                foreach (SettingItem item in section)
+                foreach (SettingItem item in uiIntegration.SettingItems[section])
                 {
                     Type controlType = item.Section != null ? 
                         (item.ControlType ?? GetDefaultControlType(item.DefaultValue.GetType())) : 

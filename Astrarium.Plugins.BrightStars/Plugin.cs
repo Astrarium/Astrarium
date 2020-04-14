@@ -17,15 +17,15 @@ namespace Astrarium.Plugins.BrightStars
         {
             #region Settings
 
-            AddSetting(new SettingItem("Stars", true, "Stars"));
-            AddSetting(new SettingItem("StarsLabels", true, "Stars", s => s.Get<bool>("Stars")));
-            AddSetting(new SettingItem("StarsProperNames", true, "Stars", s => s.Get<bool>("Stars") && s.Get<bool>("StarsLabels")));
-            AddSetting(new SettingItem("StarsColors", true, "Stars", s => s.Get<bool>("Stars")));
+            SettingItems.Add("Stars", new SettingItem("Stars", true, "Stars"));
+            SettingItems.Add("Stars", new SettingItem("StarsLabels", true, "Stars", s => s.Get<bool>("Stars")));
+            SettingItems.Add("Stars", new SettingItem("StarsProperNames", true, "Stars", s => s.Get<bool>("Stars") && s.Get<bool>("StarsLabels")));
+            SettingItems.Add("Stars", new SettingItem("StarsColors", true, "Stars", s => s.Get<bool>("Stars")));
 
-            AddSetting(new SettingItem("ConstLines", true, "Constellations"));
+            SettingItems.Add("Constellations", new SettingItem("ConstLines", true, "Constellations"));
 
-            AddSetting(new SettingItem("ColorConstLines", Color.FromArgb(64, 64, 64), "Colors"));
-            AddSetting(new SettingItem("ColorStarsLabels", Color.FromArgb(64, 64, 64), "Colors"));
+            SettingItems.Add("Colors", new SettingItem("ColorConstLines", Color.FromArgb(64, 64, 64), "Colors"));
+            SettingItems.Add("Colors", new SettingItem("ColorStarsLabels", Color.FromArgb(64, 64, 64), "Colors"));
 
             #endregion Settings
 

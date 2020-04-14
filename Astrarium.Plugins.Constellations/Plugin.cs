@@ -17,12 +17,12 @@ namespace Astrarium.Plugins.Constellations
         {
             #region Settings
 
-            AddSetting(new SettingItem("ConstBorders", true, "Constellations"));
-            AddSetting(new SettingItem("ConstLabels", true, "Constellations"));
-            AddSetting(new SettingItem("ConstLabelsType", ConstellationsRenderer.LabelType.InternationalName, "Constellations", s => s.Get<bool>("ConstLabels")));
-           
-            AddSetting(new SettingItem("ColorConstBorders", Color.FromArgb(64, 32, 32), "Colors"));
-            AddSetting(new SettingItem("ColorConstLabels", Color.FromArgb(64, 32, 32), "Colors"));
+            SettingItems.Add("Constellations", new SettingItem("ConstBorders", true, "Constellations"));
+            SettingItems.Add("Constellations", new SettingItem("ConstLabels", true, "Constellations"));
+            SettingItems.Add("Constellations", new SettingItem("ConstLabelsType", ConstellationsRenderer.LabelType.InternationalName, "Constellations", s => s.Get<bool>("ConstLabels")));
+
+            SettingItems.Add("Colors", new SettingItem("ColorConstBorders", Color.FromArgb(64, 32, 32), "Colors"));
+            SettingItems.Add("Colors", new SettingItem("ColorConstLabels", Color.FromArgb(64, 32, 32), "Colors"));
             
             #endregion Settings
 

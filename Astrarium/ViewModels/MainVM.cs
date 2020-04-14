@@ -129,7 +129,7 @@ namespace Astrarium.ViewModels
             set { sky.DateTimeSync = value; }
         }
 
-        public MainVM(ISky sky, ISkyMap map, ISettings settings, UIElementsConfiguration uiIntegration)
+        public MainVM(ISky sky, ISkyMap map, ISettings settings, UIElementsIntegration uiIntegration)
         {
             this.sky = sky;
             this.map = map;

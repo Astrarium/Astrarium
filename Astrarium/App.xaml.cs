@@ -103,11 +103,8 @@ namespace Astrarium
             kernel.Bind<ISky, Sky>().To<Sky>().InSingletonScope();
             kernel.Bind<ISkyMap, SkyMap>().To<SkyMap>().InSingletonScope();
 
-            kernel.Bind<SettingsConfig>().ToSelf().InSingletonScope();
-            kernel.Bind<UIElementsConfiguration>().ToSelf().InSingletonScope();
-
-            SettingsConfig settingsConfig = kernel.Get<SettingsConfig>();
-            UIElementsConfiguration uiIntegration = kernel.Get<UIElementsConfiguration>();
+            kernel.Bind<UIElementsIntegration>().ToSelf().InSingletonScope();
+            UIElementsIntegration uiIntegration = kernel.Get<UIElementsIntegration>();
 
             ICollection<AbstractPlugin> plugins = new List<AbstractPlugin>();
 
@@ -177,7 +174,7 @@ namespace Astrarium
                 var plugin = kernel.Get(pluginType) as AbstractPlugin;
 
                 // add settings configurations
-                settingsConfig.AddRange(plugin.SettingItems);
+                uiIntegration.SettingItems.AddRange(plugin.SettingItems);
 
                 // add configured toolbar buttons
                 uiIntegration.ToolbarButtons.AddRange(plugin.ToolbarItems);
@@ -189,14 +186,17 @@ namespace Astrarium
             }
 
             // Default rendering order for BaseRenderer descendants.
-            settingsConfig.Add(new SettingItem("RenderingOrder", new RenderingOrder(), "Rendering", typeof(RenderersListSettingControl)));
+            uiIntegration.SettingItems.Add("Rendering", new SettingItem("RenderingOrder", new RenderingOrder(), "Rendering", typeof(RenderersListSettingControl)));
 
             var settings = kernel.Get<ISettings>();
 
             // set settings defaults 
-            foreach (SettingItem item in settingsConfig)
+            foreach (string group in uiIntegration.SettingItems.Groups)
             {
-                settings.Set(item.Name, item.DefaultValue);
+                foreach (var item in uiIntegration.SettingItems[group])
+                {
+                    settings.Set(item.Name, item.DefaultValue);
+                }
             }
 
             settings.Save("Defaults");

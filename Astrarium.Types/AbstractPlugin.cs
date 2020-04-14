@@ -12,9 +12,7 @@ namespace Astrarium.Types
 {
     public abstract class AbstractPlugin : PropertyChangedBase
     {
-        private List<SettingItem> settingItems = new List<SettingItem>();
-
-        public IEnumerable<SettingItem> SettingItems => settingItems;
+        public UIElementsConfig<string, SettingItem> SettingItems { get; } = new UIElementsConfig<string, SettingItem>();
         public UIElementsConfig<string, ToolbarButtonBase> ToolbarItems { get; } = new UIElementsConfig<string, ToolbarButtonBase>();
         public UIElementsConfig<MenuItemPosition, MenuItem> MenuItems { get; } = new UIElementsConfig<MenuItemPosition, MenuItem>();
 
@@ -32,12 +30,7 @@ namespace Astrarium.Types
         {
             return pluginType.Assembly.GetTypes().Where(t => typeof(BaseAstroEventsProvider).IsAssignableFrom(t) && !t.IsAbstract);
         }
-
-        protected void AddSetting(SettingItem setting)
-        {
-            settingItems.Add(setting);
-        }
-
+      
         protected void ExportResourceDictionaries(params string[] names)
         {
             string assemblyName = GetType().Assembly.FullName;
