@@ -2960,7 +2960,8 @@
     </Style>
 
     <Style TargetType="{x:Type ToolTip}" BasedOn="{StaticResource {x:Type Control}}">
-        <Setter Property="BorderBrush" Value="{StaticResource BrushControlLightBackground}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{StaticResource BrushControlDarkBackground}" />
         <Setter Property="Background" Value="{StaticResource BrushWindowBackground}" />
     </Style>
 

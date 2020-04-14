@@ -13,14 +13,10 @@ namespace Astrarium.Types
     public abstract class AbstractPlugin : PropertyChangedBase
     {
         private List<SettingItem> settingItems = new List<SettingItem>();
-        private List<ToolbarButtonBase> toolbarItems = new List<ToolbarButtonBase>();
-        private List<MenuItem> contextMenuItems = new List<MenuItem>();
-        private List<MenuItem> mainMenuItems = new List<MenuItem>();
 
         public IEnumerable<SettingItem> SettingItems => settingItems;
-        public IEnumerable<ToolbarButtonBase> ToolbarItems => toolbarItems;
-        public IEnumerable<MenuItem> ContextMenuItems => contextMenuItems;
-        public IEnumerable<MenuItem> MainMenuItems => mainMenuItems;
+        public UIElementsConfig<string, ToolbarButtonBase> ToolbarItems { get; } = new UIElementsConfig<string, ToolbarButtonBase>();
+        public UIElementsConfig<MenuItemPosition, MenuItem> MenuItems { get; } = new UIElementsConfig<MenuItemPosition, MenuItem>();
 
         public static IEnumerable<Type> Renderers(Type pluginType)
         {            
@@ -40,21 +36,6 @@ namespace Astrarium.Types
         protected void AddSetting(SettingItem setting)
         {
             settingItems.Add(setting);
-        }
-
-        protected void AddToolbarItem(ToolbarButtonBase button)
-        {
-            toolbarItems.Add(button);
-        }
-
-        protected void AddContextMenuItem(MenuItem item)
-        {
-            contextMenuItems.Add(item);
-        }
-
-        protected void AddMainMenuItem(MenuItem item)
-        {
-            mainMenuItems.Add(item);
         }
 
         protected void ExportResourceDictionaries(params string[] names)

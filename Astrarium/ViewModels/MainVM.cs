@@ -55,15 +55,14 @@ namespace Astrarium.ViewModels
         public Command PrintCommand { get; private set; }
         public Command PrintPreviewCommand { get; private set; }
         public Command ExitAppCommand { get; private set; }
-
         public Command<SearchResultItem> QuickSearchCommand { get; private set; }
 
         public ObservableCollection<MenuItem> MainMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
         public ObservableCollection<MenuItem> ContextMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
         public ObservableCollection<MenuItem> SelectedObjectsMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
-        public string SelectedObjectName { get; private set; }
         public ObservableCollection<ToolbarItem> ToolbarItems { get; private set; } = new ObservableCollection<ToolbarItem>();
         public ISuggestionProvider SearchProvider { get; private set; }
+        public string SelectedObjectName { get; private set; }
 
         public bool FullScreen
         {
@@ -130,7 +129,7 @@ namespace Astrarium.ViewModels
             set { sky.DateTimeSync = value; }
         }
 
-        public MainVM(ISky sky, ISkyMap map, ISettings settings, ToolbarButtonsConfig toolbarButtonsConfig, MainMenuItems mainMenuItems, ContextMenuItems contextMenuItems)
+        public MainVM(ISky sky, ISkyMap map, ISettings settings, UIElementsConfiguration uiIntegration)
         {
             this.sky = sky;
             this.map = map;
@@ -175,15 +174,16 @@ namespace Astrarium.ViewModels
             Map_SelectedObjectChanged(map.SelectedObject);
             Map_ViewAngleChanged(map.ViewAngle);
 
-            var toolbarGroups = toolbarButtonsConfig.GroupBy(b => b.Group);
-            foreach (var group in toolbarGroups)
+            foreach (var group in uiIntegration.ToolbarButtons.Groups)
             {
-                foreach (var button in group)
+                foreach (var button in uiIntegration.ToolbarButtons[group])
                 {
                     ToolbarItems.Add(button);
                 }
                 ToolbarItems.Add(null);
             }
+
+            ToolbarItems.Add(new ToolbarButton("IconSettings", "$Settings", ChangeSettingsCommand));
 
             // Main window menu
 
@@ -223,10 +223,10 @@ namespace Astrarium.ViewModels
 
             menuView.SubItems.Add(null);
 
-            foreach (var group in toolbarGroups)
+            foreach (var group in uiIntegration.ToolbarButtons.Groups)
             {
-                var menuGroup = new MenuItem(group.Key);
-                foreach (var button in group.OfType<ToolbarToggleButton>())
+                var menuGroup = new MenuItem(group);
+                foreach (var button in uiIntegration.ToolbarButtons[group].OfType<ToolbarToggleButton>())
                 {
                     var binding = button.Bindings.FirstOrDefault(b => b.TargetPropertyName == nameof(ToolbarToggleButton.IsChecked));
                     if (binding != null)
@@ -278,12 +278,19 @@ namespace Astrarium.ViewModels
                 }
             };
 
-            foreach (var mainItem in mainMenuItems)
+            // "Tools" menu items from plugins
+            foreach (var menuItem in uiIntegration.MenuItems[MenuItemPosition.MainMenuTools])
             {
-                menuTools.SubItems.Add(mainItem);
+                menuTools.SubItems.Add(menuItem);
             }
 
             MainMenuItems.Add(menuTools);
+
+            // top-level menu items from plugins
+            foreach (var menuItem in uiIntegration.MenuItems[MenuItemPosition.MainMenuTop])
+            {
+                MainMenuItems.Add(menuItem);
+            }
 
             var menuOptions = new MenuItem("Options")
             {
@@ -341,7 +348,7 @@ namespace Astrarium.ViewModels
             ContextMenuItems.Add(menuEphemerides);
 
             // dynamic menu items from plugins
-            foreach (var configItem in contextMenuItems)
+            foreach (var configItem in uiIntegration.MenuItems[MenuItemPosition.ContextMenu])
             {
                 ContextMenuItems.Add(configItem);
             }

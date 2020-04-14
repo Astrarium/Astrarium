@@ -18,7 +18,11 @@ namespace Astrarium.Types.Themes
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is string)
+            if (value == null)
+            {
+                return value;
+            }
+            else if (value is string)
             {
                 string text = (string)value;
                 return text.StartsWith("$") ? Text.Get(text.Substring(1)) : text;

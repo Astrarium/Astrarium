@@ -24,7 +24,7 @@ namespace Astrarium.Plugins.Horizon
 
             #endregion Settings
 
-            AddToolbarItem(new ToolbarToggleButton("IconGround", "$Settings.Ground", new SimpleBinding(settings, "Ground", "IsChecked"), "Grids"));
+            ToolbarItems.Add("Grids", new ToolbarToggleButton("IconGround", "$Settings.Ground", new SimpleBinding(settings, "Ground", "IsChecked")));
 
             ExportResourceDictionaries("Images.xaml");
         }

@@ -55,6 +55,7 @@
   
   <ItemGroup>
     <None Remove="Astrarium.ico" />
+    <None Remove="Images.xaml" />
   </ItemGroup>
   
   <ItemGroup>
@@ -150,6 +151,12 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Astrarium.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Include="Images.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
   <ItemGroup>

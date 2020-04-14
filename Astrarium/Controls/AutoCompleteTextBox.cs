@@ -50,6 +50,8 @@ namespace Astrarium.Controls
         public static readonly DependencyProperty WatermarkProperty = DependencyProperty.Register("Watermark", typeof(string), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(string.Empty));
         public static readonly DependencyProperty SelectionCommitProperty = DependencyProperty.Register("SelectionCommit", typeof(ICommand), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(null));
         public static readonly DependencyProperty SuggestionBackgroundProperty = DependencyProperty.Register("SuggestionBackground", typeof(Brush), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(Brushes.White));
+        public static readonly DependencyProperty WatermarkForegroundProperty = DependencyProperty.Register("WatermarkForeground", typeof(Brush), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(Brushes.White));
+
         private bool _isUpdatingText;
         private bool _isSelectionCommit;
         private string _filter;
@@ -193,6 +195,12 @@ namespace Astrarium.Controls
         {
             get => (Brush)GetValue(SuggestionBackgroundProperty);
             set => SetValue(SuggestionBackgroundProperty, value);
+        }
+
+        public Brush WatermarkForeground
+        {
+            get => (Brush)GetValue(WatermarkForegroundProperty);
+            set => SetValue(WatermarkForegroundProperty, value);
         }
 
         public override void OnApplyTemplate()

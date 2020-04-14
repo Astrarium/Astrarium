@@ -38,7 +38,7 @@ namespace Astrarium.Plugins.MeasureTool
             };
             menuItem.AddBinding(new SimpleBinding(renderer, nameof(renderer.IsMeasureToolOn), "IsChecked"));
 
-            AddContextMenuItem(menuItem);
+            MenuItems.Add(MenuItemPosition.ContextMenu, menuItem);
         }
 
         private void SwitchMeasureTool()

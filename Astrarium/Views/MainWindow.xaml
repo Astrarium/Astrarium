@@ -75,7 +75,7 @@
                     </DataTemplate>
 
                     <DataTemplate x:Key="ToolbarButtonTemplate">
-                        <Button ToolTip="{Binding Tooltip, Converter={s:LocalizedTextConverter}}" Command="{Binding Command}" CommandParameter="{Binding CommandParameter}" SnapsToDevicePixels="True">
+                        <Button Padding="0" Margin="0" Width="24" Height="24" ToolTip="{Binding Tooltip, Converter={s:LocalizedTextConverter}}" Command="{Binding Command}" CommandParameter="{Binding CommandParameter}" SnapsToDevicePixels="True">
                             <Button.Content>
                                 <Rectangle Margin="2" Width="18" Height="18">
                                     <Rectangle.Fill>
@@ -90,7 +90,7 @@
                     </DataTemplate>
 
                     <DataTemplate x:Key="ToolbarToggleButtonTemplate">
-                        <ToggleButton ToolTip="{Binding Tooltip, Converter={s:LocalizedTextConverter}}" IsChecked="{Binding IsChecked}" SnapsToDevicePixels="True">
+                        <ToggleButton Padding="0" Margin="0" Width="26" Height="26" ToolTip="{Binding Tooltip, Converter={s:LocalizedTextConverter}}" IsChecked="{Binding IsChecked}" SnapsToDevicePixels="True">
                             <ToggleButton.Content>
                                 <Rectangle Margin="2" Width="18" Height="18">
                                     <Rectangle.Fill>

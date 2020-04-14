@@ -27,11 +27,11 @@ namespace Astrarium.Plugins.Tracks
 
             var menuTrack = new MenuItem("Motion track", new Command(ShowMotionTrackWindow));
             menuTrack.AddBinding(new SimpleBinding(this, nameof(IsMotionTrackEnabled), nameof(MenuItem.IsEnabled)));
-            AddContextMenuItem(menuTrack);
+            MenuItems.Add(MenuItemPosition.ContextMenu, menuTrack);
 
             var menuTracksList = new MenuItem("Motion tracks", new Command(ShowTracksListWindow));
 
-            AddMainMenuItem(menuTracksList);
+            MenuItems.Add(MenuItemPosition.MainMenuTools, menuTracksList);
         }
 
         public bool IsMotionTrackEnabled

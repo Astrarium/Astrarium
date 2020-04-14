@@ -18,15 +18,29 @@ namespace Astrarium.Types
 
     public abstract class ToolbarButtonBase : ToolbarItem
     {
-        public string Group
+        public string ImageKey
         {
-            get => GetValue<string>(nameof(Group), null);
-            set => SetValue(nameof(Group), value);
+            get => GetValue<string>(nameof(ImageKey), null);
+            set => SetValue(nameof(ImageKey), value);
+        }
+
+        public string Tooltip
+        {
+            get => GetValue<string>(nameof(Tooltip), null);
+            set => SetValue(nameof(Tooltip), value);
         }
     }
 
     public class ToolbarButton : ToolbarButtonBase
     {
+        public ToolbarButton(string imageKey, string toolTip, Command command)
+        {
+            ImageKey = imageKey;
+            Tooltip = toolTip;
+            Command = command;
+            Text.LocaleChanged += () => NotifyPropertyChanged(nameof(Tooltip));
+        }
+
         public ICommand Command
         {
             get => GetValue<ICommand>(nameof(Command), null);
@@ -42,32 +56,19 @@ namespace Astrarium.Types
 
     public class ToolbarToggleButton : ToolbarButtonBase
     {
-        public string ImageKey
-        {
-            get => GetValue<string>(nameof(ImageKey), null);
-            set => SetValue(nameof(ImageKey), value);
-        }
-       
-        public ToolbarToggleButton(string imageKey, string toolTip, SimpleBinding binding, string group)
+        public ToolbarToggleButton(string imageKey, string toolTip, SimpleBinding checkedBinding)
         {
             Tooltip = toolTip;
             ImageKey = imageKey;
-            Group = group;          
             Text.LocaleChanged += () => NotifyPropertyChanged(nameof(Tooltip));
 
-            AddBinding(binding);
+            AddBinding(checkedBinding);
         }
 
         public bool IsChecked
         {
             get => GetValue<bool>(nameof(IsChecked));
             set => SetValue(nameof(IsChecked), value);
-        }
-
-        public string Tooltip
-        {
-            get => GetValue<string>(nameof(Tooltip), null);
-            set => SetValue(nameof(Tooltip), value);
         }
     }
 }

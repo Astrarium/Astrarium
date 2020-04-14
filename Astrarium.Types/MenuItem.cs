@@ -103,4 +103,13 @@ namespace Astrarium.Types
             set => SetValue(nameof(SubItems), value);
         }
     }
+
+    public enum MenuItemPosition
+    {
+        ContextMenu = 0,
+        MainMenuTools = 1,
+        MainMenuTop = 2,
+        MainMenuOpen = 3,
+        MainMenuSave = 4
+    }
 }

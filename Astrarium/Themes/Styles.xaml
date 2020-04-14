@@ -71,9 +71,10 @@
     <Style TargetType="{x:Type c:AutoCompleteTextBox}">
         <Setter Property="Background" Value="{StaticResource BrushControlDarkBackground}" />
         <Setter Property="SuggestionBackground" Value="{StaticResource BrushWindowBackground}" />
+        <Setter Property="WatermarkForeground" Value="{StaticResource BrushControlLightBackground}" />
         <Setter Property="Focusable" Value="False" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="BorderBrush" Value="{StaticResource BrushControlLightBackground}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BrushControlBackground}" />
         <Setter Property="Validation.ErrorTemplate" Value="{x:Null}"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -93,7 +94,7 @@
                                                VerticalAlignment="Center"
                                                HorizontalAlignment="Left"
                                                Focusable="False"
-                                               Foreground="{TemplateBinding BorderBrush}"
+                                               Foreground="{TemplateBinding WatermarkForeground}"
                                                Margin="3,0" />
                                     <TextBox x:Name="PART_Editor"
                                              HorizontalAlignment="Stretch"
@@ -120,12 +121,7 @@
                                     BorderThickness="1"
                                     BorderBrush="{TemplateBinding BorderBrush}">
                                     <DockPanel Background="{TemplateBinding Background}">
-                                        <TextBlock VerticalAlignment="Center" Margin="2" Foreground="{TemplateBinding BorderBrush}" Background="Transparent" Text="No items" />
-                                        <Button Width="18" Height="18" Padding="0" Margin="4" VerticalAlignment="Center" HorizontalAlignment="Right">
-                                            <Grid>
-                                                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="10" Height="10" Stretch="Fill" Fill="{TemplateBinding Foreground}" Data="F1 M 26.9166,22.1667L 37.9999,33.25L 49.0832,22.1668L 53.8332,26.9168L 42.7499,38L 53.8332,49.0834L 49.0833,53.8334L 37.9999,42.75L 26.9166,53.8334L 22.1666,49.0833L 33.25,38L 22.1667,26.9167L 26.9166,22.1667 Z "/>
-                                            </Grid>
-                                        </Button>
+                                        <TextBlock VerticalAlignment="Center" Margin="2" Foreground="{TemplateBinding Foreground}" Background="Transparent" Text="No items" />
                                     </DockPanel>
                                 </s:BorderFix>
 
@@ -139,7 +135,7 @@
                                    VerticalOffset="{TemplateBinding ActualHeight}"
                                    HorizontalOffset="{TemplateBinding ActualWidth}"                                   
                                    MinHeight="25"
-                                   MaxHeight="600"
+                                   MaxHeight="600"                                   
                                    AllowsTransparency="True"
                                    PopupAnimation="Slide"
                                    Focusable="False">

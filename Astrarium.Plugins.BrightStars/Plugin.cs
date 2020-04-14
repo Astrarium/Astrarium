@@ -29,8 +29,8 @@ namespace Astrarium.Plugins.BrightStars
 
             #endregion Settings
 
-            AddToolbarItem(new ToolbarToggleButton("IconStar", "$Settings.Stars", new SimpleBinding(settings, "Stars", "IsChecked"), "Objects"));
-            AddToolbarItem(new ToolbarToggleButton("IconConstLines", "$Settings.ConstLines", new SimpleBinding(settings, "ConstLines", "IsChecked"), "Constellations"));
+            ToolbarItems.Add("Objects", new ToolbarToggleButton("IconStar", "$Settings.Stars", new SimpleBinding(settings, "Stars", "IsChecked")));
+            ToolbarItems.Add("Constellations", new ToolbarToggleButton("IconConstLines", "$Settings.ConstLines", new SimpleBinding(settings, "ConstLines", "IsChecked")));
 
             ExportResourceDictionaries("Images.xaml");
         }

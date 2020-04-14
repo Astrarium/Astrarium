@@ -104,14 +104,11 @@ namespace Astrarium
             kernel.Bind<ISkyMap, SkyMap>().To<SkyMap>().InSingletonScope();
 
             kernel.Bind<SettingsConfig>().ToSelf().InSingletonScope();
-            kernel.Bind<ToolbarButtonsConfig>().ToSelf().InSingletonScope();
-            kernel.Bind<ContextMenuItems>().ToSelf().InSingletonScope();
-            kernel.Bind<MainMenuItems>().ToSelf().InSingletonScope();
+            kernel.Bind<UIElementsConfiguration>().ToSelf().InSingletonScope();
 
             SettingsConfig settingsConfig = kernel.Get<SettingsConfig>();
-            ToolbarButtonsConfig toolbarButtonsConfig = kernel.Get<ToolbarButtonsConfig>();
-            ContextMenuItems contextMenuItems = kernel.Get<ContextMenuItems>();
-            MainMenuItems mainMenuItems = kernel.Get<MainMenuItems>();
+            UIElementsConfiguration uiIntegration = kernel.Get<UIElementsConfiguration>();
+
             ICollection<AbstractPlugin> plugins = new List<AbstractPlugin>();
 
             // TODO: consider more proper way to load plugins
@@ -183,13 +180,10 @@ namespace Astrarium
                 settingsConfig.AddRange(plugin.SettingItems);
 
                 // add configured toolbar buttons
-                toolbarButtonsConfig.AddRange(plugin.ToolbarItems);
+                uiIntegration.ToolbarButtons.AddRange(plugin.ToolbarItems);
 
-                // add configured context menu items
-                contextMenuItems.AddRange(plugin.ContextMenuItems);
-
-                // add configured main menu items
-                mainMenuItems.AddRange(plugin.MainMenuItems);
+                // add menu items
+                uiIntegration.MenuItems.AddRange(plugin.MenuItems);
 
                 plugins.Add(plugin);
             }
