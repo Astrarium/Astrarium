@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Astrarium.Renderers
+namespace Astrarium.Types
 {
     /// <summary>
     /// Set of extensions for <see cref="Graphics"/> class.

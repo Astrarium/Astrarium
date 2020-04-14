@@ -5,9 +5,10 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using System.Security;
+using System.Reflection;
 using WF = System.Windows.Forms;
 using Astrarium.Types.Themes;
-using System.Reflection;
+using Astrarium.Types;
 
 namespace Astrarium
 {

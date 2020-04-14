@@ -1,6 +1,4 @@
-﻿using Astrarium.Config;
-using Astrarium.Renderers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;

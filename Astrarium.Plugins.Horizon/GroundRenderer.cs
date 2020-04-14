@@ -1,5 +1,4 @@
 ﻿using Astrarium.Algorithms;
-using Astrarium.Renderers;
 using Astrarium.Types;
 using Astrarium.Types.Localization;
 using System;

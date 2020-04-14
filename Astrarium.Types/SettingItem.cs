@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Astrarium.Types;
 
-namespace Astrarium.Config
+namespace Astrarium.Types
 {
     public class SettingItem
     { 

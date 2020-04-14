@@ -1,5 +1,4 @@
-﻿using Astrarium.Config;
-using Astrarium.Objects;
+﻿using Astrarium.Objects;
 using Astrarium.Plugins.Tracks.ViewModels;
 using Astrarium.Types;
 using System;

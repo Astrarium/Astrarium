@@ -1,8 +1,4 @@
 ﻿using Astrarium.Algorithms;
-using Astrarium.Config;
-using Astrarium.Objects;
-using Astrarium.Plugins.MinorBodies;
-using Astrarium.Renderers;
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;

@@ -1,5 +1,4 @@
 ﻿using Astrarium.Algorithms;
-using Astrarium.Config;
 using Astrarium.Plugins.SolarSystem.Controls;
 using Astrarium.Types;
 using Astrarium.Types.Localization;

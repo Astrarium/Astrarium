@@ -1,5 +1,4 @@
-﻿using Astrarium.Config;
-using Astrarium.Types;
+﻿using Astrarium.Types;
 using Astrarium.Types.Config.Controls;
 using System;
 using System.Collections.Generic;
