@@ -18,23 +18,23 @@ namespace Astrarium
         public UIElementsIntegration()
         {
             // Default language
-            SettingItems.Add("UI", new SettingItem("Language", "en", "UI", typeof(LanguageSettingControl)));
+            SettingItems.Add("UI", new SettingItem("Language", "en", typeof(LanguageSettingControl)));
 
             // Type of application menu
-            SettingItems.Add("UI", new SettingItem("IsCompactMenu", false, "UI"));
+            SettingItems.Add("UI", new SettingItem("IsCompactMenu", false));
 
             // Toolbar visibility
-            SettingItems.Add("UI", new SettingItem("IsToolbarVisible", true, "UI"));
+            SettingItems.Add("UI", new SettingItem("IsToolbarVisible", true));
 
             // Status bar visibility
-            SettingItems.Add("UI", new SettingItem("IsStatusBarVisible", true, "UI"));
+            SettingItems.Add("UI", new SettingItem("IsStatusBarVisible", true));
 
             // Default observer location.
             // Has no section, so not displayed in settings window.
             SettingItems.Add(null, new SettingItem("ObserverLocation", new CrdsGeographical(-44, 56.3333, +3, 80, "Europe/Moscow", "Nizhny Novgorod")));
 
             // Default color schema
-            SettingItems.Add("Colors", new SettingItem("Schema", ColorSchema.Night, "Colors"));
+            SettingItems.Add("Colors", new SettingItem("Schema", ColorSchema.Night));
         }
     }
 }

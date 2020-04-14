@@ -15,29 +15,16 @@ namespace Astrarium.Plugins.Constellations
     {
         public Plugin(ISettings settings)
         {
-            #region Settings
-
-            SettingItems.Add("Constellations", new SettingItem("ConstBorders", true, "Constellations"));
-            SettingItems.Add("Constellations", new SettingItem("ConstLabels", true, "Constellations"));
-            SettingItems.Add("Constellations", new SettingItem("ConstLabelsType", ConstellationsRenderer.LabelType.InternationalName, "Constellations", s => s.Get<bool>("ConstLabels")));
-
-            SettingItems.Add("Colors", new SettingItem("ColorConstBorders", Color.FromArgb(64, 32, 32), "Colors"));
-            SettingItems.Add("Colors", new SettingItem("ColorConstLabels", Color.FromArgb(64, 32, 32), "Colors"));
-            
-            #endregion Settings
-
-            #region Toolbar Integration
-            
+            SettingItems.Add("Constellations", new SettingItem("ConstBorders", true));
+            SettingItems.Add("Constellations", new SettingItem("ConstLabels", true));
+            SettingItems.Add("Constellations", new SettingItem("ConstLabelsType", ConstellationsRenderer.LabelType.InternationalName, s => s.Get<bool>("ConstLabels")));
+            SettingItems.Add("Colors", new SettingItem("ColorConstBorders", Color.FromArgb(64, 32, 32)));
+            SettingItems.Add("Colors", new SettingItem("ColorConstLabels", Color.FromArgb(64, 32, 32)));
+           
             ToolbarItems.Add("Constellations", new ToolbarToggleButton("IconConstBorders", "$Settings.ConstBorders", new SimpleBinding(settings, "ConstBorders", "IsChecked")));
             ToolbarItems.Add("Constellations", new ToolbarToggleButton("IconConstLabels", "$Settings.ConstLabels", new SimpleBinding(settings, "ConstLabels", "IsChecked")));
 
-            #endregion Toolbar Integration
-
-            #region Exports
-
             ExportResourceDictionaries("Images.xaml");
-
-            #endregion
         }
     }
 }

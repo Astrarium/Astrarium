@@ -68,9 +68,7 @@ namespace Astrarium.ViewModels
 
                 foreach (SettingItem item in uiIntegration.SettingItems[section])
                 {
-                    Type controlType = item.Section != null ? 
-                        (item.ControlType ?? GetDefaultControlType(item.DefaultValue.GetType())) : 
-                        null;
+                    Type controlType = item.ControlType ?? GetDefaultControlType(item.DefaultValue.GetType()); 
 
                     if (controlType != null)
                     {

@@ -15,28 +15,15 @@ namespace Astrarium.Plugins.DeepSky
     {
         public Plugin(ISettings settings)
         {
-            #region Settings
-
-            SettingItems.Add("DeepSky", new SettingItem("DeepSky", true, "Deep Sky Objects"));
-            SettingItems.Add("DeepSky", new SettingItem("DeepSkyLabels", true, "Deep Sky Objects", s => s.Get<bool>("DeepSky")));
-            SettingItems.Add("DeepSky", new SettingItem("DeepSkyOutlines", true, "Deep Sky Objects", s => s.Get<bool>("DeepSky")));
-
-            SettingItems.Add("Colors", new SettingItem("ColorDeepSkyOutline", Color.FromArgb(50, 50, 50), "Colors"));
-            SettingItems.Add("Colors", new SettingItem("ColorDeepSkyLabel", Color.FromArgb(0, 64, 128), "Colors"));
-
-            #endregion Settings
-
-            #region Toolbar Integration
+            SettingItems.Add("DeepSky", new SettingItem("DeepSky", true));
+            SettingItems.Add("DeepSky", new SettingItem("DeepSkyLabels", true, s => s.Get<bool>("DeepSky")));
+            SettingItems.Add("DeepSky", new SettingItem("DeepSkyOutlines", true, s => s.Get<bool>("DeepSky")));
+            SettingItems.Add("Colors", new SettingItem("ColorDeepSkyOutline", Color.FromArgb(50, 50, 50)));
+            SettingItems.Add("Colors", new SettingItem("ColorDeepSkyLabel", Color.FromArgb(0, 64, 128)));
 
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconDeepSky", "$Settings.DeepSky", new SimpleBinding(settings, "DeepSky", "IsChecked")));
 
-            #endregion Toolbar Integration
-
-            #region Exports
-
             ExportResourceDictionaries("Images.xaml");
-
-            #endregion
         }
     }
 }

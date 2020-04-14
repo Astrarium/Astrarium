@@ -15,12 +15,11 @@ namespace Astrarium.Plugins.Tycho2
         {
             #region Settings
 
-            SettingItems.Add("Tycho 2", new SettingItem("Tycho2", defaultValue: true, sectionName: "Tycho 2"));
+            SettingItems.Add("Tycho 2", new SettingItem("Tycho2", defaultValue: true));
 
             SettingItems.Add("Tycho 2", new SettingItem(
                 "Tycho2Path", 
-                defaultValue: "", 
-                sectionName: "Tycho 2",                              // setting is placed into "Tycho 2" section
+                defaultValue: "",
                 controlType: typeof(FolderPickerSettingControl),     // type of UI editor
                 enabledCondition: s => s.Get<bool>("Tycho2")         // setting is enabled when "Tycho2" setting is ON
             ));

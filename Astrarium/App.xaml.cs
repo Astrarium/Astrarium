@@ -90,6 +90,21 @@ namespace Astrarium
             }
         }
 
+        private IEnumerable<Type> GetRenderers(Type pluginType)
+        {
+            return pluginType.Assembly.GetTypes().Where(t => typeof(BaseRenderer).IsAssignableFrom(t) && !t.IsAbstract);
+        }
+
+        private IEnumerable<Type> GetCalculators(Type pluginType)
+        {
+            return pluginType.Assembly.GetTypes().Where(t => typeof(BaseCalc).IsAssignableFrom(t) && !t.IsAbstract);
+        }
+
+        private IEnumerable<Type> GetAstroEventProviders(Type pluginType)
+        {
+            return pluginType.Assembly.GetTypes().Where(t => typeof(BaseAstroEventsProvider).IsAssignableFrom(t) && !t.IsAbstract);
+        }
+
         private void ConfigureContainer(IProgress<string> progress)
         {
             // use single logger for whole application
@@ -136,7 +151,7 @@ namespace Astrarium
 
             // collect all calculators types
             Type[] calcTypes = pluginTypes
-                .SelectMany(p => AbstractPlugin.Calculators(p))
+                .SelectMany(p => GetCalculators(p))
                 .ToArray();
 
             foreach (Type calcType in calcTypes)
@@ -147,7 +162,7 @@ namespace Astrarium
 
             // collect all renderers types
             Type[] rendererTypes = pluginTypes
-                .SelectMany(p => AbstractPlugin.Renderers(p))
+                .SelectMany(p => GetRenderers(p))
                 .ToArray();
 
             foreach (Type rendererType in rendererTypes)
@@ -158,7 +173,7 @@ namespace Astrarium
 
             // collect all event provider implementations
             Type[] eventProviderTypes = pluginTypes
-                .SelectMany(p => AbstractPlugin.AstroEventProviders(p))
+                .SelectMany(p => GetAstroEventProviders(p))
                 .ToArray();
 
             foreach (Type eventProviderType in eventProviderTypes)
@@ -186,7 +201,7 @@ namespace Astrarium
             }
 
             // Default rendering order for BaseRenderer descendants.
-            uiIntegration.SettingItems.Add("Rendering", new SettingItem("RenderingOrder", new RenderingOrder(), "Rendering", typeof(RenderersListSettingControl)));
+            uiIntegration.SettingItems.Add("Rendering", new SettingItem("RenderingOrder", new RenderingOrder(), typeof(RenderersListSettingControl)));
 
             var settings = kernel.Get<ISettings>();
 
