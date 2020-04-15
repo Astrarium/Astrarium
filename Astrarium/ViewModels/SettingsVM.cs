@@ -17,8 +17,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using Astrarium.Types.Config.Controls;
 using Astrarium.Types.Localization;
+using Astrarium.Config.Controls;
 
 namespace Astrarium.ViewModels
 {

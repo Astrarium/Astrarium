@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -13,14 +15,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Astrarium.Types.Config.Controls
+namespace Astrarium.Config.Controls
 {
     /// <summary>
-    /// Interaction logic for CheckboxSettingControl.xaml
+    /// Interaction logic for EnumSettingControl.xaml
     /// </summary>
-    public partial class CheckboxSettingControl : UserControl
+    public partial class EnumSettingControl : UserControl
     {
-        public CheckboxSettingControl()
+        public EnumSettingControl()
         {
             InitializeComponent();
         }

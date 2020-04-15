@@ -9,7 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace Astrarium.Controls
+namespace Astrarium.Types.Controls
 {
     public class BindableListView : ListView
     {

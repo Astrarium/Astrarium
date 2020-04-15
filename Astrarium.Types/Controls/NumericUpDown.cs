@@ -11,7 +11,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 
-namespace Astrarium.Controls
+namespace Astrarium.Types.Controls
 {
     public class NumericUpDown : Control
     {

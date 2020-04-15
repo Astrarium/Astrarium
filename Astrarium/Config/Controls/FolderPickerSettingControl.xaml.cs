@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Astrarium.Types.Config.Controls
+namespace Astrarium.Config.Controls
 {
     /// <summary>
-    /// Interaction logic for ColorPickerSettingControl.xaml
+    /// Interaction logic for FolderPickerSettingControl.xaml
     /// </summary>
-    public partial class ColorPickerSettingControl : UserControl
+    public partial class FolderPickerSettingControl : UserControl
     {
-        public ColorPickerSettingControl()
+        public FolderPickerSettingControl()
         {
             InitializeComponent();
         }

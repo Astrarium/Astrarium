@@ -1,7 +1,5 @@
-﻿using Astrarium.Types.Localization;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,17 +13,16 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Astrarium.Config
+namespace Astrarium.Config.Controls
 {
     /// <summary>
-    /// Interaction logic for LanguageSettingControl.xaml
+    /// Interaction logic for ColorPickerSettingControl.xaml
     /// </summary>
-    public partial class LanguageSettingControl : UserControl
+    public partial class ColorPickerSettingControl : UserControl
     {
-        public LanguageSettingControl()
+        public ColorPickerSettingControl()
         {
             InitializeComponent();
-            cmbCultures.ItemsSource = Text.GetLocales();
         }
     }
 }

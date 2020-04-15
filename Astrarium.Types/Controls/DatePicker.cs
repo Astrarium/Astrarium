@@ -6,7 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 
-namespace Astrarium.Controls
+namespace Astrarium.Types.Controls
 {
     public class DatePicker : Control
     {

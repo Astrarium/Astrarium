@@ -4,7 +4,7 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:t="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
-        xmlns:c="clr-namespace:Astrarium.Controls;assembly=Astrarium.Types"
+        xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
         xmlns:ec="clr-namespace:Astrarium.Controls"
         mc:Ignorable="d"
         Title="Location" 
@@ -47,10 +47,27 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                 </TextBlock.Style>
             </TextBlock>
 
-            <Button Grid.Column="1" Margin="3 3 1 3" Width="26" Height="26" VerticalContentAlignment="Center" Command="{Binding EndSearchModeCommand}" Visibility="{Binding SearchMode, Converter={t:BoolToVisibilityConverter}}">
-                <Grid>
-                    <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="8" Height="8" Stretch="Fill" Fill="White" Data="F1 M 26.9166,22.1667L 37.9999,33.25L 49.0832,22.1668L 53.8332,26.9168L 42.7499,38L 53.8332,49.0834L 49.0833,53.8334L 37.9999,42.75L 26.9166,53.8334L 22.1666,49.0833L 33.25,38L 22.1667,26.9167L 26.9166,22.1667 Z "/>
-                </Grid>
+            <Button Grid.Column="1" Margin="3 3 1 3" Width="24" Height="24" VerticalContentAlignment="Center" Command="{Binding EndSearchModeCommand}" Visibility="{Binding SearchMode, Converter={t:BoolToVisibilityConverter}}">
+                <Button.Content>
+                    <Rectangle Margin="2" Width="8" Height="8">
+                        <Rectangle.Fill>
+                            <SolidColorBrush Color="{DynamicResource ColorForeground}" />
+                        </Rectangle.Fill>
+                        <Rectangle.OpacityMask>
+                            <ImageBrush AlignmentX="Left" AlignmentY="Top" Stretch="UniformToFill">
+                                <ImageBrush.ImageSource>
+                                    <DrawingImage>
+                                        <DrawingImage.Drawing>
+                                            <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                                                <GeometryDrawing Brush="White" Geometry="F1 M 26.9166,22.1667L 37.9999,33.25L 49.0832,22.1668L 53.8332,26.9168L 42.7499,38L 53.8332,49.0834L 49.0833,53.8334L 37.9999,42.75L 26.9166,53.8334L 22.1666,49.0833L 33.25,38L 22.1667,26.9167L 26.9166,22.1667 Z " />
+                                            </DrawingGroup>
+                                        </DrawingImage.Drawing>
+                                    </DrawingImage>
+                                </ImageBrush.ImageSource>
+                            </ImageBrush>
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                </Button.Content>
             </Button>
         </Grid>
         

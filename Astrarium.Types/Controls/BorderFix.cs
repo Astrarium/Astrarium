@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace Astrarium.Controls
+namespace Astrarium.Types.Controls
 {
     public sealed class BorderFix : ContentControl
     {

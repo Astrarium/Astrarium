@@ -46,6 +46,12 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
+
+  <ItemGroup>
+    <Page Include="..\Astrarium\Config\Controls\*.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
   
   <ItemGroup>
     <Compile Remove="Logo\**" />
@@ -158,7 +164,7 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
-
+  
   <ItemGroup>
     <None Update="Data\!Credits.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

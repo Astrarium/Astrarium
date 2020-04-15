@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Astrarium.Types.Config.Controls
+namespace Astrarium.Config.Controls
 {
     /// <summary>
     /// Interaction logic for FontPicketSettingControl.xaml

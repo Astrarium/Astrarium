@@ -1,7 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:c="clr-namespace:Astrarium.Controls"
-                    xmlns:s="clr-namespace:Astrarium.Controls;assembly=Astrarium.Types"
+                    xmlns:s="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
                     xmlns:t="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types">
 
     <!-- Folders Tree -->

@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Markup;
+using Astrarium.Config.Controls;
 
 namespace Astrarium
 {

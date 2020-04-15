@@ -3,7 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:t="clr-namespace:Astrarium.Types.Themes"
-    xmlns:c="clr-namespace:Astrarium.Controls">
+    xmlns:c="clr-namespace:Astrarium.Types.Controls">
 
     <Style TargetType="{x:Type Window}">
         <Setter Property="Foreground" Value="{StaticResource BrushWindowTitle}" />

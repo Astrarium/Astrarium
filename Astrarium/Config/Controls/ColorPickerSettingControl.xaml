@@ -1,10 +1,10 @@
-﻿<UserControl x:Class="Astrarium.Types.Config.Controls.ColorPickerSettingControl"
+﻿<UserControl x:Class="Astrarium.Config.Controls.ColorPickerSettingControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             xmlns:controls="clr-namespace:Astrarium.Controls">
+             xmlns:controls="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types">
 
     <controls:ColorPicker Caption="{Binding SettingTitle, FallbackValue='Color setting'}" SelectedColor="{Binding SettingValue}" IsEnabled="{Binding IsEnabled}" />
 

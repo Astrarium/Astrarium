@@ -1,5 +1,4 @@
 ﻿using Microsoft.Win32;
-using Astrarium.Controls;
 using Astrarium.Objects;
 using Astrarium.Types;
 using Astrarium.ViewModels;
@@ -13,8 +12,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using WF = System.Windows.Forms;
-using System.Windows.Controls;
-using System.Windows.Media;
 using System.Drawing.Printing;
 
 namespace Astrarium

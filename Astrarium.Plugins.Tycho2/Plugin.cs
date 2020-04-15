@@ -1,5 +1,4 @@
 ﻿using Astrarium.Types;
-using Astrarium.Types.Config.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +18,6 @@ namespace Astrarium.Plugins.Tycho2
             SettingItems.Add("Tycho 2", new SettingItem(
                 "Tycho2Path", 
                 defaultValue: "",
-                controlType: typeof(FolderPickerSettingControl),     // type of UI editor
                 enabledCondition: s => s.Get<bool>("Tycho2")         // setting is enabled when "Tycho2" setting is ON
             ));
 

@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Astrarium.Types.Localization;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,16 +15,17 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Astrarium.Types.Config.Controls
+namespace Astrarium.Config.Controls
 {
     /// <summary>
-    /// Interaction logic for FolderPickerSettingControl.xaml
+    /// Interaction logic for LanguageSettingControl.xaml
     /// </summary>
-    public partial class FolderPickerSettingControl : UserControl
+    public partial class LanguageSettingControl : UserControl
     {
-        public FolderPickerSettingControl()
+        public LanguageSettingControl()
         {
             InitializeComponent();
+            cmbCultures.ItemsSource = Text.GetLocales();
         }
     }
 }

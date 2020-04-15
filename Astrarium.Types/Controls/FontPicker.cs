@@ -10,7 +10,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using WF = System.Windows.Forms;
 
-namespace Astrarium.Controls
+namespace Astrarium.Types.Controls
 {
     public class FontPicker : Control
     {

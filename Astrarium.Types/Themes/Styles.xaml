@@ -4,7 +4,7 @@
                     xmlns:sys="clr-namespace:System;assembly=mscorlib"
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                     xmlns:t="clr-namespace:Astrarium.Types.Themes"
-                    xmlns:c="clr-namespace:Astrarium.Controls"
+                    xmlns:c="clr-namespace:Astrarium.Types.Controls"
                     mc:Ignorable="d">
 
     <FontFamily x:Key="FontFamily">pack://application:,,,/Astrarium.Types;component/Themes/#Noto Sans</FontFamily>
