@@ -259,7 +259,6 @@ PlanetEvents.VisibilityPeriods.End = {planetName}: end of visibility
 Settings.Sun						= Sun
 Settings.SunLabel					= Sun label
 Settings.SunTexture					= Use texture for the Sun
-Settings.SunTexturePath				= Web URL for the Sun texture
 Settings.Moon						= Moon
 Settings.MoonLabel					= Moon label
 Settings.MoonTexture				= Use texture for the Moon

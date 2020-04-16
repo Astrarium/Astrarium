@@ -15,12 +15,6 @@ namespace Astrarium.Plugins.Tycho2
 
             SettingItems.Add("Tycho 2", new SettingItem("Tycho2", defaultValue: true));
 
-            SettingItems.Add("Tycho 2", new SettingItem(
-                "Tycho2Path", 
-                defaultValue: "",
-                enabledCondition: s => s.Get<bool>("Tycho2")         // setting is enabled when "Tycho2" setting is ON
-            ));
-
             #endregion Settings
 
             ExportResourceDictionaries("Images.xaml");

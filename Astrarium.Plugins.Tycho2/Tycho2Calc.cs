@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -108,6 +109,8 @@ namespace Astrarium.Plugins.Tycho2
         /// </summary>
         public Tycho2Star SelectedStar { get; set; }
 
+        private readonly string dataPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data");
+
         public Tycho2Calc(ISettings settings)
         {
             Settings = settings;
@@ -115,18 +118,10 @@ namespace Astrarium.Plugins.Tycho2
         
         public override void Initialize()
         {
-            string catalogLocation = Settings.Get<string>("Tycho2Path");
-
-            if (string.IsNullOrEmpty(catalogLocation))
-            {
-                Trace.TraceWarning("Unable to initialize Tycho2 calculator, catalog location is not set.");
-                return;
-            }
-            
             try
             {
-                string indexFile = Path.Combine(catalogLocation, "tycho2.idx");
-                string catalogFile = Path.Combine(catalogLocation, "tycho2.dat");
+                string indexFile = Path.Combine(dataPath, "tycho2.idx");
+                string catalogFile = Path.Combine(dataPath, "tycho2.dat");
 
                 // Read Tycho2 index file and load it into memory.
 

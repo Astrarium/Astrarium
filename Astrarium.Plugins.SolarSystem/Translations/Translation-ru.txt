@@ -276,7 +276,6 @@ PlanetEvents.VisibilityPeriods.End = Окончание видимости {plan
 Settings.Sun						= Солнце
 Settings.SunLabel					= Отображать название
 Settings.SunTexture					= Использовать текстуру
-Settings.SunTexturePath				= Путь для получения текстуры
 Settings.Moon						= Луна
 Settings.MoonLabel					= Отображать название
 Settings.MoonTexture				= Использовать текстуру

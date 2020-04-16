@@ -16,7 +16,6 @@ namespace Astrarium.Plugins.SolarSystem
             SettingItems.Add("Sun", new SettingItem("Sun", true));
             SettingItems.Add("Sun", new SettingItem("SunLabel", true, s => s.Get("Sun")));
             SettingItems.Add("Sun", new SettingItem("SunTexture", true, s => s.Get("Sun")));
-            SettingItems.Add("Sun", new SettingItem("SunTexturePath", "https://soho.nascom.nasa.gov/data/REPROCESSING/Completed/{yyyy}/hmiigr/{yyyy}{MM}{dd}/{yyyy}{MM}{dd}_0000_hmiigr_512.jpg", s => s.Get("Sun") && s.Get("SunTexture")));
 
             SettingItems.Add("Planets", new SettingItem("Planets", true));
             SettingItems.Add("Planets", new SettingItem("PlanetsLabels", true, s => s.Get("Planets")));
