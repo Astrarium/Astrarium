@@ -164,7 +164,6 @@ namespace Astrarium.Plugins.SolarSystem
             return PlutoPosition.Semidiameter(c.Get(Pluto_DistanceFromEarth));
         }
 
-
         /// <summary>
         /// Calculates visual magnitude of Pluto
         /// </summary>
@@ -248,7 +247,7 @@ namespace Astrarium.Plugins.SolarSystem
         public void GetInfo(CelestialObjectInfo<Pluto> info)
         {
             info
-            .SetSubtitle($"Dwarf planet")
+            .SetSubtitle(Text.Get("Pluto.Subtitle"))
             .SetTitle(info.Body.Names.First())
 
             .AddRow("Constellation")

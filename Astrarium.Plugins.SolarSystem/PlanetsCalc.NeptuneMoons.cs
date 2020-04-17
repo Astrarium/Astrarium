@@ -97,6 +97,10 @@ namespace Astrarium.Plugins.SolarSystem
             e["Rectangular.X"] = (c, nm) => c.Get(NeptuneMoon_Rectangular, nm.Number).X;
             e["Rectangular.Y"] = (c, nm) => c.Get(NeptuneMoon_Rectangular, nm.Number).Y;
             e["Rectangular.Z"] = (c, nm) => c.Get(NeptuneMoon_Rectangular, nm.Number).Z;
+            e["RTS.Rise"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, Planet.NEPTUNE).Rise);
+            e["RTS.Transit"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, Planet.NEPTUNE).Transit);
+            e["RTS.Set"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, Planet.NEPTUNE).Set);
+            e["RTS.Duration"] = (c, p) => c.Get(Planet_RiseTransitSet, Planet.NEPTUNE).Duration;
             e["AngularDiameter"] = (c, nm) => c.Get(NeptuneMoon_Semidiameter, nm.Number) * 2 / 3600.0;
             e["Magnitude"] = (c, nm) => c.Get(NeptuneMoon_Magnitude, nm.Number);
         }
@@ -122,13 +126,15 @@ namespace Astrarium.Plugins.SolarSystem
             .AddRow("Rectangular.Y")
             .AddRow("Rectangular.Z")
 
+            .AddHeader(Text.Get("NeptuneMoon.RTS"))
+            .AddRow("RTS.Rise")
+            .AddRow("RTS.Transit")
+            .AddRow("RTS.Set")
+            .AddRow("RTS.Duration")
+
+            .AddHeader(Text.Get("NeptuneMoon.Appearance"))
             .AddRow("Magnitude")
-            .AddRow("AngularDiameter");
-            //.AddHeader(Text.Get("NeptuneMoon.RTS"))
-            //.AddRow("RTS.Rise")
-            //.AddRow("RTS.Transit")
-            //.AddRow("RTS.Set")
-            //.AddRow("RTS.Duration");
+            .AddRow("AngularDiameter");;
         }
     }
 }

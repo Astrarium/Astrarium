@@ -387,7 +387,7 @@ namespace Astrarium.Plugins.SolarSystem
             else if (IsSaturn(info.Body))
             {
                 info
-                    .AddHeader(Text.Get("SaturnRings"))
+                    .AddHeader(Text.Get("Planet.SaturnRings"))
                     .AddRow("SaturnRings.a")
                     .AddRow("SaturnRings.b");
             }

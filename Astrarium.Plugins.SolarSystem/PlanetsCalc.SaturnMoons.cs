@@ -78,9 +78,6 @@ namespace Astrarium.Plugins.SolarSystem
             e["Rectangular.Y"] = (c, sm) => c.Get(SaturnMoon_Rectangular, sm.Number).Y;
             e["Rectangular.Z"] = (c, sm) => c.Get(SaturnMoon_Rectangular, sm.Number).Z;
             e["Magnitude"] = (c, sm) => c.Get(SaturnMoon_Magnitude, sm.Number);
-
-            e["Phase"] = (c, sm) => c.Get(Planet_Phase, Planet.SATURN);
-            e["PhaseAngle"] = (c, sm) => c.Get(Planet_PhaseAngle, Planet.SATURN);
             e["AngularDiameter"] = (c, sm) => c.Get(SaturnMoon_Semidiameter, sm.Number) * 2 / 3600.0;
 
             e["RTS.Rise"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, Planet.SATURN).Rise);
@@ -117,8 +114,6 @@ namespace Astrarium.Plugins.SolarSystem
             .AddRow("RTS.Duration")
 
             .AddHeader(Text.Get("SaturnMoon.Appearance"))
-            .AddRow("Phase")
-            .AddRow("PhaseAngle")
             .AddRow("Magnitude")
             .AddRow("AngularDiameter");
         }

@@ -152,6 +152,15 @@ namespace Astrarium.Plugins.SolarSystem
             return GenericSatellite.Magnitude(mag0, delta, r);
         }
 
+        private float GenericMoon_RiseTransitSet(SkyContext c, int id)
+        {
+            var moon = genericMoons.FirstOrDefault(gm => gm.Id == id);
+            var delta = moon.Planet == Planet.PLUTO ? c.Get(Pluto_DistanceFromEarth) : c.Get(Planet_DistanceFromEarth, moon.Planet);
+            double r = moon.Planet == Planet.PLUTO ? c.Get(Pluto_DistanceFromSun) : c.Get(Planet_DistanceFromSun, moon.Planet);
+            var mag0 = moon.Data.mag;
+            return GenericSatellite.Magnitude(mag0, delta, r);
+        }
+
         public void ConfigureEphemeris(EphemerisConfig<GenericMoon> e)
         {
             e["Constellation"] = (c, nm) => Constellations.FindConstellation(c.Get(GenericMoon_Equatorial, nm.Id), c.JulianDay);
@@ -161,6 +170,10 @@ namespace Astrarium.Plugins.SolarSystem
             e["Horizontal.Azimuth"] = (c, nm) => c.Get(GenericMoon_Horizontal, nm.Id).Azimuth;            
             e["AngularDiameter"] = (c, nm) => c.Get(GenericMoon_Semidiameter, nm.Id) * 2 / 3600.0;
             e["Magnitude"] = (c, nm) => c.Get(GenericMoon_Magnitude, nm.Id);
+            e["RTS.Rise"] = (c, nm) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, nm.Planet).Rise);
+            e["RTS.Transit"] = (c, nm) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, nm.Planet).Transit);
+            e["RTS.Set"] = (c, nm) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, nm.Planet).Set);
+            e["RTS.Duration"] = (c, nm) => c.Get(Planet_RiseTransitSet, nm.Planet).Duration;
         }
 
         public void GetInfo(CelestialObjectInfo<GenericMoon> info)
@@ -179,13 +192,15 @@ namespace Astrarium.Plugins.SolarSystem
             .AddRow("Equatorial.Alpha")
             .AddRow("Equatorial.Delta")
 
+            .AddHeader(Text.Get("GenericMoon.RTS"))
+            .AddRow("RTS.Rise")
+            .AddRow("RTS.Transit")
+            .AddRow("RTS.Set")
+            .AddRow("RTS.Duration")
+
+            .AddHeader(Text.Get("GenericMoon.Appearance"))
             .AddRow("Magnitude")
             .AddRow("AngularDiameter");
-            //.AddHeader(Text.Get("GenericMoon.RTS"))
-            //.AddRow("RTS.Rise")
-            //.AddRow("RTS.Transit")
-            //.AddRow("RTS.Set")
-            //.AddRow("RTS.Duration");
         }
     }
 }
