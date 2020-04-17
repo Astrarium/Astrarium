@@ -8,6 +8,32 @@ Close					= Close
 Save					= Save
 SaveToFile				= Save to file...
 
+Menu.Map				= Map
+Menu.Save				= Save
+Menu.SaveAsImage		= Save as image...
+Menu.Open				= Open
+Menu.Print				= Print...
+Menu.PrintPreview		= Print preview...
+Menu.Exit				= Exit
+Menu.View				= View
+Menu.ColorSchema		= Color schema
+Menu.Objects			= Objects
+Menu.Constellations		= Constellations
+Menu.Grids				= Grids and lines
+Menu.CompactMenu		= Compact menu
+Menu.Toolbar			= Toolbar
+Menu.StatusBar			= Status bar
+Menu.FullScreen			= Full screen
+Menu.Tools				= Tools
+Menu.Search				= Search
+Menu.Phenomena			= Astronomical phenomena
+Menu.Ephemerides		= Ephemerides
+Menu.Options			= Options
+Menu.DateTime			= Date & Time
+Menu.ObserverLocation	= Observer location
+Menu.Language			= Language
+Menu.Settings			= Settings
+
 # DateWindow
 DateWindow.Title		= Date and Time
 DateWindow.Day			= Day
@@ -29,6 +55,3 @@ RenderingOrderSettingTitle = Rendering Order
 RenderingOrderHint = Arrange layers according to desired rendering order. Upper items rendered first. Use Up and Down buttons or drag and drop to arrange items.
 RenderingOrderUpButton = Up
 RenderingOrderDownButton = Down
-
-# Menu
-Menu.Settings = Settings

@@ -170,10 +170,10 @@ namespace Astrarium.Plugins.SolarSystem
             e["Horizontal.Azimuth"] = (c, nm) => c.Get(GenericMoon_Horizontal, nm.Id).Azimuth;            
             e["AngularDiameter"] = (c, nm) => c.Get(GenericMoon_Semidiameter, nm.Id) * 2 / 3600.0;
             e["Magnitude"] = (c, nm) => c.Get(GenericMoon_Magnitude, nm.Id);
-            e["RTS.Rise"] = (c, nm) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, nm.Planet).Rise);
-            e["RTS.Transit"] = (c, nm) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, nm.Planet).Transit);
-            e["RTS.Set"] = (c, nm) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, nm.Planet).Set);
-            e["RTS.Duration"] = (c, nm) => c.Get(Planet_RiseTransitSet, nm.Planet).Duration;
+            e["RTS.Rise"] = (c, nm) => c.GetDateFromTime(c.Get(Pluto_RiseTransitSet).Rise);
+            e["RTS.Transit"] = (c, nm) => c.GetDateFromTime(c.Get(Pluto_RiseTransitSet).Transit);
+            e["RTS.Set"] = (c, nm) => c.GetDateFromTime(c.Get(Pluto_RiseTransitSet).Set);
+            e["RTS.Duration"] = (c, nm) => c.Get(Pluto_RiseTransitSet).Duration;
         }
 
         public void GetInfo(CelestialObjectInfo<GenericMoon> info)

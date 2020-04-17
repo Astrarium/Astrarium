@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace Astrarium.Plugins.Tracks
 {
@@ -29,6 +30,7 @@ namespace Astrarium.Plugins.Tracks
             MenuItems.Add(MenuItemPosition.ContextMenu, menuTrack);
 
             var menuTracksList = new MenuItem("Motion tracks", new Command(ShowTracksListWindow));
+            menuTracksList.HotKey = new KeyGesture(Key.T, ModifierKeys.Control, "Ctrl+T");
 
             MenuItems.Add(MenuItemPosition.MainMenuTools, menuTracksList);
         }

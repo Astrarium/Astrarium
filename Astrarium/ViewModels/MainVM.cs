@@ -186,23 +186,47 @@ namespace Astrarium.ViewModels
 
             // Main window menu
 
-            MainMenuItems.Add(new MenuItem("Map")
+            MenuItem menuOpen = new MenuItem("$Menu.Open");
+            menuOpen.SubItems = new ObservableCollection<MenuItem>();
+            // "Open" menu items from plugins
+            foreach (var menuItem in uiIntegration.MenuItems[MenuItemPosition.MainMenuOpen])
             {
-                SubItems = new ObservableCollection<MenuItem>()
-                {
-                    new MenuItem("Save as image...", SaveAsImageCommand),
-                    null,
-                    new MenuItem("Print...", PrintCommand),
-                    new MenuItem("Print preview...", PrintPreviewCommand),
-                    null,
-                    new MenuItem("Exit", ExitAppCommand)
-                }
+                menuOpen.SubItems.Add(menuItem);
+            }
+
+            MenuItem menuSave = new MenuItem("$Menu.Save");
+            menuSave.SubItems = new ObservableCollection<MenuItem>();
+            menuSave.SubItems.Add(new MenuItem("$Menu.SaveAsImage", SaveAsImageCommand));
+            // "Save" menu items from plugins
+            foreach (var menuItem in uiIntegration.MenuItems[MenuItemPosition.MainMenuSave])
+            {
+                menuSave.SubItems.Add(menuItem);
+            }
+
+            ObservableCollection<MenuItem> mapItems = new ObservableCollection<MenuItem>();
+            if (menuOpen.SubItems.Any())
+            {
+                mapItems.Add(menuOpen);
+            }
+            if (menuSave.SubItems.Any())
+            {
+                mapItems.Add(menuSave);
+            }
+            mapItems.Add(null);
+            mapItems.Add(new MenuItem("$Menu.Print", PrintCommand));
+            mapItems.Add(new MenuItem("$Menu.PrintPreview", PrintPreviewCommand));
+            mapItems.Add(null);
+            mapItems.Add(new MenuItem("$Menu.Exit", ExitAppCommand));
+
+            MainMenuItems.Add(new MenuItem("$Menu.Map")
+            {
+                SubItems = mapItems
             });
 
-            var menuView = new MenuItem("View");
+            var menuView = new MenuItem("$Menu.View");
             menuView.SubItems = new ObservableCollection<MenuItem>();
 
-            var menuColorSchema = new MenuItem("Color Schema")
+            var menuColorSchema = new MenuItem("$Menu.ColorSchema")
             {
                 SubItems = new ObservableCollection<MenuItem>(Enum.GetValues(typeof(ColorSchema))
                     .Cast<ColorSchema>()
@@ -222,44 +246,47 @@ namespace Astrarium.ViewModels
 
             menuView.SubItems.Add(null);
 
-            foreach (var group in uiIntegration.ToolbarButtons.Groups)
+            string[] groups = new string[] { "Objects", "Constellations", "Grids" };
+            foreach (var group in groups)
             {
-                var menuGroup = new MenuItem(group);
-                foreach (var button in uiIntegration.ToolbarButtons[group].OfType<ToolbarToggleButton>())
+                if (uiIntegration.ToolbarButtons.Groups.Any(g => g == group)) 
                 {
-                    var binding = button.Bindings.FirstOrDefault(b => b.TargetPropertyName == nameof(ToolbarToggleButton.IsChecked));
-                    if (binding != null)
+                    var menuGroup = new MenuItem($"$Menu.{group}");
+                    foreach (var button in uiIntegration.ToolbarButtons[group].OfType<ToolbarToggleButton>())
                     {
-                        var menuItem = new MenuItem(button.Tooltip);
-                        menuItem.Command = new Command(() => menuItem.IsChecked = !menuItem.IsChecked);
-                        menuItem.AddBinding(new SimpleBinding(binding.Source, binding.SourcePropertyName, nameof(MenuItem.IsChecked)));
-                        menuGroup.SubItems.Add(menuItem);
+                        var binding = button.Bindings.FirstOrDefault(b => b.TargetPropertyName == nameof(ToolbarToggleButton.IsChecked));
+                        if (binding != null)
+                        {
+                            var menuItem = new MenuItem(button.Tooltip);
+                            menuItem.Command = new Command(() => menuItem.IsChecked = !menuItem.IsChecked);
+                            menuItem.AddBinding(new SimpleBinding(binding.Source, binding.SourcePropertyName, nameof(MenuItem.IsChecked)));
+                            menuGroup.SubItems.Add(menuItem);
+                        }
                     }
+                    menuView.SubItems.Add(menuGroup);
                 }
-
-                menuView.SubItems.Add(menuGroup);
             }
 
             menuView.SubItems.Add(null);
 
-            var menuCompact = new MenuItem("Compact menu");
+            var menuCompact = new MenuItem("$Menu.CompactMenu");
             menuCompact.Command = new Command(() => menuCompact.IsChecked = !menuCompact.IsChecked);
             menuCompact.AddBinding(new SimpleBinding(settings, "IsCompactMenu", nameof(MenuItem.IsChecked)));
             menuView.SubItems.Add(menuCompact);
 
-            var menuToolbar = new MenuItem("Toolbar");
+            var menuToolbar = new MenuItem("$Menu.Toolbar");
             menuToolbar.Command = new Command(() => menuToolbar.IsChecked = !menuToolbar.IsChecked);
             menuToolbar.AddBinding(new SimpleBinding(settings, "IsToolbarVisible", nameof(MenuItem.IsChecked)));
             menuView.SubItems.Add(menuToolbar);
 
-            var menuStatusbar = new MenuItem("Statusbar");
+            var menuStatusbar = new MenuItem("$Menu.StatusBar");
             menuStatusbar.Command = new Command(() => menuStatusbar.IsChecked = !menuStatusbar.IsChecked);
             menuStatusbar.AddBinding(new SimpleBinding(settings, "IsStatusBarVisible", nameof(MenuItem.IsChecked)));
             menuView.SubItems.Add(menuStatusbar);
 
             menuView.SubItems.Add(null);
 
-            var menuFullScreen = new MenuItem("Full Screen");
+            var menuFullScreen = new MenuItem("$Menu.FullScreen");
             menuFullScreen.Command = new Command(() => menuFullScreen.IsChecked = !menuFullScreen.IsChecked);
             menuFullScreen.AddBinding(new SimpleBinding(this, nameof(FullScreen), nameof(MenuItem.IsChecked)));
             menuFullScreen.HotKey = new KeyGesture(Key.F12, ModifierKeys.None, "F12");
@@ -267,13 +294,13 @@ namespace Astrarium.ViewModels
 
             MainMenuItems.Add(menuView);
 
-            var menuTools = new MenuItem("Tools")
+            var menuTools = new MenuItem("$Menu.Tools")
             {
                 SubItems = new ObservableCollection<MenuItem>()
                 {
-                    new MenuItem("Search object", SearchObjectCommand) { HotKey = new KeyGesture(Key.F, ModifierKeys.Control, "Ctrl+F") },
-                    new MenuItem("Astronomical phenomena", CalculatePhenomenaCommand) { HotKey = new KeyGesture(Key.P, ModifierKeys.Control, "Ctrl+P") },
-                    new MenuItem("Ephemerides", GetObjectEphemerisCommand) { HotKey = new KeyGesture(Key.E, ModifierKeys.Control, "Ctrl+E") }                
+                    new MenuItem("$Menu.Search", SearchObjectCommand) { HotKey = new KeyGesture(Key.F, ModifierKeys.Control, "Ctrl+F") },
+                    new MenuItem("$Menu.Phenomena", CalculatePhenomenaCommand) { HotKey = new KeyGesture(Key.P, ModifierKeys.Control, "Ctrl+P") },
+                    new MenuItem("$Menu.Ephemerides", GetObjectEphemerisCommand) { HotKey = new KeyGesture(Key.E, ModifierKeys.Control, "Ctrl+E") }                
                 }
             };
 
@@ -291,14 +318,14 @@ namespace Astrarium.ViewModels
                 MainMenuItems.Add(menuItem);
             }
 
-            var menuOptions = new MenuItem("Options")
+            var menuOptions = new MenuItem("$Menu.Options")
             {
                 SubItems = new ObservableCollection<MenuItem>()
                 {
-                    new MenuItem("Date & Time", SetDateCommand) { HotKey = new KeyGesture(Key.D, ModifierKeys.Control, "Ctrl+D") },
-                    new MenuItem("Observer location", SelectLocationCommand) { HotKey = new KeyGesture(Key.L, ModifierKeys.Control, "Ctrl+L") },
+                    new MenuItem("$Menu.DateTime", SetDateCommand) { HotKey = new KeyGesture(Key.D, ModifierKeys.Control, "Ctrl+D") },
+                    new MenuItem("$Menu.ObserverLocation", SelectLocationCommand) { HotKey = new KeyGesture(Key.L, ModifierKeys.Control, "Ctrl+L") },
                     null,
-                    new MenuItem("Language")
+                    new MenuItem("$Menu.Language")
                     {
                         SubItems = new ObservableCollection<MenuItem>(Text.GetLocales().Select(loc => {
                             var menuItem = new MenuItem(loc.NativeName);

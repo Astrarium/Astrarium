@@ -8,6 +8,33 @@ Close					= Закрыть
 Save					= Сохранить
 SaveToFile				= Сохранить в файл...
 
+# MainWindow
+Menu.Map				= Карта
+Menu.Save				= Сохранить
+Menu.SaveAsImage		= Карту как изображение...
+Menu.Open				= Открыть
+Menu.Print				= Печать...
+Menu.PrintPreview		= Предпросмотр печати...
+Menu.Exit				= Выход
+Menu.View				= Вид
+Menu.ColorSchema		= Цветовая схема
+Menu.Objects			= Объекты
+Menu.Constellations		= Созвездия
+Menu.Grids				= Линии и сетки
+Menu.CompactMenu		= Компактное меню
+Menu.Toolbar			= Панель инструментов
+Menu.StatusBar			= Строка состояния
+Menu.FullScreen			= Полноэкранный режим
+Menu.Tools				= Инструменты
+Menu.Search				= Поиск объекта
+Menu.Phenomena			= Астрономические явления
+Menu.Ephemerides		= Эфемериды
+Menu.Options			= Опции
+Menu.DateTime			= Дата и время
+Menu.ObserverLocation	= Место наблюдения
+Menu.Language			= Язык программы
+Menu.Settings			= Настройки
+
 # DateWindow
 DateWindow.Title		= Дата и время
 DateWindow.Day			= День
@@ -29,6 +56,3 @@ RenderingOrderSettingTitle = Порядок отрисовки
 RenderingOrderHint = Отсортируйте слои в соответствии с желаемым порядком отрисовки. Верхние элементы будут отрисованы первыми. Используйте кнопки Вверх и Вниз для сортировки, либо перетаскивайте элементы мышью.
 RenderingOrderUpButton = Вверх
 RenderingOrderDownButton = Вниз
-
-# Menu
-Menu.Settings = Настройки
