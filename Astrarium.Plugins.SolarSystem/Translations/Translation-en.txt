@@ -50,6 +50,7 @@ NeptuneMoon.2.Name				= Nereid
 EarthShadow.Label				= Earth shadow
 EclipsedByJupiter				= Eclipsed by Jupiter
 Satellite.Subtitle				= Satellite of {planetName}
+Planet.Subtitle					= Planet
 
 # Ephemeris
 Planet.Constellation			= Constellation
@@ -65,10 +66,18 @@ Planet.Horizontal.Azimuth		= Azimuth
 Planet.Equatorial				= Equatorial topocentric coordinates
 Planet.Equatorial.Alpha			= Right Ascension
 Planet.Equatorial.Delta			= Declination
+Planet.MartianCalendar			= Martian calendar
+Planet.MartianCalendar.Year		= Year
+Planet.MartianCalendar.Month	= Month
+Planet.MartianCalendar.Sol		= Sol
+Planet.MartianCalendar.Ls		= Solar orbital longitude (Ls)
+Planet.MartianPolarCaps			= Latitudes of polar caps edges
+Planet.MartianPolarCaps.North	= Northern Polar Cap
+Planet.MartianPolarCaps.South	= Southern Polar Cap
+Planet.GRSLongitude				= Great Red Spot longitude
 Planet.SaturnRings				= Rings
 Planet.SaturnRings.a			= Major axis
 Planet.SaturnRings.b			= Minor axis
-Planet.GRSLongitude				= Great Red Spot longitude
 Planet.RTS						= Visibility
 Planet.RTS.Rise					= Rise
 Planet.RTS.Transit				= Transit

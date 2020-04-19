@@ -302,8 +302,8 @@ namespace Astrarium.Plugins.SolarSystem
             e["MartianCalendar.Month", IsMars] = (c, p) => c.Get(Mars_Calendar).Month;
             e["MartianCalendar.Sol", IsMars] = (c, p) => Math.Ceiling(c.Get(Mars_Calendar).Sol);
             e["MartianCalendar.Ls", IsMars, new Formatters.UnsignedDoubleFormatter(2, "\u00B0")] = (c, p) => c.Get(Mars_Calendar).Ls;
-            e["PolarCaps.North", IsMars, new Formatters.UnsignedDoubleFormatter(1, "\u00B0")] = (c, p) => c.Get(Mars_PolarCap, PolarCap.Northern);
-            e["PolarCaps.South", IsMars, new Formatters.UnsignedDoubleFormatter(1, "\u00B0")] = (c, p) => c.Get(Mars_PolarCap, PolarCap.Southern);
+            e["MartianPolarCaps.North", IsMars, new Formatters.UnsignedDoubleFormatter(1, "\u00B0")] = (c, p) => c.Get(Mars_PolarCap, PolarCap.Northern);
+            e["MartianPolarCaps.South", IsMars, new Formatters.UnsignedDoubleFormatter(1, "\u00B0")] = (c, p) => c.Get(Mars_PolarCap, PolarCap.Southern);
             e["GRSLongitude", IsJupiter] = (c, p) => c.Get(Jupiter_GreatRedSpotLongitude);
             e["SaturnRings.a", IsSaturn] = (c, p) => c.Get(Saturn_RingsAppearance, p.Number).a;
             e["SaturnRings.b", IsSaturn] = (c, p) => c.Get(Saturn_RingsAppearance, p.Number).b;
@@ -320,7 +320,7 @@ namespace Astrarium.Plugins.SolarSystem
         public void GetInfo(CelestialObjectInfo<Planet> info)
         {
             info
-                .SetSubtitle("Planet")
+                .SetSubtitle(Text.Get("Planet.Subtitle"))
                 .SetTitle(info.Body.Names.First())
 
                 .AddRow("Constellation")
@@ -375,9 +375,9 @@ namespace Astrarium.Plugins.SolarSystem
                     .AddRow("MartianCalendar.Ls");
 
                 info
-                    .AddHeader(Text.Get("Planet.PolarCaps"))
-                    .AddRow("PolarCaps.North")
-                    .AddRow("PolarCaps.South");
+                    .AddHeader(Text.Get("Planet.MartianPolarCaps"))
+                    .AddRow("MartianPolarCaps.North")
+                    .AddRow("MartianPolarCaps.South");
             }
             else if (IsJupiter(info.Body))
             {
