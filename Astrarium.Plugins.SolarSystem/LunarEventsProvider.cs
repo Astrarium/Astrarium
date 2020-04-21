@@ -14,9 +14,10 @@ namespace Astrarium.Plugins.SolarSystem
         private readonly LunarCalc lunarCalc = null;
         private readonly PlanetsCalc planetsCalc = null;
         
-        private readonly LibrationLongitudeFormatter librationLongitudeFormatter = new LibrationLongitudeFormatter();
-        private readonly LibrationLatitudeFormatter librationLatitudeFormatter = new LibrationLatitudeFormatter();
-        private readonly Formatters.SignedDoubleFormatter declinationFormatter = new Formatters.SignedDoubleFormatter(3, "\u00B0");
+        private readonly IEphemFormatter librationLongitudeFormatter = new LibrationLongitudeFormatter();
+        private readonly IEphemFormatter librationLatitudeFormatter = new LibrationLatitudeFormatter();
+        private readonly IEphemFormatter declinationFormatter = new Formatters.SignedDoubleFormatter(3, "\u00B0");
+        private readonly IEphemFormatter conjunctionSeparationFormatter = new Formatters.UnsignedDoubleFormatter(1, "\u00B0");
 
         // Bright stars which can be in conjunction with Moon
         private readonly ConjunctedStar[] stars = new ConjunctedStar[]
@@ -100,7 +101,7 @@ namespace Astrarium.Plugins.SolarSystem
             while (jd < context.To)
             {
                 jd = LunarEphem.NearestApsis(jd, MoonApsis.Apogee, out diameter);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Apsis.Apogee", ("diameter", Formatters.AngularDiameter.Format(diameter)))));
+                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Apsis.Apogee", ("diameter", Formatters.Angle.Format(diameter)))));
                 jd += LunarEphem.ANOMALISTIC_PERIOD;
             }
 
@@ -108,7 +109,7 @@ namespace Astrarium.Plugins.SolarSystem
             while (jd < context.To)
             {
                 jd = LunarEphem.NearestApsis(jd, MoonApsis.Perigee, out diameter);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Apsis.Perigee", ("diameter", Formatters.AngularDiameter.Format(diameter)))));
+                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Apsis.Perigee", ("diameter", Formatters.Angle.Format(diameter)))));
                 jd += LunarEphem.ANOMALISTIC_PERIOD * 1.1;
             }
 
@@ -219,7 +220,7 @@ namespace Astrarium.Plugins.SolarSystem
                     else
                     {
                         string direction = eqMoon.Delta > eqStar.Delta ? Text.Get("MoonEvents.ConjWithStars.Conj.North") : Text.Get("MoonEvents.ConjWithStars.Conj.South");
-                        events.Add(new AstroEvent(jd, Text.Get("MoonEvents.ConjWithStars.Conj", ("angularDistance", Formatters.ConjunctionSeparation.Format(separation)), ("direction", direction), ("starName", star.Name))));
+                        events.Add(new AstroEvent(jd, Text.Get("MoonEvents.ConjWithStars.Conj", ("angularDistance", conjunctionSeparationFormatter.Format(separation)), ("direction", direction), ("starName", star.Name))));
                     }
 
                     jd += LunarEphem.SIDEREAL_PERIOD;
@@ -263,7 +264,7 @@ namespace Astrarium.Plugins.SolarSystem
                         {
                             string moonPhase = Formatters.Phase.Format(ctx.Get(lunarCalc.Phase));
                             string planetMagnitude = Formatters.Magnitude.Format(ctx.Get(planetsCalc.Planet_Magnitude, p));
-                            string angularDistance = Formatters.ConjunctionSeparation.Format(separation);
+                            string angularDistance = conjunctionSeparationFormatter.Format(separation);
                             string direction = eqMoon.Delta > eqPlanet.Delta ? Text.Get("MoonEvents.ConjWithPlanets.Conj.North") : Text.Get("MoonEvents.ConjWithPlanets.Conj.South");
                             events.Add(new AstroEvent(jd, Text.Get("MoonEvents.ConjWithPlanets.Conj", ("moonPhase", moonPhase), ("angularDistance", angularDistance), ("direction", direction), ("planetName", planetName), ("planetMagnitude", planetMagnitude))));
                         }

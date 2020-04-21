@@ -82,7 +82,7 @@ namespace Astrarium.Plugins.MeasureTool
                     map.Graphics.DrawCurve(new Pen(map.GetColor(Color.White)), points.ToArray());
                     double angle = Angle.Separation(map.MousePosition, MeasureOrigin);
                     PointF p = map.Project(map.MousePosition);
-                    map.Graphics.DrawString(Formatters.MeasuredAngle.Format(angle), fontAngleValue, new SolidBrush(map.GetColor(Color.White)), p.X + 5, p.Y + 5);
+                    map.Graphics.DrawString(Formatters.Angle.Format(angle), fontAngleValue, new SolidBrush(map.GetColor(Color.White)), p.X + 5, p.Y + 5);
                 }
             }
         }

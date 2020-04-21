@@ -14,6 +14,8 @@ namespace Astrarium.Plugins.SolarSystem
         private readonly PlanetsCalc planetsCalc;
         private readonly SolarCalc solarCalc;
 
+        private readonly IEphemFormatter conjunctionSeparationFormatter = new Formatters.UnsignedDoubleFormatter(1, "\u00B0");
+
         public PlanetsEventsProvider(PlanetsCalc planetsCalc, SolarCalc solarCalc)
         {
             this.planetsCalc = planetsCalc;
@@ -151,7 +153,7 @@ namespace Astrarium.Plugins.SolarSystem
                                 conj.Direction = latitude(data.ElementAt(day + 2)[p1]) < latitude(data.ElementAt(day + 2)[p2]) ? "North" : "South";
 
                                 // find the angular distance at the "zero point"
-                                conj.AngularDistance = Formatters.ConjunctionSeparation.Format(Math.Abs(Interpolation.Lagrange(t, d, t0)));
+                                conj.AngularDistance = conjunctionSeparationFormatter.Format(Math.Abs(Interpolation.Lagrange(t, d, t0)));
 
                                 // magnitude of the first planet
                                 conj.Magnitude1 = Formatters.Magnitude.Format(data.ElementAt(day + 2)[p1].Magnitude);
@@ -215,7 +217,7 @@ namespace Astrarium.Plugins.SolarSystem
                                 // find the exact value of angular distance at extremum point
                                 var ctx = new SkyContext(jd - 2 + t0, context.GeoLocation, true);
                                 ad0 = Angle.Separation(ctx.Get(planetsCalc.Planet_Ecliptical, p1), ctx.Get(planetsCalc.Planet_Ecliptical, p2));
-                                string dist = Formatters.ConjunctionSeparation.Format(ad0);
+                                string dist = conjunctionSeparationFormatter.Format(ad0);
 
                                 // magnitude of the first planet
                                 string mag1 = Formatters.Magnitude.Format(data.ElementAt(day + 2)[p1].Magnitude);
@@ -407,7 +409,7 @@ namespace Astrarium.Plugins.SolarSystem
                         Interpolation.FindMaximum(t, el, 1e-6, out double t0, out double el0);
 
                         string direction = data.ElementAt(day + 2)[p].Elongation > 0 ? "East" : "West";
-                        string elongation = Formatters.ConjunctionSeparation.Format(el0);
+                        string elongation = conjunctionSeparationFormatter.Format(el0);
                         events.Add(new AstroEvent(jd - 2 + t0,
                             Text.Get("PlanetEvents.GreatestElongations.Text",
                                 ("planetName", GetPlanetName(p)),

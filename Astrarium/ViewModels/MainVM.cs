@@ -63,6 +63,11 @@ namespace Astrarium.ViewModels
         public ISuggestionProvider SearchProvider { get; private set; }
         public string SelectedObjectName { get; private set; }
 
+        public WindowState WindowState
+        {
+            get => settings.Get<bool>("StartMaximized") ? WindowState.Maximized : WindowState.Normal;
+        }
+
         public bool FullScreen
         {
             get => GetValue<bool>(nameof(FullScreen));
@@ -112,7 +117,7 @@ namespace Astrarium.ViewModels
                 MapEquatorialCoordinatesString = eq.ToString();
                 MapHorizontalCoordinatesString = hor.ToString();
                 MapConstellationNameString = Constellations.FindConstellation(eq, sky.Context.JulianDay);
-                MapViewAngleString = Formatters.AngularDiameter.Format(map.ViewAngle);
+                MapViewAngleString = Formatters.Angle.Format(map.ViewAngle);
 
                 NotifyPropertyChanged(
                     nameof(MapEquatorialCoordinatesString),
@@ -173,6 +178,8 @@ namespace Astrarium.ViewModels
             Map_SelectedObjectChanged(map.SelectedObject);
             Map_ViewAngleChanged(map.ViewAngle);
 
+            // Toolbar initialization
+
             foreach (var group in uiIntegration.ToolbarButtons.Groups)
             {
                 foreach (var button in uiIntegration.ToolbarButtons[group])
@@ -188,6 +195,7 @@ namespace Astrarium.ViewModels
 
             MenuItem menuOpen = new MenuItem("$Menu.Open");
             menuOpen.SubItems = new ObservableCollection<MenuItem>();
+            
             // "Open" menu items from plugins
             foreach (var menuItem in uiIntegration.MenuItems[MenuItemPosition.MainMenuOpen])
             {
@@ -204,14 +212,12 @@ namespace Astrarium.ViewModels
             }
 
             ObservableCollection<MenuItem> mapItems = new ObservableCollection<MenuItem>();
-            if (menuOpen.SubItems.Any())
-            {
-                mapItems.Add(menuOpen);
-            }
-            if (menuSave.SubItems.Any())
-            {
-                mapItems.Add(menuSave);
-            }
+
+            menuOpen.IsEnabled = menuOpen.SubItems.Any();
+            menuSave.IsEnabled = menuSave.SubItems.Any();
+
+            mapItems.Add(menuOpen);
+            mapItems.Add(menuSave);
             mapItems.Add(null);
             mapItems.Add(new MenuItem("$Menu.Print", PrintCommand));
             mapItems.Add(new MenuItem("$Menu.PrintPreview", PrintPreviewCommand));
@@ -344,7 +350,7 @@ namespace Astrarium.ViewModels
             };
             MainMenuItems.Add(menuOptions);
 
-            // Context menu
+            // Context menu initialization
 
             var menuInfo = new MenuItem("Info", GetObjectInfoCommand);
             menuInfo.HotKey = new KeyGesture(Key.I, ModifierKeys.Control);
@@ -405,7 +411,7 @@ namespace Astrarium.ViewModels
 
         private void Map_ViewAngleChanged(double viewAngle)
         {
-            MapViewAngleString = Formatters.AngularDiameter.Format(map.ViewAngle);
+            MapViewAngleString = Formatters.Angle.Format(map.ViewAngle);
             NotifyPropertyChanged(nameof(MapViewAngleString));
         }
 

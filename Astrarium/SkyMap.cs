@@ -296,7 +296,7 @@ namespace Astrarium
                 }
 
                 // Diagnostic info
-                g.DrawString($"FOV: {Formatters.MeasuredAngle.Format(ViewAngle)}\nMag limit: {Formatters.Magnitude.Format(MagLimit)}\nFPS: {fps}\nDaylight factor: {mapContext.DayLightFactor:F2}", fontDiagnosticText, Brushes.Red, new PointF(10, 10));
+                g.DrawString($"FOV: {Formatters.Angle.Format(ViewAngle)}\nMag limit: {Formatters.Magnitude.Format(MagLimit)}\nFPS: {fps}\nDaylight factor: {mapContext.DayLightFactor:F2}", fontDiagnosticText, Brushes.Red, new PointF(10, 10));
             }
             catch (Exception ex)
             {

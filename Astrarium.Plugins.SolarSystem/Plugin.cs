@@ -1,7 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Plugins.SolarSystem.Controls;
 using Astrarium.Types;
-using Astrarium.Types.Localization;
 using System.ComponentModel;
 using System.Drawing;
 
@@ -46,11 +45,23 @@ namespace Astrarium.Plugins.SolarSystem
 
             #endregion Settings
 
+            #region UI integration
+
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconSun", "$Settings.Sun", new SimpleBinding(settings, "Sun", "IsChecked")));
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconMoon", "$Settings.Moon", new SimpleBinding(settings, "Moon", "IsChecked")));
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconPlanet", "$Settings.Planets", new SimpleBinding(settings, "Planets", "IsChecked")));
 
             ExportResourceDictionaries("Images.xaml");
+
+            #endregion UI integration
+
+            #region Extending formatters
+
+            Formatters.Default["Appearance.CM"] = new Formatters.UnsignedDoubleFormatter(2, "\u00B0");
+            Formatters.Default["Appearance.P"] = new Formatters.UnsignedDoubleFormatter(2, "\u00B0");
+            Formatters.Default["Appearance.D"] = new Formatters.UnsignedDoubleFormatter(2, "\u00B0");
+
+            #endregion Extending formatters
         }
 
         public enum TextureQuality

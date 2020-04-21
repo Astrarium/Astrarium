@@ -304,9 +304,9 @@ namespace Astrarium.Plugins.SolarSystem
             e["MartianCalendar.Ls", IsMars, new Formatters.UnsignedDoubleFormatter(2, "\u00B0")] = (c, p) => c.Get(Mars_Calendar).Ls;
             e["MartianPolarCaps.North", IsMars, new Formatters.UnsignedDoubleFormatter(1, "\u00B0")] = (c, p) => c.Get(Mars_PolarCap, PolarCap.Northern);
             e["MartianPolarCaps.South", IsMars, new Formatters.UnsignedDoubleFormatter(1, "\u00B0")] = (c, p) => c.Get(Mars_PolarCap, PolarCap.Southern);
-            e["GRSLongitude", IsJupiter] = (c, p) => c.Get(Jupiter_GreatRedSpotLongitude);
-            e["SaturnRings.a", IsSaturn] = (c, p) => c.Get(Saturn_RingsAppearance, p.Number).a;
-            e["SaturnRings.b", IsSaturn] = (c, p) => c.Get(Saturn_RingsAppearance, p.Number).b;
+            e["GRSLongitude", IsJupiter, new Formatters.UnsignedDoubleFormatter(2, "\u00B0")] = (c, p) => c.Get(Jupiter_GreatRedSpotLongitude);
+            e["SaturnRings.a", IsSaturn, new SaturnRingsFormatter()] = (c, p) => c.Get(Saturn_RingsAppearance, p.Number).a;
+            e["SaturnRings.b", IsSaturn, new SaturnRingsFormatter()] = (c, p) => c.Get(Saturn_RingsAppearance, p.Number).b;
             e["RTS.Rise"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, p.Number).Rise);
             e["RTS.Transit"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, p.Number).Transit);
             e["RTS.Set"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, p.Number).Set);

@@ -281,7 +281,7 @@ namespace Astrarium.Plugins.SolarSystem
             e["Ecliptical.Beta"] = (c, m) => c.Get(Ecliptical0).Beta;
             e["Phase"] = (c, m) => c.Get(Phase);
             e["PhaseAngle"] = (c, m) => c.Get(PhaseAngle);
-            e["Age"] = (c, m) => c.Get(Age);
+            e["Age", new Formatters.UnsignedDoubleFormatter(2, " d")] = (c, m) => c.Get(Age);
             e["Magnitude"] = (c, m) => c.Get(Magnitude);
             e["Distance", new LunarDistanceFormatter()] = (c, m) => (int)c.Get(Ecliptical0).Distance;
             e["HorizontalParallax"] = (c, m) => c.Get(Parallax);

@@ -175,6 +175,11 @@ namespace Astrarium.Types.Localization
                                                 string key = keyValue[0].Trim();
                                                 string value = keyValue[1].Trim();
 
+                                                //if (value.StartsWith("\"") && value.EndsWith("\""))
+                                                //{
+                                                //    value = value.Trim('\"');
+                                                //}
+
                                                 if (!LocalizationStrings.ContainsKey(key))
                                                 {
                                                     try

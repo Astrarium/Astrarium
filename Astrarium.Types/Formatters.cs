@@ -8,13 +8,21 @@ using System.Text;
 
 namespace Astrarium.Types
 {
+    /// <summary>
+    /// Defines methods which must be implemented by ephemeris formatter class
+    /// </summary>
     public interface IEphemFormatter
     {
+        /// <summary>
+        /// Formats ephemeris value to string
+        /// </summary>
+        /// <param name="value">Ephemeris value</param>
+        /// <returns>String representation of the ephemeris value</returns>
         string Format(object value);
     }
 
     /// <summary>
-    /// Contains default formatters for converting data values to string
+    /// Contains default formatters for ephemeris values to string
     /// </summary>
     public static class Formatters
     {
@@ -32,17 +40,17 @@ namespace Astrarium.Types
             Default["RTS.Rise"]                 = Time;
             Default["RTS.Transit"]              = Time;
             Default["RTS.Set"]                  = Time;
-            Default["RTS.RiseAzimuth"]          = IntAzimuth;
-            Default["RTS.TransitAltitude"]      = Altitude1d;
-            Default["RTS.SetAzimuth"]           = IntAzimuth;
-            Default["RTS.Duration"]             = Duration;
+            Default["RTS.RiseAzimuth"]          = new UnsignedDoubleFormatter(0, "\u00B0");
+            Default["RTS.TransitAltitude"]      = new SignedDoubleFormatter(1, "\u00B0");
+            Default["RTS.SetAzimuth"]           = new UnsignedDoubleFormatter(0, "\u00B0");
+            Default["RTS.Duration"]             = new DurationFormatter();
             Default["Equatorial0.Alpha"]        = RA;
             Default["Equatorial0.Delta"]        = Dec;
             Default["Equatorial.Alpha"]         = RA;
             Default["Equatorial.Delta"]         = Dec;
-            Default["Distance"]                 = Distance;
-            Default["DistanceFromSun"]          = Distance;
-            Default["DistanceFromEarth"]        = Distance;
+            Default["Distance"]                 = DistanceInAu;
+            Default["DistanceFromSun"]          = DistanceInAu;
+            Default["DistanceFromEarth"]        = DistanceInAu;
             Default["Ecliptical.Lambda"]        = Longitude;
             Default["Ecliptical.Beta"]          = Latitude;
             Default["Horizontal.Azimuth"]       = Azimuth;
@@ -50,28 +58,15 @@ namespace Astrarium.Types
             Default["Magnitude"]                = Magnitude;
             Default["PhaseAngle"]               = PhaseAngle;
             Default["Phase"]                    = Phase;
-            Default["Age"]                      = Age;
-            Default["HorizontalParallax"]       = HorizontalParallax;
-            Default["AngularDiameter"]          = AngularDiameter;          
-            Default["Seasons.Spring"]           = DateTime;
-            Default["Seasons.Summer"]           = DateTime;
-            Default["Seasons.Autumn"]           = DateTime;
-            Default["Seasons.Winter"]           = DateTime;
-            Default["Appearance.CM"]            = CentralMeridian;
-            Default["Appearance.P"]             = RotationAxis;
-            Default["Appearance.D"]             = EarthDeclination;            
-            Default["Visibility.Duration"]      = VisibilityDuration;
-            Default["Visibility.Period"]        = VisibilityPeriod;
+            Default["HorizontalParallax"]       = Angle;
+            Default["AngularDiameter"]          = Angle;
+            Default["Visibility.Duration"]      = new VisibilityDurationFormatter();
+            Default["Visibility.Period"]        = new VisibilityPeriodFormatter();
             Default["Visibility.Begin"]         = Time;
             Default["Visibility.End"]           = Time;
             Default["Rectangular.X"]            = Rectangular;
             Default["Rectangular.Y"]            = Rectangular;
             Default["Rectangular.Z"]            = Rectangular;
-
-
-            Default["SaturnRings.a"] = SaturnRingsSize;
-            Default["SaturnRings.b"] = SaturnRingsSize;
-            Default["GRSLongitude"]  = GRSLongitude;
         }
 
         public static IEphemFormatter GetDefault(string key)
@@ -88,7 +83,7 @@ namespace Astrarium.Types
         /// Trivial converter for formatting any value to string.
         /// Calls default ToString() implementation for the type.
         /// </summary>
-        private class SimpleFormatter : IEphemFormatter
+        public class SimpleFormatter : IEphemFormatter
         {
             public string Format(object value)
             {
@@ -98,13 +93,15 @@ namespace Astrarium.Types
 
         private class HMSAngleFormatter : IEphemFormatter
         {
+            private static Func<HMS, string> format = (HMS hms) => string.Format(CultureInfo.InvariantCulture, $"{{0:D2}}{Text.Get("Formatters.HMSAngleFormatter.Hours")} {{1:D2}}{Text.Get("Formatters.HMSAngleFormatter.Minutes")} {{2:.##}}{Text.Get("Formatters.HMSAngleFormatter.Seconds")}", hms.Hours, hms.Minutes, hms.Seconds);
+
             public string Format(object value)
             {
-                return new HMS((double)value).ToString();
+                return new HMS((double)value).ToString(format);
             }
         }
 
-        private class SignedAngleFormatter : IEphemFormatter
+        public class SignedAngleFormatter : IEphemFormatter
         {
             public string Format(object value)
             {
@@ -112,7 +109,7 @@ namespace Astrarium.Types
             }
         }
 
-        private class UnsignedAngleFormatter : IEphemFormatter
+        public class UnsignedAngleFormatter : IEphemFormatter
         {
             public string Format(object value)
             {
@@ -120,7 +117,7 @@ namespace Astrarium.Types
             }
         }
 
-        private class SmallAngleFormatter : IEphemFormatter
+        public class AngleFormatter : IEphemFormatter
         {
             public virtual string Format(object value)
             {
@@ -139,14 +136,6 @@ namespace Astrarium.Types
                 {
                     return string.Format(CultureInfo.InvariantCulture, "{0:0.##}\u2033", a.Seconds);
                 }
-            }
-        }
-
-        private class SaturnRingsFormatter : SmallAngleFormatter
-        {
-            public override string Format(object value)
-            {
-                return base.Format((double)value / 3600);
             }
         }
 
@@ -195,16 +184,16 @@ namespace Astrarium.Types
                 double v = (double)value;
                 if (v == 0)
                 {
-                    return "Nonrising";
+                    return Text.Get("Formatters.DurationFormatter.Nonrising");
                 }
                 else if (v == 1)
                 {
-                    return "Nonsetting";
+                    return Text.Get("Formatters.DurationFormatter.Nonsetting");
                 }
                 else
                 {
                     var ts = System.TimeSpan.FromHours(v * 24);
-                    return $"{ts.Hours:D2}h {ts.Minutes:D2}m";
+                    return $"{ts.Hours:D2}{Text.Get("Formatters.DurationFormatter.Hours")} {ts.Minutes:D2}{Text.Get("Formatters.DurationFormatter.Minutes")}";
                 }
             }
         }
@@ -214,7 +203,7 @@ namespace Astrarium.Types
             private readonly string format = null;
             private readonly string units = null;
 
-            public UnsignedDoubleFormatter(uint decimalPlaces, string units = null)
+            public UnsignedDoubleFormatter(uint decimalPlaces, string units)
             {
                 string decimals = new string('0', (int)decimalPlaces);
                 format = $"0.{decimals}";
@@ -230,7 +219,7 @@ namespace Astrarium.Types
                 }
                 else
                 {
-                    return v.ToString(format, CultureInfo.InvariantCulture) + (units ?? "");
+                    return v.ToString(format, CultureInfo.InvariantCulture) + (units != null ? (units.StartsWith("$") ? Text.Get(units.Substring(1)) : units) : "");
                 }
             }
         }
@@ -299,7 +288,7 @@ namespace Astrarium.Types
             public string Format(object value)
             {
                 double duration = (double)value;
-                return duration > 0 ? $"{duration.ToString("0.0", CultureInfo.InvariantCulture)} h" : "—";
+                return duration > 0 ? $"{duration.ToString("0.0", CultureInfo.InvariantCulture)} {Text.Get("Formatters.VisibilityDurationFormatter.Hours")}" : "—";
             }
         }
 
@@ -311,25 +300,25 @@ namespace Astrarium.Types
 
                 List<string> visibility = new List<string>();
 
-                if ((p & Astrarium.Algorithms.VisibilityPeriod.Evening) != 0)
+                if ((p & VisibilityPeriod.Evening) != 0)
                 {
-                    visibility.Add("Evening");
+                    visibility.Add(Text.Get("Formatters.VisibilityPeriodFormatter.Evening"));
                 }
-                if ((p & Astrarium.Algorithms.VisibilityPeriod.Night) != 0)
+                if ((p & VisibilityPeriod.Night) != 0)
                 {
-                    visibility.Add("Night");
+                    visibility.Add(Text.Get("Formatters.VisibilityPeriodFormatter.Night"));
                 }
-                if ((p & Astrarium.Algorithms.VisibilityPeriod.Morning) != 0)
+                if ((p & VisibilityPeriod.Morning) != 0)
                 {
-                    visibility.Add("Morning");
+                    visibility.Add(Text.Get("Formatters.VisibilityPeriodFormatter.Morning"));
                 }
 
                 if (visibility.Count == 3)
-                    return "Whole night";
+                    return Text.Get("Formatters.VisibilityPeriodFormatter.WholeNight");
                 else if (visibility.Any())
                     return string.Join(", ", visibility);
                 else
-                    return "Invisible";
+                    return Text.Get("Formatters.VisibilityPeriodFormatter.Invisible");
             }
         }
 
@@ -373,7 +362,6 @@ namespace Astrarium.Types
         }
 
         public static readonly IEphemFormatter Simple = new SimpleFormatter(); 
-
         public static readonly IEphemFormatter RA = new HMSAngleFormatter();
         public static readonly IEphemFormatter Dec = new SignedAngleFormatter();
         public static readonly IEphemFormatter Altitude = new SignedAngleFormatter();
@@ -381,30 +369,15 @@ namespace Astrarium.Types
         public static readonly IEphemFormatter Latitude = new SignedAngleFormatter();
         public static readonly IEphemFormatter Longitude = new UnsignedAngleFormatter();
         public static readonly IEphemFormatter Time = new TimeFormatter();
-        public static readonly IEphemFormatter Duration = new DurationFormatter();
-        public static readonly IEphemFormatter IntAzimuth = new UnsignedDoubleFormatter(0, "\u00B0");
-        public static readonly IEphemFormatter Altitude1d = new SignedDoubleFormatter(1, "\u00B0");
-        public static readonly IEphemFormatter Distance = new UnsignedDoubleFormatter(3, " a.u.");
+        public static readonly IEphemFormatter DistanceInAu = new UnsignedDoubleFormatter(3, "$Formatters.DistanceInAu.AU");
         public static readonly IEphemFormatter Phase = new PhaseFormatter();
         public static readonly IEphemFormatter Magnitude = new SignedDoubleFormatter(2, "ᵐ");
-        public static readonly IEphemFormatter SurfaceBrightness = new SignedDoubleFormatter(2, " mag/sq.arcsec");
         public static readonly IEphemFormatter PhaseAngle = new UnsignedDoubleFormatter(2, "\u00B0");
-        public static readonly IEphemFormatter Age = new UnsignedDoubleFormatter(2, " d");
-        public static readonly IEphemFormatter HorizontalParallax = new SmallAngleFormatter();
-        public static readonly IEphemFormatter AngularDiameter = new SmallAngleFormatter();
+        public static readonly IEphemFormatter Angle = new AngleFormatter();
         public static readonly IEphemFormatter DateTime = new DateTimeFormatter();
         public static readonly IEphemFormatter Date = new DateFormatter();
-        public static readonly IEphemFormatter MonthYear = new MonthYearFormatter();
-        public static readonly IEphemFormatter CentralMeridian = new UnsignedDoubleFormatter(2, "\u00B0");
-        public static readonly IEphemFormatter RotationAxis = new UnsignedDoubleFormatter(2, "\u00B0");
-        public static readonly IEphemFormatter EarthDeclination = new SignedDoubleFormatter(2, "\u00B0");
-        public static readonly IEphemFormatter ConjunctionSeparation = new UnsignedDoubleFormatter(1, "\u00B0");
-        public static readonly IEphemFormatter SaturnRingsSize = new SaturnRingsFormatter();
-        public static readonly IEphemFormatter VisibilityDuration = new VisibilityDurationFormatter();
-        public static readonly IEphemFormatter VisibilityPeriod = new VisibilityPeriodFormatter();
+        public static readonly IEphemFormatter MonthYear = new MonthYearFormatter();     
         public static readonly IEphemFormatter TimeSpan = new TimeSpanFormatter();
         public static readonly IEphemFormatter Rectangular = new SignedDoubleFormatter(3);
-        public static readonly IEphemFormatter GRSLongitude = new UnsignedDoubleFormatter(2, "\u00B0");
-        public static readonly IEphemFormatter MeasuredAngle = new SmallAngleFormatter();
     }
 }

@@ -166,21 +166,21 @@ namespace Astrarium.Plugins.DeepSky
             }
             if (details.SurfaceBrightness != null)
             {
-                info.AddRow("Brightness", details.SurfaceBrightness, Formatters.SurfaceBrightness);
+                info.AddRow("Brightness", details.SurfaceBrightness, new Formatters.SignedDoubleFormatter(2, " mag/sq.arcsec"));
             }
 
             if (ds.SizeA > 0)
             {
-                string size = $"{Formatters.AngularDiameter.Format(ds.SizeA / 60)}";
+                string size = $"{Formatters.Angle.Format(ds.SizeA / 60)}";
                 if (ds.SizeB > 0)
                 {
-                    size += $" x {Formatters.AngularDiameter.Format(ds.SizeB / 60)}";
+                    size += $" x {Formatters.Angle.Format(ds.SizeB / 60)}";
                 }
                 info.AddRow("AngularDiameter", size, Formatters.Simple);
             }
             if (ds.PA > 0)
             {
-                info.AddRow("Position angle", ds.PA, Formatters.RotationAxis);
+                info.AddRow("Position angle", ds.PA, new Formatters.UnsignedDoubleFormatter(2, "\u00B0"));
             }
 
             if (details.Identifiers.Any() || details.PGC != null)

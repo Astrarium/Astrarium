@@ -8,6 +8,17 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.SolarSystem
 {
+    /// <summary>
+    /// Converts size of Saturn rings expressed in arcseconds to string
+    /// </summary>
+    internal class SaturnRingsFormatter : IEphemFormatter
+    {
+        public string Format(object value)
+        {
+            return string.Format(CultureInfo.InvariantCulture, "{0:0.##}\u2033", (double)value);
+        }
+    }
+
     internal class LunarDistanceFormatter : IEphemFormatter
     {
         public string Format(object value)

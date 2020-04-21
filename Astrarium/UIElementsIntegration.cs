@@ -20,6 +20,9 @@ namespace Astrarium
             // Default language
             SettingItems.Add("UI", new SettingItem("Language", "en", typeof(LanguageSettingControl)));
 
+            // Flag indicating the app should be started with maximized main window
+            SettingItems.Add("UI", new SettingItem("StartMaximized", false));
+
             // Type of application menu
             SettingItems.Add("UI", new SettingItem("IsCompactMenu", false));
 

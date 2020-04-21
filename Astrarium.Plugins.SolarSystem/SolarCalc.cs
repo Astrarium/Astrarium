@@ -202,10 +202,10 @@ namespace Astrarium.Plugins.SolarSystem
             e["HorizontalParallax"] = (c, x) => c.Get(Parallax);
             e["AngularDiameter"] = (c, x) => c.Get(Semidiameter) * 2 / 3600.0;
             e["CRN"] = (c, s) => c.Get(CarringtonNumber);
-            e["Seasons.Spring"] = (c, x) => c.Get(Seasons, Season.Spring);
-            e["Seasons.Summer"] = (c, x) => c.Get(Seasons, Season.Summer);
-            e["Seasons.Autumn"] = (c, x) => c.Get(Seasons, Season.Autumn);
-            e["Seasons.Winter"] = (c, x) => c.Get(Seasons, Season.Winter);
+            e["Seasons.Spring", Formatters.DateTime] = (c, x) => c.Get(Seasons, Season.Spring);
+            e["Seasons.Summer", Formatters.DateTime] = (c, x) => c.Get(Seasons, Season.Summer);
+            e["Seasons.Autumn", Formatters.DateTime] = (c, x) => c.Get(Seasons, Season.Autumn);
+            e["Seasons.Winter", Formatters.DateTime] = (c, x) => c.Get(Seasons, Season.Winter);
         }
 
         public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)
