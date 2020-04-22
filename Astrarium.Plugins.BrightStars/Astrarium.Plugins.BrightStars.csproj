@@ -12,6 +12,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net451|AnyCPU'">
     <OutputPath>..\Astrarium\bin\Release\Plugins\Astrarium.Plugins.BrightStars</OutputPath>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Text.ini" />
+  </ItemGroup>
   
   <ItemGroup>
     <Page Include="Images.xaml">
@@ -20,8 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Translations\Translation-en.txt" />
-    <EmbeddedResource Include="Translations\Translation-ru.txt" />
+    <EmbeddedResource Include="Text.ini" />
   </ItemGroup>
 
   <ItemGroup>

@@ -38,16 +38,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Text.ini" />
     <None Remove="Themes\NotoSans-Regular.ttf" />
     <None Remove="Themes\OpenSans.ttf" />
     <None Remove="Themes\Roboto.ttf" />
-    <None Remove="Translations\Translation-en.txt" />
-    <None Remove="Translations\Translation-ru.txt" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Translations\Translation-en.txt" />
-    <EmbeddedResource Include="Translations\Translation-ru.txt" />
+    <EmbeddedResource Include="Text.ini" />
   </ItemGroup>
 
   <ItemGroup>

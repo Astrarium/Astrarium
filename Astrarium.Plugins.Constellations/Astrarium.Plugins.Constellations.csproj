@@ -14,14 +14,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Text.ini" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Page Include="Images.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Translations\Translation-en.txt" />
-    <EmbeddedResource Include="Translations\Translation-ru.txt" />
+    <EmbeddedResource Include="Text.ini" />
   </ItemGroup>
 
   <ItemGroup>

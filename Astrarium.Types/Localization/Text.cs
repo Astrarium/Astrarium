@@ -52,8 +52,8 @@ namespace Astrarium.Types.Localization
                 return localizations.First().Value;
         }
 
-        public static string FileName { get; set; } = "Translation";
-        public static string FileExtension { get; set; } = "txt";
+        public static string FileName { get; set; } = "Text";
+        public static string FileExtension { get; set; } = "ini";
         public static string DefaultLanguage { get; set; } = "en";
 
         private static CultureInfo currentCulture = null;
@@ -113,24 +113,17 @@ namespace Astrarium.Types.Localization
 
         public static event Action LocaleChanged;
 
+        private static List<string> languages = new List<string>();
         public static CultureInfo[] GetLocales()
         {
-            Regex regex = new Regex($"^.*\\.{FileName}-(.+)\\.{FileExtension}$");
-
-            var resourceNames = AppDomain.CurrentDomain.GetAssemblies()
-                .Where(p => !p.IsDynamic).Distinct()
-                .SelectMany(a => a.GetManifestResourceNames()
-                .Where(rn => regex.IsMatch(rn)));
-            
-            return resourceNames
-                .Select(rn => regex.Match(rn).Groups[1].Value)
+            return languages
                 .Select(lang =>
                 {
                     try { return CultureInfo.GetCultureInfo(lang); }
                     catch { return null; }
                 })
                 .Where(ci => ci != null).Distinct().ToArray();
-        } 
+        }
 
         static Text()
         {
@@ -141,54 +134,66 @@ namespace Astrarium.Types.Localization
         {
             LocalizationStrings.Clear();
 
-            string[] commentSigns = new string[] { "\\\\", "#", "-", ";", "!" };
-
-            string[] localizationFiles = GetCurrentLocales()
-                .Concat(new[] { DefaultLanguage })
-                .Distinct()
-                .Select(c => $"{FileName}-{c}.{FileExtension}").ToArray();
+            string[] commentSigns = new string[] { "#", ";" };
+            string localizationFile = $"{FileName}.{FileExtension}";
+            Regex keyRegex = new Regex("^\\s*\\[\\s*(.+)\\s*\\]\\s*$");
+            string[] currentLanguages = GetCurrentLanguages();
+            string key = null;
 
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().Where(p => !p.IsDynamic).Distinct())
             {
-                foreach (string lf in localizationFiles)
+                string resourceName = assembly.GetManifestResourceNames().FirstOrDefault(rn => rn.EndsWith($".{localizationFile}"));
+                if (resourceName != null)
                 {
-                    string resourceName = assembly.GetManifestResourceNames().FirstOrDefault(rn => rn.EndsWith($".{lf}"));
-                    if (resourceName != null)
+                    using (Stream stream = assembly.GetManifestResourceStream(resourceName))
                     {
-                        using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+                        if (stream != null)
                         {
-                            if (stream != null)
+                            using (StreamReader reader = new StreamReader(stream))
                             {
-                                using (StreamReader reader = new StreamReader(stream))
+                                string line;
+                                while ((line = reader.ReadLine()) != null)
                                 {
-                                    string line;
-                                    while ((line = reader.ReadLine()) != null)
+                                    line = line.Trim();
+
+                                    // if not empty or not a comment
+                                    if (!string.IsNullOrEmpty(line) && commentSigns.All(comment => !line.StartsWith(comment)))
                                     {
-                                        line = line.Trim();
-                                        if (!string.IsNullOrEmpty(line) &&
-                                            commentSigns.All(comment => !line.StartsWith(comment)))
+                                        var match = keyRegex.Match(line);
+                                        
+                                        // key string
+                                        if (match.Success)
                                         {
-                                            string[] keyValue = line.Split(new[] { '=' }, 2, StringSplitOptions.RemoveEmptyEntries);
+                                            key = match.Groups[1].Value.Trim();
+                                        }
+                                        // value string
+                                        else 
+                                        {
+                                            string[] langValue = line.Split(new[] { '=' }, 2, StringSplitOptions.RemoveEmptyEntries);
 
-                                            if (keyValue.Length == 2)
+                                            if (langValue.Length == 2)
                                             {
-                                                string key = keyValue[0].Trim();
-                                                string value = keyValue[1].Trim();
+                                                string lang = langValue[0].Trim();
 
-                                                //if (value.StartsWith("\"") && value.EndsWith("\""))
-                                                //{
-                                                //    value = value.Trim('\"');
-                                                //}
-
-                                                if (!LocalizationStrings.ContainsKey(key))
+                                                if (currentLanguages.Contains(lang))
                                                 {
+                                                    string value = langValue[1].Trim();
                                                     try
                                                     {
                                                         value = Regex.Unescape(value);
                                                     }
                                                     catch { }
-                                                    LocalizationStrings[key] = value;
+
+                                                    if (!LocalizationStrings.ContainsKey(key))
+                                                    {
+                                                        LocalizationStrings[key] = value;
+                                                    }
                                                 }
+                                                
+                                                if (!languages.Contains(lang))
+                                                {
+                                                    languages.Add(lang);
+                                                } 
                                             }
                                         }
                                     }
@@ -200,7 +205,7 @@ namespace Astrarium.Types.Localization
             }
         }
 
-        private static string[] GetCurrentLocales()
+        private static string[] GetCurrentLanguages()
         {
             List<string> cultures = new List<string>();
             CultureInfo culture = CultureInfo.CurrentUICulture;
@@ -239,7 +244,6 @@ namespace Astrarium.Types.Localization
             
             return Get(resourceKey);
         }
-
         
         #endregion MarkupExtension
 
