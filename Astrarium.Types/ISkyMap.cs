@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Astrarium.Algorithms;
-using Astrarium.Objects;
-using Astrarium.Types;
 
 namespace Astrarium.Types
 {

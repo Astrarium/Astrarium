@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using Astrarium.Objects;
-using Astrarium.Types;
 
 namespace Astrarium.Types
 {

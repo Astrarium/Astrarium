@@ -1,10 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Reflection;
-using System.Text;
-using System.Linq;
-using Astrarium.Objects;
 using Astrarium.Algorithms;
 using Astrarium.Types;
 

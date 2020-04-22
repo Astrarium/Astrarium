@@ -1,6 +1,5 @@
 ﻿using Astrarium.Algorithms;
 using Newtonsoft.Json;
-using Astrarium.Objects;
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
@@ -10,7 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using Astrarium.Plugins.SolarSystem.Objects;
 

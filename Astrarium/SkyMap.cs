@@ -1,5 +1,4 @@
 ﻿using Astrarium.Algorithms;
-using Astrarium.Objects;
 using Astrarium.Projections;
 using Astrarium.Types;
 using System;

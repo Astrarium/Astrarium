@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Astrarium.Objects
+namespace Astrarium.Types
 {
     /// <summary>
     /// Base class for all physical objects that can be operated by the Astrarium app

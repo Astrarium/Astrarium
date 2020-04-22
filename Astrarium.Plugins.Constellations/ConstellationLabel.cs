@@ -1,4 +1,4 @@
-﻿using Astrarium.Objects;
+﻿using Astrarium.Types;
 
 namespace Astrarium.Plugins.Constellations
 {

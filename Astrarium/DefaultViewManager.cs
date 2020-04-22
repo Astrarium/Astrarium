@@ -1,5 +1,4 @@
 ﻿using Microsoft.Win32;
-using Astrarium.Objects;
 using Astrarium.Types;
 using Astrarium.ViewModels;
 using Astrarium.Views;

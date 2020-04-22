@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Astrarium.Objects
+namespace Astrarium.Types
 {
     public class CelestialPoint
     {
