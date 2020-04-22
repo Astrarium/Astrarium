@@ -3,8 +3,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:t="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
-    xmlns:loc="clr-namespace:Astrarium.Types.Localization;assembly=Astrarium.Types"
+    xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+    xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
     mc:Ignorable="d"
     Title="Search" 
     Width="600" Height="600"
@@ -23,7 +23,7 @@
         <TextBlock Grid.Row="0" Name="lstEmpty" 
             Text="No objects found" 
             IsEnabled="False"
-            Visibility="{Binding SelectedItem, Converter={t:NullToVisibilityConverter}}" 
+            Visibility="{Binding SelectedItem, Converter={s:NullToVisibilityConverter}}" 
             TextAlignment="Center" 
             VerticalAlignment="Center" />
         
@@ -33,7 +33,7 @@
             DisplayMemberPath="Name"
             SelectionMode="Single" 
             SelectedItem="{Binding SelectedItem}"
-            Visibility="{Binding SelectedItem, Converter={t:NotNullToVisibilityConverter}}"
+            Visibility="{Binding SelectedItem, Converter={s:NotNullToVisibilityConverter}}"
             VerticalContentAlignment="Top"
             IsSynchronizedWithCurrentItem="True"
             ScrollViewer.VerticalScrollBarVisibility="Visible"
@@ -54,7 +54,7 @@
                                                 <SolidColorBrush Color="{DynamicResource ColorControlLightBackground}" />
                                             </Rectangle.Fill>
                                             <Rectangle.OpacityMask>
-                                                <ImageBrush ImageSource="{Binding Body, Converter={t:CelestialObjectToIconConverter}}" Stretch="Uniform" />
+                                                <ImageBrush ImageSource="{Binding Body, Converter={s:CelestialObjectToIconConverter}}" Stretch="Uniform" />
                                             </Rectangle.OpacityMask>
                                         </Rectangle>
                                         <TextBlock Padding="4 0 0 0" Text="{Binding Name}" VerticalAlignment="Center"/>
@@ -94,10 +94,10 @@
         <StackPanel Grid.Row="2"                    
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
-            <Button MinWidth="80" Click="SelectButton_Click" Margin="0 0 4 0" IsEnabled="{Binding SelectedItem, Converter={t:NotNullToBoolConverter}, Mode=OneWay}">
+            <Button MinWidth="80" Click="SelectButton_Click" Margin="0 0 4 0" IsEnabled="{Binding SelectedItem, Converter={s:NotNullToBoolConverter}, Mode=OneWay}">
                 Select
             </Button>
-            <Button MinWidth="80" Click="CloseButton_Click" Content="{loc:Text Close}" />
+            <Button MinWidth="80" Click="CloseButton_Click" Content="{t:Text Close}" />
         </StackPanel>
 
     </Grid>

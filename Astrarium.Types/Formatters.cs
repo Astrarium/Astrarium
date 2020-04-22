@@ -1,5 +1,5 @@
 ﻿using Astrarium.Algorithms;
-using Astrarium.Types.Localization;
+using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Globalization;

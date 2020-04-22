@@ -3,8 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:t="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
-        xmlns:loc="clr-namespace:Astrarium.Types.Localization;assembly=Astrarium.Types"
+        xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+        xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
         mc:Ignorable="d"
         Title="Phenomena" 
         Width="600" Height="600"
@@ -35,7 +35,7 @@
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <WrapPanel Orientation="Horizontal" Height="Auto" Margin="0 4 0 0">
-                                            <TextBlock Visibility="{Binding NoExactTime, Converter={t:InverseBoolToVisibilityConverter}}" Padding="0 0 4 0" FontWeight="Bold">
+                                            <TextBlock Visibility="{Binding NoExactTime, Converter={s:InverseBoolToVisibilityConverter}}" Padding="0 0 4 0" FontWeight="Bold">
                                                 <Hyperlink Command="{Binding DataContext.SelectAstroEventCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding}">                                                 
                                                     <Run Text="{Binding Time}"/>
                                                 </Hyperlink>
@@ -56,8 +56,8 @@
         <StackPanel Grid.Row="2"                    
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
-            <Button MinWidth="80" Width="Auto" Margin="4 0" Padding="8 2" Command="{Binding SaveToFileCommand}" Content="{loc:Text SaveToFile}" />
-            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CloseCommand}" Content="{loc:Text Close}" />
+            <Button MinWidth="80" Width="Auto" Margin="4 0" Padding="8 2" Command="{Binding SaveToFileCommand}" Content="{t:Text SaveToFile}" />
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CloseCommand}" Content="{t:Text Close}" />
         </StackPanel>
 
     </Grid>

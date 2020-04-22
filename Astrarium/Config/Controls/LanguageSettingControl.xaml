@@ -4,11 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:cfg="clr-namespace:Astrarium.Config"
-             xmlns:loc="clr-namespace:Astrarium.Types.Localization;assembly=Astrarium.Types"
+             xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
              mc:Ignorable="d" 
              d:DesignWidth="200">
     <StackPanel Orientation="Vertical">
-        <Label Content="{loc:Text ApplicationLanguage}" />
+        <Label Content="{t:Text ApplicationLanguage}" />
         <ComboBox x:Name="cmbCultures" SelectedItem="{Binding SettingValue, Converter={cfg:CultureToStringConverter}}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>

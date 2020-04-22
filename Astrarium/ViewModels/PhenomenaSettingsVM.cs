@@ -1,5 +1,4 @@
-﻿using Astrarium.Objects;
-using Astrarium.Types.Themes;
+﻿using Astrarium.Types.Themes;
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
@@ -7,7 +6,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Astrarium.Types.Localization;
 
 namespace Astrarium.ViewModels
 {

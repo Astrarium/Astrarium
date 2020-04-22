@@ -4,12 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
-             xmlns:loc="clr-namespace:Astrarium.Types.Localization;assembly=Astrarium.Types"
+             xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
              mc:Ignorable="d">
 
     <Grid>
 
-        <GroupBox Header="{loc:Text RenderingOrderSettingTitle}">
+        <GroupBox Header="{t:Text RenderingOrderSettingTitle}">
 
             <StackPanel Orientation="Vertical">
 
@@ -45,18 +45,18 @@
 
                 <StackPanel Orientation="Horizontal">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="2">
-                        <Button Width="28" Height="28" Margin="2" Click="UpButton_Click" ToolTip="{loc:Text RenderingOrderUpButton}">
+                        <Button Width="28" Height="28" Margin="2" Click="UpButton_Click" ToolTip="{t:Text RenderingOrderUpButton}">
                             <Button.Content>
                                 <Path Width="12" Height="12" Data="M14,20H10V11L6.5,14.5L4.08,12.08L12,4.16L19.92,12.08L17.5,14.5L14,11V20Z" Stretch="UniformToFill" Fill="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}, Mode=FindAncestor}, Path=Foreground}" HorizontalAlignment="Center" SnapsToDevicePixels="True" VerticalAlignment="Center" />
                             </Button.Content>
                         </Button>
-                        <Button Width="28" Height="28" Margin="2" Click="DownButton_Click" ToolTip="{loc:Text RenderingOrderDownButton}">
+                        <Button Width="28" Height="28" Margin="2" Click="DownButton_Click" ToolTip="{t:Text RenderingOrderDownButton}">
                             <Button.Content>
                                 <Path Width="12" Height="12" Data="M10,4H14V13L17.5,9.5L19.92,11.92L12,19.84L4.08,11.92L6.5,9.5L10,13V4Z" Stretch="UniformToFill" Fill="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}, Mode=FindAncestor}, Path=Foreground}" HorizontalAlignment="Center" SnapsToDevicePixels="True" VerticalAlignment="Center" />
                             </Button.Content>
                         </Button>
                     </StackPanel>
-                    <TextBlock IsEnabled="False" Padding="8 0 0 8" TextWrapping="WrapWithOverflow" HorizontalAlignment="Left" Text="{loc:Text RenderingOrderHint}" MaxWidth="380" />
+                    <TextBlock IsEnabled="False" Padding="8 0 0 8" TextWrapping="WrapWithOverflow" HorizontalAlignment="Left" Text="{t:Text RenderingOrderHint}" MaxWidth="380" />
                 </StackPanel>
             </StackPanel>
         </GroupBox>

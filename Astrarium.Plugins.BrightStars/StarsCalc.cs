@@ -1,6 +1,5 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
-using Astrarium.Types.Localization;
 using System;
 using System.Collections.Generic;
 using System.IO;

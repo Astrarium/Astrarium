@@ -1,24 +1,13 @@
-﻿using Astrarium.Config;
-using Astrarium.Types.Themes;
-using Astrarium.Types;
-using Astrarium.Views;
+﻿using Astrarium.Types;
+using Astrarium.Config.Controls;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Drawing;
-using System.Globalization;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
-using Astrarium.Types.Localization;
-using Astrarium.Config.Controls;
 
 namespace Astrarium.ViewModels
 {

@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
-             xmlns:loc="clr-namespace:Astrarium.Types.Localization;assembly=Astrarium.Types"
+             xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <GroupBox Header="{Binding SettingTitle}" IsEnabled="{Binding IsEnabled}">
@@ -19,13 +19,13 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <Label Content="{loc:Text Settings.GRSLongitude.Epoch}" Grid.Column="0" Grid.Row="0" />
+            <Label Content="{t:Text Settings.GRSLongitude.Epoch}" Grid.Column="0" Grid.Row="0" />
             <c:DatePicker Options="MonthYear" JulianDay="{Binding SettingValue.Epoch}" Grid.Column="1" Grid.Row="0" />
 
-            <Label Content="{loc:Text Settings.GRSLongitude.Longitude}" Grid.Column="0" Grid.Row="1" />
+            <Label Content="{t:Text Settings.GRSLongitude.Longitude}" Grid.Column="0" Grid.Row="1" />
             <c:NumericUpDown Grid.Column="1" Grid.Row="1" Minimum="0" Maximum="359" DecimalPlaces="0" Value="{Binding SettingValue.Longitude}" />
 
-            <Label Content="{loc:Text Settings.GRSLongitude.MonthlyDrift}" Grid.Column="0" Grid.Row="2" />
+            <Label Content="{t:Text Settings.GRSLongitude.MonthlyDrift}" Grid.Column="0" Grid.Row="2" />
             <c:NumericUpDown Grid.Column="1" Grid.Row="2" Minimum="0" Maximum="359" Step="0.01" DecimalPlaces="2" Value="{Binding SettingValue.MonthlyDrift}" />
         </Grid>
     </GroupBox>

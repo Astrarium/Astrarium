@@ -1,7 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Plugins.SolarSystem.Objects;
 using Astrarium.Types;
-using Astrarium.Types.Localization;
 using System;
 using System.Collections.Generic;
 using System.Globalization;

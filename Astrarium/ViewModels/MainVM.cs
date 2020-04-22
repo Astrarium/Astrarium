@@ -2,7 +2,6 @@
 using Astrarium.Controls;
 using Astrarium.Objects;
 using Astrarium.Types;
-using Astrarium.Types.Localization;
 using System;
 using System.Collections;
 using System.Collections.Generic;

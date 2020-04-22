@@ -1,5 +1,4 @@
 ﻿using Astrarium.Objects;
-using Astrarium.Types.Localization;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

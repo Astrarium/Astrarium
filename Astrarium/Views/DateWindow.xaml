@@ -7,9 +7,8 @@
         xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
         xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types" 
         xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types" 
-        xmlns:loc="clr-namespace:Astrarium.Types.Localization;assembly=Astrarium.Types" 
         mc:Ignorable="d" 
-        Title="{loc:Text DateWindow.Title}" 
+        Title="{t:Text DateWindow.Title}" 
         Height="260" Width="270.5"
         Style="{StaticResource {x:Type Window}}" 
         ResizeMode="NoResize" 
@@ -35,15 +34,15 @@
                             <RowDefinition Height="36" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-                        <Label Grid.Column="0" Grid.Row="0" Content="{loc:Text DateWindow.Day}" />
-                        <Label Grid.Column="1" Grid.Row="0" Content="{loc:Text DateWindow.Month}" />
-                        <Label Grid.Column="2" Grid.Row="0" Content="{loc:Text DateWindow.Year}" />
+                        <Label Grid.Column="0" Grid.Row="0" Content="{t:Text DateWindow.Day}" />
+                        <Label Grid.Column="1" Grid.Row="0" Content="{t:Text DateWindow.Month}" />
+                        <Label Grid.Column="2" Grid.Row="0" Content="{t:Text DateWindow.Year}" />
                         <c:NumericUpDown Margin="3" Grid.Column="0" Grid.Row="1" Minimum="1" Maximum="{Binding DaysCount}" Value="{Binding Day, Converter={s:NumericConverter}, UpdateSourceTrigger=LostFocus}" DecimalPlaces="0" />
                         <ComboBox Height="22" Margin="3" Grid.Column="1" Grid.Row="1" ItemsSource="{Binding ShortMonthsNames}" SelectedIndex="{Binding SelectedMonth}" />
                         <c:NumericUpDown Margin="3" Grid.Column="2" Grid.Row="1" Minimum="-4000" Maximum="9999" Value="{Binding Year, UpdateSourceTrigger=LostFocus}" DecimalPlaces="0" />
-                        <Label Grid.Column="0" Grid.Row="2" VerticalAlignment="Bottom" Content="{loc:Text DateWindow.Hours}" />
-                        <Label Grid.Column="1" Grid.Row="2" VerticalAlignment="Bottom" Content="{loc:Text DateWindow.Minutes}" />
-                        <Label Grid.Column="2" Grid.Row="2" VerticalAlignment="Bottom" Content="{loc:Text DateWindow.Seconds}" />
+                        <Label Grid.Column="0" Grid.Row="2" VerticalAlignment="Bottom" Content="{t:Text DateWindow.Hours}" />
+                        <Label Grid.Column="1" Grid.Row="2" VerticalAlignment="Bottom" Content="{t:Text DateWindow.Minutes}" />
+                        <Label Grid.Column="2" Grid.Row="2" VerticalAlignment="Bottom" Content="{t:Text DateWindow.Seconds}" />
                         <c:NumericUpDown Margin="3" Grid.Column="0" Grid.Row="3" Maximum="23" Value="{Binding Hours, Converter={s:NumericConverter}, UpdateSourceTrigger=LostFocus}" DecimalPlaces="0" />
                         <c:NumericUpDown Margin="3" Grid.Column="1" Grid.Row="3" Maximum="59" Value="{Binding Minutes, Converter={s:NumericConverter}, UpdateSourceTrigger=LostFocus}" DecimalPlaces="0" />
                         <c:NumericUpDown Margin="3" Grid.Column="2" Grid.Row="3" Maximum="59" Value="{Binding Seconds, Converter={s:NumericConverter}, UpdateSourceTrigger=LostFocus}" DecimalPlaces="0" />
@@ -102,10 +101,10 @@
             </Grid.RowDefinitions>
             <Label Grid.Column="0" Padding="0" VerticalAlignment="Center">
                 <Hyperlink Command="{Binding SetCurrentDateCommand}">
-                    <Run Text="{loc:Text DateWindow.SetCurrent}" />
+                    <Run Text="{t:Text DateWindow.SetCurrent}" />
                 </Hyperlink>
             </Label>
-            <Button Grid.Column="2" HorizontalAlignment="Right" MinWidth="80" Height="22" VerticalAlignment="Center" Command="{Binding SelectDateCommand}" Content="{loc:Text DateWindow.Select}"></Button>
+            <Button Grid.Column="2" HorizontalAlignment="Right" MinWidth="80" Height="22" VerticalAlignment="Center" Command="{Binding SelectDateCommand}" Content="{t:Text DateWindow.Select}"></Button>
         </Grid>
     </StackPanel>
 </Window>

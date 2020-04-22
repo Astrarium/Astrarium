@@ -3,7 +3,6 @@ using Ninject;
 using Astrarium.Config;
 using Astrarium.Logging;
 using Astrarium.Types;
-using Astrarium.Types.Localization;
 using Astrarium.ViewModels;
 using System;
 using System.Collections;
