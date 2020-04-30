@@ -6,7 +6,7 @@
     xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
     xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
     mc:Ignorable="d"
-    Title="Search" 
+    Title="{t:Text SearchWindow.Title}" 
     Width="600" Height="600"
     MinWidth="300" MinHeight="300"
     Style="{StaticResource {x:Type Window}}"
@@ -21,7 +21,7 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Name="lstEmpty" 
-            Text="No objects found" 
+            Text="{t:Text SearchWindow.NothingFound}" 
             IsEnabled="False"
             Visibility="{Binding SelectedItem, Converter={s:NullToVisibilityConverter}}" 
             TextAlignment="Center" 
@@ -91,12 +91,10 @@
                 </Style>
             </TextBox.Style>
         </TextBox>
-        <StackPanel Grid.Row="2"                    
+        <StackPanel Grid.Row="2"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
-            <Button MinWidth="80" Click="SelectButton_Click" Margin="0 0 4 0" IsEnabled="{Binding SelectedItem, Converter={s:NotNullToBoolConverter}, Mode=OneWay}">
-                Select
-            </Button>
+            <Button MinWidth="80" Click="SelectButton_Click" Margin="0 0 4 0" IsEnabled="{Binding SelectedItem, Converter={s:NotNullToBoolConverter}, Mode=OneWay}" Content="{t:Text Select}" />
             <Button MinWidth="80" Click="CloseButton_Click" Content="{t:Text Close}" />
         </StackPanel>
 

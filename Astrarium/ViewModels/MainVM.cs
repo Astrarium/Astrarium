@@ -349,7 +349,7 @@ namespace Astrarium.ViewModels
 
             // Context menu initialization
 
-            var menuInfo = new MenuItem("Info", GetObjectInfoCommand);
+            var menuInfo = new MenuItem("$ContextMenu.Info", GetObjectInfoCommand);
             menuInfo.HotKey = new KeyGesture(Key.I, ModifierKeys.Control);
             menuInfo.AddBinding(new SimpleBinding(map, nameof(map.SelectedObject), nameof(MenuItem.CommandParameter)));
             menuInfo.AddBinding(new SimpleBinding(map, nameof(map.SelectedObject), nameof(MenuItem.IsEnabled))
@@ -361,13 +361,12 @@ namespace Astrarium.ViewModels
 
             ContextMenuItems.Add(null);
 
-            ContextMenuItems.Add(new MenuItem("Center", CenterOnPointCommand));
-            ContextMenuItems.Add(new MenuItem("Search object...", SearchObjectCommand));
-            ContextMenuItems.Add(new MenuItem("Go to point..."));
+            ContextMenuItems.Add(new MenuItem("$ContextMenu.Center", CenterOnPointCommand));
+            ContextMenuItems.Add(new MenuItem("$ContextMenu.Search", SearchObjectCommand));
 
             ContextMenuItems.Add(null);
 
-            var menuEphemerides = new MenuItem("Ephemerides", GetObjectEphemerisCommand);
+            var menuEphemerides = new MenuItem("$ContextMenu.Ephemerides", GetObjectEphemerisCommand);
             menuEphemerides.HotKey = new KeyGesture(Key.E, ModifierKeys.Control, "Ctrl+E");
             menuEphemerides.AddBinding(new SimpleBinding(map, nameof(map.SelectedObject), nameof(MenuItem.IsEnabled))
             {
@@ -387,7 +386,7 @@ namespace Astrarium.ViewModels
             var menuLock = new MenuItem("", LockOnObjectCommand);
             menuLock.AddBinding(new SimpleBinding(map, nameof(map.SelectedObject), nameof(MenuItem.Header))
             {
-                SourceToTargetConverter = (o) => map.LockedObject != null ? (map.SelectedObject != null && map.SelectedObject != map.LockedObject ? "Lock" : "Unlock") : "Lock"
+                SourceToTargetConverter = (o) => map.LockedObject != null ? (map.SelectedObject != null && map.SelectedObject != map.LockedObject ? Text.Get("ContextMenu.Lock") : Text.Get("ContextMenu.Unlock")) : Text.Get("ContextMenu.Lock")
             });
             menuLock.AddBinding(new SimpleBinding(map, nameof(map.SelectedObject), nameof(MenuItem.IsEnabled))
             {
@@ -420,7 +419,7 @@ namespace Astrarium.ViewModels
 
                 if (!SelectedObjectsMenuItems.Any())
                 {
-                    SelectedObjectsMenuItems.Add(new MenuItem("Clear all", ClearObjectsHistoryCommand));                
+                    SelectedObjectsMenuItems.Add(new MenuItem("$StatusBar.ClearSelectedObjectsList", ClearObjectsHistoryCommand));                
                     SelectedObjectsMenuItems.Add(null);
                 }
 
@@ -440,7 +439,7 @@ namespace Astrarium.ViewModels
             }
             else
             {
-                SelectedObjectName = "<No object>";
+                SelectedObjectName = Text.Get("StatusBar.NoSelectedObject");
             }
 
             NotifyPropertyChanged(nameof(SelectedObjectName));

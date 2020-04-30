@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:c="clr-namespace:Astrarium.Controls"
                     xmlns:s="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
-                    xmlns:t="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types">
+                    xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types">
 
     <!-- Folders Tree -->
     <Style TargetType="{x:Type c:FoldersTreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}">
@@ -121,7 +121,7 @@
                                     BorderThickness="1"
                                     BorderBrush="{TemplateBinding BorderBrush}">
                                     <DockPanel Background="{TemplateBinding Background}">
-                                        <TextBlock VerticalAlignment="Center" Margin="2" Foreground="{TemplateBinding Foreground}" Background="Transparent" Text="No items" />
+                                        <TextBlock VerticalAlignment="Center" Margin="2" Foreground="{TemplateBinding Foreground}" Background="Transparent" Text="{t:Text Toolbar.SearchEmpty}" />
                                     </DockPanel>
                                 </s:BorderFix>
 

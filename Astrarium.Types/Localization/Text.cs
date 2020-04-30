@@ -85,15 +85,21 @@ namespace Astrarium.Types
 
                                 // Check whether the target object can be accessed from the
                                 // current thread, and use Dispatcher.Invoke if it can't
-
-                                if (obj.CheckAccess())
-                                    updateAction();
-                                else
-                                    obj.Dispatcher.Invoke(updateAction);
+                                if (obj != null)
+                                {
+                                    if (obj.CheckAccess())
+                                        updateAction();
+                                    else
+                                        obj.Dispatcher.Invoke(updateAction);
+                                }
                             }
                             else // _targetProperty is PropertyInfo
                             {
                                 PropertyInfo prop = targetProperty as PropertyInfo;
+
+                                if (targetObject is Setter && ((Setter)targetObject).IsSealed)
+                                    break;
+                                
                                 prop.SetValue(targetObject, text, null);
                             }
                         }                        
