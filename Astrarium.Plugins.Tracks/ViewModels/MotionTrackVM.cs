@@ -62,25 +62,25 @@ namespace Astrarium.Plugins.Tracks.ViewModels
 
             if (track.Body == null)
             {
-                ViewManager.ShowMessageBox("Warning", "Please specify a celestial body.", System.Windows.MessageBoxButton.OK);
+                ViewManager.ShowMessageBox(Text.Get("MotionTrackWindow.WarningTitle"), Text.Get("MotionTrackWindow.CelestialBodyWarningText"), System.Windows.MessageBoxButton.OK);
                 return;
             }
 
             if (JulianDayFrom > JulianDayTo)
             {
-                ViewManager.ShowMessageBox("Warning", "Wrong date range:\nend date should be greater than start date.", System.Windows.MessageBoxButton.OK);
+                ViewManager.ShowMessageBox(Text.Get("MotionTrackWindow.WarningTitle"), Text.Get("MotionTrackWindow.DateWarningText"), System.Windows.MessageBoxButton.OK);
                 return;
             }
 
             if (LabelsStep.TotalDays < track.SmallestLabelsStep())
             {
-                ViewManager.ShowMessageBox("Warning", "Wrong labels step value:\nit's too small to calculate the track.", System.Windows.MessageBoxButton.OK);
+                ViewManager.ShowMessageBox(Text.Get("MotionTrackWindow.WarningTitle"), Text.Get("MotionTrackWindow.StepWarningText"), System.Windows.MessageBoxButton.OK);
                 return;
             }
 
             if ((JulianDayTo - JulianDayFrom) / track.Step > 10000)
             {
-                ViewManager.ShowMessageBox("Warning", "Step value and date range mismatch:\nresulting track data is too large. Please increase the step or reduce the date range.", System.Windows.MessageBoxButton.OK);
+                ViewManager.ShowMessageBox(Text.Get("MotionTrackWindow.WarningTitle"), Text.Get("MotionTrackWindow.StepDateRangeMismatchText"), System.Windows.MessageBoxButton.OK);
                 return;
             }
 

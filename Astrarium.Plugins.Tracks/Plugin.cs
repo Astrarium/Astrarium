@@ -19,13 +19,12 @@ namespace Astrarium.Plugins.Tracks
 
             this.map.SelectedObjectChanged += (o) => NotifyPropertyChanged(nameof(IsMotionTrackEnabled));
 
-            var menuTrack = new MenuItem("Motion track", new Command(ShowMotionTrackWindow));
+            var menuTrack = new MenuItem("$Astrarium.Plugins.Tracks.ContextMenu", new Command(ShowMotionTrackWindow));
             menuTrack.AddBinding(new SimpleBinding(this, nameof(IsMotionTrackEnabled), nameof(MenuItem.IsEnabled)));
             MenuItems.Add(MenuItemPosition.ContextMenu, menuTrack);
 
-            var menuTracksList = new MenuItem("Motion tracks", new Command(ShowTracksListWindow));
+            var menuTracksList = new MenuItem("$Astrarium.Plugins.Tracks.ToolsMenu", new Command(ShowTracksListWindow));
             menuTracksList.HotKey = new KeyGesture(Key.T, ModifierKeys.Control, "Ctrl+T");
-
             MenuItems.Add(MenuItemPosition.MainMenuTools, menuTracksList);
         }
 

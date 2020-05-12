@@ -14,8 +14,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Text.ini" />
     <None Remove="Views\MotionTrackWindow.xaml" />
     <None Remove="Views\TracksListWindow.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Text.ini" />
   </ItemGroup>
 
   <ItemGroup>

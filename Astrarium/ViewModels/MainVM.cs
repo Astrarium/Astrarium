@@ -521,7 +521,7 @@ namespace Astrarium.ViewModels
                 var tokenSource = new CancellationTokenSource();
                 var progress = new Progress<double>();
 
-                ViewManager.ShowProgress("Please wait", "Calculating ephemerides...", tokenSource, progress);
+                ViewManager.ShowProgress(Text.Get("CalculateEphemerides.WaitTitle"), Text.Get("CalculateEphemerides.WaitText"), tokenSource, progress);
 
                 var ephem = await Task.Run(() => sky.GetEphemerides(
                     es.SelectedBody,
@@ -552,7 +552,7 @@ namespace Astrarium.ViewModels
             {
                 var tokenSource = new CancellationTokenSource();
 
-                ViewManager.ShowProgress("Please wait", "Calculating phenomena...", tokenSource);
+                ViewManager.ShowProgress(Text.Get("CalculatePhenomena.WaitTitle"), Text.Get("CalculatePhenomena.WaitText"), tokenSource);
 
                 var events = await Task.Run(() => sky.GetEvents(
                         ps.JulianDayFrom,

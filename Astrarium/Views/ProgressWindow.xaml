@@ -3,15 +3,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"       
-        xmlns:t="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+        xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+        xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
         mc:Ignorable="d"
         Width="350" Height="170"
         Style="{StaticResource {x:Type Window}}"
         ShowInTaskbar="False"
         ResizeMode="NoResize"
-        t:WindowProperties.MinButtonVisible="Collapsed"
-        t:WindowProperties.MaxButtonVisible="Collapsed"
-        t:WindowProperties.CloseButtonVisible="Collapsed"
+        s:WindowProperties.MinButtonVisible="Collapsed"
+        s:WindowProperties.MaxButtonVisible="Collapsed"
+        s:WindowProperties.CloseButtonVisible="Collapsed"
         WindowStartupLocation="CenterOwner">
     <Grid>
         <Grid.RowDefinitions>
@@ -21,6 +22,6 @@
         </Grid.RowDefinitions>
         <Label Name="Label" Grid.Row="0" Content="Please wait..." Margin="10"/>
         <ProgressBar Name="ProgressBar" Height="8" SnapsToDevicePixels="True" VerticalAlignment="Top" Grid.Row="1" Margin="10 0 10 0"></ProgressBar>
-        <Button Name="CancelButton" Click="CancelButton_Click" MinWidth="80" Grid.Row="2" HorizontalAlignment="Right" Margin="10" Content="Cancel" />
+        <Button Name="CancelButton" Click="CancelButton_Click" MinWidth="80" Grid.Row="2" HorizontalAlignment="Right" Margin="10" Content="{t:Text Cancel}" />
     </Grid>
 </Window>

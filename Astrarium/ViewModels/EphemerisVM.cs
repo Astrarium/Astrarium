@@ -31,16 +31,15 @@ namespace Astrarium.ViewModels
             string bodyTypeName = body.GetType().Name;
             double utcOffset = sky.Context.GeoLocation.UtcOffset;
 
-            string headerTemplate = "Ephemerides of {0}\nStart date: {1}\nEnd date: {2}\nStep: {3}";
-
-            Header = string.Format(headerTemplate,
-                bodyName,
-                Formatters.DateTime.Format(new Date(jdFrom, utcOffset)),
-                Formatters.DateTime.Format(new Date(jdTo, utcOffset)),
-                Formatters.TimeSpan.Format(step));
+            Header = Text.Get("EphemeridesWindow.Header",
+                ("objectName", bodyName),
+                ("startDate", Formatters.DateTime.Format(new Date(jdFrom, utcOffset))),
+                ("endDate", Formatters.DateTime.Format(new Date(jdTo, utcOffset))),
+                ("step", Formatters.TimeSpan.Format(step))
+            );
            
             var table = new DataTable();
-            table.Columns.Add(new DataColumn() { Caption = "Date", ColumnName = "Date" });
+            table.Columns.Add(new DataColumn() { Caption = Text.Get("EphemeridesWindow.DateColumn"), ColumnName = "Date" });
             table.Columns.AddRange(ephemeris[0].Select(e => new DataColumn() { Caption = Text.Get($"{bodyTypeName}.{e.Key}"), ColumnName = e.Key }).ToArray());
 
             for (int i = 0; i < ephemeris.Count; i++)

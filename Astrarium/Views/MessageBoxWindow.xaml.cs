@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Astrarium.Types;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -40,20 +41,20 @@ namespace Astrarium.Views
                 switch (value)
                 {
                     case MessageBoxButton.OK:
-                        AddButton("OK", MessageBoxResult.OK, isDefault: true);
+                        AddButton(Text.Get("OK"), MessageBoxResult.OK, isDefault: true);
                         break;
                     case MessageBoxButton.OKCancel:
-                        AddButton("OK", MessageBoxResult.OK);
-                        AddButton("Cancel", MessageBoxResult.Cancel, isDefault: true);
+                        AddButton(Text.Get("OK"), MessageBoxResult.OK);
+                        AddButton(Text.Get("Cancel"), MessageBoxResult.Cancel, isDefault: true);
                         break;
                     case MessageBoxButton.YesNo:
-                        AddButton("Yes", MessageBoxResult.Yes);
-                        AddButton("No", MessageBoxResult.No, isDefault: true);
+                        AddButton(Text.Get("Yes"), MessageBoxResult.Yes);
+                        AddButton(Text.Get("No"), MessageBoxResult.No, isDefault: true);
                         break;
                     case MessageBoxButton.YesNoCancel:
-                        AddButton("Yes", MessageBoxResult.Yes);
-                        AddButton("No", MessageBoxResult.No);
-                        AddButton("Cancel", MessageBoxResult.Cancel, isDefault: true);
+                        AddButton(Text.Get("Yes"), MessageBoxResult.Yes);
+                        AddButton(Text.Get("No"), MessageBoxResult.No);
+                        AddButton(Text.Get("Cancel"), MessageBoxResult.Cancel, isDefault: true);
                         break;
                     default:
                         throw new ArgumentException("Unknown button value", "buttons");

@@ -4,9 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
-        xmlns:t="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+        xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+        xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
         mc:Ignorable="d"
-        Title="Ephemerides" 
+        Title="{t:Text EphemeridesSettingsWindow.Title}" 
         Height="350" Width="400"
         MinHeight="300" MinWidth="400"
         Style="{StaticResource {x:Type Window}}"
@@ -28,32 +29,32 @@
             <ColumnDefinition Width="160" />
         </Grid.ColumnDefinitions>
 
-        <Label Grid.Row="0" Grid.Column="0">Celestial body</Label>
+        <Label Grid.Row="0" Grid.Column="0" Content="{t:Text EphemeridesSettingsWindow.CelestialBody}" />
         <c:CelestialObjectPicker Grid.Row="0" Grid.Column="1" SelectedBody="{Binding SelectedBody, Mode=TwoWay}" />
 
-        <Label Grid.Row="1" Grid.Column="0">Start date</Label>
+        <Label Grid.Row="1" Grid.Column="0" Content="{t:Text EphemeridesSettingsWindow.StartDate}" />
         <c:DatePicker Grid.Row="1" Grid.Column="1" Options="DateTime" JulianDay="{Binding JulianDayFrom}" UtcOffset="{Binding UtcOffset}" />
 
-        <Label Grid.Row="2" Grid.Column="0">End date</Label>
+        <Label Grid.Row="2" Grid.Column="0" Content="{t:Text EphemeridesSettingsWindow.EndDate}" />
         <c:DatePicker Grid.Row="2" Grid.Column="1" Options="DateTime" JulianDay="{Binding JulianDayTo}" UtcOffset="{Binding UtcOffset}" />
 
-        <Label Grid.Row="3" Grid.Column="0">Step</Label>
+        <Label Grid.Row="3" Grid.Column="0" Content="{t:Text EphemeridesSettingsWindow.Step}" />
         <c:TimeSpanPicker Grid.Row="3" Grid.Column="1" TimeSpan="{Binding Step}" />
 
         <GroupBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="0 0 0 4">
             <GroupBox.Header>
-                <Label>Ephemerides</Label>
+                <Label Content="{t:Text EphemeridesSettingsWindow.Ephemerides}" />
             </GroupBox.Header>
             <GroupBox.Content>
                 <Grid>
                     <TextBlock 
-                        Text="Please choose a celestial body" 
+                        Text="{t:Text EphemeridesSettingsWindow.ChooseCelestialBody}" 
                         IsEnabled="False"
-                        Visibility="{Binding SelectedBody, Converter={t:NullToVisibilityConverter}}" 
+                        Visibility="{Binding SelectedBody, Converter={s:NullToVisibilityConverter}}" 
                         TextAlignment="Center" 
                         VerticalAlignment="Center" />
                     <TreeView 
-                        Visibility="{Binding SelectedBody, Converter={t:NotNullToVisibilityConverter}}" 
+                        Visibility="{Binding SelectedBody, Converter={s:NotNullToVisibilityConverter}}" 
                         ItemsSource="{Binding Nodes}">
                     </TreeView>
                 </Grid>
@@ -65,8 +66,8 @@
             Grid.ColumnSpan="2"
             Orientation="Horizontal"
             HorizontalAlignment="Right">
-            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding OkCommand}" IsEnabled="{Binding OkButtonEnabled}">OK</Button>
-            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CancelCommand}">Cancel</Button>
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding OkCommand}" IsEnabled="{Binding OkButtonEnabled}" Content="{t:Text OK}" />
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CancelCommand}" Content="{t:Text Cancel}" />
         </StackPanel>
     </Grid>
 </Window>

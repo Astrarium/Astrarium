@@ -30,7 +30,7 @@ namespace Astrarium.Plugins.MeasureTool
             this.map = map;
             this.renderer = renderer;
 
-            var menuItem = new MenuItem("Measure Tool")
+            var menuItem = new MenuItem("$Astrarium.Plugins.MeasureTool.ContextMenu")
             {
                 Command = new Command(SwitchMeasureTool),
                 HotKey = new KeyGesture(Key.M, ModifierKeys.Control, "Ctrl+M")

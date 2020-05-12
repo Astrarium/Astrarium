@@ -69,19 +69,19 @@ namespace Astrarium.ViewModels
         {
             if (JulianDayFrom > JulianDayTo)
             {
-                ViewManager.ShowMessageBox("Warning", "Wrong date range:\nend date should be greater than start date.", System.Windows.MessageBoxButton.OK);
+                ViewManager.ShowMessageBox(Text.Get("EphemeridesSettingsWindow.WarningTitle"), Text.Get("EphemeridesSettingsWindow.DateWarningText"), System.Windows.MessageBoxButton.OK);
                 return;
             }
 
             if (Step < TimeSpan.FromSeconds(1))
             {
-                ViewManager.ShowMessageBox("Warning", "Wrong step value:\nit's too small to calculate ephemerides.", System.Windows.MessageBoxButton.OK);
+                ViewManager.ShowMessageBox(Text.Get("EphemeridesSettingsWindow.WarningTitle"), Text.Get("EphemeridesSettingsWindow.StepWarningText"), System.Windows.MessageBoxButton.OK);
                 return;
             }
 
             if ((JulianDayTo - JulianDayFrom) / Step.TotalDays > 10000)
             {
-                ViewManager.ShowMessageBox("Warning", "Step value and date range mismatch:\nresulting ephemeris table is too large. Please increase the calculation step or reduce the date range.", System.Windows.MessageBoxButton.OK);
+                ViewManager.ShowMessageBox(Text.Get("EphemeridesSettingsWindow.WarningTitle"), Text.Get("EphemeridesSettingsWindow.LargeTableWarningText"), System.Windows.MessageBoxButton.OK);
                 return;
             }
 
@@ -99,7 +99,7 @@ namespace Astrarium.ViewModels
 
                 var groups = categories.GroupBy(cat => cat.Split('.').First());
 
-                Node root = new Node("All");
+                Node root = new Node(Text.Get("EphemeridesSettingsWindow.Ephemerides.All"));
                 root.CheckedChanged += Root_CheckedChanged;
 
                 string selectedBodyTypeName = SelectedBody.GetType().Name;

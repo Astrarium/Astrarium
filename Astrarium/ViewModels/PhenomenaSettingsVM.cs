@@ -56,7 +56,7 @@ namespace Astrarium.ViewModels
         {
             if (JulianDayFrom > JulianDayTo)
             {
-                ViewManager.ShowMessageBox("Warning", "Wrong date range:\nend date should be greater than start date.", System.Windows.MessageBoxButton.OK);
+                ViewManager.ShowMessageBox(Text.Get("PhenomenaSettingsWindow.WarningTitle"), Text.Get("PhenomenaSettingsWindow.WarningText"), System.Windows.MessageBoxButton.OK);
                 return;
             }
 
@@ -72,7 +72,7 @@ namespace Astrarium.ViewModels
 
             var groups = categories.GroupBy(cat => cat.Split('.').First());
 
-            Node root = new Node("All");
+            Node root = new Node(Text.Get("PhenomenaSettingsWindow.Phenomena.All"));
             root.CheckedChanged += Root_CheckedChanged;
 
             foreach (var group in groups)

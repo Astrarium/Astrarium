@@ -8,7 +8,7 @@ using System.Windows;
 
 namespace Astrarium.Plugins.Tracks.ViewModels
 {
-    public class TracksListVM : ViewModelBase
+    internal class TracksListVM : ViewModelBase
     {
         private readonly ISky sky;
         private readonly TrackCalc trackCalc;
@@ -102,7 +102,7 @@ namespace Astrarium.Plugins.Tracks.ViewModels
 
         private void DeleteSelectedTrack()
         {
-            if (ViewManager.ShowMessageBox("Question", "Do you really want to delete the selected track?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            if (ViewManager.ShowMessageBox(Text.Get("TracksListWindow.WarningTitle"), Text.Get("TracksListWindow.DeleteWarningText"), MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
                 trackCalc.Tracks.Remove(SelectedTrack.Track);
                 sky.Calculate();
@@ -135,7 +135,7 @@ namespace Astrarium.Plugins.Tracks.ViewModels
         }
     }
 
-    public class TrackListItemVM
+    internal class TrackListItemVM
     {
         public Track Track { get; set; }
         public string Body { get; set; }
