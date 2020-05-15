@@ -27,10 +27,7 @@ namespace Astrarium.Types
         /// </summary>
         double ViewAngle { get; set; }
 
-        /// <summary>
-        /// Occurs when map's View Angle is changed.
-        /// </summary>
-        event Action<double> ViewAngleChanged;
+
 
         /// <summary>
         /// Gets or sets horizontal coordinates of the central point of the canvas.
@@ -47,10 +44,6 @@ namespace Astrarium.Types
         /// </summary>
         CelestialObject LockedObject { get; set; }
 
-        /// <summary>
-        /// Occurs when selected celestial object is changed
-        /// </summary>
-        event Action<CelestialObject> SelectedObjectChanged;
 
         CrdsHorizontal MousePosition { get; }
 
@@ -58,20 +51,30 @@ namespace Astrarium.Types
         /// Gets or sets projection which is used for converting celestial coordinates to the sky map plane.
         /// </summary>
         IProjection Projection { get; }
-        
+
+        void Invalidate();
+
         /// <summary>
         /// Renders the celestial map on provided Graphics object
         /// </summary>
         /// <param name="g">Graphics to render the map.</param>
         void Render(Graphics g);
 
-        void Invalidate();
-
         CelestialObject FindObject(PointF point);
 
         void GoToObject(CelestialObject body, TimeSpan animationDuration);
 
         void AddDrawnObject(CelestialObject obj);
+
+        /// <summary>
+        /// Occurs when map's View Angle is changed.
+        /// </summary>
+        event Action<double> ViewAngleChanged;
+
+        /// <summary>
+        /// Occurs when selected celestial object is changed
+        /// </summary>
+        event Action<CelestialObject> SelectedObjectChanged;
 
         event Action OnInvalidate;
     }

@@ -44,18 +44,32 @@ namespace Astrarium
         /// </summary>
         private ICollection<RectangleF> labels = new List<RectangleF>();
 
+        /// <summary>
+        /// Collection of renderers
+        /// </summary>
         private readonly RenderersCollection renderers = new RenderersCollection();
 
+        /// <summary>
+        /// Font used to display diagnostic info
+        /// </summary>
         private Font fontDiagnosticText = new Font("Monospace", 8);
 
+        /// <summary>
+        /// Font used to display "Object is locked" message
+        /// </summary>
         private Font fontLockMessage = new Font("Arial", 8);
-
-        
 
         public int Width { get; set; }
         public int Height { get; set; }
 
+        /// <summary>
+        /// Backing field for <see cref="ViewAngle"/> property
+        /// </summary>
         private double viewAngle = 90;
+
+        /// <summary>
+        /// Gets or sets current FOV of the map
+        /// </summary>
         public double ViewAngle
         {
             get

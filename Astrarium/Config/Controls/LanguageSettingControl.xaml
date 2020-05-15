@@ -8,7 +8,7 @@
              mc:Ignorable="d" 
              d:DesignWidth="200">
     <StackPanel Orientation="Vertical">
-        <Label Content="{t:Text ApplicationLanguage}" />
+        <Label Content="{Binding SettingTitle}" />
         <ComboBox x:Name="cmbCultures" SelectedItem="{Binding SettingValue, Converter={cfg:CultureToStringConverter}}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>

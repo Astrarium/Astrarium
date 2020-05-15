@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
         mc:Ignorable="d"
-        Title="Settings" 
+        Title="{Binding WindowTitle, Mode=OneWay}" 
         Width="800" Height="600"
         MinWidth="300" MinHeight="300"
         Style="{StaticResource {x:Type Window}}"
@@ -27,7 +27,7 @@
 
             <ListView 
                 Grid.Column="0"
-                ItemsSource="{Binding Path=SettingsSections, Mode=OneWay}"
+                ItemsSource="{Binding Path=SettingsSections, Mode=OneWay}"                               
                 DisplayMemberPath="Title"
                 SelectionMode="Single" 
                 SelectedItem="{Binding SelectedSection}"
@@ -70,14 +70,14 @@
             <Button
                 Grid.Column="0"
                 MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding ResetCommand}"
-                Content="Reset to defaults">
+                Content="{Binding ResetToDefaultsText, FallbackValue='Reset to defaults', Mode=OneWay}">
             </Button>
             <StackPanel    
                 Grid.Column="1"
                 Orientation="Horizontal"
                 HorizontalAlignment="Right">
-                <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding SaveCommand}" Content="{t:Text Save}" />
-                <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CloseCommand}" Content="{t:Text Close}" />
+                <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding SaveCommand}" Content="{Binding SaveText, Mode=OneWay, FallbackValue='Save'}" />
+                <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CloseCommand}" Content="{Binding CloseText, Mode=OneWay, FallbackValue='Close'}" />
             </StackPanel>
         </Grid>
     </Grid>

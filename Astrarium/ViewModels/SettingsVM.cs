@@ -8,6 +8,8 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Collections;
+using System.ComponentModel;
 
 namespace Astrarium.ViewModels
 {
@@ -18,6 +20,11 @@ namespace Astrarium.ViewModels
         public ICommand SaveCommand { get; private set; }
 
         public ObservableCollection<SettingsSectionVM> SettingsSections { get; private set; }
+
+        public string WindowTitle => Text.Get("SettingsWindow.Title");
+        public string ResetToDefaultsText => Text.Get("SettingsWindow.ResetToDefaults");
+        public string SaveText => Text.Get("Save");
+        public string CloseText => Text.Get("Close");
 
         private readonly ISettings settings;
 
@@ -53,7 +60,7 @@ namespace Astrarium.ViewModels
 
             foreach (var section in uiIntegration.SettingItems.Groups.Where(g => g != null))
             {
-                var sectionVM = new SettingsSectionVM() { Title = section };
+                var sectionVM = new SettingsSectionVM(section);
 
                 foreach (SettingItem item in uiIntegration.SettingItems[section])
                 {
@@ -70,14 +77,22 @@ namespace Astrarium.ViewModels
 
             SelectedSection = SettingsSections.FirstOrDefault();
 
+            Text.LocaleChanged += () => NotifyPropertyChanged(
+                nameof(WindowTitle), 
+                nameof(SaveText), 
+                nameof(CloseText), 
+                nameof(ResetToDefaultsText)
+            );
+
             this.settings.Save("Current");
         }
+
 
         public override void Close()
         {
             if (settings.IsChanged)
             {
-                var result = ViewManager.ShowMessageBox("Warning", "You have unsaved changes in program options. Do you want to apply them?", MessageBoxButton.YesNoCancel);
+                var result = ViewManager.ShowMessageBox(Text.Get("SettingsWindow.WarningTitle"), Text.Get("SettingsWindow.UnsavedValuesWarningText"), MessageBoxButton.YesNoCancel);
                 if (MessageBoxResult.Yes == result)
                 {
                     base.Close();
@@ -110,7 +125,7 @@ namespace Astrarium.ViewModels
 
         private void Reset()
         {
-            if (MessageBoxResult.Yes == ViewManager.ShowMessageBox("Warning", "Do you really want to reset settings to default values?", MessageBoxButton.YesNo))
+            if (MessageBoxResult.Yes == ViewManager.ShowMessageBox(Text.Get("SettingsWindow.WarningTitle"), Text.Get("SettingsWindow.ResetToDefaultsWarningText"), MessageBoxButton.YesNo))
             {
                 settings.Load("Defaults");
                 Save();
@@ -137,9 +152,18 @@ namespace Astrarium.ViewModels
             return null;
         }
 
-        internal class SettingsSectionVM : List<SettingVM>
+        internal class SettingsSectionVM : List<SettingVM>, INotifyPropertyChanged
         {
-            public string Title { get; set; }
+            public event PropertyChangedEventHandler PropertyChanged;
+
+            private string section;
+            public string Title => Text.Get($"Section.{section}");
+
+            internal SettingsSectionVM(string section)
+            {
+                this.section = section;
+                Text.LocaleChanged += () => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Title)));
+            }
         }
 
         internal class SettingVM : ViewModelBase

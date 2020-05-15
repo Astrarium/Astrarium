@@ -186,7 +186,7 @@ namespace Astrarium.ViewModels
                 ToolbarItems.Add(null);
             }
 
-            ToolbarItems.Add(new ToolbarButton("IconSettings", "$Settings", ChangeSettingsCommand));
+            ToolbarItems.Add(new ToolbarButton("IconSettings", "$Menu.Settings", ChangeSettingsCommand));
 
             // Main window menu
 
