@@ -22,24 +22,25 @@ namespace Astrarium.Types.Controls
             typeof(CelestialObjectPicker), 
             new FrameworkPropertyMetadata(null, (o, e) =>
             {
-                var picker = o as CelestialObjectPicker;
-                o.SetValue(SelectedBodyNameProperty, ((CelestialObject)e.NewValue).Names.First());
+                //var picker = o as CelestialObjectPicker;
+                //o.SetValue(SelectedBodyNameProperty, ((CelestialObject)e.NewValue).Names.First());
             })
             {
                 BindsTwoWayByDefault = true,
                 DefaultUpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
             });
 
-        public string SelectedBodyName
-        {
-            get { return (string)GetValue(SelectedBodyNameProperty); }
-            private set { SetValue(SelectedBodyNameProperty, value); }
-        }
-        public readonly static DependencyProperty SelectedBodyNameProperty = DependencyProperty.Register(
-            nameof(SelectedBodyName), 
-            typeof(string), 
-            typeof(CelestialObjectPicker),
-            new PropertyMetadata("Not set"));
+        //public string SelectedBodyName
+        //{
+        //    get { return (string)GetValue(SelectedBodyNameProperty) ?? Text.Get("CelestialObjectPicker.EmptyValue"); }
+        //    private set { SetValue(SelectedBodyNameProperty, value); }
+        //}
+
+        //public readonly static DependencyProperty SelectedBodyNameProperty = DependencyProperty.Register(
+        //    nameof(SelectedBodyName), 
+        //    typeof(string), 
+        //    typeof(CelestialObjectPicker),
+        //    new PropertyMetadata(null));
 
         public Func<CelestialObject, bool> Filter
         {

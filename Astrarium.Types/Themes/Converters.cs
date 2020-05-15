@@ -140,6 +140,15 @@ namespace Astrarium.Types.Themes
         }
     }
 
+    [ValueConversion(typeof(CelestialObject), typeof(string))]
+    public class CelestialObjectNameConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value == null ? Text.Get("NoSelectedObject") : (value as CelestialObject).Names.First();
+        }
+    }
+
     public class LeftMarginMultiplierConverter : ValueConverterBase
     {
         public double Length { get; set; }

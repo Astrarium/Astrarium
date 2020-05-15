@@ -194,9 +194,8 @@
             <StatusBarItem>
                 <Menu Background="Transparent">
                     <MenuItem 
-                              Visibility="Visible" 
                               ItemsSource="{Binding SelectedObjectsMenuItems}" 
-                              Header="{Binding SelectedObjectName, FallbackValue='Selected Object'}" 
+                              Header="{Binding SelectedObject, Converter={s:CelestialObjectNameConverter}, FallbackValue='Selected Object'}" 
                               ToolTip="{t:Text StatusBar.SelectedObject}">
                         <MenuItem.ItemContainerStyle>
                             <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">

@@ -58,7 +58,7 @@ namespace Astrarium.ViewModels
         public ObservableCollection<MenuItem> SelectedObjectsMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
         public ObservableCollection<ToolbarItem> ToolbarItems { get; private set; } = new ObservableCollection<ToolbarItem>();
         public ISuggestionProvider SearchProvider { get; private set; }
-        public string SelectedObjectName { get; private set; }
+        public CelestialObject SelectedObject { get; private set; }
 
         public WindowState WindowState
         {
@@ -413,10 +413,10 @@ namespace Astrarium.ViewModels
 
         private void Map_SelectedObjectChanged(CelestialObject body)
         {
+            SelectedObject = body;
+
             if (body != null)
             {
-                SelectedObjectName = body.Names.First();
-
                 if (!SelectedObjectsMenuItems.Any())
                 {
                     SelectedObjectsMenuItems.Add(new MenuItem("$StatusBar.ClearSelectedObjectsList", ClearObjectsHistoryCommand));                
@@ -429,7 +429,7 @@ namespace Astrarium.ViewModels
                     SelectedObjectsMenuItems.Remove(existingItem);
                 }
 
-                SelectedObjectsMenuItems.Insert(2, new MenuItem(SelectedObjectName, CenterOnObjectCommand, body));
+                SelectedObjectsMenuItems.Insert(2, new MenuItem(body.Names.First(), CenterOnObjectCommand, body));
 
                 // 10 items of history + "clear all" + separator
                 if (SelectedObjectsMenuItems.Count > 13)
@@ -437,12 +437,8 @@ namespace Astrarium.ViewModels
                     SelectedObjectsMenuItems.RemoveAt(0);
                 }
             }
-            else
-            {
-                SelectedObjectName = Text.Get("StatusBar.NoSelectedObject");
-            }
 
-            NotifyPropertyChanged(nameof(SelectedObjectName));
+            NotifyPropertyChanged(nameof(SelectedObject));
         }
 
         private void Zoom(int delta)

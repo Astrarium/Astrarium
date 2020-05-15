@@ -338,23 +338,23 @@ namespace Astrarium.Types
                 if (d > 0)
                 {
                     text.Append(d)
-                        .Append("d").Append(" ");
+                        .Append(Text.Get("Formatters.TimeSpanFormatter.Days")).Append(" ");
                 }
                 if (h > 0 || (text.Length > 0 && (m > 0 || s > 0)))
                 {
                     text.Append(text.Length > 0 ? $"{h:D2}" : $"{h}")
-                        .Append("h").Append(" ");
+                        .Append(Text.Get("Formatters.TimeSpanFormatter.Hours")).Append(" ");
 
                 }
                 if (m > 0 || (text.Length > 0 && (s > 0)))
                 {
                     text.Append(text.Length > 0 ? $"{m:D2}" : $"{m}")
-                        .Append("m").Append(" ");
+                        .Append(Text.Get("Formatters.TimeSpanFormatter.Minutes")).Append(" ");
                 }
                 if (s > 0)
                 {
                     text.Append(text.Length > 0 ? $"{s:D2}" : $"{s}")
-                        .Append("s");
+                        .Append(Text.Get("Formatters.TimeSpanFormatter.Seconds"));
                 }
 
                 return text.ToString().Trim();

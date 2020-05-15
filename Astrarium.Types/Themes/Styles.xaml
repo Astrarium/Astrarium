@@ -3,6 +3,7 @@
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                     xmlns:sys="clr-namespace:System;assembly=mscorlib"
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:s="clr-namespace:Astrarium.Types"
                     xmlns:t="clr-namespace:Astrarium.Types.Themes"
                     xmlns:c="clr-namespace:Astrarium.Types.Controls"
                     mc:Ignorable="d">
@@ -3140,7 +3141,7 @@
                                 </Path>
                             </Canvas>
                         </Viewbox>
-                        <Label Grid.Column="1" Padding="2 0 0 0" Margin="0" Height="{TemplateBinding Height}" VerticalAlignment="Center" Content="{TemplateBinding SelectedBodyName}" />
+                        <Label Grid.Column="1" Padding="2 0 0 0" Margin="0" Height="{TemplateBinding Height}" VerticalAlignment="Center" Content="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=SelectedBody, Converter={t:CelestialObjectNameConverter}}" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">

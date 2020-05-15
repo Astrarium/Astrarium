@@ -60,12 +60,6 @@ namespace Astrarium.Plugins.Tracks.ViewModels
                 DrawLabels = DrawLabels
             };
 
-            if (track.Body == null)
-            {
-                ViewManager.ShowMessageBox(Text.Get("MotionTrackWindow.WarningTitle"), Text.Get("MotionTrackWindow.CelestialBodyWarningText"), System.Windows.MessageBoxButton.OK);
-                return;
-            }
-
             if (JulianDayFrom > JulianDayTo)
             {
                 ViewManager.ShowMessageBox(Text.Get("MotionTrackWindow.WarningTitle"), Text.Get("MotionTrackWindow.DateWarningText"), System.Windows.MessageBoxButton.OK);

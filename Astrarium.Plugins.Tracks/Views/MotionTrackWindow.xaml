@@ -65,7 +65,7 @@
             Grid.ColumnSpan="2"
             Orientation="Horizontal"
             HorizontalAlignment="Right">
-            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding OkCommand}" Content="{t:Text OK}" />
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding OkCommand}" Content="{t:Text OK}" IsEnabled="{Binding SelectedBody, Converter={s:NotNullToBoolConverter}}" />
             <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CancelCommand}" Content="{t:Text Cancel}" />
         </StackPanel>
     </Grid>
