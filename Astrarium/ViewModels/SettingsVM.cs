@@ -68,7 +68,18 @@ namespace Astrarium.ViewModels
 
                     if (controlType != null)
                     {
-                        sectionVM.Add(new SettingVM(settings, item.Name, item.EnabledCondition, controlType));
+                        var vm = new SettingVM(settings, item.Name, item.EnabledCondition, controlType);
+
+                        if (section == "Colors")
+                        {
+                            vm.AddBinding(new SimpleBinding(settings, "Schema", nameof(SettingVM.IsVisible))
+                            {
+                                SourceToTargetConverter = s => ((ColorSchema)s) == ColorSchema.Night,
+                                TargetToSourceConverter = s => settings.Get<ColorSchema>("Schema")
+                            });
+                        }
+
+                        sectionVM.Add(vm);
                     }
                 }
 
@@ -86,7 +97,6 @@ namespace Astrarium.ViewModels
 
             this.settings.Save("Current");
         }
-
 
         public override void Close()
         {
@@ -202,6 +212,12 @@ namespace Astrarium.ViewModels
                 {
                     settings.Set(SettingName, value);
                 }
+            }
+
+            public bool IsVisible
+            {
+                get => GetValue<bool>(nameof(IsVisible));
+                set => SetValue(nameof(IsVisible), value);
             }
 
             private Func<ISettings, bool> isEnabledCondition;

@@ -122,7 +122,6 @@ namespace Astrarium
 
             ICollection<AbstractPlugin> plugins = new List<AbstractPlugin>();
 
-            // TODO: consider more proper way to load plugins
             string homeFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             IEnumerable<string> pluginPaths = Directory.EnumerateFiles(homeFolder, "*.dll", SearchOption.AllDirectories);
 

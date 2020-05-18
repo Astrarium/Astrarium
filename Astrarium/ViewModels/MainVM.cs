@@ -597,7 +597,7 @@ namespace Astrarium.ViewModels
                 ["Joint Photographic Experts Group (*.jpg)|*.jpg"] = ImageFormat.Jpeg
             };
 
-            string fileName = ViewManager.ShowSaveFileDialog("Save as image", "Map", formats.Keys.First(), string.Join("|", formats.Keys));
+            string fileName = ViewManager.ShowSaveFileDialog(Text.Get("SaveMapAsImage.Title"), "Map", formats.Keys.First(), string.Join("|", formats.Keys));
             if (fileName != null)
             {
                 using (Image img = new Bitmap(map.Width, map.Height))

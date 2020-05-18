@@ -4,8 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             xmlns:controls="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types">
+             xmlns:controls="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+             xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types">
 
-    <controls:ColorPicker Caption="{Binding SettingTitle, FallbackValue='Color setting'}" SelectedColor="{Binding SettingValue}" IsEnabled="{Binding IsEnabled}" />
+    <controls:ColorPicker Caption="{Binding SettingTitle, FallbackValue='Color setting'}" SelectedColor="{Binding SettingValue}" IsEnabled="{Binding IsEnabled}" Visibility="{Binding IsVisible, Converter={s:BoolToVisibilityConverter}}" />
 
 </UserControl>
