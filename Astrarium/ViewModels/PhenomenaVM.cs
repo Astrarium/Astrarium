@@ -39,7 +39,7 @@ namespace Astrarium.ViewModels
 
         private void SaveToFile()
         {
-            var file = ViewManager.ShowSaveFileDialog("Save to file", "Phenomena", ".csv", "Text files (*.txt)|*.txt|Comma-separated files (*.csv)|*.csv");
+            var file = ViewManager.ShowSaveFileDialog(Text.Get("PhenomenaWindow.ExportTitle"), "Phenomena", ".csv", "Text files (*.txt)|*.txt|Comma-separated files (*.csv)|*.csv");
             if (file != null)
             {
                 IAstroEventsWriter writer = null;
@@ -58,7 +58,7 @@ namespace Astrarium.ViewModels
 
                 writer?.Write(events);
 
-                ViewManager.ShowMessageBox("Information", "Export has been successfully completed.", MessageBoxButton.OK);
+                ViewManager.ShowMessageBox(Text.Get("PhenomenaWindow.ExportDoneTitle"), Text.Get("PhenomenaWindow.ExportDoneText"), MessageBoxButton.OK);
             }
         }
 

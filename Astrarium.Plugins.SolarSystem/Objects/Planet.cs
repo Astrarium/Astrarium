@@ -97,5 +97,10 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         public const int URANUS     = 7;
         public const int NEPTUNE    = 8;
         public const int PLUTO      = 9;
+
+        /// <summary>
+        /// Name of the setting(s) responsible for displaying the object
+        /// </summary>
+        public override string[] DisplaySettingNames => new[] { "Planets" };
     }
 }

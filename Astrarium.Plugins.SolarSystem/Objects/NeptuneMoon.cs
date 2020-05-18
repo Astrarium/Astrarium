@@ -50,5 +50,10 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         public bool IsEclipsedByPlanet => false;
 
         public double AverageDailyMotion => 0.006668;
+
+        /// <summary>
+        /// Name of the setting(s) responsible for displaying the object
+        /// </summary>
+        public override string[] DisplaySettingNames => new[] { "Planets", "PlanetMoons" };
     }
 }

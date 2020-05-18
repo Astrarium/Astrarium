@@ -14,6 +14,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Text.ini" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Text.ini" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Astrarium.Algorithms\Astrarium.Algorithms.csproj">
       <Private>false</Private>
       <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>

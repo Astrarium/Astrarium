@@ -114,6 +114,11 @@ namespace Astrarium.Plugins.DeepSky
         public override double Semidiameter { get => Math.Max(SizeA, SizeB) * 30; }
 
         public ICollection<CelestialPoint> Outline { get; set; }
+
+        /// <summary>
+        /// Name of the setting(s) responsible for displaying the object
+        /// </summary>
+        public override string[] DisplaySettingNames => new[] { "DeepSky" };
     }
 
     public enum DeepSkyStatus : byte

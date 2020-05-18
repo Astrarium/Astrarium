@@ -52,5 +52,10 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         public double Elongation { get; set; }
 
         public double Phase { get; set; }
+
+        /// <summary>
+        /// Name of the setting(s) responsible for displaying the object
+        /// </summary>
+        public override string[] DisplaySettingNames => new[] { "Planets" };
     }
 }

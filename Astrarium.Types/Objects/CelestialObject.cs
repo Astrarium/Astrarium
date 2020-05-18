@@ -21,5 +21,10 @@ namespace Astrarium.Types
         /// Gets array of celestial object names
         /// </summary>
         public abstract string[] Names { get; }
+
+        /// <summary>
+        /// Name of the setting(s) responsible for displaying the object
+        /// </summary>
+        public abstract string[] DisplaySettingNames { get; }
     }
 }

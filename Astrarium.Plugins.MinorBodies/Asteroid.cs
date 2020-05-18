@@ -49,5 +49,10 @@ namespace Astrarium.Plugins.MinorBodies
         /// Gets array of asteroid names
         /// </summary>
         public override string[] Names => new[] { Name };
+
+        /// <summary>
+        /// Name of the setting(s) responsible for displaying the object
+        /// </summary>
+        public override string[] DisplaySettingNames => new[] { "Asteroids" };
     }
 }

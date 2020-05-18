@@ -134,5 +134,10 @@ namespace Astrarium.Plugins.BrightStars
         /// External function to get star names
         /// </summary>
         internal static Func<Star, ICollection<string>> GetNames { get; set; }
+
+        /// <summary>
+        /// Name of the setting(s) responsible for displaying the object
+        /// </summary>
+        public override string[] DisplaySettingNames => new[] { "Stars" };
     }
 }

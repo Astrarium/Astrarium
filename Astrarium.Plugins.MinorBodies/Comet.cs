@@ -42,5 +42,10 @@ namespace Astrarium.Plugins.MinorBodies
         /// Gets comet names
         /// </summary>
         public override string[] Names => new[] { Name };
+
+        /// <summary>
+        /// Name of the setting(s) responsible for displaying the object
+        /// </summary>
+        public override string[] DisplaySettingNames => new[] { "Comets" };
     }
 }

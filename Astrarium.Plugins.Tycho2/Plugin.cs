@@ -13,7 +13,7 @@ namespace Astrarium.Plugins.Tycho2
         {
             #region Settings
 
-            SettingItems.Add("Tycho 2", new SettingItem("Tycho2", defaultValue: true));
+            SettingItems.Add("Tycho2", new SettingItem("Tycho2", defaultValue: true));
 
             #endregion Settings
 

@@ -51,5 +51,10 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         public double DistanceFromEarth { get; internal set; }
 
         public bool IsEclipsedByPlanet => false;
+
+        /// <summary>
+        /// Name of the setting(s) responsible for displaying the object
+        /// </summary>
+        public override string[] DisplaySettingNames => new[] { "Planets", "PlanetMoons" };
     }
 }

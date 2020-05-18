@@ -130,31 +130,32 @@ namespace Astrarium.Plugins.DeepSky
             DeepSkyInfo details = c.Get(ReadDeepSkyDetails, ds);
             string constellation = Constellations.FindConstellation(c.Get(Equatorial, ds), c.JulianDay);
 
-            info.SetSubtitle(ds.Status.ToString())
+            info
+            .SetSubtitle(Text.Get("DeepSky.Status." + ds.Status.ToString()))
             .SetTitle(string.Join(" / ", ds.Names))
             .AddRow("Constellation", constellation)
 
-            .AddHeader("Equatorial coordinates (current epoch)")
+            .AddHeader(Text.Get("DeepSky.Equatorial"))
             .AddRow("Equatorial.Alpha", ds.Equatorial.Alpha)
             .AddRow("Equatorial.Delta", ds.Equatorial.Delta)
 
-            .AddHeader("Equatorial coordinates (J2000.0 epoch)")
+            .AddHeader(Text.Get("DeepSky.Equatorial0"))
             .AddRow("Equatorial0.Alpha", ds.Equatorial0.Alpha)
             .AddRow("Equatorial0.Delta", ds.Equatorial0.Delta)
 
-            .AddHeader("Horizontal coordinates")
+            .AddHeader(Text.Get("DeepSky.Horizontal"))
             .AddRow("Horizontal.Azimuth", ds.Horizontal.Azimuth)
             .AddRow("Horizontal.Altitude", ds.Horizontal.Altitude)
 
-            .AddHeader("Visibility")
+            .AddHeader(Text.Get("DeepSky.RTS"))
             .AddRow("RTS.Rise")
             .AddRow("RTS.Transit")
             .AddRow("RTS.Set")
             .AddRow("RTS.Duration")
 
-            .AddHeader("Properties");
+            .AddHeader(Text.Get("DeepSky.Properties"));
 
-            info.AddRow("DeepSky.Type", details.ObjectType);
+            info.AddRow("Type", details.ObjectType);
             if (ds.Mag != null)
             {
                 info.AddRow("VisualMagnitude", ds.Mag, Formatters.Magnitude);
@@ -165,7 +166,7 @@ namespace Astrarium.Plugins.DeepSky
             }
             if (details.SurfaceBrightness != null)
             {
-                info.AddRow("Brightness", details.SurfaceBrightness, new Formatters.SignedDoubleFormatter(2, " mag/sq.arcsec"));
+                info.AddRow("SurfaceBrightness", details.SurfaceBrightness, new Formatters.SignedDoubleFormatter(2, " mag/sq.arcsec"));
             }
 
             if (ds.SizeA > 0)
@@ -179,19 +180,19 @@ namespace Astrarium.Plugins.DeepSky
             }
             if (ds.PA > 0)
             {
-                info.AddRow("Position angle", ds.PA, new Formatters.UnsignedDoubleFormatter(2, "\u00B0"));
+                info.AddRow("PositionAngle", ds.PA, new Formatters.UnsignedDoubleFormatter(2, "\u00B0"));
             }
 
             if (details.Identifiers.Any() || details.PGC != null)
             {
-                info.AddHeader("Designations");
+                info.AddHeader(Text.Get("DeepSky.Designations"));
                 if (details.Identifiers.Any())
                 {
-                    info.AddRow("Other catalogs identifiers", string.Join(", ", details.Identifiers));
+                    info.AddRow("OtherCatalogsIdentifiers", string.Join(", ", details.Identifiers));
                 }
                 if (details.PGC != null)
                 {
-                    info.AddRow("PGC catalog number", string.Join(", ", details.PGC));
+                    info.AddRow("PGCCatalogNumber", string.Join(", ", details.PGC));
                 }
             }
 

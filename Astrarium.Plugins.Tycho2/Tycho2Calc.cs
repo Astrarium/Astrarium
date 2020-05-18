@@ -332,7 +332,6 @@ namespace Astrarium.Plugins.Tycho2
 
         private Tycho2Star GetStar(SkyContext c, byte[] buffer, int offset, short? tyc2, string tyc3)
         {
-            // short t1 = BitConverter.ToInt16(buffer, offset);
             short t2 = BitConverter.ToInt16(buffer, offset + 2);
             char t3 = (char)buffer[offset + 4];
 
@@ -396,29 +395,29 @@ namespace Astrarium.Plugins.Tycho2
 
             info
             .SetTitle(s.ToString())
-            .SetSubtitle("Star")
+            .SetSubtitle(Text.Get("Tycho2Star.Subtitle"))
 
             .AddRow("Constellation", constellation)
 
-            .AddHeader("Equatorial coordinates (current epoch)")
+            .AddHeader(Text.Get("Tycho2Star.Equatorial"))
             .AddRow("Equatorial.Alpha", c.Get(Equatorial, s).Alpha)
             .AddRow("Equatorial.Delta", c.Get(Equatorial, s).Delta)
 
-            .AddHeader("Equatorial coordinates (J2000.0 epoch)")
+            .AddHeader(Text.Get("Tycho2Star.Equatorial0"))
             .AddRow("Equatorial0.Alpha", s.Equatorial0.Alpha)
             .AddRow("Equatorial0.Delta", s.Equatorial0.Delta)
 
-            .AddHeader("Horizontal coordinates")
+            .AddHeader(Text.Get("Tycho2Star.Horizontal"))
             .AddRow("Horizontal.Azimuth")
             .AddRow("Horizontal.Altitude")
 
-            .AddHeader("Visibility")
+            .AddHeader(Text.Get("Tycho2Star.RTS"))
             .AddRow("RTS.Rise")
             .AddRow("RTS.Transit")
             .AddRow("RTS.Set")
             .AddRow("RTS.Duration")
 
-            .AddHeader("Properties")
+            .AddHeader(Text.Get("Tycho2Star.Properties"))
             .AddRow("Magnitude", s.Magnitude);
         }
 

@@ -68,5 +68,10 @@ namespace Astrarium.Plugins.SolarSystem.Objects
                     RectangularS.Z > 0 && RectangularS.X * RectangularS.X + RectangularS.Y * RectangularS.Y * 1.14784224788 <= 1.1;
             }
         }
+
+        /// <summary>
+        /// Name of the setting(s) responsible for displaying the object
+        /// </summary>
+        public override string[] DisplaySettingNames => new[] { "Planets", "PlanetMoons" };
     }
 }

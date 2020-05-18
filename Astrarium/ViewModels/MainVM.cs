@@ -652,9 +652,21 @@ namespace Astrarium.ViewModels
 
         private void CenterOnObject(CelestialObject body)
         {
+            if (body.DisplaySettingNames.Any(s => !settings.Get(s)))
+            {
+                if (ViewManager.ShowMessageBox("Warn", "Object is invisible. On?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                {
+                    body.DisplaySettingNames.ToList().ForEach(s => settings.Set(s, true));
+                }
+                else
+                {
+                    return;
+                }
+            }
+
             if (settings.Get<bool>("Ground") && body.Horizontal.Altitude <= 0)
             {
-                if (ViewManager.ShowMessageBox("Question", "The object is under horizon at the moment. Do you want to switch off displaying the ground?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                if (ViewManager.ShowMessageBox(Text.Get("ObjectUnderHorizon.Title"), Text.Get("ObjectUnderHorizon.Text"), MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
                     settings.Set("Ground", false);
                 }
@@ -666,7 +678,7 @@ namespace Astrarium.ViewModels
 
             if (map.LockedObject != null && map.LockedObject != body)
             {
-                if (ViewManager.ShowMessageBox("Question", "The map is locked on different celestial body. Do you want to unlock the map?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                if (ViewManager.ShowMessageBox(Text.Get("ObjectLocked.Title"), Text.Get("ObjectLocked.Text"), MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
                     map.LockedObject = null;
                 }
@@ -675,7 +687,7 @@ namespace Astrarium.ViewModels
                     return;
                 }
             }
-            
+
             map.GoToObject(body, TimeSpan.FromSeconds(1));
         }
 

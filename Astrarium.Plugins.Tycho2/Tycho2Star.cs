@@ -77,5 +77,10 @@ namespace Astrarium.Plugins.Tycho2
             hash = hash * 23 + Tyc3.GetHashCode();
             return hash;
         }
+
+        /// <summary>
+        /// Name of the setting(s) responsible for displaying the object
+        /// </summary>
+        public override string[] DisplaySettingNames => new[] { "Stars", "Tycho2" };
     }
 }

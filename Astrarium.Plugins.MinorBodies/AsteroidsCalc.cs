@@ -86,7 +86,7 @@ namespace Astrarium.Plugins.MinorBodies
         {
             info
             .SetTitle(info.Body.Names.First())
-            .SetSubtitle("Minor planet")
+            .SetSubtitle(Text.Get("Asteroid.Subtitle"))
             .AddRow("Constellation")
 
             .AddHeader(Text.Get("Asteroid.Equatorial"))

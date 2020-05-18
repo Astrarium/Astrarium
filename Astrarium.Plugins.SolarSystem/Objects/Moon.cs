@@ -68,5 +68,10 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         /// Primary name
         /// </summary>
         public string Name => Text.Get("Moon.Name");
+
+        /// <summary>
+        /// Name of the setting(s) responsible for displaying the object
+        /// </summary>
+        public override string[] DisplaySettingNames => new[] { "Moon" };
     }
 }
