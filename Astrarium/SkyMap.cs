@@ -197,11 +197,20 @@ namespace Astrarium
         /// </summary>
         private MapContext mapContext = null;
 
+        /// <summary>
+        /// Application settings
+        /// </summary>
         private ISettings settings = null;
 
-        public SkyMap(ISettings settings)
+        /// <summary>
+        /// Command line args
+        /// </summary>
+        private ICommandLineArgs commandLineArgs = null;
+
+        public SkyMap(ISettings settings, ICommandLineArgs commandLineArgs)
         {
             this.settings = settings;
+            this.commandLineArgs = commandLineArgs;
         }
 
         public void Initialize(SkyContext skyContext, ICollection<BaseRenderer> renderers)
@@ -296,7 +305,7 @@ namespace Astrarium
                 if (LockedObject != null && MouseButton == MouseButton.Left)
                 {
                     var format = new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                    string text = $"Map is locked on {LockedObject.Names.First()}";
+                    string text = Text.Get("MapIsLockedOn", ("objectName", LockedObject.Names.First()));
 
                     PointF center = new PointF(Width / 2, Height / 2);
                     var size = g.MeasureString(text, fontLockMessage, center, format);
@@ -309,7 +318,10 @@ namespace Astrarium
                 }
 
                 // Diagnostic info
-                g.DrawString($"FOV: {Formatters.Angle.Format(ViewAngle)}\nMag limit: {Formatters.Magnitude.Format(MagLimit)}\nFPS: {fps}\nDaylight factor: {mapContext.DayLightFactor:F2}", fontDiagnosticText, Brushes.Red, new PointF(10, 10));
+                if (commandLineArgs.Contains("-debug", StringComparer.OrdinalIgnoreCase))
+                {
+                    g.DrawString($"FOV: {Formatters.Angle.Format(ViewAngle)}\nMag limit: {Formatters.Magnitude.Format(MagLimit)}\nFPS: {fps}\nDaylight factor: {mapContext.DayLightFactor:F2}", fontDiagnosticText, Brushes.Red, new PointF(10, 10));
+                }
             }
             catch (Exception ex)
             {

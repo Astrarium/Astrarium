@@ -28,23 +28,25 @@ namespace Astrarium
     /// </summary>
     public partial class App : Application
     {
-      private IKernel kernel = new StandardKernel();
+        private IKernel kernel = new StandardKernel();
+        private ICommandLineArgs commandLineArgs = null;
 
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            commandLineArgs = new CommandLineArgs(e.Args);
 
             ViewManager.SetImplementation(new DefaultViewManager(t => kernel.Get(t)));
 
             var splashVM = new SplashScreenVM();
             ViewManager.ShowWindow(splashVM);
 
-            //in order to ensure the UI stays responsive, we need to
-            //do the work on a different thread
+            // in order to ensure the UI stays responsive, we need to
+            // do the work on a different thread
             Task.Factory.StartNew(() =>
             {
                 ConfigureContainer(splashVM);
-
                 Dispatcher.Invoke(() =>
                 {
                     ViewManager.ShowWindow<MainVM>();
@@ -106,6 +108,8 @@ namespace Astrarium
 
         private void ConfigureContainer(IProgress<string> progress)
         {
+            kernel.Bind<ICommandLineArgs>().ToConstant(commandLineArgs).InSingletonScope();
+
             // use single logger for whole application
             kernel.Bind<Logger>().ToSelf().InSingletonScope();
             kernel.Get<Logger>();

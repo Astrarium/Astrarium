@@ -656,7 +656,7 @@ namespace Astrarium.Plugins.SolarSystem
                     float rotation = map.GetRotationTowardsNorth(planet.Equatorial) + 360 - (float)planet.Appearance.P;
                     g.TranslateTransform(p.X, p.Y);
                     g.RotateTransform(rotation);
-                    DrawRotationAxis(g, diam);
+                    DrawRotationAxis(map, diam);
 
                     if (planet.Number == Planet.SATURN)
                     {
@@ -1083,13 +1083,13 @@ namespace Astrarium.Plugins.SolarSystem
             }
         }
 
-        private void DrawRotationAxis(Graphics g, float diam)
+        private void DrawRotationAxis(IMapContext map, float diam)
         {
             if (settings.Get("ShowRotationAxis"))
             {
                 var p1 = new PointF(0, -(diam / 2 + 10));
                 var p2 = new PointF(0, diam / 2 + 10);
-                g.DrawLine(Pens.Gray, p1, p2);
+                map.Graphics.DrawLine(new Pen(map.GetColor("ColorSolarSystemLabel")), p1, p2);
             }
         }
 
