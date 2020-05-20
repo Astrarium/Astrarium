@@ -21,6 +21,10 @@ using System.Windows.Input;
 using System.Windows.Markup;
 using Astrarium.Config.Controls;
 
+[assembly: AssemblyProduct("Astrarium")]
+[assembly: AssemblyInformationalVersion("2020.5")]
+[assembly: AssemblyCopyright("© Alexander Krutov, 2018-2020")]
+
 namespace Astrarium
 {
     /// <summary>

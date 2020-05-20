@@ -26,7 +26,7 @@ namespace Astrarium
 
         public IEnumerator<string> GetEnumerator()
         {
-            return args.AsEnumerable<string>().GetEnumerator();
+            return args.AsEnumerable().GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

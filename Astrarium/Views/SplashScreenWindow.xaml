@@ -1,18 +1,17 @@
 ﻿<Window x:Class="Astrarium.Views.SplashScreenWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:t="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
         WindowStartupLocation="CenterScreen"        
         WindowStyle="None"
         ShowInTaskbar="False"
         AllowsTransparency="True"
-        Height="140"
-        Width="400"
-        BorderBrush="{StaticResource BrushWindowBorder}"
-        Background="{StaticResource BrushWindowBackground}">
-
+        Height="145"
+        Width="500"
+        BorderThickness="2"
+        BorderBrush="Black">
+    <Window.Background>
+        <ImageBrush ImageSource="pack://application:,,,/Splash.jpg" />
+    </Window.Background>
     <Window.Resources>
         <ResourceDictionary>
             <Style TargetType="{x:Type Window}">
@@ -22,8 +21,8 @@
     </Window.Resources>
 
     <StackPanel Orientation="Vertical">
-        <Image Source="/Logo/64.png" Height="64" Width="64" Stretch="UniformToFill" Margin="0 10 0 0"/>
-        <ProgressBar IsIndeterminate="True" Height="8" SnapsToDevicePixels="True" VerticalAlignment="Top" Margin="10 10 10 0"></ProgressBar>
-        <Label Name="Label" Content="{Binding Progress, FallbackValue='Loading stage'}" Margin="2" HorizontalAlignment="Center"/>
+        <Image Source="/Logo/64.png" Height="48" Width="48" Stretch="UniformToFill" Margin="0 10 0 0"/>
+        <ProgressBar IsIndeterminate="True" Value="50" Height="8" Background="#55000000" Foreground="#99f5deb3" BorderThickness="0" SnapsToDevicePixels="True" VerticalAlignment="Top" Margin="8 8 8 0"></ProgressBar>
+        <TextBlock Name="Label" Foreground="#aaf5deb3" Text="{Binding Progress, FallbackValue='Loading stage'}" Margin="8" HorizontalAlignment="Center" />
     </StackPanel>
 </Window>

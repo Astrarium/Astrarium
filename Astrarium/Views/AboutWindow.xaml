@@ -1,0 +1,60 @@
+﻿<Window x:Class="Astrarium.Views.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+        xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+        WindowStartupLocation="CenterScreen"        
+        Style="{StaticResource {x:Type Window}}"
+        ShowInTaskbar="False"
+        ResizeMode="CanResize" 
+        Title="{t:Text AboutWindow.Title}"
+        s:WindowProperties.MinButtonVisible="Collapsed" 
+        s:WindowProperties.MaxButtonVisible="Collapsed"         
+        Height="350"
+        Width="500"
+        MinHeight="350"
+        MinWidth="500">
+    <Window.Resources>
+        <ResourceDictionary>
+            <Style TargetType="{x:Type Window}">
+                <Setter Property="SnapsToDevicePixels" Value="True" />
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    
+    <StackPanel Orientation="Vertical">
+
+        <Viewbox Stretch="Uniform">
+            <StackPanel Orientation="Vertical" VerticalAlignment="Top" Height="145" Width="500">
+                <StackPanel.Background>
+                    <ImageBrush ImageSource="pack://application:,,,/Splash.jpg" />
+                </StackPanel.Background>
+                <Image Source="/Logo/256.png" Height="48" Width="48" Stretch="UniformToFill" Margin="0 8 0 0"/>
+                <TextBlock Text="Astrarium" HorizontalAlignment="Center" FontSize="28" Margin="0 -8 0 0" />
+                <TextBlock Text="Open source planetarium" HorizontalAlignment="Center" FontSize="12" Margin="-4" />
+            </StackPanel>
+        </Viewbox>
+
+
+        <TabControl>
+            <TabItem Header="{t:Text AboutWindow.VersionTab}">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="{Binding ProductName, FallbackValue='Product name'}" Margin="4" />
+                    <TextBlock Text="{Binding Version, FallbackValue=Version}" Margin="4" />
+                    <TextBlock Text="{Binding Copyright, FallbackValue=Copyright}" Margin="4" />
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="{t:Text AboutWindow.PluginsTab}">
+            </TabItem>
+            <TabItem Header="{t:Text AboutWindow.CreditsTab}">
+
+            </TabItem>
+        </TabControl>
+    </StackPanel>
+
+
+    
+    
+
+</Window>

@@ -11,6 +11,10 @@
     <ApplicationIcon>Astrarium.ico</ApplicationIcon>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net451|AnyCPU'">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <ApplicationDefinition Include="..\Astrarium\App.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -61,6 +65,7 @@
   <ItemGroup>
     <None Remove="Astrarium.ico" />
     <None Remove="Images.xaml" />
+    <None Remove="Splash.jpg" />
     <None Remove="Text.ini" />
   </ItemGroup>
   
@@ -68,10 +73,11 @@
     <Content Include="Logo\128.png" />
     <Content Include="Logo\16.png" />
     <Content Include="Logo\24.png" />
-    <Content Include="Logo\256.png" />
+    <Resource Include="Logo\256.png" />
     <Content Include="Logo\32.png" />
     <Content Include="Logo\48.png" />
     <Resource Include="Logo\64.png" />
+    <Resource Include="Splash.jpg" />
   </ItemGroup>
   
   <ItemGroup>
@@ -182,6 +188,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Themes\Styles.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Update="Views\AboutWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
     </None>
   </ItemGroup>

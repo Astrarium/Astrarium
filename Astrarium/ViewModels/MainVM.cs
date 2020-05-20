@@ -47,6 +47,7 @@ namespace Astrarium.ViewModels
         public Command<CelestialObject> CenterOnObjectCommand { get; private set; }
         public Command ClearObjectsHistoryCommand { get; private set; }
         public Command ChangeSettingsCommand { get; private set; }
+        public Command ShowAboutCommand { get; private set; }
         public Command SaveAsImageCommand { get; private set; }
         public Command PrintCommand { get; private set; }
         public Command PrintPreviewCommand { get; private set; }
@@ -154,6 +155,7 @@ namespace Astrarium.ViewModels
             CenterOnObjectCommand = new Command<CelestialObject>(CenterOnObject);
             ClearObjectsHistoryCommand = new Command(ClearObjectsHistory);
             ChangeSettingsCommand = new Command(ChangeSettings);
+            ShowAboutCommand = new Command(ShowAbout);
             SaveAsImageCommand = new Command(SaveAsImage);
             PrintCommand = new Command(Print);
             PrintPreviewCommand = new Command(PrintPreview);
@@ -327,6 +329,7 @@ namespace Astrarium.ViewModels
                 {
                     new MenuItem("$Menu.DateTime", SetDateCommand) { HotKey = new KeyGesture(Key.D, ModifierKeys.Control, "Ctrl+D") },
                     new MenuItem("$Menu.ObserverLocation", SelectLocationCommand) { HotKey = new KeyGesture(Key.L, ModifierKeys.Control, "Ctrl+L") },
+                    new MenuItem("$Menu.Settings", ChangeSettingsCommand) { HotKey = new KeyGesture(Key.O, ModifierKeys.Control, "Ctrl+O") },
                     null,
                     new MenuItem("$Menu.Language")
                     {
@@ -342,7 +345,7 @@ namespace Astrarium.ViewModels
                         }))
                     },
                     null,
-                    new MenuItem("$Menu.Settings", ChangeSettingsCommand) { HotKey = new KeyGesture(Key.O, ModifierKeys.Control, "Ctrl+O") }
+                    new MenuItem("About", ShowAboutCommand)
                 }
             };
             MainMenuItems.Add(menuOptions);
@@ -585,6 +588,11 @@ namespace Astrarium.ViewModels
         private void ChangeSettings()
         {
             ViewManager.ShowDialog<SettingsVM>();
+        }
+
+        private void ShowAbout()
+        {
+            ViewManager.ShowDialog<AboutVM>();
         }
 
         private void SaveAsImage()

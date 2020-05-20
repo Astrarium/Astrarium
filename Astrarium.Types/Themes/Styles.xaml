@@ -362,7 +362,7 @@
         <Setter Property="OverridesDefaultStyle" Value="True" />
         <Setter Property="Foreground" Value="{StaticResource BrushForeground}"/>
         <Setter Property="Padding" Value="4"/>
-        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderThickness" Value="0 1 0 0" />
         <Setter Property="BorderBrush" Value="{StaticResource BrushControlBackground}"/>
         <Setter Property="Background" Value="{StaticResource BrushControlLightBackground}"/>
         <Setter Property="Panel.Background" Value="{StaticResource BrushWindowBackground}"/>
@@ -3236,16 +3236,22 @@
                         <c:BorderFix x:Name="PART_Indicator"
                               BorderThickness="1"
                               HorizontalAlignment="Left"
-                              Margin="1"
-                              Background="{TemplateBinding Foreground}">
+                              Margin="1">
                             <c:BorderFix Visibility="{TemplateBinding Property=IsIndeterminate, Converter={t:BoolToVisibilityConverter}}" x:Name="DiagonalDecorator" Width="5000">
                                 <c:BorderFix.Background>
-                                    <DrawingBrush TileMode="Tile" Stretch="None" Viewbox="0,0,1,1" Viewport="0,0,36,34" ViewportUnits="Absolute">
+
+
+                                    <DrawingBrush TileMode="Tile" Stretch="None" Viewbox="0,0,1,1" Viewport="0,0,500,5" ViewportUnits="Absolute">
+
                                         <DrawingBrush.RelativeTransform>
                                             <TranslateTransform X="0" Y="0" />
                                         </DrawingBrush.RelativeTransform>
                                         <DrawingBrush.Drawing>
-                                            <GeometryDrawing Brush="#55000000" Geometry="M0,0 18,0 36,34 18,34 Z" />
+                                            <GeometryDrawing Brush="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}">
+                                                <GeometryDrawing.Geometry>
+                                                    <RectangleGeometry Rect="0 0 250 5" />
+                                                </GeometryDrawing.Geometry>
+                                            </GeometryDrawing>
                                         </DrawingBrush.Drawing>
                                     </DrawingBrush>
                                 </c:BorderFix.Background>
@@ -3255,7 +3261,7 @@
                                             <Storyboard>
                                                 <DoubleAnimation
                                                     Storyboard.TargetProperty="(Border.Background).(DrawingBrush.RelativeTransform).(TranslateTransform.X)"
-                                                    From="0" To=".36" RepeatBehavior="Forever" Duration="0:0:18" />
+                                                    From="0" To="1" RepeatBehavior="Forever" Duration="0:0:10" />
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </EventTrigger>

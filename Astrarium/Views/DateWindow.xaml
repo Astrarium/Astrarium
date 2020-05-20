@@ -17,10 +17,9 @@
         s:WindowProperties.MaxButtonVisible="Collapsed" 
         WindowStartupLocation="CenterOwner">
     <StackPanel Orientation="Vertical">
-        <TabControl BorderThickness="0">
+        <TabControl>
             <TabItem Header="{t:Text DateWindow.TabCalendar}" Visibility="{Binding DisplayMode, Converter={s:VisibilityConverter}, ConverterParameter={x:Static t:DateOptions.DateTime}, FallbackValue=Visible}">
                 <StackPanel Orientation="Vertical">
-                    <Border Height="1" Background="{StaticResource BrushControlLightBackground}" Margin="-3 -8 -3 0" Visibility="{Binding DisplayMode, Converter={s:VisibilityConverter}, ConverterParameter={x:Static t:DateOptions.DateTime}, FallbackValue=Visible}" />
                     <!-- Date & Time Layout -->
                     <Grid Visibility="{Binding DisplayMode, Converter={s:VisibilityConverter}, ConverterParameter={x:Static t:DateOptions.DateTime}, FallbackValue=Visible}">
                         <Grid.ColumnDefinitions>
@@ -84,7 +83,6 @@
             </TabItem>
             <TabItem Header="{t:Text DateWindow.TabJulianDay}" Visibility="{Binding DisplayMode, Converter={s:VisibilityConverter}, ConverterParameter={x:Static t:DateOptions.DateTime}, FallbackValue=Visible}">
                 <StackPanel Orientation="Vertical" Visibility="{Binding DisplayMode, Converter={s:VisibilityConverter}, ConverterParameter={x:Static t:DateOptions.DateTime}, FallbackValue=Visible}">
-                    <Border Height="1" Background="{StaticResource BrushControlLightBackground}" Margin="-3 -8 -3 0" />
                     <c:NumericUpDown Value="{Binding JulianDay, UpdateSourceTrigger=LostFocus}" DecimalPlaces="6" Minimum="260058.629284" Maximum="5373485.0" />
                 </StackPanel>
             </TabItem>
