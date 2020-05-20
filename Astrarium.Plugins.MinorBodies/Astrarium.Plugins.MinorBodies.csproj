@@ -3,6 +3,10 @@
   <PropertyGroup>
     <TargetFrameworks>net451</TargetFrameworks>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <Version>2020.5</Version>
+    <Product>Minor Bodies</Product>
+    <Description>Contains comets and asteroids data</Description>
+    <Authors>Alexander Krutov</Authors>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net451|AnyCPU'">

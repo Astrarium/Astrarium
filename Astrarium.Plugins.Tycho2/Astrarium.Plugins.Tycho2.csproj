@@ -3,6 +3,10 @@
   <PropertyGroup>
     <TargetFrameworks>net451</TargetFrameworks>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <Version>2020.5</Version>
+    <Product>Tycho2</Product>
+    <Description>Tycho2 star catalogue contains data for the 2.5 million brightest stars in the sky</Description>
+    <Authors>Alexander Krutov</Authors>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net451|AnyCPU'">

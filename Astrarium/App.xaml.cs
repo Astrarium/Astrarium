@@ -147,9 +147,7 @@ namespace Astrarium
                 }
             }
 
-            // collect all plugins implementations
-            // TODO: to support plugin system, we need to load assemblies 
-            // from the specific directory and search for plugin there
+            // collect all plugins implementations            
             Type[] pluginTypes = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(a => a.GetTypes())
                 .Where(t => typeof(AbstractPlugin).IsAssignableFrom(t) && !t.IsAbstract)

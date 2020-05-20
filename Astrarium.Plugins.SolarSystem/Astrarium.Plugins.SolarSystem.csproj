@@ -3,6 +3,10 @@
   <PropertyGroup>
     <TargetFrameworks>net451</TargetFrameworks>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <Version>2020.5</Version>
+    <Product>Solar System</Product>
+    <Description>Calculates positions of Sun, Moon (ELP2000), 8 major planets (VSOP87) and Pluto</Description>
+    <Authors>Alexander Krutov</Authors>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net451|AnyCPU'">

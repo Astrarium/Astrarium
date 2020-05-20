@@ -3239,10 +3239,7 @@
                               Margin="1">
                             <c:BorderFix Visibility="{TemplateBinding Property=IsIndeterminate, Converter={t:BoolToVisibilityConverter}}" x:Name="DiagonalDecorator" Width="5000">
                                 <c:BorderFix.Background>
-
-
                                     <DrawingBrush TileMode="Tile" Stretch="None" Viewbox="0,0,1,1" Viewport="0,0,500,5" ViewportUnits="Absolute">
-
                                         <DrawingBrush.RelativeTransform>
                                             <TranslateTransform X="0" Y="0" />
                                         </DrawingBrush.RelativeTransform>

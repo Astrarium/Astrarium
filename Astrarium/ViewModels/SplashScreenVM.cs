@@ -9,7 +9,7 @@ namespace Astrarium.ViewModels
 {
     public class SplashScreenVM : ViewModelBase, IProgress<string>
     {
-        public string Progress { get; private set; }
+        public string Progress { get; private set; } = "Initializing";
 
         public void Report(string value)
         {

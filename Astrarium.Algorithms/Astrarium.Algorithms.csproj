@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFrameworks>net451</TargetFrameworks>
+    <Version>2020.5</Version>
+    <Product>Astrarium.Algorithms</Product>
+    <Description>Contains algorithms and routines used in Astrarium</Description>
+    <Copyright>© Alexander Krutov</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

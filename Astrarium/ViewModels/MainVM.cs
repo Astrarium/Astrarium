@@ -345,7 +345,7 @@ namespace Astrarium.ViewModels
                         }))
                     },
                     null,
-                    new MenuItem("About", ShowAboutCommand)
+                    new MenuItem("$Menu.About", ShowAboutCommand)
                 }
             };
             MainMenuItems.Add(menuOptions);

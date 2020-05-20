@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
         xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+        xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
         WindowStartupLocation="CenterScreen"        
         Style="{StaticResource {x:Type Window}}"
         ShowInTaskbar="False"
@@ -23,38 +24,67 @@
     </Window.Resources>
 
     
-    <StackPanel Orientation="Vertical">
+    <Grid>
 
-        <Viewbox Stretch="Uniform">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Viewbox Stretch="UniformToFill" Grid.Row="0">
             <StackPanel Orientation="Vertical" VerticalAlignment="Top" Height="145" Width="500">
                 <StackPanel.Background>
                     <ImageBrush ImageSource="pack://application:,,,/Splash.jpg" />
                 </StackPanel.Background>
                 <Image Source="/Logo/256.png" Height="48" Width="48" Stretch="UniformToFill" Margin="0 8 0 0"/>
-                <TextBlock Text="Astrarium" HorizontalAlignment="Center" FontSize="28" Margin="0 -8 0 0" />
-                <TextBlock Text="Open source planetarium" HorizontalAlignment="Center" FontSize="12" Margin="-4" />
+                <TextBlock Foreground="White" Text="Astrarium" HorizontalAlignment="Center" FontSize="28" Margin="0 -8 0 0" />
+                <TextBlock Foreground="White" Text=".Net Planetarium for Astronomy Amateurs" HorizontalAlignment="Center" FontSize="12" Margin="-4" />
             </StackPanel>
         </Viewbox>
-
-
-        <TabControl>
+        
+        <TabControl Grid.Row="1">
             <TabItem Header="{t:Text AboutWindow.VersionTab}">
                 <StackPanel Orientation="Vertical">
-                    <TextBlock Text="{Binding ProductName, FallbackValue='Product name'}" Margin="4" />
-                    <TextBlock Text="{Binding Version, FallbackValue=Version}" Margin="4" />
-                    <TextBlock Text="{Binding Copyright, FallbackValue=Copyright}" Margin="4" />
+                    <TextBlock Text="{Binding ProductName, FallbackValue='Product name'}" Margin="4" HorizontalAlignment="Center" />
+                    <TextBlock Text="{Binding Version, FallbackValue=Version}" Margin="4" HorizontalAlignment="Center" />
+                    <TextBlock HorizontalAlignment="Center">
+                    <Hyperlink NavigateUri="https://github.com/Astrarium/Astrarium" RequestNavigate="Hyperlink_RequestNavigate">github.com/Astrarium/Astrarium</Hyperlink>
+                    </TextBlock>
+                    <TextBlock Text="{Binding Copyright, FallbackValue=Copyright}" Margin="8"  HorizontalAlignment="Center"/>
                 </StackPanel>
             </TabItem>
             <TabItem Header="{t:Text AboutWindow.PluginsTab}">
+                <ListView 
+                    ScrollViewer.VerticalScrollBarVisibility="Visible"
+                    ScrollViewer.CanContentScroll="False"
+                    ItemsSource="{Binding Plugins}">
+
+                    <ListView.Resources>
+                        <Style TargetType="{x:Type ListView}" BasedOn="{StaticResource ListViewWithGridViewStyle}">
+                            <Setter Property="ItemContainerStyle">
+                                <Setter.Value>
+                                    <Style TargetType="ListViewItem" BasedOn="{StaticResource ListViewItemGridViewStyle}" />
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListView.Resources>
+
+                    <ListView.View>
+                        <GridView ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}">
+                            <GridView.Columns>
+                                <GridViewColumn Header="{t:Text AboutWindow.Plugins.Name}" Width="Auto" DisplayMemberBinding="{Binding Name}" />
+                                <GridViewColumn Header="{t:Text AboutWindow.Plugins.Description}" Width="Auto" DisplayMemberBinding="{Binding Description}" />
+                                <GridViewColumn Header="{t:Text AboutWindow.Plugins.Authors}" Width="Auto" DisplayMemberBinding="{Binding Authors}" />
+                                <GridViewColumn Header="{t:Text AboutWindow.Plugins.Version}" Width="Auto" DisplayMemberBinding="{Binding Version}" />
+                            </GridView.Columns>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
             </TabItem>
             <TabItem Header="{t:Text AboutWindow.CreditsTab}">
 
             </TabItem>
         </TabControl>
-    </StackPanel>
-
-
-    
-    
+    </Grid>
 
 </Window>
