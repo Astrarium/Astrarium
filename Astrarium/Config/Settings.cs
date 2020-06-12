@@ -247,10 +247,8 @@ namespace Astrarium.Config
             public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
             {
                 JToken jObject = JToken.ReadFrom(reader);
-
                 string name = reader.Path;
                 Type type = settingsTypes[name];
-
                 return jObject.ToObject(type);
             }
 

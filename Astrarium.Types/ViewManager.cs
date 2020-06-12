@@ -54,6 +54,11 @@ namespace Astrarium.Types
             return viewManager.ShowMessageBox(caption, text, buttons);
         }
 
+        public static MessageBoxResult ShowMessageBox(string caption, string text)
+        {
+            return viewManager.ShowMessageBox(caption, text, MessageBoxButton.OK);
+        }
+
         /// <summary>
         /// Shows window with progress bar
         /// </summary>

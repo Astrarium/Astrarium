@@ -23,14 +23,19 @@ namespace Astrarium.Views
         public AboutWindow()
         {
             InitializeComponent();
+            CommandBindings.Add(new CommandBinding(NavigationCommands.GoToPage, (s, e) => Navigate((string)e.Parameter)));
         }
 
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
         {
+            Navigate(e.Uri.AbsoluteUri);
+            e.Handled = true;
+        }
+        private void Navigate(string url)
+        {
             try
             {
-                Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
-                e.Handled = true;
+                Process.Start(new ProcessStartInfo(url));                
             }
             catch (Exception ex)
             {

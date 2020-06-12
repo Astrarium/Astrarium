@@ -2,11 +2,14 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 
 namespace Astrarium.ViewModels
 {
@@ -15,6 +18,18 @@ namespace Astrarium.ViewModels
         public string ProductName => FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductName;
         public string Version => Text.Get("AboutWindow.Version", ("version", FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion));
         public string Copyright => FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).LegalCopyright;
+
+        public string Credits
+        {
+            get
+            {
+                using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Astrarium.Credits.md"))
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    return reader.ReadToEnd();
+                }
+            }
+        }
 
         public IEnumerable<PluginInfo> Plugins 
         {

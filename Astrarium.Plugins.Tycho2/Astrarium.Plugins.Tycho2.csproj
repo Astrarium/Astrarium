@@ -10,11 +10,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net451|AnyCPU'">
-    <OutputPath>..\Astrarium\bin\Debug\Plugins\Astrarium.Plugins.Tycho2</OutputPath>
+    <OutputPath>..\Astrarium\bin\Debug</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net451|AnyCPU'">
-    <OutputPath>..\Astrarium\bin\Release\Plugins\Astrarium.Plugins.Tycho2</OutputPath>
+    <OutputPath>..\Astrarium\bin\Release</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>

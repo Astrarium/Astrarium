@@ -167,7 +167,7 @@ namespace Astrarium
                     t.Name == $"{viewModelName}Window" ||
                     t.Name == $"{viewModelName}View");
 
-                if (viewType != null)
+                if (viewType != null && !viewModelViewBindings.ContainsKey(viewModelType))
                 {
                     viewModelViewBindings.Add(viewModelType, viewType);
                 }

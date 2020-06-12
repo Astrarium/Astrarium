@@ -9,6 +9,7 @@
                 <ResourceDictionary Source="pack://application:,,,/Astrarium.Types;component/Themes/WindowStyle.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/Astrarium;component/Images.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/Astrarium;component/Themes/Styles.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Astrarium;component/Themes/Markdown.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

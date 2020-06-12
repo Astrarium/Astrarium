@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
         xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
-        xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+        xmlns:c="clr-namespace:Astrarium.Controls"
         WindowStartupLocation="CenterScreen"        
         Style="{StaticResource {x:Type Window}}"
         ShowInTaskbar="False"
@@ -16,11 +16,24 @@
         MinHeight="350"
         MinWidth="500">
     <Window.Resources>
-        <ResourceDictionary>
-            <Style TargetType="{x:Type Window}">
-                <Setter Property="SnapsToDevicePixels" Value="True" />
-            </Style>
-        </ResourceDictionary>
+
+        <c:Markdown x:Key="Markdown"
+                        DocumentStyle="{StaticResource DocumentStyle}"
+                        Heading1Style="{StaticResource H1Style}"
+                        Heading2Style="{StaticResource H2Style}"
+                        Heading3Style="{StaticResource H3Style}"
+                        Heading4Style="{StaticResource H4Style}"
+                        LinkStyle="{StaticResource LinkStyle}"
+                        ListStyle="{StaticResource ListStyle}"
+                        ListItemStyle="{StaticResource ListItemStyle}"
+                        ImageStyle="{StaticResource ImageStyle}"
+                        SeparatorStyle="{StaticResource SeparatorStyle}"
+                        TableStyle="{StaticResource TableStyle}"
+                        TableHeaderStyle="{StaticResource TableHeaderStyle}"
+                        />
+
+        <c:TextToFlowDocumentConverter x:Key="TextToFlowDocumentConverter" Markdown="{StaticResource Markdown}" />
+        
     </Window.Resources>
 
     
@@ -31,14 +44,14 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Viewbox Stretch="UniformToFill" Grid.Row="0">
+        <Viewbox Stretch="None" Grid.Row="0">
             <StackPanel Orientation="Vertical" VerticalAlignment="Top" Height="145" Width="500">
                 <StackPanel.Background>
                     <ImageBrush ImageSource="pack://application:,,,/Splash.jpg" />
                 </StackPanel.Background>
                 <Image Source="/Logo/256.png" Height="48" Width="48" Stretch="UniformToFill" Margin="0 8 0 0"/>
                 <TextBlock Foreground="White" Text="Astrarium" HorizontalAlignment="Center" FontSize="28" Margin="0 -8 0 0" />
-                <TextBlock Foreground="White" Text=".Net Planetarium for Astronomy Amateurs" HorizontalAlignment="Center" FontSize="12" Margin="-4" />
+                <TextBlock Foreground="White" Text="Open-Source .Net Planetarium" HorizontalAlignment="Center" FontSize="12" Margin="-4" />
             </StackPanel>
         </Viewbox>
         
@@ -82,7 +95,13 @@
                 </ListView>
             </TabItem>
             <TabItem Header="{t:Text AboutWindow.CreditsTab}">
-
+                <FlowDocumentScrollViewer 
+                    VerticalAlignment="Stretch"
+                    HorizontalAlignment="Stretch"
+                    Margin="0"
+                    ContextMenu="{x:Null}"
+                    SelectionBrush="{StaticResource BrushSelection}"
+                    Document="{Binding Credits, Converter={StaticResource TextToFlowDocumentConverter}}" />
             </TabItem>
         </TabControl>
     </Grid>

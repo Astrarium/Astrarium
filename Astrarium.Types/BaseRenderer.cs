@@ -23,9 +23,16 @@ namespace Astrarium.Types
         public virtual bool OnMouseMove(CrdsHorizontal mouse, MouseButton mouseButton) { return false; }
     }
 
+    /// <summary>
+    /// Defines default rendering layer
+    /// </summary>
     public enum RendererOrder
     {
+        /// <summary>
+        /// Renderer should be processed first
+        /// </summary>
         Background = 0,
+
         Grids = 1,
         DeepSpace = 2,
         Stars = 3,

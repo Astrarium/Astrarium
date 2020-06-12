@@ -139,7 +139,7 @@ namespace Astrarium
             {
                 try
                 {
-                    Assembly.LoadFrom(path);
+                    Assembly.LoadFrom(path);                    
                 }
                 catch (Exception ex)
                 {
@@ -201,7 +201,7 @@ namespace Astrarium
                 // add menu items
                 uiIntegration.MenuItems.AddRange(plugin.MenuItems);
 
-                plugins.Add(plugin);
+                plugins.Add(plugin);                
             }
 
             // Default rendering order for BaseRenderer descendants.
@@ -268,6 +268,11 @@ namespace Astrarium
                     SetLanguage((string)value);
                 }
             };
+
+            foreach (var plugin in plugins)
+            {
+                plugin.Initialize();
+            }
         }
     }
 }

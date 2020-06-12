@@ -163,6 +163,20 @@ namespace Astrarium.Types.Themes
         }
     }
 
+    [ValueConversion(typeof(object), typeof(bool))]
+    public class EqualityConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return object.Equals(value, parameter);
+        }
+
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return parameter;
+        }
+    }
+
     [ValueConversion(typeof(object), typeof(object))]
     public class VisibilityConverter : ValueConverterBase
     {

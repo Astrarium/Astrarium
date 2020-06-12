@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Window 
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+    xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:local="clr-namespace:Astrarium.Plugins.FOV" 
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types" 
+    xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+    x:Class="Astrarium.Plugins.FOV.CameraWindow" 
+    mc:Ignorable="d" 
+    Title="Camera" 
+    Height="300" 
+    Width="300" 
+    MinHeight="300" MinWidth="300" 
+    Style="{StaticResource {x:Type Window}}" 
+    WindowStartupLocation="CenterOwner">
+
+    <Grid Margin="4" SnapsToDevicePixels="True">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Vertical" Margin="6">
+            <Label Content="Model name" />
+            <TextBox Text="{Binding Camera.Name}" />
+
+            <Label Content="Resulution (Horizontal x Vertical), pixels" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <c:NumericUpDown Grid.Column="0" Value="{Binding Camera.HorizontalResolution}" DecimalPlaces="0" Minimum="1" Maximum="10000" />
+                <Label Grid.Column="1" Content=" x " />
+                <c:NumericUpDown Grid.Column="2" Value="{Binding Camera.VerticalResolution}" DecimalPlaces="0" Minimum="1" Maximum="10000" />
+            </Grid>
+
+            <Label Content="Pixel Size (Width x Height), µm" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <c:NumericUpDown Grid.Column="0" Value="{Binding Camera.PixelSizeWidth}" DecimalPlaces="2" Minimum="0.01" Maximum="1000" Step="0.1" />
+                <Label Grid.Column="1" Content=" x " />
+                <c:NumericUpDown Grid.Column="2" Value="{Binding Camera.PixelSizeHeight}" DecimalPlaces="2" Minimum="0.01" Maximum="1000" Step="0.1" />
+            </Grid>
+
+        </StackPanel>
+
+        <Separator Grid.Row="1" Margin="0 4 0 4" />
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding OkCommand}" Content="{t:Text OK}" />
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CancelCommand}" Content="{t:Text Cancel}" />
+        </StackPanel>
+    </Grid>
+</Window>

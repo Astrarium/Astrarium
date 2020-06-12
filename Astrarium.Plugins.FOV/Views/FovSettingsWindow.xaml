@@ -1,0 +1,319 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Window 
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+    xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:local="clr-namespace:Astrarium.Plugins.FOV" 
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types" 
+    xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+    x:Class="Astrarium.Plugins.FOV.FovSettingsWindow" 
+    mc:Ignorable="d" 
+    Title="FOV" 
+    Height="500" 
+    Width="700" 
+    MinHeight="500" MinWidth="700" 
+    Style="{StaticResource {x:Type Window}}" 
+    WindowStartupLocation="CenterOwner">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <Style x:Key="RadioTab" TargetType="{x:Type RadioButton}">
+                <Style.Setters>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="RadioButton">
+                                <c:BorderFix BorderThickness="0.7 1 0.7 1" x:Name="Border" BorderBrush="{TemplateBinding BorderBrush}" SnapsToDevicePixels="True">
+                                    <TextBlock x:Name="Text" Text="{TemplateBinding Content}" Margin="{TemplateBinding Padding}" />
+                                </c:BorderFix>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter Property="Background" TargetName="Border" Value="{StaticResource BrushControlBackground}" />
+                                    </Trigger>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter Property="Foreground" TargetName="Text" Value="{StaticResource BrushControlLightBackground}" />
+                                        <Setter Property="Cursor" Value="No" />
+                                    </Trigger>
+                                    <MultiTrigger>
+                                        <MultiTrigger.Conditions>
+                                            <Condition Property="IsEnabled" Value="True" />
+                                            <Condition Property="IsMouseOver" Value="True" />
+                                        </MultiTrigger.Conditions>
+                                        <Setter Property="Background" TargetName="Border" Value="{StaticResource BrushControlLightBackground}" />
+                                        <Setter Property="BorderBrush" TargetName="Border" Value="{StaticResource BrushControlLightBackground}" />
+                                    </MultiTrigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="Padding" Value="6" />
+                    <Setter Property="Foreground" Value="{StaticResource BrushForeground}" />
+                    <Setter Property="Background" Value="{StaticResource BrushControlBackground}"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource BrushControlBackground}" />
+                    <Setter Property="Cursor" Value="Hand" />
+                </Style.Setters>
+            </Style>
+
+            <Style x:Key="EditButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+                <Style.Setters>
+                    <Setter Property="Cursor" Value="Hand" />
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="Margin" Value="2" />
+                    <Setter Property="Width" Value="18" />
+                    <Setter Property="Height" Value="18" />
+                </Style.Setters>
+                <Style.Triggers>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Foreground" Value="{StaticResource BrushControlBackground}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Grid x:Key="ImageAdd" x:Shared="False" >
+                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="10" Height="10" Stretch="Fill" Fill="{StaticResource BrushForeground}" Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+            </Grid>
+
+            <Grid x:Key="ImageDelete" x:Shared="False" >
+                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="10" Height="10" Stretch="Fill" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}" Data="F1 M 26.9166,22.1667L 37.9999,33.25L 49.0832,22.1668L 53.8332,26.9168L 42.7499,38L 53.8332,49.0834L 49.0833,53.8334L 37.9999,42.75L 26.9166,53.8334L 22.1666,49.0833L 33.25,38L 22.1667,26.9167L 26.9166,22.1667 Z "/>
+            </Grid>
+
+            <Grid x:Key="ImageEdit" x:Shared="False" >
+                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="10" Height="10" Stretch="Fill" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}" Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+            </Grid>
+        </ResourceDictionary>
+    </Window.Resources>
+    
+    <Grid Margin="4" SnapsToDevicePixels="True">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Vertical" Grid.Row="0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <RadioButton Content="Telescope View" IsChecked="{Binding FrameType, Converter={s:EqualityConverter}, ConverterParameter={x:Static local:FrameType.Telescope}}" Style="{StaticResource ResourceKey=RadioTab}" />
+                <RadioButton Content="Camera View" IsChecked="{Binding FrameType, Converter={s:EqualityConverter}, ConverterParameter={x:Static local:FrameType.Camera}}" Style="{StaticResource ResourceKey=RadioTab}" />
+                <RadioButton Content="Binocular View" IsChecked="{Binding FrameType, Converter={s:EqualityConverter}, ConverterParameter={x:Static local:FrameType.Binocular}}" Style="{StaticResource ResourceKey=RadioTab}" />
+            </StackPanel>
+
+            <!-- Frame Appearance -->
+            <Grid>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" MinWidth="120" SharedSizeGroup="g1" />
+                        <ColumnDefinition Width="Auto" MinWidth="120" SharedSizeGroup="g1" />
+                    </Grid.ColumnDefinitions>
+                    <Label Content="Label" Grid.Row="0" Grid.Column="0" />
+                    <TextBox Margin="2" Text="{Binding Label}" Grid.Row="1" Grid.Column="0" />
+                    <Label Content="Shading" Grid.Row="0" Grid.Column="1" />
+                    <c:NumericUpDown Margin="2" Value="{Binding Shading}" DecimalPlaces="0" Minimum="0" Maximum="100" Grid.Row="1" Grid.Column="1" />
+                    <Label Content="Color" Grid.Row="0" Grid.Column="2" />
+                    <c:ColorPicker Margin="5" Caption="{Binding Color, Converter={s:ColorToStringConverter}}" SelectedColor="{Binding Color}" Grid.Row="1" Grid.Column="2" />
+                </Grid>
+            </Grid>
+
+            <Grid Margin="0 15 0 15">
+                <StackPanel Orientation="Vertical">
+                    
+                    <!-- Telescope -->
+                    <Grid Background="Transparent" Visibility="{Binding TelescopeVisible, Converter={s:BoolToVisibilityConverter}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" MinWidth="120" SharedSizeGroup="g1" />
+                            <ColumnDefinition Width="Auto" MinWidth="120" SharedSizeGroup="g1" />
+                        </Grid.ColumnDefinitions>
+
+                        <DockPanel Grid.Row="0" Grid.Column="0">
+                            <Label Content="Telescope" HorizontalAlignment="Left" />
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=IsMouseOver, Converter={s:BoolToVisibilityConverter}}">
+                                <Button Content="{DynamicResource ImageAdd}" Style="{StaticResource EditButton}" Command="{Binding AddEquipmentCommand}" CommandParameter="{x:Type local:Telescope}" />
+                                <Button Content="{DynamicResource ImageEdit}" Style="{StaticResource EditButton}" IsEnabled="{Binding Telescope, Converter={s:NotNullToBoolConverter}}" Command="{Binding EditEquipmentCommand}" CommandParameter="{x:Type local:Telescope}" />
+                                <Button Content="{DynamicResource ImageDelete}" Style="{StaticResource EditButton}" IsEnabled="{Binding Telescope, Converter={s:NotNullToBoolConverter}}" Command="{Binding DeleteEquipmentCommand}" CommandParameter="{x:Type local:Telescope}" />
+                            </StackPanel>
+                        </DockPanel>
+
+                        <ComboBox Margin="2" Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Telescopes}" SelectedValue="{Binding TelescopeId}" DisplayMemberPath="Name" SelectedValuePath="Id">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel />
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <Label Grid.Row="0" Grid.Column="1" Content="Focal Length" />
+                        <TextBox Margin="2" IsReadOnly="True" Grid.Row="1" Grid.Column="1" Text="{Binding Telescope.FocalLength, Mode=OneWay, Converter={local:MillimetersConverter}}" />
+                        <Label Grid.Row="0" Grid.Column="2" Content="Aperture" />
+                        <TextBox Margin="2" IsReadOnly="True" Grid.Row="1" Grid.Column="2" Text="{Binding Telescope.Aperture, Mode=OneWay, Converter={local:MillimetersConverter}}" />
+                    </Grid>
+
+                    <!-- Eyepiece -->
+                    <Grid Background="Transparent" Visibility="{Binding EyepieceVisible, Converter={s:BoolToVisibilityConverter}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" MinWidth="120" SharedSizeGroup="g1" />
+                            <ColumnDefinition Width="Auto" MinWidth="120" SharedSizeGroup="g1" />
+                        </Grid.ColumnDefinitions>
+
+                        <DockPanel Grid.Row="0" Grid.Column="0">
+                            <Label Content="Eyepiece" HorizontalAlignment="Left" />
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=IsMouseOver, Converter={s:BoolToVisibilityConverter}}">
+                                <Button Content="{DynamicResource ImageAdd}" Style="{StaticResource EditButton}" Command="{Binding AddEquipmentCommand}" CommandParameter="{x:Type local:Eyepiece}" />
+                                <Button Content="{DynamicResource ImageEdit}" Style="{StaticResource EditButton}" IsEnabled="{Binding Eyepiece, Converter={s:NotNullToBoolConverter}}" Command="{Binding EditEquipmentCommand}" CommandParameter="{x:Type local:Eyepiece}" />
+                                <Button Content="{DynamicResource ImageDelete}" Style="{StaticResource EditButton}" IsEnabled="{Binding Eyepiece, Converter={s:NotNullToBoolConverter}}" Command="{Binding DeleteEquipmentCommand}" CommandParameter="{x:Type local:Eyepiece}" />                            </StackPanel>
+                        </DockPanel>
+
+                        <ComboBox Margin="2" Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Eyepieces}" SelectedValue="{Binding EyepieceId}" DisplayMemberPath="Name" SelectedValuePath="Id">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel />
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <Label Grid.Row="0" Grid.Column="1" Content="Focal Length" />
+                        <TextBox Margin="2" IsReadOnly="True" Grid.Row="1" Grid.Column="1" Text="{Binding Eyepiece.FocalLength, Mode=OneWay, Converter={local:MillimetersConverter}}" />
+                        <Label Grid.Row="0" Grid.Column="2" Content="Field of View" />
+                        <TextBox Margin="2" IsReadOnly="True" Grid.Row="1" Grid.Column="2" Text="{Binding Eyepiece.FieldOfView, Mode=OneWay, Converter={local:FieldOfViewConverter}}" />
+                    </Grid>
+
+                    <!-- Camera -->
+                    <Grid Background="Transparent" Visibility="{Binding CameraVisible, Converter={s:BoolToVisibilityConverter}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" MinWidth="120" SharedSizeGroup="g1" />
+                            <ColumnDefinition Width="Auto" MinWidth="120" SharedSizeGroup="g1" />
+                        </Grid.ColumnDefinitions>
+                        
+                        <DockPanel Grid.Row="0" Grid.Column="0">
+                            <Label Content="Camera" HorizontalAlignment="Left" />
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=IsMouseOver, Converter={s:BoolToVisibilityConverter}}">
+                                <Button Content="{DynamicResource ImageAdd}" Style="{StaticResource EditButton}" Command="{Binding AddEquipmentCommand}" CommandParameter="{x:Type local:Camera}" />
+                                <Button Content="{DynamicResource ImageEdit}" Style="{StaticResource EditButton}" IsEnabled="{Binding Camera, Converter={s:NotNullToBoolConverter}}" Command="{Binding EditEquipmentCommand}" CommandParameter="{x:Type local:Camera}" />
+                                <Button Content="{DynamicResource ImageDelete}" Style="{StaticResource EditButton}" IsEnabled="{Binding Camera, Converter={s:NotNullToBoolConverter}}" Command="{Binding DeleteEquipmentCommand}" CommandParameter="{x:Type local:Camera}" />                            
+                            </StackPanel>
+                        </DockPanel>
+                        
+                        <ComboBox Margin="2" Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Cameras}" SelectedValue="{Binding CameraId}" DisplayMemberPath="Name" SelectedValuePath="Id">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel />
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <Label Grid.Row="0" Grid.Column="1" Content="Resolution" />
+                        <TextBox Margin="2" IsReadOnly="True" Grid.Row="1" Grid.Column="1" Text="{Binding Camera, Mode=OneWay, Converter={local:CameraResolutionConverter}}" />
+                        <Label Grid.Row="0" Grid.Column="2" Content="Pixel Size" />
+                        <TextBox Margin="2" IsReadOnly="True" Grid.Row="1" Grid.Column="2" Text="{Binding Camera, Mode=OneWay, Converter={local:CameraPixelSizeConverter}}" />
+                    </Grid>
+                    
+                    <!-- Binocular -->
+                    <Grid Background="Transparent" Visibility="{Binding BinocularVisible, Converter={s:BoolToVisibilityConverter}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" MinWidth="120" SharedSizeGroup="g2" />
+                            <ColumnDefinition Width="Auto" MinWidth="120" SharedSizeGroup="g2" />
+                            <ColumnDefinition Width="Auto" MinWidth="120" SharedSizeGroup="g2" />
+                        </Grid.ColumnDefinitions>
+                        
+                        <DockPanel Grid.Row="0" Grid.Column="0">
+                            <Label Content="Binocular" HorizontalAlignment="Left" />
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=IsMouseOver, Converter={s:BoolToVisibilityConverter}}">
+                                <Button Content="{DynamicResource ImageAdd}" Style="{StaticResource EditButton}" Command="{Binding AddEquipmentCommand}" CommandParameter="{x:Type local:Binocular}" />
+                                <Button Content="{DynamicResource ImageEdit}" Style="{StaticResource EditButton}" IsEnabled="{Binding Binocular, Converter={s:NotNullToBoolConverter}}" Command="{Binding EditEquipmentCommand}" CommandParameter="{x:Type local:Binocular}" />
+                                <Button Content="{DynamicResource ImageDelete}" Style="{StaticResource EditButton}" IsEnabled="{Binding Binocular, Converter={s:NotNullToBoolConverter}}" Command="{Binding DeleteEquipmentCommand}" CommandParameter="{x:Type local:Binocular}" />
+                            </StackPanel>
+                        </DockPanel>
+                        
+                        <ComboBox Margin="2" Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Binoculars}" SelectedValue="{Binding BinocularId}" DisplayMemberPath="Name" SelectedValuePath="Id">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel />
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <Label Grid.Row="0" Grid.Column="1" Content="Aperture" />
+                        <TextBox Margin="2" IsReadOnly="True" Grid.Row="1" Grid.Column="1" Text="{Binding Binocular.Aperture, Mode=OneWay, Converter={local:MillimetersConverter}}" />
+                        <Label Grid.Row="0" Grid.Column="2" Content="Magnification" />
+                        <TextBox Margin="2" IsReadOnly="True" Grid.Row="1" Grid.Column="2" Text="{Binding Binocular.Magnification, Mode=OneWay, Converter={local:MagnificationConverter}}" />
+                        <Label Grid.Row="0" Grid.Column="3" Content="Field of View" />
+                        <TextBox Margin="2" IsReadOnly="True" Grid.Row="1" Grid.Column="3" Text="{Binding Binocular.FieldOfView, Mode=OneWay, Converter={local:FieldOfViewConverter}}" />
+                    </Grid>
+
+                    <!-- Lens -->
+                    <Grid Visibility="{Binding LensVisible, Converter={s:BoolToVisibilityConverter}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" MinWidth="120" SharedSizeGroup="g1" />
+                            <ColumnDefinition Width="Auto" MinWidth="120" SharedSizeGroup="g1" />
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Row="0" Grid.Column="0" Content="Lens" />
+                        <ComboBox Margin="2" Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Lenses}" SelectedValue="{Binding LensId}" DisplayMemberPath="Name" SelectedValuePath="Id">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel />
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <Label Grid.Row="0" Grid.Column="1" Content="Camera Binning" Visibility="{Binding CameraVisible, Converter={s:BoolToVisibilityConverter}}" />
+                        <ComboBox Margin="2" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Binnings}" SelectedValue="{Binding Binning}" Visibility="{Binding CameraVisible, Converter={s:BoolToVisibilityConverter}}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Converter={local:BinningConverter}}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel />
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+
+                        <Label Content="Camera Rotation" Grid.Row="0" Grid.Column="2" Visibility="{Binding CameraVisible, Converter={s:BoolToVisibilityConverter}}" />
+                        <c:NumericUpDown Value="{Binding Rotation}" Margin="2" DecimalPlaces="0" Minimum="0" Maximum="359" Grid.Row="1" Grid.Column="2" Visibility="{Binding CameraVisible, Converter={s:BoolToVisibilityConverter}}" />
+
+                    </Grid>
+                    
+                </StackPanel>
+            </Grid>
+
+            <!-- Details -->
+            <GroupBox Header="Details" Margin="2 8 2 8">
+                <Grid>
+                    <TextBlock Margin="2 8 2 8" TextWrapping="Wrap" Text="{Binding FieldOfView, Mode=OneWay, Converter={local:FieldOfViewDetailsConverter}}" Visibility="{Binding FieldOfView, Converter={s:NotNullToVisibilityConverter}}" />
+                    <TextBlock Margin="2 8 2 8" VerticalAlignment="Center" HorizontalAlignment="Center" Text="Choose the equipment" Visibility="{Binding FieldOfView, Converter={s:NullToVisibilityConverter}}" />
+                </Grid>
+            </GroupBox>
+
+        </StackPanel>
+        <Separator Grid.Row="1" Margin="0 4 0 4" />
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding OkCommand}" Content="{t:Text OK}" IsEnabled="{Binding FieldOfView, Converter={s:NotNullToBoolConverter}}" />
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CancelCommand}" Content="{t:Text Cancel}" />
+        </StackPanel>
+    </Grid>
+</Window>

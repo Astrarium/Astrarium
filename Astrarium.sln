@@ -36,6 +36,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.Constella
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.BrightStars", "Astrarium.Plugins.BrightStars\Astrarium.Plugins.BrightStars.csproj", "{F6C83D37-02D7-41A3-B9E9-C5DE0C29F0CA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Astrarium.Plugins.FOV", "Astrarium.Plugins.FOV\Astrarium.Plugins.FOV.csproj", "{A9BC8A28-2355-4042-8BE6-8B8B54EDE492}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -102,6 +104,10 @@ Global
 		{F6C83D37-02D7-41A3-B9E9-C5DE0C29F0CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F6C83D37-02D7-41A3-B9E9-C5DE0C29F0CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F6C83D37-02D7-41A3-B9E9-C5DE0C29F0CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9BC8A28-2355-4042-8BE6-8B8B54EDE492}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9BC8A28-2355-4042-8BE6-8B8B54EDE492}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9BC8A28-2355-4042-8BE6-8B8B54EDE492}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9BC8A28-2355-4042-8BE6-8B8B54EDE492}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
