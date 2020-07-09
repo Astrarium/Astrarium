@@ -18,7 +18,7 @@ namespace Astrarium.Plugins.SolarSystem
     /// <remarks>
     /// Implementation of the class is based on the solution from article <see href="http://www.100byte.ru/stdntswrks/cshrp/sphTK/sphTK.html"/>.
     /// </remarks>
-    internal class GLSphereRenderer : ISphereRenderer
+    internal class GLSphereRenderer : BaseSphereRenderer
     {
         private GameWindow window;
 
@@ -36,7 +36,7 @@ namespace Astrarium.Plugins.SolarSystem
             return bitmap;
         }
 
-        public Image Render(RendererOptions options)
+        public override Image Render(RendererOptions options)
         {
             if (window == null)
             {
@@ -46,29 +46,8 @@ namespace Astrarium.Plugins.SolarSystem
 
             GL.ClearColor(Color.Transparent);
 
-            using (Bitmap sourceBitmap = new Bitmap(options.TextureFilePath))
+            using (Bitmap sourceBitmap = CreateTextureBitmap(options))
             {
-                // render martian polar caps
-                if (options.RenderPolarCaps)
-                {
-                    using (Graphics g = Graphics.FromImage(sourceBitmap))
-                    {
-                        const float df = 2.5f / 180f;
-                        {
-                            float f = (float)(options.NorthernPolarCap / 180.0);
-                            var br = new LinearGradientBrush(new Point(0, 0), new PointF(0, sourceBitmap.Height), Color.White, Color.Transparent);
-                            br.Blend = new Blend(4) { Factors = new float[] { 0, 0, 1, 1 }, Positions = new float[] { 0, Math.Max(0, f - df), Math.Min(1, f + df), 1 } };
-                            g.FillRectangle(br, 0, 0, sourceBitmap.Width, sourceBitmap.Height);
-                        }
-                        {
-                            float f = (float)((180 - options.SouthernPolarCap) / 180.0);
-                            var br = new LinearGradientBrush(new Point(0, 0), new PointF(0, sourceBitmap.Height), Color.Transparent, Color.White);
-                            br.Blend = new Blend(4) { Factors = new float[] { 0, 0, 1, 1 }, Positions = new float[] { 0, Math.Max(0, f - df), Math.Min(1, f + df), 1 } };
-                            g.FillRectangle(br, 0, 0, sourceBitmap.Width, sourceBitmap.Height);
-                        }
-                    }
-                }
-
                 BitmapData data;
                 int size = (int)options.OutputImageSize;
                 window.ClientSize = new Size(size, size);

@@ -54,7 +54,7 @@ namespace Astrarium.Plugins.SolarSystem
         };
 
         private readonly SolarTextureDownloader solarTextureDownloader = new SolarTextureDownloader();
-        private readonly ISphereRenderer sphereRenderer = new GLSphereRenderer();
+        private readonly BaseSphereRenderer sphereRenderer;
         private readonly ImagesCache imagesCache = new ImagesCache();
         private readonly ICollection<SurfaceFeature> lunarFeatures;
         private readonly ICollection<SurfaceFeature> martianFeatures;
@@ -75,6 +75,8 @@ namespace Astrarium.Plugins.SolarSystem
             var featuresReader = new SurfaceFeaturesReader();
             lunarFeatures = featuresReader.Read(Path.Combine(dataPath, "LunarFeatures.dat"));
             martianFeatures = featuresReader.Read(Path.Combine(dataPath, "MartianFeatures.dat"));
+
+            sphereRenderer = new SphereRendererFactory().CreateRenderer();
         }
 
         public override RendererOrder Order => RendererOrder.SolarSystem;

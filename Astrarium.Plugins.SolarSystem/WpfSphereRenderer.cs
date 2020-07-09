@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 using System.Windows.Controls;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
@@ -14,7 +16,7 @@ namespace Astrarium.Plugins.SolarSystem
     /// <remarks>
     /// Implementation of the class is based on the solution from article <see href="http://csharphelper.com/blog/2017/05/make-3d-globe-wpf-c/"/>.
     /// </remarks>
-    public class WpfSphereRenderer : ISphereRenderer
+    public class WpfSphereRenderer : BaseSphereRenderer
     {
         private RenderTargetBitmap targetBitmap = null;
 
@@ -45,7 +47,7 @@ namespace Astrarium.Plugins.SolarSystem
             return (Math.PI / 180) * angle;
         }
 
-        public System.Drawing.Image Render(RendererOptions options)
+        public override System.Drawing.Image Render(RendererOptions options)
         {
             // The main object model group.
             Model3DGroup group = new Model3DGroup();
@@ -59,10 +61,8 @@ namespace Astrarium.Plugins.SolarSystem
             viewport.Camera = camera;
 
             // The camera's current location.
-            string textureFilePath = options.TextureFilePath;
-            int size = (int)options.OutputImageSize;
             double cameraPhi = ToRadians(options.LatitudeShift);
-            double cameraTheta = ToRadians(options.LongutudeShift);
+            double cameraTheta = ToRadians(180 - options.LongutudeShift);
             double cameraR = 10;
 
             // Calculate the camera's position in Cartesian coordinates.
@@ -87,10 +87,15 @@ namespace Astrarium.Plugins.SolarSystem
             // Globe. Place it in a new model so we can transform it.
             Model3DGroup globe = new Model3DGroup();
             group.Children.Add(globe);
+            
+            ImageBrush globeBrush = new ImageBrush();
+            using (Bitmap sourceBitmap = CreateTextureBitmap(options))
+            {
+                globeBrush.ImageSource = FromWinFormsBitmap(sourceBitmap);
+            }
 
-            ImageBrush globeBrush = new ImageBrush(new BitmapImage(new Uri(textureFilePath, UriKind.RelativeOrAbsolute)));
             Material globeMaterial = new DiffuseMaterial(globeBrush);
-
+           
             MakeSphere(globe, globeMaterial, 1, 0, 0, 0, 64, 64);
 
             // Add the group of models to a ModelVisual3D.
@@ -100,6 +105,7 @@ namespace Astrarium.Plugins.SolarSystem
             // Display the main visual to the viewport.
             viewport.Children.Add(visual);
 
+            int size = 1024;
             viewport.Width = size;
             viewport.Height = size;
             viewport.Measure(new System.Windows.Size(size, size));
@@ -171,6 +177,20 @@ namespace Astrarium.Plugins.SolarSystem
             }
 
             return mesh;
+        }
+
+        [DllImport("gdi32.dll", EntryPoint = "DeleteObject")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool DeleteObject([In] IntPtr hObject);
+
+        private ImageSource FromWinFormsBitmap(Bitmap bmp)
+        {
+            var handle = bmp.GetHbitmap();
+            try
+            {
+                return Imaging.CreateBitmapSourceFromHBitmap(handle, IntPtr.Zero, System.Windows.Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+            }
+            finally { DeleteObject(handle); }            
         }
 
         private Bitmap ToWinFormsBitmap(BitmapSource bitmapsource)

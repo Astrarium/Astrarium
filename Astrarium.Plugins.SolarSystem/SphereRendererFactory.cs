@@ -1,0 +1,34 @@
+﻿using OpenTK;
+using OpenTK.Graphics.OpenGL;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Astrarium.Plugins.SolarSystem
+{
+    internal class SphereRendererFactory
+    {
+        public BaseSphereRenderer CreateRenderer()
+        {
+            using (var window = new GameWindow())
+            {
+                // Version should be at least 3.0.
+                string openGLversion = GL.GetString(StringName.Version);
+
+                if (int.TryParse(openGLversion.Split(' ').First().Split('.').First(), out int majorVersion) && majorVersion >= 3)
+                {
+                    Debug.WriteLine($"OpenGL sphere renderer is used (OpenGL version: {openGLversion})");
+                    return new GLSphereRenderer();
+                }
+                else
+                {
+                    Trace.TraceWarning($"WPF sphere renderer is used (OpenGL version: {openGLversion}). Only low-level quality texures are supported. To get high-level textures support, upgrade OpenGL to 3.0 version or higher.");
+                    return new WpfSphereRenderer();
+                }
+            }
+        }
+    }
+}
