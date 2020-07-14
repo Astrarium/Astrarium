@@ -413,23 +413,40 @@ namespace Astrarium.Plugins.SolarSystem
                             // distance, in pixels, between center of the feature and current mouse position
                             double d = Math.Sqrt(Math.Pow(pMouse.X - pFeature.X - p.X, 2) + Math.Pow(pMouse.Y - pFeature.Y - p.Y, 2));
 
+                            // visible flattening of feature outline,
+                            // depends on angular distance between feature and visible center of the body disk
+                            float f = (float)Math.Cos(Angle.ToRadians(sep));
+
+                            bool needDrawLabel = true;
+
                             if (fr > 100 || d < fr)
                             {
-                                // visible flattening of feature outline,
-                                // depends on angular distance between feature and visible center of the body disk
-                                float f = (float)Math.Cos(Angle.ToRadians(sep));
-
                                 float labelDist = 3;
                                 StringFormat format = null;
 
-                                // draw feature outline (for craters only)
-                                if (feature.TypeCode == "AA")
+                                // draw feature outline (for craters and satellite features only)
+                                if (feature.TypeCode == "AA" || feature.TypeCode == "SF")
                                 {
                                     g.TranslateTransform(p.X + pFeature.X, p.Y + pFeature.Y);
                                     g.RotateTransform(90 + (float)Angle.ToDegrees(Math.Atan2(pFeature.Y, pFeature.X)));
-                                    g.DrawEllipse(pen, -fr, -fr * f, fr * 2, fr * f * 2);
+
+                                    using (GraphicsPath gp = new GraphicsPath())
+                                    {
+                                        gp.AddEllipse(-fr, -fr * f, fr * 2, fr * f * 2);
+                                        gp.Transform(g.Transform);
+
+                                        if (gp.IsVisible(pMouse))
+                                        {
+                                            g.DrawEllipse(pen, -fr, -fr * f, fr * 2, fr * f * 2);
+                                        }
+                                        else
+                                        {
+                                            needDrawLabel = false;
+                                        }
+                                    }
+                                    
                                     g.ResetTransform();
-                                    labelDist = fr * 2;
+                                    labelDist = fr * 2 * f;
                                 }
 
                                 // center label for maria, oceanus, sinus, lacus, palus 
@@ -444,16 +461,20 @@ namespace Astrarium.Plugins.SolarSystem
                                     format.LineAlignment = StringAlignment.Center;
                                 }
                                 // fill central dot
-                                else if (feature.TypeCode != "AA")
+                                else if (feature.TypeCode != "AA" && feature.TypeCode != "SF")
                                 {
                                     g.TranslateTransform(p.X + pFeature.X, p.Y + pFeature.Y);
                                     g.FillEllipse(brush, -1, -1, 3, 3);
                                     g.ResetTransform();
                                 }
 
-                                // draw feature label
                                 g.ResetTransform();
-                                map.DrawObjectCaption(fontLabel, brush, feature.Name, new PointF(p.X + pFeature.X, p.Y + pFeature.Y), labelDist, format);                        
+
+                                // draw feature label
+                                if (needDrawLabel)
+                                {
+                                    map.DrawObjectCaption(fontLabel, brush, feature.Name, new PointF(p.X + pFeature.X, p.Y + pFeature.Y), labelDist, format);
+                                }
                             }
                         }
                     }
