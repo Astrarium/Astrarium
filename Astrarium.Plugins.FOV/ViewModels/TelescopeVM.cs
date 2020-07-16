@@ -25,11 +25,11 @@ namespace Astrarium.Plugins.FOV
         {
             if (string.IsNullOrWhiteSpace(Telescope.Name))
             {
-                ViewManager.ShowMessageBox("Warning", "Please specify telescope model name.");
+                ViewManager.ShowMessageBox(Text.Get("TelescopeWindow.WarningTitle"), Text.Get("TelescopeWindow.EmptyNameWarningMessage"));
             }
             else if (Telescopes.Any(t => t.Name == Telescope.Name && t.Id != Telescope.Id))
             {
-                ViewManager.ShowMessageBox("Warning", "Telescope with specified model name already exists. Please specify another name.");            
+                ViewManager.ShowMessageBox(Text.Get("TelescopeWindow.WarningTitle"), Text.Get("TelescopeWindow.NameAlreadyExistsWarningMessage"));
             }
             else
             {

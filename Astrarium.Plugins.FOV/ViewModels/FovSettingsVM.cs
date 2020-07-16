@@ -182,7 +182,15 @@ namespace Astrarium.Plugins.FOV
         private void Ok()
         {
             if (FieldOfView != null)
+            {
+                if (string.IsNullOrWhiteSpace(Label))
+                {
+                    ViewManager.ShowMessageBox(Text.Get("FovSettingsVM.WarningTitle"), Text.Get("FovSettingsVM.EmptyLabelMessage"));
+                    return;
+                }
+
                 Close(true);
+            }
         }
 
         public ICollection<Telescope> Telescopes => _Equipment.Telescopes;
@@ -434,6 +442,8 @@ namespace Astrarium.Plugins.FOV
                     TelescopeId = cameraFrame.TelescopeId;
                     CameraId = cameraFrame.CameraId;
                     LensId = cameraFrame.LensId;
+                    Rotation = (int)cameraFrame.Rotation;
+                    Binning = (int)cameraFrame.Binning;
                     FrameType = FrameType.Camera;
                 }
                 else if (value is BinocularFovFrame binocularFrame)
@@ -457,65 +467,147 @@ namespace Astrarium.Plugins.FOV
         Binocular = 2
     }
 
-    public class CameraResolutionConverter : ValueConverterBase
+    public class CameraResolutionConverter : ConverterBase
     {
-        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(object value)
         {
-            var camera = (Camera)value;
-            return camera != null ? $"{camera.HorizontalResolution} x {camera.VerticalResolution} mm" : null;
+            if (value is null)
+            {
+                return null;
+            }
+            if (value is Camera camera)
+            {
+                return Convert(new SizeF(camera.HorizontalResolution, camera.VerticalResolution));
+            }
+            else if (value is SizeF resoltion)
+            {
+                return Convert(resoltion, Text.Get("FovSettingsVM.SecondsPerPixel"));
+            }
+            else
+            {
+                throw new ArgumentException("Unknown value type.", nameof(value));
+            }
+        }
+
+        private object Convert(SizeF resolution, string units = null)
+        {
+            return $"{resolution.Width.ToString("0.##", culture)} x {resolution.Height.ToString("0.##", culture)} {units}";
         }
     }
 
-    public class CameraPixelSizeConverter : ValueConverterBase
+    public class CameraPixelSizeConverter : ConverterBase
     {
-        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(object value)
         {
             var camera = (Camera)value;
-            return camera != null ? $"{camera.PixelSizeWidth} x {camera.PixelSizeHeight} µm" : null;
+            return camera != null ? $"{camera.PixelSizeWidth.ToString("0.##", culture)} x {camera.PixelSizeHeight.ToString("0.##", culture)} {Text.Get("FovSettingsVM.MicroMeters")}" : null;
         }
     }
 
-    public class MillimetersConverter : ValueConverterBase
+    public class MillimetersConverter : ConverterBase
     {
-        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(object value)
         {
             var focalLength = (int)value;
-            return $"{focalLength} mm";
+            return $"{focalLength} {Text.Get("FovSettingsVM.MilliMeters")}";
         }
     }
 
-    public class FieldOfViewConverter : ValueConverterBase
+    public abstract class ConverterBase : ValueConverterBase
     {
+        protected static CultureInfo culture;
+        static ConverterBase()
+        {
+            culture = new CultureInfo("");
+            culture.NumberFormat = new NumberFormatInfo()
+            {
+                NumberDecimalSeparator = ".",
+                NumberGroupSeparator = ""
+            };
+        }
+
+        public abstract object Convert(object value);
+
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return $"{(float)value}°";
+            return Convert(value);
         }
     }
 
-    public class MagnificationConverter : ValueConverterBase
+    public class FieldOfViewConverter : ConverterBase
     {
-        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(object value)
         {
-            return $"x {(float)value}";
+            if (value is float circularFov)
+            {
+                return $"{circularFov.ToString("0.##", culture)}°";
+            }
+            else if (value is SizeF rectFov)
+            {
+                return $"{rectFov.Width.ToString("0.##", culture)}° x {rectFov.Height.ToString("0.##", culture)}°";
+            }
+            else
+            {
+                throw new ArgumentException("Unknown value type.", nameof(value));
+            }
+        }
+    }
+
+    public class MagnificationConverter : ConverterBase
+    {
+        public override object Convert(object value)
+        {
+            return $"{((float)value).ToString("0.##", culture)}ˣ";
+        }
+    }
+
+    public class FocalRatioConveter : ConverterBase
+    {
+        public override object Convert(object value)
+        {
+            return $"f/{((float)value).ToString("0.#", culture)}";
+        }
+    }
+
+    public class ExitPupilConverter : ConverterBase
+    {
+        public override object Convert(object value)
+        {
+            return $"{((float)value).ToString("0.##", culture)} {Text.Get("FovSettingsVM.MilliMeters")}";
+        }
+    }
+
+    public class DawesLimitConverter : ConverterBase
+    {
+        public override object Convert(object value)
+        {
+            return $"{((float)value).ToString("0.##", culture)}\"";
         }
     }
 
     public class FieldOfViewDetailsConverter : ValueConverterBase
     {
+        private static readonly FieldOfViewConverter fovConverter = new FieldOfViewConverter();
+        private static readonly MagnificationConverter magConverter = new MagnificationConverter();
+        private static readonly FocalRatioConveter frConverter = new FocalRatioConveter();
+        private static readonly ExitPupilConverter epConverter = new ExitPupilConverter();
+        private static readonly CameraResolutionConverter crConverter = new CameraResolutionConverter();
+        private static readonly DawesLimitConverter dlConverter = new DawesLimitConverter();
+
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var fieldOfView = (FieldOfView)value;
             if (fieldOfView is TelescopeFieldOfView telescopeFieldOfView)
             {
-                return $"Focal ratio: {telescopeFieldOfView.FocalRatio:0.00}, Magnification: {telescopeFieldOfView.Magnification:0.00}, Field Of View: {telescopeFieldOfView.Size}, Exit Pupil: {telescopeFieldOfView.ExitPupil}, Dawes Limit: {telescopeFieldOfView.DawesLimit}";
+                return $"{Text.Get("FovSettingsVM.FocalRatio")} = {frConverter.Convert(telescopeFieldOfView.FocalRatio)}\n{Text.Get("FovSettingsVM.Magnification")} = {magConverter.Convert(telescopeFieldOfView.Magnification)}\n{Text.Get("FovSettingsVM.FieldOfView")} = {fovConverter.Convert(telescopeFieldOfView.Size)}\n{Text.Get("FovSettingsVM.ExitPupil")} = {epConverter.Convert(telescopeFieldOfView.ExitPupil)}\n{Text.Get("FovSettingsVM.DawesLimit")} = {dlConverter.Convert(telescopeFieldOfView.DawesLimit)}";
             }
             else if (fieldOfView is CameraFieldOfView cameraFieldOfView)
             {
-                return $"Focal ratio: {cameraFieldOfView.FocalRatio}, Resolution: {cameraFieldOfView.Resolution}, Field Of View: {cameraFieldOfView.Size}, Dawes Limit: {cameraFieldOfView.DawesLimit}";
+                return $"{Text.Get("FovSettingsVM.FocalRatio")} = {frConverter.Convert(cameraFieldOfView.FocalRatio)}\n{Text.Get("FovSettingsVM.Resolution")} = {crConverter.Convert(cameraFieldOfView.Resolution)}\n{Text.Get("FovSettingsVM.FieldOfView")} = {fovConverter.Convert(cameraFieldOfView.Size)}\n{Text.Get("FovSettingsVM.DawesLimit")} = {dlConverter.Convert(cameraFieldOfView.DawesLimit)}";
             }
             else if (fieldOfView is BinocularFieldOfView binocularFieldOfView)
             {
-                return $"Magnification: {binocularFieldOfView.Magnification}, Field Of View: {binocularFieldOfView.Size}, Exit Pupil: {binocularFieldOfView.ExitPupil}, Dawes Limit: {binocularFieldOfView.DawesLimit}";
+                return $"{Text.Get("FovSettingsVM.Magnification")} = {magConverter.Convert(binocularFieldOfView.Magnification)}\n{Text.Get("FovSettingsVM.FieldOfView")} = {fovConverter.Convert(binocularFieldOfView.Size)}\n{Text.Get("FovSettingsVM.ExitPupil")} = {epConverter.Convert(binocularFieldOfView.ExitPupil)}\n{Text.Get("FovSettingsVM.DawesLimit")} = {dlConverter.Convert(binocularFieldOfView.DawesLimit)}";
             }
             else
             {

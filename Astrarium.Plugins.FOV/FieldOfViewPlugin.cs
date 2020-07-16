@@ -20,7 +20,7 @@ namespace Astrarium.Plugins.FOV
 
             SettingItems.Add(null, new SettingItem("FovFrames", new List<FovFrame>()));
 
-            MenuItem fovMenu = new MenuItem("FOV");
+            MenuItem fovMenu = new MenuItem("$FovPlugin.Menu.FOV");
             fovMenu.AddBinding(new SimpleBinding(this, nameof(FrameMenuItems), nameof(MenuItem.SubItems)));
             MenuItems.Add(MenuItemPosition.MainMenuTools, fovMenu);
         }
@@ -33,8 +33,8 @@ namespace Astrarium.Plugins.FOV
                     menuItem.CommandParameter = new MenuItemCommandParameter() { MenuItem = menuItem, Frame = f };
                     menuItem.IsChecked = f.Enabled;
                     return menuItem;
-                }).Concat(new MenuItem[] { null, new MenuItem("Manage Frames", new Command(OpenFovFramesList)) })) :             
-            new ObservableCollection<MenuItem>(new MenuItem[] { new MenuItem("Add Frame", new Command(AddFovFrame)) });
+                }).Concat(new MenuItem[] { null, new MenuItem("$FovPlugin.Menu.FOV.Manage", new Command(OpenFovFramesList)) })) :             
+            new ObservableCollection<MenuItem>(new MenuItem[] { new MenuItem("$FovPlugin.Menu.FOV.Add", new Command(AddFovFrame)) });
 
         private void MenuItemChecked(MenuItemCommandParameter param)
         {

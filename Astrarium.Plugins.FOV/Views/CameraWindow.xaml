@@ -10,7 +10,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
     x:Class="Astrarium.Plugins.FOV.CameraWindow" 
     mc:Ignorable="d" 
-    Title="Camera" 
+    Title="{t:Text CameraWindow.Title}" 
     Height="300" 
     Width="300" 
     MinHeight="300" MinWidth="300" 
@@ -25,10 +25,10 @@
         </Grid.RowDefinitions>
 
         <StackPanel Orientation="Vertical" Margin="6">
-            <Label Content="Model name" />
+            <Label Content="{t:Text CameraWindow.Name}" />
             <TextBox Text="{Binding Camera.Name}" />
 
-            <Label Content="Resulution (Horizontal x Vertical), pixels" />
+            <Label Content="{t:Text CameraWindow.Resolution}" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -40,7 +40,7 @@
                 <c:NumericUpDown Grid.Column="2" Value="{Binding Camera.VerticalResolution}" DecimalPlaces="0" Minimum="1" Maximum="10000" />
             </Grid>
 
-            <Label Content="Pixel Size (Width x Height), µm" />
+            <Label Content="{t:Text CameraWindow.PixelSize}" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>

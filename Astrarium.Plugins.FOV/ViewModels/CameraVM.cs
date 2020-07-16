@@ -25,11 +25,11 @@ namespace Astrarium.Plugins.FOV
         {
             if (string.IsNullOrWhiteSpace(Camera.Name))
             {
-                ViewManager.ShowMessageBox("Warning", "Please specify camera model name.");
+                ViewManager.ShowMessageBox(Text.Get("CameraWindow.WarningTitle"), Text.Get("CameraWindow.EmptyNameWarningMessage"));
             }
             else if (Cameras.Any(t => t.Name == Camera.Name && t.Id != Camera.Id))
             {
-                ViewManager.ShowMessageBox("Warning", "Camera with specified model name already exists. Please specify another name.");            
+                ViewManager.ShowMessageBox(Text.Get("CameraWindow.WarningTitle"), Text.Get("CameraWindow.NameAlreadyExistsWarningMessage"));           
             }
             else
             {

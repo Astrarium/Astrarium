@@ -10,7 +10,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
     x:Class="Astrarium.Plugins.FOV.FovFramesListWindow" 
     mc:Ignorable="d" 
-    Title="Fov Frames List" 
+    Title="{t:Text FovFramesListWindow.Title}" 
     Height="300" 
     Width="300" 
     MinHeight="300" MinWidth="300" 
@@ -49,7 +49,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Text="No frames" Visibility="{Binding IsEmptyList, Converter={s:BoolToVisibilityConverter}}" />
+        <TextBlock Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{t:Text FovFramesListWindow.NoFrames}" Visibility="{Binding IsEmptyList, Converter={s:BoolToVisibilityConverter}}" />
 
         <DockPanel Grid.Row="0" VerticalAlignment="Stretch">
             <c:BindableListView 

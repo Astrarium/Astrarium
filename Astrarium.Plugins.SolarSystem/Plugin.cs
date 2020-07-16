@@ -35,6 +35,7 @@ namespace Astrarium.Plugins.SolarSystem
 
             SettingItems.Add("Moon", new SettingItem("Moon", true));
             SettingItems.Add("Moon", new SettingItem("MoonLabel", true, s => s.Get("Moon")));
+            SettingItems.Add("Moon", new SettingItem("MoonPhase", true, s => s.Get("Moon")));
             SettingItems.Add("Moon", new SettingItem("MoonTexture", true, s => s.Get("Moon")));
             SettingItems.Add("Moon", new SettingItem("MoonTextureQuality", TextureQuality.Normal, s => s.Get("Moon") && s.Get("MoonTexture")));
             SettingItems.Add("Moon", new SettingItem("MoonSurfaceFeatures", true, s => s.Get("Moon") && s.Get("MoonTexture")));

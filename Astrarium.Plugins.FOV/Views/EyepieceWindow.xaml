@@ -10,7 +10,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
     x:Class="Astrarium.Plugins.FOV.EyepieceWindow" 
     mc:Ignorable="d" 
-    Title="Eyepiece" 
+    Title="{t:Text EyepieceWindow.Title}" 
     Height="300" 
     Width="300" 
     MinHeight="300" MinWidth="300" 
@@ -25,13 +25,13 @@
         </Grid.RowDefinitions>
 
         <StackPanel Orientation="Vertical" Margin="6">
-            <Label Content="Model name" />
+            <Label Content="{t:Text EyepieceWindow.Name}" />
             <TextBox Text="{Binding Eyepiece.Name}" />
 
-            <Label Content="Focal Length, mm" />
+            <Label Content="{t:Text EyepieceWindow.FocalLength}" />
             <c:NumericUpDown Value="{Binding Eyepiece.FocalLength}" DecimalPlaces="0" Minimum="1" Maximum="100" />
 
-            <Label Content="Field of View, degrees" />
+            <Label Content="{t:Text EyepieceWindow.FieldOfView}" />
             <c:NumericUpDown Value="{Binding Eyepiece.FieldOfView}" DecimalPlaces="0" Minimum="1" Maximum="180" />
 
         </StackPanel>

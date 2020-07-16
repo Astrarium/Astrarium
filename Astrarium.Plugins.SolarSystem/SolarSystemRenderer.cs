@@ -329,7 +329,7 @@ namespace Astrarium.Plugins.SolarSystem
                 }
 
                 g.ResetTransform();
-
+                
                 float phase = (float)moon.Phase * Math.Sign(moon.Elongation);
                 float rotation = map.GetRotationTowardsEclipticPole(moon.Ecliptical0);
                 GraphicsPath shadow = GetPhaseShadow(phase, size + 1);
@@ -337,9 +337,18 @@ namespace Astrarium.Plugins.SolarSystem
                 // shadowed part of disk
                 g.TranslateTransform(p.X, p.Y);
                 g.RotateTransform(rotation);
-                g.FillPath(GetShadowBrush(map), shadow);
-                g.ResetTransform();
 
+                if (settings.Get("MoonPhase"))
+                {
+                    g.FillPath(GetShadowBrush(map), shadow);
+                }
+                else
+                {
+                    g.DrawPath(new Pen(GetShadowBrush(map), 1) { DashStyle = DashStyle.Custom,  DashPattern = new float[] { 10, 5 } }, shadow);
+                }
+
+                g.ResetTransform();
+                
                 if (settings.Get("MoonLabel"))
                 {
                     map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, size);

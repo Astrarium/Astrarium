@@ -10,7 +10,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
     x:Class="Astrarium.Plugins.FOV.TelescopeWindow" 
     mc:Ignorable="d" 
-    Title="Telescope" 
+    Title="{t:Text TelescopeWindow.Title}" 
     Height="300" 
     Width="300" 
     MinHeight="300" MinWidth="300" 
@@ -25,13 +25,13 @@
         </Grid.RowDefinitions>
 
         <StackPanel Orientation="Vertical" Margin="6">
-            <Label Content="Model name" />
+            <Label Content="{t:Text TelescopeWindow.Name}" />
             <TextBox Text="{Binding Telescope.Name}" />
 
-            <Label Content="Focal Length, mm" />
+            <Label Content="{t:Text TelescopeWindow.FocalLength}" />
             <c:NumericUpDown Value="{Binding Telescope.FocalLength}" DecimalPlaces="0" Minimum="1" Maximum="10000" />
 
-            <Label Content="Aperture, mm" />
+            <Label Content="{t:Text TelescopeWindow.Aperture}" />
             <c:NumericUpDown Value="{Binding Telescope.Aperture}" DecimalPlaces="0" Minimum="1" Maximum="10000" />
 
         </StackPanel>

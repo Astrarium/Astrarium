@@ -10,7 +10,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
     x:Class="Astrarium.Plugins.FOV.FovSettingsWindow" 
     mc:Ignorable="d" 
-    Title="FOV" 
+    Title="{t:Text FovSettingsWindow.Title}" 
     Height="500" 
     Width="700" 
     MinHeight="500" MinWidth="700" 
@@ -91,11 +91,11 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Vertical" Grid.Row="0">
+        <StackPanel Orientation="Vertical" Grid.Row="0" Grid.IsSharedSizeScope="True">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <RadioButton Content="Telescope View" IsChecked="{Binding FrameType, Converter={s:EqualityConverter}, ConverterParameter={x:Static local:FrameType.Telescope}}" Style="{StaticResource ResourceKey=RadioTab}" />
-                <RadioButton Content="Camera View" IsChecked="{Binding FrameType, Converter={s:EqualityConverter}, ConverterParameter={x:Static local:FrameType.Camera}}" Style="{StaticResource ResourceKey=RadioTab}" />
-                <RadioButton Content="Binocular View" IsChecked="{Binding FrameType, Converter={s:EqualityConverter}, ConverterParameter={x:Static local:FrameType.Binocular}}" Style="{StaticResource ResourceKey=RadioTab}" />
+                <RadioButton Content="{t:Text FovSettingsWindow.FrameType.Telescope}" IsChecked="{Binding FrameType, Converter={s:EqualityConverter}, ConverterParameter={x:Static local:FrameType.Telescope}}" Style="{StaticResource ResourceKey=RadioTab}" />
+                <RadioButton Content="{t:Text FovSettingsWindow.FrameType.Camera}" IsChecked="{Binding FrameType, Converter={s:EqualityConverter}, ConverterParameter={x:Static local:FrameType.Camera}}" Style="{StaticResource ResourceKey=RadioTab}" />
+                <RadioButton Content="{t:Text FovSettingsWindow.FrameType.Binocular}" IsChecked="{Binding FrameType, Converter={s:EqualityConverter}, ConverterParameter={x:Static local:FrameType.Binocular}}" Style="{StaticResource ResourceKey=RadioTab}" />
             </StackPanel>
 
             <!-- Frame Appearance -->
@@ -110,11 +110,11 @@
                         <ColumnDefinition Width="Auto" MinWidth="120" SharedSizeGroup="g1" />
                         <ColumnDefinition Width="Auto" MinWidth="120" SharedSizeGroup="g1" />
                     </Grid.ColumnDefinitions>
-                    <Label Content="Label" Grid.Row="0" Grid.Column="0" />
+                    <Label Content="{t:Text FovSettingsWindow.Label}" Grid.Row="0" Grid.Column="0" />
                     <TextBox Margin="2" Text="{Binding Label}" Grid.Row="1" Grid.Column="0" />
-                    <Label Content="Shading" Grid.Row="0" Grid.Column="1" />
+                    <Label Content="{t:Text FovSettingsWindow.Shading}" Grid.Row="0" Grid.Column="1" />
                     <c:NumericUpDown Margin="2" Value="{Binding Shading}" DecimalPlaces="0" Minimum="0" Maximum="100" Grid.Row="1" Grid.Column="1" />
-                    <Label Content="Color" Grid.Row="0" Grid.Column="2" />
+                    <Label Content="{t:Text FovSettingsWindow.Color}" Grid.Row="0" Grid.Column="2" />
                     <c:ColorPicker Margin="5" Caption="{Binding Color, Converter={s:ColorToStringConverter}}" SelectedColor="{Binding Color}" Grid.Row="1" Grid.Column="2" />
                 </Grid>
             </Grid>
@@ -135,7 +135,7 @@
                         </Grid.ColumnDefinitions>
 
                         <DockPanel Grid.Row="0" Grid.Column="0">
-                            <Label Content="Telescope" HorizontalAlignment="Left" />
+                            <Label Content="{t:Text FovSettingsWindow.Telescope}" HorizontalAlignment="Left" />
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=IsMouseOver, Converter={s:BoolToVisibilityConverter}}">
                                 <Button Content="{DynamicResource ImageAdd}" Style="{StaticResource EditButton}" Command="{Binding AddEquipmentCommand}" CommandParameter="{x:Type local:Telescope}" />
                                 <Button Content="{DynamicResource ImageEdit}" Style="{StaticResource EditButton}" IsEnabled="{Binding Telescope, Converter={s:NotNullToBoolConverter}}" Command="{Binding EditEquipmentCommand}" CommandParameter="{x:Type local:Telescope}" />
@@ -150,9 +150,9 @@
                                 </ItemsPanelTemplate>
                             </ComboBox.ItemsPanel>
                         </ComboBox>
-                        <Label Grid.Row="0" Grid.Column="1" Content="Focal Length" />
+                        <Label Grid.Row="0" Grid.Column="1" Content="{t:Text FovSettingsWindow.Telescope.FocalLength}" />
                         <TextBox Margin="2" IsReadOnly="True" Grid.Row="1" Grid.Column="1" Text="{Binding Telescope.FocalLength, Mode=OneWay, Converter={local:MillimetersConverter}}" />
-                        <Label Grid.Row="0" Grid.Column="2" Content="Aperture" />
+                        <Label Grid.Row="0" Grid.Column="2" Content="{t:Text FovSettingsWindow.Telescope.Aperture}" />
                         <TextBox Margin="2" IsReadOnly="True" Grid.Row="1" Grid.Column="2" Text="{Binding Telescope.Aperture, Mode=OneWay, Converter={local:MillimetersConverter}}" />
                     </Grid>
 
@@ -169,7 +169,7 @@
                         </Grid.ColumnDefinitions>
 
                         <DockPanel Grid.Row="0" Grid.Column="0">
-                            <Label Content="Eyepiece" HorizontalAlignment="Left" />
+                            <Label Content="{t:Text FovSettingsWindow.Eyepiece}" HorizontalAlignment="Left" />
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=IsMouseOver, Converter={s:BoolToVisibilityConverter}}">
                                 <Button Content="{DynamicResource ImageAdd}" Style="{StaticResource EditButton}" Command="{Binding AddEquipmentCommand}" CommandParameter="{x:Type local:Eyepiece}" />
                                 <Button Content="{DynamicResource ImageEdit}" Style="{StaticResource EditButton}" IsEnabled="{Binding Eyepiece, Converter={s:NotNullToBoolConverter}}" Command="{Binding EditEquipmentCommand}" CommandParameter="{x:Type local:Eyepiece}" />
@@ -183,9 +183,9 @@
                                 </ItemsPanelTemplate>
                             </ComboBox.ItemsPanel>
                         </ComboBox>
-                        <Label Grid.Row="0" Grid.Column="1" Content="Focal Length" />
+                        <Label Grid.Row="0" Grid.Column="1" Content="{t:Text FovSettingsWindow.Eyepiece.FocalLength}" />
                         <TextBox Margin="2" IsReadOnly="True" Grid.Row="1" Grid.Column="1" Text="{Binding Eyepiece.FocalLength, Mode=OneWay, Converter={local:MillimetersConverter}}" />
-                        <Label Grid.Row="0" Grid.Column="2" Content="Field of View" />
+                        <Label Grid.Row="0" Grid.Column="2" Content="{t:Text FovSettingsWindow.Eyepiece.FieldOfView}" />
                         <TextBox Margin="2" IsReadOnly="True" Grid.Row="1" Grid.Column="2" Text="{Binding Eyepiece.FieldOfView, Mode=OneWay, Converter={local:FieldOfViewConverter}}" />
                     </Grid>
 
@@ -202,7 +202,7 @@
                         </Grid.ColumnDefinitions>
                         
                         <DockPanel Grid.Row="0" Grid.Column="0">
-                            <Label Content="Camera" HorizontalAlignment="Left" />
+                            <Label Content="{t:Text FovSettingsWindow.Camera}" HorizontalAlignment="Left" />
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=IsMouseOver, Converter={s:BoolToVisibilityConverter}}">
                                 <Button Content="{DynamicResource ImageAdd}" Style="{StaticResource EditButton}" Command="{Binding AddEquipmentCommand}" CommandParameter="{x:Type local:Camera}" />
                                 <Button Content="{DynamicResource ImageEdit}" Style="{StaticResource EditButton}" IsEnabled="{Binding Camera, Converter={s:NotNullToBoolConverter}}" Command="{Binding EditEquipmentCommand}" CommandParameter="{x:Type local:Camera}" />
@@ -217,9 +217,9 @@
                                 </ItemsPanelTemplate>
                             </ComboBox.ItemsPanel>
                         </ComboBox>
-                        <Label Grid.Row="0" Grid.Column="1" Content="Resolution" />
+                        <Label Grid.Row="0" Grid.Column="1" Content="{t:Text FovSettingsWindow.Camera.Resolution}" />
                         <TextBox Margin="2" IsReadOnly="True" Grid.Row="1" Grid.Column="1" Text="{Binding Camera, Mode=OneWay, Converter={local:CameraResolutionConverter}}" />
-                        <Label Grid.Row="0" Grid.Column="2" Content="Pixel Size" />
+                        <Label Grid.Row="0" Grid.Column="2" Content="{t:Text FovSettingsWindow.Camera.PixelSize}" />
                         <TextBox Margin="2" IsReadOnly="True" Grid.Row="1" Grid.Column="2" Text="{Binding Camera, Mode=OneWay, Converter={local:CameraPixelSizeConverter}}" />
                     </Grid>
                     
@@ -237,7 +237,7 @@
                         </Grid.ColumnDefinitions>
                         
                         <DockPanel Grid.Row="0" Grid.Column="0">
-                            <Label Content="Binocular" HorizontalAlignment="Left" />
+                            <Label Content="{t:Text FovSettingsWindow.Binocular}" HorizontalAlignment="Left" />
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=IsMouseOver, Converter={s:BoolToVisibilityConverter}}">
                                 <Button Content="{DynamicResource ImageAdd}" Style="{StaticResource EditButton}" Command="{Binding AddEquipmentCommand}" CommandParameter="{x:Type local:Binocular}" />
                                 <Button Content="{DynamicResource ImageEdit}" Style="{StaticResource EditButton}" IsEnabled="{Binding Binocular, Converter={s:NotNullToBoolConverter}}" Command="{Binding EditEquipmentCommand}" CommandParameter="{x:Type local:Binocular}" />
@@ -252,11 +252,11 @@
                                 </ItemsPanelTemplate>
                             </ComboBox.ItemsPanel>
                         </ComboBox>
-                        <Label Grid.Row="0" Grid.Column="1" Content="Aperture" />
+                        <Label Grid.Row="0" Grid.Column="1" Content="{t:Text FovSettingsWindow.Binocular.Aperture}" />
                         <TextBox Margin="2" IsReadOnly="True" Grid.Row="1" Grid.Column="1" Text="{Binding Binocular.Aperture, Mode=OneWay, Converter={local:MillimetersConverter}}" />
-                        <Label Grid.Row="0" Grid.Column="2" Content="Magnification" />
+                        <Label Grid.Row="0" Grid.Column="2" Content="{t:Text FovSettingsWindow.Binocular.Magnification}" />
                         <TextBox Margin="2" IsReadOnly="True" Grid.Row="1" Grid.Column="2" Text="{Binding Binocular.Magnification, Mode=OneWay, Converter={local:MagnificationConverter}}" />
-                        <Label Grid.Row="0" Grid.Column="3" Content="Field of View" />
+                        <Label Grid.Row="0" Grid.Column="3" Content="{t:Text FovSettingsWindow.Binocular.FieldOfView}" />
                         <TextBox Margin="2" IsReadOnly="True" Grid.Row="1" Grid.Column="3" Text="{Binding Binocular.FieldOfView, Mode=OneWay, Converter={local:FieldOfViewConverter}}" />
                     </Grid>
 
@@ -271,7 +271,7 @@
                             <ColumnDefinition Width="Auto" MinWidth="120" SharedSizeGroup="g1" />
                             <ColumnDefinition Width="Auto" MinWidth="120" SharedSizeGroup="g1" />
                         </Grid.ColumnDefinitions>
-                        <Label Grid.Row="0" Grid.Column="0" Content="Lens" />
+                        <Label Grid.Row="0" Grid.Column="0" Content="{t:Text FovSettingsWindow.Lens}" />
                         <ComboBox Margin="2" Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Lenses}" SelectedValue="{Binding LensId}" DisplayMemberPath="Name" SelectedValuePath="Id">
                             <ComboBox.ItemsPanel>
                                 <ItemsPanelTemplate>
@@ -279,7 +279,7 @@
                                 </ItemsPanelTemplate>
                             </ComboBox.ItemsPanel>
                         </ComboBox>
-                        <Label Grid.Row="0" Grid.Column="1" Content="Camera Binning" Visibility="{Binding CameraVisible, Converter={s:BoolToVisibilityConverter}}" />
+                        <Label Grid.Row="0" Grid.Column="1" Content="{t:Text FovSettingsWindow.Camera.Binning}" Visibility="{Binding CameraVisible, Converter={s:BoolToVisibilityConverter}}" />
                         <ComboBox Margin="2" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Binnings}" SelectedValue="{Binding Binning}" Visibility="{Binding CameraVisible, Converter={s:BoolToVisibilityConverter}}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
@@ -293,7 +293,7 @@
                             </ComboBox.ItemsPanel>
                         </ComboBox>
 
-                        <Label Content="Camera Rotation" Grid.Row="0" Grid.Column="2" Visibility="{Binding CameraVisible, Converter={s:BoolToVisibilityConverter}}" />
+                        <Label Content="{t:Text FovSettingsWindow.Camera.Rotation}" Grid.Row="0" Grid.Column="2" Visibility="{Binding CameraVisible, Converter={s:BoolToVisibilityConverter}}" />
                         <c:NumericUpDown Value="{Binding Rotation}" Margin="2" DecimalPlaces="0" Minimum="0" Maximum="359" Grid.Row="1" Grid.Column="2" Visibility="{Binding CameraVisible, Converter={s:BoolToVisibilityConverter}}" />
 
                     </Grid>
@@ -302,10 +302,10 @@
             </Grid>
 
             <!-- Details -->
-            <GroupBox Header="Details" Margin="2 8 2 8">
+            <GroupBox Header="{t:Text FovSettingsWindow.Details}" Margin="2 8 2 8">
                 <Grid>
                     <TextBlock Margin="2 8 2 8" TextWrapping="Wrap" Text="{Binding FieldOfView, Mode=OneWay, Converter={local:FieldOfViewDetailsConverter}}" Visibility="{Binding FieldOfView, Converter={s:NotNullToVisibilityConverter}}" />
-                    <TextBlock Margin="2 8 2 8" VerticalAlignment="Center" HorizontalAlignment="Center" Text="Choose the equipment" Visibility="{Binding FieldOfView, Converter={s:NullToVisibilityConverter}}" />
+                    <TextBlock Margin="2 8 2 8" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{t:Text FovSettingsWindow.Details.Empty}" Visibility="{Binding FieldOfView, Converter={s:NullToVisibilityConverter}}" />
                 </Grid>
             </GroupBox>
 

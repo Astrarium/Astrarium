@@ -37,7 +37,8 @@ namespace Astrarium.Plugins.BrightStars
 
             fontStarNames = new Font("Arial", 8);
             penConLine = new Pen(new SolidBrush(Color.Transparent));
-            penConLine.DashStyle = DashStyle.Dot;
+            penConLine.DashStyle = DashStyle.Custom;
+            penConLine.DashPattern = new float[] { 2, 2 };
             starColor = Color.White;
         }
 
