@@ -21,6 +21,8 @@ namespace Astrarium.ViewModels
         public double JulianDayTo { get; set; }
         public double UtcOffset { get; private set; }
 
+        private static Cache cache;
+
         public IEnumerable<string> Categories
         {
             get
@@ -44,6 +46,9 @@ namespace Astrarium.ViewModels
         {
             this.sky = sky;
 
+            JulianDayFrom = cache?.JdFrom ?? sky.Context.JulianDay;
+            JulianDayTo = cache?.JdTo ?? sky.Context.JulianDay + 30;
+
             UtcOffset = sky.Context.GeoLocation.UtcOffset;
 
             OkCommand = new Command(Ok);
@@ -60,7 +65,14 @@ namespace Astrarium.ViewModels
                 return;
             }
 
-            // everything is fine
+            // save selected values to cache
+            cache = new Cache() 
+            { 
+                JdFrom = JulianDayFrom,
+                JdTo = JulianDayTo,
+                Categories = Categories.ToArray()
+            };
+
             Close(true);
         }
 
@@ -69,7 +81,6 @@ namespace Astrarium.ViewModels
             Nodes.Clear();
 
             var categories = sky.GetEventsCategories();
-
             var groups = categories.GroupBy(cat => cat.Split('.').First());
 
             Node root = new Node(Text.Get("PhenomenaSettingsWindow.Phenomena.All"));
@@ -89,6 +100,14 @@ namespace Astrarium.ViewModels
             }
 
             Nodes.Add(root);
+
+            if (cache != null)
+            {
+                foreach (var node in AllNodes(Nodes.First()))
+                {
+                    node.IsChecked = cache.Categories.Contains(node.Id);
+                }
+            }
         }
 
         private IEnumerable<Node> AllNodes(Node node)
@@ -107,6 +126,13 @@ namespace Astrarium.ViewModels
         private void Root_CheckedChanged(object sender, bool? e)
         {
             NotifyPropertyChanged(nameof(OkButtonEnabled));
+        }
+
+        private class Cache
+        {
+            public double JdFrom { get; set; }
+            public double JdTo { get; set; }
+            public string[] Categories { get; set; }
         }
     }
 }

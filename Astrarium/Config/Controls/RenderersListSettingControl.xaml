@@ -11,7 +11,7 @@
 
         <GroupBox Header="{t:Text RenderingOrderSettingTitle}">
 
-            <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Vertical" Margin="0 5 0 0">
 
                 <ListView 
                     x:Name="List" 

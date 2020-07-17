@@ -305,7 +305,7 @@
             <GroupBox Header="{t:Text FovSettingsWindow.Details}" Margin="2 8 2 8">
                 <Grid>
                     <TextBlock Margin="2 8 2 8" TextWrapping="Wrap" Text="{Binding FieldOfView, Mode=OneWay, Converter={local:FieldOfViewDetailsConverter}}" Visibility="{Binding FieldOfView, Converter={s:NotNullToVisibilityConverter}}" />
-                    <TextBlock Margin="2 8 2 8" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{t:Text FovSettingsWindow.Details.Empty}" Visibility="{Binding FieldOfView, Converter={s:NullToVisibilityConverter}}" />
+                    <TextBlock Margin="2 8 2 8" VerticalAlignment="Center" HorizontalAlignment="Center" IsEnabled="False" Text="{t:Text FovSettingsWindow.Details.Empty}" Visibility="{Binding FieldOfView, Converter={s:NullToVisibilityConverter}}" />
                 </Grid>
             </GroupBox>
 

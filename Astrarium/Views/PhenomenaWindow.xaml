@@ -21,9 +21,10 @@
 
         <ScrollViewer
             Grid.Row="0"
+            Visibility="{Binding NoEvents, Converter={s:InverseBoolToVisibilityConverter}}" 
             HorizontalScrollBarVisibility="Auto"
             VerticalScrollBarVisibility="Auto">
-            <ItemsControl              
+            <ItemsControl 
                 Margin="4"
                 ItemsSource="{Binding Events}">
                 <ItemsControl.ItemTemplate>
@@ -51,12 +52,19 @@
             </ItemsControl>
         </ScrollViewer>
 
+        <TextBlock Grid.Row="0"
+            Text="{t:Text PhenomenaWindow.NoEvents}" 
+            IsEnabled="False"
+            Visibility="{Binding NoEvents, Converter={s:BoolToVisibilityConverter}}" 
+            TextAlignment="Center" 
+            VerticalAlignment="Center" />
+
         <Separator Grid.Row="1" />
 
         <StackPanel Grid.Row="2"                    
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
-            <Button MinWidth="80" Width="Auto" Margin="4 0" Padding="8 2" Command="{Binding SaveToFileCommand}" Content="{t:Text SaveToFile}" />
+            <Button MinWidth="80" Width="Auto" Margin="4 0" Padding="8 2" Command="{Binding SaveToFileCommand}" Content="{t:Text SaveToFile}" IsEnabled="{Binding NoEvents, Converter={s:InverseBoolConverter}}" />
             <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CloseCommand}" Content="{t:Text Close}" />
         </StackPanel>
 

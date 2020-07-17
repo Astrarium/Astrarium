@@ -545,8 +545,7 @@ namespace Astrarium.ViewModels
         private async void CalculatePhenomena()
         {
             var ps = ViewManager.CreateViewModel<PhenomenaSettingsVM>();
-            ps.JulianDayFrom = sky.Context.JulianDay;
-            ps.JulianDayTo = sky.Context.JulianDay + 30;
+
             if (ViewManager.ShowDialog(ps) ?? false)
             {
                 var tokenSource = new CancellationTokenSource();

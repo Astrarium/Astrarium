@@ -58,7 +58,7 @@ namespace Astrarium.Plugins.Tracks
 
         private void ShowMotionTrackWindow()
         {
-            var body = map.SelectedObject;
+            var body = IsMotionTrackEnabled ? map.SelectedObject : null;
             var vm = ViewManager.CreateViewModel<MotionTrackVM>();
             vm.TrackId = Guid.NewGuid();
             vm.SelectedBody = body;

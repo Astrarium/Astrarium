@@ -14,30 +14,50 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Window}">
                     <Grid>
+
+                        <!-- Thin border around window -->
                         <c:BorderFix
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}">
-                            <AdornerDecorator>
-                                <ContentPresenter />
-                            </AdornerDecorator>
+                            BorderThickness="1"
+                            BorderBrush="{TemplateBinding Background}">
                             <c:BorderFix.Style>
                                 <Style TargetType="{x:Type c:BorderFix}" BasedOn="{StaticResource {x:Type c:BorderFix}}">
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType=Window}}" Value="Maximized">
-                                            <Setter Property="Margin" Value="5,0,5,5" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType=Window}}" Value="Normal">
-                                            <Setter Property="Margin" Value="0" />
-                                        </DataTrigger>
                                         <DataTrigger Binding="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(t:WindowProperties.IsFullScreen)}" Value="true">
                                             <Setter Property="BorderThickness" Value="0" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(t:WindowProperties.IsFullScreen)}" Value="false">
-                                            <Setter Property="BorderThickness" Value="4,32,4,4" />
+                                            <Setter Property="BorderThickness" Value="1" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
                             </c:BorderFix.Style>
+                            
+                            <!-- Window title and main content -->
+                            <c:BorderFix
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}">
+                                <AdornerDecorator>
+                                    <ContentPresenter />
+                                </AdornerDecorator>
+                                <c:BorderFix.Style>
+                                    <Style TargetType="{x:Type c:BorderFix}" BasedOn="{StaticResource {x:Type c:BorderFix}}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType=Window}}" Value="Maximized">
+                                                <Setter Property="Margin" Value="5,0,5,5" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType=Window}}" Value="Normal">
+                                                <Setter Property="Margin" Value="0" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(t:WindowProperties.IsFullScreen)}" Value="true">
+                                                <Setter Property="BorderThickness" Value="0" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(t:WindowProperties.IsFullScreen)}" Value="false">
+                                                <Setter Property="BorderThickness" Value="0,32,0,0" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </c:BorderFix.Style>
+                            </c:BorderFix>
                         </c:BorderFix>
 
                         <Grid Height="32" VerticalAlignment="Top">

@@ -35,7 +35,10 @@ namespace Astrarium.ViewModels
             Events = events
                 .Select(e => new AstroEventVM(e, sky.Context.GeoLocation.UtcOffset))
                 .GroupBy(e => e.Date);
+            NotifyPropertyChanged(nameof(Events), nameof(NoEvents));
         }
+
+        public bool NoEvents => !Events.Any();
 
         private void SaveToFile()
         {

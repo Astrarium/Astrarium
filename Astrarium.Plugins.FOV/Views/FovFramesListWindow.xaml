@@ -49,7 +49,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{t:Text FovFramesListWindow.NoFrames}" Visibility="{Binding IsEmptyList, Converter={s:BoolToVisibilityConverter}}" />
+        <TextBlock Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{t:Text FovFramesListWindow.NoFrames}" IsEnabled="False" Visibility="{Binding IsEmptyList, Converter={s:BoolToVisibilityConverter}}" />
 
         <DockPanel Grid.Row="0" VerticalAlignment="Stretch">
             <c:BindableListView 
