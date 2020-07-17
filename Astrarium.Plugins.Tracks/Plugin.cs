@@ -18,14 +18,25 @@ namespace Astrarium.Plugins.Tracks
             this.trackCalc = trackCalc;
 
             this.map.SelectedObjectChanged += (o) => NotifyPropertyChanged(nameof(IsMotionTrackEnabled));
+            this.trackCalc.Tracks.CollectionChanged += (s, e) => NotifyPropertyChanged(nameof(IsTracksListEnabled));
 
-            var menuTrack = new MenuItem("$Astrarium.Plugins.Tracks.ContextMenu", new Command(ShowMotionTrackWindow));
-            menuTrack.AddBinding(new SimpleBinding(this, nameof(IsMotionTrackEnabled), nameof(MenuItem.IsEnabled)));
-            MenuItems.Add(MenuItemPosition.ContextMenu, menuTrack);
+            var contextMenuTrack = new MenuItem("$Astrarium.Plugins.Tracks.ContextMenu", new Command(ShowMotionTrackWindow));
+            contextMenuTrack.AddBinding(new SimpleBinding(this, nameof(IsMotionTrackEnabled), nameof(MenuItem.IsEnabled)));
+            MenuItems.Add(MenuItemPosition.ContextMenu, contextMenuTrack);
 
-            var menuTracksList = new MenuItem("$Astrarium.Plugins.Tracks.ToolsMenu", new Command(ShowTracksListWindow));
-            menuTracksList.HotKey = new KeyGesture(Key.T, ModifierKeys.Control, "Ctrl+T");
-            MenuItems.Add(MenuItemPosition.MainMenuTools, menuTracksList);
+            var toolsMenuTracks = new MenuItem("$Astrarium.Plugins.Tracks.ToolsMenu", new Command(ShowTracksListWindow));
+            
+            var menuAddTrack = new MenuItem("$Astrarium.Plugins.Tracks.ToolsMenu.Add", new Command(ShowMotionTrackWindow));
+            menuAddTrack.HotKey = new KeyGesture(Key.T, ModifierKeys.Control, "Ctrl+T");
+
+            var menuTracksList = new MenuItem("$Astrarium.Plugins.Tracks.ToolsMenu.List", new Command(ShowTracksListWindow));
+            menuTracksList.AddBinding(new SimpleBinding(this, nameof(IsTracksListEnabled), nameof(MenuItem.IsEnabled)));
+            menuTracksList.HotKey = new KeyGesture(Key.T, ModifierKeys.Control | ModifierKeys.Shift, "Ctrl+Shift+T");
+
+            toolsMenuTracks.SubItems.Add(menuAddTrack);
+            toolsMenuTracks.SubItems.Add(menuTracksList);
+           
+            MenuItems.Add(MenuItemPosition.MainMenuTools, toolsMenuTracks);
         }
 
         public bool IsMotionTrackEnabled
@@ -34,6 +45,14 @@ namespace Astrarium.Plugins.Tracks
             {
                 var body = map.SelectedObject;
                 return body != null && body is IMovingObject;
+            }
+        }
+
+        public bool IsTracksListEnabled
+        {
+            get
+            {
+                return trackCalc.Tracks.Count > 0;
             }
         }
 
@@ -55,11 +74,7 @@ namespace Astrarium.Plugins.Tracks
 
         private void ShowTracksListWindow()
         {
-            if (IsMotionTrackEnabled)
-            {
-                ShowMotionTrackWindow();
-            }
-            else
+            if (IsTracksListEnabled)
             {
                 var vm = ViewManager.CreateViewModel<TracksListVM>();
                 if (ViewManager.ShowDialog(vm) ?? false)
