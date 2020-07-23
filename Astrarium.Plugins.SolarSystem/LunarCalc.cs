@@ -16,6 +16,11 @@ namespace Astrarium.Plugins.SolarSystem
     {
         public Moon Moon { get; private set; } = new Moon();
 
+        public LunarCalc()
+        {
+
+        }
+
         public override void Calculate(SkyContext c)
         {
             Moon.Equatorial = c.Get(Equatorial);
@@ -65,7 +70,7 @@ namespace Astrarium.Plugins.SolarSystem
         /// <summary>
         /// Gets apparent geocentrical ecliptical coordinates of the Moon
         /// </summary>
-        private CrdsEcliptical Ecliptical0(SkyContext c)
+        public CrdsEcliptical Ecliptical0(SkyContext c)
         {
             // geocentrical coordinates of the Moon
             CrdsEcliptical ecliptical0 = LunarMotion.GetCoordinates(c.JulianDay);
@@ -79,7 +84,7 @@ namespace Astrarium.Plugins.SolarSystem
         /// <summary>
         /// Gets equatorial geocentrical coordinates of the Moon
         /// </summary>
-        private CrdsEquatorial Equatorial0(SkyContext c)
+        public CrdsEquatorial Equatorial0(SkyContext c)
         {
             return c.Get(Ecliptical0).ToEquatorial(c.Epsilon);
         }

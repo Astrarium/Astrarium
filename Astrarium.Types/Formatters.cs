@@ -105,7 +105,10 @@ namespace Astrarium.Types
         {
             public string Format(object value)
             {
-                return new DMS((double)value).ToString();
+                if (value == null || double.IsNaN((double)value))
+                    return null;
+                else
+                    return new DMS((double)value).ToString();
             }
         }
 
@@ -113,7 +116,10 @@ namespace Astrarium.Types
         {
             public string Format(object value)
             {
-                return new DMS((double)value).ToUnsignedString();
+                if (value == null | double.IsNaN((double)value))
+                    return null;
+                else
+                    return new DMS((double)value).ToUnsignedString();
             }
         }
 
@@ -367,7 +373,7 @@ namespace Astrarium.Types
         public static readonly IEphemFormatter Altitude = new SignedAngleFormatter();
         public static readonly IEphemFormatter Azimuth = new UnsignedAngleFormatter();
         public static readonly IEphemFormatter Latitude = new SignedAngleFormatter();
-        public static readonly IEphemFormatter Longitude = new UnsignedAngleFormatter();
+        public static readonly IEphemFormatter Longitude = new SignedAngleFormatter();
         public static readonly IEphemFormatter Time = new TimeFormatter();
         public static readonly IEphemFormatter DistanceInAu = new UnsignedDoubleFormatter(3, "$Formatters.DistanceInAu.AU");
         public static readonly IEphemFormatter Phase = new PhaseFormatter();

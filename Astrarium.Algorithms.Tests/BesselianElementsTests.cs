@@ -37,6 +37,8 @@ namespace Astrarium.Algorithms.Tests
             Assert.AreEqual(0.502841, elements.Y, 1e-2);
             Assert.AreEqual(0.542469, elements.L1, 1e-2);
             Assert.AreEqual(-0.003650, elements.L2, 1e-2);
+
+            Algorithms.BesselianElements.MoonShadowCenter(jd, sun, moon, 1.5162934697E+08, 3.7330565613E+05);
         }
     }
 }
