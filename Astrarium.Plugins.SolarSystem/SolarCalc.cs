@@ -134,53 +134,37 @@ namespace Astrarium.Plugins.SolarSystem
             return Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, c.Get(Parallax), altitude);
         }
 
-        private CrdsGeographical MoonShadow(SkyContext c)
-        {
-            return BesselianElements.MoonShadowCenter(c.JulianDay, c.Get(Equatorial0), c.Get(lunarCalc.Equatorial0), c.Get(Ecliptical).Distance * 149597870, c.Get(lunarCalc.Ecliptical0).Distance);
-        }
-
-        private CrdsGeographical MoonShadow2(SkyContext c)
-        {
-            var besselian = c.Get(Besselian);
-            return BesselianElements.ProjectOnEarth(new System.Drawing.PointF((float)besselian.X, (float)besselian.Y), besselian);
-        }
-
-        private BesselianElements Besselian(SkyContext c)
-        {
-            return BesselianElements.Calculate(c.JulianDay, c.Get(Equatorial0), c.Get(lunarCalc.Equatorial0), c.Get(Ecliptical).Distance * 149597870 / 6371.0, c.Get(lunarCalc.Ecliptical0).Distance / 6371.0);
-        }
-
-        private string ShadowProjections(SkyContext c)
-        {
-            var besselian = c.Get(Besselian);
-
-            SkyContext c0 = c;
-            SkyContext c1 = new SkyContext(c.JulianDay + 1 / 24.0 / 60.0, c.GeoLocation);
-
-            var b0 = c0.Get(Besselian);
-            var b1 = c1.Get(Besselian);
-
-            var points = BesselianElements.NorthSouthLimitCurves(b0, b1);
-
-            return string.Join("\n", points.Where(p => p != null).Select(p => (p != null ? (p.Latitude).ToString("0.000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000", CultureInfo.InvariantCulture) : null))); ;
-        }
-
-        private string RiseSetCurves(SkyContext c)
-        {
-            var b = c.Get(Besselian);
-            var points = BesselianElements.RiseSetCurvePoints(b);
-            return string.Join("\n", points.Where(p => p != null).Select(p => (p != null ? (p.Latitude).ToString("0.000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000", CultureInfo.InvariantCulture) : null)));
-        }
-
-        private string CentralLine(SkyContext c)
-        {
-            var b = c.Get(Besselian);
-            var p = BesselianElements.ProjectOnEarth(new System.Drawing.PointF((float)b.X, (float)b.Y), b);
-            return (p != null ? (p.Latitude).ToString("0.000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000", CultureInfo.InvariantCulture) : null);
-        }
-
         public void GetInfo(CelestialObjectInfo<Sun> info)
         {
+            // TODO: move this to separate Eclipse calculator
+
+            SunMoonPosition[] pos = new SunMoonPosition[5];
+            for (int i = 0; i < 5; i++)
+            {
+                // 5 measurements with 3h step, so interval is -6...+6 hours
+                SkyContext c = new SkyContext(info.Context.JulianDay + TimeSpan.FromHours(3).TotalDays * (i - 2), info.Context.GeoLocation);
+                pos[i] = new SunMoonPosition()
+                {
+                    JulianDay = c.JulianDay,
+                    Sun = c.Get(Equatorial0),
+                    Moon = c.Get(lunarCalc.Equatorial0),
+                    DistanceSun = c.Get(Ecliptical).Distance * 149597870 / 6371.0,
+                    DistanceMoon = c.Get(lunarCalc.Ecliptical0).Distance / 6371.0
+                };
+            }
+
+            var el = SolarEclipses.FindPolynomialBesselianElements(pos);
+
+            var curves = SolarEclipses.GetCurves(el);
+
+            var pts =
+                string.Join("\n", curves.UmbraPath.Select(p => (p != null ? (p.Latitude).ToString("0.000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000", CultureInfo.InvariantCulture) : null))) + "\n" +
+                string.Join("\n", curves.UmbraNorthernLimit.Select(p => (p != null ? (p.Latitude).ToString("0.000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000", CultureInfo.InvariantCulture) : null))) + "\n" +
+                string.Join("\n", curves.UmbraSouthernLimit.Select(p => (p != null ? (p.Latitude).ToString("0.000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000", CultureInfo.InvariantCulture) : null))) + "\n" +
+                string.Join("\n", curves.PenumbraNorthernLimit.Select(p => (p != null ? (p.Latitude).ToString("0.000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000", CultureInfo.InvariantCulture) : null))) + "\n" +
+                string.Join("\n", curves.PenumbraSouthernLimit.Select(p => (p != null ? (p.Latitude).ToString("0.000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000", CultureInfo.InvariantCulture) : null))) + "\n" +
+                string.Join("\n", curves.RiseSetCurves.Select(p => (p != null ? (p.Latitude).ToString("0.000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000", CultureInfo.InvariantCulture) : null)));
+
             info.SetTitle(Sun.Name)
 
             .AddRow("Constellation")
@@ -255,20 +239,7 @@ namespace Astrarium.Plugins.SolarSystem
             e["Seasons.Spring", Formatters.DateTime] = (c, x) => c.Get(Seasons, Season.Spring);
             e["Seasons.Summer", Formatters.DateTime] = (c, x) => c.Get(Seasons, Season.Summer);
             e["Seasons.Autumn", Formatters.DateTime] = (c, x) => c.Get(Seasons, Season.Autumn);
-            e["Seasons.Winter", Formatters.DateTime] = (c, x) => c.Get(Seasons, Season.Winter);
-
-            e["MoonShadow.Latitude", Formatters.Latitude] = (c, s) => c.Get(MoonShadow)?.Latitude;
-            e["MoonShadow.Longitude", Formatters.Longitude] = (c, s) => c.Get(MoonShadow)?.Longitude;
-
-            e["MoonShadow2.Latitude", Formatters.Latitude] = (c, s) => c.Get(MoonShadow2)?.Latitude;
-            e["MoonShadow2.Longitude", Formatters.Longitude] = (c, s) => c.Get(MoonShadow2)?.Longitude;
-
-            e["Besselian.X"] = (c, s) => c.Get(Besselian)?.X;
-            e["Besselian.Y"] = (c, s) => c.Get(Besselian)?.Y;
-
-            e["Outlines"] = (c, s) => c.Get(ShadowProjections);
-            e["RisSetCurves"] = (c, s) => c.Get(RiseSetCurves);
-            e["CentralLine"] = (c, s) => c.Get(CentralLine);
+            e["Seasons.Winter", Formatters.DateTime] = (c, x) => c.Get(Seasons, Season.Winter);            
         }
 
         public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)
