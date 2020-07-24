@@ -168,7 +168,7 @@ namespace Astrarium.Algorithms
 
             // inclination of shadow path
             // respect to fundamental plane
-            double alpha = 0;
+            double inc = 0;
 
             for (double jd = jdFrom; jd <= jdTo; jd += step)
             {
@@ -177,31 +177,49 @@ namespace Astrarium.Algorithms
                 // Projection of Moon shadow center on fundamental plane
                 PointF pCenter = new PointF((float)b.X, (float)b.Y);
 
-                // Find penumbra (L1 radius) intersection with
-                // Earth circle on fundamental plane,
-                // and add such points to the curve
-                curves.RiseSetCurves.AddRange(
-                    CirclesIntersection(pCenter, b.L1)
-                    .Select(p => ProjectOnEarth(p, b.D, b.Mu))
-                    .Where(p => p != null));
-               
-                // Find umbra center on Earth surface
-                var umbraCenter = ProjectOnEarth(pCenter, b.D, b.Mu);
+                // Umbra center coordinates on Earth surface
+                CrdsGeographical umbraCenter = ProjectOnEarth(pCenter, b.D, b.Mu);
+                              
                 if (umbraCenter != null)
                 {
                     curves.UmbraPath.Add(umbraCenter);
                 }
+                
+                // Find penumbra (L1 radius) intersection with
+                // Earth circle on fundamental plane
+                PointF[] pPenumbraIntersect = CirclesIntersection(pCenter, b.L1);
+                
+                // Find corresponding geographical coordinates
+                CrdsGeographical[] gPenumbraIntersect = pPenumbraIntersect
+                    .Select(p => ProjectOnEarth(p, b.D, b.Mu))
+                    .Where(p => p != null).ToArray();
 
+                if (gPenumbraIntersect.Any())
+                {
+                    // Rise curve
+                    if (jd <= jdFrom + (jdTo - jdFrom) / 2)
+                    {
+                        curves.RiseCurve.AddMany(gPenumbraIntersect);                        
+                    }
+
+                    // Set curve
+                    if (jd >= jdFrom + (jdTo - jdFrom) / 2)
+                    {
+                        curves.SetCurve.AddMany(gPenumbraIntersect);
+                    }
+                }
+                             
+                // look up to next time
                 if (jdTo - jd > step)
                 {
                     InstantBesselianElements bNext = pbe.GetInstantBesselianElements(jd + step);
                     double dx = bNext.X - b.X;
                     double dy = bNext.Y - b.Y;
-                    alpha = Atan2(dy, dx);
+                    inc = Atan2(dy, dx);
                 }
 
                 // Find northern and southern umbra and penumbra limit points
-                double[] angles = new double[] { alpha + PI / 2, alpha - PI / 2 };
+                double[] angles = new double[] { inc + PI / 2, inc - PI / 2 };
                 for (int i = 0; i < 2; i++)
                 {
                     double angle = angles[i];
