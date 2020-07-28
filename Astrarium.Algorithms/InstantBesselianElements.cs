@@ -35,5 +35,11 @@
         /// Hour angle of Moon shadow vector, expressed in degrees
         /// </summary>
         public double Mu { get; set; }
+
+        /// <summary>
+        /// Inclination of Moon shadow track with respect to Earth equator, in degrees.
+        /// 0 value means track path is parallel to equator.
+        /// </summary>
+        public double Inc { get; set; }
     }
 }

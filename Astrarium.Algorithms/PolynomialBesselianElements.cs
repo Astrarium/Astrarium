@@ -62,6 +62,12 @@ namespace Astrarium.Algorithms
         public double[] Mu { get; set; }
 
         /// <summary>
+        /// Coefficients of Inc (inclination of Moon shadow track with respect to Earth equator, in degrees.
+        /// 0 value means track path is parallel to equator.)
+        /// </summary>
+        public double[] Inc { get; set; }
+
+        /// <summary>
         /// Gets Besselian elements values for specified Juluan Day.
         /// </summary>
         /// <param name="jd">Julian Day of interest</param>
@@ -82,6 +88,7 @@ namespace Astrarium.Algorithms
                 L2 = L2.Select((l2, n) => l2 * Pow(t, n)).Sum(),
                 D = D.Select((d, n) => d * Pow(t, n)).Sum(),
                 Mu = To360(Mu.Select((mu, n) => mu * Pow(t, n)).Sum()),
+                Inc = Inc.Select((inc, n) => inc * Pow(t, n)).Sum(),
             };
         }
 

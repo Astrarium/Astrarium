@@ -5,16 +5,16 @@ namespace Astrarium.Algorithms
 {
     public class SolarEclipseCurves
     {
-        public List<CrdsGeographical> UmbraPath { get; } = new List<CrdsGeographical>();
-        public List<CrdsGeographical> UmbraNorthernLimit { get; } = new List<CrdsGeographical>();
-        public List<CrdsGeographical> UmbraSouthernLimit { get; } = new List<CrdsGeographical>();
-        public Curve RiseCurve { get; } = new Curve();
-        public Curve SetCurve { get; } = new Curve();
+        public Curve UmbraPath { get; } = new Curve();
+        public Curve UmbraNorthernLimit { get; } = new Curve();
+        public Curve UmbraSouthernLimit { get; } = new Curve();
 
+        public List<CrdsGeographical> RiseSetCurve { get; } = new List<CrdsGeographical>();
 
-        public List<CrdsGeographical> PenumbraNorthernLimit { get; } = new List<CrdsGeographical>();
-        public List<CrdsGeographical> PenumbraSouthernLimit { get; } = new List<CrdsGeographical>();
-    
+        public Curve PenumbraNorthernLimit { get; } = new Curve();
+        public Curve PenumbraSouthernLimit { get; } = new Curve();
+
+       
         public class Curve : List<CrdsGeographical>
         {
             public new void Add(CrdsGeographical g)

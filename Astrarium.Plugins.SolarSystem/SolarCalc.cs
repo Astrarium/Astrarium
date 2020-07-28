@@ -163,8 +163,9 @@ namespace Astrarium.Plugins.SolarSystem
                 //string.Join("\n", curves.UmbraSouthernLimit.Select(p => (p != null ? (p.Latitude).ToString("0.000000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000000", CultureInfo.InvariantCulture) : null))) + "\n" +
                 //string.Join("\n", curves.PenumbraNorthernLimit.Select(p => (p != null ? (p.Latitude).ToString("0.000000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000000", CultureInfo.InvariantCulture) : null))) + "\n" +
                 //string.Join("\n", curves.PenumbraSouthernLimit.Select(p => (p != null ? (p.Latitude).ToString("0.000000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000000", CultureInfo.InvariantCulture) : null))) + "\n" +
-            string.Join("\n", curves.RiseCurve.Select(p => (p != null ? (p.Latitude).ToString("0.000000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000000", CultureInfo.InvariantCulture) : null))) + "\n" +
-            string.Join("\n", curves.SetCurve.Select(p => (p != null ? (p.Latitude).ToString("0.000000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000000", CultureInfo.InvariantCulture) : null))) + "\n";
+                string.Join("\n", curves.RiseSetCurve.Select(p => (p != null ? (p.Latitude).ToString("0.000000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000000", CultureInfo.InvariantCulture) : null))) + "\n" +
+            
+            "";
 
             info.SetTitle(Sun.Name)
 
