@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -168,8 +169,9 @@ namespace Astrarium.Algorithms
         public static SolarEclipseCurves GetCurves(PolynomialBesselianElements pbe)
         {
             double jdFrom = pbe.From;
+            double jdMid = pbe.From + (pbe.To - pbe.From) / 2;
             double jdTo = pbe.To;
-            double step = TimeSpan.FromMinutes(1).TotalDays;
+            double step;
 
             SolarEclipseCurves curves = new SolarEclipseCurves();
 
@@ -187,25 +189,98 @@ namespace Astrarium.Algorithms
                 return Sqrt(b.X * b.X + b.Y * b.Y) - 1 - b.L1;
             };
 
+            // Function has zero value when northern limit of penumbra crosses Earth edge
+            Func<double, double> funcNorthLimit = (jd) =>
+            {
+                var b = pbe.GetInstantBesselianElements(jd);
+                double angle = ToRadians(b.Inc + 90);
+                var p = new PointF(
+                        (float)(b.X + b.L1 * Cos(angle)),
+                        (float)(b.Y + b.L1 * Sin(angle)));
+
+                return Sqrt(p.X * p.X + p.Y * p.Y) - 1;
+            };
+
+            // Function has zero value when southern limit of penumbra crosses Earth edge
+            Func<double, double> funcSouthLimit = (jd) =>
+            {
+                var b = pbe.GetInstantBesselianElements(jd);
+                double angle = ToRadians(b.Inc - 90);
+                var p = new PointF(
+                        (float)(b.X + b.L1 * Cos(angle)),
+                        (float)(b.Y + b.L1 * Sin(angle)));
+
+                return Sqrt(p.X * p.X + p.Y * p.Y) - 1;
+            };
+
             // Instant of first penumbra contact
-            double jdFirstContactPenumbra = FindRoots(funcPenumbra, jdFrom, jdFrom + (jdTo - jdFrom) / 2, 1e-8);
+            double jdFirstContactPenumbra = FindRoots(funcPenumbra, jdFrom, jdMid, 1e-8);
 
             // Instant of last penumbra contact
-            double jdLastContactPenumbra = FindRoots(funcPenumbra, jdFrom + (jdTo - jdFrom) / 2, jdTo, 1e-8);
+            double jdLastContactPenumbra = FindRoots(funcPenumbra, jdMid, jdTo, 1e-8);
+            
+            // Instant of first contact of
+            double jdFirstContactNorthLimit = FindRoots(funcNorthLimit, jdFrom, jdMid, 1e-8);                        
+            double jdLastContactNorthLimit = FindRoots(funcNorthLimit, jdMid, jdTo, 1e-8);
+
+            double jdFirstContactSouthLimit = FindRoots(funcSouthLimit, jdFrom, jdMid, 1e-8);
+            double jdLastContactSouthLimit = FindRoots(funcSouthLimit, jdMid, jdTo, 1e-8);
 
             // Instant of first umbra contact
             double jdFirstContactUmbra = FindRoots(funcUmbra, jdFrom, jdFrom + (jdTo - jdFrom) / 2, 1e-8);
             
             // Instant of last umbra contact
             double jdLastContactUmbra = FindRoots(funcUmbra, jdFrom + (jdTo - jdFrom) / 2, jdTo, 1e-8);
+            
+            // Find points of northern limit of eclipse visibility
 
-            // Calc penumbra track curves
+            if (!double.IsNaN(jdFirstContactNorthLimit) &&
+                !double.IsNaN(jdLastContactNorthLimit))
+            {
+                step = FindStep(jdLastContactNorthLimit - jdFirstContactNorthLimit);
 
-            double deltaJd = jdLastContactPenumbra - jdFirstContactPenumbra;
-            int count = (int)(deltaJd / step) + 1;
-            double s = deltaJd / count;
+                for (double jd = jdFirstContactNorthLimit; jd <= jdLastContactNorthLimit + step * 0.1; jd += step)
+                {
+                    InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
 
-            for (double jd = jdFirstContactPenumbra; jd <= jdLastContactPenumbra; jd += s)
+                    double angle = ToRadians(b.Inc + 90);
+
+                    var pPenumbra = new PointF(
+                        (float)(b.X + b.L1 * Cos(angle)),
+                        (float)(b.Y + b.L1 * Sin(angle)));
+
+                    curves.PenumbraNorthernLimit.Add(ProjectOnEarth(pPenumbra, b.D, b.Mu));
+                }
+            }
+
+            // Find points of southern limit of eclipse visibility
+
+            if (!double.IsNaN(jdFirstContactSouthLimit) &&
+                !double.IsNaN(jdLastContactSouthLimit))
+            {
+                step = FindStep(jdLastContactSouthLimit - jdFirstContactSouthLimit);
+
+                for (double jd = jdFirstContactSouthLimit; jd <= jdLastContactSouthLimit + step * 0.1; jd += step)
+                {
+                    InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
+
+                    double angle = ToRadians(b.Inc - 90);
+
+                    var pPenumbra = new PointF(
+                        (float)(b.X + b.L1 * Cos(angle)),
+                        (float)(b.Y + b.L1 * Sin(angle)));
+
+                    curves.PenumbraSouthernLimit.Add(ProjectOnEarth(pPenumbra, b.D, b.Mu));
+                }
+            }
+
+            // Calc rise/set curves
+
+            step = FindStep(jdLastContactPenumbra - jdFirstContactPenumbra);
+
+            int riseSet = 0;
+
+            for (double jd = jdFirstContactPenumbra; jd <= jdLastContactPenumbra + step * 0.1; jd += step)
             {
                 InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
 
@@ -218,58 +293,38 @@ namespace Astrarium.Algorithms
 
                 for (int i = 0; i < pPenumbraIntersect.Length; i++)
                 {
-                    CrdsGeographical g = ProjectOnEarth(pPenumbraIntersect[i], b.D, b.Mu);
-                    if (g != null)
-                    {
-                        if (pCenter.X <= 0)
-                        {
-                            if (i == 0)
-                                curves.RiseSetCurve.Insert(0, g);
-                            else
-                                curves.RiseSetCurve.Add(g);
-                        }
-                        else
-                        {
-                            if (i == 0)
-                                curves.RiseSetCurve.Add(g);
-                            else
-                                curves.RiseSetCurve.Insert(0, g);
-                        }
-                    }
-                }
-
-                
-
-
-                // Find northern and southern penumbra limit points
-                double[] angles = new double[] { b.Inc + 90, b.Inc - 90 };
-                for (int i = 0; i < 2; i++)
-                {
-                    double angle = ToRadians(angles[i]);
-
-                    var pPenumbra = new PointF(
-                        (float)(b.X + b.L1 * Cos(angle)),
-                        (float)(b.Y + b.L1 * Sin(angle)));
-
-                    var penumbraLimit = ProjectOnEarth(pPenumbra, b.D, b.Mu);
-
-                    if (penumbraLimit != null)
+                    CrdsGeographical g = ProjectOnEarth(pPenumbraIntersect[i], b.D, b.Mu);                    
+                    if (pCenter.X <= 0)
                     {
                         if (i == 0)
-                            curves.PenumbraNorthernLimit.Add(penumbraLimit);
+                            curves.RiseSetCurve[riseSet].Insert(0, g);
                         else
-                            curves.PenumbraSouthernLimit.Add(penumbraLimit);
+                            curves.RiseSetCurve[riseSet].Add(g);
                     }
+                    else
+                    {
+                        if (i == 0)
+                            curves.RiseSetCurve[riseSet].Add(g);
+                        else
+                            curves.RiseSetCurve[riseSet].Insert(0, g);
+                    }                    
+                }
+
+                // Penumbra is totally inside Earth circle
+                if (curves.PenumbraNorthernLimit.Count > 0 &&
+                    curves.PenumbraSouthernLimit.Count > 0 &&
+                    pCenter.X * pCenter.X + pCenter.Y * pCenter.Y < 1 &&
+                    !pPenumbraIntersect.Any())
+                {
+                    riseSet = 1;
                 }
             }
 
             // Calc umbra track points
 
-            deltaJd = jdLastContactUmbra - jdFirstContactUmbra;
-            count = (int)(deltaJd / step) + 1;
-            s = deltaJd / count;
+            step = FindStep(jdLastContactUmbra - jdFirstContactUmbra);
 
-            for (double jd = jdFirstContactUmbra; jd <= jdLastContactUmbra; jd += s)
+            for (double jd = jdFirstContactUmbra; jd <= jdLastContactUmbra + step * 0.1; jd += step)
             {
                 InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
 
@@ -280,11 +335,8 @@ namespace Astrarium.Algorithms
                 CrdsGeographical umbraCenter = ProjectOnEarth(pCenter, b.D, b.Mu);
 
                 // Umbra central path
-                if (umbraCenter != null)
-                {
-                    curves.UmbraPath.Add(umbraCenter);
-                }
-
+                curves.UmbraPath.Add(umbraCenter);
+                
                 // Find northern and southern umbra limit points
                 double[] angles = new double[] { b.Inc + 90, b.Inc - 90 };
                 for (int i = 0; i < 2; i++)
@@ -297,40 +349,25 @@ namespace Astrarium.Algorithms
 
                     var umbraLimit = ProjectOnEarth(p, b.D, b.Mu);
 
-                    if (umbraLimit != null)
-                    {
-                        if (i == 0)
-                            curves.UmbraNorthernLimit.Add(umbraLimit);
-                        else
-                            curves.UmbraSouthernLimit.Add(umbraLimit);
-                    }
+                    if (i == 0)
+                        curves.UmbraNorthernLimit.Add(umbraLimit);
                     else
-                    {
-                        PointF[] pp = CirclesIntersection(pCenter, b.L2);
-                        if (pp.Length == 2)
-                        {
-                            if (i == 0)
-                            {
-                                var g = ProjectOnEarth(pp[1], b.D, b.Mu);
-                                if (g != null)
-                                {
-                                    curves.UmbraNorthernLimit.Add(g);
-                                }
-                            }
-                            else
-                            {
-                                var g = ProjectOnEarth(pp[0], b.D, b.Mu);
-                                if (g != null)
-                                {
-                                    curves.UmbraSouthernLimit.Add(g);
-                                }
-                            }
-                        }
-                    }
+                        curves.UmbraSouthernLimit.Add(umbraLimit);
                 }
             }
 
             return curves;
+        }
+
+        /// <summary>
+        /// Finds step value (in Julian days) needed for calculating curve points.
+        /// </summary>
+        /// <param name="deltaJd">Time interval, in Julian days</param>
+        /// <returns>Step value (in Julian days, closest to 1 minute) needed for calculating curve points.</returns>
+        private static double FindStep(double deltaJd)
+        {            
+            int count = (int)(deltaJd / TimeSpan.FromMinutes(1).TotalDays) + 1;
+            return deltaJd / count;
         }
 
         /// <summary>
@@ -353,53 +390,45 @@ namespace Astrarium.Algorithms
         /// </remarks>
         private static CrdsGeographical ProjectOnEarth(PointF p, double d, double mu)
         {
-            // Check the point is inside the Earth circle
-            if (Sqrt(p.X * p.X + p.Y * p.Y) <= 1)
+            // Earth ellipticity, squared
+            const double e2 = 0.00669454;
+
+            // 8.334-1
+            double rho1 = Sqrt(1 - e2 * Cos(ToRadians(d) * Cos(ToRadians(d))));
+
+            double xi = p.X;
+            double eta = p.Y;
+
+            // 8.333-9
+            double eta1 = eta / rho1;
+
+            // 8.333-10
+            double zeta1_2 = 1 - xi * xi - eta1 * eta1;
+            double zeta1 = 0;
+            if (zeta1_2 > 0)
             {
-                // Earth ellipticity, squared
-                const double e2 = 0.00669454;
-
-                // 8.334-1
-                double rho1 = Sqrt(1 - e2 * Cos(ToRadians(d) * Cos(ToRadians(d))));
-
-                double xi = p.X;
-                double eta = p.Y;
-
-                // 8.333-9
-                double eta1 = eta / rho1;
-
-                // 8.333-10
-                double zeta1_2 = 1 - xi * xi - eta1 * eta1;
-                double zeta1 = 0;
-                if (zeta1_2 > 0)
-                {
-                    zeta1 = Sqrt(zeta1_2);
-                }
-
-                // 8.334-1
-                double sind1 = Sin(ToRadians(d)) / rho1;
-                double cosd1 = Sqrt(1 - e2) * Cos(ToRadians(d)) / rho1;
-
-                double d1 = Atan2(sind1, cosd1);
-
-                // 8.333-13
-                var v = Matrix.R1(d1) * new Vector(xi, eta1, zeta1);
-
-                double phi1 = Asin(v.Y);
-                double sinTheta = v.X / Cos(phi1);
-                double cosTheta = v.Z / Cos(phi1);
-
-                double theta = ToDegrees(Atan2(sinTheta, cosTheta));
-
-                // 8.331-4
-                double lambda = mu - theta;
-
-                return new CrdsGeographical(To360(lambda + 180) - 180, ToDegrees(phi1));
+                zeta1 = Sqrt(zeta1_2);
             }
-            else
-            {
-                return null;
-            }
+
+            // 8.334-1
+            double sind1 = Sin(ToRadians(d)) / rho1;
+            double cosd1 = Sqrt(1 - e2) * Cos(ToRadians(d)) / rho1;
+
+            double d1 = Atan2(sind1, cosd1);
+
+            // 8.333-13
+            var v = Matrix.R1(d1) * new Vector(xi, eta1, zeta1);
+
+            double phi1 = Asin(v.Y);
+            double sinTheta = v.X / Cos(phi1);
+            double cosTheta = v.Z / Cos(phi1);
+
+            double theta = ToDegrees(Atan2(sinTheta, cosTheta));
+
+            // 8.331-4
+            double lambda = mu - theta;
+
+            return new CrdsGeographical(To360(lambda + 180) - 180, ToDegrees(phi1));
         }
 
         /// <summary>
@@ -465,6 +494,11 @@ namespace Astrarium.Algorithms
         /// <returns>Function root</returns>
         private static double FindRoots(Func<double, double> func, double a, double b, double eps)
         {
+            // check function has different 
+            // signs on segment ends
+            if (func(b) * func(a) > 0)
+                return double.NaN;
+
             double dx;
             while (b - a > eps)
             {
