@@ -158,7 +158,7 @@ namespace Astrarium.Plugins.SolarSystem
             var curves = SolarEclipses.GetCurves(el);
 
             var pts =
-                string.Join("\n", curves.UmbraPath.Select(p => (p != null ? (p.Latitude).ToString("0.000000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000000", CultureInfo.InvariantCulture) : null))) + "\n" +
+                string.Join("\n", curves.TotalPath.Select(p => (p != null ? (p.Latitude).ToString("0.000000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000000", CultureInfo.InvariantCulture) : null))) + "\n" +
                 string.Join("\n", curves.UmbraNorthernLimit.Select(p => (p != null ? (p.Latitude).ToString("0.000000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000000", CultureInfo.InvariantCulture) : null))) + "\n" +
                 string.Join("\n", curves.UmbraSouthernLimit.Select(p => (p != null ? (p.Latitude).ToString("0.000000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000000", CultureInfo.InvariantCulture) : null))) + "\n" +
                 string.Join("\n", curves.PenumbraNorthernLimit.Select(p => (p != null ? (p.Latitude).ToString("0.000000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000000", CultureInfo.InvariantCulture) : null))) + "\n" +

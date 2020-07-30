@@ -165,15 +165,23 @@ namespace Astrarium.Algorithms
         /// Gets map curves of solar eclipse
         /// </summary>
         /// <param name="pbe">Polynomial Besselian elements defining the Eclipse</param>
-        /// <returns><see cref="SolarEclipseCurves"/> instance.</returns>
-        public static SolarEclipseCurves GetCurves(PolynomialBesselianElements pbe)
+        /// <returns><see cref="SolarEclipseMap"/> instance.</returns>
+        public static SolarEclipseMap GetCurves(PolynomialBesselianElements pbe)
         {
+            // left edge of time interval
             double jdFrom = pbe.From;
-            double jdMid = pbe.From + (pbe.To - pbe.From) / 2;
-            double jdTo = pbe.To;
-            double step;
 
-            SolarEclipseCurves curves = new SolarEclipseCurves();
+            // midpoint of time interval
+            double jdMid = pbe.From + (pbe.To - pbe.From) / 2;
+
+            // right edge of time interval
+            double jdTo = pbe.To;
+
+            // precision of calculation, in days
+            double epsilon = 1e-8;
+
+            // Eclipse map data
+            SolarEclipseMap map = new SolarEclipseMap();
 
             // Function has zero value when umbra center crosses Earth edge
             Func<double, double> funcUmbra = (jd) =>
@@ -182,11 +190,18 @@ namespace Astrarium.Algorithms
                 return b.X * b.X + b.Y * b.Y - 1;
             };
 
-            // Function has zero value when penumbra edge crosses Earth edge
-            Func<double, double> funcPenumbra = (jd) =>
+            // Function has zero value when penumbra edge crosses Earth edge externally
+            Func<double, double> funcExternalContact = (jd) =>
             {
                 var b = pbe.GetInstantBesselianElements(jd);
                 return Sqrt(b.X * b.X + b.Y * b.Y) - 1 - b.L1;
+            };
+
+            // Function has zero value when penumbra edge crosses Earth edge internally
+            Func<double, double> funcInternalContact = (jd) =>
+            {
+                var b = pbe.GetInstantBesselianElements(jd);
+                return Sqrt(b.X * b.X + b.Y * b.Y) - 1 + b.L1;
             };
 
             // Function has zero value when northern limit of penumbra crosses Earth edge
@@ -213,74 +228,148 @@ namespace Astrarium.Algorithms
                 return Sqrt(p.X * p.X + p.Y * p.Y) - 1;
             };
 
-            // Instant of first penumbra contact
-            double jdFirstContactPenumbra = FindRoots(funcPenumbra, jdFrom, jdMid, 1e-8);
-
-            // Instant of last penumbra contact
-            double jdLastContactPenumbra = FindRoots(funcPenumbra, jdMid, jdTo, 1e-8);
-            
-            // Instant of first contact of
-            double jdFirstContactNorthLimit = FindRoots(funcNorthLimit, jdFrom, jdMid, 1e-8);                        
-            double jdLastContactNorthLimit = FindRoots(funcNorthLimit, jdMid, jdTo, 1e-8);
-
-            double jdFirstContactSouthLimit = FindRoots(funcSouthLimit, jdFrom, jdMid, 1e-8);
-            double jdLastContactSouthLimit = FindRoots(funcSouthLimit, jdMid, jdTo, 1e-8);
-
-            // Instant of first umbra contact
-            double jdFirstContactUmbra = FindRoots(funcUmbra, jdFrom, jdFrom + (jdTo - jdFrom) / 2, 1e-8);
-            
-            // Instant of last umbra contact
-            double jdLastContactUmbra = FindRoots(funcUmbra, jdFrom + (jdTo - jdFrom) / 2, jdTo, 1e-8);
-            
-            // Find points of northern limit of eclipse visibility
-
-            if (!double.IsNaN(jdFirstContactNorthLimit) &&
-                !double.IsNaN(jdLastContactNorthLimit))
+            // Instant of first external contact of penumbra,
+            // assume always exists
+            double jdP1 = FindRoots(funcExternalContact, jdFrom, jdMid, epsilon);
             {
-                step = FindStep(jdLastContactNorthLimit - jdFirstContactNorthLimit);
-
-                for (double jd = jdFirstContactNorthLimit; jd <= jdLastContactNorthLimit + step * 0.1; jd += step)
-                {
-                    InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
-
-                    double angle = ToRadians(b.Inc + 90);
-
-                    var pPenumbra = new PointF(
-                        (float)(b.X + b.L1 * Cos(angle)),
-                        (float)(b.Y + b.L1 * Sin(angle)));
-
-                    curves.PenumbraNorthernLimit.Add(ProjectOnEarth(pPenumbra, b.D, b.Mu));
-                }
+                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdP1);
+                double a = Atan2(b.Y, b.X);
+                PointF p = new PointF((float)Cos(a), (float)Sin(a));                
+                map.P1 = new SolarEclipsePoint(jdP1, ProjectOnEarth(p, b.D, b.Mu));              
             }
+
+            // Instant of last external contact of penumbra
+            // assume always exists
+            double jdP4 = FindRoots(funcExternalContact, jdMid, jdTo, epsilon);
+            {
+                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdP4);
+                double a = Atan2(b.Y, b.X);
+                PointF p = new PointF((float)Cos(a), (float)Sin(a));
+                map.P4 = new SolarEclipsePoint(jdP4, ProjectOnEarth(p, b.D, b.Mu));
+            }
+
+            // Instant of first internal contact of penumbra,
+            // may not exist
+            double jdP2 = FindRoots(funcInternalContact, jdFrom, jdMid, epsilon);
+            if (!double.IsNaN(jdP2))
+            {
+                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdP2);
+                double a = Atan2(b.Y, b.X);
+                PointF p = new PointF((float)Cos(a), (float)Sin(a));
+                map.P2 = new SolarEclipsePoint(jdP2, ProjectOnEarth(p, b.D, b.Mu));
+            }
+
+            // Instant of last internal contact of penumbra,
+            // may not exist
+            double jdP3 = FindRoots(funcInternalContact, jdMid, jdTo, epsilon);
+            if (!double.IsNaN(jdP3))
+            {
+                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdP3);
+                double a = Atan2(b.Y, b.X);
+                PointF p = new PointF((float)Cos(a), (float)Sin(a));
+                map.P3 = new SolarEclipsePoint(jdP3, ProjectOnEarth(p, b.D, b.Mu));
+            }
+
+            // Instant when northern limit of penumbra crosses Earth edge first time,
+            // may not exist
+            double jdPN1 = FindRoots(funcNorthLimit, jdFrom, jdMid, epsilon);
+            if (!double.IsNaN(jdPN1))
+            {
+                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdPN1);
+                PointF p = CirclesIntersection(new PointF((float)b.X, (float)b.Y), b.L1)[0];
+                map.PN1 = new SolarEclipsePoint(jdPN1, ProjectOnEarth(p, b.D, b.Mu));
+            }
+
+            // Instant when northern limit of penumbra crosses Earth edge last time,
+            // may not exist
+            double jdPN2 = FindRoots(funcNorthLimit, jdMid, jdTo, epsilon);
+            if (!double.IsNaN(jdPN2))
+            {
+                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdPN2);
+                PointF p = CirclesIntersection(new PointF((float)b.X, (float)b.Y), b.L1)[0];
+                map.PN2 = new SolarEclipsePoint(jdPN2, ProjectOnEarth(p, b.D, b.Mu));
+            }
+
+            // Instant when southern limit of penumbra crosses Earth edge first time,
+            // may not exist
+            double jdPS1 = FindRoots(funcSouthLimit, jdFrom, jdMid, epsilon);
+            if (!double.IsNaN(jdPS1))
+            {
+                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdPS1);
+                PointF p = CirclesIntersection(new PointF((float)b.X, (float)b.Y), b.L1)[1];
+                map.PS1 = new SolarEclipsePoint(jdPS1, ProjectOnEarth(p, b.D, b.Mu));
+            }
+
+            // Instant when southern limit of penumbra crosses Earth edge last time,
+            // may not exist
+            double jdPS2 = FindRoots(funcSouthLimit, jdMid, jdTo, epsilon);
+            if (!double.IsNaN(jdPS2))
+            {
+                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdPS2);
+                PointF p = CirclesIntersection(new PointF((float)b.X, (float)b.Y), b.L1)[1];
+                map.PS2 = new SolarEclipsePoint(jdPS2, ProjectOnEarth(p, b.D, b.Mu));
+            }
+
+            // Instant of first contact of umbra center,
+            // may not exist
+            double jdC1 = FindRoots(funcUmbra, jdFrom, jdMid, epsilon);
+            if (!double.IsNaN(jdC1))
+            {
+                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdC1);
+                PointF p = new PointF((float)b.X, (float)b.Y);
+                map.С1 = new SolarEclipsePoint(jdC1, ProjectOnEarth(p, b.D, b.Mu));
+            }
+
+            // Instant of last contact of umbra center,
+            // may not exist
+            double jdC2 = FindRoots(funcUmbra, jdMid, jdTo, epsilon);
+            if (!double.IsNaN(jdC2))
+            {
+                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdC2);
+                PointF p = new PointF((float)b.X, (float)b.Y);
+                map.С2 = new SolarEclipsePoint(jdC2, ProjectOnEarth(p, b.D, b.Mu));
+            }
+
+            // Find points of northern limit of eclipse visibility
+            FindVisibilityLimits(pbe, map.PenumbraNorthernLimit, jdPN1, jdPN2, 90);
 
             // Find points of southern limit of eclipse visibility
+            FindVisibilityLimits(pbe, map.PenumbraSouthernLimit, jdPS1, jdPS2, -90);
 
-            if (!double.IsNaN(jdFirstContactSouthLimit) &&
-                !double.IsNaN(jdLastContactSouthLimit))
+            // Calc rise/set curves
+            FindRiseSetCurves(pbe, map, jdP1, jdP4);
+
+            // Calc umbra track points
+            FindTotalPath(pbe, map, jdC1, jdC2);
+            
+            return map;
+        }
+
+        private static void FindVisibilityLimits(PolynomialBesselianElements pbe, ICollection<CrdsGeographical> curve, double jdFrom, double jdTo, double ang)
+        {
+            if (!double.IsNaN(jdFrom) && !double.IsNaN(jdTo))
             {
-                step = FindStep(jdLastContactSouthLimit - jdFirstContactSouthLimit);
-
-                for (double jd = jdFirstContactSouthLimit; jd <= jdLastContactSouthLimit + step * 0.1; jd += step)
+                double step = FindStep(jdTo - jdFrom);
+                for (double jd = jdFrom; jd <= jdTo + step * 0.1; jd += step)
                 {
                     InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
 
-                    double angle = ToRadians(b.Inc - 90);
+                    double angle = ToRadians(b.Inc + ang);
 
                     var pPenumbra = new PointF(
                         (float)(b.X + b.L1 * Cos(angle)),
                         (float)(b.Y + b.L1 * Sin(angle)));
 
-                    curves.PenumbraSouthernLimit.Add(ProjectOnEarth(pPenumbra, b.D, b.Mu));
+                    curve.Add(ProjectOnEarth(pPenumbra, b.D, b.Mu));
                 }
             }
+        }
 
-            // Calc rise/set curves
-
-            step = FindStep(jdLastContactPenumbra - jdFirstContactPenumbra);
-
+        private static void FindRiseSetCurves(PolynomialBesselianElements pbe, SolarEclipseMap curves, double jdFrom, double jdTo)
+        {
+            double step = FindStep(jdTo - jdFrom);
             int riseSet = 0;
-
-            for (double jd = jdFirstContactPenumbra; jd <= jdLastContactPenumbra + step * 0.1; jd += step)
+            for (double jd = jdFrom; jd <= jdTo + step * 0.1; jd += step)
             {
                 InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
 
@@ -293,7 +382,7 @@ namespace Astrarium.Algorithms
 
                 for (int i = 0; i < pPenumbraIntersect.Length; i++)
                 {
-                    CrdsGeographical g = ProjectOnEarth(pPenumbraIntersect[i], b.D, b.Mu);                    
+                    CrdsGeographical g = ProjectOnEarth(pPenumbraIntersect[i], b.D, b.Mu);
                     if (pCenter.X <= 0)
                     {
                         if (i == 0)
@@ -307,7 +396,7 @@ namespace Astrarium.Algorithms
                             curves.RiseSetCurve[riseSet].Add(g);
                         else
                             curves.RiseSetCurve[riseSet].Insert(0, g);
-                    }                    
+                    }
                 }
 
                 // Penumbra is totally inside Earth circle
@@ -319,44 +408,45 @@ namespace Astrarium.Algorithms
                     riseSet = 1;
                 }
             }
+        }
 
-            // Calc umbra track points
-
-            step = FindStep(jdLastContactUmbra - jdFirstContactUmbra);
-
-            for (double jd = jdFirstContactUmbra; jd <= jdLastContactUmbra + step * 0.1; jd += step)
+        private static void FindTotalPath(PolynomialBesselianElements pbe, SolarEclipseMap curves, double jdFrom, double jdTo)
+        {
+            if (!double.IsNaN(jdFrom) && !double.IsNaN(jdTo))
             {
-                InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
-
-                // Projection of Moon shadow center on fundamental plane
-                PointF pCenter = new PointF((float)b.X, (float)b.Y);
-
-                // Umbra center coordinates on Earth surface
-                CrdsGeographical umbraCenter = ProjectOnEarth(pCenter, b.D, b.Mu);
-
-                // Umbra central path
-                curves.UmbraPath.Add(umbraCenter);
-                
-                // Find northern and southern umbra limit points
-                double[] angles = new double[] { b.Inc + 90, b.Inc - 90 };
-                for (int i = 0; i < 2; i++)
+                double step = FindStep(jdTo - jdFrom);
+                for (double jd = jdFrom; jd <= jdTo + step * 0.1; jd += step)
                 {
-                    double angle = ToRadians(angles[i]);
-                   
-                    var p = new PointF(
-                        (float)(b.X + b.L2 * Cos(angle)),
-                        (float)(b.Y + b.L2 * Sin(angle)));
+                    InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
 
-                    var umbraLimit = ProjectOnEarth(p, b.D, b.Mu);
+                    // Projection of Moon shadow center on fundamental plane
+                    PointF pCenter = new PointF((float)b.X, (float)b.Y);
 
-                    if (i == 0)
-                        curves.UmbraNorthernLimit.Add(umbraLimit);
-                    else
-                        curves.UmbraSouthernLimit.Add(umbraLimit);
+                    // Umbra center coordinates on Earth surface
+                    CrdsGeographical umbraCenter = ProjectOnEarth(pCenter, b.D, b.Mu);
+
+                    // Umbra central path
+                    curves.TotalPath.Add(umbraCenter);
+
+                    // Find northern and southern umbra limit points
+                    double[] angles = new double[] { b.Inc + 90, b.Inc - 90 };
+                    for (int i = 0; i < 2; i++)
+                    {
+                        double angle = ToRadians(angles[i]);
+
+                        var p = new PointF(
+                            (float)(b.X + b.L2 * Cos(angle)),
+                            (float)(b.Y + b.L2 * Sin(angle)));
+
+                        var umbraLimit = ProjectOnEarth(p, b.D, b.Mu);
+
+                        if (i == 0)
+                            curves.UmbraNorthernLimit.Add(umbraLimit);
+                        else
+                            curves.UmbraSouthernLimit.Add(umbraLimit);
+                    }
                 }
             }
-
-            return curves;
         }
 
         /// <summary>
