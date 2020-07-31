@@ -605,5 +605,273 @@ namespace Astrarium.Algorithms
             }
             return (a + b) / 2;
         }
+
+        /// <summary>
+        /// Calculates nearest solar eclipse (next or previous) for the provided Julian Day.
+        /// </summary>
+        /// <param name="jd"></param>
+        /// <param name="next"></param>
+        public static SolarEclipse NearestEclipse(double jd, bool next)
+        {
+            Date d = new Date(jd);
+            double year = d.Year + (Date.JulianEphemerisDay(d) - Date.JulianDay0(d.Year)) / 365.25;
+            double k = Floor((year - 2000) * 12.3685);
+            bool eclipseFound;
+          
+            double T = k / 1236.85;
+            double T2 = T * T;
+            double T3 = T2 * T;
+            double T4 = T3 * T;
+
+            SolarEclipse eclipse = new SolarEclipse();
+
+            do
+            {
+                // Moon's argument of latitude (mean dinstance of the Moon from its ascending node)
+                double F = 160.7108 + 390.67050284 * k
+                                    - 0.0016118 * T2
+                                    - 0.00000227 * T3
+                                    + 0.000000011 * T4;
+                
+                eclipseFound = Abs(Sin(ToRadians(F))) <= 0.36;
+
+                if (eclipseFound)
+                {
+                    double jdMeanPhase = 2451550.09766 + 29.530588861 * k
+                                                    + 0.00015437 * T2
+                                                    - 0.000000150 * T3
+                                                    + 0.00000000073 * T4;
+
+                    // Sun's mean anomaly
+                    double M = 2.5534 + 29.10535670 * k
+                                     - 0.0000014 * T2
+                                     - 0.00000011 * T3;
+                    M = ToRadians(M);
+
+                    // Moon's mean anomaly
+                    double M_ = 201.5643 + 385.81693528 * k
+                                         + 0.0107582 * T2
+                                         + 0.00001238 * T3
+                                         - 0.000000058 * T4;
+                    M_ = ToRadians(M_);
+
+                    // Mean longitude of ascending node
+                    double Omega = 124.7746 - 1.56375588 * k
+                                            + 0.0020672 * T2
+                                            + 0.00000215 * T3;
+                    Omega = ToRadians(Omega);
+
+                    // Multiplier related to the eccentricity of the Earth orbit
+                    double E = 1 - 0.002516 * T - 0.0000074 * T2;
+
+                    double F1 = ToRadians(F - 0.02665 * Sin(Omega));
+                    double A1 = ToRadians(299.77 + 0.107408 * k - 0.009173 * T2);
+
+                    double jdMax =
+                        jdMeanPhase
+                        - 0.4075 * Sin(M_)
+                        + 0.1721 * E * Sin(M)
+                        + 0.0161 * Sin(2 * M_)
+                        - 0.0097 * Sin(2 * F1)
+                        + 0.0073 * E * Sin(M_ - M)
+                        - 0.0050 * E * Sin(M_ + M)
+                        - 0.0023 * Sin(M_ - 2 * F1)
+                        + 0.0021 * E * Sin(2 * M)
+                        + 0.0012 * Sin(M_ + 2 * F1)
+                        + 0.0006 * E * Sin(2 * M_ + M)
+                        - 0.0004 * Sin(3 * M_)
+                        - 0.0003 * E * Sin(M + 2 * F1)
+                        + 0.0003 * Sin(A1)
+                        - 0.0002 * E * Sin(M - 2 * F1)
+                        - 0.0002 * E * Sin(2 * M_ - M)
+                        - 0.0002 * Sin(Omega);
+
+                    double P =
+                        0.2070 * E * Sin(M)
+                        + 0.0024 * E * Sin(2 * M)
+                        - 0.0392 * Sin(M_)
+                        + 0.0116 * Sin(2 * M_)
+                        - 0.0073 * E * Sin(M_ + M)
+                        + 0.0067 * E * Sin(M_ - M)
+                        + 0.0118 * Sin(2 * F1);
+
+                    double Q = 
+                        5.2207 - 0.0048 * E * Cos(M) 
+                        + 0.0020 * E * Cos(2 * M) 
+                        - 0.3299 * Cos(M_) 
+                        - 0.0060 * E * Cos(M_ + M) 
+                        + 0.0041 * E * Cos(M_ - M);
+
+                    double W = Abs(Cos(F1));
+
+                    double gamma = (P * Cos(F1) + Q * Sin(F1)) * (1 - 0.0048 * W);
+
+                    double u = 0.0059
+                        + 0.0046 * E * Cos(M)
+                        - 0.0182 * Cos(M_)
+                        + 0.0004 * Cos(2 * M_)
+                        - 0.0005 * E * Cos(M + M_);
+
+                    // no eclipse visible from the Earth surface
+                    if (Abs(gamma) > 1.5433 + u)
+                    {
+                        eclipseFound = false;
+                        if (next) k++;
+                        else k--;
+                        continue;
+                    }
+
+                    eclipse.U = u;
+                    eclipse.Gamma = gamma;
+                    eclipse.JulianDayMaximum = jdMax;
+
+                    // non-central eclipse
+                    if (Abs(gamma) > 0.9972 && Abs(gamma) < 0.9972 + Abs(u))
+                    {
+                        eclipse.IsNonCentral = true;
+                    }
+
+                    if (u < 0)
+                    {
+                        eclipse.EclipseType = SolarEclipseType.Total;
+                    }
+                    else if (u > 0.0047)
+                    {
+                        eclipse.EclipseType = SolarEclipseType.Annular;
+                    }
+                    else
+                    {
+                        double omega = 0.00464 * Sqrt(1 - gamma * gamma);
+                        if (u < omega)
+                        {
+                            eclipse.EclipseType = SolarEclipseType.Hybrid;
+                        }
+                        else
+                        {
+                            eclipse.EclipseType = SolarEclipseType.Annular;
+                        }
+                    }
+
+                    if (!eclipse.IsNonCentral && Abs(gamma) > 0.9972 && Abs(gamma) < 1.5433 + u)
+                    {
+                        eclipse.EclipseType = SolarEclipseType.Partial;
+                        eclipse.Phase = (1.5433 + u - Abs(gamma)) / (0.5461 + 2 * u);
+                    }
+
+                    // hemisphere
+                    if (gamma > 0)
+                    {
+                        eclipse.Regio = EclipseRegio.Northern;
+                    }
+                    if (gamma < 0)
+                    {
+                        eclipse.Regio = EclipseRegio.Southern;
+                    }
+                    if (Abs(gamma) < 0.1)
+                    {
+                        eclipse.Regio = EclipseRegio.Equatorial;
+                    }
+                }
+                else
+                {
+                    if (next) k++;
+                    else k--;
+                }
+            }
+            while (!eclipseFound);
+
+            return eclipse;
+        }
+    }
+
+    /// <summary>
+    /// Describes general details of the Solar eclipse
+    /// </summary>
+    public class SolarEclipse
+    {
+        /// <summary>
+        /// Instant of maximal eclipse
+        /// </summary>
+        public double JulianDayMaximum { get; set; }
+
+        /// <summary>
+        /// Eclipse phase
+        /// </summary>
+        public double Phase { get; set; } = 1;
+        
+        /// <summary>
+        /// Regio where the eclipse is primarily visible
+        /// </summary>
+        public EclipseRegio Regio { get; set; }        
+               
+        /// <summary>
+        /// Least distance from the axis of the Moon's shadow to the center of the Earth,
+        /// in units of equatorial radius of the Earth.
+        /// </summary>
+        public double Gamma { get; set; }
+
+        /// <summary>
+        /// Radius of the Moon's umbral cone in the fundamental plane,
+        /// in units of equatorial radius of the Earth.
+        /// </summary>
+        public double U { get; set; }
+
+        /// <summary>
+        /// Type of eclipse: annular, central, hybrid (annular-central) or partial
+        /// </summary>
+        public SolarEclipseType EclipseType { get; set; }
+
+        /// <summary>
+        /// Flag indicating the eclipse is non-central
+        /// (umbral cone touches the Earth polar regio but umbral axis does not)
+        /// </summary>
+        public bool IsNonCentral { get; set; }
+    } 
+
+    /// <summary>
+    /// Solar eclipse type
+    /// </summary>
+    public enum SolarEclipseType
+    {
+        /// <summary>
+        /// Annular solar eclipse
+        /// </summary>
+        Annular,
+
+        /// <summary>
+        /// Total solar eclipse
+        /// </summary>
+        Total,
+
+        /// <summary>
+        /// Hybrid, or annular-total solar eclipse
+        /// </summary>
+        Hybrid,
+
+        /// <summary>
+        /// Partial solar eclipse
+        /// </summary>
+        Partial
+    }
+
+    /// <summary>
+    /// Visibility regio of the eclipse
+    /// </summary>
+    public enum EclipseRegio
+    {
+        /// <summary>
+        /// Eclipse is primarily visible in Northern hemisphere
+        /// </summary>
+        Northern = 1,
+
+        /// <summary>
+        /// Eclipse is primarily visible in equatorial regio
+        /// </summary>
+        Equatorial = 0,
+
+        /// <summary>
+        /// Eclipse is primarily visible in Southern hemisphere
+        /// </summary>
+        Southern = -1
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
 namespace Astrarium.Algorithms.Tests
 {
@@ -24,7 +25,7 @@ namespace Astrarium.Algorithms.Tests
                 DistanceSun = 1.5162934697E+08 / 6371.0,
                 DistanceMoon = 3.7330565613E+05 / 6371.0
             };
-                  
+
             var elements = SolarEclipses.FindInstantBesselianElements(position);
 
             Assert.AreEqual(15.32734, elements.D, 1e-2);
@@ -33,6 +34,18 @@ namespace Astrarium.Algorithms.Tests
             Assert.AreEqual(0.502841, elements.Y, 1e-2);
             Assert.AreEqual(0.542469, elements.L1, 1e-2);
             Assert.AreEqual(-0.003650, elements.L2, 1e-2);
+        }
+
+        [TestMethod]
+        public void FindNearestSolarEclipse()
+        {
+            double jd = new Date(1993, 5, 21).ToJulianDay();
+            SolarEclipse eclipse = SolarEclipses.NearestEclipse(jd, true);
+
+            Assert.AreEqual(2449129.0979, eclipse.JulianDayMaximum, TimeSpan.FromMinutes(0.36).TotalDays);
+            Assert.AreEqual(SolarEclipseType.Partial, eclipse.EclipseType);
+            Assert.AreEqual(0.740, eclipse.Phase, 1e-3);
+            Assert.AreEqual(EclipseRegio.Northern, eclipse.Regio);
         }
     }
 }
