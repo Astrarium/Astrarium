@@ -447,6 +447,8 @@ namespace Astrarium.Algorithms
                     }
                 }
             }
+
+            curves.UmbraSouthernLimit.Reverse();
         }
 
         /// <summary>

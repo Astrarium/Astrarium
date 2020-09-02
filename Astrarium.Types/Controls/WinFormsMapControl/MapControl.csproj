@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net451</TargetFrameworks>
+    <Version>1.0.1</Version>
+    <Product>System.Windows.Forms.MapControl</Product>
+    <Description>Map control for WindowsForms</Description>
+    <Copyright>© Alexander Krutov 2020</Copyright>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Title>System.Windows.Forms.MapControl</Title>
+    <Summary>Map control for WindowsForms</Summary>
+    <PackageId>WinFormsMapControl</PackageId>    
+    <Authors>Alexander Krutov</Authors>
+    <Company>Alexander Krutov</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/AlexanderKrutov/WinFormsMapControl</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/AlexanderKrutov/WinFormsMapControl.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>WindowsForms, MapControl, OpenStreetMap</PackageTags>
+    <AssemblyName>System.Windows.Forms.MapControl</AssemblyName>
+    <RootNamespace>System.Windows.Forms</RootNamespace>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net451|AnyCPU'">
+    <DocumentationFile>System.Windows.Forms.MapControl.xml</DocumentationFile>
+  </PropertyGroup>  
+  <ItemGroup>
+    <EmbeddedResource Include="OfflineMaps\**\*.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Windows" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>  
+</Project>

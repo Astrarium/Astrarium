@@ -15,6 +15,7 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="WindowsBase" />
+    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
 
   <ItemGroup>
@@ -62,6 +63,10 @@
 
   <ItemGroup>
     <Resource Include="Themes\NotoSans-Regular.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Controls\WinFormsMapControl\OfflineMaps\**\*.jpg" />
   </ItemGroup>
   
 </Project>

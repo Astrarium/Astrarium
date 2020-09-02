@@ -37,12 +37,19 @@
   <ItemGroup>
     <None Remove="Images.xaml" />
     <None Remove="Text.ini" />
+    <None Remove="Views\SolarEclipseWindow.xaml" />
   </ItemGroup>
   
   <ItemGroup>
     <EmbeddedResource Include="Text.ini" />
   </ItemGroup>
-  
+
+  <ItemGroup>
+    <Page Include="..\Astrarium.Plugins.SolarSystem\Views\*.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="OpenTK" Version="3.2.0" />
@@ -63,6 +70,7 @@
     <Reference Include="System.Windows.Presentation" />
     <Reference Include="System.Xaml" />
     <Reference Include="WindowsBase" />
+    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
 
   <ItemGroup>

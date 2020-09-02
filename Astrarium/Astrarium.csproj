@@ -11,7 +11,6 @@
     <ApplicationIcon>Astrarium.ico</ApplicationIcon>
   </PropertyGroup>
 
-  
   <PropertyGroup> 
     <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);NETSDK1107</MSBuildWarningsAsMessages>
   </PropertyGroup>
