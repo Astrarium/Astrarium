@@ -139,6 +139,7 @@ namespace Astrarium.Types.Controls
         private static void DependencyPropertyChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             typeof(System.Windows.Forms.MapControl).GetProperty(e.Property.Name).SetValue((sender as MapControl).mapControl, e.NewValue);
+            (sender as MapControl).mapControl.Invalidate();
         }
 
         private System.Windows.Forms.MapControl mapControl = new System.Windows.Forms.MapControl();

@@ -52,7 +52,7 @@ namespace Astrarium.Plugins.SolarSystem
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconMoon", "$Settings.Moon", new SimpleBinding(settings, "Moon", "IsChecked")));
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconPlanet", "$Settings.Planets", new SimpleBinding(settings, "Planets", "IsChecked")));
 
-            MenuItem eclipsesMenu = new MenuItem("Solar eclipses", new Command(OpenFovFramesList));            
+            MenuItem eclipsesMenu = new MenuItem("Solar eclipses", new Command(ShowSolarEclipsesView));            
             MenuItems.Add(MenuItemPosition.MainMenuTools, eclipsesMenu);
 
             ExportResourceDictionaries("Images.xaml");
@@ -68,7 +68,7 @@ namespace Astrarium.Plugins.SolarSystem
             #endregion Extending formatters
         }
 
-        private void OpenFovFramesList()
+        private void ShowSolarEclipsesView()
         {
             var vm = ViewManager.CreateViewModel<SolarEclipseVM>();
             ViewManager.ShowDialog(vm);

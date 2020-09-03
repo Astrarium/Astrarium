@@ -20,16 +20,26 @@
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        
-        <ComboBox Grid.Row="0" ItemsSource="{Binding TileServers, Mode=OneTime}" DisplayMemberPath="Name" SelectedItem="{Binding TileServer}" />
 
-        <c:MapControl Grid.Row="1"
+        <StackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Center">
+            <Button MinWidth="50" Content="&lt;- Prev" Command="{Binding PrevEclipseCommand}" />
+            <Label Content="{Binding EclipseDate, FallbackValue='01 Jan 2000'}" />
+            <Button MinWidth="50" Content="Next -&gt;" Command="{Binding NextEclipseCommand}" />
+        </StackPanel>
+        
+        <ComboBox Grid.Row="1" ItemsSource="{Binding TileServers, Mode=OneTime}" DisplayMemberPath="Name" SelectedItem="{Binding TileServer}" />
+
+        <c:MapControl Grid.Row="2"
 
             BackColor="#333333" 
             TileServer="{Binding TileServer, Mode=TwoWay}" 
             CacheFolder="{Binding CacheFolder, Mode=OneTime}"
+            Markers="{Binding Markers}"
+            Tracks="{Binding Tracks}"
+            Polygons="{Binding Polygons}"
             ThumbnailBackColor="#333333"
             ThumbnailForeColor="#333333" />
  

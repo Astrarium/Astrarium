@@ -35,7 +35,7 @@ namespace Astrarium.Plugins.SolarSystem
             Sun.Semidiameter = c.Get(Semidiameter);
         }
 
-        private CrdsEcliptical Ecliptical(SkyContext c)
+        public CrdsEcliptical Ecliptical(SkyContext c)
         {
             // get Earth coordinates
             CrdsHeliocentrical crds = PlanetPositions.GetPlanetCoordinates(Planet.EARTH, c.JulianDay, highPrecision: true);
@@ -61,7 +61,7 @@ namespace Astrarium.Plugins.SolarSystem
         /// <summary>
         /// Gets geocentric equatorial coordinates of the Sun
         /// </summary>
-        private CrdsEquatorial Equatorial0(SkyContext c)
+        public CrdsEquatorial Equatorial0(SkyContext c)
         {
             return c.Get(Ecliptical).ToEquatorial(c.Epsilon);
         }
