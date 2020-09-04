@@ -2,6 +2,7 @@
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -109,23 +110,37 @@ namespace Astrarium.Plugins.SolarSystem
             {
                 markers.Add(new Marker(new GeoPoint((float)-map.P1.Coordinates.Longitude, (float)map.P1.Coordinates.Latitude), MarkerStyle.Default, "P1"));
             }
-
             if (map.P2 != null)
             {
                 markers.Add(new Marker(new GeoPoint((float)-map.P2.Coordinates.Longitude, (float)map.P2.Coordinates.Latitude), MarkerStyle.Default, "P2"));
             }
-
-            if (map.UmbraNorthernLimit.Any() && map.UmbraSouthernLimit.Any())
+            if (map.P3 != null)
             {
-                var polygon = new Polygon(PolygonStyle.Default);
-                polygon.AddRange(map.UmbraNorthernLimit.Select(p => new GeoPoint((float)-p.Longitude, (float)p.Latitude)));
-                polygon.AddRange(map.UmbraSouthernLimit.Select(p => new GeoPoint((float)-p.Longitude, (float)p.Latitude)));
-                polygons.Add(polygon);
+                markers.Add(new Marker(new GeoPoint((float)-map.P3.Coordinates.Longitude, (float)map.P3.Coordinates.Latitude), MarkerStyle.Default, "P3"));
+            }
+            if (map.P4 != null)
+            {
+                markers.Add(new Marker(new GeoPoint((float)-map.P4.Coordinates.Longitude, (float)map.P4.Coordinates.Latitude), MarkerStyle.Default, "P4"));
+            }
+
+
+            if (map.UmbraNorthernLimit.Any())
+            {
+                var track = new Track(new TrackStyle(new Pen(Color.Gray, 2)));
+                track.AddRange(map.UmbraNorthernLimit.Select(p => new GeoPoint((float)-p.Longitude, (float)p.Latitude)));
+                tracks.Add(track);
+            }
+
+            if (map.UmbraSouthernLimit.Any())
+            {
+                var track = new Track(new TrackStyle(new Pen(Color.Gray, 2)));
+                track.AddRange(map.UmbraSouthernLimit.Select(p => new GeoPoint((float)-p.Longitude, (float)p.Latitude)));
+                tracks.Add(track);
             }
 
             if (map.TotalPath.Any())
             {
-                var track = new Track(TrackStyle.Default);
+                var track = new Track(new TrackStyle(new Pen(Color.Black, 2)));
                 track.AddRange(map.TotalPath.Select(p => new GeoPoint((float)-p.Longitude, (float)p.Latitude)));
                 tracks.Add(track);
             }
@@ -134,7 +149,7 @@ namespace Astrarium.Plugins.SolarSystem
             {
                 if (curve.Any())
                 {
-                    var track = new Track(TrackStyle.Default);
+                    var track = new Track(new TrackStyle(new Pen(Color.Red, 2)));
                     track.AddRange(curve.Select(p => new GeoPoint((float)-p.Longitude, (float)p.Latitude)));
                     track.Add(track.First());
                     tracks.Add(track);
@@ -143,14 +158,14 @@ namespace Astrarium.Plugins.SolarSystem
 
             if (map.PenumbraNorthernLimit.Any())
             {
-                var track = new Track(TrackStyle.Default);
+                var track = new Track(new TrackStyle(new Pen(Color.Orange, 2)));
                 track.AddRange(map.PenumbraNorthernLimit.Select(p => new GeoPoint((float)-p.Longitude, (float)p.Latitude)));
                 tracks.Add(track);
             }
 
             if (map.PenumbraSouthernLimit.Any())
             {
-                var track = new Track(TrackStyle.Default);
+                var track = new Track(new TrackStyle(new Pen(Color.Orange, 2)));
                 track.AddRange(map.PenumbraSouthernLimit.Select(p => new GeoPoint((float)-p.Longitude, (float)p.Latitude)));
                 tracks.Add(track);
             }

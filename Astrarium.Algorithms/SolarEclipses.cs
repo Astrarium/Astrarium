@@ -360,12 +360,21 @@ namespace Astrarium.Algorithms
                         (float)(b.X + b.L1 * Cos(angle)),
                         (float)(b.Y + b.L1 * Sin(angle)));
 
+                    if (Abs(pPenumbra.Y) > 0.9)
+                    {
+                        step = FindStep(jdTo - jdFrom) / 4;
+                    }
+                    else
+                    {
+                        step = FindStep(jdTo - jdFrom);
+                    }
+
                     curve.Add(ProjectOnEarth(pPenumbra, b.D, b.Mu));
                 }
             }
         }
 
-        private static void FindRiseSetCurves(PolynomialBesselianElements pbe, SolarEclipseMap curves, double jdFrom, double jdTo)
+        private static void FindRiseSetCurves(PolynomialBesselianElements pbe, SolarEclipseMap map, double jdFrom, double jdTo)
         {
             double step = FindStep(jdTo - jdFrom);
             int riseSet = 0;
@@ -376,32 +385,82 @@ namespace Astrarium.Algorithms
                 // Projection of Moon shadow center on fundamental plane
                 PointF pCenter = new PointF((float)b.X, (float)b.Y);
 
+
+                double a = Atan2(b.Y, b.X);
+                double x = Cos(a);
+                double y = Sin(a);
+
+                if (Sqrt(Pow(b.X - x, 2) + Pow(b.Y - y, 2)) > b.L1 * 0.9)
+                {
+                    step = FindStep(jdTo - jdFrom) / 60;
+                }
+                else
+                {
+                    step = FindStep(jdTo - jdFrom);
+                }
+
                 // Find penumbra (L1 radius) intersection with
                 // Earth circle on fundamental plane
                 PointF[] pPenumbraIntersect = CirclesIntersection(pCenter, b.L1);
 
-                for (int i = 0; i < pPenumbraIntersect.Length; i++)
+                if (Abs(jd - map.P1.JulianDay) < step)
                 {
-                    CrdsGeographical g = ProjectOnEarth(pPenumbraIntersect[i], b.D, b.Mu);
+                    CrdsGeographical g = map.P1.Coordinates;
                     if (pCenter.X <= 0)
-                    {
-                        if (i == 0)
-                            curves.RiseSetCurve[riseSet].Insert(0, g);
-                        else
-                            curves.RiseSetCurve[riseSet].Add(g);
-                    }
+                        map.RiseSetCurve[riseSet].Insert(0, g);
                     else
+                        map.RiseSetCurve[riseSet].Add(g);
+                }
+                else if (map.P2 != null && Abs(jd - map.P2.JulianDay) < step)
+                {
+                    CrdsGeographical g = map.P2.Coordinates;
+                    if (pCenter.X <= 0)
+                        map.RiseSetCurve[riseSet].Insert(0, g);
+                    else
+                        map.RiseSetCurve[riseSet].Add(g);
+                }
+                else if (map.P3 != null && Abs(jd - map.P3.JulianDay) < step)
+                {
+                    CrdsGeographical g = map.P3.Coordinates;
+                    if (pCenter.X <= 0)
+                        map.RiseSetCurve[riseSet].Insert(0, g);
+                    else
+                        map.RiseSetCurve[riseSet].Add(g);
+                }
+                else if (Abs(jd - map.P4.JulianDay) < step)
+                {
+                    CrdsGeographical g = map.P4.Coordinates;
+                    if (pCenter.X <= 0)
+                        map.RiseSetCurve[riseSet].Insert(0, g);
+                    else
+                        map.RiseSetCurve[riseSet].Add(g);
+                }
+                else
+                {
+                    for (int i = 0; i < pPenumbraIntersect.Length; i++)
                     {
-                        if (i == 0)
-                            curves.RiseSetCurve[riseSet].Add(g);
+                        CrdsGeographical g = ProjectOnEarth(pPenumbraIntersect[i], b.D, b.Mu);
+
+                        if (pCenter.X <= 0)
+                        {
+                            if (i == 0)
+                                map.RiseSetCurve[riseSet].Insert(0, g);
+                            else
+                                map.RiseSetCurve[riseSet].Add(g);
+                        }
                         else
-                            curves.RiseSetCurve[riseSet].Insert(0, g);
+                        {
+                            if (i == 0)
+                                map.RiseSetCurve[riseSet].Add(g);
+                            else
+                                map.RiseSetCurve[riseSet].Insert(0, g);
+                        }
                     }
                 }
 
                 // Penumbra is totally inside Earth circle
-                if (curves.PenumbraNorthernLimit.Count > 0 &&
-                    curves.PenumbraSouthernLimit.Count > 0 &&
+                if (map.PenumbraNorthernLimit.Count > 0 &&
+                    map.PenumbraSouthernLimit.Count > 0 &&
                     pCenter.X * pCenter.X + pCenter.Y * pCenter.Y < 1 &&
                     !pPenumbraIntersect.Any())
                 {
@@ -418,6 +477,15 @@ namespace Astrarium.Algorithms
                 for (double jd = jdFrom; jd <= jdTo + step * 0.1; jd += step)
                 {
                     InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
+
+                    if (Abs(b.Y) > 0.8)
+                    {
+                        step = FindStep(jdTo - jdFrom) / 4;
+                    }
+                    else
+                    {
+                        step = FindStep(jdTo - jdFrom);
+                    }
 
                     // Projection of Moon shadow center on fundamental plane
                     PointF pCenter = new PointF((float)b.X, (float)b.Y);
@@ -438,6 +506,16 @@ namespace Astrarium.Algorithms
                             (float)(b.X + b.L2 * Cos(angle)),
                             (float)(b.Y + b.L2 * Sin(angle)));
 
+                        if (Abs(p.Y) > 0.9)
+                        {
+                            step = FindStep(jdTo - jdFrom) / 4;
+                        }
+                        else
+                        {
+                            step = FindStep(jdTo - jdFrom);
+                        }
+
+
                         var umbraLimit = ProjectOnEarth(p, b.D, b.Mu);
 
                         if (i == 0)
@@ -446,9 +524,7 @@ namespace Astrarium.Algorithms
                             curves.UmbraSouthernLimit.Add(umbraLimit);
                     }
                 }
-            }
-
-            curves.UmbraSouthernLimit.Reverse();
+            }            
         }
 
         /// <summary>

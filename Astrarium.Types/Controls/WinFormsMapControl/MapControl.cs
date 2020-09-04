@@ -441,6 +441,16 @@ namespace System.Windows.Forms
                 DrawPolygons(pe.Graphics);
                 DrawTracks(pe.Graphics);
                 DrawMarkers(pe.Graphics);
+
+                if (_Offset.Y > 0)
+                {
+                    pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, -1, Width, _Offset.Y + 1);
+                }
+
+                if (_Offset.Y + FullMapSizeInPixels < Height)
+                {
+                    pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, _Offset.Y + FullMapSizeInPixels, Width, _Offset.Y + FullMapSizeInPixels);
+                }
             }
 
             base.OnPaint(pe);
@@ -772,7 +782,7 @@ namespace System.Windows.Forms
                         PointF p = Project(g);
                         if (i > 0)
                         {
-                            p = p0.Nearest(p, new PointF(p.X - FullMapSizeInPixels, p.Y), new PointF(p.X + FullMapSizeInPixels, p.Y));
+                            p = p0.Nearest(p, new PointF(p.X - FullMapSizeInPixels, p.Y), new PointF(p.X + FullMapSizeInPixels, p.Y));               
                             gp.AddLine(p0, p);
                         }
                         p0 = p;
@@ -833,8 +843,15 @@ namespace System.Windows.Forms
             Rectangle srcRect = new Rectangle(TILE_SIZE / frac * xRemainder, TILE_SIZE / frac * yRemainder, TILE_SIZE / frac, TILE_SIZE / frac);
 
             // Destination rectangle
-            Rectangle destRect = new Rectangle(p.X, p.Y, TILE_SIZE, TILE_SIZE);
-            gr.DrawImage(image, destRect, srcRect.X, srcRect.Y, srcRect.Width, srcRect.Height, GraphicsUnit.Pixel, RedImageAttrs);
+            Rectangle destRect = new Rectangle(p.X - frac, p.Y - frac, TILE_SIZE + 2 * frac, TILE_SIZE + 2 * frac);
+
+            var state = gr.Save();            
+            gr.SmoothingMode = SmoothingMode.HighSpeed;
+            gr.InterpolationMode = InterpolationMode.NearestNeighbor;
+            gr.PixelOffsetMode = PixelOffsetMode.HighSpeed;
+            gr.CompositingQuality = CompositingQuality.HighSpeed;
+            gr.DrawImage(image, destRect, srcRect.X, srcRect.Y, srcRect.Width, srcRect.Height, GraphicsUnit.Pixel);
+            gr.Restore(state);
         }
 
         private static readonly ImageAttributes RedImageAttrs = GetImageAttributes(false);
