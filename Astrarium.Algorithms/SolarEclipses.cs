@@ -435,14 +435,14 @@ namespace Astrarium.Algorithms
                 double x = Cos(a);
                 double y = Sin(a);
 
-                if (Sqrt(Pow(b.X - x, 2) + Pow(b.Y - y, 2)) > b.L1 * 0.9)
-                {
-                    step = FindStep(jdTo - jdFrom) / 60;
-                }
-                else
-                {
-                    step = FindStep(jdTo - jdFrom);
-                }
+                //if (Sqrt(Pow(b.X - x, 2) + Pow(b.Y - y, 2)) > b.L1 * 0.9)
+                //{
+                //    step = FindStep(jdTo - jdFrom) / 60;
+                //}
+                //else
+                //{
+                //    step = FindStep(jdTo - jdFrom);
+                //}
 
                 // Find penumbra (L1 radius) intersection with
                 // Earth circle on fundamental plane

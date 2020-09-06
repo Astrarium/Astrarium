@@ -750,14 +750,14 @@ namespace System.Windows.Forms
                 DrawTrack?.Invoke(this, eventArgs);
                 if (!eventArgs.Handled)
                 {
-                    if (ZoomLevel < 3)
-                    {
-                        if (track.Style.Pen != null)
-                        {
-                            Draw(gr, () => gr.DrawLines(track.Style.Pen, points));
-                        }
-                    }
-                    else
+                    //if (ZoomLevel < 3)
+                    //{
+                    //    if (track.Style.Pen != null)
+                    //    {
+                    //        Draw(gr, () => gr.DrawLines(track.Style.Pen, points));
+                    //    }
+                    //}
+                    //else
                     {
                         Draw(gr, () => gr.DrawPolyline(track.Style.Pen, points));
                     }
@@ -774,9 +774,15 @@ namespace System.Windows.Forms
             foreach (var polygon in Polygons)
             {
                 PointF p0 = PointF.Empty;
+
+                PointF p00 = PointF.Empty;
+
                 using (GraphicsPath gp = new GraphicsPath())
                 {
                     gp.StartFigure();
+
+
+                   
 
                     for (int i = 0; i < polygon.Count; i++)
                     {
@@ -784,11 +790,26 @@ namespace System.Windows.Forms
                         PointF p = Project(g);
                         if (i > 0)
                         {
-                            p = p0.Nearest(p, new PointF(p.X - FullMapSizeInPixels, p.Y), new PointF(p.X + FullMapSizeInPixels, p.Y));               
+                            // p0.Nearest(p, new PointF(p.X + FullMapSizeInPixels, p.Y));
+
+                            //if (Math.Abs(p.X - p0.X) > FullMapSizeInPixels / 2)
+                            //{
+
+                                p = p00.Nearest(p, new PointF(p.X - FullMapSizeInPixels, p.Y), new PointF(p.X + FullMapSizeInPixels, p.Y));
+                            //}
+
+
                             gp.AddLine(p0, p);
                         }
+                        else
+                        {
+                            p00 = p;
+                        }
+
                         p0 = p;
                     }
+
+                    gp.CloseFigure();
 
                     var eventArgs = new DrawPolygonEventArgs()
                     {

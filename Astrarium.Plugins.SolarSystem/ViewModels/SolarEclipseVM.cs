@@ -146,6 +146,19 @@ namespace Astrarium.Plugins.SolarSystem
                 tracks.Add(track);
             }
 
+
+            if (map.UmbraNorthernLimit.Any() && map.UmbraSouthernLimit.Any())
+            {
+                var polygon = new Polygon(new PolygonStyle(new SolidBrush(Color.FromArgb(100, Color.Gray))));
+                polygon.Add(new GeoPoint((float)-map.С1.Coordinates.Longitude, (float)map.С1.Coordinates.Latitude));
+                polygon.AddRange(map.UmbraNorthernLimit.Select(p => new GeoPoint((float)-p.Longitude, (float)p.Latitude)));
+                polygon.Add(new GeoPoint((float)-map.С2.Coordinates.Longitude, (float)map.С2.Coordinates.Latitude));
+                polygon.AddRange((map.UmbraSouthernLimit as IEnumerable<CrdsGeographical>).Reverse().Select(p => new GeoPoint((float)-p.Longitude, (float)p.Latitude)));
+                polygon.Add(new GeoPoint((float)-map.С1.Coordinates.Longitude, (float)map.С1.Coordinates.Latitude));
+                polygon.RemoveAll(p => double.IsNaN(p.Latitude) || double.IsNaN(p.Longitude));
+                polygons.Add(polygon);
+            }
+
             if (map.TotalPath.Any())
             {
                 var track = new Track(new TrackStyle(new Pen(Color.Black, 2)));
