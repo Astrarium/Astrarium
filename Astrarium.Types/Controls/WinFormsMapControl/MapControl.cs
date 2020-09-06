@@ -442,6 +442,7 @@ namespace System.Windows.Forms
                 DrawTracks(pe.Graphics);
                 DrawMarkers(pe.Graphics);
 
+                /*
                 if (_Offset.Y > 0)
                 {
                     pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, -1, Width, _Offset.Y + 1);
@@ -451,6 +452,7 @@ namespace System.Windows.Forms
                 {
                     pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, _Offset.Y + FullMapSizeInPixels, Width, _Offset.Y + FullMapSizeInPixels);
                 }
+                */
             }
 
             base.OnPaint(pe);

@@ -123,6 +123,14 @@ namespace Astrarium.Plugins.SolarSystem
                 markers.Add(new Marker(new GeoPoint((float)-map.P4.Coordinates.Longitude, (float)map.P4.Coordinates.Latitude), MarkerStyle.Default, "P4"));
             }
 
+            if (map.С1 != null)
+            {
+                markers.Add(new Marker(new GeoPoint((float)-map.С1.Coordinates.Longitude, (float)map.С1.Coordinates.Latitude), MarkerStyle.Default, "С1"));
+            }
+            if (map.С2 != null)
+            {
+                markers.Add(new Marker(new GeoPoint((float)-map.С2.Coordinates.Longitude, (float)map.С2.Coordinates.Latitude), MarkerStyle.Default, "С2"));
+            }
 
             if (map.UmbraNorthernLimit.Any())
             {
