@@ -108,70 +108,96 @@ namespace Astrarium.Plugins.SolarSystem
 
             if (map.P1 != null)
             {
-                markers.Add(new Marker(new GeoPoint((float)-map.P1.Coordinates.Longitude, (float)map.P1.Coordinates.Latitude), MarkerStyle.Default, "P1"));
+                markers.Add(new Marker(ToGeo(map.P1.Coordinates), MarkerStyle.Default, "P1"));
             }
             if (map.P2 != null)
             {
-                markers.Add(new Marker(new GeoPoint((float)-map.P2.Coordinates.Longitude, (float)map.P2.Coordinates.Latitude), MarkerStyle.Default, "P2"));
+                markers.Add(new Marker(ToGeo(map.P2.Coordinates), MarkerStyle.Default, "P2"));
             }
             if (map.P3 != null)
             {
-                markers.Add(new Marker(new GeoPoint((float)-map.P3.Coordinates.Longitude, (float)map.P3.Coordinates.Latitude), MarkerStyle.Default, "P3"));
+                markers.Add(new Marker(ToGeo(map.P3.Coordinates), MarkerStyle.Default, "P3"));
             }
             if (map.P4 != null)
             {
-                markers.Add(new Marker(new GeoPoint((float)-map.P4.Coordinates.Longitude, (float)map.P4.Coordinates.Latitude), MarkerStyle.Default, "P4"));
+                markers.Add(new Marker(ToGeo(map.P4.Coordinates), MarkerStyle.Default, "P4"));
             }
 
-            if (map.С1 != null)
+            if (map.C1 != null)
             {
-                markers.Add(new Marker(new GeoPoint((float)-map.С1.Coordinates.Longitude, (float)map.С1.Coordinates.Latitude), MarkerStyle.Default, "С1"));
+                markers.Add(new Marker(ToGeo(map.C1.Coordinates), MarkerStyle.Default, "C1"));
             }
-            if (map.С2 != null)
+            if (map.C2 != null)
             {
-                markers.Add(new Marker(new GeoPoint((float)-map.С2.Coordinates.Longitude, (float)map.С2.Coordinates.Latitude), MarkerStyle.Default, "С2"));
-            }
-
-            if (map.UmbraNorthernLimit.Any())
-            {
-                var track = new Track(new TrackStyle(new Pen(Color.Gray, 2)));
-                track.AddRange(map.UmbraNorthernLimit.Select(p => new GeoPoint((float)-p.Longitude, (float)p.Latitude)));
-                tracks.Add(track);
+                markers.Add(new Marker(ToGeo(map.C2.Coordinates), MarkerStyle.Default, "C2"));
             }
 
-            if (map.UmbraSouthernLimit.Any())
+            for (int i = 0; i < 2; i++)
             {
-                var track = new Track(new TrackStyle(new Pen(Color.Gray, 2)));
-                track.AddRange(map.UmbraSouthernLimit.Select(p => new GeoPoint((float)-p.Longitude, (float)p.Latitude)));
-                tracks.Add(track);
-            }
+                if (map.UmbraNorthernLimit[i].Any())
+                {
+                    var track = new Track(new TrackStyle(new Pen(Color.Gray, 2)));
+                    track.AddRange(map.UmbraNorthernLimit[i].Select(p => ToGeo(p)));
+                    tracks.Add(track);
+                }
+
+                if (map.UmbraSouthernLimit[i].Any())
+                {
+                    var track = new Track(new TrackStyle(new Pen(Color.Gray, 2)));
+                    track.AddRange(map.UmbraSouthernLimit[i].Select(p => ToGeo(p)));
+                    tracks.Add(track);
+                }
+
+                if (map.UmbraNorthernLimit[i].Any() && map.UmbraSouthernLimit[i].Any())
+                {
+                    var polygon = new Polygon(new PolygonStyle(new SolidBrush(Color.FromArgb(100, Color.Gray)))); 
+                    
+                    if (i== 0)
+                    {
+                        polygon.Add(ToGeo(map.C1.Coordinates));
+                    }
+
+                    
+
+                    polygon.AddRange(map.UmbraNorthernLimit[i].Select(p => ToGeo(p)));
+
+                    if (i == 1)
+                    {
+                        polygon.Add(ToGeo(map.C2.Coordinates));
+                    }
+
+                    polygon.AddRange((map.UmbraSouthernLimit[i] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
 
 
-            if (map.UmbraNorthernLimit.Any() && map.UmbraSouthernLimit.Any())
-            {
-                var polygon = new Polygon(new PolygonStyle(new SolidBrush(Color.FromArgb(100, Color.Gray))));
-                polygon.Add(new GeoPoint((float)-map.С1.Coordinates.Longitude, (float)map.С1.Coordinates.Latitude));
-                polygon.AddRange(map.UmbraNorthernLimit.Select(p => new GeoPoint((float)-p.Longitude, (float)p.Latitude)));
-                polygon.Add(new GeoPoint((float)-map.С2.Coordinates.Longitude, (float)map.С2.Coordinates.Latitude));
-                polygon.AddRange((map.UmbraSouthernLimit as IEnumerable<CrdsGeographical>).Reverse().Select(p => new GeoPoint((float)-p.Longitude, (float)p.Latitude)));
-                polygon.Add(new GeoPoint((float)-map.С1.Coordinates.Longitude, (float)map.С1.Coordinates.Latitude));
-                polygon.RemoveAll(p => double.IsNaN(p.Latitude) || double.IsNaN(p.Longitude));
-                polygons.Add(polygon);
+
+                    polygons.Add(polygon);
+                }
+
+                if (map.TotalPath[i].Any())
+                {
+                    var track = new Track(new TrackStyle(new Pen(Color.Black, 2)));
+                    track.AddRange(map.TotalPath[i].Select(p => ToGeo(p)));
+                    tracks.Add(track);
+                }
             }
 
-            if (map.TotalPath.Any())
-            {
-                var track = new Track(new TrackStyle(new Pen(Color.Black, 2)));
-                track.AddRange(map.TotalPath.Select(p => new GeoPoint((float)-p.Longitude, (float)p.Latitude)));
-                tracks.Add(track);
-            }
+            
+
+
+            
+
+
+
+
+
+            
 
             foreach (var curve in map.RiseSetCurve)
             {
                 if (curve.Any())
                 {
                     var track = new Track(new TrackStyle(new Pen(Color.Red, 2)));
-                    track.AddRange(curve.Select(p => new GeoPoint((float)-p.Longitude, (float)p.Latitude)));
+                    track.AddRange(curve.Select(p => ToGeo(p)));
                     track.Add(track.First());
                     tracks.Add(track);
                 }
@@ -180,14 +206,14 @@ namespace Astrarium.Plugins.SolarSystem
             if (map.PenumbraNorthernLimit.Any())
             {
                 var track = new Track(new TrackStyle(new Pen(Color.Orange, 2)));
-                track.AddRange(map.PenumbraNorthernLimit.Select(p => new GeoPoint((float)-p.Longitude, (float)p.Latitude)));
+                track.AddRange(map.PenumbraNorthernLimit.Select(p => ToGeo(p)));
                 tracks.Add(track);
             }
 
             if (map.PenumbraSouthernLimit.Any())
             {
                 var track = new Track(new TrackStyle(new Pen(Color.Orange, 2)));
-                track.AddRange(map.PenumbraSouthernLimit.Select(p => new GeoPoint((float)-p.Longitude, (float)p.Latitude)));
+                track.AddRange(map.PenumbraSouthernLimit.Select(p => ToGeo(p)));
                 tracks.Add(track);
             }
 
@@ -196,6 +222,12 @@ namespace Astrarium.Plugins.SolarSystem
             Markers = markers;
 
             NotifyPropertyChanged(nameof(EclipseDate), nameof(Tracks), nameof(Polygons), nameof(Markers));
+        }
+
+        private GeoPoint ToGeo(CrdsGeographical g)
+        {
+
+            return new GeoPoint((float)-g.Longitude, (float)g.Latitude);
         }
     }
 }

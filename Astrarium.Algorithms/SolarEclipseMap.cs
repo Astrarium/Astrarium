@@ -14,11 +14,13 @@ namespace Astrarium.Algorithms
         /// <summary>
         /// Points of total eclipse path
         /// </summary>
-        public List<CrdsGeographical> TotalPath { get; } = new List<CrdsGeographical>();
-        
-        
-        public List<CrdsGeographical> UmbraNorthernLimit { get; } = new List<CrdsGeographical>();
-        public List<CrdsGeographical> UmbraSouthernLimit { get; } = new List<CrdsGeographical>();
+        public List<CrdsGeographical>[] TotalPath { get; } = new[] { new List<CrdsGeographical>(), new List<CrdsGeographical>() };
+
+
+
+        public List<CrdsGeographical>[] UmbraNorthernLimit { get; } = new[] { new List<CrdsGeographical>(), new List<CrdsGeographical>() };
+        public List<CrdsGeographical>[] UmbraSouthernLimit { get; } = new[] { new List<CrdsGeographical>(), new List<CrdsGeographical>() };
+    
 
 
         public List<CrdsGeographical>[] RiseSetCurve { get; } = new[] { new List<CrdsGeographical>(), new List<CrdsGeographical>() };
@@ -56,12 +58,12 @@ namespace Astrarium.Algorithms
         /// <summary>
         /// Instant and coordinates of start of total phase (first contact of umbra center with Earth) 
         /// </summary>
-        public SolarEclipsePoint С1 { get; set; }
+        public SolarEclipsePoint C1 { get; set; }
 
         /// <summary>
         /// Instant and coordinates of end of total phase (last contact of umbra center with Earth) 
         /// </summary>
-        public SolarEclipsePoint С2 { get; set; }
+        public SolarEclipsePoint C2 { get; set; }
 
         /// <summary>
         /// Northernmost point and instant where the solar eclipse starts to be observable
