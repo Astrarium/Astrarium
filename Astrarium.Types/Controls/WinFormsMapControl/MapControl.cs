@@ -774,65 +774,17 @@ namespace System.Windows.Forms
             foreach (var polygon in Polygons)
             {
                 PointF p0 = PointF.Empty;
-
-                PointF p00 = PointF.Empty;
-
                 using (GraphicsPath gp = new GraphicsPath())
                 {
                     gp.StartFigure();
-
-
-                    
                     for (int i = 0; i < polygon.Count; i++)
                     {
                         GeoPoint g = polygon.ElementAt(i);
-
-                       
-                        //if (g.Latitude > 85)
-                        //{
-                        //    g = new GeoPoint(g.Longitude, 85);
-                        //}
-
                         PointF p = Project(g);
-
-                        
-
                         if (i > 0)
                         {
-                            
-
-                            // p0.Nearest(p, new PointF(p.X + FullMapSizeInPixels, p.Y));
-
-                            //if (Math.Abs(p.X - p0.X) > FullMapSizeInPixels / 2)
-                            //{
-
-         
-
                             p = p0.Nearest(p, new PointF(p.X - FullMapSizeInPixels, p.Y), new PointF(p.X + FullMapSizeInPixels, p.Y));
-                            //p.X += d;
-                            ////if (Math.Sqrt((p.X - p0.X) * (p.X - p0.X)  + (p.Y - p0.Y) * (p.Y - p0.Y)) > FullMapSizeInPixels / 3)
-                            ////{
-                            ////    var pp = Project(g);
-                            ////    gr.DrawString("p", DefaultFont, Brushes.White, pp);
-                            ////    gr.DrawString("p+", DefaultFont, Brushes.White, new PointF(pp.X + FullMapSizeInPixels, pp.Y));
-                            ////    gr.DrawString("p-", DefaultFont, Brushes.White, new PointF(pp.X - FullMapSizeInPixels, pp.Y));
-
-                            ////}
-
-
-                            //
-
-                            //}
-
-                            //}
-
-
-                            
                             gp.AddLine(p0, p);
-                        }
-                        else
-                        {
-                            p00 = p;
                         }
 
                         p0 = p;

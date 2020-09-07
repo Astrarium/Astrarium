@@ -132,6 +132,7 @@ namespace Astrarium.Plugins.SolarSystem
                 markers.Add(new Marker(ToGeo(map.C2.Coordinates), MarkerStyle.Default, "C2"));
             }
 
+
             for (int i = 0; i < 2; i++)
             {
                 if (map.UmbraNorthernLimit[i].Any())
@@ -147,32 +148,10 @@ namespace Astrarium.Plugins.SolarSystem
                     track.AddRange(map.UmbraSouthernLimit[i].Select(p => ToGeo(p)));
                     tracks.Add(track);
                 }
+            }
 
-                if (map.UmbraNorthernLimit[i].Any() && map.UmbraSouthernLimit[i].Any())
-                {
-                    var polygon = new Polygon(new PolygonStyle(new SolidBrush(Color.FromArgb(100, Color.Gray)))); 
-                    
-                    if (i== 0)
-                    {
-                        polygon.Add(ToGeo(map.C1.Coordinates));
-                    }
-
-                    
-
-                    polygon.AddRange(map.UmbraNorthernLimit[i].Select(p => ToGeo(p)));
-
-                    if (i == 1)
-                    {
-                        polygon.Add(ToGeo(map.C2.Coordinates));
-                    }
-
-                    polygon.AddRange((map.UmbraSouthernLimit[i] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
-
-
-
-                    polygons.Add(polygon);
-                }
-
+            for (int i = 0; i < 2; i++)
+            {
                 if (map.TotalPath[i].Any())
                 {
                     var track = new Track(new TrackStyle(new Pen(Color.Black, 2)));
@@ -181,8 +160,68 @@ namespace Astrarium.Plugins.SolarSystem
                 }
             }
 
-            
 
+            //// central line is single => draw shadow path as single polygon
+            //if (map.TotalPath[0].Any() && !map.TotalPath[1].Any())
+            //{
+            //    var polygon = new Polygon(new PolygonStyle(new SolidBrush(Color.FromArgb(100, Color.Gray))));
+            //    polygon.Add(ToGeo(map.C1.Coordinates));
+
+            //    polygon.AddRange(map.UmbraNorthernLimit[0].Select(p => ToGeo(p)));
+            //    polygon.AddRange(map.UmbraNorthernLimit[1].Select(p => ToGeo(p)));
+            //    polygon.Add(ToGeo(map.C2.Coordinates));
+            //    polygon.AddRange((map.UmbraSouthernLimit[1] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
+            //    polygon.AddRange((map.UmbraSouthernLimit[0] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
+            //    polygon.Add(ToGeo(map.C1.Coordinates));
+            //    polygons.Add(polygon);
+            //}
+
+            // central line is divided into 2 ones => draw shadow path as 2 polygons
+            //if (map.TotalPath[0].Any() && map.TotalPath[1].Any())
+            {
+                
+
+                if ((map.UmbraNorthernLimit[0].Any() && !map.UmbraNorthernLimit[1].Any()) ||
+                    (map.UmbraSouthernLimit[0].Any() && !map.UmbraSouthernLimit[1].Any()))
+                {
+                    var polygon = new Polygon(new PolygonStyle(new SolidBrush(Color.FromArgb(100, Color.Gray))));
+                    polygon.AddRange(map.UmbraNorthernLimit[0].Select(p => ToGeo(p)));
+                    polygon.AddRange(map.UmbraNorthernLimit[1].Select(p => ToGeo(p)));
+                    if (map.C2 != null) polygon.Add(ToGeo(map.C2.Coordinates));
+                    polygon.AddRange((map.UmbraSouthernLimit[1] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
+                    polygon.AddRange((map.UmbraSouthernLimit[0] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
+                    if (map.C1 != null) polygon.Add(ToGeo(map.C1.Coordinates));
+                    polygons.Add(polygon);
+                }
+                else {
+
+                    for (int i = 0; i < 2; i++)
+                    {
+
+
+                        if ((map.UmbraNorthernLimit[i].Any() && map.UmbraSouthernLimit[i].Any()))
+                        {
+                            var polygon = new Polygon(new PolygonStyle(new SolidBrush(Color.FromArgb(100, Color.Gray))));
+
+                            if (i == 0)
+                            {
+                                //polygon.Add(ToGeo(map.C1.Coordinates));
+                            }
+
+
+                            polygon.AddRange(map.UmbraNorthernLimit[i].Select(p => ToGeo(p)));
+
+                            if (i == 1)
+                            {
+                                //polygon.Add(ToGeo(map.C2.Coordinates));
+                            }
+
+                            polygon.AddRange((map.UmbraSouthernLimit[i] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
+                            polygons.Add(polygon);
+                        }
+                    }
+                }
+            }
 
             
 
