@@ -412,8 +412,10 @@ namespace Astrarium.Algorithms
                         (float)(b.X + b.L1 * Cos(angle)),
                         (float)(b.Y + b.L1 * Sin(angle)));
 
-                    double cosR = Sqrt(p.X * p.X + p.Y * p.Y);
-                    double z = cosR <= 1 ? Acos(cosR) : 0;
+                    double z2 = 1 - p.X * p.X - p.Y * p.Y;
+                    if (z2 > 1) z2 = 1;
+                    if (z2 < 0) z2 = 0;
+                    double z = Sqrt(z2);
                     double r = Abs(b.L1 - z * Tan(ToRadians(b.F1)));
 
                     p = new PointF(
@@ -452,11 +454,13 @@ namespace Astrarium.Algorithms
                     double angle = ToRadians(b.Inc + ang);
 
                     var p = new PointF(
-                        (float)(b.X + b.L2 * Cos(angle)),
-                        (float)(b.Y + b.L2 * Sin(angle)));
+                        (float)(b.X + Abs(b.L2) * Cos(angle)),
+                        (float)(b.Y + Abs(b.L2) * Sin(angle)));
 
-                    double cosR = Sqrt(p.X * p.X + p.Y * p.Y);
-                    double z = cosR <= 1 ? Acos(cosR) : 0;
+                    double z2 = 1 - p.X * p.X - p.Y * p.Y;
+                    if (z2 > 1) z2 = 1;
+                    if (z2 < 0) z2 = 0;
+                    double z = Sqrt(z2);
                     double r = Abs(b.L2 - z * Tan(ToRadians(b.F2)));
 
                     p = new PointF(
@@ -648,7 +652,7 @@ namespace Astrarium.Algorithms
         /// Chapter 8.3 "Solar Eclipses"
         /// https://archive.org/download/131123ExplanatorySupplementAstronomicalAlmanac/131123-explanatory-supplement-astronomical-almanac.pdf
         /// </remarks>
-        private static CrdsGeographical ProjectOnEarth(PointF p, double d, double mu)
+        internal static CrdsGeographical ProjectOnEarth(PointF p, double d, double mu)
         {
             
             // Earth ellipticity, squared
@@ -664,11 +668,11 @@ namespace Astrarium.Algorithms
             double eta1 = eta / rho1;
 
             // 8.333-10
-            double zeta1_2 = 1 - xi * xi - eta * eta;
+            double zeta1_2 = 1 - xi * xi - eta1 * eta1;
             double zeta1 = 0;
             if (zeta1_2 > 0)
             {
-                zeta1 = Sqrt(zeta1_2) / rho1;
+                zeta1 = Sqrt(zeta1_2);
             }
 
             // 8.334-1
@@ -961,7 +965,7 @@ namespace Astrarium.Algorithms
             return eclipse;
         }
 
-        private static Vector ProjectOnFundamentalPlane(CrdsGeographical g, double deltaT, InstantBesselianElements b)
+        internal static Vector ProjectOnFundamentalPlane(CrdsGeographical g, double d, double mu)
         {
             const double e2 = 0.00669454;
 
@@ -976,11 +980,11 @@ namespace Astrarium.Algorithms
             double phi_ = Atan((a * S + h) * Tan(phi) / (a * C + h));
             double rho = (a * C + h) * Cos(phi) / (a * Cos(phi_));
 
-            double theta = b.Mu - g.Longitude; // (b.Mu - 1.002738 * 360.0 / 86400.0 * deltaT) - g.Longitude;
+            double theta = mu - g.Longitude; // (b.Mu - 1.002738 * 360.0 / 86400.0 * deltaT) - g.Longitude;
 
             double xi = rho * Cos(phi_) * Sin(ToRadians(theta));
-            double eta = rho * Sin(phi_) * Cos(ToRadians(b.D)) - rho * Cos(phi_) * Sin(ToRadians(b.D)) * Cos(ToRadians(theta));
-            double zeta = rho * Sin(phi_) * Sin(ToRadians(b.D)) + rho * Cos(phi_) * Cos(ToRadians(b.D)) * Cos(ToRadians(theta));
+            double eta = rho * Sin(phi_) * Cos(ToRadians(d)) - rho * Cos(phi_) * Sin(ToRadians(d)) * Cos(ToRadians(theta));
+            double zeta = rho * Sin(phi_) * Sin(ToRadians(d)) + rho * Cos(phi_) * Cos(ToRadians(d)) * Cos(ToRadians(theta));
 
             return new Vector(xi, eta, zeta);
         }
@@ -998,8 +1002,6 @@ namespace Astrarium.Algorithms
             // precision of calculation, in days
             double epsilon = 1e-8;
 
-            double deltaT = Date.DeltaT(pbe.JulianDay0);
-           
             Func<double, double> funcLocalMax = (jd) =>
             {
                 double[] dist = new double[2];
@@ -1007,7 +1009,7 @@ namespace Astrarium.Algorithms
                 for (int i=0; i<2; i++)
                 {
                     InstantBesselianElements b = pbe.GetInstantBesselianElements(jd + i * step);
-                    Vector p = ProjectOnFundamentalPlane(g, deltaT, b);
+                    Vector p = ProjectOnFundamentalPlane(g, b.D, b.Mu);
                     dist[i] = Sqrt((p.X - b.X) * (p.X - b.X) + (p.Y - b.Y) * (p.Y - b.Y));
                 }
                 return (dist[1] - dist[0]) / step;
@@ -1019,7 +1021,7 @@ namespace Astrarium.Algorithms
             if (!double.IsNaN(jdLocalMax))
             {
                 InstantBesselianElements b = pbe.GetInstantBesselianElements(jdLocalMax);
-                Vector p = ProjectOnFundamentalPlane(g, deltaT, b);
+                Vector p = ProjectOnFundamentalPlane(g, b.D, b.Mu);
 
                 double L2zeta = b.L2 - p.Z * Tan(ToRadians(b.F2));
                 

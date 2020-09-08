@@ -47,5 +47,29 @@ namespace Astrarium.Algorithms.Tests
             Assert.AreEqual(0.740, eclipse.Phase, 1e-3);
             Assert.AreEqual(EclipseRegio.Northern, eclipse.Regio);
         }
+
+        [TestMethod]
+        public void ProjectionTests()
+        {
+            {
+                double d = 15.32558;
+                double mu = 345.88554;
+                CrdsGeographical g = new CrdsGeographical(-26.71875, 44.66865);
+                Vector v = SolarEclipses.ProjectOnFundamentalPlane(g, d, mu);
+                CrdsGeographical g0 = SolarEclipses.ProjectOnEarth(new System.Drawing.PointF((float)v.X, (float)v.Y), d, mu);
+                Assert.AreEqual(g.Latitude, g0.Latitude, 1e-5);
+                Assert.AreEqual(g.Longitude, g0.Longitude, 1e-5);
+            }
+
+            {
+                double d = -23.25608;
+                double mu = 48.57292;
+                CrdsGeographical g = new CrdsGeographical(97.20703, -28.22697);
+                Vector v = SolarEclipses.ProjectOnFundamentalPlane(g, d, mu);
+                CrdsGeographical g0 = SolarEclipses.ProjectOnEarth(new System.Drawing.PointF((float)v.X, (float)v.Y), d, mu);
+                Assert.AreEqual(g.Latitude, g0.Latitude, 1e-5);
+                Assert.AreEqual(g.Longitude, g0.Longitude, 1e-5);
+            }
+        }
     }
 }
