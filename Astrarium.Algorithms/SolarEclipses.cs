@@ -162,11 +162,11 @@ namespace Astrarium.Algorithms
         }
 
         /// <summary>
-        /// Gets map curves of solar eclipse
+        /// Gets map of solar eclipse.
         /// </summary>
         /// <param name="pbe">Polynomial Besselian elements defining the Eclipse</param>
         /// <returns><see cref="SolarEclipseMap"/> instance.</returns>
-        public static SolarEclipseMap GetCurves(PolynomialBesselianElements pbe)
+        public static SolarEclipseMap GetEclipseMap(PolynomialBesselianElements pbe)
         {
             // left edge of time interval
             double jdFrom = pbe.From;
@@ -371,16 +371,16 @@ namespace Astrarium.Algorithms
             }
 
             // Find points of northern limit of eclipse visibility
-            FindLimits1(pbe, b => b.L1, map.PenumbraNorthernLimit, jdPN1, jdPN2, 90);
+            FindPenumbraLimits(pbe, map.PenumbraNorthernLimit, jdPN1, jdPN2, 90);
 
             // Find points of southern limit of eclipse visibility
-            FindLimits1(pbe, b => b.L1, map.PenumbraSouthernLimit, jdPS1, jdPS2, -90);
+            FindPenumbraLimits(pbe, map.PenumbraSouthernLimit, jdPS1, jdPS2, -90);
 
             // Find points of northern limit of total eclipse visibility
-            FindLimits(pbe, b => b.L2, map.UmbraNorthernLimit, jdUN1, jdUN2, 90);
+            FindUmbraLimits(pbe, map.UmbraNorthernLimit, jdUN1, jdUN2, 90);
 
             // Find points of southern limit of total eclipse visibility
-            FindLimits(pbe, b => b.L2, map.UmbraSouthernLimit, jdUS1, jdUS2, -90);
+            FindUmbraLimits(pbe, map.UmbraSouthernLimit, jdUS1, jdUS2, -90);
 
             // Calc rise/set curves
             FindRiseSetCurves(pbe, map, jdP1, jdP4);
@@ -391,11 +391,13 @@ namespace Astrarium.Algorithms
             return map;
         }
 
-        private static void FindLimits1(PolynomialBesselianElements pbe, Func<InstantBesselianElements, double> func, ICollection<CrdsGeographical> curve, double jdFrom, double jdTo, double ang)
+        private static void FindPenumbraLimits(PolynomialBesselianElements pbe, ICollection<CrdsGeographical> curve, double jdFrom, double jdTo, double ang)
         {
             if (!double.IsNaN(jdFrom) && !double.IsNaN(jdTo))
             {
-                double step = FindStep(jdTo - jdFrom);
+                double step0 = FindStep(jdTo - jdFrom);
+                double step = step0;
+
                 for (double jd = jdFrom; jd <= jdTo + step * 0.1; jd += step)
                 {
                     InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
@@ -403,16 +405,17 @@ namespace Astrarium.Algorithms
                     double angle = ToRadians(b.Inc + ang);
 
                     var p = new PointF(
-                        (float)(b.X + func(b) * Cos(angle)),
-                        (float)(b.Y + func(b) * Sin(angle)));
+                        (float)(b.X + b.L1 * Cos(angle)),
+                        (float)(b.Y + b.L1 * Sin(angle)));
 
+                    // Adjust iteration step according to penumbra position
                     if (Abs(p.Y) > 0.9)
                     {
-                        step = FindStep(jdTo - jdFrom) / 4;
+                        step = step0 / 4;
                     }
                     else
                     {
-                        step = FindStep(jdTo - jdFrom);
+                        step = step0;
                     }
 
                     var g = ProjectOnEarth(p, b.D, b.Mu);
@@ -422,29 +425,32 @@ namespace Astrarium.Algorithms
             }
         }
 
-        private static void FindLimits(PolynomialBesselianElements pbe, Func<InstantBesselianElements, double> func, ICollection<CrdsGeographical>[] curve, double jdFrom, double jdTo, double ang)
+        private static void FindUmbraLimits(PolynomialBesselianElements pbe, ICollection<CrdsGeographical>[] curve, double jdFrom, double jdTo, double ang)
         {
             if (!double.IsNaN(jdFrom) && !double.IsNaN(jdTo))
             {
                 int c = 0;
-                double step = FindStep(jdTo - jdFrom);
-                for (double jd = jdFrom; jd <= jdTo + step * 0.1; jd += step)
+                double step0 = FindStep(jdTo - jdFrom);
+                double step = step0;
+
+                for (double jd = jdFrom; jd <= jdTo + step * 0.5; jd += step)
                 {
                     InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
 
                     double angle = ToRadians(b.Inc + ang);
 
                     var p = new PointF(
-                        (float)(b.X + func(b) * Cos(angle)),
-                        (float)(b.Y + func(b) * Sin(angle)));
+                        (float)(b.X + b.L2 * Cos(angle)),
+                        (float)(b.Y + b.L2 * Sin(angle)));
 
+                    // Adjust iteration step according to penumbra position
                     if (Abs(p.Y) > 0.9)
                     {
-                        step = FindStep(jdTo - jdFrom) / 4;
+                        step = step0 / 4;
                     }
                     else
                     {
-                        step = FindStep(jdTo - jdFrom);
+                        step = step0;
                     }
 
                     var g = ProjectOnEarth(p, b.D, b.Mu);
@@ -462,8 +468,10 @@ namespace Astrarium.Algorithms
 
         private static void FindRiseSetCurves(PolynomialBesselianElements pbe, SolarEclipseMap map, double jdFrom, double jdTo)
         {
-            double step = FindStep(jdTo - jdFrom);
+            double step0 = FindStep(jdTo - jdFrom);
+            double step = step0;
             int riseSet = 0;
+
             for (double jd = jdFrom; jd <= jdTo + step * 0.1; jd += step)
             {
                 InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
@@ -471,22 +479,19 @@ namespace Astrarium.Algorithms
                 // Projection of Moon shadow center on fundamental plane
                 PointF pCenter = new PointF((float)b.X, (float)b.Y);
 
-                double a = Atan2(b.Y, b.X);
-                double x = Cos(a);
-                double y = Sin(a);
-
-                //if (Sqrt(Pow(b.X - x, 2) + Pow(b.Y - y, 2)) > b.L1 * 0.9)
-                //{
-                //    step = FindStep(jdTo - jdFrom) / 60;
-                //}
-                //else
-                //{
-                //    step = FindStep(jdTo - jdFrom);
-                //}
-
                 // Find penumbra (L1 radius) intersection with
                 // Earth circle on fundamental plane
                 PointF[] pPenumbraIntersect = CirclesIntersection(pCenter, b.L1);
+
+                // Adjust iteration step according to current penumbra projection
+                if (Abs(b.X) < 0.15 && pPenumbraIntersect.Any(p => Abs(p.Y) > 0.95))
+                {
+                    step = step0 / 10;
+                }
+                else
+                {
+                    step = step0;
+                }
 
                 if (Abs(jd - map.P1.JulianDay) < step)
                 {
@@ -560,18 +565,21 @@ namespace Astrarium.Algorithms
             {
                 int c = 0;
 
-                double step = FindStep(jdTo - jdFrom);
+                double step0 = FindStep(jdTo - jdFrom);
+                double step = step0;
+
                 for (double jd = jdFrom; jd <= jdTo + step * 0.1; jd += step)
                 {
                     InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
 
+                    // Adjust iteration step according to current umbra projection
                     if (Abs(b.Y) > 0.8)
                     {
-                        step = FindStep(jdTo - jdFrom) / 4;
+                        step = step0 / 4;
                     }
                     else
                     {
-                        step = FindStep(jdTo - jdFrom);
+                        step = step0;
                     }
 
                     // Projection of Moon shadow center on fundamental plane

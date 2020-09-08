@@ -3,6 +3,7 @@ using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -32,21 +33,42 @@ namespace Astrarium.Plugins.SolarSystem
 
         private readonly SolarCalc solarCalc;
         private readonly LunarCalc lunarCalc;
-        private readonly ISettings settings;
         private readonly CrdsGeographical observerLocation;
+        private readonly ISettings settings;
+
+        private readonly MarkerStyle riseSetMarkerStyle = new MarkerStyle(5, Brushes.Red, null, Brushes.Red, SystemFonts.DefaultFont, StringFormat.GenericDefault);
+        private readonly MarkerStyle centralLineMarkerStyle = new MarkerStyle(5, Brushes.Black, null, Brushes.Black, SystemFonts.DefaultFont, StringFormat.GenericDefault);
+
+        private readonly TrackStyle riseSetTrackStyle = new TrackStyle(new Pen(Color.Red, 2));
+        private readonly TrackStyle penumbraLimitTrackStyle = new TrackStyle(new Pen(Color.Orange, 2));
+        private readonly TrackStyle umbraLimitTrackStyle = new TrackStyle(new Pen(Color.Gray, 2));
+        private readonly TrackStyle centralLineTrackStyle = new TrackStyle(new Pen(Color.Black, 2));
+        private readonly PolygonStyle umbraPolygonStyle = new PolygonStyle(new SolidBrush(Color.FromArgb(100, Color.Gray)));
 
         public ITileServer TileServer
         {
             get => GetValue<ITileServer>(nameof(TileServer));
-            set => SetValue(nameof(TileServer), value);
+            set  
+            { 
+                SetValue(nameof(TileServer), value);
+                TileImageAttributes = GetImageAttributes();
+            }
+        }
+
+        public ImageAttributes TileImageAttributes
+        {
+            get => GetValue<ImageAttributes>(nameof(TileImageAttributes));
+            set => SetValue(nameof(TileImageAttributes), value);
         }
 
         public SolarEclipseVM(SolarCalc solarCalc, LunarCalc lunarCalc, ISettings settings)
         {
             this.solarCalc = solarCalc;
-            this.lunarCalc = lunarCalc;
+            this.lunarCalc = lunarCalc;            
             this.settings = settings;
-            this.observerLocation = settings.Get<CrdsGeographical>("ObserverLocation");
+            this.settings.PropertyChanged += Settings_PropertyChanged;
+
+            observerLocation = settings.Get<CrdsGeographical>("ObserverLocation");
 
             CacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "MapsCache");
 
@@ -59,9 +81,17 @@ namespace Astrarium.Plugins.SolarSystem
             };
 
             TileServer = TileServers.First();
-
+           
             JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
             CalculateEclipse(next: true);
+        }
+
+        private void Settings_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "Schema")
+            {
+                TileImageAttributes = GetImageAttributes();
+            }
         }
 
         private void PrevEclipse()
@@ -72,6 +102,54 @@ namespace Astrarium.Plugins.SolarSystem
         private void NextEclipse()
         {
             CalculateEclipse(next: true);
+        }
+
+        private ImageAttributes GetImageAttributes()
+        {
+            // make image "red"
+            if (settings.Get<ColorSchema>("Schema") == ColorSchema.Red)
+            {
+                float[][] matrix = {
+                    new float[] {0.3f, 0, 0, 0, 0},
+                    new float[] {0.3f, 0, 0, 0, 0},
+                    new float[] {0.3f, 0, 0, 0, 0},
+                    new float[] {0, 0, 0, 1, 0},
+                    new float[] {0, 0, 0, 0, 0}
+                };
+                var colorMatrix = new ColorMatrix(matrix);
+                var attr = new ImageAttributes();
+                attr.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+                return attr;
+            }
+
+            // make image lighten
+            if (TileServer is OfflineTileServer)
+            {
+                float gamma = 1;
+                float brightness = 1.2f;
+                float contrast = 1;
+                float alpha = 1;
+
+                float adjustedBrightness = brightness - 1.0f;
+
+                float[][] matrix ={
+                    new float[] {contrast, 0, 0, 0, 0}, // scale red
+                    new float[] {0, contrast, 0, 0, 0}, // scale green
+                    new float[] {0, 0, contrast, 0, 0}, // scale blue
+                    new float[] {0, 0, 0, alpha, 0},
+                    new float[] {adjustedBrightness, adjustedBrightness, adjustedBrightness, 0, 1}};
+
+                var attr = new ImageAttributes();
+                attr.ClearColorMatrix();
+                attr.SetColorMatrix(new ColorMatrix(matrix), ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+                attr.SetGamma(gamma, ColorAdjustType.Bitmap);
+
+                return attr;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         private void CalculateEclipse(bool next)
@@ -98,7 +176,7 @@ namespace Astrarium.Plugins.SolarSystem
 
             var pbe = SolarEclipses.FindPolynomialBesselianElements(pos);
 
-            var map = SolarEclipses.GetCurves(pbe);
+            var map = SolarEclipses.GetEclipseMap(pbe);
 
             EclipseDate = Formatters.Date.Format(new Date(JulianDay, observerLocation.UtcOffset));
 
@@ -108,28 +186,28 @@ namespace Astrarium.Plugins.SolarSystem
 
             if (map.P1 != null)
             {
-                markers.Add(new Marker(ToGeo(map.P1.Coordinates), MarkerStyle.Default, "P1"));
+                markers.Add(new Marker(ToGeo(map.P1.Coordinates), riseSetMarkerStyle, "P1"));
             }
             if (map.P2 != null)
             {
-                markers.Add(new Marker(ToGeo(map.P2.Coordinates), MarkerStyle.Default, "P2"));
+                markers.Add(new Marker(ToGeo(map.P2.Coordinates), riseSetMarkerStyle, "P2"));
             }
             if (map.P3 != null)
             {
-                markers.Add(new Marker(ToGeo(map.P3.Coordinates), MarkerStyle.Default, "P3"));
+                markers.Add(new Marker(ToGeo(map.P3.Coordinates), riseSetMarkerStyle, "P3"));
             }
             if (map.P4 != null)
             {
-                markers.Add(new Marker(ToGeo(map.P4.Coordinates), MarkerStyle.Default, "P4"));
+                markers.Add(new Marker(ToGeo(map.P4.Coordinates), riseSetMarkerStyle, "P4"));
             }
 
             if (map.C1 != null)
             {
-                markers.Add(new Marker(ToGeo(map.C1.Coordinates), MarkerStyle.Default, "C1"));
+                markers.Add(new Marker(ToGeo(map.C1.Coordinates), centralLineMarkerStyle, "C1"));
             }
             if (map.C2 != null)
             {
-                markers.Add(new Marker(ToGeo(map.C2.Coordinates), MarkerStyle.Default, "C2"));
+                markers.Add(new Marker(ToGeo(map.C2.Coordinates), centralLineMarkerStyle, "C2"));
             }
 
 
@@ -137,14 +215,14 @@ namespace Astrarium.Plugins.SolarSystem
             {
                 if (map.UmbraNorthernLimit[i].Any())
                 {
-                    var track = new Track(new TrackStyle(new Pen(Color.Gray, 2)));
+                    var track = new Track(umbraLimitTrackStyle);
                     track.AddRange(map.UmbraNorthernLimit[i].Select(p => ToGeo(p)));
                     tracks.Add(track);
                 }
 
                 if (map.UmbraSouthernLimit[i].Any())
                 {
-                    var track = new Track(new TrackStyle(new Pen(Color.Gray, 2)));
+                    var track = new Track(umbraLimitTrackStyle);
                     track.AddRange(map.UmbraSouthernLimit[i].Select(p => ToGeo(p)));
                     tracks.Add(track);
                 }
@@ -154,88 +232,55 @@ namespace Astrarium.Plugins.SolarSystem
             {
                 if (map.TotalPath[i].Any())
                 {
-                    var track = new Track(new TrackStyle(new Pen(Color.Black, 2)));
-                    track.AddRange(map.TotalPath[i].Select(p => ToGeo(p)));
+                    var track = new Track(centralLineTrackStyle);
+                    if (i == 0 && map.C1 != null)
+                    {
+                        track.Add(ToGeo(map.C1.Coordinates));
+                    }
+                    track.AddRange(map.TotalPath[i].Select(p => ToGeo(p)));                    
+                    if (map.C2 != null && ((i == 0 && !map.TotalPath[1].Any()) || i == 1))
+                    {
+                        track.Add(ToGeo(map.C2.Coordinates));
+                    }                    
                     tracks.Add(track);
                 }
             }
 
-
-            //// central line is single => draw shadow path as single polygon
-            //if (map.TotalPath[0].Any() && !map.TotalPath[1].Any())
-            //{
-            //    var polygon = new Polygon(new PolygonStyle(new SolidBrush(Color.FromArgb(100, Color.Gray))));
-            //    polygon.Add(ToGeo(map.C1.Coordinates));
-
-            //    polygon.AddRange(map.UmbraNorthernLimit[0].Select(p => ToGeo(p)));
-            //    polygon.AddRange(map.UmbraNorthernLimit[1].Select(p => ToGeo(p)));
-            //    polygon.Add(ToGeo(map.C2.Coordinates));
-            //    polygon.AddRange((map.UmbraSouthernLimit[1] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
-            //    polygon.AddRange((map.UmbraSouthernLimit[0] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
-            //    polygon.Add(ToGeo(map.C1.Coordinates));
-            //    polygons.Add(polygon);
-            //}
-
             // central line is divided into 2 ones => draw shadow path as 2 polygons
             //if (map.TotalPath[0].Any() && map.TotalPath[1].Any())
+                            
+
+            if ((map.UmbraNorthernLimit[0].Any() && !map.UmbraNorthernLimit[1].Any()) ||
+                (map.UmbraSouthernLimit[0].Any() && !map.UmbraSouthernLimit[1].Any()))
             {
-                
+                var polygon = new Polygon(umbraPolygonStyle);
+                polygon.AddRange(map.UmbraNorthernLimit[0].Select(p => ToGeo(p)));
+                polygon.AddRange(map.UmbraNorthernLimit[1].Select(p => ToGeo(p)));
+                if (map.C2 != null) polygon.Add(ToGeo(map.C2.Coordinates));
+                polygon.AddRange((map.UmbraSouthernLimit[1] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
+                polygon.AddRange((map.UmbraSouthernLimit[0] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
+                if (map.C1 != null) polygon.Add(ToGeo(map.C1.Coordinates));
+                polygons.Add(polygon);
+            }
+            else {
 
-                if ((map.UmbraNorthernLimit[0].Any() && !map.UmbraNorthernLimit[1].Any()) ||
-                    (map.UmbraSouthernLimit[0].Any() && !map.UmbraSouthernLimit[1].Any()))
+                for (int i = 0; i < 2; i++)
                 {
-                    var polygon = new Polygon(new PolygonStyle(new SolidBrush(Color.FromArgb(100, Color.Gray))));
-                    polygon.AddRange(map.UmbraNorthernLimit[0].Select(p => ToGeo(p)));
-                    polygon.AddRange(map.UmbraNorthernLimit[1].Select(p => ToGeo(p)));
-                    if (map.C2 != null) polygon.Add(ToGeo(map.C2.Coordinates));
-                    polygon.AddRange((map.UmbraSouthernLimit[1] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
-                    polygon.AddRange((map.UmbraSouthernLimit[0] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
-                    if (map.C1 != null) polygon.Add(ToGeo(map.C1.Coordinates));
-                    polygons.Add(polygon);
-                }
-                else {
-
-                    for (int i = 0; i < 2; i++)
+                    if (map.UmbraNorthernLimit[i].Any() && map.UmbraSouthernLimit[i].Any())
                     {
-
-
-                        if ((map.UmbraNorthernLimit[i].Any() && map.UmbraSouthernLimit[i].Any()))
-                        {
-                            var polygon = new Polygon(new PolygonStyle(new SolidBrush(Color.FromArgb(100, Color.Gray))));
-
-                            if (i == 0)
-                            {
-                                //polygon.Add(ToGeo(map.C1.Coordinates));
-                            }
-
-
-                            polygon.AddRange(map.UmbraNorthernLimit[i].Select(p => ToGeo(p)));
-
-                            if (i == 1)
-                            {
-                                //polygon.Add(ToGeo(map.C2.Coordinates));
-                            }
-
-                            polygon.AddRange((map.UmbraSouthernLimit[i] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
-                            polygons.Add(polygon);
-                        }
+                        var polygon = new Polygon(umbraPolygonStyle);
+                        polygon.AddRange(map.UmbraNorthernLimit[i].Select(p => ToGeo(p)));
+                        polygon.AddRange((map.UmbraSouthernLimit[i] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
+                        polygons.Add(polygon);
                     }
                 }
             }
-
             
-
-
-
-
-
-            
-
             foreach (var curve in map.RiseSetCurve)
             {
                 if (curve.Any())
                 {
-                    var track = new Track(new TrackStyle(new Pen(Color.Red, 2)));
+                    var track = new Track(riseSetTrackStyle);
                     track.AddRange(curve.Select(p => ToGeo(p)));
                     track.Add(track.First());
                     tracks.Add(track);
@@ -244,14 +289,14 @@ namespace Astrarium.Plugins.SolarSystem
 
             if (map.PenumbraNorthernLimit.Any())
             {
-                var track = new Track(new TrackStyle(new Pen(Color.Orange, 2)));
+                var track = new Track(penumbraLimitTrackStyle);
                 track.AddRange(map.PenumbraNorthernLimit.Select(p => ToGeo(p)));
                 tracks.Add(track);
             }
 
             if (map.PenumbraSouthernLimit.Any())
             {
-                var track = new Track(new TrackStyle(new Pen(Color.Orange, 2)));
+                var track = new Track(penumbraLimitTrackStyle);
                 track.AddRange(map.PenumbraSouthernLimit.Select(p => ToGeo(p)));
                 tracks.Add(track);
             }
@@ -265,7 +310,6 @@ namespace Astrarium.Plugins.SolarSystem
 
         private GeoPoint ToGeo(CrdsGeographical g)
         {
-
             return new GeoPoint((float)-g.Longitude, (float)g.Latitude);
         }
     }

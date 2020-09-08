@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
@@ -38,6 +39,9 @@ namespace Astrarium.Types.Controls
 
         public static readonly DependencyProperty ErrorColorProperty =
             DependencyProperty.Register(nameof(ErrorColor), typeof(Color), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged) });
+
+        public static readonly DependencyProperty TileImageAttributesProperty =
+            DependencyProperty.Register(nameof(TileImageAttributes), typeof(ImageAttributes), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged) });
 
         public static readonly DependencyProperty MarkersProperty =
             DependencyProperty.Register(nameof(Markers), typeof(ICollection<Marker>), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged) });
@@ -110,6 +114,12 @@ namespace Astrarium.Types.Controls
         {
             get => (Color)GetValue(ErrorColorProperty);
             set => SetValue(ErrorColorProperty, value);
+        }
+
+        public ImageAttributes TileImageAttributes
+        {
+            get => (ImageAttributes)GetValue(TileImageAttributesProperty);
+            set => SetValue(TileImageAttributesProperty, value);
         }
 
         public ICollection<Marker> Markers

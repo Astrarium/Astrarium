@@ -10,10 +10,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
     x:Class="Astrarium.Plugins.SolarSystem.SolarEclipseWindow" 
     mc:Ignorable="d" 
-    Title="Solar eclipse" 
-    Height="300" 
-    Width="300" 
-    MinHeight="300" MinWidth="300" 
+    Title="Solar Eclipses" 
+    Height="600" 
+    Width="600" 
+    MinHeight="600" MinWidth="600" 
     Style="{StaticResource {x:Type Window}}" 
     WindowStartupLocation="CenterOwner">
     <Grid Margin="2">
@@ -41,7 +41,8 @@
             Tracks="{Binding Tracks}"
             Polygons="{Binding Polygons}"
             ThumbnailBackColor="#333333"
-            ThumbnailForeColor="#333333" />
+            ThumbnailForeColor="#333333"
+            TileImageAttributes="{Binding TileImageAttributes}"/>
  
     </Grid>
 </Window>

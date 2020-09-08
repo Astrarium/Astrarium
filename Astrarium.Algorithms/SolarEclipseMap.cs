@@ -12,21 +12,42 @@ namespace Astrarium.Algorithms
     public class SolarEclipseMap
     {
         /// <summary>
-        /// Points of total eclipse path
+        /// Defines points on a cenral line of an eclipse.
+        /// Can be empty (if the eclipse is partial one).
+        /// Central line of eclipse can be divided into two segments, if the line crosses circumpolar regions. 
         /// </summary>
         public List<CrdsGeographical>[] TotalPath { get; } = new[] { new List<CrdsGeographical>(), new List<CrdsGeographical>() };
 
-
-
+        /// <summary>
+        /// Defines northern visibility limit of a total (or annular) eclipse.
+        /// Can be empty (if the eclipse is partial one, or there is no northern limit exist).
+        /// Can be divided into two segments, if the line crosses circumpolar regions. 
+        /// </summary>
         public List<CrdsGeographical>[] UmbraNorthernLimit { get; } = new[] { new List<CrdsGeographical>(), new List<CrdsGeographical>() };
+
+        /// <summary>
+        /// Defines southern visibility limit of a total (or annular) eclipse.
+        /// Can be empty (if the eclipse is partial one, or there is no southern limit).
+        /// Can be divided into two segments, if the line crosses circumpolar regions. 
+        /// </summary>
         public List<CrdsGeographical>[] UmbraSouthernLimit { get; } = new[] { new List<CrdsGeographical>(), new List<CrdsGeographical>() };
-    
 
-
+        /// <summary>
+        /// Defines areas on the Earth where the eclipse is visible on sunrise or sunset.
+        /// Points can be joined in one eightlike curve, or can be splitted into 2 closed curves that look like raindrops.
+        /// </summary>
         public List<CrdsGeographical>[] RiseSetCurve { get; } = new[] { new List<CrdsGeographical>(), new List<CrdsGeographical>() };
-        
-        
+
+        /// <summary>
+        /// Defines northern visibility limit of an eclipse. 
+        /// Can be empty if northern limit does not exist (northern edge of penumbra does not cross the Earth). 
+        /// </summary>
         public List<CrdsGeographical> PenumbraNorthernLimit { get; } = new List<CrdsGeographical>();
+
+        /// <summary>
+        /// Defines southern visibility limit of an eclipse. 
+        /// Can be empty if southern limit does not exist (southern edge of penumbra does not cross the Earth). 
+        /// </summary>
         public List<CrdsGeographical> PenumbraSouthernLimit { get; } = new List<CrdsGeographical>();
 
         /// <summary>
@@ -86,11 +107,26 @@ namespace Astrarium.Algorithms
         public SolarEclipsePoint PS2 { get; set; }
     }
 
+    /// <summary>
+    /// Defines point on the solar eclipse map.
+    /// </summary>
     public class SolarEclipsePoint
     {
+        /// <summary>
+        /// Julian day
+        /// </summary>
         public double JulianDay { get; set; }
+
+        /// <summary>
+        /// Coordinates of the point
+        /// </summary>
         public CrdsGeographical Coordinates { get; set; }
 
+        /// <summary>
+        /// Creates new point with Julian Day value and coordinates
+        /// </summary>
+        /// <param name="jd">Julian Day value</param>
+        /// <param name="c">Coordinates of the point</param>
         public SolarEclipsePoint(double jd, CrdsGeographical c)
         {
             JulianDay = jd;

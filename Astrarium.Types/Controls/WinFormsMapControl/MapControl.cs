@@ -236,7 +236,6 @@ namespace System.Windows.Forms
             }
         }
 
-
         /// <summary>
         /// Gets geographical coordinates of the current position of mouse.
         /// </summary>
@@ -335,6 +334,12 @@ namespace System.Windows.Forms
                 _LinkLabel.ForeColor = value;
             }
         }
+
+        /// <summary>
+        /// Image attributes to be applied to a tile image when drawing.
+        /// </summary>
+        [Description("Image attributes to be applied to a tile image when drawing."), Category("Appearance")]
+        public ImageAttributes TileImageAttributes { get; set; } = null;
 
         /// <summary>
         /// Raised when marker is drawn on the map.
@@ -442,17 +447,18 @@ namespace System.Windows.Forms
                 DrawTracks(pe.Graphics);
                 DrawMarkers(pe.Graphics);
 
-                /*
+                var gs = pe.Graphics.Save();
+
+                pe.Graphics.SmoothingMode = SmoothingMode.None;
                 if (_Offset.Y > 0)
                 {
                     pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, -1, Width, _Offset.Y + 1);
                 }
-
                 if (_Offset.Y + FullMapSizeInPixels < Height)
                 {
                     pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, _Offset.Y + FullMapSizeInPixels, Width, _Offset.Y + FullMapSizeInPixels);
                 }
-                */
+                pe.Graphics.Restore(gs);
             }
 
             base.OnPaint(pe);
@@ -820,7 +826,7 @@ namespace System.Windows.Forms
                         {
                             Draw(gr, () => gr.DrawGraphicsPath(gp, polygon.Style.Brush, polygon.Style.Pen));
                         }
-                    }                    
+                    }
                 }
             }
         }
@@ -854,32 +860,8 @@ namespace System.Windows.Forms
             gr.InterpolationMode = InterpolationMode.NearestNeighbor;
             gr.PixelOffsetMode = PixelOffsetMode.HighSpeed;
             gr.CompositingQuality = CompositingQuality.HighSpeed;
-            gr.DrawImage(image, destRect, srcRect.X, srcRect.Y, srcRect.Width, srcRect.Height, GraphicsUnit.Pixel);
+            gr.DrawImage(image, destRect, srcRect.X, srcRect.Y, srcRect.Width, srcRect.Height, GraphicsUnit.Pixel, TileImageAttributes);
             gr.Restore(state);
-        }
-
-        private static readonly ImageAttributes RedImageAttrs = GetImageAttributes(false);
-
-        private static ImageAttributes GetImageAttributes(bool overlay)
-        {
-            if (overlay)
-            {
-                float[][] matrix = {
-                    new float[] {0.3f, 0, 0, 0, 0},
-                    new float[] {0.3f, 0, 0, 0, 0},
-                    new float[] {0.3f, 0, 0, 0, 0},
-                    new float[] {0, 0, 0, 1, 0},
-                    new float[] {0, 0, 0, 0, 0}
-                };
-                var colorMatrix = new ColorMatrix(matrix);
-                var attr = new ImageAttributes();
-                attr.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
-                return attr;
-            }
-            else
-            {
-                return null;
-            }
         }
 
         /// <summary>
@@ -895,7 +877,7 @@ namespace System.Windows.Forms
             p.X = _Offset.X + x * TILE_SIZE;
             p.Y = _Offset.Y + y * TILE_SIZE;
 
-            gr.DrawImage(image, new Rectangle(p, new Drawing.Size(TILE_SIZE, TILE_SIZE)), 0, 0, TILE_SIZE, TILE_SIZE, GraphicsUnit.Pixel, RedImageAttrs);
+            gr.DrawImage(image, new Rectangle(p, new Drawing.Size(TILE_SIZE, TILE_SIZE)), 0, 0, TILE_SIZE, TILE_SIZE, GraphicsUnit.Pixel, TileImageAttributes);
         }
 
         /// <summary>

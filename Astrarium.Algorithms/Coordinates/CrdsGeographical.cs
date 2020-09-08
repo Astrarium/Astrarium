@@ -4,6 +4,9 @@ using System.Text;
 
 namespace Astrarium.Algorithms
 {
+    /// <summary>
+    /// Defines a point on the Earth surface.
+    /// </summary>
     public class CrdsGeographical
     {
         /// <summary>

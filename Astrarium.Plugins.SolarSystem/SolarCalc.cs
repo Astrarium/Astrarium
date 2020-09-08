@@ -155,7 +155,7 @@ namespace Astrarium.Plugins.SolarSystem
 
             var el = SolarEclipses.FindPolynomialBesselianElements(pos);
 
-            var curves = SolarEclipses.GetCurves(el);
+            var curves = SolarEclipses.GetEclipseMap(el);
 
             var pts =
                 //string.Join("\n", curves.TotalPath.Select(p => (p != null ? (p.Latitude).ToString("0.000000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000000", CultureInfo.InvariantCulture) : null))) + "\n" +
