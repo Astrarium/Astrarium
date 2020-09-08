@@ -41,5 +41,8 @@
         /// 0 value means track path is parallel to equator.
         /// </summary>
         public double Inc { get; set; }
+
+        public double F1 { get; set; }
+        public double F2 { get; set; }
     }
 }

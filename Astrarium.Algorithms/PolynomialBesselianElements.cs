@@ -67,6 +67,9 @@ namespace Astrarium.Algorithms
         /// </summary>
         public double[] Inc { get; set; }
 
+        public double[] F1 { get; set; }
+        public double[] F2 { get; set; }
+
         /// <summary>
         /// Gets Besselian elements values for specified Juluan Day.
         /// </summary>
@@ -89,6 +92,8 @@ namespace Astrarium.Algorithms
                 D = D.Select((d, n) => d * Pow(t, n)).Sum(),
                 Mu = To360(Mu.Select((mu, n) => mu * Pow(t, n)).Sum()),
                 Inc = Inc.Select((inc, n) => inc * Pow(t, n)).Sum(),
+                F1 = F1.Select((f1, n) => f1 * Pow(t, n)).Sum(),
+                F2 = F2.Select((f2, n) => f2 * Pow(t, n)).Sum()
             };
         }
 

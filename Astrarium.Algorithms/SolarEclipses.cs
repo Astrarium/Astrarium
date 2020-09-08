@@ -69,7 +69,9 @@ namespace Astrarium.Algorithms
                 L2 = LeastSquares.FindCoeffs(points.Select((p, i) => new PointF(p.X, (float)elements[i].L2)), 3),
                 D = LeastSquares.FindCoeffs(points.Select((p, i) => new PointF(p.X, (float)elements[i].D)), 3),
                 Mu = LeastSquares.FindCoeffs(points.Select((p, i) => new PointF(p.X, (float)elements[i].Mu)), 3),
-                Inc = LeastSquares.FindCoeffs(points.Take(4).Select((p, i) => new PointF(p.X, (float)elements[i].Inc)), 3)
+                Inc = LeastSquares.FindCoeffs(points.Take(4).Select((p, i) => new PointF(p.X, (float)elements[i].Inc)), 3),
+                F1 = LeastSquares.FindCoeffs(points.Select((p, i) => new PointF(p.X, (float)elements[i].F1)), 3),
+                F2 = LeastSquares.FindCoeffs(points.Select((p, i) => new PointF(p.X, (float)elements[i].F2)), 3)
             };
         }
 
@@ -157,7 +159,9 @@ namespace Astrarium.Algorithms
                 L1 = l1,
                 L2 = l2,
                 D = ToDegrees(d),
-                Mu = To360(theta - ToDegrees(a))
+                Mu = To360(theta - ToDegrees(a)),
+                F1 = ToDegrees(F1),
+                F2 = ToDegrees(F2)
             };
         }
 
@@ -234,8 +238,8 @@ namespace Astrarium.Algorithms
                 var b = pbe.GetInstantBesselianElements(jd);
                 double angle = ToRadians(b.Inc + 90);
                 var p = new PointF(
-                        (float)(b.X + b.L2 * Cos(angle)),
-                        (float)(b.Y + b.L2 * Sin(angle)));
+                        (float)(b.X + Abs(b.L2) * Cos(angle)),
+                        (float)(b.Y + Abs(b.L2) * Sin(angle)));
 
                 return Sqrt(p.X * p.X + p.Y * p.Y) - 1;
             };
@@ -246,8 +250,8 @@ namespace Astrarium.Algorithms
                 var b = pbe.GetInstantBesselianElements(jd);
                 double angle = ToRadians(b.Inc - 90);
                 var p = new PointF(
-                        (float)(b.X + b.L2 * Cos(angle)),
-                        (float)(b.Y + b.L2 * Sin(angle)));
+                        (float)(b.X + Abs(b.L2) * Cos(angle)),
+                        (float)(b.Y + Abs(b.L2) * Sin(angle)));
 
                 return Sqrt(p.X * p.X + p.Y * p.Y) - 1;
             };
@@ -408,6 +412,14 @@ namespace Astrarium.Algorithms
                         (float)(b.X + b.L1 * Cos(angle)),
                         (float)(b.Y + b.L1 * Sin(angle)));
 
+                    double cosR = Sqrt(p.X * p.X + p.Y * p.Y);
+                    double z = cosR <= 1 ? Acos(cosR) : 0;
+                    double r = Abs(b.L1 - z * Tan(ToRadians(b.F1)));
+
+                    p = new PointF(
+                        (float)(b.X + r * Cos(angle)),
+                        (float)(b.Y + r * Sin(angle)));
+
                     // Adjust iteration step according to penumbra position
                     if (Abs(p.Y) > 0.9)
                     {
@@ -443,6 +455,14 @@ namespace Astrarium.Algorithms
                         (float)(b.X + b.L2 * Cos(angle)),
                         (float)(b.Y + b.L2 * Sin(angle)));
 
+                    double cosR = Sqrt(p.X * p.X + p.Y * p.Y);
+                    double z = cosR <= 1 ? Acos(cosR) : 0;
+                    double r = Abs(b.L2 - z * Tan(ToRadians(b.F2)));
+
+                    p = new PointF(
+                        (float)(b.X + r * Cos(angle)),
+                        (float)(b.Y + r * Sin(angle)));
+
                     // Adjust iteration step according to penumbra position
                     if (Abs(p.Y) > 0.9)
                     {
@@ -453,7 +473,7 @@ namespace Astrarium.Algorithms
                         step = step0;
                     }
 
-                    var g = ProjectOnEarth(p, b.D, b.Mu);
+                    CrdsGeographical g = ProjectOnEarth(p, b.D, b.Mu);
 
                     if (c == 0 && Abs(g.Latitude) > 89.9)
                     {
@@ -630,6 +650,7 @@ namespace Astrarium.Algorithms
         /// </remarks>
         private static CrdsGeographical ProjectOnEarth(PointF p, double d, double mu)
         {
+            
             // Earth ellipticity, squared
             const double e2 = 0.00669454;
 
@@ -668,10 +689,14 @@ namespace Astrarium.Algorithms
 
             double theta = ToDegrees(Atan2(sinTheta, cosTheta));
 
+            double tanPhi = Tan(phi1) / Sqrt(1 - e2);
+
+            double phi = Atan(tanPhi);
+
             // 8.331-4
             double lambda = mu - theta;
 
-            return new CrdsGeographical(To360(lambda + 180) - 180, ToDegrees(phi1));
+            return new CrdsGeographical(To360(lambda + 180) - 180, ToDegrees(phi));
         }
 
         /// <summary>
@@ -935,8 +960,82 @@ namespace Astrarium.Algorithms
 
             return eclipse;
         }
-    }
 
+        private static Vector ProjectOnFundamentalPlane(CrdsGeographical g, double deltaT, InstantBesselianElements b)
+        {
+            const double e2 = 0.00669454;
+
+            double phi = ToRadians(g.Latitude);
+            double sinPhi = Sin(phi);
+
+            double C = 1.0 / Sqrt(1 - e2 * sinPhi * sinPhi);
+            double S = (1 - e2) * C;
+
+            double a = 6378137.0;
+            double h = g.Elevation;
+            double phi_ = Atan((a * S + h) * Tan(phi) / (a * C + h));
+            double rho = (a * C + h) * Cos(phi) / (a * Cos(phi_));
+
+            double theta = b.Mu - g.Longitude; // (b.Mu - 1.002738 * 360.0 / 86400.0 * deltaT) - g.Longitude;
+
+            double xi = rho * Cos(phi_) * Sin(ToRadians(theta));
+            double eta = rho * Sin(phi_) * Cos(ToRadians(b.D)) - rho * Cos(phi_) * Sin(ToRadians(b.D)) * Cos(ToRadians(theta));
+            double zeta = rho * Sin(phi_) * Sin(ToRadians(b.D)) + rho * Cos(phi_) * Cos(ToRadians(b.D)) * Cos(ToRadians(theta));
+
+            return new Vector(xi, eta, zeta);
+        }
+
+        public static bool LocalCircumstances_IsTotal(PolynomialBesselianElements pbe, CrdsGeographical g)
+        {
+            double step = TimeSpan.FromSeconds(1).TotalDays;
+
+            // left edge of time interval
+            double jdFrom = pbe.From;
+
+            // right edge of time interval
+            double jdTo = pbe.To - step;
+
+            // precision of calculation, in days
+            double epsilon = 1e-8;
+
+            double deltaT = Date.DeltaT(pbe.JulianDay0);
+           
+            Func<double, double> funcLocalMax = (jd) =>
+            {
+                double[] dist = new double[2];
+
+                for (int i=0; i<2; i++)
+                {
+                    InstantBesselianElements b = pbe.GetInstantBesselianElements(jd + i * step);
+                    Vector p = ProjectOnFundamentalPlane(g, deltaT, b);
+                    dist[i] = Sqrt((p.X - b.X) * (p.X - b.X) + (p.Y - b.Y) * (p.Y - b.Y));
+                }
+                return (dist[1] - dist[0]) / step;
+            };
+
+
+            double jdLocalMax = FindRoots(funcLocalMax, jdFrom, jdTo, epsilon);
+            
+            if (!double.IsNaN(jdLocalMax))
+            {
+                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdLocalMax);
+                Vector p = ProjectOnFundamentalPlane(g, deltaT, b);
+
+                double L2zeta = b.L2 - p.Z * Tan(ToRadians(b.F2));
+                
+                double dist = Sqrt((p.X - b.X) * (p.X - b.X) + (p.Y - b.Y) * (p.Y - b.Y));
+                if (p.Z >=0 && dist < Abs(L2zeta))
+                {
+                    //System.Diagnostics.Debug.WriteLine(dist);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+    }
+   
     /// <summary>
     /// Describes general details of the Solar eclipse
     /// </summary>

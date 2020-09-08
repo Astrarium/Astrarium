@@ -24,6 +24,7 @@ namespace Astrarium.Plugins.SolarSystem
 
         public ICommand PrevEclipseCommand => new Command(PrevEclipse);
         public ICommand NextEclipseCommand => new Command(NextEclipse);
+        public ICommand ClickOnMapCommand => new Command(ClickOnMap);
 
         public ICollection<ITileServer> TileServers { get; private set; }
 
@@ -35,6 +36,8 @@ namespace Astrarium.Plugins.SolarSystem
         private readonly LunarCalc lunarCalc;
         private readonly CrdsGeographical observerLocation;
         private readonly ISettings settings;
+
+        private PolynomialBesselianElements besselianElements;
 
         private readonly MarkerStyle riseSetMarkerStyle = new MarkerStyle(5, Brushes.Red, null, Brushes.Red, SystemFonts.DefaultFont, StringFormat.GenericDefault);
         private readonly MarkerStyle centralLineMarkerStyle = new MarkerStyle(5, Brushes.Black, null, Brushes.Black, SystemFonts.DefaultFont, StringFormat.GenericDefault);
@@ -61,7 +64,7 @@ namespace Astrarium.Plugins.SolarSystem
             set => SetValue(nameof(TileImageAttributes), value);
         }
 
-        public SolarEclipseVM(SolarCalc solarCalc, LunarCalc lunarCalc, ISettings settings)
+        public SolarEclipseVM(ISky sky, SolarCalc solarCalc, LunarCalc lunarCalc, ISettings settings)
         {
             this.solarCalc = solarCalc;
             this.lunarCalc = lunarCalc;            
@@ -81,8 +84,8 @@ namespace Astrarium.Plugins.SolarSystem
             };
 
             TileServer = TileServers.First();
-           
-            JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
+
+            JulianDay = sky.Context.JulianDay;
             CalculateEclipse(next: true);
         }
 
@@ -102,6 +105,31 @@ namespace Astrarium.Plugins.SolarSystem
         private void NextEclipse()
         {
             CalculateEclipse(next: true);
+        }
+
+        public bool IsTotal { get; set; }
+
+        public GeoPoint MapMouse
+        {
+            get => GetValue<GeoPoint>(nameof(MapMouse));
+            set
+            {
+                SetValue(nameof(MapMouse), value);
+
+                var pos = new CrdsGeographical(-value.Longitude, value.Latitude);
+                var isTotal = SolarEclipses.LocalCircumstances_IsTotal(besselianElements, pos);
+
+                IsTotal = isTotal;
+                NotifyPropertyChanged(nameof(IsTotal));
+            }
+        }
+
+        private void ClickOnMap()
+        {
+            
+
+            ;
+            //MessageBox.Show(Formatters.DateTime.Format(date));
         }
 
         private ImageAttributes GetImageAttributes()
@@ -174,9 +202,9 @@ namespace Astrarium.Plugins.SolarSystem
                 };
             }
 
-            var pbe = SolarEclipses.FindPolynomialBesselianElements(pos);
+            besselianElements = SolarEclipses.FindPolynomialBesselianElements(pos);
 
-            var map = SolarEclipses.GetEclipseMap(pbe);
+            var map = SolarEclipses.GetEclipseMap(besselianElements);
 
             EclipseDate = Formatters.Date.Format(new Date(JulianDay, observerLocation.UtcOffset));
 
@@ -304,6 +332,8 @@ namespace Astrarium.Plugins.SolarSystem
             Tracks = tracks;
             Polygons = polygons;
             Markers = markers;
+
+
 
             NotifyPropertyChanged(nameof(EclipseDate), nameof(Tracks), nameof(Polygons), nameof(Markers));
         }

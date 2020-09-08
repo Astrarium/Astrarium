@@ -10,7 +10,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
     x:Class="Astrarium.Plugins.SolarSystem.SolarEclipseWindow" 
     mc:Ignorable="d" 
-    Title="Solar Eclipses" 
+    Title="{Binding IsTotal}" 
     Height="600" 
     Width="600" 
     MinHeight="600" MinWidth="600" 
@@ -42,7 +42,9 @@
             Polygons="{Binding Polygons}"
             ThumbnailBackColor="#333333"
             ThumbnailForeColor="#333333"
-            TileImageAttributes="{Binding TileImageAttributes}"/>
+            TileImageAttributes="{Binding TileImageAttributes}"
+            OnClick="{Binding ClickOnMapCommand}"
+            Mouse="{Binding MapMouse, Mode=OneWayToSource}" />
  
     </Grid>
 </Window>
