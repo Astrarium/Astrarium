@@ -136,38 +136,6 @@ namespace Astrarium.Plugins.SolarSystem
 
         public void GetInfo(CelestialObjectInfo<Sun> info)
         {
-            // TODO: move this to separate Eclipse calculator
-
-            SunMoonPosition[] pos = new SunMoonPosition[5];
-            for (int i = 0; i < 5; i++)
-            {
-                // 5 measurements with 3h step, so interval is -6...+6 hours
-                SkyContext c = new SkyContext(info.Context.JulianDay + TimeSpan.FromHours(3).TotalDays * (i - 2), info.Context.GeoLocation);
-                pos[i] = new SunMoonPosition()
-                {
-                    JulianDay = c.JulianDay,
-                    Sun = c.Get(Equatorial0),
-                    Moon = c.Get(lunarCalc.Equatorial0),
-                    DistanceSun = c.Get(Ecliptical).Distance * 149597870 / 6371.0,
-                    DistanceMoon = c.Get(lunarCalc.Ecliptical0).Distance / 6371.0
-                };
-            }
-
-            var el = SolarEclipses.FindPolynomialBesselianElements(pos);
-
-            var curves = SolarEclipses.GetEclipseMap(el);
-
-            var pts =
-                //string.Join("\n", curves.TotalPath.Select(p => (p != null ? (p.Latitude).ToString("0.000000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000000", CultureInfo.InvariantCulture) : null))) + "\n" +
-                //string.Join("\n", curves.UmbraNorthernLimit.Select(p => (p != null ? (p.Latitude).ToString("0.000000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000000", CultureInfo.InvariantCulture) : null))) + "\n" +
-                //string.Join("\n", curves.UmbraSouthernLimit.Select(p => (p != null ? (p.Latitude).ToString("0.000000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000000", CultureInfo.InvariantCulture) : null))) + "\n" +
-                //string.Join("\n", curves.PenumbraNorthernLimit.Select(p => (p != null ? (p.Latitude).ToString("0.000000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000000", CultureInfo.InvariantCulture) : null))) + "\n" +
-                //string.Join("\n", curves.PenumbraSouthernLimit.Select(p => (p != null ? (p.Latitude).ToString("0.000000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000000", CultureInfo.InvariantCulture) : null))) + "\n" +
-                string.Join("\n", curves.RiseSetCurve[0].Select(p => (p != null ? (p.Latitude).ToString("0.000000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000000", CultureInfo.InvariantCulture) : null))) + "\n" +
-                string.Join("\n", curves.RiseSetCurve[1].Select(p => (p != null ? (p.Latitude).ToString("0.000000", CultureInfo.InvariantCulture) : null) + "," + (p != null ? (-p.Longitude).ToString("0.000000", CultureInfo.InvariantCulture) : null))) + "\n" +
-
-            "";
-
             info.SetTitle(Sun.Name)
 
             .AddRow("Constellation")

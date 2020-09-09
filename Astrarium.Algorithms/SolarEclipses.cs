@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -191,7 +192,7 @@ namespace Astrarium.Algorithms
             Func<double, double> funcUmbra = (jd) =>
             {
                 var b = pbe.GetInstantBesselianElements(jd);
-                return b.X * b.X + b.Y * b.Y - 1;
+                return Sqrt(b.X * b.X + b.Y * b.Y) - 1 - Abs(b.L2);
             };
 
             // Function has zero value when penumbra edge crosses Earth edge externally
@@ -263,7 +264,7 @@ namespace Astrarium.Algorithms
                 InstantBesselianElements b = pbe.GetInstantBesselianElements(jdP1);
                 double a = Atan2(b.Y, b.X);
                 PointF p = new PointF((float)Cos(a), (float)Sin(a));                
-                map.P1 = new SolarEclipsePoint(jdP1, ProjectOnEarth(p, b.D, b.Mu));              
+                map.P1 = new SolarEclipsePoint(jdP1, ProjectOnEarth(p, b.D, b.Mu, true));
             }
 
             // Instant of last external contact of penumbra
@@ -273,7 +274,7 @@ namespace Astrarium.Algorithms
                 InstantBesselianElements b = pbe.GetInstantBesselianElements(jdP4);
                 double a = Atan2(b.Y, b.X);
                 PointF p = new PointF((float)Cos(a), (float)Sin(a));
-                map.P4 = new SolarEclipsePoint(jdP4, ProjectOnEarth(p, b.D, b.Mu));
+                map.P4 = new SolarEclipsePoint(jdP4, ProjectOnEarth(p, b.D, b.Mu, true));
             }
 
             // Instant of first internal contact of penumbra,
@@ -284,7 +285,7 @@ namespace Astrarium.Algorithms
                 InstantBesselianElements b = pbe.GetInstantBesselianElements(jdP2);
                 double a = Atan2(b.Y, b.X);
                 PointF p = new PointF((float)Cos(a), (float)Sin(a));
-                map.P2 = new SolarEclipsePoint(jdP2, ProjectOnEarth(p, b.D, b.Mu));
+                map.P2 = new SolarEclipsePoint(jdP2, ProjectOnEarth(p, b.D, b.Mu, true));
             }
 
             // Instant of last internal contact of penumbra,
@@ -295,7 +296,7 @@ namespace Astrarium.Algorithms
                 InstantBesselianElements b = pbe.GetInstantBesselianElements(jdP3);
                 double a = Atan2(b.Y, b.X);
                 PointF p = new PointF((float)Cos(a), (float)Sin(a));
-                map.P3 = new SolarEclipsePoint(jdP3, ProjectOnEarth(p, b.D, b.Mu));
+                map.P3 = new SolarEclipsePoint(jdP3, ProjectOnEarth(p, b.D, b.Mu, true));
             }
 
             // Instant when northern limit of penumbra crosses Earth edge first time,
@@ -303,9 +304,9 @@ namespace Astrarium.Algorithms
             double jdPN1 = FindRoots(funcPenumbraNorthLimit, jdFrom, jdMid, epsilon);
             if (!double.IsNaN(jdPN1))
             {
-                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdPN1);
-                PointF p = CirclesIntersection(new PointF((float)b.X, (float)b.Y), b.L1)[0];
-                map.PN1 = new SolarEclipsePoint(jdPN1, ProjectOnEarth(p, b.D, b.Mu));
+                //InstantBesselianElements b = pbe.GetInstantBesselianElements(jdPN1);
+                //PointF p = CirclesIntersection(new PointF((float)b.X, (float)b.Y), b.L1)[0];
+                //map.PN1 = new SolarEclipsePoint(jdPN1, ProjectOnEarth(p, b.D, b.Mu));
             }
 
             // Instant when northern limit of penumbra crosses Earth edge last time,
@@ -313,9 +314,9 @@ namespace Astrarium.Algorithms
             double jdPN2 = FindRoots(funcPenumbraNorthLimit, jdMid, jdTo, epsilon);
             if (!double.IsNaN(jdPN2))
             {
-                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdPN2);
-                PointF p = CirclesIntersection(new PointF((float)b.X, (float)b.Y), b.L1)[0];
-                map.PN2 = new SolarEclipsePoint(jdPN2, ProjectOnEarth(p, b.D, b.Mu));
+                //InstantBesselianElements b = pbe.GetInstantBesselianElements(jdPN2);
+                //PointF p = CirclesIntersection(new PointF((float)b.X, (float)b.Y), b.L1)[0];
+                //map.PN2 = new SolarEclipsePoint(jdPN2, ProjectOnEarth(p, b.D, b.Mu));
             }
 
             // Instant when southern limit of penumbra crosses Earth edge first time,
@@ -323,9 +324,9 @@ namespace Astrarium.Algorithms
             double jdPS1 = FindRoots(funcPenumbraSouthLimit, jdFrom, jdMid, epsilon);
             if (!double.IsNaN(jdPS1))
             {
-                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdPS1);
-                PointF p = CirclesIntersection(new PointF((float)b.X, (float)b.Y), b.L1)[1];
-                map.PS1 = new SolarEclipsePoint(jdPS1, ProjectOnEarth(p, b.D, b.Mu));
+                //InstantBesselianElements b = pbe.GetInstantBesselianElements(jdPS1);
+                //PointF p = CirclesIntersection(new PointF((float)b.X, (float)b.Y), b.L1)[1];
+                //map.PS1 = new SolarEclipsePoint(jdPS1, ProjectOnEarth(p, b.D, b.Mu));
             }
 
             // Instant when southern limit of penumbra crosses Earth edge last time,
@@ -333,9 +334,9 @@ namespace Astrarium.Algorithms
             double jdPS2 = FindRoots(funcPenumbraSouthLimit, jdMid, jdTo, epsilon);
             if (!double.IsNaN(jdPS2))
             {
-                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdPS2);
-                PointF p = CirclesIntersection(new PointF((float)b.X, (float)b.Y), b.L1)[1];
-                map.PS2 = new SolarEclipsePoint(jdPS2, ProjectOnEarth(p, b.D, b.Mu));
+                //InstantBesselianElements b = pbe.GetInstantBesselianElements(jdPS2);
+                //PointF p = CirclesIntersection(new PointF((float)b.X, (float)b.Y), b.L1)[1];
+                //map.PS2 = new SolarEclipsePoint(jdPS2, ProjectOnEarth(p, b.D, b.Mu));
             }
 
             // Instant when northern limit of umbra crosses Earth edge first time,
@@ -359,9 +360,17 @@ namespace Astrarium.Algorithms
             double jdC1 = FindRoots(funcUmbra, jdFrom, jdMid, epsilon);
             if (!double.IsNaN(jdC1))
             {
-                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdC1);
-                PointF p = new PointF((float)b.X, (float)b.Y);
-                map.C1 = new SolarEclipsePoint(jdC1, ProjectOnEarth(p, b.D, b.Mu));
+                do
+                {
+                    InstantBesselianElements b = pbe.GetInstantBesselianElements(jdC1);
+                    PointF p = new PointF((float)b.X, (float)b.Y);
+                    var g = ProjectOnEarth(p, b.D, b.Mu);
+                    if (g == null) 
+                        jdC1 += 1e-6;
+                    else
+                        map.C1 = new SolarEclipsePoint(jdC1, g);
+                }
+                while (map.C1 == null && jdC1 < jdMid);
             }
 
             // Instant of last contact of umbra center,
@@ -369,9 +378,17 @@ namespace Astrarium.Algorithms
             double jdC2 = FindRoots(funcUmbra, jdMid, jdTo, epsilon);
             if (!double.IsNaN(jdC2))
             {
-                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdC2);
-                PointF p = new PointF((float)b.X, (float)b.Y);
-                map.C2 = new SolarEclipsePoint(jdC2, ProjectOnEarth(p, b.D, b.Mu));
+                do
+                {
+                    InstantBesselianElements b = pbe.GetInstantBesselianElements(jdC2);
+                    PointF p = new PointF((float)b.X, (float)b.Y);
+                    var g = ProjectOnEarth(p, b.D, b.Mu);
+                    if (g == null)
+                        jdC2 -= 1e-6;
+                    else
+                        map.C2 = new SolarEclipsePoint(jdC2, g);
+                }
+                while (map.C2 == null && jdC2 > jdMid);
             }
 
             // Find points of northern limit of eclipse visibility
@@ -407,8 +424,8 @@ namespace Astrarium.Algorithms
                     InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
 
                     double angle = ToRadians(b.Inc + ang);
-
-                    var p = new PointF(
+                  
+                    PointF p = new PointF(
                         (float)(b.X + b.L1 * Cos(angle)),
                         (float)(b.Y + b.L1 * Sin(angle)));
 
@@ -416,25 +433,18 @@ namespace Astrarium.Algorithms
                     if (z2 > 1) z2 = 1;
                     if (z2 < 0) z2 = 0;
                     double z = Sqrt(z2);
-                    double r = Abs(b.L1 - z * Tan(ToRadians(b.F1)));
-
+                    double r = b.L1 - z * Tan(ToRadians(b.F1));
+                    
                     p = new PointF(
                         (float)(b.X + r * Cos(angle)),
                         (float)(b.Y + r * Sin(angle)));
 
-                    // Adjust iteration step according to penumbra position
-                    if (Abs(p.Y) > 0.9)
-                    {
-                        step = step0 / 4;
-                    }
-                    else
-                    {
-                        step = step0;
-                    }
+                    var g = ProjectOnEarth(p, b.D, b.Mu, true);
 
-                    var g = ProjectOnEarth(p, b.D, b.Mu);
-
-                    curve.Add(g);
+                    if (g != null)
+                    {
+                        curve.Add(g);
+                    }
                 }
             }
         }
@@ -479,13 +489,15 @@ namespace Astrarium.Algorithms
 
                     CrdsGeographical g = ProjectOnEarth(p, b.D, b.Mu);
 
-                    if (c == 0 && Abs(g.Latitude) > 89.9)
+                    if (g != null)
                     {
-                        curve[0].Add(g);
-                        c = 1;
+                        if (c == 0 && Abs(g.Latitude) > 85.5)
+                        {
+                            curve[0].Add(g);
+                            c = 1;
+                        }
+                        curve[c].Add(g);
                     }
-                   
-                    curve[c].Add(g);
                 }
             }
         }
@@ -553,7 +565,9 @@ namespace Astrarium.Algorithms
                 {
                     for (int i = 0; i < pPenumbraIntersect.Length; i++)
                     {
-                        CrdsGeographical g = ProjectOnEarth(pPenumbraIntersect[i], b.D, b.Mu);
+                        CrdsGeographical g = ProjectOnEarth(pPenumbraIntersect[i], b.D, b.Mu, forceProjection: true);
+
+                        //if (g == null) continue;
 
                         if (pCenter.X <= 0)
                         {
@@ -610,17 +624,19 @@ namespace Astrarium.Algorithms
                     PointF pCenter = new PointF((float)b.X, (float)b.Y);
 
                     // Umbra center coordinates on Earth surface
-                    CrdsGeographical umbraCenter = ProjectOnEarth(pCenter, b.D, b.Mu);
+                    CrdsGeographical g = ProjectOnEarth(pCenter, b.D, b.Mu);
 
-                    if (c == 0 && Abs(umbraCenter.Latitude) > 89.9)
+                    if (g != null)
                     {
-                        curves.TotalPath[0].Add(umbraCenter);
-                        c = 1;
+                        if (c == 0 && Abs(g.Latitude) > 89.9)
+                        {
+                            curves.TotalPath[0].Add(g);
+                            c = 1;
+                        }
+                        curves.TotalPath[c].Add(g);
                     }
-
-                    curves.TotalPath[c].Add(umbraCenter);
                 }
-            }            
+            } 
         }
 
         /// <summary>
@@ -652,9 +668,8 @@ namespace Astrarium.Algorithms
         /// Chapter 8.3 "Solar Eclipses"
         /// https://archive.org/download/131123ExplanatorySupplementAstronomicalAlmanac/131123-explanatory-supplement-astronomical-almanac.pdf
         /// </remarks>
-        internal static CrdsGeographical ProjectOnEarth(PointF p, double d, double mu)
-        {
-            
+        internal static CrdsGeographical ProjectOnEarth(PointF p, double d, double mu, bool forceProjection = false)
+        {            
             // Earth ellipticity, squared
             const double e2 = 0.00669454;
 
@@ -669,10 +684,20 @@ namespace Astrarium.Algorithms
 
             // 8.333-10
             double zeta1_2 = 1 - xi * xi - eta1 * eta1;
-            double zeta1 = 0;
+
+            double zeta1;
             if (zeta1_2 > 0)
             {
                 zeta1 = Sqrt(zeta1_2);
+            }
+            else if (!forceProjection)
+            {
+                return null;
+            }
+            else
+            {
+                zeta1 = 0;
+                eta1 = eta;
             }
 
             // 8.334-1
@@ -683,9 +708,6 @@ namespace Astrarium.Algorithms
 
             // 8.333-13
             var v = Matrix.R1(d1) * new Vector(xi, eta1, zeta1);
-
-            if (v.Y > 0.999999) v.Y = 0.999999;
-            if (v.Y < -0.999999) v.Y = -0.999999;
 
             double phi1 = Asin(v.Y);
             double sinTheta = v.X / Cos(phi1);
@@ -1023,7 +1045,7 @@ namespace Astrarium.Algorithms
                 InstantBesselianElements b = pbe.GetInstantBesselianElements(jdLocalMax);
                 Vector p = ProjectOnFundamentalPlane(g, b.D, b.Mu);
 
-                double L2zeta = b.L2 - p.Z * Tan(ToRadians(b.F2));
+                double L2zeta = b.L1 - p.Z * Tan(ToRadians(b.F1));
                 
                 double dist = Sqrt((p.X - b.X) * (p.X - b.X) + (p.Y - b.Y) * (p.Y - b.Y));
                 if (p.Z >=0 && dist < Abs(L2zeta))

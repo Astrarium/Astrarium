@@ -238,7 +238,6 @@ namespace Astrarium.Plugins.SolarSystem
                 markers.Add(new Marker(ToGeo(map.C2.Coordinates), centralLineMarkerStyle, "C2"));
             }
 
-
             for (int i = 0; i < 2; i++)
             {
                 if (map.UmbraNorthernLimit[i].Any())
