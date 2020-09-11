@@ -416,6 +416,7 @@ namespace Astrarium.Algorithms
         {
             if (!double.IsNaN(jdFrom) && !double.IsNaN(jdTo))
             {
+
                 double step0 = FindStep(jdTo - jdFrom);
                 double step = step0;
 
@@ -429,24 +430,124 @@ namespace Astrarium.Algorithms
                         (float)(b.X + b.L1 * Cos(angle)),
                         (float)(b.Y + b.L1 * Sin(angle)));
 
-                    double z2 = 1 - p.X * p.X - p.Y * p.Y;
-                    if (z2 > 1) z2 = 1;
-                    if (z2 < 0) z2 = 0;
-                    double z = Sqrt(z2);
-                    double r = b.L1 - z * Tan(ToRadians(b.F1));
-                    
-                    p = new PointF(
-                        (float)(b.X + r * Cos(angle)),
-                        (float)(b.Y + r * Sin(angle)));
+                    //double z2 = 1 - p.X * p.X - p.Y * p.Y;
+                    //if (z2 < 0) z2 = 0;
+                    //double z = Sqrt(z2);
+
+                    //double r = b.L1 - z * Tan(ToRadians(b.F1));
+
+                    //p = new PointF(
+                    //    (float)(b.X + r * Cos(angle)),
+                    //    (float)(b.Y + r * Sin(angle)));
 
                     var g = ProjectOnEarth(p, b.D, b.Mu, true);
 
-                    if (g != null)
-                    {
-                        curve.Add(g);
-                    }
+                    g = Something(pbe, (jd - pbe.JulianDay0) / 24.0, ToRadians(g.Latitude), g.Longitude, 1e-6, ang == 90 ? 1 : -1, 0);
+
+                    curve.Add(g);
                 }
             }
+        }
+
+        private static CrdsGeographical Something(PolynomialBesselianElements bess, double t, double phi, double lambda, double tol, double i, double g)
+        {
+            // https://github.com/Hedwig1958/libastro/blob/865eb904800699f2edf0cb123176d69438fd59b9/eclipse.c
+
+            //__ Time 't' in hour from reference hour 't0'.
+            //double t = 0.0;
+            //double phi = 0.0;
+            double tau = 0;
+
+            do
+            {
+
+                var bInst =  bess.GetInstantBesselianElements(bess.JulianDay0 + t / 24.0);
+
+                
+
+
+                double x = bInst.X;
+                double y = bInst.Y;
+                double d = ToRadians(bInst.D);
+                double m = bInst.Mu;
+                double u1 = bInst.L1;
+                double u2 = bInst.L2;
+
+                //__ Hourly variations.
+                double xp = bess.X[1] + t * (2 * bess.X[2] + t * 3 * bess.X[3]);
+                double yp = bess.Y[1] + t * (2 * bess.Y[2] + t * 3 * bess.Y[3]);
+                //__ Hour angle.
+                double hour_angle = ToRadians(m - lambda);
+
+                //__ Rectangular geocentric coordinates of a place - Elements Of Solar Eclipses, pg 10.
+                double upsilon = Atan(0.99664719 * Tan(phi));
+
+                //__ k1 = rho * sin(phi'), k2 = rho * cos(phi') - Elements Of Solar Eclipses, pg 10.
+                double k1 = 0.99664719 * Sin(upsilon);
+                double k2 = Cos(upsilon);
+
+                //__ Calculate 'xi', 'eta' & 'zeta' - coordonnees du centre de l'ombre.
+                double xi = k2 * Sin(hour_angle);
+                double eta = k1 * Cos(d) - k2 * Cos(hour_angle) * Sin(d);
+                double zeta = k1 * Sin(d) + k2 * Cos(hour_angle) * Cos(d);
+
+                //__ Calculate 'xi_p' & 'eta_p' - variation des coordonnees du centre de l'ombre.
+                // 0.01745329 = 1 degree in radians
+
+                // Expl. suppl. p.458, 8.3556-2
+
+                double xi_p = 0.01745329 * bess.Mu[1] * k2 * Cos(hour_angle);
+
+                // Expl. suppl. p.455, 8.33553-3
+                double eta_p = 0.01745329 * (bess.Mu[1] * xi * Sin(d) - zeta * bess.D[1]);
+
+                
+                //__.
+                double omega = 1.0 / Sqrt(1 - 0.006694385 * Cos(d) * Cos(d));
+                double y1 = omega * y;
+
+                double tmp = 1 - x * x - y1 * y1;
+
+                double kcnt = tmp > 0.0 ? Sqrt(tmp) : 0.0;
+
+                //__ Calculate 'u', 'v, 'a', 'b', 'n' - Elements Of Solar Eclipses, pg 18.
+                double u = x - xi;
+                double v = y - eta;
+                double a = xp - xi_p;
+                double b = yp - eta_p;
+                
+                // speed of the shadow
+                double n = Sqrt(a * a + b * b);
+
+                //__ Calculate width of the path - Elements Of Solar Eclipses, pg 12.
+                double k = kcnt * kcnt + Pow((x * a + y * b), 2) / (n * n);
+
+                //__ Rayons des sections circulaires des cones de penombre et d'ombre.
+                double u1p = u1 - kcnt * Tan(ToRadians(bInst.F1));
+                double u2p = u2 - kcnt * Tan(ToRadians(bInst.F2));
+
+                double e = u1p - g * (u1p + u2p);
+
+                //__ Calculate 'tau', correction in time - Elements Of Solar Eclipses, pg 18 .
+                tau = -(u * a + v * b) / (n * n);
+
+                //__ Calculate 'delta phi', correction in latitude - Elements Of Solar Eclipses, pg 18 .
+                double w = (v * a - u * b) / n;
+                double q = (b * Sin(hour_angle) * k1 + a * (Cos(hour_angle) * Sin(d) * k1 + Cos(d) * k2)) / (57.29578 * n);
+                double d_phi = (w + i * Abs(e)) / q;
+
+                //__ Time 't' and correction 'tau' - Elements Of Solar Eclipses, pg 18.
+                t += tau;
+                phi += ToRadians(d_phi);
+                phi = Asin(Sin(phi));
+
+            }
+            while (Abs(tau) > tol);
+
+            phi = ToDegrees(phi);
+
+            return new CrdsGeographical(lambda, phi);
+
         }
 
         private static void FindUmbraLimits(PolynomialBesselianElements pbe, ICollection<CrdsGeographical>[] curve, double jdFrom, double jdTo, double ang)
@@ -1011,7 +1112,7 @@ namespace Astrarium.Algorithms
             return new Vector(xi, eta, zeta);
         }
 
-        public static bool LocalCircumstances_IsTotal(PolynomialBesselianElements pbe, CrdsGeographical g)
+        public static string LocalCircumstances_IsTotal(PolynomialBesselianElements pbe, CrdsGeographical g)
         {
             double step = TimeSpan.FromSeconds(1).TotalDays;
 
@@ -1039,23 +1140,33 @@ namespace Astrarium.Algorithms
 
 
             double jdLocalMax = FindRoots(funcLocalMax, jdFrom, jdTo, epsilon);
-            
+
+
             if (!double.IsNaN(jdLocalMax))
             {
                 InstantBesselianElements b = pbe.GetInstantBesselianElements(jdLocalMax);
                 Vector p = ProjectOnFundamentalPlane(g, b.D, b.Mu);
 
-                double L2zeta = b.L1 - p.Z * Tan(ToRadians(b.F1));
-                
-                double dist = Sqrt((p.X - b.X) * (p.X - b.X) + (p.Y - b.Y) * (p.Y - b.Y));
-                if (p.Z >=0 && dist < Abs(L2zeta))
                 {
-                    //System.Diagnostics.Debug.WriteLine(dist);
-                    return true;
+                    double L2zeta = b.L2 - p.Z * Tan(ToRadians(b.F2));
+                    double dist = Sqrt((p.X - b.X) * (p.X - b.X) + (p.Y - b.Y) * (p.Y - b.Y));
+                    if (p.Z >= 0 && dist < Abs(L2zeta))
+                    {
+                        return "Total";
+                    }
+                }
+
+                {
+                    double L1zeta = b.L1 - p.Z * Tan(ToRadians(b.F1));
+                    double dist = Sqrt((p.X - b.X) * (p.X - b.X) + (p.Y - b.Y) * (p.Y - b.Y));
+                    if (p.Z >= 0 && dist < Abs(L1zeta))
+                    {
+                        return "Partial";
+                    }
                 }
             }
 
-            return false;
+            return "None";
         }
 
     }

@@ -107,7 +107,7 @@ namespace Astrarium.Plugins.SolarSystem
             CalculateEclipse(next: true);
         }
 
-        public bool IsTotal { get; set; }
+        public string IsTotal { get; set; }
 
         public GeoPoint MapMouse
         {
