@@ -117,9 +117,10 @@ namespace Astrarium.Plugins.SolarSystem
                 SetValue(nameof(MapMouse), value);
 
                 var pos = new CrdsGeographical(-value.Longitude, value.Latitude);
-                var isTotal = SolarEclipses.LocalCircumstances_IsTotal(besselianElements, pos);
+                var localMax = SolarEclipses.FindLocalMax(besselianElements, pos);
+                var isTotal = SolarEclipses.Obscuration(besselianElements, pos, localMax);
 
-                IsTotal = isTotal;
+                IsTotal = isTotal.ToString();
                 NotifyPropertyChanged(nameof(IsTotal));
             }
         }

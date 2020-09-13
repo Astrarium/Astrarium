@@ -1,4 +1,6 @@
-﻿namespace Astrarium.Algorithms
+﻿using System;
+
+namespace Astrarium.Algorithms
 {
     /// <summary>
     /// Represents set of Besselian elements of solar eclipse,
@@ -40,9 +42,19 @@
         /// Inclination of Moon shadow track with respect to Earth equator, in degrees.
         /// 0 value means track path is parallel to equator.
         /// </summary>
-        public double Inc { get; set; }
+        public double Inc => Angle.ToDegrees(Math.Atan2(DY, DX));
 
         public double F1 { get; set; }
         public double F2 { get; set; }
+
+        /// <summary>
+        /// Derivative of X
+        /// </summary>
+        public double DX { get; set; }
+
+        /// <summary>
+        /// Derivative of Y
+        /// </summary>
+        public double DY { get; set; }
     }
 }

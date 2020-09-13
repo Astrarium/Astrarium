@@ -61,12 +61,6 @@ namespace Astrarium.Algorithms
         /// </summary>
         public double[] Mu { get; set; }
 
-        /// <summary>
-        /// Coefficients of Inc (inclination of Moon shadow track with respect to Earth equator, in degrees.
-        /// 0 value means track path is parallel to equator.)
-        /// </summary>
-        public double[] Inc { get; set; }
-
         public double[] F1 { get; set; }
         public double[] F2 { get; set; }
 
@@ -91,9 +85,10 @@ namespace Astrarium.Algorithms
                 L2 = L2.Select((l2, n) => l2 * Pow(t, n)).Sum(),
                 D = D.Select((d, n) => d * Pow(t, n)).Sum(),
                 Mu = To360(Mu.Select((mu, n) => mu * Pow(t, n)).Sum()),
-                Inc = Inc.Select((inc, n) => inc * Pow(t, n)).Sum(),
                 F1 = F1.Select((f1, n) => f1 * Pow(t, n)).Sum(),
-                F2 = F2.Select((f2, n) => f2 * Pow(t, n)).Sum()
+                F2 = F2.Select((f2, n) => f2 * Pow(t, n)).Sum(),
+                DX = X[1] + 2 * X[2] * t + 3 * X[3] * t * t,
+                DY = Y[1] + 2 * Y[2] * t + 3 * Y[3] * t * t
             };
         }
 
