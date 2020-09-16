@@ -42,19 +42,46 @@ namespace Astrarium.Algorithms
         /// Inclination of Moon shadow track with respect to Earth equator, in degrees.
         /// 0 value means track path is parallel to equator.
         /// </summary>
-        public double Inc => Angle.ToDegrees(Math.Atan2(DY, DX));
+        public double Inc => Angle.ToDegrees(Math.Atan2(Y, dX));
 
+        /// <summary>
+        /// Angle of penumbral cone, in degrees
+        /// </summary>
         public double F1 { get; set; }
+
+        /// <summary>
+        /// Angle of umbral cone, in degrees
+        /// </summary>
         public double F2 { get; set; }
 
         /// <summary>
         /// Derivative of X
         /// </summary>
-        public double DX { get; set; }
+        public double dX { get; set; }
 
         /// <summary>
         /// Derivative of Y
         /// </summary>
-        public double DY { get; set; }
+        public double dY { get; set; }
+
+        /// <summary>
+        /// Derivative of L1
+        /// </summary>
+        public double dL1 { get; set; }
+
+        /// <summary>
+        /// Derivative of L2
+        /// </summary>
+        public double dL2 { get; set; }
+
+        /// <summary>
+        /// Derivative of D
+        /// </summary>
+        public double dD { get; set; }
+
+        /// <summary>
+        /// Derivative of Mu
+        /// </summary>
+        public double dMu { get; set; }
     }
 }

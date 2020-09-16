@@ -385,10 +385,10 @@ namespace Astrarium.Algorithms
             }
 
             // Find points of northern limit of eclipse visibility
-            FindPenumbraLimits(pbe, map.PenumbraNorthernLimit, jdPN1, jdPN2, 90);
+            FindPenumbraLimits(pbe, map.PenumbraNorthernLimit, jdFrom, jdTo /*jdPN1, jdPN2*/, 90);
 
             // Find points of southern limit of eclipse visibility
-            FindPenumbraLimits(pbe, map.PenumbraSouthernLimit, jdPS1, jdPS2, -90);
+            FindPenumbraLimits(pbe, map.PenumbraSouthernLimit, jdFrom, jdTo, - 90);
 
             // Find points of northern limit of total eclipse visibility
             FindUmbraLimits(pbe, map.UmbraNorthernLimit, jdUN1, jdUN2, 90);
@@ -407,260 +407,102 @@ namespace Astrarium.Algorithms
 
         private static void FindPenumbraLimits(PolynomialBesselianElements pbe, ICollection<CrdsGeographical> curve, double jdFrom, double jdTo, double ang)
         {
+            // Earth ellipticity, squared
+            const double e2 = 0.00669454;
+
             if (!double.IsNaN(jdFrom) && !double.IsNaN(jdTo))
             {
                 double step0 = FindStep(jdTo - jdFrom);
                 double step = step0;
 
+                //if (ang == 90) return;
+
                 for (double jd = jdFrom; jd <= jdTo + step * 0.1; jd += step)
                 {
                     InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
 
-                    double angle = ToRadians(b.Inc + ang);
-                    double r = b.L1;
-                    double r0 = 0;
-                    CrdsGeographical g = null;
+                    double l = b.L1;
+                    double mu_ = ToRadians(b.dMu);
+                    double x = b.X;
+                    double x_ = b.dX;
+                    double y = b.Y;
+                    double y_ = b.dY;
+                    double d = ToRadians(b.D);
+                    double d_ = ToRadians(b.dD);
+                    double f1 = ToRadians(b.F1);
 
-                    do
-                    {
-                        var p = new PointF(
-                            (float)(b.X + r * Cos(angle)),
-                            (float)(b.Y + r * Sin(angle)));
+                    double rho1 = Sqrt(1 - e2 * Cos(d) * Cos(d));
+                    double sind1 = Sin(d) / rho1;
+                    double cosd1 = Sqrt(1 - e2) * Cos(d) / rho1;
+                    double d1 = Atan2(sind1, cosd1);
 
-                        g = ProjectOnEarth(p, b.D, b.Mu, true);
+                    double b_ = -y_ + mu_ * x * Sin(d);
+                    double c_ = x_ + mu_ * y * Sin(d) + mu_ * Tan(f1) * l * Cos(d);
 
-                        var v = ProjectOnFundamentalPlane(g, b.D, b.Mu);
+                    double E = Atan(b_ / c_);
 
-                        r0 = r;
-                        r = b.L1 - v.Z * Tan(ToRadians(b.F1));
-                    }
-                    while (Abs(r - r0) > 1e-6);
+                    double e = c_ / Cos(E);
+
+                    double F = Atan(d_ / (mu_ * Cos(d)));
+                    double f = mu_ * Cos(d) / Cos(F);
+
+                    double nu = Atan(f / e);
+
+                    double psi = Atan(Tan(ToRadians(45) + nu) * Tan(E / 2));
+                    
+                    double dE = ang == 90 ? ToRadians(180) : 0;
+                    double Qmin = E;
+                    double Qmax = E / 2 + psi;
+
+                    double Q = (Qmin + Qmax) / 2 + dE;
+
+                    double A = x - l * Sin(Q);
+                    double B = y / rho1 - l * Cos(Q) / rho1;
+
+                    double gamma = Atan(A / B);
+                    double beta = Asin(B / Cos(gamma));
+
+                    double nu_ = Atan(f / e * Cos(beta));
+
+                    Q = Atan(Tan(ToRadians(45) + nu_) * Tan(E / 2)) + E / 2;
+                   
+                    A = x - l * Sin(Q);
+                    B = y / rho1 - l * Cos(Q) / rho1;
+
+                    gamma = Atan(A / B);
+                    beta = Asin(B / Cos(gamma));
+
+                    double eps = Tan(f1) * Cos(Q - gamma);
+
+                    double zeta1 = Cos(beta) - Sin(beta) * Sin(eps);
+                    double xi = Sin(beta) * Sin(gamma) + Tan(f1) * zeta1 * Sin(Q);
+                    double eta1 = Sin(beta) * Cos(gamma) + Tan(f1) * zeta1 * Cos(Q);
+
+                    //Debug.WriteLine($"{ToDegrees(Qmin)}...{ToDegrees(Qmax)} / {ToDegrees(Q)}");
+
+                    // 8.333-13
+                    var v = Matrix.R1(d1) * new Vector(xi, eta1, zeta1);
+
+                    double phi1 = Asin(v.Y);
+                    double sinTheta = v.X / Cos(phi1);
+                    double cosTheta = v.Z / Cos(phi1);
+
+                    double theta = ToDegrees(Atan2(sinTheta, cosTheta));
+
+                    double tanPhi = Tan(phi1) / Sqrt(1 - e2);
+
+                    double phi = Atan(tanPhi);
+
+                    // 8.331-4
+                    double lambda = b.Mu - theta;
+
+                    var g = new CrdsGeographical(To360(lambda + 180) - 180, ToDegrees(phi));
+
+
 
                     curve.Add(g);
-
-                    //var jdMax = FindEclipseMaximum(pbe, g_);
-
-                    //InstantBesselianElements b_ = pbe.GetInstantBesselianElements(jdMax);
-
-
-
-                    //var g = ProjectOnEarth(p_, b.D, b.Mu, true);
-                    //curve.Add(g);
-                    //var jdMax2 = FindLocalMaximum(pbe, g_, jd);
-
-                    //double jdMax = FindLocalMax(pbe, g_);
-
-                    
-
-                    ////Debug.WriteLine(TimeSpan.FromDays(jdMax - jdMax2).ToString());
-                    //Func<double, double> func = (d) =>
-                    //{
-                    //    return Obscuration(pbe, g_, jdMax);
-                    //};
-
-                    //double L = FindRoots(func, r * 0.9, r * 1.1, 1e-6);
-
-                    //if (!double.IsNaN(L))
-                    //{
-                    //    var p0 = new PointF(
-                    //            (float)(b.X + L * Cos(angle)),
-                    //            (float)(b.Y + L * Sin(angle)));
-
-                    //    var g0 = ProjectOnEarth(p0, b.D, b.Mu, true);
-
-                    //    if (g0 != null)
-                    //    {
-                    //        if (!double.IsNaN(g0.Longitude))
-                    //            curve.Add(g0);
-                    //        else
-                    //        {
-
-                    //        }
-                    //    }
-                    //    else
-                    //    {
-                    //        curve.Add(g_);
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    curve.Add(g_);
-                    //}
                 }
             }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="bess"></param>
-        /// <param name="g"></param>
-        /// <param name="jd0">Estimated time of local maximum</param>
-        /// <returns></returns>
-        private static double FindLocalMaximum(PolynomialBesselianElements bess, CrdsGeographical g, double jd0)
-        {
-            const double e2 = 0.00669454;
-            double phi = ToRadians(g.Latitude);
-            double sinPhi = Sin(phi);
-
-            double C = 1.0 / Sqrt(1 - e2 * sinPhi * sinPhi);
-            double S = (1 - e2) * C;
-
-            double a = 6378137.0;
-            double h = g.Elevation;
-            double phi_ = Atan((a * S + h) * Tan(phi) / (a * C + h));
-            double rho = (a * C + h) * Cos(phi) / (a * Cos(phi_));
-
-            double tau = 0;
-            jd0 = bess.JulianDay0;
-            do
-            {
-
-                InstantBesselianElements b = bess.GetInstantBesselianElements(jd0);
-
-
-                double theta = ToRadians(b.Mu - g.Longitude); // (b.Mu - 1.002738 * 360.0 / 86400.0 * deltaT) - g.Longitude;
-
-                double d = ToRadians(b.D);
-                double mu_ = bess.Mu[1];
-                double d_ = bess.D[1];
-
-                double xi = rho * Cos(phi_) * Sin(theta);
-                double eta = rho * Sin(phi_) * Cos(d) - rho * Cos(phi_) * Sin(d) * Cos(theta);
-                double zeta = rho * Sin(phi_) * Sin(d) + rho * Cos(phi_) * Cos(d) * Cos(theta);
-
-                double xi_ = mu_ * rho * Cos(phi_) * Cos(theta);
-                double eta_ = mu_ * xi * Sin(d) - d_ * zeta;
-
-                double t = (jd0 - bess.JulianDay0) / bess.Step;
-                double x_ = bess.X[1] + t * (2 * bess.X[2] + t * 3 * bess.X[3]);
-                double y_ = bess.Y[1] + t * (2 * bess.Y[2] + t * 3 * bess.Y[3]);
-
-                double M = Atan2(b.X - xi, b.Y - eta);
-                double m = (b.Y - eta) / Cos(M);
-
-                double N = Atan2(x_ - xi_, y_ - eta_);
-                double n = (y_ - eta_) / Cos(N);
-
-                tau = -(m * Cos(M - N)) / n;
-
-                jd0 += tau;
-            }
-            while (Abs(tau) > 1e-6);
-
-            return jd0;
-        }
-
-        private static double Something(PolynomialBesselianElements bess, double t, double phi, double lambda, double tol, double i, double g)
-        {
-            // https://github.com/Hedwig1958/libastro/blob/865eb904800699f2edf0cb123176d69438fd59b9/eclipse.c
-
-            //__ Time 't' in hour from reference hour 't0'.
-            //double t = 0.0;
-            //double phi = 0.0;
-
-            double phi0 = phi;
-
-            double tau = 0;
-
-            double u1p, u2p;
-
-            do
-            {
-
-                var bInst =  bess.GetInstantBesselianElements(bess.JulianDay0 + t / 24.0);
-
-                
-
-
-                double x = bInst.X;
-                double y = bInst.Y;
-                double d = ToRadians(bInst.D);
-                double m = bInst.Mu;
-                double u1 = bInst.L1;
-                double u2 = bInst.L2;
-
-                //__ Hourly variations.
-                double xp = bess.X[1] + t * (2 * bess.X[2] + t * 3 * bess.X[3]);
-                double yp = bess.Y[1] + t * (2 * bess.Y[2] + t * 3 * bess.Y[3]);
-
-
-                //__ Hour angle.
-                double hour_angle = ToRadians(m - lambda);
-
-                //__ Rectangular geocentric coordinates of a place - Elements Of Solar Eclipses, pg 10.
-                double upsilon = Atan(0.99664719 * Tan(phi));
-
-                //__ k1 = rho * sin(phi'), k2 = rho * cos(phi') - Elements Of Solar Eclipses, pg 10.
-                double k1 = 0.99664719 * Sin(upsilon);
-                double k2 = Cos(upsilon);
-
-                //__ Calculate 'xi', 'eta' & 'zeta' - coordonnees du centre de l'ombre.
-                double xi = k2 * Sin(hour_angle);
-                double eta = k1 * Cos(d) - k2 * Cos(hour_angle) * Sin(d);
-                double zeta = k1 * Sin(d) + k2 * Cos(hour_angle) * Cos(d);
-
-                //__ Calculate 'xi_p' & 'eta_p' - variation des coordonnees du centre de l'ombre.
-                // 0.01745329 = 1 degree in radians
-
-                // Expl. suppl. p.458, 8.3556-2
-
-                double xi_p = 0.01745329 * bess.Mu[1] * k2 * Cos(hour_angle);
-
-                // Expl. suppl. p.455, 8.33553-3
-                double eta_p = 0.01745329 * (bess.Mu[1] * xi * Sin(d) - zeta * bess.D[1]);
-
-                
-                //__.
-                double omega = 1.0 / Sqrt(1 - 0.006694385 * Cos(d) * Cos(d));
-                double y1 = omega * y;
-
-                double tmp = 1 - x * x - y1 * y1;
-
-                double kcnt = tmp > 0.0 ? Sqrt(tmp) : 0.0;
-
-                //__ Calculate 'u', 'v, 'a', 'b', 'n' - Elements Of Solar Eclipses, pg 18.
-                double u = x - xi;
-                double v = y - eta;
-                double a = xp - xi_p;
-                double b = yp - eta_p;
-                
-                // speed of the shadow
-                double n = Sqrt(a * a + b * b);
-
-                //__ Calculate width of the path - Elements Of Solar Eclipses, pg 12.
-                double k = kcnt * kcnt + Pow((x * a + y * b), 2) / (n * n);
-
-                //__ Rayons des sections circulaires des cones de penombre et d'ombre.
-                u1p = u1 - kcnt * Tan(ToRadians(bInst.F1));
-                u2p = u2 - kcnt * Tan(ToRadians(bInst.F2));
-
-                double e = u1p - g * (u1p + u2p);
-
-                //__ Calculate 'tau', correction in time - Elements Of Solar Eclipses, pg 18 .
-                tau = -(u * a + v * b) / (n * n);
-
-                //__ Calculate 'delta phi', correction in latitude - Elements Of Solar Eclipses, pg 18 .
-                double w = (v * a - u * b) / n;
-                double q = (b * Sin(hour_angle) * k1 + a * (Cos(hour_angle) * Sin(d) * k1 + Cos(d) * k2)) / (57.29578 * n);
-                double d_phi = (w + i * Abs(e)) / q;
-
-                //__ Time 't' and correction 'tau' - Elements Of Solar Eclipses, pg 18.
-                t += tau;
-                phi += ToRadians(d_phi);
-                phi = Asin(Sin(phi));
-
-            }
-            while (Abs(tau) > tol);
-
-
-
-            phi = ToDegrees(phi);
-
-            Debug.WriteLine(phi - phi0);
-
-            return phi;
-
         }
 
         private static void FindUmbraLimits(PolynomialBesselianElements pbe, ICollection<CrdsGeographical>[] curve, double jdFrom, double jdTo, double ang)

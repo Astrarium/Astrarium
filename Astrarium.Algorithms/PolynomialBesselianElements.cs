@@ -61,7 +61,14 @@ namespace Astrarium.Algorithms
         /// </summary>
         public double[] Mu { get; set; }
 
+        /// <summary>
+        /// Coefficients of angle of penumbral cone, in degrees
+        /// </summary>
         public double[] F1 { get; set; }
+
+        /// <summary>
+        /// Coefficients of angle of umbral cone, in degrees
+        /// </summary>
         public double[] F2 { get; set; }
 
         /// <summary>
@@ -71,8 +78,8 @@ namespace Astrarium.Algorithms
         /// <returns></returns>
         internal InstantBesselianElements GetInstantBesselianElements(double jd)
         {
-            if (jd < From || jd > To)
-                throw new ArgumentException($"Polynomial Besselian elements valid only for Julian Day in range [{From} ... {To}].", nameof(jd));
+            //if (jd < From || jd > To)
+            //    throw new ArgumentException($"Polynomial Besselian elements valid only for Julian Day in range [{From} ... {To}].", nameof(jd));
 
             // difference, with t0, in step units
             double t = (jd - JulianDay0) / Step;
@@ -87,9 +94,24 @@ namespace Astrarium.Algorithms
                 Mu = To360(Mu.Select((mu, n) => mu * Pow(t, n)).Sum()),
                 F1 = F1.Select((f1, n) => f1 * Pow(t, n)).Sum(),
                 F2 = F2.Select((f2, n) => f2 * Pow(t, n)).Sum(),
-                DX = X[1] + 2 * X[2] * t + 3 * X[3] * t * t,
-                DY = Y[1] + 2 * Y[2] * t + 3 * Y[3] * t * t
+                dX = Derivative(X, t),
+                dY = Derivative(Y, t),
+                dL1 = Derivative(L1, t),
+                dL2 = Derivative(L2, t),
+                dD = Derivative(D, t),
+                dMu = Derivative(Mu, t)
             };
+        }
+
+        /// <summary>
+        /// Finds derivative of specified function at desired time instant t.
+        /// </summary>
+        /// <param name="f">Coefficients defining the function</param>
+        /// <param name="t">Time instant.</param>
+        /// <returns>Value of derivate of function at time t.</returns>
+        private double Derivative(double[] f, double t)
+        {
+            return f[1] + 2 * f[2] * t + 3 * f[3] * t * t;
         }
 
         /// <summary>
