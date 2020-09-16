@@ -388,7 +388,7 @@ namespace Astrarium.Algorithms
             FindPenumbraLimits(pbe, map.PenumbraNorthernLimit, jdFrom, jdTo /*jdPN1, jdPN2*/, 90);
 
             // Find points of southern limit of eclipse visibility
-            FindPenumbraLimits(pbe, map.PenumbraSouthernLimit, jdFrom, jdTo, - 90);
+            FindPenumbraLimits(pbe, map.PenumbraSouthernLimit, jdFrom, jdTo, -90);
 
             // Find points of northern limit of total eclipse visibility
             FindUmbraLimits(pbe, map.UmbraNorthernLimit, jdUN1, jdUN2, 90);
@@ -415,13 +415,14 @@ namespace Astrarium.Algorithms
                 double step0 = FindStep(jdTo - jdFrom);
                 double step = step0;
 
-                //if (ang == 90) return;
+                if (ang == 90) return;
 
                 for (double jd = jdFrom; jd <= jdTo + step * 0.1; jd += step)
                 {
                     InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
 
                     double l = b.L1;
+                    double l_ = b.dL1;
                     double mu_ = ToRadians(b.dMu);
                     double x = b.X;
                     double x_ = b.dX;
@@ -436,71 +437,136 @@ namespace Astrarium.Algorithms
                     double cosd1 = Sqrt(1 - e2) * Cos(d) / rho1;
                     double d1 = Atan2(sind1, cosd1);
 
+                    double a_ = -l_ - mu_ * Tan(f1) * x * Cos(d);
                     double b_ = -y_ + mu_ * x * Sin(d);
                     double c_ = x_ + mu_ * y * Sin(d) + mu_ * Tan(f1) * l * Cos(d);
 
-                    double E = Atan(b_ / c_);
+                    double E = Atan2(b_, c_);
 
                     double e = c_ / Cos(E);
 
-                    double F = Atan(d_ / (mu_ * Cos(d)));
+                    double F = Atan2(d_, (mu_ * Cos(d)));
                     double f = mu_ * Cos(d) / Cos(F);
 
-                    double nu = Atan(f / e);
+                    double nu = Atan2(f, e);
 
                     double psi = Atan(Tan(ToRadians(45) + nu) * Tan(E / 2));
                     
-                    double dE = ang == 90 ? ToRadians(180) : 0;
                     double Qmin = E;
                     double Qmax = E / 2 + psi;
 
-                    double Q = (Qmin + Qmax) / 2 + dE;
+                    //Func<double, double> func = (q) => {
+
+                    //    double xi = b.X - b.L1 * Sin(q);
+                    //    double eta = b.X - b.L1 * Sin(q);
+                    //    double zeta = Sqrt(1 - xi * xi - eta * eta);
+
+                    //    return a_ + e * Sin(q - E) - zeta * f * Sin(q - F); 
+                    //};
+                    //double Q = FindRoots(func, Qmin, Qmax, 1e-6);
+
+                
+                    double Q = (Qmin + Qmax) / 2;
 
                     double A = x - l * Sin(Q);
                     double B = y / rho1 - l * Cos(Q) / rho1;
 
-                    double gamma = Atan(A / B);
+                    double gamma = Atan2(A, B);
                     double beta = Asin(B / Cos(gamma));
 
                     double nu_ = Atan(f / e * Cos(beta));
 
                     Q = Atan(Tan(ToRadians(45) + nu_) * Tan(E / 2)) + E / 2;
-                   
-                    A = x - l * Sin(Q);
-                    B = y / rho1 - l * Cos(Q) / rho1;
 
-                    gamma = Atan(A / B);
-                    beta = Asin(B / Cos(gamma));
+                    if (double.IsNaN(Q))
+                    {
+                        //Q = (Qmin + Qmax) / 2;
 
-                    double eps = Tan(f1) * Cos(Q - gamma);
 
-                    double zeta1 = Cos(beta) - Sin(beta) * Sin(eps);
-                    double xi = Sin(beta) * Sin(gamma) + Tan(f1) * zeta1 * Sin(Q);
-                    double eta1 = Sin(beta) * Cos(gamma) + Tan(f1) * zeta1 * Cos(Q);
+                        Func<double, double> func = (q) =>
+                        {
+
+                            double xi = b.X - b.L1 * Sin(q);
+                            double eta = b.X - b.L1 * Sin(q);
+                            double zeta = Sqrt(1 - xi * xi - eta * eta);
+
+                            return a_ + e * Sin(q - E) - zeta * f * Sin(q - F);
+                        };
+                        Q = FindRoots(func, Qmin, Qmax, 1e-6);
+                    }
+
+
+                    double r = Abs(b.L1);
+                    double r0 = 0;
+                    int iter = 0;
+                    CrdsGeographical g = null;
+
+                    do
+                    {
+                        var p = new PointF(
+                            (float)(b.X - r * Sin(Q)),
+                            (float)(b.Y - r * Cos(Q)));
+
+                        // Adjust iteration step according to penumbra position
+                        if (Abs(p.Y) > 0.9)
+                        {
+                            step = step0 / 4;
+                        }
+                        else
+                        {
+                            step = step0;
+                        }
+
+                        g = ProjectOnEarth(p, b.D, b.Mu, true);
+
+                        if (g == null) break;
+
+                        var v = ProjectOnFundamentalPlane(g, b.D, b.Mu);
+
+                        r0 = r;
+                        r = Abs(b.L1 - v.Z * Tan(ToRadians(b.F1)));
+                        iter++;
+                    }
+                    while (Abs(r - r0) > 1e-6 && iter < 10);
+
+
+
+                    //A = x - l * Sin(Q);
+                    //B = y / rho1 - l * Cos(Q) / rho1;
+                    //gamma = Atan2(A, B);
+                    //beta = Asin(B / Cos(gamma));
+
+                    //double eps = Tan(f1) * Cos(Q - gamma);
+
+                    //double zeta1 = Cos(beta) - Sin(beta) * Sin(eps);
+                    //double xi = Sin(beta) * Sin(gamma) + Tan(f1) * zeta1 * Sin(Q);
+                    //double eta1 = Sin(beta) * Cos(gamma) + Tan(f1) * zeta1 * Cos(Q);
 
                     //Debug.WriteLine($"{ToDegrees(Qmin)}...{ToDegrees(Qmax)} / {ToDegrees(Q)}");
 
-                    // 8.333-13
-                    var v = Matrix.R1(d1) * new Vector(xi, eta1, zeta1);
+                    //// 8.333-13
+                    //var v = Matrix.R1(d1) * new Vector(xi, eta1, zeta1);
 
-                    double phi1 = Asin(v.Y);
-                    double sinTheta = v.X / Cos(phi1);
-                    double cosTheta = v.Z / Cos(phi1);
+                    //double phi1 = Asin(v.Y);
+                    //double sinTheta = v.X / Cos(phi1);
+                    //double cosTheta = v.Z / Cos(phi1);
 
-                    double theta = ToDegrees(Atan2(sinTheta, cosTheta));
+                    //double theta = ToDegrees(Atan2(sinTheta, cosTheta));
 
-                    double tanPhi = Tan(phi1) / Sqrt(1 - e2);
+                    //double tanPhi = Tan(phi1) / Sqrt(1 - e2);
 
-                    double phi = Atan(tanPhi);
+                    //double phi = Atan(tanPhi);
 
-                    // 8.331-4
-                    double lambda = b.Mu - theta;
+                    //// 8.331-4
+                    //double lambda = b.Mu - theta;
 
-                    var g = new CrdsGeographical(To360(lambda + 180) - 180, ToDegrees(phi));
+                    //var g = new CrdsGeographical(To360(lambda + 180) - 180, ToDegrees(phi));
+                    
 
-
-
-                    curve.Add(g);
+                    if (g != null)
+                    {
+                        curve.Add(g);
+                    }
                 }
             }
         }
