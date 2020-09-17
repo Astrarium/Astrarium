@@ -415,14 +415,13 @@ namespace Astrarium.Algorithms
                 double step0 = FindStep(jdTo - jdFrom);
                 double step = step0;
 
-                if (ang == 90) return;
-
                 for (double jd = jdFrom; jd <= jdTo + step * 0.1; jd += step)
                 {
                     InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
 
                     double l = b.L1;
                     double l_ = b.dL1;
+
                     double mu_ = ToRadians(b.dMu);
                     double x = b.X;
                     double x_ = b.dX;
@@ -430,143 +429,94 @@ namespace Astrarium.Algorithms
                     double y_ = b.dY;
                     double d = ToRadians(b.D);
                     double d_ = ToRadians(b.dD);
-                    double f1 = ToRadians(b.F1);
+                    double f = ToRadians(b.F1);
 
                     double rho1 = Sqrt(1 - e2 * Cos(d) * Cos(d));
+                    double rho2 = Sqrt(1 - e2 * Sin(d) * Sin(d));
                     double sind1 = Sin(d) / rho1;
                     double cosd1 = Sqrt(1 - e2) * Cos(d) / rho1;
                     double d1 = Atan2(sind1, cosd1);
+                    double sind1d2 = e2 * Sin(d) * Cos(d) / (rho1 * rho2);
+                    double cosd1d2 = Sqrt(1 - e2) / (rho1 * rho2);
 
-                    double a_ = -l_ - mu_ * Tan(f1) * x * Cos(d);
-                    double b_ = -y_ + mu_ * x * Sin(d);
-                    double c_ = x_ + mu_ * y * Sin(d) + mu_ * Tan(f1) * l * Cos(d);
+                    // 8.3422-2
+                    double a_ = -l_ - mu_ * Tan(f) * x * Cos(d) + y * d_ * Tan(f);
+                    double b_ = -y_ + mu_ * x * Sin(d) + l * d_ * Tan(f);
+                    double c_ = x_ + mu_ * y * Sin(d) + mu_ * Tan(f) * l * Cos(d);
 
-                    double E = Atan2(b_, c_);
+                    // Find value of Q from equation 8.353-2.
+                    // Assume a_ = 0 and zeta = 0, so
+                    // equation 8.353-2 becomes:
+                    // -b_ * Cos(Q) + c_ * Sin(Q) = 0
+                    // Now need to find roots of the equation.
+                    // But instead of algorithm in art. 8.3554, we solve it in another way.
+                    // The equation has form:
+                    // a*sin(x) + b*cos(x) = c
+                    // It can be found with method described there: 
+                    // https://socratic.org/questions/59e5f259b72cff6c4402a6a5
 
-                    double e = c_ / Cos(E);
+                    double cosAlpha = c_ / Sqrt(b_ * b_ + c_ * c_);
+                    double sinAlpha = -b_ / Sqrt(b_ * b_ + c_ * c_);
+                    double alpha = Atan2(sinAlpha, cosAlpha);
 
-                    double F = Atan2(d_, (mu_ * Cos(d)));
-                    double f = mu_ * Cos(d) / Cos(F);
+                    double Q = 0;
 
-                    double nu = Atan2(f, e);
-
-                    double psi = Atan(Tan(ToRadians(45) + nu) * Tan(E / 2));
-                    
-                    double Qmin = E;
-                    double Qmax = E / 2 + psi;
-
-                    //Func<double, double> func = (q) => {
-
-                    //    double xi = b.X - b.L1 * Sin(q);
-                    //    double eta = b.X - b.L1 * Sin(q);
-                    //    double zeta = Sqrt(1 - xi * xi - eta * eta);
-
-                    //    return a_ + e * Sin(q - E) - zeta * f * Sin(q - F); 
-                    //};
-                    //double Q = FindRoots(func, Qmin, Qmax, 1e-6);
-
-                
-                    double Q = (Qmin + Qmax) / 2;
-
-                    double A = x - l * Sin(Q);
-                    double B = y / rho1 - l * Cos(Q) / rho1;
-
-                    double gamma = Atan2(A, B);
-                    double beta = Asin(B / Cos(gamma));
-
-                    double nu_ = Atan(f / e * Cos(beta));
-
-                    Q = Atan(Tan(ToRadians(45) + nu_) * Tan(E / 2)) + E / 2;
-
-                    if (double.IsNaN(Q))
+                    // iterate thru the roots
+                    for (int k = 0; k < 2; k++)
                     {
-                        //Q = (Qmin + Qmax) / 2;
-
-
-                        Func<double, double> func = (q) =>
-                        {
-
-                            double xi = b.X - b.L1 * Sin(q);
-                            double eta = b.X - b.L1 * Sin(q);
-                            double zeta = Sqrt(1 - xi * xi - eta * eta);
-
-                            return a_ + e * Sin(q - E) - zeta * f * Sin(q - F);
-                        };
-                        Q = FindRoots(func, Qmin, Qmax, 1e-6);
+                        Q = -alpha + PI * k;
+                        if (l * Cos(Q) > 0 && ang == -90) break;
+                        if (l * Cos(Q) < 0 && ang == 90) break;
                     }
+                    
+                    double eq0;
+                    double eq = 0;
+                    double xi, eta1, zeta1;
 
+                    double L;
+                    double zeta = 0;
+                    double zeta1_2;
+                    const double epsilon = 1e-6;
 
-                    double r = Abs(b.L1);
-                    double r0 = 0;
-                    int iter = 0;
-                    CrdsGeographical g = null;
-
+                    // find coordinates on fundamental plane
                     do
                     {
-                        var p = new PointF(
-                            (float)(b.X - r * Sin(Q)),
-                            (float)(b.Y - r * Cos(Q)));
+                        eq0 = eq;
+                        L = l - zeta * Tan(f);
+                        xi = x - L * Sin(Q);
+                        eta1 = (y - L * Cos(Q)) / rho1;
 
-                        // Adjust iteration step according to penumbra position
-                        if (Abs(p.Y) > 0.9)
-                        {
-                            step = step0 / 4;
-                        }
-                        else
-                        {
-                            step = step0;
-                        }
+                        zeta1_2 = 1 - xi * xi - eta1 * eta1;
+                        zeta1 = Sqrt(zeta1_2);
+                        
+                        // 8.3554-1
+                        zeta = rho2 * (zeta1 * cosd1d2 - eta1 * sind1d2);
 
-                        g = ProjectOnEarth(p, b.D, b.Mu, true);
-
-                        if (g == null) break;
-
-                        var v = ProjectOnFundamentalPlane(g, b.D, b.Mu);
-
-                        r0 = r;
-                        r = Abs(b.L1 - v.Z * Tan(ToRadians(b.F1)));
-                        iter++;
+                        // 8.353-2
+                        eq = a_ - b_ * Cos(Q) + c_ * Sin(Q) + zeta * (1 + Tan(f) * Tan(f)) * (d_ * Cos(Q) - mu_ * Cos(d) * Sin(Q));
                     }
-                    while (Abs(r - r0) > 1e-6 && iter < 10);
+                    while (zeta1_2 > 0 && Abs(eq) > epsilon && Abs(eq0 - eq) > epsilon);
 
-
-
-                    //A = x - l * Sin(Q);
-                    //B = y / rho1 - l * Cos(Q) / rho1;
-                    //gamma = Atan2(A, B);
-                    //beta = Asin(B / Cos(gamma));
-
-                    //double eps = Tan(f1) * Cos(Q - gamma);
-
-                    //double zeta1 = Cos(beta) - Sin(beta) * Sin(eps);
-                    //double xi = Sin(beta) * Sin(gamma) + Tan(f1) * zeta1 * Sin(Q);
-                    //double eta1 = Sin(beta) * Cos(gamma) + Tan(f1) * zeta1 * Cos(Q);
-
-                    //Debug.WriteLine($"{ToDegrees(Qmin)}...{ToDegrees(Qmax)} / {ToDegrees(Q)}");
-
-                    //// 8.333-13
-                    //var v = Matrix.R1(d1) * new Vector(xi, eta1, zeta1);
-
-                    //double phi1 = Asin(v.Y);
-                    //double sinTheta = v.X / Cos(phi1);
-                    //double cosTheta = v.Z / Cos(phi1);
-
-                    //double theta = ToDegrees(Atan2(sinTheta, cosTheta));
-
-                    //double tanPhi = Tan(phi1) / Sqrt(1 - e2);
-
-                    //double phi = Atan(tanPhi);
-
-                    //// 8.331-4
-                    //double lambda = b.Mu - theta;
-
-                    //var g = new CrdsGeographical(To360(lambda + 180) - 180, ToDegrees(phi));
-                    
-
-                    if (g != null)
+                    if (zeta1_2 >= 0)
                     {
+                        // 8.333-13
+                        var v = Matrix.R1(d1) * new Vector(xi, eta1, zeta1);
+
+                        double phi1 = Asin(v.Y);
+                        double sinTheta = v.X / Cos(phi1);
+                        double cosTheta = v.Z / Cos(phi1);
+
+                        double theta = ToDegrees(Atan2(sinTheta, cosTheta));
+                        double tanPhi = Tan(phi1) / Sqrt(1 - e2);
+                        double phi = Atan(tanPhi);
+
+                        // 8.331-4
+                        double lambda = b.Mu - theta;
+
+                        var g = new CrdsGeographical(To360(lambda + 180) - 180, ToDegrees(phi));
+
                         curve.Add(g);
-                    }
+                    }                    
                 }
             }
         }
@@ -1133,59 +1083,15 @@ namespace Astrarium.Algorithms
             double phi_ = Atan((a * S + h) * Tan(phi) / (a * C + h));
             double rho = (a * C + h) * Cos(phi) / (a * Cos(phi_));
 
+            // 8.331-4
             double theta = mu - g.Longitude; // (b.Mu - 1.002738 * 360.0 / 86400.0 * deltaT) - g.Longitude;
 
+            // 8.331-5
             double xi = rho * Cos(phi_) * Sin(ToRadians(theta));
             double eta = rho * Sin(phi_) * Cos(ToRadians(d)) - rho * Cos(phi_) * Sin(ToRadians(d)) * Cos(ToRadians(theta));
             double zeta = rho * Sin(phi_) * Sin(ToRadians(d)) + rho * Cos(phi_) * Cos(ToRadians(d)) * Cos(ToRadians(theta));
 
             return new Vector(xi, eta, zeta);
-        }
-
-        public static double FindEclipseMaximum(PolynomialBesselianElements pbe, CrdsGeographical g)
-        {
-            double step = TimeSpan.FromSeconds(1).TotalDays;
-
-            // left edge of time interval
-            double jdFrom = pbe.From;
-
-            // right edge of time interval
-            double jdTo = pbe.To - step;
-
-            // precision of calculation, in days
-            double epsilon = 1e-8;
-
-            Func<double, double> funcLocalMax = (jd) =>
-            {
-                double[] dist = new double[2];
-
-                for (int i = 0; i < 2; i++)
-                {
-                    InstantBesselianElements b = pbe.GetInstantBesselianElements(jd + i * step);
-                    Vector p = ProjectOnFundamentalPlane(g, b.D, b.Mu);
-                    dist[i] = Sqrt((p.X - b.X) * (p.X - b.X) + (p.Y - b.Y) * (p.Y - b.Y));
-                }
-                return (dist[1] - dist[0]) / step;
-            };
-
-            return FindRoots(funcLocalMax, jdFrom, jdTo, epsilon);
-        }
-
-        public static double DistanceFromPenumbraLimit(PolynomialBesselianElements pbe, CrdsGeographical g, double jdLocalMax)
-        {
-            
-
-            if (!double.IsNaN(jdLocalMax))
-            {
-                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdLocalMax);
-                Vector p = ProjectOnFundamentalPlane(g, b.D, b.Mu);
-
-                double L1zeta = b.L1 - p.Z * Tan(ToRadians(b.F1));
-                double dist = Sqrt((p.X - b.X) * (p.X - b.X) + (p.Y - b.Y) * (p.Y - b.Y));
-                return dist - Abs(L1zeta);                
-            }
-
-            return 1;
         }
 
         public static double FindLocalMax(PolynomialBesselianElements pbe, CrdsGeographical g)
@@ -1208,8 +1114,19 @@ namespace Astrarium.Algorithms
                 for (int i = 0; i < 2; i++)
                 {
                     InstantBesselianElements b = pbe.GetInstantBesselianElements(jd + i * step);
-                    Vector p = ProjectOnFundamentalPlane(g, b.D, b.Mu);
-                    dist[i] = Sqrt((p.X - b.X) * (p.X - b.X) + (p.Y - b.Y) * (p.Y - b.Y));
+                    Vector v = ProjectOnFundamentalPlane(g, b.D, b.Mu);
+
+                    double xi = v.X;
+                    double eta1 = v.Y;
+
+                    // Earth ellipticity, squared
+                    const double e2 = 0.00669454;
+
+                    // 8.334-1
+                    double rho1 = Sqrt(1 - e2 * Cos(ToRadians(b.D)) * Cos(ToRadians(b.D)));
+                    double eta = eta1 * rho1;
+
+                    dist[i] = Sqrt((xi - b.X) * (xi - b.X) + (eta - b.Y) * (eta - b.Y));
                 }
                 return (dist[1] - dist[0]) / step;
             };
@@ -1220,18 +1137,38 @@ namespace Astrarium.Algorithms
         public static double Obscuration(PolynomialBesselianElements pbe, CrdsGeographical g, double jdLocalMax)
         {
             InstantBesselianElements b = pbe.GetInstantBesselianElements(jdLocalMax);
-            Vector p = ProjectOnFundamentalPlane(g, b.D, b.Mu);
+            Vector v = ProjectOnFundamentalPlane(g, b.D, b.Mu);
 
             // distance from shadow center to observation point in fundamental plane
-            double delta = Sqrt((p.X - b.X) * (p.X - b.X) + (p.Y - b.Y) * (p.Y - b.Y));
+            double xi = v.X;
+            double eta1 = v.Y;
+            double zeta1 = v.Z;
+
+            // Earth ellipticity, squared
+            const double e2 = 0.00669454;
+
+            double d = ToRadians(b.D);
+
+            // 8.334-1
+            double rho1 = Sqrt(1 - e2 * Cos(d) * Cos(d));
+            double rho2 = Sqrt(1 - e2 * Sin(d) * Sin(d));
+            double sind1d2 = e2 * Sin(d) * Cos(d) / (rho1 * rho2);
+            double cosd1d2 = Sqrt(1 - e2) / (rho1 * rho2);
+
+            double eta = eta1 * rho1;
+
+            // 8.333-14
+            double zeta = rho2 * (zeta1 * cosd1d2 - eta1 * sind1d2);
+
+            double delta = Sqrt((xi - b.X) * (xi - b.X) + (eta - b.Y) * (eta - b.Y));
 
             // Penumra radius at local point, in Earth radii
-            double L2 = b.L2 - p.Z * Tan(ToRadians(b.F2));
+            double L2 = b.L2 - zeta * Tan(ToRadians(b.F2));
 
             // Umbra radius at local point, in Earth radii
-            double L1 = b.L1 - p.Z * Tan(ToRadians(b.F1));
+            double L1 = b.L1 - zeta * Tan(ToRadians(b.F1));
 
-            if (p.Z >= 0)
+            if (v.Z >= 0)
             {
                 // No eclipse visible
                 if (delta > L1)
