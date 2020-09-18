@@ -350,6 +350,9 @@ namespace Astrarium.Algorithms
 
             double step = FindStep(jdTo - jdFrom) / 2;
 
+            double zeta0 = 0;
+            double Q0 = 0;
+
             for (double jd = jdFrom; jd <= jdTo; jd += step)
             {
                 InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
@@ -379,32 +382,37 @@ namespace Astrarium.Algorithms
                 double b_ = -y_ + mu_ * x * Sin(d) + l * d_ * Tan(f);
                 double c_ = x_ + mu_ * y * Sin(d) + mu_ * Tan(f) * l * Cos(d);
 
-                // Find value of Q from equation 8.353-2.
-                // Assume zeta = 0, so
-                // equation 8.353-2 becomes:
-                // a_ + -b_ * Cos(Q) + c_ * Sin(Q) = 0
+                // Find value of Q from equation 8.353-2:
+                // a_ - b_ * Cos(Q) + c_ * Sin(Q) + zeta0 * (1 + Tan(f) * Tan(f)) * (d_ * Cos(Q0) - mu_ * Cos(d) * Sin(Q0)) = 0
+                // zeta0 is a previous value of zeta.
+                // Q0 is a previous value of Q.
+                // Start with Q0 = 0 and zeta0 = 0.
                 // Now need to find roots of the equation.
                 // But instead of algorithm in art. 8.3554, we solve it in another way.
                 // The equation has form:
                 // a*sin(x) + b*cos(x) = c
                 // It can be found with method described there: 
                 // https://socratic.org/questions/59e5f259b72cff6c4402a6a5
+
                 double Q = 0;
 
                 // iterate thru the roots
                 for (int k = 0; k < 2; k++)
                 {
-                    Q = Pow(-1, k) * Asin(-a_ / Sqrt(b_ * b_ + c_ * c_)) - Atan2(-b_, c_) + PI * k;
+                    Q = Pow(-1, k) * Asin((-a_ - zeta0 * (1 + Tan(f) * Tan(f)) * (d_ * Cos(Q0) - mu_ * Cos(d) * Sin(Q0))) / Sqrt(b_ * b_ + c_ * c_)) - Atan2(-b_, c_) + PI * k;
                     if (l * Cos(Q) > 0 && ang == -90) break;
                     if (l * Cos(Q) < 0 && ang == 90) break;
                 }
 
+                // remember found value of Q
+                Q0 = Q;
+
                 double eq0;
                 double eq = 0;
                 double xi, eta1, zeta1;
-
-                double L;
                 double zeta = 0;
+                double L;
+
                 double zeta1_2;
 
                 // find coordinates on fundamental plane
@@ -430,6 +438,9 @@ namespace Astrarium.Algorithms
 
                     // 8.353-2
                     eq = a_ - b_ * Cos(Q) + c_ * Sin(Q) + zeta * (1 + Tan(f) * Tan(f)) * (d_ * Cos(Q) - mu_ * Cos(d) * Sin(Q));
+
+                    // remember last value of zeta
+                    zeta0 = double.IsNaN(zeta) ? 0 : zeta;
                 }
                 while (Abs(eq) > epsilon && Abs(eq0 - eq) > epsilon);
 
