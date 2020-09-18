@@ -202,30 +202,6 @@ namespace Astrarium.Algorithms
                 return Sqrt(b.X * b.X + b.Y * b.Y) - 1 + b.L1;
             };
 
-            // Function has zero value when northern limit of penumbra crosses Earth edge
-            Func<double, double> funcPenumbraNorthLimit = (jd) =>
-            {
-                var b = pbe.GetInstantBesselianElements(jd);
-                double angle = ToRadians(b.Inc + 90);
-                var p = new PointF(
-                        (float)(b.X + b.L1 * Cos(angle)),
-                        (float)(b.Y + b.L1 * Sin(angle)));
-
-                return Sqrt(p.X * p.X + p.Y * p.Y) - 1;
-            };
-
-            // Function has zero value when southern limit of penumbra crosses Earth edge
-            Func<double, double> funcPenumbraSouthLimit = (jd) =>
-            {
-                var b = pbe.GetInstantBesselianElements(jd);
-                double angle = ToRadians(b.Inc - 90);
-                var p = new PointF(
-                        (float)(b.X + b.L1 * Cos(angle)),
-                        (float)(b.Y + b.L1 * Sin(angle)));
-
-                return Sqrt(p.X * p.X + p.Y * p.Y) - 1;
-            };
-
             // Function has zero value when northern limit of umbra crosses Earth edge
             Func<double, double> funcUmbraNorthLimit = (jd) =>
             {
@@ -292,46 +268,6 @@ namespace Astrarium.Algorithms
                 map.P3 = new SolarEclipsePoint(jdP3, ProjectOnEarth(p, b.D, b.Mu, true));
             }
 
-            // Instant when northern limit of penumbra crosses Earth edge first time,
-            // may not exist
-            double jdPN1 = FindRoots(funcPenumbraNorthLimit, jdFrom, jdMid, epsilon);
-            if (!double.IsNaN(jdPN1))
-            {
-                //InstantBesselianElements b = pbe.GetInstantBesselianElements(jdPN1);
-                //PointF p = CirclesIntersection(new PointF((float)b.X, (float)b.Y), b.L1)[0];
-                //map.PN1 = new SolarEclipsePoint(jdPN1, ProjectOnEarth(p, b.D, b.Mu));
-            }
-
-            // Instant when northern limit of penumbra crosses Earth edge last time,
-            // may not exist
-            double jdPN2 = FindRoots(funcPenumbraNorthLimit, jdMid, jdTo, epsilon);
-            if (!double.IsNaN(jdPN2))
-            {
-                //InstantBesselianElements b = pbe.GetInstantBesselianElements(jdPN2);
-                //PointF p = CirclesIntersection(new PointF((float)b.X, (float)b.Y), b.L1)[0];
-                //map.PN2 = new SolarEclipsePoint(jdPN2, ProjectOnEarth(p, b.D, b.Mu));
-            }
-
-            // Instant when southern limit of penumbra crosses Earth edge first time,
-            // may not exist
-            double jdPS1 = FindRoots(funcPenumbraSouthLimit, jdFrom, jdMid, epsilon);
-            if (!double.IsNaN(jdPS1))
-            {
-                //InstantBesselianElements b = pbe.GetInstantBesselianElements(jdPS1);
-                //PointF p = CirclesIntersection(new PointF((float)b.X, (float)b.Y), b.L1)[1];
-                //map.PS1 = new SolarEclipsePoint(jdPS1, ProjectOnEarth(p, b.D, b.Mu));
-            }
-
-            // Instant when southern limit of penumbra crosses Earth edge last time,
-            // may not exist
-            double jdPS2 = FindRoots(funcPenumbraSouthLimit, jdMid, jdTo, epsilon);
-            if (!double.IsNaN(jdPS2))
-            {
-                //InstantBesselianElements b = pbe.GetInstantBesselianElements(jdPS2);
-                //PointF p = CirclesIntersection(new PointF((float)b.X, (float)b.Y), b.L1)[1];
-                //map.PS2 = new SolarEclipsePoint(jdPS2, ProjectOnEarth(p, b.D, b.Mu));
-            }
-
             // Instant when northern limit of umbra crosses Earth edge first time,
             // may not exist
             double jdUN1 = FindRoots(funcUmbraNorthLimit, jdFrom, jdMid, epsilon);
@@ -385,10 +321,10 @@ namespace Astrarium.Algorithms
             }
 
             // Find points of northern limit of eclipse visibility
-            FindPenumbraLimits(pbe, map.PenumbraNorthernLimit, jdFrom, jdTo /*jdPN1, jdPN2*/, 90);
+            FindPenumbraLimits(pbe, map.PenumbraNorthernLimit, jdP1, jdP4, 90);
 
             // Find points of southern limit of eclipse visibility
-            FindPenumbraLimits(pbe, map.PenumbraSouthernLimit, jdFrom, jdTo, -90);
+            FindPenumbraLimits(pbe, map.PenumbraSouthernLimit, jdP1, jdP4, -90);
 
             // Find points of northern limit of total eclipse visibility
             FindUmbraLimits(pbe, map.UmbraNorthernLimit, jdUN1, jdUN2, 90);
@@ -405,120 +341,114 @@ namespace Astrarium.Algorithms
             return map;
         }
 
-        private static void FindPenumbraLimits(PolynomialBesselianElements pbe, ICollection<CrdsGeographical> curve, double jdFrom, double jdTo, double ang)
+        private static void FindPenumbraLimits(PolynomialBesselianElements pbe, IList<CrdsGeographical> curve, double jdFrom, double jdTo, double ang)
         {
             // Earth ellipticity, squared
             const double e2 = 0.00669454;
 
-            if (!double.IsNaN(jdFrom) && !double.IsNaN(jdTo))
+            const double epsilon = 1e-6;
+
+            double step = FindStep(jdTo - jdFrom) / 2;
+
+            for (double jd = jdFrom; jd <= jdTo; jd += step)
             {
-                double step0 = FindStep(jdTo - jdFrom);
-                double step = step0;
+                InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
 
-                for (double jd = jdFrom; jd <= jdTo + step * 0.1; jd += step)
+                double l = b.L1;
+                double l_ = b.dL1;
+
+                double mu_ = ToRadians(b.dMu);
+                double x = b.X;
+                double x_ = b.dX;
+                double y = b.Y;
+                double y_ = b.dY;
+                double d = ToRadians(b.D);
+                double d_ = ToRadians(b.dD);
+                double f = ToRadians(b.F1);
+
+                double rho1 = Sqrt(1 - e2 * Cos(d) * Cos(d));
+                double rho2 = Sqrt(1 - e2 * Sin(d) * Sin(d));
+                double sind1 = Sin(d) / rho1;
+                double cosd1 = Sqrt(1 - e2) * Cos(d) / rho1;
+                double d1 = Atan2(sind1, cosd1);
+                double sind1d2 = e2 * Sin(d) * Cos(d) / (rho1 * rho2);
+                double cosd1d2 = Sqrt(1 - e2) / (rho1 * rho2);
+
+                // 8.3422-2
+                double a_ = -l_ - mu_ * Tan(f) * x * Cos(d) + y * d_ * Tan(f);
+                double b_ = -y_ + mu_ * x * Sin(d) + l * d_ * Tan(f);
+                double c_ = x_ + mu_ * y * Sin(d) + mu_ * Tan(f) * l * Cos(d);
+
+                // Find value of Q from equation 8.353-2.
+                // Assume zeta = 0, so
+                // equation 8.353-2 becomes:
+                // a_ + -b_ * Cos(Q) + c_ * Sin(Q) = 0
+                // Now need to find roots of the equation.
+                // But instead of algorithm in art. 8.3554, we solve it in another way.
+                // The equation has form:
+                // a*sin(x) + b*cos(x) = c
+                // It can be found with method described there: 
+                // https://socratic.org/questions/59e5f259b72cff6c4402a6a5
+                double Q = 0;
+
+                // iterate thru the roots
+                for (int k = 0; k < 2; k++)
                 {
-                    InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
-
-                    double l = b.L1;
-                    double l_ = b.dL1;
-
-                    double mu_ = ToRadians(b.dMu);
-                    double x = b.X;
-                    double x_ = b.dX;
-                    double y = b.Y;
-                    double y_ = b.dY;
-                    double d = ToRadians(b.D);
-                    double d_ = ToRadians(b.dD);
-                    double f = ToRadians(b.F1);
-
-                    double rho1 = Sqrt(1 - e2 * Cos(d) * Cos(d));
-                    double rho2 = Sqrt(1 - e2 * Sin(d) * Sin(d));
-                    double sind1 = Sin(d) / rho1;
-                    double cosd1 = Sqrt(1 - e2) * Cos(d) / rho1;
-                    double d1 = Atan2(sind1, cosd1);
-                    double sind1d2 = e2 * Sin(d) * Cos(d) / (rho1 * rho2);
-                    double cosd1d2 = Sqrt(1 - e2) / (rho1 * rho2);
-
-                    // 8.3422-2
-                    double a_ = -l_ - mu_ * Tan(f) * x * Cos(d) + y * d_ * Tan(f);
-                    double b_ = -y_ + mu_ * x * Sin(d) + l * d_ * Tan(f);
-                    double c_ = x_ + mu_ * y * Sin(d) + mu_ * Tan(f) * l * Cos(d);
-
-                    // Find value of Q from equation 8.353-2.
-                    // Assume a_ = 0 and zeta = 0, so
-                    // equation 8.353-2 becomes:
-                    // -b_ * Cos(Q) + c_ * Sin(Q) = 0
-                    // Now need to find roots of the equation.
-                    // But instead of algorithm in art. 8.3554, we solve it in another way.
-                    // The equation has form:
-                    // a*sin(x) + b*cos(x) = c
-                    // It can be found with method described there: 
-                    // https://socratic.org/questions/59e5f259b72cff6c4402a6a5
-
-                    double cosAlpha = c_ / Sqrt(b_ * b_ + c_ * c_);
-                    double sinAlpha = -b_ / Sqrt(b_ * b_ + c_ * c_);
-                    double alpha = Atan2(sinAlpha, cosAlpha);
-
-                    double Q = 0;
-
-                    // iterate thru the roots
-                    for (int k = 0; k < 2; k++)
-                    {
-                        Q = -alpha + PI * k;
-                        if (l * Cos(Q) > 0 && ang == -90) break;
-                        if (l * Cos(Q) < 0 && ang == 90) break;
-                    }
-                    
-                    double eq0;
-                    double eq = 0;
-                    double xi, eta1, zeta1;
-
-                    double L;
-                    double zeta = 0;
-                    double zeta1_2;
-                    const double epsilon = 1e-6;
-
-                    // find coordinates on fundamental plane
-                    do
-                    {
-                        eq0 = eq;
-                        L = l - zeta * Tan(f);
-                        xi = x - L * Sin(Q);
-                        eta1 = (y - L * Cos(Q)) / rho1;
-
-                        zeta1_2 = 1 - xi * xi - eta1 * eta1;
-                        zeta1 = Sqrt(zeta1_2);
-                        
-                        // 8.3554-1
-                        zeta = rho2 * (zeta1 * cosd1d2 - eta1 * sind1d2);
-
-                        // 8.353-2
-                        eq = a_ - b_ * Cos(Q) + c_ * Sin(Q) + zeta * (1 + Tan(f) * Tan(f)) * (d_ * Cos(Q) - mu_ * Cos(d) * Sin(Q));
-                    }
-                    while (zeta1_2 > 0 && Abs(eq) > epsilon && Abs(eq0 - eq) > epsilon);
-
-                    if (zeta1_2 >= 0)
-                    {
-                        // 8.333-13
-                        var v = Matrix.R1(d1) * new Vector(xi, eta1, zeta1);
-
-                        double phi1 = Asin(v.Y);
-                        double sinTheta = v.X / Cos(phi1);
-                        double cosTheta = v.Z / Cos(phi1);
-
-                        double theta = ToDegrees(Atan2(sinTheta, cosTheta));
-                        double tanPhi = Tan(phi1) / Sqrt(1 - e2);
-                        double phi = Atan(tanPhi);
-
-                        // 8.331-4
-                        double lambda = b.Mu - theta;
-
-                        var g = new CrdsGeographical(To360(lambda + 180) - 180, ToDegrees(phi));
-
-                        curve.Add(g);
-                    }                    
+                    Q = Pow(-1, k) * Asin(-a_ / Sqrt(b_ * b_ + c_ * c_)) - Atan2(-b_, c_) + PI * k;
+                    if (l * Cos(Q) > 0 && ang == -90) break;
+                    if (l * Cos(Q) < 0 && ang == 90) break;
                 }
-            }
+
+                double eq0;
+                double eq = 0;
+                double xi, eta1, zeta1;
+
+                double L;
+                double zeta = 0;
+                double zeta1_2;
+
+                // find coordinates on fundamental plane
+                do
+                {
+                    eq0 = eq;
+                    L = l - zeta * Tan(f);
+                    xi = x - L * Sin(Q);
+                    eta1 = (y - L * Cos(Q)) / rho1;
+
+                    zeta1_2 = 1 - xi * xi - eta1 * eta1;
+                    zeta1 = Sqrt(zeta1_2);
+
+                    if (zeta1_2 < 0 && zeta1_2 > -0.0125)
+                    {
+                        zeta1 = 0;
+                        xi = Cos(Atan2(eta1, xi));
+                        eta1 = Sin(Atan2(eta1, xi));
+                    }
+
+                    // 8.3554-1
+                    zeta = rho2 * (zeta1 * cosd1d2 - eta1 * sind1d2);
+
+                    // 8.353-2
+                    eq = a_ - b_ * Cos(Q) + c_ * Sin(Q) + zeta * (1 + Tan(f) * Tan(f)) * (d_ * Cos(Q) - mu_ * Cos(d) * Sin(Q));
+                }
+                while (Abs(eq) > epsilon && Abs(eq0 - eq) > epsilon);
+
+                // 8.333-13
+                var v = Matrix.R1(d1) * new Vector(xi, eta1, zeta1);
+
+                double phi1 = Asin(v.Y);
+                double sinTheta = v.X / Cos(phi1);
+                double cosTheta = v.Z / Cos(phi1);
+
+                double theta = ToDegrees(Atan2(sinTheta, cosTheta));
+                double tanPhi = Tan(phi1) / Sqrt(1 - e2);
+                double phi = Atan(tanPhi);
+
+                // 8.331-4
+                double lambda = b.Mu - theta;
+
+                curve.Add(new CrdsGeographical(To360(lambda + 180) - 180, ToDegrees(phi)));
+            }            
         }
 
         private static void FindUmbraLimits(PolynomialBesselianElements pbe, ICollection<CrdsGeographical>[] curve, double jdFrom, double jdTo, double ang)
@@ -1116,15 +1046,18 @@ namespace Astrarium.Algorithms
                     InstantBesselianElements b = pbe.GetInstantBesselianElements(jd + i * step);
                     Vector v = ProjectOnFundamentalPlane(g, b.D, b.Mu);
 
-                    double xi = v.X;
-                    double eta1 = v.Y;
+                    //double xi = v.X;
+                    //double eta1 = v.Y;
 
                     // Earth ellipticity, squared
-                    const double e2 = 0.00669454;
+                    //const double e2 = 0.00669454;
 
                     // 8.334-1
-                    double rho1 = Sqrt(1 - e2 * Cos(ToRadians(b.D)) * Cos(ToRadians(b.D)));
-                    double eta = eta1 * rho1;
+                    //double rho1 = Sqrt(1 - e2 * Cos(ToRadians(b.D)) * Cos(ToRadians(b.D)));
+                    //double eta = eta1 * rho1;
+
+                    double xi = v.X;
+                    double eta = v.Y;
 
                     dist[i] = Sqrt((xi - b.X) * (xi - b.X) + (eta - b.Y) * (eta - b.Y));
                 }
@@ -1140,25 +1073,29 @@ namespace Astrarium.Algorithms
             Vector v = ProjectOnFundamentalPlane(g, b.D, b.Mu);
 
             // distance from shadow center to observation point in fundamental plane
-            double xi = v.X;
-            double eta1 = v.Y;
-            double zeta1 = v.Z;
+            //double xi = v.X;
+            //double eta1 = v.Y;
+            //double zeta1 = v.Z;
 
             // Earth ellipticity, squared
-            const double e2 = 0.00669454;
+            //const double e2 = 0.00669454;
 
-            double d = ToRadians(b.D);
+            //double d = ToRadians(b.D);
 
             // 8.334-1
-            double rho1 = Sqrt(1 - e2 * Cos(d) * Cos(d));
-            double rho2 = Sqrt(1 - e2 * Sin(d) * Sin(d));
-            double sind1d2 = e2 * Sin(d) * Cos(d) / (rho1 * rho2);
-            double cosd1d2 = Sqrt(1 - e2) / (rho1 * rho2);
+            //double rho1 = Sqrt(1 - e2 * Cos(d) * Cos(d));
+            //double rho2 = Sqrt(1 - e2 * Sin(d) * Sin(d));
+            //double sind1d2 = e2 * Sin(d) * Cos(d) / (rho1 * rho2);
+            //double cosd1d2 = Sqrt(1 - e2) / (rho1 * rho2);
 
-            double eta = eta1 * rho1;
+            //double eta = eta1 * rho1;
 
             // 8.333-14
-            double zeta = rho2 * (zeta1 * cosd1d2 - eta1 * sind1d2);
+            //double zeta = rho2 * (zeta1 * cosd1d2 - eta1 * sind1d2);
+
+            double xi = v.X;
+            double eta = v.Y;
+            double zeta = v.Z;
 
             double delta = Sqrt((xi - b.X) * (xi - b.X) + (eta - b.Y) * (eta - b.Y));
 
