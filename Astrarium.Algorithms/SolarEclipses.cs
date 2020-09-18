@@ -327,10 +327,10 @@ namespace Astrarium.Algorithms
             FindPenumbraLimits(pbe, map.PenumbraSouthernLimit, jdP1, jdP4, -90);
 
             // Find points of northern limit of total eclipse visibility
-            FindUmbraLimits(pbe, map.UmbraNorthernLimit, jdUN1, jdUN2, 90);
+            FindUmbraLimits(pbe, map.UmbraNorthernLimit, jdP1, jdP4, 90);
 
             // Find points of southern limit of total eclipse visibility
-            FindUmbraLimits(pbe, map.UmbraSouthernLimit, jdUS1, jdUS2, -90);
+            FindUmbraLimits(pbe, map.UmbraSouthernLimit, jdP1, jdP4, -90);
 
             // Calc rise/set curves
             FindRiseSetCurves(pbe, map, jdP1, jdP4);
@@ -459,7 +459,7 @@ namespace Astrarium.Algorithms
                 double lambda = b.Mu - theta;
 
                 curve.Add(new CrdsGeographical(To360(lambda + 180) - 180, ToDegrees(phi)));
-            }            
+            }
         }
 
         private static void FindUmbraLimits(PolynomialBesselianElements pbe, ICollection<CrdsGeographical>[] curve, double jdFrom, double jdTo, double ang)
@@ -467,46 +467,125 @@ namespace Astrarium.Algorithms
             if (!double.IsNaN(jdFrom) && !double.IsNaN(jdTo))
             {
                 int c = 0;
-                double step0 = FindStep(jdTo - jdFrom);
-                double step = step0;
 
-                for (double jd = jdFrom; jd <= jdTo + step * 0.5; jd += step)
+                // Earth ellipticity, squared
+                const double e2 = 0.00669454;
+
+                const double epsilon = 1e-6;
+
+                double step = FindStep(jdTo - jdFrom) / 2;
+
+                double zeta0 = 0;
+                double Q0 = 0;
+
+                for (double jd = jdFrom; jd <= jdTo; jd += step)
                 {
                     InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
 
-                    double angle = ToRadians(b.Inc + ang);
-                    double r = Abs(b.L2);
-                    double r0 = 0;
-                    int iter = 0;
-                    CrdsGeographical g = null;
+                    double l = b.L2;
+                    double l_ = b.dL2;
 
+                    double mu_ = ToRadians(b.dMu);
+                    double x = b.X;
+                    double x_ = b.dX;
+                    double y = b.Y;
+                    double y_ = b.dY;
+                    double d = ToRadians(b.D);
+                    double d_ = ToRadians(b.dD);
+                    double f = ToRadians(b.F2);
+
+                    double rho1 = Sqrt(1 - e2 * Cos(d) * Cos(d));
+                    double rho2 = Sqrt(1 - e2 * Sin(d) * Sin(d));
+                    double sind1 = Sin(d) / rho1;
+                    double cosd1 = Sqrt(1 - e2) * Cos(d) / rho1;
+                    double d1 = Atan2(sind1, cosd1);
+                    double sind1d2 = e2 * Sin(d) * Cos(d) / (rho1 * rho2);
+                    double cosd1d2 = Sqrt(1 - e2) / (rho1 * rho2);
+
+                    // 8.3422-2
+                    double a_ = -l_ - mu_ * Tan(f) * x * Cos(d) + y * d_ * Tan(f);
+                    double b_ = -y_ + mu_ * x * Sin(d) + l * d_ * Tan(f);
+                    double c_ = x_ + mu_ * y * Sin(d) + mu_ * Tan(f) * l * Cos(d);
+
+                    // Find value of Q from equation 8.353-2:
+                    // a_ - b_ * Cos(Q) + c_ * Sin(Q) + zeta0 * (1 + Tan(f) * Tan(f)) * (d_ * Cos(Q0) - mu_ * Cos(d) * Sin(Q0)) = 0
+                    // zeta0 is a previous value of zeta.
+                    // Q0 is a previous value of Q.
+                    // Start with Q0 = 0 and zeta0 = 0.
+                    // Now need to find roots of the equation.
+                    // But instead of algorithm in art. 8.3554, we solve it in another way.
+                    // The equation has form:
+                    // a*sin(x) + b*cos(x) = c
+                    // It can be found with method described there: 
+                    // https://socratic.org/questions/59e5f259b72cff6c4402a6a5
+
+                    double Q = 0;
+
+                    // iterate thru the roots
+                    for (int k = 0; k < 2; k++)
+                    {
+                        Q = Pow(-1, k) * Asin((-a_ - zeta0 * (1 + Tan(f) * Tan(f)) * (d_ * Cos(Q0) - mu_ * Cos(d) * Sin(Q0))) / Sqrt(b_ * b_ + c_ * c_)) - Atan2(-b_, c_) + PI * k;
+                        if (l * Cos(Q) > 0 && ang == -90) break;
+                        if (l * Cos(Q) < 0 && ang == 90) break;
+                    }
+
+                    // remember found value of Q
+                    Q0 = Q;
+
+                    double eq0;
+                    double eq = 0;
+                    double xi, eta1, zeta1;
+                    double zeta = 0;
+                    double L;
+
+                    double zeta1_2;
+
+                    // find coordinates on fundamental plane
                     do
                     {
-                        var p = new PointF(
-                            (float)(b.X + r * Cos(angle)),
-                            (float)(b.Y + r * Sin(angle)));
+                        eq0 = eq;
+                        L = l - zeta * Tan(f);
+                        xi = x - L * Sin(Q);
+                        eta1 = (y - L * Cos(Q)) / rho1;
 
-                        // Adjust iteration step according to penumbra position
-                        if (Abs(p.Y) > 0.9)
+                        zeta1_2 = 1 - xi * xi - eta1 * eta1;
+                        zeta1 = Sqrt(zeta1_2);
+
+                        if (zeta1_2 < 0 && zeta1_2 > -0.00625)
                         {
-                            step = step0 / 4;
-                        }
-                        else
-                        {
-                            step = step0;
+                            zeta1 = 0;
+                            xi = Cos(Atan2(eta1, xi));
+                            eta1 = Sin(Atan2(eta1, xi));
                         }
 
-                        g = ProjectOnEarth(p, b.D, b.Mu, true);
+                        // 8.3554-1
+                        zeta = rho2 * (zeta1 * cosd1d2 - eta1 * sind1d2);
 
-                        var v = ProjectOnFundamentalPlane(g, b.D, b.Mu);
+                        // 8.353-2
+                        eq = a_ - b_ * Cos(Q) + c_ * Sin(Q) + zeta * (1 + Tan(f) * Tan(f)) * (d_ * Cos(Q) - mu_ * Cos(d) * Sin(Q));
 
-                        r0 = r;
-                        r = Abs(b.L2 - v.Z * Tan(ToRadians(b.F2)));
-                        iter++;
+                        // remember last value of zeta
+                        zeta0 = double.IsNaN(zeta) ? 0 : zeta;
                     }
-                    while (Abs(r - r0) > 1e-6 && iter < 10);
+                    while (Abs(eq) > epsilon && Abs(eq0 - eq) > epsilon);
 
-                    if (g != null)
+                    // 8.333-13
+                    var v = Matrix.R1(d1) * new Vector(xi, eta1, zeta1);
+
+                    double phi1 = Asin(v.Y);
+                    double sinTheta = v.X / Cos(phi1);
+                    double cosTheta = v.Z / Cos(phi1);
+
+                    double theta = ToDegrees(Atan2(sinTheta, cosTheta));
+                    double tanPhi = Tan(phi1) / Sqrt(1 - e2);
+                    double phi = Atan(tanPhi);
+
+                    // 8.331-4
+                    double lambda = b.Mu - theta;
+
+                    var g = new CrdsGeographical(To360(lambda + 180) - 180, ToDegrees(phi));
+
+                    if (!double.IsNaN(g.Longitude) && !double.IsNaN(g.Latitude))
                     {
                         if (c == 0 && Abs(g.Latitude) > 85.5)
                         {
