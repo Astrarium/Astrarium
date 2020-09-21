@@ -302,38 +302,45 @@ namespace Astrarium.Types
             return crosses.ToArray();
         }
 
+        private static ImageAttributes RedImageAttributes = null;
+        private static ImageAttributes WhiteImageAttributes = null;
+
         private static ImageAttributes GetImageAttributes(ColorSchema schema)
         {
             if (schema == ColorSchema.Red)
             {
-                float[][] matrix = {
-                    new float[] {0.3f, 0, 0, 0, 0},
-                    new float[] {0.3f, 0, 0, 0, 0},
-                    new float[] {0.3f, 0, 0, 0, 0},
-                    new float[] {0, 0, 0, 1, 0},
-                    new float[] {0, 0, 0, 0, 0}
-                };
-                var colorMatrix = new ColorMatrix(matrix);
-                var attr = new ImageAttributes();
-                attr.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+                if (RedImageAttributes == null)
+                {
+                    float[][] matrix = {
+                        new float[] {0.3f, 0, 0, 0, 0},
+                        new float[] {0.3f, 0, 0, 0, 0},
+                        new float[] {0.3f, 0, 0, 0, 0},
+                        new float[] {0, 0, 0, 1, 0},
+                        new float[] {0, 0, 0, 0, 0}
+                    };
+                    var colorMatrix = new ColorMatrix(matrix);
+                    RedImageAttributes = new ImageAttributes();
+                    RedImageAttributes.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
 
-                return attr;
+                }
+                return RedImageAttributes;
             }
             else if (schema == ColorSchema.White)
             {
-                float[][] matrix = {
-                    new float[] { 0.299f, 0.299f, 0.299f, 0, 0},
-                    new float[] { 0.587f, 0.587f, 0.587f, 0, 0},
-                    new float[] { 0.114f, 0.114f, 0.114f, 0, 0},
-                    new float[] {0, 0, 0, 1, 0},
-                    new float[] { 0, 0, 0, 0, 1 }
-                };
-
-                var colorMatrix = new ColorMatrix(matrix);
-                var attr = new ImageAttributes();
-                attr.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
-
-                return attr;
+                if (WhiteImageAttributes == null)
+                {
+                    float[][] matrix = {
+                        new float[] { 0.299f, 0.299f, 0.299f, 0, 0},
+                        new float[] { 0.587f, 0.587f, 0.587f, 0, 0},
+                        new float[] { 0.114f, 0.114f, 0.114f, 0, 0},
+                        new float[] {0, 0, 0, 1, 0},
+                        new float[] { 0, 0, 0, 0, 1 }
+                    };
+                    var colorMatrix = new ColorMatrix(matrix);
+                    var WhiteImageAttributes = new ImageAttributes();
+                    WhiteImageAttributes.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+                }
+                return WhiteImageAttributes;
             }
             else
             {
