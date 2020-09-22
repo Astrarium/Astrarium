@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Astrarium.Types;
+using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 
 namespace Astrarium.Plugins.SolarSystem
 {
@@ -46,6 +48,8 @@ namespace Astrarium.Plugins.SolarSystem
                 }
             }
 
+            sourceBitmap.Colorize(options.ColorSchema);
+
             return sourceBitmap;
         }
     }
@@ -89,5 +93,10 @@ namespace Astrarium.Plugins.SolarSystem
         /// Radius of southern polar cap, in degrees
         /// </summary>
         public double SouthernPolarCap { get; set; }
+
+        /// <summary>
+        /// Color schema
+        /// </summary>
+        public ColorSchema ColorSchema { get; set; }
     }
 }

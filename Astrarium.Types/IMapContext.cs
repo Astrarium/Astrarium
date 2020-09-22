@@ -302,52 +302,6 @@ namespace Astrarium.Types
             return crosses.ToArray();
         }
 
-        private static ImageAttributes RedImageAttributes = null;
-        private static ImageAttributes WhiteImageAttributes = null;
-
-        private static ImageAttributes GetImageAttributes(ColorSchema schema)
-        {
-            if (schema == ColorSchema.Red)
-            {
-                if (RedImageAttributes == null)
-                {
-                    float[][] matrix = {
-                        new float[] {0.3f, 0, 0, 0, 0},
-                        new float[] {0.3f, 0, 0, 0, 0},
-                        new float[] {0.3f, 0, 0, 0, 0},
-                        new float[] {0, 0, 0, 1, 0},
-                        new float[] {0, 0, 0, 0, 0}
-                    };
-                    var colorMatrix = new ColorMatrix(matrix);
-                    RedImageAttributes = new ImageAttributes();
-                    RedImageAttributes.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
-
-                }
-                return RedImageAttributes;
-            }
-            else if (schema == ColorSchema.White)
-            {
-                if (WhiteImageAttributes == null)
-                {
-                    float[][] matrix = {
-                        new float[] { 0.299f, 0.299f, 0.299f, 0, 0},
-                        new float[] { 0.587f, 0.587f, 0.587f, 0, 0},
-                        new float[] { 0.114f, 0.114f, 0.114f, 0, 0},
-                        new float[] {0, 0, 0, 1, 0},
-                        new float[] { 0, 0, 0, 0, 1 }
-                    };
-                    var colorMatrix = new ColorMatrix(matrix);
-                    var WhiteImageAttributes = new ImageAttributes();
-                    WhiteImageAttributes.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
-                }
-                return WhiteImageAttributes;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         public static void DrawImage(this IMapContext map, Image image, float x, float y, float width, float height)
         {
             map.DrawImage(image, new RectangleF(x, y, width, height), new Rectangle(0, 0, image.Width, image.Height));
@@ -361,9 +315,9 @@ namespace Astrarium.Types
             map.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
             map.Graphics.PixelOffsetMode = PixelOffsetMode.HighSpeed;
             map.Graphics.CompositingQuality = CompositingQuality.HighSpeed;
-
+            
             Rectangle destRect2 = new Rectangle((int)destRect.X, (int)destRect.Y, (int)destRect.Width, (int)destRect.Height);
-            map.Graphics.DrawImage(image, destRect2, (int)srcRect.X, (int)srcRect.Y, (int)srcRect.Width, (int)srcRect.Height, GraphicsUnit.Pixel, GetImageAttributes(map.Schema));
+            map.Graphics.DrawImage(image, destRect2, (int)srcRect.X, (int)srcRect.Y, (int)srcRect.Width, (int)srcRect.Height, GraphicsUnit.Pixel, null);
 
             map.Graphics.Restore(gs);
         }

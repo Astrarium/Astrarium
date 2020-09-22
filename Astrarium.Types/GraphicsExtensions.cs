@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,6 +14,63 @@ namespace Astrarium.Types
     /// </summary>
     public static class GraphicsExtensions
     {
+        private static ImageAttributes RedImageAttributes = null;
+        private static ImageAttributes WhiteImageAttributes = null;
+
+        private static ImageAttributes GetImageAttributes(ColorSchema schema)
+        {
+            if (schema == ColorSchema.Red)
+            {
+                if (RedImageAttributes == null)
+                {
+                    float[][] matrix = {
+                        new float[] {0.3f, 0, 0, 0, 0},
+                        new float[] {0.3f, 0, 0, 0, 0},
+                        new float[] {0.3f, 0, 0, 0, 0},
+                        new float[] {0, 0, 0, 1, 0},
+                        new float[] {0, 0, 0, 0, 0}
+                    };
+                    var colorMatrix = new ColorMatrix(matrix);
+                    RedImageAttributes = new ImageAttributes();
+                    RedImageAttributes.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+                }
+                return RedImageAttributes;
+            }
+            else if (schema == ColorSchema.White)
+            {
+                if (WhiteImageAttributes == null)
+                {
+                    float[][] matrix = {
+                        new float[] { 0.299f, 0.299f, 0.299f, 0, 0},
+                        new float[] { 0.587f, 0.587f, 0.587f, 0, 0},
+                        new float[] { 0.114f, 0.114f, 0.114f, 0, 0},
+                        new float[] {0, 0, 0, 1, 0},
+                        new float[] { 0, 0, 0, 0, 1 }
+                    };
+                    var colorMatrix = new ColorMatrix(matrix);
+                    WhiteImageAttributes = new ImageAttributes();
+                    WhiteImageAttributes.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+                }
+                return WhiteImageAttributes;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public static void Colorize(this Image image, ColorSchema colorSchema)
+        {
+            var attrs = GetImageAttributes(colorSchema);
+            if (attrs != null)
+            {
+                using (Graphics g = Graphics.FromImage(image))
+                {
+                    g.DrawImage(image, new Rectangle(0, 0, image.Width, image.Height), 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, attrs);
+                }
+            }
+        }
+
         public static void DrawXCross(this Graphics g, Pen pen, PointF p, float size)
         {
             g.DrawLine(pen, p.X - size, p.Y - size, p.X + size, p.Y + size);

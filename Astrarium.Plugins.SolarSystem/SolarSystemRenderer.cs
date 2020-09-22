@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -304,7 +305,7 @@ namespace Astrarium.Plugins.SolarSystem
 
                 if (useTextures && size > 10)
                 {
-                    Image textureMoon = imagesCache.RequestImage("Moon", new PlanetTextureToken(textureName, moon.Libration.l, moon.Libration.b), MoonTextureProvider, map.Redraw);
+                    Image textureMoon = imagesCache.RequestImage("Moon", new PlanetTextureToken(textureName, moon.Libration.l, moon.Libration.b, map.Schema), MoonTextureProvider, map.Redraw);
                     if (textureMoon != null)
                     {
                         var gs = g.Save();
@@ -711,7 +712,7 @@ namespace Astrarium.Plugins.SolarSystem
                                 // half of source image: 0 = top, 1 = bottom
                                 int h = (half + (rings.B > 0 ? 0 : 1)) % 2;
 
-                                Image textureRings = imagesCache.RequestImage("Rings", true, t => Image.FromFile(Path.Combine(dataPath, "Rings.png"), true), map.Redraw);
+                                Image textureRings = imagesCache.RequestImage("Rings", map.Schema, RingsTextureProvider, map.Redraw);
                                 if (textureRings != null)
                                 {
                                     map.DrawImage(textureRings,
@@ -830,7 +831,7 @@ namespace Astrarium.Plugins.SolarSystem
 
                     if (hasTexture && useTextures)
                     {
-                        Image texture = imagesCache.RequestImage($"{planet.Number}-{moon.Number}", new PlanetTextureToken($"{planet.Number}-{moon.Number}", moon.CM, planet.Appearance.D), PlanetTextureProvider, map.Redraw);
+                        Image texture = imagesCache.RequestImage($"{planet.Number}-{moon.Number}", new PlanetTextureToken($"{planet.Number}-{moon.Number}", moon.CM, planet.Appearance.D, map.Schema), PlanetTextureProvider, map.Redraw);
                         if (texture != null)
                         {
                             var gs = g.Save();
@@ -1060,15 +1061,15 @@ namespace Astrarium.Plugins.SolarSystem
                 PlanetTextureToken token;
                 if (planet.Number == Planet.MARS && settings.Get("PlanetsMartianPolarCaps"))
                 {
-                    token = new PlanetTextureToken(planet.Number.ToString(), -planet.Appearance.CM, planet.Appearance.D, planetsCalc.MarsNPCWidth, planetsCalc.MarsSPCWidth);
+                    token = new PlanetTextureToken(planet.Number.ToString(), -planet.Appearance.CM, planet.Appearance.D, map.Schema, planetsCalc.MarsNPCWidth, planetsCalc.MarsSPCWidth);
                 }
                 else if (planet.Number == Planet.JUPITER)
                 {
-                    token = new PlanetTextureToken(planet.Number.ToString(), planetsCalc.GreatRedSpotLongitude - planet.Appearance.CM, planet.Appearance.D);
+                    token = new PlanetTextureToken(planet.Number.ToString(), planetsCalc.GreatRedSpotLongitude - planet.Appearance.CM, planet.Appearance.D, map.Schema);
                 }
                 else
                 {
-                    token = new PlanetTextureToken(planet.Number.ToString(), -planet.Appearance.CM, planet.Appearance.D);
+                    token = new PlanetTextureToken(planet.Number.ToString(), -planet.Appearance.CM, planet.Appearance.D, map.Schema);
                 }
 
                 Image texturePlanet = imagesCache.RequestImage(planet.Number.ToString(), token, PlanetTextureProvider, map.Redraw);
@@ -1135,8 +1136,16 @@ namespace Astrarium.Plugins.SolarSystem
                 RenderPolarCaps = token.RenderPolarCaps,
                 NorthernPolarCap = token.NorthernPolarCap,
                 SouthernPolarCap = token.SouthernPolarCap,
-                TextureFilePath = Path.Combine(dataPath, $"{token.TextureName}.jpg")
+                TextureFilePath = Path.Combine(dataPath, $"{token.TextureName}.jpg"),
+                ColorSchema = token.ColorSchema
             });
+        }
+
+        private Image RingsTextureProvider(ColorSchema schema)
+        {
+            Image image = Image.FromFile(Path.Combine(dataPath, "Rings.png"), true);
+            image.Colorize(schema);
+            return image;
         }
 
         private Image MoonTextureProvider(PlanetTextureToken token)
@@ -1161,7 +1170,8 @@ namespace Astrarium.Plugins.SolarSystem
                 LatitudeShift = token.Latitude,
                 LongutudeShift = token.Longitude,
                 OutputImageSize = imageSize,
-                TextureFilePath = Path.Combine(dataPath, $"{token.TextureName}.jpg")
+                TextureFilePath = Path.Combine(dataPath, $"{token.TextureName}.jpg"),
+                ColorSchema = token.ColorSchema
             });
         }
 
@@ -1337,7 +1347,12 @@ namespace Astrarium.Plugins.SolarSystem
             /// </summary>
             public double SouthernPolarCap { get; private set; }
 
-            public PlanetTextureToken(string name, double longitude, double latitude)
+            /// <summary>
+            /// Color schema
+            /// </summary>
+            public ColorSchema ColorSchema { get; private set; }
+
+            public PlanetTextureToken(string name, double longitude, double latitude, ColorSchema colorSchema)
             {
                 TextureName = name;
                 Longitude = longitude;
@@ -1345,9 +1360,10 @@ namespace Astrarium.Plugins.SolarSystem
                 RenderPolarCaps = false;
                 NorthernPolarCap = 0;
                 SouthernPolarCap = 0;
+                ColorSchema = colorSchema;
             }
 
-            public PlanetTextureToken(string name, double longitude, double latitude, double northernPolarCap, double southernPolarCap)
+            public PlanetTextureToken(string name, double longitude, double latitude, ColorSchema colorSchema, double northernPolarCap, double southernPolarCap)
             {
                 TextureName = name;
                 Longitude = longitude;
@@ -1355,6 +1371,7 @@ namespace Astrarium.Plugins.SolarSystem
                 RenderPolarCaps = true;
                 NorthernPolarCap = northernPolarCap;
                 SouthernPolarCap = southernPolarCap;
+                ColorSchema = colorSchema;
             }
 
             public override bool Equals(object obj)
@@ -1363,6 +1380,7 @@ namespace Astrarium.Plugins.SolarSystem
                 {
                     return 
                         TextureName.Equals(other.TextureName) &&
+                        ColorSchema == other.ColorSchema &&
                         RenderPolarCaps == other.RenderPolarCaps &&
                         Math.Abs(NorthernPolarCap - other.NorthernPolarCap) < 1 &&
                         Math.Abs(SouthernPolarCap - other.SouthernPolarCap) < 1 &&
