@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using static System.Math;
@@ -353,6 +354,10 @@ namespace Astrarium.Algorithms
             double zeta0 = 0;
             double Q0 = 0;
 
+            // latest values of xi and eta
+            double xi0 = double.NaN;
+            double eta0 = double.NaN;
+
             for (double jd = jdFrom; jd <= jdTo; jd += step)
             {
                 InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
@@ -443,6 +448,16 @@ namespace Astrarium.Algorithms
                     zeta0 = double.IsNaN(zeta) ? 0 : zeta;
                 }
                 while (Abs(eq) > epsilon && Abs(eq0 - eq) > epsilon);
+
+                if (xi < xi0 || (y_ > 0 && eta1 < eta0) || (y_ < 0 && eta1 > eta0))
+                {
+                    continue;
+                }
+                else
+                {
+                    xi0 = xi;
+                    eta0 = eta1;
+                }
 
                 // 8.333-13
                 var v = Matrix.R1(d1) * new Vector(xi, eta1, zeta1);
