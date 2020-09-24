@@ -321,29 +321,49 @@ namespace Astrarium.Algorithms
                 while (map.C2 == null && jdC2 > jdMid);
             }
 
+            // Instant of eclipse maximum
+            {
+                InstantBesselianElements b = pbe.GetInstantBesselianElements(pbe.JulianDay0);
+                PointF p = new PointF((float)b.X, (float)b.Y);
+                                              
+                var g = ProjectOnEarth(p, b.D, b.Mu, true);
+                if (g != null)
+                {
+                    map.Max = new SolarEclipsePoint(pbe.JulianDay0, g);
+                }
+            }
+
             // Find points of northern limit of eclipse visibility
-            FindPenumbraLimits(pbe, map.PenumbraNorthernLimit, jdP1, jdP4, 90);
+            FindPenumbraLimits(pbe, map.PenumbraNorthernLimit, jdFrom, jdTo + 0.5, 90);
 
             // Find points of southern limit of eclipse visibility
-            FindPenumbraLimits(pbe, map.PenumbraSouthernLimit, jdP1, jdP4, -90);
+            FindPenumbraLimits(pbe, map.PenumbraSouthernLimit, jdFrom, jdTo, -90);
 
             // Find points of northern limit of total eclipse visibility
-            FindUmbraLimits(pbe, map.UmbraNorthernLimit, jdP1, jdP4, 90);
+            FindUmbraLimits(pbe, map.UmbraNorthernLimit, jdFrom, jdTo, 90);
 
             // Find points of southern limit of total eclipse visibility
-            FindUmbraLimits(pbe, map.UmbraSouthernLimit, jdP1, jdP4, -90);
+            FindUmbraLimits(pbe, map.UmbraSouthernLimit, jdFrom, jdTo, -90);
 
             // Calc rise/set curves
             FindRiseSetCurves(pbe, map, jdP1, jdP4);
 
             // Calc umbra track points
             FindTotalPath(pbe, map, jdC1, jdC2);
-            
+           
             return map;
+        }
+
+        private class CurvePoint
+        {
+            public double Xi { get; set; }
+            public CrdsGeographical Location { get; set; }
         }
 
         private static void FindPenumbraLimits(PolynomialBesselianElements pbe, IList<CrdsGeographical> curve, double jdFrom, double jdTo, double ang)
         {
+            List<CurvePoint> points = new List<CurvePoint>();   
+
             // Earth ellipticity, squared
             const double e2 = 0.00669454;
 
@@ -434,8 +454,9 @@ namespace Astrarium.Algorithms
                     if (zeta1_2 < 0 && zeta1_2 > -0.0125)
                     {
                         zeta1 = 0;
-                        xi = Cos(Atan2(eta1, xi));
-                        eta1 = Sin(Atan2(eta1, xi));
+                        double P = Atan2(eta1, xi);
+                        xi = Cos(P);
+                        eta1 = Sin(P);
                     }
 
                     // 8.3554-1
@@ -449,14 +470,18 @@ namespace Astrarium.Algorithms
                 }
                 while (Abs(eq) > epsilon && Abs(eq0 - eq) > epsilon);
 
+                CurvePoint p = new CurvePoint();
+
                 if (xi < xi0 || (y_ > 0 && eta1 < eta0) || (y_ < 0 && eta1 > eta0))
                 {
-                    continue;
+                    p = points.OrderBy(c => Abs(xi - c.Xi)).FirstOrDefault();                    
                 }
                 else
                 {
                     xi0 = xi;
                     eta0 = eta1;
+                    p = new CurvePoint();
+                    points.Add(p);
                 }
 
                 // 8.333-13
@@ -473,8 +498,15 @@ namespace Astrarium.Algorithms
                 // 8.331-4
                 double lambda = b.Mu - theta;
 
-                curve.Add(new CrdsGeographical(To360(lambda + 180) - 180, ToDegrees(phi)));
+                p.Xi = xi;
+                p.Location = new CrdsGeographical(To360(lambda + 180) - 180, ToDegrees(phi));
             }
+
+            foreach (var p in points)
+            {
+                curve.Add(p.Location);
+            }
+
         }
 
         private static void FindUmbraLimits(PolynomialBesselianElements pbe, ICollection<CrdsGeographical>[] curve, double jdFrom, double jdTo, double ang)
@@ -1151,16 +1183,6 @@ namespace Astrarium.Algorithms
                     InstantBesselianElements b = pbe.GetInstantBesselianElements(jd + i * step);
                     Vector v = ProjectOnFundamentalPlane(g, b.D, b.Mu);
 
-                    //double xi = v.X;
-                    //double eta1 = v.Y;
-
-                    // Earth ellipticity, squared
-                    //const double e2 = 0.00669454;
-
-                    // 8.334-1
-                    //double rho1 = Sqrt(1 - e2 * Cos(ToRadians(b.D)) * Cos(ToRadians(b.D)));
-                    //double eta = eta1 * rho1;
-
                     double xi = v.X;
                     double eta = v.Y;
 
@@ -1176,27 +1198,6 @@ namespace Astrarium.Algorithms
         {
             InstantBesselianElements b = pbe.GetInstantBesselianElements(jdLocalMax);
             Vector v = ProjectOnFundamentalPlane(g, b.D, b.Mu);
-
-            // distance from shadow center to observation point in fundamental plane
-            //double xi = v.X;
-            //double eta1 = v.Y;
-            //double zeta1 = v.Z;
-
-            // Earth ellipticity, squared
-            //const double e2 = 0.00669454;
-
-            //double d = ToRadians(b.D);
-
-            // 8.334-1
-            //double rho1 = Sqrt(1 - e2 * Cos(d) * Cos(d));
-            //double rho2 = Sqrt(1 - e2 * Sin(d) * Sin(d));
-            //double sind1d2 = e2 * Sin(d) * Cos(d) / (rho1 * rho2);
-            //double cosd1d2 = Sqrt(1 - e2) / (rho1 * rho2);
-
-            //double eta = eta1 * rho1;
-
-            // 8.333-14
-            //double zeta = rho2 * (zeta1 * cosd1d2 - eta1 * sind1d2);
 
             double xi = v.X;
             double eta = v.Y;

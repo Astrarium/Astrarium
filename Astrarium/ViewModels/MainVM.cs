@@ -520,7 +520,7 @@ namespace Astrarium.ViewModels
                 var tokenSource = new CancellationTokenSource();
                 var progress = new Progress<double>();
 
-                ViewManager.ShowProgress(Text.Get("CalculateEphemerides.WaitTitle"), Text.Get("CalculateEphemerides.WaitText"), tokenSource, progress);
+                ViewManager.ShowProgress("$CalculateEphemerides.WaitTitle", "$CalculateEphemerides.WaitText", tokenSource, progress);
 
                 var ephem = await Task.Run(() => sky.GetEphemerides(
                     es.SelectedBody,
@@ -550,7 +550,7 @@ namespace Astrarium.ViewModels
             {
                 var tokenSource = new CancellationTokenSource();
 
-                ViewManager.ShowProgress(Text.Get("CalculatePhenomena.WaitTitle"), Text.Get("CalculatePhenomena.WaitText"), tokenSource);
+                ViewManager.ShowProgress("$CalculatePhenomena.WaitTitle", "$CalculatePhenomena.WaitText", tokenSource);
 
                 var events = await Task.Run(() => sky.GetEvents(
                         ps.JulianDayFrom,
@@ -661,6 +661,7 @@ namespace Astrarium.ViewModels
         {
             if (body.DisplaySettingNames.Any(s => !settings.Get(s)))
             {
+                // TODO: localization
                 if (ViewManager.ShowMessageBox("Warn", "Object is invisible. On?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
                     body.DisplaySettingNames.ToList().ForEach(s => settings.Set(s, true));
@@ -673,7 +674,7 @@ namespace Astrarium.ViewModels
 
             if (settings.Get<bool>("Ground") && body.Horizontal.Altitude <= 0)
             {
-                if (ViewManager.ShowMessageBox(Text.Get("ObjectUnderHorizon.Title"), Text.Get("ObjectUnderHorizon.Text"), MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                if (ViewManager.ShowMessageBox("$ObjectUnderHorizon.Title", "$ObjectUnderHorizon.Text", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
                     settings.Set("Ground", false);
                 }
@@ -685,7 +686,7 @@ namespace Astrarium.ViewModels
 
             if (map.LockedObject != null && map.LockedObject != body)
             {
-                if (ViewManager.ShowMessageBox(Text.Get("ObjectLocked.Title"), Text.Get("ObjectLocked.Text"), MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                if (ViewManager.ShowMessageBox("$ObjectLocked.Title", "$ObjectLocked.Text", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
                     map.LockedObject = null;
                 }

@@ -202,8 +202,8 @@ namespace Astrarium
         {
             var dialog = typeFactory(typeof(MessageBoxWindow)) as MessageBoxWindow;
             dialog.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
-            dialog.Title = caption;
-            dialog.MessageContainer.Text = text;
+            dialog.Title = caption.StartsWith("$") ? Text.Get(caption.Substring(1)) : caption;
+            dialog.MessageContainer.Text = text.StartsWith("$") ? Text.Get(text.Substring(1)) : text;
             dialog.Buttons = buttons;
             dialog.ShowDialog();
             return dialog.Result;
@@ -213,8 +213,8 @@ namespace Astrarium
         {
             var dialog = typeFactory(typeof(ProgressWindow)) as ProgressWindow;
             dialog.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
-            dialog.Title = caption;
-            dialog.Text = text;
+            dialog.Title = caption.StartsWith("$") ? Text.Get(caption.Substring(1)) : caption;
+            dialog.Text = text.StartsWith("$") ? Text.Get(text.Substring(1)) : text;
             dialog.CancellationTokenSource = tokenSource;
             dialog.Progress = progress;
             dialog.Show();
@@ -223,7 +223,7 @@ namespace Astrarium
         public string ShowSaveFileDialog(string caption, string fileName, string extension, string filter)
         {
             var dialog = new SaveFileDialog();
-            dialog.Title = caption;
+            dialog.Title = caption.StartsWith("$") ? Text.Get(caption.Substring(1)) : caption;
             dialog.FileName = fileName;
             dialog.DefaultExt = extension;
             dialog.Filter = filter;
@@ -233,7 +233,7 @@ namespace Astrarium
         public string ShowOpenFileDialog(string caption, string filter)
         {
             var dialog = new OpenFileDialog();
-            dialog.Title = caption;
+            dialog.Title = caption.StartsWith("$") ? Text.Get(caption.Substring(1)) : caption;
             dialog.Filter = filter;
             return (dialog.ShowDialog() ?? false) ? dialog.FileName : null;
         }

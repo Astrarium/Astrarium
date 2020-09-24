@@ -25,11 +25,11 @@ namespace Astrarium.Plugins.FOV
         {
             if (string.IsNullOrWhiteSpace(Camera.Name))
             {
-                ViewManager.ShowMessageBox(Text.Get("CameraWindow.WarningTitle"), Text.Get("CameraWindow.EmptyNameWarningMessage"));
+                ViewManager.ShowMessageBox("$CameraWindow.WarningTitle", "$CameraWindow.EmptyNameWarningMessage");
             }
             else if (Cameras.Any(t => t.Name == Camera.Name && t.Id != Camera.Id))
             {
-                ViewManager.ShowMessageBox(Text.Get("CameraWindow.WarningTitle"), Text.Get("CameraWindow.NameAlreadyExistsWarningMessage"));           
+                ViewManager.ShowMessageBox("$CameraWindow.WarningTitle", "$CameraWindow.NameAlreadyExistsWarningMessage");           
             }
             else
             {

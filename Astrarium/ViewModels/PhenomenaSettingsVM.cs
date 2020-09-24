@@ -61,7 +61,7 @@ namespace Astrarium.ViewModels
         {
             if (JulianDayFrom > JulianDayTo)
             {
-                ViewManager.ShowMessageBox(Text.Get("PhenomenaSettingsWindow.WarningTitle"), Text.Get("PhenomenaSettingsWindow.WarningText"), System.Windows.MessageBoxButton.OK);
+                ViewManager.ShowMessageBox("$PhenomenaSettingsWindow.WarningTitle", "$PhenomenaSettingsWindow.WarningText", System.Windows.MessageBoxButton.OK);
                 return;
             }
 

@@ -41,6 +41,7 @@ namespace Astrarium.Plugins.SolarSystem
 
         private readonly MarkerStyle riseSetMarkerStyle = new MarkerStyle(5, Brushes.Red, null, Brushes.Red, SystemFonts.DefaultFont, StringFormat.GenericDefault);
         private readonly MarkerStyle centralLineMarkerStyle = new MarkerStyle(5, Brushes.Black, null, Brushes.Black, SystemFonts.DefaultFont, StringFormat.GenericDefault);
+        private readonly MarkerStyle maxPointMarkerStyle = new MarkerStyle(5, Brushes.Red, null, Brushes.Black, SystemFonts.DefaultFont, StringFormat.GenericDefault);
 
         private readonly TrackStyle riseSetTrackStyle = new TrackStyle(new Pen(Color.Red, 2));
         private readonly TrackStyle penumbraLimitTrackStyle = new TrackStyle(new Pen(Color.Orange, 2));
@@ -275,9 +276,7 @@ namespace Astrarium.Plugins.SolarSystem
             }
 
             // central line is divided into 2 ones => draw shadow path as 2 polygons
-            //if (map.TotalPath[0].Any() && map.TotalPath[1].Any())
-                            
-
+    
             if ((map.UmbraNorthernLimit[0].Any() && !map.UmbraNorthernLimit[1].Any()) ||
                 (map.UmbraSouthernLimit[0].Any() && !map.UmbraSouthernLimit[1].Any()))
             {
@@ -290,8 +289,8 @@ namespace Astrarium.Plugins.SolarSystem
                 if (map.C1 != null) polygon.Add(ToGeo(map.C1.Coordinates));
                 polygons.Add(polygon);
             }
-            else {
-
+            else 
+            {
                 for (int i = 0; i < 2; i++)
                 {
                     if (map.UmbraNorthernLimit[i].Any() && map.UmbraSouthernLimit[i].Any())
@@ -327,6 +326,11 @@ namespace Astrarium.Plugins.SolarSystem
                 var track = new Track(penumbraLimitTrackStyle);
                 track.AddRange(map.PenumbraSouthernLimit.Select(p => ToGeo(p)));
                 tracks.Add(track);
+            }
+
+            if (map.Max != null)
+            {
+                markers.Add(new Marker(ToGeo(map.Max.Coordinates), maxPointMarkerStyle, "Max"));
             }
 
             Tracks = tracks;

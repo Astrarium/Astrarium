@@ -69,19 +69,19 @@ namespace Astrarium.ViewModels
         {
             if (JulianDayFrom > JulianDayTo)
             {
-                ViewManager.ShowMessageBox(Text.Get("EphemeridesSettingsWindow.WarningTitle"), Text.Get("EphemeridesSettingsWindow.DateWarningText"), System.Windows.MessageBoxButton.OK);
+                ViewManager.ShowMessageBox("$EphemeridesSettingsWindow.WarningTitle", "$EphemeridesSettingsWindow.DateWarningText", System.Windows.MessageBoxButton.OK);
                 return;
             }
 
             if (Step < TimeSpan.FromSeconds(1))
             {
-                ViewManager.ShowMessageBox(Text.Get("EphemeridesSettingsWindow.WarningTitle"), Text.Get("EphemeridesSettingsWindow.StepWarningText"), System.Windows.MessageBoxButton.OK);
+                ViewManager.ShowMessageBox("$EphemeridesSettingsWindow.WarningTitle", "$EphemeridesSettingsWindow.StepWarningText", System.Windows.MessageBoxButton.OK);
                 return;
             }
 
             if ((JulianDayTo - JulianDayFrom) / Step.TotalDays > 10000)
             {
-                ViewManager.ShowMessageBox(Text.Get("EphemeridesSettingsWindow.WarningTitle"), Text.Get("EphemeridesSettingsWindow.LargeTableWarningText"), System.Windows.MessageBoxButton.OK);
+                ViewManager.ShowMessageBox("$EphemeridesSettingsWindow.WarningTitle", "$EphemeridesSettingsWindow.LargeTableWarningText", System.Windows.MessageBoxButton.OK);
                 return;
             }
 

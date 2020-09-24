@@ -142,6 +142,7 @@ namespace Astrarium.Plugins.FOV
 
         private void DeleteEquipment(Type equipmentType)
         {
+            // TODO: localization
             if (ViewManager.ShowMessageBox("Warning", "Do you really want to delete the selected equipment?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
                 if (equipmentType == typeof(Telescope))
@@ -185,7 +186,7 @@ namespace Astrarium.Plugins.FOV
             {
                 if (string.IsNullOrWhiteSpace(Label))
                 {
-                    ViewManager.ShowMessageBox(Text.Get("FovSettingsVM.WarningTitle"), Text.Get("FovSettingsVM.EmptyLabelMessage"));
+                    ViewManager.ShowMessageBox("$FovSettingsVM.WarningTitle", "$FovSettingsVM.EmptyLabelMessage");
                     return;
                 }
 

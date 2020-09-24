@@ -62,19 +62,19 @@ namespace Astrarium.Plugins.Tracks.ViewModels
 
             if (JulianDayFrom > JulianDayTo)
             {
-                ViewManager.ShowMessageBox(Text.Get("MotionTrackWindow.WarningTitle"), Text.Get("MotionTrackWindow.DateWarningText"), System.Windows.MessageBoxButton.OK);
+                ViewManager.ShowMessageBox("$MotionTrackWindow.WarningTitle", "$MotionTrackWindow.DateWarningText", System.Windows.MessageBoxButton.OK);
                 return;
             }
 
             if (LabelsStep.TotalDays < track.SmallestLabelsStep())
             {
-                ViewManager.ShowMessageBox(Text.Get("MotionTrackWindow.WarningTitle"), Text.Get("MotionTrackWindow.StepWarningText"), System.Windows.MessageBoxButton.OK);
+                ViewManager.ShowMessageBox("$MotionTrackWindow.WarningTitle", "$MotionTrackWindow.StepWarningText", System.Windows.MessageBoxButton.OK);
                 return;
             }
 
             if ((JulianDayTo - JulianDayFrom) / track.Step > 10000)
             {
-                ViewManager.ShowMessageBox(Text.Get("MotionTrackWindow.WarningTitle"), Text.Get("MotionTrackWindow.StepDateRangeMismatchText"), System.Windows.MessageBoxButton.OK);
+                ViewManager.ShowMessageBox("$MotionTrackWindow.WarningTitle", "$MotionTrackWindow.StepDateRangeMismatchText", System.Windows.MessageBoxButton.OK);
                 return;
             }
 

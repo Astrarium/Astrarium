@@ -25,11 +25,11 @@ namespace Astrarium.Plugins.FOV
         {
             if (string.IsNullOrWhiteSpace(Telescope.Name))
             {
-                ViewManager.ShowMessageBox(Text.Get("TelescopeWindow.WarningTitle"), Text.Get("TelescopeWindow.EmptyNameWarningMessage"));
+                ViewManager.ShowMessageBox("$TelescopeWindow.WarningTitle", "$TelescopeWindow.EmptyNameWarningMessage");
             }
             else if (Telescopes.Any(t => t.Name == Telescope.Name && t.Id != Telescope.Id))
             {
-                ViewManager.ShowMessageBox(Text.Get("TelescopeWindow.WarningTitle"), Text.Get("TelescopeWindow.NameAlreadyExistsWarningMessage"));
+                ViewManager.ShowMessageBox("$TelescopeWindow.WarningTitle", "$TelescopeWindow.NameAlreadyExistsWarningMessage");
             }
             else
             {

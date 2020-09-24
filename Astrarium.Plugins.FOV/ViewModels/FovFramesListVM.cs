@@ -78,7 +78,7 @@ namespace Astrarium.Plugins.FOV
             int index = fovFrames.FindIndex(f => f.Id == frame.Id);
             if (index >= 0)
             {
-                if (ViewManager.ShowMessageBox(Text.Get("FovFramesListWindow.WarningTitle"), Text.Get("FovFramesListWindow.DeleteFrameWarningMessage"), MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                if (ViewManager.ShowMessageBox("$FovFramesListWindow.WarningTitle", "$FovFramesListWindow.DeleteFrameWarningMessage", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
                     fovFrames.RemoveAt(index);
                     settings.Set("FovFrames", fovFrames);

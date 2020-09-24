@@ -61,7 +61,7 @@ namespace Astrarium.ViewModels
 
                 writer?.Write(events);
 
-                ViewManager.ShowMessageBox(Text.Get("PhenomenaWindow.ExportDoneTitle"), Text.Get("PhenomenaWindow.ExportDoneText"), MessageBoxButton.OK);
+                ViewManager.ShowMessageBox("$PhenomenaWindow.ExportDoneTitle", "$PhenomenaWindow.ExportDoneText", MessageBoxButton.OK);
             }
         }
 

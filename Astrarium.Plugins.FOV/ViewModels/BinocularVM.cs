@@ -25,11 +25,11 @@ namespace Astrarium.Plugins.FOV
         {
             if (string.IsNullOrWhiteSpace(Binocular.Name))
             {
-                ViewManager.ShowMessageBox(Text.Get("BinocularWindow.WarningTitle"), Text.Get("BinocularWindow.EmptyNameWarningMessage"));
+                ViewManager.ShowMessageBox("$BinocularWindow.WarningTitle", "$BinocularWindow.EmptyNameWarningMessage");
             }
             else if (Binoculars.Any(t => t.Name == Binocular.Name && t.Id != Binocular.Id))
             {
-                ViewManager.ShowMessageBox(Text.Get("BinocularWindow.WarningTitle"), Text.Get("BinocularWindow.NameAlreadyExistsWarningMessage")); 
+                ViewManager.ShowMessageBox("$BinocularWindow.WarningTitle", "$BinocularWindow.NameAlreadyExistsWarningMessage"); 
             }
             else
             {

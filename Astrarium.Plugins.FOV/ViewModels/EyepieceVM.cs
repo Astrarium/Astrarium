@@ -25,11 +25,11 @@ namespace Astrarium.Plugins.FOV
         {
             if (string.IsNullOrWhiteSpace(Eyepiece.Name))
             {
-                ViewManager.ShowMessageBox(Text.Get("EyepieceWindow.WarningTitle"), Text.Get("EyepieceWindow.EmptyNameWarningMessage"));
+                ViewManager.ShowMessageBox("$EyepieceWindow.WarningTitle", "$EyepieceWindow.EmptyNameWarningMessage");
             }
             else if (Eyepieces.Any(t => t.Name == Eyepiece.Name && t.Id != Eyepiece.Id))
             {
-                ViewManager.ShowMessageBox(Text.Get("EyepieceWindow.WarningTitle"), Text.Get("EyepieceWindow.NameAlreadyExistsWarningMessage"));
+                ViewManager.ShowMessageBox("$EyepieceWindow.WarningTitle", "$EyepieceWindow.NameAlreadyExistsWarningMessage");
             }
             else
             {

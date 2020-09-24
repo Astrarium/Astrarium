@@ -25,7 +25,7 @@ namespace Astrarium.Plugins.SolarSystem
             worker = new Thread(DoWork);
             worker.Name = "SphereRendererWorker";
             worker.IsBackground = true;
-            worker.SetApartmentState(ApartmentState.STA);
+            worker.SetApartmentState(ApartmentState.MTA);
             worker.Start();
         }
 

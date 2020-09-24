@@ -87,24 +87,9 @@ namespace Astrarium.Algorithms
         public SolarEclipsePoint C2 { get; set; }
 
         /// <summary>
-        /// Northernmost point and instant where the solar eclipse starts to be observable
+        /// Instant and coordinates of eclipse maximum
         /// </summary>
-        public SolarEclipsePoint PN1 { get; set; }
-
-        /// <summary>
-        /// Southernmost point and instant where the solar eclipse starts to be observable
-        /// </summary>
-        public SolarEclipsePoint PS1 { get; set; }
-
-        /// <summary>
-        /// Northernmost point and instant where the solar eclipse ends to be observable
-        /// </summary>
-        public SolarEclipsePoint PN2 { get; set; }
-
-        /// <summary>
-        /// Southernmost point and instant where the solar eclipse ends to be observable
-        /// </summary>
-        public SolarEclipsePoint PS2 { get; set; }
+        public SolarEclipsePoint Max { get; set; }
     }
 
     /// <summary>

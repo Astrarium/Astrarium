@@ -102,7 +102,7 @@ namespace Astrarium.Plugins.Tracks.ViewModels
 
         private void DeleteSelectedTrack()
         {
-            if (ViewManager.ShowMessageBox(Text.Get("TracksListWindow.WarningTitle"), Text.Get("TracksListWindow.DeleteWarningText"), MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            if (ViewManager.ShowMessageBox("$TracksListWindow.WarningTitle", "$TracksListWindow.DeleteWarningText", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
                 trackCalc.Tracks.Remove(SelectedTrack.Track);
                 sky.Calculate();

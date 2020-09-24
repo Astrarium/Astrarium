@@ -102,7 +102,7 @@ namespace Astrarium.ViewModels
         {
             if (settings.IsChanged)
             {
-                var result = ViewManager.ShowMessageBox(Text.Get("SettingsWindow.WarningTitle"), Text.Get("SettingsWindow.UnsavedValuesWarningText"), MessageBoxButton.YesNoCancel);
+                var result = ViewManager.ShowMessageBox("$SettingsWindow.WarningTitle", "$SettingsWindow.UnsavedValuesWarningText", MessageBoxButton.YesNoCancel);
                 if (MessageBoxResult.Yes == result)
                 {
                     base.Close();
@@ -135,7 +135,7 @@ namespace Astrarium.ViewModels
 
         private void Reset()
         {
-            if (MessageBoxResult.Yes == ViewManager.ShowMessageBox(Text.Get("SettingsWindow.WarningTitle"), Text.Get("SettingsWindow.ResetToDefaultsWarningText"), MessageBoxButton.YesNo))
+            if (MessageBoxResult.Yes == ViewManager.ShowMessageBox("$SettingsWindow.WarningTitle", "$SettingsWindow.ResetToDefaultsWarningText", MessageBoxButton.YesNo))
             {
                 settings.Load("Defaults");
                 Save();

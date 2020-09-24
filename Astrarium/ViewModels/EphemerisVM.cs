@@ -86,7 +86,7 @@ namespace Astrarium.ViewModels
 
                 writer?.Write(Body, StartDate, EndDate, Step, Ephemeris);
 
-                ViewManager.ShowMessageBox(Text.Get("EphemeridesWindow.ExportDoneTitle"), Text.Get("EphemeridesWindow.ExportDoneText"), MessageBoxButton.OK);
+                ViewManager.ShowMessageBox("$EphemeridesWindow.ExportDoneTitle", "$EphemeridesWindow.ExportDoneText", MessageBoxButton.OK);
             }
         }
     }

@@ -15,7 +15,7 @@ namespace Astrarium.Algorithms
     public class PolynomialBesselianElements
     {
         /// <summary>
-        /// Julian Day to the nearest hour of the instant of greatest eclipse
+        /// Julian Day of eclipse maximum.
         /// </summary>
         public double JulianDay0 { get; set; }
 
