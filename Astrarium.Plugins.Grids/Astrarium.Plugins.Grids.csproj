@@ -1,8 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
   <PropertyGroup>
     <TargetFrameworks>net451</TargetFrameworks>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <UseWpf>true</UseWpf>
     <Version>2020.5</Version>
     <Product>Grids</Product>
     <Description>Equatorial and horizontal celestial grids, ecliptic and Galactic equator lines</Description>
@@ -19,16 +20,7 @@
 
   <ItemGroup>
     <None Remove="Text.ini" />
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Include="Text.ini" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Include="Images.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>
 
   <ItemGroup>
@@ -40,14 +32,6 @@
       <Private>false</Private>
       <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
     </ProjectReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="System.Windows.Presentation" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="WindowsBase" />
   </ItemGroup>
 
 </Project>

@@ -1,8 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
   <PropertyGroup>
     <TargetFrameworks>net451</TargetFrameworks>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <UseWpf>true</UseWpf>
     <Version>2020.5</Version>
     <Product>Milky Way</Product>
     <Description>Contains Milky Way outline points</Description>
@@ -19,9 +20,6 @@
 
   <ItemGroup>
     <None Remove="Text.ini" />
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Include="Text.ini" />
   </ItemGroup>
 
@@ -37,17 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="WindowsBase" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Data\MilkyWay.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\mw.jpg">
+    <None Update="Data\*.*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
