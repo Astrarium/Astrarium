@@ -661,8 +661,7 @@ namespace Astrarium.ViewModels
         {
             if (body.DisplaySettingNames.Any(s => !settings.Get(s)))
             {
-                // TODO: localization
-                if (ViewManager.ShowMessageBox("Warn", "Object is invisible. On?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                if (ViewManager.ShowMessageBox("$ObjectInvisible.Title", "$ObjectInvisible.Text", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
                     body.DisplaySettingNames.ToList().ForEach(s => settings.Set(s, true));
                 }
