@@ -1,33 +1,17 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
   <PropertyGroup>
     <TargetFrameworks>net451</TargetFrameworks>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <Version>2020.5</Version>
+    <UseWpf>true</UseWpf>
     <Product>Constellations</Product>
     <Description>Constellations borders and labels</Description>
     <Authors>Alexander Krutov</Authors>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net451|AnyCPU'">
-    <OutputPath>..\Astrarium\bin\Debug</OutputPath>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net451|AnyCPU'">
-    <OutputPath>..\Astrarium\bin\Release</OutputPath>
+    <OutputPath>..\Astrarium\bin\$(Configuration)</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Text.ini" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Include="Images.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Include="Text.ini" />
   </ItemGroup>
 
@@ -43,17 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="WindowsBase" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Data\Borders.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\ConLabels.dat">
+    <None Update="Data\*.*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

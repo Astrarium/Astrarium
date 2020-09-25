@@ -80,5 +80,16 @@ namespace Astrarium.Algorithms
             }
             return false;
         }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 23 + Altitude.GetHashCode();
+                hash = hash * 23 + Azimuth.GetHashCode();
+                return hash;
+            }
+        }
     }
 }

@@ -1,34 +1,18 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
   <PropertyGroup>
     <TargetFrameworks>net451</TargetFrameworks>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <Version>2020.5</Version>
+    <UseWpf>true</UseWpf>
     <Product>Horizon</Product>
     <Description>Horizon line and ground</Description>
     <Authors>Alexander Krutov</Authors>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net451|AnyCPU'">
-    <OutputPath>..\Astrarium\bin\Debug</OutputPath>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net451|AnyCPU'">
-    <OutputPath>..\Astrarium\bin\Release</OutputPath>
+    <OutputPath>..\Astrarium\bin\$(Configuration)</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Text.ini" />
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Include="Text.ini" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Page Include="Images.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>
 
   <ItemGroup>
@@ -40,13 +24,6 @@
       <Private>false</Private>
       <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
     </ProjectReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="System.Xaml" />
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="WindowsBase" />
   </ItemGroup>
 
 </Project>
