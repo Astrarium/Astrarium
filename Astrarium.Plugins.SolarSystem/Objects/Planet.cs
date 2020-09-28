@@ -98,6 +98,19 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         public const int NEPTUNE    = 8;
         public const int PLUTO      = 9;
 
+        public static readonly string[] NAMES =
+        {
+            "MERCURY",
+            "VENUS",
+            "EARTH",
+            "MARS",
+            "JUPITER",
+            "SATURN",
+            "URANUS",
+            "NEPTUNE",
+            "PLUTO"
+        };
+
         /// <summary>
         /// Name of the setting(s) responsible for displaying the object
         /// </summary>

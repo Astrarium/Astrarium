@@ -18,6 +18,15 @@ namespace Astrarium.Types
         ICollection<string> GetEventsCategories();
         CelestialObjectInfo GetInfo(CelestialObject body);
         Constellation GetConstellation(string code);
-        ICollection<SearchResultItem> Search(string searchString, Func<CelestialObject, bool> filter, int maxCount = 50);
+        
+        
+        /// <summary>
+        /// Searches celestial objects by string.
+        /// </summary>
+        /// <param name="searchString">String containing object name.</param>
+        /// <param name="filter">Function to filter search results.</param>
+        /// <param name="maxCount">Maximal number of objects to be returned.</param>
+        /// <returns></returns>
+        ICollection<CelestialObject> Search(string searchString, Func<CelestialObject, bool> filter, int maxCount = 50);
     }
 }

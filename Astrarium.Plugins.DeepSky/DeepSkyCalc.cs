@@ -202,11 +202,10 @@ namespace Astrarium.Plugins.DeepSky
             }
         }
 
-        public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)
+        public ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50)
         {           
             return DeepSkies.Where(ds => ds.Names.Any(name => name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
                 .Take(maxCount)
-                .Select(ds => new SearchResultItem(ds, string.Join(", ", ds.Names)))
                 .ToArray();
         }
 

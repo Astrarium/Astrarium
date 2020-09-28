@@ -16,11 +16,6 @@ namespace Astrarium.Plugins.SolarSystem
     {
         public Moon Moon { get; private set; } = new Moon();
 
-        public LunarCalc()
-        {
-
-        }
-
         public override void Calculate(SkyContext c)
         {
             Moon.Equatorial = c.Get(Equatorial);
@@ -359,12 +354,14 @@ namespace Astrarium.Plugins.SolarSystem
             .AddRow("MaxDeclinations.South");
         }
 
-        public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)
+        public ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50)
         {
             if (Moon.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
-                return new[] { new SearchResultItem(Moon, Moon.Name) };
+                return new[] { Moon };
+            else if ("@moon".Equals(searchString, StringComparison.OrdinalIgnoreCase))
+                return new[] { Moon };
             else
-                return new SearchResultItem[0];
+                return new CelestialObject[0];
         }
     }
 }

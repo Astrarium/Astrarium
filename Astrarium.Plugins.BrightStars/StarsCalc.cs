@@ -197,7 +197,7 @@ namespace Astrarium.Plugins.BrightStars
         }
 
         private static Regex regexSpaceRemover = new Regex("[ ]{2,}", RegexOptions.None);
-        public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)
+        public ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50)
         {
             searchString = regexSpaceRemover.Replace(searchString, " ").Trim();
 
@@ -205,7 +205,6 @@ namespace Astrarium.Plugins.BrightStars
                 GetStarNamesForSearch(s)
                 .Any(name => name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
                 .Take(maxCount)
-                .Select(s => new SearchResultItem(s, string.Join(", ", s.Names)))
                 .ToArray();
         }
 

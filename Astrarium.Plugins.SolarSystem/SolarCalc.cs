@@ -213,12 +213,14 @@ namespace Astrarium.Plugins.SolarSystem
             e["Seasons.Winter", Formatters.DateTime] = (c, x) => c.Get(Seasons, Season.Winter);            
         }
 
-        public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)
+        public ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50)
         {
             if (Sun.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
-                return new[] { new SearchResultItem(Sun, Sun.Name) };
+                return new[] { Sun };
+            else if ("@sun".Equals(searchString, StringComparison.OrdinalIgnoreCase))
+                return new[] { Sun };
             else
-                return new SearchResultItem[0];
+                return new CelestialObject[0];
         }
     }
 }

@@ -34,7 +34,7 @@ namespace Astrarium.Types
     {
         void ConfigureEphemeris(EphemerisConfig<T> config);
         void GetInfo(CelestialObjectInfo<T> info);
-        ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50);
+        ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50);
     }
 
     public abstract class BaseAstroEventsProvider

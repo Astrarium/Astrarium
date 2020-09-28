@@ -179,11 +179,11 @@ namespace Astrarium.Plugins.MinorBodies
             .AddRow("HorizontalParallax");
         }
 
-        public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)
+        public ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50)
         {
             return Comets
                 .Where(c => GetNames(c.Name).Any(n => n.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
-                .Select(p => new SearchResultItem(p, p.Name)).ToArray();
+                .ToArray();
         }
 
         private string[] GetNames(string name)

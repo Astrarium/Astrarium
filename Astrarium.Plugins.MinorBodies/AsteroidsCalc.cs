@@ -133,11 +133,11 @@ namespace Astrarium.Plugins.MinorBodies
             .AddRow("Visibility.Period");
         }
 
-        public ICollection<SearchResultItem> Search(SkyContext context, string searchString, int maxCount = 50)
+        public ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50)
         {
             return Asteroids
                 .Where(a => IsAsteroidNameMatch(a, searchString))
-                .Select(p => new SearchResultItem(p, p.Name)).ToArray();
+                .ToArray();
         }
 
         private bool IsAsteroidNameMatch(Asteroid a, string searchString)

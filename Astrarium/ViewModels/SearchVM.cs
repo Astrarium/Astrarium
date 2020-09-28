@@ -84,10 +84,22 @@ namespace Astrarium.ViewModels
             SearchResults.Clear();
             foreach (var item in results)
             {
-                SearchResults.Add(item);
+                SearchResults.Add(new SearchResultItem(item, string.Join(", ", item.Names)));
             }
 
             SelectedItem = SearchResults.Any() ? SearchResults[0] : null;
+        }
+    }
+
+    public class SearchResultItem
+    {
+        public string Name { get; private set; }
+        public CelestialObject Body { get; private set; }
+
+        public SearchResultItem(CelestialObject body, string name)
+        {
+            Body = body;
+            Name = name;
         }
     }
 }

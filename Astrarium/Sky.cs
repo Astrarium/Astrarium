@@ -12,7 +12,7 @@ namespace Astrarium
 {
     public class Sky : ISky
     {
-        private delegate ICollection<SearchResultItem> SearchDelegate(SkyContext context, string searchString, int maxCount = 50);
+        private delegate ICollection<CelestialObject> SearchDelegate(SkyContext context, string searchString, int maxCount = 50);
         private delegate void GetInfoDelegate<T>(CelestialObjectInfo<T> body) where T : CelestialObject;
 
         private Dictionary<Type, EphemerisConfig> EphemConfigs = new Dictionary<Type, EphemerisConfig>();
@@ -270,17 +270,17 @@ namespace Astrarium
                 .ToArray();
         }
 
-        public ICollection<SearchResultItem> Search(string searchString, Func<CelestialObject, bool> filter, int maxCount = 50)
+        public ICollection<CelestialObject> Search(string searchString, Func<CelestialObject, bool> filter, int maxCount = 50)
         {
             var filterFunc = filter ?? ((b) => true);
-            var results = new List<SearchResultItem>();
+            var results = new List<CelestialObject>();
             if (!string.IsNullOrWhiteSpace(searchString))
             {
                 foreach (var searchProvider in SearchProviders)
                 {
                     if (results.Count < maxCount)
                     {
-                        results.AddRange(searchProvider(Context, searchString, maxCount).Where(r => filterFunc(r.Body)));
+                        results.AddRange(searchProvider(Context, searchString, maxCount).Where(filterFunc));
                     }
                     else
                     {
@@ -288,7 +288,7 @@ namespace Astrarium
                     }
                 }
             }
-            return results.Take(maxCount).OrderBy(r => r.Name).ToList();
+            return results.OrderBy(b => string.Join(", ", b.Names)).Take(maxCount).ToList();
         }
        
         public Constellation GetConstellation(string code)
