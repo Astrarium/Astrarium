@@ -12,14 +12,13 @@ namespace Astrarium.Types
         void SetDate(double jd);
         void Calculate();
         bool DateTimeSync { get; set; }
-        List<List<Ephemeris>> GetEphemerides(CelestialObject body, double from, double to, double step, IEnumerable<string> categories, CancellationToken? cancelToken = null, IProgress<double> progress = null);
+        List<Ephemerides> GetEphemerides(CelestialObject body, double from, double to, double step, IEnumerable<string> categories, CancellationToken? cancelToken = null, IProgress<double> progress = null);
         ICollection<string> GetEphemerisCategories(CelestialObject body);
         ICollection<AstroEvent> GetEvents(double jdFrom, double jdTo, IEnumerable<string> categories, CancellationToken? cancelToken = null);
         ICollection<string> GetEventsCategories();
         CelestialObjectInfo GetInfo(CelestialObject body);
         Constellation GetConstellation(string code);
-        
-        
+                
         /// <summary>
         /// Searches celestial objects by string.
         /// </summary>

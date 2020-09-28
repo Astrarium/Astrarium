@@ -32,9 +32,8 @@ namespace Astrarium.Plugins.SolarSystem
         public ICollection<Track> Tracks { get; private set; }
         public ICollection<Polygon> Polygons { get; private set; }
 
-        private readonly SolarCalc solarCalc;
-        private readonly LunarCalc lunarCalc;
         private readonly CrdsGeographical observerLocation;
+        private readonly ISky sky;
         private readonly ISettings settings;
 
         private PolynomialBesselianElements besselianElements;
@@ -65,10 +64,9 @@ namespace Astrarium.Plugins.SolarSystem
             set => SetValue(nameof(TileImageAttributes), value);
         }
 
-        public SolarEclipseVM(ISky sky, SolarCalc solarCalc, LunarCalc lunarCalc, ISettings settings)
+        public SolarEclipseVM(ISky sky, ISettings settings)
         {
-            this.solarCalc = solarCalc;
-            this.lunarCalc = lunarCalc;            
+            this.sky = sky;
             this.settings = settings;
             this.settings.PropertyChanged += Settings_PropertyChanged;
 
@@ -87,6 +85,7 @@ namespace Astrarium.Plugins.SolarSystem
             TileServer = TileServers.First();
 
             JulianDay = sky.Context.JulianDay;
+
             CalculateEclipse(next: true);
         }
 
@@ -189,18 +188,29 @@ namespace Astrarium.Plugins.SolarSystem
             SolarEclipse eclipse = SolarEclipses.NearestEclipse(JulianDay + (next ? 30 : -30), next);
             JulianDay = eclipse.JulianDayMaximum;
 
+            // 5 measurements with 3h step, so interval is -6...+6 hours
             SunMoonPosition[] pos = new SunMoonPosition[5];
+
+
+            CelestialObject sun = sky.Search("@sun", b => true).FirstOrDefault();
+            CelestialObject moon = sky.Search("@moon", b => true).FirstOrDefault();
+
+            double dt = TimeSpan.FromHours(6).TotalDays;
+            double step = TimeSpan.FromHours(3).TotalDays;
+            string[] ephemerides = new[] { "Equatorial0.Alpha", "Equatorial0.Delta", "Distance" };
+
+            var sunEphem = sky.GetEphemerides(sun, JulianDay - dt, JulianDay + dt + 1e-6, step, ephemerides);
+            var moonEphem = sky.GetEphemerides(moon, JulianDay - dt, JulianDay + dt + 1e-6, step, ephemerides);
+
             for (int i = 0; i < 5; i++)
             {
-                // 5 measurements with 3h step, so interval is -6...+6 hours
-                SkyContext c = new SkyContext(JulianDay + TimeSpan.FromHours(3).TotalDays * (i - 2), observerLocation);
                 pos[i] = new SunMoonPosition()
                 {
-                    JulianDay = c.JulianDay,
-                    Sun = c.Get(solarCalc.Equatorial0),
-                    Moon = c.Get(lunarCalc.Equatorial0),
-                    DistanceSun = c.Get(solarCalc.Ecliptical).Distance * 149597870 / 6371.0,
-                    DistanceMoon = c.Get(lunarCalc.Ecliptical0).Distance / 6371.0
+                    JulianDay = JulianDay + step * (i - 2),
+                    Sun = new CrdsEquatorial(sunEphem[i].GetValue<double>("Equatorial0.Alpha"), sunEphem[i].GetValue<double>("Equatorial0.Delta")),
+                    Moon = new CrdsEquatorial(moonEphem[i].GetValue<double>("Equatorial0.Alpha"), moonEphem[i].GetValue<double>("Equatorial0.Delta")),
+                    DistanceSun = sunEphem[i].GetValue<double>("Distance") * 149597870 / 6371.0,
+                    DistanceMoon = moonEphem[i].GetValue<double>("Distance") / 6371.0
                 };
             }
 

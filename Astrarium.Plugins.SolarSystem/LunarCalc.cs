@@ -282,7 +282,7 @@ namespace Astrarium.Plugins.SolarSystem
             e["PhaseAngle"] = (c, m) => c.Get(PhaseAngle);
             e["Age", new Formatters.UnsignedDoubleFormatter(2, " d")] = (c, m) => c.Get(Age);
             e["Magnitude"] = (c, m) => c.Get(Magnitude);
-            e["Distance", new LunarDistanceFormatter()] = (c, m) => (int)c.Get(Ecliptical0).Distance;
+            e["Distance", new LunarDistanceFormatter()] = (c, m) => c.Get(Ecliptical0).Distance;
             e["HorizontalParallax"] = (c, m) => c.Get(Parallax);
             e["AngularDiameter"] = (c, m) => c.Get(Semidiameter) * 2 / 3600.0;
             e["Libration.Latitude", new LibrationLatitudeFormatter()] = (c, m) => c.Get(LibrationElements).b;

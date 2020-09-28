@@ -93,7 +93,7 @@ namespace Astrarium.Plugins.Tracks.ViewModels
             var positions = sky.GetEphemerides(track.Body, track.From, track.To, track.Step, new[] { "Equatorial.Alpha", "Equatorial.Delta" });
             foreach (var eq in positions)
             {
-                track.Points.Add(new CelestialPoint() { Equatorial0 = new CrdsEquatorial((double)eq[0].Value, (double)eq[1].Value) });
+                track.Points.Add(new CelestialPoint() { Equatorial0 = new CrdsEquatorial(eq.GetValue<double>("Equatorial.Alpha"), eq.GetValue<double>("Equatorial.Delta")) });
             }
 
             Track existing = trackCalc.Tracks.FirstOrDefault(t => t.Id == track.Id);            

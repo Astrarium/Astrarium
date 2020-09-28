@@ -23,7 +23,7 @@ namespace Astrarium.Plugins.SolarSystem
     {
         public string Format(object value)
         {
-            return value + " km";
+            return (int)value + " km";
         }
     }
 

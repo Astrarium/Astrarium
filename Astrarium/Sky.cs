@@ -164,9 +164,9 @@ namespace Astrarium
             Calculated?.Invoke();
         }
 
-        public List<List<Ephemeris>> GetEphemerides(CelestialObject body, double from, double to, double step, IEnumerable<string> categories, CancellationToken? cancelToken = null, IProgress<double> progress = null)
+        public List<Ephemerides> GetEphemerides(CelestialObject body, double from, double to, double step, IEnumerable<string> categories, CancellationToken? cancelToken = null, IProgress<double> progress = null)
         {
-            List<List<Ephemeris>> ephemerides = new List<List<Ephemeris>>();
+            List<Ephemerides> all = new List<Ephemerides>();
 
             var config = EphemConfigs[body.GetType()];
 
@@ -185,11 +185,11 @@ namespace Astrarium
 
                 var context = new SkyContext(jd, Context.GeoLocation);
 
-                List<Ephemeris> ephemeris = new List<Ephemeris>();
+                Ephemerides ephemerides = new Ephemerides();
 
                 foreach (var item in itemsToBeCalled)
                 {
-                    ephemeris.Add(new Ephemeris()
+                    ephemerides.Add(new Ephemeris()
                     {
                         Key = item.Category,
                         Value = item.Formula.DynamicInvoke(context, body),
@@ -197,10 +197,10 @@ namespace Astrarium
                     });
                 }
 
-                ephemerides.Add(ephemeris);
+                all.Add(ephemerides);
             }
 
-            return ephemerides;
+            return all;
         }
 
         public CelestialObjectInfo GetInfo(CelestialObject body)

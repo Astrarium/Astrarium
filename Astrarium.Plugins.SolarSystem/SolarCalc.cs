@@ -20,13 +20,6 @@ namespace Astrarium.Plugins.SolarSystem
 
         public Sun Sun { get; private set; } = new Sun();
 
-        private LunarCalc lunarCalc;
-
-        public SolarCalc(LunarCalc lunarCalc)
-        {
-            this.lunarCalc = lunarCalc;
-        }
-
         public override void Calculate(SkyContext c)
         {
             Sun.Equatorial = c.Get(Equatorial);

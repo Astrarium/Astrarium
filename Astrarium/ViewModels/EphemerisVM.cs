@@ -19,7 +19,7 @@ namespace Astrarium.ViewModels
 
         private readonly ISky sky;
         private CelestialObject Body;
-        private List<List<Ephemeris>> Ephemeris;
+        private List<Ephemerides> Ephemeris;
         private double StartDate;
         private double EndDate;
         private TimeSpan Step;
@@ -32,7 +32,7 @@ namespace Astrarium.ViewModels
             CloseCommand = new Command(Close);
         }
 
-        public void SetData(CelestialObject body, double jdFrom, double jdTo, TimeSpan step, List<List<Ephemeris>> ephemeris)
+        public void SetData(CelestialObject body, double jdFrom, double jdTo, TimeSpan step, List<Ephemerides> ephemerides)
         {
             string bodyName = body.Names.First();
             string bodyTypeName = body.GetType().Name;
@@ -47,13 +47,13 @@ namespace Astrarium.ViewModels
            
             var table = new DataTable();
             table.Columns.Add(new DataColumn() { Caption = Text.Get("EphemeridesWindow.DateColumn"), ColumnName = "Date" });
-            table.Columns.AddRange(ephemeris[0].Select(e => new DataColumn() { Caption = Text.Get($"{bodyTypeName}.{e.Key}"), ColumnName = e.Key }).ToArray());
+            table.Columns.AddRange(ephemerides[0].Select(e => new DataColumn() { Caption = Text.Get($"{bodyTypeName}.{e.Key}"), ColumnName = e.Key }).ToArray());
 
-            for (int i = 0; i < ephemeris.Count; i++)
+            for (int i = 0; i < ephemerides.Count; i++)
             {
                 var row = table.NewRow();
                 row["Date"] = Formatters.DateTime.Format(new Date(jdFrom + i * step.TotalDays, utcOffset));
-                foreach (var e in ephemeris[i])
+                foreach (var e in ephemerides[i])
                 {
                     row[e.Key] = e.Formatter.Format(e.Value);
                 }
@@ -61,7 +61,7 @@ namespace Astrarium.ViewModels
             }
 
             Body = body;
-            Ephemeris = ephemeris;
+            Ephemeris = ephemerides;
             EphemerisTable = table;
             StartDate = jdFrom;
             EndDate = jdTo;
@@ -93,7 +93,7 @@ namespace Astrarium.ViewModels
 
     public interface IEphemeridesWriter
     {
-        void Write(CelestialObject body, double jdFrom, double jdTo, TimeSpan step, List<List<Ephemeris>> ephemerides);
+        void Write(CelestialObject body, double jdFrom, double jdTo, TimeSpan step, List<Ephemerides> ephemerides);
     }
 
     public class EphemeridesCsvWriter : IEphemeridesWriter
@@ -107,7 +107,7 @@ namespace Astrarium.ViewModels
             this.utcOffset = utcOffset;
         }
 
-        public void Write(CelestialObject body, double jdFrom, double jdTo, TimeSpan step, List<List<Ephemeris>> ephemerides)
+        public void Write(CelestialObject body, double jdFrom, double jdTo, TimeSpan step, List<Ephemerides> ephemerides)
         {
             string bodyTypeName = body.GetType().Name;
 
