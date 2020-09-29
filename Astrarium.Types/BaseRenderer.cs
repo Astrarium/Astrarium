@@ -8,8 +8,20 @@ namespace Astrarium.Types
     /// </summary>
     public abstract class BaseRenderer : PropertyChangedBase
     {
+        /// <summary>
+        /// Does rendering logic.
+        /// </summary>
+        /// <param name="map"><see cref="IMapContext"/> instance.</param>
         public abstract void Render(IMapContext map);
+
+        /// <summary>
+        /// Intitialization logic should be placed here.
+        /// </summary>
         public virtual void Initialize() { }
+
+        /// <summary>
+        /// Gets rendering order for the renderer.
+        /// </summary>
         public abstract RendererOrder Order { get; }
 
         /// <summary>
@@ -29,16 +41,43 @@ namespace Astrarium.Types
     public enum RendererOrder
     {
         /// <summary>
-        /// Renderer should be processed first
+        /// Rendering layer for sky background
         /// </summary>
         Background = 0,
 
+        /// <summary>
+        /// Rendering layer for displaying celestial grids and other lines
+        /// </summary>
         Grids = 1,
+
+        /// <summary>
+        /// Rendering layer for deep sky objects
+        /// </summary>
         DeepSpace = 2,
+
+        /// <summary>
+        /// Rendering layer for stars
+        /// </summary>
         Stars = 3,
+
+        /// <summary>
+        /// Rendering layer for solar system objects
+        /// </summary>
         SolarSystem = 4,
+
+        /// <summary>
+        /// Rendering layer for objects on Earth orbit
+        /// </summary>
         EarthOrbit = 5,
+
+        /// <summary>
+        /// Rendering layer for terrestrial objects
+        /// </summary>
         Terrestrial = 6,
+
+        /// <summary>
+        /// Rendering layer for foreground objects which overlap all previous layers
+        /// </summary>
         Foreground = 7
     }
 }

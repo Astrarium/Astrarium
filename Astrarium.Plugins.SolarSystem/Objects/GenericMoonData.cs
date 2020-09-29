@@ -35,7 +35,5 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         /// Mean radius of satellite, in km
         /// </summary>
         public double radius { get; set; }
-
-        public bool jpl { get; set; }
     }
 }

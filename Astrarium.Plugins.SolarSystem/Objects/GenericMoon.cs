@@ -23,7 +23,7 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         /// <summary>
         /// Moon id, used internally for calculation
         /// </summary>
-        public int Id => Data.planet * 100 + Data.satellite + (Data.jpl ? 1000 : 0);
+        public int Id => Data.planet * 100 + Data.satellite;
 
         /// <summary>
         /// Apparent equatorial coordinates of the moon

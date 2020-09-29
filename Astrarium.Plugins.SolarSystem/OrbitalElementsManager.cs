@@ -45,13 +45,14 @@ namespace Astrarium.Plugins.SolarSystem
 
             if (File.Exists(cachedFilePath))
             {
-                Debug.WriteLine("Cached orbital elements file exists, try to parse");
+                Debug.WriteLine("Read cached orbital elements file...");
                 try
                 {
                     using (StreamReader file = File.OpenText(cachedFilePath))
                     {
                         orbits = (List<GenericMoonData>)serializer.Deserialize(file, typeof(List<GenericMoonData>));
                     }
+                    Debug.WriteLine($"Reading cached orbital elements done. {orbits.Count} records read.");
                 }
                 catch (Exception ex)
                 {
@@ -65,13 +66,14 @@ namespace Astrarium.Plugins.SolarSystem
 
             if (orbits == null)
             {
-                Debug.WriteLine("Read default orbital elements.");
+                Debug.WriteLine("Read default orbital elements...");
                 try
                 {
                     using (StreamReader file = File.OpenText(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/SatellitesOrbits.dat")))
                     {
                         orbits = (List<GenericMoonData>)serializer.Deserialize(file, typeof(List<GenericMoonData>));
                     }
+                    Debug.WriteLine($"Reading default orbital elements done. {orbits.Count} records read.");
                 }
                 catch (Exception ex)
                 {
@@ -81,61 +83,76 @@ namespace Astrarium.Plugins.SolarSystem
 
             if (settings.Get("GenericMoonsAutoUpdate"))
             {
-                Task.Run(() =>
+                DateTime today = DateTime.Today;
+                double jdToday = new Date(today).ToJulianDay();
+
+                // check if any orbit data is obsolete
+                // TODO: move validityPeriod to settings
+                int validityPeriod = 30;
+
+                var obsoleteOrbits = orbits.Where(orbit => Math.Abs(orbit.jd - jdToday) > validityPeriod);
+
+                int obsoleteOrbitsCount = obsoleteOrbits.Count();
+
+                if (obsoleteOrbitsCount > 0)
                 {
-                    DateTime today = DateTime.Today;
-                    double jdToday = new Date(today).ToJulianDay();
-
-                    Debug.WriteLine("Orbital elements are obsolete, downloading from web.");
-
-                    string startDate = today.ToString("yyyy-MM-dd");
-                    string endDate = today.AddDays(2).ToString("yyyy-MM-dd");
-
-                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-
-                    foreach (var orbit in orbits)
+                    Task.Run(() =>
                     {
-                        string url = $"https://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&COMMAND='{(orbit.planet * 100 + orbit.satellite)}'&CENTER='500@{(orbit.planet * 100 + 99)}'&MAKE_EPHEM='YES'&TABLE_TYPE='ELEMENTS'&START_TIME='{startDate}'&STOP_TIME='{endDate}'&STEP_SIZE='1 d'&OUT_UNITS='AU-D'&REF_PLANE='ECLIPTIC'&REF_SYSTEM='J2000'&TP_TYPE='ABSOLUTE'&CSV_FORMAT='YES'&OBJ_DATA='YES'";
-                        try
+                        Debug.WriteLine($"Found {obsoleteOrbitsCount} obsolete orbital elements, downloading from web.");
+
+                        string startDate = today.ToString("yyyy-MM-dd");
+                        string endDate = today.AddDays(2).ToString("yyyy-MM-dd");
+
+                        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+                        foreach (var orbit in obsoleteOrbits)
                         {
-                            var request = WebRequest.Create(url);
-                            using (var response = (HttpWebResponse)(request.GetResponse()))
-                            using (var receiveStream = response.GetResponseStream())
-                            using (var reader = new StreamReader(receiveStream))
+                            string url = $"https://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&COMMAND='{(orbit.planet * 100 + orbit.satellite)}'&CENTER='500@{(orbit.planet * 100 + 99)}'&MAKE_EPHEM='YES'&TABLE_TYPE='ELEMENTS'&START_TIME='{startDate}'&STOP_TIME='{endDate}'&STEP_SIZE='1 d'&OUT_UNITS='AU-D'&REF_PLANE='ECLIPTIC'&REF_SYSTEM='J2000'&TP_TYPE='ABSOLUTE'&CSV_FORMAT='YES'&OBJ_DATA='YES'";
+                            try
                             {
-                                if (response.StatusCode == HttpStatusCode.OK)
+                                var request = WebRequest.Create(url);
+                                using (var response = (HttpWebResponse)(request.GetResponse()))
+                                using (var receiveStream = response.GetResponseStream())
+                                using (var reader = new StreamReader(receiveStream))
                                 {
-                                    ParseOrbit(orbit, reader.ReadToEnd());
-                                }
-                                else
-                                {
-                                    Trace.TraceError($"Unable to download orbital elements from url: {url}, status code: {response.StatusCode}");
+                                    if (response.StatusCode == HttpStatusCode.OK)
+                                    {
+                                        ParseOrbit(orbit, reader.ReadToEnd());
+                                    }
+                                    else
+                                    {
+                                        Trace.TraceError($"Unable to download orbital elements from url: {url}, status code: {response.StatusCode}");
+                                    }
                                 }
                             }
+                            catch (Exception ex)
+                            {
+                                Trace.TraceError($"Unable to download orbital elements from url: {url}, Details: {ex}");
+                            }
+                        }
+
+                        Debug.WriteLine($"{orbits.Count} orbital elements downloaded.");
+                        Debug.WriteLine("Saving orbital elements to cache...");
+
+                        try
+                        {
+                            using (StreamWriter file = File.CreateText(cachedFilePath))
+                            {
+                                serializer.Formatting = Formatting.Indented;
+                                serializer.Serialize(file, orbits);
+                            }
+                            Debug.WriteLine("Orbital elements saved to cache.");
                         }
                         catch (Exception ex)
                         {
-                            Trace.TraceError($"Unable to download orbital elements from url: {url}, Details: {ex}");
+                            Trace.TraceError($"Unable to save orbital elements to cache, Details: {ex}");
                         }
-                    }
-
-                    Debug.WriteLine($"{orbits.Count} orbital elements downloaded.");
-                    Debug.WriteLine("Saving orbital elements to cache...");
-
-                    try
-                    {
-                        using (StreamWriter file = File.CreateText(cachedFilePath))
-                        {
-                            serializer.Formatting = Formatting.Indented;
-                            serializer.Serialize(file, orbits);
-                        }
-                        Debug.WriteLine("Orbital elements saved to cache.");
-                    }
-                    catch (Exception ex)
-                    {
-                        Trace.TraceError($"Unable to save orbital elements to cache, Details: {ex}");
-                    }
-                });
+                    });
+                }
+                else
+                {
+                    Debug.WriteLine($"All orbital elements are up to date.");
+                }
             }
 
             return orbits;
