@@ -870,6 +870,8 @@ namespace Astrarium.Plugins.SolarSystem
         private void RenderJupiterShadow(IMapContext map, JupiterMoon moon)
         {
             if (!moon.IsEclipsedByPlanet) return;
+            if (!settings.Get("Planets")) return;
+            if (!settings.Get("PlanetMoons")) return;
 
             Planet jupiter = planetsCalc.Planets.ElementAt(Planet.JUPITER - 1);
 
@@ -919,6 +921,9 @@ namespace Astrarium.Plugins.SolarSystem
 
         private void RenderJupiterMoonShadow(IMapContext map, SizeableCelestialObject eclipsedBody, CrdsRectangular rect = null)
         {
+            if (!settings.Get("Planets")) return;
+            if (!settings.Get("PlanetMoons")) return;
+
             if (rect == null)
             {
                 rect = new CrdsRectangular();
