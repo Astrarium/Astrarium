@@ -108,9 +108,8 @@ namespace Astrarium.Plugins.SolarSystem
             .AddRow("OrbitalElements.Epoch", Formatters.Date.Format(new Date(info.Body.Data.jd)));
             // TODO: add other orbital elements
 
-            // TODO: move validityPeriod to settings
-            int validityPeriod = 30;
-            if (Math.Abs(info.Body.Data.jd - new Date(DateTime.Today).ToJulianDay()) > validityPeriod)
+            decimal validityPeriod = settings.Get<decimal>("GenericMoonsOrbitalElementsValidity");
+            if (Math.Abs(info.Body.Data.jd - new Date(DateTime.Today).ToJulianDay()) > (double)validityPeriod)
             {
                 info.AddRow("OrbitalElements.Obsolete", "");
             }

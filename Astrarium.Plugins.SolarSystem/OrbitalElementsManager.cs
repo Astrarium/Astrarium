@@ -87,10 +87,9 @@ namespace Astrarium.Plugins.SolarSystem
                 double jdToday = new Date(today).ToJulianDay();
 
                 // check if any orbit data is obsolete
-                // TODO: move validityPeriod to settings
-                int validityPeriod = 30;
+                decimal validityPeriod = settings.Get<decimal>("GenericMoonsOrbitalElementsValidity");
 
-                var obsoleteOrbits = orbits.Where(orbit => Math.Abs(orbit.jd - jdToday) > validityPeriod);
+                var obsoleteOrbits = orbits.Where(orbit => Math.Abs(orbit.jd - jdToday) > (double)validityPeriod);
 
                 int obsoleteOrbitsCount = obsoleteOrbits.Count();
 

@@ -1,6 +1,7 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Plugins.SolarSystem.Controls;
 using Astrarium.Types;
+using Astrarium.Types.Controls;
 using System.ComponentModel;
 using System.Drawing;
 
@@ -26,6 +27,8 @@ namespace Astrarium.Plugins.SolarSystem
             SettingItems.Add("Planets", new SettingItem("JupiterMoonsShadowOutline", true, s => s.Get("Planets") && s.Get("PlanetMoons")));
             SettingItems.Add("Planets", new SettingItem("GenericMoons", true, s => s.Get("Planets") && s.Get("PlanetMoons")));
             SettingItems.Add("Planets", new SettingItem("GenericMoonsAutoUpdate", false, s => s.Get("Planets") && s.Get("PlanetMoons") && s.Get("GenericMoons")));
+            SettingItems.Add("Planets", new SettingItem("GenericMoonsOrbitalElementsValidity", (decimal)30, typeof(UpDownSettingControl), s => s.Get("Planets") && s.Get("PlanetMoons") && s.Get("GenericMoons") && s.Get("GenericMoonsAutoUpdate")));
+            
             SettingItems.Add("Planets", new SettingItem("GRSLongitude", new GreatRedSpotSettings()
             {
                 Epoch = 2458150.5000179596,
