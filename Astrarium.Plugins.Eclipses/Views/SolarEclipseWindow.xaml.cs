@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace Astrarium.Plugins.SolarSystem
+namespace Astrarium.Plugins.Eclipses
 {
     /// <summary>
     /// Interaction logic for SolarEclipseWindow.xaml

@@ -55,9 +55,6 @@ namespace Astrarium.Plugins.SolarSystem
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconMoon", "$Settings.Moon", new SimpleBinding(settings, "Moon", "IsChecked")));
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconPlanet", "$Settings.Planets", new SimpleBinding(settings, "Planets", "IsChecked")));
 
-            MenuItem eclipsesMenu = new MenuItem("Solar eclipses", new Command(ShowSolarEclipsesView));            
-            MenuItems.Add(MenuItemPosition.MainMenuTools, eclipsesMenu);
-
             ExportResourceDictionaries("Images.xaml");
 
             #endregion UI integration
@@ -69,12 +66,6 @@ namespace Astrarium.Plugins.SolarSystem
             Formatters.Default["Appearance.D"] = new Formatters.UnsignedDoubleFormatter(2, "\u00B0");
 
             #endregion Extending formatters
-        }
-
-        private void ShowSolarEclipsesView()
-        {
-            var vm = ViewManager.CreateViewModel<SolarEclipseVM>();
-            ViewManager.ShowDialog(vm);
         }
 
         public enum TextureQuality

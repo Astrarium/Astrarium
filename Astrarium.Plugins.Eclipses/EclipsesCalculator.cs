@@ -7,17 +7,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Astrarium.Plugins.SolarSystem
+namespace Astrarium.Plugins.Eclipses
 {
     public class EclipsesCalculator : BaseAstroEventsProvider
     {
-        private readonly SolarCalc solarCalc;
-        private readonly LunarCalc lunarCalc;
-
-        public EclipsesCalculator(SolarCalc solarCalc, LunarCalc lunarCalc)
+        public EclipsesCalculator()
         {
-            this.solarCalc = solarCalc;
-            this.lunarCalc = lunarCalc;
+
         }
 
         public override void ConfigureAstroEvents(AstroEventsConfig cfg)
@@ -43,7 +39,7 @@ namespace Astrarium.Plugins.SolarSystem
                     string phase = eclipse.EclipseType == SolarEclipseType.Partial ? $"(max phase {Formatters.Phase.Format(eclipse.Phase)}) " : "";
                     string regio = eclipse.Regio.ToString();
 
-                    events.Add(new AstroEvent(jd, $"{type}{subtype} solar eclipse {phase}visible in {regio} regio.", solarCalc.Sun));
+                    events.Add(new AstroEvent(jd, $"{type}{subtype} solar eclipse {phase}visible in {regio} regio."));
                     jd += LunarEphem.SINODIC_PERIOD;
                 }
                 else

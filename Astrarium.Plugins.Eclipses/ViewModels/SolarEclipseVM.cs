@@ -12,41 +12,68 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 
-namespace Astrarium.Plugins.SolarSystem
+namespace Astrarium.Plugins.Eclipses
 {
     public class SolarEclipseVM : ViewModelBase
     {
+        /// <summary>
+        /// Directory to store maps cache
+        /// </summary>
         public string CacheFolder { get; private set; }
 
+        /// <summary>
+        /// Selected Julian date
+        /// </summary>
         public double JulianDay { get; set; }
 
+        /// <summary>
+        /// Date of the eclipse selected, converted to string
+        /// </summary>
         public string EclipseDate { get; private set; }
 
         public ICommand PrevEclipseCommand => new Command(PrevEclipse);
         public ICommand NextEclipseCommand => new Command(NextEclipse);
         public ICommand ClickOnMapCommand => new Command(ClickOnMap);
 
+        /// <summary>
+        /// Collection of map tile servers to switch between them
+        /// </summary>
         public ICollection<ITileServer> TileServers { get; private set; }
 
+        /// <summary>
+        /// Collection of markers (points) on the map
+        /// </summary>
         public ICollection<Marker> Markers { get; private set; }
+
+        /// <summary>
+        /// Collection of tracks (lines) on the map
+        /// </summary>
         public ICollection<Track> Tracks { get; private set; }
+
+        /// <summary>
+        /// Collection of polygons (areas) on the map
+        /// </summary>
         public ICollection<Polygon> Polygons { get; private set; }
 
-        private readonly CrdsGeographical observerLocation;
         private readonly ISky sky;
         private readonly ISettings settings;
-
+        private readonly CrdsGeographical observerLocation;
         private PolynomialBesselianElements besselianElements;
+        private readonly CelestialObject sun;
+        private readonly CelestialObject moon;
+
+        #region Map styles
 
         private readonly MarkerStyle riseSetMarkerStyle = new MarkerStyle(5, Brushes.Red, null, Brushes.Red, SystemFonts.DefaultFont, StringFormat.GenericDefault);
         private readonly MarkerStyle centralLineMarkerStyle = new MarkerStyle(5, Brushes.Black, null, Brushes.Black, SystemFonts.DefaultFont, StringFormat.GenericDefault);
         private readonly MarkerStyle maxPointMarkerStyle = new MarkerStyle(5, Brushes.Red, null, Brushes.Black, SystemFonts.DefaultFont, StringFormat.GenericDefault);
-
         private readonly TrackStyle riseSetTrackStyle = new TrackStyle(new Pen(Color.Red, 2));
         private readonly TrackStyle penumbraLimitTrackStyle = new TrackStyle(new Pen(Color.Orange, 2));
         private readonly TrackStyle umbraLimitTrackStyle = new TrackStyle(new Pen(Color.Gray, 2));
         private readonly TrackStyle centralLineTrackStyle = new TrackStyle(new Pen(Color.Black, 2));
         private readonly PolygonStyle umbraPolygonStyle = new PolygonStyle(new SolidBrush(Color.FromArgb(100, Color.Gray)));
+
+        #endregion Map styles
 
         public ITileServer TileServer
         {
@@ -69,8 +96,9 @@ namespace Astrarium.Plugins.SolarSystem
             this.sky = sky;
             this.settings = settings;
             this.settings.PropertyChanged += Settings_PropertyChanged;
-
             observerLocation = settings.Get<CrdsGeographical>("ObserverLocation");
+            sun = sky.Search("@sun", b => true).FirstOrDefault();
+            moon = sky.Search("@moon", b => true).FirstOrDefault();
 
             CacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "MapsCache");
 
@@ -183,6 +211,12 @@ namespace Astrarium.Plugins.SolarSystem
 
         private void CalculateEclipse(bool next)
         {
+            if (sun == null || moon == null)
+            {
+                ViewManager.ShowMessageBox("Error", "Failed to calculate eclipse details: unable to determine Sun and/or Moon positions. Probably SolarSystem plugin is missed.");
+                return;
+            }
+
             // TODO: move to EclipsesCalculator
 
             SolarEclipse eclipse = SolarEclipses.NearestEclipse(JulianDay + (next ? 30 : -30), next);
@@ -190,10 +224,6 @@ namespace Astrarium.Plugins.SolarSystem
 
             // 5 measurements with 3h step, so interval is -6...+6 hours
             SunMoonPosition[] pos = new SunMoonPosition[5];
-
-
-            CelestialObject sun = sky.Search("@sun", b => true).FirstOrDefault();
-            CelestialObject moon = sky.Search("@moon", b => true).FirstOrDefault();
 
             double dt = TimeSpan.FromHours(6).TotalDays;
             double step = TimeSpan.FromHours(3).TotalDays;

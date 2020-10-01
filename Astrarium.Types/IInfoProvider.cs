@@ -31,34 +31,6 @@ namespace Astrarium.Types
         }
     }
 
-    /*
-    public class InfoBuilder<T> where T : CelestialObject
-    {
-        public string Title { get; private set; }
-        public string Subtitle { get; private set; }
-        public IList<InfoElement> InfoElements { get; } = new List<InfoElement>();
-
-        public CelestialObject CelestialBody { get; private set; }
-        public SkyContext Context { get; private set; }
-
-        public InfoBuilder(SkyContext context, CelestialObject body)
-        {
-            Context = context;
-            CelestialBody = body;
-        }
-
-        public InfoBuilder<T> AddRow(string key)
-        {
-            InfoElements.Add(new InfoElementProperty()
-            {
-                Caption = key,
-                NeedCalculate = true
-            });
-            return this;
-        }
-    }
-    */
-
     public abstract class CelestialObjectInfo
     {
         public string Title { get; protected set; }
