@@ -31,6 +31,8 @@ namespace Astrarium.Plugins.Eclipses
         /// </summary>
         public string EclipseDate { get; private set; }
 
+        public double Magnitude { get; private set; }
+
         public ICommand PrevEclipseCommand => new Command(PrevEclipse);
         public ICommand NextEclipseCommand => new Command(NextEclipse);
         public ICommand ClickOnMapCommand => new Command(ClickOnMap);
@@ -250,6 +252,8 @@ namespace Astrarium.Plugins.Eclipses
 
             EclipseDate = Formatters.Date.Format(new Date(JulianDay, observerLocation.UtcOffset));
 
+            Magnitude = SolarEclipses.Obscuration(besselianElements, map.Max.Coordinates, map.Max.JulianDay);
+
             var tracks = new List<Track>();
             var polygons = new List<Polygon>();
             var markers = new List<Marker>();
@@ -377,9 +381,7 @@ namespace Astrarium.Plugins.Eclipses
             Polygons = polygons;
             Markers = markers;
 
-
-
-            NotifyPropertyChanged(nameof(EclipseDate), nameof(Tracks), nameof(Polygons), nameof(Markers));
+            NotifyPropertyChanged(nameof(EclipseDate), nameof(Tracks), nameof(Polygons), nameof(Markers), nameof(Magnitude));
         }
 
         private GeoPoint ToGeo(CrdsGeographical g)

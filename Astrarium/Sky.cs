@@ -164,6 +164,7 @@ namespace Astrarium
             Calculated?.Invoke();
         }
 
+        // TODO: add ability to specify location and preferFast flag
         public List<Ephemerides> GetEphemerides(CelestialObject body, double from, double to, double step, IEnumerable<string> categories, CancellationToken? cancelToken = null, IProgress<double> progress = null)
         {
             List<Ephemerides> all = new List<Ephemerides>();
@@ -201,6 +202,24 @@ namespace Astrarium
             }
 
             return all;
+        }
+
+        public Ephemerides GetEphemerides(CelestialObject body, SkyContext context, IEnumerable<string> categories)
+        {
+            List<Ephemerides> all = new List<Ephemerides>();
+            var config = EphemConfigs[body.GetType()];
+            var itemsToBeCalled = config.Filter(categories);
+            Ephemerides ephemerides = new Ephemerides();
+            foreach (var item in itemsToBeCalled)
+            {
+                ephemerides.Add(new Ephemeris()
+                {
+                    Key = item.Category,
+                    Value = item.Formula.DynamicInvoke(context, body),
+                    Formatter = item.Formatter ?? Formatters.GetDefault(item.Category)
+                });
+            }
+            return ephemerides;
         }
 
         public CelestialObjectInfo GetInfo(CelestialObject body)

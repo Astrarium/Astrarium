@@ -28,6 +28,8 @@
             <Button MinWidth="50" Content="&lt;- Prev" Command="{Binding PrevEclipseCommand}" />
             <Label Content="{Binding EclipseDate, FallbackValue='01 Jan 2000'}" />
             <Button MinWidth="50" Content="Next -&gt;" Command="{Binding NextEclipseCommand}" />
+
+            <Label Content="{Binding Magnitude}"/>
         </StackPanel>
         
         <ComboBox Grid.Row="1" ItemsSource="{Binding TileServers, Mode=OneTime}" DisplayMemberPath="Name" SelectedItem="{Binding TileServer}" />
