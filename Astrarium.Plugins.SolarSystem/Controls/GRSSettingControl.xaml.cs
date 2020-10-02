@@ -48,6 +48,7 @@ namespace Astrarium.Plugins.SolarSystem.Controls
                     tempFile = Path.GetTempFileName();
                     using (var client = new WebClient())
                     {
+                        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
                         client.DownloadFile("https://www.ap-i.net/pub/virtualplanet/grs.txt", tempFile);
                     }
 
