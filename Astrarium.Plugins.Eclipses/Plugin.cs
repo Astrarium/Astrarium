@@ -12,24 +12,26 @@ namespace Astrarium.Plugins.Eclipses
         {
             #region UI integration
 
-            MenuItem eclipsesMenu = new MenuItem("Solar eclipses", new Command(ShowSolarEclipsesView));            
+            MenuItem eclipsesMenu = new MenuItem("$Astrarium.Plugins.Eclipses.ToolsMenu");
+            MenuItem solarEclipsesMenu = new MenuItem("$Astrarium.Plugins.SolarEclipses.ToolsMenu", new Command(ShowSolarEclipsesView));
+            MenuItem lunarEclipsesMenu = new MenuItem("$Astrarium.Plugins.LunarEclipses.ToolsMenu", new Command(ShowLunarEclipsesView));
+            eclipsesMenu.SubItems.Add(solarEclipsesMenu);
+            eclipsesMenu.SubItems.Add(lunarEclipsesMenu);
+
             MenuItems.Add(MenuItemPosition.MainMenuTools, eclipsesMenu);
 
             #endregion UI integration
-
-            #region Extending formatters
-
-            Formatters.Default["Appearance.CM"] = new Formatters.UnsignedDoubleFormatter(2, "\u00B0");
-            Formatters.Default["Appearance.P"] = new Formatters.UnsignedDoubleFormatter(2, "\u00B0");
-            Formatters.Default["Appearance.D"] = new Formatters.UnsignedDoubleFormatter(2, "\u00B0");
-
-            #endregion Extending formatters
         }
 
         private void ShowSolarEclipsesView()
         {
             var vm = ViewManager.CreateViewModel<SolarEclipseVM>();
             ViewManager.ShowDialog(vm);
+        }
+
+        private void ShowLunarEclipsesView()
+        {
+            ViewManager.ShowMessageBox("Info", "Not implemented yet.");
         }
     }
 }

@@ -23,10 +23,12 @@ namespace Astrarium.Plugins.FOV
         public Command<FovFrame> CheckedCommand { get; }
 
         private ISettings settings;
+        private ISkyMap map;
 
-        public FovFramesListVM(ISettings settings)
+        public FovFramesListVM(ISettings settings, ISkyMap map)
         {
             this.settings = settings;
+            this.map = map;
 
             fovFrames = settings.Get<List<FovFrame>>("FovFrames");
             CloseCommand = new Command(Close);
@@ -40,6 +42,7 @@ namespace Astrarium.Plugins.FOV
         {
             settings.Set("FovFrames", fovFrames);
             settings.Save();
+            map.Invalidate();
         }
 
         private void AddFrame()
@@ -68,7 +71,6 @@ namespace Astrarium.Plugins.FOV
 
                 settings.Set("FovFrames", fovFrames);
                 settings.Save();
-
                 NotifyPropertyChanged(nameof(FovFrames), nameof(IsEmptyList));
             }
         }

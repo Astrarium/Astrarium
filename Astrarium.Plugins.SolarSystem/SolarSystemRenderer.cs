@@ -116,9 +116,11 @@ namespace Astrarium.Plugins.SolarSystem
                 }
                 else if (body is JupiterMoon jm)
                 {
-                    RenderPlanetMoon(map, planetsCalc.Planets.ElementAt(Planet.JUPITER - 1), jm);
-                    RenderJupiterMoonShadow(map, jm, jm.RectangularS);
-                    RenderJupiterShadow(map, jm);
+                    if (RenderPlanetMoon(map, planetsCalc.Planets.ElementAt(Planet.JUPITER - 1), jm))
+                    {
+                        RenderJupiterMoonShadow(map, jm, jm.RectangularS);
+                        RenderJupiterShadow(map, jm);
+                    }
                 }
                 else if (body is SaturnMoon sm)
                 {
@@ -134,7 +136,7 @@ namespace Astrarium.Plugins.SolarSystem
                 }
                 else if (settings.Get("GenericMoons") && body is GenericMoon gm)
                 {
-                    if (gm.Data.planet == 9)
+                    if (gm.Data.planet == Planet.PLUTO)
                     {
                         RenderPlanetMoon(map, planetsCalc.Pluto, gm, hasTexture: false);
                     }
@@ -781,11 +783,12 @@ namespace Astrarium.Plugins.SolarSystem
             }
         }
 
-        private void RenderPlanetMoon<TPlanet, TPlanetMoon>(IMapContext map, TPlanet planet, TPlanetMoon moon, bool hasTexture = true) where TPlanet : SizeableCelestialObject, IPlanet where TPlanetMoon : SizeableCelestialObject, IPlanetMoon
+        private bool RenderPlanetMoon<TPlanet, TPlanetMoon>(IMapContext map, TPlanet planet, TPlanetMoon moon, bool hasTexture = true) where TPlanet : SizeableCelestialObject, IPlanet where TPlanetMoon : SizeableCelestialObject, IPlanetMoon
         {
-            if (!settings.Get("Planets")) return;
-            if (!settings.Get("PlanetMoons")) return;
+            if (!settings.Get("Planets")) return false;
+            if (!settings.Get("PlanetMoons")) return false;
 
+            bool isDrawn = false;
             bool isGround = settings.Get("Ground");
             bool useTextures = settings.Get("PlanetsTextures");
             double coeff = map.DiagonalCoefficient();
@@ -818,6 +821,7 @@ namespace Astrarium.Plugins.SolarSystem
 
                             map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, 2);
                             map.AddDrawnObject(moon);
+                            isDrawn = true;
                         }
                     }
                 }
@@ -863,8 +867,11 @@ namespace Astrarium.Plugins.SolarSystem
                     
                     map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, diam);
                     map.AddDrawnObject(moon);
+                    isDrawn = true;
                 }
             }
+
+            return isDrawn;
         }
 
         private void RenderJupiterShadow(IMapContext map, JupiterMoon moon)
