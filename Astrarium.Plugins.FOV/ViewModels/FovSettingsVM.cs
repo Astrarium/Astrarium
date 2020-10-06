@@ -92,6 +92,7 @@ namespace Astrarium.Plugins.FOV
                     _Equipment.Eyepieces = new ObservableCollection<Eyepiece>(Eyepieces.OrderBy(t => t.Name));
                     NotifyPropertyChanged(nameof(Eyepieces), nameof(EyepieceId), nameof(Eyepiece));
                     Calculate();
+                    SaveEquipment();
                 }
             }
             else if (equipmentType == typeof(Camera))
@@ -114,6 +115,7 @@ namespace Astrarium.Plugins.FOV
                     _Equipment.Cameras = new ObservableCollection<Camera>(Cameras.OrderBy(t => t.Name));
                     NotifyPropertyChanged(nameof(Cameras), nameof(CameraId), nameof(Camera));
                     Calculate();
+                    SaveEquipment();
                 }
             }
             else if (equipmentType == typeof(Binocular))
@@ -136,6 +138,7 @@ namespace Astrarium.Plugins.FOV
                     _Equipment.Binoculars = new ObservableCollection<Binocular>(Binoculars.OrderBy(t => t.Name));
                     NotifyPropertyChanged(nameof(Binoculars), nameof(BinocularId), nameof(Binocular));
                     Calculate();
+                    SaveEquipment();
                 }
             }
         }
