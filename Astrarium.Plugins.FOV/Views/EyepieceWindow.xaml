@@ -29,7 +29,7 @@
             <TextBox Text="{Binding Eyepiece.Name}" />
 
             <Label Content="{t:Text EyepieceWindow.FocalLength}" />
-            <c:NumericUpDown Value="{Binding Eyepiece.FocalLength}" DecimalPlaces="0" Minimum="1" Maximum="100" />
+            <c:NumericUpDown Value="{Binding Eyepiece.FocalLength}" DecimalPlaces="1" Minimum="1" Maximum="100" />
 
             <Label Content="{t:Text EyepieceWindow.FieldOfView}" />
             <c:NumericUpDown Value="{Binding Eyepiece.FieldOfView}" DecimalPlaces="0" Minimum="1" Maximum="180" />

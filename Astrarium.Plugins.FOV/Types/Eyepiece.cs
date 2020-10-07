@@ -24,7 +24,7 @@ namespace Astrarium.Plugins.FOV
         /// <summary>
         /// Focal length, in mm
         /// </summary>
-        public int FocalLength { get; set; }
+        public float FocalLength { get; set; }
 
         /// <summary>
         /// Eyepiece name, manufacturer, model, etc.

@@ -511,8 +511,18 @@ namespace Astrarium.Plugins.FOV
     {
         public override object Convert(object value)
         {
-            var focalLength = (int)value;
-            return $"{focalLength} {Text.Get("FovSettingsVM.MilliMeters")}";
+            if (value is float floatValue)
+            {
+                return $"{floatValue.ToString(".#", culture)} {Text.Get("FovSettingsVM.MilliMeters")}";
+            }
+            else if (value is int intValue)
+            {
+                return $"{intValue} {Text.Get("FovSettingsVM.MilliMeters")}";
+            }
+            else
+            {
+                throw new ArgumentException("Unknown value type.", nameof(value));
+            }
         }
     }
 
