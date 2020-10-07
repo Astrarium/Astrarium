@@ -55,7 +55,7 @@
                 </Style.Setters>
             </Style>
 
-            <Style x:Key="EditButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+            <Style x:Key="ImageButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
                 <Style.Setters>
                     <Setter Property="Cursor" Value="Hand" />
                     <Setter Property="Background" Value="Transparent" />
@@ -72,7 +72,7 @@
             </Style>
 
             <Grid x:Key="ImageAdd" x:Shared="False" >
-                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="10" Height="10" Stretch="Fill" Fill="{StaticResource BrushForeground}" Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="10" Height="10" Stretch="Fill" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}" Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
             </Grid>
 
             <Grid x:Key="ImageDelete" x:Shared="False" >
@@ -137,9 +137,9 @@
                         <DockPanel Grid.Row="0" Grid.Column="0">
                             <Label Content="{t:Text FovSettingsWindow.Telescope}" HorizontalAlignment="Left" />
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=IsMouseOver, Converter={s:BoolToVisibilityConverter}}">
-                                <Button Content="{DynamicResource ImageAdd}" Style="{StaticResource EditButton}" Command="{Binding AddEquipmentCommand}" CommandParameter="{x:Type local:Telescope}" />
-                                <Button Content="{DynamicResource ImageEdit}" Style="{StaticResource EditButton}" IsEnabled="{Binding Telescope, Converter={s:NotNullToBoolConverter}}" Command="{Binding EditEquipmentCommand}" CommandParameter="{x:Type local:Telescope}" />
-                                <Button Content="{DynamicResource ImageDelete}" Style="{StaticResource EditButton}" IsEnabled="{Binding Telescope, Converter={s:NotNullToBoolConverter}}" Command="{Binding DeleteEquipmentCommand}" CommandParameter="{x:Type local:Telescope}" />
+                                <Button Content="{StaticResource ImageAdd}" Style="{StaticResource ImageButton}" Command="{Binding AddEquipmentCommand}" CommandParameter="{x:Type local:Telescope}" />
+                                <Button Content="{StaticResource ImageEdit}" Style="{StaticResource ImageButton}" IsEnabled="{Binding Telescope, Converter={s:NotNullToBoolConverter}}" Command="{Binding EditEquipmentCommand}" CommandParameter="{x:Type local:Telescope}" />
+                                <Button Content="{StaticResource ImageDelete}" Style="{StaticResource ImageButton}" IsEnabled="{Binding Telescope, Converter={s:NotNullToBoolConverter}}" Command="{Binding DeleteEquipmentCommand}" CommandParameter="{x:Type local:Telescope}" />
                             </StackPanel>
                         </DockPanel>
 
@@ -171,9 +171,9 @@
                         <DockPanel Grid.Row="0" Grid.Column="0">
                             <Label Content="{t:Text FovSettingsWindow.Eyepiece}" HorizontalAlignment="Left" />
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=IsMouseOver, Converter={s:BoolToVisibilityConverter}}">
-                                <Button Content="{DynamicResource ImageAdd}" Style="{StaticResource EditButton}" Command="{Binding AddEquipmentCommand}" CommandParameter="{x:Type local:Eyepiece}" />
-                                <Button Content="{DynamicResource ImageEdit}" Style="{StaticResource EditButton}" IsEnabled="{Binding Eyepiece, Converter={s:NotNullToBoolConverter}}" Command="{Binding EditEquipmentCommand}" CommandParameter="{x:Type local:Eyepiece}" />
-                                <Button Content="{DynamicResource ImageDelete}" Style="{StaticResource EditButton}" IsEnabled="{Binding Eyepiece, Converter={s:NotNullToBoolConverter}}" Command="{Binding DeleteEquipmentCommand}" CommandParameter="{x:Type local:Eyepiece}" />                            </StackPanel>
+                                <Button Content="{StaticResource ImageAdd}" Style="{StaticResource ImageButton}" Command="{Binding AddEquipmentCommand}" CommandParameter="{x:Type local:Eyepiece}" />
+                                <Button Content="{StaticResource ImageEdit}" Style="{StaticResource ImageButton}" IsEnabled="{Binding Eyepiece, Converter={s:NotNullToBoolConverter}}" Command="{Binding EditEquipmentCommand}" CommandParameter="{x:Type local:Eyepiece}" />
+                                <Button Content="{StaticResource ImageDelete}" Style="{StaticResource ImageButton}" IsEnabled="{Binding Eyepiece, Converter={s:NotNullToBoolConverter}}" Command="{Binding DeleteEquipmentCommand}" CommandParameter="{x:Type local:Eyepiece}" />                            </StackPanel>
                         </DockPanel>
 
                         <ComboBox Margin="2" Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Eyepieces}" SelectedValue="{Binding EyepieceId}" DisplayMemberPath="Name" SelectedValuePath="Id">
@@ -204,9 +204,9 @@
                         <DockPanel Grid.Row="0" Grid.Column="0">
                             <Label Content="{t:Text FovSettingsWindow.Camera}" HorizontalAlignment="Left" />
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=IsMouseOver, Converter={s:BoolToVisibilityConverter}}">
-                                <Button Content="{DynamicResource ImageAdd}" Style="{StaticResource EditButton}" Command="{Binding AddEquipmentCommand}" CommandParameter="{x:Type local:Camera}" />
-                                <Button Content="{DynamicResource ImageEdit}" Style="{StaticResource EditButton}" IsEnabled="{Binding Camera, Converter={s:NotNullToBoolConverter}}" Command="{Binding EditEquipmentCommand}" CommandParameter="{x:Type local:Camera}" />
-                                <Button Content="{DynamicResource ImageDelete}" Style="{StaticResource EditButton}" IsEnabled="{Binding Camera, Converter={s:NotNullToBoolConverter}}" Command="{Binding DeleteEquipmentCommand}" CommandParameter="{x:Type local:Camera}" />                            
+                                <Button Content="{StaticResource ImageAdd}" Style="{StaticResource ImageButton}" Command="{Binding AddEquipmentCommand}" CommandParameter="{x:Type local:Camera}" />
+                                <Button Content="{StaticResource ImageEdit}" Style="{StaticResource ImageButton}" IsEnabled="{Binding Camera, Converter={s:NotNullToBoolConverter}}" Command="{Binding EditEquipmentCommand}" CommandParameter="{x:Type local:Camera}" />
+                                <Button Content="{StaticResource ImageDelete}" Style="{StaticResource ImageButton}" IsEnabled="{Binding Camera, Converter={s:NotNullToBoolConverter}}" Command="{Binding DeleteEquipmentCommand}" CommandParameter="{x:Type local:Camera}" />                            
                             </StackPanel>
                         </DockPanel>
                         
@@ -239,9 +239,9 @@
                         <DockPanel Grid.Row="0" Grid.Column="0">
                             <Label Content="{t:Text FovSettingsWindow.Binocular}" HorizontalAlignment="Left" />
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=IsMouseOver, Converter={s:BoolToVisibilityConverter}}">
-                                <Button Content="{DynamicResource ImageAdd}" Style="{StaticResource EditButton}" Command="{Binding AddEquipmentCommand}" CommandParameter="{x:Type local:Binocular}" />
-                                <Button Content="{DynamicResource ImageEdit}" Style="{StaticResource EditButton}" IsEnabled="{Binding Binocular, Converter={s:NotNullToBoolConverter}}" Command="{Binding EditEquipmentCommand}" CommandParameter="{x:Type local:Binocular}" />
-                                <Button Content="{DynamicResource ImageDelete}" Style="{StaticResource EditButton}" IsEnabled="{Binding Binocular, Converter={s:NotNullToBoolConverter}}" Command="{Binding DeleteEquipmentCommand}" CommandParameter="{x:Type local:Binocular}" />
+                                <Button Content="{StaticResource ImageAdd}" Style="{StaticResource ImageButton}" Command="{Binding AddEquipmentCommand}" CommandParameter="{x:Type local:Binocular}" />
+                                <Button Content="{StaticResource ImageEdit}" Style="{StaticResource ImageButton}" IsEnabled="{Binding Binocular, Converter={s:NotNullToBoolConverter}}" Command="{Binding EditEquipmentCommand}" CommandParameter="{x:Type local:Binocular}" />
+                                <Button Content="{StaticResource ImageDelete}" Style="{StaticResource ImageButton}" IsEnabled="{Binding Binocular, Converter={s:NotNullToBoolConverter}}" Command="{Binding DeleteEquipmentCommand}" CommandParameter="{x:Type local:Binocular}" />
                             </StackPanel>
                         </DockPanel>
                         

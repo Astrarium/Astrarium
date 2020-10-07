@@ -19,7 +19,7 @@
 
     <Window.Resources>
         <ResourceDictionary>
-            <Style x:Key="EditButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+            <Style x:Key="ImageButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
                 <Style.Setters>
                     <Setter Property="Margin" Value="2" />
                     <Setter Property="Width" Value="22" />
@@ -74,9 +74,9 @@
         <Separator Grid.Row="1" Margin="0 4 0 4" />
 
         <StackPanel Grid.Row="2" Orientation="Horizontal">
-            <Button Content="{DynamicResource BtnAdd}" Style="{StaticResource EditButton}" Command="{Binding AddCommand}" />
-            <Button Content="{DynamicResource BtnEdit}" Style="{StaticResource EditButton}" IsEnabled="{Binding ElementName=List, Path=SelectedValue, Converter={s:NotNullToBoolConverter}}" Command="{Binding EditCommand}" CommandParameter="{Binding ElementName=List, Path=SelectedValue}" />
-            <Button Content="{DynamicResource BtnDelete}" Style="{StaticResource EditButton}" IsEnabled="{Binding ElementName=List, Path=SelectedValue, Converter={s:NotNullToBoolConverter}}" Command="{Binding DeleteCommand}" CommandParameter="{Binding ElementName=List, Path=SelectedValue}"  />
+            <Button Content="{StaticResource BtnAdd}" Style="{StaticResource ImageButton}" Command="{Binding AddCommand}" />
+            <Button Content="{StaticResource BtnEdit}" Style="{StaticResource ImageButton}" IsEnabled="{Binding ElementName=List, Path=SelectedValue, Converter={s:NotNullToBoolConverter}}" Command="{Binding EditCommand}" CommandParameter="{Binding ElementName=List, Path=SelectedValue}" />
+            <Button Content="{StaticResource BtnDelete}" Style="{StaticResource ImageButton}" IsEnabled="{Binding ElementName=List, Path=SelectedValue, Converter={s:NotNullToBoolConverter}}" Command="{Binding DeleteCommand}" CommandParameter="{Binding ElementName=List, Path=SelectedValue}"  />
         </StackPanel>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
