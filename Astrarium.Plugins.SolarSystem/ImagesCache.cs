@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.SolarSystem
 {
@@ -77,7 +78,10 @@ namespace Astrarium.Plugins.SolarSystem
             {
                 cache[key].Image = getImage.Invoke(token);
                 cache[key].IsRequestInProgress = false;
-                onComplete?.BeginInvoke(null, null);
+                if (onComplete != null)
+                {
+                    Task.Run(onComplete);
+                }
             });
             waitSignal.Set();
         }

@@ -163,13 +163,13 @@ namespace Astrarium.Config
             var settingValueChangedInvocationList = SettingValueChanged.GetInvocationList();
             foreach (var item in settingValueChangedInvocationList)
             {
-                (item as Action<string, object>).BeginInvoke(settingName, value, null, null);
+                Task.Run(() => (item as Action<string, object>).Invoke(settingName, value));
             }
 
             var propertyChangedInvocationList = PropertyChanged.GetInvocationList();
             foreach (var item in propertyChangedInvocationList)
             {
-                (item as PropertyChangedEventHandler).BeginInvoke(this, new PropertyChangedEventArgs(settingName), null, null);
+                Task.Run(() => (item as PropertyChangedEventHandler).Invoke(this, new PropertyChangedEventArgs(settingName)));
             }
         }
 
