@@ -148,8 +148,8 @@ namespace Astrarium
 
         private System.Drawing.Point LocationFromLParam(IntPtr lParam)
         {
-            int x = (int)((((long)lParam) >> 0) & 0xffff);
-            int y = (int)((((long)lParam) >> 16) & 0xffff);
+            short x = (short)((((long)lParam) >> 0) & 0xffff); 
+            short y = (short)((((long)lParam) >> 16) & 0xffff); 
             return new System.Drawing.Point(x, y);
         }
 
