@@ -48,6 +48,7 @@ namespace Astrarium.Controls
         public static readonly DependencyProperty CharacterCasingProperty = DependencyProperty.Register("CharacterCasing", typeof(CharacterCasing), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(CharacterCasing.Normal));
         public static readonly DependencyProperty MaxPopUpHeightProperty = DependencyProperty.Register("MaxPopUpHeight", typeof(int), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(600));
         public static readonly DependencyProperty WatermarkProperty = DependencyProperty.Register("Watermark", typeof(string), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(string.Empty));
+        public static readonly DependencyProperty EmptyTextProperty = DependencyProperty.Register("EmptyText", typeof(string), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(string.Empty));
         public static readonly DependencyProperty SelectionCommitProperty = DependencyProperty.Register("SelectionCommit", typeof(ICommand), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(null));
         public static readonly DependencyProperty SuggestionBackgroundProperty = DependencyProperty.Register("SuggestionBackground", typeof(Brush), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(Brushes.White));
         public static readonly DependencyProperty WatermarkForegroundProperty = DependencyProperty.Register("WatermarkForeground", typeof(Brush), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(Brushes.White));
@@ -189,6 +190,12 @@ namespace Astrarium.Controls
         {
             get => (string)GetValue(WatermarkProperty);
             set => SetValue(WatermarkProperty, value);
+        }
+
+        public string EmptyText
+        {
+            get => (string)GetValue(EmptyTextProperty);
+            set => SetValue(EmptyTextProperty, value);
         }
 
         public Brush SuggestionBackground

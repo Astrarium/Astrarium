@@ -131,7 +131,8 @@
 
             <c:AutoCompleteTextBox 
                 Watermark="{t:Text Toolbar.SearchHint}"
-                DisplayMember="Body.Names[0]"
+                EmptyText="{t:Text Toolbar.SearchEmpty}"
+                DisplayMember="Names[0]"
                 BorderThickness="0"
                 HorizontalAlignment="Right" 
                 IconPlacement="Right"                
@@ -148,10 +149,10 @@
                                     <SolidColorBrush Color="{DynamicResource ColorControlLightBackground}" />
                                 </Rectangle.Fill>
                                 <Rectangle.OpacityMask>
-                                    <ImageBrush ImageSource="{Binding Body, Converter={s:CelestialObjectToIconConverter}}" Stretch="Uniform" />
+                                    <ImageBrush ImageSource="{Binding Converter={s:CelestialObjectToIconConverter}}" Stretch="Uniform" />
                                 </Rectangle.OpacityMask>
                             </Rectangle>
-                            <TextBlock Padding="4 0 0 0" Text="{Binding Name}" VerticalAlignment="Center"/>
+                            <TextBlock Padding="4 0 0 0" Text="{Binding Names[0]}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </DataTemplate>
                 </c:AutoCompleteTextBox.ItemTemplate>

@@ -52,7 +52,7 @@ namespace Astrarium.ViewModels
         public Command PrintCommand { get; private set; }
         public Command PrintPreviewCommand { get; private set; }
         public Command ExitAppCommand { get; private set; }
-        public Command<SearchResultItem> QuickSearchCommand { get; private set; }
+        public Command<CelestialObject> QuickSearchCommand { get; private set; }
 
         public ObservableCollection<MenuItem> MainMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
         public ObservableCollection<MenuItem> ContextMenuItems { get; private set; } = new ObservableCollection<MenuItem>();
@@ -146,7 +146,7 @@ namespace Astrarium.ViewModels
             SetDateCommand = new Command(SetDate);
             SelectLocationCommand = new Command(SelectLocation);
             SearchObjectCommand = new Command(SearchObject);
-            QuickSearchCommand = new Command<SearchResultItem>(sr => CenterOnObject(sr.Body));
+            QuickSearchCommand = new Command<CelestialObject>(CenterOnObject);
             CenterOnPointCommand = new Command(CenterOnPoint);
             GetObjectInfoCommand = new Command<CelestialObject>(GetObjectInfo);
             GetObjectEphemerisCommand = new Command(GetObjectEphemeris);
