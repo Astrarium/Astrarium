@@ -11,15 +11,14 @@
     x:Class="Astrarium.Plugins.Eclipses.SolarEclipseWindow" 
     mc:Ignorable="d" 
     Title="{Binding IsTotal}" 
-    Height="600" 
+    Height="350" 
     Width="600" 
-    MinHeight="600" MinWidth="600" 
+    MinHeight="350" MinWidth="600" 
     Style="{StaticResource {x:Type Window}}" 
     WindowStartupLocation="CenterOwner">
     <Grid Margin="2">
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
@@ -31,22 +30,44 @@
 
             <Label Content="{Binding Magnitude}"/>
         </StackPanel>
+
+        <TabControl Grid.Row="1">
+            <TabItem Header="Map">
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <c:MapControl 
+                        Grid.Row="0"
+                        BackColor="#333333" 
+                        TileServer="{Binding TileServer, Mode=TwoWay}" 
+                        CacheFolder="{Binding CacheFolder, Mode=OneTime}"
+                        Markers="{Binding Markers}"
+                        Tracks="{Binding Tracks}"
+                        Polygons="{Binding Polygons}"
+                        ThumbnailBackColor="#333333"
+                        ThumbnailForeColor="#333333"
+                        TileImageAttributes="{Binding TileImageAttributes}"
+                        OnClick="{Binding ClickOnMapCommand}"
+                        Mouse="{Binding MapMouse, Mode=OneWayToSource}" />
+
+                    <DockPanel  Margin="0 4 0 0" Grid.Row="1">
+                        <ComboBox Padding="2 0" Margin="0" Width="200" Height="18" ItemsSource="{Binding TileServers, Mode=OneTime}" DisplayMemberPath="Name" SelectedItem="{Binding TileServer}" />
+                        <c:HtmlTextBlock IsEnabled="False" Foreground="{StaticResource BrushControlLightBackground}" VerticalAlignment="Center" HorizontalAlignment="Right" Padding="2 0 4 0" FontSize="12" FormattedText="{Binding TileServer.AttributionText, FallbackValue='AttributionText'}" />
+                    </DockPanel>
+
+                </Grid>
+            </TabItem>
+            <TabItem Header="General Circumstances"></TabItem>
+            <TabItem Header="Local Circumstances"></TabItem>
+        </TabControl>
         
-        <ComboBox Grid.Row="1" ItemsSource="{Binding TileServers, Mode=OneTime}" DisplayMemberPath="Name" SelectedItem="{Binding TileServer}" />
+        
 
-        <c:MapControl Grid.Row="2"
-
-            BackColor="#333333" 
-            TileServer="{Binding TileServer, Mode=TwoWay}" 
-            CacheFolder="{Binding CacheFolder, Mode=OneTime}"
-            Markers="{Binding Markers}"
-            Tracks="{Binding Tracks}"
-            Polygons="{Binding Polygons}"
-            ThumbnailBackColor="#333333"
-            ThumbnailForeColor="#333333"
-            TileImageAttributes="{Binding TileImageAttributes}"
-            OnClick="{Binding ClickOnMapCommand}"
-            Mouse="{Binding MapMouse, Mode=OneWayToSource}" />
+        
  
     </Grid>
 </Window>

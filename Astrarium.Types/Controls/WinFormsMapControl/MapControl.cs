@@ -63,11 +63,6 @@ namespace System.Windows.Forms
         private readonly StringFormat _AlignCenterStringFormat = new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
 
         /// <summary>
-        /// Link label displayed in the bottom right corner of the map with attribution text.
-        /// </summary>
-        private HtmlLinkLabel _LinkLabel;
-
-        /// <summary>
         /// Gets size of map in tiles.
         /// </summary>
         private int FullMapSizeInTiles => 1 << ZoomLevel;
@@ -186,8 +181,6 @@ namespace System.Windows.Forms
             set
             {
                 _TileServer = value;
-                _LinkLabel.Links.Clear();
-                _LinkLabel.Visible = false;
 
                 if (value != null)
                 {
@@ -195,8 +188,6 @@ namespace System.Windows.Forms
 
                     if (_TileServer.AttributionText != null)
                     {
-                        _LinkLabel.Text = _TileServer.AttributionText;
-                        _LinkLabel.Visible = true;
                         OnSizeChanged(new EventArgs());
                     }
 
@@ -331,7 +322,6 @@ namespace System.Windows.Forms
             set
             {
                 base.ForeColor = value;
-                _LinkLabel.ForeColor = value;
             }
         }
 
@@ -379,15 +369,6 @@ namespace System.Windows.Forms
             InitializeComponent();
             DoubleBuffered = true;
             Cursor = Cursors.Cross;
-
-            _LinkLabel = new HtmlLinkLabel() { Text = "", BackColor = Color.FromArgb(100, BackColor) };
-            _LinkLabel.AutoSize = true;
-            _LinkLabel.ForeColor = ForeColor;
-
-            _LinkLabel.Margin = new Padding(2);
-            _LinkLabel.LinkClicked += _LinkLabel_LinkClicked;
-
-            Controls.Add(_LinkLabel);
         }
 
         /// <summary>
@@ -472,9 +453,6 @@ namespace System.Windows.Forms
         {
             base.OnSizeChanged(e);
 
-            _LinkLabel.Left = Width - _LinkLabel.Width;
-            _LinkLabel.Top = Height - _LinkLabel.Height;
-           
             AdjustMapBounds();
             Invalidate();
             CenterChanged?.Invoke(this, EventArgs.Empty);

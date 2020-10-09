@@ -369,7 +369,7 @@ namespace Astrarium.Algorithms
 
             const double epsilon = 1e-6;
 
-            double step = FindStep(jdTo - jdFrom) / 2;
+            double step = FindStep(jdTo - jdFrom) * 2;
 
             double zeta0 = 0;
             double Q0 = 0;
@@ -520,7 +520,7 @@ namespace Astrarium.Algorithms
 
                 const double epsilon = 1e-6;
 
-                double step = FindStep(jdTo - jdFrom) / 2;
+                double step = FindStep(jdTo - jdFrom);
 
                 double zeta0 = 0;
                 double Q0 = 0;
