@@ -70,8 +70,7 @@ namespace Astrarium.Plugins.DeepSky
             penOutlineDashed = new Pen(Color.FromArgb(alpha, colorOutline));
             penOutlineDashed.DashStyle = DashStyle.Dash;
             
-            double coeff = map.DiagonalCoefficient();
-            var deepSkies = allDeepSkies.Where(ds => !ds.Status.IsEmpty() && Angle.Separation(map.Center, ds.Horizontal) < map.ViewAngle * coeff);
+            var deepSkies = allDeepSkies.Where(ds => !ds.Status.IsEmpty() && Angle.Separation(map.Center, ds.Horizontal) < map.ViewAngle);
             if (isGround)
             {
                 deepSkies = deepSkies.Where(ds => ds.Horizontal.Altitude + ds.Semidiameter / 3600 > 0);
@@ -333,8 +332,8 @@ namespace Astrarium.Plugins.DeepSky
 
             private float GetDiameter(IMapContext map, double diam)
             {
-                double maxSize = Math.Max(map.Width, map.Height);
-                return (float)(diam / 60 / map.ViewAngle * maxSize / 2);
+                double r = Math.Sqrt(map.Width * map.Width + map.Height * map.Height);
+                return (float)(diam / 60 / map.ViewAngle * r / 2);
             }
         }
 

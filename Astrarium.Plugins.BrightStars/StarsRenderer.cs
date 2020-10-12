@@ -47,7 +47,6 @@ namespace Astrarium.Plugins.BrightStars
             Graphics g = map.Graphics;
             var allStars = starsCalc.Stars;
             bool isGround = settings.Get<bool>("Ground");
-            double coeff = map.DiagonalCoefficient();
             
             if (settings.Get<bool>("ConstLines"))
             {
@@ -61,8 +60,8 @@ namespace Astrarium.Plugins.BrightStars
                     h2 = allStars.ElementAt(line.Item2).Horizontal;
 
                     if ((!isGround || h1.Altitude > 0 || h2.Altitude > 0) && 
-                        Angle.Separation(map.Center, h1) < 90 * coeff &&
-                        Angle.Separation(map.Center, h2) < 90 * coeff)
+                        Angle.Separation(map.Center, h1) < 90 &&
+                        Angle.Separation(map.Center, h2) < 90)
                     {
                         p1 = map.Project(h1);
                         p2 = map.Project(h2);
@@ -78,7 +77,7 @@ namespace Astrarium.Plugins.BrightStars
 
             if (settings.Get<bool>("Stars") && !(map.Schema == ColorSchema.Day && map.DayLightFactor == 1))
             {
-                var stars = allStars.Where(s => s != null && Angle.Separation(map.Center, s.Horizontal) < map.ViewAngle * coeff);
+                var stars = allStars.Where(s => s != null && Angle.Separation(map.Center, s.Horizontal) < map.ViewAngle);
                 if (isGround)
                 {
                     stars = stars.Where(s => s.Horizontal.Altitude >= 0);

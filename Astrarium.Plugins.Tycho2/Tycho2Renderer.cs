@@ -39,7 +39,6 @@ namespace Astrarium.Plugins.Tycho2
         {
             Graphics g = map.Graphics;            
             bool isGround = settings.Get<bool>("Ground");
-            double coeff = map.DiagonalCoefficient();
             Brush brushNames = new SolidBrush(map.GetColor("ColorStarsLabels"));
 
             if (map.MagLimit > 8 && settings.Get<bool>("Stars") && settings.Get<bool>("Tycho2"))
@@ -57,7 +56,7 @@ namespace Astrarium.Plugins.Tycho2
                 tycho2.LockedStar = map.LockedObject as Tycho2Star;
                 tycho2.SelectedStar = map.SelectedObject as Tycho2Star;
 
-                var stars = tycho2.GetStars(context, eq, map.ViewAngle * coeff, m => MagFilter(map, m));
+                var stars = tycho2.GetStars(context, eq, map.ViewAngle, m => MagFilter(map, m));
 
                 foreach (var star in stars)
                 {

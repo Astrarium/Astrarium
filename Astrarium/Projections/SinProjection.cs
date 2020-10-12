@@ -42,18 +42,18 @@ namespace Astrarium.Projections
             X = cos_d * sin_da;
             Y = sin_d * cos_d0 - cos_d * sin_d0 * cos_da;
 
-            double maxSize = Math.Max(Map.Width, Map.Height);
-            X = X * 90 / Map.ViewAngle / 2 * maxSize;
-            Y = Y * 90 / Map.ViewAngle / 2* maxSize;
+            double r = Math.Sqrt(Map.Width * Map.Width + Map.Height * Map.Height);
+            X = X * 90 / Map.ViewAngle / 2 * r;
+            Y = Y * 90 / Map.ViewAngle / 2* r;
 
             return new Point((int)(Map.Width / 2.0 + X), (int)(Map.Height / 2.0 - Y));
         }
 
         public CrdsHorizontal Invert(PointF p)
         {
-            double maxSize = Math.Max(Map.Width, Map.Height);
-            double L = Angle.ToRadians((p.X - Map.Width / 2.0) * Map.ViewAngle / maxSize * 2);
-            double M = Angle.ToRadians((-p.Y + Map.Height / 2.0) * Map.ViewAngle / maxSize * 2);
+            double r = Math.Sqrt(Map.Width * Map.Width + Map.Height * Map.Height);
+            double L = Angle.ToRadians((p.X - Map.Width / 2.0) * Map.ViewAngle / r * 2);
+            double M = Angle.ToRadians((-p.Y + Map.Height / 2.0) * Map.ViewAngle / r * 2);
 
             double theta = Math.Sqrt(L * L + M * M);
 

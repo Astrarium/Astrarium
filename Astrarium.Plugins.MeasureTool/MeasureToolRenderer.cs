@@ -64,14 +64,12 @@ namespace Astrarium.Plugins.MeasureTool
         {
             if (IsMeasureToolOn && map.MousePosition != null)
             {
-                double coeff = map.DiagonalCoefficient();
-
                 List<PointF> points = new List<PointF>();
                 for (int f = 0; f <= 10; f++)
                 {
                     CrdsHorizontal h = Angle.Intermediate(map.MousePosition, MeasureOrigin, f / 10.0);
                     points.Add(map.Project(h));
-                    if (Angle.Separation(h, map.Center) > map.ViewAngle * coeff)
+                    if (Angle.Separation(h, map.Center) > map.ViewAngle)
                     {
                         break;
                     }

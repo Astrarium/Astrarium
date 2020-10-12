@@ -139,13 +139,12 @@ namespace Astrarium.Plugins.Grids
         private void DrawGrid(IMapContext map, Pen penGrid, CelestialGrid grid)
         {
             bool isAnyPoint = false;
-            double coeff = map.DiagonalCoefficient();
 
             // Azimuths 
             for (int j = 0; j < grid.Columns; j++)
             {
                 var segments = grid.Column(j)
-                    .Select(p => Angle.Separation(grid.ToHorizontal(p, map), map.Center) < map.ViewAngle * coeff ? p : null)
+                    .Select(p => Angle.Separation(grid.ToHorizontal(p, map), map.Center) < map.ViewAngle ? p : null)
                     .Split(p => p == null, true);
 
                 foreach (var segment in segments)
@@ -167,7 +166,7 @@ namespace Astrarium.Plugins.Grids
                     {
                         var coord = grid.FromHorizontal(map.Center, map);
                         coord.Longitude = segment[0].Longitude;
-                        coord.Latitude += -map.ViewAngle * coeff + k * (map.ViewAngle * 2 * coeff);
+                        coord.Latitude += -map.ViewAngle + k * (map.ViewAngle * 2);
                         coord.Latitude = Math.Min(coord.Latitude, 80);
                         coord.Latitude = Math.Max(coord.Latitude, -80);
                         var refHorizontal = grid.ToHorizontal(coord, map);
@@ -184,7 +183,7 @@ namespace Astrarium.Plugins.Grids
             for (int i = 0; i < grid.Rows; i++)
             {
                 var segments = grid.Row(i)
-                    .Select(p => Angle.Separation(grid.ToHorizontal(p, map), map.Center) < map.ViewAngle * coeff ? p : null)
+                    .Select(p => Angle.Separation(grid.ToHorizontal(p, map), map.Center) < map.ViewAngle ? p : null)
                     .Split(p => p == null, true).ToList();
 
                 // segment that starts with point "0 degrees"
@@ -231,7 +230,7 @@ namespace Astrarium.Plugins.Grids
                         for (int k = 0; k < 2; k++)
                         {
                             var coord = grid.FromHorizontal(map.Center, map);
-                            coord.Longitude += -map.ViewAngle * coeff + k * (map.ViewAngle * coeff * 2);
+                            coord.Longitude += -map.ViewAngle + k * (map.ViewAngle * 2);
                             coord.Latitude = segment[0].Latitude;
                             var refHorizontal = grid.ToHorizontal(coord, map);
                             refPoints[k] = map.Project(refHorizontal);
@@ -283,7 +282,7 @@ namespace Astrarium.Plugins.Grids
                     for (int k = 0; k < 2; k++)
                     {
                         var coord = grid.FromHorizontal(map.Center, map);
-                        coord.Longitude += -map.ViewAngle * coeff + k * (map.ViewAngle * coeff * 2);
+                        coord.Longitude += -map.ViewAngle + k * (map.ViewAngle * 2);
                         coord.Latitude = segment[0].Latitude;
                         var refHorizontal = grid.ToHorizontal(coord, map);
                         refPoints[k] = map.Project(refHorizontal);
@@ -319,7 +318,7 @@ namespace Astrarium.Plugins.Grids
                     {
                         var coord = grid.FromHorizontal(map.Center, map);
                         coord.Longitude = segment[0].Longitude;
-                        coord.Latitude += -map.ViewAngle * coeff + k * (map.ViewAngle * 2 * coeff);
+                        coord.Latitude += -map.ViewAngle + k * (map.ViewAngle * 2);
                         coord.Latitude = Math.Min(coord.Latitude, 80);
                         coord.Latitude = Math.Max(coord.Latitude, -80);
                         var refHorizontal = grid.ToHorizontal(coord, map);
@@ -404,11 +403,10 @@ namespace Astrarium.Plugins.Grids
         {
             if (settings.Get<bool>("LabelEquinoxPoints"))
             {
-                double coeff = map.DiagonalCoefficient();
                 for (int i = 0; i < 2; i++)
                 {
                     var h = LineEcliptic.ToHorizontal(LineEcliptic.Column(equinoxRA[i]).ElementAt(0), map);
-                    if (Angle.Separation(h, map.Center) < map.ViewAngle * coeff)
+                    if (Angle.Separation(h, map.Center) < map.ViewAngle)
                     {
                         PointF p = map.Project(h);
 
@@ -426,12 +424,11 @@ namespace Astrarium.Plugins.Grids
             if (settings.Get<bool>("LabelLunarNodes"))
             {               
                 double ascNode = LunarEphem.TrueAscendingNode(map.JulianDay);
-                double coeff = map.DiagonalCoefficient();
 
                 for (int i = 0; i < 2; i++)
                 {
                     var h = LineEcliptic.ToHorizontal(new GridPoint(ascNode + (i > 0 ? 180 : 0), 0), map);
-                    if (Angle.Separation(h, map.Center) < map.ViewAngle * coeff)
+                    if (Angle.Separation(h, map.Center) < map.ViewAngle)
                     {
                         PointF p = map.Project(h);
 
@@ -449,10 +446,9 @@ namespace Astrarium.Plugins.Grids
         {
             if (settings.Get<bool>("LabelHorizontalPoles"))
             {
-                double coeff = map.DiagonalCoefficient();
                 for (int i = 0; i < 2; i++)
                 {
-                    if (Angle.Separation(horizontalPoles[i], map.Center) < map.ViewAngle * coeff)
+                    if (Angle.Separation(horizontalPoles[i], map.Center) < map.ViewAngle)
                     {
                         PointF p = map.Project(horizontalPoles[i]);
                         map.Graphics.DrawXCross(penGridHorizontal, p, 3);
@@ -466,11 +462,10 @@ namespace Astrarium.Plugins.Grids
         {
             if (settings.Get<bool>("LabelEquatorialPoles"))
             {
-                double coeff = map.DiagonalCoefficient();
                 for (int i = 0; i < 2; i++)
                 {
                     var h = GridEquatorial.ToHorizontal(polePoints[i], map);
-                    if (Angle.Separation(h, map.Center) < map.ViewAngle * coeff)
+                    if (Angle.Separation(h, map.Center) < map.ViewAngle)
                     {
                         PointF p = map.Project(h);
                         map.Graphics.DrawXCross(penGridEquatorial, p, 3);

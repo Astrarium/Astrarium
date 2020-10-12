@@ -53,7 +53,7 @@ namespace Astrarium.Projections
             X = k * cos_d * sin_da;
             Y = k * (sin_d * cos_d0 - cos_d * sin_d0 * cos_da);
 
-            double maxSize = Math.Max(Map.Width, Map.Height);
+            double maxSize = Math.Sqrt(Map.Width * Map.Width + Map.Height * Map.Height);
 
             X = Angle.ToDegrees(X) / Map.ViewAngle * maxSize / 2;
             Y = Angle.ToDegrees(Y) / Map.ViewAngle * maxSize / 2;
@@ -63,7 +63,7 @@ namespace Astrarium.Projections
 
         public CrdsHorizontal Invert(PointF p)
         {
-            double maxSize = Math.Max(Map.Width, Map.Height);
+            double maxSize = Math.Sqrt(Map.Width * Map.Width + Map.Height * Map.Height);
 
             double L = Angle.ToRadians((p.X - Map.Width / 2.0) * Map.ViewAngle / maxSize * 2);
             double M = Angle.ToRadians((-p.Y + Map.Height / 2.0) * Map.ViewAngle / maxSize * 2);
@@ -79,7 +79,10 @@ namespace Astrarium.Projections
             double A;
 
             a = Angle.ToDegrees(Math.Asin(M * Math.Cos(Angle.ToRadians(Map.Center.Altitude)) / (theta / Math.Sin(theta)) + Math.Sin(Angle.ToRadians(Map.Center.Altitude)) * Math.Cos(theta)));
-            A = Map.Center.Azimuth + Angle.ToDegrees(Math.Asin(Math.Sin(theta) * L / (theta * Math.Cos(Angle.ToRadians(a)))));
+
+            double aa = Math.Sin(theta) * L / (theta * Math.Cos(Angle.ToRadians(a)));
+            if (Math.Abs(aa) > 1) aa = Math.Sign(aa);
+            A = Map.Center.Azimuth + Angle.ToDegrees(Math.Asin(aa));
             A = Angle.To360(A);
 
             return CorrectInverse(p, new CrdsHorizontal() { Altitude = a, Azimuth = A });

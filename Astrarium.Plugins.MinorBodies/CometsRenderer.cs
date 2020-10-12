@@ -34,14 +34,13 @@ namespace Astrarium.Plugins.MinorBodies
             var allComets = cometsCalc.Comets;
             bool isGround = settings.Get("Ground");
             bool useTextures = settings.Get("PlanetsTextures");
-            double coeff = map.DiagonalCoefficient();
             bool drawComets = settings.Get("Comets");
             bool drawLabels = settings.Get("AsteroidsLabels");
             Brush brushNames = new SolidBrush(map.GetColor("ColorCometsLabels"));
 
             if (drawComets)
             {
-                var comets = allComets.Where(a => Angle.Separation(map.Center, a.Horizontal) < map.ViewAngle * coeff);
+                var comets = allComets.Where(a => Angle.Separation(map.Center, a.Horizontal) < map.ViewAngle);
 
                 foreach (var c in comets)
                 {
@@ -52,7 +51,7 @@ namespace Astrarium.Plugins.MinorBodies
                         double ad = Angle.Separation(c.Horizontal, map.Center);
 
                         if ((!isGround || c.Horizontal.Altitude + c.Semidiameter / 3600 > 0) &&
-                            ad < coeff * map.ViewAngle + c.Semidiameter / 3600)
+                            ad < map.ViewAngle + c.Semidiameter / 3600)
                         {
                             PointF p = map.Project(c.Horizontal);
                             PointF t = map.Project(c.TailHorizontal);

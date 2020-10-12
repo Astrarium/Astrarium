@@ -176,12 +176,11 @@ namespace Astrarium.Plugins.SolarSystem
             bool isGround = settings.Get("Ground");
             bool useTextures = settings.Get("SunTexture");
             double ad = Angle.Separation(sun.Horizontal, map.Center);
-            double coeff = map.DiagonalCoefficient();
             Graphics g = map.Graphics;
             Color colorSun = map.GetColor(clrSunNight, clrSunDaylight);
 
             if ((!isGround || sun.Horizontal.Altitude + sun.Semidiameter / 3600 > 0) && 
-                ad < coeff * map.ViewAngle + sun.Semidiameter / 3600)
+                ad < map.ViewAngle + sun.Semidiameter / 3600)
             {
                 PointF p = map.Project(sun.Horizontal);
 
@@ -279,10 +278,9 @@ namespace Astrarium.Plugins.SolarSystem
 
             bool isGround = settings.Get("Ground");
             double ad = Angle.Separation(moon.Horizontal, map.Center);
-            double coeff = map.DiagonalCoefficient();
             
             if ((!isGround || moon.Horizontal.Altitude + moon.Semidiameter / 3600 > 0) && 
-                ad < coeff * map.ViewAngle + moon.Semidiameter / 3600.0)
+                ad < map.ViewAngle + moon.Semidiameter / 3600.0)
             {
                 // drawing size
                 float size = map.GetDiskSize(moon.Semidiameter, 10);
@@ -570,11 +568,10 @@ namespace Astrarium.Plugins.SolarSystem
             double sdP = moon.EarthShadow.PenumbraRadius * 6378.0 / 1738.0 * moon.Semidiameter;
 
             bool isGround = settings.Get("Ground");
-            double coeff = map.DiagonalCoefficient();
             Graphics g = map.Graphics;
 
             if ((!isGround || moon.EarthShadowCoordinates.Altitude + sdP / 3600 > 0) &&
-                ad < coeff * map.ViewAngle + sdP / 3600)
+                ad < map.ViewAngle + sdP / 3600)
             {
                 PointF p = map.Project(moon.EarthShadowCoordinates);
                 PointF pMoon = map.Project(moon.Horizontal);
@@ -662,10 +659,9 @@ namespace Astrarium.Plugins.SolarSystem
             double ad = Angle.Separation(planet.Horizontal, map.Center);
             bool isGround = settings.Get("Ground");
             bool useTextures = settings.Get("PlanetsTextures");
-            double coeff = map.DiagonalCoefficient();
 
             if ((!isGround || planet.Horizontal.Altitude + planet.Semidiameter / 3600 > 0) &&
-                ad < coeff * map.ViewAngle + planet.Semidiameter / 3600)
+                ad < map.ViewAngle + planet.Semidiameter / 3600)
             {
                 float size = map.GetPointSize(planet.Magnitude, maxDrawingSize: 7);
                 float diam = map.GetDiskSize(planet.Semidiameter);
@@ -697,10 +693,10 @@ namespace Astrarium.Plugins.SolarSystem
                     {
                         var rings = planetsCalc.SaturnRings;
 
-                        double maxSize = Math.Max(map.Width, map.Height);
+                        double r = Math.Sqrt(map.Width * map.Width + map.Height * map.Height);
 
                         // scale value to convert visible size of ring to screen pixels
-                        double scale = 1.0 / 3600 / map.ViewAngle * maxSize / 4;
+                        double scale = 1.0 / 3600 / map.ViewAngle * r / 4;
 
                         // draw rings by halfs arcs, first half is farther one
                         for (int half = 0; half < 2; half++)
@@ -791,12 +787,11 @@ namespace Astrarium.Plugins.SolarSystem
             bool isDrawn = false;
             bool isGround = settings.Get("Ground");
             bool useTextures = settings.Get("PlanetsTextures");
-            double coeff = map.DiagonalCoefficient();
             double ad = Angle.Separation(moon.Horizontal, map.Center);
             Graphics g = map.Graphics;
 
             if ((!isGround || moon.Horizontal.Altitude + moon.Semidiameter / 3600 > 0) &&
-                ad < coeff * map.ViewAngle + moon.Semidiameter / 3600)
+                ad < map.ViewAngle + moon.Semidiameter / 3600)
             {
                 PointF p = map.Project(moon.Horizontal);
                 PointF pPlanet = map.Project(planet.Horizontal);

@@ -24,7 +24,6 @@ namespace Astrarium.Plugins.Tracks
         public override void Render(IMapContext map)
         {
             var tracks = trackCalc.Tracks;
-            double coeff = map.DiagonalCoefficient();
 
             foreach (var track in tracks)
             {
@@ -33,7 +32,7 @@ namespace Astrarium.Plugins.Tracks
                     var penTrack = new Pen(new SolidBrush(track.Color));
 
                     var segments = track.Points
-                        .Select(p => Angle.Separation(p.Horizontal, map.Center) < map.ViewAngle * coeff ? p : null)
+                        .Select(p => Angle.Separation(p.Horizontal, map.Center) < map.ViewAngle ? p : null)
                         .Split(p => p == null, true);
 
                     foreach (var segment in segments)
@@ -101,7 +100,6 @@ namespace Astrarium.Plugins.Tracks
             var brushLabel = new SolidBrush(track.Color);
             double trackStep = track.Step;
             double stepLabels = track.LabelsStep.TotalDays;
-            double coeff = map.DiagonalCoefficient();
 
             int each = (int)(stepLabels / trackStep);
 
@@ -112,7 +110,7 @@ namespace Astrarium.Plugins.Tracks
                 {
                     var tp = track.Points[i];
                     double ad = Angle.Separation(tp.Horizontal, map.Center);
-                    if (ad < map.ViewAngle * coeff)
+                    if (ad < map.ViewAngle)
                     {
                         PointF p = map.Project(tp.Horizontal);
                         if (!map.IsOutOfScreen(p))

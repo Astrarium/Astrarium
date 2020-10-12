@@ -36,7 +36,7 @@ namespace Astrarium.Plugins.FOV
                     float size = map.GetDiskSize(radius);
 
                     // do not draw frame if its size exceeds screen bounds
-                    if (size < Math.Max(map.Width, map.Height))
+                    if (size < Math.Sqrt(map.Width * map.Width + map.Height * map.Height))
                     {
                         if (frame.Shading > 0 && circularFrame.Size >= map.ViewAngle / 2)
                         {
@@ -65,7 +65,7 @@ namespace Astrarium.Plugins.FOV
                     float height = map.GetDiskSize(cameraFrame.Height * 3600);
 
                     // do not draw frame if its size exceeds screen bounds
-                    if (Math.Min(width, height) < Math.Max(map.Width, map.Height))
+                    if (Math.Min(width, height) < Math.Sqrt(map.Width * map.Width + map.Height * map.Height))
                     {
                         var eqCenter = map.Center.ToEquatorial(map.GeoLocation, map.SiderealTime);
                         float angle = map.GetRotationTowardsNorth(eqCenter) + cameraFrame.Rotation;

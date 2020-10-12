@@ -33,21 +33,20 @@ namespace Astrarium.Plugins.MinorBodies
             Graphics g = map.Graphics;
             var allAsteroids = asteroidsCalc.Asteroids;
             bool isGround = settings.Get<bool>("Ground");
-            double coeff = map.DiagonalCoefficient();
             bool drawAsteroids = settings.Get<bool>("Asteroids");
             bool drawLabels = settings.Get<bool>("AsteroidsLabels");
             Brush brushNames = new SolidBrush(map.GetColor("ColorAsteroidsLabels"));
 
             if (drawAsteroids)
             {
-                var asteroids = allAsteroids.Where(a => Angle.Separation(map.Center, a.Horizontal) < map.ViewAngle * coeff);
+                var asteroids = allAsteroids.Where(a => Angle.Separation(map.Center, a.Horizontal) < map.ViewAngle);
 
                 foreach (var a in asteroids)
                 {
                     double ad = Angle.Separation(a.Horizontal, map.Center);
 
                     if ((!isGround || a.Horizontal.Altitude + a.Semidiameter / 3600 > 0) &&
-                        ad < coeff * map.ViewAngle + a.Semidiameter / 3600)
+                        ad < map.ViewAngle + a.Semidiameter / 3600)
                     {
                         float diam = map.GetDiskSize(a.Semidiameter);
 

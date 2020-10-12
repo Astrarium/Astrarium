@@ -29,8 +29,6 @@ namespace Astrarium.Plugins.Horizon
 
         public override void Render(IMapContext map)
         {
-            double coeff = map.DiagonalCoefficient();
-
             if (settings.Get<bool>("Ground"))
             {
                 const int POINTS_COUNT = 64;
@@ -120,7 +118,7 @@ namespace Astrarium.Plugins.Horizon
                 for (int i = 0; i < cardinalDirections.Length; i++)
                 {
                     var h = new CrdsHorizontal(i * 360 / cardinalDirections.Length, 0);
-                    if (Angle.Separation(h, map.Center) < map.ViewAngle * coeff)
+                    if (Angle.Separation(h, map.Center) < map.ViewAngle)
                     {                       
                         PointF p = map.Project(h);
                         p.Y += fontCardinalLabels[i % 2].Height;

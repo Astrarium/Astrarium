@@ -132,11 +132,6 @@ namespace Astrarium.Types
             return Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
         }
 
-        public static double DiagonalCoefficient(this IMapContext map)
-        {
-            return Math.Sqrt(map.Width * map.Width + map.Height * map.Height) / Math.Max(map.Width, map.Height);
-        }
-
         /// <summary>
         /// Gets size of a disk (circle) representing a solar system object on sky map.
         /// </summary>
@@ -144,8 +139,8 @@ namespace Astrarium.Types
         /// <returns>Size (diameter) of a disk in screen pixels</returns>
         public static float GetDiskSize(this IMapContext map, double semidiameter, double minSize = 0)
         {
-            double maxSize = Math.Max(map.Width, map.Height);
-            return (float)Math.Max(minSize, semidiameter / 3600.0 / map.ViewAngle * maxSize);
+            double r = Math.Sqrt(map.Width * map.Width + map.Height * map.Height);
+            return (float)Math.Max(minSize, semidiameter / 3600.0 / map.ViewAngle * r);
         }
 
         /// <summary>

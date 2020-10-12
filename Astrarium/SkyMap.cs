@@ -402,7 +402,7 @@ namespace Astrarium
                 double sd = (body is SizeableCelestialObject) ?
                     (body as SizeableCelestialObject).Semidiameter : 0;
 
-                double size = Math.Max(10, sd / 3600.0 / ViewAngle * Width);
+                double size = Math.Max(10, mapContext.GetDiskSize(sd));
 
                 // do not draw selection circle if image is too large
                 bool drawCircle = true; // diam / 2 < diag;

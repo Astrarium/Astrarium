@@ -43,7 +43,6 @@ namespace Astrarium.Plugins.Constellations
             CrdsHorizontal h1, h2;
             var borders = constellationsCalc.ConstBorders;
             bool isGround = settings.Get<bool>("Ground");
-            double coeff = map.DiagonalCoefficient();
             Pen penBorder = new Pen(map.GetColor("ColorConstBorders"));
 
             foreach (var block in borders)
@@ -54,8 +53,8 @@ namespace Astrarium.Plugins.Constellations
                     h2 = block.ElementAt(i + 1).Horizontal;
 
                     if ((!isGround || h1.Altitude >= 0 || h2.Altitude >= 0) &&
-                        Angle.Separation(map.Center, h1) < 90 * coeff &&
-                        Angle.Separation(map.Center, h2) < 90 * coeff)
+                        Angle.Separation(map.Center, h1) < 90 &&
+                        Angle.Separation(map.Center, h2) < 90)
                     {
                         p1 = map.Project(h1);
                         p2 = map.Project(h2);
@@ -77,7 +76,6 @@ namespace Astrarium.Plugins.Constellations
         {
             var constellations = constellationsCalc.ConstLabels;
             bool isGround = settings.Get<bool>("Ground");
-            double coeff = map.DiagonalCoefficient();
 
             StringFormat format = new StringFormat();
             format.LineAlignment = StringAlignment.Center;
@@ -91,7 +89,7 @@ namespace Astrarium.Plugins.Constellations
             foreach (var c in constellations)
             {
                 var h = c.Horizontal;                
-                if ((!isGround || h.Altitude > 0) && Angle.Separation(map.Center, h) < map.ViewAngle * coeff)
+                if ((!isGround || h.Altitude > 0) && Angle.Separation(map.Center, h) < map.ViewAngle)
                 {
                     var p = map.Project(h);
                     var constellation = GetConstellation(c.Code);
