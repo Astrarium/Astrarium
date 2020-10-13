@@ -3,6 +3,7 @@ using Astrarium.Config.Controls;
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,7 +19,7 @@ namespace Astrarium
         public UIElementsIntegration()
         {
             // Default language
-            SettingItems.Add("UI", new SettingItem("Language", "en", typeof(LanguageSettingControl)));
+            SettingItems.Add("UI", new SettingItem("Language", CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.ToLower(), typeof(LanguageSettingControl)));
 
             // Flag indicating the app should be started with maximized main window
             SettingItems.Add("UI", new SettingItem("StartMaximized", false));

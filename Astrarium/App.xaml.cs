@@ -131,7 +131,7 @@ namespace Astrarium
             ICollection<AbstractPlugin> plugins = new List<AbstractPlugin>();
 
             string homeFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-            IEnumerable<string> pluginPaths = Directory.EnumerateFiles(homeFolder, "*.dll", SearchOption.AllDirectories);
+            IEnumerable<string> pluginPaths = Directory.EnumerateFiles(homeFolder, "Astrarium.Plugins.*.dll", SearchOption.AllDirectories);
 
             progress.Report("Loading plugins");
 
@@ -225,7 +225,7 @@ namespace Astrarium
 
             settings.Load();
 
-            SetLanguage(settings.Get("Language", CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.ToLower()));
+            SetLanguage(settings.Get<string>("Language"));
             SetColorSchema(settings.Get<ColorSchema>("Schema"));
 
             SkyContext context = new SkyContext(
