@@ -129,6 +129,8 @@ namespace Astrarium.Plugins.SolarSystem
 
         public void GetInfo(CelestialObjectInfo<Sun> info)
         {
+            var c = info.Context;
+
             info.SetTitle(Sun.Name)
 
             .AddRow("Constellation")
@@ -169,10 +171,10 @@ namespace Astrarium.Plugins.SolarSystem
             .AddRow("CRN")
 
             .AddHeader(Text.Get("Sun.Seasons"))
-            .AddRow("Seasons.Spring")
-            .AddRow("Seasons.Summer")
-            .AddRow("Seasons.Autumn")
-            .AddRow("Seasons.Winter");
+            .AddRow("Seasons.Spring", c.Get(Seasons, Season.Spring), Formatters.DateTime)
+            .AddRow("Seasons.Summer", c.Get(Seasons, Season.Summer), Formatters.DateTime)
+            .AddRow("Seasons.Autumn", c.Get(Seasons, Season.Autumn), Formatters.DateTime)
+            .AddRow("Seasons.Winter", c.Get(Seasons, Season.Winter), Formatters.DateTime);
         }
 
         public void ConfigureEphemeris(EphemerisConfig<Sun> e)
@@ -199,11 +201,7 @@ namespace Astrarium.Plugins.SolarSystem
             e["Distance"] = (c, s) => c.Get(Ecliptical).Distance;
             e["HorizontalParallax"] = (c, x) => c.Get(Parallax);
             e["AngularDiameter"] = (c, x) => c.Get(Semidiameter) * 2 / 3600.0;
-            e["CRN"] = (c, s) => c.Get(CarringtonNumber);
-            e["Seasons.Spring", Formatters.DateTime] = (c, x) => c.Get(Seasons, Season.Spring);
-            e["Seasons.Summer", Formatters.DateTime] = (c, x) => c.Get(Seasons, Season.Summer);
-            e["Seasons.Autumn", Formatters.DateTime] = (c, x) => c.Get(Seasons, Season.Autumn);
-            e["Seasons.Winter", Formatters.DateTime] = (c, x) => c.Get(Seasons, Season.Winter);            
+            e["CRN"] = (c, s) => c.Get(CarringtonNumber);         
         }
 
         public ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50)
