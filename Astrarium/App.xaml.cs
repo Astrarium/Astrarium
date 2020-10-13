@@ -118,7 +118,7 @@ namespace Astrarium
             kernel.Bind<Logger>().ToSelf().InSingletonScope();
             kernel.Get<Logger>();
 
-            Debug.WriteLine("Configuring application container...");
+            Debug.WriteLine($"Starting Astrarium {FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion}");
 
             kernel.Bind<ISettings, Settings>().To<Settings>().InSingletonScope();
 
@@ -139,7 +139,8 @@ namespace Astrarium
             {
                 try
                 {
-                    Assembly.LoadFrom(path);                    
+                    var plugin = Assembly.LoadFrom(path);
+                    Debug.WriteLine($"Loaded plugin {plugin.FullName}");
                 }
                 catch (Exception ex)
                 {
@@ -224,7 +225,7 @@ namespace Astrarium
 
             settings.Load();
 
-            SetLanguage(settings.Get<string>("Language"));
+            SetLanguage(settings.Get("Language", CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.ToLower()));
             SetColorSchema(settings.Get<ColorSchema>("Schema"));
 
             SkyContext context = new SkyContext(

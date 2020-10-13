@@ -160,8 +160,8 @@
         </DockPanel>
 
         <!-- MAP -->
-        <DockPanel Grid.Row="2" LastChildFill="true" Grid.ColumnSpan="2">
-            <WindowsFormsHost x:Name="Host" Background="Black">
+        <DockPanel Grid.Row="2" LastChildFill="true" Grid.ColumnSpan="2" Background="Black">
+            <WindowsFormsHost x:Name="Host" Background="Black" Margin="5 0">
                 <WindowsFormsHost.ContextMenu>
                     <ContextMenu ItemsSource="{Binding ContextMenuItems}" Opened="ContextMenu_Opened">
                         <ContextMenu.ItemContainerStyle>

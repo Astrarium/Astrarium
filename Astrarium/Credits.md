@@ -53,15 +53,15 @@ licensed under a Creative Commons Attribution 4.0 License
 
   - **Constellations data**  
 [Constellations boundaries and centers data](http://pbarbier.com/constellations/boundaries.html)  
-Under Creative Commons Attribution-ShareAlike 4.0 International License.
+licensed under Creative Commons Attribution-ShareAlike 4.0 International License.
 
   - **Stars data**  
 Yale Bright Star Catalog revision 5  
-is taken from http://tdc-www.harvard.edu/catalogs/bsc5.html
+is taken from [http://tdc-www.harvard.edu/catalogs/bsc5.html](http://tdc-www.harvard.edu/catalogs/bsc5.html)
 
   - **Stars names**  
-are taken from https://www.iau.org/public/themes/naming_stars/
-licensed under the Creative Commons Attribution 4.0 International license (https://www.iau.org/copyright/)
+are taken from [https://www.iau.org/public/themes/naming_stars/](https://www.iau.org/public/themes/naming_stars/)  
+licensed under the [Creative Commons Attribution 4.0 International license](https://www.iau.org/copyright/)
 
   - **Lunar surface features names and positions**  
 are from [WGPSN, IAU](https://planetarynames.wr.usgs.gov/)  
@@ -71,20 +71,21 @@ licensed under the Creative Commons Attribution 4.0 International license
 are from [WGPSN, IAU](https://planetarynames.wr.usgs.gov/)  
 licensed under the Creative Commons Attribution 4.0 International license
 
-  - **NGC/IC catalogs data**  
+  - **NGC/IC catalogs**  
 are taken from [Dr. Wolfgang Steinicke's website](http://www.klima-luft.de/steinicke/ngcic/ngcic_e.htm)  
 © Dr. Wolfgang Steinicke, under condition: any non-commercial use of data is free
 
-  - **Tycho 2 star catalogue data**  
-are taken from
+  - **Tycho 2 star catalogue**  
+is taken from [http://cdsarc.u-strasbg.fr/viz-bin/Cat?I/259](http://cdsarc.u-strasbg.fr/viz-bin/Cat?I/259)  
+© Hog E., Fabricius C., Makarov V.V., Urban S., Corbin T., Wycoff G., Bastian U., Schwekendiek P., Wicenec A.
 
   - **Sun images**  
 are downloaded automatically from [Solar and Heliospheric Observatory](https://soho.nascom.nasa.gov/data/REPROCESSING/Completed/)
 
   - **Orbital elements of small planetary satellites**  
-are from
+are from [JPL HORIZONS Web-Interface](https://ssd.jpl.nasa.gov/?horizons)
 
-  **Physical diameters of asteroids**  
+  - **Physical diameters of asteroids**  
 are extracted with [Small-Body Database Search Engine](https://ssd.jpl.nasa.gov/sbdb_query.cgi)    
  
 - **Icons**  
