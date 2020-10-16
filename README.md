@@ -1,4 +1,8 @@
-# ![Astrarium Logo](https://github.com/Astrarium/Astrarium/blob/master/Astrarium/Logo/32.png?raw=true) Astrarium
+# ![Astrarium Logo](https://github.com/Astrarium/Astrarium/blob/master/Astrarium/Logo/32.png?raw=true) Astrarium 
+![GitHub All Releases](https://img.shields.io/github/downloads/Astrarium/Astrarium/total)
+![GitHub License](https://img.shields.io/github/license/Astrarium/Astrarium)
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/Astrarium/Astrarium)
+![GitHub last commit](https://img.shields.io/github/last-commit/Astrarium/Astrarium)
 
 <p align="center">
   <img src="https://github.com/Astrarium/Astrarium/blob/master/Screenshot.png?raw=true">
