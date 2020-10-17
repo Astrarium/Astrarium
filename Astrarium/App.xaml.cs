@@ -17,13 +17,7 @@ using System.Reflection;
 using System.Resources;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Input;
-using System.Windows.Markup;
 using Astrarium.Config.Controls;
-
-[assembly: AssemblyProduct("Astrarium")]
-[assembly: AssemblyInformationalVersion("2020.10")]
-[assembly: AssemblyCopyright("© Alexander Krutov, 2018-2020")]
 
 namespace Astrarium
 {
@@ -139,7 +133,7 @@ namespace Astrarium
             {
                 try
                 {
-                    var plugin = Assembly.LoadFrom(path);
+                    var plugin = Assembly.UnsafeLoadFrom(path);
                     Debug.WriteLine($"Loaded plugin {plugin.FullName}");
                 }
                 catch (Exception ex)

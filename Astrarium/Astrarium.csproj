@@ -6,8 +6,8 @@
     <OutputType>WinExe</OutputType>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AssemblyName>Astrarium</AssemblyName>
+    <Description>Open-source .Net planetarium</Description>
     <RootNamespace>Astrarium</RootNamespace>
     <ApplicationIcon>Astrarium.ico</ApplicationIcon>
   </PropertyGroup>

@@ -61,7 +61,7 @@
                     <TextBlock Text="{Binding ProductName, FallbackValue='Product name'}" Margin="4" HorizontalAlignment="Center" />
                     <TextBlock Text="{Binding Version, FallbackValue=Version}" Margin="4" HorizontalAlignment="Center" />
                     <TextBlock HorizontalAlignment="Center">
-                    <Hyperlink NavigateUri="https://astrarium.github.io/" RequestNavigate="Hyperlink_RequestNavigate">astrarium.github.io</Hyperlink>
+                    <Hyperlink NavigateUri="https://astrarium.space/" RequestNavigate="Hyperlink_RequestNavigate">https://astrarium.space</Hyperlink>
                     </TextBlock>
                     <TextBlock Text="{Binding Copyright, FallbackValue=Copyright}" Margin="8"  HorizontalAlignment="Center"/>
                 </StackPanel>

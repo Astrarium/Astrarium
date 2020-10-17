@@ -1,0 +1,1 @@
+dotnet build Astrarium.sln -c Release
