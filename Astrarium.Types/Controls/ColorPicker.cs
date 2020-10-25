@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,42 +22,46 @@ namespace Astrarium.Types.Controls
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
         {
             base.OnMouseLeftButtonDown(e);
-
-            WF.ColorDialog dialog = new WF.ColorDialog()
+            Color? color = ViewManager.ShowColorDialog(Caption, SelectedColor.GetColor(ColorSchema, 1));
+            if (color != null)
             {
-                Color = SelectedColor
-            };
-
-            if (WF.DialogResult.OK == dialog.ShowDialog())
-            {
-                SelectedColor = dialog.Color;
-            }
+                SelectedColor.SetColor(color.Value, ColorSchema);
+                SelectedColor = new SkyColor(SelectedColor);
+            }            
         }
 
-        public System.Drawing.Color SelectedColor
-        {
-            get
-            {
-                return (System.Drawing.Color)GetValue(SelectedColorProperty);
-            }
-            set
-            {
-                SetValue(SelectedColorProperty, value);
-            }
+        public SkyColor SelectedColor
+        { 
+            get => (SkyColor)GetValue(SelectedColorProperty);
+            set => SetValue(SelectedColorProperty, value);
         }
 
         public readonly static DependencyProperty SelectedColorProperty = DependencyProperty.Register(
-            nameof(SelectedColor), typeof(System.Drawing.Color), typeof(ColorPicker), new FrameworkPropertyMetadata(System.Drawing.Color.Transparent)
+            nameof(SelectedColor), typeof(SkyColor), typeof(ColorPicker), new FrameworkPropertyMetadata(new SkyColor(Color.Black))
             {
                 BindsTwoWayByDefault = true,
                 DefaultUpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
                 AffectsRender = true
             });
 
+        public ColorSchema ColorSchema
+        {
+            get => (ColorSchema)GetValue(ColorSchemaProperty);
+            set => SetValue(ColorSchemaProperty, value);
+        }
+
+        public readonly static DependencyProperty ColorSchemaProperty = DependencyProperty.Register(
+            nameof(ColorSchema), typeof(ColorSchema), typeof(ColorPicker), new FrameworkPropertyMetadata(ColorSchema.Night)
+            {
+                BindsTwoWayByDefault = false,
+                DefaultUpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                AffectsRender = true
+            });
+
         public string Caption
         {
-            get { return (string)GetValue(CaptionProperty); }
-            set { SetValue(CaptionProperty, value); }
+            get => (string)GetValue(CaptionProperty);
+            set => SetValue(CaptionProperty, value);
         }
 
         public readonly static DependencyProperty CaptionProperty = DependencyProperty.Register(nameof(Caption), typeof(string), typeof(ColorPicker), new UIPropertyMetadata(null));

@@ -179,7 +179,7 @@ namespace Astrarium.Config
             using (JsonTextReader jsonReader = new JsonTextReader(reader))
             {
                 JsonSerializer ser = new JsonSerializer();
-                ser.Converters.Add(new SettingsJsonConverter(SettingsValues.ToDictionary(s => s.Key, s => s.Value.GetType())));
+                ser.Converters.Add(new SettingsJsonConverter(SettingsValues));
                 try
                 {
                     Load(ser.Deserialize<Dictionary<string, object>>(jsonReader));
@@ -233,10 +233,12 @@ namespace Astrarium.Config
         private class SettingsJsonConverter : JsonConverter
         {
             private IDictionary<string, Type> settingsTypes;
+            private IDictionary<string, object> defaultValues;
 
-            public SettingsJsonConverter(IDictionary<string, Type> settingsTypes)
+            public SettingsJsonConverter(IDictionary<string, object> defaultValues)
             {
-                this.settingsTypes = settingsTypes;
+                this.defaultValues = defaultValues;
+                this.settingsTypes = defaultValues.ToDictionary(s => s.Key, s => s.Value.GetType());
             }
 
             public override bool CanConvert(Type objectType)
@@ -249,7 +251,15 @@ namespace Astrarium.Config
                 JToken jObject = JToken.ReadFrom(reader);
                 string name = reader.Path;
                 Type type = settingsTypes[name];
-                return jObject.ToObject(type);
+                try
+                {
+                    return jObject.ToObject(type);
+                }
+                catch
+                {
+                    Trace.TraceError($"Unable to deserialize setting {name} to type {type.Name}, setting value: {jObject.ToString()}");
+                    return defaultValues.ContainsKey(name) ? defaultValues[name] : Activator.CreateInstance(type);
+                }
             }
 
             public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)

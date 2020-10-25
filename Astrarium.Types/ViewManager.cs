@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Drawing.Printing;
 using System.Threading;
 using System.Windows;
@@ -87,6 +88,11 @@ namespace Astrarium.Types
         public static string ShowOpenFileDialog(string caption, string filter)
         {
             return viewManager.ShowOpenFileDialog(caption, filter);
+        }
+
+        public static Color? ShowColorDialog(string caption, Color color)
+        {
+            return viewManager.ShowColorDialog(caption, color);
         }
 
         public static string ShowSelectFolderDialog(string caption, string path)

@@ -3015,7 +3015,14 @@
                             StrokeThickness="1"
                             Width="16" Height="16">
                             <Ellipse.Fill>
-                                <SolidColorBrush Color="{Binding SelectedColor, RelativeSource={RelativeSource TemplatedParent}, Converter={t:ColorConverter}}" />
+                                <SolidColorBrush>
+                                    <SolidColorBrush.Color>
+                                        <MultiBinding Converter="{t:ColorConverter}">
+                                            <Binding Path="SelectedColor" RelativeSource="{RelativeSource TemplatedParent}" Mode="OneWay" />
+                                            <Binding Path="ColorSchema" RelativeSource="{RelativeSource TemplatedParent}" Mode="OneWay" />
+                                        </MultiBinding>
+                                    </SolidColorBrush.Color>
+                                </SolidColorBrush>
                             </Ellipse.Fill>
                         </Ellipse>
                         <Label Grid.Column="1" Padding="4 0 0 0" Margin="0" Height="{TemplateBinding Height}" VerticalAlignment="Center" Content="{TemplateBinding Caption}" Foreground="{TemplateBinding Foreground}" />

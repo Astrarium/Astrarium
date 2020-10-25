@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using WF = System.Windows.Forms;
 using System.Drawing.Printing;
+using System.Drawing;
 
 namespace Astrarium
 {
@@ -268,6 +269,14 @@ namespace Astrarium
         {
             var vm = new DateVM(jd, utcOffset, displayMode);
             return (ShowDialog(vm) ?? false) ? (double?)vm.JulianDay : null;
+        }
+
+        public Color? ShowColorDialog(string caption, Color color)
+        {
+            var vm = CreateViewModel<ColorPickerVM>();
+            vm.SelectedColor = color;
+            vm.Title = caption;
+            return (ShowDialog(vm) ?? false) ? (Color?)vm.SelectedColor : null;
         }
 
         public CelestialObject ShowSearchDialog(Func<CelestialObject, bool> filter = null)

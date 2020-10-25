@@ -21,6 +21,11 @@ namespace Astrarium
         public SkyView()
         {
             InitializeComponent();
+            this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+            this.SetStyle(ControlStyles.SupportsTransparentBackColor, false);
+            this.SetStyle(ControlStyles.Opaque, false);
+            this.SetStyle(ControlStyles.UserPaint, true);
+            this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             DoubleBuffered = true;
             Cursor = Cursors.Cross;
             ForeColor = Color.White;

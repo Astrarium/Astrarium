@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Drawing.Printing;
 using System.Threading;
 using System.Windows;
@@ -78,6 +79,13 @@ namespace Astrarium.Types
         /// <param name="filter">Alowed files extensions filter</param>
         /// <returns>File name and path, if user pressed OK, null otherwise.</returns>
         string ShowOpenFileDialog(string caption, string filter);
+
+        /// <summary>
+        /// Shows color picker dialog
+        /// </summary>
+        /// <param name="caption">Dialog title</param>
+        /// <returns>Color, if user pressed OK, null otherwise.</returns>
+        Color? ShowColorDialog(string caption, Color color);
 
         /// <summary>
         /// Shows folder picker dialog
