@@ -227,7 +227,7 @@ namespace Astrarium.Types.Themes
         public override object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
             var schema = (ColorSchema)values[1];
-            var color = ((SkyColor)values[0]).GetColor(schema, 1);
+            var color = ((SkyColor)values[0]).GetColor(schema);
             return new System.Windows.Media.Color() { A = color.A, R = color.R, G = color.G, B = color.B };
         }
     }
@@ -241,20 +241,12 @@ namespace Astrarium.Types.Themes
         }
     }
 
-    public class ColorToStringConverter : ValueConverterBase
+    public class ColorToStringConverter : MultiValueConverterBase
     {
-        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            var color = (System.Drawing.Color)value;
-            return string.Format("#{3}{0:X2}{3}{1:X2}{3}{2:X2}", color.R, color.G, color.B, "\u200a");
-        }
-    }
-
-    public class ColorToString : ValueConverterBase
-    {
-        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            var color = (System.Drawing.Color)value;
+            var schema = (ColorSchema)values[1];
+            var color = ((SkyColor)values[0]).GetColor(schema);
             return string.Format("#{3}{0:X2}{3}{1:X2}{3}{2:X2}", color.R, color.G, color.B, "\u200a");
         }
     }

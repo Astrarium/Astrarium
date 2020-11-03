@@ -22,7 +22,7 @@ namespace Astrarium.Types.Controls
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
         {
             base.OnMouseLeftButtonDown(e);
-            Color? color = ViewManager.ShowColorDialog(Caption, SelectedColor.GetColor(ColorSchema, 1));
+            Color? color = ViewManager.ShowColorDialog(Caption, SelectedColor.GetColor(ColorSchema));
             if (color != null)
             {
                 SelectedColor.SetColor(color.Value, ColorSchema);

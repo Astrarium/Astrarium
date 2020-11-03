@@ -50,9 +50,16 @@
                 <GridView ColumnHeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}">
                     <GridView.Columns>
                         <GridViewColumn Header="{t:Text TracksListWindow.CelestialBody}" Width="200" DisplayMemberBinding="{Binding Path=Body}" />
-                        <GridViewColumn Header="{t:Text TracksListWindow.StartDate}" Width="Auto" DisplayMemberBinding="{Binding Path=StartDate}" />
-                        <GridViewColumn Header="{t:Text TracksListWindow.EndDate}" Width="Auto" DisplayMemberBinding="{Binding Path=EndDate}" />
-                        <GridViewColumn Header="{t:Text TracksListWindow.Color}" Width="Auto" DisplayMemberBinding="{Binding Path=Color, Converter={s:ColorToStringConverter}}" />
+                        <GridViewColumn Header="{t:Text TracksListWindow.StartDate}" Width="120" DisplayMemberBinding="{Binding Path=StartDate}" />
+                        <GridViewColumn Header="{t:Text TracksListWindow.EndDate}" Width="120" DisplayMemberBinding="{Binding Path=EndDate}" />
+                        <GridViewColumn Header="{t:Text TracksListWindow.Color}" Width="100">
+                            <GridViewColumn.DisplayMemberBinding>
+                                <MultiBinding Converter="{s:ColorToStringConverter}">
+                                    <Binding Path="Color" Mode="OneWay" />
+                                    <Binding Path="DataContext.ColorSchema" RelativeSource="{RelativeSource AncestorType={x:Type Window}, Mode=FindAncestor}" Mode="OneWay" />
+                                </MultiBinding>
+                            </GridViewColumn.DisplayMemberBinding>
+                        </GridViewColumn>
                     </GridView.Columns>
                 </GridView>
             </ListView.View>

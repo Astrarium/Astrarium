@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Astrarium.Types;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -24,11 +25,12 @@ namespace Astrarium.Plugins.FOV
         /// Flag indicating FOV frame is enabled (visible)
         /// </summary>
         public bool Enabled { get; set; }
- 
+
         /// <summary>
         /// Frame color
         /// </summary>
-        public Color Color { get; set; }
+        [JsonConverter(typeof(FovFrameColorJsonConverter))]
+        public SkyColor Color { get; set; }
 
         /// <summary>
         /// Shading level, from 0 to 100 percent

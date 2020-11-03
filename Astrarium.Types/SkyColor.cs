@@ -9,13 +9,12 @@ namespace Astrarium.Types
 {
     /// <summary>
     /// Represents colors for colouring with different <see cref="ColorSchema">ColorSchema</see>s.
-    /// </summary>    
+    /// </summary>
     public class SkyColor
     {
         public Color Night { get; set; }
         public Color Red { get; set; }
         public Color White { get; set; }
-        public Color Day { get; set; }
 
         public SkyColor() { }
 
@@ -24,7 +23,6 @@ namespace Astrarium.Types
             Night = other.Night;
             Red = other.Red;
             White = other.White;
-            Day = other.Day;
         }
 
         public SkyColor(byte r, byte g, byte b) : this(Color.FromArgb(r, g, b)) { }
@@ -32,7 +30,6 @@ namespace Astrarium.Types
         public SkyColor(Color color)
         {
             Night = color;
-            Day = GetDaylightColor(color);
             Red = GetNightModeColor(color);
             White = GetWhiteMapColor(color);
         }
@@ -81,7 +78,22 @@ namespace Astrarium.Types
                 case ColorSchema.White:
                     return White;
                 case ColorSchema.Day:
-                    return GetIntermediateColor(daylightFactor, Night, Day);
+                    return GetIntermediateColor(daylightFactor, Night, GetDaylightColor(Night));
+            }
+        }
+
+        public Color GetColor(ColorSchema schema)
+        {
+            switch (schema)
+            {
+                default:
+                case ColorSchema.Night:
+                case ColorSchema.Day:
+                    return Night;
+                case ColorSchema.Red:
+                    return Red;
+                case ColorSchema.White:
+                    return White;
             }
         }
 
@@ -91,6 +103,7 @@ namespace Astrarium.Types
             {
                 default:
                 case ColorSchema.Night:
+                case ColorSchema.Day:
                     Night = color;
                     break;
                 case ColorSchema.Red:
@@ -98,9 +111,6 @@ namespace Astrarium.Types
                     break;
                 case ColorSchema.White:
                     White = color;
-                    break;
-                case ColorSchema.Day:
-                    Day = color;
                     break;
             }
         }

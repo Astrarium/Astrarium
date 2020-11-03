@@ -47,7 +47,7 @@ namespace Astrarium.Plugins.FOV
 
         private void AddFrame()
         {
-            EditFrame(new TelescopeFovFrame() { Id = Guid.NewGuid(), Color = Color.Purple });
+            EditFrame(new TelescopeFovFrame() { Id = Guid.NewGuid(), Color = new SkyColor(Color.Purple) });
         }
     
         private void EditFrame(FovFrame frame)

@@ -28,7 +28,7 @@ namespace Astrarium.ViewModels
             get
             {
                 var schema = settings.Get<ColorSchema>("Schema");
-                return schema != ColorSchema.Night;
+                return schema != ColorSchema.Night && schema != ColorSchema.Day;
             }
         }
 

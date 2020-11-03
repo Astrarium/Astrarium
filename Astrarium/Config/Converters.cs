@@ -44,7 +44,7 @@ namespace Astrarium.Config
         {
             skyColor = (SkyColor)values[0];
             settings = (ISettings)values[1];
-            return skyColor.GetColor(settings.Get<ColorSchema>("Schema"), 1);
+            return skyColor.GetColor(settings.Get<ColorSchema>("Schema"));
         }
 
         public override object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
