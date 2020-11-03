@@ -190,7 +190,7 @@ namespace Astrarium.Controls
         {
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-            colorWheel.Width = Math.Max(0, Math.Min(Width - 20, Height));
+            colorWheel.Width = Width - 20;
             colorWheel.Height = colorWheel.Width;
             colorWheel.X = (Width - colorWheel.Width) / 2;
             colorWheel.Y = 10;
@@ -199,9 +199,9 @@ namespace Astrarium.Controls
             center.X = colorWheel.X + radius;
             center.Y = 10 + radius;
 
-            slider.X = colorWheel.X;
+            slider.X = colorWheel.X - 5;
             slider.Y = SliderOnly ? 20 : colorWheel.Height + 20;
-            slider.Width = colorWheel.Width;
+            slider.Width = colorWheel.Width + 10;
             slider.Height = 10;
 
             double phi = -_Hue * Math.PI / 180;

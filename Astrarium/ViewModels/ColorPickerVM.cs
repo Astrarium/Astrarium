@@ -25,7 +25,11 @@ namespace Astrarium.ViewModels
 
         public bool SliderOnly 
         {
-            get => settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
+            get
+            {
+                var schema = settings.Get<ColorSchema>("Schema");
+                return schema != ColorSchema.Night;
+            }
         }
 
         public int Height
