@@ -47,6 +47,9 @@ namespace Astrarium.Plugins.SolarSystem
             // Colors
             SettingItems.Add("Colors", new SettingItem("ColorSolarSystemLabel", new SkyColor(Color.DimGray)));
 
+            // Fonts
+            SettingItems.Add("Fonts", new SettingItem("SolarSystemLabelsFont", new Font("Arial", 8)));
+
             #endregion Settings
 
             #region UI integration

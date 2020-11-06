@@ -6,9 +6,14 @@
              mc:Ignorable="d" 
              xmlns:controls="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types">
 
-    <StackPanel Orientation="Vertical">
-        <Label Content="{Binding SettingName, FallbackValue='File Path'}" />
-        <controls:FontPicker SelectedFont="{Binding SettingValue}" IsEnabled="{Binding IsEnabled}" />
-    </StackPanel>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" SharedSizeGroup="FontPickerSettingLabel" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
 
+        <Label Grid.IsSharedSizeScope="True" Grid.Column="0" Content="{Binding SettingTitle, FallbackValue='Font'}" />
+        <controls:FontPicker Grid.Column="1" SelectedFont="{Binding SettingValue}" IsEnabled="{Binding IsEnabled}" />
+    </Grid>
+    
 </UserControl>

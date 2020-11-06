@@ -237,7 +237,7 @@ namespace Astrarium.Types.Themes
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var font = (System.Drawing.Font)value;
-            return font.Name;
+            return $"{font.Name}   {font.Style}   {font.Size} pt";
         }
     }
 

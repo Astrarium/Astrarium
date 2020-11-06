@@ -27,7 +27,6 @@ namespace Astrarium.Plugins.SolarSystem
         private readonly Planet mars;
         private readonly Pluto pluto;
 
-        private Font fontLabel = new Font("Arial", 8);
         private Font fontShadowLabel = new Font("Arial", 8);
         private Brush brushLabel;
 
@@ -221,6 +220,7 @@ namespace Astrarium.Plugins.SolarSystem
 
                 if (settings.Get("SunLabel"))
                 {
+                    var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
                     map.DrawObjectCaption(fontLabel, brushLabel, sun.Name, p, size);
                 }
 
@@ -352,6 +352,7 @@ namespace Astrarium.Plugins.SolarSystem
                 
                 if (settings.Get("MoonLabel"))
                 {
+                    var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
                     map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, size);
                 }
 
@@ -483,6 +484,7 @@ namespace Astrarium.Plugins.SolarSystem
                                 // draw feature label
                                 if (needDrawLabel)
                                 {
+                                    var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
                                     map.DrawObjectCaption(fontLabel, brush, feature.Name, new PointF(p.X + pFeature.X, p.Y + pFeature.Y), labelDist, format);
                                 }
                             }
@@ -674,6 +676,7 @@ namespace Astrarium.Plugins.SolarSystem
                     g.FillEllipse(GetPlanetColor(map, planet.Number), p.X - size / 2, p.Y - size / 2, size, size);
                     if (settings.Get("PlanetsLabels"))
                     {
+                        var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
                         map.DrawObjectCaption(fontLabel, brushLabel, planet.Name, p, size);
                     }
                     map.AddDrawnObject(planet);
@@ -761,6 +764,7 @@ namespace Astrarium.Plugins.SolarSystem
 
                     if (settings.Get("PlanetsLabels"))
                     {
+                        var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
                         map.DrawObjectCaption(fontLabel, brushLabel, planet.Name, p, diam);                       
                     }
                     map.AddDrawnObject(planet);
@@ -814,6 +818,7 @@ namespace Astrarium.Plugins.SolarSystem
                             g.FillEllipse(new SolidBrush(map.GetColor(Color.Wheat)), -size / 2, -size / 2, size, size);
                             g.ResetTransform();
 
+                            var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
                             map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, 2);
                             map.AddDrawnObject(moon);
                             isDrawn = true;
@@ -859,7 +864,8 @@ namespace Astrarium.Plugins.SolarSystem
                     }
 
                     g.ResetTransform();
-                    
+
+                    var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
                     map.DrawObjectCaption(fontLabel, brushLabel, moon.Name, p, diam);
                     map.AddDrawnObject(moon);
                     isDrawn = true;
