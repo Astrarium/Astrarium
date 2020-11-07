@@ -14,7 +14,6 @@ namespace Astrarium.Plugins.MinorBodies
 {
     public class CometsRenderer : BaseRenderer
     {
-        private Font fontNames;
         private readonly CometsCalc cometsCalc;
         private readonly ISettings settings;
 
@@ -24,8 +23,6 @@ namespace Astrarium.Plugins.MinorBodies
         {
             this.cometsCalc = cometsCalc;
             this.settings = settings;
-
-            fontNames = new Font("Arial", 8);
         }
 
         public override void Render(IMapContext map)
@@ -94,7 +91,8 @@ namespace Astrarium.Plugins.MinorBodies
 
                                 if (drawLabels)
                                 {
-                                    map.DrawObjectCaption(fontNames, brushNames, c.Name, p, diam);
+                                    var font = settings.Get<Font>("CometsLabelsFont");
+                                    map.DrawObjectCaption(font, brushNames, c.Name, p, diam);
                                 }
                                 map.AddDrawnObject(c);
                             }                            

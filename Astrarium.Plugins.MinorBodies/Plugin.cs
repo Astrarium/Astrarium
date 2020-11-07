@@ -16,8 +16,12 @@ namespace Astrarium.Plugins.MinorBodies
             SettingItems.Add("Comets", new SettingItem("CometsLabels", true, s => s.Get<bool>("Comets")));
             SettingItems.Add("Asteroids", new SettingItem("Asteroids", true));
             SettingItems.Add("Asteroids", new SettingItem("AsteroidsLabels", true, s => s.Get<bool>("Asteroids")));
+            
             SettingItems.Add("Colors", new SettingItem("ColorAsteroidsLabels", new SkyColor(10, 44, 37)));
             SettingItems.Add("Colors", new SettingItem("ColorCometsLabels", new SkyColor(78, 84, 99)));
+
+            SettingItems.Add("Fonts", new SettingItem("AsteroidsLabelsFont", new Font("Arial", 8)));
+            SettingItems.Add("Fonts", new SettingItem("CometsLabelsFont", new Font("Arial", 8)));
 
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconAsteroid", "$Settings.Asteroids", new SimpleBinding(settings, "Asteroids", "IsChecked")));
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconComet", "$Settings.Comets", new SimpleBinding(settings, "Comets", "IsChecked")));
