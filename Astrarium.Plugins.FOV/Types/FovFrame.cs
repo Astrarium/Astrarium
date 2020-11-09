@@ -41,6 +41,18 @@ namespace Astrarium.Plugins.FOV
         /// Frame label, to be shown on sky map
         /// </summary>
         public string Label { get; set; }
+
+        /// <summary>
+        /// Makes a copy of FOV frame
+        /// </summary>
+        /// <returns></returns>
+        public FovFrame Copy()
+        {
+            var copy = JsonConvert.DeserializeObject<FovFrame>(JsonConvert.SerializeObject(this));
+            copy.Id = Guid.NewGuid();
+            copy.Label = null;
+            return copy;
+        }
     }
 
     /// <summary>

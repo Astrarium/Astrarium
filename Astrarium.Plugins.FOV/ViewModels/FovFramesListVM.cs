@@ -1,4 +1,5 @@
 ﻿using Astrarium.Types;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,6 +18,7 @@ namespace Astrarium.Plugins.FOV
         public bool IsEmptyList => !FovFrames.Any();
 
         public Command CloseCommand { get; }
+        public Command<FovFrame> CopyCommand { get; }
         public Command<FovFrame> EditCommand { get; }
         public Command<FovFrame> DeleteCommand { get; }
         public Command AddCommand { get; }
@@ -34,6 +36,7 @@ namespace Astrarium.Plugins.FOV
             CloseCommand = new Command(Close);
             AddCommand = new Command(AddFrame);
             EditCommand = new Command<FovFrame>(EditFrame);
+            CopyCommand = new Command<FovFrame>(CopyFrame);
             DeleteCommand = new Command<FovFrame>(DeleteFrame);
             CheckedCommand = new Command<FovFrame>(CheckedFrame);
         }
@@ -49,7 +52,12 @@ namespace Astrarium.Plugins.FOV
         {
             EditFrame(new TelescopeFovFrame() { Id = Guid.NewGuid(), Color = new SkyColor(Color.Purple) });
         }
-    
+
+        private void CopyFrame(FovFrame frame)
+        {            
+            EditFrame(frame.Copy());
+        }
+
         private void EditFrame(FovFrame frame)
         {
             var viewModel = ViewManager.CreateViewModel<FovSettingsVM>();
