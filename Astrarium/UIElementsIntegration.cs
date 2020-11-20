@@ -24,6 +24,8 @@ namespace Astrarium
             // Flag indicating the app should be started with maximized main window
             SettingItems.Add("General", new SettingItem("StartMaximized", false));
 
+            SettingItems.Add("General", new SettingItem("RememberWindowSize", false, s => !s.Get("StartMaximized")));
+
             // Type of application menu
             SettingItems.Add("General", new SettingItem("IsCompactMenu", false));
 
@@ -39,6 +41,9 @@ namespace Astrarium
             // Default observer location.
             // Has no section, so not displayed in settings window.
             SettingItems.Add(null, new SettingItem("ObserverLocation", new CrdsGeographical(-44, 56.3333, +3, 80, "Europe/Moscow", "Nizhny Novgorod")));
+
+            // Default size of main window
+            SettingItems.Add(null, new SettingItem("WindowSize", System.Drawing.Size.Empty));
 
             // Default color schema
             SettingItems.Add("Colors", new SettingItem("Schema", ColorSchema.Night));

@@ -17,7 +17,8 @@
         a:MainWindow.MapDoubleClick="{Binding MapDoubleClickCommand}"
         a:MainWindow.MapRightClick="{Binding MapRightClickCommand}"
         a:MainWindow.MapZoom="{Binding ZoomCommand}"
-        s:WindowProperties.CompactMenu="{Binding MainMenuItems}"
+        a:MainWindow.WindowSize="{Binding WindowSize, Mode=TwoWay}"
+        s:WindowProperties.CompactMenu="{Binding MainMenuItems}"        
         s:WindowProperties.CompactMenuVisible="{Binding IsCompactMenu, Converter={s:BoolToVisibilityConverter}}"
         Title="Astrarium" Height="450" Width="850">
 
