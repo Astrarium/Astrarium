@@ -89,6 +89,11 @@ namespace Astrarium
             }
         }
 
+        private void SetAzimuthOrigin(AzimuthOrigin origin)
+        {
+            CrdsHorizontal.AzimuthOrigin = origin;
+        }
+
         private IEnumerable<Type> GetRenderers(Type pluginType)
         {
             return pluginType.Assembly.GetTypes().Where(t => typeof(BaseRenderer).IsAssignableFrom(t) && !t.IsAbstract);
@@ -221,6 +226,7 @@ namespace Astrarium
 
             SetLanguage(settings.Get<string>("Language"));
             SetColorSchema(settings.Get<ColorSchema>("Schema"));
+            SetAzimuthOrigin(settings.Get<AzimuthOrigin>("AzimuthOrigin"));
 
             SkyContext context = new SkyContext(
                 new Date(DateTime.Now).ToJulianEphemerisDay(),
@@ -261,6 +267,10 @@ namespace Astrarium
                 else if (settingName == "Language")
                 {
                     SetLanguage((string)value);
+                }
+                else if (settingName == "AzimuthOrigin")
+                {
+                    SetAzimuthOrigin((AzimuthOrigin)value);
                 }
             };
 
