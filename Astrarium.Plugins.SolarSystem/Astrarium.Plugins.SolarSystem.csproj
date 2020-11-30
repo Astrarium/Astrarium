@@ -11,6 +11,19 @@
     <OutputPath>..\Astrarium\bin\$(Configuration)</OutputPath>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Deploy)' == 'True'">
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>None</DebugType>
+    <OutputPath>..\Deploy\$(MSBuildProjectName)</OutputPath>
+  </PropertyGroup>
+
+  <Target Condition="'$(Deploy)' == 'True'" Name="ZipOutputPath" AfterTargets="Build">
+    <ZipDirectory
+        Overwrite="True"
+        SourceDirectory="$(OutputPath)"
+        DestinationFile="$(OutputPath)\..\$(MSBuildProjectName)-$(ProductVersion).zip" />
+  </Target>
+  
   <ItemGroup>
     <ProjectReference Include="..\Astrarium.Algorithms\Astrarium.Algorithms.csproj">
       <Private>false</Private>

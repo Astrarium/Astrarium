@@ -130,7 +130,7 @@ namespace Astrarium.Types
                 if (value == null || double.IsNaN((double)value))
                     return null;
                 else
-                    return new DMS(Algorithms.Angle.To360((double)value) + (CrdsHorizontal.AzimuthOrigin == AzimuthOrigin.North ? 180 : 0)).ToUnsignedString();
+                    return new DMS(Algorithms.Angle.To360((double)value) + (CrdsHorizontal.MeasureAzimuthFromNorth ? 180 : 0)).ToUnsignedString();
             }
         }
 
@@ -145,7 +145,7 @@ namespace Astrarium.Types
                 }
                 else
                 {
-                    return Algorithms.Angle.To360(v + (CrdsHorizontal.AzimuthOrigin == AzimuthOrigin.North ? 180 : 0)).ToString("0.\u00B0", CultureInfo.InvariantCulture);
+                    return Algorithms.Angle.To360(v + (CrdsHorizontal.MeasureAzimuthFromNorth ? 180 : 0)).ToString("0.\u00B0", CultureInfo.InvariantCulture);
                 }
             }
         }

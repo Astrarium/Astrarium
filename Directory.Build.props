@@ -1,8 +1,8 @@
 <Project>
   <PropertyGroup>
-    <Version>2020.10.1</Version>
-    <ProductVersion>2020.10.1</ProductVersion>
-    <InformationalVersion>2020.10.1</InformationalVersion>
+    <Version>$(DeploymentVersion)</Version>
+    <ProductVersion>$(DeploymentVersion)</ProductVersion>
+    <InformationalVersion>$(DeploymentVersion)</InformationalVersion>
     <Copyright>© Alexander Krutov, 2018-2020</Copyright>
   </PropertyGroup>
 </Project>

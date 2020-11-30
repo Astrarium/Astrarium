@@ -40,6 +40,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.FOV", "As
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A73C5FA1-DF83-464C-B4C7-3369E3BA519F}"
 	ProjectSection(SolutionItems) = preProject
+		deploy.bat = deploy.bat
 		Directory.Build.props = Directory.Build.props
 		LICENSE = LICENSE
 	EndProjectSection

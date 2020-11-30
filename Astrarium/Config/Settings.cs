@@ -250,15 +250,24 @@ namespace Astrarium.Config
             {
                 JToken jObject = JToken.ReadFrom(reader);
                 string name = reader.Path;
-                Type type = settingsTypes[name];
-                try
+
+                if (settingsTypes.ContainsKey(name))
                 {
-                    return jObject.ToObject(type);
+                    Type type = settingsTypes[name];
+                    try
+                    {
+                        return jObject.ToObject(type);
+                    }
+                    catch
+                    {
+                        Trace.TraceError($"Unable to deserialize setting {name} to type {type.Name}, setting value: {jObject.ToString()}");
+                        return defaultValues.ContainsKey(name) ? defaultValues[name] : Activator.CreateInstance(type);
+                    }
                 }
-                catch
+                else
                 {
-                    Trace.TraceError($"Unable to deserialize setting {name} to type {type.Name}, setting value: {jObject.ToString()}");
-                    return defaultValues.ContainsKey(name) ? defaultValues[name] : Activator.CreateInstance(type);
+                    Trace.TraceError($"Setting {name} has unknown type, setting value: {jObject.ToString()}");
+                    return null;
                 }
             }
 

@@ -18,6 +18,10 @@ namespace Astrarium
         
         public UIElementsIntegration()
         {
+            SettingItems.SetGroupOrder("General", 0);
+            SettingItems.SetGroupOrder("Colors", 1);
+            SettingItems.SetGroupOrder("Fonts", 2);
+
             // Default language
             SettingItems.Add("General", new SettingItem("Language", CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.ToLower(), typeof(LanguageSettingControl)));
 
@@ -34,9 +38,6 @@ namespace Astrarium
 
             // Status bar visibility
             SettingItems.Add("General", new SettingItem("IsStatusBarVisible", true));
-
-            // Default azumuth measurement origin
-            SettingItems.Add("General", new SettingItem("AzimuthOrigin", AzimuthOrigin.South));
 
             // Default observer location.
             // Has no section, so not displayed in settings window.

@@ -31,7 +31,20 @@
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net451|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
-  
+
+  <PropertyGroup Condition="'$(Deploy)' == 'True'">
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>None</DebugType>
+    <OutputPath>..\Deploy\$(MSBuildProjectName)</OutputPath>
+  </PropertyGroup>
+
+  <Target Condition="'$(Deploy)' == 'True'" Name="ZipOutputPath" AfterTargets="Build">
+    <ZipDirectory
+        Overwrite="True"
+        SourceDirectory="$(OutputPath)"
+        DestinationFile="$(OutputPath)\..\$(MSBuildProjectName)-$(Version).zip" />
+  </Target>
+
   <ItemGroup>
     <EmbeddedResource Include="Credits.md" />
     <EmbeddedResource Include="Text.ini" />

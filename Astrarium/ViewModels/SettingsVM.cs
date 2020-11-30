@@ -58,7 +58,9 @@ namespace Astrarium.ViewModels
             SettingsSections = new ObservableCollection<SettingsSectionVM>();
             ControlSelector = new ConfigControlTemplateSelector();
 
-            foreach (var section in uiIntegration.SettingItems.Groups.Where(g => g != null))
+            var groups = uiIntegration.SettingItems.Groups.Where(g => g != null).OrderBy(g => uiIntegration.SettingItems.GetGroupOrder(g));
+
+            foreach (var section in groups)
             {
                 var sectionVM = new SettingsSectionVM(section);
 
