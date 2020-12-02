@@ -421,71 +421,75 @@ namespace Astrarium.Plugins.SolarSystem
                         {
                             PointF pFeature = GetCartesianFeatureCoordinates(r, v, axisRotation);
 
-                            // distance, in pixels, between center of the feature and current mouse position
-                            double d = Math.Sqrt(Math.Pow(pMouse.X - pFeature.X - p.X, 2) + Math.Pow(pMouse.Y - pFeature.Y - p.Y, 2));
-
-                            // visible flattening of feature outline,
-                            // depends on angular distance between feature and visible center of the body disk
-                            float f = (float)Math.Cos(Angle.ToRadians(sep));
-
-                            bool needDrawLabel = true;
-
-                            if (fr > 100 || d < fr)
+                            // do not draw of feature is out of screen
+                            if (!map.IsOutOfScreen(new PointF(pFeature.X + p.X, pFeature.Y + p.Y)))
                             {
-                                float labelDist = 3;
-                                StringFormat format = null;
+                                // distance, in pixels, between center of the feature and current mouse position
+                                double d = Math.Sqrt(Math.Pow(pMouse.X - pFeature.X - p.X, 2) + Math.Pow(pMouse.Y - pFeature.Y - p.Y, 2));
 
-                                // draw feature outline (for craters and satellite features only)
-                                if (feature.TypeCode == "AA" || feature.TypeCode == "SF")
+                                // visible flattening of feature outline,
+                                // depends on angular distance between feature and visible center of the body disk
+                                float f = (float)Math.Cos(Angle.ToRadians(sep));
+
+                                bool needDrawLabel = true;
+
+                                if (fr > 100 || d < fr)
                                 {
-                                    g.TranslateTransform(p.X + pFeature.X, p.Y + pFeature.Y);
-                                    g.RotateTransform(90 + (float)Angle.ToDegrees(Math.Atan2(pFeature.Y, pFeature.X)));
+                                    float labelDist = 3;
+                                    StringFormat format = null;
 
-                                    using (GraphicsPath gp = new GraphicsPath())
+                                    // draw feature outline (for craters and satellite features only)
+                                    if (feature.TypeCode == "AA" || feature.TypeCode == "SF")
                                     {
-                                        gp.AddEllipse(-fr, -fr * f, fr * 2, fr * f * 2);
-                                        gp.Transform(g.Transform);
+                                        g.TranslateTransform(p.X + pFeature.X, p.Y + pFeature.Y);
+                                        g.RotateTransform(90 + (float)Angle.ToDegrees(Math.Atan2(pFeature.Y, pFeature.X)));
 
-                                        if (gp.IsVisible(pMouse))
+                                        using (GraphicsPath gp = new GraphicsPath())
                                         {
-                                            g.DrawEllipse(pen, -fr, -fr * f, fr * 2, fr * f * 2);
+                                            gp.AddEllipse(-fr, -fr * f, fr * 2, fr * f * 2);
+                                            gp.Transform(g.Transform);
+
+                                            if (gp.IsVisible(pMouse))
+                                            {
+                                                g.DrawEllipse(pen, -fr, -fr * f, fr * 2, fr * f * 2);
+                                            }
+                                            else
+                                            {
+                                                needDrawLabel = false;
+                                            }
                                         }
-                                        else
-                                        {
-                                            needDrawLabel = false;
-                                        }
+
+                                        g.ResetTransform();
+                                        labelDist = fr * 2 * f;
                                     }
-                                    
+
+                                    // center label for maria, oceanus, sinus, lacus, palus 
+                                    if (feature.TypeCode == "ME" ||
+                                        feature.TypeCode == "OC" ||
+                                        feature.TypeCode == "SI" ||
+                                        feature.TypeCode == "LC" ||
+                                        feature.TypeCode == "PA")
+                                    {
+                                        format = new StringFormat();
+                                        format.Alignment = StringAlignment.Center;
+                                        format.LineAlignment = StringAlignment.Center;
+                                    }
+                                    // fill central dot
+                                    else if (feature.TypeCode != "AA" && feature.TypeCode != "SF")
+                                    {
+                                        g.TranslateTransform(p.X + pFeature.X, p.Y + pFeature.Y);
+                                        g.FillEllipse(brush, -1, -1, 3, 3);
+                                        g.ResetTransform();
+                                    }
+
                                     g.ResetTransform();
-                                    labelDist = fr * 2 * f;
-                                }
 
-                                // center label for maria, oceanus, sinus, lacus, palus 
-                                if (feature.TypeCode == "ME" ||
-                                    feature.TypeCode == "OC" ||
-                                    feature.TypeCode == "SI" ||
-                                    feature.TypeCode == "LC" ||
-                                    feature.TypeCode == "PA")
-                                {
-                                    format = new StringFormat();
-                                    format.Alignment = StringAlignment.Center;
-                                    format.LineAlignment = StringAlignment.Center;
-                                }
-                                // fill central dot
-                                else if (feature.TypeCode != "AA" && feature.TypeCode != "SF")
-                                {
-                                    g.TranslateTransform(p.X + pFeature.X, p.Y + pFeature.Y);
-                                    g.FillEllipse(brush, -1, -1, 3, 3);
-                                    g.ResetTransform();
-                                }
-
-                                g.ResetTransform();
-
-                                // draw feature label
-                                if (needDrawLabel)
-                                {
-                                    var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
-                                    map.DrawObjectCaption(fontLabel, brush, feature.Name, new PointF(p.X + pFeature.X, p.Y + pFeature.Y), labelDist, format);
+                                    // draw feature label
+                                    if (needDrawLabel)
+                                    {
+                                        var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
+                                        map.DrawObjectCaption(fontLabel, brush, feature.Name, new PointF(p.X + pFeature.X, p.Y + pFeature.Y), labelDist, format);
+                                    }
                                 }
                             }
                         }
