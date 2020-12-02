@@ -421,7 +421,7 @@ namespace Astrarium.Plugins.SolarSystem
                         {
                             PointF pFeature = GetCartesianFeatureCoordinates(r, v, axisRotation);
 
-                            // do not draw of feature is out of screen
+                            // do not draw if feature is out of screen
                             if (!map.IsOutOfScreen(new PointF(pFeature.X + p.X, pFeature.Y + p.Y)))
                             {
                                 // distance, in pixels, between center of the feature and current mouse position
