@@ -241,9 +241,11 @@ namespace Astrarium.Algorithms
 
             decimalAngle = Math.Abs(decimalAngle);
 
+            const decimal _60 = 60;
+
             Degrees = (uint)decimalAngle;
-            Minutes = (uint)((decimalAngle - Degrees) * 60);
-            Seconds = (decimalAngle - Degrees - Minutes / 60.0) * 3600;
+            Minutes = (uint)(((decimal)decimalAngle - Degrees) * _60);
+            Seconds = (double)(((decimal)decimalAngle - Degrees - Minutes / _60) * 3600);
         }
 
         /// <summary>
@@ -433,9 +435,11 @@ namespace Astrarium.Algorithms
 
             decimalAngle /= 15;
 
+            const decimal _60 = 60;
+
             Hours = (uint)decimalAngle;
-            Minutes = (uint)((decimalAngle - Hours) * 60);
-            Seconds = (decimalAngle - Hours - Minutes / 60.0) * 3600;
+            Minutes = (uint)(((decimal)decimalAngle - Hours) * _60);
+            Seconds = (double)(((decimal)decimalAngle - Hours - Minutes / _60) * 3600);
         }
 
         /// <summary>
