@@ -272,6 +272,7 @@ namespace Astrarium
             Host.KeyDown += (o, e) => GetMapKeyDown(this)?.Execute(e);
             Host.Child = skyView;
             this.Loaded += MainWindow_Loaded;
+            this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -287,8 +288,28 @@ namespace Astrarium
             var size = GetWindowSize(this);
             if (size != System.Drawing.Size.Empty)
             {
+                var bounds = CurrentScreen(this).Bounds;
+
+                if (size.Width > bounds.Width)
+                    size.Width = bounds.Width;
+
+                if (size.Height > bounds.Height)
+                    size.Height = bounds.Height;
+
                 Width = size.Width;
                 Height = size.Height;
+
+                var left = (bounds.Width - size.Width) / 2;
+                var top = (bounds.Height - size.Height) / 2;
+
+                if (left < 0)
+                    left = 0;
+
+                if (top < 0)
+                    top = 0;
+
+                Left = left;
+                Top = top;
             }
         }
 
