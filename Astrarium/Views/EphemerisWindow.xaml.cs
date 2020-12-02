@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Astrarium.Types;
+using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,10 +29,34 @@ namespace Astrarium.Views
 
         private void DataGrid_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
         {
-            var column = e.Column as DataGridTextColumn;
+            var column = new DataGridTextColumn();
             var dataTable = ((sender as DataGrid).ItemsSource as DataView).Table;
-            column.Binding = new Binding("[" + e.PropertyName + "]");            
+            var formatter = dataTable.Columns[e.PropertyName].ExtendedProperties["Formatter"];
+            var converter = formatter != null ? new ToStringConverter((IEphemFormatter)formatter) : null;
+            column.Binding = new Binding("[" + e.PropertyName + "]") { Converter = converter };            
+            column.SortMemberPath = e.PropertyName;
             column.Header = dataTable.Columns[e.PropertyName].Caption;
+            e.Column = column;
+        }
+
+        class ToStringConverter : IValueConverter
+        {
+            private readonly IEphemFormatter formatter;
+
+            public ToStringConverter(IEphemFormatter formatter)
+            {
+                this.formatter = formatter;
+            }
+
+            public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+            {
+                return formatter.Format(value);
+            }
+
+            public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }
