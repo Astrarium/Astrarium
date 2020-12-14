@@ -181,5 +181,10 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
+    <Style x:Key="PopupContentStyle" TargetType="{x:Type s:BorderFix}" BasedOn="{StaticResource {x:Type s:BorderFix}}">
+        <Setter Property="Background" Value="{StaticResource BrushWindowBackground}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BrushControlDarkBackground}" />
+    </Style>
+
 </ResourceDictionary>

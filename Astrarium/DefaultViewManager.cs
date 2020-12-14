@@ -74,7 +74,14 @@ namespace Astrarium
 
                 if (window.GetType() != typeof(MainWindow))
                 {
-                    window.Owner = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
+                    if (Application.Current.MainWindow != window)
+                    {
+                        window.Owner = Application.Current.MainWindow;
+                    }
+                }
+                else
+                {
+                    Application.Current.MainWindow = window;
                 }
 
                 Action<bool?> viewModelClosingHandler = null;
@@ -204,7 +211,7 @@ namespace Astrarium
             var dialog = typeFactory(typeof(MessageBoxWindow)) as MessageBoxWindow;
             dialog.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
             dialog.Title = caption.StartsWith("$") ? Text.Get(caption.Substring(1)) : caption;
-            dialog.MessageContainer.Text = text.StartsWith("$") ? Text.Get(text.Substring(1)) : text;
+            dialog.DataContext = text.StartsWith("$") ? Text.Get(text.Substring(1)) : text;
             dialog.Buttons = buttons;
             dialog.ShowDialog();
             return dialog.Result;
@@ -295,6 +302,15 @@ namespace Astrarium
             var vm = CreateViewModel<TimeSpanVM>();
             vm.TimeSpan = timeSpan;
             return (ShowDialog(vm) ?? false) ? (TimeSpan?)vm.TimeSpan : null;
+        }
+
+        public void ShowPopupMessage(string message)
+        {
+            if (Application.Current?.MainWindow is MainWindow window)
+            {
+                window.popupText.Text = message.StartsWith("$") ? Text.Get(message.Substring(1)) : message;
+                window.popup.Show();
+            }
         }
     }
 }

@@ -128,5 +128,11 @@ namespace Astrarium.Types
         /// <param name="timeSpan">Time span selected by default</param>
         /// <returns></returns>
         TimeSpan? ShowTimeSpanDialog(TimeSpan timeSpan);
+
+        /// <summary>
+        /// Shows popup message over main application window
+        /// </summary>
+        /// <param name="message">Popup message text</param>
+        void ShowPopupMessage(string message);
     }
 }

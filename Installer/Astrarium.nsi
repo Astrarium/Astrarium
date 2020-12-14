@@ -54,7 +54,7 @@ Name "Astrarium"
 BrandingText "${PRODUCT_NAME} ${VERSION}"
 
 ; The file to write
-OutFile "${DEPLOY_DIR}\${PRODUCT_NAME}-WebInstaller-${VERSION}.exe"
+OutFile "${DEPLOY_DIR}\${PRODUCT_NAME}-WebInstaller.exe"
 
 ; Need admin rights to write to Program Files
 RequestExecutionLevel admin

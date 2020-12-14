@@ -9,6 +9,7 @@ using System.Reflection;
 using WF = System.Windows.Forms;
 using Astrarium.Types.Themes;
 using Astrarium.Types;
+using System.Linq;
 
 namespace Astrarium
 {
@@ -255,22 +256,23 @@ namespace Astrarium
             return WF.Screen.FromPoint(new System.Drawing.Point((int)window.Left, (int)window.Top));
         }
 
+        private readonly ISkyMap map;
+
         public MainWindow(SkyMap map)
         {
             InitializeComponent();
 
+            this.map = map;
             var skyView = new SkyView();
             skyView.SkyMap = map;
             skyView.MouseDoubleClick += (o, e) => GetMapDoubleClick(this)?.Execute(new PointF(e.X, e.Y));
             skyView.MouseClick += SkyView_MouseClick;
-            skyView.MouseMove += (o, e) => { SetMousePosition(this, new PointF(e.X, e.Y)); };
+            skyView.MouseMove += SkyView_MouseMove;
             skyView.MouseWheel += (o, e) => GetMapZoom(this)?.Execute(e.Delta);
-            skyView.Redraw += () => Activate();
-            
-            //skyView.LostFocus += (o, e) => this.Activate();
             Host.Loaded += (o, e) => WF.Application.AddMessageFilter(this);
             Host.KeyDown += (o, e) => GetMapKeyDown(this)?.Execute(e);
             Host.Child = skyView;
+
             this.Loaded += MainWindow_Loaded;
             this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
         }
@@ -345,12 +347,20 @@ namespace Astrarium
             if (e.Button == WF.MouseButtons.Right && e.Clicks == 1)
             {
                 GetMapRightClick(this)?.Execute(new PointF(e.X, e.Y));
-                
                 // setting placement target is needed to update context menu colors:
                 // see https://github.com/MahApps/MahApps.Metro/issues/2244
                 Host.ContextMenu.PlacementTarget = Host;
-
                 Host.ContextMenu.IsOpen = true;
+            }
+        }
+
+        private void SkyView_MouseMove(object sender, WF.MouseEventArgs e)
+        {
+            SetMousePosition(this, new PointF(e.X, e.Y));
+            if (map.LockedObject != null && e.Button == WF.MouseButtons.Left)
+            {
+                string text = Text.Get("MapIsLockedOn", ("objectName", map.LockedObject.Names.First()));
+                ViewManager.ShowPopupMessage(text);
             }
         }
 

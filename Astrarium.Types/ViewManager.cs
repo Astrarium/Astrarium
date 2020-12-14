@@ -131,5 +131,10 @@ namespace Astrarium.Types
         {
             return viewManager.ShowTimeSpanDialog(timeSpan);
         }
+
+        public static void ShowPopupMessage(string message)
+        {
+            viewManager.ShowPopupMessage(message);
+        }
     }
 }

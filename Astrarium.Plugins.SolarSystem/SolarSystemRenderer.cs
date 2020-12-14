@@ -152,7 +152,7 @@ namespace Astrarium.Plugins.SolarSystem
 
             RenderMoon(map);
 
-            if (map.Schema == ColorSchema.Day)
+            if (map.Schema == ColorSchema.Day && settings.Get("Sun"))
             {
                 DrawHalo(map);
             }

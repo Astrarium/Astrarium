@@ -6,6 +6,7 @@
         xmlns:a="clr-namespace:Astrarium"
         xmlns:c="clr-namespace:Astrarium.Controls"
         xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+        xmlns:cc="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
         xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
         mc:Ignorable="d"
         Style="{StaticResource {x:Type Window}}"
@@ -160,11 +161,24 @@
             </c:AutoCompleteTextBox>
         </DockPanel>
 
+        <!-- POPUP -->
+        <c:AutoClosePopup
+            PlacementTarget="{Binding ElementName=Host}"
+            PopupAnimation="Fade"
+            StaysOpen="True"
+            AllowsTransparency="True"
+            Placement="Center"
+            x:Name="popup">
+            <cc:BorderFix Width="Auto" Height="Auto" Style="{StaticResource PopupContentStyle}" BorderThickness="1">
+                <TextBlock Padding="6" Name="popupText"></TextBlock>
+            </cc:BorderFix>
+        </c:AutoClosePopup>
+
         <!-- MAP -->
         <DockPanel Grid.Row="2" LastChildFill="true" Grid.ColumnSpan="2" Background="Black">
             <WindowsFormsHost x:Name="Host" Background="Black" Margin="5 0">
                 <WindowsFormsHost.ContextMenu>
-                    <ContextMenu ItemsSource="{Binding ContextMenuItems}" Opened="ContextMenu_Opened">
+                    <ContextMenu ItemsSource="{Binding ContextMenuItems}" Opened="ContextMenu_Opened" StaysOpen="True">
                         <ContextMenu.ItemContainerStyle>
                             <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
                                 <Setter Property="IsChecked" Value="{Binding IsChecked}" />
@@ -181,7 +195,8 @@
                 </WindowsFormsHost.ContextMenu>
             </WindowsFormsHost>
         </DockPanel>
-        
+
+
         <!-- STATUS BAR -->
         <StatusBar Grid.Row="3" Visibility="{Binding IsStatusBarVisible, Converter={s:BoolToVisibilityConverter}}" Grid.ColumnSpan="2">
             <TextBlock Width="30" TextAlignment="Center" Text="{Binding MapConstellationNameString, FallbackValue='Con'}" ToolTip="{t:Text StatusBar.Constellation}" />

@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using Astrarium.Types;
+using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using System;
@@ -42,6 +43,9 @@ namespace Astrarium.Plugins.SolarSystem
             {
                 int size = 1;
                 window = new GameWindow(size, size, new GraphicsMode(new ColorFormat(8, 8, 8, 8), 24, 0, 0, ColorFormat.Empty, 1), "", GameWindowFlags.Default, DisplayDevice.Default, 3, 0, GraphicsContextFlags.Offscreen) { WindowState = WindowState.Fullscreen, Visible = false };
+                window.TargetRenderPeriod = 1;
+                window.TargetUpdateFrequency = 1;
+                
             }
 
             GL.ClearColor(Color.Transparent);
@@ -50,7 +54,11 @@ namespace Astrarium.Plugins.SolarSystem
             {
                 BitmapData data;
                 int size = (int)options.OutputImageSize;
-                window.ClientSize = new Size(size, size);
+                if (window.ClientSize.Width != size || window.ClientSize.Height != size)
+                {
+                    window.ClientSize = new Size(size, size);
+                    System.Windows.Application.Current.Dispatcher.Invoke(() => System.Windows.Application.Current.MainWindow?.Activate());
+                }
                 Rectangle rect = new Rectangle(0, 0, sourceBitmap.Width, sourceBitmap.Height);
                 data = sourceBitmap.LockBits(rect, ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
                 double crds = 1;

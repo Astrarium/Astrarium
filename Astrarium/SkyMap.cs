@@ -285,7 +285,11 @@ namespace Astrarium
                     }
                     catch (Exception ex)
                     {
-                        g.DrawString($"Error:\n{ex}", fontDiagnosticText, Brushes.Red, new RectangleF(10, 10, Width - 20, Height - 20));
+                        if (commandLineArgs.Contains("-debug", StringComparer.OrdinalIgnoreCase))
+                        {
+                            g.DrawString($"Rendering error:\n{ex}", fontDiagnosticText, Brushes.Red, new RectangleF(10, 10, Width - 20, Height - 20));
+                        }
+                        Debug.WriteLine($"Rendering error: {ex}");
                     }
                     if (needDrawSelectedObject)
                     {
@@ -301,22 +305,6 @@ namespace Astrarium
                 // Calculate mean time of rendering with Cumulative Moving Average formula
                 meanRenderTime = (renderStopWatch.ElapsedMilliseconds + rendersCount * meanRenderTime) / (rendersCount + 1);
 
-                // Locked object
-                if (LockedObject != null && MouseButton == MouseButton.Left)
-                {
-                    var format = new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                    string text = Text.Get("MapIsLockedOn", ("objectName", LockedObject.Names.First()));
-
-                    PointF center = new PointF(Width / 2, Height / 2);
-                    var size = g.MeasureString(text, fontLockMessage, center, format);
-                    int margin = 4;
-                    var box = new Rectangle((int)(center.X - size.Width / 2 - margin), (int)(center.Y - size.Height / 2 - margin), (int)size.Width + 2 * margin, (int)size.Height + 2 * margin);
-
-                    g.FillRectangle(new SolidBrush(mapContext.GetColor(Color.Black)), box);
-                    g.DrawRectangle(new Pen(Color.FromArgb(100, mapContext.GetColor(Color.White))), box);
-                    g.DrawString(text, fontLockMessage, new SolidBrush(mapContext.GetColor(Color.White)), center, format);
-                }
-
                 // Diagnostic info
                 if (commandLineArgs.Contains("-debug", StringComparer.OrdinalIgnoreCase))
                 {
@@ -325,13 +313,20 @@ namespace Astrarium
             }
             catch (Exception ex)
             {
-                g.DrawString($"Error:\n{ex}", fontDiagnosticText, Brushes.Red, new RectangleF(10, 10, Width - 20, Height - 20));
+                if (commandLineArgs.Contains("-debug", StringComparer.OrdinalIgnoreCase))
+                {
+                    g.DrawString($"Rendering error:\n{ex}", fontDiagnosticText, Brushes.Red, new RectangleF(10, 10, Width - 20, Height - 20));
+                }
+                Debug.WriteLine($"Rendering error: {ex}");
             }
         }
 
         public void Invalidate()
         {
-            OnInvalidate?.Invoke();
+            if (!renderStopWatch.IsRunning)
+            {
+                OnInvalidate?.Invoke();
+            }
         }
 
         public CelestialObject FindObject(PointF point)
@@ -363,15 +358,25 @@ namespace Astrarium
 
             double viewAngleTarget = sd == 0 ? 1 : Math.Max(sd * 10, MIN_VIEW_ANGLE);
 
+            GoToPoint(body.Horizontal, animationDuration, viewAngleTarget);
+        }
+
+        public void GoToPoint(CrdsHorizontal hor, TimeSpan animationDuration)
+        {
+            GoToPoint(hor, animationDuration, Math.Min(viewAngle, 90));
+        }
+
+        private void GoToPoint(CrdsHorizontal hor, TimeSpan animationDuration, double viewAngleTarget)
+        {
             if (animationDuration.Equals(TimeSpan.Zero))
             {
-                Center.Set(body.Horizontal);
+                Center.Set(hor);
                 ViewAngle = viewAngleTarget;
             }
             else
             {
                 CrdsHorizontal centerOriginal = new CrdsHorizontal(Center);
-                double ad = Angle.Separation(body.Horizontal, centerOriginal);
+                double ad = Angle.Separation(hor, centerOriginal);
                 double steps = Math.Round(animationDuration.TotalMilliseconds / meanRenderTime);
                 double[] x = new double[] { 0, steps / 2, steps };
                 double[] y = (ad < ViewAngle) ?
@@ -382,10 +387,10 @@ namespace Astrarium
 
                 for (int i = 0; i <= steps; i++)
                 {
-                    Center.Set(Angle.Intermediate(centerOriginal, body.Horizontal, i / steps));
+                    Center.Set(Angle.Intermediate(centerOriginal, hor, i / steps));
                     ViewAngle = Math.Min(90, Interpolation.Lagrange(x, y, i));
                 }
-            }            
+            }
         }
 
         public void AddDrawnObject(CelestialObject obj)

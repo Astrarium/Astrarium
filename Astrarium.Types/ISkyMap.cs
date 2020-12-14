@@ -64,6 +64,8 @@ namespace Astrarium.Types
 
         void GoToObject(CelestialObject body, TimeSpan animationDuration);
 
+        void GoToPoint(CrdsHorizontal hor, TimeSpan animationDuration);
+
         void AddDrawnObject(CelestialObject obj);
 
         /// <summary>

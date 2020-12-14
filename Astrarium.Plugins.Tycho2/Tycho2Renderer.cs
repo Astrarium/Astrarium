@@ -39,6 +39,7 @@ namespace Astrarium.Plugins.Tycho2
         {
             Graphics g = map.Graphics;            
             bool isGround = settings.Get<bool>("Ground");
+            bool isLabels = settings.Get<bool>("StarsLabels");
             Brush brushNames = new SolidBrush(map.GetColor("ColorStarsLabels"));
 
             if (map.MagLimit > 8 && settings.Get<bool>("Stars") && settings.Get<bool>("Tycho2"))
@@ -73,7 +74,7 @@ namespace Astrarium.Plugins.Tycho2
                             }
                             g.FillEllipse(brushStar, p.X - size / 2, p.Y - size / 2, size, size);
 
-                            if (map.ViewAngle < 1 && size > 3)
+                            if (isLabels && map.ViewAngle < 1 && size > 3)
                             {
                                 map.DrawObjectCaption(fontNames, brushNames, star.ToString(), p, size);
                             }

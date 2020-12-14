@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Astrarium
 {
@@ -60,6 +61,7 @@ namespace Astrarium
                     dateTimeSyncResetEvent.WaitOne();
                     Context.JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
                     Calculate();
+                    Thread.Sleep(1000);
                 }
                 while (true);
             })
