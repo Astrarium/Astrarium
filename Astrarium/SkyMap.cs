@@ -117,7 +117,7 @@ namespace Astrarium
 
         public CrdsHorizontal Center { get; } = new CrdsHorizontal(0, 0);
         public bool Antialias { get; set; } = true;
-       
+
         private CelestialObject selectedObject;
         public CelestialObject SelectedObject
         {
@@ -155,11 +155,11 @@ namespace Astrarium
         /// Gets or sets current coordinates of mouse, converted to Horizontal coordinates on the map.
         /// Setting new value can raise redraw of map
         /// </summary>
-        public CrdsHorizontal MousePosition 
-        { 
-            get { return mousePosition; } 
-            set 
-            { 
+        public CrdsHorizontal MousePosition
+        {
+            get { return mousePosition; }
+            set
+            {
                 mousePosition = value;
                 bool needRedraw = renderers.Any(r => r.OnMouseMove(mousePosition, MouseButton));
                 if (MouseButton == MouseButton.None && (needRedraw || lastNeedRedraw))
@@ -181,7 +181,7 @@ namespace Astrarium
         /// Projection used to render the map
         /// </summary>
         public IProjection Projection { get; set; } = null;
-              
+
         public event Action OnInvalidate;
 
         public event Action OnRedraw;
@@ -235,7 +235,7 @@ namespace Astrarium
 
             // save actual rendering order
             settings.Set("RenderingOrder", renderingOrder);
-            
+
             settings.SettingValueChanged += (name, value) =>
             {
                 // redraw if rendering order changed
@@ -285,7 +285,11 @@ namespace Astrarium
                     }
                     catch (Exception ex)
                     {
-                        g.DrawString($"Error:\n{ex}", fontDiagnosticText, Brushes.Red, new RectangleF(10, 10, Width - 20, Height - 20));
+                        if (commandLineArgs.Contains("-debug", StringComparer.OrdinalIgnoreCase))
+                        {
+                            g.DrawString($"Rendering error:\n{ex}", fontDiagnosticText, Brushes.Red, new RectangleF(10, 10, Width - 20, Height - 20));
+                        }
+                        Debug.WriteLine($"Rendering error: {ex}");
                     }
                     if (needDrawSelectedObject)
                     {
@@ -301,22 +305,6 @@ namespace Astrarium
                 // Calculate mean time of rendering with Cumulative Moving Average formula
                 meanRenderTime = (renderStopWatch.ElapsedMilliseconds + rendersCount * meanRenderTime) / (rendersCount + 1);
 
-                // Locked object
-                if (LockedObject != null && MouseButton == MouseButton.Left)
-                {
-                    var format = new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                    string text = Text.Get("MapIsLockedOn", ("objectName", LockedObject.Names.First()));
-
-                    PointF center = new PointF(Width / 2, Height / 2);
-                    var size = g.MeasureString(text, fontLockMessage, center, format);
-                    int margin = 4;
-                    var box = new Rectangle((int)(center.X - size.Width / 2 - margin), (int)(center.Y - size.Height / 2 - margin), (int)size.Width + 2 * margin, (int)size.Height + 2 * margin);
-
-                    g.FillRectangle(new SolidBrush(mapContext.GetColor(Color.Black)), box);
-                    g.DrawRectangle(new Pen(Color.FromArgb(100, mapContext.GetColor(Color.White))), box);
-                    g.DrawString(text, fontLockMessage, new SolidBrush(mapContext.GetColor(Color.White)), center, format);
-                }
-
                 // Diagnostic info
                 if (commandLineArgs.Contains("-debug", StringComparer.OrdinalIgnoreCase))
                 {
@@ -325,13 +313,20 @@ namespace Astrarium
             }
             catch (Exception ex)
             {
-                g.DrawString($"Error:\n{ex}", fontDiagnosticText, Brushes.Red, new RectangleF(10, 10, Width - 20, Height - 20));
+                if (commandLineArgs.Contains("-debug", StringComparer.OrdinalIgnoreCase))
+                {
+                    g.DrawString($"Rendering error:\n{ex}", fontDiagnosticText, Brushes.Red, new RectangleF(10, 10, Width - 20, Height - 20));
+                }
+                Debug.WriteLine($"Rendering error: {ex}");
             }
         }
 
         public void Invalidate()
         {
-            OnInvalidate?.Invoke();
+            if (!renderStopWatch.IsRunning)
+            {
+                OnInvalidate?.Invoke();
+            }
         }
 
         public CelestialObject FindObject(PointF point)
@@ -350,7 +345,7 @@ namespace Astrarium
                 if (mapContext.DistanceBetweenPoints(p, point) <= size / 2)
                 {
                     return body;
-                }                
+                }
             }
 
             return null;
@@ -363,15 +358,40 @@ namespace Astrarium
 
             double viewAngleTarget = sd == 0 ? 1 : Math.Max(sd * 10, MIN_VIEW_ANGLE);
 
+            GoToPoint(body.Horizontal, animationDuration, viewAngleTarget);
+        }
+
+        public void GoToObject(CelestialObject body, double viewAngleTarget)
+        {
+            GoToPoint(body.Horizontal, TimeSpan.Zero, viewAngleTarget);
+        }
+
+        public void GoToObject(CelestialObject body, TimeSpan animationDuration, double viewAngleTarget)
+        {
+            GoToPoint(body.Horizontal, animationDuration, viewAngleTarget);
+        }
+
+        public void GoToPoint(CrdsHorizontal hor, TimeSpan animationDuration)
+        {
+            GoToPoint(hor, animationDuration, Math.Min(viewAngle, 90));
+        }
+
+        public void GoToPoint(CrdsHorizontal hor, double viewAngleTarget)
+        {
+            GoToPoint(hor, TimeSpan.Zero, viewAngleTarget);
+        }
+
+        public void GoToPoint(CrdsHorizontal hor, TimeSpan animationDuration, double viewAngleTarget)
+        {
             if (animationDuration.Equals(TimeSpan.Zero))
             {
-                Center.Set(body.Horizontal);
+                Center.Set(hor);
                 ViewAngle = viewAngleTarget;
             }
             else
             {
                 CrdsHorizontal centerOriginal = new CrdsHorizontal(Center);
-                double ad = Angle.Separation(body.Horizontal, centerOriginal);
+                double ad = Angle.Separation(hor, centerOriginal);
                 double steps = Math.Round(animationDuration.TotalMilliseconds / meanRenderTime);
                 double[] x = new double[] { 0, steps / 2, steps };
                 double[] y = (ad < ViewAngle) ?
@@ -382,10 +402,10 @@ namespace Astrarium
 
                 for (int i = 0; i <= steps; i++)
                 {
-                    Center.Set(Angle.Intermediate(centerOriginal, body.Horizontal, i / steps));
+                    Center.Set(Angle.Intermediate(centerOriginal, hor, i / steps));
                     ViewAngle = Math.Min(90, Interpolation.Lagrange(x, y, i));
                 }
-            }            
+            }
         }
 
         public void AddDrawnObject(CelestialObject obj)
@@ -428,7 +448,7 @@ namespace Astrarium
             private readonly SkyContext skyContext;
 
             public MapContext(SkyMap map, SkyContext skyContext)
-            {                
+            {
                 this.map = map;
                 this.skyContext = skyContext;
             }
@@ -505,100 +525,22 @@ namespace Astrarium
 
             public Color GetColor(string colorName)
             {
-                return GetColor(map.settings.Get<Color>(colorName));
+                return map.settings.Get<SkyColor>(colorName).GetColor(Schema, DayLightFactor);
             }
 
             public Color GetColor(Color colorNight)
             {
-                switch (Schema)
-                {
-                    default:
-                    case ColorSchema.Night:
-                        return colorNight;
-                    case ColorSchema.Red:
-                        return GetNightModeColor(colorNight);
-                    case ColorSchema.White:
-                        return GetWhiteMapColor(colorNight);
-                    case ColorSchema.Day:
-                        return GetIntermediateColor(DayLightFactor, colorNight, GetDaylightColor(colorNight));
-                }
+                return SkyColor.GetColor(Schema, colorNight, DayLightFactor);
             }
 
             public Color GetColor(Color colorNight, Color colorDay)
             {
-                switch (Schema)
-                {
-                    default:
-                    case ColorSchema.Night:
-                        return colorNight;
-                    case ColorSchema.Red:
-                        return GetNightModeColor(colorNight);
-                    case ColorSchema.White:
-                        return GetWhiteMapColor(colorNight);
-                    case ColorSchema.Day:
-                        return GetIntermediateColor(DayLightFactor, colorNight, colorDay);
-                }
-            }
-
-            private Color GetNightModeColor(Color night)
-            {
-                int brightness = GetBrightness(night);
-                return Color.FromArgb(night.A, brightness, 0, 0);
-            }
-
-            private Color GetWhiteMapColor(Color night)
-            {
-                int brightness = 255 - GetBrightness(night);
-                return Color.FromArgb(night.A, brightness, brightness, brightness);
+                return SkyColor.GetColor(Schema, colorNight, colorDay, DayLightFactor);
             }
 
             public Color GetSkyColor()
             {
                 return GetColor(Color.Black);
-            }
-
-            private Color COLOR_DAY_SKY = Color.FromArgb(116, 184, 255);
-
-            private Color GetDaylightColor(Color night)
-            {
-                float brightness = GetBrightness(night) / 255f;
-
-                return Color.FromArgb(
-                    (int)(COLOR_DAY_SKY.R + brightness * (255 - COLOR_DAY_SKY.R)),
-                    (int)(COLOR_DAY_SKY.G + brightness * (255 - COLOR_DAY_SKY.G)),
-                    (int)(COLOR_DAY_SKY.B + brightness * (255 - COLOR_DAY_SKY.B))
-                    );
-            }
-
-            private int GetBrightness(Color night)
-            {
-                return (int)(0.299 * night.R + 0.587 * night.G + 0.114 * night.B);
-            }
-
-            private Color GetIntermediateColor(float factor, Color from, Color to)
-            {
-                if (factor == 0)
-                    return from;
-                else if (factor == 1)
-                    return to;
-                else
-                {
-                    int rMax = to.R;
-                    int rMin = from.R;
-                    int gMax = to.G;
-                    int gMin = from.G;
-                    int bMax = to.B;
-                    int bMin = from.B;
-                    int aMax = to.A;
-                    int aMin = from.A;
-
-                    int a = aMin + (int)((aMax - aMin) * factor);
-                    int r = rMin + (int)((rMax - rMin) * factor);
-                    int g = gMin + (int)((gMax - gMin) * factor);
-                    int b = bMin + (int)((bMax - bMin) * factor);
-
-                    return Color.FromArgb(a, r, g, b);
-                }
             }
 
             public void Redraw()

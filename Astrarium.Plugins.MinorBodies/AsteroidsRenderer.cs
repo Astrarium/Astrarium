@@ -14,7 +14,6 @@ namespace Astrarium.Plugins.MinorBodies
 {
     public class AsteroidsRenderer : BaseRenderer
     {
-        private Font fontNames;
         private readonly AsteroidsCalc asteroidsCalc;
         private readonly ISettings settings;
 
@@ -24,8 +23,6 @@ namespace Astrarium.Plugins.MinorBodies
         {
             this.asteroidsCalc = asteroidsCalc;
             this.settings = settings;
-
-            fontNames = new Font("Arial", 8);
         }
 
         public override void Render(IMapContext map)
@@ -59,7 +56,8 @@ namespace Astrarium.Plugins.MinorBodies
 
                             if (drawLabels)
                             {
-                                map.DrawObjectCaption(fontNames, brushNames, a.Name, p, diam);
+                                var font = settings.Get<Font>("AsteroidsLabelsFont");
+                                map.DrawObjectCaption(font, brushNames, a.Name, p, diam);
                             }
 
                             map.AddDrawnObject(a);
@@ -78,7 +76,8 @@ namespace Astrarium.Plugins.MinorBodies
 
                                 if (drawLabels)
                                 {
-                                    map.DrawObjectCaption(fontNames, brushNames, a.Name, p, size);
+                                    var font = settings.Get<Font>("AsteroidsLabelsFont");
+                                    map.DrawObjectCaption(font, brushNames, a.Name, p, size);
                                 }
 
                                 map.AddDrawnObject(a);

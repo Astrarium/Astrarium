@@ -21,7 +21,6 @@ namespace Astrarium.Plugins.DeepSky
 
         private Pen penOutlineDashed;
         private Pen penOutlineSolid;
-        private Font fontCaption = new Font("Arial", 7);
         private Brush brushCaption;
 
         private Dictionary<DeepSkyStatus, IDrawingStrategy> drawingHandlers = null;
@@ -250,7 +249,8 @@ namespace Astrarium.Plugins.DeepSky
 
                         if (map.ViewAngle <= Renderer.limitLabels && settings.Get<bool>("DeepSkyLabels"))
                         {
-                            map.DrawObjectCaption(Renderer.fontCaption, Renderer.brushCaption, ds.DisplayName, p, Math.Min(diamA, diamB));
+                            var font = settings.Get<Font>("DeepSkyLabelsFont");
+                            map.DrawObjectCaption(font, Renderer.brushCaption, ds.DisplayName, p, Math.Min(diamA, diamB));
                         }
                     }
                 }
@@ -276,7 +276,8 @@ namespace Astrarium.Plugins.DeepSky
 
                         if (map.ViewAngle <= Renderer.limitLabels && settings.Get<bool>("DeepSkyLabels"))
                         {
-                            map.DrawObjectCaption(Renderer.fontCaption, Renderer.brushCaption, ds.DisplayName, p, diamA);
+                            var font = settings.Get<Font>("DeepSkyLabelsFont");
+                            map.DrawObjectCaption(font, Renderer.brushCaption, ds.DisplayName, p, diamA);
                         }
                     }
                 }
@@ -300,7 +301,8 @@ namespace Astrarium.Plugins.DeepSky
 
                         if (map.ViewAngle <= Renderer.limitLabels && settings.Get<bool>("DeepSkyLabels"))
                         {
-                            map.DrawObjectCaption(Renderer.fontCaption, Renderer.brushCaption, ds.DisplayName, p, 0);
+                            var font = settings.Get<Font>("DeepSkyLabelsFont");
+                            map.DrawObjectCaption(font, Renderer.brushCaption, ds.DisplayName, p, 0);
                         }
                     }
                 }

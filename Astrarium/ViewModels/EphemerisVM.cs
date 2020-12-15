@@ -46,16 +46,36 @@ namespace Astrarium.ViewModels
             );
            
             var table = new DataTable();
-            table.Columns.Add(new DataColumn() { Caption = Text.Get("EphemeridesWindow.DateColumn"), ColumnName = "Date" });
-            table.Columns.AddRange(ephemerides[0].Select(e => new DataColumn() { Caption = Text.Get($"{bodyTypeName}.{e.Key}"), ColumnName = e.Key }).ToArray());
+
+            var dateColumn = new DataColumn() 
+            { 
+                Caption = Text.Get("EphemeridesWindow.DateColumn"), 
+                ColumnName = "Date", 
+                DataType = typeof(Date), 
+                ReadOnly = true 
+            };
+            dateColumn.ExtendedProperties["Formatter"] = Formatters.DateTime;
+            table.Columns.Add(dateColumn);
+            table.Columns.AddRange(ephemerides[0].Select(e => 
+            {
+                var column = new DataColumn()
+                {
+                    Caption = Text.Get($"{bodyTypeName}.{e.Key}"),
+                    ColumnName = e.Key,
+                    DataType = e.Value.GetType(),
+                    ReadOnly = true
+                };
+                column.ExtendedProperties["Formatter"] = e.Formatter;
+                return column;
+            }).ToArray());
 
             for (int i = 0; i < ephemerides.Count; i++)
             {
                 var row = table.NewRow();
-                row["Date"] = Formatters.DateTime.Format(new Date(jdFrom + i * step.TotalDays, utcOffset));
+                row["Date"] = new Date(jdFrom + i * step.TotalDays, utcOffset);
                 foreach (var e in ephemerides[i])
                 {
-                    row[e.Key] = e.Formatter.Format(e.Value);
+                    row[e.Key] = e.Value;
                 }
                 table.Rows.Add(row);
             }

@@ -1,6 +1,7 @@
 ﻿using Astrarium.Types;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,6 +26,7 @@ namespace Astrarium.Views
         public MessageBoxWindow()
         {
             InitializeComponent();
+            CommandBindings.Add(new CommandBinding(NavigationCommands.GoToPage, (s, e) => Navigate((string)e.Parameter)));
         }
 
         protected override void OnActivated(EventArgs e)
@@ -67,6 +69,18 @@ namespace Astrarium.Views
             var button = new Button() { Content = text, IsCancel = result == MessageBoxResult.Cancel, IsDefault = isDefault };
             button.Click += (o, args) => { Result = result; DialogResult = true; };
             ButtonContainer.Children.Add(button);
+        }
+
+        private void Navigate(string url)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo(url));
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError("Unable to open browser: " + ex);
+            }
         }
     }
 }

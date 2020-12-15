@@ -222,32 +222,13 @@ namespace Astrarium.Types.Themes
         }
     }
 
-    public class ColorConverter : ValueConverterBase
+    public class ColorConverter : MultiValueConverterBase
     {
-        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            return Convert(value);
-        }
-
-        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return Convert(value);
-        }
-
-        private object Convert(object value)
-        {
-            if (value is System.Windows.Media.Color)
-            {
-                var mediacolor = (System.Windows.Media.Color)value;
-                return System.Drawing.Color.FromArgb(mediacolor.A, mediacolor.R, mediacolor.G, mediacolor.B);
-            }
-            else if (value is System.Drawing.Color)
-            {
-                var color = (System.Drawing.Color)value;
-                return new System.Windows.Media.Color() { A = color.A, R = color.R, G = color.G, B = color.B };
-            }
-            else
-                throw new ArgumentException("Incorrect data type.");
+            var schema = (ColorSchema)values[1];
+            var color = ((SkyColor)values[0]).GetColor(schema);
+            return new System.Windows.Media.Color() { A = color.A, R = color.R, G = color.G, B = color.B };
         }
     }
 
@@ -256,24 +237,16 @@ namespace Astrarium.Types.Themes
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var font = (System.Drawing.Font)value;
-            return font.Name;
+            return $"{font.Name} - {font.Style} - {font.Size} pt";
         }
     }
 
-    public class ColorToStringConverter : ValueConverterBase
+    public class ColorToStringConverter : MultiValueConverterBase
     {
-        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            var color = (System.Drawing.Color)value;
-            return string.Format("#{3}{0:X2}{3}{1:X2}{3}{2:X2}", color.R, color.G, color.B, "\u200a");
-        }
-    }
-
-    public class ColorToString : ValueConverterBase
-    {
-        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            var color = (System.Drawing.Color)value;
+            var schema = (ColorSchema)values[1];
+            var color = ((SkyColor)values[0]).GetColor(schema);
             return string.Format("#{3}{0:X2}{3}{1:X2}{3}{2:X2}", color.R, color.G, color.B, "\u200a");
         }
     }

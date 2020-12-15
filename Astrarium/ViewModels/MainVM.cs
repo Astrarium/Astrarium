@@ -90,6 +90,21 @@ namespace Astrarium.ViewModels
             set => SetValue(nameof(IsStatusBarVisible), value);
         }
 
+        private System.Drawing.Size windowSize;
+        public System.Drawing.Size WindowSize
+        {
+            get => settings.Get("RememberWindowSize") ? settings.Get<System.Drawing.Size>("WindowSize") : System.Drawing.Size.Empty;
+            set 
+            {
+                if (settings.Get("RememberWindowSize") && value != WindowSize)
+                {
+                    windowSize = value;
+                    settings.Set("WindowSize", windowSize);
+                    settings.Save();
+                }               
+            }
+        }
+
         public class SearchSuggestionProvider : ISuggestionProvider
         {
             private readonly ISky sky;

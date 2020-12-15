@@ -40,9 +40,9 @@ namespace Astrarium.Types
             Default["RTS.Rise"]                 = Time;
             Default["RTS.Transit"]              = Time;
             Default["RTS.Set"]                  = Time;
-            Default["RTS.RiseAzimuth"]          = new UnsignedDoubleFormatter(0, "\u00B0");
+            Default["RTS.RiseAzimuth"]          = new AzimuthShortFormatter();
             Default["RTS.TransitAltitude"]      = new SignedDoubleFormatter(1, "\u00B0");
-            Default["RTS.SetAzimuth"]           = new UnsignedDoubleFormatter(0, "\u00B0");
+            Default["RTS.SetAzimuth"]           = new AzimuthShortFormatter();
             Default["RTS.Duration"]             = new DurationFormatter();
             Default["Equatorial0.Alpha"]        = RA;
             Default["Equatorial0.Delta"]        = Dec;
@@ -116,10 +116,37 @@ namespace Astrarium.Types
         {
             public string Format(object value)
             {
-                if (value == null | double.IsNaN((double)value))
+                if (value == null || double.IsNaN((double)value))
                     return null;
                 else
                     return new DMS((double)value).ToUnsignedString();
+            }
+        }
+
+        public class AzimuthFormatter : IEphemFormatter
+        {
+            public string Format(object value)
+            {
+                if (value == null || double.IsNaN((double)value))
+                    return null;
+                else
+                    return new DMS(Algorithms.Angle.To360((double)value) + (CrdsHorizontal.MeasureAzimuthFromNorth ? 180 : 0)).ToUnsignedString();
+            }
+        }
+
+        public class AzimuthShortFormatter : IEphemFormatter
+        {
+            public string Format(object value)
+            {
+                double v = Convert.ToDouble(value);
+                if (double.IsInfinity(v) || double.IsNaN(v))
+                {
+                    return "—";
+                }
+                else
+                {
+                    return Algorithms.Angle.To360(v + (CrdsHorizontal.MeasureAzimuthFromNorth ? 180 : 0)).ToString("0.\u00B0", CultureInfo.InvariantCulture);
+                }
             }
         }
 
@@ -371,7 +398,7 @@ namespace Astrarium.Types
         public static readonly IEphemFormatter RA = new HMSAngleFormatter();
         public static readonly IEphemFormatter Dec = new SignedAngleFormatter();
         public static readonly IEphemFormatter Altitude = new SignedAngleFormatter();
-        public static readonly IEphemFormatter Azimuth = new UnsignedAngleFormatter();
+        public static readonly IEphemFormatter Azimuth = new AzimuthFormatter();
         public static readonly IEphemFormatter Latitude = new SignedAngleFormatter();
         public static readonly IEphemFormatter Longitude = new SignedAngleFormatter();
         public static readonly IEphemFormatter Time = new TimeFormatter();

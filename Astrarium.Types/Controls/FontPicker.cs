@@ -39,24 +39,27 @@ namespace Astrarium.Types.Controls
                 AffectsRender = true
             });
         
-        Button _Button;
-        
+        TextBox _TextBox;
+
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
-            _Button = Template.FindName("Button", this) as Button;
-            _Button.Click += Button_Click;           
+            _TextBox = Template.FindName("TextBox", this) as TextBox;
+            _TextBox.PreviewMouseDown += _TextBox_PreviewMouseDown;
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void _TextBox_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            var dialog = new WF.FontDialog()
+            if (e.LeftButton == MouseButtonState.Pressed)
             {
-                Font = SelectedFont
-            };
-            if (WF.DialogResult.OK == dialog.ShowDialog())
-            {
-                SelectedFont = dialog.Font;
+                var dialog = new WF.FontDialog()
+                {
+                    Font = SelectedFont
+                };
+                if (WF.DialogResult.OK == dialog.ShowDialog())
+                {
+                    SelectedFont = dialog.Font;
+                }
             }
         }
     }

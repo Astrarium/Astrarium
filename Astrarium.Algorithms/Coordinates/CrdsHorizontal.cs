@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace Astrarium.Algorithms
@@ -9,6 +10,12 @@ namespace Astrarium.Algorithms
     /// </summary>
     public class CrdsHorizontal
     {
+        /// <summary>
+        /// Globally defines Azimuth measurement origin.
+        /// If true, azimuth is measured from North, oterwise from false.
+        /// </summary>
+        public static bool MeasureAzimuthFromNorth { get; set; }
+
         /// <summary>
         /// Azimuth, in degrees. Measured westwards from the south.
         /// </summary>
@@ -68,7 +75,7 @@ namespace Astrarium.Algorithms
 
         public override string ToString()
         {
-            return $"Az: {new DMS(Azimuth)}; Alt:{new DMS(Altitude)}";
+            return $"Az: {new DMS(Angle.To360(Azimuth + (MeasureAzimuthFromNorth ? 180 : 0)))}; Alt:{new DMS(Altitude)}";
         }
 
         public override bool Equals(object obj)
@@ -90,6 +97,6 @@ namespace Astrarium.Algorithms
                 hash = hash * 23 + Azimuth.GetHashCode();
                 return hash;
             }
-        }
+        }        
     }
 }

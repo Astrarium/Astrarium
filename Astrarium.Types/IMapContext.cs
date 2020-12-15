@@ -84,6 +84,7 @@ namespace Astrarium.Types
 
         void Redraw();
 
+        
         Color GetColor(string colorName);
         Color GetColor(Color color);
         Color GetColor(Color colorNight, Color colorDay);

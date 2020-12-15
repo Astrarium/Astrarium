@@ -81,8 +81,9 @@ namespace Astrarium.Plugins.Constellations
             format.LineAlignment = StringAlignment.Center;
             format.Alignment = StringAlignment.Center;
 
-            int fontSize = Math.Min((int)(800 / map.ViewAngle), 32);
-            Font font = new Font(FontFamily.GenericSansSerif, fontSize);
+            Font defFont = settings.Get<Font>("ConstLabelsFont");
+            float fontSize = (float)Math.Min((int)(800 / map.ViewAngle), defFont.Size);
+            Font font = new Font(defFont.FontFamily, fontSize, defFont.Style);
             LabelType labelType = settings.Get<LabelType>("ConstLabelsType");
             Brush brushLabel = new SolidBrush(map.GetColor("ColorConstLabels"));
 

@@ -29,7 +29,7 @@ namespace Astrarium.Plugins.Tracks
             {
                 if (track.Points.Any())
                 {
-                    var penTrack = new Pen(new SolidBrush(track.Color));
+                    var penTrack = new Pen(new SolidBrush(track.Color.GetColor(map.Schema, map.DayLightFactor)));
 
                     var segments = track.Points
                         .Select(p => Angle.Separation(p.Horizontal, map.Center) < map.ViewAngle ? p : null)
@@ -97,7 +97,7 @@ namespace Astrarium.Plugins.Tracks
 
         private void DrawLabels(IMapContext map, Track track)
         {
-            var brushLabel = new SolidBrush(track.Color);
+            var brushLabel = new SolidBrush(track.Color.GetColor(map.Schema, map.DayLightFactor));
             double trackStep = track.Step;
             double stepLabels = track.LabelsStep.TotalDays;
 

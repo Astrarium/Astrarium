@@ -19,7 +19,6 @@ namespace Astrarium.Plugins.BrightStars
 
         private ICollection<Tuple<int, int>> ConLines = new List<Tuple<int, int>>();
 
-        private Font fontStarNames;
         private Pen penConLine;
         private Color starColor;
         private Brush brushStarNames;
@@ -35,7 +34,6 @@ namespace Astrarium.Plugins.BrightStars
             this.starsCalc = starsCalc;
             this.settings = settings;
 
-            fontStarNames = new Font("Arial", 8);
             penConLine = new Pen(new SolidBrush(Color.Transparent));
             penConLine.DashStyle = DashStyle.Custom;
             penConLine.DashPattern = new float[] { 2, 2 };
@@ -47,7 +45,7 @@ namespace Astrarium.Plugins.BrightStars
             Graphics g = map.Graphics;
             var allStars = starsCalc.Stars;
             bool isGround = settings.Get<bool>("Ground");
-            
+
             if (settings.Get<bool>("ConstLines"))
             {
                 PointF p1, p2;
@@ -59,7 +57,7 @@ namespace Astrarium.Plugins.BrightStars
                     h1 = allStars.ElementAt(line.Item1).Horizontal;
                     h2 = allStars.ElementAt(line.Item2).Horizontal;
 
-                    if ((!isGround || h1.Altitude > 0 || h2.Altitude > 0) && 
+                    if ((!isGround || h1.Altitude > 0 || h2.Altitude > 0) &&
                         Angle.Separation(map.Center, h1) < 90 &&
                         Angle.Separation(map.Center, h2) < 90)
                     {
@@ -96,7 +94,7 @@ namespace Astrarium.Plugins.BrightStars
                                 g.FillEllipse(Brushes.White, p.X - diam / 2 - 1, p.Y - diam / 2 - 1, diam + 2, diam + 2);
                             }
 
-                            g.FillEllipse(new SolidBrush(GetColor(map, star.Color)), p.X - diam / 2, p.Y - diam / 2, diam, diam);;
+                            g.FillEllipse(new SolidBrush(GetColor(map, star.Color)), p.X - diam / 2, p.Y - diam / 2, diam, diam); ;
 
                             map.AddDrawnObject(star);
                         }
@@ -165,7 +163,7 @@ namespace Astrarium.Plugins.BrightStars
             {
                 starColor = Color.White;
             }
-           
+
             return map.GetColor(starColor, Color.Transparent);
         }
 
@@ -174,6 +172,8 @@ namespace Astrarium.Plugins.BrightStars
         /// </summary>
         private void DrawStarName(IMapContext map, PointF point, Star s, float diam)
         {
+            var fontStarNames = settings.Get<Font>("StarsLabelsFont");
+
             // Star has proper name
             if (map.ViewAngle < limitProperNames && settings.Get<bool>("StarsProperNames") && s.ProperName != null)
             {
@@ -188,7 +188,7 @@ namespace Astrarium.Plugins.BrightStars
                 if (bayerName != null)
                 {
                     map.DrawObjectCaption(fontStarNames, brushStarNames, bayerName, point, diam);
-                    return;                    
+                    return;
                 }
             }
             // Star has Flamsteed number
@@ -196,7 +196,7 @@ namespace Astrarium.Plugins.BrightStars
             {
                 string flamsteedNumber = s.FlamsteedNumber;
                 if (flamsteedNumber != null)
-                {
+                {                    
                     map.DrawObjectCaption(fontStarNames, brushStarNames, flamsteedNumber, point, diam);
                     return;
                 }

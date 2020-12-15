@@ -7,7 +7,7 @@ namespace Astrarium.Algorithms
     /// Represents astronomical date.
     /// Contains methods and functions related to time, dates, calendars.
     /// </summary>
-    public class Date
+    public class Date : IComparable
     {
         #region Epochs
 
@@ -257,6 +257,19 @@ namespace Astrarium.Algorithms
             string month = culture.DateTimeFormat.GetMonthName(Month);
             string day = Day.ToString("0.##", culture.NumberFormat);
             return string.Format($"{Year} {month} {day}");
+        }
+
+        /// <inheritdoc />
+        public int CompareTo(object obj)
+        {
+            if (obj is Date date) 
+            {
+                return Math.Sign(ToJulianDay() - date.ToJulianDay());
+            }
+            else
+            {
+                throw new ArgumentException($"Unable to compare {nameof(Date)} with {obj?.GetType()?.Name}");
+            }
         }
 
         #endregion Overrides
@@ -825,7 +838,6 @@ namespace Astrarium.Algorithms
             double cosEpsilon = Math.Cos(Angle.ToRadians(epsilon));
             return MeanSiderealTime(jd) + deltaPsi * cosEpsilon;
         }
-
 
         /// <summary>
         /// Calculates the mean obliquity of the ecliptic (ε0) for the given instant.

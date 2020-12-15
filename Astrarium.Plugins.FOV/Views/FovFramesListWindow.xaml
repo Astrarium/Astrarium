@@ -31,6 +31,11 @@
                 <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="10" Height="10" Stretch="Fill" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}" Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
             </Grid>
 
+            <Grid x:Key="BtnCopy" x:Shared="False" >
+                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="14" Height="14" Stretch="UniformToFill" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}" Data="F1 M32,40z M0,0z M28,10L12,10A2,2,0,0,0,10,12L10,28A2,2,0,0,0,12,30L28,30A2,2,0,0,0,30,28L30,12A2,2,0,0,0,28,10z M12,28L12,12 28,12 28,28z"/>
+                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="14" Height="14" Stretch="UniformToFill" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}" Data="F1 M32,40z M0,0z M7,20L4,20 4,4 20,4 20,7A1,1,0,0,0,22,7L22,4A2,2,0,0,0,20,2L4,2A2,2,0,0,0,2,4L2,20A2,2,0,0,0,4,22L7,22A1,1,0,0,0,7,20z"/>
+            </Grid>
+
             <Grid x:Key="BtnDelete" x:Shared="False" >
                 <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="10" Height="10" Stretch="Fill" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}" Data="F1 M 26.9166,22.1667L 37.9999,33.25L 49.0832,22.1668L 53.8332,26.9168L 42.7499,38L 53.8332,49.0834L 49.0833,53.8334L 37.9999,42.75L 26.9166,53.8334L 22.1666,49.0833L 33.25,38L 22.1667,26.9167L 26.9166,22.1667 Z "/>
             </Grid>
@@ -75,6 +80,7 @@
 
         <StackPanel Grid.Row="2" Orientation="Horizontal">
             <Button Content="{StaticResource BtnAdd}" Style="{StaticResource ImageButton}" Command="{Binding AddCommand}" />
+            <Button Content="{StaticResource BtnCopy}" Style="{StaticResource ImageButton}" IsEnabled="{Binding ElementName=List, Path=SelectedValue, Converter={s:NotNullToBoolConverter}}" Command="{Binding CopyCommand}" CommandParameter="{Binding ElementName=List, Path=SelectedValue}" />
             <Button Content="{StaticResource BtnEdit}" Style="{StaticResource ImageButton}" IsEnabled="{Binding ElementName=List, Path=SelectedValue, Converter={s:NotNullToBoolConverter}}" Command="{Binding EditCommand}" CommandParameter="{Binding ElementName=List, Path=SelectedValue}" />
             <Button Content="{StaticResource BtnDelete}" Style="{StaticResource ImageButton}" IsEnabled="{Binding ElementName=List, Path=SelectedValue, Converter={s:NotNullToBoolConverter}}" Command="{Binding DeleteCommand}" CommandParameter="{Binding ElementName=List, Path=SelectedValue}"  />
         </StackPanel>

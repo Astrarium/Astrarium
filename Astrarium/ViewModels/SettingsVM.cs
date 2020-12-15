@@ -58,27 +58,19 @@ namespace Astrarium.ViewModels
             SettingsSections = new ObservableCollection<SettingsSectionVM>();
             ControlSelector = new ConfigControlTemplateSelector();
 
-            foreach (var section in uiIntegration.SettingItems.Groups.Where(g => g != null))
+            var groups = uiIntegration.SettingItems.Groups.Where(g => g != null).OrderBy(g => uiIntegration.SettingItems.GetGroupOrder(g));
+
+            foreach (var section in groups)
             {
                 var sectionVM = new SettingsSectionVM(section);
 
                 foreach (SettingItem item in uiIntegration.SettingItems[section])
                 {
-                    Type controlType = item.ControlType ?? GetDefaultControlType(item.DefaultValue.GetType()); 
+                    Type controlType = item.ControlType ?? GetDefaultControlType(item.DefaultValue.GetType());
 
                     if (controlType != null)
                     {
                         var vm = new SettingVM(settings, item.Name, item.EnabledCondition, controlType);
-
-                        if (section == "Colors")
-                        {
-                            vm.AddBinding(new SimpleBinding(settings, "Schema", nameof(SettingVM.IsVisible))
-                            {
-                                SourceToTargetConverter = s => ((ColorSchema)s) == ColorSchema.Night,
-                                TargetToSourceConverter = s => settings.Get<ColorSchema>("Schema")
-                            });
-                        }
-
                         sectionVM.Add(vm);
                     }
                 }
@@ -156,7 +148,7 @@ namespace Astrarium.ViewModels
             if (settingType == typeof(Font))
                 return typeof(FontPickerSettingControl);
 
-            if (settingType == typeof(Color))
+            if (settingType == typeof(SkyColor))
                 return typeof(ColorPickerSettingControl);
 
             return null;
@@ -181,7 +173,7 @@ namespace Astrarium.ViewModels
             /// <summary>
             /// ISettings object to bind to 
             /// </summary>
-            private ISettings settings;
+            public ISettings Settings { get; private set; }
 
             /// <summary>
             /// Name of the setting
@@ -206,11 +198,11 @@ namespace Astrarium.ViewModels
             {
                 get
                 {
-                    return settings.Get<object>(SettingName);
+                    return Settings.Get<object>(SettingName);
                 }
                 set
                 {
-                    settings.Set(SettingName, value);
+                    Settings.Set(SettingName, value);
                 }
             }
 
@@ -237,11 +229,12 @@ namespace Astrarium.ViewModels
 
             public SettingVM(ISettings settings, string name, Func<ISettings, bool> isEnabledCondition, Type controlType)
             {
-                this.settings = settings;
-                this.settings.SettingValueChanged += Settings_SettingValueChanged;
+                this.Settings = settings;
+                this.Settings.SettingValueChanged += Settings_SettingValueChanged;
                 SettingName = name;
                 ControlType = controlType;
                 IsEnabledCondition = isEnabledCondition;
+                IsVisible = true;
                 Text.LocaleChanged += () => NotifyPropertyChanged(nameof(SettingTitle));
             }
 
@@ -249,7 +242,7 @@ namespace Astrarium.ViewModels
             {
                 if (isEnabledCondition != null)
                 {
-                    IsEnabled = isEnabledCondition.Invoke(settings);
+                    IsEnabled = isEnabledCondition.Invoke(Settings);
                     NotifyPropertyChanged(nameof(IsEnabled));
                 }
             }

@@ -24,13 +24,15 @@ namespace Astrarium.Plugins.FOV
 
         private Guid _Id;
         private Equipment _Equipment;
+        private ISettings _Settings;
 
-        public FovSettingsVM()
+        public FovSettingsVM(ISettings settings)
         {
+            _Settings = settings;
             LoadEquipment();
             Binning = 1;
             Rotation = 0;
-            Color = Color.Pink;
+            Color = new SkyColor(System.Drawing.Color.Pink);
 
             AddEquipmentCommand = new Command<Type>((type) => EditEquipment(type, isNew: true));
             EditEquipmentCommand = new Command<Type>((type) => EditEquipment(type, isNew: false));
@@ -352,9 +354,11 @@ namespace Astrarium.Plugins.FOV
             }
         }
 
-        public Color Color
+        public ColorSchema ColorSchema => _Settings.Get<ColorSchema>("Schema");
+
+        public SkyColor Color
         {
-            get => GetValue<Color>(nameof(Color));
+            get => GetValue<SkyColor>(nameof(Color));
             set => SetValue(nameof(Color), value);
         }
 

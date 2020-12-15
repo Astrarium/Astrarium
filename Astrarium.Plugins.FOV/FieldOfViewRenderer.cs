@@ -50,12 +50,12 @@ namespace Astrarium.Plugins.FOV
                             var solidBrush = new SolidBrush(Color.FromArgb(transparency, map.GetSkyColor()));
                             map.Graphics.FillRegion(solidBrush, shading);
                         }
-                        map.Graphics.DrawEllipse(new Pen(frame.Color), map.Width / 2 - size / 2, map.Height / 2 - size / 2, size, size);
+                        map.Graphics.DrawEllipse(new Pen(frame.Color.GetColor(map.Schema, map.DayLightFactor)), map.Width / 2 - size / 2, map.Height / 2 - size / 2, size, size);
 
                         float labelWidth = map.Graphics.MeasureString(frame.Label, font).Width;
                         if (labelWidth <= size * 2)
                         {
-                            map.Graphics.DrawString(frame.Label, font, new SolidBrush(frame.Color), new PointF(map.Width / 2, map.Height / 2 + size / 2), format);
+                            map.Graphics.DrawString(frame.Label, font, new SolidBrush(frame.Color.GetColor(map.Schema, map.DayLightFactor)), new PointF(map.Width / 2, map.Height / 2 + size / 2), format);
                         }
                     }
                 }
@@ -86,11 +86,11 @@ namespace Astrarium.Plugins.FOV
                             map.Graphics.FillRegion(solidBrush, shading);
                         }
 
-                        map.Graphics.DrawRectangle(new Pen(frame.Color), -width / 2, -height / 2, width, height);
+                        map.Graphics.DrawRectangle(new Pen(frame.Color.GetColor(map.Schema, map.DayLightFactor)), -width / 2, -height / 2, width, height);
                         float labelWidth = map.Graphics.MeasureString(frame.Label, font).Width;
                         if (labelWidth <= width * 2)
                         {
-                            map.Graphics.DrawString(frame.Label, font, new SolidBrush(frame.Color), new PointF(0, height / 2), format);
+                            map.Graphics.DrawString(frame.Label, font, new SolidBrush(frame.Color.GetColor(map.Schema, map.DayLightFactor)), new PointF(0, height / 2), format);
                         }
 
                         map.Graphics.ResetTransform();

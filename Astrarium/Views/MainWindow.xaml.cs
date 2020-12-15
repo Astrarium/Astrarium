@@ -9,6 +9,7 @@ using System.Reflection;
 using WF = System.Windows.Forms;
 using Astrarium.Types.Themes;
 using Astrarium.Types;
+using System.Linq;
 
 namespace Astrarium
 {
@@ -58,7 +59,7 @@ namespace Astrarium
 
         public static readonly DependencyProperty MapDoubleClickProperty = DependencyProperty.RegisterAttached(
             "MapDoubleClick", typeof(Command<PointF>), typeof(MainWindow));
-
+       
         public static void SetMapDoubleClick(DependencyObject target, Command<PointF> value)
         {
             target.SetValue(MapDoubleClickProperty, value);
@@ -67,6 +68,19 @@ namespace Astrarium
         public static Command<PointF> GetMapDoubleClick(DependencyObject target)
         {
             return (Command<PointF>)target.GetValue(MapDoubleClickProperty);
+        }
+
+        public static readonly DependencyProperty WindowSizeProperty = DependencyProperty.RegisterAttached(
+           "WindowSize", typeof(System.Drawing.Size), typeof(MainWindow));
+
+        public static void SetWindowSize(DependencyObject target, System.Drawing.Size value)
+        {
+            target.SetValue(WindowSizeProperty, value);
+        }
+
+        public static System.Drawing.Size GetWindowSize(DependencyObject target)
+        {
+            return (System.Drawing.Size)target.GetValue(WindowSizeProperty);
         }
 
         public static readonly DependencyProperty FullScreenProperty = DependencyProperty.RegisterAttached(
@@ -136,7 +150,11 @@ namespace Astrarium
         private const uint MK_XBUTTON1 = 0x0020;
         private const uint MK_XBUTTON2 = 0x0040;
         private const uint WM_MOUSEWHEEL = 0x020A;
+        private const uint WM_EXIT_SIZE_MOVE = 0x232;
         private const uint SWP_SHOWWINDOW = 0x0040;
+
+        private Rectangle SavedBounds;
+        private WindowState SavedState;
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         private static extern int SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int left, int top, int width, int height, uint flags);
@@ -238,26 +256,76 @@ namespace Astrarium
             return WF.Screen.FromPoint(new System.Drawing.Point((int)window.Left, (int)window.Top));
         }
 
+        private readonly ISkyMap map;
+
         public MainWindow(SkyMap map)
         {
             InitializeComponent();
 
+            this.map = map;
             var skyView = new SkyView();
             skyView.SkyMap = map;
-            skyView.MouseDoubleClick += (o, e) => GetMapDoubleClick(this)?.Execute(new PointF((e as WF.MouseEventArgs).X, (e as WF.MouseEventArgs).Y));
+            skyView.MouseDoubleClick += (o, e) => GetMapDoubleClick(this)?.Execute(new PointF(e.X, e.Y));
             skyView.MouseClick += SkyView_MouseClick;
-            skyView.MouseMove += (o, e) => { SetMousePosition(this, new PointF(e.X, e.Y)); };
+            skyView.MouseMove += SkyView_MouseMove;
             skyView.MouseWheel += (o, e) => GetMapZoom(this)?.Execute(e.Delta);
-            skyView.Redraw += () => Activate();
-            
-            //skyView.LostFocus += (o, e) => this.Activate();
             Host.Loaded += (o, e) => WF.Application.AddMessageFilter(this);
             Host.KeyDown += (o, e) => GetMapKeyDown(this)?.Execute(e);
             Host.Child = skyView;
+
+            this.Loaded += MainWindow_Loaded;
+            this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
         }
 
-        private Rectangle SavedBounds;
-        private WindowState SavedState;
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            var helper = new WindowInteropHelper(this);
+            if (helper.Handle != null)
+            {
+                var source = HwndSource.FromHwnd(helper.Handle);
+                if (source != null)
+                    source.AddHook(HwndMessageHook);
+            }
+
+            var size = GetWindowSize(this);
+            if (size != System.Drawing.Size.Empty)
+            {
+                var bounds = CurrentScreen(this).Bounds;
+
+                if (size.Width > bounds.Width)
+                    size.Width = bounds.Width;
+
+                if (size.Height > bounds.Height)
+                    size.Height = bounds.Height;
+
+                Width = size.Width;
+                Height = size.Height;
+
+                var left = (bounds.Width - size.Width) / 2;
+                var top = (bounds.Height - size.Height) / 2;
+
+                if (left < 0)
+                    left = 0;
+
+                if (top < 0)
+                    top = 0;
+
+                Left = left;
+                Top = top;
+            }
+        }
+
+        private IntPtr HwndMessageHook(IntPtr wnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            switch ((uint)msg)
+            {
+                case WM_EXIT_SIZE_MOVE:
+                    SetWindowSize(this, new System.Drawing.Size((int)RenderSize.Width, (int)RenderSize.Height));
+                    handled = true;
+                    break;
+            }
+            return IntPtr.Zero;
+        }
 
         private void SaveState()
         {
@@ -279,12 +347,20 @@ namespace Astrarium
             if (e.Button == WF.MouseButtons.Right && e.Clicks == 1)
             {
                 GetMapRightClick(this)?.Execute(new PointF(e.X, e.Y));
-                
                 // setting placement target is needed to update context menu colors:
                 // see https://github.com/MahApps/MahApps.Metro/issues/2244
                 Host.ContextMenu.PlacementTarget = Host;
-
                 Host.ContextMenu.IsOpen = true;
+            }
+        }
+
+        private void SkyView_MouseMove(object sender, WF.MouseEventArgs e)
+        {
+            SetMousePosition(this, new PointF(e.X, e.Y));
+            if (map.LockedObject != null && e.Button == WF.MouseButtons.Left)
+            {
+                string text = Text.Get("MapIsLockedOn", ("objectName", map.LockedObject.Names.First()));
+                ViewManager.ShowPopupMessage(text);
             }
         }
 

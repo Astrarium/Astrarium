@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Drawing.Printing;
 using System.Threading;
 using System.Windows;
@@ -89,6 +90,11 @@ namespace Astrarium.Types
             return viewManager.ShowOpenFileDialog(caption, filter);
         }
 
+        public static Color? ShowColorDialog(string caption, Color color)
+        {
+            return viewManager.ShowColorDialog(caption, color);
+        }
+
         public static string ShowSelectFolderDialog(string caption, string path)
         {
             return viewManager.ShowSelectFolderDialog(caption, path);
@@ -124,6 +130,11 @@ namespace Astrarium.Types
         public static TimeSpan? ShowTimeSpanDialog(TimeSpan timeSpan)
         {
             return viewManager.ShowTimeSpanDialog(timeSpan);
+        }
+
+        public static void ShowPopupMessage(string message)
+        {
+            viewManager.ShowPopupMessage(message);
         }
     }
 }

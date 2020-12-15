@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using WF = System.Windows.Forms;
 using System.Drawing.Printing;
+using System.Drawing;
 
 namespace Astrarium
 {
@@ -73,7 +74,14 @@ namespace Astrarium
 
                 if (window.GetType() != typeof(MainWindow))
                 {
-                    window.Owner = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
+                    if (Application.Current.MainWindow != window)
+                    {
+                        window.Owner = Application.Current.MainWindow;
+                    }
+                }
+                else
+                {
+                    Application.Current.MainWindow = window;
                 }
 
                 Action<bool?> viewModelClosingHandler = null;
@@ -203,7 +211,7 @@ namespace Astrarium
             var dialog = typeFactory(typeof(MessageBoxWindow)) as MessageBoxWindow;
             dialog.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
             dialog.Title = caption.StartsWith("$") ? Text.Get(caption.Substring(1)) : caption;
-            dialog.MessageContainer.Text = text.StartsWith("$") ? Text.Get(text.Substring(1)) : text;
+            dialog.DataContext = text.StartsWith("$") ? Text.Get(text.Substring(1)) : text;
             dialog.Buttons = buttons;
             dialog.ShowDialog();
             return dialog.Result;
@@ -270,6 +278,14 @@ namespace Astrarium
             return (ShowDialog(vm) ?? false) ? (double?)vm.JulianDay : null;
         }
 
+        public Color? ShowColorDialog(string caption, Color color)
+        {
+            var vm = CreateViewModel<ColorPickerVM>();
+            vm.SelectedColor = color;
+            vm.Title = caption;
+            return (ShowDialog(vm) ?? false) ? (Color?)vm.SelectedColor : null;
+        }
+
         public CelestialObject ShowSearchDialog(Func<CelestialObject, bool> filter = null)
         {
             var vm = CreateViewModel<SearchVM>();
@@ -286,6 +302,15 @@ namespace Astrarium
             var vm = CreateViewModel<TimeSpanVM>();
             vm.TimeSpan = timeSpan;
             return (ShowDialog(vm) ?? false) ? (TimeSpan?)vm.TimeSpan : null;
+        }
+
+        public void ShowPopupMessage(string message)
+        {
+            if (Application.Current?.MainWindow is MainWindow window)
+            {
+                window.popupText.Text = message.StartsWith("$") ? Text.Get(message.Substring(1)) : message;
+                window.popup.Show();
+            }
         }
     }
 }

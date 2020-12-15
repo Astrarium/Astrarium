@@ -1,4 +1,5 @@
 ﻿using Astrarium.Types;
+using Astrarium.Types.Controls;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -19,8 +20,10 @@ namespace Astrarium.Plugins.BrightStars
             SettingItems.Add("Stars", new SettingItem("StarsProperNames", true, s => s.Get<bool>("Stars") && s.Get<bool>("StarsLabels")));
             SettingItems.Add("Stars", new SettingItem("StarsColors", true, s => s.Get<bool>("Stars")));
             SettingItems.Add("Constellations", new SettingItem("ConstLines", true));
-            SettingItems.Add("Colors", new SettingItem("ColorConstLines", Color.FromArgb(64, 64, 64)));
-            SettingItems.Add("Colors", new SettingItem("ColorStarsLabels", Color.FromArgb(64, 64, 64)));
+            SettingItems.Add("Colors", new SettingItem("ColorConstLines", new SkyColor(64, 64, 64)));
+            SettingItems.Add("Colors", new SettingItem("ColorStarsLabels", new SkyColor(64, 64, 64)));
+
+            SettingItems.Add("Fonts", new SettingItem("StarsLabelsFont", new Font("Arial", 8)));
 
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconStar", "$Settings.Stars", new SimpleBinding(settings, "Stars", "IsChecked")));
             ToolbarItems.Add("Constellations", new ToolbarToggleButton("IconConstLines", "$Settings.ConstLines", new SimpleBinding(settings, "ConstLines", "IsChecked")));

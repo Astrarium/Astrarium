@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Drawing.Printing;
 using System.Threading;
 using System.Windows;
@@ -80,6 +81,13 @@ namespace Astrarium.Types
         string ShowOpenFileDialog(string caption, string filter);
 
         /// <summary>
+        /// Shows color picker dialog
+        /// </summary>
+        /// <param name="caption">Dialog title</param>
+        /// <returns>Color, if user pressed OK, null otherwise.</returns>
+        Color? ShowColorDialog(string caption, Color color);
+
+        /// <summary>
         /// Shows folder picker dialog
         /// </summary>
         /// <param name="caption">Dialog title</param>
@@ -120,5 +128,11 @@ namespace Astrarium.Types
         /// <param name="timeSpan">Time span selected by default</param>
         /// <returns></returns>
         TimeSpan? ShowTimeSpanDialog(TimeSpan timeSpan);
+
+        /// <summary>
+        /// Shows popup message over main application window
+        /// </summary>
+        /// <param name="message">Popup message text</param>
+        void ShowPopupMessage(string message);
     }
 }

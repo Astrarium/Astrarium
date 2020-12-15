@@ -21,10 +21,10 @@ namespace Astrarium.Plugins.Grids
             SettingItems.Add("Grids", new SettingItem("LabelEquinoxPoints", false, s => s.Get<bool>("EclipticLine")));
             SettingItems.Add("Grids", new SettingItem("LabelLunarNodes", false, s => s.Get<bool>("EclipticLine")));
             SettingItems.Add("Grids", new SettingItem("GalacticEquator", true));
-            SettingItems.Add("Colors", new SettingItem("ColorEcliptic", Color.FromArgb(0xC8, 0x80, 0x80, 0x00)));
-            SettingItems.Add("Colors", new SettingItem("ColorGalacticEquator", Color.FromArgb(200, 64, 0, 64)));
-            SettingItems.Add("Colors", new SettingItem("ColorHorizontalGrid", Color.FromArgb(0xC8, 0x00, 0x40, 0x00)));
-            SettingItems.Add("Colors", new SettingItem("ColorEquatorialGrid", Color.FromArgb(200, 0, 64, 64)));
+            SettingItems.Add("Colors", new SettingItem("ColorEcliptic", new SkyColor(0x80, 0x80, 0x00)));
+            SettingItems.Add("Colors", new SettingItem("ColorGalacticEquator", new SkyColor(64, 0, 64)));
+            SettingItems.Add("Colors", new SettingItem("ColorHorizontalGrid", new SkyColor(0x00, 0x40, 0x00)));
+            SettingItems.Add("Colors", new SettingItem("ColorEquatorialGrid", new SkyColor(0, 64, 64)));
 
             ToolbarItems.Add("Grids", new ToolbarToggleButton("IconEquatorialGrid", "$Settings.EquatorialGrid", new SimpleBinding(settings, "EquatorialGrid", "IsChecked")));
             ToolbarItems.Add("Grids", new ToolbarToggleButton("IconHorizontalGrid", "$Settings.HorizontalGrid", new SimpleBinding(settings, "HorizontalGrid", "IsChecked")));

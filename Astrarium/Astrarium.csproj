@@ -31,7 +31,20 @@
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net451|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
-  
+
+  <PropertyGroup Condition="'$(Deploy)' == 'True'">
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>None</DebugType>
+    <OutputPath>..\Deploy\$(MSBuildProjectName)</OutputPath>
+  </PropertyGroup>
+
+  <Target Condition="'$(Deploy)' == 'True'" Name="ZipOutputPath" AfterTargets="Build">
+    <ZipDirectory
+        Overwrite="True"
+        SourceDirectory="$(OutputPath)"
+        DestinationFile="$(OutputPath)\..\$(MSBuildProjectName)-$(Version).zip" />
+  </Target>
+
   <ItemGroup>
     <EmbeddedResource Include="Credits.md" />
     <EmbeddedResource Include="Text.ini" />
@@ -70,6 +83,11 @@
   </ItemGroup>
       
   <ItemGroup>
+    <ProjectReference Include="..\Astrarium.Plugins.ASCOM\Astrarium.Plugins.ASCOM.csproj">
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Astrarium.Plugins.BrightStars\Astrarium.Plugins.BrightStars.csproj">
       <Private>false</Private>
       <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>

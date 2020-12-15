@@ -1,0 +1,39 @@
+﻿<Window x:Class="Astrarium.Views.ColorPickerWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+    xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+    xmlns:v="clr-namespace:Astrarium.Views"
+    xmlns:c="clr-namespace:Astrarium.Controls"
+    mc:Ignorable="d"
+    Title="{Binding Title}" Width="250"
+    Style="{StaticResource {x:Type Window}}"
+    ResizeMode="NoResize"        
+    SizeToContent="Height"
+    s:WindowProperties.MinButtonVisible="Collapsed"
+    s:WindowProperties.MaxButtonVisible="Collapsed"
+    v:ColorPickerWindow.SliderOnly="{Binding SliderOnly}"
+    v:ColorPickerWindow.SelectedColor="{Binding SelectedColor, Mode=TwoWay}"
+    v:ColorPickerWindow.SliderBorderColor="{DynamicResource ColorControlDarkBackground}"
+    v:ColorPickerWindow.SliderThumbsColor="{DynamicResource ColorControlLightBackground}"
+    v:ColorPickerWindow.SliderThumbsHighlightColor="{DynamicResource ColorHighlight}"
+    WindowStartupLocation="CenterOwner">
+    
+    <StackPanel Margin="4" Orientation="Vertical">
+
+        <WindowsFormsHost Height="{Binding Height, FallbackValue=250}" Width="Auto">
+            <c:ColorPicker x:Name="picker" Dock="Fill"></c:ColorPicker>
+        </WindowsFormsHost>
+
+        <StackPanel Margin="2 10 2 2">
+            <Button 
+                HorizontalAlignment="Right"
+                MinWidth="80"           
+                Command="{Binding SelectCommand}"
+                Content="{t:Text Select}">
+            </Button>
+        </StackPanel>
+    </StackPanel>
+</Window>

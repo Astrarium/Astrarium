@@ -13,7 +13,7 @@ namespace Astrarium.Plugins.MilkyWay
         public Plugin()
         {
             SettingItems.Add("Grids", new SettingItem("MilkyWay", true));
-            SettingItems.Add("Colors", new SettingItem("ColorMilkyWay", Color.FromArgb(20, 20, 20)));
+            SettingItems.Add("Colors", new SettingItem("ColorMilkyWay", new SkyColor(20, 20, 20)));
         }
     }
 }

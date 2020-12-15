@@ -13,12 +13,14 @@ namespace Astrarium.Plugins.Tracks.ViewModels
 
         public Command OkCommand { get; private set; }
         public Command CancelCommand { get; private set; }
+        public ColorSchema ColorSchema { get; private set; }
 
-        public MotionTrackVM(ISky sky, TrackCalc trackCalc)
+        public MotionTrackVM(ISky sky, ISettings settings, TrackCalc trackCalc)
         {
-            this.sky = sky;
+            this.sky = sky;            
             this.trackCalc = trackCalc;
-
+            
+            ColorSchema = settings.Get<ColorSchema>("Schema");
             OkCommand = new Command(Ok);
             CancelCommand = new Command(Close);
         }
@@ -43,7 +45,7 @@ namespace Astrarium.Plugins.Tracks.ViewModels
         public double JulianDayFrom { get; set; }
         public double JulianDayTo { get; set; }
         public double UtcOffset { get; set; }
-        public Color TrackColor { get; set; } = Color.DimGray;
+        public SkyColor TrackColor { get; set; } = new SkyColor(Color.DimGray);
         public bool DrawLabels { get; set; }
         public TimeSpan LabelsStep { get; set; } = TimeSpan.FromDays(1);
 

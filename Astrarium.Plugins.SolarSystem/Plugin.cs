@@ -45,7 +45,10 @@ namespace Astrarium.Plugins.SolarSystem
             SettingItems.Add("Moon", new SettingItem("EarthShadowOutline", false, s => s.Get("Moon")));
 
             // Colors
-            SettingItems.Add("Colors", new SettingItem("ColorSolarSystemLabel", Color.DimGray));
+            SettingItems.Add("Colors", new SettingItem("ColorSolarSystemLabel", new SkyColor(Color.DimGray)));
+
+            // Fonts
+            SettingItems.Add("Fonts", new SettingItem("SolarSystemLabelsFont", new Font("Arial", 8)));
 
             #endregion Settings
 

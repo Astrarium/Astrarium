@@ -13,7 +13,7 @@ namespace Astrarium.Plugins.Horizon
     public class GroundRenderer : BaseRenderer
     {
         private readonly ISettings settings;
-        private readonly Font[] fontCardinalLabels = new[] { new Font("Arial", 12), new Font("Arial", 8) };
+        //private readonly Font[] fontCardinalLabels = new[] { new Font("Arial", 12), new Font("Arial", 8) };
 
         private readonly Color colorGroundNight = Color.FromArgb(4, 10, 10);
         private readonly Color colorGroundDay = Color.FromArgb(116, 185, 139);
@@ -114,17 +114,19 @@ namespace Astrarium.Plugins.Horizon
             if (settings.Get<bool>("LabelCardinalDirections"))
             {
                 Brush brushCardinalLabels = new SolidBrush(map.GetColor("ColorCardinalDirections"));
-                StringFormat format = new StringFormat() { LineAlignment = StringAlignment.Center, Alignment = StringAlignment.Center };
+                StringFormat format = new StringFormat() { LineAlignment = StringAlignment.Near, Alignment = StringAlignment.Center };
                 for (int i = 0; i < cardinalDirections.Length; i++)
                 {
                     var h = new CrdsHorizontal(i * 360 / cardinalDirections.Length, 0);
                     if (Angle.Separation(h, map.Center) < map.ViewAngle)
                     {                       
                         PointF p = map.Project(h);
-                        p.Y += fontCardinalLabels[i % 2].Height;
+                        var fontBase = settings.Get<Font>("CardinalDirectionsFont");
+                        var font = new Font(fontBase.FontFamily, fontBase.Size * (i % 2 == 0 ? 1 : 0.75f), fontBase.Style);
+
                         using (var gp = new GraphicsPath())
                         {
-                            map.Graphics.DrawString(Text.Get($"CardinalDirections.{cardinalDirections[i]}"), fontCardinalLabels[i % 2], brushCardinalLabels, p, format);
+                            map.Graphics.DrawString(Text.Get($"CardinalDirections.{cardinalDirections[i]}"), font, brushCardinalLabels, p, format);
                         }                        
                     }
                 }

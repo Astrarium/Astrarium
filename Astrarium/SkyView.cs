@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,6 +22,11 @@ namespace Astrarium
         public SkyView()
         {
             InitializeComponent();
+            this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+            this.SetStyle(ControlStyles.SupportsTransparentBackColor, false);
+            this.SetStyle(ControlStyles.Opaque, false);
+            this.SetStyle(ControlStyles.UserPaint, true);
+            this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             DoubleBuffered = true;
             Cursor = Cursors.Cross;
             ForeColor = Color.White;
@@ -56,6 +62,29 @@ namespace Astrarium
             else
             {
                 SkyMap.Render(pe.Graphics);
+
+                /*
+                // Below is a snippet how to draw mirrored part of image
+                  
+                var gr = pe.Graphics;
+                using (var img = new Bitmap(Width, Height))
+                using (var g = Graphics.FromImage(img))                
+                {
+                    SkyMap.Render(g);
+
+                    // Draw original bitmap
+                    gr.DrawImageUnscaled(img, 0, 0);
+
+                    using (var gp = new GraphicsPath())
+                    {
+                        gp.AddEllipse(new RectangleF(Width / 2 - 128, Height / 2 - 128, 256, 256));
+                        img.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                        gr.SetClip(gp);
+                        gr.DrawImageUnscaled(img, 0, 0);
+                        gr.ResetClip();
+                    }
+                }
+                */
             }
         }
 
@@ -176,17 +205,19 @@ namespace Astrarium
 
                         pOld.X = pNew.X;
                         pOld.Y = pNew.Y;
+                        
+                        Invalidate();
                     }
                     else
                     {
                         if (Cursor != Cursors.No)
                         {
+                            Invalidate();
                             Cursor = Cursors.No;
                         }
                     }
 
                     SkyMap.MousePosition = newMousePosition;
-                    Invalidate();
                 }
                 else
                 {

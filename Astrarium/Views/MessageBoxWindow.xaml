@@ -4,21 +4,54 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"       
         xmlns:t="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+        xmlns:c="clr-namespace:Astrarium.Controls"
         mc:Ignorable="d"
         Width="600" Height="200"
         MinWidth="300" MinHeight="200"
         Style="{StaticResource {x:Type Window}}"
         ShowInTaskbar="False"
-        ResizeMode="NoResize"
+        ResizeMode="CanResizeWithGrip"
         t:WindowProperties.MinButtonVisible="Collapsed"
         t:WindowProperties.MaxButtonVisible="Collapsed"
         WindowStartupLocation="CenterOwner">
+
+    <Window.Resources>
+
+        <c:Markdown x:Key="Markdown"
+            DocumentStyle="{StaticResource DocumentStyle}"
+            Heading1Style="{StaticResource H1Style}"
+            Heading2Style="{StaticResource H2Style}"
+            Heading3Style="{StaticResource H3Style}"
+            Heading4Style="{StaticResource H4Style}"
+            LinkStyle="{StaticResource LinkStyle}"
+            ListStyle="{StaticResource ListStyle}"
+            ListItemStyle="{StaticResource ListItemStyle}"
+            ImageStyle="{StaticResource ImageStyle}"
+            SeparatorStyle="{StaticResource SeparatorStyle}"
+            TableStyle="{StaticResource TableStyle}"
+            TableHeaderStyle="{StaticResource TableHeaderStyle}" />
+
+        <c:TextToFlowDocumentConverter x:Key="TextToFlowDocumentConverter" Markdown="{StaticResource Markdown}" />
+
+    </Window.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <TextBlock Name="MessageContainer" TextWrapping="WrapWithOverflow" Margin="10" FontSize="16" />
+        
+        <FlowDocumentScrollViewer 
+            Name="MessageContainer" 
+            VerticalAlignment="Stretch"
+            HorizontalAlignment="Stretch"
+            VerticalScrollBarVisibility="Auto"
+            Margin="10"
+            ContextMenu="{x:Null}"
+            Document="{Binding Path='.', Converter={StaticResource TextToFlowDocumentConverter}}"
+            SelectionBrush="Transparent"
+            Cursor="Arrow"/>
+
         <StackPanel Name="ButtonContainer" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
             <StackPanel.Resources>
                 <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
@@ -27,5 +60,6 @@
                 </Style>
             </StackPanel.Resources>
         </StackPanel>
+        <Path Data="M51.7,56.7l-1.4-1.4l5-5l1.4,1.4L51.7,56.7z M44.7,56.7l-1.4-1.4l12-12l1.4,1.4L44.7,56.7z"  Margin="0 -45" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="8" Height="8" Stretch="Fill" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=Foreground}" Opacity="0.3" />
     </Grid>
 </Window>
