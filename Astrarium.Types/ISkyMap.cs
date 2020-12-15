@@ -27,8 +27,6 @@ namespace Astrarium.Types
         /// </summary>
         double ViewAngle { get; set; }
 
-
-
         /// <summary>
         /// Gets or sets horizontal coordinates of the central point of the canvas.
         /// </summary>
@@ -43,7 +41,6 @@ namespace Astrarium.Types
         /// Locked Object. If it set, map moving is denied and it always centered on this body. 
         /// </summary>
         CelestialObject LockedObject { get; set; }
-
 
         CrdsHorizontal MousePosition { get; }
 
@@ -62,9 +59,12 @@ namespace Astrarium.Types
 
         CelestialObject FindObject(PointF point);
 
+        void GoToObject(CelestialObject body, double viewAngleTarget);
         void GoToObject(CelestialObject body, TimeSpan animationDuration);
-
+        void GoToObject(CelestialObject body, TimeSpan animationDuration, double viewAngleTarget);
+        void GoToPoint(CrdsHorizontal hor, double viewAngleTarget);
         void GoToPoint(CrdsHorizontal hor, TimeSpan animationDuration);
+        void GoToPoint(CrdsHorizontal hor, TimeSpan animationDuration, double viewAngleTarget);
 
         void AddDrawnObject(CelestialObject obj);
 

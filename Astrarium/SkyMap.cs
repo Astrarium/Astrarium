@@ -117,7 +117,7 @@ namespace Astrarium
 
         public CrdsHorizontal Center { get; } = new CrdsHorizontal(0, 0);
         public bool Antialias { get; set; } = true;
-       
+
         private CelestialObject selectedObject;
         public CelestialObject SelectedObject
         {
@@ -155,11 +155,11 @@ namespace Astrarium
         /// Gets or sets current coordinates of mouse, converted to Horizontal coordinates on the map.
         /// Setting new value can raise redraw of map
         /// </summary>
-        public CrdsHorizontal MousePosition 
-        { 
-            get { return mousePosition; } 
-            set 
-            { 
+        public CrdsHorizontal MousePosition
+        {
+            get { return mousePosition; }
+            set
+            {
                 mousePosition = value;
                 bool needRedraw = renderers.Any(r => r.OnMouseMove(mousePosition, MouseButton));
                 if (MouseButton == MouseButton.None && (needRedraw || lastNeedRedraw))
@@ -181,7 +181,7 @@ namespace Astrarium
         /// Projection used to render the map
         /// </summary>
         public IProjection Projection { get; set; } = null;
-              
+
         public event Action OnInvalidate;
 
         public event Action OnRedraw;
@@ -235,7 +235,7 @@ namespace Astrarium
 
             // save actual rendering order
             settings.Set("RenderingOrder", renderingOrder);
-            
+
             settings.SettingValueChanged += (name, value) =>
             {
                 // redraw if rendering order changed
@@ -345,7 +345,7 @@ namespace Astrarium
                 if (mapContext.DistanceBetweenPoints(p, point) <= size / 2)
                 {
                     return body;
-                }                
+                }
             }
 
             return null;
@@ -361,12 +361,27 @@ namespace Astrarium
             GoToPoint(body.Horizontal, animationDuration, viewAngleTarget);
         }
 
+        public void GoToObject(CelestialObject body, double viewAngleTarget)
+        {
+            GoToPoint(body.Horizontal, TimeSpan.Zero, viewAngleTarget);
+        }
+
+        public void GoToObject(CelestialObject body, TimeSpan animationDuration, double viewAngleTarget)
+        {
+            GoToPoint(body.Horizontal, animationDuration, viewAngleTarget);
+        }
+
         public void GoToPoint(CrdsHorizontal hor, TimeSpan animationDuration)
         {
             GoToPoint(hor, animationDuration, Math.Min(viewAngle, 90));
         }
 
-        private void GoToPoint(CrdsHorizontal hor, TimeSpan animationDuration, double viewAngleTarget)
+        public void GoToPoint(CrdsHorizontal hor, double viewAngleTarget)
+        {
+            GoToPoint(hor, TimeSpan.Zero, viewAngleTarget);
+        }
+
+        public void GoToPoint(CrdsHorizontal hor, TimeSpan animationDuration, double viewAngleTarget)
         {
             if (animationDuration.Equals(TimeSpan.Zero))
             {
@@ -433,7 +448,7 @@ namespace Astrarium
             private readonly SkyContext skyContext;
 
             public MapContext(SkyMap map, SkyContext skyContext)
-            {                
+            {
                 this.map = map;
                 this.skyContext = skyContext;
             }
@@ -510,17 +525,17 @@ namespace Astrarium
 
             public Color GetColor(string colorName)
             {
-                return map.settings.Get<SkyColor>(colorName).GetColor(Schema, DayLightFactor);                
+                return map.settings.Get<SkyColor>(colorName).GetColor(Schema, DayLightFactor);
             }
 
             public Color GetColor(Color colorNight)
             {
-                return SkyColor.GetColor(Schema, colorNight, DayLightFactor);                
+                return SkyColor.GetColor(Schema, colorNight, DayLightFactor);
             }
 
             public Color GetColor(Color colorNight, Color colorDay)
             {
-                return SkyColor.GetColor(Schema, colorNight, colorDay, DayLightFactor);                
+                return SkyColor.GetColor(Schema, colorNight, colorDay, DayLightFactor);
             }
 
             public Color GetSkyColor()
