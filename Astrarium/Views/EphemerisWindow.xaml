@@ -26,7 +26,7 @@
             HorizontalScrollBarVisibility="Auto"
             AutoGenerateColumns="True"
             CanUserReorderColumns="True"
-            CanUserSortColumns="False"
+            CanUserSortColumns="True"
             CanUserResizeRows="False"
             IsReadOnly="True"
             GridLinesVisibility="All"
