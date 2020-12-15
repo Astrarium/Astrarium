@@ -157,6 +157,7 @@ InstType $(TextIstallTypeFull)
 !insertmacro AddSection "Astrarium.Plugins.Tracks"	 			1 2 ""   ""
 !insertmacro AddSection "Astrarium.Plugins.FOV" 				1 2 ""   ""
 !insertmacro AddSection "Astrarium.Plugins.Tycho2"  			2 2 ""   ""
+!insertmacro AddSection "Astrarium.Plugins.ASCOM"  				2 2 ""   ""
 
 Section -AdditionalIcons
   SetShellVarContext all
@@ -205,13 +206,14 @@ SectionEnd
 !insertmacro MUI_DESCRIPTION_TEXT ${Astrarium.Plugins.Tracks} $(TextSectionDescr.Astrarium.Plugins.Tracks)
 !insertmacro MUI_DESCRIPTION_TEXT ${Astrarium.Plugins.FOV} $(TextSectionDescr.Astrarium.Plugins.FOV)
 !insertmacro MUI_DESCRIPTION_TEXT ${Astrarium.Plugins.Tycho2} $(TextSectionDescr.Astrarium.Plugins.Tycho2)
+!insertmacro MUI_DESCRIPTION_TEXT ${Astrarium.Plugins.ASCOM} $(TextSectionDescr.Astrarium.Plugins.ASCOM)
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 # Section descriptions (uninstall)
 !insertmacro MUI_UNFUNCTION_DESCRIPTION_BEGIN
 !insertmacro MUI_DESCRIPTION_TEXT ${Astrarium} $(TextSectionDescr.Astrarium)
 !insertmacro MUI_DESCRIPTION_TEXT ${Astrarium.Plugins.BrightStars} $(TextSectionDescr.Astrarium.Plugins.BrightStars)
-!insertmacro MUI_DESCRIPTION_TEXT ${Astrarium.Plugins.SolarSystem} $(TextSectionDescr.Astrarium.Plugins.Tycho2)
+!insertmacro MUI_DESCRIPTION_TEXT ${Astrarium.Plugins.SolarSystem} $(TextSectionDescr.Astrarium.Plugins.SolarSystem)
 !insertmacro MUI_DESCRIPTION_TEXT ${Astrarium.Plugins.Constellations} $(TextSectionDescr.Astrarium.Plugins.Constellations)
 !insertmacro MUI_DESCRIPTION_TEXT ${Astrarium.Plugins.DeepSky} $(TextSectionDescr.Astrarium.Plugins.DeepSky)
 !insertmacro MUI_DESCRIPTION_TEXT ${Astrarium.Plugins.Grids} $(TextSectionDescr.Astrarium.Plugins.Grids)
@@ -222,6 +224,7 @@ SectionEnd
 !insertmacro MUI_DESCRIPTION_TEXT ${Astrarium.Plugins.Tracks} $(TextSectionDescr.Astrarium.Plugins.Tracks)
 !insertmacro MUI_DESCRIPTION_TEXT ${Astrarium.Plugins.FOV} $(TextSectionDescr.Astrarium.Plugins.FOV)
 !insertmacro MUI_DESCRIPTION_TEXT ${Astrarium.Plugins.Tycho2} $(TextSectionDescr.Astrarium.Plugins.Tycho2)
+!insertmacro MUI_DESCRIPTION_TEXT ${Astrarium.Plugins.ASCOM} $(TextSectionDescr.Astrarium.Plugins.ASCOM)
 !insertmacro MUI_UNFUNCTION_DESCRIPTION_END
 
 # Welcome page
@@ -343,6 +346,12 @@ LangString TextSectionTitle.Astrarium.Plugins.Tycho2 ${LANG_ENGLISH} "Tycho2 Sta
 LangString TextSectionTitle.Astrarium.Plugins.Tycho2 ${LANG_RUSSIAN} "Звёздный каталог Tycho2"
 LangString TextSectionDescr.Astrarium.Plugins.Tycho2 ${LANG_ENGLISH} "Contains about 2.5M stars from Tycho2 star catalogue"
 LangString TextSectionDescr.Astrarium.Plugins.Tycho2 ${LANG_RUSSIAN} "Содержит около 2.5 млн звёзд из каталога Tycho2"
+
+; Section "ASCOM"
+LangString TextSectionTitle.Astrarium.Plugins.ASCOM ${LANG_ENGLISH} "ASCOM Telescope Control"
+LangString TextSectionTitle.Astrarium.Plugins.ASCOM ${LANG_RUSSIAN} "Управление телескопом через платформу ASCOM"
+LangString TextSectionDescr.Astrarium.Plugins.ASCOM ${LANG_ENGLISH} "Allows to telescope control via ASCOM platform"
+LangString TextSectionDescr.Astrarium.Plugins.ASCOM ${LANG_RUSSIAN} "Позволяет управлять телескопом или монтировкой через платформу ASCOM"
 
 LangString TextDownloadCanceled ${LANG_ENGLISH} "Download canceled.$\nInstallation will be aborted."
 LangString TextDownloadCanceled ${LANG_RUSSIAN} "Скачивание отменено.$\nУстановка будет прервана."
