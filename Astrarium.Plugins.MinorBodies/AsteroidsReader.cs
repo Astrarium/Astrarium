@@ -1,6 +1,7 @@
 ﻿using Astrarium.Algorithms;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -51,27 +52,48 @@ namespace Astrarium.Plugins.MinorBodies
             {
                 while (line != null && !sr.EndOfStream)
                 {
-                    line = sr.ReadLine();
-                    int number = Read<int>(line, 1, 7);
-                    asteroids.Add(new Asteroid()
+                    try
                     {
-                        H = Read<double>(line, 9, 13),
-                        G = Read<double>(line, 15, 19),
-                        Orbit = new OrbitalElements()
+                        line = sr.ReadLine();
+                        string number = Read<string>(line, 1, 7);
+                        float physicalDiameter = 0;
+                        float? maxBrightness = null;
+
+                        if (int.TryParse(number, out int num))
                         {
-                            Epoch = ReadDate(line, 21, 25),
-                            M = Read<double>(line, 27, 35),
-                            omega = Read<double>(line, 38, 46),
-                            Omega = Read<double>(line, 49, 57),
-                            i = Read<double>(line, 60, 68),
-                            e = Read<double>(line, 71, 79),
-                            a = Read<double>(line, 93, 103)
-                        },
-                        AverageDailyMotion = Read<double>(line, 81, 91),
-                        Name = Read<string>(line, 167, 194),
-                        PhysicalDiameter = sizes.ContainsKey(number) ? sizes[number] : 0,
-                        MaxBrightness = brightness.ContainsKey(number) ? brightness[number] : null
-                    });
+                            physicalDiameter = sizes.ContainsKey(num) ? sizes[num] : 0;
+                            maxBrightness = brightness.ContainsKey(num) ? brightness[num] : null;
+                        }
+
+                        // H or G is not defined
+                        if (string.IsNullOrWhiteSpace(Read<string>(line, 9, 13)) ||
+                            string.IsNullOrWhiteSpace(Read<string>(line, 15, 19)))
+                            continue;
+
+                        asteroids.Add(new Asteroid()
+                        {
+                            H = Read<double>(line, 9, 13),
+                            G = Read<double>(line, 15, 19),
+                            Orbit = new OrbitalElements()
+                            {
+                                Epoch = ReadDate(line, 21, 25),
+                                M = Read<double>(line, 27, 35),
+                                omega = Read<double>(line, 38, 46),
+                                Omega = Read<double>(line, 49, 57),
+                                i = Read<double>(line, 60, 68),
+                                e = Read<double>(line, 71, 79),
+                                a = Read<double>(line, 93, 103)
+                            },
+                            AverageDailyMotion = Read<double>(line, 81, 91),
+                            Name = Read<string>(line, 167, 194),
+                            PhysicalDiameter = physicalDiameter,
+                            MaxBrightness = maxBrightness
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.TraceError($"Unable to parse asteroid data. Line:\n{line}\nError: {ex}");
+                    }
                 }
             }
 

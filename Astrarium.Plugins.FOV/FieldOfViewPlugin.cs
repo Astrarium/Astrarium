@@ -65,7 +65,9 @@ namespace Astrarium.Plugins.FOV
             }
             else if (param.Frame is CameraFovFrame cameraFovFrame)
             {
-                fov = Math.Max(cameraFovFrame.Width, cameraFovFrame.Height);
+                double w = cameraFovFrame.Width;
+                double h = cameraFovFrame.Height;
+                fov = Math.Sqrt(w * w + h * h) * 1.7;
             }
 
             if (map.SelectedObject != null)
