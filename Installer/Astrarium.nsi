@@ -18,10 +18,11 @@ Unicode True
 
 !include "MUI.nsh"
 !include "nsdialogs.nsh"
-!include "LogicLib.nsh"
+!include "nsdialogs.nsh"
+
 
 !ifndef VERSION
-  !define VERSION 1.0.0
+  !define VERSION 2020.12
   !warning "$\n$\nVERSION command line parameter is not defined. $\n"
 !endif
 
@@ -122,8 +123,19 @@ SectionEnd
   MessageBox MB_OK|MB_ICONSTOP "Download error: $R0.$\nInstallation will be aborted." /SD IDOK
   Quit
   
-  nsisunz::UnzipToLog "${TEMP_DIR}\${PluginFile}" "$INSTDIR"
+  SetShellVarContext All
+
+  ; Unzipping to temp folder  
+  nsisunz::Unzip "${TEMP_DIR}\${PluginFile}" "${TEMP_DIR}"
+  
+  ; Delete original ZIP file
   Delete "${TEMP_DIR}\${PluginFile}"
+
+  ; Copy extracted files to installation directory
+  CopyFiles "${TEMP_DIR}\*.*" $INSTDIR
+  
+  ; Remove temp directory
+  RMDIR /r "${TEMP_DIR}"
   
 !macroend
 
@@ -376,7 +388,8 @@ Function .onInit
   !insertmacro CalcFolderSize "Astrarium.Plugins.MinorBodies"
   !insertmacro CalcFolderSize "Astrarium.Plugins.SolarSystem"
   !insertmacro CalcFolderSize "Astrarium.Plugins.Tracks"
-  !insertmacro CalcFolderSize "Astrarium.Plugins.Tycho2"  
+  !insertmacro CalcFolderSize "Astrarium.Plugins.Tycho2"
+  !insertmacro CalcFolderSize "Astrarium.Plugins.ASCOM"  
 FunctionEnd
 
 Function un.onInit
