@@ -38,7 +38,7 @@ namespace Astrarium.Plugins.MilkyWay
             string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/MilkyWay.dat");
 
             List<CelestialPoint> block = null;
-            using (var sr = new BinaryReader(new FileStream(file, FileMode.Open)))
+            using (var sr = new BinaryReader(new FileStream(file, FileMode.Open, FileAccess.Read)))
             {
                 int fragment = -1;
                 while (sr.BaseStream.Position != sr.BaseStream.Length)

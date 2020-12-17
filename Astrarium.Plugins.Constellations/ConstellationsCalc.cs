@@ -57,7 +57,7 @@ namespace Astrarium.Plugins.Constellations
         {
             string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Borders.dat");
 
-            using (var sr = new BinaryReader(new FileStream(file, FileMode.Open)))
+            using (var sr = new BinaryReader(new FileStream(file, FileMode.Open, FileAccess.Read)))
             {
                 List<CelestialPoint> block = null;
                 while (sr.BaseStream.Position != sr.BaseStream.Length)
@@ -83,7 +83,7 @@ namespace Astrarium.Plugins.Constellations
         private void LoadLabelsData()
         {
             string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Conlabels.dat");
-            using (var sr = new BinaryReader(new FileStream(file, FileMode.Open)))
+            using (var sr = new BinaryReader(new FileStream(file, FileMode.Open, FileAccess.Read)))
             {
                 while (sr.BaseStream.Position != sr.BaseStream.Length)
                 {
