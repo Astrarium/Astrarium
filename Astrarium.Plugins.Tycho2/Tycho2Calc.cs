@@ -143,7 +143,7 @@ namespace Astrarium.Plugins.Tycho2
                 sr.Close();
 
                 // Open Tycho2 catalog file
-                CatalogReader = new BinaryReader(File.Open(catalogFile, FileMode.Open));
+                CatalogReader = new BinaryReader(File.Open(catalogFile, FileMode.Open, FileAccess.Read));
             }
             catch (Exception ex)
             {
