@@ -45,11 +45,13 @@ namespace Astrarium.Plugins.SolarSystem
                     ("planetName1", GetPlanetName(c.Planet1)),
                     ("planetGenitiveName1", GetPlanetGenitiveName(c.Planet1)),
                     ("planetMagnitude1", c.Magnitude1), 
-                    ("angularDistance", c.AngularDistance), 
+                    ("angularDistance", c.AngularDistanceString), 
                     ("direction", Text.Get($"PlanetEvents.ConjunctionsInRightAscension.Text.{c.Direction}")), 
                     ("planetName2", GetPlanetName(c.Planet2)),
                     ("planetGenitiveName2", GetPlanetGenitiveName(c.Planet2)),
-                    ("planetMagnitude2", c.Magnitude2))))
+                    ("planetMagnitude2", c.Magnitude2)),
+                    GetPlanet(c.Planet1),
+                    GetPlanet(c.Planet2)))
                 .ToArray();
         }
 
@@ -63,11 +65,13 @@ namespace Astrarium.Plugins.SolarSystem
                     ("planetName1", GetPlanetName(c.Planet1)),
                     ("planetGenitiveName1", GetPlanetGenitiveName(c.Planet1)),
                     ("planetMagnitude1", c.Magnitude1),
-                    ("angularDistance", c.AngularDistance),
+                    ("angularDistance", c.AngularDistanceString),
                     ("direction", Text.Get($"PlanetEvents.ConjunctionsInEclipticalLongitude.Text.{c.Direction}")),
                     ("planetName2", GetPlanetName(c.Planet2)),
                     ("planetGenitiveName2", GetPlanetGenitiveName(c.Planet2)),
-                    ("planetMagnitude2", c.Magnitude2))))
+                    ("planetMagnitude2", c.Magnitude2)),
+                    GetPlanet(c.Planet1),
+                    GetPlanet(c.Planet2)))
                 .ToArray();
         }
 
@@ -152,7 +156,8 @@ namespace Astrarium.Plugins.SolarSystem
                                 conj.Direction = latitude(data.ElementAt(day + 2)[p1]) < latitude(data.ElementAt(day + 2)[p2]) ? "North" : "South";
 
                                 // find the angular distance at the "zero point"
-                                conj.AngularDistance = conjunctionSeparationFormatter.Format(Math.Abs(Interpolation.Lagrange(t, d, t0)));
+                                conj.AngularDistance = Math.Abs(Interpolation.Lagrange(t, d, t0));
+                                conj.AngularDistanceString = conjunctionSeparationFormatter.Format(conj.AngularDistance);
 
                                 // magnitude of the first planet
                                 conj.Magnitude1 = Formatters.Magnitude.Format(data.ElementAt(day + 2)[p1].Magnitude);
@@ -232,7 +237,9 @@ namespace Astrarium.Plugins.SolarSystem
                                     ("angularDistance", dist),
                                     ("planetName2", GetPlanetName(p2)),
                                     ("planetGenitiveName2", GetPlanetGenitiveName(p2)),
-                                    ("planetMagnitude2", mag2))));
+                                    ("planetMagnitude2", mag2)),
+                                    GetPlanet(p1),
+                                    GetPlanet(p2)));
                             }
                         }
                     }
@@ -294,7 +301,8 @@ namespace Astrarium.Plugins.SolarSystem
                                 events.Add(new AstroEvent(jd - 2 + t0,
                                     Text.Get("PlanetEvents.MaximalMagnitude.Text",
                                         ("planetName", name),
-                                        ("planetMagnitude", mag))));
+                                        ("planetMagnitude", mag)),
+                                    GetPlanet(p)));
                             }
                         }
                     }
@@ -351,7 +359,8 @@ namespace Astrarium.Plugins.SolarSystem
                             events.Add(new AstroEvent(jd - 2 + t0,
                                 Text.Get("PlanetEvents.Stationaries.ProgradeText",
                                     ("planetName", GetPlanetName(p)),
-                                    ("planetGenitiveName", GetPlanetGenitiveName(p)))));
+                                    ("planetGenitiveName", GetPlanetGenitiveName(p))),
+                                GetPlanet(p)));
                         }
                         else if (lon[1] < lon[2] && lon[2] > lon[3])
                         {
@@ -360,7 +369,8 @@ namespace Astrarium.Plugins.SolarSystem
                             events.Add(new AstroEvent(jd - 2 + t0,
                                 Text.Get("PlanetEvents.Stationaries.RetrogradeText",
                                     ("planetName", GetPlanetName(p)),
-                                    ("planetGenitiveName", GetPlanetGenitiveName(p)))));
+                                    ("planetGenitiveName", GetPlanetGenitiveName(p))),
+                                GetPlanet(p)));
                         }
                     }
                 }
@@ -414,8 +424,8 @@ namespace Astrarium.Plugins.SolarSystem
                                 ("planetName", GetPlanetName(p)),
                                 ("planetGenitiveName", GetPlanetGenitiveName(p)),
                                 ("direction", Text.Get($"PlanetEvents.GreatestElongations.{direction}")),
-                                ("elongation", elongation))
-                            ));
+                                ("elongation", elongation)),
+                            GetPlanet(p)));
                     }                   
                 }
 
@@ -464,7 +474,8 @@ namespace Astrarium.Plugins.SolarSystem
                         events.Add(new AstroEvent(jd - 2 + t0,
                             Text.Get("PlanetEvents.Oppositions.Text",
                                 ("planetName", GetPlanetName(p)),
-                                ("planetGenitiveName", GetPlanetGenitiveName(p)))));
+                                ("planetGenitiveName", GetPlanetGenitiveName(p))),
+                            GetPlanet(p)));
                     }
                 }
 
@@ -539,7 +550,7 @@ namespace Astrarium.Plugins.SolarSystem
                                     ("planetGenitiveName", GetPlanetGenitiveName(p)));
                             }
 
-                            events.Add(new AstroEvent(jdConj, text));
+                            events.Add(new AstroEvent(jdConj, text, GetPlanet(p)));
                         }
                     }
                 }
@@ -652,6 +663,11 @@ namespace Astrarium.Plugins.SolarSystem
             return results;
         }
 
+        private CelestialObject GetPlanet(int planetNumber)
+        {
+            return planetsCalc.Planets.ElementAt(planetNumber - 1);
+        }
+
         private string GetPlanetName(int planetNumber)
         {
             return Text.Get($"Planet.{planetNumber}.Name");
@@ -703,7 +719,8 @@ namespace Astrarium.Plugins.SolarSystem
             public string Magnitude1 { get; set; }
             public string Magnitude2 { get; set; }
             public string Direction { get; set; }
-            public string AngularDistance { get; set; }
+            public double AngularDistance { get; set; }
+            public string AngularDistanceString { get; set; }
         }
     }
 }

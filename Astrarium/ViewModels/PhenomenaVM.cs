@@ -14,7 +14,8 @@ namespace Astrarium.ViewModels
         public Command CloseCommand { get; private set; }
         public Command<AstroEventVM> SelectAstroEventCommand { get; private set; }
         public double JulianDay { get; private set; }
-        public CelestialObject Body { get; private set; }
+        public CelestialObject PrimaryBody { get; private set; }
+        public CelestialObject SecondaryBody { get; private set; }
         public IEnumerable<IGrouping<string, AstroEventVM>> Events { get; private set; }
 
         private ICollection<AstroEvent> events;
@@ -68,7 +69,8 @@ namespace Astrarium.ViewModels
         private void SelectAstroEvent(AstroEventVM ev)
         {
             JulianDay = ev.JulianDay;
-            Body = ev.Body;
+            PrimaryBody = ev.PrimaryBody;
+            SecondaryBody = ev.SecondaryBody;
             Close(true);
         }
     }
@@ -80,7 +82,8 @@ namespace Astrarium.ViewModels
         public double JulianDay { get; set; }
         public string Text { get; set; }
         public bool NoExactTime { get; set; }
-        public CelestialObject Body { get; set; }
+        public CelestialObject PrimaryBody { get; set; }
+        public CelestialObject SecondaryBody { get; set; }
 
         public AstroEventVM(AstroEvent e, double utcOffset)
         {
@@ -88,7 +91,8 @@ namespace Astrarium.ViewModels
             JulianDay = e.JulianDay;
             Text = e.Text;
             NoExactTime = e.NoExactTime;
-            Body = e.Body;
+            PrimaryBody = e.PrimaryBody;
+            SecondaryBody = e.SecondaryBody;
             Date = Formatters.Date.Format(date);
             Time = Formatters.Time.Format(date);
         }

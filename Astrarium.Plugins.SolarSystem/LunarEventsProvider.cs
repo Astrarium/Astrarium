@@ -100,7 +100,7 @@ namespace Astrarium.Plugins.SolarSystem
             while (jd < context.To)
             {
                 jd = LunarEphem.NearestApsis(jd, MoonApsis.Apogee, out diameter);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Apsis.Apogee", ("diameter", Formatters.Angle.Format(diameter)))));
+                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Apsis.Apogee", ("diameter", Formatters.Angle.Format(diameter))), lunarCalc.Moon));
                 jd += LunarEphem.ANOMALISTIC_PERIOD;
             }
 
@@ -108,7 +108,7 @@ namespace Astrarium.Plugins.SolarSystem
             while (jd < context.To)
             {
                 jd = LunarEphem.NearestApsis(jd, MoonApsis.Perigee, out diameter);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Apsis.Perigee", ("diameter", Formatters.Angle.Format(diameter)))));
+                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Apsis.Perigee", ("diameter", Formatters.Angle.Format(diameter))), lunarCalc.Moon));
                 jd += LunarEphem.ANOMALISTIC_PERIOD * 1.1;
             }
 
@@ -127,7 +127,7 @@ namespace Astrarium.Plugins.SolarSystem
             while (jd < context.To)
             {
                 jd = LunarEphem.NearestMaxLibration(jd, LibrationEdge.East, out librationAngle);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Librations.East", ("angle", librationLongitudeFormatter.Format(librationAngle)))));
+                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Librations.East", ("angle", librationLongitudeFormatter.Format(librationAngle))), lunarCalc.Moon));
                 jd += LunarEphem.ANOMALISTIC_PERIOD;
             }
 
@@ -135,7 +135,7 @@ namespace Astrarium.Plugins.SolarSystem
             while (jd < context.To)
             {
                 jd = LunarEphem.NearestMaxLibration(jd, LibrationEdge.West, out librationAngle);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Librations.West", ("angle", librationLongitudeFormatter.Format(librationAngle)))));
+                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Librations.West", ("angle", librationLongitudeFormatter.Format(librationAngle))), lunarCalc.Moon));
                 jd += LunarEphem.ANOMALISTIC_PERIOD;
             }
 
@@ -143,7 +143,7 @@ namespace Astrarium.Plugins.SolarSystem
             while (jd < context.To)
             {
                 jd = LunarEphem.NearestMaxLibration(jd, LibrationEdge.North, out librationAngle);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Librations.North", ("angle", librationLatitudeFormatter.Format(librationAngle)))));
+                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Librations.North", ("angle", librationLatitudeFormatter.Format(librationAngle))), lunarCalc.Moon));
                 jd += LunarEphem.DRACONIC_PERIOD;
             }
 
@@ -151,7 +151,7 @@ namespace Astrarium.Plugins.SolarSystem
             while (jd < context.To)
             {
                 jd = LunarEphem.NearestMaxLibration(jd, LibrationEdge.South, out librationAngle);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Librations.South", ("angle", librationLatitudeFormatter.Format(librationAngle)))));
+                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Librations.South", ("angle", librationLatitudeFormatter.Format(librationAngle))), lunarCalc.Moon));
                 jd += LunarEphem.DRACONIC_PERIOD;
             }
 
@@ -171,7 +171,7 @@ namespace Astrarium.Plugins.SolarSystem
             while (jd < context.To)
             {
                 jd = LunarEphem.NearestMaxDeclination(jd, MoonDeclination.North, out delta);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.MaxDeclinations.North", ("declination", declinationFormatter.Format(delta)))));
+                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.MaxDeclinations.North", ("declination", declinationFormatter.Format(delta))), lunarCalc.Moon));
                 jd += LunarEphem.DRACONIC_PERIOD;
             }
 
@@ -179,7 +179,7 @@ namespace Astrarium.Plugins.SolarSystem
             while (jd < context.To)
             {
                 jd = LunarEphem.NearestMaxDeclination(jd, MoonDeclination.South, out delta);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.MaxDeclinations.South", ("declination", declinationFormatter.Format(-delta)))));
+                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.MaxDeclinations.South", ("declination", declinationFormatter.Format(-delta))), lunarCalc.Moon));
                 jd += LunarEphem.DRACONIC_PERIOD;
             }
 
@@ -213,13 +213,13 @@ namespace Astrarium.Plugins.SolarSystem
                     // occultation
                     if (semidiameter >= separation)
                     {
-                        events.Add(new AstroEvent(jd, Text.Get("MoonEvents.ConjWithStars.Occults", ("starName", star.Name))));
+                        events.Add(new AstroEvent(jd, Text.Get("MoonEvents.ConjWithStars.Occults", ("starName", star.Name)), lunarCalc.Moon));
                     }
                     // conjunction
                     else
                     {
                         string direction = eqMoon.Delta > eqStar.Delta ? Text.Get("MoonEvents.ConjWithStars.Conj.North") : Text.Get("MoonEvents.ConjWithStars.Conj.South");
-                        events.Add(new AstroEvent(jd, Text.Get("MoonEvents.ConjWithStars.Conj", ("angularDistance", conjunctionSeparationFormatter.Format(separation)), ("direction", direction), ("starName", star.Name))));
+                        events.Add(new AstroEvent(jd, Text.Get("MoonEvents.ConjWithStars.Conj", ("angularDistance", conjunctionSeparationFormatter.Format(separation)), ("direction", direction), ("starName", star.Name)), lunarCalc.Moon));
                     }
 
                     jd += LunarEphem.SIDEREAL_PERIOD;
@@ -256,16 +256,17 @@ namespace Astrarium.Plugins.SolarSystem
                         // occultation
                         if (semidiameter >= separation)
                         {
-                            events.Add(new AstroEvent(jd, Text.Get("MoonEvents.ConjWithPlanets.Occults", ("planetName", planetName))));
+                            events.Add(new AstroEvent(jd, Text.Get("MoonEvents.ConjWithPlanets.Occults", ("planetName", planetName)), lunarCalc.Moon));
                         }
                         // conjunction
                         else
                         {
+                            var planet = planetsCalc.Planets.ElementAt(p - 1); 
                             string moonPhase = Formatters.Phase.Format(ctx.Get(lunarCalc.Phase));
                             string planetMagnitude = Formatters.Magnitude.Format(ctx.Get(planetsCalc.Planet_Magnitude, p));
                             string angularDistance = conjunctionSeparationFormatter.Format(separation);
                             string direction = eqMoon.Delta > eqPlanet.Delta ? Text.Get("MoonEvents.ConjWithPlanets.Conj.North") : Text.Get("MoonEvents.ConjWithPlanets.Conj.South");
-                            events.Add(new AstroEvent(jd, Text.Get("MoonEvents.ConjWithPlanets.Conj", ("moonPhase", moonPhase), ("angularDistance", angularDistance), ("direction", direction), ("planetName", planetName), ("planetMagnitude", planetMagnitude))));
+                            events.Add(new AstroEvent(jd, Text.Get("MoonEvents.ConjWithPlanets.Conj", ("moonPhase", moonPhase), ("angularDistance", angularDistance), ("direction", direction), ("planetName", planetName), ("planetMagnitude", planetMagnitude)), lunarCalc.Moon, planet));
                         }
 
                         jd += LunarEphem.SIDEREAL_PERIOD;

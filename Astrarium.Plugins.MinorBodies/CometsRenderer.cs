@@ -42,6 +42,7 @@ namespace Astrarium.Plugins.MinorBodies
                 foreach (var c in comets)
                 {
                     float diam = map.GetDiskSize(c.Semidiameter);
+                    float size = map.GetPointSize(c.Magnitude);
 
                     if (diam > 5)
                     {
@@ -96,6 +97,24 @@ namespace Astrarium.Plugins.MinorBodies
                                 }
                                 map.AddDrawnObject(c);
                             }                            
+                        }
+                    }
+                    else if ((int)size > 0)
+                    {
+                        PointF p = map.Project(c.Horizontal);
+
+                        if (!map.IsOutOfScreen(p))
+                        {
+                            g.FillEllipse(new SolidBrush(map.GetColor(Color.White)), p.X - size / 2, p.Y - size / 2, size, size);
+
+                            if (drawLabels)
+                            {
+                                var font = settings.Get<Font>("CometsLabelsFont");
+                                map.DrawObjectCaption(font, brushNames, c.Name, p, size);
+                            }
+
+                            map.AddDrawnObject(c);
+                            continue;
                         }
                     }
                 }

@@ -581,9 +581,18 @@ namespace Astrarium.ViewModels
                     if (ViewManager.ShowDialog(vm) ?? false)
                     {
                         sky.SetDate(vm.JulianDay);                        
-                        if (vm.Body != null) 
+                        if (vm.PrimaryBody != null) 
                         {
-                            map.GoToObject(vm.Body, TimeSpan.Zero);
+                            if (vm.SecondaryBody != null)
+                            {
+                                var hor = Angle.Intermediate(vm.PrimaryBody.Horizontal, vm.SecondaryBody.Horizontal, 0.5);
+                                var targetViewAngle = Angle.Separation(vm.PrimaryBody.Horizontal, vm.SecondaryBody.Horizontal) * 3;
+                                CenterOnPoint(hor, targetViewAngle);
+                            }
+                            else
+                            {
+                                CenterOnObject(vm.PrimaryBody);
+                            }
                         }
                     }
                 }
@@ -674,6 +683,11 @@ namespace Astrarium.ViewModels
 
         private void CenterOnObject(CelestialObject body)
         {
+            CenterOnObject(body, 0);
+        }
+
+        private void CenterOnObject(CelestialObject body, double targetViewAngle)
+        {
             if (body.DisplaySettingNames.Any(s => !settings.Get(s)))
             {
                 if (ViewManager.ShowMessageBox("$ObjectInvisible.Title", "$ObjectInvisible.Text", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
@@ -710,7 +724,42 @@ namespace Astrarium.ViewModels
                 }
             }
 
-            map.GoToObject(body, TimeSpan.FromSeconds(1));
+            map.GoToObject(body, TimeSpan.FromSeconds(1), targetViewAngle);
+        }
+
+        private void CenterOnPoint()
+        {
+            map.Center.Set(map.MousePosition);
+            map.Invalidate();
+        }
+
+        private void CenterOnPoint(CrdsHorizontal hor, double targetViewAngle)
+        {
+            if (settings.Get<bool>("Ground") && hor.Altitude <= 0)
+            {
+                if (ViewManager.ShowMessageBox("$PointUnderHorizon.Title", "$PointUnderHorizon.Text", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                {
+                    settings.Set("Ground", false);
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            if (map.LockedObject != null)
+            {
+                if (ViewManager.ShowMessageBox("$ObjectLocked.Title", "$ObjectLocked.Text", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                {
+                    map.LockedObject = null;
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            map.GoToPoint(hor, TimeSpan.FromSeconds(1), targetViewAngle);
         }
 
         private void LockOnObject(CelestialObject body)
@@ -729,12 +778,6 @@ namespace Astrarium.ViewModels
         private void ClearObjectsHistory()
         {
             SelectedObjectsMenuItems.Clear();
-        }
-
-        private void CenterOnPoint()
-        {
-            map.Center.Set(map.MousePosition);
-            map.Invalidate();
         }
 
         private void GetObjectInfo(CelestialObject body)

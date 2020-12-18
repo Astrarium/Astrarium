@@ -383,6 +383,11 @@ namespace Astrarium
 
         public void GoToPoint(CrdsHorizontal hor, TimeSpan animationDuration, double viewAngleTarget)
         {
+            if (viewAngleTarget == 0)
+            {
+                viewAngleTarget = ViewAngle;
+            }
+
             if (animationDuration.Equals(TimeSpan.Zero))
             {
                 Center.Set(hor);
