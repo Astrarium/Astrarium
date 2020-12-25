@@ -293,9 +293,13 @@ namespace Astrarium.Plugins.Eclipses
             {
                 if (map.UmbraNorthernLimit[i].Any())
                 {
+                    
                     var track = new Track(umbraLimitTrackStyle);
                     track.AddRange(map.UmbraNorthernLimit[i].Select(p => ToGeo(p)));
                     tracks.Add(track);
+                    
+
+
                 }
 
                 if (map.UmbraSouthernLimit[i].Any())
@@ -303,22 +307,28 @@ namespace Astrarium.Plugins.Eclipses
                     var track = new Track(umbraLimitTrackStyle);
                     track.AddRange(map.UmbraSouthernLimit[i].Select(p => ToGeo(p)));
                     tracks.Add(track);
+
+                    /*
+                    for (int j = 0; j < map.UmbraSouthernLimit[i].Count; j++)
+                    {
+                        markers.Add(new Marker(ToGeo(map.UmbraSouthernLimit[i][j]), maxPointMarkerStyle, j.ToString()));
+                    }*/
                 }
             }
 
 
             if (map.TotalPath.Any())
             {
-                //var track = new Track(centralLineTrackStyle);
-                //track.AddRange(map.TotalPath.Select(p => ToGeo(p)));                                      
-                //tracks.Add(track);
+                var track = new Track(centralLineTrackStyle);
+                track.AddRange(map.TotalPath.Select(p => ToGeo(p)));                                      
+                tracks.Add(track);
 
-                
+                /*
                 for (int i=0; i<map.TotalPath.Count; i++)
                 {
                     markers.Add(new Marker(ToGeo(map.TotalPath[i]), maxPointMarkerStyle, i.ToString()));
                 }
-                
+                */
             }
 
             /*

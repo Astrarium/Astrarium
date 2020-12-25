@@ -187,7 +187,7 @@ namespace Astrarium.Algorithms
 
             double jd;
 
-            double d, H;
+            double d, H, h;
 
             do
             {
@@ -202,20 +202,33 @@ namespace Astrarium.Algorithms
                 double M = be.Mu;
                 H = ToRadians(M - g.Longitude - 0.00417807 * deltaT);
 
-
                 double dX = be.dX; 
                 double dY = be.dY;
-
-                
 
                 double U = Atan(fconst * Tan(ToRadians(phi)));
 
                 double rhoSinPhi_ = fconst * Sin(U);
                 double rhoCosPhi_ = Cos(U);
 
+                double sinh = Sin(d) * Sin(ToRadians(phi)) + Cos(d) * Cos(ToRadians(phi)) * Cos(H);
+                h = ToDegrees(Asin(sinh));
+
                 double ksi = rhoCosPhi_ * Sin(H);
                 double eta = rhoSinPhi_ * Cos(d) - rhoCosPhi_ * Cos(H) * Sin(d);
                 double zeta = rhoSinPhi_ * Sin(d) + rhoCosPhi_ * Cos(H) * Cos(d);
+
+                // take athmospheric refraction into account
+                // J.Meeus "Elements of Solar Eclipses 1950-2200", page 29
+                if (i != 0 && h >= 0 && h <= 10)
+                {
+                    // this is an exponential function that fits values listed in the book
+                    // Function form is: y(x) = a + b * e ^ (-c*x)
+                    double sigma = 1.000012 + 0.0002282559 * Exp(-0.5035747 * h);
+
+                    ksi *= sigma;
+                    eta *= sigma;
+                    zeta *= sigma;
+                }
 
                 double ksi_ = ToRadians(pbe.Mu[1] * rhoCosPhi_ * Cos(H));
                 double eta_ = ToRadians(pbe.Mu[1] * ksi * Sin(d) - zeta * pbe.D[1]);
@@ -248,38 +261,89 @@ namespace Astrarium.Algorithms
 
                 t += tau;
                 phi += deltaPhi;
-
-                phi = ToDegrees(Asin(Sin(ToRadians(phi))));
-
             }
-            while ((Abs(tau) >= 0.0001 || Abs(deltaPhi) >= 0.0001) && iters < 20);
+            while ((Abs(tau) >= 0.0001 || Abs(deltaPhi) >= 0.0001) && iters < 50);
 
             if (Abs(phi) > 90)
             {
                 return null;
             }
 
-            double sinh = Sin(d) * Sin(ToRadians(phi)) + Cos(d) * Cos(ToRadians(phi)) * Cos(H);
-
-            if (sinh < 0)
+            // Sun is below horizon
+            if (h < 0)
             {
-                // Sun is below horizon
                 return null;
             }
-
+            
             if (Abs(tau) < 0.0001 && Abs(deltaPhi) < 0.0001)
             {
                 return new SolarEclipsePoint(jd, new CrdsGeographical(g.Longitude, phi));
             }
             else
             {
-                //return new SolarEclipsePoint(jd, new CrdsGeographical(g.Longitude, phi));
-                // no point
-                //return null;
                 return null;
             }
         }
 
+        private static SolarEclipsePoint ExtremeLimitOfCentralLine(PolynomialBesselianElements pbe, bool begin)
+        {
+            double d = ToRadians(pbe.D[0]);
+            double omega = 1.0 / Sqrt(1 - 0.006_694_385 * Cos(d) * Cos(d));
+
+            double u = pbe.X[0];
+            double v = omega * pbe.Y[0];
+
+            double a = pbe.X[1];
+            double b = omega * pbe.Y[1];
+
+            double n2 = a * a + b * b;
+            double n = Sqrt(n2);
+
+            double S = (a * v - u * b) / n;
+
+            double t1 = -(u * a + v * b) / n2;
+            double t2 = Sqrt(1 - S * S) / n;
+
+            double tau;
+            double jd = pbe.JulianDay0;
+            InstantBesselianElements be;
+            do
+            {
+                tau = (t1 + (begin ? -1 : 1) * t2) * pbe.Step;
+                jd += tau;
+
+                be = pbe.GetInstantBesselianElements(jd);
+
+                d = ToRadians(be.D);
+                omega = 1.0 / Sqrt(1 - 0.006_694_385 * Cos(d) * Cos(d));
+
+                u = be.X;
+                v = omega * be.Y;
+                a = be.dX;
+                b = omega * be.dY;
+                n2 = a * a + b * b;
+                n = Sqrt(n2);
+                
+                S = (a * v - u * b) / n;
+                t1 = -(u * a + v * b) / n2;
+                t2 = Sqrt(1 - S * S) / n;
+
+                tau = (t1 + (begin ? -1 : 1) * t2) * pbe.Step;
+                jd += tau;
+            }
+            while (Abs(tau) > 0.0001);
+
+            be = pbe.GetInstantBesselianElements(jd);
+            d = ToRadians(be.D);
+            double omega2 = 1.0 / (1 - 0.006_694_385 * Cos(d) * Cos(d));
+            double H = To360(ToDegrees(Atan2(be.X, -omega2 * be.Y * Sin(d))));
+            double M = be.Mu;
+
+            double phi1 = Asin(0.996_647_19 * omega2 * be.Y * Cos(d));
+            double phi = ToDegrees(Atan(1.003_364_09 * Tan(phi1)));
+            double lambda = M - H - 0.004_178_07 * pbe.DeltaT.Value;
+            return new SolarEclipsePoint(jd, new CrdsGeographical(lambda, phi));
+        }
 
         /// <summary>
         /// Gets map of solar eclipse.
@@ -365,7 +429,7 @@ namespace Astrarium.Algorithms
                 InstantBesselianElements b = pbe.GetInstantBesselianElements(jdP4);
                 double a = Atan2(b.Y, b.X);
                 PointF p = new PointF((float)Cos(a), (float)Sin(a));
-                map.P4 = new SolarEclipsePoint(jdP4, ProjectOnEarth(p, b.D, b.Mu, true));
+                map.P4 = new SolarEclipsePoint(jdP4, Project(b, pbe.DeltaT.Value, p));
             }
 
             // Instant of first internal contact of penumbra,
@@ -376,7 +440,7 @@ namespace Astrarium.Algorithms
                 InstantBesselianElements b = pbe.GetInstantBesselianElements(jdP2);
                 double a = Atan2(b.Y, b.X);
                 PointF p = new PointF((float)Cos(a), (float)Sin(a));
-                map.P2 = new SolarEclipsePoint(jdP2, ProjectOnEarth(p, b.D, b.Mu, true));
+                map.P2 = new SolarEclipsePoint(jdP2, Project(b, pbe.DeltaT.Value, p));
             }
 
             // Instant of last internal contact of penumbra,
@@ -387,7 +451,7 @@ namespace Astrarium.Algorithms
                 InstantBesselianElements b = pbe.GetInstantBesselianElements(jdP3);
                 double a = Atan2(b.Y, b.X);
                 PointF p = new PointF((float)Cos(a), (float)Sin(a));
-                map.P3 = new SolarEclipsePoint(jdP3, ProjectOnEarth(p, b.D, b.Mu, true));
+                map.P3 = new SolarEclipsePoint(jdP3, Project(b, pbe.DeltaT.Value, p));
             }
 
             // Instant when northern limit of umbra crosses Earth edge first time,
@@ -406,59 +470,28 @@ namespace Astrarium.Algorithms
             // may not exist
             double jdUS2 = FindRoots(funcUmbraSouthLimit, jdMid, jdTo, epsilon);
 
-            // Instant of first contact of umbra center,
-            // may not exist
-            double jdC1 = FindRoots(funcUmbra, jdFrom, jdMid, epsilon);
-            if (!double.IsNaN(jdC1))
-            {
-                do
-                {
-                    InstantBesselianElements b = pbe.GetInstantBesselianElements(jdC1);
-                    PointF p = new PointF((float)b.X, (float)b.Y);
-                    var g = ProjectOnEarth(p, b.D, b.Mu);
-                    if (g == null) 
-                        jdC1 += 1e-6;
-                    else
-                        map.C1 = new SolarEclipsePoint(jdC1, g);
-                }
-                while (map.C1 == null && jdC1 < jdMid);
-            }
+            
 
-            // Instant of last contact of umbra center,
-            // may not exist
-            double jdC2 = FindRoots(funcUmbra, jdMid, jdTo, epsilon);
-            if (!double.IsNaN(jdC2))
-            {
-                do
-                {
-                    InstantBesselianElements b = pbe.GetInstantBesselianElements(jdC2);
-                    PointF p = new PointF((float)b.X, (float)b.Y);
-                    var g = ProjectOnEarth(p, b.D, b.Mu);
-                    if (g == null)
-                        jdC2 -= 1e-6;
-                    else
-                        map.C2 = new SolarEclipsePoint(jdC2, g);
-                }
-                while (map.C2 == null && jdC2 > jdMid);
+            if (eclipseType != SolarEclipseType.Partial)
+            { 
+                map.C1 = ExtremeLimitOfCentralLine(pbe, true);
+                map.C2 = ExtremeLimitOfCentralLine(pbe, false);
             }
 
             // Instant of eclipse maximum
             {
                 InstantBesselianElements b = pbe.GetInstantBesselianElements(pbe.JulianDay0);
                 PointF p = new PointF((float)b.X, (float)b.Y);
-                                              
+
+                //var g = Project(b, pbe.DeltaT.Value, p);
                 var g = ProjectOnEarth(p, b.D, b.Mu, true);
+                
                 if (g != null)
                 {
                     map.Max = new SolarEclipsePoint(pbe.JulianDay0, g);
                 }
+
             }
-
-            // initial longitude to start iteration process
-            // to find map's curves points
-
-
-            var beMax = pbe.GetInstantBesselianElements(map.Max.JulianDay);
 
             // TOTAL PATH by Meeus algorithm:
 
@@ -515,8 +548,6 @@ namespace Astrarium.Algorithms
             return map;
         }
 
-
-
         private static CrdsGeographical Project(InstantBesselianElements be, double deltaT, PointF p)
         {
             double d = ToRadians(be.D);
@@ -529,40 +560,13 @@ namespace Astrarium.Algorithms
             double b2 = 0.996_647_19 * omega * Cos(d);
 
             double B2 = 1 - p.X * p.X - y1 * y1;
-
-            //if (B2 >= 0)
-            {
-                double B = 0;
-
-                if (B2 >= 0)
-                {
-                    B = Sqrt(B2);
-
-                    double H = ToDegrees(Atan2(p.X, B * b2 - y1 * b1));
-                    double phi1 = Asin(B * b1 + y1 * b2);
-                    double phi = ToDegrees(Atan(1.003_364_09 * Tan(phi1)));
-                    double lambda = M - H - 0.004_178_07 * deltaT;
-                    return new CrdsGeographical(lambda, phi);
-                }
-                else
-                {
-
-                    double ang = Atan2(p.X, p.Y);
-                    p.X = (float)Sin(ang);
-                    y1 = Cos(ang);
-  
-                    double H = ToDegrees(Atan2(p.X, -y1 * b1));
-                    double phi1 = Asin(y1 * b2);
-
-                    double phi = ToDegrees(Atan(1.003_364_09 * Tan(phi1)));
-
-                    double lambda = M - H - 0.004_178_07 * deltaT;
-
-                    return new CrdsGeographical(lambda, phi);
-                }
-
-                
-            }
+            double B = B2 > 0 ? Sqrt(B2) : 0;
+            double H = To360(ToDegrees(Atan2(p.X, B * b2 - y1 * b1)));
+            double phi1 = Asin(B * b1 + y1 * b2);
+            double phi = ToDegrees(Atan(1.003_364_09 * Tan(phi1)));
+            double lambda = M - H - 0.004_178_07 * deltaT;
+            return new CrdsGeographical(lambda, phi);
+               
         }
 
         internal static double FindFunctionEnd(Func<double, bool> func, double left, double right, bool leftExist, bool rightExist, double epsilon)
@@ -630,6 +634,7 @@ namespace Astrarium.Algorithms
                         Func<double, bool> func = (lon) => GetEclipseCurvePoint(pbe, new CrdsGeographical(lon, phis[k]), i, G) != null;
                         double lon0 = FindFunctionEnd(func, lambda - step, lambda, prevExist, exist, 0.0001);
                         var p0 = GetEclipseCurvePoint(pbe, new CrdsGeographical(lon0, phis[k]), i, G);
+
                         if (p0 != null)
                         {
                             if (exist)
@@ -637,7 +642,7 @@ namespace Astrarium.Algorithms
                                 double sep = Separation(p0.Coordinates, p.Coordinates);
                                 if (sep > 1)
                                 {
-                                    for (int j = 0; j < 5; j++)
+                                    for (int j = 0; j <= 5; j++)
                                     {
                                         var m = Intermediate(p0.Coordinates, p.Coordinates, (double)j / 5);
                                         var m1 = GetEclipseCurvePoint(pbe, new CrdsGeographical(m.Longitude, phis[k]), i, G);
@@ -651,7 +656,7 @@ namespace Astrarium.Algorithms
                                 double sep = Separation(prev[k].Coordinates, p0.Coordinates);
                                 if (sep > 1)
                                 {
-                                    for (int j = 0; j < 5; j++)
+                                    for (int j = 0; j <= 5; j++)
                                     {
                                         var m = Intermediate(prev[k].Coordinates, p0.Coordinates, (double)j / 5);
                                         var m1 = GetEclipseCurvePoint(pbe, new CrdsGeographical(m.Longitude, phis[k]), i, G);
@@ -670,7 +675,7 @@ namespace Astrarium.Algorithms
 
                         if (sep > 1)
                         {
-                            for (int j = 1; j < 5; j++)
+                            for (int j = 0; j <= 5; j++)
                             {
                                 var m = Intermediate(prev[k].Coordinates, p.Coordinates, (double)j / 5);
                                 var m1 = GetEclipseCurvePoint(pbe, new CrdsGeographical(m.Longitude, phis[k]), i, G);
@@ -687,6 +692,12 @@ namespace Astrarium.Algorithms
 
                     prev[k] = p;
                 }
+            }
+
+            if (i == 0)
+            {
+                points.Add(ExtremeLimitOfCentralLine(pbe, true));
+                points.Add(ExtremeLimitOfCentralLine(pbe, false));
             }
 
             // ORDERING POINTS
@@ -1229,6 +1240,11 @@ namespace Astrarium.Algorithms
                     for (int i = 0; i < pPenumbraIntersect.Length; i++)
                     {
                         CrdsGeographical g = Project(b, deltaT, pPenumbraIntersect[i]);
+                        if (Abs(g.Longitude) > 180 )
+                        {
+
+                        }
+
                         //CrdsGeographical g = ProjectOnEarth(pPenumbraIntersect[i], b.D, b.Mu, forceProjection: true);
 
                         //if (g == null) continue;
