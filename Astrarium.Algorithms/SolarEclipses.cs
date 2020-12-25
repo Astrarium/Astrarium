@@ -355,7 +355,7 @@ namespace Astrarium.Algorithms
                 InstantBesselianElements b = pbe.GetInstantBesselianElements(jdP1);
                 double a = Atan2(b.Y, b.X);
                 PointF p = new PointF((float)Cos(a), (float)Sin(a));                
-                map.P1 = new SolarEclipsePoint(jdP1, ProjectOnEarth(p, b.D, b.Mu, true));
+                map.P1 = new SolarEclipsePoint(jdP1, Project(b, pbe.DeltaT.Value, p));
             }
 
             // Instant of last external contact of penumbra
@@ -468,111 +468,45 @@ namespace Astrarium.Algorithms
 
                 var points = FindCurvePoints(pbe, lambda0, 0, 0);
 
-                //CrdsGeographical g = points.FirstOrDefault().Coordinates;
-                //do
-                //{
-                //    int index = map.TotalPath.IndexOf(g);
-                //    if (index + 1 < points.Count)
-                //    {
-                //        var gNext = points[index + 1].Coordinates;
-
-
-
-                //        if (count > 1)
-                //        {
-                //            var pts = new List<CrdsGeographical>();
-                //            for (int i = 0; i < count; i++)
-                //            {
-                //                var m = Intermediate(g, gNext, (double)i / count);
-
-
-                //                var m1 = GetEclipseCurvePoint(pbe, new CrdsGeographical(m), 0, 0);
-                //                if (m1 != null)
-                //                {
-                //                    pts.Add(m1.Coordinates);
-
-                //                    //pts.Add(m2.Coordinates);
-                //                }
-                //                else
-                //                {
-                //                    pts.Add(m);
-                //                }
-                //            }
-                //            map.TotalPath.InsertRange(index + 1, pts);
-                //        }
-                //        g = gNext;
-                //    }
-                //    else
-                //    {
-                //        break;
-                //    }
-                //}
-                //while (true);
-
-                map.TotalPath = Order(points);// .Select(p => p.Coordinates).ToList();
+                map.TotalPath = points;
             }
 
             if (eclipseType != SolarEclipseType.Partial)
             {
-                double lambda0 = 0;// map.Max.Coordinates.Longitude;
+                double lambda0 = 0;
 
                 var northPoints = FindCurvePoints(pbe, lambda0, 1, 1);
-                var northPointsOrdered = Order(northPoints);
 
                 var southPoints = FindCurvePoints(pbe, lambda0, -1, 1);
-                var southPointsOrdered = Order(southPoints);
-
 
                 if (northPoints.Count > 2)
                 {
-                    var m1 = northPointsOrdered.OrderByDescending(p => Abs(p.Latitude)).First();
-                    int northIndex = northPointsOrdered.IndexOf(m1);
+                    var m1 = northPoints.OrderByDescending(p => Abs(p.Latitude)).First();
+                    int northIndex = northPoints.IndexOf(m1);
 
-                    map.UmbraNorthernLimit[0] = northPointsOrdered.Take(northIndex).ToList();
-                    map.UmbraNorthernLimit[1] = northPointsOrdered.Skip(northIndex - 1).ToList();
+                    map.UmbraNorthernLimit[0] = northPoints.Take(northIndex).ToList();
+                    map.UmbraNorthernLimit[1] = northPoints.Skip(northIndex - 1).ToList();
                 }
 
                 if (southPoints.Count > 2)
                 {
-                    var m2 = southPointsOrdered.OrderByDescending(p => Abs(p.Latitude)).First();
-                    int southIndex = southPointsOrdered.IndexOf(m2);
+                    var m2 = southPoints.OrderByDescending(p => Abs(p.Latitude)).First();
+                    int southIndex = southPoints.IndexOf(m2);
 
-                    map.UmbraSouthernLimit[0] = southPointsOrdered.Take(southIndex).ToList();
-                    map.UmbraSouthernLimit[1] = southPointsOrdered.Skip(southIndex - 1).ToList();
+                    map.UmbraSouthernLimit[0] = southPoints.Take(southIndex).ToList();
+                    map.UmbraSouthernLimit[1] = southPoints.Skip(southIndex - 1).ToList();
                 }
             }
 
-
             // Find points of Northern limit of penumbra
             {
-                //double ang = Atan2(beMax.Y, beMax.X);
-                //float x = (float)(beMax.X + beMax.L1 * Cos(ang));
-                //float y = (float)(beMax.Y + beMax.L1 * Sin(ang));
-                //var p = ProjectOnEarth(new PointF(x, y), beMax.D, beMax.Mu);
-
-                //if (p != null)
-                {
-                    double lambda0 = 0;// -69;
-
-                    var points = FindCurvePoints(pbe, lambda0, 1, 0);
-                    map.PenumbraNorthernLimit = Order(points);
-                }
+                double lambda0 = 0;// -69;
+                map.PenumbraNorthernLimit = FindCurvePoints(pbe, lambda0, 1, 0);
             }
 
             // Find points of Southern limit of penumbra 
             {
-                //double ang = Atan2(beMax.Y, beMax.X);
-                //float x = (float)(beMax.X + beMax.L1 * Cos(ang));
-                //float y = (float)(beMax.Y - beMax.L1 * Sin(ang));
-                //var p = ProjectOnEarth(new PointF(x, y), beMax.D, beMax.Mu);
-
-                //if (p != null)
-                //{
-                //    double lambda0 = p.Longitude;
-
-                    var points = FindCurvePoints(pbe, 0, -1, 0);
-                    map.PenumbraSouthernLimit = Order(points);
-                //}
+                map.PenumbraSouthernLimit = FindCurvePoints(pbe, 0, -1, 0);
             }
 
             // Calc rise/set curves
@@ -581,76 +515,54 @@ namespace Astrarium.Algorithms
             return map;
         }
 
-        private static List<CrdsGeographical> Order(List<SolarEclipsePoint> points)
+
+
+        private static CrdsGeographical Project(InstantBesselianElements be, double deltaT, PointF p)
         {
-            if ( points.Count <= 2)
+            double d = ToRadians(be.D);
+            double M = be.Mu;
+
+            double omega = 1.0 / Sqrt(1 - 0.006_694_385 * Cos(d) * Cos(d));
+
+            double y1 = omega * p.Y;
+            double b1 = omega * Sin(d);
+            double b2 = 0.996_647_19 * omega * Cos(d);
+
+            double B2 = 1 - p.X * p.X - y1 * y1;
+
+            //if (B2 >= 0)
             {
-                return points.Select(p => p.Coordinates).ToList();
-            }
-
-            double jdMin = points.Min(p => p.JulianDay);
-            double jdMax = points.Max(p => p.JulianDay);
-
-            double jdMid = (jdMin + jdMax) / 2;
-
-            var mid = points.OrderBy(p => Abs(p.JulianDay - jdMid)).First().Coordinates;
-
-            var jdOrdered = points.OrderBy(p => p.JulianDay).Select(p => p.Coordinates).ToList();
-
-            int middleIndex = jdOrdered.IndexOf(mid);
-
-            var left = jdOrdered.Take(middleIndex);
-            var right = jdOrdered.Skip(middleIndex + 1);
-
-            var newList = new List<CrdsGeographical>();
-
-            newList.AddRange(left.OrderByDescending(p => Separation(mid, p)));
-            newList.Add(mid);
-            newList.AddRange(right.OrderBy(p => Separation(mid, p)));
-
-            return newList.ToList();
-        }
-
-
-        private static List<CrdsGeographical> FindTotalPathByTime(PolynomialBesselianElements pbe)
-        {
-            double deltaT = pbe.DeltaT ?? Date.DeltaT(pbe.JulianDay0);
-
-            List<CrdsGeographical> points = new List<CrdsGeographical>();
-
-            for (double jd = pbe.JulianDay0 - 0.5; jd< pbe.JulianDay0 + 0.5; jd += TimeSpan.FromMinutes(1).TotalDays)
-            {
-                var be = pbe.GetInstantBesselianElements(jd);
-                double X = be.X;
-                double Y = be.Y;
-                double d = ToRadians(be.D);
-                double M = be.Mu;
-
-                double omega = 1.0 / Sqrt(1 - 0.006_694_385 * Cos(d) * Cos(d));
-
-                double y1 = omega * Y;
-                double b1 = omega * Sin(d);
-                double b2 = 0.996_647_19 * omega * Cos(d);
-
-                double B2 = 1 - X * X - y1 * y1;
+                double B = 0;
 
                 if (B2 >= 0)
                 {
-                    double B = Sqrt(B2);
+                    B = Sqrt(B2);
 
-                    double H = ToDegrees(Atan2(X, B * b2 - y1 * b1));
-
+                    double H = ToDegrees(Atan2(p.X, B * b2 - y1 * b1));
                     double phi1 = Asin(B * b1 + y1 * b2);
+                    double phi = ToDegrees(Atan(1.003_364_09 * Tan(phi1)));
+                    double lambda = M - H - 0.004_178_07 * deltaT;
+                    return new CrdsGeographical(lambda, phi);
+                }
+                else
+                {
+
+                    double ang = Atan2(p.X, p.Y);
+                    p.X = (float)Sin(ang);
+                    y1 = Cos(ang);
+  
+                    double H = ToDegrees(Atan2(p.X, -y1 * b1));
+                    double phi1 = Asin(y1 * b2);
 
                     double phi = ToDegrees(Atan(1.003_364_09 * Tan(phi1)));
 
                     double lambda = M - H - 0.004_178_07 * deltaT;
 
-                    points.Add(new CrdsGeographical(lambda, phi));
+                    return new CrdsGeographical(lambda, phi);
                 }
-            }
 
-            return points;
+                
+            }
         }
 
         internal static double FindFunctionEnd(Func<double, bool> func, double left, double right, bool leftExist, bool rightExist, double epsilon)
@@ -695,13 +607,14 @@ namespace Astrarium.Algorithms
             }
         } 
 
-        private static List<SolarEclipsePoint> FindCurvePoints(PolynomialBesselianElements pbe, double lambda0, int i, int G)
+        private static List<CrdsGeographical> FindCurvePoints(PolynomialBesselianElements pbe, double lambda0, int i, int G)
         {
             double[] phis = new double[] { 0, Sign(pbe.Y[0]) * 89.9 };           
-            bool[] prevExist = new bool[2];
+            SolarEclipsePoint[] prev = new SolarEclipsePoint[2];
+
             var points = new List<SolarEclipsePoint>();
 
-            double step = 1;
+            const double step = 1;
 
             for (double lambda = lambda0 - 180; lambda <= lambda0 + 180; lambda += step)
             {
@@ -710,25 +623,61 @@ namespace Astrarium.Algorithms
                     SolarEclipsePoint p = GetEclipseCurvePoint(pbe, new CrdsGeographical(lambda, phis[k]), i, G);
 
                     bool exist = p != null;
+                    bool prevExist = prev[k] != null;
 
-                    if (prevExist[k] != exist)
+                    if (prevExist != exist)
                     {
                         Func<double, bool> func = (lon) => GetEclipseCurvePoint(pbe, new CrdsGeographical(lon, phis[k]), i, G) != null;
-                        double lon0 = FindFunctionEnd(func, lambda - step, lambda, prevExist[k], exist, 0.0001);
+                        double lon0 = FindFunctionEnd(func, lambda - step, lambda, prevExist, exist, 0.0001);
                         var p0 = GetEclipseCurvePoint(pbe, new CrdsGeographical(lon0, phis[k]), i, G);
                         if (p0 != null)
                         {
+                            if (exist)
+                            {
+                                double sep = Separation(p0.Coordinates, p.Coordinates);
+                                if (sep > 1)
+                                {
+                                    for (int j = 0; j < 5; j++)
+                                    {
+                                        var m = Intermediate(p0.Coordinates, p.Coordinates, (double)j / 5);
+                                        var m1 = GetEclipseCurvePoint(pbe, new CrdsGeographical(m.Longitude, phis[k]), i, G);
+                                        if (m1 != null)
+                                            points.Add(m1);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                double sep = Separation(prev[k].Coordinates, p0.Coordinates);
+                                if (sep > 1)
+                                {
+                                    for (int j = 0; j < 5; j++)
+                                    {
+                                        var m = Intermediate(prev[k].Coordinates, p0.Coordinates, (double)j / 5);
+                                        var m1 = GetEclipseCurvePoint(pbe, new CrdsGeographical(m.Longitude, phis[k]), i, G);
+                                        if (m1 != null)
+                                            points.Add(m1);
+                                    }
+                                }
+                            }
+
                             points.Add(p0);
                         }
                     }
-
-                    if (prevExist[k] && exist)
+                    else if (exist)
                     {
-                        //double sep = Separation(points.Last().Coordinates, p.Coordinates);
-                        //if (sep > 1)
-                        //{
-                        //    step = 1 / sep;
-                        //}
+                        double sep = Separation(prev[k].Coordinates, p.Coordinates);
+
+                        if (sep > 1)
+                        {
+                            for (int j = 1; j < 5; j++)
+                            {
+                                var m = Intermediate(prev[k].Coordinates, p.Coordinates, (double)j / 5);
+                                var m1 = GetEclipseCurvePoint(pbe, new CrdsGeographical(m.Longitude, phis[k]), i, G);
+                                if (m1 != null)
+                                    points.Add(m1);
+                            }
+                        }
                     }
 
                     if (p != null)
@@ -736,11 +685,40 @@ namespace Astrarium.Algorithms
                         points.Add(p);
                     }
 
-                    prevExist[k] = exist;
+                    prev[k] = p;
                 }
             }
 
-            return points;
+            // ORDERING POINTS
+
+            if (points.Count <= 2)
+            {
+                return points.Select(p => p.Coordinates).ToList();
+            }
+            else
+            {
+                double jdMin = points.Min(p => p.JulianDay);
+                double jdMax = points.Max(p => p.JulianDay);
+
+                double jdMid = (jdMin + jdMax) / 2;
+
+                var mid = points.OrderBy(p => Abs(p.JulianDay - jdMid)).First().Coordinates;
+
+                var jdOrdered = points.OrderBy(p => p.JulianDay).Select(p => p.Coordinates).ToList();
+
+                int middleIndex = jdOrdered.IndexOf(mid);
+
+                var left = jdOrdered.Take(middleIndex);
+                var right = jdOrdered.Skip(middleIndex + 1);
+
+                var newList = new List<CrdsGeographical>();
+
+                newList.AddRange(left.OrderByDescending(p => Separation(mid, p)));
+                newList.Add(mid);
+                newList.AddRange(right.OrderBy(p => Separation(mid, p)));
+
+                return newList.ToList();
+            }
         }
 
 
@@ -1250,8 +1228,8 @@ namespace Astrarium.Algorithms
                 {
                     for (int i = 0; i < pPenumbraIntersect.Length; i++)
                     {
-                        //CrdsGeographical g = Project(pPenumbraIntersect[i], b, deltaT);
-                        CrdsGeographical g = ProjectOnEarth(pPenumbraIntersect[i], b.D, b.Mu, forceProjection: true);
+                        CrdsGeographical g = Project(b, deltaT, pPenumbraIntersect[i]);
+                        //CrdsGeographical g = ProjectOnEarth(pPenumbraIntersect[i], b.D, b.Mu, forceProjection: true);
 
                         //if (g == null) continue;
 
@@ -1283,6 +1261,7 @@ namespace Astrarium.Algorithms
             }
         }
 
+        /*
         private static void FindTotalPath(PolynomialBesselianElements pbe, SolarEclipseMap curves, double jdFrom, double jdTo)
         {
             if (!double.IsNaN(jdFrom) && !double.IsNaN(jdTo))
@@ -1319,6 +1298,7 @@ namespace Astrarium.Algorithms
                 }
             } 
         }
+        */
 
         /// <summary>
         /// Finds step value (in Julian days) needed for calculating curve points.

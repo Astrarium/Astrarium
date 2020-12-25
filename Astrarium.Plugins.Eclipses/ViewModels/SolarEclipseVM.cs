@@ -309,16 +309,16 @@ namespace Astrarium.Plugins.Eclipses
 
             if (map.TotalPath.Any())
             {
-                var track = new Track(centralLineTrackStyle);
-                track.AddRange(map.TotalPath.Select(p => ToGeo(p)));                                      
-                tracks.Add(track);
+                //var track = new Track(centralLineTrackStyle);
+                //track.AddRange(map.TotalPath.Select(p => ToGeo(p)));                                      
+                //tracks.Add(track);
 
-                /*
+                
                 for (int i=0; i<map.TotalPath.Count; i++)
                 {
                     markers.Add(new Marker(ToGeo(map.TotalPath[i]), maxPointMarkerStyle, i.ToString()));
                 }
-                */
+                
             }
 
             /*
