@@ -25,5 +25,10 @@
             Longitude = longitude;
             Latitude = latitude;
         }
+
+        public override string ToString()
+        {
+            return $"Lon={Longitude}, Lat={Latitude}";
+        }
     }
 }

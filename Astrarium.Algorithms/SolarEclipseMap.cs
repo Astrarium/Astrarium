@@ -16,7 +16,7 @@ namespace Astrarium.Algorithms
         /// Can be empty (if the eclipse is partial one).
         /// Central line of eclipse can be divided into two segments, if the line crosses circumpolar regions. 
         /// </summary>
-        public List<CrdsGeographical>[] TotalPath { get; } = new[] { new List<CrdsGeographical>(), new List<CrdsGeographical>() };
+        public List<CrdsGeographical> TotalPath { get; set; } = new List<CrdsGeographical>();
 
         /// <summary>
         /// Defines northern visibility limit of a total (or annular) eclipse.
@@ -42,13 +42,13 @@ namespace Astrarium.Algorithms
         /// Defines northern visibility limit of an eclipse. 
         /// Can be empty if northern limit does not exist (northern edge of penumbra does not cross the Earth). 
         /// </summary>
-        public List<CrdsGeographical> PenumbraNorthernLimit { get; } = new List<CrdsGeographical>();
+        public List<CrdsGeographical> PenumbraNorthernLimit { get; set; } = new List<CrdsGeographical>();
 
         /// <summary>
         /// Defines southern visibility limit of an eclipse. 
         /// Can be empty if southern limit does not exist (southern edge of penumbra does not cross the Earth). 
         /// </summary>
-        public List<CrdsGeographical> PenumbraSouthernLimit { get; } = new List<CrdsGeographical>();
+        public List<CrdsGeographical> PenumbraSouthernLimit { get; set; } = new List<CrdsGeographical>();
 
         /// <summary>
         /// First external contact.

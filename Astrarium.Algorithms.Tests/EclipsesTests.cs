@@ -71,5 +71,149 @@ namespace Astrarium.Algorithms.Tests
                 Assert.AreEqual(g.Longitude, g0.Longitude, 1e-5);
             }
         }
+
+
+        /// <summary>
+        /// Example 5 (EOSE)
+        /// </summary>
+        [TestMethod]
+        public void PointOfCentralEclipse()
+        {
+            // 10 may 1994
+            var pbe = new PolynomialBesselianElements()
+            {
+                JulianDay0 = 2449483.20833,
+                X = new[] { -0.173_367, +0.499_0629, +0.000_0296, -0.000_005_63 },
+                Y = new[] { +0.383_484, +0.086_9393, -0.000_1183, -0.000_000_92 },
+                D = new[] { +17.686_13, +0.010_642, -0.000_004, 0 },
+                Mu = new[] { 75.909_23, 15.001_621, 0, 0 },
+                L1 = new[] { +0.566_906, -0.000_0318, -0.000_0098, 0 },
+                L2 = new[] { +0.020_679, -0.000_0317, -0.000_0097, 0 },
+                F1 = new double[] { 0, 0, 0, 0 },
+                F2 = new double[] { 0, 0, 0, 0 },
+                tanF1 = 0.004_6308,
+                tanF2 = 0.004_6077,
+                Step = 1.0 / 24.0,                                
+                DeltaT = 61 // Used in examples from Meeus' book
+            };
+
+            // 1 second of time is enough
+            double epsTime = TimeSpan.FromSeconds(1).TotalDays;
+
+            // 1 second of arc is enough
+            double epsCoord = 1 / 3600.0;
+
+            // Example 5
+            {
+                var pointInitial = new CrdsGeographical(97, 0);
+                var pointFinal = SolarEclipses.GetEclipseCurvePoint(pbe, pointInitial);
+
+                // 16:35:50 UT, convert to DT!
+                double expectedTime = (16 + 35 / 60.0 + 50 / 3600.0 + pbe.DeltaT.Value / 3600.0) / 24.0;
+
+                Assert.AreEqual(36.74052, pointFinal.Coordinates.Latitude, epsCoord);
+                Assert.AreEqual(expectedTime, new Date(pointFinal.JulianDay).Time, epsTime);
+            }
+
+            // Example 6 (Northern limit of annlar path, point for longitude 97 West)
+            {
+                var pointInitial = new CrdsGeographical(97, 0);
+                var pointFinal = SolarEclipses.GetEclipseCurvePoint(pbe, pointInitial, 1, 1);
+
+                // 16:38:05 UT, convert to DT!
+                double expectedTime = (16 + 38 / 60.0 + 05 / 3600.0 + pbe.DeltaT.Value / 3600.0) / 24.0;
+
+                Assert.AreEqual(37.99034, pointFinal.Coordinates.Latitude, epsCoord);
+                Assert.AreEqual(expectedTime, new Date(pointFinal.JulianDay).Time, epsTime);
+            }
+
+            // Example 6 (Southern limit of annular path, point for longitude 97 West)
+            {
+                var pointInitial = new CrdsGeographical(97, 0);
+                var pointFinal = SolarEclipses.GetEclipseCurvePoint(pbe, pointInitial, -1, 1);
+
+                // 16:33:34 UT, convert to DT!
+                double expectedTime = (16 + 33 / 60.0 + 34 / 3600.0 + pbe.DeltaT.Value / 3600.0) / 24.0;
+
+                Assert.AreEqual(35.49901, pointFinal.Coordinates.Latitude, epsCoord);
+                Assert.AreEqual(expectedTime, new Date(pointFinal.JulianDay).Time, epsTime);
+            }
+
+            // Excercise from page 24 (1)
+            {
+                var pointInitial = new CrdsGeographical(120, 0);
+                var pointFinal = SolarEclipses.GetEclipseCurvePoint(pbe, pointInitial, 1, 0.8);
+
+                // 15:56:17 UT, convert to DT!
+                double expectedTime = (15 + 56 / 60.0 + 17 / 3600.0 + pbe.DeltaT.Value / 3600.0) / 24.0;
+
+                Assert.AreEqual(32.7424, pointFinal.Coordinates.Latitude, epsCoord);
+                Assert.AreEqual(expectedTime, new Date(pointFinal.JulianDay).Time, epsTime);
+            }
+
+            // Excercise from page 24 (2)
+            {
+                var pointInitial = new CrdsGeographical(115, 0);
+                var pointFinal = SolarEclipses.GetEclipseCurvePoint(pbe, pointInitial, 1, 0.8);
+
+                // 16:06:10 UT, convert to DT!
+                double expectedTime = (16 + 06 / 60.0 + 10 / 3600.0 + pbe.DeltaT.Value / 3600.0) / 24.0;
+
+                Assert.AreEqual(35.4645, pointFinal.Coordinates.Latitude, epsCoord);
+                Assert.AreEqual(expectedTime, new Date(pointFinal.JulianDay).Time, epsTime);
+            }
+
+            // Excercise from page 24 (3)
+            {
+                var pointInitial = new CrdsGeographical(110, 0);
+                var pointFinal = SolarEclipses.GetEclipseCurvePoint(pbe, pointInitial, 1, 0.8);
+
+                // 16:17:19 UT, convert to DT!
+                double expectedTime = (16 + 17 / 60.0 + 19 / 3600.0 + pbe.DeltaT.Value / 3600.0) / 24.0;
+
+                Assert.AreEqual(38.1538, pointFinal.Coordinates.Latitude, epsCoord);
+                Assert.AreEqual(expectedTime, new Date(pointFinal.JulianDay).Time, epsTime);
+            }
+
+            // Excercise from page 24 (4)
+            {
+                var pointInitial = new CrdsGeographical(105, 0);
+                var pointFinal = SolarEclipses.GetEclipseCurvePoint(pbe, pointInitial, 1, 0.8);
+
+                // 16:29:14 UT, convert to DT!
+                double expectedTime = (16 + 29 / 60.0 + 14 / 3600.0 + pbe.DeltaT.Value / 3600.0) / 24.0;
+
+                Assert.AreEqual(40.7021, pointFinal.Coordinates.Latitude, epsCoord);
+                Assert.AreEqual(expectedTime, new Date(pointFinal.JulianDay).Time, epsTime);
+            }
+
+            // Excercise from page 24 (5)
+            {
+                var pointInitial = new CrdsGeographical(100, 0);
+                var pointFinal = SolarEclipses.GetEclipseCurvePoint(pbe, pointInitial, 1, 0.8);
+
+                // 16:41:25 UT, convert to DT!
+                double expectedTime = (16 + 41 / 60.0 + 25 / 3600.0 + pbe.DeltaT.Value / 3600.0) / 24.0;
+
+                Assert.AreEqual(43.0162, pointFinal.Coordinates.Latitude, epsCoord);
+                Assert.AreEqual(expectedTime, new Date(pointFinal.JulianDay).Time, epsTime);
+            }
+        }
+
+        [TestMethod]
+        public void FindFunctionEnd()
+        {
+            {
+                Func<double, bool> func = (x) => x < 2;
+                var x0 = SolarEclipses.FindFunctionEnd(func, -5, 6, true, false, 1e-6);
+                Assert.AreEqual(2, x0, 1e-6);
+            }
+
+            {
+                Func<double, bool> func = (x) => x > 4;
+                var x0 = SolarEclipses.FindFunctionEnd(func, -5, 5, false, true, 1e-6);
+                Assert.AreEqual(4, x0, 1e-6);
+            }
+        }
     }
 }

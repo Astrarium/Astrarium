@@ -58,6 +58,7 @@ namespace Astrarium.Algorithms
             return new PolynomialBesselianElements()
             {
                 JulianDay0 = positions[2].JulianDay,
+                DeltaT = Date.DeltaT(positions[2].JulianDay),
                 Step = step,
                 X = LeastSquares.FindCoeffs(points.Select((p, i) => new PointF(p.X, (float)elements[i].X)), 3),
                 Y = LeastSquares.FindCoeffs(points.Select((p, i) => new PointF(p.X, (float)elements[i].Y)), 3),
@@ -160,12 +161,132 @@ namespace Astrarium.Algorithms
             };
         }
 
+        public static SolarEclipsePoint GetEclipseCurvePoint(PolynomialBesselianElements pbe, CrdsGeographical g, int i = 0, double G = 0)
+        {
+            // Sanity checks:
+            if (!(i == 0 || i == -1 || i == 1))
+                throw new ArgumentException($"Invalid value of {nameof(i)} argument", nameof(i));
+            if (G < 0 || G > 1)
+                throw new ArgumentException($"Invalid value of {nameof(G)} argument", nameof(G));
+
+            double deltaT = pbe.DeltaT ?? Date.DeltaT(pbe.JulianDay0);
+
+            double t = 0;   // time since jd0
+            double phi = g.Latitude; // latitude
+
+            double tau;
+            double deltaPhi;
+
+            int iters = 0;
+
+            // Earth flattening
+            const double flat = 1.0 / 298.257;
+
+            // Earth flattening constant, used in calculation: 0.99664719
+            double fconst = 1.0 - flat;
+
+            double jd;
+
+            double d, H;
+
+            do
+            {
+                iters++;
+
+                jd = pbe.JulianDay0 + t * pbe.Step;
+                var be = pbe.GetInstantBesselianElements(jd);
+
+                double X = be.X;
+                double Y = be.Y;
+                d = ToRadians(be.D);
+                double M = be.Mu;
+                H = ToRadians(M - g.Longitude - 0.00417807 * deltaT);
+
+
+                double dX = be.dX; 
+                double dY = be.dY;
+
+                
+
+                double U = Atan(fconst * Tan(ToRadians(phi)));
+
+                double rhoSinPhi_ = fconst * Sin(U);
+                double rhoCosPhi_ = Cos(U);
+
+                double ksi = rhoCosPhi_ * Sin(H);
+                double eta = rhoSinPhi_ * Cos(d) - rhoCosPhi_ * Cos(H) * Sin(d);
+                double zeta = rhoSinPhi_ * Sin(d) + rhoCosPhi_ * Cos(H) * Cos(d);
+
+                double ksi_ = ToRadians(pbe.Mu[1] * rhoCosPhi_ * Cos(H));
+                double eta_ = ToRadians(pbe.Mu[1] * ksi * Sin(d) - zeta * pbe.D[1]);
+
+                double u = X - ksi;
+                double v = Y - eta;
+
+                double a = dX - ksi_;
+                double b = dY - eta_;
+
+                double n2 = a * a + b * b;
+
+                double n = Sqrt(n2);
+
+                tau = -(u * a + v * b) / n2;
+
+                double W = (v * a - u * b) / n;
+
+                double Q1 = b * Sin(H) * rhoSinPhi_;
+                double Q2 = a * (Cos(H) * Sin(d) * rhoSinPhi_ + Cos(d) * rhoCosPhi_);
+
+                double Q = (Q1 + Q2) / ToDegrees(n);
+
+                double dL1 = be.L1 - zeta * pbe.tanF1;
+                double dL2 = be.L2 - zeta * pbe.tanF2;
+
+                double E = dL1 - G * (dL1 + dL2);
+
+                deltaPhi = (W + i * Abs(E)) / Q;
+
+                t += tau;
+                phi += deltaPhi;
+
+                phi = ToDegrees(Asin(Sin(ToRadians(phi))));
+
+            }
+            while ((Abs(tau) >= 0.0001 || Abs(deltaPhi) >= 0.0001) && iters < 20);
+
+            if (Abs(phi) > 90)
+            {
+                return null;
+            }
+
+            double sinh = Sin(d) * Sin(ToRadians(phi)) + Cos(d) * Cos(ToRadians(phi)) * Cos(H);
+
+            if (sinh < 0)
+            {
+                // Sun is below horizon
+                return null;
+            }
+
+            if (Abs(tau) < 0.0001 && Abs(deltaPhi) < 0.0001)
+            {
+                return new SolarEclipsePoint(jd, new CrdsGeographical(g.Longitude, phi));
+            }
+            else
+            {
+                //return new SolarEclipsePoint(jd, new CrdsGeographical(g.Longitude, phi));
+                // no point
+                //return null;
+                return null;
+            }
+        }
+
+
         /// <summary>
         /// Gets map of solar eclipse.
         /// </summary>
         /// <param name="pbe">Polynomial Besselian elements defining the Eclipse</param>
         /// <returns><see cref="SolarEclipseMap"/> instance.</returns>
-        public static SolarEclipseMap GetEclipseMap(PolynomialBesselianElements pbe)
+        public static SolarEclipseMap GetEclipseMap(PolynomialBesselianElements pbe, SolarEclipseType eclipseType)
         {
             // left edge of time interval
             double jdFrom = pbe.From;
@@ -333,26 +454,295 @@ namespace Astrarium.Algorithms
                 }
             }
 
-            // Find points of northern limit of eclipse visibility
-            FindPenumbraLimits(pbe, map.PenumbraNorthernLimit, jdFrom, jdTo + 0.5, 90);
+            // initial longitude to start iteration process
+            // to find map's curves points
 
-            // Find points of southern limit of eclipse visibility
-            FindPenumbraLimits(pbe, map.PenumbraSouthernLimit, jdFrom, jdTo, -90);
 
-            // Find points of northern limit of total eclipse visibility
-            FindUmbraLimits(pbe, map.UmbraNorthernLimit, jdFrom, jdTo, 90);
+            var beMax = pbe.GetInstantBesselianElements(map.Max.JulianDay);
 
-            // Find points of southern limit of total eclipse visibility
-            FindUmbraLimits(pbe, map.UmbraSouthernLimit, jdFrom, jdTo, -90);
+            // TOTAL PATH by Meeus algorithm:
+
+            if (eclipseType != SolarEclipseType.Partial)
+            {
+                double lambda0 = 0;
+
+                var points = FindCurvePoints(pbe, lambda0, 0, 0);
+
+                //CrdsGeographical g = points.FirstOrDefault().Coordinates;
+                //do
+                //{
+                //    int index = map.TotalPath.IndexOf(g);
+                //    if (index + 1 < points.Count)
+                //    {
+                //        var gNext = points[index + 1].Coordinates;
+
+
+
+                //        if (count > 1)
+                //        {
+                //            var pts = new List<CrdsGeographical>();
+                //            for (int i = 0; i < count; i++)
+                //            {
+                //                var m = Intermediate(g, gNext, (double)i / count);
+
+
+                //                var m1 = GetEclipseCurvePoint(pbe, new CrdsGeographical(m), 0, 0);
+                //                if (m1 != null)
+                //                {
+                //                    pts.Add(m1.Coordinates);
+
+                //                    //pts.Add(m2.Coordinates);
+                //                }
+                //                else
+                //                {
+                //                    pts.Add(m);
+                //                }
+                //            }
+                //            map.TotalPath.InsertRange(index + 1, pts);
+                //        }
+                //        g = gNext;
+                //    }
+                //    else
+                //    {
+                //        break;
+                //    }
+                //}
+                //while (true);
+
+                map.TotalPath = Order(points);// .Select(p => p.Coordinates).ToList();
+            }
+
+            if (eclipseType != SolarEclipseType.Partial)
+            {
+                double lambda0 = 0;// map.Max.Coordinates.Longitude;
+
+                var northPoints = FindCurvePoints(pbe, lambda0, 1, 1);
+                var northPointsOrdered = Order(northPoints);
+
+                var southPoints = FindCurvePoints(pbe, lambda0, -1, 1);
+                var southPointsOrdered = Order(southPoints);
+
+
+                if (northPoints.Count > 2)
+                {
+                    var m1 = northPointsOrdered.OrderByDescending(p => Abs(p.Latitude)).First();
+                    int northIndex = northPointsOrdered.IndexOf(m1);
+
+                    map.UmbraNorthernLimit[0] = northPointsOrdered.Take(northIndex).ToList();
+                    map.UmbraNorthernLimit[1] = northPointsOrdered.Skip(northIndex - 1).ToList();
+                }
+
+                if (southPoints.Count > 2)
+                {
+                    var m2 = southPointsOrdered.OrderByDescending(p => Abs(p.Latitude)).First();
+                    int southIndex = southPointsOrdered.IndexOf(m2);
+
+                    map.UmbraSouthernLimit[0] = southPointsOrdered.Take(southIndex).ToList();
+                    map.UmbraSouthernLimit[1] = southPointsOrdered.Skip(southIndex - 1).ToList();
+                }
+            }
+
+
+            // Find points of Northern limit of penumbra
+            {
+                //double ang = Atan2(beMax.Y, beMax.X);
+                //float x = (float)(beMax.X + beMax.L1 * Cos(ang));
+                //float y = (float)(beMax.Y + beMax.L1 * Sin(ang));
+                //var p = ProjectOnEarth(new PointF(x, y), beMax.D, beMax.Mu);
+
+                //if (p != null)
+                {
+                    double lambda0 = 0;// -69;
+
+                    var points = FindCurvePoints(pbe, lambda0, 1, 0);
+                    map.PenumbraNorthernLimit = Order(points);
+                }
+            }
+
+            // Find points of Southern limit of penumbra 
+            {
+                //double ang = Atan2(beMax.Y, beMax.X);
+                //float x = (float)(beMax.X + beMax.L1 * Cos(ang));
+                //float y = (float)(beMax.Y - beMax.L1 * Sin(ang));
+                //var p = ProjectOnEarth(new PointF(x, y), beMax.D, beMax.Mu);
+
+                //if (p != null)
+                //{
+                //    double lambda0 = p.Longitude;
+
+                    var points = FindCurvePoints(pbe, 0, -1, 0);
+                    map.PenumbraSouthernLimit = Order(points);
+                //}
+            }
 
             // Calc rise/set curves
             FindRiseSetCurves(pbe, map, jdP1, jdP4);
 
-            // Calc umbra track points
-            FindTotalPath(pbe, map, jdC1, jdC2);
-           
             return map;
         }
+
+        private static List<CrdsGeographical> Order(List<SolarEclipsePoint> points)
+        {
+            if ( points.Count <= 2)
+            {
+                return points.Select(p => p.Coordinates).ToList();
+            }
+
+            double jdMin = points.Min(p => p.JulianDay);
+            double jdMax = points.Max(p => p.JulianDay);
+
+            double jdMid = (jdMin + jdMax) / 2;
+
+            var mid = points.OrderBy(p => Abs(p.JulianDay - jdMid)).First().Coordinates;
+
+            var jdOrdered = points.OrderBy(p => p.JulianDay).Select(p => p.Coordinates).ToList();
+
+            int middleIndex = jdOrdered.IndexOf(mid);
+
+            var left = jdOrdered.Take(middleIndex);
+            var right = jdOrdered.Skip(middleIndex + 1);
+
+            var newList = new List<CrdsGeographical>();
+
+            newList.AddRange(left.OrderByDescending(p => Separation(mid, p)));
+            newList.Add(mid);
+            newList.AddRange(right.OrderBy(p => Separation(mid, p)));
+
+            return newList.ToList();
+        }
+
+
+        private static List<CrdsGeographical> FindTotalPathByTime(PolynomialBesselianElements pbe)
+        {
+            double deltaT = pbe.DeltaT ?? Date.DeltaT(pbe.JulianDay0);
+
+            List<CrdsGeographical> points = new List<CrdsGeographical>();
+
+            for (double jd = pbe.JulianDay0 - 0.5; jd< pbe.JulianDay0 + 0.5; jd += TimeSpan.FromMinutes(1).TotalDays)
+            {
+                var be = pbe.GetInstantBesselianElements(jd);
+                double X = be.X;
+                double Y = be.Y;
+                double d = ToRadians(be.D);
+                double M = be.Mu;
+
+                double omega = 1.0 / Sqrt(1 - 0.006_694_385 * Cos(d) * Cos(d));
+
+                double y1 = omega * Y;
+                double b1 = omega * Sin(d);
+                double b2 = 0.996_647_19 * omega * Cos(d);
+
+                double B2 = 1 - X * X - y1 * y1;
+
+                if (B2 >= 0)
+                {
+                    double B = Sqrt(B2);
+
+                    double H = ToDegrees(Atan2(X, B * b2 - y1 * b1));
+
+                    double phi1 = Asin(B * b1 + y1 * b2);
+
+                    double phi = ToDegrees(Atan(1.003_364_09 * Tan(phi1)));
+
+                    double lambda = M - H - 0.004_178_07 * deltaT;
+
+                    points.Add(new CrdsGeographical(lambda, phi));
+                }
+            }
+
+            return points;
+        }
+
+        internal static double FindFunctionEnd(Func<double, bool> func, double left, double right, bool leftExist, bool rightExist, double epsilon)
+        {
+            double mid = (left + right) / 2;
+            bool midExist = func(mid);
+
+            if (Abs(left - right) < epsilon)
+            {
+                return leftExist ? left : right;
+            }
+
+            if (leftExist && !rightExist)
+            {
+                // 1
+                if (midExist)
+                {
+                    return FindFunctionEnd(func, mid, right, true, false, epsilon);
+                }
+                // 2
+                else
+                {
+                    return FindFunctionEnd(func, left, mid, true, false, epsilon);
+                }
+            }
+            else if (!leftExist && rightExist)
+            {
+                // 3
+                if (midExist)
+                {
+                    return FindFunctionEnd(func, left, mid, false, true, epsilon);
+                }
+                // 4
+                else
+                {
+                    return FindFunctionEnd(func, mid, right, false, true, epsilon);
+                }
+            }
+            else 
+            {
+                throw new Exception();
+            }
+        } 
+
+        private static List<SolarEclipsePoint> FindCurvePoints(PolynomialBesselianElements pbe, double lambda0, int i, int G)
+        {
+            double[] phis = new double[] { 0, Sign(pbe.Y[0]) * 89.9 };           
+            bool[] prevExist = new bool[2];
+            var points = new List<SolarEclipsePoint>();
+
+            double step = 1;
+
+            for (double lambda = lambda0 - 180; lambda <= lambda0 + 180; lambda += step)
+            {
+                for (int k = 0; k < 2; k++)
+                {
+                    SolarEclipsePoint p = GetEclipseCurvePoint(pbe, new CrdsGeographical(lambda, phis[k]), i, G);
+
+                    bool exist = p != null;
+
+                    if (prevExist[k] != exist)
+                    {
+                        Func<double, bool> func = (lon) => GetEclipseCurvePoint(pbe, new CrdsGeographical(lon, phis[k]), i, G) != null;
+                        double lon0 = FindFunctionEnd(func, lambda - step, lambda, prevExist[k], exist, 0.0001);
+                        var p0 = GetEclipseCurvePoint(pbe, new CrdsGeographical(lon0, phis[k]), i, G);
+                        if (p0 != null)
+                        {
+                            points.Add(p0);
+                        }
+                    }
+
+                    if (prevExist[k] && exist)
+                    {
+                        //double sep = Separation(points.Last().Coordinates, p.Coordinates);
+                        //if (sep > 1)
+                        //{
+                        //    step = 1 / sep;
+                        //}
+                    }
+
+                    if (p != null)
+                    {
+                        points.Add(p);
+                    }
+
+                    prevExist[k] = exist;
+                }
+            }
+
+            return points;
+        }
+
 
         private class CurvePoint
         {
@@ -509,6 +899,156 @@ namespace Astrarium.Algorithms
 
         }
 
+        private static double FindPenumbraLongitude(PolynomialBesselianElements pbe, double jd, int ang)
+        {
+            List<CurvePoint> points = new List<CurvePoint>();
+
+            // Earth ellipticity, squared
+            const double e2 = 0.00669454;
+
+            const double epsilon = 1e-6;
+
+            double zeta0 = 0;
+            double Q0 = 0;
+
+            // latest values of xi and eta
+            double xi0 = double.NaN;
+            double eta0 = double.NaN;
+
+            
+            {
+                InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
+
+                double l = b.L1;
+                double l_ = b.dL1;
+
+                double mu_ = ToRadians(b.dMu);
+                double x = b.X;
+                double x_ = b.dX;
+                double y = b.Y;
+                double y_ = b.dY;
+                double d = ToRadians(b.D);
+                double d_ = ToRadians(b.dD);
+                double f = ToRadians(b.F1);
+
+                double rho1 = Sqrt(1 - e2 * Cos(d) * Cos(d));
+                double rho2 = Sqrt(1 - e2 * Sin(d) * Sin(d));
+                double sind1 = Sin(d) / rho1;
+                double cosd1 = Sqrt(1 - e2) * Cos(d) / rho1;
+                double d1 = Atan2(sind1, cosd1);
+                double sind1d2 = e2 * Sin(d) * Cos(d) / (rho1 * rho2);
+                double cosd1d2 = Sqrt(1 - e2) / (rho1 * rho2);
+
+                // 8.3422-2
+                double a_ = -l_ - mu_ * Tan(f) * x * Cos(d) + y * d_ * Tan(f);
+                double b_ = -y_ + mu_ * x * Sin(d) + l * d_ * Tan(f);
+                double c_ = x_ + mu_ * y * Sin(d) + mu_ * Tan(f) * l * Cos(d);
+
+                // Find value of Q from equation 8.353-2:
+                // a_ - b_ * Cos(Q) + c_ * Sin(Q) + zeta0 * (1 + Tan(f) * Tan(f)) * (d_ * Cos(Q0) - mu_ * Cos(d) * Sin(Q0)) = 0
+                // zeta0 is a previous value of zeta.
+                // Q0 is a previous value of Q.
+                // Start with Q0 = 0 and zeta0 = 0.
+                // Now need to find roots of the equation.
+                // But instead of algorithm in art. 8.3554, we solve it in another way.
+                // The equation has form:
+                // a*sin(x) + b*cos(x) = c
+                // It can be found with method described there: 
+                // https://socratic.org/questions/59e5f259b72cff6c4402a6a5
+
+                double Q = 0;
+
+                // iterate thru the roots
+                for (int k = 0; k < 2; k++)
+                {
+                    Q = Pow(-1, k) * Asin((-a_ - zeta0 * (1 + Tan(f) * Tan(f)) * (d_ * Cos(Q0) - mu_ * Cos(d) * Sin(Q0))) / Sqrt(b_ * b_ + c_ * c_)) - Atan2(-b_, c_) + PI * k;
+                    if (l * Cos(Q) > 0 && ang == -90) break;
+                    if (l * Cos(Q) < 0 && ang == 90) break;
+                }
+
+                // remember found value of Q
+                Q0 = Q;
+
+                double eq0;
+                double eq = 0;
+                double xi, eta1, zeta1;
+                double zeta = 0;
+                double L;
+
+                double zeta1_2;
+
+                // find coordinates on fundamental plane
+                do
+                {
+                    eq0 = eq;
+                    L = l - zeta * Tan(f);
+                    xi = x - L * Sin(Q);
+                    eta1 = (y - L * Cos(Q)) / rho1;
+
+                    zeta1_2 = 1 - xi * xi - eta1 * eta1;
+                    zeta1 = Sqrt(zeta1_2);
+
+                    if (zeta1_2 < 0 && zeta1_2 > -0.0125)
+                    {
+                        zeta1 = 0;
+                        double P = Atan2(eta1, xi);
+                        xi = Cos(P);
+                        eta1 = Sin(P);
+                    }
+
+                    // 8.3554-1
+                    zeta = rho2 * (zeta1 * cosd1d2 - eta1 * sind1d2);
+
+                    // 8.353-2
+                    eq = a_ - b_ * Cos(Q) + c_ * Sin(Q) + zeta * (1 + Tan(f) * Tan(f)) * (d_ * Cos(Q) - mu_ * Cos(d) * Sin(Q));
+
+                    // remember last value of zeta
+                    zeta0 = double.IsNaN(zeta) ? 0 : zeta;
+                }
+                while (Abs(eq) > epsilon && Abs(eq0 - eq) > epsilon);
+
+                CurvePoint p = new CurvePoint();
+
+                if (xi < xi0 || (y_ > 0 && eta1 < eta0) || (y_ < 0 && eta1 > eta0))
+                {
+                    p = points.OrderBy(c => Abs(xi - c.Xi)).FirstOrDefault();
+                }
+                else
+                {
+                    xi0 = xi;
+                    eta0 = eta1;
+                    p = new CurvePoint();
+                    points.Add(p);
+                }
+
+                // 8.333-13
+                var v = Matrix.R1(d1) * new Vector(xi, eta1, zeta1);
+
+                double phi1 = Asin(v.Y);
+                double sinTheta = v.X / Cos(phi1);
+                double cosTheta = v.Z / Cos(phi1);
+
+                double theta = ToDegrees(Atan2(sinTheta, cosTheta));
+                double tanPhi = Tan(phi1) / Sqrt(1 - e2);
+                double phi = Atan(tanPhi);
+
+                // 8.331-4
+                double lambda = b.Mu - theta;
+
+                p.Xi = xi;
+
+                return To360(lambda + 180) - 180;
+
+                //p.Location = new CrdsGeographical(To360(lambda + 180) - 180, ToDegrees(phi));
+            }
+
+
+
+        }
+
+
+
+
         private static void FindUmbraLimits(PolynomialBesselianElements pbe, ICollection<CrdsGeographical>[] curve, double jdFrom, double jdTo, double ang)
         {
             if (!double.IsNaN(jdFrom) && !double.IsNaN(jdTo))
@@ -651,6 +1191,8 @@ namespace Astrarium.Algorithms
             double step = step0;
             int riseSet = 0;
 
+            double deltaT = Date.DeltaT(jdFrom);
+
             for (double jd = jdFrom; jd <= jdTo + step * 0.1; jd += step)
             {
                 InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
@@ -708,6 +1250,7 @@ namespace Astrarium.Algorithms
                 {
                     for (int i = 0; i < pPenumbraIntersect.Length; i++)
                     {
+                        //CrdsGeographical g = Project(pPenumbraIntersect[i], b, deltaT);
                         CrdsGeographical g = ProjectOnEarth(pPenumbraIntersect[i], b.D, b.Mu, forceProjection: true);
 
                         //if (g == null) continue;
@@ -771,12 +1314,7 @@ namespace Astrarium.Algorithms
 
                     if (g != null)
                     {
-                        if (c == 0 && Abs(g.Latitude) > 89.9)
-                        {
-                            curves.TotalPath[0].Add(g);
-                            c = 1;
-                        }
-                        curves.TotalPath[c].Add(g);
+                        curves.TotalPath.Add(g);
                     }
                 }
             } 
@@ -792,6 +1330,40 @@ namespace Astrarium.Algorithms
             int count = (int)(deltaJd / TimeSpan.FromMinutes(1).TotalDays) + 1;
             return deltaJd / count;
         }
+
+        //internal static CrdsGeographical Project(PointF p, InstantBesselianElements be, double deltaT)
+        //{
+        //    double d = ToRadians(be.D);
+        //    double omega2 = 1.0 / (1 - 0.006_694_385 * Cos(d) * Cos(d));
+
+        //    double omega = Sqrt(omega2);
+
+        //    double y1 = omega * p.Y;
+        //    double b1 = omega * Sin(d);
+        //    double b2 = 0.996_647_19 * omega * Cos(d);
+
+        //    double discriminant = 1 - p.X * p.X - y1 * y1;
+
+        //    double B = 0;
+        //    if (discriminant >= 0)
+        //    {
+        //        B = Sqrt(discriminant);
+        //    }
+ 
+        //    double H = ToDegrees(Atan2(p.X, B * b2 - y1 * b1));
+
+        //    double phi1 = Asin(B * b1 + y1 * b2);
+
+        //    double tanPhi = 1.003_364_09 * Tan(phi1);
+
+        //    double phi = ToDegrees(Atan(tanPhi));
+
+        //    double lambda = be.Mu - H - 0.004_178_07 * deltaT;
+
+        //    return new CrdsGeographical(lambda, phi);
+
+        //}
+
 
         /// <summary>
         /// Project point from Besselian fundamental plane 
@@ -1245,6 +1817,107 @@ namespace Astrarium.Algorithms
             {
                 return 0;
             }
+        }
+
+        public static double LocalCircumstances(PolynomialBesselianElements pbe, CrdsGeographical g)
+        {
+            double deltaT = pbe.DeltaT ?? Date.DeltaT(pbe.JulianDay0);
+
+            double t = 0;   // time since jd0
+            double phi = g.Latitude; // latitude
+
+            double tau;
+
+            int iters = 0;
+
+            // Earth flattening
+            const double flat = 1.0 / 298.257;
+
+            // Earth flattening constant, used in calculation: 0.99664719
+            double fconst = 1.0 - flat;
+
+            double U = Atan(fconst * Tan(ToRadians(phi)));
+
+            double rhoSinPhi_ = fconst * Sin(U);
+            double rhoCosPhi_ = Cos(U);
+
+
+            double jd;
+
+            double d, H, zeta, u, v, a, b, n2;
+            InstantBesselianElements be;
+
+            do
+            {
+                iters++;
+
+                jd = pbe.JulianDay0 + t * pbe.Step;
+                be = pbe.GetInstantBesselianElements(jd);
+
+                double X = be.X;
+                double Y = be.Y;
+                d = ToRadians(be.D); 
+                double M = be.Mu; 
+
+                double dX = be.dX; 
+                double dY = be.dY; 
+
+                H = ToRadians(M - g.Longitude - 0.00417807 * deltaT);
+
+                double ksi = rhoCosPhi_ * Sin(H);
+                double eta = rhoSinPhi_ * Cos(d) - rhoCosPhi_ * Cos(H) * Sin(d);
+                zeta = rhoSinPhi_ * Sin(d) + rhoCosPhi_ * Cos(H) * Cos(d);
+
+                double ksi_ = ToRadians(pbe.Mu[1] * rhoCosPhi_ * Cos(H));
+                double eta_ = ToRadians(pbe.Mu[1] * ksi * Sin(d) - zeta * pbe.D[1]);
+
+                u = X - ksi;
+                v = Y - eta;
+
+                a = dX - ksi_;
+                b = dY - eta_;
+
+                n2 = a * a + b * b;
+
+                tau = -(u * a + v * b) / n2;
+
+                t += tau;
+            }
+            while (Abs(tau) >= 0.00001 && iters < 20);
+
+            //double sinh = Sin(d) * Sin(ToRadians(phi)) + Cos(d) * Cos(ToRadians(phi)) * Cos(H);
+
+            //double h = ToDegrees(Asin(sinh));
+
+            //if (h < -0.5)
+            //{
+            // Sun is below horizon
+            //return 0;
+            //}
+
+            double jdMax = jd;
+
+            double dL1 = be.L1 - zeta * pbe.tanF1;
+            double dL2 = be.L2 - zeta * pbe.tanF2;
+
+            double m = Sqrt(u * u + v * v);
+
+            double G = (dL1 - m) / (dL1 + dL2);
+
+            
+            
+            if (G < 0)
+                return 0;
+
+            double n = Sqrt(n2);
+
+
+            double S = (a * v - u * b) / (n * dL1);
+
+            double tauBegin = -(u * a + v * b) / n2 - dL1 / n * Sqrt(1 - S * S);
+            double tauEnd = -(u * a + v * b) / n2 + dL1 / n * Sqrt(1 - S * S);
+
+            return G;
         }
     }
    
