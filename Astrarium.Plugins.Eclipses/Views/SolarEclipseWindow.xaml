@@ -10,7 +10,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
     x:Class="Astrarium.Plugins.Eclipses.SolarEclipseWindow" 
     mc:Ignorable="d" 
-    Title="{Binding IsTotal}" 
+    Title="Solar Eclipses"
     Height="350" 
     Width="600" 
     MinHeight="350" MinWidth="600" 
@@ -20,6 +20,7 @@
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
@@ -27,11 +28,11 @@
             <Button MinWidth="50" Content="&lt;- Prev" Command="{Binding PrevEclipseCommand}" />
             <Label Content="{Binding EclipseDate, FallbackValue='01 Jan 2000'}" />
             <Button MinWidth="50" Content="Next -&gt;" Command="{Binding NextEclipseCommand}" />
-
-            <Label Content="{Binding Magnitude}"/>
         </StackPanel>
 
-        <TabControl Grid.Row="1">
+        <TextBlock Grid.Row="1" Text="{Binding Details, FallbackValue='test'}" Height="auto" />
+
+        <TabControl Grid.Row="2">
             <TabItem Header="Map">
 
                 <Grid>

@@ -65,9 +65,9 @@ namespace Astrarium.Algorithms
                 L1 = LeastSquares.FindCoeffs(points.Select((p, i) => new PointF(p.X, (float)elements[i].L1)), 3),
                 L2 = LeastSquares.FindCoeffs(points.Select((p, i) => new PointF(p.X, (float)elements[i].L2)), 3),
                 D = LeastSquares.FindCoeffs(points.Select((p, i) => new PointF(p.X, (float)elements[i].D)), 3),
-                Mu = LeastSquares.FindCoeffs(points.Select((p, i) => new PointF(p.X, (float)elements[i].Mu)), 3),                
-                F1 = LeastSquares.FindCoeffs(points.Select((p, i) => new PointF(p.X, (float)elements[i].F1)), 3),
-                F2 = LeastSquares.FindCoeffs(points.Select((p, i) => new PointF(p.X, (float)elements[i].F2)), 3)
+                Mu = LeastSquares.FindCoeffs(points.Select((p, i) => new PointF(p.X, (float)elements[i].Mu)), 3),
+                TanF1 = elements.Average(p => p.TanF1),
+                TanF2 = elements.Average(p => p.TanF2),
             };
         }
 
@@ -145,8 +145,11 @@ namespace Astrarium.Algorithms
             double zv1 = zm + rhoMoon / sinF1;
             double zv2 = zm - rhoMoon / sinF2;
 
-            double l1 = zv1 * Tan(F1);
-            double l2 = zv2 * Tan(F2);
+            double tanF1 = Tan(F1);
+            double tanF2 = Tan(F2);
+
+            double l1 = zv1 * tanF1;
+            double l2 = zv2 * tanF2;
 
             return new InstantBesselianElements()
             {
@@ -156,8 +159,8 @@ namespace Astrarium.Algorithms
                 L2 = l2,
                 D = ToDegrees(d),
                 Mu = To360(theta - ToDegrees(a)),
-                F1 = ToDegrees(F1),
-                F2 = ToDegrees(F2)
+                TanF1 = tanF1,
+                TanF2 = tanF2
             };
         }
 
@@ -169,7 +172,7 @@ namespace Astrarium.Algorithms
             if (G < 0 || G > 1)
                 throw new ArgumentException($"Invalid value of {nameof(G)} argument", nameof(G));
 
-            double deltaT = pbe.DeltaT ?? Date.DeltaT(pbe.JulianDay0);
+            double deltaT = pbe.DeltaT;
 
             double t = 0;   // time since jd0
             double phi = g.Latitude; // latitude
@@ -252,8 +255,8 @@ namespace Astrarium.Algorithms
 
                 double Q = (Q1 + Q2) / ToDegrees(n);
 
-                double dL1 = be.L1 - zeta * pbe.tanF1;
-                double dL2 = be.L2 - zeta * pbe.tanF2;
+                double dL1 = be.L1 - zeta * pbe.TanF1;
+                double dL2 = be.L2 - zeta * pbe.TanF2;
 
                 double E = dL1 - G * (dL1 + dL2);
 
@@ -341,7 +344,7 @@ namespace Astrarium.Algorithms
 
             double phi1 = Asin(0.996_647_19 * omega2 * be.Y * Cos(d));
             double phi = ToDegrees(Atan(1.003_364_09 * Tan(phi1)));
-            double lambda = M - H - 0.004_178_07 * pbe.DeltaT.Value;
+            double lambda = M - H - 0.004_178_07 * pbe.DeltaT;
             return new SolarEclipsePoint(jd, new CrdsGeographical(lambda, phi));
         }
 
@@ -388,7 +391,7 @@ namespace Astrarium.Algorithms
                 InstantBesselianElements b = pbe.GetInstantBesselianElements(jdP1);
                 double a = Atan2(b.Y, b.X);
                 PointF p = new PointF((float)Cos(a), (float)Sin(a));                
-                map.P1 = new SolarEclipsePoint(jdP1, Project(b, pbe.DeltaT.Value, p));
+                map.P1 = new SolarEclipsePoint(jdP1, Project(b, pbe.DeltaT, p));
             }
 
             // Instant of last external contact of penumbra
@@ -398,7 +401,7 @@ namespace Astrarium.Algorithms
                 InstantBesselianElements b = pbe.GetInstantBesselianElements(jdP4);
                 double a = Atan2(b.Y, b.X);
                 PointF p = new PointF((float)Cos(a), (float)Sin(a));
-                map.P4 = new SolarEclipsePoint(jdP4, Project(b, pbe.DeltaT.Value, p));
+                map.P4 = new SolarEclipsePoint(jdP4, Project(b, pbe.DeltaT, p));
             }
 
             // Instant of first internal contact of penumbra,
@@ -409,7 +412,7 @@ namespace Astrarium.Algorithms
                 InstantBesselianElements b = pbe.GetInstantBesselianElements(jdP2);
                 double a = Atan2(b.Y, b.X);
                 PointF p = new PointF((float)Cos(a), (float)Sin(a));
-                map.P2 = new SolarEclipsePoint(jdP2, Project(b, pbe.DeltaT.Value, p));
+                map.P2 = new SolarEclipsePoint(jdP2, Project(b, pbe.DeltaT, p));
             }
 
             // Instant of last internal contact of penumbra,
@@ -420,7 +423,7 @@ namespace Astrarium.Algorithms
                 InstantBesselianElements b = pbe.GetInstantBesselianElements(jdP3);
                 double a = Atan2(b.Y, b.X);
                 PointF p = new PointF((float)Cos(a), (float)Sin(a));
-                map.P3 = new SolarEclipsePoint(jdP3, Project(b, pbe.DeltaT.Value, p));
+                map.P3 = new SolarEclipsePoint(jdP3, Project(b, pbe.DeltaT, p));
             }
 
             if (eclipseType != SolarEclipseType.Partial)
@@ -434,8 +437,8 @@ namespace Astrarium.Algorithms
                 InstantBesselianElements b = pbe.GetInstantBesselianElements(pbe.JulianDay0);
                 PointF p = new PointF((float)b.X, (float)b.Y);
 
-                //var g = Project(b, pbe.DeltaT.Value, p);
-                var g = ProjectOnEarth(p, b.D, b.Mu, true);
+                var g = Project(b, pbe.DeltaT, p);
+                //var g = ProjectOnEarth(p, b.D, b.Mu, true);
                 
                 if (g != null)
                 {
@@ -486,18 +489,26 @@ namespace Astrarium.Algorithms
 
             double omega = 1.0 / Sqrt(1 - 0.006_694_385 * Cos(d) * Cos(d));
 
+            double x = p.X;
             double y1 = omega * p.Y;
             double b1 = omega * Sin(d);
             double b2 = 0.996_647_19 * omega * Cos(d);
+            double B2 = 1 - x * x - y1 * y1;
 
-            double B2 = 1 - p.X * p.X - y1 * y1;
-            double B = B2 > 0 ? Sqrt(B2) : 0;
-            double H = To360(ToDegrees(Atan2(p.X, B * b2 - y1 * b1)));
+            if (B2 < 0)
+            {
+                double P = Atan2(y1, x);
+                x = Cos(P);
+                y1 = Sin(P);
+                B2 = 0;
+            }
+
+            double B = Sqrt(B2);
+            double H = To360(ToDegrees(Atan2(x, B * b2 - y1 * b1)));
             double phi1 = Asin(B * b1 + y1 * b2);
             double phi = ToDegrees(Atan(1.003_364_09 * Tan(phi1)));
             double lambda = M - H - 0.004_178_07 * deltaT;
             return new CrdsGeographical(lambda, phi);
-               
         }
 
         internal static double FindFunctionEnd(Func<double, bool> func, double left, double right, bool leftExist, bool rightExist, double epsilon)
@@ -1145,62 +1156,9 @@ namespace Astrarium.Algorithms
             return new Vector(xi, eta, zeta);
         }
 
-        public static double Obscuration(PolynomialBesselianElements pbe, CrdsGeographical g, double jdLocalMax)
-        {
-            InstantBesselianElements b = pbe.GetInstantBesselianElements(jdLocalMax);
-            Vector v = ProjectOnFundamentalPlane(g, b.D, b.Mu);
-
-            double xi = v.X;
-            double eta = v.Y;
-            double zeta = v.Z;
-
-            double delta = Sqrt((xi - b.X) * (xi - b.X) + (eta - b.Y) * (eta - b.Y));
-
-            // Penumra radius at local point, in Earth radii
-            double L2 = b.L2 - zeta * Tan(ToRadians(b.F2));
-
-            // Umbra radius at local point, in Earth radii
-            double L1 = b.L1 - zeta * Tan(ToRadians(b.F1));
-
-            if (v.Z >= 0)
-            {
-                // No eclipse visible
-                if (delta > L1)
-                {
-                    return 0;
-                }
-                // Partial eclipse
-                else if (delta <= L1 && delta > Abs(L2))
-                {
-                    return (L1 - delta) / (L1 + L2);
-                }
-                else if (delta <= Abs(L2))
-                {
-                    // Total eclipse
-                    if (L2 < 0)
-                    {
-                        return 1;
-                    }
-                    // Annular eclipse   
-                    else
-                    {
-                        return (L1 - delta) / (L1 + L2);
-                    }
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-            else
-            {
-                return 0;
-            }
-        }
-
         public static SolarEclipseLocalCircumstances LocalCircumstances(PolynomialBesselianElements pbe, CrdsGeographical g)
         {
-            double deltaT = pbe.DeltaT ?? Date.DeltaT(pbe.JulianDay0);
+            double deltaT = pbe.DeltaT;
 
             double phi = ToRadians(g.Latitude); 
 
@@ -1222,7 +1180,7 @@ namespace Astrarium.Algorithms
 
             double jd;
 
-            double d, H, h, zeta, u, v, a, b, n2, n, S;
+            double d, H, h, ksi, eta, zeta, u, v, a, b, n2, n, S;
             InstantBesselianElements be;
 
             do
@@ -1242,25 +1200,12 @@ namespace Astrarium.Algorithms
 
                 H = ToRadians(M - g.Longitude - 0.00417807 * deltaT);
 
-                double ksi = rhoCosPhi_ * Sin(H);
-                double eta = rhoSinPhi_ * Cos(d) - rhoCosPhi_ * Cos(H) * Sin(d);
+                ksi = rhoCosPhi_ * Sin(H);
+                eta = rhoSinPhi_ * Cos(d) - rhoCosPhi_ * Cos(H) * Sin(d);
                 zeta = rhoSinPhi_ * Sin(d) + rhoCosPhi_ * Cos(H) * Cos(d);
 
                 double sinh = Sin(d) * Sin(phi) + Cos(d) * Cos(phi) * Cos(H);
                 h = ToDegrees(Asin(sinh));
-
-                // take athmospheric refraction into account
-                // J.Meeus "Elements of Solar Eclipses 1950-2200", page 29
-                //if (h >= 0 && h <= 10)
-                //{
-                //    // this is an exponential function that fits values listed in the book
-                //    // Function form is: y(x) = a + b * e ^ (-c*x)
-                //    double sigma = 1.000012 + 0.0002282559 * Exp(-0.5035747 * h);
-
-                //    ksi *= sigma;
-                //    eta *= sigma;
-                //    zeta *= sigma;
-                //}
 
                 double ksi_ = ToRadians(pbe.Mu[1] * rhoCosPhi_ * Cos(H));
                 double eta_ = ToRadians(pbe.Mu[1] * ksi * Sin(d) - zeta * pbe.D[1]);
@@ -1272,63 +1217,52 @@ namespace Astrarium.Algorithms
                 b = dY - eta_;
 
                 n2 = a * a + b * b;
+                n = Sqrt(n2);
 
                 tau = -(u * a + v * b) / n2;
                 t += tau;
             }
             while (Abs(tau) >= 0.00001 && iters < 20);
 
-
-
-            //if (h < 0)
-            //{
-            //    // Sun is below horizon
-            //    return 0;
-            //}
-
             double tMax = t;
             double jdMax = jd;
+            double altMax = h;
 
-            double dL1 = be.L1 - zeta * pbe.tanF1;
-            double dL2 = be.L2 - zeta * pbe.tanF2;
+            double dL1 = be.L1 - zeta * pbe.TanF1;
+            double dL2 = be.L2 - zeta * pbe.TanF2;
 
             double m = Sqrt(u * u + v * v);
-
             double G = (dL1 - m) / (dL1 + dL2);
+            double A = (dL1 - dL2) / (dL1 + dL2);
 
             if (G < 0)
+            {
                 return new SolarEclipseLocalCircumstances();
+            }
 
-            var tau0 = new double[4];
-            var jdInstants = new double[4];
-            var sign = new int[4] { -1, 1, -1, 1 }; // -1 for begin, +1 for end
-            var Lfunc = new Func<InstantBesselianElements, double>[4]
-            {
-                (_) => _.L1, // begin of partial eclipse
-                (_) => _.L1, // end of partial eclipse
-                (_) => _.L2, // begin of total/annular eclipse
-                (_) => _.L2, // end of total/annular eclipse
-            };
-            var tanFfunc = new Func<double>[4]
-            {
-                () => pbe.tanF1, // begin of partial eclipse
-                () => pbe.tanF1, // end of partial eclipse
-                () => pbe.tanF2, // begin of total/annular eclipse
-                () => pbe.tanF2, // end of total/annular eclipse
-            };
+            var tauPhases = new double[4];
+            var jdPhases = new double[4];
+            var altPhases = new double[4];
 
             // calculate initial values of tau
             for (int i = 0; i < 4; i++) 
             {
-                double dL0 = Lfunc[i](be) - zeta * tanFfunc[i]();
-                n = Sqrt(n2);
-                S = (a * v - u * b) / (n * dL0);
-                tau0[i] = -(u * a + v * b) / n2 + sign[i] * dL0 / n * Sqrt(1 - S * S);
+                double tanFx = i < 2 ? pbe.TanF1 : pbe.TanF2;
+                double Lx = i < 2 ? be.L1 : be.L2;
+                int sign = i % 2 == 0 ? -1 : 1;
+                double dLx = Lx - zeta * tanFx;                
+
+                S = (a * v - u * b) / (n * dLx);
+                tauPhases[i] = -(u * a + v * b) / n2 + sign * dLx / n * Sqrt(1 - S * S);
             }
 
+            // i=0: beginning of partial phase
+            // i=1: end of partial phase
+            // i=2: beginning of total phase
+            // i=3: end of total phae
             for (int i = 0; i < 4; i++)
             {
-                t = tMax + tau0[i];
+                t = tMax + tauPhases[i];
                 iters = 0;
 
                 do
@@ -1337,10 +1271,6 @@ namespace Astrarium.Algorithms
 
                     jd = pbe.JulianDay0 + t * pbe.Step;
                     be = pbe.GetInstantBesselianElements(jd);
-
-
-                    //jd += tau / 24 * pbe.Step;
-                    //be = pbe.GetInstantBesselianElements(jd);
 
                     double X = be.X;
                     double Y = be.Y;
@@ -1352,14 +1282,17 @@ namespace Astrarium.Algorithms
 
                     H = ToRadians(M - g.Longitude - 0.00417807 * deltaT);
 
-                    double ksi = rhoCosPhi_ * Sin(H);
-                    double eta = rhoSinPhi_ * Cos(d) - rhoCosPhi_ * Cos(H) * Sin(d);
-                    zeta = rhoSinPhi_ * Sin(d) + rhoCosPhi_ * Cos(H) * Cos(d);
-
-                    double dL0 = Lfunc[i](be) - zeta * tanFfunc[i]();
-
                     double sinh = Sin(d) * Sin(phi) + Cos(d) * Cos(phi) * Cos(H);
                     h = ToDegrees(Asin(sinh));
+
+                    ksi = rhoCosPhi_ * Sin(H);
+                    eta = rhoSinPhi_ * Cos(d) - rhoCosPhi_ * Cos(H) * Sin(d);
+                    zeta = rhoSinPhi_ * Sin(d) + rhoCosPhi_ * Cos(H) * Cos(d);
+
+                    double tanFx = i < 2 ? pbe.TanF1 : pbe.TanF2;
+                    double Lx = i < 2 ? be.L1 : be.L2;
+                    int sign = i % 2 == 0 ? -1 : 1;
+                    double dLx = Lx - zeta * tanFx;
 
                     double ksi_ = ToRadians(pbe.Mu[1] * rhoCosPhi_ * Cos(H));
                     double eta_ = ToRadians(pbe.Mu[1] * ksi * Sin(d) - zeta * pbe.D[1]);
@@ -1373,27 +1306,39 @@ namespace Astrarium.Algorithms
                     n2 = a * a + b * b;
                     n = Sqrt(n2);
 
-                    S = (a * v - u * b) / (n * dL0);
-                    tau = -(u * a + v * b) / n2 + sign[i] * dL0 / n * Sqrt(1 - S * S);
+                    S = (a * v - u * b) / (n * dLx);
+                    tau = -(u * a + v * b) / n2 + sign * dLx / n * Sqrt(1 - S * S);
                     t += tau;
                 }
                 while (Abs(tau) >= 0.00001 && iters < 20);
 
-                jdInstants[i] = jd;
+                jdPhases[i] = jd;
+                altPhases[i] = h;
             }
 
-
-
-            return
-                new SolarEclipseLocalCircumstances()
-                {
-                    JulianDayMax = jdMax,
-                    JulianDayPartialBegin = jdInstants[0],
-                    JulianDayPartialEnd = jdInstants[1],
-                    JulianDayTotalBegin = jdInstants[2],
-                    JulianDayTotalEnd = jdInstants[3],
-                    MaxMagnitude = G
-                };
+            if (altPhases[0] < 0 && altPhases[1] < 0)
+            {
+                return new SolarEclipseLocalCircumstances();
+            }
+            else
+            {
+                return
+                    new SolarEclipseLocalCircumstances()
+                    {
+                        JulianDayMax = jdMax,
+                        SunAltMax = altMax,
+                        JulianDayPartialBegin = jdPhases[0],
+                        SunAltPartialBegin = altPhases[0],
+                        JulianDayPartialEnd = jdPhases[1],
+                        SunAltPartialEnd = altPhases[1],
+                        JulianDayTotalBegin = jdPhases[2],
+                        SunAltTotalBegin = altPhases[2],
+                        JulianDayTotalEnd = jdPhases[3],
+                        SunAltTotalEnd = altPhases[3],
+                        MaxMagnitude = G,
+                        MoonToSunDiameterRatio = A
+                    };
+            }
         }
     }
    

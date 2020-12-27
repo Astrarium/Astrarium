@@ -23,7 +23,7 @@ namespace Astrarium.Algorithms
         /// DeltaT value (difference between Dynamical and Universal Times).
         /// If not specified, calculated automatically for the <see cref="JulianDay0"/> value.
         /// </summary>
-        public double? DeltaT { get; set; }
+        public double DeltaT { get; set; }
 
         /// <summary>
         /// Step, in days, between each item in instant Besselian elements series
@@ -67,22 +67,9 @@ namespace Astrarium.Algorithms
         /// </summary>
         public double[] Mu { get; set; }
 
-        /// <summary>
-        /// Coefficients of angle of penumbral cone, in degrees
-        /// </summary>
-        
-        // TODO: remove this
-        public double[] F1 { get; set; }
+        public double TanF1 { get; set; }
 
-        /// <summary>
-        /// Coefficients of angle of umbral cone, in degrees
-        /// </summary>
-        /// 
-        // TODO: remove this
-        public double[] F2 { get; set; }
-
-        public double tanF1 { get; set; }
-        public double tanF2 { get; set; }
+        public double TanF2 { get; set; }
 
         /// <summary>
         /// Gets Besselian elements values for specified Juluan Day.
@@ -105,14 +92,8 @@ namespace Astrarium.Algorithms
                 L2 = L2.Select((l2, n) => l2 * Pow(t, n)).Sum(),
                 D = D.Select((d, n) => d * Pow(t, n)).Sum(),
                 Mu = To360(Mu.Select((mu, n) => mu * Pow(t, n)).Sum()),
-                F1 = F1.Select((f1, n) => f1 * Pow(t, n)).Sum(),
-                F2 = F2.Select((f2, n) => f2 * Pow(t, n)).Sum(),
                 dX = Derivative(X, t),
-                dY = Derivative(Y, t),
-                //dL1 = Derivative(L1, t),
-                //dL2 = Derivative(L2, t),
-                //dD = Derivative(D, t),
-                //dMu = Derivative(Mu, t)
+                dY = Derivative(Y, t)
             };
         }
 

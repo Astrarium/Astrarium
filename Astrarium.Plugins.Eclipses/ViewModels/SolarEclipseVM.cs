@@ -31,8 +31,6 @@ namespace Astrarium.Plugins.Eclipses
         /// </summary>
         public string EclipseDate { get; private set; }
 
-        public double Magnitude { get; private set; }
-
         public ICommand PrevEclipseCommand => new Command(PrevEclipse);
         public ICommand NextEclipseCommand => new Command(NextEclipse);
         public ICommand ClickOnMapCommand => new Command(ClickOnMap);
@@ -140,7 +138,7 @@ namespace Astrarium.Plugins.Eclipses
             CalculateEclipse(next: true);
         }
 
-        public string IsTotal { get; set; }
+        public string Details { get; set; }
 
         public GeoPoint MapMouse
         {
@@ -150,12 +148,11 @@ namespace Astrarium.Plugins.Eclipses
                 SetValue(nameof(MapMouse), value);
 
                 var pos = new CrdsGeographical(-value.Longitude, value.Latitude);
-                //var localMax = SolarEclipses.FindLocalMax(besselianElements, pos);
-                var isTotal = SolarEclipses.LocalCircumstances(besselianElements, pos);// SolarEclipses.Obscuration(besselianElements, pos, localMax);
+                var isTotal = SolarEclipses.LocalCircumstances(besselianElements, pos);
 
-                IsTotal = isTotal.ToString();
+                Details = isTotal.ToString();
 
-                NotifyPropertyChanged(nameof(IsTotal));
+                NotifyPropertyChanged(nameof(Details));
             }
         }
 
@@ -256,8 +253,6 @@ namespace Astrarium.Plugins.Eclipses
             var map = SolarEclipses.GetEclipseMap(besselianElements, eclipse.EclipseType);
 
             EclipseDate = Formatters.Date.Format(new Date(JulianDay, observerLocation.UtcOffset));
-
-            Magnitude = SolarEclipses.Obscuration(besselianElements, map.Max.Coordinates, map.Max.JulianDay);
 
             var tracks = new List<Track>();
             var polygons = new List<Polygon>();
@@ -393,7 +388,7 @@ namespace Astrarium.Plugins.Eclipses
             Polygons = polygons;
             Markers = markers;
 
-            NotifyPropertyChanged(nameof(EclipseDate), nameof(Tracks), nameof(Polygons), nameof(Markers), nameof(Magnitude));
+            NotifyPropertyChanged(nameof(EclipseDate), nameof(Tracks), nameof(Polygons), nameof(Markers));
         }
 
         private GeoPoint ToGeo(CrdsGeographical g)

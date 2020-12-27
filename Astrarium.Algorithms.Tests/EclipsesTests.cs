@@ -90,8 +90,8 @@ namespace Astrarium.Algorithms.Tests
                 L2 = new[] { +0.020_679, -0.000_0317, -0.000_0097, 0 },
                 F1 = new double[] { 0, 0, 0, 0 },
                 F2 = new double[] { 0, 0, 0, 0 },
-                tanF1 = 0.004_6308,
-                tanF2 = 0.004_6077,
+                TanF1 = 0.004_6308,
+                TanF2 = 0.004_6077,
                 Step = 1.0 / 24.0,                                
                 DeltaT = 61 // Used in examples from Meeus' book
             };
@@ -217,8 +217,8 @@ namespace Astrarium.Algorithms.Tests
                 L2 = new[] { +0.020_679, -0.000_0317, -0.000_0097, 0 },
                 F1 = new double[] { 0, 0, 0, 0 },
                 F2 = new double[] { 0, 0, 0, 0 },
-                tanF1 = 0.004_6308,
-                tanF2 = 0.004_6077,
+                TanF1 = 0.004_6308,
+                TanF2 = 0.004_6077,
                 Step = 1.0 / 24.0,
                 DeltaT = 61 // Used in examples from Meeus' book
             };
@@ -237,6 +237,9 @@ namespace Astrarium.Algorithms.Tests
             Assert.AreEqual(jdMaxExpected, local.JulianDayMax, epsTime);
             Assert.AreEqual(jdPartialBegin, local.JulianDayPartialBegin, epsTime);
             Assert.AreEqual(jdPartialEnd, local.JulianDayPartialEnd, epsTime);
+
+            Assert.AreEqual(0.857, local.MaxMagnitude, 1e-4);
+            Assert.AreEqual(0.9434, local.MoonToSunDiameterRatio, 1e-5);
         }
 
         [TestMethod]
