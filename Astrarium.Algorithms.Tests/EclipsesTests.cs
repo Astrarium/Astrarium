@@ -72,7 +72,6 @@ namespace Astrarium.Algorithms.Tests
             }
         }
 
-
         /// <summary>
         /// Example 5 (EOSE)
         /// </summary>
@@ -198,6 +197,46 @@ namespace Astrarium.Algorithms.Tests
                 Assert.AreEqual(43.0162, pointFinal.Coordinates.Latitude, epsCoord);
                 Assert.AreEqual(expectedTime, new Date(pointFinal.JulianDay).Time, epsTime);
             }
+        }
+
+        /// <summary>
+        /// Example 8 (EOSE)
+        /// </summary>
+        [TestMethod]
+        public void LocalCircumstances()
+        {
+            // 10 may 1994
+            var pbe = new PolynomialBesselianElements()
+            {
+                JulianDay0 = 2449483.20833,
+                X = new[] { -0.173_367, +0.499_0629, +0.000_0296, -0.000_005_63 },
+                Y = new[] { +0.383_484, +0.086_9393, -0.000_1183, -0.000_000_92 },
+                D = new[] { +17.686_13, +0.010_642, -0.000_004, 0 },
+                Mu = new[] { 75.909_23, 15.001_621, 0, 0 },
+                L1 = new[] { +0.566_906, -0.000_0318, -0.000_0098, 0 },
+                L2 = new[] { +0.020_679, -0.000_0317, -0.000_0097, 0 },
+                F1 = new double[] { 0, 0, 0, 0 },
+                F2 = new double[] { 0, 0, 0, 0 },
+                tanF1 = 0.004_6308,
+                tanF2 = 0.004_6077,
+                Step = 1.0 / 24.0,
+                DeltaT = 61 // Used in examples from Meeus' book
+            };
+
+            // 1 second of time is enough
+            double epsTime = TimeSpan.FromSeconds(1).TotalDays;
+
+            CrdsGeographical g = new CrdsGeographical(new DMS("+77*03'56''"), new DMS("+38*55'17''"));
+
+            var local = SolarEclipses.LocalCircumstances(pbe, g);
+
+            double jdPartialBegin = new Date(new DateTime(1994, 5, 10, 15, 39, 19, DateTimeKind.Utc)).ToJulianEphemerisDay();
+            double jdMaxExpected = new Date(new DateTime(1994, 5, 10, 17, 26, 45, DateTimeKind.Utc)).ToJulianEphemerisDay();
+            double jdPartialEnd = new Date(new DateTime(1994, 5, 10, 19, 13, 53, DateTimeKind.Utc)).ToJulianEphemerisDay();
+
+            Assert.AreEqual(jdMaxExpected, local.JulianDayMax, epsTime);
+            Assert.AreEqual(jdPartialBegin, local.JulianDayPartialBegin, epsTime);
+            Assert.AreEqual(jdPartialEnd, local.JulianDayPartialEnd, epsTime);
         }
 
         [TestMethod]

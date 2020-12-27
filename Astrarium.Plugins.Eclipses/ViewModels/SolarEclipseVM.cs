@@ -331,15 +331,6 @@ namespace Astrarium.Plugins.Eclipses
                 */
             }
 
-            /*
-            if (map.TotalPathByTime.Any())
-            {
-                var track = new Track(centralLineTrackStyle2);
-                track.AddRange(map.TotalPathByTime.Select(p => ToGeo(p)));
-                tracks.Add(track);
-            }
-            */
-
             // central line is divided into 2 ones => draw shadow path as 2 polygons
 
             if ((map.UmbraNorthernLimit[0].Any() && !map.UmbraNorthernLimit[1].Any()) ||
@@ -381,27 +372,13 @@ namespace Astrarium.Plugins.Eclipses
 
             if (map.PenumbraNorthernLimit.Any())
             {
-                //int count = 0;
-                //foreach (var p in map.PenumbraNorthernLimit)
-                //{
-                //    markers.Add(new Marker(ToGeo(p), centralLineMarkerStyle, null));
-                //}
-
-
                 var track = new Track(penumbraLimitTrackStyle);
                 track.AddRange(map.PenumbraNorthernLimit.Select(p => ToGeo(p)));
                 tracks.Add(track);
-
             }
 
             if (map.PenumbraSouthernLimit.Any())
             {
-                //int count = 0;
-                //foreach (var p in map.PenumbraSouthernLimit)
-                //{
-                //    markers.Add(new Marker(ToGeo(p), centralLineMarkerStyle, $"{++count}"));
-                //}
-
                 var track = new Track(penumbraLimitTrackStyle);
                 track.AddRange(map.PenumbraSouthernLimit.Select(p => ToGeo(p)));
                 tracks.Add(track);

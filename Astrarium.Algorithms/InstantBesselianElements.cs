@@ -67,21 +67,21 @@ namespace Astrarium.Algorithms
         /// <summary>
         /// Derivative of L1
         /// </summary>
-        public double dL1 { get; set; }
+        //public double dL1 { get; set; }
 
         /// <summary>
         /// Derivative of L2
         /// </summary>
-        public double dL2 { get; set; }
+        //public double dL2 { get; set; }
 
         /// <summary>
         /// Derivative of D
         /// </summary>
-        public double dD { get; set; }
+        //public double dD { get; set; }
 
         /// <summary>
         /// Derivative of Mu
         /// </summary>
-        public double dMu { get; set; }
+        //public double dMu { get; set; }
     }
 }

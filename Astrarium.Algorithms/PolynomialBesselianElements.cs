@@ -109,10 +109,10 @@ namespace Astrarium.Algorithms
                 F2 = F2.Select((f2, n) => f2 * Pow(t, n)).Sum(),
                 dX = Derivative(X, t),
                 dY = Derivative(Y, t),
-                dL1 = Derivative(L1, t),
-                dL2 = Derivative(L2, t),
-                dD = Derivative(D, t),
-                dMu = Derivative(Mu, t)
+                //dL1 = Derivative(L1, t),
+                //dL2 = Derivative(L2, t),
+                //dD = Derivative(D, t),
+                //dMu = Derivative(Mu, t)
             };
         }
 

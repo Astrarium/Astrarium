@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Text;
 
 namespace Astrarium.Algorithms
 {
@@ -117,5 +120,45 @@ namespace Astrarium.Algorithms
             JulianDay = jd;
             Coordinates = c;
         }
-    } 
+    }
+
+    public class SolarEclipseLocalCircumstances
+    {
+        public double JulianDayMax { get; set; }
+        public double SolarAltitude { get; set; }
+        public double MaxMagnitude { get; set; }
+        public double MoonToSunDiameterRatio { get; set; }
+        public double JulianDayPartialBegin { get; set; }
+        public double JulianDayPartialEnd { get; set; }
+        public double JulianDayTotalBegin { get; set; }
+        public double JulianDayTotalEnd { get; set; }
+
+        private string JdToString(double jd)
+        {
+            if (double.IsNaN(jd) || jd == 0)
+                return "-";
+            else
+            {
+                var date = new Date(jd, 0);
+                var culture = CultureInfo.InvariantCulture;
+                string month = culture.DateTimeFormat.GetMonthName(date.Month);
+                int day = (int)date.Day;
+                int year = date.Year;
+                var time = TimeSpan.FromDays(date.Day - day);
+                return string.Format($"{day} {month} {year} {time:hh\\:mm\\:ss} UT");
+            }
+        }
+
+        public override string ToString()
+        {
+            return
+                new StringBuilder()                    
+                    .AppendLine($"Partial Begin = {JdToString(JulianDayPartialBegin)}")
+                    .AppendLine($"Total Begin = {JdToString(JulianDayTotalBegin)}")
+                    .AppendLine($"Max = {JdToString(JulianDayMax)}")
+                    .AppendLine($"Total End = {JdToString(JulianDayTotalEnd)}")
+                    .AppendLine($"Partial End = {JdToString(JulianDayPartialEnd)}")
+                    .ToString();
+        }
+    }
 }
