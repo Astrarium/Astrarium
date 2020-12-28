@@ -67,8 +67,14 @@ namespace Astrarium.Algorithms
         /// </summary>
         public double[] Mu { get; set; }
 
+        /// <summary>
+        /// Tangent of the penumbral cone angle.
+        /// </summary>
         public double TanF1 { get; set; }
 
+        /// <summary>
+        /// Tangent of the umbral cone angle.
+        /// </summary>
         public double TanF2 { get; set; }
 
         /// <summary>
@@ -78,14 +84,15 @@ namespace Astrarium.Algorithms
         /// <returns></returns>
         internal InstantBesselianElements GetInstantBesselianElements(double jd)
         {
-            //if (jd < From || jd > To)
-            //    throw new ArgumentException($"Polynomial Besselian elements valid only for Julian Day in range [{From} ... {To}].", nameof(jd));
+            if (jd < From || jd > To)
+                throw new ArgumentException($"Polynomial Besselian elements valid only for Julian Day in range [{From} ... {To}].", nameof(jd));
 
             // difference, with t0, in step units
             double t = (jd - JulianDay0) / Step;
-
+           
             return new InstantBesselianElements()
             {
+                DeltaT = DeltaT,
                 X = X.Select((x, n) => x * Pow(t, n)).Sum(),
                 Y = Y.Select((y, n) => y * Pow(t, n)).Sum(),
                 L1 = L1.Select((l1, n) => l1 * Pow(t, n)).Sum(),

@@ -18,11 +18,374 @@ namespace Astrarium.Algorithms
     public static class SolarEclipses
     {
         /// <summary>
-        /// Finds polynomial Besselian elements by 5 positions of Sun and Moon
+        /// Calculates nearest solar eclipse (next or previous) for the provided Julian Day.
         /// </summary>
-        /// <param name="positions">Positions of Sun and Moon</param>
-        /// <returns>Polynomial Besselian elements of the Solar eclipse</returns>
-        public static PolynomialBesselianElements FindPolynomialBesselianElements(SunMoonPosition[] positions)
+        /// <param name="jd">Julian day of interest, the nearest solar eclipse for that date will be found.</param>
+        /// <param name="next">Flag indicating searching direction. True means searching next eclipse, false means previous.</param>
+        public static SolarEclipse NearestEclipse(double jd, bool next)
+        {
+            Date d = new Date(jd);
+            double year = d.Year + (Date.JulianEphemerisDay(d) - Date.JulianDay0(d.Year)) / 365.25;
+            double k = Floor((year - 2000) * 12.3685);
+            bool eclipseFound;
+
+            double T = k / 1236.85;
+            double T2 = T * T;
+            double T3 = T2 * T;
+            double T4 = T3 * T;
+
+            SolarEclipse eclipse = new SolarEclipse();
+
+            do
+            {
+                // Moon's argument of latitude (mean dinstance of the Moon from its ascending node)
+                double F = 160.7108 + 390.67050284 * k
+                                    - 0.0016118 * T2
+                                    - 0.00000227 * T3
+                                    + 0.000000011 * T4;
+
+                eclipseFound = Abs(Sin(ToRadians(F))) <= 0.36;
+
+                if (eclipseFound)
+                {
+                    double jdMeanPhase = 2451550.09766 + 29.530588861 * k
+                                                    + 0.00015437 * T2
+                                                    - 0.000000150 * T3
+                                                    + 0.00000000073 * T4;
+
+                    // Sun's mean anomaly
+                    double M = 2.5534 + 29.10535670 * k
+                                     - 0.0000014 * T2
+                                     - 0.00000011 * T3;
+                    M = ToRadians(M);
+
+                    // Moon's mean anomaly
+                    double M_ = 201.5643 + 385.81693528 * k
+                                         + 0.0107582 * T2
+                                         + 0.00001238 * T3
+                                         - 0.000000058 * T4;
+                    M_ = ToRadians(M_);
+
+                    // Mean longitude of ascending node
+                    double Omega = 124.7746 - 1.56375588 * k
+                                            + 0.0020672 * T2
+                                            + 0.00000215 * T3;
+                    Omega = ToRadians(Omega);
+
+                    // Multiplier related to the eccentricity of the Earth orbit
+                    double E = 1 - 0.002516 * T - 0.0000074 * T2;
+
+                    double F1 = ToRadians(F - 0.02665 * Sin(Omega));
+                    double A1 = ToRadians(299.77 + 0.107408 * k - 0.009173 * T2);
+
+                    double jdMax =
+                        jdMeanPhase
+                        - 0.4075 * Sin(M_)
+                        + 0.1721 * E * Sin(M)
+                        + 0.0161 * Sin(2 * M_)
+                        - 0.0097 * Sin(2 * F1)
+                        + 0.0073 * E * Sin(M_ - M)
+                        - 0.0050 * E * Sin(M_ + M)
+                        - 0.0023 * Sin(M_ - 2 * F1)
+                        + 0.0021 * E * Sin(2 * M)
+                        + 0.0012 * Sin(M_ + 2 * F1)
+                        + 0.0006 * E * Sin(2 * M_ + M)
+                        - 0.0004 * Sin(3 * M_)
+                        - 0.0003 * E * Sin(M + 2 * F1)
+                        + 0.0003 * Sin(A1)
+                        - 0.0002 * E * Sin(M - 2 * F1)
+                        - 0.0002 * E * Sin(2 * M_ - M)
+                        - 0.0002 * Sin(Omega);
+
+                    double P =
+                        0.2070 * E * Sin(M)
+                        + 0.0024 * E * Sin(2 * M)
+                        - 0.0392 * Sin(M_)
+                        + 0.0116 * Sin(2 * M_)
+                        - 0.0073 * E * Sin(M_ + M)
+                        + 0.0067 * E * Sin(M_ - M)
+                        + 0.0118 * Sin(2 * F1);
+
+                    double Q =
+                        5.2207 - 0.0048 * E * Cos(M)
+                        + 0.0020 * E * Cos(2 * M)
+                        - 0.3299 * Cos(M_)
+                        - 0.0060 * E * Cos(M_ + M)
+                        + 0.0041 * E * Cos(M_ - M);
+
+                    double W = Abs(Cos(F1));
+
+                    double gamma = (P * Cos(F1) + Q * Sin(F1)) * (1 - 0.0048 * W);
+
+                    double u = 0.0059
+                        + 0.0046 * E * Cos(M)
+                        - 0.0182 * Cos(M_)
+                        + 0.0004 * Cos(2 * M_)
+                        - 0.0005 * E * Cos(M + M_);
+
+                    // no eclipse visible from the Earth surface
+                    if (Abs(gamma) > 1.5433 + u)
+                    {
+                        eclipseFound = false;
+                        if (next) k++;
+                        else k--;
+                        continue;
+                    }
+
+                    eclipse.U = u;
+                    eclipse.Gamma = gamma;
+                    eclipse.JulianDayMaximum = jdMax;
+
+                    // non-central eclipse
+                    if (Abs(gamma) > 0.9972 && Abs(gamma) < 0.9972 + Abs(u))
+                    {
+                        eclipse.IsNonCentral = true;
+                    }
+
+                    if (u < 0)
+                    {
+                        eclipse.EclipseType = SolarEclipseType.Total;
+                    }
+                    else if (u > 0.0047)
+                    {
+                        eclipse.EclipseType = SolarEclipseType.Annular;
+                    }
+                    else
+                    {
+                        double omega = 0.00464 * Sqrt(1 - gamma * gamma);
+                        if (u < omega)
+                        {
+                            eclipse.EclipseType = SolarEclipseType.Hybrid;
+                        }
+                        else
+                        {
+                            eclipse.EclipseType = SolarEclipseType.Annular;
+                        }
+                    }
+
+                    if (!eclipse.IsNonCentral && Abs(gamma) > 0.9972 && Abs(gamma) < 1.5433 + u)
+                    {
+                        eclipse.EclipseType = SolarEclipseType.Partial;
+                        eclipse.Phase = (1.5433 + u - Abs(gamma)) / (0.5461 + 2 * u);
+                    }
+
+                    // hemisphere
+                    if (gamma > 0)
+                    {
+                        eclipse.Regio = SolarEclipseRegio.Northern;
+                    }
+                    if (gamma < 0)
+                    {
+                        eclipse.Regio = SolarEclipseRegio.Southern;
+                    }
+                    if (Abs(gamma) < 0.1)
+                    {
+                        eclipse.Regio = SolarEclipseRegio.Equatorial;
+                    }
+                }
+                else
+                {
+                    if (next) k++;
+                    else k--;
+                }
+            }
+            while (!eclipseFound);
+
+            return eclipse;
+        }
+
+
+        /// <summary>
+        /// Calculates local circumstances of solar eclipse.
+        /// </summary>
+        /// <param name="pbe"><see cref="PolynomialBesselianElements"/> Besselian elements for the eclipse</param>
+        /// <param name="g">Geographical coordinates to get eclipse circumstances for.</param>
+        /// <returns><see cref="SolarEclipseLocalCircumstances"/> instance containing local curcumstances details.</returns>
+        /// <remarks>
+        /// The method is from book J.Meeus "Elements of Solar Eclipses, 1951-2000, § 23.
+        /// </remarks>
+        public static SolarEclipseLocalCircumstances LocalCircumstances(PolynomialBesselianElements pbe, CrdsGeographical g)
+        {
+            double deltaT = pbe.DeltaT;
+            double phi = ToRadians(g.Latitude);
+            double t = 0;
+            double tau = 0;
+            int iters = 0;
+
+            // Earth flattening
+            const double flat = 1.0 / 298.257;
+
+            // Earth flattening constant, used in calculation: 0.99664719
+            double fconst = 1.0 - flat;
+            double U = Atan(fconst * Tan(phi));
+            double rhoSinPhi_ = fconst * Sin(U);
+            double rhoCosPhi_ = Cos(U);
+
+            double jd;
+
+            double d, H, h, ksi, eta, zeta, u, v, a, b, n2, n, S;
+            InstantBesselianElements be;
+
+            do
+            {
+                iters++;
+
+                jd = pbe.JulianDay0 + t * pbe.Step;
+                be = pbe.GetInstantBesselianElements(jd);
+
+                double X = be.X;
+                double Y = be.Y;
+                d = ToRadians(be.D);
+                double M = be.Mu;
+                double dX = be.dX;
+                double dY = be.dY;
+
+                H = ToRadians(M - g.Longitude - 0.00417807 * deltaT);
+
+                ksi = rhoCosPhi_ * Sin(H);
+                eta = rhoSinPhi_ * Cos(d) - rhoCosPhi_ * Cos(H) * Sin(d);
+                zeta = rhoSinPhi_ * Sin(d) + rhoCosPhi_ * Cos(H) * Cos(d);
+
+                double sinh = Sin(d) * Sin(phi) + Cos(d) * Cos(phi) * Cos(H);
+                h = ToDegrees(Asin(sinh));
+
+                double ksi_ = ToRadians(pbe.Mu[1] * rhoCosPhi_ * Cos(H));
+                double eta_ = ToRadians(pbe.Mu[1] * ksi * Sin(d) - zeta * pbe.D[1]);
+
+                u = X - ksi;
+                v = Y - eta;
+
+                a = dX - ksi_;
+                b = dY - eta_;
+
+                n2 = a * a + b * b;
+                n = Sqrt(n2);
+
+                tau = -(u * a + v * b) / n2;
+                t += tau;
+            }
+            while (Abs(tau) >= 0.00001 && iters < 20);
+
+            double tMax = t;
+            double jdMax = jd;
+            double altMax = h;
+
+            double dL1 = be.L1 - zeta * pbe.TanF1;
+            double dL2 = be.L2 - zeta * pbe.TanF2;
+
+            double m = Sqrt(u * u + v * v);
+            double G = (dL1 - m) / (dL1 + dL2);
+            double A = (dL1 - dL2) / (dL1 + dL2);
+
+            if (G < 0)
+            {
+                return new SolarEclipseLocalCircumstances();
+            }
+
+            var tauPhases = new double[4];
+            var jdPhases = new double[4];
+            var altPhases = new double[4];
+
+            // calculate initial values of tau
+            for (int i = 0; i < 4; i++)
+            {
+                double tanFx = i < 2 ? pbe.TanF1 : pbe.TanF2;
+                double Lx = i < 2 ? be.L1 : be.L2;
+                int sign = i % 2 == 0 ? -1 : 1;
+                double dLx = Lx - zeta * tanFx;
+                S = (a * v - u * b) / (n * dLx);
+                tauPhases[i] = -(u * a + v * b) / n2 + sign * dLx / n * Sqrt(1 - S * S);
+            }
+
+            // i=0: beginning of partial phase
+            // i=1: end of partial phase
+            // i=2: beginning of total phase
+            // i=3: end of total phae
+            for (int i = 0; i < 4; i++)
+            {
+                t = tMax + tauPhases[i];
+                iters = 0;
+
+                do
+                {
+                    iters++;
+
+                    jd = pbe.JulianDay0 + t * pbe.Step;
+                    be = pbe.GetInstantBesselianElements(jd);
+
+                    double X = be.X;
+                    double Y = be.Y;
+                    d = ToRadians(be.D);
+                    double M = be.Mu;
+                    double dX = be.dX;
+                    double dY = be.dY;
+
+                    H = ToRadians(M - g.Longitude - 0.00417807 * deltaT);
+
+                    double sinh = Sin(d) * Sin(phi) + Cos(d) * Cos(phi) * Cos(H);
+                    h = ToDegrees(Asin(sinh));
+
+                    ksi = rhoCosPhi_ * Sin(H);
+                    eta = rhoSinPhi_ * Cos(d) - rhoCosPhi_ * Cos(H) * Sin(d);
+                    zeta = rhoSinPhi_ * Sin(d) + rhoCosPhi_ * Cos(H) * Cos(d);
+
+                    double tanFx = i < 2 ? pbe.TanF1 : pbe.TanF2;
+                    double Lx = i < 2 ? be.L1 : be.L2;
+                    int sign = i % 2 == 0 ? -1 : 1;
+                    double dLx = Lx - zeta * tanFx;
+
+                    double ksi_ = ToRadians(pbe.Mu[1] * rhoCosPhi_ * Cos(H));
+                    double eta_ = ToRadians(pbe.Mu[1] * ksi * Sin(d) - zeta * pbe.D[1]);
+
+                    u = X - ksi;
+                    v = Y - eta;
+
+                    a = dX - ksi_;
+                    b = dY - eta_;
+
+                    n2 = a * a + b * b;
+                    n = Sqrt(n2);
+
+                    S = (a * v - u * b) / (n * dLx);
+                    tau = -(u * a + v * b) / n2 + sign * dLx / n * Sqrt(1 - S * S);
+                    t += tau;
+                }
+                while (Abs(tau) >= 0.00001 && iters < 20);
+
+                jdPhases[i] = jd;
+                altPhases[i] = h;
+            }
+
+            if (altPhases[0] < 0 && altPhases[1] < 0)
+            {
+                return new SolarEclipseLocalCircumstances();
+            }
+            else
+            {
+                return new SolarEclipseLocalCircumstances()
+                {
+                    JulianDayMax = jdMax,
+                    SunAltMax = altMax,
+                    JulianDayPartialBegin = jdPhases[0],
+                    SunAltPartialBegin = altPhases[0],
+                    JulianDayPartialEnd = jdPhases[1],
+                    SunAltPartialEnd = altPhases[1],
+                    JulianDayTotalBegin = jdPhases[2],
+                    SunAltTotalBegin = altPhases[2],
+                    JulianDayTotalEnd = jdPhases[3],
+                    SunAltTotalEnd = altPhases[3],
+                    MaxMagnitude = G,
+                    MoonToSunDiameterRatio = A
+                };
+            }
+        }
+
+        /// <summary>
+        /// Finds polynomial Besselian elements by 5 positions of Sun and Moon.
+        /// </summary>
+        /// <param name="positions">Positions of Sun and Moon.</param>
+        /// <returns>Polynomial Besselian elements of the Solar eclipse.</returns>
+        public static PolynomialBesselianElements BesselianElements(SunMoonPosition[] positions)
         {
             if (positions.Length != 5)
                 throw new ArgumentException("Five positions are required", nameof(positions));
@@ -42,7 +405,7 @@ namespace Astrarium.Algorithms
             PointF[] points = new PointF[5];
             for (int i = 0; i < 5; i++)
             {
-                elements[i] = FindInstantBesselianElements(positions[i]);
+                elements[i] = BesselianElements(positions[i]);
                 points[i].X = i - 2;
             }
 
@@ -72,6 +435,134 @@ namespace Astrarium.Algorithms
         }
 
         /// <summary>
+        /// Gets map of solar eclipse.
+        /// </summary>
+        /// <param name="pbe">Polynomial Besselian elements defining the Eclipse</param>
+        /// <returns><see cref="SolarEclipseMap"/> instance.</returns>
+        public static SolarEclipseMap EclipseMap(PolynomialBesselianElements pbe, SolarEclipseType eclipseType)
+        {
+            // left edge of time interval
+            double jdFrom = pbe.From;
+
+            // midpoint of time interval
+            double jdMid = pbe.From + (pbe.To - pbe.From) / 2;
+
+            // right edge of time interval
+            double jdTo = pbe.To;
+
+            // precision of calculation, in days
+            double epsilon = 1e-8;
+
+            // Eclipse map data
+            SolarEclipseMap map = new SolarEclipseMap();
+
+            // Function has zero value when penumbra edge crosses Earth edge externally
+            Func<double, double> funcExternalContact = (jd) =>
+            {
+                var b = pbe.GetInstantBesselianElements(jd);
+                return Sqrt(b.X * b.X + b.Y * b.Y) - 1 - b.L1;
+            };
+
+            // Function has zero value when penumbra edge crosses Earth edge internally
+            Func<double, double> funcInternalContact = (jd) =>
+            {
+                var b = pbe.GetInstantBesselianElements(jd);
+                return Sqrt(b.X * b.X + b.Y * b.Y) - 1 + b.L1;
+            };
+
+            // Instant of first external contact of penumbra,
+            // assume always exists
+            double jdP1 = FindRoots(funcExternalContact, jdFrom, jdMid, epsilon);
+            {
+                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdP1);
+                double a = Atan2(b.Y, b.X);
+                PointF p = new PointF((float)Cos(a), (float)Sin(a));
+                map.P1 = new SolarEclipseMapPoint(jdP1, Project(b, p));
+            }
+
+            // Instant of last external contact of penumbra
+            // assume always exists
+            double jdP4 = FindRoots(funcExternalContact, jdMid, jdTo, epsilon);
+            {
+                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdP4);
+                double a = Atan2(b.Y, b.X);
+                PointF p = new PointF((float)Cos(a), (float)Sin(a));
+                map.P4 = new SolarEclipseMapPoint(jdP4, Project(b, p));
+            }
+
+            // Instant of first internal contact of penumbra,
+            // may not exist
+            double jdP2 = FindRoots(funcInternalContact, jdFrom, jdMid, epsilon);
+            if (!double.IsNaN(jdP2))
+            {
+                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdP2);
+                double a = Atan2(b.Y, b.X);
+                PointF p = new PointF((float)Cos(a), (float)Sin(a));
+                map.P2 = new SolarEclipseMapPoint(jdP2, Project(b, p));
+            }
+
+            // Instant of last internal contact of penumbra,
+            // may not exist
+            double jdP3 = FindRoots(funcInternalContact, jdMid, jdTo, epsilon);
+            if (!double.IsNaN(jdP3))
+            {
+                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdP3);
+                double a = Atan2(b.Y, b.X);
+                PointF p = new PointF((float)Cos(a), (float)Sin(a));
+                map.P3 = new SolarEclipseMapPoint(jdP3, Project(b, p));
+            }
+
+            if (eclipseType != SolarEclipseType.Partial)
+            {
+                map.C1 = FindExtremeLimitOfCentralLine(pbe, true);
+                map.C2 = FindExtremeLimitOfCentralLine(pbe, false);
+            }
+
+            // Instant of eclipse maximum
+            {
+                InstantBesselianElements b = pbe.GetInstantBesselianElements(pbe.JulianDay0);
+                PointF p = new PointF((float)b.X, (float)b.Y);
+                var g = Project(b, p);
+                if (g != null)
+                {
+                    map.Max = new SolarEclipseMapPoint(pbe.JulianDay0, g);
+                }
+            }
+
+            if (eclipseType != SolarEclipseType.Partial)
+            {
+                map.TotalPath = FindCurvePoints(pbe, 0, 0);
+                var northPoints = FindCurvePoints(pbe, 1, 1);
+                var southPoints = FindCurvePoints(pbe, -1, 1);
+
+                if (northPoints.Count > 2)
+                {
+                    var g = northPoints.OrderByDescending(p => Abs(p.Latitude)).First();
+                    int index = northPoints.IndexOf(g);
+                    map.UmbraNorthernLimit[0] = northPoints.Take(index).ToList();
+                    map.UmbraNorthernLimit[1] = northPoints.Skip(index - 1).ToList();
+                }
+
+                if (southPoints.Count > 2)
+                {
+                    var g = southPoints.OrderByDescending(p => Abs(p.Latitude)).First();
+                    int index = southPoints.IndexOf(g);
+                    map.UmbraSouthernLimit[0] = southPoints.Take(index).ToList();
+                    map.UmbraSouthernLimit[1] = southPoints.Skip(index - 1).ToList();
+                }
+            }
+
+            // Find points of Northern limit of penumbra
+            map.PenumbraNorthernLimit = FindCurvePoints(pbe, 1, 0);
+            map.PenumbraSouthernLimit = FindCurvePoints(pbe, -1, 0);
+
+            // Calc rise/set curves
+            FindRiseSetCurves(pbe, map, jdP1, jdP4);
+
+            return map;
+        }
+
+        /// <summary>
         /// Calculates Besselian elements for solar eclipse,
         /// valid only for specified instant.
         /// </summary>
@@ -83,7 +574,7 @@ namespace Astrarium.Algorithms
         /// The method is based on formulae given here:
         /// https://de.wikipedia.org/wiki/Besselsche_Elemente
         /// </remarks>
-        internal static InstantBesselianElements FindInstantBesselianElements(SunMoonPosition position)
+        internal static InstantBesselianElements BesselianElements(SunMoonPosition position)
         {
             // Nutation elements
             var nutation = Nutation.NutationElements(position.JulianDay);
@@ -164,7 +655,37 @@ namespace Astrarium.Algorithms
             };
         }
 
-        public static SolarEclipsePoint GetEclipseCurvePoint(PolynomialBesselianElements pbe, CrdsGeographical g, int i = 0, double G = 0)
+        /// <summary>
+        /// Gets point of a specified curve of solar eclipse map, for specified geographical longitude.
+        /// </summary>
+        /// <param name="pbe">Polynomial Besselian elements.</param>
+        /// <param name="g">
+        /// Geographical coordinates of a point to start iteration from.
+        /// Longitude of the final point will remain unchanged, but latitude will be adjusted.
+        /// </param>
+        /// <param name="i">Type of the curve (see remarks)</param>
+        /// <param name="G">Magnitude (see remarks)</param>
+        /// <returns>
+        /// Point of the eclipse's map curve, for specified longitude, if exists.
+        /// </returns>
+        /// <remarks>
+        /// The method is from book J.Meeus "Elements of Solar Eclipses, 1951-2000, § 22.
+        /// <paramref name="i"/> and <paramref name="G"/> define a curve type:
+        /// <code>
+        /// ------------------------------------------------------------------------------
+        /// Type of curve                                          i              G
+        /// ------------------------------------------------------------------------------
+        /// central line                                           0         irrelevant
+        /// northern limit of path of total or annular eclipse    +1             +1
+        /// southern limit of path of total or annular eclipse    -1             +1
+        /// northern limit of partial eclipse                     +1              0
+        /// southern limit of partial eclipse                     -1              0
+        /// equal magnitude (north)                               +1         the given G
+        /// equal magnitude (south)                               -1         the given G
+        /// -------------------------------------------------------------------------------
+        /// </code>
+        /// </remarks>
+        internal static SolarEclipseMapPoint FindEclipseCurvePoint(PolynomialBesselianElements pbe, CrdsGeographical g, int i = 0, double G = 0)
         {
             // Sanity checks:
             if (!(i == 0 || i == -1 || i == 1))
@@ -280,7 +801,7 @@ namespace Astrarium.Algorithms
             
             if (Abs(tau) < 0.0001 && Abs(deltaPhi) < 0.0001)
             {
-                return new SolarEclipsePoint(jd, new CrdsGeographical(g.Longitude, phi));
+                return new SolarEclipseMapPoint(jd, new CrdsGeographical(g.Longitude, phi));
             }
             else
             {
@@ -288,7 +809,15 @@ namespace Astrarium.Algorithms
             }
         }
 
-        private static SolarEclipsePoint ExtremeLimitOfCentralLine(PolynomialBesselianElements pbe, bool begin)
+        /// <summary>
+        /// Finds extreme points on central line of eclipse.
+        /// </summary>
+        /// <param name="pbe">Polynomial Besselian elements.</param>
+        /// <param name="begin">Flag indicating type of the point. True means begin point, false means end point.</param>
+        /// <returns>
+        /// Eclipse point C1 (begin) or C2 (end) of the central line.
+        /// </returns>
+        internal static SolarEclipseMapPoint FindExtremeLimitOfCentralLine(PolynomialBesselianElements pbe, bool begin)
         {
             double d = ToRadians(pbe.D[0]);
             double omega = 1.0 / Sqrt(1 - 0.006_694_385 * Cos(d) * Cos(d));
@@ -345,144 +874,16 @@ namespace Astrarium.Algorithms
             double phi1 = Asin(0.996_647_19 * omega2 * be.Y * Cos(d));
             double phi = ToDegrees(Atan(1.003_364_09 * Tan(phi1)));
             double lambda = M - H - 0.004_178_07 * pbe.DeltaT;
-            return new SolarEclipsePoint(jd, new CrdsGeographical(lambda, phi));
+            return new SolarEclipseMapPoint(jd, new CrdsGeographical(lambda, phi));
         }
 
         /// <summary>
-        /// Gets map of solar eclipse.
+        /// Projects point on Besselian plane to Earth globe.
         /// </summary>
-        /// <param name="pbe">Polynomial Besselian elements defining the Eclipse</param>
-        /// <returns><see cref="SolarEclipseMap"/> instance.</returns>
-        public static SolarEclipseMap GetEclipseMap(PolynomialBesselianElements pbe, SolarEclipseType eclipseType)
-        {
-            // left edge of time interval
-            double jdFrom = pbe.From;
-
-            // midpoint of time interval
-            double jdMid = pbe.From + (pbe.To - pbe.From) / 2;
-
-            // right edge of time interval
-            double jdTo = pbe.To;
-
-            // precision of calculation, in days
-            double epsilon = 1e-8;
-
-            // Eclipse map data
-            SolarEclipseMap map = new SolarEclipseMap();
-
-            // Function has zero value when penumbra edge crosses Earth edge externally
-            Func<double, double> funcExternalContact = (jd) =>
-            {
-                var b = pbe.GetInstantBesselianElements(jd);
-                return Sqrt(b.X * b.X + b.Y * b.Y) - 1 - b.L1;
-            };
-
-            // Function has zero value when penumbra edge crosses Earth edge internally
-            Func<double, double> funcInternalContact = (jd) =>
-            {
-                var b = pbe.GetInstantBesselianElements(jd);
-                return Sqrt(b.X * b.X + b.Y * b.Y) - 1 + b.L1;
-            };
-
-            // Instant of first external contact of penumbra,
-            // assume always exists
-            double jdP1 = FindRoots(funcExternalContact, jdFrom, jdMid, epsilon);
-            {
-                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdP1);
-                double a = Atan2(b.Y, b.X);
-                PointF p = new PointF((float)Cos(a), (float)Sin(a));                
-                map.P1 = new SolarEclipsePoint(jdP1, Project(b, pbe.DeltaT, p));
-            }
-
-            // Instant of last external contact of penumbra
-            // assume always exists
-            double jdP4 = FindRoots(funcExternalContact, jdMid, jdTo, epsilon);
-            {
-                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdP4);
-                double a = Atan2(b.Y, b.X);
-                PointF p = new PointF((float)Cos(a), (float)Sin(a));
-                map.P4 = new SolarEclipsePoint(jdP4, Project(b, pbe.DeltaT, p));
-            }
-
-            // Instant of first internal contact of penumbra,
-            // may not exist
-            double jdP2 = FindRoots(funcInternalContact, jdFrom, jdMid, epsilon);
-            if (!double.IsNaN(jdP2))
-            {
-                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdP2);
-                double a = Atan2(b.Y, b.X);
-                PointF p = new PointF((float)Cos(a), (float)Sin(a));
-                map.P2 = new SolarEclipsePoint(jdP2, Project(b, pbe.DeltaT, p));
-            }
-
-            // Instant of last internal contact of penumbra,
-            // may not exist
-            double jdP3 = FindRoots(funcInternalContact, jdMid, jdTo, epsilon);
-            if (!double.IsNaN(jdP3))
-            {
-                InstantBesselianElements b = pbe.GetInstantBesselianElements(jdP3);
-                double a = Atan2(b.Y, b.X);
-                PointF p = new PointF((float)Cos(a), (float)Sin(a));
-                map.P3 = new SolarEclipsePoint(jdP3, Project(b, pbe.DeltaT, p));
-            }
-
-            if (eclipseType != SolarEclipseType.Partial)
-            { 
-                map.C1 = ExtremeLimitOfCentralLine(pbe, true);
-                map.C2 = ExtremeLimitOfCentralLine(pbe, false);
-            }
-
-            // Instant of eclipse maximum
-            {
-                InstantBesselianElements b = pbe.GetInstantBesselianElements(pbe.JulianDay0);
-                PointF p = new PointF((float)b.X, (float)b.Y);
-
-                var g = Project(b, pbe.DeltaT, p);
-                //var g = ProjectOnEarth(p, b.D, b.Mu, true);
-                
-                if (g != null)
-                {
-                    map.Max = new SolarEclipsePoint(pbe.JulianDay0, g);
-                }
-            }
-
-            if (eclipseType != SolarEclipseType.Partial)
-            {
-                map.TotalPath = FindCurvePoints(pbe, 0, 0, 0);
-
-                var northPoints = FindCurvePoints(pbe, 0, 1, 1);
-                var southPoints = FindCurvePoints(pbe, 0, -1, 1);
-
-                if (northPoints.Count > 2)
-                {
-                    var m1 = northPoints.OrderByDescending(p => Abs(p.Latitude)).First();
-                    int northIndex = northPoints.IndexOf(m1);
-
-                    map.UmbraNorthernLimit[0] = northPoints.Take(northIndex).ToList();
-                    map.UmbraNorthernLimit[1] = northPoints.Skip(northIndex - 1).ToList();
-                }
-
-                if (southPoints.Count > 2)
-                {
-                    var m2 = southPoints.OrderByDescending(p => Abs(p.Latitude)).First();
-                    int southIndex = southPoints.IndexOf(m2);
-
-                    map.UmbraSouthernLimit[0] = southPoints.Take(southIndex).ToList();
-                    map.UmbraSouthernLimit[1] = southPoints.Skip(southIndex - 1).ToList();
-                }
-            }
-
-            // Find points of Northern limit of penumbra
-            map.PenumbraNorthernLimit = FindCurvePoints(pbe, 0, 1, 0);
-            map.PenumbraSouthernLimit = FindCurvePoints(pbe, 0, -1, 0);
-
-            // Calc rise/set curves
-            FindRiseSetCurves(pbe, map, jdP1, jdP4);
-
-            return map;
-        }
-
-        private static CrdsGeographical Project(InstantBesselianElements be, double deltaT, PointF p)
+        /// <param name="be">Besselian elements for specified instant.</param>
+        /// <param name="p">Point on Besselian plane.</param>
+        /// <returns>Geographical coordinates corresponding to the point.</returns>
+        private static CrdsGeographical Project(InstantBesselianElements be, PointF p)
         {
             double d = ToRadians(be.D);
             double M = be.Mu;
@@ -507,87 +908,71 @@ namespace Astrarium.Algorithms
             double H = To360(ToDegrees(Atan2(x, B * b2 - y1 * b1)));
             double phi1 = Asin(B * b1 + y1 * b2);
             double phi = ToDegrees(Atan(1.003_364_09 * Tan(phi1)));
-            double lambda = M - H - 0.004_178_07 * deltaT;
+            double lambda = M - H - 0.004_178_07 * be.DeltaT;
             return new CrdsGeographical(lambda, phi);
         }
 
-        internal static double FindFunctionEnd(Func<double, bool> func, double left, double right, bool leftExist, bool rightExist, double epsilon)
-        {
-            double mid = (left + right) / 2;
-            bool midExist = func(mid);
-
-            if (Abs(left - right) < epsilon)
-            {
-                return leftExist ? left : right;
-            }
-
-            if (leftExist && !rightExist)
-            {
-                // 1
-                if (midExist)
-                {
-                    return FindFunctionEnd(func, mid, right, true, false, epsilon);
-                }
-                // 2
-                else
-                {
-                    return FindFunctionEnd(func, left, mid, true, false, epsilon);
-                }
-            }
-            else if (!leftExist && rightExist)
-            {
-                // 3
-                if (midExist)
-                {
-                    return FindFunctionEnd(func, left, mid, false, true, epsilon);
-                }
-                // 4
-                else
-                {
-                    return FindFunctionEnd(func, mid, right, false, true, epsilon);
-                }
-            }
-            else 
-            {
-                throw new Exception();
-            }
-        } 
-
-        private static List<CrdsGeographical> FindCurvePoints(PolynomialBesselianElements pbe, double lambda0, int i, int G)
+        /// <summary>
+        /// Finds specified curve of solar eclipse map.
+        /// </summary>
+        /// <param name="pbe">Polynomial Besselian elements.</param>
+        /// <param name="i">Type of the curve (see remarks)</param>
+        /// <param name="G">Magnitude (see remarks)</param>
+        /// <returns>
+        /// Point of the eclipse's map curve, for specified longitude, if exists.
+        /// </returns>
+        /// <remarks>
+        /// The method is from book J.Meeus "Elements of Solar Eclipses, 1951-2000, § 22.
+        /// <paramref name="i"/> and <paramref name="G"/> define a curve type:
+        /// <code>
+        /// ------------------------------------------------------------------------------
+        /// Type of curve                                          i              G
+        /// ------------------------------------------------------------------------------
+        /// central line                                           0         irrelevant
+        /// northern limit of path of total or annular eclipse    +1             +1
+        /// southern limit of path of total or annular eclipse    -1             +1
+        /// northern limit of partial eclipse                     +1              0
+        /// southern limit of partial eclipse                     -1              0
+        /// equal magnitude (north)                               +1         the given G
+        /// equal magnitude (south)                               -1         the given G
+        /// -------------------------------------------------------------------------------
+        /// </code>
+        /// </remarks>
+        private static IList<CrdsGeographical> FindCurvePoints(PolynomialBesselianElements pbe, int i, int G)
         {
             double[] phis = new double[] { 0, Sign(pbe.Y[0]) * 89.9 };           
-            SolarEclipsePoint[] prev = new SolarEclipsePoint[2];
+            SolarEclipseMapPoint[] prev = new SolarEclipseMapPoint[2];
 
-            var points = new List<SolarEclipsePoint>();
+            var points = new List<SolarEclipseMapPoint>();
 
             const double step = 1;
 
-            for (double lambda = lambda0 - 180; lambda <= lambda0 + 180; lambda += step)
+            for (double lambda = -180; lambda <= 180; lambda += step)
             {
                 for (int k = 0; k < 2; k++)
                 {
-                    SolarEclipsePoint p = GetEclipseCurvePoint(pbe, new CrdsGeographical(lambda, phis[k]), i, G);
+                    SolarEclipseMapPoint p = FindEclipseCurvePoint(pbe, new CrdsGeographical(lambda, phis[k]), i, G);
 
                     bool exist = p != null;
                     bool prevExist = prev[k] != null;
 
                     if (prevExist != exist)
                     {
-                        Func<double, bool> func = (lon) => GetEclipseCurvePoint(pbe, new CrdsGeographical(lon, phis[k]), i, G) != null;
+                        Func<double, bool> func = (lon) => FindEclipseCurvePoint(pbe, new CrdsGeographical(lon, phis[k]), i, G) != null;
                         double lon0 = FindFunctionEnd(func, lambda - step, lambda, prevExist, exist, 0.0001);
-                        var p0 = GetEclipseCurvePoint(pbe, new CrdsGeographical(lon0, phis[k]), i, G);
+                        var p0 = FindEclipseCurvePoint(pbe, new CrdsGeographical(lon0, phis[k]), i, G);
 
                         if (p0 != null)
                         {
                             if (exist)
                             {
-                                double sep = Separation(p0.Coordinates, p.Coordinates);
+                                double sep = Separation(p0, p);
                                 if (sep > 1)
                                 {
                                     for (int j = 0; j <= 5; j++)
                                     {
-                                        var m = Intermediate(p0.Coordinates, p.Coordinates, (double)j / 5);
-                                        var m1 = GetEclipseCurvePoint(pbe, new CrdsGeographical(m.Longitude, phis[k]), i, G);
+                                        var m = Intermediate(p0, p, (double)j / 5);
+                                        var m1 = FindEclipseCurvePoint(pbe, new CrdsGeographical(m.Longitude, phis[k]), i, G);
                                         if (m1 != null)
                                             points.Add(m1);
                                     }
@@ -595,13 +980,13 @@ namespace Astrarium.Algorithms
                             }
                             else
                             {
-                                double sep = Separation(prev[k].Coordinates, p0.Coordinates);
+                                double sep = Separation(prev[k], p0);
                                 if (sep > 1)
                                 {
                                     for (int j = 0; j <= 5; j++)
                                     {
-                                        var m = Intermediate(prev[k].Coordinates, p0.Coordinates, (double)j / 5);
-                                        var m1 = GetEclipseCurvePoint(pbe, new CrdsGeographical(m.Longitude, phis[k]), i, G);
+                                        var m = Intermediate(prev[k], p0, (double)j / 5);
+                                        var m1 = FindEclipseCurvePoint(pbe, new CrdsGeographical(m.Longitude, phis[k]), i, G);
                                         if (m1 != null)
                                             points.Add(m1);
                                     }
@@ -613,14 +998,14 @@ namespace Astrarium.Algorithms
                     }
                     else if (exist)
                     {
-                        double sep = Separation(prev[k].Coordinates, p.Coordinates);
+                        double sep = Separation(prev[k], p);
 
                         if (sep > 1)
                         {
                             for (int j = 0; j <= 5; j++)
                             {
-                                var m = Intermediate(prev[k].Coordinates, p.Coordinates, (double)j / 5);
-                                var m1 = GetEclipseCurvePoint(pbe, new CrdsGeographical(m.Longitude, phis[k]), i, G);
+                                var m = Intermediate(prev[k], p, (double)j / 5);
+                                var m1 = FindEclipseCurvePoint(pbe, new CrdsGeographical(m.Longitude, phis[k]), i, G);
                                 if (m1 != null)
                                     points.Add(m1);
                             }
@@ -638,15 +1023,15 @@ namespace Astrarium.Algorithms
 
             if (i == 0)
             {
-                points.Add(ExtremeLimitOfCentralLine(pbe, true));
-                points.Add(ExtremeLimitOfCentralLine(pbe, false));
+                points.Add(FindExtremeLimitOfCentralLine(pbe, true));
+                points.Add(FindExtremeLimitOfCentralLine(pbe, false));
             }
 
             // ORDERING POINTS
 
             if (points.Count <= 2)
             {
-                return points.Select(p => p.Coordinates).ToList();
+                return points.ToArray();
             }
             else
             {
@@ -655,9 +1040,9 @@ namespace Astrarium.Algorithms
 
                 double jdMid = (jdMin + jdMax) / 2;
 
-                var mid = points.OrderBy(p => Abs(p.JulianDay - jdMid)).First().Coordinates;
+                var mid = points.OrderBy(p => Abs(p.JulianDay - jdMid)).First();
 
-                var jdOrdered = points.OrderBy(p => p.JulianDay).Select(p => p.Coordinates).ToList();
+                var jdOrdered = points.OrderBy(p => p.JulianDay).ToList();
 
                 int middleIndex = jdOrdered.IndexOf(mid);
 
@@ -674,21 +1059,20 @@ namespace Astrarium.Algorithms
             }
         }
 
-
-        private class CurvePoint
-        {
-            public double Xi { get; set; }
-            public CrdsGeographical Location { get; set; }
-        }
-
+        /// <summary>
+        /// Finds "eclipse on sunrise/sunset" curves for an eclipse.
+        /// </summary>
+        /// <param name="pbe">Polynomial Besselian elements for the eclipse.</param>
+        /// <param name="map">Solar eclipse map.</param>
+        /// <param name="jdFrom">Juluan Day value to start from</param>
+        /// <param name="jdTo">Juluan Day value to end</param>
         private static void FindRiseSetCurves(PolynomialBesselianElements pbe, SolarEclipseMap map, double jdFrom, double jdTo)
         {
-            double step0 = FindStep(jdTo - jdFrom);
-            double step = step0;
+            double deltaJd = jdTo - jdFrom;
+            int count = (int)(deltaJd / TimeSpan.FromMinutes(1).TotalDays) + 1;
+            double step = deltaJd / count / 20;
             int riseSet = 0;
-
-            double deltaT = Date.DeltaT(jdFrom);
-
+           
             for (double jd = jdFrom; jd <= jdTo + step * 0.1; jd += step)
             {
                 InstantBesselianElements b = pbe.GetInstantBesselianElements(jd);
@@ -698,21 +1082,11 @@ namespace Astrarium.Algorithms
 
                 // Find penumbra (L1 radius) intersection with
                 // Earth circle on fundamental plane
-                PointF[] pPenumbraIntersect = CirclesIntersection(pCenter, b.L1);
-
-                // Adjust iteration step according to current penumbra projection
-                if (Abs(b.X) < 0.15 && pPenumbraIntersect.Any(p => Abs(p.Y) > 0.95))
-                {
-                    step = step0 / 10;
-                }
-                else
-                {
-                    step = step0;
-                }
+                PointF[] pPenumbraIntersect = FindCirclesIntersection(pCenter, b.L1);
 
                 if (Abs(jd - map.P1.JulianDay) < step)
                 {
-                    CrdsGeographical g = map.P1.Coordinates;
+                    CrdsGeographical g = map.P1;
                     if (pCenter.X <= 0)
                         map.RiseSetCurve[riseSet].Insert(0, g);
                     else
@@ -720,7 +1094,7 @@ namespace Astrarium.Algorithms
                 }
                 else if (map.P2 != null && Abs(jd - map.P2.JulianDay) < step)
                 {
-                    CrdsGeographical g = map.P2.Coordinates;
+                    CrdsGeographical g = map.P2;
                     if (pCenter.X <= 0)
                         map.RiseSetCurve[riseSet].Insert(0, g);
                     else
@@ -728,7 +1102,7 @@ namespace Astrarium.Algorithms
                 }
                 else if (map.P3 != null && Abs(jd - map.P3.JulianDay) < step)
                 {
-                    CrdsGeographical g = map.P3.Coordinates;
+                    CrdsGeographical g = map.P3;
                     if (pCenter.X <= 0)
                         map.RiseSetCurve[riseSet].Insert(0, g);
                     else
@@ -736,7 +1110,7 @@ namespace Astrarium.Algorithms
                 }
                 else if (Abs(jd - map.P4.JulianDay) < step)
                 {
-                    CrdsGeographical g = map.P4.Coordinates;
+                    CrdsGeographical g = map.P4;
                     if (pCenter.X <= 0)
                         map.RiseSetCurve[riseSet].Insert(0, g);
                     else
@@ -746,7 +1120,7 @@ namespace Astrarium.Algorithms
                 {
                     for (int i = 0; i < pPenumbraIntersect.Length; i++)
                     {
-                        CrdsGeographical g = Project(b, deltaT, pPenumbraIntersect[i]);
+                        CrdsGeographical g = Project(b, pPenumbraIntersect[i]);
                         
                         if (pCenter.X <= 0)
                         {
@@ -777,98 +1151,6 @@ namespace Astrarium.Algorithms
         }
 
         /// <summary>
-        /// Finds step value (in Julian days) needed for calculating curve points.
-        /// </summary>
-        /// <param name="deltaJd">Time interval, in Julian days</param>
-        /// <returns>Step value (in Julian days, closest to 1 minute) needed for calculating curve points.</returns>
-        private static double FindStep(double deltaJd)
-        {            
-            int count = (int)(deltaJd / TimeSpan.FromMinutes(1).TotalDays) + 1;
-            return deltaJd / count;
-        }
-
-        
-        /// <summary>
-        /// Project point from Besselian fundamental plane 
-        /// to Earth surface and find geographical coordinates of projection
-        /// </summary>
-        /// <param name="p">Point on Besselian fundamental plane</param>
-        /// <param name="d">Declination of Moon shadow vector, in degrees</param>
-        /// <param name="mu">Hour angle of Moon shadow vector, in degrees</param>
-        /// <returns>
-        /// Geograhphical coordinates of a point on Earth surface, corresponding to the
-        /// point on Besselian fundamental plane, or null if point is outside the Earth circle on the plane.
-        /// </returns>
-        /// <remarks>
-        /// Formulae are taken from book
-        /// Seidelmann, P. K.: Explanatory Supplement to The Astronomical Almanac, 
-        /// University Science Book, Mill Valley (California), 1992,
-        /// Chapter 8.3 "Solar Eclipses"
-        /// https://archive.org/download/131123ExplanatorySupplementAstronomicalAlmanac/131123-explanatory-supplement-astronomical-almanac.pdf
-        /// </remarks>
-        internal static CrdsGeographical ProjectOnEarth(PointF p, double d, double mu, bool forceProjection = false)
-        {            
-            // Earth ellipticity, squared
-            const double e2 = 0.00669454;
-
-            // 8.334-1
-            double rho1 = Sqrt(1 - e2 * Cos(ToRadians(d)) * Cos(ToRadians(d)));
-
-            double xi = p.X;
-            double eta = p.Y;
-
-            // 8.333-9
-            double eta1 = eta / rho1;
-
-            // 8.333-10
-            double zeta1_2 = 1 - xi * xi - eta1 * eta1;
-
-            double zeta1;
-            if (zeta1_2 >= 0)
-            {
-                zeta1 = Sqrt(zeta1_2);
-            }
-            else 
-            {
-                if (forceProjection)
-                {
-                    double P = Atan2(eta1, xi);
-                    xi = Cos(P);
-                    eta1 = Sin(P);
-                    zeta1 = 0;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-
-            // 8.334-1
-            double sind1 = Sin(ToRadians(d)) / rho1;
-            double cosd1 = Sqrt(1 - e2) * Cos(ToRadians(d)) / rho1;
-
-            double d1 = Atan2(sind1, cosd1);
-
-            // 8.333-13
-            var v = Matrix.R1(d1) * new Vector(xi, eta1, zeta1);
-
-            double phi1 = Asin(v.Y);
-            double sinTheta = v.X / Cos(phi1);
-            double cosTheta = v.Z / Cos(phi1);
-
-            double theta = ToDegrees(Atan2(sinTheta, cosTheta));
-
-            double tanPhi = Tan(phi1) / Sqrt(1 - e2);
-
-            double phi = Atan(tanPhi);
-
-            // 8.331-4
-            double lambda = mu - theta;
-
-            return new CrdsGeographical(To360(lambda + 180) - 180, ToDegrees(phi));
-        }
-
-        /// <summary>
         /// Finds points of intersection of two circles.
         /// First circle is a Unit circle (of radius 1 centered at the origin (0, 0) of fundamental plane).
         /// Second circle is defined by its center (<paramref name="p"/>) and radius (<paramref name="r"/>)
@@ -883,7 +1165,7 @@ namespace Astrarium.Algorithms
         /// https://e-maxx.ru/algo/circles_intersection
         /// https://e-maxx.ru/algo/circle_line_intersection
         /// </remarks>
-        private static PointF[] CirclesIntersection(PointF p, double r)
+        private static PointF[] FindCirclesIntersection(PointF p, double r)
         {
             double a = -2 * p.X;
             double b = -2 * p.Y;
@@ -922,6 +1204,58 @@ namespace Astrarium.Algorithms
         }
 
         /// <summary>
+        /// Helper method to find end of line based on bisection method.
+        /// </summary>
+        /// <param name="func">Function describing the line. Should return true of point exists on the line, false otherwise.</param>
+        /// <param name="left">Left (lesser) value of argument.</param>
+        /// <param name="right">Right (larger) value of argument.</param>
+        /// <param name="leftExist">True, if line exist on the left point</param>
+        /// <param name="rightExist">True, if line exist on the right point</param>
+        /// <param name="epsilon">Desired tolerance.</param>
+        /// <returns>Point where the function ends.</returns>
+        internal static double FindFunctionEnd(Func<double, bool> func, double left, double right, bool leftExist, bool rightExist, double epsilon)
+        {
+            double mid = (left + right) / 2;
+            bool midExist = func(mid);
+
+            if (Abs(left - right) < epsilon)
+            {
+                return leftExist ? left : right;
+            }
+
+            if (leftExist && !rightExist)
+            {
+                // 1
+                if (midExist)
+                {
+                    return FindFunctionEnd(func, mid, right, true, false, epsilon);
+                }
+                // 2
+                else
+                {
+                    return FindFunctionEnd(func, left, mid, true, false, epsilon);
+                }
+            }
+            else if (!leftExist && rightExist)
+            {
+                // 3
+                if (midExist)
+                {
+                    return FindFunctionEnd(func, left, mid, false, true, epsilon);
+                }
+                // 4
+                else
+                {
+                    return FindFunctionEnd(func, mid, right, false, true, epsilon);
+                }
+            }
+            else
+            {
+                throw new Exception();
+            }
+        }
+
+        /// <summary>
         /// Finds function root by bisection method
         /// </summary>
         /// <param name="func">Function to find root</param>
@@ -952,484 +1286,5 @@ namespace Astrarium.Algorithms
             }
             return (a + b) / 2;
         }
-
-        /// <summary>
-        /// Calculates nearest solar eclipse (next or previous) for the provided Julian Day.
-        /// </summary>
-        /// <param name="jd"></param>
-        /// <param name="next"></param>
-        public static SolarEclipse NearestEclipse(double jd, bool next)
-        {
-            Date d = new Date(jd);
-            double year = d.Year + (Date.JulianEphemerisDay(d) - Date.JulianDay0(d.Year)) / 365.25;
-            double k = Floor((year - 2000) * 12.3685);
-            bool eclipseFound;
-          
-            double T = k / 1236.85;
-            double T2 = T * T;
-            double T3 = T2 * T;
-            double T4 = T3 * T;
-
-            SolarEclipse eclipse = new SolarEclipse();
-
-            do
-            {
-                // Moon's argument of latitude (mean dinstance of the Moon from its ascending node)
-                double F = 160.7108 + 390.67050284 * k
-                                    - 0.0016118 * T2
-                                    - 0.00000227 * T3
-                                    + 0.000000011 * T4;
-                
-                eclipseFound = Abs(Sin(ToRadians(F))) <= 0.36;
-
-                if (eclipseFound)
-                {
-                    double jdMeanPhase = 2451550.09766 + 29.530588861 * k
-                                                    + 0.00015437 * T2
-                                                    - 0.000000150 * T3
-                                                    + 0.00000000073 * T4;
-
-                    // Sun's mean anomaly
-                    double M = 2.5534 + 29.10535670 * k
-                                     - 0.0000014 * T2
-                                     - 0.00000011 * T3;
-                    M = ToRadians(M);
-
-                    // Moon's mean anomaly
-                    double M_ = 201.5643 + 385.81693528 * k
-                                         + 0.0107582 * T2
-                                         + 0.00001238 * T3
-                                         - 0.000000058 * T4;
-                    M_ = ToRadians(M_);
-
-                    // Mean longitude of ascending node
-                    double Omega = 124.7746 - 1.56375588 * k
-                                            + 0.0020672 * T2
-                                            + 0.00000215 * T3;
-                    Omega = ToRadians(Omega);
-
-                    // Multiplier related to the eccentricity of the Earth orbit
-                    double E = 1 - 0.002516 * T - 0.0000074 * T2;
-
-                    double F1 = ToRadians(F - 0.02665 * Sin(Omega));
-                    double A1 = ToRadians(299.77 + 0.107408 * k - 0.009173 * T2);
-
-                    double jdMax =
-                        jdMeanPhase
-                        - 0.4075 * Sin(M_)
-                        + 0.1721 * E * Sin(M)
-                        + 0.0161 * Sin(2 * M_)
-                        - 0.0097 * Sin(2 * F1)
-                        + 0.0073 * E * Sin(M_ - M)
-                        - 0.0050 * E * Sin(M_ + M)
-                        - 0.0023 * Sin(M_ - 2 * F1)
-                        + 0.0021 * E * Sin(2 * M)
-                        + 0.0012 * Sin(M_ + 2 * F1)
-                        + 0.0006 * E * Sin(2 * M_ + M)
-                        - 0.0004 * Sin(3 * M_)
-                        - 0.0003 * E * Sin(M + 2 * F1)
-                        + 0.0003 * Sin(A1)
-                        - 0.0002 * E * Sin(M - 2 * F1)
-                        - 0.0002 * E * Sin(2 * M_ - M)
-                        - 0.0002 * Sin(Omega);
-
-                    double P =
-                        0.2070 * E * Sin(M)
-                        + 0.0024 * E * Sin(2 * M)
-                        - 0.0392 * Sin(M_)
-                        + 0.0116 * Sin(2 * M_)
-                        - 0.0073 * E * Sin(M_ + M)
-                        + 0.0067 * E * Sin(M_ - M)
-                        + 0.0118 * Sin(2 * F1);
-
-                    double Q = 
-                        5.2207 - 0.0048 * E * Cos(M) 
-                        + 0.0020 * E * Cos(2 * M) 
-                        - 0.3299 * Cos(M_) 
-                        - 0.0060 * E * Cos(M_ + M) 
-                        + 0.0041 * E * Cos(M_ - M);
-
-                    double W = Abs(Cos(F1));
-
-                    double gamma = (P * Cos(F1) + Q * Sin(F1)) * (1 - 0.0048 * W);
-
-                    double u = 0.0059
-                        + 0.0046 * E * Cos(M)
-                        - 0.0182 * Cos(M_)
-                        + 0.0004 * Cos(2 * M_)
-                        - 0.0005 * E * Cos(M + M_);
-
-                    // no eclipse visible from the Earth surface
-                    if (Abs(gamma) > 1.5433 + u)
-                    {
-                        eclipseFound = false;
-                        if (next) k++;
-                        else k--;
-                        continue;
-                    }
-
-                    eclipse.U = u;
-                    eclipse.Gamma = gamma;
-                    eclipse.JulianDayMaximum = jdMax;
-
-                    // non-central eclipse
-                    if (Abs(gamma) > 0.9972 && Abs(gamma) < 0.9972 + Abs(u))
-                    {
-                        eclipse.IsNonCentral = true;
-                    }
-
-                    if (u < 0)
-                    {
-                        eclipse.EclipseType = SolarEclipseType.Total;
-                    }
-                    else if (u > 0.0047)
-                    {
-                        eclipse.EclipseType = SolarEclipseType.Annular;
-                    }
-                    else
-                    {
-                        double omega = 0.00464 * Sqrt(1 - gamma * gamma);
-                        if (u < omega)
-                        {
-                            eclipse.EclipseType = SolarEclipseType.Hybrid;
-                        }
-                        else
-                        {
-                            eclipse.EclipseType = SolarEclipseType.Annular;
-                        }
-                    }
-
-                    if (!eclipse.IsNonCentral && Abs(gamma) > 0.9972 && Abs(gamma) < 1.5433 + u)
-                    {
-                        eclipse.EclipseType = SolarEclipseType.Partial;
-                        eclipse.Phase = (1.5433 + u - Abs(gamma)) / (0.5461 + 2 * u);
-                    }
-
-                    // hemisphere
-                    if (gamma > 0)
-                    {
-                        eclipse.Regio = EclipseRegio.Northern;
-                    }
-                    if (gamma < 0)
-                    {
-                        eclipse.Regio = EclipseRegio.Southern;
-                    }
-                    if (Abs(gamma) < 0.1)
-                    {
-                        eclipse.Regio = EclipseRegio.Equatorial;
-                    }
-                }
-                else
-                {
-                    if (next) k++;
-                    else k--;
-                }
-            }
-            while (!eclipseFound);
-
-            return eclipse;
-        }
-
-        internal static Vector ProjectOnFundamentalPlane(CrdsGeographical g, double d, double mu)
-        {
-            const double e2 = 0.00669454;
-
-            double phi = ToRadians(g.Latitude);
-            double sinPhi = Sin(phi);
-
-            double C = 1.0 / Sqrt(1 - e2 * sinPhi * sinPhi);
-            double S = (1 - e2) * C;
-
-            double a = 6378137.0;
-            double h = g.Elevation;
-            double phi_ = Atan((a * S + h) * Tan(phi) / (a * C + h));
-            double rho = (a * C + h) * Cos(phi) / (a * Cos(phi_));
-
-            // 8.331-4
-            double theta = mu - g.Longitude; // (b.Mu - 1.002738 * 360.0 / 86400.0 * deltaT) - g.Longitude;
-
-            // 8.331-5
-            double xi = rho * Cos(phi_) * Sin(ToRadians(theta));
-            double eta = rho * Sin(phi_) * Cos(ToRadians(d)) - rho * Cos(phi_) * Sin(ToRadians(d)) * Cos(ToRadians(theta));
-            double zeta = rho * Sin(phi_) * Sin(ToRadians(d)) + rho * Cos(phi_) * Cos(ToRadians(d)) * Cos(ToRadians(theta));
-
-            return new Vector(xi, eta, zeta);
-        }
-
-        public static SolarEclipseLocalCircumstances LocalCircumstances(PolynomialBesselianElements pbe, CrdsGeographical g)
-        {
-            double deltaT = pbe.DeltaT;
-
-            double phi = ToRadians(g.Latitude); 
-
-            double t = 0;
-            double tau = 0;
-
-            int iters = 0;
-
-            // Earth flattening
-            const double flat = 1.0 / 298.257;
-
-            // Earth flattening constant, used in calculation: 0.99664719
-            double fconst = 1.0 - flat;
-
-            double U = Atan(fconst * Tan(phi));
-
-            double rhoSinPhi_ = fconst * Sin(U);
-            double rhoCosPhi_ = Cos(U);
-
-            double jd;
-
-            double d, H, h, ksi, eta, zeta, u, v, a, b, n2, n, S;
-            InstantBesselianElements be;
-
-            do
-            {
-                iters++;
-
-                jd = pbe.JulianDay0 + t * pbe.Step;
-                be = pbe.GetInstantBesselianElements(jd);
-
-                double X = be.X;
-                double Y = be.Y;
-                d = ToRadians(be.D); 
-                double M = be.Mu; 
-
-                double dX = be.dX; 
-                double dY = be.dY; 
-
-                H = ToRadians(M - g.Longitude - 0.00417807 * deltaT);
-
-                ksi = rhoCosPhi_ * Sin(H);
-                eta = rhoSinPhi_ * Cos(d) - rhoCosPhi_ * Cos(H) * Sin(d);
-                zeta = rhoSinPhi_ * Sin(d) + rhoCosPhi_ * Cos(H) * Cos(d);
-
-                double sinh = Sin(d) * Sin(phi) + Cos(d) * Cos(phi) * Cos(H);
-                h = ToDegrees(Asin(sinh));
-
-                double ksi_ = ToRadians(pbe.Mu[1] * rhoCosPhi_ * Cos(H));
-                double eta_ = ToRadians(pbe.Mu[1] * ksi * Sin(d) - zeta * pbe.D[1]);
-
-                u = X - ksi;
-                v = Y - eta;
-
-                a = dX - ksi_;
-                b = dY - eta_;
-
-                n2 = a * a + b * b;
-                n = Sqrt(n2);
-
-                tau = -(u * a + v * b) / n2;
-                t += tau;
-            }
-            while (Abs(tau) >= 0.00001 && iters < 20);
-
-            double tMax = t;
-            double jdMax = jd;
-            double altMax = h;
-
-            double dL1 = be.L1 - zeta * pbe.TanF1;
-            double dL2 = be.L2 - zeta * pbe.TanF2;
-
-            double m = Sqrt(u * u + v * v);
-            double G = (dL1 - m) / (dL1 + dL2);
-            double A = (dL1 - dL2) / (dL1 + dL2);
-
-            if (G < 0)
-            {
-                return new SolarEclipseLocalCircumstances();
-            }
-
-            var tauPhases = new double[4];
-            var jdPhases = new double[4];
-            var altPhases = new double[4];
-
-            // calculate initial values of tau
-            for (int i = 0; i < 4; i++) 
-            {
-                double tanFx = i < 2 ? pbe.TanF1 : pbe.TanF2;
-                double Lx = i < 2 ? be.L1 : be.L2;
-                int sign = i % 2 == 0 ? -1 : 1;
-                double dLx = Lx - zeta * tanFx;                
-
-                S = (a * v - u * b) / (n * dLx);
-                tauPhases[i] = -(u * a + v * b) / n2 + sign * dLx / n * Sqrt(1 - S * S);
-            }
-
-            // i=0: beginning of partial phase
-            // i=1: end of partial phase
-            // i=2: beginning of total phase
-            // i=3: end of total phae
-            for (int i = 0; i < 4; i++)
-            {
-                t = tMax + tauPhases[i];
-                iters = 0;
-
-                do
-                {
-                    iters++;
-
-                    jd = pbe.JulianDay0 + t * pbe.Step;
-                    be = pbe.GetInstantBesselianElements(jd);
-
-                    double X = be.X;
-                    double Y = be.Y;
-                    d = ToRadians(be.D);
-                    double M = be.Mu;
-
-                    double dX = be.dX;
-                    double dY = be.dY;
-
-                    H = ToRadians(M - g.Longitude - 0.00417807 * deltaT);
-
-                    double sinh = Sin(d) * Sin(phi) + Cos(d) * Cos(phi) * Cos(H);
-                    h = ToDegrees(Asin(sinh));
-
-                    ksi = rhoCosPhi_ * Sin(H);
-                    eta = rhoSinPhi_ * Cos(d) - rhoCosPhi_ * Cos(H) * Sin(d);
-                    zeta = rhoSinPhi_ * Sin(d) + rhoCosPhi_ * Cos(H) * Cos(d);
-
-                    double tanFx = i < 2 ? pbe.TanF1 : pbe.TanF2;
-                    double Lx = i < 2 ? be.L1 : be.L2;
-                    int sign = i % 2 == 0 ? -1 : 1;
-                    double dLx = Lx - zeta * tanFx;
-
-                    double ksi_ = ToRadians(pbe.Mu[1] * rhoCosPhi_ * Cos(H));
-                    double eta_ = ToRadians(pbe.Mu[1] * ksi * Sin(d) - zeta * pbe.D[1]);
-
-                    u = X - ksi;
-                    v = Y - eta;
-
-                    a = dX - ksi_;
-                    b = dY - eta_;
-
-                    n2 = a * a + b * b;
-                    n = Sqrt(n2);
-
-                    S = (a * v - u * b) / (n * dLx);
-                    tau = -(u * a + v * b) / n2 + sign * dLx / n * Sqrt(1 - S * S);
-                    t += tau;
-                }
-                while (Abs(tau) >= 0.00001 && iters < 20);
-
-                jdPhases[i] = jd;
-                altPhases[i] = h;
-            }
-
-            if (altPhases[0] < 0 && altPhases[1] < 0)
-            {
-                return new SolarEclipseLocalCircumstances();
-            }
-            else
-            {
-                return
-                    new SolarEclipseLocalCircumstances()
-                    {
-                        JulianDayMax = jdMax,
-                        SunAltMax = altMax,
-                        JulianDayPartialBegin = jdPhases[0],
-                        SunAltPartialBegin = altPhases[0],
-                        JulianDayPartialEnd = jdPhases[1],
-                        SunAltPartialEnd = altPhases[1],
-                        JulianDayTotalBegin = jdPhases[2],
-                        SunAltTotalBegin = altPhases[2],
-                        JulianDayTotalEnd = jdPhases[3],
-                        SunAltTotalEnd = altPhases[3],
-                        MaxMagnitude = G,
-                        MoonToSunDiameterRatio = A
-                    };
-            }
-        }
-    }
-   
-    /// <summary>
-    /// Describes general details of the Solar eclipse
-    /// </summary>
-    public class SolarEclipse
-    {
-        /// <summary>
-        /// Instant of maximal eclipse
-        /// </summary>
-        public double JulianDayMaximum { get; set; }
-
-        /// <summary>
-        /// Eclipse phase
-        /// </summary>
-        public double Phase { get; set; } = 1;
-        
-        /// <summary>
-        /// Regio where the eclipse is primarily visible
-        /// </summary>
-        public EclipseRegio Regio { get; set; }        
-               
-        /// <summary>
-        /// Least distance from the axis of the Moon's shadow to the center of the Earth,
-        /// in units of equatorial radius of the Earth.
-        /// </summary>
-        public double Gamma { get; set; }
-
-        /// <summary>
-        /// Radius of the Moon's umbral cone in the fundamental plane,
-        /// in units of equatorial radius of the Earth.
-        /// </summary>
-        public double U { get; set; }
-
-        /// <summary>
-        /// Type of eclipse: annular, central, hybrid (annular-central) or partial
-        /// </summary>
-        public SolarEclipseType EclipseType { get; set; }
-
-        /// <summary>
-        /// Flag indicating the eclipse is non-central
-        /// (umbral cone touches the Earth polar regio but umbral axis does not)
-        /// </summary>
-        public bool IsNonCentral { get; set; }
-    } 
-
-    /// <summary>
-    /// Solar eclipse type
-    /// </summary>
-    public enum SolarEclipseType
-    {
-        /// <summary>
-        /// Annular solar eclipse
-        /// </summary>
-        Annular,
-
-        /// <summary>
-        /// Total solar eclipse
-        /// </summary>
-        Total,
-
-        /// <summary>
-        /// Hybrid, or annular-total solar eclipse
-        /// </summary>
-        Hybrid,
-
-        /// <summary>
-        /// Partial solar eclipse
-        /// </summary>
-        Partial
-    }
-
-    /// <summary>
-    /// Visibility regio of the eclipse
-    /// </summary>
-    public enum EclipseRegio
-    {
-        /// <summary>
-        /// Eclipse is primarily visible in Northern hemisphere
-        /// </summary>
-        Northern = 1,
-
-        /// <summary>
-        /// Eclipse is primarily visible in equatorial regio
-        /// </summary>
-        Equatorial = 0,
-
-        /// <summary>
-        /// Eclipse is primarily visible in Southern hemisphere
-        /// </summary>
-        Southern = -1
     }
 }

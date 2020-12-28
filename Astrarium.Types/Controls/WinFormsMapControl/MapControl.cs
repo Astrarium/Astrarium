@@ -734,17 +734,17 @@ namespace System.Windows.Forms
                 DrawTrack?.Invoke(this, eventArgs);
                 if (!eventArgs.Handled)
                 {
-                    if (ZoomLevel < 3)
-                    {
+                    //if (ZoomLevel < 3)
+                    //{
                         if (track.Style.Pen != null)
                         {
                             Draw(gr, () => gr.DrawLines(track.Style.Pen, points));
                         }
-                    }
-                    else
-                    {
-                        Draw(gr, () => gr.DrawPolyline(track.Style.Pen, points));
-                    }
+                    //}
+                    //else
+                    //{
+                    //    Draw(gr, () => gr.DrawPolyline(track.Style.Pen, points));
+                    //}
                 }
             }
         }

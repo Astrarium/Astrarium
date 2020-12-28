@@ -247,10 +247,9 @@ namespace Astrarium.Plugins.Eclipses
                 };
             }
 
-            besselianElements = SolarEclipses.FindPolynomialBesselianElements(pos);
+            besselianElements = SolarEclipses.BesselianElements(pos);
 
-
-            var map = SolarEclipses.GetEclipseMap(besselianElements, eclipse.EclipseType);
+            var map = SolarEclipses.EclipseMap(besselianElements, eclipse.EclipseType);
 
             EclipseDate = Formatters.Date.Format(new Date(JulianDay, observerLocation.UtcOffset));
 
@@ -260,41 +259,36 @@ namespace Astrarium.Plugins.Eclipses
 
             if (map.P1 != null)
             {
-                markers.Add(new Marker(ToGeo(map.P1.Coordinates), riseSetMarkerStyle, "P1"));
+                markers.Add(new Marker(ToGeo(map.P1), riseSetMarkerStyle, "P1"));
             }
             if (map.P2 != null)
             {
-                markers.Add(new Marker(ToGeo(map.P2.Coordinates), riseSetMarkerStyle, "P2"));
+                markers.Add(new Marker(ToGeo(map.P2), riseSetMarkerStyle, "P2"));
             }
             if (map.P3 != null)
             {
-                markers.Add(new Marker(ToGeo(map.P3.Coordinates), riseSetMarkerStyle, "P3"));
+                markers.Add(new Marker(ToGeo(map.P3), riseSetMarkerStyle, "P3"));
             }
             if (map.P4 != null)
             {
-                markers.Add(new Marker(ToGeo(map.P4.Coordinates), riseSetMarkerStyle, "P4"));
+                markers.Add(new Marker(ToGeo(map.P4), riseSetMarkerStyle, "P4"));
             }
-
             if (map.C1 != null)
             {
-                markers.Add(new Marker(ToGeo(map.C1.Coordinates), centralLineMarkerStyle, "C1"));
+                markers.Add(new Marker(ToGeo(map.C1), centralLineMarkerStyle, "C1"));
             }
             if (map.C2 != null)
             {
-                markers.Add(new Marker(ToGeo(map.C2.Coordinates), centralLineMarkerStyle, "C2"));
+                markers.Add(new Marker(ToGeo(map.C2), centralLineMarkerStyle, "C2"));
             }
 
             for (int i = 0; i < 2; i++)
             {
                 if (map.UmbraNorthernLimit[i].Any())
                 {
-                    
                     var track = new Track(umbraLimitTrackStyle);
                     track.AddRange(map.UmbraNorthernLimit[i].Select(p => ToGeo(p)));
                     tracks.Add(track);
-                    
-
-
                 }
 
                 if (map.UmbraSouthernLimit[i].Any())
@@ -302,28 +296,14 @@ namespace Astrarium.Plugins.Eclipses
                     var track = new Track(umbraLimitTrackStyle);
                     track.AddRange(map.UmbraSouthernLimit[i].Select(p => ToGeo(p)));
                     tracks.Add(track);
-
-                    /*
-                    for (int j = 0; j < map.UmbraSouthernLimit[i].Count; j++)
-                    {
-                        markers.Add(new Marker(ToGeo(map.UmbraSouthernLimit[i][j]), maxPointMarkerStyle, j.ToString()));
-                    }*/
                 }
             }
-
 
             if (map.TotalPath.Any())
             {
                 var track = new Track(centralLineTrackStyle);
                 track.AddRange(map.TotalPath.Select(p => ToGeo(p)));                                      
                 tracks.Add(track);
-
-                /*
-                for (int i=0; i<map.TotalPath.Count; i++)
-                {
-                    markers.Add(new Marker(ToGeo(map.TotalPath[i]), maxPointMarkerStyle, i.ToString()));
-                }
-                */
             }
 
             // central line is divided into 2 ones => draw shadow path as 2 polygons
@@ -334,10 +314,10 @@ namespace Astrarium.Plugins.Eclipses
                 var polygon = new Polygon(umbraPolygonStyle);
                 polygon.AddRange(map.UmbraNorthernLimit[0].Select(p => ToGeo(p)));
                 polygon.AddRange(map.UmbraNorthernLimit[1].Select(p => ToGeo(p)));
-                if (map.C2 != null) polygon.Add(ToGeo(map.C2.Coordinates));
+                if (map.C2 != null) polygon.Add(ToGeo(map.C2));
                 polygon.AddRange((map.UmbraSouthernLimit[1] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
                 polygon.AddRange((map.UmbraSouthernLimit[0] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
-                if (map.C1 != null) polygon.Add(ToGeo(map.C1.Coordinates));
+                if (map.C1 != null) polygon.Add(ToGeo(map.C1));
                 polygons.Add(polygon);
             }
             else 
@@ -381,14 +361,19 @@ namespace Astrarium.Plugins.Eclipses
 
             if (map.Max != null)
             {
-                markers.Add(new Marker(ToGeo(map.Max.Coordinates), maxPointMarkerStyle, "Max"));
+                markers.Add(new Marker(ToGeo(map.Max), maxPointMarkerStyle, "Max"));
             }
 
             Tracks = tracks;
             Polygons = polygons;
             Markers = markers;
 
-            NotifyPropertyChanged(nameof(EclipseDate), nameof(Tracks), nameof(Polygons), nameof(Markers));
+            NotifyPropertyChanged(
+                nameof(EclipseDate), 
+                nameof(Tracks), 
+                nameof(Polygons), 
+                nameof(Markers)
+            );
         }
 
         private GeoPoint ToGeo(CrdsGeographical g)
