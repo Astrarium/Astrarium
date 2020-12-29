@@ -55,12 +55,10 @@ namespace Astrarium.Plugins.Eclipses
         /// </summary>
         public ICollection<Polygon> Polygons { get; private set; }
 
-        private readonly ISky sky;
+        private readonly IEclipsesCalculator eclipsesCalculator;
         private readonly ISettings settings;
         private readonly CrdsGeographical observerLocation;
         private PolynomialBesselianElements besselianElements;
-        private readonly CelestialObject sun;
-        private readonly CelestialObject moon;
 
         #region Map styles
 
@@ -71,9 +69,6 @@ namespace Astrarium.Plugins.Eclipses
         private readonly TrackStyle penumbraLimitTrackStyle = new TrackStyle(new Pen(Color.Orange, 2));
         private readonly TrackStyle umbraLimitTrackStyle = new TrackStyle(new Pen(Color.Gray, 2));
         private readonly TrackStyle centralLineTrackStyle = new TrackStyle(new Pen(Color.Black, 2));
-
-        private readonly TrackStyle centralLineTrackStyle2 = new TrackStyle(new Pen(Color.Red, 2));
-
         private readonly PolygonStyle umbraPolygonStyle = new PolygonStyle(new SolidBrush(Color.FromArgb(100, Color.Gray)));
 
         #endregion Map styles
@@ -85,6 +80,11 @@ namespace Astrarium.Plugins.Eclipses
             { 
                 SetValue(nameof(TileServer), value);
                 TileImageAttributes = GetImageAttributes();
+                if (settings.Get<string>("EclipseMapTileServer") != value.Name)
+                {
+                    settings.Set("EclipseMapTileServer", value.Name);
+                    settings.Save();
+                }
             }
         }
 
@@ -94,14 +94,12 @@ namespace Astrarium.Plugins.Eclipses
             set => SetValue(nameof(TileImageAttributes), value);
         }
 
-        public SolarEclipseVM(ISky sky, ISettings settings)
+        public SolarEclipseVM(IEclipsesCalculator eclipsesCalculator, ISky sky, ISettings settings)
         {
-            this.sky = sky;
+            this.eclipsesCalculator = eclipsesCalculator;
             this.settings = settings;
             this.settings.PropertyChanged += Settings_PropertyChanged;
             observerLocation = settings.Get<CrdsGeographical>("ObserverLocation");
-            sun = sky.Search("@sun", b => true).FirstOrDefault();
-            moon = sky.Search("@moon", b => true).FirstOrDefault();
 
             CacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "MapsCache");
 
@@ -113,9 +111,11 @@ namespace Astrarium.Plugins.Eclipses
                 new OpenTopoMapServer()
             };
 
-            TileServer = TileServers.First();
+            string tileServerName = settings.Get<string>("EclipseMapTileServer");
+            var tileServer = TileServers.FirstOrDefault(s => s.Name.Equals(tileServerName));            
+            TileServer = tileServer ?? TileServers.First();
 
-            JulianDay = sky.Context.JulianDay;
+            JulianDay = sky.Context.JulianDay - LunarEphem.SINODIC_PERIOD;
 
             CalculateEclipse(next: true);
         }
@@ -159,9 +159,6 @@ namespace Astrarium.Plugins.Eclipses
         private void ClickOnMap()
         {
             
-
-            ;
-            //MessageBox.Show(Formatters.DateTime.Format(date));
         }
 
         private ImageAttributes GetImageAttributes()
@@ -214,41 +211,10 @@ namespace Astrarium.Plugins.Eclipses
 
         private void CalculateEclipse(bool next)
         {
-            if (sun == null || moon == null)
-            {
-                ViewManager.ShowMessageBox("Error", "Failed to calculate eclipse details: unable to determine Sun and/or Moon positions. Probably SolarSystem plugin is missed.");
-                return;
-            }
-
-            // TODO: move to EclipsesCalculator
-
-            SolarEclipse eclipse = SolarEclipses.NearestEclipse(JulianDay + (next ? 30 : -30), next);
+            SolarEclipse eclipse = SolarEclipses.NearestEclipse(JulianDay + (next ? 1 : -1) * LunarEphem.SINODIC_PERIOD, next);
             JulianDay = eclipse.JulianDayMaximum;
 
-            // 5 measurements with 3h step, so interval is -6...+6 hours
-            SunMoonPosition[] pos = new SunMoonPosition[5];
-
-            double dt = TimeSpan.FromHours(6).TotalDays;
-            double step = TimeSpan.FromHours(3).TotalDays;
-            string[] ephemerides = new[] { "Equatorial0.Alpha", "Equatorial0.Delta", "Distance" };
-
-            var sunEphem = sky.GetEphemerides(sun, JulianDay - dt, JulianDay + dt + 1e-6, step, ephemerides);
-            var moonEphem = sky.GetEphemerides(moon, JulianDay - dt, JulianDay + dt + 1e-6, step, ephemerides);
-
-            for (int i = 0; i < 5; i++)
-            {
-                pos[i] = new SunMoonPosition()
-                {
-                    JulianDay = JulianDay + step * (i - 2),
-                    Sun = new CrdsEquatorial(sunEphem[i].GetValue<double>("Equatorial0.Alpha"), sunEphem[i].GetValue<double>("Equatorial0.Delta")),
-                    Moon = new CrdsEquatorial(moonEphem[i].GetValue<double>("Equatorial0.Alpha"), moonEphem[i].GetValue<double>("Equatorial0.Delta")),
-                    DistanceSun = sunEphem[i].GetValue<double>("Distance") * 149597870 / 6371.0,
-                    DistanceMoon = moonEphem[i].GetValue<double>("Distance") / 6371.0
-                };
-            }
-
-            besselianElements = SolarEclipses.BesselianElements(pos);
-
+            besselianElements = eclipsesCalculator.GetBesselianElements(JulianDay);
             var map = SolarEclipses.EclipseMap(besselianElements, eclipse.EclipseType);
 
             EclipseDate = Formatters.Date.Format(new Date(JulianDay, observerLocation.UtcOffset));

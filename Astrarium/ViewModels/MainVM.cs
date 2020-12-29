@@ -586,7 +586,18 @@ namespace Astrarium.ViewModels
                             if (vm.SecondaryBody != null)
                             {
                                 var hor = Angle.Intermediate(vm.PrimaryBody.Horizontal, vm.SecondaryBody.Horizontal, 0.5);
+                                
                                 var targetViewAngle = Angle.Separation(vm.PrimaryBody.Horizontal, vm.SecondaryBody.Horizontal) * 3;
+                                
+                                if (vm.PrimaryBody is SizeableCelestialObject pb && vm.SecondaryBody is SizeableCelestialObject sb) 
+                                {
+                                    var minSemidiamter = Math.Min(pb.Semidiameter, sb.Semidiameter) / 3600;
+                                    if (minSemidiamter > targetViewAngle)
+                                    {
+                                        targetViewAngle = minSemidiamter * 3;
+                                    }
+                                }
+
                                 CenterOnPoint(hor, targetViewAngle);
                             }
                             else

@@ -36,6 +36,9 @@ namespace Astrarium.Algorithms.Tests
             Assert.AreEqual(-0.003650, elements.L2, 1e-2);
         }
 
+        /// <summary>
+        /// AA(II), ex. 54a
+        /// </summary>
         [TestMethod]
         public void FindNearestSolarEclipse()
         {
@@ -46,6 +49,41 @@ namespace Astrarium.Algorithms.Tests
             Assert.AreEqual(SolarEclipseType.Partial, eclipse.EclipseType);
             Assert.AreEqual(0.740, eclipse.Phase, 1e-3);
             Assert.AreEqual(SolarEclipseRegio.Northern, eclipse.Regio);
+        }
+
+        /// <summary>
+        /// AA(II), ex. 54c / 54d
+        /// </summary>
+        [TestMethod]
+        public void FindNearestLunarEclipse()
+        {
+            // ex. 54c
+            {
+                double jd = new Date(1973, 6, 1).ToJulianDay();
+                LunarEclipse eclipse = LunarEclipses.NearestEclipse(jd, true);
+                var d = new Date(eclipse.JulianDayMaximum, 0);
+                Assert.AreEqual(1973, d.Year);
+                Assert.AreEqual(6, d.Month);
+                Assert.AreEqual(15, (int)d.Day);
+                Assert.AreEqual(20, d.Hour);
+                Assert.AreEqual(50, d.Minute);
+                Assert.AreEqual(LunarEclipseType.Penumbral, eclipse.EclipseType);
+                Assert.AreEqual(0.462, eclipse.Magnitude, 1e-3);
+            }
+
+            // ex. 54d
+            {
+                double jd = new Date(1997, 7, 1).ToJulianDay();
+                LunarEclipse eclipse = LunarEclipses.NearestEclipse(jd, true);
+                var d = new Date(eclipse.JulianDayMaximum, 0);
+                Assert.AreEqual(1997, d.Year);
+                Assert.AreEqual(9, d.Month);
+                Assert.AreEqual(16, (int)d.Day);
+                Assert.AreEqual(18, d.Hour);
+                Assert.AreEqual(47, d.Minute);
+                Assert.AreEqual(LunarEclipseType.Total, eclipse.EclipseType);
+                Assert.AreEqual(1.187, eclipse.Magnitude, 1e-3);
+            }
         }
 
         /// <summary>

@@ -608,6 +608,10 @@ namespace Astrarium.Plugins.SolarSystem
                         gpU.AddEllipse(p.X - szU / 2, p.Y - szU / 2, szU, szU);
                         gpM.AddEllipse(pMoon.X - szM / 2 - 0.5f, pMoon.Y - szM / 2 - 0.5f, szM + 1, szM + 1);
 
+                        gpP.Flatten();
+                        gpU.Flatten();
+                        gpM.Flatten();
+
                         var brushP = new PathGradientBrush(gpP);
                         brushP.CenterPoint = p;
                         brushP.CenterColor = clrPenumbraGrayDark;
@@ -631,8 +635,20 @@ namespace Astrarium.Plugins.SolarSystem
                         regionP.Intersect(gpM);
                         regionU.Intersect(gpM);
 
+                        regionP.Intersect(new Rectangle(0, 0, map.Width, map.Height));
+                        regionU.Intersect(new Rectangle(0, 0, map.Width, map.Height));
+                        
                         g.FillRegion(brushP, regionP);
                         g.FillRegion(brushU, regionU);
+
+                        gpM.Dispose();
+                        gpP.Dispose();
+                        gpU.Dispose();
+
+                        brushP.Dispose();
+                        brushU.Dispose();
+                        regionP.Dispose();
+                        regionU.Dispose();
                     }
 
                     // outline circles

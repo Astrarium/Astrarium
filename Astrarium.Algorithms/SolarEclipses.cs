@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
-using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using static System.Math;
@@ -194,7 +192,6 @@ namespace Astrarium.Algorithms
             return eclipse;
         }
 
-
         /// <summary>
         /// Calculates local circumstances of solar eclipse.
         /// </summary>
@@ -300,7 +297,7 @@ namespace Astrarium.Algorithms
             // i=0: beginning of partial phase
             // i=1: end of partial phase
             // i=2: beginning of total phase
-            // i=3: end of total phae
+            // i=3: end of total phase
             for (int i = 0; i < 4; i++)
             {
                 t = tMax + tauPhases[i];
@@ -370,9 +367,9 @@ namespace Astrarium.Algorithms
                     SunAltPartialBegin = altPhases[0],
                     JulianDayPartialEnd = jdPhases[1],
                     SunAltPartialEnd = altPhases[1],
-                    JulianDayTotalBegin = jdPhases[2],
+                    JulianDayTotalBegin = Min(jdPhases[2], jdPhases[3]),
                     SunAltTotalBegin = altPhases[2],
-                    JulianDayTotalEnd = jdPhases[3],
+                    JulianDayTotalEnd = Max(jdPhases[2], jdPhases[3]),
                     SunAltTotalEnd = altPhases[3],
                     MaxMagnitude = G,
                     MoonToSunDiameterRatio = A
@@ -412,7 +409,7 @@ namespace Astrarium.Algorithms
             // Mu expressed in degrees and can cross zero point.
             // Values must be aligned in order to avoid crossing.
             double[] Mu = elements.Select(e => e.Mu).ToArray();
-            Angle.Align(Mu);
+            Align(Mu);
             for (int i = 0; i < 5; i++)
             {
                 elements[i].Mu = Mu[i];      

@@ -397,7 +397,7 @@ namespace Astrarium
             {
                 CrdsHorizontal centerOriginal = new CrdsHorizontal(Center);
                 double ad = Angle.Separation(hor, centerOriginal);
-                double steps = Math.Round(animationDuration.TotalMilliseconds / meanRenderTime);
+                double steps = Math.Ceiling(animationDuration.TotalMilliseconds / meanRenderTime);
                 double[] x = new double[] { 0, steps / 2, steps };
                 double[] y = (ad < ViewAngle) ?
                     // linear zooming if body is already on the screen:

@@ -69,7 +69,6 @@ namespace Astrarium.Algorithms
                     .AppendLine($"Moon/Sun size ratio = {MoonToSunDiameterRatio}")
                     .AppendLine($"Total Dur = {TimeToString(TotalDuration)}")
                     .AppendLine($"Partial Dur = {TimeToString(PartialDuration)}")
-
                     .ToString();
         }
     }

@@ -429,17 +429,16 @@ namespace System.Windows.Forms
                 DrawMarkers(pe.Graphics);
 
                 var gs = pe.Graphics.Save();
-
-                //pe.Graphics.SmoothingMode = SmoothingMode.None;
-                //if (_Offset.Y > 0)
-                //{
-                //    pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, -1, Width, _Offset.Y + 1);
-                //}
-                //if (_Offset.Y + FullMapSizeInPixels < Height)
-                //{
-                //    pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, _Offset.Y + FullMapSizeInPixels, Width, _Offset.Y + FullMapSizeInPixels);
-                //}
-                //pe.Graphics.Restore(gs);
+                pe.Graphics.SmoothingMode = SmoothingMode.None;
+                if (_Offset.Y > 0)
+                {
+                    pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, -1, Width, _Offset.Y + 1);
+                }
+                if (_Offset.Y + FullMapSizeInPixels < Height)
+                {
+                    pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, _Offset.Y + FullMapSizeInPixels, Width, _Offset.Y + FullMapSizeInPixels);
+                }
+                pe.Graphics.Restore(gs);
             }
 
             base.OnPaint(pe);
