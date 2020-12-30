@@ -5,11 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using static Astrarium.Plugins.SolarSystem.Plugin;
 
 namespace Astrarium.Plugins.SolarSystem
@@ -1210,9 +1208,7 @@ namespace Astrarium.Plugins.SolarSystem
 
         private Image SunImageProvider(DateTime date)
         {
-            string format = Regex.Replace(solarTexturePath, "{([^}]*)}", match => "{0:" + match.Groups[1].Value + "}");
-            string url = string.Format(format, date);
-            return solarTextureDownloader.Download(url);
+            return solarTextureDownloader.Download(date);
         }
 
         private Image VolumeTextureProvider(Color skyColor)
