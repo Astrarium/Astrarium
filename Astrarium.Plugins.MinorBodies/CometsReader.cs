@@ -29,40 +29,42 @@ namespace Astrarium.Plugins.MinorBodies
                     try
                     {
                         line = sr.ReadLine();
-
-                        // perihelion distance, in AU
-                        double q = Read<double>(line, 31, 39);
-
-                        // orbital eccentricity
-                        double e = Read<double>(line, 42, 49);
-
-                        // mean motion, degrees/day
-                        double n = 1; // TODO: ?
-
-                        int y = Read<int>(line, 15, 18);
-                        int m = Read<int>(line, 20, 21);
-                        double d = Read<double>(line, 23, 29);
-
-                        // date of perihelion passage
-                        double pp = Date.JulianDay(y, m, d);
-
-                        comets.Add(new Comet()
+                        if (!line.Contains("****"))
                         {
-                            H = Read<double>(line, 92, 95),
-                            G = Read<double>(line, 97, 100),
-                            Orbit = new OrbitalElements()
+                            // perihelion distance, in AU
+                            double q = Read<double>(line, 31, 39);
+
+                            // orbital eccentricity
+                            double e = Read<double>(line, 42, 49);
+
+                            // mean motion, degrees/day
+                            double n = 1; // TODO: ?
+
+                            int y = Read<int>(line, 15, 18);
+                            int m = Read<int>(line, 20, 21);
+                            double d = Read<double>(line, 23, 29);
+
+                            // date of perihelion passage
+                            double pp = Date.JulianDay(y, m, d);
+
+                            comets.Add(new Comet()
                             {
-                                Epoch = pp,
-                                M = 0, // since the epoch is perihelion passage date, mean anomaly is zero
-                                omega = Read<double>(line, 52, 59),
-                                Omega = Read<double>(line, 62, 69),
-                                i = Read<double>(line, 72, 79),
-                                e = e,
-                                q = q
-                            },
-                            AverageDailyMotion = n,
-                            Name = Read<string>(line, 103, 158)
-                        });
+                                H = Read<double>(line, 92, 95),
+                                G = Read<double>(line, 97, 100),
+                                Orbit = new OrbitalElements()
+                                {
+                                    Epoch = pp,
+                                    M = 0, // since the epoch is perihelion passage date, mean anomaly is zero
+                                    omega = Read<double>(line, 52, 59),
+                                    Omega = Read<double>(line, 62, 69),
+                                    i = Read<double>(line, 72, 79),
+                                    e = e,
+                                    q = q
+                                },
+                                AverageDailyMotion = n,
+                                Name = Read<string>(line, 103, 158)
+                            });
+                        }
                     }
                     catch (Exception ex) 
                     {
