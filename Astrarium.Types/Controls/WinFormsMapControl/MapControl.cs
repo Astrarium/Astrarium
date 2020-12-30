@@ -138,6 +138,10 @@ namespace System.Windows.Forms
                     throw new ArgumentException($"{value} is an incorrect value for {nameof(MinZoomLevel)} property. Value should be in range from 0 to 19.");
 
                 _MinZoomLevel = value;
+
+                if (ZoomLevel < _MinZoomLevel)
+                    ZoomLevel = _MinZoomLevel;
+                
                 Invalidate();
             }
         }

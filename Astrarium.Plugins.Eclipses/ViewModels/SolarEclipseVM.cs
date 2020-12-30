@@ -2,6 +2,7 @@
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -31,6 +32,16 @@ namespace Astrarium.Plugins.Eclipses
         /// </summary>
         public string EclipseDate { get; private set; }
 
+        /// <summary>
+        /// Eclipse description
+        /// </summary>
+        public string EclipseDescription { get; private set; }
+
+        /// <summary>
+        /// Flag indicating calculation is in progress
+        /// </summary>
+        public bool IsCalculating { get; private set; }
+
         public ICommand PrevEclipseCommand => new Command(PrevEclipse);
         public ICommand NextEclipseCommand => new Command(NextEclipse);
         public ICommand ClickOnMapCommand => new Command(ClickOnMap);
@@ -55,9 +66,10 @@ namespace Astrarium.Plugins.Eclipses
         /// </summary>
         public ICollection<Polygon> Polygons { get; private set; }
 
+        private readonly ISky sky;
         private readonly IEclipsesCalculator eclipsesCalculator;
         private readonly ISettings settings;
-        private readonly CrdsGeographical observerLocation;
+        private CrdsGeographical observerLocation;
         private PolynomialBesselianElements besselianElements;
 
         #region Map styles
@@ -70,6 +82,7 @@ namespace Astrarium.Plugins.Eclipses
         private readonly TrackStyle umbraLimitTrackStyle = new TrackStyle(new Pen(Color.Gray, 2));
         private readonly TrackStyle centralLineTrackStyle = new TrackStyle(new Pen(Color.Black, 2));
         private readonly PolygonStyle umbraPolygonStyle = new PolygonStyle(new SolidBrush(Color.FromArgb(100, Color.Gray)));
+        private readonly MarkerStyle observerLocationMarkerStyle = new MarkerStyle(5, Brushes.Black, null, Brushes.Black, SystemFonts.DefaultFont, StringFormat.GenericDefault);
 
         #endregion Map styles
 
@@ -96,6 +109,7 @@ namespace Astrarium.Plugins.Eclipses
 
         public SolarEclipseVM(IEclipsesCalculator eclipsesCalculator, ISky sky, ISettings settings)
         {
+            this.sky = sky;
             this.eclipsesCalculator = eclipsesCalculator;
             this.settings = settings;
             this.settings.PropertyChanged += Settings_PropertyChanged;
@@ -158,7 +172,11 @@ namespace Astrarium.Plugins.Eclipses
 
         private void ClickOnMap()
         {
-            
+            var location = MapMouse;
+
+            observerLocation = new CrdsGeographical(-location.Longitude, location.Latitude, 0, 0, "UTC+0", "Selected location");
+            Markers.Remove(Markers.Last());
+            AddLocationMarker();
         }
 
         private ImageAttributes GetImageAttributes()
@@ -209,137 +227,159 @@ namespace Astrarium.Plugins.Eclipses
             }
         }
 
-        private void CalculateEclipse(bool next)
+        private async void CalculateEclipse(bool next)
         {
             SolarEclipse eclipse = SolarEclipses.NearestEclipse(JulianDay + (next ? 1 : -1) * LunarEphem.SINODIC_PERIOD, next);
             JulianDay = eclipse.JulianDayMaximum;
-
-            besselianElements = eclipsesCalculator.GetBesselianElements(JulianDay);
-            var map = SolarEclipses.EclipseMap(besselianElements, eclipse.EclipseType);
-
             EclipseDate = Formatters.Date.Format(new Date(JulianDay, observerLocation.UtcOffset));
 
-            var tracks = new List<Track>();
-            var polygons = new List<Polygon>();
-            var markers = new List<Marker>();
+            string type = eclipse.EclipseType.ToString();
+            string subtype = eclipse.IsNonCentral ? " non-central" : "";
+            EclipseDescription = $"{type}{subtype} solar eclipse";
 
-            if (map.P1 != null)
-            {
-                markers.Add(new Marker(ToGeo(map.P1), riseSetMarkerStyle, "P1"));
-            }
-            if (map.P2 != null)
-            {
-                markers.Add(new Marker(ToGeo(map.P2), riseSetMarkerStyle, "P2"));
-            }
-            if (map.P3 != null)
-            {
-                markers.Add(new Marker(ToGeo(map.P3), riseSetMarkerStyle, "P3"));
-            }
-            if (map.P4 != null)
-            {
-                markers.Add(new Marker(ToGeo(map.P4), riseSetMarkerStyle, "P4"));
-            }
-            if (map.C1 != null)
-            {
-                markers.Add(new Marker(ToGeo(map.C1), centralLineMarkerStyle, "C1"));
-            }
-            if (map.C2 != null)
-            {
-                markers.Add(new Marker(ToGeo(map.C2), centralLineMarkerStyle, "C2"));
-            }
+            IsCalculating = true;
 
-            for (int i = 0; i < 2; i++)
+            NotifyPropertyChanged(nameof(EclipseDate), nameof(EclipseDescription), nameof(IsCalculating));
+
+            await Task.Run(() =>
             {
-                if (map.UmbraNorthernLimit[i].Any())
+
+                besselianElements = eclipsesCalculator.GetBesselianElements(JulianDay);
+                var map = SolarEclipses.EclipseMap(besselianElements, eclipse.EclipseType);
+
+
+                var tracks = new List<Track>();
+                var polygons = new List<Polygon>();
+                var markers = new List<Marker>();
+
+                if (map.P1 != null)
                 {
-                    var track = new Track(umbraLimitTrackStyle);
-                    track.AddRange(map.UmbraNorthernLimit[i].Select(p => ToGeo(p)));
-                    tracks.Add(track);
+                    markers.Add(new Marker(ToGeo(map.P1), riseSetMarkerStyle, "P1"));
+                }
+                if (map.P2 != null)
+                {
+                    markers.Add(new Marker(ToGeo(map.P2), riseSetMarkerStyle, "P2"));
+                }
+                if (map.P3 != null)
+                {
+                    markers.Add(new Marker(ToGeo(map.P3), riseSetMarkerStyle, "P3"));
+                }
+                if (map.P4 != null)
+                {
+                    markers.Add(new Marker(ToGeo(map.P4), riseSetMarkerStyle, "P4"));
+                }
+                if (map.C1 != null)
+                {
+                    markers.Add(new Marker(ToGeo(map.C1), centralLineMarkerStyle, "C1"));
+                }
+                if (map.C2 != null)
+                {
+                    markers.Add(new Marker(ToGeo(map.C2), centralLineMarkerStyle, "C2"));
                 }
 
-                if (map.UmbraSouthernLimit[i].Any())
-                {
-                    var track = new Track(umbraLimitTrackStyle);
-                    track.AddRange(map.UmbraSouthernLimit[i].Select(p => ToGeo(p)));
-                    tracks.Add(track);
-                }
-            }
-
-            if (map.TotalPath.Any())
-            {
-                var track = new Track(centralLineTrackStyle);
-                track.AddRange(map.TotalPath.Select(p => ToGeo(p)));                                      
-                tracks.Add(track);
-            }
-
-            // central line is divided into 2 ones => draw shadow path as 2 polygons
-
-            if ((map.UmbraNorthernLimit[0].Any() && !map.UmbraNorthernLimit[1].Any()) ||
-                (map.UmbraSouthernLimit[0].Any() && !map.UmbraSouthernLimit[1].Any()))
-            {
-                var polygon = new Polygon(umbraPolygonStyle);
-                polygon.AddRange(map.UmbraNorthernLimit[0].Select(p => ToGeo(p)));
-                polygon.AddRange(map.UmbraNorthernLimit[1].Select(p => ToGeo(p)));
-                if (map.C2 != null) polygon.Add(ToGeo(map.C2));
-                polygon.AddRange((map.UmbraSouthernLimit[1] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
-                polygon.AddRange((map.UmbraSouthernLimit[0] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
-                if (map.C1 != null) polygon.Add(ToGeo(map.C1));
-                polygons.Add(polygon);
-            }
-            else 
-            {
                 for (int i = 0; i < 2; i++)
                 {
-                    if (map.UmbraNorthernLimit[i].Any() && map.UmbraSouthernLimit[i].Any())
+                    if (map.UmbraNorthernLimit[i].Any())
                     {
-                        var polygon = new Polygon(umbraPolygonStyle);
-                        polygon.AddRange(map.UmbraNorthernLimit[i].Select(p => ToGeo(p)));
-                        polygon.AddRange((map.UmbraSouthernLimit[i] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
-                        polygons.Add(polygon);
+                        var track = new Track(umbraLimitTrackStyle);
+                        track.AddRange(map.UmbraNorthernLimit[i].Select(p => ToGeo(p)));
+                        tracks.Add(track);
+                    }
+
+                    if (map.UmbraSouthernLimit[i].Any())
+                    {
+                        var track = new Track(umbraLimitTrackStyle);
+                        track.AddRange(map.UmbraSouthernLimit[i].Select(p => ToGeo(p)));
+                        tracks.Add(track);
                     }
                 }
-            }
-            
-            foreach (var curve in map.RiseSetCurve)
-            {
-                if (curve.Any())
+
+                if (map.TotalPath.Any())
                 {
-                    var track = new Track(riseSetTrackStyle);
-                    track.AddRange(curve.Select(p => ToGeo(p)));
-                    track.Add(track.First());
+                    var track = new Track(centralLineTrackStyle);
+                    track.AddRange(map.TotalPath.Select(p => ToGeo(p)));
                     tracks.Add(track);
                 }
-            }
 
-            if (map.PenumbraNorthernLimit.Any())
-            {
-                var track = new Track(penumbraLimitTrackStyle);
-                track.AddRange(map.PenumbraNorthernLimit.Select(p => ToGeo(p)));
-                tracks.Add(track);
-            }
+                // central line is divided into 2 ones => draw shadow path as 2 polygons
 
-            if (map.PenumbraSouthernLimit.Any())
-            {
-                var track = new Track(penumbraLimitTrackStyle);
-                track.AddRange(map.PenumbraSouthernLimit.Select(p => ToGeo(p)));
-                tracks.Add(track);
-            }
+                if ((map.UmbraNorthernLimit[0].Any() && !map.UmbraNorthernLimit[1].Any()) ||
+                    (map.UmbraSouthernLimit[0].Any() && !map.UmbraSouthernLimit[1].Any()))
+                {
+                    var polygon = new Polygon(umbraPolygonStyle);
+                    polygon.AddRange(map.UmbraNorthernLimit[0].Select(p => ToGeo(p)));
+                    polygon.AddRange(map.UmbraNorthernLimit[1].Select(p => ToGeo(p)));
+                    if (map.C2 != null) polygon.Add(ToGeo(map.C2));
+                    polygon.AddRange((map.UmbraSouthernLimit[1] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
+                    polygon.AddRange((map.UmbraSouthernLimit[0] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
+                    if (map.C1 != null) polygon.Add(ToGeo(map.C1));
+                    polygons.Add(polygon);
+                }
+                else
+                {
+                    for (int i = 0; i < 2; i++)
+                    {
+                        if (map.UmbraNorthernLimit[i].Any() && map.UmbraSouthernLimit[i].Any())
+                        {
+                            var polygon = new Polygon(umbraPolygonStyle);
+                            polygon.AddRange(map.UmbraNorthernLimit[i].Select(p => ToGeo(p)));
+                            polygon.AddRange((map.UmbraSouthernLimit[i] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
+                            polygons.Add(polygon);
+                        }
+                    }
+                }
 
-            if (map.Max != null)
-            {
-                markers.Add(new Marker(ToGeo(map.Max), maxPointMarkerStyle, "Max"));
-            }
+                foreach (var curve in map.RiseSetCurve)
+                {
+                    if (curve.Any())
+                    {
+                        var track = new Track(riseSetTrackStyle);
+                        track.AddRange(curve.Select(p => ToGeo(p)));
+                        track.Add(track.First());
+                        tracks.Add(track);
+                    }
+                }
 
-            Tracks = tracks;
-            Polygons = polygons;
-            Markers = markers;
+                if (map.PenumbraNorthernLimit.Any())
+                {
+                    var track = new Track(penumbraLimitTrackStyle);
+                    track.AddRange(map.PenumbraNorthernLimit.Select(p => ToGeo(p)));
+                    tracks.Add(track);
+                }
 
-            NotifyPropertyChanged(
-                nameof(EclipseDate), 
-                nameof(Tracks), 
-                nameof(Polygons), 
-                nameof(Markers)
-            );
+                if (map.PenumbraSouthernLimit.Any())
+                {
+                    var track = new Track(penumbraLimitTrackStyle);
+                    track.AddRange(map.PenumbraSouthernLimit.Select(p => ToGeo(p)));
+                    tracks.Add(track);
+                }
+
+                if (map.Max != null)
+                {
+                    markers.Add(new Marker(ToGeo(map.Max), maxPointMarkerStyle, "Max"));
+                }
+                
+                Tracks = tracks;
+                Polygons = polygons;
+                Markers = markers;
+                IsCalculating = false;
+
+                AddLocationMarker();
+
+                NotifyPropertyChanged(
+                    nameof(IsCalculating),
+                    nameof(Tracks),
+                    nameof(Polygons),
+                    nameof(Markers)
+                );
+            });
+        }
+
+        private void AddLocationMarker()
+        {
+            Markers.Add(new Marker(ToGeo(observerLocation), observerLocationMarkerStyle, observerLocation.LocationName));
+            Markers = new List<Marker>(Markers);            
+            NotifyPropertyChanged(nameof(Markers));
         }
 
         private GeoPoint ToGeo(CrdsGeographical g)

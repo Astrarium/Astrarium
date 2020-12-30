@@ -16,7 +16,51 @@
     MinHeight="350" MinWidth="600" 
     Style="{StaticResource {x:Type Window}}" 
     WindowStartupLocation="CenterOwner">
-    <Grid Margin="2">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <Style x:Key="ImageButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+                <Style.Setters>
+                    <Setter Property="Cursor" Value="Hand" />
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="Margin" Value="2" />
+                    <Setter Property="MinWidth" Value="100" />
+                    <Setter Property="Height" Value="40" />
+                </Style.Setters>
+                <Style.Triggers>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Foreground" Value="{StaticResource BrushControlBackground}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Grid x:Key="ImagePrev" x:Shared="False">
+                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="32" Height="10" Stretch="Fill" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
+                    <Path.Data>
+                        <StreamGeometry>M251.1,2981.4l66.1-66.4l-66.8-66.8h56.3l59.2,59.2h403.6l-29.4-58.9c0-0.1,166.3,66.5,166.3,66.5L741,2981.2l28.5-58.6   H365.9l-59.2,59.2L251.1,2981.4z</StreamGeometry>
+                    </Path.Data>
+                    <Path.LayoutTransform>
+                        <RotateTransform Angle="180"></RotateTransform>
+                    </Path.LayoutTransform>
+                </Path>
+            </Grid>
+
+            <Grid x:Key="ImageNext" x:Shared="False">
+                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="32" Height="10" Stretch="Fill" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
+                    <Path.Data>
+                        <StreamGeometry>M251.1,2981.4l66.1-66.4l-66.8-66.8h56.3l59.2,59.2h403.6l-29.4-58.9c0-0.1,166.3,66.5,166.3,66.5L741,2981.2l28.5-58.6   H365.9l-59.2,59.2L251.1,2981.4z</StreamGeometry>
+                    </Path.Data>
+                    <Path.LayoutTransform>
+                        <RotateTransform Angle="0"></RotateTransform>
+                    </Path.LayoutTransform>
+                </Path>
+            </Grid>
+
+        </ResourceDictionary>
+    </Window.Resources>
+    
+    <Grid Margin="0">
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -24,46 +68,73 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Center">
-            <Button MinWidth="50" Content="&lt;- Prev" Command="{Binding PrevEclipseCommand}" />
-            <Label Content="{Binding EclipseDate, FallbackValue='01 Jan 2000'}" />
-            <Button MinWidth="50" Content="Next -&gt;" Command="{Binding NextEclipseCommand}" />
+        <StackPanel Orientation="Vertical" Grid.Row="0" HorizontalAlignment="Center">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="{StaticResource ImagePrev}" Style="{StaticResource ImageButton}" Command="{Binding PrevEclipseCommand}" />
+                <TextBlock VerticalAlignment="Center" MinWidth="250" Height="Auto" TextAlignment="Center" HorizontalAlignment="Center" FontSize="32" Text="{Binding EclipseDate, FallbackValue='01 Jan 2000'}" />
+                <Button Content="{StaticResource ImageNext}" Style="{StaticResource ImageButton}" Command="{Binding NextEclipseCommand}" />
+            </StackPanel>
+            <TextBlock Height="Auto" Padding="0" HorizontalAlignment="Center" Text="{Binding EclipseDescription, FallbackValue='Eclipse description'}"></TextBlock>
         </StackPanel>
+        
+        <Grid Height="6" Grid.Row="1">
+            <ProgressBar Height="6" Background="Transparent" IsIndeterminate="True" Visibility="{Binding IsCalculating, Converter={s:BoolToVisibilityConverter}}" />
+        </Grid>
 
-        <TextBlock Grid.Row="1" Text="{Binding Details, FallbackValue='test'}" Height="auto" />
+        <TabControl Grid.Row="2" Padding="0">
+            <TabItem Header="Eclipse Map">
 
-        <TabControl Grid.Row="2">
-            <TabItem Header="Map">
 
                 <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="200"/>
+                    </Grid.ColumnDefinitions>
 
-                    <c:MapControl 
-                        Grid.Row="0"
-                        BackColor="#333333" 
-                        TileServer="{Binding TileServer, Mode=TwoWay}" 
-                        CacheFolder="{Binding CacheFolder, Mode=OneTime}"
-                        Markers="{Binding Markers}"
-                        Tracks="{Binding Tracks}"
-                        Polygons="{Binding Polygons}"
-                        ThumbnailBackColor="#333333"
-                        ThumbnailForeColor="#333333"
-                        TileImageAttributes="{Binding TileImageAttributes}"
-                        OnClick="{Binding ClickOnMapCommand}"
-                        Mouse="{Binding MapMouse, Mode=OneWayToSource}" />
+                    <Grid Grid.Column="0" Margin="1 -1 -2 0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
-                    <DockPanel  Margin="0 4 0 0" Grid.Row="1">
-                        <ComboBox Padding="2 0" Margin="0" Width="200" Height="18" ItemsSource="{Binding TileServers, Mode=OneTime}" DisplayMemberPath="Name" SelectedItem="{Binding TileServer}" />
-                        <TextBlock Padding="2 0" Text="{Binding MapMouse, FallbackValue='Coordinates'}" IsEnabled="False" VerticalAlignment="Center" />
-                        <c:HtmlTextBlock IsEnabled="False" Foreground="{StaticResource BrushControlLightBackground}" VerticalAlignment="Center" HorizontalAlignment="Right" Padding="2 0 4 0" FontSize="12" FormattedText="{Binding TileServer.AttributionText, FallbackValue='AttributionText'}" />
-                    </DockPanel>
+                        <c:MapControl
+                            Grid.Row="0"
+                            BackColor="#333333" 
+                            TileServer="{Binding TileServer, Mode=TwoWay}" 
+                            CacheFolder="{Binding CacheFolder, Mode=OneTime}"
+                            Markers="{Binding Markers}"
+                            Tracks="{Binding Tracks}"
+                            Polygons="{Binding Polygons}"
+                            ThumbnailBackColor="#333333"
+                            ThumbnailForeColor="#333333"
+                            TileImageAttributes="{Binding TileImageAttributes}"
+                            OnClick="{Binding ClickOnMapCommand}"
+                            Mouse="{Binding MapMouse, Mode=OneWayToSource}" />
+
+                        <DockPanel Margin="2 4" Grid.Row="1">
+                            <ComboBox Padding="2 0" Margin="0" Width="200" Height="18" ItemsSource="{Binding TileServers, Mode=OneTime}" DisplayMemberPath="Name" SelectedItem="{Binding TileServer}" />
+                            <TextBlock Padding="2 0" Text="{Binding MapMouse, FallbackValue='Coordinates'}" IsEnabled="False" VerticalAlignment="Center" />
+                            <c:HtmlTextBlock IsEnabled="False" Foreground="{StaticResource BrushControlLightBackground}" VerticalAlignment="Center" HorizontalAlignment="Right" Padding="2 0 4 0" FontSize="12" FormattedText="{Binding TileServer.AttributionText, FallbackValue='AttributionText'}" />
+                        </DockPanel>
+                    </Grid>
+
+                    <GridSplitter 
+                        Grid.Column="1" 
+                        ShowsPreview="False"   
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Stretch" />
+
+                    <TextBlock Grid.Column="2" Text="{Binding Details, FallbackValue='test'}" />
+
+
 
                 </Grid>
+                
+       
+                
             </TabItem>
-            <TabItem Header="General Circumstances"></TabItem>
+            <TabItem Header="General Information"></TabItem>
             <TabItem Header="Local Circumstances"></TabItem>
         </TabControl>
         
