@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Windows;
@@ -167,9 +168,14 @@ namespace Astrarium.Types.Controls
             mapControl.MouseChanged += (s, e) => Mouse = mapControl.Mouse;
             mapControl.BackColorChanged += (s, e) => BackColor = mapControl.BackColor;
             mapControl.ForeColorChanged += (s, e) => ForeColor = mapControl.ForeColor;
-
+            mapControl.Resize += MapControl_Resize;
             Child = mapControl;
             mapControl.Focus();
+        }
+
+        private void MapControl_Resize(object sender, System.EventArgs e)
+        {
+            mapControl.MinZoomLevel = mapControl.Height / 256;
         }
     }
 }

@@ -68,7 +68,7 @@ namespace Astrarium.Plugins.MinorBodies
                             events.Add(new AstroEvent(jdOpposition, 
                                 Text.Get("AsteroidsEvents.Opposition.Text", 
                                     ("AsteroidName", a.Name), 
-                                    ("AsteroidMagnitude", Formatters.Magnitude.Format(mag)))
+                                    ("AsteroidMagnitude", Formatters.Magnitude.Format(mag))), a
                                 )
                             );
                         }

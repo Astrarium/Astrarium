@@ -175,6 +175,54 @@ namespace Astrarium.Algorithms
             return new CrdsHorizontal(ToDegrees(az), ToDegrees(alt));
         }
 
+        /// <summary>
+        /// Calculates an intermediate point at any fraction along the great circle path 
+        /// between two points with geographical coordinates
+        /// </summary>
+        /// <param name="p1">Geographical coordinates of the first point</param>
+        /// <param name="p2">Geographical coordinates of the second point</param>
+        /// <param name="fraction">Fraction along great circle route (f=0 is point 1, f=1 is point 2).</param>
+        /// <returns>
+        /// The intermediate point at specified fraction
+        /// </returns>
+        /// <remarks>
+        /// Formula is taken from <see href="http://www.movable-type.co.uk/scripts/latlong.html"/>
+        /// that is originally based on <see cref="http://www.edwilliams.org/avform.htm#Intermediate"/>.
+        /// </remarks>
+        public static CrdsGeographical Intermediate(CrdsGeographical p1, CrdsGeographical p2, double fraction)
+        {
+            if (fraction < 0 || fraction > 1)
+                throw new ArgumentException("Fraction value should be in range [0, 1]", nameof(fraction));
+
+            double d = ToRadians(Separation(p1, p2));
+
+            double a, b;
+
+            if (d <= 1e-6)
+            {
+                a = 1 - fraction;
+                b = fraction;
+            }
+            else
+            {
+                a = Math.Sin((1 - fraction) * d) / Math.Sin(d);
+                b = Math.Sin(fraction * d) / Math.Sin(d);
+            }
+
+            double alt1 = ToRadians(p1.Latitude);
+            double alt2 = ToRadians(p2.Latitude);
+            double az1 = ToRadians(p1.Longitude);
+            double az2 = ToRadians(p2.Longitude);
+
+            double x = a * Math.Cos(alt1) * Math.Cos(az1) + b * Math.Cos(alt2) * Math.Cos(az2);
+            double y = a * Math.Cos(alt1) * Math.Sin(az1) + b * Math.Cos(alt2) * Math.Sin(az2);
+            double z = a * Math.Sin(alt1) + b * Math.Sin(alt2);
+            double lat = Math.Atan2(z, Math.Sqrt(x * x + y * y));
+            double lon = Math.Atan2(y, x);
+
+            return new CrdsGeographical(ToDegrees(lon), ToDegrees(lat));
+        }
+
         // TODO: tests
         public static void Align(double[] array)
         {
@@ -445,7 +493,7 @@ namespace Astrarium.Algorithms
         /// <summary>
         /// Creates new angle from sexagesimal value.
         /// </summary>
-        /// <param name="hours">Hours part of angle value. Should be in range [0 ... 260).</param>
+        /// <param name="hours">Hours part of angle value. Should be in range [0 ... 360).</param>
         /// <param name="minutes">Minutes part of angle value. Should be in range [0 ... 60).</param>
         /// <param name="seconds">Seconds part of angle value. Should be in range [0 ... 60).</param>
         public HMS(uint hours, uint minutes, double seconds)

@@ -167,7 +167,8 @@ namespace Astrarium
             foreach (Type rendererType in rendererTypes)
             {
                 var types = new[] { rendererType }.Concat(rendererType.GetInterfaces()).ToArray();
-                kernel.Bind(rendererType).ToSelf().InSingletonScope();
+                //kernel.Bind(rendererType).ToSelf().InSingletonScope();
+                kernel.Bind(types).To(rendererType).InSingletonScope();
             }
 
             // collect all event provider implementations
@@ -177,7 +178,9 @@ namespace Astrarium
 
             foreach (Type eventProviderType in eventProviderTypes)
             {
-                kernel.Bind(eventProviderType).ToSelf().InSingletonScope();
+                //kernel.Bind(eventProviderType).ToSelf().InSingletonScope();
+                var types = new[] { eventProviderType }.Concat(eventProviderType.GetInterfaces()).ToArray();
+                kernel.Bind(types).To(eventProviderType).InSingletonScope();
             }
 
             foreach (Type pluginType in pluginTypes)

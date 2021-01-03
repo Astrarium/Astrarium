@@ -5,11 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using static Astrarium.Plugins.SolarSystem.Plugin;
 
 namespace Astrarium.Plugins.SolarSystem
@@ -608,6 +606,10 @@ namespace Astrarium.Plugins.SolarSystem
                         gpU.AddEllipse(p.X - szU / 2, p.Y - szU / 2, szU, szU);
                         gpM.AddEllipse(pMoon.X - szM / 2 - 0.5f, pMoon.Y - szM / 2 - 0.5f, szM + 1, szM + 1);
 
+                        gpP.Flatten();
+                        gpU.Flatten();
+                        gpM.Flatten();
+
                         var brushP = new PathGradientBrush(gpP);
                         brushP.CenterPoint = p;
                         brushP.CenterColor = clrPenumbraGrayDark;
@@ -631,8 +633,20 @@ namespace Astrarium.Plugins.SolarSystem
                         regionP.Intersect(gpM);
                         regionU.Intersect(gpM);
 
+                        regionP.Intersect(new Rectangle(0, 0, map.Width, map.Height));
+                        regionU.Intersect(new Rectangle(0, 0, map.Width, map.Height));
+                        
                         g.FillRegion(brushP, regionP);
                         g.FillRegion(brushU, regionU);
+
+                        gpM.Dispose();
+                        gpP.Dispose();
+                        gpU.Dispose();
+
+                        brushP.Dispose();
+                        brushU.Dispose();
+                        regionP.Dispose();
+                        regionU.Dispose();
                     }
 
                     // outline circles
@@ -1194,9 +1208,7 @@ namespace Astrarium.Plugins.SolarSystem
 
         private Image SunImageProvider(DateTime date)
         {
-            string format = Regex.Replace(solarTexturePath, "{([^}]*)}", match => "{0:" + match.Groups[1].Value + "}");
-            string url = string.Format(format, date);
-            return solarTextureDownloader.Download(url);
+            return solarTextureDownloader.Download(date);
         }
 
         private Image VolumeTextureProvider(Color skyColor)

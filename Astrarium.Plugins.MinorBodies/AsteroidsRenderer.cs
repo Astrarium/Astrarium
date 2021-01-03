@@ -45,10 +45,12 @@ namespace Astrarium.Plugins.MinorBodies
                     if ((!isGround || a.Horizontal.Altitude + a.Semidiameter / 3600 > 0) &&
                         ad < map.ViewAngle + a.Semidiameter / 3600)
                     {
+
                         float diam = map.GetDiskSize(a.Semidiameter);
+                        float size = map.GetPointSize(a.Magnitude);
 
                         // asteroid should be rendered as disk
-                        if ((int)diam > 0)
+                        if ((int)diam > 0 && diam > size)
                         {
                             PointF p = map.Project(a.Horizontal);
                             map.Graphics.FillEllipse(new SolidBrush(map.GetColor(colorAsteroid)), p.X - diam / 2, p.Y - diam / 2, diam, diam);
@@ -63,10 +65,8 @@ namespace Astrarium.Plugins.MinorBodies
                             map.AddDrawnObject(a);
                             continue;
                         }
-
                         // asteroid should be rendered as point
-                        float size = map.GetPointSize(a.Magnitude, maxDrawingSize: 3);
-                        if ((int)size > 0)
+                        else if ((int)size > 0)
                         {
                             PointF p = map.Project(a.Horizontal);
 

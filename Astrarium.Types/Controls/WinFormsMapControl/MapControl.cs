@@ -138,6 +138,10 @@ namespace System.Windows.Forms
                     throw new ArgumentException($"{value} is an incorrect value for {nameof(MinZoomLevel)} property. Value should be in range from 0 to 19.");
 
                 _MinZoomLevel = value;
+
+                if (ZoomLevel < _MinZoomLevel)
+                    ZoomLevel = _MinZoomLevel;
+                
                 Invalidate();
             }
         }
@@ -429,17 +433,16 @@ namespace System.Windows.Forms
                 DrawMarkers(pe.Graphics);
 
                 var gs = pe.Graphics.Save();
-
-                //pe.Graphics.SmoothingMode = SmoothingMode.None;
-                //if (_Offset.Y > 0)
-                //{
-                //    pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, -1, Width, _Offset.Y + 1);
-                //}
-                //if (_Offset.Y + FullMapSizeInPixels < Height)
-                //{
-                //    pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, _Offset.Y + FullMapSizeInPixels, Width, _Offset.Y + FullMapSizeInPixels);
-                //}
-                //pe.Graphics.Restore(gs);
+                pe.Graphics.SmoothingMode = SmoothingMode.None;
+                if (_Offset.Y > 0)
+                {
+                    pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, -1, Width, _Offset.Y + 1);
+                }
+                if (_Offset.Y + FullMapSizeInPixels < Height)
+                {
+                    pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, _Offset.Y + FullMapSizeInPixels, Width, _Offset.Y + FullMapSizeInPixels);
+                }
+                pe.Graphics.Restore(gs);
             }
 
             base.OnPaint(pe);
@@ -736,15 +739,15 @@ namespace System.Windows.Forms
                 {
                     //if (ZoomLevel < 3)
                     //{
-                    //    if (track.Style.Pen != null)
-                    //    {
-                    //        Draw(gr, () => gr.DrawLines(track.Style.Pen, points));
-                    //    }
+                        if (track.Style.Pen != null)
+                        {
+                            Draw(gr, () => gr.DrawLines(track.Style.Pen, points));
+                        }
                     //}
                     //else
-                    {
-                        Draw(gr, () => gr.DrawPolyline(track.Style.Pen, points));
-                    }
+                    //{
+                    //    Draw(gr, () => gr.DrawPolyline(track.Style.Pen, points));
+                    //}
                 }
             }
         }

@@ -94,21 +94,17 @@ namespace Astrarium
                     
                     window.Close();
 
-                    if (viewModel is ViewModelBase)
-                    {
-                        (viewModel as ViewModelBase).Closing -= viewModelClosingHandler;
-                    }
+                    viewModel.Closing -= viewModelClosingHandler;
 
                     if (needDisposeModel)
                     {
                         viewModel.Dispose();
                     }
+
+                    Application.Current.Dispatcher.Invoke(() => window.Owner?.Activate());
                 };
 
-                if (viewModel is ViewModelBase)
-                {
-                    (viewModel as ViewModelBase).Closing += viewModelClosingHandler;
-                }
+                viewModel.Closing += viewModelClosingHandler;
 
                 if (isDialog)
                 {
