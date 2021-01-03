@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -36,6 +37,11 @@ namespace Astrarium.Plugins.Eclipses
         /// Eclipse description
         /// </summary>
         public string EclipseDescription { get; private set; }
+
+        /// <summary>
+        /// Eclipse details (general information) in markdown format.
+        /// </summary>
+        public string EclipseDetails { get; private set; }
 
         /// <summary>
         /// Flag indicating calculation is in progress
@@ -229,22 +235,61 @@ namespace Astrarium.Plugins.Eclipses
 
         private async void CalculateEclipse(bool next)
         {
+            NumberFormatInfo nf = new NumberFormatInfo();
+            nf.NumberDecimalSeparator = ".";
+            nf.NumberGroupSeparator = "\u2009";
+
             SolarEclipse eclipse = SolarEclipses.NearestEclipse(JulianDay + (next ? 1 : -1) * LunarEphem.SINODIC_PERIOD, next);
             JulianDay = eclipse.JulianDayMaximum;
             EclipseDate = Formatters.Date.Format(new Date(JulianDay, observerLocation.UtcOffset));
-
+            besselianElements = eclipsesCalculator.GetBesselianElements(JulianDay);
             string type = eclipse.EclipseType.ToString();
             string subtype = eclipse.IsNonCentral ? " non-central" : "";
             EclipseDescription = $"{type}{subtype} solar eclipse";
+            EclipseDetails = 
+$@"# Eclipse Details
+||
+|----------|
+| Type | Total |
+| Date | 12 Jun 2020 |
+| Magnitude | 1.02353 |
+| Gamma | -0.77878 |
+| Maximal duration | 03m 58s |
+| Delta T | 85.2 s |
+| [link](astrarium://test.link) | link |
+# Contacts
+| Point | Coordinates | Time |
+|-----|------|------|
+| P1 (First external contact) | 44*12'54''N 22*34'12''W | 00:16:24 UT |
+| P2 (First internal contact) | 44*12'54''N 22*34'12''W | 00:23:24 UT |
+| C1 (First umbra contact) | 44*12'54''N 22*34'12''W | 00:23:24 UT |
+| Max (Greatest Eclipse) | 44*12'54''N 22*34'12''W | 00:23:24 UT |
+| C2 (Last umbra contact) | 44*12'54''N 22*34'12''W | 00:23:24 UT |
+| P3 (Last internal contact) | 44*12'54''N 22*34'12''W | 00:23:24 UT |
+| P4 (Last external contact) | 44*12'54''N 22*34'12''W | 00:23:24 UT |
+# Besselian Elements
+| n | x | y | d | l1 | l2 | μ |
+|-----|-----|-----|-----|-----|-----|-----|
+| 0 | {besselianElements.X[0].ToString("N6", nf)} |{besselianElements.Y[0].ToString("N6", nf)} | {besselianElements.D[0].ToString("N6", nf)} | {besselianElements.L1[0].ToString("N6", nf)} | {besselianElements.L2[0].ToString("N6", nf)} | {besselianElements.Mu[0].ToString("N6", nf)} |
+| 1 | {besselianElements.X[1].ToString("N6", nf)} |{besselianElements.Y[1].ToString("N6", nf)} | {besselianElements.D[1].ToString("N6", nf)} | {besselianElements.L1[1].ToString("N6", nf)} | {besselianElements.L2[1].ToString("N6", nf)} | {besselianElements.Mu[1].ToString("N6", nf)} |
+| 2 | {besselianElements.X[2].ToString("N6", nf)} |{besselianElements.Y[2].ToString("N6", nf)} | {besselianElements.D[2].ToString("N6", nf)} | {besselianElements.L1[2].ToString("N6", nf)} | {besselianElements.L2[2].ToString("N6", nf)} | |
+| 3 | {besselianElements.X[3].ToString("N6", nf)} |{besselianElements.Y[3].ToString("N6", nf)} | | | | |
+Tan ƒ1 = {besselianElements.TanF1.ToString("N7", nf)}  
+Tan ƒ2 = {besselianElements.TanF2.ToString("N7", nf)}   
+t0 = {Formatters.DateTime.Format(new Date(besselianElements.JulianDay0, 0))} UT (JDE = {besselianElements.JulianDay0.ToString("N6", nf)})
+";
 
             IsCalculating = true;
 
-            NotifyPropertyChanged(nameof(EclipseDate), nameof(EclipseDescription), nameof(IsCalculating));
+            NotifyPropertyChanged(
+                nameof(EclipseDate), 
+                nameof(EclipseDescription), 
+                nameof(EclipseDetails), 
+                nameof(IsCalculating));
 
             await Task.Run(() =>
             {
-
-                besselianElements = eclipsesCalculator.GetBesselianElements(JulianDay);
+                
                 var map = SolarEclipses.EclipseMap(besselianElements, eclipse.EclipseType);
 
 

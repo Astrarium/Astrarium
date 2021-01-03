@@ -14,7 +14,7 @@ using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace Astrarium.Controls
+namespace Astrarium.Types.Controls
 {
     /// <summary>
     /// The code is based on https://github.com/theunrepentantgeek/Markdown.XAML
@@ -973,9 +973,12 @@ namespace Astrarium.Controls
                 tableHeaderRG.Style = TableHeaderStyle;
             }
 
-            var tableHeader = CreateTableRow(headers, aligns);
-            tableHeaderRG.Rows.Add(tableHeader);
-            table.RowGroups.Add(tableHeaderRG);
+            if (headers.Any(h => !string.IsNullOrWhiteSpace(h)))
+            {
+                var tableHeader = CreateTableRow(headers, aligns);
+                tableHeaderRG.Rows.Add(tableHeader);
+                table.RowGroups.Add(tableHeaderRG);
+            }
 
             // row
             var tableBodyRG = new TableRowGroup();
