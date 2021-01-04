@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 
-namespace Astrarium.Controls
+namespace Astrarium.Types.Controls
 {
     public class TextToFlowDocumentConverter : DependencyObject, IValueConverter
     {

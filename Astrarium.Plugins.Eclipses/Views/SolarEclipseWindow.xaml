@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types" 
     xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types" 
+    xmlns:с="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types" 
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
     x:Class="Astrarium.Plugins.Eclipses.SolarEclipseWindow" 
     mc:Ignorable="d" 
@@ -56,7 +57,7 @@
                     </Path.LayoutTransform>
                 </Path>
             </Grid>
-
+            <c:TextToFlowDocumentConverter x:Key="TextToFlowDocumentConverter" Markdown="{StaticResource Markdown}" />
         </ResourceDictionary>
     </Window.Resources>
     
@@ -71,7 +72,7 @@
         <StackPanel Orientation="Vertical" Grid.Row="0" HorizontalAlignment="Center">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Content="{StaticResource ImagePrev}" Style="{StaticResource ImageButton}" Command="{Binding PrevEclipseCommand}" />
-                <TextBlock VerticalAlignment="Center" MinWidth="250" Height="Auto" TextAlignment="Center" HorizontalAlignment="Center" FontSize="32" Text="{Binding EclipseDate, FallbackValue='01 Jan 2000'}" />
+                <TextBlock VerticalAlignment="Center" MinWidth="200" Height="Auto" TextAlignment="Center" HorizontalAlignment="Center" FontSize="32" Text="{Binding EclipseDate, FallbackValue='01 Jan 2000'}" />
                 <Button Content="{StaticResource ImageNext}" Style="{StaticResource ImageButton}" Command="{Binding NextEclipseCommand}" />
             </StackPanel>
             <TextBlock Height="Auto" Padding="0" HorizontalAlignment="Center" Text="{Binding EclipseDescription, FallbackValue='Eclipse description'}"></TextBlock>
@@ -83,8 +84,6 @@
 
         <TabControl Grid.Row="2" Padding="0">
             <TabItem Header="Eclipse Map">
-
-
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -134,7 +133,18 @@
        
                 
             </TabItem>
-            <TabItem Header="General Information"></TabItem>
+            <TabItem Header="General Information">
+                <FlowDocumentScrollViewer 
+           
+                VerticalAlignment="Stretch"
+                HorizontalAlignment="Left"
+                VerticalScrollBarVisibility="Auto"
+                Margin="10"
+                ContextMenu="{x:Null}"
+                Document="{Binding EclipseDetails, Converter={StaticResource TextToFlowDocumentConverter}}"
+                SelectionBrush="Transparent"
+                Cursor="Arrow"/>
+            </TabItem>
             <TabItem Header="Local Circumstances"></TabItem>
         </TabControl>
         
