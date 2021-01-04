@@ -3,14 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28729.10
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Algorithms", "Astrarium.Algorithms\Astrarium.Algorithms.csproj", "{0DA17A1C-068E-4CCE-82A4-646E137CC121}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Algorithms.Tests", "Astrarium.Algorithms.Tests\Astrarium.Algorithms.Tests.csproj", "{B8E35F4C-4324-48DE-97DB-6C9D083D59B1}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium", "Astrarium\Astrarium.csproj", "{BD5D4668-0D89-4A08-A669-739FF47CA03B}"
 	ProjectSection(ProjectDependencies) = postProject
 		{58EA126A-1037-4976-B212-8DBAE98B7D78} = {58EA126A-1037-4976-B212-8DBAE98B7D78}
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Algorithms", "Astrarium.Algorithms\Astrarium.Algorithms.csproj", "{0DA17A1C-068E-4CCE-82A4-646E137CC121}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Algorithms.Tests", "Astrarium.Algorithms.Tests\Astrarium.Algorithms.Tests.csproj", "{B8E35F4C-4324-48DE-97DB-6C9D083D59B1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Types", "Astrarium.Types\Astrarium.Types.csproj", "{098854D6-DFD9-4A4A-8657-CE0323DB0DB2}"
 EndProject
