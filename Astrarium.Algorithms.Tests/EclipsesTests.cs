@@ -47,7 +47,7 @@ namespace Astrarium.Algorithms.Tests
 
             Assert.AreEqual(2449129.0979, eclipse.JulianDayMaximum, TimeSpan.FromMinutes(0.36).TotalDays);
             Assert.AreEqual(SolarEclipseType.Partial, eclipse.EclipseType);
-            Assert.AreEqual(0.740, eclipse.Phase, 1e-3);
+            Assert.AreEqual(0.740, eclipse.Magnitude, 1e-3);
             Assert.AreEqual(SolarEclipseRegio.Northern, eclipse.Regio);
         }
 
@@ -265,6 +265,66 @@ namespace Astrarium.Algorithms.Tests
                 Func<double, bool> func = (x) => x > 4;
                 var x0 = SolarEclipses.FindFunctionEnd(func, -5, 5, false, true, 1e-6);
                 Assert.AreEqual(4, x0, 1e-6);
+            }
+        }
+
+        [TestMethod]
+        public void SarosNumber()
+        {
+            // Solar eclipse 11 Aug 1999
+            {
+                double jd = 2451401;
+                int saros = SolarEclipses.SarosNumber(jd);
+                Assert.AreEqual(145, saros);
+            }
+
+            // Solar eclipse 3 Nov 2013
+            {
+                double jd = Date.JulianDay(new Date(2013, 11, 3));
+                int saros = SolarEclipses.SarosNumber(jd);
+                Assert.AreEqual(143, saros);
+            }
+
+            // Solar eclipse 22 Jul 2009
+            {
+                double jd = Date.JulianDay(new Date(2009, 7, 22));
+                int saros = SolarEclipses.SarosNumber(jd);
+                Assert.AreEqual(136, saros);
+            }
+
+            // Solar eclipse 30 Jul 1505
+            {
+                double jd = Date.JulianDay(new Date(1505, 7, 30));
+                int saros = SolarEclipses.SarosNumber(jd);
+                Assert.AreEqual(108, saros);
+            }
+
+            // Lunar eclipse 18 Aug 2016
+            {
+                double jd = Date.JulianDay(new Date(2016, 8, 18));
+                int saros = LunarEclipses.Saros(jd);
+                Assert.AreEqual(109, saros);
+            }
+
+            // Lunar eclipse 16 Sep 2016
+            {
+                double jd = Date.JulianDay(new Date(2016, 9, 16));
+                int saros = LunarEclipses.Saros(jd);
+                Assert.AreEqual(147, saros);
+            }
+
+            // Lunar eclipse 30 Oct 2031
+            {
+                double jd = Date.JulianDay(new Date(2031, 10, 30));
+                int saros = LunarEclipses.Saros(jd);
+                Assert.AreEqual(117, saros);
+            }
+
+            // Lunar eclipse 15 Oct 1521
+            {
+                double jd = Date.JulianDay(new Date(1521, 10, 15));
+                int saros = LunarEclipses.Saros(jd);
+                Assert.AreEqual(138, saros);
             }
         }
     }

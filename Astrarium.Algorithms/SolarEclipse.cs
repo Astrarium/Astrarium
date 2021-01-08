@@ -17,9 +17,9 @@ namespace Astrarium.Algorithms
         public double JulianDayMaximum { get; set; }
 
         /// <summary>
-        /// Eclipse phase
+        /// Eclipse magnitude
         /// </summary>
-        public double Phase { get; set; } = 1;
+        public double Magnitude { get; set; } = 1;
 
         /// <summary>
         /// Regio where the eclipse is primarily visible
@@ -48,5 +48,10 @@ namespace Astrarium.Algorithms
         /// (umbral cone touches the Earth polar regio but umbral axis does not)
         /// </summary>
         public bool IsNonCentral { get; set; }
+
+        /// <summary>
+        /// Saros series number for the eclipse
+        /// </summary>
+        public int Saros { get; set; }
     }
 }

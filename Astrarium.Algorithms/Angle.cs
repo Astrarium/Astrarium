@@ -48,6 +48,16 @@ namespace Astrarium.Algorithms
         }
 
         /// <summary>
+        /// Normalizes angle value expressed in degrees to value in range from -180 to +180.
+        /// </summary>
+        /// <param name="angle">Angle value expressed in degrees.</param>
+        /// <returns>Value expressed in degrees in range from -180 to +180</returns>
+        public static double To180(double angle) 
+        {
+            return To360(angle + 180) - 180;
+        }
+
+        /// <summary>
         /// Calculates angular separation between two points with horizontal coordinates
         /// </summary>
         /// <param name="p1">Horizontal coordinates of the first point</param>

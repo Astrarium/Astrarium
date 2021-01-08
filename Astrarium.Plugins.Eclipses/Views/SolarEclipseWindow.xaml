@@ -25,7 +25,7 @@
                     <Setter Property="Cursor" Value="Hand" />
                     <Setter Property="Background" Value="Transparent" />
                     <Setter Property="Margin" Value="2" />
-                    <Setter Property="MinWidth" Value="100" />
+                    <Setter Property="MinWidth" Value="40" />
                     <Setter Property="Height" Value="40" />
                 </Style.Setters>
                 <Style.Triggers>
@@ -35,11 +35,28 @@
                     </Trigger>
                 </Style.Triggers>
             </Style>
-
-            <Grid x:Key="ImagePrev" x:Shared="False">
-                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="32" Height="10" Stretch="Fill" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
+            <Grid x:Key="ImagePrevEclipse" x:Shared="False">
+                <Path HorizontalAlignment="Left" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="16" Height="16" Stretch="Uniform" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
                     <Path.Data>
-                        <StreamGeometry>M251.1,2981.4l66.1-66.4l-66.8-66.8h56.3l59.2,59.2h403.6l-29.4-58.9c0-0.1,166.3,66.5,166.3,66.5L741,2981.2l28.5-58.6   H365.9l-59.2,59.2L251.1,2981.4z</StreamGeometry>
+                        <StreamGeometry>F1 M100,100z M0,0z M14,8L14,8 2.5,19.6 32.9,50 2.5,80.4 14,92 56,50z</StreamGeometry>
+                    </Path.Data>
+                    <Path.LayoutTransform>
+                        <RotateTransform Angle="180"></RotateTransform>
+                    </Path.LayoutTransform>
+                </Path>
+            </Grid>
+            <Grid x:Key="ImagePrevSaros" x:Shared="False">
+                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="16" Height="16" Stretch="Uniform" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
+                    <Path.Data>
+                        <StreamGeometry>F1 M100,100z M0,0z M14,8L14,8 2.5,19.6 32.9,50 2.5,80.4 14,92 56,50z</StreamGeometry>
+                    </Path.Data>
+                    <Path.LayoutTransform>
+                        <RotateTransform Angle="180"></RotateTransform>
+                    </Path.LayoutTransform>
+                </Path>
+                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="16" Height="16" Stretch="Uniform" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
+                    <Path.Data>
+                        <StreamGeometry>F1 M100,100z M0,0z M55.5,8L55.5,8 44,19.6 74.4,50 44,80.4 55.5,92 97.5,50z</StreamGeometry>
                     </Path.Data>
                     <Path.LayoutTransform>
                         <RotateTransform Angle="180"></RotateTransform>
@@ -47,10 +64,28 @@
                 </Path>
             </Grid>
 
-            <Grid x:Key="ImageNext" x:Shared="False">
-                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="32" Height="10" Stretch="Fill" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
+            <Grid x:Key="ImageNextEclipse" x:Shared="False">
+                <Path HorizontalAlignment="Right" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="20" Height="20" Stretch="Uniform" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
                     <Path.Data>
-                        <StreamGeometry>M251.1,2981.4l66.1-66.4l-66.8-66.8h56.3l59.2,59.2h403.6l-29.4-58.9c0-0.1,166.3,66.5,166.3,66.5L741,2981.2l28.5-58.6   H365.9l-59.2,59.2L251.1,2981.4z</StreamGeometry>
+                        <StreamGeometry>F1 M100,125z M0,0z M14,8L14,8 2.5,19.6 32.9,50 2.5,80.4 14,92 56,50z</StreamGeometry>
+                    </Path.Data>
+                    <Path.LayoutTransform>
+                        <RotateTransform Angle="0"></RotateTransform>
+                    </Path.LayoutTransform>
+                </Path>
+            </Grid>
+            <Grid x:Key="ImageNextSaros" x:Shared="False">
+                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="20" Height="20" Stretch="Uniform" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
+                    <Path.Data>
+                        <StreamGeometry>F1 M100,125z M0,0z M14,8L14,8 2.5,19.6 32.9,50 2.5,80.4 14,92 56,50z</StreamGeometry>
+                    </Path.Data>
+                    <Path.LayoutTransform>
+                        <RotateTransform Angle="0"></RotateTransform>
+                    </Path.LayoutTransform>
+                </Path>
+                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="20" Height="20" Stretch="Uniform" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
+                    <Path.Data>
+                        <StreamGeometry>F1 M100,125z M0,0z M55.5,8L55.5,8 44,19.6 74.4,50 44,80.4 55.5,92 97.5,50z</StreamGeometry>
                     </Path.Data>
                     <Path.LayoutTransform>
                         <RotateTransform Angle="0"></RotateTransform>
@@ -60,7 +95,7 @@
             <c:TextToFlowDocumentConverter x:Key="TextToFlowDocumentConverter" Markdown="{StaticResource Markdown}" />
         </ResourceDictionary>
     </Window.Resources>
-    
+
     <Grid Margin="0">
 
         <Grid.RowDefinitions>
@@ -71,18 +106,20 @@
 
         <StackPanel Orientation="Vertical" Grid.Row="0" HorizontalAlignment="Center">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Content="{StaticResource ImagePrev}" Style="{StaticResource ImageButton}" Command="{Binding PrevEclipseCommand}" />
+                <Button Content="{StaticResource ImagePrevSaros}" Style="{StaticResource ImageButton}" Command="{Binding PrevSarosCommand}" IsEnabled="{Binding PrevSarosEnabled}" ToolTip="Previous eclipse of the same saros" />
+                <Button Content="{StaticResource ImagePrevEclipse}" Style="{StaticResource ImageButton}" Command="{Binding PrevEclipseCommand}" ToolTip="Previous eclipse" />
                 <TextBlock VerticalAlignment="Center" MinWidth="200" Height="Auto" TextAlignment="Center" HorizontalAlignment="Center" FontSize="32" Text="{Binding EclipseDate, FallbackValue='01 Jan 2000'}" />
-                <Button Content="{StaticResource ImageNext}" Style="{StaticResource ImageButton}" Command="{Binding NextEclipseCommand}" />
+                <Button Content="{StaticResource ImageNextEclipse}" Style="{StaticResource ImageButton}" Command="{Binding NextEclipseCommand}" ToolTip="Next eclipse" />
+                <Button Content="{StaticResource ImageNextSaros}" Style="{StaticResource ImageButton}" Command="{Binding NextSarosCommand}" IsEnabled="{Binding NextSarosEnabled}" ToolTip="Next eclipse of the same saros" />
             </StackPanel>
             <TextBlock Height="Auto" Padding="0" HorizontalAlignment="Center" Text="{Binding EclipseDescription, FallbackValue='Eclipse description'}"></TextBlock>
         </StackPanel>
-        
+
         <Grid Height="6" Grid.Row="1">
             <ProgressBar Height="6" Background="Transparent" IsIndeterminate="True" Visibility="{Binding IsCalculating, Converter={s:BoolToVisibilityConverter}}" />
         </Grid>
 
-        <TabControl Grid.Row="2" Padding="0">
+        <TabControl Grid.Row="2" Padding="0" SelectedIndex="{Binding SelectedTabIndex}">
             <TabItem Header="Eclipse Map">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -92,6 +129,10 @@
                     </Grid.ColumnDefinitions>
 
                     <Grid Grid.Column="0" Margin="1 -1 -2 0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="115*"/>
+                            <ColumnDefinition Width="268*"/>
+                        </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="Auto" />
@@ -109,48 +150,50 @@
                             ThumbnailForeColor="#333333"
                             TileImageAttributes="{Binding TileImageAttributes}"
                             OnClick="{Binding ClickOnMapCommand}"
-                            Mouse="{Binding MapMouse, Mode=OneWayToSource}" />
+                            Mouse="{Binding MapMouse, Mode=OneWayToSource}" Grid.ColumnSpan="2" Margin="0,0,0.4,25.4" Grid.RowSpan="2" />
 
-                        <DockPanel Margin="2 4" Grid.Row="1">
+                        <DockPanel Margin="2,4.2,2.4,4.4" Grid.Row="1" Grid.ColumnSpan="2">
                             <ComboBox Padding="2 0" Margin="0" Width="200" Height="18" ItemsSource="{Binding TileServers, Mode=OneTime}" DisplayMemberPath="Name" SelectedItem="{Binding TileServer}" />
                             <TextBlock Padding="2 0" Text="{Binding MapMouse, FallbackValue='Coordinates'}" IsEnabled="False" VerticalAlignment="Center" />
                             <c:HtmlTextBlock IsEnabled="False" Foreground="{StaticResource BrushControlLightBackground}" VerticalAlignment="Center" HorizontalAlignment="Right" Padding="2 0 4 0" FontSize="12" FormattedText="{Binding TileServer.AttributionText, FallbackValue='AttributionText'}" />
                         </DockPanel>
                     </Grid>
-
                     <GridSplitter 
                         Grid.Column="1" 
                         ShowsPreview="False"   
                         HorizontalAlignment="Center" 
                         VerticalAlignment="Stretch" />
-
                     <TextBlock Grid.Column="2" Text="{Binding Details, FallbackValue='test'}" />
-
-
-
                 </Grid>
-                
-       
-                
             </TabItem>
             <TabItem Header="General Information">
                 <FlowDocumentScrollViewer 
-           
-                VerticalAlignment="Stretch"
-                HorizontalAlignment="Left"
-                VerticalScrollBarVisibility="Auto"
-                Margin="10"
-                ContextMenu="{x:Null}"
-                Document="{Binding EclipseDetails, Converter={StaticResource TextToFlowDocumentConverter}}"
-                SelectionBrush="Transparent"
-                Cursor="Arrow"/>
+                    VerticalAlignment="Stretch"
+                    HorizontalAlignment="Left"
+                    VerticalScrollBarVisibility="Auto"
+                    Margin="10"
+                    ContextMenu="{x:Null}"
+                    Document="{Binding EclipseDetails, Converter={StaticResource TextToFlowDocumentConverter}}"
+                    SelectionBrush="Transparent"
+                    Cursor="Arrow"/>
+            </TabItem>
+            <TabItem Header="Saros Series">
+                <FlowDocumentScrollViewer 
+                    VerticalAlignment="Stretch"
+                    HorizontalAlignment="Left"
+                    VerticalScrollBarVisibility="Auto"
+                    Margin="10"
+                    ContextMenu="{x:Null}"
+                    Document="{Binding SarosSeries, Converter={StaticResource TextToFlowDocumentConverter}}"
+                    SelectionBrush="Transparent"
+                    Cursor="Arrow"/>
             </TabItem>
             <TabItem Header="Local Circumstances"></TabItem>
         </TabControl>
-        
-        
 
-        
- 
+
+
+
+
     </Grid>
 </Window>

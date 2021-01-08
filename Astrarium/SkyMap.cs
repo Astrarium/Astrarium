@@ -54,11 +54,6 @@ namespace Astrarium
         /// </summary>
         private Font fontDiagnosticText = new Font("Monospace", 8);
 
-        /// <summary>
-        /// Font used to display "Object is locked" message
-        /// </summary>
-        private Font fontLockMessage = new Font("Arial", 8);
-
         public int Width { get; set; }
         public int Height { get; set; }
 

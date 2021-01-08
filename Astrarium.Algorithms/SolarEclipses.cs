@@ -16,6 +16,67 @@ namespace Astrarium.Algorithms
     public static class SolarEclipses
     {
         /// <summary>
+        /// Calculates saros series number for the solar eclipse.
+        /// </summary>
+        /// <param name="jd">Julian day of the eclipse instant.</param>
+        /// <returns>Saros series number for the solar eclipse.</returns>
+        /// <remarks>
+        /// The method is based on algorithm described here: https://webspace.science.uu.nl/~gent0113/eclipse/eclipsecycles.htm
+        /// </remarks>
+        public static int Saros(double jd)
+        {
+            // New Moon 6 Jan 2000
+            const double jd0 = 2451550.25972;
+            int LN = (int)Round((jd - jd0) / LunarEphem.SINODIC_PERIOD);
+            int ND = LN + 105;
+            int NS = 136 + 38 * ND;
+            int NX = -61 * ND;
+            int NC = (int)Floor(NX / 358.0 + 0.5 - ND / (12.0 * 358 * 358));
+            int SNS = (NS + NC * 223 - 1) % 223 + 1;
+            return SNS;
+        }
+
+        // TODO:
+        // calculate Saros and Inex number of an eclipse
+        // https://web.archive.org/web/20070630062339/http://user.online.be/felixverbelen/cycles.htm
+
+        internal static int SarosNumber(double jd) 
+        {
+            // Solar eclipse 01 Jul 2000
+            const double jd0 = 2451727.31498;
+
+            // Inex cycle length, in days
+            const double I = 10571.95;
+
+            // Saros cycle length, in days
+            const double S = 6585.32;
+
+            // Saros number of the solar eclipse 01 Jul 2000
+            const int Saros0 = 117;
+
+            // Dates difference
+            double T = jd - jd0;
+
+            int a0 = -1;
+            do
+            {
+                a0++;
+                for (int i = 0; i < 2; i++)
+                {
+                    int a = (i == 0 ? 1 : -1) * a0;
+                    int b = (int)Round((T - a * I) / S);
+                    double t = a * I + b * S;
+                    double dt = Abs(T - t);
+                    if (dt <= 2)
+                    {
+                        return Saros0 + a;
+                    }
+                }
+            }
+            while (true);
+        }
+
+        /// <summary>
         /// Calculates nearest solar eclipse (next or previous) for the provided Julian Day.
         /// </summary>
         /// <param name="jd">Julian day of interest, the nearest solar eclipse for that date will be found.</param>
@@ -164,7 +225,7 @@ namespace Astrarium.Algorithms
                     if (!eclipse.IsNonCentral && Abs(gamma) > 0.9972 && Abs(gamma) < 1.5433 + u)
                     {
                         eclipse.EclipseType = SolarEclipseType.Partial;
-                        eclipse.Phase = (1.5433 + u - Abs(gamma)) / (0.5461 + 2 * u);
+                        eclipse.Magnitude = (1.5433 + u - Abs(gamma)) / (0.5461 + 2 * u);
                     }
 
                     // hemisphere
@@ -180,6 +241,9 @@ namespace Astrarium.Algorithms
                     {
                         eclipse.Regio = SolarEclipseRegio.Equatorial;
                     }
+
+                    // saros
+                    eclipse.Saros = Saros(jdMax);
                 }
                 else
                 {
@@ -436,6 +500,9 @@ namespace Astrarium.Algorithms
         /// </summary>
         /// <param name="pbe">Polynomial Besselian elements defining the Eclipse</param>
         /// <returns><see cref="SolarEclipseMap"/> instance.</returns>
+        /// 
+
+        // TODO: get rid of eclipse type as parameter!
         public static SolarEclipseMap EclipseMap(PolynomialBesselianElements pbe, SolarEclipseType eclipseType)
         {
             // left edge of time interval
@@ -511,6 +578,7 @@ namespace Astrarium.Algorithms
 
             if (eclipseType != SolarEclipseType.Partial)
             {
+                // TODO: take non-central eclipses into account (there are no C1/C2 points in that case!)
                 map.C1 = FindExtremeLimitOfCentralLine(pbe, true);
                 map.C2 = FindExtremeLimitOfCentralLine(pbe, false);
             }
@@ -870,7 +938,7 @@ namespace Astrarium.Algorithms
 
             double phi1 = Asin(0.996_647_19 * omega2 * be.Y * Cos(d));
             double phi = ToDegrees(Atan(1.003_364_09 * Tan(phi1)));
-            double lambda = M - H - 0.004_178_07 * pbe.DeltaT;
+            double lambda = To180(M - H - 0.004_178_07 * pbe.DeltaT);
             return new SolarEclipseMapPoint(jd, new CrdsGeographical(lambda, phi));
         }
 
@@ -905,7 +973,7 @@ namespace Astrarium.Algorithms
             double H = To360(ToDegrees(Atan2(x, B * b2 - y1 * b1)));
             double phi1 = Asin(B * b1 + y1 * b2);
             double phi = ToDegrees(Atan(1.003_364_09 * Tan(phi1)));
-            double lambda = M - H - 0.004_178_07 * be.DeltaT;
+            double lambda = To180(M - H - 0.004_178_07 * be.DeltaT);
             return new CrdsGeographical(lambda, phi);
         }
 

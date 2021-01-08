@@ -10,6 +10,63 @@ namespace Astrarium.Algorithms
     public static class LunarEclipses
     {
         /// <summary>
+        /// Calculates saros series number for the lunar eclipse.
+        /// </summary>
+        /// <param name="jd">Julian day of the eclipse instant.</param>
+        /// <returns>Saros series number for the lunar eclipse.</returns>
+        /// <remarks>
+        /// The method is based on algorithm described here: https://www.aa.quae.nl/en/saros.html#2_1
+        /// The algorithm returns values in range from 1 to 223, 
+        /// so it is not valid for some historical dates where saros series number is non-positive (see list of saros cycles here: https://en.wikipedia.org/wiki/List_of_saros_series_for_lunar_eclipses).
+        /// By same reason it is not valid for further eclipse cycles with saros series number larger than 223.
+        /// </remarks>
+        public static int Saros(double jd)
+        {
+            // Full moon 18 Jan 2003
+            const double jd0 = 2452656.94931;
+            int LN = (int)Round((jd - jd0) / LunarEphem.SINODIC_PERIOD);
+            int SNL = (192 + LN * 38 - 1) % 223 + 1;
+            if (SNL < 0) SNL += 223;
+            return SNL;
+        }
+
+        public static int SarosNumber(double jd)
+        {
+            // Lunar eclipse 21 Jan 2000
+            const double jd0 = 2451564.69689;
+
+            // Inex cycle length, in days
+            const double I = 10571.95;
+
+            // Saros cycle length, in days
+            const double S = 6585.32;
+
+            // Saros number of the lunar eclipse 21 Jan 2000
+            const int Saros0 = 124;
+
+            // Dates difference
+            double T = jd - jd0;
+
+            int a0 = -1;
+            do
+            {
+                a0++;
+                for (int i = 0; i < 2; i++)
+                {
+                    int a = (i == 0 ? 1 : -1) * a0;
+                    int b = (int)Round((T - a * I) / S);
+                    double t = a * I + b * S;
+                    double dt = Abs(T - t);
+                    if (dt <= 2)
+                    {
+                        return Saros0 + a;
+                    }
+                }
+            }
+            while (true);
+        }
+
+        /// <summary>
         /// Calculates nearest lunar eclipse (next or previous) for the provided Julian Day.
         /// </summary>
         /// <param name="jd">Julian day of interest, the nearest lunar eclipse for that date will be found.</param>

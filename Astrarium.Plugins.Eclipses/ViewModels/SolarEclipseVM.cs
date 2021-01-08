@@ -44,13 +44,41 @@ namespace Astrarium.Plugins.Eclipses
         public string EclipseDetails { get; private set; }
 
         /// <summary>
+        /// Saros series table in markdown format
+        /// </summary>
+        public string SarosSeries { get; private set; }
+
+        /// <summary>
         /// Flag indicating calculation is in progress
         /// </summary>
         public bool IsCalculating { get; private set; }
 
+        /// <summary>
+        /// Flag indicating previous saros button is enabled
+        /// </summary>
+        public bool PrevSarosEnabled { get; private set; }
+
+        /// <summary>
+        /// Flag indicating next saros button is enabled
+        /// </summary>
+        public bool NextSarosEnabled { get; private set; }
+
         public ICommand PrevEclipseCommand => new Command(PrevEclipse);
         public ICommand NextEclipseCommand => new Command(NextEclipse);
+        public ICommand PrevSarosCommand => new Command(PrevSaros);
+        public ICommand NextSarosCommand => new Command(NextSaros);
         public ICommand ClickOnMapCommand => new Command(ClickOnMap);
+
+        private int selectedTabIndex = 0;
+        public int SelectedTabIndex
+        {
+            get => selectedTabIndex; 
+            set
+            {
+                selectedTabIndex = value;
+                CalculateSarosSeries();
+            }
+        } 
 
         /// <summary>
         /// Collection of map tile servers to switch between them
@@ -76,7 +104,11 @@ namespace Astrarium.Plugins.Eclipses
         private readonly IEclipsesCalculator eclipsesCalculator;
         private readonly ISettings settings;
         private CrdsGeographical observerLocation;
-        private PolynomialBesselianElements besselianElements;
+        private PolynomialBesselianElements be;
+        private NumberFormatInfo nf;
+
+        private readonly IEphemFormatter fmtGeo = new Formatters.GeoCoordinatesFormatter();
+        private readonly IEphemFormatter fmtTime = new Formatters.TimeFormatter(withSeconds: true);
 
         #region Map styles
 
@@ -120,7 +152,10 @@ namespace Astrarium.Plugins.Eclipses
             this.settings = settings;
             this.settings.PropertyChanged += Settings_PropertyChanged;
             observerLocation = settings.Get<CrdsGeographical>("ObserverLocation");
-
+            nf = new NumberFormatInfo();
+            nf.NumberDecimalSeparator = ".";
+            nf.NumberGroupSeparator = "\u2009";
+            
             CacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "MapsCache");
 
             TileServers = new List<ITileServer>() 
@@ -137,7 +172,7 @@ namespace Astrarium.Plugins.Eclipses
 
             JulianDay = sky.Context.JulianDay - LunarEphem.SINODIC_PERIOD;
 
-            CalculateEclipse(next: true);
+            CalculateEclipse(next: true, saros: false);
         }
 
         private void Settings_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -150,12 +185,22 @@ namespace Astrarium.Plugins.Eclipses
 
         private void PrevEclipse()
         {
-            CalculateEclipse(next: false);
+            CalculateEclipse(next: false, saros: false);
         }
 
         private void NextEclipse()
         {
-            CalculateEclipse(next: true);
+            CalculateEclipse(next: true, saros: false);
+        }
+
+        private void PrevSaros()
+        {
+            CalculateEclipse(next: false, saros: true);
+        }
+
+        private void NextSaros()
+        {
+            CalculateEclipse(next: true, saros: true);
         }
 
         public string Details { get; set; }
@@ -168,7 +213,7 @@ namespace Astrarium.Plugins.Eclipses
                 SetValue(nameof(MapMouse), value);
 
                 var pos = new CrdsGeographical(-value.Longitude, value.Latitude);
-                var isTotal = SolarEclipses.LocalCircumstances(besselianElements, pos);
+                var isTotal = SolarEclipses.LocalCircumstances(be, pos);
 
                 Details = isTotal.ToString();
 
@@ -233,65 +278,30 @@ namespace Astrarium.Plugins.Eclipses
             }
         }
 
-        private async void CalculateEclipse(bool next)
+        private async void CalculateEclipse(bool next, bool saros)
         {
-            NumberFormatInfo nf = new NumberFormatInfo();
-            nf.NumberDecimalSeparator = ".";
-            nf.NumberGroupSeparator = "\u2009";
-
-            SolarEclipse eclipse = SolarEclipses.NearestEclipse(JulianDay + (next ? 1 : -1) * LunarEphem.SINODIC_PERIOD, next);
+            SolarEclipse eclipse = SolarEclipses.NearestEclipse(JulianDay + (next ? 1 : -1) * (saros ? LunarEphem.SAROS : LunarEphem.SINODIC_PERIOD), next);
             JulianDay = eclipse.JulianDayMaximum;
             EclipseDate = Formatters.Date.Format(new Date(JulianDay, observerLocation.UtcOffset));
-            besselianElements = eclipsesCalculator.GetBesselianElements(JulianDay);
+            be = eclipsesCalculator.GetBesselianElements(JulianDay);
             string type = eclipse.EclipseType.ToString();
             string subtype = eclipse.IsNonCentral ? " non-central" : "";
             EclipseDescription = $"{type}{subtype} solar eclipse";
-            EclipseDetails = 
-$@"# Eclipse Details
-||
-|----------|
-| Type | Total |
-| Date | 12 Jun 2020 |
-| Magnitude | 1.02353 |
-| Gamma | -0.77878 |
-| Maximal duration | 03m 58s |
-| Delta T | 85.2 s |
-| [link](astrarium://test.link) | link |
-# Contacts
-| Point | Coordinates | Time |
-|-----|------|------|
-| P1 (First external contact) | 44*12'54''N 22*34'12''W | 00:16:24 UT |
-| P2 (First internal contact) | 44*12'54''N 22*34'12''W | 00:23:24 UT |
-| C1 (First umbra contact) | 44*12'54''N 22*34'12''W | 00:23:24 UT |
-| Max (Greatest Eclipse) | 44*12'54''N 22*34'12''W | 00:23:24 UT |
-| C2 (Last umbra contact) | 44*12'54''N 22*34'12''W | 00:23:24 UT |
-| P3 (Last internal contact) | 44*12'54''N 22*34'12''W | 00:23:24 UT |
-| P4 (Last external contact) | 44*12'54''N 22*34'12''W | 00:23:24 UT |
-# Besselian Elements
-| n | x | y | d | l1 | l2 | μ |
-|-----|-----|-----|-----|-----|-----|-----|
-| 0 | {besselianElements.X[0].ToString("N6", nf)} |{besselianElements.Y[0].ToString("N6", nf)} | {besselianElements.D[0].ToString("N6", nf)} | {besselianElements.L1[0].ToString("N6", nf)} | {besselianElements.L2[0].ToString("N6", nf)} | {besselianElements.Mu[0].ToString("N6", nf)} |
-| 1 | {besselianElements.X[1].ToString("N6", nf)} |{besselianElements.Y[1].ToString("N6", nf)} | {besselianElements.D[1].ToString("N6", nf)} | {besselianElements.L1[1].ToString("N6", nf)} | {besselianElements.L2[1].ToString("N6", nf)} | {besselianElements.Mu[1].ToString("N6", nf)} |
-| 2 | {besselianElements.X[2].ToString("N6", nf)} |{besselianElements.Y[2].ToString("N6", nf)} | {besselianElements.D[2].ToString("N6", nf)} | {besselianElements.L1[2].ToString("N6", nf)} | {besselianElements.L2[2].ToString("N6", nf)} | |
-| 3 | {besselianElements.X[3].ToString("N6", nf)} |{besselianElements.Y[3].ToString("N6", nf)} | | | | |
-Tan ƒ1 = {besselianElements.TanF1.ToString("N7", nf)}  
-Tan ƒ2 = {besselianElements.TanF2.ToString("N7", nf)}   
-t0 = {Formatters.DateTime.Format(new Date(besselianElements.JulianDay0, 0))} UT (JDE = {besselianElements.JulianDay0.ToString("N6", nf)})
-";
-
+            PrevSarosEnabled = SolarEclipses.NearestEclipse(JulianDay - LunarEphem.SAROS, next: false).Saros == eclipse.Saros;
+            NextSarosEnabled = SolarEclipses.NearestEclipse(JulianDay + LunarEphem.SAROS, next: true).Saros == eclipse.Saros;
             IsCalculating = true;
 
             NotifyPropertyChanged(
                 nameof(EclipseDate), 
                 nameof(EclipseDescription), 
-                nameof(EclipseDetails), 
+                nameof(PrevSarosEnabled),
+                nameof(NextSarosEnabled),
                 nameof(IsCalculating));
 
             await Task.Run(() =>
             {
                 
-                var map = SolarEclipses.EclipseMap(besselianElements, eclipse.EclipseType);
-
+                var map = SolarEclipses.EclipseMap(be, eclipse.EclipseType);
 
                 var tracks = new List<Track>();
                 var polygons = new List<Polygon>();
@@ -403,19 +413,74 @@ t0 = {Formatters.DateTime.Format(new Date(besselianElements.JulianDay0, 0))} UT 
                 {
                     markers.Add(new Marker(ToGeo(map.Max), maxPointMarkerStyle, "Max"));
                 }
-                
+
+                var eclipseDetails = new StringBuilder();
+                eclipseDetails
+                    .AppendLine($"# {"Eclipse Details"}")
+                    .AppendLine($"||")
+                    .AppendLine($"|-----|")
+                    .AppendLine($"| {"Type"} | {type}{subtype} |")
+                    .AppendLine($"| {"Saros"} | {eclipse.Saros} |")
+                    .AppendLine($"| {"Date"} | {EclipseDate} |")
+                    .AppendLine($"| {"Magnitude"} | { eclipse.Magnitude.ToString("N5", nf)} |")
+                    .AppendLine($"| {"Gamma"} | { eclipse.Gamma.ToString("N5", nf)} |")
+                    .AppendLine($"| {"Maximal Duration"} | { "TODO" } |")
+                    .AppendLine($"| {"ΔT"} | { be.DeltaT.ToString("N1", nf) } s |")
+                    .AppendLine($"# {"Contacts"}")
+                    .AppendLine($"| {"Point"} | {"Coordinates"} | {"Time"} |")
+                    .AppendLine("|-----|-----|-----|")
+                    .AppendLine($"| {"P1 (First external contact)"} | {fmtGeo.Format(map.P1)} | {fmtTime.Format(new Date(map.P1.JulianDay, 0))} UT |");
+
+                if (map.P2 != null)
+                {
+                    eclipseDetails.AppendLine($"| {"P2 (First internal contact)"} | {fmtGeo.Format(map.P2)} | {fmtTime.Format(new Date(map.P2.JulianDay, 0))} UT |");
+                }
+                if (map.C1 != null)
+                {
+                    eclipseDetails.AppendLine($"| {"C1 (First umbra contact)"} | {fmtGeo.Format(map.C1)} | {fmtTime.Format(new Date(map.C1.JulianDay, 0))} UT |");
+                }
+
+                eclipseDetails.AppendLine($"| {"Max (Greatest Eclipse)"} | {fmtGeo.Format(map.Max)} | {fmtTime.Format(new Date(map.Max.JulianDay, 0))} UT |");
+
+                if (map.C2 != null)
+                {
+                    eclipseDetails.AppendLine($"| {"C2 (Last umbra contact)"} | {fmtGeo.Format(map.C2)} | {fmtTime.Format(new Date(map.C2.JulianDay, 0))} UT |");
+                }
+                if (map.P3 != null)
+                {
+                    eclipseDetails.AppendLine($"| {"P3 (Last internal contact)"} | {fmtGeo.Format(map.P3)} | {fmtTime.Format(new Date(map.P3.JulianDay, 0))} UT |");
+                }
+                eclipseDetails.AppendLine($"| {"P4 (Last external contact)"} | {fmtGeo.Format(map.P4)} | {fmtTime.Format(new Date(map.P4.JulianDay, 0))} UT |");
+
+                eclipseDetails
+                    .AppendLine($"# {"Besselian Elements"}")
+                    .AppendLine($"| n | x | y | d | l1 | l2 | μ |")
+                    .AppendLine("|-----|-----|-----|-----|-----|-----|-----|")
+                    .AppendLine($"| 0 | {be.X[0].ToString("N6", nf)} |{be.Y[0].ToString("N6", nf)} | {be.D[0].ToString("N6", nf)} | {be.L1[0].ToString("N6", nf)} | {be.L2[0].ToString("N6", nf)} | {be.Mu[0].ToString("N6", nf)} |")
+                    .AppendLine($"| 1 | {be.X[1].ToString("N6", nf)} |{be.Y[1].ToString("N6", nf)} | {be.D[1].ToString("N6", nf)} | {be.L1[1].ToString("N6", nf)} | {be.L2[1].ToString("N6", nf)} | {be.Mu[1].ToString("N6", nf)} |")
+                    .AppendLine($"| 2 | {be.X[2].ToString("N6", nf)} |{be.Y[2].ToString("N6", nf)} | {be.D[2].ToString("N6", nf)} | {be.L1[2].ToString("N6", nf)} | {be.L2[2].ToString("N6", nf)} | |")
+                    .AppendLine($"| 3 | {be.X[3].ToString("N6", nf)} |{be.Y[3].ToString("N6", nf)} | | | | |")
+                    .AppendLine()
+                    .AppendLine($"Tan ƒ1 = {be.TanF1.ToString("N7", nf)}  ")
+                    .AppendLine($"Tan ƒ2 = {be.TanF2.ToString("N7", nf)}  ")
+                    .AppendLine($"t\u2080 = {Formatters.DateTime.Format(new Date(be.JulianDay0, 0))} UT (JDE = { be.JulianDay0.ToString("N6", nf)}");
+
                 Tracks = tracks;
                 Polygons = polygons;
                 Markers = markers;
                 IsCalculating = false;
+                EclipseDetails = eclipseDetails.ToString();
 
                 AddLocationMarker();
+
+                CalculateSarosSeries();
 
                 NotifyPropertyChanged(
                     nameof(IsCalculating),
                     nameof(Tracks),
                     nameof(Polygons),
-                    nameof(Markers)
+                    nameof(Markers),
+                    nameof(EclipseDetails)
                 );
             });
         }
@@ -425,6 +490,71 @@ t0 = {Formatters.DateTime.Format(new Date(besselianElements.JulianDay0, 0))} UT 
             Markers.Add(new Marker(ToGeo(observerLocation), observerLocationMarkerStyle, observerLocation.LocationName));
             Markers = new List<Marker>(Markers);            
             NotifyPropertyChanged(nameof(Markers));
+        }
+
+        private void CalculateSarosSeries()
+        {
+            if (SelectedTabIndex != 2) return;
+
+            double jd = JulianDay;
+            List<SolarEclipse> eclipses = new List<SolarEclipse>();
+            
+            // add current eclipse
+            var eclipse = SolarEclipses.NearestEclipse(jd, true);
+            eclipses.Add(eclipse);
+            int saros = eclipse.Saros;
+            
+            // add previous eclipses
+            do
+            {
+                jd -= LunarEphem.SAROS;
+                eclipse = SolarEclipses.NearestEclipse(jd, false);
+                if (eclipse.Saros == saros)
+                {
+                    eclipses.Insert(0, eclipse);
+                }
+                else
+                {
+                    break;
+                }
+            }
+            while (true);
+
+            jd = JulianDay;
+            // add next eclipses
+            do
+            {
+                jd += LunarEphem.SAROS;
+                eclipse = SolarEclipses.NearestEclipse(jd, true);
+                if (eclipse.Saros == saros)
+                {
+                    eclipses.Add(eclipse);
+                }
+                else
+                {
+                    break;
+                }
+            }
+            while (true);
+
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"# List of solar eclipses of saros {saros}");
+            sb.AppendLine($"| Date | Type | Gamma | Mag |");
+            sb.AppendLine($"|-----|-----|-----|-----|");
+            foreach (var e in eclipses)
+            {
+                string type = e.EclipseType.ToString();
+                string subtype = e.IsNonCentral ? " non-central" : "";
+                sb.Append("| ");
+                sb.Append($" {Formatters.Date.Format(new Date(e.JulianDayMaximum, 0))} |");
+                sb.Append($" {type}{subtype} |");
+                sb.Append($" {e.Gamma.ToString("N5", nf)} |");
+                sb.Append($" {e.Magnitude.ToString("N5", nf)} |");
+                sb.AppendLine();
+            }
+
+            SarosSeries = sb.ToString();
+            NotifyPropertyChanged(nameof(SarosSeries));
         }
 
         private GeoPoint ToGeo(CrdsGeographical g)

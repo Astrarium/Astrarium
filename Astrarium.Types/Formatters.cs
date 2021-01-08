@@ -112,6 +112,21 @@ namespace Astrarium.Types
             }
         }
 
+        public class GeoCoordinatesFormatter : IEphemFormatter
+        {
+            public string Format(object value)
+            {
+                if (value is CrdsGeographical g && g != null)
+                {
+                    string ns = g.Latitude >= 0 ? "N" : "S";
+                    string we = g.Longitude >= 0 ? "W" : "E";
+                    return $"{new DMS(Math.Abs(g.Latitude)).ToUnsignedString()} {ns} {new DMS(Math.Abs(g.Longitude)).ToUnsignedString()} {we}";
+                }
+                else
+                    return null;
+            }
+        }
+
         public class UnsignedAngleFormatter : IEphemFormatter
         {
             public string Format(object value)
@@ -181,8 +196,15 @@ namespace Astrarium.Types
             }
         }
 
-        private class TimeFormatter : IEphemFormatter
+        public class TimeFormatter : IEphemFormatter
         {
+            private bool withSeconds = false;
+
+            public TimeFormatter(bool withSeconds = false)
+            {
+                this.withSeconds = withSeconds;
+            }
+
             public string Format(object value)
             {
                 double time;
@@ -205,7 +227,7 @@ namespace Astrarium.Types
                 }
                 else
                 {
-                    return System.TimeSpan.FromHours(time * 24).ToString(@"hh\:mm");
+                    return System.TimeSpan.FromHours(time * 24).ToString(withSeconds ? @"hh\:mm\:ss" : @"hh\:mm");
                 }
             }
         }

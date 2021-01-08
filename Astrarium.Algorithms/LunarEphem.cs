@@ -30,6 +30,11 @@ namespace Astrarium.Algorithms
         public const double DRACONIC_PERIOD = 27.2122204;
 
         /// <summary>
+        /// Length of saros cycle, in days.
+        /// </summary>
+        public const double SAROS = 6585.3211;
+
+        /// <summary>
         /// Average apparent daily motion of the Moon, among the stars, in degrees per day.
         /// </summary>
         public const double AVERAGE_DAILY_MOTION = 360 / SIDEREAL_PERIOD;

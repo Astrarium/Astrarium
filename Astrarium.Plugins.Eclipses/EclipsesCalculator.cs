@@ -54,7 +54,7 @@ namespace Astrarium.Plugins.Eclipses
 
                     string type = eclipse.EclipseType.ToString();
                     string subtype = eclipse.IsNonCentral ? " non-central" : "";
-                    string phase = eclipse.EclipseType == SolarEclipseType.Partial ? $" (max phase {Formatters.Phase.Format(eclipse.Phase)})" : "";
+                    string phase = eclipse.EclipseType == SolarEclipseType.Partial ? $" (max phase {Formatters.Phase.Format(eclipse.Magnitude)})" : "";
                     double jdMax = jd;
 
                     string localVisibility = "invisible from current place";
