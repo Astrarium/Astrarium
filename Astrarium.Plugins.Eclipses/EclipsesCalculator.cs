@@ -55,32 +55,8 @@ namespace Astrarium.Plugins.Eclipses
                     string type = eclipse.EclipseType.ToString();
                     string subtype = eclipse.IsNonCentral ? " non-central" : "";
                     string phase = eclipse.EclipseType == SolarEclipseType.Partial ? $" (max phase {Formatters.Phase.Format(eclipse.Magnitude)})" : "";
-                    double jdMax = jd;
-
-                    string localVisibility = "invisible from current place";
-                    if (localCirc.MaxMagnitude > 0)
-                    {
-                        jdMax = localCirc.JulianDayMax;
-                        string localMag = Formatters.Phase.Format(localCirc.MaxMagnitude);
-                        string asPartial = eclipse.EclipseType != SolarEclipseType.Partial ? " as partial" : "";
-                        
-                        // max instant not visible
-                        if (localCirc.SunAltMax <= 0)
-                        {
-                            if (localCirc.SunAltTotalEnd < 0 || localCirc.SunAltPartialEnd < 0)
-                                localVisibility = $"visible{asPartial} on sunset from current place (max phase {localMag})";
-                            else if (localCirc.SunAltPartialBegin < 0 || localCirc.SunAltTotalBegin < 0)
-                                localVisibility = $"visible{asPartial} on sunrise from current place (max phase {localMag})";
-                        }
-                        // max instant visible
-                        else
-                        {
-                            if (localCirc.TotalDuration > 0)
-                                localVisibility = "completely visible from current place";
-                            else
-                                localVisibility = $"visible{asPartial} from current place (max phase {localMag})";
-                        }
-                    }    
+                    double jdMax = localCirc.MaxMagnitude > 0 ? localCirc.JulianDayMax : jd;
+                    string localVisibility = GetLocalVisibilityString(eclipse, localCirc);
 
                     events.Add(new AstroEvent(jdMax, $"{type}{subtype} solar eclipse{phase}, {localVisibility}.", sun, moon));
                     jd += LunarEphem.SINODIC_PERIOD;
@@ -143,6 +119,35 @@ namespace Astrarium.Plugins.Eclipses
             }
             while (true);
             return events;
+        }
+
+        public string GetLocalVisibilityString(SolarEclipse eclipse, SolarEclipseLocalCircumstances localCirc)
+        {
+            string localVisibility = "invisible from current place";
+            if (localCirc.MaxMagnitude > 0)
+            {
+                string localMag = Formatters.Phase.Format(localCirc.MaxMagnitude);
+                string asPartial = eclipse.EclipseType != SolarEclipseType.Partial ? " as partial" : "";
+
+                // max instant not visible
+                if (localCirc.SunAltMax <= 0)
+                {
+                    if (localCirc.SunAltTotalEnd < 0 || localCirc.SunAltPartialEnd < 0)
+                        localVisibility = $"visible{asPartial} on sunset from current place (max phase {localMag})";
+                    else if (localCirc.SunAltPartialBegin < 0 || localCirc.SunAltTotalBegin < 0)
+                        localVisibility = $"visible{asPartial} on sunrise from current place (max phase {localMag})";
+                }
+                // max instant visible
+                else
+                {
+                    if (localCirc.TotalDuration > 0)
+                        localVisibility = "completely visible from current place";
+                    else
+                        localVisibility = $"visible{asPartial} from current place (max phase {localMag})";
+                }
+            }
+
+            return localVisibility;
         }
 
         public PolynomialBesselianElements GetBesselianElements(double jd)

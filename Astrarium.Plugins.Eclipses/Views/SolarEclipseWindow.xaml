@@ -15,7 +15,7 @@
     Height="350" 
     Width="600" 
     MinHeight="350" MinWidth="600" 
-    Style="{StaticResource {x:Type Window}}" 
+    Style="{StaticResource {x:Type Window}}"     
     WindowStartupLocation="CenterOwner">
 
     <Window.Resources>
@@ -105,6 +105,7 @@
         </Grid.RowDefinitions>
 
         <StackPanel Orientation="Vertical" Grid.Row="0" HorizontalAlignment="Center">
+            <TextBlock Height="Auto" Padding="0 10 0 0" HorizontalAlignment="Center" Text="{Binding EclipseDescription, FallbackValue='Eclipse description'}"></TextBlock>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Content="{StaticResource ImagePrevSaros}" Style="{StaticResource ImageButton}" Command="{Binding PrevSarosCommand}" IsEnabled="{Binding PrevSarosEnabled}" ToolTip="Previous eclipse of the same saros" />
                 <Button Content="{StaticResource ImagePrevEclipse}" Style="{StaticResource ImageButton}" Command="{Binding PrevEclipseCommand}" ToolTip="Previous eclipse" />
@@ -112,7 +113,6 @@
                 <Button Content="{StaticResource ImageNextEclipse}" Style="{StaticResource ImageButton}" Command="{Binding NextEclipseCommand}" ToolTip="Next eclipse" />
                 <Button Content="{StaticResource ImageNextSaros}" Style="{StaticResource ImageButton}" Command="{Binding NextSarosCommand}" IsEnabled="{Binding NextSarosEnabled}" ToolTip="Next eclipse of the same saros" />
             </StackPanel>
-            <TextBlock Height="Auto" Padding="0" HorizontalAlignment="Center" Text="{Binding EclipseDescription, FallbackValue='Eclipse description'}"></TextBlock>
         </StackPanel>
 
         <Grid Height="6" Grid.Row="1">
@@ -172,21 +172,42 @@
                     HorizontalAlignment="Left"
                     VerticalScrollBarVisibility="Auto"
                     Margin="10"
-                    ContextMenu="{x:Null}"
+                    ContextMenu="{x:Null}"                   
                     Document="{Binding EclipseDetails, Converter={StaticResource TextToFlowDocumentConverter}}"
                     SelectionBrush="Transparent"
                     Cursor="Arrow"/>
             </TabItem>
             <TabItem Header="Saros Series">
-                <FlowDocumentScrollViewer 
-                    VerticalAlignment="Stretch"
-                    HorizontalAlignment="Left"
+                <DataGrid 
+                    IsEnabled="{Binding IsCalculating, Converter={s:InverseBoolConverter}}"
                     VerticalScrollBarVisibility="Auto"
-                    Margin="10"
-                    ContextMenu="{x:Null}"
-                    Document="{Binding SarosSeries, Converter={StaticResource TextToFlowDocumentConverter}}"
-                    SelectionBrush="Transparent"
-                    Cursor="Arrow"/>
+                    VerticalAlignment="Stretch"
+                    AutoGenerateColumns="False" 
+                    IsReadOnly="True"
+                    GridLinesVisibility="All"
+                    BorderThickness="1"
+                    Margin="4"
+                    Padding="2"
+                    RowHeaderWidth="0"
+                    ColumnHeaderHeight="32"
+                    RowHeight="24"
+                    ItemsSource="{Binding SarosSeries}">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="Date">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock FontFamily="Lucida Console" FontSize="12">
+                                        <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:SolarEclipseWindow}, Mode=FindAncestor}, Path=DataContext.ClickOnLinkCommand}" CommandParameter="{Binding JulianDay}"><Run Text="{Binding Date}" /></Hyperlink>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Type" Binding="{Binding Type}"/>
+                        <DataGridTextColumn Header="Gamma" Binding="{Binding Gamma}"/>
+                        <DataGridTextColumn Header="Magnitude" Binding="{Binding Magnitude}"/>
+                        <DataGridTextColumn Header="Local visibility" Binding="{Binding LocalVisibility}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
             </TabItem>
             <TabItem Header="Local Circumstances"></TabItem>
         </TabControl>

@@ -46,7 +46,7 @@ namespace Astrarium.Plugins.Eclipses
         /// <summary>
         /// Saros series table in markdown format
         /// </summary>
-        public string SarosSeries { get; private set; }
+        public ObservableCollection<SarosSeriesItem> SarosSeries { get; private set; } = new ObservableCollection<SarosSeriesItem>();
 
         /// <summary>
         /// Flag indicating calculation is in progress
@@ -68,6 +68,7 @@ namespace Astrarium.Plugins.Eclipses
         public ICommand PrevSarosCommand => new Command(PrevSaros);
         public ICommand NextSarosCommand => new Command(NextSaros);
         public ICommand ClickOnMapCommand => new Command(ClickOnMap);
+        public ICommand ClickOnLinkCommand => new Command<double>(ClickOnLink);
 
         private int selectedTabIndex = 0;
         public int SelectedTabIndex
@@ -228,6 +229,12 @@ namespace Astrarium.Plugins.Eclipses
             observerLocation = new CrdsGeographical(-location.Longitude, location.Latitude, 0, 0, "UTC+0", "Selected location");
             Markers.Remove(Markers.Last());
             AddLocationMarker();
+        }
+
+        private void ClickOnLink(double jd)
+        {
+            JulianDay = jd - LunarEphem.SINODIC_PERIOD / 2;
+            CalculateEclipse(next: true, saros: false);
         }
 
         private ImageAttributes GetImageAttributes()
@@ -498,74 +505,98 @@ namespace Astrarium.Plugins.Eclipses
             NotifyPropertyChanged(nameof(Markers));
         }
 
-        private void CalculateSarosSeries()
+        private async void CalculateSarosSeries()
         {
-            if (SelectedTabIndex != 2) return;
-
-            double jd = JulianDay;
-            List<SolarEclipse> eclipses = new List<SolarEclipse>();
-            
-            // add current eclipse
-            var eclipse = SolarEclipses.NearestEclipse(jd, true);
-            eclipses.Add(eclipse);
-            int saros = eclipse.Saros;
-            
-            // add previous eclipses
-            do
+            await Task.Run(() =>
             {
-                jd -= LunarEphem.SAROS;
-                eclipse = SolarEclipses.NearestEclipse(jd, false);
-                if (eclipse.Saros == saros)
-                {
-                    eclipses.Insert(0, eclipse);
-                }
-                else
-                {
-                    break;
-                }
-            }
-            while (true);
+                if (SelectedTabIndex != 2) return;
 
-            jd = JulianDay;
-            // add next eclipses
-            do
-            {
-                jd += LunarEphem.SAROS;
-                eclipse = SolarEclipses.NearestEclipse(jd, true);
-                if (eclipse.Saros == saros)
-                {
-                    eclipses.Add(eclipse);
-                }
-                else
-                {
-                    break;
-                }
-            }
-            while (true);
+                IsCalculating = true;
+                NotifyPropertyChanged(nameof(IsCalculating));
 
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"# List of solar eclipses of saros {saros}");
-            sb.AppendLine($"| Date | Type | Gamma | Mag |");
-            sb.AppendLine($"|-----|-----|-----|-----|");
-            foreach (var e in eclipses)
-            {
-                string type = e.EclipseType.ToString();
-                string subtype = e.IsNonCentral ? " non-central" : "";
-                sb.Append("| ");
-                sb.Append($" {Formatters.Date.Format(new Date(e.JulianDayMaximum, 0))} |");
-                sb.Append($" {type}{subtype} |");
-                sb.Append($" {e.Gamma.ToString("N5", nf)} |");
-                sb.Append($" {e.Magnitude.ToString("N5", nf)} |");
-                sb.AppendLine();
-            }
+                double jd = JulianDay;
+                List<SolarEclipse> eclipses = new List<SolarEclipse>();
 
-            SarosSeries = sb.ToString();
-            NotifyPropertyChanged(nameof(SarosSeries));
+                // add current eclipse
+                var eclipse = SolarEclipses.NearestEclipse(jd, true);
+                eclipses.Add(eclipse);
+                int saros = eclipse.Saros;
+
+                // add previous eclipses
+                do
+                {
+                    jd -= LunarEphem.SAROS;
+                    eclipse = SolarEclipses.NearestEclipse(jd, false);
+                    if (eclipse.Saros == saros)
+                    {
+                        eclipses.Insert(0, eclipse);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                while (true);
+
+                jd = JulianDay;
+                // add next eclipses
+                do
+                {
+                    jd += LunarEphem.SAROS;
+                    eclipse = SolarEclipses.NearestEclipse(jd, true);
+                    if (eclipse.Saros == saros)
+                    {
+                        eclipses.Add(eclipse);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                while (true);
+
+                ObservableCollection<SarosSeriesItem> sarosSeries = new ObservableCollection<SarosSeriesItem>();
+
+                foreach (var e in eclipses)
+                {
+                    string type = e.EclipseType.ToString();
+                    string subtype = e.IsNonCentral ? " non-central" : "";
+                    var pbe = eclipsesCalculator.GetBesselianElements(e.JulianDayMaximum);
+                    var local = SolarEclipses.LocalCircumstances(pbe, observerLocation);
+                    sarosSeries.Add(new SarosSeriesItem()
+                    {
+                        JulianDay = e.JulianDayMaximum,
+                        Date = Formatters.Date.Format(new Date(e.JulianDayMaximum, 0)),
+                        Type = $"{type}{subtype}",
+                        Gamma = e.Gamma.ToString("N5", nf),
+                        Magnitude = e.Magnitude.ToString("N5", nf),
+                        LocalVisibility = eclipsesCalculator.GetLocalVisibilityString(eclipse, local)
+                    });
+                }
+
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    SarosSeries = sarosSeries;
+                });
+
+                IsCalculating = false;
+                NotifyPropertyChanged(nameof(SarosSeries), nameof(IsCalculating));
+            });
         }
 
         private GeoPoint ToGeo(CrdsGeographical g)
         {
             return new GeoPoint((float)-g.Longitude, (float)g.Latitude);
+        }
+
+        public class SarosSeriesItem
+        {
+            public double JulianDay { get; set; }
+            public string Date { get; set; }
+            public string Type { get; set; }
+            public string Gamma { get; set; }
+            public string Magnitude { get; set; }
+            public string LocalVisibility { get; set; }
         }
     }
 }
