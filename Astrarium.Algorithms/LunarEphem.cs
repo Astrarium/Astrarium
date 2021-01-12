@@ -976,8 +976,6 @@ namespace Astrarium.Algorithms
             return jdMean;
         }
 
-        
-
         /// <summary>
         /// Gets age of the Moon (time since last new moon in days)
         /// </summary>
@@ -1115,6 +1113,37 @@ namespace Astrarium.Algorithms
                 - 0.0005 * Math.Cos(M + M_);
 
             return new ShadowAppearance(u);
+        }
+
+        /// <summary>
+        /// Calculates lunation number for Julian day
+        /// </summary>
+        /// <param name="jd">Julian day of new moon instant to calculate lunation number.</param>
+        /// <param name="system">Lunation system. Brown system is default.</param>
+        /// <returns>Lunation number.</returns>
+        public static int Lunation(double jd, LunationSystem system = LunationSystem.Brown)
+        {
+            // Meeus' Lunation Number epoch
+            // is a first New Moon of 2000 (6th January, ~ 18:14 UTC)
+            double jd0 = 2451550.25972;
+            int LN = (int)Math.Round((jd - jd0) / SINODIC_PERIOD);
+
+            switch (system)
+            {
+                default:
+                case LunationSystem.Brown:
+                    return LN + 953;
+                case LunationSystem.Meeus:
+                    return LN;
+                case LunationSystem.Goldstine:
+                    return LN + 37105;
+                case LunationSystem.Hebrew:
+                    return LN + 71234;
+                case LunationSystem.Islamic:
+                    return LN + 17038;
+                case LunationSystem.Thai:
+                    return LN + 16843;
+            }
         }
     }
 }

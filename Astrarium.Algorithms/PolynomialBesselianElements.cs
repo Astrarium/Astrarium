@@ -84,8 +84,8 @@ namespace Astrarium.Algorithms
         /// <returns></returns>
         internal InstantBesselianElements GetInstantBesselianElements(double jd)
         {
-            if (jd < From || jd > To)
-                throw new ArgumentException($"Polynomial Besselian elements valid only for Julian Day in range [{From} ... {To}].", nameof(jd));
+            //if (jd < From || jd > To)
+            //    throw new ArgumentException($"Polynomial Besselian elements valid only for Julian Day in range [{From} ... {To}].", nameof(jd));
 
             // difference, with t0, in step units
             double t = (jd - JulianDay0) / Step;

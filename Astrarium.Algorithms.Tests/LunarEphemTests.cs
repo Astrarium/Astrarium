@@ -239,5 +239,12 @@ namespace Astrarium.Algorithms.Tests
                 Assert.AreEqual(28.9739, delta, 1e-4);
             }
         }
+
+        [TestMethod]
+        public void LunationNumber()
+        {            
+            Assert.AreEqual(1217, LunarEphem.Lunation(new Date(2021, 5, 11).ToJulianEphemerisDay()));
+            Assert.AreEqual(-282, LunarEphem.Lunation(new Date(1900, 2, 17).ToJulianEphemerisDay()));
+        }
     }
 }

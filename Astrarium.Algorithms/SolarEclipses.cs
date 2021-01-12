@@ -25,55 +25,13 @@ namespace Astrarium.Algorithms
         /// </remarks>
         public static int Saros(double jd)
         {
-            // New Moon 6 Jan 2000
-            const double jd0 = 2451550.25972;
-            int LN = (int)Round((jd - jd0) / LunarEphem.SINODIC_PERIOD);
+            int LN = LunarEphem.Lunation(jd, LunationSystem.Meeus);
             int ND = LN + 105;
             int NS = 136 + 38 * ND;
             int NX = -61 * ND;
             int NC = (int)Floor(NX / 358.0 + 0.5 - ND / (12.0 * 358 * 358));
             int SNS = (NS + NC * 223 - 1) % 223 + 1;
             return SNS;
-        }
-
-        // TODO:
-        // calculate Saros and Inex number of an eclipse
-        // https://web.archive.org/web/20070630062339/http://user.online.be/felixverbelen/cycles.htm
-
-        internal static int SarosNumber(double jd) 
-        {
-            // Solar eclipse 01 Jul 2000
-            const double jd0 = 2451727.31498;
-
-            // Inex cycle length, in days
-            const double I = 10571.95;
-
-            // Saros cycle length, in days
-            const double S = 6585.32;
-
-            // Saros number of the solar eclipse 01 Jul 2000
-            const int Saros0 = 117;
-
-            // Dates difference
-            double T = jd - jd0;
-
-            int a0 = -1;
-            do
-            {
-                a0++;
-                for (int i = 0; i < 2; i++)
-                {
-                    int a = (i == 0 ? 1 : -1) * a0;
-                    int b = (int)Round((T - a * I) / S);
-                    double t = a * I + b * S;
-                    double dt = Abs(T - t);
-                    if (dt <= 2)
-                    {
-                        return Saros0 + a;
-                    }
-                }
-            }
-            while (true);
         }
 
         /// <summary>
@@ -227,21 +185,7 @@ namespace Astrarium.Algorithms
                         eclipse.EclipseType = SolarEclipseType.Partial;
                         eclipse.Magnitude = (1.5433 + u - Abs(gamma)) / (0.5461 + 2 * u);
                     }
-
-                    // hemisphere
-                    if (gamma > 0)
-                    {
-                        eclipse.Regio = SolarEclipseRegio.Northern;
-                    }
-                    if (gamma < 0)
-                    {
-                        eclipse.Regio = SolarEclipseRegio.Southern;
-                    }
-                    if (Abs(gamma) < 0.1)
-                    {
-                        eclipse.Regio = SolarEclipseRegio.Equatorial;
-                    }
-
+                   
                     // saros
                     eclipse.Saros = Saros(jdMax);
                 }
@@ -284,7 +228,7 @@ namespace Astrarium.Algorithms
 
             double jd;
 
-            double d, H, h, ksi, eta, zeta, u, v, a, b, n2, n, S;
+            double d, H, h, ksi, eta, zeta, u, v, a, b, n2, n, S, X, Y;
             InstantBesselianElements be;
 
             do
@@ -294,8 +238,8 @@ namespace Astrarium.Algorithms
                 jd = pbe.JulianDay0 + t * pbe.Step;
                 be = pbe.GetInstantBesselianElements(jd);
 
-                double X = be.X;
-                double Y = be.Y;
+                X = be.X;
+                Y = be.Y;
                 d = ToRadians(be.D);
                 double M = be.Mu;
                 double dX = be.dX;
@@ -334,9 +278,17 @@ namespace Astrarium.Algorithms
             double dL1 = be.L1 - zeta * pbe.TanF1;
             double dL2 = be.L2 - zeta * pbe.TanF2;
 
+            // calculate instantaneous magnitude (EOSE, p. 29)
             double m = Sqrt(u * u + v * v);
             double G = (dL1 - m) / (dL1 + dL2);
             double A = (dL1 - dL2) / (dL1 + dL2);
+
+            // calculate path width (EOSE, p. 12)
+            double omega = 1.0 / Sqrt(1 - 0.006_694_385 * Cos(d) * Cos(d));
+            double Y1 = omega * Y;
+            double B = Sqrt(1 - X * X - Y1 * Y1);
+            double K2 = B * B + (X * a + Y * b) * (X * a + Y * b) / n2;
+            double width = 12756 * Abs(dL2) / Sqrt(K2);
 
             if (G < 0)
             {
@@ -374,8 +326,8 @@ namespace Astrarium.Algorithms
                     jd = pbe.JulianDay0 + t * pbe.Step;
                     be = pbe.GetInstantBesselianElements(jd);
 
-                    double X = be.X;
-                    double Y = be.Y;
+                    X = be.X;
+                    Y = be.Y;
                     d = ToRadians(be.D);
                     double M = be.Mu;
                     double dX = be.dX;
@@ -417,6 +369,11 @@ namespace Astrarium.Algorithms
                 altPhases[i] = h;
             }
 
+            if (double.IsNaN(width) || double.IsNaN(jdPhases[2]) || double.IsNaN(jdPhases[3]))
+            {
+                width = 0;
+            }
+
             if (altPhases[0] < 0 && altPhases[1] < 0)
             {
                 return new SolarEclipseLocalCircumstances();
@@ -436,7 +393,8 @@ namespace Astrarium.Algorithms
                     JulianDayTotalEnd = Max(jdPhases[2], jdPhases[3]),
                     SunAltTotalEnd = altPhases[3],
                     MaxMagnitude = G,
-                    MoonToSunDiameterRatio = A
+                    MoonToSunDiameterRatio = A,
+                    PathWidth = width
                 };
             }
         }
@@ -500,10 +458,7 @@ namespace Astrarium.Algorithms
         /// </summary>
         /// <param name="pbe">Polynomial Besselian elements defining the Eclipse</param>
         /// <returns><see cref="SolarEclipseMap"/> instance.</returns>
-        /// 
-
-        // TODO: get rid of eclipse type as parameter!
-        public static SolarEclipseMap EclipseMap(PolynomialBesselianElements pbe, SolarEclipseType eclipseType)
+        public static SolarEclipseMap EclipseMap(PolynomialBesselianElements pbe)
         {
             // left edge of time interval
             double jdFrom = pbe.From;
@@ -516,6 +471,9 @@ namespace Astrarium.Algorithms
 
             // precision of calculation, in days
             double epsilon = 1e-8;
+
+            // Eclipse general details
+            SolarEclipse eclipse = NearestEclipse(pbe.JulianDay0, true);
 
             // Eclipse map data
             SolarEclipseMap map = new SolarEclipseMap();
@@ -576,9 +534,9 @@ namespace Astrarium.Algorithms
                 map.P3 = new SolarEclipseMapPoint(jdP3, Project(b, p));
             }
 
-            if (eclipseType != SolarEclipseType.Partial)
+            // There are no C1/C2 points for partial and non-central eclipses
+            if (eclipse.EclipseType != SolarEclipseType.Partial && !eclipse.IsNonCentral)
             {
-                // TODO: take non-central eclipses into account (there are no C1/C2 points in that case!)
                 map.C1 = FindExtremeLimitOfCentralLine(pbe, true);
                 map.C2 = FindExtremeLimitOfCentralLine(pbe, false);
             }
@@ -594,7 +552,7 @@ namespace Astrarium.Algorithms
                 }
             }
 
-            if (eclipseType != SolarEclipseType.Partial)
+            if (eclipse.EclipseType != SolarEclipseType.Partial)
             {
                 map.TotalPath = FindCurvePoints(pbe, 0, 0);
                 var northPoints = FindCurvePoints(pbe, 1, 1);

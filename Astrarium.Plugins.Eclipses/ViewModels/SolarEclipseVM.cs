@@ -213,9 +213,9 @@ namespace Astrarium.Plugins.Eclipses
                 SetValue(nameof(MapMouse), value);
 
                 var pos = new CrdsGeographical(-value.Longitude, value.Latitude);
-                var isTotal = SolarEclipses.LocalCircumstances(be, pos);
+                var local = SolarEclipses.LocalCircumstances(be, pos);
 
-                Details = isTotal.ToString();
+                Details = local.ToString();
 
                 NotifyPropertyChanged(nameof(Details));
             }
@@ -280,6 +280,9 @@ namespace Astrarium.Plugins.Eclipses
 
         private async void CalculateEclipse(bool next, bool saros)
         {
+            IsCalculating = true;
+            NotifyPropertyChanged(nameof(IsCalculating));
+
             SolarEclipse eclipse = SolarEclipses.NearestEclipse(JulianDay + (next ? 1 : -1) * (saros ? LunarEphem.SAROS : LunarEphem.SINODIC_PERIOD), next);
             JulianDay = eclipse.JulianDayMaximum;
             EclipseDate = Formatters.Date.Format(new Date(JulianDay, observerLocation.UtcOffset));
@@ -289,19 +292,16 @@ namespace Astrarium.Plugins.Eclipses
             EclipseDescription = $"{type}{subtype} solar eclipse";
             PrevSarosEnabled = SolarEclipses.NearestEclipse(JulianDay - LunarEphem.SAROS, next: false).Saros == eclipse.Saros;
             NextSarosEnabled = SolarEclipses.NearestEclipse(JulianDay + LunarEphem.SAROS, next: true).Saros == eclipse.Saros;
-            IsCalculating = true;
-
+            
             NotifyPropertyChanged(
                 nameof(EclipseDate), 
                 nameof(EclipseDescription), 
                 nameof(PrevSarosEnabled),
-                nameof(NextSarosEnabled),
-                nameof(IsCalculating));
+                nameof(NextSarosEnabled));
 
             await Task.Run(() =>
             {
-                
-                var map = SolarEclipses.EclipseMap(be, eclipse.EclipseType);
+                var map = SolarEclipses.EclipseMap(be);
 
                 var tracks = new List<Track>();
                 var polygons = new List<Polygon>();
@@ -414,6 +414,12 @@ namespace Astrarium.Plugins.Eclipses
                     markers.Add(new Marker(ToGeo(map.Max), maxPointMarkerStyle, "Max"));
                 }
 
+                var maxCirc = SolarEclipses.LocalCircumstances(be, map.Max);
+
+                // TODO:
+                // add Sun/Moon info for greatest eclipse:
+                // https://eclipse.gsfc.nasa.gov/SEplot/SEplot2001/SE2022Apr30P.GIF
+
                 var eclipseDetails = new StringBuilder();
                 eclipseDetails
                     .AppendLine($"# {"Eclipse Details"}")
@@ -424,7 +430,7 @@ namespace Astrarium.Plugins.Eclipses
                     .AppendLine($"| {"Date"} | {EclipseDate} |")
                     .AppendLine($"| {"Magnitude"} | { eclipse.Magnitude.ToString("N5", nf)} |")
                     .AppendLine($"| {"Gamma"} | { eclipse.Gamma.ToString("N5", nf)} |")
-                    .AppendLine($"| {"Maximal Duration"} | { "TODO" } |")
+                    .AppendLine($"| {"Maximal Duration"} | { fmtTime.Format(maxCirc.TotalDuration) } |")
                     .AppendLine($"| {"ΔT"} | { be.DeltaT.ToString("N1", nf) } s |")
                     .AppendLine($"# {"Contacts"}")
                     .AppendLine($"| {"Point"} | {"Coordinates"} | {"Time"} |")
@@ -435,14 +441,14 @@ namespace Astrarium.Plugins.Eclipses
                 {
                     eclipseDetails.AppendLine($"| {"P2 (First internal contact)"} | {fmtGeo.Format(map.P2)} | {fmtTime.Format(new Date(map.P2.JulianDay, 0))} UT |");
                 }
-                if (map.C1 != null)
+                if (map.C1 != null && !double.IsNaN(map.C1.JulianDay))
                 {
                     eclipseDetails.AppendLine($"| {"C1 (First umbra contact)"} | {fmtGeo.Format(map.C1)} | {fmtTime.Format(new Date(map.C1.JulianDay, 0))} UT |");
                 }
 
                 eclipseDetails.AppendLine($"| {"Max (Greatest Eclipse)"} | {fmtGeo.Format(map.Max)} | {fmtTime.Format(new Date(map.Max.JulianDay, 0))} UT |");
 
-                if (map.C2 != null)
+                if (map.C2 != null && !double.IsNaN(map.C2.JulianDay))
                 {
                     eclipseDetails.AppendLine($"| {"C2 (Last umbra contact)"} | {fmtGeo.Format(map.C2)} | {fmtTime.Format(new Date(map.C2.JulianDay, 0))} UT |");
                 }

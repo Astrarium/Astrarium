@@ -77,23 +77,39 @@ namespace Astrarium.Plugins.SolarSystem
             // listing url
             string lstUrl = url + ".full_512.lst";
 
+            // regex pattern
+            string regexPattern = $"{date:yyyyMMdd}_\\d{{4}}_{res}_512\\.\\w+";
+
             string srcImageFile = null;
+            string srcFileName = null;
+
+            ServicePointManager.Expect100Continue = true;
+            ServicePointManager.SecurityProtocol =
+                SecurityProtocolType.Tls |
+                SecurityProtocolType.Tls11 |
+                SecurityProtocolType.Tls12 |
+                SecurityProtocolType.Ssl3;
 
             try
             {
                 using (var client = new WebClient())
                 {
-                    ServicePointManager.Expect100Continue = true;
-                    ServicePointManager.SecurityProtocol =
-                        SecurityProtocolType.Tls |
-                        SecurityProtocolType.Tls11 |
-                        SecurityProtocolType.Tls12 |
-                        SecurityProtocolType.Ssl3;
-
-                    string listing = client.DownloadString(lstUrl);
-
-                    string srcFileName = listing.Split('\n').Select(s => s.Trim()).FirstOrDefault(s => Regex.IsMatch(s, $"{date:yyyyMMdd}_\\d{{4}}_{res}_512\\.\\w+"));
-
+                    try
+                    {
+                        string listing = client.DownloadString(lstUrl);
+                        srcFileName = listing.Split('\n').Select(s => s.Trim()).FirstOrDefault(s => Regex.IsMatch(s, regexPattern));
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Unable to list solar images for the date {date}. Reason: {ex.Message}");
+                        string listing = client.DownloadString(url);
+                        var match = Regex.Match(listing, regexPattern);
+                        if (match.Success)
+                        {
+                            srcFileName = match.Value;
+                        }
+                    }
+                    
                     if (srcFileName == null)
                     {
                         Debug.WriteLine($"There are no solar image file for the date {date}");

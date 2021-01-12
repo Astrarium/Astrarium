@@ -22,11 +22,6 @@ namespace Astrarium.Algorithms
         public double Magnitude { get; set; } = 1;
 
         /// <summary>
-        /// Regio where the eclipse is primarily visible
-        /// </summary>
-        public SolarEclipseRegio Regio { get; set; }
-
-        /// <summary>
         /// Least distance from the axis of the Moon's shadow to the center of the Earth,
         /// in units of equatorial radius of the Earth.
         /// </summary>

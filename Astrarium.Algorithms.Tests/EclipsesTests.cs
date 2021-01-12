@@ -48,7 +48,6 @@ namespace Astrarium.Algorithms.Tests
             Assert.AreEqual(2449129.0979, eclipse.JulianDayMaximum, TimeSpan.FromMinutes(0.36).TotalDays);
             Assert.AreEqual(SolarEclipseType.Partial, eclipse.EclipseType);
             Assert.AreEqual(0.740, eclipse.Magnitude, 1e-3);
-            Assert.AreEqual(SolarEclipseRegio.Northern, eclipse.Regio);
         }
 
         /// <summary>
@@ -236,20 +235,41 @@ namespace Astrarium.Algorithms.Tests
             // 1 second of time is enough
             double epsTime = TimeSpan.FromSeconds(1).TotalDays;
 
-            CrdsGeographical g = new CrdsGeographical(new DMS("+77*03'56''"), new DMS("+38*55'17''"));
+            // Example 8 (EOSE)
+            {
+                CrdsGeographical g = new CrdsGeographical(new DMS("+77*03'56''"), new DMS("+38*55'17''"));
+                var local = SolarEclipses.LocalCircumstances(pbe, g);
 
-            var local = SolarEclipses.LocalCircumstances(pbe, g);
+                double jdPartialBegin = new Date(new DateTime(1994, 5, 10, 15, 39, 19, DateTimeKind.Utc)).ToJulianEphemerisDay();
+                double jdMaxExpected = new Date(new DateTime(1994, 5, 10, 17, 26, 45, DateTimeKind.Utc)).ToJulianEphemerisDay();
+                double jdPartialEnd = new Date(new DateTime(1994, 5, 10, 19, 13, 53, DateTimeKind.Utc)).ToJulianEphemerisDay();
 
-            double jdPartialBegin = new Date(new DateTime(1994, 5, 10, 15, 39, 19, DateTimeKind.Utc)).ToJulianEphemerisDay();
-            double jdMaxExpected = new Date(new DateTime(1994, 5, 10, 17, 26, 45, DateTimeKind.Utc)).ToJulianEphemerisDay();
-            double jdPartialEnd = new Date(new DateTime(1994, 5, 10, 19, 13, 53, DateTimeKind.Utc)).ToJulianEphemerisDay();
+                Assert.AreEqual(jdMaxExpected, local.JulianDayMax, epsTime);
+                Assert.AreEqual(jdPartialBegin, local.JulianDayPartialBegin, epsTime);
+                Assert.AreEqual(jdPartialEnd, local.JulianDayPartialEnd, epsTime);
 
-            Assert.AreEqual(jdMaxExpected, local.JulianDayMax, epsTime);
-            Assert.AreEqual(jdPartialBegin, local.JulianDayPartialBegin, epsTime);
-            Assert.AreEqual(jdPartialEnd, local.JulianDayPartialEnd, epsTime);
+                Assert.AreEqual(0.857, local.MaxMagnitude, 1e-4);
+                Assert.AreEqual(0.9434, local.MoonToSunDiameterRatio, 1e-4);
+            }
 
-            Assert.AreEqual(0.857, local.MaxMagnitude, 1e-4);
-            Assert.AreEqual(0.9434, local.MoonToSunDiameterRatio, 1e-5);
+            // Example 2 (EOSE)
+            {
+                CrdsGeographical g = new CrdsGeographical(new DMS("+100*09'54''"), new DMS("+35*13'43''"));
+                var local = SolarEclipses.LocalCircumstances(pbe, g);
+
+                Assert.AreEqual(56.25, local.SunAltMax, 1e-2);
+                Assert.AreEqual(244, local.PathWidth, 0.5);
+                Assert.AreEqual(0.9419, local.MoonToSunDiameterRatio, 1e-4);
+            }
+
+            // Example 5 (EOSE)
+            {
+                CrdsGeographical g = new CrdsGeographical(new DMS("+97*00'00''"), new DMS("+36*44'26''"));
+                var local = SolarEclipses.LocalCircumstances(pbe, g);
+
+                Assert.AreEqual(59.45, local.SunAltMax, 1e-2);
+                Assert.AreEqual(240, local.PathWidth, 0.5);
+            }
         }
 
         [TestMethod]
@@ -269,33 +289,33 @@ namespace Astrarium.Algorithms.Tests
         }
 
         [TestMethod]
-        public void SarosNumber()
+        public void Saros()
         {
             // Solar eclipse 11 Aug 1999
             {
                 double jd = 2451401;
-                int saros = SolarEclipses.SarosNumber(jd);
+                int saros = SolarEclipses.Saros(jd);
                 Assert.AreEqual(145, saros);
             }
 
             // Solar eclipse 3 Nov 2013
             {
                 double jd = Date.JulianDay(new Date(2013, 11, 3));
-                int saros = SolarEclipses.SarosNumber(jd);
+                int saros = SolarEclipses.Saros(jd);
                 Assert.AreEqual(143, saros);
             }
 
             // Solar eclipse 22 Jul 2009
             {
                 double jd = Date.JulianDay(new Date(2009, 7, 22));
-                int saros = SolarEclipses.SarosNumber(jd);
+                int saros = SolarEclipses.Saros(jd);
                 Assert.AreEqual(136, saros);
             }
 
             // Solar eclipse 30 Jul 1505
             {
                 double jd = Date.JulianDay(new Date(1505, 7, 30));
-                int saros = SolarEclipses.SarosNumber(jd);
+                int saros = SolarEclipses.Saros(jd);
                 Assert.AreEqual(108, saros);
             }
 
