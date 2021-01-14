@@ -292,7 +292,7 @@ namespace Astrarium.Algorithms
 
             if (G < 0)
             {
-                return new SolarEclipseLocalCircumstances();
+                return new SolarEclipseLocalCircumstances() { IsInvisible = true };
             }
 
             var tauPhases = new double[4];
@@ -376,7 +376,7 @@ namespace Astrarium.Algorithms
 
             if (altPhases[0] < 0 && altPhases[1] < 0)
             {
-                return new SolarEclipseLocalCircumstances();
+                return new SolarEclipseLocalCircumstances() { IsInvisible = true };
             }
             else
             {
@@ -402,9 +402,10 @@ namespace Astrarium.Algorithms
         /// <summary>
         /// Finds polynomial Besselian elements by 5 positions of Sun and Moon.
         /// </summary>
+        /// <param name="jdMaximum">Instant of eclipse maximum.</param>
         /// <param name="positions">Positions of Sun and Moon.</param>
         /// <returns>Polynomial Besselian elements of the Solar eclipse.</returns>
-        public static PolynomialBesselianElements BesselianElements(SunMoonPosition[] positions)
+        public static PolynomialBesselianElements BesselianElements(double jdMaximum, SunMoonPosition[] positions)
         {
             if (positions.Length != 5)
                 throw new ArgumentException("Five positions are required", nameof(positions));
@@ -440,6 +441,7 @@ namespace Astrarium.Algorithms
             return new PolynomialBesselianElements()
             {
                 JulianDay0 = positions[2].JulianDay,
+                JulianDayMaximum = jdMaximum,
                 DeltaT = Date.DeltaT(positions[2].JulianDay),
                 Step = step,
                 X = LeastSquares.FindCoeffs(points.Select((p, i) => new PointF(p.X, (float)elements[i].X)), 3),
@@ -548,7 +550,7 @@ namespace Astrarium.Algorithms
                 var g = Project(b, p);
                 if (g != null)
                 {
-                    map.Max = new SolarEclipseMapPoint(pbe.JulianDay0, g);
+                    map.Max = new SolarEclipseMapPoint(pbe.JulianDayMaximum, g);
                 }
             }
 

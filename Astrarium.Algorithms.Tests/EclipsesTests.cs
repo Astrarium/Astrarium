@@ -94,7 +94,8 @@ namespace Astrarium.Algorithms.Tests
             // 10 may 1994
             var pbe = new PolynomialBesselianElements()
             {
-                JulianDay0 = 2449483.20833,
+                JulianDay0 = 2449483.20833,         // 17:00:00 TDT
+                JulianDayMaximum = 2449483.216973,  // 17:12:26 TDT
                 X = new[] { -0.173_367, +0.499_0629, +0.000_0296, -0.000_005_63 },
                 Y = new[] { +0.383_484, +0.086_9393, -0.000_1183, -0.000_000_92 },
                 D = new[] { +17.686_13, +0.010_642, -0.000_004, 0 },
@@ -219,7 +220,8 @@ namespace Astrarium.Algorithms.Tests
             // 10 may 1994
             var pbe = new PolynomialBesselianElements()
             {
-                JulianDay0 = 2449483.20833,
+                JulianDay0 = 2449483.20833,         // 17:00:00 TDT
+                JulianDayMaximum = 2449483.216973,  // 17:12:26 TDT
                 X = new[] { -0.173_367, +0.499_0629, +0.000_0296, -0.000_005_63 },
                 Y = new[] { +0.383_484, +0.086_9393, -0.000_1183, -0.000_000_92 },
                 D = new[] { +17.686_13, +0.010_642, -0.000_004, 0 },

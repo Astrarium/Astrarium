@@ -20,6 +20,11 @@ namespace Astrarium.Algorithms
         public double JulianDay0 { get; set; }
 
         /// <summary>
+        /// Instant of eclipse maximum
+        /// </summary>
+        public double JulianDayMaximum { get; set; }
+
+        /// <summary>
         /// DeltaT value (difference between Dynamical and Universal Times).
         /// If not specified, calculated automatically for the <see cref="JulianDay0"/> value.
         /// </summary>

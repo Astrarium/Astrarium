@@ -150,23 +150,38 @@ namespace Astrarium.Plugins.Eclipses
             return localVisibility;
         }
 
-        public PolynomialBesselianElements GetBesselianElements(double jd)
+        /// <summary>
+        /// Calculates Besselian for a solar eclipse.
+        /// </summary>
+        /// <param name="jdMaximum">Julian Day of eclipse maximum.</param>
+        /// <returns></returns>
+        public PolynomialBesselianElements GetBesselianElements(double jdMaximum)
         {
-            // 5 measurements with 3h step, so interval is -6...+6 hours
+            // found t0 (nearest integer hour closest to the eclipse maximum)
+            double t0;
+            Date d = new Date(jdMaximum);
+            if (d.Minute < 30)
+                t0 = jdMaximum - new TimeSpan(0, d.Minute, d.Second).TotalDays;
+            else
+                t0 = jdMaximum - new TimeSpan(0, d.Minute, d.Second).TotalDays + TimeSpan.FromHours(1).TotalDays;
+
+            // The Besselian elements are derived from a least-squares fit to elements
+            // calculated at five uniformly spaced times over a 12 hour period centered at t0.
+            // So step = 3 hours, dt = 6 hours.
             SunMoonPosition[] pos = new SunMoonPosition[5];
 
             double dt = TimeSpan.FromHours(6).TotalDays;
             double step = TimeSpan.FromHours(3).TotalDays;
             string[] ephemerides = new[] { "Equatorial0.Alpha", "Equatorial0.Delta", "Distance" };
 
-            var sunEphem = sky.GetEphemerides(sun, jd - dt, jd + dt + 1e-6, step, ephemerides);
-            var moonEphem = sky.GetEphemerides(moon, jd - dt, jd + dt + 1e-6, step, ephemerides);
+            var sunEphem = sky.GetEphemerides(sun, t0 - dt, t0 + dt + 1e-6, step, ephemerides);
+            var moonEphem = sky.GetEphemerides(moon, t0 - dt, t0 + dt + 1e-6, step, ephemerides);
 
             for (int i = 0; i < 5; i++)
             {
                 pos[i] = new SunMoonPosition()
                 {
-                    JulianDay = jd + step * (i - 2),
+                    JulianDay = t0 + step * (i - 2),
                     Sun = new CrdsEquatorial(sunEphem[i].GetValue<double>("Equatorial0.Alpha"), sunEphem[i].GetValue<double>("Equatorial0.Delta")),
                     Moon = new CrdsEquatorial(moonEphem[i].GetValue<double>("Equatorial0.Alpha"), moonEphem[i].GetValue<double>("Equatorial0.Delta")),
                     DistanceSun = sunEphem[i].GetValue<double>("Distance") * 149597870 / 6371.0,
@@ -174,7 +189,7 @@ namespace Astrarium.Plugins.Eclipses
                 };
             }
 
-            return SolarEclipses.BesselianElements(pos);
+            return SolarEclipses.BesselianElements(jdMaximum, pos);
         }
     }
 }

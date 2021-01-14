@@ -13,6 +13,11 @@ namespace Astrarium.Algorithms
     public class SolarEclipseLocalCircumstances
     {
         /// <summary>
+        /// Flag indicating the eclipse is invisible from current point
+        /// </summary>
+        public bool IsInvisible { get; set; }
+
+        /// <summary>
         /// Instant of maximum eclipse for the current point, in Julian days.
         /// </summary>
         public double JulianDayMax { get; set; }
