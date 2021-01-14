@@ -39,14 +39,27 @@ namespace Astrarium.Plugins.Eclipses
         public string EclipseDescription { get; private set; }
 
         /// <summary>
-        /// Eclipse details (general information) in markdown format.
-        /// </summary>
-        public string EclipseDetails { get; private set; }
-
-        /// <summary>
-        /// Saros series table in markdown format
+        /// Saros series table
         /// </summary>
         public ObservableCollection<SarosSeriesItem> SarosSeries { get; private set; } = new ObservableCollection<SarosSeriesItem>();
+
+        /// <summary>
+        /// General eclipse info table
+        /// </summary>
+        public ObservableCollection<EclipseGeneralDetailsItem> EclipseGeneralDetails { get; private set; } = new ObservableCollection<EclipseGeneralDetailsItem>();
+
+        /// <summary>
+        /// Eclipse contacts info table
+        /// </summary>
+        public ObservableCollection<EclipseContactsItem> EclipseContacts { get; private set; } = new ObservableCollection<EclipseContactsItem>();
+
+        /// <summary>
+        /// Besselian elements table
+        /// </summary>
+        public ObservableCollection<BesselianElementsTableItem> BesselianElementsTable { get; private set; } = new ObservableCollection<BesselianElementsTableItem>();
+
+        public string BesselianElementsTableFooter { get; private set; }
+        public string BesselianElementsTableHeader { get; private set; }
 
         /// <summary>
         /// Flag indicating calculation is in progress
@@ -106,10 +119,10 @@ namespace Astrarium.Plugins.Eclipses
         private readonly ISettings settings;
         private CrdsGeographical observerLocation;
         private PolynomialBesselianElements be;
-        private NumberFormatInfo nf;
+        private static NumberFormatInfo nf;
 
-        private readonly IEphemFormatter fmtGeo = new Formatters.GeoCoordinatesFormatter();
-        private readonly IEphemFormatter fmtTime = new Formatters.TimeFormatter(withSeconds: true);
+        private static readonly IEphemFormatter fmtGeo = new Formatters.GeoCoordinatesFormatter();
+        private static readonly IEphemFormatter fmtTime = new Formatters.TimeFormatter(withSeconds: true);
 
         #region Map styles
 
@@ -146,6 +159,13 @@ namespace Astrarium.Plugins.Eclipses
             set => SetValue(nameof(TileImageAttributes), value);
         }
 
+        static SolarEclipseVM()
+        {
+            nf = new NumberFormatInfo();
+            nf.NumberDecimalSeparator = ".";
+            nf.NumberGroupSeparator = "\u2009";
+        }
+
         public SolarEclipseVM(IEclipsesCalculator eclipsesCalculator, ISky sky, ISettings settings)
         {
             this.sky = sky;
@@ -153,9 +173,6 @@ namespace Astrarium.Plugins.Eclipses
             this.settings = settings;
             this.settings.PropertyChanged += Settings_PropertyChanged;
             observerLocation = settings.Get<CrdsGeographical>("ObserverLocation");
-            nf = new NumberFormatInfo();
-            nf.NumberDecimalSeparator = ".";
-            nf.NumberGroupSeparator = "\u2009";
             
             CacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "MapsCache");
 
@@ -427,62 +444,68 @@ namespace Astrarium.Plugins.Eclipses
                 // add Sun/Moon info for greatest eclipse:
                 // https://eclipse.gsfc.nasa.gov/SEplot/SEplot2001/SE2022Apr30P.GIF
 
-                var eclipseDetails = new StringBuilder();
-                eclipseDetails
-                    .AppendLine($"# {"Eclipse Details"}")
-                    .AppendLine($"||")
-                    .AppendLine($"|-----|")
-                    .AppendLine($"| {"Type"} | {type}{subtype} |")
-                    .AppendLine($"| {"Saros"} | {eclipse.Saros} |")
-                    .AppendLine($"| {"Date"} | {EclipseDate} |")
-                    .AppendLine($"| {"Magnitude"} | { eclipse.Magnitude.ToString("N5", nf)} |")
-                    .AppendLine($"| {"Gamma"} | { eclipse.Gamma.ToString("N5", nf)} |")
-                    .AppendLine($"| {"Maximal Duration"} | { fmtTime.Format(maxCirc.TotalDuration) } |")
-                    .AppendLine($"| {"ΔT"} | { be.DeltaT.ToString("N1", nf) } s |")
-                    .AppendLine($"# {"Contacts"}")
-                    .AppendLine($"| {"Point"} | {"Coordinates"} | {"Time"} |")
-                    .AppendLine("|-----|-----|-----|")
-                    .AppendLine($"| {"P1 (First external contact)"} | {fmtGeo.Format(map.P1)} | {fmtTime.Format(new Date(map.P1.JulianDay, 0))} UT |");
+                var eclipseGeneralDetails = new ObservableCollection<EclipseGeneralDetailsItem>()
+                {
+                    new EclipseGeneralDetailsItem("Type", $"{type}{subtype}"),
+                    new EclipseGeneralDetailsItem("Saros", $"{eclipse.Saros}"),
+                    new EclipseGeneralDetailsItem("Date", $"{EclipseDate}"),
+                    new EclipseGeneralDetailsItem("Magnitude", $"{eclipse.Magnitude.ToString("N5", nf)}"),
+                    new EclipseGeneralDetailsItem("Gamma", $"{eclipse.Gamma.ToString("N5", nf)}"),
+                    new EclipseGeneralDetailsItem("Maximal Duration", $"{fmtTime.Format(maxCirc.TotalDuration) }"),
+                    new EclipseGeneralDetailsItem("ΔT", $"{be.DeltaT.ToString("N1", nf) } s")
+                };
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    EclipseGeneralDetails = eclipseGeneralDetails;
+                });
 
+                var eclipseContacts = new ObservableCollection<EclipseContactsItem>();
+                eclipseContacts.Add(new EclipseContactsItem("P1 (First external contact)", map.P1));
                 if (map.P2 != null)
                 {
-                    eclipseDetails.AppendLine($"| {"P2 (First internal contact)"} | {fmtGeo.Format(map.P2)} | {fmtTime.Format(new Date(map.P2.JulianDay, 0))} UT |");
+                    eclipseContacts.Add(new EclipseContactsItem("P2 (First internal contact)", map.P2));
                 }
                 if (map.C1 != null && !double.IsNaN(map.C1.JulianDay))
                 {
-                    eclipseDetails.AppendLine($"| {"C1 (First umbra contact)"} | {fmtGeo.Format(map.C1)} | {fmtTime.Format(new Date(map.C1.JulianDay, 0))} UT |");
+                    eclipseContacts.Add(new EclipseContactsItem("C1 (First umbra contact)", map.C1));
                 }
-
-                eclipseDetails.AppendLine($"| {"Max (Greatest Eclipse)"} | {fmtGeo.Format(map.Max)} | {fmtTime.Format(new Date(map.Max.JulianDay, 0))} UT |");
-
+                eclipseContacts.Add(new EclipseContactsItem("Max (Greatest Eclipse)", map.Max));   
                 if (map.C2 != null && !double.IsNaN(map.C2.JulianDay))
                 {
-                    eclipseDetails.AppendLine($"| {"C2 (Last umbra contact)"} | {fmtGeo.Format(map.C2)} | {fmtTime.Format(new Date(map.C2.JulianDay, 0))} UT |");
+                    eclipseContacts.Add(new EclipseContactsItem("C2 (Last umbra contact)", map.C2));
                 }
                 if (map.P3 != null)
                 {
-                    eclipseDetails.AppendLine($"| {"P3 (Last internal contact)"} | {fmtGeo.Format(map.P3)} | {fmtTime.Format(new Date(map.P3.JulianDay, 0))} UT |");
+                    eclipseContacts.Add(new EclipseContactsItem("P3 (Last internal contact)", map.P3));
                 }
-                eclipseDetails.AppendLine($"| {"P4 (Last external contact)"} | {fmtGeo.Format(map.P4)} | {fmtTime.Format(new Date(map.P4.JulianDay, 0))} UT |");
+                eclipseContacts.Add(new EclipseContactsItem("P4 (Last external contact)", map.P4));    
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    EclipseContacts = eclipseContacts;
+                });
 
-                eclipseDetails
-                    .AppendLine($"# {"Besselian Elements"}")
-                    .AppendLine($"| n | x | y | d | l1 | l2 | μ |")
-                    .AppendLine("|-----|-----|-----|-----|-----|-----|-----|")
-                    .AppendLine($"| 0 | {be.X[0].ToString("N6", nf)} |{be.Y[0].ToString("N6", nf)} | {be.D[0].ToString("N6", nf)} | {be.L1[0].ToString("N6", nf)} | {be.L2[0].ToString("N6", nf)} | {be.Mu[0].ToString("N6", nf)} |")
-                    .AppendLine($"| 1 | {be.X[1].ToString("N6", nf)} |{be.Y[1].ToString("N6", nf)} | {be.D[1].ToString("N6", nf)} | {be.L1[1].ToString("N6", nf)} | {be.L2[1].ToString("N6", nf)} | {be.Mu[1].ToString("N6", nf)} |")
-                    .AppendLine($"| 2 | {be.X[2].ToString("N6", nf)} |{be.Y[2].ToString("N6", nf)} | {be.D[2].ToString("N6", nf)} | {be.L1[2].ToString("N6", nf)} | {be.L2[2].ToString("N6", nf)} | |")
-                    .AppendLine($"| 3 | {be.X[3].ToString("N6", nf)} |{be.Y[3].ToString("N6", nf)} | | | | |")
-                    .AppendLine()
-                    .AppendLine($"Tan ƒ1 = {be.TanF1.ToString("N7", nf)}  ")
-                    .AppendLine($"Tan ƒ2 = {be.TanF2.ToString("N7", nf)}  ")
-                    .AppendLine($"t\u2080 = {Formatters.DateTime.Format(new Date(be.JulianDay0, 0))} UT (JDE = { be.JulianDay0.ToString("N6", nf)}");
+
+                var besselianElementsTable = new ObservableCollection<BesselianElementsTableItem>();
+                for (int i=0; i<4; i++)
+                {
+                    besselianElementsTable.Add(new BesselianElementsTableItem(i, be));
+                }
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    BesselianElementsTable = besselianElementsTable;
+                });
+
+                BesselianElementsTableHeader = $"Elements for t\u2080 = {Formatters.DateTime.Format(new Date(be.JulianDay0))} TDT (JDE = { be.JulianDay0.ToString("N6", nf)})";
+
+                var tanFInfo = new StringBuilder();
+                tanFInfo.AppendLine($"Tan ƒ1 = {be.TanF1.ToString("N7", nf)}");
+                tanFInfo.AppendLine($"Tan ƒ2 = {be.TanF2.ToString("N7", nf)}");
+                BesselianElementsTableFooter = tanFInfo.ToString();
 
                 Tracks = tracks;
                 Polygons = polygons;
                 Markers = markers;
                 IsCalculating = false;
-                EclipseDetails = eclipseDetails.ToString();
 
                 AddLocationMarker();
 
@@ -493,7 +516,11 @@ namespace Astrarium.Plugins.Eclipses
                     nameof(Tracks),
                     nameof(Polygons),
                     nameof(Markers),
-                    nameof(EclipseDetails)
+                    nameof(EclipseGeneralDetails),
+                    nameof(EclipseContacts),
+                    nameof(BesselianElementsTable),
+                    nameof(BesselianElementsTableHeader),
+                    nameof(BesselianElementsTableFooter)
                 );
             });
         }
@@ -597,6 +624,72 @@ namespace Astrarium.Plugins.Eclipses
             public string Gamma { get; set; }
             public string Magnitude { get; set; }
             public string LocalVisibility { get; set; }
+        }
+
+        public class EclipseGeneralDetailsItem
+        {
+            public string Name { get; set; }
+            public string Value { get; set; }
+
+            public EclipseGeneralDetailsItem(string name, string value)
+            {
+                Name = name;
+                Value = value;
+            }
+        }
+
+        public class EclipseContactsItem
+        {
+            public string Point { get; set; }
+            public string Coordinates { get; set; }
+            public string Time { get; set; }
+
+            public EclipseContactsItem(string text, SolarEclipseMapPoint p)
+            {
+                Point = text;
+                Coordinates = fmtGeo.Format(p);
+                Time = $"{fmtTime.Format(new Date(p.JulianDay, 0))} UT";
+            }
+        }
+
+        public class BesselianElementsTableItem
+        {
+            public string Index { get; set; }
+            public string X { get; set; }
+            public string Y { get; set; }
+            public string D { get; set; }
+            public string L1 { get; set; }
+            public string L2 { get; set; }
+            public string Mu { get; set; }
+
+            public BesselianElementsTableItem(int index, PolynomialBesselianElements pbe)
+            {
+                Index = index.ToString();
+                X = pbe.X[index].ToString("N6", nf);
+                Y = pbe.Y[index].ToString("N6", nf);
+
+                if (index <= 2)
+                {
+                    D = pbe.D[index].ToString("N6", nf);
+                    L1 = pbe.L1[index].ToString("N6", nf);
+                    L2 = pbe.L2[index].ToString("N6", nf);
+                }
+
+                if (index <= 1)
+                    Mu = Angle.To360(pbe.Mu[index]).ToString("N6", nf);
+            }
+        }
+
+        public class BesselianElementsFTableItem
+        {
+            public string Text { get; set; }
+            public string Value { get; set; }
+
+            public BesselianElementsFTableItem(string text, string value)
+            {
+                Text = text;
+                Value = value;
+            }
         }
     }
 }

@@ -123,12 +123,14 @@
             <TabItem Header="Eclipse Map">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="148*"/>
+                        <ColumnDefinition Width="19*"/>
+                        <ColumnDefinition Width="213*"/>
                         <ColumnDefinition Width="10"/>
                         <ColumnDefinition Width="200"/>
                     </Grid.ColumnDefinitions>
 
-                    <Grid Grid.Column="0" Margin="1 -1 -2 0">
+                    <Grid Grid.Column="0" Margin="1,-1,8,0" Grid.ColumnSpan="4">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="115*"/>
                             <ColumnDefinition Width="268*"/>
@@ -159,55 +161,162 @@
                         </DockPanel>
                     </Grid>
                     <GridSplitter 
-                        Grid.Column="1" 
+                        Grid.Column="3" 
                         ShowsPreview="False"   
                         HorizontalAlignment="Center" 
-                        VerticalAlignment="Stretch" />
-                    <TextBlock Grid.Column="2" Text="{Binding Details, FallbackValue='test'}" />
+                        VerticalAlignment="Stretch" Margin="2,0" Width="6" />
+                    <TextBlock Grid.Column="4" Text="{Binding Details, FallbackValue='test'}" />
                 </Grid>
             </TabItem>
-            <TabItem Header="General Information">
-                <FlowDocumentScrollViewer 
-                    VerticalAlignment="Stretch"
-                    HorizontalAlignment="Left"
-                    VerticalScrollBarVisibility="Auto"
-                    Margin="10"
-                    ContextMenu="{x:Null}"                   
-                    Document="{Binding EclipseDetails, Converter={StaticResource TextToFlowDocumentConverter}}"
-                    SelectionBrush="Transparent"
-                    Cursor="Arrow"/>
+            <TabItem Header="General Information" IsEnabled="{Binding IsCalculating, Converter={s:InverseBoolConverter}}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+                    <Grid ScrollViewer.CanContentScroll="True">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <!-- General details table title -->
+                        <TextBlock Grid.Row="0" FontSize="18" Padding="8 8 0 0">Eclipse Details</TextBlock>
+
+                        <!-- General details table -->
+                        <DataGrid Grid.Row="1"                            
+                            VerticalScrollBarVisibility="Auto"
+                            VerticalAlignment="Stretch"
+                            AutoGenerateColumns="False" 
+                            IsReadOnly="True"
+                            CanUserReorderColumns="False"
+                            CanUserSortColumns="False"
+                            HeadersVisibility="None"
+                            GridLinesVisibility="All"
+                            BorderThickness="1"
+                            Margin="8"
+                            Padding="2"
+                            RowHeaderWidth="0"
+                            ColumnHeaderHeight="32"
+                            RowHeight="24"
+                            ItemsSource="{Binding EclipseGeneralDetails}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
+                                <DataGridTextColumn Header="Value" FontFamily="Lucida Console" Binding="{Binding Value}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <!-- Contacts table title -->
+                        <TextBlock Grid.Row="2" FontSize="18" Padding="8 8 0 0">Contacts</TextBlock>
+
+                        <!-- Contacts table -->
+                        <DataGrid Grid.Row="3"
+                            VerticalScrollBarVisibility="Auto"
+                            VerticalAlignment="Stretch"
+                            CanUserReorderColumns="False"
+                            CanUserSortColumns="False"
+                            AutoGenerateColumns="False" 
+                            IsReadOnly="True"
+                            GridLinesVisibility="All"
+                            BorderThickness="1"
+                            Margin="8"
+                            Padding="2"
+                            RowHeaderWidth="0"
+                            ColumnHeaderHeight="32"
+                            RowHeight="24"
+                            ItemsSource="{Binding EclipseContacts}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Point" Binding="{Binding Point}"/>
+                                <DataGridTextColumn Header="Coordinates" FontFamily="Lucida Console" Binding="{Binding Coordinates}"/>
+                                <DataGridTextColumn Header="Time" FontFamily="Lucida Console" Binding="{Binding Time}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <!-- Besselian elements table title -->
+                        <TextBlock Grid.Row="4" FontSize="18" Padding="8 8 0 0">Besselian Elements</TextBlock>
+
+                        <!-- Besselian elements table header (displaying t0 timings) -->
+                        <TextBlock Grid.Row="5" Padding="8 8 0 0" Text="{Binding BesselianElementsTableHeader}" />
+
+                        <!-- Besselian elements table -->
+                        <DataGrid Grid.Row="6"
+                            VerticalScrollBarVisibility="Auto"
+                            VerticalAlignment="Stretch"
+                            CanUserReorderColumns="False"
+                            CanUserSortColumns="False"
+                            AutoGenerateColumns="False" 
+                            IsReadOnly="True"
+                            GridLinesVisibility="All"
+                            BorderThickness="1"
+                            Margin="8 8 8 0"
+                            Padding="2"
+                            RowHeaderWidth="0"
+                            ColumnHeaderHeight="32"
+                            RowHeight="24"
+                            ItemsSource="{Binding BesselianElementsTable}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="n" FontFamily="Lucida Console" Binding="{Binding Index}"/>
+                                <DataGridTextColumn Header="x" FontFamily="Lucida Console" Binding="{Binding X}"/>
+                                <DataGridTextColumn Header="y" FontFamily="Lucida Console" Binding="{Binding Y}"/>
+                                <DataGridTextColumn Header="D" FontFamily="Lucida Console" Binding="{Binding D}"/>
+                                <DataGridTextColumn Header="L1" FontFamily="Lucida Console" Binding="{Binding L1}"/>
+                                <DataGridTextColumn Header="L2" FontFamily="Lucida Console" Binding="{Binding L2}"/>
+                                <DataGridTextColumn Header="μ" FontFamily="Lucida Console" Binding="{Binding Mu}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <!-- Besselian elements table footer (displaying tanF1 and tanF2)-->
+                        <TextBlock Grid.Row="7" Padding="8" Text="{Binding BesselianElementsTableFooter}" />
+
+                    </Grid>
+                </ScrollViewer>
             </TabItem>
             <TabItem Header="Saros Series">
-                <DataGrid 
-                    IsEnabled="{Binding IsCalculating, Converter={s:InverseBoolConverter}}"
-                    VerticalScrollBarVisibility="Auto"
-                    VerticalAlignment="Stretch"
-                    AutoGenerateColumns="False" 
-                    IsReadOnly="True"
-                    GridLinesVisibility="All"
-                    BorderThickness="1"
-                    Margin="4"
-                    Padding="2"
-                    RowHeaderWidth="0"
-                    ColumnHeaderHeight="32"
-                    RowHeight="24"
-                    ItemsSource="{Binding SarosSeries}">
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn Header="Date">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock FontFamily="Lucida Console" FontSize="12">
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" FontSize="18" Padding="8 8 0 0">List of eclipses of saros series #123</TextBlock>
+                    <DataGrid Grid.Row="1"
+                        IsEnabled="{Binding IsCalculating, Converter={s:InverseBoolConverter}}"
+                        VerticalScrollBarVisibility="Auto"
+                        VerticalAlignment="Stretch"
+                        AutoGenerateColumns="False" 
+                        CanUserReorderColumns="False"
+                        CanUserSortColumns="False"
+                        IsReadOnly="True"
+                        GridLinesVisibility="All"
+                        BorderThickness="1"
+                        Margin="8"
+                        Padding="2"
+                        RowHeaderWidth="0"
+                        ColumnHeaderHeight="32"
+                        RowHeight="24"
+                        ItemsSource="{Binding SarosSeries}">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Date">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock FontFamily="Lucida Console" FontSize="12">
                                         <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:SolarEclipseWindow}, Mode=FindAncestor}, Path=DataContext.ClickOnLinkCommand}" CommandParameter="{Binding JulianDay}"><Run Text="{Binding Date}" /></Hyperlink>
-                                    </TextBlock>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Type" Binding="{Binding Type}"/>
-                        <DataGridTextColumn Header="Gamma" Binding="{Binding Gamma}"/>
-                        <DataGridTextColumn Header="Magnitude" Binding="{Binding Magnitude}"/>
-                        <DataGridTextColumn Header="Local visibility" Binding="{Binding LocalVisibility}"/>
-                    </DataGrid.Columns>
-                </DataGrid>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Type" Binding="{Binding Type}"/>
+                            <DataGridTextColumn Header="Gamma" Binding="{Binding Gamma}"/>
+                            <DataGridTextColumn Header="Magnitude" Binding="{Binding Magnitude}"/>
+                            <DataGridTextColumn Header="Local visibility" Binding="{Binding LocalVisibility}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+
+
             </TabItem>
             <TabItem Header="Local Circumstances"></TabItem>
         </TabControl>
