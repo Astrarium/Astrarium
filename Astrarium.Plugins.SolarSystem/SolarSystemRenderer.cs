@@ -58,7 +58,6 @@ namespace Astrarium.Plugins.SolarSystem
         private readonly ICollection<SurfaceFeature> martianFeatures;
 
         private readonly string dataPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data");
-        private const string solarTexturePath = "https://soho.nascom.nasa.gov/data/REPROCESSING/Completed/{yyyy}/hmiigr/{yyyy}{MM}{dd}/{yyyy}{MM}{dd}_0000_hmiigr_512.jpg";
 
         public SolarSystemRenderer(LunarCalc lunarCalc, SolarCalc solarCalc, PlanetsCalc planetsCalc, ISettings settings)
         {

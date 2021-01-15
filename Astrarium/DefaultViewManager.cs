@@ -224,14 +224,23 @@ namespace Astrarium
             dialog.Show();
         }
 
-        public string ShowSaveFileDialog(string caption, string fileName, string extension, string filter)
+        public string ShowSaveFileDialog(string caption, string fileName, string extension, string filter, out int selectedFilterIndex)
         {
             var dialog = new SaveFileDialog();
             dialog.Title = caption.StartsWith("$") ? Text.Get(caption.Substring(1)) : caption;
             dialog.FileName = fileName;
             dialog.DefaultExt = extension;
             dialog.Filter = filter;
-            return (dialog.ShowDialog() ?? false) ? dialog.FileName : null;
+            if (dialog.ShowDialog() ?? false)
+            {
+                selectedFilterIndex = dialog.FilterIndex;
+                return dialog.FileName;
+            }
+            else
+            {
+                selectedFilterIndex = -1;
+                return null;
+            }
         }
 
         public string ShowOpenFileDialog(string caption, string filter)

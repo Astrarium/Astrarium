@@ -43,7 +43,7 @@ namespace Astrarium.ViewModels
 
         private void SaveToFile()
         {
-            var file = ViewManager.ShowSaveFileDialog(Text.Get("PhenomenaWindow.ExportTitle"), "Phenomena", ".csv", "Text files (*.txt)|*.txt|Comma-separated files (*.csv)|*.csv");
+            var file = ViewManager.ShowSaveFileDialog(Text.Get("PhenomenaWindow.ExportTitle"), "Phenomena", ".csv", "Text files (*.txt)|*.txt|Comma-separated files (*.csv)|*.csv", out int selectedFilterIndex);
             if (file != null)
             {
                 IAstroEventsWriter writer = null;

@@ -79,10 +79,11 @@ namespace Astrarium.Types
         /// <param name="fileName">Default file name</param>
         /// <param name="extension">Default file extension</param>
         /// <param name="filter">Alowed files extensions filter</param>
+        /// <param name="selectedFilterIndex">Selected filter index, as specified in the <paramref name="filter"/> string</param>
         /// <returns>File name and path, if user pressed OK, null otherwise.</returns>
-        public static string ShowSaveFileDialog(string caption, string fileName, string extension, string filter)
+        public static string ShowSaveFileDialog(string caption, string fileName, string extension, string filter, out int selectedFilterIndex)
         {
-            return viewManager.ShowSaveFileDialog(caption, fileName, extension, filter);
+            return viewManager.ShowSaveFileDialog(caption, fileName, extension, filter, out selectedFilterIndex);
         }
 
         public static string ShowOpenFileDialog(string caption, string filter)
