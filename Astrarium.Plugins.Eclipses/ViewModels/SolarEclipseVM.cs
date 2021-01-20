@@ -437,13 +437,13 @@ namespace Astrarium.Plugins.Eclipses
                 {
                     markers.Add(new Marker(ToGeo(map.P4), riseSetMarkerStyle, "P4"));
                 }
-                if (map.C1 != null)
+                if (map.U1 != null)
                 {
-                    markers.Add(new Marker(ToGeo(map.C1), centralLineMarkerStyle, "C1"));
+                    markers.Add(new Marker(ToGeo(map.U1), centralLineMarkerStyle, "U1"));
                 }
-                if (map.C2 != null)
+                if (map.U2 != null)
                 {
-                    markers.Add(new Marker(ToGeo(map.C2), centralLineMarkerStyle, "C2"));
+                    markers.Add(new Marker(ToGeo(map.U2), centralLineMarkerStyle, "U2"));
                 }
 
                 for (int i = 0; i < 2; i++)
@@ -478,10 +478,10 @@ namespace Astrarium.Plugins.Eclipses
                     var polygon = new Polygon(umbraPolygonStyle);
                     polygon.AddRange(map.UmbraNorthernLimit[0].Select(p => ToGeo(p)));
                     polygon.AddRange(map.UmbraNorthernLimit[1].Select(p => ToGeo(p)));
-                    if (map.C2 != null) polygon.Add(ToGeo(map.C2));
+                    if (map.U2 != null) polygon.Add(ToGeo(map.U2));
                     polygon.AddRange((map.UmbraSouthernLimit[1] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
                     polygon.AddRange((map.UmbraSouthernLimit[0] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
-                    if (map.C1 != null) polygon.Add(ToGeo(map.C1));
+                    if (map.U1 != null) polygon.Add(ToGeo(map.U1));
                     polygons.Add(polygon);
                 }
                 else
@@ -550,25 +550,25 @@ namespace Astrarium.Plugins.Eclipses
                 });
 
                 var eclipseContacts = new ObservableCollection<ContactsTableItem>();
-                eclipseContacts.Add(new ContactsTableItem("P1 (First external contact)", map.P1));
+                eclipseContacts.Add(new ContactsTableItem("P1: First external contact", map.P1));
                 if (map.P2 != null)
                 {
-                    eclipseContacts.Add(new ContactsTableItem("P2 (First internal contact)", map.P2));
+                    eclipseContacts.Add(new ContactsTableItem("P2: First internal contact", map.P2));
                 }
-                if (map.C1 != null && !double.IsNaN(map.C1.JulianDay))
+                if (map.U1 != null && !double.IsNaN(map.U1.JulianDay))
                 {
-                    eclipseContacts.Add(new ContactsTableItem("C1 (First umbra contact)", map.C1));
+                    eclipseContacts.Add(new ContactsTableItem("U1: First umbra contact", map.U1));
                 }
-                eclipseContacts.Add(new ContactsTableItem("Max (Greatest Eclipse)", map.Max));   
-                if (map.C2 != null && !double.IsNaN(map.C2.JulianDay))
+                eclipseContacts.Add(new ContactsTableItem("Max: Greatest Eclipse", map.Max));   
+                if (map.U2 != null && !double.IsNaN(map.U2.JulianDay))
                 {
-                    eclipseContacts.Add(new ContactsTableItem("C2 (Last umbra contact)", map.C2));
+                    eclipseContacts.Add(new ContactsTableItem("U2: Last umbra contact", map.U2));
                 }
                 if (map.P3 != null)
                 {
-                    eclipseContacts.Add(new ContactsTableItem("P3 (Last internal contact)", map.P3));
+                    eclipseContacts.Add(new ContactsTableItem("P3: Last internal contact", map.P3));
                 }
-                eclipseContacts.Add(new ContactsTableItem("P4 (Last external contact)", map.P4));    
+                eclipseContacts.Add(new ContactsTableItem("P4: Last external contact", map.P4));    
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
                     EclipseContacts = eclipseContacts;
@@ -640,11 +640,11 @@ namespace Astrarium.Plugins.Eclipses
             if (!local.IsInvisible)
             {
                 var contacts = new List<LocalContactsTableItem>();
-                contacts.Add(new LocalContactsTableItem("Beginning of partial phase", local.JulianDayPartialBegin, local.SunAltPartialBegin, local.ZAnglePartialBegin));
-                contacts.Add(new LocalContactsTableItem("Beginning of total phase", local.JulianDayTotalBegin, local.SunAltTotalBegin, local.ZAngleTotalBegin));
-                contacts.Add(new LocalContactsTableItem("Eclipse maximum", local.JulianDayMax, local.SunAltMax, local.ZAngleMax));
-                contacts.Add(new LocalContactsTableItem("End of total phase", local.JulianDayTotalEnd, local.SunAltTotalEnd, local.ZAngleTotalEnd));
-                contacts.Add(new LocalContactsTableItem("End of partial phase", local.JulianDayPartialEnd, local.SunAltPartialEnd, local.ZAnglePartialEnd));
+                contacts.Add(new LocalContactsTableItem("C1: Beginning of partial phase", local.PartialBegin));
+                contacts.Add(new LocalContactsTableItem("C2: Beginning of total phase", local.TotalBegin));
+                contacts.Add(new LocalContactsTableItem("Max: Local maximum", local.Maximum));
+                contacts.Add(new LocalContactsTableItem("C3: End of total phase", local.TotalEnd));
+                contacts.Add(new LocalContactsTableItem("C4: End of partial phase", local.PartialEnd));
 
                 var details = new List<NameValueTableItem>();
                 details.Add(new NameValueTableItem("Maximal magnitude", fmtMag.Format(local.MaxMagnitude)));
@@ -654,8 +654,8 @@ namespace Astrarium.Plugins.Eclipses
 
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
-                    contacts.Where(i => !string.IsNullOrEmpty(i.Time)).ToList().ForEach(i => LocalContactsTable.Add(i));
-                    details.Where(i => !string.IsNullOrEmpty(i.Value)).ToList().ForEach(i => LocalCircumstancesTable.Add(i));
+                    contacts.ToList().ForEach(i => LocalContactsTable.Add(i));
+                    details.ToList().ForEach(i => LocalCircumstancesTable.Add(i));
                 });
             }
 
@@ -793,19 +793,21 @@ namespace Astrarium.Plugins.Eclipses
 
         public class LocalContactsTableItem
         {
-            public string Point { get; set; }
-            public string Time { get; set; }
-            public string Altitude { get; set; }
-            public string PosAngle { get; set; }
+            public string Point { get; private set; }
+            public string Time { get; private set; }
+            public string Altitude { get; private set; }
+            public string PAngle { get; private set; }
+            public string ZAngle { get; private set; }
 
-            public LocalContactsTableItem(string text, double time, double altitude, double posAngle)
+            public LocalContactsTableItem(string text, SolarEclipseLocalCircumstancesContactPoint contact)
             {
                 Point = text;
-                if (!double.IsNaN(time))
+                if (contact != null)
                 {
-                    Time = $"{fmtTime.Format(new Date(time, 0))} UT";
-                    Altitude = fmtAlt.Format(altitude);
-                    PosAngle = fmtAlt.Format(posAngle);
+                    Time = !double.IsNaN(contact.JulianDay) ? $"{fmtTime.Format(new Date(contact.JulianDay, 0))} UT" : "-";
+                    Altitude = fmtAlt.Format(contact.SolarAltitude);
+                    PAngle = fmtAlt.Format(contact.PAngle);
+                    ZAngle = fmtAlt.Format(contact.ZAngle);
                 }
             }
         }

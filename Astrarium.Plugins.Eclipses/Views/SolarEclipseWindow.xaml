@@ -21,6 +21,7 @@
 
     <Window.Resources>
         <ResourceDictionary>
+            
             <Style x:Key="ImageButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
                 <Style.Setters>
                     <Setter Property="Cursor" Value="Hand" />
@@ -36,6 +37,7 @@
                     </Trigger>
                 </Style.Triggers>
             </Style>
+            
             <Grid x:Key="ImagePrevEclipse" x:Shared="False">
                 <Path HorizontalAlignment="Left" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="16" Height="16" Stretch="Uniform" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
                     <Path.Data>
@@ -94,6 +96,45 @@
                 </Path>
             </Grid>
             <c:TextToFlowDocumentConverter x:Key="TextToFlowDocumentConverter" Markdown="{StaticResource Markdown}" />
+
+            <Style x:Key="RadioTab" TargetType="{x:Type RadioButton}">
+                <Style.Setters>
+                    <Setter Property="Height" Value="24" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="RadioButton">
+                                <c:BorderFix BorderThickness="1" x:Name="Border" BorderBrush="{TemplateBinding BorderBrush}" Width="40" HorizontalContentAlignment="Center" SnapsToDevicePixels="True">
+                                    <TextBlock x:Name="Text" Text="{TemplateBinding Content}" Margin="0" Width="Auto" Padding="0" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                </c:BorderFix>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter Property="Background" TargetName="Border" Value="{StaticResource BrushControlBackground}" />
+                                    </Trigger>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter Property="Foreground" TargetName="Text" Value="{StaticResource BrushControlLightBackground}" />
+                                        <Setter Property="Cursor" Value="No" />
+                                    </Trigger>
+                                    <MultiTrigger>
+                                        <MultiTrigger.Conditions>
+                                            <Condition Property="IsEnabled" Value="True" />
+                                            <Condition Property="IsMouseOver" Value="True" />
+                                        </MultiTrigger.Conditions>
+                                        <Setter Property="Background" TargetName="Border" Value="{StaticResource BrushControlLightBackground}" />
+                                        <Setter Property="BorderBrush" TargetName="Border" Value="{StaticResource BrushControlLightBackground}" />
+                                    </MultiTrigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="Padding" Value="6" />
+                    <Setter Property="Foreground" Value="{StaticResource BrushForeground}" />
+                    <Setter Property="Background" Value="{StaticResource BrushControlBackground}"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource BrushControlBackground}" />
+                    <Setter Property="Cursor" Value="Hand" />
+                </Style.Setters>
+            </Style>
+
         </ResourceDictionary>
     </Window.Resources>
 
@@ -128,7 +169,7 @@
                         <ColumnDefinition Width="19*"/>
                         <ColumnDefinition Width="213*"/>
                         <ColumnDefinition Width="10"/>
-                        <ColumnDefinition Width="400"/>
+                        <ColumnDefinition Width="460"/>
                     </Grid.ColumnDefinitions>
 
                     <Grid Grid.Column="0" Margin="1,-1,8,0" Grid.ColumnSpan="4">
@@ -171,16 +212,17 @@
 
                     <!-- Local circumstances table title -->
 
-                    <ScrollViewer Grid.Column="4" 
-                        HorizontalScrollBarVisibility="Visible"
-                        VerticalScrollBarVisibility="Visible">
-                        <StackPanel Orientation="Vertical">
+                    <ScrollViewer Grid.Column="4"
+                        
+                        HorizontalScrollBarVisibility="Auto"
+                        VerticalScrollBarVisibility="Auto">
+                        <StackPanel  Orientation="Vertical">
                             <TextBlock FontSize="18" Padding="6 2">Local Circumstances</TextBlock>
                             <TextBlock Padding="6 2" Text="{Binding ObserverLocationName, FallbackValue='Observer location name'}" />
                             <TextBlock Padding="6 2" Text="{Binding ObserverLocationCoordinates, FallbackValue='Coordinates'}" />
-                            <TextBlock Padding="6 2" Text="{Binding LocalVisibilityDescription, FallbackValue='Local visibility description'}" MaxWidth="200" HorizontalAlignment="Left" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Padding="6 2" Text="{Binding LocalVisibilityDescription, FallbackValue='Local visibility description'}" HorizontalAlignment="Left" />
 
-                            <Expander Header="Local Details" Visibility="{Binding IsVisibleFromCurrentPlace, Mode=OneWay, Converter={s:BoolToVisibilityConverter}}"  IsExpanded="True">
+                            <Expander Margin="0 6 0 4" Header="Local Details" Visibility="{Binding IsVisibleFromCurrentPlace, Mode=OneWay, Converter={s:BoolToVisibilityConverter}}"  IsExpanded="True">
                                 <StackPanel Orientation="Vertical">
                                     <DataGrid               
                                         VerticalScrollBarVisibility="Hidden"
@@ -222,32 +264,51 @@
                                         <DataGrid.Columns>
                                             <DataGridTextColumn Header="Instant" Binding="{Binding Point}" />
                                             <DataGridTextColumn Header="Time" FontFamily="Lucida Console" Binding="{Binding Time}"/>
-                                            <DataGridTextColumn Header="Solar Altitude" FontFamily="Lucida Console" Binding="{Binding Altitude}"/>
-                                            <DataGridTextColumn Header="Pos Angle" FontFamily="Lucida Console" Binding="{Binding PosAngle}"/>
+                                            <DataGridTextColumn Header="Alt" FontFamily="Lucida Console" Binding="{Binding Altitude}"/>
+                                            <DataGridTextColumn Header="P" FontFamily="Lucida Console" Binding="{Binding PAngle}"/>
+                                            <DataGridTextColumn Header="Z" FontFamily="Lucida Console" Binding="{Binding ZAngle}"/>
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </StackPanel>
                             </Expander>
 
                             <Expander Header="Local View" Visibility="{Binding IsVisibleFromCurrentPlace, Mode=OneWay, Converter={s:BoolToVisibilityConverter}}" IsExpanded="True">
+                                <StackPanel Orientation="Vertical">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
 
-                                <q:SolarEclipseLocalView 
-                                    BorderBrush="Red"
-                                    BorderThickness="1"
-                                    x:Name="LocalView"
-                                    HorizontalAlignment="Stretch" 
-                                    VerticalAlignment="Stretch"                                  
-                                    MinHeight="100"
-                                    
-                                    Circumstances="{Binding LocalCircumstances}"
-                                    />
+                                        <StackPanel Margin="2" Grid.Column="0" HorizontalAlignment="Left" SnapsToDevicePixels="True" Orientation="Horizontal">
+                                            <RadioButton Content="C1" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C1}}" Style="{StaticResource ResourceKey=RadioTab}" />
+                                            <RadioButton Content="C2" IsEnabled="{Binding LocalCircumstances.TotalBegin, Converter={s:NotNullToBoolConverter}}" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C2}}" Style="{StaticResource ResourceKey=RadioTab}" />
+                                            <RadioButton Content="Max" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.Max}}" Style="{StaticResource ResourceKey=RadioTab}" />
+                                            <RadioButton Content="C3" IsEnabled="{Binding LocalCircumstances.TotalEnd, Converter={s:NotNullToBoolConverter}}" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C3}}" Style="{StaticResource ResourceKey=RadioTab}" />
+                                            <RadioButton Content="C4" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C4}}" Style="{StaticResource ResourceKey=RadioTab}" />
+                                        </StackPanel>
+
+                                        <TextBlock Margin="20 0 3 0" Grid.Column="1" VerticalAlignment="Center" Text="Orientation:" />
+                                        <ComboBox Grid.Column="2"
+                                            Margin="2"
+                                            ItemsSource="{Binding ElementName=Chart, Path=Orientation, Converter={s:EnumValueToEnumCollectionConverter}}"
+                                            SelectedValue="{Binding ElementName=Chart, Path=Orientation}">
+                                        </ComboBox>
+
+                                    </Grid>
+
+                                    <q:SolarEclipseChartControl 
+                                        x:Name="Chart"
+                                        HorizontalAlignment="Stretch" 
+                                        VerticalAlignment="Stretch"                                  
+                                        MinHeight="200"
+                                        Circumstances="{Binding LocalCircumstances}" />
+                                </StackPanel>
                             </Expander>
-                            
                         </StackPanel>
-
                     </ScrollViewer>
-                    
-                    
+
                 </Grid>
             </TabItem>
             <TabItem Header="General Information">

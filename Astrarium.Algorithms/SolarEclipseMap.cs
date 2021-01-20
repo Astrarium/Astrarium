@@ -82,12 +82,12 @@ namespace Astrarium.Algorithms
         /// <summary>
         /// Instant and coordinates of start of total phase (first contact of umbra center with Earth) 
         /// </summary>
-        public SolarEclipseMapPoint C1 { get; set; }
+        public SolarEclipseMapPoint U1 { get; set; }
 
         /// <summary>
         /// Instant and coordinates of end of total phase (last contact of umbra center with Earth) 
         /// </summary>
-        public SolarEclipseMapPoint C2 { get; set; }
+        public SolarEclipseMapPoint U2 { get; set; }
 
         /// <summary>
         /// Instant and coordinates of eclipse maximum

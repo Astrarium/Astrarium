@@ -17,23 +17,31 @@ namespace Astrarium.Algorithms
         /// </summary>
         public bool IsInvisible { get; set; }
 
+
+        public SolarEclipseLocalCircumstancesContactPoint PartialBegin { get; set; }
+        public SolarEclipseLocalCircumstancesContactPoint TotalBegin { get; set; }
+        public SolarEclipseLocalCircumstancesContactPoint Maximum { get; set; }
+        public SolarEclipseLocalCircumstancesContactPoint TotalEnd { get; set; }
+        public SolarEclipseLocalCircumstancesContactPoint PartialEnd { get; set; }
+
+
         /// <summary>
         /// Instant of maximum eclipse for the current point, in Julian days.
         /// </summary>
-        public double JulianDayMax { get; set; }
+        //public double JulianDayMax { get; set; }
 
         /// <summary>
         /// Altitude of the Sun at eclipse maximum, in degrees.
         /// </summary>
-        public double SunAltMax { get; set; }
+        //public double SunAltMax { get; set; }
 
         /// <summary>
         /// Position angle of the point of center of lunar disk, 
         /// measured from the zenith point of the solar limb towards the east,
         /// in degrees, at eclipse maximum.
         /// </summary>
-        public double ZAngleMax { get; set; }
-        public double PAngleMax { get; set; }
+        //public double ZAngleMax { get; set; }
+        //public double PAngleMax { get; set; }
 
         /// <summary>
         /// Maximal eclipse magnitude.
@@ -53,127 +61,105 @@ namespace Astrarium.Algorithms
         /// <summary>
         /// Instant of beginning of partial phase for the current place, in Julian days.
         /// </summary>
-        public double JulianDayPartialBegin { get; set; }
+        //public double JulianDayPartialBegin { get; set; }
 
         /// <summary>
         /// Altitude of the Sun at the beginning of partial phase for the current place, in degrees.
         /// </summary>
-        public double SunAltPartialBegin { get; set; }
+        //public double SunAltPartialBegin { get; set; }
 
         /// <summary>
         /// Position angle of the point of center of lunar disk, 
         /// measured from the zenith point of the solar limb towards the east,
         /// in degrees, at the beginning of partial phase.
         /// </summary>
-        public double ZAnglePartialBegin { get; set; }
-        public double PAnglePartialBegin { get; set; }
+        //public double ZAnglePartialBegin { get; set; }
+        //public double PAnglePartialBegin { get; set; }
 
         /// <summary>
         /// Instant of end of partial phase for the current place, in Julian days.
         /// </summary>
-        public double JulianDayPartialEnd { get; set; }
+        //public double JulianDayPartialEnd { get; set; }
 
         /// <summary>
         /// Altitude of the Sun at the end of partial phase for the current place, in degrees.
         /// </summary>
-        public double SunAltPartialEnd { get; set; }
+        //public double SunAltPartialEnd { get; set; }
 
         /// <summary>
         /// Position angle of the point of center of lunar disk, 
         /// measured from the zenith point of the solar limb towards the east,
         /// in degrees, at the end of partial phase.
         /// </summary>
-        public double ZAnglePartialEnd { get; set; }
-        public double PAnglePartialEnd { get; set; }
+        //public double ZAnglePartialEnd { get; set; }
+        //public double PAnglePartialEnd { get; set; }
 
         /// <summary>
         /// Instant of beginning of total phase for the current place, in Julian days.
         /// </summary>
-        public double JulianDayTotalBegin { get; set; }
+        //public double JulianDayTotalBegin { get; set; }
 
         /// <summary>
         /// Position angle of the point of center of lunar disk, 
         /// measured from the zenith point of the solar limb towards the east,
         /// in degrees, at the beginning of total phase.
         /// </summary>
-        public double ZAngleTotalBegin { get; set; }
-        public double PAngleTotalBegin { get; set; }
+        //public double ZAngleTotalBegin { get; set; }
+        //public double PAngleTotalBegin { get; set; }
 
         /// <summary>
         /// Altitude of the Sun at beginning of the total phase for the current place, in degrees.
         /// </summary>
-        public double SunAltTotalBegin { get; set; }
+        //public double SunAltTotalBegin { get; set; }
 
         /// <summary>
         /// Position angle of the point of center of lunar disk, 
         /// measured from the zenith point of the solar limb towards the east,
         /// in degrees, at the end of total phase.
         /// </summary>
-        public double ZAngleTotalEnd { get; set; }
-        public double PAngleTotalEnd { get; set; }
+        //public double ZAngleTotalEnd { get; set; }
+        //public double PAngleTotalEnd { get; set; }
 
         /// <summary>
         /// Instant of beginning of total phase for the current place, in Julian days.
         /// </summary>
-        public double JulianDayTotalEnd { get; set; }
+        //public double JulianDayTotalEnd { get; set; }
 
         /// <summary>
         /// Altitude of the Sun at end of the total phase for the current place, in degrees.
         /// </summary>
-        public double SunAltTotalEnd { get; set; }
+        //public double SunAltTotalEnd { get; set; }
 
         /// <summary>
         /// Duration of total phase, in fractions of day.
         /// </summary>
-        public double TotalDuration => JulianDayTotalEnd - JulianDayTotalBegin;
+        public double TotalDuration => TotalBegin != null && TotalEnd != null ? TotalEnd.JulianDay - TotalBegin.JulianDay : 0;
 
         /// <summary>
         /// Duration of partial phase, in fractions of day.
         /// </summary>
-        public double PartialDuration => JulianDayPartialEnd - JulianDayPartialBegin;
+        public double PartialDuration => PartialBegin != null && PartialEnd != null ? PartialEnd.JulianDay - PartialBegin.JulianDay : 0;
+    }
 
-        /// <inheritdoc/>
-        public override string ToString()
-        {
-            return
-                new StringBuilder()
-                    .AppendLine($"Partial Begin = {JdToString(JulianDayPartialBegin)} / ({SunAltPartialBegin} deg)")
-                    .AppendLine($"Total Begin = {JdToString(JulianDayTotalBegin)} / ({SunAltTotalBegin} deg)")
-                    .AppendLine($"Max = {JdToString(JulianDayMax)} / ({SunAltMax} deg)")
-                    .AppendLine($"Total End = {JdToString(JulianDayTotalEnd)} / ({SunAltTotalEnd} deg)")
-                    .AppendLine($"Partial End = {JdToString(JulianDayPartialEnd)} / ({SunAltPartialEnd} deg)")
-                    .AppendLine($"Max Mag = {MaxMagnitude}")
-                    .AppendLine($"Moon/Sun size ratio = {MoonToSunDiameterRatio}")
-                    .AppendLine($"Path Width = {PathWidth} km")
-                    .AppendLine($"Total Dur = {TimeToString(TotalDuration)}")
-                    .AppendLine($"Partial Dur = {TimeToString(PartialDuration)}")
-                    .ToString();
-        }
+    public class SolarEclipseLocalCircumstancesContactPoint
+    {
+        public double JulianDay { get; private set; }
+        public double SolarAltitude { get; private set; }
+        public double PAngle { get; private set; }
+        public double ZAngle { get; private set; }
+        
+        /// <summary>
+        /// Parallactic angle, in degrees
+        /// </summary>
+        public double QAngle { get; private set; }
 
-        private string JdToString(double jd)
+        public SolarEclipseLocalCircumstancesContactPoint(double jd, double solarAlt, double pAngle, double zAngle, double qAngle)
         {
-            if (double.IsNaN(jd) || jd == 0)
-                return "-";
-            else
-            {
-                var date = new Date(jd, 0);
-                var culture = CultureInfo.InvariantCulture;
-                string month = culture.DateTimeFormat.GetMonthName(date.Month);
-                int day = (int)date.Day;
-                int year = date.Year;
-                return string.Format($"{day} {month} {year} {TimeToString(date.Day - day)} UT");
-            }
-        }
-
-        private string TimeToString(double time)
-        {
-            if (double.IsNaN(time) || time == 0)
-                return "-";
-            else
-            {
-                var ts = TimeSpan.FromDays(time);
-                return string.Format($"{ts:hh\\:mm\\:ss}");
-            }
+            JulianDay = jd;
+            SolarAltitude = solarAlt;
+            PAngle = pAngle;
+            ZAngle = zAngle;
+            QAngle = qAngle;
         }
     }
 }

@@ -293,6 +293,7 @@ namespace Astrarium.Algorithms
             // calculate position angles (EOSE, pp. 26-27)
             double P = Atan2(u, v);
             double q = Asin(Cos(phi) * Sin(H) / Cos(ToRadians(h)));
+            double qAngleMax = To360(ToDegrees(q));
             double zenithAngleMax = To360(ToDegrees(P - q));
             double posAngleMax = To360(ToDegrees(P));
 
@@ -306,6 +307,7 @@ namespace Astrarium.Algorithms
             var altPhases = new double[4];
             var zenithAngles = new double[4];
             var posAngles = new double[4];
+            var qAngles = new double[4];
 
             // calculate initial values of tau
             for (int i = 0; i < 4; i++)
@@ -377,6 +379,7 @@ namespace Astrarium.Algorithms
                 q = Asin(Cos(phi) * Sin(H) / Cos(ToRadians(h)));
                 posAngles[i] = To360(ToDegrees(P));
                 zenithAngles[i] = To360(ToDegrees(P - q));
+                qAngles[i] = To360(ToDegrees(q));
                 jdPhases[i] = jd;
                 altPhases[i] = h;
             }
@@ -394,26 +397,15 @@ namespace Astrarium.Algorithms
             {
                 return new SolarEclipseLocalCircumstances()
                 {
-                    JulianDayMax = jdMax,
-                    SunAltMax = altMax,
-                    ZAngleMax = zenithAngleMax, 
-                    PAngleMax = posAngleMax,
-                    JulianDayPartialBegin = jdPhases[0],
-                    SunAltPartialBegin = altPhases[0],
-                    ZAnglePartialBegin = zenithAngles[0],
-                    PAnglePartialBegin = posAngles[0],
-                    JulianDayPartialEnd = jdPhases[1],
-                    SunAltPartialEnd = altPhases[1],
-                    ZAnglePartialEnd = zenithAngles[1],
-                    PAnglePartialEnd = posAngles[1],
-                    JulianDayTotalBegin = Min(jdPhases[2], jdPhases[3]),
-                    SunAltTotalBegin = altPhases[2],
-                    ZAngleTotalBegin = zenithAngles[2],
-                    PAngleTotalBegin = posAngles[2],
-                    JulianDayTotalEnd = Max(jdPhases[2], jdPhases[3]),
-                    SunAltTotalEnd = altPhases[3],
-                    ZAngleTotalEnd = zenithAngles[3],
-                    PAngleTotalEnd = posAngles[3],
+                    Maximum = new SolarEclipseLocalCircumstancesContactPoint(jdMax, altMax, posAngleMax, zenithAngleMax, qAngleMax),
+                    PartialBegin = new SolarEclipseLocalCircumstancesContactPoint(jdPhases[0], altPhases[0], posAngles[0], zenithAngles[0], qAngles[0]),
+                    PartialEnd = new SolarEclipseLocalCircumstancesContactPoint(jdPhases[1], altPhases[1], posAngles[1], zenithAngles[1], qAngles[1]),
+                    TotalBegin = !double.IsNaN(jdPhases[2]) && !double.IsNaN(jdPhases[3]) ? 
+                        new SolarEclipseLocalCircumstancesContactPoint(Min(jdPhases[2], jdPhases[3]), altPhases[2], posAngles[2], zenithAngles[2], qAngles[2]) : 
+                        null,
+                    TotalEnd = !double.IsNaN(jdPhases[2]) && !double.IsNaN(jdPhases[3]) ? 
+                        new SolarEclipseLocalCircumstancesContactPoint(Max(jdPhases[2], jdPhases[3]), altPhases[3], posAngles[3], zenithAngles[3], qAngles[3]) :
+                        null,
                     MaxMagnitude = G,
                     MoonToSunDiameterRatio = A,
                     PathWidth = width
@@ -561,8 +553,8 @@ namespace Astrarium.Algorithms
             // There are no C1/C2 points for partial and non-central eclipses
             if (eclipse.EclipseType != SolarEclipseType.Partial && !eclipse.IsNonCentral)
             {
-                map.C1 = FindExtremeLimitOfCentralLine(pbe, true);
-                map.C2 = FindExtremeLimitOfCentralLine(pbe, false);
+                map.U1 = FindExtremeLimitOfCentralLine(pbe, true);
+                map.U2 = FindExtremeLimitOfCentralLine(pbe, false);
             }
 
             // Instant of eclipse maximum
