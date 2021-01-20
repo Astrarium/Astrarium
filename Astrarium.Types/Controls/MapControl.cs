@@ -38,6 +38,9 @@ namespace Astrarium.Types.Controls
         public static readonly DependencyProperty ThumbnailTextProperty =
             DependencyProperty.Register(nameof(ThumbnailText), typeof(string), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged) });
 
+        public static readonly DependencyProperty IsMouseOverMapProperty =
+            DependencyProperty.Register(nameof(IsMouseOverMap), typeof(bool), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
+
         public static readonly DependencyProperty ErrorColorProperty =
             DependencyProperty.Register(nameof(ErrorColor), typeof(Color), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged) });
 
@@ -56,6 +59,8 @@ namespace Astrarium.Types.Controls
         public static readonly DependencyProperty OnClickProperty =
             DependencyProperty.Register(nameof(OnClick), typeof(ICommand), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
 
+        public static readonly DependencyProperty IsDraggingProperty =
+           DependencyProperty.Register(nameof(IsDragging), typeof(bool), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = false, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged) });
 
         public ITileServer TileServer
         {
@@ -111,6 +116,18 @@ namespace Astrarium.Types.Controls
             set => SetValue(ThumbnailTextProperty, value);
         }
 
+        public bool IsMouseOverMap
+        {
+            get => (bool)GetValue(IsMouseOverMapProperty);
+            set => SetValue(IsMouseOverMapProperty, value);
+        }
+
+        public bool IsDragging
+        {
+            get => (bool)GetValue(IsDraggingProperty);
+            set => SetValue(IsDraggingProperty, value);
+        }
+
         public Color ErrorColor
         {
             get => (Color)GetValue(ErrorColorProperty);
@@ -157,11 +174,14 @@ namespace Astrarium.Types.Controls
 
         public MapControl()
         {
+            mapControl.MouseEnter += (s, e) => IsMouseOverMap = true;
+            mapControl.MouseLeave += (s, e) => IsMouseOverMap = false;
             mapControl.MouseLeave += (s, e) => Focus();
             mapControl.MouseEnter += (s, e) => mapControl.Focus();
             mapControl.MouseDown += (s, e) => mapControl.Focus();
             mapControl.MouseUp += (s, e) => mapControl.Focus();
             mapControl.MouseDoubleClick += (s, e) => { if (e.Button == MouseButtons.Left) OnClick?.Execute(null); };
+            mapControl.IsDraggingChaged += (s, e) => IsDragging = mapControl.IsDragging;
 
             mapControl.TileServerChanged += (s, e) => TileServer = mapControl.TileServer;
             mapControl.CenterChanged += (s, e) => Center = mapControl.Center;

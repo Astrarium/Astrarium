@@ -28,6 +28,14 @@ namespace Astrarium.Algorithms
         public double SunAltMax { get; set; }
 
         /// <summary>
+        /// Position angle of the point of center of lunar disk, 
+        /// measured from the zenith point of the solar limb towards the east,
+        /// in degrees, at eclipse maximum.
+        /// </summary>
+        public double ZAngleMax { get; set; }
+        public double PAngleMax { get; set; }
+
+        /// <summary>
         /// Maximal eclipse magnitude.
         /// </summary>
         public double MaxMagnitude { get; set; }
@@ -53,6 +61,14 @@ namespace Astrarium.Algorithms
         public double SunAltPartialBegin { get; set; }
 
         /// <summary>
+        /// Position angle of the point of center of lunar disk, 
+        /// measured from the zenith point of the solar limb towards the east,
+        /// in degrees, at the beginning of partial phase.
+        /// </summary>
+        public double ZAnglePartialBegin { get; set; }
+        public double PAnglePartialBegin { get; set; }
+
+        /// <summary>
         /// Instant of end of partial phase for the current place, in Julian days.
         /// </summary>
         public double JulianDayPartialEnd { get; set; }
@@ -63,14 +79,38 @@ namespace Astrarium.Algorithms
         public double SunAltPartialEnd { get; set; }
 
         /// <summary>
+        /// Position angle of the point of center of lunar disk, 
+        /// measured from the zenith point of the solar limb towards the east,
+        /// in degrees, at the end of partial phase.
+        /// </summary>
+        public double ZAnglePartialEnd { get; set; }
+        public double PAnglePartialEnd { get; set; }
+
+        /// <summary>
         /// Instant of beginning of total phase for the current place, in Julian days.
         /// </summary>
         public double JulianDayTotalBegin { get; set; }
 
         /// <summary>
+        /// Position angle of the point of center of lunar disk, 
+        /// measured from the zenith point of the solar limb towards the east,
+        /// in degrees, at the beginning of total phase.
+        /// </summary>
+        public double ZAngleTotalBegin { get; set; }
+        public double PAngleTotalBegin { get; set; }
+
+        /// <summary>
         /// Altitude of the Sun at beginning of the total phase for the current place, in degrees.
         /// </summary>
         public double SunAltTotalBegin { get; set; }
+
+        /// <summary>
+        /// Position angle of the point of center of lunar disk, 
+        /// measured from the zenith point of the solar limb towards the east,
+        /// in degrees, at the end of total phase.
+        /// </summary>
+        public double ZAngleTotalEnd { get; set; }
+        public double PAngleTotalEnd { get; set; }
 
         /// <summary>
         /// Instant of beginning of total phase for the current place, in Julian days.

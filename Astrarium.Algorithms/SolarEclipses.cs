@@ -207,7 +207,7 @@ namespace Astrarium.Algorithms
         /// <param name="g">Geographical coordinates to get eclipse circumstances for.</param>
         /// <returns><see cref="SolarEclipseLocalCircumstances"/> instance containing local curcumstances details.</returns>
         /// <remarks>
-        /// The method is from book J.Meeus "Elements of Solar Eclipses, 1951-2000, § 23.
+        /// The method is from book J.Meeus "Elements of Solar Eclipses", 1951-2000, § 23.
         /// </remarks>
         public static SolarEclipseLocalCircumstances LocalCircumstances(PolynomialBesselianElements pbe, CrdsGeographical g)
         {
@@ -274,7 +274,7 @@ namespace Astrarium.Algorithms
             double tMax = t;
             double jdMax = jd;
             double altMax = h;
-
+           
             double dL1 = be.L1 - zeta * pbe.TanF1;
             double dL2 = be.L2 - zeta * pbe.TanF2;
 
@@ -290,6 +290,12 @@ namespace Astrarium.Algorithms
             double K2 = B * B + (X * a + Y * b) * (X * a + Y * b) / n2;
             double width = 12756 * Abs(dL2) / Sqrt(K2);
 
+            // calculate position angles (EOSE, pp. 26-27)
+            double P = Atan2(u, v);
+            double q = Asin(Cos(phi) * Sin(H) / Cos(ToRadians(h)));
+            double zenithAngleMax = To360(ToDegrees(P - q));
+            double posAngleMax = To360(ToDegrees(P));
+
             if (G < 0)
             {
                 return new SolarEclipseLocalCircumstances() { IsInvisible = true };
@@ -298,6 +304,8 @@ namespace Astrarium.Algorithms
             var tauPhases = new double[4];
             var jdPhases = new double[4];
             var altPhases = new double[4];
+            var zenithAngles = new double[4];
+            var posAngles = new double[4];
 
             // calculate initial values of tau
             for (int i = 0; i < 4; i++)
@@ -365,6 +373,10 @@ namespace Astrarium.Algorithms
                 }
                 while (Abs(tau) >= 0.00001 && iters < 20);
 
+                P = Atan2(u, v);
+                q = Asin(Cos(phi) * Sin(H) / Cos(ToRadians(h)));
+                posAngles[i] = To360(ToDegrees(P));
+                zenithAngles[i] = To360(ToDegrees(P - q));
                 jdPhases[i] = jd;
                 altPhases[i] = h;
             }
@@ -384,14 +396,24 @@ namespace Astrarium.Algorithms
                 {
                     JulianDayMax = jdMax,
                     SunAltMax = altMax,
+                    ZAngleMax = zenithAngleMax, 
+                    PAngleMax = posAngleMax,
                     JulianDayPartialBegin = jdPhases[0],
                     SunAltPartialBegin = altPhases[0],
+                    ZAnglePartialBegin = zenithAngles[0],
+                    PAnglePartialBegin = posAngles[0],
                     JulianDayPartialEnd = jdPhases[1],
                     SunAltPartialEnd = altPhases[1],
+                    ZAnglePartialEnd = zenithAngles[1],
+                    PAnglePartialEnd = posAngles[1],
                     JulianDayTotalBegin = Min(jdPhases[2], jdPhases[3]),
                     SunAltTotalBegin = altPhases[2],
+                    ZAngleTotalBegin = zenithAngles[2],
+                    PAngleTotalBegin = posAngles[2],
                     JulianDayTotalEnd = Max(jdPhases[2], jdPhases[3]),
                     SunAltTotalEnd = altPhases[3],
+                    ZAngleTotalEnd = zenithAngles[3],
+                    PAngleTotalEnd = posAngles[3],
                     MaxMagnitude = G,
                     MoonToSunDiameterRatio = A,
                     PathWidth = width

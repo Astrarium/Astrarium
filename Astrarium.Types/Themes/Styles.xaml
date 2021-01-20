@@ -3313,4 +3313,89 @@
         <CheckBox IsChecked="{Binding IsChecked, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Content="{Binding Text}" />
     </HierarchicalDataTemplate>
 
+    <!-- Expander -->
+    <ControlTemplate x:Key="ExpanderToggleButton" TargetType="{x:Type ToggleButton}">
+        <c:BorderFix x:Name="Border"
+            Margin="-1"
+            BorderBrush="{TemplateBinding BorderBrush}"
+            Background="{TemplateBinding BorderBrush}"
+            BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Path x:Name="CollapsedArrow" Fill="{TemplateBinding Background}" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 4 4 L 8 0 Z" />
+                <Path x:Name="ExpandedArrow" Fill="{TemplateBinding Background}" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" Data="M 0 4 L 4 0 L 8 4 Z" />
+                <ContentPresenter Grid.Column="1" ContentSource="{TemplateBinding Content}" />
+            </Grid>
+        </c:BorderFix>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="Border" Property="Background" Value="{StaticResource BrushControlLightBackground}" />
+                <Setter TargetName="ExpandedArrow" Property="Fill" Value="{StaticResource BrushControlDarkBackground}" />
+                <Setter TargetName="CollapsedArrow" Property="Fill" Value="{StaticResource BrushControlDarkBackground}" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="Border" Property="Background" Value="{StaticResource BrushControlDarkBackground}" />
+                <Setter TargetName="ExpandedArrow" Property="Fill" Value="{StaticResource BrushControlLightBackground}" />
+                <Setter TargetName="CollapsedArrow" Property="Fill" Value="{StaticResource BrushControlLightBackground}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter TargetName="Border" Property="Background" Value="{StaticResource BrushControlDarkBackground}" />
+            </Trigger>
+            <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="ExpandedArrow" Property="Visibility" Value="Visible" />
+                <Setter TargetName="CollapsedArrow" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="IsChecked" Value="False">
+                <Setter TargetName="ExpandedArrow" Property="Visibility" Value="Collapsed" />
+                <Setter TargetName="CollapsedArrow" Property="Visibility" Value="Visible" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <Style TargetType="{x:Type Expander}">
+        <Setter Property="MinHeight" Value="21" />
+        <Setter Property="Background" Value="{StaticResource BrushControlDarkBackground}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BrushControlBackground}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Expander}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition x:Name="ContentRow" Height="0" />
+                        </Grid.RowDefinitions>
+                        <c:BorderFix BorderBrush="{TemplateBinding BorderBrush}" Grid.Row="0" BorderThickness="1,0,1,0">
+                            <ToggleButton 
+                                x:Name="Toggle"
+                                MinHeight="21" 
+                                OverridesDefaultStyle="True" 
+                                Template="{StaticResource ExpanderToggleButton}" 
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                                    <ContentPresenter VerticalAlignment="Center" x:Name="Header" Margin="0" ContentSource="Header" RecognizesAccessKey="True"  />
+                            </ToggleButton>
+                        </c:BorderFix>
+                        <c:BorderFix 
+                            x:Name="Content" 
+                            Grid.Row="1" 
+                            BorderThickness="1,1,1,1"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            Background="{TemplateBinding Background}">
+                                <ContentPresenter Margin="4" />
+                        </c:BorderFix>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsExpanded" Value="True">
+                            <Setter TargetName="ContentRow" Property="Height" Value="{Binding Height, ElementName=Content}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>

@@ -28,11 +28,6 @@ namespace System.Windows.Forms
         private Drawing.Point _Offset = new Drawing.Point();
 
         /// <summary>
-        /// Flag indicating thar mouse is captured.
-        /// </summary>
-        private bool _MouseCaptured = false;
-
-        /// <summary>
         /// Last known mouse position.
         /// </summary>
         private Drawing.Point _LastMouse = new Drawing.Point();
@@ -247,6 +242,13 @@ namespace System.Windows.Forms
         }
 
         /// <summary>
+        /// Gets value indicating the map is dragging by the mouse now.
+        /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool IsDragging { get; private set; }
+
+        /// <summary>
         /// Gets collection of markers to be displayed on the map.
         /// </summary>
         [Browsable(false)]
@@ -361,6 +363,11 @@ namespace System.Windows.Forms
         public event EventHandler<EventArgs> MouseChanged;
 
         /// <summary>
+        /// Raised when <see cref="IsDragging"/> property value is changed.
+        /// </summary>
+        public event EventHandler<EventArgs> IsDraggingChaged;
+
+        /// <summary>
         /// Raised when <see cref="TileServer"/> property value is changed.
         /// </summary>
         public event EventHandler<EventArgs> TileServerChanged;
@@ -424,25 +431,34 @@ namespace System.Windows.Forms
 
             if (drawContent)
             {
-                pe.Graphics.SmoothingMode = SmoothingMode.None;
-                DrawTiles(pe.Graphics);
-                pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-
-                DrawPolygons(pe.Graphics);
-                DrawTracks(pe.Graphics);
-                DrawMarkers(pe.Graphics);
-
-                var gs = pe.Graphics.Save();
-                pe.Graphics.SmoothingMode = SmoothingMode.None;
-                if (_Offset.Y > 0)
+                try
                 {
-                    pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, -1, Width, _Offset.Y + 1);
+
+                    pe.Graphics.SmoothingMode = SmoothingMode.None;
+                    DrawTiles(pe.Graphics);
+                    pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+                    DrawPolygons(pe.Graphics);
+                    DrawTracks(pe.Graphics);
+                    DrawMarkers(pe.Graphics);
+
+                    var gs = pe.Graphics.Save();
+                    pe.Graphics.SmoothingMode = SmoothingMode.None;
+                    if (_Offset.Y > 0)
+                    {
+                        pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, -1, Width, _Offset.Y + 1);
+                    }
+                    if (_Offset.Y + FullMapSizeInPixels < Height)
+                    {
+                        pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, _Offset.Y + FullMapSizeInPixels, Width, _Offset.Y + FullMapSizeInPixels);
+                    }
+                    pe.Graphics.Restore(gs);
+
                 }
-                if (_Offset.Y + FullMapSizeInPixels < Height)
+                catch (Exception ex) 
                 {
-                    pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, _Offset.Y + FullMapSizeInPixels, Width, _Offset.Y + FullMapSizeInPixels);
+                    DrawErrorString(pe.Graphics, $"Drawing error:\n{ex}");
                 }
-                pe.Graphics.Restore(gs);
             }
 
             base.OnPaint(pe);
@@ -469,7 +485,8 @@ namespace System.Windows.Forms
         {
             if (e.Button == MouseButtons.Left)
             {
-                _MouseCaptured = true;
+                IsDragging = true;
+                IsDraggingChaged?.Invoke(this, EventArgs.Empty);
                 _LastMouse.X = e.X;
                 _LastMouse.Y = e.Y;
             }
@@ -482,7 +499,8 @@ namespace System.Windows.Forms
         /// <param name="e">Event args.</param>
         protected override void OnMouseUp(MouseEventArgs e)
         {
-            _MouseCaptured = false;
+            IsDragging = false;
+            IsDraggingChaged?.Invoke(this, EventArgs.Empty);
             base.OnMouseUp(e);
         }
 
@@ -492,7 +510,7 @@ namespace System.Windows.Forms
         /// <param name="e">Event args.</param>
         protected override void OnMouseMove(MouseEventArgs e)
         {
-            if (_MouseCaptured)
+            if (IsDragging)
             {
                 _Offset.X += (e.X - _LastMouse.X);
                 _Offset.Y += (e.Y - _LastMouse.Y);
@@ -739,7 +757,7 @@ namespace System.Windows.Forms
                 {
                     //if (ZoomLevel < 3)
                     //{
-                        if (track.Style.Pen != null)
+                        if (track.Style.Pen != null && points.Length > 1)
                         {
                             Draw(gr, () => gr.DrawLines(track.Style.Pen, points));
                         }
@@ -778,6 +796,7 @@ namespace System.Windows.Forms
                     }
 
                     gp.CloseFigure();
+                    gp.Flatten();
 
                     var eventArgs = new DrawPolygonEventArgs()
                     {

@@ -7,7 +7,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types" 
     xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types" 
-    xmlns:с="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types" 
+    xmlns:q="clr-namespace:Astrarium.Plugins.Eclipses.Controls" 
+    xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
     x:Class="Astrarium.Plugins.Eclipses.SolarEclipseWindow" 
     mc:Ignorable="d" 
@@ -150,6 +151,8 @@
                             Polygons="{Binding Polygons}"
                             ThumbnailBackColor="#333333"
                             ThumbnailForeColor="#333333"
+                            IsMouseOverMap = "{Binding IsMouseOverMap, Mode=OneWayToSource}"
+                            IsDragging="{Binding IsMapDragging, Mode=OneWayToSource}"
                             TileImageAttributes="{Binding TileImageAttributes}"
                             OnClick="{Binding ClickOnMapCommand}"
                             Mouse="{Binding MapMouse, Mode=OneWayToSource}" Grid.ColumnSpan="2" Margin="0,0,0.4,25.4" Grid.RowSpan="2" />
@@ -168,61 +171,83 @@
 
                     <!-- Local circumstances table title -->
 
-                    <StackPanel Orientation="Vertical" Grid.Column="4" MinWidth="{Binding ElementName=LocalCircumstancesTable, Path=ActualWidth, UpdateSourceTrigger=PropertyChanged}">
-                        <TextBlock FontSize="18" Padding="2 0 2 0">Local Circumstances</TextBlock>
-                        <TextBlock Padding="2">Mouse coordinates</TextBlock>
+                    <ScrollViewer Grid.Column="4" 
+                        HorizontalScrollBarVisibility="Visible"
+                        VerticalScrollBarVisibility="Visible">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock FontSize="18" Padding="6 2">Local Circumstances</TextBlock>
+                            <TextBlock Padding="6 2" Text="{Binding ObserverLocationName, FallbackValue='Observer location name'}" />
+                            <TextBlock Padding="6 2" Text="{Binding ObserverLocationCoordinates, FallbackValue='Coordinates'}" />
+                            <TextBlock Padding="6 2" Text="{Binding LocalVisibilityDescription, FallbackValue='Local visibility description'}" MaxWidth="200" HorizontalAlignment="Left" TextTrimming="CharacterEllipsis" />
 
-                        <DataGrid 
-                            VerticalScrollBarVisibility="Auto"
-                            VerticalAlignment="Stretch"
-                            AutoGenerateColumns="False" 
-                            IsReadOnly="True"
-                            CanUserReorderColumns="False"
-                            CanUserSortColumns="False"
-                            GridLinesVisibility="All"
-                            BorderThickness="1"
-                            HeadersVisibility="None"
-                            Margin="0 2 0 2"
-                            Padding="2"
-                            RowHeaderWidth="0"
-                            ColumnHeaderHeight="32"
-                            RowHeight="24"
-                            ItemsSource="{Binding LocalCircumstancesTable}">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Binding="{Binding Name}"/>
-                                <DataGridTextColumn Binding="{Binding Value}"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                        
-                        <DataGrid 
-                            x:Name="LocalCircumstancesTable"
-                            VerticalScrollBarVisibility="Auto"
-                            VerticalAlignment="Stretch"
-                            AutoGenerateColumns="False" 
-                            IsReadOnly="True"
-                            CanUserReorderColumns="False"
-                            CanUserSortColumns="False"
-                            GridLinesVisibility="All"
-                            BorderThickness="1"
-                            Margin="0 2 0 2"
-                            Padding="2"
-                            RowHeaderWidth="0"
-                            ColumnHeaderHeight="32"
-                            RowHeight="24"
-                            ItemsSource="{Binding LocalContactsTable}">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Instant" Binding="{Binding Point}"/>
-                                <DataGridTextColumn Header="Time" FontFamily="Lucida Console" Binding="{Binding Time}"/>
-                                <DataGridTextColumn Header="Sun Altitude" FontFamily="Lucida Console" Binding="{Binding Altitude}"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
+                            <Expander Header="Local Details" Visibility="{Binding IsVisibleFromCurrentPlace, Mode=OneWay, Converter={s:BoolToVisibilityConverter}}"  IsExpanded="True">
+                                <StackPanel Orientation="Vertical">
+                                    <DataGrid               
+                                        VerticalScrollBarVisibility="Hidden"
+                                        AutoGenerateColumns="False" 
+                                        IsReadOnly="True"
+                                        CanUserReorderColumns="False"
+                                        CanUserSortColumns="False"
+                                        GridLinesVisibility="All"
+                                        BorderThickness="1"
+                                        HeadersVisibility="None"
+                                        Margin="0 2 0 2"
+                                        Padding="2"
+                                        RowHeaderWidth="0"
+                                        ColumnHeaderHeight="32"
+                                        RowHeight="24"
+                                        ItemsSource="{Binding LocalCircumstancesTable}">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Binding="{Binding Name}" />
+                                            <DataGridTextColumn Binding="{Binding Value}"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
 
-                        
+                                    <DataGrid 
+                                        x:Name="LocalCircumstancesTable"
+                                        VerticalScrollBarVisibility="Auto"
+                                        VerticalAlignment="Stretch"
+                                        AutoGenerateColumns="False" 
+                                        IsReadOnly="True"
+                                        CanUserReorderColumns="False"
+                                        CanUserSortColumns="False"
+                                        GridLinesVisibility="All"
+                                        BorderThickness="1"
+                                        Margin="0 2 0 2"
+                                        Padding="2"
+                                        RowHeaderWidth="0"
+                                        ColumnHeaderHeight="32"
+                                        RowHeight="24"
+                                        ItemsSource="{Binding LocalContactsTable}">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="Instant" Binding="{Binding Point}" />
+                                            <DataGridTextColumn Header="Time" FontFamily="Lucida Console" Binding="{Binding Time}"/>
+                                            <DataGridTextColumn Header="Solar Altitude" FontFamily="Lucida Console" Binding="{Binding Altitude}"/>
+                                            <DataGridTextColumn Header="Pos Angle" FontFamily="Lucida Console" Binding="{Binding PosAngle}"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </StackPanel>
+                            </Expander>
 
-                    </StackPanel>
-                   
+                            <Expander Header="Local View" Visibility="{Binding IsVisibleFromCurrentPlace, Mode=OneWay, Converter={s:BoolToVisibilityConverter}}" IsExpanded="True">
+
+                                <q:SolarEclipseLocalView 
+                                    BorderBrush="Red"
+                                    BorderThickness="1"
+                                    x:Name="LocalView"
+                                    HorizontalAlignment="Stretch" 
+                                    VerticalAlignment="Stretch"                                  
+                                    MinHeight="100"
+                                    
+                                    Circumstances="{Binding LocalCircumstances}"
+                                    />
+                            </Expander>
+                            
+                        </StackPanel>
+
+                    </ScrollViewer>
                     
-
+                    
                 </Grid>
             </TabItem>
             <TabItem Header="General Information">
