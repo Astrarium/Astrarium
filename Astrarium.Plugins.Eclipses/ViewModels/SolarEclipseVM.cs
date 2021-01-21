@@ -129,6 +129,15 @@ namespace Astrarium.Plugins.Eclipses
         }
 
         /// <summary>
+        /// Flag indicating dark mode is used
+        /// </summary>
+        public bool IsDarkMode
+        {
+            get => GetValue<bool>(nameof(IsDarkMode));
+            private set => SetValue(nameof(IsDarkMode), value);
+        }
+
+        /// <summary>
         /// Name of current observer location point
         /// </summary>
         public string ObserverLocationName
@@ -145,7 +154,7 @@ namespace Astrarium.Plugins.Eclipses
             get => GetValue<string>(nameof(ObserverLocationCoordinates));
             private set => SetValue(nameof(ObserverLocationCoordinates), value);
         }
-
+       
         /// <summary>
         /// String description of local visibility, like "Visible as partial", "Invisible" and etc.
         /// </summary>
@@ -164,12 +173,21 @@ namespace Astrarium.Plugins.Eclipses
             private set => SetValue(nameof(IsVisibleFromCurrentPlace), value);
         }
 
+        public float ChartZoomLevel
+        {
+            get => GetValue<float>(nameof(ChartZoomLevel));
+            set => SetValue(nameof(ChartZoomLevel), value);
+        }
+
         public ICommand PrevEclipseCommand => new Command(PrevEclipse);
         public ICommand NextEclipseCommand => new Command(NextEclipse);
         public ICommand PrevSarosCommand => new Command(PrevSaros);
         public ICommand NextSarosCommand => new Command(NextSaros);
         public ICommand ClickOnMapCommand => new Command(ClickOnMap);
         public ICommand ClickOnLinkCommand => new Command<double>(ClickOnLink);
+
+        public ICommand ChartZoomInCommand => new Command(ChartZoomIn);
+        public ICommand ChartZoomOutCommand => new Command(ChartZoomOut);
 
         private int currentSarosSeries = 0;
         private int selectedTabIndex = 0;
@@ -217,7 +235,6 @@ namespace Astrarium.Plugins.Eclipses
         private static readonly IEphemFormatter fmtMag = new Formatters.UnsignedDoubleFormatter(3, "");
         private static readonly IEphemFormatter fmtRatio = new Formatters.UnsignedDoubleFormatter(4, "");
         private static readonly IEphemFormatter fmtPathWidth = new Formatters.UnsignedDoubleFormatter(0, "km");
-
 
         #region Map styles
 
@@ -268,7 +285,9 @@ namespace Astrarium.Plugins.Eclipses
             this.settings = settings;
             this.settings.PropertyChanged += Settings_PropertyChanged;
             observerLocation = settings.Get<CrdsGeographical>("ObserverLocation");
-            
+
+            IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
+            ChartZoomLevel = 1;
             CacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "MapsCache");
 
             TileServers = new List<ITileServer>() 
@@ -292,6 +311,7 @@ namespace Astrarium.Plugins.Eclipses
         {
             if (e.PropertyName == "Schema")
             {
+                IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red; 
                 TileImageAttributes = GetImageAttributes();
             }
         }
@@ -342,6 +362,16 @@ namespace Astrarium.Plugins.Eclipses
         {
             JulianDay = jd - LunarEphem.SINODIC_PERIOD / 2;
             CalculateEclipse(next: true, saros: false);
+        }
+
+        private void ChartZoomIn()
+        {
+            ChartZoomLevel = Math.Min(3, ChartZoomLevel * 1.1f);
+        }
+
+        private void ChartZoomOut()
+        {
+            ChartZoomLevel = Math.Max(1.0f / 3f, ChartZoomLevel / 1.1f);
         }
 
         private ImageAttributes GetImageAttributes()
@@ -637,7 +667,7 @@ namespace Astrarium.Plugins.Eclipses
             });
 
             var local = SolarEclipses.LocalCircumstances(be, pos);
-            if (!local.IsInvisible)
+            //if (!local.IsInvisible)
             {
                 var contacts = new List<LocalContactsTableItem>();
                 contacts.Add(new LocalContactsTableItem("C1: Beginning of partial phase", local.PartialBegin));
@@ -647,10 +677,10 @@ namespace Astrarium.Plugins.Eclipses
                 contacts.Add(new LocalContactsTableItem("C4: End of partial phase", local.PartialEnd));
 
                 var details = new List<NameValueTableItem>();
-                details.Add(new NameValueTableItem("Maximal magnitude", fmtMag.Format(local.MaxMagnitude)));
-                details.Add(new NameValueTableItem("Moon/Sun diameter ratio", fmtRatio.Format(local.MoonToSunDiameterRatio)));
-                details.Add(new NameValueTableItem("Partial phase duration", double.IsNaN(local.PartialDuration) ? "" : fmtTime.Format(local.PartialDuration)));
-                details.Add(new NameValueTableItem("Total phase duration", double.IsNaN(local.TotalDuration) ? "" : fmtTime.Format(local.TotalDuration)));
+                details.Add(new NameValueTableItem("Maximal magnitude", local.MaxMagnitude > 0 ? fmtMag.Format(local.MaxMagnitude) : ""));
+                details.Add(new NameValueTableItem("Moon/Sun diameter ratio", local.MoonToSunDiameterRatio > 0 ? fmtRatio.Format(local.MoonToSunDiameterRatio) : ""));
+                details.Add(new NameValueTableItem("Partial phase duration", !double.IsNaN(local.PartialDuration) && local.PartialDuration > 0 ? fmtTime.Format(local.PartialDuration) : ""));
+                details.Add(new NameValueTableItem("Total phase duration", !double.IsNaN(local.TotalDuration) && local.TotalDuration > 0 ? fmtTime.Format(local.TotalDuration) : ""));
 
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {

@@ -30,5 +30,22 @@ namespace Astrarium.Plugins.Eclipses
             scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - e.Delta);
             e.Handled = true;
         }
+
+        private void RightPanel_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            AdjustRightPanelControls();
+        }
+
+        private void RightPanel_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            AdjustRightPanelControls();
+        }
+
+        private void AdjustRightPanelControls()
+        {
+            double width = RightPanel.ActualWidth - (RightPanel.ComputedVerticalScrollBarVisibility == Visibility.Visible ? 17 : 0);
+            RightPanelStack.Width = width;
+            RightPanelFooter.Width = width;
+        }
     }
 }

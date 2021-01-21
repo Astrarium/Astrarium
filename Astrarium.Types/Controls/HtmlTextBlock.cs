@@ -1,30 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
-using System.Windows.Markup;
-using System.Xml;
 
 namespace Astrarium.Types.Controls
 {
     public class HtmlTextBlock : TextBlock
     {
         public static readonly DependencyProperty FormattedTextProperty = DependencyProperty.RegisterAttached("FormattedText", typeof(string), typeof(HtmlTextBlock), new FrameworkPropertyMetadata(string.Empty, FrameworkPropertyMetadataOptions.AffectsMeasure, FormattedTextPropertyChanged));
-        
-        public static void SetFormattedText(DependencyObject textBlock, string value) { 
-            textBlock.SetValue(FormattedTextProperty, value); 
+
+        public static void SetFormattedText(DependencyObject textBlock, string value)
+        {
+            textBlock.SetValue(FormattedTextProperty, value);
         }
 
         public static string GetFormattedText(DependencyObject textBlock)
-        { 
-            return (string)textBlock.GetValue(FormattedTextProperty); 
+        {
+            return (string)textBlock.GetValue(FormattedTextProperty);
         }
 
         static void FormattedTextPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -42,7 +36,8 @@ namespace Astrarium.Types.Controls
 
                 foreach (Match m2 in m1)
                 {
-                    textBlock.Inlines.Add(value.Substring(lastIndex, m2.Index - lastIndex));
+                    var tb = new TextBlock(new Run(value.Substring(lastIndex, m2.Index - lastIndex))) { FontSize = textBlock.FontSize };
+                    textBlock.Inlines.Add(tb);
 
                     string fullLinkWithTags = m2.Groups[1].Value;
 
@@ -56,17 +51,20 @@ namespace Astrarium.Types.Controls
                         link.Inlines.Add(innerText);
                         lastIndex = m2.Index + m2.Length;
                         textBlock.Inlines.Add(link);
-                    }                    
+                    }
                 }
 
                 if (lastIndex <= value.Length - 1)
                 {
-                    textBlock.Inlines.Add(value.Substring(lastIndex));
+                    var tb = new TextBlock(new Run(value.Substring(lastIndex))) { FontSize = textBlock.FontSize };
+                    textBlock.Inlines.Add(tb);
                 }
             }
             else
             {
-                textBlock.Inlines.Add(value);
+                var tb = new TextBlock(new Run(value)) { FontSize = textBlock.FontSize };
+
+                textBlock.Inlines.Add(tb);
             }
         }
 

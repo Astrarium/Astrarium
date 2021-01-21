@@ -86,6 +86,7 @@ namespace System.Windows.Forms
 
                 SetZoomLevel(value, new Drawing.Point(Width / 2, Height / 2));
                 CenterChanged?.Invoke(this, EventArgs.Empty);
+                
             }
         }
 
@@ -366,6 +367,11 @@ namespace System.Windows.Forms
         /// Raised when <see cref="IsDragging"/> property value is changed.
         /// </summary>
         public event EventHandler<EventArgs> IsDraggingChaged;
+
+        /// <summary>
+        /// Raised when <see cref="ZoomLevel"/> property value is changed.
+        /// </summary>
+        public event EventHandler<EventArgs> ZoomLevelChaged;
 
         /// <summary>
         /// Raised when <see cref="TileServer"/> property value is changed.
@@ -943,6 +949,8 @@ namespace System.Windows.Forms
 
                 _Offset.X = (int)(_Offset.X % FullMapSizeInPixels);                
                 Invalidate();
+
+                ZoomLevelChaged?.Invoke(this, EventArgs.Empty);
             }
         }
 

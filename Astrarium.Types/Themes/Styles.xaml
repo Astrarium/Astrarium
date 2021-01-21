@@ -1229,7 +1229,7 @@
                         </Trigger>
                         <Trigger Property="IsPressed" Value="true">
                             <Setter Property="Stroke" TargetName="Border" Value="{StaticResource BrushHighlight}" />
-                            <!--<Setter Property="StrokeThickness" TargetName="Border" Value="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=BorderThickness}" />-->
+                            <Setter Property="StrokeThickness" TargetName="Border" Value="1" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="true">
                             <Setter Property="Background" Value="{StaticResource BrushControlDarkBackground}"/>
@@ -1283,7 +1283,7 @@
         <Setter Property="SnapsToDevicePixels" Value="true" />
         <Setter Property="FocusVisualStyle" Value="{StaticResource ButtonFocusVisual}"/>
         <Setter Property="Background" Value="{StaticResource BrushControlBackground}"/>
-        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BrushControlBackground}"/>
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Foreground" Value="{StaticResource BrushForeground}"/>
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
@@ -1294,6 +1294,8 @@
                     <Grid Margin="1">
                         <Rectangle
                             x:Name="Border"
+                            StrokeThickness="{TemplateBinding BorderThickness}"
+                            Stroke="{TemplateBinding BorderBrush}"
                             Fill="{TemplateBinding Background}" 
                             SnapsToDevicePixels="True" />
                         <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
@@ -1315,8 +1317,8 @@
                             <Setter Property="Foreground" Value="{StaticResource BrushForeground}"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="true">
+                            <Setter Property="Fill" TargetName="Border" Value="Transparent" />
                             <Setter Property="Stroke" TargetName="Border" Value="{StaticResource BrushHighlight}" />
-                            <Setter Property="StrokeThickness" TargetName="Border" Value="0" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="true">
                             <Setter Property="Background" Value="{StaticResource BrushControlLightBackground}"/>
@@ -3357,7 +3359,7 @@
 
     <Style TargetType="{x:Type Expander}">
         <Setter Property="MinHeight" Value="21" />
-        <Setter Property="Background" Value="{StaticResource BrushControlDarkBackground}" />
+        <Setter Property="Background" Value="{StaticResource BrushWindowBackground}" />
         <Setter Property="BorderBrush" Value="{StaticResource BrushControlBackground}" />
         <Setter Property="Template">
             <Setter.Value>
@@ -3396,6 +3398,93 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+
+    <Style x:Key="SliderThumb" TargetType="Thumb">
+        <Setter Property="SnapsToDevicePixels" Value="true" />
+        <Setter Property="OverridesDefaultStyle" Value="true" />
+        <Setter Property="Background" Value="{StaticResource BrushControlBackground}" />
+        <Setter Property="Foreground" Value="{StaticResource BrushControlLightBackground}" />
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Thumb">
+                    <Ellipse x:Name="Ellipse" Height="10" Width="10" Fill="{TemplateBinding Foreground}"></Ellipse>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter TargetName="Ellipse" Property="Fill" Value="{StaticResource BrushHighlight}"></Setter>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="SliderRepeatButtonEmpty" TargetType="RepeatButton">
+        <Setter Property="SnapsToDevicePixels" Value="true" />
+        <Setter Property="OverridesDefaultStyle" Value="true" />
+        <Setter Property="IsTabStop" Value="false" />
+        <Setter Property="Focusable" Value="false" />
+        <Setter Property="Background" Value="{StaticResource BrushControlBackground}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RepeatButton">
+                    <c:BorderFix BorderThickness="1" BorderBrush="{TemplateBinding Background}" Opacity="0.75" Background="{TemplateBinding Background}" Height="3"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="SliderRepeatButtonFilled" TargetType="RepeatButton">
+        <Setter Property="SnapsToDevicePixels" Value="true" />
+        <Setter Property="OverridesDefaultStyle" Value="true" />
+        <Setter Property="Background" Value="{StaticResource BrushControlLightBackground}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RepeatButton">
+                    <c:BorderFix SnapsToDevicePixels="True" Background="{TemplateBinding Background}" BorderThickness="1" BorderBrush="{TemplateBinding Background}" Height="3"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type Slider}">
+        <Setter Property="Focusable" Value="False"/>
+        <Setter Property="Height" Value="16" />
+        <Setter Property="SnapsToDevicePixels" Value="true" />
+        <Setter Property="OverridesDefaultStyle" Value="true" />
+        <Setter Property="Padding" Value="0" />
+        <Style.Triggers>
+            <Trigger Property="Orientation" Value="Horizontal">
+                <Setter Property="MinHeight" Value="16" />
+                <Setter Property="MinWidth" Value="32" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Slider">
+                            <Grid Margin="{TemplateBinding Padding}" Height="{TemplateBinding Height}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" MinHeight="{TemplateBinding MinHeight}" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Track Grid.Row="1" x:Name="PART_Track"   >
+                                    <Track.DecreaseRepeatButton>
+                                        <RepeatButton Style="{StaticResource SliderRepeatButtonFilled}" Command="Slider.DecreaseLarge" />
+                                    </Track.DecreaseRepeatButton>
+                                    <Track.Thumb>
+                                        <Thumb Style="{StaticResource SliderThumb}"  />
+                                    </Track.Thumb>
+                                    <Track.IncreaseRepeatButton>
+                                        <RepeatButton Style="{StaticResource SliderRepeatButtonEmpty}" Command="Slider.IncreaseLarge" />
+                                    </Track.IncreaseRepeatButton>
+                                </Track>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
 </ResourceDictionary>

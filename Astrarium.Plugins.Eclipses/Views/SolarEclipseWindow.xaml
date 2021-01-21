@@ -15,7 +15,7 @@
     Title="Solar Eclipses"
     Height="350" 
     Width="600" 
-    MinHeight="350" MinWidth="600" 
+    MinHeight="350" MinWidth="1000" 
     Style="{StaticResource {x:Type Window}}"     
     WindowStartupLocation="CenterOwner">
 
@@ -66,7 +66,6 @@
                     </Path.LayoutTransform>
                 </Path>
             </Grid>
-
             <Grid x:Key="ImageNextEclipse" x:Shared="False">
                 <Path HorizontalAlignment="Right" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="20" Height="20" Stretch="Uniform" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
                     <Path.Data>
@@ -95,6 +94,90 @@
                     </Path.LayoutTransform>
                 </Path>
             </Grid>
+            
+            <Grid x:Key="ImageZoomIn" x:Shared="False" >
+                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="20" Height="20" Stretch="UniformToFill" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
+                    <Path.Data>
+                        <StreamGeometry>
+                            F1 M96,120z M0,0z M89.4,83.8L71.1,65.5C74.8,60.6 77,54.6 77,48 77,32 64,19 48,19 32,19 19,32 19,48 19,64 32,77 48,77 54.6,77 60.6,74.8 65.5,71.1L83.8,89.4 89.4,83.8z M27,48C27,36.4 36.4,27 48,27 59.6,27 69,36.4 69,48 69,59.6 59.6,69 48,69 36.4,69 27,59.6 27,48z
+                        </StreamGeometry>
+                    </Path.Data>
+                </Path>
+                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="20" Height="20" Stretch="UniformToFill" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
+                    <Path.Data>
+                        <StreamGeometry>
+                            F1 M96,120z M0,0z M52,37L52,37 44,37 44,44 37,44 37,52 44,52 44,59 52,59 52,52 59,52 59,44 52,44z
+                        </StreamGeometry>
+                    </Path.Data>
+                </Path>
+            </Grid>
+            <Grid x:Key="ImageZoomOut" x:Shared="False" >
+                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="20" Height="20" Stretch="UniformToFill" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
+                    <Path.Data>
+                        <StreamGeometry>
+                            F1 M96,96z M0,0z M89.4,83.8L71.1,65.5C74.8,60.6 77,54.6 77,48 77,32 64,19 48,19 32,19 19,32 19,48 19,64 32,77 48,77 54.6,77 60.6,74.8 65.5,71.1L83.8,89.4 89.4,83.8z M27,48C27,36.4 36.4,27 48,27 59.6,27 69,36.4 69,48 69,59.6 59.6,69 48,69 36.4,69 27,59.6 27,48z
+                        </StreamGeometry>
+                    </Path.Data>
+                </Path>
+                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="20" Height="20" Stretch="None" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
+                    <Path.Data>
+                        <RectangleGeometry RadiusX="0.5" RadiusY="0.5" Rect="8,9,4,2" />
+                    </Path.Data>
+                </Path>
+            </Grid>
+
+            <Grid x:Key="ImageChartLabels" x:Shared="False" Width="16" Margin="0 3 0 0" Height="20">
+                <Path Clip="M0,0 V125 H100 V0 H0 Z" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform" SnapsToDevicePixels="True" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ToggleButton}, Path=Foreground}">
+                    <Path.Data>
+                        <StreamGeometry>
+                            F1 M100,125z M0,0z M7.7,17.9L92.4,17.9C95.2,17.9 97.6,15.6 97.6,12.7 97.6,9.8 95.3,7.5 92.4,7.5L7.7,7.5C4.9,7.5 2.5,9.8 2.5,12.7 2.5,15.6 4.8,17.9 7.7,17.9z
+                        </StreamGeometry>
+                    </Path.Data>
+                </Path>
+                <Path Clip="M0,0 V125 H100 V0 H0 Z" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform" SnapsToDevicePixels="True" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ToggleButton}, Path=Foreground}">
+                    <Path.Data>
+                        <StreamGeometry>
+                            F1 M100,125z M0,0z M92.3,32.4L7.7,32.4C4.9,32.4 2.5,34.7 2.5,37.6 2.5,40.4 4.8,42.8 7.7,42.8L92.4,42.8C95.2,42.8 97.6,40.5 97.6,37.6 97.5,34.7 95.2,32.4 92.3,32.4z
+                        </StreamGeometry>
+                    </Path.Data>
+                </Path>
+                <Path Clip="M0,0 V125 H100 V0 H0 Z" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform" SnapsToDevicePixels="True" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ToggleButton}, Path=Foreground}">
+                    <Path.Data>
+                        <StreamGeometry>
+                            F1 M100,125z M0,0z M92.3,57.3L7.7,57.3C4.9,57.3 2.5,59.6 2.5,62.5 2.5,65.3 4.8,67.7 7.7,67.7L92.4,67.7C95.2,67.7 97.6,65.4 97.6,62.5 97.5,59.6 95.2,57.3 92.3,57.3z
+                        </StreamGeometry>
+                    </Path.Data>
+                </Path>
+                <Path Clip="M0,0 V125 H100 V0 H0 Z" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform" SnapsToDevicePixels="True" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ToggleButton}, Path=Foreground}">
+                    <Path.Data>
+                        <StreamGeometry>
+                                F1 M100,125z M0,0z M50,82.1L7.7,82.1C4.9,82.1 2.5,84.4 2.5,87.3 2.5,90.2 4.8,92.5 7.7,92.5L50,92.5C52.8,92.5 55.2,90.2 55.2,87.3 55.2,84.4 52.8,82.1 50,82.1z
+                            </StreamGeometry>
+                    </Path.Data>
+                </Path>
+            </Grid>
+
+            <Grid x:Key="ImageChartCircles" x:Shared="False">
+                <Path Clip="M0,0 V60 H48 V0 H0 Z" StrokeThickness="1" Stroke="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ToggleButton}, Path=Foreground}" SnapsToDevicePixels="True" Stretch="Uniform" Margin="1 4 1 1" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ToggleButton}, Path=Foreground}">
+                    <Path.Data>
+                        <PathGeometry>
+                            F1 M48,60z M0,0z M32.71094,16.82623A15.28908,15.28908,0,1,0,15.28857,32.78259A15.28908,15.28908,0,1,0,32.71094,16.82623z M4.15479,17.65479A13.29223,13.29223,0,0,1,30.7027,16.66272C30.6499,16.66217,30.59882,16.65479,30.5459,16.65479A15.30981,15.30981,0,0,0,15.3069,30.76447A13.3086,13.3086,0,0,1,4.15479,17.65479z M30.70184,18.66266A13.30749,13.30749,0,0,1,17.4541,30.9541C17.40131,30.9541,17.35034,30.94678,17.29767,30.94617A13.30754,13.30754,0,0,1,30.5459,18.65479C30.59857,18.65479,30.64935,18.66205,30.70184,18.66266z M30.5459,45.25342A13.30731,13.30731,0,0,1,17.29681,32.94611C17.34981,32.94666,17.401,32.95411,17.4541,32.95411A15.30971,15.30971,0,0,0,32.69263,18.84436A13.29116,13.29116,0,0,1,30.5459,45.25342z
+                        </PathGeometry>
+                    </Path.Data>
+                </Path>
+            </Grid>
+
+            <Grid x:Key="ImageChartMoonOutline" x:Shared="False">
+                <Path Clip="M0,0 V125 H100 V0 H0 Z" SnapsToDevicePixels="True" Stretch="UniformToFill" Margin="4" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ToggleButton}, Path=Foreground}">
+                    <Path.Data>
+                        <PathGeometry>
+                            F1 M100,125z M0,0z M50,5C25.187,5 5,25.187 5,50.005 5,74.813 25.187,95 50,95 74.813,95 95,74.813 95,50.005 95,25.187 74.813,5 50,5z M50,63.456C42.581,63.456 36.544,57.418 36.544,50.005 36.544,42.581 42.582,36.544 50,36.544 57.418,36.544 63.456,42.582 63.456,50.005 63.456,57.419 57.419,63.456 50,63.456z
+                        </PathGeometry>
+                    </Path.Data>
+                </Path>
+            </Grid>
+
+
             <c:TextToFlowDocumentConverter x:Key="TextToFlowDocumentConverter" Markdown="{StaticResource Markdown}" />
 
             <Style x:Key="RadioTab" TargetType="{x:Type RadioButton}">
@@ -183,6 +266,7 @@
                         </Grid.RowDefinitions>
 
                         <c:MapControl
+                            x:Name="Map"
                             Grid.Row="0"
                             BackColor="#333333" 
                             TileServer="{Binding TileServer, Mode=TwoWay}" 
@@ -198,11 +282,19 @@
                             OnClick="{Binding ClickOnMapCommand}"
                             Mouse="{Binding MapMouse, Mode=OneWayToSource}" Grid.ColumnSpan="2" Margin="0,0,0.4,25.4" Grid.RowSpan="2" />
 
-                        <DockPanel Margin="2,4.2,2.4,4.4" Grid.Row="1" Grid.ColumnSpan="2">
-                            <ComboBox Padding="2 0" Margin="0" Width="200" Height="18" ItemsSource="{Binding TileServers, Mode=OneTime}" DisplayMemberPath="Name" SelectedItem="{Binding TileServer}" />
-                            <TextBlock Padding="2 0" Text="{Binding MapMouse, FallbackValue='Coordinates'}" IsEnabled="False" VerticalAlignment="Center" />
-                            <c:HtmlTextBlock IsEnabled="False" Foreground="{StaticResource BrushControlLightBackground}" VerticalAlignment="Center" HorizontalAlignment="Right" Padding="2 0 4 0" FontSize="12" FormattedText="{Binding TileServer.AttributionText, FallbackValue='AttributionText'}" />
-                        </DockPanel>
+                        <Grid Margin="2,4.2,2.4,4.4" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Stretch">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ComboBox Grid.Column="0" Padding="2 0" Margin="0" Width="200" Height="18" ItemsSource="{Binding TileServers, Mode=OneTime}" DisplayMemberPath="Name" SelectedItem="{Binding TileServer}" />
+                            <Slider Padding="16 0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Column="1" Orientation="Horizontal" 
+                                Minimum="{Binding ElementName=Map, Path=MinZoomLevel, Mode=OneWay}"
+                                Maximum="{Binding ElementName=Map, Path=MaxZoomLevel, Mode=OneWay}"
+                                Value="{Binding ElementName=Map, Path=ZoomLevel, Mode=TwoWay}" />
+                            <c:HtmlTextBlock Grid.Column="2" Foreground="{StaticResource BrushControlLightBackground}" VerticalAlignment="Center" HorizontalAlignment="Right" Padding="2 0 4 0" FontSize="12" FormattedText="{Binding TileServer.AttributionText, FallbackValue='AttributionText'}" />
+                        </Grid>
                     </Grid>
                     <GridSplitter 
                         Grid.Column="3" 
@@ -213,17 +305,19 @@
                     <!-- Local circumstances table title -->
 
                     <ScrollViewer Grid.Column="4"
-                        
+                        x:Name="RightPanel"
+                        SizeChanged="RightPanel_SizeChanged"
+                        ScrollChanged="RightPanel_ScrollChanged"
                         HorizontalScrollBarVisibility="Auto"
                         VerticalScrollBarVisibility="Auto">
-                        <StackPanel  Orientation="Vertical">
+                        <StackPanel x:Name="RightPanelStack" Orientation="Vertical">
                             <TextBlock FontSize="18" Padding="6 2">Local Circumstances</TextBlock>
                             <TextBlock Padding="6 2" Text="{Binding ObserverLocationName, FallbackValue='Observer location name'}" />
                             <TextBlock Padding="6 2" Text="{Binding ObserverLocationCoordinates, FallbackValue='Coordinates'}" />
-                            <TextBlock Padding="6 2" Text="{Binding LocalVisibilityDescription, FallbackValue='Local visibility description'}" HorizontalAlignment="Left" />
+                            <TextBlock Padding="6 2" TextTrimming="CharacterEllipsis" Width="{Binding ElementName=RightPanel, Path=ActualWidth}" Text="{Binding LocalVisibilityDescription, FallbackValue='Local visibility description'}" HorizontalAlignment="Left" />
 
-                            <Expander Margin="0 6 0 4" Header="Local Details" Visibility="{Binding IsVisibleFromCurrentPlace, Mode=OneWay, Converter={s:BoolToVisibilityConverter}}"  IsExpanded="True">
-                                <StackPanel Orientation="Vertical">
+                            <Expander Margin="0 6 0 4" Header="Local Details" IsExpanded="True">
+                                <StackPanel Orientation="Vertical" IsEnabled="{Binding IsVisibleFromCurrentPlace, Mode=OneWay}">
                                     <DataGrid               
                                         VerticalScrollBarVisibility="Hidden"
                                         AutoGenerateColumns="False" 
@@ -272,15 +366,16 @@
                                 </StackPanel>
                             </Expander>
 
-                            <Expander Header="Local View" Visibility="{Binding IsVisibleFromCurrentPlace, Mode=OneWay, Converter={s:BoolToVisibilityConverter}}" IsExpanded="True">
-                                <StackPanel Orientation="Vertical">
+                            <Expander Header="Local View" IsExpanded="True" >
+                                <StackPanel  Orientation="Vertical" IsEnabled="{Binding IsVisibleFromCurrentPlace, Mode=OneWay}">
+                                    <!-- Chart header -->
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-
+                                        <!-- Eclipse contacts toggler -->
                                         <StackPanel Margin="2" Grid.Column="0" HorizontalAlignment="Left" SnapsToDevicePixels="True" Orientation="Horizontal">
                                             <RadioButton Content="C1" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C1}}" Style="{StaticResource ResourceKey=RadioTab}" />
                                             <RadioButton Content="C2" IsEnabled="{Binding LocalCircumstances.TotalBegin, Converter={s:NotNullToBoolConverter}}" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C2}}" Style="{StaticResource ResourceKey=RadioTab}" />
@@ -288,24 +383,45 @@
                                             <RadioButton Content="C3" IsEnabled="{Binding LocalCircumstances.TotalEnd, Converter={s:NotNullToBoolConverter}}" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C3}}" Style="{StaticResource ResourceKey=RadioTab}" />
                                             <RadioButton Content="C4" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C4}}" Style="{StaticResource ResourceKey=RadioTab}" />
                                         </StackPanel>
-
-                                        <TextBlock Margin="20 0 3 0" Grid.Column="1" VerticalAlignment="Center" Text="Orientation:" />
-                                        <ComboBox Grid.Column="2"
-                                            Margin="2"
-                                            ItemsSource="{Binding ElementName=Chart, Path=Orientation, Converter={s:EnumValueToEnumCollectionConverter}}"
-                                            SelectedValue="{Binding ElementName=Chart, Path=Orientation}">
-                                        </ComboBox>
-
+                                        <!-- Chart orientation toggler -->
+                                        <StackPanel Margin="2" Grid.Column="2" HorizontalAlignment="Right" SnapsToDevicePixels="True" Orientation="Horizontal">
+                                            <RadioButton Content="Z" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartOrientation.Zenithal}}" Style="{StaticResource ResourceKey=RadioTab}" />
+                                            <RadioButton Content="N" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartOrientation.Equatorial}}" Style="{StaticResource ResourceKey=RadioTab}" />
+                                        </StackPanel>
                                     </Grid>
 
+                                    <!-- Local circumstances chart -->
                                     <q:SolarEclipseChartControl 
                                         x:Name="Chart"
                                         HorizontalAlignment="Stretch" 
                                         VerticalAlignment="Stretch"                                  
                                         MinHeight="200"
+                                        DarkMode="{Binding IsDarkMode, Mode=OneWay}"
+                                        ZoomLevel="{Binding ChartZoomLevel}"
                                         Circumstances="{Binding LocalCircumstances}" />
+
+                                    <!-- Chart footer -->
+                                    <DockPanel Margin="0" HorizontalAlignment="Stretch">
+                                        <!-- Chart options togglers -->
+                                        <ToggleButton IsChecked="{Binding ElementName=Chart, Path=ShowLabels}" ToolTip="Labels" Width="24" Height="24" Content="{StaticResource ImageChartLabels}" />
+                                        <ToggleButton IsChecked="{Binding ElementName=Chart, Path=ShowContactCircles}" ToolTip="Contact Circles" Width="24" Height="24" Content="{StaticResource ImageChartCircles}" />
+                                        <ToggleButton IsChecked="{Binding ElementName=Chart, Path=ShowMoonOutlineOnly}" ToolTip="Show Moon as outline" Width="24" Height="24" Content="{StaticResource ImageChartMoonOutline}" />
+                                        <!-- Chart zoom buttons -->
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <Button Command="{Binding ChartZoomInCommand}" Content="{StaticResource ImageZoomIn}" ToolTip="Zoom in" Height="22" Width="22" Margin="2" Padding="-3 -1 0 0" />
+                                            <Button Command="{Binding ChartZoomOutCommand}" Content="{StaticResource ImageZoomOut}" ToolTip="Zoom out" Height="22" Width="22" Margin="2" Padding="-3 -1 0 0" />
+                                        </StackPanel>
+                                    </DockPanel>
                                 </StackPanel>
                             </Expander>
+
+                            <StackPanel x:Name="RightPanelFooter" Orientation="Vertical">
+                                <TextBlock IsEnabled="False" Padding="4" FontSize="12" TextWrapping="WrapWithOverflow" HorizontalAlignment="Stretch" Text="Double click on map to lock the desired point. Double click on map to lock the desired point. Double click on map to lock the desired point." />
+                            </StackPanel>
+
+                          
+
+
                         </StackPanel>
                     </ScrollViewer>
 

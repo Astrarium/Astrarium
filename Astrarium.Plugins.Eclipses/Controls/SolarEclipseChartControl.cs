@@ -1,6 +1,7 @@
 ﻿using Astrarium.Algorithms;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,10 +21,25 @@ namespace Astrarium.Plugins.Eclipses.Controls
             DependencyProperty.Register(nameof(Circumstances), typeof(SolarEclipseLocalCircumstances), typeof(SolarEclipseChartControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
 
         public static readonly DependencyProperty OrientationProperty =
-           DependencyProperty.Register(nameof(Orientation), typeof(SolarEclipseChartOrientation), typeof(SolarEclipseChartControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = true, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, DefaultValue = SolarEclipseChartOrientation.Equatorial });
+           DependencyProperty.Register(nameof(Orientation), typeof(SolarEclipseChartOrientation), typeof(SolarEclipseChartControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = true, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, DefaultValue = SolarEclipseChartOrientation.Zenithal });
 
         public static readonly DependencyProperty ContactProperty =
            DependencyProperty.Register(nameof(Contact), typeof(SolarEclipseChartContact), typeof(SolarEclipseChartControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = true, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, DefaultValue = SolarEclipseChartContact.Max });
+
+        public static readonly DependencyProperty ZoomLevelProperty =
+           DependencyProperty.Register(nameof(ZoomLevel), typeof(float), typeof(SolarEclipseChartControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = true, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, DefaultValue = (float)1 });
+
+        public static readonly DependencyProperty ShowLabelsProperty =
+           DependencyProperty.Register(nameof(ShowLabels), typeof(bool), typeof(SolarEclipseChartControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = true, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, DefaultValue = true });
+
+        public static readonly DependencyProperty ShowContactCirclesProperty =
+           DependencyProperty.Register(nameof(ShowContactCircles), typeof(bool), typeof(SolarEclipseChartControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = true, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, DefaultValue = true });
+
+        public static readonly DependencyProperty ShowMoonOutlineOnlyProperty =
+           DependencyProperty.Register(nameof(ShowMoonOutlineOnly), typeof(bool), typeof(SolarEclipseChartControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = true, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, DefaultValue = false });
+
+        public static readonly DependencyProperty DarkModeProperty =
+           DependencyProperty.Register(nameof(DarkMode), typeof(bool), typeof(SolarEclipseChartControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, DefaultValue = false });
 
         /// <summary>
         /// Local curcumstances of the eclipse
@@ -52,57 +68,122 @@ namespace Astrarium.Plugins.Eclipses.Controls
             set => SetValue(ContactProperty, value);
         }
 
+        /// <summary>
+        /// Zoom level 
+        /// </summary>
+        public float ZoomLevel
+        {
+            get => (float)GetValue(ZoomLevelProperty);
+            set => SetValue(ZoomLevelProperty, value);
+        }
+
+        /// <summary>
+        /// Display labels on the chart
+        /// </summary>
+        public bool ShowLabels
+        {
+            get => (bool)GetValue(ShowLabelsProperty);
+            set => SetValue(ShowLabelsProperty, value);
+        }
+
+        /// <summary>
+        /// If flag is set, contact circles are shown
+        /// </summary>
+        public bool ShowContactCircles
+        {
+            get => (bool)GetValue(ShowContactCirclesProperty);
+            set => SetValue(ShowContactCirclesProperty, value);
+        }
+
+        /// <summary>
+        /// If set, Moon displayed as oultine circle without filling
+        /// </summary>
+        public bool ShowMoonOutlineOnly
+        {
+            get => (bool)GetValue(ShowMoonOutlineOnlyProperty);
+            set => SetValue(ShowMoonOutlineOnlyProperty, value);
+        }
+
+        /// <summary>
+        /// If set, dark mode is used
+        /// </summary>
+        public bool DarkMode
+        {
+            get => (bool)GetValue(DarkModeProperty);
+            set => SetValue(DarkModeProperty, value);
+        }
+
+        private Typeface font = new Typeface(new FontFamily("#Noto Sans"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
+
+        private Brush[] foregroundBrush = new Brush[] { Brushes.Gray, Brushes.DarkRed };
+        private Brush ForegroundBrush => foregroundBrush[DarkMode ? 1 : 0];
+
+        private Brush[] moonBrush = new Brush[] { Brushes.Blue, Brushes.DarkRed };
+        private Brush MoonBrush => moonBrush[DarkMode ? 1 : 0];
+
+        private Brush[] sunBrush = new Brush[] { Brushes.Yellow, Brushes.Red };
+        private Brush SunBrush => sunBrush[DarkMode ? 1 : 0];
+
+        private Brush[] horizonBrush = new Brush[] { Brushes.Green, Brushes.DarkRed };
+        private Brush HorizonBrush => horizonBrush[DarkMode ? 1 : 0];
+
         protected override void OnRender(DrawingContext ctx)
         {
+            var pSun = new Point(ActualWidth / 2, ActualHeight / 2);
+            
             if (Circumstances != null && !Circumstances.IsInvisible)
             {
-                var pSun = new Point(ActualWidth / 2, ActualHeight / 2);
-
-                double solarRadius = Math.Min(ActualWidth, ActualHeight) / 6;
+                double solarRadius = ZoomLevel * Math.Min(ActualWidth, ActualHeight) / 6;
                 double lunarRadius = solarRadius * Circumstances.MoonToSunDiameterRatio;
 
-
-
-                /*
-                FontFamily courier = new FontFamily("Courier New");
-
-                Typeface courierTypeface = new Typeface(courier, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
-
-                FormattedText ft2 = new FormattedText(dist.ToString("F5"),
-                                                     System.Globalization.CultureInfo.CurrentCulture,
-                                                     FlowDirection.LeftToRight,
-                                                     courierTypeface,
-                                                     14.0,
-                                                     Brushes.White);
-
-                drawingContext.DrawText(ft2, new Point(0, 0));
-*/
-
-                ctx.DrawEllipse(Brushes.Yellow, null, pSun, solarRadius, solarRadius);
-
-
-                // C1
+                var bounds = new Rect(0, 0, ActualWidth, ActualHeight);
+                ctx.PushClip(new RectangleGeometry(bounds));
+                ctx.DrawEllipse(SunBrush, null, pSun, solarRadius, solarRadius);
+               
+                Point pC1;
                 {
                     double dist = solarRadius + lunarRadius;
                     double angle = GetOrientationAngle(Circumstances.PartialBegin);
-                    var pMoon = GetMoonCoordinates(pSun, angle, dist);
-                    ctx.DrawEllipse(null, new Pen(Brushes.Gray, 1), pMoon, lunarRadius, lunarRadius);
+                    pC1 = GetMoonCoordinates(pSun, angle, dist);
                 }
 
-                // Max
+                Point pC2;
+                {
+                    double dist = Math.Abs(solarRadius - lunarRadius);
+                    double angle = GetOrientationAngle(Circumstances.TotalBegin);
+                    pC2 = GetMoonCoordinates(pSun, angle, dist);
+                }
+
+                Point pMax;
                 {
                     double dist = (solarRadius + lunarRadius) - Circumstances.MaxMagnitude * (2 * solarRadius);
                     double angle = GetOrientationAngle(Circumstances.Maximum);
-                    var pMoon = GetMoonCoordinates(pSun, angle, dist);
-                    ctx.DrawEllipse(null, new Pen(Brushes.Gray, 1), pMoon, lunarRadius, lunarRadius);
+                    pMax = GetMoonCoordinates(pSun, angle, dist);
                 }
 
-                // C4
+                Point pC3;
+                {
+                    double dist = Math.Abs(solarRadius - lunarRadius);
+                    double angle = GetOrientationAngle(Circumstances.TotalEnd);
+                    pC3 = GetMoonCoordinates(pSun, angle, dist);
+                }
+
+                Point pC4;
                 {
                     double dist = solarRadius + lunarRadius;
                     double angle = GetOrientationAngle(Circumstances.PartialEnd);
-                    var pMoon = GetMoonCoordinates(pSun, angle, dist);
-                    ctx.DrawEllipse(null, new Pen(Brushes.Gray, 1), pMoon, lunarRadius, lunarRadius);
+                    pC4 = GetMoonCoordinates(pSun, angle, dist);
+                }
+
+                if (ShowContactCircles)
+                {
+                    ctx.DrawEllipse(null, new Pen(ForegroundBrush, 1), pC1, lunarRadius, lunarRadius);
+                    //if (Circumstances.TotalBegin != null)
+                    //    ctx.DrawEllipse(null, new Pen(ForegroundBrush, 1), pC2, lunarRadius, lunarRadius);
+                    ctx.DrawEllipse(null, new Pen(ForegroundBrush, 1), pMax, lunarRadius, lunarRadius);
+                    //if (Circumstances.TotalEnd != null)
+                    //    ctx.DrawEllipse(null, new Pen(ForegroundBrush, 1), pC3, lunarRadius, lunarRadius);
+                    ctx.DrawEllipse(null, new Pen(ForegroundBrush, 1), pC4, lunarRadius, lunarRadius);
                 }
 
                 {
@@ -152,90 +233,74 @@ namespace Astrarium.Plugins.Eclipses.Controls
                             q = Circumstances.PartialEnd.QAngle;
                             break;
                     }
-                    var pMoon = GetMoonCoordinates(pSun, angle, dist);
-                    ctx.DrawEllipse(Brushes.Blue, null, pMoon, lunarRadius, lunarRadius);
 
-                    // Draw horizon
-                    dist = (alt / 0.25) * solarRadius;
-                    if (Orientation == SolarEclipseChartOrientation.Zenithal)
+                    var pMoon = GetMoonCoordinates(pSun, angle, dist);
+
+                    if (ShowMoonOutlineOnly)
                     {
-                        double yHorizon = pSun.Y + dist;
-                        ctx.PushOpacity(0.5);
-                        ctx.PushClip(new RectangleGeometry(new Rect(0, 0, ActualWidth, ActualHeight)));
-                        ctx.DrawRectangle(Brushes.Green, null, new Rect(new Point(0, yHorizon), new Point(ActualWidth, ActualHeight)));
-                        ctx.Pop();
+                        ctx.DrawEllipse(null, new Pen(MoonBrush, 1.5), pMoon, lunarRadius, lunarRadius);
                     }
                     else
                     {
-                        Point p1, p2, p3, p4;
-
-                        {
-                            dist = (alt / 0.25) * solarRadius;
-                            double dx = dist * Math.Sin(Angle.ToRadians(q));
-                            double dy = dist * Math.Cos(Angle.ToRadians(q));
-
-                            Point p0 = new Point(pSun.X + dx, pSun.Y + dy);
-
-                            double r = 2 * Math.Sqrt(ActualHeight * ActualHeight + ActualWidth * ActualWidth);
-
-                            dx = r * Math.Sin(Angle.ToRadians(q));
-                            dy = r * Math.Cos(Angle.ToRadians(q));
-
-                            p1 = new Point(p0.X - dy, p0.Y + dx);
-                            p2 = new Point(p0.X + dy, p0.Y - dx);
-                        }
-
-                        {
-                            dist = ((alt + 20) / 0.25) * solarRadius;
-                            double dx = dist * Math.Sin(Angle.ToRadians(q));
-                            double dy = dist * Math.Cos(Angle.ToRadians(q));
-
-                            Point p0 = new Point(pSun.X + dx, pSun.Y + dy);
-
-                            double r = 2 * Math.Sqrt(ActualHeight * ActualHeight + ActualWidth * ActualWidth);
-
-                            dx = r * Math.Sin(Angle.ToRadians(q));
-                            dy = r * Math.Cos(Angle.ToRadians(q));
-
-                            p3 = new Point(p0.X + dy, p0.Y - dx);
-                            p4 = new Point(p0.X - dy, p0.Y + dx);                            
-                        }
-
-
-                        
-
-                        //var pts = LineScreenIntersection(p1, p2);
-                        //if (pts.Length == 2)
-                        //{
-                        //    ctx.DrawLine(new Pen(Brushes.Green, 2), pts[0], pts[1]);
-
-
-                        
-                        StreamGeometry g = new StreamGeometry();
-                        using (var gc = g.Open())
-                        {
-                            gc.BeginFigure(p1, true, true);
-                            gc.LineTo(p2, true, true);
-                            gc.LineTo(p3, true, true);
-                            gc.LineTo(p4, true, true);
-
-
-                        }
-
-                        ctx.PushOpacity(0.5);
-                        ctx.PushClip(new RectangleGeometry(new Rect(0, 0, ActualWidth, ActualHeight)));
-                        //ctx.DrawLine(new Pen(Brushes.Green, 2), p1, p2);
-                        ctx.DrawGeometry(Brushes.Green, null, g);
-                        ctx.Pop();
-                        
-                        //}
-
-
+                        ctx.DrawEllipse(MoonBrush, null, pMoon, lunarRadius, lunarRadius);
                     }
+
+                    if (ShowLabels)
+                    {
+                        if (ShowContactCircles || contact == SolarEclipseChartContact.C1)
+                            DrawText(ctx, "C1", pC1, 10);
+    
+                        if (ShowContactCircles || contact == SolarEclipseChartContact.Max)
+                            DrawText(ctx, "Max", pMax, 10);
+
+                        if (ShowContactCircles || contact == SolarEclipseChartContact.C4)
+                            DrawText(ctx, "C4", pC4, 10);
+                    }
+
+                    // Draw horizon
+                    Point[] p = new Point[4];
+
+                    if (Orientation == SolarEclipseChartOrientation.Zenithal)
+                    {
+                        q = 0;
+                    }
+
+                    // Calculate points needed to draw horizon
+                    // i=0,1 is a horizon line itself,
+                    // i=2,3 is a line 20 degrees below horizon
+                    // 0.25 is a mean solar radius in degrees (more accurate value is not needed)
+                    for (int i = 0; i < 2; i++)
+                    {                        
+                        double d = (alt + (i == 0 ? 0 : 20)) / 0.25 * solarRadius;
+                        double ang = Angle.ToRadians(q);
+                        double dx = d * Math.Sin(ang);
+                        double dy = d * Math.Cos(ang);
+                        Point p0 = new Point(pSun.X + dx, pSun.Y + dy);
+                        double r = 2 * Math.Sqrt(ActualHeight * ActualHeight + ActualWidth * ActualWidth);
+                        dx = r * Math.Sin(ang);
+                        dy = r * Math.Cos(ang);
+                        p[2 * i] = new Point(p0.X - dy, p0.Y + dx);
+                        p[2 * i + 1] = new Point(p0.X + dy, p0.Y - dx);
+                    }
+
+                    StreamGeometry g = new StreamGeometry();
+                    using (var gc = g.Open())
+                    {
+                        gc.BeginFigure(p[0], true, true);
+                        gc.LineTo(p[1], true, true);
+                        gc.LineTo(p[3], true, true);
+                        gc.LineTo(p[2], true, true);
+                    }
+
+                    ctx.PushOpacity(0.5);
+                    ctx.DrawGeometry(HorizonBrush, null, g);
                 }
 
-                
-
+                ctx.Pop();
+            }
+            else
+            {
+                DrawText(ctx, "Eclipse is invisible", pSun, 12);
             }
 
             base.OnRender(ctx);
@@ -249,82 +314,64 @@ namespace Astrarium.Plugins.Eclipses.Controls
 
         private Point GetMoonCoordinates(Point pSun, double posAngle, double dist)
         {
-            double dx = dist * Math.Sin(Angle.ToRadians(posAngle + 180));
-            double dy = dist * Math.Cos(Angle.ToRadians(posAngle + 180));
+            double ang = Angle.ToRadians(posAngle + 180);
+            double dx = dist * Math.Sin(ang);
+            double dy = dist * Math.Cos(ang);
             var pMoon = new Point(pSun.X + dx, pSun.Y + dy);
             return pMoon;
         }
 
-        public Point[] LineScreenIntersection(Point p1, Point p2)
+        private void DrawText(DrawingContext ctx, string text, Point point, double size)
         {
-            double width = ActualWidth;
-            double height = ActualHeight;
-
-            Point p00 = new Point(0, 0);
-            Point pW0 = new Point(width, 0);
-            Point pWH = new Point(width, height);
-            Point p0H = new Point(0, height);
-
-            List<Point> crosses = new List<Point>();
-
-            Point c1 = LinesIntersection(p1, p2, p00, pW0);
-            if (Math.Abs(c1.Y) < 1 && c1.X >= 0 && c1.X <= width)
-            {
-                crosses.Add(c1);
-            }
-
-            Point c2 = LinesIntersection(p1, p2, pW0, pWH);
-            if (Math.Abs(c2.X - width) < 1 && c2.Y >= 0 && c2.Y <= height)
-            {
-                crosses.Add(c2);
-            }
-
-            Point c3 = LinesIntersection(p1, p2, p0H, pWH);
-            if (Math.Abs(c3.Y - height) < 1 && c3.X >= 0 && c3.X <= width)
-            {
-                crosses.Add(c3);
-            }
-
-            Point c4 = LinesIntersection(p1, p2, p00, p0H);
-            if (Math.Abs(c4.X) < 1 && c4.Y >= 0 && c4.Y <= height)
-            {
-                crosses.Add(c4);
-            }
-
-            return crosses.ToArray();
-        }
-
-        private Point LinesIntersection(Point p1, Point p2, Point p3, Point p4)
-        {
-            double x1 = p1.X;
-            double x2 = p2.X;
-            double x3 = p3.X;
-            double x4 = p4.X;
-
-            double y1 = p1.Y;
-            double y2 = p2.Y;
-            double y3 = p3.Y;
-            double y4 = p4.Y;
-
-            double x = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
-            double y = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
-
-            return new Point() { X = x, Y = y };
+            FormattedText formattedText = new FormattedText(text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, font, size, ForegroundBrush);
+            ctx.DrawText(formattedText, new Point(point.X - formattedText.Width / 2, point.Y - formattedText.Height / 2));
         }
     }
 
+    /// <summary>
+    /// Defines chart orientation
+    /// </summary>
     public enum SolarEclipseChartOrientation
     {
+        /// <summary>
+        /// Top of the chart points on Zenith
+        /// </summary>
         Zenithal,
+
+        /// <summary>
+        /// Top of the chart point os North
+        /// </summary>
         Equatorial
     }
 
+    /// <summary>
+    /// Defines main contacts instants of an eclipse
+    /// </summary>
     public enum SolarEclipseChartContact
     {
+        /// <summary>
+        /// First external contact (Moon disk touches Sun first time)
+        /// </summary>
         C1,
+
+        /// <summary>
+        /// First internal contact (beginning of total or annular phase)
+        /// </summary>
         C2,
+
+        /// <summary>
+        /// Instant of eclipse maximum
+        /// </summary>
         Max,
+
+        /// <summary>
+        /// Last internal contact (end of total or annular phase)
+        /// </summary>
         C3,
+
+        /// <summary>
+        /// Last external contact (Moon disk goes out from the Sun)
+        /// </summary>
         C4
     }
 }

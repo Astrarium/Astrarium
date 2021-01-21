@@ -62,6 +62,15 @@ namespace Astrarium.Types.Controls
         public static readonly DependencyProperty IsDraggingProperty =
            DependencyProperty.Register(nameof(IsDragging), typeof(bool), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = false, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged) });
 
+        public static readonly DependencyProperty MinZoomLevelProperty =
+           DependencyProperty.Register(nameof(MinZoomLevel), typeof(int), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = false, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
+
+        public static readonly DependencyProperty MaxZoomLevelProperty =
+           DependencyProperty.Register(nameof(MaxZoomLevel), typeof(int), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = false, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
+
+        public static readonly DependencyProperty ZoomLevelProperty =
+            DependencyProperty.Register(nameof(ZoomLevel), typeof(int), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = true, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged) });
+
         public ITileServer TileServer
         {
             get => (ITileServer)GetValue(TileServerProperty);
@@ -128,6 +137,24 @@ namespace Astrarium.Types.Controls
             set => SetValue(IsDraggingProperty, value);
         }
 
+        public int MinZoomLevel
+        {
+            get => (int)GetValue(MinZoomLevelProperty);
+            set => SetValue(MinZoomLevelProperty, value);
+        }
+
+        public int MaxZoomLevel
+        {
+            get => (int)GetValue(MaxZoomLevelProperty);
+            set => SetValue(MaxZoomLevelProperty, value);
+        }
+
+        public int ZoomLevel
+        {
+            get => (int)GetValue(ZoomLevelProperty);
+            set => SetValue(ZoomLevelProperty, value);
+        }
+
         public Color ErrorColor
         {
             get => (Color)GetValue(ErrorColorProperty);
@@ -181,13 +208,22 @@ namespace Astrarium.Types.Controls
             mapControl.MouseDown += (s, e) => mapControl.Focus();
             mapControl.MouseUp += (s, e) => mapControl.Focus();
             mapControl.MouseDoubleClick += (s, e) => { if (e.Button == MouseButtons.Left) OnClick?.Execute(null); };
-            mapControl.IsDraggingChaged += (s, e) => IsDragging = mapControl.IsDragging;
+            
+            mapControl.TileServerChanged += (s, e) =>
+            {
+                TileServer = mapControl.TileServer;
+                MinZoomLevel = mapControl.MinZoomLevel;
+                MaxZoomLevel = mapControl.MaxZoomLevel;
+            };
 
-            mapControl.TileServerChanged += (s, e) => TileServer = mapControl.TileServer;
             mapControl.CenterChanged += (s, e) => Center = mapControl.Center;
             mapControl.MouseChanged += (s, e) => Mouse = mapControl.Mouse;
             mapControl.BackColorChanged += (s, e) => BackColor = mapControl.BackColor;
             mapControl.ForeColorChanged += (s, e) => ForeColor = mapControl.ForeColor;
+            mapControl.IsDraggingChaged += (s, e) => IsDragging = mapControl.IsDragging;
+            mapControl.ZoomLevelChaged += (s, e) => ZoomLevel = mapControl.ZoomLevel;
+
+
             mapControl.Resize += MapControl_Resize;
             Child = mapControl;
             mapControl.Focus();
@@ -196,6 +232,8 @@ namespace Astrarium.Types.Controls
         private void MapControl_Resize(object sender, System.EventArgs e)
         {
             mapControl.MinZoomLevel = mapControl.Height / 256;
+            MinZoomLevel = mapControl.MinZoomLevel;
+            MaxZoomLevel = mapControl.MaxZoomLevel;
         }
     }
 }
