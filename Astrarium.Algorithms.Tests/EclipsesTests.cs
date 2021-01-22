@@ -246,9 +246,9 @@ namespace Astrarium.Algorithms.Tests
                 double jdMaxExpected = new Date(new DateTime(1994, 5, 10, 17, 26, 45, DateTimeKind.Utc)).ToJulianEphemerisDay();
                 double jdPartialEnd = new Date(new DateTime(1994, 5, 10, 19, 13, 53, DateTimeKind.Utc)).ToJulianEphemerisDay();
 
-                Assert.AreEqual(jdMaxExpected, local.JulianDayMax, epsTime);
-                Assert.AreEqual(jdPartialBegin, local.JulianDayPartialBegin, epsTime);
-                Assert.AreEqual(jdPartialEnd, local.JulianDayPartialEnd, epsTime);
+                Assert.AreEqual(jdMaxExpected, local.Maximum.JulianDay, epsTime);
+                Assert.AreEqual(jdPartialBegin, local.PartialBegin.JulianDay, epsTime);
+                Assert.AreEqual(jdPartialEnd, local.PartialEnd.JulianDay, epsTime);
 
                 Assert.AreEqual(0.857, local.MaxMagnitude, 1e-4);
                 Assert.AreEqual(0.9434, local.MoonToSunDiameterRatio, 1e-4);
@@ -259,7 +259,7 @@ namespace Astrarium.Algorithms.Tests
                 CrdsGeographical g = new CrdsGeographical(new DMS("+100*09'54''"), new DMS("+35*13'43''"));
                 var local = SolarEclipses.LocalCircumstances(pbe, g);
 
-                Assert.AreEqual(56.25, local.SunAltMax, 1e-2);
+                Assert.AreEqual(56.25, local.Maximum.SolarAltitude, 1e-2);
                 Assert.AreEqual(244, local.PathWidth, 0.5);
                 Assert.AreEqual(0.9419, local.MoonToSunDiameterRatio, 1e-4);
             }
@@ -269,7 +269,7 @@ namespace Astrarium.Algorithms.Tests
                 CrdsGeographical g = new CrdsGeographical(new DMS("+97*00'00''"), new DMS("+36*44'26''"));
                 var local = SolarEclipses.LocalCircumstances(pbe, g);
 
-                Assert.AreEqual(59.45, local.SunAltMax, 1e-2);
+                Assert.AreEqual(59.45, local.Maximum.SolarAltitude, 1e-2);
                 Assert.AreEqual(240, local.PathWidth, 0.5);
             }
         }

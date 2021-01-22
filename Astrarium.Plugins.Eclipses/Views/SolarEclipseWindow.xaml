@@ -6,9 +6,7 @@
     xmlns:local="clr-namespace:Astrarium.Plugins.Eclipses" 
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types" 
-    xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types" 
     xmlns:q="clr-namespace:Astrarium.Plugins.Eclipses.Controls" 
-    xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
     x:Class="Astrarium.Plugins.Eclipses.SolarEclipseWindow" 
     mc:Ignorable="d" 
@@ -37,9 +35,25 @@
                     </Trigger>
                 </Style.Triggers>
             </Style>
-            
+
+            <Style x:Key="DateButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+                <Style.Setters>
+                    <Setter Property="Cursor" Value="Hand" />
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="Margin" Value="2" />
+                    <Setter Property="MinWidth" Value="40" />
+                    <Setter Property="Height" Value="40" />
+                </Style.Setters>
+                <Style.Triggers>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Foreground" Value="{StaticResource BrushControlBackground}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
             <Grid x:Key="ImagePrevEclipse" x:Shared="False">
-                <Path HorizontalAlignment="Left" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="16" Height="16" Stretch="Uniform" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
+                <Path HorizontalAlignment="Left" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="16" Height="16" Margin="-11 0 0 0" Stretch="Uniform" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
                     <Path.Data>
                         <StreamGeometry>F1 M100,100z M0,0z M14,8L14,8 2.5,19.6 32.9,50 2.5,80.4 14,92 56,50z</StreamGeometry>
                     </Path.Data>
@@ -67,7 +81,7 @@
                 </Path>
             </Grid>
             <Grid x:Key="ImageNextEclipse" x:Shared="False">
-                <Path HorizontalAlignment="Right" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="20" Height="20" Stretch="Uniform" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
+                <Path HorizontalAlignment="Right" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="20" Height="20" Margin="7 4 4 0" Stretch="Uniform" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
                     <Path.Data>
                         <StreamGeometry>F1 M100,125z M0,0z M14,8L14,8 2.5,19.6 32.9,50 2.5,80.4 14,92 56,50z</StreamGeometry>
                     </Path.Data>
@@ -77,7 +91,7 @@
                 </Path>
             </Grid>
             <Grid x:Key="ImageNextSaros" x:Shared="False">
-                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="20" Height="20" Stretch="Uniform" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
+                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="20" Height="20" Margin="2 4 0 0" Stretch="Uniform" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
                     <Path.Data>
                         <StreamGeometry>F1 M100,125z M0,0z M14,8L14,8 2.5,19.6 32.9,50 2.5,80.4 14,92 56,50z</StreamGeometry>
                     </Path.Data>
@@ -85,7 +99,7 @@
                         <RotateTransform Angle="0"></RotateTransform>
                     </Path.LayoutTransform>
                 </Path>
-                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="20" Height="20" Stretch="Uniform" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
+                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="20" Height="20" Margin="2 4 0 0" Stretch="Uniform" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
                     <Path.Data>
                         <StreamGeometry>F1 M100,125z M0,0z M55.5,8L55.5,8 44,19.6 74.4,50 44,80.4 55.5,92 97.5,50z</StreamGeometry>
                     </Path.Data>
@@ -177,9 +191,6 @@
                 </Path>
             </Grid>
 
-
-            <c:TextToFlowDocumentConverter x:Key="TextToFlowDocumentConverter" Markdown="{StaticResource Markdown}" />
-
             <Style x:Key="RadioTab" TargetType="{x:Type RadioButton}">
                 <Style.Setters>
                     <Setter Property="Height" Value="24" />
@@ -230,14 +241,18 @@
         </Grid.RowDefinitions>
 
         <StackPanel Orientation="Vertical" Grid.Row="0" HorizontalAlignment="Center">
-            <TextBlock Height="Auto" Padding="0 10 0 0" HorizontalAlignment="Center" Text="{Binding EclipseDescription, FallbackValue='Eclipse description'}"></TextBlock>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Content="{StaticResource ImagePrevSaros}" Style="{StaticResource ImageButton}" Command="{Binding PrevSarosCommand}" IsEnabled="{Binding PrevSarosEnabled}" ToolTip="Previous eclipse of the same saros" />
                 <Button Content="{StaticResource ImagePrevEclipse}" Style="{StaticResource ImageButton}" Command="{Binding PrevEclipseCommand}" ToolTip="Previous eclipse" />
-                <TextBlock VerticalAlignment="Center" MinWidth="200" Height="Auto" TextAlignment="Center" HorizontalAlignment="Center" FontSize="32" Text="{Binding EclipseDate, FallbackValue='01 Jan 2000'}" />
+                <Button MinWidth="200" VerticalAlignment="Center" Command="{Binding ChangeDateCommand}" Style="{StaticResource DateButton}" ToolTip="Eclipse date. Click to find eclipse by nearest date.">
+                    <Button.Content>
+                        <TextBlock FontSize="32" VerticalAlignment="Center"  Text="{Binding EclipseDate, FallbackValue='01 Jan 2000'}" />
+                    </Button.Content>
+                </Button>
                 <Button Content="{StaticResource ImageNextEclipse}" Style="{StaticResource ImageButton}" Command="{Binding NextEclipseCommand}" ToolTip="Next eclipse" />
                 <Button Content="{StaticResource ImageNextSaros}" Style="{StaticResource ImageButton}" Command="{Binding NextSarosCommand}" IsEnabled="{Binding NextSarosEnabled}" ToolTip="Next eclipse of the same saros" />
             </StackPanel>
+            <TextBlock Height="Auto" Padding="0 0 0 10" HorizontalAlignment="Center" Text="{Binding EclipseDescription, FallbackValue='Eclipse description'}"></TextBlock>
         </StackPanel>
 
         <Grid Height="6" Grid.Row="1">
@@ -268,14 +283,14 @@
                         <c:MapControl
                             x:Name="Map"
                             Grid.Row="0"
-                            BackColor="#333333" 
+                            BackColor="#333333"                             
                             TileServer="{Binding TileServer, Mode=TwoWay}" 
                             CacheFolder="{Binding CacheFolder, Mode=OneTime}"
                             Markers="{Binding Markers}"
                             Tracks="{Binding Tracks}"
                             Polygons="{Binding Polygons}"
                             ThumbnailBackColor="#333333"
-                            ThumbnailForeColor="#333333"
+                            ThumbnailForeColor="#555555"
                             IsMouseOverMap = "{Binding IsMouseOverMap, Mode=OneWayToSource}"
                             IsDragging="{Binding IsMapDragging, Mode=OneWayToSource}"
                             TileImageAttributes="{Binding TileImageAttributes}"
@@ -335,7 +350,7 @@
                                         ItemsSource="{Binding LocalCircumstancesTable}">
                                         <DataGrid.Columns>
                                             <DataGridTextColumn Binding="{Binding Name}" />
-                                            <DataGridTextColumn Binding="{Binding Value}"/>
+                                            <DataGridTextColumn FontFamily="Lucida Console" Binding="{Binding Value}"/>
                                         </DataGrid.Columns>
                                     </DataGrid>
 
@@ -377,16 +392,16 @@
                                         </Grid.ColumnDefinitions>
                                         <!-- Eclipse contacts toggler -->
                                         <StackPanel Margin="2" Grid.Column="0" HorizontalAlignment="Left" SnapsToDevicePixels="True" Orientation="Horizontal">
-                                            <RadioButton Content="C1" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C1}}" Style="{StaticResource ResourceKey=RadioTab}" />
-                                            <RadioButton Content="C2" IsEnabled="{Binding LocalCircumstances.TotalBegin, Converter={s:NotNullToBoolConverter}}" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C2}}" Style="{StaticResource ResourceKey=RadioTab}" />
-                                            <RadioButton Content="Max" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.Max}}" Style="{StaticResource ResourceKey=RadioTab}" />
-                                            <RadioButton Content="C3" IsEnabled="{Binding LocalCircumstances.TotalEnd, Converter={s:NotNullToBoolConverter}}" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C3}}" Style="{StaticResource ResourceKey=RadioTab}" />
-                                            <RadioButton Content="C4" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C4}}" Style="{StaticResource ResourceKey=RadioTab}" />
+                                            <RadioButton Content="C1" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C1}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="C1: Beginning of partial phase" />
+                                            <RadioButton Content="C2" IsEnabled="{Binding LocalCircumstances.TotalBegin, Converter={s:NotNullToBoolConverter}}" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C2}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="C2: Beginning of total phase"  />
+                                            <RadioButton Content="Max" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.Max}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="Max: Local maximum" />
+                                            <RadioButton Content="C3" IsEnabled="{Binding LocalCircumstances.TotalEnd, Converter={s:NotNullToBoolConverter}}" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C3}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="C3: End of total phase" />
+                                            <RadioButton Content="C4" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C4}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="C4: End of partial phase" />
                                         </StackPanel>
                                         <!-- Chart orientation toggler -->
                                         <StackPanel Margin="2" Grid.Column="2" HorizontalAlignment="Right" SnapsToDevicePixels="True" Orientation="Horizontal">
-                                            <RadioButton Content="Z" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartOrientation.Zenithal}}" Style="{StaticResource ResourceKey=RadioTab}" />
-                                            <RadioButton Content="N" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartOrientation.Equatorial}}" Style="{StaticResource ResourceKey=RadioTab}" />
+                                            <RadioButton Content="Z" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartOrientation.Zenithal}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="Zenith on top" />
+                                            <RadioButton Content="N" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartOrientation.Equatorial}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="North on top" />
                                         </StackPanel>
                                     </Grid>
 
@@ -403,8 +418,8 @@
                                     <!-- Chart footer -->
                                     <DockPanel Margin="0" HorizontalAlignment="Stretch">
                                         <!-- Chart options togglers -->
-                                        <ToggleButton IsChecked="{Binding ElementName=Chart, Path=ShowLabels}" ToolTip="Labels" Width="24" Height="24" Content="{StaticResource ImageChartLabels}" />
-                                        <ToggleButton IsChecked="{Binding ElementName=Chart, Path=ShowContactCircles}" ToolTip="Contact Circles" Width="24" Height="24" Content="{StaticResource ImageChartCircles}" />
+                                        <ToggleButton IsChecked="{Binding ElementName=Chart, Path=ShowLabels}" ToolTip="Show labels" Width="24" Height="24" Content="{StaticResource ImageChartLabels}" />
+                                        <ToggleButton IsChecked="{Binding ElementName=Chart, Path=ShowContactCircles}" ToolTip="Show contacts circles" Width="24" Height="24" Content="{StaticResource ImageChartCircles}" />
                                         <ToggleButton IsChecked="{Binding ElementName=Chart, Path=ShowMoonOutlineOnly}" ToolTip="Show Moon as outline" Width="24" Height="24" Content="{StaticResource ImageChartMoonOutline}" />
                                         <!-- Chart zoom buttons -->
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -414,14 +429,9 @@
                                     </DockPanel>
                                 </StackPanel>
                             </Expander>
-
                             <StackPanel x:Name="RightPanelFooter" Orientation="Vertical">
-                                <TextBlock IsEnabled="False" Padding="4" FontSize="12" TextWrapping="WrapWithOverflow" HorizontalAlignment="Stretch" Text="Double click on map to lock the desired point. Double click on map to lock the desired point. Double click on map to lock the desired point." />
+                                <TextBlock IsEnabled="False" Padding="4" FontSize="12" TextWrapping="WrapWithOverflow" HorizontalAlignment="Stretch" Text="Double click the map to lock on the desired point." />
                             </StackPanel>
-
-                          
-
-
                         </StackPanel>
                     </ScrollViewer>
 
@@ -558,6 +568,7 @@
                         RowHeight="24"
                         ItemsSource="{Binding SarosSeriesTable}">
                         <DataGrid.Columns>
+                            <DataGridTextColumn Header="Member" Binding="{Binding Member}"/>
                             <DataGridTemplateColumn Header="Date">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>

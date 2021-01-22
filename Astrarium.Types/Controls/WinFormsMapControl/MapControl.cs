@@ -196,6 +196,9 @@ namespace System.Windows.Forms
 
                     if (ZoomLevel < TileServer.MinZoomLevel)
                         ZoomLevel = TileServer.MinZoomLevel;
+
+                    MaxZoomLevel = TileServer.MaxZoomLevel;
+                    MinZoomLevel = TileServer.MinZoomLevel;
                 }
 
                 Invalidate();

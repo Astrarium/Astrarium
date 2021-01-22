@@ -1201,6 +1201,7 @@
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Padding" Value="1"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSize}" />
         <Setter Property="Height" Value="24" />
         <Setter Property="Template">
             <Setter.Value>
@@ -1217,6 +1218,7 @@
                             Content="{TemplateBinding Content}"
                             HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"				
                             Margin="{TemplateBinding Padding}" 
+                            TextElement.FontSize="{TemplateBinding FontSize}"
                             TextElement.Foreground="{TemplateBinding Foreground}"
                             TextBlock.Foreground="{TemplateBinding Foreground}"
 							SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 

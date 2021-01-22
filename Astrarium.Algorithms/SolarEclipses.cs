@@ -41,9 +41,11 @@ namespace Astrarium.Algorithms
         /// <param name="next">Flag indicating searching direction. True means searching next eclipse, false means previous.</param>
         public static SolarEclipse NearestEclipse(double jd, bool next)
         {
-            Date d = new Date(jd);
-            double year = d.Year + (Date.JulianEphemerisDay(d) - Date.JulianDay0(d.Year)) / 365.25;
-            double k = Floor((year - 2000) * 12.3685);
+            //Date d = new Date(jd);
+            //double year = d.Year + (Date.JulianEphemerisDay(d) - Date.JulianDay0(d.Year)) / 365.25;            
+            //double k = Floor((year - 2000) * 12.3685);
+            double k = LunarEphem.Lunation(jd, LunationSystem.Meeus);
+
             bool eclipseFound;
 
             double T = k / 1236.85;
