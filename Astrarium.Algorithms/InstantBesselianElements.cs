@@ -6,7 +6,7 @@ namespace Astrarium.Algorithms
     /// Represents set of Besselian elements of solar eclipse,
     /// valid for the time instant
     /// </summary>
-    internal class InstantBesselianElements
+    public class InstantBesselianElements
     {
         /// <summary>
         /// DeltaT value (difference between Dynamical and Universal Times).

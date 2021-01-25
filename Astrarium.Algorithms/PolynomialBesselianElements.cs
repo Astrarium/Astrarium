@@ -87,7 +87,7 @@ namespace Astrarium.Algorithms
         /// </summary>
         /// <param name="jd">Julian Day of interest</param>
         /// <returns></returns>
-        internal InstantBesselianElements GetInstantBesselianElements(double jd)
+        public InstantBesselianElements GetInstantBesselianElements(double jd)
         {
             //if (jd < From || jd > To)
             //    throw new ArgumentException($"Polynomial Besselian elements valid only for Julian Day in range [{From} ... {To}].", nameof(jd));

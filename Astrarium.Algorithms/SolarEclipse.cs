@@ -45,6 +45,12 @@ namespace Astrarium.Algorithms
         public bool IsNonCentral { get; set; }
 
         /// <summary>
+        /// Flag indicating the eclipse occurance is uncertain 
+        /// and needs to be verified with mo accurate algorithm.
+        /// </summary>
+        public bool IsUncertain { get; set; }
+
+        /// <summary>
         /// Saros series number for the eclipse
         /// </summary>
         public int Saros { get; set; }

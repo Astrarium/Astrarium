@@ -45,7 +45,7 @@ namespace Astrarium.Plugins.Eclipses
             double jd = context.From;
             do
             {
-                SolarEclipse eclipse = SolarEclipses.NearestEclipse(jd, next: true);
+                SolarEclipse eclipse = GetNearestEclipse(jd, next: true, saros: false);
                 jd = eclipse.JulianDayMaximum;
                 if (jd <= context.To)
                 {
@@ -119,6 +119,35 @@ namespace Astrarium.Plugins.Eclipses
             }
             while (true);
             return events;
+        }
+
+        public SolarEclipse GetNearestEclipse(double jd, bool next, bool saros)
+        {
+            do
+            {
+                jd += (next ? 1 : -1) * (saros ? LunarEphem.SAROS : LunarEphem.SINODIC_PERIOD);
+                var eclipse = SolarEclipses.NearestEclipse(jd, next);
+                if (eclipse.IsUncertain)
+                {
+                    var pbe = GetBesselianElements(eclipse.JulianDayMaximum);
+                    var be = pbe.GetInstantBesselianElements(eclipse.JulianDayMaximum);
+                    bool isExist = Math.Sqrt(be.X * be.X + be.Y * be.Y) - be.L1 <= 0.999;
+                    if (isExist)
+                    {
+                        eclipse.IsUncertain = false;
+                        return eclipse;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    return eclipse;
+                }
+            }
+            while (true);
         }
 
         public string GetLocalVisibilityString(SolarEclipse eclipse, SolarEclipseLocalCircumstances localCirc)

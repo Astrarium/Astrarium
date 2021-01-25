@@ -46,7 +46,8 @@ namespace Astrarium.Algorithms
             //double k = Floor((year - 2000) * 12.3685);
             double k = LunarEphem.Lunation(jd, LunationSystem.Meeus);
 
-            bool eclipseFound;
+            bool eclipseFound = false;
+            bool isUncertain = false;
 
             double T = k / 1236.85;
             double T2 = T * T;
@@ -145,12 +146,20 @@ namespace Astrarium.Algorithms
                     // no eclipse visible from the Earth surface
                     if (Abs(gamma) > 1.5433 + u)
                     {
-                        eclipseFound = false;
-                        if (next) k++;
-                        else k--;
-                        continue;
+                        if (Abs(gamma) > 1.5433 + u + 0.001)
+                        {
+                            eclipseFound = false;
+                            if (next) k++;
+                            else k--;
+                            continue;
+                        }
+                        else
+                        {
+                            isUncertain = true;
+                        }
                     }
 
+                    eclipse.IsUncertain = isUncertain;
                     eclipse.U = u;
                     eclipse.Gamma = gamma;
                     eclipse.JulianDayMaximum = jdMax;
@@ -182,12 +191,21 @@ namespace Astrarium.Algorithms
                         }
                     }
 
-                    if (!eclipse.IsNonCentral && Abs(gamma) > 0.9972 && Abs(gamma) < 1.5433 + u)
+                    if (!eclipse.IsNonCentral && Abs(gamma) > 0.9972 && Abs(gamma) < 1.5433 + u + (isUncertain ? 0.001 : 0))
                     {
                         eclipse.EclipseType = SolarEclipseType.Partial;
-                        eclipse.Magnitude = (1.5433 + u - Abs(gamma)) / (0.5461 + 2 * u);
+                        eclipse.Magnitude = (1.5433 + u + (isUncertain ? 0.001 : 0) - Abs(gamma)) / (0.5461 + 2 * u);
                     }
-                   
+
+                    //if (isUncertain && eclipse.EclipseType != SolarEclipseType.Partial)
+                    //{
+                    //    eclipseFound = false;
+                    //    if (next) k++;
+                    //    else k--;
+                    //    continue;
+                    //}
+
+
                     // saros
                     eclipse.Saros = Saros(jdMax);
                 }
@@ -561,13 +579,10 @@ namespace Astrarium.Algorithms
 
             // Instant of eclipse maximum
             {
-                InstantBesselianElements b = pbe.GetInstantBesselianElements(pbe.JulianDay0);
+                InstantBesselianElements b = pbe.GetInstantBesselianElements(pbe.JulianDayMaximum);
                 PointF p = new PointF((float)b.X, (float)b.Y);
                 var g = Project(b, p);
-                if (g != null)
-                {
-                    map.Max = new SolarEclipseMapPoint(pbe.JulianDayMaximum, g);
-                }
+                map.Max = new SolarEclipseMapPoint(pbe.JulianDayMaximum, g);
             }
 
             if (eclipse.EclipseType != SolarEclipseType.Partial)
@@ -1162,7 +1177,6 @@ namespace Astrarium.Algorithms
                     for (int i = 0; i < pPenumbraIntersect.Length; i++)
                     {
                         CrdsGeographical g = Project(b, pPenumbraIntersect[i]);
-                        
                         if (pCenter.X <= 0)
                         {
                             if (i == 0)

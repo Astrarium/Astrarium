@@ -33,6 +33,11 @@ namespace System.Windows.Forms
         private Drawing.Point _LastMouse = new Drawing.Point();
 
         /// <summary>
+        /// Flag indicating the map is dragging by mouse
+        /// </summary>
+        private bool _IsDragging = false;
+
+        /// <summary>
         /// Cache used to store tile images in memory.
         /// </summary>
         private ConcurrentBag<Tile> _Cache = new ConcurrentBag<Tile>();
@@ -246,13 +251,6 @@ namespace System.Windows.Forms
         }
 
         /// <summary>
-        /// Gets value indicating the map is dragging by the mouse now.
-        /// </summary>
-        [Browsable(false)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool IsDragging { get; private set; }
-
-        /// <summary>
         /// Gets collection of markers to be displayed on the map.
         /// </summary>
         [Browsable(false)]
@@ -365,11 +363,6 @@ namespace System.Windows.Forms
         /// Raised when <see cref="Mouse"/> property value is changed.
         /// </summary>
         public event EventHandler<EventArgs> MouseChanged;
-
-        /// <summary>
-        /// Raised when <see cref="IsDragging"/> property value is changed.
-        /// </summary>
-        public event EventHandler<EventArgs> IsDraggingChaged;
 
         /// <summary>
         /// Raised when <see cref="ZoomLevel"/> property value is changed.
@@ -494,23 +487,11 @@ namespace System.Windows.Forms
         {
             if (e.Button == MouseButtons.Left)
             {
-                IsDragging = true;
-                IsDraggingChaged?.Invoke(this, EventArgs.Empty);
+                _IsDragging = true;
                 _LastMouse.X = e.X;
                 _LastMouse.Y = e.Y;
             }
             base.OnMouseDown(e);
-        }
-
-        /// <summary>
-        /// Called when mouse is up.
-        /// </summary>
-        /// <param name="e">Event args.</param>
-        protected override void OnMouseUp(MouseEventArgs e)
-        {
-            IsDragging = false;
-            IsDraggingChaged?.Invoke(this, EventArgs.Empty);
-            base.OnMouseUp(e);
         }
 
         /// <summary>
@@ -519,7 +500,7 @@ namespace System.Windows.Forms
         /// <param name="e">Event args.</param>
         protected override void OnMouseMove(MouseEventArgs e)
         {
-            if (IsDragging)
+            if (_IsDragging)
             {
                 _Offset.X += (e.X - _LastMouse.X);
                 _Offset.Y += (e.Y - _LastMouse.Y);
@@ -543,6 +524,12 @@ namespace System.Windows.Forms
             MouseChanged?.Invoke(this, EventArgs.Empty);
 
             base.OnMouseMove(e);
+        }
+
+        protected override void OnMouseUp(MouseEventArgs e)
+        {
+            _IsDragging = false;
+            base.OnMouseUp(e);
         }
 
         /// <summary>

@@ -59,9 +59,6 @@ namespace Astrarium.Types.Controls
         public static readonly DependencyProperty OnClickProperty =
             DependencyProperty.Register(nameof(OnClick), typeof(ICommand), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
 
-        public static readonly DependencyProperty IsDraggingProperty =
-           DependencyProperty.Register(nameof(IsDragging), typeof(bool), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = false, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged) });
-
         public static readonly DependencyProperty MinZoomLevelProperty =
            DependencyProperty.Register(nameof(MinZoomLevel), typeof(int), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = false, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
 
@@ -129,12 +126,6 @@ namespace Astrarium.Types.Controls
         {
             get => (bool)GetValue(IsMouseOverMapProperty);
             set => SetValue(IsMouseOverMapProperty, value);
-        }
-
-        public bool IsDragging
-        {
-            get => (bool)GetValue(IsDraggingProperty);
-            set => SetValue(IsDraggingProperty, value);
         }
 
         public int MinZoomLevel
@@ -220,7 +211,6 @@ namespace Astrarium.Types.Controls
             mapControl.MouseChanged += (s, e) => Mouse = mapControl.Mouse;
             mapControl.BackColorChanged += (s, e) => BackColor = mapControl.BackColor;
             mapControl.ForeColorChanged += (s, e) => ForeColor = mapControl.ForeColor;
-            mapControl.IsDraggingChaged += (s, e) => IsDragging = mapControl.IsDragging;
             mapControl.ZoomLevelChaged += (s, e) => ZoomLevel = mapControl.ZoomLevel;
 
 

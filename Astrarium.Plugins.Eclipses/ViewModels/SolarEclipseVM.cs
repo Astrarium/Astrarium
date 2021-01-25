@@ -3,6 +3,8 @@ using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
@@ -112,20 +114,8 @@ namespace Astrarium.Plugins.Eclipses
             set 
             {
                 SetValue(nameof(IsMouseOverMap), value);
-                if (!IsMapDragging)
-                {
-                    CalculateLocalCircumstances(observerLocation);
-                }
+                CalculateLocalCircumstances(observerLocation);
             } 
-        }
-
-        /// <summary>
-        /// Flag indicating map is dragging
-        /// </summary>
-        public bool IsMapDragging
-        {
-            get => GetValue<bool>(nameof(IsMapDragging));
-            set => SetValue(nameof(IsMapDragging), value);
         }
 
         /// <summary>
@@ -301,6 +291,12 @@ namespace Astrarium.Plugins.Eclipses
                 new OpenTopoMapServer()
             };
 
+            for (int i = 0; i < 5; i++) 
+            {
+                LocalContactsTable.Add(new LocalContactsTableItem(null, null));
+                LocalCircumstancesTable.Add(new NameValueTableItem(null, null));
+            }
+
             string tileServerName = settings.Get<string>("EclipseMapTileServer");
             var tileServer = TileServers.FirstOrDefault(s => s.Name.Equals(tileServerName));            
             TileServer = tileServer ?? TileServers.First();
@@ -355,10 +351,7 @@ namespace Astrarium.Plugins.Eclipses
             set
             {
                 SetValue(nameof(MapMouse), value);
-                if (!IsMapDragging)
-                {
-                    CalculateLocalCircumstances(new CrdsGeographical(-value.Longitude, value.Latitude));
-                }
+                CalculateLocalCircumstances(new CrdsGeographical(-value.Longitude, value.Latitude));
             }
         }
 
@@ -440,33 +433,15 @@ namespace Astrarium.Plugins.Eclipses
             IsCalculating = true;
             NotifyPropertyChanged(nameof(IsCalculating));
 
-            // TODO: verify algorithm
-            /*
-            do
-            {
-                eclipse = SolarEclipses.NearestEclipse(JulianDay + (next ? 1 : -1) * (saros ? LunarEphem.SAROS : LunarEphem.SINODIC_PERIOD), next);
-                if (Math.Abs(eclipse.JulianDayMaximum - JulianDay) < 1)
-                {
-                    JulianDay += (next ? 1 : -1) * LunarEphem.SINODIC_PERIOD / 2;
-                }
-                else
-                {
-                    break;
-                }
-            
-            }
-            while (true);
-            */
-            eclipse = SolarEclipses.NearestEclipse(JulianDay + (next ? 1 : -1) * (saros ? LunarEphem.SAROS : LunarEphem.SINODIC_PERIOD), next);
-
+            eclipse =  eclipsesCalculator.GetNearestEclipse(JulianDay, next, saros);
             JulianDay = eclipse.JulianDayMaximum;
             EclipseDate = Formatters.Date.Format(new Date(JulianDay, observerLocation.UtcOffset));
             be = eclipsesCalculator.GetBesselianElements(JulianDay);
             string type = eclipse.EclipseType.ToString();
             string subtype = eclipse.IsNonCentral ? " non-central" : "";
             EclipseDescription = $"{type}{subtype} solar eclipse";
-            PrevSarosEnabled = SolarEclipses.NearestEclipse(JulianDay - LunarEphem.SAROS, next: false).Saros == eclipse.Saros;
-            NextSarosEnabled = SolarEclipses.NearestEclipse(JulianDay + LunarEphem.SAROS, next: true).Saros == eclipse.Saros;
+            PrevSarosEnabled = eclipsesCalculator.GetNearestEclipse(JulianDay, next: false, saros: true).Saros == eclipse.Saros;
+            NextSarosEnabled = eclipsesCalculator.GetNearestEclipse(JulianDay, next: true, saros: true).Saros == eclipse.Saros;
 
             NotifyPropertyChanged(
                 nameof(EclipseDate), 
@@ -704,35 +679,24 @@ namespace Astrarium.Plugins.Eclipses
 
         private void CalculateLocalCircumstances(CrdsGeographical pos)
         {
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
-            {
-                LocalContactsTable.Clear();
-                LocalCircumstancesTable.Clear();
-            });
-
             var local = SolarEclipses.LocalCircumstances(be, pos);
-            
-            
-            var contacts = new List<LocalContactsTableItem>();
-            contacts.Add(new LocalContactsTableItem("C1: Beginning of partial phase", local.PartialBegin));
-            contacts.Add(new LocalContactsTableItem("C2: Beginning of total phase", local.TotalBegin));
-            contacts.Add(new LocalContactsTableItem("Max: Local maximum", local.Maximum));
-            contacts.Add(new LocalContactsTableItem("C3: End of total phase", local.TotalEnd));
-            contacts.Add(new LocalContactsTableItem("C4: End of partial phase", local.PartialEnd));
-
-            var details = new List<NameValueTableItem>();
-            details.Add(new NameValueTableItem("Maximal magnitude", local.MaxMagnitude > 0 ? fmtMag.Format(local.MaxMagnitude) : ""));
-            details.Add(new NameValueTableItem("Moon/Sun diameter ratio", local.MoonToSunDiameterRatio > 0 ? fmtRatio.Format(local.MoonToSunDiameterRatio) : ""));
-            details.Add(new NameValueTableItem("Partial phase duration", !double.IsNaN(local.PartialDuration) && local.PartialDuration > 0 ? fmtTime.Format(local.PartialDuration) : ""));
-            details.Add(new NameValueTableItem("Total phase duration", !double.IsNaN(local.TotalDuration) && local.TotalDuration > 0 ? fmtTime.Format(local.TotalDuration) : ""));
-            details.Add(new NameValueTableItem("Shadow path width", local.PathWidth > 0 ? fmtPathWidth.Format(local.PathWidth) : ""));
 
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
-                contacts.ToList().ForEach(i => LocalContactsTable.Add(i));
-                details.ToList().ForEach(i => LocalCircumstancesTable.Add(i));
+                var items = new List<LocalContactsTableItem>();
+                LocalContactsTable[0] = new LocalContactsTableItem("C1: Beginning of partial phase", local.PartialBegin);
+                LocalContactsTable[1] = new LocalContactsTableItem("C2: Beginning of total phase", local.TotalBegin);
+                LocalContactsTable[2] = new LocalContactsTableItem("Max: Local maximum", local.Maximum);
+                LocalContactsTable[3] = new LocalContactsTableItem("C3: End of total phase", local.TotalEnd);
+                LocalContactsTable[4] = new LocalContactsTableItem("C4: End of partial phase", local.PartialEnd);
+
+                LocalCircumstancesTable[0] = new NameValueTableItem("Maximal magnitude", local.MaxMagnitude > 0 ? fmtMag.Format(local.MaxMagnitude) : "");
+                LocalCircumstancesTable[1] = new NameValueTableItem("Moon/Sun diameter ratio", local.MoonToSunDiameterRatio > 0 ? fmtRatio.Format(local.MoonToSunDiameterRatio) : "");
+                LocalCircumstancesTable[2] = new NameValueTableItem("Partial phase duration", !double.IsNaN(local.PartialDuration) && local.PartialDuration > 0 ? fmtTime.Format(local.PartialDuration) : "");
+                LocalCircumstancesTable[3] = new NameValueTableItem("Total phase duration", !double.IsNaN(local.TotalDuration) && local.TotalDuration > 0 ? fmtTime.Format(local.TotalDuration) : "");
+                LocalCircumstancesTable[4] = new NameValueTableItem("Shadow path width", local.PathWidth > 0 ? fmtPathWidth.Format(local.PathWidth) : "");
             });
-            
+
             ObserverLocationName = IsMouseOverMap ? "Mouse coordinates" : observerLocation.LocationName;
             ObserverLocationCoordinates = IsMouseOverMap ? fmtGeo.Format(new CrdsGeographical(-MapMouse.Longitude, MapMouse.Latitude)) : fmtGeo.Format(observerLocation);
             LocalVisibilityDescription = eclipsesCalculator.GetLocalVisibilityString(eclipse, local);
@@ -761,8 +725,7 @@ namespace Astrarium.Plugins.Eclipses
                 // add previous eclipses
                 do
                 {
-                    jd -= LunarEphem.SAROS;
-                    var e = SolarEclipses.NearestEclipse(jd, false);
+                    var e = eclipsesCalculator.GetNearestEclipse(jd, next: false, saros: true);
                     jd = e.JulianDayMaximum;
                     if (e.Saros == eclipse.Saros)
                     {
@@ -779,8 +742,7 @@ namespace Astrarium.Plugins.Eclipses
                 // add next eclipses
                 do
                 {
-                    jd += LunarEphem.SAROS;
-                    var e = SolarEclipses.NearestEclipse(jd, true);
+                    var e = eclipsesCalculator.GetNearestEclipse(jd, next: true, saros: true);
                     jd = e.JulianDayMaximum;
                     if (e.Saros == eclipse.Saros)
                     {
@@ -844,7 +806,7 @@ namespace Astrarium.Plugins.Eclipses
             public string LocalVisibility { get; set; }
         }
 
-        public class NameValueTableItem
+        public class NameValueTableItem : INotifyPropertyChanged
         {
             public string Name { get; set; }
             public string Value { get; set; }
@@ -853,7 +815,16 @@ namespace Astrarium.Plugins.Eclipses
             {
                 Name = name;
                 Value = value;
+
             }
+
+            public void RaiseChanged()
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
+            }
+
+            public event PropertyChangedEventHandler PropertyChanged;
         }
 
         public class ContactsTableItem

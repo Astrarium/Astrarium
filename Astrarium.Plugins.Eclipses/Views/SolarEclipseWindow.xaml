@@ -292,7 +292,6 @@
                             ThumbnailBackColor="#333333"
                             ThumbnailForeColor="#555555"
                             IsMouseOverMap = "{Binding IsMouseOverMap, Mode=OneWayToSource}"
-                            IsDragging="{Binding IsMapDragging, Mode=OneWayToSource}"
                             TileImageAttributes="{Binding TileImageAttributes}"
                             OnClick="{Binding ClickOnMapCommand}"
                             Mouse="{Binding MapMouse, Mode=OneWayToSource}" Grid.ColumnSpan="2" Margin="0,0,0.4,25.4" Grid.RowSpan="2" />
@@ -336,6 +335,11 @@
                                     <DataGrid               
                                         VerticalScrollBarVisibility="Hidden"
                                         AutoGenerateColumns="False" 
+                                        EnableRowVirtualization="True"
+                                        EnableColumnVirtualization="True"
+                                        VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                                        VirtualizingPanel.VirtualizationMode="Recycling"
+                                        VirtualizingPanel.IsVirtualizing="True"
                                         IsReadOnly="True"
                                         CanUserReorderColumns="False"
                                         CanUserSortColumns="False"
@@ -347,7 +351,7 @@
                                         RowHeaderWidth="0"
                                         ColumnHeaderHeight="32"
                                         RowHeight="24"
-                                        ItemsSource="{Binding LocalCircumstancesTable}">
+                                        ItemsSource="{Binding Path=LocalCircumstancesTable, Mode=OneWay}">
                                         <DataGrid.Columns>
                                             <DataGridTextColumn Binding="{Binding Name}" />
                                             <DataGridTextColumn FontFamily="Lucida Console" Binding="{Binding Value}"/>
@@ -357,6 +361,11 @@
                                     <DataGrid 
                                         x:Name="LocalCircumstancesTable"
                                         VerticalScrollBarVisibility="Auto"
+                                        EnableRowVirtualization="True"
+                                        EnableColumnVirtualization="True"
+                                        VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                                        VirtualizingPanel.VirtualizationMode="Recycling"
+                                        VirtualizingPanel.IsVirtualizing="True"
                                         VerticalAlignment="Stretch"
                                         AutoGenerateColumns="False" 
                                         IsReadOnly="True"
@@ -369,7 +378,7 @@
                                         RowHeaderWidth="0"
                                         ColumnHeaderHeight="32"
                                         RowHeight="24"
-                                        ItemsSource="{Binding LocalContactsTable}">
+                                        ItemsSource="{Binding Path=LocalContactsTable, Mode=OneWay}">
                                         <DataGrid.Columns>
                                             <DataGridTextColumn Header="Instant" Binding="{Binding Point}" />
                                             <DataGridTextColumn Header="Time" FontFamily="Lucida Console" Binding="{Binding Time}"/>
