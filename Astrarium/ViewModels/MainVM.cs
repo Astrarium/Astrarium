@@ -564,14 +564,13 @@ namespace Astrarium.ViewModels
             if (ViewManager.ShowDialog(ps) ?? false)
             {
                 var tokenSource = new CancellationTokenSource();
-
                 ViewManager.ShowProgress("$CalculatePhenomena.WaitTitle", "$CalculatePhenomena.WaitText", tokenSource);
 
                 var events = await Task.Run(() => sky.GetEvents(
                         ps.JulianDayFrom,
                         ps.JulianDayTo,
                         ps.Categories,
-                        tokenSource.Token));
+                        tokenSource.Token), tokenSource.Token);
                
                 if (!tokenSource.IsCancellationRequested)
                 {

@@ -1,10 +1,12 @@
 ﻿using Astrarium.Algorithms;
+using Astrarium.Plugins.Eclipses.Types;
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Eclipses
@@ -12,12 +14,14 @@ namespace Astrarium.Plugins.Eclipses
     public class EclipsesCalculator : BaseAstroEventsProvider, IEclipsesCalculator
     {
         private readonly ISky sky;
+        private readonly CitiesManager citiesManager;
         private CelestialObject sun;
         private CelestialObject moon;
 
-        public EclipsesCalculator(ISky sky)
+        public EclipsesCalculator(ISky sky, CitiesManager citiesManager)
         {
             this.sky = sky;
+            this.citiesManager = citiesManager;
             this.sky.Calculated += Sky_Calculated;
         }
 
@@ -219,6 +223,62 @@ namespace Astrarium.Plugins.Eclipses
             }
 
             return SolarEclipses.BesselianElements(jdMaximum, pos);
+        }
+
+        /// <inheritdoc/>
+        public ICollection<SolarEclipseLocalCircumstances> FindCitiesOnCentralLine(PolynomialBesselianElements be, ICollection<CrdsGeographical> centralLine, CancellationToken? cancelToken = null, IProgress<double> progress = null)
+        {
+            List<CrdsGeographical> cities = new List<CrdsGeographical>();
+
+            for (int i = 0; i < centralLine.Count - 1; i++)
+            {
+                // Report progess
+                progress?.Report((double)(i + 1) / centralLine.Count * 100);
+
+                // Exit loop if cancel requested
+                if (cancelToken?.IsCancellationRequested == true)
+                    return new SolarEclipseLocalCircumstances[0];
+
+                // 2 successive points create a central line segment
+                var g0 = centralLine.ElementAt(i);
+                var g1 = centralLine.ElementAt(i + 1);
+
+                // Segment length, distance between 2 points on central line, in kilometers
+                var length = g0.DistanceTo(g1);
+
+                // Local circumstances at point "g0"
+                var local = SolarEclipses.LocalCircumstances(be, g0);
+
+                // Lunar umbra radius, in kilometers
+                float r = (float)(local.PathWidth / 2);
+
+                if (r > 0)
+                {
+                    // Count of parts the segment should be splitted 
+                    int parts = (int)Math.Round(length / r);
+
+                    // If the segment should be splitted
+                    if (parts > 1)
+                    {
+                        // Find intermediate points and add closest cities 
+                        for (int j = 0; j < parts; j++)
+                        {
+                            var g = Angle.Intermediate(g0, g1, (float)j / parts);
+                            cities.AddRange(citiesManager.FindCities(g, r));
+                        }
+                    }
+                    // The segment should not be splitted, add closest cities to the first point
+                    else
+                    {
+                        cities.AddRange(citiesManager.FindCities(g0, r));
+                    }
+                }
+            }
+
+            return cities
+                .Distinct()
+                .Select(c => SolarEclipses.LocalCircumstances(be, c))
+                .ToArray();
         }
     }
 }

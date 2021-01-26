@@ -597,12 +597,20 @@
 
 
             </TabItem>
-            <TabItem Header="Local Circumstances"></TabItem>
+            <TabItem Header="Local Circumstances">
+
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" Margin="12">
+                    <RadioButton Content="Import from file" Margin="4" HorizontalAlignment="Left" />
+                    <RadioButton Content="Find cities on central line (total path)" Margin="4"  HorizontalAlignment="Left" />
+                    <RadioButton Content="Add cities manually" Margin="4"  HorizontalAlignment="Left" />
+                    <Separator Margin="4" />
+                    <Button Margin="4" MinWidth="80" Command="{Binding FindCitiesOnCentralLineCommand}" HorizontalAlignment="Left" Content="test" Width="Auto" />
+                </StackPanel>
+                
+                
+                
+            </TabItem>
         </TabControl>
-
-
-
-
 
     </Grid>
 </Window>

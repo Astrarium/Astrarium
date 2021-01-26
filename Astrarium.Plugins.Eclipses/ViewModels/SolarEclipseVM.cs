@@ -1,4 +1,5 @@
 ﻿using Astrarium.Algorithms;
+using Astrarium.Plugins.Eclipses.Types;
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -170,16 +172,15 @@ namespace Astrarium.Plugins.Eclipses
         }
 
         public ICommand ChangeDateCommand => new Command(ChangeDate);
-
         public ICommand PrevEclipseCommand => new Command(PrevEclipse);
         public ICommand NextEclipseCommand => new Command(NextEclipse);
         public ICommand PrevSarosCommand => new Command(PrevSaros);
         public ICommand NextSarosCommand => new Command(NextSaros);
         public ICommand ClickOnMapCommand => new Command(ClickOnMap);
         public ICommand ClickOnLinkCommand => new Command<double>(ClickOnLink);
-
         public ICommand ChartZoomInCommand => new Command(ChartZoomIn);
         public ICommand ChartZoomOutCommand => new Command(ChartZoomOut);
+        public ICommand FindCitiesOnCentralLineCommand => new Command(FindCitiesOnCentralLine);
 
         private int currentSarosSeries = 0;
         private int selectedTabIndex = 0;
@@ -217,6 +218,7 @@ namespace Astrarium.Plugins.Eclipses
         private readonly IEclipsesCalculator eclipsesCalculator;
         private readonly ISettings settings;
         private CrdsGeographical observerLocation;
+        private SolarEclipseMap map;
         private PolynomialBesselianElements be;
         private SolarEclipse eclipse;
         private static NumberFormatInfo nf;
@@ -451,7 +453,7 @@ namespace Astrarium.Plugins.Eclipses
 
             await Task.Run(() =>
             {
-                var map = SolarEclipses.EclipseMap(be);
+                map = SolarEclipses.EclipseMap(be);
 
                 var tracks = new List<Track>();
                 var polygons = new List<Polygon>();
@@ -790,6 +792,21 @@ namespace Astrarium.Plugins.Eclipses
             });
         }
 
+        public async void FindCitiesOnCentralLine()
+        {
+            var tokenSource = new CancellationTokenSource();
+            var progress = new Progress<double>();
+            ViewManager.ShowProgress("Please wait", "Finding cities on central line of the eclipse...", tokenSource, progress);
+            var locals = await Task.Run(() => eclipsesCalculator.FindCitiesOnCentralLine(be, map.TotalPath, tokenSource.Token, progress));
+
+            if (!tokenSource.IsCancellationRequested)
+            {
+                tokenSource.Cancel();
+            }
+
+            Console.WriteLine($"{locals.Count} cities found.");
+        }        
+
         private GeoPoint ToGeo(CrdsGeographical g)
         {
             return new GeoPoint((float)-g.Longitude, (float)g.Latitude);
@@ -806,7 +823,7 @@ namespace Astrarium.Plugins.Eclipses
             public string LocalVisibility { get; set; }
         }
 
-        public class NameValueTableItem : INotifyPropertyChanged
+        public class NameValueTableItem
         {
             public string Name { get; set; }
             public string Value { get; set; }
@@ -817,14 +834,6 @@ namespace Astrarium.Plugins.Eclipses
                 Value = value;
 
             }
-
-            public void RaiseChanged()
-            {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
-            }
-
-            public event PropertyChangedEventHandler PropertyChanged;
         }
 
         public class ContactsTableItem
@@ -888,6 +897,6 @@ namespace Astrarium.Plugins.Eclipses
                 if (index <= 1)
                     Mu = Angle.To360(pbe.Mu[index]).ToString("N6", nf);
             }
-        }
+        }        
     }
 }

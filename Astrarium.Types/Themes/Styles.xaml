@@ -3277,8 +3277,10 @@
                         <c:BorderFix x:Name="PART_Track" BorderThickness="1" BorderBrush="{TemplateBinding BorderBrush}" />
                         <c:BorderFix x:Name="PART_Indicator"
                               BorderThickness="1"
+                              Background="{TemplateBinding Foreground}"      
                               HorizontalAlignment="Left"
                               Margin="1">
+
                             <c:BorderFix Visibility="{TemplateBinding Property=IsIndeterminate, Converter={t:BoolToVisibilityConverter}}" x:Name="DiagonalDecorator" Width="5000">
                                 <c:BorderFix.Background>
                                     <DrawingBrush TileMode="Tile" Stretch="None" Viewbox="0,0,1,1" Viewport="0,0,500,5" ViewportUnits="Absolute">
@@ -3308,6 +3310,11 @@
                             </c:BorderFix>
                         </c:BorderFix>
                     </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsIndeterminate" Value="True">
+                            <Setter TargetName="PART_Indicator" Property="Background" Value="Transparent" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

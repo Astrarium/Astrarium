@@ -21,6 +21,10 @@ namespace Astrarium.Plugins.SolarSystem
 
             for (double jd = context.From; jd < context.To; jd += 365)
             {
+                // check for cancel
+                if (context.CancelToken?.IsCancellationRequested == true)
+                    return new AstroEvent[0];
+
                 events.Add(new AstroEvent(SolarEphem.Season(jd, Season.Spring), Text.Get("SunEvents.Seasons.Spring")));
                 events.Add(new AstroEvent(SolarEphem.Season(jd, Season.Summer), Text.Get("SunEvents.Seasons.Summer")));
                 events.Add(new AstroEvent(SolarEphem.Season(jd, Season.Autumn), Text.Get("SunEvents.Seasons.Autumn")));

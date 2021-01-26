@@ -319,7 +319,7 @@ namespace Astrarium.Algorithms
 
             if (G < 0)
             {
-                return new SolarEclipseLocalCircumstances() { IsInvisible = true };
+                return new SolarEclipseLocalCircumstances() { IsInvisible = true, Location = g };
             }
 
             var tauPhases = new double[4];
@@ -411,12 +411,13 @@ namespace Astrarium.Algorithms
 
             if (altPhases[0] < 0 && altPhases[1] < 0)
             {
-                return new SolarEclipseLocalCircumstances() { IsInvisible = true };
+                return new SolarEclipseLocalCircumstances() { IsInvisible = true, Location = g };
             }
             else
             {
                 return new SolarEclipseLocalCircumstances()
                 {
+                    Location = g,
                     Maximum = new SolarEclipseLocalCircumstancesContactPoint(jdMax, altMax, posAngleMax, zenithAngleMax, qAngleMax),
                     PartialBegin = new SolarEclipseLocalCircumstancesContactPoint(jdPhases[0], altPhases[0], posAngles[0], zenithAngles[0], qAngles[0]),
                     PartialEnd = new SolarEclipseLocalCircumstancesContactPoint(jdPhases[1], altPhases[1], posAngles[1], zenithAngles[1], qAngles[1]),

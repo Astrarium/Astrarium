@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Astrarium.Types
@@ -47,5 +48,6 @@ namespace Astrarium.Types
         public CrdsGeographical GeoLocation { get; set; }
         public double From { get; set; }
         public double To { get; set; }
+        public CancellationToken? CancelToken { get; set; }
     }
 }

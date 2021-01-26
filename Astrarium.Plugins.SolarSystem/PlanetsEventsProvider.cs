@@ -97,6 +97,10 @@ namespace Astrarium.Plugins.SolarSystem
 
             for (jd = context.From; jd < context.To; jd++)
             {
+                // check for cancel
+                if (context.CancelToken?.IsCancellationRequested == true)
+                    return new Conjunction[0];
+
                 // "a" is a difference in longitude coordinate (Right Ascension or Ecliptical Longitude) between two planets (5 points)
                 double[] a = new double[5];
 
@@ -196,6 +200,10 @@ namespace Astrarium.Plugins.SolarSystem
 
             for (jd = context.From; jd < context.To; jd++)
             {
+                // check for cancel
+                if (context.CancelToken?.IsCancellationRequested == true)
+                    return new AstroEvent[0];
+
                 // "ad" is a angular distance between two planets (5 points)
                 double[] ad = new double[5];
 
@@ -270,6 +278,10 @@ namespace Astrarium.Plugins.SolarSystem
 
             for (jd = context.From; jd < context.To; jd++)
             {
+                // check for cancel
+                if (context.CancelToken?.IsCancellationRequested == true)
+                    return new AstroEvent[0];
+
                 // "m" is a planet magnitude
                 double[] m = new double[5];
 
@@ -333,6 +345,10 @@ namespace Astrarium.Plugins.SolarSystem
 
             for (jd = context.From; jd < context.To; jd++)
             {
+                // check for cancel
+                if (context.CancelToken?.IsCancellationRequested == true)
+                    return new AstroEvent[0];
+
                 // "lon" is a planet ecliptical longitude 
                 double[] lon = new double[5];
 
@@ -400,6 +416,10 @@ namespace Astrarium.Plugins.SolarSystem
 
             for (jd = context.From; jd < context.To; jd++)
             {
+                // check for cancel
+                if (context.CancelToken?.IsCancellationRequested == true)
+                    return new AstroEvent[0];
+
                 // "el" is a planet elongation
                 double[] el = new double[5];
 
@@ -454,6 +474,10 @@ namespace Astrarium.Plugins.SolarSystem
 
             for (jd = context.From; jd < context.To; jd++)
             {
+                // check for cancel
+                if (context.CancelToken?.IsCancellationRequested == true)
+                    return new AstroEvent[0];
+
                 // "diff" is a planet difference in longitude with the Sun
                 double[] diff = new double[5];
 
@@ -504,6 +528,10 @@ namespace Astrarium.Plugins.SolarSystem
 
             for (jd = context.From; jd < context.To; jd++)
             {
+                // check for cancel
+                if (context.CancelToken?.IsCancellationRequested == true)
+                    return new AstroEvent[0];
+
                 // "diff" is a planet difference in longitude with the Sun
                 double[] diff = new double[5];
 
@@ -574,6 +602,10 @@ namespace Astrarium.Plugins.SolarSystem
 
             for (double jd = context.From; jd < context.To; jd++)
             {
+                // check for cancel
+                if (context.CancelToken?.IsCancellationRequested == true)
+                    return new AstroEvent[0];
+
                 // p is a number of a planet
                 for (int p = 1; p <= 8; p++)
                 {

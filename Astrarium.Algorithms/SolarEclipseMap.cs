@@ -17,7 +17,6 @@ namespace Astrarium.Algorithms
         /// <summary>
         /// Defines points on a cenral line of an eclipse.
         /// Can be empty (if the eclipse is partial one).
-        /// Central line of eclipse can be divided into two segments, if the line crosses circumpolar regions. 
         /// </summary>
         public IList<CrdsGeographical> TotalPath { get; set; } = new CrdsGeographical[0];
 

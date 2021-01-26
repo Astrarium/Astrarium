@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -40,7 +41,10 @@ namespace Astrarium.Views
             set
             {                
                 _Progress = value;
+
+                ProgressBar.Value = 0;
                 ProgressBar.IsIndeterminate = _Progress == null;
+
                 if (_Progress != null)
                 {
                     _Progress.ProgressChanged += _Progress_ProgressChanged;
@@ -70,11 +74,13 @@ namespace Astrarium.Views
 
         private void _Progress_ProgressChanged(object sender, double progress)
         {
-            ProgressBar.Value = progress;            
+            Dispatcher.Invoke(() => { ProgressBar.Value = progress; });
         }
 
         protected override void OnClosed(EventArgs e)
-        {           
+        {
+            ProgressBar.IsIndeterminate = false;
+            ProgressBar.Value = 0;
             if (_Progress != null)
             {
                 _Progress.ProgressChanged -= _Progress_ProgressChanged;
@@ -84,7 +90,7 @@ namespace Astrarium.Views
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
-            CancellationTokenSource?.Cancel();          
+            _CancellationTokenSource?.Cancel();          
         }
     }
 }

@@ -28,7 +28,7 @@ namespace Astrarium.Plugins.Eclipses
         private void ShowSolarEclipsesView()
         {
             var vm = ViewManager.CreateViewModel<SolarEclipseVM>();
-            ViewManager.ShowWindow(vm);
+            ViewManager.ShowDialog(vm);
         }
 
         private void ShowLunarEclipsesView()

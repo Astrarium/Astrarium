@@ -316,5 +316,26 @@ namespace Astrarium.Algorithms
             double R = 1.02 / Math.Tan(Angle.ToRadians(h0.Altitude + 10.3 / (h0.Altitude + 5.11)));
             return new CrdsHorizontal(h0.Azimuth, h0.Altitude + R / 60);
         }
+
+        /// <summary>
+        /// Calculates distance in kilometers between 2 points on the Earth surface.
+        /// </summary>
+        /// <param name="g1">First point.</param>
+        /// <param name="g2">Second point.</param>
+        /// <returns>Distance in kilometers between 2 points.</returns>
+        /// <remarks>
+        /// The method is taken from https://www.movable-type.co.uk/scripts/latlong.html
+        /// </remarks>
+        public static double DistanceTo(this CrdsGeographical g1, CrdsGeographical g2)
+        {
+            const double R = 6371;
+            double phi1 = Angle.ToRadians(g1.Latitude);
+            double phi2 = Angle.ToRadians(g2.Latitude);
+            double deltaPhi = Angle.ToRadians(g2.Latitude - g1.Latitude);
+            double deltaLambda = Angle.ToRadians(g2.Longitude - g1.Longitude);
+            double a = Math.Sin(deltaPhi / 2) * Math.Sin(deltaPhi / 2) + Math.Cos(phi1) * Math.Cos(phi2) * Math.Sin(deltaLambda / 2) * Math.Sin(deltaLambda / 2);
+            double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+            return R * c;
+        }
     }
 }

@@ -212,7 +212,6 @@ namespace Astrarium.ViewModels
                 return results;
             }
 
-
             var stringPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data", "Cities.dat");
             FileStream _FileStream = File.OpenRead(stringPath);
 
