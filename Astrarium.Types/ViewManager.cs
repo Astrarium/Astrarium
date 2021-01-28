@@ -86,6 +86,12 @@ namespace Astrarium.Types
             return viewManager.ShowSaveFileDialog(caption, fileName, extension, filter, out selectedFilterIndex);
         }
 
+        /// <summary>
+        /// Shows open file dialog
+        /// </summary>
+        /// <param name="caption">Dialog title</param>
+        /// <param name="filter">Alowed files extensions filter</param>
+        /// <returns>File name and path, if user pressed OK, null otherwise.</returns>
         public static string ShowOpenFileDialog(string caption, string filter)
         {
             return viewManager.ShowOpenFileDialog(caption, filter);

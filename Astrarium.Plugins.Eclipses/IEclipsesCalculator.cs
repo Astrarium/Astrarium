@@ -21,5 +21,7 @@ namespace Astrarium.Plugins.Eclipses
         /// <param name="progress">Interface for reporting calculation progress.</param>
         /// <returns>Collection of local circumstances for all places found on the central line.</returns>
         ICollection<SolarEclipseLocalCircumstances> FindCitiesOnCentralLine(PolynomialBesselianElements be, ICollection<CrdsGeographical> centralLine, CancellationToken? cancelToken = null, IProgress<double> progress = null);
+
+        ICollection<SolarEclipseLocalCircumstances> FindLocalCircumstancesForCities(PolynomialBesselianElements be, ICollection<CrdsGeographical> cities, CancellationToken? cancelToken = null, IProgress<double> progress = null);
     }
 }

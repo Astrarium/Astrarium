@@ -7,6 +7,7 @@
         xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
         mc:Ignorable="d"
         Width="600" Height="200"
+        SizeToContent="Height"
         MinWidth="300" MinHeight="200"
         Style="{StaticResource {x:Type Window}}"
         ShowInTaskbar="False"

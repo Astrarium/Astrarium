@@ -8,6 +8,7 @@
     xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types" 
     xmlns:q="clr-namespace:Astrarium.Plugins.Eclipses.Controls" 
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+    xmlns:vm="clr-namespace:Astrarium.Plugins.Eclipses.ViewModels"
     x:Class="Astrarium.Plugins.Eclipses.SolarEclipseWindow" 
     mc:Ignorable="d" 
     Title="Solar Eclipses"
@@ -19,7 +20,7 @@
 
     <Window.Resources>
         <ResourceDictionary>
-            
+
             <Style x:Key="ImageButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
                 <Style.Setters>
                     <Setter Property="Cursor" Value="Hand" />
@@ -108,7 +109,7 @@
                     </Path.LayoutTransform>
                 </Path>
             </Grid>
-            
+
             <Grid x:Key="ImageZoomIn" x:Shared="False" >
                 <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="20" Height="20" Stretch="UniformToFill" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
                     <Path.Data>
@@ -165,8 +166,8 @@
                 <Path Clip="M0,0 V125 H100 V0 H0 Z" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform" SnapsToDevicePixels="True" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ToggleButton}, Path=Foreground}">
                     <Path.Data>
                         <StreamGeometry>
-                                F1 M100,125z M0,0z M50,82.1L7.7,82.1C4.9,82.1 2.5,84.4 2.5,87.3 2.5,90.2 4.8,92.5 7.7,92.5L50,92.5C52.8,92.5 55.2,90.2 55.2,87.3 55.2,84.4 52.8,82.1 50,82.1z
-                            </StreamGeometry>
+                            F1 M100,125z M0,0z M50,82.1L7.7,82.1C4.9,82.1 2.5,84.4 2.5,87.3 2.5,90.2 4.8,92.5 7.7,92.5L50,92.5C52.8,92.5 55.2,90.2 55.2,87.3 55.2,84.4 52.8,82.1 50,82.1z
+                        </StreamGeometry>
                     </Path.Data>
                 </Path>
             </Grid>
@@ -283,11 +284,13 @@
                         <c:MapControl
                             x:Name="Map"
                             Grid.Row="0"
-                            BackColor="#333333"                             
+                            BackColor="#333333"                       
                             TileServer="{Binding TileServer, Mode=TwoWay}" 
                             CacheFolder="{Binding CacheFolder, Mode=OneTime}"
                             Markers="{Binding Markers}"
                             Tracks="{Binding Tracks}"
+                            Center="{Binding MapCenter, Mode=TwoWay}"
+                            ZoomLevel="{Binding MapZoomLevel, Mode=TwoWay}"
                             Polygons="{Binding Polygons}"
                             ThumbnailBackColor="#333333"
                             ThumbnailForeColor="#555555"
@@ -325,13 +328,16 @@
                         HorizontalScrollBarVisibility="Auto"
                         VerticalScrollBarVisibility="Auto">
                         <StackPanel x:Name="RightPanelStack" Orientation="Vertical">
-                            <TextBlock FontSize="18" Padding="6 2">Local Circumstances</TextBlock>
+                            <TextBlock Padding="6 2" FontSize="18" >Local Circumstances</TextBlock>
                             <TextBlock Padding="6 2" Text="{Binding ObserverLocationName, FallbackValue='Observer location name'}" />
-                            <TextBlock Padding="6 2" Text="{Binding ObserverLocationCoordinates, FallbackValue='Coordinates'}" />
                             <TextBlock Padding="6 2" TextTrimming="CharacterEllipsis" Width="{Binding ElementName=RightPanel, Path=ActualWidth}" Text="{Binding LocalVisibilityDescription, FallbackValue='Local visibility description'}" HorizontalAlignment="Left" />
+                            <ToggleButton IsChecked="{Binding IsMapLocked}" Visibility="{Binding IsMapLocked, Converter={s:BoolToVisibilityConverter}}" Margin="6 2" Content="Unlock the map" Height="24" HorizontalAlignment="Left" VerticalContentAlignment="Center" />
+                            <TextBlock Visibility="{Binding IsMapLocked, Converter={s:InverseBoolToVisibilityConverter}}" IsEnabled="False" Padding="6 2" FontSize="12" TextWrapping="WrapWithOverflow" HorizontalAlignment="Stretch" Text="Double click the map to lock on the desired point." />
 
+                            <!-- Local details expander -->
                             <Expander Margin="0 6 0 4" Header="Local Details" IsExpanded="True">
                                 <StackPanel Orientation="Vertical" IsEnabled="{Binding IsVisibleFromCurrentPlace, Mode=OneWay}">
+                                    <!-- Local circumstances table -->
                                     <DataGrid               
                                         VerticalScrollBarVisibility="Hidden"
                                         AutoGenerateColumns="False" 
@@ -357,9 +363,8 @@
                                             <DataGridTextColumn FontFamily="Lucida Console" Binding="{Binding Value}"/>
                                         </DataGrid.Columns>
                                     </DataGrid>
-
+                                    <!-- Local contacts table -->
                                     <DataGrid 
-                                        x:Name="LocalCircumstancesTable"
                                         VerticalScrollBarVisibility="Auto"
                                         EnableRowVirtualization="True"
                                         EnableColumnVirtualization="True"
@@ -390,6 +395,7 @@
                                 </StackPanel>
                             </Expander>
 
+                            <!-- Eclipse chart -->
                             <Expander Header="Local View" IsExpanded="True" >
                                 <StackPanel  Orientation="Vertical" IsEnabled="{Binding IsVisibleFromCurrentPlace, Mode=OneWay}">
                                     <!-- Chart header -->
@@ -439,7 +445,6 @@
                                 </StackPanel>
                             </Expander>
                             <StackPanel x:Name="RightPanelFooter" Orientation="Vertical">
-                                <TextBlock IsEnabled="False" Padding="4" FontSize="12" TextWrapping="WrapWithOverflow" HorizontalAlignment="Stretch" Text="Double click the map to lock on the desired point." />
                             </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
@@ -554,12 +559,16 @@
             <TabItem Header="Saros Series">
 
                 <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="62*"/>
+                        <ColumnDefinition Width="103*"/>
+                    </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" FontSize="18" Padding="8 8 0 0" Text="{Binding SarosSeriesTableTitle, FallbackValue='List of eclipses of saros series 123'}" />
+                    <TextBlock Grid.Row="0" FontSize="18" Padding="8 8 0 0" Text="{Binding SarosSeriesTableTitle, FallbackValue='List of eclipses of saros series 123'}" Grid.ColumnSpan="2" />
                     <DataGrid Grid.Row="1"
                         IsEnabled="{Binding IsCalculating, Converter={s:InverseBoolConverter}}"
                         VerticalScrollBarVisibility="Auto"
@@ -575,14 +584,14 @@
                         RowHeaderWidth="0"
                         ColumnHeaderHeight="32"
                         RowHeight="24"
-                        ItemsSource="{Binding SarosSeriesTable}">
+                        ItemsSource="{Binding SarosSeriesTable}" Grid.ColumnSpan="2">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Member" Binding="{Binding Member}"/>
                             <DataGridTemplateColumn Header="Date">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock FontFamily="Lucida Console" FontSize="12">
-                                        <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:SolarEclipseWindow}, Mode=FindAncestor}, Path=DataContext.ClickOnLinkCommand}" CommandParameter="{Binding JulianDay}"><Run Text="{Binding Date}" /></Hyperlink>
+                                        <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:SolarEclipseWindow}, Mode=FindAncestor}, Path=DataContext.SarosSeriesTableSetDateCommand}" CommandParameter="{Binding JulianDay}"><Run Text="{Binding Date}" /></Hyperlink>
                                         </TextBlock>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -590,7 +599,20 @@
                             <DataGridTextColumn Header="Type" Binding="{Binding Type}"/>
                             <DataGridTextColumn Header="Gamma" Binding="{Binding Gamma}"/>
                             <DataGridTextColumn Header="Magnitude" Binding="{Binding Magnitude}"/>
-                            <DataGridTextColumn Header="Local visibility" Binding="{Binding LocalVisibility}"/>
+                            <DataGridTemplateColumn>
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                        <Style.Setters>
+                                            <Setter Property="Content" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:SolarEclipseWindow}, Mode=FindAncestor}, Path=DataContext.SettingsLocationName}" />
+                                        </Style.Setters>
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock FontSize="12" Text="{Binding LocalVisibility}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
@@ -599,16 +621,77 @@
             </TabItem>
             <TabItem Header="Local Circumstances">
 
-                <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" Margin="12">
-                    <RadioButton Content="Import from file" Margin="4" HorizontalAlignment="Left" />
-                    <RadioButton Content="Find cities on central line (total path)" Margin="4"  HorizontalAlignment="Left" />
-                    <RadioButton Content="Add cities manually" Margin="4"  HorizontalAlignment="Left" />
-                    <Separator Margin="4" />
-                    <Button Margin="4" MinWidth="80" Command="{Binding FindCitiesOnCentralLineCommand}" HorizontalAlignment="Left" Content="test" Width="Auto" />
-                </StackPanel>
-                
-                
-                
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Expander Header="Options" Margin="8 8 8 0" IsExpanded="True" Grid.Row="0">
+                        <StackPanel  Orientation="Vertical" HorizontalAlignment="Stretch">
+                            <RadioButton IsChecked="{Binding FillCitiesOption, Converter={s:EqualityConverter}, ConverterParameter={x:Static vm:CitiesListOption.FromFile}}" Content="Import cities from file" Margin="4" HorizontalAlignment="Left" />
+                            <RadioButton IsChecked="{Binding FillCitiesOption, Converter={s:EqualityConverter}, ConverterParameter={x:Static vm:CitiesListOption.TotalPath}}" Content="Find cities on total eclipse path" Margin="4"  HorizontalAlignment="Left" />
+                            <Separator Margin="4" />
+                            <Button Margin="4" MinWidth="80" Command="{Binding FillCitiesTableCommand}" HorizontalAlignment="Left" Content="test" Width="Auto" />
+                        </StackPanel>
+                    </Expander>
+                    
+                    
+                    <DataGrid Grid.Row="1"
+                        VerticalScrollBarVisibility="Auto"
+                        VerticalAlignment="Stretch"
+                        AutoGenerateColumns="False" 
+                        CanUserReorderColumns="False"
+                        CanUserSortColumns="True"
+                        VirtualizingPanel.IsVirtualizing="True"
+                        EnableRowVirtualization="True"
+                        IsReadOnly="True"
+                        GridLinesVisibility="All"
+                        BorderThickness="1"
+                        Margin="8"
+                        Padding="2"
+                        RowHeaderWidth="0"
+                        ColumnHeaderHeight="32"
+                        RowHeight="24"
+                        ItemsSource="{Binding CitiesListTable}">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Location" CanUserSort="True" SortMemberPath="{Binding LocationName}">
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                        <Setter Property="ToolTip" Value="Name of the location" />
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock>
+                                            <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:SolarEclipseWindow}, Mode=FindAncestor}, Path=DataContext.CitiesListTableGoToCoordinatesCommand}" CommandParameter="{Binding Coordinates, Mode=OneWay}"><Run Text="{Binding LocationName, Mode=OneWay}" ToolTip="Click to show the map" /></Hyperlink>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            
+                            <DataGridTextColumn Header="Coordinates" Binding="{Binding CoordinatesString}" CanUserSort="False" />
+
+                            <DataGridTextColumn Header="Max Mag" Binding="{Binding MaxMagString}" SortMemberPath="MaxMag" CanUserSort="True">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                        <Setter Property="ToolTip" Value="Maximal magnitude" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Moon/Sun" Binding="{Binding MoonSunRatioString}" SortMemberPath="MoonSunRatio" CanUserSort="True" />
+                            <DataGridTextColumn Header="Partial Dur" Binding="{Binding PartialDurString}" SortMemberPath="PartialDur" CanUserSort="True" />
+                            <DataGridTextColumn Header="Total Dur" Binding="{Binding TotalDurString}" SortMemberPath="TotalDur" CanUserSort="True" />
+                            <DataGridTextColumn Header="Shadow" Binding="{Binding ShadowWidthString}" SortMemberPath="ShadowWidth" CanUserSort="True" />
+                            <DataGridTextColumn Header="Partial Begin" Binding="{Binding C1TimeString}" SortMemberPath="C1Time" CanUserSort="True" />
+                            <DataGridTextColumn Header="Total Begin" Binding="{Binding C2TimeString}" SortMemberPath="C2Time" CanUserSort="True" />
+                            <DataGridTextColumn Header="Max" Binding="{Binding MaxTimeString}" SortMemberPath="MaxTime" CanUserSort="True" />
+                            <DataGridTextColumn Header="Total End" Binding="{Binding C3TimeString}" SortMemberPath="C3Time" CanUserSort="True" />
+                            <DataGridTextColumn Header="Partial End" Binding="{Binding C4TimeString}" SortMemberPath="C4Time" CanUserSort="True" />
+                            <DataGridTextColumn Header="Visibility" Binding="{Binding Visibility}" CanUserSort="False" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
             </TabItem>
         </TabControl>
 

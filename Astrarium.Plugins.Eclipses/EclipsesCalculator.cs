@@ -156,7 +156,7 @@ namespace Astrarium.Plugins.Eclipses
 
         public string GetLocalVisibilityString(SolarEclipse eclipse, SolarEclipseLocalCircumstances localCirc)
         {
-            string localVisibility = "invisible from current place";
+            string localVisibility = "invisible";
             if (localCirc.MaxMagnitude > 0)
             {
                 string localMag = Formatters.Phase.Format(localCirc.MaxMagnitude);
@@ -166,17 +166,17 @@ namespace Astrarium.Plugins.Eclipses
                 if (localCirc.Maximum.SolarAltitude <= 0)
                 {
                     if ((localCirc.TotalEnd != null && localCirc.TotalEnd.SolarAltitude < 0) || localCirc.PartialEnd.SolarAltitude < 0)
-                        localVisibility = $"visible{asPartial} on sunset from current place (max phase {localMag})";
+                        localVisibility = $"visible{asPartial} on sunset (max phase {localMag})";
                     else if (localCirc.PartialBegin.SolarAltitude < 0 || (localCirc.TotalBegin != null && localCirc.TotalBegin.SolarAltitude < 0))
-                        localVisibility = $"visible{asPartial} on sunrise from current place (max phase {localMag})";
+                        localVisibility = $"visible{asPartial} on sunrise (max phase {localMag})";
                 }
                 // max instant visible
                 else
                 {
                     if (localCirc.TotalDuration > 0)
-                        localVisibility = "completely visible from current place";
+                        localVisibility = "completely visible";
                     else
-                        localVisibility = $"visible{asPartial} from current place (max phase {localMag})";
+                        localVisibility = $"visible{asPartial} (max phase {localMag})";
                 }
             }
 
@@ -275,6 +275,12 @@ namespace Astrarium.Plugins.Eclipses
                 }
             }
 
+            return FindLocalCircumstancesForCities(be, cities, cancelToken, progress);
+        }
+
+        /// <inheritdoc/>
+        public ICollection<SolarEclipseLocalCircumstances> FindLocalCircumstancesForCities(PolynomialBesselianElements be, ICollection<CrdsGeographical> cities, CancellationToken? cancelToken = null, IProgress<double> progress = null)
+        {
             return cities
                 .Distinct()
                 .Select(c => SolarEclipses.LocalCircumstances(be, c))

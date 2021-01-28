@@ -45,7 +45,7 @@ namespace Astrarium.Plugins.Eclipses
         {
             double width = RightPanel.ActualWidth - (RightPanel.ComputedVerticalScrollBarVisibility == Visibility.Visible ? 17 : 0);
             RightPanelStack.Width = width;
-            RightPanelFooter.Width = width;
+            //RightPanelFooter.Width = width;
         }
     }
 }

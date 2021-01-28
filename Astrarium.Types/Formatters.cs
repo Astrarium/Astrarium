@@ -120,10 +120,15 @@ namespace Astrarium.Types
                 {
                     string ns = g.Latitude >= 0 ? "N" : "S";
                     string we = g.Longitude >= 0 ? "W" : "E";
-                    return $"{new DMS(Math.Abs(g.Latitude)).ToUnsignedString()} {ns} {new DMS(Math.Abs(g.Longitude)).ToUnsignedString()} {we}";
+                    return $"{new DMS(Math.Abs(g.Latitude)).ToString(DMSFormatter)}\u2009{ns} {new DMS(Math.Abs(g.Longitude)).ToString(DMSFormatter)}\u2009{we}";
                 }
                 else
                     return null;
+            }
+
+            private string DMSFormatter(DMS angle)
+            {
+                return $"{angle.Degrees:00}°\u2009{angle.Minutes:00}′\u2009{(int)angle.Seconds:00}″";
             }
         }
 
