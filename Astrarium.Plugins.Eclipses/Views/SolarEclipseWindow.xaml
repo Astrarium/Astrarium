@@ -12,14 +12,32 @@
     x:Class="Astrarium.Plugins.Eclipses.SolarEclipseWindow" 
     mc:Ignorable="d" 
     Title="Solar Eclipses"
-    Height="350" 
-    Width="600" 
-    MinHeight="350" MinWidth="1000" 
+    Height="768" 
+    Width="1024" 
+    WindowState="Maximized"
+    MinHeight="600" MinWidth="800" 
     Style="{StaticResource {x:Type Window}}"     
     WindowStartupLocation="CenterOwner">
 
     <Window.Resources>
         <ResourceDictionary>
+
+            <Style x:Key="MenuItemHeader" TargetType="{x:Type MenuItem}">
+                <Setter Property="IsEnabled" Value="False" />
+                <Setter Property="BorderBrush" Value="{StaticResource BrushControlBackground}" />
+                <Setter Property="Foreground" Value="{StaticResource BrushControlLightBackground}" />
+                <Setter Property="Background" Value="{StaticResource BrushControlDarkBackground}" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type MenuItem}">
+                            <StackPanel Orientation="Vertical" Height="Auto">
+                                <c:BorderFix Height="2" Margin="-1" Background="{TemplateBinding BorderBrush}" />
+                                <TextBlock FontSize="12" Padding="30 4 12 4" Text="{TemplateBinding Header}" Foreground="{TemplateBinding Foreground}" Background="{TemplateBinding Background}" />
+                            </StackPanel>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
 
             <Style x:Key="ImageButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
                 <Style.Setters>
@@ -296,8 +314,20 @@
                             ThumbnailForeColor="#555555"
                             IsMouseOverMap = "{Binding IsMouseOverMap, Mode=OneWayToSource}"
                             TileImageAttributes="{Binding TileImageAttributes}"
-                            OnClick="{Binding ClickOnMapCommand}"
-                            Mouse="{Binding MapMouse, Mode=OneWayToSource}" Grid.ColumnSpan="2" Margin="0,0,0.4,25.4" Grid.RowSpan="2" />
+                            OnDoubleClick="{Binding LockOnCurrentPositionCommand}"
+                            OnRightClick="{Binding RightClickOnMapCommand}"
+                            Mouse="{Binding MapMouse, Mode=OneWayToSource}" Grid.ColumnSpan="2" Margin="0,0,0.4,25.4" Grid.RowSpan="2">
+                            <c:MapControl.ContextMenu>
+                                <ContextMenu Opened="ContextMenu_Opened">
+                                    <MenuItem Style="{StaticResource MenuItemHeader}" Header="{Binding MapMouseString}" IsEnabled="False" />
+                                    <MenuItem Header="Lock the map" Command="{Binding LockOnCurrentPositionCommand}" />
+                                    <MenuItem Header="Add to cities list" Command="{Binding AddCurrentPositionToCitiesListCommand}" />
+                                    <MenuItem Style="{StaticResource MenuItemHeader}" Visibility="{Binding NearestLocation, Converter={s:NotNullToVisibilityConverter}}" Header="{Binding NearestLocation.LocationName}" />
+                                    <MenuItem Header="Lock the map" Visibility="{Binding NearestLocation, Converter={s:NotNullToVisibilityConverter}}" Command="{Binding LockOnNearestLocationCommand}" />
+                                    <MenuItem Header="Add to cities list" Command="{Binding AddNearestLocationToCitiesListCommand}" Visibility="{Binding NearestLocation, Converter={s:NotNullToVisibilityConverter}}" />
+                                </ContextMenu>
+                            </c:MapControl.ContextMenu>
+                        </c:MapControl>
 
                         <Grid Margin="2,4.2,2.4,4.4" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Stretch">
                             <Grid.ColumnDefinitions>
@@ -328,11 +358,28 @@
                         HorizontalScrollBarVisibility="Auto"
                         VerticalScrollBarVisibility="Auto">
                         <StackPanel x:Name="RightPanelStack" Orientation="Vertical">
+
                             <TextBlock Padding="6 2" FontSize="18" >Local Circumstances</TextBlock>
-                            <TextBlock Padding="6 2" Text="{Binding ObserverLocationName, FallbackValue='Observer location name'}" />
+                            
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock VerticalAlignment="Center" Padding="6 4" Text="{Binding ObserverLocationName, FallbackValue='Observer location name'}" />
+                                <ToggleButton Grid.Column="1" IsChecked="{Binding IsMapLocked}" Visibility="{Binding IsMapLocked, Converter={s:BoolToVisibilityConverter}}" Margin="4 0 4 0" Height="24" VerticalContentAlignment="Center" HorizontalAlignment="Right">
+                                    <ToggleButton.Content>
+                                        <TextBlock Padding="4" VerticalAlignment="Center" Text="Unlock" />
+                                    </ToggleButton.Content>
+                                </ToggleButton>
+                            </Grid>
+                            
+
+
                             <TextBlock Padding="6 2" TextTrimming="CharacterEllipsis" Width="{Binding ElementName=RightPanel, Path=ActualWidth}" Text="{Binding LocalVisibilityDescription, FallbackValue='Local visibility description'}" HorizontalAlignment="Left" />
-                            <ToggleButton IsChecked="{Binding IsMapLocked}" Visibility="{Binding IsMapLocked, Converter={s:BoolToVisibilityConverter}}" Margin="6 2" Content="Unlock the map" Height="24" HorizontalAlignment="Left" VerticalContentAlignment="Center" />
-                            <TextBlock Visibility="{Binding IsMapLocked, Converter={s:InverseBoolToVisibilityConverter}}" IsEnabled="False" Padding="6 2" FontSize="12" TextWrapping="WrapWithOverflow" HorizontalAlignment="Stretch" Text="Double click the map to lock on the desired point." />
+                            
+                            <!--<TextBlock Visibility="{Binding IsMapLocked, Converter={s:InverseBoolToVisibilityConverter}}" IsEnabled="False" Padding="6 2" MinHeight="28" FontSize="12" TextWrapping="WrapWithOverflow" HorizontalAlignment="Stretch" Text="Double click the map to lock on the desired point." />-->
 
                             <!-- Local details expander -->
                             <Expander Margin="0 6 0 4" Header="Local Details" IsExpanded="True">
@@ -633,6 +680,8 @@
                             <RadioButton IsChecked="{Binding FillCitiesOption, Converter={s:EqualityConverter}, ConverterParameter={x:Static vm:CitiesListOption.TotalPath}}" Content="Find cities on total eclipse path" Margin="4"  HorizontalAlignment="Left" />
                             <Separator Margin="4" />
                             <Button Margin="4" MinWidth="80" Command="{Binding FillCitiesTableCommand}" HorizontalAlignment="Left" Content="test" Width="Auto" />
+
+                            <Button Margin="4" MinWidth="80" Command="{Binding ExportCitiesTableCommand}" HorizontalAlignment="Left" Content="Export" Width="Auto" />
                         </StackPanel>
                     </Expander>
                     
@@ -671,6 +720,8 @@
                             </DataGridTemplateColumn>
                             
                             <DataGridTextColumn Header="Coordinates" Binding="{Binding CoordinatesString}" CanUserSort="False" />
+
+                            <DataGridTextColumn Header="Time Zone" Binding="{Binding TimeZoneString}" SortMemberPath="TimeZone" CanUserSort="True" />
 
                             <DataGridTextColumn Header="Max Mag" Binding="{Binding MaxMagString}" SortMemberPath="MaxMag" CanUserSort="True">
                                 <DataGridTextColumn.HeaderStyle>

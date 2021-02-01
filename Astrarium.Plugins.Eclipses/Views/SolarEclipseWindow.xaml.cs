@@ -47,5 +47,13 @@ namespace Astrarium.Plugins.Eclipses
             RightPanelStack.Width = width;
             //RightPanelFooter.Width = width;
         }
+
+        private void ContextMenu_Opened(object sender, RoutedEventArgs e)
+        {
+            if (Map.ContextMenu.DataContext == null)
+            {
+                Map.ContextMenu.DataContext = DataContext;
+            }
+        }
     }
 }

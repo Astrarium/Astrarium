@@ -56,8 +56,11 @@ namespace Astrarium.Types.Controls
         public static readonly DependencyProperty PolygonsProperty =
             DependencyProperty.Register(nameof(Polygons), typeof(ICollection<Polygon>), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged) });
 
-        public static readonly DependencyProperty OnClickProperty =
-            DependencyProperty.Register(nameof(OnClick), typeof(ICommand), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
+        public static readonly DependencyProperty OnDoubleClickProperty =
+            DependencyProperty.Register(nameof(OnDoubleClick), typeof(ICommand), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
+
+        public static readonly DependencyProperty OnRightClickProperty =
+            DependencyProperty.Register(nameof(OnRightClick), typeof(ICommand), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
 
         public static readonly DependencyProperty MinZoomLevelProperty =
            DependencyProperty.Register(nameof(MinZoomLevel), typeof(int), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = false, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
@@ -176,10 +179,16 @@ namespace Astrarium.Types.Controls
             set => SetValue(PolygonsProperty, value);
         }
 
-        public ICommand OnClick
+        public ICommand OnDoubleClick
         {
-            get => (ICommand)GetValue(OnClickProperty);
-            set => SetValue(OnClickProperty, value);
+            get => (ICommand)GetValue(OnDoubleClickProperty);
+            set => SetValue(OnDoubleClickProperty, value);
+        }
+
+        public ICommand OnRightClick
+        {
+            get => (ICommand)GetValue(OnRightClickProperty);
+            set => SetValue(OnRightClickProperty, value);
         }
 
         private static void DependencyPropertyChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -194,12 +203,20 @@ namespace Astrarium.Types.Controls
         {
             mapControl.MouseEnter += (s, e) => IsMouseOverMap = true;
             mapControl.MouseLeave += (s, e) => IsMouseOverMap = false;
-            mapControl.MouseLeave += (s, e) => Focus();
+            //mapControl.MouseLeave += (s, e) => Focus();
             mapControl.MouseEnter += (s, e) => mapControl.Focus();
             mapControl.MouseDown += (s, e) => mapControl.Focus();
             mapControl.MouseUp += (s, e) => mapControl.Focus();
-            mapControl.MouseDoubleClick += (s, e) => { if (e.Button == MouseButtons.Left) OnClick?.Execute(null); };
-            
+            mapControl.MouseDoubleClick += (s, e) => { if (e.Button == MouseButtons.Left) OnDoubleClick?.Execute(null); };
+            mapControl.MouseClick += (s, e) => { 
+                if (e.Button == MouseButtons.Right) 
+                {
+                    OnRightClick?.Execute(null);
+                    if (ContextMenu != null) 
+                        ContextMenu.IsOpen = true; 
+                } 
+            };
+
             mapControl.TileServerChanged += (s, e) =>
             {
                 TileServer = mapControl.TileServer;
@@ -212,7 +229,6 @@ namespace Astrarium.Types.Controls
             mapControl.BackColorChanged += (s, e) => BackColor = mapControl.BackColor;
             mapControl.ForeColorChanged += (s, e) => ForeColor = mapControl.ForeColor;
             mapControl.ZoomLevelChaged += (s, e) => ZoomLevel = mapControl.ZoomLevel;
-
 
             mapControl.Resize += MapControl_Resize;
             Child = mapControl;
