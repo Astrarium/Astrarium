@@ -14,14 +14,14 @@ namespace Astrarium.Plugins.Eclipses
     public class EclipsesCalculator : BaseAstroEventsProvider, IEclipsesCalculator
     {
         private readonly ISky sky;
-        private readonly CitiesManager citiesManager;
+        private readonly IGeoLocationsManager locationsManager;
         private CelestialObject sun;
         private CelestialObject moon;
 
-        public EclipsesCalculator(ISky sky, CitiesManager citiesManager)
+        public EclipsesCalculator(ISky sky, IGeoLocationsManager locationsManager)
         {
             this.sky = sky;
-            this.citiesManager = citiesManager;
+            this.locationsManager = locationsManager;
             this.sky.Calculated += Sky_Calculated;
         }
 
@@ -228,7 +228,7 @@ namespace Astrarium.Plugins.Eclipses
         /// <inheritdoc/>
         public ICollection<SolarEclipseLocalCircumstances> FindCitiesOnCentralLine(PolynomialBesselianElements be, ICollection<CrdsGeographical> centralLine, CancellationToken? cancelToken = null, IProgress<double> progress = null)
         {
-            List<CrdsGeographical> cities = new List<CrdsGeographical>();
+            var cities = new List<CrdsGeographical>();
 
             for (int i = 0; i < centralLine.Count - 1; i++)
             {
@@ -264,13 +264,13 @@ namespace Astrarium.Plugins.Eclipses
                         for (int j = 0; j < parts; j++)
                         {
                             var g = Angle.Intermediate(g0, g1, (float)j / parts);
-                            cities.AddRange(citiesManager.FindCities(g, r));
+                            cities.AddRange(locationsManager.Search(g, r));
                         }
                     }
                     // The segment should not be splitted, add closest cities to the first point
                     else
                     {
-                        cities.AddRange(citiesManager.FindCities(g0, r));
+                        cities.AddRange(locationsManager.Search(g0, r));
                     }
                 }
             }

@@ -308,7 +308,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         public ICollection<Polygon> Polygons { get; private set; }
 
         private readonly CsvLocationsReader locationsReader;
-        private readonly CitiesManager citiesManager;
+        private readonly IGeoLocationsManager locationsManager;
         private readonly IEclipsesCalculator eclipsesCalculator;
         private readonly ISettings settings;
         private CrdsGeographical observerLocation;
@@ -340,10 +340,10 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             nf.NumberGroupSeparator = "\u2009";
         }
 
-        public SolarEclipseVM(IEclipsesCalculator eclipsesCalculator, CitiesManager citiesManager, CsvLocationsReader locationsReader, ISky sky, ISettings settings)
+        public SolarEclipseVM(IEclipsesCalculator eclipsesCalculator, IGeoLocationsManager locationsManager, CsvLocationsReader locationsReader, ISky sky, ISettings settings)
         {
             this.eclipsesCalculator = eclipsesCalculator;
-            this.citiesManager = citiesManager;
+            this.locationsManager = locationsManager;
             this.locationsReader = locationsReader;
             this.settings = settings;
             this.settings.PropertyChanged += Settings_PropertyChanged;
@@ -458,8 +458,9 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         private void RightClickOnMap()
         {
             var mouse = FromGeoPoint(MapMouse);
-            NearestLocation = citiesManager
-                .FindCities(mouse, 30)
+
+            NearestLocation = locationsManager
+                .Search(mouse, 30)
                 .OrderBy(c => c.DistanceTo(mouse))
                 .FirstOrDefault();
         }
