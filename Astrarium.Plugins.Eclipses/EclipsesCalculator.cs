@@ -14,15 +14,15 @@ namespace Astrarium.Plugins.Eclipses
     public class EclipsesCalculator : BaseAstroEventsProvider, IEclipsesCalculator
     {
         private readonly ISky sky;
-        private readonly IGeoLocationsManager locationsManager;
         private CelestialObject sun;
         private CelestialObject moon;
+        private IGeoLocationsManager locationsManager;
 
         public EclipsesCalculator(ISky sky, IGeoLocationsManager locationsManager)
         {
             this.sky = sky;
-            this.locationsManager = locationsManager;
             this.sky.Calculated += Sky_Calculated;
+            this.locationsManager = locationsManager;
         }
 
         private void Sky_Calculated()

@@ -13,6 +13,16 @@ namespace Astrarium.Types
     public interface IGeoLocationsManager
     {
         /// <summary>
+        /// Loads list of locations
+        /// </summary>
+        void Load();
+
+        /// <summary>
+        /// Unloads list of locations
+        /// </summary>
+        void Unload();
+
+        /// <summary>
         /// Searches geographical locations in a circle with specified center and radius in km.
         /// </summary>
         /// <param name="center">Center of the circle to search locations within.</param>
@@ -32,5 +42,15 @@ namespace Astrarium.Types
         /// Gets collection of timezones
         /// </summary>
         ICollection<TimeZoneInfo> TimeZones { get; }
+
+        /// <summary>
+        /// Fired when list of timezones has been loaded
+        /// </summary>
+        event Action TimeZonesLoaded;
+
+        /// <summary>
+        /// Fired when list of locations has been loaded
+        /// </summary>
+        event Action LocationsLoaded;
     }
 }

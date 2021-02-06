@@ -60,7 +60,6 @@ namespace Astrarium
             }
             else
             {
-                Load();
                 return new CrdsGeographical[0];                
             }
         }
@@ -95,7 +94,6 @@ namespace Astrarium
             }
             else
             {
-                Load();
                 return new CrdsGeographical[0];
             }
         }
@@ -105,31 +103,41 @@ namespace Astrarium
         {
             get 
             {
-                if (isLoaded)
-                {
-                    return timeZones.Select(tz =>
-                        TimeZoneInfo.CreateCustomTimeZone(tz.TimeZoneId, TimeSpan.FromHours(tz.UtcOffset), tz.Name, tz.Name))
-                        .ToArray();
-                }
-                else
-                {
-                    Load();
-                    return new TimeZoneInfo[0];
-                }
+                return timeZones.Select(tz =>
+                    TimeZoneInfo.CreateCustomTimeZone(tz.TimeZoneId, TimeSpan.FromHours(tz.UtcOffset), tz.Name, tz.Name))
+                    .ToArray();
             }
         }
 
-        private void Load()
+        /// <inheritdoc/>
+        public void Load()
         {
             Task.Run(() =>
             {
-                LoadTimeZonesIfRequired();
-                LoadLocationsIfRequired();
+                LoadTimeZones();
+                LoadLocations();
                 isLoaded = true;
             });
         }
 
-        private void LoadTimeZonesIfRequired()
+        /// <inheritdoc/>
+        public void Unload()
+        {
+            lock (locker)
+            {
+                timeZones.Clear();
+                allLocations.Clear();
+                isLoaded = false;
+            }
+        }
+
+        /// <inheritdoc/>
+        public event Action TimeZonesLoaded;
+
+        /// <inheritdoc/>
+        public event Action LocationsLoaded;
+
+        private void LoadTimeZones()
         {
             lock (locker)
             {
@@ -157,12 +165,13 @@ namespace Astrarium
                     file.Close();
                 }
             }
+            TimeZonesLoaded?.Invoke();
         }
 
         /// <summary>
         /// Loads cities from file
         /// </summary>
-        private void LoadLocationsIfRequired()
+        private void LoadLocations()
         {
             lock (locker)
             {
@@ -225,6 +234,7 @@ namespace Astrarium
                     }
                 }
             }
+            LocationsLoaded?.Invoke();
         }
 
         private class GeoLocation

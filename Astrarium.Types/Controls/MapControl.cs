@@ -222,6 +222,7 @@ namespace Astrarium.Types.Controls
                 TileServer = mapControl.TileServer;
                 MinZoomLevel = mapControl.MinZoomLevel;
                 MaxZoomLevel = mapControl.MaxZoomLevel;
+                MapControl_Resize(mapControl, EventArgs.Empty);
             };
 
             mapControl.CenterChanged += (s, e) => Center = mapControl.Center;

@@ -45,7 +45,7 @@ namespace Astrarium.Plugins.Eclipses.Types
                     ["MaxTime"] = i => isRawData ? i.MaxTime?.ToString(ci) : i.MaxTimeString,
                     ["C3Time"] = i => isRawData ? i.C3Time?.ToString(ci) : i.C3TimeString,
                     ["C4Time"] = i => isRawData ? i.C4Time?.ToString(ci) : i.C4TimeString,
-                    ["Visibility"] = i => string.Empty
+                    ["Visibility"] = i => i.Visibility
                 };
 
                 // header

@@ -408,6 +408,9 @@ namespace Astrarium.ViewModels
 
         #region TimeZone properties
 
+        /// <summary>
+        /// Gets timezones list
+        /// </summary>
         public ICollection<TimeZoneInfo> TimeZones
         {
             get => _LocationsManager.TimeZones;
@@ -456,6 +459,8 @@ namespace Astrarium.ViewModels
         public LocationVM(ISky sky, IGeoLocationsManager locationsManager, ISettings settings)
         {
             _LocationsManager = locationsManager;
+            _LocationsManager.TimeZonesLoaded += OnTimeZonesLoaded;
+            _LocationsManager.Load();
 
             CrdsEquatorial eqSun = SolarEphem.Ecliptical(sky.Context.JulianDay).ToEquatorial(sky.Context.Epsilon);
             ObserverLocation = new CrdsGeographical(sky.Context.GeoLocation);
@@ -466,7 +471,16 @@ namespace Astrarium.ViewModels
             OkCommand = new Command(Ok);
             CancelCommand = new Command(Close);
             EndSearchModeCommand = new Command(EndSearchMode);
-            SelectLocationCommand = new Command(SelectLocation);
+            SelectLocationCommand = new Command(SelectLocation);            
+        }
+
+        /// <summary>
+        /// <see cref="IGeoLocationsManager.TimeZonesLoaded"/> handler
+        /// </summary>
+        private void OnTimeZonesLoaded()
+        {
+            NotifyPropertyChanged(nameof(TimeZones));
+            NotifyPropertyChanged(nameof(TimeZone));
         }
 
         /// <summary>
@@ -492,6 +506,16 @@ namespace Astrarium.ViewModels
         {
             _SavedLocation = new CrdsGeographical(ObserverLocation);
             EndSearchMode();
+        }
+
+        /// <summary>
+        /// Disposes allocated resources
+        /// </summary>
+        public override void Dispose()
+        {
+            _LocationsManager.TimeZonesLoaded -= OnTimeZonesLoaded;
+            _LocationsManager.Unload();
+            base.Dispose();
         }
     }
 

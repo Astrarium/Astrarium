@@ -8,7 +8,6 @@
     xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types" 
     xmlns:q="clr-namespace:Astrarium.Plugins.Eclipses.Controls" 
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
-    xmlns:vm="clr-namespace:Astrarium.Plugins.Eclipses.ViewModels"
     x:Class="Astrarium.Plugins.Eclipses.SolarEclipseWindow" 
     mc:Ignorable="d" 
     Title="Solar Eclipses"
@@ -21,7 +20,6 @@
 
     <Window.Resources>
         <ResourceDictionary>
-
             <Style x:Key="MenuItemHeader" TargetType="{x:Type MenuItem}">
                 <Setter Property="IsEnabled" Value="False" />
                 <Setter Property="BorderBrush" Value="{StaticResource BrushControlBackground}" />
@@ -38,7 +36,43 @@
                     </Setter.Value>
                 </Setter>
             </Style>
-
+            <Style x:Key="RadioTab" TargetType="{x:Type RadioButton}">
+                <Style.Setters>
+                    <Setter Property="Height" Value="24" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="RadioButton">
+                                <c:BorderFix BorderThickness="1" x:Name="Border" BorderBrush="{TemplateBinding BorderBrush}" Width="40" HorizontalContentAlignment="Center" SnapsToDevicePixels="True">
+                                    <TextBlock x:Name="Text" Text="{TemplateBinding Content}" Margin="0" Width="Auto" Padding="0" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                </c:BorderFix>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter Property="Background" TargetName="Border" Value="{StaticResource BrushControlBackground}" />
+                                    </Trigger>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter Property="Foreground" TargetName="Text" Value="{StaticResource BrushControlLightBackground}" />
+                                        <Setter Property="Cursor" Value="No" />
+                                    </Trigger>
+                                    <MultiTrigger>
+                                        <MultiTrigger.Conditions>
+                                            <Condition Property="IsEnabled" Value="True" />
+                                            <Condition Property="IsMouseOver" Value="True" />
+                                        </MultiTrigger.Conditions>
+                                        <Setter Property="Background" TargetName="Border" Value="{StaticResource BrushControlLightBackground}" />
+                                        <Setter Property="BorderBrush" TargetName="Border" Value="{StaticResource BrushControlLightBackground}" />
+                                    </MultiTrigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="Padding" Value="6" />
+                    <Setter Property="Foreground" Value="{StaticResource BrushForeground}" />
+                    <Setter Property="Background" Value="{StaticResource BrushControlBackground}"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource BrushControlBackground}" />
+                    <Setter Property="Cursor" Value="Hand" />
+                </Style.Setters>
+            </Style>
             <Style x:Key="ImageButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
                 <Style.Setters>
                     <Setter Property="Cursor" Value="Hand" />
@@ -54,7 +88,6 @@
                     </Trigger>
                 </Style.Triggers>
             </Style>
-
             <Style x:Key="DateButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
                 <Style.Setters>
                     <Setter Property="Cursor" Value="Hand" />
@@ -70,7 +103,6 @@
                     </Trigger>
                 </Style.Triggers>
             </Style>
-
             <Grid x:Key="ImagePrevEclipse" x:Shared="False">
                 <Path HorizontalAlignment="Left" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="16" Height="16" Margin="-11 0 0 0" Stretch="Uniform" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
                     <Path.Data>
@@ -127,7 +159,6 @@
                     </Path.LayoutTransform>
                 </Path>
             </Grid>
-
             <Grid x:Key="ImageZoomIn" x:Shared="False" >
                 <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="20" Height="20" Stretch="UniformToFill" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
                     <Path.Data>
@@ -158,7 +189,6 @@
                     </Path.Data>
                 </Path>
             </Grid>
-
             <Grid x:Key="ImageChartLabels" x:Shared="False" Width="16" Margin="0 3 0 0" Height="20">
                 <Path Clip="M0,0 V125 H100 V0 H0 Z" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform" SnapsToDevicePixels="True" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ToggleButton}, Path=Foreground}">
                     <Path.Data>
@@ -189,7 +219,6 @@
                     </Path.Data>
                 </Path>
             </Grid>
-
             <Grid x:Key="ImageChartCircles" x:Shared="False">
                 <Path Clip="M0,0 V60 H48 V0 H0 Z" StrokeThickness="1" Stroke="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ToggleButton}, Path=Foreground}" SnapsToDevicePixels="True" Stretch="Uniform" Margin="1 4 1 1" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ToggleButton}, Path=Foreground}">
                     <Path.Data>
@@ -199,7 +228,6 @@
                     </Path.Data>
                 </Path>
             </Grid>
-
             <Grid x:Key="ImageChartMoonOutline" x:Shared="False">
                 <Path Clip="M0,0 V125 H100 V0 H0 Z" SnapsToDevicePixels="True" Stretch="UniformToFill" Margin="4" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ToggleButton}, Path=Foreground}">
                     <Path.Data>
@@ -209,45 +237,6 @@
                     </Path.Data>
                 </Path>
             </Grid>
-
-            <Style x:Key="RadioTab" TargetType="{x:Type RadioButton}">
-                <Style.Setters>
-                    <Setter Property="Height" Value="24" />
-                    <Setter Property="Padding" Value="0" />
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="RadioButton">
-                                <c:BorderFix BorderThickness="1" x:Name="Border" BorderBrush="{TemplateBinding BorderBrush}" Width="40" HorizontalContentAlignment="Center" SnapsToDevicePixels="True">
-                                    <TextBlock x:Name="Text" Text="{TemplateBinding Content}" Margin="0" Width="Auto" Padding="0" VerticalAlignment="Center" HorizontalAlignment="Center" />
-                                </c:BorderFix>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsChecked" Value="True">
-                                        <Setter Property="Background" TargetName="Border" Value="{StaticResource BrushControlBackground}" />
-                                    </Trigger>
-                                    <Trigger Property="IsEnabled" Value="False">
-                                        <Setter Property="Foreground" TargetName="Text" Value="{StaticResource BrushControlLightBackground}" />
-                                        <Setter Property="Cursor" Value="No" />
-                                    </Trigger>
-                                    <MultiTrigger>
-                                        <MultiTrigger.Conditions>
-                                            <Condition Property="IsEnabled" Value="True" />
-                                            <Condition Property="IsMouseOver" Value="True" />
-                                        </MultiTrigger.Conditions>
-                                        <Setter Property="Background" TargetName="Border" Value="{StaticResource BrushControlLightBackground}" />
-                                        <Setter Property="BorderBrush" TargetName="Border" Value="{StaticResource BrushControlLightBackground}" />
-                                    </MultiTrigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                    <Setter Property="Padding" Value="6" />
-                    <Setter Property="Foreground" Value="{StaticResource BrushForeground}" />
-                    <Setter Property="Background" Value="{StaticResource BrushControlBackground}"/>
-                    <Setter Property="BorderBrush" Value="{StaticResource BrushControlBackground}" />
-                    <Setter Property="Cursor" Value="Hand" />
-                </Style.Setters>
-            </Style>
-
         </ResourceDictionary>
     </Window.Resources>
 
@@ -302,7 +291,7 @@
                         <c:MapControl
                             x:Name="Map"
                             Grid.Row="0"
-                            BackColor="#333333"                       
+                            BackColor="{Binding MapThumbnailBackColor}"                       
                             TileServer="{Binding TileServer, Mode=TwoWay}" 
                             CacheFolder="{Binding CacheFolder, Mode=OneTime}"
                             Markers="{Binding Markers}"
@@ -310,8 +299,8 @@
                             Center="{Binding MapCenter, Mode=TwoWay}"
                             ZoomLevel="{Binding MapZoomLevel, Mode=TwoWay}"
                             Polygons="{Binding Polygons}"
-                            ThumbnailBackColor="#333333"
-                            ThumbnailForeColor="#555555"
+                            ThumbnailBackColor="{Binding MapThumbnailBackColor}"
+                            ThumbnailForeColor="{Binding MapThumbnailForeColor}"
                             IsMouseOverMap = "{Binding IsMouseOverMap, Mode=OneWayToSource}"
                             TileImageAttributes="{Binding TileImageAttributes}"
                             OnDoubleClick="{Binding LockOnCurrentPositionCommand}"
@@ -534,7 +523,7 @@
                             ItemsSource="{Binding EclipseGeneralDetails}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
-                                <DataGridTextColumn Header="Value" FontFamily="Lucida Console" Binding="{Binding Value}"/>
+                                <DataGridTextColumn Header="Value" Binding="{Binding Value}"/>
                             </DataGrid.Columns>
                         </DataGrid>
 
@@ -559,8 +548,8 @@
                             ItemsSource="{Binding EclipseContacts}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Point" Binding="{Binding Point}"/>
-                                <DataGridTextColumn Header="Coordinates" FontFamily="Lucida Console" Binding="{Binding Coordinates}"/>
-                                <DataGridTextColumn Header="Time" FontFamily="Lucida Console" Binding="{Binding Time}"/>
+                                <DataGridTextColumn Header="Coordinates" Binding="{Binding Coordinates}"/>
+                                <DataGridTextColumn Header="Time" Binding="{Binding Time}"/>
                             </DataGrid.Columns>
                         </DataGrid>
 
@@ -587,13 +576,13 @@
                             RowHeight="24"
                             ItemsSource="{Binding BesselianElementsTable}">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="n" FontFamily="Lucida Console" Binding="{Binding Index}"/>
-                                <DataGridTextColumn Header="x" FontFamily="Lucida Console" Binding="{Binding X}"/>
-                                <DataGridTextColumn Header="y" FontFamily="Lucida Console" Binding="{Binding Y}"/>
-                                <DataGridTextColumn Header="D" FontFamily="Lucida Console" Binding="{Binding D}"/>
-                                <DataGridTextColumn Header="L1" FontFamily="Lucida Console" Binding="{Binding L1}"/>
-                                <DataGridTextColumn Header="L2" FontFamily="Lucida Console" Binding="{Binding L2}"/>
-                                <DataGridTextColumn Header="μ" FontFamily="Lucida Console" Binding="{Binding Mu}"/>
+                                <DataGridTextColumn Header="n" Binding="{Binding Index}"/>
+                                <DataGridTextColumn Header="x" Binding="{Binding X}"/>
+                                <DataGridTextColumn Header="y" Binding="{Binding Y}"/>
+                                <DataGridTextColumn Header="D" Binding="{Binding D}"/>
+                                <DataGridTextColumn Header="L1" Binding="{Binding L1}"/>
+                                <DataGridTextColumn Header="L2" Binding="{Binding L2}"/>
+                                <DataGridTextColumn Header="μ" Binding="{Binding Mu}"/>
                             </DataGrid.Columns>
                         </DataGrid>
 
@@ -606,16 +595,20 @@
             <TabItem Header="Saros Series">
 
                 <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="62*"/>
-                        <ColumnDefinition Width="103*"/>
-                    </Grid.ColumnDefinitions>
+                    
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
                     <TextBlock Grid.Row="0" FontSize="18" Padding="8 8 0 0" Text="{Binding SarosSeriesTableTitle, FallbackValue='List of eclipses of saros series 123'}" Grid.ColumnSpan="2" />
+                    <Button Margin="0 8 8 0" Padding="8 0" Grid.Column="2" HorizontalAlignment="Right" Content="Export..." Command="{Binding ExportSarosSeriesTableCommand}" />
+
                     <DataGrid Grid.Row="1"
                         IsEnabled="{Binding IsCalculating, Converter={s:InverseBoolConverter}}"
                         VerticalScrollBarVisibility="Auto"
@@ -671,30 +664,61 @@
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-
-                    <Expander Header="Options" Margin="8 8 8 0" IsExpanded="True" Grid.Row="0">
-                        <StackPanel  Orientation="Vertical" HorizontalAlignment="Stretch">
-                            <RadioButton IsChecked="{Binding FillCitiesOption, Converter={s:EqualityConverter}, ConverterParameter={x:Static vm:CitiesListOption.FromFile}}" Content="Import cities from file" Margin="4" HorizontalAlignment="Left" />
-                            <RadioButton IsChecked="{Binding FillCitiesOption, Converter={s:EqualityConverter}, ConverterParameter={x:Static vm:CitiesListOption.TotalPath}}" Content="Find cities on total eclipse path" Margin="4"  HorizontalAlignment="Left" />
-                            <Separator Margin="4" />
-                            <Button Margin="4" MinWidth="80" Command="{Binding FillCitiesTableCommand}" HorizontalAlignment="Left" Content="test" Width="Auto" />
-
-                            <Button Margin="4" MinWidth="80" Command="{Binding ExportCitiesTableCommand}" HorizontalAlignment="Left" Content="Export" Width="Auto" />
-                        </StackPanel>
-                    </Expander>
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="18" Padding="8 8 0 0" Text="Eclipse local circumstances" />
+                        <Button Margin="0 8 8 0" Padding="8 0" Grid.Column="1" HorizontalAlignment="Right" Content="Clear" Command="{Binding ClearLocationsTableCommand}" Visibility="{Binding IsCitiesListTableNotEmpty, Converter={s:BoolToVisibilityConverter}}" />
+                        <Button Margin="0 8 8 0" Padding="8 0" Grid.Column="2" HorizontalAlignment="Right" Content="Export..." Command="{Binding ExportLocationsTableCommand}" Visibility="{Binding IsCitiesListTableNotEmpty, Converter={s:BoolToVisibilityConverter}}" />
+                    </Grid>
                     
+                    <!-- Import options view, displayed if no locations loaded -->
+                    <Grid Grid.Row="1" Margin="0 10" Visibility="{Binding IsCitiesListTableNotEmpty, Converter={s:InverseBoolToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        
+                        <Button Grid.Row="0" Grid.Column="0" Margin="8 4" Padding="8 0" Content="Import..." Width="Auto" HorizontalAlignment="Stretch" Command="{Binding LoadLocationsFromFileCommand}" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" Padding="0 " VerticalAlignment="Center">                                
+                            Import locations from a CSV file. The file should match the <Hyperlink Command="{Binding ShowLocationsFileFormatCommand}">following format</Hyperlink>.
+                        </TextBlock>
+
+                        <Button Grid.Row="1" Grid.Column="0" Margin="8 4" Padding="8 0" HorizontalAlignment="Stretch" Width="Auto" Content="Find on path" Command="{Binding FindLocationsOnTotalPathCommand}" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Padding="0" VerticalAlignment="Center">                                
+                            Find locations on the eclipse path (only for total or annular eclipses).
+                        </TextBlock>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"  Padding="8 4" VerticalAlignment="Center">                                
+                            To add a location from the eclipse map, right click on the map and select the location from a context menu.
+                        </TextBlock>
+                    </Grid>
                     
-                    <DataGrid Grid.Row="1"
+                    <!-- Locations list table -->
+                    <DataGrid Grid.Row="2"
                         VerticalScrollBarVisibility="Auto"
                         VerticalAlignment="Stretch"
                         AutoGenerateColumns="False" 
                         CanUserReorderColumns="False"
                         CanUserSortColumns="True"
-                        VirtualizingPanel.IsVirtualizing="True"
                         EnableRowVirtualization="True"
+                        EnableColumnVirtualization="True"
+                        VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                        VirtualizingPanel.VirtualizationMode="Recycling"
+                        VirtualizingPanel.IsVirtualizing="True"
                         IsReadOnly="True"
+                        Visibility="{Binding IsCitiesListTableNotEmpty, Converter={s:BoolToVisibilityConverter}}"
                         GridLinesVisibility="All"
                         BorderThickness="1"
                         Margin="8"
@@ -718,11 +742,8 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            
                             <DataGridTextColumn Header="Coordinates" Binding="{Binding CoordinatesString}" CanUserSort="False" />
-
                             <DataGridTextColumn Header="Time Zone" Binding="{Binding TimeZoneString}" SortMemberPath="TimeZone" CanUserSort="True" />
-
                             <DataGridTextColumn Header="Max Mag" Binding="{Binding MaxMagString}" SortMemberPath="MaxMag" CanUserSort="True">
                                 <DataGridTextColumn.HeaderStyle>
                                     <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">

@@ -207,6 +207,7 @@ namespace Astrarium
             var dialog = typeFactory(typeof(MessageBoxWindow)) as MessageBoxWindow;
             dialog.Owner = null;// Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
             dialog.Topmost = true;
+            dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             dialog.Title = caption.StartsWith("$") ? Text.Get(caption.Substring(1)) : caption;
             dialog.DataContext = text.StartsWith("$") ? Text.Get(text.Substring(1)) : text;
             dialog.Buttons = buttons;
