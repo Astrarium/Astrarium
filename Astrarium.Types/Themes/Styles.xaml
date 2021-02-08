@@ -2977,11 +2977,11 @@
                             </TextBox.Text>
                         </TextBox>
                         <RepeatButton Style="{StaticResource {x:Type ButtonBase}}" Name="PART_UpButton" BorderThickness="0" Grid.Column="1" Grid.Row="0"
-                                      Width="14" Height="12" Margin="0">
+                                      Width="14" Height="12" Margin="0" Focusable="False">
                             <Path Fill="{TemplateBinding Foreground}" Data="M 0 3 L 6 3 L 3 0 Z"/>
                         </RepeatButton>
                         <RepeatButton Style="{StaticResource {x:Type ButtonBase}}" Name="PART_DownButton" BorderThickness="0" Grid.Column="1" Grid.Row="1"
-                                      Width="14" Height="12" Margin="0">
+                                      Width="14" Height="12" Margin="0" Focusable="False">
                             <Path Fill="{TemplateBinding Foreground}" Data="M 0 0 L 3 3 L 6 0 Z"/>
                         </RepeatButton>
 
