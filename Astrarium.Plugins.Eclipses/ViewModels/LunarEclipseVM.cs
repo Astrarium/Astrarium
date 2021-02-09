@@ -21,7 +21,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         private LunarEclipse eclipse;
         private LunarEclipseMap map;
         
-        public LunarEclipseVM(IEclipsesCalculator eclipsesCalculator, ISky sky, ISettings settings) : base(settings)
+        public LunarEclipseVM(IEclipsesCalculator eclipsesCalculator, IGeoLocationsManager locationsManager, ISky sky, ISettings settings) : base(locationsManager, settings)
         {
             this.eclipsesCalculator = eclipsesCalculator;
 
@@ -39,12 +39,13 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         protected override void CalculateLocalCircumstances(CrdsGeographical g)
         {
             // TODO: implement
+
+            ObserverLocationName = (IsMouseOverMap && !IsMapLocked) ? $"Mouse coordinates ({Format.Geo.Format(FromGeoPoint(MapMouse))})" : $"{observerLocation.LocationName} ({Format.Geo.Format(observerLocation)})";
         }
 
         protected override void CalculateEclipse(bool next, bool saros)
         {
             IsCalculating = true;
-            NotifyPropertyChanged(nameof(IsCalculating));
 
             eclipse = eclipsesCalculator.GetNearestLunarEclipse(JulianDay, next, saros);
             JulianDay = eclipse.JulianDayMaximum;
@@ -52,6 +53,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
             string type = eclipse.EclipseType.ToString();
             EclipseDescription = $"{type} lunar eclipse";
+            LocalVisibilityDescription = "visible as... TODO";
 
             var contacts = eclipsesCalculator.GetLunarEclipseContacts(eclipse);
 
@@ -105,15 +107,22 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
             Tracks = tracks;
             Polygons = polygons;
-
-            NotifyPropertyChanged(
-                nameof(Tracks), 
-                nameof(Polygons), 
-                nameof(EclipseDate),
-                nameof(EclipseDescription));
-
             IsCalculating = false;
-            NotifyPropertyChanged(nameof(IsCalculating));
+        }
+
+        protected override void CalculateSarosSeries()
+        {
+            // TODO: implement this
+        }
+
+        protected override void ExportSarosSeriesTable()
+        {
+            // TODO: implement this
+        }
+
+        protected override void AddToCitiesList(CrdsGeographical location)
+        {
+            // TODO: implement this
         }
     }
 }

@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -21,61 +20,8 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
     /// <summary>
     /// Implements business logic of Solar Eclopse window.
     /// </summary>
-    public class SolarEclipseVM : ViewModelBase
+    public class SolarEclipseVM : EclipseVM
     {
-        /// <summary>
-        /// Selected Julian date
-        /// </summary>
-        public double JulianDay { get; private set; }
-
-        /// <summary>
-        /// Directory to store maps cache
-        /// </summary>
-        public string CacheFolder { get; private set; }
-
-        /// <summary>
-        /// Name of the observer location from settings
-        /// </summary>
-        public string SettingsLocationName { get; private set; }
-
-        /// <summary>
-        /// Date of the eclipse selected, converted to string
-        /// </summary>
-        public string EclipseDate { get; private set; }
-
-        /// <summary>
-        /// Eclipse description
-        /// </summary>
-        public string EclipseDescription { get; private set; }
-
-        /// <summary>
-        /// Flag indicating the map is locked on some point
-        /// </summary>
-        public bool IsMapLocked
-        {
-            get => GetValue<bool>(nameof(IsMapLocked));
-            set 
-            {
-                SetValue(nameof(IsMapLocked), value);
-                if (!value)
-                {
-                    observerLocation = settings.Get<CrdsGeographical>("ObserverLocation");
-                    CalculateLocalCircumstances(observerLocation);
-                    Markers.Remove(Markers.Last());
-                    AddLocationMarker();
-                }   
-            }
-        }
-
-        /// <summary>
-        /// Location nearest to the current mouse position on the map
-        /// </summary>
-        public CrdsGeographical NearestLocation
-        {
-            get => GetValue<CrdsGeographical>(nameof(NearestLocation));
-            private set => SetValue(nameof(NearestLocation), value);
-        }
-
         public bool IsCitiesListTableNotEmpty
         {
             get => GetValue<bool>(nameof(IsCitiesListTableNotEmpty));
@@ -130,78 +76,19 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         /// <summary>
         /// Table header for Besselian elements table
         /// </summary>
-        public string BesselianElementsTableHeader { get; private set; }
+        public string BesselianElementsTableHeader
+        {
+            get => GetValue<string>(nameof(BesselianElementsTableHeader));
+            private set => SetValue(nameof(BesselianElementsTableHeader), value);
+        }
 
         /// <summary>
         /// Table footer for Besselian elements table
         /// </summary>
-        public string BesselianElementsTableFooter { get; private set; }
-
-        /// <summary>
-        /// Flag indicating calculation is in progress
-        /// </summary>
-        public bool IsCalculating { get; private set; }
-
-        /// <summary>
-        /// Flag indicating previous saros button is enabled
-        /// </summary>
-        public bool PrevSarosEnabled { get; private set; }
-
-        /// <summary>
-        /// Flag indicating next saros button is enabled
-        /// </summary>
-        public bool NextSarosEnabled { get; private set; }
-
-        /// <summary>
-        /// Flag indicating mouse is over eclipse map
-        /// </summary>
-        public bool IsMouseOverMap 
+        public string BesselianElementsTableFooter
         {
-            get => GetValue<bool>(nameof(IsMouseOverMap));
-            set 
-            {
-                SetValue(nameof(IsMouseOverMap), value);
-                if (!IsMapLocked)
-                {
-                    CalculateLocalCircumstances(observerLocation);
-                }
-            } 
-        }
-
-        /// <summary>
-        /// Flag indicating dark mode is used
-        /// </summary>
-        public bool IsDarkMode
-        {
-            get => GetValue<bool>(nameof(IsDarkMode));
-            private set => SetValue(nameof(IsDarkMode), value);
-        }
-
-        /// <summary>
-        /// Name of current observer location point
-        /// </summary>
-        public string ObserverLocationName
-        {
-            get => GetValue<string>(nameof(ObserverLocationName));
-            private set => SetValue(nameof(ObserverLocationName), value);
-        }
-       
-        /// <summary>
-        /// String description of local visibility, like "Visible as partial", "Invisible" and etc.
-        /// </summary>
-        public string LocalVisibilityDescription
-        {
-            get => GetValue<string>(nameof(LocalVisibilityDescription));
-            private set => SetValue(nameof(LocalVisibilityDescription), value); 
-        }
-
-        /// <summary>
-        /// Flag indicating the eclipse is visible from current place
-        /// </summary>
-        public bool IsVisibleFromCurrentPlace
-        {
-            get => GetValue<bool>(nameof(IsVisibleFromCurrentPlace));
-            private set => SetValue(nameof(IsVisibleFromCurrentPlace), value);
+            get => GetValue<string>(nameof(BesselianElementsTableFooter));
+            private set => SetValue(nameof(BesselianElementsTableFooter), value);
         }
 
         public float ChartZoomLevel
@@ -210,127 +97,12 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             set => SetValue(nameof(ChartZoomLevel), value);
         }
 
-        public ICommand ChangeDateCommand => new Command(ChangeDate);
-        public ICommand PrevEclipseCommand => new Command(PrevEclipse);
-        public ICommand NextEclipseCommand => new Command(NextEclipse);
-        public ICommand PrevSarosCommand => new Command(PrevSaros);
-        public ICommand NextSarosCommand => new Command(NextSaros);
-        public ICommand LockOnCurrentPositionCommand => new Command(LockOnCurrentPosition);
-        public ICommand LockOnNearestLocationCommand => new Command(LockOnNearestLocation);
-        public ICommand AddCurrentPositionToCitiesListCommand => new Command(AddCurrentPositionToCitiesList);
-        public ICommand AddNearestLocationToCitiesListCommand => new Command(AddNearestLocationToCitiesList);
-        public ICommand RightClickOnMapCommand => new Command(RightClickOnMap);
-        public ICommand SarosSeriesTableSetDateCommand => new Command<double>(SarosSeriesTableSetDate);
-        public ICommand ExportSarosSeriesTableCommand => new Command(ExportSarosSeriesTable);
         public ICommand ChartZoomInCommand => new Command(ChartZoomIn);
         public ICommand ChartZoomOutCommand => new Command(ChartZoomOut);
-        public ICommand CitiesListTableGoToCoordinatesCommand => new Command<CrdsGeographical>(CitiesListTableGoToCoordinates);
-        public ICommand ShowLocationsFileFormatCommand => new Command(ShowLocationsFileFormat);
+        public ICommand FindLocationsOnTotalPathCommand => new Command(FindLocationsOnTotalPath);
         public ICommand ClearLocationsTableCommand => new Command(ClearLocationsTable);
         public ICommand LoadLocationsFromFileCommand => new Command(LoadLocationsFromFile);
-        public ICommand FindLocationsOnTotalPathCommand => new Command(FindLocationsOnTotalPath);
         public ICommand ExportLocationsTableCommand => new Command(ExportLocationsTable);
-        
-        public int SelectedTabIndex
-        {
-            get => GetValue<int>(nameof(SelectedTabIndex)); 
-            set  
-            {
-                SetValue(nameof(SelectedTabIndex), value);
-                CalculateSarosSeries();
-            }
-        }
-
-        public GeoPoint MapCenter
-        {
-            get => GetValue(nameof(MapCenter), new GeoPoint());
-            set => SetValue(nameof(MapCenter), value);
-        }
-
-        public int MapZoomLevel
-        {
-            get => GetValue(nameof(MapZoomLevel), 1);
-            set => SetValue(nameof(MapZoomLevel), value);
-        }
-
-        public GeoPoint MapMouse
-        {
-            get => GetValue<GeoPoint>(nameof(MapMouse));
-            set
-            {
-                SetValue(nameof(MapMouse), value);
-                MapMouseString = Format.Geo.Format(FromGeoPoint(value));
-                if (!IsMapLocked)
-                {
-                    CalculateLocalCircumstances(FromGeoPoint(value));
-                }
-            }
-        }
-
-        public string MapMouseString
-        {
-            get => GetValue<string>(nameof(MapMouseString));
-            private set => SetValue(nameof(MapMouseString), value);
-        }
-
-        public ITileServer TileServer
-        {
-            get => GetValue<ITileServer>(nameof(TileServer));
-            set
-            {
-                SetValue(nameof(TileServer), value);
-                TileImageAttributes = GetImageAttributes();
-                if (settings.Get<string>("EclipseMapTileServer") != value.Name)
-                {
-                    settings.Set("EclipseMapTileServer", value.Name);
-                    settings.Save();
-                }
-            }
-        }
-
-        public ImageAttributes TileImageAttributes
-        {
-            get => GetValue<ImageAttributes>(nameof(TileImageAttributes));
-            set => SetValue(nameof(TileImageAttributes), value);
-        }
-
-        /// <summary>
-        /// Collection of map tile servers to switch between them
-        /// </summary>
-        public ICollection<ITileServer> TileServers { get; private set; }
-
-        /// <summary>
-        /// Collection of markers (points) on the map
-        /// </summary>
-        public ICollection<Marker> Markers { get; private set; }
-
-        /// <summary>
-        /// Collection of tracks (lines) on the map
-        /// </summary>
-        public ICollection<Track> Tracks { get; private set; }
-
-        /// <summary>
-        /// Collection of polygons (areas) on the map
-        /// </summary>
-        public ICollection<Polygon> Polygons { get; private set; }
-
-        public Color MapThumbnailBackColor
-        {
-            get => GetValue<Color>(nameof(MapThumbnailBackColor));
-            set => SetValue(nameof(MapThumbnailBackColor), value);
-        }
-
-        public Color MapThumbnailForeColor
-        {
-            get => GetValue<Color>(nameof(MapThumbnailForeColor));
-            set => SetValue(nameof(MapThumbnailForeColor), value);
-        }
-
-        private readonly CsvLocationsReader locationsReader;
-        private readonly IGeoLocationsManager locationsManager;
-        private readonly IEclipsesCalculator eclipsesCalculator;
-        private readonly ISettings settings;
-        private CrdsGeographical observerLocation;
 
         private int currentSarosSeries;
         private SolarEclipseMap map;
@@ -348,8 +120,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         private readonly TrackStyle umbraLimitTrackStyle = new TrackStyle(new Pen(Color.Gray, 2));
         private readonly TrackStyle centralLineTrackStyle = new TrackStyle(new Pen(Color.Black, 2));
         private readonly PolygonStyle umbraPolygonStyle = new PolygonStyle(new SolidBrush(Color.FromArgb(100, Color.Gray)));
-        private readonly MarkerStyle observerLocationMarkerStyle = new MarkerStyle(5, Brushes.Black, null, Brushes.Black, SystemFonts.DefaultFont, StringFormat.GenericDefault);
-
+        
         #endregion Map styles
 
         static SolarEclipseVM()
@@ -359,28 +130,15 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             nf.NumberGroupSeparator = "\u2009";            
         }
 
-        public SolarEclipseVM(IEclipsesCalculator eclipsesCalculator, IGeoLocationsManager locationsManager, CsvLocationsReader locationsReader, ISky sky, ISettings settings)
+        public SolarEclipseVM(IEclipsesCalculator eclipsesCalculator, IGeoLocationsManager locationsManager, CsvLocationsReader locationsReader, ISky sky, ISettings settings) : base(locationsManager, settings)
         {
             this.eclipsesCalculator = eclipsesCalculator;
-            this.locationsManager = locationsManager;
             this.locationsReader = locationsReader;
-            this.settings = settings;
             this.settings.PropertyChanged += Settings_PropertyChanged;
-            observerLocation = settings.Get<CrdsGeographical>("ObserverLocation");
-            locationsManager.Load();
 
-            SettingsLocationName = $"Local visibility ({observerLocation.LocationName})";
-            IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
             ChartZoomLevel = 1;
-            CacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "MapsCache");
+            
             SetMapColors();
-            TileServers = new List<ITileServer>() 
-            {
-                new OfflineTileServer(),
-                new OpenStreetMapTileServer("Astrarium v1.0 contact astrarium@astrarium.space"),
-                new StamenTerrainTileServer(),
-                new OpenTopoMapServer()
-            };
 
             for (int i = 0; i < 5; i++) 
             {
@@ -388,9 +146,6 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 LocalCircumstancesTable.Add(new NameValueTableItem(null, null));
             }
 
-            string tileServerName = settings.Get<string>("EclipseMapTileServer");
-            var tileServer = TileServers.FirstOrDefault(s => s.Name.Equals(tileServerName));            
-            TileServer = tileServer ?? TileServers.First();
             JulianDay = sky.Context.JulianDay - LunarEphem.SINODIC_PERIOD;
 
             CalculateEclipse(next: true, saros: false);
@@ -421,105 +176,16 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 TileImageAttributes = GetImageAttributes();
                 SetMapColors();
                 // need to recalculate 
-
-                
-
                 //JulianDay -= LunarEphem.SINODIC_PERIOD;
                 //CalculateEclipse(next: true, saros: false);
             }
         }
 
-        private void ChangeDate()
-        {
-            var jd = ViewManager.ShowDateDialog(JulianDay, 0, DateOptions.MonthYear);
-            if (jd != null)
-            {
-                JulianDay = jd.Value - LunarEphem.SINODIC_PERIOD;
-                CalculateEclipse(next: true, saros: false);
-            }
-        }
-
-        private void PrevEclipse()
-        {
-            CalculateEclipse(next: false, saros: false);
-        }
-
-        private void NextEclipse()
-        {
-            CalculateEclipse(next: true, saros: false);
-        }
-
-        private void PrevSaros()
-        {
-            CalculateEclipse(next: false, saros: true);
-        }
-
-        private void NextSaros()
-        {
-            CalculateEclipse(next: true, saros: true);
-        }
-
-        private void LockOnCurrentPosition()
-        {
-            var g = FromGeoPoint(MapMouse);
-            g.LocationName = "Locked Point";
-            LockOn(g);
-        }
-
-        private void LockOnNearestLocation()
-        {
-            LockOn(NearestLocation);
-        }
-
-        private void LockOn(CrdsGeographical location)
-        {
-            observerLocation = location;
-            Markers.Remove(Markers.Last());
-            AddLocationMarker();
-            IsMapLocked = true;
-            CalculateLocalCircumstances(observerLocation);
-        }
-
-        private void AddCurrentPositionToCitiesList()
-        {
-            var g = FromGeoPoint(MapMouse);
-            g.LocationName = "Locked Point";
-            AddToCitiesList(g);
-        }
-
-        private void AddNearestLocationToCitiesList()
-        {
-            AddToCitiesList(NearestLocation);
-        }
-
-        private void AddToCitiesList(CrdsGeographical location)
+        protected override void AddToCitiesList(CrdsGeographical location)
         {
             var local = eclipsesCalculator.FindLocalCircumstancesForCities(be, new[] { location }).First();
             CitiesListTable.Add(new CitiesListTableItem(local, eclipsesCalculator.GetLocalVisibilityString(eclipse, local)));
             IsCitiesListTableNotEmpty = true;
-        }
-
-        private void RightClickOnMap()
-        {
-            var mouse = FromGeoPoint(MapMouse);
-
-            NearestLocation = locationsManager
-                .Search(mouse, 30)
-                .OrderBy(c => c.DistanceTo(mouse))
-                .FirstOrDefault();
-        }
-
-        private void CitiesListTableGoToCoordinates(CrdsGeographical location)
-        {
-            MapZoomLevel = Math.Min(12, TileServer.MaxZoomLevel);
-            MapCenter = new GeoPoint((float)(-location.Longitude), (float)location.Latitude);
-            SelectedTabIndex = 0;
-        }
-
-        private void SarosSeriesTableSetDate(double jd)
-        {
-            JulianDay = jd - LunarEphem.SINODIC_PERIOD;
-            CalculateEclipse(next: true, saros: false);
         }
 
         private void ChartZoomIn()
@@ -532,54 +198,6 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             ChartZoomLevel = Math.Max(1.0f / 3f, ChartZoomLevel / 1.1f);
         }
 
-        private ImageAttributes GetImageAttributes()
-        {
-            // make image "red"
-            if (settings.Get<ColorSchema>("Schema") == ColorSchema.Red)
-            {
-                float[][] matrix = {
-                    new float[] {0.3f, 0, 0, 0, 0},
-                    new float[] {0.3f, 0, 0, 0, 0},
-                    new float[] {0.3f, 0, 0, 0, 0},
-                    new float[] {0, 0, 0, 1, 0},
-                    new float[] {0, 0, 0, 0, 0}
-                };
-                var colorMatrix = new ColorMatrix(matrix);
-                var attr = new ImageAttributes();
-                attr.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
-                return attr;
-            }
-
-            // make image lighten
-            if (TileServer is OfflineTileServer)
-            {
-                float gamma = 1;
-                float brightness = 1.2f;
-                float contrast = 1;
-                float alpha = 1;
-
-                float adjustedBrightness = brightness - 1.0f;
-
-                float[][] matrix ={
-                    new float[] {contrast, 0, 0, 0, 0}, // scale red
-                    new float[] {0, contrast, 0, 0, 0}, // scale green
-                    new float[] {0, 0, contrast, 0, 0}, // scale blue
-                    new float[] {0, 0, 0, alpha, 0},
-                    new float[] {adjustedBrightness, adjustedBrightness, adjustedBrightness, 0, 1}};
-
-                var attr = new ImageAttributes();
-                attr.ClearColorMatrix();
-                attr.SetColorMatrix(new ColorMatrix(matrix), ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
-                attr.SetGamma(gamma, ColorAdjustType.Bitmap);
-
-                return attr;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         private void SetMapColors()
         {
             penumbraLimitTrackStyle.Pen = IsDarkMode ? new Pen(Color.DarkRed, 2) : new Pen(Color.Orange, 2);
@@ -589,10 +207,9 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             MapThumbnailForeColor = IsDarkMode ? Color.FromArgb(0xFF, 0x59, 0, 0) : Color.FromArgb(0xFF, 0x59, 0x59, 0x59);
         }
 
-        private async void CalculateEclipse(bool next, bool saros)
+        protected override async void CalculateEclipse(bool next, bool saros)
         {
             IsCalculating = true;
-            NotifyPropertyChanged(nameof(IsCalculating));
 
             eclipse =  eclipsesCalculator.GetNearestSolarEclipse(JulianDay, next, saros);
             JulianDay = eclipse.JulianDayMaximum;
@@ -603,13 +220,6 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             EclipseDescription = $"{type}{subtype} solar eclipse";
             PrevSarosEnabled = eclipsesCalculator.GetNearestSolarEclipse(JulianDay, next: false, saros: true).Saros == eclipse.Saros;
             NextSarosEnabled = eclipsesCalculator.GetNearestSolarEclipse(JulianDay, next: true, saros: true).Saros == eclipse.Saros;
-
-            NotifyPropertyChanged(
-                nameof(EclipseDate), 
-                nameof(EclipseDescription), 
-                nameof(PrevSarosEnabled),
-                nameof(NextSarosEnabled),
-                nameof(SettingsLocationName));
 
             await Task.Run(() =>
             {
@@ -809,35 +419,18 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 IsCalculating = false;
 
                 AddLocationMarker();
-
                 CalculateSarosSeries();
-
                 CalculateLocalCircumstances(observerLocation);
-
                 CalculateCitiesTable();
-
                 NotifyPropertyChanged(
-                    nameof(IsCalculating),
-                    nameof(Tracks),
-                    nameof(Polygons),
-                    nameof(Markers),
                     nameof(EclipseGeneralDetails),
                     nameof(EclipseContacts),
-                    nameof(BesselianElementsTable),
-                    nameof(BesselianElementsTableHeader),
-                    nameof(BesselianElementsTableFooter)
+                    nameof(BesselianElementsTable)
                 );
             });
         }
 
-        private void AddLocationMarker()
-        {
-            Markers.Add(new Marker(ToGeo(observerLocation), observerLocationMarkerStyle, observerLocation.LocationName));
-            Markers = new List<Marker>(Markers);            
-            NotifyPropertyChanged(nameof(Markers));
-        }
-
-        private void CalculateLocalCircumstances(CrdsGeographical pos)
+        protected override void CalculateLocalCircumstances(CrdsGeographical pos)
         {
             var local = SolarEclipses.LocalCircumstances(be, pos);
 
@@ -864,14 +457,13 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             NotifyPropertyChanged(nameof(LocalCircumstances));
         }
 
-        private async void CalculateSarosSeries()
+        protected override async void CalculateSarosSeries()
         {
             await Task.Run(() =>
             {
                 if (SelectedTabIndex != 2 || currentSarosSeries == eclipse.Saros) return;
 
                 IsCalculating = true;
-                NotifyPropertyChanged(nameof(IsCalculating));
 
                 double jd = JulianDay;
                 List<SolarEclipse> eclipses = new List<SolarEclipse>();
@@ -944,7 +536,6 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 IsCalculating = false;
                 NotifyPropertyChanged(
                     nameof(SarosSeriesTable), 
-                    nameof(IsCalculating), 
                     nameof(SarosSeriesTableTitle)
                 );
             });
@@ -965,20 +556,6 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             }
         }
 
-        private void ClearLocationsTable()
-        {
-            if (ViewManager.ShowMessageBox("Warning", "Do you really want to clear the table?", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)
-            {
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                {
-                    CitiesListTable.Clear();
-                    IsCitiesListTableNotEmpty = false;
-                });
-                NotifyPropertyChanged(nameof(CitiesListTable));
-                NotifyPropertyChanged(nameof(IsCitiesListTableNotEmpty));
-            }
-        }
-
         private void LoadLocationsFromFile()
         {
             FillCitiesTable(fromFile: true);
@@ -992,9 +569,17 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             }
         }
 
-        private void ShowLocationsFileFormat()
+        private void ClearLocationsTable()
         {
-            ViewManager.ShowMessageBox("Information", "CSV file should contain following columns:\n\n- Location name (string)\n- Latitude in decimal degrees (float, in range -90...90, positive north, negative south)\n- longitude in decimal degrees (float, in range -180...180, positive east, negative west)\n- UTC offset in hours (float, optional)\n");
+            if (ViewManager.ShowMessageBox("Warning", "Do you really want to clear the table?", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    CitiesListTable.Clear();
+                    IsCitiesListTableNotEmpty = false;
+                    NotifyPropertyChanged(nameof(CitiesListTable), nameof(IsCitiesListTableNotEmpty));
+                });
+            }
         }
 
         private async void FillCitiesTable(bool fromFile)
@@ -1074,7 +659,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             }
         }
 
-        private void ExportSarosSeriesTable()
+        protected override void ExportSarosSeriesTable()
         {
             var formats = new Dictionary<string, string>
             {
@@ -1104,16 +689,6 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                     System.Diagnostics.Process.Start(file);
                 }
             }
-        }
-
-        private GeoPoint ToGeo(CrdsGeographical g)
-        {
-            return new GeoPoint((float)-g.Longitude, (float)g.Latitude);
-        }
-
-        private CrdsGeographical FromGeoPoint(GeoPoint p)
-        {
-            return new CrdsGeographical(-p.Longitude, p.Latitude);
         }
     }
 }
