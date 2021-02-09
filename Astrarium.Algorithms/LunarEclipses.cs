@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using static System.Math;
 using static Astrarium.Algorithms.Angle;
 
@@ -241,6 +242,67 @@ namespace Astrarium.Algorithms
             while (!eclipseFound);
 
             return eclipse;
+        }
+
+        /// <summary>
+        /// Calculates lunar eclipse map
+        /// </summary>
+        public static LunarEclipseMap EclipseMap(LunarEclipseContacts contacts)
+        {
+            var c = new LunarEclipseContact[] {
+                contacts.FirstContactPenumbra,
+                contacts.FirstContactUmbra,
+                contacts.TotalBegin,
+                contacts.Maximum,
+                contacts.TotalEnd,
+                contacts.LastContactUmbra,
+                contacts.LastContactPenumbra
+            };
+
+            var m = new IList<CrdsGeographical>[7];
+
+            for (int j = 0; j < 7; j++)
+            {
+                if (j != 3 && c[j] != null)
+                {
+                    m[j] = new List<CrdsGeographical>();
+                    double jd = c[j].JuluanDay;
+
+                    var ne = Nutation.NutationElements(jd);
+                    double epsilon = Date.TrueObliquity(jd, ne.deltaEpsilon);
+                    double siderealTime = Date.ApparentSiderealTime(jd, ne.deltaPsi, epsilon);
+
+                    double ra = c[j].Alpha;
+                    double dec = c[j].Delta;
+
+                    // Hour angle of the Moon
+                    double hourAngle = Coordinates.HourAngle(siderealTime, 0, ra);
+
+
+                    m[j].Add(new CrdsGeographical(-180 + hourAngle, -88 * Sign(dec)));
+
+                    for (int i = -180; i <= 180; i++)
+                    {
+                        double longitude = To180(i + hourAngle);
+                        double tanLat = -Cos(ToRadians(i)) / Tan(ToRadians(dec));
+                        double latitude = ToDegrees(Atan(tanLat));
+
+                        m[j].Add(new CrdsGeographical(longitude, latitude));
+                    }
+
+                    m[j].Add(new CrdsGeographical(180 + hourAngle, -88 * Sign(dec)));
+                }
+            }
+
+            return new LunarEclipseMap()
+            {
+                P1 = m[0],
+                U1 = m[1],
+                U2 = m[2],
+                U3 = m[4],
+                U4 = m[5],
+                P4 = m[6]
+            };
         }
     }
 }

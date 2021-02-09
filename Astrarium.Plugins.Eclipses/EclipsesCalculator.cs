@@ -49,7 +49,7 @@ namespace Astrarium.Plugins.Eclipses
             double jd = context.From;
             do
             {
-                SolarEclipse eclipse = GetNearestEclipse(jd, next: true, saros: false);
+                SolarEclipse eclipse = GetNearestSolarEclipse(jd, next: true, saros: false);
                 jd = eclipse.JulianDayMaximum;
                 if (jd <= context.To)
                 {
@@ -89,7 +89,7 @@ namespace Astrarium.Plugins.Eclipses
                     string phase = Formatters.Phase.Format(eclipse.Magnitude);
                     // TODO: local circumstances
 
-                    string[] ephemerides = new[] { "Horizontal.Altitude" };
+                    string[] ephemerides = new[] { "Horizontal.Altitude", "Equatorial0.Alpha", "Equatorial0.Delta" };
                     double[] jdInstants = new double[7] 
                     {
                         eclipse.JulianDayFirstContactPenumbra,
@@ -102,6 +102,8 @@ namespace Astrarium.Plugins.Eclipses
                     };
 
                     double[] altitudes = new double[7];
+                    double[] ra = new double[7];
+                    double[] dec = new double[7];
 
                     for (int i = 0; i < 7; i++)
                     {
@@ -110,6 +112,8 @@ namespace Astrarium.Plugins.Eclipses
                             var ctx = new SkyContext(jdInstants[i], context.GeoLocation);
                             var moonEphem = sky.GetEphemerides(moon, ctx, ephemerides);
                             altitudes[i] = (double)moonEphem[0].Value;
+                            ra[i] = (double)moonEphem[1].Value;
+                            dec[i] = (double)moonEphem[2].Value;
                         }
                     }
 
@@ -125,7 +129,84 @@ namespace Astrarium.Plugins.Eclipses
             return events;
         }
 
-        public SolarEclipse GetNearestEclipse(double jd, bool next, bool saros)
+        public LunarEclipse GetNearestLunarEclipse(double jd, bool next, bool saros)
+        {
+            do
+            {
+                jd += (next ? 1 : -1) * (saros ? LunarEphem.SAROS : 30/*LunarEphem.SINODIC_PERIOD*/);
+                var eclipse = LunarEclipses.NearestEclipse(jd, next);
+                return eclipse;
+                
+                /*
+                if (eclipse.IsUncertain)
+                {
+                    var pbe = GetBesselianElements(eclipse.JulianDayMaximum);
+                    var be = pbe.GetInstantBesselianElements(eclipse.JulianDayMaximum);
+                    bool isExist = Math.Sqrt(be.X * be.X + be.Y * be.Y) - be.L1 <= 0.999;
+                    if (isExist)
+                    {
+                        eclipse.IsUncertain = false;
+                        return eclipse;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    return eclipse;
+                }*/
+            }
+            while (true);
+        }
+
+        public LunarEclipseContacts GetLunarEclipseContacts(LunarEclipse eclipse)
+        {
+            string[] ephemerides = new[] { "Equatorial0.Alpha", "Equatorial0.Delta" };
+            double[] jdInstants = new double[7]
+            {
+                eclipse.JulianDayFirstContactPenumbra,
+                eclipse.JulianDayFirstContactUmbra,
+                eclipse.JulianDayTotalBegin,
+                eclipse.JulianDayMaximum,
+                eclipse.JulianDayTotalEnd,
+                eclipse.JulianDayLastContactUmbra,
+                eclipse.JulianDayLastContactPenumbra
+            };
+
+            var c = new LunarEclipseContact[7];
+
+            for (int i = 0; i < 7; i++)
+            {
+                if (!double.IsNaN(jdInstants[i]))
+                {
+                    var ctx = new SkyContext(jdInstants[i], new CrdsGeographical());
+                    var moonEphem = sky.GetEphemerides(moon, ctx, ephemerides);
+                    c[i] = new LunarEclipseContact()
+                    {
+                        JuluanDay = jdInstants[i],
+                        Alpha = (double)moonEphem[0].Value,
+                        Delta = (double)moonEphem[1].Value
+                    };
+                }
+            }
+
+            return new LunarEclipseContacts()
+            {
+                FirstContactPenumbra = c[0],
+                FirstContactUmbra = c[1],
+                TotalBegin = c[2],
+                Maximum = c[3],
+                TotalEnd = c[4],
+                LastContactUmbra = c[5],
+                LastContactPenumbra = c[6]
+            };
+
+            
+        }
+
+        public SolarEclipse GetNearestSolarEclipse(double jd, bool next, bool saros)
         {
             do
             {

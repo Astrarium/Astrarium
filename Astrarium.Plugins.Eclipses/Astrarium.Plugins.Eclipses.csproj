@@ -28,6 +28,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="Views\LunarEclipseWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Views\SolarEclipseWindow.xaml">
       <SubType>Designer</SubType>
     </Page>

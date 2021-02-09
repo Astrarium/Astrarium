@@ -13,6 +13,7 @@
         MinHeight="300" MinWidth="300"
         WindowState="{Binding WindowState, Mode=OneTime}"
         ResizeMode="CanResize"
+        WindowStartupLocation="CenterScreen"
         a:MainWindow.FullScreen="{Binding FullScreen, Mode=OneWay}"
         a:MainWindow.MousePosition="{Binding SkyMousePosition, Mode=OneWayToSource}"
         a:MainWindow.MapKeyDown="{Binding MapKeyDownCommand}"
@@ -22,7 +23,7 @@
         a:MainWindow.WindowSize="{Binding WindowSize, Mode=TwoWay}"
         s:WindowProperties.CompactMenu="{Binding MainMenuItems}"        
         s:WindowProperties.CompactMenuVisible="{Binding IsCompactMenu, Converter={s:BoolToVisibilityConverter}}"
-        Title="Astrarium" Height="450" Width="850">
+        Title="Astrarium" Height="768" Width="1024">
 
     <Window.Resources>
         <ResourceDictionary>

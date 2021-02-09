@@ -594,15 +594,15 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             IsCalculating = true;
             NotifyPropertyChanged(nameof(IsCalculating));
 
-            eclipse =  eclipsesCalculator.GetNearestEclipse(JulianDay, next, saros);
+            eclipse =  eclipsesCalculator.GetNearestSolarEclipse(JulianDay, next, saros);
             JulianDay = eclipse.JulianDayMaximum;
             EclipseDate = Formatters.Date.Format(new Date(JulianDay, 0));
             be = eclipsesCalculator.GetBesselianElements(JulianDay);
             string type = eclipse.EclipseType.ToString();
             string subtype = eclipse.IsNonCentral ? " non-central" : "";
             EclipseDescription = $"{type}{subtype} solar eclipse";
-            PrevSarosEnabled = eclipsesCalculator.GetNearestEclipse(JulianDay, next: false, saros: true).Saros == eclipse.Saros;
-            NextSarosEnabled = eclipsesCalculator.GetNearestEclipse(JulianDay, next: true, saros: true).Saros == eclipse.Saros;
+            PrevSarosEnabled = eclipsesCalculator.GetNearestSolarEclipse(JulianDay, next: false, saros: true).Saros == eclipse.Saros;
+            NextSarosEnabled = eclipsesCalculator.GetNearestSolarEclipse(JulianDay, next: true, saros: true).Saros == eclipse.Saros;
 
             NotifyPropertyChanged(
                 nameof(EclipseDate), 
@@ -884,7 +884,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 // add previous eclipses
                 do
                 {
-                    var e = eclipsesCalculator.GetNearestEclipse(jd, next: false, saros: true);
+                    var e = eclipsesCalculator.GetNearestSolarEclipse(jd, next: false, saros: true);
                     jd = e.JulianDayMaximum;
                     if (e.Saros == eclipse.Saros)
                     {
@@ -901,7 +901,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 // add next eclipses
                 do
                 {
-                    var e = eclipsesCalculator.GetNearestEclipse(jd, next: true, saros: true);
+                    var e = eclipsesCalculator.GetNearestSolarEclipse(jd, next: true, saros: true);
                     jd = e.JulianDayMaximum;
                     if (e.Saros == eclipse.Saros)
                     {
@@ -1115,11 +1115,5 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         {
             return new CrdsGeographical(-p.Longitude, p.Latitude);
         }
-    }
-
-    public enum CitiesListOption
-    {
-        FromFile = 0,
-        TotalPath = 1
     }
 }

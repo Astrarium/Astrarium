@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -141,5 +142,48 @@ namespace Astrarium.Algorithms
         }
 
         #endregion Helpers
+    }
+
+    public class LunarEclipseContact : CrdsEquatorial
+    {
+        public double JuluanDay { get; set; }
+    }
+
+    public class LunarEclipseContacts
+    {
+        /// <summary>
+        /// Instant and geocentrical coordinates of first contact with penumbra (P1)
+        /// </summary>
+        public LunarEclipseContact FirstContactPenumbra { get; set; }
+
+        /// <summary>
+        /// Instant and geocentrical coordinates of first contact with umbra (U1)
+        /// </summary>
+        public LunarEclipseContact FirstContactUmbra { get; set; }
+
+        /// <summary>
+        /// Instant and geocentrical coordinates of beginning of total phase (U2)
+        /// </summary>
+        public LunarEclipseContact TotalBegin { get; set; }
+
+        /// <summary>
+        /// Instant and geocentrical coordinates of maximal eclipse (Max)
+        /// </summary>
+        public LunarEclipseContact Maximum { get; set; }
+
+        /// <summary>
+        /// Instant and geocentrical coordinates of end of total phase (U3)
+        /// </summary>
+        public LunarEclipseContact TotalEnd { get; set; }
+
+        /// <summary>
+        /// Instant and coordinates of last contact with umbra (U4)
+        /// </summary>
+        public LunarEclipseContact LastContactUmbra { get; set; }
+
+        /// <summary>
+        /// Instant and geocentrical coordinates of last contact with penumbra (P4)
+        /// </summary>
+        public LunarEclipseContact LastContactPenumbra { get; set; }
     }
 }

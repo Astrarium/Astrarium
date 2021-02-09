@@ -40,7 +40,9 @@ namespace Astrarium.Plugins.Eclipses
 
         private void ShowLunarEclipsesView()
         {
-            ViewManager.ShowMessageBox("Info", "Not implemented yet.");
+            var vm = ViewManager.CreateViewModel<LunarEclipseVM>();
+            vm.Closing += (e) => { vm.Dispose(); };
+            ViewManager.ShowWindow(vm);
         }
     }
 }

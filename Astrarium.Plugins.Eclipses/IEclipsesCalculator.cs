@@ -8,7 +8,11 @@ namespace Astrarium.Plugins.Eclipses
 {
     public interface IEclipsesCalculator
     {
-        SolarEclipse GetNearestEclipse(double jd, bool next, bool saros);
+        SolarEclipse GetNearestSolarEclipse(double jd, bool next, bool saros);
+        LunarEclipse GetNearestLunarEclipse(double jd, bool next, bool saros);
+
+        LunarEclipseContacts GetLunarEclipseContacts(LunarEclipse eclipse);
+
         PolynomialBesselianElements GetBesselianElements(double jd);
         string GetLocalVisibilityString(SolarEclipse eclipse, SolarEclipseLocalCircumstances localCirc);
 
