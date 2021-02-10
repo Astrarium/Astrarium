@@ -144,9 +144,56 @@ namespace Astrarium.Algorithms
         #endregion Helpers
     }
 
-    public class LunarEclipseContact : CrdsEquatorial
+    public class LunarEclipseLocalCircumstancesContactPoint
     {
+        public double JulianDay { get; private set; }
+        public double LunarAltitude { get; private set; }
+        
+        public LunarEclipseLocalCircumstancesContactPoint(double jd, double alt)
+        {
+            JulianDay = jd;
+            LunarAltitude = alt;
+        }
+    }
+
+    public class LunarEclipseLocalCircumstances
+    {
+        /// <summary>
+        /// Geographical location
+        /// </summary>
+        public CrdsGeographical Location { get; set; }
+
+        // TODO: docs
+        public LunarEclipseLocalCircumstancesContactPoint PenumbralBegin { get; set; }
+        public LunarEclipseLocalCircumstancesContactPoint PartialBegin { get; set; }
+        public LunarEclipseLocalCircumstancesContactPoint TotalBegin { get; set; }
+        public LunarEclipseLocalCircumstancesContactPoint Maximum { get; set; }
+        public LunarEclipseLocalCircumstancesContactPoint TotalEnd { get; set; }
+        public LunarEclipseLocalCircumstancesContactPoint PartialEnd { get; set; }
+        public LunarEclipseLocalCircumstancesContactPoint PenumbralEnd { get; set; }
+    }
+
+    public class LunarEclipseContact
+    {
+        /// <summary>
+        /// Contact instant
+        /// </summary>
         public double JuluanDay { get; set; }
+        
+        /// <summary>
+        /// Equatorial geocentrical coordinates of the Moon
+        /// </summary>
+        public CrdsEquatorial MoonCoordinates { get; set; }
+
+        /// <summary>
+        /// Apparent sidereal time at Greenwich, in degrees
+        /// </summary>
+        public double SiderealTime { get; set; }
+
+        /// <summary>
+        /// Horizontal equatorial parallax of the Moon
+        /// </summary>
+        public double Parallax { get; set; }
     }
 
     public class LunarEclipseContacts
@@ -154,12 +201,12 @@ namespace Astrarium.Algorithms
         /// <summary>
         /// Instant and geocentrical coordinates of first contact with penumbra (P1)
         /// </summary>
-        public LunarEclipseContact FirstContactPenumbra { get; set; }
+        public LunarEclipseContact PenumbralBegin { get; set; }
 
         /// <summary>
         /// Instant and geocentrical coordinates of first contact with umbra (U1)
         /// </summary>
-        public LunarEclipseContact FirstContactUmbra { get; set; }
+        public LunarEclipseContact PartialBegin { get; set; }
 
         /// <summary>
         /// Instant and geocentrical coordinates of beginning of total phase (U2)
@@ -179,11 +226,11 @@ namespace Astrarium.Algorithms
         /// <summary>
         /// Instant and coordinates of last contact with umbra (U4)
         /// </summary>
-        public LunarEclipseContact LastContactUmbra { get; set; }
+        public LunarEclipseContact PartialEnd { get; set; }
 
         /// <summary>
         /// Instant and geocentrical coordinates of last contact with penumbra (P4)
         /// </summary>
-        public LunarEclipseContact LastContactPenumbra { get; set; }
+        public LunarEclipseContact PenumbralEnd { get; set; }
     }
 }

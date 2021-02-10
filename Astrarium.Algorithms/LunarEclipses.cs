@@ -208,7 +208,7 @@ namespace Astrarium.Algorithms
                         eclipseFound = false;
                     }
                     // Eclipse found
-                    else 
+                    else
                     {
                         eclipse.JulianDayMaximum = jdMax;
                         eclipse.Magnitude = mag;
@@ -232,7 +232,7 @@ namespace Astrarium.Algorithms
                         eclipse.JulianDayLastContactPenumbra = jdMax + sdPenumbra;
                     }
                 }
-                
+
                 if (!eclipseFound)
                 {
                     if (next) k++;
@@ -249,60 +249,78 @@ namespace Astrarium.Algorithms
         /// </summary>
         public static LunarEclipseMap EclipseMap(LunarEclipseContacts contacts)
         {
-            var c = new LunarEclipseContact[] {
-                contacts.FirstContactPenumbra,
-                contacts.FirstContactUmbra,
-                contacts.TotalBegin,
-                contacts.Maximum,
-                contacts.TotalEnd,
-                contacts.LastContactUmbra,
-                contacts.LastContactPenumbra
-            };
-
-            var m = new IList<CrdsGeographical>[7];
-
-            for (int j = 0; j < 7; j++)
-            {
-                if (j != 3 && c[j] != null)
-                {
-                    m[j] = new List<CrdsGeographical>();
-                    double jd = c[j].JuluanDay;
-
-                    var ne = Nutation.NutationElements(jd);
-                    double epsilon = Date.TrueObliquity(jd, ne.deltaEpsilon);
-                    double siderealTime = Date.ApparentSiderealTime(jd, ne.deltaPsi, epsilon);
-
-                    double ra = c[j].Alpha;
-                    double dec = c[j].Delta;
-
-                    // Hour angle of the Moon
-                    double hourAngle = Coordinates.HourAngle(siderealTime, 0, ra);
-
-
-                    m[j].Add(new CrdsGeographical(-180 + hourAngle, -88 * Sign(dec)));
-
-                    for (int i = -180; i <= 180; i++)
-                    {
-                        double longitude = To180(i + hourAngle);
-                        double tanLat = -Cos(ToRadians(i)) / Tan(ToRadians(dec));
-                        double latitude = ToDegrees(Atan(tanLat));
-
-                        m[j].Add(new CrdsGeographical(longitude, latitude));
-                    }
-
-                    m[j].Add(new CrdsGeographical(180 + hourAngle, -88 * Sign(dec)));
-                }
-            }
-
             return new LunarEclipseMap()
             {
-                P1 = m[0],
-                U1 = m[1],
-                U2 = m[2],
-                U3 = m[4],
-                U4 = m[5],
-                P4 = m[6]
+                PenumbralBegin = FindCurvePoints(contacts.PenumbralBegin),
+                PartialBegin = FindCurvePoints(contacts.PartialBegin),
+                TotalBegin = FindCurvePoints(contacts.TotalBegin),
+                TotalEnd = FindCurvePoints(contacts.TotalEnd),
+                PartialEnd = FindCurvePoints(contacts.PartialEnd),
+                PenumbralEnd = FindCurvePoints(contacts.PenumbralEnd)
             };
+        }
+
+        private static IList<CrdsGeographical> FindCurvePoints(LunarEclipseContact c)
+        {
+            if (c == null) 
+                return null;
+
+            var curve = new List<CrdsGeographical>();
+
+            var p0 = Project(c, -180);
+            curve.Add(new CrdsGeographical(p0.Longitude, -88 * Sign(c.MoonCoordinates.Delta)));
+
+            for (int i = -180; i <= 180; i++)
+            {
+                curve.Add(Project(c, i));
+            }
+
+            var p1 = Project(c, 180);
+            curve.Add(new CrdsGeographical(p1.Longitude, -88 * Sign(c.MoonCoordinates.Delta)));
+
+            return curve;
+        }
+
+        private static CrdsGeographical Project(LunarEclipseContact c, double L)
+        {
+            CrdsGeographical g = null;
+            CrdsEquatorial eq = new CrdsEquatorial(c.MoonCoordinates);
+            double siderealTime = c.SiderealTime;
+            double parallax = c.Parallax;
+            for (int i = 0; i < 2; i++)
+            {
+                double hourAngle = Coordinates.HourAngle(siderealTime, 0, eq.Alpha);
+                double longitude = To180(L + hourAngle);
+                double tanLat = -Cos(ToRadians(L)) / Tan(ToRadians(eq.Delta));
+                double latitude = ToDegrees(Atan(tanLat));
+                g = new CrdsGeographical(longitude, latitude);
+                eq = eq.ToTopocentric(g, siderealTime, parallax);
+            }
+            return g;
+        }
+
+        public static LunarEclipseLocalCircumstances LocalCircumstances(LunarEclipseContacts contacts, CrdsGeographical g)
+        {
+            return new LunarEclipseLocalCircumstances()
+            {
+                Location = g,
+                PenumbralBegin = GetLocalCircumstancesContactPoint(contacts.PenumbralBegin, g),
+                PartialBegin = GetLocalCircumstancesContactPoint(contacts.PartialBegin, g),
+                TotalBegin = GetLocalCircumstancesContactPoint(contacts.TotalBegin, g),
+                Maximum = GetLocalCircumstancesContactPoint(contacts.Maximum, g),
+                TotalEnd = GetLocalCircumstancesContactPoint(contacts.TotalEnd, g),
+                PartialEnd = GetLocalCircumstancesContactPoint(contacts.PartialEnd, g),
+                PenumbralEnd = GetLocalCircumstancesContactPoint(contacts.PenumbralEnd, g)
+            };
+        }
+
+        private static LunarEclipseLocalCircumstancesContactPoint GetLocalCircumstancesContactPoint(LunarEclipseContact c, CrdsGeographical g)
+        {
+            if (c == null)
+                return null;
+
+            var h = c.MoonCoordinates.ToTopocentric(g, c.SiderealTime, c.Parallax).ToHorizontal(g, c.SiderealTime);
+            return new LunarEclipseLocalCircumstancesContactPoint(c.JuluanDay, h.Altitude);
         }
     }
 }

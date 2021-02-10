@@ -31,7 +31,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         /// <summary>
         /// Table of local contacts instants, displayed to the right of eclipse map
         /// </summary>
-        public ObservableCollection<LocalContactsTableItem> LocalContactsTable { get; private set; } = new ObservableCollection<LocalContactsTableItem>();
+        public ObservableCollection<SolarEclipseLocalContactsTableItem> LocalContactsTable { get; private set; } = new ObservableCollection<SolarEclipseLocalContactsTableItem>();
 
         /// <summary>
         /// Table of local circumstances, displayed to the right of eclipse map
@@ -142,7 +142,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
             for (int i = 0; i < 5; i++) 
             {
-                LocalContactsTable.Add(new LocalContactsTableItem(null, null));
+                LocalContactsTable.Add(new SolarEclipseLocalContactsTableItem(null, null));
                 LocalCircumstancesTable.Add(new NameValueTableItem(null, null));
             }
 
@@ -436,12 +436,12 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
-                var items = new List<LocalContactsTableItem>();
-                LocalContactsTable[0] = new LocalContactsTableItem("C1: Beginning of partial phase", local.PartialBegin);
-                LocalContactsTable[1] = new LocalContactsTableItem("C2: Beginning of total phase", local.TotalBegin);
-                LocalContactsTable[2] = new LocalContactsTableItem("Max: Local maximum", local.Maximum);
-                LocalContactsTable[3] = new LocalContactsTableItem("C3: End of total phase", local.TotalEnd);
-                LocalContactsTable[4] = new LocalContactsTableItem("C4: End of partial phase", local.PartialEnd);
+                var items = new List<SolarEclipseLocalContactsTableItem>();
+                LocalContactsTable[0] = new SolarEclipseLocalContactsTableItem("C1: Beginning of partial phase", local.PartialBegin);
+                LocalContactsTable[1] = new SolarEclipseLocalContactsTableItem("C2: Beginning of total phase", local.TotalBegin);
+                LocalContactsTable[2] = new SolarEclipseLocalContactsTableItem("Max: Local maximum", local.Maximum);
+                LocalContactsTable[3] = new SolarEclipseLocalContactsTableItem("C3: End of total phase", local.TotalEnd);
+                LocalContactsTable[4] = new SolarEclipseLocalContactsTableItem("C4: End of partial phase", local.PartialEnd);
 
                 LocalCircumstancesTable[0] = new NameValueTableItem("Maximal magnitude", local.MaxMagnitude > 0 ? Format.Mag.Format(local.MaxMagnitude) : "");
                 LocalCircumstancesTable[1] = new NameValueTableItem("Moon/Sun diameter ratio", local.MoonToSunDiameterRatio > 0 ? Format.Ratio.Format(local.MoonToSunDiameterRatio) : "");

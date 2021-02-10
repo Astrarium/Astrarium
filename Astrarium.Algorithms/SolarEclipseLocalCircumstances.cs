@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Astrarium.Algorithms
 {
     /// <summary>
-    /// Contains details of local circumstances of the solar eclipse for given place.
+    /// Contains details of local circumstances of the solar eclipse for a given place.
     /// </summary>
     public class SolarEclipseLocalCircumstances
     {
@@ -22,6 +22,7 @@ namespace Astrarium.Algorithms
         /// </summary>
         public CrdsGeographical Location { get; set; }
 
+        // TODO: docs
         public SolarEclipseLocalCircumstancesContactPoint PartialBegin { get; set; }
         public SolarEclipseLocalCircumstancesContactPoint TotalBegin { get; set; }
         public SolarEclipseLocalCircumstancesContactPoint Maximum { get; set; }
@@ -54,11 +55,27 @@ namespace Astrarium.Algorithms
         public double PartialDuration => PartialBegin != null && PartialEnd != null ? PartialEnd.JulianDay - PartialBegin.JulianDay : 0;
     }
 
+    // TODO: docs
     public class SolarEclipseLocalCircumstancesContactPoint
     {
+        /// <summary>
+        /// Julian Day of the contact instant
+        /// </summary>
         public double JulianDay { get; private set; }
+
+        /// <summary>
+        /// Solar altitude, in degrees, at the instant
+        /// </summary>
         public double SolarAltitude { get; private set; }
+
+        /// <summary>
+        /// Position angle of contact point, in degrees, measured CCW from celestial North pole
+        /// </summary>
         public double PAngle { get; private set; }
+
+        /// <summary>
+        /// Position angle of contact point, in degrees, measured CCW from zenith
+        /// </summary>
         public double ZAngle { get; private set; }
         
         /// <summary>

@@ -25,7 +25,7 @@ namespace Astrarium.Algorithms
         /// </summary>
         /// <param name="eq">Pair of equatorial coodinates</param>
         /// <param name="geo">Geographical coordinates of the observer</param>
-        /// <param name="theta0">Local sidereal time</param>
+        /// <param name="theta0">Sidereal time at Greenwich</param>
         /// <remarks>
         /// Implementation is taken from AA(I), formulae 12.5, 12.6.
         /// </remarks>
@@ -53,7 +53,7 @@ namespace Astrarium.Algorithms
         /// </summary>
         /// <param name="hor">Pair of local horizontal coordinates.</param>
         /// <param name="geo">Geographical of the observer</param>
-        /// <param name="theta0">Local sidereal time.</param>
+        /// <param name="theta0">Sidereal time at Greenwich.</param>
         /// <returns>Pair of equatorial coordinates</returns>
         public static CrdsEquatorial ToEquatorial(this CrdsHorizontal hor, CrdsGeographical geo, double theta0)
         {
