@@ -89,8 +89,10 @@ namespace Astrarium.Plugins.Eclipses
                     string phase = Formatters.Phase.Format(eclipse.Magnitude);
                     // TODO: local circumstances
 
+                    var elements = GetLunarEclipseElements(jdMax);                    
+
                     string[] ephemerides = new[] { "Horizontal.Altitude", "Equatorial0.Alpha", "Equatorial0.Delta" };
-                    double[] jdInstants = new double[7] 
+                    double[] jdInstants = new double[7]
                     {
                         eclipse.JulianDayFirstContactPenumbra,
                         eclipse.JulianDayFirstContactUmbra,
@@ -133,41 +135,11 @@ namespace Astrarium.Plugins.Eclipses
         {
             do
             {
-                jd += (next ? 1 : -1) * (saros ? LunarEphem.SAROS : 30/*LunarEphem.SINODIC_PERIOD*/);
+                // TODO: check the period
+                jd += (next ? 1 : -1) * (saros ? LunarEphem.SAROS : LunarEphem.SINODIC_PERIOD);
                 return LunarEclipses.NearestEclipse(jd, next);
             }
             while (true);
-        }
-
-        public LunarEclipseContacts GetLunarEclipseContacts(LunarEclipse eclipse)
-        {
-            return new LunarEclipseContacts()
-            {
-                PenumbralBegin = GetLunarEclipseContact(eclipse.JulianDayFirstContactPenumbra),
-                PartialBegin = GetLunarEclipseContact(eclipse.JulianDayFirstContactUmbra),
-                TotalBegin = GetLunarEclipseContact(eclipse.JulianDayTotalBegin),
-                Maximum = GetLunarEclipseContact(eclipse.JulianDayMaximum),
-                TotalEnd = GetLunarEclipseContact(eclipse.JulianDayTotalEnd),
-                PartialEnd = GetLunarEclipseContact(eclipse.JulianDayLastContactUmbra),
-                PenumbralEnd = GetLunarEclipseContact(eclipse.JulianDayLastContactPenumbra)
-            };
-        }
-
-        private LunarEclipseContact GetLunarEclipseContact(double jd)
-        {
-            if (double.IsNaN(jd))
-                return null;
-
-            string[] ephemerides = new[] { "Equatorial0.Alpha", "Equatorial0.Delta", "HorizontalParallax" };
-            var ctx = new SkyContext(jd, new CrdsGeographical());
-            var moonEphem = sky.GetEphemerides(moon, ctx, ephemerides);
-            return new LunarEclipseContact()
-            {
-                JuluanDay = jd,
-                MoonCoordinates = new CrdsEquatorial((double)moonEphem[0].Value, (double)moonEphem[1].Value),
-                Parallax = (double)moonEphem[2].Value,
-                SiderealTime = ctx.SiderealTime
-            };
         }
 
         public SolarEclipse GetNearestSolarEclipse(double jd, bool next, bool saros)
@@ -229,11 +201,14 @@ namespace Astrarium.Plugins.Eclipses
         }
 
         /// <summary>
-        /// Calculates Besselian for a solar eclipse.
+        /// Calculates solar and lunar positions at five uniformly spaced times 
+        /// over a specified period centered at t0, where t0 is an integer hour of day
+        /// nearest to the specified time instant of eclipse maximum.
         /// </summary>
-        /// <param name="jdMaximum">Julian Day of eclipse maximum.</param>
+        /// <param name="jdMaximum">Instant of eclipse maximum.</param>
+        /// <param name="period">Period, in hours.</param>
         /// <returns></returns>
-        public PolynomialBesselianElements GetBesselianElements(double jdMaximum)
+        private SunMoonPosition[] GetSunMoonPositions(double jdMaximum, double period)
         {
             // found t0 (nearest integer hour closest to the eclipse maximum)
             double t0;
@@ -244,16 +219,22 @@ namespace Astrarium.Plugins.Eclipses
                 t0 = jdMaximum - new TimeSpan(0, d.Minute, d.Second).TotalDays + TimeSpan.FromHours(1).TotalDays;
 
             // The Besselian elements are derived from a least-squares fit to elements
-            // calculated at five uniformly spaced times over a 12 hour period centered at t0.
-            // So step = 3 hours, dt = 6 hours.
+            // calculated at five uniformly spaced times over a period centered at t0.
             SunMoonPosition[] pos = new SunMoonPosition[5];
 
-            double dt = TimeSpan.FromHours(6).TotalDays;
-            double step = TimeSpan.FromHours(3).TotalDays;
+            double dt = TimeSpan.FromHours(period / 2).TotalDays;
+            double step = TimeSpan.FromHours(period / 4).TotalDays;
+
             string[] ephemerides = new[] { "Equatorial0.Alpha", "Equatorial0.Delta", "Distance" };
 
             var sunEphem = sky.GetEphemerides(sun, t0 - dt, t0 + dt + 1e-6, step, ephemerides);
             var moonEphem = sky.GetEphemerides(moon, t0 - dt, t0 + dt + 1e-6, step, ephemerides);
+
+            // astronomical unit, in km
+            const double AU = 149597870;
+
+            // earth radius, in km
+            const double EARTH_RADIUS = 6371;
 
             for (int i = 0; i < 5; i++)
             {
@@ -262,12 +243,24 @@ namespace Astrarium.Plugins.Eclipses
                     JulianDay = t0 + step * (i - 2),
                     Sun = new CrdsEquatorial(sunEphem[i].GetValue<double>("Equatorial0.Alpha"), sunEphem[i].GetValue<double>("Equatorial0.Delta")),
                     Moon = new CrdsEquatorial(moonEphem[i].GetValue<double>("Equatorial0.Alpha"), moonEphem[i].GetValue<double>("Equatorial0.Delta")),
-                    DistanceSun = sunEphem[i].GetValue<double>("Distance") * 149597870 / 6371.0,
-                    DistanceMoon = moonEphem[i].GetValue<double>("Distance") / 6371.0
+                    DistanceSun = sunEphem[i].GetValue<double>("Distance") * AU / EARTH_RADIUS,
+                    DistanceMoon = moonEphem[i].GetValue<double>("Distance") / EARTH_RADIUS
                 };
             }
 
-            return SolarEclipses.BesselianElements(jdMaximum, pos);
+            return pos;
+        }
+
+        /// <inheritdoc/>
+        public PolynomialBesselianElements GetBesselianElements(double jdMaximum)
+        {
+            return SolarEclipses.BesselianElements(jdMaximum, GetSunMoonPositions(jdMaximum, 12));
+        }
+
+        /// <inheritdoc/>
+        public PolynomialLunarEclipseElements GetLunarEclipseElements(double jdMaximum)
+        {
+            return LunarEclipses.BesselianElements(jdMaximum, GetSunMoonPositions(jdMaximum, 4));
         }
 
         /// <inheritdoc/>

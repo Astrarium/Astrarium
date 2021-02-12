@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
 using static System.Math;
 using static Astrarium.Algorithms.Angle;
 
@@ -74,10 +76,9 @@ namespace Astrarium.Algorithms
         /// <param name="next">Flag indicating searching direction. True means searching next eclipse, false means previous.</param>
         public static LunarEclipse NearestEclipse(double jd, bool next)
         {
-            //Date d = new Date(jd);
-            //double year = d.Year + (Date.JulianEphemerisDay(d) - Date.JulianDay0(d.Year)) / 365.25;
-            //double k = Floor((year - 2000) * 12.3685) + 0.5;
-            double k = LunarEphem.Lunation(jd, LunationSystem.Meeus) + 0.5;
+            Date d = new Date(jd);
+            double year = d.Year + (Date.JulianEphemerisDay(d) - Date.JulianDay0(d.Year)) / 365.25;
+            double k = Floor((year - 2000) * 12.3685) + 0.5;
 
             bool eclipseFound;
 
@@ -244,83 +245,267 @@ namespace Astrarium.Algorithms
             return eclipse;
         }
 
-        /// <summary>
-        /// Calculates lunar eclipse map
-        /// </summary>
-        public static LunarEclipseMap EclipseMap(LunarEclipseContacts contacts)
+        public static PolynomialLunarEclipseElements BesselianElements(double jdMaximum, SunMoonPosition[] positions)
         {
-            return new LunarEclipseMap()
+            if (positions.Length != 5)
+                throw new ArgumentException("Five positions are required", nameof(positions));
+
+            double step = positions[1].JulianDay - positions[0].JulianDay;
+
+            if (!positions.Zip(positions.Skip(1),
+                (a, b) => new { a, b })
+                .All(p => Abs(p.b.JulianDay - p.a.JulianDay - step) <= 1e-6))
             {
-                PenumbralBegin = FindCurvePoints(contacts.PenumbralBegin),
-                PartialBegin = FindCurvePoints(contacts.PartialBegin),
-                TotalBegin = FindCurvePoints(contacts.TotalBegin),
-                TotalEnd = FindCurvePoints(contacts.TotalEnd),
-                PartialEnd = FindCurvePoints(contacts.PartialEnd),
-                PenumbralEnd = FindCurvePoints(contacts.PenumbralEnd)
+                throw new ArgumentException("Positions should be sorted ascending by JulianDay value, and have same JulianDay step.", nameof(positions));
+            }
+
+            // 5 time instants required
+            InstantLunarEclipseElements[] elements = new InstantLunarEclipseElements[5];
+
+            PointF[] points = new PointF[5];
+            for (int i = 0; i < 5; i++)
+            {
+                elements[i] = BesselianElements(positions[i]);
+                points[i].X = i - 2;
+            }
+
+            // Alpha expressed in degrees and can cross zero point (360 -> 0).
+            // Values must be aligned in order to avoid crossing.
+            double[] Alpha = Align(elements.Select(e => e.Alpha).ToArray());
+
+            return new PolynomialLunarEclipseElements()
+            {
+                JulianDay0 = positions[2].JulianDay,
+                JulianDayMaximum = jdMaximum,
+                DeltaT = Date.DeltaT(positions[2].JulianDay),
+                Step = step,
+                X = LeastSquares.FindCoeffs(points.Select((p, i) => new PointF(p.X, (float)elements[i].X)), 3),
+                Y = LeastSquares.FindCoeffs(points.Select((p, i) => new PointF(p.X, (float)elements[i].Y)), 3),
+                F1 = LeastSquares.FindCoeffs(points.Select((p, i) => new PointF(p.X, (float)elements[i].F1)), 3),
+                F2 = LeastSquares.FindCoeffs(points.Select((p, i) => new PointF(p.X, (float)elements[i].F2)), 3),
+                F3 = LeastSquares.FindCoeffs(points.Select((p, i) => new PointF(p.X, (float)elements[i].F3)), 3),
+                Alpha = LeastSquares.FindCoeffs(points.Select((p, i) => new PointF(p.X, (float)Alpha[i])), 3),
+                Delta = LeastSquares.FindCoeffs(points.Select((p, i) => new PointF(p.X, (float)elements[i].Delta)), 3),
             };
         }
 
-        private static IList<CrdsGeographical> FindCurvePoints(LunarEclipseContact c)
+        /// <summary>
+        /// Calculates Besselian elements for lunar eclipse,
+        /// valid only for specified instant.
+        /// </summary>
+        /// <param name="position">Sun and Moon position data</param>
+        /// <returns>
+        /// Besselian elements for lunar eclipse
+        /// </returns>
+        /// <remarks>
+        /// The method is based on formulae given here:
+        /// https://de.wikipedia.org/wiki/Besselsche_Elemente
+        /// </remarks>
+        internal static InstantLunarEclipseElements BesselianElements(SunMoonPosition position)
         {
-            if (c == null) 
-                return null;
+            // Geocentric RA of the center of Earth shadow
+            double a = ToRadians(position.Sun.Alpha + 180);
 
+            // Geocentric Dec of the center of Earth shadow
+            double d = ToRadians(-position.Sun.Delta);
+
+            // Geocentric RA of the Moon, in radians
+            double am = ToRadians(position.Moon.Alpha);
+
+            // Geocentric Dec of the Moon, in radians
+            double dm = ToRadians(position.Moon.Delta);
+           
+            double x = Cos(dm) * Sin(am - a);
+            double y = Sin(dm) * Cos(d) - Cos(dm) * Sin(d) * Cos(am - a);
+
+            // Astronomical unit, in km
+            const double AU = 149597870;
+
+            // Earth radius, in km
+            const double EARTH_RADIUS = 6371;
+
+            // Seconds in degree
+            const double SEC_IN_DEGREE = 3600;
+
+            // Geocentric solar radius, in degrees
+            double rs = SolarEphem.Semidiameter(position.DistanceSun * EARTH_RADIUS / AU) / SEC_IN_DEGREE;
+
+            // Geocentric lunar radius, in degrees
+            double rm = LunarEphem.Semidiameter(position.DistanceMoon * EARTH_RADIUS) / SEC_IN_DEGREE;
+
+            // Geocentric parallax of the Sun, in degrees
+            double pi_s = LunarEphem.Parallax(position.DistanceSun * EARTH_RADIUS);
+
+            // Geocentric parallax of the Moon, in degrees
+            double pi_m = LunarEphem.Parallax(position.DistanceMoon * EARTH_RADIUS);
+
+            // Danjon rule of shadow enlargement is used
+            const double ENLARGEMENT = 1.01;
+
+            // Earth penumbra radius, in degrees
+            double f1 = ENLARGEMENT * pi_m + pi_s + rs;
+
+            // Earth umbra radius, in degrees
+            double f2 = ENLARGEMENT * pi_m + pi_s - rs;
+
+            // Lunar radius (semidiameter), in degrees
+            double f3 = rm;
+
+            return new InstantLunarEclipseElements()
+            {
+                JulianDay = position.JulianDay,
+                // Convert to degrees: 
+                // http://www.eclipsewise.com/lunar/LEprime/2001-2100/LE2021May26Tprime.html
+                X = ToDegrees(x),
+                Y = ToDegrees(y),
+                F1 = f1,
+                F2 = f2,
+                F3 = f3,
+                Alpha = position.Moon.Alpha,
+                Delta = position.Moon.Delta
+            };
+        }
+
+        /// <summary>
+        /// Calculates lunar eclipse map
+        /// </summary>
+        /// <param name="eclipse">Eclipse general details</param>
+        /// <param name="elements">Besselian elements for the eclipse</param>
+        /// <returns>Eclipse map</returns>
+        public static LunarEclipseMap EclipseMap(LunarEclipse eclipse, PolynomialLunarEclipseElements elements)
+        {
+            return new LunarEclipseMap()
+            {
+                PenumbralBegin = !double.IsNaN(eclipse.JulianDayFirstContactPenumbra) ? FindCurvePoints(elements.GetInstantBesselianElements(eclipse.JulianDayFirstContactPenumbra)) : null,
+                PartialBegin = !double.IsNaN(eclipse.JulianDayFirstContactUmbra) ? FindCurvePoints(elements.GetInstantBesselianElements(eclipse.JulianDayFirstContactUmbra)) : null,
+                TotalBegin = !double.IsNaN(eclipse.JulianDayTotalBegin) ? FindCurvePoints(elements.GetInstantBesselianElements(eclipse.JulianDayTotalBegin)) : null,
+                TotalEnd = !double.IsNaN(eclipse.JulianDayTotalEnd) ? FindCurvePoints(elements.GetInstantBesselianElements(eclipse.JulianDayTotalEnd)) : null,
+                PartialEnd = !double.IsNaN(eclipse.JulianDayLastContactUmbra) ? FindCurvePoints(elements.GetInstantBesselianElements(eclipse.JulianDayLastContactUmbra)) : null,
+                PenumbralEnd = !double.IsNaN(eclipse.JulianDayLastContactPenumbra) ? FindCurvePoints(elements.GetInstantBesselianElements(eclipse.JulianDayLastContactPenumbra)) : null,
+            };
+        }
+
+        private static IList<CrdsGeographical> FindCurvePoints(InstantLunarEclipseElements e)
+        {
             var curve = new List<CrdsGeographical>();
-
-            var p0 = Project(c, -180);
-            curve.Add(new CrdsGeographical(p0.Longitude, -88 * Sign(c.MoonCoordinates.Delta)));
+           
+            var p0 = Project(e, -180);
+            curve.Add(new CrdsGeographical(p0.Longitude, -88 * Sign(e.Delta)));
 
             for (int i = -180; i <= 180; i++)
             {
-                curve.Add(Project(c, i));
+                var p = Project(e, i);
+                curve.Add(p);
             }
 
-            var p1 = Project(c, 180);
-            curve.Add(new CrdsGeographical(p1.Longitude, -88 * Sign(c.MoonCoordinates.Delta)));
+            var p1 = Project(e, 180);
+            curve.Add(new CrdsGeographical(p1.Longitude, -88 * Sign(e.Delta)));
 
             return curve;
         }
 
-        private static CrdsGeographical Project(LunarEclipseContact c, double L)
+        /// <summary>
+        /// Finds horizon circle point for a given geographical longitude 
+        /// for an instant of lunar eclipse, where Moon has zero altitude.
+        /// </summary>
+        /// <param name="e">Besselian elements of the Moon for the given instant.</param>
+        /// <param name="L">Geographical longitude, positive west, negative east, from -180 to +180 degrees.</param>
+        /// <returns>
+        /// Geographical coordinates for the point.
+        /// </returns>
+        /// <remarks>
+        /// The method core is based on formulae from the book:
+        /// Seidelmann, P. K.: Explanatory Supplement to The Astronomical Almanac, 
+        /// University Science Book, Mill Valley (California), 1992,
+        /// Chapter 8 "Eclipses of the Sun and Moon"
+        /// https://archive.org/download/131123ExplanatorySupplementAstronomicalAlmanac/131123-explanatory-supplement-astronomical-almanac.pdf
+        /// </remarks>
+        private static CrdsGeographical Project(InstantLunarEclipseElements e, double L)
         {
             CrdsGeographical g = null;
-            CrdsEquatorial eq = new CrdsEquatorial(c.MoonCoordinates);
-            double siderealTime = c.SiderealTime;
-            double parallax = c.Parallax;
+            
+            // Nutation elements
+            var nutation = Nutation.NutationElements(e.JulianDay);
+
+            // True obliquity
+            var epsilon = Date.TrueObliquity(e.JulianDay, nutation.deltaEpsilon);
+
+            // Greenwich apparent sidereal time 
+            double siderealTime = Date.ApparentSiderealTime(e.JulianDay, nutation.deltaPsi, epsilon);
+
+            // Geocenric distance to the Moon, in km
+            double dist = 358473400.0 / (e.F3 * 3600);
+
+            // Horizontal parallax of the Moon
+            double parallax = LunarEphem.Parallax(dist);
+
+            // Equatorial coordinates of the Moon, initial value is geocentric
+            CrdsEquatorial eq = new CrdsEquatorial(e.Alpha, e.Delta);
+
+            // two iterations:
+            // 1st: find geo location needed to perform topocentric correction
+            // 2nd: correct sublunar point with topocentric position and find true geoposition
             for (int i = 0; i < 2; i++)
             {
-                double hourAngle = Coordinates.HourAngle(siderealTime, 0, eq.Alpha);
-                double longitude = To180(L + hourAngle);
-                double tanLat = -Cos(ToRadians(L)) / Tan(ToRadians(eq.Delta));
-                double latitude = ToDegrees(Atan(tanLat));
-                g = new CrdsGeographical(longitude, latitude);
-                eq = eq.ToTopocentric(g, siderealTime, parallax);
+                // sublunar point latitude, preserve sign!
+                double phi0 = Sign(e.Delta) * Abs(eq.Delta);
+
+                // sublunar point longitude (formula 8.426-1)
+                double lambda0 = siderealTime - eq.Alpha;
+
+                // sublunar point latitude (formula 8.426-2)
+                double tanPhi = -1.0 / Tan(ToRadians(phi0)) * Cos(ToRadians(lambda0 - L));
+                double phi = ToDegrees(Atan(tanPhi));
+
+                g = new CrdsGeographical(L, phi);
+
+                if (i == 0)
+                {
+                    // correct to topocentric
+                    eq = eq.ToTopocentric(g, siderealTime, parallax);
+                }
             }
+
             return g;
         }
 
-        public static LunarEclipseLocalCircumstances LocalCircumstances(LunarEclipseContacts contacts, CrdsGeographical g)
+        public static LunarEclipseLocalCircumstances LocalCircumstances(LunarEclipse eclipse, PolynomialLunarEclipseElements e, CrdsGeographical g)
         {
             return new LunarEclipseLocalCircumstances()
             {
                 Location = g,
-                PenumbralBegin = GetLocalCircumstancesContactPoint(contacts.PenumbralBegin, g),
-                PartialBegin = GetLocalCircumstancesContactPoint(contacts.PartialBegin, g),
-                TotalBegin = GetLocalCircumstancesContactPoint(contacts.TotalBegin, g),
-                Maximum = GetLocalCircumstancesContactPoint(contacts.Maximum, g),
-                TotalEnd = GetLocalCircumstancesContactPoint(contacts.TotalEnd, g),
-                PartialEnd = GetLocalCircumstancesContactPoint(contacts.PartialEnd, g),
-                PenumbralEnd = GetLocalCircumstancesContactPoint(contacts.PenumbralEnd, g)
+                PenumbralBegin = GetContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayFirstContactPenumbra), g),
+                PartialBegin = GetContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayFirstContactUmbra), g),
+                TotalBegin = GetContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayTotalBegin), g),
+                Maximum = GetContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayMaximum), g),
+                TotalEnd = GetContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayTotalEnd), g),
+                PartialEnd = GetContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayLastContactUmbra), g),
+                PenumbralEnd = GetContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayLastContactPenumbra), g)
             };
         }
 
-        private static LunarEclipseLocalCircumstancesContactPoint GetLocalCircumstancesContactPoint(LunarEclipseContact c, CrdsGeographical g)
+        private static LunarEclipseLocalCircumstancesContactPoint GetContactPoint(InstantLunarEclipseElements e, CrdsGeographical g)
         {
-            if (c == null)
-                return null;
+            CrdsEquatorial eq = new CrdsEquatorial(e.Alpha, e.Delta);
 
-            var h = c.MoonCoordinates.ToTopocentric(g, c.SiderealTime, c.Parallax).ToHorizontal(g, c.SiderealTime);
-            return new LunarEclipseLocalCircumstancesContactPoint(c.JuluanDay, h.Altitude);
+            // Nutation elements
+            var nutation = Nutation.NutationElements(e.JulianDay);
+
+            // True obliquity
+            var epsilon = Date.TrueObliquity(e.JulianDay, nutation.deltaEpsilon);
+
+            // Greenwich apparent sidereal time 
+            double siderealTime = Date.ApparentSiderealTime(e.JulianDay, nutation.deltaPsi, epsilon);
+
+            // Geocenric distance to the Moon, in km
+            double dist = 358473400.0 / (e.F3 * 3600);
+
+            // Horizontal parallax of the Moon
+            double parallax = LunarEphem.Parallax(dist);
+
+            // Horizontal coordinates
+            var h = eq.ToTopocentric(g, siderealTime, parallax).ToHorizontal(g, siderealTime);
+            return new LunarEclipseLocalCircumstancesContactPoint(e.JulianDay, h.Altitude);
         }
     }
 }

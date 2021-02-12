@@ -11,9 +11,20 @@ namespace Astrarium.Plugins.Eclipses
         SolarEclipse GetNearestSolarEclipse(double jd, bool next, bool saros);
         LunarEclipse GetNearestLunarEclipse(double jd, bool next, bool saros);
 
-        LunarEclipseContacts GetLunarEclipseContacts(LunarEclipse eclipse);
-
+        /// <summary>
+        /// Calculates Besselian for a solar eclipse.
+        /// </summary>
+        /// <param name="jdMaximum">Julian Day of eclipse maximum.</param>
+        /// <returns>Polynomial Besselian elements for the solar eclipse.</returns>
         PolynomialBesselianElements GetBesselianElements(double jd);
+
+        /// <summary>
+        /// Calculates Besselian for a lunar eclipse.
+        /// </summary>
+        /// <param name="jdMaximum">Julian Day of eclipse maximum.</param>
+        /// <returns>Polynomial Besselian elements for the lunar eclipse.</returns>
+        PolynomialLunarEclipseElements GetLunarEclipseElements(double jd);
+
         string GetLocalVisibilityString(SolarEclipse eclipse, SolarEclipseLocalCircumstances localCirc);
 
         /// <summary>

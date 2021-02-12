@@ -417,7 +417,9 @@
                                         </Grid.ColumnDefinitions>
                                         <!-- Eclipse contacts toggler -->
                                         <StackPanel Margin="2" Grid.Column="0" HorizontalAlignment="Left" SnapsToDevicePixels="True" Orientation="Horizontal">
-                                            <RadioButton Content="C1" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C1}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="C1: Beginning of partial phase" />
+                                            <RadioButton Content="P1" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:LunarEclipseChartContact.P1}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="C1: Beginning of partial phase" />
+                                            
+                                            
                                             <RadioButton Content="C2" IsEnabled="{Binding LocalCircumstances.TotalBegin, Converter={s:NotNullToBoolConverter}}" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C2}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="C2: Beginning of total phase"  />
                                             <RadioButton Content="Max" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.Max}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="Max: Local maximum" />
                                             <RadioButton Content="C3" IsEnabled="{Binding LocalCircumstances.TotalEnd, Converter={s:NotNullToBoolConverter}}" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C3}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="C3: End of total phase" />

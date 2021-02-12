@@ -106,7 +106,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
         private int currentSarosSeries;
         private SolarEclipseMap map;
-        private PolynomialBesselianElements be;
+        private PolynomialBesselianElements elements;
         private SolarEclipse eclipse;
         private static NumberFormatInfo nf;
        
@@ -183,7 +183,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
         protected override void AddToCitiesList(CrdsGeographical location)
         {
-            var local = eclipsesCalculator.FindLocalCircumstancesForCities(be, new[] { location }).First();
+            var local = eclipsesCalculator.FindLocalCircumstancesForCities(elements, new[] { location }).First();
             CitiesListTable.Add(new CitiesListTableItem(local, eclipsesCalculator.GetLocalVisibilityString(eclipse, local)));
             IsCitiesListTableNotEmpty = true;
         }
@@ -214,7 +214,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             eclipse =  eclipsesCalculator.GetNearestSolarEclipse(JulianDay, next, saros);
             JulianDay = eclipse.JulianDayMaximum;
             EclipseDate = Formatters.Date.Format(new Date(JulianDay, 0));
-            be = eclipsesCalculator.GetBesselianElements(JulianDay);
+            elements = eclipsesCalculator.GetBesselianElements(JulianDay);
             string type = eclipse.EclipseType.ToString();
             string subtype = eclipse.IsNonCentral ? " non-central" : "";
             EclipseDescription = $"{type}{subtype} solar eclipse";
@@ -223,7 +223,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
             await Task.Run(() =>
             {
-                map = SolarEclipses.EclipseMap(be);
+                map = SolarEclipses.EclipseMap(eclipse, elements);
 
                 var tracks = new List<Track>();
                 var polygons = new List<Polygon>();
@@ -337,7 +337,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 }
 
                 // Local curcumstances at point of maximum
-                var maxCirc = SolarEclipses.LocalCircumstances(be, map.Max);
+                var maxCirc = SolarEclipses.LocalCircumstances(elements, map.Max);
 
                 // Brown lunation number
                 var lunation = LunarEphem.Lunation(JulianDay);
@@ -351,7 +351,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                     new NameValueTableItem("Gamma", $"{eclipse.Gamma.ToString("N5", nf)}"),
                     new NameValueTableItem("Maximal Duration", $"{Format.Time.Format(maxCirc.TotalDuration) }"),
                     new NameValueTableItem("Brown Lunation Number", $"{lunation}"),
-                    new NameValueTableItem("ΔT", $"{be.DeltaT.ToString("N1", nf) } s")
+                    new NameValueTableItem("ΔT", $"{elements.DeltaT.ToString("N1", nf) } s")
                 };
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -394,7 +394,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 var besselianElementsTable = new ObservableCollection<BesselianElementsTableItem>();
                 for (int i=0; i<4; i++)
                 {
-                    besselianElementsTable.Add(new BesselianElementsTableItem(i, be));
+                    besselianElementsTable.Add(new BesselianElementsTableItem(i, elements));
                 }
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -403,14 +403,14 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
                 // Besselian elements table header
                 var beTableHeader = new StringBuilder();
-                beTableHeader.AppendLine($"Elements for t\u2080 = {Formatters.DateTime.Format(new Date(be.JulianDay0))} TDT (JDE = { be.JulianDay0.ToString("N6", nf)})");
+                beTableHeader.AppendLine($"Elements for t\u2080 = {Formatters.DateTime.Format(new Date(elements.JulianDay0))} TDT (JDE = { elements.JulianDay0.ToString("N6", nf)})");
                 beTableHeader.AppendLine($"The Besselian elements are valid over the period t\u2080 - 6h ≤ t\u2080 ≤ t\u2080 + 6h");
                 BesselianElementsTableHeader = beTableHeader.ToString();
 
                 // Besselian elements table footer
                 var beTableFooter = new StringBuilder();
-                beTableFooter.AppendLine($"Tan ƒ1 = {be.TanF1.ToString("N7", nf)}");
-                beTableFooter.AppendLine($"Tan ƒ2 = {be.TanF2.ToString("N7", nf)}");
+                beTableFooter.AppendLine($"Tan ƒ1 = {elements.TanF1.ToString("N7", nf)}");
+                beTableFooter.AppendLine($"Tan ƒ2 = {elements.TanF2.ToString("N7", nf)}");
                 BesselianElementsTableFooter = beTableFooter.ToString();
 
                 Tracks = tracks;
@@ -432,7 +432,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
         protected override void CalculateLocalCircumstances(CrdsGeographical pos)
         {
-            var local = SolarEclipses.LocalCircumstances(be, pos);
+            var local = SolarEclipses.LocalCircumstances(elements, pos);
 
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
@@ -546,7 +546,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             if (CitiesListTable.Any())
             {
                 var cities = CitiesListTable.Select(l => l.Location).ToArray();
-                var locals = await Task.Run(() => eclipsesCalculator.FindLocalCircumstancesForCities(be, cities));
+                var locals = await Task.Run(() => eclipsesCalculator.FindLocalCircumstancesForCities(elements, cities));
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
                     CitiesListTable.Clear();
@@ -597,13 +597,13 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                     {
                         ViewManager.ShowProgress("Please wait", "Calculating circumstances for locations...", tokenSource);
                         var cities = locationsReader.ReadFromFile(file);
-                        locals = await Task.Run(() => eclipsesCalculator.FindLocalCircumstancesForCities(be, cities, tokenSource.Token, null));
+                        locals = await Task.Run(() => eclipsesCalculator.FindLocalCircumstancesForCities(elements, cities, tokenSource.Token, null));
                     }
                 }
                 else
                 {
                     ViewManager.ShowProgress("Please wait", "Searching cities on central line of the eclipse...", tokenSource, progress);
-                    locals = await Task.Run(() => eclipsesCalculator.FindCitiesOnCentralLine(be, map.TotalPath, tokenSource.Token, progress));
+                    locals = await Task.Run(() => eclipsesCalculator.FindCitiesOnCentralLine(elements, map.TotalPath, tokenSource.Token, progress));
                 }
             }
             catch (Exception ex)

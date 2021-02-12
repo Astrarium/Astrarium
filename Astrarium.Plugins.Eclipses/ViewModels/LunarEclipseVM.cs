@@ -21,7 +21,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
         private LunarEclipse eclipse;
         private LunarEclipseMap map;
-        private LunarEclipseContacts contacts;
+        private PolynomialLunarEclipseElements elements;
 
         /// <summary>
         /// Table of local contacts instants, displayed to the right of eclipse map
@@ -50,7 +50,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
         protected override void CalculateLocalCircumstances(CrdsGeographical g)
         {
-            var local = LunarEclipses.LocalCircumstances(contacts, g);
+            var local = LunarEclipses.LocalCircumstances(eclipse, elements, g);
 
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
@@ -89,10 +89,9 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             EclipseDescription = $"{type} lunar eclipse";
             LocalVisibilityDescription = "visible as... TODO";
 
-            contacts = eclipsesCalculator.GetLunarEclipseContacts(eclipse);
+            elements = eclipsesCalculator.GetLunarEclipseElements(eclipse.JulianDayMaximum);
 
-
-            map = LunarEclipses.EclipseMap(contacts);
+            map = LunarEclipses.EclipseMap(eclipse, elements);
 
             var tracks = new List<Track>();
             var polygons = new List<Polygon>();

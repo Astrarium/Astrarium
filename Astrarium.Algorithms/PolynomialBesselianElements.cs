@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using static System.Math;
 using static Astrarium.Algorithms.Angle;
 
@@ -15,7 +14,7 @@ namespace Astrarium.Algorithms
     public class PolynomialBesselianElements
     {
         /// <summary>
-        /// Julian Day of eclipse maximum.
+        /// Julian Day of elements t0 instant.
         /// </summary>
         public double JulianDay0 { get; set; }
 
@@ -97,6 +96,7 @@ namespace Astrarium.Algorithms
            
             return new InstantBesselianElements()
             {
+                JulianDay = jd,
                 DeltaT = DeltaT,
                 X = X.Select((x, n) => x * Pow(t, n)).Sum(),
                 Y = Y.Select((y, n) => y * Pow(t, n)).Sum(),

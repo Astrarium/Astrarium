@@ -9,17 +9,22 @@ namespace Astrarium.Algorithms
     public class InstantBesselianElements
     {
         /// <summary>
+        /// Instant of the elements
+        /// </summary>
+        public double JulianDay { get; set; }
+
+        /// <summary>
         /// DeltaT value (difference between Dynamical and Universal Times).
         /// </summary>
         public double DeltaT { get; set; }
 
         /// <summary>
-        /// X-coordinate of projection of Moon shadow on fundamental plane).
+        /// X-coordinate of projection of Moon shadow on fundamental plane.
         /// </summary>
         public double X { get; set; }
 
         /// <summary>
-        /// Y-coordinate of projection of Moon shadow on fundamental plane).
+        /// Y-coordinate of projection of Moon shadow on fundamental plane.
         /// </summary>
         public double Y { get; set; }
 

@@ -464,7 +464,7 @@ namespace Astrarium.Algorithms
                 points[i].X = i - 2;
             }
 
-            // Mu expressed in degrees and can cross zero point.
+            // Mu expressed in degrees and can cross zero point (360 -> 0).
             // Values must be aligned in order to avoid crossing.
             double[] Mu = elements.Select(e => e.Mu).ToArray();
             Align(Mu);
@@ -493,9 +493,10 @@ namespace Astrarium.Algorithms
         /// <summary>
         /// Gets map of solar eclipse.
         /// </summary>
+        /// <param name="eclipse">Eclipse general details</param>
         /// <param name="pbe">Polynomial Besselian elements defining the Eclipse</param>
         /// <returns><see cref="SolarEclipseMap"/> instance.</returns>
-        public static SolarEclipseMap EclipseMap(PolynomialBesselianElements pbe)
+        public static SolarEclipseMap EclipseMap(SolarEclipse eclipse, PolynomialBesselianElements pbe)
         {
             // left edge of time interval
             double jdFrom = pbe.From;
@@ -508,9 +509,6 @@ namespace Astrarium.Algorithms
 
             // precision of calculation, in days
             double epsilon = 1e-8;
-
-            // Eclipse general details
-            SolarEclipse eclipse = NearestEclipse(pbe.JulianDay0, true);
 
             // Eclipse map data
             SolarEclipseMap map = new SolarEclipseMap();

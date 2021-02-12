@@ -234,7 +234,7 @@ namespace Astrarium.Algorithms
         }
 
         // TODO: tests
-        public static void Align(double[] array)
+        public static double[] Align(double[] array)
         {
             for (int i = 0; i < array.Length - 1; i++)
             {
@@ -244,6 +244,7 @@ namespace Astrarium.Algorithms
                     array[i + 1] += 360 * -Math.Sign(d);
                 }
             }
+            return array;
         }
     }
 

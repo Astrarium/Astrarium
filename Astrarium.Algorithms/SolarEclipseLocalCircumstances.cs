@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Astrarium.Algorithms
+﻿namespace Astrarium.Algorithms
 {
     /// <summary>
     /// Contains details of local circumstances of the solar eclipse for a given place.
@@ -13,24 +6,42 @@ namespace Astrarium.Algorithms
     public class SolarEclipseLocalCircumstances
     {
         /// <summary>
-        /// Flag indicating the eclipse is invisible from current point
+        /// Flag indicating the eclipse is invisible from current point.
         /// </summary>
         public bool IsInvisible { get; set; }
 
         /// <summary>
-        /// Geographical location
+        /// Geographical location.
         /// </summary>
         public CrdsGeographical Location { get; set; }
 
-        // TODO: docs
+        /// <summary>
+        /// Details for instant of beginning of partial phase of solar eclipse.
+        /// </summary>
         public SolarEclipseLocalCircumstancesContactPoint PartialBegin { get; set; }
+
+        /// <summary>
+        /// Details for instant of beginning of total phase of solar eclipse.
+        /// </summary>
         public SolarEclipseLocalCircumstancesContactPoint TotalBegin { get; set; }
+
+        /// <summary>
+        /// Details for instant of maximum of solar eclipse.
+        /// </summary>
         public SolarEclipseLocalCircumstancesContactPoint Maximum { get; set; }
+
+        /// <summary>
+        /// Details for instant of end of total phase of solar eclipse.
+        /// </summary>
         public SolarEclipseLocalCircumstancesContactPoint TotalEnd { get; set; }
+
+        /// <summary>
+        /// Details for instant of end of partial phase of solar eclipse.
+        /// </summary>
         public SolarEclipseLocalCircumstancesContactPoint PartialEnd { get; set; }
 
         /// <summary>
-        /// Maximal eclipse magnitude.
+        /// Maximal eclipse magnitude for a given place.
         /// </summary>
         public double MaxMagnitude { get; set; }
 
@@ -55,7 +66,9 @@ namespace Astrarium.Algorithms
         public double PartialDuration => PartialBegin != null && PartialEnd != null ? PartialEnd.JulianDay - PartialBegin.JulianDay : 0;
     }
 
-    // TODO: docs
+    /// <summary>
+    /// Describes details of instant of solar eclipse for a given point.
+    /// </summary>
     public class SolarEclipseLocalCircumstancesContactPoint
     {
         /// <summary>
@@ -83,6 +96,9 @@ namespace Astrarium.Algorithms
         /// </summary>
         public double QAngle { get; private set; }
 
+        /// <summary>
+        /// Creates new instance
+        /// </summary>        
         public SolarEclipseLocalCircumstancesContactPoint(double jd, double solarAlt, double pAngle, double zAngle, double qAngle)
         {
             JulianDay = jd;
