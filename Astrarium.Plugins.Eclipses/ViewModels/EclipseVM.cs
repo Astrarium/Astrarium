@@ -154,7 +154,8 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         public ICommand ExportSarosSeriesTableCommand => new Command(ExportSarosSeriesTable);
         public ICommand CitiesListTableGoToCoordinatesCommand => new Command<CrdsGeographical>(CitiesListTableGoToCoordinates);
         public ICommand ShowLocationsFileFormatCommand => new Command(ShowLocationsFileFormat);
-        
+        public ICommand ChartZoomInCommand => new Command(ChartZoomIn);
+        public ICommand ChartZoomOutCommand => new Command(ChartZoomOut);
 
         protected EclipseVM(IGeoLocationsManager locationsManager, ISettings settings)
         {
@@ -164,6 +165,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
             this.locationsManager.Load();
 
+            ChartZoomLevel = 1;
             SettingsLocationName = $"Local visibility ({observerLocation.LocationName})";
             CacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "MapsCache");
 
@@ -336,10 +338,26 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             protected set => SetValue(nameof(IsVisibleFromCurrentPlace), value);
         }
 
+        public float ChartZoomLevel
+        {
+            get => GetValue<float>(nameof(ChartZoomLevel));
+            set => SetValue(nameof(ChartZoomLevel), value);
+        }
+
         protected void AddLocationMarker()
         {
             Markers.Add(new Marker(ToGeo(observerLocation), observerLocationMarkerStyle, observerLocation.LocationName));
             Markers = new List<Marker>(Markers);
+        }
+
+        private void ChartZoomIn()
+        {
+            ChartZoomLevel = Math.Min(3, ChartZoomLevel * 1.1f);
+        }
+
+        private void ChartZoomOut()
+        {
+            ChartZoomLevel = Math.Max(1.0f / 3f, ChartZoomLevel / 1.1f);
         }
 
         private void ChangeDate()
@@ -387,7 +405,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         private void LockOn(CrdsGeographical location)
         {
             observerLocation = location;
-            Markers.Remove(Markers.Last());
+            Markers.Remove(Markers.LastOrDefault());
             AddLocationMarker();
             IsMapLocked = true;
             CalculateLocalCircumstances(observerLocation);

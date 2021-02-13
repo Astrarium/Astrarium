@@ -28,6 +28,15 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         /// </summary>
         public ObservableCollection<LunarEclipseLocalContactsTableItem> LocalContactsTable { get; private set; } = new ObservableCollection<LunarEclipseLocalContactsTableItem>();
 
+        /// <summary>
+        /// Local circumstance of the eclipse
+        /// </summary>
+        public LunarEclipseLocalCircumstances LocalCircumstances
+        {
+            get => GetValue<LunarEclipseLocalCircumstances>(nameof(LocalCircumstances));
+            private set => SetValue(nameof(LocalCircumstances), value);
+        }
+
         public LunarEclipseVM(IEclipsesCalculator eclipsesCalculator, IGeoLocationsManager locationsManager, ISky sky, ISettings settings) : base(locationsManager, settings)
         {
             this.eclipsesCalculator = eclipsesCalculator;
@@ -75,6 +84,8 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 (local.PenumbralBegin.LunarAltitude > 0/* -contacts.FirstContactPenumbra.Parallax*/).ToString();
 
             ObserverLocationName = (IsMouseOverMap && !IsMapLocked) ? $"Mouse coordinates ({Format.Geo.Format(FromGeoPoint(MapMouse))})" : $"{observerLocation.LocationName} ({Format.Geo.Format(observerLocation)})";
+            LocalCircumstances = local;
+            IsVisibleFromCurrentPlace = true;
         }
 
         protected override void CalculateEclipse(bool next, bool saros)
@@ -139,9 +150,12 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 polygons.Add(polygon);
             }
 
+            Markers = new List<Marker>();
             Tracks = tracks;
             Polygons = polygons;
             IsCalculating = false;
+
+            CalculateLocalCircumstances(observerLocation);
         }
 
         protected override void CalculateSarosSeries()

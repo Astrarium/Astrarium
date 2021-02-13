@@ -46,7 +46,11 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         /// <summary>
         /// Local circumstance of the eclipse
         /// </summary>
-        public SolarEclipseLocalCircumstances LocalCircumstances { get; private set; }
+        public SolarEclipseLocalCircumstances LocalCircumstances
+        {
+            get => GetValue<SolarEclipseLocalCircumstances>(nameof(LocalCircumstances));
+            private set => SetValue(nameof(LocalCircumstances), value);
+        }
 
         /// <summary>
         /// Title of Saros series table
@@ -91,14 +95,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             private set => SetValue(nameof(BesselianElementsTableFooter), value);
         }
 
-        public float ChartZoomLevel
-        {
-            get => GetValue<float>(nameof(ChartZoomLevel));
-            set => SetValue(nameof(ChartZoomLevel), value);
-        }
-
-        public ICommand ChartZoomInCommand => new Command(ChartZoomIn);
-        public ICommand ChartZoomOutCommand => new Command(ChartZoomOut);
+        
         public ICommand FindLocationsOnTotalPathCommand => new Command(FindLocationsOnTotalPath);
         public ICommand ClearLocationsTableCommand => new Command(ClearLocationsTable);
         public ICommand LoadLocationsFromFileCommand => new Command(LoadLocationsFromFile);
@@ -135,8 +132,6 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             this.eclipsesCalculator = eclipsesCalculator;
             this.locationsReader = locationsReader;
             this.settings.PropertyChanged += Settings_PropertyChanged;
-
-            ChartZoomLevel = 1;
             
             SetMapColors();
 
@@ -188,15 +183,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             IsCitiesListTableNotEmpty = true;
         }
 
-        private void ChartZoomIn()
-        {
-            ChartZoomLevel = Math.Min(3, ChartZoomLevel * 1.1f);
-        }
 
-        private void ChartZoomOut()
-        {
-            ChartZoomLevel = Math.Max(1.0f / 3f, ChartZoomLevel / 1.1f);
-        }
 
         private void SetMapColors()
         {
@@ -454,7 +441,6 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             LocalVisibilityDescription = eclipsesCalculator.GetLocalVisibilityString(eclipse, local);
             IsVisibleFromCurrentPlace = !local.IsInvisible;
             LocalCircumstances = local;
-            NotifyPropertyChanged(nameof(LocalCircumstances));
         }
 
         protected override async void CalculateSarosSeries()

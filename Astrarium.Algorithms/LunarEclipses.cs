@@ -474,38 +474,14 @@ namespace Astrarium.Algorithms
             return new LunarEclipseLocalCircumstances()
             {
                 Location = g,
-                PenumbralBegin = GetContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayFirstContactPenumbra), g),
-                PartialBegin = GetContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayFirstContactUmbra), g),
-                TotalBegin = GetContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayTotalBegin), g),
-                Maximum = GetContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayMaximum), g),
-                TotalEnd = GetContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayTotalEnd), g),
-                PartialEnd = GetContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayLastContactUmbra), g),
-                PenumbralEnd = GetContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayLastContactPenumbra), g)
+                PenumbralBegin = new LunarEclipseLocalCircumstancesContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayFirstContactPenumbra), g),
+                PartialBegin = new LunarEclipseLocalCircumstancesContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayFirstContactUmbra), g),
+                TotalBegin = new LunarEclipseLocalCircumstancesContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayTotalBegin), g),
+                Maximum = new LunarEclipseLocalCircumstancesContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayMaximum), g),
+                TotalEnd = new LunarEclipseLocalCircumstancesContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayTotalEnd), g),
+                PartialEnd = new LunarEclipseLocalCircumstancesContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayLastContactUmbra), g),
+                PenumbralEnd = new LunarEclipseLocalCircumstancesContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayLastContactPenumbra), g)
             };
-        }
-
-        private static LunarEclipseLocalCircumstancesContactPoint GetContactPoint(InstantLunarEclipseElements e, CrdsGeographical g)
-        {
-            CrdsEquatorial eq = new CrdsEquatorial(e.Alpha, e.Delta);
-
-            // Nutation elements
-            var nutation = Nutation.NutationElements(e.JulianDay);
-
-            // True obliquity
-            var epsilon = Date.TrueObliquity(e.JulianDay, nutation.deltaEpsilon);
-
-            // Greenwich apparent sidereal time 
-            double siderealTime = Date.ApparentSiderealTime(e.JulianDay, nutation.deltaPsi, epsilon);
-
-            // Geocenric distance to the Moon, in km
-            double dist = 358473400.0 / (e.F3 * 3600);
-
-            // Horizontal parallax of the Moon
-            double parallax = LunarEphem.Parallax(dist);
-
-            // Horizontal coordinates
-            var h = eq.ToTopocentric(g, siderealTime, parallax).ToHorizontal(g, siderealTime);
-            return new LunarEclipseLocalCircumstancesContactPoint(e.JulianDay, h.Altitude);
         }
     }
 }
