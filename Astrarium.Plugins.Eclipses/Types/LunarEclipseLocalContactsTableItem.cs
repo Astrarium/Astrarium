@@ -12,6 +12,8 @@ namespace Astrarium.Plugins.Eclipses.Types
         public string Point { get; private set; }
         public string Time { get; private set; }
         public string Altitude { get; private set; }
+        public string PAngle { get; private set; }
+        public string ZAngle { get; private set; }
 
         public LunarEclipseLocalContactsTableItem(string text, LunarEclipseLocalCircumstancesContactPoint contact)
         {
@@ -20,6 +22,8 @@ namespace Astrarium.Plugins.Eclipses.Types
             {
                 Time = !double.IsNaN(contact.JulianDay) ? $"{Format.Time.Format(new Date(contact.JulianDay, 0))} UTC" : "—";
                 Altitude = Format.Alt.Format(contact.LunarAltitude);
+                PAngle = Format.Angle.Format(contact.PAngle);
+                ZAngle = Format.Angle.Format(contact.ZAngle);
             }
         }
     }

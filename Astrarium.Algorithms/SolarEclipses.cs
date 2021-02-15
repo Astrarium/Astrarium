@@ -312,7 +312,8 @@ namespace Astrarium.Algorithms
 
             // calculate position angles (EOSE, pp. 26-27)
             double P = Atan2(u, v);
-            double q = Asin(Cos(phi) * Sin(H) / Cos(ToRadians(h)));
+            // Parallactic angle - AA(II), p.98, formula 14.1
+            double q = Atan2(Sin(H), Tan(phi) * Cos(d) - Sin(d) * Cos(H));
             double qAngleMax = To360(ToDegrees(q));
             double zenithAngleMax = To360(ToDegrees(P - q));
             double posAngleMax = To360(ToDegrees(P));
@@ -367,7 +368,7 @@ namespace Astrarium.Algorithms
 
                     double sinh = Sin(d) * Sin(phi) + Cos(d) * Cos(phi) * Cos(H);
                     h = ToDegrees(Asin(sinh));
-
+                   
                     ksi = rhoCosPhi_ * Sin(H);
                     eta = rhoSinPhi_ * Cos(d) - rhoCosPhi_ * Cos(H) * Sin(d);
                     zeta = rhoSinPhi_ * Sin(d) + rhoCosPhi_ * Cos(H) * Cos(d);
@@ -396,11 +397,14 @@ namespace Astrarium.Algorithms
                 while (Abs(tau) >= 0.00001 && iters < 20);
 
                 P = Atan2(u, v);
-                q = Asin(Cos(phi) * Sin(H) / Cos(ToRadians(h)));
+                // Parallactic angle - AA(II), p.98, formula 14.1
+                q = Atan2(Sin(H), Tan(phi) * Cos(d) - Sin(d) * Cos(H));
+
                 posAngles[i] = To360(ToDegrees(P));
                 zenithAngles[i] = To360(ToDegrees(P - q));
                 qAngles[i] = To360(ToDegrees(q));
                 jdPhases[i] = jd;
+
                 altPhases[i] = h;
             }
 

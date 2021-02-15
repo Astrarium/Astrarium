@@ -398,8 +398,8 @@
                                             <DataGridTextColumn Header="Instant" Binding="{Binding Point}" />
                                             <DataGridTextColumn Header="Time" FontFamily="Lucida Console" Binding="{Binding Time}"/>
                                             <DataGridTextColumn Header="Alt" FontFamily="Lucida Console" Binding="{Binding Altitude}"/>
-                                            <!--<DataGridTextColumn Header="P" FontFamily="Lucida Console" Binding="{Binding PAngle}"/>
-                                            <DataGridTextColumn Header="Z" FontFamily="Lucida Console" Binding="{Binding ZAngle}"/>-->
+                                            <DataGridTextColumn Header="P" FontFamily="Lucida Console" Binding="{Binding PAngle}"/>
+                                            <DataGridTextColumn Header="Z" FontFamily="Lucida Console" Binding="{Binding ZAngle}"/>
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </StackPanel>

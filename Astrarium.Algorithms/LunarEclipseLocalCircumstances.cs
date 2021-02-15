@@ -71,6 +71,16 @@ namespace Astrarium.Algorithms
         public double QAngle { get; private set; }
 
         /// <summary>
+        /// Equatorial position angle of the Moon center, measured in degrees
+        /// </summary>
+        public double PAngle { get; private set; }
+
+        /// <summary>
+        /// Zenithal position angle of the Moon center, measured in degrees
+        /// </summary>
+        public double ZAngle { get; private set; }
+
+        /// <summary>
         /// X-coordinate of center of the Moon in fundamental plane.
         /// </summary>
         public double X { get; set; }
@@ -126,13 +136,22 @@ namespace Astrarium.Algorithms
             // Hour angle
             double H = Coordinates.HourAngle(siderealTime, g.Longitude, eqTopo.Alpha);
 
-            // Parallactic angle
-            // Calculation is based on formula 7, page 26, "Elements of Solar Eclipses" by J.Meeus 
-            double q = ToDegrees(Asin(Cos(ToRadians(g.Latitude)) * Sin(ToRadians(H)) / Cos(ToRadians(h.Altitude))));
+            // Position angles
+
+            // Parallactic angle - AA(II), p.98, formula 14.1
+            double qAngle = ToDegrees(Atan2(Sin(ToRadians(H)), Tan(ToRadians(g.Latitude)) * Cos(ToRadians(eqTopo.Delta)) - Sin(ToRadians(eqTopo.Delta)) * Cos(ToRadians(H))));
+
+            // Position angle, measured from North to East (CCW)
+            double pAngle = To360(ToDegrees(Atan2(e.X, e.Y)));
+
+            // Position angle, measured from Zenith CCW
+            double zAngle = To360(pAngle - qAngle);
 
             JulianDay = e.JulianDay;
             LunarAltitude = h.Altitude;
-            QAngle = g.Latitude >= 0 ? q : 180 - q;
+            QAngle = qAngle;
+            PAngle = pAngle;
+            ZAngle = zAngle;
             X = e.X;
             Y = e.Y;
             F1 = e.F1;

@@ -266,7 +266,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 {
                     observerLocation = settings.Get<CrdsGeographical>("ObserverLocation");
                     CalculateLocalCircumstances(observerLocation);
-                    Markers.Remove(Markers.Last());
+                    Markers.Remove(Markers.LastOrDefault());
                     AddLocationMarker();
                 }
             }
