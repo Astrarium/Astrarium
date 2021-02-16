@@ -51,6 +51,11 @@ namespace Astrarium.Algorithms
         public LunarEclipseType EclipseType { get; set; }
 
         /// <summary>
+        /// Saros series number for the eclipse
+        /// </summary>
+        public int Saros { get; set; }
+
+        /// <summary>
         /// Instant of first contact with penumbra (P1)
         /// </summary>
         public double JulianDayFirstContactPenumbra { get; set; }

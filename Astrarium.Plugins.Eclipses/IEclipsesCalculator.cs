@@ -26,6 +26,7 @@ namespace Astrarium.Plugins.Eclipses
         PolynomialLunarEclipseElements GetLunarEclipseElements(double jd);
 
         string GetLocalVisibilityString(SolarEclipse eclipse, SolarEclipseLocalCircumstances localCirc);
+        string GetLocalVisibilityString(LunarEclipse eclipse, LunarEclipseLocalCircumstances localCirc);
 
         /// <summary>
         /// Finds local circumstance of an eclipse for places located on the eclipse totality path

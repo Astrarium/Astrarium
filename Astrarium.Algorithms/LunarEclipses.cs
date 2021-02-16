@@ -33,42 +33,6 @@ namespace Astrarium.Algorithms
             return SNL;
         }
 
-        public static int SarosNumber(double jd)
-        {
-            // Lunar eclipse 21 Jan 2000
-            const double jd0 = 2451564.69689;
-
-            // Inex cycle length, in days
-            const double I = 10571.95;
-
-            // Saros cycle length, in days
-            const double S = 6585.32;
-
-            // Saros number of the lunar eclipse 21 Jan 2000
-            const int Saros0 = 124;
-
-            // Dates difference
-            double T = jd - jd0;
-
-            int a0 = -1;
-            do
-            {
-                a0++;
-                for (int i = 0; i < 2; i++)
-                {
-                    int a = (i == 0 ? 1 : -1) * a0;
-                    int b = (int)Round((T - a * I) / S);
-                    double t = a * I + b * S;
-                    double dt = Abs(T - t);
-                    if (dt <= 2)
-                    {
-                        return Saros0 + a;
-                    }
-                }
-            }
-            while (true);
-        }
-
         /// <summary>
         /// Calculates nearest lunar eclipse (next or previous) for the provided Julian Day.
         /// </summary>
@@ -214,6 +178,7 @@ namespace Astrarium.Algorithms
                         eclipse.JulianDayMaximum = jdMax;
                         eclipse.Magnitude = mag;
                         eclipse.Rho = rho;
+                        eclipse.Gamma = gamma;
                         eclipse.Sigma = sigma;
 
                         double p = 1.0128 - u;
@@ -231,6 +196,7 @@ namespace Astrarium.Algorithms
                         eclipse.JulianDayTotalEnd = jdMax + sdTotal;
                         eclipse.JulianDayLastContactUmbra = jdMax + sdPartial;
                         eclipse.JulianDayLastContactPenumbra = jdMax + sdPenumbra;
+                        eclipse.Saros = Saros(jdMax);
                     }
                 }
 
@@ -470,18 +436,26 @@ namespace Astrarium.Algorithms
         }
 
         public static LunarEclipseLocalCircumstances LocalCircumstances(LunarEclipse eclipse, PolynomialLunarEclipseElements e, CrdsGeographical g)
-        {
+        {           
             return new LunarEclipseLocalCircumstances()
             {
                 Location = g,
-                PenumbralBegin = new LunarEclipseLocalCircumstancesContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayFirstContactPenumbra), g),
-                PartialBegin = new LunarEclipseLocalCircumstancesContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayFirstContactUmbra), g),
-                TotalBegin = new LunarEclipseLocalCircumstancesContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayTotalBegin), g),
-                Maximum = new LunarEclipseLocalCircumstancesContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayMaximum), g),
-                TotalEnd = new LunarEclipseLocalCircumstancesContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayTotalEnd), g),
-                PartialEnd = new LunarEclipseLocalCircumstancesContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayLastContactUmbra), g),
-                PenumbralEnd = new LunarEclipseLocalCircumstancesContactPoint(e.GetInstantBesselianElements(eclipse.JulianDayLastContactPenumbra), g)
+                PenumbralBegin = GetLocalCircumstancesContactPoint(eclipse.JulianDayFirstContactPenumbra, eclipse, e, g),
+                PartialBegin = GetLocalCircumstancesContactPoint(eclipse.JulianDayFirstContactUmbra, eclipse, e, g),
+                TotalBegin = GetLocalCircumstancesContactPoint(eclipse.JulianDayTotalBegin, eclipse, e, g),
+                Maximum = GetLocalCircumstancesContactPoint(eclipse.JulianDayMaximum, eclipse, e, g),
+                TotalEnd = GetLocalCircumstancesContactPoint(eclipse.JulianDayTotalEnd, eclipse, e, g),
+                PartialEnd = GetLocalCircumstancesContactPoint(eclipse.JulianDayLastContactUmbra, eclipse, e, g),
+                PenumbralEnd = GetLocalCircumstancesContactPoint(eclipse.JulianDayLastContactPenumbra, eclipse, e, g),
             };
+        }
+
+        private static LunarEclipseLocalCircumstancesContactPoint GetLocalCircumstancesContactPoint(double jd, LunarEclipse eclipse, PolynomialLunarEclipseElements e, CrdsGeographical g)
+        {
+            if (!double.IsNaN(jd))
+                return new LunarEclipseLocalCircumstancesContactPoint(e.GetInstantBesselianElements(jd), g);
+            else
+                return null;
         }
     }
 }

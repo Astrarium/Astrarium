@@ -62,7 +62,7 @@ namespace Astrarium.Plugins.Eclipses
                     double jdMax = localCirc.MaxMagnitude > 0 ? localCirc.Maximum.JulianDay : jd;
                     string localVisibility = GetLocalVisibilityString(eclipse, localCirc);
 
-                    events.Add(new AstroEvent(jdMax, $"{type}{subtype} solar eclipse{phase}, {localVisibility}.", sun, moon));
+                    events.Add(new AstroEvent(jdMax, $"{type}{subtype} solar eclipse{phase}, {localVisibility} from current point.", sun, moon));
                     jd += LunarEphem.SINODIC_PERIOD;
                 }
                 else
@@ -87,39 +87,10 @@ namespace Astrarium.Plugins.Eclipses
                     double jdMax = jd;
                     string type = eclipse.EclipseType.ToString();
                     string phase = Formatters.Phase.Format(eclipse.Magnitude);
-                    // TODO: local circumstances
-
-                    var elements = GetLunarEclipseElements(jdMax);                    
-
-                    string[] ephemerides = new[] { "Horizontal.Altitude", "Equatorial0.Alpha", "Equatorial0.Delta" };
-                    double[] jdInstants = new double[7]
-                    {
-                        eclipse.JulianDayFirstContactPenumbra,
-                        eclipse.JulianDayFirstContactUmbra,
-                        eclipse.JulianDayTotalBegin,
-                        eclipse.JulianDayMaximum,
-                        eclipse.JulianDayTotalEnd,
-                        eclipse.JulianDayLastContactUmbra,
-                        eclipse.JulianDayLastContactPenumbra
-                    };
-
-                    double[] altitudes = new double[7];
-                    double[] ra = new double[7];
-                    double[] dec = new double[7];
-
-                    for (int i = 0; i < 7; i++)
-                    {
-                        if (!double.IsNaN(jdInstants[i]))
-                        {
-                            var ctx = new SkyContext(jdInstants[i], context.GeoLocation);
-                            var moonEphem = sky.GetEphemerides(moon, ctx, ephemerides);
-                            altitudes[i] = (double)moonEphem[0].Value;
-                            ra[i] = (double)moonEphem[1].Value;
-                            dec[i] = (double)moonEphem[2].Value;
-                        }
-                    }
-
-                    events.Add(new AstroEvent(jdMax, $"{type} lunar eclipse (magnitude {phase}).", moon));
+                    var elements = GetLunarEclipseElements(jdMax);
+                    var local = LunarEclipses.LocalCircumstances(eclipse, elements, context.GeoLocation);
+                    string localVisibility = GetLocalVisibilityString(eclipse, local);
+                    events.Add(new AstroEvent(jdMax, $"{type} lunar eclipse (magnitude {phase}), {localVisibility} from current point.", moon));
                     jd += LunarEphem.SINODIC_PERIOD;
                 }
                 else
@@ -196,6 +167,34 @@ namespace Astrarium.Plugins.Eclipses
                         localVisibility = $"visible{asPartial} (max phase {localMag})";
                 }
             }
+
+            return localVisibility;
+        }
+
+        public string GetLocalVisibilityString(LunarEclipse eclipse, LunarEclipseLocalCircumstances localCirc)
+        {
+            if (localCirc.Maximum.LunarAltitude > 0)
+                return "visible";
+
+            string localVisibility = "invisible";
+
+            if (localCirc.PenumbralBegin.LunarAltitude > 0)
+                localVisibility = "visible begin of penumbral phase";
+
+            if (localCirc.PartialBegin?.LunarAltitude > 0)
+                localVisibility = "visible begin of partial phase";
+
+            if (localCirc.TotalBegin?.LunarAltitude > 0)
+                localVisibility = "visible begin of total phase";
+
+            if (localCirc.PenumbralEnd.LunarAltitude > 0)
+                localVisibility = "visible end of penumbral phase";
+
+            if (localCirc.PartialEnd?.LunarAltitude > 0)
+                localVisibility = "visible end of partial phase";
+
+            if (localCirc.TotalEnd?.LunarAltitude > 0)
+                localVisibility = "visible end of total phase";
 
             return localVisibility;
         }

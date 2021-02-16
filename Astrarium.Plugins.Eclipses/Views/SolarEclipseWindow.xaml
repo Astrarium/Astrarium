@@ -433,7 +433,7 @@
 
                             <!-- Eclipse chart -->
                             <Expander Header="Local View" IsExpanded="True" >
-                                <StackPanel  Orientation="Vertical" IsEnabled="{Binding IsVisibleFromCurrentPlace, Mode=OneWay}">
+                                <StackPanel Orientation="Vertical">
                                     <!-- Chart header -->
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -459,6 +459,7 @@
                                     <!-- Local circumstances chart -->
                                     <q:SolarEclipseChartControl 
                                         x:Name="Chart"
+                                        IsEnabled="{Binding IsVisibleFromCurrentPlace, Mode=OneWay}"
                                         HorizontalAlignment="Stretch" 
                                         VerticalAlignment="Stretch"                                  
                                         MinHeight="200"

@@ -170,9 +170,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red; 
                 TileImageAttributes = GetImageAttributes();
                 SetMapColors();
-                // need to recalculate 
-                //JulianDay -= LunarEphem.SINODIC_PERIOD;
-                //CalculateEclipse(next: true, saros: false);
+                // TODO: need to recalculate eclipse
             }
         }
 
@@ -182,8 +180,6 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             CitiesListTable.Add(new CitiesListTableItem(local, eclipsesCalculator.GetLocalVisibilityString(eclipse, local)));
             IsCitiesListTableNotEmpty = true;
         }
-
-
 
         private void SetMapColors()
         {
@@ -400,9 +396,9 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 beTableFooter.AppendLine($"Tan ƒ2 = {elements.TanF2.ToString("N7", nf)}");
                 BesselianElementsTableFooter = beTableFooter.ToString();
 
-                Tracks = tracks;
-                Polygons = polygons;
                 Markers = markers;
+                Tracks = tracks;
+                Polygons = polygons;                
                 IsCalculating = false;
 
                 AddLocationMarker();

@@ -9,6 +9,24 @@ namespace Astrarium.Algorithms
     public class LunarEclipseLocalCircumstances
     {
         /// <summary>
+        /// Flag indicating the eclipse is invisible from current place.
+        /// </summary>
+        public bool IsInvisible
+        {
+            get
+            {
+                return
+                    (PenumbralBegin.LunarAltitude <= 0 &&
+                    (PartialBegin == null || PartialBegin.LunarAltitude <= 0) &&
+                    (TotalBegin == null || TotalBegin.LunarAltitude <= 0) &&
+                     Maximum.LunarAltitude <= 0 &&
+                    (PenumbralEnd == null || PenumbralEnd.LunarAltitude <= 0) &&
+                    (PartialEnd == null || PartialEnd.LunarAltitude <= 0) &&
+                    (TotalEnd == null || TotalEnd.LunarAltitude <= 0));
+            }
+        }
+
+        /// <summary>
         /// Geographical location.
         /// </summary>
         public CrdsGeographical Location { get; set; }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -22,11 +23,18 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         private LunarEclipse eclipse;
         private LunarEclipseMap map;
         private PolynomialLunarEclipseElements elements;
+        private static NumberFormatInfo nf;
 
         /// <summary>
         /// Table of local contacts instants, displayed to the right of eclipse map
         /// </summary>
         public ObservableCollection<LunarEclipseLocalContactsTableItem> LocalContactsTable { get; private set; } = new ObservableCollection<LunarEclipseLocalContactsTableItem>();
+
+        /// <summary>
+        /// General eclipse info table
+        /// </summary>
+        public ObservableCollection<NameValueTableItem> EclipseGeneralDetails { get; private set; } = new ObservableCollection<NameValueTableItem>();
+
 
         /// <summary>
         /// Local circumstance of the eclipse
@@ -37,15 +45,19 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             private set => SetValue(nameof(LocalCircumstances), value);
         }
 
+        static LunarEclipseVM()
+        {
+            nf = new NumberFormatInfo();
+            nf.NumberDecimalSeparator = ".";
+            nf.NumberGroupSeparator = "\u2009";
+        }
+
         public LunarEclipseVM(IEclipsesCalculator eclipsesCalculator, IGeoLocationsManager locationsManager, ISky sky, ISettings settings) : base(locationsManager, settings)
         {
             this.eclipsesCalculator = eclipsesCalculator;
-
-            //SettingsLocationName = $"Local visibility ({observerLocation.LocationName})";
-            //IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
-            //ChartZoomLevel = 1;
-
-            //SetMapColors();
+            this.settings.PropertyChanged += Settings_PropertyChanged;
+            
+            SetMapColors();
 
             for (int i = 0; i < 7; i++)
             {
@@ -55,6 +67,17 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             JulianDay = sky.Context.JulianDay - LunarEphem.SINODIC_PERIOD;
 
             CalculateEclipse(next: true, saros: false);
+        }
+
+        private void Settings_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "Schema")
+            {
+                IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
+                TileImageAttributes = GetImageAttributes();
+                SetMapColors();
+                // TODO: need to recalculate eclipse
+            }
         }
 
         protected override void CalculateLocalCircumstances(CrdsGeographical g)
@@ -71,21 +94,19 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 LocalContactsTable[4] = new LunarEclipseLocalContactsTableItem("U3: Total ends", local.TotalEnd);
                 LocalContactsTable[5] = new LunarEclipseLocalContactsTableItem("U4: Partial ends", local.PartialEnd);
                 LocalContactsTable[6] = new LunarEclipseLocalContactsTableItem("P4: Penumbral ends", local.PenumbralEnd);
-
-
-                //LocalCircumstancesTable[0] = new NameValueTableItem("Maximal magnitude", local.MaxMagnitude > 0 ? Format.Mag.Format(local.MaxMagnitude) : "");
-                //LocalCircumstancesTable[1] = new NameValueTableItem("Moon/Sun diameter ratio", local.MoonToSunDiameterRatio > 0 ? Format.Ratio.Format(local.MoonToSunDiameterRatio) : "");
-                //LocalCircumstancesTable[2] = new NameValueTableItem("Partial phase duration", !double.IsNaN(local.PartialDuration) && local.PartialDuration > 0 ? Format.Time.Format(local.PartialDuration) : "");
-                //LocalCircumstancesTable[3] = new NameValueTableItem("Total phase duration", !double.IsNaN(local.TotalDuration) && local.TotalDuration > 0 ? Format.Time.Format(local.TotalDuration) : "");
-                //LocalCircumstancesTable[4] = new NameValueTableItem("Shadow path width", local.PathWidth > 0 ? Format.PathWidth.Format(local.PathWidth) : "");
             });
 
-            LocalVisibilityDescription =
-                (local.PenumbralBegin.LunarAltitude > 0/* -contacts.FirstContactPenumbra.Parallax*/).ToString();
+            LocalVisibilityDescription = eclipsesCalculator.GetLocalVisibilityString(eclipse, local);
 
             ObserverLocationName = (IsMouseOverMap && !IsMapLocked) ? $"Mouse coordinates ({Format.Geo.Format(FromGeoPoint(MapMouse))})" : $"{observerLocation.LocationName} ({Format.Geo.Format(observerLocation)})";
             LocalCircumstances = local;
             IsVisibleFromCurrentPlace = true;
+        }
+
+        private void SetMapColors()
+        {
+            MapThumbnailBackColor = IsDarkMode ? Color.FromArgb(0xFF, 0x33, 0, 0) : Color.FromArgb(0xFF, 0x33, 0x33, 0x33);
+            MapThumbnailForeColor = IsDarkMode ? Color.FromArgb(0xFF, 0x59, 0, 0) : Color.FromArgb(0xFF, 0x59, 0x59, 0x59);
         }
 
         protected override void CalculateEclipse(bool next, bool saros)
@@ -98,7 +119,6 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
             string type = eclipse.EclipseType.ToString();
             EclipseDescription = $"{type} lunar eclipse";
-            LocalVisibilityDescription = "visible as... TODO";
 
             elements = eclipsesCalculator.GetLunarEclipseElements(eclipse.JulianDayMaximum);
 
@@ -150,12 +170,39 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 polygons.Add(polygon);
             }
 
+            // Brown lunation number
+            var lunation = LunarEphem.Lunation(JulianDay);
+
+            var eclipseGeneralDetails = new ObservableCollection<NameValueTableItem>()
+            {
+                new NameValueTableItem("Type", $"{type}{type}"),
+                new NameValueTableItem("Saros", $"{eclipse.Saros}"),
+                new NameValueTableItem("Date", $"{EclipseDate}"),
+                new NameValueTableItem("Magnitude", $"{eclipse.Magnitude.ToString("N5", nf)}"),
+                new NameValueTableItem("Gamma", $"{eclipse.Gamma.ToString("N5", nf)}"),
+                new NameValueTableItem("Penumbral duration", $"{Format.Time.Format(eclipse.PenumbralDuration)}"),
+                new NameValueTableItem("Partial duration", $"{Format.Time.Format(eclipse.PartialDuration)}"),
+                new NameValueTableItem("Total duration", $"{Format.Time.Format(eclipse.TotalityDuration)}"),
+                new NameValueTableItem("Brown Lunation Number", $"{lunation}"),
+                new NameValueTableItem("ΔT", $"{elements.DeltaT.ToString("N1", nf) } s")
+            };
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                EclipseGeneralDetails = eclipseGeneralDetails;
+            });
+
             Markers = new List<Marker>();
             Tracks = tracks;
             Polygons = polygons;
             IsCalculating = false;
 
+            AddLocationMarker();
+            CalculateSarosSeries();
             CalculateLocalCircumstances(observerLocation);
+            //CalculateCitiesTable();
+
+
+            NotifyPropertyChanged(nameof(EclipseGeneralDetails));
         }
 
         protected override void CalculateSarosSeries()

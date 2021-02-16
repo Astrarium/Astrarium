@@ -197,15 +197,6 @@ namespace Astrarium.Algorithms
                         eclipse.Magnitude = (1.5433 + u + (isUncertain ? 0.001 : 0) - Abs(gamma)) / (0.5461 + 2 * u);
                     }
 
-                    //if (isUncertain && eclipse.EclipseType != SolarEclipseType.Partial)
-                    //{
-                    //    eclipseFound = false;
-                    //    if (next) k++;
-                    //    else k--;
-                    //    continue;
-                    //}
-
-
                     // saros
                     eclipse.Saros = Saros(jdMax);
                 }
@@ -290,6 +281,22 @@ namespace Astrarium.Algorithms
                 t += tau;
             }
             while (Abs(tau) >= 0.00001 && iters < 20);
+
+            //{
+            //    CrdsEquatorial eq = new CrdsEquatorial(be.SunAlpha, be.SunDelta);
+
+            //    // Nutation elements
+            //    var nutation = Nutation.NutationElements(jd);
+
+            //    // True obliquity
+            //    var epsilon = Date.TrueObliquity(jd, nutation.deltaEpsilon);
+
+            //    // Greenwich apparent sidereal time 
+            //    double siderealTime = Date.ApparentSiderealTime(jd, nutation.deltaPsi, epsilon);
+
+            //    // altitude
+            //    h = eq.ToHorizontal(g, siderealTime).Altitude;
+            //}
 
             double tMax = t;
             double jdMax = jd;
@@ -405,6 +412,22 @@ namespace Astrarium.Algorithms
                 qAngles[i] = To360(ToDegrees(q));
                 jdPhases[i] = jd;
 
+                //{
+                //    CrdsEquatorial eq = new CrdsEquatorial(be.SunAlpha, be.SunDelta);
+
+                //    // Nutation elements
+                //    var nutation = Nutation.NutationElements(jd);
+
+                //    // True obliquity
+                //    var epsilon = Date.TrueObliquity(jd, nutation.deltaEpsilon);
+
+                //    // Greenwich apparent sidereal time 
+                //    double siderealTime = Date.ApparentSiderealTime(jd, nutation.deltaPsi, epsilon);
+
+                //    // altitude
+                //    h = eq.ToHorizontal(g, siderealTime).Altitude;
+                //}
+
                 altPhases[i] = h;
             }
 
@@ -490,7 +513,7 @@ namespace Astrarium.Algorithms
                 D = LeastSquares.FindCoeffs(points.Select((p, i) => new PointF(p.X, (float)elements[i].D)), 3),
                 Mu = LeastSquares.FindCoeffs(points.Select((p, i) => new PointF(p.X, (float)elements[i].Mu)), 3),
                 TanF1 = elements.Average(p => p.TanF1),
-                TanF2 = elements.Average(p => p.TanF2),
+                TanF2 = elements.Average(p => p.TanF2)
             };
         }
 
@@ -968,6 +991,7 @@ namespace Astrarium.Algorithms
             double phi1 = Asin(B * b1 + y1 * b2);
             double phi = ToDegrees(Atan(1.003_364_09 * Tan(phi1)));
             double lambda = To180(M - H - 0.004_178_07 * be.DeltaT);
+
             return new CrdsGeographical(lambda, phi);
         }
 
