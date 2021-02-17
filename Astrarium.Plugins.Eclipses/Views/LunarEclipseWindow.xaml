@@ -349,7 +349,7 @@
                         <StackPanel x:Name="RightPanelStack" Orientation="Vertical">
 
                             <TextBlock Padding="6 2" FontSize="18" >Local Circumstances</TextBlock>
-                            
+
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
@@ -363,8 +363,6 @@
                                     </ToggleButton.Content>
                                 </ToggleButton>
                             </Grid>
-                            
-
 
                             <TextBlock Padding="6 2" TextTrimming="CharacterEllipsis" Width="{Binding ElementName=RightPanel, Path=ActualWidth}" Text="{Binding LocalVisibilityDescription, FallbackValue='Local visibility description'}" HorizontalAlignment="Left" />
                             
@@ -455,6 +453,12 @@
                                     </DockPanel>
                                 </StackPanel>
                             </Expander>
+
+                            <!--<GridSplitter 
+                                ShowsPreview="False"   
+                                HorizontalAlignment="Stretch" 
+                                VerticalAlignment="Center" Margin="0,2" Width="Auto" Height="6" />-->
+
                             <StackPanel x:Name="RightPanelFooter" Orientation="Vertical">
                             </StackPanel>
                         </StackPanel>
@@ -523,7 +527,6 @@
                             ItemsSource="{Binding EclipseContacts}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Point" Binding="{Binding Point}"/>
-                                <DataGridTextColumn Header="Coordinates" Binding="{Binding Coordinates}"/>
                                 <DataGridTextColumn Header="Time" Binding="{Binding Time}"/>
                             </DataGrid.Columns>
                         </DataGrid>
@@ -554,10 +557,9 @@
                                 <DataGridTextColumn Header="n" Binding="{Binding Index}"/>
                                 <DataGridTextColumn Header="x" Binding="{Binding X}"/>
                                 <DataGridTextColumn Header="y" Binding="{Binding Y}"/>
-                                <DataGridTextColumn Header="D" Binding="{Binding D}"/>
-                                <DataGridTextColumn Header="L1" Binding="{Binding L1}"/>
-                                <DataGridTextColumn Header="L2" Binding="{Binding L2}"/>
-                                <DataGridTextColumn Header="μ" Binding="{Binding Mu}"/>
+                                <DataGridTextColumn Header="F1" Binding="{Binding F1}"/>
+                                <DataGridTextColumn Header="F2" Binding="{Binding F2}"/>
+                                <DataGridTextColumn Header="F3" Binding="{Binding F3}"/>
                             </DataGrid.Columns>
                         </DataGrid>
 
@@ -606,7 +608,7 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock FontFamily="Lucida Console" FontSize="12">
-                                        <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:SolarEclipseWindow}, Mode=FindAncestor}, Path=DataContext.SarosSeriesTableSetDateCommand}" CommandParameter="{Binding JulianDay}"><Run Text="{Binding Date}" /></Hyperlink>
+                                        <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:LunarEclipseWindow}, Mode=FindAncestor}, Path=DataContext.SarosSeriesTableSetDateCommand}" CommandParameter="{Binding MeeusLunationNumber}"><Run Text="{Binding Date}" /></Hyperlink>
                                         </TextBlock>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -618,7 +620,7 @@
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
                                         <Style.Setters>
-                                            <Setter Property="Content" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:SolarEclipseWindow}, Mode=FindAncestor}, Path=DataContext.SettingsLocationName}" />
+                                            <Setter Property="Content" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:LunarEclipseWindow}, Mode=FindAncestor}, Path=DataContext.SettingsLocationName}" />
                                         </Style.Setters>
                                     </Style>
                                 </DataGridTemplateColumn.HeaderStyle>
@@ -662,7 +664,6 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         
                         <Button Grid.Row="0" Grid.Column="0" Margin="8 4" Padding="8 0" Content="Import..." Width="Auto" HorizontalAlignment="Stretch" Command="{Binding LoadLocationsFromFileCommand}" />
@@ -670,12 +671,7 @@
                             Import locations from a CSV file. The file should match the <Hyperlink Command="{Binding ShowLocationsFileFormatCommand}">following format</Hyperlink>.
                         </TextBlock>
 
-                        <Button Grid.Row="1" Grid.Column="0" Margin="8 4" Padding="8 0" HorizontalAlignment="Stretch" Width="Auto" Content="Find on path" Command="{Binding FindLocationsOnTotalPathCommand}" />
-                        <TextBlock Grid.Row="1" Grid.Column="1" Padding="0" VerticalAlignment="Center">                                
-                            Find locations on the eclipse path (only for total or annular eclipses).
-                        </TextBlock>
-
-                        <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"  Padding="8 4" VerticalAlignment="Center">                                
+                        <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"  Padding="8 4" VerticalAlignment="Center">                                
                             To add a location from the eclipse map, right click on the map and select the location from a context menu.
                         </TextBlock>
                     </Grid>
@@ -712,7 +708,7 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock>
-                                            <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:SolarEclipseWindow}, Mode=FindAncestor}, Path=DataContext.CitiesListTableGoToCoordinatesCommand}" CommandParameter="{Binding Coordinates, Mode=OneWay}"><Run Text="{Binding LocationName, Mode=OneWay}" ToolTip="Click to show the map" /></Hyperlink>
+                                            <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:LunarEclipseWindow}, Mode=FindAncestor}, Path=DataContext.CitiesListTableGoToCoordinatesCommand}" CommandParameter="{Binding Coordinates, Mode=OneWay}"><Run Text="{Binding LocationName, Mode=OneWay}" ToolTip="Click to show the map" /></Hyperlink>
                                         </TextBlock>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>

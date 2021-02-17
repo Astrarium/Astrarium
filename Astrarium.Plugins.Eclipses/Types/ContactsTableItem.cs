@@ -13,11 +13,11 @@ namespace Astrarium.Plugins.Eclipses.Types
         public string Coordinates { get; set; }
         public string Time { get; set; }
 
-        public ContactsTableItem(string text, SolarEclipseMapPoint p)
+        public ContactsTableItem(string text, double jd, CrdsGeographical g = null)
         {
             Point = text;
-            Coordinates = Format.Geo.Format(p);
-            Time = $"{Format.Time.Format(new Date(p.JulianDay, 0))} UTC";
+            Coordinates = g != null ? Format.Geo.Format(g) : null;
+            Time = $"{Format.Time.Format(new Date(jd, 0))} {(!double.IsNaN(jd) ? "UTC" : "")}";
         }
     }
 }

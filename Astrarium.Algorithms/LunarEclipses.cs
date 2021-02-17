@@ -38,11 +38,14 @@ namespace Astrarium.Algorithms
         /// </summary>
         /// <param name="jd">Julian day of interest, the nearest lunar eclipse for that date will be found.</param>
         /// <param name="next">Flag indicating searching direction. True means searching next eclipse, false means previous.</param>
-        public static LunarEclipse NearestEclipse(double jd, bool next)
+        public static LunarEclipse NearestEclipse(int lunationNumber, bool next)
         {
-            Date d = new Date(jd);
-            double year = d.Year + (Date.JulianEphemerisDay(d) - Date.JulianDay0(d.Year)) / 365.25;
-            double k = Floor((year - 2000) * 12.3685) + 0.5;
+            //Date d = new Date(jd);
+            //double year = d.Year + (Date.JulianEphemerisDay(d) - Date.JulianDay0(d.Year)) / 365.25;
+            //double k = Floor((year - 2000) * 12.3685) + 0.5;
+
+            //double k = LunarEphem.Lunation(jd, LunationSystem.Meeus) + 0.5;
+            double k = lunationNumber + 0.5;
 
             bool eclipseFound;
 
@@ -197,6 +200,7 @@ namespace Astrarium.Algorithms
                         eclipse.JulianDayLastContactUmbra = jdMax + sdPartial;
                         eclipse.JulianDayLastContactPenumbra = jdMax + sdPenumbra;
                         eclipse.Saros = Saros(jdMax);
+                        eclipse.MeeusLunationNumber = (int)Round(k - 0.5);
                     }
                 }
 

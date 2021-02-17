@@ -632,7 +632,7 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock FontFamily="Lucida Console" FontSize="12">
-                                        <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:SolarEclipseWindow}, Mode=FindAncestor}, Path=DataContext.SarosSeriesTableSetDateCommand}" CommandParameter="{Binding JulianDay}"><Run Text="{Binding Date}" /></Hyperlink>
+                                        <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:SolarEclipseWindow}, Mode=FindAncestor}, Path=DataContext.SarosSeriesTableSetDateCommand}" CommandParameter="{Binding MeeusLunationNumber}"><Run Text="{Binding Date}" /></Hyperlink>
                                         </TextBlock>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>

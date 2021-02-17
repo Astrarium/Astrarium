@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Eclipses.Types
 {
-    public class CitiesListTableItem
+    public class SolarEclipseCitiesListTableItem
     {
         public CrdsGeographical Location { get; private set; }
 
@@ -51,7 +51,7 @@ namespace Astrarium.Plugins.Eclipses.Types
 
         public string Visibility { get; private set; }
 
-        public CitiesListTableItem(SolarEclipseLocalCircumstances local, string visibility)
+        public SolarEclipseCitiesListTableItem(SolarEclipseLocalCircumstances local, string visibility)
         {
             Location = local.Location;
 

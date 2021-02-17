@@ -12,6 +12,11 @@ namespace Astrarium.Algorithms
     public class SolarEclipse
     {
         /// <summary>
+        /// Meeus lunation number
+        /// </summary>
+        public int MeeusLunationNumber { get; set; }
+
+        /// <summary>
         /// Instant of maximal eclipse
         /// </summary>
         public double JulianDayMaximum { get; set; }

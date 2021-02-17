@@ -22,12 +22,6 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
     /// </summary>
     public class SolarEclipseVM : EclipseVM
     {
-        public bool IsCitiesListTableNotEmpty
-        {
-            get => GetValue<bool>(nameof(IsCitiesListTableNotEmpty));
-            private set => SetValue(nameof(IsCitiesListTableNotEmpty), value);
-        }
-
         /// <summary>
         /// Table of local contacts instants, displayed to the right of eclipse map
         /// </summary>
@@ -41,7 +35,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         /// <summary>
         /// Table of local circumstances for selected cities
         /// </summary>
-        public ObservableCollection<CitiesListTableItem> CitiesListTable { get; private set; } = new ObservableCollection<CitiesListTableItem>();
+        public ObservableCollection<SolarEclipseCitiesListTableItem> CitiesListTable { get; private set; } = new ObservableCollection<SolarEclipseCitiesListTableItem>();
 
         /// <summary>
         /// Local circumstance of the eclipse
@@ -53,55 +47,15 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         }
 
         /// <summary>
-        /// Title of Saros series table
-        /// </summary>
-        public string SarosSeriesTableTitle { get; private set; }
-
-        /// <summary>
-        /// Saros series table
-        /// </summary>
-        public ObservableCollection<SarosSeriesTableItem> SarosSeriesTable { get; private set; } = new ObservableCollection<SarosSeriesTableItem>();
-
-        /// <summary>
-        /// General eclipse info table
-        /// </summary>
-        public ObservableCollection<NameValueTableItem> EclipseGeneralDetails { get; private set; } = new ObservableCollection<NameValueTableItem>();
-
-        /// <summary>
-        /// Eclipse contacts info table
-        /// </summary>
-        public ObservableCollection<ContactsTableItem> EclipseContacts { get; private set; } = new ObservableCollection<ContactsTableItem>();
-
-        /// <summary>
         /// Besselian elements table
         /// </summary>
         public ObservableCollection<BesselianElementsTableItem> BesselianElementsTable { get; private set; } = new ObservableCollection<BesselianElementsTableItem>();
 
-        /// <summary>
-        /// Table header for Besselian elements table
-        /// </summary>
-        public string BesselianElementsTableHeader
-        {
-            get => GetValue<string>(nameof(BesselianElementsTableHeader));
-            private set => SetValue(nameof(BesselianElementsTableHeader), value);
-        }
-
-        /// <summary>
-        /// Table footer for Besselian elements table
-        /// </summary>
-        public string BesselianElementsTableFooter
-        {
-            get => GetValue<string>(nameof(BesselianElementsTableFooter));
-            private set => SetValue(nameof(BesselianElementsTableFooter), value);
-        }
-
-        
         public ICommand FindLocationsOnTotalPathCommand => new Command(FindLocationsOnTotalPath);
         public ICommand ClearLocationsTableCommand => new Command(ClearLocationsTable);
-        public ICommand LoadLocationsFromFileCommand => new Command(LoadLocationsFromFile);
         public ICommand ExportLocationsTableCommand => new Command(ExportLocationsTable);
+        public ICommand LoadLocationsFromFileCommand => new Command(LoadLocationsFromFile);
 
-        private int currentSarosSeries;
         private SolarEclipseMap map;
         private PolynomialBesselianElements elements;
         private SolarEclipse eclipse;
@@ -141,7 +95,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 LocalCircumstancesTable.Add(new NameValueTableItem(null, null));
             }
 
-            JulianDay = sky.Context.JulianDay - LunarEphem.SINODIC_PERIOD;
+            meeusLunationNumber = LunarEphem.Lunation(sky.Context.JulianDay, LunationSystem.Meeus);
 
             CalculateEclipse(next: true, saros: false);
         }
@@ -177,7 +131,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         protected override void AddToCitiesList(CrdsGeographical location)
         {
             var local = eclipsesCalculator.FindLocalCircumstancesForCities(elements, new[] { location }).First();
-            CitiesListTable.Add(new CitiesListTableItem(local, eclipsesCalculator.GetLocalVisibilityString(eclipse, local)));
+            CitiesListTable.Add(new SolarEclipseCitiesListTableItem(local, eclipsesCalculator.GetLocalVisibilityString(eclipse, local)));
             IsCitiesListTableNotEmpty = true;
         }
 
@@ -194,15 +148,16 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         {
             IsCalculating = true;
 
-            eclipse =  eclipsesCalculator.GetNearestSolarEclipse(JulianDay, next, saros);
-            JulianDay = eclipse.JulianDayMaximum;
-            EclipseDate = Formatters.Date.Format(new Date(JulianDay, 0));
-            elements = eclipsesCalculator.GetBesselianElements(JulianDay);
+            eclipse =  eclipsesCalculator.GetNearestSolarEclipse(meeusLunationNumber, next, saros);
+            julianDay = eclipse.JulianDayMaximum;
+            meeusLunationNumber = eclipse.MeeusLunationNumber;            
+            elements = eclipsesCalculator.GetBesselianElements(eclipse.JulianDayMaximum);
             string type = eclipse.EclipseType.ToString();
             string subtype = eclipse.IsNonCentral ? " non-central" : "";
             EclipseDescription = $"{type}{subtype} solar eclipse";
-            PrevSarosEnabled = eclipsesCalculator.GetNearestSolarEclipse(JulianDay, next: false, saros: true).Saros == eclipse.Saros;
-            NextSarosEnabled = eclipsesCalculator.GetNearestSolarEclipse(JulianDay, next: true, saros: true).Saros == eclipse.Saros;
+            EclipseDate = Formatters.Date.Format(new Date(eclipse.JulianDayMaximum, 0));
+            PrevSarosEnabled = eclipsesCalculator.GetNearestSolarEclipse(meeusLunationNumber, next: false, saros: true).Saros == eclipse.Saros;
+            NextSarosEnabled = eclipsesCalculator.GetNearestSolarEclipse(meeusLunationNumber, next: true, saros: true).Saros == eclipse.Saros;
 
             await Task.Run(() =>
             {
@@ -323,7 +278,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 var maxCirc = SolarEclipses.LocalCircumstances(elements, map.Max);
 
                 // Brown lunation number
-                var lunation = LunarEphem.Lunation(JulianDay);
+                var lunation = LunarEphem.Lunation(eclipse.JulianDayMaximum);
 
                 var eclipseGeneralDetails = new ObservableCollection<NameValueTableItem>()
                 {
@@ -345,29 +300,29 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
                 if (!double.IsNaN(map.P1.JulianDay))
                 {
-                    eclipseContacts.Add(new ContactsTableItem("P1: First external contact", map.P1));
+                    eclipseContacts.Add(new ContactsTableItem("P1: First external contact", map.P1.JulianDay, map.P1));
                 }
                 if (map.P2 != null)
                 {
-                    eclipseContacts.Add(new ContactsTableItem("P2: First internal contact", map.P2));
+                    eclipseContacts.Add(new ContactsTableItem("P2: First internal contact", map.P2.JulianDay, map.P2));
                 }
                 if (map.U1 != null && !double.IsNaN(map.U1.JulianDay))
                 {
-                    eclipseContacts.Add(new ContactsTableItem("U1: First umbra contact", map.U1));
+                    eclipseContacts.Add(new ContactsTableItem("U1: First umbra contact", map.U1.JulianDay, map.U2));
                 }
-                eclipseContacts.Add(new ContactsTableItem("Max: Greatest Eclipse", map.Max));   
+                eclipseContacts.Add(new ContactsTableItem("Max: Greatest Eclipse", map.Max.JulianDay, map.Max));
                 if (map.U2 != null && !double.IsNaN(map.U2.JulianDay))
                 {
-                    eclipseContacts.Add(new ContactsTableItem("U2: Last umbra contact", map.U2));
+                    eclipseContacts.Add(new ContactsTableItem("U2: Last umbra contact", map.U2.JulianDay, map.U2));
                 }
                 if (map.P3 != null)
                 {
-                    eclipseContacts.Add(new ContactsTableItem("P3: Last internal contact", map.P3));
+                    eclipseContacts.Add(new ContactsTableItem("P3: Last internal contact", map.P3.JulianDay, map.P3));
                 }
 
                 if (!double.IsNaN(map.P4.JulianDay))
                 {
-                    eclipseContacts.Add(new ContactsTableItem("P4: Last external contact", map.P4));
+                    eclipseContacts.Add(new ContactsTableItem("P4: Last external contact", map.P4.JulianDay, map.P4));
                 }
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -447,7 +402,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
                 IsCalculating = true;
 
-                double jd = JulianDay;
+                int ln = meeusLunationNumber;
                 List<SolarEclipse> eclipses = new List<SolarEclipse>();
 
                 // add current eclipse
@@ -458,8 +413,8 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 // add previous eclipses
                 do
                 {
-                    var e = eclipsesCalculator.GetNearestSolarEclipse(jd, next: false, saros: true);
-                    jd = e.JulianDayMaximum;
+                    var e = eclipsesCalculator.GetNearestSolarEclipse(ln, next: false, saros: true);
+                    ln = e.MeeusLunationNumber;
                     if (e.Saros == eclipse.Saros)
                     {
                         eclipses.Insert(0, e);
@@ -471,12 +426,12 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 }
                 while (true);
 
-                jd = JulianDay;
+                ln = meeusLunationNumber;
                 // add next eclipses
                 do
                 {
-                    var e = eclipsesCalculator.GetNearestSolarEclipse(jd, next: true, saros: true);
-                    jd = e.JulianDayMaximum;
+                    var e = eclipsesCalculator.GetNearestSolarEclipse(ln, next: true, saros: true);
+                    ln = e.MeeusLunationNumber;
                     if (e.Saros == eclipse.Saros)
                     {
                         eclipses.Add(e);
@@ -501,6 +456,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                     sarosSeriesTable.Add(new SarosSeriesTableItem()
                     {
                         Member = $"{++sarosMember}",
+                        MeeusLunationNumber = e.MeeusLunationNumber,
                         JulianDay = e.JulianDayMaximum,
                         Date = Formatters.Date.Format(new Date(e.JulianDayMaximum, 0)),
                         Type = $"{type}{subtype}",
@@ -517,8 +473,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
                 IsCalculating = false;
                 NotifyPropertyChanged(
-                    nameof(SarosSeriesTable), 
-                    nameof(SarosSeriesTableTitle)
+                    nameof(SarosSeriesTable)
                 );
             });
         }
@@ -532,7 +487,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
                     CitiesListTable.Clear();
-                    CitiesListTable = new ObservableCollection<CitiesListTableItem>(locals.Select(c => new CitiesListTableItem(c, eclipsesCalculator.GetLocalVisibilityString(eclipse, c))));
+                    CitiesListTable = new ObservableCollection<SolarEclipseCitiesListTableItem>(locals.Select(c => new SolarEclipseCitiesListTableItem(c, eclipsesCalculator.GetLocalVisibilityString(eclipse, c))));
                 });
                 NotifyPropertyChanged(nameof(CitiesListTable));
             }
@@ -559,7 +514,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 {
                     CitiesListTable.Clear();
                     IsCitiesListTableNotEmpty = false;
-                    NotifyPropertyChanged(nameof(CitiesListTable), nameof(IsCitiesListTableNotEmpty));
+                    NotifyPropertyChanged(nameof(CitiesListTable));
                 });
             }
         }
@@ -600,7 +555,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
                     CitiesListTable.Clear();
-                    CitiesListTable = new ObservableCollection<CitiesListTableItem>(locals.Select(c => new CitiesListTableItem(c, eclipsesCalculator.GetLocalVisibilityString(eclipse, c))));
+                    CitiesListTable = new ObservableCollection<SolarEclipseCitiesListTableItem>(locals.Select(c => new SolarEclipseCitiesListTableItem(c, eclipsesCalculator.GetLocalVisibilityString(eclipse, c))));
                     IsCitiesListTableNotEmpty = CitiesListTable.Any();
                 });
             }
@@ -633,38 +588,6 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 writer?.Write(CitiesListTable);
 
                 //ViewManager.ShowMessageBox("$SolarEclipseWindow.ExportDoneTitle", "$SolarEclipseWindow.ExportDoneText", MessageBoxButton.OK);
-                var answer = ViewManager.ShowMessageBox("Информация", "Экспорт в файл успешно завершён. Окрыть файл?", System.Windows.MessageBoxButton.YesNo);
-                if (answer == System.Windows.MessageBoxResult.Yes)
-                {
-                    System.Diagnostics.Process.Start(file);
-                }
-            }
-        }
-
-        protected override void ExportSarosSeriesTable()
-        {
-            var formats = new Dictionary<string, string>
-            {
-                ["Comma-separated files (with formatting) (*.csv)"] = "*.csv",
-                ["Comma-separated files (raw data) (*.csv)"] = "*.csv",
-            };
-            string filter = string.Join("|", formats.Select(kv => $"{kv.Key}|{kv.Value}"));
-            var file = ViewManager.ShowSaveFileDialog("Export", $"SarosSeries{currentSarosSeries}", ".csv", filter, out int selectedFilterIndex);
-            if (file != null)
-            {
-                SarosSeriesTableCsvWriter writer = null;
-                string ext = Path.GetExtension(file);
-                switch (ext)
-                {
-                    case ".csv":
-                        writer = new SarosSeriesTableCsvWriter(file, selectedFilterIndex == 2);
-                        break;
-                    default:
-                        break;
-                }
-
-                writer?.Write(SarosSeriesTable);
-
                 var answer = ViewManager.ShowMessageBox("Информация", "Экспорт в файл успешно завершён. Окрыть файл?", System.Windows.MessageBoxButton.YesNo);
                 if (answer == System.Windows.MessageBoxResult.Yes)
                 {

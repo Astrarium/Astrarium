@@ -21,7 +21,7 @@ namespace Astrarium.Plugins.Eclipses.Types
             this.isRawData = isRawData;
         }
 
-        public void Write(ICollection<CitiesListTableItem> list)
+        public void Write(ICollection<SolarEclipseCitiesListTableItem> list)
         {
             CultureInfo ci = CultureInfo.InvariantCulture;
 
@@ -29,7 +29,7 @@ namespace Astrarium.Plugins.Eclipses.Types
             {
                 Func<double?, string> durToString = (dur) => dur != null ? (dur.Value * 24).ToString(ci) : "";
 
-                var columns = new Dictionary<string, Func<CitiesListTableItem, string>>
+                var columns = new Dictionary<string, Func<SolarEclipseCitiesListTableItem, string>>
                 {
                     ["LocationName"] = i => i.LocationName,
                     ["Latitude"] = i => i.Location.Latitude.ToString(ci),

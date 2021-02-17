@@ -22,24 +22,19 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
     {
         #region Fields
 
+        protected double julianDay;
+        protected int meeusLunationNumber;
+        protected int currentSarosSeries;
+        protected CrdsGeographical observerLocation;
         protected CsvLocationsReader locationsReader;
         protected IGeoLocationsManager locationsManager;
         protected IEclipsesCalculator eclipsesCalculator;
         protected ISettings settings;
-        protected CrdsGeographical observerLocation;
 
         protected readonly MarkerStyle observerLocationMarkerStyle = new MarkerStyle(5, Brushes.Black, null, Brushes.Black, SystemFonts.DefaultFont, StringFormat.GenericDefault);
 
         #endregion Fields
 
-        /// <summary>
-        /// Selected Julian date
-        /// </summary>
-        public double JulianDay
-        {
-            get => GetValue<double>(nameof(JulianDay));
-            protected set => SetValue(nameof(JulianDay), value);
-        }
 
         /// <summary>
         /// Date of the eclipse selected, converted to string
@@ -141,6 +136,54 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             protected set => SetValue(nameof(SettingsLocationName), value);
         }
 
+        /// <summary>
+        /// Table header for Besselian elements table
+        /// </summary>
+        public string BesselianElementsTableHeader
+        {
+            get => GetValue<string>(nameof(BesselianElementsTableHeader));
+            protected set => SetValue(nameof(BesselianElementsTableHeader), value);
+        }
+
+        /// <summary>
+        /// Table footer for Besselian elements table
+        /// </summary>
+        public string BesselianElementsTableFooter
+        {
+            get => GetValue<string>(nameof(BesselianElementsTableFooter));
+            protected set => SetValue(nameof(BesselianElementsTableFooter), value);
+        }
+
+        /// <summary>
+        /// Title of Saros series table
+        /// </summary>
+        public string SarosSeriesTableTitle
+        {
+            get => GetValue<string>(nameof(SarosSeriesTableTitle));
+            protected set => SetValue(nameof(SarosSeriesTableTitle), value);
+        }
+
+        public bool IsCitiesListTableNotEmpty
+        {
+            get => GetValue<bool>(nameof(IsCitiesListTableNotEmpty));
+            protected set => SetValue(nameof(IsCitiesListTableNotEmpty), value);
+        }
+
+        /// <summary>
+        /// General eclipse info table
+        /// </summary>
+        public ObservableCollection<NameValueTableItem> EclipseGeneralDetails { get; protected set; } = new ObservableCollection<NameValueTableItem>();
+
+        /// <summary>
+        /// Eclipse contacts info table
+        /// </summary>
+        public ObservableCollection<ContactsTableItem> EclipseContacts { get; protected set; } = new ObservableCollection<ContactsTableItem>();
+
+        /// <summary>
+        /// Saros series table
+        /// </summary>
+        public ObservableCollection<SarosSeriesTableItem> SarosSeriesTable { get; protected set; } = new ObservableCollection<SarosSeriesTableItem>();
+
         public ICommand ChangeDateCommand => new Command(ChangeDate);
         public ICommand PrevEclipseCommand => new Command(PrevEclipse);
         public ICommand NextEclipseCommand => new Command(NextEclipse);
@@ -151,7 +194,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         public ICommand AddCurrentPositionToCitiesListCommand => new Command(AddCurrentPositionToCitiesList);
         public ICommand AddNearestLocationToCitiesListCommand => new Command(AddNearestLocationToCitiesList);
         public ICommand RightClickOnMapCommand => new Command(RightClickOnMap);
-        public ICommand SarosSeriesTableSetDateCommand => new Command<double>(SarosSeriesTableSetDate);
+        public ICommand SarosSeriesTableSetDateCommand => new Command<int>(SarosSeriesTableSetDate);
         public ICommand ExportSarosSeriesTableCommand => new Command(ExportSarosSeriesTable);
         public ICommand CitiesListTableGoToCoordinatesCommand => new Command<CrdsGeographical>(CitiesListTableGoToCoordinates);
         public ICommand ShowLocationsFileFormatCommand => new Command(ShowLocationsFileFormat);
@@ -363,10 +406,12 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
         private void ChangeDate()
         {
-            var jd = ViewManager.ShowDateDialog(JulianDay, 0, DateOptions.MonthYear);
-            if (jd != null)
+            var d = new Date(julianDay, 0);
+            var jd0 = new Date(d.Year, d.Month, 1).ToJulianEphemerisDay();
+            var jd = ViewManager.ShowDateDialog(jd0, 0, DateOptions.MonthYear);
+            if (jd != null && Math.Abs(jd.Value - jd0) > 0.5)
             {
-                JulianDay = jd.Value - LunarEphem.SINODIC_PERIOD;
+                meeusLunationNumber = LunarEphem.Lunation(jd.Value, LunationSystem.Meeus) - 1;
                 CalculateEclipse(next: true, saros: false);
             }
         }
@@ -444,11 +489,43 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         private void ShowLocationsFileFormat()
         {
             ViewManager.ShowMessageBox("Information", "CSV file should contain following columns:\n\n- Location name (string)\n- Latitude in decimal degrees (float, in range -90...90, positive north, negative south)\n- longitude in decimal degrees (float, in range -180...180, positive east, negative west)\n- UTC offset in hours (float, optional)\n");
-        }        
+        }
 
-        private void SarosSeriesTableSetDate(double jd)
+        private void ExportSarosSeriesTable()
         {
-            JulianDay = jd - LunarEphem.SINODIC_PERIOD;
+            var formats = new Dictionary<string, string>
+            {
+                ["Comma-separated files (with formatting) (*.csv)"] = "*.csv",
+                ["Comma-separated files (raw data) (*.csv)"] = "*.csv",
+            };
+            string filter = string.Join("|", formats.Select(kv => $"{kv.Key}|{kv.Value}"));
+            var file = ViewManager.ShowSaveFileDialog("Export", $"SarosSeries{currentSarosSeries}", ".csv", filter, out int selectedFilterIndex);
+            if (file != null)
+            {
+                SarosSeriesTableCsvWriter writer = null;
+                string ext = Path.GetExtension(file);
+                switch (ext)
+                {
+                    case ".csv":
+                        writer = new SarosSeriesTableCsvWriter(file, selectedFilterIndex == 2);
+                        break;
+                    default:
+                        break;
+                }
+
+                writer?.Write(SarosSeriesTable);
+
+                var answer = ViewManager.ShowMessageBox("Информация", "Экспорт в файл успешно завершён. Окрыть файл?", System.Windows.MessageBoxButton.YesNo);
+                if (answer == System.Windows.MessageBoxResult.Yes)
+                {
+                    System.Diagnostics.Process.Start(file);
+                }
+            }
+        }
+
+        private void SarosSeriesTableSetDate(int lunationNumber)
+        {
+            meeusLunationNumber = lunationNumber - 1;
             CalculateEclipse(next: true, saros: false);
         }
 
@@ -514,6 +591,5 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         protected abstract void CalculateSarosSeries();
         protected abstract void CalculateLocalCircumstances(CrdsGeographical g);
         protected abstract void AddToCitiesList(CrdsGeographical location);
-        protected abstract void ExportSarosSeriesTable();
     }
 }

@@ -46,11 +46,12 @@ namespace Astrarium.Plugins.Eclipses
         private ICollection<AstroEvent> FindSolarEclipses(AstroEventsContext context)
         {
             List<AstroEvent> events = new List<AstroEvent>();
-            double jd = context.From;
+
+            int ln = LunarEphem.Lunation(context.From, LunationSystem.Meeus);
             do
             {
-                SolarEclipse eclipse = GetNearestSolarEclipse(jd, next: true, saros: false);
-                jd = eclipse.JulianDayMaximum;
+                SolarEclipse eclipse = GetNearestSolarEclipse(ln, next: true, saros: false);
+                double jd = eclipse.JulianDayMaximum;
                 if (jd <= context.To)
                 {
                     var pbe = GetBesselianElements(jd);
@@ -63,7 +64,7 @@ namespace Astrarium.Plugins.Eclipses
                     string localVisibility = GetLocalVisibilityString(eclipse, localCirc);
 
                     events.Add(new AstroEvent(jdMax, $"{type}{subtype} solar eclipse{phase}, {localVisibility} from current point.", sun, moon));
-                    jd += LunarEphem.SINODIC_PERIOD;
+                    ln++;
                 }
                 else
                 {
@@ -77,11 +78,12 @@ namespace Astrarium.Plugins.Eclipses
         private ICollection<AstroEvent> FindLunarEclipses(AstroEventsContext context)
         {
             List<AstroEvent> events = new List<AstroEvent>();
-            double jd = context.From;
+
+            int ln = LunarEphem.Lunation(context.From, LunationSystem.Meeus);
             do
             {
-                LunarEclipse eclipse = LunarEclipses.NearestEclipse(jd, next: true);
-                jd = eclipse.JulianDayMaximum;
+                LunarEclipse eclipse = LunarEclipses.NearestEclipse(ln, next: true);
+                double jd = eclipse.JulianDayMaximum;
                 if (jd <= context.To)
                 {
                     double jdMax = jd;
@@ -91,7 +93,7 @@ namespace Astrarium.Plugins.Eclipses
                     var local = LunarEclipses.LocalCircumstances(eclipse, elements, context.GeoLocation);
                     string localVisibility = GetLocalVisibilityString(eclipse, local);
                     events.Add(new AstroEvent(jdMax, $"{type} lunar eclipse (magnitude {phase}), {localVisibility} from current point.", moon));
-                    jd += LunarEphem.SINODIC_PERIOD;
+                    ln++;
                 }
                 else
                 {
@@ -102,23 +104,17 @@ namespace Astrarium.Plugins.Eclipses
             return events;
         }
 
-        public LunarEclipse GetNearestLunarEclipse(double jd, bool next, bool saros)
+        public LunarEclipse GetNearestLunarEclipse(int ln, bool next, bool saros)
         {
-            do
-            {
-                // TODO: check the period
-                jd += (next ? 1 : -1) * (saros ? LunarEphem.SAROS : LunarEphem.SINODIC_PERIOD);
-                return LunarEclipses.NearestEclipse(jd, next);
-            }
-            while (true);
+            return LunarEclipses.NearestEclipse(ln + (next ? 1 : -1) * (saros ? 223 : 1), next);
         }
 
-        public SolarEclipse GetNearestSolarEclipse(double jd, bool next, bool saros)
+        public SolarEclipse GetNearestSolarEclipse(int ln, bool next, bool saros)
         {
             do
             {
-                jd += (next ? 1 : -1) * (saros ? LunarEphem.SAROS : LunarEphem.SINODIC_PERIOD);
-                var eclipse = SolarEclipses.NearestEclipse(jd, next);
+                ln += (next ? 1 : -1) * (saros ? 223 : 1);
+                var eclipse = SolarEclipses.NearestEclipse(ln, next);
                 if (eclipse.IsUncertain)
                 {
                     var pbe = GetBesselianElements(eclipse.JulianDayMaximum);
@@ -321,6 +317,15 @@ namespace Astrarium.Plugins.Eclipses
             return cities
                 .Distinct()
                 .Select(c => SolarEclipses.LocalCircumstances(be, c))
+                .ToArray();
+        }
+
+        /// <inheritdoc/>
+        public ICollection<LunarEclipseLocalCircumstances> FindLocalCircumstancesForCities(LunarEclipse e, PolynomialLunarEclipseElements be, ICollection<CrdsGeographical> cities, CancellationToken? cancelToken = null, IProgress<double> progress = null)
+        {
+            return cities
+                .Distinct()
+                .Select(c => LunarEclipses.LocalCircumstances(e, be, c))
                 .ToArray();
         }
     }

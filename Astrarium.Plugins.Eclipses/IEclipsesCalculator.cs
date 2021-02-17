@@ -8,8 +8,8 @@ namespace Astrarium.Plugins.Eclipses
 {
     public interface IEclipsesCalculator
     {
-        SolarEclipse GetNearestSolarEclipse(double jd, bool next, bool saros);
-        LunarEclipse GetNearestLunarEclipse(double jd, bool next, bool saros);
+        SolarEclipse GetNearestSolarEclipse(int ln, bool next, bool saros);
+        LunarEclipse GetNearestLunarEclipse(int ln, bool next, bool saros);
 
         /// <summary>
         /// Calculates Besselian for a solar eclipse.
@@ -39,5 +39,6 @@ namespace Astrarium.Plugins.Eclipses
         ICollection<SolarEclipseLocalCircumstances> FindCitiesOnCentralLine(PolynomialBesselianElements be, ICollection<CrdsGeographical> centralLine, CancellationToken? cancelToken = null, IProgress<double> progress = null);
 
         ICollection<SolarEclipseLocalCircumstances> FindLocalCircumstancesForCities(PolynomialBesselianElements be, ICollection<CrdsGeographical> cities, CancellationToken? cancelToken = null, IProgress<double> progress = null);
+        ICollection<LunarEclipseLocalCircumstances> FindLocalCircumstancesForCities(LunarEclipse e, PolynomialLunarEclipseElements be, ICollection<CrdsGeographical> cities, CancellationToken? cancelToken = null, IProgress<double> progress = null);
     }
 }
