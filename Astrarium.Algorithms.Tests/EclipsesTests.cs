@@ -43,8 +43,7 @@ namespace Astrarium.Algorithms.Tests
         public void FindNearestSolarEclipse()
         {
             double jd = new Date(1993, 5, 21).ToJulianDay();
-            int ln = LunarEphem.Lunation(jd, LunationSystem.Meeus);
-            SolarEclipse eclipse = SolarEclipses.NearestEclipse(ln, true);
+            SolarEclipse eclipse = SolarEclipses.NearestEclipse(jd, true);
 
             Assert.AreEqual(2449129.0979, eclipse.JulianDayMaximum, TimeSpan.FromMinutes(0.36).TotalDays);
             Assert.AreEqual(SolarEclipseType.Partial, eclipse.EclipseType);
@@ -60,8 +59,7 @@ namespace Astrarium.Algorithms.Tests
             // ex. 54c
             {
                 double jd = new Date(1973, 6, 1).ToJulianDay();
-                int ln = LunarEphem.Lunation(jd, LunationSystem.Meeus);
-                LunarEclipse eclipse = LunarEclipses.NearestEclipse(ln, true);
+                LunarEclipse eclipse = LunarEclipses.NearestEclipse(jd, true);
                 var d = new Date(eclipse.JulianDayMaximum, 0);
                 Assert.AreEqual(1973, d.Year);
                 Assert.AreEqual(6, d.Month);

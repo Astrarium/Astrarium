@@ -34,17 +34,29 @@ namespace Astrarium.Algorithms
         }
 
         /// <summary>
+        /// Calculates nearest solar eclipse (next or previous) for the provided lunation number.
+        /// </summary>
+        /// <param name="lunationNumber">Meeus lunation number of interest.</param>
+        /// <param name="next">Flag indicating searching direction. True means searching next eclipse, false means previous.</param>
+
+        /// <summary>
         /// Calculates nearest lunar eclipse (next or previous) for the provided Julian Day.
         /// </summary>
         /// <param name="jd">Julian day of interest, the nearest lunar eclipse for that date will be found.</param>
         /// <param name="next">Flag indicating searching direction. True means searching next eclipse, false means previous.</param>
+        public static LunarEclipse NearestEclipse(double jd, bool next)
+        {
+            int lunationNumber = LunarEphem.Lunation(jd, LunationSystem.Meeus);
+            return NearestEclipse(lunationNumber, next);
+        }
+
+        /// <summary>
+        /// Calculates nearest lunar eclipse (next or previous) for the provided lunation number.
+        /// </summary>
+        /// <param name="lunationNumber">Meeus lunation number of interest.</param>
+        /// <param name="next">Flag indicating searching direction. True means searching next eclipse, false means previous.</param>
         public static LunarEclipse NearestEclipse(int lunationNumber, bool next)
         {
-            //Date d = new Date(jd);
-            //double year = d.Year + (Date.JulianEphemerisDay(d) - Date.JulianDay0(d.Year)) / 365.25;
-            //double k = Floor((year - 2000) * 12.3685) + 0.5;
-
-            //double k = LunarEphem.Lunation(jd, LunationSystem.Meeus) + 0.5;
             double k = lunationNumber + 0.5;
 
             bool eclipseFound;

@@ -1,13 +1,9 @@
 ﻿using Astrarium.Algorithms;
-using Astrarium.Plugins.Eclipses.Types;
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Eclipses
 {
@@ -57,14 +53,14 @@ namespace Astrarium.Plugins.Eclipses
                     var pbe = GetBesselianElements(jd);
                     var localCirc = SolarEclipses.LocalCircumstances(pbe, context.GeoLocation);
 
-                    string type = eclipse.EclipseType.ToString();
-                    string subtype = eclipse.IsNonCentral ? " non-central" : "";
-                    string phase = eclipse.EclipseType == SolarEclipseType.Partial ? $" (max phase {Formatters.Phase.Format(eclipse.Magnitude)})" : "";
+                    string type = Text.Get($"SolarEclipse.Type.{eclipse.EclipseType}");
+                    string subtype = eclipse.IsNonCentral ? $" {Text.Get("SolarEclipse.Type.NoCentral")}" : "";
+                    string phase = eclipse.EclipseType == SolarEclipseType.Partial ? $" ({Text.Get("SolarEclipse.MaxPhase")} {Formatters.Phase.Format(eclipse.Magnitude)})" : "";
                     double jdMax = localCirc.MaxMagnitude > 0 ? localCirc.Maximum.JulianDay : jd;
                     string localVisibility = GetLocalVisibilityString(eclipse, localCirc);
 
-                    events.Add(new AstroEvent(jdMax, $"{type}{subtype} solar eclipse{phase}, {localVisibility} from current point.", sun, moon));
-                    ln++;
+                    events.Add(new AstroEvent(jdMax, Text.Get("SolarEclipse.Event", ("type", type), ("subtype", subtype), ("phase", phase), ("localVisibility", localVisibility)), sun, moon));
+                    ln = eclipse.MeeusLunationNumber + 1;
                 }
                 else
                 {
@@ -87,13 +83,13 @@ namespace Astrarium.Plugins.Eclipses
                 if (jd <= context.To)
                 {
                     double jdMax = jd;
-                    string type = eclipse.EclipseType.ToString();
+                    string type =  Text.Get($"LunarEclipse.Type.{eclipse.EclipseType}");
                     string phase = Formatters.Phase.Format(eclipse.Magnitude);
                     var elements = GetLunarEclipseElements(jdMax);
                     var local = LunarEclipses.LocalCircumstances(eclipse, elements, context.GeoLocation);
                     string localVisibility = GetLocalVisibilityString(eclipse, local);
-                    events.Add(new AstroEvent(jdMax, $"{type} lunar eclipse (magnitude {phase}), {localVisibility} from current point.", moon));
-                    ln++;
+                    events.Add(new AstroEvent(jdMax, Text.Get("LunarEclipse.Event", ("type", type), ("phase", phase), ("localVisibility", localVisibility)), moon));
+                    ln = eclipse.MeeusLunationNumber + 1;
                 }
                 else
                 {
@@ -104,11 +100,13 @@ namespace Astrarium.Plugins.Eclipses
             return events;
         }
 
+        /// <inheritdoc />
         public LunarEclipse GetNearestLunarEclipse(int ln, bool next, bool saros)
         {
             return LunarEclipses.NearestEclipse(ln + (next ? 1 : -1) * (saros ? 223 : 1), next);
         }
 
+        /// <inheritdoc />
         public SolarEclipse GetNearestSolarEclipse(int ln, bool next, bool saros)
         {
             do
@@ -138,29 +136,30 @@ namespace Astrarium.Plugins.Eclipses
             while (true);
         }
 
+        /// <inheritdoc />
         public string GetLocalVisibilityString(SolarEclipse eclipse, SolarEclipseLocalCircumstances localCirc)
         {
-            string localVisibility = "invisible";
+            string localVisibility = Text.Get("SolarEclipse.LocalVisibility.Invisible");
             if (localCirc.MaxMagnitude > 0)
             {
                 string localMag = Formatters.Phase.Format(localCirc.MaxMagnitude);
-                string asPartial = eclipse.EclipseType != SolarEclipseType.Partial ? " as partial" : "";
+                string asPartial = eclipse.EclipseType != SolarEclipseType.Partial ? $" {Text.Get("SolarEclipse.LocalVisibility.AsPartial")}" : "";
 
                 // max instant not visible
                 if (localCirc.Maximum.SolarAltitude <= 0)
                 {
                     if ((localCirc.TotalEnd != null && localCirc.TotalEnd.SolarAltitude < 0) || localCirc.PartialEnd.SolarAltitude < 0)
-                        localVisibility = $"visible{asPartial} on sunset (max phase {localMag})";
+                        localVisibility = Text.Get("SolarEclipse.LocalVisibility.VisibleOnSunset", ("asPartial", asPartial), ("localMag", localMag));
                     else if (localCirc.PartialBegin.SolarAltitude < 0 || (localCirc.TotalBegin != null && localCirc.TotalBegin.SolarAltitude < 0))
-                        localVisibility = $"visible{asPartial} on sunrise (max phase {localMag})";
+                        localVisibility = Text.Get("SolarEclipse.LocalVisibility.VisibleOnSunrise", ("asPartial", asPartial), ("localMag", localMag));
                 }
                 // max instant visible
                 else
                 {
                     if (localCirc.TotalDuration > 0)
-                        localVisibility = "completely visible";
+                        localVisibility = Text.Get("SolarEclipse.LocalVisibility.VisibleTotally");
                     else
-                        localVisibility = $"visible{asPartial} (max phase {localMag})";
+                        localVisibility = Text.Get("SolarEclipse.LocalVisibility.Visible", ("asPartial", asPartial), ("localMag", localMag));
                 }
             }
 
@@ -170,27 +169,27 @@ namespace Astrarium.Plugins.Eclipses
         public string GetLocalVisibilityString(LunarEclipse eclipse, LunarEclipseLocalCircumstances localCirc)
         {
             if (localCirc.Maximum.LunarAltitude > 0)
-                return "visible";
+                return Text.Get("LunarEclipse.LocalVisibility.Visible"); // "visible"
 
-            string localVisibility = "invisible";
+            string localVisibility = Text.Get("LunarEclipse.LocalVisibility.Invisible"); // "invisible"
 
             if (localCirc.PenumbralBegin.LunarAltitude > 0)
-                localVisibility = "visible begin of penumbral phase";
+                localVisibility = Text.Get("LunarEclipse.LocalVisibility.VisibleBeginPenumbral"); // "visible begin of penumbral phase"
 
             if (localCirc.PartialBegin?.LunarAltitude > 0)
-                localVisibility = "visible begin of partial phase";
+                localVisibility = Text.Get("LunarEclipse.LocalVisibility.VisibleBeginPartial"); // "visible begin of partial phase"
 
             if (localCirc.TotalBegin?.LunarAltitude > 0)
-                localVisibility = "visible begin of total phase";
+                localVisibility = Text.Get("LunarEclipse.LocalVisibility.VisibleBeginTotal"); // "visible begin of total phase"
 
             if (localCirc.PenumbralEnd.LunarAltitude > 0)
-                localVisibility = "visible end of penumbral phase";
+                localVisibility = Text.Get("LunarEclipse.LocalVisibility.VisibleEndPenumbral"); // "visible end of penumbral phase"
 
             if (localCirc.PartialEnd?.LunarAltitude > 0)
-                localVisibility = "visible end of partial phase";
+                localVisibility = Text.Get("LunarEclipse.LocalVisibility.VisibleEndPartial"); // "visible end of partial phase"
 
             if (localCirc.TotalEnd?.LunarAltitude > 0)
-                localVisibility = "visible end of total phase";
+                localVisibility = Text.Get("LunarEclipse.LocalVisibility.VisibleEndTotal"); // "visible end of total phase"
 
             return localVisibility;
         }

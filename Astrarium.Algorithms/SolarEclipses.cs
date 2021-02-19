@@ -37,15 +37,22 @@ namespace Astrarium.Algorithms
         /// <summary>
         /// Calculates nearest solar eclipse (next or previous) for the provided Julian Day.
         /// </summary>
-        /// <param name="jd">Meeus lunation number of interest</param>
+        /// <param name="jd">Julian day of interest.</param>
         /// <param name="next">Flag indicating searching direction. True means searching next eclipse, false means previous.</param>
-        public static SolarEclipse NearestEclipse(int ln, bool next)
+        public static SolarEclipse NearestEclipse(double jd, bool next)
         {
-            //Date d = new Date(jd);
-            //double year = d.Year + (Date.JulianEphemerisDay(d) - Date.JulianDay0(d.Year)) / 365.25;            
-            //double k = Floor((year - 2000) * 12.3685);
-            //double k = LunarEphem.Lunation(jd, LunationSystem.Meeus);
-            double k = ln;
+            int lunationNumber = LunarEphem.Lunation(jd, LunationSystem.Meeus);
+            return NearestEclipse(lunationNumber, next);
+        }
+
+        /// <summary>
+        /// Calculates nearest solar eclipse (next or previous) for the provided lunation number.
+        /// </summary>
+        /// <param name="lunationNumber">Meeus lunation number of interest.</param>
+        /// <param name="next">Flag indicating searching direction. True means searching next eclipse, false means previous.</param>
+        public static SolarEclipse NearestEclipse(int lunationNumber, bool next)
+        {
+            double k = lunationNumber;
 
             bool eclipseFound = false;
             bool isUncertain = false;

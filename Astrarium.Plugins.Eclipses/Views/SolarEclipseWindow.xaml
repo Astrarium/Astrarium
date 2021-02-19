@@ -5,12 +5,13 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:local="clr-namespace:Astrarium.Plugins.Eclipses" 
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
     xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types" 
     xmlns:q="clr-namespace:Astrarium.Plugins.Eclipses.Controls" 
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
     x:Class="Astrarium.Plugins.Eclipses.SolarEclipseWindow" 
     mc:Ignorable="d" 
-    Title="Solar Eclipses"
+    Title="{t:Text Eclipses.Solar}"
     Height="768" 
     Width="1024" 
     WindowState="Maximized"
@@ -268,7 +269,7 @@
         </Grid>
 
         <TabControl Grid.Row="2" Padding="0" SelectedIndex="{Binding SelectedTabIndex}">
-            <TabItem Header="Eclipse Map">
+            <TabItem Header="{t:Text SolarEclipseView.Tab.Map}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="148*"/>
@@ -349,7 +350,7 @@
                         <StackPanel x:Name="RightPanelStack" Orientation="Vertical">
 
                             <TextBlock Padding="6 2" FontSize="18" >Local Circumstances</TextBlock>
-                            
+
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
@@ -363,13 +364,9 @@
                                     </ToggleButton.Content>
                                 </ToggleButton>
                             </Grid>
-                            
-
 
                             <TextBlock Padding="6 2" TextTrimming="CharacterEllipsis" Width="{Binding ElementName=RightPanel, Path=ActualWidth}" Text="{Binding LocalVisibilityDescription, FallbackValue='Local visibility description'}" HorizontalAlignment="Left" />
                             
-                            <!--<TextBlock Visibility="{Binding IsMapLocked, Converter={s:InverseBoolToVisibilityConverter}}" IsEnabled="False" Padding="6 2" MinHeight="28" FontSize="12" TextWrapping="WrapWithOverflow" HorizontalAlignment="Stretch" Text="Double click the map to lock on the desired point." />-->
-
                             <!-- Local details expander -->
                             <Expander Margin="0 6 0 4" Header="Local Details" IsExpanded="True">
                                 <StackPanel Orientation="Vertical" IsEnabled="{Binding IsVisibleFromCurrentPlace, Mode=OneWay}">
@@ -488,7 +485,7 @@
 
                 </Grid>
             </TabItem>
-            <TabItem Header="General Information">
+            <TabItem Header="{t:Text SolarEclipseView.Tab.GeneralInfo}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
                     <Grid ScrollViewer.CanContentScroll="True" IsEnabled="{Binding IsCalculating, Converter={s:InverseBoolConverter}}">
                         <Grid.RowDefinitions>
@@ -503,7 +500,7 @@
                         </Grid.RowDefinitions>
 
                         <!-- General details table title -->
-                        <TextBlock Grid.Row="0" FontSize="18" Padding="8 8 0 0">Eclipse Details</TextBlock>
+                        <TextBlock Grid.Row="0" FontSize="18" Padding="8 8 0 0" Text="{t:Text SolarEclipseView.EclipseDetails}" />
 
                         <!-- General details table -->
                         <DataGrid Grid.Row="1"                            
@@ -529,7 +526,7 @@
                         </DataGrid>
 
                         <!-- Contacts table title -->
-                        <TextBlock Grid.Row="2" FontSize="18" Padding="8 8 0 0">Contacts</TextBlock>
+                        <TextBlock Grid.Row="2" FontSize="18" Padding="8 8 0 0" Text="{t:Text SolarEclipseView.EclipseContacts}" />
 
                         <!-- Contacts table -->
                         <DataGrid Grid.Row="3"
@@ -548,14 +545,14 @@
                             RowHeight="24"
                             ItemsSource="{Binding EclipseContacts}">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Point" Binding="{Binding Point}"/>
-                                <DataGridTextColumn Header="Coordinates" Binding="{Binding Coordinates}"/>
-                                <DataGridTextColumn Header="Time" Binding="{Binding Time}"/>
+                                <DataGridTextColumn Header="{t:Text SolarEclipseView.EclipseContacts.Point}" Binding="{Binding Point}"/>
+                                <DataGridTextColumn Header="{t:Text SolarEclipseView.EclipseContacts.Coordinates}" Binding="{Binding Coordinates}"/>
+                                <DataGridTextColumn Header="{t:Text SolarEclipseView.EclipseContacts.Time}" Binding="{Binding Time}"/>
                             </DataGrid.Columns>
                         </DataGrid>
 
                         <!-- Besselian elements table title -->
-                        <TextBlock Grid.Row="4" FontSize="18" Padding="8 8 0 0">Besselian Elements</TextBlock>
+                        <TextBlock Grid.Row="4" FontSize="18" Padding="8 8 0 0" Text="{t:Text SolarEclipseView.BesselianElements}" />
 
                         <!-- Besselian elements table header (displaying t0 timings) -->
                         <TextBlock Grid.Row="5" Padding="8 8 0 0" Text="{Binding BesselianElementsTableHeader}" />
@@ -593,7 +590,7 @@
                     </Grid>
                 </ScrollViewer>
             </TabItem>
-            <TabItem Header="Saros Series">
+            <TabItem Header="{t:Text SolarEclipseView.Tab.SarosSeries}">
 
                 <Grid>
                     
@@ -659,7 +656,7 @@
                 </Grid>
 
             </TabItem>
-            <TabItem Header="Local Circumstances">
+            <TabItem Header="{t:Text SolarEclipseView.Tab.LocalCircumstances}">
 
                 <Grid>
                     <Grid.RowDefinitions>
