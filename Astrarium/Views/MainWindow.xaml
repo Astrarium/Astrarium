@@ -177,7 +177,7 @@
         </c:AutoClosePopup>
 
         <!-- MAP -->
-        <DockPanel Grid.Row="2" LastChildFill="true" Grid.ColumnSpan="2" Background="{StaticResource BrushWindowBackground}">
+        <DockPanel Grid.Row="2" LastChildFill="true" Grid.ColumnSpan="2" Background="Transparent">
             <WindowsFormsHost x:Name="Host" Background="Black" Margin="5 0">
                 <WindowsFormsHost.ContextMenu>
                     <ContextMenu ItemsSource="{Binding ContextMenuItems}" Opened="ContextMenu_Opened" StaysOpen="True">

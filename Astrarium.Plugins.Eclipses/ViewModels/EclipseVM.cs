@@ -235,7 +235,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             SetMapColors();
 
             ChartZoomLevel = 1;
-            SettingsLocationName = $"Local visibility ({observerLocation.LocationName})";
+            SettingsLocationName = $"{Text.Get("EclipseView.SettingsLocationName")} ({observerLocation.LocationName})";
             CacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "MapsCache");
 
             TileServers = new List<ITileServer>()
@@ -478,7 +478,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         private void LockOnCurrentPosition()
         {
             var g = FromGeoPoint(MapMouse);
-            g.LocationName = "Locked Point";
+            g.LocationName = Text.Get("EclipseView.LockedPoint");
             LockOn(g);
         }
 
@@ -499,7 +499,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         private void AddCurrentPositionToCitiesList()
         {
             var g = FromGeoPoint(MapMouse);
-            g.LocationName = "<No name>";
+            g.LocationName = Text.Get("EclipseView.NoName");
             AddToCitiesList(g);
         }
 

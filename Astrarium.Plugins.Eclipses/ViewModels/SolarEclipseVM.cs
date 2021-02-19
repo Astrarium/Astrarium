@@ -352,21 +352,21 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
-                var items = new List<SolarEclipseLocalContactsTableItem>();
-                LocalContactsTable[0] = new SolarEclipseLocalContactsTableItem("C1: Beginning of partial phase", local.PartialBegin);
-                LocalContactsTable[1] = new SolarEclipseLocalContactsTableItem("C2: Beginning of total phase", local.TotalBegin);
-                LocalContactsTable[2] = new SolarEclipseLocalContactsTableItem("Max: Local maximum", local.Maximum);
-                LocalContactsTable[3] = new SolarEclipseLocalContactsTableItem("C3: End of total phase", local.TotalEnd);
-                LocalContactsTable[4] = new SolarEclipseLocalContactsTableItem("C4: End of partial phase", local.PartialEnd);
+                LocalCircumstancesTable[0] = new NameValueTableItem(Text.Get("SolarEclipseView.LocalCircumstances.MaxMagnitude"), local.MaxMagnitude > 0 ? Format.Mag.Format(local.MaxMagnitude) : "");
+                LocalCircumstancesTable[1] = new NameValueTableItem(Text.Get("SolarEclipseView.LocalCircumstances.MoonSunRatio"), local.MoonToSunDiameterRatio > 0 ? Format.Ratio.Format(local.MoonToSunDiameterRatio) : "");
+                LocalCircumstancesTable[2] = new NameValueTableItem(Text.Get("SolarEclipseView.LocalCircumstances.PartialDur"), !double.IsNaN(local.PartialDuration) && local.PartialDuration > 0 ? Format.Time.Format(local.PartialDuration) : "");
+                LocalCircumstancesTable[3] = new NameValueTableItem(Text.Get("SolarEclipseView.LocalCircumstances.TotalDur"), !double.IsNaN(local.TotalDuration) && local.TotalDuration > 0 ? Format.Time.Format(local.TotalDuration) : "");
+                LocalCircumstancesTable[4] = new NameValueTableItem(Text.Get("SolarEclipseView.LocalCircumstances.ShadowWidth"), local.PathWidth > 0 ? Format.PathWidth.Format(local.PathWidth) : "");
 
-                LocalCircumstancesTable[0] = new NameValueTableItem("Maximal magnitude", local.MaxMagnitude > 0 ? Format.Mag.Format(local.MaxMagnitude) : "");
-                LocalCircumstancesTable[1] = new NameValueTableItem("Moon/Sun diameter ratio", local.MoonToSunDiameterRatio > 0 ? Format.Ratio.Format(local.MoonToSunDiameterRatio) : "");
-                LocalCircumstancesTable[2] = new NameValueTableItem("Partial phase duration", !double.IsNaN(local.PartialDuration) && local.PartialDuration > 0 ? Format.Time.Format(local.PartialDuration) : "");
-                LocalCircumstancesTable[3] = new NameValueTableItem("Total phase duration", !double.IsNaN(local.TotalDuration) && local.TotalDuration > 0 ? Format.Time.Format(local.TotalDuration) : "");
-                LocalCircumstancesTable[4] = new NameValueTableItem("Shadow path width", local.PathWidth > 0 ? Format.PathWidth.Format(local.PathWidth) : "");
+                var items = new List<SolarEclipseLocalContactsTableItem>();
+                LocalContactsTable[0] = new SolarEclipseLocalContactsTableItem(Text.Get("SolarEclipseView.LocalCircumstances.C1"), local.PartialBegin);
+                LocalContactsTable[1] = new SolarEclipseLocalContactsTableItem(Text.Get("SolarEclipseView.LocalCircumstances.C2"), local.TotalBegin);
+                LocalContactsTable[2] = new SolarEclipseLocalContactsTableItem(Text.Get("SolarEclipseView.LocalCircumstances.Max"), local.Maximum);
+                LocalContactsTable[3] = new SolarEclipseLocalContactsTableItem(Text.Get("SolarEclipseView.LocalCircumstances.C3"), local.TotalEnd);
+                LocalContactsTable[4] = new SolarEclipseLocalContactsTableItem(Text.Get("SolarEclipseView.LocalCircumstances.C4"), local.PartialEnd);
             });
 
-            ObserverLocationName = (IsMouseOverMap && !IsMapLocked) ? $"Mouse coordinates ({Format.Geo.Format(FromGeoPoint(MapMouse))})" : $"{observerLocation.LocationName} ({Format.Geo.Format(observerLocation)})";            
+            ObserverLocationName = (IsMouseOverMap && !IsMapLocked) ? $"{Text.Get("SolarEclipseView.MouseCoordinates")} ({Format.Geo.Format(FromGeoPoint(MapMouse))})" : $"{observerLocation.LocationName} ({Format.Geo.Format(observerLocation)})";            
             LocalVisibilityDescription = eclipsesCalculator.GetLocalVisibilityString(eclipse, local);
             IsVisibleFromCurrentPlace = !local.IsInvisible;
             LocalCircumstances = local;
@@ -386,7 +386,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 // add current eclipse
                 eclipses.Add(eclipse);
                 currentSarosSeries = eclipse.Saros;
-                SarosSeriesTableTitle = $"List of eclipses of saros series {currentSarosSeries}";
+                SarosSeriesTableTitle = Text.Get("SolarEclipseView.SarosTable.Header", ("currentSarosSeries", currentSarosSeries.ToString()));
 
                 // add previous eclipses
                 do
@@ -427,8 +427,8 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 int sarosMember = 0;
                 foreach (var e in eclipses)
                 {
-                    string type = e.EclipseType.ToString();
-                    string subtype = e.IsNonCentral ? " non-central" : "";
+                    string type = Text.Get($"SolarEclipse.Type.{e.EclipseType}");
+                    string subtype = e.IsNonCentral ? $" {Text.Get("SolarEclipse.Type.NoCentral")}" : "";
                     var pbe = eclipsesCalculator.GetBesselianElements(e.JulianDayMaximum);
                     var local = SolarEclipses.LocalCircumstances(pbe, settingsLocation);
                     sarosSeriesTable.Add(new SarosSeriesTableItem()

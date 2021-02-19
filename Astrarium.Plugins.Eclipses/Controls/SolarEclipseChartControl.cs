@@ -1,4 +1,5 @@
 ﻿using Astrarium.Algorithms;
+using Astrarium.Types;
 using System;
 using System.Globalization;
 using System.Windows;
@@ -298,7 +299,7 @@ namespace Astrarium.Plugins.Eclipses.Controls
             }
             else
             {
-                DrawText(ctx, "Eclipse is invisible", pSun, 12);
+                DrawText(ctx, Text.Get("EclipseView.ChartInvisible"), pSun, 12);
             }
 
             base.OnRender(ctx);

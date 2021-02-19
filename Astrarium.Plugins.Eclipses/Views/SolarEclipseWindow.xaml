@@ -251,15 +251,15 @@
 
         <StackPanel Orientation="Vertical" Grid.Row="0" HorizontalAlignment="Center">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Content="{StaticResource ImagePrevSaros}" Style="{StaticResource ImageButton}" Command="{Binding PrevSarosCommand}" IsEnabled="{Binding PrevSarosEnabled}" ToolTip="Previous eclipse of the same saros" />
-                <Button Content="{StaticResource ImagePrevEclipse}" Style="{StaticResource ImageButton}" Command="{Binding PrevEclipseCommand}" ToolTip="Previous eclipse" />
-                <Button MinWidth="200" VerticalAlignment="Center" Command="{Binding ChangeDateCommand}" Style="{StaticResource DateButton}" ToolTip="Eclipse date. Click to find eclipse by nearest date.">
+                <Button Content="{StaticResource ImagePrevSaros}" Style="{StaticResource ImageButton}" Command="{Binding PrevSarosCommand}" IsEnabled="{Binding PrevSarosEnabled}" ToolTip="{t:Text EclipseView.PrevSaros}" />
+                <Button Content="{StaticResource ImagePrevEclipse}" Style="{StaticResource ImageButton}" Command="{Binding PrevEclipseCommand}" ToolTip="{t:Text EclipseView.Prev}" />
+                <Button MinWidth="200" VerticalAlignment="Center" Command="{Binding ChangeDateCommand}" Style="{StaticResource DateButton}" ToolTip="{t:Text EclipseView.ChangeDate}">
                     <Button.Content>
                         <TextBlock FontSize="32" VerticalAlignment="Center"  Text="{Binding EclipseDate, FallbackValue='01 Jan 2000'}" />
                     </Button.Content>
                 </Button>
-                <Button Content="{StaticResource ImageNextEclipse}" Style="{StaticResource ImageButton}" Command="{Binding NextEclipseCommand}" ToolTip="Next eclipse" />
-                <Button Content="{StaticResource ImageNextSaros}" Style="{StaticResource ImageButton}" Command="{Binding NextSarosCommand}" IsEnabled="{Binding NextSarosEnabled}" ToolTip="Next eclipse of the same saros" />
+                <Button Content="{StaticResource ImageNextEclipse}" Style="{StaticResource ImageButton}" Command="{Binding NextEclipseCommand}" ToolTip="{t:Text EclipseView.Next}" />
+                <Button Content="{StaticResource ImageNextSaros}" Style="{StaticResource ImageButton}" Command="{Binding NextSarosCommand}" IsEnabled="{Binding NextSarosEnabled}" ToolTip="{t:Text EclipseView.NextSaros}" />
             </StackPanel>
             <TextBlock Height="Auto" Padding="0 0 0 10" HorizontalAlignment="Center" Text="{Binding EclipseDescription, FallbackValue='Eclipse description'}"></TextBlock>
         </StackPanel>
@@ -349,7 +349,7 @@
                         VerticalScrollBarVisibility="Auto">
                         <StackPanel x:Name="RightPanelStack" Orientation="Vertical">
 
-                            <TextBlock Padding="6 2" FontSize="18" >Local Circumstances</TextBlock>
+                            <TextBlock Padding="6 2" FontSize="18" Text="{t:Text SolarEclipseView.LocalCircumstances}" />
 
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -360,7 +360,7 @@
                                 <TextBlock VerticalAlignment="Center" Padding="6 4" Text="{Binding ObserverLocationName, FallbackValue='Observer location name'}" />
                                 <ToggleButton Grid.Column="1" IsChecked="{Binding IsMapLocked}" Visibility="{Binding IsMapLocked, Converter={s:BoolToVisibilityConverter}}" Margin="4 0 4 0" Height="24" VerticalContentAlignment="Center" HorizontalAlignment="Right">
                                     <ToggleButton.Content>
-                                        <TextBlock Padding="4" VerticalAlignment="Center" Text="Unlock" />
+                                        <TextBlock Padding="4" VerticalAlignment="Center" Text="{t:Text SolarEclipseView.Unlock}" />
                                     </ToggleButton.Content>
                                 </ToggleButton>
                             </Grid>
@@ -368,7 +368,7 @@
                             <TextBlock Padding="6 2" TextTrimming="CharacterEllipsis" Width="{Binding ElementName=RightPanel, Path=ActualWidth}" Text="{Binding LocalVisibilityDescription, FallbackValue='Local visibility description'}" HorizontalAlignment="Left" />
                             
                             <!-- Local details expander -->
-                            <Expander Margin="0 6 0 4" Header="Local Details" IsExpanded="True">
+                            <Expander Margin="0 6 0 4" Header="{t:Text SolarEclipseView.LocalDetails}" IsExpanded="True">
                                 <StackPanel Orientation="Vertical" IsEnabled="{Binding IsVisibleFromCurrentPlace, Mode=OneWay}">
                                     <!-- Local circumstances table -->
                                     <DataGrid               
@@ -418,9 +418,9 @@
                                         RowHeight="24"
                                         ItemsSource="{Binding Path=LocalContactsTable, Mode=OneWay}">
                                         <DataGrid.Columns>
-                                            <DataGridTextColumn Header="Instant" Binding="{Binding Point}" />
-                                            <DataGridTextColumn Header="Time" FontFamily="Lucida Console" Binding="{Binding Time}"/>
-                                            <DataGridTextColumn Header="Alt" FontFamily="Lucida Console" Binding="{Binding Altitude}"/>
+                                            <DataGridTextColumn Header="{t:Text SolarEclipseView.LocalContacts.Instant}" Binding="{Binding Point}" />
+                                            <DataGridTextColumn Header="{t:Text SolarEclipseView.LocalContacts.Time}" FontFamily="Lucida Console" Binding="{Binding Time}"/>
+                                            <DataGridTextColumn Header="{t:Text SolarEclipseView.LocalContacts.Alt}" FontFamily="Lucida Console" Binding="{Binding Altitude}"/>
                                             <DataGridTextColumn Header="P" FontFamily="Lucida Console" Binding="{Binding PAngle}"/>
                                             <DataGridTextColumn Header="Z" FontFamily="Lucida Console" Binding="{Binding ZAngle}"/>
                                         </DataGrid.Columns>
@@ -429,7 +429,7 @@
                             </Expander>
 
                             <!-- Eclipse chart -->
-                            <Expander Header="Local View" IsExpanded="True" >
+                            <Expander Header="{t:Text SolarEclipseView.LocalView}" IsExpanded="True" >
                                 <StackPanel Orientation="Vertical">
                                     <!-- Chart header -->
                                     <Grid>
@@ -440,16 +440,16 @@
                                         </Grid.ColumnDefinitions>
                                         <!-- Eclipse contacts toggler -->
                                         <StackPanel Margin="2" Grid.Column="0" HorizontalAlignment="Left" SnapsToDevicePixels="True" Orientation="Horizontal">
-                                            <RadioButton Content="C1" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C1}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="C1: Beginning of partial phase" />
-                                            <RadioButton Content="C2" IsEnabled="{Binding LocalCircumstances.TotalBegin, Converter={s:NotNullToBoolConverter}}" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C2}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="C2: Beginning of total phase"  />
-                                            <RadioButton Content="Max" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.Max}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="Max: Local maximum" />
-                                            <RadioButton Content="C3" IsEnabled="{Binding LocalCircumstances.TotalEnd, Converter={s:NotNullToBoolConverter}}" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C3}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="C3: End of total phase" />
-                                            <RadioButton Content="C4" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C4}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="C4: End of partial phase" />
+                                            <RadioButton Content="C1" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C1}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="{t:Text SolarEclipseView.LocalCircumstances.C1}" />
+                                            <RadioButton Content="C2" IsEnabled="{Binding LocalCircumstances.TotalBegin, Converter={s:NotNullToBoolConverter}}" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C2}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="{t:Text SolarEclipseView.LocalCircumstances.C2}"  />
+                                            <RadioButton Content="Max" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.Max}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="{t:Text SolarEclipseView.LocalCircumstances.Max}" />
+                                            <RadioButton Content="C3" IsEnabled="{Binding LocalCircumstances.TotalEnd, Converter={s:NotNullToBoolConverter}}" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C3}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="{t:Text SolarEclipseView.LocalCircumstances.C3}" />
+                                            <RadioButton Content="C4" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartContact.C4}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="{t:Text SolarEclipseView.LocalCircumstances.C4}" />
                                         </StackPanel>
                                         <!-- Chart orientation toggler -->
                                         <StackPanel Margin="2" Grid.Column="2" HorizontalAlignment="Right" SnapsToDevicePixels="True" Orientation="Horizontal">
-                                            <RadioButton Content="Z" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartOrientation.Zenithal}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="Zenith on top" />
-                                            <RadioButton Content="N" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartOrientation.Equatorial}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="North on top" />
+                                            <RadioButton Content="Z" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartOrientation.Zenithal}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="{t:Text SolarEclipseView.LocalView.Zenithal}" />
+                                            <RadioButton Content="N" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartOrientation.Equatorial}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="{t:Text SolarEclipseView.LocalView.Equatorial}" />
                                         </StackPanel>
                                     </Grid>
 
@@ -467,13 +467,13 @@
                                     <!-- Chart footer -->
                                     <DockPanel Margin="0" HorizontalAlignment="Stretch">
                                         <!-- Chart options togglers -->
-                                        <ToggleButton IsChecked="{Binding ElementName=Chart, Path=ShowLabels}" ToolTip="Show labels" Width="24" Height="24" Content="{StaticResource ImageChartLabels}" />
-                                        <ToggleButton IsChecked="{Binding ElementName=Chart, Path=ShowContactCircles}" ToolTip="Show contacts circles" Width="24" Height="24" Content="{StaticResource ImageChartCircles}" />
-                                        <ToggleButton IsChecked="{Binding ElementName=Chart, Path=ShowMoonOutlineOnly}" ToolTip="Show Moon as outline" Width="24" Height="24" Content="{StaticResource ImageChartMoonOutline}" />
+                                        <ToggleButton IsChecked="{Binding ElementName=Chart, Path=ShowLabels}" ToolTip="{t:Text SolarEclipseView.LocalView.ShowLabels}" Width="24" Height="24" Content="{StaticResource ImageChartLabels}" />
+                                        <ToggleButton IsChecked="{Binding ElementName=Chart, Path=ShowContactCircles}" ToolTip="{t:Text SolarEclipseView.LocalView.ShowContactCircles}" Width="24" Height="24" Content="{StaticResource ImageChartCircles}" />
+                                        <ToggleButton IsChecked="{Binding ElementName=Chart, Path=ShowMoonOutlineOnly}" ToolTip="{t:Text SolarEclipseView.LocalView.ShowMoonOutlineOnly}" Width="24" Height="24" Content="{StaticResource ImageChartMoonOutline}" />
                                         <!-- Chart zoom buttons -->
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                            <Button Command="{Binding ChartZoomInCommand}" Content="{StaticResource ImageZoomIn}" ToolTip="Zoom in" Height="22" Width="22" Margin="2" Padding="-3 -1 0 0" />
-                                            <Button Command="{Binding ChartZoomOutCommand}" Content="{StaticResource ImageZoomOut}" ToolTip="Zoom out" Height="22" Width="22" Margin="2" Padding="-3 -1 0 0" />
+                                            <Button Command="{Binding ChartZoomInCommand}" Content="{StaticResource ImageZoomIn}" ToolTip="{t:Text SolarEclipseView.LocalView.ZoomIn}" Height="22" Width="22" Margin="2" Padding="-3 -1 0 0" />
+                                            <Button Command="{Binding ChartZoomOutCommand}" Content="{StaticResource ImageZoomOut}" ToolTip="{t:Text SolarEclipseView.LocalView.ZoomOut}" Height="22" Width="22" Margin="2" Padding="-3 -1 0 0" />
                                         </StackPanel>
                                     </DockPanel>
                                 </StackPanel>
@@ -605,7 +605,7 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Row="0" FontSize="18" Padding="8 8 0 0" Text="{Binding SarosSeriesTableTitle, FallbackValue='List of eclipses of saros series 123'}" Grid.ColumnSpan="2" />
-                    <Button Margin="0 8 8 0" Padding="8 0" Grid.Column="2" HorizontalAlignment="Right" Content="Export..." Command="{Binding ExportSarosSeriesTableCommand}" />
+                    <Button Margin="0 8 8 0" Padding="8 0" Grid.Column="2" HorizontalAlignment="Right" Content="{t:Text EclipseView.Export}" Command="{Binding ExportSarosSeriesTableCommand}" />
 
                     <DataGrid Grid.Row="1"
                         IsEnabled="{Binding IsCalculating, Converter={s:InverseBoolConverter}}"
@@ -624,8 +624,8 @@
                         RowHeight="24"
                         ItemsSource="{Binding SarosSeriesTable}" Grid.ColumnSpan="2">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Member" Binding="{Binding Member}"/>
-                            <DataGridTemplateColumn Header="Date">
+                            <DataGridTextColumn Header="{t:Text SolarEclipseView.SarosTable.Member}" Binding="{Binding Member}"/>
+                            <DataGridTemplateColumn Header="{t:Text SolarEclipseView.SarosTable.Date}">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock FontFamily="Lucida Console" FontSize="12">
@@ -634,9 +634,9 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Type" Binding="{Binding Type}"/>
-                            <DataGridTextColumn Header="Gamma" Binding="{Binding Gamma}"/>
-                            <DataGridTextColumn Header="Magnitude" Binding="{Binding Magnitude}"/>
+                            <DataGridTextColumn Header="{t:Text SolarEclipseView.SarosTable.Type}" Binding="{Binding Type}"/>
+                            <DataGridTextColumn Header="{t:Text SolarEclipseView.SarosTable.Gamma}" Binding="{Binding Gamma}"/>
+                            <DataGridTextColumn Header="{t:Text SolarEclipseView.SarosTable.Magnitude}" Binding="{Binding Magnitude}"/>
                             <DataGridTemplateColumn>
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
@@ -671,8 +671,8 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="18" Padding="8 8 0 0" Text="Eclipse local circumstances" />
-                        <Button Margin="0 8 8 0" Padding="8 0" Grid.Column="1" HorizontalAlignment="Right" Content="Clear" Command="{Binding ClearLocationsTableCommand}" Visibility="{Binding IsCitiesListTableNotEmpty, Converter={s:BoolToVisibilityConverter}}" />
-                        <Button Margin="0 8 8 0" Padding="8 0" Grid.Column="2" HorizontalAlignment="Right" Content="Export..." Command="{Binding ExportLocationsTableCommand}" Visibility="{Binding IsCitiesListTableNotEmpty, Converter={s:BoolToVisibilityConverter}}" />
+                        <Button Margin="0 8 8 0" Padding="8 0" Grid.Column="1" HorizontalAlignment="Right" Content="{t:Text EclipseView.Clear}" Command="{Binding ClearLocationsTableCommand}" Visibility="{Binding IsCitiesListTableNotEmpty, Converter={s:BoolToVisibilityConverter}}" />
+                        <Button Margin="0 8 8 0" Padding="8 0" Grid.Column="2" HorizontalAlignment="Right" Content="{t:Text EclipseView.Export}" Command="{Binding ExportLocationsTableCommand}" Visibility="{Binding IsCitiesListTableNotEmpty, Converter={s:BoolToVisibilityConverter}}" />
                     </Grid>
                     
                     <!-- Import options view, displayed if no locations loaded -->
