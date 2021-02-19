@@ -373,18 +373,9 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             var file = ViewManager.ShowSaveFileDialog("Export", "CitiesList", ".csv", filter, out int selectedFilterIndex);
             if (file != null)
             {
-                LunarEclipseCitiesTableCsvWriter writer = null;
-                string ext = Path.GetExtension(file);
-                switch (ext)
-                {
-                    case ".csv":
-                        writer = new LunarEclipseCitiesTableCsvWriter(file, selectedFilterIndex == 2);
-                        break;
-                    default:
-                        break;
-                }
-
-                writer?.Write(CitiesListTable);
+                bool rawData = selectedFilterIndex == 2;
+                var writer = new LunarEclipseCitiesTableCsvWriter(rawData);
+                writer.Write(file, CitiesListTable);
 
                 var answer = ViewManager.ShowMessageBox("Информация", "Экспорт в файл успешно завершён. Окрыть файл?", System.Windows.MessageBoxButton.YesNo);
                 if (answer == System.Windows.MessageBoxResult.Yes)

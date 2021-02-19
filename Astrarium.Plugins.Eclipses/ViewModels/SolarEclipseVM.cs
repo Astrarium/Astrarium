@@ -5,10 +5,7 @@ using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Drawing;
-using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -138,9 +135,9 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             julianDay = eclipse.JulianDayMaximum;
             meeusLunationNumber = eclipse.MeeusLunationNumber;            
             elements = eclipsesCalculator.GetBesselianElements(eclipse.JulianDayMaximum);
-            string type = eclipse.EclipseType.ToString();
-            string subtype = eclipse.IsNonCentral ? " non-central" : "";
-            EclipseDescription = $"{type}{subtype} solar eclipse";
+            string type = Text.Get($"SolarEclipse.Type.{eclipse.EclipseType}");
+            string subtype = eclipse.IsNonCentral ? $" {Text.Get("SolarEclipse.Type.NoCentral")}" : "";
+            EclipseDescription = Text.Get("SolarEclipseView.EclipseDescription", ("type", type), ("subtype", subtype));
             EclipseDate = Formatters.Date.Format(new Date(eclipse.JulianDayMaximum, 0));
             PrevSarosEnabled = eclipsesCalculator.GetNearestSolarEclipse(meeusLunationNumber, next: false, saros: true).Saros == eclipse.Saros;
             NextSarosEnabled = eclipsesCalculator.GetNearestSolarEclipse(meeusLunationNumber, next: true, saros: true).Saros == eclipse.Saros;
@@ -268,13 +265,13 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
                 var eclipseGeneralDetails = new ObservableCollection<NameValueTableItem>()
                 {
-                    new NameValueTableItem("Type", $"{type}{subtype}"),
-                    new NameValueTableItem("Saros", $"{eclipse.Saros}"),
-                    new NameValueTableItem("Date", $"{EclipseDate}"),
-                    new NameValueTableItem("Magnitude", $"{eclipse.Magnitude.ToString("N5", nf)}"),
-                    new NameValueTableItem("Gamma", $"{eclipse.Gamma.ToString("N5", nf)}"),
-                    new NameValueTableItem("Maximal Duration", $"{Format.Time.Format(maxCirc.TotalDuration) }"),
-                    new NameValueTableItem("Brown Lunation Number", $"{lunation}"),
+                    new NameValueTableItem(Text.Get("SolarEclipseView.EclipseType"), $"{type}{subtype}"),
+                    new NameValueTableItem(Text.Get("SolarEclipseView.EclipseSaros"), $"{eclipse.Saros}"),
+                    new NameValueTableItem(Text.Get("SolarEclipseView.EclipseDate"), $"{EclipseDate}"),
+                    new NameValueTableItem(Text.Get("SolarEclipseView.EclipseMagnitude"), $"{eclipse.Magnitude.ToString("N5", nf)}"),
+                    new NameValueTableItem(Text.Get("SolarEclipseView.EclipseGamma"), $"{eclipse.Gamma.ToString("N5", nf)}"),
+                    new NameValueTableItem(Text.Get("SolarEclipseView.EclipseMaxDuration"), $"{Format.Time.Format(maxCirc.TotalDuration)}"),
+                    new NameValueTableItem(Text.Get("SolarEclipseView.BrownLunationNumber"), $"{lunation}"),
                     new NameValueTableItem("ΔT", $"{elements.DeltaT.ToString("N1", nf) } s")
                 };
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
@@ -286,29 +283,29 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
                 if (!double.IsNaN(map.P1.JulianDay))
                 {
-                    eclipseContacts.Add(new ContactsTableItem("P1: First external contact", map.P1.JulianDay, map.P1));
+                    eclipseContacts.Add(new ContactsTableItem(Text.Get("SolarEclipseView.EclipseContacts.P1"), map.P1.JulianDay, map.P1));
                 }
                 if (map.P2 != null)
                 {
-                    eclipseContacts.Add(new ContactsTableItem("P2: First internal contact", map.P2.JulianDay, map.P2));
+                    eclipseContacts.Add(new ContactsTableItem(Text.Get("SolarEclipseView.EclipseContacts.P2"), map.P2.JulianDay, map.P2));
                 }
                 if (map.U1 != null && !double.IsNaN(map.U1.JulianDay))
                 {
-                    eclipseContacts.Add(new ContactsTableItem("U1: First umbra contact", map.U1.JulianDay, map.U2));
+                    eclipseContacts.Add(new ContactsTableItem(Text.Get("SolarEclipseView.EclipseContacts.U1"), map.U1.JulianDay, map.U2));
                 }
-                eclipseContacts.Add(new ContactsTableItem("Max: Greatest Eclipse", map.Max.JulianDay, map.Max));
+                eclipseContacts.Add(new ContactsTableItem(Text.Get("SolarEclipseView.EclipseContacts.Max"), map.Max.JulianDay, map.Max));
                 if (map.U2 != null && !double.IsNaN(map.U2.JulianDay))
                 {
-                    eclipseContacts.Add(new ContactsTableItem("U2: Last umbra contact", map.U2.JulianDay, map.U2));
+                    eclipseContacts.Add(new ContactsTableItem(Text.Get("SolarEclipseView.EclipseContacts.U2"), map.U2.JulianDay, map.U2));
                 }
                 if (map.P3 != null)
                 {
-                    eclipseContacts.Add(new ContactsTableItem("P3: Last internal contact", map.P3.JulianDay, map.P3));
+                    eclipseContacts.Add(new ContactsTableItem(Text.Get("SolarEclipseView.EclipseContacts.P3"), map.P3.JulianDay, map.P3));
                 }
 
                 if (!double.IsNaN(map.P4.JulianDay))
                 {
-                    eclipseContacts.Add(new ContactsTableItem("P4: Last external contact", map.P4.JulianDay, map.P4));
+                    eclipseContacts.Add(new ContactsTableItem(Text.Get("SolarEclipseView.EclipseContacts.P4"), map.P4.JulianDay, map.P4));
                 }
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -327,8 +324,8 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
                 // Besselian elements table header
                 var beTableHeader = new StringBuilder();
-                beTableHeader.AppendLine($"Elements for t\u2080 = {Formatters.DateTime.Format(new Date(elements.JulianDay0))} TDT (JDE = { elements.JulianDay0.ToString("N6", nf)})");
-                beTableHeader.AppendLine($"The Besselian elements are valid over the period t\u2080 - 6h ≤ t\u2080 ≤ t\u2080 + 6h");
+                beTableHeader.AppendLine($"{Text.Get("SolarEclipseView.BesselianElements.HeaderTime")} t\u2080 = {Formatters.DateTime.Format(new Date(elements.JulianDay0))} TDT (JDE = { elements.JulianDay0.ToString("N6", nf)})");
+                beTableHeader.AppendLine(Text.Get("SolarEclipseView.BesselianElements.HeaderValid"));
                 BesselianElementsTableHeader = beTableHeader.ToString();
 
                 // Besselian elements table footer
@@ -550,20 +547,10 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             var file = ViewManager.ShowSaveFileDialog("Export", "CitiesList", ".csv", filter, out int selectedFilterIndex);
             if (file != null)
             {
-                SolarEclipseCitiesTableCsvWriter writer = null;
-                string ext = Path.GetExtension(file);
-                switch (ext)
-                {
-                    case ".csv":
-                        writer = new SolarEclipseCitiesTableCsvWriter(file, selectedFilterIndex == 2);
-                        break;
-                    default:
-                        break;
-                }
+                bool rawData = selectedFilterIndex == 2;
+                var writer = new SolarEclipseCitiesTableCsvWriter(rawData);
+                writer.Write(file, CitiesListTable);
 
-                writer?.Write(CitiesListTable);
-
-                //ViewManager.ShowMessageBox("$SolarEclipseWindow.ExportDoneTitle", "$SolarEclipseWindow.ExportDoneText", MessageBoxButton.OK);
                 var answer = ViewManager.ShowMessageBox("Информация", "Экспорт в файл успешно завершён. Окрыть файл?", System.Windows.MessageBoxButton.YesNo);
                 if (answer == System.Windows.MessageBoxResult.Yes)
                 {

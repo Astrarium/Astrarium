@@ -5,17 +5,31 @@ using System.Globalization;
 
 namespace Astrarium.Plugins.Eclipses.ImportExport
 {
+    /// <summary>
+    /// CSV writer for list of local circumstances of lunar eclipses.
+    /// </summary>
     public class LunarEclipseCitiesTableCsvWriter : CsvWriterBase<LunarEclipseCitiesListTableItem>
     {
+        /// <summary>
+        /// Flag indicating raw (unformatted) data should be serialized.
+        /// </summary>
         private bool isRawData;
-        private CultureInfo ci = CultureInfo.InvariantCulture;
-        private string DurToString(double? dur) => dur != null ? (dur.Value * 24).ToString(ci) : "";
 
-        public LunarEclipseCitiesTableCsvWriter(string file, bool isRawData) : base(file)
+        /// <summary>
+        /// Invariant culture used for serialization.
+        /// </summary>
+        private CultureInfo ci = CultureInfo.InvariantCulture;
+
+        /// <summary>
+        /// Creates new instance of the writer.
+        /// </summary>
+        /// <param name="isRawData">Flag indicating raw (unformatted) data should be serialized.</param>
+        public LunarEclipseCitiesTableCsvWriter(bool isRawData)
         {
             this.isRawData = isRawData;
         }
 
+        /// <inheritdoc/>
         protected override Dictionary<string, Func<LunarEclipseCitiesListTableItem, string>> Columns => 
             new Dictionary<string, Func<LunarEclipseCitiesListTableItem, string>>
             {

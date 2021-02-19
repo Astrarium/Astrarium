@@ -11,8 +11,6 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 
@@ -543,18 +541,8 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             var file = ViewManager.ShowSaveFileDialog("Export", $"SarosSeries{currentSarosSeries}", ".csv", filter, out int selectedFilterIndex);
             if (file != null)
             {
-                SarosSeriesTableCsvWriter writer = null;
-                string ext = Path.GetExtension(file);
-                switch (ext)
-                {
-                    case ".csv":
-                        writer = new SarosSeriesTableCsvWriter(file, selectedFilterIndex == 2);
-                        break;
-                    default:
-                        break;
-                }
-
-                writer?.Write(SarosSeriesTable);
+                SarosSeriesTableCsvWriter writer = new SarosSeriesTableCsvWriter(selectedFilterIndex == 2);
+                writer.Write(file, SarosSeriesTable);
 
                 var answer = ViewManager.ShowMessageBox("Информация", "Экспорт в файл успешно завершён. Окрыть файл?", System.Windows.MessageBoxButton.YesNo);
                 if (answer == System.Windows.MessageBoxResult.Yes)

@@ -5,17 +5,38 @@ using System.Globalization;
 
 namespace Astrarium.Plugins.Eclipses.ImportExport
 {
+    /// <summary>
+    /// CSV writer for list of local circumstances of solar eclipses.
+    /// </summary>
     public class SolarEclipseCitiesTableCsvWriter : CsvWriterBase<SolarEclipseCitiesListTableItem>
     {
+        /// <summary>
+        /// Flag indicating raw (unformatted) data should be serialized.
+        /// </summary>
         private bool isRawData;
+
+        /// <summary>
+        /// Invariant culture used for serialization.
+        /// </summary>
         private CultureInfo ci = CultureInfo.InvariantCulture;
+        
+        /// <summary>
+        /// Converter to serialize duration to string.
+        /// </summary>
+        /// <param name="dur">Duration of an event, in fractions of day.</param>
+        /// <returns></returns>
         private string DurToString(double? dur) => dur != null ? (dur.Value * 24).ToString(ci) : "";
 
-        public SolarEclipseCitiesTableCsvWriter(string file, bool isRawData) : base(file)
+        /// <summary>
+        /// Creates new instance of the writer.
+        /// </summary>
+        /// <param name="isRawData">Flag indicating raw (unformatted) data should be serialized.</param>
+        public SolarEclipseCitiesTableCsvWriter(bool isRawData)
         {
             this.isRawData = isRawData;
         }
 
+        /// <inheritdoc/>
         protected override Dictionary<string, Func<SolarEclipseCitiesListTableItem, string>> Columns => 
             new Dictionary<string, Func<SolarEclipseCitiesListTableItem, string>>
             {
