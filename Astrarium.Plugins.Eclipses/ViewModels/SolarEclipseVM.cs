@@ -1,4 +1,5 @@
 ﻿using Astrarium.Algorithms;
+using Astrarium.Plugins.Eclipses.ImportExport;
 using Astrarium.Plugins.Eclipses.Types;
 using Astrarium.Types;
 using System;
@@ -25,17 +26,29 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         /// <summary>
         /// Table of local contacts instants, displayed to the right of eclipse map
         /// </summary>
-        public ObservableCollection<SolarEclipseLocalContactsTableItem> LocalContactsTable { get; private set; } = new ObservableCollection<SolarEclipseLocalContactsTableItem>();
+        public ObservableCollection<SolarEclipseLocalContactsTableItem> LocalContactsTable
+        {
+            get => GetValue(nameof(LocalContactsTable), new ObservableCollection<SolarEclipseLocalContactsTableItem>(Enumerable.Repeat(new SolarEclipseLocalContactsTableItem(null, null), 5)));
+            private set => SetValue(nameof(LocalContactsTable), value);
+        }
 
         /// <summary>
         /// Table of local circumstances, displayed to the right of eclipse map
         /// </summary>
-        public ObservableCollection<NameValueTableItem> LocalCircumstancesTable { get; private set; } = new ObservableCollection<NameValueTableItem>();
+        public ObservableCollection<NameValueTableItem> LocalCircumstancesTable
+        {
+            get => GetValue(nameof(LocalCircumstancesTable), new ObservableCollection<NameValueTableItem>(Enumerable.Repeat(new NameValueTableItem(null, null), 5)));
+            private set => SetValue(nameof(LocalCircumstancesTable), value);
+        }
 
         /// <summary>
         /// Table of local circumstances for selected cities
         /// </summary>
-        public ObservableCollection<SolarEclipseCitiesListTableItem> CitiesListTable { get; private set; } = new ObservableCollection<SolarEclipseCitiesListTableItem>();
+        public ObservableCollection<SolarEclipseCitiesListTableItem> CitiesListTable
+        {
+            get => GetValue(nameof(CitiesListTable), new ObservableCollection<SolarEclipseCitiesListTableItem>());
+            private set => SetValue(nameof(CitiesListTable), value);
+        }
 
         /// <summary>
         /// Local circumstance of the eclipse
@@ -49,7 +62,11 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         /// <summary>
         /// Besselian elements table
         /// </summary>
-        public ObservableCollection<BesselianElementsTableItem> BesselianElementsTable { get; private set; } = new ObservableCollection<BesselianElementsTableItem>();
+        public ObservableCollection<BesselianElementsTableItem> BesselianElementsTable
+        {
+            get => GetValue(nameof(BesselianElementsTable), new ObservableCollection<BesselianElementsTableItem>());
+            private set => SetValue(nameof(BesselianElementsTable), value);
+        }
 
         public ICommand FindLocationsOnTotalPathCommand => new Command(FindLocationsOnTotalPath);
         public ICommand ClearLocationsTableCommand => new Command(ClearLocationsTable);
@@ -59,8 +76,8 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         private SolarEclipseMap map;
         private PolynomialBesselianElements elements;
         private SolarEclipse eclipse;
-        private static NumberFormatInfo nf;
-       
+        private int citiesListTableLunationNumber;
+
         #region Map styles
 
         private readonly MarkerStyle riseSetMarkerStyle = new MarkerStyle(5, Brushes.Red, null, Brushes.Red, SystemFonts.DefaultFont, StringFormat.GenericDefault);
@@ -74,31 +91,12 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         
         #endregion Map styles
 
-        static SolarEclipseVM()
-        {
-            nf = new NumberFormatInfo();
-            nf.NumberDecimalSeparator = ".";
-            nf.NumberGroupSeparator = "\u2009";            
-        }
-
-        public SolarEclipseVM(IEclipsesCalculator eclipsesCalculator, IGeoLocationsManager locationsManager, CsvLocationsReader locationsReader, ISky sky, ISettings settings) : base(locationsManager, settings)
-        {
-            this.eclipsesCalculator = eclipsesCalculator;
-            this.locationsReader = locationsReader;
-            this.settings.PropertyChanged += Settings_PropertyChanged;
-            
-            SetMapColors();
-
-            for (int i = 0; i < 5; i++) 
-            {
-                LocalContactsTable.Add(new SolarEclipseLocalContactsTableItem(null, null));
-                LocalCircumstancesTable.Add(new NameValueTableItem(null, null));
-            }
-
-            meeusLunationNumber = LunarEphem.Lunation(sky.Context.JulianDay, LunationSystem.Meeus);
-
-            CalculateEclipse(next: true, saros: false);
-        }
+        public SolarEclipseVM(
+            ISky sky,
+            IEclipsesCalculator eclipsesCalculator,
+            IGeoLocationsManager locationsManager,
+            ISettings settings)
+            : base(sky, eclipsesCalculator, locationsManager, settings) { }
 
         public override void Dispose()
         {
@@ -117,17 +115,6 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             GC.Collect();
         }
 
-        private void Settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == "Schema")
-            {
-                IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red; 
-                TileImageAttributes = GetImageAttributes();
-                SetMapColors();
-                // TODO: need to recalculate eclipse
-            }
-        }
-
         protected override void AddToCitiesList(CrdsGeographical location)
         {
             var local = eclipsesCalculator.FindLocalCircumstancesForCities(elements, new[] { location }).First();
@@ -135,13 +122,12 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             IsCitiesListTableNotEmpty = true;
         }
 
-        private void SetMapColors()
+        protected override void SetMapColors()
         {
+            base.SetMapColors();
             penumbraLimitTrackStyle.Pen = IsDarkMode ? new Pen(Color.DarkRed, 2) : new Pen(Color.Orange, 2);
             umbraLimitTrackStyle.Pen = IsDarkMode ? new Pen(Color.DarkRed, 2) : new Pen(Color.Gray, 2);
-            umbraPolygonStyle.Brush = IsDarkMode ? new SolidBrush(Color.FromArgb(50, Color.DarkRed)) : new SolidBrush(Color.FromArgb(100, Color.Gray));
-            MapThumbnailBackColor = IsDarkMode ? Color.FromArgb(0xFF, 0x33, 0, 0) : Color.FromArgb(0xFF, 0x33, 0x33, 0x33);
-            MapThumbnailForeColor = IsDarkMode ? Color.FromArgb(0xFF, 0x59, 0, 0) : Color.FromArgb(0xFF, 0x59, 0x59, 0x59);
+            umbraPolygonStyle.Brush = IsDarkMode ? new SolidBrush(Color.FromArgb(50, Color.DarkRed)) : new SolidBrush(Color.FromArgb(100, Color.Gray));            
         }
 
         protected override async void CalculateEclipse(bool next, bool saros)
@@ -360,11 +346,6 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 CalculateSarosSeries();
                 CalculateLocalCircumstances(observerLocation);
                 CalculateCitiesTable();
-                NotifyPropertyChanged(
-                    nameof(EclipseGeneralDetails),
-                    nameof(EclipseContacts),
-                    nameof(BesselianElementsTable)
-                );
             });
         }
 
@@ -472,25 +453,23 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 });
 
                 IsCalculating = false;
-                NotifyPropertyChanged(
-                    nameof(SarosSeriesTable)
-                );
             });
         }
 
-        private async void CalculateCitiesTable()
+        protected override async void CalculateCitiesTable()
         {
-            if (CitiesListTable.Any())
+            if (SelectedTabIndex != 3 ||
+                citiesListTableLunationNumber == meeusLunationNumber ||
+                !CitiesListTable.Any()) return;
+
+            var cities = CitiesListTable.Select(l => l.Location).ToArray();
+            var locals = await Task.Run(() => eclipsesCalculator.FindLocalCircumstancesForCities(elements, cities));
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
-                var cities = CitiesListTable.Select(l => l.Location).ToArray();
-                var locals = await Task.Run(() => eclipsesCalculator.FindLocalCircumstancesForCities(elements, cities));
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                {
-                    CitiesListTable.Clear();
-                    CitiesListTable = new ObservableCollection<SolarEclipseCitiesListTableItem>(locals.Select(c => new SolarEclipseCitiesListTableItem(c, eclipsesCalculator.GetLocalVisibilityString(eclipse, c))));
-                });
-                NotifyPropertyChanged(nameof(CitiesListTable));
-            }
+                CitiesListTable.Clear();
+                CitiesListTable = new ObservableCollection<SolarEclipseCitiesListTableItem>(locals.Select(c => new SolarEclipseCitiesListTableItem(c, eclipsesCalculator.GetLocalVisibilityString(eclipse, c))));
+                citiesListTableLunationNumber = meeusLunationNumber;
+            });
         }
 
         private void LoadLocationsFromFile()
@@ -514,7 +493,6 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 {
                     CitiesListTable.Clear();
                     IsCitiesListTableNotEmpty = false;
-                    NotifyPropertyChanged(nameof(CitiesListTable));
                 });
             }
         }
@@ -533,7 +511,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                     if (file != null)
                     {
                         ViewManager.ShowProgress("Please wait", "Calculating circumstances for locations...", tokenSource);
-                        var cities = locationsReader.ReadFromFile(file);
+                        var cities = new CsvLocationsReader().ReadFromFile(file);
                         locals = await Task.Run(() => eclipsesCalculator.FindLocalCircumstancesForCities(elements, cities, tokenSource.Token, null));
                     }
                 }
@@ -559,8 +537,6 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                     IsCitiesListTableNotEmpty = CitiesListTable.Any();
                 });
             }
-
-            NotifyPropertyChanged(nameof(CitiesListTable));
         }
 
         private void ExportLocationsTable()
@@ -574,12 +550,12 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             var file = ViewManager.ShowSaveFileDialog("Export", "CitiesList", ".csv", filter, out int selectedFilterIndex);
             if (file != null)
             {
-                CitiesTableCsvWriter writer = null;
+                SolarEclipseCitiesTableCsvWriter writer = null;
                 string ext = Path.GetExtension(file);
                 switch (ext)
                 {
                     case ".csv":
-                        writer = new CitiesTableCsvWriter(file, selectedFilterIndex == 2);
+                        writer = new SolarEclipseCitiesTableCsvWriter(file, selectedFilterIndex == 2);
                         break;
                     default:
                         break;

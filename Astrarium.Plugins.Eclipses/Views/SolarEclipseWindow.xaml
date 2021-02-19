@@ -658,7 +658,6 @@
                     </DataGrid>
                 </Grid>
 
-
             </TabItem>
             <TabItem Header="Local Circumstances">
 
@@ -729,7 +728,7 @@
                         RowHeight="24"
                         ItemsSource="{Binding CitiesListTable}">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="Location" CanUserSort="True" SortMemberPath="{Binding LocationName}">
+                            <DataGridTemplateColumn Header="Location" CanUserSort="True" SortMemberPath="LocationName">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
                                         <Setter Property="ToolTip" Value="Name of the location" />

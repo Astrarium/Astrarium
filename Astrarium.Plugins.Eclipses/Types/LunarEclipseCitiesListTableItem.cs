@@ -19,8 +19,26 @@ namespace Astrarium.Plugins.Eclipses.Types
         public CrdsGeographical Coordinates { get; private set; }
         public string CoordinatesString { get; private set; }
 
-        public string MaxMagString { get; private set; }
-        public double MaxMag { get; private set; }
+        public string P1String { get; private set; }
+        public double? P1 { get; private set; }
+
+        public string U1String { get; private set; }
+        public double? U1 { get; private set; }
+
+        public string U2String { get; private set; }
+        public double? U2 { get; private set; }
+
+        public string MaxString { get; private set; }
+        public double? Max { get; private set; }
+
+        public string U3String { get; private set; }
+        public double? U3 { get; private set; }
+
+        public string U4String { get; private set; }
+        public double? U4 { get; private set; }
+
+        public string P4String { get; private set; }
+        public double? P4 { get; private set; }
 
         public string Visibility { get; private set; }
 
@@ -39,6 +57,27 @@ namespace Astrarium.Plugins.Eclipses.Types
 
             TimeZone = offset;
             TimeZoneString = tz;
+
+            P1 = local.PenumbralBegin?.JulianDay;
+            P1String = local.PenumbralBegin != null ? $"{Format.Time.Format(new Date(local.PenumbralBegin.JulianDay, offset))}" : empty;
+
+            U1 = local.PartialBegin?.JulianDay;
+            U1String = local.PartialBegin != null ? $"{Format.Time.Format(new Date(local.PartialBegin.JulianDay, offset))}" : empty;
+
+            U2 = local.TotalBegin?.JulianDay;
+            U2String = local.TotalBegin != null ? $"{Format.Time.Format(new Date(local.TotalBegin.JulianDay, offset))}" : empty;
+
+            Max = local.Maximum?.JulianDay;
+            MaxString = local.Maximum != null ? $"{Format.Time.Format(new Date(local.Maximum.JulianDay, offset))}" : empty;
+
+            U3 = local.TotalEnd?.JulianDay;
+            U3String = local.TotalEnd != null ? $"{Format.Time.Format(new Date(local.TotalEnd.JulianDay, offset))}" : empty;
+
+            U4 = local.PartialEnd?.JulianDay;
+            U4String = local.PartialEnd != null ? $"{Format.Time.Format(new Date(local.PartialEnd.JulianDay, offset))}" : empty;
+
+            P4 = local.PenumbralEnd?.JulianDay;
+            P4String = local.PenumbralEnd != null ? $"{Format.Time.Format(new Date(local.PenumbralEnd.JulianDay, offset))}" : empty;
 
             Visibility = visibility;
         }

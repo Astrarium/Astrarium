@@ -82,7 +82,6 @@ namespace Astrarium.Plugins.Eclipses.Types
             ShadowWidthString = local.PathWidth > 0 ? Format.PathWidth.Format(local.PathWidth) : empty;
             ShadowWidth = local.PathWidth;
 
-
             C1TimeString = local.PartialBegin != null ? $"{Format.Time.Format(new Date(local.PartialBegin.JulianDay, offset))}" : empty;
             C1Time = local.PartialBegin?.JulianDay;
 

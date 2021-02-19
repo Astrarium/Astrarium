@@ -1,13 +1,8 @@
 ﻿using Astrarium.Algorithms;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms.Integration;
 using System.Windows.Media;
 
 namespace Astrarium.Plugins.Eclipses.Controls
@@ -115,8 +110,11 @@ namespace Astrarium.Plugins.Eclipses.Controls
 
         private Typeface font = new Typeface(new FontFamily("#Noto Sans"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
 
-        private Brush[] foregroundBrush = new Brush[] { Brushes.Gray, Brushes.DarkRed };
+        private Brush[] foregroundBrush = new Brush[] { Brushes.Gray, Brushes.Red };
         private Brush ForegroundBrush => foregroundBrush[DarkMode ? 1 : 0];
+
+        private Brush[] linesBrush = new Brush[] { Brushes.DimGray, Brushes.DarkRed };
+        private Brush LinesBrush => linesBrush[DarkMode ? 1 : 0];
 
         private Brush[] moonBrush = new Brush[] { Brushes.Blue, Brushes.DarkRed };
         private Brush MoonBrush => moonBrush[DarkMode ? 1 : 0];
@@ -130,7 +128,7 @@ namespace Astrarium.Plugins.Eclipses.Controls
         protected override void OnRender(DrawingContext ctx)
         {
             var pSun = new Point(ActualWidth / 2, ActualHeight / 2);
-            
+
             if (Circumstances != null && !Circumstances.IsInvisible)
             {
                 double solarRadius = ZoomLevel * Math.Min(ActualWidth, ActualHeight) / 6;
@@ -139,7 +137,7 @@ namespace Astrarium.Plugins.Eclipses.Controls
                 var bounds = new Rect(0, 0, ActualWidth, ActualHeight);
                 ctx.PushClip(new RectangleGeometry(bounds));
                 ctx.DrawEllipse(SunBrush, null, pSun, solarRadius, solarRadius);
-               
+
                 Point pC1;
                 {
                     double dist = solarRadius + lunarRadius;
@@ -177,13 +175,13 @@ namespace Astrarium.Plugins.Eclipses.Controls
 
                 if (ShowContactCircles)
                 {
-                    ctx.DrawEllipse(null, new Pen(ForegroundBrush, 1), pC1, lunarRadius, lunarRadius);
+                    ctx.DrawEllipse(null, new Pen(LinesBrush, 1), pC1, lunarRadius, lunarRadius);
                     //if (Circumstances.TotalBegin != null)
-                    //    ctx.DrawEllipse(null, new Pen(ForegroundBrush, 1), pC2, lunarRadius, lunarRadius);
-                    ctx.DrawEllipse(null, new Pen(ForegroundBrush, 1), pMax, lunarRadius, lunarRadius);
+                    //    ctx.DrawEllipse(null, new Pen(LinesBrush, 1), pC2, lunarRadius, lunarRadius);
+                    ctx.DrawEllipse(null, new Pen(LinesBrush, 1), pMax, lunarRadius, lunarRadius);
                     //if (Circumstances.TotalEnd != null)
-                    //    ctx.DrawEllipse(null, new Pen(ForegroundBrush, 1), pC3, lunarRadius, lunarRadius);
-                    ctx.DrawEllipse(null, new Pen(ForegroundBrush, 1), pC4, lunarRadius, lunarRadius);
+                    //    ctx.DrawEllipse(null, new Pen(LinesBrush, 1), pC3, lunarRadius, lunarRadius);
+                    ctx.DrawEllipse(null, new Pen(LinesBrush, 1), pC4, lunarRadius, lunarRadius);
                 }
 
                 {
@@ -249,7 +247,7 @@ namespace Astrarium.Plugins.Eclipses.Controls
                     {
                         if (ShowContactCircles || contact == SolarEclipseChartContact.C1)
                             DrawText(ctx, "C1", pC1, 10);
-    
+
                         if (ShowContactCircles || contact == SolarEclipseChartContact.Max)
                             DrawText(ctx, "Max", pMax, 10);
 
@@ -270,7 +268,7 @@ namespace Astrarium.Plugins.Eclipses.Controls
                     // i=2,3 is a line 20 degrees below horizon
                     // 0.25 is a mean solar radius in degrees (more accurate value is not needed)
                     for (int i = 0; i < 2; i++)
-                    {                        
+                    {
                         double d = (alt + (i == 0 ? 0 : 20)) / 0.25 * solarRadius;
                         double ang = Angle.ToRadians(q);
                         double dx = d * Math.Sin(ang);
@@ -308,7 +306,7 @@ namespace Astrarium.Plugins.Eclipses.Controls
 
         private double GetOrientationAngle(SolarEclipseLocalCircumstancesContactPoint point)
         {
-            return point != null ? 
+            return point != null ?
                 (Orientation == SolarEclipseChartOrientation.Equatorial ? point.PAngle : point.ZAngle) : 0;
         }
 

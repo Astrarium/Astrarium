@@ -572,7 +572,7 @@
             <TabItem Header="Saros Series">
 
                 <Grid>
-                    
+
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
@@ -633,7 +633,6 @@
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
-
 
             </TabItem>
             <TabItem Header="Local Circumstances">
@@ -699,7 +698,7 @@
                         RowHeight="24"
                         ItemsSource="{Binding CitiesListTable}">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="Location" CanUserSort="True" SortMemberPath="{Binding LocationName}">
+                            <DataGridTemplateColumn Header="Location" CanUserSort="True" SortMemberPath="LocationName">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
                                         <Setter Property="ToolTip" Value="Name of the location" />
@@ -715,28 +714,57 @@
                             </DataGridTemplateColumn>
                             <DataGridTextColumn Header="Coordinates" Binding="{Binding CoordinatesString}" CanUserSort="False" />
                             <DataGridTextColumn Header="Time Zone" Binding="{Binding TimeZoneString}" SortMemberPath="TimeZone" CanUserSort="True" />
-                            <DataGridTextColumn Header="Max Mag" Binding="{Binding MaxMagString}" SortMemberPath="MaxMag" CanUserSort="True">
+
+                            <DataGridTextColumn Header="P1" Binding="{Binding P1String}">
                                 <DataGridTextColumn.HeaderStyle>
                                     <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
-                                        <Setter Property="ToolTip" Value="Maximal magnitude" />
+                                        <Setter Property="ToolTip" Value="P1: Penumbral begins" />
                                     </Style>
                                 </DataGridTextColumn.HeaderStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="Moon/Sun" Binding="{Binding MoonSunRatioString}" SortMemberPath="MoonSunRatio" CanUserSort="True">
+                            <DataGridTextColumn Header="U1" Binding="{Binding U1String}">
                                 <DataGridTextColumn.HeaderStyle>
                                     <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
-                                        <Setter Property="ToolTip" Value="Moon/Sun visible diameter ratio" />
+                                        <Setter Property="ToolTip" Value="U1: Partial begins" />
                                     </Style>
                                 </DataGridTextColumn.HeaderStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="Partial Dur" Binding="{Binding PartialDurString}" SortMemberPath="PartialDur" CanUserSort="True" />
-                            <DataGridTextColumn Header="Total Dur" Binding="{Binding TotalDurString}" SortMemberPath="TotalDur" CanUserSort="True" />
-                            <DataGridTextColumn Header="Shadow" Binding="{Binding ShadowWidthString}" SortMemberPath="ShadowWidth" CanUserSort="True" />
-                            <DataGridTextColumn Header="Partial Begin" Binding="{Binding C1TimeString}" SortMemberPath="C1Time" CanUserSort="True" />
-                            <DataGridTextColumn Header="Total Begin" Binding="{Binding C2TimeString}" SortMemberPath="C2Time" CanUserSort="True" />
-                            <DataGridTextColumn Header="Max" Binding="{Binding MaxTimeString}" SortMemberPath="MaxTime" CanUserSort="True" />
-                            <DataGridTextColumn Header="Total End" Binding="{Binding C3TimeString}" SortMemberPath="C3Time" CanUserSort="True" />
-                            <DataGridTextColumn Header="Partial End" Binding="{Binding C4TimeString}" SortMemberPath="C4Time" CanUserSort="True" />
+                            <DataGridTextColumn Header="U2" Binding="{Binding U2String}">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                        <Setter Property="ToolTip" Value="U2: Total begins" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Max" Binding="{Binding MaxString}">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                        <Setter Property="ToolTip" Value="Max: Greatest eclipse" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="U3" Binding="{Binding U3String}">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                        <Setter Property="ToolTip" Value="U3: Total ends" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="U4" Binding="{Binding U4String}">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                        <Setter Property="ToolTip" Value="U4: Partial begins" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="P4" Binding="{Binding P4String}">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                        <Setter Property="ToolTip" Value="P4: Penumbral ends" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+
                             <DataGridTextColumn Header="Visibility" Binding="{Binding Visibility}" CanUserSort="False" />
                         </DataGrid.Columns>
                     </DataGrid>

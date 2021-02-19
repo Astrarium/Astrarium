@@ -10,7 +10,6 @@
         Width="600" Height="600"
         MinWidth="300" MinHeight="300"
         Style="{StaticResource {x:Type Window}}"
-        ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner">
     <Grid Margin="4">
         <Grid.RowDefinitions>

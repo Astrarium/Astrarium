@@ -74,9 +74,11 @@ namespace Astrarium
 
                 if (window.GetType() != typeof(MainWindow))
                 {
-                    if (Application.Current.MainWindow != window)
+                    if (isDialog)
                     {
-                        window.Owner = Application.Current.MainWindow;
+                        var owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive && !(w is ProgressWindow) && !(w is MessageBoxWindow));
+                        window.Owner = owner ?? Application.Current.MainWindow;
+                        window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                     }
                 }
                 else
@@ -205,7 +207,7 @@ namespace Astrarium
         public MessageBoxResult ShowMessageBox(string caption, string text, MessageBoxButton buttons)
         {
             var dialog = typeFactory(typeof(MessageBoxWindow)) as MessageBoxWindow;
-            dialog.Owner = null;// Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
+            dialog.Owner = null;
             dialog.Topmost = true;
             dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             dialog.Title = caption.StartsWith("$") ? Text.Get(caption.Substring(1)) : caption;

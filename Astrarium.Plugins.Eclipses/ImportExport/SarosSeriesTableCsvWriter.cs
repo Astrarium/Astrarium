@@ -1,14 +1,11 @@
-﻿using Astrarium.Types;
+﻿using Astrarium.Plugins.Eclipses.Types;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Astrarium.Plugins.Eclipses.ViewModels.SolarEclipseVM;
 
-namespace Astrarium.Plugins.Eclipses.Types
+namespace Astrarium.Plugins.Eclipses.ImportExport
 {
     public class SarosSeriesTableCsvWriter
     {

@@ -1,11 +1,14 @@
 ﻿using Astrarium.Algorithms;
+using Astrarium.Plugins.Eclipses.ImportExport;
 using Astrarium.Plugins.Eclipses.Types;
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -22,11 +25,12 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
     {
         #region Fields
 
+        protected static NumberFormatInfo nf;
+
         protected double julianDay;
         protected int meeusLunationNumber;
         protected int currentSarosSeries;
         protected CrdsGeographical observerLocation;
-        protected CsvLocationsReader locationsReader;
         protected IGeoLocationsManager locationsManager;
         protected IEclipsesCalculator eclipsesCalculator;
         protected ISettings settings;
@@ -61,6 +65,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             {
                 SetValue(nameof(SelectedTabIndex), value);
                 CalculateSarosSeries();
+                CalculateCitiesTable();
             }
         }
 
@@ -172,17 +177,29 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         /// <summary>
         /// General eclipse info table
         /// </summary>
-        public ObservableCollection<NameValueTableItem> EclipseGeneralDetails { get; protected set; } = new ObservableCollection<NameValueTableItem>();
+        public ObservableCollection<NameValueTableItem> EclipseGeneralDetails 
+        {
+            get => GetValue(nameof(EclipseGeneralDetails), new ObservableCollection<NameValueTableItem>());
+            protected set => SetValue(nameof(EclipseGeneralDetails), value);
+        }
 
         /// <summary>
         /// Eclipse contacts info table
         /// </summary>
-        public ObservableCollection<ContactsTableItem> EclipseContacts { get; protected set; } = new ObservableCollection<ContactsTableItem>();
+        public ObservableCollection<ContactsTableItem> EclipseContacts 
+        {
+            get => GetValue(nameof(EclipseContacts), new ObservableCollection<ContactsTableItem>());
+            protected set => SetValue(nameof(EclipseContacts), value);
+        } 
 
         /// <summary>
         /// Saros series table
         /// </summary>
-        public ObservableCollection<SarosSeriesTableItem> SarosSeriesTable { get; protected set; } = new ObservableCollection<SarosSeriesTableItem>();
+        public ObservableCollection<SarosSeriesTableItem> SarosSeriesTable
+        {
+            get => GetValue(nameof(SarosSeriesTable), new ObservableCollection<SarosSeriesTableItem>());
+            protected set => SetValue(nameof(SarosSeriesTable), value);
+        }
 
         public ICommand ChangeDateCommand => new Command(ChangeDate);
         public ICommand PrevEclipseCommand => new Command(PrevEclipse);
@@ -201,13 +218,23 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         public ICommand ChartZoomInCommand => new Command(ChartZoomIn);
         public ICommand ChartZoomOutCommand => new Command(ChartZoomOut);
 
-        protected EclipseVM(IGeoLocationsManager locationsManager, ISettings settings)
+        static EclipseVM()
+        {
+            nf = new NumberFormatInfo();
+            nf.NumberDecimalSeparator = ".";
+            nf.NumberGroupSeparator = "\u2009";
+        }
+
+        protected EclipseVM(ISky sky, IEclipsesCalculator eclipsesCalculator, IGeoLocationsManager locationsManager, ISettings settings)
         {
             this.settings = settings;
+            this.settings.PropertyChanged += Settings_PropertyChanged;
             this.observerLocation = settings.Get<CrdsGeographical>("ObserverLocation");
             this.locationsManager = locationsManager;
-
+            this.eclipsesCalculator = eclipsesCalculator;
             this.locationsManager.Load();
+
+            SetMapColors();
 
             ChartZoomLevel = 1;
             SettingsLocationName = $"Local visibility ({observerLocation.LocationName})";
@@ -226,6 +253,20 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             TileServer = tileServer ?? TileServers.First();
 
             IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
+
+            meeusLunationNumber = LunarEphem.Lunation(sky.Context.JulianDay, LunationSystem.Meeus);
+
+            CalculateEclipse(next: true, saros: false);
+        }
+
+        private void Settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "Schema")
+            {
+                IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
+                TileImageAttributes = GetImageAttributes();
+                SetMapColors();
+            }
         }
 
         /// <summary>
@@ -587,8 +628,15 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             return new CrdsGeographical(-p.Longitude, p.Latitude);
         }
 
+        protected virtual void SetMapColors()
+        {
+            MapThumbnailBackColor = IsDarkMode ? Color.FromArgb(0xFF, 0x33, 0, 0) : Color.FromArgb(0xFF, 0x33, 0x33, 0x33);
+            MapThumbnailForeColor = IsDarkMode ? Color.FromArgb(0xFF, 0x59, 0, 0) : Color.FromArgb(0xFF, 0x59, 0x59, 0x59);
+        }
+
         protected abstract void CalculateEclipse(bool next, bool saros);
         protected abstract void CalculateSarosSeries();
+        protected abstract void CalculateCitiesTable();
         protected abstract void CalculateLocalCircumstances(CrdsGeographical g);
         protected abstract void AddToCitiesList(CrdsGeographical location);
     }

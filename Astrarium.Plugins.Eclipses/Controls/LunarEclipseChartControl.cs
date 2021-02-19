@@ -98,8 +98,20 @@ namespace Astrarium.Plugins.Eclipses.Controls
 
         private Typeface font = new Typeface(new FontFamily("#Noto Sans"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
 
-        private Brush[] foregroundBrush = new Brush[] { Brushes.Gray, Brushes.DarkRed };
+        private Brush[] foregroundBrush = new Brush[] { Brushes.Gray, Brushes.Red };
         private Brush ForegroundBrush => foregroundBrush[DarkMode ? 1 : 0];
+
+        private Brush[] linesBrush = new Brush[] { Brushes.DimGray, Brushes.DarkRed };
+        private Brush LinesBrush => linesBrush[DarkMode ? 1 : 0];
+
+        private Brush[] moonBrush = new Brush[] { Brushes.Gray, Brushes.DarkRed };
+        private Brush MoonBrush => moonBrush[DarkMode ? 1 : 0];
+
+        private Brush[] eclipsedMoonBrush = new Brush[] { Brushes.Brown, Brushes.Red };
+        private Brush EclipsedMoonBrush => eclipsedMoonBrush[DarkMode ? 1 : 0];
+
+        private Brush[] horizonBrush = new Brush[] { Brushes.Green, Brushes.DarkRed };
+        private Brush HorizonBrush => horizonBrush[DarkMode ? 1 : 0];
 
         protected override void OnRender(DrawingContext ctx)
         {
@@ -177,44 +189,44 @@ namespace Astrarium.Plugins.Eclipses.Controls
                 Point pP4 = ContactPoint(Circumstances.PenumbralEnd, 3);
 
                 // Penumbra
-                ctx.DrawEllipse(null, new Pen(Brushes.DimGray, 1), pCenter, penumbraRadius, penumbraRadius);
+                ctx.DrawEllipse(null, new Pen(LinesBrush, 1), pCenter, penumbraRadius, penumbraRadius);
 
                 // Umbra
                 var umbraEllipse = new EllipseGeometry(pCenter, umbraRadius, umbraRadius);
-                ctx.DrawGeometry(null, new Pen(Brushes.DimGray, 1), umbraEllipse);
+                ctx.DrawGeometry(null, new Pen(LinesBrush, 1), umbraEllipse);
 
                 // Contact circles
                 if (ShowContactCircles)
                 {
-                    ctx.DrawEllipse(null, new Pen(Brushes.DimGray, 1), pP1, moonRadius, moonRadius);
+                    ctx.DrawEllipse(null, new Pen(LinesBrush, 1), pP1, moonRadius, moonRadius);
 
                     if (Circumstances.PartialBegin != null)
-                        ctx.DrawEllipse(null, new Pen(Brushes.DimGray, 1), pU1, moonRadius, moonRadius);
+                        ctx.DrawEllipse(null, new Pen(LinesBrush, 1), pU1, moonRadius, moonRadius);
 
                     if (Circumstances.TotalBegin != null)
-                        ctx.DrawEllipse(null, new Pen(Brushes.DimGray, 1), pU2, moonRadius, moonRadius);
+                        ctx.DrawEllipse(null, new Pen(LinesBrush, 1), pU2, moonRadius, moonRadius);
 
-                    ctx.DrawEllipse(null, new Pen(Brushes.DimGray, 1), pMax, moonRadius, moonRadius);
+                    ctx.DrawEllipse(null, new Pen(LinesBrush, 1), pMax, moonRadius, moonRadius);
 
                     if (Circumstances.TotalEnd != null)
-                        ctx.DrawEllipse(null, new Pen(Brushes.DimGray, 1), pU3, moonRadius, moonRadius);
+                        ctx.DrawEllipse(null, new Pen(LinesBrush, 1), pU3, moonRadius, moonRadius);
 
                     if (Circumstances.PartialEnd != null)
-                        ctx.DrawEllipse(null, new Pen(Brushes.DimGray, 1), pU4, moonRadius, moonRadius);
+                        ctx.DrawEllipse(null, new Pen(LinesBrush, 1), pU4, moonRadius, moonRadius);
 
-                    ctx.DrawEllipse(null, new Pen(Brushes.DimGray, 1), pP4, moonRadius, moonRadius);
+                    ctx.DrawEllipse(null, new Pen(LinesBrush, 1), pP4, moonRadius, moonRadius);
                 }
 
                 // Moon
-                var pMoon = ContactPoint(contactPoint, L);// new Point(pCenter.X - contactPoint.X / contactPoint.F1 * penumbraRadius, pCenter.Y - contactPoint.Y / contactPoint.F1 * penumbraRadius);
+                var pMoon = ContactPoint(contactPoint, L);
                 var moonEllipse = new EllipseGeometry(pMoon, moonRadius, moonRadius);
-                ctx.DrawGeometry(Brushes.Gray, null, moonEllipse);
+                ctx.DrawGeometry(MoonBrush, null, moonEllipse);
 
                 // Totally eclipsed part of the Moon
                 var totalityRegion = new CombinedGeometry(GeometryCombineMode.Intersect, umbraEllipse, moonEllipse);
                 if (!totalityRegion.IsEmpty())
                 {
-                    ctx.DrawGeometry(Brushes.Brown, null, totalityRegion);
+                    ctx.DrawGeometry(EclipsedMoonBrush, null, totalityRegion);
                 }
 
                 // Labels
@@ -273,7 +285,7 @@ namespace Astrarium.Plugins.Eclipses.Controls
                 }
 
                 ctx.PushOpacity(0.5);
-                ctx.DrawGeometry(Brushes.Green, null, g);
+                ctx.DrawGeometry(HorizonBrush, null, g);
             }
             else
             {
@@ -299,7 +311,7 @@ namespace Astrarium.Plugins.Eclipses.Controls
                 double umbraRadius = c.F2 / c.F1 * penumbraRadius;
                 double moonRadius = c.F3 / c.F1 * penumbraRadius;
 
-                double r = Math.Sqrt(c.X * c.X + c.Y * c.Y) / c.F1 * penumbraRadius; ;
+                double r = Math.Sqrt(c.X * c.X + c.Y * c.Y) / c.F1 * penumbraRadius;
                 switch (L)
                 {
                     case 3:
