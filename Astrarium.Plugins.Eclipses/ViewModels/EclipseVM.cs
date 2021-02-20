@@ -34,6 +34,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         protected ISettings settings;
 
         protected readonly MarkerStyle observerLocationMarkerStyle = new MarkerStyle(5, Brushes.Black, null, Brushes.Black, SystemFonts.DefaultFont, StringFormat.GenericDefault);
+        protected readonly MarkerStyle citiesListMarkerStyle = new MarkerStyle(5, Brushes.Green, null, Brushes.Black, SystemFonts.DefaultFont, StringFormat.GenericDefault);
 
         #endregion Fields
 
@@ -88,9 +89,9 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         /// <summary>
         /// Collection of markers (points) on the map
         /// </summary>
-        public ICollection<Marker> Markers
+        public ObservableCollection<Marker> Markers
         {
-            get => GetValue<ICollection<Marker>>(nameof(Markers));
+            get => GetValue(nameof(Markers), new ObservableCollection<Marker>());
             protected set => SetValue(nameof(Markers), value);
         }
 
@@ -99,7 +100,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         /// </summary>
         public ICollection<Track> Tracks
         {
-            get => GetValue<ICollection<Track>>(nameof(Tracks));
+            get => GetValue<ICollection<Track>>(nameof(Tracks), new ObservableCollection<Track>());
             protected set => SetValue(nameof(Tracks), value);
         }
 
@@ -108,7 +109,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         /// </summary>
         public ICollection<Polygon> Polygons
         {
-            get => GetValue<ICollection<Polygon>>(nameof(Polygons));
+            get => GetValue<ICollection<Polygon>>(nameof(Polygons), new ObservableCollection<Polygon>());
             protected set => SetValue(nameof(Polygons), value);
         }
 
@@ -349,7 +350,6 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 {
                     observerLocation = settings.Get<CrdsGeographical>("ObserverLocation");
                     CalculateLocalCircumstances(observerLocation);
-                    Markers.Remove(Markers.LastOrDefault());
                     AddLocationMarker();
                 }
             }
@@ -429,8 +429,13 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
         protected void AddLocationMarker()
         {
-            Markers.Add(new Marker(ToGeo(observerLocation), observerLocationMarkerStyle, observerLocation.LocationName));
-            Markers = new List<Marker>(Markers);
+            Markers.Remove(Markers.FirstOrDefault(m => m.Data as string == "CurrentLocation"));
+            Markers.Add(new Marker(ToGeo(observerLocation), observerLocationMarkerStyle, observerLocation.LocationName) { Data = "CurrentLocation" });
+        }
+
+        protected void AddCitiesListMarker(CrdsGeographical g)
+        {
+            Markers.Add(new Marker(ToGeo(g), citiesListMarkerStyle, g.LocationName) { MinZoomToDisplayLabel = 10, Data = "CitiesList" });
         }
 
         private void ChartZoomIn()
@@ -490,7 +495,6 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         private void LockOn(CrdsGeographical location)
         {
             observerLocation = location;
-            Markers.Remove(Markers.LastOrDefault());
             AddLocationMarker();
             IsMapLocked = true;
             CalculateLocalCircumstances(observerLocation);
@@ -618,6 +622,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
         protected virtual void SetMapColors()
         {
+            citiesListMarkerStyle.MarkerBrush = IsDarkMode ? Brushes.Red : Brushes.Green;
             MapThumbnailBackColor = IsDarkMode ? Color.FromArgb(0xFF, 0x33, 0, 0) : Color.FromArgb(0xFF, 0x33, 0x33, 0x33);
             MapThumbnailForeColor = IsDarkMode ? Color.FromArgb(0xFF, 0x59, 0, 0) : Color.FromArgb(0xFF, 0x59, 0x59, 0x59);
         }

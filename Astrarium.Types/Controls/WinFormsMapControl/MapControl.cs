@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -251,25 +252,85 @@ namespace System.Windows.Forms
         }
 
         /// <summary>
-        /// Gets collection of markers to be displayed on the map.
+        /// Backing field for <see cref="Markers"/> property.
+        /// </summary>
+        private ObservableCollection<Marker> _Markers = new ObservableCollection<Marker>();
+
+        /// <summary>
+        /// Gets or sets collection of markers to be displayed on the map.
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public ICollection<Marker> Markers { get; set; } = new List<Marker>();
+        public ObservableCollection<Marker> Markers
+        {
+            get => _Markers;
+            set
+            {
+                if (value != _Markers)
+                {
+                    _Markers.CollectionChanged -= OverayItemsChanged;
+                    _Markers = value;
+                    if (value != null)
+                    {
+                        _Markers.CollectionChanged += OverayItemsChanged;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Backing field for <see cref="Tracks"/> property.
+        /// </summary>
+        private ObservableCollection<Track> _Tracks = new ObservableCollection<Track>();
 
         /// <summary>
         /// Gets collection of tracks to be displayed on the map.
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public ICollection<Track> Tracks { get; set; } = new List<Track>();
+        public ObservableCollection<Track> Tracks
+        {
+            get => _Tracks;
+            set
+            {
+                if (value != _Tracks)
+                {
+                    _Tracks.CollectionChanged -= OverayItemsChanged;
+                    _Tracks = value;
+                    if (value != null)
+                    {
+                        _Tracks.CollectionChanged += OverayItemsChanged;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Backing field for <see cref="Polygons"/> property.
+        /// </summary>
+        private ObservableCollection<Polygon> _Polygons = new ObservableCollection<Polygon>();
 
         /// <summary>
         /// Gets collection of polygons to be displayed on the map.
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public ICollection<Polygon> Polygons { get; set;  } = new List<Polygon>();
+        public ObservableCollection<Polygon> Polygons
+        {
+            get => _Polygons;
+            set
+            {
+                if (value != _Polygons)
+                {
+                    _Polygons.CollectionChanged -= OverayItemsChanged;
+                    _Polygons = value;
+                    if (value != null)
+                    {
+                        _Polygons.CollectionChanged += OverayItemsChanged;
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Backing field for <see cref="FitToBounds"/> property.
@@ -289,6 +350,31 @@ namespace System.Windows.Forms
                 Invalidate();
             }
         }
+
+        /// <summary>
+        /// Flag indicating the map is in the update state, 
+        /// and painting events should be suppressed.
+        /// </summary>
+        private bool _IsUpdating = false;
+
+        /// <summary>
+        /// Maintains the map control performance by preventing the control from drawing 
+        /// until the <see cref="EndUpdate"/> method is called.
+        /// </summary>
+        public void BeginUpdate()
+        {
+            _IsUpdating = true;
+        }
+
+        /// <summary>
+        /// Resumes painting the map control after painting is suspended 
+        /// by the <see cref="BeginUpdate"/> method.
+        /// </summary>
+        public void EndUpdate()
+        {
+            _IsUpdating = false;
+            Invalidate();
+        }       
 
         /// <summary>
         /// Gets or sets color used to draw error messages.
@@ -394,6 +480,14 @@ namespace System.Windows.Forms
         }
 
         /// <summary>
+        /// Raised when overlay items (markers, tracks, polygons) changed.
+        /// </summary>
+        private void OverayItemsChanged(object sender, Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            Invalidate();
+        }
+
+        /// <summary>
         /// Handles clicks on LinkLabel links
         /// </summary>
         private void _LinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -435,14 +529,16 @@ namespace System.Windows.Forms
             {
                 try
                 {
-
                     pe.Graphics.SmoothingMode = SmoothingMode.None;
                     DrawTiles(pe.Graphics);
                     pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-                    DrawPolygons(pe.Graphics);
-                    DrawTracks(pe.Graphics);
-                    DrawMarkers(pe.Graphics);
+                    if (!_IsUpdating)
+                    {
+                        DrawPolygons(pe.Graphics);
+                        DrawTracks(pe.Graphics);
+                        DrawMarkers(pe.Graphics);
+                    }
 
                     var gs = pe.Graphics.Save();
                     pe.Graphics.SmoothingMode = SmoothingMode.None;
@@ -712,7 +808,11 @@ namespace System.Windows.Forms
                             }
                             if (m.Style.LabelFont != null && m.Style.LabelBrush != null && m.Style.LabelFormat != null)
                             {
-                                gr.DrawString(m.Label, m.Style.LabelFont, m.Style.LabelBrush, new PointF(p.X + m.Style.MarkerWidth * 0.35f, p.Y + m.Style.MarkerWidth * 0.35f), m.Style.LabelFormat);
+                                if ((m.MinZoomToDisplayLabel == 0 || ZoomLevel >= m.MinZoomToDisplayLabel) &&
+                                    (m.MaxZoomToDisplayLabel == 0 || ZoomLevel <= m.MaxZoomToDisplayLabel))
+                                {
+                                    gr.DrawString(m.Label, m.Style.LabelFont, m.Style.LabelBrush, new PointF(p.X + m.Style.MarkerWidth * 0.35f, p.Y + m.Style.MarkerWidth * 0.35f), m.Style.LabelFormat);
+                                }
                             }
                         }
                     }

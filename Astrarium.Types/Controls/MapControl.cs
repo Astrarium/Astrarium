@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Windows;
@@ -11,6 +12,9 @@ namespace Astrarium.Types.Controls
 {
     public class MapControl : WindowsFormsHost
     {
+        public static readonly DependencyProperty IsUpdatingProperty =
+            DependencyProperty.Register(nameof(IsUpdating), typeof(bool), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = false, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(IsUpdatingPropertyChanged) });
+
         public static readonly DependencyProperty CacheFolderProperty =
             DependencyProperty.Register(nameof(CacheFolder), typeof(string), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged) });
 
@@ -48,13 +52,13 @@ namespace Astrarium.Types.Controls
             DependencyProperty.Register(nameof(TileImageAttributes), typeof(ImageAttributes), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged) });
 
         public static readonly DependencyProperty MarkersProperty =
-            DependencyProperty.Register(nameof(Markers), typeof(ICollection<Marker>), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged) });
+            DependencyProperty.Register(nameof(Markers), typeof(ObservableCollection<Marker>), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged) });
 
         public static readonly DependencyProperty TracksProperty =
-            DependencyProperty.Register(nameof(Tracks), typeof(ICollection<Track>), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged) });
+            DependencyProperty.Register(nameof(Tracks), typeof(ObservableCollection<Track>), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged) });
 
         public static readonly DependencyProperty PolygonsProperty =
-            DependencyProperty.Register(nameof(Polygons), typeof(ICollection<Polygon>), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged) });
+            DependencyProperty.Register(nameof(Polygons), typeof(ObservableCollection<Polygon>), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged) });
 
         public static readonly DependencyProperty OnDoubleClickProperty =
             DependencyProperty.Register(nameof(OnDoubleClick), typeof(ICommand), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
@@ -70,6 +74,12 @@ namespace Astrarium.Types.Controls
 
         public static readonly DependencyProperty ZoomLevelProperty =
             DependencyProperty.Register(nameof(ZoomLevel), typeof(int), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = true, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged) });
+
+        public bool IsUpdating
+        {
+            get => (bool)GetValue(IsUpdatingProperty);
+            set => SetValue(IsUpdatingProperty, value);
+        }
 
         public ITileServer TileServer
         {
@@ -161,21 +171,21 @@ namespace Astrarium.Types.Controls
             set => SetValue(TileImageAttributesProperty, value);
         }
 
-        public ICollection<Marker> Markers
+        public ObservableCollection<Marker> Markers
         {
-            get => (ICollection<Marker>)GetValue(MarkersProperty);
+            get => (ObservableCollection<Marker>)GetValue(MarkersProperty);
             set => SetValue(MarkersProperty, value);
         }
 
-        public ICollection<Track> Tracks
+        public ObservableCollection<Track> Tracks
         {
-            get => (ICollection<Track>)GetValue(TracksProperty);
+            get => (ObservableCollection<Track>)GetValue(TracksProperty);
             set => SetValue(TracksProperty, value);
         }
 
-        public ICollection<Polygon> Polygons
+        public ObservableCollection<Polygon> Polygons
         {
-            get => (ICollection<Polygon>)GetValue(PolygonsProperty);
+            get => (ObservableCollection<Polygon>)GetValue(PolygonsProperty);
             set => SetValue(PolygonsProperty, value);
         }
 
@@ -197,13 +207,22 @@ namespace Astrarium.Types.Controls
             (sender as MapControl).mapControl.Invalidate();
         }
 
+        private static void IsUpdatingPropertyChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            bool isUpdating = (bool)e.NewValue;
+            var mapControl = (sender as MapControl).mapControl;
+            if (isUpdating)
+                mapControl.BeginUpdate();
+            else
+                mapControl.EndUpdate();
+        }
+
         private System.Windows.Forms.MapControl mapControl = new System.Windows.Forms.MapControl();
 
         public MapControl()
         {
             mapControl.MouseEnter += (s, e) => IsMouseOverMap = true;
             mapControl.MouseLeave += (s, e) => IsMouseOverMap = false;
-            //mapControl.MouseLeave += (s, e) => Focus();
             mapControl.MouseEnter += (s, e) => mapControl.Focus();
             mapControl.MouseDown += (s, e) => mapControl.Focus();
             mapControl.MouseUp += (s, e) => mapControl.Focus();

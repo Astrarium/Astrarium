@@ -221,6 +221,7 @@ namespace Astrarium
         {
             var dialog = typeFactory(typeof(ProgressWindow)) as ProgressWindow;
             dialog.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
+            dialog.Topmost = true;
             dialog.Title = caption.StartsWith("$") ? Text.Get(caption.Substring(1)) : caption;
             dialog.Text = text.StartsWith("$") ? Text.Get(text.Substring(1)) : text;
             dialog.CancellationTokenSource = tokenSource;

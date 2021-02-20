@@ -131,50 +131,50 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             {
                 map = LunarEclipses.EclipseMap(eclipse, elements);
 
-                var tracks = new List<Track>();
-                var polygons = new List<Polygon>();
-                var markers = new List<Marker>();
+                Polygons.Clear();
+                Tracks.Clear();
+                Markers.Clear();
 
                 if (map.PenumbralBegin != null)
                 {
                     var polygon = new Polygon(polygonStyle);
                     polygon.AddRange(map.PenumbralBegin.Select(p => ToGeo(p)));
-                    polygons.Add(polygon);
+                    Polygons.Add(polygon);
                 }
 
                 if (map.PartialBegin != null)
                 {
                     var polygon = new Polygon(polygonStyle);
                     polygon.AddRange(map.PartialBegin.Select(p => ToGeo(p)));
-                    polygons.Add(polygon);
+                    Polygons.Add(polygon);
                 }
 
                 if (map.TotalBegin != null)
                 {
                     var polygon = new Polygon(polygonStyle);
                     polygon.AddRange(map.TotalBegin.Select(p => ToGeo(p)));
-                    polygons.Add(polygon);
+                    Polygons.Add(polygon);
                 }
 
                 if (map.TotalEnd != null)
                 {
                     var polygon = new Polygon(polygonStyle);
                     polygon.AddRange(map.TotalEnd.Select(p => ToGeo(p)));
-                    polygons.Add(polygon);
+                    Polygons.Add(polygon);
                 }
 
                 if (map.PartialEnd != null)
                 {
                     var polygon = new Polygon(polygonStyle);
                     polygon.AddRange(map.PartialEnd.Select(p => ToGeo(p)));
-                    polygons.Add(polygon);
+                    Polygons.Add(polygon);
                 }
 
                 if (map.PenumbralEnd != null)
                 {
                     var polygon = new Polygon(polygonStyle);
                     polygon.AddRange(map.PenumbralEnd.Select(p => ToGeo(p)));
-                    polygons.Add(polygon);
+                    Polygons.Add(polygon);
                 }
 
                 // Brown lunation number
@@ -229,15 +229,14 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 beTableHeader.AppendLine($"The Besselian elements are valid over the period t\u2080 - 2h ≤ t\u2080 ≤ t\u2080 + 2h");
                 BesselianElementsTableHeader = beTableHeader.ToString();
 
-                Markers = new List<Marker>();
-                Tracks = tracks;
-                Polygons = polygons;
-                IsCalculating = false;
-
                 AddLocationMarker();
                 CalculateSarosSeries();
                 CalculateLocalCircumstances(observerLocation);
                 CalculateCitiesTable();
+
+                CitiesListTable.Select(l => l.Location).ToList().ForEach(c => AddCitiesListMarker(c));
+
+                IsCalculating = false;
             });
         }
 
@@ -325,6 +324,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         {
             var local = eclipsesCalculator.FindLocalCircumstancesForCities(eclipse, elements, new[] { location }).First();
             CitiesListTable.Add(new LunarEclipseCitiesListTableItem(local, eclipsesCalculator.GetLocalVisibilityString(eclipse, local)));
+            AddCitiesListMarker(location);
             IsCitiesListTableNotEmpty = true;
         }
 
@@ -357,6 +357,8 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 {
                     CitiesListTable.Clear();
                     CitiesListTable = new ObservableCollection<LunarEclipseCitiesListTableItem>(locals.Select(c => new LunarEclipseCitiesListTableItem(c, eclipsesCalculator.GetLocalVisibilityString(eclipse, c))));
+                    var cities = CitiesListTable.Select(l => l.Location).ToList();
+                    cities.ForEach(c => AddCitiesListMarker(c));
                     IsCitiesListTableNotEmpty = CitiesListTable.Any();
                 });
             }
@@ -392,6 +394,8 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
                     CitiesListTable.Clear();
+                    Markers.Clear();
+                    AddLocationMarker();
                     IsCitiesListTableNotEmpty = false;
                 });
             }

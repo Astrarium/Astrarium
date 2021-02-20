@@ -295,6 +295,7 @@
                             BackColor="{Binding MapThumbnailBackColor}"                       
                             TileServer="{Binding TileServer, Mode=TwoWay}" 
                             CacheFolder="{Binding CacheFolder, Mode=OneTime}"
+                            IsUpdating="{Binding IsCalculating}"
                             Markers="{Binding Markers}"
                             Tracks="{Binding Tracks}"
                             Center="{Binding MapCenter, Mode=TwoWay}"

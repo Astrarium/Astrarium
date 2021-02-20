@@ -269,7 +269,7 @@
         </Grid>
 
         <TabControl Grid.Row="2" Padding="0" SelectedIndex="{Binding SelectedTabIndex}">
-            <TabItem Header="{t:Text SolarEclipseView.Tab.Map}">
+            <TabItem Header="{t:Text EclipseView.Tab.Map}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="148*"/>
@@ -295,6 +295,7 @@
                             BackColor="{Binding MapThumbnailBackColor}"                       
                             TileServer="{Binding TileServer, Mode=TwoWay}" 
                             CacheFolder="{Binding CacheFolder, Mode=OneTime}"
+                            IsUpdating="{Binding IsCalculating}"
                             Markers="{Binding Markers}"
                             Tracks="{Binding Tracks}"
                             Center="{Binding MapCenter, Mode=TwoWay}"
@@ -349,7 +350,7 @@
                         VerticalScrollBarVisibility="Auto">
                         <StackPanel x:Name="RightPanelStack" Orientation="Vertical">
 
-                            <TextBlock Padding="6 2" FontSize="18" Text="{t:Text SolarEclipseView.LocalCircumstances}" />
+                            <TextBlock Padding="6 2" FontSize="18" Text="{t:Text EclipseView.LocalCircumstances}" />
 
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -360,7 +361,7 @@
                                 <TextBlock VerticalAlignment="Center" Padding="6 4" Text="{Binding ObserverLocationName, FallbackValue='Observer location name'}" />
                                 <ToggleButton Grid.Column="1" IsChecked="{Binding IsMapLocked}" Visibility="{Binding IsMapLocked, Converter={s:BoolToVisibilityConverter}}" Margin="4 0 4 0" Height="24" VerticalContentAlignment="Center" HorizontalAlignment="Right">
                                     <ToggleButton.Content>
-                                        <TextBlock Padding="4" VerticalAlignment="Center" Text="{t:Text SolarEclipseView.Unlock}" />
+                                        <TextBlock Padding="4" VerticalAlignment="Center" Text="{t:Text EclipseView.Unlock}" />
                                     </ToggleButton.Content>
                                 </ToggleButton>
                             </Grid>
@@ -368,7 +369,7 @@
                             <TextBlock Padding="6 2" TextTrimming="CharacterEllipsis" Width="{Binding ElementName=RightPanel, Path=ActualWidth}" Text="{Binding LocalVisibilityDescription, FallbackValue='Local visibility description'}" HorizontalAlignment="Left" />
                             
                             <!-- Local details expander -->
-                            <Expander Margin="0 6 0 4" Header="{t:Text SolarEclipseView.LocalDetails}" IsExpanded="True">
+                            <Expander Margin="0 6 0 4" Header="{t:Text EclipseView.LocalDetails}" IsExpanded="True">
                                 <StackPanel Orientation="Vertical" IsEnabled="{Binding IsVisibleFromCurrentPlace, Mode=OneWay}">
                                     <!-- Local circumstances table -->
                                     <DataGrid               
@@ -429,7 +430,7 @@
                             </Expander>
 
                             <!-- Eclipse chart -->
-                            <Expander Header="{t:Text SolarEclipseView.LocalView}" IsExpanded="True" >
+                            <Expander Header="{t:Text EclipseView.LocalView}" IsExpanded="True" >
                                 <StackPanel Orientation="Vertical">
                                     <!-- Chart header -->
                                     <Grid>
@@ -448,8 +449,8 @@
                                         </StackPanel>
                                         <!-- Chart orientation toggler -->
                                         <StackPanel Margin="2" Grid.Column="2" HorizontalAlignment="Right" SnapsToDevicePixels="True" Orientation="Horizontal">
-                                            <RadioButton Content="Z" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartOrientation.Zenithal}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="{t:Text SolarEclipseView.LocalView.Zenithal}" />
-                                            <RadioButton Content="N" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartOrientation.Equatorial}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="{t:Text SolarEclipseView.LocalView.Equatorial}" />
+                                            <RadioButton Content="Z" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartOrientation.Zenithal}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="{t:Text EclipseView.LocalView.Zenithal}" />
+                                            <RadioButton Content="N" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:SolarEclipseChartOrientation.Equatorial}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="{t:Text EclipseView.LocalView.Equatorial}" />
                                         </StackPanel>
                                     </Grid>
 
@@ -467,13 +468,13 @@
                                     <!-- Chart footer -->
                                     <DockPanel Margin="0" HorizontalAlignment="Stretch">
                                         <!-- Chart options togglers -->
-                                        <ToggleButton IsChecked="{Binding ElementName=Chart, Path=ShowLabels}" ToolTip="{t:Text SolarEclipseView.LocalView.ShowLabels}" Width="24" Height="24" Content="{StaticResource ImageChartLabels}" />
-                                        <ToggleButton IsChecked="{Binding ElementName=Chart, Path=ShowContactCircles}" ToolTip="{t:Text SolarEclipseView.LocalView.ShowContactCircles}" Width="24" Height="24" Content="{StaticResource ImageChartCircles}" />
+                                        <ToggleButton IsChecked="{Binding ElementName=Chart, Path=ShowLabels}" ToolTip="{t:Text EclipseView.LocalView.ShowLabels}" Width="24" Height="24" Content="{StaticResource ImageChartLabels}" />
+                                        <ToggleButton IsChecked="{Binding ElementName=Chart, Path=ShowContactCircles}" ToolTip="{t:Text EclipseView.LocalView.ShowContactCircles}" Width="24" Height="24" Content="{StaticResource ImageChartCircles}" />
                                         <ToggleButton IsChecked="{Binding ElementName=Chart, Path=ShowMoonOutlineOnly}" ToolTip="{t:Text SolarEclipseView.LocalView.ShowMoonOutlineOnly}" Width="24" Height="24" Content="{StaticResource ImageChartMoonOutline}" />
                                         <!-- Chart zoom buttons -->
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                            <Button Command="{Binding ChartZoomInCommand}" Content="{StaticResource ImageZoomIn}" ToolTip="{t:Text SolarEclipseView.LocalView.ZoomIn}" Height="22" Width="22" Margin="2" Padding="-3 -1 0 0" />
-                                            <Button Command="{Binding ChartZoomOutCommand}" Content="{StaticResource ImageZoomOut}" ToolTip="{t:Text SolarEclipseView.LocalView.ZoomOut}" Height="22" Width="22" Margin="2" Padding="-3 -1 0 0" />
+                                            <Button Command="{Binding ChartZoomInCommand}" Content="{StaticResource ImageZoomIn}" ToolTip="{t:Text EclipseView.LocalView.ZoomIn}" Height="22" Width="22" Margin="2" Padding="-3 -1 0 0" />
+                                            <Button Command="{Binding ChartZoomOutCommand}" Content="{StaticResource ImageZoomOut}" ToolTip="{t:Text EclipseView.LocalView.ZoomOut}" Height="22" Width="22" Margin="2" Padding="-3 -1 0 0" />
                                         </StackPanel>
                                     </DockPanel>
                                 </StackPanel>
@@ -485,7 +486,7 @@
 
                 </Grid>
             </TabItem>
-            <TabItem Header="{t:Text SolarEclipseView.Tab.GeneralInfo}">
+            <TabItem Header="{t:Text EclipseView.Tab.GeneralInfo}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
                     <Grid ScrollViewer.CanContentScroll="True" IsEnabled="{Binding IsCalculating, Converter={s:InverseBoolConverter}}">
                         <Grid.RowDefinitions>
@@ -500,7 +501,7 @@
                         </Grid.RowDefinitions>
 
                         <!-- General details table title -->
-                        <TextBlock Grid.Row="0" FontSize="18" Padding="8 8 0 0" Text="{t:Text SolarEclipseView.EclipseDetails}" />
+                        <TextBlock Grid.Row="0" FontSize="18" Padding="8 8 0 0" Text="{t:Text EclipseView.EclipseDetails}" />
 
                         <!-- General details table -->
                         <DataGrid Grid.Row="1"                            
@@ -552,7 +553,7 @@
                         </DataGrid>
 
                         <!-- Besselian elements table title -->
-                        <TextBlock Grid.Row="4" FontSize="18" Padding="8 8 0 0" Text="{t:Text SolarEclipseView.BesselianElements}" />
+                        <TextBlock Grid.Row="4" FontSize="18" Padding="8 8 0 0" Text="{t:Text EclipseView.BesselianElements}" />
 
                         <!-- Besselian elements table header (displaying t0 timings) -->
                         <TextBlock Grid.Row="5" Padding="8 8 0 0" Text="{Binding BesselianElementsTableHeader}" />
@@ -590,7 +591,7 @@
                     </Grid>
                 </ScrollViewer>
             </TabItem>
-            <TabItem Header="{t:Text SolarEclipseView.Tab.SarosSeries}">
+            <TabItem Header="{t:Text EclipseView.Tab.SarosSeries}">
 
                 <Grid>
                     
@@ -624,8 +625,8 @@
                         RowHeight="24"
                         ItemsSource="{Binding SarosSeriesTable}" Grid.ColumnSpan="2">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="{t:Text SolarEclipseView.SarosTable.Member}" Binding="{Binding Member}"/>
-                            <DataGridTemplateColumn Header="{t:Text SolarEclipseView.SarosTable.Date}">
+                            <DataGridTextColumn Header="{t:Text EclipseView.SarosTable.Member}" Binding="{Binding Member}"/>
+                            <DataGridTemplateColumn Header="{t:Text EclipseView.SarosTable.Date}">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock FontFamily="Lucida Console" FontSize="12">
@@ -634,9 +635,9 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="{t:Text SolarEclipseView.SarosTable.Type}" Binding="{Binding Type}"/>
-                            <DataGridTextColumn Header="{t:Text SolarEclipseView.SarosTable.Gamma}" Binding="{Binding Gamma}"/>
-                            <DataGridTextColumn Header="{t:Text SolarEclipseView.SarosTable.Magnitude}" Binding="{Binding Magnitude}"/>
+                            <DataGridTextColumn Header="{t:Text EclipseView.SarosTable.Type}" Binding="{Binding Type}"/>
+                            <DataGridTextColumn Header="{t:Text EclipseView.SarosTable.Gamma}" Binding="{Binding Gamma}"/>
+                            <DataGridTextColumn Header="{t:Text EclipseView.SarosTable.Magnitude}" Binding="{Binding Magnitude}"/>
                             <DataGridTemplateColumn>
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
@@ -656,7 +657,7 @@
                 </Grid>
 
             </TabItem>
-            <TabItem Header="{t:Text SolarEclipseView.Tab.LocalCircumstances}">
+            <TabItem Header="{t:Text EclipseView.Tab.LocalCircumstances}">
 
                 <Grid>
                     <Grid.RowDefinitions>
@@ -670,7 +671,7 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="18" Padding="8 8 0 0" Text="Eclipse local circumstances" />
+                        <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="18" Padding="8 8 0 0" Text="{t:Text EclipseView.LocalCircumstances}" />
                         <Button Margin="0 8 8 0" Padding="8 0" Grid.Column="1" HorizontalAlignment="Right" Content="{t:Text EclipseView.Clear}" Command="{Binding ClearLocationsTableCommand}" Visibility="{Binding IsCitiesListTableNotEmpty, Converter={s:BoolToVisibilityConverter}}" />
                         <Button Margin="0 8 8 0" Padding="8 0" Grid.Column="2" HorizontalAlignment="Right" Content="{t:Text EclipseView.Export}" Command="{Binding ExportLocationsTableCommand}" Visibility="{Binding IsCitiesListTableNotEmpty, Converter={s:BoolToVisibilityConverter}}" />
                     </Grid>
@@ -687,19 +688,14 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         
-                        <Button Grid.Row="0" Grid.Column="0" Margin="8 4" Padding="8 0" Content="Import..." Width="Auto" HorizontalAlignment="Stretch" Command="{Binding LoadLocationsFromFileCommand}" />
-                        <TextBlock Grid.Row="0" Grid.Column="1" Padding="0 " VerticalAlignment="Center">                                
-                            Import locations from a CSV file. The file should match the <Hyperlink Command="{Binding ShowLocationsFileFormatCommand}">following format</Hyperlink>.
+                        <Button Grid.Row="0" Grid.Column="0" Margin="8 4" Padding="8 0" Content="{t:Text EclipseView.Import}" Width="Auto" HorizontalAlignment="Stretch" Command="{Binding LoadLocationsFromFileCommand}" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" Padding="0 " VerticalAlignment="Center">     
+                            <Run Text="{t:Text EclipseView.Import.Text}" /> <Hyperlink Command="{Binding ShowLocationsFileFormatCommand}" ><Run Text="{t:Text EclipseView.Import.Format}" /></Hyperlink>.
                         </TextBlock>
 
-                        <Button Grid.Row="1" Grid.Column="0" Margin="8 4" Padding="8 0" HorizontalAlignment="Stretch" Width="Auto" Content="Find on path" Command="{Binding FindLocationsOnTotalPathCommand}" />
-                        <TextBlock Grid.Row="1" Grid.Column="1" Padding="0" VerticalAlignment="Center">                                
-                            Find locations on the eclipse path (only for total or annular eclipses).
-                        </TextBlock>
-
-                        <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"  Padding="8 4" VerticalAlignment="Center">                                
-                            To add a location from the eclipse map, right click on the map and select the location from a context menu.
-                        </TextBlock>
+                        <Button IsEnabled="{Binding IsFindLocationsOnPathEnabled}" Grid.Row="1" Grid.Column="0" Margin="8 4" Padding="8 0" HorizontalAlignment="Stretch" Width="Auto" Content="{t:Text SolarEclipseView.FindLocationsOnPath}" Command="{Binding FindLocationsOnTotalPathCommand}" />
+                        <TextBlock IsEnabled="{Binding IsFindLocationsOnPathEnabled}" Grid.Row="1" Grid.Column="1" Padding="0" VerticalAlignment="Center" Text="{t:Text SolarEclipseView.FindLocationsOnPath.Text}" />
+                        <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"  Padding="8 4" VerticalAlignment="Center" Text="{t:Text EclipseView.AddLocationFromMap}" />
                     </Grid>
                     
                     <!-- Locations list table -->
@@ -710,7 +706,6 @@
                         CanUserReorderColumns="False"
                         CanUserSortColumns="True"
                         EnableRowVirtualization="True"
-                        EnableColumnVirtualization="True"
                         VirtualizingPanel.IsVirtualizingWhenGrouping="True"
                         VirtualizingPanel.VirtualizationMode="Recycling"
                         VirtualizingPanel.IsVirtualizing="True"

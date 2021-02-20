@@ -65,6 +65,15 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             private set => SetValue(nameof(BesselianElementsTable), value);
         }
 
+        /// <summary>
+        /// Flag indicating searching cities on the total eclipse path is enabled
+        /// </summary>
+        public bool IsFindLocationsOnPathEnabled
+        {
+            get => GetValue<bool>(nameof(IsFindLocationsOnPathEnabled));
+            private set => SetValue(nameof(IsFindLocationsOnPathEnabled), value);
+        }
+
         public ICommand FindLocationsOnTotalPathCommand => new Command(FindLocationsOnTotalPath);
         public ICommand ClearLocationsTableCommand => new Command(ClearLocationsTable);
         public ICommand ExportLocationsTableCommand => new Command(ExportLocationsTable);
@@ -116,6 +125,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         {
             var local = eclipsesCalculator.FindLocalCircumstancesForCities(elements, new[] { location }).First();
             CitiesListTable.Add(new SolarEclipseCitiesListTableItem(local, eclipsesCalculator.GetLocalVisibilityString(eclipse, local)));
+            AddCitiesListMarker(location);
             IsCitiesListTableNotEmpty = true;
         }
 
@@ -131,48 +141,49 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         {
             IsCalculating = true;
 
-            eclipse =  eclipsesCalculator.GetNearestSolarEclipse(meeusLunationNumber, next, saros);
+            eclipse = eclipsesCalculator.GetNearestSolarEclipse(meeusLunationNumber, next, saros);
             julianDay = eclipse.JulianDayMaximum;
             meeusLunationNumber = eclipse.MeeusLunationNumber;            
             elements = eclipsesCalculator.GetBesselianElements(eclipse.JulianDayMaximum);
             string type = Text.Get($"SolarEclipse.Type.{eclipse.EclipseType}");
-            string subtype = eclipse.IsNonCentral ? $" {Text.Get("SolarEclipse.Type.NoCentral")}" : "";
+            string subtype = eclipse.IsNonCentral ? $" {Text.Get("SolarEclipse.Type.NoCentral")}" : "";            
             EclipseDescription = Text.Get("SolarEclipseView.EclipseDescription", ("type", type), ("subtype", subtype));
             EclipseDate = Formatters.Date.Format(new Date(eclipse.JulianDayMaximum, 0));
             PrevSarosEnabled = eclipsesCalculator.GetNearestSolarEclipse(meeusLunationNumber, next: false, saros: true).Saros == eclipse.Saros;
             NextSarosEnabled = eclipsesCalculator.GetNearestSolarEclipse(meeusLunationNumber, next: true, saros: true).Saros == eclipse.Saros;
+            IsFindLocationsOnPathEnabled = eclipse.EclipseType != SolarEclipseType.Partial && !eclipse.IsNonCentral;
 
             await Task.Run(() =>
             {
                 map = SolarEclipses.EclipseMap(eclipse, elements);
 
-                var tracks = new List<Track>();
-                var polygons = new List<Polygon>();
-                var markers = new List<Marker>();
+                Polygons.Clear();
+                Tracks.Clear();
+                Markers.Clear();
 
                 if (map.P1 != null)
                 {
-                    markers.Add(new Marker(ToGeo(map.P1), riseSetMarkerStyle, "P1"));
+                    Markers.Add(new Marker(ToGeo(map.P1), riseSetMarkerStyle, "P1"));
                 }
                 if (map.P2 != null)
                 {
-                    markers.Add(new Marker(ToGeo(map.P2), riseSetMarkerStyle, "P2"));
+                    Markers.Add(new Marker(ToGeo(map.P2), riseSetMarkerStyle, "P2"));
                 }
                 if (map.P3 != null)
                 {
-                    markers.Add(new Marker(ToGeo(map.P3), riseSetMarkerStyle, "P3"));
+                    Markers.Add(new Marker(ToGeo(map.P3), riseSetMarkerStyle, "P3"));
                 }
                 if (map.P4 != null)
                 {
-                    markers.Add(new Marker(ToGeo(map.P4), riseSetMarkerStyle, "P4"));
+                    Markers.Add(new Marker(ToGeo(map.P4), riseSetMarkerStyle, "P4"));
                 }
                 if (map.U1 != null)
                 {
-                    markers.Add(new Marker(ToGeo(map.U1), centralLineMarkerStyle, "U1"));
+                    Markers.Add(new Marker(ToGeo(map.U1), centralLineMarkerStyle, "U1"));
                 }
                 if (map.U2 != null)
                 {
-                    markers.Add(new Marker(ToGeo(map.U2), centralLineMarkerStyle, "U2"));
+                    Markers.Add(new Marker(ToGeo(map.U2), centralLineMarkerStyle, "U2"));
                 }
 
                 for (int i = 0; i < 2; i++)
@@ -181,14 +192,14 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                     {
                         var track = new Track(umbraLimitTrackStyle);
                         track.AddRange(map.UmbraNorthernLimit[i].Select(p => ToGeo(p)));
-                        tracks.Add(track);
+                        Tracks.Add(track);
                     }
 
                     if (map.UmbraSouthernLimit[i].Any())
                     {
                         var track = new Track(umbraLimitTrackStyle);
                         track.AddRange(map.UmbraSouthernLimit[i].Select(p => ToGeo(p)));
-                        tracks.Add(track);
+                        Tracks.Add(track);
                     }
                 }
 
@@ -196,7 +207,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 {
                     var track = new Track(centralLineTrackStyle);
                     track.AddRange(map.TotalPath.Select(p => ToGeo(p)));
-                    tracks.Add(track);
+                    Tracks.Add(track);
                 }
 
                 // central line is divided into 2 ones => draw shadow path as 2 polygons
@@ -211,7 +222,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                     polygon.AddRange((map.UmbraSouthernLimit[1] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
                     polygon.AddRange((map.UmbraSouthernLimit[0] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
                     if (map.U1 != null) polygon.Add(ToGeo(map.U1));
-                    polygons.Add(polygon);
+                    Polygons.Add(polygon);
                 }
                 else
                 {
@@ -222,7 +233,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                             var polygon = new Polygon(umbraPolygonStyle);
                             polygon.AddRange(map.UmbraNorthernLimit[i].Select(p => ToGeo(p)));
                             polygon.AddRange((map.UmbraSouthernLimit[i] as IEnumerable<CrdsGeographical>).Reverse().Select(p => ToGeo(p)));
-                            polygons.Add(polygon);
+                            Polygons.Add(polygon);
                         }
                     }
                 }
@@ -234,7 +245,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                         var track = new Track(riseSetTrackStyle);
                         track.AddRange(curve.Select(p => ToGeo(p)));
                         track.Add(track.First());
-                        tracks.Add(track);
+                        Tracks.Add(track);
                     }
                 }
 
@@ -242,19 +253,19 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 {
                     var track = new Track(penumbraLimitTrackStyle);
                     track.AddRange(map.PenumbraNorthernLimit.Select(p => ToGeo(p)));
-                    tracks.Add(track);
+                    Tracks.Add(track);
                 }
 
                 if (map.PenumbraSouthernLimit.Any())
                 {
                     var track = new Track(penumbraLimitTrackStyle);
                     track.AddRange(map.PenumbraSouthernLimit.Select(p => ToGeo(p)));
-                    tracks.Add(track);
+                    Tracks.Add(track);
                 }
 
                 if (map.Max != null)
                 {
-                    markers.Add(new Marker(ToGeo(map.Max), maxPointMarkerStyle, "Max"));
+                    Markers.Add(new Marker(ToGeo(map.Max), maxPointMarkerStyle, "Max"));
                 }
 
                 // Local curcumstances at point of maximum
@@ -324,8 +335,8 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
                 // Besselian elements table header
                 var beTableHeader = new StringBuilder();
-                beTableHeader.AppendLine($"{Text.Get("SolarEclipseView.BesselianElements.HeaderTime")} t\u2080 = {Formatters.DateTime.Format(new Date(elements.JulianDay0))} TDT (JDE = { elements.JulianDay0.ToString("N6", nf)})");
-                beTableHeader.AppendLine(Text.Get("SolarEclipseView.BesselianElements.HeaderValid"));
+                beTableHeader.AppendLine($"{Text.Get("EclipseView.BesselianElements.HeaderTime")} t\u2080 = {Formatters.DateTime.Format(new Date(elements.JulianDay0))} TDT (JDE = { elements.JulianDay0.ToString("N6", nf)})");
+                beTableHeader.AppendLine(Text.Get("EclipseView.BesselianElements.HeaderValid"));
                 BesselianElementsTableHeader = beTableHeader.ToString();
 
                 // Besselian elements table footer
@@ -334,15 +345,14 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 beTableFooter.AppendLine($"Tan ƒ2 = {elements.TanF2.ToString("N7", nf)}");
                 BesselianElementsTableFooter = beTableFooter.ToString();
 
-                Markers = markers;
-                Tracks = tracks;
-                Polygons = polygons;                
-                IsCalculating = false;
-
                 AddLocationMarker();
                 CalculateSarosSeries();
                 CalculateLocalCircumstances(observerLocation);
                 CalculateCitiesTable();
+
+                CitiesListTable.Select(l => l.Location).ToList().ForEach(c => AddCitiesListMarker(c));
+
+                IsCalculating = false;
             });
         }
 
@@ -366,7 +376,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 LocalContactsTable[4] = new SolarEclipseLocalContactsTableItem(Text.Get("SolarEclipseView.LocalCircumstances.C4"), local.PartialEnd);
             });
 
-            ObserverLocationName = (IsMouseOverMap && !IsMapLocked) ? $"{Text.Get("SolarEclipseView.MouseCoordinates")} ({Format.Geo.Format(FromGeoPoint(MapMouse))})" : $"{observerLocation.LocationName} ({Format.Geo.Format(observerLocation)})";            
+            ObserverLocationName = (IsMouseOverMap && !IsMapLocked) ? $"{Text.Get("EclipseView.MouseCoordinates")} ({Format.Geo.Format(FromGeoPoint(MapMouse))})" : $"{observerLocation.LocationName} ({Format.Geo.Format(observerLocation)})";            
             LocalVisibilityDescription = eclipsesCalculator.GetLocalVisibilityString(eclipse, local);
             IsVisibleFromCurrentPlace = !local.IsInvisible;
             LocalCircumstances = local;
@@ -386,7 +396,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 // add current eclipse
                 eclipses.Add(eclipse);
                 currentSarosSeries = eclipse.Saros;
-                SarosSeriesTableTitle = Text.Get("SolarEclipseView.SarosTable.Header", ("currentSarosSeries", currentSarosSeries.ToString()));
+                SarosSeriesTableTitle = Text.Get("EclipseView.SarosTable.Header", ("currentSarosSeries", currentSarosSeries.ToString()));
 
                 // add previous eclipses
                 do
@@ -489,6 +499,8 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
                     CitiesListTable.Clear();
+                    Markers.Clear();
+                    AddLocationMarker();
                     IsCitiesListTableNotEmpty = false;
                 });
             }
@@ -531,6 +543,8 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 {
                     CitiesListTable.Clear();
                     CitiesListTable = new ObservableCollection<SolarEclipseCitiesListTableItem>(locals.Select(c => new SolarEclipseCitiesListTableItem(c, eclipsesCalculator.GetLocalVisibilityString(eclipse, c))));
+                    var cities = CitiesListTable.Select(l => l.Location).ToList();
+                    cities.ForEach(c => AddCitiesListMarker(c));
                     IsCitiesListTableNotEmpty = CitiesListTable.Any();
                 });
             }

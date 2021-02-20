@@ -283,6 +283,11 @@ namespace Astrarium.Plugins.Eclipses
 
                 // Lunar umbra radius, in kilometers
                 float r = (float)(local.PathWidth / 2);
+                float r0 = r;
+                if (r < 10)
+                {
+                    r = 10;
+                }
 
                 if (r > 0)
                 {
@@ -295,14 +300,20 @@ namespace Astrarium.Plugins.Eclipses
                         // Find intermediate points and add closest cities 
                         for (int j = 0; j < parts; j++)
                         {
+                            // Exit loop if cancel requested
+                            if (cancelToken?.IsCancellationRequested == true)
+                                return new SolarEclipseLocalCircumstances[0];
+
                             var g = Angle.Intermediate(g0, g1, (float)j / parts);
-                            cities.AddRange(locationsManager.Search(g, r));
+                            var locations = locationsManager.Search(g, r);
+                            cities.AddRange(locations.Where(loc => loc.DistanceTo(g) <= r0));
                         }
                     }
                     // The segment should not be splitted, add closest cities to the first point
                     else
                     {
-                        cities.AddRange(locationsManager.Search(g0, r));
+                        var locations = locationsManager.Search(g0, r);
+                        cities.AddRange(locations.Where(loc => loc.DistanceTo(g0) <= r0));
                     }
                 }
             }
