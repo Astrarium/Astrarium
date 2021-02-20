@@ -486,7 +486,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
         private void FindLocationsOnTotalPath()
         {
-            if (ViewManager.ShowMessageBox("Warning", "Searching locations on eclipse path could take some time. Proceed?", System.Windows.MessageBoxButton.OKCancel) == System.Windows.MessageBoxResult.OK)
+            if (ViewManager.ShowMessageBox("$EclipseView.WarnMessageBox.Title", "$SolarEclipseView.LocalCircumstances.SearchingCitiesOnTotalPathProgress.Warning", System.Windows.MessageBoxButton.OKCancel) == System.Windows.MessageBoxResult.OK)
             {
                 FillCitiesTable(fromFile: false);
             }
@@ -494,7 +494,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
         private void ClearLocationsTable()
         {
-            if (ViewManager.ShowMessageBox("Warning", "Do you really want to clear the table?", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)
+            if (ViewManager.ShowMessageBox("$EclipseView.WarnMessageBox.Title", "$SolarEclipseView.LocalCircumstances.ClearTable.Warning", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)
             {
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -516,17 +516,17 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             {
                 if (fromFile)
                 {
-                    string file = ViewManager.ShowOpenFileDialog("Open cities list", "Comma-separated files (*.csv)|*.csv");
+                    string file = ViewManager.ShowOpenFileDialog("$SolarEclipseView.ImportCitiesList.DialogTitle", $"{Text.Get("SolarEclipseView.ImportCitiesList.FileFormat")}|*.csv");
                     if (file != null)
                     {
-                        ViewManager.ShowProgress("Please wait", "Calculating circumstances for locations...", tokenSource);
+                        ViewManager.ShowProgress("$EclipseView.WaitMessageBox.Title", "$SolarEclipseView.LocalCircumstances.CalculatingCircumstancesProgress", tokenSource);
                         var cities = new CsvLocationsReader().ReadFromFile(file);
                         locals = await Task.Run(() => eclipsesCalculator.FindLocalCircumstancesForCities(elements, cities, tokenSource.Token, null));
                     }
                 }
                 else
                 {
-                    ViewManager.ShowProgress("Please wait", "Searching cities on central line of the eclipse...", tokenSource, progress);
+                    ViewManager.ShowProgress("$EclipseView.WaitMessageBox.Title", "$SolarEclipseView.LocalCircumstances.SearchingCitiesOnTotalPathProgress", tokenSource, progress);
                     locals = await Task.Run(() => eclipsesCalculator.FindCitiesOnCentralLine(elements, map.TotalPath, tokenSource.Token, progress));
                 }
             }
@@ -554,18 +554,18 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         {
             var formats = new Dictionary<string, string>
             {
-                ["Comma-separated files (with formatting) (*.csv)"] = "*.csv",
-                ["Comma-separated files (raw data) (*.csv)"] = "*.csv",
+                [Text.Get("EclipseView.LocalCircumstances.OutputFormat.CsvWithFormatting")] = "*.csv",
+                [Text.Get("EclipseView.LocalCircumstances.OutputFormat.CsvRawData")] = "*.csv",
             };
             string filter = string.Join("|", formats.Select(kv => $"{kv.Key}|{kv.Value}"));
-            var file = ViewManager.ShowSaveFileDialog("Export", "CitiesList", ".csv", filter, out int selectedFilterIndex);
+            var file = ViewManager.ShowSaveFileDialog("$EclipseView.Export", "CitiesList", ".csv", filter, out int selectedFilterIndex);
             if (file != null)
             {
                 bool rawData = selectedFilterIndex == 2;
                 var writer = new SolarEclipseCitiesTableCsvWriter(rawData);
                 writer.Write(file, CitiesListTable);
 
-                var answer = ViewManager.ShowMessageBox("Информация", "Экспорт в файл успешно завершён. Окрыть файл?", System.Windows.MessageBoxButton.YesNo);
+                var answer = ViewManager.ShowMessageBox("$EclipseView.InfoMessageBox.Title", "$EclipseView.ExportDoneMessage", System.Windows.MessageBoxButton.YesNo);
                 if (answer == System.Windows.MessageBoxResult.Yes)
                 {
                     System.Diagnostics.Process.Start(file);

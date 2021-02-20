@@ -38,6 +38,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
         #endregion Fields
 
+        #region Properties
 
         /// <summary>
         /// Date of the eclipse selected, converted to string
@@ -57,6 +58,9 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             protected set => SetValue(nameof(CacheFolder), value);
         }
 
+        /// <summary>
+        /// Index of currently selected tab page
+        /// </summary>
         public int SelectedTabIndex
         {
             get => GetValue<int>(nameof(SelectedTabIndex));
@@ -167,6 +171,9 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             protected set => SetValue(nameof(SarosSeriesTableTitle), value);
         }
 
+        /// <summary>
+        /// Flag indicating locations list table is not empty
+        /// </summary>
         public bool IsCitiesListTableNotEmpty
         {
             get => GetValue<bool>(nameof(IsCitiesListTableNotEmpty));
@@ -200,6 +207,196 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             protected set => SetValue(nameof(SarosSeriesTable), value);
         }
 
+        /// <summary>
+        /// Eclipse description
+        /// </summary>
+        public string EclipseDescription
+        {
+            get => GetValue<string>(nameof(EclipseDescription));
+            protected set => SetValue(nameof(EclipseDescription), value);
+        }
+
+        /// <summary>
+        /// Image attributes used to modify the eclipse map tiles
+        /// </summary>
+        public ImageAttributes TileImageAttributes
+        {
+            get => GetValue<ImageAttributes>(nameof(TileImageAttributes));
+            set => SetValue(nameof(TileImageAttributes), value);
+        }
+
+        /// <summary>
+        /// Flag indicating mouse is over eclipse map
+        /// </summary>
+        public bool IsMouseOverMap
+        {
+            get => GetValue<bool>(nameof(IsMouseOverMap));
+            set
+            {
+                SetValue(nameof(IsMouseOverMap), value);
+                if (!IsMapLocked)
+                {
+                    CalculateLocalCircumstances(observerLocation);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Tile server of the eclipse map
+        /// </summary>
+        public ITileServer TileServer
+        {
+            get => GetValue<ITileServer>(nameof(TileServer));
+            set
+            {
+                SetValue(nameof(TileServer), value);
+                TileImageAttributes = GetImageAttributes();
+                if (settings.Get<string>("EclipseMapTileServer") != value.Name)
+                {
+                    settings.Set("EclipseMapTileServer", value.Name);
+                    settings.Save();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Current geographical coordinates of the mouse over the eclipse map
+        /// </summary>
+        public GeoPoint MapMouse
+        {
+            get => GetValue<GeoPoint>(nameof(MapMouse));
+            set
+            {
+                SetValue(nameof(MapMouse), value);
+                MapMouseString = Format.Geo.Format(FromGeoPoint(value));
+                if (!IsMapLocked)
+                {
+                    CalculateLocalCircumstances(FromGeoPoint(value));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Location nearest to the current mouse position on the map
+        /// </summary>
+        public CrdsGeographical NearestLocation
+        {
+            get => GetValue<CrdsGeographical>(nameof(NearestLocation));
+            protected set => SetValue(nameof(NearestLocation), value);
+        }
+
+        /// <summary>
+        /// Flag indicating the map is locked on some point
+        /// </summary>
+        public bool IsMapLocked
+        {
+            get => GetValue<bool>(nameof(IsMapLocked));
+            set
+            {
+                SetValue(nameof(IsMapLocked), value);
+                if (!value)
+                {
+                    observerLocation = settings.Get<CrdsGeographical>("ObserverLocation");
+                    CalculateLocalCircumstances(observerLocation);
+                    AddLocationMarker();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Current geographical coordinates of eclipse map center
+        /// </summary>
+        public GeoPoint MapCenter
+        {
+            get => GetValue(nameof(MapCenter), new GeoPoint());
+            set => SetValue(nameof(MapCenter), value);
+        }
+
+        /// <summary>
+        /// Current zoom level of the eclipse map
+        /// </summary>
+        public int MapZoomLevel
+        {
+            get => GetValue(nameof(MapZoomLevel), 1);
+            set => SetValue(nameof(MapZoomLevel), value);
+        }
+
+        /// <summary>
+        /// Formatted string representing current mouse coordinates on the map
+        /// </summary>
+        public string MapMouseString
+        {
+            get => GetValue<string>(nameof(MapMouseString));
+            protected set => SetValue(nameof(MapMouseString), value);
+        }
+
+        /// <summary>
+        /// Flag indicating dark mode is used
+        /// </summary>
+        public bool IsDarkMode
+        {
+            get => GetValue<bool>(nameof(IsDarkMode));
+            protected set => SetValue(nameof(IsDarkMode), value);
+        }
+
+        /// <summary>
+        /// Background color for eclipse map thumbnails
+        /// </summary>
+        public Color MapThumbnailBackColor
+        {
+            get => GetValue<Color>(nameof(MapThumbnailBackColor));
+            protected set => SetValue(nameof(MapThumbnailBackColor), value);
+        }
+
+        /// <summary>
+        /// Foreground color for eclipse map thumbnails text
+        /// </summary>
+        public Color MapThumbnailForeColor
+        {
+            get => GetValue<Color>(nameof(MapThumbnailForeColor));
+            protected set => SetValue(nameof(MapThumbnailForeColor), value);
+        }
+
+        /// <summary>
+        /// Name of current observer location point
+        /// </summary>
+        public string ObserverLocationName
+        {
+            get => GetValue<string>(nameof(ObserverLocationName));
+            protected set => SetValue(nameof(ObserverLocationName), value);
+        }
+
+        /// <summary>
+        /// String description of local visibility, like "Visible as partial", "Invisible" and etc.
+        /// </summary>
+        public string LocalVisibilityDescription
+        {
+            get => GetValue<string>(nameof(LocalVisibilityDescription));
+            protected set => SetValue(nameof(LocalVisibilityDescription), value);
+        }
+
+        /// <summary>
+        /// Flag indicating the eclipse is visible from current place
+        /// </summary>
+        public bool IsVisibleFromCurrentPlace
+        {
+            get => GetValue<bool>(nameof(IsVisibleFromCurrentPlace));
+            protected set => SetValue(nameof(IsVisibleFromCurrentPlace), value);
+        }
+
+        /// <summary>
+        /// Current zoom level of local view chart
+        /// </summary>
+        public float ChartZoomLevel
+        {
+            get => GetValue<float>(nameof(ChartZoomLevel));
+            set => SetValue(nameof(ChartZoomLevel), value);
+        }
+
+        #endregion Properties
+
+        #region Commands
+
         public ICommand ChangeDateCommand => new Command(ChangeDate);
         public ICommand PrevEclipseCommand => new Command(PrevEclipse);
         public ICommand NextEclipseCommand => new Command(NextEclipse);
@@ -217,6 +414,11 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         public ICommand ChartZoomInCommand => new Command(ChartZoomIn);
         public ICommand ChartZoomOutCommand => new Command(ChartZoomOut);
 
+        #endregion Commands
+
+        /// <summary>
+        /// Static initialization
+        /// </summary>
         static EclipseVM()
         {
             nf = new NumberFormatInfo();
@@ -224,6 +426,9 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             nf.NumberGroupSeparator = "\u2009";
         }
 
+        /// <summary>
+        /// Creates new instance of <see cref="EclipseVM"/>.
+        /// </summary>
         protected EclipseVM(ISky sky, IEclipsesCalculator eclipsesCalculator, IGeoLocationsManager locationsManager, ISettings settings)
         {
             this.settings = settings;
@@ -266,165 +471,6 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 TileImageAttributes = GetImageAttributes();
                 SetMapColors();
             }
-        }
-
-        /// <summary>
-        /// Eclipse description
-        /// </summary>
-        public string EclipseDescription
-        {
-            get => GetValue<string>(nameof(EclipseDescription));
-            protected set => SetValue(nameof(EclipseDescription), value);
-        }
-
-        public ImageAttributes TileImageAttributes
-        {
-            get => GetValue<ImageAttributes>(nameof(TileImageAttributes));
-            set => SetValue(nameof(TileImageAttributes), value);
-        }
-
-        /// <summary>
-        /// Flag indicating mouse is over eclipse map
-        /// </summary>
-        public bool IsMouseOverMap
-        {
-            get => GetValue<bool>(nameof(IsMouseOverMap));
-            set
-            {
-                SetValue(nameof(IsMouseOverMap), value);
-                if (!IsMapLocked)
-                {
-                    CalculateLocalCircumstances(observerLocation);
-                }
-            }
-        }
-
-        public ITileServer TileServer
-        {
-            get => GetValue<ITileServer>(nameof(TileServer));
-            set
-            {
-                SetValue(nameof(TileServer), value);
-                TileImageAttributes = GetImageAttributes();
-                if (settings.Get<string>("EclipseMapTileServer") != value.Name)
-                {
-                    settings.Set("EclipseMapTileServer", value.Name);
-                    settings.Save();
-                }
-            }
-        }
-
-        public GeoPoint MapMouse
-        {
-            get => GetValue<GeoPoint>(nameof(MapMouse));
-            set
-            {
-                SetValue(nameof(MapMouse), value);
-                MapMouseString = Format.Geo.Format(FromGeoPoint(value));
-                if (!IsMapLocked)
-                {
-                    CalculateLocalCircumstances(FromGeoPoint(value));
-                }
-            }
-        }
-
-        /// <summary>
-        /// Location nearest to the current mouse position on the map
-        /// </summary>
-        public CrdsGeographical NearestLocation
-        {
-            get => GetValue<CrdsGeographical>(nameof(NearestLocation));
-            protected set => SetValue(nameof(NearestLocation), value);
-        }
-
-        /// <summary>
-        /// Flag indicating the map is locked on some point
-        /// </summary>
-        public bool IsMapLocked
-        {
-            get => GetValue<bool>(nameof(IsMapLocked));
-            set
-            {
-                SetValue(nameof(IsMapLocked), value);
-                if (!value)
-                {
-                    observerLocation = settings.Get<CrdsGeographical>("ObserverLocation");
-                    CalculateLocalCircumstances(observerLocation);
-                    AddLocationMarker();
-                }
-            }
-        }
-
-        public GeoPoint MapCenter
-        {
-            get => GetValue(nameof(MapCenter), new GeoPoint());
-            set => SetValue(nameof(MapCenter), value);
-        }
-
-        public int MapZoomLevel
-        {
-            get => GetValue(nameof(MapZoomLevel), 1);
-            set => SetValue(nameof(MapZoomLevel), value);
-        }
-
-        public string MapMouseString
-        {
-            get => GetValue<string>(nameof(MapMouseString));
-            protected set => SetValue(nameof(MapMouseString), value);
-        }
-
-        /// <summary>
-        /// Flag indicating dark mode is used
-        /// </summary>
-        public bool IsDarkMode
-        {
-            get => GetValue<bool>(nameof(IsDarkMode));
-            protected set => SetValue(nameof(IsDarkMode), value);
-        }
-
-        public Color MapThumbnailBackColor
-        {
-            get => GetValue<Color>(nameof(MapThumbnailBackColor));
-            protected set => SetValue(nameof(MapThumbnailBackColor), value);
-        }
-
-        public Color MapThumbnailForeColor
-        {
-            get => GetValue<Color>(nameof(MapThumbnailForeColor));
-            protected set => SetValue(nameof(MapThumbnailForeColor), value);
-        }
-
-        /// <summary>
-        /// Name of current observer location point
-        /// </summary>
-        public string ObserverLocationName
-        {
-            get => GetValue<string>(nameof(ObserverLocationName));
-            protected set => SetValue(nameof(ObserverLocationName), value);
-        }
-
-        /// <summary>
-        /// String description of local visibility, like "Visible as partial", "Invisible" and etc.
-        /// </summary>
-        public string LocalVisibilityDescription
-        {
-            get => GetValue<string>(nameof(LocalVisibilityDescription));
-            protected set => SetValue(nameof(LocalVisibilityDescription), value);
-        }
-
-        /// <summary>
-        /// Flag indicating the eclipse is visible from current place
-        /// </summary>
-        public bool IsVisibleFromCurrentPlace
-        {
-            get => GetValue<bool>(nameof(IsVisibleFromCurrentPlace));
-            protected set => SetValue(nameof(IsVisibleFromCurrentPlace), value);
-        }
-
-        public float ChartZoomLevel
-        {
-            get => GetValue<float>(nameof(ChartZoomLevel));
-            set => SetValue(nameof(ChartZoomLevel), value);
         }
 
         protected void AddLocationMarker()
@@ -531,24 +577,24 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
         private void ShowLocationsFileFormat()
         {
-            ViewManager.ShowMessageBox("Information", "CSV file should contain following columns:\n\n- Location name (string)\n- Latitude in decimal degrees (float, in range -90...90, positive north, negative south)\n- longitude in decimal degrees (float, in range -180...180, positive east, negative west)\n- UTC offset in hours (float, optional)\n");
+            ViewManager.ShowMessageBox("$EclipseView.InfoMessageBox.Title", "$EclipseView.LocalCircumstances.FileFormat.Info");
         }
 
         private void ExportSarosSeriesTable()
         {
             var formats = new Dictionary<string, string>
             {
-                ["Comma-separated files (with formatting) (*.csv)"] = "*.csv",
-                ["Comma-separated files (raw data) (*.csv)"] = "*.csv",
+                [Text.Get("EclipseView.LocalCircumstances.OutputFormat.CsvWithFormatting")] = "*.csv",
+                [Text.Get("EclipseView.LocalCircumstances.OutputFormat.CsvRawData")] = "*.csv",
             };
             string filter = string.Join("|", formats.Select(kv => $"{kv.Key}|{kv.Value}"));
-            var file = ViewManager.ShowSaveFileDialog("Export", $"SarosSeries{currentSarosSeries}", ".csv", filter, out int selectedFilterIndex);
+            var file = ViewManager.ShowSaveFileDialog("$EclipseView.Export", $"SarosSeries{currentSarosSeries}", ".csv", filter, out int selectedFilterIndex);
             if (file != null)
             {
-                SarosSeriesTableCsvWriter writer = new SarosSeriesTableCsvWriter(selectedFilterIndex == 2);
+                var writer = new SarosSeriesTableCsvWriter(isRawData: selectedFilterIndex == 2);
                 writer.Write(file, SarosSeriesTable);
 
-                var answer = ViewManager.ShowMessageBox("Информация", "Экспорт в файл успешно завершён. Окрыть файл?", System.Windows.MessageBoxButton.YesNo);
+                var answer = ViewManager.ShowMessageBox("$EclipseView.InfoMessageBox.Title", "$EclipseView.ExportDoneMessage", System.Windows.MessageBoxButton.YesNo);
                 if (answer == System.Windows.MessageBoxResult.Yes)
                 {
                     System.Diagnostics.Process.Start(file);
