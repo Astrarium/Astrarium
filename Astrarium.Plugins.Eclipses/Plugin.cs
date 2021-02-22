@@ -9,13 +9,14 @@ namespace Astrarium.Plugins.Eclipses
 {
     public class Plugin : AbstractPlugin
     {
-        public Plugin(ISettings settings)
+        public Plugin()
         {
             #region UI integration
 
             MenuItem eclipsesMenu = new MenuItem("$Astrarium.Plugins.Eclipses.ToolsMenu");
             MenuItem solarEclipsesMenu = new MenuItem("$Astrarium.Plugins.SolarEclipses.ToolsMenu", new Command(ShowSolarEclipsesView));
             MenuItem lunarEclipsesMenu = new MenuItem("$Astrarium.Plugins.LunarEclipses.ToolsMenu", new Command(ShowLunarEclipsesView));
+
             eclipsesMenu.SubItems.Add(solarEclipsesMenu);
             eclipsesMenu.SubItems.Add(lunarEclipsesMenu);
 
@@ -38,6 +39,7 @@ namespace Astrarium.Plugins.Eclipses
             var vm = ViewManager.CreateViewModel<LunarEclipseVM>();
             vm.Closing += (e) => { vm.Dispose(); };
             ViewManager.ShowWindow(vm);
+
         }
     }
 }

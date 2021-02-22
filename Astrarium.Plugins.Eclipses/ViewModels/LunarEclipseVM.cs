@@ -20,13 +20,6 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 {
     public class LunarEclipseVM : EclipseVM
     {
-        private readonly PolygonStyle polygonStyle = new PolygonStyle(new SolidBrush(Color.FromArgb(70, Color.Black)));
-
-        private LunarEclipse eclipse;
-        private LunarEclipseMap map;
-        private PolynomialLunarEclipseElements elements;
-        private int citiesListTableLunationNumber;
-
         /// <summary>
         /// Table of local contacts instants, displayed to the right of eclipse map
         /// </summary>
@@ -63,9 +56,15 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             private set => SetValue(nameof(LocalCircumstances), value);
         }
 
+        private readonly PolygonStyle polygonStyle = new PolygonStyle(new SolidBrush(Color.FromArgb(70, Color.Black)));
+
         public ICommand ClearLocationsTableCommand => new Command(ClearLocationsTable);
         public ICommand LoadLocationsFromFileCommand => new Command(LoadLocationsFromFile);
         public ICommand ExportLocationsTableCommand => new Command(ExportLocationsTable);
+
+        private LunarEclipse eclipse;
+        private LunarEclipseMap map;
+        private PolynomialLunarEclipseElements elements;
 
         public LunarEclipseVM(
             ISky sky,
@@ -81,20 +80,19 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
                 var items = new List<LunarEclipseLocalContactsTableItem>();
-                LocalContactsTable[0] = new LunarEclipseLocalContactsTableItem("P1: Penumbral begins", local.PenumbralBegin);
-                LocalContactsTable[1] = new LunarEclipseLocalContactsTableItem("U1: Partial begins", local.PartialBegin);
-                LocalContactsTable[2] = new LunarEclipseLocalContactsTableItem("U2: Total begins", local.TotalBegin);
-                LocalContactsTable[3] = new LunarEclipseLocalContactsTableItem("Max: Greatest eclipse", local.Maximum);
-                LocalContactsTable[4] = new LunarEclipseLocalContactsTableItem("U3: Total ends", local.TotalEnd);
-                LocalContactsTable[5] = new LunarEclipseLocalContactsTableItem("U4: Partial ends", local.PartialEnd);
-                LocalContactsTable[6] = new LunarEclipseLocalContactsTableItem("P4: Penumbral ends", local.PenumbralEnd);
+                LocalContactsTable[0] = new LunarEclipseLocalContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.P1"), local.PenumbralBegin);
+                LocalContactsTable[1] = new LunarEclipseLocalContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.U1"), local.PartialBegin);
+                LocalContactsTable[2] = new LunarEclipseLocalContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.U2"), local.TotalBegin);
+                LocalContactsTable[3] = new LunarEclipseLocalContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.Max"), local.Maximum);
+                LocalContactsTable[4] = new LunarEclipseLocalContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.U3"), local.TotalEnd);
+                LocalContactsTable[5] = new LunarEclipseLocalContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.U4"), local.PartialEnd);
+                LocalContactsTable[6] = new LunarEclipseLocalContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.P4"), local.PenumbralEnd);
             });
 
+            ObserverLocationName = (IsMouseOverMap && !IsMapLocked) ? $"{Text.Get("EclipseView.MouseCoordinates")} ({Format.Geo.Format(FromGeoPoint(MapMouse))})" : $"{observerLocation.LocationName} ({Format.Geo.Format(observerLocation)})";
             LocalVisibilityDescription = eclipsesCalculator.GetLocalVisibilityString(eclipse, local);
-
-            ObserverLocationName = (IsMouseOverMap && !IsMapLocked) ? $"Mouse coordinates ({Format.Geo.Format(FromGeoPoint(MapMouse))})" : $"{observerLocation.LocationName} ({Format.Geo.Format(observerLocation)})";
+            IsVisibleFromCurrentPlace = !local.IsInvisible;
             LocalCircumstances = local;
-            IsVisibleFromCurrentPlace = true;
         }
 
         protected override async void CalculateCitiesTable()
@@ -121,8 +119,8 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             julianDay = eclipse.JulianDayMaximum;
             meeusLunationNumber = eclipse.MeeusLunationNumber;
             elements = eclipsesCalculator.GetLunarEclipseElements(eclipse.JulianDayMaximum);
-            string type = eclipse.EclipseType.ToString();
-            EclipseDescription = $"{type} lunar eclipse";
+            string type = Text.Get($"LunarEclipse.Type.{eclipse.EclipseType}");
+            EclipseDescription = Text.Get("LunarEclipseView.EclipseDescription", ("type", type));
             EclipseDate = Formatters.Date.Format(new Date(eclipse.JulianDayMaximum, 0));
             PrevSarosEnabled = eclipsesCalculator.GetNearestLunarEclipse(meeusLunationNumber, next: false, saros: true).Saros == eclipse.Saros;
             NextSarosEnabled = eclipsesCalculator.GetNearestLunarEclipse(meeusLunationNumber, next: true, saros: true).Saros == eclipse.Saros;
@@ -182,15 +180,15 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
                 var eclipseGeneralDetails = new ObservableCollection<NameValueTableItem>()
                 {
-                    new NameValueTableItem("Type", $"{type}"),
-                    new NameValueTableItem("Saros", $"{eclipse.Saros}"),
-                    new NameValueTableItem("Date", $"{EclipseDate}"),
-                    new NameValueTableItem("Magnitude", $"{eclipse.Magnitude.ToString("N5", nf)}"),
-                    new NameValueTableItem("Gamma", $"{eclipse.Gamma.ToString("N5", nf)}"),
-                    new NameValueTableItem("Penumbral duration", $"{Format.Time.Format(eclipse.PenumbralDuration)}"),
-                    new NameValueTableItem("Partial duration", $"{Format.Time.Format(eclipse.PartialDuration)}"),
-                    new NameValueTableItem("Total duration", $"{Format.Time.Format(eclipse.TotalityDuration)}"),
-                    new NameValueTableItem("Brown Lunation Number", $"{lunation}"),
+                    new NameValueTableItem(Text.Get("LunarEclipseView.EclipseType"), $"{type}"),
+                    new NameValueTableItem(Text.Get("LunarEclipseView.EclipseSaros"), $"{eclipse.Saros}"),
+                    new NameValueTableItem(Text.Get("LunarEclipseView.EclipseDate"), $"{EclipseDate}"),
+                    new NameValueTableItem(Text.Get("LunarEclipseView.EclipseMagnitude"), $"{eclipse.Magnitude.ToString("N5", nf)}"),
+                    new NameValueTableItem(Text.Get("LunarEclipseView.EclipseGamma"), $"{eclipse.Gamma.ToString("N5", nf)}"),
+                    new NameValueTableItem(Text.Get("LunarEclipseView.EclipsePenumbralDuration"), $"{Format.Time.Format(eclipse.PenumbralDuration)}"),
+                    new NameValueTableItem(Text.Get("LunarEclipseView.EclipsePartialDuration"), $"{Format.Time.Format(eclipse.PartialDuration)}"),
+                    new NameValueTableItem(Text.Get("LunarEclipseView.EclipseTotalDuration"), $"{Format.Time.Format(eclipse.TotalityDuration)}"),
+                    new NameValueTableItem(Text.Get("LunarEclipseView.BrownLunationNumber"), $"{lunation}"),
                     new NameValueTableItem("ΔT", $"{elements.DeltaT.ToString("N1", nf) } s")
                 };
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
@@ -200,13 +198,13 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
                 var eclipseContacts = new ObservableCollection<ContactsTableItem>();
 
-                eclipseContacts.Add(new ContactsTableItem("P1: Penumbral begins", eclipse.JulianDayFirstContactPenumbra));
-                eclipseContacts.Add(new ContactsTableItem("U1: Partial begins", eclipse.JulianDayFirstContactUmbra));
-                eclipseContacts.Add(new ContactsTableItem("U2: Total begins", eclipse.JulianDayTotalBegin));
-                eclipseContacts.Add(new ContactsTableItem("Max: Greatest eclipse", eclipse.JulianDayMaximum));
-                eclipseContacts.Add(new ContactsTableItem("U3: Total ends", eclipse.JulianDayTotalEnd));
-                eclipseContacts.Add(new ContactsTableItem("U4: Partial ends", eclipse.JulianDayLastContactUmbra));
-                eclipseContacts.Add(new ContactsTableItem("P4: Penumbral end", eclipse.JulianDayLastContactPenumbra));
+                eclipseContacts.Add(new ContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.P1"), eclipse.JulianDayFirstContactPenumbra));
+                eclipseContacts.Add(new ContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.U1"), eclipse.JulianDayFirstContactUmbra));
+                eclipseContacts.Add(new ContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.U2"), eclipse.JulianDayTotalBegin));
+                eclipseContacts.Add(new ContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.Max"), eclipse.JulianDayMaximum));
+                eclipseContacts.Add(new ContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.U3"), eclipse.JulianDayTotalEnd));
+                eclipseContacts.Add(new ContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.U4"), eclipse.JulianDayLastContactUmbra));
+                eclipseContacts.Add(new ContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.P4"), eclipse.JulianDayLastContactPenumbra));
 
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -225,8 +223,10 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
                 // Besselian elements table header
                 var beTableHeader = new StringBuilder();
-                beTableHeader.AppendLine($"Elements for t\u2080 = {Formatters.DateTime.Format(new Date(elements.JulianDay0))} TDT (JDE = { elements.JulianDay0.ToString("N6", nf)})");
-                beTableHeader.AppendLine($"The Besselian elements are valid over the period t\u2080 - 2h ≤ t\u2080 ≤ t\u2080 + 2h");
+
+                beTableHeader.AppendLine($"{Text.Get("EclipseView.BesselianElements.HeaderTime")} t\u2080 = {Formatters.DateTime.Format(new Date(elements.JulianDay0))} TDT (JDE = { elements.JulianDay0.ToString("N6", nf)})");
+                beTableHeader.AppendLine(Text.Get("LunarEclipseView.BesselianElements.HeaderValid"));
+
                 BesselianElementsTableHeader = beTableHeader.ToString();
 
                 AddLocationMarker();
@@ -254,7 +254,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 // add current eclipse
                 eclipses.Add(eclipse);
                 currentSarosSeries = eclipse.Saros;
-                SarosSeriesTableTitle = $"List of eclipses of saros series {currentSarosSeries}";
+                SarosSeriesTableTitle = Text.Get("EclipseView.SarosTable.Header", ("currentSarosSeries", currentSarosSeries.ToString()));
 
                 // add previous eclipses
                 do
@@ -295,7 +295,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 int sarosMember = 0;
                 foreach (var e in eclipses)
                 {
-                    string type = e.EclipseType.ToString();
+                    string type = Text.Get($"LunarEclipse.Type.{e.EclipseType}");
                     var pbe = eclipsesCalculator.GetLunarEclipseElements(e.JulianDayMaximum);
                     var local = LunarEclipses.LocalCircumstances(e, pbe, settingsLocation);
                     sarosSeriesTable.Add(new SarosSeriesTableItem()
@@ -336,10 +336,10 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
             try
             {
-                string file = ViewManager.ShowOpenFileDialog("Open cities list", "Comma-separated files (*.csv)|*.csv");
+                string file = ViewManager.ShowOpenFileDialog("$EclipseView.ImportCitiesList.DialogTitle", $"{Text.Get("EclipseView.ImportCitiesList.FileFormat")}|*.csv");
                 if (file != null)
                 {
-                    ViewManager.ShowProgress("Please wait", "Calculating circumstances for locations...", tokenSource);
+                    ViewManager.ShowProgress("$EclipseView.WaitMessageBox.Title", "$EclipseView.LocalCircumstances.CalculatingCircumstancesProgress", tokenSource);
                     var cities = new CsvLocationsReader().ReadFromFile(file);
                     locals = await Task.Run(() => eclipsesCalculator.FindLocalCircumstancesForCities(eclipse, elements, cities, tokenSource.Token, null));
                 }
@@ -368,18 +368,18 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         {
             var formats = new Dictionary<string, string>
             {
-                ["Comma-separated files (with formatting) (*.csv)"] = "*.csv",
-                ["Comma-separated files (raw data) (*.csv)"] = "*.csv",
+                [Text.Get("EclipseView.LocalCircumstances.OutputFormat.CsvWithFormatting")] = "*.csv",
+                [Text.Get("EclipseView.LocalCircumstances.OutputFormat.CsvRawData")] = "*.csv",
             };
             string filter = string.Join("|", formats.Select(kv => $"{kv.Key}|{kv.Value}"));
-            var file = ViewManager.ShowSaveFileDialog("Export", "CitiesList", ".csv", filter, out int selectedFilterIndex);
+            var file = ViewManager.ShowSaveFileDialog("$EclipseView.Export", "CitiesList", ".csv", filter, out int selectedFilterIndex);
             if (file != null)
             {
                 bool rawData = selectedFilterIndex == 2;
                 var writer = new LunarEclipseCitiesTableCsvWriter(rawData);
                 writer.Write(file, CitiesListTable);
 
-                var answer = ViewManager.ShowMessageBox("Информация", "Экспорт в файл успешно завершён. Окрыть файл?", System.Windows.MessageBoxButton.YesNo);
+                var answer = ViewManager.ShowMessageBox("$EclipseView.InfoMessageBox.Title", "$EclipseView.ExportDoneMessage", System.Windows.MessageBoxButton.YesNo);
                 if (answer == System.Windows.MessageBoxResult.Yes)
                 {
                     System.Diagnostics.Process.Start(file);
@@ -389,7 +389,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
         private void ClearLocationsTable()
         {
-            if (ViewManager.ShowMessageBox("Warning", "Do you really want to clear the table?", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)
+            if (ViewManager.ShowMessageBox("$EclipseView.WarnMessageBox.Title", "$EclipseView.LocalCircumstances.ClearTable.Warning", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)
             {
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {

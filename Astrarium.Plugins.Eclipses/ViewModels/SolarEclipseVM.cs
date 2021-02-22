@@ -82,7 +82,6 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         private SolarEclipseMap map;
         private PolynomialBesselianElements elements;
         private SolarEclipse eclipse;
-        private int citiesListTableLunationNumber;
 
         #region Map styles
 
@@ -336,7 +335,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 // Besselian elements table header
                 var beTableHeader = new StringBuilder();
                 beTableHeader.AppendLine($"{Text.Get("EclipseView.BesselianElements.HeaderTime")} t\u2080 = {Formatters.DateTime.Format(new Date(elements.JulianDay0))} TDT (JDE = { elements.JulianDay0.ToString("N6", nf)})");
-                beTableHeader.AppendLine(Text.Get("EclipseView.BesselianElements.HeaderValid"));
+                beTableHeader.AppendLine(Text.Get("SolarEclipseView.BesselianElements.HeaderValid"));
                 BesselianElementsTableHeader = beTableHeader.ToString();
 
                 // Besselian elements table footer
@@ -494,7 +493,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
         private void ClearLocationsTable()
         {
-            if (ViewManager.ShowMessageBox("$EclipseView.WarnMessageBox.Title", "$SolarEclipseView.LocalCircumstances.ClearTable.Warning", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)
+            if (ViewManager.ShowMessageBox("$EclipseView.WarnMessageBox.Title", "$EclipseView.LocalCircumstances.ClearTable.Warning", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)
             {
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -516,10 +515,10 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             {
                 if (fromFile)
                 {
-                    string file = ViewManager.ShowOpenFileDialog("$SolarEclipseView.ImportCitiesList.DialogTitle", $"{Text.Get("SolarEclipseView.ImportCitiesList.FileFormat")}|*.csv");
+                    string file = ViewManager.ShowOpenFileDialog("$EclipseView.ImportCitiesList.DialogTitle", $"{Text.Get("EclipseView.ImportCitiesList.FileFormat")}|*.csv");
                     if (file != null)
                     {
-                        ViewManager.ShowProgress("$EclipseView.WaitMessageBox.Title", "$SolarEclipseView.LocalCircumstances.CalculatingCircumstancesProgress", tokenSource);
+                        ViewManager.ShowProgress("$EclipseView.WaitMessageBox.Title", "$EclipseView.LocalCircumstances.CalculatingCircumstancesProgress", tokenSource);
                         var cities = new CsvLocationsReader().ReadFromFile(file);
                         locals = await Task.Run(() => eclipsesCalculator.FindLocalCircumstancesForCities(elements, cities, tokenSource.Token, null));
                     }

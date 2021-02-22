@@ -27,6 +27,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
         protected double julianDay;
         protected int meeusLunationNumber;
+        protected int citiesListTableLunationNumber;
         protected int currentSarosSeries;
         protected CrdsGeographical observerLocation;
         protected IGeoLocationsManager locationsManager;
