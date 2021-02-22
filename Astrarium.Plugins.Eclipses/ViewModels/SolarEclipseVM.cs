@@ -390,7 +390,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 IsCalculating = true;
 
                 int ln = meeusLunationNumber;
-                List<SolarEclipse> eclipses = new List<SolarEclipse>();
+                var eclipses = new List<SolarEclipse>();
 
                 // add current eclipse
                 eclipses.Add(eclipse);

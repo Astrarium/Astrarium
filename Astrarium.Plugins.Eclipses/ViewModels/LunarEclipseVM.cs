@@ -196,15 +196,16 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                     EclipseGeneralDetails = eclipseGeneralDetails;
                 });
 
-                var eclipseContacts = new ObservableCollection<ContactsTableItem>();
-
-                eclipseContacts.Add(new ContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.P1"), eclipse.JulianDayFirstContactPenumbra));
-                eclipseContacts.Add(new ContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.U1"), eclipse.JulianDayFirstContactUmbra));
-                eclipseContacts.Add(new ContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.U2"), eclipse.JulianDayTotalBegin));
-                eclipseContacts.Add(new ContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.Max"), eclipse.JulianDayMaximum));
-                eclipseContacts.Add(new ContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.U3"), eclipse.JulianDayTotalEnd));
-                eclipseContacts.Add(new ContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.U4"), eclipse.JulianDayLastContactUmbra));
-                eclipseContacts.Add(new ContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.P4"), eclipse.JulianDayLastContactPenumbra));
+                var eclipseContacts = new ObservableCollection<ContactsTableItem>
+                {
+                    new ContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.P1"), eclipse.JulianDayFirstContactPenumbra),
+                    new ContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.U1"), eclipse.JulianDayFirstContactUmbra),
+                    new ContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.U2"), eclipse.JulianDayTotalBegin),
+                    new ContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.Max"), eclipse.JulianDayMaximum),
+                    new ContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.U3"), eclipse.JulianDayTotalEnd),
+                    new ContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.U4"), eclipse.JulianDayLastContactUmbra),
+                    new ContactsTableItem(Text.Get("LunarEclipseView.LocalCircumstances.P4"), eclipse.JulianDayLastContactPenumbra)
+                };
 
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -249,7 +250,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 IsCalculating = true;
 
                 int ln = meeusLunationNumber;
-                List<LunarEclipse> eclipses = new List<LunarEclipse>();
+                var eclipses = new List<LunarEclipse>();
 
                 // add current eclipse
                 eclipses.Add(eclipse);

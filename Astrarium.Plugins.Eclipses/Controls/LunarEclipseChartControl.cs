@@ -97,21 +97,21 @@ namespace Astrarium.Plugins.Eclipses.Controls
             set => SetValue(DarkModeProperty, value);
         }
 
-        private Typeface font = new Typeface(new FontFamily("#Noto Sans"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
+        private readonly Typeface font = new Typeface(new FontFamily("#Noto Sans"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
 
-        private Brush[] foregroundBrush = new Brush[] { Brushes.Gray, Brushes.Red };
+        private readonly Brush[] foregroundBrush = new Brush[] { Brushes.Gray, Brushes.Red };
         private Brush ForegroundBrush => foregroundBrush[DarkMode ? 1 : 0];
 
-        private Brush[] linesBrush = new Brush[] { Brushes.DimGray, Brushes.DarkRed };
+        private readonly Brush[] linesBrush = new Brush[] { Brushes.DimGray, Brushes.DarkRed };
         private Brush LinesBrush => linesBrush[DarkMode ? 1 : 0];
 
-        private Brush[] moonBrush = new Brush[] { Brushes.Gray, Brushes.DarkRed };
+        private readonly Brush[] moonBrush = new Brush[] { Brushes.Gray, Brushes.DarkRed };
         private Brush MoonBrush => moonBrush[DarkMode ? 1 : 0];
 
-        private Brush[] eclipsedMoonBrush = new Brush[] { Brushes.Brown, Brushes.Red };
+        private readonly Brush[] eclipsedMoonBrush = new Brush[] { Brushes.Brown, Brushes.Red };
         private Brush EclipsedMoonBrush => eclipsedMoonBrush[DarkMode ? 1 : 0];
 
-        private Brush[] horizonBrush = new Brush[] { Brushes.Green, Brushes.DarkRed };
+        private readonly Brush[] horizonBrush = new Brush[] { Brushes.Green, Brushes.DarkRed };
         private Brush HorizonBrush => horizonBrush[DarkMode ? 1 : 0];
 
         protected override void OnRender(DrawingContext ctx)
@@ -330,7 +330,7 @@ namespace Astrarium.Plugins.Eclipses.Controls
                 return new Point(pCenter.X - r * Math.Sin(rot), pCenter.Y - r * Math.Cos(rot));
             }
 
-            return default(Point);
+            return default;
         }
 
         private void DrawText(DrawingContext ctx, string text, Point point, double size)

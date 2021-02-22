@@ -10,9 +10,9 @@ namespace Astrarium.Plugins.Eclipses
     public class EclipsesCalculator : BaseAstroEventsProvider, IEclipsesCalculator
     {
         private readonly ISky sky;
+        private readonly IGeoLocationsManager locationsManager;
         private CelestialObject sun;
         private CelestialObject moon;
-        private IGeoLocationsManager locationsManager;
 
         public EclipsesCalculator(ISky sky, IGeoLocationsManager locationsManager)
         {

@@ -13,12 +13,12 @@ namespace Astrarium.Plugins.Eclipses.ImportExport
         /// <summary>
         /// Flag indicating raw (unformatted) data should be serialized.
         /// </summary>
-        private bool isRawData;
+        private readonly bool isRawData;
 
         /// <summary>
         /// Invariant culture used for serialization.
         /// </summary>
-        private CultureInfo ci = CultureInfo.InvariantCulture;
+        private readonly CultureInfo ci = CultureInfo.InvariantCulture;
         
         /// <summary>
         /// Converter to serialize duration to string.
