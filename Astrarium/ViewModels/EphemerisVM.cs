@@ -113,7 +113,11 @@ namespace Astrarium.ViewModels
 
                 writer?.Write(Body, StartDate, EndDate, Step, Ephemeris);
 
-                ViewManager.ShowMessageBox("$EphemeridesWindow.ExportDoneTitle", "$EphemeridesWindow.ExportDoneText", MessageBoxButton.OK);
+                var answer = ViewManager.ShowMessageBox("$EphemeridesWindow.ExportDoneTitle", "$EphemeridesWindow.ExportDoneText", MessageBoxButton.YesNo);
+                if (answer == MessageBoxResult.Yes)
+                {
+                    System.Diagnostics.Process.Start(file);
+                }
             }
         }
     }

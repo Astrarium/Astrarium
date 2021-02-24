@@ -11,6 +11,7 @@ namespace Astrarium.Plugins.SolarSystem
     public class LunarEventsProvider : BaseAstroEventsProvider
     {
         private readonly LunarCalc lunarCalc = null;
+        private readonly SolarCalc solarCalc = null;
         private readonly PlanetsCalc planetsCalc = null;
         
         private readonly IEphemFormatter librationLongitudeFormatter = new LibrationLongitudeFormatter();
@@ -29,9 +30,10 @@ namespace Astrarium.Plugins.SolarSystem
             new ConjunctedStar("Antares", "16h 29m 24.4s", "-26° 25' 55''", 0.01f, -0.02f)
         };
 
-        public LunarEventsProvider(LunarCalc lunarCalc, PlanetsCalc planetsCalc)
+        public LunarEventsProvider(LunarCalc lunarCalc, SolarCalc solarCalc, PlanetsCalc planetsCalc)
         {
             this.lunarCalc = lunarCalc;
+            this.solarCalc = solarCalc;
             this.planetsCalc = planetsCalc;
         }
 
@@ -43,6 +45,130 @@ namespace Astrarium.Plugins.SolarSystem
             c["MoonEvents.MaxDeclinations"] = MaxDeclinations;
             c["MoonEvents.ConjWithStars"] = ConjunctionsWithStars;
             c["MoonEvents.ConjWithPlanets"] = ConjuntionsWithPlanets;
+            c["MoonEvents.Noumenia"] = Noumenia;
+            c["MoonEvents.Epimenia"] = Epimenia;
+        }
+
+        /// <summary>
+        /// Calculates instants of first sighting of lunar crescent on the evening sky, i.e. noumenia events.
+        /// </summary>
+        /// <remarks>
+        /// The method is based on work of B.D.Yallop,
+        /// see the work there: https://webspace.science.uu.nl/~gent0113/islam/downloads/naotn_69.pdf.
+        /// As it noted in the work (see page 12):
+        /// From observers reports it has been found that in general q = 0 
+        /// is close to the lower limit for first visibility under 
+        /// perfect atmospheric conditions at sea level without requiring optical aid.
+        /// Also lunar altitude should be checked: 2 degrees above horizon is an empyric value.
+        /// So, the condition of the event used there is "q > 0 && alt > 0"
+        /// </remarks>
+        private ICollection<AstroEvent> Noumenia(AstroEventsContext context)
+        {
+            List<AstroEvent> events = new List<AstroEvent>();
+            double jd = 0;
+
+            jd = context.From;
+            while (jd < context.To)
+            {
+                if (context.CancelToken?.IsCancellationRequested == true)
+                {
+                    return new AstroEvent[0];
+                }
+                else
+                {
+                    double jdNewMoon = LunarEphem.NearestPhase(jd, MoonPhase.NewMoon);
+
+                    for (int day = 0; day <= 7; day++)
+                    {
+                        var ctx = new SkyContext(jdNewMoon + day, context.GeoLocation, preferFast: true);
+
+                        double jdMidnight = ctx.JulianDayMidnight;
+
+                        var rtsSun = ctx.Get(solarCalc.RiseTransitSet);
+                        var rtsMoon = ctx.Get(lunarCalc.RiseTransitSet);
+
+                        var sunSet = double.IsNaN(rtsSun.Set) ? 1 : rtsSun.Set;
+                        var moonSet = double.IsNaN(rtsMoon.Set) ? 1 : rtsMoon.Set;
+
+                        double jdBestTime = jdMidnight + sunSet + 4.0 / 9.0 * (moonSet - sunSet);
+                        ctx = new SkyContext(jdBestTime, context.GeoLocation, preferFast: true);
+
+                        double alt = ctx.Get(lunarCalc.Horizontal).Altitude;
+                        double q = ctx.Get(lunarCalc.CrescentQ);
+
+                        if (q > 0 && alt > 2)
+                        {
+                            events.Add(new AstroEvent(jdBestTime, Text.Get("MoonEvents.Noumenia.Text"), lunarCalc.Moon));
+                            break;
+                        }
+                    }
+
+                    jd = jdNewMoon + LunarEphem.SINODIC_PERIOD;
+                }
+            }
+
+            return events;
+        }
+
+        /// <summary>
+        /// Calculates instants of last sighting of lunar crescent on the morning sky, i.e. epimenia events.
+        /// </summary>
+        /// <remarks>
+        /// The method is based on work of B.D.Yallop,
+        /// see the work there: https://webspace.science.uu.nl/~gent0113/islam/downloads/naotn_69.pdf.
+        /// As it noted in the work (see page 12):
+        /// From observers reports it has been found that in general q = 0 
+        /// is close to the lower limit for first visibility under 
+        /// perfect atmospheric conditions at sea level without requiring optical aid.
+        /// Also lunar altitude should be checked: 2 degrees above horizon is an empyric value.
+        /// So, the condition of the event used there is "q > 0 && alt > 0"
+        /// </remarks>
+        private ICollection<AstroEvent> Epimenia(AstroEventsContext context)
+        {
+            List<AstroEvent> events = new List<AstroEvent>();
+            double jd = 0;
+
+            jd = context.From;
+            while (jd < context.To)
+            {
+                if (context.CancelToken?.IsCancellationRequested == true)
+                {
+                    return new AstroEvent[0];
+                }
+                else
+                {
+                    double jdNewMoon = LunarEphem.NearestPhase(jd, MoonPhase.NewMoon);
+
+                    for (int day = 0; day <= 7; day++)
+                    {
+                        var ctx = new SkyContext(jdNewMoon - day, context.GeoLocation, preferFast: true);
+
+                        double jdMidnight = ctx.JulianDayMidnight;
+
+                        var rtsSun = ctx.Get(solarCalc.RiseTransitSet);
+                        var rtsMoon = ctx.Get(lunarCalc.RiseTransitSet);
+
+                        var sunRise = double.IsNaN(rtsSun.Rise) ? 0 : rtsSun.Rise;
+                        var moonRise = double.IsNaN(rtsMoon.Rise) ? 0 : rtsMoon.Rise;
+
+                        double jdBestTime = jdMidnight + sunRise - 4.0 / 9.0 * (sunRise - moonRise);
+                        ctx = new SkyContext(jdBestTime, context.GeoLocation, preferFast: true);
+
+                        double alt = ctx.Get(lunarCalc.Horizontal).Altitude;
+                        double q = ctx.Get(lunarCalc.CrescentQ);
+
+                        if (q > 0 && alt > 2)
+                        {
+                            events.Add(new AstroEvent(jdBestTime, Text.Get("MoonEvents.Epimenia.Text"), lunarCalc.Moon));
+                            break;
+                        }
+                    }
+
+                    jd = jdNewMoon + LunarEphem.SINODIC_PERIOD;
+                }
+            }
+
+            return events;
         }
 
         /// <summary>

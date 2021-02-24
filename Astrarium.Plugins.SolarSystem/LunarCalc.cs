@@ -259,9 +259,21 @@ namespace Astrarium.Plugins.SolarSystem
         }
 
         /// <summary>
+        /// Calculates parameter Q descibing the visibility of lunar crescent.
+        /// Used for calculating noumenia and epimenia events.
+        /// </summary>
+        public double CrescentQ(SkyContext c)
+        {
+            var eclSun = c.Get(SunEcliptical);
+            var eclMoon = c.Get(Ecliptical0);
+            var sd = c.Get(Semidiameter);
+            return LunarEphem.CrescentQ(eclMoon, eclSun, sd, c.Epsilon, c.SiderealTime, c.GeoLocation);
+        }
+
+        /// <summary>
         /// Gets rise, transit and set info for the Moon
         /// </summary>
-        private RTS RiseTransitSet(SkyContext c)
+        public RTS RiseTransitSet(SkyContext c)
         {
             double jd = c.JulianDayMidnight;
             double theta0 = Date.ApparentSiderealTime(jd, c.NutationElements.deltaPsi, c.Epsilon);

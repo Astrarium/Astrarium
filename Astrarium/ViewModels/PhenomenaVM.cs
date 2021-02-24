@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -13,10 +14,8 @@ namespace Astrarium.ViewModels
         public Command SaveToFileCommand { get; private set; }
         public Command CloseCommand { get; private set; }
         public Command<AstroEventVM> SelectAstroEventCommand { get; private set; }
-        public double JulianDay { get; private set; }
-        public CelestialObject PrimaryBody { get; private set; }
-        public CelestialObject SecondaryBody { get; private set; }
         public IEnumerable<IGrouping<string, AstroEventVM>> Events { get; private set; }
+        public event Action<AstroEvent> OnEventSelected;
 
         private ICollection<AstroEvent> events;
         private readonly ISky sky;
@@ -62,16 +61,17 @@ namespace Astrarium.ViewModels
 
                 writer?.Write(events);
 
-                ViewManager.ShowMessageBox("$PhenomenaWindow.ExportDoneTitle", "$PhenomenaWindow.ExportDoneText", MessageBoxButton.OK);
+                var answer = ViewManager.ShowMessageBox("$PhenomenaWindow.ExportDoneTitle", "$PhenomenaWindow.ExportDoneText", MessageBoxButton.YesNo);
+                if (answer == MessageBoxResult.Yes)
+                {
+                    System.Diagnostics.Process.Start(file);
+                }
             }
         }
 
         private void SelectAstroEvent(AstroEventVM ev)
         {
-            JulianDay = ev.JulianDay;
-            PrimaryBody = ev.PrimaryBody;
-            SecondaryBody = ev.SecondaryBody;
-            Close(true);
+            OnEventSelected?.Invoke(new AstroEvent(ev.JulianDay, ev.Text, ev.PrimaryBody, ev.SecondaryBody));
         }
     }
 

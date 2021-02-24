@@ -577,36 +577,39 @@ namespace Astrarium.ViewModels
                     tokenSource.Cancel();
                     var vm = ViewManager.CreateViewModel<PhenomenaVM>();
                     vm.SetEvents(events);
-                    if (ViewManager.ShowDialog(vm) ?? false)
-                    {
-                        sky.SetDate(vm.JulianDay);                        
-                        if (vm.PrimaryBody != null) 
-                        {
-                            if (vm.SecondaryBody != null)
-                            {
-                                var hor = Angle.Intermediate(vm.PrimaryBody.Horizontal, vm.SecondaryBody.Horizontal, 0.5);
-                                
-                                var targetViewAngle = Angle.Separation(vm.PrimaryBody.Horizontal, vm.SecondaryBody.Horizontal) * 3;
-                                
-                                if (vm.PrimaryBody is SizeableCelestialObject pb && vm.SecondaryBody is SizeableCelestialObject sb) 
-                                {
-                                    var minSemidiamter = Math.Min(pb.Semidiameter, sb.Semidiameter) / 3600;
-                                    if (minSemidiamter > targetViewAngle)
-                                    {
-                                        targetViewAngle = minSemidiamter * 3;
-                                    }
-                                }
-
-                                CenterOnPoint(hor, targetViewAngle);
-                            }
-                            else
-                            {
-                                CenterOnObject(vm.PrimaryBody);
-                            }
-                        }
-                    }
+                    vm.OnEventSelected += OnPhenomenaSelected;
+                    ViewManager.ShowWindow(vm);
                 }
             }    
+        }
+
+        private void OnPhenomenaSelected(AstroEvent ev)
+        {
+            sky.SetDate(ev.JulianDay);
+            if (ev.PrimaryBody != null)
+            {
+                if (ev.SecondaryBody != null)
+                {
+                    var hor = Angle.Intermediate(ev.PrimaryBody.Horizontal, ev.SecondaryBody.Horizontal, 0.5);
+
+                    var targetViewAngle = Angle.Separation(ev.PrimaryBody.Horizontal, ev.SecondaryBody.Horizontal) * 3;
+
+                    if (ev.PrimaryBody is SizeableCelestialObject pb && ev.SecondaryBody is SizeableCelestialObject sb)
+                    {
+                        var minSemidiamter = Math.Min(pb.Semidiameter, sb.Semidiameter) / 3600;
+                        if (minSemidiamter > targetViewAngle)
+                        {
+                            targetViewAngle = minSemidiamter * 3;
+                        }
+                    }
+
+                    CenterOnPoint(hor, targetViewAngle);
+                }
+                else
+                {
+                    CenterOnObject(ev.PrimaryBody);
+                }
+            }
         }
 
         private void SearchObject()
@@ -693,11 +696,6 @@ namespace Astrarium.ViewModels
 
         private void CenterOnObject(CelestialObject body)
         {
-            CenterOnObject(body, 0);
-        }
-
-        private void CenterOnObject(CelestialObject body, double targetViewAngle)
-        {
             if (body.DisplaySettingNames.Any(s => !settings.Get(s)))
             {
                 if (ViewManager.ShowMessageBox("$ObjectInvisible.Title", "$ObjectInvisible.Text", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
@@ -734,7 +732,7 @@ namespace Astrarium.ViewModels
                 }
             }
 
-            map.GoToObject(body, TimeSpan.FromSeconds(1), targetViewAngle);
+            map.GoToObject(body, TimeSpan.FromSeconds(1));
         }
 
         private void CenterOnPoint()
@@ -801,7 +799,7 @@ namespace Astrarium.ViewModels
                     if (ViewManager.ShowDialog(vm) ?? false)
                     {
                         sky.SetDate(vm.JulianDay);
-                        map.GoToObject(body, TimeSpan.Zero);
+                        map.GoToObject(body, TimeSpan.Zero, 0);
                     }
                 }
             }

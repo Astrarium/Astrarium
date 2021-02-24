@@ -1145,5 +1145,43 @@ namespace Astrarium.Algorithms
                     return LN + 16843;
             }
         }
+
+        /// <summary>
+        /// Calculates parameter Q describing the visibility of lunar crescent.
+        /// Used for calculating noumenia and epimenia events, and based on work of B.D.Yallop:
+        /// see https://webspace.science.uu.nl/~gent0113/islam/downloads/naotn_69.pdf
+        /// </summary>
+        /// <param name="eclMoon">Geocentric ecliptical coodinates of the Moon.</param>
+        /// <param name="eclSun">Geocentric ecliptical coodinates of the Sun.</param>
+        /// <param name="moonSemidiameter">Moon semidiameter, in seconds of arc.</param>
+        /// <param name="epsilon">True obliquity.</param>
+        /// <param name="siderealTime">Sidereal time at Greenwich, in degrees.</param>
+        /// <param name="geo">Geographical location of point of interest.</param>
+        /// <returns>Value of Q (see referenced work for more details)</returns>
+        public static double CrescentQ(CrdsEcliptical eclMoon, CrdsEcliptical eclSun, double moonSemidiameter, double epsilon, double siderealTime, CrdsGeographical geo)
+        {
+            CrdsHorizontal hSun = eclSun.ToEquatorial(epsilon).ToHorizontal(geo, siderealTime);
+            CrdsHorizontal hMoon = eclMoon.ToEquatorial(epsilon).ToHorizontal(geo, siderealTime);
+
+            // Lunar semidiameter, in degrees
+            double sd = moonSemidiameter / 3600;
+
+            // difference in azimuths, in degrees
+            double DAZ = hSun.Azimuth - hMoon.Azimuth;
+
+            // Arc of Light (angular separation between Sun and Moon, as seen from Earth center), in radians
+            double ARCL = Angle.ToRadians(Angle.Separation(eclSun, eclMoon));
+
+            // Arc of Vision, in degrees
+            // ARCV is the geocentric dierence in altitude between the centre of the Sun 
+            // and the centre of the Moon for a given latitude and longitude ignoring the eects of refraction
+            double ARCV = Angle.ToDegrees(Math.Acos(Math.Cos(ARCL) / Math.Cos(Angle.ToRadians(DAZ))));
+            
+            // Width of lunar crescent, in minutes of arc
+            double W = sd * (1 - Math.Cos(ARCL)) * 60;
+            double W2 = W * W, W3 = W * W2;
+
+            return (ARCV - 11.8371 + 6.3226 * W - 0.7319 * W2 + 0.1018 * W3) / 10;
+        }
     }
 }
