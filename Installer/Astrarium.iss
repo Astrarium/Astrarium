@@ -1,5 +1,5 @@
 ; Astrarium Inno Setup project file
-; Copyright Alexander Krutov, 2020
+; Copyright Alexander Krutov, 2018-2021
 ; https://astrarium.space/
 
 #include "idp.iss"
@@ -12,7 +12,7 @@
 #endif
 
 #ifndef VERSION
-  #define VERSION "2020.12"
+  #define VERSION "1.0"
   #pragma warning "Version is not provided from command line, setting default value"
 #endif
 
@@ -28,7 +28,7 @@ UninstallDisplayIcon  = {app}\Astrarium\Astrarium.exe
 Compression           = lzma2
 SolidCompression      = yes
 OutputBaseFilename    = Astrarium-setup
-AppCopyright          = "© Alexander Krutov, 2018-2020"
+AppCopyright          = "© Alexander Krutov, 2018-2021"
 AppPublisher          = Alexander Krutov
 AppPublisherURL       = https://astrarium.space/
 AppUpdatesURL         = https://astrarium.space/
@@ -108,6 +108,11 @@ en.Astrarium_Plugins_MinorBodies            = Asteroids and comets
 #define sz_Astrarium_Plugins_MinorBodies    = CalcDirSize('..\Deploy\Astrarium.Plugins.MinorBodies')
 sz_Astrarium_Plugins_MinorBodies            = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.MinorBodies')}
 
+ru.Astrarium_Plugins_Eclipses               = Затмения
+en.Astrarium_Plugins_Eclipses               = Eclipses
+#define sz_Astrarium_Plugins_Eclipses       = CalcDirSize('..\Deploy\Astrarium.Plugins.Eclipses')
+sz_Astrarium_Plugins_Eclipses               = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Eclipses')}
+
 ru.Astrarium_Plugins_Grids                  = Линии и сетки
 en.Astrarium_Plugins_Grids                  = Celestial grids and lines
 #define sz_Astrarium_Plugins_Grids          = CalcDirSize('..\Deploy\Astrarium.Plugins.Grids')
@@ -155,6 +160,7 @@ Name: Astrarium_Plugins_BrightStars;    Description: {cm:Astrarium_Plugins_Brigh
 Name: Astrarium_Plugins_Constellations; Description: {cm:Astrarium_Plugins_Constellations}; Types: full compact custom; Flags: fixed; ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Constellations};
 Name: Astrarium_Plugins_DeepSky;        Description: {cm:Astrarium_Plugins_DeepSky};        Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_DeepSky};
 Name: Astrarium_Plugins_MinorBodies;    Description: {cm:Astrarium_Plugins_MinorBodies};    Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_MinorBodies};
+Name: Astrarium_Plugins_Eclipses;       Description: {cm:Astrarium_Plugins_Eclipses};       Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Eclipses};
 Name: Astrarium_Plugins_Grids;          Description: {cm:Astrarium_Plugins_Grids};          Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Grids};
 Name: Astrarium_Plugins_Horizon;        Description: {cm:Astrarium_Plugins_Horizon};        Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Horizon};
 Name: Astrarium_Plugins_MilkyWay;       Description: {cm:Astrarium_Plugins_MilkyWay};       Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_MilkyWay};
