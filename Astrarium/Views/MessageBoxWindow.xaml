@@ -4,9 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"       
         xmlns:t="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
-        xmlns:c="clr-namespace:Astrarium.Controls"
+        xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
         mc:Ignorable="d"
         Width="600" Height="200"
+        SizeToContent="Height"
         MinWidth="300" MinHeight="200"
         Style="{StaticResource {x:Type Window}}"
         ShowInTaskbar="False"
@@ -16,23 +17,7 @@
         WindowStartupLocation="CenterOwner">
 
     <Window.Resources>
-
-        <c:Markdown x:Key="Markdown"
-            DocumentStyle="{StaticResource DocumentStyle}"
-            Heading1Style="{StaticResource H1Style}"
-            Heading2Style="{StaticResource H2Style}"
-            Heading3Style="{StaticResource H3Style}"
-            Heading4Style="{StaticResource H4Style}"
-            LinkStyle="{StaticResource LinkStyle}"
-            ListStyle="{StaticResource ListStyle}"
-            ListItemStyle="{StaticResource ListItemStyle}"
-            ImageStyle="{StaticResource ImageStyle}"
-            SeparatorStyle="{StaticResource SeparatorStyle}"
-            TableStyle="{StaticResource TableStyle}"
-            TableHeaderStyle="{StaticResource TableHeaderStyle}" />
-
         <c:TextToFlowDocumentConverter x:Key="TextToFlowDocumentConverter" Markdown="{StaticResource Markdown}" />
-
     </Window.Resources>
 
     <Grid>

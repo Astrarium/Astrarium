@@ -3,14 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28729.10
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Algorithms", "Astrarium.Algorithms\Astrarium.Algorithms.csproj", "{0DA17A1C-068E-4CCE-82A4-646E137CC121}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Algorithms.Tests", "Astrarium.Algorithms.Tests\Astrarium.Algorithms.Tests.csproj", "{B8E35F4C-4324-48DE-97DB-6C9D083D59B1}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium", "Astrarium\Astrarium.csproj", "{BD5D4668-0D89-4A08-A669-739FF47CA03B}"
 	ProjectSection(ProjectDependencies) = postProject
 		{58EA126A-1037-4976-B212-8DBAE98B7D78} = {58EA126A-1037-4976-B212-8DBAE98B7D78}
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Algorithms", "Astrarium.Algorithms\Astrarium.Algorithms.csproj", "{0DA17A1C-068E-4CCE-82A4-646E137CC121}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Algorithms.Tests", "Astrarium.Algorithms.Tests\Astrarium.Algorithms.Tests.csproj", "{B8E35F4C-4324-48DE-97DB-6C9D083D59B1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Types", "Astrarium.Types\Astrarium.Types.csproj", "{098854D6-DFD9-4A4A-8657-CE0323DB0DB2}"
 EndProject
@@ -38,7 +38,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.BrightSta
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.FOV", "Astrarium.Plugins.FOV\Astrarium.Plugins.FOV.csproj", "{A9BC8A28-2355-4042-8BE6-8B8B54EDE492}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Astrarium.Plugins.ASCOM", "Astrarium.Plugins.ASCOM\Astrarium.Plugins.ASCOM.csproj", "{CBF8E153-1D3E-43D7-8F3A-05CC8BFB56A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.ASCOM", "Astrarium.Plugins.ASCOM\Astrarium.Plugins.ASCOM.csproj", "{CBF8E153-1D3E-43D7-8F3A-05CC8BFB56A9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A73C5FA1-DF83-464C-B4C7-3369E3BA519F}"
 	ProjectSection(SolutionItems) = preProject
@@ -46,6 +46,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Build.props = Directory.Build.props
 		LICENSE = LICENSE
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.Eclipses", "Astrarium.Plugins.Eclipses\Astrarium.Plugins.Eclipses.csproj", "{4928AC5C-135C-4FA2-8E48-8F1BE4D921EC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -121,6 +123,10 @@ Global
 		{CBF8E153-1D3E-43D7-8F3A-05CC8BFB56A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CBF8E153-1D3E-43D7-8F3A-05CC8BFB56A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CBF8E153-1D3E-43D7-8F3A-05CC8BFB56A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4928AC5C-135C-4FA2-8E48-8F1BE4D921EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4928AC5C-135C-4FA2-8E48-8F1BE4D921EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4928AC5C-135C-4FA2-8E48-8F1BE4D921EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4928AC5C-135C-4FA2-8E48-8F1BE4D921EC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

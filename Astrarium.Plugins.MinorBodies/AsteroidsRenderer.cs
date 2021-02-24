@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -31,8 +32,12 @@ namespace Astrarium.Plugins.MinorBodies
             var allAsteroids = asteroidsCalc.Asteroids;
             bool isGround = settings.Get<bool>("Ground");
             bool drawAsteroids = settings.Get<bool>("Asteroids");
-            bool drawLabels = settings.Get<bool>("AsteroidsLabels");
+            bool drawLabels = settings.Get<bool>("AsteroidsLabels");            
+            bool drawAll = settings.Get<bool>("AsteroidsDrawAll");
+            decimal drawAllMagLimit = settings.Get<decimal>("AsteroidsDrawAllMagLimit");
+            bool drawLabelMag = settings.Get<bool>("AsteroidsLabelsMag");
             Brush brushNames = new SolidBrush(map.GetColor("ColorAsteroidsLabels"));
+            var font = settings.Get<Font>("AsteroidsLabelsFont");
 
             if (drawAsteroids)
             {
@@ -46,9 +51,18 @@ namespace Astrarium.Plugins.MinorBodies
                         ad < map.ViewAngle + a.Semidiameter / 3600)
                     {
                         float diam = map.GetDiskSize(a.Semidiameter);
+                        float size = map.GetPointSize(a.Magnitude);
 
+                        // if "draw all" setting is enabled, draw asteroids brighter than limit
+                        if (drawAll && size < 1 && a.Magnitude <= (float)drawAllMagLimit)
+                        {
+                            size = 1;
+                        }
+
+                        string label = drawLabelMag ? $"{a.Name} {Formatters.Magnitude.Format(a.Magnitude)}" : a.Name;
+                        
                         // asteroid should be rendered as disk
-                        if ((int)diam > 0)
+                        if ((int)diam > 0 && diam > size)
                         {
                             PointF p = map.Project(a.Horizontal);
                             map.Graphics.FillEllipse(new SolidBrush(map.GetColor(colorAsteroid)), p.X - diam / 2, p.Y - diam / 2, diam, diam);
@@ -56,17 +70,14 @@ namespace Astrarium.Plugins.MinorBodies
 
                             if (drawLabels)
                             {
-                                var font = settings.Get<Font>("AsteroidsLabelsFont");
-                                map.DrawObjectCaption(font, brushNames, a.Name, p, diam);
+                                map.DrawObjectCaption(font, brushNames, label, p, diam);
                             }
 
                             map.AddDrawnObject(a);
                             continue;
                         }
-
                         // asteroid should be rendered as point
-                        float size = map.GetPointSize(a.Magnitude, maxDrawingSize: 3);
-                        if ((int)size > 0)
+                        else if ((int)size > 0)
                         {
                             PointF p = map.Project(a.Horizontal);
 
@@ -76,8 +87,7 @@ namespace Astrarium.Plugins.MinorBodies
 
                                 if (drawLabels)
                                 {
-                                    var font = settings.Get<Font>("AsteroidsLabelsFont");
-                                    map.DrawObjectCaption(font, brushNames, a.Name, p, size);
+                                    map.DrawObjectCaption(font, brushNames, label, p, size);
                                 }
 
                                 map.AddDrawnObject(a);

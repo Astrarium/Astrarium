@@ -72,7 +72,13 @@ namespace Astrarium.Types
             if (binding != null)
                 return binding.GetValue<T>();
             else
-                return backingFields.ContainsKey(propertyName) ? (T)backingFields[propertyName] : defaultValue;
+            {
+                if (!backingFields.ContainsKey(propertyName))
+                {
+                    backingFields[propertyName] = defaultValue;
+                }
+                return (T)backingFields[propertyName];
+            }
         }
 
         protected void SetValue(string propertyName, object value)

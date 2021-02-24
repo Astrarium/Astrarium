@@ -15,6 +15,15 @@ namespace Astrarium.Types.Controls
 {
     public class NumericUpDown : Control
     {
+        public bool Loop
+        {
+            get { return (bool)GetValue(LoopProperty); }
+            set { SetValue(LoopProperty, value); }
+        }
+
+        public readonly static DependencyProperty LoopProperty = DependencyProperty.Register(
+            "Loop", typeof(bool), typeof(NumericUpDown), new UIPropertyMetadata(false));
+
         public bool HideButtons
         {
             get { return (bool)GetValue(HideButtonsProperty); }
@@ -100,6 +109,24 @@ namespace Astrarium.Types.Controls
                 BindsTwoWayByDefault = true,
                 DefaultUpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
             });
+
+        public readonly static DependencyProperty LoopIncrementCommandProperty = DependencyProperty.Register(
+            "LoopIncrementCommand", typeof(ICommand), typeof(NumericUpDown));
+
+        public ICommand LoopIncrementCommand
+        {
+            get { return (ICommand)GetValue(LoopIncrementCommandProperty); }
+            set { SetValue(LoopIncrementCommandProperty, value); }
+        }
+
+        public readonly static DependencyProperty LoopDecrementCommandProperty = DependencyProperty.Register(
+            "LoopDecrementCommand", typeof(ICommand), typeof(NumericUpDown));
+
+        public ICommand LoopDecrementCommand
+        {
+            get { return (ICommand)GetValue(LoopDecrementCommandProperty); }
+            set { SetValue(LoopDecrementCommandProperty, value); }
+        }
 
         public event EventHandler<DependencyPropertyChangedEventArgs> ValueChanged;
         private void RaiseValueChangedEvent(DependencyPropertyChangedEventArgs e)
@@ -220,6 +247,10 @@ namespace Astrarium.Types.Controls
                 if (Value > Maximum)
                     Value = Maximum;
             }
+            else if (Loop)
+            {
+                LoopIncrementCommand?.Execute(null);
+            }
         }
 
         private void Decrement(object sender, RoutedEventArgs e)
@@ -229,6 +260,10 @@ namespace Astrarium.Types.Controls
                 Value -= Step;
                 if (Value < Minimum)
                     Value = Minimum;
+            }
+            else if (Loop)
+            {
+                LoopDecrementCommand?.Execute(null);
             }
         }
     }

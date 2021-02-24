@@ -94,6 +94,7 @@ namespace Astrarium
                 if (value)
                 {
                     var bounds = CurrentScreen(window).Bounds;
+                    window.SaveState();
                     if (window.WindowState != WindowState.Normal)
                     {
                         window.Left = bounds.Left;
@@ -101,8 +102,6 @@ namespace Astrarium
                         window.Width = bounds.Width;
                         window.Height = bounds.Height;                        
                     }
-
-                    window.SaveState();
 
                     WindowProperties.SetIsFullScreen(window, true);
                     window.WindowState = WindowState.Normal;
@@ -116,6 +115,7 @@ namespace Astrarium
                     WindowProperties.SetIsFullScreen(window, false);
                     SetWindowPos(handle, HWND_NOTOPMOST, bounds.Left, bounds.Top, bounds.Width, bounds.Height, flags);
                 }
+                window.MainWindow_StateChanged(window, EventArgs.Empty);
             }));
 
         public static void SetFullScreen(DependencyObject target, bool value)
@@ -263,6 +263,7 @@ namespace Astrarium
             InitializeComponent();
 
             this.map = map;
+            this.StateChanged += MainWindow_StateChanged;
             var skyView = new SkyView();
             skyView.SkyMap = map;
             skyView.MouseDoubleClick += (o, e) => GetMapDoubleClick(this)?.Execute(new PointF(e.X, e.Y));
@@ -275,6 +276,18 @@ namespace Astrarium
 
             this.Loaded += MainWindow_Loaded;
             this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        }
+
+        private void MainWindow_StateChanged(object sender, EventArgs e)
+        {
+            if (WindowState == WindowState.Maximized || GetFullScreen(this))
+            {
+                Host.Margin = new Thickness(-1);
+            }
+            else
+            {
+                Host.Margin = new Thickness(5, 0, 5, 0);
+            }
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)

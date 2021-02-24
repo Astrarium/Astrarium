@@ -33,7 +33,11 @@ namespace Astrarium.Plugins.MinorBodies
             bool useTextures = settings.Get("PlanetsTextures");
             bool drawComets = settings.Get("Comets");
             bool drawLabels = settings.Get("AsteroidsLabels");
+            bool drawAll = settings.Get<bool>("CometsDrawAll");
+            decimal drawAllMagLimit = settings.Get<decimal>("CometsDrawAllMagLimit");
+            bool drawLabelMag = settings.Get<bool>("CometsLabelsMag");
             Brush brushNames = new SolidBrush(map.GetColor("ColorCometsLabels"));
+            var font = settings.Get<Font>("CometsLabelsFont");
 
             if (drawComets)
             {
@@ -42,6 +46,15 @@ namespace Astrarium.Plugins.MinorBodies
                 foreach (var c in comets)
                 {
                     float diam = map.GetDiskSize(c.Semidiameter);
+                    float size = map.GetPointSize(c.Magnitude);
+
+                    // if "draw all" setting is enabled, draw comets brighter than limit
+                    if (drawAll && size < 1 && c.Magnitude <= (float)drawAllMagLimit)
+                    {
+                        size = 1;
+                    }
+
+                    string label = drawLabelMag ? $"{c.Name} {Formatters.Magnitude.Format(c.Magnitude)}" : c.Name;
 
                     if (diam > 5)
                     {
@@ -91,11 +104,27 @@ namespace Astrarium.Plugins.MinorBodies
 
                                 if (drawLabels)
                                 {
-                                    var font = settings.Get<Font>("CometsLabelsFont");
-                                    map.DrawObjectCaption(font, brushNames, c.Name, p, diam);
+                                    map.DrawObjectCaption(font, brushNames, label, p, diam);
                                 }
                                 map.AddDrawnObject(c);
-                            }                            
+                            }
+                        }
+                    }
+                    else if ((int)size > 0)
+                    {
+                        PointF p = map.Project(c.Horizontal);
+
+                        if (!map.IsOutOfScreen(p))
+                        {
+                            g.FillEllipse(new SolidBrush(map.GetColor(Color.White)), p.X - size / 2, p.Y - size / 2, size, size);
+
+                            if (drawLabels)
+                            {
+                                map.DrawObjectCaption(font, brushNames, label, p, size);
+                            }
+
+                            map.AddDrawnObject(c);
+                            continue;
                         }
                     }
                 }

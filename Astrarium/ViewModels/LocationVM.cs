@@ -48,6 +48,11 @@ namespace Astrarium.ViewModels
         private CrdsGeographical _ObserverLocation;
 
         /// <summary>
+        /// Geo locations manager instance.
+        /// </summary>
+        private IGeoLocationsManager _LocationsManager;
+
+        /// <summary>
         /// Current observer location chosen in the view. 
         /// Executing the <see cref="OkCommand"/> will propagate the value as dialog result.
         /// </summary>
@@ -181,8 +186,6 @@ namespace Astrarium.ViewModels
             }
         }
 
-        private string _LastSearchString = null;
-
         /// <summary>
         /// Searches for geographical locations asynchronously.
         /// </summary>
@@ -205,61 +208,18 @@ namespace Astrarium.ViewModels
         /// <returns>List of location items matching the specified search string</returns>
         private List<LocationSearchItem> Search(string searchString)
         {
-            List<LocationSearchItem> results = new List<LocationSearchItem>();
-
             if (searchString.Length == 0)
             {
-                return results;
-            }
+                return new List<LocationSearchItem>();
+            }                     
 
-
-            var stringPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data", "Cities.dat");
-            FileStream _FileStream = File.OpenRead(stringPath);
-
-            using (var fileReader = new StreamReader(_FileStream, Encoding.UTF8))
+            return _LocationsManager.Search(searchString, 10).Select(c => new LocationSearchItem()
             {
-                _LastSearchString = searchString;
-
-                string line = null;
-                try
-                {
-                    while ((line = fileReader.ReadLine()) != null && searchString.Equals(_LastSearchString))
-                    {
-                        string[] chunks = line.Split('\t');
-
-                        var names = new List<string>();
-                        names.Add(chunks[1]);
-                        names.AddRange(chunks[3].Split(','));
-                        var name = names.FirstOrDefault(s => s.Replace("\'", "").StartsWith(searchString, StringComparison.InvariantCultureIgnoreCase));
-                        if (name != null)
-                        {
-                            double latitude = double.Parse(chunks[4], CultureInfo.InvariantCulture);
-                            double longitude = double.Parse(chunks[5], CultureInfo.InvariantCulture);
-                            double elevation = double.Parse(string.IsNullOrWhiteSpace(chunks[15]) ? "0" : chunks[15], CultureInfo.InvariantCulture);
-                            TimeZoneItem timeZone = TimeZones.FirstOrDefault(tz => tz.TimeZoneId.Equals(chunks[17], StringComparison.InvariantCultureIgnoreCase));
-
-                            results.Add(new LocationSearchItem
-                            {
-                                Name = name,
-                                Country = chunks[8],
-                                Names = string.Join(", ", names.Distinct().Except(new[] { name }).ToArray()),
-                                Location = new CrdsGeographical(-longitude, latitude, timeZone.UtcOffset, elevation, timeZone.TimeZoneId, name)
-                            });
-
-                            if (results.Count == 10)
-                            {
-                                break;
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-
-                }
-
-                return results.OrderBy(r => r.Name).ToList();
-            }
+                Country = c.CountryCode,
+                Location = c,
+                Name = c.LocationName,
+                Names = string.Join(", ", c.OtherNames)
+            }).ToList();
         }
 
         #endregion Search properties
@@ -449,24 +409,27 @@ namespace Astrarium.ViewModels
         #region TimeZone properties
 
         /// <summary>
-        /// Gets list of available time zones loaded from the file
+        /// Gets timezones list
         /// </summary>
-        public ObservableCollection<TimeZoneItem> TimeZones { get; private set; } = new ObservableCollection<TimeZoneItem>();
+        public ICollection<TimeZoneInfo> TimeZones
+        {
+            get => _LocationsManager.TimeZones;
+        }
 
         /// <summary>
         /// Gets/sets a time zone associated with the observer location
         /// </summary>
-        public TimeZoneItem TimeZone
+        public TimeZoneInfo TimeZone
         {
             get
             {
-                return TimeZones.FirstOrDefault(tz => tz.TimeZoneId.Equals(ObserverLocation.TimeZoneId, StringComparison.InvariantCultureIgnoreCase));
+                return _LocationsManager.TimeZones.FirstOrDefault(tz => tz.Id.Equals(ObserverLocation.TimeZoneId, StringComparison.InvariantCultureIgnoreCase));
             }
             set
             {
                 if (value != null)
                 {
-                    ObserverLocation = new CrdsGeographical(ObserverLocation.Longitude, ObserverLocation.Latitude, value.UtcOffset, ObserverLocation.Elevation, value.TimeZoneId, ObserverLocation.LocationName);
+                    ObserverLocation = new CrdsGeographical(ObserverLocation.Longitude, ObserverLocation.Latitude, value.BaseUtcOffset.TotalHours, ObserverLocation.Elevation, value.Id, ObserverLocation.LocationName);
                 }
                 NotifyPropertyChanged(nameof(TimeZone));
             }
@@ -493,8 +456,12 @@ namespace Astrarium.ViewModels
         /// <summary>
         /// Creates new instance of <see cref="LocationVM"/>
         /// </summary>
-        public LocationVM(ISky sky, ISettings settings)
+        public LocationVM(ISky sky, IGeoLocationsManager locationsManager, ISettings settings)
         {
+            _LocationsManager = locationsManager;
+            _LocationsManager.TimeZonesLoaded += OnTimeZonesLoaded;
+            _LocationsManager.Load();
+
             CrdsEquatorial eqSun = SolarEphem.Ecliptical(sky.Context.JulianDay).ToEquatorial(sky.Context.Epsilon);
             ObserverLocation = new CrdsGeographical(sky.Context.GeoLocation);
             SunHourAngle = Coordinates.HourAngle(sky.Context.SiderealTime, 0, eqSun.Alpha);
@@ -504,26 +471,16 @@ namespace Astrarium.ViewModels
             OkCommand = new Command(Ok);
             CancelCommand = new Command(Close);
             EndSearchModeCommand = new Command(EndSearchMode);
-            SelectLocationCommand = new Command(SelectLocation);
+            SelectLocationCommand = new Command(SelectLocation);            
+        }
 
-            string line;
-            string filePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data", "TimeZones.dat");
-            using (StreamReader file = new StreamReader(filePath))
-            {
-                while ((line = file.ReadLine()) != null)
-                {
-                    // skip first and empty lines
-                    if (line.StartsWith("CountryCode") ||
-                        string.IsNullOrWhiteSpace(line))
-                    {
-                        continue;
-                    }
-
-                    string[] chunks = line.Split('\t');
-                    TimeZones.Add(new TimeZoneItem() { TimeZoneId = chunks[1], UtcOffset = double.Parse(chunks[4], CultureInfo.InvariantCulture) });
-                }
-                file.Close();
-            }
+        /// <summary>
+        /// <see cref="IGeoLocationsManager.TimeZonesLoaded"/> handler
+        /// </summary>
+        private void OnTimeZonesLoaded()
+        {
+            NotifyPropertyChanged(nameof(TimeZones));
+            NotifyPropertyChanged(nameof(TimeZone));
         }
 
         /// <summary>
@@ -549,6 +506,16 @@ namespace Astrarium.ViewModels
         {
             _SavedLocation = new CrdsGeographical(ObserverLocation);
             EndSearchMode();
+        }
+
+        /// <summary>
+        /// Disposes allocated resources
+        /// </summary>
+        public override void Dispose()
+        {
+            _LocationsManager.TimeZonesLoaded -= OnTimeZonesLoaded;
+            _LocationsManager.Unload();
+            base.Dispose();
         }
     }
 
@@ -576,32 +543,5 @@ namespace Astrarium.ViewModels
         /// Geographical location
         /// </summary>
         public CrdsGeographical Location { get; set; }
-    }
-
-    /// <summary>
-    /// Represents time zone information
-    /// </summary>
-    public class TimeZoneItem
-    {
-        /// <summary>
-        /// Unique time zone id, like "Europe/Moscow"
-        /// </summary>
-        public string TimeZoneId { get; set; }
-
-        /// <summary>
-        /// UTC offset of the zone, in hours
-        /// </summary>
-        public double UtcOffset { get; set; }
-
-        /// <summary>
-        /// Gets displayable name of the time zone
-        /// </summary>
-        public string Name
-        {
-            get
-            {
-                return $"UTC{(UtcOffset >= 0 ? "+" : "-")}{TimeSpan.FromHours(UtcOffset).ToString("hh\\:mm")} ({TimeZoneId.Replace('_', ' ')})";
-            }
-        }
     }
 }

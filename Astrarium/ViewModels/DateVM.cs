@@ -17,12 +17,62 @@ namespace Astrarium.ViewModels
         /// <summary>
         /// Called when user clicks on "Set Current Date&Time" link.
         /// </summary>
-        public Command SetCurrentDateCommand { get; private set; }
+        public Command SetCurrentDateCommand => new Command(SetCurrentDate);
 
         /// <summary>
         /// Called when user selects date in the dialog.
         /// </summary>
-        public Command SelectDateCommand { get; private set; }
+        public Command SelectDateCommand => new Command(SelectDate);
+
+        /// <summary>
+        /// Called when month part decrements over minimal value.
+        /// </summary>
+        public Command LoopMonthDecrementCommand => new Command(LoopMonthDecrement);
+
+        /// <summary>
+        /// Called when month part increments over maximal value.
+        /// </summary>
+        public Command LoopMonthIncrementCommand => new Command(LoopMonthIncrement);
+
+        /// <summary>
+        /// Called when day part decrements over minimal value.
+        /// </summary>
+        public Command LoopDayDecrementCommand => new Command(LoopDayDecrement);
+
+        /// <summary>
+        /// Called when day part increments over maximal value.
+        /// </summary>
+        public Command LoopDayIncrementCommand => new Command(LoopDayIncrement);
+
+        /// <summary>
+        /// Called when hours hours decrements over minimal value.
+        /// </summary>
+        public Command LoopHoursDecrementCommand => new Command(LoopHoursDecrement);
+
+        /// <summary>
+        /// Called when hours part increments over maximal value.
+        /// </summary>
+        public Command LoopHoursIncrementCommand => new Command(LoopHoursIncrement);
+
+        /// <summary>
+        /// Called when minutes part decrements over minimal value.
+        /// </summary>
+        public Command LoopMinutesDecrementCommand => new Command(LoopMinutesDecrement);
+
+        /// <summary>
+        /// Called when minutes part increments over maximal value.
+        /// </summary>
+        public Command LoopMinutesIncrementCommand => new Command(LoopMinutesIncrement);
+
+        /// <summary>
+        /// Called when seconds part decrements over minimal value.
+        /// </summary>
+        public Command LoopSecondsDecrementCommand => new Command(LoopSecondsDecrement);
+
+        /// <summary>
+        /// Called when seconds part increments over maximal value.
+        /// </summary>
+        public Command LoopSecondsIncrementCommand => new Command(LoopSecondsIncrement);
 
         /// <summary>
         /// Display mode for the editor.
@@ -87,7 +137,7 @@ namespace Astrarium.ViewModels
             }
             set
             {
-                _Year = value;
+                _Year = Math.Max(-4000, Math.Min(value, 9999));
                 NotifyPropertyChanged(nameof(DaysCount), nameof(Year), nameof(JulianDay));
             }
         }
@@ -108,7 +158,7 @@ namespace Astrarium.ViewModels
             }
             set
             {
-                _Day = value;
+                _Day = Math.Max(1, Math.Min(value, DaysCount));
                 NotifyPropertyChanged(nameof(Day), nameof(JulianDay));
             }
         }
@@ -129,7 +179,7 @@ namespace Astrarium.ViewModels
             }
             set
             {
-                _SelectedMonth = value;
+                _SelectedMonth = Math.Max(0, Math.Min(value, 11));
                 NotifyPropertyChanged(nameof(DaysCount), nameof(SelectedMonth), nameof(JulianDay));
             }
         }
@@ -150,7 +200,7 @@ namespace Astrarium.ViewModels
             }
             set
             {
-                _Hours = value;
+                _Hours = Math.Max(0, Math.Min(value, 23));
                 NotifyPropertyChanged(nameof(Hours), nameof(JulianDay));
             }
         }
@@ -171,7 +221,7 @@ namespace Astrarium.ViewModels
             }
             set
             {
-                _Minutes = value;
+                _Minutes = Math.Max(0, Math.Min(value, 59));
                 NotifyPropertyChanged(nameof(Minutes), nameof(JulianDay));
             }
         }
@@ -192,7 +242,7 @@ namespace Astrarium.ViewModels
             }
             set
             {
-                _Seconds = value;
+                _Seconds = Math.Max(0, Math.Min(value, 59));
                 NotifyPropertyChanged(nameof(Seconds), nameof(JulianDay));
             }
         }
@@ -211,6 +261,86 @@ namespace Astrarium.ViewModels
         private void SelectDate()
         {
             Close(true);
+        }
+
+        /// <summary>
+        /// Command handler for <see cref="LoopMonthDecrementCommand"/>
+        /// </summary>
+        private void LoopMonthDecrement()
+        {
+            SetJulianDay(JulianDay - 31);
+        }
+
+        /// <summary>
+        /// Command handler for <see cref="LoopMonthIncrementCommand"/>
+        /// </summary>
+        private void LoopMonthIncrement()
+        {
+            SetJulianDay(JulianDay + 31);
+        }
+
+        /// <summary>
+        /// Command handler for <see cref="LoopDayDecrementCommand"/>
+        /// </summary>
+        private void LoopDayDecrement()
+        {
+            SetJulianDay(JulianDay - 1); 
+        }
+
+        /// <summary>
+        /// Command handler for <see cref="LoopDayIncrementCommand"/>
+        /// </summary>
+        private void LoopDayIncrement()
+        {
+            SetJulianDay(JulianDay + 1);
+        }
+
+        /// <summary>
+        /// Command handler for <see cref="LoopHoursDecrementCommand"/>
+        /// </summary>
+        private void LoopHoursDecrement()
+        {
+            SetJulianDay(JulianDay - TimeSpan.FromHours(1).TotalDays);
+        }
+
+        /// <summary>
+        /// Command handler for <see cref="LoopHoursIncrementCommand"/>
+        /// </summary>
+        private void LoopHoursIncrement()
+        {
+            SetJulianDay(JulianDay + TimeSpan.FromHours(1).TotalDays);
+        }
+
+        /// <summary>
+        /// Command handler for <see cref="LoopMinutesDecrementCommand"/>
+        /// </summary>
+        private void LoopMinutesDecrement()
+        {
+            SetJulianDay(JulianDay - TimeSpan.FromMinutes(1).TotalDays);
+        }
+
+        /// <summary>
+        /// Command handler for <see cref="LoopMinutesIncrementCommand"/>
+        /// </summary>
+        private void LoopMinutesIncrement()
+        {
+            SetJulianDay(JulianDay + TimeSpan.FromMinutes(1).TotalDays);
+        }
+
+        /// <summary>
+        /// Command handler for <see cref="LoopSecondsDecrementCommand"/>
+        /// </summary>
+        private void LoopSecondsDecrement()
+        {
+            SetJulianDay(JulianDay - TimeSpan.FromSeconds(1).TotalDays);
+        }
+
+        /// <summary>
+        /// Command handler for <see cref="LoopSecondsIncrementCommand"/>
+        /// </summary>
+        private void LoopSecondsIncrement()
+        {
+            SetJulianDay(JulianDay + TimeSpan.FromSeconds(1.001).TotalDays);
         }
 
         /// <summary>
@@ -236,10 +366,7 @@ namespace Astrarium.ViewModels
         /// <param name="utcOffset">UTC offset, in hours</param>
         /// <param name="displayMode">Editor display mode</param>
         public DateVM(double jd, double utcOffset, DateOptions displayMode = DateOptions.DateTime)
-        {           
-            SetCurrentDateCommand = new Command(SetCurrentDate);
-            SelectDateCommand = new Command(SelectDate);
-
+        {
             var dateTimeFormat = CultureInfo.CurrentCulture.DateTimeFormat;
             ShortMonthsNames = dateTimeFormat.AbbreviatedMonthNames.Take(12).ToArray();
             FullMonthsNames = dateTimeFormat.MonthNames.Take(12).ToArray();

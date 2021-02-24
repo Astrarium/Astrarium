@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -13,9 +14,8 @@ namespace Astrarium.ViewModels
         public Command SaveToFileCommand { get; private set; }
         public Command CloseCommand { get; private set; }
         public Command<AstroEventVM> SelectAstroEventCommand { get; private set; }
-        public double JulianDay { get; private set; }
-        public CelestialObject Body { get; private set; }
         public IEnumerable<IGrouping<string, AstroEventVM>> Events { get; private set; }
+        public event Action<AstroEvent> OnEventSelected;
 
         private ICollection<AstroEvent> events;
         private readonly ISky sky;
@@ -42,7 +42,7 @@ namespace Astrarium.ViewModels
 
         private void SaveToFile()
         {
-            var file = ViewManager.ShowSaveFileDialog(Text.Get("PhenomenaWindow.ExportTitle"), "Phenomena", ".csv", "Text files (*.txt)|*.txt|Comma-separated files (*.csv)|*.csv");
+            var file = ViewManager.ShowSaveFileDialog(Text.Get("PhenomenaWindow.ExportTitle"), "Phenomena", ".csv", "Text files (*.txt)|*.txt|Comma-separated files (*.csv)|*.csv", out int selectedFilterIndex);
             if (file != null)
             {
                 IAstroEventsWriter writer = null;
@@ -61,15 +61,17 @@ namespace Astrarium.ViewModels
 
                 writer?.Write(events);
 
-                ViewManager.ShowMessageBox("$PhenomenaWindow.ExportDoneTitle", "$PhenomenaWindow.ExportDoneText", MessageBoxButton.OK);
+                var answer = ViewManager.ShowMessageBox("$PhenomenaWindow.ExportDoneTitle", "$PhenomenaWindow.ExportDoneText", MessageBoxButton.YesNo);
+                if (answer == MessageBoxResult.Yes)
+                {
+                    System.Diagnostics.Process.Start(file);
+                }
             }
         }
 
         private void SelectAstroEvent(AstroEventVM ev)
         {
-            JulianDay = ev.JulianDay;
-            Body = ev.Body;
-            Close(true);
+            OnEventSelected?.Invoke(new AstroEvent(ev.JulianDay, ev.Text, ev.PrimaryBody, ev.SecondaryBody));
         }
     }
 
@@ -80,7 +82,8 @@ namespace Astrarium.ViewModels
         public double JulianDay { get; set; }
         public string Text { get; set; }
         public bool NoExactTime { get; set; }
-        public CelestialObject Body { get; set; }
+        public CelestialObject PrimaryBody { get; set; }
+        public CelestialObject SecondaryBody { get; set; }
 
         public AstroEventVM(AstroEvent e, double utcOffset)
         {
@@ -88,7 +91,8 @@ namespace Astrarium.ViewModels
             JulianDay = e.JulianDay;
             Text = e.Text;
             NoExactTime = e.NoExactTime;
-            Body = e.Body;
+            PrimaryBody = e.PrimaryBody;
+            SecondaryBody = e.SecondaryBody;
             Date = Formatters.Date.Format(date);
             Time = Formatters.Time.Format(date);
         }

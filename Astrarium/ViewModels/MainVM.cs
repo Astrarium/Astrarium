@@ -564,30 +564,52 @@ namespace Astrarium.ViewModels
             if (ViewManager.ShowDialog(ps) ?? false)
             {
                 var tokenSource = new CancellationTokenSource();
-
                 ViewManager.ShowProgress("$CalculatePhenomena.WaitTitle", "$CalculatePhenomena.WaitText", tokenSource);
 
                 var events = await Task.Run(() => sky.GetEvents(
                         ps.JulianDayFrom,
                         ps.JulianDayTo,
                         ps.Categories,
-                        tokenSource.Token));
+                        tokenSource.Token), tokenSource.Token);
                
                 if (!tokenSource.IsCancellationRequested)
                 {
                     tokenSource.Cancel();
                     var vm = ViewManager.CreateViewModel<PhenomenaVM>();
                     vm.SetEvents(events);
-                    if (ViewManager.ShowDialog(vm) ?? false)
-                    {
-                        sky.SetDate(vm.JulianDay);                        
-                        if (vm.Body != null) 
-                        {
-                            map.GoToObject(vm.Body, TimeSpan.Zero);
-                        }
-                    }
+                    vm.OnEventSelected += OnPhenomenaSelected;
+                    ViewManager.ShowWindow(vm);
                 }
             }    
+        }
+
+        private void OnPhenomenaSelected(AstroEvent ev)
+        {
+            sky.SetDate(ev.JulianDay);
+            if (ev.PrimaryBody != null)
+            {
+                if (ev.SecondaryBody != null)
+                {
+                    var hor = Angle.Intermediate(ev.PrimaryBody.Horizontal, ev.SecondaryBody.Horizontal, 0.5);
+
+                    var targetViewAngle = Angle.Separation(ev.PrimaryBody.Horizontal, ev.SecondaryBody.Horizontal) * 3;
+
+                    if (ev.PrimaryBody is SizeableCelestialObject pb && ev.SecondaryBody is SizeableCelestialObject sb)
+                    {
+                        var minSemidiamter = Math.Min(pb.Semidiameter, sb.Semidiameter) / 3600;
+                        if (minSemidiamter > targetViewAngle)
+                        {
+                            targetViewAngle = minSemidiamter * 3;
+                        }
+                    }
+
+                    CenterOnPoint(hor, targetViewAngle);
+                }
+                else
+                {
+                    CenterOnObject(ev.PrimaryBody);
+                }
+            }
         }
 
         private void SearchObject()
@@ -619,7 +641,7 @@ namespace Astrarium.ViewModels
                 ["Joint Photographic Experts Group (*.jpg)|*.jpg"] = ImageFormat.Jpeg
             };
 
-            string fileName = ViewManager.ShowSaveFileDialog(Text.Get("SaveMapAsImage.Title"), "Map", formats.Keys.First(), string.Join("|", formats.Keys));
+            string fileName = ViewManager.ShowSaveFileDialog(Text.Get("SaveMapAsImage.Title"), "Map", formats.Keys.First(), string.Join("|", formats.Keys), out int selectedFilterIndex);
             if (fileName != null)
             {
                 using (Image img = new Bitmap(map.Width, map.Height))
@@ -713,6 +735,41 @@ namespace Astrarium.ViewModels
             map.GoToObject(body, TimeSpan.FromSeconds(1));
         }
 
+        private void CenterOnPoint()
+        {
+            map.Center.Set(map.MousePosition);
+            map.Invalidate();
+        }
+
+        private void CenterOnPoint(CrdsHorizontal hor, double targetViewAngle)
+        {
+            if (settings.Get<bool>("Ground") && hor.Altitude <= 0)
+            {
+                if (ViewManager.ShowMessageBox("$PointUnderHorizon.Title", "$PointUnderHorizon.Text", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                {
+                    settings.Set("Ground", false);
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            if (map.LockedObject != null)
+            {
+                if (ViewManager.ShowMessageBox("$ObjectLocked.Title", "$ObjectLocked.Text", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                {
+                    map.LockedObject = null;
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            map.GoToPoint(hor, TimeSpan.FromSeconds(1), targetViewAngle);
+        }
+
         private void LockOnObject(CelestialObject body)
         {
             if (map.LockedObject != body)
@@ -731,12 +788,6 @@ namespace Astrarium.ViewModels
             SelectedObjectsMenuItems.Clear();
         }
 
-        private void CenterOnPoint()
-        {
-            map.Center.Set(map.MousePosition);
-            map.Invalidate();
-        }
-
         private void GetObjectInfo(CelestialObject body)
         {
             if (body != null)
@@ -748,7 +799,7 @@ namespace Astrarium.ViewModels
                     if (ViewManager.ShowDialog(vm) ?? false)
                     {
                         sky.SetDate(vm.JulianDay);
-                        map.GoToObject(body, TimeSpan.Zero);
+                        map.GoToObject(body, TimeSpan.Zero, 0);
                     }
                 }
             }
@@ -765,14 +816,16 @@ namespace Astrarium.ViewModels
 
         private void SelectLocation()
         {
-            var vm = ViewManager.CreateViewModel<LocationVM>();       
-            if (ViewManager.ShowDialog(vm) ?? false)
+            using (var vm = ViewManager.CreateViewModel<LocationVM>())
             {
-                sky.Context.GeoLocation = new CrdsGeographical(vm.ObserverLocation);
-                settings.Set("ObserverLocation", vm.ObserverLocation);
-                settings.Save();
-                sky.Calculate();
-            }            
+                if (ViewManager.ShowDialog(vm) ?? false)
+                {
+                    sky.Context.GeoLocation = new CrdsGeographical(vm.ObserverLocation);
+                    settings.Set("ObserverLocation", vm.ObserverLocation);
+                    settings.Save();
+                    sky.Calculate();
+                }
+            }
         }
     }
 }

@@ -239,5 +239,75 @@ namespace Astrarium.Algorithms.Tests
                 Assert.AreEqual(28.9739, delta, 1e-4);
             }
         }
+
+        [TestMethod]
+        public void LunationNumber()
+        {            
+            Assert.AreEqual(1217, LunarEphem.Lunation(new Date(2021, 5, 11).ToJulianEphemerisDay()));
+            Assert.AreEqual(-282, LunarEphem.Lunation(new Date(1900, 2, 17).ToJulianEphemerisDay()));
+        }
+
+        [TestMethod]
+        public void Noumenia()
+        {
+            // Example are taken from
+            // http://www.makkahcalendar.org/en/islamicCalendarArticle4.php
+
+            // IX.4 Example of Makkah
+            {
+                // 17 Nov 2009, "best time" is 14:48 UTC
+                double jd = new Date(new DateTime(2009, 11, 17, 14, 48, 0, DateTimeKind.Utc)).ToJulianEphemerisDay();
+
+                // Nutation elements
+                var nutation = Nutation.NutationElements(jd);
+
+                // True obliquity
+                var epsilon = Date.TrueObliquity(jd, nutation.deltaEpsilon);
+
+                // Sidereal time at Greenwich
+                double siderealTime = Date.ApparentSiderealTime(jd, nutation.deltaPsi, epsilon);
+
+                // Ecliptical coordinates of the Sun, taken from the example (see ref.)
+                CrdsEcliptical eclSun = new CrdsEcliptical(235.39, 0);
+
+                // Ecliptical coordinates of the Moon, taken from the example (see ref.)
+                CrdsEcliptical eclMoon = new CrdsEcliptical(245.01, -3.76);
+
+                // Geograhical coordinates of Makkah
+                CrdsGeographical geo = new CrdsGeographical(-39.82563, 21.42664);
+
+                double q = LunarEphem.CrescentQ(eclMoon, eclSun, 0.2539 * 3600, epsilon, siderealTime, geo);
+
+                Assert.AreEqual(-0.465, q, 0.001);
+            }
+
+            // IX.5 Example of intermediate horizon 30°W, 30°S at 21:04
+            {
+                // 17 Nov 2009, 21:04 UTC
+                double jd = new Date(new DateTime(2009, 11, 17, 21, 04, 0, DateTimeKind.Utc)).ToJulianEphemerisDay();
+
+                // Nutation elements
+                var nutation = Nutation.NutationElements(jd);
+
+                // True obliquity
+                var epsilon = Date.TrueObliquity(jd, nutation.deltaEpsilon);
+
+                // Sidereal time at Greenwich
+                double siderealTime = Date.ApparentSiderealTime(jd, nutation.deltaPsi, epsilon);
+
+                // Ecliptical coordinates of the Sun, taken from the example (see ref.)
+                CrdsEcliptical eclSun = new CrdsEcliptical(235.65, 0);
+
+                // Ecliptical coordinates of the Moon, taken from the example (see ref.)
+                CrdsEcliptical eclMoon = new CrdsEcliptical(248.32, -3.55);
+
+                // Geograhical coordinates of Makkah
+                CrdsGeographical geo = new CrdsGeographical(30, -30);
+
+                double q = LunarEphem.CrescentQ(eclMoon, eclSun, 0.2536 * 3600, epsilon, siderealTime, geo);
+
+                Assert.AreEqual(0.367, q, 0.001);
+            }
+        }
     }
 }

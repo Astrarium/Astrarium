@@ -1,0 +1,570 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Window 
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+    xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:local="clr-namespace:Astrarium.Plugins.Eclipses" 
+    xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types" 
+    xmlns:q="clr-namespace:Astrarium.Plugins.Eclipses.Controls" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+    x:Class="Astrarium.Plugins.Eclipses.LunarEclipseWindow" 
+    mc:Ignorable="d" 
+    Title="{t:Text Eclipses.Lunar}"
+    Height="768" 
+    Width="1024" 
+    WindowState="Maximized"
+    MinHeight="600" MinWidth="800" 
+    Style="{StaticResource {x:Type Window}}"     
+    WindowStartupLocation="CenterOwner">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="./Resources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="0">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Vertical" Grid.Row="0" HorizontalAlignment="Center">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="{StaticResource ImagePrevSaros}" Style="{StaticResource ImageButton}" Command="{Binding PrevSarosCommand}" IsEnabled="{Binding PrevSarosEnabled}" ToolTip="{t:Text EclipseView.PrevSaros}" />
+                <Button Content="{StaticResource ImagePrevEclipse}" Style="{StaticResource ImageButton}" Command="{Binding PrevEclipseCommand}" ToolTip="{t:Text EclipseView.Prev}" />
+                <Button MinWidth="200" VerticalAlignment="Center" Command="{Binding ChangeDateCommand}" Style="{StaticResource DateButton}" ToolTip="{t:Text EclipseView.ChangeDate}">
+                    <Button.Content>
+                        <TextBlock FontSize="32" VerticalAlignment="Center"  Text="{Binding EclipseDate, FallbackValue='01 Jan 2000'}" />
+                    </Button.Content>
+                </Button>
+                <Button Content="{StaticResource ImageNextEclipse}" Style="{StaticResource ImageButton}" Command="{Binding NextEclipseCommand}" ToolTip="{t:Text EclipseView.Next}" />
+                <Button Content="{StaticResource ImageNextSaros}" Style="{StaticResource ImageButton}" Command="{Binding NextSarosCommand}" IsEnabled="{Binding NextSarosEnabled}" ToolTip="{t:Text EclipseView.NextSaros}" />
+            </StackPanel>
+            <TextBlock Height="Auto" Padding="0 0 0 10" HorizontalAlignment="Center" Text="{Binding EclipseDescription, FallbackValue='Eclipse description'}"></TextBlock>
+        </StackPanel>
+
+        <Grid Height="6" Grid.Row="1">
+            <ProgressBar Height="6" Background="Transparent" IsIndeterminate="True" Visibility="{Binding IsCalculating, Converter={s:BoolToVisibilityConverter}}" />
+        </Grid>
+
+        <TabControl Grid.Row="2" Padding="0" SelectedIndex="{Binding SelectedTabIndex}">
+            <TabItem Header="{t:Text EclipseView.Tab.Map}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="148*"/>
+                        <ColumnDefinition Width="19*"/>
+                        <ColumnDefinition Width="213*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="460"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.Column="0" Margin="1,-1,8,0" Grid.ColumnSpan="4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="115*"/>
+                            <ColumnDefinition Width="268*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <c:MapControl
+                            x:Name="Map"
+                            Grid.Row="0"
+                            BackColor="{Binding MapThumbnailBackColor}"                       
+                            TileServer="{Binding TileServer, Mode=TwoWay}" 
+                            CacheFolder="{Binding CacheFolder, Mode=OneTime}"
+                            IsUpdating="{Binding IsCalculating}"
+                            Markers="{Binding Markers}"
+                            Tracks="{Binding Tracks}"
+                            Center="{Binding MapCenter, Mode=TwoWay}"
+                            ZoomLevel="{Binding MapZoomLevel, Mode=TwoWay}"
+                            Polygons="{Binding Polygons}"
+                            ThumbnailBackColor="{Binding MapThumbnailBackColor}"
+                            ThumbnailForeColor="{Binding MapThumbnailForeColor}"
+                            IsMouseOverMap = "{Binding IsMouseOverMap, Mode=OneWayToSource}"
+                            TileImageAttributes="{Binding TileImageAttributes}"
+                            OnDoubleClick="{Binding LockOnCurrentPositionCommand}"
+                            OnRightClick="{Binding RightClickOnMapCommand}"
+                            Mouse="{Binding MapMouse, Mode=OneWayToSource}" Grid.ColumnSpan="2" Margin="0,0,0.4,25.4" Grid.RowSpan="2">
+                            <c:MapControl.ContextMenu>
+                                <ContextMenu Opened="ContextMenu_Opened">
+                                    <MenuItem Style="{StaticResource MenuItemHeader}" Header="{Binding MapMouseString}" IsEnabled="False" />
+                                    <MenuItem Header="{t:Text EclipseView.ContextMenu.Lock}" Command="{Binding LockOnCurrentPositionCommand}" />
+                                    <MenuItem Header="{t:Text EclipseView.ContextMenu.AddToCitiesList}" Command="{Binding AddCurrentPositionToCitiesListCommand}" />
+                                    <MenuItem Style="{StaticResource MenuItemHeader}" Visibility="{Binding NearestLocation, Converter={s:NotNullToVisibilityConverter}}" Header="{Binding NearestLocation.LocationName}" />
+                                    <MenuItem Header="{t:Text EclipseView.ContextMenu.Lock}" Visibility="{Binding NearestLocation, Converter={s:NotNullToVisibilityConverter}}" Command="{Binding LockOnNearestLocationCommand}" />
+                                    <MenuItem Header="{t:Text EclipseView.ContextMenu.AddToCitiesList}" Command="{Binding AddNearestLocationToCitiesListCommand}" Visibility="{Binding NearestLocation, Converter={s:NotNullToVisibilityConverter}}" />
+                                </ContextMenu>
+                            </c:MapControl.ContextMenu>
+                        </c:MapControl>
+
+                        <Grid Margin="2,4.2,2.4,4.4" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Stretch">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ComboBox Grid.Column="0" Padding="2 0" Margin="0" Width="200" Height="18" ItemsSource="{Binding TileServers, Mode=OneTime}" DisplayMemberPath="Name" SelectedItem="{Binding TileServer}" />
+                            <Slider Padding="16 0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Column="1" Orientation="Horizontal" 
+                                Minimum="{Binding ElementName=Map, Path=MinZoomLevel, Mode=OneWay}"
+                                Maximum="{Binding ElementName=Map, Path=MaxZoomLevel, Mode=OneWay}"
+                                Value="{Binding ElementName=Map, Path=ZoomLevel, Mode=TwoWay}" />
+                            <c:HtmlTextBlock Grid.Column="2" Foreground="{StaticResource BrushControlLightBackground}" VerticalAlignment="Center" HorizontalAlignment="Right" Padding="2 0 4 0" FontSize="12" FormattedText="{Binding TileServer.AttributionText, FallbackValue='AttributionText'}" />
+                        </Grid>
+                    </Grid>
+                    <GridSplitter 
+                        Grid.Column="3" 
+                        ShowsPreview="False"   
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Stretch" Margin="2,0" Width="6" />
+
+                    <!-- Local circumstances table title -->
+
+                    <ScrollViewer Grid.Column="4"
+                        x:Name="RightPanel"
+                        SizeChanged="RightPanel_SizeChanged"
+                        ScrollChanged="RightPanel_ScrollChanged"
+                        HorizontalScrollBarVisibility="Auto"
+                        VerticalScrollBarVisibility="Auto">
+                        <StackPanel x:Name="RightPanelStack" Orientation="Vertical">
+
+                            <TextBlock Padding="6 2" FontSize="18" Text="{t:Text EclipseView.LocalCircumstances}" />
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock VerticalAlignment="Center" Padding="6 4" Text="{Binding ObserverLocationName, FallbackValue='Observer location name'}" />
+                                <ToggleButton Grid.Column="1" IsChecked="{Binding IsMapLocked}" Visibility="{Binding IsMapLocked, Converter={s:BoolToVisibilityConverter}}" Margin="4 0 4 0" Height="24" VerticalContentAlignment="Center" HorizontalAlignment="Right">
+                                    <ToggleButton.Content>
+                                        <TextBlock Padding="4" VerticalAlignment="Center" Text="{t:Text EclipseView.Unlock}" />
+                                    </ToggleButton.Content>
+                                </ToggleButton>
+                            </Grid>
+
+                            <TextBlock Padding="6 2" TextTrimming="CharacterEllipsis" Width="{Binding ElementName=RightPanel, Path=ActualWidth}" Text="{Binding LocalVisibilityDescription, FallbackValue='Local visibility description'}" HorizontalAlignment="Left" />
+                            
+                            <!-- Local details expander -->
+                            <Expander Margin="0 6 0 4" Header="{t:Text EclipseView.LocalDetails}" IsExpanded="True">
+                                <StackPanel Orientation="Vertical">
+                                    <!-- Local contacts table -->
+                                    <DataGrid 
+                                        VerticalScrollBarVisibility="Auto"
+                                        EnableRowVirtualization="True"
+                                        EnableColumnVirtualization="True"
+                                        VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                                        VirtualizingPanel.VirtualizationMode="Recycling"
+                                        VirtualizingPanel.IsVirtualizing="True"
+                                        VerticalAlignment="Stretch"
+                                        AutoGenerateColumns="False" 
+                                        IsReadOnly="True"
+                                        CanUserReorderColumns="False"
+                                        CanUserSortColumns="False"
+                                        GridLinesVisibility="All"
+                                        BorderThickness="1"
+                                        Margin="0 2 0 2"
+                                        Padding="2"
+                                        RowHeaderWidth="0"
+                                        ColumnHeaderHeight="32"
+                                        RowHeight="24"
+                                        ItemsSource="{Binding Path=LocalContactsTable, Mode=OneWay}">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="{t:Text EclipseView.LocalContacts.Instant}" Binding="{Binding Point}" />
+                                            <DataGridTextColumn Header="{t:Text EclipseView.LocalContacts.Time}" FontFamily="Lucida Console" Binding="{Binding Time}"/>
+                                            <DataGridTextColumn Header="{t:Text EclipseView.LocalContacts.Alt}" FontFamily="Lucida Console" Binding="{Binding Altitude}"/>
+                                            <DataGridTextColumn Header="P" FontFamily="Lucida Console" Binding="{Binding PAngle}"/>
+                                            <DataGridTextColumn Header="Z" FontFamily="Lucida Console" Binding="{Binding ZAngle}"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </StackPanel>
+                            </Expander>
+
+                            <!-- Eclipse chart -->
+                            <Expander Header="{t:Text EclipseView.LocalView}" IsExpanded="True" >
+                                <StackPanel Orientation="Vertical">
+                                    <!-- Chart header -->
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <!-- Eclipse contacts toggler -->
+                                        <StackPanel Margin="2" Grid.Column="0" HorizontalAlignment="Left" SnapsToDevicePixels="True" Orientation="Horizontal">
+                                            <RadioButton Content="P1" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:LunarEclipseChartContact.P1}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="{t:Text LunarEclipseView.LocalCircumstances.P1}" />
+                                            <RadioButton Content="U1" IsEnabled="{Binding LocalCircumstances.PartialBegin, Converter={s:NotNullToBoolConverter}}" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:LunarEclipseChartContact.U1}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="{t:Text LunarEclipseView.LocalCircumstances.U1}" />
+                                            <RadioButton Content="U2" IsEnabled="{Binding LocalCircumstances.TotalBegin, Converter={s:NotNullToBoolConverter}}" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:LunarEclipseChartContact.U2}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="{t:Text LunarEclipseView.LocalCircumstances.U2}" />
+                                            <RadioButton Content="Max" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:LunarEclipseChartContact.Max}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="{t:Text LunarEclipseView.LocalCircumstances.Max}" />
+                                            <RadioButton Content="U3" IsEnabled="{Binding LocalCircumstances.TotalEnd, Converter={s:NotNullToBoolConverter}}" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:LunarEclipseChartContact.U3}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="{t:Text LunarEclipseView.LocalCircumstances.U3}" />
+                                            <RadioButton Content="U4" IsEnabled="{Binding LocalCircumstances.PartialEnd, Converter={s:NotNullToBoolConverter}}" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:LunarEclipseChartContact.U4}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="{t:Text LunarEclipseView.LocalCircumstances.U4}" />
+                                            <RadioButton Content="P4" IsChecked="{Binding ElementName=Chart, Path=Contact, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:LunarEclipseChartContact.P4}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="{t:Text LunarEclipseView.LocalCircumstances.P4}" />
+                                        </StackPanel>
+                                        <!-- Chart orientation toggler -->
+                                        <StackPanel Margin="2" Grid.Column="2" HorizontalAlignment="Right" SnapsToDevicePixels="True" Orientation="Horizontal">
+                                            <RadioButton Content="Z" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:LunarEclipseChartOrientation.Zenithal}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="{t:Text EclipseView.LocalView.Zenithal}" />
+                                            <RadioButton Content="N" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static q:LunarEclipseChartOrientation.Equatorial}}" Style="{StaticResource ResourceKey=RadioTab}" ToolTip="{t:Text EclipseView.LocalView.Equatorial}" />
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <!-- Local circumstances chart -->
+                                    <q:LunarEclipseChartControl 
+                                        x:Name="Chart"
+                                        IsEnabled="{Binding IsVisibleFromCurrentPlace, Mode=OneWay}"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch"
+                                        MinHeight="300"
+                                        DarkMode="{Binding IsDarkMode, Mode=OneWay}"
+                                        ZoomLevel="{Binding ChartZoomLevel}"
+                                        Circumstances="{Binding LocalCircumstances}" />
+
+                                    <!-- Chart footer -->
+                                    <DockPanel Margin="0" HorizontalAlignment="Stretch">
+                                        <!-- Chart options togglers -->
+                                        <ToggleButton IsChecked="{Binding ElementName=Chart, Path=ShowLabels}" ToolTip="{t:Text EclipseView.LocalView.ShowLabels}" Width="24" Height="24" Content="{StaticResource ImageChartLabels}" />
+                                        <ToggleButton IsChecked="{Binding ElementName=Chart, Path=ShowContactCircles}" ToolTip="{t:Text EclipseView.LocalView.ShowContactCircles}" Width="24" Height="24" Content="{StaticResource ImageChartCircles}" />
+                                        <!-- Chart zoom buttons -->
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <Button Command="{Binding ChartZoomInCommand}" Content="{StaticResource ImageZoomIn}" ToolTip="{t:Text EclipseView.LocalView.ZoomIn}" Height="22" Width="22" Margin="2" Padding="-3 -1 0 0" />
+                                            <Button Command="{Binding ChartZoomOutCommand}" Content="{StaticResource ImageZoomOut}" ToolTip="{t:Text EclipseView.LocalView.ZoomOut}" Height="22" Width="22" Margin="2" Padding="-3 -1 0 0" />
+                                        </StackPanel>
+                                    </DockPanel>
+                                </StackPanel>
+                            </Expander>
+
+                            <StackPanel x:Name="RightPanelFooter" Orientation="Vertical">
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                </Grid>
+            </TabItem>
+            <TabItem Header="{t:Text EclipseView.Tab.GeneralInfo}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+                    <Grid ScrollViewer.CanContentScroll="True" IsEnabled="{Binding IsCalculating, Converter={s:InverseBoolConverter}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <!-- General details table title -->
+                        <TextBlock Grid.Row="0" FontSize="18" Padding="8 8 0 0" Text="{t:Text EclipseView.EclipseDetails}" />
+
+                        <!-- General details table -->
+                        <DataGrid Grid.Row="1"                            
+                            VerticalScrollBarVisibility="Auto"
+                            VerticalAlignment="Stretch"
+                            AutoGenerateColumns="False" 
+                            IsReadOnly="True"
+                            CanUserReorderColumns="False"
+                            CanUserSortColumns="False"
+                            HeadersVisibility="None"
+                            GridLinesVisibility="All"
+                            BorderThickness="1"
+                            Margin="8"
+                            Padding="2"
+                            RowHeaderWidth="0"
+                            ColumnHeaderHeight="32"
+                            RowHeight="24"
+                            ItemsSource="{Binding EclipseGeneralDetails}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
+                                <DataGridTextColumn Header="Value" Binding="{Binding Value}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <!-- Contacts table title -->
+                        <TextBlock Grid.Row="2" FontSize="18" Padding="8 8 0 0" Text="{t:Text LunarEclipseView.EclipseContacts}" />
+
+                        <!-- Contacts table -->
+                        <DataGrid Grid.Row="3"
+                            VerticalScrollBarVisibility="Auto"
+                            VerticalAlignment="Stretch"
+                            CanUserReorderColumns="False"
+                            CanUserSortColumns="False"
+                            AutoGenerateColumns="False" 
+                            IsReadOnly="True"
+                            GridLinesVisibility="All"
+                            BorderThickness="1"
+                            Margin="8"
+                            Padding="2"
+                            RowHeaderWidth="0"
+                            ColumnHeaderHeight="32"
+                            RowHeight="24"
+                            ItemsSource="{Binding EclipseContacts}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="{t:Text LunarEclipseView.EclipseContacts.Point}" Binding="{Binding Point}"/>
+                                <DataGridTextColumn Header="{t:Text LunarEclipseView.EclipseContacts.Time}" Binding="{Binding Time}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <!-- Besselian elements table title -->
+                        <TextBlock Grid.Row="4" FontSize="18" Padding="8 8 0 0" Text="{t:Text EclipseView.BesselianElements}" />
+
+                        <!-- Besselian elements table header (displaying t0 timings) -->
+                        <TextBlock Grid.Row="5" Padding="8 8 0 0" Text="{Binding BesselianElementsTableHeader}" />
+
+                        <!-- Besselian elements table -->
+                        <DataGrid Grid.Row="6"
+                            VerticalScrollBarVisibility="Auto"
+                            VerticalAlignment="Stretch"
+                            CanUserReorderColumns="False"
+                            CanUserSortColumns="False"
+                            AutoGenerateColumns="False" 
+                            IsReadOnly="True"
+                            GridLinesVisibility="All"
+                            BorderThickness="1"
+                            Margin="8 -8 8 0"
+                            Padding="2"
+                            RowHeaderWidth="0"
+                            ColumnHeaderHeight="32"
+                            RowHeight="24"
+                            ItemsSource="{Binding BesselianElementsTable}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="n" Binding="{Binding Index}"/>
+                                <DataGridTextColumn Header="x" Binding="{Binding X}"/>
+                                <DataGridTextColumn Header="y" Binding="{Binding Y}"/>
+                                <DataGridTextColumn Header="F1" Binding="{Binding F1}"/>
+                                <DataGridTextColumn Header="F2" Binding="{Binding F2}"/>
+                                <DataGridTextColumn Header="F3" Binding="{Binding F3}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <!-- Besselian elements table footer (displaying tanF1 and tanF2)-->
+                        <TextBlock Grid.Row="7" Padding="8" Text="{Binding BesselianElementsTableFooter}" />
+
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="{t:Text EclipseView.Tab.SarosSeries}">
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Row="0" FontSize="18" Padding="8 8 0 0" Text="{Binding SarosSeriesTableTitle, FallbackValue='List of eclipses of saros series 123'}" Grid.ColumnSpan="2" />
+                    <Button Margin="0 8 8 0" Padding="8 0" Grid.Column="2" HorizontalAlignment="Right" Content="{t:Text EclipseView.Export}" Command="{Binding ExportSarosSeriesTableCommand}" />
+
+                    <DataGrid Grid.Row="1"
+                        IsEnabled="{Binding IsCalculating, Converter={s:InverseBoolConverter}}"
+                        VerticalScrollBarVisibility="Auto"
+                        VerticalAlignment="Stretch"
+                        AutoGenerateColumns="False" 
+                        CanUserReorderColumns="False"
+                        CanUserSortColumns="False"
+                        IsReadOnly="True"
+                        GridLinesVisibility="All"
+                        BorderThickness="1"
+                        Margin="8"
+                        Padding="2"
+                        RowHeaderWidth="0"
+                        ColumnHeaderHeight="32"
+                        RowHeight="24"
+                        ItemsSource="{Binding SarosSeriesTable}" Grid.ColumnSpan="2">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="{t:Text EclipseView.SarosTable.Member}" Binding="{Binding Member}"/>
+                            <DataGridTemplateColumn Header="{t:Text EclipseView.SarosTable.Date}">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock FontFamily="Lucida Console" FontSize="12">
+                                        <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:LunarEclipseWindow}, Mode=FindAncestor}, Path=DataContext.SarosSeriesTableSetDateCommand}" CommandParameter="{Binding MeeusLunationNumber}"><Run Text="{Binding Date}" /></Hyperlink>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="{t:Text EclipseView.SarosTable.Type}" Binding="{Binding Type}"/>
+                            <DataGridTextColumn Header="{t:Text EclipseView.SarosTable.Gamma}" Binding="{Binding Gamma}"/>
+                            <DataGridTextColumn Header="{t:Text EclipseView.SarosTable.Magnitude}" Binding="{Binding Magnitude}"/>
+                            <DataGridTemplateColumn>
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                        <Style.Setters>
+                                            <Setter Property="Content" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:LunarEclipseWindow}, Mode=FindAncestor}, Path=DataContext.SettingsLocationName}" />
+                                        </Style.Setters>
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock FontSize="12" Text="{Binding LocalVisibility}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+
+            </TabItem>
+            <TabItem Header="{t:Text EclipseView.Tab.LocalCircumstances}">
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="18" Padding="8 8 0 0" Text="{t:Text EclipseView.LocalCircumstances}" />
+                        <Button Margin="0 8 8 0" Padding="8 0" Grid.Column="1" HorizontalAlignment="Right" Content="{t:Text EclipseView.Clear}" Command="{Binding ClearLocationsTableCommand}" Visibility="{Binding IsCitiesListTableNotEmpty, Converter={s:BoolToVisibilityConverter}}" />
+                        <Button Margin="0 8 8 0" Padding="8 0" Grid.Column="2" HorizontalAlignment="Right" Content="{t:Text EclipseView.Export}" Command="{Binding ExportLocationsTableCommand}" Visibility="{Binding IsCitiesListTableNotEmpty, Converter={s:BoolToVisibilityConverter}}" />
+                    </Grid>
+                    
+                    <!-- Import options view, displayed if no locations loaded -->
+                    <Grid Grid.Row="1" Margin="0 10" Visibility="{Binding IsCitiesListTableNotEmpty, Converter={s:InverseBoolToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <Button Grid.Row="0" Grid.Column="0" Margin="8 4" Padding="8 0" Content="{t:Text EclipseView.Import}" Width="Auto" HorizontalAlignment="Stretch" Command="{Binding LoadLocationsFromFileCommand}" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" Padding="0 " VerticalAlignment="Center">                                
+                            <Run Text="{t:Text EclipseView.Import.Text}" /> <Hyperlink Command="{Binding ShowLocationsFileFormatCommand}"><Run Text="{t:Text EclipseView.Import.Format}" /></Hyperlink>.
+                        </TextBlock>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"  Padding="8 4" VerticalAlignment="Center" Text="{t:Text EclipseView.AddLocationFromMap}" />
+                    </Grid>
+                    
+                    <!-- Locations list table -->
+                    <DataGrid Grid.Row="2"
+                        VerticalScrollBarVisibility="Auto"
+                        VerticalAlignment="Stretch"
+                        AutoGenerateColumns="False" 
+                        CanUserReorderColumns="False"
+                        CanUserSortColumns="True"
+                        EnableRowVirtualization="True"
+                        EnableColumnVirtualization="True"
+                        VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                        VirtualizingPanel.VirtualizationMode="Recycling"
+                        VirtualizingPanel.IsVirtualizing="True"
+                        IsReadOnly="True"
+                        Visibility="{Binding IsCitiesListTableNotEmpty, Converter={s:BoolToVisibilityConverter}}"
+                        GridLinesVisibility="All"
+                        BorderThickness="1"
+                        Margin="8"
+                        Padding="2"
+                        RowHeaderWidth="0"
+                        ColumnHeaderHeight="32"
+                        RowHeight="24"
+                        ItemsSource="{Binding CitiesListTable}">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="{t:Text EclipseView.LocalCircumstancesTable.Location}" CanUserSort="True" SortMemberPath="LocationName">
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                        <Setter Property="ToolTip" Value="{t:Text EclipseView.LocalCircumstancesTable.Location.Tooltip}" />
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock>
+                                            <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:LunarEclipseWindow}, Mode=FindAncestor}, Path=DataContext.CitiesListTableGoToCoordinatesCommand}" CommandParameter="{Binding Coordinates, Mode=OneWay}"><Run Text="{Binding LocationName, Mode=OneWay}" ToolTip="{t:Text EclipseView.LocalCircumstancesTable.Location.LinkTooltip}" /></Hyperlink>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="{t:Text EclipseView.LocalCircumstancesTable.Coordinates}" Binding="{Binding CoordinatesString}" CanUserSort="False">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                        <Setter Property="ToolTip" Value="{t:Text EclipseView.LocalCircumstancesTable.Coordinates.Tooltip}" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="{t:Text EclipseView.LocalCircumstancesTable.TimeZone}" Binding="{Binding TimeZoneString}" SortMemberPath="TimeZone" CanUserSort="True">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                        <Setter Property="ToolTip" Value="{t:Text EclipseView.LocalCircumstancesTable.TimeZone.Tooltip}" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="P1" Binding="{Binding P1String}">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                        <Setter Property="ToolTip" Value="{t:Text LunarEclipseView.LocalCircumstances.P1}" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="U1" Binding="{Binding U1String}">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                        <Setter Property="ToolTip" Value="{t:Text LunarEclipseView.LocalCircumstances.U1}" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="U2" Binding="{Binding U2String}">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                        <Setter Property="ToolTip" Value="{t:Text LunarEclipseView.LocalCircumstances.U2}" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Max" Binding="{Binding MaxString}">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                        <Setter Property="ToolTip" Value="{t:Text LunarEclipseView.LocalCircumstances.Max}" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="U3" Binding="{Binding U3String}">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                        <Setter Property="ToolTip" Value="{t:Text LunarEclipseView.LocalCircumstances.U3}" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="U4" Binding="{Binding U4String}">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                        <Setter Property="ToolTip" Value="{t:Text LunarEclipseView.LocalCircumstances.U4}" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="P4" Binding="{Binding P4String}">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                        <Setter Property="ToolTip" Value="{t:Text LunarEclipseView.LocalCircumstances.P4}" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="{t:Text EclipseView.LocalCircumstancesTable.Visibility}" Binding="{Binding Visibility}" CanUserSort="False">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                        <Setter Property="ToolTip" Value="{t:Text EclipseView.LocalCircumstancesTable.Visibility.Tooltip}" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+    </Grid>
+</Window>

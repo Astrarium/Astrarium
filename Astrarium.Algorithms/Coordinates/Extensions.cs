@@ -25,7 +25,7 @@ namespace Astrarium.Algorithms
         /// </summary>
         /// <param name="eq">Pair of equatorial coodinates</param>
         /// <param name="geo">Geographical coordinates of the observer</param>
-        /// <param name="theta0">Local sidereal time</param>
+        /// <param name="theta0">Sidereal time at Greenwich</param>
         /// <remarks>
         /// Implementation is taken from AA(I), formulae 12.5, 12.6.
         /// </remarks>
@@ -53,7 +53,7 @@ namespace Astrarium.Algorithms
         /// </summary>
         /// <param name="hor">Pair of local horizontal coordinates.</param>
         /// <param name="geo">Geographical of the observer</param>
-        /// <param name="theta0">Local sidereal time.</param>
+        /// <param name="theta0">Sidereal time at Greenwich.</param>
         /// <returns>Pair of equatorial coordinates</returns>
         public static CrdsEquatorial ToEquatorial(this CrdsHorizontal hor, CrdsGeographical geo, double theta0)
         {
@@ -315,6 +315,27 @@ namespace Astrarium.Algorithms
             //if (h0.Altitude < 0) return h0;
             double R = 1.02 / Math.Tan(Angle.ToRadians(h0.Altitude + 10.3 / (h0.Altitude + 5.11)));
             return new CrdsHorizontal(h0.Azimuth, h0.Altitude + R / 60);
+        }
+
+        /// <summary>
+        /// Calculates distance in kilometers between 2 points on the Earth surface.
+        /// </summary>
+        /// <param name="g1">First point.</param>
+        /// <param name="g2">Second point.</param>
+        /// <returns>Distance in kilometers between 2 points.</returns>
+        /// <remarks>
+        /// The method is taken from https://www.movable-type.co.uk/scripts/latlong.html
+        /// </remarks>
+        public static double DistanceTo(this CrdsGeographical g1, CrdsGeographical g2)
+        {
+            const double R = 6371;
+            double phi1 = Angle.ToRadians(g1.Latitude);
+            double phi2 = Angle.ToRadians(g2.Latitude);
+            double deltaPhi = Angle.ToRadians(g2.Latitude - g1.Latitude);
+            double deltaLambda = Angle.ToRadians(g2.Longitude - g1.Longitude);
+            double a = Math.Sin(deltaPhi / 2) * Math.Sin(deltaPhi / 2) + Math.Cos(phi1) * Math.Cos(phi2) * Math.Sin(deltaLambda / 2) * Math.Sin(deltaLambda / 2);
+            double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+            return R * c;
         }
     }
 }

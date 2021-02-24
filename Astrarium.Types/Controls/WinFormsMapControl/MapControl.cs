@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -28,14 +29,14 @@ namespace System.Windows.Forms
         private Drawing.Point _Offset = new Drawing.Point();
 
         /// <summary>
-        /// Flag indicating thar mouse is captured.
-        /// </summary>
-        private bool _MouseCaptured = false;
-
-        /// <summary>
         /// Last known mouse position.
         /// </summary>
         private Drawing.Point _LastMouse = new Drawing.Point();
+
+        /// <summary>
+        /// Flag indicating the map is dragging by mouse
+        /// </summary>
+        private bool _IsDragging = false;
 
         /// <summary>
         /// Cache used to store tile images in memory.
@@ -91,6 +92,7 @@ namespace System.Windows.Forms
 
                 SetZoomLevel(value, new Drawing.Point(Width / 2, Height / 2));
                 CenterChanged?.Invoke(this, EventArgs.Empty);
+                
             }
         }
 
@@ -138,6 +140,10 @@ namespace System.Windows.Forms
                     throw new ArgumentException($"{value} is an incorrect value for {nameof(MinZoomLevel)} property. Value should be in range from 0 to 19.");
 
                 _MinZoomLevel = value;
+
+                if (ZoomLevel < _MinZoomLevel)
+                    ZoomLevel = _MinZoomLevel;
+                
                 Invalidate();
             }
         }
@@ -196,6 +202,9 @@ namespace System.Windows.Forms
 
                     if (ZoomLevel < TileServer.MinZoomLevel)
                         ZoomLevel = TileServer.MinZoomLevel;
+
+                    MaxZoomLevel = TileServer.MaxZoomLevel;
+                    MinZoomLevel = TileServer.MinZoomLevel;
                 }
 
                 Invalidate();
@@ -243,25 +252,85 @@ namespace System.Windows.Forms
         }
 
         /// <summary>
-        /// Gets collection of markers to be displayed on the map.
+        /// Backing field for <see cref="Markers"/> property.
+        /// </summary>
+        private ObservableCollection<Marker> _Markers = new ObservableCollection<Marker>();
+
+        /// <summary>
+        /// Gets or sets collection of markers to be displayed on the map.
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public ICollection<Marker> Markers { get; set; } = new List<Marker>();
+        public ObservableCollection<Marker> Markers
+        {
+            get => _Markers;
+            set
+            {
+                if (value != _Markers)
+                {
+                    _Markers.CollectionChanged -= OverayItemsChanged;
+                    _Markers = value;
+                    if (value != null)
+                    {
+                        _Markers.CollectionChanged += OverayItemsChanged;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Backing field for <see cref="Tracks"/> property.
+        /// </summary>
+        private ObservableCollection<Track> _Tracks = new ObservableCollection<Track>();
 
         /// <summary>
         /// Gets collection of tracks to be displayed on the map.
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public ICollection<Track> Tracks { get; set; } = new List<Track>();
+        public ObservableCollection<Track> Tracks
+        {
+            get => _Tracks;
+            set
+            {
+                if (value != _Tracks)
+                {
+                    _Tracks.CollectionChanged -= OverayItemsChanged;
+                    _Tracks = value;
+                    if (value != null)
+                    {
+                        _Tracks.CollectionChanged += OverayItemsChanged;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Backing field for <see cref="Polygons"/> property.
+        /// </summary>
+        private ObservableCollection<Polygon> _Polygons = new ObservableCollection<Polygon>();
 
         /// <summary>
         /// Gets collection of polygons to be displayed on the map.
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public ICollection<Polygon> Polygons { get; set;  } = new List<Polygon>();
+        public ObservableCollection<Polygon> Polygons
+        {
+            get => _Polygons;
+            set
+            {
+                if (value != _Polygons)
+                {
+                    _Polygons.CollectionChanged -= OverayItemsChanged;
+                    _Polygons = value;
+                    if (value != null)
+                    {
+                        _Polygons.CollectionChanged += OverayItemsChanged;
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Backing field for <see cref="FitToBounds"/> property.
@@ -281,6 +350,31 @@ namespace System.Windows.Forms
                 Invalidate();
             }
         }
+
+        /// <summary>
+        /// Flag indicating the map is in the update state, 
+        /// and painting events should be suppressed.
+        /// </summary>
+        private bool _IsUpdating = false;
+
+        /// <summary>
+        /// Maintains the map control performance by preventing the control from drawing 
+        /// until the <see cref="EndUpdate"/> method is called.
+        /// </summary>
+        public void BeginUpdate()
+        {
+            _IsUpdating = true;
+        }
+
+        /// <summary>
+        /// Resumes painting the map control after painting is suspended 
+        /// by the <see cref="BeginUpdate"/> method.
+        /// </summary>
+        public void EndUpdate()
+        {
+            _IsUpdating = false;
+            Invalidate();
+        }       
 
         /// <summary>
         /// Gets or sets color used to draw error messages.
@@ -357,6 +451,11 @@ namespace System.Windows.Forms
         public event EventHandler<EventArgs> MouseChanged;
 
         /// <summary>
+        /// Raised when <see cref="ZoomLevel"/> property value is changed.
+        /// </summary>
+        public event EventHandler<EventArgs> ZoomLevelChaged;
+
+        /// <summary>
         /// Raised when <see cref="TileServer"/> property value is changed.
         /// </summary>
         public event EventHandler<EventArgs> TileServerChanged;
@@ -378,6 +477,14 @@ namespace System.Windows.Forms
         {
             base.OnCreateControl();
             Center = new GeoPoint(0, 0);
+        }
+
+        /// <summary>
+        /// Raised when overlay items (markers, tracks, polygons) changed.
+        /// </summary>
+        private void OverayItemsChanged(object sender, Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            Invalidate();
         }
 
         /// <summary>
@@ -420,26 +527,36 @@ namespace System.Windows.Forms
 
             if (drawContent)
             {
-                pe.Graphics.SmoothingMode = SmoothingMode.None;
-                DrawTiles(pe.Graphics);
-                pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                try
+                {
+                    pe.Graphics.SmoothingMode = SmoothingMode.None;
+                    DrawTiles(pe.Graphics);
+                    pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-                DrawPolygons(pe.Graphics);
-                DrawTracks(pe.Graphics);
-                DrawMarkers(pe.Graphics);
+                    if (!_IsUpdating)
+                    {
+                        DrawPolygons(pe.Graphics);
+                        DrawTracks(pe.Graphics);
+                        DrawMarkers(pe.Graphics);
+                    }
 
-                var gs = pe.Graphics.Save();
+                    var gs = pe.Graphics.Save();
+                    pe.Graphics.SmoothingMode = SmoothingMode.None;
+                    if (_Offset.Y > 0)
+                    {
+                        pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, -1, Width, _Offset.Y + 1);
+                    }
+                    if (_Offset.Y + FullMapSizeInPixels < Height)
+                    {
+                        pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, _Offset.Y + FullMapSizeInPixels, Width, _Offset.Y + FullMapSizeInPixels);
+                    }
+                    pe.Graphics.Restore(gs);
 
-                //pe.Graphics.SmoothingMode = SmoothingMode.None;
-                //if (_Offset.Y > 0)
-                //{
-                //    pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, -1, Width, _Offset.Y + 1);
-                //}
-                //if (_Offset.Y + FullMapSizeInPixels < Height)
-                //{
-                //    pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, _Offset.Y + FullMapSizeInPixels, Width, _Offset.Y + FullMapSizeInPixels);
-                //}
-                //pe.Graphics.Restore(gs);
+                }
+                catch (Exception ex) 
+                {
+                    DrawErrorString(pe.Graphics, $"Drawing error:\n{ex}");
+                }
             }
 
             base.OnPaint(pe);
@@ -466,21 +583,11 @@ namespace System.Windows.Forms
         {
             if (e.Button == MouseButtons.Left)
             {
-                _MouseCaptured = true;
+                _IsDragging = true;
                 _LastMouse.X = e.X;
                 _LastMouse.Y = e.Y;
             }
             base.OnMouseDown(e);
-        }
-
-        /// <summary>
-        /// Called when mouse is up.
-        /// </summary>
-        /// <param name="e">Event args.</param>
-        protected override void OnMouseUp(MouseEventArgs e)
-        {
-            _MouseCaptured = false;
-            base.OnMouseUp(e);
         }
 
         /// <summary>
@@ -489,7 +596,7 @@ namespace System.Windows.Forms
         /// <param name="e">Event args.</param>
         protected override void OnMouseMove(MouseEventArgs e)
         {
-            if (_MouseCaptured)
+            if (_IsDragging)
             {
                 _Offset.X += (e.X - _LastMouse.X);
                 _Offset.Y += (e.Y - _LastMouse.Y);
@@ -513,6 +620,12 @@ namespace System.Windows.Forms
             MouseChanged?.Invoke(this, EventArgs.Empty);
 
             base.OnMouseMove(e);
+        }
+
+        protected override void OnMouseUp(MouseEventArgs e)
+        {
+            _IsDragging = false;
+            base.OnMouseUp(e);
         }
 
         /// <summary>
@@ -695,7 +808,11 @@ namespace System.Windows.Forms
                             }
                             if (m.Style.LabelFont != null && m.Style.LabelBrush != null && m.Style.LabelFormat != null)
                             {
-                                gr.DrawString(m.Label, m.Style.LabelFont, m.Style.LabelBrush, new PointF(p.X + m.Style.MarkerWidth * 0.35f, p.Y + m.Style.MarkerWidth * 0.35f), m.Style.LabelFormat);
+                                if ((m.MinZoomToDisplayLabel == 0 || ZoomLevel >= m.MinZoomToDisplayLabel) &&
+                                    (m.MaxZoomToDisplayLabel == 0 || ZoomLevel <= m.MaxZoomToDisplayLabel))
+                                {
+                                    gr.DrawString(m.Label, m.Style.LabelFont, m.Style.LabelBrush, new PointF(p.X + m.Style.MarkerWidth * 0.35f, p.Y + m.Style.MarkerWidth * 0.35f), m.Style.LabelFormat);
+                                }
                             }
                         }
                     }
@@ -736,15 +853,15 @@ namespace System.Windows.Forms
                 {
                     //if (ZoomLevel < 3)
                     //{
-                    //    if (track.Style.Pen != null)
-                    //    {
-                    //        Draw(gr, () => gr.DrawLines(track.Style.Pen, points));
-                    //    }
+                        if (track.Style.Pen != null && points.Length > 1)
+                        {
+                            Draw(gr, () => gr.DrawLines(track.Style.Pen, points));
+                        }
                     //}
                     //else
-                    {
-                        Draw(gr, () => gr.DrawPolyline(track.Style.Pen, points));
-                    }
+                    //{
+                    //    Draw(gr, () => gr.DrawPolyline(track.Style.Pen, points));
+                    //}
                 }
             }
         }
@@ -775,6 +892,7 @@ namespace System.Windows.Forms
                     }
 
                     gp.CloseFigure();
+                    gp.Flatten();
 
                     var eventArgs = new DrawPolygonEventArgs()
                     {
@@ -921,6 +1039,8 @@ namespace System.Windows.Forms
 
                 _Offset.X = (int)(_Offset.X % FullMapSizeInPixels);                
                 Invalidate();
+
+                ZoomLevelChaged?.Invoke(this, EventArgs.Empty);
             }
         }
 

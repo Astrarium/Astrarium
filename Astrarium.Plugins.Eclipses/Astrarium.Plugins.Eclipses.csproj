@@ -1,0 +1,52 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <TargetFrameworks>net451</TargetFrameworks>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <UseWpf>true</UseWpf>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Product>Eclipses</Product>
+    <Description>Solar and lunar eclipses plugin</Description>
+    <Authors>Alexander Krutov</Authors>
+    <OutputPath>..\Astrarium\bin\$(Configuration)</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Deploy)' == 'True'">
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>None</DebugType>
+    <OutputPath>..\Deploy\$(MSBuildProjectName)</OutputPath>
+  </PropertyGroup>
+
+  <Target Condition="'$(Deploy)' == 'True'" Name="ZipOutputPath" AfterTargets="Build">
+    <ZipDirectory
+        Overwrite="True"
+        SourceDirectory="$(OutputPath)"
+        DestinationFile="$(OutputPath)\..\$(MSBuildProjectName)-$(ProductVersion).zip" />
+  </Target>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\Astrarium.Algorithms\Astrarium.Algorithms.csproj">
+      <Private>false</Private>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+    </ProjectReference>
+    <ProjectReference Include="..\Astrarium.Types\Astrarium.Types.csproj">
+      <Private>false</Private>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Text.ini" />
+    <EmbeddedResource Include="Text.ini" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Views\LunarEclipseWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\SolarEclipseWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+
+</Project>

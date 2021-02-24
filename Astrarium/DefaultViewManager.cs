@@ -74,9 +74,11 @@ namespace Astrarium
 
                 if (window.GetType() != typeof(MainWindow))
                 {
-                    if (Application.Current.MainWindow != window)
+                    if (isDialog)
                     {
-                        window.Owner = Application.Current.MainWindow;
+                        var owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive && !(w is ProgressWindow) && !(w is MessageBoxWindow));
+                        window.Owner = owner ?? Application.Current.MainWindow;
+                        window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                     }
                 }
                 else
@@ -94,21 +96,17 @@ namespace Astrarium
                     
                     window.Close();
 
-                    if (viewModel is ViewModelBase)
-                    {
-                        (viewModel as ViewModelBase).Closing -= viewModelClosingHandler;
-                    }
+                    viewModel.Closing -= viewModelClosingHandler;
 
                     if (needDisposeModel)
                     {
                         viewModel.Dispose();
                     }
+
+                    Application.Current.Dispatcher.Invoke(() => window.Owner?.Activate());
                 };
 
-                if (viewModel is ViewModelBase)
-                {
-                    (viewModel as ViewModelBase).Closing += viewModelClosingHandler;
-                }
+                viewModel.Closing += viewModelClosingHandler;
 
                 if (isDialog)
                 {
@@ -209,7 +207,9 @@ namespace Astrarium
         public MessageBoxResult ShowMessageBox(string caption, string text, MessageBoxButton buttons)
         {
             var dialog = typeFactory(typeof(MessageBoxWindow)) as MessageBoxWindow;
-            dialog.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
+            dialog.Owner = null;
+            dialog.Topmost = true;
+            dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             dialog.Title = caption.StartsWith("$") ? Text.Get(caption.Substring(1)) : caption;
             dialog.DataContext = text.StartsWith("$") ? Text.Get(text.Substring(1)) : text;
             dialog.Buttons = buttons;
@@ -221,6 +221,7 @@ namespace Astrarium
         {
             var dialog = typeFactory(typeof(ProgressWindow)) as ProgressWindow;
             dialog.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
+            dialog.Topmost = true;
             dialog.Title = caption.StartsWith("$") ? Text.Get(caption.Substring(1)) : caption;
             dialog.Text = text.StartsWith("$") ? Text.Get(text.Substring(1)) : text;
             dialog.CancellationTokenSource = tokenSource;
@@ -228,14 +229,23 @@ namespace Astrarium
             dialog.Show();
         }
 
-        public string ShowSaveFileDialog(string caption, string fileName, string extension, string filter)
+        public string ShowSaveFileDialog(string caption, string fileName, string extension, string filter, out int selectedFilterIndex)
         {
             var dialog = new SaveFileDialog();
             dialog.Title = caption.StartsWith("$") ? Text.Get(caption.Substring(1)) : caption;
             dialog.FileName = fileName;
             dialog.DefaultExt = extension;
             dialog.Filter = filter;
-            return (dialog.ShowDialog() ?? false) ? dialog.FileName : null;
+            if (dialog.ShowDialog() ?? false)
+            {
+                selectedFilterIndex = dialog.FilterIndex;
+                return dialog.FileName;
+            }
+            else
+            {
+                selectedFilterIndex = -1;
+                return null;
+            }
         }
 
         public string ShowOpenFileDialog(string caption, string filter)

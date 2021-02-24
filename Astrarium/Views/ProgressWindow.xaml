@@ -21,7 +21,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Label Name="Label" Grid.Row="0" Content="Please wait..." Margin="10"/>
-        <ProgressBar Name="ProgressBar" Height="8" SnapsToDevicePixels="True" VerticalAlignment="Top" Grid.Row="1" Margin="10 0 10 0"></ProgressBar>
+        <ProgressBar Name="ProgressBar" Height="8" SnapsToDevicePixels="True" Minimum="0" Maximum="100" VerticalAlignment="Top" Grid.Row="1" Margin="10 0 10 0"></ProgressBar>
         <Button Name="CancelButton" Click="CancelButton_Click" MinWidth="80" Grid.Row="2" HorizontalAlignment="Right" Margin="10" Content="{t:Text Cancel}" />
     </Grid>
 </Window>

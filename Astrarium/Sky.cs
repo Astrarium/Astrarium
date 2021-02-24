@@ -269,19 +269,27 @@ namespace Astrarium
             {
                 From = jdFrom,
                 To = jdTo,
-                GeoLocation = Context.GeoLocation
+                GeoLocation = Context.GeoLocation,
+                CancelToken = cancelToken
             };
 
             var events = new List<AstroEvent>();
             foreach (var item in EventConfigs.SelectMany(c => c).Where(i => categories.Contains(i.Key)))
             {
-                if (cancelToken != null && cancelToken.Value.IsCancellationRequested)
+                try
                 {
-                    break;
+                    if (cancelToken?.IsCancellationRequested == true)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        events.AddRange(item.Formula.Invoke(context));
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    events.AddRange(item.Formula.Invoke(context));
+
                 }
             }
 

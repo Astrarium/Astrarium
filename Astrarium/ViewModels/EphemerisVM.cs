@@ -3,6 +3,7 @@ using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -90,7 +91,13 @@ namespace Astrarium.ViewModels
 
         private void SaveToFile()
         {
-            var file = ViewManager.ShowSaveFileDialog(Text.Get("EphemeridesWindow.ExportTitle"), "Ephemerides", ".csv", "Comma-separated files (*.csv)|*.csv");
+            var formats = new Dictionary<string, string>
+            {
+                ["Comma-separated files (with formatting) (*.csv)"] = "*.csv",
+                ["Comma-separated files (raw data) (*.csv)"] = "*.csv",
+            };
+            string filter = string.Join("|", formats.Select(kv => $"{kv.Key}|{kv.Value}"));
+            var file = ViewManager.ShowSaveFileDialog(Text.Get("EphemeridesWindow.ExportTitle"), "Ephemerides", ".csv", filter, out int selectedFilterIndex);
             if (file != null)
             {
                 IEphemeridesWriter writer = null;
@@ -98,7 +105,7 @@ namespace Astrarium.ViewModels
                 switch (ext)
                 {
                     case ".csv":
-                        writer = new EphemeridesCsvWriter(file, sky.Context.GeoLocation.UtcOffset);
+                        writer = new EphemeridesCsvWriter(file, sky.Context.GeoLocation.UtcOffset, selectedFilterIndex == 2);
                         break;
                     default:
                         break;
@@ -106,7 +113,11 @@ namespace Astrarium.ViewModels
 
                 writer?.Write(Body, StartDate, EndDate, Step, Ephemeris);
 
-                ViewManager.ShowMessageBox("$EphemeridesWindow.ExportDoneTitle", "$EphemeridesWindow.ExportDoneText", MessageBoxButton.OK);
+                var answer = ViewManager.ShowMessageBox("$EphemeridesWindow.ExportDoneTitle", "$EphemeridesWindow.ExportDoneText", MessageBoxButton.YesNo);
+                if (answer == MessageBoxResult.Yes)
+                {
+                    System.Diagnostics.Process.Start(file);
+                }
             }
         }
     }
@@ -120,11 +131,16 @@ namespace Astrarium.ViewModels
     {
         private string file;
         private double utcOffset;
+        private bool isRawData;
+        private NumberFormatInfo nf;
 
-        public EphemeridesCsvWriter(string file, double utcOffset)
+        public EphemeridesCsvWriter(string file, double utcOffset, bool isRawData)
         {
             this.file = file;
             this.utcOffset = utcOffset;
+            this.isRawData = isRawData;
+            nf = new NumberFormatInfo();
+            nf.NumberDecimalSeparator = ".";
         }
 
         public void Write(CelestialObject body, double jdFrom, double jdTo, TimeSpan step, List<Ephemerides> ephemerides)
@@ -145,15 +161,16 @@ namespace Astrarium.ViewModels
                 // content rows
                 for (int i = 0; i < ephemerides.Count; i++)
                 {
+                    double jd = jdFrom + i * step.TotalDays;
                     row = new StringBuilder();
                     row.Append("\"");
-                    row.Append(Formatters.DateTime.Format(new Date(jdFrom + i * step.TotalDays, utcOffset)));
+                    row.Append(isRawData ? jd.ToString(nf) : Formatters.DateTime.Format(new Date(jd, utcOffset)));
                     row.Append("\",");
 
                     foreach (var e in ephemerides[i])
                     {
                         row.Append("\"");
-                        row.Append(e.Formatter.Format(e.Value));
+                        row.Append(isRawData ? Convert.ToString(e.Value, nf) : e.Formatter.Format(e.Value));
                         row.Append("\",");
                     }
 

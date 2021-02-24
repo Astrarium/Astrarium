@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using static System.Math;
 using static Astrarium.Algorithms.Angle;
 
@@ -15,9 +14,20 @@ namespace Astrarium.Algorithms
     public class PolynomialBesselianElements
     {
         /// <summary>
-        /// Julian Day of eclipse maximum.
+        /// Julian Day of elements t0 instant.
         /// </summary>
         public double JulianDay0 { get; set; }
+
+        /// <summary>
+        /// Instant of eclipse maximum
+        /// </summary>
+        public double JulianDayMaximum { get; set; }
+
+        /// <summary>
+        /// DeltaT value (difference between Dynamical and Universal Times).
+        /// If not specified, calculated automatically for the <see cref="JulianDay0"/> value.
+        /// </summary>
+        public double DeltaT { get; set; }
 
         /// <summary>
         /// Step, in days, between each item in instant Besselian elements series
@@ -62,44 +72,40 @@ namespace Astrarium.Algorithms
         public double[] Mu { get; set; }
 
         /// <summary>
-        /// Coefficients of angle of penumbral cone, in degrees
+        /// Tangent of the penumbral cone angle.
         /// </summary>
-        public double[] F1 { get; set; }
+        public double TanF1 { get; set; }
 
         /// <summary>
-        /// Coefficients of angle of umbral cone, in degrees
+        /// Tangent of the umbral cone angle.
         /// </summary>
-        public double[] F2 { get; set; }
+        public double TanF2 { get; set; }
 
         /// <summary>
         /// Gets Besselian elements values for specified Juluan Day.
         /// </summary>
         /// <param name="jd">Julian Day of interest</param>
         /// <returns></returns>
-        internal InstantBesselianElements GetInstantBesselianElements(double jd)
+        public InstantBesselianElements GetInstantBesselianElements(double jd)
         {
             //if (jd < From || jd > To)
             //    throw new ArgumentException($"Polynomial Besselian elements valid only for Julian Day in range [{From} ... {To}].", nameof(jd));
 
             // difference, with t0, in step units
             double t = (jd - JulianDay0) / Step;
-
+           
             return new InstantBesselianElements()
             {
+                JulianDay = jd,
+                DeltaT = DeltaT,
                 X = X.Select((x, n) => x * Pow(t, n)).Sum(),
                 Y = Y.Select((y, n) => y * Pow(t, n)).Sum(),
                 L1 = L1.Select((l1, n) => l1 * Pow(t, n)).Sum(),
                 L2 = L2.Select((l2, n) => l2 * Pow(t, n)).Sum(),
                 D = D.Select((d, n) => d * Pow(t, n)).Sum(),
                 Mu = To360(Mu.Select((mu, n) => mu * Pow(t, n)).Sum()),
-                F1 = F1.Select((f1, n) => f1 * Pow(t, n)).Sum(),
-                F2 = F2.Select((f2, n) => f2 * Pow(t, n)).Sum(),
                 dX = Derivative(X, t),
-                dY = Derivative(Y, t),
-                dL1 = Derivative(L1, t),
-                dL2 = Derivative(L2, t),
-                dD = Derivative(D, t),
-                dMu = Derivative(Mu, t)
+                dY = Derivative(Y, t)
             };
         }
 

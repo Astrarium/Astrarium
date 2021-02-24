@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace Astrarium.Plugins.SolarSystem
         private Dictionary<string, ImageData> cache = new Dictionary<string, ImageData>();
         private Thread worker = null;
         private AutoResetEvent waitSignal = new AutoResetEvent(true);
-        private Queue<Action> requests = new Queue<Action>(); 
+        private ConcurrentQueue<Action> requests = new ConcurrentQueue<Action>(); 
 
         public ImagesCache()
         {
@@ -92,7 +93,10 @@ namespace Astrarium.Plugins.SolarSystem
             {
                 while (requests.Any())
                 {
-                    requests.Dequeue().Invoke();
+                    if (requests.TryDequeue(out Action action)) 
+                    {
+                        action?.Invoke();
+                    }
                 }
             }
         }

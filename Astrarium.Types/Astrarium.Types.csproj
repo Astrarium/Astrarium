@@ -41,5 +41,11 @@
   <ItemGroup>
     <EmbeddedResource Include="Controls\WinFormsMapControl\OfflineMaps\**\*.jpg" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Themes\Markdown.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
   
 </Project>

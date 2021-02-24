@@ -11,6 +11,7 @@ namespace Astrarium.Plugins.SolarSystem
     public class LunarEventsProvider : BaseAstroEventsProvider
     {
         private readonly LunarCalc lunarCalc = null;
+        private readonly SolarCalc solarCalc = null;
         private readonly PlanetsCalc planetsCalc = null;
         
         private readonly IEphemFormatter librationLongitudeFormatter = new LibrationLongitudeFormatter();
@@ -29,9 +30,10 @@ namespace Astrarium.Plugins.SolarSystem
             new ConjunctedStar("Antares", "16h 29m 24.4s", "-26° 25' 55''", 0.01f, -0.02f)
         };
 
-        public LunarEventsProvider(LunarCalc lunarCalc, PlanetsCalc planetsCalc)
+        public LunarEventsProvider(LunarCalc lunarCalc, SolarCalc solarCalc, PlanetsCalc planetsCalc)
         {
             this.lunarCalc = lunarCalc;
+            this.solarCalc = solarCalc;
             this.planetsCalc = planetsCalc;
         }
 
@@ -43,6 +45,130 @@ namespace Astrarium.Plugins.SolarSystem
             c["MoonEvents.MaxDeclinations"] = MaxDeclinations;
             c["MoonEvents.ConjWithStars"] = ConjunctionsWithStars;
             c["MoonEvents.ConjWithPlanets"] = ConjuntionsWithPlanets;
+            c["MoonEvents.Noumenia"] = Noumenia;
+            c["MoonEvents.Epimenia"] = Epimenia;
+        }
+
+        /// <summary>
+        /// Calculates instants of first sighting of lunar crescent on the evening sky, i.e. noumenia events.
+        /// </summary>
+        /// <remarks>
+        /// The method is based on work of B.D.Yallop,
+        /// see the work there: https://webspace.science.uu.nl/~gent0113/islam/downloads/naotn_69.pdf.
+        /// As it noted in the work (see page 12):
+        /// From observers reports it has been found that in general q = 0 
+        /// is close to the lower limit for first visibility under 
+        /// perfect atmospheric conditions at sea level without requiring optical aid.
+        /// Also lunar altitude should be checked: 2 degrees above horizon is an empyric value.
+        /// So, the condition of the event used there is "q > 0 && alt > 0"
+        /// </remarks>
+        private ICollection<AstroEvent> Noumenia(AstroEventsContext context)
+        {
+            List<AstroEvent> events = new List<AstroEvent>();
+            double jd = 0;
+
+            jd = context.From;
+            while (jd < context.To)
+            {
+                if (context.CancelToken?.IsCancellationRequested == true)
+                {
+                    return new AstroEvent[0];
+                }
+                else
+                {
+                    double jdNewMoon = LunarEphem.NearestPhase(jd, MoonPhase.NewMoon);
+
+                    for (int day = 0; day <= 7; day++)
+                    {
+                        var ctx = new SkyContext(jdNewMoon + day, context.GeoLocation, preferFast: true);
+
+                        double jdMidnight = ctx.JulianDayMidnight;
+
+                        var rtsSun = ctx.Get(solarCalc.RiseTransitSet);
+                        var rtsMoon = ctx.Get(lunarCalc.RiseTransitSet);
+
+                        var sunSet = double.IsNaN(rtsSun.Set) ? 1 : rtsSun.Set;
+                        var moonSet = double.IsNaN(rtsMoon.Set) ? 1 : rtsMoon.Set;
+
+                        double jdBestTime = jdMidnight + sunSet + 4.0 / 9.0 * (moonSet - sunSet);
+                        ctx = new SkyContext(jdBestTime, context.GeoLocation, preferFast: true);
+
+                        double alt = ctx.Get(lunarCalc.Horizontal).Altitude;
+                        double q = ctx.Get(lunarCalc.CrescentQ);
+
+                        if (q > 0 && alt > 2)
+                        {
+                            events.Add(new AstroEvent(jdBestTime, Text.Get("MoonEvents.Noumenia.Text"), lunarCalc.Moon));
+                            break;
+                        }
+                    }
+
+                    jd = jdNewMoon + LunarEphem.SINODIC_PERIOD;
+                }
+            }
+
+            return events;
+        }
+
+        /// <summary>
+        /// Calculates instants of last sighting of lunar crescent on the morning sky, i.e. epimenia events.
+        /// </summary>
+        /// <remarks>
+        /// The method is based on work of B.D.Yallop,
+        /// see the work there: https://webspace.science.uu.nl/~gent0113/islam/downloads/naotn_69.pdf.
+        /// As it noted in the work (see page 12):
+        /// From observers reports it has been found that in general q = 0 
+        /// is close to the lower limit for first visibility under 
+        /// perfect atmospheric conditions at sea level without requiring optical aid.
+        /// Also lunar altitude should be checked: 2 degrees above horizon is an empyric value.
+        /// So, the condition of the event used there is "q > 0 && alt > 0"
+        /// </remarks>
+        private ICollection<AstroEvent> Epimenia(AstroEventsContext context)
+        {
+            List<AstroEvent> events = new List<AstroEvent>();
+            double jd = 0;
+
+            jd = context.From;
+            while (jd < context.To)
+            {
+                if (context.CancelToken?.IsCancellationRequested == true)
+                {
+                    return new AstroEvent[0];
+                }
+                else
+                {
+                    double jdNewMoon = LunarEphem.NearestPhase(jd, MoonPhase.NewMoon);
+
+                    for (int day = 0; day <= 7; day++)
+                    {
+                        var ctx = new SkyContext(jdNewMoon - day, context.GeoLocation, preferFast: true);
+
+                        double jdMidnight = ctx.JulianDayMidnight;
+
+                        var rtsSun = ctx.Get(solarCalc.RiseTransitSet);
+                        var rtsMoon = ctx.Get(lunarCalc.RiseTransitSet);
+
+                        var sunRise = double.IsNaN(rtsSun.Rise) ? 0 : rtsSun.Rise;
+                        var moonRise = double.IsNaN(rtsMoon.Rise) ? 0 : rtsMoon.Rise;
+
+                        double jdBestTime = jdMidnight + sunRise - 4.0 / 9.0 * (sunRise - moonRise);
+                        ctx = new SkyContext(jdBestTime, context.GeoLocation, preferFast: true);
+
+                        double alt = ctx.Get(lunarCalc.Horizontal).Altitude;
+                        double q = ctx.Get(lunarCalc.CrescentQ);
+
+                        if (q > 0 && alt > 2)
+                        {
+                            events.Add(new AstroEvent(jdBestTime, Text.Get("MoonEvents.Epimenia.Text"), lunarCalc.Moon));
+                            break;
+                        }
+                    }
+
+                    jd = jdNewMoon + LunarEphem.SINODIC_PERIOD;
+                }
+            }
+
+            return events;
         }
 
         /// <summary>
@@ -56,33 +182,61 @@ namespace Astrarium.Plugins.SolarSystem
             jd = context.From;
             while (jd < context.To)
             {
-                jd = LunarEphem.NearestPhase(jd, MoonPhase.NewMoon);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Phases.NewMoon"), lunarCalc.Moon));
-                jd += LunarEphem.SINODIC_PERIOD;
+                if (context.CancelToken?.IsCancellationRequested == true)
+                {
+                    return new AstroEvent[0];
+                }
+                else
+                {
+                    jd = LunarEphem.NearestPhase(jd, MoonPhase.NewMoon);
+                    events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Phases.NewMoon"), lunarCalc.Moon));
+                    jd += LunarEphem.SINODIC_PERIOD;
+                }
             }
 
             jd = context.From;
             while (jd < context.To)
             {
-                jd = LunarEphem.NearestPhase(jd, MoonPhase.FirstQuarter);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Phases.FirstQuarter"), lunarCalc.Moon));
-                jd += LunarEphem.SINODIC_PERIOD;
+                if (context.CancelToken?.IsCancellationRequested == true)
+                {
+                    return new AstroEvent[0];
+                }
+                else
+                {
+                    jd = LunarEphem.NearestPhase(jd, MoonPhase.FirstQuarter);
+                    events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Phases.FirstQuarter"), lunarCalc.Moon));
+                    jd += LunarEphem.SINODIC_PERIOD;
+                }
             }
 
             jd = context.From;
             while (jd < context.To)
             {
-                jd = LunarEphem.NearestPhase(jd, MoonPhase.FullMoon);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Phases.FullMoon"), lunarCalc.Moon));
-                jd += LunarEphem.SINODIC_PERIOD;
+                if (context.CancelToken?.IsCancellationRequested == true)
+                {
+                    return new AstroEvent[0];
+                }
+                else
+                {
+                    jd = LunarEphem.NearestPhase(jd, MoonPhase.FullMoon);
+                    events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Phases.FullMoon"), lunarCalc.Moon));
+                    jd += LunarEphem.SINODIC_PERIOD;
+                }
             }
 
             jd = context.From;
             while (jd < context.To)
             {
-                jd = LunarEphem.NearestPhase(jd, MoonPhase.LastQuarter);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Phases.LastQuarter"), lunarCalc.Moon));
-                jd += LunarEphem.SINODIC_PERIOD;
+                if (context.CancelToken?.IsCancellationRequested == true)
+                {
+                    return new AstroEvent[0];
+                }
+                else
+                {
+                    jd = LunarEphem.NearestPhase(jd, MoonPhase.LastQuarter);
+                    events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Phases.LastQuarter"), lunarCalc.Moon));
+                    jd += LunarEphem.SINODIC_PERIOD;
+                }
             }
 
             return events;
@@ -99,17 +253,31 @@ namespace Astrarium.Plugins.SolarSystem
             jd = context.From;
             while (jd < context.To)
             {
-                jd = LunarEphem.NearestApsis(jd, MoonApsis.Apogee, out diameter);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Apsis.Apogee", ("diameter", Formatters.Angle.Format(diameter)))));
-                jd += LunarEphem.ANOMALISTIC_PERIOD;
+                if (context.CancelToken?.IsCancellationRequested == true)
+                {
+                    return new AstroEvent[0];
+                }
+                else
+                {
+                    jd = LunarEphem.NearestApsis(jd, MoonApsis.Apogee, out diameter);
+                    events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Apsis.Apogee", ("diameter", Formatters.Angle.Format(diameter))), lunarCalc.Moon));
+                    jd += LunarEphem.ANOMALISTIC_PERIOD;
+                }
             }
 
             jd = context.From;
             while (jd < context.To)
             {
-                jd = LunarEphem.NearestApsis(jd, MoonApsis.Perigee, out diameter);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Apsis.Perigee", ("diameter", Formatters.Angle.Format(diameter)))));
-                jd += LunarEphem.ANOMALISTIC_PERIOD * 1.1;
+                if (context.CancelToken?.IsCancellationRequested == true)
+                {
+                    return new AstroEvent[0];
+                }
+                else
+                {
+                    jd = LunarEphem.NearestApsis(jd, MoonApsis.Perigee, out diameter);
+                    events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Apsis.Perigee", ("diameter", Formatters.Angle.Format(diameter))), lunarCalc.Moon));
+                    jd += LunarEphem.ANOMALISTIC_PERIOD * 1.1;
+                }
             }
 
             return events;
@@ -126,33 +294,61 @@ namespace Astrarium.Plugins.SolarSystem
             jd = context.From;
             while (jd < context.To)
             {
-                jd = LunarEphem.NearestMaxLibration(jd, LibrationEdge.East, out librationAngle);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Librations.East", ("angle", librationLongitudeFormatter.Format(librationAngle)))));
-                jd += LunarEphem.ANOMALISTIC_PERIOD;
+                if (context.CancelToken?.IsCancellationRequested == true)
+                {
+                    return new AstroEvent[0];
+                }
+                else
+                {
+                    jd = LunarEphem.NearestMaxLibration(jd, LibrationEdge.East, out librationAngle);
+                    events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Librations.East", ("angle", librationLongitudeFormatter.Format(librationAngle))), lunarCalc.Moon));
+                    jd += LunarEphem.ANOMALISTIC_PERIOD;
+                }
             }
 
             jd = context.From;
             while (jd < context.To)
             {
-                jd = LunarEphem.NearestMaxLibration(jd, LibrationEdge.West, out librationAngle);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Librations.West", ("angle", librationLongitudeFormatter.Format(librationAngle)))));
-                jd += LunarEphem.ANOMALISTIC_PERIOD;
+                if (context.CancelToken?.IsCancellationRequested == true)
+                {
+                    return new AstroEvent[0];
+                }
+                else
+                {
+                    jd = LunarEphem.NearestMaxLibration(jd, LibrationEdge.West, out librationAngle);
+                    events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Librations.West", ("angle", librationLongitudeFormatter.Format(librationAngle))), lunarCalc.Moon));
+                    jd += LunarEphem.ANOMALISTIC_PERIOD;
+                }
             }
 
             jd = context.From;
             while (jd < context.To)
             {
-                jd = LunarEphem.NearestMaxLibration(jd, LibrationEdge.North, out librationAngle);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Librations.North", ("angle", librationLatitudeFormatter.Format(librationAngle)))));
-                jd += LunarEphem.DRACONIC_PERIOD;
+                if (context.CancelToken?.IsCancellationRequested == true)
+                {
+                    return new AstroEvent[0];
+                }
+                else
+                {
+                    jd = LunarEphem.NearestMaxLibration(jd, LibrationEdge.North, out librationAngle);
+                    events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Librations.North", ("angle", librationLatitudeFormatter.Format(librationAngle))), lunarCalc.Moon));
+                    jd += LunarEphem.DRACONIC_PERIOD;
+                }
             }
 
             jd = context.From;
             while (jd < context.To)
             {
-                jd = LunarEphem.NearestMaxLibration(jd, LibrationEdge.South, out librationAngle);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Librations.South", ("angle", librationLatitudeFormatter.Format(librationAngle)))));
-                jd += LunarEphem.DRACONIC_PERIOD;
+                if (context.CancelToken?.IsCancellationRequested == true)
+                {
+                    return new AstroEvent[0];
+                }
+                else
+                {
+                    jd = LunarEphem.NearestMaxLibration(jd, LibrationEdge.South, out librationAngle);
+                    events.Add(new AstroEvent(jd, Text.Get("MoonEvents.Librations.South", ("angle", librationLatitudeFormatter.Format(librationAngle))), lunarCalc.Moon));
+                    jd += LunarEphem.DRACONIC_PERIOD;
+                }
             }
 
             return events;
@@ -170,17 +366,31 @@ namespace Astrarium.Plugins.SolarSystem
 
             while (jd < context.To)
             {
-                jd = LunarEphem.NearestMaxDeclination(jd, MoonDeclination.North, out delta);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.MaxDeclinations.North", ("declination", declinationFormatter.Format(delta)))));
-                jd += LunarEphem.DRACONIC_PERIOD;
+                if (context.CancelToken?.IsCancellationRequested == true)
+                {
+                    return new AstroEvent[0];
+                }
+                else
+                {
+                    jd = LunarEphem.NearestMaxDeclination(jd, MoonDeclination.North, out delta);
+                    events.Add(new AstroEvent(jd, Text.Get("MoonEvents.MaxDeclinations.North", ("declination", declinationFormatter.Format(delta))), lunarCalc.Moon));
+                    jd += LunarEphem.DRACONIC_PERIOD;
+                }
             }
 
             jd = context.From;
             while (jd < context.To)
             {
-                jd = LunarEphem.NearestMaxDeclination(jd, MoonDeclination.South, out delta);
-                events.Add(new AstroEvent(jd, Text.Get("MoonEvents.MaxDeclinations.South", ("declination", declinationFormatter.Format(-delta)))));
-                jd += LunarEphem.DRACONIC_PERIOD;
+                if (context.CancelToken?.IsCancellationRequested == true)
+                {
+                    return new AstroEvent[0];
+                }
+                else
+                {
+                    jd = LunarEphem.NearestMaxDeclination(jd, MoonDeclination.South, out delta);
+                    events.Add(new AstroEvent(jd, Text.Get("MoonEvents.MaxDeclinations.South", ("declination", declinationFormatter.Format(-delta))), lunarCalc.Moon));
+                    jd += LunarEphem.DRACONIC_PERIOD;
+                }
             }
 
             return events;
@@ -200,6 +410,9 @@ namespace Astrarium.Plugins.SolarSystem
                 double jd = context.From;
                 while (jd < context.To)
                 {
+                    if (context.CancelToken?.IsCancellationRequested == true)
+                        return new AstroEvent[0];
+
                     ctx.JulianDay = jd;
 
                     jd = NearestPassWithStar(ctx, star);
@@ -213,13 +426,13 @@ namespace Astrarium.Plugins.SolarSystem
                     // occultation
                     if (semidiameter >= separation)
                     {
-                        events.Add(new AstroEvent(jd, Text.Get("MoonEvents.ConjWithStars.Occults", ("starName", star.Name))));
+                        events.Add(new AstroEvent(jd, Text.Get("MoonEvents.ConjWithStars.Occults", ("starName", star.Name)), lunarCalc.Moon));
                     }
                     // conjunction
                     else
                     {
                         string direction = eqMoon.Delta > eqStar.Delta ? Text.Get("MoonEvents.ConjWithStars.Conj.North") : Text.Get("MoonEvents.ConjWithStars.Conj.South");
-                        events.Add(new AstroEvent(jd, Text.Get("MoonEvents.ConjWithStars.Conj", ("angularDistance", conjunctionSeparationFormatter.Format(separation)), ("direction", direction), ("starName", star.Name))));
+                        events.Add(new AstroEvent(jd, Text.Get("MoonEvents.ConjWithStars.Conj", ("angularDistance", conjunctionSeparationFormatter.Format(separation)), ("direction", direction), ("starName", star.Name)), lunarCalc.Moon));
                     }
 
                     jd += LunarEphem.SIDEREAL_PERIOD;
@@ -242,6 +455,9 @@ namespace Astrarium.Plugins.SolarSystem
                     double jd = context.From;
                     while (jd < context.To)
                     {
+                        if (context.CancelToken?.IsCancellationRequested == true)
+                            return new AstroEvent[0];
+
                         ctx.JulianDay = jd;
 
                         jd = NearestPassWithPlanet(ctx, p);
@@ -256,16 +472,17 @@ namespace Astrarium.Plugins.SolarSystem
                         // occultation
                         if (semidiameter >= separation)
                         {
-                            events.Add(new AstroEvent(jd, Text.Get("MoonEvents.ConjWithPlanets.Occults", ("planetName", planetName))));
+                            events.Add(new AstroEvent(jd, Text.Get("MoonEvents.ConjWithPlanets.Occults", ("planetName", planetName)), lunarCalc.Moon));
                         }
                         // conjunction
                         else
                         {
+                            var planet = planetsCalc.Planets.ElementAt(p - 1); 
                             string moonPhase = Formatters.Phase.Format(ctx.Get(lunarCalc.Phase));
                             string planetMagnitude = Formatters.Magnitude.Format(ctx.Get(planetsCalc.Planet_Magnitude, p));
                             string angularDistance = conjunctionSeparationFormatter.Format(separation);
                             string direction = eqMoon.Delta > eqPlanet.Delta ? Text.Get("MoonEvents.ConjWithPlanets.Conj.North") : Text.Get("MoonEvents.ConjWithPlanets.Conj.South");
-                            events.Add(new AstroEvent(jd, Text.Get("MoonEvents.ConjWithPlanets.Conj", ("moonPhase", moonPhase), ("angularDistance", angularDistance), ("direction", direction), ("planetName", planetName), ("planetMagnitude", planetMagnitude))));
+                            events.Add(new AstroEvent(jd, Text.Get("MoonEvents.ConjWithPlanets.Conj", ("moonPhase", moonPhase), ("angularDistance", angularDistance), ("direction", direction), ("planetName", planetName), ("planetMagnitude", planetMagnitude)), lunarCalc.Moon, planet));
                         }
 
                         jd += LunarEphem.SIDEREAL_PERIOD;

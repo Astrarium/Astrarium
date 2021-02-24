@@ -92,7 +92,7 @@ namespace Astrarium.Plugins.SolarSystem
         /// <summary>
         /// Gets rise, transit and set info for the Sun
         /// </summary>
-        private RTS RiseTransitSet(SkyContext c)
+        public RTS RiseTransitSet(SkyContext c)
         {
             double jd = c.JulianDayMidnight;
             double theta0 = Date.ApparentSiderealTime(jd, c.NutationElements.deltaPsi, c.Epsilon);

@@ -73,6 +73,16 @@ namespace Astrarium.Algorithms
         /// </summary>
         public string LocationName { get; set; }
 
+        /// <summary>
+        /// Optional country code
+        /// </summary>
+        public string CountryCode { get; set; }
+
+        /// <summary>
+        /// Optional other names of the location
+        /// </summary>
+        public string[] OtherNames { get; set; }
+
         public CrdsGeographical() { }
 
         public CrdsGeographical(double longitude, double latitude, double utcOffset = 0, double elevation = 0, string timeZoneId = null, string locationName = null)
@@ -94,6 +104,29 @@ namespace Astrarium.Algorithms
         public override string ToString()
         {
             return $"Latitude: {new DMS(Latitude)}; Longitude:{new DMS(Longitude)}";
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (GetHashCode() != obj.GetHashCode())
+                return false;
+            else if (obj is CrdsGeographical other)
+                return
+                    other.Latitude == other.Latitude &&
+                    other.Longitude == other.Longitude;
+            else 
+                return false;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 23 + Latitude.GetHashCode();
+                hash = hash * 23 + Longitude.GetHashCode();
+                return hash;
+            }
         }
     }
 }

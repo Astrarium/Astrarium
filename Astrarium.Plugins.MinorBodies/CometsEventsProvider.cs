@@ -28,7 +28,7 @@ namespace Astrarium.Plugins.MinorBodies
                 cometsCalc.Comets.Where(c =>
                     c.Orbit.Epoch >= context.From &&
                     c.Orbit.Epoch <= context.To)
-                    .Select(c => new AstroEvent(c.Orbit.Epoch, Text.Get("CometsEvents.PerihelionPassage.Text", ("CometName", c.Name))))
+                    .Select(c => new AstroEvent(c.Orbit.Epoch, Text.Get("CometsEvents.PerihelionPassage.Text", ("CometName", c.Name)), c))
                     .ToArray();
         }
     }

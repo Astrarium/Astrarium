@@ -26,6 +26,16 @@
         public object Data { get; set; }
 
         /// <summary>
+        /// Minimal zoom to display marker label.
+        /// </summary>
+        public uint MinZoomToDisplayLabel { get; set; }
+
+        /// <summary>
+        /// Maximal zoom to display marker label.
+        /// </summary>
+        public uint MaxZoomToDisplayLabel { get; set; }
+
+        /// <summary>
         /// Creates new <see cref="Marker"/> object with specified coordinates.
         /// </summary>
         /// <param name="point">Coordinates of the marker.</param>

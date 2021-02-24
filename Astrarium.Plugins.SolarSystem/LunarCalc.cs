@@ -189,6 +189,15 @@ namespace Astrarium.Plugins.SolarSystem
         }
 
         /// <summary>
+        /// Gets Brown lunation number
+        /// </summary>
+        private int Lunation(SkyContext c)
+        {
+            double age = c.Get(Age);
+            return LunarEphem.Lunation(c.JulianDay - age);
+        }
+
+        /// <summary>
         /// Gets nearest apsis date
         /// </summary>
         private Date NearestApsis(SkyContext c, MoonApsis a)
@@ -202,6 +211,14 @@ namespace Astrarium.Plugins.SolarSystem
         private Date NearestMaxDeclination(SkyContext c, MoonDeclination d)
         {
             return c.GetDate(LunarEphem.NearestMaxDeclination(c.JulianDay, d, out double delta));
+        }
+
+        /// <summary>
+        /// Gets nearest max libration date
+        /// </summary>
+        private Date NearestMaxLibration(SkyContext c, LibrationEdge e)
+        {
+            return c.GetDate(LunarEphem.NearestMaxLibration(c.JulianDay, e, out double angle));
         }
 
         /// <summary>
@@ -242,9 +259,21 @@ namespace Astrarium.Plugins.SolarSystem
         }
 
         /// <summary>
+        /// Calculates parameter Q descibing the visibility of lunar crescent.
+        /// Used for calculating noumenia and epimenia events.
+        /// </summary>
+        public double CrescentQ(SkyContext c)
+        {
+            var eclSun = c.Get(SunEcliptical);
+            var eclMoon = c.Get(Ecliptical0);
+            var sd = c.Get(Semidiameter);
+            return LunarEphem.CrescentQ(eclMoon, eclSun, sd, c.Epsilon, c.SiderealTime, c.GeoLocation);
+        }
+
+        /// <summary>
         /// Gets rise, transit and set info for the Moon
         /// </summary>
-        private RTS RiseTransitSet(SkyContext c)
+        public RTS RiseTransitSet(SkyContext c)
         {
             double jd = c.JulianDayMidnight;
             double theta0 = Date.ApparentSiderealTime(jd, c.NutationElements.deltaPsi, c.Epsilon);
@@ -281,6 +310,7 @@ namespace Astrarium.Plugins.SolarSystem
             e["Phase"] = (c, m) => c.Get(Phase);
             e["PhaseAngle"] = (c, m) => c.Get(PhaseAngle);
             e["Age", new Formatters.UnsignedDoubleFormatter(2, " d")] = (c, m) => c.Get(Age);
+            e["Lunation"] = (c, m) => c.Get(Lunation);
             e["Magnitude"] = (c, m) => c.Get(Magnitude);
             e["Distance", new LunarDistanceFormatter()] = (c, m) => c.Get(Ecliptical0).Distance;
             e["HorizontalParallax"] = (c, m) => c.Get(Parallax);
@@ -326,26 +356,57 @@ namespace Astrarium.Plugins.SolarSystem
             .AddRow("Phase")
             .AddRow("PhaseAngle")
             .AddRow("Age")
+            .AddRow("Lunation")
             .AddRow("Magnitude")
             .AddRow("Distance")
             .AddRow("HorizontalParallax")
             .AddRow("AngularDiameter")
             .AddRow("Libration.Latitude")
-            .AddRow("Libration.Longitude")
+            .AddRow("Libration.Longitude");
 
-            .AddHeader(Text.Get("Moon.Phases"))
-            .AddRow("Phases.NewMoon", c.Get(NearestPhase, MoonPhase.NewMoon), Formatters.DateTime)
-            .AddRow("Phases.FirstQuarter", c.Get(NearestPhase, MoonPhase.FirstQuarter), Formatters.DateTime)
-            .AddRow("Phases.FullMoon", c.Get(NearestPhase, MoonPhase.FullMoon), Formatters.DateTime)
-            .AddRow("Phases.LastQuarter", c.Get(NearestPhase, MoonPhase.LastQuarter), Formatters.DateTime)
+            info.AddHeader(Text.Get("Moon.Phases"));
+            var phases = new Tuple<string, Date>[] {
+                 new Tuple<string, Date>("Phases.NewMoon", c.Get(NearestPhase, MoonPhase.NewMoon)),
+                 new Tuple<string, Date>("Phases.FirstQuarter", c.Get(NearestPhase, MoonPhase.FirstQuarter)),
+                 new Tuple<string, Date>("Phases.FullMoon", c.Get(NearestPhase, MoonPhase.FullMoon)),
+                 new Tuple<string, Date>("Phases.LastQuarter", c.Get(NearestPhase, MoonPhase.LastQuarter))
+            };
+            foreach (var p in phases.OrderBy(i => i.Item2))
+            {
+                info.AddRow(p.Item1, p.Item2, Formatters.DateTime);
+            }
 
-            .AddHeader(Text.Get("Moon.Apsis"))
-            .AddRow("Apsis.Apogee", c.Get(NearestApsis, MoonApsis.Apogee), Formatters.DateTime)
-            .AddRow("Apsis.Perigee", c.Get(NearestApsis, MoonApsis.Perigee), Formatters.DateTime)
+            info.AddHeader(Text.Get("Moon.Apsis"));
+            var apsis = new Tuple<string, Date>[] {
+                 new Tuple<string, Date>("Apsis.Apogee", c.Get(NearestApsis, MoonApsis.Apogee)),
+                 new Tuple<string, Date>("Apsis.Perigee", c.Get(NearestApsis, MoonApsis.Perigee))
+            };
+            foreach (var p in apsis.OrderBy(i => i.Item2))
+            {
+                info.AddRow(p.Item1, p.Item2, Formatters.DateTime);
+            }
 
-            .AddHeader(Text.Get("Moon.MaxDeclinations"))
-            .AddRow("MaxDeclinations.North", c.Get(NearestMaxDeclination, MoonDeclination.North), Formatters.DateTime)
-            .AddRow("MaxDeclinations.South", c.Get(NearestMaxDeclination, MoonDeclination.South), Formatters.DateTime);
+            info.AddHeader(Text.Get("Moon.MaxDeclinations"));
+            var maxDeclinations = new Tuple<string, Date>[] {
+                 new Tuple<string, Date>("MaxDeclinations.North", c.Get(NearestMaxDeclination, MoonDeclination.North)),
+                 new Tuple<string, Date>("MaxDeclinations.South", c.Get(NearestMaxDeclination, MoonDeclination.South))
+            };
+            foreach (var p in maxDeclinations.OrderBy(i => i.Item2))
+            {
+                info.AddRow(p.Item1, p.Item2, Formatters.DateTime);
+            }
+
+            info.AddHeader(Text.Get("Moon.MaxLibrations"));
+            var maxLibrations = new Tuple<string, Date>[] {
+                 new Tuple<string, Date>("MaxLibrations.North", c.Get(NearestMaxLibration, LibrationEdge.North)),
+                 new Tuple<string, Date>("MaxLibrations.South", c.Get(NearestMaxLibration, LibrationEdge.South)),
+                 new Tuple<string, Date>("MaxLibrations.East", c.Get(NearestMaxLibration, LibrationEdge.East)),
+                 new Tuple<string, Date>("MaxLibrations.West", c.Get(NearestMaxLibration, LibrationEdge.West))
+            };
+            foreach (var p in maxLibrations.OrderBy(i => i.Item2))
+            {
+                info.AddRow(p.Item1, p.Item2, Formatters.DateTime);
+            }
         }
 
         public ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50)

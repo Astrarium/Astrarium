@@ -46,6 +46,10 @@ namespace Astrarium.Plugins.MinorBodies
 
                 for (double jd = context.From; jd < context.To; jd++)
                 {
+                    // check for canceled operation
+                    if (context.CancelToken?.IsCancellationRequested == true)
+                        return new AstroEvent[0];
+
                     // "diff" is a difference in longitude with the Sun, five values
                     double[] diff = asteroidData.Skip(day).Take(5).Select(d => Math.Abs(d.LongitudeDifference)).ToArray();
 
@@ -68,7 +72,7 @@ namespace Astrarium.Plugins.MinorBodies
                             events.Add(new AstroEvent(jdOpposition, 
                                 Text.Get("AsteroidsEvents.Opposition.Text", 
                                     ("AsteroidName", a.Name), 
-                                    ("AsteroidMagnitude", Formatters.Magnitude.Format(mag)))
+                                    ("AsteroidMagnitude", Formatters.Magnitude.Format(mag))), a
                                 )
                             );
                         }
@@ -91,6 +95,9 @@ namespace Astrarium.Plugins.MinorBodies
 
             for (double jd = context.From - 2; jd < context.To + 2; jd++)
             {
+                if (context.CancelToken?.IsCancellationRequested == true)
+                    return new AsteroidData[0];
+
                 ctx.JulianDay = jd;
                 foreach (Asteroid a in brightestAsteroids)
                 {

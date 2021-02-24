@@ -36,15 +36,15 @@
                         <Label Grid.Column="0" Grid.Row="0" Content="{t:Text DateWindow.Day}" />
                         <Label Grid.Column="1" Grid.Row="0" Content="{t:Text DateWindow.Month}" />
                         <Label Grid.Column="2" Grid.Row="0" Content="{t:Text DateWindow.Year}" />
-                        <c:NumericUpDown Margin="3" Grid.Column="0" Grid.Row="1" Minimum="1" Maximum="{Binding DaysCount}" Value="{Binding Day, Converter={s:NumericConverter}, UpdateSourceTrigger=LostFocus}" DecimalPlaces="0" />
-                        <ComboBox Margin="3" Grid.Column="1" Grid.Row="1" ItemsSource="{Binding ShortMonthsNames}" SelectedIndex="{Binding SelectedMonth}" />
-                        <c:NumericUpDown Margin="3" Grid.Column="2" Grid.Row="1" Minimum="-4000" Maximum="9999" Value="{Binding Year, UpdateSourceTrigger=LostFocus}" DecimalPlaces="0" />
+                        <c:NumericUpDown Margin="3" Grid.Column="0" Grid.Row="1" Minimum="1" Maximum="{Binding DaysCount}" Value="{Binding Day, Converter={s:NumericConverter}, UpdateSourceTrigger=PropertyChanged}" DecimalPlaces="0" Loop="True" LoopDecrementCommand="{Binding LoopDayDecrementCommand}" LoopIncrementCommand="{Binding LoopDayIncrementCommand}" />
+                        <c:RepeatingComboBox Style="{StaticResource {x:Type ComboBox}}" Margin="3" Grid.Column="1" Grid.Row="1" ItemsSource="{Binding ShortMonthsNames}" SelectedIndex="{Binding SelectedMonth}" Loop="True" LoopDecrementCommand="{Binding LoopMonthDecrementCommand}" LoopIncrementCommand="{Binding LoopMonthIncrementCommand}" />
+                        <c:NumericUpDown Margin="3" Grid.Column="2" Grid.Row="1" Minimum="-4000" Maximum="9999" Value="{Binding Year, UpdateSourceTrigger=PropertyChanged}" DecimalPlaces="0" />
                         <Label Grid.Column="0" Grid.Row="2" VerticalAlignment="Bottom" Content="{t:Text DateWindow.Hours}" />
                         <Label Grid.Column="1" Grid.Row="2" VerticalAlignment="Bottom" Content="{t:Text DateWindow.Minutes}" />
                         <Label Grid.Column="2" Grid.Row="2" VerticalAlignment="Bottom" Content="{t:Text DateWindow.Seconds}" />
-                        <c:NumericUpDown Margin="3" Grid.Column="0" Grid.Row="3" Maximum="23" Value="{Binding Hours, Converter={s:NumericConverter}, UpdateSourceTrigger=LostFocus}" DecimalPlaces="0" />
-                        <c:NumericUpDown Margin="3" Grid.Column="1" Grid.Row="3" Maximum="59" Value="{Binding Minutes, Converter={s:NumericConverter}, UpdateSourceTrigger=LostFocus}" DecimalPlaces="0" />
-                        <c:NumericUpDown Margin="3" Grid.Column="2" Grid.Row="3" Maximum="59" Value="{Binding Seconds, Converter={s:NumericConverter}, UpdateSourceTrigger=LostFocus}" DecimalPlaces="0" />
+                        <c:NumericUpDown Margin="3" Grid.Column="0" Grid.Row="3" Maximum="23" Value="{Binding Hours, Converter={s:NumericConverter}, UpdateSourceTrigger=PropertyChanged}" DecimalPlaces="0" Loop="True" LoopIncrementCommand="{Binding LoopHoursIncrementCommand}" LoopDecrementCommand="{Binding LoopHoursDecrementCommand}" />
+                        <c:NumericUpDown Margin="3" Grid.Column="1" Grid.Row="3" Maximum="59" Value="{Binding Minutes, Converter={s:NumericConverter}, UpdateSourceTrigger=PropertyChanged}" DecimalPlaces="0" Loop="True" LoopIncrementCommand="{Binding LoopMinutesIncrementCommand}" LoopDecrementCommand="{Binding LoopMinutesDecrementCommand}" />
+                        <c:NumericUpDown Margin="3" Grid.Column="2" Grid.Row="3" Maximum="59" Value="{Binding Seconds, Converter={s:NumericConverter}, UpdateSourceTrigger=PropertyChanged}" DecimalPlaces="0" Loop="True" LoopIncrementCommand="{Binding LoopSecondsIncrementCommand}" LoopDecrementCommand="{Binding LoopSecondsDecrementCommand}" />
                     </Grid>
                     <!-- Date Only Layout -->
                     <Grid Visibility="{Binding DisplayMode, Converter={s:VisibilityConverter}, ConverterParameter={x:Static t:DateOptions.DateOnly}, FallbackValue=Collapsed}">
@@ -60,8 +60,8 @@
                         <Label Grid.Column="0" Grid.Row="0" Content="{t:Text DateWindow.Day}" />
                         <Label Grid.Column="1" Grid.Row="0" Content="{t:Text DateWindow.Month}" />
                         <Label Grid.Column="2" Grid.Row="0" Content="{t:Text DateWindow.Year}" />
-                        <c:NumericUpDown Margin="3" Grid.Column="0" Grid.Row="1" Minimum="1" Maximum="{Binding DaysCount}" Value="{Binding Day, Converter={s:NumericConverter}}" />
-                        <ComboBox Margin="3" Grid.Column="1" Grid.Row="1" ItemsSource="{Binding ShortMonthsNames}" SelectedIndex="{Binding SelectedMonth}" />
+                        <c:NumericUpDown Margin="3" Grid.Column="0" Grid.Row="1" Minimum="1" Maximum="{Binding DaysCount}" Value="{Binding Day, Converter={s:NumericConverter}}" Loop="True" LoopDecrementCommand="{Binding LoopDayDecrementCommand}" LoopIncrementCommand="{Binding LoopDayIncrementCommand}" />
+                        <c:RepeatingComboBox Style="{StaticResource {x:Type ComboBox}}" Margin="3" Grid.Column="1" Grid.Row="1" ItemsSource="{Binding ShortMonthsNames}" SelectedIndex="{Binding SelectedMonth}" Loop="True" LoopDecrementCommand="{Binding LoopMonthDecrementCommand}" LoopIncrementCommand="{Binding LoopMonthIncrementCommand}" />
                         <c:NumericUpDown Margin="3" Grid.Column="2" Grid.Row="1" Minimum="-4000" Maximum="9999" Value="{Binding Year, Converter={s:NumericConverter}}" />
                     </Grid>
                     <!-- Month & Year Layout -->
@@ -76,14 +76,14 @@
                         </Grid.RowDefinitions>
                         <Label Grid.Column="0" Grid.Row="0" Content="{t:Text DateWindow.Month}" />
                         <Label Grid.Column="1" Grid.Row="0" Content="{t:Text DateWindow.Year}" />
-                        <ComboBox Margin="3" Grid.Column="0" Grid.Row="1" ItemsSource="{Binding FullMonthsNames}" SelectedIndex="{Binding SelectedMonth}" />
-                        <c:NumericUpDown Margin="3" Grid.Column="1" Grid.Row="1" Minimum="-4000" Maximum="9999" Value="{Binding Year, Converter={s:NumericConverter}, UpdateSourceTrigger=LostFocus}" DecimalPlaces="0" />
+                        <c:RepeatingComboBox Style="{StaticResource {x:Type ComboBox}}" Margin="3" Grid.Column="0" Grid.Row="1" ItemsSource="{Binding FullMonthsNames}" SelectedIndex="{Binding SelectedMonth}" Loop="True" LoopDecrementCommand="{Binding LoopMonthDecrementCommand}" LoopIncrementCommand="{Binding LoopMonthIncrementCommand}" />
+                        <c:NumericUpDown Margin="3" Grid.Column="1" Grid.Row="1" Minimum="-4000" Maximum="9999" Value="{Binding Year, Converter={s:NumericConverter}, UpdateSourceTrigger=PropertyChanged}" DecimalPlaces="0" />
                     </Grid>
                 </StackPanel>
             </TabItem>
             <TabItem Header="{t:Text DateWindow.TabJulianDay}" Visibility="{Binding DisplayMode, Converter={s:VisibilityConverter}, ConverterParameter={x:Static t:DateOptions.DateTime}, FallbackValue=Visible}">
                 <StackPanel Orientation="Vertical" Visibility="{Binding DisplayMode, Converter={s:VisibilityConverter}, ConverterParameter={x:Static t:DateOptions.DateTime}, FallbackValue=Visible}">
-                    <c:NumericUpDown Value="{Binding JulianDay, UpdateSourceTrigger=LostFocus}" DecimalPlaces="6" Minimum="260058.629284" Maximum="5373485.0" />
+                    <c:NumericUpDown Value="{Binding JulianDay, UpdateSourceTrigger=PropertyChanged}" DecimalPlaces="6" Minimum="260058.629284" Maximum="5373485.0" />
                 </StackPanel>
             </TabItem>
         </TabControl>

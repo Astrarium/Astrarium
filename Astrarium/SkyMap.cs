@@ -54,11 +54,6 @@ namespace Astrarium
         /// </summary>
         private Font fontDiagnosticText = new Font("Monospace", 8);
 
-        /// <summary>
-        /// Font used to display "Object is locked" message
-        /// </summary>
-        private Font fontLockMessage = new Font("Arial", 8);
-
         public int Width { get; set; }
         public int Height { get; set; }
 
@@ -383,6 +378,11 @@ namespace Astrarium
 
         public void GoToPoint(CrdsHorizontal hor, TimeSpan animationDuration, double viewAngleTarget)
         {
+            if (viewAngleTarget == 0)
+            {
+                viewAngleTarget = ViewAngle;
+            }
+
             if (animationDuration.Equals(TimeSpan.Zero))
             {
                 Center.Set(hor);
@@ -392,7 +392,7 @@ namespace Astrarium
             {
                 CrdsHorizontal centerOriginal = new CrdsHorizontal(Center);
                 double ad = Angle.Separation(hor, centerOriginal);
-                double steps = Math.Round(animationDuration.TotalMilliseconds / meanRenderTime);
+                double steps = Math.Ceiling(animationDuration.TotalMilliseconds / meanRenderTime);
                 double[] x = new double[] { 0, steps / 2, steps };
                 double[] y = (ad < ViewAngle) ?
                     // linear zooming if body is already on the screen:
