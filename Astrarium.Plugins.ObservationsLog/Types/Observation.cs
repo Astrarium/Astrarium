@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.ObservationsLog.Types
 {
-    public class Observation
+    public class Observation : IEntity
     {
+        public string Id { get; set; }
         public Observer Observer { get; set; }
         public DateTime Begin { get; set; }
         public DateTime? End { get; set; }
+        public Target Target { get; set; }
         public string Result { get; set; }
     }
 }

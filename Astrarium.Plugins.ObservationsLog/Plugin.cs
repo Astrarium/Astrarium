@@ -1,4 +1,6 @@
-﻿using Astrarium.Types;
+﻿using Astrarium.Plugins.ObservationsLog.OAL;
+using Astrarium.Plugins.ObservationsLog.Types;
+using Astrarium.Types;
 using LiteDB;
 using System;
 using System.Collections.Generic;
@@ -25,68 +27,65 @@ namespace Astrarium.Plugins.ObservationsLog
             var file = ViewManager.ShowOpenFileDialog("Import", "Open Astronomy Log files (*.xml)|*.xml|All files|*.*");
             if (file != null)
             {
-                XmlSerializer serializer = new XmlSerializer(typeof(OAL.observations));
+                XmlSerializer serializer = new XmlSerializer(typeof(observations));
                 var stringData = File.ReadAllText(file);
                 using (TextReader reader = new StringReader(stringData))
                 {
-                    var data = (OAL.observations)serializer.Deserialize(reader);
+                    var data = (observations)serializer.Deserialize(reader);
 
                     var dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "ObservationsLog", "Observations.db");
                     var dbDir = Path.GetDirectoryName(dbPath);
-                    if (Directory.Exists(dbDir))
+                    if (!Directory.Exists(dbDir))
                     {
                         Directory.CreateDirectory(dbDir);
                     }
 
                     using (var db = new LiteDatabase(dbPath))
                     {
-                        var observers = db.GetCollection<OAL.observerType>("observers");
-                        var sites = db.GetCollection<OAL.siteType>("sites");
-                        var sessions = db.GetCollection<OAL.sessionType>("sessions");
-                        var targets = db.GetCollection<OAL.observationTargetType>("targets");
-                        var scopes = db.GetCollection<OAL.opticsType>("scopes");
-                        var eyepieces = db.GetCollection<OAL.eyepieceType>("eyepieces");
-                        var lenses = db.GetCollection<OAL.lensType>("lenses");
-                        var filters = db.GetCollection<OAL.filterType>("filters");
-                        var imagers = db.GetCollection<OAL.imagerType>("imagers");
-                        var observations = db.GetCollection<OAL.observationType>("observations");
+                        var mapper = BsonMapper.Global;
 
-                        /*
-                        observers.EnsureIndex(i => i.id);
-                        observers.InsertBulk(data.observers);
+                        mapper.Entity<Session>()
+                            .Id(x => x.Id)
+                            .DbRef(x => x.Observations);
 
-                        sites.EnsureIndex(i => i.id);
-                        sites.InsertBulk(data.sites);
+                        mapper.Entity<Observation>()
+                            .Id(x => x.Id)
+                            .DbRef(x => x.Observer)
+                            .DbRef(x => x.Target);
+                            
+                        var sessions = data.Import();
 
-                        sessions.EnsureIndex(i => i.id);
-                        sessions.InsertBulk(data.sessions);
+                        var dbObservers = db.GetCollection<Observer>("observers");
+                        var dbObservations = db.GetCollection<Observation>("observations");
+                        var dbSessions = db.GetCollection<Session>("sessions");
+                        var dbTargets = db.GetCollection<Target>("targets");
 
-                        targets.EnsureIndex(i => i.id);
-                        targets.InsertBulk(data.targets);
+                        dbObservers.EnsureIndex(i => i.Id);
+                        dbObservations.EnsureIndex(i => i.Id);
+                        dbSessions.EnsureIndex(i => i.Id);
+                        dbTargets.EnsureIndex(i => i.Id);
 
-                        scopes.EnsureIndex(i => i.id);
-                        scopes.InsertBulk(data.scopes);
+                        // upload data
+                        
+                        dbSessions.InsertBulk(sessions);
 
-                        eyepieces.EnsureIndex(i => i.id);
-                        eyepieces.InsertBulk(data.eyepieces);
+                        var observations = sessions.SelectMany(s => s.Observations).Distinct(new EntityIdEqualityComparer<Observation>()).ToArray();                        
+                        dbObservations.InsertBulk(observations);
 
-                        lenses.EnsureIndex(i => i.id);
-                        lenses.InsertBulk(data.lenses);
+                        var observers = sessions.SelectMany(s => s.Observations.Select(o => o.Observer)).Distinct(new EntityIdEqualityComparer<Observer>()).ToArray();
+                        dbObservers.Insert(observers);
 
-                        filters.EnsureIndex(i => i.id);
-                        filters.InsertBulk(data.filters);
-
-                        imagers.EnsureIndex(i => i.id);
-                        imagers.InsertBulk(data.imagers);
-
-                        observations.EnsureIndex(i => i.id);
-                        observations.InsertBulk(data.observation);
-                        */
+                        var targets = sessions.SelectMany(s => s.Observations.Select(o => o.Target)).Distinct(new EntityIdEqualityComparer<Target>()).ToArray();
+                        dbTargets.Insert(targets);
+                        
                         // var planets = targets.Query().OfType<OAL.Types.PlanetTargetType, OAL.observationTargetType>().ToArray();
-                        var pl = targets.Query().OfType(typeof(OAL.deepSkyOC)).Where(t => ((OAL.deepSkyOC)t).@class.StartsWith("II.3.r")).ToArray();
+                        // var pl = targets.Query().OfType(typeof(OAL.deepSkyOC)).Where(t => ((OAL.deepSkyOC)t).@class.StartsWith("II.3.r")).ToArray();
 
 
-                        var Observers = data.observers.Select(i => OAL.Mappings.FromOAL(i)).ToArray();
+                        var obs = dbObservations.Query()
+                            .Include(o => o.Target)
+                            .Include(o => o.Observer)
+                            .ToArray();
                     }
                 }
             }
