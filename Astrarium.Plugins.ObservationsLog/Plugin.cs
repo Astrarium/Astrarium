@@ -1,5 +1,7 @@
-﻿using Astrarium.Plugins.ObservationsLog.OAL;
+﻿using Astrarium.Plugins.ObservationsLog.Database;
+using Astrarium.Plugins.ObservationsLog.OAL;
 using Astrarium.Plugins.ObservationsLog.Types;
+using Astrarium.Plugins.ObservationsLog.ViewModels;
 using Astrarium.Types;
 using LiteDB;
 using System;
@@ -19,25 +21,27 @@ namespace Astrarium.Plugins.ObservationsLog
             var topMenu = new MenuItem("Journal");
             topMenu.SubItems.Add(new MenuItem("Import...", new Command(ImportOAL)));
             topMenu.SubItems.Add(new MenuItem("Find", new Command(Find)));
+            topMenu.SubItems.Add(new MenuItem("Show Log", new Command(Show)));
 
             MenuItems.Add(MenuItemPosition.MainMenuTop, topMenu);
         }
 
         private void Find()
         {
-            var dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "ObservationsLog", "Observations.db");
+            //var sessions = Storage.GetSessions(s => s.Observations.Any(o => o.Target.Name == "mm"));
 
+            //var target = sessions.ElementAt(0).Observations[0].Target;
 
-            using (var db = new LiteDatabase(dbPath))
-            {
-                var dbSessions = db.GetCollection<Session>("sessions");
-                //var dbObservations = db.GetCollection<Observation>("observations");
+            //target.Name = "mm";
 
-                var planetSessions = dbSessions.Query().ToEnumerable()
-                        .Where(s => s.Observations.Any(o => o.Target is PlanetTarget)).ToArray();
-            
-            
-            }
+            //Storage.SaveTarget(target);
+
+        }
+
+        private void Show()
+        {
+            var vm = new ObservationsLogVM();
+            ViewManager.ShowWindow(vm);
         }
 
         private void ImportOAL()
@@ -50,81 +54,8 @@ namespace Astrarium.Plugins.ObservationsLog
                 using (TextReader reader = new StringReader(stringData))
                 {
                     var data = (observations)serializer.Deserialize(reader);
-
-                    var dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "ObservationsLog", "Observations.db");
-                    var dbDir = Path.GetDirectoryName(dbPath);
-                    if (!Directory.Exists(dbDir))
-                    {
-                        Directory.CreateDirectory(dbDir);
-                    }
-
-                    // TODO: for debug only!
-                    if (File.Exists(dbPath))
-                    {
-                        File.Delete(dbPath);
-                    }
-
-                    using (var db = new LiteDatabase(dbPath))
-                    {
-                        var mapper = BsonMapper.Global;
-
-                        /*
-                        mapper.Entity<Session>()
-                            .Id(x => x.Id)
-                            .DbRef(x => x.Site)
-                            .DbRef(x => x.Observer)
-                            .DbRef(x => x.Observations);
-
-                        mapper.Entity<Observation>()
-                            .Id(x => x.Id)
-                            .DbRef(x => x.Target);
-
-                        mapper.Entity<MultipleStarTarget>()
-                            .DbRef(x => x.Components, "targets");
-                        */
-
-                        var sessions = data.ImportAll();
-
-                        var dbSessions = db.GetCollection<Session>("sessions");
-                        /*
-                        var dbObservers = db.GetCollection<Observer>("observers");
-                        var dbObservations = db.GetCollection<Observation>("observations");
-                        var dbSites = db.GetCollection<Site>("sites");
-                        var dbTargets = db.GetCollection<Target>("targets");
-                        */
-                        dbSessions.EnsureIndex(i => i.Id);
-
-                        /*
-                        dbObservers.EnsureIndex(i => i.Id);
-                        dbObservations.EnsureIndex(i => i.Id);
-                        dbTargets.EnsureIndex(i => i.Id);
-                        dbSites.EnsureIndex(i => i.Id);
-                        */
-                        // upload data
-                        
-                        dbSessions.InsertBulk(sessions);
-
-                        /*
-                        var observations = sessions.SelectMany(s => s.Observations).Distinct(new EntityIdEqualityComparer<Observation>()).ToArray();                        
-                        dbObservations.InsertBulk(observations);
-
-                        var observers = sessions.Select(s => s.Observer).Distinct(new EntityIdEqualityComparer<Observer>()).ToArray();
-                        dbObservers.InsertBulk(observers);
-
-                        var targets = sessions.SelectMany(s => s.Observations.Select(o => o.Target).Concat(s.Observations.Select(t => t.Target).OfType<MultipleStarTarget>().SelectMany(ms => ms.Components))).Distinct(new EntityIdEqualityComparer<Target>()).ToArray();
-                        dbTargets.InsertBulk(targets);
-                        
-                        var sites = sessions.Select(s => s.Site).Distinct(new EntityIdEqualityComparer<Site>()).ToArray();
-                        dbSites.InsertBulk(sites);
-                        */
-                        
-
-
-                        // var planets = targets.Query().OfType<OAL.Types.PlanetTargetType, OAL.observationTargetType>().ToArray();
-                        // var pl = targets.Query().OfType(typeof(OAL.deepSkyOC)).Where(t => ((OAL.deepSkyOC)t).@class.StartsWith("II.3.r")).ToArray();
-
-
-                    }
+                    var sessions = data.ImportAll();
+                    Storage.AddSessions(sessions);
                 }
             }
         }

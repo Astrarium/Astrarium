@@ -2490,6 +2490,7 @@
                             <MultiTrigger.Conditions>
                                 <Condition Property="IsMouseOver" Value="true"/>
                                 <Condition Property="IsSelected" Value="false"/>
+                                <Condition Property="IsManipulationEnabled" Value="true" />
                             </MultiTrigger.Conditions>
                             <Setter Property="Background" TargetName="Bd" Value="{StaticResource BrushControlDarkBackground}"/>
                         </MultiTrigger>

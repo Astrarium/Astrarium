@@ -149,6 +149,14 @@ namespace Astrarium.Types.Themes
         }
     }
 
+    public class WidthConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return (double)value + double.Parse(parameter.ToString());
+        }
+    }
+
     public class LeftMarginMultiplierConverter : ValueConverterBase
     {
         public double Length { get; set; }

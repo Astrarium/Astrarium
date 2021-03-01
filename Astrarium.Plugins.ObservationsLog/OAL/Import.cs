@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.ObservationsLog.OAL
 {
-    public static class Mappings
+    public static class Import
     {
         public static ICollection<Session> ImportAll(this observations data)
         {
@@ -150,6 +150,7 @@ namespace Astrarium.Plugins.ObservationsLog.OAL
         {
             Target result = null;
 
+            /*
             // Single star
             if (target is starTargetType st)
             {
@@ -254,6 +255,7 @@ namespace Astrarium.Plugins.ObservationsLog.OAL
                 result = new SunTarget();
             }
             else
+            */
             {
                 result = new Target();
             }
