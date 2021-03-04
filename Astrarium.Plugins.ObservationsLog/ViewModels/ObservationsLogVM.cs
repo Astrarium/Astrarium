@@ -27,29 +27,33 @@ namespace Astrarium.Plugins.ObservationsLog.ViewModels
 
         public ObservationsLogVM()
         {
-            SessionsList = new ObservableCollection<SessionsListItem>(Storage.GetSessions(s => true).Select(s => new SessionsListItem(s)));
+            SessionsList = new ObservableCollection<SessionsListItem>(Storage.GetSessions(s => true).Select(s => new SessionsListItem(s)).OrderByDescending(s => s.Begin));
             Session = SessionsList.FirstOrDefault();
         }
     }
 
     public class SessionsListItem
     {
-        public string DateTime { get; set; }
+        public DateTime Begin { get; set; }
         public string Title { get; set; }        
         public string Weather { get; set; }
         public string Comments { get; set; }
         public string Seeing { get; set; }
+        public int ObservationsCount { get => Observations.Count; }
 
         public ObservableCollection<ObservationsListItem> Observations { get; set; } = new ObservableCollection<ObservationsListItem>();
 
         public SessionsListItem(Session session)
         {
-            DateTime = session.Observations.First().Begin.ToString();
-            Title = session.Observations.First().Begin.ToString();
+            var firstObservation = session.Observations.OrderBy(o => o.Begin).First();
+            var utcBegin = firstObservation.Begin.ToUniversalTime();
+            
+            Begin = utcBegin;
+            Title = utcBegin.AddHours(session.Site.TimeZone).ToString();
             Weather = session.Weather;
             Comments = session.Comments;
             Seeing = session.Seeing;
-            Observations = new ObservableCollection<ObservationsListItem>(session.Observations.Select(o => new ObservationsListItem(o)));        
+            Observations = new ObservableCollection<ObservationsListItem>(session.Observations.Select(o => new ObservationsListItem(session, o))); 
         }
     }
 
@@ -60,9 +64,20 @@ namespace Astrarium.Plugins.ObservationsLog.ViewModels
         public string Result { get; set; }
         public CelestialObject Body { get; set; }
 
-        public ObservationsListItem(Observation observation)
+        public TimeSpan? Begin { get; set; }
+        public TimeSpan? End { get; set; }
+
+        public ObservationsListItem(Session session, Observation observation)
         {
-            Title = observation.Begin.TimeOfDay.ToString("hh\\:mm") + " - " + observation.Target.Name;
+            var utcBegin = observation.Begin.ToUniversalTime();
+            var utcEnd = observation.End?.ToUniversalTime();
+
+            var timeBegin = utcBegin.AddHours(session.Site.TimeZone).TimeOfDay;
+            var timeEnd = utcEnd?.AddHours(session.Site.TimeZone).TimeOfDay;
+
+            Begin = timeBegin;
+            End = timeEnd;
+            Title = timeBegin.ToString("hh\\:mm") + " - " + observation.Target.Name;
             Result = observation.Result;
             Body = new TargetBody(new string[] { observation.Target.Name }); 
         }

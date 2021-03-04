@@ -2,6 +2,7 @@
 using Astrarium.Plugins.ObservationsLog.Types;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,13 +43,26 @@ namespace Astrarium.Plugins.ObservationsLog.OAL
 
         private static Observation ToObservation(this observationType observation, observations data)
         {
+            // get target
+            var target = data.targets.FirstOrDefault(t => t.id == observation.target);
+            
+            // collect all results from the observation
+            var results = observation.result.Select(r => r.description).ToList();
+
+            // target can have optional notes, if exist, add to the results collection too
+            var notes = target?.notes;
+            if (!string.IsNullOrWhiteSpace(notes))
+            {
+                results.Add(notes);
+            }
+
             return new Observation()
             {
                 Id = observation.id,
                 Begin = observation.begin,
                 End = observation.endSpecified ? (DateTime?)observation.end : null,
-                Result = string.Join("\n\r", observation.result.Select(r => r.description)),                
-                Target = data.targets.FirstOrDefault(t => t.id == observation.target).ToTarget(data, observation.begin),                
+                Result = string.Join("\n\r", results),                
+                Target = target.ToTarget(data, observation.begin),                
             };
         }
 
@@ -88,9 +102,22 @@ namespace Astrarium.Plugins.ObservationsLog.OAL
                 Latitude = site.latitude.ToAngle(),
                 Longitude = site.longitude.ToAngle(),
                 Elevation = site.elevationSpecified ? (double?)site.elevation : null,
-                TimeZone = site.timezone,
+                TimeZone = site.timezone.ToDouble() / 60.0,
                 IAUCode = site.code
             };
+        }
+
+        private static double ToDouble(this string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return 0;
+            else
+            {
+                if (double.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture.NumberFormat, out double result))
+                    return result;
+                else
+                    return 0;
+            } 
         }
 
         private static CrdsEquatorial ToEquatorialCoordinates(this equPosType pos, DateTime dateTime)

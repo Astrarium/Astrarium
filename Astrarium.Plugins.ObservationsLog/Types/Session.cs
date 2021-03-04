@@ -10,7 +10,6 @@ namespace Astrarium.Plugins.ObservationsLog.Types
     {
         public string Id { get; set; }
 
-
         public string Seeing { get; set; }
         public double? FaintestStar { get; set; }
         public double? SkyBrightness { get; set; }

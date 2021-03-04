@@ -9,9 +9,6 @@
                     mc:Ignorable="d">
 
     <Style TargetType="{x:Type q:MultilineEdit}">
-        <!--<Setter Property="BorderBrush" Value="{StaticResource BrushControlBackground}" />
-        <Setter Property="Foreground" Value="{StaticResource BrushForeground}" />
-        <Setter Property="Background" Value="{StaticResource BrushControlBackground}" />-->
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type q:MultilineEdit}">
@@ -38,8 +35,6 @@
                             Grid.Row="0" Grid.Column="1" Margin="1" Padding="8 0" Width="Auto" Height="24" HorizontalAlignment="Right" VerticalAlignment="Bottom" >
                             <Run FontSize="10">SAVE</Run>
                         </Button>
-
-                        
 
                         <TextBox                             
                             Name="PART_Editor" 
@@ -70,11 +65,10 @@
                             Foreground="{StaticResource BrushControlLightBackground}"
                             VerticalAlignment="Stretch"
                             HorizontalAlignment="Stretch"
+                            Cursor="Hand"
                             Grid.Row="1" Grid.ColumnSpan="2" />
-
                     </Grid>
                     <ControlTemplate.Triggers>
-
                         <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEditMode}" Value="False">
                             <Setter TargetName="PART_Editor" Property="BorderBrush" Value="Transparent" />
                             <Setter TargetName="PART_Editor" Property="IsReadOnly" Value="True" />
@@ -85,16 +79,59 @@
                             <Setter TargetName="PART_Editor" Property="IsReadOnly" Value="False" />
                             <Setter TargetName="PART_Editor" Property="ToolTip" Value="Shift+Enter to apply" />
                         </DataTrigger>
-
-
-                        
-
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
-          
         </Setter>
-        
+    </Style>
+
+    <Style TargetType="{x:Type q:TimeEdit}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type q:TimeEdit}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock
+                            Name="PART_Placeholder"
+                            Padding="4 2"
+                            Text="--:--"
+                            Visibility="Collapsed"
+                            Foreground="{StaticResource BrushControlLightBackground}"
+                            VerticalAlignment="Stretch"
+                            HorizontalAlignment="Stretch"
+                            Cursor="Hand" />
+
+                        <TextBox Name="PART_Input" Visibility="Visible" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" BorderThickness="0" Width="44" Padding="3" />
+                    </Grid>
+                    <!--<ControlTemplate.Triggers>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver" SourceName="PART_Input" Value="True" />
+                                <Condition Property="IsEnabled" SourceName="PART_Input" Value="True" />
+                            </MultiTrigger.Conditions>
+                            <MultiTrigger.Setters>
+                                <Setter Property="BorderThickness" TargetName="PART_Input" Value="1" />
+                                <Setter Property="Padding" TargetName="PART_Input" Value="2" />
+                            </MultiTrigger.Setters>
+                        </MultiTrigger>
+
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsKeyboardFocused" SourceName="PART_Input" Value="True" />
+                                <Condition Property="IsEnabled" SourceName="PART_Input" Value="True" />
+                            </MultiTrigger.Conditions>
+                            <MultiTrigger.Setters>
+                                <Setter Property="BorderThickness" TargetName="PART_Input" Value="1" />
+                                <Setter Property="Padding" TargetName="PART_Input" Value="2" />
+                            </MultiTrigger.Setters>
+                        </MultiTrigger>
+                    </ControlTemplate.Triggers>-->
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
 

@@ -127,6 +127,8 @@ namespace Astrarium.Plugins.ObservationsLog.Database
         {
             var db = new LiteDatabase(DATABASE_PATH);
 
+            db.Pragma("UTC_DATE", true);
+
             var dbSessions = db.GetCollection<Session>();
             var dbObservers = db.GetCollection<Observer>();
             var dbObservations = db.GetCollection<Observation>();

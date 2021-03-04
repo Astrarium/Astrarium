@@ -14,7 +14,7 @@ namespace Astrarium.Plugins.ObservationsLog.Types
         public double Longitude { get; set; }
         public double Latitude { get; set; }
         public double? Elevation { get; set; }
-        public string TimeZone { get; set; }
+        public double TimeZone { get; set; }
         public string IAUCode { get; set; }
     }
 }

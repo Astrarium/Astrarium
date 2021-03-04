@@ -60,7 +60,12 @@ namespace Astrarium.Plugins.ObservationsLog.Controls
             typeof(MultilineEdit),
             new FrameworkPropertyMetadata(null, (o, e) =>
             {
-
+                string value = (string)e.NewValue;
+                var placeholder = (o as MultilineEdit)._placeholder;
+                if (placeholder != null)
+                {
+                    placeholder.Visibility = string.IsNullOrWhiteSpace(value) ? Visibility.Visible : Visibility.Collapsed;
+                }
             })
             {
                 BindsTwoWayByDefault = true,
@@ -165,8 +170,10 @@ namespace Astrarium.Plugins.ObservationsLog.Controls
             }
             else
             {
-                _text = Text;
+               _text = _editor.Text;
+               Text = _text;
             }
+
             IsEditMode = false;
             _placeholder.Visibility = string.IsNullOrWhiteSpace(_editor.Text) ? Visibility.Visible : Visibility.Collapsed;
             Keyboard.ClearFocus();

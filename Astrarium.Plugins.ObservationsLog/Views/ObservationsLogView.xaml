@@ -38,22 +38,34 @@
 
         <GridSplitter Grid.Column="0" Width="6" />
 
-        <TabControl Grid.Column="1">
-            <TabItem Header="General">
-                <StackPanel Orientation="Vertical">
-                    
-                    <!-- Weather -->
-                    <q:MultilineEdit Title="Weather" Text="{Binding Session.Weather}" Placeholder="Enter optional description of weather conditions" />
+        <Grid Grid.Column="1">
 
-                    <!-- Comments -->
-                    <q:MultilineEdit Title="Comments" Text="{Binding Session.Comments}" Placeholder="Any comments related to the observation session" />
-                </StackPanel>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Orientation="Vertical" Grid.Row="0">
+                <TextBlock FontSize="23" Padding="6" Text="{Binding Session.Title}" />
+                <TextBlock Text="{Binding Session.ObservationsCount}" />
+            </StackPanel>
+
+            <TabControl Grid.Row="1">
+                <TabItem Header="General">
+                    <StackPanel Orientation="Vertical">
+
+                        <!-- Weather -->
+                        <q:MultilineEdit Title="Weather" Text="{Binding Session.Weather}" Placeholder="Enter optional description of weather conditions" />
+
+                        <!-- Comments -->
+                        <q:MultilineEdit Title="Comments" Text="{Binding Session.Comments}" Placeholder="Any comments related to the observation session" />
+                    </StackPanel>
 
 
-            </TabItem>
-            <TabItem Header="Observations" IsSelected="True">
+                </TabItem>
+                <TabItem Header="Observations" IsSelected="True">
 
-                
+
                     <ListBox 
                         HorizontalContentAlignment="Stretch" ItemsSource="{Binding Session.Observations}" 
                          ScrollViewer.CanContentScroll="True"
@@ -88,66 +100,67 @@
                                             </Grid.ColumnDefinitions>
                                             <TextBlock VerticalAlignment="Center" Grid.Column="0" Text="{Binding Title}" />
                                             <Button Grid.Column="1">
-                                            <Button.ContextMenu>
-                                                <ContextMenu x:Name="MainContextMenu" PlacementRectangle="{Binding RelativeSource={RelativeSource Self}}">
+                                                <Button.ContextMenu>
+                                                    <ContextMenu x:Name="MainContextMenu" PlacementRectangle="{Binding RelativeSource={RelativeSource Self}}">
                                                         <MenuItem Header="Find" />
                                                         <MenuItem Header="Add" />
                                                         <MenuItem Header="View" />
-                                                    <MenuItem Header="Edit" />
-                                                </ContextMenu>
-                                            </Button.ContextMenu>
-                                            <Path Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" Fill="{StaticResource BrushForeground}" Stretch="Uniform" Height="12" Width="12" />
-                                        </Button>
+                                                        <MenuItem Header="Edit" />
+                                                    </ContextMenu>
+                                                </Button.ContextMenu>
+                                                <Path Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" Fill="{StaticResource BrushForeground}" Stretch="Uniform" Height="12" Width="12" />
+                                            </Button>
                                         </Grid>
                                     </Expander.Header>
 
-                                <StackPanel Orientation="Vertical" Grid.IsSharedSizeScope="True">
+                                    <StackPanel Orientation="Vertical" Grid.IsSharedSizeScope="True">
 
-                                    <Grid HorizontalAlignment="Stretch">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="Header"   />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" FontWeight="Bold" Content="Celestial object other " />
-                                        <c:CelestialObjectPicker Grid.Column="1" Margin="0 0 10 0" HorizontalAlignment="Left"  SelectedBody="{Binding Body}" />
-                                    </Grid>
+                                        <Grid HorizontalAlignment="Stretch">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="Header"   />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" FontWeight="Bold" Content="Celestial object" />
+                                            <c:CelestialObjectPicker Grid.Column="1" Margin="0 0 10 0" HorizontalAlignment="Left"  SelectedBody="{Binding Body}" />
+                                        </Grid>
 
-                                    <Grid HorizontalAlignment="Stretch">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="Header"  />
-                                            <ColumnDefinition Width="*"  />
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" FontWeight="Bold" Content="Begin of observation" />
-                                        <c:DatePicker Grid.Column="1" JulianDay="2344444" />
-                                    </Grid>
+                                        <Grid HorizontalAlignment="Stretch">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="Header"  />
+                                                <ColumnDefinition Width="*"  />
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" FontWeight="Bold" Content="Begin of observation" />
+                                            <q:TimeEdit Grid.Column="1" Time="{Binding Begin}" />
+                                        </Grid>
 
-                                    <Grid HorizontalAlignment="Stretch">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="Header"  />
-                                            <ColumnDefinition Width="*"  />
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" FontWeight="Bold" Content="End of observation" />
-                                        <c:DatePicker Grid.Column="1" JulianDay="2344444" />
-                                    </Grid>
+                                        <Grid HorizontalAlignment="Stretch">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="Header"  />
+                                                <ColumnDefinition Width="*"  />
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" FontWeight="Bold" Content="End of observation" />
+                                            <q:TimeEdit Grid.Column="1" Time="{Binding End}" />
+                                        </Grid>
 
-                                    
 
-                                    <!-- Observation findings and notes -->
+
+                                        <!-- Observation findings and notes -->
                                         <q:MultilineEdit Title="Findings" Text="{Binding Result}" Placeholder="enter some text" />
-                                </StackPanel>
+                                    </StackPanel>
 
 
-                                    
+
                                 </Expander>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-               
 
-            </TabItem>
-            <TabItem Header="Gallery" />
 
-        </TabControl>
+                </TabItem>
+                <TabItem Header="Gallery" />
 
+            </TabControl>
+        </Grid>
+        
     </Grid>
 </Window>
