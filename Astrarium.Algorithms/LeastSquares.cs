@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static System.Math;
 
 namespace Astrarium.Algorithms
 {
-    internal static class LeastSquares
+    public static class LeastSquares
     {
         /// <summary>
         /// Finds function coefficients with least squares polynomial fit.
@@ -22,7 +19,7 @@ namespace Astrarium.Algorithms
         /// The code is based on article
         /// http://csharphelper.com/blog/2014/10/find-a-polynomial-least-squares-fit-for-a-set-of-points-in-c/
         /// </remarks>
-        internal static double[] FindCoeffs(IEnumerable<PointF> points, int degree)
+        public static double[] FindCoeffs(IEnumerable<PointF> points, int degree)
         {
             // Allocate space for (degree + 1) equations with 
             // (degree + 2) terms each (including the constant term).

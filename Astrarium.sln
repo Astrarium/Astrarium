@@ -49,12 +49,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.Eclipses", "Astrarium.Plugins.Eclipses\Astrarium.Plugins.Eclipses.csproj", "{4928AC5C-135C-4FA2-8E48-8F1BE4D921EC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Astrarium.Plugins.JupiterMoons", "Astrarium.Plugins.JupiterMoons\Astrarium.Plugins.JupiterMoons.csproj", "{E7FEE116-6603-4554-8285-3AD3D44C77B9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BD5D4668-0D89-4A08-A669-739FF47CA03B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD5D4668-0D89-4A08-A669-739FF47CA03B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD5D4668-0D89-4A08-A669-739FF47CA03B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD5D4668-0D89-4A08-A669-739FF47CA03B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0DA17A1C-068E-4CCE-82A4-646E137CC121}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0DA17A1C-068E-4CCE-82A4-646E137CC121}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0DA17A1C-068E-4CCE-82A4-646E137CC121}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -63,10 +69,6 @@ Global
 		{B8E35F4C-4324-48DE-97DB-6C9D083D59B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B8E35F4C-4324-48DE-97DB-6C9D083D59B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B8E35F4C-4324-48DE-97DB-6C9D083D59B1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BD5D4668-0D89-4A08-A669-739FF47CA03B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BD5D4668-0D89-4A08-A669-739FF47CA03B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BD5D4668-0D89-4A08-A669-739FF47CA03B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BD5D4668-0D89-4A08-A669-739FF47CA03B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{098854D6-DFD9-4A4A-8657-CE0323DB0DB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{098854D6-DFD9-4A4A-8657-CE0323DB0DB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{098854D6-DFD9-4A4A-8657-CE0323DB0DB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -127,6 +129,10 @@ Global
 		{4928AC5C-135C-4FA2-8E48-8F1BE4D921EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4928AC5C-135C-4FA2-8E48-8F1BE4D921EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4928AC5C-135C-4FA2-8E48-8F1BE4D921EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7FEE116-6603-4554-8285-3AD3D44C77B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7FEE116-6603-4554-8285-3AD3D44C77B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7FEE116-6603-4554-8285-3AD3D44C77B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7FEE116-6603-4554-8285-3AD3D44C77B9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
