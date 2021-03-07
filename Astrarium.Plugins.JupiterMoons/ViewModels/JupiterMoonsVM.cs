@@ -70,6 +70,23 @@ namespace Astrarium.Plugins.JupiterMoons
 
             string[] moonNames = { "Io", "Europa", "Ganymede", "Callisto" };
 
+            var events = new List<JovianEvent>();
+
+            // function returns true if moon is occulted by Jupiter
+            Func<int, double, bool> isOcculted = (int m, double jd) =>
+            {
+                var p = model.GetJupiterMoonsPosition(jd)[m, 0];
+                return p.Z > 0 && Math.Sqrt(p.X * p.X + p.Y * p.Y * STRETCH) < 1;
+            };
+
+            // function returns true if moon is eclipsed by Jupiter
+            Func<int, double, bool> isEclipsed = (int m, double jd) =>
+            {
+                var p = model.GetJupiterMoonsPosition(jd)[m, 1];
+                return p.Z > 0 && Math.Sqrt(p.X * p.X + p.Y * p.Y * STRETCH) < 1;
+            };
+
+
             // for each hour
             for (int h = 0; h <= daysInMonth * 24; h++)
             {
@@ -98,62 +115,73 @@ namespace Astrarium.Plugins.JupiterMoons
                                 // instant of max transit/occultation
                                 double jd_x0 = FindRoots(f_x0, jd0 + (h - 1) / 24.0, jd0 + h / 24.0, eps);
 
-                                // function calculates distance between center of moon
+                                // "Touch" function calculates distance between center of moon
                                 // and Jupiter's edge (Y-coordinate is stretched
                                 // to compensate Jupiter flattening)
-                                Func<double, double> func = (double jd) =>
+                                Func<double, double> f_touch = (double jd) =>
                                 {
                                     var p = model.GetJupiterMoonsPosition(jd)[m, s];
                                     return Math.Sqrt(p.X * p.X + p.Y * p.Y * STRETCH) - 1;
                                 };
 
-                                // function returns true if moon is occulted
-                                Func<double, bool> isOcculted = (double jd) =>
-                                {
-                                    var p = model.GetJupiterMoonsPosition(jd)[m, 0];
-                                    return p.Z > 0 && Math.Sqrt(p.X * p.X + p.Y * p.Y * STRETCH) < 1;
-                                };
+                                // event timings
+                                double jdBegin = FindRoots(f_touch, jd_x0 - 3 / 24.0, jd_x0, eps);
+                                double jdEnd = FindRoots(f_touch, jd_x0, jd_x0 + 3 / 24.0, eps);
 
-                                // begin of event
-                                double jdBegin = FindRoots(func, jd_x0 - 3 / 24.0, jd_x0, eps);
-                                if (!double.IsNaN(jdBegin))
+                                if (!double.IsNaN(jdBegin) && !double.IsNaN(jdEnd))
                                 {
                                     // occultation
                                     if (occult && s == 0)
-                                        Debug.WriteLine($"{jdBegin.ToString(CultureInfo.InvariantCulture)}: Jupiter begins to occult {moonNames[m]}");
-                                    // eclipse, need to check planet is not occulted at that time 
-                                    else if (occult && s == 1 && !isOcculted(jdBegin))
-                                        Debug.WriteLine($"{jdBegin.ToString(CultureInfo.InvariantCulture)}: Jupiter begins to eclipse {moonNames[m]}");
+                                    {
+                                        events.Add(new JovianEvent()
+                                        {
+                                            Code = $"O{m + 1}",
+                                            Text = $"Occultation of {moonNames[m]}",
+                                            JdBegin = jdBegin,
+                                            JdEnd = jdEnd,
+                                            IsEclipsedAtBegin = isEclipsed(m, jdBegin),
+                                            IsEclipsedAtEnd = isEclipsed(m, jdEnd)
+                                        });
+                                    }
+                                    // eclipse
+                                    else if (occult && s == 1)
+                                    {
+                                        events.Add(new JovianEvent()
+                                        {
+                                            Code = $"E{m + 1}",
+                                            Text = $"Eclipse of {moonNames[m]}",
+                                            JdBegin = jdBegin,
+                                            JdEnd = jdEnd,
+                                            IsOccultedAtBegin = isOcculted(m, jdBegin),
+                                            IsOccultedAtEnd = isOcculted(m, jdEnd)
+                                        });
+                                    }
                                     // transit of moon
                                     else if (!occult && s == 0)
-                                        Debug.WriteLine($"{jdBegin.ToString(CultureInfo.InvariantCulture)}: {moonNames[m]} begins transit of Jupiter");
+                                    {
+                                        events.Add(new JovianEvent()
+                                        {
+                                            Code = $"T{m + 1}",
+                                            Text = $"Transit of {moonNames[m]}",
+                                            JdBegin = jdBegin,
+                                            JdEnd = jdEnd,
+                                        });
+                                    }
                                     // transit of shadow
                                     else if (!occult && s == 1)
-                                        Debug.WriteLine($"{jdBegin.ToString(CultureInfo.InvariantCulture)}: {moonNames[m]}'s shadow enters Jupiter");
-                                }
-
-                                // end of event
-                                double jdEnd = FindRoots(func, jd_x0, jd_x0 + 3 / 24.0, eps);
-                                if (!double.IsNaN(jdEnd))
-                                {
-                                    // occultation
-                                    if (occult && s == 0)
-                                        Debug.WriteLine($"{jdEnd.ToString(CultureInfo.InvariantCulture)}: Jupiter ends to occult {moonNames[m]}");
-                                    // eclipse, need to check planet is not occulted at that time 
-                                    else if (occult && s == 1 && !isOcculted(jdEnd))
-                                        Debug.WriteLine($"{jdEnd.ToString(CultureInfo.InvariantCulture)}: Jupiter ends to eclipse {moonNames[m]}");
-                                    // transit of moon
-                                    else if (!occult && s == 0)
-                                        Debug.WriteLine($"{jdEnd.ToString(CultureInfo.InvariantCulture)}: {moonNames[m]} ends transit of Jupiter");
-                                    // transit of shadow
-                                    else if (!occult && s == 1)
-                                        Debug.WriteLine($"{jdEnd.ToString(CultureInfo.InvariantCulture)}: {moonNames[m]}'s shadow leaves Jupiter");
+                                    {
+                                        events.Add(new JovianEvent()
+                                        {
+                                            Code = $"S{m + 1}",
+                                            Text = $"Transit of {moonNames[m]} shadow",
+                                            JdBegin = jdBegin,
+                                            JdEnd = jdEnd,
+                                        });
+                                    }
                                 }
                             }
 
                             // n = another moon index
-                            // for that moon we don't condider shadow position,
-                            // so second index of always zero (=moon).
                             for (int n = 0; n < 4; n++)
                             {
                                 // skip self
@@ -161,18 +189,17 @@ namespace Astrarium.Plugins.JupiterMoons
 
                                 // find difference in X coordinates between
                                 // first moon or shadow and another moon
-                                double dX0 = prevPos[m, s].X - prevPos[n, 0].X;
-                                double dX1 = pos[m, s].X - pos[n, 0].X;
+                                double dX0 = prevPos[m, s].X - prevPos[n, s].X;
+                                double dX1 = pos[m, s].X - pos[n, s].X;
 
                                 // dX changes sign => crossing
                                 if (dX0 * dX1 < 0)
                                 {
                                     // crossing function
-                                    // has zero value when dX is zero
                                     Func<double, double> f_dx0 = (double jd) =>
                                     {
                                         var p = model.GetJupiterMoonsPosition(jd);
-                                        return p[m, s].X - p[n, 0].X;
+                                        return p[m, s].X - p[n, s].X;
                                     };
 
                                     // instant of crossing instant
@@ -183,12 +210,12 @@ namespace Astrarium.Plugins.JupiterMoons
                                         var p = model.GetJupiterMoonsPosition(jd_dx0);
 
                                         // ignore case when first object (moon/shadow)
-                                        // is far than second moon:
+                                        // is far than another moon:
                                         // no eclipse/occultation possible 
-                                        if (p[m, s].Z > p[n, 0].Z) continue;
+                                        if (p[m, 0].Z > p[n, 0].Z) continue;
 
-                                        double dX = p[m, s].X - p[n, 0].X;
-                                        double dY = p[m, s].Y - p[n, 0].Y;
+                                        double dX = p[m, s].X - p[n, s].X;
+                                        double dY = p[m, s].Y - p[n, s].Y;
 
                                         // distance between objects,
                                         // in units of Jupiter equatorial radii 
@@ -204,20 +231,63 @@ namespace Astrarium.Plugins.JupiterMoons
                                         double sd = PlanetEphem.Semidiameter(5, r);
 
                                         // first object (moon/shadow) semidiameter:
-                                        double r1 = s == 0 ?
+                                        double sd1 = s == 0 ?
                                             GalileanMoons.MoonSemidiameter(r, p[m, 0].Z, m) :
+                                            GalileanMoons.Shadow(r, r0, m, p[m, 1], p[n, 1]).Umbra;
 
-                                            // TODO: this is incorrect, check!
-                                            GalileanMoons.Shadow(r, r0, m, p[m, 1], p[n, 0]).Penumbra;
-                                                                                
-                                        double r2 = GalileanMoons.MoonSemidiameter(r, p[n, 0].Z, n);
+                                        // another moon semidiameter
+                                        double sd2 = GalileanMoons.MoonSemidiameter(r, p[n, 0].Z, n);
 
-                                        if (d * sd < r1 + r2)
+                                        // if distance between objects is less
+                                        // than sum of semidiameters, then event takes place
+                                        if (d * sd < sd1 + sd2)
                                         {
-                                            if (s == 0)
-                                                Debug.WriteLine($"{jd_dx0.ToString(CultureInfo.InvariantCulture)}: {moonNames[m]} occults {moonNames[n]}");
-                                            else if (s == 1)
-                                                Debug.WriteLine($"{jd_dx0.ToString(CultureInfo.InvariantCulture)}: {moonNames[m]} eclipses {moonNames[n]}");
+                                            // "Touch" function: has zero value wnen
+                                            // two objects (moon/shadow and another moon)
+                                            // touches with their edges
+                                            Func<double, double> f_touch = (double jd) =>
+                                            {
+                                                p = model.GetJupiterMoonsPosition(jd);
+                                                dX = p[m, s].X - p[n, s].X;
+                                                dY = p[m, s].Y - p[n, s].Y;
+                                                return Math.Sqrt(dX * dX + dY * dY) * sd - (sd1 + sd2);
+                                            };
+
+                                            // begin and end of event
+                                            double jdBegin = FindRoots(f_touch, jd_dx0 - 1 / 24.0, jd_dx0, eps);
+                                            double jdEnd = FindRoots(f_touch, jd_dx0, jd_dx0 + 1 / 24.0, eps);
+
+                                            if (!double.IsNaN(jdBegin) && !double.IsNaN(jdEnd))
+                                            {
+                                                if (s == 0)
+                                                {
+                                                    events.Add(new JovianEvent()
+                                                    {
+                                                        Code = $"{m + 1}O{n + 1}",
+                                                        Text = $"{moonNames[m]} occults {moonNames[n]}",
+                                                        JdBegin = jdBegin,
+                                                        JdEnd = jdEnd,
+                                                        IsEclipsedAtBegin = isEclipsed(n, jdBegin),
+                                                        IsOccultedAtBegin = isOcculted(n, jdBegin),
+                                                        IsEclipsedAtEnd = isEclipsed(n, jdEnd),
+                                                        IsOccultedAtEnd = isOcculted(n, jdEnd),
+                                                    });
+                                                }
+                                                else if (s == 1)
+                                                {
+                                                    events.Add(new JovianEvent()
+                                                    {
+                                                        Code = $"{m + 1}E{n + 1}",
+                                                        Text = $"{moonNames[m]} eclipses {moonNames[n]}",
+                                                        JdBegin = jdBegin,
+                                                        JdEnd = jdEnd,
+                                                        IsEclipsedAtBegin = isEclipsed(n, jdBegin),
+                                                        IsOccultedAtBegin = isOcculted(n, jdBegin),
+                                                        IsEclipsedAtEnd = isEclipsed(n, jdEnd),
+                                                        IsOccultedAtEnd = isOcculted(n, jdEnd),
+                                                    });
+                                                }
+                                            }
                                         } 
                                     }
                                 }
@@ -226,6 +296,12 @@ namespace Astrarium.Plugins.JupiterMoons
                     }
                 }
                 prevPos = pos;   
+            }
+
+            foreach (var e in events.OrderBy(e => e.JdBegin))
+            {
+                Debug.WriteLine($"{Formatters.DateTime.Format(new Date(e.JdBegin, sky.Context.GeoLocation.UtcOffset))} - {e.Text} (begin)");
+                Debug.WriteLine($"{Formatters.DateTime.Format(new Date(e.JdEnd, sky.Context.GeoLocation.UtcOffset))} - {e.Text} (end)");
             }
         }
 
@@ -260,6 +336,81 @@ namespace Astrarium.Plugins.JupiterMoons
             }
             return (a + b) / 2;
         }
+    }
+
+    public class JovianEvent
+    {
+        /// <summary>
+        /// Julian ephemeris day of beginning of the event.
+        /// </summary>
+        public double JdBegin { get; set; }
+
+        /// <summary>
+        /// Julian ephemeris day of end of the event.
+        /// </summary>
+        public double JdEnd { get; set; }
+
+        /// <summary>
+        /// Event duration, in fractions of day.
+        /// </summary>
+        public double Duration => JdEnd - JdBegin;
+
+        /// <summary>
+        /// Event code.
+        /// </summary>
+        /// <example>
+        /// Event code examples:
+        /// JO1 = Jupiter occults Io
+        /// JE1 = Jupiter eclipses Io
+        /// 2O1 = Europa occults Io
+        /// 2E1 = Europa occults Io
+        /// </example>
+        public string Code { get; set; }
+
+        /// <summary>
+        /// Textual description of the event.
+        /// </summary>
+        public string Text { get; set; }
+
+        /// <summary>
+        /// Altitude of the Sun at beginning of the event.
+        /// </summary>
+        public double SunAltBegin { get; set; }
+
+        /// <summary>
+        /// Altitude of the Sun at end of the event.
+        /// </summary>
+        public double SunAltEnd { get; set; }
+
+        /// <summary>
+        /// Altitude of the Jupiter at beginning of the event.
+        /// </summary>
+        public double JupiterAltBegin { get; set; }
+
+        /// <summary>
+        /// Altitude of the Jupiter at end of the event.
+        /// </summary>
+        public double JupiterAltEnd { get; set; }
+
+        /// <summary>
+        /// Is the Jovian moon eclipsed by Jupiter at beginning of the event.
+        /// </summary>
+        public bool IsEclipsedAtBegin { get; set; }
+
+        /// <summary>
+        /// Is the Jovian moon eclipsed by Jupiter at end of the event.
+        /// </summary>
+        public bool IsEclipsedAtEnd { get; set; }
+
+        /// <summary>
+        /// Is the Jovian moon occulted by Jupiter at beginning of the event.
+        /// </summary>
+        public bool IsOccultedAtBegin { get; set; }
+
+        /// <summary>
+        /// Is the Jovian moon occulted by Jupiter at end of the event.
+        /// </summary>
+        public bool IsOccultedAtEnd { get; set; }
     }
 
     class PositionsCoefficients
