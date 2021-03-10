@@ -4,11 +4,111 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Astrarium.Plugins.JupiterMoons"
+        xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
         mc:Ignorable="d"
         Title="Jupiter Moons" 
         Style="{StaticResource {x:Type Window}}" 
         Height="450" Width="800">
     <Grid>
-        
+
+        <TabControl>
+            <TabItem Header="Graph" />
+            <TabItem Header="Events">
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="9" />
+                        <ColumnDefinition Width="200" />
+                    </Grid.ColumnDefinitions>
+
+                    <DataGrid 
+                        Grid.Column="0"
+                        VerticalScrollBarVisibility="Auto"
+                        VerticalAlignment="Stretch"
+                        VirtualizingPanel.IsVirtualizing="True"
+                        VirtualizingPanel.VirtualizationMode="Recycling"
+                        AutoGenerateColumns="False" 
+                        CanUserReorderColumns="False"
+                        CanUserSortColumns="False"
+                        IsReadOnly="True"
+                        GridLinesVisibility="All"
+                        BorderThickness="1"
+                        Margin="4 0"
+                        Padding="2"
+                        RowHeaderWidth="0"
+                        ColumnHeaderHeight="32"
+                        RowHeight="24"
+                        ItemsSource="{Binding EventsTable}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Begin Date" Binding="{Binding BeginDate}"/>
+                            <DataGridTemplateColumn Header="Begin Time">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock FontFamily="Lucida Console" FontSize="12">
+                                <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:JupiterMoonsView}, Mode=FindAncestor}, Path=DataContext.ShowEventBeginCommand}" CommandParameter="{Binding}"><Run Text="{Binding BeginTime}" /></Hyperlink>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="End Time">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock FontFamily="Lucida Console" FontSize="12">
+                                <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:JupiterMoonsView}, Mode=FindAncestor}, Path=DataContext.ShowEventEndCommand}" CommandParameter="{Binding}"><Run Text="{Binding EndTime}" /></Hyperlink>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Duration" Binding="{Binding Duration}"/>
+                            <DataGridTextColumn Header="Event" Binding="{Binding Text}"/>
+                            <DataGridTextColumn Header="Code" Binding="{Binding Code}"/>
+                            <DataGridTextColumn Header="Jup. Alt Begin" Binding="{Binding JupiterAltBegin}"/>
+                            <DataGridTextColumn Header="Jup. Alt End" Binding="{Binding JupiterAltEnd}"/>
+
+                            <DataGridTextColumn Header="Sun Alt Begin" Binding="{Binding SunAltBegin}"/>
+                            <DataGridTextColumn Header="Sun Alt End" Binding="{Binding SunAltEnd}"/>
+
+
+                            <DataGridTextColumn Header="Dist" Binding="{Binding Distance}"/>
+                            <DataGridTextColumn Header="Limb" Binding="{Binding Limb}"/>
+
+                            <DataGridTextColumn Header="Notes" Binding="{Binding Notes}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <GridSplitter 
+                        Grid.Column="1" 
+                        ShowsPreview="False"   
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Stretch" Margin="2 -4" Width="6" />
+
+                    <StackPanel Grid.Column="2" Orientation="Vertical">
+
+                        <CheckBox Content="Io" Margin="2" IsChecked="{Binding FilterBodyIo}" />
+                        <CheckBox Content="Europa" Margin="2" IsChecked="{Binding FilterBodyEuropa}" />
+                        <CheckBox Content="Ganymede" Margin="2" IsChecked="{Binding FilterBodyGanymede}" />
+                        <CheckBox Content="Callisto" Margin="2 2 2 12" IsChecked="{Binding FilterBodyCallisto}" />
+
+                        <CheckBox Content="Transits" Margin="2" IsChecked="{Binding FilterTransits}" />
+                        <CheckBox Content="Shadow transits" Margin="2" IsChecked="{Binding FilterShadowTransits}" />
+                        <CheckBox Content="Eclipses" Margin="2" IsChecked="{Binding FilterEclipses}" />
+                        <CheckBox Content="Occultations" Margin="2 2 2 12" IsChecked="{Binding FilterOccultations}" />
+
+                        <CheckBox Content="Mutual eclipses" Margin="2" IsChecked="{Binding FilterMutualEclipses}" />
+                        <CheckBox Content="Mutual occultations" Margin="2 2 2 12" IsChecked="{Binding FilterMutualOccultations}" />
+
+                        <CheckBox Content="Jupiter is above horizon" Margin="2" IsChecked="{Binding FilterJupiterAboveHorizon}" />
+                        <CheckBox Content="Sun is below horizon" Margin="2" IsChecked="{Binding FilterSunBelowHorizon}" />
+
+                    </StackPanel>
+
+                </Grid>
+                
+                
+
+            </TabItem>
+            <TabItem Header="GRS Transits" />
+        </TabControl>
     </Grid>
 </Window>
