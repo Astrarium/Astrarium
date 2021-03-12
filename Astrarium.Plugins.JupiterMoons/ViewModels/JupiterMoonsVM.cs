@@ -19,13 +19,14 @@ namespace Astrarium.Plugins.JupiterMoons
         private readonly ISky sky;
         private readonly ISkyMap map;
         private readonly JupiterMoonsCalculator calculator = null;
-
         private readonly CelestialObject jupiter = null;
         private readonly CelestialObject[] moons = new CelestialObject[4];
+        private Date selectedDate;
         private ICollection<JovianEvent> events = null;
 
         #region Formatters
 
+        private readonly IEphemFormatter MonthYearFormatter = Formatters.MonthYear;
         private readonly IEphemFormatter DateFormatter = Formatters.Date;
         private readonly IEphemFormatter TimeFormatter = Formatters.Time;
         private readonly IEphemFormatter DurationFormatter = new Formatters.TimeFormatter(withSeconds: true);
@@ -35,12 +36,28 @@ namespace Astrarium.Plugins.JupiterMoons
 
         #region Commands
 
+        public ICommand ChangeMonthCommand => new Command(ChangeMonth);
+        public ICommand PrevMonthCommand => new Command(PrevMonth);
+        public ICommand NextMonthCommand => new Command(NextMonth);
         public ICommand ShowEventBeginCommand => new Command<EventsTableItem>(ShowEventBegin);
         public ICommand ShowEventEndCommand => new Command<EventsTableItem>(ShowEventEnd);
+        public ICommand ExportJovianEventsCommand => new Command(ExportJovianEvents);
 
         #endregion Commands
 
         #region Bindable properties
+
+        public string SelectedMonth
+        {
+            get => GetValue(nameof(SelectedMonth), "");
+            set => SetValue(nameof(SelectedMonth), value);
+        }
+
+        public bool IsCalculating
+        {
+            get => GetValue(nameof(IsCalculating), false);
+            set => SetValue(nameof(IsCalculating), value);
+        }
 
         public bool FilterBodyIo
         {
@@ -128,16 +145,23 @@ namespace Astrarium.Plugins.JupiterMoons
                 moons[i] = sky.Search($"@Jupiter-{i+1}", obj => true).FirstOrDefault();
             }
 
+            Date now = new Date(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset);
+            selectedDate = new Date(now.Year, now.Month, 1, now.UtcOffset);
+            
             Calculate();
         }
 
         private async void Calculate()
         {
-            Date now = sky.Context.GetDate(sky.Context.JulianDay);
-            await calculator.SetDate(now.Year, now.Month, sky.Context.GeoLocation);
+            IsCalculating = true;
+            SelectedMonth = MonthYearFormatter.Format(selectedDate);
+                        
+            await calculator.SetDate(selectedDate, sky.Context.GeoLocation);
             events = await calculator.GetEvents();
 
             ApplyFilter();
+
+            IsCalculating = false;
         }
 
         private bool IsMatchFilter(JovianEvent e, bool filter, string code)
@@ -149,6 +173,7 @@ namespace Astrarium.Plugins.JupiterMoons
         {
             await Task.Run(() =>
             {
+                IsCalculating = true;
                 var items = new List<EventsTableItem>();
 
                 foreach (var e in events.OrderBy(e => e.JdBegin)
@@ -181,9 +206,7 @@ namespace Astrarium.Plugins.JupiterMoons
 
                     items.Add(new EventsTableItem()
                     {
-                        JdBegin = e.JdBegin,
-                        JdEnd = e.JdEnd,
-                        MoonNumber = e.MoonNumber,
+                        Event = e,
                         BeginDate = DateFormatter.Format(dateBegin),
                         BeginTime = TimeFormatter.Format(dateBegin),
                         EndTime = TimeFormatter.Format(dateEnd),
@@ -199,20 +222,63 @@ namespace Astrarium.Plugins.JupiterMoons
                 }
 
                 EventsTable = items.ToArray();
+                IsCalculating = false;
             });
+        }
+
+        private void ChangeMonth()
+        {
+            double? jd = ViewManager.ShowDateDialog(selectedDate.ToJulianEphemerisDay(), selectedDate.UtcOffset, DateOptions.MonthYear);
+            if (jd != null)
+            {
+                var date = new Date(jd.Value, selectedDate.UtcOffset);
+                selectedDate = new Date(date.Year, date.Month, 1, selectedDate.UtcOffset);
+                Calculate();
+            }
+        }
+
+        private void PrevMonth()
+        {
+            int month = selectedDate.Month - 1;
+            int year = selectedDate.Year;
+            if (month < 1)
+            {
+                month = 12;
+                year--;
+            }
+            selectedDate = new Date(year, month, 1, selectedDate.UtcOffset);
+            Calculate();
+        }
+
+        private void NextMonth()
+        {
+            int month = selectedDate.Month + 1;
+            int year = selectedDate.Year;
+            if (month > 12)
+            {
+                month = 1;
+                year++;
+            }
+            selectedDate = new Date(year, month, 1, selectedDate.UtcOffset);
+            Calculate();
+        }
+
+        private void ExportJovianEvents()
+        {
+
         }
 
         private void ShowEventBegin(EventsTableItem e)
         {
-            ShowEvent(e, e.JdBegin);
+            ShowEvent(e.Event, e.Event.JdBegin);
         }
 
         private void ShowEventEnd(EventsTableItem e)
         {
-            ShowEvent(e, e.JdEnd);
+            ShowEvent(e.Event, e.Event.JdEnd);
         }
 
-        private void ShowEvent(EventsTableItem e, double jd)
+        private void ShowEvent(JovianEvent e, double jd)
         {
             var body = e.MoonNumber > 0 ? moons[e.MoonNumber - 1] : jupiter;
             if (body != null)

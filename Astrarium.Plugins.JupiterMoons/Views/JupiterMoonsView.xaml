@@ -4,79 +4,166 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Astrarium.Plugins.JupiterMoons"
+        x:Name="Window"
+        xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
         xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
         mc:Ignorable="d"
         Title="Jupiter Moons" 
         Style="{StaticResource {x:Type Window}}" 
         Height="450" Width="800">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <Style x:Key="ImageButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+                <Style.Setters>
+                    <Setter Property="Cursor" Value="Hand" />
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="Margin" Value="2" />
+                    <Setter Property="MinWidth" Value="40" />
+                    <Setter Property="Height" Value="40" />
+                </Style.Setters>
+                <Style.Triggers>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Foreground" Value="{StaticResource BrushControlBackground}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <Style x:Key="DateButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+                <Style.Setters>
+                    <Setter Property="Cursor" Value="Hand" />
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="Margin" Value="2" />
+                    <Setter Property="MinWidth" Value="40" />
+                    <Setter Property="Height" Value="40" />
+                </Style.Setters>
+                <Style.Triggers>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Foreground" Value="{StaticResource BrushControlBackground}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <Grid x:Key="ImagePrevEclipse" x:Shared="False">
+                <Path HorizontalAlignment="Left" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="16" Height="16" Margin="-11 0 0 0" Stretch="Uniform" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
+                    <Path.Data>
+                        <StreamGeometry>F1 M100,100z M0,0z M14,8L14,8 2.5,19.6 32.9,50 2.5,80.4 14,92 56,50z</StreamGeometry>
+                    </Path.Data>
+                    <Path.LayoutTransform>
+                        <RotateTransform Angle="180"></RotateTransform>
+                    </Path.LayoutTransform>
+                </Path>
+            </Grid>
+            <Grid x:Key="ImageNextEclipse" x:Shared="False">
+                <Path HorizontalAlignment="Right" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="20" Height="20" Margin="7 4 4 0" Stretch="Uniform" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
+                    <Path.Data>
+                        <StreamGeometry>F1 M100,125z M0,0z M14,8L14,8 2.5,19.6 32.9,50 2.5,80.4 14,92 56,50z</StreamGeometry>
+                    </Path.Data>
+                    <Path.LayoutTransform>
+                        <RotateTransform Angle="0"></RotateTransform>
+                    </Path.LayoutTransform>
+                </Path>
+            </Grid>
+        </ResourceDictionary>
+    </Window.Resources>
+    
     <Grid>
 
-        <TabControl>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+       
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Content="{StaticResource ImagePrevEclipse}" Style="{StaticResource ImageButton}" Command="{Binding PrevMonthCommand}" ToolTip="" />
+            <Button MinWidth="200" VerticalAlignment="Center" Command="{Binding ChangeMonthCommand}" Style="{StaticResource DateButton}" ToolTip="">
+                <Button.Content>
+                    <TextBlock FontSize="32" VerticalAlignment="Center"  Text="{Binding SelectedMonth, FallbackValue='Jan 2000'}" />
+                </Button.Content>
+            </Button>
+            <Button Content="{StaticResource ImageNextEclipse}" Style="{StaticResource ImageButton}" Command="{Binding NextMonthCommand}" ToolTip="" />
+        </StackPanel>
+
+        <Grid Height="6" Grid.Row="1">
+            <ProgressBar Background="Transparent" IsIndeterminate="True" Visibility="{Binding IsCalculating, Converter={s:BoolToVisibilityConverter}, FallbackValue=Collapsed}" />
+        </Grid>
+
+        <TabControl Grid.Row="2" IsEnabled="{Binding IsCalculating, Converter={s:InverseBoolConverter}}">
             <TabItem Header="Graph" />
             <TabItem Header="Events">
-
                 <Grid>
+
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="9" />
                         <ColumnDefinition Width="200" />
                     </Grid.ColumnDefinitions>
 
-                    <DataGrid 
-                        Grid.Column="0"
-                        VerticalScrollBarVisibility="Auto"
-                        VerticalAlignment="Stretch"
-                        VirtualizingPanel.IsVirtualizing="True"
-                        VirtualizingPanel.VirtualizationMode="Recycling"
-                        AutoGenerateColumns="False" 
-                        CanUserReorderColumns="False"
-                        CanUserSortColumns="False"
-                        IsReadOnly="True"
-                        GridLinesVisibility="All"
-                        BorderThickness="1"
-                        Margin="4 0"
-                        Padding="2"
-                        RowHeaderWidth="0"
-                        ColumnHeaderHeight="32"
-                        RowHeight="24"
-                        ItemsSource="{Binding EventsTable}">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Begin Date" Binding="{Binding BeginDate}"/>
-                            <DataGridTemplateColumn Header="Begin Time">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock FontFamily="Lucida Console" FontSize="12">
-                                <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:JupiterMoonsView}, Mode=FindAncestor}, Path=DataContext.ShowEventBeginCommand}" CommandParameter="{Binding}"><Run Text="{Binding BeginTime}" /></Hyperlink>
-                                        </TextBlock>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="End Time">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock FontFamily="Lucida Console" FontSize="12">
-                                <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:JupiterMoonsView}, Mode=FindAncestor}, Path=DataContext.ShowEventEndCommand}" CommandParameter="{Binding}"><Run Text="{Binding EndTime}" /></Hyperlink>
-                                        </TextBlock>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Duration" Binding="{Binding Duration}"/>
-                            <DataGridTextColumn Header="Event" Binding="{Binding Text}"/>
-                            <DataGridTextColumn Header="Code" Binding="{Binding Code}"/>
-                            <DataGridTextColumn Header="Jup. Alt Begin" Binding="{Binding JupiterAltBegin}"/>
-                            <DataGridTextColumn Header="Jup. Alt End" Binding="{Binding JupiterAltEnd}"/>
+                    <Grid Grid.Column="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
 
-                            <DataGridTextColumn Header="Sun Alt Begin" Binding="{Binding SunAltBegin}"/>
-                            <DataGridTextColumn Header="Sun Alt End" Binding="{Binding SunAltEnd}"/>
+                        <TextBlock Grid.Row="0" FontSize="18" Padding="6" Text="Events of Galilean moons system of Jupiter" VerticalAlignment="Center" />
+                        <Button  Margin="6" Padding="8 0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Content="Export..." Command="{Binding ExportJovianEventsCommand}" />
 
-
-                            <DataGridTextColumn Header="Dist" Binding="{Binding Distance}"/>
-                            <DataGridTextColumn Header="Limb" Binding="{Binding Limb}"/>
-
-                            <DataGridTextColumn Header="Notes" Binding="{Binding Notes}"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-
+                        <DataGrid 
+                            Grid.Row="1"
+                            Grid.ColumnSpan="2"
+                            VerticalScrollBarVisibility="Auto"
+                            VerticalAlignment="Stretch"
+                            VirtualizingPanel.IsVirtualizing="True"
+                            AutoGenerateColumns="False" 
+                            CanUserReorderColumns="False"
+                            CanUserSortColumns="True"
+                            IsReadOnly="True"
+                            GridLinesVisibility="All"
+                            BorderThickness="1"
+                            Margin="4 4"
+                            Padding="2 0"
+                            RowHeaderWidth="0"
+                            ColumnHeaderHeight="32"
+                            RowHeight="24"
+                            ItemsSource="{Binding EventsTable}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Begin Date" Binding="{Binding BeginDate}"/>
+                                <DataGridTemplateColumn Header="Begin Time" SortMemberPath="Event.JdBegin" CanUserSort="True">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock FontFamily="Lucida Console" FontSize="12">
+                                            <Hyperlink Command="{Binding ElementName=Window, Path=DataContext.ShowEventBeginCommand}" CommandParameter="{Binding}"><Run Text="{Binding BeginTime}" /></Hyperlink>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="End Time" SortMemberPath="Event.JdEnd" CanUserSort="True">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock FontFamily="Lucida Console" FontSize="12">
+                                            <Hyperlink Command="{Binding ElementName=Window, Path=DataContext.ShowEventEndCommand}" CommandParameter="{Binding}"><Run Text="{Binding EndTime}" /></Hyperlink>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Duration" Binding="{Binding Duration}" SortMemberPath="Event.Duration" />
+                                <DataGridTextColumn Header="Event" Binding="{Binding Text}" CanUserSort="False" />
+                                <DataGridTextColumn Header="Code" Binding="{Binding Code}" CanUserSort="False" />
+                                <DataGridTextColumn Header="Jup. Alt Begin" Binding="{Binding JupiterAltBegin}" SortMemberPath="Event.JupiterAltBegin" />
+                                <DataGridTextColumn Header="Jup. Alt End" Binding="{Binding JupiterAltEnd}" SortMemberPath="Event.JupiterAltEnd" />
+                                <DataGridTextColumn Header="Sun Alt Begin" Binding="{Binding SunAltBegin}" SortMemberPath="Event.SunAltBegin" />
+                                <DataGridTextColumn Header="Sun Alt End" Binding="{Binding SunAltEnd}" SortMemberPath="Event.SunAltEnd" />
+                                <DataGridTextColumn Header="Notes" Binding="{Binding Notes}" CanUserSort="False" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                    
                     <GridSplitter 
                         Grid.Column="1" 
                         ShowsPreview="False"   

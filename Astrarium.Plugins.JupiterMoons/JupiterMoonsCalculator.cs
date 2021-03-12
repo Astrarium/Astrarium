@@ -25,12 +25,12 @@ namespace Astrarium.Plugins.JupiterMoons
 
         public JupiterMoonsCalculator() { }
 
-        public async Task SetDate(int year, int month, CrdsGeographical geoLocation)
+        public async Task SetDate(Date date, CrdsGeographical geoLocation)
         {
             await Task.Run(() =>
             {
-                double jd0 = new Date(year, month, 1).ToJulianEphemerisDay();
-                daysInMonth = Date.DaysInMonth(year, month);
+                double jd0 = date.ToJulianEphemerisDay();
+                daysInMonth = Date.DaysInMonth(date.Year, date.Month);
 
                 var eL = new PointF[5];
                 var eB = new PointF[5];
@@ -156,7 +156,7 @@ namespace Astrarium.Plugins.JupiterMoons
                                                 JupiterAltBegin = GetJupiterAltitude(jdBegin),
                                                 JupiterAltEnd = GetJupiterAltitude(jdEnd),
                                                 SunAltBegin = GetSunAltitude(jdBegin),
-                                                SunAltEnd = GetSunAltitude(jdEnd),
+                                                SunAltEnd = GetSunAltitude(jdEnd),                                                
                                             });
                                         }
                                         // eclipse
@@ -338,8 +338,9 @@ namespace Astrarium.Plugins.JupiterMoons
                     prevPos = pos;
                 }
 
-                // filter invisible events
                 return events.Where(e =>
+                    e.JdBegin >= Begin &&
+                    e.JdEnd <= End + daysInMonth &&
                     !(e.IsEclipsedAtBegin && e.IsEclipsedAtEnd) &&
                     !(e.IsOccultedAtBegin && e.IsOccultedAtEnd))
                 .ToArray();
