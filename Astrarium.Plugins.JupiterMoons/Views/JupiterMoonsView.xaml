@@ -66,7 +66,7 @@
             </Grid>
         </ResourceDictionary>
     </Window.Resources>
-    
+
     <Grid>
 
         <Grid.RowDefinitions>
@@ -75,7 +75,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-       
+
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Content="{StaticResource ImagePrevEclipse}" Style="{StaticResource ImageButton}" Command="{Binding PrevMonthCommand}" ToolTip="" />
             <Button MinWidth="200" VerticalAlignment="Center" Command="{Binding ChangeMonthCommand}" Style="{StaticResource DateButton}" ToolTip="">
@@ -103,7 +103,8 @@
 
                     <Grid Grid.Column="0">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="81*" />
+                            <ColumnDefinition Width="167*"/>
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
@@ -111,12 +112,12 @@
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="0" FontSize="18" Padding="6" Text="Events of Galilean moons system of Jupiter" VerticalAlignment="Center" />
-                        <Button  Margin="6" Padding="8 0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Content="Export..." Command="{Binding ExportJovianEventsCommand}" />
+                        <TextBlock Grid.Row="0" FontSize="18" Padding="6" Text="Events of Galilean moons system of Jupiter" VerticalAlignment="Center" Grid.ColumnSpan="2" Margin="0,1" />
+                        <Button  Margin="0,6,6,6" Padding="8 0" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Content="Export..." Command="{Binding ExportJovianEventsCommand}" />
 
                         <DataGrid 
                             Grid.Row="1"
-                            Grid.ColumnSpan="2"
+                            Grid.ColumnSpan="3"
                             VerticalScrollBarVisibility="Auto"
                             VerticalAlignment="Stretch"
                             VirtualizingPanel.IsVirtualizing="True"
@@ -163,7 +164,7 @@
                             </DataGrid.Columns>
                         </DataGrid>
                     </Grid>
-                    
+
                     <GridSplitter 
                         Grid.Column="1" 
                         ShowsPreview="False"   
@@ -191,11 +192,112 @@
                     </StackPanel>
 
                 </Grid>
-                
-                
+
+
 
             </TabItem>
-            <TabItem Header="GRS Transits" />
+            <TabItem Header="GRS Transits">
+
+                <Grid>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="9" />
+                        <ColumnDefinition Width="200" />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.Column="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" FontSize="18" Padding="6" Text="Great Red Spot transits" VerticalAlignment="Center" />
+                        <Button  Margin="6" Padding="8 0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Content="Export..." Command="{Binding ExportGRSEventsCommand}" />
+
+                        <DataGrid 
+                            Grid.Row="1"
+                            Grid.ColumnSpan="2"
+                        VerticalScrollBarVisibility="Auto"
+                        VerticalAlignment="Stretch"
+                        VirtualizingPanel.IsVirtualizing="True"
+                        AutoGenerateColumns="False" 
+                        CanUserReorderColumns="False"
+                        CanUserSortColumns="True"
+                        IsReadOnly="True"
+                        GridLinesVisibility="All"
+                        BorderThickness="1"
+                        Margin="4 4"
+                        Padding="2 0"
+                        RowHeaderWidth="0"
+                        ColumnHeaderHeight="32"
+                        RowHeight="24"
+                        ItemsSource="{Binding GRSTable}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Date" Binding="{Binding Date}"/>
+                                <DataGridTemplateColumn Header="Transit Time" CanUserSort="False">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock FontFamily="Lucida Console" FontSize="12">
+                                    <Hyperlink Command="{Binding ElementName=Window, Path=DataContext.ShowGRSTransitCommand}" CommandParameter="{Binding}"><Run Text="{Binding TransitTime}" /></Hyperlink>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTextColumn Header="Jup. Alt Transit" Binding="{Binding JupiterAltTransit}" SortMemberPath="Event.JupiterAltTransit" />
+                                <DataGridTextColumn Header="Sun Alt Transit" Binding="{Binding SunAltTransit}" SortMemberPath="Event.SunAltTransit" />
+
+                                <DataGridTemplateColumn Header="Appear Time" CanUserSort="False">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock FontFamily="Lucida Console" FontSize="12">
+                                    <Hyperlink Command="{Binding ElementName=Window, Path=DataContext.ShowGRSAppearCommand}" CommandParameter="{Binding}"><Run Text="{Binding AppearTime}" /></Hyperlink>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTextColumn Header="Jup. Alt Appear" Binding="{Binding JupiterAltAppear}" SortMemberPath="Event.JupiterAltAppear" />
+                                <DataGridTextColumn Header="Sun Alt Appear" Binding="{Binding SunAltAppear}" SortMemberPath="Event.SunAltAppear" />
+
+                                <DataGridTemplateColumn Header="Disappear Time" CanUserSort="False">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock FontFamily="Lucida Console" FontSize="12">
+                                    <Hyperlink Command="{Binding ElementName=Window, Path=DataContext.ShowGRSDisappearCommand}" CommandParameter="{Binding}"><Run Text="{Binding DisappearTime}" /></Hyperlink>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTextColumn Header="Jup. Alt Disappear" Binding="{Binding JupiterAltDisappear}" SortMemberPath="Event.JupiterAltDisappear" />
+                                <DataGridTextColumn Header="Sun Alt Disappear" Binding="{Binding SunAltDisappear}" SortMemberPath="Event.SunAltDisappear" />
+
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+
+                    <GridSplitter 
+                        Grid.Column="1" 
+                        ShowsPreview="False"   
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Stretch" Margin="2 -4" Width="6" />
+
+                    <StackPanel Grid.Column="2" Orientation="Vertical">
+
+                        <CheckBox Content="Jupiter is above horizon" Margin="2" IsChecked="{Binding FilterJupiterAboveHorizon}" />
+                        <CheckBox Content="Sun is below horizon" Margin="2" IsChecked="{Binding FilterSunBelowHorizon}" />
+
+                    </StackPanel>
+
+                </Grid>
+
+            </TabItem>
         </TabControl>
     </Grid>
 </Window>

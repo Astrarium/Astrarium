@@ -1,4 +1,5 @@
 ﻿using Astrarium.Algorithms;
+using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -10,6 +11,8 @@ namespace Astrarium.Plugins.JupiterMoons
 {
     public class JupiterMoonsCalculator
     {
+        private readonly ISettings settings;
+
         public double Begin { get; private set; }
         public double End { get; private set; }
         public CrdsGeographical GeoLocation { get; private set; }
@@ -23,7 +26,10 @@ namespace Astrarium.Plugins.JupiterMoons
         public double[] jB { get; private set; }
         public double[] jR { get; private set; }
 
-        public JupiterMoonsCalculator() { }
+        public JupiterMoonsCalculator(ISettings settings) 
+        {
+            this.settings = settings;
+        }
 
         public async Task SetDate(Date date, CrdsGeographical geoLocation)
         {
@@ -344,6 +350,65 @@ namespace Astrarium.Plugins.JupiterMoons
                     !(e.IsEclipsedAtBegin && e.IsEclipsedAtEnd) &&
                     !(e.IsOccultedAtBegin && e.IsOccultedAtEnd))
                 .ToArray();
+            });
+        }
+
+        public async Task<ICollection<GRSEvent>> GetGRSTimes()
+        {
+            return await Task.Run(() =>
+            {
+                var events = new List<GRSEvent>();
+
+                var grsLongitudeSettings = settings.Get<GreatRedSpotSettings>("GRSLongitude");
+
+                // Jupiter rotation speed (system II), degress per day
+                const double ROT_SPEED = 870.1869147;
+
+                // Two hours, expressed in fractions of day
+                const double TWO_HOURS = 1.0 / 12.0;
+
+                double jd = Begin - 1;
+                do
+                {
+                    jd += 360.0 / ROT_SPEED;
+
+                    // GRS longitude
+                    double grsLongitude = PlanetEphem.GreatRedSpotLongitude(jd, grsLongitudeSettings);
+
+                    // Central Meridian longitude (system II)
+                    double CM = PlanetEphem.JupiterCM2(jd);
+
+                    // Difference between CM longitude and GRS longitude
+                    double delta = Angle.To360(CM - grsLongitude);
+
+                    if (delta > 180)
+                    {
+                        delta -= 360;
+                    }
+
+                    // Correction
+                    jd = jd - delta / ROT_SPEED;
+
+                    if (jd >= Begin && jd <= End)
+                    {
+                        var ev = new GRSEvent()
+                        {
+                            JdTransit = jd,
+                            JdAppear = jd - TWO_HOURS,
+                            JdDisappear = jd + TWO_HOURS,
+                            SunAltTransit = GetSunAltitude(jd),
+                            JupiterAltTransit = GetJupiterAltitude(jd),
+                            SunAltAppear = GetSunAltitude(jd - TWO_HOURS),
+                            JupiterAltAppear = GetJupiterAltitude(jd - TWO_HOURS),
+                            SunAltDisappear = GetSunAltitude(jd + TWO_HOURS),
+                            JupiterAltDisappear = GetJupiterAltitude(jd + TWO_HOURS)                            
+                        };
+                        events.Add(ev);
+                    }
+                }
+                while (jd <= End);
+
+                return events;
             });
         }
 

@@ -21,7 +21,6 @@ namespace Astrarium.Plugins.JupiterMoons
         public string JupiterAltEnd { get; set; }
         public string SunAltBegin { get; set; }
         public string SunAltEnd { get; set; }
-
         public JovianEvent Event { get; set; }
     }
 }

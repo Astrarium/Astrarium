@@ -1,4 +1,5 @@
 ﻿using Astrarium.Algorithms;
+using Astrarium.Plugins.JupiterMoons.ImportExport;
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
@@ -23,6 +24,7 @@ namespace Astrarium.Plugins.JupiterMoons
         private readonly CelestialObject[] moons = new CelestialObject[4];
         private Date selectedDate;
         private ICollection<JovianEvent> events = null;
+        private ICollection<GRSEvent> grsEvents = null;
 
         #region Formatters
 
@@ -42,6 +44,10 @@ namespace Astrarium.Plugins.JupiterMoons
         public ICommand ShowEventBeginCommand => new Command<EventsTableItem>(ShowEventBegin);
         public ICommand ShowEventEndCommand => new Command<EventsTableItem>(ShowEventEnd);
         public ICommand ExportJovianEventsCommand => new Command(ExportJovianEvents);
+        public ICommand ShowGRSTransitCommand => new Command<GRSTableItem>(ShowGRSTransit);
+        public ICommand ShowGRSAppearCommand => new Command<GRSTableItem>(ShowGRSAppear);
+        public ICommand ShowGRSDisappearCommand => new Command<GRSTableItem>(ShowGRSDisappear);
+        public ICommand ExportGRSEventsCommand => new Command(ExportGRSEvents);
 
         #endregion Commands
 
@@ -133,11 +139,11 @@ namespace Astrarium.Plugins.JupiterMoons
 
         #endregion Bindable properties
 
-        public JupiterMoonsVM(ISky sky, ISkyMap  map)
+        public JupiterMoonsVM(ISky sky, ISkyMap map, ISettings settings)
         {
             this.sky = sky;
             this.map = map;
-            this.calculator = new JupiterMoonsCalculator();
+            this.calculator = new JupiterMoonsCalculator(settings);
 
             jupiter = sky.Search("@Jupiter", obj => true).FirstOrDefault();
             for (int i = 0; i < 4; i++)
@@ -158,6 +164,7 @@ namespace Astrarium.Plugins.JupiterMoons
                         
             await calculator.SetDate(selectedDate, sky.Context.GeoLocation);
             events = await calculator.GetEvents();
+            grsEvents = await calculator.GetGRSTimes();
 
             ApplyFilter();
 
@@ -174,54 +181,89 @@ namespace Astrarium.Plugins.JupiterMoons
             await Task.Run(() =>
             {
                 IsCalculating = true;
-                var items = new List<EventsTableItem>();
 
-                foreach (var e in events.OrderBy(e => e.JdBegin)
-                    .Where(e => IsMatchFilter(e, FilterBodyIo, "^.+1$"))
-                    .Where(e => IsMatchFilter(e, FilterBodyEuropa, "^.+2$"))
-                    .Where(e => IsMatchFilter(e, FilterBodyGanymede, "^.+3$"))
-                    .Where(e => IsMatchFilter(e, FilterBodyCallisto, "^.+4$"))
-                    .Where(e => IsMatchFilter(e, FilterTransits, "^T\\d$"))
-                    .Where(e => IsMatchFilter(e, FilterShadowTransits, "^S\\d$"))
-                    .Where(e => IsMatchFilter(e, FilterEclipses, "^E\\d$"))
-                    .Where(e => IsMatchFilter(e, FilterOccultations, "^O\\d$"))
-                    .Where(e => IsMatchFilter(e, FilterMutualEclipses, "^\\dE\\d$"))
-                    .Where(e => IsMatchFilter(e, FilterMutualOccultations, "^\\dO\\d$"))
-                    .Where(e => FilterJupiterAboveHorizon ? e.JupiterAltBegin > 0 || e.JupiterAltEnd > 0 : true)
-                    .Where(e => FilterSunBelowHorizon ? e.SunAltBegin < 0 || e.SunAltEnd < 0 : true))
+                // Moon events table
                 {
-                    string notes = null;
-
-                    if (e.IsEclipsedAtBegin)
-                        notes = "Eclipsed by Jupiter at begin";
-                    if (e.IsOccultedAtBegin)
-                        notes = "Occulted by Jupiter at begin";
-                    if (e.IsEclipsedAtEnd)
-                        notes = "Eclipsed by Jupiter at end";
-                    if (e.IsOccultedAtEnd)
-                        notes = "Occulted by Jupiter at end";
-
-                    var dateBegin = new Date(e.JdBegin, sky.Context.GeoLocation.UtcOffset);
-                    var dateEnd = new Date(e.JdEnd, sky.Context.GeoLocation.UtcOffset);
-
-                    items.Add(new EventsTableItem()
+                    var items = new List<EventsTableItem>();
+                    foreach (var e in events.OrderBy(e => e.JdBegin)
+                        .Where(e => IsMatchFilter(e, FilterBodyIo, "^.+1$"))
+                        .Where(e => IsMatchFilter(e, FilterBodyEuropa, "^.+2$"))
+                        .Where(e => IsMatchFilter(e, FilterBodyGanymede, "^.+3$"))
+                        .Where(e => IsMatchFilter(e, FilterBodyCallisto, "^.+4$"))
+                        .Where(e => IsMatchFilter(e, FilterTransits, "^T\\d$"))
+                        .Where(e => IsMatchFilter(e, FilterShadowTransits, "^S\\d$"))
+                        .Where(e => IsMatchFilter(e, FilterEclipses, "^E\\d$"))
+                        .Where(e => IsMatchFilter(e, FilterOccultations, "^O\\d$"))
+                        .Where(e => IsMatchFilter(e, FilterMutualEclipses, "^\\dE\\d$"))
+                        .Where(e => IsMatchFilter(e, FilterMutualOccultations, "^\\dO\\d$"))
+                        .Where(e => FilterJupiterAboveHorizon ? e.JupiterAltBegin > 0 || e.JupiterAltEnd > 0 : true)
+                        .Where(e => FilterSunBelowHorizon ? e.SunAltBegin < 0 || e.SunAltEnd < 0 : true))
                     {
-                        Event = e,
-                        BeginDate = DateFormatter.Format(dateBegin),
-                        BeginTime = TimeFormatter.Format(dateBegin),
-                        EndTime = TimeFormatter.Format(dateEnd),
-                        Duration = DurationFormatter.Format(e.JdEnd - e.JdBegin),
-                        JupiterAltBegin = AltitudeFormatter.Format(e.JupiterAltBegin),
-                        JupiterAltEnd = AltitudeFormatter.Format(e.JupiterAltEnd),
-                        SunAltBegin = AltitudeFormatter.Format(e.SunAltBegin),
-                        SunAltEnd = AltitudeFormatter.Format(e.SunAltEnd),
-                        Code = e.Code,
-                        Text = e.Text,
-                        Notes = notes
-                    });
+                        string notes = null;
+
+                        if (e.IsEclipsedAtBegin)
+                            notes = "Eclipsed by Jupiter at begin";
+                        if (e.IsOccultedAtBegin)
+                            notes = "Occulted by Jupiter at begin";
+                        if (e.IsEclipsedAtEnd)
+                            notes = "Eclipsed by Jupiter at end";
+                        if (e.IsOccultedAtEnd)
+                            notes = "Occulted by Jupiter at end";
+
+                        var dateBegin = new Date(e.JdBegin, sky.Context.GeoLocation.UtcOffset);
+                        var dateEnd = new Date(e.JdEnd, sky.Context.GeoLocation.UtcOffset);
+
+                        items.Add(new EventsTableItem()
+                        {
+                            Event = e,
+                            BeginDate = DateFormatter.Format(dateBegin),
+                            BeginTime = TimeFormatter.Format(dateBegin),
+                            EndTime = TimeFormatter.Format(dateEnd),
+                            Duration = DurationFormatter.Format(e.JdEnd - e.JdBegin),
+                            JupiterAltBegin = AltitudeFormatter.Format(e.JupiterAltBegin),
+                            JupiterAltEnd = AltitudeFormatter.Format(e.JupiterAltEnd),
+                            SunAltBegin = AltitudeFormatter.Format(e.SunAltBegin),
+                            SunAltEnd = AltitudeFormatter.Format(e.SunAltEnd),
+                            Code = e.Code,
+                            Text = e.Text,
+                            Notes = notes
+                        });
+                    }
+
+                    EventsTable = items.ToArray();
                 }
 
-                EventsTable = items.ToArray();
+                // GRS table
+                {
+                    var items = new List<GRSTableItem>();
+
+                    foreach (var e in grsEvents
+                        .Where(e => FilterJupiterAboveHorizon ? e.JupiterAltTransit > 0 : true)
+                        .Where(e => FilterSunBelowHorizon ? e.SunAltTransit < 0 : true))
+                    {
+                        var date = new Date(e.JdTransit, sky.Context.GeoLocation.UtcOffset);
+                        var appear = new Date(e.JdAppear, sky.Context.GeoLocation.UtcOffset);
+                        var disappear = new Date(e.JdDisappear, sky.Context.GeoLocation.UtcOffset);
+
+                        items.Add(new GRSTableItem()
+                        {
+                            Event = e,
+                            Date = DateFormatter.Format(date),
+                            TransitTime = TimeFormatter.Format(date),
+                            AppearTime = TimeFormatter.Format(appear),
+                            DisappearTime = TimeFormatter.Format(disappear),
+                            SunAltTransit = AltitudeFormatter.Format(e.SunAltTransit),
+                            JupiterAltTransit = AltitudeFormatter.Format(e.JupiterAltTransit),
+                            SunAltAppear = AltitudeFormatter.Format(e.SunAltAppear),
+                            JupiterAltAppear = AltitudeFormatter.Format(e.JupiterAltAppear),
+                            SunAltDisappear = AltitudeFormatter.Format(e.SunAltDisappear),
+                            JupiterAltDisappear = AltitudeFormatter.Format(e.JupiterAltDisappear),
+                        });
+                    }
+
+                    GRSTable = items.ToArray();
+                }
+
                 IsCalculating = false;
             });
         }
@@ -265,7 +307,48 @@ namespace Astrarium.Plugins.JupiterMoons
 
         private void ExportJovianEvents()
         {
+            var formats = new Dictionary<string, string>
+            {
+                ["With formatting"] = "*.csv",
+                ["Raw data"] = "*.csv",
+            };
+            string filter = string.Join("|", formats.Select(kv => $"{kv.Key}|{kv.Value}"));
+            var file = ViewManager.ShowSaveFileDialog("Export", "JovianEvents", ".csv", filter, out int selectedFilterIndex);
+            if (file != null)
+            {
+                bool rawData = selectedFilterIndex == 2;
+                var writer = new JovianEventsCsvWriter(rawData);
+                writer.Write(file, EventsTable);
 
+                var answer = ViewManager.ShowMessageBox("Info", "Export Done", System.Windows.MessageBoxButton.YesNo);
+                if (answer == System.Windows.MessageBoxResult.Yes)
+                {
+                    Process.Start(file);
+                }
+            }
+        }
+
+        private void ExportGRSEvents()
+        {
+            var formats = new Dictionary<string, string>
+            {
+                ["With formatting"] = "*.csv",
+                ["Raw data"] = "*.csv",
+            };
+            string filter = string.Join("|", formats.Select(kv => $"{kv.Key}|{kv.Value}"));
+            var file = ViewManager.ShowSaveFileDialog("Export", "GreatRedSpot", ".csv", filter, out int selectedFilterIndex);
+            if (file != null)
+            {
+                bool rawData = selectedFilterIndex == 2;
+                var writer = new GRSEventsCsvWriter(rawData);
+                writer.Write(file, GRSTable);
+
+                var answer = ViewManager.ShowMessageBox("Info", "Export Done", System.Windows.MessageBoxButton.YesNo);
+                if (answer == System.Windows.MessageBoxResult.Yes)
+                {
+                    Process.Start(file);
+                }
+            }
         }
 
         private void ShowEventBegin(EventsTableItem e)
@@ -288,10 +371,34 @@ namespace Astrarium.Plugins.JupiterMoons
             }
         }
 
+        private void ShowGRSAppear(GRSTableItem e)
+        {
+            sky.SetDate(e.Event.JdAppear);
+            map.GoToObject(jupiter, TimeSpan.Zero);
+        }
+
+        private void ShowGRSDisappear(GRSTableItem e)
+        {
+            sky.SetDate(e.Event.JdDisappear);
+            map.GoToObject(jupiter, TimeSpan.Zero);
+        }
+
+        private void ShowGRSTransit(GRSTableItem e)
+        {
+            sky.SetDate(e.Event.JdTransit);
+            map.GoToObject(jupiter, TimeSpan.Zero);
+        }
+
         public EventsTableItem[] EventsTable
         {
             get => GetValue(nameof(EventsTable), new EventsTableItem[0]);
             set => SetValue(nameof(EventsTable), value);
+        }
+
+        public GRSTableItem[] GRSTable
+        {
+            get => GetValue(nameof(GRSTable), new GRSTableItem[0]);
+            set => SetValue(nameof(GRSTable), value);
         }
     }
 
