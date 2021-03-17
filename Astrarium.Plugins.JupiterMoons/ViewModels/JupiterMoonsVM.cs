@@ -59,6 +59,12 @@ namespace Astrarium.Plugins.JupiterMoons
             set => SetValue(nameof(SelectedMonth), value);
         }
 
+        public int DaysCount
+        {
+            get => GetValue(nameof(DaysCount), 0);
+            set => SetValue(nameof(DaysCount), value);
+        }
+
         public bool IsCalculating
         {
             get => GetValue(nameof(IsCalculating), false);
@@ -161,10 +167,12 @@ namespace Astrarium.Plugins.JupiterMoons
         {
             IsCalculating = true;
             SelectedMonth = MonthYearFormatter.Format(selectedDate);
-                        
+            DaysCount = Date.DaysInMonth(selectedDate.Year, selectedDate.Month);       
+            
             await calculator.SetDate(selectedDate, sky.Context.GeoLocation);
             events = await calculator.GetEvents();
             grsEvents = await calculator.GetGRSTimes();
+            MoonsPositions = await calculator.GetPositions();
 
             ApplyFilter();
 
@@ -182,7 +190,7 @@ namespace Astrarium.Plugins.JupiterMoons
             {
                 IsCalculating = true;
 
-                // Moon events table
+                // Moons events table
                 {
                     var items = new List<EventsTableItem>();
                     foreach (var e in events.OrderBy(e => e.JdBegin)
@@ -387,6 +395,12 @@ namespace Astrarium.Plugins.JupiterMoons
         {
             sky.SetDate(e.Event.JdTransit);
             map.GoToObject(jupiter, TimeSpan.Zero);
+        }
+
+        public ICollection<CrdsRectangular[,]> MoonsPositions
+        {
+            get => GetValue<ICollection<CrdsRectangular[,]>>(nameof(MoonsPositions));
+            set => SetValue(nameof(MoonsPositions), value);
         }
 
         public EventsTableItem[] EventsTable

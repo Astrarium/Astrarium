@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Astrarium.Plugins.JupiterMoons"
         x:Name="Window"
         xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
-        xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+        xmlns:c="clr-namespace:Astrarium.Plugins.JupiterMoons.Controls"
         mc:Ignorable="d"
         Title="Jupiter Moons" 
         Style="{StaticResource {x:Type Window}}" 
@@ -91,7 +91,30 @@
         </Grid>
 
         <TabControl Grid.Row="2" IsEnabled="{Binding IsCalculating, Converter={s:InverseBoolConverter}}">
-            <TabItem Header="Graph" />
+            <TabItem Header="Graph">
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <c:MoonsGraphControl Positions="{Binding MoonsPositions}"  DaysOffset="{Binding ElementName=DaysOffset, Path=Value}" />
+                    <ScrollBar x:Name="DaysOffset" Style="{StaticResource VerticalScrollBarStyle}" Minimum="0" Maximum="{Binding DaysCount}" ViewportSize="5" SmallChange="0.0416666" LargeChange="1" Value="0" Grid.Row="0" Grid.Column="1" Orientation="Vertical" />
+                </Grid>
+
+
+
+                <!--<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                    
+                </ScrollViewer>-->
+                
+            </TabItem>
             <TabItem Header="Events">
                 <Grid>
 

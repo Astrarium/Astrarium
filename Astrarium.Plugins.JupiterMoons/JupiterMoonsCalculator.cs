@@ -18,13 +18,12 @@ namespace Astrarium.Plugins.JupiterMoons
         public CrdsGeographical GeoLocation { get; private set; }
         private int daysInMonth;
 
-        public double[] eL { get; private set; }
-        public double[] eB { get; private set; }
-        public double[] eR { get; private set; }
-
-        public double[] jL { get; private set; }
-        public double[] jB { get; private set; }
-        public double[] jR { get; private set; }
+        private double[] eL;
+        private double[] eB;
+        private double[] eR;
+        private double[] jL;
+        private double[] jB;
+        private double[] jR;
 
         public JupiterMoonsCalculator(ISettings settings) 
         {
@@ -70,6 +69,20 @@ namespace Astrarium.Plugins.JupiterMoons
                 this.jL = LeastSquares.FindCoeffs(jL, 3);
                 this.jB = LeastSquares.FindCoeffs(jB, 3);
                 this.jR = LeastSquares.FindCoeffs(jR, 3);
+            });
+        }
+
+        public async Task<ICollection<CrdsRectangular[,]>> GetPositions()
+        {
+            return await Task.Run(() =>
+            {
+                var positions = new List<CrdsRectangular[,]>();
+                for (int h = 0; h <= daysInMonth * 24; h++) 
+                {
+                    double jd = Begin + h / 24.0;
+                    positions.Add(GetJupiterMoonsPosition(jd));
+                }
+                return positions;
             });
         }
 
