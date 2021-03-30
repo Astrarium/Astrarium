@@ -43,20 +43,35 @@ namespace Astrarium.Plugins.Horizon
                     var h = new CrdsHorizontal(map.Center.Azimuth - map.ViewAngle + step * i, 0);
                     hor[i] = map.Project(h);
                 }
-                if (hor[0].X >= 0) hor[0].X = -1;
-                if (hor[POINTS_COUNT - 1].X <= map.Width) hor[POINTS_COUNT - 1].X = map.Width + 1;
+                //if (hor[0].X >= 0) hor[0].X = -1;
+                //if (hor[POINTS_COUNT - 1].X <= map.Width) hor[POINTS_COUNT - 1].X = map.Width + 1;
 
                 if (hor.Any(h => !map.IsOutOfScreen(h)))
                 {
                     GraphicsPath gp = new GraphicsPath();
 
                     gp.AddCurve(hor);
-                    gp.AddLines(new PointF[]
+
+                    var pts = map.IsInverted ? 
+                        new PointF[]
+                    {                        
+                        new PointF(map.Width + 1, -1),
+                        new PointF(-1, -1),
+                    } : new PointF[]
                     {
                         new PointF(map.Width + 1, map.Height + 1),
                         new PointF(-1, map.Height + 1)
-                    });
+                    };
 
+                    if (hor.Last().X > map.Width / 2)
+                    {
+                        gp.AddLines(pts);
+                    }
+                    else
+                    {
+                        gp.AddLines(pts.Reverse().ToArray());
+                    }
+                   
                     map.Graphics.FillPath(brushGround, gp);
                 }
                 else if (map.Center.Altitude <= 0)
@@ -101,8 +116,8 @@ namespace Astrarium.Plugins.Horizon
                     var h = new CrdsHorizontal(map.Center.Azimuth - map.ViewAngle + step * i, 0);
                     hor[i] = map.Project(h);
                 }
-                if (hor[0].X >= 0) hor[0].X = -1;
-                if (hor[POINTS_COUNT - 1].X <= map.Width) hor[POINTS_COUNT - 1].X = map.Width + 1;
+                //if (hor[0].X >= 0) hor[0].X = -1;
+                //if (hor[POINTS_COUNT - 1].X <= map.Width) hor[POINTS_COUNT - 1].X = map.Width + 1;
 
                 if (hor.Any(h => !map.IsOutOfScreen(h)))
                 {

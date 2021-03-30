@@ -62,7 +62,7 @@ namespace Astrarium
             else
             {
                 SkyMap.Render(pe.Graphics);
-
+                
                 /*
                 // Below is a snippet how to draw mirrored part of image
                   
@@ -171,8 +171,8 @@ namespace Astrarium
 
                         pNew.X = e.X;
                         pNew.Y = e.Y;
-                        double dx = pNew.X - pOld.X;
-                        double dy = pNew.Y - pOld.Y;
+                        double dx = (SkyMap.Projection.IsMirrored ? -1 : 1) * (pNew.X - pOld.X);
+                        double dy = (SkyMap.Projection.IsInverted ? -1 : 1) * (pNew.Y - pOld.Y);
 
                         SkyMap.Antialias = Math.Sqrt(dx * dx + dy * dy) < 30;
 

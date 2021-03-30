@@ -72,6 +72,9 @@ namespace Astrarium.Types
         /// <returns><see cref="PointF"/> instance - is a projection of horizontal corrdinates on the map.</returns>
         PointF Project(CrdsHorizontal hor);
 
+        bool IsMirrored { get; set; }
+        bool IsInverted { get; set; }
+
         double JulianDay { get; }
 
         double Epsilon { get; }
@@ -180,40 +183,65 @@ namespace Astrarium.Types
             return size;
         }
 
-        /// <summary>
-        /// Gets drawing rotation of image, measured clockwise from 
-        /// a point oriented to top of the screen towards North celestial pole point 
-        /// </summary>
-        /// <param name="eq">Equatorial coordinates of a central point of a body.</param>
-        /// <returns></returns>
-        public static float GetRotationTowardsNorth(this IMapContext map, CrdsEquatorial eq)
+        public static void Flip(this IMapContext map)
         {
-            // Coordinates of center of a body (image) to be rotated
-            PointF p = map.Project(eq.ToHorizontal(map.GeoLocation, map.SiderealTime));
-
-            // Point directed to North celestial pole
-            PointF pNorth = map.Project((eq + new CrdsEquatorial(0, 1)).ToHorizontal(map.GeoLocation, map.SiderealTime));
-
-            // Clockwise rotation
-            return LineInclinationY(p, pNorth);
+            var transformMatrix = map.Graphics.Transform;
+            if (map.IsMirrored)
+            {
+                transformMatrix.Multiply(new Matrix(-1, 0, 0, 1, 0, 0));
+            }
+            if (map.IsInverted)
+            {
+                transformMatrix.Multiply(new Matrix(1, 0, 0, -1, 0, 0));
+            }
+            map.Graphics.Transform = transformMatrix;
         }
 
-        /// <summary>
-        /// Gets drawing rotation of image, measured clockwise from 
-        /// a point oriented to top of the screen towards North ecliptic pole point 
-        /// </summary>
-        /// <param name="ecl">Ecliptical coordinates of a central point of a body.</param>
-        /// <returns></returns>
-        public static float GetRotationTowardsEclipticPole(this IMapContext map, CrdsEcliptical ecl)
+        public static void Rotate(this IMapContext map, PointF p, CrdsEcliptical ecl)
         {
-            // Coordinates of center of a body (image) to be rotated
-            PointF p = map.Project(ecl.ToEquatorial(map.Epsilon).ToHorizontal(map.GeoLocation, map.SiderealTime));
-
             // Point directed to North ecliptic pole
             PointF pNorth = map.Project((ecl + new CrdsEcliptical(0, 1)).ToEquatorial(map.Epsilon).ToHorizontal(map.GeoLocation, map.SiderealTime));
 
             // Clockwise rotation
-            return LineInclinationY(p, pNorth);
+            float inc = LineInclinationY(p, pNorth);
+
+            if (map.IsInverted)
+            {
+                inc = -90 - inc;
+            }
+            float rotation = (float)inc;
+            if (map.IsInverted)
+            {
+                rotation = 90 - rotation;
+            }
+
+            map.Graphics.TranslateTransform(p.X, p.Y);
+            map.Graphics.RotateTransform(rotation);
+        }
+
+        public static float Rotate(this IMapContext map, PointF p, CrdsEquatorial eq, double PA)
+        {
+            // Point directed to North celestial pole
+            PointF pNorth = map.Project((eq + new CrdsEquatorial(0, 1)).ToHorizontal(map.GeoLocation, map.SiderealTime));
+
+            // Clockwise rotation
+            float inc = LineInclinationY(p, pNorth);
+
+            if (map.IsInverted)
+            {
+                inc = -90 - inc;
+            }
+
+            float rotation = (float)(inc - (map.IsMirrored ? -1 : 1) * PA);
+            if (map.IsInverted)
+            {
+                rotation = 90 - rotation;
+            }
+
+            map.Graphics.TranslateTransform(p.X, p.Y);
+            map.Graphics.RotateTransform(rotation);
+
+            return rotation;
         }
 
         /// <summary>
@@ -311,8 +339,11 @@ namespace Astrarium.Types
             map.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
             map.Graphics.PixelOffsetMode = PixelOffsetMode.HighSpeed;
             map.Graphics.CompositingQuality = CompositingQuality.HighSpeed;
-            
+
+            map.Flip();
+
             Rectangle destRect2 = new Rectangle((int)destRect.X, (int)destRect.Y, (int)destRect.Width, (int)destRect.Height);
+
             map.Graphics.DrawImage(image, destRect2, (int)srcRect.X, (int)srcRect.Y, (int)srcRect.Width, (int)srcRect.Height, GraphicsUnit.Pixel, null);
 
             map.Graphics.Restore(gs);

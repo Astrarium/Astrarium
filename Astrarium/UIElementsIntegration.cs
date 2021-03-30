@@ -48,6 +48,10 @@ namespace Astrarium
 
             // Default color schema
             SettingItems.Add("Colors", new SettingItem("Schema", ColorSchema.Night));
+
+            // Map transformation
+            SettingItems.Add(null, new SettingItem("IsMirrored", false));
+            SettingItems.Add(null, new SettingItem("IsInverted", false));
         }
     }
 }

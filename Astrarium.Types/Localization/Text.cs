@@ -52,7 +52,7 @@ namespace Astrarium.Types
         public static string FileExtension { get; set; } = "ini";
         public static string DefaultLanguage { get; set; } = "en";
 
-        private static CultureInfo currentCulture = null;
+        private static CultureInfo currentCulture = CultureInfo.GetCultureInfo("en");
 
         public static void SetLocale(CultureInfo culture)
         {

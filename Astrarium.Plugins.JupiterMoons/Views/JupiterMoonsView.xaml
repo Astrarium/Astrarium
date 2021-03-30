@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Astrarium.Plugins.JupiterMoons"
         x:Name="Window"
+        xmlns:t="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
         xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
         xmlns:c="clr-namespace:Astrarium.Plugins.JupiterMoons.Controls"
         mc:Ignorable="d"
@@ -75,7 +76,6 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Content="{StaticResource ImagePrevEclipse}" Style="{StaticResource ImageButton}" Command="{Binding PrevMonthCommand}" ToolTip="" />
             <Button MinWidth="200" VerticalAlignment="Center" Command="{Binding ChangeMonthCommand}" Style="{StaticResource DateButton}" ToolTip="">
@@ -94,26 +94,99 @@
             <TabItem Header="Graph">
 
                 <Grid>
+
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="9" />
+                        <ColumnDefinition Width="200" />
                     </Grid.ColumnDefinitions>
 
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
+                    <Grid Grid.Column="0" Grid.IsSharedSizeScope="True">
 
-                    <c:MoonsGraphControl Positions="{Binding MoonsPositions}"  DaysOffset="{Binding ElementName=DaysOffset, Path=Value}" />
-                    <ScrollBar x:Name="DaysOffset" Style="{StaticResource VerticalScrollBarStyle}" Minimum="0" Maximum="{Binding DaysCount}" ViewportSize="5" SmallChange="0.0416666" LargeChange="1" Value="0" Grid.Row="0" Grid.Column="1" Orientation="Vertical" />
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                            <!--<RowDefinition Height="*" />-->
+                        </Grid.RowDefinitions>
+                        
+                        
+
+                        <!--<TextBlock Grid.Row="0" FontSize="18" Padding="6" Text="Graph of Galilean moons positions" VerticalAlignment="Center" Margin="0,1" />
+                        <Button Margin="0,6,6,6" Padding="8 0" VerticalAlignment="Center" HorizontalAlignment="Right" Content="Export..." Command="{Binding ExportJovianEventsCommand}" />
+
+                        -->
+
+                        <c:MoonsGraphControl Cursor="Cross" Grid.Row="0" BorderThickness="0 1 0 0" BorderBrush="{StaticResource BrushControlLightBackground}" x:Name="Chart" Positions="{Binding MoonsPositions}" DaysOffset="{Binding ElementName=DaysOffset, Path=Value}" />
+                        <ScrollBar Grid.Row="0" Grid.Column="1" x:Name="DaysOffset" Visibility="{Binding ElementName=Chart, Path=VerticalScale, Mode=TwoWay, Converter={s:InverseVisibilityConverter}, ConverterParameter=1}" Style="{StaticResource VerticalScrollBarStyle}" Minimum="0" Maximum="{Binding DaysCount}" ViewportSize="5" SmallChange="0.0416666" LargeChange="1" Value="0" Orientation="Vertical" />
+
+
+                        <Expander IsExpanded="True" Header="Instant view" Grid.Row="2">
+                            <c:InstantViewControl Height="100"
+                                Positions="{Binding ElementName=Chart, Path=CurrentPositions, Mode=OneWay}" 
+                                Orientation="{Binding ElementName=Chart, Path=Orientation}"
+                                HorizontalScale="{Binding ElementName=Chart, Path=HorizontalScale}" />
+                        </Expander>
+
+                        <!--<GridSplitter ResizeDirection="Rows" Height="6" HorizontalAlignment="Stretch" ShowsPreview="False" Grid.Row="1" Grid.ColumnSpan="2" />-->
+
+                        
+                 
+
+                    </Grid>
+
+                    <GridSplitter 
+                        Grid.Column="1" 
+                        ShowsPreview="False"   
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Stretch" Margin="2 -4" Width="6" />
+
+                    <StackPanel Grid.Column="2" Orientation="Vertical">
+                        
+                        <CheckBox Content="Io" Margin="2" IsChecked="{Binding FilterBodyIo}" />
+                        <CheckBox Content="Europa" Margin="2" IsChecked="{Binding FilterBodyEuropa}" />
+                        <CheckBox Content="Ganymede" Margin="2" IsChecked="{Binding FilterBodyGanymede}" />
+                        <CheckBox Content="Callisto" Margin="2 2 2 12" IsChecked="{Binding FilterBodyCallisto}" />
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Label Content="Vertical" Padding="4 2" Grid.Column="0" />
+                            <Slider Margin="4" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" 
+                                Orientation="Horizontal" 
+                                Minimum="1"
+                                Maximum="10"
+                                Value="{Binding ElementName=Chart, Path=VerticalScale}" />
+
+                            <Label Content="Horizontal" Padding="4 2" Grid.Column="0" Grid.Row="1" />
+                            <Slider Margin="4" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" 
+                                Orientation="Horizontal" 
+                                Minimum="1"
+                                Maximum="10"
+                                Value="{Binding ElementName=Chart, Path=HorizontalScale}" />
+                        </Grid>
+
+                        <RadioButton Content="Direct view" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static c:ChartOrientation.Direct}}" />
+                        <RadioButton Content="Inverted view" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static c:ChartOrientation.Inverted}}" />
+                        <RadioButton Content="Mirrored reversed view" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static c:ChartOrientation.Mirrored}}" />
+
+
+                    </StackPanel>
+
                 </Grid>
 
 
-
-                <!--<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                    
-                </ScrollViewer>-->
-                
             </TabItem>
             <TabItem Header="Events">
                 <Grid>
@@ -245,21 +318,21 @@
                         <DataGrid 
                             Grid.Row="1"
                             Grid.ColumnSpan="2"
-                        VerticalScrollBarVisibility="Auto"
-                        VerticalAlignment="Stretch"
-                        VirtualizingPanel.IsVirtualizing="True"
-                        AutoGenerateColumns="False" 
-                        CanUserReorderColumns="False"
-                        CanUserSortColumns="True"
-                        IsReadOnly="True"
-                        GridLinesVisibility="All"
-                        BorderThickness="1"
-                        Margin="4 4"
-                        Padding="2 0"
-                        RowHeaderWidth="0"
-                        ColumnHeaderHeight="32"
-                        RowHeight="24"
-                        ItemsSource="{Binding GRSTable}">
+                            VerticalScrollBarVisibility="Auto"
+                            VerticalAlignment="Stretch"
+                            VirtualizingPanel.IsVirtualizing="True"
+                            AutoGenerateColumns="False" 
+                            CanUserReorderColumns="False"
+                            CanUserSortColumns="True"
+                            IsReadOnly="True"
+                            GridLinesVisibility="All"
+                            BorderThickness="1"
+                            Margin="4 4"
+                            Padding="2 0"
+                            RowHeaderWidth="0"
+                            ColumnHeaderHeight="32"
+                            RowHeight="24"
+                            ItemsSource="{Binding GRSTable}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Date" Binding="{Binding Date}"/>
                                 <DataGridTemplateColumn Header="Transit Time" CanUserSort="False">

@@ -12,5 +12,7 @@ namespace Astrarium.Types
     {
         PointF Project(CrdsHorizontal hor);
         CrdsHorizontal Invert(PointF point);
+        bool IsMirrored { get; set; }
+        bool IsInverted { get; set; }
     }
 }

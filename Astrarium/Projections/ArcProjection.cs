@@ -22,13 +22,16 @@ namespace Astrarium.Projections
             Map = map;
         }
 
+        public bool IsMirrored { get; set; }
+        public bool IsInverted { get; set; }
+
         public PointF Project(CrdsHorizontal hor)
         {
             double X, Y;
 
-            double d = Angle.ToRadians(hor.Altitude);
-            double d0 = Angle.ToRadians(Map.Center.Altitude);
-            double da = Angle.ToRadians(hor.Azimuth - Map.Center.Azimuth);
+            double d = (IsInverted ? -1 : 1) * Angle.ToRadians(hor.Altitude);
+            double d0 = (IsInverted ? -1 : 1) * Angle.ToRadians(Map.Center.Altitude);
+            double da = (IsMirrored ? -1 : 1) * Angle.ToRadians(hor.Azimuth - Map.Center.Azimuth);
 
             double sin_da = Math.Sin(da);
             double cos_da = Math.Cos(da);
@@ -78,11 +81,12 @@ namespace Astrarium.Projections
             double a;
             double A;
 
-            a = Angle.ToDegrees(Math.Asin(M * Math.Cos(Angle.ToRadians(Map.Center.Altitude)) / (theta / Math.Sin(theta)) + Math.Sin(Angle.ToRadians(Map.Center.Altitude)) * Math.Cos(theta)));
+            a = Angle.ToDegrees(Math.Asin(M * Math.Cos(Angle.ToRadians(Map.Center.Altitude)) / (theta / Math.Sin(theta)) +  (IsInverted ? -1 : 1) * Math.Sin(Angle.ToRadians(Map.Center.Altitude)) * Math.Cos(theta)));
+            a = (IsInverted ? -1 : 1) * a;
 
             double aa = Math.Sin(theta) * L / (theta * Math.Cos(Angle.ToRadians(a)));
             if (Math.Abs(aa) > 1) aa = Math.Sign(aa);
-            A = Map.Center.Azimuth + Angle.ToDegrees(Math.Asin(aa));
+            A = Map.Center.Azimuth + (IsMirrored ? -1 : 1) * Angle.ToDegrees(Math.Asin(aa));
             A = Angle.To360(A);
 
             return CorrectInverse(p, new CrdsHorizontal() { Altitude = a, Azimuth = A });

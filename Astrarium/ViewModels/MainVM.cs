@@ -246,6 +246,22 @@ namespace Astrarium.ViewModels
             var menuView = new MenuItem("$Menu.View");
             menuView.SubItems = new ObservableCollection<MenuItem>();
 
+            var menuMapTransformMirror = new MenuItem("$Menu.MapTransform.Mirror") { IsCheckable = true };
+            menuMapTransformMirror.Command = new Command(() => menuMapTransformMirror.IsChecked = !menuMapTransformMirror.IsChecked);
+            menuMapTransformMirror.AddBinding(new SimpleBinding(settings, "IsMirrored", nameof(MenuItem.IsChecked)));
+
+            var menuMapTransformInvert = new MenuItem("$Menu.MapTransform.Invert") { IsCheckable = true };
+            menuMapTransformInvert.Command = new Command(() => menuMapTransformInvert.IsChecked = !menuMapTransformInvert.IsChecked);
+            menuMapTransformInvert.AddBinding(new SimpleBinding(settings, "IsInverted", nameof(MenuItem.IsChecked)));
+
+            var menuMapTransform = new MenuItem("$Menu.MapTransform")
+            {
+                SubItems = new ObservableCollection<MenuItem>(new MenuItem[] {
+                    menuMapTransformMirror, 
+                    menuMapTransformInvert
+                })
+            };
+
             var menuColorSchema = new MenuItem("$Menu.ColorSchema")
             {
                 SubItems = new ObservableCollection<MenuItem>(Enum.GetValues(typeof(ColorSchema))
@@ -262,8 +278,9 @@ namespace Astrarium.ViewModels
                         return menuItem;
                     }))
             };
-            menuView.SubItems.Add(menuColorSchema);
 
+            menuView.SubItems.Add(menuMapTransform);
+            menuView.SubItems.Add(menuColorSchema);
             menuView.SubItems.Add(null);
 
             string[] groups = new string[] { "Objects", "Constellations", "Grids" };

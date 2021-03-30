@@ -213,6 +213,8 @@ namespace Astrarium
             mapContext = new MapContext(this, skyContext);
 
             Projection = new ArcProjection(mapContext);
+            Projection.IsInverted = settings.Get("IsInverted");
+            Projection.IsMirrored = settings.Get("IsMirrored");
 
             this.renderers.AddRange(renderers);
             this.renderers.ForEach(r => r.Initialize());
@@ -243,6 +245,18 @@ namespace Astrarium
                 if (name == "Schema")
                 {
                     Schema = settings.Get<ColorSchema>("Schema");
+                    Invalidate();
+                }
+
+                if (name == "IsMirrored")
+                {
+                    Projection.IsMirrored = settings.Get("IsMirrored");
+                    Invalidate();
+                }
+
+                if (name == "IsInverted")
+                {
+                    Projection.IsInverted = settings.Get("IsInverted");
                     Invalidate();
                 }
             };
@@ -470,6 +484,17 @@ namespace Astrarium
             public MouseButton MouseButton => map.MouseButton;
             public CelestialObject LockedObject => map.LockedObject;
             public CelestialObject SelectedObject => map.SelectedObject;
+            public bool IsMirrored
+            {
+                get => map.Projection.IsMirrored;
+                set => map.Projection.IsMirrored = value;
+            }
+
+            public bool IsInverted
+            {
+                get => map.Projection.IsInverted;
+                set => map.Projection.IsInverted = value;
+            }
 
             public PointF Project(CrdsHorizontal hor)
             {

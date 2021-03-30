@@ -143,6 +143,12 @@ namespace Astrarium.Plugins.JupiterMoons
             set { SetValue(nameof(FilterSunBelowHorizon), value); ApplyFilter(); }
         }
 
+        public CrdsRectangular[,] CurrentPositions
+        {
+            get => GetValue<CrdsRectangular[,]>(nameof(CurrentPositions));
+            set => SetValue(nameof(CurrentPositions), value);
+        }
+
         #endregion Bindable properties
 
         public JupiterMoonsVM(ISky sky, ISkyMap map, ISettings settings)

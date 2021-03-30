@@ -239,9 +239,7 @@ namespace Astrarium.Plugins.DeepSky
                         }
                         else
                         {
-                            float rotation = map.GetRotationTowardsNorth(ds.Equatorial) + 90 - ds.PA;
-                            map.Graphics.TranslateTransform(p.X, p.Y);
-                            map.Graphics.RotateTransform(rotation);
+                            map.Rotate(p, ds.Equatorial, ds.PA + 90);
                             DrawEllipticObject(map.Graphics, diamA, diamB);
                             map.Graphics.ResetTransform();
                         }
@@ -266,9 +264,7 @@ namespace Astrarium.Plugins.DeepSky
                         }
                         else
                         {
-                            float rotation = map.GetRotationTowardsNorth(ds.Equatorial) + 90 - ds.PA;
-                            map.Graphics.TranslateTransform(p.X, p.Y);
-                            map.Graphics.RotateTransform(rotation);
+                            map.Rotate(p, ds.Equatorial, ds.PA + 90);
                             DrawRoundObject(map.Graphics, diamA);
                             map.Graphics.ResetTransform();
                         }
@@ -316,9 +312,6 @@ namespace Astrarium.Plugins.DeepSky
                     {
                         var h1 = outline.ElementAt(i).Horizontal;
                         var h2 = outline.ElementAt(i + 1).Horizontal;
-
-                        double ad1 = Angle.Separation(h1, map.Center);
-                        double ad2 = Angle.Separation(h2, map.Center);
 
                         PointF p1, p2;
                         p1 = map.Project(h1);
