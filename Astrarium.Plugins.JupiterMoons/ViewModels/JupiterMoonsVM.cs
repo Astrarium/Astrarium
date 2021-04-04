@@ -6,12 +6,15 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Astrarium.Plugins.JupiterMoons
 {
@@ -23,6 +26,7 @@ namespace Astrarium.Plugins.JupiterMoons
         private readonly CelestialObject jupiter = null;
         private readonly CelestialObject[] moons = new CelestialObject[4];
         private Date selectedDate;
+        private Date chartDate;
         private ICollection<JovianEvent> events = null;
         private ICollection<GRSEvent> grsEvents = null;
 
@@ -48,6 +52,8 @@ namespace Astrarium.Plugins.JupiterMoons
         public ICommand ShowGRSAppearCommand => new Command<GRSTableItem>(ShowGRSAppear);
         public ICommand ShowGRSDisappearCommand => new Command<GRSTableItem>(ShowGRSDisappear);
         public ICommand ExportGRSEventsCommand => new Command(ExportGRSEvents);
+        public ICommand SaveChartBitmapCommand => new Command<IBitmapWriter>(SaveChartBitmap);
+        public ICommand ChartShowDateCommand => new Command(ChartShowDate);
 
         #endregion Commands
 
@@ -149,6 +155,27 @@ namespace Astrarium.Plugins.JupiterMoons
             set => SetValue(nameof(CurrentPositions), value);
         }
 
+        public bool ChartExportAddHeader
+        {
+            get => GetValue(nameof(ChartExportAddHeader), true);
+            set => SetValue(nameof(ChartExportAddHeader), value);
+        }
+
+        public bool ChartExportAddLegend
+        {
+            get => GetValue(nameof(ChartExportAddLegend), true);
+            set => SetValue(nameof(ChartExportAddLegend), value);
+        }
+
+        /// <summary>
+        /// Flag indicating dark mode is used
+        /// </summary>
+        public bool IsDarkMode
+        {
+            get => GetValue<bool>(nameof(IsDarkMode));
+            protected set => SetValue(nameof(IsDarkMode), value);
+        }
+
         #endregion Bindable properties
 
         public JupiterMoonsVM(ISky sky, ISkyMap map, ISettings settings)
@@ -156,6 +183,7 @@ namespace Astrarium.Plugins.JupiterMoons
             this.sky = sky;
             this.map = map;
             this.calculator = new JupiterMoonsCalculator(settings);
+            settings.SettingValueChanged += Settings_SettingValueChanged;
 
             jupiter = sky.Search("@Jupiter", obj => true).FirstOrDefault();
             for (int i = 0; i < 4; i++)
@@ -164,9 +192,18 @@ namespace Astrarium.Plugins.JupiterMoons
             }
 
             Date now = new Date(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset);
-            selectedDate = new Date(now.Year, now.Month, 1, now.UtcOffset);
-            
+            selectedDate = new Date(now.Year, now.Month, 1, now.UtcOffset);            
+            IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
+
             Calculate();
+        }
+
+        private void Settings_SettingValueChanged(string settingName, object value)
+        {
+            if (settingName == "Schema")
+            {
+                IsDarkMode = ColorSchema.Red.Equals(value);
+            }
         }
 
         private async void Calculate()
@@ -401,6 +438,71 @@ namespace Astrarium.Plugins.JupiterMoons
         {
             sky.SetDate(e.Event.JdTransit);
             map.GoToObject(jupiter, TimeSpan.Zero);
+        }
+
+        private void ChartShowDate()
+        {
+            if (chartDate != null)
+            {
+                sky.SetDate(chartDate.ToJulianEphemerisDay());
+                map.GoToObject(jupiter, TimeSpan.Zero);
+            }
+        }
+
+        private void SaveChartBitmap(IBitmapWriter bitmapWriter)
+        {
+            var filters = new Dictionary<string, string>
+            {
+                ["PNG (*.png)"] = "*.png",
+                ["BMP (*.bmp)"] = "*.bmp",
+                ["GIF (*.gif)"] = "*.gif",
+                ["TIFF (*.tiff)"] = "*.tiff"
+            };
+            var formats = new ImageFormat[] 
+            {
+                ImageFormat.Png,
+                ImageFormat.Bmp,
+                ImageFormat.Gif,
+                ImageFormat.Tiff
+            };
+
+            string filter = string.Join("|", filters.Select(kv => $"{kv.Key}|{kv.Value}"));
+            var file = ViewManager.ShowSaveFileDialog("Export", "Chart", ".png", filter, out int selectedFilterIndex);
+            if (file != null)
+            {
+                var options = new WriteToBitmapOptions() 
+                { 
+                    IsWriteToFile = true,
+                    Header = ChartExportAddHeader, 
+                    Legend = ChartExportAddLegend 
+                };
+                var bmp = bitmapWriter.WriteToBitmap(options);
+                bmp.Save(file, formats[selectedFilterIndex - 1]);
+
+                var answer = ViewManager.ShowMessageBox("Info", "Export Done. Open the image?", System.Windows.MessageBoxButton.YesNo);
+                if (answer == System.Windows.MessageBoxResult.Yes)
+                {
+                    Process.Start(file);
+                }
+            }            
+        }
+
+        public int CurrentChartPosition
+        {
+            get => GetValue(nameof(CurrentChartPosition), -1);
+            set 
+            { 
+                SetValue(nameof(CurrentChartPosition), value);
+
+                chartDate = value != -1 ? new Date(selectedDate.Year, selectedDate.Month, 1 + value / 24.0 + TimeSpan.FromSeconds(1).TotalDays, utcOffset : sky.Context.GeoLocation.UtcOffset) : null;
+                CurrentDateTime = value != -1 ? Formatters.DateTime.Format(chartDate) : null;
+            }
+        }
+
+        public string CurrentDateTime
+        {
+            get => GetValue<string>(nameof(CurrentDateTime));
+            set => SetValue(nameof(CurrentDateTime), value);
         }
 
         public ICollection<CrdsRectangular[,]> MoonsPositions

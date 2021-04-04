@@ -10,8 +10,11 @@
         xmlns:c="clr-namespace:Astrarium.Plugins.JupiterMoons.Controls"
         mc:Ignorable="d"
         Title="Jupiter Moons" 
+        WindowStartupLocation="CenterOwner"        
+        WindowState="Maximized"
         Style="{StaticResource {x:Type Window}}" 
-        Height="450" Width="800">
+        MinHeight="600" MinWidth="800"
+        Height="600" Width="800">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -45,7 +48,7 @@
                     </Trigger>
                 </Style.Triggers>
             </Style>
-            <Grid x:Key="ImagePrevEclipse" x:Shared="False">
+            <Grid x:Key="ImagePrevMonth" x:Shared="False">
                 <Path HorizontalAlignment="Left" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="16" Height="16" Margin="-11 0 0 0" Stretch="Uniform" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
                     <Path.Data>
                         <StreamGeometry>F1 M100,100z M0,0z M14,8L14,8 2.5,19.6 32.9,50 2.5,80.4 14,92 56,50z</StreamGeometry>
@@ -55,7 +58,7 @@
                     </Path.LayoutTransform>
                 </Path>
             </Grid>
-            <Grid x:Key="ImageNextEclipse" x:Shared="False">
+            <Grid x:Key="ImageNextMonth" x:Shared="False">
                 <Path HorizontalAlignment="Right" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="20" Height="20" Margin="7 4 4 0" Stretch="Uniform" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
                     <Path.Data>
                         <StreamGeometry>F1 M100,125z M0,0z M14,8L14,8 2.5,19.6 32.9,50 2.5,80.4 14,92 56,50z</StreamGeometry>
@@ -65,6 +68,11 @@
                     </Path.LayoutTransform>
                 </Path>
             </Grid>
+            <Style x:Key="Hyperlink" TargetType="{x:Type Hyperlink}" BasedOn="{StaticResource {x:Type Hyperlink}}">
+                <Style.Setters>
+                    <Setter Property="Foreground" Value="{StaticResource BrushForeground}" />
+                </Style.Setters>
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
 
@@ -77,30 +85,32 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Content="{StaticResource ImagePrevEclipse}" Style="{StaticResource ImageButton}" Command="{Binding PrevMonthCommand}" ToolTip="" />
+            <Button Content="{StaticResource ImagePrevMonth}" Style="{StaticResource ImageButton}" Command="{Binding PrevMonthCommand}" ToolTip="" />
             <Button MinWidth="200" VerticalAlignment="Center" Command="{Binding ChangeMonthCommand}" Style="{StaticResource DateButton}" ToolTip="">
                 <Button.Content>
                     <TextBlock FontSize="32" VerticalAlignment="Center"  Text="{Binding SelectedMonth, FallbackValue='Jan 2000'}" />
                 </Button.Content>
             </Button>
-            <Button Content="{StaticResource ImageNextEclipse}" Style="{StaticResource ImageButton}" Command="{Binding NextMonthCommand}" ToolTip="" />
+            <Button Content="{StaticResource ImageNextMonth}" Style="{StaticResource ImageButton}" Command="{Binding NextMonthCommand}" ToolTip="" />
         </StackPanel>
 
         <Grid Height="6" Grid.Row="1">
             <ProgressBar Background="Transparent" IsIndeterminate="True" Visibility="{Binding IsCalculating, Converter={s:BoolToVisibilityConverter}, FallbackValue=Collapsed}" />
         </Grid>
 
+        
         <TabControl Grid.Row="2" IsEnabled="{Binding IsCalculating, Converter={s:InverseBoolConverter}}">
-            <TabItem Header="Graph">
 
+            <!-- Chart Tab -->
+            <TabItem Header="Chart">
                 <Grid>
-
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="9" />
-                        <ColumnDefinition Width="200" />
+                        <ColumnDefinition Width="200" MaxWidth="400" />
                     </Grid.ColumnDefinitions>
 
+                    <!-- Chart and instant view left side panel -->
                     <Grid Grid.Column="0" Grid.IsSharedSizeScope="True">
 
                         <Grid.ColumnDefinitions>
@@ -111,31 +121,45 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*" />
                             <RowDefinition Height="Auto" />
-                            <!--<RowDefinition Height="*" />-->
                         </Grid.RowDefinitions>
-                        
-                        
 
-                        <!--<TextBlock Grid.Row="0" FontSize="18" Padding="6" Text="Graph of Galilean moons positions" VerticalAlignment="Center" Margin="0,1" />
-                        <Button Margin="0,6,6,6" Padding="8 0" VerticalAlignment="Center" HorizontalAlignment="Right" Content="Export..." Command="{Binding ExportJovianEventsCommand}" />
-
-                        -->
-
-                        <c:MoonsGraphControl Cursor="Cross" Grid.Row="0" BorderThickness="0 1 0 0" BorderBrush="{StaticResource BrushControlLightBackground}" x:Name="Chart" Positions="{Binding MoonsPositions}" DaysOffset="{Binding ElementName=DaysOffset, Path=Value}" />
+                        <c:ChartControl 
+                            x:Name="Chart"
+                            Cursor="Cross" 
+                            Grid.Row="0"
+                            BorderThickness="0 1 0 0" 
+                            BorderBrush="{StaticResource BrushControlLightBackground}"
+                            DarkMode="{Binding IsDarkMode}"
+                            Positions="{Binding MoonsPositions}" 
+                            CurrentPosition="{Binding CurrentChartPosition, Mode=OneWayToSource}" 
+                            DaysOffset="{Binding ElementName=DaysOffset, Path=Value}" 
+                            Header="{Binding SelectedMonth}"
+                            ShowIo="{Binding FilterBodyIo}"
+                            ShowEuropa="{Binding FilterBodyEuropa}"
+                            ShowGanymede="{Binding FilterBodyGanymede}"
+                            ShowCallisto="{Binding FilterBodyCallisto}" />
                         <ScrollBar Grid.Row="0" Grid.Column="1" x:Name="DaysOffset" Visibility="{Binding ElementName=Chart, Path=VerticalScale, Mode=TwoWay, Converter={s:InverseVisibilityConverter}, ConverterParameter=1}" Style="{StaticResource VerticalScrollBarStyle}" Minimum="0" Maximum="{Binding DaysCount}" ViewportSize="5" SmallChange="0.0416666" LargeChange="1" Value="0" Orientation="Vertical" />
 
-
-                        <Expander IsExpanded="True" Header="Instant view" Grid.Row="2">
-                            <c:InstantViewControl Height="100"
+                        <Expander IsExpanded="True" Grid.Row="2">
+                            <Expander.Header>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="Instant view" />
+                                    <TextBlock HorizontalAlignment="Right" Grid.Column="1" Margin="6 0 6 0">
+                                        <Hyperlink Style="{StaticResource Hyperlink}" Command="{Binding ElementName=Window, Path=DataContext.ChartShowDateCommand}"><Run Text="{Binding CurrentDateTime, FallbackValue='01 Mar 20:00'}" /></Hyperlink>
+                                    </TextBlock>
+                                </Grid>
+                            </Expander.Header>
+                            <c:InstantViewControl 
+                                Height="100"
+                                DarkMode="{Binding IsDarkMode}"
                                 Positions="{Binding ElementName=Chart, Path=CurrentPositions, Mode=OneWay}" 
                                 Orientation="{Binding ElementName=Chart, Path=Orientation}"
                                 HorizontalScale="{Binding ElementName=Chart, Path=HorizontalScale}" />
                         </Expander>
-
-                        <!--<GridSplitter ResizeDirection="Rows" Height="6" HorizontalAlignment="Stretch" ShowsPreview="False" Grid.Row="1" Grid.ColumnSpan="2" />-->
-
-                        
-                 
 
                     </Grid>
 
@@ -145,47 +169,70 @@
                         HorizontalAlignment="Center" 
                         VerticalAlignment="Stretch" Margin="2 -4" Width="6" />
 
-                    <StackPanel Grid.Column="2" Orientation="Vertical">
+                    <!-- Chart view: right panel -->
+                    <StackPanel Grid.Column="2" HorizontalAlignment="Stretch" Orientation="Vertical" Margin="4">
+
+                        <GroupBox Header="Tracks" Padding="0 4 0 0" HorizontalAlignment="Stretch" >
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
+                                <CheckBox Content="Io" Margin="2" IsChecked="{Binding FilterBodyIo}" />
+                                <CheckBox Content="Europa" Margin="2" IsChecked="{Binding FilterBodyEuropa}" />
+                                <CheckBox Content="Ganymede" Margin="2" IsChecked="{Binding FilterBodyGanymede}" />
+                                <CheckBox Content="Callisto" Margin="2" IsChecked="{Binding FilterBodyCallisto}" />
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="Chart options" Padding="0 4 0 0" HorizontalAlignment="Stretch" >
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <Label Content="Vertical scale" Padding="4 2" Grid.Column="0" />
+                                    <Slider Margin="4" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" 
+                                        Orientation="Horizontal" 
+                                        Minimum="1"
+                                        Maximum="10"
+                                        Value="{Binding ElementName=Chart, Path=VerticalScale}" />
+
+                                    <Label Content="Horizontal scale" Padding="4 2" Grid.Column="0" Grid.Row="1" />
+                                    <Slider Margin="4" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" 
+                                        Orientation="Horizontal" 
+                                        Minimum="1"
+                                        Maximum="10"
+                                        Value="{Binding ElementName=Chart, Path=HorizontalScale}" />
+                                </Grid>
+
+                                <RadioButton Margin="2" Content="Direct view" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static c:ChartOrientation.Direct}}" />
+                                <RadioButton Margin="2" Content="Inverted view" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static c:ChartOrientation.Inverted}}" />
+                                <RadioButton Margin="2" Content="Mirrored reversed view" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static c:ChartOrientation.Mirrored}}" />
+
+                            </StackPanel>
+
+                            
+                        </GroupBox>
+
                         
-                        <CheckBox Content="Io" Margin="2" IsChecked="{Binding FilterBodyIo}" />
-                        <CheckBox Content="Europa" Margin="2" IsChecked="{Binding FilterBodyEuropa}" />
-                        <CheckBox Content="Ganymede" Margin="2" IsChecked="{Binding FilterBodyGanymede}" />
-                        <CheckBox Content="Callisto" Margin="2 2 2 12" IsChecked="{Binding FilterBodyCallisto}" />
+                        <GroupBox Header="Export" Padding="0 4 0 0" HorizontalAlignment="Stretch" >
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
+                                <CheckBox Margin="2" Content="Header" IsChecked="{Binding ChartExportAddHeader}" />
+                                <CheckBox Margin="2" Content="Legend" IsChecked="{Binding ChartExportAddLegend}" />
+                                <Button Margin="2 8 0 2" Content="Save image..." Width="Auto" Padding="10 0" HorizontalAlignment="Right" MinWidth="20" Command="{Binding SaveChartBitmapCommand}" CommandParameter="{Binding ElementName=Chart}" ToolTip="" />
+                            </StackPanel>
+                        </GroupBox>
 
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-
-                            <Label Content="Vertical" Padding="4 2" Grid.Column="0" />
-                            <Slider Margin="4" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" 
-                                Orientation="Horizontal" 
-                                Minimum="1"
-                                Maximum="10"
-                                Value="{Binding ElementName=Chart, Path=VerticalScale}" />
-
-                            <Label Content="Horizontal" Padding="4 2" Grid.Column="0" Grid.Row="1" />
-                            <Slider Margin="4" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" 
-                                Orientation="Horizontal" 
-                                Minimum="1"
-                                Maximum="10"
-                                Value="{Binding ElementName=Chart, Path=HorizontalScale}" />
-                        </Grid>
-
-                        <RadioButton Content="Direct view" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static c:ChartOrientation.Direct}}" />
-                        <RadioButton Content="Inverted view" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static c:ChartOrientation.Inverted}}" />
-                        <RadioButton Content="Mirrored reversed view" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static c:ChartOrientation.Mirrored}}" />
+                        <TextBlock Padding="0 4" IsEnabled="False" TextWrapping="Wrap" Text="Double click on the chart to lock." Visibility="{Binding ElementName=Chart, Path=IsLocked, Converter={s:InverseBoolToVisibilityConverter}}" />
+                        <TextBlock Padding="0 4" VerticalAlignment="Stretch" TextWrapping="Wrap" IsEnabled="False" Text="Chart is locked. Double click on the chart to unlock." Visibility="{Binding ElementName=Chart, Path=IsLocked, Converter={s:BoolToVisibilityConverter}}" />
 
 
                     </StackPanel>
 
                 </Grid>
-
 
             </TabItem>
             <TabItem Header="Events">
@@ -194,22 +241,18 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="9" />
-                        <ColumnDefinition Width="200" />
+                        <ColumnDefinition Width="200" MaxWidth="400" />
                     </Grid.ColumnDefinitions>
 
                     <Grid Grid.Column="0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="81*" />
-                            <ColumnDefinition Width="167*"/>
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
+
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="0" FontSize="18" Padding="6" Text="Events of Galilean moons system of Jupiter" VerticalAlignment="Center" Grid.ColumnSpan="2" Margin="0,1" />
-                        <Button  Margin="0,6,6,6" Padding="8 0" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Content="Export..." Command="{Binding ExportJovianEventsCommand}" />
+                        <TextBlock Grid.Row="0" FontSize="18" Padding="6" Text="Jupiter moons events" VerticalAlignment="Center" Grid.ColumnSpan="2" />
+                        <Button  Margin="6" Padding="8 0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Content="Export..." Command="{Binding ExportJovianEventsCommand}" />
 
                         <DataGrid 
                             Grid.Row="1"
@@ -299,7 +342,7 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="9" />
-                        <ColumnDefinition Width="200" />
+                        <ColumnDefinition Width="200" MaxWidth="400" />
                     </Grid.ColumnDefinitions>
 
                     <Grid Grid.Column="0">
@@ -313,7 +356,10 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Row="0" FontSize="18" Padding="6" Text="Great Red Spot transits" VerticalAlignment="Center" />
-                        <Button  Margin="6" Padding="8 0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Content="Export..." Command="{Binding ExportGRSEventsCommand}" />
+                        <Button Margin="6" Padding="8 0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Content="Export..." Command="{Binding ExportGRSEventsCommand}" />
+
+
+
 
                         <DataGrid 
                             Grid.Row="1"
@@ -334,12 +380,12 @@
                             RowHeight="24"
                             ItemsSource="{Binding GRSTable}">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Date" Binding="{Binding Date}"/>
+                                <DataGridTextColumn Header="Transit Date" Binding="{Binding Date}"/>
                                 <DataGridTemplateColumn Header="Transit Time" CanUserSort="False">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock FontFamily="Lucida Console" FontSize="12">
-                                    <Hyperlink Command="{Binding ElementName=Window, Path=DataContext.ShowGRSTransitCommand}" CommandParameter="{Binding}"><Run Text="{Binding TransitTime}" /></Hyperlink>
+                                                <Hyperlink Command="{Binding ElementName=Window, Path=DataContext.ShowGRSTransitCommand}" CommandParameter="{Binding}"><Run Text="{Binding TransitTime}" /></Hyperlink>
                                             </TextBlock>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>

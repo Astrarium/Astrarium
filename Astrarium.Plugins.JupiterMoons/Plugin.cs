@@ -7,13 +7,9 @@ namespace Astrarium.Plugins.JupiterMoons
     {
         public Plugin()
         {
-            var menuItem = new MenuItem("Jupiter Moons", new Command(ShowJupiterMoonsView));
-            MenuItems.Add(MenuItemPosition.MainMenuTools, menuItem);
-        }
-
-        private void ShowJupiterMoonsView()
-        {
-            ViewManager.ShowWindow<JupiterMoonsVM>();
+            MenuItems.Add(MenuItemPosition.MainMenuTools, 
+                new MenuItem("$Astrarium.Plugins.JupiterMoons.ToolsMenu", 
+                new Command(() => ViewManager.ShowWindow<JupiterMoonsVM>())));
         }
     }
 }

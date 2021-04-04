@@ -23,7 +23,19 @@ namespace Astrarium.Plugins.JupiterMoons.Controls
         public static readonly DependencyProperty HorizontalScaleProperty =
             DependencyProperty.Register(nameof(HorizontalScale), typeof(int), typeof(InstantViewControl), new FrameworkPropertyMetadata(null) { DefaultValue = 3, BindsTwoWayByDefault = true, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
 
+        public static readonly DependencyProperty DarkModeProperty =
+            DependencyProperty.Register(nameof(DarkMode), typeof(bool), typeof(InstantViewControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, DefaultValue = false });
+
         private Typeface font = new Typeface(new FontFamily("#Noto Sans"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
+
+        private readonly Brush[] labelsBrush = new Brush[] { Brushes.Gray, Brushes.DarkRed };
+        private Brush LabelsBrush => labelsBrush[DarkMode ? 1 : 0];
+
+        private readonly Brush[] jupiterBrush = new Brush[] { Brushes.Wheat, Brushes.DarkRed };
+        private Brush JupiterBrush => jupiterBrush[DarkMode ? 1 : 0];
+
+        private readonly Brush[] moonBrush = new Brush[] { Brushes.White, Brushes.Red };
+        private Brush MoonBrush => moonBrush[DarkMode ? 1 : 0];
 
         private string[] names = new[]
         {
@@ -46,6 +58,15 @@ namespace Astrarium.Plugins.JupiterMoons.Controls
         {
             get => (CrdsRectangular[,])GetValue(PositionsProperty);
             set => SetValue(PositionsProperty, value);
+        }
+
+        /// <summary>
+        /// If set, dark mode is used
+        /// </summary>
+        public bool DarkMode
+        {
+            get => (bool)GetValue(DarkModeProperty);
+            set => SetValue(DarkModeProperty, value);
         }
 
         private bool IsOcculted(CrdsRectangular p) 
@@ -75,7 +96,7 @@ namespace Astrarium.Plugins.JupiterMoons.Controls
 
                 // Jupiter
                 {
-                    ctx.DrawEllipse(Brushes.Wheat, null, pCenter, jupRadius, jupRadius * (1 - 0.06487));
+                    ctx.DrawEllipse(JupiterBrush, null, pCenter, jupRadius, jupRadius * (1 - 0.06487));
                 }
 
                 // moons
@@ -89,17 +110,21 @@ namespace Astrarium.Plugins.JupiterMoons.Controls
                         bool southTop = Orientation == ChartOrientation.Inverted;
                         double x = pCenter.X + pos.X * jupRadius * (mirrored ? -1 : 1);
                         double y = pCenter.Y - pos.Y * jupRadius * (southTop ? -1 : 1);
-                        ctx.DrawEllipse(Brushes.White, null, new Point(x, y), 1, 1);
+                        ctx.DrawEllipse(MoonBrush, null, new Point(x, y), 1, 1);
 
                         DrawText(ctx, names[m], new Point(x, y + 10), 10);
                     }
                 }
             }
+            else
+            {
+                DrawText(ctx, "Hover the chart above to see configuation of moons", pCenter, 12);
+            }
         }
 
         private void DrawText(DrawingContext ctx, string text, Point point, double size)
         {
-            FormattedText formattedText = new FormattedText(text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, font, size, Brushes.Gray);
+            FormattedText formattedText = new FormattedText(text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, font, size, LabelsBrush);
             ctx.DrawText(formattedText, new Point(point.X - formattedText.Width / 2, point.Y - formattedText.Height / 2));
         }
     }

@@ -1,7 +1,7 @@
 ﻿namespace Astrarium.Plugins.JupiterMoons
 {
     /// <summary>
-    /// Represent event in Jovian system.
+    /// Represent event in Jovian moons system.
     /// </summary>
     public class JovianEvent
     {

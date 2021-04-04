@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Astrarium.Plugins.JupiterMoons
+﻿namespace Astrarium.Plugins.JupiterMoons
 {
+    /// <summary>
+    /// Represents circumstances of Great Red Spot visibility.
+    /// </summary>
     public class GRSEvent
     {
         /// <summary>
@@ -23,13 +20,34 @@ namespace Astrarium.Plugins.JupiterMoons
         /// </summary>
         public double JdDisappear { get; set; }
 
+        /// <summary>
+        /// Altitude of the Sun above the horison at the instant of GRS transit, in degrees.
+        /// </summary>
         public double SunAltTransit { get; set; }
+
+        /// <summary>
+        /// Altitude of the Jupiter above the horison at the instant of GRS transit, in degrees.
+        /// </summary>
         public double JupiterAltTransit { get; set; }
 
+        /// <summary>
+        /// Altitude of the Sun above the horison at the instant of GRS appearing, in degrees.
+        /// </summary>
         public double SunAltAppear { get; set; }
+
+        /// <summary>
+        /// Altitude of the Jupiter above the horison at the instant of GRS appearing, in degrees.
+        /// </summary>
         public double JupiterAltAppear { get; set; }
 
+        /// <summary>
+        /// Altitude of the Sun above the horison at the instant of GRS disappearing, in degrees.
+        /// </summary>
         public double SunAltDisappear { get; set; }
+
+        /// <summary>
+        /// Altitude of the Jupiter above the horison at the instant of GRS disappearing, in degrees.
+        /// </summary>
         public double JupiterAltDisappear { get; set; }
     }
 }
