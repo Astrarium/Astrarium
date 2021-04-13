@@ -37,25 +37,19 @@ namespace Astrarium
             this.typeFactory = typeFactory;
         }
 
-        public void ShowWindow<TViewModel>() where TViewModel : ViewModelBase
+        public void ShowWindow<TViewModel>(bool isSingleInstance = false) where TViewModel : ViewModelBase
         {
-            Show<TViewModel>(viewModel: null, isDialog: false);
+            Show<TViewModel>(viewModel: null, isDialog: false, isSingleInstance);
         }
 
         public bool? ShowDialog<TViewModel>() where TViewModel : ViewModelBase
         {
-            return Show<TViewModel>(viewModel: null, isDialog: true);
+            return Show<TViewModel>(viewModel: null, isDialog: true, isSingleInstance: false);
         }
 
-        private bool? Show<TViewModel>(TViewModel viewModel, bool isDialog = false) where TViewModel : ViewModelBase
+        private bool? Show<TViewModel>(TViewModel viewModel, bool isDialog, bool isSingleInstance) where TViewModel : ViewModelBase
         {
-            bool needDisposeModel = false;
-
-            if (viewModel == null)
-            {
-                needDisposeModel = true;
-                viewModel = CreateViewModel<TViewModel>();
-            }
+            // Resolve view by model type
 
             Type viewType = null;
             if (viewModelViewBindings.ContainsKey(typeof(TViewModel)))
@@ -65,8 +59,28 @@ namespace Astrarium
             else
             {
                 viewType = ResolveVVMBindings(typeof(TViewModel));
-            }            
+            }
 
+            // Handle single-instance window case
+
+            if (isSingleInstance && viewType != null)
+            {
+                var window = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.GetType() == viewType);
+                if (window != null)
+                {
+                    window.Activate();
+                    return null;
+                }
+            }
+
+            bool needDisposeModel = false;
+
+            if (viewModel == null)
+            {
+                needDisposeModel = true;
+                viewModel = CreateViewModel<TViewModel>();
+            }
+         
             if (viewType != null)
             {
                 var window = typeFactory(viewType) as Window;
@@ -196,12 +210,12 @@ namespace Astrarium
 
         public void ShowWindow<TViewModel>(TViewModel viewModel) where TViewModel : ViewModelBase
         {
-            Show(viewModel: viewModel, isDialog: false);
+            Show(viewModel: viewModel, isDialog: false, isSingleInstance: false);
         }
 
         public bool? ShowDialog<TViewModel>(TViewModel viewModel) where TViewModel : ViewModelBase
         {
-            return Show(viewModel: viewModel, isDialog: true);
+            return Show(viewModel: viewModel, isDialog: true, isSingleInstance: false);
         }
 
         public MessageBoxResult ShowMessageBox(string caption, string text, MessageBoxButton buttons)
@@ -260,8 +274,19 @@ namespace Astrarium
         {
             var dialog = new WF.PrintDialog(); 
             dialog.Document = document;
+            dialog.AllowPrintToFile = true;
+            dialog.PrinterSettings = document.PrinterSettings;
             dialog.UseEXDialog = true;
-            return dialog.ShowDialog() == WF.DialogResult.OK;
+
+            if (dialog.ShowDialog() == WF.DialogResult.OK)
+            {
+                document.PrinterSettings = dialog.PrinterSettings;
+                return true;
+            } 
+            else
+            {
+                return false;
+            }
         }
 
         public bool ShowPrintPreviewDialog(PrintDocument document)

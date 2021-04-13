@@ -9,7 +9,7 @@ namespace Astrarium.Plugins.JupiterMoons
         {
             MenuItems.Add(MenuItemPosition.MainMenuTools, 
                 new MenuItem("$Astrarium.Plugins.JupiterMoons.ToolsMenu", 
-                new Command(() => ViewManager.ShowWindow<JupiterMoonsVM>())));
+                new Command(() => ViewManager.ShowWindow<JupiterMoonsVM>(isSingleInstance: true))));
         }
     }
 }
