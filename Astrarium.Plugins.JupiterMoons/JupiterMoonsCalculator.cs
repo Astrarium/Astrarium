@@ -99,7 +99,10 @@ namespace Astrarium.Plugins.JupiterMoons
                 // Y-scale stretching, squared (to avoid Jupiter flattening)
                 const double STRETCH = 1.14784224788;
 
-                string[] moonNames = { "Io", "Europa", "Ganymede", "Callisto" };
+                string[] moonNames = new[] { Text.Get("JupiterMoons.Io"), Text.Get("JupiterMoons.Europa"), Text.Get("JupiterMoons.Ganymede"), Text.Get("JupiterMoons.Callisto") };
+                string[] moonNamesGenitive = new[] { Text.Get("JupiterMoons.Io.Genitive"), Text.Get("JupiterMoons.Europa.Genitive"), Text.Get("JupiterMoons.Ganymede.Genitive"), Text.Get("JupiterMoons.Callisto.Genitive") };
+                string[] moonNamesDative = new[] { Text.Get("JupiterMoons.Io.Dative"), Text.Get("JupiterMoons.Europa.Dative"), Text.Get("JupiterMoons.Ganymede.Dative"), Text.Get("JupiterMoons.Callisto.Dative") };
+
 
                 var events = new List<JovianEvent>();
 
@@ -167,7 +170,7 @@ namespace Astrarium.Plugins.JupiterMoons
                                             {
                                                 MoonNumber = m + 1,
                                                 Code = $"O{m + 1}",
-                                                Text = $"Occultation of {moonNames[m]}",
+                                                Text = Text.Get("JovianEvent.Occultation", ("Name", moonNames[m]), ("GenitiveName", moonNamesGenitive[m])),
                                                 JdBegin = jdBegin,
                                                 JdEnd = jdEnd,
                                                 IsEclipsedAtBegin = isEclipsed(m, jdBegin),
@@ -185,7 +188,7 @@ namespace Astrarium.Plugins.JupiterMoons
                                             {
                                                 MoonNumber = m + 1,
                                                 Code = $"E{m + 1}",
-                                                Text = $"Eclipse of {moonNames[m]}",
+                                                Text = Text.Get("JovianEvent.Eclipse", ("Name", moonNames[m]), ("GenitiveName", moonNamesGenitive[m])),
                                                 JdBegin = jdBegin,
                                                 JdEnd = jdEnd,
                                                 IsOccultedAtBegin = isOcculted(m, jdBegin),
@@ -203,7 +206,7 @@ namespace Astrarium.Plugins.JupiterMoons
                                             {
                                                 MoonNumber = m + 1,
                                                 Code = $"T{m + 1}",
-                                                Text = $"Transit of {moonNames[m]}",
+                                                Text = Text.Get("JovianEvent.Transit", ("Name", moonNames[m]), ("GenitiveName", moonNamesGenitive[m])),
                                                 JdBegin = jdBegin,
                                                 JdEnd = jdEnd,
                                                 JupiterAltBegin = GetJupiterAltitude(jdBegin),
@@ -218,7 +221,7 @@ namespace Astrarium.Plugins.JupiterMoons
                                             events.Add(new JovianEvent()
                                             {
                                                 Code = $"S{m + 1}",
-                                                Text = $"Transit of {moonNames[m]} shadow",
+                                                Text = Text.Get("JovianEvent.ShadowTransit", ("Name", moonNames[m]), ("GenitiveName", moonNamesGenitive[m])),
                                                 JdBegin = jdBegin,
                                                 JdEnd = jdEnd,
                                                 JupiterAltBegin = GetJupiterAltitude(jdBegin),
@@ -314,7 +317,10 @@ namespace Astrarium.Plugins.JupiterMoons
                                                         {
                                                             MoonNumber = n + 1,
                                                             Code = $"{m + 1}O{n + 1}",
-                                                            Text = $"{moonNames[m]} occults {moonNames[n]}",
+                                                            Text = Text.Get("JovianEvent.MutualOccultation", 
+                                                            ("Name", moonNames[m]), ("OccultedName", moonNames[n]),
+                                                            ("GenitiveName", moonNamesGenitive[m]), ("OccultedGenitiveName", moonNamesGenitive[n]),
+                                                            ("DativeName", moonNamesDative[m]), ("OccultedDativeName", moonNamesDative[n])),
                                                             JdBegin = jdBegin,
                                                             JdEnd = jdEnd,
                                                             IsEclipsedAtBegin = isEclipsed(n, jdBegin),
@@ -333,7 +339,10 @@ namespace Astrarium.Plugins.JupiterMoons
                                                         {
                                                             MoonNumber = n + 1,
                                                             Code = $"{m + 1}E{n + 1}",
-                                                            Text = $"{moonNames[m]} eclipses {moonNames[n]}",
+                                                            Text = Text.Get("JovianEvent.MutualEclipse",
+                                                            ("Name", moonNames[m]), ("EclipsedName", moonNames[n]),
+                                                            ("GenitiveName", moonNamesGenitive[m]), ("EclipsedGenitiveName", moonNamesGenitive[n]),
+                                                            ("DativeName", moonNamesDative[m]), ("EclipsedDativeName", moonNamesDative[n])),
                                                             JdBegin = jdBegin,
                                                             JdEnd = jdEnd,
                                                             IsEclipsedAtBegin = isEclipsed(n, jdBegin),

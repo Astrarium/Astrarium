@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Plugins.JupiterMoons.ImportExport;
+using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -61,10 +62,7 @@ namespace Astrarium.Plugins.JupiterMoons.Controls
 
         private Typeface font = new Typeface(new FontFamily("#Noto Sans"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
 
-        private string[] names = new[]
-        {
-            "Io", "Europa", "Ganymede", "Callisto"
-        };
+        private string[] names = new[] { Text.Get("JupiterMoons.Io"), Text.Get("JupiterMoons.Europa"), Text.Get("JupiterMoons.Ganymede"), Text.Get("JupiterMoons.Callisto") };
 
         private WriteToBitmapOptions renderOptions = new WriteToBitmapOptions();
 

@@ -253,13 +253,13 @@ namespace Astrarium.Plugins.JupiterMoons
                         string notes = null;
 
                         if (e.IsEclipsedAtBegin)
-                            notes = "Eclipsed by Jupiter at begin";
+                            notes = Text.Get("JovianEvent.EclipsedAtBegin");
                         if (e.IsOccultedAtBegin)
-                            notes = "Occulted by Jupiter at begin";
+                            notes = Text.Get("JovianEvent.OccultedAtBegin");
                         if (e.IsEclipsedAtEnd)
-                            notes = "Eclipsed by Jupiter at end";
+                            notes = Text.Get("JovianEvent.EclipsedAtEnd");
                         if (e.IsOccultedAtEnd)
-                            notes = "Occulted by Jupiter at end";
+                            notes = Text.Get("JovianEvent.OccultedAtEnd");
 
                         var dateBegin = new Date(e.JdBegin, sky.Context.GeoLocation.UtcOffset);
                         var dateEnd = new Date(e.JdEnd, sky.Context.GeoLocation.UtcOffset);
@@ -360,18 +360,18 @@ namespace Astrarium.Plugins.JupiterMoons
         {
             var formats = new Dictionary<string, string>
             {
-                ["With formatting"] = "*.csv",
-                ["Raw data"] = "*.csv",
+                [Text.Get("JupiterMoonsView.OutputFormat.CsvWithFormatting")] = "*.csv",
+                [Text.Get("JupiterMoonsView.OutputFormat.CsvRawData")] = "*.csv",
             };
             string filter = string.Join("|", formats.Select(kv => $"{kv.Key}|{kv.Value}"));
-            var file = ViewManager.ShowSaveFileDialog("Export", "JovianEvents", ".csv", filter, out int selectedFilterIndex);
+            var file = ViewManager.ShowSaveFileDialog("$JupiterMoonsView.ExportTitle", "JovianEvents", ".csv", filter, out int selectedFilterIndex);
             if (file != null)
             {
                 bool rawData = selectedFilterIndex == 2;
                 var writer = new JovianEventsCsvWriter(rawData);
                 writer.Write(file, EventsTable);
 
-                var answer = ViewManager.ShowMessageBox("Info", "Export Done", System.Windows.MessageBoxButton.YesNo);
+                var answer = ViewManager.ShowMessageBox("$JupiterMoonsView.ExportDone.Title", "$JupiterMoonsView.ExportDone.Message", System.Windows.MessageBoxButton.YesNo);
                 if (answer == System.Windows.MessageBoxResult.Yes)
                 {
                     Process.Start(file);
@@ -383,18 +383,18 @@ namespace Astrarium.Plugins.JupiterMoons
         {
             var formats = new Dictionary<string, string>
             {
-                ["With formatting"] = "*.csv",
-                ["Raw data"] = "*.csv",
+                [Text.Get("JupiterMoonsView.OutputFormat.CsvWithFormatting")] = "*.csv",
+                [Text.Get("JupiterMoonsView.OutputFormat.CsvRawData")] = "*.csv",
             };
             string filter = string.Join("|", formats.Select(kv => $"{kv.Key}|{kv.Value}"));
-            var file = ViewManager.ShowSaveFileDialog("Export", "GreatRedSpot", ".csv", filter, out int selectedFilterIndex);
+            var file = ViewManager.ShowSaveFileDialog("$JupiterMoonsView.ExportTitle", "GreatRedSpot", ".csv", filter, out int selectedFilterIndex);
             if (file != null)
             {
                 bool rawData = selectedFilterIndex == 2;
                 var writer = new GRSEventsCsvWriter(rawData);
                 writer.Write(file, GRSTable);
 
-                var answer = ViewManager.ShowMessageBox("Info", "Export Done", System.Windows.MessageBoxButton.YesNo);
+                var answer = ViewManager.ShowMessageBox("$JupiterMoonsView.ExportDone.Title", "$JupiterMoonsView.ExportDone.Message", System.Windows.MessageBoxButton.YesNo);
                 if (answer == System.Windows.MessageBoxResult.Yes)
                 {
                     Process.Start(file);
@@ -467,7 +467,7 @@ namespace Astrarium.Plugins.JupiterMoons
             };
 
             string filter = string.Join("|", filters.Select(kv => $"{kv.Key}|{kv.Value}"));
-            var file = ViewManager.ShowSaveFileDialog("Export", "Chart", ".png", filter, out int selectedFilterIndex);
+            var file = ViewManager.ShowSaveFileDialog("$JupiterMoonsView.SaveImageTitle", $"JupiterMoons-{SelectedMonth.Replace(" ", "-")}", ".png", filter, out int selectedFilterIndex);
             if (file != null)
             {
                 var options = new WriteToBitmapOptions() 
@@ -479,7 +479,7 @@ namespace Astrarium.Plugins.JupiterMoons
                 var bmp = bitmapWriter.WriteToBitmap(options);
                 bmp.Save(file, formats[selectedFilterIndex - 1]);
 
-                var answer = ViewManager.ShowMessageBox("Info", "Export Done. Open the image?", System.Windows.MessageBoxButton.YesNo);
+                var answer = ViewManager.ShowMessageBox("$JupiterMoonsView.SaveImageDone.Title", "$JupiterMoonsView.SaveImageDone.Message", System.Windows.MessageBoxButton.YesNo);
                 if (answer == System.Windows.MessageBoxResult.Yes)
                 {
                     Process.Start(file);

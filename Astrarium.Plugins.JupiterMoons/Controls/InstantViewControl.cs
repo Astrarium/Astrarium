@@ -1,4 +1,5 @@
 ﻿using Astrarium.Algorithms;
+using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -37,10 +38,7 @@ namespace Astrarium.Plugins.JupiterMoons.Controls
         private readonly Brush[] moonBrush = new Brush[] { Brushes.White, Brushes.Red };
         private Brush MoonBrush => moonBrush[DarkMode ? 1 : 0];
 
-        private string[] names = new[]
-        {
-            "Io", "Europa", "Ganymede", "Callisto"
-        };
+        private string[] names = new[] { Text.Get("JupiterMoons.Io"), Text.Get("JupiterMoons.Europa"), Text.Get("JupiterMoons.Ganymede"), Text.Get("JupiterMoons.Callisto") };
 
         public ChartOrientation Orientation
         {
@@ -118,7 +116,7 @@ namespace Astrarium.Plugins.JupiterMoons.Controls
             }
             else
             {
-                DrawText(ctx, "Hover the chart above to see configuation of moons", pCenter, 12);
+                DrawText(ctx, Text.Get("JupiterMoonsView.InstantViewHoverHint"), pCenter, 12);
             }
         }
 

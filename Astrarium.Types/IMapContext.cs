@@ -161,15 +161,18 @@ namespace Astrarium.Types
 
             float size;
 
-            // TODO: compare with constant
-            if (map.ViewAngle == 1.0 / 1024.0)
-                size = 1;
-            else if (mag > mag0)
+            if (mag > mag0)
                 size = 0;
             else if (maxDrawingSize != 0)
                 size = Math.Min(maxDrawingSize, mag0 - mag);
             else
                 size = mag0 - mag;
+
+            // TODO: compare with constant
+            if (size == 0 && map.ViewAngle == 1.0 / 1024.0)
+            {
+                size = 1;
+            }
 
             if (map.Schema == ColorSchema.Day)
             {

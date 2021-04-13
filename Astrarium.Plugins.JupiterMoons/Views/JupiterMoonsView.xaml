@@ -5,11 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Astrarium.Plugins.JupiterMoons"
         x:Name="Window"
-        xmlns:t="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+        xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
         xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
         xmlns:c="clr-namespace:Astrarium.Plugins.JupiterMoons.Controls"
         mc:Ignorable="d"
-        Title="Jupiter Moons" 
+        Title="{t:Text JupiterMoonsView.Title}" 
         WindowStartupLocation="CenterOwner"        
         WindowState="Maximized"
         Style="{StaticResource {x:Type Window}}" 
@@ -85,29 +85,28 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Content="{StaticResource ImagePrevMonth}" Style="{StaticResource ImageButton}" Command="{Binding PrevMonthCommand}" ToolTip="" />
-            <Button MinWidth="200" VerticalAlignment="Center" Command="{Binding ChangeMonthCommand}" Style="{StaticResource DateButton}" ToolTip="">
+            <Button Content="{StaticResource ImagePrevMonth}" Style="{StaticResource ImageButton}" Command="{Binding PrevMonthCommand}" ToolTip="{t:Text JupiterMoonsView.PrevMonth}" />
+            <Button MinWidth="200" VerticalAlignment="Center" Command="{Binding ChangeMonthCommand}" Style="{StaticResource DateButton}" ToolTip="{t:Text JupiterMoonsView.ChangeMonth}">
                 <Button.Content>
-                    <TextBlock FontSize="32" VerticalAlignment="Center"  Text="{Binding SelectedMonth, FallbackValue='Jan 2000'}" />
+                    <TextBlock FontSize="32" VerticalAlignment="Center" Text="{Binding SelectedMonth, FallbackValue='Jan 2000'}" />
                 </Button.Content>
             </Button>
-            <Button Content="{StaticResource ImageNextMonth}" Style="{StaticResource ImageButton}" Command="{Binding NextMonthCommand}" ToolTip="" />
+            <Button Content="{StaticResource ImageNextMonth}" Style="{StaticResource ImageButton}" Command="{Binding NextMonthCommand}" ToolTip="{t:Text JupiterMoonsView.NextMonth}" />
         </StackPanel>
 
         <Grid Height="6" Grid.Row="1">
             <ProgressBar Background="Transparent" IsIndeterminate="True" Visibility="{Binding IsCalculating, Converter={s:BoolToVisibilityConverter}, FallbackValue=Collapsed}" />
         </Grid>
 
-        
         <TabControl Grid.Row="2" IsEnabled="{Binding IsCalculating, Converter={s:InverseBoolConverter}}">
 
             <!-- Chart Tab -->
-            <TabItem Header="Chart">
+            <TabItem Header="{t:Text JupiterMoonsView.TabChart}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="9" />
-                        <ColumnDefinition Width="200" MaxWidth="400" />
+                        <ColumnDefinition Width="300" MaxWidth="400" />
                     </Grid.ColumnDefinitions>
 
                     <!-- Chart and instant view left side panel -->
@@ -147,9 +146,9 @@
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="Instant view" />
+                                    <TextBlock Grid.Column="0" Text="{t:Text JupiterMoonsView.InstantViewTitle}" />
                                     <TextBlock HorizontalAlignment="Right" Grid.Column="1" Margin="6 0 6 0">
-                                        <Hyperlink Style="{StaticResource Hyperlink}" Command="{Binding ElementName=Window, Path=DataContext.ChartShowDateCommand}"><Run Text="{Binding CurrentDateTime, FallbackValue='01 Mar 20:00'}" /></Hyperlink>
+                                        <Hyperlink ToolTip="{t:Text JupiterMoonsView.InstantViewDateHint}" Style="{StaticResource Hyperlink}" Command="{Binding ElementName=Window, Path=DataContext.ChartShowDateCommand}"><Run Text="{Binding CurrentDateTime, FallbackValue='01 Mar 20:00'}" /></Hyperlink>
                                     </TextBlock>
                                 </Grid>
                             </Expander.Header>
@@ -170,89 +169,84 @@
                         VerticalAlignment="Stretch" Margin="2 -4" Width="6" />
 
                     <!-- Chart view: right panel -->
-                    <StackPanel Grid.Column="2" HorizontalAlignment="Stretch" Orientation="Vertical" Margin="4">
 
-                        <GroupBox Header="Tracks" Padding="0 4 0 0" HorizontalAlignment="Stretch" >
-                            <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
-                                <CheckBox Content="Io" Margin="2" IsChecked="{Binding FilterBodyIo}" />
-                                <CheckBox Content="Europa" Margin="2" IsChecked="{Binding FilterBodyEuropa}" />
-                                <CheckBox Content="Ganymede" Margin="2" IsChecked="{Binding FilterBodyGanymede}" />
-                                <CheckBox Content="Callisto" Margin="2" IsChecked="{Binding FilterBodyCallisto}" />
-                            </StackPanel>
-                        </GroupBox>
-
-                        <GroupBox Header="Chart options" Padding="0 4 0 0" HorizontalAlignment="Stretch" >
-                            <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-
-                                    <Label Content="Vertical scale" Padding="4 2" Grid.Column="0" />
-                                    <Slider Margin="4" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" 
-                                        Orientation="Horizontal" 
-                                        Minimum="1"
-                                        Maximum="10"
-                                        Value="{Binding ElementName=Chart, Path=VerticalScale}" />
-
-                                    <Label Content="Horizontal scale" Padding="4 2" Grid.Column="0" Grid.Row="1" />
-                                    <Slider Margin="4" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" 
-                                        Orientation="Horizontal" 
-                                        Minimum="1"
-                                        Maximum="10"
-                                        Value="{Binding ElementName=Chart, Path=HorizontalScale}" />
-                                </Grid>
-
-                                <RadioButton Margin="2" Content="Direct view" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static c:ChartOrientation.Direct}}" />
-                                <RadioButton Margin="2" Content="Inverted view" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static c:ChartOrientation.Inverted}}" />
-                                <RadioButton Margin="2" Content="Mirrored reversed view" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static c:ChartOrientation.Mirrored}}" />
-
-                            </StackPanel>
-
-                            
-                        </GroupBox>
-
-                        
-                        <GroupBox Header="Export" Padding="0 4 0 0" HorizontalAlignment="Stretch" >
-                            <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
-                                <CheckBox Margin="2" Content="Header" IsChecked="{Binding ChartExportAddHeader}" />
-                                <CheckBox Margin="2" Content="Legend" IsChecked="{Binding ChartExportAddLegend}" />
-                                <Button Margin="2 8 0 2" Content="Save image..." Width="Auto" Padding="10 0" HorizontalAlignment="Right" MinWidth="20" Command="{Binding SaveChartBitmapCommand}" CommandParameter="{Binding ElementName=Chart}" ToolTip="" />
-                            </StackPanel>
-                        </GroupBox>
-
-                        <TextBlock Padding="0 4" IsEnabled="False" TextWrapping="Wrap" Text="Double click on the chart to lock." Visibility="{Binding ElementName=Chart, Path=IsLocked, Converter={s:InverseBoolToVisibilityConverter}}" />
-                        <TextBlock Padding="0 4" VerticalAlignment="Stretch" TextWrapping="Wrap" IsEnabled="False" Text="Chart is locked. Double click on the chart to unlock." Visibility="{Binding ElementName=Chart, Path=IsLocked, Converter={s:BoolToVisibilityConverter}}" />
-
-
-                    </StackPanel>
-
-                </Grid>
-
-            </TabItem>
-            <TabItem Header="Events">
-                <Grid>
-
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="9" />
-                        <ColumnDefinition Width="200" MaxWidth="400" />
-                    </Grid.ColumnDefinitions>
-
-                    <Grid Grid.Column="0">
-
+                    <Grid Grid.Column="2">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="0" FontSize="18" Padding="6" Text="Jupiter moons events" VerticalAlignment="Center" Grid.ColumnSpan="2" />
-                        <Button  Margin="6" Padding="8 0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Content="Export..." Command="{Binding ExportJovianEventsCommand}" />
+                        <StackPanel HorizontalAlignment="Stretch" Orientation="Vertical" Margin="4">
+
+                            <GroupBox Header="{t:Text JupiterMoonsView.TracksFilter}" Padding="0 4 0 0" HorizontalAlignment="Stretch" >
+                                <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
+                                    <CheckBox Content="{t:Text JupiterMoons.Io}" Margin="2" IsChecked="{Binding FilterBodyIo}" />
+                                    <CheckBox Content="{t:Text JupiterMoons.Europa}" Margin="2" IsChecked="{Binding FilterBodyEuropa}" />
+                                    <CheckBox Content="{t:Text JupiterMoons.Ganymede}" Margin="2" IsChecked="{Binding FilterBodyGanymede}" />
+                                    <CheckBox Content="{t:Text JupiterMoons.Callisto}" Margin="2" IsChecked="{Binding FilterBodyCallisto}" />
+                                </StackPanel>
+                            </GroupBox>
+
+                            <GroupBox Header="{t:Text JupiterMoonsView.ChartOptions}" Padding="0 4 0 0" HorizontalAlignment="Stretch" >
+                                <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <Label Content="{t:Text JupiterMoonsView.ChartVerticalScale}" Padding="4 2" Grid.Column="0" />
+                                        <Slider Margin="4" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" 
+                                            Orientation="Horizontal" 
+                                            Minimum="1"
+                                            Maximum="10"
+                                            Value="{Binding ElementName=Chart, Path=VerticalScale}" />
+
+                                        <Label Content="{t:Text JupiterMoonsView.ChartHorizontalScale}" Padding="4 2" Grid.Column="0" Grid.Row="1" />
+                                        <Slider Margin="4" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" 
+                                            Orientation="Horizontal" 
+                                            Minimum="1"
+                                            Maximum="10"
+                                            Value="{Binding ElementName=Chart, Path=HorizontalScale}" />
+                                    </Grid>
+                                    <RadioButton Margin="2" Content="{t:Text JupiterMoonsView.ChartOrientation.Direct}" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static c:ChartOrientation.Direct}}" />
+                                    <RadioButton Margin="2" Content="{t:Text JupiterMoonsView.ChartOrientation.Inverted}" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static c:ChartOrientation.Inverted}}" />
+                                    <RadioButton Margin="2" Content="{t:Text JupiterMoonsView.ChartOrientation.Mirrored}" IsChecked="{Binding ElementName=Chart, Path=Orientation, Converter={s:EqualityConverter}, ConverterParameter={x:Static c:ChartOrientation.Mirrored}}" />
+                                </StackPanel>
+                            </GroupBox>
+                            <GroupBox Header="{t:Text JupiterMoonsView.ChartExportOptions}" Padding="0 4 0 0" HorizontalAlignment="Stretch" >
+                                <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
+                                    <CheckBox Margin="2" Content="{t:Text JupiterMoonsView.ChartHeader}" IsChecked="{Binding ChartExportAddHeader}" />
+                                    <CheckBox Margin="2" Content="{t:Text JupiterMoonsView.ChartLegend}" IsChecked="{Binding ChartExportAddLegend}" />
+                                    <Button Margin="2 8 0 2" Content="{t:Text JupiterMoonsView.ChartExportButton}" Width="Auto" Padding="10 0" HorizontalAlignment="Right" MinWidth="20" Command="{Binding SaveChartBitmapCommand}" CommandParameter="{Binding ElementName=Chart}" ToolTip="" />
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+
+                        <TextBlock Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="0 4" IsEnabled="False" TextWrapping="Wrap" Text="{t:Text JupiterMoonsView.LockChartHint}" Visibility="{Binding ElementName=Chart, Path=IsLocked, Converter={s:InverseBoolToVisibilityConverter}}" />
+                        <TextBlock Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="0 4" IsEnabled="False" TextWrapping="Wrap" Text="{t:Text JupiterMoonsView.UnlockChartHint}" Visibility="{Binding ElementName=Chart, Path=IsLocked, Converter={s:BoolToVisibilityConverter}}" />
+                    </Grid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="{t:Text JupiterMoonsView.TabEvents}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="9" />
+                        <ColumnDefinition Width="300" MaxWidth="400" />
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" FontSize="18" Padding="6" Text="{t:Text JupiterMoonsView.EventsTitle}" VerticalAlignment="Center" Grid.ColumnSpan="2" />
+                        <Button  Margin="6" Padding="8 0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Content="{t:Text JupiterMoonsView.ExportButton}" Command="{Binding ExportJovianEventsCommand}" />
 
                         <DataGrid 
                             Grid.Row="1"
@@ -273,8 +267,8 @@
                             RowHeight="24"
                             ItemsSource="{Binding EventsTable}">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Begin Date" Binding="{Binding BeginDate}"/>
-                                <DataGridTemplateColumn Header="Begin Time" SortMemberPath="Event.JdBegin" CanUserSort="True">
+                                <DataGridTextColumn Header="{t:Text JupiterMoonsView.EventsTable.BeginDate}" Binding="{Binding BeginDate}" />
+                                <DataGridTemplateColumn Header="{t:Text JupiterMoonsView.EventsTable.BeginTime}" SortMemberPath="Event.JdBegin" CanUserSort="True">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock FontFamily="Lucida Console" FontSize="12">
@@ -283,7 +277,7 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="End Time" SortMemberPath="Event.JdEnd" CanUserSort="True">
+                                <DataGridTemplateColumn Header="{t:Text JupiterMoonsView.EventsTable.EndTime}" SortMemberPath="Event.JdEnd" CanUserSort="True">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock FontFamily="Lucida Console" FontSize="12">
@@ -292,14 +286,14 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn Header="Duration" Binding="{Binding Duration}" SortMemberPath="Event.Duration" />
-                                <DataGridTextColumn Header="Event" Binding="{Binding Text}" CanUserSort="False" />
-                                <DataGridTextColumn Header="Code" Binding="{Binding Code}" CanUserSort="False" />
-                                <DataGridTextColumn Header="Jup. Alt Begin" Binding="{Binding JupiterAltBegin}" SortMemberPath="Event.JupiterAltBegin" />
-                                <DataGridTextColumn Header="Jup. Alt End" Binding="{Binding JupiterAltEnd}" SortMemberPath="Event.JupiterAltEnd" />
-                                <DataGridTextColumn Header="Sun Alt Begin" Binding="{Binding SunAltBegin}" SortMemberPath="Event.SunAltBegin" />
-                                <DataGridTextColumn Header="Sun Alt End" Binding="{Binding SunAltEnd}" SortMemberPath="Event.SunAltEnd" />
-                                <DataGridTextColumn Header="Notes" Binding="{Binding Notes}" CanUserSort="False" />
+                                <DataGridTextColumn Header="{t:Text JupiterMoonsView.EventsTable.Duration}" Binding="{Binding Duration}" SortMemberPath="Event.Duration" />
+                                <DataGridTextColumn Header="{t:Text JupiterMoonsView.EventsTable.Event}" Binding="{Binding Text}" CanUserSort="False" />
+                                <DataGridTextColumn Header="{t:Text JupiterMoonsView.EventsTable.Code}" Binding="{Binding Code}" CanUserSort="False" />
+                                <DataGridTextColumn Header="{t:Text JupiterMoonsView.EventsTable.JupAltBegin}" Binding="{Binding JupiterAltBegin}" SortMemberPath="Event.JupiterAltBegin" />
+                                <DataGridTextColumn Header="{t:Text JupiterMoonsView.EventsTable.JupAltEnd}" Binding="{Binding JupiterAltEnd}" SortMemberPath="Event.JupiterAltEnd" />
+                                <DataGridTextColumn Header="{t:Text JupiterMoonsView.EventsTable.SunAltBegin}" Binding="{Binding SunAltBegin}" SortMemberPath="Event.SunAltBegin" />
+                                <DataGridTextColumn Header="{t:Text JupiterMoonsView.EventsTable.SunAltEnd}" Binding="{Binding SunAltEnd}" SortMemberPath="Event.SunAltEnd" />
+                                <DataGridTextColumn Header="{t:Text JupiterMoonsView.EventsTable.Notes}" Binding="{Binding Notes}" CanUserSort="False" />
                             </DataGrid.Columns>
                         </DataGrid>
                     </Grid>
@@ -312,37 +306,34 @@
 
                     <StackPanel Grid.Column="2" Orientation="Vertical">
 
-                        <CheckBox Content="Io" Margin="2" IsChecked="{Binding FilterBodyIo}" />
-                        <CheckBox Content="Europa" Margin="2" IsChecked="{Binding FilterBodyEuropa}" />
-                        <CheckBox Content="Ganymede" Margin="2" IsChecked="{Binding FilterBodyGanymede}" />
-                        <CheckBox Content="Callisto" Margin="2 2 2 12" IsChecked="{Binding FilterBodyCallisto}" />
+                        <CheckBox Content="{t:Text JupiterMoons.Io}" Margin="2" IsChecked="{Binding FilterBodyIo}" />
+                        <CheckBox Content="{t:Text JupiterMoons.Europa}" Margin="2" IsChecked="{Binding FilterBodyEuropa}" />
+                        <CheckBox Content="{t:Text JupiterMoons.Ganymede}" Margin="2" IsChecked="{Binding FilterBodyGanymede}" />
+                        <CheckBox Content="{t:Text JupiterMoons.Callisto}" Margin="2 2 2 12" IsChecked="{Binding FilterBodyCallisto}" />
 
-                        <CheckBox Content="Transits" Margin="2" IsChecked="{Binding FilterTransits}" />
-                        <CheckBox Content="Shadow transits" Margin="2" IsChecked="{Binding FilterShadowTransits}" />
-                        <CheckBox Content="Eclipses" Margin="2" IsChecked="{Binding FilterEclipses}" />
-                        <CheckBox Content="Occultations" Margin="2 2 2 12" IsChecked="{Binding FilterOccultations}" />
+                        <CheckBox Content="{t:Text JupiterMoonsView.EventsTable.Filter.Transits}" Margin="2" IsChecked="{Binding FilterTransits}" />
+                        <CheckBox Content="{t:Text JupiterMoonsView.EventsTable.Filter.ShadowTransits}" Margin="2" IsChecked="{Binding FilterShadowTransits}" />
+                        <CheckBox Content="{t:Text JupiterMoonsView.EventsTable.Filter.Eclipses}" Margin="2" IsChecked="{Binding FilterEclipses}" />
+                        <CheckBox Content="{t:Text JupiterMoonsView.EventsTable.Filter.Occultations}" Margin="2 2 2 12" IsChecked="{Binding FilterOccultations}" />
 
-                        <CheckBox Content="Mutual eclipses" Margin="2" IsChecked="{Binding FilterMutualEclipses}" />
-                        <CheckBox Content="Mutual occultations" Margin="2 2 2 12" IsChecked="{Binding FilterMutualOccultations}" />
+                        <CheckBox Content="{t:Text JupiterMoonsView.EventsTable.Filter.MutualEclipses}" Margin="2" IsChecked="{Binding FilterMutualEclipses}" />
+                        <CheckBox Content="{t:Text JupiterMoonsView.EventsTable.Filter.MutualOccultations}" Margin="2 2 2 12" IsChecked="{Binding FilterMutualOccultations}" />
 
-                        <CheckBox Content="Jupiter is above horizon" Margin="2" IsChecked="{Binding FilterJupiterAboveHorizon}" />
-                        <CheckBox Content="Sun is below horizon" Margin="2" IsChecked="{Binding FilterSunBelowHorizon}" />
+                        <CheckBox Content="{t:Text JupiterMoonsView.Filter.JupiterAboveHorizon}" Margin="2" IsChecked="{Binding FilterJupiterAboveHorizon}" />
+                        <CheckBox Content="{t:Text JupiterMoonsView.Filter.SunBelowHorizon}" Margin="2" IsChecked="{Binding FilterSunBelowHorizon}" />
 
                     </StackPanel>
 
                 </Grid>
 
-
-
             </TabItem>
-            <TabItem Header="GRS Transits">
+            <TabItem Header="{t:Text JupiterMoonsView.TabGRS}">
 
                 <Grid>
-
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="9" />
-                        <ColumnDefinition Width="200" MaxWidth="400" />
+                        <ColumnDefinition Width="300" MaxWidth="400" />
                     </Grid.ColumnDefinitions>
 
                     <Grid Grid.Column="0">
@@ -355,11 +346,8 @@
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="0" FontSize="18" Padding="6" Text="Great Red Spot transits" VerticalAlignment="Center" />
-                        <Button Margin="6" Padding="8 0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Content="Export..." Command="{Binding ExportGRSEventsCommand}" />
-
-
-
+                        <TextBlock Grid.Row="0" FontSize="18" Padding="6" Text="{t:Text JupiterMoonsView.GRSTitle}" VerticalAlignment="Center" />
+                        <Button Margin="6" Padding="8 0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Content="{t:Text JupiterMoonsView.ExportButton}" Command="{Binding ExportGRSEventsCommand}" />
 
                         <DataGrid 
                             Grid.Row="1"
@@ -380,8 +368,8 @@
                             RowHeight="24"
                             ItemsSource="{Binding GRSTable}">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Transit Date" Binding="{Binding Date}"/>
-                                <DataGridTemplateColumn Header="Transit Time" CanUserSort="False">
+                                <DataGridTextColumn Header="{t:Text JupiterMoonsView.GRSTable.TransitDate}" Binding="{Binding Date}"/>
+                                <DataGridTemplateColumn Header="{t:Text JupiterMoonsView.GRSTable.TransitTime}" CanUserSort="False">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock FontFamily="Lucida Console" FontSize="12">
@@ -391,10 +379,10 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTextColumn Header="Jup. Alt Transit" Binding="{Binding JupiterAltTransit}" SortMemberPath="Event.JupiterAltTransit" />
-                                <DataGridTextColumn Header="Sun Alt Transit" Binding="{Binding SunAltTransit}" SortMemberPath="Event.SunAltTransit" />
+                                <DataGridTextColumn Header="{t:Text JupiterMoonsView.GRSTable.JupAltTransit}" Binding="{Binding JupiterAltTransit}" SortMemberPath="Event.JupiterAltTransit" />
+                                <DataGridTextColumn Header="{t:Text JupiterMoonsView.GRSTable.SunAltTransit}" Binding="{Binding SunAltTransit}" SortMemberPath="Event.SunAltTransit" />
 
-                                <DataGridTemplateColumn Header="Appear Time" CanUserSort="False">
+                                <DataGridTemplateColumn Header="{t:Text JupiterMoonsView.GRSTable.AppearTime}" CanUserSort="False">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock FontFamily="Lucida Console" FontSize="12">
@@ -404,21 +392,21 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTextColumn Header="Jup. Alt Appear" Binding="{Binding JupiterAltAppear}" SortMemberPath="Event.JupiterAltAppear" />
-                                <DataGridTextColumn Header="Sun Alt Appear" Binding="{Binding SunAltAppear}" SortMemberPath="Event.SunAltAppear" />
+                                <DataGridTextColumn Header="{t:Text JupiterMoonsView.GRSTable.JupAltAppear}" Binding="{Binding JupiterAltAppear}" SortMemberPath="Event.JupiterAltAppear" />
+                                <DataGridTextColumn Header="{t:Text JupiterMoonsView.GRSTable.SunAltTransit}" Binding="{Binding SunAltAppear}" SortMemberPath="Event.SunAltAppear" />
 
-                                <DataGridTemplateColumn Header="Disappear Time" CanUserSort="False">
+                                <DataGridTemplateColumn Header="{t:Text JupiterMoonsView.GRSTable.DisappearTime}" CanUserSort="False">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock FontFamily="Lucida Console" FontSize="12">
-                                    <Hyperlink Command="{Binding ElementName=Window, Path=DataContext.ShowGRSDisappearCommand}" CommandParameter="{Binding}"><Run Text="{Binding DisappearTime}" /></Hyperlink>
+                                                <Hyperlink Command="{Binding ElementName=Window, Path=DataContext.ShowGRSDisappearCommand}" CommandParameter="{Binding}"><Run Text="{Binding DisappearTime}" /></Hyperlink>
                                             </TextBlock>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTextColumn Header="Jup. Alt Disappear" Binding="{Binding JupiterAltDisappear}" SortMemberPath="Event.JupiterAltDisappear" />
-                                <DataGridTextColumn Header="Sun Alt Disappear" Binding="{Binding SunAltDisappear}" SortMemberPath="Event.SunAltDisappear" />
+                                <DataGridTextColumn Header="{t:Text JupiterMoonsView.GRSTable.JupAltDisappear}" Binding="{Binding JupiterAltDisappear}" SortMemberPath="Event.JupiterAltDisappear" />
+                                <DataGridTextColumn Header="{t:Text JupiterMoonsView.GRSTable.SunAltDisappear}" Binding="{Binding SunAltDisappear}" SortMemberPath="Event.SunAltDisappear" />
 
                             </DataGrid.Columns>
                         </DataGrid>
@@ -431,10 +419,8 @@
                         VerticalAlignment="Stretch" Margin="2 -4" Width="6" />
 
                     <StackPanel Grid.Column="2" Orientation="Vertical">
-
-                        <CheckBox Content="Jupiter is above horizon" Margin="2" IsChecked="{Binding FilterJupiterAboveHorizon}" />
-                        <CheckBox Content="Sun is below horizon" Margin="2" IsChecked="{Binding FilterSunBelowHorizon}" />
-
+                        <CheckBox Content="{t:Text JupiterMoonsView.Filter.JupiterAboveHorizon}" Margin="2" IsChecked="{Binding FilterJupiterAboveHorizon}" />
+                        <CheckBox Content="{t:Text JupiterMoonsView.Filter.SunBelowHorizon}" Margin="2" IsChecked="{Binding FilterSunBelowHorizon}" />
                     </StackPanel>
 
                 </Grid>

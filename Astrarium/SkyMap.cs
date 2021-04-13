@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
+using System.Text;
 
 namespace Astrarium
 {
@@ -53,6 +54,10 @@ namespace Astrarium
         /// Font used to display diagnostic info
         /// </summary>
         private Font fontDiagnosticText = new Font("Monospace", 8);
+
+        private Font fontMapInformationText = new Font("Arial", 14);
+
+        private Font fontMag = new Font("Arial", 8);
 
         public int Width { get; set; }
         public int Height { get; set; }
@@ -305,6 +310,83 @@ namespace Astrarium
                         needDrawSelectedObject = !DrawSelectedObject(g);
                     }
                 }
+
+// TODO: this should be refactored and moved to separate "Printing" plugin
+#if DEBUG
+                // Map information
+                if (mapContext.Schema == ColorSchema.White) 
+                {
+                    float headerHeight = (int)(mapContext.GetPointSize(0) + 35);
+                    float margin = 10;
+                    
+                    g.FillRectangle(Brushes.White, new RectangleF(0, 0, mapContext.Width, headerHeight));
+                    g.DrawLine(Pens.Black, 0, headerHeight, mapContext.Width, headerHeight);
+
+                    var location = settings.Get<CrdsGeographical>("ObserverLocation");
+                    var date = new Date(mapContext.JulianDay, location.UtcOffset);
+                    double offset = location.UtcOffset;
+                    string tz = offset != 0 ? $"UTC{(offset < 0 ? "-" : "+")}{TimeSpan.FromHours(offset):h\\:mm}" : "UTC";
+                    string dateText = $"{Formatters.DateTime.Format(date)} {tz}";
+
+                    var dateTextSize = g.MeasureString(dateText, fontMapInformationText);
+                    g.DrawString(dateText, fontMapInformationText, Brushes.Black, margin, (headerHeight - dateTextSize.Height) / 2);
+
+                    var mapTransformSb = new StringBuilder();
+                    if (mapContext.IsInverted)
+                    {
+                        mapTransformSb.Append(" inverted");
+                    }
+                    if (mapContext.IsMirrored)
+                    {
+                        mapTransformSb.Append(" mirrored");
+                    }
+                    string mapTransformText = mapTransformSb.ToString().Trim();
+                    if (string.IsNullOrEmpty(mapTransformText))
+                    {
+                        mapTransformText = "Direct";
+                    }
+
+                    var mapTransformTextSize = g.MeasureString(mapTransformText, fontMapInformationText);
+
+                    g.DrawString(mapTransformText, fontMapInformationText, Brushes.Black, mapContext.Width - margin - mapTransformTextSize.Width, (headerHeight - mapTransformTextSize.Height) / 2);
+                    g.DrawRectangle(Pens.Black, new Rectangle(0, 0, mapContext.Width, mapContext.Height));
+
+                    var magLimit = mapContext.MagLimit;
+                    float r0 = mapContext.GetPointSize(0);
+                    float gap = r0 * 1.1f;
+
+                    float yLabel = headerHeight / 2 - r0 / 2 - fontMag.Height / 2 - 3;
+
+                    float scaleWidth = ((int)magLimit) * gap;
+
+                    int magStep = 1;
+                    if (magLimit >= 14)
+                    {
+                        magStep = 2;
+                        scaleWidth = scaleWidth / 2;
+                    }
+
+                    int c = 0;
+                    for (int m = 0; m <= magLimit + magStep; m += magStep)
+                    {
+                        float r = mapContext.GetPointSize(m);
+                        if ((int)r > 0)
+                        {
+                            string label = m.ToString();
+                            float labelWidth = g.MeasureString(label, fontMag).Width;
+
+                            float xCircle = mapContext.Width / 2 - scaleWidth / 2 + c * gap - r / 2;
+                            float xLabel = mapContext.Width / 2 - scaleWidth / 2 + c * gap - labelWidth / 2;
+
+                            float yCircle = headerHeight / 2 - r / 2 + fontMag.Height / 2 + 3;
+                            
+                            g.DrawString(label, fontMag, Brushes.Black, xLabel, yLabel);
+                            g.FillEllipse(Brushes.Gray, xCircle, yCircle, r, r);
+                        }
+                        c++;
+                    }
+                }
+#endif
 
                 renderStopWatch.Stop();
                 rendersCount++;
