@@ -17,6 +17,8 @@ namespace Astrarium.Plugins.Grids
 
         private CelestialGrid LineEcliptic = new CelestialGrid("Ecliptic", 1, 24);
         private CelestialGrid LineGalactic = new CelestialGrid("Galactic", 1, 24);
+        private CelestialGrid LineMeridian = new CelestialGrid("Meridian", 1, 24);
+
         private CelestialGrid GridHorizontal = new CelestialGrid("Horizontal", 17, 24);
         private CelestialGrid GridEquatorial = new CelestialGrid("Equatorial", 17, 24);
 
@@ -24,6 +26,7 @@ namespace Astrarium.Plugins.Grids
         private Pen penGridHorizontal = null;
         private Pen penLineEcliptic = null;
         private Pen penLineGalactic = null;
+        private Pen penLineMeridian = null;
 
         private Font fontNodeLabel = new Font("Arial", 8);
         private Font fontEquinoxLabel = new Font("Arial", 8);
@@ -46,6 +49,7 @@ namespace Astrarium.Plugins.Grids
             penGridHorizontal = new Pen(Brushes.Transparent);
             penLineEcliptic = new Pen(Brushes.Transparent);
             penLineGalactic = new Pen(Brushes.Transparent);
+            penLineMeridian = new Pen(Brushes.Transparent);
         }
 
         public override void Initialize()
@@ -80,6 +84,10 @@ namespace Astrarium.Plugins.Grids
                 return eq.ToHorizontal(ctx.GeoLocation, ctx.SiderealTime);
             };
 
+            // Meridian line
+            LineMeridian.FromHorizontal = (h, ctx) => new GridPoint(0, h.Azimuth - 180);
+            LineMeridian.ToHorizontal = (c, context) => new CrdsHorizontal(0, c.Longitude - 180);
+
             // Horizontal grid
             GridHorizontal.FromHorizontal = (h, ctx) => new GridPoint(h.Azimuth, h.Altitude);
             GridHorizontal.ToHorizontal = (c, context) => new CrdsHorizontal(c.Longitude, c.Latitude);
@@ -106,11 +114,13 @@ namespace Astrarium.Plugins.Grids
             Color colorGridHorizontal = map.GetColor("ColorHorizontalGrid");
             Color colorLineEcliptic = map.GetColor("ColorEcliptic");
             Color colorLineGalactic = map.GetColor("ColorGalacticEquator");
+            Color colorLineMeridian = map.GetColor("ColorMeridian");
 
             penGridEquatorial.Color = colorGridEquatorial;
             penGridHorizontal.Color = colorGridHorizontal;
             penLineEcliptic.Color = colorLineEcliptic;
             penLineGalactic.Color = colorLineGalactic;
+            penLineMeridian.Color = colorLineMeridian;
 
             if (settings.Get<bool>("GalacticEquator"))
             {
@@ -131,6 +141,10 @@ namespace Astrarium.Plugins.Grids
                 DrawGrid(map, penLineEcliptic, LineEcliptic);
                 DrawEquinoxLabels(map);
                 DrawLunarNodes(map);
+            }
+            if (settings.Get<bool>("MeridianLine"))
+            {
+                DrawGrid(map, penLineMeridian, LineMeridian);
             }
         }
 

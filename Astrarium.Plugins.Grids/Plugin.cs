@@ -21,7 +21,9 @@ namespace Astrarium.Plugins.Grids
             SettingItems.Add("Grids", new SettingItem("LabelEquinoxPoints", false, s => s.Get<bool>("EclipticLine")));
             SettingItems.Add("Grids", new SettingItem("LabelLunarNodes", false, s => s.Get<bool>("EclipticLine")));
             SettingItems.Add("Grids", new SettingItem("GalacticEquator", true));
+            SettingItems.Add("Grids", new SettingItem("MeridianLine", false));
             SettingItems.Add("Colors", new SettingItem("ColorEcliptic", new SkyColor(0x80, 0x80, 0x00)));
+            SettingItems.Add("Colors", new SettingItem("ColorMeridian", new SkyColor(0x08, 0xA4, 0x6F)));
             SettingItems.Add("Colors", new SettingItem("ColorGalacticEquator", new SkyColor(64, 0, 64)));
             SettingItems.Add("Colors", new SettingItem("ColorHorizontalGrid", new SkyColor(0x00, 0x40, 0x00)));
             SettingItems.Add("Colors", new SettingItem("ColorEquatorialGrid", new SkyColor(0, 64, 64)));
