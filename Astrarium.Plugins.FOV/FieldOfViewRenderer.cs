@@ -68,10 +68,7 @@ namespace Astrarium.Plugins.FOV
                     if (Math.Min(width, height) < Math.Sqrt(map.Width * map.Width + map.Height * map.Height))
                     {
                         var eqCenter = map.Center.ToEquatorial(map.GeoLocation, map.SiderealTime);
-                        float angle = map.GetRotationTowardsNorth(eqCenter) + cameraFrame.Rotation;
-
-                        map.Graphics.TranslateTransform(map.Width / 2, map.Height / 2);
-                        map.Graphics.RotateTransform(angle);
+                        map.Rotate(new PointF(map.Width / 2, map.Height / 2), eqCenter, cameraFrame.Rotation);
 
                         if (frame.Shading > 0 && cameraFrame.Height >= map.ViewAngle / 2)
                         {

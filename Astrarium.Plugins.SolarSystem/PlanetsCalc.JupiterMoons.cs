@@ -25,6 +25,7 @@ namespace Astrarium.Plugins.SolarSystem
         {
             CrdsHeliocentrical earth = c.Get(Earth_Heliocentrial);
             CrdsHeliocentrical jupiter = c.Get(Planet_Heliocentrical, Planet.JUPITER);
+            double distance = jupiter.ToRectangular(earth).ToEcliptical().Distance;
             return GalileanMoons.Positions(c.JulianDay, earth, jupiter);
         }
 

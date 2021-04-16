@@ -199,7 +199,7 @@ namespace Astrarium.Algorithms
         /// <remarks>
         /// This method is based on formula described here: <see href="https://www.projectpluto.com/grs_form.htm"/>
         /// </remarks>
-        private static double JupiterCM2(double jd)
+        public static double JupiterCM2(double jd)
         {
             double jup_mean = (jd - 2455636.938) * 360.0 / 4332.89709;
             double eqn_center = 5.55 * Math.Sin(Angle.ToRadians(jup_mean));

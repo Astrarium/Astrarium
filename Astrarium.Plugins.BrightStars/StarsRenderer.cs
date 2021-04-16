@@ -94,7 +94,7 @@ namespace Astrarium.Plugins.BrightStars
                                 g.FillEllipse(Brushes.White, p.X - diam / 2 - 1, p.Y - diam / 2 - 1, diam + 2, diam + 2);
                             }
 
-                            g.FillEllipse(new SolidBrush(GetColor(map, star.Color)), p.X - diam / 2, p.Y - diam / 2, diam, diam); ;
+                            g.FillEllipse(new SolidBrush(GetColor(map, star.Color)), p.X - diam / 2, p.Y - diam / 2, diam, diam);
 
                             map.AddDrawnObject(star);
                         }

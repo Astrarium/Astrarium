@@ -11,6 +11,29 @@ namespace Astrarium.Algorithms.Tests
     public class GalileanMoonsTests : TestClassBase
     {
         [TestMethod]
+        public void Positions()
+        {
+            var earth = new CrdsHeliocentrical()
+            {
+                L = 164.39745364456394,
+                B = -0.00010322443896298875,
+                R = 0.9917003651870131
+            };
+
+            var jupiter = new CrdsHeliocentrical()
+            {
+                L = 312.39309804246045,
+                B = -0.68464503476063021,
+                R = 5.074939001057106
+            };
+
+            for (int i = 0; i < 30 * 24; i++)
+            {
+                var pos = GalileanMoons.Positions(2459278.25976003, earth, jupiter);
+            }
+        }
+
+        [TestMethod]
         public void Magnitude()
         {
             var lines = ReadLinesFromResource("Astrarium.Algorithms.Tests.Data.GalileanMoonsMag.chk", Encoding.ASCII).ToArray();

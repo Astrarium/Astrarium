@@ -113,6 +113,11 @@ en.Astrarium_Plugins_Eclipses               = Eclipses
 #define sz_Astrarium_Plugins_Eclipses       = CalcDirSize('..\Deploy\Astrarium.Plugins.Eclipses')
 sz_Astrarium_Plugins_Eclipses               = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Eclipses')}
 
+ru.Astrarium_Plugins_JupiterMoons           = Спутники Юпитера и БКП
+en.Astrarium_Plugins_JupiterMoons           = Jupiter moons events and GRS
+#define sz_Astrarium_Plugins_JupiterMoons   = CalcDirSize('..\Deploy\Astrarium.Plugins.JupiterMoons')
+sz_Astrarium_Plugins_JupiterMoons           = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.JupiterMoons')}
+
 ru.Astrarium_Plugins_Grids                  = Линии и сетки
 en.Astrarium_Plugins_Grids                  = Celestial grids and lines
 #define sz_Astrarium_Plugins_Grids          = CalcDirSize('..\Deploy\Astrarium.Plugins.Grids')
@@ -160,6 +165,7 @@ Name: Astrarium_Plugins_BrightStars;    Description: {cm:Astrarium_Plugins_Brigh
 Name: Astrarium_Plugins_Constellations; Description: {cm:Astrarium_Plugins_Constellations}; Types: full compact custom; Flags: fixed; ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Constellations};
 Name: Astrarium_Plugins_DeepSky;        Description: {cm:Astrarium_Plugins_DeepSky};        Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_DeepSky};
 Name: Astrarium_Plugins_MinorBodies;    Description: {cm:Astrarium_Plugins_MinorBodies};    Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_MinorBodies};
+Name: Astrarium_Plugins_JupiterMoons;   Description: {cm:Astrarium_Plugins_JupiterMoons};   Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_JupiterMoons};
 Name: Astrarium_Plugins_Eclipses;       Description: {cm:Astrarium_Plugins_Eclipses};       Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Eclipses};
 Name: Astrarium_Plugins_Grids;          Description: {cm:Astrarium_Plugins_Grids};          Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Grids};
 Name: Astrarium_Plugins_Horizon;        Description: {cm:Astrarium_Plugins_Horizon};        Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Horizon};

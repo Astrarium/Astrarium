@@ -17,6 +17,9 @@ namespace Astrarium.Projections
     {
         private readonly IMapContext Map = null;
 
+        public bool IsMirrored { get; set; }
+        public bool IsInverted { get; set; }
+
         public SinProjection(IMapContext map)
         {
             Map = map;

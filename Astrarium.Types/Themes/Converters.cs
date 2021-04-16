@@ -182,10 +182,26 @@ namespace Astrarium.Types.Themes
     {
         public override object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            if (object.Equals(value, parameter))
+            var castedParameter = System.Convert.ChangeType(parameter, value.GetType());
+
+            if (object.Equals(value, castedParameter))
                 return Visibility.Visible;
             else
                 return Visibility.Collapsed;
+        }
+    }
+
+    [ValueConversion(typeof(object), typeof(object))]
+    public class InverseVisibilityConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            var castedParameter = System.Convert.ChangeType(parameter, value.GetType());
+
+            if (object.Equals(value, castedParameter))
+                return Visibility.Collapsed;
+            else
+                return Visibility.Visible;
         }
     }
 

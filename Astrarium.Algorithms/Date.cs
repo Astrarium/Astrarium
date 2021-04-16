@@ -129,7 +129,7 @@ namespace Astrarium.Algorithms
         /// <param name="year">Year. Positive value means A.D. year. Zero value means 1 B.C. -1 value = 2 B.C., -2 = 3 B.C. etc.</param>
         /// <param name="month">Month. 1 = January, 2 = February, etc.</param>
         /// <param name="day">Day of month with fractions (if needed). For example, 17.5 means 17th day of month, 12:00.</param>
-        public Date(int year, int month, double day)
+        public Date(int year, int month, double day, double utcOffset = 0)
         {
             if (month < 1 || month > 12)
                 throw new ArgumentException("Month value should be from 1 to 12.", nameof(month));
@@ -140,6 +140,7 @@ namespace Astrarium.Algorithms
             Year = year;
             Month = month;
             Day = day;
+            UtcOffset = utcOffset;
         }
 
         /// <summary>

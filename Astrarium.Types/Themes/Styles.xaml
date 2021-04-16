@@ -3016,18 +3016,30 @@
     <Style TargetType="{x:Type GridSplitter}" BasedOn="{StaticResource {x:Type Control}}">
         <Setter Property="Background" Value="{StaticResource BrushControlBackground}" />
         <Setter Property="Foreground" Value="{StaticResource BrushControlDarkBackground}" />
-        <Setter Property="Width" Value="5" />
         <Setter Property="ShowsPreview" Value="False" />
         <Setter Property="Control.Template">
             <Setter.Value>
-                <ControlTemplate>
-                    <Grid Background="{TemplateBinding Background}">
-                        <Canvas Width="3" Height="19">
+                <ControlTemplate TargetType="{x:Type GridSplitter}">
+                    <Grid Background="{TemplateBinding Background}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <Canvas Name="Canvas" Width="3" Height="19">
                             <Ellipse Fill="{TemplateBinding Foreground}" Width="3" Height="3" Canvas.Top="1"  />
                             <Ellipse Fill="{TemplateBinding Foreground}" Width="3" Height="3" Canvas.Top="7"  />
                             <Ellipse Fill="{TemplateBinding Foreground}" Width="3" Height="3" Canvas.Top="13"  />
+                            <Canvas.RenderTransformOrigin>
+                                <Point X="0.5" Y="0.5" />
+                            </Canvas.RenderTransformOrigin>
                         </Canvas>
                     </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="ResizeDirection" Value="Rows">
+                            <Setter TargetName="Canvas" Property="RenderTransform">
+                                <Setter.Value>
+                                    <RotateTransform Angle="90" />
+                                </Setter.Value>
+                            </Setter>
+                            <Setter TargetName="Canvas" Property="Margin" Value="-10" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

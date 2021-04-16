@@ -22,7 +22,7 @@ namespace Astrarium.Types
         /// Shows window by its ViewModel type. 
         /// Calling this method automatically creates instance of the ViewModel and attaches it to DataContext property. />
         /// </summary>
-        void ShowWindow<TViewModel>() where TViewModel : ViewModelBase;
+        void ShowWindow<TViewModel>(bool isSingleInstance = false) where TViewModel : ViewModelBase;
 
         /// <summary>
         /// Shows dialog window by its ViewModel type.

@@ -211,6 +211,12 @@ namespace Astrarium.Plugins.SolarSystem
                     if (p != Planet.EARTH - 1 && searchString.Equals($"@{Planet.NAMES[p]}", StringComparison.OrdinalIgnoreCase))
                         return new[] { Planets.ElementAt(p) };
                 }
+
+                for (int m = 0; m < jupiterMoons.Length; m++)
+                {
+                    if (searchString.Equals($"@Jupiter-{m+1}", StringComparison.OrdinalIgnoreCase))
+                        return new[] { jupiterMoons.ElementAt(m) };
+                }
             }
 
             var s1 = planets.Where(p => p.Number != Planet.EARTH && p.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))

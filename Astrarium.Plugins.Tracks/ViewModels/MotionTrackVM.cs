@@ -92,7 +92,7 @@ namespace Astrarium.Plugins.Tracks.ViewModels
                 throw new Exception($"Ephemeris provider for type {track.Body.GetType().Name} does not provide \"Equatorial.Alpha\" and \"Equatorial.Delta\" ephemeris.");
             }
 
-            var positions = sky.GetEphemerides(track.Body, track.From, track.To, track.Step, new[] { "Equatorial.Alpha", "Equatorial.Delta" });
+            var positions = sky.GetEphemerides(track.Body, track.From, track.To + track.Step, track.Step, new[] { "Equatorial.Alpha", "Equatorial.Delta" });
             foreach (var eq in positions)
             {
                 track.Points.Add(new CelestialPoint() { Equatorial0 = new CrdsEquatorial(eq.GetValue<double>("Equatorial.Alpha"), eq.GetValue<double>("Equatorial.Delta")) });
