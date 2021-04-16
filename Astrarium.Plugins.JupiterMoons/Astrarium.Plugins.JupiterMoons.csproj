@@ -4,8 +4,8 @@
     <TargetFrameworks>net451</TargetFrameworks>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <UseWpf>true</UseWpf>
-    <Product>Measure Tool</Product>
-    <Description>Calculates mutual events in Jupiter moons system and GRS transit times</Description>
+    <Product>Jupiter Moons</Product>
+    <Description>Calculates events of Jupiter moons system and GRS transit times</Description>
     <Authors>Alexander Krutov</Authors>
     <OutputPath>..\Astrarium\bin\$(Configuration)</OutputPath>
   </PropertyGroup>
