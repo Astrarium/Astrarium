@@ -12,6 +12,10 @@ namespace Astrarium.Types
         public string Key { get; set; }
         public object Value { get; set; }
         public IEphemFormatter Formatter { get; set; }
+        public T GetValue<T>()
+        {
+            return (T)Value;
+        }
     }
 
     public class Ephemerides : List<Ephemeris>
@@ -23,7 +27,7 @@ namespace Astrarium.Types
 
         public T GetValue<T>(string key)
         {
-            return (T)Get(key)?.Value;
+            return Get(key).GetValue<T>();
         }
     }
 }

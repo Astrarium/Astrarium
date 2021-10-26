@@ -5,25 +5,113 @@
         xmlns:c="clr-namespace:Astrarium.Plugins.Meteors.Controls"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Astrarium.Plugins.Meteors"
+        xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+        xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
         mc:Ignorable="d"
         Title="MeteorShowersView" 
         Style="{StaticResource {x:Type Window}}" 
         MinHeight="600" MinWidth="800"
         Height="600" Width="800">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <Style x:Key="ImageButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+                <Style.Setters>
+                    <Setter Property="Cursor" Value="Hand" />
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="Margin" Value="2" />
+                    <Setter Property="MinWidth" Value="40" />
+                    <Setter Property="Height" Value="40" />
+                </Style.Setters>
+                <Style.Triggers>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Foreground" Value="{StaticResource BrushControlBackground}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <Style x:Key="DateButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+                <Style.Setters>
+                    <Setter Property="Cursor" Value="Hand" />
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="Margin" Value="2" />
+                    <Setter Property="MinWidth" Value="40" />
+                    <Setter Property="Height" Value="40" />
+                </Style.Setters>
+                <Style.Triggers>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Foreground" Value="{StaticResource BrushControlBackground}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <Grid x:Key="ImagePrevYear" x:Shared="False">
+                <Path HorizontalAlignment="Left" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="16" Height="16" Margin="-11 0 0 0" Stretch="Uniform" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
+                    <Path.Data>
+                        <StreamGeometry>F1 M100,100z M0,0z M14,8L14,8 2.5,19.6 32.9,50 2.5,80.4 14,92 56,50z</StreamGeometry>
+                    </Path.Data>
+                    <Path.LayoutTransform>
+                        <RotateTransform Angle="180"></RotateTransform>
+                    </Path.LayoutTransform>
+                </Path>
+            </Grid>
+            <Grid x:Key="ImageNextYear" x:Shared="False">
+                <Path HorizontalAlignment="Right" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="20" Height="20" Margin="7 4 4 0" Stretch="Uniform" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
+                    <Path.Data>
+                        <StreamGeometry>F1 M100,125z M0,0z M14,8L14,8 2.5,19.6 32.9,50 2.5,80.4 14,92 56,50z</StreamGeometry>
+                    </Path.Data>
+                    <Path.LayoutTransform>
+                        <RotateTransform Angle="0"></RotateTransform>
+                    </Path.LayoutTransform>
+                </Path>
+            </Grid>
+            <Style x:Key="Hyperlink" TargetType="{x:Type Hyperlink}" BasedOn="{StaticResource {x:Type Hyperlink}}">
+                <Style.Setters>
+                    <Setter Property="Foreground" Value="{StaticResource BrushForeground}" />
+                </Style.Setters>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+    
     <Grid>
-        <c:MeteorShowersTable Style="{StaticResource {x:Type DataGrid}}" 
-                              VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Auto"
-                            VerticalAlignment="Stretch"
-                            VirtualizingPanel.IsVirtualizing="True"
-                            AutoGenerateColumns="False" 
-                            CanUserReorderColumns="False"
-                            CanUserSortColumns="True"
-                            IsReadOnly="True"
-                                         
-                        FrozenColumnCount ="2"
-                            GridLinesVisibility="All"
-                              ItemsSource="{Binding Meteors}">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Content="{StaticResource ImagePrevYear}" Style="{StaticResource ImageButton}" Command="{Binding PrevYearCommand}" ToolTip="{t:Text MeteorShowersView.PrevYear}" />
+            <Button MinWidth="200" VerticalAlignment="Center" Command="{Binding ChangeYearCommand}" Style="{StaticResource DateButton}" ToolTip="{t:Text MeteorShowersView.ChangeYear}">
+                <Button.Content>
+                    <TextBlock FontSize="32" VerticalAlignment="Center" Text="{Binding Year, FallbackValue='Jan 2000'}" />
+                </Button.Content>
+            </Button>
+            <Button Content="{StaticResource ImageNextYear}" Style="{StaticResource ImageButton}" Command="{Binding NextYearCommand}" ToolTip="{t:Text MeteorShowersView.NextYear}" />
+        </StackPanel>
+
+        <Grid Height="6" Grid.Row="1">
+            <ProgressBar Background="Transparent" IsIndeterminate="True" Visibility="{Binding IsCalculating, Converter={s:BoolToVisibilityConverter}, FallbackValue=Collapsed}" />
+        </Grid>
+
+        <c:MeteorShowersTable 
+            x:Name="Table"
+            Grid.Row="2"
+            Style="{StaticResource {x:Type DataGrid}}" 
+            VerticalScrollBarVisibility="Auto"
+            HorizontalScrollBarVisibility="Auto"
+            VerticalAlignment="Stretch"
+            VirtualizingPanel.IsVirtualizing="True"
+            AutoGenerateColumns="False" 
+            CanUserReorderColumns="False"
+            CanUserSortColumns="True"
+            IsReadOnly="True"
+            FrozenColumnCount ="2"
+            GridLinesVisibility="All"
+            Year="{Binding Year, Mode=OneWay}"
+            MoonPhaseData="{Binding MoonPhaseData, Mode=OneWay}"
+            ItemsSource="{Binding Meteors, Mode=OneWay}">
 
             <DataGrid.RowStyle>
                 <Style TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}">
@@ -36,8 +124,10 @@
             
             <DataGrid.Columns>
 
-                <DataGridTextColumn Header="Code" Binding="{Binding Code}"/>
+                <!--<DataGridTextColumn Header="Code" Binding="{Binding Code}"/>-->
                 <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+                <DataGridTextColumn Header="Max" Binding="{Binding Max}"/>
+                
                 <DataGridTemplateColumn Width="3650" IsReadOnly="True">
                     <DataGridTemplateColumn.CellStyle>
                         <Style TargetType="DataGridCell">
@@ -62,7 +152,7 @@
 
                     <DataGridTemplateColumn.HeaderTemplate>
                         <DataTemplate>
-                            <c:MeteorActivityHeader Width="3650" Height="27" Padding="0" Margin="0" VerticalAlignment="Stretch" />
+                            <c:MeteorActivityHeader Width="3650" Height="27" Padding="0" Margin="0" VerticalAlignment="Stretch" Year="{Binding ElementName=Table, Path=Year, NotifyOnSourceUpdated=True}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.HeaderTemplate>
 

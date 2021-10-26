@@ -20,14 +20,42 @@ namespace Astrarium.Plugins.Meteors.Controls
             set => SetValue(MeteorProperty, value);
         }
 
+        /// <summary>
+        /// Array index is a meteor shower activity class, zero-based
+        /// </summary>
+        private readonly byte[] TransparencyCodes = new byte[] { 250, 200, 150, 100 };
+
         protected override void OnRender(DrawingContext drawingContext)
         {
             if (Meteor != null)
             {
-                double x = (Meteor.Begin - 1) / 365.0 * ActualWidth;
-                double w = (Meteor.End - Meteor.Begin) / 365.0 * ActualWidth;
+                for (int i = 0; i < 2; i++)
+                {
+                    double x = (Meteor.Begin - 1) / 365.0 * ActualWidth;
+                    double w = (Meteor.End - Meteor.Begin) / 365.0 * ActualWidth;
+                    double x0 = (Meteor.Max - 1) / 365.0 * ActualWidth;
 
-                drawingContext.DrawRectangle(new SolidColorBrush(Colors.Blue), null, new Rect(x, 0, w, ActualHeight));
+                    x += i * ActualWidth;
+                    x0 += i * ActualWidth;
+
+                    var g = new StreamGeometry();
+
+                    var points = new Point[3]
+                    {
+                        new Point(x, ActualHeight),
+                        new Point(x0, -ActualHeight),
+                        new Point(x + w, ActualHeight)
+                    };
+
+                    using (StreamGeometryContext gc = g.Open())
+                    {
+                        gc.BeginFigure(points[0], true, true);
+                        gc.PolyBezierTo(points, true, true);
+                    }
+
+                    var color = Colors.Cyan;
+                    drawingContext.DrawGeometry(new SolidColorBrush(Color.FromArgb(TransparencyCodes[Meteor.ActivityClass - 1], color.R, color.G, color.B)), null, g);
+                }
             }
         }
     }
