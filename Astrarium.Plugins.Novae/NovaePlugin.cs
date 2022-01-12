@@ -12,7 +12,6 @@ namespace Astrarium.Plugins.Novae
             SettingItems.Add("Novae", new SettingItem("Novae", true));
             SettingItems.Add("Novae", new SettingItem("NovaeLabels", true, s => s.Get<bool>("Novae")));
 
-
             ExportResourceDictionaries("Images.xaml");
         }
     }

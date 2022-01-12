@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace Astrarium.Plugins.Meteors.Controls
@@ -14,16 +15,35 @@ namespace Astrarium.Plugins.Meteors.Controls
         public static readonly DependencyProperty MeteorProperty =
             DependencyProperty.Register(nameof(Meteor), typeof(Meteor), typeof(MeteorActivityBar), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
 
+        public static readonly DependencyProperty OnDoubleClickCommandProperty =
+                    DependencyProperty.Register(nameof(OnDoubleClickCommand), typeof(ICommand), typeof(MeteorActivityBar), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = false, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.Explicit });
+
         public Meteor Meteor
         {
             get => (Meteor)GetValue(MeteorProperty);
             set => SetValue(MeteorProperty, value);
         }
 
+        public ICommand OnDoubleClickCommand
+        {
+            get => (ICommand)GetValue(OnDoubleClickCommandProperty);
+            set => SetValue(OnDoubleClickCommandProperty, value);
+        }
+
         /// <summary>
         /// Array index is a meteor shower activity class, zero-based
         /// </summary>
         private readonly byte[] TransparencyCodes = new byte[] { 250, 200, 150, 100 };
+
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            Cursor = Cursors.Help;
+        }
+
+        protected override void OnMouseDoubleClick(MouseButtonEventArgs e)
+        {
+            OnDoubleClickCommand?.Execute(Meteor);
+        }
 
         protected override void OnRender(DrawingContext drawingContext)
         {

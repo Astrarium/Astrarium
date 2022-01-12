@@ -1,12 +1,9 @@
 ﻿using Astrarium.Algorithms;
-using Astrarium.Types;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -22,6 +19,9 @@ namespace Astrarium.Plugins.Meteors.Controls
         public static readonly DependencyProperty YearProperty =
             DependencyProperty.Register(nameof(Year), typeof(int), typeof(MeteorShowersTable), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
 
+        public static readonly DependencyProperty JulianDayProperty =
+            DependencyProperty.Register(nameof(JulianDay), typeof(double), typeof(MeteorShowersTable), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
+
 
         public ICollection<float> MoonPhaseData
         {
@@ -35,6 +35,12 @@ namespace Astrarium.Plugins.Meteors.Controls
             set => SetValue(YearProperty, value);
         }
 
+        public double JulianDay
+        {
+            get => (double)GetValue(JulianDayProperty);
+            set => SetValue(JulianDayProperty, value);
+        }
+
         private ScrollViewer scrollViewer;
 
         protected override void OnItemsSourceChanged(IEnumerable oldValue, IEnumerable newValue)
@@ -46,8 +52,7 @@ namespace Astrarium.Plugins.Meteors.Controls
 
         private static T GetVisualChild<T>(DependencyObject parent) where T : Visual
         {
-            T child = default(T);
-
+            T child = default;
             int numVisuals = VisualTreeHelper.GetChildrenCount(parent);
             for (int i = 0; i < numVisuals; i++)
             {
@@ -68,15 +73,11 @@ namespace Astrarium.Plugins.Meteors.Controls
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
-
+            PropertyDescriptor pd = DependencyPropertyDescriptor.FromProperty(DataGridColumn.ActualWidthProperty, typeof(DataGridColumn));
+            for (int c = 0; c < Columns.Count; c++)
             {
-                PropertyDescriptor pd = DependencyPropertyDescriptor.FromProperty(DataGridColumn.ActualWidthProperty, typeof(DataGridColumn));
-                for (int c = 0; c < Columns.Count; c++)
-                {
-                    pd.AddValueChanged(Columns[c], ColumnWidthPropertyChanged);
-                }
+                pd.AddValueChanged(Columns[c], ColumnWidthPropertyChanged);
             }
-
             Background = new SolidColorBrush(Colors.Transparent);
         }
 
@@ -95,10 +96,29 @@ namespace Astrarium.Plugins.Meteors.Controls
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
-
             mousePosition = e.GetPosition(this);
-
+            double x = mousePosition.X;
+            double offset = scrollViewer?.HorizontalOffset ?? 0;
+            double of = CellsPanelHorizontalOffset;
+            double start = Columns.Take(Columns.Count - 1).Select(c => c.ActualWidth).Sum() + of * 2;
+            double width = Columns.Last().ActualWidth;
+            int daysCount = MoonPhaseData.Count;
+            double i = (x - start + offset) / width * daysCount;
+            if (i >= 0 && i < daysCount)
+            {
+                JulianDay = Date.JulianDay0(Year) + i + 1;
+            }
+            else
+            {
+                JulianDay = -1;
+            }
             InvalidateVisual();
+        }
+
+        protected override void OnMouseLeave(MouseEventArgs e)
+        {
+            base.OnMouseLeave(e);
+            JulianDay = -1;
         }
 
         protected override void OnRender(DrawingContext drawingContext)
@@ -109,39 +129,32 @@ namespace Astrarium.Plugins.Meteors.Controls
 
             int daysCount = MoonPhaseData.Count;
 
-            var jd0 = new Date(Year, 1, 1).ToJulianDay();
-
+            double jd0 = new Date(Year, 1, 1).ToJulianDay();
             double offset = scrollViewer?.HorizontalOffset ?? 0;
-
-            var of = this.CellsPanelHorizontalOffset;
-            
-            var width = this.Columns[2].ActualWidth;
-            double start = this.Columns[0].ActualWidth + this.Columns[1].ActualWidth + of * 2;
-
-            var right = scrollViewer?.ComputedVerticalScrollBarVisibility == System.Windows.Visibility.Visible ? 24 : 0;
-
-            double ww = ActualWidth - (this.Columns[0].ActualWidth + this.Columns[1].ActualWidth) - right;
+            double of = CellsPanelHorizontalOffset;
+            double frozenColsWidth = Columns.Take(Columns.Count - 1).Select(c => c.ActualWidth).Sum();
+            double width = Columns.Last().ActualWidth; 
+            double start = frozenColsWidth + of * 2;
+            double right = scrollViewer?.ComputedVerticalScrollBarVisibility == System.Windows.Visibility.Visible ? 24 : 0;
+            double ww = ActualWidth - frozenColsWidth - right;
 
             if (ww > 0)
             {
                 var solidPen = new Pen(new SolidColorBrush(Color.FromArgb(255, 80, 80, 80)), 0.5);
                 var dotPen = new Pen(new SolidColorBrush(Color.FromArgb(255, 80, 80, 80)), 0.2);
-
                 var bounds = new Rect(start, 0, ww, ActualHeight);
                 drawingContext.PushClip(new RectangleGeometry(bounds));
-
                 drawingContext.DrawRectangle(Brushes.Black, null, bounds);
 
                 for (int i = 0; i <= daysCount; i++)
                 {
                     var d = new Date(jd0 + i);
-
                     double x = start + (double)i / daysCount * width - offset;
 
                     if (MoonPhaseData != null && i < MoonPhaseData.Count)
                     {
-                        var phase = MoonPhaseData.ElementAt(i);
-                        byte transp = (byte)((int)(phase * 200));
+                        float phase = MoonPhaseData.ElementAt(i);
+                        byte transp = (byte)(int)(phase * 200);
 
                         var brush = new SolidColorBrush(Color.FromArgb(transp, 100, 100, 100));
                         drawingContext.DrawRectangle(brush, null, new Rect(new Point(x, 0), new Size(width / daysCount, ActualHeight)));
@@ -152,7 +165,6 @@ namespace Astrarium.Plugins.Meteors.Controls
             }
 
             drawingContext.DrawLine(new Pen(new SolidColorBrush(Colors.Red), 0.5), new Point(mousePosition.X, 0), new Point(mousePosition.X, ActualHeight));
-
         }
     }
 }

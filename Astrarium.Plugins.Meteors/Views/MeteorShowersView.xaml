@@ -15,6 +15,8 @@
 
     <Window.Resources>
         <ResourceDictionary>
+            <local:DayOfYearToDateConverter x:Key="DayOfYearToDateConverter" />
+
             <Style x:Key="ImageButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
                 <Style.Setters>
                     <Setter Property="Cursor" Value="Hand" />
@@ -79,6 +81,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
@@ -107,11 +110,12 @@
             CanUserReorderColumns="False"
             CanUserSortColumns="True"
             IsReadOnly="True"
-            FrozenColumnCount ="2"
+            FrozenColumnCount ="4"
             GridLinesVisibility="All"
             Year="{Binding Year, Mode=OneWay}"
             MoonPhaseData="{Binding MoonPhaseData, Mode=OneWay}"
-            ItemsSource="{Binding Meteors, Mode=OneWay}">
+            ItemsSource="{Binding Meteors, Mode=OneWay}"
+            JulianDay="{Binding JulianDay, Mode=OneWayToSource}">
 
             <DataGrid.RowStyle>
                 <Style TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}">
@@ -124,10 +128,18 @@
             
             <DataGrid.Columns>
 
-                <!--<DataGridTextColumn Header="Code" Binding="{Binding Code}"/>-->
                 <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
-                <DataGridTextColumn Header="Max" Binding="{Binding Max}"/>
-                
+                <DataGridTextColumn Header="Max" SortMemberPath="Max">
+                    <DataGridTextColumn.Binding>
+                        <MultiBinding Converter="{StaticResource DayOfYearToDateConverter}"  UpdateSourceTrigger="PropertyChanged" >
+                            <Binding Path="Max" Mode="OneWay" UpdateSourceTrigger="PropertyChanged" />
+                            <Binding Path="DataContext.JulianDay0" RelativeSource="{RelativeSource AncestorType=Window}" Mode="OneWay" UpdateSourceTrigger="PropertyChanged" />
+                        </MultiBinding>
+                    </DataGridTextColumn.Binding>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="ZHR" Binding="{Binding ZHR}" />
+                <DataGridTextColumn Header="Activity class" Binding="{Binding ActivityClass}" />
+
                 <DataGridTemplateColumn Width="3650" IsReadOnly="True">
                     <DataGridTemplateColumn.CellStyle>
                         <Style TargetType="DataGridCell">
@@ -158,11 +170,25 @@
 
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <c:MeteorActivityBar Meteor="{Binding}" Width="3650" Height="19" />
+                            <c:MeteorActivityBar Meteor="{Binding}" Width="3650" Height="19" OnDoubleClickCommand="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.ShowMeteorInfoCommand}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </c:MeteorShowersTable>
+
+        <StatusBar Grid.Row="3">
+            <StatusBarItem>
+                <TextBlock Text="{Binding DateString, Mode=OneWay}" />
+            </StatusBarItem>
+            <Separator />
+            <StatusBarItem>
+                <TextBlock Text="{Binding MoonPhaseString, Mode=OneWay}" />
+            </StatusBarItem>
+            <Separator />
+            <StatusBarItem>
+                <TextBlock Text="{Binding ActiveCountString, Mode=OneWay}" />
+            </StatusBarItem>
+        </StatusBar>
     </Grid>
 </Window>

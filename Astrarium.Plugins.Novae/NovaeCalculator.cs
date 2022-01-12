@@ -241,34 +241,34 @@ namespace Astrarium.Plugins.Novae
             var jd0 = Date.DeltaT(c.JulianDay) / 86400.0 + Date.JulianDay0(year) - offset / 24;
 
             info
-            .SetTitle(string.Join(", ", info.Body.Names))
-            .SetSubtitle(Text.Get("Nova.Subtitle"))
-            .AddRow("Constellation", constellation)
+                .SetTitle(string.Join(", ", info.Body.Names))
+                .SetSubtitle(Text.Get("Nova.Subtitle"))
+                .AddRow("Constellation", constellation)
 
-            .AddHeader(Text.Get("Nova.Equatorial"))
-            .AddRow("Equatorial.Alpha")
-            .AddRow("Equatorial.Delta")
+                .AddHeader(Text.Get("Nova.Equatorial"))
+                .AddRow("Equatorial.Alpha")
+                .AddRow("Equatorial.Delta")
 
-            .AddHeader(Text.Get("Nova.Equatorial0"))
-            .AddRow("Equatorial0.Alpha", n.Equatorial0.Alpha, Formatters.RA)
-            .AddRow("Equatorial0.Delta", n.Equatorial0.Delta, Formatters.Dec)
+                .AddHeader(Text.Get("Nova.Equatorial0"))
+                .AddRow("Equatorial0.Alpha", n.Equatorial0.Alpha, Formatters.RA)
+                .AddRow("Equatorial0.Delta", n.Equatorial0.Delta, Formatters.Dec)
 
-            .AddHeader(Text.Get("Nova.Horizontal"))
-            .AddRow("Horizontal.Azimuth")
-            .AddRow("Horizontal.Altitude")
+                .AddHeader(Text.Get("Nova.Horizontal"))
+                .AddRow("Horizontal.Azimuth")
+                .AddRow("Horizontal.Altitude")
 
-            .AddHeader(Text.Get("Nova.Properties"))
-            .AddRow("Magnitude")
-            .AddRow("PeakDate", new Date(n.JulianDayPeak), Formatters.Date)
-            .AddRow("MaxMagnitude", n.MaxMagnitude, Formatters.Magnitude)
-            .AddRow("MinMagnitude", n.MinMagnitude, Formatters.Magnitude)
-            .AddRow("Type", n.NovaType + NovaTypeDescription(n))
+                .AddHeader(Text.Get("Nova.Properties"))
+                .AddRow("Magnitude")
+                .AddRow("PeakDate", new Date(n.JulianDayPeak), Formatters.Date)
+                .AddRow("MaxMagnitude", n.MaxMagnitude, Formatters.Magnitude)
+                .AddRow("MinMagnitude", n.MinMagnitude, Formatters.Magnitude)
+                .AddRow("Type", n.NovaType + NovaTypeDescription(n))
 
-            .AddHeader(Text.Get("Nova.RTS"))
-            .AddRow("RTS.Rise")
-            .AddRow("RTS.Transit")
-            .AddRow("RTS.Set")
-            .AddRow("RTS.Duration");
+                .AddHeader(Text.Get("Nova.RTS"))
+                .AddRow("RTS.Rise")
+                .AddRow("RTS.Transit")
+                .AddRow("RTS.Set")
+                .AddRow("RTS.Duration");
         }
 
         public ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50)

@@ -24,9 +24,7 @@ namespace Astrarium.Plugins.Meteors
         public short Max { get; set; }
 
         public bool IsActive { get; set; }
-
         public double AverageDailyMotion => 1;
-        //public float Velocity { get; set; }
         public string ZHR { get; set; }
         public int ActivityClass { get; set; }
     }
