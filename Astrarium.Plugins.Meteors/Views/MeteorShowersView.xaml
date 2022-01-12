@@ -109,13 +109,16 @@
             AutoGenerateColumns="False" 
             CanUserReorderColumns="False"
             CanUserSortColumns="True"
+            SelectionMode="Single"
+            SelectionUnit="FullRow"
             IsReadOnly="True"
             FrozenColumnCount ="4"
             GridLinesVisibility="All"
             Year="{Binding Year, Mode=OneWay}"
             MoonPhaseData="{Binding MoonPhaseData, Mode=OneWay}"
             ItemsSource="{Binding Meteors, Mode=OneWay}"
-            JulianDay="{Binding JulianDay, Mode=OneWayToSource}">
+            JulianDay="{Binding JulianDay, Mode=OneWayToSource}"
+            RowDoubleClick="{Binding ShowMeteorInfoCommand, Mode=OneWay}">
 
             <DataGrid.RowStyle>
                 <Style TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}">
@@ -137,7 +140,7 @@
                         </MultiBinding>
                     </DataGridTextColumn.Binding>
                 </DataGridTextColumn>
-                <DataGridTextColumn Header="ZHR" Binding="{Binding ZHR}" />
+                <DataGridTextColumn Header="ZHR" Binding="{Binding ZHR}" SortMemberPath="ZHRNumeric" />
                 <DataGridTextColumn Header="Activity class" Binding="{Binding ActivityClass}" />
 
                 <DataGridTemplateColumn Width="3650" IsReadOnly="True">
@@ -177,7 +180,7 @@
             </DataGrid.Columns>
         </c:MeteorShowersTable>
 
-        <StatusBar Grid.Row="3">
+        <StatusBar Grid.Row="3" Visibility="{Binding IsMouseOver, Converter={s:BoolToVisibilityConverter}, ConverterParameter={x:Static Visibility.Hidden}}">
             <StatusBarItem>
                 <TextBlock Text="{Binding DateString, Mode=OneWay}" />
             </StatusBarItem>

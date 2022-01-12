@@ -11,7 +11,7 @@ namespace Astrarium.Plugins.Meteors
 {
     public class MeteorsRenderer : BaseRenderer
     {
-        public override RendererOrder Order => RendererOrder.EarthOrbit;
+        public override RendererOrder Order => RendererOrder.DeepSpace;
 
         private MeteorsCalculator calc;
         private ISettings settings;
@@ -28,6 +28,7 @@ namespace Astrarium.Plugins.Meteors
             bool isGround = settings.Get<bool>("Ground");
             bool showMeteors = settings.Get("Meteors");
             bool onlyActive = settings.Get("MeteorsOnlyActive");
+            bool showLabels = settings.Get("MeteorsLabels");
             int activityClassLimit = 4;
 
             if (!showMeteors) return;
@@ -57,7 +58,11 @@ namespace Astrarium.Plugins.Meteors
                 {
                     g.DrawXCross(pen, p, 5);
                     map.AddDrawnObject(meteor);
-                    map.DrawObjectCaption(font, brush, meteor.Name, p, 10);
+
+                    if (showLabels)
+                    {
+                        map.DrawObjectCaption(font, brush, meteor.Name, p, 10);
+                    }
                 }
             }
         }

@@ -28,6 +28,7 @@ namespace Astrarium.Plugins.ASCOM
         public void SetDateTime(DateTime utc) { }
         public void Slew(CrdsEquatorial eq) { }
         public void Sync(CrdsEquatorial eq) { }
+        public void ShowSetupDialog() { }
         public void AbortSlewing() { }
         public void FindHome() { }
         public void Park() { }

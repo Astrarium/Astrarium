@@ -22,6 +22,8 @@ namespace Astrarium.Plugins.Meteors.Controls
         public static readonly DependencyProperty JulianDayProperty =
             DependencyProperty.Register(nameof(JulianDay), typeof(double), typeof(MeteorShowersTable), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
 
+        public static readonly DependencyProperty RowDoubleClickProperty =
+            DependencyProperty.Register(nameof(RowDoubleClick), typeof(ICommand), typeof(MeteorShowersTable), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
 
         public ICollection<float> MoonPhaseData
         {
@@ -39,6 +41,12 @@ namespace Astrarium.Plugins.Meteors.Controls
         {
             get => (double)GetValue(JulianDayProperty);
             set => SetValue(JulianDayProperty, value);
+        }
+
+        public ICommand RowDoubleClick
+        {
+            get => (ICommand)GetValue(RowDoubleClickProperty);
+            set => SetValue(RowDoubleClickProperty, value);
         }
 
         private ScrollViewer scrollViewer;
@@ -79,6 +87,18 @@ namespace Astrarium.Plugins.Meteors.Controls
                 pd.AddValueChanged(Columns[c], ColumnWidthPropertyChanged);
             }
             Background = new SolidColorBrush(Colors.Transparent);
+        }
+
+        protected override void OnMouseDoubleClick(MouseButtonEventArgs e)
+        {
+            var row = ContainerFromElement(this, e.OriginalSource as DependencyObject) as DataGridRow;
+            if (row != null && CurrentColumn.IsFrozen)
+            {
+                if (e.LeftButton == MouseButtonState.Pressed && SelectedItem != null)
+                {
+                    RowDoubleClick?.Execute(SelectedItem);
+                }
+            }
         }
 
         private void ColumnWidthPropertyChanged(object sender, EventArgs e)

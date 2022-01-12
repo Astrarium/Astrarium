@@ -9,6 +9,14 @@ namespace Astrarium.Plugins.Meteors
 {
     public class MeteorsCalculator : BaseCalc, ICelestialObjectCalc<Meteor>
     {
+        private readonly ISky Sky;
+        private CelestialObject Moon;
+
+        public MeteorsCalculator(ISky sky)
+        {
+            Sky = sky;
+        }
+
         public ICollection<Meteor> Meteors { get; private set; }
 
         public override void Initialize()
@@ -70,6 +78,15 @@ namespace Astrarium.Plugins.Meteors
             return Visibility.RiseTransitSet(eq, ctx.GeoLocation, theta0);
         }
 
+        private double LunarPhaseAtMax(SkyContext ctx, Meteor m)
+        {
+            if (Moon == null)
+            {
+                Moon = Sky.Search("@moon", f => true).FirstOrDefault();
+            }
+            return Moon != null ? (double)Sky.GetEphemerides(Moon, ctx, new[] { "Phase" }).First().Value : 0;
+        }
+
         public void ConfigureEphemeris(EphemerisConfig<Meteor> e)
         {
             e["Equatorial.Alpha"] = (c, m) => c.Get(Equatorial, m).Alpha;
@@ -86,6 +103,7 @@ namespace Astrarium.Plugins.Meteors
         {
             Meteor m = info.Body;
             SkyContext c = info.Context;
+
             string constellation = Constellations.FindConstellation(c.Get(Equatorial, m), c.JulianDay);
             int year = c.GetDate(c.JulianDay).Year;
             var offset = c.GeoLocation.UtcOffset;
@@ -93,6 +111,8 @@ namespace Astrarium.Plugins.Meteors
             var begin = new Date(jd0 + m.Begin, offset);
             var max = new Date(jd0 + m.Max, offset);
             var end = new Date(jd0 + m.End, offset);
+            SkyContext cMax = new SkyContext(jd0 + m.Max, c.GeoLocation, c.PreferFastCalculation);
+            var phase = LunarPhaseAtMax(cMax, m);
 
             info
             .SetTitle(string.Join(", ", info.Body.Names))
@@ -117,6 +137,7 @@ namespace Astrarium.Plugins.Meteors
             .AddRow("Meteor.Activity.Begin", begin, Formatters.Date)
             .AddRow("Meteor.Activity.Max", max, Formatters.Date)
             .AddRow("Meteor.Activity.End", end, Formatters.Date)
+            .AddRow("Meteor.Activity.LunarPhaseAtMax", phase, Formatters.Phase)
 
             .AddHeader(Text.Get("Meteor.Data"))
             .AddRow("Meteor.ZHR", m.ZHR)

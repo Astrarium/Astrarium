@@ -201,7 +201,7 @@ namespace Astrarium.Types
                 {
                     phase = (double)value;
                 }
-                if (value is float)
+                else if (value is float)
                 {
                     phase = (float)value;
                 }

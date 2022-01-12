@@ -26,6 +26,18 @@ namespace Astrarium.Plugins.Meteors
         public bool IsActive { get; set; }
         public double AverageDailyMotion => 1;
         public string ZHR { get; set; }
+        public int ZHRNumeric
+        {
+            get
+            {
+               switch (ZHR)
+                {
+                    case "var": return 0;
+                    case "<2": return 1;
+                    default: return int.Parse(ZHR);
+                };
+            }
+        }
         public int ActivityClass { get; set; }
     }
 }

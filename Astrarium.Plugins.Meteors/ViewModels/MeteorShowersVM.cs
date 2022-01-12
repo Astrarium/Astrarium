@@ -65,10 +65,12 @@ namespace Astrarium.Plugins.Meteors
                         MoonPhaseString = null;
                     }
 
+                    IsMouseOver = true;
                     ActiveCountString = $"Active showers count: {Meteors.Count(m => m.Begin <= doy && doy <= m.End)}";
                 }
                 else
                 {
+                    IsMouseOver = false;
                     DateString = null;
                     MoonPhaseString = null;
                     ActiveCountString = null;
@@ -94,11 +96,17 @@ namespace Astrarium.Plugins.Meteors
             set => SetValue(nameof(ActiveCountString), value);
         }
 
+        public bool IsMouseOver
+        {
+            get => GetValue<bool>(nameof(IsMouseOver));
+            set => SetValue(nameof(IsMouseOver), value);
+        }
+
         #endregion Bindable properties
 
         public MeteorShowersVM(MeteorsCalculator calc, ISky sky)
         {
-            Meteors = calc.Meteors;
+            Meteors = calc.Meteors.OrderBy(x => x.Max).ToArray();
             Sky = sky;
             Year = sky.Context.GetDate(sky.Context.JulianDay).Year;
             Moon = Sky.Search("@moon", f => true).FirstOrDefault();
@@ -124,6 +132,7 @@ namespace Astrarium.Plugins.Meteors
 
         private void ShowMeteorInfo(Meteor meteor)
         {
+            // TODO: show meteor info window
             ViewManager.ShowMessageBox("Info", meteor.Name);
         }
 
@@ -134,11 +143,9 @@ namespace Astrarium.Plugins.Meteors
                 double from = Date.JulianDay0(Year) + 0.5;
                 double to = from + (Date.IsLeapYear(Year) ? 366 : 365);
                 MoonPhaseData = Sky.GetEphemerides(Moon, from, to, 1, new string[] { "Phase" })
-                .Select(e => (float)e[0].GetValue<double>()).ToArray();
+                    .Select(e => (float)e[0].GetValue<double>()).ToArray();
                 JulianDay0 = Date.JulianDay0(Year);
             }
         }
-
-        
     }
 }

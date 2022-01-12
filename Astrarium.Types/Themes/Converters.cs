@@ -60,7 +60,8 @@ namespace Astrarium.Types.Themes
         {
             if (value is bool)
             {
-                return (bool)value ? Visibility.Visible : Visibility.Collapsed;
+                Visibility falseState = parameter is Visibility ? (Visibility)parameter : Visibility.Collapsed;
+                return (bool)value ? Visibility.Visible : falseState;
             }
             else
             {

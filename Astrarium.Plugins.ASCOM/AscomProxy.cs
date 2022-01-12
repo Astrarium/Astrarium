@@ -406,6 +406,30 @@ namespace Astrarium.Plugins.ASCOM
         }
 
         /// <inheritdoc/>
+        public void ShowSetupDialog()
+        {
+            try
+            {
+                lock (locker)
+                {
+                    if (telescope != null && telescope.Connected)
+                    {
+                        telescope.SetupDialog();
+                    }
+                    else
+                    {
+                        Trace.TraceError("Unable to show setup dialog (telescope disconnected).");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                RaiseOnMessageShow("$Ascom.Messages.UnableShowSetup");
+                Trace.TraceError($"Unable to show setup dialog {ex}");
+            }
+        }
+
+        /// <inheritdoc/>
         public void Sync(CrdsEquatorial eq)
         {
             try
