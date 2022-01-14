@@ -78,7 +78,7 @@ namespace Astrarium.Plugins.Meteors
             return Visibility.RiseTransitSet(eq, ctx.GeoLocation, theta0);
         }
 
-        private double LunarPhaseAtMax(SkyContext ctx, Meteor m)
+        public double LunarPhaseAtMax(SkyContext ctx, Meteor m)
         {
             if (Moon == null)
             {
@@ -134,14 +134,16 @@ namespace Astrarium.Plugins.Meteors
             .AddRow("RTS.Duration")
 
             .AddHeader(Text.Get("Meteor.Activity"))
-            .AddRow("Meteor.Activity.Begin", begin, Formatters.Date)
-            .AddRow("Meteor.Activity.Max", max, Formatters.Date)
-            .AddRow("Meteor.Activity.End", end, Formatters.Date)
-            .AddRow("Meteor.Activity.LunarPhaseAtMax", phase, Formatters.Phase)
+            .AddRow("Activity.Begin", begin, Formatters.Date)
+            .AddRow("Activity.Max", max, Formatters.Date)
+            .AddRow("Activity.End", end, Formatters.Date)
+            .AddRow("Activity.LunarPhaseAtMax", phase, Formatters.Phase)
 
             .AddHeader(Text.Get("Meteor.Data"))
-            .AddRow("Meteor.ZHR", m.ZHR)
-            .AddRow("Meteor.ActivityClass", m.ActivityClass);
+            .AddRow("Data.ZHR", m.ZHR)
+            .AddRow("Data.ActivityClass", m.ActivityClass)
+            .AddRow("Data.DriftRA", m.Drift.Alpha, Formatters.Angle)
+            .AddRow("Data.DriftDec", m.Drift.Delta, Formatters.Angle);
         }
 
         public ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50)

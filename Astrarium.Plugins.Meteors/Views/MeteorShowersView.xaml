@@ -8,9 +8,11 @@
         xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
         xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
         mc:Ignorable="d"
-        Title="MeteorShowersView" 
+        Title="{t:Text MeteorShowersView.Title}" 
         Style="{StaticResource {x:Type Window}}" 
         MinHeight="600" MinWidth="800"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
         Height="600" Width="800">
 
     <Window.Resources>
@@ -131,8 +133,8 @@
             
             <DataGrid.Columns>
 
-                <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
-                <DataGridTextColumn Header="Max" SortMemberPath="Max">
+                <DataGridTextColumn Header="{t:Text MeteorShowersView.TableColumn.Name}" Binding="{Binding Name}" />
+                <DataGridTextColumn Header="{t:Text MeteorShowersView.TableColumn.Max}" SortMemberPath="Max">
                     <DataGridTextColumn.Binding>
                         <MultiBinding Converter="{StaticResource DayOfYearToDateConverter}"  UpdateSourceTrigger="PropertyChanged" >
                             <Binding Path="Max" Mode="OneWay" UpdateSourceTrigger="PropertyChanged" />
@@ -140,8 +142,8 @@
                         </MultiBinding>
                     </DataGridTextColumn.Binding>
                 </DataGridTextColumn>
-                <DataGridTextColumn Header="ZHR" Binding="{Binding ZHR}" SortMemberPath="ZHRNumeric" />
-                <DataGridTextColumn Header="Activity class" Binding="{Binding ActivityClass}" />
+                <DataGridTextColumn Header="{t:Text MeteorShowersView.TableColumn.ZHR}" Binding="{Binding ZHR}" SortMemberPath="ZHRNumeric" />
+                <DataGridTextColumn Header="{t:Text MeteorShowersView.TableColumn.ActivityClass}" Binding="{Binding ActivityClass}" />
 
                 <DataGridTemplateColumn Width="3650" IsReadOnly="True">
                     <DataGridTemplateColumn.CellStyle>

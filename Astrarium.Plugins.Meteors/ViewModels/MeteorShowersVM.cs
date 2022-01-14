@@ -12,6 +12,7 @@ namespace Astrarium.Plugins.Meteors
     public class MeteorShowersVM : ViewModelBase
     {
         private ISky Sky { get; set; }
+        private MeteorsCalculator Calculator;
         private CelestialObject Moon { get; set; }
 
         #region Commands
@@ -54,11 +55,11 @@ namespace Astrarium.Plugins.Meteors
                 if (value > 0)
                 {
                     var date = Sky.Context.GetDate(value);
-                    DateString = $"Date: {Formatters.Date.Format(date)}";
+                    DateString = Text.Get("MeteorShowersView.StatusBar.Date", ("Date", Formatters.Date.Format(date)));
                     var doy = Date.DayOfYear(date) - 1;
                     if (doy >= 0 && doy < MoonPhaseData.Count)
                     {
-                        MoonPhaseString = $"Moon phase: Ф = {Formatters.Phase.Format(MoonPhaseData.ElementAt(doy))}";
+                        MoonPhaseString = Text.Get("MeteorShowersView.StatusBar.LunarPhase", ("Phase", Formatters.Phase.Format(MoonPhaseData.ElementAt(doy))));
                     }
                     else
                     {
@@ -66,7 +67,7 @@ namespace Astrarium.Plugins.Meteors
                     }
 
                     IsMouseOver = true;
-                    ActiveCountString = $"Active showers count: {Meteors.Count(m => m.Begin <= doy && doy <= m.End)}";
+                    ActiveCountString = Text.Get("MeteorShowersView.StatusBar.ActiveShowersCount", ("Count", Meteors.Count(m => m.Begin <= doy && doy <= m.End).ToString()));
                 }
                 else
                 {
@@ -108,6 +109,7 @@ namespace Astrarium.Plugins.Meteors
         {
             Meteors = calc.Meteors.OrderBy(x => x.Max).ToArray();
             Sky = sky;
+            Calculator = calc;
             Year = sky.Context.GetDate(sky.Context.JulianDay).Year;
             Moon = Sky.Search("@moon", f => true).FirstOrDefault();
             Calculate();
@@ -115,7 +117,12 @@ namespace Astrarium.Plugins.Meteors
 
         private void ChangeYear()
         {
-
+            double? jd = ViewManager.ShowDateDialog(Date.JulianEphemerisDay(new Date(Year, 1, 1)), 0, DateOptions.Year);
+            if (jd != null)
+            {
+                Year = new Date(jd.Value, 0).Year;
+                Calculate();
+            }
         }
 
         private void PrevYear()
@@ -130,10 +137,48 @@ namespace Astrarium.Plugins.Meteors
             Calculate();
         }
 
-        private void ShowMeteorInfo(Meteor meteor)
+        private void ShowMeteorInfo(Meteor m)
         {
-            // TODO: show meteor info window
-            ViewManager.ShowMessageBox("Info", meteor.Name);
+            SkyContext c = new SkyContext(JulianDay, Sky.Context.GeoLocation);
+            int year = c.GetDate(c.JulianDay).Year;
+            var offset = c.GeoLocation.UtcOffset;
+            var jd0 = Date.DeltaT(c.JulianDay) / 86400.0 + Date.JulianDay0(year) - offset / 24;
+            var begin = new Date(jd0 + m.Begin, offset);
+            var max = new Date(jd0 + m.Max, offset);
+            var end = new Date(jd0 + m.End, offset);
+            SkyContext cMax = new SkyContext(jd0 + m.Max, c.GeoLocation, c.PreferFastCalculation);
+            var phase = Calculator.LunarPhaseAtMax(cMax, m);
+
+            var sb = new StringBuilder();
+            sb.AppendLine($"**{Text.Get("MeteorShowersInfoDialog.Names")}**  ");
+            sb.AppendLine(string.Join(", ", m.Names));
+            sb.AppendLine();
+
+            sb.AppendLine($"**{Text.Get("Meteor.Activity.Begin")}**  ");
+            sb.AppendLine(Formatters.Date.Format(begin));
+            sb.AppendLine();
+
+            sb.AppendLine($"**{Text.Get("Meteor.Activity.Max")}**  ");
+            sb.AppendLine(Formatters.Date.Format(max));
+            sb.AppendLine();
+
+            sb.AppendLine($"**{Text.Get("Meteor.Activity.End")}**  ");
+            sb.AppendLine(Formatters.Date.Format(end));
+            sb.AppendLine();
+
+            sb.AppendLine($"**{Text.Get("Meteor.Data.ZHR")}**  ");
+            sb.AppendLine(m.ZHR);
+            sb.AppendLine();
+
+            sb.AppendLine($"**{Text.Get("Meteor.Data.ActivityClass")}**  ");
+            sb.AppendLine(m.ActivityClass.ToString());
+            sb.AppendLine();
+
+            sb.AppendLine($"**{Text.Get("Meteor.Activity.LunarPhaseAtMax")}**  ");
+            sb.AppendLine(Formatters.Phase.Format(phase));
+            sb.AppendLine();
+
+            ViewManager.ShowMessageBox("$MeteorShowersInfoDialog.Title", sb.ToString());
         }
 
         private void Calculate()

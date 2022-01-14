@@ -13,6 +13,7 @@ namespace Astrarium.Types
     {
         DateTime,
         DateOnly,
-        MonthYear
+        MonthYear,
+        Year
     }
 }

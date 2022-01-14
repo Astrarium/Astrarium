@@ -30,7 +30,7 @@ namespace Astrarium.Plugins.Meteors
         {
             get
             {
-               switch (ZHR)
+                switch (ZHR)
                 {
                     case "var": return 0;
                     case "<2": return 1;

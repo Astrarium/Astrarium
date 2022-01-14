@@ -79,6 +79,15 @@
                         <c:RepeatingComboBox Style="{StaticResource {x:Type ComboBox}}" Margin="3" Grid.Column="0" Grid.Row="1" ItemsSource="{Binding FullMonthsNames}" SelectedIndex="{Binding SelectedMonth}" Loop="True" LoopDecrementCommand="{Binding LoopMonthDecrementCommand}" LoopIncrementCommand="{Binding LoopMonthIncrementCommand}" />
                         <c:NumericUpDown Margin="3" Grid.Column="1" Grid.Row="1" Minimum="-4000" Maximum="9999" Value="{Binding Year, Converter={s:NumericConverter}, UpdateSourceTrigger=PropertyChanged}" DecimalPlaces="0" />
                     </Grid>
+                    <!-- Year Layout -->
+                    <Grid Visibility="{Binding DisplayMode, Converter={s:VisibilityConverter}, ConverterParameter={x:Static t:DateOptions.Year}, FallbackValue=Collapsed}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Label Grid.Row="0" Content="{t:Text DateWindow.Year}" />
+                        <c:NumericUpDown Margin="3" Grid.Row="1" Minimum="-4000" Maximum="9999" Value="{Binding Year, Converter={s:NumericConverter}, UpdateSourceTrigger=PropertyChanged}" DecimalPlaces="0" />
+                    </Grid>
                 </StackPanel>
             </TabItem>
             <TabItem Header="{t:Text DateWindow.TabJulianDay}" Visibility="{Binding DisplayMode, Converter={s:VisibilityConverter}, ConverterParameter={x:Static t:DateOptions.DateTime}, FallbackValue=Visible}">

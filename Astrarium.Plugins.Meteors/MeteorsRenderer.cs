@@ -39,7 +39,7 @@ namespace Astrarium.Plugins.Meteors
                 meteors = meteors.Where(m => m.Horizontal.Altitude >= 0);
             }
 
-            if (onlyActive) 
+            if (onlyActive)
             {
                 meteors = meteors.Where(m => m.IsActive);
             }
