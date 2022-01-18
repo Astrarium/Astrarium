@@ -554,10 +554,10 @@ namespace Astrarium.Plugins.SolarSystem
                             string text;
 
                             if (p < 3)
-                            {                                
+                            {
                                 string conjType = data.ElementAt(day + 2)[p].Ecliptical.Distance < 1 ? 
                                     "Inferior" : "Superior";
-                                
+
                                 var ctx = new SkyContext(jdConj, context.GeoLocation, false);
                                 double sd = solarCalc.Semidiameter(ctx) / 3600;
                                 double ad = Math.Abs(planetsCalc.Planet_Elongation(ctx, p));
@@ -667,7 +667,7 @@ namespace Astrarium.Plugins.SolarSystem
 
             // current calculated value of Julian Day
             double jd = context.From;
-            
+
             for (jd = context.From - 2; jd < context.To + 2; jd++)
             {
                 ctx.JulianDay = jd;

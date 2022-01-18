@@ -668,12 +668,22 @@ namespace Astrarium.Plugins.SolarSystem
             double ad = Angle.Separation(planet.Horizontal, map.Center);
             bool isGround = settings.Get("Ground");
             bool useTextures = settings.Get("PlanetsTextures");
+            bool drawAll = settings.Get("PlanetsDrawAll");
+            bool drawLabelMag = settings.Get("PlanetsLabelsMag");
 
             if ((!isGround || planet.Horizontal.Altitude + planet.Semidiameter / 3600 > 0) &&
                 ad < map.ViewAngle + planet.Semidiameter / 3600)
             {
                 float size = map.GetPointSize(planet.Magnitude, maxDrawingSize: 7);
                 float diam = map.GetDiskSize(planet.Semidiameter);
+
+                // if "draw all" setting is enabled, draw planets anyway
+                if (drawAll && size < 1)
+                {
+                    size = 1;
+                }
+
+                string label = drawLabelMag ? $"{planet.Name} {Formatters.Magnitude.Format(planet.Magnitude)}" : planet.Name;
 
                 // diameter is to small to render as planet disk, 
                 // but point size caclulated from magnitude is enough to be drawn
@@ -684,7 +694,7 @@ namespace Astrarium.Plugins.SolarSystem
                     if (settings.Get("PlanetsLabels"))
                     {
                         var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
-                        map.DrawObjectCaption(fontLabel, brushLabel, planet.Name, p, size);
+                        map.DrawObjectCaption(fontLabel, brushLabel, label, p, size);
                     }
                     map.AddDrawnObject(planet);
                 }

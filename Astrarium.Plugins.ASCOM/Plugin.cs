@@ -55,6 +55,9 @@ namespace Astrarium.Plugins.ASCOM
             menuTrack.AddBinding(new SimpleBinding(ascom, nameof(ascom.IsTracking), nameof(MenuItem.IsChecked)));
             menuTrack.AddBinding(new SimpleBinding(ascom, nameof(ascom.IsConnected), nameof(MenuItem.IsEnabled)));
 
+            var menuSetup = new MenuItem("$Menu.Setup", new Command(ShowSetupDialog));
+            menuSetup.AddBinding(new SimpleBinding(ascom, nameof(ascom.IsConnected), nameof(MenuItem.IsEnabled)));
+
             var menuInfo = new MenuItem("$Menu.AscomInformation", new Command(ShowInfo));
             menuInfo.AddBinding(new SimpleBinding(ascom, nameof(ascom.IsConnected), nameof(MenuItem.IsEnabled)));
 
@@ -68,6 +71,7 @@ namespace Astrarium.Plugins.ASCOM
             menuAscom.SubItems.Add(menuPark);
             menuAscom.SubItems.Add(menuTrack);
             menuAscom.SubItems.Add(null);
+            menuAscom.SubItems.Add(menuSetup);
             menuAscom.SubItems.Add(menuInfo);
 
             MenuItems.Add(MenuItemPosition.MainMenuTop, menuAscom);
@@ -221,6 +225,11 @@ namespace Astrarium.Plugins.ASCOM
         private void SwitchTracking()
         {
             ascom.SwitchTracking();
+        }
+
+        private void ShowSetupDialog()
+        {
+            ascom.ShowSetupDialog();
         }
 
         private void ShowInfo()

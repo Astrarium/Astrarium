@@ -44,20 +44,40 @@ namespace Astrarium.Plugins.JupiterMoons
                 var jB = new PointF[5];
                 var jR = new PointF[5];
 
+                var earth = new CrdsHeliocentrical[5];
+                var jupiter = new CrdsHeliocentrical[5];
+
                 // calculate heliocentrical positions of Earth and Jupiter for 5 instants
                 // and find least squares approximation model of planets position
                 // to quick calculation of Galilean moons postions.
                 for (int i = 0; i < 5; i++)
                 {
                     double jd = jd0 + (i / 4.0) * daysInMonth;
-                    var earth = PlanetPositions.GetPlanetCoordinates(3, jd);
-                    var jupiter = PlanetPositions.GetPlanetCoordinates(5, jd);
-                    eL[i] = new PointF(i, (float)earth.L);
-                    eB[i] = new PointF(i, (float)earth.B);
-                    eR[i] = new PointF(i, (float)earth.R);
-                    jL[i] = new PointF(i, (float)jupiter.L);
-                    jB[i] = new PointF(i, (float)jupiter.B);
-                    jR[i] = new PointF(i, (float)jupiter.R);
+                    earth[i] = PlanetPositions.GetPlanetCoordinates(3, jd);
+                    jupiter[i] = PlanetPositions.GetPlanetCoordinates(5, jd);
+                }
+
+                double[] earthL = earth.Select(x => x.L).ToArray();
+                double[] earthB = earth.Select(x => x.B).ToArray();
+                double[] earthR = earth.Select(x => x.R).ToArray();
+
+                double[] jupiterL = jupiter.Select(x => x.L).ToArray();
+                double[] jupiterB = jupiter.Select(x => x.B).ToArray();
+                double[] jupiterR = jupiter.Select(x => x.R).ToArray();
+
+                // it's important to align longitudes (avoid 0 degrees crossing)
+                // before applying least squares method
+                earthL = Angle.Align(earthL);
+                jupiterL = Angle.Align(jupiterL);
+
+                for (int i = 0; i < 5; i++)
+                {
+                    eL[i] = new PointF(i, (float)earthL[i]);
+                    eB[i] = new PointF(i, (float)earthB[i]);
+                    eR[i] = new PointF(i, (float)earthR[i]);
+                    jL[i] = new PointF(i, (float)jupiterL[i]);
+                    jB[i] = new PointF(i, (float)jupiterB[i]);
+                    jR[i] = new PointF(i, (float)jupiterR[i]);
                 }
 
                 Begin = jd0;
@@ -102,7 +122,6 @@ namespace Astrarium.Plugins.JupiterMoons
                 string[] moonNames = new[] { Text.Get("JupiterMoons.Io"), Text.Get("JupiterMoons.Europa"), Text.Get("JupiterMoons.Ganymede"), Text.Get("JupiterMoons.Callisto") };
                 string[] moonNamesGenitive = new[] { Text.Get("JupiterMoons.Io.Genitive"), Text.Get("JupiterMoons.Europa.Genitive"), Text.Get("JupiterMoons.Ganymede.Genitive"), Text.Get("JupiterMoons.Callisto.Genitive") };
                 string[] moonNamesDative = new[] { Text.Get("JupiterMoons.Io.Dative"), Text.Get("JupiterMoons.Europa.Dative"), Text.Get("JupiterMoons.Ganymede.Dative"), Text.Get("JupiterMoons.Callisto.Dative") };
-
 
                 var events = new List<JovianEvent>();
 
@@ -178,7 +197,7 @@ namespace Astrarium.Plugins.JupiterMoons
                                                 JupiterAltBegin = GetJupiterAltitude(jdBegin),
                                                 JupiterAltEnd = GetJupiterAltitude(jdEnd),
                                                 SunAltBegin = GetSunAltitude(jdBegin),
-                                                SunAltEnd = GetSunAltitude(jdEnd),                                                
+                                                SunAltEnd = GetSunAltitude(jdEnd)
                                             });
                                         }
                                         // eclipse
@@ -196,7 +215,7 @@ namespace Astrarium.Plugins.JupiterMoons
                                                 JupiterAltBegin = GetJupiterAltitude(jdBegin),
                                                 JupiterAltEnd = GetJupiterAltitude(jdEnd),
                                                 SunAltBegin = GetSunAltitude(jdBegin),
-                                                SunAltEnd = GetSunAltitude(jdEnd),
+                                                SunAltEnd = GetSunAltitude(jdEnd)
                                             });
                                         }
                                         // transit of moon
@@ -212,7 +231,7 @@ namespace Astrarium.Plugins.JupiterMoons
                                                 JupiterAltBegin = GetJupiterAltitude(jdBegin),
                                                 JupiterAltEnd = GetJupiterAltitude(jdEnd),
                                                 SunAltBegin = GetSunAltitude(jdBegin),
-                                                SunAltEnd = GetSunAltitude(jdEnd),
+                                                SunAltEnd = GetSunAltitude(jdEnd)
                                             });
                                         }
                                         // transit of shadow
@@ -227,7 +246,7 @@ namespace Astrarium.Plugins.JupiterMoons
                                                 JupiterAltBegin = GetJupiterAltitude(jdBegin),
                                                 JupiterAltEnd = GetJupiterAltitude(jdEnd),
                                                 SunAltBegin = GetSunAltitude(jdBegin),
-                                                SunAltEnd = GetSunAltitude(jdEnd),
+                                                SunAltEnd = GetSunAltitude(jdEnd)
                                             });
                                         }
                                     }
@@ -250,8 +269,8 @@ namespace Astrarium.Plugins.JupiterMoons
                                         // crossing function
                                         Func<double, double> f_dx0 = (double jd) =>
                                         {
-                                            var p = GetJupiterMoonsPosition(jd);
-                                            return p[m, s].X - p[n, s].X;
+                                            var pc = GetJupiterMoonsPosition(jd);
+                                            return pc[m, s].X - pc[n, s].X;
                                         };
 
                                         // instant of crossing instant
@@ -299,10 +318,10 @@ namespace Astrarium.Plugins.JupiterMoons
                                                 // touches with their edges
                                                 Func<double, double> f_touch = (double jd) =>
                                                 {
-                                                    p = GetJupiterMoonsPosition(jd);
-                                                    dX = p[m, s].X - p[n, s].X;
-                                                    dY = p[m, s].Y - p[n, s].Y;
-                                                    return Math.Sqrt(dX * dX + dY * dY) * sd - (sd1 + sd2);
+                                                    var pt = GetJupiterMoonsPosition(jd);
+                                                    var dX_ = pt[m, s].X - pt[n, s].X;
+                                                    var dY_ = pt[m, s].Y - pt[n, s].Y;
+                                                    return Math.Sqrt(dX_ * dX_ + dY_ * dY_) - (sd1 + sd2) / sd;
                                                 };
 
                                                 // begin and end of event

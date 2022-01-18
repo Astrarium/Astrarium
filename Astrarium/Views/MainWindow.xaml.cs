@@ -384,5 +384,11 @@ namespace Astrarium
                 Host.ContextMenu.DataContext = DataContext;
             }
         }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            Environment.Exit(0);
+        }
     }
 }

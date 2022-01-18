@@ -16,7 +16,9 @@ namespace Astrarium.Plugins.ASCOM
         /// </summary>
         bool IsAscomPlatformInstalled { get; }
 
-
+        /// <summary>
+        /// Polling period to update telescope state
+        /// </summary>
         int PollingPeriod { get; set; }
 
         /// <summary>
@@ -84,6 +86,11 @@ namespace Astrarium.Plugins.ASCOM
         /// </summary>
         /// <param name="eq">Target equatorial coordinates</param>
         void Sync(CrdsEquatorial eq);
+
+        /// <summary>
+        /// Shows setup dialog for the telescope.
+        /// </summary>
+        void ShowSetupDialog();
 
         /// <summary>
         /// Shows dialog to choose telescope and, if choosen, connects to the selected telescope.

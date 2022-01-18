@@ -18,7 +18,9 @@ namespace Astrarium.Plugins.SolarSystem
             SettingItems.Add("Sun", new SettingItem("SunTexture", true, s => s.Get("Sun")));
 
             SettingItems.Add("Planets", new SettingItem("Planets", true));
+            SettingItems.Add("Planets", new SettingItem("PlanetsDrawAll", false, s => s.Get("Planets")));
             SettingItems.Add("Planets", new SettingItem("PlanetsLabels", true, s => s.Get("Planets")));
+            SettingItems.Add("Planets", new SettingItem("PlanetsLabelsMag", false, s => s.Get<bool>("Planets") && s.Get<bool>("PlanetsLabels")));
             SettingItems.Add("Planets", new SettingItem("PlanetsTextures", true, s => s.Get("Planets")));
             SettingItems.Add("Planets", new SettingItem("PlanetsSurfaceFeatures", true, s => s.Get("Planets") && s.Get("PlanetsTextures")));
             SettingItems.Add("Planets", new SettingItem("PlanetsMartianPolarCaps", true, s => s.Get("Planets") && s.Get("PlanetsTextures")));

@@ -61,8 +61,8 @@ namespace Astrarium.Plugins.FOV
                 }
                 else if (frame is CameraFovFrame cameraFrame)
                 {
-                    float width = map.GetDiskSize(cameraFrame.Width * 3600);
-                    float height = map.GetDiskSize(cameraFrame.Height * 3600);
+                    float width = map.GetDiskSize(cameraFrame.Width * 3600 / 2);
+                    float height = map.GetDiskSize(cameraFrame.Height * 3600 / 2);
 
                     // do not draw frame if its size exceeds screen bounds
                     if (Math.Min(width, height) < Math.Sqrt(map.Width * map.Width + map.Height * map.Height))

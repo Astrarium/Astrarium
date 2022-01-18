@@ -196,7 +196,20 @@ namespace Astrarium.Types
         {
             public string Format(object value)
             {
-                double phase = (double)value;
+                double phase = 0;
+                if (value is double)
+                {
+                    phase = (double)value;
+                }
+                else if (value is float)
+                {
+                    phase = (float)value;
+                }
+                else
+                {
+                    return "?";
+                }
+
                 return Math.Round(Math.Abs(phase), 2).ToString("0.00", CultureInfo.InvariantCulture);
             }
         }

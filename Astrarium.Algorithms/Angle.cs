@@ -261,7 +261,7 @@ namespace Astrarium.Algorithms
         /// <summary>
         /// Regex to parse angle value from string.
         /// </summary>
-        private static readonly Regex REGEX = new Regex("^\\s*([-+]?)\\s*(\\d+)[\\*°\\s]\\s*(\\d+)[\\s']\\s*(\\d+\\.?\\d*)(''|\"|\\s*){1}\\s*$");
+        private static readonly Regex REGEX = new Regex(@"^\s*([-+]?)\s*(\d+)[\*°d\s]\s*(\d+)[\s'm]\s*(\d+\.?\d*)(''|\""|s|\\s*){1}\s*$");
 
         /// <summary>
         /// Degrees part of angle value.

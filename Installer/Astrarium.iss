@@ -1,5 +1,5 @@
 ; Astrarium Inno Setup project file
-; Copyright Alexander Krutov, 2018-2021
+; Copyright Alexander Krutov, 2018-2022
 ; https://astrarium.space/
 
 #include "idp.iss"
@@ -28,7 +28,7 @@ UninstallDisplayIcon  = {app}\Astrarium\Astrarium.exe
 Compression           = lzma2
 SolidCompression      = yes
 OutputBaseFilename    = Astrarium-setup
-AppCopyright          = "© Alexander Krutov, 2018-2021"
+AppCopyright          = "© Alexander Krutov, 2018-2022"
 AppPublisher          = Alexander Krutov
 AppPublisherURL       = https://astrarium.space/
 AppUpdatesURL         = https://astrarium.space/
@@ -108,6 +108,16 @@ en.Astrarium_Plugins_MinorBodies            = Asteroids and comets
 #define sz_Astrarium_Plugins_MinorBodies    = CalcDirSize('..\Deploy\Astrarium.Plugins.MinorBodies')
 sz_Astrarium_Plugins_MinorBodies            = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.MinorBodies')}
 
+ru.Astrarium_Plugins_Meteors            	= Метеорные потоки
+en.Astrarium_Plugins_Meteors            	= Meteor showers
+#define sz_Astrarium_Plugins_Meteors    	= CalcDirSize('..\Deploy\Astrarium.Plugins.Meteors')
+sz_Astrarium_Plugins_Meteors            	= {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Meteors')}
+
+ru.Astrarium_Plugins_Novae          		= Новые звёзды
+en.Astrarium_Plugins_Novae             		= Novae stars
+#define sz_Astrarium_Plugins_Novae     		= CalcDirSize('..\Deploy\Astrarium.Plugins.Novae')
+sz_Astrarium_Plugins_Novae              	= {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Novae')}
+
 ru.Astrarium_Plugins_Eclipses               = Затмения
 en.Astrarium_Plugins_Eclipses               = Eclipses
 #define sz_Astrarium_Plugins_Eclipses       = CalcDirSize('..\Deploy\Astrarium.Plugins.Eclipses')
@@ -165,6 +175,8 @@ Name: Astrarium_Plugins_BrightStars;    Description: {cm:Astrarium_Plugins_Brigh
 Name: Astrarium_Plugins_Constellations; Description: {cm:Astrarium_Plugins_Constellations}; Types: full compact custom; Flags: fixed; ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Constellations};
 Name: Astrarium_Plugins_DeepSky;        Description: {cm:Astrarium_Plugins_DeepSky};        Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_DeepSky};
 Name: Astrarium_Plugins_MinorBodies;    Description: {cm:Astrarium_Plugins_MinorBodies};    Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_MinorBodies};
+Name: Astrarium_Plugins_Meteors;    	Description: {cm:Astrarium_Plugins_Meteors};    	Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Meteors};
+Name: Astrarium_Plugins_Novae;    		Description: {cm:Astrarium_Plugins_Novae};    		Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Novae};
 Name: Astrarium_Plugins_JupiterMoons;   Description: {cm:Astrarium_Plugins_JupiterMoons};   Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_JupiterMoons};
 Name: Astrarium_Plugins_Eclipses;       Description: {cm:Astrarium_Plugins_Eclipses};       Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Eclipses};
 Name: Astrarium_Plugins_Grids;          Description: {cm:Astrarium_Plugins_Grids};          Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Grids};

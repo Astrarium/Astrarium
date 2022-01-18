@@ -49,7 +49,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.Eclipses", "Astrarium.Plugins.Eclipses\Astrarium.Plugins.Eclipses.csproj", "{4928AC5C-135C-4FA2-8E48-8F1BE4D921EC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Astrarium.Plugins.JupiterMoons", "Astrarium.Plugins.JupiterMoons\Astrarium.Plugins.JupiterMoons.csproj", "{E7FEE116-6603-4554-8285-3AD3D44C77B9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.JupiterMoons", "Astrarium.Plugins.JupiterMoons\Astrarium.Plugins.JupiterMoons.csproj", "{E7FEE116-6603-4554-8285-3AD3D44C77B9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.Meteors", "Astrarium.Plugins.Meteors\Astrarium.Plugins.Meteors.csproj", "{27EC196C-5435-4151-B557-C2936FC5EC69}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Astrarium.Plugins.Novae", "Astrarium.Plugins.Novae\Astrarium.Plugins.Novae.csproj", "{2F383171-C891-410C-A00F-1BB16873131A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -133,6 +137,14 @@ Global
 		{E7FEE116-6603-4554-8285-3AD3D44C77B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E7FEE116-6603-4554-8285-3AD3D44C77B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E7FEE116-6603-4554-8285-3AD3D44C77B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27EC196C-5435-4151-B557-C2936FC5EC69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27EC196C-5435-4151-B557-C2936FC5EC69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27EC196C-5435-4151-B557-C2936FC5EC69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27EC196C-5435-4151-B557-C2936FC5EC69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F383171-C891-410C-A00F-1BB16873131A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F383171-C891-410C-A00F-1BB16873131A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F383171-C891-410C-A00F-1BB16873131A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F383171-C891-410C-A00F-1BB16873131A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
