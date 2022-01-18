@@ -19,10 +19,19 @@ namespace Astrarium.Plugins.Meteors.Controls
         public static readonly DependencyProperty YearProperty =
             DependencyProperty.Register(nameof(Year), typeof(int), typeof(MeteorActivityHeader), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
 
+        public static readonly DependencyProperty IsDarkModeProperty =
+            DependencyProperty.Register(nameof(IsDarkMode), typeof(bool), typeof(MeteorActivityHeader), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
+
         public int Year
         {
             get => (int)GetValue(YearProperty);
             set => SetValue(YearProperty, value);
+        }
+
+        public bool IsDarkMode
+        {
+            get => (bool)GetValue(IsDarkModeProperty);
+            set => SetValue(IsDarkModeProperty, value);
         }
 
         protected override void OnRender(DrawingContext drawingContext)
@@ -33,7 +42,8 @@ namespace Astrarium.Plugins.Meteors.Controls
 
             var monthNames = CultureInfo.CurrentCulture.DateTimeFormat.MonthNames.Take(12).ToArray();
 
-            var pen = new Pen(new SolidColorBrush(Color.FromArgb(255, 80, 80, 80)), 1);
+            Color color = IsDarkMode ? Color.FromArgb(255, 80, 0, 0) : Color.FromArgb(255, 80, 80, 80);
+            var pen = new Pen(new SolidColorBrush(color), 1);
 
             for (int i = 0; i <= daysCount; i++)
             {
@@ -57,7 +67,8 @@ namespace Astrarium.Plugins.Meteors.Controls
 
         private void DrawText(DrawingContext ctx, string text, Point point, double size)
         {
-            FormattedText formattedText = new FormattedText(text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, font, size, Brushes.Gray);
+            Brush textBrush = IsDarkMode ? Brushes.Red : Brushes.Gray;
+            FormattedText formattedText = new FormattedText(text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, font, size, textBrush);
             ctx.DrawText(formattedText, new Point(point.X - formattedText.Width / 2, point.Y - formattedText.Height / 2));
         }
     }

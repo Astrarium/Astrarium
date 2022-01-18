@@ -25,6 +25,9 @@ namespace Astrarium.Plugins.Meteors.Controls
         public static readonly DependencyProperty RowDoubleClickProperty =
             DependencyProperty.Register(nameof(RowDoubleClick), typeof(ICommand), typeof(MeteorShowersTable), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
 
+        public static readonly DependencyProperty IsDarkModeProperty =
+            DependencyProperty.Register(nameof(IsDarkMode), typeof(bool), typeof(MeteorShowersTable), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
+
         public ICollection<float> MoonPhaseData
         {
             get => (ICollection<float>)GetValue(MoonPhaseDataProperty);
@@ -47,6 +50,12 @@ namespace Astrarium.Plugins.Meteors.Controls
         {
             get => (ICommand)GetValue(RowDoubleClickProperty);
             set => SetValue(RowDoubleClickProperty, value);
+        }
+
+        public bool IsDarkMode
+        {
+            get => (bool)GetValue(IsDarkModeProperty);
+            set => SetValue(IsDarkModeProperty, value);
         }
 
         private ScrollViewer scrollViewer;
@@ -160,8 +169,9 @@ namespace Astrarium.Plugins.Meteors.Controls
 
             if (ww > 0)
             {
-                var solidPen = new Pen(new SolidColorBrush(Color.FromArgb(255, 80, 80, 80)), 0.5);
-                var dotPen = new Pen(new SolidColorBrush(Color.FromArgb(255, 80, 80, 80)), 0.2);
+                Color color = IsDarkMode ? Color.FromArgb(255, 80, 0, 0) : Color.FromArgb(255, 80, 80, 80);
+                var solidPen = new Pen(new SolidColorBrush(color), 0.5);
+                var dotPen = new Pen(new SolidColorBrush(color), 0.2);
                 var bounds = new Rect(start, 0, ww, ActualHeight);
                 drawingContext.PushClip(new RectangleGeometry(bounds));
                 drawingContext.DrawRectangle(Brushes.Black, null, bounds);
@@ -176,7 +186,8 @@ namespace Astrarium.Plugins.Meteors.Controls
                         float phase = MoonPhaseData.ElementAt(i);
                         byte transp = (byte)(int)(phase * 200);
 
-                        var brush = new SolidColorBrush(Color.FromArgb(transp, 100, 100, 100));
+                        Color moonColor = IsDarkMode ? Color.FromArgb(transp, 100, 0, 0) : Color.FromArgb(transp, 100, 100, 100);
+                        var brush = new SolidColorBrush(moonColor);
                         drawingContext.DrawRectangle(brush, null, new Rect(new Point(x, 0), new Size(width / daysCount, ActualHeight)));
                     }
 

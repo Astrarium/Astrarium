@@ -116,6 +116,7 @@
             IsReadOnly="True"
             FrozenColumnCount ="4"
             GridLinesVisibility="All"
+            IsDarkMode="{Binding IsDarkMode}"
             Year="{Binding Year, Mode=OneWay}"
             MoonPhaseData="{Binding MoonPhaseData, Mode=OneWay}"
             ItemsSource="{Binding Meteors, Mode=OneWay}"
@@ -169,13 +170,13 @@
 
                     <DataGridTemplateColumn.HeaderTemplate>
                         <DataTemplate>
-                            <c:MeteorActivityHeader Width="3650" Height="27" Padding="0" Margin="0" VerticalAlignment="Stretch" Year="{Binding ElementName=Table, Path=Year, NotifyOnSourceUpdated=True}" />
+                            <c:MeteorActivityHeader Width="3650" Height="27" Padding="0" Margin="0" VerticalAlignment="Stretch" Year="{Binding ElementName=Table, Path=Year, NotifyOnSourceUpdated=True}" IsDarkMode="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.IsDarkMode}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.HeaderTemplate>
 
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <c:MeteorActivityBar Meteor="{Binding}" Width="3650" Height="19" OnDoubleClickCommand="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.ShowMeteorInfoCommand}" />
+                            <c:MeteorActivityBar Meteor="{Binding}" IsDarkMode="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.IsDarkMode}" Width="3650" Height="19" OnDoubleClickCommand="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.ShowMeteorInfoCommand}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

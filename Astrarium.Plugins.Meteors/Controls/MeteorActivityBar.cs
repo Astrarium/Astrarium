@@ -16,7 +16,10 @@ namespace Astrarium.Plugins.Meteors.Controls
             DependencyProperty.Register(nameof(Meteor), typeof(Meteor), typeof(MeteorActivityBar), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
 
         public static readonly DependencyProperty OnDoubleClickCommandProperty =
-                    DependencyProperty.Register(nameof(OnDoubleClickCommand), typeof(ICommand), typeof(MeteorActivityBar), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = false, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.Explicit });
+            DependencyProperty.Register(nameof(OnDoubleClickCommand), typeof(ICommand), typeof(MeteorActivityBar), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = false, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.Explicit });
+
+        public static readonly DependencyProperty IsDarkModeProperty =
+            DependencyProperty.Register(nameof(IsDarkMode), typeof(bool), typeof(MeteorActivityBar), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
 
         public Meteor Meteor
         {
@@ -28,6 +31,12 @@ namespace Astrarium.Plugins.Meteors.Controls
         {
             get => (ICommand)GetValue(OnDoubleClickCommandProperty);
             set => SetValue(OnDoubleClickCommandProperty, value);
+        }
+
+        public bool IsDarkMode
+        {
+            get => (bool)GetValue(IsDarkModeProperty);
+            set => SetValue(IsDarkModeProperty, value);
         }
 
         /// <summary>
@@ -73,7 +82,7 @@ namespace Astrarium.Plugins.Meteors.Controls
                         gc.PolyBezierTo(points, true, true);
                     }
 
-                    var color = Colors.Cyan;
+                    var color = IsDarkMode ? Colors.Red : Colors.Cyan;
                     drawingContext.DrawGeometry(new SolidColorBrush(Color.FromArgb(TransparencyCodes[Meteor.ActivityClass - 1], color.R, color.G, color.B)), null, g);
                 }
             }

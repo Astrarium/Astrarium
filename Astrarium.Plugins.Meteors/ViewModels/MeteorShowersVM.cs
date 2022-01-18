@@ -86,7 +86,7 @@ namespace Astrarium.Plugins.Meteors
         }
 
         public string MoonPhaseString
-        { 
+        {
             get => GetValue<string>(nameof(MoonPhaseString));
             set => SetValue(nameof(MoonPhaseString), value);
         }
@@ -103,16 +103,32 @@ namespace Astrarium.Plugins.Meteors
             set => SetValue(nameof(IsMouseOver), value);
         }
 
+        public bool IsDarkMode
+        {
+            get => GetValue<bool>(nameof(IsDarkMode));
+            set => SetValue(nameof(IsDarkMode), value);
+        }
+
         #endregion Bindable properties
 
-        public MeteorShowersVM(MeteorsCalculator calc, ISky sky)
+        public MeteorShowersVM(MeteorsCalculator calc, ISky sky, ISettings settings)
         {
             Meteors = calc.Meteors.OrderBy(x => x.Max).ToArray();
             Sky = sky;
             Calculator = calc;
             Year = sky.Context.GetDate(sky.Context.JulianDay).Year;
             Moon = Sky.Search("@moon", f => true).FirstOrDefault();
+            IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
+            settings.SettingValueChanged += Settings_SettingValueChanged;
             Calculate();
+        }
+
+        private void Settings_SettingValueChanged(string settingName, object value)
+        {
+            if (settingName == "Schema")
+            {
+                IsDarkMode = (ColorSchema)value == ColorSchema.Red;
+            }
         }
 
         private void ChangeYear()
