@@ -180,6 +180,27 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Config\Controls\ColorsSettingsSection - Copy.xaml.cs">
+      <SubType>Code</SubType>
+      <DependentUpon>ColorsSettingsSection.xaml.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Config\Controls\FontsSettingsSection - Copy.xaml.cs">
+      <DependentUpon>FontsSettingsSection.xaml.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Config\Controls\GeneralSettingsSection.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Config\Controls\FontsSettingsSection.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="if /I &quot;$(ConfigurationName)&quot; == &quot;Release&quot; (&#xD;&#xA;cd &quot;$(TargetDir)&quot;&#xD;&#xA;del $(TargetFileName).config&#xD;&#xA;del /s *.pdb&#xD;&#xA;del /s /a:H Thumbs.db&#xD;&#xA;)" />
   </Target>

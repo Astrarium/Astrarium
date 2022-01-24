@@ -436,7 +436,7 @@ namespace Astrarium.Plugins.Grids
         private void DrawLunarNodes(IMapContext map)
         {
             if (settings.Get<bool>("LabelLunarNodes"))
-            {               
+            {
                 double ascNode = LunarEphem.TrueAscendingNode(map.JulianDay);
 
                 for (int i = 0; i < 2; i++)

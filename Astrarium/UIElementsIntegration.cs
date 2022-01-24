@@ -1,6 +1,7 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Config.Controls;
 using Astrarium.Types;
+using Astrarium.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -14,44 +15,46 @@ namespace Astrarium
     {
         public UIElementsConfig<string, ToolbarButtonBase> ToolbarButtons { get; } = new UIElementsConfig<string, ToolbarButtonBase>();
         public UIElementsConfig<MenuItemPosition, MenuItem> MenuItems { get; } = new UIElementsConfig<MenuItemPosition, MenuItem>();
-        public UIElementsConfig<string, SettingItem> SettingItems { get; } = new UIElementsConfig<string, SettingItem>();
-        
+        public List<SettingDefinition> SettingDefinitions { get; } = new List<SettingDefinition>();
+        public List<SettingSectionDefinition> SettingSections { get; } = new List<SettingSectionDefinition>();
+
         public UIElementsIntegration()
         {
-            SettingItems.SetGroupOrder("General", 0);
-            SettingItems.SetGroupOrder("Colors", 1);
-            SettingItems.SetGroupOrder("Fonts", 2);
-
             // Default language
-            SettingItems.Add("General", new SettingItem("Language", CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.ToLower(), typeof(LanguageSettingControl)));
+            SettingDefinitions.Add(new SettingDefinition("Language", "en", false));
 
-            // Flag indicating the app should be started with maximized main window
-            SettingItems.Add("General", new SettingItem("StartMaximized", false));
-
-            SettingItems.Add("General", new SettingItem("RememberWindowSize", false, s => !s.Get("StartMaximized")));
+            // Flag indicating main window should be maximized on startup
+            SettingDefinitions.Add(new SettingDefinition("StartMaximized", false, false));
+            
+            // If set to true, window size will be remembered
+            SettingDefinitions.Add(new SettingDefinition("RememberWindowSize", false, false));
 
             // Type of application menu
-            SettingItems.Add("General", new SettingItem("IsCompactMenu", false));
+            SettingDefinitions.Add(new SettingDefinition("IsCompactMenu", false, false));
 
             // Toolbar visibility
-            SettingItems.Add("General", new SettingItem("IsToolbarVisible", true));
+            SettingDefinitions.Add(new SettingDefinition("IsToolbarVisible", true, false));
 
             // Status bar visibility
-            SettingItems.Add("General", new SettingItem("IsStatusBarVisible", true));
+            SettingDefinitions.Add(new SettingDefinition("IsStatusBarVisible", true, false));
 
-            // Default observer location.
-            // Has no section, so not displayed in settings window.
-            SettingItems.Add(null, new SettingItem("ObserverLocation", new CrdsGeographical(-44, 56.3333, +3, 80, "Europe/Moscow", "Nizhny Novgorod")));
+            // Default observer location
+            SettingDefinitions.Add(new SettingDefinition("ObserverLocation", new CrdsGeographical(-44, 56.3333, +3, 80, "Europe/Moscow", "Nizhny Novgorod"), true));
 
             // Default size of main window
-            SettingItems.Add(null, new SettingItem("WindowSize", System.Drawing.Size.Empty));
+            SettingDefinitions.Add(new SettingDefinition("WindowSize", System.Drawing.Size.Empty, false));
 
             // Default color schema
-            SettingItems.Add("Colors", new SettingItem("Schema", ColorSchema.Night));
+            SettingDefinitions.Add(new SettingDefinition("Schema", ColorSchema.Night, false));
 
             // Map transformation
-            SettingItems.Add(null, new SettingItem("IsMirrored", false));
-            SettingItems.Add(null, new SettingItem("IsInverted", false));
+            SettingDefinitions.Add(new SettingDefinition("IsMirrored", false, false));
+            SettingDefinitions.Add(new SettingDefinition("IsInverted", false, false));
+
+            SettingSections.Add(new SettingSectionDefinition(typeof(GeneralSettingsSection), typeof(GeneralSettingsVM)));
+            SettingSections.Add(new SettingSectionDefinition(typeof(ColorsSettingsSection), typeof(ColorsSettingsVM)));
+            SettingSections.Add(new SettingSectionDefinition(typeof(FontsSettingsSection), typeof(FontsSettingsVM)));
+            SettingSections.Add(new SettingSectionDefinition(typeof(RenderingOrderSettingsSection), typeof(RenderingOrderSettingsVM)));
         }
     }
 }

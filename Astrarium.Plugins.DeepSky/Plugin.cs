@@ -1,4 +1,5 @@
-﻿using Astrarium.Types;
+﻿using Astrarium.Plugins.DeepSky.Controls;
+using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -14,18 +15,20 @@ namespace Astrarium.Plugins.DeepSky
     {
         public Plugin(ISettings settings)
         {
-            SettingItems.Add("DeepSky", new SettingItem("DeepSky", true));
-            SettingItems.Add("DeepSky", new SettingItem("DeepSkyLabels", true, s => s.Get<bool>("DeepSky")));
-            SettingItems.Add("DeepSky", new SettingItem("DeepSkyOutlines", true, s => s.Get<bool>("DeepSky")));
-            
+            DefineSetting("DeepSky", true);
+            DefineSetting("DeepSkyLabels", true);
+            DefineSetting("DeepSkyOutlines", true);
+
             // Colors
-            SettingItems.Add("Colors", new SettingItem("ColorDeepSkyOutline", new SkyColor(50, 50, 50)));
-            SettingItems.Add("Colors", new SettingItem("ColorDeepSkyLabel", new SkyColor(0, 64, 128)));
+            DefineSetting("ColorDeepSkyOutline", new SkyColor(50, 50, 50));
+            DefineSetting("ColorDeepSkyLabel", new SkyColor(0, 64, 128));
 
             // Fonts
-            SettingItems.Add("Fonts", new SettingItem("DeepSkyLabelsFont", new Font("Arial", 7)));
+            DefineSetting("DeepSkyLabelsFont", new Font("Arial", 7));
 
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconDeepSky", "$Settings.DeepSky", new SimpleBinding(settings, "DeepSky", "IsChecked")));
+
+            DefineSettingsSection<DeepSkySettingsSection, SettingsViewModel>();
 
             ExportResourceDictionaries("Images.xaml");
         }

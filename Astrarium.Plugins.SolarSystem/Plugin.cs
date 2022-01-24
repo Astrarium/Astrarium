@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Plugins.SolarSystem.Controls;
+using Astrarium.Plugins.SolarSystem.ViewModels;
 using Astrarium.Types;
 using Astrarium.Types.Controls;
 using System.ComponentModel;
@@ -13,48 +14,54 @@ namespace Astrarium.Plugins.SolarSystem
         {
             #region Settings
 
-            SettingItems.Add("Sun", new SettingItem("Sun", true));
-            SettingItems.Add("Sun", new SettingItem("SunLabel", true, s => s.Get("Sun")));
-            SettingItems.Add("Sun", new SettingItem("SunTexture", true, s => s.Get("Sun")));
+            DefineSetting("Sun", true);
+            DefineSetting("SunLabel", true);
+            DefineSetting("SunTexture", true);
 
-            SettingItems.Add("Planets", new SettingItem("Planets", true));
-            SettingItems.Add("Planets", new SettingItem("PlanetsDrawAll", false, s => s.Get("Planets")));
-            SettingItems.Add("Planets", new SettingItem("PlanetsLabels", true, s => s.Get("Planets")));
-            SettingItems.Add("Planets", new SettingItem("PlanetsLabelsMag", false, s => s.Get<bool>("Planets") && s.Get<bool>("PlanetsLabels")));
-            SettingItems.Add("Planets", new SettingItem("PlanetsTextures", true, s => s.Get("Planets")));
-            SettingItems.Add("Planets", new SettingItem("PlanetsSurfaceFeatures", true, s => s.Get("Planets") && s.Get("PlanetsTextures")));
-            SettingItems.Add("Planets", new SettingItem("PlanetsMartianPolarCaps", true, s => s.Get("Planets") && s.Get("PlanetsTextures")));
-            SettingItems.Add("Planets", new SettingItem("ShowRotationAxis", true, s => s.Get("Planets")));
-            SettingItems.Add("Planets", new SettingItem("PlanetMoons", true, s => s.Get("Planets")));
-            SettingItems.Add("Planets", new SettingItem("JupiterMoonsShadowOutline", true, s => s.Get("Planets") && s.Get("PlanetMoons")));
-            SettingItems.Add("Planets", new SettingItem("GenericMoons", true, s => s.Get("Planets") && s.Get("PlanetMoons")));
-            SettingItems.Add("Planets", new SettingItem("GenericMoonsAutoUpdate", false, s => s.Get("Planets") && s.Get("PlanetMoons") && s.Get("GenericMoons")));
-            SettingItems.Add("Planets", new SettingItem("GenericMoonsOrbitalElementsValidity", (decimal)30, typeof(UpDownSettingControl), s => s.Get("Planets") && s.Get("PlanetMoons") && s.Get("GenericMoons") && s.Get("GenericMoonsAutoUpdate")));
-            
-            SettingItems.Add("Planets", new SettingItem("GRSLongitude", new GreatRedSpotSettings()
+            DefineSetting("Planets", true);
+            DefineSetting("PlanetsDrawAll", false);
+            DefineSetting("PlanetsLabels", true);
+            DefineSetting("PlanetsLabelsMag", false);
+
+            DefineSetting("PlanetsTextures", true);
+            DefineSetting("PlanetsSurfaceFeatures", true);
+            DefineSetting("PlanetsMartianPolarCaps", true);
+            DefineSetting("ShowRotationAxis", true);
+
+            DefineSetting("PlanetMoons", true);
+            DefineSetting("JupiterMoonsShadowOutline", true);
+            DefineSetting("GenericMoons", true);
+            DefineSetting("GenericMoonsAutoUpdate", false);
+            DefineSetting("GenericMoonsOrbitalElementsValidity", 30m);
+
+            DefineSetting("GRSLongitude", new GreatRedSpotSettings()
             {
                 Epoch = 2458150.5000179596,
                 MonthlyDrift = 2,
                 Longitude = 283
-            }, typeof(GRSSettingControl), s => s.Get("Planets")));
+            });
 
-            SettingItems.Add("Moon", new SettingItem("Moon", true));
-            SettingItems.Add("Moon", new SettingItem("MoonLabel", true, s => s.Get("Moon")));
-            SettingItems.Add("Moon", new SettingItem("MoonPhase", true, s => s.Get("Moon")));
-            SettingItems.Add("Moon", new SettingItem("MoonTexture", true, s => s.Get("Moon")));
-            SettingItems.Add("Moon", new SettingItem("MoonTextureQuality", TextureQuality.Normal, s => s.Get("Moon") && s.Get("MoonTexture")));
-            SettingItems.Add("Moon", new SettingItem("MoonSurfaceFeatures", true, s => s.Get("Moon") && s.Get("MoonTexture")));
-            SettingItems.Add("Moon", new SettingItem("EarthShadowOutline", false, s => s.Get("Moon")));
+            DefineSetting("Moon", true);
+            DefineSetting("MoonLabel", true);
+            DefineSetting("MoonPhase", true);
+            DefineSetting("MoonTexture", true);
+            DefineSetting("MoonTextureQuality", TextureQuality.Normal);
+            DefineSetting("MoonSurfaceFeatures", true);
+            DefineSetting("EarthShadowOutline", false);
 
             // Colors
-            SettingItems.Add("Colors", new SettingItem("ColorSolarSystemLabel", new SkyColor(Color.DimGray)));
+            DefineSetting("ColorSolarSystemLabel", new SkyColor(Color.DimGray));
 
             // Fonts
-            SettingItems.Add("Fonts", new SettingItem("SolarSystemLabelsFont", new Font("Arial", 8)));
+            DefineSetting("SolarSystemLabelsFont", new Font("Arial", 8));
 
             #endregion Settings
 
             #region UI integration
+
+            DefineSettingsSection<SunSettingsSection, SettingsViewModel>();
+            DefineSettingsSection<MoonSettingsSection, MoonSettingsVM>();
+            DefineSettingsSection<PlanetsSettingsSection, PlanetsSettingsVM>();
 
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconSun", "$Settings.Sun", new SimpleBinding(settings, "Sun", "IsChecked")));
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconMoon", "$Settings.Moon", new SimpleBinding(settings, "Moon", "IsChecked")));
@@ -72,17 +79,17 @@ namespace Astrarium.Plugins.SolarSystem
 
             #endregion Extending formatters
         }
+    }
 
-        public enum TextureQuality
-        {
-            [Description("Settings.MoonTextureQuality.Low")]
-            Low = 2,
+    public enum TextureQuality
+    {
+        [Description("Settings.MoonTextureQuality.Low")]
+        Low = 2,
 
-            [Description("Settings.MoonTextureQuality.Normal")]
-            Normal = 4,
+        [Description("Settings.MoonTextureQuality.Normal")]
+        Normal = 4,
 
-            [Description("Settings.MoonTextureQuality.High")]
-            High = 8
-        }
+        [Description("Settings.MoonTextureQuality.High")]
+        High = 8
     }
 }

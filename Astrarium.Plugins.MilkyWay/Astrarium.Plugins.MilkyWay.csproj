@@ -17,10 +17,7 @@
   </PropertyGroup>
 
   <Target Condition="'$(Deploy)' == 'True'" Name="ZipOutputPath" AfterTargets="Build">
-    <ZipDirectory
-        Overwrite="True"
-        SourceDirectory="$(OutputPath)"
-        DestinationFile="$(OutputPath)\..\$(MSBuildProjectName)-$(ProductVersion).zip" />
+    <ZipDirectory Overwrite="True" SourceDirectory="$(OutputPath)" DestinationFile="$(OutputPath)\..\$(MSBuildProjectName)-$(ProductVersion).zip" />
   </Target>
 
   <ItemGroup>
@@ -43,6 +40,19 @@
     <None Update="Data\*.*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Controls\MilkyWaySettingsSection.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Controls\MilkyWaySettingsSection.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
 
 </Project>

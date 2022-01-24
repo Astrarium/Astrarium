@@ -99,9 +99,8 @@ namespace Astrarium.ViewModels
                 if (settings.Get("RememberWindowSize") && value != WindowSize)
                 {
                     windowSize = value;
-                    settings.Set("WindowSize", windowSize);
-                    settings.Save();
-                }               
+                    settings.SetAndSave("WindowSize", windowSize);
+                }
             }
         }
 
@@ -247,17 +246,23 @@ namespace Astrarium.ViewModels
             menuView.SubItems = new ObservableCollection<MenuItem>();
 
             var menuMapTransformMirror = new MenuItem("$Menu.MapTransform.Mirror") { IsCheckable = true };
-            menuMapTransformMirror.Command = new Command(() => menuMapTransformMirror.IsChecked = !menuMapTransformMirror.IsChecked);
+            menuMapTransformMirror.Command = new Command(() => {
+                menuMapTransformMirror.IsChecked = !menuMapTransformMirror.IsChecked;
+                settings.SetAndSave("IsMirrored", menuMapTransformMirror.IsChecked);
+            });
             menuMapTransformMirror.AddBinding(new SimpleBinding(settings, "IsMirrored", nameof(MenuItem.IsChecked)));
 
             var menuMapTransformInvert = new MenuItem("$Menu.MapTransform.Invert") { IsCheckable = true };
-            menuMapTransformInvert.Command = new Command(() => menuMapTransformInvert.IsChecked = !menuMapTransformInvert.IsChecked);
+            menuMapTransformInvert.Command = new Command(() => {
+                menuMapTransformInvert.IsChecked = !menuMapTransformInvert.IsChecked;
+                settings.SetAndSave("IsInverted", menuMapTransformInvert.IsChecked);
+            });
             menuMapTransformInvert.AddBinding(new SimpleBinding(settings, "IsInverted", nameof(MenuItem.IsChecked)));
 
             var menuMapTransform = new MenuItem("$Menu.MapTransform")
             {
                 SubItems = new ObservableCollection<MenuItem>(new MenuItem[] {
-                    menuMapTransformMirror, 
+                    menuMapTransformMirror,
                     menuMapTransformInvert
                 })
             };
@@ -269,7 +274,10 @@ namespace Astrarium.ViewModels
                     .Select(s =>
                     {
                         var menuItem = new MenuItem($"$Settings.Schema.{s}");
-                        menuItem.Command = new Command(() => menuItem.IsChecked = true);
+                        menuItem.Command = new Command(() => {
+                            menuItem.IsChecked = true;
+                            settings.SetAndSave("Schema", s);
+                        });
                         menuItem.AddBinding(new SimpleBinding(settings, "Schema", "IsChecked")
                         {
                             SourceToTargetConverter = (schema) => (ColorSchema)schema == s,
@@ -295,10 +303,23 @@ namespace Astrarium.ViewModels
                         if (binding != null)
                         {
                             var menuItem = new MenuItem(button.Tooltip);
-                            menuItem.Command = new Command(() => menuItem.IsChecked = !menuItem.IsChecked);
+                            menuItem.Command = new Command(() => {
+                                menuItem.IsChecked = !menuItem.IsChecked;
+                                if (binding.Source == settings)
+                                {
+                                    settings.SetAndSave(binding.SourcePropertyName, menuItem.IsChecked);
+                                }
+                            });
                             menuItem.AddBinding(new SimpleBinding(binding.Source, binding.SourcePropertyName, nameof(MenuItem.IsChecked)));
                             menuGroup.SubItems.Add(menuItem);
                         }
+
+                        button.Command = new Command(() => {
+                            if (binding.Source == settings)
+                            {
+                                settings.SetAndSave(binding.SourcePropertyName, button.IsChecked);
+                            }
+                        });
                     }
                     menuView.SubItems.Add(menuGroup);
                 }
@@ -307,17 +328,26 @@ namespace Astrarium.ViewModels
             menuView.SubItems.Add(null);
 
             var menuCompact = new MenuItem("$Menu.CompactMenu");
-            menuCompact.Command = new Command(() => menuCompact.IsChecked = !menuCompact.IsChecked);
+            menuCompact.Command = new Command(() => {
+                menuCompact.IsChecked = !menuCompact.IsChecked;
+                settings.SetAndSave("IsCompactMenu", menuCompact.IsChecked);
+            });
             menuCompact.AddBinding(new SimpleBinding(settings, "IsCompactMenu", nameof(MenuItem.IsChecked)));
             menuView.SubItems.Add(menuCompact);
 
             var menuToolbar = new MenuItem("$Menu.Toolbar");
-            menuToolbar.Command = new Command(() => menuToolbar.IsChecked = !menuToolbar.IsChecked);
+            menuToolbar.Command = new Command(() => {
+                menuToolbar.IsChecked = !menuToolbar.IsChecked;
+                settings.SetAndSave("IsToolbarVisible", menuToolbar.IsChecked);
+            });
             menuToolbar.AddBinding(new SimpleBinding(settings, "IsToolbarVisible", nameof(MenuItem.IsChecked)));
             menuView.SubItems.Add(menuToolbar);
 
             var menuStatusbar = new MenuItem("$Menu.StatusBar");
-            menuStatusbar.Command = new Command(() => menuStatusbar.IsChecked = !menuStatusbar.IsChecked);
+            menuStatusbar.Command = new Command(() => {
+                menuStatusbar.IsChecked = !menuStatusbar.IsChecked;
+                settings.SetAndSave("IsStatusBarVisible", menuStatusbar.IsChecked);
+            });
             menuStatusbar.AddBinding(new SimpleBinding(settings, "IsStatusBarVisible", nameof(MenuItem.IsChecked)));
             menuView.SubItems.Add(menuStatusbar);
 
@@ -367,8 +397,11 @@ namespace Astrarium.ViewModels
                     {
                         SubItems = new ObservableCollection<MenuItem>(Text.GetLocales().Select(loc => {
                             var menuItem = new MenuItem(loc.NativeName);
-                            menuItem.Command = new Command(() => menuItem.IsChecked = true);
-                            menuItem.AddBinding(new SimpleBinding(settings, "Language", nameof(MenuItem.IsChecked)) 
+                            menuItem.Command = new Command(() => {
+                                menuItem.IsChecked = true;
+                                settings.SetAndSave("Language", loc.Name);
+                            });
+                            menuItem.AddBinding(new SimpleBinding(settings, "Language", nameof(MenuItem.IsChecked))
                             {
                                 SourceToTargetConverter = (lang) => (string)lang == loc.Name,
                                 TargetToSourceConverter = (isChecked) => (bool)isChecked ? loc.Name : settings.Get<string>("Language"),
@@ -838,8 +871,7 @@ namespace Astrarium.ViewModels
                 if (ViewManager.ShowDialog(vm) ?? false)
                 {
                     sky.Context.GeoLocation = new CrdsGeographical(vm.ObserverLocation);
-                    settings.Set("ObserverLocation", vm.ObserverLocation);
-                    settings.Save();
+                    settings.SetAndSave("ObserverLocation", vm.ObserverLocation);
                     sky.Calculate();
                 }
             }

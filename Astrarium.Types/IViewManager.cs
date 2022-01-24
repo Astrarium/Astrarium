@@ -10,7 +10,14 @@ namespace Astrarium.Types
     /// Defines methods to work with views (Windows and MessageBoxes) and ViewModels.
     /// </summary>
     public interface IViewManager
-    {        
+    {
+        /// <summary>
+        /// Creates new ViewModel by its type.
+        /// </summary>
+        /// <param name="type">Type of the ViewModel.</typeparam>
+        /// <returns>Instance of ViewModel type.</returns>
+        object CreateViewModel(Type type);
+
         /// <summary>
         /// Creates new ViewModel by its type.
         /// </summary>

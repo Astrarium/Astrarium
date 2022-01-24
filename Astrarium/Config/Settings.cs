@@ -126,6 +126,21 @@ namespace Astrarium.Config
             }
         }
 
+        public void SetAndSave(string settingName, object value)
+        {
+            Set(settingName, value);
+            Save();
+        }
+
+        /// <inheritdoc/>
+        public ICollection<string> OfType<TValue>()
+        {
+            return SettingsValues
+                .Where(kv => kv.Value is TValue)
+                .Select(kv => kv.Key)
+                .ToArray();
+        }
+
         public override bool TryGetMember(GetMemberBinder binder, out object result)
         {
             string name = binder.Name;

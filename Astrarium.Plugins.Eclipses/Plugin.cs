@@ -24,7 +24,7 @@ namespace Astrarium.Plugins.Eclipses
 
             #endregion UI integration
 
-            SettingItems.Add(null, new SettingItem("EclipseMapTileServer", ""));
+            DefineSetting("EclipseMapTileServer", "");
         }
 
         private void ShowSolarEclipsesView()

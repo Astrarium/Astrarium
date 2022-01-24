@@ -17,10 +17,7 @@
   </PropertyGroup>
 
   <Target Condition="'$(Deploy)' == 'True'" Name="ZipOutputPath" AfterTargets="Build">
-    <ZipDirectory
-        Overwrite="True"
-        SourceDirectory="$(OutputPath)"
-        DestinationFile="$(OutputPath)\..\$(MSBuildProjectName)-$(ProductVersion).zip" />
+    <ZipDirectory Overwrite="True" SourceDirectory="$(OutputPath)" DestinationFile="$(OutputPath)\..\$(MSBuildProjectName)-$(ProductVersion).zip" />
   </Target>
   
   <ItemGroup>
@@ -37,6 +34,19 @@
       <Private>false</Private>
       <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
     </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Controls\GridsSettingsSection.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Controls\GridsSettingsSection.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
 
 </Project>

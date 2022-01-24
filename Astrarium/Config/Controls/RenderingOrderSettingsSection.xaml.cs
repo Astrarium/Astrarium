@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Astrarium.Types.Controls;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,11 +17,11 @@ using System.Windows.Shapes;
 namespace Astrarium.Config.Controls
 {
     /// <summary>
-    /// Interaction logic for RenderersListSettingControl.xaml
+    /// Interaction logic for RenderingOrderSettingsSection.xaml
     /// </summary>
-    public partial class RenderersListSettingControl : UserControl
+    public partial class RenderingOrderSettingsSection : SettingsSection
     {
-        public RenderersListSettingControl()
+        public RenderingOrderSettingsSection()
         {
             InitializeComponent();
 
@@ -50,7 +51,7 @@ namespace Astrarium.Config.Controls
 
             int oldIndex = List.Items.IndexOf(fromItem);
             int newIndex = List.Items.IndexOf(toItem);
-            
+
             renderingOrder.Move(oldIndex, newIndex);
         }
 

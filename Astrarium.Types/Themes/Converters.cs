@@ -70,6 +70,32 @@ namespace Astrarium.Types.Themes
         }
     }
 
+    public class BooleanAndConverter : MultiValueConverterBase
+    {
+        public override object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return values.OfType<IConvertible>().All(System.Convert.ToBoolean);
+        }
+
+        public override object[] ConvertBack(object value, Type[] targetTypes, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
+
+    public class BooleanOrConverter : MultiValueConverterBase
+    {
+        public override object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return values.OfType<IConvertible>().Any(System.Convert.ToBoolean);
+        }
+
+        public override object[] ConvertBack(object value, Type[] targetTypes, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
+
     public class NumericUpDownTextConverter : MultiValueConverterBase
     {
         public override object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)

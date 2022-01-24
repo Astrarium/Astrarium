@@ -20,7 +20,7 @@ namespace Astrarium.Plugins.FOV
             this.map = map;
             this.settings = settings;
 
-            SettingItems.Add(null, new SettingItem("FovFrames", new List<FovFrame>()));
+            DefineSetting("FovFrames", new List<FovFrame>());
 
             MenuItem fovMenu = new MenuItem("$FovPlugin.Menu.FOV");
             fovMenu.AddBinding(new SimpleBinding(this, nameof(FrameMenuItems), nameof(MenuItem.SubItems)));
@@ -85,8 +85,7 @@ namespace Astrarium.Plugins.FOV
             param.MenuItem.IsChecked = !param.MenuItem.IsChecked;
             param.Frame.Enabled = param.MenuItem.IsChecked;
 
-            settings.Set("FovFrames", fovFrames);
-            settings.Save();
+            settings.SetAndSave("FovFrames", fovFrames);
 
             NotifyPropertyChanged(
                 nameof(FrameContextMenuItems), 
@@ -100,11 +99,11 @@ namespace Astrarium.Plugins.FOV
             if (ViewManager.ShowDialog(viewModel) ?? false)
             {
                 fovFrames.Add(viewModel.Frame);
-                settings.Set("FovFrames", fovFrames);
-                settings.Save();
+                settings.SetAndSave("FovFrames", fovFrames);
+
                 NotifyPropertyChanged(
-                    nameof(FrameMenuItems), 
-                    nameof(FrameContextMenuItems), 
+                    nameof(FrameMenuItems),
+                    nameof(FrameContextMenuItems),
                     nameof(IsContextMenuVisible));
             }
         }

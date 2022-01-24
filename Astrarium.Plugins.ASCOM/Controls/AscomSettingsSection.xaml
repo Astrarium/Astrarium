@@ -1,0 +1,22 @@
+﻿<c:SettingsSection 
+    x:Class="Astrarium.Plugins.ASCOM.Controls.AscomSettingsSection"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+    xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+    xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+    Title="{t:Text Section.Ascom}"
+    mc:Ignorable="d"
+    d:DesignHeight="450" 
+    d:DesignWidth="800">
+    <StackPanel Orientation="Vertical" Margin="6">
+        <CheckBox Content="{t:Text Settings.TelescopeMarkerLabel}" IsChecked="{Binding Settings.TelescopeMarkerLabel}" Margin="2" />
+        <CheckBox Content="{t:Text Settings.TelescopeFindCurrentPointAfterConnect}" IsChecked="{Binding Settings.TelescopeFindCurrentPointAfterConnect}" Margin="2" />
+        <StackPanel Orientation="Horizontal" Margin="-2">
+            <Label Content="{t:Text Settings.TelescopePollingPeriod}"/>
+            <c:NumericUpDown Width="60" DecimalPlaces="0" Minimum="0" Maximum="5000" HorizontalAlignment="Left" Value="{Binding Settings.TelescopePollingPeriod}" />
+        </StackPanel>
+    </StackPanel>
+</c:SettingsSection>

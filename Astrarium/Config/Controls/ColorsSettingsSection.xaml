@@ -1,0 +1,32 @@
+﻿<c:SettingsSection x:Class="Astrarium.Config.Controls.ColorsSettingsSection"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+    xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+    xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+    Title="{t:Text Section.Colors}"
+    mc:Ignorable="d" 
+    d:DesignHeight="450" d:DesignWidth="800">
+    <StackPanel Orientation="Vertical">
+        <GroupBox Header="{t:Text Settings.Schema}" Margin="6">
+            <StackPanel Orientation="Vertical" Margin="2">
+                <RadioButton Margin="2" Content="{t:Text Settings.Schema.Night}" GroupName="Schema" IsChecked="{Binding IsNightColorSchema}"/>
+                <RadioButton Margin="2" Content="{t:Text Settings.Schema.Day}" GroupName="Schema" IsChecked="{Binding IsDayNightColorSchema}"/>
+                <RadioButton Margin="2" Content="{t:Text Settings.Schema.Red}" GroupName="Schema" IsChecked="{Binding IsRedColorSchema}"/>
+                <RadioButton Margin="2" Content="{t:Text Settings.Schema.White}" GroupName="Schema" IsChecked="{Binding IsWhiteColorSchema}"/>
+            </StackPanel>
+        </GroupBox>
+        <ItemsControl  
+            Width="Auto" 
+            Height="Auto"
+            ItemsSource="{Binding ColorSettings}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <c:ColorPicker Caption="{Binding Title}" SelectedColor="{Binding Value}" ColorSchema="{Binding RelativeSource={RelativeSource AncestorType=c:SettingsSection}, Path=DataContext.Settings.Schema}" Margin="6 2" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
+</c:SettingsSection>

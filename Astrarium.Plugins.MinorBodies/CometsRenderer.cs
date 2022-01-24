@@ -32,7 +32,7 @@ namespace Astrarium.Plugins.MinorBodies
             bool isGround = settings.Get("Ground");
             bool useTextures = settings.Get("PlanetsTextures");
             bool drawComets = settings.Get("Comets");
-            bool drawLabels = settings.Get("AsteroidsLabels");
+            bool drawLabels = settings.Get("CometsLabels");
             bool drawAll = settings.Get<bool>("CometsDrawAll");
             decimal drawAllMagLimit = settings.Get<decimal>("CometsDrawAllMagLimit");
             bool drawLabelMag = settings.Get<bool>("CometsLabelsMag");

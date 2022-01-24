@@ -254,8 +254,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 TileImageAttributes = GetImageAttributes();
                 if (settings.Get<string>("EclipseMapTileServer") != value.Name)
                 {
-                    settings.Set("EclipseMapTileServer", value.Name);
-                    settings.Save();
+                    settings.SetAndSave("EclipseMapTileServer", value.Name);
                 }
             }
         }

@@ -77,8 +77,7 @@ namespace Astrarium.Plugins.FOV
                     fovFrames.Add(frame);
                 }
 
-                settings.Set("FovFrames", fovFrames);
-                settings.Save();
+                settings.SetAndSave("FovFrames", fovFrames);
                 NotifyPropertyChanged(nameof(FovFrames), nameof(IsEmptyList));
             }
         }
@@ -91,8 +90,7 @@ namespace Astrarium.Plugins.FOV
                 if (ViewManager.ShowMessageBox("$FovFramesListWindow.WarningTitle", "$FovFramesListWindow.DeleteFrameWarningMessage", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
                     fovFrames.RemoveAt(index);
-                    settings.Set("FovFrames", fovFrames);
-                    settings.Save();
+                    settings.SetAndSave("FovFrames", fovFrames);
                     NotifyPropertyChanged(nameof(FovFrames), nameof(IsEmptyList));
                 }
             }

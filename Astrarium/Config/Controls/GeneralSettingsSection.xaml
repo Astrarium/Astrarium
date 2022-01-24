@@ -1,0 +1,22 @@
+﻿<c:SettingsSection x:Class="Astrarium.Config.Controls.GeneralSettingsSection"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+    xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+    xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+    Title="{t:Text Section.General}"
+    mc:Ignorable="d" 
+    d:DesignHeight="450" d:DesignWidth="800">
+    <StackPanel Orientation="Vertical" Margin="6">
+        <TextBlock Text="{t:Text Settings.Language}" Margin="2" />
+        <ComboBox Margin="2 0 2 2" ItemsSource="{Binding Languages}" SelectedValue="{Binding SelectedLanguage}" DisplayMemberPath="NativeName" />
+
+        <CheckBox Margin="2" Content="{t:Text Settings.StartMaximized}" IsChecked="{Binding Settings.StartMaximized}" />
+        <CheckBox Margin="2" Content="{t:Text Settings.RememberWindowSize}" IsChecked="{Binding Settings.RememberWindowSize}" IsEnabled="{Binding Settings.StartMaximized, Converter={s:InverseBoolConverter}}" />
+        <CheckBox Margin="2" Content="{t:Text Settings.IsCompactMenu}" IsChecked="{Binding Settings.IsCompactMenu}" />
+        <CheckBox Margin="2" Content="{t:Text Settings.IsToolbarVisible}" IsChecked="{Binding Settings.IsToolbarVisible}" />
+        <CheckBox Margin="2" Content="{t:Text Settings.IsStatusBarVisible}" IsChecked="{Binding Settings.IsStatusBarVisible}" />
+    </StackPanel>
+</c:SettingsSection>

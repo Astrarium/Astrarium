@@ -1,0 +1,27 @@
+﻿<c:SettingsSection 
+    x:Class="Astrarium.Plugins.Constellations.Controls.ConstellationsSettingsSection"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+    xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+    xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+    Title="{t:Text Section.Constellations}"
+    mc:Ignorable="d"
+    d:DesignHeight="450" 
+    d:DesignWidth="800">
+    <StackPanel Orientation="Vertical" Margin="6">
+        <CheckBox Content="{t:Text Settings.ConstLines}" IsChecked="{Binding Settings.ConstLines}" Margin="2" />
+        <CheckBox Content="{t:Text Settings.ConstBorders}" IsChecked="{Binding Settings.ConstBorders}" Margin="2" />
+        <CheckBox Content="{t:Text Settings.ConstLabels}" IsChecked="{Binding Settings.ConstLabels}" Margin="2" />
+        <GroupBox Header="{t:Text Settings.ConstLabelsType}" Margin="6 0" IsEnabled="{Binding Settings.ConstLabels}">
+            <StackPanel Orientation="Vertical" Margin="2">
+                <RadioButton Margin="2" Content="{t:Text Settings.ConstLabelsType.InternationalName}" GroupName="ConstLabelsType" IsChecked="{Binding IsConstLabelsTypeInternationalName}"/>
+                <RadioButton Margin="2" Content="{t:Text Settings.ConstLabelsType.InternationalCode}" GroupName="ConstLabelsType" IsChecked="{Binding IsConstLabelsTypeInternationalCode}"/>
+                <RadioButton Margin="2" Content="{t:Text Settings.ConstLabelsType.LocalName}" GroupName="ConstLabelsType" IsChecked="{Binding IsConstLabelsTypeLocalName}"/>
+            </StackPanel>
+        </GroupBox>
+        
+    </StackPanel>
+</c:SettingsSection>

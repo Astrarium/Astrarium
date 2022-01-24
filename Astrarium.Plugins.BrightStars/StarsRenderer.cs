@@ -14,10 +14,9 @@ namespace Astrarium.Plugins.BrightStars
 {
     public class StarsRenderer : BaseRenderer
     {
+        private readonly ISky sky;
         private readonly StarsCalc starsCalc;
         private readonly ISettings settings;
-
-        private ICollection<Tuple<int, int>> ConLines = new List<Tuple<int, int>>();
 
         private Pen penConLine;
         private Color starColor;
@@ -29,8 +28,9 @@ namespace Astrarium.Plugins.BrightStars
         private const int limitFlamsteedNames = 10;
         private const int limitVarNames = 5;
 
-        public StarsRenderer(StarsCalc starsCalc, ISettings settings)
+        public StarsRenderer(ISky sky, StarsCalc starsCalc, ISettings settings)
         {
+            this.sky = sky;
             this.starsCalc = starsCalc;
             this.settings = settings;
 
@@ -52,7 +52,7 @@ namespace Astrarium.Plugins.BrightStars
                 CrdsHorizontal h1, h2;
                 penConLine.Brush = new SolidBrush(map.GetColor("ColorConstLines"));
 
-                foreach (var line in ConLines)
+                foreach (var line in sky.ConstellationLines)
                 {
                     h1 = allStars.ElementAt(line.Item1).Horizontal;
                     h2 = allStars.ElementAt(line.Item2).Horizontal;
@@ -196,7 +196,7 @@ namespace Astrarium.Plugins.BrightStars
             {
                 string flamsteedNumber = s.FlamsteedNumber;
                 if (flamsteedNumber != null)
-                {                    
+                {
                     map.DrawObjectCaption(fontStarNames, brushStarNames, flamsteedNumber, point, diam);
                     return;
                 }
@@ -217,26 +217,6 @@ namespace Astrarium.Plugins.BrightStars
             if (map.ViewAngle < 2)
             {
                 map.DrawObjectCaption(fontStarNames, brushStarNames, $"HR {s.Number}", point, diam);
-            }
-        }
-
-        public override void Initialize()
-        {
-            string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/ConLines.dat");
-            string[] chunks = null;
-            int from, to;
-            string line = "";
-
-            using (var sr = new StreamReader(file, Encoding.Default))
-            {
-                while (line != null && !sr.EndOfStream)
-                {
-                    line = sr.ReadLine();
-                    chunks = line.Split(',');
-                    from = Convert.ToInt32(chunks[0]) - 1;
-                    to = Convert.ToInt32(chunks[1]) - 1;
-                    ConLines.Add(new Tuple<int, int>(from, to));
-                }
             }
         }
 

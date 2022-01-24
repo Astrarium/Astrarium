@@ -2,11 +2,7 @@
 using Astrarium.Plugins.ASCOM.Controls;
 using Astrarium.Types;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -28,7 +24,7 @@ namespace Astrarium.Plugins.ASCOM
             this.sky = sky;
             this.settings = settings;
 
-            SettingItems.Add(null, new SettingItem("ASCOMTelescopeId", ""));
+            DefineSetting("ASCOMTelescopeId", "");
 
             var menuConnectTelescope = new MenuItem("$Menu.ConnectToTelescope", new Command(ConnectTelescope));
             menuConnectTelescope.AddBinding(new SimpleBinding(this, nameof(IsConnectTelescopeVisible), nameof(MenuItem.IsVisible)));
@@ -93,11 +89,14 @@ namespace Astrarium.Plugins.ASCOM
             ascom.PropertyChanged += Ascom_PropertyChanged;
             ascom.OnMessageShow += Ascom_OnMessageShow;
 
-            SettingItems.Add("Colors", new SettingItem("TelescopeMarkerColor", new SkyColor(Color.DarkOrange)));
-            SettingItems.Add("Fonts", new SettingItem("TelescopeMarkerFont", SystemFonts.DefaultFont));
-            SettingItems.Add("Ascom", new SettingItem("TelescopeMarkerLabel", true));
-            SettingItems.Add("Ascom", new SettingItem("TelescopeFindCurrentPointAfterConnect", false));
-            SettingItems.Add("Ascom", new SettingItem("TelescopePollingPeriod", (decimal)500, typeof(UpDownSettingControl)));
+            DefineSetting("TelescopeMarkerColor", new SkyColor(Color.DarkOrange));
+            DefineSetting("TelescopeMarkerFont", SystemFonts.DefaultFont);
+
+            DefineSetting("TelescopeMarkerLabel", true);
+            DefineSetting("TelescopeFindCurrentPointAfterConnect", false);
+            DefineSetting("TelescopePollingPeriod", 500m);
+
+            DefineSettingsSection<AscomSettingsSection, SettingsViewModel>();
 
             settings.SettingValueChanged += Settings_SettingValueChanged;
         }
@@ -173,8 +172,7 @@ namespace Astrarium.Plugins.ASCOM
                     ascom.SetLocation(settings.Get<CrdsGeographical>("ObserverLocation"));
                     if (!string.Equals(telescopeId, savedTelescopeId))
                     {
-                        settings.Set("ASCOMTelescopeId", telescopeId);
-                        settings.Save();
+                        settings.SetAndSave("ASCOMTelescopeId", telescopeId);
                     }
                     if (settings.Get("TelescopeFindCurrentPointAfterConnect"))
                     {

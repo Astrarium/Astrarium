@@ -49,7 +49,7 @@ namespace Astrarium.Plugins.Meteors
             var color = map.GetColor("ColorMeteors");
             var pen = new Pen(color);
             var brush = new SolidBrush(color);
-            var font = SystemFonts.DefaultFont;
+            var font = settings.Get<Font>("MeteorsLabelsFont");
 
             foreach (var meteor in meteors)
             {

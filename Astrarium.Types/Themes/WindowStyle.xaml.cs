@@ -18,7 +18,14 @@ namespace Astrarium.Types.Themes
         private void CloseClick(object sender, RoutedEventArgs e)
         {
             var window = (Window)((FrameworkElement)sender).TemplatedParent;
-            window.Close();
+            if (window.DataContext is ViewModelBase model)
+            {
+                model.Close();
+            }
+            else
+            {
+                window.Close();
+            }
         }
 
         private void MaximizeRestoreClick(object sender, RoutedEventArgs e)

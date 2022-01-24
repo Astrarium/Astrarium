@@ -53,14 +53,10 @@ namespace Astrarium.Types
         }
     }
 
-    public class ToolbarToggleButton : ToolbarButtonBase
+    public class ToolbarToggleButton : ToolbarButton
     {
-        public ToolbarToggleButton(string imageKey, string toolTip, SimpleBinding checkedBinding)
+        public ToolbarToggleButton(string imageKey, string toolTip, SimpleBinding checkedBinding) : base(imageKey, toolTip, null)
         {
-            Tooltip = toolTip;
-            ImageKey = imageKey;
-            Text.LocaleChanged += () => NotifyPropertyChanged(nameof(Tooltip));
-
             AddBinding(checkedBinding);
         }
 

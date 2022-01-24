@@ -1,9 +1,6 @@
-﻿using System;
+﻿using Astrarium.Types.Controls;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace Astrarium.Types
@@ -14,9 +11,14 @@ namespace Astrarium.Types
     public abstract class AbstractPlugin : PropertyChangedBase
     {
         /// <summary>
-        /// Gets configurations of settings items
+        /// Gets list of settings definitions
         /// </summary>
-        public UIElementsConfig<string, SettingItem> SettingItems { get; } = new UIElementsConfig<string, SettingItem>();
+        public List<SettingDefinition> SettingDefinitions { get; } = new List<SettingDefinition>();
+
+        /// <summary>
+        /// Gets list of settings sections definitions
+        /// </summary>
+        public List<SettingSectionDefinition> SettingSections { get; } = new List<SettingSectionDefinition>();
 
         /// <summary>
         /// Gets configurations of toolbar items
@@ -39,6 +41,27 @@ namespace Astrarium.Types
             {
                 Application.Current.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri($"/{assemblyName};component/{name}", UriKind.Relative) });
             }
+        }
+
+        /// <summary>
+        /// Defines a setting with specified name and default value.
+        /// </summary>
+        /// <param name="name">Unique setting name.</param>
+        /// <param name="defaultValue">Default setting name.</param>
+        /// <param name="isPermanent">Flag indicating the setting should not be resetted.</param>
+        public void DefineSetting(string name, object defaultValue, bool isPermanent = false)
+        {
+            SettingDefinitions.Add(new SettingDefinition(name, defaultValue, isPermanent));
+        }
+
+        /// <summary>
+        /// Defines UI section in settings window.
+        /// </summary>
+        /// <typeparam name="TSectionControl">Type of UI control responsive for displaying settings.</typeparam>
+        /// <typeparam name="TViewModel">Type of ViewModel for the UI control.</typeparam>
+        public void DefineSettingsSection<TSectionControl, TViewModel>() where TSectionControl : SettingsSection where TViewModel : ViewModelBase
+        {
+            SettingSections.Add(new SettingSectionDefinition(typeof(TSectionControl), typeof(TViewModel)));
         }
 
         /// <summary>
