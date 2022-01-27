@@ -16,18 +16,18 @@ namespace Astrarium.Plugins.MinorBodies
         protected IOrbitalElementsReader<TCelestialBody> Reader;
         protected OrbitalElementsDownloader Downloader;
 
+        protected abstract string DownloadUrl { get; }
+        protected abstract int MaxCount { get; }
+        protected abstract Func<string, bool> Matcher { get; }
+        protected abstract string FileName { get; }
+        protected abstract string TimeStampKey { get; }
+
         public DataUpdater(ISettings settings, IOrbitalElementsReader<TCelestialBody> reader, OrbitalElementsDownloader downloader)
         {
             Settings = settings;
             Reader = reader;
             Downloader = downloader;
         }
-
-        protected abstract string DownloadUrl { get; }
-        protected abstract int MaxCount { get; }
-        protected abstract Func<string, bool> Matcher { get; }
-        protected abstract string FileName { get; }
-        protected abstract string TimeStampKey { get; }
 
         public async Task<ICollection<TCelestialBody>> Update(bool silent)
         {

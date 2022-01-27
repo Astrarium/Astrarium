@@ -16,15 +16,17 @@ namespace Astrarium.Plugins.MinorBodies
     {
         private readonly Regex asteroidNameRegex = new Regex("\\((\\d+)\\)\\s*(\\w+)");
         private readonly ISky sky;
+        private readonly ISettings settings;
         private readonly AsteroidsReader reader;
         private readonly AsteroidsDataUpdater updater;
         private readonly List<Asteroid> asteroids = new List<Asteroid>();
+        private object locker = new object();
+        public ICollection<Asteroid> Asteroids { get { lock (locker) { return asteroids; } } }
 
-        public ICollection<Asteroid> Asteroids => asteroids;
-
-        public AsteroidsCalc(ISky sky, AsteroidsReader reader, AsteroidsDataUpdater updater)
+        public AsteroidsCalc(ISky sky, ISettings settings, AsteroidsReader reader, AsteroidsDataUpdater updater)
         {
             this.sky = sky;
+            this.settings = settings;
             this.reader = reader;
             this.updater = updater;
         }
@@ -34,13 +36,16 @@ namespace Astrarium.Plugins.MinorBodies
             ICollection<Asteroid> newData = await updater.Update(silent);
             if (newData != null && newData.Any())
             {
-                asteroids.Clear();
-                asteroids.AddRange(newData);
-                sky.Calculate();
+                lock (locker)
+                {
+                    asteroids.Clear();
+                    asteroids.AddRange(newData);
+                    sky.Calculate();
+                }
             }
         }
 
-        public override void Initialize()
+        public async override void Initialize()
         {
             // use app data path to asteroids data (downloaded by user)
             string file = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "OrbitalElements", "Asteroids.dat");
@@ -60,15 +65,24 @@ namespace Astrarium.Plugins.MinorBodies
             {
                 Trace.TraceError("Asteroids orbital elements data file not found.");
             }
+
+            if (settings.Get<bool>("AsteroidsAutoUpdateOrbitalElements") && 
+                DateTime.Now.Subtract(settings.Get<DateTime>("AsteroidsDownloadOrbitalElementsTimestamp")).TotalDays >= (int)settings.Get<decimal>("AsteroidsAutoUpdateOrbitalElementsPeriod"))
+            {
+                await Task.Run(() => UpdateOrbitalElements(silent: true));
+            }
         }
 
         public override void Calculate(SkyContext c)
         {
-            foreach (Asteroid a in asteroids)
+            lock (locker)
             {
-                a.Horizontal = c.Get(Horizontal, a);
-                a.Magnitude = c.Get(Magnitude, a);
-                a.Semidiameter = c.Get(Semidiameter, a);
+                foreach (Asteroid a in asteroids)
+                {
+                    a.Horizontal = c.Get(Horizontal, a);
+                    a.Magnitude = c.Get(Magnitude, a);
+                    a.Semidiameter = c.Get(Semidiameter, a);
+                }
             }
         }
 

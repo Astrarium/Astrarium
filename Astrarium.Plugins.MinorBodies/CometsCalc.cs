@@ -15,15 +15,17 @@ namespace Astrarium.Plugins.MinorBodies
     public class CometsCalc : MinorBodyCalc<Comet>, ICelestialObjectCalc<Comet>
     {
         private readonly ISky sky;
+        private readonly ISettings settings;
         private readonly CometsReader reader;
         private readonly CometsDataUpdater updater;
         private readonly List<Comet> comets = new List<Comet>();
+        private object locker = new object();
+        public ICollection<Comet> Comets { get { lock (locker) { return comets; } } }
 
-        public ICollection<Comet> Comets => comets;
-
-        public CometsCalc(ISky sky, CometsReader reader, CometsDataUpdater updater)
+        public CometsCalc(ISky sky, ISettings settings, CometsReader reader, CometsDataUpdater updater)
         {
             this.sky = sky;
+            this.settings = settings;
             this.reader = reader;
             this.updater = updater;
         }
@@ -33,13 +35,16 @@ namespace Astrarium.Plugins.MinorBodies
             ICollection<Comet> newData = await updater.Update(silent);
             if (newData != null && newData.Any())
             {
-                comets.Clear();
-                comets.AddRange(newData);
-                sky.Calculate();
+                lock (locker)
+                {
+                    comets.Clear();
+                    comets.AddRange(newData);
+                    sky.Calculate();
+                }
             }
         }
 
-        public override void Initialize()
+        public async override void Initialize()
         {
             // use app data path to comets data (downloaded by user)
             string file = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "OrbitalElements", "Comets.dat");
@@ -59,16 +64,25 @@ namespace Astrarium.Plugins.MinorBodies
             {
                 Trace.TraceError("Comets orbital elements data file not found.");
             }
+
+            if (settings.Get<bool>("CometsAutoUpdateOrbitalElements") &&
+                DateTime.Now.Subtract(settings.Get<DateTime>("CometsDownloadOrbitalElementsTimestamp")).TotalDays >= (int)settings.Get<decimal>("CometsAutoUpdateOrbitalElementsPeriod"))
+            {
+                await Task.Run(() => UpdateOrbitalElements(silent: true));
+            }
         }
 
         public override void Calculate(SkyContext ctx)
         {
-            foreach (Comet c in comets)
+            lock (locker)
             {
-                c.Horizontal = ctx.Get(Horizontal, c);
-                c.Magnitude = ctx.Get(Magnitude, c);
-                c.Semidiameter = ctx.Get(Appearance, c).Coma;
-                c.TailHorizontal = ctx.Get(TailHorizontal, c);
+                foreach (Comet c in comets)
+                {
+                    c.Horizontal = ctx.Get(Horizontal, c);
+                    c.Magnitude = ctx.Get(Magnitude, c);
+                    c.Semidiameter = ctx.Get(Appearance, c).Coma;
+                    c.TailHorizontal = ctx.Get(TailHorizontal, c);
+                }
             }
         }
 
