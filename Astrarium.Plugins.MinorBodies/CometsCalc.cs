@@ -2,6 +2,7 @@
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -13,15 +14,51 @@ namespace Astrarium.Plugins.MinorBodies
 {
     public class CometsCalc : MinorBodyCalc<Comet>, ICelestialObjectCalc<Comet>
     {
-        private readonly string ORBITAL_ELEMENTS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Comets.dat");
-        private readonly CometsReader reader = new CometsReader();
+        private readonly ISky sky;
+        private readonly CometsReader reader;
+        private readonly CometsDataUpdater updater;
         private readonly List<Comet> comets = new List<Comet>();
 
         public ICollection<Comet> Comets => comets;
 
+        public CometsCalc(ISky sky, CometsReader reader, CometsDataUpdater updater)
+        {
+            this.sky = sky;
+            this.reader = reader;
+            this.updater = updater;
+        }
+
+        public async void UpdateOrbitalElements(bool silent)
+        {
+            ICollection<Comet> newData = await updater.Update(silent);
+            if (newData != null && newData.Any())
+            {
+                comets.Clear();
+                comets.AddRange(newData);
+                sky.Calculate();
+            }
+        }
+
         public override void Initialize()
         {
-            comets.AddRange(reader.Read(ORBITAL_ELEMENTS_FILE));
+            // use app data path to comets data (downloaded by user)
+            string file = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "OrbitalElements", "Comets.dat");
+
+            // use default path to comets data
+            if (!File.Exists(file))
+            {
+                file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data", "Comets.dat");
+            }
+
+            if (File.Exists(file))
+            {
+                comets.Clear();
+                comets.AddRange(reader.Read(file));
+            }
+            else
+            {
+                Trace.TraceError("Comets orbital elements data file not found.");
+            }
         }
 
         public override void Calculate(SkyContext ctx)

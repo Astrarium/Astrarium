@@ -33,5 +33,36 @@
                 </MultiBinding>
             </StackPanel.IsEnabled>
         </StackPanel>
+
+        <GroupBox Header="Orbital elements" Margin="0 8" IsEnabled="{Binding IsUpdating, Converter={s:InverseBoolConverter}}">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal" Margin="0 2 0 0" >
+                    <CheckBox IsChecked="{Binding Settings.AsteroidsAutoUpdateOrbitalElements}" VerticalAlignment="Center" Content="Update orbital elements automatically, if older than"  Margin="4 4 4 4" />
+                    <c:NumericUpDown VerticalAlignment="Center" Width="50" DecimalPlaces="0" Value="{Binding Settings.AsteroidsAutoUpdateOrbitalElementsPeriod}" Minimum="1" Maximum="365" />
+                    <TextBlock Margin="4" VerticalAlignment="Center">days</TextBlock>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Margin="4 0" VerticalAlignment="Center">Maximal objects to download:</TextBlock>
+                    <c:NumericUpDown VerticalAlignment="Center" Width="60" DecimalPlaces="0" Value="{Binding Settings.AsteroidsDownloadOrbitalElementsCount}" Minimum="1" Maximum="1000" />
+                </StackPanel>
+                <TextBlock Margin="4 6 4 0">Update URL:</TextBlock>
+                <TextBox Margin="4" Text="{Binding Settings.AsteroidsDownloadOrbitalElementsUrl}" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Margin="4"  Orientation="Horizontal" VerticalAlignment="Center" Grid.Column="0">
+                        <TextBlock IsEnabled="False" Text="Last updated: " />
+                        <TextBlock IsEnabled="False" Text="{Binding LastUpdated, Mode=OneWay, FallbackValue='?'}" />
+                    </StackPanel>
+                    <StackPanel Margin="4" Orientation="Horizontal" HorizontalAlignment="Right" Grid.Column="1">
+                        <Button Margin="2" MinWidth="100" Padding="8 0" Visibility="Collapsed">Elements editor</Button>
+                        <Button Margin="2" MinWidth="100" Padding="8 0" Command="{Binding UpdateElementsCommand}">Update now</Button>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </GroupBox>
+
     </StackPanel>
 </c:SettingsSection>

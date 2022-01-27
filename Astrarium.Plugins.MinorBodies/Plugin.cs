@@ -20,11 +20,23 @@ namespace Astrarium.Plugins.MinorBodies
             DefineSetting("CometsDrawAll", false);
             DefineSetting("CometsDrawAllMagLimit", 10m);
 
+            DefineSetting("CometsAutoUpdateOrbitalElements", false);
+            DefineSetting("CometsAutoUpdateOrbitalElementsPeriod", 30m);
+            DefineSetting("CometsDownloadOrbitalElementsCount", 1000m);
+            DefineSetting("CometsDownloadOrbitalElementsUrl", "https://www.minorplanetcenter.net/iau/MPCORB/CometEls.txt");
+            DefineSetting("CometsDownloadOrbitalElementsTimestamp", DateTime.MinValue);
+
             DefineSetting("Asteroids", true);
             DefineSetting("AsteroidsLabels", true);
             DefineSetting("AsteroidsLabelsMag", false);
             DefineSetting("AsteroidsDrawAll", false);
             DefineSetting("AsteroidsDrawAllMagLimit", 10m);
+
+            DefineSetting("AsteroidsAutoUpdateOrbitalElements", false);
+            DefineSetting("AsteroidsAutoUpdateOrbitalElementsPeriod", 30m);
+            DefineSetting("AsteroidsDownloadOrbitalElementsCount", 1000m);
+            DefineSetting("AsteroidsDownloadOrbitalElementsUrl", "https://www.minorplanetcenter.net/iau/MPCORB/MPCORB.DAT");
+            DefineSetting("AsteroidsDownloadOrbitalElementsTimestamp", DateTime.MinValue);
 
             DefineSetting("ColorAsteroidsLabels", new SkyColor(10, 44, 37));
             DefineSetting("ColorCometsLabels", new SkyColor(78, 84, 99));

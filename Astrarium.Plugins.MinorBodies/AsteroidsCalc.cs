@@ -2,6 +2,7 @@
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -14,14 +15,51 @@ namespace Astrarium.Plugins.MinorBodies
     public class AsteroidsCalc : MinorBodyCalc<Asteroid>, ICelestialObjectCalc<Asteroid>
     {
         private readonly Regex asteroidNameRegex = new Regex("\\((\\d+)\\)\\s*(\\w+)");
-        private readonly AsteroidsReader reader = new AsteroidsReader();
+        private readonly ISky sky;
+        private readonly AsteroidsReader reader;
+        private readonly AsteroidsDataUpdater updater;
         private readonly List<Asteroid> asteroids = new List<Asteroid>();
 
         public ICollection<Asteroid> Asteroids => asteroids;
 
+        public AsteroidsCalc(ISky sky, AsteroidsReader reader, AsteroidsDataUpdater updater)
+        {
+            this.sky = sky;
+            this.reader = reader;
+            this.updater = updater;
+        }
+
+        public async void UpdateOrbitalElements(bool silent)
+        {
+            ICollection<Asteroid> newData = await updater.Update(silent);
+            if (newData != null && newData.Any())
+            {
+                asteroids.Clear();
+                asteroids.AddRange(newData);
+                sky.Calculate();
+            }
+        }
+
         public override void Initialize()
         {
-            asteroids.AddRange(reader.Read());
+            // use app data path to asteroids data (downloaded by user)
+            string file = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "OrbitalElements", "Asteroids.dat");
+
+            // use default path to asteroids data
+            if (!File.Exists(file))
+            {
+                file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data", "Asteroids.dat");
+            }
+
+            if (File.Exists(file))
+            {
+                asteroids.Clear();
+                asteroids.AddRange(reader.Read(file));
+            }
+            else
+            {
+                Trace.TraceError("Asteroids orbital elements data file not found.");
+            }
         }
 
         public override void Calculate(SkyContext c)

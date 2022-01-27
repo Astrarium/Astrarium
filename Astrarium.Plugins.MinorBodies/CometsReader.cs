@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Astrarium.Plugins.MinorBodies
 {
-    internal class CometsReader
+    public class CometsReader : IOrbitalElementsReader<Comet>
     {
         /// <summary>
         /// Reads comets orbital elements written in MPC format.

@@ -9,9 +9,8 @@ using System.Text;
 
 namespace Astrarium.Plugins.MinorBodies
 {
-    internal class AsteroidsReader
+    public class AsteroidsReader : IOrbitalElementsReader<Asteroid>
     {
-        private readonly string ORBITAL_ELEMENTS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Asteroids.dat");
         private readonly string SIZES_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/AsteroidsSizes.dat");
         private readonly string BRIGHTNESS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/AsteroidsBright.dat");
 
@@ -20,7 +19,7 @@ namespace Astrarium.Plugins.MinorBodies
         /// Description of the format can be found at <see href="https://www.minorplanetcenter.net/iau/info/MPOrbitFormat.html"/>.
         /// </summary>
         /// <returns>Collection of <see cref="Asteroid"/> items.</returns>
-        public ICollection<Asteroid> Read()
+        public ICollection<Asteroid> Read(string orbitalElementsFile)
         {
             List<Asteroid> asteroids = new List<Asteroid>();
             var sizes = new Dictionary<int, float>();
@@ -48,7 +47,7 @@ namespace Astrarium.Plugins.MinorBodies
                 }
             }
 
-            using (var sr = new StreamReader(ORBITAL_ELEMENTS_FILE, Encoding.Default))
+            using (var sr = new StreamReader(orbitalElementsFile, Encoding.Default))
             {
                 while (line != null && !sr.EndOfStream)
                 {
