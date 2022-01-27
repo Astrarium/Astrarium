@@ -28,8 +28,8 @@ namespace Astrarium.Plugins.MinorBodies
             {
                 byte[] buffer = new byte[BUFFER_SIZE];
                 int bytesRead = 0;
-                bool header = true;
                 int totalRecords = 0;
+                StringBuilder remainder = new StringBuilder();
 
                 do
                 {
@@ -39,39 +39,13 @@ namespace Astrarium.Plugins.MinorBodies
                     }
 
                     bytesRead = responseStream.Read(buffer, 0, BUFFER_SIZE);
-                    string[] records = Encoding.UTF8.GetString(buffer, 0, bytesRead).Split('\n');
+                    remainder.Append(Encoding.UTF8.GetString(buffer, 0, bytesRead));
 
-                    if (header)
-                    {
-                        records = records.SkipWhile(c => !matcher(c)).ToArray();
-                        header = !records.Any();
-                    }
+                    string[] records = remainder.ToString().Split('\n');
 
                     foreach (string record in records)
                     {
-                        if (!matcher(record))
-                        {
-                            if (record.Length == 0)
-                            {
-                                continue;
-                            }
-                            if (records.Last() == record)
-                            {
-                                streamWriter.Write(record);
-                            }
-                            if (records.First() == record)
-                            {
-                                streamWriter.WriteLine(record);
-                                totalRecords++;
-                                progress?.Report((int)(totalRecords / (double)maxCount * 100));
-
-                                if (totalRecords >= maxCount)
-                                {
-                                    return totalRecords;
-                                }
-                            }
-                        }
-                        else
+                        if (matcher(record))
                         {
                             streamWriter.WriteLine(record);
                             totalRecords++;
@@ -80,6 +54,11 @@ namespace Astrarium.Plugins.MinorBodies
                             {
                                 return totalRecords;
                             }
+                        }
+                        else if (record == records.Last())
+                        {
+                            remainder.Clear();
+                            remainder.Append(record);
                         }
                     }
                 }

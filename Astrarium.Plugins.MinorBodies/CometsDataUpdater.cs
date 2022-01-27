@@ -10,7 +10,7 @@ namespace Astrarium.Plugins.MinorBodies
 
         protected override string DownloadUrl => Settings.Get<string>("CometsDownloadOrbitalElementsUrl");
         protected override int MaxCount => (int)Settings.Get<decimal>("CometsDownloadOrbitalElementsCount");
-        protected override Func<string, bool> Matcher => (line) => line.Length >= 167;
+        protected override Func<string, bool> Matcher => (line) => line.Length >= 168;
         protected override string FileName => "Comets.dat";
         protected override string TimeStampKey => "CometsDownloadOrbitalElementsTimestamp";
     }
