@@ -61,13 +61,14 @@ namespace Astrarium.Plugins.FOV
 
             if (param.Frame is CircularFovFrame circularFovFrame)
             {
-                fov = circularFovFrame.Size;
+                double scale = Math.Min(map.Width, map.Height) / (Math.Sqrt(map.Width * map.Width + map.Height * map.Height) / 2);
+                fov = circularFovFrame.Size / scale;
             }
             else if (param.Frame is CameraFovFrame cameraFovFrame)
             {
                 double w = cameraFovFrame.Width;
                 double h = cameraFovFrame.Height;
-                fov = Math.Sqrt(w * w + h * h) * 1.7;
+                fov = Math.Sqrt(w * w + h * h);
             }
 
             if (map.SelectedObject != null)
