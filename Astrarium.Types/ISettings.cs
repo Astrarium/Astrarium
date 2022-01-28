@@ -67,8 +67,21 @@ namespace Astrarium.Types
         /// </summary>
         void Load();
 
+        /// <summary>
+        /// Saves settings into in-memory snapshot with specified name.
+        /// </summary>
+        /// <param name="snapshotName">Name of the snapshot to be saved.</param>
         void Save(string snapshotName);
 
+        /// <summary>
+        /// Loads settings from in-memory snapshot with specified name.
+        /// </summary>
+        /// <param name="snapshotName">Name of the snapshot to be loaded.</param>
         void Load(string snapshotName);
+
+        /// <summary>
+        /// Defines set of settings.
+        /// </summary>
+        void Define(ICollection<SettingDefinition> definitions);
     }
 }

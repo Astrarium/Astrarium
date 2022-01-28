@@ -39,7 +39,7 @@ namespace Astrarium.Plugins.SolarSystem
                 Epoch = 2458150.5000179596,
                 MonthlyDrift = 2,
                 Longitude = 283
-            });
+            }, isPermanent: true);
 
             DefineSetting("Moon", true);
             DefineSetting("MoonLabel", true);

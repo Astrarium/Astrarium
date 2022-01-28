@@ -21,35 +21,35 @@ namespace Astrarium
         public UIElementsIntegration()
         {
             // Default language
-            SettingDefinitions.Add(new SettingDefinition("Language", "en", false));
+            SettingDefinitions.Add(new SettingDefinition("Language", "en", isPermanent: true));
 
             // Flag indicating main window should be maximized on startup
-            SettingDefinitions.Add(new SettingDefinition("StartMaximized", false, false));
+            SettingDefinitions.Add(new SettingDefinition("StartMaximized", false));
             
             // If set to true, window size will be remembered
-            SettingDefinitions.Add(new SettingDefinition("RememberWindowSize", false, false));
+            SettingDefinitions.Add(new SettingDefinition("RememberWindowSize", false));
 
             // Type of application menu
-            SettingDefinitions.Add(new SettingDefinition("IsCompactMenu", false, false));
+            SettingDefinitions.Add(new SettingDefinition("IsCompactMenu", false));
 
             // Toolbar visibility
-            SettingDefinitions.Add(new SettingDefinition("IsToolbarVisible", true, false));
+            SettingDefinitions.Add(new SettingDefinition("IsToolbarVisible", true));
 
             // Status bar visibility
-            SettingDefinitions.Add(new SettingDefinition("IsStatusBarVisible", true, false));
+            SettingDefinitions.Add(new SettingDefinition("IsStatusBarVisible", true));
 
             // Default observer location
-            SettingDefinitions.Add(new SettingDefinition("ObserverLocation", new CrdsGeographical(-44, 56.3333, +3, 80, "Europe/Moscow", "Nizhny Novgorod"), true));
+            SettingDefinitions.Add(new SettingDefinition("ObserverLocation", new CrdsGeographical(-44, 56.3333, +3, 80, "Europe/Moscow", "Nizhny Novgorod"), isPermanent: true));
 
             // Default size of main window
-            SettingDefinitions.Add(new SettingDefinition("WindowSize", System.Drawing.Size.Empty, false));
+            SettingDefinitions.Add(new SettingDefinition("WindowSize", System.Drawing.Size.Empty));
 
             // Default color schema
-            SettingDefinitions.Add(new SettingDefinition("Schema", ColorSchema.Night, false));
+            SettingDefinitions.Add(new SettingDefinition("Schema", ColorSchema.Night));
 
             // Map transformation
-            SettingDefinitions.Add(new SettingDefinition("IsMirrored", false, false));
-            SettingDefinitions.Add(new SettingDefinition("IsInverted", false, false));
+            SettingDefinitions.Add(new SettingDefinition("IsMirrored", false));
+            SettingDefinitions.Add(new SettingDefinition("IsInverted", false));
 
             SettingSections.Add(new SettingSectionDefinition(typeof(GeneralSettingsSection), typeof(GeneralSettingsVM)));
             SettingSections.Add(new SettingSectionDefinition(typeof(ColorsSettingsSection), typeof(ColorsSettingsVM)));

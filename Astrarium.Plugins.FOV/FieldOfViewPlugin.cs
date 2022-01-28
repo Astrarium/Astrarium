@@ -20,7 +20,7 @@ namespace Astrarium.Plugins.FOV
             this.map = map;
             this.settings = settings;
 
-            DefineSetting("FovFrames", new List<FovFrame>());
+            DefineSetting("FovFrames", new List<FovFrame>(), isPermanent: true);
 
             MenuItem fovMenu = new MenuItem("$FovPlugin.Menu.FOV");
             fovMenu.AddBinding(new SimpleBinding(this, nameof(FrameMenuItems), nameof(MenuItem.SubItems)));

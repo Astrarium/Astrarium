@@ -209,11 +209,7 @@ namespace Astrarium
             uiIntegration.SettingDefinitions.Add(new SettingDefinition("RenderingOrder", defaultRenderingOrder, false));
 
             var settings = kernel.Get<ISettings>();
-            foreach (var item in uiIntegration.SettingDefinitions)
-            {
-                settings.Set(item.Name, item.DefaultValue);
-            }
-
+            settings.Define(uiIntegration.SettingDefinitions);
             settings.Save("Defaults");
 
             progress.Report($"Loading settings");

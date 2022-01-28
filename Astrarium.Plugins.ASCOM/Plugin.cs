@@ -24,7 +24,7 @@ namespace Astrarium.Plugins.ASCOM
             this.sky = sky;
             this.settings = settings;
 
-            DefineSetting("ASCOMTelescopeId", "");
+            DefineSetting("ASCOMTelescopeId", "", isPermanent: true);
 
             var menuConnectTelescope = new MenuItem("$Menu.ConnectToTelescope", new Command(ConnectTelescope));
             menuConnectTelescope.AddBinding(new SimpleBinding(this, nameof(IsConnectTelescopeVisible), nameof(MenuItem.IsVisible)));
