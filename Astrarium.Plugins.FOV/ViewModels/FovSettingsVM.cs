@@ -205,9 +205,9 @@ namespace Astrarium.Plugins.FOV
         public ICollection<Lens> Lenses => _Equipment.Lens;
         public ICollection<int> Binnings { get; } = new int[] { 1, 2, 3, 4, 5 };
 
-        public FieldOfView FieldOfView
+        public IFieldOfView FieldOfView
         {
-            get => GetValue<FieldOfView>(nameof(FieldOfView));
+            get => GetValue<IFieldOfView>(nameof(FieldOfView));
             set
             {
                 SetValue(nameof(FieldOfView), value);
@@ -288,6 +288,66 @@ namespace Astrarium.Plugins.FOV
             }
         }
 
+        public decimal FinderSize1
+        {
+            get => GetValue<decimal>(nameof(FinderSize1));
+            set
+            {
+                SetValue(nameof(FinderSize1), value);
+                Calculate();
+            }
+        }
+
+        public decimal FinderSize2
+        {
+            get => GetValue<decimal>(nameof(FinderSize2));
+            set
+            {
+                SetValue(nameof(FinderSize2), value);
+                Calculate();
+            }
+        }
+
+        public bool FinderSize2Enabled
+        {
+            get => GetValue<bool>(nameof(FinderSize2Enabled));
+            set
+            {
+                SetValue(nameof(FinderSize2Enabled), value);
+                Calculate();
+            }
+        }
+
+        public decimal FinderSize3
+        {
+            get => GetValue<decimal>(nameof(FinderSize3));
+            set
+            {
+                SetValue(nameof(FinderSize3), value);
+                Calculate();
+            }
+        }
+
+        public bool FinderSize3Enabled
+        {
+            get => GetValue<bool>(nameof(FinderSize3Enabled));
+            set
+            {
+                SetValue(nameof(FinderSize3Enabled), value);
+                Calculate();
+            }
+        }
+
+        public bool FinderCrosslines
+        {
+            get => GetValue<bool>(nameof(FinderCrosslines));
+            set
+            {
+                SetValue(nameof(FinderCrosslines), value);
+                Calculate();
+            }
+        }
+
         public Binocular Binocular => Binoculars.FirstOrDefault(t => t.Id == BinocularId);
         public Telescope Telescope => Telescopes.FirstOrDefault(t => t.Id == TelescopeId);
         public Eyepiece Eyepiece => Eyepieces.FirstOrDefault(t => t.Id == EyepieceId);
@@ -307,6 +367,10 @@ namespace Astrarium.Plugins.FOV
             else if (FrameType == FrameType.Camera && Camera != null && Telescope != null && Lens != null)
             {
                 FieldOfView = FovCalculator.GetCameraView(Telescope, Camera, Lens, Binning, Rotation);
+            }
+            else if (FrameType == FrameType.Finder && FinderSize1 > 0)
+            {
+                FieldOfView = new FinderFieldOfView();
             }
             else
             {
@@ -344,11 +408,12 @@ namespace Astrarium.Plugins.FOV
             { 
                 SetValue(nameof(FrameType), value);
                 NotifyPropertyChanged(
-                    nameof(TelescopeVisible), 
+                    nameof(TelescopeVisible),
                     nameof(EyepieceVisible),
                     nameof(BinocularVisible),
                     nameof(CameraVisible),
-                    nameof(LensVisible)
+                    nameof(LensVisible),
+                    nameof(FinderVisible)
                     );
                 Calculate();
             }
@@ -374,11 +439,12 @@ namespace Astrarium.Plugins.FOV
             set => SetValue(nameof(Label), value);
         }
 
-        public bool TelescopeVisible => FrameType != FrameType.Binocular;
-        public bool EyepieceVisible => FrameType == FrameType.Telescope;
-        public bool BinocularVisible => FrameType == FrameType.Binocular;
-        public bool CameraVisible => FrameType == FrameType.Camera;
-        public bool LensVisible => FrameType != FrameType.Binocular;
+        public bool TelescopeVisible => FrameType != FrameType.Binocular && FrameType != FrameType.Finder;
+        public bool EyepieceVisible => FrameType == FrameType.Telescope && FrameType != FrameType.Finder;
+        public bool BinocularVisible => FrameType == FrameType.Binocular && FrameType != FrameType.Finder;
+        public bool CameraVisible => FrameType == FrameType.Camera && FrameType != FrameType.Finder;
+        public bool LensVisible => FrameType != FrameType.Binocular && FrameType != FrameType.Finder;
+        public bool FinderVisible => FrameType == FrameType.Finder;
 
         public FovFrame Frame
         {
@@ -430,6 +496,24 @@ namespace Astrarium.Plugins.FOV
                         Size = binocularFieldOfView.Size
                     };
                 }
+                else if (FieldOfView is FinderFieldOfView)
+                {
+                    return new FinderFovFrame()
+                    {
+                        Id = _Id,
+                        Color = Color,
+                        Label = Label,
+                        Shading = Shading,
+                        Enabled = true,
+                        Sizes = new float?[] {
+                            (float?)FinderSize1,
+                            FinderSize2Enabled ? (float?)FinderSize2 : null,
+                            FinderSize3Enabled ? (float?)FinderSize3 : null
+                        }.Where(s => s != null && s.Value > 0)
+                        .Cast<float>().ToArray(),
+                        Crosslines = FinderCrosslines
+                    };
+                }
                 else
                 {
                     return null;
@@ -458,6 +542,22 @@ namespace Astrarium.Plugins.FOV
                     BinocularId = binocularFrame.BinocularId;
                     FrameType = FrameType.Binocular;
                 }
+                else if (value is FinderFovFrame finderFrame)
+                {
+                    FinderSize1 = (decimal)finderFrame.Sizes[0];
+                    if (finderFrame.Sizes.Length > 1)
+                    {
+                        FinderSize2Enabled = true;
+                        FinderSize2 = (decimal)finderFrame.Sizes[1];
+                    }
+                    if (finderFrame.Sizes.Length > 2)
+                    {
+                        FinderSize3Enabled = true;
+                        FinderSize3 = (decimal)finderFrame.Sizes[2];
+                    }
+                    FinderCrosslines = finderFrame.Crosslines;
+                    FrameType = FrameType.Finder;
+                }
 
                 _Id = value.Id;
                 Shading = value.Shading;
@@ -471,7 +571,8 @@ namespace Astrarium.Plugins.FOV
     {
         Telescope = 0,
         Camera = 1,
-        Binocular = 2
+        Binocular = 2,
+        Finder = 3
     }
 
     public class CameraResolutionConverter : ConverterBase
@@ -613,7 +714,7 @@ namespace Astrarium.Plugins.FOV
 
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var fieldOfView = (FieldOfView)value;
+            var fieldOfView = (IFieldOfView)value;
             if (fieldOfView is TelescopeFieldOfView telescopeFieldOfView)
             {
                 return $"{Text.Get("FovSettingsVM.FocalRatio")} = {frConverter.Convert(telescopeFieldOfView.FocalRatio)}\n{Text.Get("FovSettingsVM.Magnification")} = {magConverter.Convert(telescopeFieldOfView.Magnification)}\n{Text.Get("FovSettingsVM.FieldOfView")} = {fovConverter.Convert(telescopeFieldOfView.Size)}\n{Text.Get("FovSettingsVM.ExitPupil")} = {epConverter.Convert(telescopeFieldOfView.ExitPupil)}\n{Text.Get("FovSettingsVM.DawesLimit")} = {dlConverter.Convert(telescopeFieldOfView.DawesLimit)}";

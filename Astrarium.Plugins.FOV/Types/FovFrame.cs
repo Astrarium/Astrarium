@@ -1,12 +1,6 @@
 ﻿using Astrarium.Types;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.FOV
 {
@@ -96,6 +90,15 @@ namespace Astrarium.Plugins.FOV
         /// Binocular id
         /// </summary>
         public Guid BinocularId { get; set; }
+    }
+
+    /// <summary>
+    /// Represents frame of a finder
+    /// </summary>
+    public class FinderFovFrame : FovFrame
+    {
+        public float[] Sizes { get; set; } = new float[1];
+        public bool Crosslines { get; set; }
     }
 
     /// <summary>

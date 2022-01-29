@@ -96,6 +96,7 @@
                 <RadioButton Content="{t:Text FovSettingsWindow.FrameType.Telescope}" IsChecked="{Binding FrameType, Converter={s:EqualityConverter}, ConverterParameter={x:Static local:FrameType.Telescope}}" Style="{StaticResource ResourceKey=RadioTab}" />
                 <RadioButton Content="{t:Text FovSettingsWindow.FrameType.Camera}" IsChecked="{Binding FrameType, Converter={s:EqualityConverter}, ConverterParameter={x:Static local:FrameType.Camera}}" Style="{StaticResource ResourceKey=RadioTab}" />
                 <RadioButton Content="{t:Text FovSettingsWindow.FrameType.Binocular}" IsChecked="{Binding FrameType, Converter={s:EqualityConverter}, ConverterParameter={x:Static local:FrameType.Binocular}}" Style="{StaticResource ResourceKey=RadioTab}" />
+                <RadioButton Content="{t:Text FovSettingsWindow.FrameType.Finder}" IsChecked="{Binding FrameType, Converter={s:EqualityConverter}, ConverterParameter={x:Static local:FrameType.Finder}}" Style="{StaticResource ResourceKey=RadioTab}" />
             </StackPanel>
 
             <!-- Frame Appearance -->
@@ -304,12 +305,46 @@
                         <c:NumericUpDown Value="{Binding Rotation}" Margin="2" DecimalPlaces="0" Minimum="0" Maximum="359" Grid.Row="1" Grid.Column="2" Visibility="{Binding CameraVisible, Converter={s:BoolToVisibilityConverter}}" />
 
                     </Grid>
-                    
+
+                    <!-- Finder -->
+                    <GroupBox Header="{t:Text FovSettingsWindow.FinderParameters}" Visibility="{Binding FinderVisible, Converter={s:BoolToVisibilityConverter}}" Margin="2 8 2 8">
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Margin="8" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Text="{t:Text FovSettingsWindow.Finder.Size1}" />
+                            <c:NumericUpDown VerticalAlignment="Center" Width="50" Grid.Row="0" Grid.Column="1" Step="0.1" Value="{Binding FinderSize1}" Minimum="0" Maximum="90" DecimalPlaces="1" />
+
+                            <CheckBox IsChecked="{Binding FinderSize2Enabled}" Margin="8" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" Content="{t:Text FovSettingsWindow.Finder.Size2}" />
+                            <c:NumericUpDown IsEnabled="{Binding FinderSize2Enabled}" VerticalAlignment="Center" Width="50" Grid.Row="1" Grid.Column="1" Step="0.1" Value="{Binding FinderSize2}" Minimum="0" Maximum="90" DecimalPlaces="1" />
+
+                            <CheckBox IsEnabled="{Binding FinderSize2Enabled}" IsChecked="{Binding FinderSize3Enabled}" Margin="8" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0" Content="{t:Text FovSettingsWindow.Finder.Size3}" />
+                            <c:NumericUpDown VerticalAlignment="Center" Width="50" Grid.Row="2" Grid.Column="1" Step="0.1" Value="{Binding FinderSize3}" Minimum="0" Maximum="90" DecimalPlaces="1">
+                                <c:NumericUpDown.IsEnabled>
+                                    <MultiBinding Converter="{s:BooleanAndConverter}">
+                                        <Binding Path="FinderSize3Enabled" />
+                                        <Binding Path="FinderSize2Enabled" />
+                                    </MultiBinding>
+                                </c:NumericUpDown.IsEnabled>
+                            </c:NumericUpDown>
+                            <CheckBox Margin="8" VerticalAlignment="Center" Grid.Row="3" Grid.ColumnSpan="2" IsChecked="{Binding FinderCrosslines}" Content="{t:Text FovSettingsWindow.Finder.Crosslines}" />
+                        </Grid>
+                    </GroupBox>
+
                 </StackPanel>
             </Grid>
 
             <!-- Details -->
-            <GroupBox Header="{t:Text FovSettingsWindow.Details}" Margin="2 8 2 8">
+            <GroupBox Header="{t:Text FovSettingsWindow.Details}" Visibility="{Binding FinderVisible, Converter={s:InverseBoolToVisibilityConverter}}" Margin="2 8 2 8">
                 <Grid>
                     <TextBlock Margin="2 8 2 8" TextWrapping="Wrap" Text="{Binding FieldOfView, Mode=OneWay, Converter={local:FieldOfViewDetailsConverter}}" Visibility="{Binding FieldOfView, Converter={s:NotNullToVisibilityConverter}}" />
                     <TextBlock Margin="2 8 2 8" VerticalAlignment="Center" HorizontalAlignment="Center" IsEnabled="False" Text="{t:Text FovSettingsWindow.Details.Empty}" Visibility="{Binding FieldOfView, Converter={s:NullToVisibilityConverter}}" />

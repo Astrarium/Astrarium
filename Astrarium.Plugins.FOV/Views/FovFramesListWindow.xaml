@@ -12,8 +12,8 @@
     mc:Ignorable="d" 
     Title="{t:Text FovFramesListWindow.Title}" 
     Height="300" 
-    Width="300" 
-    MinHeight="300" MinWidth="300" 
+    Width="400" 
+    MinHeight="300" MinWidth="400" 
     Style="{StaticResource {x:Type Window}}" 
     WindowStartupLocation="CenterOwner">
 

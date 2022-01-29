@@ -30,34 +30,28 @@ namespace Astrarium.Plugins.FOV
 
             foreach (var frame in frames)
             {
-                if (frame is CircularFovFrame circularFrame)
+                if (frame is FinderFovFrame finderFrame)
                 {
-                    float radius = circularFrame.Size * 3600 / 2;
-                    float size = map.GetDiskSize(radius);
-
-                    // do not draw frame if its size exceeds screen bounds
-                    if (size < Math.Sqrt(map.Width * map.Width + map.Height * map.Height))
+                    var sizes = finderFrame.Sizes.OrderByDescending(s => s);
+                    bool outer = true;
+                    foreach (var size in sizes)
                     {
-                        if (frame.Shading > 0 && circularFrame.Size >= map.ViewAngle / 2)
+                        DrawFovCircle(map, size, finderFrame, isOuter: outer);
+
+                        if (finderFrame.Crosslines)
                         {
-                            var circle = new GraphicsPath();
-                            circle.AddEllipse(map.Width / 2 - size / 2, map.Height / 2 - size / 2, size, size);
+                            float radius = size * 3600 / 4;
+                            float diam = map.GetDiskSize(radius);
 
-                            var shading = new Region(new RectangleF(0, 0, map.Width, map.Height));
-                            shading.Exclude(circle);
-
-                            int transparency = (int)(frame.Shading / 100f * 255);
-                            var solidBrush = new SolidBrush(Color.FromArgb(transparency, map.GetSkyColor()));
-                            map.Graphics.FillRegion(solidBrush, shading);
+                            map.Graphics.DrawPlusCross(new Pen(frame.Color.GetColor(map.Schema, map.DayLightFactor)), new PointF(map.Width / 2, map.Height / 2), diam);
                         }
-                        map.Graphics.DrawEllipse(new Pen(frame.Color.GetColor(map.Schema, map.DayLightFactor)), map.Width / 2 - size / 2, map.Height / 2 - size / 2, size, size);
 
-                        float labelWidth = map.Graphics.MeasureString(frame.Label, font).Width;
-                        if (labelWidth <= size * 2)
-                        {
-                            map.Graphics.DrawString(frame.Label, font, new SolidBrush(frame.Color.GetColor(map.Schema, map.DayLightFactor)), new PointF(map.Width / 2, map.Height / 2 + size / 2), format);
-                        }
+                        outer = false;
                     }
+                }
+                else if (frame is CircularFovFrame circularFrame)
+                {
+                    DrawFovCircle(map, circularFrame.Size, circularFrame, isOuter: true);
                 }
                 else if (frame is CameraFovFrame cameraFrame)
                 {
@@ -94,7 +88,39 @@ namespace Astrarium.Plugins.FOV
                     }
                 }
             }
+        }
 
+        private void DrawFovCircle(IMapContext map, float frameSize, FovFrame frame, bool isOuter)
+        {
+            float radius = frameSize * 3600 / 2;
+            float size = map.GetDiskSize(radius);
+
+            // do not draw frame if its size exceeds screen bounds
+            if (size < Math.Sqrt(map.Width * map.Width + map.Height * map.Height))
+            {
+                if (isOuter && frame.Shading > 0 && frameSize >= map.ViewAngle / 2)
+                {
+                    var circle = new GraphicsPath();
+                    circle.AddEllipse(map.Width / 2 - size / 2, map.Height / 2 - size / 2, size, size);
+
+                    var shading = new Region(new RectangleF(0, 0, map.Width, map.Height));
+                    shading.Exclude(circle);
+
+                    int transparency = (int)(frame.Shading / 100f * 255);
+                    var solidBrush = new SolidBrush(Color.FromArgb(transparency, map.GetSkyColor()));
+                    map.Graphics.FillRegion(solidBrush, shading);
+                }
+                map.Graphics.DrawEllipse(new Pen(frame.Color.GetColor(map.Schema, map.DayLightFactor)), map.Width / 2 - size / 2, map.Height / 2 - size / 2, size, size);
+
+                if (isOuter)
+                {
+                    float labelWidth = map.Graphics.MeasureString(frame.Label, font).Width;
+                    if (labelWidth <= size * 2)
+                    {
+                        map.Graphics.DrawString(frame.Label, font, new SolidBrush(frame.Color.GetColor(map.Schema, map.DayLightFactor)), new PointF(map.Width / 2, map.Height / 2 + size / 2), format);
+                    }
+                }
+            }
         }
     }
 }

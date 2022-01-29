@@ -8,9 +8,19 @@ using System.Threading.Tasks;
 namespace Astrarium.Plugins.FOV
 {
     /// <summary>
+    /// Marker interface for all field of views
+    /// </summary>
+    public interface IFieldOfView { }
+
+    /// <summary>
+    /// Finder frame of view
+    /// </summary>
+    public class FinderFieldOfView : IFieldOfView { }
+
+    /// <summary>
     /// Abstract field of view
     /// </summary>
-    public abstract class FieldOfView 
+    public abstract class FieldOfView : IFieldOfView
     {
         /// <summary>
         /// Dawes limit
