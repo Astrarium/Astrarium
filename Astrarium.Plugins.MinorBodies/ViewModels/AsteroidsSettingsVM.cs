@@ -13,7 +13,7 @@ namespace Astrarium.Plugins.MinorBodies.ViewModels
         private AsteroidsCalc Calculator;
         public ICommand UpdateElementsCommand { get; private set; }
 
-        public AsteroidsSettingsVM(ISettings settings, AsteroidsCalc calculator) : base(settings) 
+        public AsteroidsSettingsVM(ISettings settings, AsteroidsCalc calculator) : base(settings)
         {
             Calculator = calculator;
             UpdateElementsCommand = new Command(UpdateElements);
@@ -39,7 +39,7 @@ namespace Astrarium.Plugins.MinorBodies.ViewModels
             get
             {
                 var timestamp = Settings.Get<DateTime>("AsteroidsDownloadOrbitalElementsTimestamp");
-                return timestamp < new DateTime(2000, 1, 1) ? "unknown" : Formatters.DateTime.Format(timestamp);
+                return timestamp < new DateTime(2000, 1, 1) ? Text.Get("OrbitalElements.LastUpdatedUnknown") : Formatters.DateTime.Format(timestamp);
             }
         }
 

@@ -39,7 +39,7 @@ namespace Astrarium.Plugins.MinorBodies.ViewModels
             get
             {
                 var timestamp = Settings.Get<DateTime>("CometsDownloadOrbitalElementsTimestamp");
-                return timestamp < new DateTime(2000, 1, 1) ? "unknown" : Formatters.DateTime.Format(timestamp);
+                return timestamp < new DateTime(2000, 1, 1) ? Text.Get("OrbitalElements.LastUpdatedUnknown") : Formatters.DateTime.Format(timestamp);
             }
         }
 

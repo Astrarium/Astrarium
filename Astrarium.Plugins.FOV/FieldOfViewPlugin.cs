@@ -42,7 +42,7 @@ namespace Astrarium.Plugins.FOV
                     menuItem.IsChecked = f.Enabled;
                     return menuItem;
                 }).Concat(new MenuItem[] { null, new MenuItem("$FovPlugin.Menu.FOV.Manage", new Command(OpenFovFramesList)) { HotKey = new KeyGesture(Key.R, ModifierKeys.Control, "Ctrl+R") } })) :
-            new ObservableCollection<MenuItem>(new MenuItem[] { new MenuItem("$FovPlugin.Menu.FOV.Add", new Command(AddFovFrame)) });
+            new ObservableCollection<MenuItem>(new MenuItem[] { new MenuItem("$FovPlugin.Menu.FOV.Add", new Command(AddFovFrame)) { HotKey = new KeyGesture(Key.R, ModifierKeys.Control, "Ctrl+R") } });
 
         public bool IsContextMenuVisible => fovFrames.Any(f => f.Enabled);
 

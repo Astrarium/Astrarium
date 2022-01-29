@@ -37,7 +37,7 @@ namespace Astrarium.Plugins.MinorBodies
 
             if (!silent)
             {
-                ViewManager.ShowProgress("Downloading", "Please wait...", tokenSource, progress);
+                ViewManager.ShowProgress("$DataUpdater.ProgressTitle", "$DataUpdater.ProgressText", tokenSource, progress);
             }
 
             Exception error = null;
@@ -68,7 +68,7 @@ namespace Astrarium.Plugins.MinorBodies
                 Trace.TraceError($"Unable to update orbital elements. Error: {error}");
                 if (!silent)
                 {
-                    ViewManager.ShowMessageBox("$Error", $"Unable to download orbital elements: {error.Message}");
+                    ViewManager.ShowMessageBox("$Error", $"{Text.Get("DataUpdater.DownloadError")}: {error.Message}");
                 }
                 DeleteTempFile(tempFile);
                 return null;
@@ -79,7 +79,7 @@ namespace Astrarium.Plugins.MinorBodies
                 Trace.TraceWarning("Unable to download orbital elements. File does not contain data.");
                 if (!silent)
                 {
-                    ViewManager.ShowMessageBox("$Error", $"Unable to download orbital elements. File does not contain data.");
+                    ViewManager.ShowMessageBox("$Error", "$DataUpdater.NoData");
                 }
                 DeleteTempFile(tempFile);
                 return null;
@@ -100,7 +100,7 @@ namespace Astrarium.Plugins.MinorBodies
                 Trace.TraceError($"Unable to read orbital elements. Error: {error}");
                 if (!silent)
                 {
-                    ViewManager.ShowMessageBox("$Error", $"Unable to read orbital elements. Error: {error.Message}");
+                    ViewManager.ShowMessageBox("$Error", $"{Text.Get("DataUpdater.ParseError")}: {error.Message}");
                 }
                 DeleteTempFile(tempFile);
                 return null;
@@ -108,10 +108,10 @@ namespace Astrarium.Plugins.MinorBodies
 
             if (!orbitalElements.Any())
             {
-                Trace.TraceError($"Unable to read orbital elements. Error: {error}");
+                Trace.TraceError($"Unable to read orbital elements.");
                 if (!silent)
                 {
-                    ViewManager.ShowMessageBox("$Error", $"Unable to read orbital elements. Error: {error.Message}");
+                    ViewManager.ShowMessageBox("$Error", Text.Get("DataUpdater.ParseError"));
                 }
                 DeleteTempFile(tempFile);
                 return null;
@@ -138,7 +138,7 @@ namespace Astrarium.Plugins.MinorBodies
                 Trace.TraceError($"Unable to copy elements file. Error: {error}");
                 if (!silent)
                 {
-                    ViewManager.ShowMessageBox("$Error", $"Unable to copy elements file. Error: {error.Message}");
+                    ViewManager.ShowMessageBox("$Error", $"{Text.Get("DataUpdater.CopyError")}: {error.Message}");
                 }
             }
 
@@ -147,7 +147,7 @@ namespace Astrarium.Plugins.MinorBodies
                 Settings.SetAndSave(TimeStampKey, DateTime.Now);
                 if (!silent)
                 {
-                    ViewManager.ShowMessageBox("$Success", $"Orbital elements have been updated successfully.");
+                    ViewManager.ShowMessageBox("$Success", "$DataUpdater.Success");
                 }
             }
 
