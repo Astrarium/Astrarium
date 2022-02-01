@@ -14,7 +14,7 @@ namespace Astrarium.ViewModels
     public class EphemerisVM : ViewModelBase
     {
         public string Header { get; private set; }
-        public DataTable EphemerisTable { get; private set; }      
+        public DataTable EphemerisTable { get; private set; }
         public Command SaveToFileCommand { get; private set; }
         public Command CloseCommand { get; private set; }
 
@@ -63,7 +63,7 @@ namespace Astrarium.ViewModels
                 {
                     Caption = Text.Get($"{bodyTypeName}.{e.Key}"),
                     ColumnName = e.Key,
-                    DataType = e.Value.GetType(),
+                    DataType = e.Value?.GetType() ?? typeof(object),
                     ReadOnly = true
                 };
                 column.ExtendedProperties["Formatter"] = e.Formatter;

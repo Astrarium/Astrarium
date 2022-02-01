@@ -33,7 +33,7 @@ namespace Astrarium.Plugins.Meteors
 
             if (!showMeteors) return;
 
-            var meteors = calc.Meteors.Where(m => Angle.Separation(map.Center, m.Horizontal) < map.ViewAngle);
+            var meteors = calc.GetCelestialObjects().Where(m => Angle.Separation(map.Center, m.Horizontal) < map.ViewAngle);
             if (isGround)
             {
                 meteors = meteors.Where(m => m.Horizontal.Altitude >= 0);

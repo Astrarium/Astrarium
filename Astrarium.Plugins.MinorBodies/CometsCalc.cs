@@ -21,6 +21,7 @@ namespace Astrarium.Plugins.MinorBodies
         private readonly List<Comet> comets = new List<Comet>();
         private object locker = new object();
         public ICollection<Comet> Comets { get { lock (locker) { return comets; } } }
+        public IEnumerable<Comet> GetCelestialObjects() => Comets;
 
         public CometsCalc(ISky sky, ISettings settings, CometsReader reader, CometsDataUpdater updater)
         {
@@ -175,13 +176,20 @@ namespace Astrarium.Plugins.MinorBodies
             e["Equatorial0T.Alpha", Formatters.RA] = (c, p) => c.Get(EquatorialJ2000T, p).Alpha;
             e["Equatorial0T.Delta", Formatters.Dec] = (c, p) => c.Get(EquatorialJ2000T, p).Delta;
             e["EquatorialG.Alpha", Formatters.RA] = (c, p) => c.Get(EquatorialG, p).Alpha;
-            e["EquatorialG.Delta", Formatters.Dec] = (c, p) => c.Get(EquatorialG, p).Delta;           
+            e["EquatorialG.Delta", Formatters.Dec] = (c, p) => c.Get(EquatorialG, p).Delta;
             e["Ecliptical.Lambda"] = (c, p) => c.Get(Ecliptical, p).Lambda;
             e["Ecliptical.Beta"] = (c, p) => c.Get(Ecliptical, p).Beta;
             e["RTS.Rise"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, p).Rise);
             e["RTS.Transit"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, p).Transit);
             e["RTS.Set"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, p).Set);
             e["RTS.Duration"] = (c, p) => c.Get(RiseTransitSet, p).Duration;
+            e["RTS.RiseAzimuth"] = (c, p) => c.Get(RiseTransitSet, p).RiseAzimuth;
+            e["RTS.TransitAltitude"] = (c, p) => c.Get(RiseTransitSet, p).TransitAltitude;
+            e["RTS.SetAzimuth"] = (c, p) => c.Get(RiseTransitSet, p).SetAzimuth;
+            e["Visibility.Begin"] = (c, p) => c.GetDateFromTime(c.Get(Visibility, p).Begin);
+            e["Visibility.End"] = (c, p) => c.GetDateFromTime(c.Get(Visibility, p).End);
+            e["Visibility.Duration"] = (c, p) => c.Get(Visibility, p).Duration;
+            e["Visibility.Period"] = (c, p) => c.Get(Visibility, p).Period;
         }
 
         public void GetInfo(CelestialObjectInfo<Comet> info)
@@ -221,6 +229,12 @@ namespace Astrarium.Plugins.MinorBodies
             .AddRow("RTS.Transit")
             .AddRow("RTS.Set")
             .AddRow("RTS.Duration")
+
+            .AddHeader(Text.Get("Comet.Visibility"))
+            .AddRow("Visibility.Begin")
+            .AddRow("Visibility.End")
+            .AddRow("Visibility.Duration")
+            .AddRow("Visibility.Period")
 
             .AddHeader(Text.Get("Comet.Appearance"))
             .AddRow("AngularDiameter")

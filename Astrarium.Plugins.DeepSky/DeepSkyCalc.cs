@@ -20,22 +20,32 @@ namespace Astrarium.Plugins.DeepSky
         private static string NAMES_FILE = Path.Combine(LOCATION, "Data/NGCICNames.dat");
         private static string OUTLINES_FILE = Path.Combine(LOCATION, "Data/Outlines.dat");
 
+        /// <inheritdoc/>
+        public IEnumerable<DeepSky> GetCelestialObjects() => deepSkies.Where(ds => !ds.Status.IsEmpty());
+
         /// <summary>
         /// Collection of NGC/IC object
         /// </summary>
-        public ICollection<DeepSky> DeepSkies { get; private set; } = new List<DeepSky>();
+        internal List<DeepSky> deepSkies = new List<DeepSky>();
 
         /// <summary>
         /// Length of single record in data file
         /// </summary>
         private long RecordLength = 0;
 
+        private readonly ISky sky;
+
+        public DeepSkyCalc(ISky sky)
+        {
+            this.sky = sky;
+        }
+
         public override void Calculate(SkyContext context)
         {
             // precessional elements
             var p = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
 
-            foreach (var ds in DeepSkies)
+            foreach (var ds in deepSkies)
             {
                 ds.Equatorial = context.Get(Equatorial, ds);
                 ds.Horizontal = context.Get(Horizontal, ds);
@@ -110,17 +120,36 @@ namespace Astrarium.Plugins.DeepSky
         {
             double theta0 = Date.ApparentSiderealTime(c.JulianDayMidnight, c.NutationElements.deltaPsi, c.Epsilon);
             var eq = c.Get(Equatorial, ds);
-            return Visibility.RiseTransitSet(eq, c.GeoLocation, theta0);
+            return Algorithms.Visibility.RiseTransitSet(eq, c.GeoLocation, theta0);
+        }
+
+        private VisibilityDetails Visibility(SkyContext c, DeepSky body)
+        {
+            var ctx = c.Copy(c.JulianDayMidnight);
+            var eq = ctx.Get(Equatorial, body);
+            var eqSun = ctx.Get(sky.SunEquatorial);
+
+            double minBodyAltitude = ctx.MinimalBodyAltitudeForVisibilityCalculations ?? 5;
+            double minSunAltitude = ctx.MinimalSunAltitudeForVisibilityCalculations ?? -10;
+            return Algorithms.Visibility.Details(eq, eqSun, ctx.GeoLocation, ctx.SiderealTime, minBodyAltitude, minSunAltitude);
         }
 
         public void ConfigureEphemeris(EphemerisConfig<DeepSky> e)
         {
             e["Horizontal.Altitude"] = (c, ds) => c.Get(Horizontal, ds).Altitude;
             e["Horizontal.Azimuth"] = (c, ds) => c.Get(Horizontal, ds).Azimuth;
+            e["Magnitude"] = (c, ds) => ds.Mag;
             e["RTS.Rise"] = (c, ds) => c.GetDateFromTime(c.Get(RiseTransitSet, ds).Rise);
             e["RTS.Transit"] = (c, ds) => c.GetDateFromTime(c.Get(RiseTransitSet, ds).Transit);
             e["RTS.Set"] = (c, ds) => c.GetDateFromTime(c.Get(RiseTransitSet, ds).Set);
             e["RTS.Duration"] = (c, ds) => c.Get(RiseTransitSet, ds).Duration;
+            e["RTS.RiseAzimuth"] = (c, ds) => c.Get(RiseTransitSet, ds).RiseAzimuth;
+            e["RTS.TransitAltitude"] = (c, ds) => c.Get(RiseTransitSet, ds).TransitAltitude;
+            e["RTS.SetAzimuth"] = (c, ds) => c.Get(RiseTransitSet, ds).SetAzimuth;
+            e["Visibility.Begin"] = (c, p) => c.GetDateFromTime(c.Get(Visibility, p).Begin);
+            e["Visibility.End"] = (c, p) => c.GetDateFromTime(c.Get(Visibility, p).End);
+            e["Visibility.Duration"] = (c, p) => c.Get(Visibility, p).Duration;
+            e["Visibility.Period"] = (c, p) => c.Get(Visibility, p).Period;
         }
 
         public void GetInfo(CelestialObjectInfo<DeepSky> info)
@@ -152,6 +181,12 @@ namespace Astrarium.Plugins.DeepSky
             .AddRow("RTS.Transit")
             .AddRow("RTS.Set")
             .AddRow("RTS.Duration")
+
+            .AddHeader(Text.Get("DeepSky.Visibility"))
+            .AddRow("Visibility.Begin")
+            .AddRow("Visibility.End")
+            .AddRow("Visibility.Duration")
+            .AddRow("Visibility.Period")
 
             .AddHeader(Text.Get("DeepSky.Properties"));
 
@@ -203,8 +238,8 @@ namespace Astrarium.Plugins.DeepSky
         }
 
         public ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50)
-        {           
-            return DeepSkies.Where(ds => ds.Names.Any(name => name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
+        {
+            return deepSkies.Where(ds => ds.Names.Any(name => name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
                 .Take(maxCount)
                 .ToArray();
         }
@@ -273,7 +308,7 @@ namespace Astrarium.Plugins.DeepSky
                         Messier = messier,
                     };
 
-                    DeepSkies.Add(ds);
+                    deepSkies.Add(ds);
                 }
 
                 RecordLength = (long)Math.Round(reader.BaseStream.Length / (double)recordNumber);
@@ -285,7 +320,7 @@ namespace Astrarium.Plugins.DeepSky
                 while (!reader.EndOfStream)
                 {
                     string[] line = reader.ReadLine().Split(';');
-                    var ds = DeepSkies.FirstOrDefault(d => d.CatalogName.Replace(" ", "").Equals(line[0].Replace(" ", "")));
+                    var ds = deepSkies.FirstOrDefault(d => d.CatalogName.Replace(" ", "").Equals(line[0].Replace(" ", "")));
                     if (ds != null)
                     {
                         ds.ProperName = line[1].Trim();
@@ -309,7 +344,7 @@ namespace Astrarium.Plugins.DeepSky
                         outline = new List<CelestialPoint>();
 
                         string name = line.Substring(2).Trim().ToUpper();
-                        var ds = DeepSkies.FirstOrDefault(d => d.Names.Any(n => n.Replace(" ", "").Equals(name)));
+                        var ds = deepSkies.FirstOrDefault(d => d.Names.Any(n => n.Replace(" ", "").Equals(name)));
                         if (ds != null && ds.Status != DeepSkyStatus.Galaxy)
                         {
                             ds.Outline = outline;

@@ -13,6 +13,9 @@ namespace Astrarium.Plugins.Novae
         public ICollection<Nova> Novae { get; private set; }
 
         /// <inheritdoc />
+        public IEnumerable<Nova> GetCelestialObjects() => Novae;
+
+        /// <inheritdoc />
         public override void Initialize()
         {
             string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/novae.json");

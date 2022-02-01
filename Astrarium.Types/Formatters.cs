@@ -60,7 +60,7 @@ namespace Astrarium.Types
             Default["Phase"]                    = Phase;
             Default["HorizontalParallax"]       = Angle;
             Default["AngularDiameter"]          = Angle;
-            Default["Visibility.Duration"]      = new VisibilityDurationFormatter();
+            Default["Visibility.Duration"]      = VisibilityDuration;
             Default["Visibility.Period"]        = new VisibilityPeriodFormatter();
             Default["Visibility.Begin"]         = Time;
             Default["Visibility.End"]           = Time;
@@ -311,7 +311,9 @@ namespace Astrarium.Types
 
             public string Format(object value)
             {
-                if ((value is double && (double.IsInfinity((double)value) || double.IsNaN((double)value))) ||
+                if ((value == null) ||
+                    (value is DBNull) ||
+                    (value is double && (double.IsInfinity((double)value) || double.IsNaN((double)value))) ||
                     (value is float && (float.IsInfinity((float)value) || float.IsNaN((float)value))))
                 {
                     return "—";
@@ -454,6 +456,7 @@ namespace Astrarium.Types
         public static readonly IEphemFormatter Time = new TimeFormatter();
         public static readonly IEphemFormatter DistanceInAu = new UnsignedDoubleFormatter(3, "$Formatters.DistanceInAu.AU");
         public static readonly IEphemFormatter Phase = new PhaseFormatter();
+        public static readonly IEphemFormatter VisibilityDuration = new VisibilityDurationFormatter();
         public static readonly IEphemFormatter Magnitude = new SignedDoubleFormatter(2, "ᵐ");
         public static readonly IEphemFormatter PhaseAngle = new UnsignedDoubleFormatter(2, "\u00B0");
         public static readonly IEphemFormatter Angle = new AngleFormatter();

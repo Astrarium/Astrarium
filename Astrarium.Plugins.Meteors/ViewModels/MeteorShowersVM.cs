@@ -113,7 +113,7 @@ namespace Astrarium.Plugins.Meteors
 
         public MeteorShowersVM(MeteorsCalculator calc, ISky sky, ISettings settings)
         {
-            Meteors = calc.Meteors.OrderBy(x => x.Max).ToArray();
+            Meteors = calc.GetCelestialObjects().OrderBy(x => x.Max).ToArray();
             Sky = sky;
             Calculator = calc;
             Year = sky.Context.GetDate(sky.Context.JulianDay).Year;

@@ -21,6 +21,23 @@ namespace Astrarium.Types
             JulianDay = jd;
         }
 
+        /// <summary>
+        /// Copies the context, or preserves the exising one if julian day not changed.
+        /// </summary>
+        /// <param name="jd"></param>
+        /// <returns></returns>
+        public SkyContext Copy(double jd)
+        {
+            if (Math.Abs(jd - _JulianDay) < 1e-6)
+                return this;
+            else
+                return new SkyContext(jd, GeoLocation, PreferFastCalculation)
+                {
+                    MinimalBodyAltitudeForVisibilityCalculations = MinimalBodyAltitudeForVisibilityCalculations,
+                    MinimalSunAltitudeForVisibilityCalculations = MinimalSunAltitudeForVisibilityCalculations
+                };
+        }
+
         private double _JulianDay;
 
         /// <summary>
@@ -68,6 +85,18 @@ namespace Astrarium.Types
                 ContextChanged?.Invoke();
             }
         }
+
+        /// <summary>
+        /// Minimal Sun altitude taken into account for calculating visibility conditions, expressed in degrees.
+        /// Default value is null (not set).
+        /// </summary>
+        public double? MinimalSunAltitudeForVisibilityCalculations { get; set; }
+
+        /// <summary>
+        /// Minimal Sun altitude taken into account for calculating visibility conditions, expressed in degrees.
+        /// Default value is null (not set).
+        /// </summary>
+        public double? MinimalBodyAltitudeForVisibilityCalculations { get; set; }
 
         /// <summary>
         /// Flag indicating fast calculation (low precision) is preferred

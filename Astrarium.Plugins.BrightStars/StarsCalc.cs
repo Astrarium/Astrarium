@@ -22,7 +22,10 @@ namespace Astrarium.Plugins.BrightStars
         /// <summary>
         /// Collection of all stars
         /// </summary>
-        public ICollection<Star> Stars { get; private set; } = new List<Star>();
+        internal ICollection<Star> Stars = new List<Star>();
+
+        /// <inheritdoc />
+        public IEnumerable<Star> GetCelestialObjects() => Stars.Where(s => s != null);
 
         /// <summary>
         /// Stars data reader
@@ -56,7 +59,7 @@ namespace Astrarium.Plugins.BrightStars
             DataReader.StarsDataFilePath = STARS_FILE;
             DataReader.StarsNamesFilePath = NAMES_FILE;
             DataReader.AlphabetFilePath = ALPHABET_FILE;
-            Stars = DataReader.ReadStars();            
+            Stars = DataReader.ReadStars();
             Alphabet = DataReader.ReadAlphabet();            
         }
 

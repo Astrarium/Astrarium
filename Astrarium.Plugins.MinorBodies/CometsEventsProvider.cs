@@ -25,7 +25,7 @@ namespace Astrarium.Plugins.MinorBodies
         private ICollection<AstroEvent> PerihelionPassages(AstroEventsContext context)
         {
             return
-                cometsCalc.Comets.Where(c =>
+                cometsCalc.GetCelestialObjects().Where(c =>
                     c.Orbit.Epoch >= context.From &&
                     c.Orbit.Epoch <= context.To)
                     .Select(c => new AstroEvent(c.Orbit.Epoch, Text.Get("CometsEvents.PerihelionPassage.Text", ("CometName", c.Name)), c))

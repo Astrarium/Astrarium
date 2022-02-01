@@ -11,13 +11,14 @@ namespace Astrarium.Plugins.Meteors
     {
         private readonly ISky Sky;
         private CelestialObject Moon;
+        private ICollection<Meteor> Meteors;
 
         public MeteorsCalculator(ISky sky)
         {
             Sky = sky;
         }
 
-        public ICollection<Meteor> Meteors { get; private set; }
+        public IEnumerable<Meteor> GetCelestialObjects() => Meteors;
 
         public override void Initialize()
         {

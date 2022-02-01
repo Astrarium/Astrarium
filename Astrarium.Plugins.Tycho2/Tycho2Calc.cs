@@ -106,6 +106,9 @@ namespace Astrarium.Plugins.Tycho2
         /// </summary>
         public Tycho2Star SelectedStar { get; set; }
 
+        /// <inheritdoc />
+        public IEnumerable<Tycho2Star> GetCelestialObjects() => new Tycho2Star[0];
+
         private readonly string dataPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data");
 
         public Tycho2Calc(ISettings settings)
@@ -427,7 +430,7 @@ namespace Astrarium.Plugins.Tycho2
         {
             var match = searchRegex.Match(searchString.ToLowerInvariant());
             if (match.Success)
-            {           
+            {
                 int tyc1 = int.Parse(match.Groups["tyc1"].Value);
                 short? tyc2 = match.Groups["tyc2"].Success ? short.Parse(match.Groups["tyc2"].Value) : (short?)null;
                 string tyc3 = match.Groups["tyc3"].Value;

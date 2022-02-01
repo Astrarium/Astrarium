@@ -40,6 +40,15 @@ namespace Astrarium.Plugins.SolarSystem
         public double MarsNPCWidth { get; private set; }
         public double MarsSPCWidth { get; private set; }
 
+        IEnumerable<Planet> ICelestialObjectCalc<Planet>.GetCelestialObjects() => planets.Where(p => p.Number != 3);
+        IEnumerable<Pluto> ICelestialObjectCalc<Pluto>.GetCelestialObjects() => new Pluto[] { pluto };
+        IEnumerable<MarsMoon> ICelestialObjectCalc<MarsMoon>.GetCelestialObjects() => marsMoons;
+        IEnumerable<JupiterMoon> ICelestialObjectCalc<JupiterMoon>.GetCelestialObjects() => jupiterMoons;
+        IEnumerable<SaturnMoon> ICelestialObjectCalc<SaturnMoon>.GetCelestialObjects() => saturnMoons;
+        IEnumerable<UranusMoon> ICelestialObjectCalc<UranusMoon>.GetCelestialObjects() => uranusMoons;
+        IEnumerable<NeptuneMoon> ICelestialObjectCalc<NeptuneMoon>.GetCelestialObjects() => neptuneMoons;
+        IEnumerable<GenericMoon> ICelestialObjectCalc<GenericMoon>.GetCelestialObjects() => genericMoons;
+
         private readonly Func<Planet, bool> IsMars = p => p.Number == Planet.MARS;
         private readonly Func<Planet, bool> IsJupiter = p => p.Number == Planet.JUPITER;
         private readonly Func<Planet, bool> IsSaturn = p => p.Number == Planet.SATURN;

@@ -16,10 +16,17 @@ namespace Astrarium.Types
         {
             return (T)Value;
         }
+
+        public override string ToString()
+        {
+            return $"{Key} = {Formatter?.Format(Value) ?? Value}";
+        }
     }
 
     public class Ephemerides : List<Ephemeris>
     {
+        public CelestialObject CelestialObject { get; private set; }
+
         public Ephemeris Get(string key)
         {
             return this.FirstOrDefault(e => e.Key == key);
@@ -28,6 +35,16 @@ namespace Astrarium.Types
         public T GetValue<T>(string key)
         {
             return Get(key).GetValue<T>();
+        }
+
+        public Ephemerides(CelestialObject body)
+        {
+            CelestialObject = body;
+        }
+
+        public override string ToString()
+        {
+            return $"{CelestialObject.Names.First()} {base.ToString()}";
         }
     }
 }

@@ -16,6 +16,8 @@ namespace Astrarium.Plugins.SolarSystem
     {
         public Moon Moon { get; private set; } = new Moon();
 
+        public IEnumerable<Moon> GetCelestialObjects() => new Moon[] { Moon };
+
         public override void Calculate(SkyContext c)
         {
             Moon.Equatorial = c.Get(Equatorial);
@@ -167,7 +169,7 @@ namespace Astrarium.Plugins.SolarSystem
         /// <summary>
         /// Gets visual magnitude of the Moon
         /// </summary>
-        public double Magnitude(SkyContext c)
+        public float Magnitude(SkyContext c)
         {
             return LunarEphem.Magnitude(c.Get(PhaseAngle));
         }

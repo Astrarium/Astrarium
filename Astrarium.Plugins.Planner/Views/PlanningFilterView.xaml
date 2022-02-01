@@ -1,0 +1,91 @@
+﻿<Window x:Class="Astrarium.Plugins.Planner.Views.PlanningFilterView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+        xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+        xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+        mc:Ignorable="d"
+        Title="Create New Observation Plan"
+        Style="{StaticResource {x:Type Window}}" 
+        MinHeight="300" MinWidth="400"
+        WindowStartupLocation="CenterOwner"
+        Height="500" Width="600">
+    <Grid Margin="4">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="200" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Label Margin="4 0 4 0" Background="{StaticResource BrushControlDarkBackground}" Content="Object types" />
+                    <TreeView Margin="4" Grid.Row="1" ItemsSource="{Binding ObjectTypes}" />
+                </Grid>
+               
+
+                <GridSplitter Grid.Column="1" HorizontalAlignment="Center"  />
+                <Grid Grid.Column="2" HorizontalAlignment="Stretch">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Height="28" Grid.ColumnSpan="2" Margin="2 0 2 0" Background="{StaticResource BrushControlDarkBackground}" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <c:DatePicker Grid.Column="0" Width="100" JulianDay="{Binding JulianDay}" UtcOffset="{Binding UtcOffset}" Options="DateOnly" Margin="4" />
+
+                        <c:TimeInput Grid.Column="1" ShowSeconds="False" Width="55" />
+                        <DatePicker Grid.Column="3" />
+                    </Grid>
+
+                    <CheckBox Margin="2" Grid.Row="1" Grid.Column="0" Content="Minimal altitude of celestial object" VerticalAlignment="Center" />
+                    <c:NumericUpDown Margin="2" Width="50" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="0" Value="5" Maximum="90" DecimalPlaces="0" />
+
+                    <CheckBox Margin="2" Grid.Row="2" Grid.Column="0" Content="Maximal altitude of the Sun" VerticalAlignment="Center" />
+                    <c:NumericUpDown Margin="2" Grid.Row="2" Width="50" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="-90" Maximum="0" Value="0" DecimalPlaces="0" />
+
+                    <CheckBox IsChecked="{Binding EnableMagLimit}" Margin="2" Grid.Row="3" Grid.Column="0" Content="Minimal magnitude of celestial body" VerticalAlignment="Center" />
+                    <c:NumericUpDown IsEnabled="{Binding EnableMagLimit}" Margin="2" Grid.Row="3" Width="50" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="-10" Maximum="25" Value="{Binding MagLimit}" DecimalPlaces="1" />
+
+                </Grid>
+            </Grid>
+        </Grid>
+        
+        <Separator Margin="0 4" Grid.Row="1" />
+        <StackPanel  
+            Grid.Row="2"
+            VerticalAlignment="Bottom"
+            Orientation="Horizontal"
+            HorizontalAlignment="Right">
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding OkCommand}" IsEnabled="{Binding OkButtonEnabled}" Content="{t:Text OK}" />
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CancelCommand}" Content="{t:Text Cancel}" />
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Astrarium.Algorithms;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -12,6 +13,10 @@ namespace Astrarium.Types
         void SetDate(double jd);
         void Calculate();
         bool DateTimeSync { get; set; }
+
+        /// <summary>
+        /// Gets ephemerides of specified celestial object
+        /// </summary>
         List<Ephemerides> GetEphemerides(CelestialObject body, double from, double to, double step, IEnumerable<string> categories, CancellationToken? cancelToken = null, IProgress<double> progress = null);
         Ephemerides GetEphemerides(CelestialObject body, SkyContext context, IEnumerable<string> categories);
         ICollection<string> GetEphemerisCategories(CelestialObject body);
@@ -20,7 +25,13 @@ namespace Astrarium.Types
         CelestialObjectInfo GetInfo(CelestialObject body);
         Constellation GetConstellation(string code);
         ICollection<Tuple<int, int>> ConstellationLines { get; set; }
-                
+        IEnumerable<CelestialObject> CelestialObjects { get; }
+        
+        /// <summary>
+        /// Function that gets equatorial coordinates of the Sun
+        /// </summary>
+        Func<SkyContext, CrdsEquatorial> SunEquatorial { get; set; }
+
         /// <summary>
         /// Searches celestial objects by string.
         /// </summary>

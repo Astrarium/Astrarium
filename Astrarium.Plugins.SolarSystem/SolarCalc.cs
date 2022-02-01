@@ -20,6 +20,13 @@ namespace Astrarium.Plugins.SolarSystem
 
         public Sun Sun { get; private set; } = new Sun();
 
+        public IEnumerable<Sun> GetCelestialObjects() => new Sun[] { Sun };
+
+        public SolarCalc(ISky sky)
+        {
+            sky.SunEquatorial = Equatorial;
+        }
+
         public override void Calculate(SkyContext c)
         {
             Sun.Equatorial = c.Get(Equatorial);

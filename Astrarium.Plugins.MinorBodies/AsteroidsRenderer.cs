@@ -32,7 +32,7 @@ namespace Astrarium.Plugins.MinorBodies
             var allAsteroids = asteroidsCalc.Asteroids;
             bool isGround = settings.Get<bool>("Ground");
             bool drawAsteroids = settings.Get<bool>("Asteroids");
-            bool drawLabels = settings.Get<bool>("AsteroidsLabels");            
+            bool drawLabels = settings.Get<bool>("AsteroidsLabels");
             bool drawAll = settings.Get<bool>("AsteroidsDrawAll");
             decimal drawAllMagLimit = settings.Get<decimal>("AsteroidsDrawAllMagLimit");
             bool drawLabelMag = settings.Get<bool>("AsteroidsLabelsMag");

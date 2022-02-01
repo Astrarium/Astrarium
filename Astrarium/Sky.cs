@@ -15,7 +15,9 @@ namespace Astrarium
     {
         private delegate ICollection<CelestialObject> SearchDelegate(SkyContext context, string searchString, int maxCount = 50);
         private delegate void GetInfoDelegate<T>(CelestialObjectInfo<T> body) where T : CelestialObject;
+        private delegate IEnumerable<T> GetCelestialObjectsDelegate<T>() where T : CelestialObject;
 
+        private Dictionary<Type, Delegate> CelestialObjectsProviders = new Dictionary<Type, Delegate>();
         private Dictionary<Type, EphemerisConfig> EphemConfigs = new Dictionary<Type, EphemerisConfig>();
         private Dictionary<Type, Delegate> InfoProviders = new Dictionary<Type, Delegate>();
         private List<SearchDelegate> SearchProviders = new List<SearchDelegate>();
@@ -52,7 +54,19 @@ namespace Astrarium
             }
         }
 
+        /// <inheritdoc />
         public ICollection<Tuple<int, int>> ConstellationLines { get; set; } = new Tuple<int, int>[0];
+
+        public IEnumerable<CelestialObject> CelestialObjects
+        {
+            get
+            {
+                return CelestialObjectsProviders.SelectMany(p => p.Value.DynamicInvoke() as IEnumerable<CelestialObject>);
+            }
+        }
+
+        /// <inheritdoc />
+        public Func<SkyContext, CrdsEquatorial> SunEquatorial { get; set; } = (c) => new CrdsEquatorial(0, 0);
 
         public Sky()
         {
@@ -97,12 +111,17 @@ namespace Astrarium
                         EphemConfigs[bodyType] = config;
                     }
 
+                    // Celestial objects providers
+                    Type genericGetCelestialObjectsFuncType = typeof(GetCelestialObjectsDelegate<>).MakeGenericType(bodyType);
+                    CelestialObjectsProviders[bodyType] = concreteCalc.GetMethod(nameof(ICelestialObjectCalc<CelestialObject>.GetCelestialObjects)).CreateDelegate(genericGetCelestialObjectsFuncType, calc);
+
                     // Info provider
                     Type genericGetInfoFuncType = typeof(GetInfoDelegate<>).MakeGenericType(bodyType);
-                    InfoProviders[bodyType] = concreteCalc.GetMethod(nameof(ICelestialObjectCalc<CelestialObject>.GetInfo)).CreateDelegate(genericGetInfoFuncType, calc) as Delegate;
-                    
+                    InfoProviders[bodyType] = concreteCalc.GetMethod(nameof(ICelestialObjectCalc<CelestialObject>.GetInfo)).CreateDelegate(genericGetInfoFuncType, calc);
+
                     // Search provider
-                    var searchFunc = concreteCalc.GetMethod(nameof(ICelestialObjectCalc<CelestialObject>.Search)).CreateDelegate(typeof(SearchDelegate), calc) as SearchDelegate;
+                    Type[] searchParameters = typeof(SearchDelegate).GetMethod("Invoke").GetParameters().Select(p => p.ParameterType).ToArray();
+                    var searchFunc = concreteCalc.GetMethod(nameof(ICelestialObjectCalc<CelestialObject>.Search), searchParameters).CreateDelegate(typeof(SearchDelegate), calc) as SearchDelegate;
                     if (!SearchProviders.Contains(searchFunc))
                     {
                         SearchProviders.Add(searchFunc);
@@ -190,7 +209,7 @@ namespace Astrarium
 
                 var context = new SkyContext(jd, Context.GeoLocation);
 
-                Ephemerides ephemerides = new Ephemerides();
+                Ephemerides ephemerides = new Ephemerides(body);
 
                 foreach (var item in itemsToBeCalled)
                 {
@@ -210,10 +229,9 @@ namespace Astrarium
 
         public Ephemerides GetEphemerides(CelestialObject body, SkyContext context, IEnumerable<string> categories)
         {
-            List<Ephemerides> all = new List<Ephemerides>();
             var config = EphemConfigs[body.GetType()];
             var itemsToBeCalled = config.Filter(categories);
-            Ephemerides ephemerides = new Ephemerides();
+            Ephemerides ephemerides = new Ephemerides(body);
             foreach (var item in itemsToBeCalled)
             {
                 ephemerides.Add(new Ephemeris()
@@ -321,7 +339,7 @@ namespace Astrarium
             }
             return results.OrderBy(b => string.Join(", ", b.Names)).Take(maxCount).ToList();
         }
-       
+
         public Constellation GetConstellation(string code)
         {
             code = code.ToUpper();

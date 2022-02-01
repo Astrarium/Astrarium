@@ -36,7 +36,7 @@ namespace Astrarium.Plugins.Meteors
                 double jd0 = Date.JulianDay0(year);
 
                 events.AddRange(
-                    meteorsCalc.Meteors
+                    meteorsCalc.GetCelestialObjects()
                         // TODO: limit by setting
                         .Where(m => m.ActivityClass <= 3)
                         .Select(m => new AstroEvent(jd0 + func(m), text(m), noExactTime: true))
