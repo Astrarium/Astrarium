@@ -13,6 +13,9 @@ namespace Astrarium.Plugins.SolarSystem.Objects
             Number = number;
         }
 
+        /// <inheritdoc />
+        public override string Type => "PlanetMoon";
+
         /// <summary>
         /// Apparent equatorial coordinates of the Saturn moon
         /// </summary>

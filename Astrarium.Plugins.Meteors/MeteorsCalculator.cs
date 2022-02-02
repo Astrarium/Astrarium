@@ -117,7 +117,7 @@ namespace Astrarium.Plugins.Meteors
 
             info
             .SetTitle(string.Join(", ", info.Body.Names))
-            .SetSubtitle(Text.Get("Meteor.Subtitle"))
+            .SetSubtitle(Text.Get("Meteor.Type"))
             .AddRow("Constellation", constellation)
 
             .AddHeader(Text.Get("Meteor.Equatorial"))

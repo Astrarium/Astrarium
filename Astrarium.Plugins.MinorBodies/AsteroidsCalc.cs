@@ -143,7 +143,7 @@ namespace Astrarium.Plugins.MinorBodies
         {
             info
             .SetTitle(info.Body.Names.First())
-            .SetSubtitle(Text.Get("Asteroid.Subtitle"))
+            .SetSubtitle(Text.Get("Asteroid.Type"))
             .AddRow("Constellation")
 
             .AddHeader(Text.Get("Asteroid.Equatorial"))

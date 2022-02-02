@@ -317,7 +317,7 @@ namespace Astrarium.Plugins.SolarSystem
         public void GetInfo(CelestialObjectInfo<Planet> info)
         {
             info
-                .SetSubtitle(Text.Get("Planet.Subtitle"))
+                .SetSubtitle(Text.Get("Planet.Type"))
                 .SetTitle(info.Body.Names.First())
 
                 .AddRow("Constellation")

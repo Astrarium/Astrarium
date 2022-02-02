@@ -33,6 +33,12 @@ namespace Astrarium.Plugins.Planner.ViewModels
             set => SetValue(nameof(UtcOffset), value);
         }
 
+        public TimeSpan TimeFrom
+        {
+            get => GetValue<TimeSpan>(nameof(TimeFrom), new TimeSpan(22, 0, 0));
+            set => SetValue(nameof(TimeFrom), value);
+        }
+
         public bool EnableMagLimit
         {
             get => GetValue<bool>(nameof(EnableMagLimit));
@@ -60,20 +66,20 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
         private void BuildCategoriesTree()
         {
-            var categories = sky.GetEventsCategories();
-            var groups = categories.GroupBy(cat => cat.Split('.').First());
+            var types = sky.CelestialObjects.Select(c => c.Type).Where(t => t != null).Distinct();
+            var groups = types.GroupBy(t => t.Split('.').First());
 
-            Node root = new Node(Text.Get("PhenomenaSettingsWindow.Phenomena.All"));
+            Node root = new Node("All");
             root.CheckedChanged += Root_CheckedChanged;
 
             foreach (var group in groups)
             {
-                Node node = new Node(Text.Get(group.Key), group.Key);
+                Node node = new Node(Text.Get($"{group.Key}.Type"), group.Key);
                 foreach (var item in group)
                 {
                     if (item != group.Key)
                     {
-                        node.Children.Add(new Node(Text.Get(item), item));
+                        node.Children.Add(new Node(Text.Get($"{item}.Type"), item));
                     }
                 }
                 root.Children.Add(node);
@@ -89,17 +95,37 @@ namespace Astrarium.Plugins.Planner.ViewModels
             NotifyPropertyChanged(nameof(OkButtonEnabled));
         }
 
+        private IEnumerable<Node> AllNodes(Node node)
+        {
+            yield return node;
+
+            foreach (Node child in node.Children)
+            {
+                foreach (Node n in AllNodes(child))
+                {
+                    yield return n;
+                }
+            }
+        }
+
+        private string[] GetObjectTypes()
+        {
+            return AllNodes(ObjectTypes.First())
+                    .Where(n => n.IsChecked ?? false)
+                    .Select(n => n.Id).ToArray();
+        }
+
         private void Ok()
         {
             Filter = new PlanningFilter()
             {
                 JulianDayMidnight = JulianDay,
                 MagLimit = EnableMagLimit ? (float?)MagLimit : null,
-                TimeFrom = 22,
+                TimeFrom = TimeFrom.TotalHours,
                 TimeTo = 3,
                 MinBodyAltitude = 0,
                 MinSunAltitude = 0,
-                ObjectTypes = new string[] { },
+                ObjectTypes = GetObjectTypes(),
                 ObserverLocation = sky.Context.GeoLocation
             };
 

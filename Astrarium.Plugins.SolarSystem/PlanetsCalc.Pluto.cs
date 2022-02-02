@@ -246,7 +246,7 @@ namespace Astrarium.Plugins.SolarSystem
         public void GetInfo(CelestialObjectInfo<Pluto> info)
         {
             info
-            .SetSubtitle(Text.Get("Pluto.Subtitle"))
+            .SetSubtitle(Text.Get("Pluto.Type"))
             .SetTitle(info.Body.Names.First())
 
             .AddRow("Constellation")

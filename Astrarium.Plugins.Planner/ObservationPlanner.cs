@@ -39,12 +39,14 @@ namespace Astrarium.Plugins.Planner
             context.MinimalBodyAltitudeForVisibilityCalculations = filter.MinBodyAltitude ?? 0;
             context.MinimalSunAltitudeForVisibilityCalculations = filter.MinSunAltitude ?? 0;
 
+            var celesialObjects = sky.CelestialObjects.Where(b => filter.ObjectTypes.Contains(b.Type));
+
             // Total objects count
-            double objectsCount = sky.CelestialObjects.Count();
+            double objectsCount = celesialObjects.Count();
 
             int counter = 0;
 
-            foreach (CelestialObject body in sky.CelestialObjects)
+            foreach (CelestialObject body in celesialObjects)
             {
                 if (token.HasValue && token.Value.IsCancellationRequested)
                 {
@@ -53,8 +55,6 @@ namespace Astrarium.Plugins.Planner
                 }
 
                 progress?.Report(counter++ / objectsCount * 100);
-
-                // TODO: filter by celestial object type!
 
                 // Ephemerides for particular celestial body
                 Ephemerides bodyEphemerides = new Ephemerides(body);

@@ -17,7 +17,7 @@ namespace Astrarium.Types.Controls
         public const string PartUpButton = "PART_UpButton";
         public const string PartDownButton = "PART_DownButton";
 
-        public static readonly DependencyProperty ValueProperty = DependencyProperty.Register(nameof(Value), typeof(double), typeof(TimeInput), new FrameworkPropertyMetadata(0d) { AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(ValuePropertyChanged), BindsTwoWayByDefault = true });
+        public static readonly DependencyProperty ValueProperty = DependencyProperty.Register(nameof(Value), typeof(TimeSpan), typeof(TimeInput), new FrameworkPropertyMetadata(TimeSpan.Zero) { AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(ValuePropertyChanged), BindsTwoWayByDefault = true });
 
         public static readonly DependencyProperty ShowSecondsProperty = DependencyProperty.Register(nameof(ShowSeconds), typeof(bool), typeof(TimeInput), new FrameworkPropertyMetadata(false) { AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(ShowSecondsPropertyChanged), BindsTwoWayByDefault = true });
 
@@ -27,9 +27,9 @@ namespace Astrarium.Types.Controls
         private RepeatButton downButton;
         private string currentGroup = "";
 
-        public double Value
+        public TimeSpan Value
         {
-            get => (double)GetValue(ValueProperty);
+            get => (TimeSpan)GetValue(ValueProperty);
             set => SetValue(ValueProperty, value);
         }
 
@@ -43,7 +43,7 @@ namespace Astrarium.Types.Controls
         {
             TimeInput @this = (TimeInput)sender;
             bool showSeconds = @this.ShowSeconds;
-            double value = (double)e.NewValue;
+            TimeSpan value = (TimeSpan)e.NewValue;
             @this.editor.Text = ValueToString(value, showSeconds);
         }
 
@@ -51,7 +51,7 @@ namespace Astrarium.Types.Controls
         {
             TimeInput @this = (TimeInput)sender;
             bool showSeconds = (bool)e.NewValue;
-            double value = @this.Value;
+            TimeSpan value = @this.Value;
             if (@this.editor != null)
             {
                 @this.editor.Text = ValueToString(value, showSeconds);
@@ -91,16 +91,16 @@ namespace Astrarium.Types.Controls
             EndEdit();
         }
 
-        private static string ValueToString(double value, bool showSeconds)
+        private static string ValueToString(TimeSpan value, bool showSeconds)
         {
             string format = showSeconds ? "hh\\:mm\\:ss" : "hh\\:mm";
-            return TimeSpan.FromHours(value).ToString(format, CultureInfo.InvariantCulture);
+            return value.ToString(format, CultureInfo.InvariantCulture);
         }
 
-        private static double StringToValue(string str, bool showSeconds)
+        private static TimeSpan StringToValue(string str, bool showSeconds)
         {
             string format = showSeconds ? "HH:mm:ss" : "HH:mm";
-            return DateTime.ParseExact(str, format, CultureInfo.InvariantCulture).TimeOfDay.TotalHours;
+            return DateTime.ParseExact(str, format, CultureInfo.InvariantCulture).TimeOfDay;
         }
 
         private void TryParceValueFromEditorText()

@@ -196,7 +196,7 @@ namespace Astrarium.Plugins.MinorBodies
         {
             info
             .SetTitle(info.Body.Names.First())
-            .SetSubtitle(Text.Get("Comet.Subtitle"))
+            .SetSubtitle(Text.Get("Comet.Type"))
 
             .AddRow("Constellation")
 

@@ -398,7 +398,7 @@ namespace Astrarium.Plugins.Tycho2
 
             info
             .SetTitle(s.ToString())
-            .SetSubtitle(Text.Get("Tycho2Star.Subtitle"))
+            .SetSubtitle(Text.Get("Tycho2Star.Type"))
 
             .AddRow("Constellation", constellation)
 

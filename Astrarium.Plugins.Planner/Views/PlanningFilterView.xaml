@@ -11,7 +11,7 @@
         Style="{StaticResource {x:Type Window}}" 
         MinHeight="300" MinWidth="400"
         WindowStartupLocation="CenterOwner"
-        Height="500" Width="600">
+        Height="500" Width="800">
     <Grid Margin="4">
 
         <Grid.RowDefinitions>
@@ -23,9 +23,9 @@
         <Grid Grid.Row="0">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="200" />
+                    <ColumnDefinition Width="300" MinWidth="200" />
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" MinWidth="400" />
                 </Grid.ColumnDefinitions>
 
                 <Grid>
@@ -33,48 +33,61 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <Label Margin="4 0 4 0" Background="{StaticResource BrushControlDarkBackground}" Content="Object types" />
+                    <Label Margin="4 0 4 0" Background="{StaticResource BrushControlDarkBackground}" FontWeight="Bold" Content="Object types" />
                     <TreeView Margin="4" Grid.Row="1" ItemsSource="{Binding ObjectTypes}" />
                 </Grid>
                
-
                 <GridSplitter Grid.Column="1" HorizontalAlignment="Center"  />
-                <Grid Grid.Column="2" HorizontalAlignment="Stretch">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
+                <StackPanel Grid.Column="2" HorizontalAlignment="Stretch" Orientation="Vertical">
+                    <GroupBox Header="Date and time" Margin="8 0">
+                        <StackPanel Orientation="Vertical" Margin="0 8 0 0">
+                            <DockPanel Margin="0 2">
+                                <Label Content="Date of observation:" VerticalAlignment="Center" />
+                                <DatePicker Margin="0 -1" Grid.Column="3" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                            </DockPanel>
+                            <DockPanel Margin="0 2">
+                                <Label Content="Time of beginning:" VerticalAlignment="Center" />
+                                <c:TimeInput Value="{Binding TimeFrom}" ShowSeconds="False" Width="55" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                            </DockPanel>
+                            <DockPanel Margin="0 2">
+                                <Label Content="Time of end:" VerticalAlignment="Center" />
+                                <c:TimeInput Value="{Binding TimeTo}" ShowSeconds="False" Width="55" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                            </DockPanel>
+                        </StackPanel>
+                    </GroupBox>
 
-                    <Grid Height="28" Grid.ColumnSpan="2" Margin="2 0 2 0" Background="{StaticResource BrushControlDarkBackground}" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                    <GroupBox Header="Filters" Margin="8 8 8 0">
+                        <StackPanel Orientation="Vertical" Margin="0 8 0 0">
+                            <DockPanel Margin="8 2">
+                                <CheckBox Content="Minimal altitude of celestial object" VerticalAlignment="Center" />
+                                <c:NumericUpDown Width="50" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="0" Value="5" Maximum="90" DecimalPlaces="0" />
+                            </DockPanel>
 
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <c:DatePicker Grid.Column="0" Width="100" JulianDay="{Binding JulianDay}" UtcOffset="{Binding UtcOffset}" Options="DateOnly" Margin="4" />
+                            <DockPanel Margin="8 2">
+                                <CheckBox Content="Maximal altitude of the Sun" VerticalAlignment="Center" />
+                                <c:NumericUpDown Width="50" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="-90" Maximum="0" Value="0" DecimalPlaces="0" />
+                            </DockPanel>
 
-                        <c:TimeInput Grid.Column="1" ShowSeconds="False" Width="55" />
-                        <DatePicker Grid.Column="3" />
-                    </Grid>
+                            <DockPanel Margin="8 2">
+                                <CheckBox IsChecked="{Binding EnableMagLimit}" Content="Minimal magnitude of celestial body" VerticalAlignment="Center" />
+                                <c:NumericUpDown IsEnabled="{Binding EnableMagLimit}" Width="50" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="-10" Maximum="25" Value="{Binding MagLimit}" DecimalPlaces="1" />
+                            </DockPanel>
 
-                    <CheckBox Margin="2" Grid.Row="1" Grid.Column="0" Content="Minimal altitude of celestial object" VerticalAlignment="Center" />
-                    <c:NumericUpDown Margin="2" Width="50" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="0" Value="5" Maximum="90" DecimalPlaces="0" />
+                            <DockPanel Margin="8 2">
+                                <CheckBox Content="Except objects observable less than (minutes)" VerticalAlignment="Center" />
+                                <c:NumericUpDown Width="50" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="0" Maximum="60" DecimalPlaces="0" />
+                            </DockPanel>
+                            
+                            <CheckBox Margin="8 4" Content="Skip objects with unknown magnitude" VerticalAlignment="Center" />
 
-                    <CheckBox Margin="2" Grid.Row="2" Grid.Column="0" Content="Maximal altitude of the Sun" VerticalAlignment="Center" />
-                    <c:NumericUpDown Margin="2" Grid.Row="2" Width="50" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="-90" Maximum="0" Value="0" DecimalPlaces="0" />
+                            <DockPanel Margin="8 2">
+                                <CheckBox Content="Limit count of objects" VerticalAlignment="Center" />
+                                <c:NumericUpDown Width="50" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="1" Maximum="1000" DecimalPlaces="0" />
+                            </DockPanel>
 
-                    <CheckBox IsChecked="{Binding EnableMagLimit}" Margin="2" Grid.Row="3" Grid.Column="0" Content="Minimal magnitude of celestial body" VerticalAlignment="Center" />
-                    <c:NumericUpDown IsEnabled="{Binding EnableMagLimit}" Margin="2" Grid.Row="3" Width="50" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="-10" Maximum="25" Value="{Binding MagLimit}" DecimalPlaces="1" />
-
-                </Grid>
+                        </StackPanel>
+                    </GroupBox>
+                </StackPanel>
             </Grid>
         </Grid>
         

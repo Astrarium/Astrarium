@@ -13,6 +13,9 @@ namespace Astrarium.Plugins.SolarSystem.Objects
             Number = number;
         }
 
+        /// <inheritdoc />
+        public override string Type => "Planet";
+
         /// <summary>
         /// Serial number of the planet, from 1 (Mercury) to 8 (Neptune).
         /// </summary>

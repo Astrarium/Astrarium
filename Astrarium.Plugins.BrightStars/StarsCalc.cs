@@ -161,7 +161,7 @@ namespace Astrarium.Plugins.BrightStars
 
             info
             .SetTitle(string.Join(", ", s.Names))
-            .SetSubtitle(Text.Get("Star.Subtitle"))
+            .SetSubtitle(Text.Get("Star.Type"))
 
             .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial, s.Number), c.JulianDay))
 

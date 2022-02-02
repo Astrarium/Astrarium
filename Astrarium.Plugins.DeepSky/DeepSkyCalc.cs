@@ -155,12 +155,12 @@ namespace Astrarium.Plugins.DeepSky
         public void GetInfo(CelestialObjectInfo<DeepSky> info)
         {
             DeepSky ds = info.Body;
-            SkyContext c = info.Context;           
+            SkyContext c = info.Context;
             DeepSkyInfo details = c.Get(ReadDeepSkyDetails, ds);
             string constellation = Constellations.FindConstellation(c.Get(Equatorial, ds), c.JulianDay);
 
             info
-            .SetSubtitle(Text.Get("DeepSky.Status." + ds.Status.ToString()))
+            .SetSubtitle(Text.Get($"DeepSky.{ds.Status}.Type"))
             .SetTitle(string.Join(" / ", ds.Names))
             .AddRow("Constellation", constellation)
 

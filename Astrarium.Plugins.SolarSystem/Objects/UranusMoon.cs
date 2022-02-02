@@ -8,6 +8,9 @@ namespace Astrarium.Plugins.SolarSystem.Objects
     /// </summary>
     public class UranusMoon : SizeableCelestialObject, IPlanetMoon, ISolarSystemObject
     {
+        /// <inheritdoc />
+        public override string Type => "PlanetMoon";
+
         public UranusMoon(int number)
         {
             Number = number;

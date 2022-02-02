@@ -245,7 +245,7 @@ namespace Astrarium.Plugins.Novae
 
             info
                 .SetTitle(string.Join(", ", info.Body.Names))
-                .SetSubtitle(Text.Get("Nova.Subtitle"))
+                .SetSubtitle(Text.Get("Nova.Type"))
                 .AddRow("Constellation", constellation)
 
                 .AddHeader(Text.Get("Nova.Equatorial"))

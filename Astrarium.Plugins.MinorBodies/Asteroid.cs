@@ -10,6 +10,9 @@ namespace Astrarium.Plugins.MinorBodies
         /// </summary>
         public string Name { get; set; }
 
+        /// <inheritdoc />
+        public override string Type => "Asteroid";
+
         /// <summary>
         /// Orbital elements of the minor planet
         /// </summary>

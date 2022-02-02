@@ -5,6 +5,9 @@ namespace Astrarium.Plugins.SolarSystem.Objects
 {
     public class Sun : SizeableCelestialObject, ISolarSystemObject, IMovingObject
     {
+        /// <inheritdoc />
+        public override string Type => "Sun";
+
         /// <summary>
         /// Apparent topocentrical equatorial coordinates
         /// </summary>
