@@ -138,6 +138,8 @@ namespace Astrarium.Plugins.DeepSky
         {
             e["Horizontal.Altitude"] = (c, ds) => c.Get(Horizontal, ds).Altitude;
             e["Horizontal.Azimuth"] = (c, ds) => c.Get(Horizontal, ds).Azimuth;
+            e["Equatorial.Alpha"] = (c, ds) => c.Get(Equatorial, ds).Alpha;
+            e["Equatorial.Delta"] = (c, ds) => c.Get(Equatorial, ds).Delta;
             e["Magnitude"] = (c, ds) => ds.Mag;
             e["RTS.Rise"] = (c, ds) => c.GetDateFromTime(c.Get(RiseTransitSet, ds).Rise);
             e["RTS.Transit"] = (c, ds) => c.GetDateFromTime(c.Get(RiseTransitSet, ds).Transit);

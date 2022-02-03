@@ -2,11 +2,14 @@
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace Astrarium.Plugins.Planner.ViewModels
@@ -20,16 +23,86 @@ namespace Astrarium.Plugins.Planner.ViewModels
         public ICommand SetTimeCommand { get; private set; }
         public ICommand ShowObjectCommand { get; private set; }
 
-        public ICollection<Ephemerides> Ephemerides
+        public string FilterString
         {
-            get => GetValue<ICollection<Ephemerides>>(nameof(Ephemerides));
-            private set => SetValue(nameof(Ephemerides), value);
+            get => GetValue<string>(nameof(FilterString));
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    TableData.Filter = null;
+                    TableData.Refresh();
+                }
+                else
+                {
+                    // TODO: complex filter
+                    TableData.Filter = e => (e as Ephemerides).CelestialObject.Names.Any(n => n.IndexOf(value.Trim(), StringComparison.OrdinalIgnoreCase) >= 0);
+                    TableData.Refresh();
+                }
+                SetValue(nameof(FilterString), value);
+            }
+        }
+
+        public double SiderealTime
+        {
+            get => GetValue<double>(nameof(SiderealTime));
+            set => SetValue(nameof(SiderealTime), value);
+        }
+
+        public CrdsEquatorial[] SunCoordinates
+        {
+            get => GetValue<CrdsEquatorial[]>(nameof(SunCoordinates));
+            set => SetValue(nameof(SunCoordinates), value);
+        }
+
+        public CrdsEquatorial[] BodyCoordinates
+        {
+            get => GetValue<CrdsEquatorial[]>(nameof(BodyCoordinates));
+            set => SetValue(nameof(BodyCoordinates), value);
+        }
+
+        public ICollectionView TableData
+        {
+            get => GetValue<ICollectionView>(nameof(TableData));
+            set => SetValue(nameof(TableData), value);
+        }
+        
+        public CrdsGeographical GeoLocation
+        {
+            get => GetValue<CrdsGeographical>(nameof(GeoLocation));
+            set => SetValue(nameof(GeoLocation), value);
         }
 
         public Ephemerides SelectedTableItem
         {
             get => GetValue<Ephemerides>(nameof(SelectedTableItem));
-            set => SetValue(nameof(SelectedTableItem), value);
+            set
+            {
+                SetValue(nameof(SelectedTableItem), value);
+
+                if (SelectedTableItem != null)
+                {
+                    var body = SelectedTableItem.CelestialObject;
+                    CrdsEquatorial[] bodyCoordinates = new CrdsEquatorial[3];
+
+                    for (int i = 0; i < 3; i++)
+                    {
+                        SkyContext context = new SkyContext(julianDay + i / 2.0, GeoLocation, preferFast: true);
+                        var e = sky.GetEphemerides(body, context, new string[] { "Equatorial.Alpha", "Equatorial.Delta" });
+
+                        double alpha = e.GetValue<double>("Equatorial.Alpha");
+                        double delta = e.GetValue<double>("Equatorial.Delta");
+
+                        bodyCoordinates[i] = new CrdsEquatorial(alpha, delta);
+                    }
+
+                    BodyCoordinates = bodyCoordinates;
+                }
+                else
+                {
+                    BodyCoordinates = null;
+                }
+            }
         }
 
         public PlanningListVM(ISky sky, ISkyMap map, ObservationPlanner planner)
@@ -42,8 +115,39 @@ namespace Astrarium.Plugins.Planner.ViewModels
             ShowObjectCommand = new Command<CelestialObject>(ShowObject);
         }
 
+        
+        private double julianDay;
+        
+
         public async void CreatePlan(PlanningFilter filter)
         {
+
+
+            julianDay = filter.JulianDayMidnight;
+            GeoLocation = filter.ObserverLocation;
+
+            var ne = Nutation.NutationElements(julianDay);
+            double epsilon = Date.TrueObliquity(julianDay, ne.deltaEpsilon);
+
+            SiderealTime = Date.ApparentSiderealTime(julianDay, ne.deltaPsi, epsilon);
+
+            CrdsEquatorial[] sunCoordinates = new CrdsEquatorial[3];
+
+            CelestialObject sun = sky.Search("@sun", x => true, 1).FirstOrDefault();
+            
+            for (int i = 0; i < 3; i++)
+            {
+                SkyContext context = new SkyContext(julianDay + i / 2.0, GeoLocation, preferFast: true);
+                var e = sky.GetEphemerides(sun, context, new string[] { "Equatorial.Alpha", "Equatorial.Delta" });
+
+                double alpha = e.GetValue<double>("Equatorial.Alpha");
+                double delta = e.GetValue<double>("Equatorial.Delta");
+
+                sunCoordinates[i] = new CrdsEquatorial(alpha, delta);
+            }
+
+            SunCoordinates = sunCoordinates;
+
             var tokenSource = new CancellationTokenSource();
             var progress = new Progress<double>();
 
@@ -55,9 +159,23 @@ namespace Astrarium.Plugins.Planner.ViewModels
             {
                 if (ephemerides.Any())
                 {
-                    Ephemerides = ephemerides;
+
+                    var table = CollectionViewSource.GetDefaultView(ephemerides);
+
+                    //table.GroupDescriptions.Add( new CustomGroupDescription());
+                    //
+
+                    TableData = table;
                 }
                 tokenSource.Cancel();
+            }
+        }
+
+        public class CustomGroupDescription : GroupDescription
+        {
+            public override object GroupNameFromItem(object item, int level, CultureInfo culture)
+            {
+                return Text.Get($"{(item as Ephemerides).CelestialObject.Type}.Type");
             }
         }
 

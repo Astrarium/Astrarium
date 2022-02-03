@@ -60,7 +60,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
         public bool EnableMinBodyAltitude
         {
-            get => GetValue<bool>(nameof(EnableMinBodyAltitude));
+            get => GetValue<bool>(nameof(EnableMinBodyAltitude), true);
             set => SetValue(nameof(EnableMinBodyAltitude), value);
         }
 
@@ -84,7 +84,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
         public bool EnableCountLimit
         {
-            get => GetValue<bool>(nameof(EnableCountLimit));
+            get => GetValue<bool>(nameof(EnableCountLimit), true);
             set => SetValue(nameof(EnableCountLimit), value);
         }
 
@@ -96,7 +96,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
         public bool EnableDurationLimit
         {
-            get => GetValue<bool>(nameof(EnableDurationLimit));
+            get => GetValue<bool>(nameof(EnableDurationLimit), true);
             set => SetValue(nameof(EnableDurationLimit), value);
         }
 
@@ -111,7 +111,6 @@ namespace Astrarium.Plugins.Planner.ViewModels
             get => GetValue<bool>(nameof(SkipUnknownMagnitude));
             set => SetValue(nameof(SkipUnknownMagnitude), value);
         }
-
 
         public bool OkButtonEnabled => ObjectTypes.Any() && ObjectTypes.First().IsChecked != false;
 
