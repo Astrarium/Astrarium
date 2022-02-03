@@ -36,16 +36,7 @@ namespace Astrarium.ViewModels
             }
         }
 
-        public IEnumerable<string> Categories
-        {
-            get
-            {
-                return
-                    AllNodes(Nodes.First())
-                        .Where(n => n.IsChecked ?? false)
-                        .Select(n => n.Id);
-            }
-        }
+        public IEnumerable<string> Categories => Nodes.First().CheckedChildIds;
 
         public bool OkButtonEnabled
         {
@@ -120,19 +111,6 @@ namespace Astrarium.ViewModels
                 }
 
                 Nodes.Add(root);
-            }
-        }
-
-        private IEnumerable<Node> AllNodes(Node node)
-        {
-            yield return node;
-
-            foreach (Node child in node.Children)
-            {
-                foreach (Node n in AllNodes(child))
-                {
-                    yield return n;
-                }
             }
         }
 

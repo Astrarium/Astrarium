@@ -3,12 +3,31 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="clr-namespace:Astrarium.Plugins.Planner.Views" 
+        xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
         mc:Ignorable="d"
         Title="Observation Plan"
         Style="{StaticResource {x:Type Window}}"
         WindowStartupLocation="CenterScreen"
         MinHeight="300" MinWidth="400"
         Height="500" Width="600">
+
+    <Window.Resources>
+        <ContextMenu x:Key="RowMenu" DataContext="{Binding Path=DataContext, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
+            <MenuItem Header="Show object" Command="{Binding ShowObjectCommand}" CommandParameter="{Binding SelectedTableItem.CelestialObject}" />
+            <MenuItem Header="Go to Observation begin" Command="{Binding SetTimeCommand}" CommandParameter="{Binding SelectedTableItem[Observation.Begin]}" />
+            <MenuItem Header="Go to Observation end" Command="{Binding SetTimeCommand}" CommandParameter="{Binding SelectedTableItem[Observation.End]}" />
+            <Separator />
+            <MenuItem Header="Add object by name..." />
+            <MenuItem Header="Add objects by criteria..." />
+            <Separator />
+            <MenuItem Header="Remove selected item(s)" />
+        </ContextMenu>
+        <Style x:Key="DefaultRowStyle" TargetType="{x:Type DataGridRow}" BasedOn="{StaticResource {x:Type DataGridRow}}">
+            <Setter Property="ContextMenu" Value="{StaticResource RowMenu}" />
+        </Style>
+    </Window.Resources>
+    
     <Grid Margin="4">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -26,8 +45,7 @@
             VirtualizingPanel.IsVirtualizingWhenGrouping="True"
             VirtualizingPanel.VirtualizationMode="Recycling"
             VirtualizingPanel.IsVirtualizing="True"
-            
-            AutoGenerateColumns="True"
+            AutoGenerateColumns="False"
             CanUserReorderColumns="True"
             CanUserSortColumns="True"
             CanUserResizeRows="False"
@@ -41,8 +59,53 @@
             RowHeight="24"
             SelectionMode="Extended"
             SelectionUnit="FullRow"
-            AutoGeneratingColumn="DataGrid_AutoGeneratingColumn"
-            ItemsSource="{Binding PlanTable}">
+            RowStyle="{StaticResource DefaultRowStyle}"
+            ItemsSource="{Binding Ephemerides}"
+            SelectedItem="{Binding SelectedTableItem}">
+
+            <DataGrid.Columns>
+
+                <DataGridTemplateColumn Header="Celestial object" SortMemberPath="CelestialObject">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Background="Transparent">
+                                <Rectangle Margin="2" Width="16" Height="16" ToolTip="{Binding CelestialObject, Converter={views:CelestialObjectTypeDescriptionConverter}}">
+                                    <Rectangle.Fill>
+                                        <SolidColorBrush Color="{StaticResource ColorControlLightBackground}" />
+                                    </Rectangle.Fill>
+                                    <Rectangle.OpacityMask>
+                                        <ImageBrush ImageSource="{Binding CelestialObject, Converter={s:CelestialObjectToIconConverter}}" Stretch="Uniform" />
+                                    </Rectangle.OpacityMask>
+                                </Rectangle>
+                                <TextBlock Padding="4 0 0 0" Text="{Binding CelestialObject, Converter={views:CelestialObjectNameConverter}}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Mag" Binding="{Binding Path='[Magnitude]', Converter={views:Converter}, ConverterParameter='Magnitude'}" SortMemberPath="[Magnitude]" />
+                <DataGridTemplateColumn Header="Begin obs." CanUserSort="True" SortMemberPath="[Observation.Begin]">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock FontFamily="Lucida Console" FontSize="12">
+                                <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type views:PlanningListWindow}, Mode=FindAncestor}, Path=DataContext.SetTimeCommand}" CommandParameter="{Binding Path='[Observation.Begin]'}"><Run Text="{Binding Path='[Observation.Begin]', Mode=OneWay, Converter={views:Converter}, ConverterParameter='Visibility.Begin'}" /></Hyperlink>
+                            </TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="End obs." CanUserSort="True" SortMemberPath="[Observation.End]">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock FontFamily="Lucida Console" FontSize="12">
+                                <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type views:PlanningListWindow}, Mode=FindAncestor}, Path=DataContext.SetTimeCommand}" CommandParameter="{Binding Path='[Observation.End]'}"><Run Text="{Binding Path='[Observation.End]', Mode=OneWay,  Converter={views:Converter}, ConverterParameter='Visibility.End'}" /></Hyperlink>
+                            </TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTextColumn Header="Obs. dur." Binding="{Binding Path='[Observation.Duration]', Converter={views:Converter}, ConverterParameter='Visibility.Duration'}" SortMemberPath="[Observation.Duration]" />
+
+            </DataGrid.Columns>
+            
         </DataGrid>
 
         <!--<StackPanel Grid.Row="3"                    

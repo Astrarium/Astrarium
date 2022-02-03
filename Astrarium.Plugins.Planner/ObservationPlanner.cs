@@ -22,7 +22,9 @@ namespace Astrarium.Plugins.Planner
         {
             float? magLimit = filter.MagLimit;
             double timeFrom = filter.TimeFrom / 24.0;
-            double obsDuration = filter.TimeTo / 24.0;
+            double timeTo = filter.TimeTo / 24.0;
+            double obsDuration = timeTo < timeFrom ? timeTo - timeFrom + 1 : timeTo - timeFrom;
+            double? durationLimit = filter.DurationLimit != null ? filter.DurationLimit / 60.0 : null;
 
             // Planned observation range, expressed as circular sector (angles)
             // It represents a timeframe to be compared with each celestial body visibility conditions.
@@ -36,8 +38,8 @@ namespace Astrarium.Plugins.Planner
             // and after that apply desired timeframe to find intersections.
             var context = new SkyContext(filter.JulianDayMidnight, filter.ObserverLocation, true);
 
-            context.MinimalBodyAltitudeForVisibilityCalculations = filter.MinBodyAltitude ?? 0;
-            context.MinimalSunAltitudeForVisibilityCalculations = filter.MinSunAltitude ?? 0;
+            context.MinBodyAltitudeForVisibilityCalculations = filter.MinBodyAltitude;
+            context.MaxSunAltitudeForVisibilityCalculations = filter.MaxSunAltitude;
 
             var celesialObjects = sky.CelestialObjects.Where(b => filter.ObjectTypes.Contains(b.Type));
 
@@ -51,6 +53,11 @@ namespace Astrarium.Plugins.Planner
                 if (token.HasValue && token.Value.IsCancellationRequested)
                 {
                     ephemerides.Clear();
+                    break;
+                }
+
+                if (ephemerides.Count >= filter.CountLimit)
+                {
                     break;
                 }
 
@@ -84,9 +91,10 @@ namespace Astrarium.Plugins.Planner
                         bodyEphemerides.Add(magEphem);
                     }
 
-                    // Body does not have magnitude, but add it anyway (empty) as it required by planner
+                    // Body does not have magnitude 
                     if (!categories.Contains("Magnitude"))
                     {
+                        // add it anyway (empty) as it required by planner
                         bodyEphemerides.Add(new Ephemeris() { Key = "Magnitude", Value = null, Formatter = Formatters.Magnitude });
                     }
 
@@ -113,17 +121,31 @@ namespace Astrarium.Plugins.Planner
 
                         if (ranges.Any())
                         {
+                            double beginTime = ranges.First().Start / 360;
+
+                            if (beginTime < timeFrom)
+                            {
+                                beginTime += 1;
+                            }
+
+                            double endTime = beginTime + ranges.First().Range / 360;
+
                             // Begin of body observation, limited by desired observation begin and end time,
                             // and expressed in Date
-                            Date bodyObsBegin = new Date(context.JulianDayMidnight + ranges.First().Start / 360, context.GeoLocation.UtcOffset);
+                            Date bodyObsBegin = new Date(context.JulianDayMidnight + beginTime, context.GeoLocation.UtcOffset);
 
                             // Real duration of body observation, limited by desired observation begin and end time,
                             // and expressed in hours (convert from angle range expressed in degrees):
                             double bodyObsDuration = ranges.First().Range / 360 * 24;
 
+                            if (durationLimit > bodyObsDuration)
+                            {
+                                continue;
+                            }
+
                             // End of body observation, limited by desired observation begin and end time,
                             // and expressed in Date
-                            Date bodyObsEnd = new Date(context.JulianDayMidnight + ranges.First().Start / 360 + ranges.First().Range / 360, context.GeoLocation.UtcOffset);
+                            Date bodyObsEnd = new Date(context.JulianDayMidnight + endTime, context.GeoLocation.UtcOffset);
 
                             bodyEphemerides.Add(new Ephemeris() { Key = "Observation.Begin", Value = bodyObsBegin, Formatter = Formatters.Time });
                             bodyEphemerides.Add(new Ephemeris() { Key = "Observation.Duration", Value = bodyObsDuration, Formatter = Formatters.VisibilityDuration });

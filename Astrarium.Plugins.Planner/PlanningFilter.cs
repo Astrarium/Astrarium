@@ -26,9 +26,13 @@ namespace Astrarium.Plugins.Planner
         /// </summary>
         public double Duration => TimeTo > TimeFrom ? TimeTo - TimeFrom : 24 - TimeFrom + TimeTo;
 
-        public double? MinSunAltitude { get; set; }
+        public double? MaxSunAltitude { get; set; }
         public double? MinBodyAltitude { get; set; }
         public float? MagLimit { get; set; }
+        public int? CountLimit { get; set; }
+        public double? DurationLimit { get; set; }
+        public bool SkipUnknownMagnitude { get; set; }
+
         public CrdsGeographical ObserverLocation { get; set; }
         public IReadOnlyCollection<string> ObjectTypes { get; set; }
     }

@@ -1,4 +1,5 @@
-﻿using Astrarium.Types;
+﻿using Astrarium.Algorithms;
+using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -6,19 +7,39 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace Astrarium.Plugins.Planner.ViewModels
 {
     public class PlanningListVM : ViewModelBase
     {
+        private readonly ISky sky;
+        private readonly ISkyMap map;
         private readonly ObservationPlanner planner;
 
-        public ICollection<Ephemerides> Ephemerides { get; private set; }
-        public DataTable PlanTable { get; private set; }
-       
-        public PlanningListVM(ObservationPlanner planner)
+        public ICommand SetTimeCommand { get; private set; }
+        public ICommand ShowObjectCommand { get; private set; }
+
+        public ICollection<Ephemerides> Ephemerides
+        {
+            get => GetValue<ICollection<Ephemerides>>(nameof(Ephemerides));
+            private set => SetValue(nameof(Ephemerides), value);
+        }
+
+        public Ephemerides SelectedTableItem
+        {
+            get => GetValue<Ephemerides>(nameof(SelectedTableItem));
+            set => SetValue(nameof(SelectedTableItem), value);
+        }
+
+        public PlanningListVM(ISky sky, ISkyMap map, ObservationPlanner planner)
         {
             this.planner = planner;
+            this.sky = sky;
+            this.map = map;
+
+            SetTimeCommand = new Command<Date>(SetTime);
+            ShowObjectCommand = new Command<CelestialObject>(ShowObject);
         }
 
         public async void CreatePlan(PlanningFilter filter)
@@ -34,54 +55,20 @@ namespace Astrarium.Plugins.Planner.ViewModels
             {
                 if (ephemerides.Any())
                 {
-                    FillTable(ephemerides);
+                    Ephemerides = ephemerides;
                 }
                 tokenSource.Cancel();
             }
         }
 
-        private void FillTable(ICollection<Ephemerides> ephemerides)
+        private void SetTime(Date time)
         {
-            var table = new DataTable();
+            sky.SetDate(time.ToJulianEphemerisDay());
+        }
 
-            var objectColumn = new DataColumn()
-            {
-                Caption = "Celestial object",
-                ColumnName = "Object",
-                DataType = typeof(string),
-                ReadOnly = true
-            };
-
-            table.Columns.Add(objectColumn);
-            table.Columns.AddRange(ephemerides.ElementAt(0).Select(e =>
-            {
-                var column = new DataColumn()
-                {
-                    Caption = e.Key,
-                    ColumnName = e.Key,
-                    DataType = e.Value?.GetType() ?? typeof(object),
-                    ReadOnly = true
-                };
-                column.ExtendedProperties["Formatter"] = e.Formatter;
-                
-                return column;
-            }).ToArray());
-
-            for (int i = 0; i < ephemerides.Count; i++)
-            {
-                var row = table.NewRow();
-                row["Object"] = string.Join(",", ephemerides.ElementAt(i).CelestialObject.Names);
-                foreach (var e in ephemerides.ElementAt(i))
-                {
-                    row[e.Key] = e.Value ?? DBNull.Value;
-                }
-                table.Rows.Add(row);
-            }
-
-            
-            PlanTable = table;
-            NotifyPropertyChanged(nameof(PlanTable));
-            Ephemerides = ephemerides;
+        private void ShowObject(CelestialObject body)
+        {
+            map.GoToObject(body, TimeSpan.FromSeconds(1));
         }
     }
 }

@@ -15,11 +15,11 @@ using System.Windows.Shapes;
 namespace Astrarium.Plugins.Planner.Views
 {
     /// <summary>
-    /// Interaction logic for PlanningFilterView.xaml
+    /// Interaction logic for PlanningFilterWindow.xaml
     /// </summary>
-    public partial class PlanningFilterView : Window
+    public partial class PlanningFilterWindow : Window
     {
-        public PlanningFilterView()
+        public PlanningFilterWindow()
         {
             InitializeComponent();
         }

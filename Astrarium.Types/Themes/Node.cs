@@ -26,6 +26,26 @@ namespace Astrarium.Types.Themes
             Id = id;
         }
 
+        //private IEnumerable<Node> AllNodes(Node node)
+        //{
+        //    yield return node;
+
+        //    foreach (Node child in node.Children)
+        //    {
+        //        foreach (Node n in AllNodes(child))
+        //        {
+        //            yield return n;
+        //        }
+        //    }
+        //}
+
+        public string[] CheckedChildIds
+        {
+            get => AllChildren(this)
+                .Where(n => n.IsChecked ?? false)
+                .Select(n => n.Id).ToArray();
+        }
+
         private IEnumerable<Node> AllChildren(Node node)
         {
             foreach (Node child in node.Children)

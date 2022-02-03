@@ -1,4 +1,5 @@
-﻿using Astrarium.Types;
+﻿using Astrarium.Algorithms;
+using Astrarium.Types;
 using Astrarium.Types.Themes;
 using System;
 using System.Collections.Generic;
@@ -39,6 +40,12 @@ namespace Astrarium.Plugins.Planner.ViewModels
             set => SetValue(nameof(TimeFrom), value);
         }
 
+        public TimeSpan TimeTo
+        {
+            get => GetValue<TimeSpan>(nameof(TimeTo), new TimeSpan(0, 0, 0));
+            set => SetValue(nameof(TimeTo), value);
+        }
+
         public bool EnableMagLimit
         {
             get => GetValue<bool>(nameof(EnableMagLimit));
@@ -51,6 +58,63 @@ namespace Astrarium.Plugins.Planner.ViewModels
             set => SetValue(nameof(MagLimit), value);
         }
 
+        public bool EnableMinBodyAltitude
+        {
+            get => GetValue<bool>(nameof(EnableMinBodyAltitude));
+            set => SetValue(nameof(EnableMinBodyAltitude), value);
+        }
+
+        public decimal MinBodyAltitude
+        {
+            get => GetValue<decimal>(nameof(MinBodyAltitude), 5);
+            set => SetValue(nameof(MinBodyAltitude), value);
+        }
+
+        public bool EnableMaxSunAltitude
+        {
+            get => GetValue<bool>(nameof(EnableMaxSunAltitude));
+            set => SetValue(nameof(EnableMaxSunAltitude), value);
+        }
+
+        public decimal MaxSunAltitude
+        {
+            get => GetValue<decimal>(nameof(MaxSunAltitude), 0);
+            set => SetValue(nameof(MaxSunAltitude), value);
+        }
+
+        public bool EnableCountLimit
+        {
+            get => GetValue<bool>(nameof(EnableCountLimit));
+            set => SetValue(nameof(EnableCountLimit), value);
+        }
+
+        public decimal CountLimit
+        {
+            get => GetValue<decimal>(nameof(CountLimit), 1000);
+            set => SetValue(nameof(CountLimit), value);
+        }
+
+        public bool EnableDurationLimit
+        {
+            get => GetValue<bool>(nameof(EnableDurationLimit));
+            set => SetValue(nameof(EnableDurationLimit), value);
+        }
+
+        public decimal DurationLimit
+        {
+            get => GetValue<decimal>(nameof(DurationLimit), 10);
+            set => SetValue(nameof(DurationLimit), value);
+        }
+
+        public bool SkipUnknownMagnitude
+        {
+            get => GetValue<bool>(nameof(SkipUnknownMagnitude));
+            set => SetValue(nameof(SkipUnknownMagnitude), value);
+        }
+
+
+        public bool OkButtonEnabled => ObjectTypes.Any() && ObjectTypes.First().IsChecked != false;
+
         public PlanningFilterVM(ISky sky)
         {
             this.sky = sky;
@@ -61,12 +125,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
             JulianDay = sky.Context.JulianDayMidnight;
             UtcOffset = sky.Context.GeoLocation.UtcOffset;
 
-            BuildCategoriesTree();
-        }
-
-        private void BuildCategoriesTree()
-        {
-            var types = sky.CelestialObjects.Select(c => c.Type).Where(t => t != null).Distinct();
+            IEnumerable<string> types = sky.CelestialObjects.Select(c => c.Type).Where(t => t != null).Distinct();
             var groups = types.GroupBy(t => t.Split('.').First());
 
             Node root = new Node("All");
@@ -88,31 +147,9 @@ namespace Astrarium.Plugins.Planner.ViewModels
             ObjectTypes.Add(root);
         }
 
-        public bool OkButtonEnabled => ObjectTypes.Any() && ObjectTypes.First().IsChecked != false;
-
         private void Root_CheckedChanged(object sender, bool? e)
         {
             NotifyPropertyChanged(nameof(OkButtonEnabled));
-        }
-
-        private IEnumerable<Node> AllNodes(Node node)
-        {
-            yield return node;
-
-            foreach (Node child in node.Children)
-            {
-                foreach (Node n in AllNodes(child))
-                {
-                    yield return n;
-                }
-            }
-        }
-
-        private string[] GetObjectTypes()
-        {
-            return AllNodes(ObjectTypes.First())
-                    .Where(n => n.IsChecked ?? false)
-                    .Select(n => n.Id).ToArray();
         }
 
         private void Ok()
@@ -122,10 +159,13 @@ namespace Astrarium.Plugins.Planner.ViewModels
                 JulianDayMidnight = JulianDay,
                 MagLimit = EnableMagLimit ? (float?)MagLimit : null,
                 TimeFrom = TimeFrom.TotalHours,
-                TimeTo = 3,
-                MinBodyAltitude = 0,
-                MinSunAltitude = 0,
-                ObjectTypes = GetObjectTypes(),
+                TimeTo = TimeTo.TotalHours,
+                MinBodyAltitude = EnableMinBodyAltitude ? (double?)MinBodyAltitude : null,
+                MaxSunAltitude = EnableMaxSunAltitude ? (double?)MaxSunAltitude : null,
+                CountLimit = EnableCountLimit ? (int?)CountLimit : null,
+                DurationLimit = EnableDurationLimit ? (double?)DurationLimit : null,
+                SkipUnknownMagnitude = SkipUnknownMagnitude,
+                ObjectTypes = ObjectTypes.First().CheckedChildIds,
                 ObserverLocation = sky.Context.GeoLocation
             };
 

@@ -129,8 +129,8 @@ namespace Astrarium.Plugins.DeepSky
             var eq = ctx.Get(Equatorial, body);
             var eqSun = ctx.Get(sky.SunEquatorial);
 
-            double minBodyAltitude = ctx.MinimalBodyAltitudeForVisibilityCalculations ?? 5;
-            double minSunAltitude = ctx.MinimalSunAltitudeForVisibilityCalculations ?? -10;
+            double minBodyAltitude = ctx.MinBodyAltitudeForVisibilityCalculations ?? 5;
+            double minSunAltitude = ctx.MaxSunAltitudeForVisibilityCalculations ?? -10;
             return Algorithms.Visibility.Details(eq, eqSun, ctx.GeoLocation, ctx.SiderealTime, minBodyAltitude, minSunAltitude);
         }
 

@@ -263,8 +263,8 @@ namespace Astrarium.Plugins.MinorBodies
             SkyContext ctx = c.Copy(c.JulianDayMidnight);
             CrdsEquatorial eq = ctx.Get(EquatorialT, body);
             CrdsEquatorial eqSun = ctx.Get(SunEquatorial);
-            double minBodyAltitude = ctx.MinimalBodyAltitudeForVisibilityCalculations ?? 5;
-            double minSunAltitude = ctx.MinimalSunAltitudeForVisibilityCalculations ?? -5;
+            double minBodyAltitude = ctx.MinBodyAltitudeForVisibilityCalculations ?? 5;
+            double minSunAltitude = ctx.MaxSunAltitudeForVisibilityCalculations ?? -5;
             return Algorithms.Visibility.Details(eq, eqSun, ctx.GeoLocation, ctx.SiderealTime, minBodyAltitude, minSunAltitude);
         }
     }

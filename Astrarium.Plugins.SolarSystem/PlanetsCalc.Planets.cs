@@ -244,8 +244,8 @@ namespace Astrarium.Plugins.SolarSystem
             var ctx = c.Copy(c.JulianDayMidnight);
             var eq = ctx.Get(Planet_Equatorial, p);
             var eqSun = ctx.Get(Sun_Equatorial);
-            double minBodyAltitude = ctx.MinimalBodyAltitudeForVisibilityCalculations ?? 5;
-            double minSunAltitude = ctx.MinimalSunAltitudeForVisibilityCalculations ?? 0;
+            double minBodyAltitude = ctx.MinBodyAltitudeForVisibilityCalculations ?? 5;
+            double minSunAltitude = ctx.MaxSunAltitudeForVisibilityCalculations ?? 0;
             return Visibility.Details(eq, eqSun, ctx.GeoLocation, ctx.SiderealTime, minBodyAltitude, minSunAltitude);
         }
 

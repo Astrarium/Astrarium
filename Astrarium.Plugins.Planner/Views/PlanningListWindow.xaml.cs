@@ -27,53 +27,5 @@ namespace Astrarium.Plugins.Planner.Views
         {
             InitializeComponent();
         }
-
-        private void DataGrid_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
-        {
-            if (e.PropertyType == typeof(Date))
-            {
-                var column = new DataGridHyperlinkColumn();
-                var dataTable = ((sender as DataGrid).ItemsSource as DataView).Table;
-                var formatter = dataTable.Columns[e.PropertyName].ExtendedProperties["Formatter"];
-                var converter = formatter != null ? new ToStringConverter((IEphemFormatter)formatter) : null;
-
-                
-                column.Binding = new Binding("[" + e.PropertyName + "]") { Converter = converter };
-                column.SortMemberPath = e.PropertyName;
-                column.Header = dataTable.Columns[e.PropertyName].Caption;
-                e.Column = column;
-            }
-            else
-            {
-                var column = new DataGridTextColumn();
-                var dataTable = ((sender as DataGrid).ItemsSource as DataView).Table;
-                var formatter = dataTable.Columns[e.PropertyName].ExtendedProperties["Formatter"];
-                var converter = formatter != null ? new ToStringConverter((IEphemFormatter)formatter) : null;
-                column.Binding = new Binding("[" + e.PropertyName + "]") { Converter = converter };
-                column.SortMemberPath = e.PropertyName;
-                column.Header = dataTable.Columns[e.PropertyName].Caption;
-                e.Column = column;
-            }
-        }
-
-        class ToStringConverter : IValueConverter
-        {
-            private readonly IEphemFormatter formatter;
-
-            public ToStringConverter(IEphemFormatter formatter)
-            {
-                this.formatter = formatter;
-            }
-
-            public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-            {
-                return formatter.Format(value);
-            }
-
-            public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-            {
-                throw new NotImplementedException();
-            }
-        }
     }
 }

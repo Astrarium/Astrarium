@@ -33,8 +33,8 @@ namespace Astrarium.Types
             else
                 return new SkyContext(jd, GeoLocation, PreferFastCalculation)
                 {
-                    MinimalBodyAltitudeForVisibilityCalculations = MinimalBodyAltitudeForVisibilityCalculations,
-                    MinimalSunAltitudeForVisibilityCalculations = MinimalSunAltitudeForVisibilityCalculations
+                    MinBodyAltitudeForVisibilityCalculations = MinBodyAltitudeForVisibilityCalculations,
+                    MaxSunAltitudeForVisibilityCalculations = MaxSunAltitudeForVisibilityCalculations
                 };
         }
 
@@ -90,13 +90,13 @@ namespace Astrarium.Types
         /// Minimal Sun altitude taken into account for calculating visibility conditions, expressed in degrees.
         /// Default value is null (not set).
         /// </summary>
-        public double? MinimalSunAltitudeForVisibilityCalculations { get; set; }
+        public double? MaxSunAltitudeForVisibilityCalculations { get; set; }
 
         /// <summary>
         /// Minimal Sun altitude taken into account for calculating visibility conditions, expressed in degrees.
         /// Default value is null (not set).
         /// </summary>
-        public double? MinimalBodyAltitudeForVisibilityCalculations { get; set; }
+        public double? MinBodyAltitudeForVisibilityCalculations { get; set; }
 
         /// <summary>
         /// Flag indicating fast calculation (low precision) is preferred

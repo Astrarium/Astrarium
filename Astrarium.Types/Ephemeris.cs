@@ -27,6 +27,11 @@ namespace Astrarium.Types
     {
         public CelestialObject CelestialObject { get; private set; }
 
+        public object this[string key]
+        {
+            get => GetValue<object>(key);
+        }
+
         public Ephemeris Get(string key)
         {
             return this.FirstOrDefault(e => e.Key == key);
