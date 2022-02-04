@@ -136,6 +136,7 @@ namespace Astrarium.Plugins.DeepSky
 
         public void ConfigureEphemeris(EphemerisConfig<DeepSky> e)
         {
+            e["Constellation"] = (c, ds) => Constellations.FindConstellation(c.Get(Equatorial, ds), c.JulianDay);
             e["Horizontal.Altitude"] = (c, ds) => c.Get(Horizontal, ds).Altitude;
             e["Horizontal.Azimuth"] = (c, ds) => c.Get(Horizontal, ds).Azimuth;
             e["Equatorial.Alpha"] = (c, ds) => c.Get(Equatorial, ds).Alpha;

@@ -71,12 +71,10 @@ namespace Astrarium.Types
 
         public static IEphemFormatter GetDefault(string key)
         {
-            Default.TryGetValue(key, out IEphemFormatter formatter);
-            if (formatter == null)
-            {
-                formatter = Simple;
-            }
-            return formatter;
+            if (Default.ContainsKey(key))
+                return Default[key];
+            else
+                return Simple;
         }
 
         /// <summary>

@@ -36,6 +36,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
                 else
                 {
                     // TODO: complex filter
+                    //TableData.GroupDescriptions.Add(new CustomGroupDescription());
                     TableData.Filter = e => (e as Ephemerides).CelestialObject.Names.Any(n => n.IndexOf(value.Trim(), StringComparison.OrdinalIgnoreCase) >= 0);
                     TableData.Refresh();
                 }
@@ -71,6 +72,18 @@ namespace Astrarium.Plugins.Planner.ViewModels
         {
             get => GetValue<CrdsGeographical>(nameof(GeoLocation));
             set => SetValue(nameof(GeoLocation), value);
+        }
+
+        public TimeSpan FromTime
+        {
+            get => GetValue<TimeSpan>(nameof(FromTime));
+            private set => SetValue(nameof(FromTime), value);
+        }
+
+        public TimeSpan ToTime
+        {
+            get => GetValue<TimeSpan>(nameof(ToTime));
+            private set => SetValue(nameof(ToTime), value);
         }
 
         public Ephemerides SelectedTableItem
@@ -118,13 +131,12 @@ namespace Astrarium.Plugins.Planner.ViewModels
         
         private double julianDay;
         
-
         public async void CreatePlan(PlanningFilter filter)
         {
-
-
             julianDay = filter.JulianDayMidnight;
             GeoLocation = filter.ObserverLocation;
+            FromTime = TimeSpan.FromHours(filter.TimeFrom);
+            ToTime = TimeSpan.FromHours(filter.TimeTo);
 
             var ne = Nutation.NutationElements(julianDay);
             double epsilon = Date.TrueObliquity(julianDay, ne.deltaEpsilon);
@@ -134,7 +146,8 @@ namespace Astrarium.Plugins.Planner.ViewModels
             CrdsEquatorial[] sunCoordinates = new CrdsEquatorial[3];
 
             CelestialObject sun = sky.Search("@sun", x => true, 1).FirstOrDefault();
-            
+          
+
             for (int i = 0; i < 3; i++)
             {
                 SkyContext context = new SkyContext(julianDay + i / 2.0, GeoLocation, preferFast: true);
@@ -159,13 +172,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
             {
                 if (ephemerides.Any())
                 {
-
-                    var table = CollectionViewSource.GetDefaultView(ephemerides);
-
-                    //table.GroupDescriptions.Add( new CustomGroupDescription());
-                    //
-
-                    TableData = table;
+                    TableData = CollectionViewSource.GetDefaultView(ephemerides);
                 }
                 tokenSource.Cancel();
             }

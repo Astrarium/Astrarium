@@ -49,6 +49,8 @@
 
             <controls:VisibilityChart 
                 SnapsToDevicePixels="True"
+                FromTime="{Binding FromTime}"
+                ToTime="{Binding ToTime}"
                 SunCoordinates="{Binding SunCoordinates}" 
                 BodyCoordinates="{Binding BodyCoordinates}"
                 SiderealTime="{Binding SiderealTime}"
@@ -103,9 +105,9 @@
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate>
-                                        <GroupBox Header="{Binding Name}">
+                                        <Expander Header="{Binding Name}">
                                             <ItemsPresenter />
-                                        </GroupBox>
+                                        </Expander>
                                     </ControlTemplate>
                                 </Setter.Value>
                             </Setter>
@@ -114,8 +116,7 @@
                 </GroupStyle>
             </DataGrid.GroupStyle>
             <DataGrid.Columns>
-
-                <DataGridTemplateColumn Header="Celestial object" SortMemberPath="CelestialObject">
+                <DataGridTemplateColumn Header="Object" SortMemberPath="CelestialObject">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" Background="Transparent">
@@ -132,6 +133,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
+
                 <DataGridTextColumn Header="Mag" Binding="{Binding Path='[Magnitude]', Converter={views:Converter}, ConverterParameter='Magnitude'}" SortMemberPath="[Magnitude]" />
                 <DataGridTemplateColumn Header="Begin obs." CanUserSort="True" SortMemberPath="[Observation.Begin]">
                     <DataGridTemplateColumn.CellTemplate>
@@ -142,6 +144,19 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Header="BEST Time" CanUserSort="True" SortMemberPath="[Observation.Best]">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock FontFamily="Lucida Console" FontSize="12">
+                                <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type views:PlanningListWindow}, Mode=FindAncestor}, Path=DataContext.SetTimeCommand}" CommandParameter="{Binding Path='[Observation.Best]'}"><Run Text="{Binding Path='[Observation.Best]', Mode=OneWay,  Converter={views:Converter}, ConverterParameter='Visibility.Begin'}" /></Hyperlink>
+                            </TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTextColumn Binding="{Binding Path='[Observation.BestAltitude]', Converter={views:Converter}, ConverterParameter='RTS.TransitAltitude'}" Header="BEST Alt." CanUserSort="True" SortMemberPath="[Observation.BestAltitude]" />
+
                 <DataGridTemplateColumn Header="End obs." CanUserSort="True" SortMemberPath="[Observation.End]">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -151,8 +166,56 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-
+                
                 <DataGridTextColumn Header="Obs. dur." Binding="{Binding Path='[Observation.Duration]', Converter={views:Converter}, ConverterParameter='Visibility.Duration'}" SortMemberPath="[Observation.Duration]" />
+
+                <DataGridTemplateColumn Header="Rise" CanUserSort="True" SortMemberPath="[RTS.Rise]">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <TextBlock Visibility="{Binding Path='[RTS.Rise]', Converter={views:TimeLinkVisibilityConverter}}"  FontFamily="Lucida Console" FontSize="12">
+                                    <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type views:PlanningListWindow}, Mode=FindAncestor}, Path=DataContext.SetTimeCommand}" CommandParameter="{Binding Path='[RTS.Rise]'}"><Run Text="{Binding Path='[RTS.Rise]', Mode=OneWay, Converter={views:Converter}, ConverterParameter='RTS.Rise'}" /></Hyperlink>
+                                </TextBlock>
+                                <TextBlock IsEnabled="False" Visibility="{Binding Path='[RTS.Rise]', Converter={views:TimeLinkInverseVisibilityConverter}}" Text="—" />
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Header="Transit" CanUserSort="True" SortMemberPath="[RTS.Transit]">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <TextBlock Visibility="{Binding Path='[RTS.Transit]', Converter={views:TimeLinkVisibilityConverter}}"  FontFamily="Lucida Console" FontSize="12">
+                                    <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type views:PlanningListWindow}, Mode=FindAncestor}, Path=DataContext.SetTimeCommand}" CommandParameter="{Binding Path='[RTS.Transit]'}"><Run Text="{Binding Path='[RTS.Transit]', Mode=OneWay, Converter={views:Converter}, ConverterParameter='RTS.Transit'}" /></Hyperlink>
+                                </TextBlock>
+                                <TextBlock IsEnabled="False" Visibility="{Binding Path='[RTS.Transit]', Converter={views:TimeLinkInverseVisibilityConverter}}" Text="—" />
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Header="Set" CanUserSort="True" SortMemberPath="[RTS.Set]">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <TextBlock Visibility="{Binding Path='[RTS.Set]', Converter={views:TimeLinkVisibilityConverter}}"  FontFamily="Lucida Console" FontSize="12">
+                                    <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type views:PlanningListWindow}, Mode=FindAncestor}, Path=DataContext.SetTimeCommand}" CommandParameter="{Binding Path='[RTS.Set]'}"><Run Text="{Binding Path='[RTS.Set]', Mode=OneWay, Converter={views:Converter}, ConverterParameter='RTS.Set'}" /></Hyperlink>
+                                </TextBlock>
+                                <TextBlock IsEnabled="False" Visibility="{Binding Path='[RTS.Set]', Converter={views:TimeLinkInverseVisibilityConverter}}" Text="—" />
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTextColumn Binding="{Binding Path='[RTS.RiseAzimuth]', Converter={views:Converter}, ConverterParameter='RTS.RiseAzimuth'}" Header="Rise Azi." CanUserSort="True" SortMemberPath="[RTS.RiseAzimuth]" />
+                <DataGridTextColumn Binding="{Binding Path='[RTS.TransitAltitude]', Converter={views:Converter}, ConverterParameter='RTS.TransitAltitude'}" Header="Trans. Alt." CanUserSort="True" SortMemberPath="[RTS.TransitAltitude]" />
+                <DataGridTextColumn Binding="{Binding Path='[RTS.SetAzimuth]', Converter={views:Converter}, ConverterParameter='RTS.SetAzimuth'}" Header="Set Azi." CanUserSort="True" SortMemberPath="[RTS.SetAzimuth]" />
+
+                <DataGridTextColumn Binding="{Binding Path='[Equatorial.Alpha]', Converter={views:Converter}, ConverterParameter='Equatorial.Alpha'}" Header="R.A." CanUserSort="True" SortMemberPath="[Equatorial.Alpha]" />
+                <DataGridTextColumn Binding="{Binding Path='[Equatorial.Delta]', Converter={views:Converter}, ConverterParameter='Equatorial.Delta'}" Header="Dec." CanUserSort="True" SortMemberPath="[Equatorial.Delta]" />
+
+                <DataGridTextColumn Binding="{Binding Path='[Constellation]'}" Header="Const." CanUserSort="True" SortMemberPath="[Constellation]" />
 
             </DataGrid.Columns>
             
