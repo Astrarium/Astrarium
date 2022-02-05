@@ -166,6 +166,7 @@ namespace Astrarium.Plugins.Planner
                                 {
                                     bodyEphemerides.Add(new Ephemeris() { Key = "Observation.Best", Value = transit, Formatter = Formatters.Time });
                                     bodyEphemerides.Add(new Ephemeris() { Key = "Observation.BestAltitude", Value = transitAlt, Formatter = Formatters.Altitude });
+                                    bodyEphemerides.Add(new Ephemeris() { Key = "Observation.BestAzimuth", Value = 0, Formatter = Formatters.Azimuth });
 
                                     var ctxBest = new SkyContext(transit.ToJulianEphemerisDay(), context.GeoLocation, preferFast: true);
                                     var bestEphemerides = sky.GetEphemerides(body, ctxBest, new[] { "Equatorial.Alpha", "Equatorial.Delta", "Constellation" });
@@ -174,23 +175,27 @@ namespace Astrarium.Plugins.Planner
                                 else
                                 {
                                     var ctxBegin = new SkyContext(bodyObsBegin.ToJulianEphemerisDay(), context.GeoLocation, preferFast: true);
-                                    var beginEphemerides = sky.GetEphemerides(body, ctxBegin, new[] { "Horizontal.Altitude", "Equatorial.Alpha", "Equatorial.Delta", "Constellation" });
+                                    var beginEphemerides = sky.GetEphemerides(body, ctxBegin, new[] { "Horizontal.Altitude", "Horizontal.Azimuth", "Equatorial.Alpha", "Equatorial.Delta", "Constellation" });
                                     double altBegin = beginEphemerides.GetValue<double>("Horizontal.Altitude");
+                                    double aziBegin = beginEphemerides.GetValue<double>("Horizontal.Azimuth");
 
                                     var ctxEnd = new SkyContext(bodyObsEnd.ToJulianEphemerisDay(), context.GeoLocation, preferFast: true);
-                                    var endEphemerides = sky.GetEphemerides(body, ctxEnd, new[] { "Horizontal.Altitude", "Equatorial.Alpha", "Equatorial.Delta", "Constellation" });
+                                    var endEphemerides = sky.GetEphemerides(body, ctxEnd, new[] { "Horizontal.Altitude", "Horizontal.Azimuth", "Equatorial.Alpha", "Equatorial.Delta", "Constellation" });
                                     double altEnd = endEphemerides.GetValue<double>("Horizontal.Altitude");
+                                    double aziEnd = endEphemerides.GetValue<double>("Horizontal.Azimuth");
 
                                     if (altBegin >= altEnd)
                                     {
                                         bodyEphemerides.Add(new Ephemeris() { Key = "Observation.Best", Value = bodyObsBegin, Formatter = Formatters.Time });
                                         bodyEphemerides.Add(new Ephemeris() { Key = "Observation.BestAltitude", Value = altBegin, Formatter = Formatters.Altitude });
+                                        bodyEphemerides.Add(new Ephemeris() { Key = "Observation.BestAzimuth", Value = aziBegin, Formatter = Formatters.Azimuth });
                                         bodyEphemerides.AddRange(beginEphemerides);
                                     }
                                     else
                                     {
                                         bodyEphemerides.Add(new Ephemeris() { Key = "Observation.Best", Value = bodyObsEnd, Formatter = Formatters.Time });
                                         bodyEphemerides.Add(new Ephemeris() { Key = "Observation.BestAltitude", Value = altEnd, Formatter = Formatters.Altitude });
+                                        bodyEphemerides.Add(new Ephemeris() { Key = "Observation.BestAzimuth", Value = aziEnd, Formatter = Formatters.Azimuth });
                                         bodyEphemerides.AddRange(endEphemerides);
                                     }
                                 }

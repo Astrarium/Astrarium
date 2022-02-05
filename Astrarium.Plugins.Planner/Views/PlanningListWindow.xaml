@@ -156,6 +156,7 @@
                 </DataGridTemplateColumn>
 
                 <DataGridTextColumn Binding="{Binding Path='[Observation.BestAltitude]', Converter={views:Converter}, ConverterParameter='RTS.TransitAltitude'}" Header="BEST Alt." CanUserSort="True" SortMemberPath="[Observation.BestAltitude]" />
+                <DataGridTextColumn Binding="{Binding Path='[Observation.BestAzimuth]', Converter={views:Converter}, ConverterParameter='RTS.RiseAzimuth'}" Header="BEST Azi." CanUserSort="True" SortMemberPath="[Observation.BestAzimuth]" />
 
                 <DataGridTemplateColumn Header="End obs." CanUserSort="True" SortMemberPath="[Observation.End]">
                     <DataGridTemplateColumn.CellTemplate>

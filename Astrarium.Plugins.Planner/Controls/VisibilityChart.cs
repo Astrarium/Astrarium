@@ -12,13 +12,12 @@ namespace Astrarium.Plugins.Planner.Controls
 {
     public class VisibilityChart : Canvas
     {
-        public readonly static DependencyProperty SunCoordinatesProperty = DependencyProperty.Register(nameof(SunCoordinates), typeof(CrdsEquatorial[]), typeof(VisibilityChart), new FrameworkPropertyMetadata(defaultValue: null) { AffectsRender = true, BindsTwoWayByDefault = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DepPropertyChanged) });
-        public readonly static DependencyProperty BodyCoordinatesProperty = DependencyProperty.Register(nameof(BodyCoordinates), typeof(CrdsEquatorial[]), typeof(VisibilityChart), new FrameworkPropertyMetadata(defaultValue: null) { AffectsRender = true, BindsTwoWayByDefault = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DepPropertyChanged) });
+        public readonly static DependencyProperty SunCoordinatesProperty = DependencyProperty.Register(nameof(SunCoordinates), typeof(CrdsEquatorial), typeof(VisibilityChart), new FrameworkPropertyMetadata(defaultValue: null) { AffectsRender = true, BindsTwoWayByDefault = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DepPropertyChanged) });
+        public readonly static DependencyProperty BodyCoordinatesProperty = DependencyProperty.Register(nameof(BodyCoordinates), typeof(CrdsEquatorial), typeof(VisibilityChart), new FrameworkPropertyMetadata(defaultValue: null) { AffectsRender = true, BindsTwoWayByDefault = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DepPropertyChanged) });
         public readonly static DependencyProperty GeoLocationProperty = DependencyProperty.Register(nameof(GeoLocation), typeof(CrdsGeographical), typeof(VisibilityChart), new FrameworkPropertyMetadata(defaultValue: null) { AffectsRender = true, BindsTwoWayByDefault = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DepPropertyChanged) });
         public readonly static DependencyProperty SiderealTimeProperty = DependencyProperty.Register(nameof(SiderealTime), typeof(double), typeof(VisibilityChart), new FrameworkPropertyMetadata(0.0) { AffectsRender = true, BindsTwoWayByDefault = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DepPropertyChanged) });
         public readonly static DependencyProperty FromTimeProperty = DependencyProperty.Register(nameof(FromTime), typeof(TimeSpan), typeof(VisibilityChart), new FrameworkPropertyMetadata(TimeSpan.Zero) { AffectsRender = true, BindsTwoWayByDefault = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DepPropertyChanged) });
         public readonly static DependencyProperty ToTimeProperty = DependencyProperty.Register(nameof(ToTime), typeof(TimeSpan), typeof(VisibilityChart), new FrameworkPropertyMetadata(TimeSpan.Zero) { AffectsRender = true, BindsTwoWayByDefault = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DepPropertyChanged) });
-
 
         private static void DepPropertyChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
@@ -40,15 +39,15 @@ namespace Astrarium.Plugins.Planner.Controls
             set => SetValue(SiderealTimeProperty, value);
         }
 
-        public CrdsEquatorial[] SunCoordinates
+        public CrdsEquatorial SunCoordinates
         {
-            get => (CrdsEquatorial[])GetValue(SunCoordinatesProperty);
+            get => (CrdsEquatorial)GetValue(SunCoordinatesProperty);
             set => SetValue(SunCoordinatesProperty, value);
         }
 
-        public CrdsEquatorial[] BodyCoordinates
+        public CrdsEquatorial BodyCoordinates
         {
-            get => (CrdsEquatorial[])GetValue(BodyCoordinatesProperty);
+            get => (CrdsEquatorial)GetValue(BodyCoordinatesProperty);
             set => SetValue(BodyCoordinatesProperty, value);
         }
 
@@ -69,58 +68,27 @@ namespace Astrarium.Plugins.Planner.Controls
 
         private void Interpolate()
         {
-            if (SunCoordinates != null && SunCoordinates.Length == 3 &&
-                BodyCoordinates != null && BodyCoordinates.Length == 3 &&
-                GeoLocation != null)
+            if (SunCoordinates != null && BodyCoordinates != null && GeoLocation != null)
             {
                 sunCoordinatesInterpolated = Interpolate(SunCoordinates, GeoLocation, SiderealTime, 120);
                 bodyCoordinatesInterpolated = Interpolate(BodyCoordinates, GeoLocation, SiderealTime, 120);
-
                 InvalidateVisual();
             }
         }
 
-        private CrdsHorizontal[] Interpolate(CrdsEquatorial[] eq, CrdsGeographical location, double theta0, int count)
+        private CrdsHorizontal[] Interpolate(CrdsEquatorial eq, CrdsGeographical location, double theta0, int count)
         {
-            if (eq.Length != 3)
-                throw new ArgumentException("Number of equatorial coordinates in the array should be equal to 3.");
-
-            double[] alpha = new double[3];
-            double[] delta = new double[3];
-            for (int i = 0; i < 3; i++)
-            {
-                alpha[i] = eq[i].Alpha;
-                delta[i] = eq[i].Delta;
-            }
-
-            Angle.Align(alpha);
-            Angle.Align(delta);
-
             List<CrdsHorizontal> hor = new List<CrdsHorizontal>();
             for (int i = 0; i <= count; i++)
             {
                 double n = i / (double)count;
-                CrdsEquatorial eq0 = InterpolateEq(alpha, delta, n);
-                var sidTime = InterpolateSiderialTime(theta0, n);
-                hor.Add(eq0.ToHorizontal(location, sidTime));
+                double sidTime = Angle.To360(theta0 + n * 360.98564736629);
+                hor.Add(eq.ToHorizontal(location, sidTime));
             }
 
             return hor.ToArray();
         }
 
-        private static double InterpolateSiderialTime(double theta0, double n)
-        {
-            return Angle.To360(theta0 + n * 360.98564736629);
-        }
-
-        private static CrdsEquatorial InterpolateEq(double[] alpha, double[] delta, double n)
-        {
-            double[] x = new double[] { 0, 0.5, 1 };
-            CrdsEquatorial eq = new CrdsEquatorial();
-            eq.Alpha = Interpolation.Lagrange(x, alpha, n);
-            eq.Delta = Interpolation.Lagrange(x, delta, n);
-            return eq;
-        }
 
         protected override void OnRender(DrawingContext dc)
         {
@@ -136,7 +104,7 @@ namespace Astrarium.Plugins.Planner.Controls
             Color colorDaylight = Color.FromArgb(255, 119, 203, 255);
             Pen penHourLine = new Pen(brushHourLine, dpiFactor);
             Pen penBodyLine = new Pen(brushBodyLine, dpiFactor);
-            Brush brushObservationLimits = new SolidColorBrush(Color.FromArgb(60, 255, 0, 0));
+            Pen penObservationLimits = new Pen(new SolidColorBrush(Color.FromRgb(255, 0, 0)), dpiFactor * 2);
 
             var bounds = new Rect(0, 0, ActualWidth, ActualHeight);
             dc.PushClip(new RectangleGeometry(bounds));
@@ -205,9 +173,6 @@ namespace Astrarium.Plugins.Planner.Controls
 
                 var geometry = new PathGeometry();
                 geometry.Figures.Add(figure);
-
-                RenderOptions.SetEdgeMode(geometry, EdgeMode.Unspecified);
-
                 dc.DrawGeometry(null, penBodyLine, geometry);
             }
 
@@ -219,15 +184,27 @@ namespace Astrarium.Plugins.Planner.Controls
                 double from = ((FromTime.TotalDays + 0.5) % 1) * ActualWidth;
                 double to = ((ToTime.TotalDays + 0.5) % 1) * ActualWidth;
 
+                var guidelines = new GuidelineSet();
+                guidelines.GuidelinesX.Add(0);
+                guidelines.GuidelinesX.Add(to);
+                guidelines.GuidelinesX.Add(ActualWidth);
+                guidelines.GuidelinesX.Add(ActualWidth - from + to);
+                guidelines.GuidelinesY.Add(0);
+                guidelines.GuidelinesY.Add(ActualHeight);
+
+                dc.PushGuidelineSet(guidelines);
+
                 if (from < to)
                 {
-                    dc.DrawRectangle(brushObservationLimits, null, new Rect(0, 0, from, ActualHeight / 2));
-                    dc.DrawRectangle(brushObservationLimits, null, new Rect(to, 0, ActualWidth - to, ActualHeight / 2));
+                    dc.DrawRectangle(null, penObservationLimits, new Rect(0, 0, from, ActualHeight));
+                    dc.DrawRectangle(null, penObservationLimits, new Rect(to, 0, ActualWidth - to, ActualHeight));
                 }
                 else
                 {
-                    dc.DrawRectangle(brushObservationLimits, null, new Rect(0, 0, from - to, ActualHeight / 2));
+                    dc.DrawRectangle(null, penObservationLimits, new Rect(0, 0, from - to, ActualHeight));
                 }
+
+                dc.Pop();
             }
 
             // time grid

@@ -50,15 +50,15 @@ namespace Astrarium.Plugins.Planner.ViewModels
             set => SetValue(nameof(SiderealTime), value);
         }
 
-        public CrdsEquatorial[] SunCoordinates
+        public CrdsEquatorial SunCoordinates
         {
-            get => GetValue<CrdsEquatorial[]>(nameof(SunCoordinates));
+            get => GetValue<CrdsEquatorial>(nameof(SunCoordinates));
             set => SetValue(nameof(SunCoordinates), value);
         }
 
-        public CrdsEquatorial[] BodyCoordinates
+        public CrdsEquatorial BodyCoordinates
         {
-            get => GetValue<CrdsEquatorial[]>(nameof(BodyCoordinates));
+            get => GetValue<CrdsEquatorial>(nameof(BodyCoordinates));
             set => SetValue(nameof(BodyCoordinates), value);
         }
 
@@ -96,18 +96,22 @@ namespace Astrarium.Plugins.Planner.ViewModels
                 if (SelectedTableItem != null)
                 {
                     var body = SelectedTableItem.CelestialObject;
-                    CrdsEquatorial[] bodyCoordinates = new CrdsEquatorial[3];
+                    double alpha = SelectedTableItem.GetValue<double>("Equatorial.Alpha");
+                    double delta = SelectedTableItem.GetValue<double>("Equatorial.Delta");
+                    CrdsEquatorial bodyCoordinates = new CrdsEquatorial(alpha, delta);
 
-                    for (int i = 0; i < 3; i++)
-                    {
-                        SkyContext context = new SkyContext(julianDay + i / 2.0, GeoLocation, preferFast: true);
-                        var e = sky.GetEphemerides(body, context, new string[] { "Equatorial.Alpha", "Equatorial.Delta" });
+                    //CrdsEquatorial[] bodyCoordinates = new CrdsEquatorial[3];
 
-                        double alpha = e.GetValue<double>("Equatorial.Alpha");
-                        double delta = e.GetValue<double>("Equatorial.Delta");
+                    //for (int i = 0; i < 3; i++)
+                    //{
+                    //    SkyContext context = new SkyContext(julianDay + i / 2.0, GeoLocation, preferFast: true);
+                    //    var e = sky.GetEphemerides(body, context, new string[] { "Equatorial.Alpha", "Equatorial.Delta" });
 
-                        bodyCoordinates[i] = new CrdsEquatorial(alpha, delta);
-                    }
+                    //    double alpha = e.GetValue<double>("Equatorial.Alpha");
+                    //    double delta = e.GetValue<double>("Equatorial.Delta");
+
+                    //    bodyCoordinates[i] = new CrdsEquatorial(alpha, delta);
+                    //}
 
                     BodyCoordinates = bodyCoordinates;
                 }
@@ -137,29 +141,9 @@ namespace Astrarium.Plugins.Planner.ViewModels
             GeoLocation = filter.ObserverLocation;
             FromTime = TimeSpan.FromHours(filter.TimeFrom);
             ToTime = TimeSpan.FromHours(filter.TimeTo);
-
-            var ne = Nutation.NutationElements(julianDay);
-            double epsilon = Date.TrueObliquity(julianDay, ne.deltaEpsilon);
-
-            SiderealTime = Date.ApparentSiderealTime(julianDay, ne.deltaPsi, epsilon);
-
-            CrdsEquatorial[] sunCoordinates = new CrdsEquatorial[3];
-
-            CelestialObject sun = sky.Search("@sun", x => true, 1).FirstOrDefault();
-          
-
-            for (int i = 0; i < 3; i++)
-            {
-                SkyContext context = new SkyContext(julianDay + i / 2.0, GeoLocation, preferFast: true);
-                var e = sky.GetEphemerides(sun, context, new string[] { "Equatorial.Alpha", "Equatorial.Delta" });
-
-                double alpha = e.GetValue<double>("Equatorial.Alpha");
-                double delta = e.GetValue<double>("Equatorial.Delta");
-
-                sunCoordinates[i] = new CrdsEquatorial(alpha, delta);
-            }
-
-            SunCoordinates = sunCoordinates;
+            SkyContext context = new SkyContext(julianDay, GeoLocation, preferFast: true);
+            SunCoordinates = context.Get(sky.SunEquatorial);
+            SiderealTime = context.SiderealTime;
 
             var tokenSource = new CancellationTokenSource();
             var progress = new Progress<double>();
