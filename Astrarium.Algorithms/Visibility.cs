@@ -59,10 +59,10 @@ namespace Astrarium.Algorithms
 
                 if (hor0.Altitude > 0)
                 {
-                    double r = SolveParabola(Math.Sin(Angle.ToRadians(hor[i].Azimuth)), Math.Sin(Angle.ToRadians(hor0.Azimuth)), Math.Sin(Angle.ToRadians(hor[i + 1].Azimuth)));
-                    if (!double.IsNaN(r))
+                    double[] r = SolveParabola(Math.Sin(Angle.ToRadians(hor[i].Azimuth)), Math.Sin(Angle.ToRadians(hor0.Azimuth)), Math.Sin(Angle.ToRadians(hor[i + 1].Azimuth)));
+                    if (r.Any())
                     {
-                        double t = (i + r) / 24.0;
+                        double t = (i + r[0]) / 24.0;
 
                         eq0 = InterpolateEq(alpha, delta, t);
                         sidTime = InterpolateSiderialTime(theta0, t);
@@ -78,24 +78,53 @@ namespace Astrarium.Algorithms
 
                 if (double.IsNaN(result.Rise) || double.IsNaN(result.Set))
                 {
-                    double r = SolveParabola(hor[i].Altitude + sd, hor0.Altitude + sd, hor[i + 1].Altitude + sd);
+                    double[] r = SolveParabola(hor[i].Altitude + sd, hor0.Altitude + sd, hor[i + 1].Altitude + sd);
 
-                    if (!double.IsNaN(r))
+                    if (r.Any())
                     {
-                        double t = (i + r) / 24.0;
-                        eq0 = InterpolateEq(alpha, delta, t);
-                        sidTime = InterpolateSiderialTime(theta0, t);
-
-                        if (double.IsNaN(result.Rise) && hor[i].Altitude + sd < 0 && hor[i + 1].Altitude + sd > 0)
+                        if (r.Length == 1)
                         {
-                            result.Rise = t;
-                            result.RiseAzimuth = eq0.ToTopocentric(location, sidTime, pi).ToHorizontal(location, sidTime).Azimuth;
+                            double t = (i + r[0]) / 24.0;
+                            eq0 = InterpolateEq(alpha, delta, t);
+                            sidTime = InterpolateSiderialTime(theta0, t);
+
+                            if (double.IsNaN(result.Rise) && hor[i].Altitude + sd < 0 && hor[i + 1].Altitude + sd > 0)
+                            {
+                                result.Rise = t;
+                                result.RiseAzimuth = eq0.ToTopocentric(location, sidTime, pi).ToHorizontal(location, sidTime).Azimuth;
+                            }
+
+                            if (double.IsNaN(result.Set) && hor[i].Altitude + sd > 0 && hor[i + 1].Altitude + sd < 0)
+                            {
+                                result.Set = t;
+                                result.SetAzimuth = eq0.ToTopocentric(location, sidTime, pi).ToHorizontal(location, sidTime).Azimuth;
+                            }
                         }
-
-                        if (double.IsNaN(result.Set) && hor[i].Altitude + sd > 0 && hor[i + 1].Altitude + sd < 0)
+                        else // 2 roots
                         {
-                            result.Set = t;
-                            result.SetAzimuth = eq0.ToTopocentric(location, sidTime, pi).ToHorizontal(location, sidTime).Azimuth;
+                            double t1 = (i + r[0]) / 24.0;
+                            double sidTime1 = InterpolateSiderialTime(theta0, t1);
+
+                            double t2 = (i + r[1]) / 24.0;
+                            double sidTime2 = InterpolateSiderialTime(theta0, t2);
+
+                            if (double.IsNaN(result.Rise) && double.IsNaN(result.Set) && hor[i].Altitude + sd < 0 && hor[i + 1].Altitude + sd < 0)
+                            {
+                                result.Rise = t1;
+                                result.RiseAzimuth = eq0.ToTopocentric(location, sidTime1, pi).ToHorizontal(location, sidTime1).Azimuth;
+
+                                result.Set = t2;
+                                result.SetAzimuth = eq0.ToTopocentric(location, sidTime2, pi).ToHorizontal(location, sidTime2).Azimuth;
+                            }
+
+                            if (double.IsNaN(result.Rise) && double.IsNaN(result.Set) && hor[i].Altitude + sd > 0 && hor[i + 1].Altitude + sd > 0)
+                            {
+                                result.Set = t1;
+                                result.SetAzimuth = eq0.ToTopocentric(location, sidTime1, pi).ToHorizontal(location, sidTime1).Azimuth;
+
+                                result.Rise = t2;
+                                result.RiseAzimuth = eq0.ToTopocentric(location, sidTime2, pi).ToHorizontal(location, sidTime2).Azimuth;
+                            }
                         }
 
                         if (!double.IsNaN(result.Transit) && !double.IsNaN(result.Rise) && !double.IsNaN(result.Set))
@@ -103,7 +132,7 @@ namespace Astrarium.Algorithms
                             break;
                         }
                     }
-                }                
+                }
             }
        
             return result;
@@ -139,10 +168,10 @@ namespace Astrarium.Algorithms
 
                 if (hor0.Altitude > 0)
                 {
-                    double r = SolveParabola(Math.Sin(Angle.ToRadians(hor[i].Azimuth)), Math.Sin(Angle.ToRadians(hor0.Azimuth)), Math.Sin(Angle.ToRadians(hor[i + 1].Azimuth)));
-                    if (!double.IsNaN(r))
+                    double[] r = SolveParabola(Math.Sin(Angle.ToRadians(hor[i].Azimuth)), Math.Sin(Angle.ToRadians(hor0.Azimuth)), Math.Sin(Angle.ToRadians(hor[i + 1].Azimuth)));
+                    if (r.Any())
                     {
-                        double t = (i + r) / 24.0;
+                        double t = (i + r[0]) / 24.0;
                         sidTime = InterpolateSiderialTime(theta0, t);
 
                         double altitude = eq.ToHorizontal(location, sidTime).Altitude;
@@ -156,23 +185,52 @@ namespace Astrarium.Algorithms
 
                 if (double.IsNaN(result.Rise) || double.IsNaN(result.Set))
                 {
-                    double r = SolveParabola(hor[i].Altitude - minAltitude, hor0.Altitude - minAltitude, hor[i + 1].Altitude - minAltitude);
+                    double[] r = SolveParabola(hor[i].Altitude - minAltitude, hor0.Altitude - minAltitude, hor[i + 1].Altitude - minAltitude);
 
-                    if (!double.IsNaN(r))
+                    if (r.Any())
                     {
-                        double t = (i + r) / 24.0;
-                        sidTime = InterpolateSiderialTime(theta0, t);
-
-                        if (double.IsNaN(result.Rise) && hor[i].Altitude - minAltitude < 0 && hor[i + 1].Altitude - minAltitude > 0)
+                        if (r.Length == 1)
                         {
-                            result.Rise = t;
-                            result.RiseAzimuth = eq.ToHorizontal(location, sidTime).Azimuth;
+                            double t = (i + r[0]) / 24.0;
+                            sidTime = InterpolateSiderialTime(theta0, t);
+
+                            if (double.IsNaN(result.Rise) && hor[i].Altitude - minAltitude < 0 && hor[i + 1].Altitude - minAltitude > 0)
+                            {
+                                result.Rise = t;
+                                result.RiseAzimuth = eq.ToHorizontal(location, sidTime).Azimuth;
+                            }
+
+                            if (double.IsNaN(result.Set) && hor[i].Altitude - minAltitude > 0 && hor[i + 1].Altitude - minAltitude < 0)
+                            {
+                                result.Set = t;
+                                result.SetAzimuth = eq.ToHorizontal(location, sidTime).Azimuth;
+                            }
                         }
-
-                        if (double.IsNaN(result.Set) && hor[i].Altitude - minAltitude > 0 && hor[i + 1].Altitude - minAltitude < 0)
+                        else
                         {
-                            result.Set = t;
-                            result.SetAzimuth = eq.ToHorizontal(location, sidTime).Azimuth;
+                            double t1 = (i + r[0]) / 24.0;
+                            double sidTime1 = InterpolateSiderialTime(theta0, t1);
+
+                            double t2 = (i + r[1]) / 24.0;
+                            double sidTime2 = InterpolateSiderialTime(theta0, t2);
+
+                            if (double.IsNaN(result.Rise) && double.IsNaN(result.Set) && hor[i].Altitude - minAltitude < 0 && hor[i + 1].Altitude - minAltitude < 0)
+                            {
+                                result.Rise = t1;
+                                result.RiseAzimuth = eq.ToHorizontal(location, sidTime1).Azimuth;
+
+                                result.Set = t2;
+                                result.SetAzimuth = eq.ToHorizontal(location, sidTime2).Azimuth;
+                            }
+
+                            if (double.IsNaN(result.Rise) && double.IsNaN(result.Set) && hor[i].Altitude - minAltitude > 0 && hor[i + 1].Altitude - minAltitude > 0)
+                            {
+                                result.Set = t1;
+                                result.SetAzimuth = eq.ToHorizontal(location, sidTime1).Azimuth;
+
+                                result.Rise = t2;
+                                result.RiseAzimuth = eq.ToHorizontal(location, sidTime2).Azimuth;
+                            }
                         }
 
                         if (!double.IsNaN(result.Transit) && !double.IsNaN(result.Rise) && !double.IsNaN(result.Set))
@@ -330,7 +388,7 @@ namespace Astrarium.Algorithms
         }
 
         // TODO: description
-        private static double SolveParabola(double y1, double y2, double y3)
+        private static double[] SolveParabola(double y1, double y2, double y3)
         {
             double a = 2 * y1 - 4 * y2 + 2 * y3;
             double b = -3 * y1 + 4 * y2 - y3;
@@ -341,10 +399,12 @@ namespace Astrarium.Algorithms
             double x1 = (-b - D) / (2 * a);
             double x2 = (-b + D) / (2 * a);
 
-            if (x1 >= 0 && x1 < 1) return x1;
-            if (x2 >= 0 && x2 < 1) return x2;
+            List<double> roots = new List<double>();
 
-            return double.NaN;
+            if (x1 >= 0 && x1 < 1) roots.Add(x1);
+            if (x2 >= 0 && x2 < 1) roots.Add(x2);
+
+            return roots.OrderBy(x => x).ToArray();
         }
     }
 }
