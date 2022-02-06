@@ -18,7 +18,7 @@ using System.Windows.Input;
 
 namespace Astrarium.ViewModels
 {
-    public class MainVM : ViewModelBase
+    public class MainVM : ViewModelBase, IMainWindow
     {
         private readonly ISky sky;
         private readonly ISkyMap map;
@@ -744,7 +744,7 @@ namespace Astrarium.ViewModels
             ViewManager.ShowPrintPreviewDialog(document);
         }
 
-        private void CenterOnObject(CelestialObject body)
+        public void CenterOnObject(CelestialObject body)
         {
             if (body.DisplaySettingNames.Any(s => !settings.Get(s)))
             {

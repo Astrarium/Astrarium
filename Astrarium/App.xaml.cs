@@ -118,6 +118,7 @@ namespace Astrarium
             kernel.Bind<ISky, Sky>().To<Sky>().InSingletonScope();
             kernel.Bind<ISkyMap, SkyMap>().To<SkyMap>().InSingletonScope();
             kernel.Bind<IGeoLocationsManager, GeoLocationsManager>().To<GeoLocationsManager>().InSingletonScope();
+            kernel.Bind<IMainWindow, MainVM>().To<MainVM>().InSingletonScope();
             kernel.Bind<UIElementsIntegration>().ToSelf().InSingletonScope();
             UIElementsIntegration uiIntegration = kernel.Get<UIElementsIntegration>();
 

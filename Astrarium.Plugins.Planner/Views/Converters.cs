@@ -8,9 +8,17 @@ namespace Astrarium.Plugins.Planner.Views
 {
     public class Converter : ValueConverterBase
     {
+        private IEphemFormatter formatter;
+        private string formatterName;
+
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return Formatters.GetDefault((string)parameter).Format(value);
+            if (formatter == null || formatterName != (string)parameter)
+            {
+                formatterName = (string)parameter;
+                formatter = Formatters.GetDefault(formatterName);
+            }
+            return formatter.Format(value);
         }
     }
 

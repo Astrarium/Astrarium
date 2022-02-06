@@ -254,10 +254,17 @@ namespace Astrarium.Algorithms
         /// </returns>
         public override string ToString()
         {
-            var culture = CultureInfo.InvariantCulture;
-            string month = culture.DateTimeFormat.GetMonthName(Month);
-            string day = Day.ToString("0.##", culture.NumberFormat);
-            return string.Format($"{Year} {month} {day}");
+            if (double.IsNaN(Day))
+            {
+                return "-";
+            }
+            else
+            {
+                var culture = CultureInfo.InvariantCulture;
+                string month = culture.DateTimeFormat.GetMonthName(Month);
+                string day = Day.ToString("0.##", culture.NumberFormat);
+                return string.Format($"{Year} {month} {day}");
+            }
         }
 
         /// <inheritdoc />

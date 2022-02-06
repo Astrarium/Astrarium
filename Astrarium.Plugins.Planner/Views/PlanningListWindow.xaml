@@ -16,14 +16,15 @@
 
     <Window.Resources>
         <ContextMenu x:Key="RowMenu" DataContext="{Binding Path=DataContext, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
-            <MenuItem Header="Show object" Command="{Binding ShowObjectCommand}" CommandParameter="{Binding SelectedTableItem.CelestialObject}" />
-            <MenuItem Header="Go to Observation begin" Command="{Binding SetTimeCommand}" CommandParameter="{Binding SelectedTableItem[Observation.Begin]}" />
-            <MenuItem Header="Go to Observation end" Command="{Binding SetTimeCommand}" CommandParameter="{Binding SelectedTableItem[Observation.End]}" />
+            <MenuItem Header="Show object" Command="{Binding ShowObjectCommand}" CommandParameter="{Binding SelectedTableItem.CelestialObject}"  IsEnabled="{Binding IsSigleTableItemSelected}" />
+            <MenuItem Header="Go to BEGIN of observation" Command="{Binding SetTimeCommand}" CommandParameter="{Binding SelectedTableItem[Observation.Begin]}"  IsEnabled="{Binding IsSigleTableItemSelected}" />
+            <MenuItem Header="Go to BEST observation time" Command="{Binding SetTimeCommand}" CommandParameter="{Binding SelectedTableItem[Observation.Best]}"  IsEnabled="{Binding IsSigleTableItemSelected}" />
+            <MenuItem Header="Go to END of observation" Command="{Binding SetTimeCommand}" CommandParameter="{Binding SelectedTableItem[Observation.End]}"  IsEnabled="{Binding IsSigleTableItemSelected}" />
             <Separator />
             <MenuItem Header="Add object by name..." />
             <MenuItem Header="Add objects by criteria..." />
             <Separator />
-            <MenuItem Header="Remove selected item(s)" />
+            <MenuItem Header="Remove selected item(s)" Command="{Binding RemoveSelectedItemsCommand}" IsEnabled="{Binding SelectedTableItem, Converter={s:NotNullToBoolConverter}}" />
         </ContextMenu>
         <Style x:Key="DefaultRowStyle" TargetType="{x:Type DataGridRow}" BasedOn="{StaticResource {x:Type DataGridRow}}">
             <Setter Property="ContextMenu" Value="{StaticResource RowMenu}" />
@@ -72,11 +73,13 @@
             <TextBox Grid.Column="2" HorizontalAlignment="Stretch" Text="{Binding FilterString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="4" />
         </Grid>
 
-        <DataGrid 
+        <controls:ExtendedDataGrid 
+            Style="{StaticResource {x:Type DataGrid}}"
             Grid.Row="2"
             VerticalScrollBarVisibility="Auto"
             HorizontalScrollBarVisibility="Auto"
             EnableRowVirtualization="True"
+            EnableColumnVirtualization="True"
             VirtualizingPanel.IsVirtualizingWhenGrouping="True"
             VirtualizingPanel.VirtualizationMode="Recycling"
             VirtualizingPanel.IsVirtualizing="True"
@@ -86,7 +89,7 @@
             CanUserResizeRows="False"
             ScrollViewer.CanContentScroll ="True"
             IsReadOnly="True"
-            GridLinesVisibility="All"
+            GridLinesVisibility="Vertical"
             BorderThickness="1"
             Margin="4"
             RowHeaderWidth="0"
@@ -95,8 +98,9 @@
             SelectionMode="Extended"
             SelectionUnit="FullRow"
             RowStyle="{StaticResource DefaultRowStyle}"
-            ItemsSource="{Binding TableData}"
-            SelectedItem="{Binding SelectedTableItem}">
+            ItemsSource="{Binding TableData, IsAsync=True}"
+            SelectedItem="{Binding SelectedTableItem}"
+            SelectedItems="{Binding SelectedTableItems, Mode=OneWayToSource}">
 
             <DataGrid.GroupStyle>
                 <GroupStyle>
@@ -220,7 +224,7 @@
 
             </DataGrid.Columns>
             
-        </DataGrid>
+        </controls:ExtendedDataGrid>
 
         <StatusBar Grid.Row="3" Margin="4 0" BorderThickness="1" Background="{StaticResource BrushControlDarkBackground}" BorderBrush="{StaticResource BrushControlDarkBackground}">
             <StatusBarItem>

@@ -1,6 +1,7 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -9,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 
@@ -17,11 +19,14 @@ namespace Astrarium.Plugins.Planner.ViewModels
     public class PlanningListVM : ViewModelBase
     {
         private readonly ISky sky;
-        private readonly ISkyMap map;
+        private readonly IMainWindow mainWindow;
         private readonly ObservationPlanner planner;
+
+        private ICollection<Ephemerides> ephemerides;
 
         public ICommand SetTimeCommand { get; private set; }
         public ICommand ShowObjectCommand { get; private set; }
+        public ICommand RemoveSelectedItemsCommand { get; private set; }
 
         public string FilterString
         {
@@ -86,34 +91,29 @@ namespace Astrarium.Plugins.Planner.ViewModels
             private set => SetValue(nameof(ToTime), value);
         }
 
+        public IList SelectedTableItems
+        {
+            get => GetValue<IList>(nameof(SelectedTableItems));
+            set
+            {
+                SetValue(nameof(SelectedTableItems), value);
+                NotifyPropertyChanged(nameof(IsSigleTableItemSelected));
+            }
+        }
+
         public Ephemerides SelectedTableItem
         {
             get => GetValue<Ephemerides>(nameof(SelectedTableItem));
             set
             {
                 SetValue(nameof(SelectedTableItem), value);
+                NotifyPropertyChanged(nameof(IsSigleTableItemSelected));
 
                 if (SelectedTableItem != null)
                 {
-                    var body = SelectedTableItem.CelestialObject;
                     double alpha = SelectedTableItem.GetValue<double>("Equatorial.Alpha");
                     double delta = SelectedTableItem.GetValue<double>("Equatorial.Delta");
-                    CrdsEquatorial bodyCoordinates = new CrdsEquatorial(alpha, delta);
-
-                    //CrdsEquatorial[] bodyCoordinates = new CrdsEquatorial[3];
-
-                    //for (int i = 0; i < 3; i++)
-                    //{
-                    //    SkyContext context = new SkyContext(julianDay + i / 2.0, GeoLocation, preferFast: true);
-                    //    var e = sky.GetEphemerides(body, context, new string[] { "Equatorial.Alpha", "Equatorial.Delta" });
-
-                    //    double alpha = e.GetValue<double>("Equatorial.Alpha");
-                    //    double delta = e.GetValue<double>("Equatorial.Delta");
-
-                    //    bodyCoordinates[i] = new CrdsEquatorial(alpha, delta);
-                    //}
-
-                    BodyCoordinates = bodyCoordinates;
+                    BodyCoordinates = new CrdsEquatorial(alpha, delta);
                 }
                 else
                 {
@@ -122,16 +122,18 @@ namespace Astrarium.Plugins.Planner.ViewModels
             }
         }
 
-        public PlanningListVM(ISky sky, ISkyMap map, ObservationPlanner planner)
+        public bool IsSigleTableItemSelected => SelectedTableItems != null && SelectedTableItems.Count == 1;
+
+        public PlanningListVM(ISky sky, IMainWindow mainWindow, ObservationPlanner planner)
         {
             this.planner = planner;
             this.sky = sky;
-            this.map = map;
+            this.mainWindow = mainWindow;
 
             SetTimeCommand = new Command<Date>(SetTime);
             ShowObjectCommand = new Command<CelestialObject>(ShowObject);
+            RemoveSelectedItemsCommand = new Command(RemoveSelectedItems);
         }
-
         
         private double julianDay;
         
@@ -150,7 +152,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
             ViewManager.ShowProgress("Please wait", "Creating observation plan...", tokenSource, progress);
 
-            ICollection<Ephemerides> ephemerides = await Task.Run(() => planner.CreatePlan(filter, tokenSource.Token, progress));
+            ephemerides = await Task.Run(() => planner.CreatePlan(filter, tokenSource.Token, progress));
 
             if (!tokenSource.IsCancellationRequested)
             {
@@ -173,11 +175,32 @@ namespace Astrarium.Plugins.Planner.ViewModels
         private void SetTime(Date time)
         {
             sky.SetDate(time.ToJulianEphemerisDay());
+            if (SelectedTableItem != null)
+            {
+                mainWindow.CenterOnObject(SelectedTableItem.CelestialObject);
+            }
         }
 
         private void ShowObject(CelestialObject body)
         {
-            map.GoToObject(body, TimeSpan.FromSeconds(1));
+            mainWindow.CenterOnObject(body);
+        }
+
+        private void RemoveSelectedItems()
+        {
+            if (SelectedTableItems != null && SelectedTableItems.Count > 0)
+            {
+                var items = SelectedTableItems.Cast<Ephemerides>().ToArray();
+                var result = ViewManager.ShowMessageBox("Warning", "Do you really want to delete selected items?", MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.Yes)
+                {
+                    foreach (Ephemerides item in items)
+                    {
+                        ephemerides.Remove(item);
+                    }
+                    TableData.Refresh();
+                }
+            }
         }
     }
 }

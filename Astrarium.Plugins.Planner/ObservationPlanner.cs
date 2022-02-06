@@ -166,7 +166,7 @@ namespace Astrarium.Plugins.Planner
                                 {
                                     bodyEphemerides.Add(new Ephemeris() { Key = "Observation.Best", Value = transit, Formatter = Formatters.Time });
                                     bodyEphemerides.Add(new Ephemeris() { Key = "Observation.BestAltitude", Value = transitAlt, Formatter = Formatters.Altitude });
-                                    bodyEphemerides.Add(new Ephemeris() { Key = "Observation.BestAzimuth", Value = 0, Formatter = Formatters.Azimuth });
+                                    bodyEphemerides.Add(new Ephemeris() { Key = "Observation.BestAzimuth", Value = 0.0, Formatter = Formatters.Azimuth });
 
                                     var ctxBest = new SkyContext(transit.ToJulianEphemerisDay(), context.GeoLocation, preferFast: true);
                                     var bestEphemerides = sky.GetEphemerides(body, ctxBest, new[] { "Equatorial.Alpha", "Equatorial.Delta", "Constellation" });
