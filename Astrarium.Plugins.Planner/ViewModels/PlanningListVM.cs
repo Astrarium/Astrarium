@@ -46,6 +46,8 @@ namespace Astrarium.Plugins.Planner.ViewModels
                     TableData.Refresh();
                 }
                 SetValue(nameof(FilterString), value);
+
+                NotifyPropertyChanged(nameof(FilteredItemsCount));
             }
         }
 
@@ -124,6 +126,10 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
         public bool IsSigleTableItemSelected => SelectedTableItems != null && SelectedTableItems.Count == 1;
 
+        public int TotalItemsCount => ephemerides?.Count ?? 0;
+
+        public int FilteredItemsCount => TableData != null ? TableData.Cast<object>().Count() : 0;
+
         public PlanningListVM(ISky sky, IMainWindow mainWindow, ObservationPlanner planner)
         {
             this.planner = planner;
@@ -159,6 +165,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
                 if (ephemerides.Any())
                 {
                     TableData = CollectionViewSource.GetDefaultView(ephemerides);
+                    NotifyPropertyChanged(nameof(TotalItemsCount), nameof(FilteredItemsCount));
                 }
                 tokenSource.Cancel();
             }
@@ -199,6 +206,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
                         ephemerides.Remove(item);
                     }
                     TableData.Refresh();
+                    NotifyPropertyChanged(nameof(TotalItemsCount), nameof(FilteredItemsCount));
                 }
             }
         }

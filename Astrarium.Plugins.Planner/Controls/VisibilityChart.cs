@@ -1,95 +1,11 @@
-﻿using Astrarium.Algorithms;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace Astrarium.Plugins.Planner.Controls
 {
-    public class VisibilityChart : Canvas
+    public class VisibilityChart : BaseChart
     {
-        public readonly static DependencyProperty SunCoordinatesProperty = DependencyProperty.Register(nameof(SunCoordinates), typeof(CrdsEquatorial), typeof(VisibilityChart), new FrameworkPropertyMetadata(defaultValue: null) { AffectsRender = true, BindsTwoWayByDefault = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DepPropertyChanged) });
-        public readonly static DependencyProperty BodyCoordinatesProperty = DependencyProperty.Register(nameof(BodyCoordinates), typeof(CrdsEquatorial), typeof(VisibilityChart), new FrameworkPropertyMetadata(defaultValue: null) { AffectsRender = true, BindsTwoWayByDefault = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DepPropertyChanged) });
-        public readonly static DependencyProperty GeoLocationProperty = DependencyProperty.Register(nameof(GeoLocation), typeof(CrdsGeographical), typeof(VisibilityChart), new FrameworkPropertyMetadata(defaultValue: null) { AffectsRender = true, BindsTwoWayByDefault = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DepPropertyChanged) });
-        public readonly static DependencyProperty SiderealTimeProperty = DependencyProperty.Register(nameof(SiderealTime), typeof(double), typeof(VisibilityChart), new FrameworkPropertyMetadata(0.0) { AffectsRender = true, BindsTwoWayByDefault = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DepPropertyChanged) });
-        public readonly static DependencyProperty FromTimeProperty = DependencyProperty.Register(nameof(FromTime), typeof(TimeSpan), typeof(VisibilityChart), new FrameworkPropertyMetadata(TimeSpan.Zero) { AffectsRender = true, BindsTwoWayByDefault = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DepPropertyChanged) });
-        public readonly static DependencyProperty ToTimeProperty = DependencyProperty.Register(nameof(ToTime), typeof(TimeSpan), typeof(VisibilityChart), new FrameworkPropertyMetadata(TimeSpan.Zero) { AffectsRender = true, BindsTwoWayByDefault = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DepPropertyChanged) });
-
-        private static void DepPropertyChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            VisibilityChart @this = (VisibilityChart)sender;
-            @this.Interpolate();
-        }
-
-        public VisibilityChart() { }
-
-        public CrdsGeographical GeoLocation
-        {
-            get => (CrdsGeographical)GetValue(GeoLocationProperty);
-            set => SetValue(GeoLocationProperty, value);
-        }
-
-        public double SiderealTime
-        {
-            get => (double)GetValue(SiderealTimeProperty);
-            set => SetValue(SiderealTimeProperty, value);
-        }
-
-        public CrdsEquatorial SunCoordinates
-        {
-            get => (CrdsEquatorial)GetValue(SunCoordinatesProperty);
-            set => SetValue(SunCoordinatesProperty, value);
-        }
-
-        public CrdsEquatorial BodyCoordinates
-        {
-            get => (CrdsEquatorial)GetValue(BodyCoordinatesProperty);
-            set => SetValue(BodyCoordinatesProperty, value);
-        }
-
-        public TimeSpan FromTime
-        {
-            get => (TimeSpan)GetValue(FromTimeProperty);
-            set => SetValue(FromTimeProperty, value);
-        }
-
-        public TimeSpan ToTime
-        {
-            get => (TimeSpan)GetValue(ToTimeProperty);
-            set => SetValue(ToTimeProperty, value);
-        }
-
-        private CrdsHorizontal[] bodyCoordinatesInterpolated = null;
-        private CrdsHorizontal[] sunCoordinatesInterpolated = null;
-
-        private void Interpolate()
-        {
-            if (SunCoordinates != null && BodyCoordinates != null && GeoLocation != null)
-            {
-                sunCoordinatesInterpolated = Interpolate(SunCoordinates, GeoLocation, SiderealTime, 120);
-                bodyCoordinatesInterpolated = Interpolate(BodyCoordinates, GeoLocation, SiderealTime, 120);
-                InvalidateVisual();
-            }
-        }
-
-        private CrdsHorizontal[] Interpolate(CrdsEquatorial eq, CrdsGeographical location, double theta0, int count)
-        {
-            List<CrdsHorizontal> hor = new List<CrdsHorizontal>();
-            for (int i = 0; i <= count; i++)
-            {
-                double n = i / (double)count;
-                double sidTime = Angle.To360(theta0 + n * 360.98564736629);
-                hor.Add(eq.ToHorizontal(location, sidTime));
-            }
-
-            return hor.ToArray();
-        }
-
-
         protected override void OnRender(DrawingContext dc)
         {
             Matrix m = PresentationSource.FromVisual(this).CompositionTarget.TransformToDevice;
@@ -97,128 +13,126 @@ namespace Astrarium.Plugins.Planner.Controls
 
             RenderOptions.SetEdgeMode(this, EdgeMode.Unspecified);
 
+            const double verticalPadding = 20;
+            const double horizontalPadding = 10;
+
             Brush brushBackground = new SolidColorBrush(Color.FromRgb(20, 20, 20));
             Brush brushGround = Brushes.DarkGreen;
             Brush brushHourLine = new SolidColorBrush(Color.FromArgb(50, 255, 255, 255));
             Brush brushBodyLine = Brushes.Yellow;
-            Color colorDaylight = Color.FromArgb(255, 119, 203, 255);
+            Color colorDaylight = Color.FromRgb(0, 114, 196);
             Pen penHourLine = new Pen(brushHourLine, dpiFactor);
             Pen penBodyLine = new Pen(brushBodyLine, dpiFactor);
-            Pen penObservationLimits = new Pen(new SolidColorBrush(Color.FromRgb(255, 0, 0)), dpiFactor * 2);
+            Pen penObservationLimits = new Pen(new SolidColorBrush(Color.FromRgb(155, 0, 0)), dpiFactor * 2);
 
             var bounds = new Rect(0, 0, ActualWidth, ActualHeight);
             dc.PushClip(new RectangleGeometry(bounds));
 
+            dc.PushClip(new RectangleGeometry(new Rect(horizontalPadding, verticalPadding, ActualWidth - 2 * horizontalPadding, ActualHeight - 2 * verticalPadding)));
+
             // background
             dc.DrawRectangle(brushBackground, null, bounds);
 
+            // daylight/night background
             if (sunCoordinatesInterpolated != null)
             {
                 double sunAltitudesCount = sunCoordinatesInterpolated.Length;
+                LinearGradientBrush linearGradientBrush = new LinearGradientBrush();
+                linearGradientBrush.StartPoint = new Point(horizontalPadding, ActualHeight / 2);
+                linearGradientBrush.EndPoint = new Point(ActualWidth - horizontalPadding, ActualHeight / 2);
+                linearGradientBrush.MappingMode = BrushMappingMode.Absolute;
                 for (int i = 0; i < sunCoordinatesInterpolated.Length; i++)
                 {
-                    double x0 = i / sunAltitudesCount * ActualWidth;
-                    double x1 = (i + 1) / sunAltitudesCount * ActualWidth;
-
                     // -18 degrees is an astronomical night
                     double transp = sunCoordinatesInterpolated[i].Altitude <= -18 ? 0 : (sunCoordinatesInterpolated[i].Altitude < 0 ? (sunCoordinatesInterpolated[i].Altitude + 18) / 18.0 : 1);
-
                     Color c = Color.FromArgb((byte)(transp * 255), colorDaylight.R, colorDaylight.G, colorDaylight.B);
-
-                    SolidColorBrush brush = new SolidColorBrush(c);
-
-                    for (int j = 0; j < 2; j++)
-                    {
-                        double _x0 = x0 + (j == 0 ? -1 : 1) * ActualWidth / 2;
-                        double _x1 = x1 + (j == 0 ? -1 : 1) * ActualWidth / 2;
-                        var rect = new Rect(_x0, 0, _x1 - _x0, ActualHeight);
-
-                        // Create a guidelines set
-                        var guidelines = new GuidelineSet();
-                        guidelines.GuidelinesX.Add(rect.Left);
-                        guidelines.GuidelinesX.Add(rect.Right);
-                        guidelines.GuidelinesY.Add(rect.Top);
-                        guidelines.GuidelinesY.Add(rect.Bottom);
-
-                        dc.PushGuidelineSet(guidelines);
-                        dc.DrawRectangle(brush, null, rect);
-                        dc.Pop();
-                    }
+                    double f = (i / (sunAltitudesCount - 1) + 0.5) % 1;
+                    linearGradientBrush.GradientStops.Add(new GradientStop(c, f));
                 }
+                dc.DrawRectangle(linearGradientBrush, null, bounds);
             }
 
+            // ground overlay
             dc.DrawRectangle(brushGround, null, new Rect(0, ActualHeight / 2, ActualWidth, ActualHeight / 2));
 
             if (bodyCoordinatesInterpolated != null)
             {
                 // body altitude line
-                var figure = new PathFigure();
-                
                 for (int j = 0; j < 2; j++)
                 {
+                    var figure = new PathFigure();
+
                     for (int i = 0; i <= bodyCoordinatesInterpolated.Length; i++)
                     {
                         double k = i;
-                        double x = k / (double)bodyCoordinatesInterpolated.Length * ActualWidth;
+                        double x = horizontalPadding + k / (double)bodyCoordinatesInterpolated.Length * (ActualWidth - 2 * horizontalPadding);
                         double alt = i == bodyCoordinatesInterpolated.Length ? bodyCoordinatesInterpolated[i - 1].Altitude : bodyCoordinatesInterpolated[i].Altitude;
-                        double y = ActualHeight / 2 - alt / 90.0 * (ActualHeight / 2);
-                        var point = new Point(x + (j == 0 ? -ActualWidth / 2 : ActualWidth / 2), y);
-                        if (i == 0 && j == 0)
+                        double y = (ActualHeight / 2) - alt / 90.0 * (ActualHeight / 2 - verticalPadding);
+                        double offset = -Math.Sign(j - 0.5) * (ActualWidth - 2 * horizontalPadding) / 2;
+
+                        var point = new Point(x + offset, y);
+                        if (i == 0)
                         {
                             figure.StartPoint = point;
                         }
                         figure.Segments.Add(new LineSegment(point, true));
                     }
-                }
 
-                var geometry = new PathGeometry();
-                geometry.Figures.Add(figure);
-                dc.DrawGeometry(null, penBodyLine, geometry);
+                    var geometry = new PathGeometry();
+                    geometry.Figures.Add(figure);
+                    dc.DrawGeometry(null, penBodyLine, geometry);
+                }
             }
 
+            // dim the body path below horizon
             dc.DrawRectangle(new SolidColorBrush(Color.FromArgb(150, 0, 0, 0)), null, new Rect(0, ActualHeight / 2, ActualWidth, ActualHeight / 2));;
-
-            // visibility box
-            if (true)
-            {
-                double from = ((FromTime.TotalDays + 0.5) % 1) * ActualWidth;
-                double to = ((ToTime.TotalDays + 0.5) % 1) * ActualWidth;
-
-                var guidelines = new GuidelineSet();
-                guidelines.GuidelinesX.Add(0);
-                guidelines.GuidelinesX.Add(to);
-                guidelines.GuidelinesX.Add(ActualWidth);
-                guidelines.GuidelinesX.Add(ActualWidth - from + to);
-                guidelines.GuidelinesY.Add(0);
-                guidelines.GuidelinesY.Add(ActualHeight);
-
-                dc.PushGuidelineSet(guidelines);
-
-                if (from < to)
-                {
-                    dc.DrawRectangle(null, penObservationLimits, new Rect(0, 0, from, ActualHeight));
-                    dc.DrawRectangle(null, penObservationLimits, new Rect(to, 0, ActualWidth - to, ActualHeight));
-                }
-                else
-                {
-                    dc.DrawRectangle(null, penObservationLimits, new Rect(0, 0, from - to, ActualHeight));
-                }
-
-                dc.Pop();
-            }
 
             // time grid
             for (int i = 0; i <= 24; i++)
             {
-                double x = i / 24.0 * ActualWidth;
+                double x = horizontalPadding + i / 24.0 * (ActualWidth - 2 * horizontalPadding);
                 GuidelineSet guidelines = new GuidelineSet();
-                guidelines.GuidelinesX.Add(penHourLine.Thickness * 0.5);
+                guidelines.GuidelinesX.Add(x);
                 dc.PushGuidelineSet(guidelines);
                 dc.DrawLine(penHourLine, new Point(x, 0), new Point(x, ActualHeight));
                 dc.Pop();
             }
 
+            // pop the vertical offset margins
+            dc.Pop();
 
+            // visibility box
+            {
+                double from = horizontalPadding + (FromTime.TotalDays + 0.5) % 1 * (ActualWidth - 2 * horizontalPadding);
+                double to = horizontalPadding + (ToTime.TotalDays + 0.5) % 1 * (ActualWidth - 2 * horizontalPadding);
+
+                var guidelines = new GuidelineSet();
+                guidelines.GuidelinesX.Add(to);
+                guidelines.GuidelinesX.Add(ActualWidth - 2 * horizontalPadding - from + to);
+                dc.PushGuidelineSet(guidelines);
+                dc.DrawLine(penObservationLimits, new Point(from, verticalPadding), new Point(from, ActualHeight - verticalPadding));
+                dc.DrawLine(penObservationLimits, new Point(to, verticalPadding), new Point(to, ActualHeight - verticalPadding));
+                dc.Pop();
+
+                double[] x = new double[] { from, to };
+                string[] label = new string[] { "BEGIN", "END" };
+                for (int i = 0; i < 2; i++)
+                {
+                    var text = new FormattedText(label[i], System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Arial"), 10, brushHourLine);
+                    double offset = -text.WidthIncludingTrailingWhitespace / 2;
+                    dc.DrawText(text, new Point(x[i] + offset, ActualHeight - verticalPadding / 2 - text.Height / 2));
+                }
+            }
+
+            // time grid labels
+            for (int i = 0; i <= 24; i++)
+            {
+                double x = horizontalPadding +  i / 24.0 * (ActualWidth - 2 * horizontalPadding);
+                var text = new FormattedText($"{(i + 12) % 24}", System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Arial"), 10, brushHourLine);
+                dc.DrawText(text, new Point(x - text.WidthIncludingTrailingWhitespace / 2, (verticalPadding - text.Height) / 2));
+            }
+
+            //dc.DrawRectangle(null, penHourLine, bounds);
         }
     }
 }
