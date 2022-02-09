@@ -1,9 +1,5 @@
-﻿using Astrarium.Types;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Types
 {
@@ -15,6 +11,13 @@ namespace Astrarium.Types
         public T GetValue<T>()
         {
             return (T)Value;
+        }
+
+        public Ephemeris(string key, object value, IEphemFormatter formatter = null)
+        {
+            Key = key;
+            Value = value;
+            Formatter = formatter ?? Formatters.GetDefault(key);
         }
 
         public override string ToString()

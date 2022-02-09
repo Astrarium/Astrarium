@@ -213,12 +213,7 @@ namespace Astrarium
 
                 foreach (var item in itemsToBeCalled)
                 {
-                    ephemerides.Add(new Ephemeris()
-                    {
-                        Key = item.Category,
-                        Value = item.Formula.DynamicInvoke(context, body),
-                        Formatter = item.Formatter ?? Formatters.GetDefault(item.Category)
-                    });
+                    ephemerides.Add(new Ephemeris(item.Category, item.Formula.DynamicInvoke(context, body), item.Formatter ?? Formatters.GetDefault(item.Category)));
                 }
 
                 all.Add(ephemerides);
@@ -234,12 +229,7 @@ namespace Astrarium
             Ephemerides ephemerides = new Ephemerides(body);
             foreach (var item in itemsToBeCalled)
             {
-                ephemerides.Add(new Ephemeris()
-                {
-                    Key = item.Category,
-                    Value = item.Formula.DynamicInvoke(context, body),
-                    Formatter = item.Formatter ?? Formatters.GetDefault(item.Category)
-                });
+                ephemerides.Add(new Ephemeris(item.Category, item.Formula.DynamicInvoke(context, body), item.Formatter ?? Formatters.GetDefault(item.Category)));
             }
             return ephemerides;
         }

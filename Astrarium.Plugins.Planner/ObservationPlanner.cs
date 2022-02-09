@@ -116,7 +116,7 @@ namespace Astrarium.Plugins.Planner
             {
                 if (!force && filter.SkipUnknownMagnitude) return null;
                 // Apply "skip unknown mag" filter
-                bodyEphemerides.Add(new Ephemeris() { Key = "Magnitude", Value = null, Formatter = Formatters.Magnitude });
+                bodyEphemerides.Add(new Ephemeris("Magnitude", null, Formatters.Magnitude));
             }
 
             if (!force && filter.MagLimit != null)
@@ -164,9 +164,9 @@ namespace Astrarium.Plugins.Planner
                         // and expressed in Date
                         Date bodyObsEnd = new Date(context.JulianDayMidnight + endTime, context.GeoLocation.UtcOffset);
 
-                        bodyEphemerides.Add(new Ephemeris() { Key = "Observation.Begin", Value = bodyObsBegin, Formatter = Formatters.Time });
-                        bodyEphemerides.Add(new Ephemeris() { Key = "Observation.Duration", Value = bodyObsDuration, Formatter = Formatters.VisibilityDuration });
-                        bodyEphemerides.Add(new Ephemeris() { Key = "Observation.End", Value = bodyObsEnd, Formatter = Formatters.Time });
+                        bodyEphemerides.Add(new Ephemeris("Observation.Begin", bodyObsBegin, Formatters.Time));
+                        bodyEphemerides.Add(new Ephemeris("Observation.Duration", bodyObsDuration, Formatters.VisibilityDuration));
+                        bodyEphemerides.Add(new Ephemeris("Observation.End", bodyObsEnd, Formatters.Time));
 
                         bodyEphemerides.AddRange(visibilityEphems);
 
@@ -180,9 +180,9 @@ namespace Astrarium.Plugins.Planner
 
                             if (bodyObsRange.Overlaps(tranRange).Any())
                             {
-                                bodyEphemerides.Add(new Ephemeris() { Key = "Observation.Best", Value = transit, Formatter = Formatters.Time });
-                                bodyEphemerides.Add(new Ephemeris() { Key = "Observation.BestAltitude", Value = transitAlt, Formatter = Formatters.Altitude });
-                                bodyEphemerides.Add(new Ephemeris() { Key = "Observation.BestAzimuth", Value = 0.0, Formatter = Formatters.Azimuth });
+                                bodyEphemerides.Add(new Ephemeris("Observation.Best", transit, Formatters.Time));
+                                bodyEphemerides.Add(new Ephemeris("Observation.BestAltitude", transitAlt, Formatters.Altitude));
+                                bodyEphemerides.Add(new Ephemeris("Observation.BestAzimuth", 0.0, Formatters.Azimuth));
 
                                 var ctxBest = new SkyContext(transit.ToJulianEphemerisDay(), context.GeoLocation, preferFast: true);
                                 var bestEphemerides = sky.GetEphemerides(body, ctxBest, new[] { "Equatorial.Alpha", "Equatorial.Delta", "Constellation" });
@@ -202,16 +202,16 @@ namespace Astrarium.Plugins.Planner
 
                                 if (altBegin >= altEnd)
                                 {
-                                    bodyEphemerides.Add(new Ephemeris() { Key = "Observation.Best", Value = bodyObsBegin, Formatter = Formatters.Time });
-                                    bodyEphemerides.Add(new Ephemeris() { Key = "Observation.BestAltitude", Value = altBegin, Formatter = Formatters.Altitude });
-                                    bodyEphemerides.Add(new Ephemeris() { Key = "Observation.BestAzimuth", Value = aziBegin, Formatter = Formatters.Azimuth });
+                                    bodyEphemerides.Add(new Ephemeris("Observation.Best", bodyObsBegin, Formatters.Time));
+                                    bodyEphemerides.Add(new Ephemeris("Observation.BestAltitude", altBegin, Formatters.Altitude));
+                                    bodyEphemerides.Add(new Ephemeris("Observation.BestAzimuth", aziBegin, Formatters.Azimuth));
                                     bodyEphemerides.AddRange(beginEphemerides);
                                 }
                                 else
                                 {
-                                    bodyEphemerides.Add(new Ephemeris() { Key = "Observation.Best", Value = bodyObsEnd, Formatter = Formatters.Time });
-                                    bodyEphemerides.Add(new Ephemeris() { Key = "Observation.BestAltitude", Value = altEnd, Formatter = Formatters.Altitude });
-                                    bodyEphemerides.Add(new Ephemeris() { Key = "Observation.BestAzimuth", Value = aziEnd, Formatter = Formatters.Azimuth });
+                                    bodyEphemerides.Add(new Ephemeris("Observation.Best", bodyObsEnd, Formatters.Time));
+                                    bodyEphemerides.Add(new Ephemeris("Observation.BestAltitude", altEnd, Formatters.Altitude));
+                                    bodyEphemerides.Add(new Ephemeris("Observation.BestAzimuth", aziEnd, Formatters.Azimuth));
                                     bodyEphemerides.AddRange(endEphemerides);
                                 }
                             }
@@ -227,39 +227,34 @@ namespace Astrarium.Plugins.Planner
             // or no info provided about observation
             if (force)
             {
-                bodyEphemerides.Add(new Ephemeris() { Key = "Observation.Begin", Value = new Date(double.NaN), Formatter = Formatters.Time });
-                bodyEphemerides.Add(new Ephemeris() { Key = "Observation.Duration", Value = double.NaN, Formatter = Formatters.VisibilityDuration });
-                bodyEphemerides.Add(new Ephemeris() { Key = "Observation.End", Value = new Date(double.NaN), Formatter = Formatters.Time });
-                bodyEphemerides.Add(new Ephemeris() { Key = "Observation.Best", Value = new Date(double.NaN), Formatter = Formatters.Time });
-                bodyEphemerides.Add(new Ephemeris() { Key = "Observation.BestAltitude", Value = double.NaN, Formatter = Formatters.Altitude });
-                bodyEphemerides.Add(new Ephemeris() { Key = "Observation.BestAzimuth", Value = double.NaN, Formatter = Formatters.Azimuth });
+                bodyEphemerides.Add(new Ephemeris("Observation.Begin", new Date(double.NaN), Formatters.Time));
+                bodyEphemerides.Add(new Ephemeris("Observation.Duration", double.NaN, Formatters.VisibilityDuration));
+                bodyEphemerides.Add(new Ephemeris("Observation.End", new Date(double.NaN), Formatters.Time));
+                bodyEphemerides.Add(new Ephemeris("Observation.Best", new Date(double.NaN), Formatters.Time));
+                bodyEphemerides.Add(new Ephemeris("Observation.BestAltitude", double.NaN, Formatters.Altitude));
+                bodyEphemerides.Add(new Ephemeris("Observation.BestAzimuth", double.NaN, Formatters.Azimuth));
                 bodyEphemerides.AddRange(visibilityEphems);
                 var ctx = new SkyContext(filter.JulianDayMidnight, filter.ObserverLocation, preferFast: true);
                 bodyEphemerides.AddRange(sky.GetEphemerides(body, ctx, new[] { "Horizontal.Altitude", "Horizontal.Azimuth", "Equatorial.Alpha", "Equatorial.Delta", "Constellation" }));
 
                 // final check: add fictive/empty ephemerides as it needed by planner
-                string[] existingEphems = bodyEphemerides.Select(e => e.Key).ToArray();
-                if (!existingEphems.Contains("Constellation"))
-                {
-                    bodyEphemerides.Add(new Ephemeris() { Key = "Constellation", Value = null, Formatter = Formatters.Simple });
-                }
-                if (!existingEphems.Contains("RTS.RiseAzimuth"))
-                {
-                    bodyEphemerides.Add(new Ephemeris() { Key = "RTS.RiseAzimuth", Value = double.NaN, Formatter = Formatters.GetDefault("RTS.RiseAzimuth") });
-                }
-                if (!existingEphems.Contains("RTS.SetAzimuth"))
-                {
-                    bodyEphemerides.Add(new Ephemeris() { Key = "RTS.SetAzimuth", Value = double.NaN, Formatter = Formatters.GetDefault("RTS.SetAzimuth") });
-                }
-                if (!existingEphems.Contains("RTS.TransitAltitude"))
-                {
-                    bodyEphemerides.Add(new Ephemeris() { Key = "RTS.TransitAltitude", Value = double.NaN, Formatter = Formatters.GetDefault("RTS.TransitAltitude") });
-                }
+                AddEphemIfMissing(bodyEphemerides, "Constellation", null);
+                AddEphemIfMissing(bodyEphemerides, "RTS.RiseAzimuth", double.NaN);
+                AddEphemIfMissing(bodyEphemerides, "RTS.SetAzimuth", double.NaN);
+                AddEphemIfMissing(bodyEphemerides, "RTS.TransitAltitude", double.NaN);
 
                 return bodyEphemerides;
             }
 
             return null;
+        }
+
+        private void AddEphemIfMissing(Ephemerides bodyEphemerides, string key, object value)
+        {
+            if (!bodyEphemerides.Select(e => e.Key).Contains(key))
+            {
+                bodyEphemerides.Add(new Ephemeris(key, value, Formatters.GetDefault(key)));
+            }
         }
     }
 }
