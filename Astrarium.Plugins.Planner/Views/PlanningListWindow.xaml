@@ -29,6 +29,11 @@
         <Style x:Key="DefaultRowStyle" TargetType="{x:Type DataGridRow}" BasedOn="{StaticResource {x:Type DataGridRow}}">
             <Setter Property="ContextMenu" Value="{StaticResource RowMenu}" />
         </Style>
+        <Style x:Key="DateLinkStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="Height" Value="10" />
+            <Setter Property="FontFamily" Value="Lucida Console" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
     </Window.Resources>
     
     <Grid Margin="0 4">
@@ -111,7 +116,7 @@
             Margin="4"
             RowHeaderWidth="0"
             ColumnHeaderHeight="32"
-            RowHeight="24"
+            RowHeight="22"
             SelectionMode="Extended"
             SelectionUnit="FullRow"
             RowStyle="{StaticResource DefaultRowStyle}"
@@ -157,10 +162,11 @@
                 </DataGridTemplateColumn>
 
                 <DataGridTextColumn Header="Mag" Binding="{Binding Path='[Magnitude]', Converter={views:Converter}, ConverterParameter='Magnitude'}" SortMemberPath="[Magnitude]" />
+                
                 <DataGridTemplateColumn Header="Begin obs." CanUserSort="True" SortMemberPath="[Observation.Begin]">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock FontFamily="Lucida Console" FontSize="12">
+                            <TextBlock Style="{StaticResource DateLinkStyle}">
                                 <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type views:PlanningListWindow}, Mode=FindAncestor}, Path=DataContext.SetTimeCommand}" CommandParameter="{Binding Path='[Observation.Begin]'}"><Run Text="{Binding Path='[Observation.Begin]', Mode=OneWay, Converter={views:Converter}, ConverterParameter='Visibility.Begin'}" /></Hyperlink>
                             </TextBlock>
                         </DataTemplate>
@@ -170,7 +176,7 @@
                 <DataGridTemplateColumn Header="BEST Time" CanUserSort="True" SortMemberPath="[Observation.Best]">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock FontFamily="Lucida Console" FontSize="12">
+                            <TextBlock Style="{StaticResource DateLinkStyle}">
                                 <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type views:PlanningListWindow}, Mode=FindAncestor}, Path=DataContext.SetTimeCommand}" CommandParameter="{Binding Path='[Observation.Best]'}"><Run Text="{Binding Path='[Observation.Best]', Mode=OneWay,  Converter={views:Converter}, ConverterParameter='Visibility.Begin'}" /></Hyperlink>
                             </TextBlock>
                         </DataTemplate>
@@ -183,7 +189,7 @@
                 <DataGridTemplateColumn Header="End obs." CanUserSort="True" SortMemberPath="[Observation.End]">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock VerticalAlignment="Center" FontFamily="Lucida Console" FontSize="12">
+                            <TextBlock Style="{StaticResource DateLinkStyle}">
                                 <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type views:PlanningListWindow}, Mode=FindAncestor}, Path=DataContext.SetTimeCommand}" CommandParameter="{Binding Path='[Observation.End]'}"><Run Text="{Binding Path='[Observation.End]', Mode=OneWay,  Converter={views:Converter}, ConverterParameter='Visibility.End'}" /></Hyperlink>
                             </TextBlock>
                         </DataTemplate>
@@ -196,7 +202,7 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Grid>
-                                <TextBlock Visibility="{Binding Path='[RTS.Rise]', Converter={views:TimeLinkVisibilityConverter}}"  FontFamily="Lucida Console" FontSize="12">
+                                <TextBlock Visibility="{Binding Path='[RTS.Rise]', Converter={views:TimeLinkVisibilityConverter}}" Style="{StaticResource DateLinkStyle}">
                                     <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type views:PlanningListWindow}, Mode=FindAncestor}, Path=DataContext.SetTimeCommand}" CommandParameter="{Binding Path='[RTS.Rise]'}"><Run Text="{Binding Path='[RTS.Rise]', Mode=OneWay, Converter={views:Converter}, ConverterParameter='RTS.Rise'}" /></Hyperlink>
                                 </TextBlock>
                                 <TextBlock IsEnabled="False" Visibility="{Binding Path='[RTS.Rise]', Converter={views:TimeLinkInverseVisibilityConverter}}" Text="—" />
@@ -209,7 +215,7 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Grid>
-                                <TextBlock Visibility="{Binding Path='[RTS.Transit]', Converter={views:TimeLinkVisibilityConverter}}"  FontFamily="Lucida Console" FontSize="12">
+                                <TextBlock Visibility="{Binding Path='[RTS.Transit]', Converter={views:TimeLinkVisibilityConverter}}" Style="{StaticResource DateLinkStyle}">
                                     <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type views:PlanningListWindow}, Mode=FindAncestor}, Path=DataContext.SetTimeCommand}" CommandParameter="{Binding Path='[RTS.Transit]'}"><Run Text="{Binding Path='[RTS.Transit]', Mode=OneWay, Converter={views:Converter}, ConverterParameter='RTS.Transit'}" /></Hyperlink>
                                 </TextBlock>
                                 <TextBlock IsEnabled="False" Visibility="{Binding Path='[RTS.Transit]', Converter={views:TimeLinkInverseVisibilityConverter}}" Text="—" />
@@ -222,7 +228,7 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Grid>
-                                <TextBlock Visibility="{Binding Path='[RTS.Set]', Converter={views:TimeLinkVisibilityConverter}}"  FontFamily="Lucida Console" FontSize="12">
+                                <TextBlock Visibility="{Binding Path='[RTS.Set]', Converter={views:TimeLinkVisibilityConverter}}" Style="{StaticResource DateLinkStyle}">
                                     <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type views:PlanningListWindow}, Mode=FindAncestor}, Path=DataContext.SetTimeCommand}" CommandParameter="{Binding Path='[RTS.Set]'}"><Run Text="{Binding Path='[RTS.Set]', Mode=OneWay, Converter={views:Converter}, ConverterParameter='RTS.Set'}" /></Hyperlink>
                                 </TextBlock>
                                 <TextBlock IsEnabled="False" Visibility="{Binding Path='[RTS.Set]', Converter={views:TimeLinkInverseVisibilityConverter}}" Text="—" />
