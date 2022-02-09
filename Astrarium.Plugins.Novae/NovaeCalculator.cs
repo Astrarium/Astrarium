@@ -223,6 +223,7 @@ namespace Astrarium.Plugins.Novae
 
         public void ConfigureEphemeris(EphemerisConfig<Nova> e)
         {
+            e["Constellation"] = (c, m) => Constellations.FindConstellation(c.Get(Equatorial, m), c.JulianDay);
             e["Equatorial.Alpha"] = (c, m) => c.Get(Equatorial, m).Alpha;
             e["Equatorial.Delta"] = (c, m) => c.Get(Equatorial, m).Delta;
             e["Horizontal.Altitude"] = (c, m) => c.Get(Horizontal, m).Altitude;

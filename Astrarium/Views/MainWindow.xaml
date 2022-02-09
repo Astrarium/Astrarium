@@ -213,9 +213,9 @@
             <StatusBarItem>
                 <Menu Background="Transparent">
                     <MenuItem 
-                              ItemsSource="{Binding SelectedObjectsMenuItems}" 
-                              Header="{Binding SelectedObject, Converter={s:CelestialObjectNameConverter}, FallbackValue='Selected Object'}" 
-                              ToolTip="{t:Text StatusBar.SelectedObject}">
+                        ItemsSource="{Binding SelectedObjectsMenuItems}" 
+                        Header="{Binding SelectedObject, Converter={s:CelestialObjectNameConverter}, FallbackValue='Selected Object'}" 
+                        ToolTip="{t:Text StatusBar.SelectedObject}">
                         <MenuItem.ItemContainerStyle>
                             <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
                                 <Setter Property="IsChecked" Value="{Binding IsChecked}" />

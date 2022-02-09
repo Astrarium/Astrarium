@@ -27,6 +27,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
         public ICommand SetTimeCommand { get; private set; }
         public ICommand ShowObjectCommand { get; private set; }
         public ICommand RemoveSelectedItemsCommand { get; private set; }
+        public ICommand AddObjectCommand { get; private set; }
 
         public string FilterString
         {
@@ -99,8 +100,17 @@ namespace Astrarium.Plugins.Planner.ViewModels
             set
             {
                 SetValue(nameof(SelectedTableItems), value);
-                NotifyPropertyChanged(nameof(IsSigleTableItemSelected));
+                NotifySelectedTableItemChanged();
             }
+        }
+
+        private void NotifySelectedTableItemChanged()
+        {
+            NotifyPropertyChanged(
+                nameof(IsSigleTableItemSelected),
+                nameof(IsGoToObservationBeginEnabled),
+                nameof(IsGoToObservationBestEnabled),
+                nameof(IsGoToObservationEndEnabled));
         }
 
         public Ephemerides SelectedTableItem
@@ -109,7 +119,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
             set
             {
                 SetValue(nameof(SelectedTableItem), value);
-                NotifyPropertyChanged(nameof(IsSigleTableItemSelected));
+                NotifySelectedTableItemChanged();
 
                 if (SelectedTableItem != null)
                 {
@@ -123,6 +133,10 @@ namespace Astrarium.Plugins.Planner.ViewModels
                 }
             }
         }
+
+        public bool IsGoToObservationBeginEnabled => IsSigleTableItemSelected && SelectedTableItem != null && !double.IsNaN(SelectedTableItem.GetValue<Date>("Observation.Begin").Day);
+        public bool IsGoToObservationBestEnabled => IsSigleTableItemSelected && SelectedTableItem != null &&  !double.IsNaN(SelectedTableItem.GetValue<Date>("Observation.Best").Day);
+        public bool IsGoToObservationEndEnabled => IsSigleTableItemSelected && SelectedTableItem != null && !double.IsNaN(SelectedTableItem.GetValue<Date>("Observation.End").Day);
 
         public bool IsSigleTableItemSelected => SelectedTableItems != null && SelectedTableItems.Count == 1;
 
@@ -139,12 +153,15 @@ namespace Astrarium.Plugins.Planner.ViewModels
             SetTimeCommand = new Command<Date>(SetTime);
             ShowObjectCommand = new Command<CelestialObject>(ShowObject);
             RemoveSelectedItemsCommand = new Command(RemoveSelectedItems);
+            AddObjectCommand = new Command(AddObject);
         }
         
         private double julianDay;
+        private PlanningFilter filter;
         
         public async void CreatePlan(PlanningFilter filter)
         {
+            this.filter = filter;
             julianDay = filter.JulianDayMidnight;
             GeoLocation = filter.ObserverLocation;
             FromTime = TimeSpan.FromHours(filter.TimeFrom);
@@ -162,11 +179,8 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
             if (!tokenSource.IsCancellationRequested)
             {
-                if (ephemerides.Any())
-                {
-                    TableData = CollectionViewSource.GetDefaultView(ephemerides);
-                    NotifyPropertyChanged(nameof(TotalItemsCount), nameof(FilteredItemsCount));
-                }
+                TableData = CollectionViewSource.GetDefaultView(ephemerides);
+                NotifyPropertyChanged(nameof(TotalItemsCount), nameof(FilteredItemsCount));
                 tokenSource.Cancel();
             }
         }
@@ -207,8 +221,28 @@ namespace Astrarium.Plugins.Planner.ViewModels
                     }
                     TableData.Refresh();
                     NotifyPropertyChanged(nameof(TotalItemsCount), nameof(FilteredItemsCount));
+                    NotifySelectedTableItemChanged();
                 }
             }
+        }
+
+        private void AddObject()
+        {
+            var body = ViewManager.ShowSearchDialog(x => true);
+            if (body != null)
+            {
+                var item = ephemerides.FirstOrDefault(x => x.CelestialObject.Type == body.Type && x.CelestialObject.Names[0] == body.Names[0]);
+                if (item == null)
+                {
+                    item = planner.GetObservationDetails(filter, body);
+                    ephemerides.Add(item);
+                    TableData.Refresh();
+                    NotifyPropertyChanged(nameof(TotalItemsCount), nameof(FilteredItemsCount));
+                }
+
+                TableData.MoveCurrentTo(item);
+            }
+            
         }
     }
 }

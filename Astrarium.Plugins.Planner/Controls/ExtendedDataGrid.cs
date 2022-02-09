@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace Astrarium.Plugins.Planner.Controls
 {
@@ -13,16 +14,19 @@ namespace Astrarium.Plugins.Planner.Controls
     {
         public static readonly DependencyProperty SelectedItemsProperty = DependencyProperty.Register(nameof(SelectedItems), typeof(IList), typeof(ExtendedDataGrid), new PropertyMetadata(default(IList), OnSelectedItemsPropertyChanged));
 
-        //static ExtendedDataGrid()
-        //{
-        //    DefaultStyleKeyProperty.
-        //    DefaultStyleKeyProperty.OverrideMetadata(typeof(ExtendedDataGrid), new FrameworkPropertyMetadata(typeof(DataGrid)));
-        //}
-
         protected override void OnSelectionChanged(SelectionChangedEventArgs e)
         {
             base.OnSelectionChanged(e);
             SetValue(SelectedItemsProperty, base.SelectedItems);
+
+            if (SelectedItem != null && SelectedItems.Count == 1)
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    UpdateLayout();
+                    ScrollIntoView(SelectedItem, null);
+                });
+            }
         }
 
         public new IList SelectedItems
