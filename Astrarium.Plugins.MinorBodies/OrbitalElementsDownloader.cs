@@ -54,6 +54,10 @@ namespace Astrarium.Plugins.MinorBodies
                             {
                                 return totalRecords;
                             }
+                            if (record == records.Last())
+                            {
+                                remainder.Clear();
+                            }
                         }
                         else if (record == records.Last())
                         {
