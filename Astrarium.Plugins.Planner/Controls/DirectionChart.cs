@@ -18,6 +18,8 @@ namespace Astrarium.Plugins.Planner.Controls
             double dpiFactor = 1 / m.M11;
 
             RenderOptions.SetEdgeMode(this, EdgeMode.Unspecified);
+
+            Brush brushTextLabel = new SolidColorBrush((Color)FindResource("ColorControlLightBackground"));
             Brush brushBodyLine = Brushes.Yellow;
             Brush brushBackground = new SolidColorBrush(Color.FromRgb(20, 20, 20));
             Pen penBodyLine = new Pen(brushBodyLine, dpiFactor);
@@ -65,7 +67,7 @@ namespace Astrarium.Plugins.Planner.Controls
             string[] labels = new string[] { "S", "W", "N", "E" };
             for (int i = 0; i < 4; i++)
             {
-                var text = new FormattedText(labels[i], System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Arial"), 10, brushBodyLine);
+                var text = new FormattedText(labels[i], System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Arial"), 10, brushTextLabel);
                 double angle = Angle.ToRadians(i * 90 - 90);
                 double r = radius + 5 + Math.Max(text.WidthIncludingTrailingWhitespace / 2, text.Height / 2);
                 double x = ActualWidth / 2 + r * Math.Cos(angle);

@@ -259,7 +259,7 @@
                 <DataGridTextColumn Binding="{Binding Path='[RTS.SetAzimuth]', Converter={views:Converter}, ConverterParameter='RTS.SetAzimuth'}" Header="Set Azi." CanUserSort="True" SortMemberPath="[RTS.SetAzimuth]" />
                 <DataGridTextColumn Binding="{Binding Path='[Equatorial.Alpha]', Converter={views:Converter}, ConverterParameter='Equatorial.Alpha'}" Header="R.A." CanUserSort="True" SortMemberPath="[Equatorial.Alpha]" />
                 <DataGridTextColumn Binding="{Binding Path='[Equatorial.Delta]', Converter={views:Converter}, ConverterParameter='Equatorial.Delta'}" Header="Dec." CanUserSort="True" SortMemberPath="[Equatorial.Delta]" />
-                <DataGridTextColumn Binding="{Binding Path='[Constellation]'}" Header="Const." CanUserSort="True" SortMemberPath="[Constellation]" />
+                <DataGridTextColumn Binding="{Binding Path='[Constellation]', Converter={views:Converter}, ConverterParameter='Constellation'}" Header="Const." CanUserSort="True" SortMemberPath="[Constellation]" />
 
             </DataGrid.Columns>
             

@@ -18,6 +18,8 @@ namespace Astrarium.Plugins.Planner.Controls
 
             Brush brushBackground = new SolidColorBrush(Color.FromRgb(20, 20, 20));
             Brush brushGround = Brushes.DarkGreen;
+
+            Brush brushTextLabel = new SolidColorBrush((Color)FindResource("ColorControlLightBackground"));
             Brush brushHourLine = new SolidColorBrush(Color.FromArgb(50, 255, 255, 255));
             Brush brushBodyLine = Brushes.Yellow;
             Color colorDaylight = Color.FromRgb(0, 114, 196);
@@ -118,7 +120,7 @@ namespace Astrarium.Plugins.Planner.Controls
                 string[] label = new string[] { "BEGIN", "END" };
                 for (int i = 0; i < 2; i++)
                 {
-                    var text = new FormattedText(label[i], System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Arial"), 10, brushHourLine);
+                    var text = new FormattedText(label[i], System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Arial"), 10, brushTextLabel);
                     double offset = -text.WidthIncludingTrailingWhitespace / 2;
                     dc.DrawText(text, new Point(x[i] + offset, ActualHeight - verticalPadding / 2 - text.Height / 2));
                 }
@@ -128,7 +130,7 @@ namespace Astrarium.Plugins.Planner.Controls
             for (int i = 0; i <= 24; i++)
             {
                 double x = horizontalPadding +  i / 24.0 * (ActualWidth - 2 * horizontalPadding);
-                var text = new FormattedText($"{(i + 12) % 24}", System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Arial"), 10, brushHourLine);
+                var text = new FormattedText($"{(i + 12) % 24}", System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Arial"), 10, brushTextLabel);
                 dc.DrawText(text, new Point(x - text.WidthIncludingTrailingWhitespace / 2, (verticalPadding - text.Height) / 2));
             }
 

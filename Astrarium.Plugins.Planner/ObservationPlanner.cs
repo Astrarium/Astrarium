@@ -239,6 +239,11 @@ namespace Astrarium.Plugins.Planner
 
                 // final check: add fictive/empty ephemerides as it needed by planner
                 AddEphemIfMissing(bodyEphemerides, "Constellation", null);
+                AddEphemIfMissing(bodyEphemerides, "Equatorial.Alpha", double.NaN);
+                AddEphemIfMissing(bodyEphemerides, "Equatorial.Delta", double.NaN);
+                AddEphemIfMissing(bodyEphemerides, "Horizontal.Altitude", double.NaN);
+                AddEphemIfMissing(bodyEphemerides, "Horizontal.Azimuth", double.NaN);
+                AddEphemIfMissing(bodyEphemerides, "Constellation", null);
                 AddEphemIfMissing(bodyEphemerides, "RTS.RiseAzimuth", double.NaN);
                 AddEphemIfMissing(bodyEphemerides, "RTS.SetAzimuth", double.NaN);
                 AddEphemIfMissing(bodyEphemerides, "RTS.TransitAltitude", double.NaN);

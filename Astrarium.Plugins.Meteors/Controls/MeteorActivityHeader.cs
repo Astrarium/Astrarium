@@ -36,14 +36,15 @@ namespace Astrarium.Plugins.Meteors.Controls
 
         protected override void OnRender(DrawingContext drawingContext)
         {
+            Brush brushTextLabel = new SolidColorBrush((Color)FindResource("ColorControlLightBackground"));
+
             var jd0 = new Date(Year, 1, 1).ToJulianDay();
 
             double daysCount = Date.IsLeapYear(Year) ? 366 : 365;
 
             var monthNames = CultureInfo.CurrentCulture.DateTimeFormat.MonthNames.Take(12).ToArray();
 
-            Color color = IsDarkMode ? Color.FromArgb(255, 80, 0, 0) : Color.FromArgb(255, 80, 80, 80);
-            var pen = new Pen(new SolidColorBrush(color), 1);
+            var pen = new Pen(brushTextLabel, 1);
 
             for (int i = 0; i <= daysCount; i++)
             {
@@ -56,7 +57,7 @@ namespace Astrarium.Plugins.Meteors.Controls
                 {
                     double dayWidth = ActualWidth / daysCount;
                     var p = new Point(x + Date.DaysInMonth(d.Year, d.Month) / 2.0 * dayWidth, y);
-                    DrawText(drawingContext, $"{monthNames[d.Month - 1]}", p, 12);
+                    DrawText(drawingContext, $"{monthNames[d.Month - 1]}", p, 12, brushTextLabel);
                 }
 
                 y = ActualHeight - ((d.Day == 1) ? ActualHeight : ActualHeight / 5);
@@ -65,9 +66,8 @@ namespace Astrarium.Plugins.Meteors.Controls
             }
         }
 
-        private void DrawText(DrawingContext ctx, string text, Point point, double size)
+        private void DrawText(DrawingContext ctx, string text, Point point, double size, Brush textBrush)
         {
-            Brush textBrush = IsDarkMode ? Brushes.Red : Brushes.Gray;
             FormattedText formattedText = new FormattedText(text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, font, size, textBrush);
             ctx.DrawText(formattedText, new Point(point.X - formattedText.Width / 2, point.Y - formattedText.Height / 2));
         }

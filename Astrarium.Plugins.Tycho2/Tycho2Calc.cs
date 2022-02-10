@@ -382,8 +382,12 @@ namespace Astrarium.Plugins.Tycho2
 
         public void ConfigureEphemeris(EphemerisConfig<Tycho2Star> e)
         {
+            e["Constellation"] = (c, s) => Constellations.FindConstellation(c.Get(Equatorial, s), c.JulianDay);
+            e["Equatorial.Alpha"] = (c, s) => c.Get(Equatorial, s).Alpha;
+            e["Equatorial.Delta"] = (c, s) => c.Get(Equatorial, s).Delta;
             e["Horizontal.Azimuth"] = (c, s) => c.Get(Horizontal, s).Azimuth;
             e["Horizontal.Altitude"] = (c, s) => c.Get(Horizontal, s).Altitude;
+            e["Magnitude"] = (c, s) => s.Magnitude;
             e["RTS.Rise"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet, s).Rise);
             e["RTS.Transit"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet, s).Transit);
             e["RTS.Set"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet, s).Set);

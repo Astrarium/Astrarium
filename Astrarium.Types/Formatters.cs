@@ -37,6 +37,7 @@ namespace Astrarium.Types
         /// </summary>
         static Formatters()
         {
+            Default["Constellation"]            = new ConstellationFormatter();
             Default["RTS.Rise"]                 = Time;
             Default["RTS.Transit"]              = Time;
             Default["RTS.Set"]                  = Time;
@@ -77,6 +78,17 @@ namespace Astrarium.Types
                 return Simple;
         }
 
+        private class ConstellationFormatter : IEphemFormatter
+        {
+            public string Format(object value)
+            {
+                if (string.IsNullOrEmpty((string)value))
+                    return "—";
+                else
+                    return Text.Get($"ConName.{((string)value).ToUpper()}");
+            }
+        }
+
         /// <summary>
         /// Trivial converter for formatting any value to string.
         /// Calls default ToString() implementation for the type.
@@ -95,7 +107,10 @@ namespace Astrarium.Types
 
             public string Format(object value)
             {
-                return new HMS((double)value).ToString(format);
+                if (value == null || double.IsNaN((double)value))
+                    return "—";
+                else
+                    return new HMS((double)value).ToString(format);
             }
         }
 
@@ -104,7 +119,7 @@ namespace Astrarium.Types
             public string Format(object value)
             {
                 if (value == null || double.IsNaN((double)value))
-                    return null;
+                    return "—";
                 else
                     return new DMS((double)value).ToString();
             }
@@ -135,7 +150,7 @@ namespace Astrarium.Types
             public string Format(object value)
             {
                 if (value == null || double.IsNaN((double)value))
-                    return null;
+                    return "—";
                 else
                     return new DMS((double)value).ToUnsignedString();
             }
@@ -146,7 +161,7 @@ namespace Astrarium.Types
             public string Format(object value)
             {
                 if (value == null || double.IsNaN((double)value))
-                    return null;
+                    return "—";
                 else
                     return new DMS(Algorithms.Angle.To360((double)value) + (CrdsHorizontal.MeasureAzimuthFromNorth ? 180 : 0)).ToUnsignedString();
             }
@@ -460,7 +475,7 @@ namespace Astrarium.Types
         public static readonly IEphemFormatter Angle = new AngleFormatter();
         public static readonly IEphemFormatter DateTime = new DateTimeFormatter();
         public static readonly IEphemFormatter Date = new DateFormatter();
-        public static readonly IEphemFormatter MonthYear = new MonthYearFormatter();     
+        public static readonly IEphemFormatter MonthYear = new MonthYearFormatter();
         public static readonly IEphemFormatter TimeSpan = new TimeSpanFormatter();
         public static readonly IEphemFormatter Rectangular = new SignedDoubleFormatter(3);
     }
