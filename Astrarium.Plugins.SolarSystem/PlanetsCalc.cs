@@ -211,41 +211,39 @@ namespace Astrarium.Plugins.SolarSystem
             pluto.Ecliptical = context.Get(Pluto_Ecliptical);
         }
        
-        public ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50)
+        public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
-            if (searchString.StartsWith("@"))
+            // common names
+            for (int p = 0; p < Planet.NAMES.Length; p++)
             {
-                for (int p = 0; p < Planet.NAMES.Length; p++)
-                {
-                    if (p != Planet.EARTH - 1 && searchString.Equals($"@{Planet.NAMES[p]}", StringComparison.OrdinalIgnoreCase))
-                        return new[] { Planets.ElementAt(p) };
-                }
-
-                for (int m = 0; m < jupiterMoons.Length; m++)
-                {
-                    if (searchString.Equals($"@Jupiter-{m+1}", StringComparison.OrdinalIgnoreCase))
-                        return new[] { jupiterMoons.ElementAt(m) };
-                }
+                if (p != Planet.EARTH - 1 &&  p < Planet.PLUTO - 1 && searchString.Equals(Planets.ElementAt(p).CommonName, StringComparison.OrdinalIgnoreCase) && filterFunc(Planets.ElementAt(p)))
+                    return new[] { Planets.ElementAt(p) };
             }
 
-            var s1 = planets.Where(p => p.Number != Planet.EARTH && p.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
+            for (int m = 0; m < jupiterMoons.Length; m++)
+            {
+                if (searchString.Equals(jupiterMoons[m].CommonName, StringComparison.OrdinalIgnoreCase) && filterFunc(jupiterMoons.ElementAt(m)))
+                    return new[] { jupiterMoons.ElementAt(m) };
+            }
+
+            var s1 = planets.Where(p => p.Number != Planet.EARTH && p.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase) && filterFunc(p))
                 .Select(p => p as CelestialObject);
 
-            var s2 = marsMoons.Where(m => m.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase));
+            var s2 = marsMoons.Where(m => m.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)).Where(filterFunc);
 
-            var s3 = jupiterMoons.Where(m => m.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase));
+            var s3 = jupiterMoons.Where(m => m.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)).Where(filterFunc);
 
-            var s4 = saturnMoons.Where(m => m.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase));
+            var s4 = saturnMoons.Where(m => m.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)).Where(filterFunc);
 
-            var s5 = uranusMoons.Where(m => m.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase));
+            var s5 = uranusMoons.Where(m => m.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)).Where(filterFunc);
 
-            var s6 = neptuneMoons.Where(m => m.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase));
+            var s6 = neptuneMoons.Where(m => m.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)).Where(filterFunc);
 
-            var s7 = genericMoons.Where(m => m.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase));
+            var s7 = genericMoons.Where(m => m.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)).Where(filterFunc);
 
-            var s8 = new[] { pluto }.Where(p => p.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase));
+            var s8 = new[] { pluto }.Where(p => p.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)).Where(filterFunc);
 
-            return s1.Concat(s2).Concat(s3).Concat(s4).Concat(s5).Concat(s6).Concat(s7).Concat(s8).ToArray();
+            return s1.Concat(s2).Concat(s3).Concat(s4).Concat(s5).Concat(s6).Concat(s7).Concat(s8).Take(maxCount).ToArray();
         }
     }
 }

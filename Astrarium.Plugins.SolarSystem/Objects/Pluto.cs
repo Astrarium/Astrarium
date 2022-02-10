@@ -16,6 +16,9 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         /// <inheritdoc />
         public override string Type => "Planet";
 
+        /// <inheritdoc />
+        public override string CommonName => "Pluto";
+
         /// <summary>
         /// Apparent topocentrical equatorial coordinates
         /// </summary>

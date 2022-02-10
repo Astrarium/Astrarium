@@ -411,11 +411,11 @@ namespace Astrarium.Plugins.SolarSystem
             }
         }
 
-        public ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50)
+        public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
-            if (Moon.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
+            if (Moon.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase) && filterFunc(Moon))
                 return new[] { Moon };
-            else if ("@moon".Equals(searchString, StringComparison.OrdinalIgnoreCase))
+            else if (Moon.CommonName.Equals(searchString, StringComparison.OrdinalIgnoreCase) && filterFunc(Moon))
                 return new[] { Moon };
             else
                 return new CelestialObject[0];

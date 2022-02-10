@@ -17,6 +17,14 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         public override string Type => "PlanetMoon";
 
         /// <summary>
+        /// Common names of all Saturn moons
+        /// </summary>
+        private static readonly string[] CommonNames = new string[] { "Mimas", "Enceladus", "Tethys", "Dione", "Rhea", "Titan", "Hyperion", "Japetus" };
+
+        /// <inheritdoc />
+        public override string CommonName => CommonNames[Number - 1];
+
+        /// <summary>
         /// Apparent equatorial coordinates of the Saturn moon
         /// </summary>
         public CrdsEquatorial Equatorial { get; internal set; }

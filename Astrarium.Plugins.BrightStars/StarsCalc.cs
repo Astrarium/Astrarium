@@ -227,13 +227,14 @@ namespace Astrarium.Plugins.BrightStars
         }
 
         private static Regex regexSpaceRemover = new Regex("[ ]{2,}", RegexOptions.None);
-        public ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50)
+        public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
             searchString = regexSpaceRemover.Replace(searchString, " ").Trim();
 
-            return Stars.Where(s => s != null && 
+            return Stars.Where(s => s != null &&
                 GetStarNamesForSearch(s)
                 .Any(name => name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
+                .Where(filterFunc)
                 .Take(maxCount)
                 .ToArray();
         }

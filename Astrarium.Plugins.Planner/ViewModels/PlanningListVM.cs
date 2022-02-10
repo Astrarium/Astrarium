@@ -204,7 +204,23 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
         private void ShowObject(CelestialObject body)
         {
-            mainWindow.CenterOnObject(body);
+            // it's needed because table items may be downloaded from file, 
+            // and in-memory object references can be different
+            var skyObject = sky.Search("", x => x.CommonName == body.CommonName && x.Type == body.Type, 1).FirstOrDefault();
+            if (skyObject != null)
+            {
+                mainWindow.CenterOnObject(body);
+            }
+            else
+            {
+                if (ViewManager.ShowMessageBox("Warning", "Selected object can not be found on the sky. Remove it from the observation plan?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                {
+                    ephemerides.Remove(SelectedTableItem);
+                    TableData.Refresh();
+                    NotifyPropertyChanged(nameof(TotalItemsCount), nameof(FilteredItemsCount));
+                    NotifySelectedTableItemChanged();
+                }
+            }
         }
 
         private void RemoveSelectedItems()
@@ -231,7 +247,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
             var body = ViewManager.ShowSearchDialog(x => true);
             if (body != null)
             {
-                var item = ephemerides.FirstOrDefault(x => x.CelestialObject.Type == body.Type && x.CelestialObject.Names[0] == body.Names[0]);
+                var item = ephemerides.FirstOrDefault(x => x.CelestialObject.CommonName == body.CommonName && x.CelestialObject.Type == body.Type);
                 if (item == null)
                 {
                     item = planner.GetObservationDetails(filter, body);

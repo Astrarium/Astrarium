@@ -185,14 +185,16 @@ namespace Astrarium.Plugins.JupiterMoons
             this.calculator = new JupiterMoonsCalculator(settings);
             settings.SettingValueChanged += Settings_SettingValueChanged;
 
-            jupiter = sky.Search("@Jupiter", obj => true).FirstOrDefault();
-            for (int i = 0; i < 4; i++)
+            jupiter = sky.Search("", x => x.Type == "Planet" && x.CommonName == "Jupiter").FirstOrDefault();
+
+            string[] moonNames = new string[] { "Io", "Europa", "Ganymede", "Callisto" };
+            for (int i = 0; i < moonNames.Length; i++)
             {
-                moons[i] = sky.Search($"@Jupiter-{i+1}", obj => true).FirstOrDefault();
+                moons[i] = sky.Search("", x => x.Type == "PlanetMoon" && x.CommonName == moonNames[i]).FirstOrDefault();
             }
 
             Date now = new Date(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset);
-            selectedDate = new Date(now.Year, now.Month, 1, now.UtcOffset);            
+            selectedDate = new Date(now.Year, now.Month, 1, now.UtcOffset);
             IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
 
             Calculate();

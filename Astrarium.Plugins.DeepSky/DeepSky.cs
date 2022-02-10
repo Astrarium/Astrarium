@@ -10,6 +10,9 @@ namespace Astrarium.Plugins.DeepSky
         /// <inheritdoc />
         public override string Type => Status.IsEmpty() ? null : $"DeepSky.{Status}";
 
+        /// <inheritdoc />
+        public override string CommonName => CatalogName;
+
         /// <summary>
         /// Number of record in the catalog file
         /// </summary>

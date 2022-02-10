@@ -16,6 +16,9 @@ namespace Astrarium.Plugins.Novae
         /// <inheritdoc />
         public override string Type => "Nova";
 
+        /// <inheritdoc />
+        public override string CommonName => Name;
+
         /// <summary>
         /// Variable name of nova star
         /// </summary>

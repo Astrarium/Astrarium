@@ -430,7 +430,7 @@ namespace Astrarium.Plugins.Tycho2
 
         private readonly Regex searchRegex = new Regex("tyc\\s*(?<tyc1>\\d+)((\\s*-\\s*|\\s+)(?<tyc2>\\d+)((\\s*-\\s*|\\s+)(?<tyc3>\\d+))?)?");
 
-        public ICollection<CelestialObject> Search(SkyContext c, string searchString, int maxCount = 50)
+        public ICollection<CelestialObject> Search(SkyContext c, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
             var match = searchRegex.Match(searchString.ToLowerInvariant());
             if (match.Success)
@@ -443,8 +443,7 @@ namespace Astrarium.Plugins.Tycho2
                 {
                     Tycho2Region region = IndexRegions.ElementAt(tyc1 - 1);
                     var stars = GetStarsInRegion(region, c, tyc2, tyc3);
-
-                    return stars.Take(maxCount).Select(s => s as CelestialObject).ToList();
+                    return stars.Where(filterFunc).Take(maxCount).ToArray();
                 }
             }
 

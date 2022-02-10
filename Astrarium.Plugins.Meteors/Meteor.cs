@@ -13,6 +13,9 @@ namespace Astrarium.Plugins.Meteors
         /// <inheritdoc />
         public override string Type => "Meteor";
 
+        /// <inheritdoc />
+        public override string CommonName => Code;
+
         public override string[] Names => new[] { Name, Code };
         public override string[] DisplaySettingNames => new[] { "Meteors" };
 

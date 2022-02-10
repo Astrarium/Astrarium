@@ -8,6 +8,9 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         /// <inheritdoc />
         public override string Type => "Sun";
 
+        /// <inheritdoc />
+        public override string CommonName => "Sun";
+
         /// <summary>
         /// Apparent topocentrical equatorial coordinates
         /// </summary>

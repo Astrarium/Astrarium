@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Astrarium.Types
 {
@@ -26,8 +27,9 @@ namespace Astrarium.Types
         /// <param name="context"><see cref="SkyContext"/> instance.</param>
         /// <param name="searchString">Search string.</param>
         /// <param name="maxCount">Maximal count of search results to return.</param>
+        /// <param name="filterFunc">Filter function to match searching criteria.</param>
         /// <returns>Collection of celestial objects matching the search criteria.</returns>
-        ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50);
+        ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50);
         
         /// <summary>
         /// Enumerates celestial objects of given type which calculator operates of.

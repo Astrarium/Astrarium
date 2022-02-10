@@ -275,9 +275,13 @@ namespace Astrarium.Plugins.Novae
                 .AddRow("RTS.Duration");
         }
 
-        public ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50)
+        public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
-            return Novae.Where(m => m.Names.Any(n => n.StartsWith(searchString, System.StringComparison.OrdinalIgnoreCase))).Take(50).ToArray();
+            return Novae
+                .Where(m => m.Names.Any(n => n.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
+                .Where(filterFunc)
+                .Take(maxCount)
+                .ToArray();
         }
     }
 }

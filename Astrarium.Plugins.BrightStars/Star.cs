@@ -25,6 +25,9 @@ namespace Astrarium.Plugins.BrightStars
         /// <inheritdoc />
         public override string Type => "Star";
 
+        /// <inheritdoc />
+        public override string CommonName => $"HR {Number}";
+
         /// <summary>
         /// Star number in BSC catalogue (= HR number = Harvard Revised Number = Bright Star Number) 
         /// </summary>

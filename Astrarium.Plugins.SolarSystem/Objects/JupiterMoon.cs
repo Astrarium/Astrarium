@@ -7,14 +7,22 @@ namespace Astrarium.Plugins.SolarSystem.Objects
     /// Contains coordinates and visual appearance data for the Galilean moon of Jupiter for given instant of time.
     /// </summary>
     public class JupiterMoon : SizeableCelestialObject, IPlanetMoon, ISolarSystemObject
-    {
+    {        
         public JupiterMoon(int number)
         {
             Number = number;
         }
 
+        /// <summary>
+        /// Common names of all Jupiter moons
+        /// </summary>
+        private static readonly string[] CommonNames = new string[] { "Io", "Europa", "Ganymede", "Callisto" };
+
         /// <inheritdoc />
         public override string Type => "PlanetMoon";
+
+        /// <inheritdoc />
+        public override string CommonName => CommonNames[Number - 1];
 
         /// <summary>
         /// Apparent equatorial coordinates of the Galilean moon

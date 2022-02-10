@@ -11,6 +11,9 @@ namespace Astrarium.Plugins.Tycho2
         /// <inheritdoc />
         public override string Type => "Star";
 
+        /// <inheritdoc />
+        public override string CommonName => ToString();
+
         /// <summary>
         /// Equatorial coordinates of the star at current epoch
         /// </summary>

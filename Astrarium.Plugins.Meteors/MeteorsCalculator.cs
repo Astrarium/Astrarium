@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Linq;
+using System;
 
 namespace Astrarium.Plugins.Meteors
 {
@@ -83,7 +84,7 @@ namespace Astrarium.Plugins.Meteors
         {
             if (Moon == null)
             {
-                Moon = Sky.Search("@moon", f => true).FirstOrDefault();
+                Moon = Sky.Search("", x => x.Type == "Moon", 1).FirstOrDefault();
             }
             return Moon != null ? (double)Sky.GetEphemerides(Moon, ctx, new[] { "Phase" }).First().Value : 0;
         }
@@ -147,9 +148,13 @@ namespace Astrarium.Plugins.Meteors
             .AddRow("Data.DriftDec", m.Drift.Delta, Formatters.Angle);
         }
 
-        public ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50)
+        public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
-            return Meteors.Where(m => m.Names.Any(n => n.StartsWith(searchString, System.StringComparison.OrdinalIgnoreCase))).Take(50).ToArray();
+            return Meteors
+                .Where(m => m.Names.Any(n => n.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
+                .Where(filterFunc)
+                .Take(maxCount)
+                .ToArray();
         }
     }
 }

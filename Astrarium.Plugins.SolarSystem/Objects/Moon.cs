@@ -11,6 +11,9 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         /// <inheritdoc />
         public override string Type => "Moon";
 
+        /// <inheritdoc />
+        public override string CommonName => "Moon";
+
         /// <summary>
         /// Apparent topocentrical equatorial coordinates
         /// </summary>

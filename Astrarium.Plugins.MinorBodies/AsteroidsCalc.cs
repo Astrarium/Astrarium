@@ -192,10 +192,12 @@ namespace Astrarium.Plugins.MinorBodies
             .AddRow("Visibility.Period");
         }
 
-        public ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50)
+        public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
             return Asteroids
                 .Where(a => IsAsteroidNameMatch(a, searchString))
+                .Where(filterFunc)
+                .Take(maxCount)
                 .ToArray();
         }
 

@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Astrarium.Plugins.DeepSky
 {
@@ -240,9 +241,11 @@ namespace Astrarium.Plugins.DeepSky
             }
         }
 
-        public ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50)
+        public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
-            return deepSkies.Where(ds => ds.Names.Any(name => name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
+            return deepSkies
+                .Where(ds => ds.Names.Any(name => Regex.Replace(name, @"\s", "").StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
+                .Where(filterFunc)
                 .Take(maxCount)
                 .ToArray();
         }

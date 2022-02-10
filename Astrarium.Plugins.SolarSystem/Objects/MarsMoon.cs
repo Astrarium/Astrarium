@@ -13,8 +13,16 @@ namespace Astrarium.Plugins.SolarSystem.Objects
             Number = number;
         }
 
+        /// <summary>
+        /// Common names of all Mars moons
+        /// </summary>
+        private static readonly string[] CommonNames = new string[] { "Phobos", "Deimos" };
+
         /// <inheritdoc />
         public override string Type => "PlanetMoon";
+
+        /// <inheritdoc />
+        public override string CommonName => CommonNames[Number - 1];
 
         /// <summary>
         /// Moon index, 1-based
