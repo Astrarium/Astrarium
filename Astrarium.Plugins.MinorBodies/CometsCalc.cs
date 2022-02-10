@@ -39,8 +39,9 @@ namespace Astrarium.Plugins.MinorBodies
                 {
                     comets.Clear();
                     comets.AddRange(newData);
-                    sky.Calculate();
                 }
+                Trace.TraceInformation($"Updated comets: {newData.Count}");
+                sky.Calculate();
             }
         }
 
@@ -68,6 +69,7 @@ namespace Astrarium.Plugins.MinorBodies
             if (settings.Get<bool>("CometsAutoUpdateOrbitalElements") &&
                 DateTime.Now.Subtract(settings.Get<DateTime>("CometsDownloadOrbitalElementsTimestamp")).TotalDays >= (int)settings.Get<decimal>("CometsAutoUpdateOrbitalElementsPeriod"))
             {
+                Trace.TraceInformation("Obital elements of comets needs to be updated, updating...");
                 await Task.Run(() => UpdateOrbitalElements(silent: true));
             }
         }

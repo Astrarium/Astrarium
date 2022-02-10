@@ -54,5 +54,13 @@ namespace Astrarium.Plugins.MinorBodies
         /// Name of the setting(s) responsible for displaying the object
         /// </summary>
         public override string[] DisplaySettingNames => new[] { "Asteroids" };
+
+        /// <summary>
+        /// Creates new instance
+        /// </summary>
+        public Asteroid()
+        {
+            Horizontal = new CrdsHorizontal();
+        }
     }
 }
