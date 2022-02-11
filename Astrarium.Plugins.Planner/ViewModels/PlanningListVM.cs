@@ -198,21 +198,15 @@ namespace Astrarium.Plugins.Planner.ViewModels
             sky.SetDate(time.ToJulianEphemerisDay());
             if (SelectedTableItem != null)
             {
-                mainWindow.CenterOnObject(SelectedTableItem.CelestialObject);
+                ShowObject(SelectedTableItem.CelestialObject);
             }
         }
 
         private void ShowObject(CelestialObject body)
         {
-            // it's needed because table items may be downloaded from file, 
-            // and in-memory object references can be different
-            var skyObject = sky.Search("", x => x.CommonName == body.CommonName && x.Type == body.Type, 1).FirstOrDefault();
-            if (skyObject != null)
+            if (!mainWindow.CenterOnObject(body))
             {
-                mainWindow.CenterOnObject(body);
-            }
-            else
-            {
+                // TODO: localize
                 if (ViewManager.ShowMessageBox("Warning", "Selected object can not be found on the sky. Remove it from the observation plan?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
                     ephemerides.Remove(SelectedTableItem);

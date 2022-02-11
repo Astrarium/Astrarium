@@ -117,7 +117,7 @@ namespace Astrarium.Plugins.Meteors
             Sky = sky;
             Calculator = calc;
             Year = sky.Context.GetDate(sky.Context.JulianDay).Year;
-            Moon = Sky.Search("", x => x.Type == "Moon", 1).FirstOrDefault();
+            Moon = Sky.Search("Moon");
             IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
             settings.SettingValueChanged += Settings_SettingValueChanged;
             Calculate();

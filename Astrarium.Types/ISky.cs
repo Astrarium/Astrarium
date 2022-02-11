@@ -40,5 +40,13 @@ namespace Astrarium.Types
         /// <param name="maxCount">Maximal number of objects to be returned.</param>
         /// <returns></returns>
         ICollection<CelestialObject> Search(string searchString, Func<CelestialObject, bool> filter, int maxCount = 50);
+
+        /// <summary>
+        /// Searches celestial object by its type and name. 
+        /// </summary>
+        /// <param name="objectType">Unique string identifier of celestial object type, see <see cref="CelestialObject.Type"/></param>
+        /// <param name="objectName">Unique common name of the celestial object, see <see cref="CelestialObject.CommonName"/>. Can be omitted in case of single objects (like Sun or Moon).</param>
+        /// <returns></returns>
+        CelestialObject Search(string objectType, string commonName = null);
     }
 }

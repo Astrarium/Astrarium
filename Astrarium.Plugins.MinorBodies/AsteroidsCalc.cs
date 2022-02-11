@@ -203,6 +203,12 @@ namespace Astrarium.Plugins.MinorBodies
 
         private bool IsAsteroidNameMatch(Asteroid a, string searchString)
         {
+            if (searchString.Equals(a.Name, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if (searchString.Equals(a.CommonName, StringComparison.OrdinalIgnoreCase))
+                return true;
+
             var match = asteroidNameRegex.Match(a.Name);
             if (match.Success)
             {

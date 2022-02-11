@@ -220,11 +220,44 @@ namespace Astrarium.Plugins.SolarSystem
                     return new[] { Planets.ElementAt(p) };
             }
 
+            for (int m = 0; m < marsMoons.Length; m++)
+            {
+                if (searchString.Equals(marsMoons[m].CommonName, StringComparison.OrdinalIgnoreCase) && filterFunc(marsMoons.ElementAt(m)))
+                    return new[] { marsMoons.ElementAt(m) };
+            }
+
             for (int m = 0; m < jupiterMoons.Length; m++)
             {
                 if (searchString.Equals(jupiterMoons[m].CommonName, StringComparison.OrdinalIgnoreCase) && filterFunc(jupiterMoons.ElementAt(m)))
                     return new[] { jupiterMoons.ElementAt(m) };
             }
+
+            for (int m = 0; m < saturnMoons.Length; m++)
+            {
+                if (searchString.Equals(saturnMoons[m].CommonName, StringComparison.OrdinalIgnoreCase) && filterFunc(saturnMoons.ElementAt(m)))
+                    return new[] { saturnMoons.ElementAt(m) };
+            }
+
+            for (int m = 0; m < uranusMoons.Length; m++)
+            {
+                if (searchString.Equals(uranusMoons[m].CommonName, StringComparison.OrdinalIgnoreCase) && filterFunc(uranusMoons.ElementAt(m)))
+                    return new[] { uranusMoons.ElementAt(m) };
+            }
+
+            for (int m = 0; m < neptuneMoons.Length; m++)
+            {
+                if (searchString.Equals(neptuneMoons[m].CommonName, StringComparison.OrdinalIgnoreCase) && filterFunc(neptuneMoons.ElementAt(m)))
+                    return new[] { neptuneMoons.ElementAt(m) };
+            }
+
+            for (int m = 0; m < genericMoons.Count; m++)
+            {
+                if (searchString.Equals(genericMoons[m].CommonName, StringComparison.OrdinalIgnoreCase) && filterFunc(genericMoons.ElementAt(m)))
+                    return new[] { genericMoons.ElementAt(m) };
+            }
+
+            if (pluto.CommonName.Equals(searchString, StringComparison.OrdinalIgnoreCase) && filterFunc(pluto))
+                return new[] { pluto };
 
             var s1 = planets.Where(p => p.Number != Planet.EARTH && p.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase) && filterFunc(p))
                 .Select(p => p as CelestialObject);

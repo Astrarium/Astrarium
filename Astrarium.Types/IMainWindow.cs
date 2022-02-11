@@ -15,6 +15,7 @@ namespace Astrarium.Types
         /// Centers the sky map on the specified object.
         /// </summary>
         /// <param name="body"></param>
-        void CenterOnObject(CelestialObject body);
+        /// <returns>True if object was found on the sky and can be centered, false otherwise.</returns>
+        bool CenterOnObject(CelestialObject body);
     }
 }

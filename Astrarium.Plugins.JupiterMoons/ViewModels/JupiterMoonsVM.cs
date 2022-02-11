@@ -185,12 +185,12 @@ namespace Astrarium.Plugins.JupiterMoons
             this.calculator = new JupiterMoonsCalculator(settings);
             settings.SettingValueChanged += Settings_SettingValueChanged;
 
-            jupiter = sky.Search("", x => x.Type == "Planet" && x.CommonName == "Jupiter").FirstOrDefault();
+            jupiter = sky.Search("Planet", "Jupiter");
 
             string[] moonNames = new string[] { "Io", "Europa", "Ganymede", "Callisto" };
             for (int i = 0; i < moonNames.Length; i++)
             {
-                moons[i] = sky.Search("", x => x.Type == "PlanetMoon" && x.CommonName == moonNames[i]).FirstOrDefault();
+                moons[i] = sky.Search("PlanetMoon", moonNames[i]);
             }
 
             Date now = new Date(sky.Context.JulianDay, sky.Context.GeoLocation.UtcOffset);

@@ -84,7 +84,7 @@ namespace Astrarium.Plugins.Meteors
         {
             if (Moon == null)
             {
-                Moon = Sky.Search("", x => x.Type == "Moon", 1).FirstOrDefault();
+                Moon = Sky.Search("Moon");
             }
             return Moon != null ? (double)Sky.GetEphemerides(Moon, ctx, new[] { "Phase" }).First().Value : 0;
         }

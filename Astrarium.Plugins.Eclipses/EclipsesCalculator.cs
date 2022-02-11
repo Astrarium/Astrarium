@@ -25,11 +25,11 @@ namespace Astrarium.Plugins.Eclipses
         {
             if (sun == null)
             {
-                sun = sky.Search("", x => x.Type == "Sun").FirstOrDefault();
+                sun = sky.Search("Sun");
             }
             if (moon == null)
             {
-                moon = sky.Search("", x => x.Type == "Moon").FirstOrDefault();
+                moon = sky.Search("Moon");
             }
         }
 

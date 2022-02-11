@@ -309,6 +309,7 @@ namespace Astrarium
                 .ToArray();
         }
 
+        /// <inheritdoc />
         public ICollection<CelestialObject> Search(string searchString, Func<CelestialObject, bool> filter, int maxCount = 50)
         {
             var filterFunc = filter ?? ((b) => true);
@@ -325,6 +326,12 @@ namespace Astrarium
                 }
             }
             return results.OrderBy(b => string.Join(", ", b.Names)).Take(maxCount).ToList();
+        }
+
+        /// <inheritdoc />
+        public CelestialObject Search(string objectType, string commonName = null)
+        {
+            return Search(commonName ?? "", x => x.Type == objectType && (!string.IsNullOrEmpty(commonName) ? x.CommonName == commonName : true), 1).FirstOrDefault();
         }
 
         public Constellation GetConstellation(string code)

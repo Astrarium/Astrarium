@@ -249,7 +249,10 @@ namespace Astrarium.Plugins.MinorBodies
         public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
             return Comets
-                .Where(c => GetNames(c.Name).Any(n => n.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
+                .Where(c =>
+                    searchString.Equals(c.Name, StringComparison.OrdinalIgnoreCase) ||
+                    searchString.Equals(c.CommonName, StringComparison.OrdinalIgnoreCase) ||
+                    GetNames(c.Name).Any(n => n.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
                 .Where(filterFunc)
                 .Take(maxCount)
                 .ToArray();

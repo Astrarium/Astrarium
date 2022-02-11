@@ -244,7 +244,7 @@ namespace Astrarium.Plugins.DeepSky
         public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
             return deepSkies
-                .Where(ds => ds.Names.Any(name => Regex.Replace(name, @"\s", "").StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
+                .Where(ds => ds.CommonName.Equals(searchString) || ds.Names.Any(name => Regex.Replace(name, @"\s", "").StartsWith(searchString.Replace(" ", ""), StringComparison.OrdinalIgnoreCase)))
                 .Where(filterFunc)
                 .Take(maxCount)
                 .ToArray();
