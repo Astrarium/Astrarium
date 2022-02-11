@@ -28,6 +28,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
         public ICommand ShowObjectCommand { get; private set; }
         public ICommand RemoveSelectedItemsCommand { get; private set; }
         public ICommand AddObjectCommand { get; private set; }
+        public ICommand AddObjectsCommand { get; private set; }
 
         public string FilterString
         {
@@ -143,6 +144,8 @@ namespace Astrarium.Plugins.Planner.ViewModels
         public int TotalItemsCount => ephemerides?.Count ?? 0;
 
         public int FilteredItemsCount => TableData != null ? TableData.Cast<object>().Count() : 0;
+        
+        public string Name { get; set; }
 
         public PlanningListVM(ISky sky, IMainWindow mainWindow, ObservationPlanner planner)
         {
@@ -154,6 +157,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
             ShowObjectCommand = new Command<CelestialObject>(ShowObject);
             RemoveSelectedItemsCommand = new Command(RemoveSelectedItems);
             AddObjectCommand = new Command(AddObject);
+            AddObjectsCommand = new Command(AddObjects);
         }
         
         private double julianDay;
@@ -163,6 +167,8 @@ namespace Astrarium.Plugins.Planner.ViewModels
         {
             this.filter = filter;
             julianDay = filter.JulianDayMidnight;
+
+            Name = new Date(filter.JulianDayMidnight, filter.ObserverLocation.UtcOffset).ToString();
             GeoLocation = filter.ObserverLocation;
             FromTime = TimeSpan.FromHours(filter.TimeFrom);
             ToTime = TimeSpan.FromHours(filter.TimeTo);
@@ -172,9 +178,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
             var tokenSource = new CancellationTokenSource();
             var progress = new Progress<double>();
-
             ViewManager.ShowProgress("Please wait", "Creating observation plan...", tokenSource, progress);
-
             ephemerides = await Task.Run(() => planner.CreatePlan(filter, tokenSource.Token, progress));
 
             if (!tokenSource.IsCancellationRequested)
@@ -236,6 +240,28 @@ namespace Astrarium.Plugins.Planner.ViewModels
             }
         }
 
+        private async void AddObjects()
+        {
+            var vm = ViewManager.CreateViewModel<PlanningFilterVM>();
+            vm.CelestialObjectsTypes = sky.CelestialObjects.Select(c => c.Type).Where(t => t != null).Distinct().ToArray();
+            vm.Filter = filter;
+            if (ViewManager.ShowDialog(vm) ?? false)
+            {
+                var tokenSource = new CancellationTokenSource();
+                var progress = new Progress<double>();
+                ViewManager.ShowProgress("Please wait", "Creating observation plan...", tokenSource, progress);
+                var addedItems = await Task.Run(() => planner.CreatePlan(vm.Filter, tokenSource.Token, progress));
+                
+                // TODO: rewrite
+                foreach (var item in addedItems)
+                {
+                    ephemerides.Add(item);
+                }
+                TableData.Refresh();
+                NotifyPropertyChanged(nameof(TotalItemsCount), nameof(FilteredItemsCount));
+            }
+        }
+
         private void AddObject()
         {
             var body = ViewManager.ShowSearchDialog(x => true);
@@ -244,15 +270,18 @@ namespace Astrarium.Plugins.Planner.ViewModels
                 var item = ephemerides.FirstOrDefault(x => x.CelestialObject.CommonName == body.CommonName && x.CelestialObject.Type == body.Type);
                 if (item == null)
                 {
-                    item = planner.GetObservationDetails(filter, body);
-                    ephemerides.Add(item);
-                    TableData.Refresh();
-                    NotifyPropertyChanged(nameof(TotalItemsCount), nameof(FilteredItemsCount));
+                    AddObject(body);
                 }
-
                 TableData.MoveCurrentTo(item);
             }
-            
+        }
+
+        public void AddObject(CelestialObject body)
+        {
+            Ephemerides item = planner.GetObservationDetails(filter, body);
+            ephemerides.Add(item);
+            TableData.Refresh();
+            NotifyPropertyChanged(nameof(TotalItemsCount), nameof(FilteredItemsCount));
         }
     }
 }

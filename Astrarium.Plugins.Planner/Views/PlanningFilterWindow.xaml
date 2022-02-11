@@ -6,6 +6,7 @@
         xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
         xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
         xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+        xmlns:v="clr-namespace:Astrarium.Plugins.Planner.Views" 
         mc:Ignorable="d"
         Title="Create New Observation Plan"
         Style="{StaticResource {x:Type Window}}" 
@@ -33,12 +34,42 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <Label Margin="4 0 4 0" Background="{StaticResource BrushControlDarkBackground}" FontWeight="Bold" Content="Object types" />
-                    <TreeView Margin="4" Grid.Row="1" ItemsSource="{Binding ObjectTypes}" />
+                    <Label Margin="4 0 4 0" Background="{StaticResource BrushControlDarkBackground}" FontWeight="Bold" Content="Objects" />
+                    
+                    <!-- Celestial objects types tree view -->
+                    <TreeView Margin="4" Grid.Row="1" ItemsSource="{Binding Nodes}" Visibility="{Binding IsCelestialObjectsTypesTreeVisible, Converter={s:BoolToVisibilityConverter}}" />
+
+                    <!-- Celestial objects list view -->
+                    <ListView Margin="4" Grid.Row="1" SelectionMode="Single" VirtualizingPanel.IsVirtualizing="True" ItemsSource="{Binding ListItems}" Visibility="{Binding IsCelestialObjectsListVisible, Converter={s:BoolToVisibilityConverter}}">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="{x:Type ListViewItem}" BasedOn="{StaticResource ListViewItemStyle}">
+                                <Setter Property="Focusable" Value="False" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}">
+                                    <StackPanel HorizontalAlignment="Stretch" Orientation="Horizontal" Background="Transparent">
+                                        <Rectangle Margin="2" Width="16" Height="16" ToolTip="{Binding Item, Converter={v:CelestialObjectTypeDescriptionConverter}}">
+                                            <Rectangle.Fill>
+                                                <SolidColorBrush Color="{StaticResource ColorControlLightBackground}" />
+                                            </Rectangle.Fill>
+                                            <Rectangle.OpacityMask>
+                                                <ImageBrush ImageSource="{Binding Item, Converter={s:CelestialObjectToIconConverter}}" Stretch="Uniform" />
+                                            </Rectangle.OpacityMask>
+                                        </Rectangle>
+                                        <TextBlock Padding="4 0 0 0" Text="{Binding Item, Converter={v:CelestialObjectNameConverter}}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </CheckBox>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListView>
                 </Grid>
                
                 <GridSplitter Grid.Column="1" HorizontalAlignment="Center"  />
                 <StackPanel Grid.Column="2" HorizontalAlignment="Stretch" Orientation="Vertical">
+                    
+                    <!-- Date and time panel -->
                     <GroupBox Header="Date and time" Margin="8 0">
                         <StackPanel Orientation="Vertical" Margin="0 8 0 0">
                             <DockPanel Margin="0 2">
@@ -56,8 +87,16 @@
                         </StackPanel>
                     </GroupBox>
 
-                    <GroupBox Header="Filters" Margin="8 8 8 0">
-                        <StackPanel Orientation="Vertical" Margin="0 8 0 0">
+                    <!-- Filters panel -->
+                    <GroupBox Margin="8 8 8 0">
+
+                        <GroupBox.Header>
+                            <CheckBox IsChecked="{Binding ApplyFilters}" Content="Apply filters" VerticalAlignment="Center" />
+                        </GroupBox.Header>
+                        
+                        <StackPanel IsEnabled="{Binding ApplyFilters}" Orientation="Vertical" Margin="0 8 0 0">
+
+        
                             <DockPanel Margin="8 2">
                                 <CheckBox IsChecked="{Binding EnableMinBodyAltitude}" Content="Minimal altitude of celestial object" VerticalAlignment="Center" />
                                 <c:NumericUpDown IsEnabled="{Binding EnableMinBodyAltitude}" Width="50" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="0" Value="{Binding MinBodyAltitude}" Maximum="90" DecimalPlaces="0" />
@@ -65,8 +104,12 @@
 
                             <DockPanel Margin="8 2">
                                 <CheckBox IsChecked="{Binding EnableMaxSunAltitude}" Content="Maximal altitude of the Sun" VerticalAlignment="Center" />
-                                <c:NumericUpDown IsEnabled="{Binding EnableMaxSunAltitude}" Width="50" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="-90" Maximum="0" Value="{Binding MaxSunAltitude}" DecimalPlaces="0" />
+                                <c:NumericUpDown IsEnabled="{Binding EnableMaxSunAltitude}" Width="50" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="-18" Maximum="0" Value="{Binding MaxSunAltitude}" DecimalPlaces="0" />
                             </DockPanel>
+
+                            <StackPanel Margin="8 0" Orientation="Horizontal">
+                                
+                            </StackPanel>
 
                             <DockPanel Margin="8 2">
                                 <CheckBox IsChecked="{Binding EnableMagLimit}" Content="Minimal magnitude of celestial body" VerticalAlignment="Center" />

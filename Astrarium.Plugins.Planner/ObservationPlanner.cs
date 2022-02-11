@@ -40,14 +40,30 @@ namespace Astrarium.Plugins.Planner
             context.MinBodyAltitudeForVisibilityCalculations = filter.MinBodyAltitude;
             context.MaxSunAltitudeForVisibilityCalculations = filter.MaxSunAltitude;
 
-            var celesialObjects = sky.CelestialObjects.Where(b => filter.ObjectTypes.Contains(b.Type));
+            IEnumerable<CelestialObject> celestialObjects = null;
 
+            // create plan from predefined list of objects
+            if (filter.CelestialObjects.Any())
+            {
+                celestialObjects = filter.CelestialObjects;
+            }
+            // create plan from objects types filter
+            else if (filter.CelestialObjectsTypes.Any())
+            {
+                celestialObjects = sky.CelestialObjects.Where(b => filter.CelestialObjectsTypes.Contains(b.Type));
+            }
+            // filter is uncomplete!
+            else
+            {
+                throw new ArgumentException("Filter must contain either celestial objects list or celestial objects types list.");
+            }
+            
             // Total objects count
-            double objectsCount = celesialObjects.Count();
+            double objectsCount = celestialObjects.Count();
 
             int counter = 0;
 
-            foreach (CelestialObject body in celesialObjects)
+            foreach (CelestialObject body in celestialObjects)
             {
                 if (token.HasValue && token.Value.IsCancellationRequested)
                 {
@@ -62,7 +78,7 @@ namespace Astrarium.Plugins.Planner
 
                 progress?.Report(counter++ / objectsCount * 100);
 
-                var e = GetObservationDetails(filter, context, body, force: false);
+                var e = GetObservationDetails(filter, context, body, !filter.ApplyFilters);
                 if (e != null)
                 {
                     ephemerides.Add(e);

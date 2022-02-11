@@ -18,9 +18,103 @@ namespace Astrarium.Plugins.Planner.ViewModels
         public ICommand OkCommand { get; private set; }
         public ICommand CancelCommand { get; private set; }
 
-        public PlanningFilter Filter { get; private set; }
+        public PlanningFilter Filter
+        {
+            get
+            {
+                return new PlanningFilter()
+                {
+                    JulianDayMidnight = JulianDay,
+                    TimeFrom = TimeFrom.TotalHours,
+                    TimeTo = TimeTo.TotalHours,
+                    ApplyFilters = ApplyFilters,
+                    MagLimit = EnableMagLimit ? (float?)MagLimit : null,
+                    MinBodyAltitude = EnableMinBodyAltitude ? (double?)MinBodyAltitude : null,
+                    MaxSunAltitude = EnableMaxSunAltitude ? (double?)MaxSunAltitude : null,
+                    CountLimit = EnableCountLimit ? (int?)CountLimit : null,
+                    DurationLimit = EnableDurationLimit ? (double?)DurationLimit : null,
+                    SkipUnknownMagnitude = SkipUnknownMagnitude,
+                    CelestialObjects = CelestialObjects.ToArray(),
+                    CelestialObjectsTypes = CelestialObjectsTypes.ToArray(),
+                    ObserverLocation = sky.Context.GeoLocation
+                };
+            }
+            set
+            {
 
-        public ObservableCollection<Node> ObjectTypes { get; private set; } = new ObservableCollection<Node>();
+            }
+        }
+
+        /// <summary>
+        /// Filter of celestial objects types.
+        /// </summary>
+        public ObservableCollection<Node> Nodes { get; private set; } = new ObservableCollection<Node>();
+
+        /// <summary>
+        /// Collection of celestial objects to be included in the plan. If set, types filter (<see cref="Nodes"/> is not taken into account.
+        /// </summary>
+        public ObservableCollection<CheckedListItem<CelestialObject>> ListItems { get; private set; } = new ObservableCollection<CheckedListItem<CelestialObject>>();
+
+        public ICollection<CelestialObject> CelestialObjects
+        {
+            get => ListItems.Where(x => x.IsChecked).Select(x => x.Item).ToArray();
+            set
+            {
+                if (value != null)
+                {
+                    ListItems = new ObservableCollection<CheckedListItem<CelestialObject>>(value.Select(x => new CheckedListItem<CelestialObject>(x, isChecked: true, c => NotifyPropertyChanged(nameof(OkButtonEnabled)))));
+                }
+                else
+                {
+                    ListItems = new ObservableCollection<CheckedListItem<CelestialObject>>();
+                }
+
+                NotifyPropertyChanged(
+                    nameof(CelestialObjects),
+                    nameof(ListItems),
+                    nameof(IsCelestialObjectsListVisible));
+            }
+        }
+
+        public ICollection<string> CelestialObjectsTypes
+        {
+            get => Nodes.Any() ? Nodes.First().CheckedChildIds : new string[0];
+            set
+            {
+                Nodes.Clear();
+                if (value != null)
+                {
+                    var groups = value.GroupBy(t => t.Split('.').First());
+
+                    Node root = new Node("All");
+                    root.CheckedChanged += Root_CheckedChanged;
+
+                    foreach (var group in groups)
+                    {
+                        Node node = new Node(Text.Get($"{group.Key}.Type"), group.Key);
+                        foreach (var item in group)
+                        {
+                            if (item != group.Key)
+                            {
+                                node.Children.Add(new Node(Text.Get($"{item}.Type"), item));
+                            }
+                        }
+                        root.Children.Add(node);
+                    }
+
+                    Nodes.Add(root);
+                }
+
+                NotifyPropertyChanged(
+                    nameof(CelestialObjectsTypes),
+                    nameof(Nodes), 
+                    nameof(IsCelestialObjectsTypesTreeVisible));
+            }
+        }
+
+        public bool IsCelestialObjectsTypesTreeVisible => Nodes.Any();
+        
+        public bool IsCelestialObjectsListVisible => ListItems.Any();
 
         public double JulianDay
         {
@@ -44,6 +138,12 @@ namespace Astrarium.Plugins.Planner.ViewModels
         {
             get => GetValue<TimeSpan>(nameof(TimeTo), new TimeSpan(0, 0, 0));
             set => SetValue(nameof(TimeTo), value);
+        }
+
+        public bool ApplyFilters
+        {
+            get => GetValue<bool>(nameof(ApplyFilters), true);
+            set => SetValue(nameof(ApplyFilters), value);
         }
 
         public bool EnableMagLimit
@@ -112,7 +212,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
             set => SetValue(nameof(SkipUnknownMagnitude), value);
         }
 
-        public bool OkButtonEnabled => ObjectTypes.Any() && ObjectTypes.First().IsChecked != false;
+        public bool OkButtonEnabled => CelestialObjectsTypes.Any() || CelestialObjects.Any();
 
         public PlanningFilterVM(ISky sky)
         {
@@ -123,27 +223,6 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
             JulianDay = sky.Context.JulianDayMidnight;
             UtcOffset = sky.Context.GeoLocation.UtcOffset;
-
-            IEnumerable<string> types = sky.CelestialObjects.Select(c => c.Type).Where(t => t != null).Distinct();
-            var groups = types.GroupBy(t => t.Split('.').First());
-
-            Node root = new Node("All");
-            root.CheckedChanged += Root_CheckedChanged;
-
-            foreach (var group in groups)
-            {
-                Node node = new Node(Text.Get($"{group.Key}.Type"), group.Key);
-                foreach (var item in group)
-                {
-                    if (item != group.Key)
-                    {
-                        node.Children.Add(new Node(Text.Get($"{item}.Type"), item));
-                    }
-                }
-                root.Children.Add(node);
-            }
-
-            ObjectTypes.Add(root);
         }
 
         private void Root_CheckedChanged(object sender, bool? e)
@@ -153,22 +232,34 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
         private void Ok()
         {
-            Filter = new PlanningFilter()
-            {
-                JulianDayMidnight = JulianDay,
-                MagLimit = EnableMagLimit ? (float?)MagLimit : null,
-                TimeFrom = TimeFrom.TotalHours,
-                TimeTo = TimeTo.TotalHours,
-                MinBodyAltitude = EnableMinBodyAltitude ? (double?)MinBodyAltitude : null,
-                MaxSunAltitude = EnableMaxSunAltitude ? (double?)MaxSunAltitude : null,
-                CountLimit = EnableCountLimit ? (int?)CountLimit : null,
-                DurationLimit = EnableDurationLimit ? (double?)DurationLimit : null,
-                SkipUnknownMagnitude = SkipUnknownMagnitude,
-                ObjectTypes = ObjectTypes.First().CheckedChildIds,
-                ObserverLocation = sky.Context.GeoLocation
-            };
-
             Close(true);
+        }
+
+        public class CheckedListItem<T> : PropertyChangedBase
+        {
+            private bool _IsChecked;
+            public bool IsChecked
+            {
+                get => _IsChecked;
+                set
+                {
+                    _IsChecked = value;
+                    NotifyPropertyChanged(nameof(IsChecked));
+                    if (OnCheckedChanged != null)
+                        OnCheckedChanged.Invoke(_IsChecked);
+                }
+            }
+
+            public T Item { get; set; }
+
+            private Action<bool> OnCheckedChanged;
+
+            public CheckedListItem(T item, bool isChecked = true, Action<bool> onCheckedChanged = null)
+            {
+                Item = item;
+                IsChecked = isChecked;
+                OnCheckedChanged = onCheckedChanged;
+            }
         }
     }
 }

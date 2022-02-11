@@ -1,4 +1,5 @@
 ﻿using Astrarium.Algorithms;
+using Astrarium.Types;
 using System.Collections.Generic;
 
 namespace Astrarium.Plugins.Planner
@@ -32,6 +33,8 @@ namespace Astrarium.Plugins.Planner
         /// Gets duration of observation, in hours and fractions
         /// </summary>
         public double Duration => TimeTo > TimeFrom ? TimeTo - TimeFrom : 24 - TimeFrom + TimeTo;
+
+        public bool ApplyFilters { get; set; } = true;
 
         /// <summary>
         /// Maximal altitude of the Sun, in degrees, considering as observation condition.
@@ -74,6 +77,11 @@ namespace Astrarium.Plugins.Planner
         /// <summary>
         /// Collection of celestial object types (string keys) to be observed.
         /// </summary>
-        public IReadOnlyCollection<string> ObjectTypes { get; set; }
+        public IReadOnlyCollection<string> CelestialObjectsTypes { get; set; }
+
+        /// <summary>
+        /// Collection of celestial objects to create plan from.
+        /// </summary>
+        public IReadOnlyCollection<CelestialObject> CelestialObjects { get; set; }
     }
 }
