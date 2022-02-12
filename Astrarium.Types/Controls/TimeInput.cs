@@ -44,7 +44,10 @@ namespace Astrarium.Types.Controls
             TimeInput @this = (TimeInput)sender;
             bool showSeconds = @this.ShowSeconds;
             TimeSpan value = (TimeSpan)e.NewValue;
-            @this.editor.Text = ValueToString(value, showSeconds);
+            if (@this.editor != null)
+            {
+                @this.editor.Text = ValueToString(value, showSeconds);
+            }
         }
 
         private static void ShowSecondsPropertyChanged(object sender, DependencyPropertyChangedEventArgs e)

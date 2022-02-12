@@ -21,8 +21,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
         private readonly ISky sky;
         private readonly IMainWindow mainWindow;
         private readonly ObservationPlanner planner;
-
-        private ICollection<Ephemerides> ephemerides;
+        private readonly List<Ephemerides> ephemerides = new List<Ephemerides>();
 
         public ICommand SetTimeCommand { get; private set; }
         public ICommand ShowObjectCommand { get; private set; }
@@ -144,7 +143,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
         public int TotalItemsCount => ephemerides?.Count ?? 0;
 
         public int FilteredItemsCount => TableData != null ? TableData.Cast<object>().Count() : 0;
-        
+
         public string Name { get; set; }
 
         public PlanningListVM(ISky sky, IMainWindow mainWindow, ObservationPlanner planner)
@@ -158,6 +157,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
             RemoveSelectedItemsCommand = new Command(RemoveSelectedItems);
             AddObjectCommand = new Command(AddObject);
             AddObjectsCommand = new Command(AddObjects);
+            TableData = CollectionViewSource.GetDefaultView(ephemerides);
         }
         
         private double julianDay;
@@ -176,14 +176,20 @@ namespace Astrarium.Plugins.Planner.ViewModels
             SunCoordinates = context.Get(sky.SunEquatorial);
             SiderealTime = context.SiderealTime;
 
+            DoCreatePlan(filter);
+        }
+
+        private async void DoCreatePlan(PlanningFilter filter)
+        {
             var tokenSource = new CancellationTokenSource();
             var progress = new Progress<double>();
             ViewManager.ShowProgress("Please wait", "Creating observation plan...", tokenSource, progress);
-            ephemerides = await Task.Run(() => planner.CreatePlan(filter, tokenSource.Token, progress));
+            var ephemerides = await Task.Run(() => planner.CreatePlan(filter, tokenSource.Token, progress));
 
             if (!tokenSource.IsCancellationRequested)
             {
-                TableData = CollectionViewSource.GetDefaultView(ephemerides);
+                this.ephemerides.AddRange(ephemerides);
+                TableData.Refresh();
                 NotifyPropertyChanged(nameof(TotalItemsCount), nameof(FilteredItemsCount));
                 tokenSource.Cancel();
             }
@@ -240,25 +246,14 @@ namespace Astrarium.Plugins.Planner.ViewModels
             }
         }
 
-        private async void AddObjects()
+        private void AddObjects()
         {
             var vm = ViewManager.CreateViewModel<PlanningFilterVM>();
             vm.CelestialObjectsTypes = sky.CelestialObjects.Select(c => c.Type).Where(t => t != null).Distinct().ToArray();
             vm.Filter = filter;
             if (ViewManager.ShowDialog(vm) ?? false)
             {
-                var tokenSource = new CancellationTokenSource();
-                var progress = new Progress<double>();
-                ViewManager.ShowProgress("Please wait", "Creating observation plan...", tokenSource, progress);
-                var addedItems = await Task.Run(() => planner.CreatePlan(vm.Filter, tokenSource.Token, progress));
-                
-                // TODO: rewrite
-                foreach (var item in addedItems)
-                {
-                    ephemerides.Add(item);
-                }
-                TableData.Refresh();
-                NotifyPropertyChanged(nameof(TotalItemsCount), nameof(FilteredItemsCount));
+                DoCreatePlan(vm.Filter);
             }
         }
 
