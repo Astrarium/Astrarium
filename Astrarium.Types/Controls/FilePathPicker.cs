@@ -75,7 +75,7 @@ namespace Astrarium.Types.Controls
             if (Mode == PickerMode.File)
             {
                 // TODO: take caption and filter from control properties
-                string path = ViewManager.ShowOpenFileDialog("Open file", "*.*");
+                string path = ViewManager.ShowOpenFileDialog("Open file", "*.*", out int filterIndex);
                 if (!string.IsNullOrEmpty(path))
                 { 
                     SelectedPath = path;

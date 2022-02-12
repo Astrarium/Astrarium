@@ -1,4 +1,5 @@
 ﻿using Astrarium.Algorithms;
+using Astrarium.Plugins.Planner.ImportExport;
 using Astrarium.Types;
 using System;
 using System.Collections;
@@ -28,6 +29,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
         public ICommand RemoveSelectedItemsCommand { get; private set; }
         public ICommand AddObjectCommand { get; private set; }
         public ICommand AddObjectsCommand { get; private set; }
+        public ICommand SaveCommand { get; private set; }
 
         public string FilterString
         {
@@ -157,13 +159,15 @@ namespace Astrarium.Plugins.Planner.ViewModels
             RemoveSelectedItemsCommand = new Command(RemoveSelectedItems);
             AddObjectCommand = new Command(AddObject);
             AddObjectsCommand = new Command(AddObjects);
+            SaveCommand = new Command(Save);
+
             TableData = CollectionViewSource.GetDefaultView(ephemerides);
         }
         
         private double julianDay;
         private PlanningFilter filter;
         
-        public async void CreatePlan(PlanningFilter filter)
+        public void CreatePlan(PlanningFilter filter)
         {
             this.filter = filter;
             julianDay = filter.JulianDayMidnight;
@@ -188,7 +192,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
             if (!tokenSource.IsCancellationRequested)
             {
-                this.ephemerides.AddRange(ephemerides);
+                this.ephemerides.InsertRange(0, ephemerides);
                 TableData.Refresh();
                 NotifyPropertyChanged(nameof(TotalItemsCount), nameof(FilteredItemsCount));
                 tokenSource.Cancel();
@@ -274,9 +278,28 @@ namespace Astrarium.Plugins.Planner.ViewModels
         public void AddObject(CelestialObject body)
         {
             Ephemerides item = planner.GetObservationDetails(filter, body);
-            ephemerides.Add(item);
+            ephemerides.Insert(0, item);
             TableData.Refresh();
             NotifyPropertyChanged(nameof(TotalItemsCount), nameof(FilteredItemsCount));
+        }
+
+        private void Save()
+        {
+            var formats = new string[]
+            {
+                "Astrarium Observation Plan (*.plan)|*.plan",
+                "SkySafari Observing List (*.skylist)|*.skylist",
+                "Cartes du Ciel Observing List (*.txt)|*.txt"
+            };
+
+            string filePath = ViewManager.ShowSaveFileDialog("Save", "observation", ".plan", string.Join("|", formats), out int selectedExtensionIndex);
+            if (filePath != null)
+            {
+                if (selectedExtensionIndex == 2)
+                {
+                    new SkySafariPlanReadWriter().Write(ephemerides, filePath);
+                }
+            }
         }
     }
 }

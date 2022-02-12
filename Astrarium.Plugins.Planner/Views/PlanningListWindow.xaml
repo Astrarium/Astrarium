@@ -23,9 +23,12 @@
             <MenuItem Header="Go to END of observation" Command="{Binding SetTimeCommand}" CommandParameter="{Binding SelectedTableItem[Observation.End]}"  IsEnabled="{Binding IsGoToObservationEndEnabled}" />
             <Separator />
             <MenuItem Header="Add object by name..." Command="{Binding AddObjectCommand}" InputGestureText="Ctrl+F" />
-            <MenuItem Header="Add objects by criteria..." />
+            <MenuItem Header="Add objects by criteria..." Command="{Binding AddObjectsCommand}" InputGestureText="Ctrl+I" />
             <Separator />
             <MenuItem Header="Remove selected item(s)" Command="{Binding RemoveSelectedItemsCommand}" IsEnabled="{Binding SelectedTableItem, Converter={s:NotNullToBoolConverter}}" InputGestureText="Delete" />
+            <Separator />
+            <MenuItem Header="Save..." Command="{Binding SaveCommand}" />
+
         </ContextMenu>
         <Style x:Key="DefaultRowStyle" TargetType="{x:Type DataGridRow}" BasedOn="{StaticResource {x:Type DataGridRow}}">
             <Setter Property="ContextMenu" Value="{StaticResource RowMenu}" />
@@ -38,6 +41,7 @@
     </Window.Resources>
     <Window.InputBindings>
         <KeyBinding Modifiers="Control" Key="F" Command="{Binding AddObjectCommand}" />
+        <KeyBinding Modifiers="Control" Key="I" Command="{Binding AddObjectsCommand}" />
     </Window.InputBindings>
 
     <Grid Margin="0 4">

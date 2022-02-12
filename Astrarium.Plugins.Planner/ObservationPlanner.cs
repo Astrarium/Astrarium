@@ -57,9 +57,9 @@ namespace Astrarium.Plugins.Planner
             {
                 throw new ArgumentException("Filter must contain either celestial objects list or celestial objects types list.");
             }
-            
+
             // Total objects count
-            double objectsCount = celestialObjects.Count();
+            double objectsCount = filter.CountLimit ?? celestialObjects.Count();
 
             int counter = 0;
 
