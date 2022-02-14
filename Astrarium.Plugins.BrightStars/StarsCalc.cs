@@ -382,7 +382,7 @@ namespace Astrarium.Plugins.BrightStars
             }
             if (s.VariableName != null)
             {
-                string[] varName = s.VariableName.Split(' ');
+                string[] varName = s.VariableName.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                 if (varName.Length > 1)
                 {
                     conName = sky.GetConstellation(varName[1]).LatinGenitiveName;

@@ -19,17 +19,32 @@ namespace Astrarium.Plugins.Planner.ViewModels
 {
     public class PlanningListVM : ViewModelBase
     {
+        #region Dependencies
+
         private readonly ISky sky;
         private readonly IMainWindow mainWindow;
         private readonly ObservationPlanner planner;
+        private readonly PlanReadWriterFactory readWriterFactory;
         private readonly List<Ephemerides> ephemerides = new List<Ephemerides>();
+
+        #endregion Dependencies
+
+        #region Commands
 
         public ICommand SetTimeCommand { get; private set; }
         public ICommand ShowObjectCommand { get; private set; }
+        public ICommand ClearFilterCommand { get; private set; }
         public ICommand RemoveSelectedItemsCommand { get; private set; }
         public ICommand AddObjectCommand { get; private set; }
         public ICommand AddObjectsCommand { get; private set; }
         public ICommand SaveCommand { get; private set; }
+
+        #endregion Commands
+
+        /// <summary>
+        /// Flag indicating plan is already created (possible with no objects).
+        /// </summary>
+        private bool isInitialized = false;
 
         public string FilterString
         {
@@ -50,7 +65,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
                 }
                 SetValue(nameof(FilterString), value);
 
-                NotifyPropertyChanged(nameof(FilteredItemsCount));
+                NotifyTableItemsCountChanged();
             }
         }
 
@@ -115,6 +130,16 @@ namespace Astrarium.Plugins.Planner.ViewModels
                 nameof(IsGoToObservationEndEnabled));
         }
 
+        private void NotifyTableItemsCountChanged()
+        {
+            NotifyPropertyChanged(
+                nameof(TotalItemsCount), 
+                nameof(FilteredItemsCount), 
+                nameof(NoTotalItems),
+                nameof(NoFilteredItems),
+                nameof(HasItemsToDisplay));
+        }
+
         public Ephemerides SelectedTableItem
         {
             get => GetValue<Ephemerides>(nameof(SelectedTableItem));
@@ -142,21 +167,26 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
         public bool IsSigleTableItemSelected => SelectedTableItems != null && SelectedTableItems.Count == 1;
 
-        public int TotalItemsCount => ephemerides?.Count ?? 0;
 
+        public int TotalItemsCount => ephemerides?.Count ?? 0;
         public int FilteredItemsCount => TableData != null ? TableData.Cast<object>().Count() : 0;
+        public bool NoTotalItems => isInitialized && TotalItemsCount == 0;
+        public bool NoFilteredItems => isInitialized && TotalItemsCount > 0 && FilteredItemsCount == 0;
+        public bool HasItemsToDisplay => isInitialized && !NoTotalItems && !NoFilteredItems;
 
         public string Name { get; set; }
 
-        public PlanningListVM(ISky sky, IMainWindow mainWindow, ObservationPlanner planner)
+        public PlanningListVM(ISky sky, IMainWindow mainWindow, ObservationPlanner planner, PlanReadWriterFactory readWriterFactory)
         {
             this.planner = planner;
             this.sky = sky;
             this.mainWindow = mainWindow;
+            this.readWriterFactory = readWriterFactory;
 
             SetTimeCommand = new Command<Date>(SetTime);
             ShowObjectCommand = new Command<CelestialObject>(ShowObject);
             RemoveSelectedItemsCommand = new Command(RemoveSelectedItems);
+            ClearFilterCommand = new Command(ClearFilter);
             AddObjectCommand = new Command(AddObject);
             AddObjectsCommand = new Command(AddObjects);
             SaveCommand = new Command(Save);
@@ -189,12 +219,12 @@ namespace Astrarium.Plugins.Planner.ViewModels
             var progress = new Progress<double>();
             ViewManager.ShowProgress("Please wait", "Creating observation plan...", tokenSource, progress);
             var ephemerides = await Task.Run(() => planner.CreatePlan(filter, tokenSource.Token, progress));
-
+            isInitialized = true;
             if (!tokenSource.IsCancellationRequested)
             {
                 this.ephemerides.InsertRange(0, ephemerides);
                 TableData.Refresh();
-                NotifyPropertyChanged(nameof(TotalItemsCount), nameof(FilteredItemsCount));
+                NotifyTableItemsCountChanged();
                 tokenSource.Cancel();
             }
         }
@@ -205,6 +235,11 @@ namespace Astrarium.Plugins.Planner.ViewModels
             {
                 return Text.Get($"{(item as Ephemerides).CelestialObject.Type}.Type");
             }
+        }
+
+        private void ClearFilter()
+        {
+            FilterString = null;
         }
 
         private void SetTime(Date time)
@@ -225,7 +260,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
                 {
                     ephemerides.Remove(SelectedTableItem);
                     TableData.Refresh();
-                    NotifyPropertyChanged(nameof(TotalItemsCount), nameof(FilteredItemsCount));
+                    NotifyTableItemsCountChanged();
                     NotifySelectedTableItemChanged();
                 }
             }
@@ -244,7 +279,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
                         ephemerides.Remove(item);
                     }
                     TableData.Refresh();
-                    NotifyPropertyChanged(nameof(TotalItemsCount), nameof(FilteredItemsCount));
+                    NotifyTableItemsCountChanged();
                     NotifySelectedTableItemChanged();
                 }
             }
@@ -280,25 +315,17 @@ namespace Astrarium.Plugins.Planner.ViewModels
             Ephemerides item = planner.GetObservationDetails(filter, body);
             ephemerides.Insert(0, item);
             TableData.Refresh();
-            NotifyPropertyChanged(nameof(TotalItemsCount), nameof(FilteredItemsCount));
+            NotifyTableItemsCountChanged();
         }
 
-        private void Save()
+        private async void Save()
         {
-            var formats = new string[]
-            {
-                "Astrarium Observation Plan (*.plan)|*.plan",
-                "SkySafari Observing List (*.skylist)|*.skylist",
-                "Cartes du Ciel Observing List (*.txt)|*.txt"
-            };
-
-            string filePath = ViewManager.ShowSaveFileDialog("Save", "observation", ".plan", string.Join("|", formats), out int selectedExtensionIndex);
+            string filePath = ViewManager.ShowSaveFileDialog("Save", "observation", ".plan", readWriterFactory.FormatsString, out int selectedExtensionIndex);
             if (filePath != null)
             {
-                if (selectedExtensionIndex == 2)
-                {
-                    new SkySafariPlanReadWriter().Write(ephemerides, filePath);
-                }
+                var format = readWriterFactory.GetFormat(selectedExtensionIndex);
+                var writer = readWriterFactory.Create(format);
+                await Task.Run(() => writer.Write(ephemerides, filePath));                
             }
         }
     }

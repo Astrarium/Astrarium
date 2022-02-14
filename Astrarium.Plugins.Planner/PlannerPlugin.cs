@@ -1,4 +1,5 @@
 ﻿using Astrarium.Algorithms;
+using Astrarium.Plugins.Planner.ImportExport;
 using Astrarium.Plugins.Planner.ViewModels;
 using Astrarium.Types;
 using System;
@@ -7,6 +8,8 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Planner
 {
@@ -14,12 +17,14 @@ namespace Astrarium.Plugins.Planner
     {
         private readonly ISky sky;
         private readonly ISkyMap map;
+        private readonly PlanReadWriterFactory readWriterFactory;
 
-        public PlannerPlugin(ISky sky, ISkyMap map)
+        public PlannerPlugin(ISky sky, ISkyMap map, PlanReadWriterFactory readWriterFactory)
         {
             this.sky = sky;
             this.map = map;
             this.map.SelectedObjectChanged += (x) => NotifyPropertyChanged(nameof(HasSelectedObject));
+            this.readWriterFactory = readWriterFactory;
 
             /* Main app menu */
 
@@ -29,7 +34,7 @@ namespace Astrarium.Plugins.Planner
             recentPlansMenu.AddBinding(new SimpleBinding(this, nameof(HasRecentPlans), nameof(MenuItem.IsEnabled)));
             plannerMenu.SubItems = new ObservableCollection<MenuItem>(new[] {
                 new MenuItem("Create new plan...", new Command<ICollection<CelestialObject>>(CreateNewPlan), null),
-                new MenuItem("Open plan..."),
+                new MenuItem("Open plan...", new Command(OpenPlan)),
                 recentPlansMenu,
                 null,
                 new MenuItem("Defaults...")
@@ -105,6 +110,36 @@ namespace Astrarium.Plugins.Planner
                 {
                     plan.AddObject(body);
                 }
+            }
+        }
+
+        private async void OpenPlan()
+        {
+            string filePath = ViewManager.ShowOpenFileDialog("Open", readWriterFactory.FormatsString, out int selectedExtensionIndex);
+            if (filePath != null)
+            {
+                var fileFormat = readWriterFactory.GetFormat(selectedExtensionIndex);
+                IPlanReadWriter reader = readWriterFactory.Create(fileFormat);
+
+                var tokenSource = new CancellationTokenSource();
+                var progress = new Progress<double>();
+                ViewManager.ShowProgress("Please wait", "Reading data...", tokenSource, progress);
+
+                var celestialObjects = await Task.Run(() => reader.Read(filePath, tokenSource.Token, progress));
+
+                if (!tokenSource.IsCancellationRequested)
+                {
+                    tokenSource.Cancel();
+                    if (celestialObjects.Any())
+                    {
+                        CreateNewPlan(celestialObjects);
+                    }
+                    else
+                    {
+                        // TODO: inform user
+                    }
+                }
+                
             }
         }
 

@@ -127,6 +127,8 @@ namespace Astrarium.Plugins.Planner
                 "Magnitude"
             });
 
+            bodyEphemerides.AddRange(visibilityEphems);
+
             // Body does not have magnitude 
             if (!categories.Contains("Magnitude"))
             {
@@ -184,7 +186,7 @@ namespace Astrarium.Plugins.Planner
                         bodyEphemerides.Add(new Ephemeris("Observation.Duration", bodyObsDuration, Formatters.VisibilityDuration));
                         bodyEphemerides.Add(new Ephemeris("Observation.End", bodyObsEnd, Formatters.Time));
 
-                        bodyEphemerides.AddRange(visibilityEphems);
+
 
                         // best time of observation (in the expected time range)
                         {

@@ -38,6 +38,17 @@
             <Setter Property="FontFamily" Value="Lucida Console" />
             <Setter Property="FontSize" Value="12" />
         </Style>
+
+        <Grid x:Key="ImageFilter" x:Shared="False">
+            <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="20" Height="20" Margin="0 4 0 0" Stretch="Uniform" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
+                <Path.Data>
+                    <StreamGeometry>F1 M700,700z M0,0z M140,70L303.34,256.66 303.34,443.32 396.676,489.984 396.676,256.644 560.016,69.9839999999999 350.016,69.9839999999999z</StreamGeometry>
+                </Path.Data>
+                <Path.LayoutTransform>
+                    <RotateTransform Angle="0"></RotateTransform>
+                </Path.LayoutTransform>
+            </Path>
+        </Grid>
     </Window.Resources>
     <Window.InputBindings>
         <KeyBinding Modifiers="Control" Key="F" Command="{Binding AddObjectCommand}" />
@@ -53,6 +64,10 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -92,21 +107,33 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             
             <Button Grid.Column="0" Margin="4 0" Padding="8 0" Content="+ NAME" Command="{Binding AddObjectCommand}" />
             <Button Grid.Column="1" Margin="2 0" Padding="8 0" Content="+ CRITERIA" Command="{Binding AddObjectsCommand}" />
-
-            <TextBox Grid.Column="2" HorizontalAlignment="Stretch" Text="{Binding FilterString, Mode=TwoWay, Delay=1000, UpdateSourceTrigger=PropertyChanged}" Margin="4 0 0 0" />
-
-            <Button Grid.Column="3" Margin="0 0 4 0" Width="24" Height="24" Padding="0">
-                
-            </Button>
+            <Button Grid.Column="2" Margin="2 0" Padding="8 0" Content="Save..." Command="{Binding SaveCommand}" />
+            
+            <TextBox Grid.Column="3" HorizontalAlignment="Stretch" Text="{Binding FilterString, Mode=TwoWay, Delay=1000, UpdateSourceTrigger=PropertyChanged}" Margin="4 0 0 0" />
+            <Button Grid.Column="4" Margin="0 0 4 0" Width="24" Height="24" Padding="0" Content="{StaticResource ImageFilter}" />
         </Grid>
 
+        <TextBlock TextAlignment="Center" Padding="20" TextWrapping="Wrap" Visibility="{Binding NoTotalItems, Converter={s:BoolToVisibilityConverter}}" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Run IsEnabled="False" Text="There are no objects that can be observable at desired time interval and matching the observation filter. You can"></Run>
+            <Hyperlink Command="{Binding AddObjectCommand}"><Run Text="add objects by name" /></Hyperlink>
+            <Run IsEnabled="False" Text="or" />
+            <Hyperlink Command="{Binding AddObjectsCommand}"><Run Text="change the observation filter" /></Hyperlink>
+        </TextBlock>
+        <TextBlock TextAlignment="Center" Padding="20" TextWrapping="Wrap" Visibility="{Binding NoFilteredItems, Converter={s:BoolToVisibilityConverter}}" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" >            
+            <Run IsEnabled="False" Text="There are no objects matching the search criteria" />
+            <LineBreak></LineBreak>
+            <Hyperlink Command="{Binding ClearFilterCommand}"><Run Text="Clear the filter" /></Hyperlink>        
+        </TextBlock>
+
         <controls:ExtendedDataGrid 
+            Visibility="{Binding HasItemsToDisplay, Converter={s:BoolToVisibilityConverter}}"
             Style="{StaticResource {x:Type DataGrid}}"
             Grid.Row="2"
             VerticalScrollBarVisibility="Auto"
@@ -165,7 +192,7 @@
                             <StackPanel Orientation="Horizontal" Background="Transparent">
                                 <Rectangle Margin="2" Width="16" Height="16" ToolTip="{Binding CelestialObject, Converter={views:CelestialObjectTypeDescriptionConverter}}">
                                     <Rectangle.Fill>
-                                        <SolidColorBrush Color="{StaticResource ColorControlLightBackground}" />
+                                        <SolidColorBrush Color="{DynamicResource ColorControlLightBackground}" />
                                     </Rectangle.Fill>
                                     <Rectangle.OpacityMask>
                                         <ImageBrush ImageSource="{Binding CelestialObject, Converter={s:CelestialObjectToIconConverter}}" Stretch="Uniform" />
@@ -273,9 +300,9 @@
             
         </controls:ExtendedDataGrid>
 
-        <StatusBar Grid.Row="3" Margin="4 0" BorderThickness="1" Background="{StaticResource BrushControlDarkBackground}" BorderBrush="{StaticResource BrushControlDarkBackground}">
-            <StatusBarItem >
-                <StackPanel  IsEnabled="False" Orientation="Horizontal">
+        <StatusBar Grid.Row="3" Margin="4 0" BorderThickness="1">
+            <StatusBarItem>
+                <StackPanel IsEnabled="False" Orientation="Horizontal">
                     <TextBlock Text="Total objects: " />
                     <TextBlock Text="{Binding TotalItemsCount, FallbackValue=0}" />
                 </StackPanel>

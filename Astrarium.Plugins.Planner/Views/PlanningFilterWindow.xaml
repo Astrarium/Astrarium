@@ -96,7 +96,6 @@
                         
                         <StackPanel IsEnabled="{Binding ApplyFilters}" Orientation="Vertical" Margin="0 8 0 0">
 
-        
                             <DockPanel Margin="8 2">
                                 <CheckBox IsChecked="{Binding EnableMinBodyAltitude}" Content="Minimal altitude of celestial object" VerticalAlignment="Center" />
                                 <c:NumericUpDown IsEnabled="{Binding EnableMinBodyAltitude}" Width="50" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="0" Value="{Binding MinBodyAltitude}" Maximum="90" DecimalPlaces="0" />
@@ -106,10 +105,6 @@
                                 <CheckBox IsChecked="{Binding EnableMaxSunAltitude}" Content="Maximal altitude of the Sun" VerticalAlignment="Center" />
                                 <c:NumericUpDown IsEnabled="{Binding EnableMaxSunAltitude}" Width="50" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="-18" Maximum="0" Value="{Binding MaxSunAltitude}" DecimalPlaces="0" />
                             </DockPanel>
-
-                            <StackPanel Margin="8 0" Orientation="Horizontal">
-                                
-                            </StackPanel>
 
                             <DockPanel Margin="8 2">
                                 <CheckBox IsChecked="{Binding EnableMagLimit}" Content="Minimal magnitude of celestial body" VerticalAlignment="Center" />
