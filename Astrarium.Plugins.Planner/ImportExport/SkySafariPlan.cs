@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Planner.ImportExport
 {
-    public class SkySafariPlanReadWriter : IPlanReadWriter
+    public class SkySafariPlan : IPlan
     {
         private const string FILE_HEADER = "SkySafariObservingListVersion=3.0";
         private const string BEGIN_OBJECT = "SkyObject=BeginObject";
@@ -18,7 +18,7 @@ namespace Astrarium.Plugins.Planner.ImportExport
 
         private readonly ISky sky = null;
 
-        public SkySafariPlanReadWriter(ISky sky)
+        public SkySafariPlan(ISky sky)
         {
             this.sky = sky;
         }

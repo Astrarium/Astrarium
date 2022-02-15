@@ -1,6 +1,7 @@
 ﻿using Astrarium.Types;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -10,11 +11,11 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Planner.ImportExport
 {
-    public class CartesDuCielPlanReadWriter : IPlanReadWriter
+    public class CartesDuCielPlan : IPlan
     {
         private readonly ISky sky = null;
 
-        public CartesDuCielPlanReadWriter(ISky sky)
+        public CartesDuCielPlan(ISky sky)
         {
             this.sky = sky;
         }
@@ -27,11 +28,9 @@ namespace Astrarium.Plugins.Planner.ImportExport
             {
                 string line = file.ReadLine();
 
-                bool firstLine = true;
-
                 // Get total lines count. This method lazily enumerates lines rather than greedily reading them all.
                 double linesCount = File.ReadLines(filePath).Count();
-                long counter = 1;
+                long counter = 0;
 
                 while ((line = file.ReadLine()) != null)
                 {
@@ -41,29 +40,28 @@ namespace Astrarium.Plugins.Planner.ImportExport
                         break;
                     }
 
-                    progress?.Report(counter++ / linesCount * 100);
+                    progress?.Report(++counter / linesCount * 100);
 
-                    // skip the file header (1 line)
-                    if (firstLine)
+                    // skip the file header (first line)
+                    if (counter == 1)
                     {
-                        firstLine = false;
                         continue;
                     }
 
                     string name = line.Substring(0, 32).Trim();
-                    //string ra = line.Substring(32, 10).Trim();
-                    //string dec = line.Substring(42, 10).Trim();
                     string exactName = line.Substring(52, Math.Max(line.Length, 32) - 52).Trim();
 
-                    var body = sky.CelestialObjects.Where(x => x.Type != null && x.CommonName.Equals(exactName) || x.CommonName.Replace(" ", "").Equals(exactName) ||
-                                                                                 x.Names.Select(n => n.Replace(" ", "")).Contains(exactName) || x.Names.Contains(exactName) || 
-                                                                                 x.Names.Select(n => n.Replace(" ", "")).Contains(name) || x.Names.Contains(name)).FirstOrDefault();
+                    var body = sky.CelestialObjects.FirstOrDefault(x => x.Type != null &&
+                        ((string.Compare(x.CommonName, exactName, CultureInfo.InvariantCulture, CompareOptions.IgnoreCase | CompareOptions.IgnoreSymbols) == 0) ||
+                         x.Names.Any(n => string.Compare(exactName, n, CultureInfo.InvariantCulture, CompareOptions.IgnoreCase | CompareOptions.IgnoreSymbols) == 0)));
+
                     if (body != null)
                     {
                         bodies.Add(body);
                     }
                     else
                     {
+                        Debug.WriteLine("");
                         // TODO: log it.
                     }
                 }

@@ -24,7 +24,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
         private readonly ISky sky;
         private readonly IMainWindow mainWindow;
         private readonly ObservationPlanner planner;
-        private readonly PlanReadWriterFactory readWriterFactory;
+        private readonly PlanFactory readWriterFactory;
         private readonly List<Ephemerides> ephemerides = new List<Ephemerides>();
 
         #endregion Dependencies
@@ -176,7 +176,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
         public string Name { get; set; }
 
-        public PlanningListVM(ISky sky, IMainWindow mainWindow, ObservationPlanner planner, PlanReadWriterFactory readWriterFactory)
+        public PlanningListVM(ISky sky, IMainWindow mainWindow, ObservationPlanner planner, PlanFactory readWriterFactory)
         {
             this.planner = planner;
             this.sky = sky;

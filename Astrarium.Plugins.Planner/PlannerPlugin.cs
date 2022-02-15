@@ -17,9 +17,9 @@ namespace Astrarium.Plugins.Planner
     {
         private readonly ISky sky;
         private readonly ISkyMap map;
-        private readonly PlanReadWriterFactory readWriterFactory;
+        private readonly PlanFactory readWriterFactory;
 
-        public PlannerPlugin(ISky sky, ISkyMap map, PlanReadWriterFactory readWriterFactory)
+        public PlannerPlugin(ISky sky, ISkyMap map, PlanFactory readWriterFactory)
         {
             this.sky = sky;
             this.map = map;
@@ -119,13 +119,23 @@ namespace Astrarium.Plugins.Planner
             if (filePath != null)
             {
                 var fileFormat = readWriterFactory.GetFormat(selectedExtensionIndex);
-                IPlanReadWriter reader = readWriterFactory.Create(fileFormat);
+                IPlan reader = readWriterFactory.Create(fileFormat);
 
+                ICollection<CelestialObject> celestialObjects = new CelestialObject[0];
                 var tokenSource = new CancellationTokenSource();
                 var progress = new Progress<double>();
                 ViewManager.ShowProgress("Please wait", "Reading data...", tokenSource, progress);
 
-                var celestialObjects = await Task.Run(() => reader.Read(filePath, tokenSource.Token, progress));
+                try
+                {
+                    celestialObjects = await Task.Run(() => reader.Read(filePath, tokenSource.Token, progress));
+                }
+                catch (Exception ex)
+                {
+                    tokenSource.Cancel();
+                    // TODO: log
+                    ViewManager.ShowMessageBox("Error", $"Unable to import observation plan.\r\nError: {ex.Message}");
+                }
 
                 if (!tokenSource.IsCancellationRequested)
                 {
