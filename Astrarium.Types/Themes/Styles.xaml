@@ -4068,5 +4068,36 @@
         </Setter>
     </Style>
 
+    <Style TargetType="{x:Type c:SearchTextBox}">
+        <Setter Property="Padding" Value="2" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type c:SearchTextBox}">
+                    <Grid>
+                        <TextBox x:Name="PART_Editor"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center"
+							Foreground="{StaticResource BrushForeground}" 
+                            Text="{TemplateBinding Text}"
+                            Padding="{TemplateBinding Padding}" />
+                        <TextBlock x:Name="PART_Watermark"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Left"
+                            Background="Transparent"
+                            Focusable="False"
+                            Text="{TemplateBinding Watermark}"
+                            Foreground="{StaticResource BrushControlLightBackground}"
+                            IsHitTestVisible="False"
+                            Margin="6 2" />
+                        <Button Background="Transparent" x:Name="PART_Clear" Margin="4 2" Height="16" Width="16" HorizontalAlignment="Right" Visibility="Collapsed">
+                            <Grid>
+                                <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="10" Height="10" Stretch="Fill" Fill="{StaticResource BrushForeground}" Data="F1 M 26.9166,22.1667L 37.9999,33.25L 49.0832,22.1668L 53.8332,26.9168L 42.7499,38L 53.8332,49.0834L 49.0833,53.8334L 37.9999,42.75L 26.9166,53.8334L 22.1666,49.0833L 33.25,38L 22.1667,26.9167L 26.9166,22.1667 Z "/>
+                            </Grid>
+                        </Button>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
 </ResourceDictionary>
