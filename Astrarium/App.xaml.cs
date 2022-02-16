@@ -18,6 +18,7 @@ using System.Resources;
 using System.Threading.Tasks;
 using System.Windows;
 using Astrarium.Config.Controls;
+using NLog;
 
 namespace Astrarium
 {
@@ -36,6 +37,13 @@ namespace Astrarium
             commandLineArgs = new CommandLineArgs(e.Args);
 
             ViewManager.SetImplementation(new DefaultViewManager(t => kernel.Get(t)));
+            Log.SetImplementation((DefaultLogger)LogManager.GetLogger("", typeof(DefaultLogger)));
+            if (commandLineArgs.Contains("-debug", StringComparer.OrdinalIgnoreCase))
+            {
+                Log.Level = "Debug";
+            }
+
+            Log.Info($"Starting Astrarium {FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion}");
 
             var splashVM = new SplashScreenVM();
             ViewManager.ShowWindow(splashVM);
@@ -55,7 +63,7 @@ namespace Astrarium
             Dispatcher.UnhandledException += (s, ea) =>
             {
                 string message = $"An unhandled exception occurred:\n\n{ea.Exception.Message}\nStack trace:\n\n{ea.Exception.StackTrace}";
-                Trace.TraceError(message);
+                Log.Error(message);
                 ViewManager.ShowMessageBox("Error", message, MessageBoxButton.OK);
                 ea.Handled = true;                
             };
@@ -107,13 +115,6 @@ namespace Astrarium
         private void ConfigureContainer(IProgress<string> progress)
         {
             kernel.Bind<ICommandLineArgs>().ToConstant(commandLineArgs).InSingletonScope();
-
-            // use single logger for whole application
-            kernel.Bind<Logger>().ToSelf().InSingletonScope();
-            kernel.Get<Logger>();
-
-            Debug.WriteLine($"Starting Astrarium {FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion}");
-
             kernel.Bind<ISettings, Settings>().To<Settings>().InSingletonScope();
             kernel.Bind<ISky, Sky>().To<Sky>().InSingletonScope();
             kernel.Bind<ISkyMap, SkyMap>().To<SkyMap>().InSingletonScope();
@@ -134,11 +135,11 @@ namespace Astrarium
                 try
                 {
                     var plugin = Assembly.UnsafeLoadFrom(path);
-                    Debug.WriteLine($"Loaded plugin {plugin.FullName}");
+                    Log.Info($"Loaded plugin {plugin.FullName}");
                 }
                 catch (Exception ex)
                 {
-                    Trace.TraceError($"Unable to load plugin assembly with path {path}. {ex})");
+                    Log.Error($"Unable to load plugin assembly with path {path}. {ex})");
                 }
             }
 
@@ -244,7 +245,7 @@ namespace Astrarium
             progress.Report($"Initializing sky map");
             kernel.Get<SkyMap>().Initialize(context, renderers);
 
-            Debug.Write("Application container has been configured.");
+            Log.Debug("Application container has been configured.");
 
             progress.Report($"Initializing shell");
 

@@ -65,7 +65,7 @@ namespace Astrarium.Plugins.MinorBodies
 
             if (error != null)
             {
-                Trace.TraceError($"Unable to update orbital elements. Error: {error}");
+                Log.Error($"Unable to update orbital elements. Error: {error}");
                 if (!silent)
                 {
                     ViewManager.ShowMessageBox("$Error", $"{Text.Get("DataUpdater.DownloadError")}: {error.Message}");
@@ -76,7 +76,7 @@ namespace Astrarium.Plugins.MinorBodies
 
             if (totalCount == 0)
             {
-                Trace.TraceWarning("Unable to download orbital elements. File does not contain data.");
+                Log.Error("Unable to download orbital elements. File does not contain data.");
                 if (!silent)
                 {
                     ViewManager.ShowMessageBox("$Error", "$DataUpdater.NoData");
@@ -97,7 +97,7 @@ namespace Astrarium.Plugins.MinorBodies
 
             if (error != null)
             {
-                Trace.TraceError($"Unable to read orbital elements. Error: {error}");
+                Log.Error($"Unable to read orbital elements. Error: {error}");
                 if (!silent)
                 {
                     ViewManager.ShowMessageBox("$Error", $"{Text.Get("DataUpdater.ParseError")}: {error.Message}");
@@ -108,7 +108,7 @@ namespace Astrarium.Plugins.MinorBodies
 
             if (!orbitalElements.Any())
             {
-                Trace.TraceError($"Unable to read orbital elements.");
+                Log.Error($"Unable to read orbital elements.");
                 if (!silent)
                 {
                     ViewManager.ShowMessageBox("$Error", Text.Get("DataUpdater.ParseError"));
@@ -135,7 +135,7 @@ namespace Astrarium.Plugins.MinorBodies
 
             if (error != null)
             {
-                Trace.TraceError($"Unable to copy elements file. Error: {error}");
+                Log.Error($"Unable to copy elements file. Error: {error}");
                 if (!silent)
                 {
                     ViewManager.ShowMessageBox("$Error", $"{Text.Get("DataUpdater.CopyError")}: {error.Message}");
@@ -165,7 +165,7 @@ namespace Astrarium.Plugins.MinorBodies
             }
             catch (Exception ex)
             {
-                Trace.TraceWarning($"Unable to delete temp file {file}: {ex.Message}");
+                Log.Warn($"Unable to delete temp file {file}: {ex.Message}");
             }
         }
     }

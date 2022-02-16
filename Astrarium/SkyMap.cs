@@ -303,7 +303,7 @@ namespace Astrarium
                         {
                             g.DrawString($"Rendering error:\n{ex}", fontDiagnosticText, Brushes.Red, new RectangleF(10, 10, Width - 20, Height - 20));
                         }
-                        Debug.WriteLine($"Rendering error: {ex}");
+                        Log.Debug($"Rendering error: {ex}");
                     }
                     if (needDrawSelectedObject)
                     {
@@ -408,7 +408,7 @@ namespace Astrarium
                 {
                     g.DrawString($"Rendering error:\n{ex}", fontDiagnosticText, Brushes.Red, new RectangleF(10, 10, Width - 20, Height - 20));
                 }
-                Debug.WriteLine($"Rendering error: {ex}");
+                Log.Error($"Rendering error: {ex}");
             }
         }
 

@@ -1,4 +1,5 @@
 ﻿using Astrarium.Algorithms;
+using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -91,7 +92,7 @@ namespace Astrarium.Plugins.MinorBodies
                     }
                     catch (Exception ex)
                     {
-                        Trace.TraceError($"Unable to parse asteroid data. Line:\n{line}\nError: {ex}");
+                        Log.Error($"Unable to parse asteroid data. Line:\n{line}\nError: {ex}");
                     }
                 }
             }

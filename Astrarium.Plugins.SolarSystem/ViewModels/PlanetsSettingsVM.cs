@@ -65,7 +65,7 @@ namespace Astrarium.Plugins.SolarSystem.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    Trace.TraceError($"Unable to update GRS data. Reason: {ex}");
+                    Log.Error($"Unable to update GRS data. Reason: {ex}");
                     isError = true;
                 }
                 finally

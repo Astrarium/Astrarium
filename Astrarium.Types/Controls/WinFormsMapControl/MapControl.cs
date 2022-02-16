@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using Astrarium.Types;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -1159,7 +1160,7 @@ namespace System.Windows.Forms
                             }
                             catch (Exception ex)
                             {
-                                Debug.WriteLine($"Unable to save tile image {localPath}. Reason: {ex.Message}");
+                                Log.Debug($"Unable to save tile image {localPath}. Reason: {ex.Message}");
                             }
                         }
 

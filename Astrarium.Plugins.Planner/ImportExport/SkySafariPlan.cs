@@ -1,6 +1,7 @@
 ﻿using Astrarium.Types;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -17,10 +18,29 @@ namespace Astrarium.Plugins.Planner.ImportExport
         private const string END_OBJECT = "EndObject=SkyObject";
 
         private readonly ISky sky = null;
+        private readonly IgnoreSpaceStringComparer comparer = new IgnoreSpaceStringComparer();
 
         public SkySafariPlan(ISky sky)
         {
             this.sky = sky;
+        }
+
+        private class IgnoreSpaceStringComparer : StringComparer
+        {
+            public override int Compare(string x, string y)
+            {
+                return string.Compare(x, y, CultureInfo.InvariantCulture, CompareOptions.IgnoreCase | CompareOptions.IgnoreSymbols);
+            }
+
+            public override bool Equals(string x, string y)
+            {
+                return Compare(x, y) == 0;
+            }
+
+            public override int GetHashCode(string obj)
+            {
+                return obj.GetHashCode();
+            }
         }
 
         public ICollection<CelestialObject> Read(string filePath, CancellationToken? token = null, IProgress<double> progress = null)
@@ -82,17 +102,42 @@ namespace Astrarium.Plugins.Planner.ImportExport
                     }
                     else if (line == END_OBJECT)
                     {
-                        if (skySafariType == "DeepSky")
+                        CelestialObject body = null;
+                        if (skySafariType == "SolarSystem")
                         {
-                            var body = sky.CelestialObjects.Where(x => x.Type != null && x.Type.StartsWith("DeepSky") && catalogNumbers.Any(cn => x.CommonName.Equals(cn))).FirstOrDefault();
-                            if (body != null)
-                            {
-                                bodies.Add(body);
-                            }
-                            else
-                            {
-                                // TODO: log it.
-                            }
+                            body = sky.CelestialObjects.FirstOrDefault(
+                                x =>
+                                (x.Type == "Sun" || x.Type == "Moon" || x.Type == "Planet" || x.Type == "PlanetMoon") && commonNames.Any(n => n.Equals(x.CommonName, StringComparison.OrdinalIgnoreCase)) ||
+                                (x.Type == "Asteroid" && catalogNumbers.Count == 1 && commonNames.Count == 1 && x.CommonName.Equals($"({catalogNumbers[0]}) {commonNames[0]}", StringComparison.OrdinalIgnoreCase)) ||
+                                (x.Type == "Comet" && commonNames.Count == 2 && x.CommonName.Equals($"{commonNames[1]} {commonNames[0]}", StringComparison.OrdinalIgnoreCase)) ||
+                                (x.Type == "Comet" && commonNames.Count == 2 && x.CommonName.Equals($"{commonNames[1]} ({commonNames[0]})", StringComparison.OrdinalIgnoreCase)) ||
+                                (x.Type == "Comet" && commonNames.Count == 1 && x.CommonName.Equals(commonNames[0], StringComparison.OrdinalIgnoreCase))
+                            );
+                        }
+                        else if (skySafariType == "Star")
+                        {
+                            body = sky.CelestialObjects.FirstOrDefault(
+                                x => x.Type == "Star" &&
+                                catalogNumbers.Any(n => string.Compare(x.CommonName, n, CultureInfo.InvariantCulture, CompareOptions.IgnoreCase | CompareOptions.IgnoreSymbols) == 0)
+                            );
+                        }
+                        else if (skySafariType == "DeepSky")
+                        {
+                            body = sky.CelestialObjects.FirstOrDefault(
+                                x => x.Type != null && 
+                                x.Type.StartsWith("DeepSky") &&
+                                (catalogNumbers.Any(n => string.Compare(x.CommonName, n, CultureInfo.InvariantCulture, CompareOptions.IgnoreCase | CompareOptions.IgnoreSymbols) == 0) ||
+                                 x.Names.Intersect(catalogNumbers, comparer).Any())
+                            );
+                        }
+
+                        if (body != null)
+                        {
+                            bodies.Add(body);
+                        }
+                        else
+                        {
+                            Log.Debug($"{GetType().Name}: unable to identify celestial object (CommonNames=[{string.Join(",", commonNames)}],CatalogNumbers=[{string.Join(",", catalogNumbers)}],Type={skySafariType})");
                         }
                     }
                 }
@@ -148,8 +193,8 @@ namespace Astrarium.Plugins.Planner.ImportExport
                                 string name = match.Groups["name"].Value;
                                 if (match.Success)
                                 {
+                                    file.WriteLine($"\tCommonName={name}");
                                     file.WriteLine($"\tCatalogNumber={number}");
-                                    file.WriteLine($"\tCatalogNumber={name}");
                                 }
                                 else
                                 {

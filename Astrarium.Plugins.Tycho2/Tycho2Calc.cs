@@ -150,7 +150,7 @@ namespace Astrarium.Plugins.Tycho2
             }
             catch (Exception ex)
             {
-                Trace.TraceError($"Unable to initialize Tycho2 calculator: {ex}");
+                Log.Error($"Unable to initialize Tycho2 calculator: {ex}");
             }
         }
 

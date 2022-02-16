@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Astrarium.Types;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -39,7 +40,7 @@ namespace Astrarium.Views
             }
             catch (Exception ex)
             {
-                Trace.TraceError("Unable to open browser: " + ex);
+                Log.Error("Unable to open browser: " + ex);
             }
         }
     }

@@ -41,7 +41,7 @@ namespace Astrarium.Plugins.MinorBodies
                     comets.Clear();
                     comets.AddRange(newData);
                 }
-                Trace.TraceInformation($"Updated comets: {newData.Count}");
+                Log.Info($"Updated comets: {newData.Count}");
                 sky.Calculate();
             }
         }
@@ -64,13 +64,13 @@ namespace Astrarium.Plugins.MinorBodies
             }
             else
             {
-                Trace.TraceError("Comets orbital elements data file not found.");
+                Log.Error("Comets orbital elements data file not found.");
             }
 
             if (settings.Get<bool>("CometsAutoUpdateOrbitalElements") &&
                 DateTime.Now.Subtract(settings.Get<DateTime>("CometsDownloadOrbitalElementsTimestamp")).TotalDays >= (int)settings.Get<decimal>("CometsAutoUpdateOrbitalElementsPeriod"))
             {
-                Trace.TraceInformation("Obital elements of comets needs to be updated, updating...");
+                Log.Info("Obital elements of comets needs to be updated, updating...");
                 await Task.Run(() => UpdateOrbitalElements(silent: true));
             }
         }

@@ -78,7 +78,7 @@ namespace Astrarium.Plugins.ASCOM
                 }
                 catch (Exception ex)
                 {
-                    Trace.TraceError($"Rendering error in {nameof(TelescopeRenderer)}: {ex}");
+                    Log.Error($"Rendering error in {nameof(TelescopeRenderer)}: {ex}");
                 }
             }
         }

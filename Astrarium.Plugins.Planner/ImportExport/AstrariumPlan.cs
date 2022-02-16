@@ -67,8 +67,7 @@ namespace Astrarium.Plugins.Planner.ImportExport
                 }
                 else
                 {
-                    Debug.WriteLine("");
-                    // TODO: log it.
+                    Log.Debug($"{GetType().Name}: unable to identify celestial object (Name={item.Name},Type={item.Type})");
                 }
             }
 

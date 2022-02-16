@@ -85,7 +85,7 @@ namespace Astrarium.Plugins.ASCOM
             catch (Exception ex)
             {
                 RaiseOnMessageShow("$Ascom.Messages.UnableChoose");
-                Trace.TraceError($"Unable to choose telescope: {ex}");
+                Log.Error($"Unable to choose telescope: {ex}");
                 return null;
             }
         }
@@ -108,7 +108,7 @@ namespace Astrarium.Plugins.ASCOM
             catch (Exception ex)
             {               
                 RaiseOnMessageShow("$Ascom.Messages.UnableAbortSlew");
-                Trace.TraceError($"Unable to abort slewing: {ex}");
+                Log.Error($"Unable to abort slewing: {ex}");
             }
         }
 
@@ -130,7 +130,7 @@ namespace Astrarium.Plugins.ASCOM
             catch (Exception ex)
             {
                 RaiseOnMessageShow("$Ascom.Messages.UnableFindHome");
-                Trace.TraceError($"Unable to find home: {ex}");
+                Log.Error($"Unable to find home: {ex}");
             }
         }
 
@@ -151,7 +151,7 @@ namespace Astrarium.Plugins.ASCOM
             catch (Exception ex)
             {
                 RaiseOnMessageShow("$Ascom.Messages.UnablePark");
-                Trace.TraceError($"Unable to park telescope: {ex}");
+                Log.Error($"Unable to park telescope: {ex}");
             }
         }
 
@@ -169,7 +169,7 @@ namespace Astrarium.Plugins.ASCOM
             catch (Exception ex)
             {
                 RaiseOnMessageShow("$Ascom.Messages.UnableUnpark");
-                Trace.TraceError($"Unable to unpark telescope: {ex}");
+                Log.Error($"Unable to unpark telescope: {ex}");
             }
         }
 
@@ -192,7 +192,7 @@ namespace Astrarium.Plugins.ASCOM
             }
             catch (Exception ex)
             {
-                Trace.TraceError($"Unable to switch tracking: {ex}");
+                Log.Error($"Unable to switch tracking: {ex}");
             }
         }
 
@@ -210,7 +210,7 @@ namespace Astrarium.Plugins.ASCOM
             catch (Exception ex)
             {
                 RaiseOnMessageShow("$Ascom.Messages.UnableDisconnect");
-                Trace.TraceError($"Unable to disconnect: {ex}");
+                Log.Error($"Unable to disconnect: {ex}");
             }
         }
 
@@ -230,7 +230,7 @@ namespace Astrarium.Plugins.ASCOM
             catch (Exception ex)
             {
                 RaiseOnMessageShow("$Ascom.Messages.UnableSetDateTime");
-                Trace.TraceError($"Unable to set date and time: {ex}");
+                Log.Error($"Unable to set date and time: {ex}");
             }
         }
 
@@ -252,7 +252,7 @@ namespace Astrarium.Plugins.ASCOM
             catch (Exception ex)
             {
                 RaiseOnMessageShow("$Ascom.Messages.UnableSetLocation");
-                Trace.TraceError($"Unable to set telescope observation place: {ex}");
+                Log.Error($"Unable to set telescope observation place: {ex}");
             }
         }
 
@@ -270,7 +270,7 @@ namespace Astrarium.Plugins.ASCOM
                 }
                 catch (Exception ex)
                 {
-                    Trace.TraceError($"Unable to get telescope connection state: {ex}");
+                    Log.Error($"Unable to get telescope connection state: {ex}");
                     return false;
                 }
             }
@@ -290,7 +290,7 @@ namespace Astrarium.Plugins.ASCOM
                 }
                 catch (Exception ex)
                 {
-                    Trace.TraceError($"Unable to get slewing state of telescope: {ex}");
+                    Log.Error($"Unable to get slewing state of telescope: {ex}");
                     return false;
                 }
             }
@@ -346,7 +346,7 @@ namespace Astrarium.Plugins.ASCOM
                 }
                 catch (Exception ex)
                 {
-                    Trace.TraceError($"Unable to get telescope name: {ex}");
+                    Log.Error($"Unable to get telescope name: {ex}");
                     return null;
                 }
             }
@@ -366,7 +366,7 @@ namespace Astrarium.Plugins.ASCOM
                 }
                 catch (Exception ex)
                 {
-                    Trace.TraceError($"Unable to get telescope description: {ex}");
+                    Log.Error($"Unable to get telescope description: {ex}");
                     return null;
                 }
             }
@@ -400,7 +400,7 @@ namespace Astrarium.Plugins.ASCOM
             }
             catch (Exception ex)
             {
-                Trace.TraceError($"Unable to slew telescope: {ex}");
+                Log.Error($"Unable to slew telescope: {ex}");
                 RaiseOnMessageShow("$Ascom.Messages.UnableSlew");
             }
         }
@@ -418,14 +418,14 @@ namespace Astrarium.Plugins.ASCOM
                     }
                     else
                     {
-                        Trace.TraceError("Unable to show setup dialog (telescope disconnected).");
+                        Log.Error("Unable to show setup dialog (telescope disconnected).");
                     }
                 }
             }
             catch (Exception ex)
             {
                 RaiseOnMessageShow("$Ascom.Messages.UnableShowSetup");
-                Trace.TraceError($"Unable to show setup dialog {ex}");
+                Log.Error($"Unable to show setup dialog {ex}");
             }
         }
 
@@ -453,14 +453,14 @@ namespace Astrarium.Plugins.ASCOM
                     }
                     else
                     {
-                        Trace.TraceError("Unable to sync (telescope disconnected).");
+                        Log.Error("Unable to sync (telescope disconnected).");
                     }
                 }
             }
             catch (Exception ex)
             {
                 RaiseOnMessageShow("$Ascom.Messages.UnableSync");
-                Trace.TraceError($"Unable to sync {ex}");
+                Log.Error($"Unable to sync {ex}");
             }
         }
 
@@ -511,7 +511,7 @@ namespace Astrarium.Plugins.ASCOM
                 }
                 else
                 {
-                    Trace.TraceWarning($"Unable to disconnect.");
+                    Log.Error($"Unable to disconnect.");
                 }
 
                 try
@@ -549,7 +549,7 @@ namespace Astrarium.Plugins.ASCOM
             }
             catch (Exception ex)
             {
-                Trace.TraceError($"Unable to unpark telesope: {ex}");
+                Log.Error($"Unable to unpark telesope: {ex}");
             }
         }
 
@@ -571,7 +571,7 @@ namespace Astrarium.Plugins.ASCOM
             }
             catch (Exception ex)
             {
-                Trace.TraceError($"Unable to set tracking: {ex}");
+                Log.Error($"Unable to set tracking: {ex}");
             }
         }
 

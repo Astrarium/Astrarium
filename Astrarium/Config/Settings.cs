@@ -185,7 +185,7 @@ namespace Astrarium.Config
             }
             else
             {
-                Debug.Write($"Setting file {SETTINGS_PATH} not found, skip loading settings.");
+                Log.Debug($"Setting file {SETTINGS_PATH} not found, skip loading settings.");
             }
         }
 
@@ -228,7 +228,7 @@ namespace Astrarium.Config
                 }
                 catch (Exception ex)
                 {
-                    Trace.TraceError(ex.ToString());
+                    Log.Error(ex.ToString());
                 }
             }
         }
@@ -294,13 +294,13 @@ namespace Astrarium.Config
                     }
                     catch
                     {
-                        Trace.TraceError($"Unable to deserialize setting {name} to type {type.Name}, setting value: {jObject.ToString()}");
+                        Log.Error($"Unable to deserialize setting {name} to type {type.Name}, setting value: {jObject.ToString()}");
                         return defaultValues.ContainsKey(name) ? defaultValues[name] : Activator.CreateInstance(type);
                     }
                 }
                 else
                 {
-                    Trace.TraceError($"Setting {name} has unknown type, setting value: {jObject.ToString()}");
+                    Log.Error($"Setting {name} has unknown type, setting value: {jObject.ToString()}");
                     return null;
                 }
             }
