@@ -1,23 +1,16 @@
 ﻿using Astrarium.Algorithms;
 using Ninject;
 using Astrarium.Config;
-using Astrarium.Logging;
 using Astrarium.Types;
 using Astrarium.ViewModels;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
-using System.Drawing;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Resources;
 using System.Threading.Tasks;
 using System.Windows;
-using Astrarium.Config.Controls;
 using NLog;
 
 namespace Astrarium
