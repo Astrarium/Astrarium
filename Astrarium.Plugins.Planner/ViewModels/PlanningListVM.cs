@@ -25,9 +25,11 @@ namespace Astrarium.Plugins.Planner.ViewModels
         private readonly IMainWindow mainWindow;
         private readonly ObservationPlanner planner;
         private readonly PlanFactory readWriterFactory;
-        private readonly List<Ephemerides> ephemerides = new List<Ephemerides>();
 
         #endregion Dependencies
+
+        private readonly List<Ephemerides> ephemerides = new List<Ephemerides>();
+        private readonly ObservationPlanSmartFilter smartFilter = new ObservationPlanSmartFilter();
 
         #region Commands
 
@@ -58,10 +60,19 @@ namespace Astrarium.Plugins.Planner.ViewModels
                 }
                 else
                 {
-                    // TODO: complex filter
-                    //TableData.GroupDescriptions.Add(new CustomGroupDescription());
-                    TableData.Filter = e => (e as Ephemerides).CelestialObject.Names.Any(n => n.IndexOf(value.Trim(), StringComparison.OrdinalIgnoreCase) >= 0);
-                    TableData.Refresh();
+                    try
+                    {
+                        var filterExpression = smartFilter.CreateFromString(value);
+                        TableData.Filter = x => filterExpression((Ephemerides)x);
+                    }
+                    catch
+                    {
+                        TableData.Filter = e => (e as Ephemerides).CelestialObject.Names.Any(n => n.IndexOf(value.Trim(), StringComparison.OrdinalIgnoreCase) >= 0);
+                    }
+                    finally
+                    {
+                        TableData.Refresh();
+                    }
                 }
                 SetValue(nameof(FilterString), value);
 
