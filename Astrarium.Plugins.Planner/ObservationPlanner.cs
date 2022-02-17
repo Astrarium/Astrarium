@@ -186,8 +186,6 @@ namespace Astrarium.Plugins.Planner
                         bodyEphemerides.Add(new Ephemeris("Observation.Duration", bodyObsDuration, Formatters.VisibilityDuration));
                         bodyEphemerides.Add(new Ephemeris("Observation.End", bodyObsEnd, Formatters.Time));
 
-
-
                         // best time of observation (in the expected time range)
                         {
                             var transit = visibilityEphems.GetValue<Date>("RTS.Transit");

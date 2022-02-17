@@ -63,7 +63,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
                     try
                     {
                         var filterExpression = smartFilter.CreateFromString(value);
-                        TableData.Filter = x => filterExpression((Ephemerides)x);
+                        TableData.Filter = x => x != null ? filterExpression((Ephemerides)x) : false;
                     }
                     catch
                     {
