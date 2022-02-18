@@ -28,7 +28,7 @@ namespace Astrarium.Plugins.Planner.Controls
             double radius = Math.Min(ActualWidth, ActualHeight) / 2 - padding;
             dc.DrawEllipse(brushBackground, null, new Point(ActualWidth / 2, ActualHeight / 2), radius, radius);
 
-            if (bodyCoordinatesInterpolated != null)
+            if (ShowChart && bodyCoordinatesInterpolated != null)
             {
                 Geometry clipGeometry = new EllipseGeometry(new Point(ActualWidth / 2, ActualHeight / 2), radius, radius);
                 dc.PushClip(clipGeometry);

@@ -8,6 +8,7 @@ namespace Astrarium.Plugins.Planner.Controls
 {
     public abstract class BaseChart : Canvas
     {
+        public readonly static DependencyProperty ShowChartProperty = DependencyProperty.Register(nameof(ShowChart), typeof(bool), typeof(BaseChart), new FrameworkPropertyMetadata(defaultValue: false) { AffectsRender = true, BindsTwoWayByDefault = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DepPropertyChanged) });
         public readonly static DependencyProperty SunCoordinatesProperty = DependencyProperty.Register(nameof(SunCoordinates), typeof(CrdsEquatorial), typeof(BaseChart), new FrameworkPropertyMetadata(defaultValue: null) { AffectsRender = true, BindsTwoWayByDefault = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DepPropertyChanged) });
         public readonly static DependencyProperty BodyCoordinatesProperty = DependencyProperty.Register(nameof(BodyCoordinates), typeof(CrdsEquatorial), typeof(BaseChart), new FrameworkPropertyMetadata(defaultValue: null) { AffectsRender = true, BindsTwoWayByDefault = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DepPropertyChanged) });
         public readonly static DependencyProperty GeoLocationProperty = DependencyProperty.Register(nameof(GeoLocation), typeof(CrdsGeographical), typeof(BaseChart), new FrameworkPropertyMetadata(defaultValue: null) { AffectsRender = true, BindsTwoWayByDefault = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DepPropertyChanged) });
@@ -21,6 +22,12 @@ namespace Astrarium.Plugins.Planner.Controls
         private static void DepPropertyChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             ((BaseChart)sender).Interpolate();
+        }
+
+        public bool ShowChart
+        {
+            get => (bool)GetValue(ShowChartProperty);
+            set => SetValue(ShowChartProperty, value);
         }
 
         public CrdsGeographical GeoLocation

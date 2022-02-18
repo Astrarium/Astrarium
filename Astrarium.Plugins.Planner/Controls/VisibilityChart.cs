@@ -57,7 +57,7 @@ namespace Astrarium.Plugins.Planner.Controls
             // ground overlay
             dc.DrawRectangle(brushGround, null, new Rect(0, ActualHeight / 2, ActualWidth, ActualHeight / 2));
 
-            if (bodyCoordinatesInterpolated != null)
+            if (ShowChart && bodyCoordinatesInterpolated != null)
             {
                 // body altitude line
                 for (int j = 0; j < 2; j++)
@@ -133,8 +133,6 @@ namespace Astrarium.Plugins.Planner.Controls
                 var text = new FormattedText($"{(i + 12) % 24}", System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Arial"), 10, brushTextLabel);
                 dc.DrawText(text, new Point(x - text.WidthIncludingTrailingWhitespace / 2, (verticalPadding - text.Height) / 2));
             }
-
-            //dc.DrawRectangle(null, penHourLine, bounds);
         }
     }
 }

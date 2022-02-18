@@ -36,6 +36,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
         public ICommand SetTimeCommand { get; private set; }
         public ICommand ShowObjectCommand { get; private set; }
         public ICommand ClearFilterCommand { get; private set; }
+        public ICommand ShowSmartFilterCommand { get; private set; }
         public ICommand RemoveSelectedItemsCommand { get; private set; }
         public ICommand AddObjectCommand { get; private set; }
         public ICommand AddObjectsCommand { get; private set; }
@@ -63,7 +64,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
                     try
                     {
                         var filterExpression = smartFilter.CreateFromString(value);
-                        TableData.Filter = x => x != null ? filterExpression((Ephemerides)x) : false;
+                        TableData.Filter = x => x != null && filterExpression((Ephemerides)x);
                     }
                     catch
                     {
@@ -144,8 +145,8 @@ namespace Astrarium.Plugins.Planner.ViewModels
         private void NotifyTableItemsCountChanged()
         {
             NotifyPropertyChanged(
-                nameof(TotalItemsCount), 
-                nameof(FilteredItemsCount), 
+                nameof(TotalItemsCount),
+                nameof(FilteredItemsCount),
                 nameof(NoTotalItems),
                 nameof(NoFilteredItems),
                 nameof(HasItemsToDisplay));
@@ -175,10 +176,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
         public bool IsGoToObservationBeginEnabled => IsSigleTableItemSelected && SelectedTableItem != null && !double.IsNaN(SelectedTableItem.GetValue<Date>("Observation.Begin").Day);
         public bool IsGoToObservationBestEnabled => IsSigleTableItemSelected && SelectedTableItem != null &&  !double.IsNaN(SelectedTableItem.GetValue<Date>("Observation.Best").Day);
         public bool IsGoToObservationEndEnabled => IsSigleTableItemSelected && SelectedTableItem != null && !double.IsNaN(SelectedTableItem.GetValue<Date>("Observation.End").Day);
-
         public bool IsSigleTableItemSelected => SelectedTableItems != null && SelectedTableItems.Count == 1;
-
-
         public int TotalItemsCount => ephemerides?.Count ?? 0;
         public int FilteredItemsCount => TableData != null ? TableData.Cast<object>().Count() : 0;
         public bool NoTotalItems => isInitialized && TotalItemsCount == 0;
@@ -198,6 +196,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
             ShowObjectCommand = new Command<CelestialObject>(ShowObject);
             RemoveSelectedItemsCommand = new Command(RemoveSelectedItems);
             ClearFilterCommand = new Command(ClearFilter);
+            ShowSmartFilterCommand = new Command(ShowSmartFilter);
             AddObjectCommand = new Command(AddObject);
             AddObjectsCommand = new Command(AddObjects);
             SaveCommand = new Command(Save);
@@ -251,6 +250,16 @@ namespace Astrarium.Plugins.Planner.ViewModels
         private void ClearFilter()
         {
             FilterString = null;
+        }
+
+        private void ShowSmartFilter()
+        {
+            var vm = ViewManager.CreateViewModel<SmartFilterVM>();
+            vm.FilterString = FilterString;
+            if (ViewManager.ShowDialog(vm) == true)
+            {
+                FilterString = vm.FilterString;
+            }
         }
 
         private void SetTime(Date time)
