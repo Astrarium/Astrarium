@@ -122,13 +122,13 @@
         </Grid>
 
         <TextBlock TextAlignment="Center" Padding="20" TextWrapping="Wrap" Visibility="{Binding NoTotalItems, Converter={s:BoolToVisibilityConverter}}" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Run IsEnabled="False" Text="There are no objects that can be observable at desired time interval and matching the observation filter. You can"></Run>
+            <Run IsEnabled="False" Text="There are no objects that can be observable at desired time interval and match the observation filter. You can"></Run>
             <Hyperlink Command="{Binding AddObjectCommand}"><Run Text="add objects by name" /></Hyperlink>
             <Run IsEnabled="False" Text="or" />
             <Hyperlink Command="{Binding AddObjectsCommand}"><Run Text="change the observation filter" /></Hyperlink>
         </TextBlock>
         <TextBlock TextAlignment="Center" Padding="20" TextWrapping="Wrap" Visibility="{Binding NoFilteredItems, Converter={s:BoolToVisibilityConverter}}" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" >            
-            <Run IsEnabled="False" Text="There are no objects matching the search criteria" />
+            <Run IsEnabled="False" Text="There are no objects that match the search criteria" />
             <LineBreak></LineBreak>
             <Hyperlink Command="{Binding ClearFilterCommand}"><Run Text="Clear the filter" /></Hyperlink>        
         </TextBlock>

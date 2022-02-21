@@ -10,7 +10,7 @@ using System.Windows.Media;
 
 namespace Astrarium.Types
 {
-    public abstract class ToolbarItem : ViewModelBase
+    public abstract class ToolbarItem : PropertyChangedBase
     {
         public Type Type => GetType();
     }

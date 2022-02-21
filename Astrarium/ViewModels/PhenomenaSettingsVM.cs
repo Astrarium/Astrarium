@@ -81,6 +81,7 @@ namespace Astrarium.ViewModels
             }
 
             Nodes.Add(root);
+            root.IsChecked = true;
         }
 
         private void Root_CheckedChanged(object sender, bool? e)

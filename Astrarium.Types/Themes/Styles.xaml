@@ -3516,7 +3516,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type c:TimeInput}">
-                    <Grid Background="Transparent">
+                    <Grid x:Name="grid" Background="Transparent">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
@@ -3525,7 +3525,6 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-
                         <TextBox Grid.Column="0" Grid.Row="0" Grid.RowSpan="2"  VerticalContentAlignment="Center" FontSize="{TemplateBinding FontSize}" Foreground="{TemplateBinding Foreground}" SelectionBrush="{StaticResource BrushHighlight}"  Padding="{TemplateBinding Padding}" Margin="{TemplateBinding Margin}" x:Name="PART_Editor" HorizontalAlignment="Stretch" VerticalAlignment="Center" />
                         <RepeatButton Style="{StaticResource {x:Type ButtonBase}}" Name="PART_UpButton" BorderThickness="0" Grid.Column="1" Grid.Row="0"
                              Width="14" Height="12" Margin="0" Focusable="False">
@@ -3536,9 +3535,13 @@
                             <Path Fill="{TemplateBinding Foreground}" Data="M 0 0 L 3 3 L 6 0 Z"/>
                         </RepeatButton>
                     </Grid>
-
-
-                    
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Trigger.Setters>
+                                <Setter Property="Foreground" Value="{StaticResource BrushControlLightBackground}" />
+                            </Trigger.Setters>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Data;
 
 namespace Astrarium.Plugins.Planner
 {
@@ -57,15 +58,14 @@ namespace Astrarium.Plugins.Planner
         {
             var vm = ViewManager.CreateViewModel<PlanningFilterVM>();
 
-            // create filter window with treeview of object types
-            if (celestialObjects == null || !celestialObjects.Any())
-            {
-                vm.CelestialObjectsTypes = sky.CelestialObjects.Select(c => c.Type).Where(t => t != null).Distinct().ToArray();
-            }
             // create filter window with list of celestial objects
-            else
+            if (celestialObjects != null && celestialObjects.Any())
             {
                 vm.CelestialObjects = celestialObjects;
+            }
+            else
+            {
+                vm.Nodes.First().IsChecked = true;
             }
 
             if (ViewManager.ShowDialog(vm) ?? false)

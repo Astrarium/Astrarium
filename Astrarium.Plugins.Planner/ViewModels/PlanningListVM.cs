@@ -308,7 +308,6 @@ namespace Astrarium.Plugins.Planner.ViewModels
         private void AddObjects()
         {
             var vm = ViewManager.CreateViewModel<PlanningFilterVM>();
-            vm.CelestialObjectsTypes = sky.CelestialObjects.Select(c => c.Type).Where(t => t != null).Distinct().ToArray();
             vm.Filter = filter;
             if (ViewManager.ShowDialog(vm) ?? false)
             {

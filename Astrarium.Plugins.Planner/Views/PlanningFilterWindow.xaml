@@ -70,7 +70,7 @@
                 <StackPanel Grid.Column="2" HorizontalAlignment="Stretch" Orientation="Vertical">
                     
                     <!-- Date and time panel -->
-                    <GroupBox Header="Date and time" Margin="8 0">
+                    <GroupBox Header="Date and time" Margin="8 0" IsEnabled="{Binding IsDateTimeControlsEnabled}">
                         <StackPanel Orientation="Vertical" Margin="0 8 0 0">
                             <DockPanel Margin="0 2">
                                 <Label Content="Date of observation:" VerticalAlignment="Center" />

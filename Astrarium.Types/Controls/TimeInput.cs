@@ -21,6 +21,7 @@ namespace Astrarium.Types.Controls
 
         public static readonly DependencyProperty ShowSecondsProperty = DependencyProperty.Register(nameof(ShowSeconds), typeof(bool), typeof(TimeInput), new FrameworkPropertyMetadata(false) { AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(ShowSecondsPropertyChanged), BindsTwoWayByDefault = true });
 
+        private TimeSpan defaultValue = TimeSpan.FromSeconds(0);
         private string oldValue = "";
         private TextBox editor;
         private RepeatButton upButton;
@@ -47,6 +48,10 @@ namespace Astrarium.Types.Controls
             if (@this.editor != null)
             {
                 @this.editor.Text = ValueToString(value, showSeconds);
+            }
+            else
+            {
+                @this.defaultValue = value;
             }
         }
 
@@ -81,7 +86,7 @@ namespace Astrarium.Types.Controls
 
             if (editor != null)
             {
-                editor.Text = ShowSeconds ? "00:00:00" : "00:00";
+                editor.Text = ValueToString(defaultValue, ShowSeconds);
                 editor.SelectionChanged += EditorSelectionChanged;
                 editor.PreviewKeyDown += OnEditorKeyDown;
                 editor.LostFocus += Editor_LostFocus;

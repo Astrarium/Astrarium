@@ -14,7 +14,7 @@ namespace Astrarium.Types
     /// <summary>
     /// Represents ViewModel for single menu item
     /// </summary>
-    public class MenuItem : ViewModelBase
+    public class MenuItem : PropertyChangedBase
     {
         public MenuItem(string title) : this(title, null) { }
 

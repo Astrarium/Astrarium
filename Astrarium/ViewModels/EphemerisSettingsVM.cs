@@ -111,6 +111,7 @@ namespace Astrarium.ViewModels
                 }
 
                 Nodes.Add(root);
+                root.IsChecked = true;
             }
         }
 

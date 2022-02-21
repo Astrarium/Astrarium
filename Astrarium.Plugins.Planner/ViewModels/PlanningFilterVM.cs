@@ -41,7 +41,46 @@ namespace Astrarium.Plugins.Planner.ViewModels
             }
             set
             {
+                IsDateTimeControlsEnabled = false;
+                JulianDay = value.JulianDayMidnight;
+                TimeFrom = TimeSpan.FromHours(value.TimeFrom);
+                TimeTo = TimeSpan.FromHours(value.TimeTo);
+                ApplyFilters = value.ApplyFilters;
 
+                EnableMagLimit = value.MagLimit != null;
+                if (EnableMagLimit)
+                {
+                    MagLimit = (decimal)value.MagLimit;
+                }
+
+                EnableMinBodyAltitude = value.MinBodyAltitude != null;
+                if (EnableMinBodyAltitude)
+                {
+                    MinBodyAltitude = (decimal)value.MinBodyAltitude;
+                }
+
+                EnableMaxSunAltitude = value.MaxSunAltitude != null;
+                if (EnableMaxSunAltitude)
+                {
+                    MaxSunAltitude = (decimal)value.MaxSunAltitude;
+                }
+
+                EnableCountLimit = value.CountLimit != null;
+                if (EnableCountLimit)
+                {
+                    CountLimit = (decimal)value.CountLimit;
+                }
+
+                EnableDurationLimit = value.DurationLimit != null;
+                if (EnableDurationLimit)
+                {
+                    DurationLimit = (decimal)value.DurationLimit;
+                }
+
+                SkipUnknownMagnitude = value.SkipUnknownMagnitude;
+
+
+                CelestialObjectsTypes = value.CelestialObjectsTypes.ToArray();
             }
         }
 
@@ -81,36 +120,11 @@ namespace Astrarium.Plugins.Planner.ViewModels
             get => Nodes.Any() ? Nodes.First().CheckedChildIds : new string[0];
             set
             {
-                Nodes.Clear();
-                if (value != null)
-                {
-                    var groups = value.GroupBy(t => t.Split('.').First());
-
-                    Node root = new Node("All");
-                    root.CheckedChanged += Root_CheckedChanged;
-
-                    foreach (var group in groups)
-                    {
-                        Node node = new Node(Text.Get($"{group.Key}.Type"), group.Key);
-                        foreach (var item in group)
-                        {
-                            if (item != group.Key)
-                            {
-                                node.Children.Add(new Node(Text.Get($"{item}.Type"), item));
-                            }
-                        }
-                        root.Children.Add(node);
-                    }
-
-                    Nodes.Add(root);
-                }
-
-                NotifyPropertyChanged(
-                    nameof(CelestialObjectsTypes),
-                    nameof(Nodes), 
-                    nameof(IsCelestialObjectsTypesTreeVisible));
+                Nodes.First().CheckedChildIds = value.ToArray();
             }
         }
+
+        public bool IsDateTimeControlsEnabled { get; private set; } = true;
 
         public bool IsCelestialObjectsTypesTreeVisible => Nodes.Any();
         
@@ -130,19 +144,19 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
         public TimeSpan TimeFrom
         {
-            get => GetValue<TimeSpan>(nameof(TimeFrom), new TimeSpan(22, 0, 0));
+            get => GetValue(nameof(TimeFrom), new TimeSpan(22, 0, 0));
             set => SetValue(nameof(TimeFrom), value);
         }
 
         public TimeSpan TimeTo
         {
-            get => GetValue<TimeSpan>(nameof(TimeTo), new TimeSpan(0, 0, 0));
+            get => GetValue(nameof(TimeTo), new TimeSpan(0, 0, 0));
             set => SetValue(nameof(TimeTo), value);
         }
 
         public bool ApplyFilters
         {
-            get => GetValue<bool>(nameof(ApplyFilters), true);
+            get => GetValue(nameof(ApplyFilters), true);
             set => SetValue(nameof(ApplyFilters), value);
         }
 
@@ -223,6 +237,37 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
             JulianDay = sky.Context.JulianDayMidnight;
             UtcOffset = sky.Context.GeoLocation.UtcOffset;
+
+            BuildTree();
+        }
+
+        private void BuildTree()
+        {
+            string[] types = sky.CelestialObjects.Select(c => c.Type).Where(t => t != null).Distinct().ToArray();
+            var groups = types.GroupBy(t => t.Split('.').First());
+
+            Node root = new Node("All");
+            root.CheckedChanged += Root_CheckedChanged;
+
+            foreach (var group in groups)
+            {
+                Node node = new Node(Text.Get($"{group.Key}.Type"), group.Key);
+                foreach (var item in group)
+                {
+                    if (item != group.Key)
+                    {
+                        node.Children.Add(new Node(Text.Get($"{item}.Type"), item));
+                    }
+                }
+                root.Children.Add(node);
+            }
+
+            Nodes.Add(root);
+
+            NotifyPropertyChanged(
+                nameof(CelestialObjectsTypes),
+                nameof(Nodes),
+                nameof(IsCelestialObjectsTypesTreeVisible));
         }
 
         private void Root_CheckedChanged(object sender, bool? e)
