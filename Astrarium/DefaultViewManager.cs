@@ -200,7 +200,12 @@ namespace Astrarium
             else
             {
                 return null;
-            }            
+            }
+        }
+
+        public object CreateViewModel(Type type)
+        {
+            return typeFactory(type);
         }
 
         public TViewModel CreateViewModel<TViewModel>() where TViewModel : ViewModelBase

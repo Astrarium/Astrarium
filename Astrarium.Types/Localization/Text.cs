@@ -54,6 +54,8 @@ namespace Astrarium.Types
 
         private static CultureInfo currentCulture = CultureInfo.GetCultureInfo("en");
 
+        public static CultureInfo GetCurrentLocale() => currentCulture;
+
         public static void SetLocale(CultureInfo culture)
         {
             if (!culture.Equals(currentCulture))
@@ -61,15 +63,15 @@ namespace Astrarium.Types
                 CultureInfo.DefaultThreadCurrentCulture = culture;
                 CultureInfo.DefaultThreadCurrentUICulture = culture;
                 LoadLocalizationStrings();
-                LocaleChanged?.Invoke();
                 currentCulture = culture;
+                LocaleChanged?.Invoke();
 
-                foreach (var lo in LocalizedObjectsRefs)
+                foreach (LocalizedObjectHolder lo in LocalizedObjectsRefs)
                 {
                     WeakReference wr = lo.ObjectReference;
 
                     if (wr.IsAlive)
-                    {                        
+                    {
                         object targetObject = lo.ObjectReference.Target;
                         object targetProperty = lo.Property;
                         string text = Get(lo.ResourceKey);
@@ -95,14 +97,13 @@ namespace Astrarium.Types
                             }
                             else // _targetProperty is PropertyInfo
                             {
-                                PropertyInfo prop = targetProperty as PropertyInfo;
-
-                                if (targetObject is Setter && ((Setter)targetObject).IsSealed)
-                                    break;
-                                
-                                prop.SetValue(targetObject, text, null);
+                                if (!(targetObject is Setter setter && setter.IsSealed))
+                                {
+                                    PropertyInfo prop = targetProperty as PropertyInfo;
+                                    prop.SetValue(targetObject, text, null);
+                                }
                             }
-                        }                        
+                        }
                     }
                 }
 
@@ -233,7 +234,7 @@ namespace Astrarium.Types
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
             IProvideValueTarget target = serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget;
-            
+
             if (target != null)
             {
                 LocalizedObjectsRefs.Add(new LocalizedObjectHolder()
@@ -243,10 +244,10 @@ namespace Astrarium.Types
                     ResourceKey = resourceKey
                 });
             }
-            
+
             return Get(resourceKey);
         }
-        
+
         #endregion MarkupExtension
 
         private class LocalizedObjectHolder

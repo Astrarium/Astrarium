@@ -44,6 +44,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Controls\MeteorsSettingsSection.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="Data\Meteors.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -53,6 +59,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="Controls\MeteorsSettingsSection.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Images.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>

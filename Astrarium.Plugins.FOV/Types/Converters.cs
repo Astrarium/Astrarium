@@ -28,17 +28,21 @@ namespace Astrarium.Plugins.FOV
             {
                 var jObject = JObject.Load(reader);
 
-                if (jObject.ContainsKey("EyepieceId"))
+                if (jObject.ContainsKey(nameof(TelescopeFovFrame.EyepieceId)))
                 {
                     return jObject.ToObject<TelescopeFovFrame>();
                 }
-                else if (jObject.ContainsKey("CameraId"))
+                else if (jObject.ContainsKey(nameof(CameraFovFrame.CameraId)))
                 {
                     return jObject.ToObject<CameraFovFrame>();
                 }
-                else if (jObject.ContainsKey("BinocularId"))
+                else if (jObject.ContainsKey(nameof(BinocularFovFrame.BinocularId)))
                 {
                     return jObject.ToObject<BinocularFovFrame>();
+                }
+                else if (jObject.ContainsKey(nameof(FinderFovFrame.Crosslines)))
+                {
+                    return jObject.ToObject<FinderFovFrame>();
                 }
                 else
                 {

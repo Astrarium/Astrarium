@@ -52,6 +52,8 @@ namespace Astrarium
             }
         }
 
+        public ICollection<Tuple<int, int>> ConstellationLines { get; set; } = new Tuple<int, int>[0];
+
         public Sky()
         {
             new Thread(() =>

@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 using Astrarium.Types;
 
 namespace Astrarium
-{    
+{
     public class RenderingOrder : ObservableCollection<RenderingOrderItem>
     {
         public RenderingOrder() : base() { }
@@ -24,13 +24,7 @@ namespace Astrarium
         /// Displayable renderer name
         /// </summary>
         [JsonIgnore]
-        public string Name
-        {
-            get
-            {
-                return Text.Get($"{RendererTypeName}.Name");
-            }
-        }
+        public string Name => Text.Get($"{RendererTypeName}.Name");
 
         public RenderingOrderItem(string name)
         {

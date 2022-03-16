@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Astrarium.Types;
 
 namespace Astrarium.Plugins.FOV
@@ -20,7 +21,7 @@ namespace Astrarium.Plugins.FOV
             this.map = map;
             this.settings = settings;
 
-            SettingItems.Add(null, new SettingItem("FovFrames", new List<FovFrame>()));
+            DefineSetting("FovFrames", new List<FovFrame>(), isPermanent: true);
 
             MenuItem fovMenu = new MenuItem("$FovPlugin.Menu.FOV");
             fovMenu.AddBinding(new SimpleBinding(this, nameof(FrameMenuItems), nameof(MenuItem.SubItems)));
@@ -33,15 +34,15 @@ namespace Astrarium.Plugins.FOV
         }
 
         public ObservableCollection<MenuItem> FrameMenuItems =>
-            fovFrames.Any() ?            
+            fovFrames.Any() ?
             new ObservableCollection<MenuItem>(fovFrames
                 .Select(f => {
                     var menuItem = new MenuItem(f.Label, new Command<MenuItemCommandParameter>(MenuItemChecked));
                     menuItem.CommandParameter = new MenuItemCommandParameter() { MenuItem = menuItem, Frame = f };
                     menuItem.IsChecked = f.Enabled;
                     return menuItem;
-                }).Concat(new MenuItem[] { null, new MenuItem("$FovPlugin.Menu.FOV.Manage", new Command(OpenFovFramesList)) })) :             
-            new ObservableCollection<MenuItem>(new MenuItem[] { new MenuItem("$FovPlugin.Menu.FOV.Add", new Command(AddFovFrame)) });
+                }).Concat(new MenuItem[] { null, new MenuItem("$FovPlugin.Menu.FOV.Manage", new Command(OpenFovFramesList)) { HotKey = new KeyGesture(Key.R, ModifierKeys.Control, "Ctrl+R") } })) :
+            new ObservableCollection<MenuItem>(new MenuItem[] { new MenuItem("$FovPlugin.Menu.FOV.Add", new Command(AddFovFrame)) { HotKey = new KeyGesture(Key.R, ModifierKeys.Control, "Ctrl+R") } });
 
         public bool IsContextMenuVisible => fovFrames.Any(f => f.Enabled);
 
@@ -59,15 +60,23 @@ namespace Astrarium.Plugins.FOV
         {
             double fov = 1;
 
-            if (param.Frame is CircularFovFrame circularFovFrame)
-            {
-                fov = circularFovFrame.Size;
-            }
-            else if (param.Frame is CameraFovFrame cameraFovFrame)
+            if (param.Frame is CameraFovFrame cameraFovFrame)
             {
                 double w = cameraFovFrame.Width;
                 double h = cameraFovFrame.Height;
-                fov = Math.Sqrt(w * w + h * h) * 1.7;
+                fov = Math.Sqrt(w * w + h * h);
+            }
+            else
+            {
+                double scale = Math.Min(map.Width, map.Height) / (Math.Sqrt(map.Width * map.Width + map.Height * map.Height) / 2);
+                if (param.Frame is CircularFovFrame circularFovFrame)
+                {
+                    fov = circularFovFrame.Size / scale;
+                }
+                else if (param.Frame is FinderFovFrame finderFovFrame)
+                {
+                    fov = finderFovFrame.Sizes.Max() / scale;
+                }
             }
 
             if (map.SelectedObject != null)
@@ -85,8 +94,7 @@ namespace Astrarium.Plugins.FOV
             param.MenuItem.IsChecked = !param.MenuItem.IsChecked;
             param.Frame.Enabled = param.MenuItem.IsChecked;
 
-            settings.Set("FovFrames", fovFrames);
-            settings.Save();
+            settings.SetAndSave("FovFrames", fovFrames);
 
             NotifyPropertyChanged(
                 nameof(FrameContextMenuItems), 
@@ -100,11 +108,11 @@ namespace Astrarium.Plugins.FOV
             if (ViewManager.ShowDialog(viewModel) ?? false)
             {
                 fovFrames.Add(viewModel.Frame);
-                settings.Set("FovFrames", fovFrames);
-                settings.Save();
+                settings.SetAndSave("FovFrames", fovFrames);
+
                 NotifyPropertyChanged(
-                    nameof(FrameMenuItems), 
-                    nameof(FrameContextMenuItems), 
+                    nameof(FrameMenuItems),
+                    nameof(FrameContextMenuItems),
                     nameof(IsContextMenuVisible));
             }
         }

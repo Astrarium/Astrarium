@@ -13,8 +13,8 @@ namespace Astrarium.Plugins.Horizon
     public class GroundRenderer : BaseRenderer
     {
         private readonly ISettings settings;
-        //private readonly Font[] fontCardinalLabels = new[] { new Font("Arial", 12), new Font("Arial", 8) };
 
+        // TODO: move to settings!
         private readonly Color colorGroundNight = Color.FromArgb(4, 10, 10);
         private readonly Color colorGroundDay = Color.FromArgb(116, 185, 139);
 
@@ -43,8 +43,6 @@ namespace Astrarium.Plugins.Horizon
                     var h = new CrdsHorizontal(map.Center.Azimuth - map.ViewAngle + step * i, 0);
                     hor[i] = map.Project(h);
                 }
-                //if (hor[0].X >= 0) hor[0].X = -1;
-                //if (hor[POINTS_COUNT - 1].X <= map.Width) hor[POINTS_COUNT - 1].X = map.Width + 1;
 
                 if (hor.Any(h => !map.IsOutOfScreen(h)))
                 {
@@ -54,7 +52,7 @@ namespace Astrarium.Plugins.Horizon
 
                     var pts = map.IsInverted ? 
                         new PointF[]
-                    {                        
+                    {
                         new PointF(map.Width + 1, -1),
                         new PointF(-1, -1),
                     } : new PointF[]
@@ -71,7 +69,7 @@ namespace Astrarium.Plugins.Horizon
                     {
                         gp.AddLines(pts.Reverse().ToArray());
                     }
-                   
+
                     map.Graphics.FillPath(brushGround, gp);
                 }
                 else if (map.Center.Altitude <= 0)
@@ -116,8 +114,6 @@ namespace Astrarium.Plugins.Horizon
                     var h = new CrdsHorizontal(map.Center.Azimuth - map.ViewAngle + step * i, 0);
                     hor[i] = map.Project(h);
                 }
-                //if (hor[0].X >= 0) hor[0].X = -1;
-                //if (hor[POINTS_COUNT - 1].X <= map.Width) hor[POINTS_COUNT - 1].X = map.Width + 1;
 
                 if (hor.Any(h => !map.IsOutOfScreen(h)))
                 {
@@ -134,7 +130,7 @@ namespace Astrarium.Plugins.Horizon
                 {
                     var h = new CrdsHorizontal(i * 360 / cardinalDirections.Length, 0);
                     if (Angle.Separation(h, map.Center) < map.ViewAngle)
-                    {                       
+                    {
                         PointF p = map.Project(h);
                         var fontBase = settings.Get<Font>("CardinalDirectionsFont");
                         var font = new Font(fontBase.FontFamily, fontBase.Size * (i % 2 == 0 ? 1 : 0.75f), fontBase.Style);
@@ -142,7 +138,7 @@ namespace Astrarium.Plugins.Horizon
                         using (var gp = new GraphicsPath())
                         {
                             map.Graphics.DrawString(Text.Get($"CardinalDirections.{cardinalDirections[i]}"), font, brushCardinalLabels, p, format);
-                        }                        
+                        }
                     }
                 }
             }

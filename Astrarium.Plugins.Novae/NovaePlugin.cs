@@ -1,4 +1,5 @@
-﻿using Astrarium.Types;
+﻿using Astrarium.Plugins.Novae.Controls;
+using Astrarium.Types;
 using System;
 using System.IO;
 using System.Reflection;
@@ -7,11 +8,11 @@ namespace Astrarium.Plugins.Novae
 {
     public class NovaePlugin : AbstractPlugin
     {
-        public NovaePlugin(ISettings settings)
+        public NovaePlugin()
         {
-            SettingItems.Add("Novae", new SettingItem("Novae", true));
-            SettingItems.Add("Novae", new SettingItem("NovaeLabels", true, s => s.Get<bool>("Novae")));
-
+            DefineSetting("Novae", true);
+            DefineSetting("NovaeLabels", true);
+            DefineSettingsSection<NovaeSettingsSection, SettingsViewModel>();
             ExportResourceDictionaries("Images.xaml");
         }
     }

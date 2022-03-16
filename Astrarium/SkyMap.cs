@@ -229,7 +229,7 @@ namespace Astrarium
             // get saved rendering orders
             RenderingOrder renderingOrder = settings.Get<RenderingOrder>("RenderingOrder");
 
-            // sort renderers according saving orders
+            // sort renderers according saved orders
             this.renderers.Sort(renderingOrder.Select(r => r.RendererTypeName));
 
             // build rendering order based on existing renderers
@@ -647,6 +647,7 @@ namespace Astrarium
 
             public Color GetSkyColor()
             {
+                // TODO: move to settings
                 return GetColor(Color.Black);
             }
 

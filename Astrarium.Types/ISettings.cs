@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace Astrarium.Types
@@ -33,6 +34,20 @@ namespace Astrarium.Types
         void Set(string settingName, object value);
 
         /// <summary>
+        /// Sets value of setting with specified name and saves settings
+        /// </summary>
+        /// <param name="settingName"></param>
+        /// <param name="value"></param>
+        void SetAndSave(string settingName, object value);
+
+        /// <summary>
+        /// Gets all settings with specified type
+        /// </summary>
+        /// <typeparam name="TValue"></typeparam>
+        /// <returns></returns>
+        ICollection<string> OfType<TValue>();
+
+        /// <summary>
         /// Raised when setting has been changed
         /// </summary>
         event Action<string, object> SettingValueChanged;
@@ -52,8 +67,21 @@ namespace Astrarium.Types
         /// </summary>
         void Load();
 
+        /// <summary>
+        /// Saves settings into in-memory snapshot with specified name.
+        /// </summary>
+        /// <param name="snapshotName">Name of the snapshot to be saved.</param>
         void Save(string snapshotName);
 
+        /// <summary>
+        /// Loads settings from in-memory snapshot with specified name.
+        /// </summary>
+        /// <param name="snapshotName">Name of the snapshot to be loaded.</param>
         void Load(string snapshotName);
+
+        /// <summary>
+        /// Defines set of settings.
+        /// </summary>
+        void Define(ICollection<SettingDefinition> definitions);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Astrarium.Types;
+﻿using Astrarium.Plugins.Tycho2.Controls;
+using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,8 @@ namespace Astrarium.Plugins.Tycho2
         {
             #region Settings
 
-            SettingItems.Add("Tycho2", new SettingItem("Tycho2", defaultValue: true));
+            DefineSetting("Tycho2", defaultValue: true);
+            DefineSettingsSection<Tycho2SettingsSection, SettingsViewModel>();
 
             #endregion Settings
 

@@ -19,6 +19,7 @@ namespace Astrarium.Types
         ICollection<string> GetEventsCategories();
         CelestialObjectInfo GetInfo(CelestialObject body);
         Constellation GetConstellation(string code);
+        ICollection<Tuple<int, int>> ConstellationLines { get; set; }
                 
         /// <summary>
         /// Searches celestial objects by string.

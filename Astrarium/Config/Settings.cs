@@ -28,6 +28,11 @@ namespace Astrarium.Config
         private readonly Dictionary<string, object> SettingsValues = new Dictionary<string, object>();
 
         /// <summary>
+        /// List of settings names which should not be rewritten on resetting to defaults.
+        /// </summary>
+        private readonly List<string> PermanentSettings = new List<string>();
+
+        /// <summary>
         /// Saved states of settings values
         /// </summary>
         private readonly Dictionary<string, string> Snapshots = new Dictionary<string, string>();
@@ -75,7 +80,7 @@ namespace Astrarium.Config
             {
                 using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(Snapshots[snapshotName])))
                 {
-                    Load(stream);
+                    Load(stream, keepPermanent: true);
                 }
             }
             else
@@ -101,6 +106,18 @@ namespace Astrarium.Config
             }
         }
 
+        public void Define(ICollection<SettingDefinition> definitions)
+        {
+            foreach (var definition in definitions)
+            {
+                SettingsValues[definition.Name] = definition.DefaultValue;
+                if (definition.IsPermanent)
+                {
+                    PermanentSettings.Add(definition.Name);
+                }
+            }
+        }
+
         public void Set(string settingName, object value)
         {
             if (SettingsValues.ContainsKey(settingName))
@@ -115,7 +132,7 @@ namespace Astrarium.Config
             }
             else
             {
-                SettingsValues[settingName] = value;
+                throw new Exception($"Setting {settingName} is not defined. Use `{nameof(Define)}` method to define settings.");
             }
 
             if (value is INotifyCollectionChanged)
@@ -124,6 +141,21 @@ namespace Astrarium.Config
                 collection.CollectionChanged -= HandleObservableCollectionChanged;
                 collection.CollectionChanged += HandleObservableCollectionChanged;
             }
+        }
+
+        public void SetAndSave(string settingName, object value)
+        {
+            Set(settingName, value);
+            Save();
+        }
+
+        /// <inheritdoc/>
+        public ICollection<string> OfType<TValue>()
+        {
+            return SettingsValues
+                .Where(kv => kv.Value is TValue)
+                .Select(kv => kv.Key)
+                .ToArray();
         }
 
         public override bool TryGetMember(GetMemberBinder binder, out object result)
@@ -148,7 +180,7 @@ namespace Astrarium.Config
             {
                 using (var stream = new FileStream(SETTINGS_PATH, FileMode.Open))
                 {
-                    Load(stream);
+                    Load(stream, keepPermanent: false);
                 }
             }
             else
@@ -173,7 +205,7 @@ namespace Astrarium.Config
             }
         }
 
-        private void Load(Stream stream)
+        private void Load(Stream stream, bool keepPermanent)
         {
             using (StreamReader reader = new StreamReader(stream))
             using (JsonTextReader jsonReader = new JsonTextReader(reader))
@@ -182,20 +214,22 @@ namespace Astrarium.Config
                 ser.Converters.Add(new SettingsJsonConverter(SettingsValues));
                 try
                 {
-                    Load(ser.Deserialize<Dictionary<string, object>>(jsonReader));
+                    var savedSettings = ser.Deserialize<Dictionary<string, object>>(jsonReader);
+                    foreach (var savedSetting in savedSettings)
+                    {
+                        if (SettingsValues.ContainsKey(savedSetting.Key))
+                        {
+                            if (!PermanentSettings.Contains(savedSetting.Key) || !keepPermanent)
+                            {
+                                Set(savedSetting.Key, savedSetting.Value);
+                            }
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
                     Trace.TraceError(ex.ToString());
                 }
-            }
-        }
-
-        private void Load(IDictionary<string, object> savedSettings)
-        {
-            foreach (var savedSetting in savedSettings)
-            {
-                Set(savedSetting.Key, savedSetting.Value);
             }
         }
 

@@ -57,13 +57,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Controls\UpDownSettingControl.xaml.cs">
+    <Compile Update="Controls\AscomSettingsSection.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <Page Update="Controls\UpDownSettingControl.xaml">
+    <Page Update="Controls\AscomSettingsSection.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

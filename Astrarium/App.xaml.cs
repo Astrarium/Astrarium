@@ -81,7 +81,7 @@ namespace Astrarium
         }
 
         private void SetLanguage(string language)
-        {            
+        {
             var locale = Text.GetLocales().FirstOrDefault(loc => loc.Name == language);
             if (locale != null)
             {
@@ -166,7 +166,6 @@ namespace Astrarium
             foreach (Type rendererType in rendererTypes)
             {
                 var types = new[] { rendererType }.Concat(rendererType.GetInterfaces()).ToArray();
-                //kernel.Bind(rendererType).ToSelf().InSingletonScope();
                 kernel.Bind(types).To(rendererType).InSingletonScope();
             }
 
@@ -177,7 +176,6 @@ namespace Astrarium
 
             foreach (Type eventProviderType in eventProviderTypes)
             {
-                //kernel.Bind(eventProviderType).ToSelf().InSingletonScope();
                 var types = new[] { eventProviderType }.Concat(eventProviderType.GetInterfaces()).ToArray();
                 kernel.Bind(types).To(eventProviderType).InSingletonScope();
             }
@@ -189,8 +187,11 @@ namespace Astrarium
                 kernel.Bind(pluginType).ToSelf().InSingletonScope();
                 var plugin = kernel.Get(pluginType) as AbstractPlugin;
 
-                // add settings configurations
-                uiIntegration.SettingItems.AddRange(plugin.SettingItems);
+                // add settings definitions
+                uiIntegration.SettingDefinitions.AddRange(plugin.SettingDefinitions);
+
+                // add settings sections
+                uiIntegration.SettingSections.AddRange(plugin.SettingSections);
 
                 // add configured toolbar buttons
                 uiIntegration.ToolbarButtons.AddRange(plugin.ToolbarItems);
@@ -198,23 +199,17 @@ namespace Astrarium
                 // add menu items
                 uiIntegration.MenuItems.AddRange(plugin.MenuItems);
 
-                plugins.Add(plugin);                
+                plugins.Add(plugin);
             }
 
-            // Default rendering order for BaseRenderer descendants.
-            uiIntegration.SettingItems.Add("Rendering", new SettingItem("RenderingOrder", new RenderingOrder(), typeof(RenderersListSettingControl)));
+            progress.Report($"Creating renderers");
+
+            var renderers = rendererTypes.Select(r => kernel.Get(r)).Cast<BaseRenderer>().ToArray();
+            var defaultRenderingOrder = new RenderingOrder(renderers.OrderBy(r => r.Order).Select(r => new RenderingOrderItem(r)));
+            uiIntegration.SettingDefinitions.Add(new SettingDefinition("RenderingOrder", defaultRenderingOrder, false));
 
             var settings = kernel.Get<ISettings>();
-
-            // set settings defaults 
-            foreach (string group in uiIntegration.SettingItems.Groups)
-            {
-                foreach (var item in uiIntegration.SettingItems[group])
-                {
-                    settings.Set(item.Name, item.DefaultValue);
-                }
-            }
-
+            settings.Define(uiIntegration.SettingDefinitions);
             settings.Save("Defaults");
 
             progress.Report($"Loading settings");
@@ -242,12 +237,10 @@ namespace Astrarium
                 .Cast<BaseAstroEventsProvider>()
                 .ToArray();
 
-            progress.Report($"Creating renderers");
-
-            var renderers = rendererTypes.Select(r => kernel.Get(r)).Cast<BaseRenderer>().ToArray();
-
+            progress.Report($"Initializing sky");
             kernel.Get<Sky>().Initialize(context, calculators, eventProviders);
 
+            progress.Report($"Initializing sky map");
             kernel.Get<SkyMap>().Initialize(context, renderers);
 
             Debug.Write("Application container has been configured.");

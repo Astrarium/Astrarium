@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+        xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
         mc:Ignorable="d"
-        Title="{Binding WindowTitle, Mode=OneWay}" 
+        Title="{t:Text SettingsWindow.Title}" 
         Width="800" Height="600"
         MinWidth="300" MinHeight="300"
         Style="{StaticResource {x:Type Window}}"
@@ -43,20 +44,13 @@
                 ShowsPreview="False"   
                 HorizontalAlignment="Center" 
                 VerticalAlignment="Stretch" />
-
+            
             <ScrollViewer
                 MinWidth="100" 
                 Grid.Column="2" 
                 VerticalScrollBarVisibility="Auto"
                 HorizontalScrollBarVisibility="Auto">
-                <StackPanel Grid.IsSharedSizeScope="True" Orientation="Vertical" Margin="8">
-                    <ItemsControl  
-                       Width="Auto" 
-                       Height="Auto"
-                       ItemTemplateSelector="{Binding ControlSelector}"
-                       ItemsSource="{Binding SelectedSection}">
-                    </ItemsControl>
-                </StackPanel>
+                <ContentControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Content="{Binding SelectedSection}" />
             </ScrollViewer>
         </Grid>
 
@@ -70,14 +64,14 @@
             <Button
                 Grid.Column="0"
                 MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding ResetCommand}"
-                Content="{Binding ResetToDefaultsText, FallbackValue='Reset to defaults', Mode=OneWay}">
+                Content="{t:Text SettingsWindow.ResetToDefaults}">
             </Button>
             <StackPanel    
                 Grid.Column="1"
                 Orientation="Horizontal"
                 HorizontalAlignment="Right">
-                <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding SaveCommand}" Content="{Binding SaveText, Mode=OneWay, FallbackValue='Save'}" />
-                <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CloseCommand}" Content="{Binding CloseText, Mode=OneWay, FallbackValue='Close'}" />
+                <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding SaveCommand}" Content="{t:Text Save}" />
+                <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CloseCommand}" Content="{t:Text Close}" />
             </StackPanel>
         </Grid>
     </Grid>

@@ -95,7 +95,7 @@
                     </DataTemplate>
 
                     <DataTemplate x:Key="ToolbarToggleButtonTemplate">
-                        <ToggleButton Padding="0" Margin="0" Width="26" Height="26" ToolTip="{Binding Tooltip, Converter={s:LocalizedTextConverter}}" IsChecked="{Binding IsChecked}" SnapsToDevicePixels="True">
+                        <ToggleButton Padding="0" Margin="0" Width="26" Height="26" ToolTip="{Binding Tooltip, Converter={s:LocalizedTextConverter}}" Command="{Binding Command}" IsChecked="{Binding IsChecked}" SnapsToDevicePixels="True">
                             <ToggleButton.Content>
                                 <Rectangle Margin="2" Width="18" Height="18">
                                     <Rectangle.Fill>

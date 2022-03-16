@@ -1,4 +1,5 @@
 ﻿using Astrarium.Plugins.MinorBodies.Controls;
+using Astrarium.Plugins.MinorBodies.ViewModels;
 using Astrarium.Types;
 using System;
 using System.Collections.Generic;
@@ -13,23 +14,38 @@ namespace Astrarium.Plugins.MinorBodies
     {
         public Plugin(ISettings settings)
         {
-            SettingItems.Add("Comets", new SettingItem("Comets", true));
-            SettingItems.Add("Comets", new SettingItem("CometsLabels", true, s => s.Get<bool>("Comets")));
-            SettingItems.Add("Comets", new SettingItem("CometsLabelsMag", false, s => s.Get<bool>("Comets") && s.Get<bool>("CometsLabels")));
-            SettingItems.Add("Comets", new SettingItem("CometsDrawAll", false, s => s.Get<bool>("Comets")));
-            SettingItems.Add("Comets", new SettingItem("CometsDrawAllMagLimit", (decimal)10, typeof(UpDownSettingControl), s => s.Get<bool>("Comets") && s.Get<bool>("CometsDrawAll")));
+            DefineSetting("Comets", true);
+            DefineSetting("CometsLabels", true);
+            DefineSetting("CometsLabelsMag", false);
+            DefineSetting("CometsDrawAll", false);
+            DefineSetting("CometsDrawAllMagLimit", 10m);
 
-            SettingItems.Add("Asteroids", new SettingItem("Asteroids", true));
-            SettingItems.Add("Asteroids", new SettingItem("AsteroidsLabels", true, s => s.Get<bool>("Asteroids")));            
-            SettingItems.Add("Asteroids", new SettingItem("AsteroidsLabelsMag", false, s => s.Get<bool>("Asteroids") && s.Get<bool>("AsteroidsLabels")));
-            SettingItems.Add("Asteroids", new SettingItem("AsteroidsDrawAll", false, s => s.Get<bool>("Asteroids")));
-            SettingItems.Add("Asteroids", new SettingItem("AsteroidsDrawAllMagLimit", (decimal)10, typeof(UpDownSettingControl), s => s.Get<bool>("Asteroids") && s.Get<bool>("AsteroidsDrawAll")));
+            DefineSetting("CometsAutoUpdateOrbitalElements", false);
+            DefineSetting("CometsAutoUpdateOrbitalElementsPeriod", 30m);
+            DefineSetting("CometsDownloadOrbitalElementsCount", 1000m);
+            DefineSetting("CometsDownloadOrbitalElementsUrl", "https://www.minorplanetcenter.net/iau/MPCORB/CometEls.txt");
+            DefineSetting("CometsDownloadOrbitalElementsTimestamp", DateTime.MinValue, isPermanent: true);
 
-            SettingItems.Add("Colors", new SettingItem("ColorAsteroidsLabels", new SkyColor(10, 44, 37)));
-            SettingItems.Add("Colors", new SettingItem("ColorCometsLabels", new SkyColor(78, 84, 99)));
+            DefineSetting("Asteroids", true);
+            DefineSetting("AsteroidsLabels", true);
+            DefineSetting("AsteroidsLabelsMag", false);
+            DefineSetting("AsteroidsDrawAll", false);
+            DefineSetting("AsteroidsDrawAllMagLimit", 10m);
 
-            SettingItems.Add("Fonts", new SettingItem("AsteroidsLabelsFont", new Font("Arial", 8)));
-            SettingItems.Add("Fonts", new SettingItem("CometsLabelsFont", new Font("Arial", 8)));
+            DefineSetting("AsteroidsAutoUpdateOrbitalElements", false);
+            DefineSetting("AsteroidsAutoUpdateOrbitalElementsPeriod", 30m);
+            DefineSetting("AsteroidsDownloadOrbitalElementsCount", 1000m);
+            DefineSetting("AsteroidsDownloadOrbitalElementsUrl", "https://www.minorplanetcenter.net/iau/MPCORB/MPCORB.DAT");
+            DefineSetting("AsteroidsDownloadOrbitalElementsTimestamp", DateTime.MinValue, isPermanent: true);
+
+            DefineSetting("ColorAsteroidsLabels", new SkyColor(10, 44, 37));
+            DefineSetting("ColorCometsLabels", new SkyColor(78, 84, 99));
+
+            DefineSetting("AsteroidsLabelsFont", new Font("Arial", 8));
+            DefineSetting("CometsLabelsFont", new Font("Arial", 8));
+
+            DefineSettingsSection<CometsSettingsSection, CometsSettingsVM>();
+            DefineSettingsSection<AsteroidsSettingsSection, AsteroidsSettingsVM>();
 
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconAsteroid", "$Settings.Asteroids", new SimpleBinding(settings, "Asteroids", "IsChecked")));
             ToolbarItems.Add("Objects", new ToolbarToggleButton("IconComet", "$Settings.Comets", new SimpleBinding(settings, "Comets", "IsChecked")));

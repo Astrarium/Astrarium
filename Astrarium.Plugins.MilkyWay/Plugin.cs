@@ -1,4 +1,5 @@
-﻿using Astrarium.Types;
+﻿using Astrarium.Plugins.MilkyWay.Controls;
+using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -12,8 +13,9 @@ namespace Astrarium.Plugins.MilkyWay
     {
         public Plugin()
         {
-            SettingItems.Add("Grids", new SettingItem("MilkyWay", true));
-            SettingItems.Add("Colors", new SettingItem("ColorMilkyWay", new SkyColor(20, 20, 20)));
+            DefineSetting("MilkyWay", true);
+            DefineSetting("ColorMilkyWay", new SkyColor(20, 20, 20));
+            DefineSettingsSection<MilkyWaySettingsSection, SettingsViewModel>();
         }
     }
 }

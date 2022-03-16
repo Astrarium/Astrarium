@@ -18,6 +18,16 @@ namespace Astrarium.Types
         /// <summary>
         /// Creates new ViewModel by its type.
         /// </summary>
+        /// <param name="type">Type of the ViewModel.</typeparam>
+        /// <returns>Instance of ViewModel type.</returns>
+        public static object CreateViewModel(Type type)
+        {
+            return viewManager.CreateViewModel(type);
+        }
+
+        /// <summary>
+        /// Creates new ViewModel by its type.
+        /// </summary>
         /// <typeparam name="TViewModel">Type of the ViewModel.</typeparam>
         /// <returns>Instance of ViewModel type <typeparamref name="TViewModel"/>.</returns>
         public static TViewModel CreateViewModel<TViewModel>() where TViewModel : ViewModelBase

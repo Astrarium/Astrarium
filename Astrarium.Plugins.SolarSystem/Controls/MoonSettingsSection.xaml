@@ -1,0 +1,39 @@
+﻿<c:SettingsSection 
+    x:Class="Astrarium.Plugins.SolarSystem.Controls.MoonSettingsSection"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:p="clr-namespace:Astrarium.Plugins.SolarSystem"
+    xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+    xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+    xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+    Title="{t:Text Section.Moon}"
+    mc:Ignorable="d"
+    d:DesignHeight="450" 
+    d:DesignWidth="800">
+    <StackPanel Orientation="Vertical" Margin="6">
+        <CheckBox Content="{t:Text Settings.Moon}" IsChecked="{Binding Settings.Moon}" Margin="2" />
+        <CheckBox Content="{t:Text Settings.MoonLabel}" IsChecked="{Binding Settings.MoonLabel}" IsEnabled="{Binding Settings.Moon}" Margin="2" />
+        <CheckBox Content="{t:Text Settings.MoonPhase}" IsChecked="{Binding Settings.MoonPhase}" IsEnabled="{Binding Settings.Moon}" Margin="2" />
+        <CheckBox Content="{t:Text Settings.MoonTexture}" IsChecked="{Binding Settings.MoonTexture}" IsEnabled="{Binding Settings.Moon}" Margin="2" />
+
+        <GroupBox Header="{t:Text Settings.MoonTextureQuality}" Margin="6 0">
+            <StackPanel Orientation="Vertical" Margin="2">
+                <RadioButton Margin="2" Content="{t:Text Settings.MoonTextureQuality.Low}" GroupName="MoonTextureQuality" IsChecked="{Binding IsTextureQualityLow}"/>
+                <RadioButton Margin="2" Content="{t:Text Settings.MoonTextureQuality.Normal}" GroupName="MoonTextureQuality" IsChecked="{Binding IsTextureQualityNormal}"/>
+                <RadioButton Margin="2" Content="{t:Text Settings.MoonTextureQuality.High}" GroupName="MoonTextureQuality" IsChecked="{Binding IsTextureQualityHigh}"/>
+            </StackPanel>
+            <GroupBox.IsEnabled>
+                <MultiBinding Converter="{s:BooleanAndConverter}">
+                    <Binding Path="Settings.Moon" />
+                    <Binding Path="Settings.MoonTexture" />
+                </MultiBinding>
+            </GroupBox.IsEnabled>
+        </GroupBox>
+
+        <CheckBox Content="{t:Text Settings.MoonSurfaceFeatures}" IsChecked="{Binding Settings.MoonSurfaceFeatures}" IsEnabled="{Binding Settings.Moon}" Margin="2" />
+        <CheckBox Content="{t:Text Settings.EarthShadowOutline}" IsChecked="{Binding Settings.EarthShadowOutline}" Margin="2" />
+
+    </StackPanel>
+</c:SettingsSection>

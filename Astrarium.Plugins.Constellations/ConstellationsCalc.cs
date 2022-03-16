@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using Astrarium.Algorithms;
 using Astrarium.Types;
 
@@ -17,6 +19,18 @@ namespace Astrarium.Plugins.Constellations
         /// Constellations borders coordinates
         /// </summary>
         public List<List<CelestialPoint>> ConstBorders { get; private set; } = new List<List<CelestialPoint>>();
+
+        /// <summary>
+        /// List of constellation lines (traditional)
+        /// </summary>
+        public List<Tuple<int, int>> ConstLinesTraditional { get; private set; } = new List<Tuple<int, int>>();
+
+        private ISky sky;
+
+        public ConstellationsCalc(ISky sky)
+        {
+            this.sky = sky;
+        }
 
         public override void Calculate(SkyContext context)
         {
@@ -48,6 +62,7 @@ namespace Astrarium.Plugins.Constellations
         {
             LoadBordersData();
             LoadLabelsData();
+            LoadLinesData();
         }
 
         /// <summary>
@@ -94,6 +109,29 @@ namespace Astrarium.Plugins.Constellations
                         Equatorial0 = new CrdsEquatorial(sr.ReadSingle(), sr.ReadSingle())
                     });
                 }
+            }
+        }
+
+        private void LoadLinesData()
+        {
+            string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/ConLines.dat");
+            string[] chunks = null;
+            int from, to;
+            string line = "";
+
+            using (var sr = new StreamReader(file, Encoding.Default))
+            {
+                while (line != null && !sr.EndOfStream)
+                {
+                    line = sr.ReadLine();
+                    chunks = line.Split(',');
+                    from = Convert.ToInt32(chunks[0]) - 1;
+                    to = Convert.ToInt32(chunks[1]) - 1;
+
+                    ConstLinesTraditional.Add(new Tuple<int, int>(from, to));
+                }
+
+                sky.ConstellationLines = ConstLinesTraditional;
             }
         }
     }

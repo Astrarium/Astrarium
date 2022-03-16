@@ -1,4 +1,5 @@
-﻿using Astrarium.Types;
+﻿using Astrarium.Plugins.Grids.Controls;
+using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -13,23 +14,26 @@ namespace Astrarium.Plugins.Grids
     {
         public Plugin(ISettings settings)
         {
-            SettingItems.Add("Grids", new SettingItem("EquatorialGrid", false));
-            SettingItems.Add("Grids", new SettingItem("LabelEquatorialPoles", true, s => s.Get<bool>("EquatorialGrid")));
-            SettingItems.Add("Grids", new SettingItem("HorizontalGrid", false));
-            SettingItems.Add("Grids", new SettingItem("LabelHorizontalPoles", true, s => s.Get<bool>("HorizontalGrid")));
-            SettingItems.Add("Grids", new SettingItem("EclipticLine", true));
-            SettingItems.Add("Grids", new SettingItem("LabelEquinoxPoints", false, s => s.Get<bool>("EclipticLine")));
-            SettingItems.Add("Grids", new SettingItem("LabelLunarNodes", false, s => s.Get<bool>("EclipticLine")));
-            SettingItems.Add("Grids", new SettingItem("GalacticEquator", true));
-            SettingItems.Add("Grids", new SettingItem("MeridianLine", false));
-            SettingItems.Add("Colors", new SettingItem("ColorEcliptic", new SkyColor(0x80, 0x80, 0x00)));
-            SettingItems.Add("Colors", new SettingItem("ColorMeridian", new SkyColor(0x08, 0xA4, 0x6F)));
-            SettingItems.Add("Colors", new SettingItem("ColorGalacticEquator", new SkyColor(64, 0, 64)));
-            SettingItems.Add("Colors", new SettingItem("ColorHorizontalGrid", new SkyColor(0x00, 0x40, 0x00)));
-            SettingItems.Add("Colors", new SettingItem("ColorEquatorialGrid", new SkyColor(0, 64, 64)));
+            DefineSetting("EquatorialGrid", false);
+            DefineSetting("LabelEquatorialPoles", true);
+            DefineSetting("HorizontalGrid", false);
+            DefineSetting("LabelHorizontalPoles", true);
+            DefineSetting("EclipticLine", true);
+            DefineSetting("LabelEquinoxPoints", false);
+            DefineSetting("LabelLunarNodes", false);
+            DefineSetting("GalacticEquator", true);
+            DefineSetting("MeridianLine", false);
+
+            DefineSetting("ColorEcliptic", new SkyColor(0x80, 0x80, 0x00));
+            DefineSetting("ColorMeridian", new SkyColor(0x08, 0xA4, 0x6F));
+            DefineSetting("ColorGalacticEquator", new SkyColor(64, 0, 64));
+            DefineSetting("ColorHorizontalGrid", new SkyColor(0x00, 0x40, 0x00));
+            DefineSetting("ColorEquatorialGrid", new SkyColor(0, 64, 64));
 
             ToolbarItems.Add("Grids", new ToolbarToggleButton("IconEquatorialGrid", "$Settings.EquatorialGrid", new SimpleBinding(settings, "EquatorialGrid", "IsChecked")));
             ToolbarItems.Add("Grids", new ToolbarToggleButton("IconHorizontalGrid", "$Settings.HorizontalGrid", new SimpleBinding(settings, "HorizontalGrid", "IsChecked")));
+
+            DefineSettingsSection<GridsSettingsSection, SettingsViewModel>();
 
             ExportResourceDictionaries("Images.xaml");
         }
