@@ -123,9 +123,6 @@ namespace Astrarium
 
             progress.Report("Loading plugins");
 
-            pluginPaths = pluginPaths.Where(p => !p.EndsWith("ASCOM.dll")).Concat(new string[] { @"C:\Program Files (x86)\Astrarium\Astrarium\Astrarium.Plugins.ASCOM.dll" });
-
-
             foreach (string path in pluginPaths)
             {
                 try
