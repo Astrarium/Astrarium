@@ -123,6 +123,9 @@ namespace Astrarium
 
             progress.Report("Loading plugins");
 
+            pluginPaths = pluginPaths.Where(p => !p.EndsWith("ASCOM.dll")).Concat(new string[] { @"C:\Program Files (x86)\Astrarium\Astrarium\Astrarium.Plugins.ASCOM.dll" });
+
+
             foreach (string path in pluginPaths)
             {
                 try
@@ -179,22 +182,30 @@ namespace Astrarium
             {
                 progress.Report($"Creating plugin {pluginType}");
 
-                kernel.Bind(pluginType).ToSelf().InSingletonScope();
-                var plugin = kernel.Get(pluginType) as AbstractPlugin;
+                try
+                {
+                    kernel.Bind(pluginType).ToSelf().InSingletonScope();
+                    var plugin = kernel.Get(pluginType) as AbstractPlugin;
 
-                // add settings definitions
-                uiIntegration.SettingDefinitions.AddRange(plugin.SettingDefinitions);
+                    // add settings definitions
+                    uiIntegration.SettingDefinitions.AddRange(plugin.SettingDefinitions);
 
-                // add settings sections
-                uiIntegration.SettingSections.AddRange(plugin.SettingSections);
+                    // add settings sections
+                    uiIntegration.SettingSections.AddRange(plugin.SettingSections);
 
-                // add configured toolbar buttons
-                uiIntegration.ToolbarButtons.AddRange(plugin.ToolbarItems);
+                    // add configured toolbar buttons
+                    uiIntegration.ToolbarButtons.AddRange(plugin.ToolbarItems);
 
-                // add menu items
-                uiIntegration.MenuItems.AddRange(plugin.MenuItems);
+                    // add menu items
+                    uiIntegration.MenuItems.AddRange(plugin.MenuItems);
 
-                plugins.Add(plugin);
+                    plugins.Add(plugin);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error($"Unable to create plugin of type {pluginType.Name}: {ex}");
+                    kernel.Unbind(pluginType);
+                }
             }
 
             progress.Report($"Creating renderers");
