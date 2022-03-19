@@ -17,6 +17,7 @@ namespace Astrarium
         private delegate void GetInfoDelegate<T>(CelestialObjectInfo<T> body) where T : CelestialObject;
         private delegate IEnumerable<T> GetCelestialObjectsDelegate<T>() where T : CelestialObject;
 
+        private Dictionary<string, ICollection<IDictionary<string, string>>> CrossReferences = new Dictionary<string, ICollection<IDictionary<string, string>>>(); 
         private Dictionary<Type, Delegate> CelestialObjectsProviders = new Dictionary<Type, Delegate>();
         private Dictionary<Type, EphemerisConfig> EphemConfigs = new Dictionary<Type, EphemerisConfig>();
         private Dictionary<Type, Delegate> InfoProviders = new Dictionary<Type, Delegate>();
@@ -334,6 +335,7 @@ namespace Astrarium
             return Search(commonName ?? "", x => x.Type == objectType && (!string.IsNullOrEmpty(commonName) ? x.CommonName == commonName : true), 1).FirstOrDefault();
         }
 
+        /// <inheritdoc />
         public Constellation GetConstellation(string code)
         {
             code = code.ToUpper();
@@ -345,6 +347,35 @@ namespace Astrarium
             {
                 return null;
             }
+        }
+
+        /// <inheritdoc />
+        public ICollection<string> GetCrossReferences(CelestialObject body)
+        {
+            List<string> names = new List<string>();
+            if (CrossReferences.TryGetValue(body.Type, out ICollection<IDictionary<string, string>> crossRefsListForType))
+            {
+                foreach (var crossReferences in crossRefsListForType)
+                {
+                    if (crossReferences.TryGetValue(body.CommonName, out string name))
+                    {
+                        names.Add(name);
+                    }
+                }
+            }
+            return names.Any() ? names : null;
+        }
+
+        /// <inheritdoc />
+        public void AddCrossReferences(string celestialObjectType, IDictionary<string, string> crossReferences)
+        {
+            if (!CrossReferences.ContainsKey(celestialObjectType))
+            {
+                CrossReferences.Add(celestialObjectType, new List<IDictionary<string, string>>());
+            }
+
+            var crossRefsListForType = CrossReferences[celestialObjectType];
+            crossRefsListForType.Add(crossReferences);
         }
     }
 }

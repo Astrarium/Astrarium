@@ -26,6 +26,24 @@ namespace Astrarium.Types
         Constellation GetConstellation(string code);
         ICollection<Tuple<int, int>> ConstellationLines { get; set; }
         IEnumerable<CelestialObject> CelestialObjects { get; }
+
+        /// <summary>
+        /// Adds cross-reference data for celestial objects with specified type.
+        /// This should be used generally for adding cross-references between star catalogues to exclude duplicate entries 
+        /// on the sky map and in search results.
+        /// </summary>
+        /// <param name="celestialObjectType">Unique celestial object type code.</param>
+        /// <param name="crossReferences">Dictionary of cross identifiers. Key is a primary catalog name of the object, 
+        /// for example, star name in BSC (Bright Star Catalog), value is a secondary (large) catalog name, for example, star name in Tycho2 catalogue.
+        /// </param>
+        void AddCrossReferences(string celestialObjectType, IDictionary<string, string> crossReferences);
+        
+        /// <summary>
+        /// Gets cross-reference (supplementary) names of the celestial body in extended catalogs.
+        /// </summary>
+        /// <param name="body">Celestial body to get supplementary cross-reference identifiers.</param>
+        /// <returns>Collection of celestial object names in other catalogs.</returns>
+        ICollection<string> GetCrossReferences(CelestialObject body);
         
         /// <summary>
         /// Function that gets equatorial coordinates of the Sun

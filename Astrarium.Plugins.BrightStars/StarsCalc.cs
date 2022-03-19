@@ -247,6 +247,15 @@ namespace Astrarium.Plugins.BrightStars
             List<string> constSynonyms = new List<string>();
 
             string conCode = s.Name.Substring(7, 3).Trim();
+            if (string.IsNullOrEmpty(conCode) && s.VariableName != null)
+            {
+                string[] varName = s.VariableName.Split(' ');
+                if (varName.Length > 1)
+                {
+                    conCode = varName[1];
+                }
+            }
+
             if (!string.IsNullOrEmpty(conCode))
             {
                 constSynonyms.Add(conCode);
@@ -348,13 +357,23 @@ namespace Astrarium.Plugins.BrightStars
                 names.Add($"FK5 {s.FK5Number}");
                 names.Add($"{s.FK5Number}");
             }
+
             names.Add($"HR {s.Number}");
             names.Add($"HR{s.Number}");
             names.Add($"{s.Number}");
 
-            names.AddRange(constSynonyms);
+            var crossRefNames = GetCrossReferences(s);
+            if (crossRefNames != null && crossRefNames.Any())
+            {
+                names.AddRange(crossRefNames);
+            }
 
             return names;
+        }
+
+        private ICollection<string> GetCrossReferences(Star s)
+        {
+            return sky.GetCrossReferences(s);
         }
 
         private ICollection<string> GetStarNames(Star s)
@@ -406,6 +425,11 @@ namespace Astrarium.Plugins.BrightStars
                 names.Add($"FK5 {s.FK5Number}");
             }
             names.Add($"HR {s.Number}");
+            var crossRefNames = GetCrossReferences(s);
+            if (crossRefNames != null && crossRefNames.Any())
+            {
+                names.AddRange(crossRefNames);
+            }
             return names;
         }
     }
