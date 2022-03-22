@@ -1036,6 +1036,7 @@
     
     <Style TargetType="{x:Type ComboBox}">
         <Setter Property="Height" Value="24" />
+        <Setter Property="Validation.ErrorTemplate" Value="{x:Null}"/>
         <Setter Property="FocusVisualStyle" Value="{StaticResource ComboBoxFocusVisual}"/>
         <Setter Property="Foreground" Value="{StaticResource BrushForeground}"/>
         <Setter Property="Background" Value="{StaticResource BrushWindowBackground}"/>
