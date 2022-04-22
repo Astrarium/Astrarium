@@ -43,7 +43,11 @@ namespace Astrarium.Plugins.FOV
                             float radius = size * 3600 / 4;
                             float diam = map.GetDiskSize(radius);
 
-                            map.Graphics.DrawPlusCross(new Pen(frame.Color.GetColor(map.Schema, map.DayLightFactor)), new PointF(map.Width / 2, map.Height / 2), diam);
+                            // do not draw frame if its size exceeds screen bounds
+                            if (diam < Math.Sqrt(map.Width * map.Width + map.Height * map.Height))
+                            {
+                                map.Graphics.DrawPlusCross(new Pen(frame.Color.GetColor(map.Schema, map.DayLightFactor)), new PointF(map.Width / 2, map.Height / 2), diam);
+                            }
                         }
 
                         outer = false;
