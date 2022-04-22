@@ -344,7 +344,8 @@ namespace Astrarium.Plugins.Planner.ViewModels
             {
                 var format = readWriterFactory.GetFormat(selectedExtensionIndex);
                 var writer = readWriterFactory.Create(format);
-                await Task.Run(() => writer.Write(ephemerides, filePath));                
+                await Task.Run(() => writer.Write(ephemerides, filePath));
+                RecentPlansManager.AddToRecentList(filePath);
             }
         }
     }

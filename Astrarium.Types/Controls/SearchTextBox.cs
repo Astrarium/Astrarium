@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Astrarium.Types.Controls
 {
@@ -11,6 +12,7 @@ namespace Astrarium.Types.Controls
         public const string PartWatermark = "PART_Watermark";
         public const string PartClear = "PART_Clear";
 
+        public static readonly DependencyProperty WatermarkBrushProperty = DependencyProperty.Register("WatermarkBrush", typeof(Brush), typeof(SearchTextBox), new FrameworkPropertyMetadata(Brushes.Gray) { BindsTwoWayByDefault = true });
         public static readonly DependencyProperty TextProperty = DependencyProperty.Register("Text", typeof(string), typeof(SearchTextBox), new FrameworkPropertyMetadata(string.Empty) { BindsTwoWayByDefault = true, PropertyChangedCallback = OnTextPropertyChanged });
         public static readonly DependencyProperty WatermarkProperty = DependencyProperty.Register("Watermark", typeof(string), typeof(SearchTextBox), new FrameworkPropertyMetadata(string.Empty));
 
@@ -21,6 +23,12 @@ namespace Astrarium.Types.Controls
         static SearchTextBox()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(SearchTextBox), new FrameworkPropertyMetadata(typeof(SearchTextBox)));
+        }
+
+        public Brush WatermarkBrush
+        {
+            get => (Brush)GetValue(WatermarkBrushProperty);
+            set => SetValue(WatermarkBrushProperty, value);
         }
 
         public string Text

@@ -50,6 +50,18 @@ namespace Astrarium.Plugins.Planner
             MenuItems.Add(MenuItemPosition.ContextMenu, contextMenu);
         }
 
+        public override void Initialize()
+        {
+            RecentPlansManager.LoadRecentPlansList();
+            RecentPlansManager.RecentPlansListChanged += HandleRecentPlansListChanged;
+            HandleRecentPlansListChanged();
+        }
+
+        private void HandleRecentPlansListChanged()
+        {
+            NotifyPropertyChanged(nameof(RecentPlansMenuItems), nameof(HasRecentPlans));
+        }
+
         /// <summary>
         /// Creates new plan, from filter or from collection of items.
         /// </summary>
@@ -92,9 +104,9 @@ namespace Astrarium.Plugins.Planner
             NotifyPropertyChanged(nameof(ActivePlansMenuItems));
         }
 
-        private void RecentPlanSelected(string path)
+        private void RecentPlanSelected(string filePath)
         {
-            // TODO: load and open plan
+            LoadPlan(filePath, readWriterFactory.GetFormat(Path.GetExtension(filePath).ToLower()));
         }
 
         private void AddObjectToPlan(PlanningListVM plan)
@@ -113,43 +125,47 @@ namespace Astrarium.Plugins.Planner
             }
         }
 
-        private async void OpenPlan()
+        private void OpenPlan()
         {
             string filePath = ViewManager.ShowOpenFileDialog("Open", readWriterFactory.FormatsString, out int selectedExtensionIndex);
             if (filePath != null)
             {
-                var fileFormat = readWriterFactory.GetFormat(selectedExtensionIndex);
-                IPlan reader = readWriterFactory.Create(fileFormat);
+                LoadPlan(filePath, readWriterFactory.GetFormat(selectedExtensionIndex));
+            }
+        }
 
-                ICollection<CelestialObject> celestialObjects = new CelestialObject[0];
-                var tokenSource = new CancellationTokenSource();
-                var progress = new Progress<double>();
-                ViewManager.ShowProgress("Please wait", "Reading data...", tokenSource, progress);
+        private async void LoadPlan(string filePath, PlanType fileFormat)
+        {
+            IPlan reader = readWriterFactory.Create(fileFormat);
 
-                try
-                {
-                    celestialObjects = await Task.Run(() => reader.Read(filePath, tokenSource.Token, progress));
-                }
-                catch (Exception ex)
-                {
-                    tokenSource.Cancel();
-                    // TODO: log
-                    ViewManager.ShowMessageBox("Error", $"Unable to import observation plan.\r\nError: {ex.Message}");
-                }
+            ICollection<CelestialObject> celestialObjects = new CelestialObject[0];
+            var tokenSource = new CancellationTokenSource();
+            var progress = new Progress<double>();
+            ViewManager.ShowProgress("Please wait", "Reading data...", tokenSource, progress);
 
-                if (!tokenSource.IsCancellationRequested)
+            try
+            {
+                celestialObjects = await Task.Run(() => reader.Read(filePath, tokenSource.Token, progress));
+            }
+            catch (Exception ex)
+            {
+                tokenSource.Cancel();
+                // TODO: log
+                ViewManager.ShowMessageBox("Error", $"Unable to import observation plan.\r\nError: {ex.Message}");
+            }
+
+            if (!tokenSource.IsCancellationRequested)
+            {
+                tokenSource.Cancel();
+                if (celestialObjects.Any())
                 {
-                    tokenSource.Cancel();
-                    if (celestialObjects.Any())
-                    {
-                        CreateNewPlan(celestialObjects);
-                    }
-                    else
-                    {
-                        // TODO: inform user
-                    }
+                    CreateNewPlan(celestialObjects);
+                    RecentPlansManager.AddToRecentList(filePath);
                 }
-                
+                else
+                {
+                    // TODO: inform user
+                }
             }
         }
 
@@ -157,18 +173,19 @@ namespace Astrarium.Plugins.Planner
 
         public bool HasRecentPlans => RecentPlansMenuItems.Count > 0;
 
+        private ObservableCollection<MenuItem> recentPlansMenuItems = new ObservableCollection<MenuItem>();
+
         public ObservableCollection<MenuItem> RecentPlansMenuItems
         {
             get
             {
-                // TODO: take from settings, filter only existing files, order by file change name, take 10 latest
-                string[] recentPlanFiles = new[]
+                recentPlansMenuItems.Clear();
+                var recentPlanFiles = RecentPlansManager.RecentList.Where(f => File.Exists(f)).ToArray();
+                foreach (var f in recentPlanFiles)
                 {
-                    @"C:\\PathToTheFile\File1.plan",
-                    @"C:\\Second\PathToTheFile\File 2.plan"
-                };
-
-                return new ObservableCollection<MenuItem>(recentPlanFiles.Select(f => new MenuItem(Path.GetFileNameWithoutExtension(f), new Command<string>(RecentPlanSelected))));
+                    recentPlansMenuItems.Add(new MenuItem(Path.GetFileNameWithoutExtension(f), new Command<string>(RecentPlanSelected), f));
+                }
+                return recentPlansMenuItems;
             }
         }
 
