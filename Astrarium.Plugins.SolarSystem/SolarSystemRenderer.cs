@@ -636,21 +636,21 @@ namespace Astrarium.Plugins.SolarSystem
                         brushU.Dispose();
                         regionP.Dispose();
                         regionU.Dispose();
-                    }
 
-                    // outline circles
-                    if (settings.Get("EarthShadowOutline") && map.ViewAngle > 0.5)
-                    {
-                        var brush = new SolidBrush(map.GetColor(clrShadowOutline));
-                        var pen = new Pen(brush) { DashStyle = DashStyle.Dot };
-
-                        g.TranslateTransform(p.X, p.Y);
-                        g.DrawEllipse(pen, -szP / 2, -szP / 2, szP, szP);
-                        g.DrawEllipse(pen, -szU / 2, -szU / 2, szU, szU);
-                        g.ResetTransform();
-                        if (map.ViewAngle <= 10)
+                        // outline circles
+                        if (settings.Get("EarthShadowOutline") && map.ViewAngle > 0.5)
                         {
-                            map.DrawObjectCaption(fontShadowLabel, brush, Text.Get("EarthShadow.Label"), p, szP);
+                            var brush = new SolidBrush(map.GetColor(clrShadowOutline));
+                            var pen = new Pen(brush) { DashStyle = DashStyle.Dot };
+
+                            g.TranslateTransform(p.X, p.Y);
+                            g.DrawEllipse(pen, -szP / 2, -szP / 2, szP, szP);
+                            g.DrawEllipse(pen, -szU / 2, -szU / 2, szU, szU);
+                            g.ResetTransform();
+                            if (map.ViewAngle <= 10)
+                            {
+                                map.DrawObjectCaption(fontShadowLabel, brush, Text.Get("EarthShadow.Label"), p, szP);
+                            }
                         }
                     }
                 }
