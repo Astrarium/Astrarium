@@ -18,14 +18,16 @@ namespace Astrarium.Plugins.Planner
     {
         private readonly ISky sky;
         private readonly ISkyMap map;
-        private readonly PlanFactory readWriterFactory;
+        private readonly IPlanFactory readWriterFactory;
+        private readonly IRecentPlansManager recentPlansManager;
 
-        public PlannerPlugin(ISky sky, ISkyMap map, PlanFactory readWriterFactory)
+        public PlannerPlugin(ISky sky, ISkyMap map, IRecentPlansManager recentPlansManager, IPlanFactory readWriterFactory)
         {
             this.sky = sky;
             this.map = map;
             this.map.SelectedObjectChanged += (x) => NotifyPropertyChanged(nameof(HasSelectedObject));
             this.readWriterFactory = readWriterFactory;
+            this.recentPlansManager = recentPlansManager;
 
             /* Main app menu */
 
@@ -52,8 +54,8 @@ namespace Astrarium.Plugins.Planner
 
         public override void Initialize()
         {
-            RecentPlansManager.LoadRecentPlansList();
-            RecentPlansManager.RecentPlansListChanged += HandleRecentPlansListChanged;
+            recentPlansManager.LoadRecentPlansList();
+            recentPlansManager.RecentPlansListChanged += HandleRecentPlansListChanged;
             HandleRecentPlansListChanged();
         }
 
@@ -160,7 +162,7 @@ namespace Astrarium.Plugins.Planner
                 if (celestialObjects.Any())
                 {
                     CreateNewPlan(celestialObjects);
-                    RecentPlansManager.AddToRecentList(filePath);
+                    recentPlansManager.AddToRecentList(filePath);
                 }
                 else
                 {
@@ -180,7 +182,7 @@ namespace Astrarium.Plugins.Planner
             get
             {
                 recentPlansMenuItems.Clear();
-                var recentPlanFiles = RecentPlansManager.RecentList.Where(f => File.Exists(f)).ToArray();
+                var recentPlanFiles = recentPlansManager.RecentList.Where(f => File.Exists(f)).ToArray();
                 foreach (var f in recentPlanFiles)
                 {
                     recentPlansMenuItems.Add(new MenuItem(Path.GetFileNameWithoutExtension(f), new Command<string>(RecentPlanSelected), f));

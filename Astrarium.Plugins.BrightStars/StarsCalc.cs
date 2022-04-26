@@ -13,12 +13,14 @@ namespace Astrarium.Plugins.BrightStars
 {
     public class StarsCalc : BaseCalc, ICelestialObjectCalc<Star>
     {
-        private readonly string STARS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Stars.dat");
-        private readonly string NAMES_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/StarNames.dat");
-        private readonly string ALPHABET_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Alphabet.dat");
-
+        /// <summary>
+        /// ISky instance
+        /// </summary>
         private readonly ISky sky;
 
+        /// <summary>
+        /// Alphabet
+        /// </summary>
         private Dictionary<string, string> Alphabet = new Dictionary<string, string>();
 
         /// <summary>
@@ -32,11 +34,12 @@ namespace Astrarium.Plugins.BrightStars
         /// <summary>
         /// Stars data reader
         /// </summary>
-        private StarsReader DataReader = new StarsReader();
+        private readonly IStarsReader dataReader;
 
-        public StarsCalc(ISky sky)
+        public StarsCalc(ISky sky, IStarsReader dataReader)
         {
             this.sky = sky;
+            this.dataReader = dataReader;
             Star.GetNames = GetStarNames;
         }
 
@@ -53,11 +56,8 @@ namespace Astrarium.Plugins.BrightStars
 
         public override void Initialize()
         {
-            DataReader.StarsDataFilePath = STARS_FILE;
-            DataReader.StarsNamesFilePath = NAMES_FILE;
-            DataReader.AlphabetFilePath = ALPHABET_FILE;
-            Stars = DataReader.ReadStars();
-            Alphabet = DataReader.ReadAlphabet();
+            Stars = dataReader.ReadStars();
+            Alphabet = dataReader.ReadAlphabet();
         }
 
         #region Ephemeris
@@ -148,7 +148,7 @@ namespace Astrarium.Plugins.BrightStars
         /// </summary>
         private StarDetails ReadStarDetails(SkyContext c, ushort hrNumber)
         {
-            return DataReader.GetStarDetails(hrNumber);
+            return dataReader.GetStarDetails(hrNumber);
         }
 
         #endregion Ephemeris

@@ -128,6 +128,26 @@ namespace Astrarium
                 try
                 {
                     var plugin = Assembly.UnsafeLoadFrom(path);
+
+                    // get singletons defined in plugin
+                    var singletons = plugin.GetExportedTypes().Where(t => t.IsDefined(typeof(SingletonAttribute), false)).ToArray();
+                    foreach (var singletonImpl in singletons)
+                    {
+                        var singletonAttr = singletonImpl.GetCustomAttribute<SingletonAttribute>();
+                        if (singletonAttr.InterfaceType != null)
+                        {
+                            if (!singletonAttr.InterfaceType.IsAssignableFrom(singletonImpl))
+                            {
+                                throw new Exception($"Interface type {singletonAttr.InterfaceType} is not assignable from {singletonImpl}");
+                            }
+                            kernel.Bind(singletonAttr.InterfaceType).To(singletonImpl).InSingletonScope();
+                        }
+                        else
+                        {
+                            kernel.Bind(singletonImpl).ToSelf().InSingletonScope();
+                        }
+                    }
+
                     Log.Info($"Loaded plugin {plugin.FullName}");
                 }
                 catch (Exception ex)
@@ -181,6 +201,7 @@ namespace Astrarium
 
                 try
                 {
+                    // plugin is a singleton
                     kernel.Bind(pluginType).ToSelf().InSingletonScope();
                     var plugin = kernel.Get(pluginType) as AbstractPlugin;
 

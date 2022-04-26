@@ -10,13 +10,16 @@ namespace Astrarium.Plugins.Meteors
 {
     public class MeteorsCalculator : BaseCalc, ICelestialObjectCalc<Meteor>
     {
-        private readonly ISky Sky;
+        private readonly ISky sky;
+        private readonly IMeteorsReader meteorsReader;
+
         private CelestialObject Moon;
         private ICollection<Meteor> Meteors;
 
-        public MeteorsCalculator(ISky sky)
+        public MeteorsCalculator(ISky sky, IMeteorsReader meteorsReader)
         {
-            Sky = sky;
+            this.sky = sky;
+            this.meteorsReader = meteorsReader;
         }
 
         public IEnumerable<Meteor> GetCelestialObjects() => Meteors;
@@ -24,7 +27,7 @@ namespace Astrarium.Plugins.Meteors
         public override void Initialize()
         {
             string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Meteors.dat");
-            Meteors = new MeteorsReader().Read(file);
+            Meteors = meteorsReader.Read(file);
         }
 
         public override void Calculate(SkyContext ctx)
@@ -84,9 +87,9 @@ namespace Astrarium.Plugins.Meteors
         {
             if (Moon == null)
             {
-                Moon = Sky.Search("Moon");
+                Moon = sky.Search("Moon");
             }
-            return Moon != null ? (double)Sky.GetEphemerides(Moon, ctx, new[] { "Phase" }).First().Value : 0;
+            return Moon != null ? (double)sky.GetEphemerides(Moon, ctx, new[] { "Phase" }).First().Value : 0;
         }
 
         public void ConfigureEphemeris(EphemerisConfig<Meteor> e)

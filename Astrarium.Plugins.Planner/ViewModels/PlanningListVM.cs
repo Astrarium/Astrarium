@@ -23,8 +23,9 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
         private readonly ISky sky;
         private readonly IMainWindow mainWindow;
-        private readonly ObservationPlanner planner;
-        private readonly PlanFactory readWriterFactory;
+        private readonly IRecentPlansManager recentPlansManager;
+        private readonly IObservationPlanner planner;
+        private readonly IPlanFactory readWriterFactory;
 
         #endregion Dependencies
 
@@ -185,11 +186,12 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
         public string Name { get; set; }
 
-        public PlanningListVM(ISky sky, IMainWindow mainWindow, ObservationPlanner planner, PlanFactory readWriterFactory)
+        public PlanningListVM(ISky sky, IMainWindow mainWindow, IRecentPlansManager recentPlansManager, IObservationPlanner planner, IPlanFactory readWriterFactory)
         {
             this.planner = planner;
             this.sky = sky;
             this.mainWindow = mainWindow;
+            this.recentPlansManager = recentPlansManager;
             this.readWriterFactory = readWriterFactory;
 
             SetTimeCommand = new Command<Date>(SetTime);
@@ -345,7 +347,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
                 var format = readWriterFactory.GetFormat(selectedExtensionIndex);
                 var writer = readWriterFactory.Create(format);
                 await Task.Run(() => writer.Write(ephemerides, filePath));
-                RecentPlansManager.AddToRecentList(filePath);
+                recentPlansManager.AddToRecentList(filePath);
             }
         }
     }

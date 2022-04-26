@@ -1,13 +1,16 @@
 ﻿using Astrarium.Algorithms;
+using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Text;
 
 namespace Astrarium.Plugins.BrightStars
 {
-    public class StarsReader
+    [Singleton(typeof(IStarsReader))]
+    public class StarsReader : IStarsReader
     {
         /// <summary>
         /// Length of single record in data file
@@ -17,30 +20,28 @@ namespace Astrarium.Plugins.BrightStars
         /// <summary>
         /// File path to the stars data file
         /// </summary>
-        public string StarsDataFilePath { get; set; }
+        private readonly string STARS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Stars.dat");
 
         /// <summary>
         /// File path to the file with stars proper names
         /// </summary>
-        public string StarsNamesFilePath { get; set; }
+        private readonly string NAMES_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/StarNames.dat");
 
         /// <summary>
         /// File with greek alphabet letters abbreviations and full names
         /// </summary>
-        public string AlphabetFilePath { get; set; }
+        private readonly string ALPHABET_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Alphabet.dat");
 
         /// <summary>
         /// Reads stars data
         /// </summary>
         public ICollection<Star> ReadStars()
         {
-            SanityCheck();
-
             List<Star> stars = new List<Star>();
 
             string line = "";
 
-            using (var sr = new StreamReader(StarsDataFilePath, Encoding.Default))
+            using (var sr = new StreamReader(STARS_FILE, Encoding.Default))
             {
                 while (line != null && !sr.EndOfStream)
                 {
@@ -73,9 +74,9 @@ namespace Astrarium.Plugins.BrightStars
                         }
 
                         string varName = line.Substring(51, 9).Trim();
-                        if (!string.IsNullOrEmpty(varName) && 
-                            !varName.Equals("Var?") && 
-                            !varName.Equals("Var") && 
+                        if (!string.IsNullOrEmpty(varName) &&
+                            !varName.Equals("Var?") &&
+                            !varName.Equals("Var") &&
                             !line.Substring(51, 3).Trim().Equals(star.Name.Substring(3, 3).Trim()))
                         {
                             star.VariableName = varName;
@@ -112,7 +113,7 @@ namespace Astrarium.Plugins.BrightStars
                 RecordLength = (int)Math.Round(sr.BaseStream.Length / 9110.0);
             }
 
-            using (var sr = new StreamReader(StarsNamesFilePath, Encoding.Default))
+            using (var sr = new StreamReader(NAMES_FILE, Encoding.Default))
             {
                 while (line != null && !sr.EndOfStream)
                 {
@@ -128,11 +129,9 @@ namespace Astrarium.Plugins.BrightStars
 
         public StarDetails GetStarDetails(ushort hrNumber)
         {
-            SanityCheck();
-
             var details = new StarDetails();
 
-            using (var sr = new StreamReader(StarsDataFilePath, Encoding.Default))
+            using (var sr = new StreamReader(STARS_FILE, Encoding.Default))
             {
                 sr.BaseStream.Seek((hrNumber - 1) * RecordLength, SeekOrigin.Begin);
                 string line = sr.ReadLine();
@@ -152,7 +151,7 @@ namespace Astrarium.Plugins.BrightStars
         public Dictionary<string, string> ReadAlphabet()
         {
             Dictionary<string, string> alphabet = new Dictionary<string, string>();
-            using (var sr = new StreamReader(AlphabetFilePath, Encoding.Default))
+            using (var sr = new StreamReader(ALPHABET_FILE, Encoding.Default))
             {
                 string line = "";
                 while (line != null && !sr.EndOfStream)
@@ -163,18 +162,6 @@ namespace Astrarium.Plugins.BrightStars
                 }
             }
             return alphabet;
-        }
-
-        private void SanityCheck()
-        {
-            if (string.IsNullOrEmpty(StarsDataFilePath))
-                throw new Exception("Stars data file path is not set.");
-
-            if (string.IsNullOrEmpty(StarsNamesFilePath))
-                throw new Exception("Stars names file path is not set.");
-
-            if (string.IsNullOrEmpty(AlphabetFilePath))
-                throw new Exception("Alhabet file path is not set.");
         }
     }
 

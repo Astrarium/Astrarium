@@ -14,8 +14,8 @@ namespace Astrarium.Plugins.Planner.ImportExport
         CartesDuCiel = 2
     }
 
-    // TODO: singleton, interface
-    public class PlanFactory
+    [Singleton(typeof(IPlanFactory))]
+    public class PlanFactory : IPlanFactory
     {
         private readonly Dictionary<string, PlanType> formats = new Dictionary<string, PlanType>()
         {

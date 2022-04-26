@@ -9,7 +9,8 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Planner
 {
-    public class ObservationPlanner
+    [Singleton(typeof(IObservationPlanner))]
+    public class ObservationPlanner : IObservationPlanner
     {
         private readonly ISky sky;
 

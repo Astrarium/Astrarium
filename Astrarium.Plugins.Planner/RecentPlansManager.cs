@@ -8,16 +8,16 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Planner
 {
-    // TODO: singleton via interface
-    public static class RecentPlansManager
+    [Singleton(typeof(IRecentPlansManager))]
+    public class RecentPlansManager : IRecentPlansManager
     {
-        private static List<string> recentPlansList = new List<string>(10);
-        private static string plannerDirectory;
-        private static string recentPlansFile;
+        private List<string> recentPlansList = new List<string>(10);
+        private string plannerDirectory;
+        private string recentPlansFile;
 
-        public static event Action RecentPlansListChanged;
+        public event Action RecentPlansListChanged;
 
-        public static void LoadRecentPlansList()
+        public void LoadRecentPlansList()
         {
             try
             {
@@ -40,7 +40,7 @@ namespace Astrarium.Plugins.Planner
             }
         }
 
-        public static void AddToRecentList(string filePath)
+        public void AddToRecentList(string filePath)
         {
             int existingIndex = recentPlansList.FindIndex(f => f.Equals(filePath, StringComparison.OrdinalIgnoreCase));
             if (existingIndex >= 0)
@@ -63,7 +63,7 @@ namespace Astrarium.Plugins.Planner
             RecentPlansListChanged?.Invoke();
         }
 
-        public static List<string> RecentList
+        public List<string> RecentList
         {
             get => new List<string>(recentPlansList);
         }
