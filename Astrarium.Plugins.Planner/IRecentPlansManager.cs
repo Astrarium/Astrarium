@@ -31,5 +31,16 @@ namespace Astrarium.Plugins.Planner
         /// File path to the plan
         /// </summary>
         public string Path { get; set; }
+
+        /// <summary>
+        /// Constructor used by JSON deserializer
+        /// </summary>
+        public RecentPlan() { }
+
+        public RecentPlan(string path, PlanType type)
+        {
+            Path = path;
+            Type = type;
+        }
     }
 }

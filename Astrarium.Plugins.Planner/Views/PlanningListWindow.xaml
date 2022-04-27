@@ -40,6 +40,14 @@
             <Setter Property="FontSize" Value="12" />
         </Style>
 
+        <DrawingImage x:Key="ImageUnsaved">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V125 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="{StaticResource BrushControlLightBackground}" Geometry="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+
         <Grid x:Key="ImageFilter" x:Shared="False">
             <Path HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" Width="20" Height="20" Margin="0 4 0 0" Stretch="Uniform" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}, Path=Foreground}">
                 <Path.Data>
@@ -316,10 +324,17 @@
                     <TextBlock Text="{Binding FilteredItemsCount, FallbackValue=0}" />
                 </StackPanel>
             </StatusBarItem>
-            
-            <StatusBarItem HorizontalAlignment="Right" >
-                <TextBlock  IsEnabled="False" Text="{Binding FilePath}" />
+
+            <StatusBarItem HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal" Visibility="{Binding FilePath, Converter={s:NotNullToVisibilityConverter}}">
+                        <Image Source="{StaticResource ImageUnsaved}" Margin="0 2 4 0" Stretch="UniformToFill" Width="10" Height="10" Visibility="{Binding IsSaved, Converter={s:InverseBoolToVisibilityConverter}}" ToolTip="{t:Text PlanningListWindow.StatusBar.UnsavedChanges}" />
+                        <TextBlock IsEnabled="False" Text="{Binding FilePath}" />
+                    </StackPanel>
+                    <TextBlock IsEnabled="False" Text="{t:Text PlanningListWindow.StatusBar.PlanNotSaved}" Visibility="{Binding FilePath, Converter={s:NullToVisibilityConverter}}"  />
+                </StackPanel>
             </StatusBarItem>
+
         </StatusBar>
 
         <!--<StackPanel Grid.Row="3"                    

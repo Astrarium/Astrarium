@@ -44,7 +44,7 @@ namespace Astrarium.Plugins.Planner.ImportExport
 
             using (StreamReader file = File.OpenText(filePath))
             {
-                JsonSerializer serializer = new JsonSerializer();
+                JsonSerializer serializer = JsonSerializer.CreateDefault();
                 plan = (PlanItem[])serializer.Deserialize(file, typeof(PlanItem[]));
                 itemsCount = plan.Count();
             }

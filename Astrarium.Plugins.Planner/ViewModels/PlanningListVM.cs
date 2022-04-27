@@ -136,8 +136,14 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
         public string FilePath
         {
-            get => GetValue<string>(nameof(FilePath), Text.Get("PlanningListWindow.StatusBar.PlanNotSaved"));
+            get => GetValue<string>(nameof(FilePath));
             private set => SetValue(nameof(FilePath), value);
+        }
+
+        public bool IsSaved
+        {
+            get => GetValue<bool>(nameof(IsSaved));
+            private set => SetValue(nameof(IsSaved), value);
         }
 
         private void NotifySelectedTableItemChanged()
@@ -212,8 +218,6 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
             TableData = CollectionViewSource.GetDefaultView(ephemerides);
         }
-
-
 
         private double julianDay;
         private PlanningFilter filter;
@@ -291,6 +295,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
                 if (ViewManager.ShowMessageBox("Warning", "Selected object can not be found on the sky. Remove it from the observation plan?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
                     ephemerides.Remove(SelectedTableItem);
+                    IsSaved = false;
                     TableData.Refresh();
                     NotifyTableItemsCountChanged();
                     NotifySelectedTableItemChanged();
@@ -311,6 +316,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
                         ephemerides.Remove(item);
                     }
                     TableData.Refresh();
+                    IsSaved = false;
                     NotifyTableItemsCountChanged();
                     NotifySelectedTableItemChanged();
                 }
@@ -324,6 +330,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
             if (ViewManager.ShowDialog(vm) ?? false)
             {
                 DoCreatePlan(vm.Filter);
+                IsSaved = false;
             }
         }
 
@@ -346,21 +353,45 @@ namespace Astrarium.Plugins.Planner.ViewModels
             Ephemerides item = planner.GetObservationDetails(filter, body);
             ephemerides.Insert(0, item);
             TableData.Refresh();
+            IsSaved = false;
             NotifyTableItemsCountChanged();
+        }
+
+        public override void Close()
+        {
+            if (IsSaved || !ephemerides.Any())
+            {
+                base.Close();
+            }
+            else
+            {
+                string question = string.IsNullOrEmpty(FilePath) ? "The plan has not been saved. Save it before closing?" : "You have unsaved changes in the plan. Save them before closing?";
+                var answer = ViewManager.ShowMessageBox("$Warning", question, MessageBoxButton.YesNoCancel);
+                switch (answer)
+                {
+                    case MessageBoxResult.Yes:
+                        Save();
+                        break;
+                    case MessageBoxResult.No:
+                        base.Close();
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
 
         private async void Save()
         {
-            // TODO: insert date and plan name 
-
-            string filePath = ViewManager.ShowSaveFileDialog("$Save", $"Observation-{Date.ToString("yyyy-MM-dd")}", ".plan", readWriterFactory.FormatsString, out int selectedExtensionIndex);
+            string filePath = ViewManager.ShowSaveFileDialog("$Save", $"Observation-{Date:yyyy-MM-dd}", ".plan", readWriterFactory.FormatsString, out int selectedExtensionIndex);
             if (filePath != null)
             {
                 var format = readWriterFactory.GetFormat(selectedExtensionIndex);
                 var writer = readWriterFactory.Create(format);
                 await Task.Run(() => writer.Write(ephemerides, filePath));
+                IsSaved = true;
                 FilePath = filePath;
-                recentPlansManager.AddToRecentList(new RecentPlan() { Path = filePath, Type = format });
+                recentPlansManager.AddToRecentList(new RecentPlan(filePath, format));
             }
         }
     }

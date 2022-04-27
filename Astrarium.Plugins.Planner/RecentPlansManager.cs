@@ -77,9 +77,8 @@ namespace Astrarium.Plugins.Planner
             if (existingIndex >= 0)
             {
                 recentPlansList.RemoveAt(existingIndex);
+                SaveFile();
             }
-
-            SaveFile();
         }
 
         public void ClearRecentPlansList()

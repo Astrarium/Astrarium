@@ -168,6 +168,7 @@ namespace Astrarium.Plugins.Planner
             catch (Exception ex)
             {
                 tokenSource.Cancel();
+                recentPlansManager.RemoveFromRecentList(new RecentPlan(filePath, fileFormat));
                 // TODO: log
                 ViewManager.ShowMessageBox("$Error", $"Unable to import observation plan.\r\nError: {ex.Message}");
             }
@@ -178,7 +179,7 @@ namespace Astrarium.Plugins.Planner
                 if (celestialObjects.Any())
                 {
                     CreateNewPlan(celestialObjects);
-                    recentPlansManager.AddToRecentList(new RecentPlan() { Path = filePath, Type = fileFormat });
+                    recentPlansManager.AddToRecentList(new RecentPlan(filePath, fileFormat));
                 }
                 else if (ViewManager.ShowMessageBox("$Warning", $"There are no celestial objects found in the observation plan file.\r\nDo you want to create a new plan?", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes) 
                 {
