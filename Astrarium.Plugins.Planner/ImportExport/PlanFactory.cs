@@ -38,18 +38,6 @@ namespace Astrarium.Plugins.Planner.ImportExport
             return formats.ElementAt(index - 1).Value;
         }
 
-        public PlanType GetFormat(string extension)
-        {
-            switch (extension)
-            {
-                case ".plan": return PlanType.Astrarium;
-                case ".skylist": return PlanType.SkySafari;
-                case ".txt": return PlanType.CartesDuCiel;
-                default: return PlanType.Astrarium;
-            }
-        }
-
-
         public IPlan Create(PlanType type)
         {
             switch (type)

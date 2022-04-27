@@ -106,9 +106,25 @@ namespace Astrarium.Plugins.Planner
             NotifyPropertyChanged(nameof(ActivePlansMenuItems));
         }
 
-        private void RecentPlanSelected(string filePath)
+        private void ClearRecentPlansList()
         {
-            LoadPlan(filePath, readWriterFactory.GetFormat(Path.GetExtension(filePath).ToLower()));
+            if (ViewManager.ShowMessageBox("Warning", "Do you really want to clear the recent plans list?", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)
+            {
+                recentPlansManager.ClearRecentPlansList();
+            }
+        }
+
+        private void RecentPlanSelected(RecentPlan recentPlan)
+        {
+            if (File.Exists(recentPlan.Path))
+            {
+                LoadPlan(recentPlan.Path, recentPlan.Type);
+            }
+            else
+            {
+                recentPlansManager.RemoveFromRecentList(recentPlan);
+                ViewManager.ShowMessageBox("$Error", "File does not exist anymore.");
+            }
         }
 
         private void AddObjectToPlan(PlanningListVM plan)
@@ -153,7 +169,7 @@ namespace Astrarium.Plugins.Planner
             {
                 tokenSource.Cancel();
                 // TODO: log
-                ViewManager.ShowMessageBox("Error", $"Unable to import observation plan.\r\nError: {ex.Message}");
+                ViewManager.ShowMessageBox("$Error", $"Unable to import observation plan.\r\nError: {ex.Message}");
             }
 
             if (!tokenSource.IsCancellationRequested)
@@ -162,11 +178,11 @@ namespace Astrarium.Plugins.Planner
                 if (celestialObjects.Any())
                 {
                     CreateNewPlan(celestialObjects);
-                    recentPlansManager.AddToRecentList(filePath);
+                    recentPlansManager.AddToRecentList(new RecentPlan() { Path = filePath, Type = fileFormat });
                 }
-                else
+                else if (ViewManager.ShowMessageBox("$Warning", $"There are no celestial objects found in the observation plan file.\r\nDo you want to create a new plan?", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes) 
                 {
-                    // TODO: inform user
+                    CreateNewPlan(null);
                 }
             }
         }
@@ -182,11 +198,18 @@ namespace Astrarium.Plugins.Planner
             get
             {
                 recentPlansMenuItems.Clear();
-                var recentPlanFiles = recentPlansManager.RecentList.Where(f => File.Exists(f)).ToArray();
+                var recentPlanFiles = recentPlansManager.RecentList.Where(x => File.Exists(x.Path)).ToArray();
                 foreach (var f in recentPlanFiles)
                 {
-                    recentPlansMenuItems.Add(new MenuItem(Path.GetFileNameWithoutExtension(f), new Command<string>(RecentPlanSelected), f));
+                    recentPlansMenuItems.Add(new MenuItem(Path.GetFileNameWithoutExtension(f.Path), new Command<RecentPlan>(RecentPlanSelected), f) { Tooltip = f.Path });
                 }
+
+                if (recentPlanFiles.Any())
+                {
+                    recentPlansMenuItems.Add(null);
+                    recentPlansMenuItems.Add(new MenuItem("Clear list", new Command(ClearRecentPlansList)));
+                }
+
                 return recentPlansMenuItems;
             }
         }
@@ -203,7 +226,7 @@ namespace Astrarium.Plugins.Planner
 
                 if (activePlans.Any())
                 {
-                    menuItems.Add(null); // separator
+                    menuItems.Add(null);
                     menuItems.AddRange(activePlans.Select(plan => new MenuItem(plan.Name, new Command<PlanningListVM>(AddObjectToPlan), plan)));
                 }
 

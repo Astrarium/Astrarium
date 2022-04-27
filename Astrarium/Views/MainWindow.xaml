@@ -61,6 +61,7 @@
                         <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
                         <Setter Property="Visibility" Value="{Binding IsVisible, Converter={s:BoolToVisibilityConverter}}" />
                         <Setter Property="Header" Value="{Binding Header, Converter={s:LocalizedTextConverter}}" />
+                        <Setter Property="ToolTip" Value="{Binding Tooltip, Converter={s:LocalizedTextConverter}}" />
                         <Setter Property="InputGestureText" Value="{Binding InputGestureText}" />
                         <Setter Property="Command" Value="{Binding Command}" />
                         <Setter Property="CommandParameter" Value="{Binding CommandParameter}" />

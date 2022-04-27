@@ -26,7 +26,12 @@ namespace Astrarium.Types
             this.Command = command;
             this.CommandParameter = commandParameter;
             this.SubItems = new ObservableCollection<MenuItem>();
-            Text.LocaleChanged += () => NotifyPropertyChanged(nameof(Header));
+            Text.LocaleChanged += HandleLocaleChanged;
+        }
+
+        private void HandleLocaleChanged()
+        {
+            NotifyPropertyChanged(nameof(Header), nameof(Tooltip));
         }
 
         public bool IsCheckable
@@ -65,6 +70,12 @@ namespace Astrarium.Types
             set => SetValue(nameof(Header), value);
         }
 
+        public string Tooltip
+        {
+            get => GetValue<string>(nameof(Tooltip), null);
+            set => SetValue(nameof(Tooltip), value);
+        }
+
         public string InputGestureText
         {
             get
@@ -78,7 +89,7 @@ namespace Astrarium.Types
         {
             get => GetValue<KeyGesture>(nameof(HotKey), null);
             set
-            { 
+            {
                 SetValue(nameof(HotKey), value);
                 NotifyPropertyChanged(nameof(InputGestureText));
             }

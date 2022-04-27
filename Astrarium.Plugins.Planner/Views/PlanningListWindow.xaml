@@ -6,6 +6,7 @@
         xmlns:views="clr-namespace:Astrarium.Plugins.Planner.Views" 
         xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
         xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+        xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
         xmlns:controls="clr-namespace:Astrarium.Plugins.Planner.Controls"
         mc:Ignorable="d"
         Title="Observation Plan"
@@ -317,7 +318,7 @@
             </StatusBarItem>
             
             <StatusBarItem HorizontalAlignment="Right" >
-                <TextBlock  IsEnabled="False" Text="C:\Program Data\Astrarium\Plans\03_feb_2022.plan" />
+                <TextBlock  IsEnabled="False" Text="{Binding FilePath}" />
             </StatusBarItem>
         </StatusBar>
 

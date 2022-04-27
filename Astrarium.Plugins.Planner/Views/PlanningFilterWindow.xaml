@@ -8,7 +8,7 @@
         xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
         xmlns:v="clr-namespace:Astrarium.Plugins.Planner.Views" 
         mc:Ignorable="d"
-        Title="Create New Observation Plan"
+        Title="Observation Plan Settings"
         Style="{StaticResource {x:Type Window}}" 
         MinHeight="300" MinWidth="400"
         WindowStartupLocation="CenterOwner"

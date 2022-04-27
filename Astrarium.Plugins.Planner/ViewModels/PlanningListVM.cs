@@ -134,6 +134,12 @@ namespace Astrarium.Plugins.Planner.ViewModels
             }
         }
 
+        public string FilePath
+        {
+            get => GetValue<string>(nameof(FilePath), Text.Get("PlanningListWindow.StatusBar.PlanNotSaved"));
+            private set => SetValue(nameof(FilePath), value);
+        }
+
         private void NotifySelectedTableItemChanged()
         {
             NotifyPropertyChanged(
@@ -185,6 +191,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
         public bool HasItemsToDisplay => isInitialized && !NoTotalItems && !NoFilteredItems;
 
         public string Name { get; set; }
+        public DateTime Date { get; private set; }
 
         public PlanningListVM(ISky sky, IMainWindow mainWindow, IRecentPlansManager recentPlansManager, IObservationPlanner planner, IPlanFactory readWriterFactory)
         {
@@ -205,7 +212,9 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
             TableData = CollectionViewSource.GetDefaultView(ephemerides);
         }
-        
+
+
+
         private double julianDay;
         private PlanningFilter filter;
         
@@ -221,6 +230,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
             SkyContext context = new SkyContext(julianDay, GeoLocation, preferFast: true);
             SunCoordinates = context.Get(sky.SunEquatorial);
             SiderealTime = context.SiderealTime;
+            Date = new Date(julianDay, GeoLocation.UtcOffset).ToDateTime();
 
             DoCreatePlan(filter);
         }
@@ -341,13 +351,16 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
         private async void Save()
         {
-            string filePath = ViewManager.ShowSaveFileDialog("Save", "observation", ".plan", readWriterFactory.FormatsString, out int selectedExtensionIndex);
+            // TODO: insert date and plan name 
+
+            string filePath = ViewManager.ShowSaveFileDialog("$Save", $"Observation-{Date.ToString("yyyy-MM-dd")}", ".plan", readWriterFactory.FormatsString, out int selectedExtensionIndex);
             if (filePath != null)
             {
                 var format = readWriterFactory.GetFormat(selectedExtensionIndex);
                 var writer = readWriterFactory.Create(format);
                 await Task.Run(() => writer.Write(ephemerides, filePath));
-                recentPlansManager.AddToRecentList(filePath);
+                FilePath = filePath;
+                recentPlansManager.AddToRecentList(new RecentPlan() { Path = filePath, Type = format });
             }
         }
     }

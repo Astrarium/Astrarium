@@ -316,6 +316,15 @@ namespace Astrarium.Algorithms
         #region Instance Methods
 
         /// <summary>
+        /// Converts the <see cref="Date"/> to <see cref="DateTime"/>.
+        /// </summary>
+        /// <returns><see cref="DateTime"/> object</returns>
+        public DateTime ToDateTime()
+        {
+            return new DateTime(Year, Month, (int)Day, Hour, Minute, Second, DateTimeKind.Unspecified);
+        }
+
+        /// <summary>
         /// Converts the <see cref="Date"/> to Julian Day value.
         /// </summary>
         /// <returns>Julian Day value.</returns>
