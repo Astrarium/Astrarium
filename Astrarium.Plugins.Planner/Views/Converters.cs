@@ -37,20 +37,4 @@ namespace Astrarium.Plugins.Planner.Views
             return double.IsNaN((value as Date).Day) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Collapsed;
         }
     }
-
-    public class CelestialObjectNameConverter : ValueConverterBase
-    {
-        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return string.Join(", ", (value as CelestialObject).Names);
-        }
-    }
-
-    public class CelestialObjectTypeDescriptionConverter : ValueConverterBase
-    {
-        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return Text.Get($"{(value as CelestialObject).Type}.Type");
-        }
-    }
 }

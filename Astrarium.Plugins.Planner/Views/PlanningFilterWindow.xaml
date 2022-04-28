@@ -58,7 +58,7 @@
                             <DataTemplate>
                                 <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}">
                                     <StackPanel HorizontalAlignment="Stretch" Orientation="Horizontal" Background="Transparent">
-                                        <Rectangle Margin="2" Width="16" Height="16" ToolTip="{Binding Item, Converter={v:CelestialObjectTypeDescriptionConverter}}">
+                                        <Rectangle Margin="2" Width="16" Height="16" ToolTip="{Binding Item, Converter={s:CelestialObjectTypeDescriptionConverter}}">
                                             <Rectangle.Fill>
                                                 <SolidColorBrush Color="{StaticResource ColorControlLightBackground}" />
                                             </Rectangle.Fill>
@@ -66,7 +66,7 @@
                                                 <ImageBrush ImageSource="{Binding Item, Converter={s:CelestialObjectToIconConverter}}" Stretch="Uniform" />
                                             </Rectangle.OpacityMask>
                                         </Rectangle>
-                                        <TextBlock Padding="4 0 0 0" Text="{Binding Item, Converter={v:CelestialObjectNameConverter}}" VerticalAlignment="Center"/>
+                                        <TextBlock Padding="4 0 0 0" Text="{Binding Item, Converter={s:CelestialObjectNameConverter}}" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </CheckBox>
                             </DataTemplate>

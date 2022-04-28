@@ -54,7 +54,6 @@
     <!--#region TextBlock -->
     <Style TargetType="{x:Type TextBlock}">
         <Setter Property="FontFamily" Value="{StaticResource FontFamily}"/>
-        <!--<Setter Property="Foreground" Value="{StaticResource BrushForeground}"/>-->
         <Setter Property="FontSize" Value="{StaticResource FontSize}" />
         <Style.Triggers>
             <Trigger Property="IsEnabled" Value="false">
@@ -1168,7 +1167,7 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsHighlighted" Value="true">
                             <Setter Property="Fill" TargetName="Bd" Value="{StaticResource BrushSelection}"/>
-                            <Setter Property="Foreground" Value="{StaticResource BrushForeground}"/>
+                            <Setter Property="Foreground" Value="{StaticResource BrushSelectionForeground}"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="false">
                             <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
@@ -1533,7 +1532,7 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsSelected" Value="true">
                             <Setter Property="Background" TargetName="Bd" Value="{StaticResource BrushSelection}"/>
-                            <Setter Property="Foreground" Value="{StaticResource BrushWindowBackground}"/>
+                            <Setter Property="Foreground" Value="{StaticResource BrushSelectionForeground}"/>
                         </Trigger>
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
@@ -1647,10 +1646,11 @@
                         <Trigger Property="IsMouseOver" Value="true">
                             <Setter Property="Background" TargetName="HeaderBorder" Value="{StaticResource BrushWindowBackground}"/>
                             <Setter Property="Background" TargetName="PART_HeaderGripper" Value="Transparent"/>
-                            <Setter Property="Background" Value="{StaticResource BrushWindowBackground}"/>
-                            <Setter Property="Foreground" Value="Black"/>
+                            <!--<Setter Property="Background" Value="{StaticResource BrushWindowBackground}"/>
+                            <Setter Property="Foreground" Value="Black"/>-->
                         </Trigger>
                         <Trigger Property="IsPressed" Value="true">
+                            <Setter Property="Foreground" Value="{StaticResource BrushSelectionForeground}"/>
                             <Setter Property="Background" TargetName="HeaderBorder" Value="{StaticResource BrushSelection}"/>
                             <Setter Property="Visibility" TargetName="PART_HeaderGripper" Value="Hidden"/>
                             <Setter Property="Margin" TargetName="HeaderContent" Value="1,1,0,0"/>
@@ -1776,7 +1776,7 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsSelected" Value="true">
                             <Setter Property="Background" TargetName="Bd" Value="{StaticResource BrushSelection}"/>
-                            <Setter Property="Foreground" Value="{StaticResource BrushWindowBackground}"/>
+                            <Setter Property="Foreground" Value="{StaticResource BrushSelectionForeground}"/>
                         </Trigger>
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
@@ -2319,6 +2319,7 @@
                 <Setter TargetName="HeaderHost" Property="TextBlock.Foreground" Value="{StaticResource BrushSelectionForeground}" />
                 <Setter Property="Foreground" Value="{StaticResource BrushSelectionForeground}" />
                 <Setter Property="Foreground" TargetName="InputGestureText" Value="{StaticResource BrushForeground}" />
+                <Setter Property="Fill" TargetName="CheckMark" Value="{StaticResource BrushSelectionForeground}" />
             </Trigger>
             <Trigger Property="IsEnabled" Value="false">
                 <Setter Property="Foreground" Value="{StaticResource BrushControlLightBackground}" />
@@ -2373,7 +2374,7 @@
     <Style x:Key="{x:Type MenuItem}" TargetType="{x:Type MenuItem}">
         <Setter Property="Foreground" Value="{StaticResource BrushForeground}" />
         <Setter Property="TextBlock.Foreground" Value="{StaticResource BrushForeground}" />
-        <Setter Property="Label.Foreground" Value="{StaticResource BrushControlLightBackground}" />
+        <!--<Setter Property="Label.Foreground" Value="{StaticResource BrushControlLightBackground}" />-->
         <Setter Property="OverridesDefaultStyle" Value="True" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="MinHeight" Value="28" />
@@ -2389,15 +2390,18 @@
             </Trigger>
             <Trigger Property="Role" Value="TopLevelItem">
                 <Setter Property="TextBlock.Foreground" Value="{StaticResource BrushForeground}" />
+                <!--<Setter Property="Label.Foreground" Value="{StaticResource BrushControlLightBackground}" />-->
                 <Setter Property="Template" Value="{StaticResource {x:Static MenuItem.TopLevelItemTemplateKey}}" />
             </Trigger>
             <Trigger Property="Role" Value="SubmenuHeader">
-                <Setter Property="Foreground" Value="{StaticResource BrushForeground}" />
+                <!--<Setter Property="Foreground" Value="{StaticResource BrushForeground}" />-->
                 <Setter Property="TextBlock.Foreground" Value="{StaticResource BrushForeground}" />
+                <!--<Setter Property="Label.Foreground" Value="{StaticResource BrushControlLightBackground}" />-->
                 <Setter Property="Template" Value="{StaticResource {x:Static MenuItem.SubmenuHeaderTemplateKey}}" />
             </Trigger>
             <Trigger Property="Role" Value="SubmenuItem">
                 <Setter Property="TextBlock.Foreground" Value="{StaticResource BrushForeground}" />
+                <!--<Setter Property="Label.Foreground" Value="{StaticResource BrushControlLightBackground}" />-->
                 <Setter Property="Template" Value="{StaticResource {x:Static MenuItem.SubmenuItemTemplateKey}}" />
             </Trigger>
 
@@ -2495,7 +2499,7 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsSelected" Value="true">
                             <Setter Property="Background" TargetName="Bd" Value="{StaticResource BrushSelection}"/>
-                            <Setter Property="Foreground" Value="{StaticResource BrushWindowBackground}"/>
+                            <Setter Property="Foreground" Value="{StaticResource BrushSelectionForeground}"/>
                         </Trigger>
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
@@ -3393,6 +3397,7 @@
 
     <Style TargetType="{x:Type Expander}">
         <Setter Property="MinHeight" Value="21" />
+        <Setter Property="Foreground" Value="{StaticResource BrushForeground}" />
         <Setter Property="Background" Value="{StaticResource BrushWindowBackground}" />
         <Setter Property="BorderBrush" Value="{StaticResource BrushControlBackground}" />
         <Setter Property="Template">
@@ -3409,6 +3414,7 @@
                                 MinHeight="21" 
                                 OverridesDefaultStyle="True" 
                                 Template="{StaticResource ExpanderToggleButton}" 
+                                Foreground="{TemplateBinding Foreground}"
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">

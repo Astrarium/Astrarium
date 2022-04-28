@@ -149,7 +149,7 @@
                 <c:AutoCompleteTextBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
-                            <Rectangle Margin="2" Width="16" Height="16">
+                            <Rectangle Margin="2" Width="16" Height="16" ToolTip="{Binding Converter={s:CelestialObjectTypeDescriptionConverter}}">
                                 <Rectangle.Fill>
                                     <SolidColorBrush Color="{DynamicResource ColorControlLightBackground}" />
                                 </Rectangle.Fill>

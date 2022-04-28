@@ -345,4 +345,12 @@ namespace Astrarium.Types.Themes
             return null;
         }
     }
+
+    public class CelestialObjectTypeDescriptionConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return Text.Get($"{(value as CelestialObject).Type}.Type");
+        }
+    }
 }

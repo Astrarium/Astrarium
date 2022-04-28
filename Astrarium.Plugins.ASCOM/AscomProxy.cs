@@ -414,7 +414,7 @@ namespace Astrarium.Plugins.ASCOM
                 {
                     if (telescope != null && telescope.Connected)
                     {
-                        telescope.SetupDialog();
+                        Task.Run(() => telescope.SetupDialog());
                     }
                     else
                     {
