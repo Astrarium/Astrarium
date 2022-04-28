@@ -101,7 +101,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
             {
                 if (value != null)
                 {
-                    ListItems = new ObservableCollection<CheckedListItem<CelestialObject>>(value.Select(x => new CheckedListItem<CelestialObject>(x, isChecked: true, c => NotifyPropertyChanged(nameof(OkButtonEnabled)))));
+                    ListItems = new ObservableCollection<CheckedListItem<CelestialObject>>(value.Select(x => new CheckedListItem<CelestialObject>(x, isChecked: true, c => NotifyPropertyChanged(nameof(OkButtonEnabled), nameof(ObjectsCount)))));
                 }
                 else
                 {
@@ -129,6 +129,8 @@ namespace Astrarium.Plugins.Planner.ViewModels
         public bool IsCelestialObjectsTypesTreeVisible => Nodes.Any();
         
         public bool IsCelestialObjectsListVisible => ListItems.Any();
+
+        public int ObjectsCount => ListItems.Where(x => x.IsChecked).Count();
 
         public double JulianDay
         {

@@ -1,9 +1,9 @@
 ﻿namespace Astrarium.Plugins.Planner.ImportExport
 {
-    public interface IPlanFactory
+    public interface IPlanManagerFactory
     {
         string FormatsString { get; }
-        IPlan Create(PlanType type);
+        IPlanManager Create(PlanType type);
         PlanType GetFormat(int index);
     }
 }

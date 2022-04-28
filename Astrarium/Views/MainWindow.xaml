@@ -259,6 +259,7 @@
                                                 </Trigger>
                                                 <Trigger Property="IsMouseOver" Value="True">
                                                     <Setter TargetName="Border" Property="Background" Value="{StaticResource BrushSelection}"/>
+                                                    <Setter Property="Foreground" Value="{StaticResource BrushSelectionForeground}" />
                                                 </Trigger>
                                             </ControlTemplate.Triggers>
                                         </ControlTemplate>
@@ -289,6 +290,7 @@
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
                                                     <Setter TargetName="Border" Property="Background" Value="{StaticResource BrushSelection}"/>
+                                                    <Setter Property="Foreground" Value="{StaticResource BrushSelectionForeground}" />
                                                 </Trigger>
                                             </ControlTemplate.Triggers>
                                         </ControlTemplate>

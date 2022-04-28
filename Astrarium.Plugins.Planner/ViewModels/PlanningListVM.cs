@@ -25,7 +25,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
         private readonly IMainWindow mainWindow;
         private readonly IRecentPlansManager recentPlansManager;
         private readonly IObservationPlanner planner;
-        private readonly IPlanFactory readWriterFactory;
+        private readonly IPlanManagerFactory readWriterFactory;
 
         #endregion Dependencies
 
@@ -137,7 +137,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
         public string FilePath
         {
             get => GetValue<string>(nameof(FilePath));
-            private set => SetValue(nameof(FilePath), value);
+            set => SetValue(nameof(FilePath), value);
         }
 
         public bool IsSaved
@@ -199,7 +199,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
         public string Name { get; set; }
         public DateTime Date { get; private set; }
 
-        public PlanningListVM(ISky sky, IMainWindow mainWindow, IRecentPlansManager recentPlansManager, IObservationPlanner planner, IPlanFactory readWriterFactory)
+        public PlanningListVM(ISky sky, IMainWindow mainWindow, IRecentPlansManager recentPlansManager, IObservationPlanner planner, IPlanManagerFactory readWriterFactory)
         {
             this.planner = planner;
             this.sky = sky;
@@ -388,7 +388,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
             {
                 var format = readWriterFactory.GetFormat(selectedExtensionIndex);
                 var writer = readWriterFactory.Create(format);
-                await Task.Run(() => writer.Write(ephemerides, filePath));
+                await Task.Run(() => writer.Write(new PlanExportData() { Date = Date, Begin = FromTime, End = ToTime, Ephemerides = ephemerides }, filePath));
                 IsSaved = true;
                 FilePath = filePath;
                 recentPlansManager.AddToRecentList(new RecentPlan(filePath, format));

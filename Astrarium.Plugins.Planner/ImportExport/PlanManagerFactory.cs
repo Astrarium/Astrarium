@@ -14,8 +14,8 @@ namespace Astrarium.Plugins.Planner.ImportExport
         CartesDuCiel = 2
     }
 
-    [Singleton(typeof(IPlanFactory))]
-    public class PlanFactory : IPlanFactory
+    [Singleton(typeof(IPlanManagerFactory))]
+    public class PlanManagerFactory : IPlanManagerFactory
     {
         private readonly Dictionary<string, PlanType> formats = new Dictionary<string, PlanType>()
         {
@@ -26,7 +26,7 @@ namespace Astrarium.Plugins.Planner.ImportExport
 
         private readonly ISky sky;
 
-        public PlanFactory(ISky sky)
+        public PlanManagerFactory(ISky sky)
         {
             this.sky = sky;
         }
@@ -38,16 +38,16 @@ namespace Astrarium.Plugins.Planner.ImportExport
             return formats.ElementAt(index - 1).Value;
         }
 
-        public IPlan Create(PlanType type)
+        public IPlanManager Create(PlanType type)
         {
             switch (type)
             {
                 case PlanType.Astrarium:
-                    return new AstrariumPlan(sky);
+                    return new AstrariumPlanManager(sky);
                 case PlanType.SkySafari:
-                    return new SkySafariPlan(sky);
+                    return new SkySafariPlanManager(sky);
                 case PlanType.CartesDuCiel:
-                    return new CartesDuCielPlan(sky);
+                    return new CartesDuCielPlanManager(sky);
                 default:
                     throw new NotImplementedException();
             }

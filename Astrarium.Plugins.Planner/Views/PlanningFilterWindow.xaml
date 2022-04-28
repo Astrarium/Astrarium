@@ -34,8 +34,16 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <Label Margin="4 0 4 0" Background="{StaticResource BrushControlDarkBackground}" FontWeight="Bold" Content="Objects" />
-                    
+
+                    <Grid Margin="0 0 4 0" Background="{StaticResource BrushControlDarkBackground}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Margin="6" VerticalAlignment="Center" Grid.Column="0" FontWeight="Bold" Text="Objects" />
+                        <TextBlock Margin="6" VerticalAlignment="Center" Foreground="{StaticResource BrushControlLightBackground}" Grid.Column="1" HorizontalAlignment="Right" Text="{Binding ObjectsCount}" />
+                    </Grid>
+
                     <!-- Celestial objects types tree view -->
                     <TreeView Margin="4" Grid.Row="1" ItemsSource="{Binding Nodes}" Visibility="{Binding IsCelestialObjectsTypesTreeVisible, Converter={s:BoolToVisibilityConverter}}" />
 

@@ -18,15 +18,15 @@ namespace Astrarium.Plugins.Planner
     {
         private readonly ISky sky;
         private readonly ISkyMap map;
-        private readonly IPlanFactory readWriterFactory;
+        private readonly IPlanManagerFactory planManagerFactory;
         private readonly IRecentPlansManager recentPlansManager;
 
-        public PlannerPlugin(ISky sky, ISkyMap map, IRecentPlansManager recentPlansManager, IPlanFactory readWriterFactory)
+        public PlannerPlugin(ISky sky, ISkyMap map, IRecentPlansManager recentPlansManager, IPlanManagerFactory planManagerFactory)
         {
             this.sky = sky;
             this.map = map;
             this.map.SelectedObjectChanged += (x) => NotifyPropertyChanged(nameof(HasSelectedObject));
-            this.readWriterFactory = readWriterFactory;
+            this.planManagerFactory = planManagerFactory;
             this.recentPlansManager = recentPlansManager;
 
             /* Main app menu */
@@ -36,7 +36,7 @@ namespace Astrarium.Plugins.Planner
             recentPlansMenu.AddBinding(new SimpleBinding(this, nameof(RecentPlansMenuItems), nameof(MenuItem.SubItems)));
             recentPlansMenu.AddBinding(new SimpleBinding(this, nameof(HasRecentPlans), nameof(MenuItem.IsEnabled)));
             plannerMenu.SubItems = new ObservableCollection<MenuItem>(new[] {
-                new MenuItem("Create new plan...", new Command<ICollection<CelestialObject>>(CreateNewPlan), null),
+                new MenuItem("Create new plan...", new Command<PlanImportData>(CreateNewPlan), null),
                 new MenuItem("Open plan...", new Command(OpenPlan)),
                 recentPlansMenu,
                 null,
@@ -67,28 +67,33 @@ namespace Astrarium.Plugins.Planner
         /// <summary>
         /// Creates new plan, from filter or from collection of items.
         /// </summary>
-        /// <param name="body"></param>
-        private void CreateNewPlan(ICollection<CelestialObject> celestialObjects)
+        private void CreateNewPlan(PlanImportData data)
         {
-            var vm = ViewManager.CreateViewModel<PlanningFilterVM>();
+            var planFilterVM = ViewManager.CreateViewModel<PlanningFilterVM>();
 
             // create filter window with list of celestial objects
-            if (celestialObjects != null && celestialObjects.Any())
+            if (data != null && data.Objects.Any())
             {
-                vm.CelestialObjects = celestialObjects;
+                planFilterVM.CelestialObjects = data.Objects;
+                if (data.Date != null)
+                    planFilterVM.JulianDay = new Date(data.Date.Value).ToJulianEphemerisDay();
+                if (data.Begin != null)
+                    planFilterVM.TimeFrom = data.Begin.Value;
+                if (data.End != null)
+                    planFilterVM.TimeTo = data.End.Value;
             }
             else
             {
-                vm.Nodes.First().IsChecked = true;
+                planFilterVM.Nodes.First().IsChecked = true;
             }
 
-            if (ViewManager.ShowDialog(vm) ?? false)
+            if (ViewManager.ShowDialog(planFilterVM) ?? false)
             {
-                var plan = ViewManager.CreateViewModel<PlanningListVM>();
-                ViewManager.ShowWindow(plan);
-                plan.CreatePlan(vm.Filter);
-                AddActivePlan(plan);
-                plan.Closing += x => RemoveActivePlan(plan);
+                var planListVM = ViewManager.CreateViewModel<PlanningListVM>();
+                ViewManager.ShowWindow(planListVM);
+                planListVM.CreatePlan(planFilterVM.Filter);
+                AddActivePlan(planListVM);
+                planListVM.Closing += x => RemoveActivePlan(planListVM);
             }
         }
 
@@ -134,7 +139,7 @@ namespace Astrarium.Plugins.Planner
             {
                 if (plan == null)
                 {
-                    CreateNewPlan(new CelestialObject[] { body });
+                    CreateNewPlan(new PlanImportData() { Objects = new CelestialObject[] { body } });
                 }
                 else
                 {
@@ -145,40 +150,40 @@ namespace Astrarium.Plugins.Planner
 
         private void OpenPlan()
         {
-            string filePath = ViewManager.ShowOpenFileDialog("Open", readWriterFactory.FormatsString, out int selectedExtensionIndex);
+            string filePath = ViewManager.ShowOpenFileDialog("Open", planManagerFactory.FormatsString, out int selectedExtensionIndex);
             if (filePath != null)
             {
-                LoadPlan(filePath, readWriterFactory.GetFormat(selectedExtensionIndex));
+                LoadPlan(filePath, planManagerFactory.GetFormat(selectedExtensionIndex));
             }
         }
 
         private async void LoadPlan(string filePath, PlanType fileFormat)
         {
-            IPlan reader = readWriterFactory.Create(fileFormat);
+            IPlanManager reader = planManagerFactory.Create(fileFormat);
 
-            ICollection<CelestialObject> celestialObjects = new CelestialObject[0];
+            PlanImportData plan = null;
             var tokenSource = new CancellationTokenSource();
             var progress = new Progress<double>();
             ViewManager.ShowProgress("Please wait", "Reading data...", tokenSource, progress);
 
             try
             {
-                celestialObjects = await Task.Run(() => reader.Read(filePath, tokenSource.Token, progress));
+                plan = await Task.Run(() => reader.Read(filePath, tokenSource.Token, progress));
             }
             catch (Exception ex)
             {
                 tokenSource.Cancel();
                 recentPlansManager.RemoveFromRecentList(new RecentPlan(filePath, fileFormat));
-                // TODO: log
+                Log.Error($"Unable to import observation plan: {ex}");
                 ViewManager.ShowMessageBox("$Error", $"Unable to import observation plan.\r\nError: {ex.Message}");
             }
 
             if (!tokenSource.IsCancellationRequested)
             {
                 tokenSource.Cancel();
-                if (celestialObjects.Any())
+                if (plan?.Objects.Any() == true)
                 {
-                    CreateNewPlan(celestialObjects);
+                    CreateNewPlan(plan);
                     recentPlansManager.AddToRecentList(new RecentPlan(filePath, fileFormat));
                 }
                 else if (ViewManager.ShowMessageBox("$Warning", $"There are no celestial objects found in the observation plan file.\r\nDo you want to create a new plan?", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes) 
@@ -202,7 +207,7 @@ namespace Astrarium.Plugins.Planner
                 var recentPlanFiles = recentPlansManager.RecentList.Where(x => File.Exists(x.Path)).ToArray();
                 foreach (var f in recentPlanFiles)
                 {
-                    recentPlansMenuItems.Add(new MenuItem(Path.GetFileNameWithoutExtension(f.Path), new Command<RecentPlan>(RecentPlanSelected), f) { Tooltip = f.Path });
+                    recentPlansMenuItems.Add(new MenuItem(Path.GetFileName(f.Path), new Command<RecentPlan>(RecentPlanSelected), f) { Tooltip = $"Path: {f.Path}\r\nType: {f.Type}" });
                 }
 
                 if (recentPlanFiles.Any())

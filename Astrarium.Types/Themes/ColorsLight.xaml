@@ -28,6 +28,9 @@
     <!-- Selected list items background, hovered menu items -->
     <Color x:Key="ColorSelection">#9BA7FF</Color>
 
+    <!-- Color of text over selected background -->
+    <Color x:Key="ColorSelectionForeground">#404040</Color>
+
     <!-- Hovered checkbox and radiobutton outline -->
     <Color x:Key="ColorHighlight">#9BA7FF</Color>
 

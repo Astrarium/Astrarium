@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Planner.ImportExport
 {
-    public class SkySafariPlan : IPlan
+    public class SkySafariPlanManager : IPlanManager
     {
         private const string FILE_HEADER = "SkySafariObservingListVersion=3.0";
         private const string BEGIN_OBJECT = "SkyObject=BeginObject";
@@ -20,7 +20,7 @@ namespace Astrarium.Plugins.Planner.ImportExport
         private readonly ISky sky = null;
         private readonly IgnoreSpaceStringComparer comparer = new IgnoreSpaceStringComparer();
 
-        public SkySafariPlan(ISky sky)
+        public SkySafariPlanManager(ISky sky)
         {
             this.sky = sky;
         }
@@ -43,7 +43,7 @@ namespace Astrarium.Plugins.Planner.ImportExport
             }
         }
 
-        public ICollection<CelestialObject> Read(string filePath, CancellationToken? token = null, IProgress<double> progress = null)
+        public PlanImportData Read(string filePath, CancellationToken? token = null, IProgress<double> progress = null)
         {
             var bodies = new List<CelestialObject>();
 
@@ -143,15 +143,19 @@ namespace Astrarium.Plugins.Planner.ImportExport
                 }
             }
 
-            return bodies;
+            return new PlanImportData()
+            {
+                FilePath = filePath,
+                Objects = bodies
+            };
         }
 
-        public void Write(ICollection<Ephemerides> plan, string filePath)
+        public void Write(PlanExportData data, string filePath)
         {
             using (var file = new StreamWriter(filePath, false, Encoding.UTF8))
             {
                 file.WriteLine(FILE_HEADER);
-                foreach (var item in plan)
+                foreach (var item in data.Ephemerides)
                 {
                     file.WriteLine(BEGIN_OBJECT);
 
