@@ -5,10 +5,10 @@
                     mc:Ignorable="d">
     
     <!-- Captions, icons, etc. -->
-    <Color x:Key="ColorForeground">#404040</Color>
+    <Color x:Key="ColorForeground">#202020</Color>
 
     <!-- Window background -->
-    <Color x:Key="ColorWindowBackground">#a6a6a6</Color>
+    <Color x:Key="ColorWindowBackground">#e6e6e6</Color>
 
     <!-- Window border and title background -->
     <Color x:Key="ColorWindowBorder">#1E2772</Color>
@@ -17,7 +17,7 @@
     <Color x:Key="ColorWindowTitle">#ffffff</Color>
 
     <!-- Buttons background, dropdowns buttons, toolbar buttons, dividers, splitters -->
-    <Color x:Key="ColorControlBackground">#dddddd</Color>
+    <Color x:Key="ColorControlBackground">#aaaaaa</Color>
 
     <!-- Hovered buttons, scrollbar scroller, inactive checkmarks -->
     <Color x:Key="ColorControlLightBackground">#bbbbbb</Color>
