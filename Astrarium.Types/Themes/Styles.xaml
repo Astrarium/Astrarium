@@ -13,8 +13,8 @@
     
     <SolidColorBrush x:Key="BrushForeground" Color="{DynamicResource ColorForeground}" />
     <SolidColorBrush x:Key="BrushWindowBackground" Color="{DynamicResource ColorWindowBackground}" />
-    <SolidColorBrush x:Key="BrushWindowBorder" Color="{DynamicResource ColorWindowBorder}" />
-    <SolidColorBrush x:Key="BrushWindowTitle" Color="{DynamicResource ColorWindowTitle}" />
+    <SolidColorBrush x:Key="BrushWindowTitleBackground" Color="{DynamicResource ColorWindowTitleBackground}" />
+    <SolidColorBrush x:Key="BrushWindowTitleForeground" Color="{DynamicResource ColorWindowTitleForeground}" />
     <SolidColorBrush x:Key="BrushControlBackground" Color="{DynamicResource ColorControlBackground}" />
     <SolidColorBrush x:Key="BrushControlLightBackground" Color="{DynamicResource ColorControlLightBackground}" />
     <SolidColorBrush x:Key="BrushControlDarkBackground" Color="{DynamicResource ColorControlDarkBackground}" />
@@ -1256,7 +1256,7 @@
         <Setter Property="Width" Value="24" />
         <Setter Property="Height" Value="24" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Background" Value="{StaticResource BrushWindowBorder}" />
+        <Setter Property="Background" Value="{StaticResource BrushWindowTitleBackground}" />
         <Setter Property="BorderBrush" Value="Transparent" />
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
@@ -1404,7 +1404,6 @@
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="false">
                             <Setter Property="Foreground" Value="{StaticResource BrushControlLightBackground}"/>
-                            <Setter Property="BorderBrush" TargetName="CheckBoxBorder" Value="{StaticResource BrushControlDarkBackground}"/>
                             <Setter Property="Fill" TargetName="CheckMark" Value="{StaticResource BrushControlLightBackground}" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -2217,7 +2216,7 @@
     <ControlTemplate x:Key="{x:Static MenuItem.TopLevelHeaderTemplateKey}" TargetType="{x:Type MenuItem}">
         <c:BorderFix x:Name="Border" Background="{TemplateBinding Background}" VerticalAlignment="Center">
             <Grid>
-                <ContentPresenter Margin="6,3,6,3" ContentSource="Header" RecognizesAccessKey="True" />
+                <ContentPresenter x:Name="ContentPresenter" Margin="6,3,6,3" ContentSource="Header" RecognizesAccessKey="True" />
                 <Popup x:Name="Popup"
                      Placement="Bottom"
                      IsOpen="{TemplateBinding IsSubmenuOpen}"
@@ -3286,7 +3285,7 @@
 
     <!-- Progress bar -->
     <Style TargetType="{x:Type ProgressBar}">
-        <Setter Property="Background" Value="{StaticResource BrushWindowBorder}" />
+        <Setter Property="Background" Value="{StaticResource BrushWindowTitleBackground}" />
         <Setter Property="BorderBrush" Value="{StaticResource BrushWindowBackground}" />
         <Setter Property="Foreground" Value="{StaticResource BrushHighlight}" />
         <Setter Property="Template">

@@ -10,11 +10,11 @@
     <!-- Window background -->
     <Color x:Key="ColorWindowBackground">#333333</Color>
 
-    <!-- Window border and title background -->
-    <Color x:Key="ColorWindowBorder">#1B1B1B</Color>
+    <!-- Window title background -->
+    <Color x:Key="ColorWindowTitleBackground">#1B1B1B</Color>
 
     <!-- Window title text -->
-    <Color x:Key="ColorWindowTitle">#EFEFEF</Color>
+    <Color x:Key="ColorWindowTitleForeground">#EFEFEF</Color>
 
     <!-- Buttons background, dropdowns buttons, toolbar buttons, dividers, splitters -->
     <Color x:Key="ColorControlBackground">#595959</Color>

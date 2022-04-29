@@ -8,8 +8,8 @@
 
     <Color x:Key="ColorForeground">#EF0000</Color>
     <Color x:Key="ColorWindowBackground">#330000</Color>
-    <Color x:Key="ColorWindowBorder">#1B0000</Color>
-    <Color x:Key="ColorWindowTitle">#EF0000</Color>
+    <Color x:Key="ColorWindowTitleBackground">#1B0000</Color>
+    <Color x:Key="ColorWindowTitleForeground">#EF0000</Color>
     <Color x:Key="ColorControlBackground">#590000</Color>
     <Color x:Key="ColorControlLightBackground">#800000</Color>
     <Color x:Key="ColorControlDarkBackground">#3D0000</Color>
