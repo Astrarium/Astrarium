@@ -8,7 +8,7 @@
     <Color x:Key="ColorForeground">#404040</Color>
 
     <!-- Window background -->
-    <Color x:Key="ColorWindowBackground">#F6F6F6</Color>
+    <Color x:Key="ColorWindowBackground">#a6a6a6</Color>
 
     <!-- Window border and title background -->
     <Color x:Key="ColorWindowBorder">#1E2772</Color>
@@ -17,7 +17,7 @@
     <Color x:Key="ColorWindowTitle">#ffffff</Color>
 
     <!-- Buttons background, dropdowns buttons, toolbar buttons, dividers, splitters -->
-    <Color x:Key="ColorControlBackground">#cccccc</Color>
+    <Color x:Key="ColorControlBackground">#dddddd</Color>
 
     <!-- Hovered buttons, scrollbar scroller, inactive checkmarks -->
     <Color x:Key="ColorControlLightBackground">#bbbbbb</Color>
@@ -26,10 +26,10 @@
     <Color x:Key="ColorControlDarkBackground">#eeeeee</Color>
 
     <!-- Selected list items background, hovered menu items -->
-    <Color x:Key="ColorSelection">#9BA7FF</Color>
+    <Color x:Key="ColorSelection">#1E2772</Color>
 
     <!-- Color of text over selected background -->
-    <Color x:Key="ColorSelectionForeground">#404040</Color>
+    <Color x:Key="ColorSelectionForeground">#ffffff</Color>
 
     <!-- Hovered checkbox and radiobutton outline -->
     <Color x:Key="ColorHighlight">#9BA7FF</Color>

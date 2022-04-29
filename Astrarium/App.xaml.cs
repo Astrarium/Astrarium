@@ -70,7 +70,7 @@ namespace Astrarium
 
         private void SetColorSchema(ColorSchema schema)
         {
-            Current.Resources.MergedDictionaries[0].Source = new Uri($@"pack://application:,,,/Astrarium.Types;component/Themes/Colors{(schema == ColorSchema.Red ? "Red" : "DeepBlue")}.xaml");
+            Current.Resources.MergedDictionaries[0].Source = new Uri($@"pack://application:,,,/Astrarium.Types;component/Themes/Colors{(schema == ColorSchema.Red ? "Red" : "Light")}.xaml");
             if (schema == ColorSchema.Red)
             {
                 CursorsHelper.SetCustomCursors();

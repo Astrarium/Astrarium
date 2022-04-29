@@ -2314,12 +2314,18 @@
             <Trigger Property="IsCheckable" Value="true">
                 <Setter TargetName="Icon" Property="Visibility" Value="Hidden" />
             </Trigger>
+
+            <Trigger Property="IsHighlighted" Value="false">
+                <Setter Property="Foreground" TargetName="InputGestureText" Value="{StaticResource BrushControlLightBackground}" />
+            </Trigger>
+
             <Trigger Property="IsHighlighted" Value="true">
                 <Setter Property="Background" TargetName="Border" Value="{StaticResource BrushSelection}" />
                 <Setter TargetName="HeaderHost" Property="TextBlock.Foreground" Value="{StaticResource BrushSelectionForeground}" />
                 <Setter Property="Foreground" Value="{StaticResource BrushSelectionForeground}" />
                 <Setter Property="Foreground" TargetName="InputGestureText" Value="{StaticResource BrushForeground}" />
                 <Setter Property="Fill" TargetName="CheckMark" Value="{StaticResource BrushSelectionForeground}" />
+                <Setter Property="Foreground" TargetName="InputGestureText" Value="{StaticResource BrushSelectionForeground}" />
             </Trigger>
             <Trigger Property="IsEnabled" Value="false">
                 <Setter Property="Foreground" Value="{StaticResource BrushControlLightBackground}" />
@@ -2338,7 +2344,7 @@
                 </Grid.ColumnDefinitions>
                 <Image x:Name="Icon" Source="{TemplateBinding Icon}" Margin="0 0 11 0" Height="20" Width="20" VerticalAlignment="Center" HorizontalAlignment="Center" />
                 <ContentPresenter x:Name="HeaderHost" Margin="1 0 0 0" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True" />
-                <Path Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 0 7 L 4 3.5 Z" Fill="{TemplateBinding Foreground}" Margin="12,0,0,3" />
+                <Path Grid.Column="3" x:Name="Arrow" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 0 7 L 4 3.5 Z" Fill="{TemplateBinding Foreground}" Margin="12,0,0,3" />
                 <Popup 
                     x:Name="Popup" 
                     Placement="Right" 
@@ -2366,6 +2372,7 @@
             </Trigger>
             <Trigger Property="IsEnabled" Value="false">
                 <Setter Property="Foreground" Value="{StaticResource BrushControlLightBackground}" />
+                <Setter Property="Fill" TargetName="Arrow" Value="{StaticResource BrushControlLightBackground}" />
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
@@ -2373,8 +2380,6 @@
     <!-- MenuItem Style -->
     <Style x:Key="{x:Type MenuItem}" TargetType="{x:Type MenuItem}">
         <Setter Property="Foreground" Value="{StaticResource BrushForeground}" />
-        <Setter Property="TextBlock.Foreground" Value="{StaticResource BrushForeground}" />
-        <!--<Setter Property="Label.Foreground" Value="{StaticResource BrushControlLightBackground}" />-->
         <Setter Property="OverridesDefaultStyle" Value="True" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="MinHeight" Value="28" />
@@ -2383,28 +2388,19 @@
         <Setter Property="Background" Value="{StaticResource BrushWindowBackground}" />
         <Style.Triggers>
             <Trigger Property="Role" Value="TopLevelHeader">
-                <Setter Property="TextBlock.Foreground" Value="{StaticResource BrushForeground}" />
-                <Setter Property="Background" Value="{StaticResource BrushWindowBackground}" />
-                <Setter Property="Template" Value="{StaticResource {x:Static MenuItem.TopLevelHeaderTemplateKey}}" />
                 <Setter Property="Grid.IsSharedSizeScope" Value="true" />
+                <Setter Property="Template" Value="{StaticResource {x:Static MenuItem.TopLevelHeaderTemplateKey}}" />
             </Trigger>
             <Trigger Property="Role" Value="TopLevelItem">
-                <Setter Property="TextBlock.Foreground" Value="{StaticResource BrushForeground}" />
-                <!--<Setter Property="Label.Foreground" Value="{StaticResource BrushControlLightBackground}" />-->
                 <Setter Property="Template" Value="{StaticResource {x:Static MenuItem.TopLevelItemTemplateKey}}" />
             </Trigger>
             <Trigger Property="Role" Value="SubmenuHeader">
-                <!--<Setter Property="Foreground" Value="{StaticResource BrushForeground}" />-->
-                <Setter Property="TextBlock.Foreground" Value="{StaticResource BrushForeground}" />
-                <!--<Setter Property="Label.Foreground" Value="{StaticResource BrushControlLightBackground}" />-->
                 <Setter Property="Template" Value="{StaticResource {x:Static MenuItem.SubmenuHeaderTemplateKey}}" />
             </Trigger>
             <Trigger Property="Role" Value="SubmenuItem">
-                <Setter Property="TextBlock.Foreground" Value="{StaticResource BrushForeground}" />
-                <!--<Setter Property="Label.Foreground" Value="{StaticResource BrushControlLightBackground}" />-->
                 <Setter Property="Template" Value="{StaticResource {x:Static MenuItem.SubmenuItemTemplateKey}}" />
             </Trigger>
-
+            
             <DataTrigger Binding="{Binding}" Value="{x:Null}">
                 <Setter Property="MinHeight" Value="1" />
                 <Setter Property="Height" Value="5" />
