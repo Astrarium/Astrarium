@@ -41,7 +41,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
             }
             set
             {
-                IsDateTimeControlsEnabled = false;
+                IsDateTimeControlsVisible = false;
                 JulianDay = value.JulianDayMidnight;
                 TimeFrom = TimeSpan.FromHours(value.TimeFrom);
                 TimeTo = TimeSpan.FromHours(value.TimeTo);
@@ -124,13 +124,15 @@ namespace Astrarium.Plugins.Planner.ViewModels
             }
         }
 
-        public bool IsDateTimeControlsEnabled { get; private set; } = true;
+        public bool IsDateTimeControlsVisible { get; private set; } = true;
 
         public bool IsCelestialObjectsTypesTreeVisible => Nodes.Any();
         
         public bool IsCelestialObjectsListVisible => ListItems.Any();
 
         public int ObjectsCount => ListItems.Where(x => x.IsChecked).Count();
+
+        public string ObjectsFilterTitle => IsCelestialObjectsListVisible ? Text.Get("Objects") : Text.Get("ObjectTypes");
 
         public double JulianDay
         {

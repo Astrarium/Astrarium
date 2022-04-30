@@ -35,13 +35,25 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <Grid Margin="0 0 4 0" Background="{StaticResource BrushControlDarkBackground}">
+                    <Grid Margin="0 0 4 0">
+                        <Grid.Style>
+                            <Style TargetType="{x:Type Grid}">
+                                <Setter Property="Background" Value="{StaticResource BrushControlBackground}" />
+                            </Style>
+                        </Grid.Style>
+                        
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Margin="6" VerticalAlignment="Center" Grid.Column="0" FontWeight="Bold" Text="Objects" />
-                        <TextBlock Margin="6" VerticalAlignment="Center" Foreground="{StaticResource BrushControlLightBackground}" Grid.Column="1" HorizontalAlignment="Right" Text="{Binding ObjectsCount}" />
+                        <TextBlock Margin="6" VerticalAlignment="Center" Grid.Column="0" FontWeight="Bold" Text="{Binding ObjectsFilterTitle}" />
+                        <TextBlock Margin="6" VerticalAlignment="Center" Grid.Column="1" HorizontalAlignment="Right" Text="{Binding ObjectsCount}" Visibility="{Binding IsCelestialObjectsListVisible, Converter={s:BoolToVisibilityConverter}}">
+                            <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="Foreground" Value="{StaticResource BrushControlLightBackground}" />
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
                     </Grid>
 
                     <!-- Celestial objects types tree view -->
@@ -78,7 +90,7 @@
                 <StackPanel Grid.Column="2" HorizontalAlignment="Stretch" Orientation="Vertical">
                     
                     <!-- Date and time panel -->
-                    <GroupBox Header="Date and time" Margin="8 0" IsEnabled="{Binding IsDateTimeControlsEnabled}">
+                    <GroupBox Header="Date and time" Margin="8 0" Visibility="{Binding IsDateTimeControlsVisible, Converter={s:BoolToVisibilityConverter}}">
                         <StackPanel Orientation="Vertical" Margin="0 8 0 0">
                             <DockPanel Margin="0 2">
                                 <Label Content="Date of observation:" VerticalAlignment="Center" />
