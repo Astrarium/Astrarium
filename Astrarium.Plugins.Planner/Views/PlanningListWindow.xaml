@@ -82,7 +82,9 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
@@ -101,14 +103,14 @@
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <TextBlock Grid.Column="0" Margin="0 6 10 0" Text="From:" Foreground="{StaticResource BrushControlLightBackground}" />
-                    <TextBlock Grid.Column="1" Text="22:00" Margin="0 6 0 0"  Foreground="{StaticResource BrushControlLightBackground}" />
-                    <TextBlock Grid.Column="0" Margin="0 0 10 0" Grid.Row="1" Text="To:" Foreground="{StaticResource BrushControlLightBackground}" />
-                    <TextBlock Grid.Column="1" Grid.Row="1" Text="00:00" Foreground="{StaticResource BrushControlLightBackground}" />
-                    <TextBlock Grid.Column="0" Margin="0 0 10 0"  Grid.Row="2" Text="Duration:" Foreground="{StaticResource BrushControlLightBackground}" />
-                    <TextBlock Grid.Column="1" Grid.Row="2" Text="2h 00m" Foreground="{StaticResource BrushControlLightBackground}" />
-                    <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3" Margin="0 16 0 0" Text="Observation place:" Foreground="{StaticResource BrushControlLightBackground}" />
-                    <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Text="Nizhny Novgorod" Foreground="{StaticResource BrushControlLightBackground}" />
+                    <TextBlock Grid.Column="0" Margin="0 6 10 0" Text="From:" />
+                    <TextBlock Grid.Column="1" Text="22:00" Margin="0 6 0 0" />
+                    <TextBlock Grid.Column="0" Margin="0 0 10 0" Grid.Row="1" Text="To:" />
+                    <TextBlock Grid.Column="1" Grid.Row="1" Text="00:00" />
+                    <TextBlock Grid.Column="0" Margin="0 0 10 0"  Grid.Row="2" Text="Duration:" />
+                    <TextBlock Grid.Column="1" Grid.Row="2" Text="2h 00m" />
+                    <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3" Margin="0 10 0 0" Text="Observation place:" />
+                    <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Text="Nizhny Novgorod" />
                 </Grid>
             </StackPanel>
 
@@ -129,24 +131,26 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Margin="8 6 0 0" Grid.Row="0" Grid.Column="0" Text="Sun set" /> 
+                <TextBlock Margin="8 6 8 0" Grid.Row="0" Grid.Column="0" Text="Sun set" /> 
                 <TextBlock Margin="0 6 0 0" Grid.Row="0" Grid.Column="1" Text="21:59" />
-                <TextBlock Margin="8 0 0 0" Grid.Row="1" Grid.Column="0" Text="Civil dusk" />
+                <TextBlock Margin="8 0 8 0" Grid.Row="1" Grid.Column="0" Text="Civil dusk" />
                 <TextBlock Grid.Row="1" Grid.Column="1" Text="21:59" />
-                <TextBlock Margin="8 0 0 0" Grid.Row="2" Grid.Column="0" Text="Nautical dusk" />
+                <TextBlock Margin="8 0 8 0" Grid.Row="2" Grid.Column="0" Text="Nautical dusk" />
                 <TextBlock Grid.Row="2" Grid.Column="1" Text="21:59" />
-                <TextBlock Margin="8 0 0 0" Grid.Row="3" Grid.Column="0" Text="Astronomical dusk" />
+                <TextBlock Margin="8 0 8 0" Grid.Row="3" Grid.Column="0" Text="Astronomical dusk" />
                 <TextBlock Grid.Row="3" Grid.Column="1" Text="21:59" />
-                <TextBlock Margin="8 0 0 0" Grid.Row="4" Grid.Column="0" Text="Astronomical twilight" />
+                <TextBlock Margin="8 0 8 0" Grid.Row="4" Grid.Column="0" Text="Astronomical twilight" />
                 <TextBlock Grid.Row="4" Grid.Column="1" Text="21:59" />
-                <TextBlock Margin="8 0 0 0" Grid.Row="5" Grid.Column="0" Text="Nautical twilight" />
+                <TextBlock Margin="8 0 8 0" Grid.Row="5" Grid.Column="0" Text="Nautical twilight" />
                 <TextBlock Grid.Row="5" Grid.Column="1" Text="21:59" />
-                <TextBlock Margin="8 0 0 0" Grid.Row="6" Grid.Column="0" Text="Civil twilight" />
+                <TextBlock Margin="8 0 8 0" Grid.Row="6" Grid.Column="0" Text="Civil twilight" />
                 <TextBlock Grid.Row="6" Grid.Column="1" Text="21:59" />
-                <TextBlock Margin="8 0 0 0" Grid.Row="7" Grid.Column="0" Text="Sun rise" />
+                <TextBlock Margin="8 0 8 0" Grid.Row="7" Grid.Column="0" Text="Sun rise" />
                 <TextBlock Grid.Row="7" Grid.Column="1" Text="21:59" />
             </Grid>
-            
+
+            <Grid Grid.Column="3" SnapsToDevicePixels="True" Background="{StaticResource BrushControlBackground}" Width="1" Height="140" Margin="10 0 0 0" />
+
             <controls:DirectionChart 
                 Height="140"
                 Width="140"
@@ -159,9 +163,11 @@
                 BodyCoordinates="{Binding BodyCoordinates}"
                 SiderealTime="{Binding SiderealTime}"
                 GeoLocation="{Binding GeoLocation}"
-                Grid.Column="4" HorizontalAlignment="Stretch" Background="#202020" />
+                Grid.Column="5" HorizontalAlignment="Stretch" Background="#202020" />
+
 
             <controls:VisibilityChart 
+                Grid.Column="6"
                 Width="400"
                 Height="140"
                 Margin="8"
@@ -173,7 +179,8 @@
                 BodyCoordinates="{Binding BodyCoordinates}"
                 SiderealTime="{Binding SiderealTime}"
                 GeoLocation="{Binding GeoLocation}"
-                Grid.Column="5" HorizontalAlignment="Stretch" Background="#202020" />
+                Background="#202020" HorizontalAlignment="Stretch" />
+
         </Grid>
 
         <Grid Margin="1" Grid.Row="1">

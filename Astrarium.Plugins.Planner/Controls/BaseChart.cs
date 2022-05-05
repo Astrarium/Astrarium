@@ -68,9 +68,19 @@ namespace Astrarium.Plugins.Planner.Controls
 
         private void Interpolate()
         {
-            if (SunCoordinates != null && BodyCoordinates != null && GeoLocation != null)
+            if (SunCoordinates != null && GeoLocation != null)
             {
                 sunCoordinatesInterpolated = Interpolate(SunCoordinates, GeoLocation, SiderealTime, 120);
+                InvalidateVisual();
+            }
+            else
+            {
+                sunCoordinatesInterpolated = null;
+                InvalidateVisual();
+            }
+
+            if (BodyCoordinates != null && GeoLocation != null)
+            {
                 bodyCoordinatesInterpolated = Interpolate(BodyCoordinates, GeoLocation, SiderealTime, 120);
                 InvalidateVisual();
             }

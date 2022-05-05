@@ -216,6 +216,8 @@ namespace Astrarium.Plugins.Planner.ViewModels
             AddObjectsCommand = new Command(AddObjects);
             SaveCommand = new Command(Save);
 
+            
+
             TableData = CollectionViewSource.GetDefaultView(ephemerides);
         }
 

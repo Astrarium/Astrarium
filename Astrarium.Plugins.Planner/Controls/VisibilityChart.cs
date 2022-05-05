@@ -30,7 +30,7 @@ namespace Astrarium.Plugins.Planner.Controls
             var bounds = new Rect(0, 0, ActualWidth, ActualHeight);
             dc.PushClip(new RectangleGeometry(bounds));
 
-            dc.PushClip(new RectangleGeometry(new Rect(horizontalPadding, verticalPadding, ActualWidth - 2 * horizontalPadding, ActualHeight - 2 * verticalPadding)));
+            dc.PushClip(new RectangleGeometry(new Rect(horizontalPadding, verticalPadding, Math.Max(0, ActualWidth - 2 * horizontalPadding), ActualHeight - 2 * verticalPadding)));
 
             // background
             dc.DrawRectangle(brushBackground, null, bounds);
