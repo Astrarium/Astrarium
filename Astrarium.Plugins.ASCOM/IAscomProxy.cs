@@ -1,6 +1,7 @@
 ﻿using Astrarium.Algorithms;
 using System;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.ASCOM
 {
@@ -95,7 +96,7 @@ namespace Astrarium.Plugins.ASCOM
         /// <summary>
         /// Shows dialog to choose telescope and, if choosen, connects to the selected telescope.
         /// </summary>
-        string Connect(string telescopeId);
+        Task<string> Connect(string telescopeId);
 
         /// <summary>
         /// Disconnects the selected telescope.

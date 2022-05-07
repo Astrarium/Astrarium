@@ -115,7 +115,7 @@ namespace Astrarium.Plugins.ASCOM
 
         private void Ascom_OnMessageShow(string message)
         {
-            ViewManager.ShowPopupMessage(message);
+            System.Windows.Application.Current.Dispatcher.Invoke(() => ViewManager.ShowPopupMessage(message));
         }
 
         private void Ascom_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -165,7 +165,7 @@ namespace Astrarium.Plugins.ASCOM
             if (ascom.IsAscomPlatformInstalled)
             {
                 string savedTelescopeId = settings.Get<string>("ASCOMTelescopeId");
-                var telescopeId = ascom.Connect(savedTelescopeId);
+                var telescopeId = await ascom.Connect(savedTelescopeId);
                 if (!string.IsNullOrEmpty(telescopeId))
                 {
                     ascom.SetDateTime(DateTime.UtcNow);
