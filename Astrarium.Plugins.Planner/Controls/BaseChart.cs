@@ -15,6 +15,7 @@ namespace Astrarium.Plugins.Planner.Controls
         public readonly static DependencyProperty SiderealTimeProperty = DependencyProperty.Register(nameof(SiderealTime), typeof(double), typeof(BaseChart), new FrameworkPropertyMetadata(0.0) { AffectsRender = true, BindsTwoWayByDefault = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DepPropertyChanged) });
         public readonly static DependencyProperty FromTimeProperty = DependencyProperty.Register(nameof(FromTime), typeof(TimeSpan), typeof(BaseChart), new FrameworkPropertyMetadata(TimeSpan.Zero) { AffectsRender = true, BindsTwoWayByDefault = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
         public readonly static DependencyProperty ToTimeProperty = DependencyProperty.Register(nameof(ToTime), typeof(TimeSpan), typeof(BaseChart), new FrameworkPropertyMetadata(TimeSpan.Zero) { AffectsRender = true, BindsTwoWayByDefault = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
+        public static readonly DependencyProperty IsDarkModeProperty = DependencyProperty.Register(nameof(IsDarkMode), typeof(bool), typeof(BaseChart), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
 
         protected CrdsHorizontal[] bodyCoordinatesInterpolated = null;
         protected CrdsHorizontal[] sunCoordinatesInterpolated = null;
@@ -64,6 +65,12 @@ namespace Astrarium.Plugins.Planner.Controls
         {
             get => (TimeSpan)GetValue(ToTimeProperty);
             set => SetValue(ToTimeProperty, value);
+        }
+
+        public bool IsDarkMode
+        {
+            get => (bool)GetValue(IsDarkModeProperty);
+            set => SetValue(IsDarkModeProperty, value);
         }
 
         private void Interpolate()

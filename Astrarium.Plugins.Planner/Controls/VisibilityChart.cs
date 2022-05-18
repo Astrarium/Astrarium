@@ -17,12 +17,12 @@ namespace Astrarium.Plugins.Planner.Controls
             const double horizontalPadding = 10;
 
             Brush brushBackground = new SolidColorBrush(Color.FromRgb(20, 20, 20));
-            Brush brushGround = Brushes.DarkGreen;
+            Brush brushGround = IsDarkMode ? Brushes.DarkRed : Brushes.DarkGreen;
 
             Brush brushTextLabel = new SolidColorBrush((Color)FindResource("ColorControlLightBackground"));
             Brush brushHourLine = new SolidColorBrush(Color.FromArgb(50, 255, 255, 255));
-            Brush brushBodyLine = Brushes.Yellow;
-            Color colorDaylight = Color.FromRgb(0, 114, 196);
+            Brush brushBodyLine = IsDarkMode ? Brushes.Red : Brushes.Yellow;
+            Color colorDaylight = IsDarkMode ? Colors.DarkRed : Color.FromRgb(0, 114, 196);
             Pen penHourLine = new Pen(brushHourLine, dpiFactor);
             Pen penBodyLine = new Pen(brushBodyLine, dpiFactor);
             Pen penObservationLimits = new Pen(new SolidColorBrush(Color.FromRgb(155, 0, 0)), dpiFactor * 2);

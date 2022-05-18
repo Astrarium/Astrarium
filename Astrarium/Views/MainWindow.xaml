@@ -192,6 +192,7 @@
                                 <Setter Property="InputGestureText" Value="{Binding InputGestureText}" />
                                 <Setter Property="CommandParameter" Value="{Binding CommandParameter}" />
                                 <Setter Property="ItemsSource" Value="{Binding SubItems}" />
+                                <Setter Property="ToolTip" Value="{Binding Tooltip}" />
                             </Style>
                         </ContextMenu.ItemContainerStyle>
                     </ContextMenu>

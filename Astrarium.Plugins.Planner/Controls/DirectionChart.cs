@@ -20,8 +20,8 @@ namespace Astrarium.Plugins.Planner.Controls
             RenderOptions.SetEdgeMode(this, EdgeMode.Unspecified);
 
             Brush brushTextLabel = new SolidColorBrush((Color)FindResource("ColorControlLightBackground"));
-            Brush brushBodyLine = Brushes.Yellow;
-            Brush brushBackground = new SolidColorBrush(Color.FromRgb(20, 20, 20));
+            Brush brushBodyLine = IsDarkMode ? Brushes.Red : Brushes.Yellow;
+            Brush brushBackground = IsDarkMode ? new SolidColorBrush(Color.FromRgb(20, 0, 0)) : new SolidColorBrush(Color.FromRgb(20, 20, 20));
             Pen penBodyLine = new Pen(brushBodyLine, dpiFactor);
 
             double padding = 20;

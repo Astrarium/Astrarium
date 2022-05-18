@@ -18,6 +18,12 @@ namespace Astrarium.Plugins.Planner.ViewModels
         public ICommand OkCommand { get; private set; }
         public ICommand CancelCommand { get; private set; }
 
+        public string Title
+        {
+            get => GetValue<string>(nameof(Title));
+            set => SetValue(nameof(Title), value);
+        }
+
         public PlanningFilter Filter
         {
             get
@@ -41,7 +47,6 @@ namespace Astrarium.Plugins.Planner.ViewModels
             }
             set
             {
-                IsDateTimeControlsVisible = false;
                 JulianDay = value.JulianDayMidnight;
                 TimeFrom = TimeSpan.FromHours(value.TimeFrom);
                 TimeTo = TimeSpan.FromHours(value.TimeTo);
@@ -124,7 +129,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
             }
         }
 
-        public bool IsDateTimeControlsVisible { get; private set; } = true;
+        public bool IsDateTimeControlsVisible { get; set; } = true;
 
         public bool IsCelestialObjectsTypesTreeVisible => Nodes.Any();
         

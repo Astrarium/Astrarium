@@ -20,14 +20,18 @@ namespace Astrarium.Plugins.Planner
         private readonly ISkyMap map;
         private readonly IPlanManagerFactory planManagerFactory;
         private readonly IRecentPlansManager recentPlansManager;
+        private readonly ISettings settings;
 
-        public PlannerPlugin(ISky sky, ISkyMap map, IRecentPlansManager recentPlansManager, IPlanManagerFactory planManagerFactory)
+        public PlannerPlugin(ISky sky, ISkyMap map, ISettings settings, IRecentPlansManager recentPlansManager, IPlanManagerFactory planManagerFactory)
         {
             this.sky = sky;
             this.map = map;
+            this.settings = settings;
             this.map.SelectedObjectChanged += (x) => NotifyPropertyChanged(nameof(HasSelectedObject));
             this.planManagerFactory = planManagerFactory;
             this.recentPlansManager = recentPlansManager;
+
+            DefineSetting("PlannerDefaultSettings", new PlanningFilter(), isPermanent: true);
 
             /* Main app menu */
 
@@ -40,7 +44,7 @@ namespace Astrarium.Plugins.Planner
                 new MenuItem("Open plan...", new Command(OpenPlan)),
                 recentPlansMenu,
                 null,
-                new MenuItem("Defaults...")
+                new MenuItem("Defaults...", new Command(ShowPlannerDefaults))
             });
             MenuItems.Add(MenuItemPosition.MainMenuTop, plannerMenu);
 
@@ -70,10 +74,18 @@ namespace Astrarium.Plugins.Planner
         private void CreateNewPlan(PlanImportData data)
         {
             var planFilterVM = ViewManager.CreateViewModel<PlanningFilterVM>();
+            var defaults = settings.Get("PlannerDefaultSettings", new PlanningFilter());
+
+            planFilterVM.Title = "Creating new plan";
+            planFilterVM.Filter = defaults;
+            planFilterVM.JulianDay = sky.Context.JulianDayMidnight;
+            planFilterVM.TimeFrom = TimeSpan.FromHours(22);
+            planFilterVM.TimeTo = TimeSpan.FromHours(0);
 
             // create filter window with list of celestial objects
             if (data != null && data.Objects.Any())
             {
+                planFilterVM.Title = "Importing plan";
                 planFilterVM.CelestialObjects = data.Objects;
                 if (data.Date != null)
                     planFilterVM.JulianDay = new Date(data.Date.Value).ToJulianEphemerisDay();
@@ -81,10 +93,6 @@ namespace Astrarium.Plugins.Planner
                     planFilterVM.TimeFrom = data.Begin.Value;
                 if (data.End != null)
                     planFilterVM.TimeTo = data.End.Value;
-            }
-            else
-            {
-                planFilterVM.Nodes.First().IsChecked = true;
             }
 
             if (ViewManager.ShowDialog(planFilterVM) ?? false)
@@ -154,6 +162,29 @@ namespace Astrarium.Plugins.Planner
             if (filePath != null)
             {
                 LoadPlan(filePath, planManagerFactory.GetFormat(selectedExtensionIndex));
+            }
+        }
+
+        private void ShowPlannerDefaults()
+        {
+            var planFilterVM = ViewManager.CreateViewModel<PlanningFilterVM>();
+
+            var defaults = settings.Get("PlannerDefaultSettings", new PlanningFilter());
+
+            defaults.JulianDayMidnight = sky.Context.JulianDayMidnight;
+            defaults.ObserverLocation = sky.Context.GeoLocation;
+
+            planFilterVM.Title = "Planner Default Settings";
+            planFilterVM.IsDateTimeControlsVisible = false;
+            planFilterVM.Filter = defaults;
+            if (!defaults.CelestialObjectsTypes.Any())
+            {
+                planFilterVM.Nodes.First().IsChecked = true;
+            }
+
+            if (ViewManager.ShowDialog(planFilterVM) ?? false)
+            {
+                settings.SetAndSave("PlannerDefaultSettings", planFilterVM.Filter);
             }
         }
 
@@ -233,7 +264,7 @@ namespace Astrarium.Plugins.Planner
                 if (activePlans.Any())
                 {
                     menuItems.Add(null);
-                    menuItems.AddRange(activePlans.Select(plan => new MenuItem(plan.Name, new Command<PlanningListVM>(AddObjectToPlan), plan)));
+                    menuItems.AddRange(activePlans.Select(plan => new MenuItem(plan.IsSaved ? Path.GetFileName(plan.FilePath) : Formatters.Date.Format(plan.Date), new Command<PlanningListVM>(AddObjectToPlan), plan) { Tooltip = plan.IsSaved ? plan.FilePath : "Not saved yet" }));
                 }
 
                 return new ObservableCollection<MenuItem>(menuItems);

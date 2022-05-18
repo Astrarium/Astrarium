@@ -367,8 +367,18 @@ namespace Astrarium.Types
         {
             public string Format(object value)
             {
-                Date d = (Date)value;
-                return $"{(int)d.Day:00} {AbbreviatedMonthNames[d.Month - 1]} {d.Year}";
+                if (value is Date d)
+                {
+                    return $"{(int)d.Day:00} {AbbreviatedMonthNames[d.Month - 1]} {d.Year}";
+                }
+                else if (value is DateTime dt)
+                {
+                    return $"{dt.Day:00} {AbbreviatedMonthNames[dt.Month - 1]} {dt.Year}";
+                }
+                else
+                {
+                    return "?";
+                }
             }
         }
 

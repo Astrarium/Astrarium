@@ -124,6 +124,16 @@ namespace Astrarium.Plugins.Planner.ViewModels
             private set => SetValue(nameof(ToTime), value);
         }
 
+        public string DurationString
+        {
+            get 
+            { 
+                double hours = ToTime.TotalHours - FromTime.TotalHours;
+                if (hours < 0) hours += 24;
+                return Formatters.TimeSpan.Format(TimeSpan.FromHours(hours));
+            }
+        }
+
         public IList SelectedTableItems
         {
             get => GetValue<IList>(nameof(SelectedTableItems));
@@ -195,17 +205,29 @@ namespace Astrarium.Plugins.Planner.ViewModels
         public bool NoTotalItems => isInitialized && TotalItemsCount == 0;
         public bool NoFilteredItems => isInitialized && TotalItemsCount > 0 && FilteredItemsCount == 0;
         public bool HasItemsToDisplay => isInitialized && !NoTotalItems && !NoFilteredItems;
+        
+        public DateTime Date 
+        {
+            get => GetValue<DateTime>(nameof(Date));
+            private set => SetValue(nameof(Date), value);
+        }
 
-        public string Name { get; set; }
-        public DateTime Date { get; private set; }
+        public bool IsDarkMode
+        {
+            get => GetValue<bool>(nameof(IsDarkMode));
+            private set => SetValue(nameof(IsDarkMode), value);
+        }
 
-        public PlanningListVM(ISky sky, IMainWindow mainWindow, IRecentPlansManager recentPlansManager, IObservationPlanner planner, IPlanManagerFactory readWriterFactory)
+        public PlanningListVM(ISky sky, ISettings settings, IMainWindow mainWindow, IRecentPlansManager recentPlansManager, IObservationPlanner planner, IPlanManagerFactory readWriterFactory)
         {
             this.planner = planner;
             this.sky = sky;
             this.mainWindow = mainWindow;
             this.recentPlansManager = recentPlansManager;
             this.readWriterFactory = readWriterFactory;
+
+            IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
+            settings.SettingValueChanged += Settings_SettingValueChanged;
 
             SetTimeCommand = new Command<Date>(SetTime);
             ShowObjectCommand = new Command<CelestialObject>(ShowObject);
@@ -216,26 +238,32 @@ namespace Astrarium.Plugins.Planner.ViewModels
             AddObjectsCommand = new Command(AddObjects);
             SaveCommand = new Command(Save);
 
-            
-
             TableData = CollectionViewSource.GetDefaultView(ephemerides);
         }
 
         private double julianDay;
         private PlanningFilter filter;
-        
+
+        private void Settings_SettingValueChanged(string settingName, object value)
+        {
+            if (settingName == "Schema")
+            {
+                IsDarkMode = (ColorSchema)value == ColorSchema.Red;
+            }
+        }
+
         public void CreatePlan(PlanningFilter filter)
         {
             this.filter = filter;
             julianDay = filter.JulianDayMidnight;
 
-            Name = new Date(filter.JulianDayMidnight, filter.ObserverLocation.UtcOffset).ToString();
             GeoLocation = filter.ObserverLocation;
             FromTime = TimeSpan.FromHours(filter.TimeFrom);
             ToTime = TimeSpan.FromHours(filter.TimeTo);
+            NotifyPropertyChanged(nameof(DurationString));
             SkyContext context = new SkyContext(julianDay, GeoLocation, preferFast: true);
-            SunCoordinates = context.Get(sky.SunEquatorial);
             SiderealTime = context.SiderealTime;
+            SunCoordinates = context.Get(sky.SunEquatorial);
             Date = new Date(julianDay, GeoLocation.UtcOffset).ToDateTime();
 
             DoCreatePlan(filter);
@@ -328,7 +356,9 @@ namespace Astrarium.Plugins.Planner.ViewModels
         private void AddObjects()
         {
             var vm = ViewManager.CreateViewModel<PlanningFilterVM>();
+            vm.Title = "Adding Objects";
             vm.Filter = filter;
+            vm.IsDateTimeControlsVisible = false;
             if (ViewManager.ShowDialog(vm) ?? false)
             {
                 DoCreatePlan(vm.Filter);
