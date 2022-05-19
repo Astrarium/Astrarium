@@ -10,7 +10,7 @@
         mc:Ignorable="d"
         Title="{Binding Title}"
         Style="{StaticResource {x:Type Window}}" 
-        MinHeight="300" MinWidth="400"
+        MinHeight="300" MinWidth="600"
         WindowStartupLocation="CenterOwner"
         Height="500" Width="800">
     <Grid Margin="4">
@@ -90,18 +90,18 @@
                 <StackPanel Grid.Column="2" HorizontalAlignment="Stretch" Orientation="Vertical">
                     
                     <!-- Date and time panel -->
-                    <GroupBox Header="Date and time" Margin="8 0" Visibility="{Binding IsDateTimeControlsVisible, Converter={s:BoolToVisibilityConverter}}">
+                    <GroupBox Header="{t:Text Planner.PlanningFilter.DateTime}" Margin="8 0" Visibility="{Binding IsDateTimeControlsVisible, Converter={s:BoolToVisibilityConverter}}">
                         <StackPanel Orientation="Vertical" Margin="0 8 0 0">
                             <DockPanel Margin="0 2">
-                                <Label Content="Date of observation:" VerticalAlignment="Center" />
+                                <Label Content="{t:Text Planner.PlanningFilter.Date}" VerticalAlignment="Center" />
                                 <c:DatePicker JulianDay="{Binding JulianDay}" UtcOffset="{Binding UtcOffset}" Options="DateOnly" Grid.Column="3" HorizontalAlignment="Right" VerticalAlignment="Center" />
                             </DockPanel>
                             <DockPanel Margin="0 2">
-                                <Label Content="Time of beginning:" VerticalAlignment="Center" />
+                                <Label Content="{t:Text Planner.PlanningFilter.TimeFrom}" VerticalAlignment="Center" />
                                 <c:TimeInput Value="{Binding TimeFrom}" ShowSeconds="False" Width="55" HorizontalAlignment="Right" VerticalAlignment="Center" />
                             </DockPanel>
                             <DockPanel Margin="0 2">
-                                <Label Content="Time of end:" VerticalAlignment="Center" />
+                                <Label Content="{t:Text Planner.PlanningFilter.TimeTo}" VerticalAlignment="Center" />
                                 <c:TimeInput Value="{Binding TimeTo}" ShowSeconds="False" Width="55" HorizontalAlignment="Right" VerticalAlignment="Center" />
                             </DockPanel>
                         </StackPanel>
@@ -111,35 +111,35 @@
                     <GroupBox Margin="8 8 8 0">
 
                         <GroupBox.Header>
-                            <CheckBox IsChecked="{Binding ApplyFilters}" Content="Apply filters" VerticalAlignment="Center" />
+                            <CheckBox IsChecked="{Binding ApplyFilters}" Content="{t:Text Planner.PlanningFilter.ApplyFilters}" VerticalAlignment="Center" />
                         </GroupBox.Header>
                         
                         <StackPanel IsEnabled="{Binding ApplyFilters}" Orientation="Vertical" Margin="0 8 0 0">
 
                             <DockPanel Margin="8 2">
-                                <CheckBox IsChecked="{Binding EnableMinBodyAltitude}" Content="Minimal altitude of celestial object" VerticalAlignment="Center" />
+                                <CheckBox IsChecked="{Binding EnableMinBodyAltitude}" Content="{t:Text Planner.PlanningFilter.MinBodyAltitude}" VerticalAlignment="Center" />
                                 <c:NumericUpDown IsEnabled="{Binding EnableMinBodyAltitude}" Width="50" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="0" Value="{Binding MinBodyAltitude}" Maximum="90" DecimalPlaces="0" />
                             </DockPanel>
 
                             <DockPanel Margin="8 2">
-                                <CheckBox IsChecked="{Binding EnableMaxSunAltitude}" Content="Maximal altitude of the Sun" VerticalAlignment="Center" />
+                                <CheckBox IsChecked="{Binding EnableMaxSunAltitude}" Content="{t:Text Planner.PlanningFilter.MaxSunAltitude}" VerticalAlignment="Center" />
                                 <c:NumericUpDown IsEnabled="{Binding EnableMaxSunAltitude}" Width="50" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="-18" Maximum="0" Value="{Binding MaxSunAltitude}" DecimalPlaces="0" />
                             </DockPanel>
 
                             <DockPanel Margin="8 2">
-                                <CheckBox IsChecked="{Binding EnableMagLimit}" Content="Minimal magnitude of celestial body" VerticalAlignment="Center" />
+                                <CheckBox IsChecked="{Binding EnableMagLimit}" Content="{t:Text Planner.PlanningFilter.MagLimit}" VerticalAlignment="Center" />
                                 <c:NumericUpDown IsEnabled="{Binding EnableMagLimit}" Width="50" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="-10" Maximum="25" Value="{Binding MagLimit}" DecimalPlaces="1" />
                             </DockPanel>
 
+                            <CheckBox IsChecked="{Binding SkipUnknownMagnitude}" Margin="8 4" Content="{t:Text Planner.PlanningFilter.SkipUnknownMagnitude}" VerticalAlignment="Center" />
+
                             <DockPanel Margin="8 2">
-                                <CheckBox IsChecked="{Binding EnableDurationLimit}" Content="Except objects observable less than (minutes)" VerticalAlignment="Center" />
+                                <CheckBox IsChecked="{Binding EnableDurationLimit}" Content="{t:Text Planner.PlanningFilter.DurationLimit}" VerticalAlignment="Center" />
                                 <c:NumericUpDown IsEnabled="{Binding EnableDurationLimit}" Width="50" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="0" Maximum="60" Value="{Binding DurationLimit}" DecimalPlaces="0" />
                             </DockPanel>
 
-                            <CheckBox IsChecked="{Binding SkipUnknownMagnitude}" Margin="8 4" Content="Skip objects with unknown magnitude" VerticalAlignment="Center" />
-
                             <DockPanel Margin="8 2">
-                                <CheckBox IsChecked="{Binding EnableCountLimit}" Content="Limit count of objects" VerticalAlignment="Center" />
+                                <CheckBox IsChecked="{Binding EnableCountLimit}" Content="{t:Text Planner.PlanningFilter.CountLimit}" VerticalAlignment="Center" />
                                 <c:NumericUpDown IsEnabled="{Binding EnableCountLimit}" Width="50" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="1" Maximum="1000" Value="{Binding CountLimit}" DecimalPlaces="0" />
                             </DockPanel>
 

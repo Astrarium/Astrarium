@@ -35,22 +35,22 @@ namespace Astrarium.Plugins.Planner
 
             /* Main app menu */
 
-            MenuItem plannerMenu = new MenuItem("Planner");
-            MenuItem recentPlansMenu = new MenuItem("Recent plans");
+            MenuItem plannerMenu = new MenuItem("$Planner.Menu.Planner");
+            MenuItem recentPlansMenu = new MenuItem("$Planner.Menu.RecentPlans");
             recentPlansMenu.AddBinding(new SimpleBinding(this, nameof(RecentPlansMenuItems), nameof(MenuItem.SubItems)));
             recentPlansMenu.AddBinding(new SimpleBinding(this, nameof(HasRecentPlans), nameof(MenuItem.IsEnabled)));
             plannerMenu.SubItems = new ObservableCollection<MenuItem>(new[] {
-                new MenuItem("Create new plan...", new Command<PlanImportData>(CreateNewPlan), null),
-                new MenuItem("Open plan...", new Command(OpenPlan)),
+                new MenuItem("$Planner.Menu.CreateNewPlan", new Command<PlanImportData>(CreateNewPlan), null),
+                new MenuItem("$Planner.Menu.OpenPlan", new Command(OpenPlan)),
                 recentPlansMenu,
                 null,
-                new MenuItem("Defaults...", new Command(ShowPlannerDefaults))
+                new MenuItem("$Planner.Menu.Defaults", new Command(ShowPlannerDefaults))
             });
             MenuItems.Add(MenuItemPosition.MainMenuTop, plannerMenu);
 
             /* Context menu */
 
-            MenuItem contextMenu = new MenuItem("Add to observation plan");
+            MenuItem contextMenu = new MenuItem("$Planner.ContextMenu.AddToObservationPlan");
             contextMenu.AddBinding(new SimpleBinding(this, nameof(HasSelectedObject), nameof(MenuItem.IsEnabled)));
             contextMenu.AddBinding(new SimpleBinding(this, nameof(ActivePlansMenuItems), nameof(MenuItem.SubItems)));
             MenuItems.Add(MenuItemPosition.ContextMenu, contextMenu);
@@ -76,7 +76,7 @@ namespace Astrarium.Plugins.Planner
             var planFilterVM = ViewManager.CreateViewModel<PlanningFilterVM>();
             var defaults = settings.Get("PlannerDefaultSettings", new PlanningFilter());
 
-            planFilterVM.Title = "Creating new plan";
+            planFilterVM.Title = Text.Get("Planner.PlanningFilter.CreateNew.Title");
             planFilterVM.Filter = defaults;
             planFilterVM.JulianDay = sky.Context.JulianDayMidnight;
             planFilterVM.TimeFrom = TimeSpan.FromHours(22);
@@ -121,7 +121,7 @@ namespace Astrarium.Plugins.Planner
 
         private void ClearRecentPlansList()
         {
-            if (ViewManager.ShowMessageBox("Warning", "Do you really want to clear the recent plans list?", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)
+            if (ViewManager.ShowMessageBox("$Warning", "$Planner.Menu.RecentPlans.Clear.WarningText", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)
             {
                 recentPlansManager.ClearRecentPlansList();
             }
@@ -244,7 +244,7 @@ namespace Astrarium.Plugins.Planner
                 if (recentPlanFiles.Any())
                 {
                     recentPlansMenuItems.Add(null);
-                    recentPlansMenuItems.Add(new MenuItem("Clear list", new Command(ClearRecentPlansList)));
+                    recentPlansMenuItems.Add(new MenuItem("$Planner.Menu.RecentPlans.Clear", new Command(ClearRecentPlansList)));
                 }
 
                 return recentPlansMenuItems;
@@ -259,12 +259,12 @@ namespace Astrarium.Plugins.Planner
             get
             {
                 List<MenuItem> menuItems = new List<MenuItem>();
-                menuItems.Add(new MenuItem("Create new plan...", new Command<PlanningListVM>(AddObjectToPlan), null));
+                menuItems.Add(new MenuItem("$Planner.ContextMenu.CreateNewPlan", new Command<PlanningListVM>(AddObjectToPlan), null));
 
                 if (activePlans.Any())
                 {
                     menuItems.Add(null);
-                    menuItems.AddRange(activePlans.Select(plan => new MenuItem(plan.IsSaved ? Path.GetFileName(plan.FilePath) : Formatters.Date.Format(plan.Date), new Command<PlanningListVM>(AddObjectToPlan), plan) { Tooltip = plan.IsSaved ? plan.FilePath : "Not saved yet" }));
+                    menuItems.AddRange(activePlans.Select(plan => new MenuItem(plan.IsSaved ? Path.GetFileName(plan.FilePath) : Formatters.Date.Format(plan.Date), new Command<PlanningListVM>(AddObjectToPlan), plan) { Tooltip = plan.IsSaved ? plan.FilePath : "$Planner.ContextMenu.PlanItem.NotSavedTooltip" }));
                 }
 
                 return new ObservableCollection<MenuItem>(menuItems);

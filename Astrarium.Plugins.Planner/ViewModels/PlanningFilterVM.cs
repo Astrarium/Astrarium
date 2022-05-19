@@ -137,7 +137,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
 
         public int ObjectsCount => ListItems.Where(x => x.IsChecked).Count();
 
-        public string ObjectsFilterTitle => IsCelestialObjectsListVisible ? Text.Get("Objects") : Text.Get("ObjectTypes");
+        public string ObjectsFilterTitle => IsCelestialObjectsListVisible ? Text.Get("Planner.PlanningFilter.Objects") : Text.Get("Planner.PlanningFilter.ObjectsTypes");
 
         public double JulianDay
         {
@@ -255,7 +255,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
             string[] types = sky.CelestialObjects.Select(c => c.Type).Where(t => t != null).Distinct().ToArray();
             var groups = types.GroupBy(t => t.Split('.').First());
 
-            Node root = new Node("All");
+            Node root = new Node(Text.Get("Planner.PlanningFilter.ObjectsTypes.All"));
             root.CheckedChanged += Root_CheckedChanged;
 
             foreach (var group in groups)
