@@ -47,8 +47,10 @@ namespace Astrarium.Plugins.MinorBodies
 
             double ksi = 0, eta = 0, zeta = 0, Delta = 0;
 
+            int count = 0;
+
             // Iterative process to find rectangular coordinates of minor body
-            while (Math.Abs(tau - tau0) > deltaTau)
+            while (Math.Abs(tau - tau0) > deltaTau && count++ < 100)
             {
                 // Rectangular coordinates of minor body
                 rect = MinorBodyPositions.GetRectangularCoordinates(orbit, c.JulianDay - tau, c.Epsilon);
