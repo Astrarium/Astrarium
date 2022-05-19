@@ -505,12 +505,10 @@ namespace Astrarium.Plugins.ASCOM
                 Position.Alpha = 0;
                 Position.Delta = 0;
                 IsConnected = false;
-
-
-                NotifyPropertyChanged(nameof(IsSlewing));
-                NotifyPropertyChanged(nameof(AtHome));
-                NotifyPropertyChanged(nameof(AtPark));
-                NotifyPropertyChanged(nameof(IsTracking));
+                IsSlewing = false;
+                AtHome = false;
+                AtPark = false;
+                IsTracking = false;
             }
         }
 
@@ -557,7 +555,6 @@ namespace Astrarium.Plugins.ASCOM
                 Log.Error($"Unable to set tracking: {ex}");
             }
         }
-
 
         /// <summary>
         /// Thread loop to update telescope state
@@ -613,7 +610,14 @@ namespace Astrarium.Plugins.ASCOM
                         IsTracking = false;
                     }
                 }
-                catch { }
+                catch 
+                {
+                    IsConnected = false; 
+                    IsSlewing = false;
+                    AtHome = false;
+                    AtPark = false;
+                    IsTracking = false;
+                }
             }
         }
 

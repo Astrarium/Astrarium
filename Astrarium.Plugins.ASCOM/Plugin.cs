@@ -4,6 +4,7 @@ using Astrarium.Types;
 using System;
 using System.Drawing;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.ASCOM
@@ -99,6 +100,11 @@ namespace Astrarium.Plugins.ASCOM
             DefineSettingsSection<AscomSettingsSection, SettingsViewModel>();
 
             settings.SettingValueChanged += Settings_SettingValueChanged;
+        }
+
+        public override void Initialize()
+        {
+            this.ascom.PollingPeriod = (int)settings.Get<decimal>("TelescopePollingPeriod");
         }
 
         private void Settings_SettingValueChanged(string settingName, object value)
