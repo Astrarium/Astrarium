@@ -1,4 +1,5 @@
 ﻿using Astrarium.Algorithms;
+using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 
@@ -67,7 +68,7 @@ namespace Astrarium.Plugins.Planner.Controls
             string[] labels = new string[] { "S", "W", "N", "E" };
             for (int i = 0; i < 4; i++)
             {
-                var text = new FormattedText(labels[i], System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Arial"), 10, brushTextLabel);
+                var text = new FormattedText(Text.Get($"Planner.DirectionChart.{labels[i]}"), System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Arial"), 10, brushTextLabel);
                 double angle = Angle.ToRadians(i * 90 - 90);
                 double r = radius + 5 + Math.Max(text.WidthIncludingTrailingWhitespace / 2, text.Height / 2);
                 double x = ActualWidth / 2 + r * Math.Cos(angle);

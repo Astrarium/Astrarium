@@ -85,7 +85,6 @@ namespace Astrarium.Plugins.Planner
             // create filter window with list of celestial objects
             if (data != null && data.Objects.Any())
             {
-                planFilterVM.Title = "Importing plan";
                 planFilterVM.CelestialObjects = data.Objects;
                 if (data.Date != null)
                     planFilterVM.JulianDay = new Date(data.Date.Value).ToJulianEphemerisDay();
@@ -93,6 +92,8 @@ namespace Astrarium.Plugins.Planner
                     planFilterVM.TimeFrom = data.Begin.Value;
                 if (data.End != null)
                     planFilterVM.TimeTo = data.End.Value;
+                if (data.FilePath != null)
+                    planFilterVM.Title = Text.Get("Planner.PlanningFilter.Import.Title");
             }
 
             if (ViewManager.ShowDialog(planFilterVM) ?? false)
@@ -136,7 +137,7 @@ namespace Astrarium.Plugins.Planner
             else
             {
                 recentPlansManager.RemoveFromRecentList(recentPlan);
-                ViewManager.ShowMessageBox("$Error", "File does not exist anymore.");
+                ViewManager.ShowMessageBox("$Error", "$Planner.Menu.RecentPlans.FileDoesNotExist");
             }
         }
 
@@ -158,7 +159,7 @@ namespace Astrarium.Plugins.Planner
 
         private void OpenPlan()
         {
-            string filePath = ViewManager.ShowOpenFileDialog("Open", planManagerFactory.FormatsString, out int selectedExtensionIndex);
+            string filePath = ViewManager.ShowOpenFileDialog("$Planner.Menu.OpenPlan.DialogTitle", planManagerFactory.FormatsString, out int selectedExtensionIndex);
             if (filePath != null)
             {
                 LoadPlan(filePath, planManagerFactory.GetFormat(selectedExtensionIndex));
@@ -174,7 +175,7 @@ namespace Astrarium.Plugins.Planner
             defaults.JulianDayMidnight = sky.Context.JulianDayMidnight;
             defaults.ObserverLocation = sky.Context.GeoLocation;
 
-            planFilterVM.Title = "Planner Default Settings";
+            planFilterVM.Title = Text.Get("Planner.PlanningFilter.Defaults");
             planFilterVM.IsDateTimeControlsVisible = false;
             planFilterVM.Filter = defaults;
             if (!defaults.CelestialObjectsTypes.Any())
@@ -195,7 +196,7 @@ namespace Astrarium.Plugins.Planner
             PlanImportData plan = null;
             var tokenSource = new CancellationTokenSource();
             var progress = new Progress<double>();
-            ViewManager.ShowProgress("Please wait", "Reading data...", tokenSource, progress);
+            ViewManager.ShowProgress("$Planner.Importing.WaitTitle", "$Planner.Importing.WaitText", tokenSource, progress);
 
             try
             {
@@ -206,7 +207,7 @@ namespace Astrarium.Plugins.Planner
                 tokenSource.Cancel();
                 recentPlansManager.RemoveFromRecentList(new RecentPlan(filePath, fileFormat));
                 Log.Error($"Unable to import observation plan: {ex}");
-                ViewManager.ShowMessageBox("$Error", $"Unable to import observation plan.\r\nError: {ex.Message}");
+                ViewManager.ShowMessageBox("$Error", $"{Text.Get("Planner.Importing.Error")}: {ex.Message}");
             }
 
             if (!tokenSource.IsCancellationRequested)
@@ -217,7 +218,7 @@ namespace Astrarium.Plugins.Planner
                     CreateNewPlan(plan);
                     recentPlansManager.AddToRecentList(new RecentPlan(filePath, fileFormat));
                 }
-                else if (ViewManager.ShowMessageBox("$Warning", $"There are no celestial objects found in the observation plan file.\r\nDo you want to create a new plan?", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes) 
+                else if (ViewManager.ShowMessageBox("$Warning", Text.Get("Planner.Importing.NoCelestialObjectImported"), System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes) 
                 {
                     CreateNewPlan(null);
                 }
@@ -238,7 +239,7 @@ namespace Astrarium.Plugins.Planner
                 var recentPlanFiles = recentPlansManager.RecentList.Where(x => File.Exists(x.Path)).ToArray();
                 foreach (var f in recentPlanFiles)
                 {
-                    recentPlansMenuItems.Add(new MenuItem(Path.GetFileName(f.Path), new Command<RecentPlan>(RecentPlanSelected), f) { Tooltip = $"Path: {f.Path}\r\nType: {f.Type}" });
+                    recentPlansMenuItems.Add(new MenuItem(Path.GetFileName(f.Path), new Command<RecentPlan>(RecentPlanSelected), f) { Tooltip = $"{Text.Get("Planner.Menu.RecentPlans.ItemTooltip.Path")}: {f.Path}\r\n{Text.Get("Planner.Menu.RecentPlans.ItemTooltip.Type")}: {f.Type}" });
                 }
 
                 if (recentPlanFiles.Any())
@@ -264,7 +265,7 @@ namespace Astrarium.Plugins.Planner
                 if (activePlans.Any())
                 {
                     menuItems.Add(null);
-                    menuItems.AddRange(activePlans.Select(plan => new MenuItem(plan.IsSaved ? Path.GetFileName(plan.FilePath) : Formatters.Date.Format(plan.Date), new Command<PlanningListVM>(AddObjectToPlan), plan) { Tooltip = plan.IsSaved ? plan.FilePath : "$Planner.ContextMenu.PlanItem.NotSavedTooltip" }));
+                    menuItems.AddRange(activePlans.Select(plan => new MenuItem(plan.IsSaved ? Path.GetFileName(plan.FilePath) : Formatters.Date.Format(plan.Date), new Command<PlanningListVM>(AddObjectToPlan), plan) { Tooltip = plan.IsSaved ? plan.FilePath : Text.Get("Planner.ContextMenu.PlanItem.NotSavedTooltip") }));
                 }
 
                 return new ObservableCollection<MenuItem>(menuItems);

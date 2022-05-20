@@ -273,7 +273,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
         {
             var tokenSource = new CancellationTokenSource();
             var progress = new Progress<double>();
-            ViewManager.ShowProgress("Please wait", "Creating observation plan...", tokenSource, progress);
+            ViewManager.ShowProgress("$PlanningListWindow.WaitDialog.Title", "$PlanningListWindow.WaitDialog.Text", tokenSource, progress);
             var ephemerides = await Task.Run(() => planner.CreatePlan(filter, tokenSource.Token, progress));
             isInitialized = true;
             if (!tokenSource.IsCancellationRequested)
@@ -321,8 +321,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
         {
             if (!mainWindow.CenterOnObject(body))
             {
-                // TODO: localize
-                if (ViewManager.ShowMessageBox("Warning", "Selected object can not be found on the sky. Remove it from the observation plan?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                if (ViewManager.ShowMessageBox("$Warning", "$PlanningListWindow.ObjectNotFoundDialog.Text", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
                     ephemerides.Remove(SelectedTableItem);
                     IsSaved = false;
@@ -338,7 +337,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
             if (SelectedTableItems != null && SelectedTableItems.Count > 0)
             {
                 var items = SelectedTableItems.Cast<Ephemerides>().ToArray();
-                var result = ViewManager.ShowMessageBox("Warning", "Do you really want to delete selected items?", MessageBoxButton.YesNo);
+                var result = ViewManager.ShowMessageBox("$Warning", "$PlanningListWindow.DeleteDialog.Text", MessageBoxButton.YesNo);
                 if (result == MessageBoxResult.Yes)
                 {
                     foreach (Ephemerides item in items)
@@ -356,7 +355,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
         private void AddObjects()
         {
             var vm = ViewManager.CreateViewModel<PlanningFilterVM>();
-            vm.Title = "Adding Objects";
+            vm.Title = Text.Get("Planner.PlanningFilter.AddingObjects.Title");
             vm.Filter = filter;
             vm.IsDateTimeControlsVisible = false;
             if (ViewManager.ShowDialog(vm) ?? false)
@@ -371,22 +370,22 @@ namespace Astrarium.Plugins.Planner.ViewModels
             var body = ViewManager.ShowSearchDialog(x => true);
             if (body != null)
             {
-                var item = ephemerides.FirstOrDefault(x => x.CelestialObject.CommonName == body.CommonName && x.CelestialObject.Type == body.Type);
-                if (item == null)
-                {
-                    AddObject(body);
-                }
-                TableData.MoveCurrentTo(item);
+                AddObject(body);
             }
         }
 
         public void AddObject(CelestialObject body)
         {
-            Ephemerides item = planner.GetObservationDetails(filter, body);
-            ephemerides.Insert(0, item);
-            TableData.Refresh();
-            IsSaved = false;
-            NotifyTableItemsCountChanged();
+            var item = ephemerides.FirstOrDefault(x => x.CelestialObject.CommonName == body.CommonName && x.CelestialObject.Type == body.Type);
+            if (item == null)
+            {
+                item = planner.GetObservationDetails(filter, body);
+                ephemerides.Insert(0, item);
+                TableData.Refresh();
+                TableData.MoveCurrentTo(item);
+                IsSaved = false;
+                NotifyTableItemsCountChanged();
+            }
         }
 
         public override void Close()
@@ -397,7 +396,7 @@ namespace Astrarium.Plugins.Planner.ViewModels
             }
             else
             {
-                string question = string.IsNullOrEmpty(FilePath) ? "The plan has not been saved. Save it before closing?" : "You have unsaved changes in the plan. Save them before closing?";
+                string question = string.IsNullOrEmpty(FilePath) ? Text.Get("PlanningListWindow.PlanNotSavedDialog.Text") : Text.Get("PlanningListWindow.UnsavedChangesDialog.Text");
                 var answer = ViewManager.ShowMessageBox("$Warning", question, MessageBoxButton.YesNoCancel);
                 switch (answer)
                 {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Astrarium.Types;
+using System;
 using System.Windows;
 using System.Windows.Media;
 
@@ -117,10 +118,10 @@ namespace Astrarium.Plugins.Planner.Controls
                 dc.Pop();
 
                 double[] x = new double[] { from, to };
-                string[] label = new string[] { "BEGIN", "END" };
+                string[] label = new string[] { "Begin", "End" };
                 for (int i = 0; i < 2; i++)
                 {
-                    var text = new FormattedText(label[i], System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Arial"), 10, brushTextLabel);
+                    var text = new FormattedText(Text.Get($"Planner.VisibilityChart.{label[i]}"), System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Arial"), 10, brushTextLabel);
                     double offset = -text.WidthIncludingTrailingWhitespace / 2;
                     dc.DrawText(text, new Point(x[i] + offset, ActualHeight - verticalPadding / 2 - text.Height / 2));
                 }

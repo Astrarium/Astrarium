@@ -9,7 +9,7 @@
         xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
         xmlns:controls="clr-namespace:Astrarium.Plugins.Planner.Controls"
         mc:Ignorable="d"
-        Title="Observation Plan"
+        Title="{t:Text PlanningListWindow.Title}"
         Style="{StaticResource {x:Type Window}}"
         WindowStartupLocation="CenterScreen"
         MinHeight="300" MinWidth="800"
@@ -17,18 +17,18 @@
 
     <Window.Resources>
         <ContextMenu x:Key="RowMenu" DataContext="{Binding Path=DataContext, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
-            <MenuItem Header="Show object" Command="{Binding ShowObjectCommand}" CommandParameter="{Binding SelectedTableItem.CelestialObject}" IsEnabled="{Binding IsSigleTableItemSelected}" />
+            <MenuItem Header="{t:Text PlanningListWindow.ContextMenu.ShowObject}" Command="{Binding ShowObjectCommand}" CommandParameter="{Binding SelectedTableItem.CelestialObject}" IsEnabled="{Binding IsSigleTableItemSelected}" />
             <Separator />
-            <MenuItem Header="Go to BEGIN of observation" Command="{Binding SetTimeCommand}" CommandParameter="{Binding SelectedTableItem[Observation.Begin]}" IsEnabled="{Binding IsGoToObservationBeginEnabled}" />
-            <MenuItem Header="Go to BEST observation time" Command="{Binding SetTimeCommand}" CommandParameter="{Binding SelectedTableItem[Observation.Best]}"  IsEnabled="{Binding IsGoToObservationBestEnabled}" />
-            <MenuItem Header="Go to END of observation" Command="{Binding SetTimeCommand}" CommandParameter="{Binding SelectedTableItem[Observation.End]}"  IsEnabled="{Binding IsGoToObservationEndEnabled}" />
+            <MenuItem Header="{t:Text PlanningListWindow.ContextMenu.SetBeginTime}" Command="{Binding SetTimeCommand}" CommandParameter="{Binding SelectedTableItem[Observation.Begin]}" IsEnabled="{Binding IsGoToObservationBeginEnabled}" />
+            <MenuItem Header="{t:Text PlanningListWindow.ContextMenu.SetBestTime}" Command="{Binding SetTimeCommand}" CommandParameter="{Binding SelectedTableItem[Observation.Best]}"  IsEnabled="{Binding IsGoToObservationBestEnabled}" />
+            <MenuItem Header="{t:Text PlanningListWindow.ContextMenu.SetEndTime}" Command="{Binding SetTimeCommand}" CommandParameter="{Binding SelectedTableItem[Observation.End]}"  IsEnabled="{Binding IsGoToObservationEndEnabled}" />
             <Separator />
-            <MenuItem Header="Add object by name..." Command="{Binding AddObjectCommand}" InputGestureText="Ctrl+F" />
-            <MenuItem Header="Add objects by criteria..." Command="{Binding AddObjectsCommand}" InputGestureText="Ctrl+I" />
+            <MenuItem Header="{t:Text PlanningListWindow.ContextMenu.AddObjectByName}" Command="{Binding AddObjectCommand}" InputGestureText="Ctrl+F" />
+            <MenuItem Header="{t:Text PlanningListWindow.ContextMenu.AddObjectsByFilter}" Command="{Binding AddObjectsCommand}" InputGestureText="Ctrl+I" />
             <Separator />
-            <MenuItem Header="Remove selected item(s)" Command="{Binding RemoveSelectedItemsCommand}" IsEnabled="{Binding SelectedTableItem, Converter={s:NotNullToBoolConverter}}" InputGestureText="Delete" />
+            <MenuItem Header="{t:Text PlanningListWindow.ContextMenu.RemoveSelected}" Command="{Binding RemoveSelectedItemsCommand}" IsEnabled="{Binding SelectedTableItem, Converter={s:NotNullToBoolConverter}}" InputGestureText="Delete" />
             <Separator />
-            <MenuItem Header="Save..." Command="{Binding SaveCommand}" />
+            <MenuItem Header="{t:Text PlanningListWindow.ContextMenu.Save}" Command="{Binding SaveCommand}" />
 
         </ContextMenu>
         <Style x:Key="DefaultRowStyle" TargetType="{x:Type DataGridRow}" BasedOn="{StaticResource {x:Type DataGridRow}}">
@@ -102,16 +102,14 @@
                     </Grid.RowDefinitions>
                     <TextBlock FontSize="30" Text="{Binding Date, Converter={controls:DateToStringConverter}, Mode=OneWay}" IsEnabled="False" Grid.ColumnSpan="2" />
 
-                    <TextBlock Grid.Column="0" Grid.Row="1" Margin="0 6 10 0" Text="From:" IsEnabled="False"  />
+                    <TextBlock Grid.Column="0" Grid.Row="1" Margin="0 6 10 0" Text="{t:Text PlanningListWindow.From}" IsEnabled="False"  />
                     <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding FromTime, Converter={controls:TimeSpanToStringConverter}}" Margin="0 6 0 0" HorizontalAlignment="Right" />
-                    <TextBlock Grid.Column="0" Margin="0 0 10 0" Grid.Row="2" Text="To:" IsEnabled="False"  />
+                    <TextBlock Grid.Column="0" Margin="0 0 10 0" Grid.Row="2" Text="{t:Text PlanningListWindow.To}" IsEnabled="False"  />
                     <TextBlock Grid.Column="1" Grid.Row="2" Text="{Binding ToTime, Converter={controls:TimeSpanToStringConverter}}" HorizontalAlignment="Right" />
-                    <TextBlock Grid.Column="0" Margin="0 0 10 0"  Grid.Row="3" Text="Duration:" IsEnabled="False"  />
+                    <TextBlock Grid.Column="0" Margin="0 0 10 0"  Grid.Row="3" Text="{t:Text PlanningListWindow.Duration}" IsEnabled="False"  />
                     <TextBlock Grid.Column="1" Grid.Row="3" Text="{Binding DurationString, Mode=OneWay}" HorizontalAlignment="Right" />
-
-                    <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Margin="0 8 10 0"   Text="Observer location:" IsEnabled="False"  />
+                    <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Margin="0 8 10 0" Text="{t:Text PlanningListWindow.ObserverLocation}" IsEnabled="False"  />
                     <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="5" Text="{Binding GeoLocation.LocationName, Mode=OneWay}" IsEnabled="False" />
-
                 </Grid>
             </StackPanel>
 
@@ -160,22 +158,22 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="0" Margin="4 0" Padding="8 0" Content="+ NAME" Command="{Binding AddObjectCommand}" />
-            <Button Grid.Column="1" Margin="2 0" Padding="8 0" Content="+ CRITERIA" Command="{Binding AddObjectsCommand}" />
-            <Button Grid.Column="2" Margin="4 0" Padding="8 0" Content="Save..." Command="{Binding SaveCommand}" />
-            <c:SearchTextBox Grid.Column="3" Margin="2 0 2 0" Watermark="Filter..." HorizontalAlignment="Stretch" Text="{Binding FilterString, Mode=TwoWay, Delay=1000, UpdateSourceTrigger=PropertyChanged}" />
+            <Button Grid.Column="0" Margin="4 0" Padding="8 0" Content="{t:Text PlanningListWindow.AddObjectByName.Button}" ToolTip="{t:Text PlanningListWindow.AddObjectByName.Button.Tooltip}" Command="{Binding AddObjectCommand}" />
+            <Button Grid.Column="1" Margin="2 0" Padding="8 0" Content="{t:Text PlanningListWindow.AddObjectsByFilter.Button}"  ToolTip="{t:Text PlanningListWindow.AddObjectsByFilter.Button.Tooltip}" Command="{Binding AddObjectsCommand}" />
+            <Button Grid.Column="2" Margin="4 0" Padding="8 0" Content="{t:Text PlanningListWindow.Save.Button}" Command="{Binding SaveCommand}" />
+            <c:SearchTextBox Grid.Column="3" Margin="2 0 2 0" Watermark="{t:Text PlanningListWindow.Filter.Hint}" HorizontalAlignment="Stretch" Text="{Binding FilterString, Mode=TwoWay, Delay=1000, UpdateSourceTrigger=PropertyChanged}" />
         </Grid>
 
         <TextBlock TextAlignment="Center" Padding="20" TextWrapping="Wrap" Visibility="{Binding NoTotalItems, Converter={s:BoolToVisibilityConverter}}" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Run IsEnabled="False" Text="There are no objects that can be observable at desired time interval and match the observation filter. You can"></Run>
-            <Hyperlink Command="{Binding AddObjectCommand}"><Run Text="add objects by name" /></Hyperlink>
-            <Run IsEnabled="False" Text="or" />
-            <Hyperlink Command="{Binding AddObjectsCommand}"><Run Text="change the observation filter" /></Hyperlink>
+            <Run IsEnabled="False" Text="{t:Text PlanningListWindow.NoObjects.YouCan}"></Run>
+            <Hyperlink Command="{Binding AddObjectCommand}"><Run Text="{t:Text PlanningListWindow.NoObjects.AddObjectByName}" /></Hyperlink>
+            <Run IsEnabled="False" Text="{t:Text PlanningListWindow.NoObjects.Or}" />
+            <Hyperlink Command="{Binding AddObjectsCommand}"><Run Text="{t:Text PlanningListWindow.NoObjects.AddObjectsByFilter}" /></Hyperlink>
         </TextBlock>
         <TextBlock TextAlignment="Center" Padding="20" TextWrapping="Wrap" Visibility="{Binding NoFilteredItems, Converter={s:BoolToVisibilityConverter}}" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" >            
-            <Run IsEnabled="False" Text="There are no objects that match the search criteria" />
+            <Run IsEnabled="False" Text="{t:Text PlanningListWindow.NoFilteredObjects}" />
             <LineBreak></LineBreak>
-            <Hyperlink Command="{Binding ClearFilterCommand}"><Run Text="Clear the filter" /></Hyperlink>        
+            <Hyperlink Command="{Binding ClearFilterCommand}"><Run Text="{t:Text PlanningListWindow.ClearFilter}" /></Hyperlink>        
         </TextBlock>
 
         <controls:ExtendedDataGrid 
@@ -232,7 +230,7 @@
             </DataGrid.GroupStyle>
             
             <DataGrid.Columns>
-                <DataGridTemplateColumn Header="Object" SortMemberPath="CelestialObject.Names[0]">
+                <DataGridTemplateColumn Header="{t:Text PlanningListWindow.Table.Object}" SortMemberPath="CelestialObject.Names[0]">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" Background="Transparent">
@@ -250,9 +248,9 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTextColumn Header="Mag" Binding="{Binding Path='[Magnitude]', Converter={views:Converter}, ConverterParameter='Magnitude'}" SortMemberPath="[Magnitude]" />
-                
-                <DataGridTemplateColumn Header="Begin obs." CanUserSort="True" SortMemberPath="[Observation.Begin]">
+                <DataGridTextColumn Header="{t:Text PlanningListWindow.Table.Mag}" Binding="{Binding Path='[Magnitude]', Converter={views:Converter}, ConverterParameter='Magnitude'}" SortMemberPath="[Magnitude]" />
+
+                <DataGridTemplateColumn Header="{t:Text PlanningListWindow.Table.BeginObs}" CanUserSort="True" SortMemberPath="[Observation.Begin]">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Grid>
@@ -265,7 +263,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTemplateColumn Header="BEST Time" CanUserSort="True" SortMemberPath="[Observation.Best]">
+                <DataGridTemplateColumn Header="{t:Text PlanningListWindow.Table.BestTime}" CanUserSort="True" SortMemberPath="[Observation.Best]">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Grid>
@@ -278,7 +276,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTemplateColumn Header="End obs." CanUserSort="True" SortMemberPath="[Observation.End]">
+                <DataGridTemplateColumn Header="{t:Text PlanningListWindow.Table.EndObs}" CanUserSort="True" SortMemberPath="[Observation.End]">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Grid>
@@ -290,13 +288,13 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                
-                <DataGridTextColumn Header="Obs. dur." Binding="{Binding Path='[Observation.Duration]', Converter={views:Converter}, ConverterParameter='Visibility.Duration'}" SortMemberPath="[Observation.Duration]" />
 
-                <DataGridTextColumn Binding="{Binding Path='[Observation.BestAltitude]', Converter={views:Converter}, ConverterParameter='RTS.TransitAltitude'}" Header="BEST Alt." CanUserSort="True" SortMemberPath="[Observation.BestAltitude]" />
-                <DataGridTextColumn Binding="{Binding Path='[Observation.BestAzimuth]', Converter={views:Converter}, ConverterParameter='RTS.RiseAzimuth'}" Header="BEST Azi." CanUserSort="True" SortMemberPath="[Observation.BestAzimuth]" />
+                <DataGridTextColumn Header="{t:Text PlanningListWindow.Table.ObsDur}" Binding="{Binding Path='[Observation.Duration]', Converter={views:Converter}, ConverterParameter='Visibility.Duration'}" SortMemberPath="[Observation.Duration]" />
 
-                <DataGridTemplateColumn Header="Rise" CanUserSort="True" SortMemberPath="[RTS.Rise]">
+                <DataGridTextColumn Binding="{Binding Path='[Observation.BestAltitude]', Converter={views:Converter}, ConverterParameter='RTS.TransitAltitude'}" Header="{t:Text PlanningListWindow.Table.BestAlt}" CanUserSort="True" SortMemberPath="[Observation.BestAltitude]" />
+                <DataGridTextColumn Binding="{Binding Path='[Observation.BestAzimuth]', Converter={views:Converter}, ConverterParameter='RTS.RiseAzimuth'}" Header="{t:Text PlanningListWindow.Table.BestAzi}" CanUserSort="True" SortMemberPath="[Observation.BestAzimuth]" />
+
+                <DataGridTemplateColumn Header="{t:Text PlanningListWindow.Table.Rise}" CanUserSort="True" SortMemberPath="[RTS.Rise]">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Grid>
@@ -309,7 +307,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTemplateColumn Header="Transit" CanUserSort="True" SortMemberPath="[RTS.Transit]">
+                <DataGridTemplateColumn Header="{t:Text PlanningListWindow.Table.Transit}" CanUserSort="True" SortMemberPath="[RTS.Transit]">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Grid>
@@ -322,7 +320,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTemplateColumn Header="Set" CanUserSort="True" SortMemberPath="[RTS.Set]">
+                <DataGridTemplateColumn Header="{t:Text PlanningListWindow.Table.Set}" CanUserSort="True" SortMemberPath="[RTS.Set]">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Grid>
@@ -335,12 +333,12 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTextColumn Binding="{Binding Path='[RTS.RiseAzimuth]', Converter={views:Converter}, ConverterParameter='RTS.RiseAzimuth'}" Header="Rise Azi." CanUserSort="True" SortMemberPath="[RTS.RiseAzimuth]" />
-                <DataGridTextColumn Binding="{Binding Path='[RTS.TransitAltitude]', Converter={views:Converter}, ConverterParameter='RTS.TransitAltitude'}" Header="Trans. Alt." CanUserSort="True" SortMemberPath="[RTS.TransitAltitude]" />
-                <DataGridTextColumn Binding="{Binding Path='[RTS.SetAzimuth]', Converter={views:Converter}, ConverterParameter='RTS.SetAzimuth'}" Header="Set Azi." CanUserSort="True" SortMemberPath="[RTS.SetAzimuth]" />
-                <DataGridTextColumn Binding="{Binding Path='[Equatorial.Alpha]', Converter={views:Converter}, ConverterParameter='Equatorial.Alpha'}" Header="R.A." CanUserSort="True" SortMemberPath="[Equatorial.Alpha]" />
-                <DataGridTextColumn Binding="{Binding Path='[Equatorial.Delta]', Converter={views:Converter}, ConverterParameter='Equatorial.Delta'}" Header="Dec." CanUserSort="True" SortMemberPath="[Equatorial.Delta]" />
-                <DataGridTextColumn Binding="{Binding Path='[Constellation]', Converter={views:Converter}, ConverterParameter='Constellation'}" Header="Const." CanUserSort="True" SortMemberPath="[Constellation]" />
+                <DataGridTextColumn Binding="{Binding Path='[RTS.RiseAzimuth]', Converter={views:Converter}, ConverterParameter='RTS.RiseAzimuth'}" Header="{t:Text PlanningListWindow.Table.RiseAzimuth}" CanUserSort="True" SortMemberPath="[RTS.RiseAzimuth]" />
+                <DataGridTextColumn Binding="{Binding Path='[RTS.TransitAltitude]', Converter={views:Converter}, ConverterParameter='RTS.TransitAltitude'}" Header="{t:Text PlanningListWindow.Table.TransitAltitude}" CanUserSort="True" SortMemberPath="[RTS.TransitAltitude]" />
+                <DataGridTextColumn Binding="{Binding Path='[RTS.SetAzimuth]', Converter={views:Converter}, ConverterParameter='RTS.SetAzimuth'}" Header="{t:Text PlanningListWindow.Table.SetAzimuth}" CanUserSort="True" SortMemberPath="[RTS.SetAzimuth]" />
+                <DataGridTextColumn Binding="{Binding Path='[Equatorial.Alpha]', Converter={views:Converter}, ConverterParameter='Equatorial.Alpha'}" Header="{t:Text PlanningListWindow.Table.RA}" CanUserSort="True" SortMemberPath="[Equatorial.Alpha]" />
+                <DataGridTextColumn Binding="{Binding Path='[Equatorial.Delta]', Converter={views:Converter}, ConverterParameter='Equatorial.Delta'}" Header="{t:Text PlanningListWindow.Table.Dec}" CanUserSort="True" SortMemberPath="[Equatorial.Delta]" />
+                <DataGridTextColumn Binding="{Binding Path='[Constellation]', Converter={views:Converter}, ConverterParameter='Constellation'}" Header="{t:Text PlanningListWindow.Table.Constellation}" CanUserSort="True" SortMemberPath="[Constellation]" />
 
             </DataGrid.Columns>
             
@@ -349,14 +347,14 @@
         <StatusBar Grid.Row="3" Margin="4 0" BorderThickness="1">
             <StatusBarItem>
                 <StackPanel IsEnabled="False" Orientation="Horizontal">
-                    <TextBlock Text="Total objects: " />
+                    <TextBlock Text="{t:Text PlanningListWindow.StatusBar.TotalObjects}" />
                     <TextBlock Text="{Binding TotalItemsCount, FallbackValue=0}" />
                 </StackPanel>
             </StatusBarItem>
             <Separator />
             <StatusBarItem>
                 <StackPanel IsEnabled="False" Orientation="Horizontal">
-                    <TextBlock Text="Filtered: " />
+                    <TextBlock Text="{t:Text PlanningListWindow.StatusBar.Filtered}" />
                     <TextBlock Text="{Binding FilteredItemsCount, FallbackValue=0}" />
                 </StackPanel>
             </StatusBarItem>
