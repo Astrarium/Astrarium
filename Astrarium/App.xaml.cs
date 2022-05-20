@@ -68,9 +68,9 @@ namespace Astrarium
             base.OnExit(e);
         }
 
-        private void SetColorSchema(ColorSchema schema)
+        private void SetColorSchema(ColorSchema schema, string appTheme)
         {
-            Current.Resources.MergedDictionaries[0].Source = new Uri($@"pack://application:,,,/Astrarium.Types;component/Themes/Colors{(schema == ColorSchema.Red ? "Red" : "DeepBlue")}.xaml");
+            Current.Resources.MergedDictionaries[0].Source = new Uri($@"pack://application:,,,/Astrarium.Types;component/Themes/Colors{(schema == ColorSchema.Red ? "Red" : appTheme)}.xaml");
             if (schema == ColorSchema.Red)
             {
                 CursorsHelper.SetCustomCursors();
@@ -241,7 +241,7 @@ namespace Astrarium
             settings.Load();
 
             SetLanguage(settings.Get<string>("Language"));
-            SetColorSchema(settings.Get<ColorSchema>("Schema"));
+            SetColorSchema(settings.Get<ColorSchema>("Schema"), settings.Get("AppTheme", "DeepBlue"));
 
             SkyContext context = new SkyContext(
                 new Date(DateTime.Now).ToJulianEphemerisDay(),
@@ -273,9 +273,9 @@ namespace Astrarium
 
             settings.SettingValueChanged += (settingName, value) =>
             {
-                if (settingName == "Schema")
+                if (settingName == "Schema" || settingName == "AppTheme")
                 {
-                    SetColorSchema((ColorSchema)value);
+                    SetColorSchema(settings.Get("Schema", ColorSchema.Night), settings.Get("AppTheme", "DeepBlue"));
                 }
                 else if (settingName == "Language")
                 {

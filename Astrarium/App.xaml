@@ -4,7 +4,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/Astrarium.Types;component/Themes/ColorsDefault.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Astrarium.Types;component/Themes/ColorsDeepBlue.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/Astrarium.Types;component/Themes/Styles.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/Astrarium.Types;component/Themes/WindowStyle.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/Astrarium.Types;component/Themes/Markdown.xaml" />
