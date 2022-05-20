@@ -303,7 +303,20 @@
                         </ComboBox>
 
                         <Label Content="{t:Text FovSettingsWindow.Camera.Rotation}" Grid.Row="0" Grid.Column="2" Visibility="{Binding CameraVisible, Converter={s:BoolToVisibilityConverter}}" />
-                        <c:NumericUpDown Value="{Binding Rotation}" Margin="2" DecimalPlaces="0" Minimum="0" Maximum="359" Grid.Row="1" Grid.Column="2" Visibility="{Binding CameraVisible, Converter={s:BoolToVisibilityConverter}}" />
+
+                        <Grid Visibility="{Binding CameraVisible, Converter={s:BoolToVisibilityConverter}}" Grid.Row="1" Grid.Column="2" >
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="50" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <c:NumericUpDown Grid.Column="0" Value="{Binding Rotation}" Margin="2" DecimalPlaces="0" Minimum="0" Maximum="359"  />
+                            <TextBlock Grid.Column="1" Text="°" Margin="0 0 4 0" />
+                            <ComboBox Grid.Column="2" SelectedValuePath="Tag" SelectedValue="{Binding RotateOrigin}" IsEditable="False">
+                                <ComboBoxItem Content="{t:Text FovSettingsWindow.RotateOrigin.Equatorial}" Tag="{x:Static local:FovFrameRotateOrigin.Equatorial}"/>
+                                <ComboBoxItem Content="{t:Text FovSettingsWindow.RotateOrigin.Horizontal}" Tag="{x:Static local:FovFrameRotateOrigin.Horizontal}"/>
+                            </ComboBox>
+                        </Grid>
 
                     </Grid>
 

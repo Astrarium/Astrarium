@@ -288,6 +288,16 @@ namespace Astrarium.Plugins.FOV
             }
         }
 
+        public FovFrameRotateOrigin RotateOrigin
+        {
+            get => GetValue<FovFrameRotateOrigin>(nameof(RotateOrigin));
+            set
+            {
+                SetValue(nameof(RotateOrigin), value);
+                Calculate();
+            }
+        }
+
         public decimal FinderSize1
         {
             get => GetValue<decimal>(nameof(FinderSize1));
@@ -480,7 +490,8 @@ namespace Astrarium.Plugins.FOV
                         TelescopeId = TelescopeId ?? Guid.Empty,
                         Binning = Binning,
                         CameraId = CameraId ?? Guid.Empty,
-                        Rotation = Rotation
+                        Rotation = Rotation,
+                        RotateOrigin = RotateOrigin
                     };
                 }
                 else if (FieldOfView is BinocularFieldOfView binocularFieldOfView)
@@ -534,6 +545,7 @@ namespace Astrarium.Plugins.FOV
                     CameraId = cameraFrame.CameraId;
                     LensId = cameraFrame.LensId;
                     Rotation = (int)cameraFrame.Rotation;
+                    RotateOrigin = cameraFrame.RotateOrigin;
                     Binning = (int)cameraFrame.Binning;
                     FrameType = FrameType.Camera;
                 }

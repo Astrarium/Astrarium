@@ -65,8 +65,15 @@ namespace Astrarium.Plugins.FOV
                     // do not draw frame if its size exceeds screen bounds
                     if (Math.Min(width, height) < Math.Sqrt(map.Width * map.Width + map.Height * map.Height))
                     {
-                        var eqCenter = map.Center.ToEquatorial(map.GeoLocation, map.SiderealTime);
-                        map.Rotate(new PointF(map.Width / 2, map.Height / 2), eqCenter, cameraFrame.Rotation);
+                        var pCenter = new PointF(map.Width / 2, map.Height / 2);
+                        if (cameraFrame.RotateOrigin == FovFrameRotateOrigin.Equatorial)
+                        {
+                            map.Rotate(pCenter, map.Center.ToEquatorial(map.GeoLocation, map.SiderealTime), cameraFrame.Rotation);
+                        }
+                        else if (cameraFrame.RotateOrigin == FovFrameRotateOrigin.Horizontal)
+                        {
+                            map.Rotate(pCenter, cameraFrame.Rotation);
+                        }
 
                         if (frame.Shading > 0 && cameraFrame.Height >= map.ViewAngle / 2)
                         {
