@@ -108,15 +108,15 @@ en.Astrarium_Plugins_MinorBodies            = Asteroids and comets
 #define sz_Astrarium_Plugins_MinorBodies    = CalcDirSize('..\Deploy\Astrarium.Plugins.MinorBodies')
 sz_Astrarium_Plugins_MinorBodies            = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.MinorBodies')}
 
-ru.Astrarium_Plugins_Meteors            	= Метеорные потоки
-en.Astrarium_Plugins_Meteors            	= Meteor showers
-#define sz_Astrarium_Plugins_Meteors    	= CalcDirSize('..\Deploy\Astrarium.Plugins.Meteors')
-sz_Astrarium_Plugins_Meteors            	= {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Meteors')}
+ru.Astrarium_Plugins_Meteors            	  = Метеорные потоки
+en.Astrarium_Plugins_Meteors            	  = Meteor showers
+#define sz_Astrarium_Plugins_Meteors    	  = CalcDirSize('..\Deploy\Astrarium.Plugins.Meteors')
+sz_Astrarium_Plugins_Meteors            	  = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Meteors')}
 
-ru.Astrarium_Plugins_Novae          		= Новые звёзды
-en.Astrarium_Plugins_Novae             		= Novae stars
-#define sz_Astrarium_Plugins_Novae     		= CalcDirSize('..\Deploy\Astrarium.Plugins.Novae')
-sz_Astrarium_Plugins_Novae              	= {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Novae')}
+ru.Astrarium_Plugins_Novae          		    = Новые звёзды
+en.Astrarium_Plugins_Novae             		  = Novae stars
+#define sz_Astrarium_Plugins_Novae     		  = CalcDirSize('..\Deploy\Astrarium.Plugins.Novae')
+sz_Astrarium_Plugins_Novae              	  = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Novae')}
 
 ru.Astrarium_Plugins_Eclipses               = Затмения
 en.Astrarium_Plugins_Eclipses               = Eclipses
@@ -143,7 +143,7 @@ en.Astrarium_Plugins_MilkyWay               = Milky Way outline
 #define sz_Astrarium_Plugins_MilkyWay       = CalcDirSize('..\Deploy\Astrarium.Plugins.MilkyWay')
 sz_Astrarium_Plugins_MilkyWay               = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.MilkyWay')}
 
-ru.Astrarium_Plugins_MeasureTool            = Инструмент линейка
+ru.Astrarium_Plugins_MeasureTool            = Инструмент Линейка
 en.Astrarium_Plugins_MeasureTool            = Measure tool
 #define sz_Astrarium_Plugins_MeasureTool    = CalcDirSize('..\Deploy\Astrarium.Plugins.MeasureTool')
 sz_Astrarium_Plugins_MeasureTool            = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.MeasureTool')}
@@ -168,6 +168,11 @@ en.Astrarium_Plugins_ASCOM                  = ASCOM telescope control
 #define sz_Astrarium_Plugins_ASCOM          = CalcDirSize('..\Deploy\Astrarium.Plugins.ASCOM')
 sz_Astrarium_Plugins_ASCOM                  = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.ASCOM')}
 
+ru.Astrarium_Plugins_Planner                = Планировщик наблюдений
+en.Astrarium_Plugins_Planner                = Observation planner
+#define sz_Astrarium_Plugins_Planner        = CalcDirSize('..\Deploy\Astrarium.Plugins.Planner')
+sz_Astrarium_Plugins_Planner                = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Planner')}
+
 [Components]
 Name: Astrarium;                        Description: {cm:Astarium};                         Types: full compact custom; Flags: fixed; ExtraDiskSpaceRequired: {#sz_Astrarium};
 Name: Astrarium_Plugins_SolarSystem;    Description: {cm:Astrarium_Plugins_SolarSystem};    Types: full compact custom; Flags: fixed; ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_SolarSystem};  
@@ -175,8 +180,8 @@ Name: Astrarium_Plugins_BrightStars;    Description: {cm:Astrarium_Plugins_Brigh
 Name: Astrarium_Plugins_Constellations; Description: {cm:Astrarium_Plugins_Constellations}; Types: full compact custom; Flags: fixed; ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Constellations};
 Name: Astrarium_Plugins_DeepSky;        Description: {cm:Astrarium_Plugins_DeepSky};        Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_DeepSky};
 Name: Astrarium_Plugins_MinorBodies;    Description: {cm:Astrarium_Plugins_MinorBodies};    Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_MinorBodies};
-Name: Astrarium_Plugins_Meteors;    	Description: {cm:Astrarium_Plugins_Meteors};    	Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Meteors};
-Name: Astrarium_Plugins_Novae;    		Description: {cm:Astrarium_Plugins_Novae};    		Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Novae};
+Name: Astrarium_Plugins_Meteors;    	  Description: {cm:Astrarium_Plugins_Meteors};    	  Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Meteors};
+Name: Astrarium_Plugins_Novae;    		  Description: {cm:Astrarium_Plugins_Novae};    		  Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Novae};
 Name: Astrarium_Plugins_JupiterMoons;   Description: {cm:Astrarium_Plugins_JupiterMoons};   Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_JupiterMoons};
 Name: Astrarium_Plugins_Eclipses;       Description: {cm:Astrarium_Plugins_Eclipses};       Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Eclipses};
 Name: Astrarium_Plugins_Grids;          Description: {cm:Astrarium_Plugins_Grids};          Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Grids};
@@ -187,6 +192,8 @@ Name: Astrarium_Plugins_Tracks;         Description: {cm:Astrarium_Plugins_Track
 Name: Astrarium_Plugins_FOV;            Description: {cm:Astrarium_Plugins_FOV};            Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_FOV};
 Name: Astrarium_Plugins_Tycho2;         Description: {cm:Astrarium_Plugins_Tycho2};         Types: full;                              ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Tycho2};
 Name: Astrarium_Plugins_ASCOM;          Description: {cm:Astrarium_Plugins_ASCOM};          Types: full;                              ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_ASCOM};
+Name: Astrarium_Plugins_Planner;        Description: {cm:Astrarium_Plugins_Planner};        Types: full;                              ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Planner};
+
 
 [Files]
 Source: "7za.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall; AfterInstall: AfterInstallProc
