@@ -446,7 +446,7 @@ namespace Astrarium.Plugins.SolarSystem
         {
             List<AstroEvent> events = new List<AstroEvent>();
            
-            for (int p = 1; p <= 6; p++)
+            for (int p = 1; p <= 8; p++)
             {
                 if (p != 3)
                 {

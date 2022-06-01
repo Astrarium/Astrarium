@@ -21,6 +21,7 @@ namespace Astrarium.Plugins.MinorBodies
         private readonly List<Comet> comets = new List<Comet>();
         private object locker = new object();
         public ICollection<Comet> Comets { get { lock (locker) { return comets; } } }
+        public IEnumerable<Comet> GetCelestialObjects() => Comets;
 
         public CometsCalc(ISky sky, ISettings settings, CometsReader reader, CometsDataUpdater updater)
         {
@@ -40,7 +41,7 @@ namespace Astrarium.Plugins.MinorBodies
                     comets.Clear();
                     comets.AddRange(newData);
                 }
-                Trace.TraceInformation($"Updated comets: {newData.Count}");
+                Log.Info($"Updated comets: {newData.Count}");
                 sky.Calculate();
             }
         }
@@ -63,13 +64,13 @@ namespace Astrarium.Plugins.MinorBodies
             }
             else
             {
-                Trace.TraceError("Comets orbital elements data file not found.");
+                Log.Error("Comets orbital elements data file not found.");
             }
 
             if (settings.Get<bool>("CometsAutoUpdateOrbitalElements") &&
                 DateTime.Now.Subtract(settings.Get<DateTime>("CometsDownloadOrbitalElementsTimestamp")).TotalDays >= (int)settings.Get<decimal>("CometsAutoUpdateOrbitalElementsPeriod"))
             {
-                Trace.TraceInformation("Obital elements of comets needs to be updated, updating...");
+                Log.Info("Obital elements of comets needs to be updated, updating...");
                 await Task.Run(() => UpdateOrbitalElements(silent: true));
             }
         }
@@ -177,20 +178,27 @@ namespace Astrarium.Plugins.MinorBodies
             e["Equatorial0T.Alpha", Formatters.RA] = (c, p) => c.Get(EquatorialJ2000T, p).Alpha;
             e["Equatorial0T.Delta", Formatters.Dec] = (c, p) => c.Get(EquatorialJ2000T, p).Delta;
             e["EquatorialG.Alpha", Formatters.RA] = (c, p) => c.Get(EquatorialG, p).Alpha;
-            e["EquatorialG.Delta", Formatters.Dec] = (c, p) => c.Get(EquatorialG, p).Delta;           
+            e["EquatorialG.Delta", Formatters.Dec] = (c, p) => c.Get(EquatorialG, p).Delta;
             e["Ecliptical.Lambda"] = (c, p) => c.Get(Ecliptical, p).Lambda;
             e["Ecliptical.Beta"] = (c, p) => c.Get(Ecliptical, p).Beta;
             e["RTS.Rise"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, p).Rise);
             e["RTS.Transit"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, p).Transit);
             e["RTS.Set"] = (c, p) => c.GetDateFromTime(c.Get(RiseTransitSet, p).Set);
             e["RTS.Duration"] = (c, p) => c.Get(RiseTransitSet, p).Duration;
+            e["RTS.RiseAzimuth"] = (c, p) => c.Get(RiseTransitSet, p).RiseAzimuth;
+            e["RTS.TransitAltitude"] = (c, p) => c.Get(RiseTransitSet, p).TransitAltitude;
+            e["RTS.SetAzimuth"] = (c, p) => c.Get(RiseTransitSet, p).SetAzimuth;
+            e["Visibility.Begin"] = (c, p) => c.GetDateFromTime(c.Get(Visibility, p).Begin);
+            e["Visibility.End"] = (c, p) => c.GetDateFromTime(c.Get(Visibility, p).End);
+            e["Visibility.Duration"] = (c, p) => c.Get(Visibility, p).Duration;
+            e["Visibility.Period"] = (c, p) => c.Get(Visibility, p).Period;
         }
 
         public void GetInfo(CelestialObjectInfo<Comet> info)
         {
             info
             .SetTitle(info.Body.Names.First())
-            .SetSubtitle(Text.Get("Comet.Subtitle"))
+            .SetSubtitle(Text.Get("Comet.Type"))
 
             .AddRow("Constellation")
 
@@ -224,6 +232,12 @@ namespace Astrarium.Plugins.MinorBodies
             .AddRow("RTS.Set")
             .AddRow("RTS.Duration")
 
+            .AddHeader(Text.Get("Comet.Visibility"))
+            .AddRow("Visibility.Begin")
+            .AddRow("Visibility.End")
+            .AddRow("Visibility.Duration")
+            .AddRow("Visibility.Period")
+
             .AddHeader(Text.Get("Comet.Appearance"))
             .AddRow("AngularDiameter")
             .AddRow("Magnitude")
@@ -232,10 +246,15 @@ namespace Astrarium.Plugins.MinorBodies
             .AddRow("HorizontalParallax");
         }
 
-        public ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50)
+        public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
             return Comets
-                .Where(c => GetNames(c.Name).Any(n => n.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
+                .Where(c =>
+                    searchString.Equals(c.Name, StringComparison.OrdinalIgnoreCase) ||
+                    searchString.Equals(c.CommonName, StringComparison.OrdinalIgnoreCase) ||
+                    GetNames(c.Name).Any(n => n.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
+                .Where(filterFunc)
+                .Take(maxCount)
                 .ToArray();
         }
 

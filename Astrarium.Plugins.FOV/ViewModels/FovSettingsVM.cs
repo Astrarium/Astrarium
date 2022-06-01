@@ -214,9 +214,9 @@ namespace Astrarium.Plugins.FOV
             }
         }
 
-        public Guid TelescopeId
+        public Guid? TelescopeId
         {
-            get => GetValue<Guid>(nameof(TelescopeId));
+            get => GetValue<Guid?>(nameof(TelescopeId));
             set
             {
                 SetValue(nameof(TelescopeId), value);
@@ -225,9 +225,9 @@ namespace Astrarium.Plugins.FOV
             }
         }
 
-        public Guid EyepieceId
+        public Guid? EyepieceId
         {
-            get => GetValue<Guid>(nameof(EyepieceId));
+            get => GetValue<Guid?>(nameof(EyepieceId));
             set
             {
                 SetValue(nameof(EyepieceId), value);
@@ -236,9 +236,9 @@ namespace Astrarium.Plugins.FOV
             }
         }
 
-        public Guid BinocularId
+        public Guid? BinocularId
         {
-            get => GetValue<Guid>(nameof(BinocularId));
+            get => GetValue<Guid?>(nameof(BinocularId));
             set 
             { 
                 SetValue(nameof(BinocularId), value);
@@ -247,9 +247,9 @@ namespace Astrarium.Plugins.FOV
             }
         }
 
-        public Guid CameraId
+        public Guid? CameraId
         {
-            get => GetValue<Guid>(nameof(CameraId));
+            get => GetValue<Guid?>(nameof(CameraId));
             set 
             {
                 SetValue(nameof(CameraId), value);
@@ -284,6 +284,16 @@ namespace Astrarium.Plugins.FOV
             set
             {
                 SetValue(nameof(Rotation), value);
+                Calculate();
+            }
+        }
+
+        public FovFrameRotateOrigin RotateOrigin
+        {
+            get => GetValue<FovFrameRotateOrigin>(nameof(RotateOrigin));
+            set
+            {
+                SetValue(nameof(RotateOrigin), value);
                 Calculate();
             }
         }
@@ -459,10 +469,10 @@ namespace Astrarium.Plugins.FOV
                         Label = Label,
                         Shading = Shading,
                         Enabled = true,
-                        EyepieceId = EyepieceId,
+                        EyepieceId = EyepieceId ?? Guid.Empty,
                         LensId = LensId,
                         Size = telescopeFieldOfView.Size,
-                        TelescopeId = TelescopeId
+                        TelescopeId = TelescopeId ?? Guid.Empty
                     };
                 }
                 else if (FieldOfView is CameraFieldOfView cameraFieldOfView)
@@ -477,10 +487,11 @@ namespace Astrarium.Plugins.FOV
                         LensId = LensId,
                         Width = cameraFieldOfView.Size.Width,
                         Height = cameraFieldOfView.Size.Height,
-                        TelescopeId = TelescopeId,
+                        TelescopeId = TelescopeId ?? Guid.Empty,
                         Binning = Binning,
-                        CameraId = CameraId,
-                        Rotation = Rotation
+                        CameraId = CameraId ?? Guid.Empty,
+                        Rotation = Rotation,
+                        RotateOrigin = RotateOrigin
                     };
                 }
                 else if (FieldOfView is BinocularFieldOfView binocularFieldOfView)
@@ -492,7 +503,7 @@ namespace Astrarium.Plugins.FOV
                         Label = Label,
                         Shading = Shading,
                         Enabled = true,
-                        BinocularId = BinocularId,
+                        BinocularId = BinocularId ?? Guid.Empty,
                         Size = binocularFieldOfView.Size
                     };
                 }
@@ -534,6 +545,7 @@ namespace Astrarium.Plugins.FOV
                     CameraId = cameraFrame.CameraId;
                     LensId = cameraFrame.LensId;
                     Rotation = (int)cameraFrame.Rotation;
+                    RotateOrigin = cameraFrame.RotateOrigin;
                     Binning = (int)cameraFrame.Binning;
                     FrameType = FrameType.Camera;
                 }

@@ -10,6 +10,12 @@ namespace Astrarium.Plugins.MinorBodies
         /// </summary>
         public string Name { get; set; }
 
+        /// <inheritdoc />
+        public override string Type => "Comet";
+
+        /// <inheritdoc />
+        public override string CommonName => Name;
+
         /// <summary>
         /// Orbital elements of the comet
         /// </summary>

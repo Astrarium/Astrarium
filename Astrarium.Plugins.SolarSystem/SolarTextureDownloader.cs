@@ -33,7 +33,7 @@ namespace Astrarium.Plugins.SolarSystem
                 }
                 catch (Exception ex)
                 {
-                    Trace.TraceError($"Unable to create directory for sun images: {SunImagesPath}, Details: {ex}");
+                    Log.Error($"Unable to create directory for sun images: {SunImagesPath}, Details: {ex}");
                 }
             }
         }
@@ -63,7 +63,7 @@ namespace Astrarium.Plugins.SolarSystem
                 }
                 catch (Exception ex)
                 {
-                    Trace.TraceError($"Unable to read image from file {pngImageFile}, exception: {ex}");
+                    Log.Error($"Unable to read image from file {pngImageFile}, exception: {ex}");
                     return null;
                 }
             }
@@ -101,7 +101,7 @@ namespace Astrarium.Plugins.SolarSystem
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"Unable to list solar images for the date {date}. Reason: {ex.Message}");
+                        Log.Debug($"Unable to list solar images for the date {date}. Reason: {ex.Message}");
                         string listing = client.DownloadString(url);
                         var match = Regex.Match(listing, regexPattern);
                         if (match.Success)
@@ -112,7 +112,7 @@ namespace Astrarium.Plugins.SolarSystem
                     
                     if (srcFileName == null)
                     {
-                        Debug.WriteLine($"There are no solar image file for the date {date}");
+                        Log.Debug($"There are no solar image file for the date {date}");
                         return null;
                     }
 
@@ -182,7 +182,7 @@ namespace Astrarium.Plugins.SolarSystem
             }
             catch (Exception ex)
             {
-                Trace.TraceError($"Unable to download file from {url}, exception: {ex}");
+                Log.Error($"Unable to download file from {url}, exception: {ex}");
                 return null;
             }
             finally
@@ -196,7 +196,7 @@ namespace Astrarium.Plugins.SolarSystem
                     }
                     catch (Exception ex)
                     {
-                        Trace.TraceError($"Unable to delete file {srcImageFile}, exception: {ex}");
+                        Log.Error($"Unable to delete file {srcImageFile}, exception: {ex}");
                     }
                 }
             }

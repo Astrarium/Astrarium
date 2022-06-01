@@ -16,6 +16,8 @@ namespace Astrarium.Plugins.SolarSystem
     {
         public Moon Moon { get; private set; } = new Moon();
 
+        public IEnumerable<Moon> GetCelestialObjects() => new Moon[] { Moon };
+
         public override void Calculate(SkyContext c)
         {
             Moon.Equatorial = c.Get(Equatorial);
@@ -167,7 +169,7 @@ namespace Astrarium.Plugins.SolarSystem
         /// <summary>
         /// Gets visual magnitude of the Moon
         /// </summary>
-        public double Magnitude(SkyContext c)
+        public float Magnitude(SkyContext c)
         {
             return LunarEphem.Magnitude(c.Get(PhaseAngle));
         }
@@ -409,11 +411,11 @@ namespace Astrarium.Plugins.SolarSystem
             }
         }
 
-        public ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50)
+        public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
-            if (Moon.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
+            if (Moon.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase) && filterFunc(Moon))
                 return new[] { Moon };
-            else if ("@moon".Equals(searchString, StringComparison.OrdinalIgnoreCase))
+            else if (Moon.CommonName.Equals(searchString, StringComparison.OrdinalIgnoreCase) && filterFunc(Moon))
                 return new[] { Moon };
             else
                 return new CelestialObject[0];

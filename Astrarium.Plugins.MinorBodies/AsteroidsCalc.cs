@@ -21,6 +21,8 @@ namespace Astrarium.Plugins.MinorBodies
         private readonly AsteroidsDataUpdater updater;
         private readonly List<Asteroid> asteroids = new List<Asteroid>();
         private object locker = new object();
+
+        public IEnumerable<Asteroid> GetCelestialObjects() => Asteroids;
         public ICollection<Asteroid> Asteroids { get { lock (locker) { return asteroids; } } }
 
         public AsteroidsCalc(ISky sky, ISettings settings, AsteroidsReader reader, AsteroidsDataUpdater updater)
@@ -41,7 +43,7 @@ namespace Astrarium.Plugins.MinorBodies
                     asteroids.Clear();
                     asteroids.AddRange(newData);
                 }
-                Trace.TraceInformation($"Updated asteroids: {newData.Count}");
+                Log.Info($"Updated asteroids: {newData.Count}");
                 sky.Calculate();
             }
         }
@@ -64,13 +66,13 @@ namespace Astrarium.Plugins.MinorBodies
             }
             else
             {
-                Trace.TraceError("Asteroids orbital elements data file not found.");
+                Log.Error("Asteroids orbital elements data file not found.");
             }
 
             if (settings.Get<bool>("AsteroidsAutoUpdateOrbitalElements") && 
                 DateTime.Now.Subtract(settings.Get<DateTime>("AsteroidsDownloadOrbitalElementsTimestamp")).TotalDays >= (int)settings.Get<decimal>("AsteroidsAutoUpdateOrbitalElementsPeriod"))
             {
-                Trace.TraceInformation("Obital elements of asteroids needs to be updated, updating...");
+                Log.Info("Obital elements of asteroids needs to be updated, updating...");
                 await Task.Run(() => UpdateOrbitalElements(silent: true));
             }
         }
@@ -114,7 +116,7 @@ namespace Astrarium.Plugins.MinorBodies
             e["Horizontal.Altitude"] = (c, a) => c.Get(Horizontal, a).Altitude;
             e["Horizontal.Azimuth"] = (c, a) => c.Get(Horizontal, a).Azimuth;
             e["Equatorial.Alpha"] = (c, a) => c.Get(EquatorialT, a).Alpha;
-            e["Equatorial.Delta"] = (c, a) => c.Get(EquatorialT, a).Delta;            
+            e["Equatorial.Delta"] = (c, a) => c.Get(EquatorialT, a).Delta;
             e["Equatorial0.Alpha"] = (c, a) => c.Get(EquatorialG, a).Alpha;
             e["Equatorial0.Delta"] = (c, a) => c.Get(EquatorialG, a).Delta;
             e["Ecliptical.Lambda"] = (c, a) => c.Get(Ecliptical, a).Lambda;
@@ -123,6 +125,9 @@ namespace Astrarium.Plugins.MinorBodies
             e["RTS.Transit"] = (c, a) => c.GetDateFromTime(c.Get(RiseTransitSet, a).Transit);
             e["RTS.Set"] = (c, a) => c.GetDateFromTime(c.Get(RiseTransitSet, a).Set);
             e["RTS.Duration"] = (c, a) => c.Get(RiseTransitSet, a).Duration;
+            e["RTS.RiseAzimuth"] = (c, a) => c.Get(RiseTransitSet, a).RiseAzimuth;
+            e["RTS.TransitAltitude"] = (c, a) => c.Get(RiseTransitSet, a).TransitAltitude;
+            e["RTS.SetAzimuth"] = (c, a) => c.Get(RiseTransitSet, a).SetAzimuth;
             e["Visibility.Begin"] = (c, a) => c.GetDateFromTime(c.Get(Visibility, a).Begin);
             e["Visibility.End"] = (c, a) => c.GetDateFromTime(c.Get(Visibility, a).End);
             e["Visibility.Duration"] = (c, a) => c.Get(Visibility, a).Duration;
@@ -140,7 +145,7 @@ namespace Astrarium.Plugins.MinorBodies
         {
             info
             .SetTitle(info.Body.Names.First())
-            .SetSubtitle(Text.Get("Asteroid.Subtitle"))
+            .SetSubtitle(Text.Get("Asteroid.Type"))
             .AddRow("Constellation")
 
             .AddHeader(Text.Get("Asteroid.Equatorial"))
@@ -187,15 +192,23 @@ namespace Astrarium.Plugins.MinorBodies
             .AddRow("Visibility.Period");
         }
 
-        public ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50)
+        public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
             return Asteroids
                 .Where(a => IsAsteroidNameMatch(a, searchString))
+                .Where(filterFunc)
+                .Take(maxCount)
                 .ToArray();
         }
 
         private bool IsAsteroidNameMatch(Asteroid a, string searchString)
         {
+            if (searchString.Equals(a.Name, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if (searchString.Equals(a.CommonName, StringComparison.OrdinalIgnoreCase))
+                return true;
+
             var match = asteroidNameRegex.Match(a.Name);
             if (match.Success)
             {

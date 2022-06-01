@@ -74,9 +74,9 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="log4net" Version="2.0.12" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Ninject" Version="3.3.4" />
+    <PackageReference Include="NLog" Version="4.7.13" />
   </ItemGroup>
       
   <ItemGroup>
@@ -165,6 +165,11 @@
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <Private>false</Private>
     </ProjectReference>
+	<ProjectReference Include="..\Astrarium.Plugins.Planner\Astrarium.Plugins.Planner.csproj">
+		<CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+		<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+		<Private>false</Private>
+	</ProjectReference>
     
     <ProjectReference Include="..\Astrarium.Types\Astrarium.Types.csproj" />
     <ProjectReference Include="..\Astrarium.Algorithms\Astrarium.Algorithms.csproj" />
@@ -199,6 +204,10 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Logging\" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

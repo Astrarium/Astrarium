@@ -1,5 +1,6 @@
 ﻿using Astrarium.Types;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -80,7 +81,10 @@ namespace Astrarium.ViewModels
         /// </summary>
         private async void DoSearch()
         {
-            var results = await Task.Run(() => sky.Search(SearchString, Filter));
+            ICollection<CelestialObject> results = !string.IsNullOrWhiteSpace(SearchString) ?
+                await Task.Run(() => sky.Search(SearchString, Filter)) :
+                new CelestialObject[0];
+
             SearchResults.Clear();
             foreach (var item in results)
             {

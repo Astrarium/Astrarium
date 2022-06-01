@@ -7,6 +7,12 @@ namespace Astrarium.Plugins.DeepSky
 {
     public class DeepSky : SizeableCelestialObject
     {
+        /// <inheritdoc />
+        public override string Type => Status.IsEmpty() ? null : $"DeepSky.{Status}";
+
+        /// <inheritdoc />
+        public override string CommonName => CatalogName;
+
         /// <summary>
         /// Number of record in the catalog file
         /// </summary>

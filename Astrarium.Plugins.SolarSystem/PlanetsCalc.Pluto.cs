@@ -203,15 +203,12 @@ namespace Astrarium.Plugins.SolarSystem
 
         public VisibilityDetails Pluto_Visibility(SkyContext c)
         {
-            double jd = c.JulianDayMidnight;
-            double theta0 = Date.ApparentSiderealTime(jd, c.NutationElements.deltaPsi, c.Epsilon);
-            double parallax = c.Get(Pluto_Parallax);
-
-            var ctx = new SkyContext(jd, c.GeoLocation);
+            var ctx = c.Copy(c.JulianDayMidnight);
             var eq = ctx.Get(Pluto_Equatorial);
             var eqSun = ctx.Get(Sun_Equatorial);
-
-            return Visibility.Details(eq, eqSun, c.GeoLocation, theta0, 5);
+            double minBodyAltitude = ctx.MinBodyAltitudeForVisibilityCalculations ?? 5;
+            double minSunAltitude = ctx.MaxSunAltitudeForVisibilityCalculations ?? 0;
+            return Visibility.Details(eq, eqSun, ctx.GeoLocation, ctx.SiderealTime, minBodyAltitude, minSunAltitude);
         }
 
         public void ConfigureEphemeris(EphemerisConfig<Pluto> e)
@@ -237,6 +234,9 @@ namespace Astrarium.Plugins.SolarSystem
             e["RTS.Transit"] = (c, p) => c.GetDateFromTime(c.Get(Pluto_RiseTransitSet).Transit);
             e["RTS.Set"] = (c, p) => c.GetDateFromTime(c.Get(Pluto_RiseTransitSet).Set);
             e["RTS.Duration"] = (c, p) => c.Get(Pluto_RiseTransitSet).Duration;
+            e["RTS.RiseAzimuth"] = (c, p) => c.Get(Pluto_RiseTransitSet).RiseAzimuth;
+            e["RTS.TransitAltitude"] = (c, p) => c.Get(Pluto_RiseTransitSet).TransitAltitude;
+            e["RTS.SetAzimuth"] = (c, p) => c.Get(Pluto_RiseTransitSet).SetAzimuth;
             e["Visibility.Begin"] = (c, p) => c.GetDateFromTime(c.Get(Pluto_Visibility).Begin);
             e["Visibility.End"] = (c, p) => c.GetDateFromTime(c.Get(Pluto_Visibility).End);
             e["Visibility.Duration"] = (c, p) => c.Get(Pluto_Visibility).Duration;
@@ -246,7 +246,7 @@ namespace Astrarium.Plugins.SolarSystem
         public void GetInfo(CelestialObjectInfo<Pluto> info)
         {
             info
-            .SetSubtitle(Text.Get("Pluto.Subtitle"))
+            .SetSubtitle(Text.Get("Pluto.Type"))
             .SetTitle(info.Body.Names.First())
 
             .AddRow("Constellation")

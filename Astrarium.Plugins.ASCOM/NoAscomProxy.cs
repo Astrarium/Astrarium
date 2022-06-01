@@ -22,7 +22,7 @@ namespace Astrarium.Plugins.ASCOM
         public bool IsTracking => false;
         public CrdsEquatorial Position => new CrdsEquatorial();
         public string TelescopeName { get; }
-        public string Connect(string telescopeId) => null;
+        public Task<string> Connect(string telescopeId) => Task.FromResult<string>(null);
         public void Disconnect() { }
         public void SetLocation(CrdsGeographical geo) { }
         public void SetDateTime(DateTime utc) { }

@@ -57,41 +57,74 @@ namespace Astrarium.Algorithms
                 var sidTime = InterpolateSiderialTime(theta0, n);
                 var hor0 = eq0.ToTopocentric(location, sidTime, pi).ToHorizontal(location, sidTime);
 
-                if (double.IsNaN(result.Transit) && hor0.Altitude > 0)
+                if (hor0.Altitude > 0)
                 {
-                    double r = SolveParabola(Math.Sin(Angle.ToRadians(hor[i].Azimuth)), Math.Sin(Angle.ToRadians(hor0.Azimuth)), Math.Sin(Angle.ToRadians(hor[i + 1].Azimuth)));
-                    if (!double.IsNaN(r))
+                    double[] r = SolveParabola(Math.Sin(Angle.ToRadians(hor[i].Azimuth)), Math.Sin(Angle.ToRadians(hor0.Azimuth)), Math.Sin(Angle.ToRadians(hor[i + 1].Azimuth)));
+                    if (r.Any())
                     {
-                        double t = (i + r) / 24.0;
+                        double t = (i + r[0]) / 24.0;
 
                         eq0 = InterpolateEq(alpha, delta, t);
                         sidTime = InterpolateSiderialTime(theta0, t);
 
-                        result.Transit = t;
-                        result.TransitAltitude = eq0.ToTopocentric(location, sidTime, pi).ToHorizontal(location, sidTime).Altitude;
+                        double altitude = eq0.ToTopocentric(location, sidTime, pi).ToHorizontal(location, sidTime).Altitude;
+                        if (double.IsNaN(result.Transit) || result.TransitAltitude < altitude)
+                        {
+                            result.Transit = t;
+                            result.TransitAltitude = altitude;
+                        }
                     }
                 }
 
                 if (double.IsNaN(result.Rise) || double.IsNaN(result.Set))
                 {
-                    double r = SolveParabola(hor[i].Altitude + sd, hor0.Altitude + sd, hor[i + 1].Altitude + sd);
+                    double[] r = SolveParabola(hor[i].Altitude + sd, hor0.Altitude + sd, hor[i + 1].Altitude + sd);
 
-                    if (!double.IsNaN(r))
+                    if (r.Any())
                     {
-                        double t = (i + r) / 24.0;
-                        eq0 = InterpolateEq(alpha, delta, t);
-                        sidTime = InterpolateSiderialTime(theta0, t);
-
-                        if (double.IsNaN(result.Rise) && hor[i].Altitude + sd < 0 && hor[i + 1].Altitude + sd > 0)
+                        if (r.Length == 1)
                         {
-                            result.Rise = t;
-                            result.RiseAzimuth = eq0.ToTopocentric(location, sidTime, pi).ToHorizontal(location, sidTime).Azimuth;
+                            double t = (i + r[0]) / 24.0;
+                            eq0 = InterpolateEq(alpha, delta, t);
+                            sidTime = InterpolateSiderialTime(theta0, t);
+
+                            if (double.IsNaN(result.Rise) && hor[i].Altitude + sd < 0 && hor[i + 1].Altitude + sd > 0)
+                            {
+                                result.Rise = t;
+                                result.RiseAzimuth = eq0.ToTopocentric(location, sidTime, pi).ToHorizontal(location, sidTime).Azimuth;
+                            }
+
+                            if (double.IsNaN(result.Set) && hor[i].Altitude + sd > 0 && hor[i + 1].Altitude + sd < 0)
+                            {
+                                result.Set = t;
+                                result.SetAzimuth = eq0.ToTopocentric(location, sidTime, pi).ToHorizontal(location, sidTime).Azimuth;
+                            }
                         }
-
-                        if (double.IsNaN(result.Set) && hor[i].Altitude + sd > 0 && hor[i + 1].Altitude + sd < 0)
+                        else // 2 roots
                         {
-                            result.Set = t;
-                            result.SetAzimuth = eq0.ToTopocentric(location, sidTime, pi).ToHorizontal(location, sidTime).Azimuth;
+                            double t1 = (i + r[0]) / 24.0;
+                            double sidTime1 = InterpolateSiderialTime(theta0, t1);
+
+                            double t2 = (i + r[1]) / 24.0;
+                            double sidTime2 = InterpolateSiderialTime(theta0, t2);
+
+                            if (double.IsNaN(result.Rise) && double.IsNaN(result.Set) && hor[i].Altitude + sd < 0 && hor[i + 1].Altitude + sd < 0)
+                            {
+                                result.Rise = t1;
+                                result.RiseAzimuth = eq0.ToTopocentric(location, sidTime1, pi).ToHorizontal(location, sidTime1).Azimuth;
+
+                                result.Set = t2;
+                                result.SetAzimuth = eq0.ToTopocentric(location, sidTime2, pi).ToHorizontal(location, sidTime2).Azimuth;
+                            }
+
+                            if (double.IsNaN(result.Rise) && double.IsNaN(result.Set) && hor[i].Altitude + sd > 0 && hor[i + 1].Altitude + sd > 0)
+                            {
+                                result.Set = t1;
+                                result.SetAzimuth = eq0.ToTopocentric(location, sidTime1, pi).ToHorizontal(location, sidTime1).Azimuth;
+
+                                result.Rise = t2;
+                                result.RiseAzimuth = eq0.ToTopocentric(location, sidTime2, pi).ToHorizontal(location, sidTime2).Azimuth;
+                            }
                         }
 
                         if (!double.IsNaN(result.Transit) && !double.IsNaN(result.Rise) && !double.IsNaN(result.Set))
@@ -99,7 +132,7 @@ namespace Astrarium.Algorithms
                             break;
                         }
                     }
-                }                
+                }
             }
        
             return result;
@@ -133,38 +166,71 @@ namespace Astrarium.Algorithms
                 var sidTime = InterpolateSiderialTime(theta0, n);
                 var hor0 = eq.ToHorizontal(location, sidTime);
 
-                if (double.IsNaN(result.Transit) && hor0.Altitude > 0)
+                if (hor0.Altitude > 0)
                 {
-                    double r = SolveParabola(Math.Sin(Angle.ToRadians(hor[i].Azimuth)), Math.Sin(Angle.ToRadians(hor0.Azimuth)), Math.Sin(Angle.ToRadians(hor[i + 1].Azimuth)));
-                    if (!double.IsNaN(r))
+                    double[] r = SolveParabola(Math.Sin(Angle.ToRadians(hor[i].Azimuth)), Math.Sin(Angle.ToRadians(hor0.Azimuth)), Math.Sin(Angle.ToRadians(hor[i + 1].Azimuth)));
+                    if (r.Any())
                     {
-                        double t = (i + r) / 24.0;                        
+                        double t = (i + r[0]) / 24.0;
                         sidTime = InterpolateSiderialTime(theta0, t);
 
-                        result.Transit = t;
-                        result.TransitAltitude = eq.ToHorizontal(location, sidTime).Altitude;
+                        double altitude = eq.ToHorizontal(location, sidTime).Altitude;
+                        if (double.IsNaN(result.Transit) || result.TransitAltitude < altitude)
+                        {
+                            result.Transit = t;
+                            result.TransitAltitude = altitude;
+                        }
                     }
                 }
 
                 if (double.IsNaN(result.Rise) || double.IsNaN(result.Set))
                 {
-                    double r = SolveParabola(hor[i].Altitude - minAltitude, hor0.Altitude - minAltitude, hor[i + 1].Altitude - minAltitude);
+                    double[] r = SolveParabola(hor[i].Altitude - minAltitude, hor0.Altitude - minAltitude, hor[i + 1].Altitude - minAltitude);
 
-                    if (!double.IsNaN(r))
+                    if (r.Any())
                     {
-                        double t = (i + r) / 24.0;
-                        sidTime = InterpolateSiderialTime(theta0, t);
-
-                        if (double.IsNaN(result.Rise) && hor[i].Altitude - minAltitude < 0 && hor[i + 1].Altitude - minAltitude > 0)
+                        if (r.Length == 1)
                         {
-                            result.Rise = t;
-                            result.RiseAzimuth = eq.ToHorizontal(location, sidTime).Azimuth;
+                            double t = (i + r[0]) / 24.0;
+                            sidTime = InterpolateSiderialTime(theta0, t);
+
+                            if (double.IsNaN(result.Rise) && hor[i].Altitude - minAltitude < 0 && hor[i + 1].Altitude - minAltitude > 0)
+                            {
+                                result.Rise = t;
+                                result.RiseAzimuth = eq.ToHorizontal(location, sidTime).Azimuth;
+                            }
+
+                            if (double.IsNaN(result.Set) && hor[i].Altitude - minAltitude > 0 && hor[i + 1].Altitude - minAltitude < 0)
+                            {
+                                result.Set = t;
+                                result.SetAzimuth = eq.ToHorizontal(location, sidTime).Azimuth;
+                            }
                         }
-
-                        if (double.IsNaN(result.Set) && hor[i].Altitude - minAltitude > 0 && hor[i + 1].Altitude - minAltitude < 0)
+                        else
                         {
-                            result.Set = t;
-                            result.SetAzimuth = eq.ToHorizontal(location, sidTime).Azimuth;
+                            double t1 = (i + r[0]) / 24.0;
+                            double sidTime1 = InterpolateSiderialTime(theta0, t1);
+
+                            double t2 = (i + r[1]) / 24.0;
+                            double sidTime2 = InterpolateSiderialTime(theta0, t2);
+
+                            if (double.IsNaN(result.Rise) && double.IsNaN(result.Set) && hor[i].Altitude - minAltitude < 0 && hor[i + 1].Altitude - minAltitude < 0)
+                            {
+                                result.Rise = t1;
+                                result.RiseAzimuth = eq.ToHorizontal(location, sidTime1).Azimuth;
+
+                                result.Set = t2;
+                                result.SetAzimuth = eq.ToHorizontal(location, sidTime2).Azimuth;
+                            }
+
+                            if (double.IsNaN(result.Rise) && double.IsNaN(result.Set) && hor[i].Altitude - minAltitude > 0 && hor[i + 1].Altitude - minAltitude > 0)
+                            {
+                                result.Set = t1;
+                                result.SetAzimuth = eq.ToHorizontal(location, sidTime1).Azimuth;
+
+                                result.Rise = t2;
+                                result.RiseAzimuth = eq.ToHorizontal(location, sidTime2).Azimuth;
+                            }
                         }
 
                         if (!double.IsNaN(result.Transit) && !double.IsNaN(result.Rise) && !double.IsNaN(result.Set))
@@ -183,77 +249,104 @@ namespace Astrarium.Algorithms
         /// </summary>
         /// <param name="eqBody">Mean equatorial coordinates of the body for the desired day.</param>
         /// <param name="eqSun">Mean equatorial coordinates of the Sun for the desired day.</param>
-        /// <param name="minAltitude">Minimal altitude of the body, in degrees, to be considered as approproate for observations. By default it's 5 degrees for planet.</param>
+        /// <param name="minBodyAltitude">Minimal altitude of the body, in degrees, to be considered as approproate for observations. By default it's 5 degrees for planet.</param>
         /// <returns><see cref="VisibilityDetails"/> instance describing details of visibility.</returns>
         // TODO: tests
-        public static VisibilityDetails Details(CrdsEquatorial eqBody, CrdsEquatorial eqSun, CrdsGeographical location, double theta0, double minAltitude = 5)
+        public static VisibilityDetails Details(CrdsEquatorial eqBody, CrdsEquatorial eqSun, CrdsGeographical location, double theta0, double minBodyAltitude = 5, double minSunAltitude = 0)
         {
             var details = new VisibilityDetails();
 
             // period when the planet is above the horizon and its altitude is larger than "minAltitude"
-            RTS body = RiseTransitSet(eqBody, location, theta0, minAltitude);
+            RTS body = RiseTransitSet(eqBody, location, theta0, minBodyAltitude);
 
             // period when the Sun is above the horizon
-            RTS sun = RiseTransitSet(eqSun, location, theta0);
+            RTS sun = RiseTransitSet(eqSun, location, theta0, minSunAltitude);
 
             // body reaches minimal altitude but Sun does not rise at all (polar night)
-            if (body.TransitAltitude > minAltitude && sun.TransitAltitude <= 0)
+            if (body.TransitAltitude > minBodyAltitude && sun.TransitAltitude <= 0)
             {
                 details.Period = VisibilityPeriod.WholeNight;
                 details.Duration = body.Duration * 24;
             }
             // body does not reach the minimal altitude during the day
-            else if (body.TransitAltitude <= minAltitude)
+            else if (double.IsNaN(body.TransitAltitude) || body.TransitAltitude <= minBodyAltitude)
             {
                 details.Period = VisibilityPeriod.Invisible;
                 details.Duration = 0;
+                details.Begin = double.NaN;
+                details.End = double.NaN;
             }
             // there is a day/night change during the day and body reaches minimal altitude
-            else if (body.TransitAltitude > minAltitude)
+            else if (body.TransitAltitude > minBodyAltitude)
             {
-                // "Sun is below horizon" time range, expressed in degrees (0 is midnight, 180 is noon)
-                var r1 = new AngleRange(sun.Set * 360, (1 - sun.Duration) * 360);
-
-                // "body is above horizon" time range, expressed in degrees (0 is midnight, 180 is noon)
-                var r2 = new AngleRange(body.Rise * 360, body.Duration * 360);
-
-                // find the intersections of two ranges
-                var ranges = r1.Overlaps(r2);
-
-                // no intersections of time ranges
-                if (!ranges.Any())
+                // non-setting body
+                if (body.Duration == 1)
                 {
-                    details.Period = VisibilityPeriod.Invisible;
-                    details.Duration = 0;
-                    details.Begin = double.NaN;
-                    details.End = double.NaN;
+                    details.Period = VisibilityPeriod.WholeNight;
+                    details.Duration = (1 - sun.Duration) * 24;
+                    details.Begin = sun.Set;
+                    details.End = sun.Rise;
                 }
-                // the body is observable during the day
-                else
+                // body rises and sets during the day
+                else if (body.Duration < 1)
                 {
-                    // duration of visibility
-                    details.Duration = ranges.Sum(i => i.Range / 360 * 24);
+                    // "Sun is below horizon" time range, expressed in degrees (0 is midnight, 180 is noon)
+                    var r1 = new AngleRange(sun.Set * 360, (1 - sun.Duration) * 360);
 
-                    // beginning of visibility
-                    details.Begin = ranges.First().Start / 360;
+                    // "body is above horizon" time range, expressed in degrees (0 is midnight, 180 is noon)
+                    var r2 = new AngleRange(body.Rise * 360, body.Duration * 360);
 
-                    // end of visibility
-                    details.End = (details.Begin + details.Duration / 24) % 1;
+                    // find the intersections of two ranges
+                    var ranges = r1.Overlaps(r2);
 
-                    // Evening time range, expressed in degrees
-                    // Start is a sunset time, range is a timespan from sunset to midnight.
-                    var rE = new AngleRange(sun.Set * 360, (1 - sun.Set) * 360);
-
-                    // Night time range, expressed in degrees
-                    // Start is a midnight time, range is a half of timespan from midnight to sunrise
-                    var rN = new AngleRange(0, sun.Rise / 2 * 360);
-
-                    // Morning time range, expressed in degrees
-                    // Start is a half of time from midnight to sunrise, range is a time to sunrise
-                    var rM = new AngleRange(sun.Rise / 2 * 360, sun.Rise / 2 * 360);
-
-                    foreach (var r in ranges)
+                    // no intersections of time ranges
+                    if (!ranges.Any())
                     {
+                        details.Period = VisibilityPeriod.Invisible;
+                        details.Duration = 0;
+                        details.Begin = double.NaN;
+                        details.End = double.NaN;
+                    }
+                    // the body is observable during the day
+                    else
+                    {
+                        /*
+                         * Old algorithm, contains errors.
+                         * 
+                        // duration of visibility
+                        details.Duration = ranges.Sum(i => i.Range / 360 * 24);
+
+                        // beginning of visibility
+                        details.Begin = ranges.First().Start / 360;
+
+                        // end of visibility
+                        details.End = (details.Begin + details.Duration / 24) % 1;
+                        */
+
+                        // New alogrithm: take only longest range
+                        AngleRange r = ranges.OrderByDescending(i => i.Range).First();
+
+                        // duration of visibility
+                        details.Duration = r.Range / 360 * 24;
+
+                        // beginning of visibility
+                        details.Begin = r.Start / 360;
+
+                        // end of visibility
+                        details.End = (details.Begin + details.Duration / 24) % 1;
+
+                        // Evening time range, expressed in degrees
+                        // Start is a sunset time, range is a timespan from sunset to midnight.
+                        var rE = new AngleRange(sun.Set * 360, (1 - sun.Set) * 360);
+
+                        // Night time range, expressed in degrees
+                        // Start is a midnight time, range is a half of timespan from midnight to sunrise
+                        var rN = new AngleRange(0, sun.Rise / 2 * 360);
+
+                        // Morning time range, expressed in degrees
+                        // Start is a half of time from midnight to sunrise, range is a time to sunrise
+                        var rM = new AngleRange(sun.Rise / 2 * 360, sun.Rise / 2 * 360);
+
                         var isEvening = r.Overlaps(rE);
                         if (isEvening.Any())
                         {
@@ -295,7 +388,7 @@ namespace Astrarium.Algorithms
         }
 
         // TODO: description
-        private static double SolveParabola(double y1, double y2, double y3)
+        private static double[] SolveParabola(double y1, double y2, double y3)
         {
             double a = 2 * y1 - 4 * y2 + 2 * y3;
             double b = -3 * y1 + 4 * y2 - y3;
@@ -306,10 +399,12 @@ namespace Astrarium.Algorithms
             double x1 = (-b - D) / (2 * a);
             double x2 = (-b + D) / (2 * a);
 
-            if (x1 >= 0 && x1 < 1) return x1;
-            if (x2 >= 0 && x2 < 1) return x2;
+            List<double> roots = new List<double>();
 
-            return double.NaN;
+            if (x1 >= 0 && x1 < 1) roots.Add(x1);
+            if (x2 >= 0 && x2 < 1) roots.Add(x2);
+
+            return roots.OrderBy(x => x).ToArray();
         }
     }
 }

@@ -1,9 +1,5 @@
-﻿using Astrarium.Types;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Types
 {
@@ -16,10 +12,29 @@ namespace Astrarium.Types
         {
             return (T)Value;
         }
+
+        public Ephemeris(string key, object value, IEphemFormatter formatter = null)
+        {
+            Key = key;
+            Value = value;
+            Formatter = formatter ?? Formatters.GetDefault(key);
+        }
+
+        public override string ToString()
+        {
+            return $"{Key} = {Formatter?.Format(Value) ?? Value}";
+        }
     }
 
     public class Ephemerides : List<Ephemeris>
     {
+        public CelestialObject CelestialObject { get; private set; }
+
+        public object this[string key]
+        {
+            get => GetValue<object>(key);
+        }
+
         public Ephemeris Get(string key)
         {
             return this.FirstOrDefault(e => e.Key == key);
@@ -28,6 +43,16 @@ namespace Astrarium.Types
         public T GetValue<T>(string key)
         {
             return Get(key).GetValue<T>();
+        }
+
+        public Ephemerides(CelestialObject body)
+        {
+            CelestialObject = body;
+        }
+
+        public override string ToString()
+        {
+            return $"{CelestialObject.Names.First()} {base.ToString()}";
         }
     }
 }

@@ -43,6 +43,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="Themes\ColorsDeepBlue.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
     <Page Update="Themes\Markdown.xaml">
       <SubType>Designer</SubType>
     </Page>

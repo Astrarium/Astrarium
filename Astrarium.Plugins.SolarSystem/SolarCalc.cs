@@ -20,6 +20,13 @@ namespace Astrarium.Plugins.SolarSystem
 
         public Sun Sun { get; private set; } = new Sun();
 
+        public IEnumerable<Sun> GetCelestialObjects() => new Sun[] { Sun };
+
+        public SolarCalc(ISky sky)
+        {
+            sky.SunEquatorial = Equatorial;
+        }
+
         public override void Calculate(SkyContext c)
         {
             Sun.Equatorial = c.Get(Equatorial);
@@ -201,14 +208,14 @@ namespace Astrarium.Plugins.SolarSystem
             e["Distance"] = (c, s) => c.Get(Ecliptical).Distance;
             e["HorizontalParallax"] = (c, x) => c.Get(Parallax);
             e["AngularDiameter"] = (c, x) => c.Get(Semidiameter) * 2 / 3600.0;
-            e["CRN"] = (c, s) => c.Get(CarringtonNumber);         
+            e["CRN"] = (c, s) => c.Get(CarringtonNumber);
         }
 
-        public ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50)
+        public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
-            if (Sun.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase))
+            if (Sun.Name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase) && filterFunc(Sun))
                 return new[] { Sun };
-            else if ("@sun".Equals(searchString, StringComparison.OrdinalIgnoreCase))
+            else if (Sun.CommonName.Equals(searchString, StringComparison.OrdinalIgnoreCase) && filterFunc(Sun))
                 return new[] { Sun };
             else
                 return new CelestialObject[0];

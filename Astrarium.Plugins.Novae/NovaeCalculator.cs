@@ -13,6 +13,9 @@ namespace Astrarium.Plugins.Novae
         public ICollection<Nova> Novae { get; private set; }
 
         /// <inheritdoc />
+        public IEnumerable<Nova> GetCelestialObjects() => Novae;
+
+        /// <inheritdoc />
         public override void Initialize()
         {
             string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/novae.json");
@@ -220,6 +223,7 @@ namespace Astrarium.Plugins.Novae
 
         public void ConfigureEphemeris(EphemerisConfig<Nova> e)
         {
+            e["Constellation"] = (c, m) => Constellations.FindConstellation(c.Get(Equatorial, m), c.JulianDay);
             e["Equatorial.Alpha"] = (c, m) => c.Get(Equatorial, m).Alpha;
             e["Equatorial.Delta"] = (c, m) => c.Get(Equatorial, m).Delta;
             e["Horizontal.Altitude"] = (c, m) => c.Get(Horizontal, m).Altitude;
@@ -242,7 +246,7 @@ namespace Astrarium.Plugins.Novae
 
             info
                 .SetTitle(string.Join(", ", info.Body.Names))
-                .SetSubtitle(Text.Get("Nova.Subtitle"))
+                .SetSubtitle(Text.Get("Nova.Type"))
                 .AddRow("Constellation", constellation)
 
                 .AddHeader(Text.Get("Nova.Equatorial"))
@@ -271,9 +275,13 @@ namespace Astrarium.Plugins.Novae
                 .AddRow("RTS.Duration");
         }
 
-        public ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50)
+        public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
-            return Novae.Where(m => m.Names.Any(n => n.StartsWith(searchString, System.StringComparison.OrdinalIgnoreCase))).Take(50).ToArray();
+            return Novae
+                .Where(m => m.Names.Any(n => n.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
+                .Where(filterFunc)
+                .Take(maxCount)
+                .ToArray();
         }
     }
 }

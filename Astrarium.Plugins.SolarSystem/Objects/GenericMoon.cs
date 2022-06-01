@@ -5,6 +5,12 @@ namespace Astrarium.Plugins.SolarSystem.Objects
 {
     public class GenericMoon : SizeableCelestialObject, IPlanetMoon, ISolarSystemObject, IMovingObject
     {
+        /// <inheritdoc />
+        public override string Type => "PlanetMoon";
+
+        /// <inheritdoc />
+        public override string CommonName => Data.names["en"];
+
         /// <summary>
         /// Contains data about orbit and main physical characteristics of the satellite
         /// </summary>

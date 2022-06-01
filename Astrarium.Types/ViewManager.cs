@@ -102,9 +102,9 @@ namespace Astrarium.Types
         /// <param name="caption">Dialog title</param>
         /// <param name="filter">Alowed files extensions filter</param>
         /// <returns>File name and path, if user pressed OK, null otherwise.</returns>
-        public static string ShowOpenFileDialog(string caption, string filter)
+        public static string ShowOpenFileDialog(string caption, string filter, out int selectedFilterIndex)
         {
-            return viewManager.ShowOpenFileDialog(caption, filter);
+            return viewManager.ShowOpenFileDialog(caption, filter, out selectedFilterIndex);
         }
 
         public static Color? ShowColorDialog(string caption, Color color)

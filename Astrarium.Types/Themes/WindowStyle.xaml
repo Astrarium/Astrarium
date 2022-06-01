@@ -6,8 +6,8 @@
     xmlns:c="clr-namespace:Astrarium.Types.Controls">
 
     <Style TargetType="{x:Type Window}">
-        <Setter Property="Foreground" Value="{StaticResource BrushWindowTitle}" />
-        <Setter Property="BorderBrush" Value="{StaticResource BrushWindowBorder}" />
+        <Setter Property="Foreground" Value="{StaticResource BrushWindowTitleForeground}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BrushWindowTitleBackground}" />
         <Setter Property="Background" Value="{StaticResource BrushWindowBackground}" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
         <Setter Property="Template">
@@ -18,7 +18,7 @@
                         <!-- Thin border around window -->
                         <c:BorderFix
                             BorderThickness="1"
-                            BorderBrush="{TemplateBinding Background}">
+                            BorderBrush="{TemplateBinding BorderBrush}">
                             <c:BorderFix.Style>
                                 <Style TargetType="{x:Type c:BorderFix}" BasedOn="{StaticResource {x:Type c:BorderFix}}">
                                     <Style.Triggers>
@@ -73,7 +73,7 @@
                                     <MenuItem.Header>
                                         <Rectangle Width="16" Height="16" SnapsToDevicePixels="True">
                                             <Rectangle.Fill>
-                                                <SolidColorBrush Color="{DynamicResource ColorWindowTitle}" />
+                                                <SolidColorBrush Color="{DynamicResource ColorWindowTitleForeground}" />
                                             </Rectangle.Fill>
                                             <Rectangle.OpacityMask>
                                                 <ImageBrush Stretch="Uniform">

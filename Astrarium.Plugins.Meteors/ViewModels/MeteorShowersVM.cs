@@ -113,11 +113,11 @@ namespace Astrarium.Plugins.Meteors
 
         public MeteorShowersVM(MeteorsCalculator calc, ISky sky, ISettings settings)
         {
-            Meteors = calc.Meteors.OrderBy(x => x.Max).ToArray();
+            Meteors = calc.GetCelestialObjects().OrderBy(x => x.Max).ToArray();
             Sky = sky;
             Calculator = calc;
             Year = sky.Context.GetDate(sky.Context.JulianDay).Year;
-            Moon = Sky.Search("@moon", f => true).FirstOrDefault();
+            Moon = Sky.Search("Moon");
             IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
             settings.SettingValueChanged += Settings_SettingValueChanged;
             Calculate();

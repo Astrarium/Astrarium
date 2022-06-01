@@ -275,7 +275,13 @@ namespace Astrarium
             Host.Child = skyView;
 
             this.Loaded += MainWindow_Loaded;
+            this.Closing += MainWindow_Closing;
             this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        }
+
+        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            CursorsHelper.SetSystemCursors();
         }
 
         private void MainWindow_StateChanged(object sender, EventArgs e)

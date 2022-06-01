@@ -23,6 +23,9 @@ namespace Astrarium
             // Default language
             SettingDefinitions.Add(new SettingDefinition("Language", "en", isPermanent: true));
 
+            // App theme
+            SettingDefinitions.Add(new SettingDefinition("AppTheme", "DeepBlue"));
+
             // Flag indicating main window should be maximized on startup
             SettingDefinitions.Add(new SettingDefinition("StartMaximized", false));
             

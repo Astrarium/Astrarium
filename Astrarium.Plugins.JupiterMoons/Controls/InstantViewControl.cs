@@ -14,7 +14,6 @@ namespace Astrarium.Plugins.JupiterMoons.Controls
 {
     public class InstantViewControl : Control
     {
-
         public static readonly DependencyProperty OrientationProperty =
            DependencyProperty.Register(nameof(Orientation), typeof(ChartOrientation), typeof(InstantViewControl), new FrameworkPropertyMetadata(null) { DefaultValue = ChartOrientation.Direct, BindsTwoWayByDefault = true, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
 
@@ -29,8 +28,7 @@ namespace Astrarium.Plugins.JupiterMoons.Controls
 
         private Typeface font = new Typeface(new FontFamily("#Noto Sans"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
 
-        private readonly Brush[] labelsBrush = new Brush[] { Brushes.Gray, Brushes.DarkRed };
-        private Brush LabelsBrush => labelsBrush[DarkMode ? 1 : 0];
+        private Brush LabelsBrush => new SolidColorBrush((Color)FindResource("ColorControlLightBackground"));
 
         private readonly Brush[] jupiterBrush = new Brush[] { Brushes.Wheat, Brushes.DarkRed };
         private Brush JupiterBrush => jupiterBrush[DarkMode ? 1 : 0];

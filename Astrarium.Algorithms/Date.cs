@@ -254,10 +254,17 @@ namespace Astrarium.Algorithms
         /// </returns>
         public override string ToString()
         {
-            var culture = CultureInfo.InvariantCulture;
-            string month = culture.DateTimeFormat.GetMonthName(Month);
-            string day = Day.ToString("0.##", culture.NumberFormat);
-            return string.Format($"{Year} {month} {day}");
+            if (double.IsNaN(Day))
+            {
+                return "-";
+            }
+            else
+            {
+                var culture = CultureInfo.InvariantCulture;
+                string month = culture.DateTimeFormat.GetMonthName(Month);
+                string day = Day.ToString("0.##", culture.NumberFormat);
+                return string.Format($"{Year} {month} {day}");
+            }
         }
 
         /// <inheritdoc />
@@ -307,6 +314,15 @@ namespace Astrarium.Algorithms
         #endregion Operators
 
         #region Instance Methods
+
+        /// <summary>
+        /// Converts the <see cref="Date"/> to <see cref="DateTime"/>.
+        /// </summary>
+        /// <returns><see cref="DateTime"/> object</returns>
+        public DateTime ToDateTime()
+        {
+            return new DateTime(Year, Month, (int)Day, Hour, Minute, Second, DateTimeKind.Unspecified);
+        }
 
         /// <summary>
         /// Converts the <see cref="Date"/> to Julian Day value.

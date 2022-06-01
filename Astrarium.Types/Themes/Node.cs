@@ -26,6 +26,14 @@ namespace Astrarium.Types.Themes
             Id = id;
         }
 
+        public string[] CheckedChildIds
+        {
+            get => AllChildren(this)
+                  .Where(n => n.IsChecked ?? false)
+                  .Select(n => n.Id).ToArray();
+            set => AllChildren(this).Where(n => value.Contains(n.Id)).ToList().ForEach(n => n.IsChecked = true);
+        }
+
         private IEnumerable<Node> AllChildren(Node node)
         {
             foreach (Node child in node.Children)
@@ -69,7 +77,7 @@ namespace Astrarium.Types.Themes
 
         public event EventHandler<bool?> CheckedChanged;
 
-        private bool? _IsChecked = true;
+        private bool? _IsChecked = false;
         public bool? IsChecked
         {
             get { return _IsChecked; }

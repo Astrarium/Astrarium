@@ -79,7 +79,7 @@ namespace Astrarium.Views
             }
             catch (Exception ex)
             {
-                Trace.TraceError("Unable to open browser: " + ex);
+                Log.Error("Unable to open browser: " + ex);
             }
         }
     }

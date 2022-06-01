@@ -98,15 +98,9 @@ namespace Astrarium.Plugins.Eclipses.Controls
         }
 
         private readonly Typeface font = new Typeface(new FontFamily("#Noto Sans"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
-
-        private readonly Brush[] foregroundBrush = new Brush[] { Brushes.Gray, Brushes.Red };
-        private Brush ForegroundBrush => foregroundBrush[DarkMode ? 1 : 0];
-
-        private readonly Brush[] linesBrush = new Brush[] { Brushes.DimGray, Brushes.DarkRed };
-        private Brush LinesBrush => linesBrush[DarkMode ? 1 : 0];
-
-        private readonly Brush[] moonBrush = new Brush[] { Brushes.Gray, Brushes.DarkRed };
-        private Brush MoonBrush => moonBrush[DarkMode ? 1 : 0];
+        private Brush ForegroundBrush => new SolidColorBrush((Color)FindResource("ColorControlLightBackground"));
+        private Brush LinesBrush => new SolidColorBrush((Color)FindResource("ColorControlLightBackground"));
+        private Brush MoonBrush => new SolidColorBrush((Color)FindResource("ColorControlBackground"));
 
         private readonly Brush[] eclipsedMoonBrush = new Brush[] { Brushes.Brown, Brushes.Red };
         private Brush EclipsedMoonBrush => eclipsedMoonBrush[DarkMode ? 1 : 0];

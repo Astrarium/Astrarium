@@ -1,0 +1,163 @@
+﻿<Window x:Class="Astrarium.Plugins.Planner.Views.PlanningFilterWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+        xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+        xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+        xmlns:v="clr-namespace:Astrarium.Plugins.Planner.Views" 
+        mc:Ignorable="d"
+        Title="{Binding Title}"
+        Style="{StaticResource {x:Type Window}}" 
+        MinHeight="300" MinWidth="800"
+        WindowStartupLocation="CenterOwner"
+        Height="500" Width="800">
+    <Grid Margin="4">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="300" MinWidth="200" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" MinWidth="480" />
+                </Grid.ColumnDefinitions>
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Margin="0 0 4 0">
+                        <Grid.Style>
+                            <Style TargetType="{x:Type Grid}">
+                                <Setter Property="Background" Value="{StaticResource BrushControlBackground}" />
+                            </Style>
+                        </Grid.Style>
+                        
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Margin="6" VerticalAlignment="Center" Grid.Column="0" FontWeight="Bold" Text="{Binding ObjectsFilterTitle}" />
+                        <TextBlock Margin="6" VerticalAlignment="Center" Grid.Column="1" HorizontalAlignment="Right" Text="{Binding ObjectsCount}" Visibility="{Binding IsCelestialObjectsListVisible, Converter={s:BoolToVisibilityConverter}}">
+                            <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="Foreground" Value="{StaticResource BrushControlLightBackground}" />
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+
+                    <!-- Celestial objects types tree view -->
+                    <TreeView Margin="4" Grid.Row="1" ItemsSource="{Binding Nodes}" Visibility="{Binding IsCelestialObjectsTypesTreeVisible, Converter={s:BoolToVisibilityConverter}}" />
+
+                    <!-- Celestial objects list view -->
+                    <ListView Margin="4" Grid.Row="1" SelectionMode="Single" VirtualizingPanel.IsVirtualizing="True" ItemsSource="{Binding ListItems}" Visibility="{Binding IsCelestialObjectsListVisible, Converter={s:BoolToVisibilityConverter}}">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="{x:Type ListViewItem}" BasedOn="{StaticResource ListViewItemStyle}">
+                                <Setter Property="Focusable" Value="False" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}">
+                                    <StackPanel HorizontalAlignment="Stretch" Orientation="Horizontal" Background="Transparent">
+                                        <Rectangle Margin="2" Width="16" Height="16" ToolTip="{Binding Item, Converter={s:CelestialObjectTypeDescriptionConverter}}">
+                                            <Rectangle.Fill>
+                                                <SolidColorBrush Color="{StaticResource ColorControlLightBackground}" />
+                                            </Rectangle.Fill>
+                                            <Rectangle.OpacityMask>
+                                                <ImageBrush ImageSource="{Binding Item, Converter={s:CelestialObjectToIconConverter}}" Stretch="Uniform" />
+                                            </Rectangle.OpacityMask>
+                                        </Rectangle>
+                                        <TextBlock Padding="4 0 0 0" Text="{Binding Item, Converter={s:CelestialObjectNameConverter}}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </CheckBox>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListView>
+                </Grid>
+               
+                <GridSplitter Grid.Column="1" HorizontalAlignment="Center"  />
+
+                <StackPanel Grid.Column="2" HorizontalAlignment="Stretch" Orientation="Vertical">
+                    
+                    <!-- Date and time panel -->
+                    <GroupBox Header="{t:Text Planner.PlanningFilter.DateTime}" Margin="8 0" Visibility="{Binding IsDateTimeControlsVisible, Converter={s:BoolToVisibilityConverter}}">
+                        <StackPanel Orientation="Vertical" Margin="0 8 0 0">
+                            <DockPanel Margin="0 2">
+                                <Label Content="{t:Text Planner.PlanningFilter.Date}" VerticalAlignment="Center" />
+                                <c:DatePicker JulianDay="{Binding JulianDay}" UtcOffset="{Binding UtcOffset}" Options="DateOnly" Grid.Column="3" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                            </DockPanel>
+                            <DockPanel Margin="0 2">
+                                <Label Content="{t:Text Planner.PlanningFilter.TimeFrom}" VerticalAlignment="Center" />
+                                <c:TimeInput Value="{Binding TimeFrom}" ShowSeconds="False" Width="55" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                            </DockPanel>
+                            <DockPanel Margin="0 2">
+                                <Label Content="{t:Text Planner.PlanningFilter.TimeTo}" VerticalAlignment="Center" />
+                                <c:TimeInput Value="{Binding TimeTo}" ShowSeconds="False" Width="55" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                            </DockPanel>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <!-- Filters panel -->
+                    <GroupBox Margin="8 8 8 0">
+
+                        <GroupBox.Header>
+                            <CheckBox IsChecked="{Binding ApplyFilters}" Content="{t:Text Planner.PlanningFilter.ApplyFilters}" VerticalAlignment="Center" />
+                        </GroupBox.Header>
+                        
+                        <StackPanel IsEnabled="{Binding ApplyFilters}" Orientation="Vertical" Margin="0 8 0 0">
+
+                            <DockPanel Margin="8 2">
+                                <CheckBox IsChecked="{Binding EnableMinBodyAltitude}" Content="{t:Text Planner.PlanningFilter.MinBodyAltitude}" VerticalAlignment="Center" />
+                                <c:NumericUpDown IsEnabled="{Binding EnableMinBodyAltitude}" Width="50" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="0" Value="{Binding MinBodyAltitude}" Maximum="90" DecimalPlaces="0" />
+                            </DockPanel>
+
+                            <DockPanel Margin="8 2">
+                                <CheckBox IsChecked="{Binding EnableMaxSunAltitude}" Content="{t:Text Planner.PlanningFilter.MaxSunAltitude}" VerticalAlignment="Center" />
+                                <c:NumericUpDown IsEnabled="{Binding EnableMaxSunAltitude}" Width="50" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="-18" Maximum="0" Value="{Binding MaxSunAltitude}" DecimalPlaces="0" />
+                            </DockPanel>
+
+                            <DockPanel Margin="8 2">
+                                <CheckBox IsChecked="{Binding EnableMagLimit}" Content="{t:Text Planner.PlanningFilter.MagLimit}" VerticalAlignment="Center" />
+                                <c:NumericUpDown IsEnabled="{Binding EnableMagLimit}" Width="50" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="-10" Maximum="25" Value="{Binding MagLimit}" DecimalPlaces="1" />
+                            </DockPanel>
+
+                            <CheckBox IsChecked="{Binding SkipUnknownMagnitude}" Margin="8 4" Content="{t:Text Planner.PlanningFilter.SkipUnknownMagnitude}" VerticalAlignment="Center" />
+
+                            <DockPanel Margin="8 2">
+                                <CheckBox IsChecked="{Binding EnableDurationLimit}" Content="{t:Text Planner.PlanningFilter.DurationLimit}" VerticalAlignment="Center" />
+                                <c:NumericUpDown IsEnabled="{Binding EnableDurationLimit}" Width="50" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="0" Maximum="60" Value="{Binding DurationLimit}" DecimalPlaces="0" />
+                            </DockPanel>
+
+                            <DockPanel Margin="8 2">
+                                <CheckBox IsChecked="{Binding EnableCountLimit}" Content="{t:Text Planner.PlanningFilter.CountLimit}" VerticalAlignment="Center" />
+                                <c:NumericUpDown IsEnabled="{Binding EnableCountLimit}" Width="50" HorizontalAlignment="Right" VerticalAlignment="Center" Minimum="1" Maximum="1000" Value="{Binding CountLimit}" DecimalPlaces="0" />
+                            </DockPanel>
+
+                        </StackPanel>
+                    </GroupBox>
+                </StackPanel>
+            </Grid>
+        </Grid>
+        
+        <Separator Margin="0 4" Grid.Row="1" />
+        <StackPanel  
+            Grid.Row="2"
+            VerticalAlignment="Bottom"
+            Orientation="Horizontal"
+            HorizontalAlignment="Right">
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding OkCommand}" IsEnabled="{Binding OkButtonEnabled}" Content="{t:Text OK}" />
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CancelCommand}" Content="{t:Text Cancel}" />
+        </StackPanel>
+    </Grid>
+</Window>

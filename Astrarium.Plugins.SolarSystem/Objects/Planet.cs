@@ -14,6 +14,17 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         }
 
         /// <summary>
+        /// Common names of all Planets
+        /// </summary>
+        private static readonly string[] CommonNames = new string[] { "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune" };
+
+        /// <inheritdoc />
+        public override string Type => "Planet";
+
+        /// <inheritdoc />
+        public override string CommonName => CommonNames[Number - 1];
+
+        /// <summary>
         /// Serial number of the planet, from 1 (Mercury) to 8 (Neptune).
         /// </summary>
         public int Number { get; private set; }

@@ -4,6 +4,7 @@ using Astrarium.Types;
 using System;
 using System.Drawing;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.ASCOM
@@ -101,6 +102,11 @@ namespace Astrarium.Plugins.ASCOM
             settings.SettingValueChanged += Settings_SettingValueChanged;
         }
 
+        public override void Initialize()
+        {
+            this.ascom.PollingPeriod = (int)settings.Get<decimal>("TelescopePollingPeriod");
+        }
+
         private void Settings_SettingValueChanged(string settingName, object value)
         {
             if (settingName == "TelescopePollingPeriod")
@@ -115,7 +121,7 @@ namespace Astrarium.Plugins.ASCOM
 
         private void Ascom_OnMessageShow(string message)
         {
-            ViewManager.ShowPopupMessage(message);
+            System.Windows.Application.Current.Dispatcher.Invoke(() => ViewManager.ShowPopupMessage(message));
         }
 
         private void Ascom_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -165,7 +171,7 @@ namespace Astrarium.Plugins.ASCOM
             if (ascom.IsAscomPlatformInstalled)
             {
                 string savedTelescopeId = settings.Get<string>("ASCOMTelescopeId");
-                var telescopeId = ascom.Connect(savedTelescopeId);
+                var telescopeId = await ascom.Connect(savedTelescopeId);
                 if (!string.IsNullOrEmpty(telescopeId))
                 {
                     ascom.SetDateTime(DateTime.UtcNow);

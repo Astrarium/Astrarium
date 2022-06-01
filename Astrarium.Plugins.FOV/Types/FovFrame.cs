@@ -1,6 +1,7 @@
 ﻿using Astrarium.Types;
 using Newtonsoft.Json;
 using System;
+using System.ComponentModel;
 
 namespace Astrarium.Plugins.FOV
 {
@@ -135,10 +136,31 @@ namespace Astrarium.Plugins.FOV
         /// Camera rotation
         /// </summary>
         public float Rotation { get; set; }
-        
+
+        /// <summary>
+        /// Rotation origin of the frame
+        /// </summary>
+        public FovFrameRotateOrigin RotateOrigin { get; set; }
+
         /// <summary>
         /// Camera binning
         /// </summary>
         public float Binning { get; set; }
+    }
+
+    /// <summary>
+    /// Rotation origin of the FOV frame
+    /// </summary>
+    public enum FovFrameRotateOrigin
+    {
+        /// <summary>
+        /// Frame is rotated around equatorial grid
+        /// </summary>
+        Equatorial = 0,
+
+        /// <summary>
+        /// Frame is rotated around horizontal grid
+        /// </summary>
+        Horizontal = 1,
     }
 }

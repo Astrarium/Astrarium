@@ -13,30 +13,33 @@ namespace Astrarium.Plugins.BrightStars
 {
     public class StarsCalc : BaseCalc, ICelestialObjectCalc<Star>
     {
-        private readonly string STARS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Stars.dat");
-        private readonly string NAMES_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/StarNames.dat");
-        private readonly string ALPHABET_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Alphabet.dat");
+        /// <summary>
+        /// ISky instance
+        /// </summary>
+        private readonly ISky sky;
 
+        /// <summary>
+        /// Alphabet
+        /// </summary>
         private Dictionary<string, string> Alphabet = new Dictionary<string, string>();
 
         /// <summary>
         /// Collection of all stars
         /// </summary>
-        public ICollection<Star> Stars { get; private set; } = new List<Star>();
+        internal ICollection<Star> Stars = new List<Star>();
+
+        /// <inheritdoc />
+        public IEnumerable<Star> GetCelestialObjects() => Stars.Where(s => s != null);
 
         /// <summary>
         /// Stars data reader
         /// </summary>
-        private StarsReader DataReader = new StarsReader();
+        private readonly IStarsReader dataReader;
 
-        /// <summary>
-        /// Function to get constellation info
-        /// </summary>
-        private Func<string, Constellation> GetConstellation;
-
-        public StarsCalc(ISky sky)
+        public StarsCalc(ISky sky, IStarsReader dataReader)
         {
-            GetConstellation = sky.GetConstellation;
+            this.sky = sky;
+            this.dataReader = dataReader;
             Star.GetNames = GetStarNames;
         }
 
@@ -53,11 +56,8 @@ namespace Astrarium.Plugins.BrightStars
 
         public override void Initialize()
         {
-            DataReader.StarsDataFilePath = STARS_FILE;
-            DataReader.StarsNamesFilePath = NAMES_FILE;
-            DataReader.AlphabetFilePath = ALPHABET_FILE;
-            Stars = DataReader.ReadStars();            
-            Alphabet = DataReader.ReadAlphabet();            
+            Stars = dataReader.ReadStars();
+            Alphabet = dataReader.ReadAlphabet();
         }
 
         #region Ephemeris
@@ -131,23 +131,47 @@ namespace Astrarium.Plugins.BrightStars
         }
 
         /// <summary>
+        /// Gets visibility info for the star
+        /// </summary>
+        private VisibilityDetails VisibilityDetails(SkyContext c, ushort hrNumber)
+        {
+            var ctx = c.Copy(c.JulianDayMidnight);
+            var eq = ctx.Get(Equatorial, hrNumber);
+            var eqSun = ctx.Get(sky.SunEquatorial);
+            double minBodyAltitude = ctx.MinBodyAltitudeForVisibilityCalculations ?? 5;
+            double minSunAltitude = ctx.MaxSunAltitudeForVisibilityCalculations ?? 0;
+            return Visibility.Details(eq, eqSun, ctx.GeoLocation, ctx.SiderealTime, minBodyAltitude, minSunAltitude);
+        }
+
+        /// <summary>
         /// Gets detailed info about star
         /// </summary>
         private StarDetails ReadStarDetails(SkyContext c, ushort hrNumber)
         {
-            return DataReader.GetStarDetails(hrNumber);
+            return dataReader.GetStarDetails(hrNumber);
         }
 
         #endregion Ephemeris
 
         public void ConfigureEphemeris(EphemerisConfig<Star> e)
         {
+            e["Constellation"] = (c, s) => Constellations.FindConstellation(c.Get(Equatorial, s.Number), c.JulianDay);
+            e["Equatorial.Alpha"] = (c, s) => c.Get(Equatorial, s.Number).Alpha;
+            e["Equatorial.Delta"] = (c, s) => c.Get(Equatorial, s.Number).Delta;
+            e["Horizontal.Azimuth"] = (c, s) => c.Get(Horizontal, s.Number).Azimuth;
+            e["Horizontal.Altitude"] = (c, s) => c.Get(Horizontal, s.Number).Altitude;
+            e["Magnitude"] = (c, s) => s.Mag;
             e["RTS.Rise"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet, s.Number).Rise);
             e["RTS.Transit"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet, s.Number).Transit);
             e["RTS.Set"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet, s.Number).Set);
             e["RTS.Duration"] = (c, s) => c.Get(RiseTransitSet, s.Number).Duration;
-            e["Horizontal.Azimuth"] = (c, s) =>c.Get(Horizontal, s.Number).Azimuth;
-            e["Horizontal.Altitude"] = (c, s) => c.Get(Horizontal, s.Number).Altitude;
+            e["RTS.RiseAzimuth"] = (c, s) => c.Get(RiseTransitSet, s.Number).RiseAzimuth;
+            e["RTS.TransitAltitude"] = (c, s) => c.Get(RiseTransitSet, s.Number).TransitAltitude;
+            e["RTS.SetAzimuth"] = (c, s) => c.Get(RiseTransitSet, s.Number).SetAzimuth;
+            e["Visibility.Begin"] = (c, s) => c.GetDateFromTime(c.Get(VisibilityDetails, s.Number).Begin);
+            e["Visibility.End"] = (c, s) => c.GetDateFromTime(c.Get(VisibilityDetails, s.Number).End);
+            e["Visibility.Duration"] = (c, s) => c.Get(VisibilityDetails, s.Number).Duration;
+            e["Visibility.Period"] = (c, s) => c.Get(VisibilityDetails, s.Number).Period;
         }
 
         public void GetInfo(CelestialObjectInfo<Star> info)
@@ -158,7 +182,7 @@ namespace Astrarium.Plugins.BrightStars
 
             info
             .SetTitle(string.Join(", ", s.Names))
-            .SetSubtitle(Text.Get("Star.Subtitle"))
+            .SetSubtitle(Text.Get("Star.Type"))
 
             .AddRow("Constellation", Constellations.FindConstellation(c.Get(Equatorial, s.Number), c.JulianDay))
 
@@ -180,6 +204,12 @@ namespace Astrarium.Plugins.BrightStars
             .AddRow("RTS.Set")
             .AddRow("RTS.Duration")
 
+            .AddHeader(Text.Get("Star.Visibility"))
+            .AddRow("Visibility.Begin")
+            .AddRow("Visibility.End")
+            .AddRow("Visibility.Duration")
+            .AddRow("Visibility.Period")
+
             .AddHeader(Text.Get("Star.Properties"))
             .AddRow("Magnitude", s.Mag)
             .AddRow("IsInfraredSource", details.IsInfraredSource)
@@ -197,13 +227,14 @@ namespace Astrarium.Plugins.BrightStars
         }
 
         private static Regex regexSpaceRemover = new Regex("[ ]{2,}", RegexOptions.None);
-        public ICollection<CelestialObject> Search(SkyContext context, string searchString, int maxCount = 50)
+        public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
             searchString = regexSpaceRemover.Replace(searchString, " ").Trim();
 
-            return Stars.Where(s => s != null && 
+            return Stars.Where(s => s != null &&
                 GetStarNamesForSearch(s)
                 .Any(name => name.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
+                .Where(filterFunc)
                 .Take(maxCount)
                 .ToArray();
         }
@@ -216,10 +247,19 @@ namespace Astrarium.Plugins.BrightStars
             List<string> constSynonyms = new List<string>();
 
             string conCode = s.Name.Substring(7, 3).Trim();
+            if (string.IsNullOrEmpty(conCode) && s.VariableName != null)
+            {
+                string[] varName = s.VariableName.Split(' ');
+                if (varName.Length > 1)
+                {
+                    conCode = varName[1];
+                }
+            }
+
             if (!string.IsNullOrEmpty(conCode))
             {
                 constSynonyms.Add(conCode);
-                var constellation = GetConstellation(conCode);
+                var constellation = sky.GetConstellation(conCode);
                 if (constellation != null)
                 {
                     constSynonyms.Add(constellation.LatinGenitiveName);
@@ -317,13 +357,23 @@ namespace Astrarium.Plugins.BrightStars
                 names.Add($"FK5 {s.FK5Number}");
                 names.Add($"{s.FK5Number}");
             }
+
             names.Add($"HR {s.Number}");
             names.Add($"HR{s.Number}");
             names.Add($"{s.Number}");
 
-            names.AddRange(constSynonyms);
+            var crossRefNames = GetCrossReferences(s);
+            if (crossRefNames != null && crossRefNames.Any())
+            {
+                names.AddRange(crossRefNames);
+            }
 
             return names;
+        }
+
+        private ICollection<string> GetCrossReferences(Star s)
+        {
+            return sky.GetCrossReferences(s);
         }
 
         private ICollection<string> GetStarNames(Star s)
@@ -334,7 +384,7 @@ namespace Astrarium.Plugins.BrightStars
 
             if (!string.IsNullOrEmpty(conName))
             {
-                conName = GetConstellation(conName).LatinGenitiveName;
+                conName = sky.GetConstellation(conName).LatinGenitiveName;
             }
 
             if (s.ProperName != null)
@@ -351,10 +401,10 @@ namespace Astrarium.Plugins.BrightStars
             }
             if (s.VariableName != null)
             {
-                string[] varName = s.VariableName.Split(' ');
+                string[] varName = s.VariableName.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                 if (varName.Length > 1)
                 {
-                    conName = GetConstellation(varName[1]).LatinGenitiveName;
+                    conName = sky.GetConstellation(varName[1]).LatinGenitiveName;
                     names.Add($"{varName[0]} {conName}");
                 }
                 else
@@ -375,6 +425,11 @@ namespace Astrarium.Plugins.BrightStars
                 names.Add($"FK5 {s.FK5Number}");
             }
             names.Add($"HR {s.Number}");
+            var crossRefNames = GetCrossReferences(s);
+            if (crossRefNames != null && crossRefNames.Any())
+            {
+                names.AddRange(crossRefNames);
+            }
             return names;
         }
     }

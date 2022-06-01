@@ -241,16 +241,12 @@ namespace Astrarium.Plugins.SolarSystem
 
         public VisibilityDetails Planet_Visibility(SkyContext c, int p)
         {
-            double jd = c.JulianDayMidnight;
-            double theta0 = Date.ApparentSiderealTime(jd, c.NutationElements.deltaPsi, c.Epsilon);
-            double parallax = c.Get(Planet_Parallax, p);
-
-            var ctx = new SkyContext(jd, c.GeoLocation);
-
+            var ctx = c.Copy(c.JulianDayMidnight);
             var eq = ctx.Get(Planet_Equatorial, p);
             var eqSun = ctx.Get(Sun_Equatorial);
-
-            return Visibility.Details(eq, eqSun, c.GeoLocation, theta0, 5);
+            double minBodyAltitude = ctx.MinBodyAltitudeForVisibilityCalculations ?? 5;
+            double minSunAltitude = ctx.MaxSunAltitudeForVisibilityCalculations ?? 0;
+            return Visibility.Details(eq, eqSun, ctx.GeoLocation, ctx.SiderealTime, minBodyAltitude, minSunAltitude);
         }
 
         private MartianDate Mars_Calendar(SkyContext c)
@@ -309,6 +305,9 @@ namespace Astrarium.Plugins.SolarSystem
             e["RTS.Transit"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, p.Number).Transit);
             e["RTS.Set"] = (c, p) => c.GetDateFromTime(c.Get(Planet_RiseTransitSet, p.Number).Set);
             e["RTS.Duration"] = (c, p) => c.Get(Planet_RiseTransitSet, p.Number).Duration;
+            e["RTS.RiseAzimuth"] = (c, p) => c.Get(Planet_RiseTransitSet, p.Number).RiseAzimuth;
+            e["RTS.TransitAltitude"] = (c, p) => c.Get(Planet_RiseTransitSet, p.Number).TransitAltitude;
+            e["RTS.SetAzimuth"] = (c, p) => c.Get(Planet_RiseTransitSet, p.Number).SetAzimuth;
             e["Visibility.Begin"] = (c, p) => c.GetDateFromTime(c.Get(Planet_Visibility, p.Number).Begin);
             e["Visibility.End"] = (c, p) => c.GetDateFromTime(c.Get(Planet_Visibility, p.Number).End);
             e["Visibility.Duration"] = (c, p) => c.Get(Planet_Visibility, p.Number).Duration;
@@ -318,7 +317,7 @@ namespace Astrarium.Plugins.SolarSystem
         public void GetInfo(CelestialObjectInfo<Planet> info)
         {
             info
-                .SetSubtitle(Text.Get("Planet.Subtitle"))
+                .SetSubtitle(Text.Get("Planet.Type"))
                 .SetTitle(info.Body.Names.First())
 
                 .AddRow("Constellation")

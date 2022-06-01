@@ -1006,12 +1006,12 @@ namespace Astrarium.Algorithms
         /// Formula is taken from <see href="https://astronomy.stackexchange.com/questions/10246/is-there-a-simple-analytical-formula-for-the-lunar-phase-brightness-curve"/>
         /// </remarks>
         // TODO: tests
-        public static double Magnitude(double phaseAngle)
+        public static float Magnitude(double phaseAngle)
         {
             double psi = Angle.ToRadians(phaseAngle);
             double psi4 = Math.Pow(psi, 4);
 
-            return -12.73 + 1.49 * Math.Abs(psi) + 0.043 * psi4;
+            return (float)(-12.73 + 1.49 * Math.Abs(psi) + 0.043 * psi4);
         }
 
         /// <summary>

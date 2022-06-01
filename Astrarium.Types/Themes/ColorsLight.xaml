@@ -5,30 +5,33 @@
                     mc:Ignorable="d">
     
     <!-- Captions, icons, etc. -->
-    <Color x:Key="ColorForeground">#404040</Color>
+    <Color x:Key="ColorForeground">#303030</Color>
 
     <!-- Window background -->
-    <Color x:Key="ColorWindowBackground">#F6F6F6</Color>
+    <Color x:Key="ColorWindowBackground">#E9EDF1</Color>
 
-    <!-- Window border and title background -->
-    <Color x:Key="ColorWindowBorder">#1E2772</Color>
+    <!-- Window title background -->
+    <Color x:Key="ColorWindowTitleBackground">#005A9E</Color>
 
     <!-- Window title text -->
-    <Color x:Key="ColorWindowTitle">#ffffff</Color>
+    <Color x:Key="ColorWindowTitleForeground">#ffffff</Color>
 
     <!-- Buttons background, dropdowns buttons, toolbar buttons, dividers, splitters -->
-    <Color x:Key="ColorControlBackground">#cccccc</Color>
+    <Color x:Key="ColorControlBackground">#B7B9BC</Color>
 
     <!-- Hovered buttons, scrollbar scroller, inactive checkmarks -->
-    <Color x:Key="ColorControlLightBackground">#bbbbbb</Color>
+    <Color x:Key="ColorControlLightBackground">#868889</Color>
 
     <!-- Scrollbar background, disable tabs background-->
-    <Color x:Key="ColorControlDarkBackground">#eeeeee</Color>
+    <Color x:Key="ColorControlDarkBackground">#D3D3D3</Color>
 
     <!-- Selected list items background, hovered menu items -->
-    <Color x:Key="ColorSelection">#9BA7FF</Color>
+    <Color x:Key="ColorSelection">#0078D4</Color>
+
+    <!-- Color of text over selected background -->
+    <Color x:Key="ColorSelectionForeground">#ffffff</Color>
 
     <!-- Hovered checkbox and radiobutton outline -->
-    <Color x:Key="ColorHighlight">#9BA7FF</Color>
+    <Color x:Key="ColorHighlight">#005A9E</Color>
 
 </ResourceDictionary>

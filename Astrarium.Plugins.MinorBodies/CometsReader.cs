@@ -1,4 +1,5 @@
 ﻿using Astrarium.Algorithms;
+using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -66,9 +67,9 @@ namespace Astrarium.Plugins.MinorBodies
                             });
                         }
                     }
-                    catch (Exception ex) 
+                    catch (Exception ex)
                     {
-                        Trace.TraceError($"Unable to parse comet data. Line:\n{line}\nError: {ex}");
+                        Log.Error($"Unable to parse comet data. Line:\n{line}\nError: {ex}");
                     }
                 }
             }

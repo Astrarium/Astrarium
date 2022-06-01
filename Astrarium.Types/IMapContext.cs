@@ -222,6 +222,20 @@ namespace Astrarium.Types
             map.Graphics.RotateTransform(rotation);
         }
 
+        public static void Rotate(this IMapContext map, PointF p, double angle)
+        {
+            map.Graphics.TranslateTransform(p.X, p.Y);
+            if (map.IsInverted)
+            {
+                angle = -angle;
+            }
+            if (map.IsMirrored)
+            {
+                angle = -angle;
+            }
+            map.Graphics.RotateTransform((float)angle);
+        }
+
         public static float Rotate(this IMapContext map, PointF p, CrdsEquatorial eq, double PA)
         {
             // Point directed to North celestial pole

@@ -13,6 +13,17 @@ namespace Astrarium.Plugins.SolarSystem.Objects
             Number = number;
         }
 
+        /// <inheritdoc />
+        public override string Type => "PlanetMoon";
+
+        /// <summary>
+        /// Common names of all Uranus moons
+        /// </summary>
+        private static readonly string[] CommonNames = new string[] { "Miranda", "Ariel", "Umbriel", "Titania", "Oberon" };
+
+        /// <inheritdoc />
+        public override string CommonName => CommonNames[Number - 1];
+
         /// <summary>
         /// Moon index, 1-based
         /// </summary>

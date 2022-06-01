@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Astrarium.Types;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -63,7 +64,7 @@ namespace Astrarium.Plugins.ASCOM
             }
             catch (Exception ex)
             {
-                Trace.TraceError($"Error on checking assembly in GAC: {ex}");
+                Log.Error($"Error on checking assembly in GAC: {ex}");
                 return false;
             }
         }

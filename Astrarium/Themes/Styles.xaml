@@ -18,6 +18,7 @@
         <Style.Triggers>
             <Trigger Property="IsSelected" Value="true">
                 <Setter Property="Background" Value="{StaticResource BrushSelection}" />
+                <Setter Property="Foreground" Value="{StaticResource BrushSelectionForeground}" />
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -33,10 +34,12 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter Property="Background" TargetName="ContentBorder" Value="{StaticResource BrushSelection}" />
+                            <Setter Property="Foreground" Value="{StaticResource BrushSelectionForeground}" />
                             <Setter Property="IsSelected" Value="True" />
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="Background" TargetName="ContentBorder" Value="{StaticResource BrushSelection}" />
+                            <Setter Property="Foreground" Value="{StaticResource BrushSelectionForeground}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

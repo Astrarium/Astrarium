@@ -2,6 +2,7 @@
 <Window 
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
     xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types" 
+    xmlns:lc="clr-namespace:Astrarium.Plugins.FOV.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:local="clr-namespace:Astrarium.Plugins.FOV" 
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -151,13 +152,13 @@
                             </StackPanel>
                         </DockPanel>
 
-                        <ComboBox Margin="2" Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Telescopes}" SelectedValue="{Binding TelescopeId}" DisplayMemberPath="Name" SelectedValuePath="Id">
+                        <lc:AutoCompleteComboBox Style="{StaticResource {x:Type ComboBox}}" Margin="2" Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Telescopes}" SelectedValue="{Binding TelescopeId}" DisplayMemberPath="Name" SelectedValuePath="Id" TextSearch.TextPath="Name">
                             <ComboBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <VirtualizingStackPanel />
                                 </ItemsPanelTemplate>
                             </ComboBox.ItemsPanel>
-                        </ComboBox>
+                        </lc:AutoCompleteComboBox>
                         <Label Grid.Row="0" Grid.Column="1" Content="{t:Text FovSettingsWindow.Telescope.FocalLength}" />
                         <TextBox Margin="2" IsReadOnly="True" Grid.Row="1" Grid.Column="1" Text="{Binding Telescope.FocalLength, Mode=OneWay, Converter={local:MillimetersConverter}}" />
                         <Label Grid.Row="0" Grid.Column="2" Content="{t:Text FovSettingsWindow.Telescope.Aperture}" />
@@ -184,13 +185,13 @@
                                 <Button Content="{StaticResource ImageDelete}" Style="{StaticResource ImageButton}" IsEnabled="{Binding Eyepiece, Converter={s:NotNullToBoolConverter}}" Command="{Binding DeleteEquipmentCommand}" CommandParameter="{x:Type local:Eyepiece}" />                            </StackPanel>
                         </DockPanel>
 
-                        <ComboBox Margin="2" Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Eyepieces}" SelectedValue="{Binding EyepieceId}" DisplayMemberPath="Name" SelectedValuePath="Id">
+                        <lc:AutoCompleteComboBox Style="{StaticResource {x:Type ComboBox}}" Margin="2" Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Eyepieces}" SelectedValue="{Binding EyepieceId}" DisplayMemberPath="Name" SelectedValuePath="Id" TextSearch.TextPath="Name">
                             <ComboBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <VirtualizingStackPanel />
                                 </ItemsPanelTemplate>
                             </ComboBox.ItemsPanel>
-                        </ComboBox>
+                        </lc:AutoCompleteComboBox>
                         <Label Grid.Row="0" Grid.Column="1" Content="{t:Text FovSettingsWindow.Eyepiece.FocalLength}" />
                         <TextBox Margin="2" IsReadOnly="True" Grid.Row="1" Grid.Column="1" Text="{Binding Eyepiece.FocalLength, Mode=OneWay, Converter={local:MillimetersConverter}}" />
                         <Label Grid.Row="0" Grid.Column="2" Content="{t:Text FovSettingsWindow.Eyepiece.FieldOfView}" />
@@ -217,14 +218,14 @@
                                 <Button Content="{StaticResource ImageDelete}" Style="{StaticResource ImageButton}" IsEnabled="{Binding Camera, Converter={s:NotNullToBoolConverter}}" Command="{Binding DeleteEquipmentCommand}" CommandParameter="{x:Type local:Camera}" />                            
                             </StackPanel>
                         </DockPanel>
-                        
-                        <ComboBox Margin="2" Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Cameras}" SelectedValue="{Binding CameraId}" DisplayMemberPath="Name" SelectedValuePath="Id">
+
+                        <lc:AutoCompleteComboBox Style="{StaticResource {x:Type ComboBox}}" Margin="2" Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Cameras}" SelectedValue="{Binding CameraId}" DisplayMemberPath="Name" SelectedValuePath="Id" TextSearch.TextPath="Name">
                             <ComboBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <VirtualizingStackPanel />
                                 </ItemsPanelTemplate>
                             </ComboBox.ItemsPanel>
-                        </ComboBox>
+                        </lc:AutoCompleteComboBox>
                         <Label Grid.Row="0" Grid.Column="1" Content="{t:Text FovSettingsWindow.Camera.Resolution}" />
                         <TextBox Margin="2" IsReadOnly="True" Grid.Row="1" Grid.Column="1" Text="{Binding Camera, Mode=OneWay, Converter={local:CameraResolutionConverter}}" />
                         <Label Grid.Row="0" Grid.Column="2" Content="{t:Text FovSettingsWindow.Camera.PixelSize}" />
@@ -252,14 +253,14 @@
                                 <Button Content="{StaticResource ImageDelete}" Style="{StaticResource ImageButton}" IsEnabled="{Binding Binocular, Converter={s:NotNullToBoolConverter}}" Command="{Binding DeleteEquipmentCommand}" CommandParameter="{x:Type local:Binocular}" />
                             </StackPanel>
                         </DockPanel>
-                        
-                        <ComboBox Margin="2" Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Binoculars}" SelectedValue="{Binding BinocularId}" DisplayMemberPath="Name" SelectedValuePath="Id">
+
+                        <lc:AutoCompleteComboBox Style="{StaticResource {x:Type ComboBox}}" Margin="2" Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Binoculars}" SelectedValue="{Binding BinocularId}" DisplayMemberPath="Name" SelectedValuePath="Id" TextSearch.TextPath="Name">
                             <ComboBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <VirtualizingStackPanel />
                                 </ItemsPanelTemplate>
                             </ComboBox.ItemsPanel>
-                        </ComboBox>
+                        </lc:AutoCompleteComboBox>
                         <Label Grid.Row="0" Grid.Column="1" Content="{t:Text FovSettingsWindow.Binocular.Aperture}" />
                         <TextBox Margin="2" IsReadOnly="True" Grid.Row="1" Grid.Column="1" Text="{Binding Binocular.Aperture, Mode=OneWay, Converter={local:MillimetersConverter}}" />
                         <Label Grid.Row="0" Grid.Column="2" Content="{t:Text FovSettingsWindow.Binocular.Magnification}" />
@@ -280,13 +281,13 @@
                             <ColumnDefinition Width="Auto" MinWidth="120" SharedSizeGroup="g1" />
                         </Grid.ColumnDefinitions>
                         <Label Grid.Row="0" Grid.Column="0" Content="{t:Text FovSettingsWindow.Lens}" />
-                        <ComboBox Margin="2" Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Lenses}" SelectedValue="{Binding LensId}" DisplayMemberPath="Name" SelectedValuePath="Id">
+                        <lc:AutoCompleteComboBox Style="{StaticResource {x:Type ComboBox}}" Margin="2" Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Lenses}" SelectedValue="{Binding LensId}" DisplayMemberPath="Name" SelectedValuePath="Id" TextSearch.TextPath="Name">
                             <ComboBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <VirtualizingStackPanel />
                                 </ItemsPanelTemplate>
                             </ComboBox.ItemsPanel>
-                        </ComboBox>
+                        </lc:AutoCompleteComboBox>
                         <Label Grid.Row="0" Grid.Column="1" Content="{t:Text FovSettingsWindow.Camera.Binning}" Visibility="{Binding CameraVisible, Converter={s:BoolToVisibilityConverter}}" />
                         <ComboBox Margin="2" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Binnings}" SelectedValue="{Binding Binning}" Visibility="{Binding CameraVisible, Converter={s:BoolToVisibilityConverter}}">
                             <ComboBox.ItemTemplate>
@@ -302,7 +303,20 @@
                         </ComboBox>
 
                         <Label Content="{t:Text FovSettingsWindow.Camera.Rotation}" Grid.Row="0" Grid.Column="2" Visibility="{Binding CameraVisible, Converter={s:BoolToVisibilityConverter}}" />
-                        <c:NumericUpDown Value="{Binding Rotation}" Margin="2" DecimalPlaces="0" Minimum="0" Maximum="359" Grid.Row="1" Grid.Column="2" Visibility="{Binding CameraVisible, Converter={s:BoolToVisibilityConverter}}" />
+
+                        <Grid Visibility="{Binding CameraVisible, Converter={s:BoolToVisibilityConverter}}" Grid.Row="1" Grid.Column="2" >
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="50" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <c:NumericUpDown Grid.Column="0" Value="{Binding Rotation}" Margin="2" DecimalPlaces="0" Minimum="0" Maximum="359"  />
+                            <TextBlock Grid.Column="1" Text="°" Margin="0 0 4 0" />
+                            <ComboBox Grid.Column="2" SelectedValuePath="Tag" SelectedValue="{Binding RotateOrigin}" IsEditable="False">
+                                <ComboBoxItem Content="{t:Text FovSettingsWindow.RotateOrigin.Equatorial}" Tag="{x:Static local:FovFrameRotateOrigin.Equatorial}"/>
+                                <ComboBoxItem Content="{t:Text FovSettingsWindow.RotateOrigin.Horizontal}" Tag="{x:Static local:FovFrameRotateOrigin.Horizontal}"/>
+                            </ComboBox>
+                        </Grid>
 
                     </Grid>
 

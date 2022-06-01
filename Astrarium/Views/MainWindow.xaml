@@ -61,6 +61,7 @@
                         <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
                         <Setter Property="Visibility" Value="{Binding IsVisible, Converter={s:BoolToVisibilityConverter}}" />
                         <Setter Property="Header" Value="{Binding Header, Converter={s:LocalizedTextConverter}}" />
+                        <Setter Property="ToolTip" Value="{Binding Tooltip, Converter={s:LocalizedTextConverter}}" />
                         <Setter Property="InputGestureText" Value="{Binding InputGestureText}" />
                         <Setter Property="Command" Value="{Binding Command}" />
                         <Setter Property="CommandParameter" Value="{Binding CommandParameter}" />
@@ -148,7 +149,7 @@
                 <c:AutoCompleteTextBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
-                            <Rectangle Margin="2" Width="16" Height="16">
+                            <Rectangle Margin="2" Width="16" Height="16" ToolTip="{Binding Converter={s:CelestialObjectTypeDescriptionConverter}}">
                                 <Rectangle.Fill>
                                     <SolidColorBrush Color="{DynamicResource ColorControlLightBackground}" />
                                 </Rectangle.Fill>
@@ -191,6 +192,7 @@
                                 <Setter Property="InputGestureText" Value="{Binding InputGestureText}" />
                                 <Setter Property="CommandParameter" Value="{Binding CommandParameter}" />
                                 <Setter Property="ItemsSource" Value="{Binding SubItems}" />
+                                <Setter Property="ToolTip" Value="{Binding Tooltip}" />
                             </Style>
                         </ContextMenu.ItemContainerStyle>
                     </ContextMenu>
@@ -213,9 +215,9 @@
             <StatusBarItem>
                 <Menu Background="Transparent">
                     <MenuItem 
-                              ItemsSource="{Binding SelectedObjectsMenuItems}" 
-                              Header="{Binding SelectedObject, Converter={s:CelestialObjectNameConverter}, FallbackValue='Selected Object'}" 
-                              ToolTip="{t:Text StatusBar.SelectedObject}">
+                        ItemsSource="{Binding SelectedObjectsMenuItems}" 
+                        Header="{Binding SelectedObject, Converter={s:CelestialObjectNameConverter}, FallbackValue='Selected Object'}" 
+                        ToolTip="{t:Text StatusBar.SelectedObject}">
                         <MenuItem.ItemContainerStyle>
                             <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
                                 <Setter Property="IsChecked" Value="{Binding IsChecked}" />
@@ -258,6 +260,7 @@
                                                 </Trigger>
                                                 <Trigger Property="IsMouseOver" Value="True">
                                                     <Setter TargetName="Border" Property="Background" Value="{StaticResource BrushSelection}"/>
+                                                    <Setter Property="Foreground" Value="{StaticResource BrushSelectionForeground}" />
                                                 </Trigger>
                                             </ControlTemplate.Triggers>
                                         </ControlTemplate>
@@ -288,6 +291,7 @@
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
                                                     <Setter TargetName="Border" Property="Background" Value="{StaticResource BrushSelection}"/>
+                                                    <Setter Property="Foreground" Value="{StaticResource BrushSelectionForeground}" />
                                                 </Trigger>
                                             </ControlTemplate.Triggers>
                                         </ControlTemplate>

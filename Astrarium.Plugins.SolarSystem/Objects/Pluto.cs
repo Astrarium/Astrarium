@@ -13,6 +13,12 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         /// </summary>
         public string Name => Text.Get($"Planet.9.Name");
 
+        /// <inheritdoc />
+        public override string Type => "Planet";
+
+        /// <inheritdoc />
+        public override string CommonName => "Pluto";
+
         /// <summary>
         /// Apparent topocentrical equatorial coordinates
         /// </summary>

@@ -21,18 +21,7 @@ namespace Astrarium.ViewModels
         public double JulianDayTo { get; set; }
         public double UtcOffset { get; private set; }
 
-        private static Cache cache;
-
-        public IEnumerable<string> Categories
-        {
-            get
-            {
-                return
-                    AllNodes(Nodes.First())
-                        .Where(n => n.IsChecked ?? false)
-                        .Select(n => n.Id);
-            }
-        }
+        public IEnumerable<string> Categories => Nodes.First().CheckedChildIds;
 
         public bool OkButtonEnabled
         {
@@ -46,8 +35,8 @@ namespace Astrarium.ViewModels
         {
             this.sky = sky;
 
-            JulianDayFrom = cache?.JdFrom ?? sky.Context.JulianDay;
-            JulianDayTo = cache?.JdTo ?? sky.Context.JulianDay + 30;
+            JulianDayFrom = sky.Context.JulianDay;
+            JulianDayTo = sky.Context.JulianDay + 30;
 
             UtcOffset = sky.Context.GeoLocation.UtcOffset;
 
@@ -64,14 +53,6 @@ namespace Astrarium.ViewModels
                 ViewManager.ShowMessageBox("$PhenomenaSettingsWindow.WarningTitle", "$PhenomenaSettingsWindow.WarningText", System.Windows.MessageBoxButton.OK);
                 return;
             }
-
-            // save selected values to cache
-            cache = new Cache() 
-            { 
-                JdFrom = JulianDayFrom,
-                JdTo = JulianDayTo,
-                Categories = Categories.ToArray()
-            };
 
             Close(true);
         }
@@ -100,39 +81,12 @@ namespace Astrarium.ViewModels
             }
 
             Nodes.Add(root);
-
-            if (cache != null)
-            {
-                foreach (var node in AllNodes(Nodes.First()))
-                {
-                    node.IsChecked = cache.Categories.Contains(node.Id);
-                }
-            }
-        }
-
-        private IEnumerable<Node> AllNodes(Node node)
-        {
-            yield return node;
-
-            foreach (Node child in node.Children)
-            {
-                foreach (Node n in AllNodes(child))
-                {
-                    yield return n;
-                }
-            }
+            root.IsChecked = true;
         }
 
         private void Root_CheckedChanged(object sender, bool? e)
         {
             NotifyPropertyChanged(nameof(OkButtonEnabled));
-        }
-
-        private class Cache
-        {
-            public double JdFrom { get; set; }
-            public double JdTo { get; set; }
-            public string[] Categories { get; set; }
         }
     }
 }

@@ -74,7 +74,7 @@ namespace Astrarium.Views
 
         private void _Progress_ProgressChanged(object sender, double progress)
         {
-            Dispatcher.Invoke(() => { ProgressBar.Value = progress; });
+            Dispatcher.Invoke(() => { ProgressBar.Value = double.IsInfinity(progress) ? 0 : progress; });
         }
 
         protected override void OnClosed(EventArgs e)

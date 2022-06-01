@@ -58,7 +58,7 @@ namespace Astrarium.Plugins.DeepSky
                 return;
             }
 
-            var allDeepSkies = deepSkyCalc.DeepSkies;
+            var allDeepSkies = deepSkyCalc.deepSkies;
             bool isGround = settings.Get<bool>("Ground");
             brushCaption = new SolidBrush(map.GetColor("ColorDeepSkyLabel"));
 

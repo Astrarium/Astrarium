@@ -1,0 +1,37 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    mc:Ignorable="d">
+    
+    <!-- Captions, icons, etc. -->
+    <Color x:Key="ColorForeground">#BCD0E0</Color>
+
+    <!-- Window background -->
+    <Color x:Key="ColorWindowBackground">#1E2A33</Color>
+
+    <!-- Window title background -->
+    <Color x:Key="ColorWindowTitleBackground">#10161B</Color>
+
+    <!-- Window title text -->
+    <Color x:Key="ColorWindowTitleForeground">#BCD0E0</Color>
+
+    <!-- Buttons background, dropdowns buttons, toolbar buttons, dividers, splitters -->
+    <Color x:Key="ColorControlBackground">#354A59</Color>
+
+    <!-- Hovered buttons, scrollbar scroller, inactive checkmarks -->
+    <Color x:Key="ColorControlLightBackground">#4C6A80</Color>
+
+    <!-- Scrollbar background, disable tabs background-->
+    <Color x:Key="ColorControlDarkBackground">#24323D</Color>
+
+    <!-- Selected list items background, hovered menu items -->
+    <Color x:Key="ColorSelection">#284766</Color>
+
+    <!-- Color of text over selected background -->
+    <Color x:Key="ColorSelectionForeground">#BCD0E0</Color>
+    
+    <!-- Hovered checkbox and radiobutton outline -->
+    <Color x:Key="ColorHighlight">#4796CC</Color>
+
+</ResourceDictionary>

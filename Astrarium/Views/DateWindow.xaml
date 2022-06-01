@@ -60,9 +60,9 @@
                         <Label Grid.Column="0" Grid.Row="0" Content="{t:Text DateWindow.Day}" />
                         <Label Grid.Column="1" Grid.Row="0" Content="{t:Text DateWindow.Month}" />
                         <Label Grid.Column="2" Grid.Row="0" Content="{t:Text DateWindow.Year}" />
-                        <c:NumericUpDown Margin="3" Grid.Column="0" Grid.Row="1" Minimum="1" Maximum="{Binding DaysCount}" Value="{Binding Day, Converter={s:NumericConverter}}" Loop="True" LoopDecrementCommand="{Binding LoopDayDecrementCommand}" LoopIncrementCommand="{Binding LoopDayIncrementCommand}" />
+                        <c:NumericUpDown Margin="3" Grid.Column="0" Grid.Row="1" Minimum="1" Maximum="{Binding DaysCount}" Value="{Binding Day, Converter={s:NumericConverter}}" Loop="True" LoopDecrementCommand="{Binding LoopDayDecrementCommand}" LoopIncrementCommand="{Binding LoopDayIncrementCommand}" DecimalPlaces="0" />
                         <c:RepeatingComboBox Style="{StaticResource {x:Type ComboBox}}" Margin="3" Grid.Column="1" Grid.Row="1" ItemsSource="{Binding ShortMonthsNames}" SelectedIndex="{Binding SelectedMonth}" Loop="True" LoopDecrementCommand="{Binding LoopMonthDecrementCommand}" LoopIncrementCommand="{Binding LoopMonthIncrementCommand}" />
-                        <c:NumericUpDown Margin="3" Grid.Column="2" Grid.Row="1" Minimum="-4000" Maximum="9999" Value="{Binding Year, Converter={s:NumericConverter}}" />
+                        <c:NumericUpDown Margin="3" Grid.Column="2" Grid.Row="1" Minimum="-4000" Maximum="9999" Value="{Binding Year, Converter={s:NumericConverter}}" DecimalPlaces="0" />
                     </Grid>
                     <!-- Month & Year Layout -->
                     <Grid Visibility="{Binding DisplayMode, Converter={s:VisibilityConverter}, ConverterParameter={x:Static t:DateOptions.MonthYear}, FallbackValue=Collapsed}">

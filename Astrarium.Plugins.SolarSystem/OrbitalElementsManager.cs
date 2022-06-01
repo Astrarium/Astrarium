@@ -32,7 +32,7 @@ namespace Astrarium.Plugins.SolarSystem
                 }
                 catch (Exception ex)
                 {
-                    Trace.TraceError($"Unable to create directory for orbital elements: {OrbitalElementsPath}, Details: {ex}");
+                    Log.Error($"Unable to create directory for orbital elements: {OrbitalElementsPath}, Details: {ex}");
                 }
             }
         }
@@ -45,39 +45,39 @@ namespace Astrarium.Plugins.SolarSystem
 
             if (File.Exists(cachedFilePath))
             {
-                Debug.WriteLine("Read cached orbital elements file...");
+                Log.Debug("Read cached orbital elements file...");
                 try
                 {
                     using (StreamReader file = File.OpenText(cachedFilePath))
                     {
                         orbits = (List<GenericMoonData>)serializer.Deserialize(file, typeof(List<GenericMoonData>));
                     }
-                    Debug.WriteLine($"Reading cached orbital elements done. {orbits.Count} records read.");
+                    Log.Debug($"Reading cached orbital elements done. {orbits.Count} records read.");
                 }
                 catch (Exception ex)
                 {
-                    Trace.TraceError($"Unable to read cached orbital elements file, Details: {ex}");
+                    Log.Error($"Unable to read cached orbital elements file, Details: {ex}");
                 }
             }
             else
             {
-                Debug.WriteLine("No cached orbital elements found.");
+                Log.Debug("No cached orbital elements found.");
             }
 
             if (orbits == null)
             {
-                Debug.WriteLine("Read default orbital elements...");
+                Log.Debug("Read default orbital elements...");
                 try
                 {
                     using (StreamReader file = File.OpenText(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/SatellitesOrbits.dat")))
                     {
                         orbits = (List<GenericMoonData>)serializer.Deserialize(file, typeof(List<GenericMoonData>));
                     }
-                    Debug.WriteLine($"Reading default orbital elements done. {orbits.Count} records read.");
+                    Log.Debug($"Reading default orbital elements done. {orbits.Count} records read.");
                 }
                 catch (Exception ex)
                 {
-                    Trace.TraceError($"Unable to read default orbital elements file, Details: {ex}");
+                    Log.Error($"Unable to read default orbital elements file, Details: {ex}");
                 }
             }
 
@@ -97,7 +97,7 @@ namespace Astrarium.Plugins.SolarSystem
                 {
                     Task.Run(() =>
                     {
-                        Debug.WriteLine($"Found {obsoleteOrbitsCount} obsolete orbital elements, downloading from web.");
+                        Log.Debug($"Found {obsoleteOrbitsCount} obsolete orbital elements, downloading from web.");
 
                         string startDate = today.ToString("yyyy-MM-dd");
                         string endDate = today.AddDays(2).ToString("yyyy-MM-dd");
@@ -120,18 +120,18 @@ namespace Astrarium.Plugins.SolarSystem
                                     }
                                     else
                                     {
-                                        Trace.TraceError($"Unable to download orbital elements from url: {url}, status code: {response.StatusCode}");
+                                        Log.Error($"Unable to download orbital elements from url: {url}, status code: {response.StatusCode}");
                                     }
                                 }
                             }
                             catch (Exception ex)
                             {
-                                Trace.TraceError($"Unable to download orbital elements from url: {url}, Details: {ex}");
+                                Log.Error($"Unable to download orbital elements from url: {url}, Details: {ex}");
                             }
                         }
 
-                        Debug.WriteLine($"{orbits.Count} orbital elements downloaded.");
-                        Debug.WriteLine("Saving orbital elements to cache...");
+                        Log.Debug($"{orbits.Count} orbital elements downloaded.");
+                        Log.Debug("Saving orbital elements to cache...");
 
                         try
                         {
@@ -140,17 +140,17 @@ namespace Astrarium.Plugins.SolarSystem
                                 serializer.Formatting = Formatting.Indented;
                                 serializer.Serialize(file, orbits);
                             }
-                            Debug.WriteLine("Orbital elements saved to cache.");
+                            Log.Debug("Orbital elements saved to cache.");
                         }
                         catch (Exception ex)
                         {
-                            Trace.TraceError($"Unable to save orbital elements to cache, Details: {ex}");
+                            Log.Error($"Unable to save orbital elements to cache, Details: {ex}");
                         }
                     });
                 }
                 else
                 {
-                    Debug.WriteLine($"All orbital elements are up to date.");
+                    Log.Debug($"All orbital elements are up to date.");
                 }
             }
 

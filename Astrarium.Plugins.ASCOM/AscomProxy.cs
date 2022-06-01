@@ -63,31 +63,40 @@ namespace Astrarium.Plugins.ASCOM
         public int PollingPeriod { get; set; }
 
         /// <inheritdoc/>
-        public string Connect(string telescopeId)
+        public Task<string> Connect(string telescopeId)
         {
-            try
+            return Task.Run(() =>
             {
-                lock (locker)
+                try
                 {
-                    string id = Telescope.Choose(telescopeId);
-                    if (!string.IsNullOrEmpty(id))
+                    bool needShowMessage = false;
+                    string id = null;
+                    lock (locker)
                     {
-                        DoDisconnect();
-                        telescope = new Telescope(id);
-                        telescope.Connected = true;
-                        NotifyPropertyChanged(nameof(IsConnected));
+                        id = Telescope.Choose(telescopeId);
+                        if (!string.IsNullOrEmpty(id))
+                        {
+                            DoDisconnect();
+                            telescope = new Telescope(id);
+                            telescope.Connected = true;
+                            IsConnected = true;
+                            needShowMessage = true;
+                            watcherResetEvent.Set();
+                        }
+                    }
+                    if (needShowMessage)
+                    {
                         RaiseOnMessageShow(Text.Get("Ascom.Messages.Connected", ("telescopeName", telescope.Name)));
-                        watcherResetEvent.Set();
                     }
                     return id;
                 }
-            }
-            catch (Exception ex)
-            {
-                RaiseOnMessageShow("$Ascom.Messages.UnableChoose");
-                Trace.TraceError($"Unable to choose telescope: {ex}");
-                return null;
-            }
+                catch (Exception ex)
+                {
+                    RaiseOnMessageShow("$Ascom.Messages.UnableChoose");
+                    Log.Error($"Unable to choose telescope: {ex}");
+                    return null;
+                }
+            });
         }
 
         /// <inheritdoc/>
@@ -108,12 +117,12 @@ namespace Astrarium.Plugins.ASCOM
             catch (Exception ex)
             {               
                 RaiseOnMessageShow("$Ascom.Messages.UnableAbortSlew");
-                Trace.TraceError($"Unable to abort slewing: {ex}");
+                Log.Error($"Unable to abort slewing: {ex}");
             }
         }
 
         /// <inheritdoc/>
-        public void FindHome() 
+        public void FindHome()
         {
             try
             {
@@ -130,7 +139,7 @@ namespace Astrarium.Plugins.ASCOM
             catch (Exception ex)
             {
                 RaiseOnMessageShow("$Ascom.Messages.UnableFindHome");
-                Trace.TraceError($"Unable to find home: {ex}");
+                Log.Error($"Unable to find home: {ex}");
             }
         }
 
@@ -145,13 +154,13 @@ namespace Astrarium.Plugins.ASCOM
                     {
                         Task.Run(() => telescope.Park());
                         NotifyPropertyChanged(nameof(IsSlewing));
-                    }                   
+                    }
                 }
             }
             catch (Exception ex)
             {
                 RaiseOnMessageShow("$Ascom.Messages.UnablePark");
-                Trace.TraceError($"Unable to park telescope: {ex}");
+                Log.Error($"Unable to park telescope: {ex}");
             }
         }
 
@@ -169,7 +178,7 @@ namespace Astrarium.Plugins.ASCOM
             catch (Exception ex)
             {
                 RaiseOnMessageShow("$Ascom.Messages.UnableUnpark");
-                Trace.TraceError($"Unable to unpark telescope: {ex}");
+                Log.Error($"Unable to unpark telescope: {ex}");
             }
         }
 
@@ -182,6 +191,11 @@ namespace Astrarium.Plugins.ASCOM
                 {
                     if (telescope.CanSetTracking)
                     {
+                        if (telescope.AtPark)
+                        {
+                            UnparkIfPossible();
+                        }
+
                         telescope.Tracking = !telescope.Tracking;
                     }
                     if (!telescope.CanSetTracking)
@@ -192,7 +206,7 @@ namespace Astrarium.Plugins.ASCOM
             }
             catch (Exception ex)
             {
-                Trace.TraceError($"Unable to switch tracking: {ex}");
+                Log.Error($"Unable to switch tracking: {ex}");
             }
         }
 
@@ -204,13 +218,13 @@ namespace Astrarium.Plugins.ASCOM
                 lock (locker)
                 {
                     DoDisconnect();
-                    RaiseOnMessageShow("$Ascom.Messages.Disconnected");
                 }
+                RaiseOnMessageShow("$Ascom.Messages.Disconnected");
             }
             catch (Exception ex)
             {
                 RaiseOnMessageShow("$Ascom.Messages.UnableDisconnect");
-                Trace.TraceError($"Unable to disconnect: {ex}");
+                Log.Error($"Unable to disconnect: {ex}");
             }
         }
 
@@ -230,7 +244,7 @@ namespace Astrarium.Plugins.ASCOM
             catch (Exception ex)
             {
                 RaiseOnMessageShow("$Ascom.Messages.UnableSetDateTime");
-                Trace.TraceError($"Unable to set date and time: {ex}");
+                Log.Error($"Unable to set date and time: {ex}");
             }
         }
 
@@ -252,125 +266,92 @@ namespace Astrarium.Plugins.ASCOM
             catch (Exception ex)
             {
                 RaiseOnMessageShow("$Ascom.Messages.UnableSetLocation");
-                Trace.TraceError($"Unable to set telescope observation place: {ex}");
+                Log.Error($"Unable to set telescope observation place: {ex}");
             }
         }
+
+        private bool _IsConnected = false;
 
         /// <inheritdoc/>
         public bool IsConnected
         {
-            get
+            get => _IsConnected;
+            private set
             {
-                try
+                if (_IsConnected != value)
                 {
-                    lock (locker)
-                    {
-                        return (telescope != null && telescope.Connected);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Trace.TraceError($"Unable to get telescope connection state: {ex}");
-                    return false;
+                    _IsConnected = value;
+                    NotifyPropertyChanged(nameof(IsConnected));
                 }
             }
         }
+
+        private bool _IsSlewing = false;
 
         /// <inheritdoc/>
         public bool IsSlewing
         {
-            get
+            get => _IsSlewing;
+            private set 
             {
-                try
+                if (_IsSlewing != value)
                 {
-                    lock (locker)
-                    {
-                        return (telescope != null && telescope.Connected && telescope.Slewing);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Trace.TraceError($"Unable to get slewing state of telescope: {ex}");
-                    return false;
+                    _IsSlewing = value;
+                    NotifyPropertyChanged(nameof(IsSlewing));
                 }
             }
         }
 
+        private bool _AtHome = false;
+
         /// <inheritdoc/>
-        public bool AtHome
-        {
-            get
+        public bool AtHome 
+        { 
+            get => _AtHome; 
+            private set
             {
-                lock (locker)
+                if (_AtHome != value)
                 {
-                    return (telescope != null && telescope.Connected && telescope.AtHome);
+                    _AtHome = value;
+                    NotifyPropertyChanged(nameof(AtHome));
                 }
             }
         }
+
+        private bool _AtPark = false;
 
         /// <inheritdoc/>
         public bool AtPark
         {
-            get
+            get => _AtPark;
+            private set
             {
-                lock (locker)
+                if (_AtPark != value)
                 {
-                    return (telescope != null && telescope.Connected && telescope.AtPark);
+                    _AtPark = value;
+                    NotifyPropertyChanged(nameof(AtPark));
+                }
+            }
+        }
+
+        private bool _IsTracking = false;
+
+        /// <inheritdoc/>
+        public bool IsTracking 
+        {
+            get => _IsTracking;
+            private set
+            {
+                if (_IsTracking != value)
+                {
+                    _IsTracking = value;
+                    NotifyPropertyChanged(nameof(IsTracking));
                 }
             }
         }
 
         /// <inheritdoc/>
-        public bool IsTracking
-        {
-            get
-            {
-                lock (locker)
-                {
-                    return (telescope != null && telescope.Connected && telescope.Tracking);
-                }
-            }
-        }
-
-        /// <inheritdoc/>
-        public string TelescopeName
-        {
-            get
-            {
-                try
-                {
-                    lock (locker)
-                    { 
-                        return telescope?.Name;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Trace.TraceError($"Unable to get telescope name: {ex}");
-                    return null;
-                }
-            }
-        }
-
-        /// <inheritdoc/>
-        public string TelescopeDescription
-        {
-            get
-            {
-                try
-                {
-                    lock (locker)
-                    {
-                        return telescope?.Description;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Trace.TraceError($"Unable to get telescope description: {ex}");
-                    return null;
-                }
-            }
-        }
+        public string TelescopeName { get; private set; }
 
         /// <inheritdoc/>
         public void Slew(CrdsEquatorial eq)
@@ -400,7 +381,7 @@ namespace Astrarium.Plugins.ASCOM
             }
             catch (Exception ex)
             {
-                Trace.TraceError($"Unable to slew telescope: {ex}");
+                Log.Error($"Unable to slew telescope: {ex}");
                 RaiseOnMessageShow("$Ascom.Messages.UnableSlew");
             }
         }
@@ -414,18 +395,18 @@ namespace Astrarium.Plugins.ASCOM
                 {
                     if (telescope != null && telescope.Connected)
                     {
-                        telescope.SetupDialog();
+                        Task.Run(() => telescope.SetupDialog());
                     }
                     else
                     {
-                        Trace.TraceError("Unable to show setup dialog (telescope disconnected).");
+                        Log.Error("Unable to show setup dialog (telescope disconnected).");
                     }
                 }
             }
             catch (Exception ex)
             {
                 RaiseOnMessageShow("$Ascom.Messages.UnableShowSetup");
-                Trace.TraceError($"Unable to show setup dialog {ex}");
+                Log.Error($"Unable to show setup dialog {ex}");
             }
         }
 
@@ -453,14 +434,14 @@ namespace Astrarium.Plugins.ASCOM
                     }
                     else
                     {
-                        Trace.TraceError("Unable to sync (telescope disconnected).");
+                        Log.Error("Unable to sync (telescope disconnected).");
                     }
                 }
             }
             catch (Exception ex)
             {
                 RaiseOnMessageShow("$Ascom.Messages.UnableSync");
-                Trace.TraceError($"Unable to sync {ex}");
+                Log.Error($"Unable to sync {ex}");
             }
         }
 
@@ -511,7 +492,7 @@ namespace Astrarium.Plugins.ASCOM
                 }
                 else
                 {
-                    Trace.TraceWarning($"Unable to disconnect.");
+                    Log.Error($"Unable to disconnect.");
                 }
 
                 try
@@ -523,11 +504,11 @@ namespace Astrarium.Plugins.ASCOM
                 telescope = null;
                 Position.Alpha = 0;
                 Position.Delta = 0;
-                NotifyPropertyChanged(nameof(IsConnected));
-                NotifyPropertyChanged(nameof(IsSlewing));
-                NotifyPropertyChanged(nameof(AtHome));
-                NotifyPropertyChanged(nameof(AtPark));
-                NotifyPropertyChanged(nameof(IsTracking));
+                IsConnected = false;
+                IsSlewing = false;
+                AtHome = false;
+                AtPark = false;
+                IsTracking = false;
             }
         }
 
@@ -549,7 +530,7 @@ namespace Astrarium.Plugins.ASCOM
             }
             catch (Exception ex)
             {
-                Trace.TraceError($"Unable to unpark telesope: {ex}");
+                Log.Error($"Unable to unpark telesope: {ex}");
             }
         }
 
@@ -571,10 +552,9 @@ namespace Astrarium.Plugins.ASCOM
             }
             catch (Exception ex)
             {
-                Trace.TraceError($"Unable to set tracking: {ex}");
+                Log.Error($"Unable to set tracking: {ex}");
             }
         }
-
 
         /// <summary>
         /// Thread loop to update telescope state
@@ -590,18 +570,16 @@ namespace Astrarium.Plugins.ASCOM
                 {
                     CrdsEquatorial eq = new CrdsEquatorial();
 
-                    bool isConnected = false;
-
                     lock (locker)
                     {
                         if (telescope != null && telescope.Connected)
                         {
                             eq = ConvertCoordinatesFromTelescopeEpoch();
-                            isConnected = true;
+                            IsConnected = true;
                         }
                     }
 
-                    if (isConnected)
+                    if (IsConnected)
                     {
                         bool isMoving = false;
 
@@ -618,14 +596,29 @@ namespace Astrarium.Plugins.ASCOM
                             NotifyPropertyChanged(nameof(Position));
                         }
 
-                        NotifyPropertyChanged(nameof(IsSlewing));
-                        NotifyPropertyChanged(nameof(AtHome));
-                        NotifyPropertyChanged(nameof(AtPark));
-                        NotifyPropertyChanged(nameof(IsTracking));
+                        IsSlewing = telescope.Slewing;
+                        AtHome = telescope.AtHome;
+                        AtPark = telescope.AtPark;
+                        IsTracking = telescope.Tracking;
+                        TelescopeName = telescope.Name;
+                    }
+                    else
+                    {
+                        IsSlewing = false;
+                        AtHome = false;
+                        AtPark = false;
+                        IsTracking = false;
                     }
                 }
-                catch { }
-            }            
+                catch 
+                {
+                    IsConnected = false; 
+                    IsSlewing = false;
+                    AtHome = false;
+                    AtPark = false;
+                    IsTracking = false;
+                }
+            }
         }
 
         /// <summary>

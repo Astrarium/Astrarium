@@ -29,7 +29,7 @@ namespace Astrarium.Types
         private IEnumerable<Ephemeris> Ephemeris { get; set; }
 
         public CelestialObjectInfo(SkyContext context, T body, IEnumerable<Ephemeris> ephemeris)
-        {           
+        {
             Context = context;
             Body = body;
             Ephemeris = ephemeris;

@@ -7,7 +7,13 @@ namespace Astrarium.Plugins.SolarSystem.Objects
     /// Contains coordinates and visual appearance data for the Moon for given instant of time.
     /// </summary>
     public class Moon : SizeableCelestialObject, IMovingObject
-    { 
+    {
+        /// <inheritdoc />
+        public override string Type => "Moon";
+
+        /// <inheritdoc />
+        public override string CommonName => "Moon";
+
         /// <summary>
         /// Apparent topocentrical equatorial coordinates
         /// </summary>

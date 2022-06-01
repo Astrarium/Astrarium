@@ -37,6 +37,7 @@ namespace Astrarium.Types
         /// </summary>
         static Formatters()
         {
+            Default["Constellation"]            = new ConstellationFormatter();
             Default["RTS.Rise"]                 = Time;
             Default["RTS.Transit"]              = Time;
             Default["RTS.Set"]                  = Time;
@@ -60,7 +61,7 @@ namespace Astrarium.Types
             Default["Phase"]                    = Phase;
             Default["HorizontalParallax"]       = Angle;
             Default["AngularDiameter"]          = Angle;
-            Default["Visibility.Duration"]      = new VisibilityDurationFormatter();
+            Default["Visibility.Duration"]      = VisibilityDuration;
             Default["Visibility.Period"]        = new VisibilityPeriodFormatter();
             Default["Visibility.Begin"]         = Time;
             Default["Visibility.End"]           = Time;
@@ -71,12 +72,21 @@ namespace Astrarium.Types
 
         public static IEphemFormatter GetDefault(string key)
         {
-            Default.TryGetValue(key, out IEphemFormatter formatter);
-            if (formatter == null)
+            if (Default.ContainsKey(key))
+                return Default[key];
+            else
+                return Simple;
+        }
+
+        private class ConstellationFormatter : IEphemFormatter
+        {
+            public string Format(object value)
             {
-                formatter = Simple;
+                if (string.IsNullOrEmpty((string)value))
+                    return "—";
+                else
+                    return Text.Get($"ConName.{((string)value).ToUpper()}");
             }
-            return formatter;
         }
 
         /// <summary>
@@ -97,7 +107,10 @@ namespace Astrarium.Types
 
             public string Format(object value)
             {
-                return new HMS((double)value).ToString(format);
+                if (value == null || double.IsNaN((double)value))
+                    return "—";
+                else
+                    return new HMS((double)value).ToString(format);
             }
         }
 
@@ -106,7 +119,7 @@ namespace Astrarium.Types
             public string Format(object value)
             {
                 if (value == null || double.IsNaN((double)value))
-                    return null;
+                    return "—";
                 else
                     return new DMS((double)value).ToString();
             }
@@ -137,7 +150,7 @@ namespace Astrarium.Types
             public string Format(object value)
             {
                 if (value == null || double.IsNaN((double)value))
-                    return null;
+                    return "—";
                 else
                     return new DMS((double)value).ToUnsignedString();
             }
@@ -148,7 +161,7 @@ namespace Astrarium.Types
             public string Format(object value)
             {
                 if (value == null || double.IsNaN((double)value))
-                    return null;
+                    return "—";
                 else
                     return new DMS(Algorithms.Angle.To360((double)value) + (CrdsHorizontal.MeasureAzimuthFromNorth ? 180 : 0)).ToUnsignedString();
             }
@@ -311,7 +324,9 @@ namespace Astrarium.Types
 
             public string Format(object value)
             {
-                if ((value is double && (double.IsInfinity((double)value) || double.IsNaN((double)value))) ||
+                if ((value == null) ||
+                    (value is DBNull) ||
+                    (value is double && (double.IsInfinity((double)value) || double.IsNaN((double)value))) ||
                     (value is float && (float.IsInfinity((float)value) || float.IsNaN((float)value))))
                 {
                     return "—";
@@ -352,8 +367,18 @@ namespace Astrarium.Types
         {
             public string Format(object value)
             {
-                Date d = (Date)value;
-                return $"{(int)d.Day:00} {AbbreviatedMonthNames[d.Month - 1]} {d.Year}";
+                if (value is Date d)
+                {
+                    return $"{(int)d.Day:00} {AbbreviatedMonthNames[d.Month - 1]} {d.Year}";
+                }
+                else if (value is DateTime dt)
+                {
+                    return $"{dt.Day:00} {AbbreviatedMonthNames[dt.Month - 1]} {dt.Year}";
+                }
+                else
+                {
+                    return "?";
+                }
             }
         }
 
@@ -454,12 +479,13 @@ namespace Astrarium.Types
         public static readonly IEphemFormatter Time = new TimeFormatter();
         public static readonly IEphemFormatter DistanceInAu = new UnsignedDoubleFormatter(3, "$Formatters.DistanceInAu.AU");
         public static readonly IEphemFormatter Phase = new PhaseFormatter();
+        public static readonly IEphemFormatter VisibilityDuration = new VisibilityDurationFormatter();
         public static readonly IEphemFormatter Magnitude = new SignedDoubleFormatter(2, "ᵐ");
         public static readonly IEphemFormatter PhaseAngle = new UnsignedDoubleFormatter(2, "\u00B0");
         public static readonly IEphemFormatter Angle = new AngleFormatter();
         public static readonly IEphemFormatter DateTime = new DateTimeFormatter();
         public static readonly IEphemFormatter Date = new DateFormatter();
-        public static readonly IEphemFormatter MonthYear = new MonthYearFormatter();     
+        public static readonly IEphemFormatter MonthYear = new MonthYearFormatter();
         public static readonly IEphemFormatter TimeSpan = new TimeSpanFormatter();
         public static readonly IEphemFormatter Rectangular = new SignedDoubleFormatter(3);
     }

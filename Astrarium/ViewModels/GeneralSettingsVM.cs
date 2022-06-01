@@ -28,10 +28,23 @@ namespace Astrarium.ViewModels
             }
         }
 
+        public string[] Themes { get; private set; }
+
+        public string SelectedTheme
+        {
+            get => Settings.Get("AppTheme", "DeepBlue");
+            set
+            {
+                Settings.Set("AppTheme", value);
+                NotifyPropertyChanged(nameof(SelectedTheme));
+            }
+        }
+
         public GeneralSettingsVM(ISettings settings)
         {
             Settings = settings;
             Languages = Text.GetLocales();
+            Themes = new string[] { "DeepBlue", "Graphite" };
             NotifyPropertyChanged(nameof(SelectedLanguage));
             Text.LocaleChanged += () => NotifyPropertyChanged(nameof(SelectedLanguage));
         }

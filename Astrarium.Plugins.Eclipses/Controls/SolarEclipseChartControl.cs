@@ -111,11 +111,8 @@ namespace Astrarium.Plugins.Eclipses.Controls
 
         private Typeface font = new Typeface(new FontFamily("#Noto Sans"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
 
-        private Brush[] foregroundBrush = new Brush[] { Brushes.Gray, Brushes.Red };
-        private Brush ForegroundBrush => foregroundBrush[DarkMode ? 1 : 0];
-
-        private Brush[] linesBrush = new Brush[] { Brushes.DimGray, Brushes.DarkRed };
-        private Brush LinesBrush => linesBrush[DarkMode ? 1 : 0];
+        private Brush ForegroundBrush => new SolidColorBrush((Color)FindResource("ColorControlLightBackground"));
+        private Brush LinesBrush => new SolidColorBrush((Color)FindResource("ColorControlLightBackground"));
 
         private Brush[] moonBrush = new Brush[] { Brushes.Blue, Brushes.DarkRed };
         private Brush MoonBrush => moonBrush[DarkMode ? 1 : 0];

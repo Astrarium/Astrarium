@@ -47,8 +47,10 @@ namespace Astrarium.Plugins.MinorBodies
 
             double ksi = 0, eta = 0, zeta = 0, Delta = 0;
 
+            int count = 0;
+
             // Iterative process to find rectangular coordinates of minor body
-            while (Math.Abs(tau - tau0) > deltaTau)
+            while (Math.Abs(tau - tau0) > deltaTau && count++ < 100)
             {
                 // Rectangular coordinates of minor body
                 rect = MinorBodyPositions.GetRectangularCoordinates(orbit, c.JulianDay - tau, c.Epsilon);
@@ -95,7 +97,7 @@ namespace Astrarium.Plugins.MinorBodies
         }
 
         public CrdsEcliptical Ecliptical(SkyContext c, T body)
-        {             
+        {
             var r = c.Get(RectangularG, body);
             return r.ToEcliptical();
         }
@@ -254,21 +256,18 @@ namespace Astrarium.Plugins.MinorBodies
                 eq[i] = new SkyContext(jd + diff[i], c.GeoLocation).Get(EquatorialG, body);
             }
 
-            return Astrarium.Algorithms.Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, parallax);
+            return Algorithms.Visibility.RiseTransitSet(eq, c.GeoLocation, theta0, parallax);
         }
 
         protected VisibilityDetails Visibility(SkyContext c, T body)
         {
             double jd = c.JulianDayMidnight;
-            double theta0 = Date.ApparentSiderealTime(jd, c.NutationElements.deltaPsi, c.Epsilon);
-            double parallax = c.Get(Parallax, body);
-
-            var ctx = new SkyContext(jd, c.GeoLocation);
-
-            var eq = ctx.Get(EquatorialJ2000T, body);
-            var eqSun = ctx.Get(SunEquatorial);
-
-            return Astrarium.Algorithms.Visibility.Details(eq, eqSun, c.GeoLocation, theta0, 5);
+            SkyContext ctx = c.Copy(c.JulianDayMidnight);
+            CrdsEquatorial eq = ctx.Get(EquatorialT, body);
+            CrdsEquatorial eqSun = ctx.Get(SunEquatorial);
+            double minBodyAltitude = ctx.MinBodyAltitudeForVisibilityCalculations ?? 5;
+            double minSunAltitude = ctx.MaxSunAltitudeForVisibilityCalculations ?? -5;
+            return Algorithms.Visibility.Details(eq, eqSun, ctx.GeoLocation, ctx.SiderealTime, minBodyAltitude, minSunAltitude);
         }
     }
 }

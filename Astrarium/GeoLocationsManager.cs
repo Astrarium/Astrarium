@@ -216,7 +216,7 @@ namespace Astrarium
                             }
                             catch (Exception ex)
                             {
-                                Trace.TraceError($"Unable to parse geographical location, line = {line}, error: {ex}");
+                                Log.Error($"Unable to parse geographical location, line = {line}, error: {ex}");
                             }
                         }
                     }
@@ -224,7 +224,7 @@ namespace Astrarium
                 }
                 catch (Exception ex)
                 {
-                    Trace.TraceError($"Unable to load locations list, error: {ex}");
+                    Log.Error($"Unable to load locations list, error: {ex}");
                 }
                 finally
                 {

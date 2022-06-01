@@ -13,6 +13,17 @@ namespace Astrarium.Plugins.SolarSystem.Objects
             Number = number;
         }
 
+        /// <inheritdoc />
+        public override string Type => "PlanetMoon";
+
+        /// <summary>
+        /// Common names of all Saturn moons
+        /// </summary>
+        private static readonly string[] CommonNames = new string[] { "Mimas", "Enceladus", "Tethys", "Dione", "Rhea", "Titan", "Hyperion", "Japetus" };
+
+        /// <inheritdoc />
+        public override string CommonName => CommonNames[Number - 1];
+
         /// <summary>
         /// Apparent equatorial coordinates of the Saturn moon
         /// </summary>

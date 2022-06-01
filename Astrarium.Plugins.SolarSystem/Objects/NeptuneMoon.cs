@@ -11,6 +11,17 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         }
 
         /// <summary>
+        /// Common names of all Neptune moons
+        /// </summary>
+        private static readonly string[] CommonNames = new string[] { "Triton", "Nereid" };
+
+        /// <inheritdoc />
+        public override string Type => "PlanetMoon";
+
+        /// <inheritdoc />
+        public override string CommonName => CommonNames[Number - 1];
+
+        /// <summary>
         /// Moon index, 1-based
         /// </summary>
         public int Number { get; private set; }

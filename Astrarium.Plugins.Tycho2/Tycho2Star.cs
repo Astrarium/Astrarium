@@ -8,6 +8,12 @@ namespace Astrarium.Plugins.Tycho2
     /// </summary>
     public class Tycho2Star : CelestialObject
     {
+        /// <inheritdoc />
+        public override string Type => "Star";
+
+        /// <inheritdoc />
+        public override string CommonName => ToString();
+
         /// <summary>
         /// Equatorial coordinates of the star at current epoch
         /// </summary>

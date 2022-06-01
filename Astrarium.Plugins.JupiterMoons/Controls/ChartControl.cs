@@ -66,14 +66,11 @@ namespace Astrarium.Plugins.JupiterMoons.Controls
 
         private WriteToBitmapOptions renderOptions = new WriteToBitmapOptions();
 
-        private readonly Brush[] labelsBrush = new Brush[] { Brushes.White, Brushes.Red };
-        private Brush LabelsBrush => labelsBrush[DarkMode ? 1 : 0];
+        private Brush LabelsBrush => new SolidColorBrush((Color)FindResource("ColorForeground"));
 
-        private readonly Brush[] linesBrush = new Brush[] { Brushes.DimGray, Brushes.DarkRed };
-        private Brush LinesBrush => linesBrush[DarkMode ? 1 : 0];
+        private Brush LinesBrush => new SolidColorBrush((Color)FindResource("ColorControlLightBackground"));
 
-        private readonly Brush[] currentDateBrush = new Brush[] { Brushes.Gray, Brushes.Red };
-        private Brush CurrentDateBrush => currentDateBrush[DarkMode ? 1 : 0];
+        private Brush CurrentDateBrush => new SolidColorBrush((Color)FindResource("ColorForeground"));
 
         private readonly Brush[] jupiterBrush = new Brush[] { Brushes.Wheat, Brushes.DarkRed };
         private Brush JupiterBrush => jupiterBrush[DarkMode ? 1 : 0];

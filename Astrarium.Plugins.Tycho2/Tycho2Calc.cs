@@ -77,6 +77,11 @@ namespace Astrarium.Plugins.Tycho2
         private ICollection<Tycho2Region> IndexRegions = new List<Tycho2Region>();
 
         /// <summary>
+        /// Star entries that have cross-identifiers with Bright Star Catalog. Should be excluded.
+        /// </summary>
+        private HashSet<string> SkippedEntries = new HashSet<string>();
+
+        /// <summary>
         /// Binary Reader for accessing catalog data
         /// </summary>
         private BinaryReader CatalogReader;
@@ -97,6 +102,11 @@ namespace Astrarium.Plugins.Tycho2
         private readonly ISettings Settings;
 
         /// <summary>
+        /// Sky instance
+        /// </summary>
+        private readonly ISky Sky;
+
+        /// <summary>
         /// Gets or sets Tycho2Star object that the map is locked on
         /// </summary>
         public Tycho2Star LockedStar { get; set; }
@@ -106,12 +116,16 @@ namespace Astrarium.Plugins.Tycho2
         /// </summary>
         public Tycho2Star SelectedStar { get; set; }
 
+        /// <inheritdoc />
+        public IEnumerable<Tycho2Star> GetCelestialObjects() => new Tycho2Star[0];
+
         private readonly string dataPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data");
 
-        public Tycho2Calc(ISettings settings)
+        public Tycho2Calc(ISettings settings, ISky sky)
         {
             Settings = settings;
-        }
+            Sky = sky;
+        } 
         
         public override void Initialize()
         {
@@ -119,12 +133,27 @@ namespace Astrarium.Plugins.Tycho2
             {
                 string indexFile = Path.Combine(dataPath, "tycho2.idx");
                 string catalogFile = Path.Combine(dataPath, "tycho2.dat");
+                string crossRefFile = Path.Combine(dataPath, "tycho2.ref");
 
-                // Read Tycho2 index file and load it into memory.
+                LoadIndex(indexFile);
+                LoadCrossReference(crossRefFile);
 
-                // TODO: it's better to convert string format to binary.
-                StreamReader sr = new StreamReader(indexFile);
+                // Open Tycho2 catalog file
+                CatalogReader = new BinaryReader(File.Open(catalogFile, FileMode.Open, FileAccess.Read));
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Unable to initialize Tycho2 calculator: {ex}");
+            }
+        }
 
+        /// <summary>
+        /// Read Tycho2 index file and load it into memory.
+        /// </summary>
+        private void LoadIndex(string indexFile)
+        {
+            using (StreamReader sr = new StreamReader(indexFile))
+            {
                 while (!sr.EndOfStream)
                 {
                     string line = sr.ReadLine();
@@ -139,16 +168,30 @@ namespace Astrarium.Plugins.Tycho2
                         DECmax = Convert.ToSingle(chunks[5].Trim(), CultureInfo.InvariantCulture)
                     });
                 }
-
-                sr.Close();
-
-                // Open Tycho2 catalog file
-                CatalogReader = new BinaryReader(File.Open(catalogFile, FileMode.Open, FileAccess.Read));
             }
-            catch (Exception ex)
+        }
+
+        /// <summary>
+        /// Loads cross-reference data (for BSC catalog)
+        /// </summary>
+        private void LoadCrossReference(string crossRefFile)
+        {
+            Dictionary<string, string> starsCrossRefs = new Dictionary<string, string>();
+
+            using (StreamReader sr = new StreamReader(crossRefFile))
             {
-                Trace.TraceError($"Unable to initialize Tycho2 calculator: {ex}");
+                while (!sr.EndOfStream)
+                {
+                    string line = sr.ReadLine();
+                    string[] chunks = line.Split(' ');
+                    ushort hrIdentifier = ushort.Parse(chunks[0]);
+                    string tyc2Identifier = chunks[1];
+                    SkippedEntries.Add(tyc2Identifier);
+                    starsCrossRefs.Add($"HR {hrIdentifier}", $"TYC {tyc2Identifier}");
+                }
             }
+            
+            Sky.AddCrossReferences("Star", starsCrossRefs);
         }
 
         private void CalculateCoordinates(SkyContext c, Tycho2Star star)
@@ -359,9 +402,15 @@ namespace Astrarium.Plugins.Tycho2
             star.PmRA = BitConverter.ToSingle(buffer, offset + 21);
             star.PmDec = BitConverter.ToSingle(buffer, offset + 25);
 
-            CalculateCoordinates(c, star);
-
-            return star;
+            if (SkippedEntries.Contains($"{star.Tyc1}-{star.Tyc2}-{star.Tyc3}"))
+            {
+                return null;
+            }
+            else
+            {
+                CalculateCoordinates(c, star);
+                return star;
+            }
         }
 
         public override void Calculate(SkyContext context)
@@ -379,8 +428,12 @@ namespace Astrarium.Plugins.Tycho2
 
         public void ConfigureEphemeris(EphemerisConfig<Tycho2Star> e)
         {
+            e["Constellation"] = (c, s) => Constellations.FindConstellation(c.Get(Equatorial, s), c.JulianDay);
+            e["Equatorial.Alpha"] = (c, s) => c.Get(Equatorial, s).Alpha;
+            e["Equatorial.Delta"] = (c, s) => c.Get(Equatorial, s).Delta;
             e["Horizontal.Azimuth"] = (c, s) => c.Get(Horizontal, s).Azimuth;
             e["Horizontal.Altitude"] = (c, s) => c.Get(Horizontal, s).Altitude;
+            e["Magnitude"] = (c, s) => s.Magnitude;
             e["RTS.Rise"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet, s).Rise);
             e["RTS.Transit"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet, s).Transit);
             e["RTS.Set"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet, s).Set);
@@ -395,7 +448,7 @@ namespace Astrarium.Plugins.Tycho2
 
             info
             .SetTitle(s.ToString())
-            .SetSubtitle(Text.Get("Tycho2Star.Subtitle"))
+            .SetSubtitle(Text.Get("Tycho2Star.Type"))
 
             .AddRow("Constellation", constellation)
 
@@ -423,24 +476,21 @@ namespace Astrarium.Plugins.Tycho2
 
         private readonly Regex searchRegex = new Regex("tyc\\s*(?<tyc1>\\d+)((\\s*-\\s*|\\s+)(?<tyc2>\\d+)((\\s*-\\s*|\\s+)(?<tyc3>\\d+))?)?");
 
-        public ICollection<CelestialObject> Search(SkyContext c, string searchString, int maxCount = 50)
+        public ICollection<CelestialObject> Search(SkyContext c, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
             var match = searchRegex.Match(searchString.ToLowerInvariant());
             if (match.Success)
-            {           
+            {
                 int tyc1 = int.Parse(match.Groups["tyc1"].Value);
                 short? tyc2 = match.Groups["tyc2"].Success ? short.Parse(match.Groups["tyc2"].Value) : (short?)null;
                 string tyc3 = match.Groups["tyc3"].Value;
-
                 if (tyc1 > 0 && tyc1 <= 9537)
                 {
                     Tycho2Region region = IndexRegions.ElementAt(tyc1 - 1);
                     var stars = GetStarsInRegion(region, c, tyc2, tyc3);
-
-                    return stars.Take(maxCount).Select(s => s as CelestialObject).ToList();
+                    return stars.Where(filterFunc).Take(maxCount).ToArray();
                 }
             }
-
             return new CelestialObject[0];
         }
     }

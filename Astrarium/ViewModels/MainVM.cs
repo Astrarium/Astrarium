@@ -18,7 +18,7 @@ using System.Windows.Input;
 
 namespace Astrarium.ViewModels
 {
-    public class MainVM : ViewModelBase
+    public class MainVM : ViewModelBase, IMainWindow
     {
         private readonly ISky sky;
         private readonly ISkyMap map;
@@ -44,7 +44,7 @@ namespace Astrarium.ViewModels
         public Command<CelestialObject> MotionTrackCommand { get; private set; }
         public Command<CelestialObject> LockOnObjectCommand { get; private set; }
         public Command<PointF> MeasureToolCommand { get; private set; }
-        public Command<CelestialObject> CenterOnObjectCommand { get; private set; }
+        public Command<CelestialObject> GoToHistoryItemCommand { get; private set; }
         public Command ClearObjectsHistoryCommand { get; private set; }
         public Command ChangeSettingsCommand { get; private set; }
         public Command ShowAboutCommand { get; private set; }
@@ -160,13 +160,13 @@ namespace Astrarium.ViewModels
             SetDateCommand = new Command(SetDate);
             SelectLocationCommand = new Command(SelectLocation);
             SearchObjectCommand = new Command(SearchObject);
-            QuickSearchCommand = new Command<CelestialObject>(CenterOnObject);
+            QuickSearchCommand = new Command<CelestialObject>(GoToObject);
             CenterOnPointCommand = new Command(CenterOnPoint);
             GetObjectInfoCommand = new Command<CelestialObject>(GetObjectInfo);
             GetObjectEphemerisCommand = new Command(GetObjectEphemeris);
             CalculatePhenomenaCommand = new Command(CalculatePhenomena);
             LockOnObjectCommand = new Command<CelestialObject>(LockOnObject);
-            CenterOnObjectCommand = new Command<CelestialObject>(CenterOnObject);
+            GoToHistoryItemCommand = new Command<CelestialObject>(GoToObject);
             ClearObjectsHistoryCommand = new Command(ClearObjectsHistory);
             ChangeSettingsCommand = new Command(ChangeSettings);
             ShowAboutCommand = new Command(ShowAbout);
@@ -497,7 +497,7 @@ namespace Astrarium.ViewModels
                     SelectedObjectsMenuItems.Remove(existingItem);
                 }
 
-                SelectedObjectsMenuItems.Insert(2, new MenuItem(body.Names.First(), CenterOnObjectCommand, body));
+                SelectedObjectsMenuItems.Insert(2, new MenuItem(body.Names.First(), GoToHistoryItemCommand, body));
 
                 // 10 items of history + "clear all" + separator
                 if (SelectedObjectsMenuItems.Count > 13)
@@ -657,7 +657,7 @@ namespace Astrarium.ViewModels
                 }
                 else
                 {
-                    CenterOnObject(ev.PrimaryBody);
+                    GoToObject(ev.PrimaryBody);
                 }
             }
         }
@@ -667,7 +667,7 @@ namespace Astrarium.ViewModels
             CelestialObject body = ViewManager.ShowSearchDialog();
             if (body != null)
             {
-                CenterOnObject(body);
+                GoToObject(body);
             }
         }
 
@@ -744,8 +744,23 @@ namespace Astrarium.ViewModels
             ViewManager.ShowPrintPreviewDialog(document);
         }
 
-        private void CenterOnObject(CelestialObject body)
+        private void GoToObject(CelestialObject body)
         {
+            if (!CenterOnObject(body))
+            {
+                // TODO: localize
+                ViewManager.ShowMessageBox("Warning", "Selected object can not be found on the sky.");
+            }
+        }
+
+        public bool CenterOnObject(CelestialObject celestialObject)
+        {
+            CelestialObject body = sky.Search(celestialObject.Type, celestialObject.CommonName);
+            if (body == null)
+            {
+                return false;
+            }
+
             if (body.DisplaySettingNames.Any(s => !settings.Get(s)))
             {
                 if (ViewManager.ShowMessageBox("$ObjectInvisible.Title", "$ObjectInvisible.Text", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
@@ -754,7 +769,7 @@ namespace Astrarium.ViewModels
                 }
                 else
                 {
-                    return;
+                    return true;
                 }
             }
 
@@ -766,7 +781,7 @@ namespace Astrarium.ViewModels
                 }
                 else
                 {
-                    return;
+                    return true;
                 }
             }
 
@@ -778,11 +793,13 @@ namespace Astrarium.ViewModels
                 }
                 else
                 {
-                    return;
+                    return true;
                 }
             }
 
             map.GoToObject(body, TimeSpan.FromSeconds(1));
+
+            return true;
         }
 
         private void CenterOnPoint()

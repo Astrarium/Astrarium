@@ -85,8 +85,9 @@ namespace Astrarium.Types
         /// </summary>
         /// <param name="caption">Dialog title</param>
         /// <param name="filter">Alowed files extensions filter</param>
+        /// <param name="selectedFilterIndex">Selected filter index, as specified in the <paramref name="filter"/> string</param>
         /// <returns>File name and path, if user pressed OK, null otherwise.</returns>
-        string ShowOpenFileDialog(string caption, string filter);
+        string ShowOpenFileDialog(string caption, string filter, out int selectedFilterIndex);
 
         /// <summary>
         /// Shows color picker dialog

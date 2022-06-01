@@ -1,4 +1,5 @@
 ﻿using Astrarium.Algorithms;
+using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -10,7 +11,8 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Meteors
 {
-    public class MeteorsReader
+    [Singleton(typeof(IMeteorsReader))]
+    public class MeteorsReader : IMeteorsReader
     {
         public ICollection<Meteor> Read(string filePath)
         {
@@ -59,7 +61,7 @@ namespace Astrarium.Plugins.Meteors
                     meteors.Add(meteor);
                 }
             }
-            
+
             return meteors;
         }
     }
