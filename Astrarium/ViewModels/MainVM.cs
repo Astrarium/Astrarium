@@ -23,6 +23,7 @@ namespace Astrarium.ViewModels
         private readonly ISky sky;
         private readonly ISkyMap map;
         private readonly ISettings settings;
+        private readonly IAppUpdater appUpdater;
 
         public string MapEquatorialCoordinatesString { get; private set; }
         public string MapHorizontalCoordinatesString { get; private set; }
@@ -48,6 +49,7 @@ namespace Astrarium.ViewModels
         public Command ClearObjectsHistoryCommand { get; private set; }
         public Command ChangeSettingsCommand { get; private set; }
         public Command ShowAboutCommand { get; private set; }
+        public Command CheckForUpdatesCommand { get; private set; }
         public Command SaveAsImageCommand { get; private set; }
         public Command PrintCommand { get; private set; }
         public Command PrintPreviewCommand { get; private set; }
@@ -115,7 +117,7 @@ namespace Astrarium.ViewModels
 
             public IEnumerable GetSuggestions(string filter)
             {
-                return sky.Search(filter, body => true, 10);                
+                return sky.Search(filter, body => true, 10);
             }
         }
 
@@ -145,11 +147,18 @@ namespace Astrarium.ViewModels
             set { sky.DateTimeSync = value; }
         }
 
-        public MainVM(ISky sky, ISkyMap map, ISettings settings, UIElementsIntegration uiIntegration)
+        public MainVM(ISky sky, ISkyMap map, IAppUpdater appUpdater, ISettings settings, UIElementsIntegration uiIntegration)
         {
             this.sky = sky;
             this.map = map;
             this.settings = settings;
+            this.appUpdater = appUpdater;
+
+            Task.Run(async () =>
+            {
+                await Task.Delay(TimeSpan.FromSeconds(3));
+                appUpdater.CheckUpdates(x => OnAppUpdateFound(x));
+            });
 
             sky.Calculate();
 
@@ -170,6 +179,7 @@ namespace Astrarium.ViewModels
             ClearObjectsHistoryCommand = new Command(ClearObjectsHistory);
             ChangeSettingsCommand = new Command(ChangeSettings);
             ShowAboutCommand = new Command(ShowAbout);
+            CheckForUpdatesCommand = new Command(CheckForUpdates);
             SaveAsImageCommand = new Command(SaveAsImage);
             PrintCommand = new Command(Print);
             PrintPreviewCommand = new Command(PrintPreview);
@@ -410,6 +420,7 @@ namespace Astrarium.ViewModels
                         }))
                     },
                     null,
+                    new MenuItem("$Menu.CheckForUpdates", CheckForUpdatesCommand),
                     new MenuItem("$Menu.About", ShowAboutCommand)
                 }
             };
@@ -463,6 +474,37 @@ namespace Astrarium.ViewModels
             menuLock.AddBinding(new SimpleBinding(map, nameof(map.SelectedObject), nameof(MenuItem.CommandParameter)));
 
             ContextMenuItems.Add(menuLock);
+        }
+
+        private void OnAppUpdateFound(LastRelease lastRelease, CancellationTokenSource cts = null)
+        {
+            if (cts != null)
+            {
+                if (cts.IsCancellationRequested)
+                    return;
+                else
+                    cts.Cancel();
+            }
+
+            App.Current.Dispatcher.Invoke(() =>
+            {
+                var vm = ViewManager.CreateViewModel<AppUpdateVM>();
+                vm.SetReleaseInfo(lastRelease);
+                ViewManager.ShowDialog(vm);
+            });
+        }
+
+        private void OnAppUpdateError(Exception ex, CancellationTokenSource cts = null)
+        {
+            if (cts != null)
+            {
+                if (cts.IsCancellationRequested)
+                    return;
+                else
+                    cts.Cancel();
+            }
+
+            ViewManager.ShowMessageBox("$Error", $"Unable to check app updates: {ex.Message}");
         }
 
         private void Sky_ContextChanged()
@@ -679,6 +721,13 @@ namespace Astrarium.ViewModels
         private void ShowAbout()
         {
             ViewManager.ShowDialog<AboutVM>();
+        }
+
+        private void CheckForUpdates()
+        {
+            var cts = new CancellationTokenSource();
+            ViewManager.ShowProgress("Please wait", "Checking for updates...", cts);
+            appUpdater.CheckUpdates(x => OnAppUpdateFound(x, cts), x => OnAppUpdateError(x, cts));
         }
 
         private void SaveAsImage()

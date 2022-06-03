@@ -50,9 +50,13 @@
   </ItemGroup>
   
   <ItemGroup>
+    <Compile Remove="Logging\**" />
     <Compile Remove="Logo\**" />
+    <EmbeddedResource Remove="Logging\**" />
     <EmbeddedResource Remove="Logo\**" />
+    <None Remove="Logging\**" />
     <None Remove="Logo\**" />
+    <Page Remove="Logging\**" />
   </ItemGroup>
   
   <ItemGroup>
@@ -209,10 +213,6 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Logging\" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
