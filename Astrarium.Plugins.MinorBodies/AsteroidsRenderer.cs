@@ -77,8 +77,10 @@ namespace Astrarium.Plugins.MinorBodies
                             continue;
                         }
                         // asteroid should be rendered as point
-                        else if ((int)size > 0)
+                        else if (size > 0)
                         {
+                            if ((int)size == 0) size = 1;
+
                             PointF p = map.Project(a.Horizontal);
 
                             if (!map.IsOutOfScreen(p))

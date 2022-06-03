@@ -6,7 +6,7 @@ namespace Astrarium.Plugins.SolarSystem.Objects
     /// <summary>
     /// Contains coordinates and visual appearance data for the moon of Mars for given instant of time.
     /// </summary>
-    public class MarsMoon : SizeableCelestialObject, IPlanetMoon, ISolarSystemObject
+    public class MarsMoon : SizeableCelestialObject, IPlanetMoon, ISolarSystemObject, IMagnitudeObject
     {
         public MarsMoon(int number)
         {

@@ -197,6 +197,9 @@
                         </ContextMenu.ItemContainerStyle>
                     </ContextMenu>
                 </WindowsFormsHost.ContextMenu>
+                <WindowsFormsHost.ToolTip>
+                    <ToolTip x:Name="skyToolTip" />
+                </WindowsFormsHost.ToolTip>
             </WindowsFormsHost>
         </DockPanel>
 

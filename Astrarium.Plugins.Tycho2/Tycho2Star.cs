@@ -6,7 +6,7 @@ namespace Astrarium.Plugins.Tycho2
     /// <summary>
     /// Represents single star from Tycho2 star catalog
     /// </summary>
-    public class Tycho2Star : CelestialObject
+    public class Tycho2Star : CelestialObject, IMagnitudeObject
     {
         /// <inheritdoc />
         public override string Type => "Star";

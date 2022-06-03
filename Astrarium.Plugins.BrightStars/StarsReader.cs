@@ -103,7 +103,7 @@ namespace Astrarium.Plugins.BrightStars
                             star.PmDelta = Convert.ToSingle(line.Substring(154, 6), CultureInfo.InvariantCulture);
                         }
 
-                        star.Mag = Convert.ToSingle(line.Substring(102, 5), CultureInfo.InvariantCulture);
+                        star.Magnitude = Convert.ToSingle(line.Substring(102, 5), CultureInfo.InvariantCulture);
                         star.Color = line[129];
                     }
 

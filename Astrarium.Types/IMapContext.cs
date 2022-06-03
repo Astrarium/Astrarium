@@ -183,6 +183,12 @@ namespace Astrarium.Types
                 size *= 2;
             }
 
+            // TODO: make this configurable thru settings
+            if (map.MouseButton != MouseButton.None)
+            {
+                size = (float)Math.Round(size, 0);
+            }
+           
             return size;
         }
 

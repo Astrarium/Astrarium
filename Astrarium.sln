@@ -55,7 +55,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.Meteors",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.Novae", "Astrarium.Plugins.Novae\Astrarium.Plugins.Novae.csproj", "{2F383171-C891-410C-A00F-1BB16873131A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Astrarium.Plugins.Planner", "Astrarium.Plugins.Planner\Astrarium.Plugins.Planner.csproj", "{50C3B6A6-7F9E-4791-A60B-67DDAFB83F8A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Astrarium.Plugins.Planner", "Astrarium.Plugins.Planner\Astrarium.Plugins.Planner.csproj", "{50C3B6A6-7F9E-4791-A60B-67DDAFB83F8A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Astrarium.Plugins.UCAC4", "Astrarium.Plugins.UCAC4\Astrarium.Plugins.UCAC4.csproj", "{DE948749-702B-421C-8ED5-D7051EEE0E7A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -151,6 +153,10 @@ Global
 		{50C3B6A6-7F9E-4791-A60B-67DDAFB83F8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{50C3B6A6-7F9E-4791-A60B-67DDAFB83F8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{50C3B6A6-7F9E-4791-A60B-67DDAFB83F8A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE948749-702B-421C-8ED5-D7051EEE0E7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE948749-702B-421C-8ED5-D7051EEE0E7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE948749-702B-421C-8ED5-D7051EEE0E7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE948749-702B-421C-8ED5-D7051EEE0E7A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

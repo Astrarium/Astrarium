@@ -24,15 +24,9 @@ namespace Astrarium.Plugins.Tycho2
             fontNames = new Font("Arial", 6);
         }
 
-        private bool MagFilter(IMapContext map, float mag)
+        private bool MagFilter(float mag, float magLimit)
         {
-            if (mag > map.MagLimit)
-                return false;
-
-            if ((int)map.GetPointSize(mag) == 0)
-                return false;
-
-            return true;
+            return mag <= magLimit;
         }
 
         public override void Render(IMapContext map)
@@ -57,17 +51,19 @@ namespace Astrarium.Plugins.Tycho2
                 tycho2.LockedStar = map.LockedObject as Tycho2Star;
                 tycho2.SelectedStar = map.SelectedObject as Tycho2Star;
 
-                var stars = tycho2.GetStars(context, eq, map.ViewAngle, m => MagFilter(map, m));
+                float magLimit = (float)(-1.44995 * Math.Log(0.000230685 * map.ViewAngle));
+                var stars = tycho2.GetStars(context, eq, map.ViewAngle, m => m <= magLimit);
 
                 foreach (var star in stars)
                 {
                     if (!isGround || star.Horizontal.Altitude > 0)
                     {
+                        float size = map.GetPointSize(star.Magnitude);
+                        if (size > 0)
+                        {
                         PointF p = map.Project(star.Horizontal);
                         if (!map.IsOutOfScreen(p))
                         {
-                            float size = map.GetPointSize(star.Magnitude);
-
                             if (map.Schema == ColorSchema.White)
                             {
                                 g.FillEllipse(Brushes.White, p.X - size / 2 - 1, p.Y - size / 2 - 1, size + 2, size + 2);
@@ -83,6 +79,7 @@ namespace Astrarium.Plugins.Tycho2
                     }
                 }
             }
+        }
         }
 
         public override RendererOrder Order => RendererOrder.Stars;

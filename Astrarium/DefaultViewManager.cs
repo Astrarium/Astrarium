@@ -13,6 +13,7 @@ using System.Windows;
 using WF = System.Windows.Forms;
 using System.Drawing.Printing;
 using System.Drawing;
+using System.IO;
 
 namespace Astrarium
 {
@@ -315,10 +316,11 @@ namespace Astrarium
         {
             var dialog = new WF.FolderBrowserDialog();
             dialog.Description = caption;
+            if (Directory.Exists(path))
+            {
+                dialog.SelectedPath = path;
+            }
             return (WF.DialogResult.OK == dialog.ShowDialog()) ? dialog.SelectedPath : null;
-            //var vm = new SelectFolderVM();
-            //vm.SelectedPath = path;
-            //return (ShowDialog(vm) ?? false) ? vm.SelectedPath : null;
         }
 
         public double? ShowDateDialog(double jd, double utcOffset, DateOptions displayMode = DateOptions.DateTime)

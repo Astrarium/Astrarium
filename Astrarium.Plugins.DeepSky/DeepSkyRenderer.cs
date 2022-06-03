@@ -280,7 +280,7 @@ namespace Astrarium.Plugins.DeepSky
                 // point object
                 else
                 {
-                    float size = map.GetPointSize(ds.Mag == null ? 15 : ds.Mag.Value);
+                    float size = map.GetPointSize(ds.Magnitude == float.NaN ? 20 : ds.Magnitude);
                     if ((int)size > 0)
                     {
                         if (ds.Outline != null && settings.Get<bool>("DeepSkyOutlines"))

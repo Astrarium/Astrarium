@@ -14,11 +14,6 @@ namespace Astrarium.Types.Controls
 {
     public class FilePathPicker : Control
     {
-        public FilePathPicker()
-        {
-
-        }
-
         public enum PickerMode
         {
             File = 0,
@@ -45,13 +40,15 @@ namespace Astrarium.Types.Controls
                 AffectsRender = true
             });
 
+        public readonly static DependencyProperty ModeProperty = DependencyProperty.Register(nameof(Mode), typeof(PickerMode), typeof(FilePathPicker), new UIPropertyMetadata(null));
+        public readonly static DependencyProperty CaptionProperty = DependencyProperty.Register(nameof(Caption), typeof(string), typeof(FilePathPicker), new UIPropertyMetadata(null));
+        public readonly static DependencyProperty ValidatorProperty = DependencyProperty.Register(nameof(Validator), typeof(Func<string, bool>), typeof(FilePathPicker), new UIPropertyMetadata(null));
+
         public string Caption
         {
             get { return (string)GetValue(CaptionProperty); }
             set { SetValue(CaptionProperty, value); }
         }
-
-        public readonly static DependencyProperty CaptionProperty = DependencyProperty.Register(nameof(Caption), typeof(string), typeof(FilePathPicker), new UIPropertyMetadata(null));
 
         public PickerMode Mode
         {
@@ -59,7 +56,11 @@ namespace Astrarium.Types.Controls
             set { SetValue(ModeProperty, value); }
         }
 
-        public readonly static DependencyProperty ModeProperty = DependencyProperty.Register(nameof(Mode), typeof(PickerMode), typeof(FilePathPicker), new UIPropertyMetadata(null));
+        public Func<string, bool> Validator
+        {
+            get { return (Func<string, bool>)GetValue(ValidatorProperty); }
+            set { SetValue(ValidatorProperty, value); }
+        }
 
         Button _Button;
         
@@ -74,18 +75,21 @@ namespace Astrarium.Types.Controls
         {
             if (Mode == PickerMode.File)
             {
-                // TODO: take caption and filter from control properties
-                string path = ViewManager.ShowOpenFileDialog("Open file", "*.*", out int filterIndex);
-                if (!string.IsNullOrEmpty(path))
-                { 
-                    SelectedPath = path;
-                }
+                string path = ViewManager.ShowOpenFileDialog(Caption, "*.*", out int filterIndex);
+                TrySetValue(path);
             }
             else if (Mode == PickerMode.Directory)
+                { 
+                string path = ViewManager.ShowSelectFolderDialog(Caption, SelectedPath);
+                TrySetValue(path);
+                }
+            }
+
+        private void TrySetValue(string path)
             {
-                // TODO: take caption from control properties
-                string path = ViewManager.ShowSelectFolderDialog("Choose folder", SelectedPath);
                 if (!string.IsNullOrEmpty(path))
+                {
+                if (Validator == null || Validator.Invoke(path))
                 {
                     SelectedPath = path;
                 }
