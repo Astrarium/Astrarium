@@ -1,27 +1,89 @@
 ﻿using Astrarium.Types;
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Net;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace Astrarium.ViewModels
 {
     public class AppUpdateVM : ViewModelBase
     {
-        public ICommand GoToDownloadPageCommand { get; private set; }
+        private ISettings settings;
 
-        public AppUpdateVM()
+        public ICommand DownloadCommand { get; private set; }
+
+        public AppUpdateVM(ISettings settings)
         {
-            GoToDownloadPageCommand = new Command(GoToDownloadPage);
+            this.settings = settings;
+            DownloadCommand = new Command(Download);
         }
 
         public string ReleaseNotes { get; private set; }
 
-        public void SetReleaseInfo(LastRelease lastRelease)
+        public bool CheckUpdatesOnStart
         {
-            ReleaseNotes = $"New version of **Astarium {lastRelease.Version}** is available!\r\n What's new:\r\n\r\n" + lastRelease.ReleaseNotes;
+            get => settings.Get("CheckUpdatesOnStart");
+            set
+            {
+                settings.SetAndSave("CheckUpdatesOnStart", value);
+            }
         }
 
-        private void GoToDownloadPage()
+        public void SetReleaseInfo(LastRelease lastRelease)
         {
-            System.Diagnostics.Process.Start("https://github.com/Astrarium/Astrarium/releases/latest/download/Astrarium-setup.exe");
+            ReleaseNotes = Text.Get("AppUpdateWindow.AppUpdateAvailable", ("version", lastRelease.Version.ToString()), ("releaseNotes", lastRelease.ReleaseNotes));
+        }
+
+        private async void Download()
+        {
+            Close();
+
+            await Task.Run(() =>
+            {
+                string filePath = ViewManager.ShowSaveFileDialog("$Save", "Astrarium-installer", ".exe", "Application executable|*.exe|All files|*.*", out int selectedExtensionIndex);
+                if (filePath != null)
+                {
+                    using (var client = new WebClient())
+                    {
+                        try
+                        {
+                            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+                            client.DownloadFile("https://github.com/Astrarium/Astrarium/releases/latest/download/Astrarium-setup.exe", filePath);
+                        }
+                        catch (Exception ex)
+                        {
+                            Application.Current.Dispatcher.Invoke(() => ViewManager.ShowMessageBox("$Error", $"{Text.Get("AppUpdateWindow.UnableToDownloadInstaller")}: {ex.Message}"));
+                            return;
+                        }
+
+                        if (File.Exists(filePath))
+                        {
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                var answer = ViewManager.ShowMessageBox("$Warning", Text.Get("AppUpdateWindow.InstallConfirmation"), MessageBoxButton.YesNo);
+                                if (answer == MessageBoxResult.Yes)
+                                {
+                                    try
+                                    {
+                                        ProcessStartInfo info = new ProcessStartInfo(filePath);
+                                        info.UseShellExecute = true;
+                                        info.Verb = "runas";
+                                        Process.Start(info);
+                                        Environment.Exit(0);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        ViewManager.ShowMessageBox("$Error", $"{Text.Get("AppUpdateWindow.UnableToStartInstaller")}: {ex.Message}");
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+            });
         }
     }
 }

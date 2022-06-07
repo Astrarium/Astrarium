@@ -3,10 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:t="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
         xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+        xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
         mc:Ignorable="d"
-        Title="AppUpdateWindow" 
+        Title="{t:Text AppUpdateWindow.Title}" 
         Width="600" Height="350"
         SizeToContent="Height"
         MinWidth="300" MinHeight="200"
@@ -50,8 +50,8 @@
                     <Setter Property="Margin" Value="10,0,0,0"/>
                 </Style>
             </Grid.Resources>
-            <CheckBox Grid.Column="0" IsChecked="False" Content="Do not check updates on application start" VerticalAlignment="Center" />
-            <Button Grid.Column="2" Content="Go to download page" Command="{Binding GoToDownloadPageCommand}" />
+            <CheckBox Grid.Column="0" IsChecked="{Binding CheckUpdatesOnStart}" Content="{t:Text AppUpdateWindow.CheckUpdatesOnStart}" VerticalAlignment="Center" />
+            <Button Grid.Column="2" Content="{t:Text AppUpdateWindow.DownloadButton}" Command="{Binding DownloadCommand}" />
         </Grid>
         <Path Data="M51.7,56.7l-1.4-1.4l5-5l1.4,1.4L51.7,56.7z M44.7,56.7l-1.4-1.4l12-12l1.4,1.4L44.7,56.7z"  Margin="0 -45" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="8" Height="8" Stretch="Fill" Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=Foreground}" Opacity="0.3" />
     </Grid>

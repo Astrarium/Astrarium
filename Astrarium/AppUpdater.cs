@@ -19,11 +19,10 @@ namespace Astrarium
         {
             try
             {
-                var lastRelease = GetLastRelease("Astrarium", "Astrarium");
+                var lastRelease = GetLatestRelease("Astrarium", "Astrarium");
                 Assembly assembly = Assembly.GetExecutingAssembly();
                 var fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
                 Version currentVersion = Version.Parse(fileVersionInfo.ProductVersion);
-
                 if (lastRelease.Version.CompareTo(currentVersion) > 0)
                 {
                     onUpdateFound?.Invoke(lastRelease);
@@ -35,7 +34,7 @@ namespace Astrarium
             }
         }
 
-        private LastRelease GetLastRelease(string owner, string repo)
+        private LastRelease GetLatestRelease(string owner, string repo)
         {
             ServicePointManager.SecurityProtocol =
                 SecurityProtocolType.Tls |

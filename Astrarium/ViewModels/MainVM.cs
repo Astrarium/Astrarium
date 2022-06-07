@@ -154,11 +154,14 @@ namespace Astrarium.ViewModels
             this.settings = settings;
             this.appUpdater = appUpdater;
 
-            Task.Run(async () =>
+            if (settings.Get("CheckUpdatesOnStart"))
             {
-                await Task.Delay(TimeSpan.FromSeconds(3));
-                appUpdater.CheckUpdates(x => OnAppUpdateFound(x));
-            });
+                Task.Run(async () =>
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(3));
+                    appUpdater.CheckUpdates(x => OnAppUpdateFound(x));
+                });
+            }
 
             sky.Calculate();
 
@@ -476,17 +479,9 @@ namespace Astrarium.ViewModels
             ContextMenuItems.Add(menuLock);
         }
 
-        private void OnAppUpdateFound(LastRelease lastRelease, CancellationTokenSource cts = null)
+        private void OnAppUpdateFound(LastRelease lastRelease)
         {
-            if (cts != null)
-            {
-                if (cts.IsCancellationRequested)
-                    return;
-                else
-                    cts.Cancel();
-            }
-
-            App.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.Invoke(() =>
             {
                 var vm = ViewManager.CreateViewModel<AppUpdateVM>();
                 vm.SetReleaseInfo(lastRelease);
@@ -494,17 +489,9 @@ namespace Astrarium.ViewModels
             });
         }
 
-        private void OnAppUpdateError(Exception ex, CancellationTokenSource cts = null)
+        private void OnAppUpdateError(Exception ex)
         {
-            if (cts != null)
-            {
-                if (cts.IsCancellationRequested)
-                    return;
-                else
-                    cts.Cancel();
-            }
-
-            ViewManager.ShowMessageBox("$Error", $"Unable to check app updates: {ex.Message}");
+            Application.Current.Dispatcher.Invoke(() => ViewManager.ShowMessageBox("$Error", $"Unable to check app updates: {ex.Message}"));
         }
 
         private void Sky_ContextChanged()
@@ -725,9 +712,7 @@ namespace Astrarium.ViewModels
 
         private void CheckForUpdates()
         {
-            var cts = new CancellationTokenSource();
-            ViewManager.ShowProgress("Please wait", "Checking for updates...", cts);
-            appUpdater.CheckUpdates(x => OnAppUpdateFound(x, cts), x => OnAppUpdateError(x, cts));
+            appUpdater.CheckUpdates(x => OnAppUpdateFound(x), x => OnAppUpdateError(x));
         }
 
         private void SaveAsImage()
