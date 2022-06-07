@@ -190,7 +190,7 @@ namespace Astrarium.ViewModels
             SearchProvider = new SearchSuggestionProvider(sky);
 
             sky.Context.ContextChanged += Sky_ContextChanged;
-            sky.Calculated += () => map.Invalidate();
+            sky.Calculated += map.Invalidate;
             sky.DateTimeSyncChanged += () => NotifyPropertyChanged(nameof(DateTimeSync));
             map.SelectedObjectChanged += Map_SelectedObjectChanged;
             map.ViewAngleChanged += Map_ViewAngleChanged;
@@ -710,9 +710,9 @@ namespace Astrarium.ViewModels
             ViewManager.ShowDialog<AboutVM>();
         }
 
-        private void CheckForUpdates()
+        private async void CheckForUpdates()
         {
-            appUpdater.CheckUpdates(x => OnAppUpdateFound(x), x => OnAppUpdateError(x));
+            await Task.Run(() => appUpdater.CheckUpdates(x => OnAppUpdateFound(x), x => OnAppUpdateError(x)));
         }
 
         private void SaveAsImage()
