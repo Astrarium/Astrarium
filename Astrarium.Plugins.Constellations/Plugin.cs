@@ -13,6 +13,7 @@ namespace Astrarium.Plugins.Constellations
             DefineSetting("ConstBorders", true);
             DefineSetting("ConstLabels", true);
             DefineSetting("ConstLabelsType", ConstellationsRenderer.LabelType.InternationalName);
+            DefineSetting("ConstLinesType", ConstellationsCalc.LineType.Traditional);
 
             // Colors
             DefineSetting("ColorConstLines", new SkyColor(64, 64, 64));

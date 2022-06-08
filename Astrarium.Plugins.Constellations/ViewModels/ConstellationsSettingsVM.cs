@@ -59,12 +59,46 @@ namespace Astrarium.Plugins.Constellations.ViewModels
             }
         }
 
+        public bool IsConstLinesTypeTraditional
+        {
+            get => Settings.Get<ConstellationsCalc.LineType>("ConstLinesType") == ConstellationsCalc.LineType.Traditional;
+            set
+            {
+                if (value)
+                {
+                    Settings.Set("ConstLinesType", ConstellationsCalc.LineType.Traditional);
+                    NotifyConstLinesTypeChanged();
+                }
+            }
+        }
+
+        public bool IsConstLinesTypeRey
+        {
+            get => Settings.Get<ConstellationsCalc.LineType>("ConstLinesType") == ConstellationsCalc.LineType.Rey;
+            set
+            {
+                if (value)
+                {
+                    Settings.Set("ConstLinesType", ConstellationsCalc.LineType.Rey);
+                    NotifyConstLinesTypeChanged();
+                }
+            }
+        }
+
         public void NotifyConstLabelsTypeChanged()
         {
             NotifyPropertyChanged(
                 nameof(IsConstLabelsTypeInternationalCode),
                 nameof(IsConstLabelsTypeInternationalName),
                 nameof(IsConstLabelsTypeLocalName)
+            );
+        }
+
+        public void NotifyConstLinesTypeChanged()
+        {
+            NotifyPropertyChanged(
+                nameof(IsConstLinesTypeTraditional),
+                nameof(IsConstLinesTypeRey)
             );
         }
     }
