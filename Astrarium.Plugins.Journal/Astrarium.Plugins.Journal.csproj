@@ -1,0 +1,60 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+	<PropertyGroup>
+		<TargetFrameworks>net451</TargetFrameworks>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<UseWpf>true</UseWpf>
+		<Product>Observation Log</Product>
+		<Description>Handy tool to log your astronomical observations</Description>
+		<Authors>Alexander Krutov</Authors>
+		<OutputPath>..\Astrarium\bin\$(Configuration)</OutputPath>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Deploy)' == 'True'">
+		<DebugSymbols>false</DebugSymbols>
+		<DebugType>None</DebugType>
+		<OutputPath>..\Deploy\$(MSBuildProjectName)</OutputPath>
+	</PropertyGroup>
+
+	<Target Condition="'$(Deploy)' == 'True'" Name="ZipOutputPath" AfterTargets="Build">
+		<ZipDirectory Overwrite="True" SourceDirectory="$(OutputPath)" DestinationFile="$(OutputPath)\..\$(MSBuildProjectName)-$(ProductVersion).zip" />
+	</Target>
+
+	<ItemGroup>
+	  <None Remove="Text.ini" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="Text.ini" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Astrarium.Algorithms\Astrarium.Algorithms.csproj">
+			<Private>false</Private>
+			<CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+		</ProjectReference>
+		<ProjectReference Include="..\Astrarium.Types\Astrarium.Types.csproj">
+			<Private>false</Private>
+			<CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+		</ProjectReference>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="OAL\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="EntityFramework" Version="6.4.4" />
+	  <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+	  <PackageReference Include="SQLite.CodeFirst" Version="1.7.0.34" />
+	  <PackageReference Include="System.Data.SQLite.Core" Version="1.0.116" />
+	  <PackageReference Include="System.Data.SQLite.EF6" Version="1.0.116" />
+	  <PackageReference Include="System.Data.SQLite.Linq" Version="1.0.116" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Reference Include="System.Xml" />
+	  <Reference Include="System.Xml.Serialization" />
+	</ItemGroup>
+
+</Project>
