@@ -3,24 +3,87 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Astrarium.Plugins.Journal.Views"
+        xmlns:v="clr-namespace:Astrarium.Plugins.Journal.Views"
+        xmlns:vm="clr-namespace:Astrarium.Plugins.Journal.ViewModels"
+        xmlns:c="clr-namespace:Astrarium.Plugins.Journal.Controls"
+        xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
         mc:Ignorable="d"
         Style="{StaticResource {x:Type Window}}" 
-        Title="JournalWindow" Height="450" Width="800">
+        Title="JournalWindow" Height="450" Width="800"
+        MinWidth="350">
+
+    <Window.Resources>
+
+        <!-- Session tree view item  -->
+        <HierarchicalDataTemplate DataType="{x:Type vm:TreeItemSession}" ItemsSource="{Binding Observations}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="22" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="{Binding Date}" FontFamily="Lucida Console" FontSize="12" VerticalAlignment="Center" Grid.Column="0" />
+                <TextBlock Text="{Binding Time}" FontFamily="Lucida Console"  VerticalAlignment="Center" Margin="4 0" FontSize="12" IsEnabled="False" Grid.Column="1" />
+                <TextBlock Text="{Binding ObservationsCount}" IsEnabled="False" VerticalAlignment="Center" FontSize="10" Margin="16 0 8 1" Grid.Column="3" Visibility="{Binding IsExpanded, Converter={s:InverseBoolToVisibilityConverter}}" />
+            </Grid>
+        </HierarchicalDataTemplate>
+
+        <!-- Observation tree view item  -->
+        <HierarchicalDataTemplate DataType="{x:Type vm:TreeItemObservation}">
+            <StackPanel Orientation="Horizontal" Background="Transparent">
+                <Rectangle Margin="2" Width="16" Height="16" ToolTip="{Binding ObjectType, Converter={s:CelestialObjectTypeDescriptionConverter}}">
+                    <Rectangle.Fill>
+                        <SolidColorBrush Color="{DynamicResource ColorControlLightBackground}" />
+                    </Rectangle.Fill>
+                    <Rectangle.OpacityMask>
+                        <ImageBrush ImageSource="{Binding ObjectType, Converter={s:CelestialObjectTypeToIconConverter}}" Stretch="Uniform" />
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+                <TextBlock Padding="4 0 0 0" Text="{Binding ObjectName}" ToolTip="{Binding ObjectNameAliases}" ToolTipService.IsEnabled="{Binding ObjectNameAliases, Converter={s:NotNullToBoolConverter}}" VerticalAlignment="Center" />
+            </StackPanel>
+        </HierarchicalDataTemplate>
+
+
+    </Window.Resources>
 
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200" MinWidth="0" />
+            <ColumnDefinition Width="150" MinWidth="100" />
             <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" MinWidth="200" />
         </Grid.ColumnDefinitions>
 
 
-        <TreeView Margin="4" Grid.Column="0" ItemsSource="{Binding Nodes}">
-            
-        </TreeView>
+        <c:BindableTreeView 
+            Style="{StaticResource {x:Type TreeView}}" 
+            SelectedTreeViewItem="{Binding SelectedTreeViewItem, Mode=TwoWay}" 
+            ItemsSource="{Binding AllSessions}"
+            ScrollViewer.HorizontalScrollBarVisibility="Auto"
+            VirtualizingPanel.IsContainerVirtualizable="True"
+            VirtualizingPanel.VirtualizationMode="Recycling"
+            VirtualizingPanel.IsVirtualizing="True"
+            Margin="4" 
+            Grid.Column="0">
+        </c:BindableTreeView>
 
-        <GridSplitter Grid.Column="1" />
+        <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Center" VerticalAlignment="Stretch" />
+
+        <ContentControl Grid.Column="2" Content="{Binding SelectedTreeViewItem}">
+            <ContentControl.Resources>
+                <DataTemplate DataType="{x:Type vm:TreeItemSession}">
+                    <v:SessionView DataContext="{Binding}" />
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:TreeItemObservation}">
+                    <v:ObservationView DataContext="{Binding}" />
+                </DataTemplate>
+            </ContentControl.Resources>
+        </ContentControl>
+
     </Grid>
 </Window>

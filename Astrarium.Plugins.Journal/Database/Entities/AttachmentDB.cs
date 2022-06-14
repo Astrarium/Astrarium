@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ObservationPlannerDatabase.Database.Entities
+namespace Astrarium.Plugins.Journal.Database.Entities
 {
     /// <summary>
     /// Defines a file attached to an observation or a session

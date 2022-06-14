@@ -1,12 +1,9 @@
-﻿using Astrarium.Plugins.Journal.OAL;
+﻿using Astrarium.Plugins.Journal.Database;
+using Astrarium.Plugins.Journal.OAL;
 using Astrarium.Plugins.Journal.ViewModels;
 using Astrarium.Types;
-using ObservationPlannerDatabase.Database;
-using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Journal
 {
@@ -14,13 +11,26 @@ namespace Astrarium.Plugins.Journal
     {
         public JournalPlugin()
         {
-            MenuItems.Add(MenuItemPosition.MainMenuTop,
-                    new MenuItem("Journal",
+            var menuItemJournal = new MenuItem("Journal");
+
+            menuItemJournal.SubItems.Add(new MenuItem("Show Journal",
                     new Command(() => ViewManager.ShowWindow<JournalVM>(isSingleInstance: true))));
 
-            using (var db = new DatabaseContext())
+            menuItemJournal.SubItems.Add(new MenuItem("Import", new Command(DoImport)));
+
+            MenuItems.Add(MenuItemPosition.MainMenuTop, menuItemJournal);
+        }
+
+        private void DoImport()
+        {
+            string file = ViewManager.ShowOpenFileDialog("Import from OAL file", "Open Astronomy Log files (*.xml)|*.xml|All files|*.*", out int filterIndex);
+           
+            if (file != null)
             {
-                var obs = db.Observations.FirstOrDefault();
+                //System.Data.Entity.Database.Delete("db");
+                
+
+                Import.ImportFromOAL(file);
             }
         }
     }

@@ -1,19 +1,12 @@
-﻿using ObservationPlannerDatabase.Database.Entities;
+﻿using Astrarium.Plugins.Journal.Database.Entities;
 using SQLite.CodeFirst;
-using System;
-using System.Collections.Generic;
-using System.Data.Common;
 using System.Data.Entity;
-using System.Data.Entity.Infrastructure;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ObservationPlannerDatabase.Database
+namespace Astrarium.Plugins.Journal.Database
 {
     public class DatabaseContext : DbContext
     {
-        public DatabaseContext() : base() 
+        public DatabaseContext() : base()
         {
             Configuration.ProxyCreationEnabled = false;
             Configuration.LazyLoadingEnabled = false;

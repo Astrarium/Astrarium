@@ -1,0 +1,109 @@
+﻿<UserControl x:Class="Astrarium.Plugins.Journal.Views.ObservationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:c="clr-namespace:Astrarium.Plugins.Journal.Controls"
+             xmlns:v="clr-namespace:Astrarium.Plugins.Journal.Views"
+             xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+             xmlns:e="clr-namespace:Astrarium.Plugins.Journal.Database.Entities"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/Astrarium.Plugins.Journal;component/Themes/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Label Grid.Row="0" Content="date time" />
+
+        <TabControl Grid.Row="1">
+            <TabItem Header="Findings">
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <c:MultilineEdit 
+                        Grid.Row="0"
+                        VerticalAlignment="Stretch" 
+                        HorizontalAlignment="Stretch"  
+                        Text="{Binding Findings}" 
+                        Title="Findings" 
+                        Placeholder="Enter observation findings" />
+
+                    <GridSplitter ResizeDirection="Rows" Height="4" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Visibility="{Binding Details, Converter={s:NotNullToVisibilityConverter}}" />
+
+                    <ContentControl Grid.Row="2" Content="{Binding Details}" Visibility="{Binding Details, Converter={s:NotNullToVisibilityConverter}}">
+                        <ContentControl.Resources>
+                            <DataTemplate DataType="{x:Type e:DeepSkyObservationDetails}">
+                                <v:DeepSkyObservationDetailsView DataContext="{Binding}" />
+                            </DataTemplate>
+                            <DataTemplate DataType="{x:Type e:OpenClusterObservationDetails}">
+                                <v:OpenClusterObservationDetailsView DataContext="{Binding}" />
+                            </DataTemplate>
+                        </ContentControl.Resources>
+                    </ContentControl>
+
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Target details">
+
+                <StackPanel Orientation="Vertical" Grid.IsSharedSizeScope="True">
+
+                    <v:TargetDetailsView DataContext="{Binding}" />
+
+                    <ContentControl Content="{Binding TargetDetails}" Visibility="{Binding TargetDetails, Converter={s:NotNullToVisibilityConverter}}">
+                        <ContentControl.Resources>
+                            <DataTemplate DataType="{x:Type e:DeepSkyOpenClusterTargetDetails}">
+                                <v:DeepSkyOpenClusterTargetDetailsView DataContext="{Binding}" />
+                            </DataTemplate>
+                        </ContentControl.Resources>
+                    </ContentControl>
+
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Header="Equipment">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="Telescope / Other optics" VerticalAlignment="Center" Padding="6" />
+                    <TextBox Text="{Binding Telescope}" Grid.Column="1" />
+
+                    <TextBlock Text="Eyepiece" VerticalAlignment="Center" Padding="6" Grid.Row="1" />
+                    <TextBox Text="{Binding Eyepiece}" Grid.Column="1" Grid.Row="1" />
+
+                    <TextBlock Text="Lens" VerticalAlignment="Center" Padding="6" Grid.Row="2" />
+                    <TextBox Text="{Binding Lens}" Grid.Column="1" Grid.Row="2" />
+
+                </Grid>
+
+            </TabItem>
+
+
+            <TabItem Header="Images" />
+        </TabControl>
+    </Grid>
+</UserControl>

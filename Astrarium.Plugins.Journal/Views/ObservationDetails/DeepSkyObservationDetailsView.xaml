@@ -1,0 +1,39 @@
+﻿<UserControl x:Class="Astrarium.Plugins.Journal.Views.DeepSkyObservationDetailsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/Astrarium.Plugins.Journal;component/Themes/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <StackPanel VerticalAlignment="Stretch"  Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto">
+
+            <TextBlock Margin="2 8 2 2" Text="Visual rating:" />
+
+            <ComboBox Margin="2 2 2 8" SelectedValuePath="Tag" SelectedValue="{Binding Rating}" IsEditable="False">
+                <ComboBoxItem Tag="99">
+                    <TextBlock IsEnabled="False" Text="Not set  " />
+                </ComboBoxItem>
+                <ComboBoxItem Content="(1) Very conspicuous, nice eye-catcher" Tag="1"/>
+                <ComboBoxItem Content="(2) Easily visible with direct vision" Tag="2"/>
+                <ComboBoxItem Content="(3) Barely seen with direct vision" Tag="3"/>
+                <ComboBoxItem Content="(4) Averted vision is needed" Tag="4"/>
+                <ComboBoxItem Content="(5) Barely visible with averted vision" Tag="5"/>
+                <ComboBoxItem Content="(6) Visibility is doubtful" Tag="6"/>
+                <ComboBoxItem Content="(7) Not seen" Tag="7"/>
+            </ComboBox>
+
+            <CheckBox Margin="2 8 2 2" IsThreeState="True" Content="Stellar" IsChecked="{Binding Stellar}" />
+            <CheckBox Margin="2" IsThreeState="True" Content="Extended" IsChecked="{Binding Extended}" />
+            <CheckBox Margin="2" IsThreeState="True" Content="Resolved" IsChecked="{Binding Resolved}" />
+            <CheckBox Margin="2" IsThreeState="True" Content="Mottled" IsChecked="{Binding Mottled}" />
+        </StackPanel>
+    </Grid>
+</UserControl>

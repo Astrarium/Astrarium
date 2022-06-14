@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json;
-using ObservationPlannerDatabase.Database;
-using ObservationPlannerDatabase.Database.Entities;
+﻿using Astrarium.Plugins.Journal.Database;
+using Newtonsoft.Json;
+using Astrarium.Plugins.Journal.Database.Entities;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -347,7 +347,7 @@ namespace Astrarium.Plugins.Journal.OAL
                     details.UnusualActivity = vs.unusualActivitySpecified ? vs.unusualActivity : (bool?)null;
                     jsonDetails = JsonConvert.SerializeObject(details, jsonSettings);
                 }
-                else if (finding is findingsDeepSkyType) 
+                else if (finding is findingsDeepSkyType dst) 
                 {
                     // Double star
                     if (finding is findingsDeepSkyDSType ds)
@@ -368,6 +368,13 @@ namespace Astrarium.Plugins.Journal.OAL
                         details.PartlyUnresolved = oc.partlyUnresolvedSpecified ? oc.partlyUnresolved : (bool?)null;
                         details.UnusualShape = oc.unusualShapeSpecified ? oc.unusualShape : (bool?)null;
                         details.ColorContrasts = oc.colorContrastsSpecified ? oc.colorContrasts : (bool?)null;
+                        jsonDetails = JsonConvert.SerializeObject(details, jsonSettings);
+                    }
+
+                    // Other deep sky objects
+                    else 
+                    {
+                        var details = BuildDeepSkyObservationDetails<DeepSkyObservationDetails>(dst);
                         jsonDetails = JsonConvert.SerializeObject(details, jsonSettings);
                     }
                 }
@@ -551,7 +558,7 @@ namespace Astrarium.Plugins.Journal.OAL
         private static T BuildDeepSkyObservationDetails<T>(findingsDeepSkyType ds) where T : DeepSkyObservationDetails, new()
         {
             var details = new T();
-            details.Rating = (int)ds.rating;
+            details.Rating = int.Parse(ds.rating.ToStringEnum());
             details.SmallDiameter = ds.smallDiameter.ToAngle();
             details.LargeDiameter = ds.largeDiameter.ToAngle();
             details.Resolved = ds.resolvedSpecified ? ds.resolved : (bool?)null;

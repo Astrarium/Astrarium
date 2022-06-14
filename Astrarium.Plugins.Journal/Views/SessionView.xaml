@@ -1,0 +1,103 @@
+﻿<UserControl x:Class="Astrarium.Plugins.Journal.Views.SessionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:c="clr-namespace:Astrarium.Plugins.Journal.Controls"
+             xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+             xmlns:cc="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/Astrarium.Plugins.Journal;component/Themes/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Label Grid.Row="0" Content="date time" />
+
+        <TabControl Grid.Row="1">
+            <TabItem Header="Comments">
+                <c:MultilineEdit 
+                    VerticalAlignment="Stretch" 
+                    HorizontalAlignment="Stretch"  
+                    Text="{Binding Comments}" 
+                    Title="Comments" 
+                    Placeholder="Enter session comments" />
+            </TabItem>
+            <TabItem Header="Equipment">
+                <c:MultilineEdit 
+                    VerticalAlignment="Stretch" 
+                    HorizontalAlignment="Stretch"  
+                    Text="{Binding Equipment}" 
+                    Title="Equipment" 
+                    Placeholder="Enter equipment used during the session" />
+            </TabItem>
+           
+            <TabItem Header="Weather">
+
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
+
+                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Margin="6" Text="Seeing by Antoniadi scale:" Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" />
+                        <ComboBox SelectedValuePath="Tag" SelectedValue="{Binding Seeing}" Width="400" IsEditable="False" Grid.Column="1" Grid.Row="0" >
+                            <ComboBoxItem Tag="{x:Null}">
+                                <TextBlock IsEnabled="False" Text="Not set" />
+                            </ComboBoxItem>
+                            <ComboBoxItem Content="(1) Perfect seeing, the perfect image without shaking" Tag="1"/>
+                            <ComboBoxItem Content="(2) Good seeing, slight shaking of the objects" Tag="2"/>
+                            <ComboBoxItem Content="(3) Moderate seeing the image is still not absolutely sharp" Tag="3"/>
+                            <ComboBoxItem Content="(4) Poor seeing, undulation of the image" Tag="4"/>
+                            <ComboBoxItem Content="(5) Very poor seeing, the flashing image" Tag="5"/>
+                        </ComboBox>
+
+                        <CheckBox Margin="6" Content="Faintest star" Grid.Column="0" Grid.Row="1" VerticalAlignment="Center" IsChecked="{Binding FaintestStar, Converter={s:NotNullToBoolConverter}}" />
+                        <cc:NumericUpDown Width="70" HorizontalAlignment="Left" DecimalPlaces="1" Value="{Binding FaintestStar}" Grid.Column="1" Grid.Row="1" Visibility="{Binding FaintestStar, Converter={s:NotNullToVisibilityConverter}}" />
+
+                        <CheckBox Margin="6" Content="Sky quality" Grid.Column="0" Grid.Row="2" VerticalAlignment="Center" IsChecked="{Binding SkyQuality, Converter={s:NotNullToBoolConverter}}"  />
+                        <cc:NumericUpDown Width="70" HorizontalAlignment="Left" DecimalPlaces="1" Value="{Binding SkyQuality}" Grid.Column="1" Grid.Row="2" Visibility="{Binding SkyQuality, Converter={s:NotNullToVisibilityConverter}}" />
+
+
+                    </Grid>
+                    
+                    <c:MultilineEdit 
+                        VerticalAlignment="Stretch" 
+                        HorizontalAlignment="Stretch"  
+                        Text="{Binding Weather}" 
+                        Title="Weather" 
+                        Placeholder="Enter weather conditions" />
+
+                </StackPanel>
+
+            </TabItem>
+            <TabItem Header="Observers">
+                
+            </TabItem>
+            <TabItem Header="Place">
+
+            </TabItem>
+
+            <TabItem Header="Images" />
+        </TabControl>
+    </Grid>
+</UserControl>

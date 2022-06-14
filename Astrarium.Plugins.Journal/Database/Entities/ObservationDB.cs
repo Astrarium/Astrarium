@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ObservationPlannerDatabase.Database.Entities
+namespace Astrarium.Plugins.Journal.Database.Entities
 {
     public class ObservationDB : IEntity
     {
@@ -21,7 +21,7 @@ namespace ObservationPlannerDatabase.Database.Entities
         public string Result { get; set; }
 
         /// <summary>
-        /// Finding details are specific for target type
+        /// Finding details specific for target type, in JSON form.
         /// </summary>
         public string Details { get; set; }
 

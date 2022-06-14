@@ -153,6 +153,15 @@ namespace Astrarium.Types.Themes
         }
     }
 
+    [ValueConversion(typeof(string), typeof(Visibility))]
+    public class NullOrEmptyToVisibilityConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return string.IsNullOrEmpty(value as string) ? Visibility.Visible : Visibility.Collapsed;
+        }
+    }
+
     [ValueConversion(typeof(bool), typeof(Visibility))]
     public class NullToVisibilityConverter : ValueConverterBase
     {
@@ -340,7 +349,24 @@ namespace Astrarium.Types.Themes
                 if (key != null)
                 {
                     return Application.Current.Resources[key];
-                }                
+                }
+            }
+            return null;
+        }
+    }
+
+    public class CelestialObjectTypeToIconConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            string bodyType = value as string;
+            if (bodyType != null)
+            {
+                string key = $"Icon{bodyType.Split('.').First()}";
+                if (Application.Current.Resources.Contains(key))
+                {
+                    return Application.Current.Resources[key];
+                }
             }
             return null;
         }
@@ -350,7 +376,18 @@ namespace Astrarium.Types.Themes
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return Text.Get($"{(value as CelestialObject).Type}.Type");
+            if (value is string type)
+            {
+                return Text.Get($"{type}.Type");
+            }
+            else if (value is CelestialObject body)
+            {
+                return Text.Get($"{body.Type}.Type");
+            }
+            else
+            {
+                throw new NotImplementedException("Value type is not supported");
+            }
         }
     }
 }

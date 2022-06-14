@@ -40,6 +40,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Folder Include="Themes\" />
 	  <Folder Include="OAL\" />
 	</ItemGroup>
 
@@ -53,8 +54,31 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Reference Include="System.Design" />
 	  <Reference Include="System.Xml" />
 	  <Reference Include="System.Xml.Serialization" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Views\OpenClusterObservationDetailsView - Copy.xaml.cs">
+	    <SubType>Code</SubType>
+	    <DependentUpon>OpenClusterObservationDetailsView.xaml.cs</DependentUpon>
+	  </Compile>
+	  <Compile Update="Views\SessionView - Copy.xaml.cs">
+	    <SubType>Code</SubType>
+	    <DependentUpon>SessionView.xaml.cs</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Page Update="Views\ObservationView.xaml">
+	    <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+	    <SubType>Designer</SubType>
+	  </Page>
+	  <Page Update="Views\ObservationDetails\DeepSkyObservationDetailsView.xaml">
+	    <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+	    <SubType>Designer</SubType>
+	  </Page>
 	</ItemGroup>
 
 </Project>
