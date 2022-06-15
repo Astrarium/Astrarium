@@ -22,7 +22,7 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
-                        <Label FontWeight="Bold" Foreground="{StaticResource BrushControlLightBackground}" Grid.Row="0" Content="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Title}" />
+                        <Label FontWeight="Bold" Grid.Row="0" Content="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Title}" />
 
                         <Button 
                             Focusable="False"
@@ -71,7 +71,7 @@
                     </Grid>
                     <ControlTemplate.Triggers>
                         <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEditMode}" Value="False">
-                            <Setter TargetName="PART_Editor" Property="BorderBrush" Value="Transparent" />
+                            <Setter TargetName="PART_Editor" Property="BorderBrush" Value="{StaticResource BrushControlDarkBackground}" />
                             <Setter TargetName="PART_Editor" Property="IsReadOnly" Value="True" />
                             <Setter TargetName="PART_Editor" Property="ToolTip" Value="Double click to edit" />
                         </DataTrigger>
@@ -80,6 +80,17 @@
                             <Setter TargetName="PART_Editor" Property="IsReadOnly" Value="False" />
                             <Setter TargetName="PART_Editor" Property="ToolTip" Value="Shift+Enter to apply" />
                         </DataTrigger>
+
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver" Value="True" />
+                                <Condition Property="IsEditMode" Value="False" />
+                            </MultiTrigger.Conditions>
+                            <MultiTrigger.Setters>
+                                <Setter TargetName="PART_Editor" Property="BorderBrush" Value="{StaticResource BrushControlBackground}" />
+                            </MultiTrigger.Setters>
+                        </MultiTrigger>
+     
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>

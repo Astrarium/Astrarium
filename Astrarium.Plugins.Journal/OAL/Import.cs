@@ -514,7 +514,7 @@ namespace Astrarium.Plugins.Journal.OAL
         //    return eq0;
         //}
 
-        private static double? ToAngle(this angleType angle)
+        private static double? ToAngle(this angleType angle, angleUnit unit = angleUnit.deg)
         {
             if (angle == null)
                 return null;
@@ -534,6 +534,10 @@ namespace Astrarium.Plugins.Journal.OAL
                     value = value * 180.0 / Math.PI;
                     break;
             }
+
+            if (unit == angleUnit.arcsec)
+                value *= 3600;
+
             return value;
         }
 
@@ -548,8 +552,8 @@ namespace Astrarium.Plugins.Journal.OAL
         private static T BuildDeepSkyTargetDetails<T>(deepSkyTargetType ds) where T : DeepSkyTargetDetails, new()
         {
             var details = new T();
-            details.LargeDiameter = ds.largeDiameter.ToAngle();
-            details.SmallDiameter = ds.smallDiameter.ToAngle();
+            details.LargeDiameter = ds.largeDiameter.ToAngle(unit: angleUnit.arcsec);
+            details.SmallDiameter = ds.smallDiameter.ToAngle(unit: angleUnit.arcsec);
             details.Brightness = ds.surfBr?.ToBrightness();
             details.Magnitude = ds.visMagSpecified ? ds.visMag : (double?)null;
             return details;
@@ -559,8 +563,8 @@ namespace Astrarium.Plugins.Journal.OAL
         {
             var details = new T();
             details.Rating = int.Parse(ds.rating.ToStringEnum());
-            details.SmallDiameter = ds.smallDiameter.ToAngle();
-            details.LargeDiameter = ds.largeDiameter.ToAngle();
+            details.SmallDiameter = ds.smallDiameter.ToAngle(unit: angleUnit.arcsec);
+            details.LargeDiameter = ds.largeDiameter.ToAngle(unit: angleUnit.arcsec);
             details.Resolved = ds.resolvedSpecified ? ds.resolved : (bool?)null;
             details.Stellar = ds.stellarSpecified ? ds.stellar : (bool?)null;
             details.Mottled = ds.mottledSpecified ? ds.mottled : (bool?)null;
@@ -644,7 +648,7 @@ namespace Astrarium.Plugins.Journal.OAL
                     result.Type = "DeepSky.DoubleStar";
                     var details = BuildDeepSkyTargetDetails<DeepSkyDoubleStarTargetDetails>(ds);
                     details.PositionAngle = ds.pa.ToIntNullable();
-                    details.Separation = ds.separation.ToAngle();
+                    details.Separation = ds.separation.ToAngle(unit: angleUnit.arcsec);
                     details.CompanionMagnitude = ds.magCompSpecified ? ds.magComp : (double?)null;
                     result.Details = JsonConvert.SerializeObject(details, jsonSettings);
                 }

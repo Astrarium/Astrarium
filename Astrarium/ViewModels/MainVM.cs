@@ -312,7 +312,7 @@ namespace Astrarium.ViewModels
                     var menuGroup = new MenuItem($"$Menu.{group}");
                     foreach (var button in uiIntegration.ToolbarButtons[group].OfType<ToolbarToggleButton>())
                     {
-                        var binding = button.Bindings.FirstOrDefault(b => b.TargetPropertyName == nameof(ToolbarToggleButton.IsChecked));
+                        var binding = button.FindBinding(nameof(ToolbarToggleButton.IsChecked));
                         if (binding != null)
                         {
                             var menuItem = new MenuItem(button.Tooltip);

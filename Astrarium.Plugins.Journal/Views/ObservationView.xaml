@@ -46,7 +46,7 @@
 
                     <GridSplitter ResizeDirection="Rows" Height="4" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Visibility="{Binding Details, Converter={s:NotNullToVisibilityConverter}}" />
 
-                    <ContentControl Grid.Row="2" Content="{Binding Details}" Visibility="{Binding Details, Converter={s:NotNullToVisibilityConverter}}">
+                    <ContentControl MinHeight="0" Grid.Row="2" Content="{Binding Details}" Visibility="{Binding Details, Converter={s:NotNullToVisibilityConverter}}">
                         <ContentControl.Resources>
                             <DataTemplate DataType="{x:Type e:DeepSkyObservationDetails}">
                                 <v:DeepSkyObservationDetailsView DataContext="{Binding}" />
@@ -87,6 +87,7 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
                     <TextBlock Text="Telescope / Other optics" VerticalAlignment="Center" Padding="6" />
@@ -97,6 +98,9 @@
 
                     <TextBlock Text="Lens" VerticalAlignment="Center" Padding="6" Grid.Row="2" />
                     <TextBox Text="{Binding Lens}" Grid.Column="1" Grid.Row="2" />
+
+                    <TextBlock Text="Camera" VerticalAlignment="Center" Padding="6" Grid.Row="3" />
+                    <TextBox Text="{Binding Camera}" Grid.Column="1" Grid.Row="3" />
 
                 </Grid>
 

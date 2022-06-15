@@ -1,4 +1,5 @@
 ﻿using Astrarium.Plugins.Journal.Database.Entities;
+using Astrarium.Types;
 using SQLite.CodeFirst;
 using System.Data.Entity;
 
@@ -10,6 +11,8 @@ namespace Astrarium.Plugins.Journal.Database
         {
             Configuration.ProxyCreationEnabled = false;
             Configuration.LazyLoadingEnabled = false;
+
+            Database.Log = s => System.Diagnostics.Debug.Write($"Observations DB: {s}");
         }
 
         public DbSet<SessionDB> Sessions { get; set; }

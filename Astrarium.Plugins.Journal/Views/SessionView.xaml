@@ -42,53 +42,50 @@
                     Title="Equipment" 
                     Placeholder="Enter equipment used during the session" />
             </TabItem>
-           
+
             <TabItem Header="Weather">
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-                <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
+                    <TextBlock Margin="6" Text="Seeing by Antoniadi scale:" Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" />
+                    <ComboBox SelectedValuePath="Tag" SelectedValue="{Binding Seeing}" Width="Auto" IsEditable="False" Grid.Column="1" Grid.Row="0" >
+                        <ComboBoxItem Tag="{x:Null}">
+                            <TextBlock IsEnabled="False" Text="Not set" />
+                        </ComboBoxItem>
+                        <ComboBoxItem Content="(1) Perfect seeing, the perfect image without shaking" Tag="1"/>
+                        <ComboBoxItem Content="(2) Good seeing, slight shaking of the objects" Tag="2"/>
+                        <ComboBoxItem Content="(3) Moderate seeing the image is still not absolutely sharp" Tag="3"/>
+                        <ComboBoxItem Content="(4) Poor seeing, undulation of the image" Tag="4"/>
+                        <ComboBoxItem Content="(5) Very poor seeing, the flashing image" Tag="5"/>
+                    </ComboBox>
 
-                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
+                    <CheckBox Margin="4" Content="Magnitude of faintest star" Grid.Column="0" Grid.Row="1" VerticalAlignment="Center" IsChecked="{Binding FaintestStarSpecified}" />
+                    <cc:NumericUpDown Width="70" HorizontalAlignment="Left" DecimalPlaces="1" Step="0.1" Minimum="-4" Maximum="8" Value="{Binding FaintestStar}" Grid.Column="1" Grid.Row="1" Visibility="{Binding FaintestStarSpecified, Converter={s:BoolToVisibilityConverter}}" />
 
-                        <TextBlock Margin="6" Text="Seeing by Antoniadi scale:" Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" />
-                        <ComboBox SelectedValuePath="Tag" SelectedValue="{Binding Seeing}" Width="400" IsEditable="False" Grid.Column="1" Grid.Row="0" >
-                            <ComboBoxItem Tag="{x:Null}">
-                                <TextBlock IsEnabled="False" Text="Not set" />
-                            </ComboBoxItem>
-                            <ComboBoxItem Content="(1) Perfect seeing, the perfect image without shaking" Tag="1"/>
-                            <ComboBoxItem Content="(2) Good seeing, slight shaking of the objects" Tag="2"/>
-                            <ComboBoxItem Content="(3) Moderate seeing the image is still not absolutely sharp" Tag="3"/>
-                            <ComboBoxItem Content="(4) Poor seeing, undulation of the image" Tag="4"/>
-                            <ComboBoxItem Content="(5) Very poor seeing, the flashing image" Tag="5"/>
-                        </ComboBox>
+                    <CheckBox Margin="4" Content="Sky quality, mag/sq. arcsec" Grid.Column="0" Grid.Row="2" VerticalAlignment="Center" IsChecked="{Binding SkyQualitySpecified}"  />
+                    <cc:NumericUpDown Width="70" HorizontalAlignment="Left" DecimalPlaces="2" Step="0.1" Minimum="16" Maximum="22" Value="{Binding SkyQuality}" Grid.Column="1" Grid.Row="2" Visibility="{Binding SkyQualitySpecified, Converter={s:BoolToVisibilityConverter}}" />
 
-                        <CheckBox Margin="6" Content="Faintest star" Grid.Column="0" Grid.Row="1" VerticalAlignment="Center" IsChecked="{Binding FaintestStar, Converter={s:NotNullToBoolConverter}}" />
-                        <cc:NumericUpDown Width="70" HorizontalAlignment="Left" DecimalPlaces="1" Value="{Binding FaintestStar}" Grid.Column="1" Grid.Row="1" Visibility="{Binding FaintestStar, Converter={s:NotNullToVisibilityConverter}}" />
-
-                        <CheckBox Margin="6" Content="Sky quality" Grid.Column="0" Grid.Row="2" VerticalAlignment="Center" IsChecked="{Binding SkyQuality, Converter={s:NotNullToBoolConverter}}"  />
-                        <cc:NumericUpDown Width="70" HorizontalAlignment="Left" DecimalPlaces="1" Value="{Binding SkyQuality}" Grid.Column="1" Grid.Row="2" Visibility="{Binding SkyQuality, Converter={s:NotNullToVisibilityConverter}}" />
-
-
-                    </Grid>
-                    
                     <c:MultilineEdit 
+                        Grid.Row="4"
+                        Grid.ColumnSpan="3"
                         VerticalAlignment="Stretch" 
                         HorizontalAlignment="Stretch"  
                         Text="{Binding Weather}" 
                         Title="Weather" 
                         Placeholder="Enter weather conditions" />
-
-                </StackPanel>
-
+                </Grid>
             </TabItem>
             <TabItem Header="Observers">
                 

@@ -4,6 +4,7 @@ using Astrarium.Plugins.Journal.ViewModels;
 using Astrarium.Types;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Journal
 {
@@ -13,12 +14,26 @@ namespace Astrarium.Plugins.Journal
         {
             var menuItemJournal = new MenuItem("Journal");
 
-            menuItemJournal.SubItems.Add(new MenuItem("Show Journal",
-                    new Command(() => ViewManager.ShowWindow<JournalVM>(isSingleInstance: true))));
-
+            menuItemJournal.SubItems.Add(new MenuItem("Show Journal", new Command(ShowJournal)));
             menuItemJournal.SubItems.Add(new MenuItem("Import", new Command(DoImport)));
 
             MenuItems.Add(MenuItemPosition.MainMenuTop, menuItemJournal);
+
+            // this will avoid first slow call
+            Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    bool sessionsExists = db.Sessions.Any();
+                }
+            });
+        }
+
+        private void ShowJournal()
+        {
+            var vm = ViewManager.CreateViewModel<JournalVM>();
+            ViewManager.ShowWindow(vm);
+            vm.Load();
         }
 
         private void DoImport()
