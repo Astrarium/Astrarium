@@ -8,7 +8,9 @@
         xmlns:c="clr-namespace:Astrarium.Plugins.Journal.Controls"
         xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
         mc:Ignorable="d"
+        Name="Window"
         Style="{StaticResource {x:Type Window}}" 
+        WindowStartupLocation="CenterScreen"
         Title="JournalWindow" Height="450" Width="800"
         MinWidth="350">
 
@@ -47,30 +49,41 @@
                 <TextBlock Padding="4 0 0 0" Text="{Binding ObjectName}" ToolTip="{Binding ObjectNameAliases}" ToolTipService.IsEnabled="{Binding ObjectNameAliases, Converter={s:NotNullToBoolConverter}}" VerticalAlignment="Center" />
             </StackPanel>
         </HierarchicalDataTemplate>
-
-
     </Window.Resources>
-
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="150" MinWidth="100" />
+            <ColumnDefinition Width="250" MinWidth="100" />
             <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" MinWidth="200" />
+            <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
 
-        <c:BindableTreeView 
-            Style="{StaticResource {x:Type TreeView}}" 
-            SelectedTreeViewItem="{Binding SelectedTreeViewItem, Mode=TwoWay}" 
-            ItemsSource="{Binding AllSessions}"
-            ScrollViewer.HorizontalScrollBarVisibility="Auto"
-            VirtualizingPanel.IsContainerVirtualizable="True"
-            VirtualizingPanel.VirtualizationMode="Recycling"
-            VirtualizingPanel.IsVirtualizing="True"
-            Margin="4" 
-            Grid.Column="0">
-        </c:BindableTreeView>
+        <Grid Grid.Column="0">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Button Grid.Row="0" Content="E/C" Width="24" Height="24" HorizontalAlignment="Right" Command="{Binding ExpandCollapseCommand}">
+                
+            </Button>
+            
+            <c:BindableTreeView 
+                Style="{StaticResource {x:Type TreeView}}" 
+                SelectedTreeViewItem="{Binding SelectedTreeViewItem, Mode=TwoWay}" 
+                ItemsSource="{Binding AllSessions}"
+                ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                VirtualizingPanel.IsContainerVirtualizable="True"
+                VirtualizingPanel.VirtualizationMode="Recycling"
+                VirtualizingPanel.IsVirtualizing="True"
+                Margin="4"
+                Grid.Row="1">
+            </c:BindableTreeView>
+        </Grid>
+        
+
 
         <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Center" VerticalAlignment="Stretch" />
 

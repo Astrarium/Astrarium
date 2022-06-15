@@ -12,7 +12,7 @@ namespace Astrarium.Plugins.Journal.Database
             Configuration.ProxyCreationEnabled = false;
             Configuration.LazyLoadingEnabled = false;
 
-            Database.Log = s => System.Diagnostics.Debug.Write($"Observations DB: {s}");
+            //Database.Log = s => System.Diagnostics.Debug.Write($"Observations DB: {s}");
         }
 
         public DbSet<SessionDB> Sessions { get; set; }

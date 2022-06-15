@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Astrarium.Plugins.Journal.Database.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;

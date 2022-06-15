@@ -9,8 +9,11 @@ namespace Astrarium.Plugins.Journal.Database.Entities
     public class OpticsDB : IEntity
     {
         public string Id { get; set; }
+
         public double Aperture { get; set; }
+
         public string Model { get; set; }
+
         public string Vendor { get; set; }
 
         /// <summary>
@@ -33,8 +36,14 @@ namespace Astrarium.Plugins.Journal.Database.Entities
         /// </summary>
         public double? LightGrasp { get; set; }
 
+        /// <summary>
+        /// Optional flag indicating the telescope gives erect orientation
+        /// </summary>
         public bool? OrientationErect { get; set; }
-        
+
+        /// <summary>
+        /// Optional flag indicating the telescope gives true-sided (non-mirrored) orientation
+        /// </summary>
         public bool? OrientationTrueSided { get; set; }
 
         /// <summary>
@@ -46,6 +55,12 @@ namespace Astrarium.Plugins.Journal.Database.Entities
         /// Object-type specific details
         /// </summary>
         public string Details { get; set; }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{Vendor} {Model}".Trim();
+        }
     }
 
     public class ScopeDetails

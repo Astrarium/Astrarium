@@ -13,6 +13,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace Astrarium.Plugins.Journal.ViewModels
 {
@@ -98,7 +99,11 @@ namespace Astrarium.Plugins.Journal.ViewModels
         public bool SkyQualitySpecified
         {
             get => GetValue(nameof(SkyQualitySpecified), false);
-            set => SetValue(nameof(SkyQualitySpecified), value);
+            set
+            {
+                SetValue(nameof(SkyQualitySpecified), value);
+                NotifyPropertyChanged(nameof(skyQuality));
+            }
         }
 
         /// <summary>
@@ -110,7 +115,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
         public decimal FaintestStar
         {
             get => GetValue(nameof(FaintestStar), 6.0m);
-            set 
+            set
             {
                 SetValue(nameof(FaintestStar), value);
                 NotifyPropertyChanged(nameof(faintestStar));
@@ -127,12 +132,23 @@ namespace Astrarium.Plugins.Journal.ViewModels
             }
         }
 
+        /// <summary>
+        /// This used only for DB storing
+        /// </summary>
+        [DBStored(Entity = typeof(SessionDB), Field = "SkyQuality")]
+        private double? skyQuality => SkyQualitySpecified ? (double)SkyQuality : (double?)null;
+
         public decimal SkyQuality
         {
             get => GetValue(nameof(SkyQuality), 19m);
-            set => SetValue(nameof(SkyQuality), value);
+            set 
+            { 
+                SetValue(nameof(SkyQuality), value);
+                NotifyPropertyChanged(nameof(skyQuality));
+            }
         }
 
+        [DBStored(Entity = typeof(SessionDB), Field = "Equipment")]
         public string Equipment
         {
             get => GetValue<string>(nameof(Equipment), null);
@@ -179,6 +195,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
             set => SetValue(nameof(ObjectType), value);
         }
 
+        [DBStored(Entity = typeof(ObservationDB), Field = "Result")]
         public string Findings
         {
             get => GetValue<string>(nameof(Findings));
@@ -217,10 +234,11 @@ namespace Astrarium.Plugins.Journal.ViewModels
             set => SetValue(nameof(TargetDetails), value);
         }
 
-        public string Telescope
+        [DBStored(Entity = typeof(ObservationDB), Field = "ScopeId")]
+        public string TelescopeId
         {
-            get => GetValue<string>(nameof(Telescope), null);
-            set => SetValue(nameof(Telescope), value);
+            get => GetValue<string>(nameof(TelescopeId), null);
+            set => SetValue(nameof(TelescopeId), value);
         }
 
         public string Eyepiece
@@ -262,7 +280,32 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
     public class JournalVM : ViewModelBase
     {
+        public ICommand ExpandCollapseCommand { get; private set; }
+
         public ObservableCollection<TreeItemSession> AllSessions { get; private set; } = new ObservableCollection<TreeItemSession>();
+
+        public JournalVM()
+        {
+            ExpandCollapseCommand = new Command(ExpandCollapse);
+        }
+
+        private void ExpandCollapse()
+        {
+            if (AllSessions.Any(x => !x.IsExpanded))
+            {
+                foreach (var s in AllSessions)
+                {
+                    s.IsExpanded = true;
+                }
+            }
+            else
+            {
+                foreach (var s in AllSessions)
+                {
+                    s.IsExpanded = false;
+                }
+            }
+        }
 
         public DBStoredEntity SelectedTreeViewItem
         {
@@ -359,7 +402,6 @@ namespace Astrarium.Plugins.Journal.ViewModels
                 {
                     var obs = db.Observations
                         .Include(x => x.Target)
-                        .Include(x => x.Scope)
                         .Include(x => x.Eyepiece)
                         .Include(x => x.Lens)
                         .Include(x => x.Imager)
@@ -369,13 +411,15 @@ namespace Astrarium.Plugins.Journal.ViewModels
                     observation.Details = DeserializeObservationDetails(obs.Target.Type, obs.Details);
                     observation.TargetDetails = DeserializeTargetDetails(obs.Target.Type, obs.Target.Details);
 
-                    observation.Telescope = obs.Scope != null ? (obs.Scope.Vendor + " " + obs.Scope.Model) : null;
+                    observation.TelescopeId = obs.ScopeId;
                     observation.Eyepiece = obs.Eyepiece != null ? (obs.Eyepiece.Vendor + " " + obs.Eyepiece.Model) : null;
                     observation.Lens = obs.Lens != null ? (obs.Lens?.Vendor + " " + obs.Lens.Model) : null;
                     observation.Camera = obs.Imager != null ? (obs.Imager?.Vendor + " " + obs.Imager.Model) : null;
 
                     observation.Constellation = obs.Target?.Constellation;
                     observation.EquatorialCoordinates = obs.Target?.RightAscension != null && obs.Target?.Declination != null ? new CrdsEquatorial((double)obs.Target?.RightAscension.Value, (double)obs.Target?.Declination.Value) : null;
+
+
                 }
             }
         }

@@ -43,7 +43,7 @@
                     Placeholder="Enter equipment used during the session" />
             </TabItem>
 
-            <TabItem Header="Weather">
+            <TabItem Header="Weather &amp; Location">
                 <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -90,9 +90,7 @@
             <TabItem Header="Observers">
                 
             </TabItem>
-            <TabItem Header="Place">
-
-            </TabItem>
+            
 
             <TabItem Header="Images" />
         </TabControl>

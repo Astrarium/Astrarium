@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:c="clr-namespace:Astrarium.Plugins.Journal.Controls"
              xmlns:v="clr-namespace:Astrarium.Plugins.Journal.Views"
+             xmlns:vm="clr-namespace:Astrarium.Plugins.Journal.ViewModels"
              xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
              xmlns:e="clr-namespace:Astrarium.Plugins.Journal.Database.Entities"
              mc:Ignorable="d" 
@@ -81,6 +82,7 @@
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="300" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
@@ -91,7 +93,15 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock Text="Telescope / Other optics" VerticalAlignment="Center" Padding="6" />
-                    <TextBox Text="{Binding Telescope}" Grid.Column="1" />
+
+                    <ComboBox Grid.Column="1" SelectedValue="{Binding TelescopeId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False">
+                        <ComboBox.ItemsSource>
+                            <CompositeCollection>
+                                <e:OpticsDB Id="{x:Null}" Model="" />
+                                <CollectionContainer Collection="{Binding Source={x:Static vm:Equipment.Telescopes}}" />
+                            </CompositeCollection>
+                        </ComboBox.ItemsSource>
+                    </ComboBox>
 
                     <TextBlock Text="Eyepiece" VerticalAlignment="Center" Padding="6" Grid.Row="1" />
                     <TextBox Text="{Binding Eyepiece}" Grid.Column="1" Grid.Row="1" />
