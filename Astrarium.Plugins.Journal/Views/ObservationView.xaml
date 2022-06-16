@@ -168,7 +168,40 @@
             </TabItem>
 
 
-            <TabItem Header="Images" />
+            <TabItem Header="Images">
+
+                <ListView ItemsSource="{Binding Images}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="18" />
+                                </Grid.RowDefinitions>
+                                <Image Source="{Binding}" Width="200" Height="200" />
+                                <TextBlock Grid.Row="1" Text="{Binding}" TextWrapping="Wrap" FontSize="12" TextTrimming="CharacterEllipsis" MaxWidth="200" />
+                                <Grid.InputBindings>
+                                    <MouseBinding Gesture="LeftDoubleClick" Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.OpenImageCommand}" CommandParameter="{Binding}" />
+                                </Grid.InputBindings>
+                            </Grid>
+                            
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                    
+                    
+                </ListView>
+
+
+               
+
+
+            </TabItem>
         </TabControl>
     </Grid>
 </UserControl>

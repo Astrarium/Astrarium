@@ -13,59 +13,55 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid>
-        <StackPanel VerticalAlignment="Stretch" Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto">
 
-            <StackPanel Orientation="Horizontal" Margin="4 8">
-                <TextBlock Margin="2 0" Text="Visual rating:" VerticalAlignment="Center" />
-                <ComboBox Margin="2 0" SelectedValuePath="Tag" SelectedValue="{Binding Rating}" IsEditable="False" Width="300" HorizontalAlignment="Left">
-                    <ComboBoxItem Tag="99">
-                        <TextBlock IsEnabled="False" Text="Not set  " />
-                    </ComboBoxItem>
-                    <ComboBoxItem Content="(1) Very conspicuous, nice eye-catcher" Tag="1"/>
-                    <ComboBoxItem Content="(2) Easily visible with direct vision" Tag="2"/>
-                    <ComboBoxItem Content="(3) Barely seen with direct vision" Tag="3"/>
-                    <ComboBoxItem Content="(4) Averted vision is needed" Tag="4"/>
-                    <ComboBoxItem Content="(5) Barely visible with averted vision" Tag="5"/>
-                    <ComboBoxItem Content="(6) Visibility is doubtful" Tag="6"/>
-                    <ComboBoxItem Content="(7) Not seen" Tag="7"/>
-                </ComboBox>
-            </StackPanel>
+    <StackPanel VerticalAlignment="Stretch" Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto">
 
-            <GroupBox Header="Visual size" Padding="8" Margin="0 2">
-                <Grid Margin="2 0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <CheckBox VerticalAlignment="Center" Content="Small diameter: " IsChecked="{Binding SmallDiameterSpecified}" Grid.Column="0" Grid.Row="0" />
-                    <c:NumericUpDown Margin="0 2" IsEnabled="{Binding SmallDiameterSpecified}" Step="1" DecimalPlaces="0" Minimum="0" Width="70" Value="{Binding SmallDiameterValue}" Grid.Column="1" Grid.Row="0"  />
-                    <TextBlock Margin="6 0" VerticalAlignment="Center" Text="arcsec" Grid.Column="2" Grid.Row="0"  />
-
-                    <CheckBox VerticalAlignment="Center" Content="Large diameter: " IsChecked="{Binding LargeDiameterSpecified}" Grid.Column="0" Grid.Row="1" />
-                    <c:NumericUpDown Margin="0 2" IsEnabled="{Binding LargeDiameterSpecified}" Step="1" DecimalPlaces="0" Minimum="0" Width="70" Value="{Binding LargeDiameterValue}" Grid.Column="1" Grid.Row="1"  />
-                    <TextBlock Margin="6 0" VerticalAlignment="Center" Text="arcsec" Grid.Column="2" Grid.Row="1"  />
-                </Grid>
-            </GroupBox>
-
-
-
-            <GroupBox Header="Quick characteristics" Padding="8" Margin="0 2">
-                <StackPanel Margin="0 4 0 0" Orientation="Horizontal">
-                    <CheckBox Margin="2 0 8 0" IsThreeState="True" Content="Stellar" IsChecked="{Binding Stellar}" />
-                    <CheckBox Margin="2 0 8 0" IsThreeState="True" Content="Extended" IsChecked="{Binding Extended}" />
-                    <CheckBox Margin="2 0 8 0" IsThreeState="True" Content="Resolved" IsChecked="{Binding Resolved}" />
-                    <CheckBox Margin="2 0 8 0" IsThreeState="True" Content="Mottled" IsChecked="{Binding Mottled}" />
-                </StackPanel>
-            </GroupBox>
-
-
-
+        <StackPanel Orientation="Horizontal" Margin="4 8">
+            <TextBlock Margin="2 0" Text="Visual rating:" VerticalAlignment="Center" />
+            <ComboBox Margin="2 0" SelectedValuePath="Tag" SelectedValue="{Binding Rating}" IsEditable="False" Width="300" HorizontalAlignment="Left">
+                <ComboBoxItem Tag="99">
+                    <TextBlock IsEnabled="False" Text="Not set  " />
+                </ComboBoxItem>
+                <ComboBoxItem Content="(1) Very conspicuous, nice eye-catcher" Tag="1"/>
+                <ComboBoxItem Content="(2) Easily visible with direct vision" Tag="2"/>
+                <ComboBoxItem Content="(3) Barely seen with direct vision" Tag="3"/>
+                <ComboBoxItem Content="(4) Averted vision is needed" Tag="4"/>
+                <ComboBoxItem Content="(5) Barely visible with averted vision" Tag="5"/>
+                <ComboBoxItem Content="(6) Visibility is doubtful" Tag="6"/>
+                <ComboBoxItem Content="(7) Not seen" Tag="7"/>
+            </ComboBox>
         </StackPanel>
-    </Grid>
+
+        <GroupBox Header="Visual size" Padding="8" Margin="0 2">
+            <Grid Margin="2 0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <CheckBox VerticalAlignment="Center" Content="Small diameter: " IsChecked="{Binding SmallDiameterSpecified}" Grid.Column="0" Grid.Row="0" />
+                <c:NumericUpDown Margin="0 2" IsEnabled="{Binding SmallDiameterSpecified}" Step="1" DecimalPlaces="0" Minimum="0" Width="70" Value="{Binding SmallDiameterValue}" Grid.Column="1" Grid.Row="0"  />
+                <TextBlock Margin="6 0" VerticalAlignment="Center" Text="arcsec" Grid.Column="2" Grid.Row="0"  />
+
+                <CheckBox VerticalAlignment="Center" Content="Large diameter: " IsChecked="{Binding LargeDiameterSpecified}" Grid.Column="0" Grid.Row="1" />
+                <c:NumericUpDown Margin="0 2" IsEnabled="{Binding LargeDiameterSpecified}" Step="1" DecimalPlaces="0" Minimum="0" Width="70" Value="{Binding LargeDiameterValue}" Grid.Column="1" Grid.Row="1"  />
+                <TextBlock Margin="6 0" VerticalAlignment="Center" Text="arcsec" Grid.Column="2" Grid.Row="1"  />
+            </Grid>
+        </GroupBox>
+
+        <GroupBox Header="Quick characteristics" Padding="8" Margin="0 2">
+            <StackPanel Margin="0 4 0 0" Orientation="Horizontal">
+                <CheckBox Margin="2 0 8 0" IsThreeState="True" Content="Stellar" IsChecked="{Binding Stellar}" />
+                <CheckBox Margin="2 0 8 0" IsThreeState="True" Content="Extended" IsChecked="{Binding Extended}" />
+                <CheckBox Margin="2 0 8 0" IsThreeState="True" Content="Resolved" IsChecked="{Binding Resolved}" />
+                <CheckBox Margin="2 0 8 0" IsThreeState="True" Content="Mottled" IsChecked="{Binding Mottled}" />
+            </StackPanel>
+        </GroupBox>
+
+    </StackPanel>
+
 </UserControl>

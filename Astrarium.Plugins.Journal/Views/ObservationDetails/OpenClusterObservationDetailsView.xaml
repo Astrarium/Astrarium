@@ -13,12 +13,35 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid>
-        <StackPanel VerticalAlignment="Stretch"  Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto">
-            <v:DeepSkyObservationDetailsView DataContext="{Binding}" />
-            <CheckBox Margin="2" IsThreeState="True" Content="Unusual shape" IsChecked="{Binding UnusualShape}" />
-            <CheckBox Margin="2" IsThreeState="True" Content="Partly Unresolved" IsChecked="{Binding PartlyUnresolved}" />
-            <CheckBox Margin="2" IsThreeState="True" Content="Color Contrasts" IsChecked="{Binding ColorContrasts}" />
+    
+    <StackPanel VerticalAlignment="Stretch"  Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto">
+        <v:DeepSkyObservationDetailsView DataContext="{Binding}" />
+        <GroupBox Header="Open cluster findings" Padding="8" Margin="0 2">
+            <StackPanel Margin="0 4 0 0"  Orientation="Horizontal">
+                <CheckBox Margin="2 0 8 0" IsThreeState="True" Content="Unusual shape" IsChecked="{Binding UnusualShape}" />
+                <CheckBox Margin="2 0 8 0" IsThreeState="True" Content="Partly Unresolved" IsChecked="{Binding PartlyUnresolved}" />
+                <CheckBox Margin="2 0 8 0" IsThreeState="True" Content="Stars show noticeable contrast in their color" IsChecked="{Binding ColorContrasts}" />
+            </StackPanel>
+        </GroupBox>
+
+        <StackPanel Orientation="Horizontal" Margin="4 8">
+            <TextBlock Margin="2 0" Text="Open cluster character" VerticalAlignment="Center" />
+            <ComboBox Margin="2 0" SelectedValuePath="Tag" SelectedValue="{Binding Character}" IsEditable="False" Width="300" HorizontalAlignment="Left">
+                <ComboBoxItem Tag="{x:Null}">
+                    <TextBlock IsEnabled="False" Text="Not set" />
+                </ComboBoxItem>
+                <ComboBoxItem Content="A" Tag="A"/>
+                <ComboBoxItem Content="B" Tag="B"/>
+                <ComboBoxItem Content="C" Tag="C"/>
+                <ComboBoxItem Content="D" Tag="D"/>
+                <ComboBoxItem Content="E" Tag="E"/>
+                <ComboBoxItem Content="F" Tag="F"/>
+                <ComboBoxItem Content="G" Tag="G"/>
+                <ComboBoxItem Content="H" Tag="H"/>
+                <ComboBoxItem Content="I" Tag="I"/>
+                <ComboBoxItem Content="X" Tag="X"/>
+            </ComboBox>
         </StackPanel>
-    </Grid>
+
+    </StackPanel>
 </UserControl>

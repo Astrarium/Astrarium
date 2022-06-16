@@ -136,5 +136,11 @@ namespace Astrarium.Plugins.Journal.ViewModels
             get => GetValue<CrdsHorizontal>(nameof(HorizontalCoordinates), null);
             set => SetValue(nameof(HorizontalCoordinates), value);
         }
+
+        public string[] Images
+        {
+            get => GetValue<string[]>(nameof(Images), new string[0]);
+            set => SetValue(nameof(Images), value);
+        }
     }
 }

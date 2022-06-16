@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data.Entity;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -29,12 +30,14 @@ namespace Astrarium.Plugins.Journal.ViewModels
         #region Commands
 
         public ICommand ExpandCollapseCommand { get; private set; }
+        public ICommand OpenImageCommand { get; private set; }
 
         #endregion Commands
 
         public JournalVM()
         {
             ExpandCollapseCommand = new Command(ExpandCollapse);
+            OpenImageCommand = new Command<string>(OpenImage);
         }
 
         public ObservableCollection<TreeItemSession> AllSessions { get; private set; } = new ObservableCollection<TreeItemSession>();
@@ -177,6 +180,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
                 {
                     var obs = db.Observations
                         .Include(x => x.Target)
+                        .Include(x => x.Attachments)
                         .FirstOrDefault(x => x.Id == observation.Id);
 
                     observation.Findings = obs.Result;
@@ -191,6 +195,11 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
                     observation.Constellation = obs.Target?.Constellation;
                     observation.EquatorialCoordinates = obs.Target?.RightAscension != null && obs.Target?.Declination != null ? new CrdsEquatorial((double)obs.Target?.RightAscension.Value, (double)obs.Target?.Declination.Value) : null;
+
+                    string databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Observations", "Observations.db");
+                    string databaseFolder = Path.GetDirectoryName(databasePath);
+
+                    observation.Images = obs.Attachments.Select(x => Path.Combine(databaseFolder, x.FilePath)).ToArray();
                 }
             }
         }
@@ -213,6 +222,11 @@ namespace Astrarium.Plugins.Journal.ViewModels
                     s.IsExpanded = false;
                 }
             }
+        }
+
+        private void OpenImage(string path)
+        {
+            System.Diagnostics.Process.Start(path);
         }
 
         #endregion Command handlers
