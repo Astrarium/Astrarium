@@ -1,4 +1,5 @@
 ﻿using Astrarium.Algorithms;
+using Astrarium.Plugins.Journal.Controls;
 using Astrarium.Plugins.Journal.Database;
 using Astrarium.Plugins.Journal.Database.Entities;
 using Astrarium.Types;
@@ -28,6 +29,24 @@ namespace Astrarium.Plugins.Journal.ViewModels
     public abstract class DBStoredEntity : PropertyChangedBase
     {
         public event Action<object, Type, string, object> DatabasePropertyChanged;
+
+        public DateTime Date
+        {
+            get => GetValue<DateTime>(nameof(Date));
+            set
+            {
+                SetValue(nameof(Date), value);
+                NotifyPropertyChanged(nameof(DateString));
+            }
+        }
+
+        public string DateString => Date.ToString("dd MMM yyyy");
+
+        public string TimeString
+        {
+            get => GetValue<string>(nameof(TimeString));
+            set => SetValue(nameof(TimeString), value);
+        }
 
         protected override void NotifyPropertyChanged(params string[] propertyNames)
         {
@@ -61,18 +80,6 @@ namespace Astrarium.Plugins.Journal.ViewModels
         {
             get => GetValue(nameof(IsExpanded), false);
             set => SetValue(nameof(IsExpanded), value);
-        }
-
-        public string Date
-        {
-            get => GetValue<string>(nameof(Date));
-            set => SetValue(nameof(Date), value);
-        }
-
-        public string Time
-        {
-            get => GetValue<string>(nameof(Time));
-            set => SetValue(nameof(Time), value);
         }
 
         [DBStored(Entity = typeof(SessionDB), Field = "Comments")]
@@ -284,6 +291,8 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         public ObservableCollection<TreeItemSession> AllSessions { get; private set; } = new ObservableCollection<TreeItemSession>();
 
+        public ICollection<DateTime> SessionDates => AllSessions.Select(x => x.Date.Date).Distinct().ToArray();
+
         public JournalVM()
         {
             ExpandCollapseCommand = new Command(ExpandCollapse);
@@ -307,22 +316,54 @@ namespace Astrarium.Plugins.Journal.ViewModels
             }
         }
 
+        private DateTimeComparer dateConverter = new DateTimeComparer();
+
+        public DateTime CalendarDate
+        {
+            get => GetValue(nameof(CalendarDate), DateTime.Now);
+            set
+            {
+                if (value != CalendarDate)
+                {
+                    SetValue(nameof(CalendarDate), value);
+                    if (SessionDates.Contains(value, dateConverter))
+                    {
+                        SelectedTreeViewItem = AllSessions.FirstOrDefault(x => dateConverter.Equals(x.Date, value));
+                    }
+                }
+            }
+        }
+
+
+        public bool IsSessionSelected => SelectedTreeViewItem is TreeItemSession;
+
         public DBStoredEntity SelectedTreeViewItem
         {
             get => GetValue<DBStoredEntity>(nameof(SelectedTreeViewItem));
             set
             {
-                if (SelectedTreeViewItem != null)
+                if (SelectedTreeViewItem != value)
                 {
-                    SelectedTreeViewItem.DatabasePropertyChanged -= SaveDatabaseEntityProperty;
-                }
+                    // unsubscribe from changes
+                    if (SelectedTreeViewItem != null)
+                    {
+                        SelectedTreeViewItem.DatabasePropertyChanged -= SaveDatabaseEntityProperty;
+                    }
 
-                SetValue(nameof(SelectedTreeViewItem), value);
-                LoadSelectedTreeViewItemDetails();
+                    // update backing field
+                    SetValue(nameof(SelectedTreeViewItem), value);
 
-                if (value != null)
-                {
-                    value.DatabasePropertyChanged += SaveDatabaseEntityProperty;
+                    NotifyPropertyChanged(nameof(IsSessionSelected));
+
+                    // load session or observation details
+                    LoadSelectedTreeViewItemDetails();
+
+                    // subscribe for changes
+                    if (value != null)
+                    {
+                        value.DatabasePropertyChanged += SaveDatabaseEntityProperty;
+                        CalendarDate = value.Date;
+                    }
                 }
             }
         }
@@ -354,8 +395,8 @@ namespace Astrarium.Plugins.Journal.ViewModels
                     {
                         var item = new TreeItemSession(s.Id)
                         {
-                            Date = s.Begin.ToString("dd MMM yyyy"),
-                            Time = $"{s.Begin.ToString("HH:mm")}-{s.End.ToString("HH:mm")}"
+                            Date = s.Begin,
+                            TimeString = $"{s.Begin:HH:mm}-{s.End:HH:mm}"
                         };
 
                         var observations = s.Observations.OrderByDescending(x => x.Begin);
@@ -363,6 +404,8 @@ namespace Astrarium.Plugins.Journal.ViewModels
                         {
                             item.Observations.Add(new TreeItemObservation(obs.Id)
                             {
+                                Date = obs.Begin,
+                                TimeString = $"{obs.Begin:HH:mm}-{obs.End:HH:mm}",
                                 ObjectName = obs.Target.Name,
                                 ObjectType = obs.Target.Type,
                                 ObjectNameAliases = DeserializeAliases(obs.Target.Aliases)
@@ -373,7 +416,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
                     }
 
                     AllSessions = new ObservableCollection<TreeItemSession>(allSessions);
-                    NotifyPropertyChanged(nameof(AllSessions));
+                    NotifyPropertyChanged(nameof(AllSessions), nameof(SessionDates));
                 }
             });
         }

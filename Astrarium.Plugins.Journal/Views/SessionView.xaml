@@ -23,7 +23,13 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Label Grid.Row="0" Content="date time" />
+        <!-- Date and time panel -->
+        <DockPanel Grid.Row="0" Margin="2" Background="{StaticResource BrushControlDarkBackground}">
+            <TextBlock Padding="8" Text="Session:" FontSize="18" VerticalAlignment="Center"  />
+            <TextBlock Padding="8" FontSize="18" Text="{Binding DateString}" VerticalAlignment="Center" />
+            <TextBlock Padding="8" FontSize="18" Text="{Binding TimeString}" VerticalAlignment="Center" />
+            <Button HorizontalAlignment="Right" Content="Add" />
+        </DockPanel>
 
         <TabControl Grid.Row="1">
             <TabItem Header="Comments">
@@ -60,7 +66,7 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock Margin="6" Text="Seeing by Antoniadi scale:" Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" />
-                    <ComboBox SelectedValuePath="Tag" SelectedValue="{Binding Seeing}" Width="Auto" IsEditable="False" Grid.Column="1" Grid.Row="0" >
+                    <ComboBox SelectedValuePath="Tag" SelectedValue="{Binding Seeing}" Width="300" IsEditable="False" Grid.Column="1" Grid.Row="0" >
                         <ComboBoxItem Tag="{x:Null}">
                             <TextBlock IsEnabled="False" Text="Not set" />
                         </ComboBoxItem>

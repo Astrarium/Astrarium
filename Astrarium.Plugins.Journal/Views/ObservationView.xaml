@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:c="clr-namespace:Astrarium.Plugins.Journal.Controls"
+             xmlns:tc="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
              xmlns:v="clr-namespace:Astrarium.Plugins.Journal.Views"
              xmlns:vm="clr-namespace:Astrarium.Plugins.Journal.ViewModels"
              xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
@@ -25,7 +26,12 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Label Grid.Row="0" Content="date time" />
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="2" Background="{StaticResource BrushControlDarkBackground}">
+            <TextBlock Padding="8" Text="Observation:" FontSize="18" VerticalAlignment="Center"  />
+            <TextBlock Padding="8" FontSize="18"><Hyperlink><Run Text="{Binding ObjectName}" /></Hyperlink></TextBlock>
+            <TextBlock Padding="8" FontSize="18" Text="{Binding DateString}" VerticalAlignment="Center" />
+            <TextBlock Padding="8" FontSize="18" Text="{Binding TimeString}" VerticalAlignment="Center" />
+        </StackPanel>
 
         <TabControl Grid.Row="1">
             <TabItem Header="Findings">
