@@ -38,5 +38,11 @@ namespace Astrarium.Plugins.Journal.Database.Entities
         /// Apparent field of view, in degrees.
         /// </summary>
         public double? ApparentFOV { get; set; }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{Vendor} {Model}".Trim();
+        }
     }
 }

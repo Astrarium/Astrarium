@@ -22,6 +22,12 @@ namespace Astrarium.Plugins.Journal.Database.Entities
         /// Detailed information related to particular imager type, serialized as JSON
         /// </summary>
         public string Details { get; set; }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{Vendor} {Model}".Trim();
+        }
     }
 
     public class CameraImagerDetails

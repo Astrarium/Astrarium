@@ -14,10 +14,24 @@
 
     <UserControl.Resources>
         <ResourceDictionary>
+
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/Astrarium.Plugins.Journal;component/Themes/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <DataTemplate x:Key="ComboBoxWithNullDataTemplate">
+                <TextBlock Name="textBlock" Text="{Binding}"/>
+                <DataTemplate.Triggers>
+                    <DataTrigger Binding="{Binding Id}" Value="{x:Null}">
+                        <Setter TargetName="textBlock" Property="Foreground" Value="{StaticResource BrushControlLightBackground}" />
+                    </DataTrigger>
+                </DataTemplate.Triggers>
+            </DataTemplate>
+
         </ResourceDictionary>
+
+        
+
     </UserControl.Resources>
 
     <Grid>
@@ -96,27 +110,58 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
                     <TextBlock Text="Telescope / Other optics" VerticalAlignment="Center" Padding="6" />
-
-                    <ComboBox Grid.Column="1" SelectedValue="{Binding TelescopeId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False">
+                    <ComboBox Grid.Column="1" Grid.Row="0" SelectedValue="{Binding TelescopeId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}">
                         <ComboBox.ItemsSource>
                             <CompositeCollection>
-                                <e:OpticsDB Id="{x:Null}" Model="" />
+                                <e:OpticsDB Id="{x:Null}" Model="None" />
                                 <CollectionContainer Collection="{Binding Source={x:Static vm:Equipment.Telescopes}}" />
                             </CompositeCollection>
                         </ComboBox.ItemsSource>
                     </ComboBox>
 
                     <TextBlock Text="Eyepiece" VerticalAlignment="Center" Padding="6" Grid.Row="1" />
-                    <TextBox Text="{Binding Eyepiece}" Grid.Column="1" Grid.Row="1" />
+                    <ComboBox Grid.Column="1" Grid.Row="1" SelectedValue="{Binding EyepieceId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}">
+                        <ComboBox.ItemsSource>
+                            <CompositeCollection>
+                                <e:EyepieceDB Id="{x:Null}" Model="None" />
+                                <CollectionContainer Collection="{Binding Source={x:Static vm:Equipment.Eyepieces}}" />
+                            </CompositeCollection>
+                        </ComboBox.ItemsSource>
+                    </ComboBox>
 
                     <TextBlock Text="Lens" VerticalAlignment="Center" Padding="6" Grid.Row="2" />
-                    <TextBox Text="{Binding Lens}" Grid.Column="1" Grid.Row="2" />
+                    <ComboBox Grid.Column="1" Grid.Row="2" SelectedValue="{Binding LensId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}">
+                        <ComboBox.ItemsSource>
+                            <CompositeCollection>
+                                <e:LensDB Id="{x:Null}" Model="None" />
+                                <CollectionContainer Collection="{Binding Source={x:Static vm:Equipment.Lenses}}" />
+                            </CompositeCollection>
+                        </ComboBox.ItemsSource>
+                    </ComboBox>
 
-                    <TextBlock Text="Camera" VerticalAlignment="Center" Padding="6" Grid.Row="3" />
-                    <TextBox Text="{Binding Camera}" Grid.Column="1" Grid.Row="3" />
+                    <TextBlock Text="Filter" VerticalAlignment="Center" Padding="6" Grid.Row="3" />
+                    <ComboBox Grid.Column="1" Grid.Row="3" SelectedValue="{Binding FilterId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}">
+                        <ComboBox.ItemsSource>
+                            <CompositeCollection>
+                                <e:FilterDB Id="{x:Null}" Model="None" />
+                                <CollectionContainer Collection="{Binding Source={x:Static vm:Equipment.Filters}}" />
+                            </CompositeCollection>
+                        </ComboBox.ItemsSource>
+                    </ComboBox>
+
+                    <TextBlock Text="Camera" VerticalAlignment="Center" Padding="6" Grid.Row="4" />
+                    <ComboBox Grid.Column="1" Grid.Row="4" SelectedValue="{Binding CameraId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}">
+                        <ComboBox.ItemsSource>
+                            <CompositeCollection>
+                                <e:ImagerDB Id="{x:Null}" Model="None" />
+                                <CollectionContainer Collection="{Binding Source={x:Static vm:Equipment.Cameras}}" />
+                            </CompositeCollection>
+                        </ComboBox.ItemsSource>
+                    </ComboBox>
 
                 </Grid>
 

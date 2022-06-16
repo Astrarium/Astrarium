@@ -33,5 +33,11 @@ namespace Astrarium.Plugins.Journal.Database.Entities
         /// Schott filter code number
         /// </summary>
         public string Schott { get; set; }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{Vendor} {Model}".Trim();
+        }
     }
 }

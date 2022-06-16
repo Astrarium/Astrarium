@@ -12,5 +12,11 @@ namespace Astrarium.Plugins.Journal.Database.Entities
         public string Model { get; set; }
         public string Vendor { get; set; }
         public double Factor { get; set; }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{Vendor} {Model}".Trim();
+        }
     }
 }

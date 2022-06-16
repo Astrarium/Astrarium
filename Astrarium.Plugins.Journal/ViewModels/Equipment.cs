@@ -11,20 +11,54 @@ namespace Astrarium.Plugins.Journal.ViewModels
 {
     public static class Equipment
     {
-        private static ObservableCollection<OpticsDB> telescopes;
-        public static ObservableCollection<OpticsDB> Telescopes
+        public static ObservableCollection<OpticsDB> Telescopes => telescopes.Value;
+
+        public static ObservableCollection<EyepieceDB> Eyepieces => eyepieces.Value;
+
+        public static ObservableCollection<LensDB> Lenses => lenses.Value;
+
+        public static ObservableCollection<FilterDB> Filters => filters.Value;
+
+        public static ObservableCollection<ImagerDB> Cameras => cameras.Value;
+
+        private static Lazy<ObservableCollection<OpticsDB>> telescopes = new Lazy<ObservableCollection<OpticsDB>>(() =>
         {
-            get
+            using (var db = new DatabaseContext())
             {
-                if (telescopes == null)
-                {
-                    using (var db = new DatabaseContext())
-                    {
-                        telescopes = new ObservableCollection<OpticsDB>(db.Optics.ToArray());
-                    }
-                }
-                return telescopes;
+                return new ObservableCollection<OpticsDB>(db.Optics.ToArray());
             }
-        }
+        });
+
+        private static Lazy<ObservableCollection<EyepieceDB>> eyepieces = new Lazy<ObservableCollection<EyepieceDB>>(() =>
+        {
+            using (var db = new DatabaseContext())
+            {
+                return new ObservableCollection<EyepieceDB>(db.Eyepieces.ToArray());
+            }
+        });
+
+        private static Lazy<ObservableCollection<LensDB>> lenses = new Lazy<ObservableCollection<LensDB>>(() =>
+        {
+            using (var db = new DatabaseContext())
+            {
+                return new ObservableCollection<LensDB>(db.Lenses.ToArray());
+            }
+        });
+
+        private static Lazy<ObservableCollection<FilterDB>> filters = new Lazy<ObservableCollection<FilterDB>>(() =>
+        {
+            using (var db = new DatabaseContext())
+            {
+                return new ObservableCollection<FilterDB>(db.Filters.ToArray());
+            }
+        });
+
+        private static Lazy<ObservableCollection<ImagerDB>> cameras = new Lazy<ObservableCollection<ImagerDB>>(() =>
+        {
+            using (var db = new DatabaseContext())
+            {
+                return new ObservableCollection<ImagerDB>(db.Imagers.ToArray());
+            }
+        });
     }
 }
