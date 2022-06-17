@@ -39,21 +39,17 @@ namespace Astrarium.Plugins.Journal.Controls
         }
     }
 
-    public class DisabledDaysConverter : MultiValueConverterBase
+    public class SelectedCalendarDateConverter : MultiValueConverterBase
     {
         private static IEqualityComparer<DateTime> Comparer = new DateTimeComparer();
 
         public override object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (values[0] == null)
-                return true;
+            if (!(values[0] is DateTime) || !(values[1] is DateTime))
+                return false;
             var date = (DateTime)values[0];
-            var dates = values[1] as DateTime[];
-            if (dates != null)
-            {
-                return !dates.Contains(date, Comparer);
-            }
-            return true;
+            var selectedDate = (DateTime)values[1];
+            return Comparer.Equals(date, selectedDate);
         }
     }
 }

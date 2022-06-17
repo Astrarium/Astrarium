@@ -17,6 +17,8 @@ namespace Astrarium.Plugins.Journal.ViewModels
             Id = id;
         }
 
+        public override DateTime SessionDate => Begin;
+
         public bool IsExpanded
         {
             get => GetValue(nameof(IsExpanded), false);
@@ -101,6 +103,12 @@ namespace Astrarium.Plugins.Journal.ViewModels
         {
             get => GetValue<string>(nameof(Equipment), null);
             set => SetValue(nameof(Equipment), value);
+        }
+
+        public Attachment[] Attachments
+        {
+            get => GetValue<Attachment[]>(nameof(Attachments), new Attachment[0]);
+            set => SetValue(nameof(Attachments), value);
         }
 
         public int ObservationsCount

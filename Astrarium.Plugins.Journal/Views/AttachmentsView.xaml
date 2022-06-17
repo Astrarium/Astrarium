@@ -1,0 +1,58 @@
+﻿<UserControl x:Class="Astrarium.Plugins.Journal.Views.AttachmentsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:c="clr-namespace:Astrarium.Plugins.Journal.Controls"
+             xmlns:local="clr-namespace:Astrarium.Plugins.Journal.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <Grid Grid.Row="0" Background="{StaticResource BrushControlDarkBackground}" Margin="-2 -4 0 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <ToggleButton Margin="2" VerticalAlignment="Center" Grid.Column="0" Height="26" Width="26" />
+
+            <Slider x:Name="SliderPreviewSize" Minimum="100" Maximum="400" Value="200" Width="200" Orientation="Horizontal" VerticalAlignment="Center" Grid.Column="1" />
+            <Button Margin="0 0 2 0" Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Right" Content="Add" />
+        </Grid>
+
+        <ListView Grid.Row="1" ItemsSource="{Binding Attachments}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal"/>
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Background="Black">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="18" />
+                        </Grid.RowDefinitions>
+                        <c:MultiformatImage Source="{Binding FilePath}" Width="{Binding ElementName=SliderPreviewSize, Path=Value}" Height="{Binding ElementName=SliderPreviewSize, Path=Value}" />
+                        <TextBlock HorizontalAlignment="Center" ToolTip="{Binding FilePath}" Grid.Row="1" Text="{Binding Title}" TextWrapping="Wrap" FontSize="12" TextTrimming="CharacterEllipsis" MaxWidth="200" />
+
+                        <Grid.InputBindings>
+                            <MouseBinding Gesture="LeftDoubleClick" Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.OpenImageCommand}" CommandParameter="{Binding FilePath}" />
+                        </Grid.InputBindings>
+                        
+                        
+                    </Grid>
+
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</UserControl>

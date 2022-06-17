@@ -22,6 +22,13 @@ namespace Astrarium.Plugins.Journal.ViewModels
             Id = id;
         }
 
+        public override DateTime SessionDate => Session.Begin;
+
+        /// <summary>
+        /// Session instance associated with the observation
+        /// </summary>
+        public TreeItemSession Session { get; set; }
+
         /// <summary>
         /// Required by the tree view control
         /// </summary>
@@ -137,10 +144,10 @@ namespace Astrarium.Plugins.Journal.ViewModels
             set => SetValue(nameof(HorizontalCoordinates), value);
         }
 
-        public string[] Images
+        public Attachment[] Attachments
         {
-            get => GetValue<string[]>(nameof(Images), new string[0]);
-            set => SetValue(nameof(Images), value);
+            get => GetValue<Attachment[]>(nameof(Attachments), new Attachment[0]);
+            set => SetValue(nameof(Attachments), value);
         }
     }
 }

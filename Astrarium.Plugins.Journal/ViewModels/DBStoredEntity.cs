@@ -12,23 +12,23 @@ namespace Astrarium.Plugins.Journal.ViewModels
     {
         public event Action<object, Type, string, object> DatabasePropertyChanged;
 
-        public DateTime Date
+        public abstract DateTime SessionDate { get; }
+
+        public DateTime Begin
         {
-            get => GetValue<DateTime>(nameof(Date));
-            set
-            {
-                SetValue(nameof(Date), value);
-                NotifyPropertyChanged(nameof(DateString));
-            }
+            get => GetValue<DateTime>(nameof(Begin));
+            set => SetValue(nameof(Begin), value);
         }
 
-        public string DateString => Date.ToString("dd MMM yyyy");
-
-        public string TimeString
+        public DateTime End
         {
-            get => GetValue<string>(nameof(TimeString));
-            set => SetValue(nameof(TimeString), value);
+            get => GetValue<DateTime>(nameof(End));
+            set => SetValue(nameof(End), value);
         }
+
+        public string DateString => Begin.ToString("dd MMM yyyy");
+
+        public string TimeString => $"{Begin:HH:mm}-{End:HH:mm}";
 
         protected override void NotifyPropertyChanged(params string[] propertyNames)
         {

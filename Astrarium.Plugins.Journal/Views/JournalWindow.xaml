@@ -52,6 +52,17 @@
         </HierarchicalDataTemplate>
 
         <Style x:Key="JournalCalendarDayButtonStyle" BasedOn="{StaticResource CalendarDayButtonStyle}" TargetType="CalendarDayButton">
+
+            <Style.Setters>
+                <Setter Property="Focusable" Value="False" />
+                <Setter Property="ContextMenu">
+                    <Setter.Value>
+                        <ContextMenu>
+                            <MenuItem Header="test" Command=""/>
+                        </ContextMenu>
+                    </Setter.Value>
+                </Setter>
+            </Style.Setters>
             
             <Style.Triggers>
                 <DataTrigger Value="True">
@@ -62,19 +73,18 @@
                         </MultiBinding>
                     </DataTrigger.Binding>
                     <Setter Property="Background" Value="{StaticResource BrushSelection}" />
+                    <Setter Property="Cursor" Value="Hand" />
                 </DataTrigger>
-
                 <DataTrigger Value="True">
                     <DataTrigger.Binding>
-                        <MultiBinding Converter="{c:DisabledDaysConverter}">
+                        <MultiBinding Converter="{c:SelectedCalendarDateConverter}">
                             <Binding />
-                            <Binding Path="DataContext.SessionDates" RelativeSource="{RelativeSource AncestorType=Calendar}" />
+                            <Binding Path="DataContext.SelectedTreeViewItem.SessionDate" RelativeSource="{RelativeSource AncestorType=Calendar}" />
                         </MultiBinding>
                     </DataTrigger.Binding>
-                    <!--<Setter Property="IsHitTestVisible" Value="False" />-->
+                    <Setter Property="Background" Value="{StaticResource BrushHighlight}" />
+                    <Setter Property="Cursor" Value="Hand" />
                 </DataTrigger>
-
-
             </Style.Triggers>
         </Style>
 
@@ -113,14 +123,16 @@
             </Grid>
 
             <Calendar 
+                x:Name="calendar"
                 Grid.Row="0"
+                Focusable="False"
                 SelectedDate="{Binding CalendarDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                DisplayDate="{Binding CalendarDate, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                 SelectionMode="SingleDate"
                 Margin="4"
                 HorizontalAlignment="Stretch"
                 IsTodayHighlighted="False"
                 IsManipulationEnabled="True"
-                DisplayDate="{Binding CalendarDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 CalendarDayButtonStyle="{StaticResource JournalCalendarDayButtonStyle}" />
 
             <c:BindableTreeView

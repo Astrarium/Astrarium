@@ -1,9 +1,8 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Plugins.Journal.Controls;
 using Astrarium.Plugins.Journal.Database;
-using Astrarium.Plugins.Journal.Database.Entities;
+using Astrarium.Plugins.Journal.Types;
 using Astrarium.Types;
-using Astrarium.Types.Themes;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -23,7 +22,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
     {
         #region Private fields
 
-        private DateTimeComparer dateConverter = new DateTimeComparer();
+        private DateTimeComparer dateComparer = new DateTimeComparer();
 
         #endregion Private fields
 
@@ -42,22 +41,22 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         public ObservableCollection<TreeItemSession> AllSessions { get; private set; } = new ObservableCollection<TreeItemSession>();
 
-        public ICollection<DateTime> SessionDates => AllSessions.Select(x => x.Date.Date).Distinct().ToArray();
+        public ICollection<DateTime> SessionDates => AllSessions.Select(x => x.SessionDate).Distinct(dateComparer).ToArray();
 
         /// <summary>
         /// Binds to date selected in the calendar view
         /// </summary>
         public DateTime CalendarDate
         {
-            get => GetValue(nameof(CalendarDate), DateTime.Now.Date);
+            get => GetValue(nameof(CalendarDate), DateTime.Now);
             set
             {
-                if (value != CalendarDate)
+                if (!dateComparer.Equals(value, CalendarDate))
                 {
                     SetValue(nameof(CalendarDate), value);
-                    if (SessionDates.Contains(value, dateConverter))
+                    if (SessionDates.Contains(value, dateComparer))
                     {
-                        SelectedTreeViewItem = AllSessions.FirstOrDefault(x => dateConverter.Equals(x.Date.Date, value));
+                        SelectedTreeViewItem = AllSessions.FirstOrDefault(x => dateComparer.Equals(x.Begin, value));
                     }
                 }
             }
@@ -96,8 +95,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
                     if (value != null)
                     {
                         value.DatabasePropertyChanged += SaveDatabaseEntityProperty;
-                        SetValue(nameof(CalendarDate), value.Date.Date);
-                        //CalendarDate = value.Date;
+                        SetValue(nameof(CalendarDate), value.SessionDate);
                     }
                 }
             }
@@ -130,8 +128,8 @@ namespace Astrarium.Plugins.Journal.ViewModels
                     {
                         var item = new TreeItemSession(s.Id)
                         {
-                            Date = s.Begin,
-                            TimeString = $"{s.Begin:HH:mm}-{s.End:HH:mm}"
+                            Begin = s.Begin,
+                            End = s.End
                         };
 
                         var observations = s.Observations.OrderByDescending(x => x.Begin);
@@ -139,8 +137,9 @@ namespace Astrarium.Plugins.Journal.ViewModels
                         {
                             item.Observations.Add(new TreeItemObservation(obs.Id)
                             {
-                                Date = obs.Begin,
-                                TimeString = $"{obs.Begin:HH:mm}-{obs.End:HH:mm}",
+                                Session = item,
+                                Begin = obs.Begin,
+                                End = obs.End,
                                 ObjectName = obs.Target.Name,
                                 ObjectType = obs.Target.Type,
                                 ObjectNameAliases = DeserializeAliases(obs.Target.Aliases)
@@ -158,11 +157,14 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         private void LoadJournalItemDetails()
         {
+            string databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Observations", "Observations.db");
+            string databaseFolder = Path.GetDirectoryName(databasePath);
+
             if (SelectedTreeViewItem is TreeItemSession session)
             {
                 using (var db = new DatabaseContext())
                 {
-                    var s = db.Sessions.FirstOrDefault(x => x.Id == session.Id);
+                    var s = db.Sessions.Include(x => x.Attachments).FirstOrDefault(x => x.Id == session.Id);
                     session.Weather = s.Weather;
                     session.Seeing = s.Seeing;
                     session.FaintestStar = s.FaintestStar != null ? (decimal)s.FaintestStar.Value : 6m;
@@ -172,6 +174,13 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
                     session.Equipment = s.Equipment;
                     session.Comments = s.Comments;
+                    session.Attachments = s.Attachments.ToArray().Select(x => new Attachment()
+                    {
+                        Id = x.Id,
+                        FilePath = Path.Combine(databaseFolder, x.FilePath),
+                        Title = Path.GetFileNameWithoutExtension(x.FilePath),
+                        Comments = x.Comments
+                    }).ToArray();
                 }
             }
             else if (SelectedTreeViewItem is TreeItemObservation observation)
@@ -196,10 +205,13 @@ namespace Astrarium.Plugins.Journal.ViewModels
                     observation.Constellation = obs.Target?.Constellation;
                     observation.EquatorialCoordinates = obs.Target?.RightAscension != null && obs.Target?.Declination != null ? new CrdsEquatorial((double)obs.Target?.RightAscension.Value, (double)obs.Target?.Declination.Value) : null;
 
-                    string databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Observations", "Observations.db");
-                    string databaseFolder = Path.GetDirectoryName(databasePath);
-
-                    observation.Images = obs.Attachments.Select(x => Path.Combine(databaseFolder, x.FilePath)).ToArray();
+                    observation.Attachments = obs.Attachments.ToArray().Select(x => new Attachment()
+                    {
+                        Id = x.Id,
+                        FilePath = Path.Combine(databaseFolder, x.FilePath),
+                        Title = Path.GetFileNameWithoutExtension(x.FilePath),
+                        Comments = x.Comments
+                    }).ToArray();
                 }
             }
         }
@@ -250,6 +262,10 @@ namespace Astrarium.Plugins.Journal.ViewModels
                 if (targetType == "DeepSky.OpenCluster")
                 {
                     return JsonConvert.DeserializeObject<OpenClusterObservationDetails>(details);
+                }
+                if (targetType == "DeepSky.DoubleStar")
+                {
+                    return JsonConvert.DeserializeObject<DoubleStarObservationDetails>(details);
                 }
                 else if (targetType.StartsWith("DeepSky"))
                 {
