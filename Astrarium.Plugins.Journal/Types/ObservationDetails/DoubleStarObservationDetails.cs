@@ -22,10 +22,10 @@ namespace Astrarium.Plugins.Journal.Types
         /// Color of main component, string with possible values:
         /// "white", "red", "orange", "yellow", "green", "blue"
         /// </summary>
-        public string ColorCompainionComponent
+        public string ColorCompanionComponent
         {
-            get => GetValue<string>(nameof(ColorCompainionComponent));
-            set => SetValue(nameof(ColorCompainionComponent), value);
+            get => GetValue<string>(nameof(ColorCompanionComponent));
+            set => SetValue(nameof(ColorCompanionComponent), value);
         }
 
         public bool? EqualBrightness

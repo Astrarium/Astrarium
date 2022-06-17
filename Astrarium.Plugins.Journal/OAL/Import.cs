@@ -355,7 +355,7 @@ namespace Astrarium.Plugins.Journal.OAL
                     {
                         var details = BuildDeepSkyObservationDetails<DoubleStarObservationDetails>(ds);
                         details.ColorMainComponent = ds.colorMainSpecified ? ds.colorMain.ToStringEnum() : null;
-                        details.ColorCompainionComponent = ds.colorCompanionSpecified ? ds.colorCompanion.ToStringEnum() : null;
+                        details.ColorCompanionComponent = ds.colorCompanionSpecified ? ds.colorCompanion.ToStringEnum() : null;
                         details.EqualBrightness = ds.equalBrightnessSpecified ? ds.equalBrightness : (bool?)null;
                         details.NiceSurrounding = ds.niceSurroundingSpecified ? ds.niceSurrounding : (bool?)null;
                         jsonDetails = JsonConvert.SerializeObject(details, jsonSettings);
