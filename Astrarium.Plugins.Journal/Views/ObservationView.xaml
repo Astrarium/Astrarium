@@ -72,6 +72,9 @@
                             <DataTemplate DataType="{x:Type t:DoubleStarObservationDetails}">
                                 <v:DoubleStarObservationDetailsView DataContext="{Binding}" />
                             </DataTemplate>
+                            <DataTemplate DataType="{x:Type t:VariableStarObservationDetails}">
+                                <v:VariableStarObservationDetailsView DataContext="{Binding}" />
+                            </DataTemplate>
                         </ContentControl.Resources>
                     </ContentControl>
 

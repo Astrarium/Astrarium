@@ -259,15 +259,20 @@ namespace Astrarium.Plugins.Journal.ViewModels
         {
             if (details != null)
             {
-                if (targetType == "DeepSky.OpenCluster")
+                if (targetType == "VarStar" || targetType == "Nova")
+                {
+                    return JsonConvert.DeserializeObject<VariableStarObservationDetails>(details);
+                }
+                else if (targetType == "DeepSky.OpenCluster")
                 {
                     return JsonConvert.DeserializeObject<OpenClusterObservationDetails>(details);
                 }
-                if (targetType == "DeepSky.DoubleStar")
+                else if (targetType == "DeepSky.DoubleStar")
                 {
                     return JsonConvert.DeserializeObject<DoubleStarObservationDetails>(details);
                 }
-                else if (targetType.StartsWith("DeepSky"))
+
+                if (targetType.StartsWith("DeepSky"))
                 {
                     return JsonConvert.DeserializeObject<DeepSkyObservationDetails>(details);
                 }

@@ -28,12 +28,18 @@ namespace Astrarium.Plugins.Journal.Types
             set => SetValue(nameof(ColorCompanionComponent), value);
         }
 
+        /// <summary>
+        /// Flag indicating components have equal brightness
+        /// </summary>
         public bool? EqualBrightness
         {
             get => GetValue<bool?>(nameof(EqualBrightness));
             set => SetValue(nameof(EqualBrightness), value);
         }
 
+        /// <summary>
+        /// Flag indicating nice sirrounding of components
+        /// </summary>
         public bool? NiceSurrounding
         {
             get => GetValue<bool?>(nameof(NiceSurrounding));

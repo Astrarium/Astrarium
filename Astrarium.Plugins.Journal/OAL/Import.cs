@@ -334,9 +334,16 @@ namespace Astrarium.Plugins.Journal.OAL
                 if (finding is findingsVariableStarType vs)
                 {
                     var details = new VariableStarObservationDetails();
+                    details.VisMag = vs.visMag.Value;
+                    details.VisMagUncertain = vs.visMag.uncertainSpecified ? vs.visMag.uncertain : (bool?)null;
+                    details.VisMagFainterThan = vs.visMag.fainterThanSpecified ? vs.visMag.fainterThan : (bool?)null;
+
+                    details.ComparisonStars = vs.comparisonStar.ToListOfValues();
+
+                    // AAVSO chart date identifier
                     details.ChartDate = vs.chartID?.Value;
                     details.NonAAVSOChart = vs.chartID?.nonAAVSOchartSpecified == true ? vs.chartID.nonAAVSOchart : (bool?)null;
-                    details.ComparisonStars = vs.comparisonStar.ToListOfValues();
+
                     details.BrightSky = vs.brightSkySpecified ? vs.brightSky : (bool?)null;
                     details.Clouds = vs.cloudsSpecified ? vs.clouds : (bool?)null;
                     details.ComparismSequenceProblem = vs.comparismSequenceProblemSpecified ? vs.comparismSequenceProblem : (bool?)null;
@@ -586,19 +593,20 @@ namespace Astrarium.Plugins.Journal.OAL
                     Magnitude = st.apparentMagSpecified ? st.apparentMag : (double?)null,
                     Classification = st.classification
                 }, jsonSettings);
-            }
-            // Variable star
-            else if (target is variableStarTargetType vs)
-            {
-                result.Type = "VarStar";
-                result.Details = JsonConvert.SerializeObject(new VariableStarTargetDetails()
+
+                // Variable star
+                if (target is variableStarTargetType vs)
                 {
-                    Magnitude = vs.apparentMagSpecified ? vs.apparentMag : (double?)null,
-                    MaxMagnitude = vs.maxApparentMagSpecified ? vs.maxApparentMag : (double?)null,
-                    Period = vs.periodSpecified ? vs.period : (double?)null,
-                    VarStarType = vs.type,
-                    Classification = vs.classification
-                }, jsonSettings);
+                    result.Type = "VarStar";
+                    result.Details = JsonConvert.SerializeObject(new VariableStarTargetDetails()
+                    {
+                        Magnitude = vs.apparentMagSpecified ? vs.apparentMag : (double?)null,
+                        MaxMagnitude = vs.maxApparentMagSpecified ? vs.maxApparentMag : (double?)null,
+                        Period = vs.periodSpecified ? vs.period : (double?)null,
+                        VarStarType = vs.type,
+                        Classification = vs.classification
+                    }, jsonSettings);
+                }
             }
             // Multiple star (don't know why it's prefixed as "deepSky" in OAL)
             else if (target is deepSkyMS ms)
