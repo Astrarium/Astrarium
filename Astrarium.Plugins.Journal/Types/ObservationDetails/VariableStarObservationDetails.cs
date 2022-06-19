@@ -36,23 +36,85 @@ namespace Astrarium.Plugins.Journal.Types
             set => SetValue(nameof(VisMagFainterThan), value);
         }
 
-        public string ComparisonStars { get; set; }
+        public string ComparisonStars
+        {
+            get => GetValue<string>(nameof(ComparisonStars));
+            set => SetValue(nameof(ComparisonStars), value);
+        }
 
+        /// <summary>
+        /// AAVSO chart identifier
+        /// </summary>
+        public string ChartDate
+        {
+            get => GetValue<string>(nameof(ChartDate));
+            set => SetValue(nameof(ChartDate), value);
+        }
 
-        public string ChartDate { get; set; }
+        /// <summary>
+        /// Flag indicating Non-AAVSO chart ID is provided
+        /// </summary>
+        public bool? NonAAVSOChart
+        {
+            get => GetValue<bool?>(nameof(NonAAVSOChart));
+            set => SetValue(nameof(NonAAVSOChart), value);
+        }
 
+        /// <summary>
+        /// The sky is bright (Moon, twilight, light pollution, aurora)
+        /// </summary>
+        public bool? BrightSky
+        {
+            get => GetValue<bool?>(nameof(BrightSky));
+            set => SetValue(nameof(BrightSky), value);
+        }
 
-        public bool? NonAAVSOChart { get; set; }
+        public bool? Clouds
+        {
+            get => GetValue<bool?>(nameof(Clouds));
+            set => SetValue(nameof(Clouds), value);
+        }
 
+        public bool? PoorSeeing
+        {
+            get => GetValue<bool?>(nameof(PoorSeeing));
+            set => SetValue(nameof(PoorSeeing), value);
+        }
 
-        public bool? BrightSky { get; set; }
-        public bool? Clouds { get; set; }
-        public bool? PoorSeeing { get; set; }
-        public bool? NearHorizion { get; set; }
-        public bool? UnusualActivity { get; set; }
-        public bool? Outburst { get; set; }
-        public bool? ComparismSequenceProblem { get; set; }
-        public bool? StarIdentificationUncertain { get; set; }
-        public bool? FaintStar { get; set; }
+        public bool? NearHorizion
+        {
+            get => GetValue<bool?>(nameof(NearHorizion));
+            set => SetValue(nameof(NearHorizion), value);
+        }
+
+        public bool? UnusualActivity
+        {
+            get => GetValue<bool?>(nameof(UnusualActivity));
+            set => SetValue(nameof(UnusualActivity), value);
+        }
+
+        public bool? Outburst
+        {
+            get => GetValue<bool?>(nameof(Outburst));
+            set => SetValue(nameof(Outburst), value);
+        }
+
+        public bool? ComparismSequenceProblem
+        {
+            get => GetValue<bool?>(nameof(ComparismSequenceProblem));
+            set => SetValue(nameof(ComparismSequenceProblem), value);
+        }
+
+        public bool? StarIdentificationUncertain
+        {
+            get => GetValue<bool?>(nameof(StarIdentificationUncertain));
+            set => SetValue(nameof(StarIdentificationUncertain), value);
+        }
+
+        public bool? FaintStar
+        {
+            get => GetValue<bool?>(nameof(FaintStar));
+            set => SetValue(nameof(FaintStar), value);
+        }
     }
 }
