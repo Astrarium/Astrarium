@@ -89,6 +89,12 @@
 
                     <ContentControl Content="{Binding TargetDetails}" Visibility="{Binding TargetDetails, Converter={s:NotNullToVisibilityConverter}}">
                         <ContentControl.Resources>
+                            <DataTemplate DataType="{x:Type t:DeepSkyAsterismTargetDetails}">
+                                <v:DeepSkyAsterismTargetDetailsView DataContext="{Binding}" />
+                            </DataTemplate>
+                            <DataTemplate DataType="{x:Type t:DeepSkyClusterOfGalaxiesTargetDetails}">
+                                <v:DeepSkyClusterOfGalaxiesTargetDetailsView DataContext="{Binding}" />
+                            </DataTemplate>
                             <DataTemplate DataType="{x:Type t:DeepSkyOpenClusterTargetDetails}">
                                 <v:DeepSkyOpenClusterTargetDetailsView DataContext="{Binding}" />
                             </DataTemplate>

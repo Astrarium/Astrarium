@@ -288,6 +288,14 @@ namespace Astrarium.Plugins.Journal.ViewModels
                 {
                     return JsonConvert.DeserializeObject<DeepSkyOpenClusterTargetDetails>(details);
                 }
+                else if (targetType == "DeepSky.GalaxyCluster")
+                {
+                    return JsonConvert.DeserializeObject<DeepSkyClusterOfGalaxiesTargetDetails>(details);
+                }
+                else if (targetType == "Asterism")
+                {
+                    return JsonConvert.DeserializeObject<DeepSkyAsterismTargetDetails>(details);
+                }
                 //else if (targetType.StartsWith("DeepSky"))
                 //{
                 //    return JsonConvert.DeserializeObject<DeepSkyTargetDetails>(details);

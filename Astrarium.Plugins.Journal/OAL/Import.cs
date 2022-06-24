@@ -355,7 +355,7 @@ namespace Astrarium.Plugins.Journal.OAL
                     details.UnusualActivity = vs.unusualActivitySpecified ? vs.unusualActivity : (bool?)null;
                     jsonDetails = JsonConvert.SerializeObject(details, jsonSettings);
                 }
-                else if (finding is findingsDeepSkyType dst) 
+                else if (finding is findingsDeepSkyType dst)
                 {
                     // Double star
                     if (finding is findingsDeepSkyDSType ds)
