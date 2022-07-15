@@ -38,24 +38,24 @@ namespace Astrarium.Plugins.Journal.Controls
             PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged)
         });
 
-        //protected override void OnPreviewMouseRightButtonDown(MouseButtonEventArgs e)
-        //{
-        //    TreeViewItem treeViewItem = VisualUpwardSearch(e.OriginalSource as DependencyObject);
+        protected override void OnPreviewMouseRightButtonDown(MouseButtonEventArgs e)
+        {
+            TreeViewItem treeViewItem = VisualUpwardSearch(e.OriginalSource as DependencyObject);
 
-        //    if (treeViewItem != null)
-        //    {
-        //        treeViewItem.Focus();
-        //        e.Handled = true;
-        //    }
-        //}
+            if (treeViewItem != null)
+            {
+                treeViewItem.Focus();
+                e.Handled = true;
+            }
+        }
 
-        //static TreeViewItem VisualUpwardSearch(DependencyObject source)
-        //{
-        //    while (source != null && !(source is TreeViewItem))
-        //        source = VisualTreeHelper.GetParent(source);
+        static TreeViewItem VisualUpwardSearch(DependencyObject source)
+        {
+            while (source != null && source is Visual && !(source is TreeViewItem))
+                source = VisualTreeHelper.GetParent(source);
 
-        //    return source as TreeViewItem;
-        //}
+            return source as TreeViewItem;
+        }
 
         private static void DependencyPropertyChanged(object sender, DependencyPropertyChangedEventArgs e)
         {

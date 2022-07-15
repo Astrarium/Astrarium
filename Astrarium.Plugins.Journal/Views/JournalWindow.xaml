@@ -19,7 +19,15 @@
 
         <!-- Session tree view item  -->
         <HierarchicalDataTemplate DataType="{x:Type vm:TreeItemSession}" ItemsSource="{Binding Observations}">
-            <Grid>
+            <Grid Background="#01000000">
+                <Grid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Add observation..." />
+                        <Separator />
+                        <MenuItem Header="Edit..." />
+                        <MenuItem Header="Delete" />
+                    </ContextMenu>
+                </Grid.ContextMenu>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
@@ -38,7 +46,15 @@
 
         <!-- Observation tree view item  -->
         <HierarchicalDataTemplate DataType="{x:Type vm:TreeItemObservation}">
-            <StackPanel Orientation="Horizontal" Background="Transparent">
+            <StackPanel Orientation="Horizontal" Background="#01000000">
+
+                <StackPanel.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Edit..." />
+                        <MenuItem Header="Delete" />
+                    </ContextMenu>
+                </StackPanel.ContextMenu>
+
                 <Rectangle Margin="2" Width="16" Height="16" ToolTip="{Binding ObjectType, Converter={s:CelestialObjectTypeDescriptionConverter}}">
                     <Rectangle.Fill>
                         <SolidColorBrush Color="{DynamicResource ColorControlLightBackground}" />
@@ -52,7 +68,7 @@
         </HierarchicalDataTemplate>
 
         <Style x:Key="JournalCalendarDayButtonStyle" BasedOn="{StaticResource CalendarDayButtonStyle}" TargetType="CalendarDayButton">
-
+            
             <Style.Setters>
                 <Setter Property="Focusable" Value="False" />
                 <Setter Property="ContextMenu">
@@ -127,12 +143,11 @@
                 Grid.Row="0"
                 Focusable="False"
                 SelectedDate="{Binding CalendarDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                DisplayDate="{Binding CalendarDate, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                SelectedDatesChanged="calendar_SelectedDatesChanged"
                 SelectionMode="SingleDate"
                 Margin="4"
                 HorizontalAlignment="Stretch"
                 IsTodayHighlighted="False"
-                IsManipulationEnabled="True"
                 CalendarDayButtonStyle="{StaticResource JournalCalendarDayButtonStyle}" />
 
             <c:BindableTreeView
@@ -145,7 +160,6 @@
                 VirtualizingPanel.IsVirtualizing="True"
                 Margin="4"
                 Grid.Row="2">
-                
             </c:BindableTreeView>
         </Grid>
         
