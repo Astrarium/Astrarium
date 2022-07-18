@@ -143,11 +143,5 @@ namespace Astrarium.Plugins.Journal.ViewModels
             get => GetValue<CrdsHorizontal>(nameof(HorizontalCoordinates), null);
             set => SetValue(nameof(HorizontalCoordinates), value);
         }
-
-        public Attachment[] Attachments
-        {
-            get => GetValue<Attachment[]>(nameof(Attachments), new Attachment[0]);
-            set => SetValue(nameof(Attachments), value);
-        }
     }
 }

@@ -105,12 +105,6 @@ namespace Astrarium.Plugins.Journal.ViewModels
             set => SetValue(nameof(Equipment), value);
         }
 
-        public Attachment[] Attachments
-        {
-            get => GetValue<Attachment[]>(nameof(Attachments), new Attachment[0]);
-            set => SetValue(nameof(Attachments), value);
-        }
-
         public int ObservationsCount
         {
             get => Observations.Count;

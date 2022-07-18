@@ -25,7 +25,7 @@
             <ToggleButton Margin="2" VerticalAlignment="Center" Grid.Column="0" Height="26" Width="26" />
 
             <Slider x:Name="SliderPreviewSize" Minimum="100" Maximum="400" Value="200" Width="200" Orientation="Horizontal" VerticalAlignment="Center" Grid.Column="1" />
-            <Button Margin="0 0 2 0" Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Right" Content="Add" />
+            <Button Margin="0 0 2 0" Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Right" Content="+" Width="24" Height="24" Command="{Binding Path=DataContext.CreateAttachmentCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding}" />
         </Grid>
 
         <ListView Grid.Row="1" ItemsSource="{Binding Attachments}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
@@ -36,7 +36,7 @@
             </ListView.ItemsPanel>
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Grid Background="Black">
+                    <Grid Background="Black" Tag="{Binding Path=DataContext, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="18" />
@@ -45,9 +45,17 @@
                         <TextBlock HorizontalAlignment="Center" ToolTip="{Binding FilePath}" Grid.Row="1" Text="{Binding Title}" TextWrapping="Wrap" FontSize="12" TextTrimming="CharacterEllipsis" MaxWidth="200" />
 
                         <Grid.InputBindings>
-                            <MouseBinding Gesture="LeftDoubleClick" Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.OpenImageCommand}" CommandParameter="{Binding FilePath}" />
+                            <MouseBinding Gesture="LeftDoubleClick" Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.OpenImageCommand}" CommandParameter="{Binding}" />
                         </Grid.InputBindings>
-                        
+
+                        <Grid.ContextMenu>
+                            <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
+                                <MenuItem Header="View" Command="{Binding Tag.OpenImageCommand}" CommandParameter="{Binding DataContext}" />
+                                <MenuItem Header="Details" />
+                                <MenuItem Header="Open file location" Command="{Binding Tag.OpenAttachmentLocationCommand}" CommandParameter="{Binding DataContext}" />
+                                <MenuItem Header="Delete" Command="{Binding Tag.DeleteImageCommand}" CommandParameter="{Binding DataContext}" />
+                            </ContextMenu>
+                        </Grid.ContextMenu>
                         
                     </Grid>
 

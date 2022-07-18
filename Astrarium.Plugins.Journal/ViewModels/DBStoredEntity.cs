@@ -26,6 +26,12 @@ namespace Astrarium.Plugins.Journal.ViewModels
             set => SetValue(nameof(End), value);
         }
 
+        public ICollection<Attachment> Attachments
+        {
+            get => GetValue<ICollection<Attachment>>(nameof(Attachments), new List<Attachment>());
+            set => SetValue(nameof(Attachments), value);
+        }
+
         public string DateString => Begin.ToString("dd MMM yyyy");
 
         public string TimeString => $"{Begin:HH:mm}-{End:HH:mm}";

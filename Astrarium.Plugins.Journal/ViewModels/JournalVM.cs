@@ -24,19 +24,27 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         private DateTimeComparer dateComparer = new DateTimeComparer();
 
+        private string imagesPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Observations", "images");
+
         #endregion Private fields
 
         #region Commands
 
         public ICommand ExpandCollapseCommand { get; private set; }
         public ICommand OpenImageCommand { get; private set; }
+        public ICommand DeleteImageCommand { get; private set; }
+        public ICommand OpenAttachmentLocationCommand { get; private set; }
+        public ICommand CreateAttachmentCommand { get; private set; }
 
         #endregion Commands
 
         public JournalVM()
         {
             ExpandCollapseCommand = new Command(ExpandCollapse);
-            OpenImageCommand = new Command<string>(OpenImage);
+            OpenImageCommand = new Command<Attachment>(OpenImage);
+            DeleteImageCommand = new Command<Attachment>(DeleteImage);
+            OpenAttachmentLocationCommand = new Command<Attachment>(OpenAttachmentLocation);
+            CreateAttachmentCommand = new Command<DBStoredEntity>(CreateAttachment);
         }
 
         public ObservableCollection<TreeItemSession> AllSessions { get; private set; } = new ObservableCollection<TreeItemSession>();
@@ -180,7 +188,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
                         FilePath = Path.Combine(databaseFolder, x.FilePath),
                         Title = Path.GetFileNameWithoutExtension(x.FilePath),
                         Comments = x.Comments
-                    }).ToArray();
+                    }).ToList();
                 }
             }
             else if (SelectedTreeViewItem is TreeItemObservation observation)
@@ -211,7 +219,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
                         FilePath = Path.Combine(databaseFolder, x.FilePath),
                         Title = Path.GetFileNameWithoutExtension(x.FilePath),
                         Comments = x.Comments
-                    }).ToArray();
+                    }).ToList();
                 }
             }
         }
@@ -236,9 +244,78 @@ namespace Astrarium.Plugins.Journal.ViewModels
             }
         }
 
-        private void OpenImage(string path)
+        private void OpenImage(Attachment attachment)
         {
-            System.Diagnostics.Process.Start(path);
+            System.Diagnostics.Process.Start(attachment.FilePath);
+        }
+
+        private void OpenAttachmentLocation(Attachment attachment)
+        {
+            System.Diagnostics.Process.Start(Path.GetDirectoryName(attachment.FilePath));
+        }
+
+        private void CreateAttachment(DBStoredEntity parent)
+        {
+            string filter = "PNG files (*.png)|*.png|All image formats|*.*";
+            string fullPath = ViewManager.ShowOpenFileDialog("Add attachment", filter, out int filterIndex);
+            if (fullPath != null)
+            {
+                // source file directory
+                var directory = Path.GetDirectoryName(fullPath);
+
+                string destinationPath = fullPath;
+                if (!Utils.ArePathsEqual(directory, imagesPath))
+                {
+                    destinationPath = Path.Combine(imagesPath, Path.GetFileName(fullPath));
+                    File.Copy(fullPath, destinationPath);
+                }
+
+                var attachment = new Attachment()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    FilePath = destinationPath
+                };
+
+                using (var db = new DatabaseContext())
+                {
+                    var a = new Database.Entities.AttachmentDB()
+                    {
+                        Id = attachment.Id,
+                        FilePath = attachment.FilePath
+                    };
+                    db.Attachments.Add(a);
+                    
+                    if (parent is TreeItemSession session)
+                    {
+                        var existing = db.Sessions.Include(x => x.Attachments).First(x => x.Id == session.Id);
+                        existing.Attachments.Add(a);
+                    }
+                    else if (parent is TreeItemObservation observation)
+                    {
+                        var existing = db.Observations.Include(x => x.Attachments).First(x => x.Id == observation.Id);
+                        existing.Attachments.Add(a);
+                    }
+
+                    db.SaveChanges();
+
+                    LoadJournalItemDetails();
+                }
+            }
+        }
+
+        private void DeleteImage(Attachment attachment)
+        {
+            if (ViewManager.ShowMessageBox("Warning", "Do you really want to delete the attachment? This action can not be undone.", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)
+            {
+                using (var db = new DatabaseContext())
+                {
+                    var existing = db.Attachments.FirstOrDefault(x => x.Id == attachment.Id);
+                    db.Attachments.Remove(existing);
+                    db.SaveChanges();
+
+                    LoadJournalItemDetails();
+                }
+            }
         }
 
         #endregion Command handlers
