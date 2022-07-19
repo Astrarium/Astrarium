@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:c="clr-namespace:Astrarium.Plugins.Journal.Controls"
+             xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
              xmlns:local="clr-namespace:Astrarium.Plugins.Journal.Views"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
@@ -17,23 +18,48 @@
         <Grid Grid.Row="0" Background="{StaticResource BrushControlDarkBackground}" Margin="-2 -4 0 0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <ToggleButton Margin="2" VerticalAlignment="Center" Grid.Column="0" Height="26" Width="26" />
+            <StackPanel Grid.Column="0" Margin="0 0 2 0"  Orientation="Horizontal">
+                <Button Width="24" Height="24" Margin="2" Content="O" IsEnabled="{Binding ElementName=attachmentsList, Path=SelectedItem, Converter={s:NotNullToBoolConverter}}" Command="{Binding Path=DataContext.OpenImageCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding ElementName=attachmentsList, Path=SelectedItem}" />
+                <Button Width="24" Height="24" Margin="2" Content="D" IsEnabled="{Binding ElementName=attachmentsList, Path=SelectedItem, Converter={s:NotNullToBoolConverter}}" Command="{Binding Path=DataContext.ShowAttachmentDetailsCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding ElementName=attachmentsList, Path=SelectedItem}" />
+                <Button Width="24" Height="24" Margin="2" Content="F" IsEnabled="{Binding ElementName=attachmentsList, Path=SelectedItem, Converter={s:NotNullToBoolConverter}}" Command="{Binding Path=DataContext.OpenAttachmentLocationCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding ElementName=attachmentsList, Path=SelectedItem}" />
+                <Button Width="24" Height="24" Margin="2" Content="X" IsEnabled="{Binding ElementName=attachmentsList, Path=SelectedItem, Converter={s:NotNullToBoolConverter}}" Command="{Binding Path=DataContext.DeleteAttachmentCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding ElementName=attachmentsList, Path=SelectedItem}" />
+            </StackPanel>
 
-            <Slider x:Name="SliderPreviewSize" Minimum="100" Maximum="400" Value="200" Width="200" Orientation="Horizontal" VerticalAlignment="Center" Grid.Column="1" />
-            <Button Margin="0 0 2 0" Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Right" Content="+" Width="24" Height="24" Command="{Binding Path=DataContext.CreateAttachmentCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding}" />
+            <Slider Grid.Column="2" x:Name="SliderPreviewSize" Minimum="100" Maximum="400" Value="200" Width="200" Orientation="Horizontal" VerticalAlignment="Center" />
+
+            <StackPanel Grid.Column="4" Margin="0 0 2 0"  Orientation="Horizontal">
+                <Button Margin="2" VerticalAlignment="Center" Content="+" Width="24" Height="24" Command="{Binding Path=DataContext.CreateAttachmentCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding}" />
+            </StackPanel>
         </Grid>
 
-        <ListView Grid.Row="1" ItemsSource="{Binding Attachments}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+        <ListView x:Name="attachmentsList" Grid.Row="1" ItemsSource="{Binding Attachments}" SelectionMode="Single" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel Orientation="Horizontal"/>
                 </ItemsPanelTemplate>
             </ListView.ItemsPanel>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                    <Style.Setters>
+                        <Setter Property="Margin" Value="4" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="BorderThickness" Value="1" />
+                        <Setter Property="BorderBrush" Value="Transparent" />
+                    </Style.Setters>
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="BorderBrush" Value="{StaticResource BrushHighlight}" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </ListView.ItemContainerStyle>
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <Grid Background="Black" Tag="{Binding Path=DataContext, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
@@ -42,7 +68,9 @@
                             <RowDefinition Height="18" />
                         </Grid.RowDefinitions>
                         <c:MultiformatImage Source="{Binding FilePath}" Width="{Binding ElementName=SliderPreviewSize, Path=Value}" Height="{Binding ElementName=SliderPreviewSize, Path=Value}" />
-                        <TextBlock HorizontalAlignment="Center" ToolTip="{Binding FilePath}" Grid.Row="1" Text="{Binding Title}" TextWrapping="Wrap" FontSize="12" TextTrimming="CharacterEllipsis" MaxWidth="200" />
+                        <TextBlock HorizontalAlignment="Center" Grid.Row="1" Text="{Binding Title}" ToolTip="{Binding Title}" TextWrapping="Wrap" FontSize="12" TextTrimming="CharacterEllipsis" MaxWidth="{Binding ElementName=SliderPreviewSize, Path=Value}" />
+
+                        <!--<Button x:Name="btn" Background="#10FFFFFF" Visibility="Collapsed" Grid.Row="1" HorizontalAlignment="Right" Height="16" Width="16" Content="..." />-->
 
                         <Grid.InputBindings>
                             <MouseBinding Gesture="LeftDoubleClick" Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.OpenImageCommand}" CommandParameter="{Binding}" />
@@ -51,15 +79,25 @@
                         <Grid.ContextMenu>
                             <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
                                 <MenuItem Header="View" Command="{Binding Tag.OpenImageCommand}" CommandParameter="{Binding DataContext}" />
-                                <MenuItem Header="Details" />
+                                <MenuItem Header="Details" Command="{Binding Tag.ShowAttachmentDetailsCommand}" CommandParameter="{Binding DataContext}" />
                                 <MenuItem Header="Open file location" Command="{Binding Tag.OpenAttachmentLocationCommand}" CommandParameter="{Binding DataContext}" />
-                                <MenuItem Header="Delete" Command="{Binding Tag.DeleteImageCommand}" CommandParameter="{Binding DataContext}" />
+                                <MenuItem Header="Delete" Command="{Binding Tag.DeleteAttachmentCommand}" CommandParameter="{Binding DataContext}" />
                             </ContextMenu>
                         </Grid.ContextMenu>
-                        
-                    </Grid>
 
+                    </Grid>
+                    <!--<DataTemplate.Triggers>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver" Value="True" />
+                            </MultiTrigger.Conditions>
+                            <MultiTrigger.Setters>
+                                <Setter Property="Visibility" Value="Visible" TargetName="btn" />
+                            </MultiTrigger.Setters>
+                        </MultiTrigger>
+                    </DataTemplate.Triggers>-->
                 </DataTemplate>
+               
             </ListView.ItemTemplate>
         </ListView>
     </Grid>

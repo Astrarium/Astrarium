@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -17,19 +15,13 @@ using System.Windows.Shapes;
 namespace Astrarium.Plugins.Journal.Views
 {
     /// <summary>
-    /// Interaction logic for JournalWindow.xaml
+    /// Interaction logic for AttachmentDetailsWindow.xaml
     /// </summary>
-    public partial class JournalWindow : Window
+    public partial class AttachmentDetailsWindow : Window
     {
-        public JournalWindow()
+        public AttachmentDetailsWindow()
         {
             InitializeComponent();
-        }
-
-        private async void calendar_SelectedDatesChanged(object sender, SelectionChangedEventArgs e)
-        {
-            await Task.Delay(100);
-            calendar.DisplayDate = calendar.SelectedDate.Value;
         }
     }
 }

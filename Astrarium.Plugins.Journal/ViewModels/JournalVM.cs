@@ -7,12 +7,9 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Data.Entity;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -32,19 +29,21 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         public ICommand ExpandCollapseCommand { get; private set; }
         public ICommand OpenImageCommand { get; private set; }
-        public ICommand DeleteImageCommand { get; private set; }
+        public ICommand DeleteAttachmentCommand { get; private set; }
         public ICommand OpenAttachmentLocationCommand { get; private set; }
         public ICommand CreateAttachmentCommand { get; private set; }
+        public ICommand ShowAttachmentDetailsCommand { get; private set; }
 
         #endregion Commands
 
         public JournalVM()
         {
             ExpandCollapseCommand = new Command(ExpandCollapse);
-            OpenImageCommand = new Command<Attachment>(OpenImage);
-            DeleteImageCommand = new Command<Attachment>(DeleteImage);
+            OpenImageCommand = new Command<Attachment>(ShowAttachmentDetails);
+            DeleteAttachmentCommand = new Command<Attachment>(DeleteAttachment);
             OpenAttachmentLocationCommand = new Command<Attachment>(OpenAttachmentLocation);
             CreateAttachmentCommand = new Command<DBStoredEntity>(CreateAttachment);
+            ShowAttachmentDetailsCommand = new Command<Attachment>(ShowAttachmentDetails);
         }
 
         public ObservableCollection<TreeItemSession> AllSessions { get; private set; } = new ObservableCollection<TreeItemSession>();
@@ -186,7 +185,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
                     {
                         Id = x.Id,
                         FilePath = Path.Combine(databaseFolder, x.FilePath),
-                        Title = Path.GetFileNameWithoutExtension(x.FilePath),
+                        Title = x.Title,
                         Comments = x.Comments
                     }).ToList();
                 }
@@ -217,7 +216,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
                     {
                         Id = x.Id,
                         FilePath = Path.Combine(databaseFolder, x.FilePath),
-                        Title = Path.GetFileNameWithoutExtension(x.FilePath),
+                        Title = x.Title,
                         Comments = x.Comments
                     }).ToList();
                 }
@@ -251,13 +250,12 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         private void OpenAttachmentLocation(Attachment attachment)
         {
-            System.Diagnostics.Process.Start(Path.GetDirectoryName(attachment.FilePath));
+            System.Diagnostics.Process.Start("explorer.exe", $@"/e,/select,{attachment.FilePath}");
         }
 
         private void CreateAttachment(DBStoredEntity parent)
         {
-            string filter = "PNG files (*.png)|*.png|All image formats|*.*";
-            string fullPath = ViewManager.ShowOpenFileDialog("Add attachment", filter, out int filterIndex);
+            string fullPath = ViewManager.ShowOpenFileDialog("Add attachment", Utils.GetOpenImageDialogFilterString(), out int filterIndex);
             if (fullPath != null)
             {
                 // source file directory
@@ -303,7 +301,17 @@ namespace Astrarium.Plugins.Journal.ViewModels
             }
         }
 
-        private void DeleteImage(Attachment attachment)
+        private void ShowAttachmentDetails(Attachment attachment)
+        {
+            var model = ViewManager.CreateViewModel<AttachmentDetailsVM>();
+            model.SetAttachment(attachment);
+            if (ViewManager.ShowDialog(model) == true)
+            {
+                LoadJournalItemDetails();
+            }
+        }
+
+        private void DeleteAttachment(Attachment attachment)
         {
             if (ViewManager.ShowMessageBox("Warning", "Do you really want to delete the attachment? This action can not be undone.", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)
             {

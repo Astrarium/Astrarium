@@ -141,7 +141,6 @@
             <Calendar 
                 x:Name="calendar"
                 Grid.Row="0"
-                Focusable="False"
                 SelectedDate="{Binding CalendarDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 SelectedDatesChanged="calendar_SelectedDatesChanged"
                 SelectionMode="SingleDate"
