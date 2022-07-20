@@ -14,9 +14,22 @@
 
     <TabControl>
         <TabItem Header="Image">
-            <c:ZoomBorder ClipToBounds="True" Background="Black">
-                <c:MultiformatImage Source="{Binding FilePath}"  />
-            </c:ZoomBorder>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <ToolBar ToolBarTray.IsLocked="True" Grid.Row="0">
+                    <Button Margin="2" Height="24" Width="24" Content="+" ToolTip="Zoom In" />
+                    <Button Margin="2" Width="24" Content="-" ToolTip="Zoom Out" />
+                    <Button Margin="2" Width="24" Content="1:1" ToolTip="Actual size" />
+                    <Button Margin="2" Width="24" Content="Fit" ToolTip="Fit to window" />
+                </ToolBar>
+                    
+                <c:ZoomBorder Grid.Row="1" ClipToBounds="True" Background="Black">
+                    <c:MultiformatImage Source="{Binding FilePath}" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                </c:ZoomBorder>
+            </Grid>
         </TabItem>
         <TabItem Header="Details">
             <Grid>
