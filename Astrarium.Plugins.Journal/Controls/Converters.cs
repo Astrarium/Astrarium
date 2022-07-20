@@ -2,9 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 
 namespace Astrarium.Plugins.Journal.Controls
 {
@@ -50,6 +52,24 @@ namespace Astrarium.Plugins.Journal.Controls
             var date = (DateTime)values[0];
             var selectedDate = (DateTime)values[1];
             return Comparer.Equals(date, selectedDate);
+        }
+    }
+
+    public class PathToBitmapImageConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            string path = value as string;
+
+            if (path == null || !File.Exists(path))
+                return null;
+
+            var bmp = new BitmapImage();
+            bmp.BeginInit();
+            bmp.CacheOption = BitmapCacheOption.OnLoad;
+            bmp.UriSource = new Uri(path, UriKind.RelativeOrAbsolute);
+            bmp.EndInit();
+            return bmp;
         }
     }
 }

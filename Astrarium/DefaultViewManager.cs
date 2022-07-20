@@ -268,15 +268,16 @@ namespace Astrarium
             }
         }
 
-        public string ShowOpenFileDialog(string caption, string filter, out int selectedFilterIndex)
+        public string[] ShowOpenFileDialog(string caption, string filter, bool multiSelect, out int selectedFilterIndex)
         {
             var dialog = new OpenFileDialog();
             dialog.Title = caption.StartsWith("$") ? Text.Get(caption.Substring(1)) : caption;
             dialog.Filter = filter;
+            dialog.Multiselect = multiSelect;
             if (dialog.ShowDialog() ?? false)
             {
                 selectedFilterIndex = dialog.FilterIndex;
-                return dialog.FileName;
+                return dialog.FileNames;
             }
             else
             {

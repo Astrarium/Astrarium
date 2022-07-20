@@ -38,7 +38,7 @@ namespace Astrarium.Plugins.Journal
 
         private void DoImport()
         {
-            string file = ViewManager.ShowOpenFileDialog("Import from OAL file", "Open Astronomy Log files (*.xml)|*.xml|All files|*.*", out int filterIndex);
+            string file = ViewManager.ShowOpenFileDialog("Import from OAL file", "Open Astronomy Log files (*.xml)|*.xml|All files|*.*", multiSelect: false, out int filterIndex)?.FirstOrDefault();
            
             if (file != null)
             {

@@ -29,7 +29,13 @@
             <TextBlock Padding="8" Text="Session:" FontSize="18" VerticalAlignment="Center"  />
             <TextBlock Padding="8" FontSize="18" Text="{Binding DateString}" VerticalAlignment="Center" />
             <TextBlock Padding="8" FontSize="18" Text="{Binding TimeString}" VerticalAlignment="Center" />
-            <Button HorizontalAlignment="Right" Content="Add" />
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Margin="2" Content="Del" />
+                <Button Margin="2" Content="Edit" />
+                <Button Margin="2" Content="Add" />
+            </StackPanel>
+
         </DockPanel>
 
         <TabControl Grid.Row="1">

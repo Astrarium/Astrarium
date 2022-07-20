@@ -27,7 +27,7 @@
                 </ToolBar>
                     
                 <c:ZoomBorder x:Name="zoomBorder" Grid.Row="1" ClipToBounds="True" Background="Black">
-                    <c:MultiformatImage Source="{Binding FilePath}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <c:MultiformatImage Source="{Binding FilePath, Converter={c:PathToBitmapImageConverter}}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                     <c:ZoomBorder.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Zoom IN" Click="ZoomInContextMenu" />

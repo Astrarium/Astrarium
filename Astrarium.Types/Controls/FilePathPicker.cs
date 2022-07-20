@@ -75,7 +75,7 @@ namespace Astrarium.Types.Controls
         {
             if (Mode == PickerMode.File)
             {
-                string path = ViewManager.ShowOpenFileDialog(Caption, "*.*", out int filterIndex);
+                string path = ViewManager.ShowOpenFileDialog(Caption, "*.*", multiSelect: false, out int filterIndex)?.FirstOrDefault();
                 TrySetValue(path);
             }
             else if (Mode == PickerMode.Directory)

@@ -337,7 +337,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
 
             try
             {
-                string file = ViewManager.ShowOpenFileDialog("$EclipseView.ImportCitiesList.DialogTitle", $"{Text.Get("EclipseView.ImportCitiesList.FileFormat")}|*.csv", out int filterIndex);
+                string file = ViewManager.ShowOpenFileDialog("$EclipseView.ImportCitiesList.DialogTitle", $"{Text.Get("EclipseView.ImportCitiesList.FileFormat")}|*.csv", multiSelect: false, out int filterIndex)?.FirstOrDefault();
                 if (file != null)
                 {
                     ViewManager.ShowProgress("$EclipseView.WaitMessageBox.Title", "$EclipseView.LocalCircumstances.CalculatingCircumstancesProgress", tokenSource);

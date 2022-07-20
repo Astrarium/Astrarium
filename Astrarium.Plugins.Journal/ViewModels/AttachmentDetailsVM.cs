@@ -61,6 +61,12 @@ namespace Astrarium.Plugins.Journal.ViewModels
             }
         }
 
+        public override void Close()
+        {
+            base.Close();
+
+        }
+
         private void Save()
         {
             using (var ctx = new DatabaseContext())

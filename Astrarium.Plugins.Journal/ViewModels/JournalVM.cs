@@ -21,7 +21,9 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         private DateTimeComparer dateComparer = new DateTimeComparer();
 
-        private string imagesPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Observations", "images");
+        private readonly string rootPath;
+        private readonly string databasePath;
+        private readonly string imagesPath;
 
         #endregion Private fields
 
@@ -34,18 +36,24 @@ namespace Astrarium.Plugins.Journal.ViewModels
         public ICommand OpenAttachmentLocationCommand { get; private set; }
         public ICommand CreateAttachmentCommand { get; private set; }
         public ICommand ShowAttachmentDetailsCommand { get; private set; }
+        public ICommand DropAttachmentsCommand { get; private set; }
 
         #endregion Commands
 
         public JournalVM()
         {
+            rootPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Observations");
+            databasePath = Path.Combine(rootPath, "Observations.db");
+            imagesPath = Path.Combine(rootPath, "images");
+
             ExpandCollapseCommand = new Command(ExpandCollapse);
             OpenImageCommand = new Command<Attachment>(OpenImage);
             DeleteAttachmentCommand = new Command<Attachment>(DeleteAttachment);
             OpenAttachmentLocationCommand = new Command<Attachment>(OpenAttachmentLocation);
             OpenAttachmentInSystemViewerCommand = new Command<Attachment>(OpenAttachmentInSystemViewer);
-            CreateAttachmentCommand = new Command<DBStoredEntity>(CreateAttachment);
+            CreateAttachmentCommand = new Command(CreateAttachment);
             ShowAttachmentDetailsCommand = new Command<Attachment>(ShowAttachmentDetails);
+            DropAttachmentsCommand = new Command<string[]>(DropAttachments);
         }
 
         public ObservableCollection<TreeItemSession> AllSessions { get; private set; } = new ObservableCollection<TreeItemSession>();
@@ -166,7 +174,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         private void LoadJournalItemDetails()
         {
-            string databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Observations", "Observations.db");
+            
             string databaseFolder = Path.GetDirectoryName(databasePath);
 
             if (SelectedTreeViewItem is TreeItemSession session)
@@ -247,60 +255,87 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         private void OpenAttachmentLocation(Attachment attachment)
         {
-            System.Diagnostics.Process.Start("explorer.exe", $@"/e,/select,{attachment.FilePath}");
+            string path = Path.Combine(rootPath, attachment.FilePath);
+            try
+            {
+                System.Diagnostics.Process.Start("explorer.exe", $@"/e,/select,{path}");
+            }
+            catch (Exception ex)
+            {
+                ViewManager.ShowMessageBox("$Error", ex.Message);
+            }
         }
 
-        private void CreateAttachment(DBStoredEntity parent)
+        private void CreateAttachment()
         {
-            string fullPath = ViewManager.ShowOpenFileDialog("Add attachment", Utils.GetOpenImageDialogFilterString(), out int filterIndex);
-            if (fullPath != null)
+            string[] fullPaths = ViewManager.ShowOpenFileDialog("Add attachment", Utils.GetOpenImageDialogFilterString(), multiSelect: true, out int filterIndex);
+            if (fullPaths != null)
             {
-                // source file directory
-                var directory = Path.GetDirectoryName(fullPath);
-
-                string destinationPath = fullPath;
-                if (!Utils.ArePathsEqual(directory, imagesPath))
+                foreach (var file in fullPaths)
                 {
-                    destinationPath = Path.Combine(imagesPath, Path.GetFileName(fullPath));
-                    File.Copy(fullPath, destinationPath);
+                    CreateAttachment(file);
+                }
+            }
+        }
+
+        private void CreateAttachment(string fullPath)
+        {
+            // source file directory
+            var directory = Path.GetDirectoryName(fullPath);
+
+            string destinationPath = fullPath;
+            
+            // copying is needed
+            if (!Utils.ArePathsEqual(directory, imagesPath))
+            {
+                destinationPath = Path.Combine(imagesPath, Path.GetFileName(fullPath));
+
+                // new name is needed (already exists), just add a guid string
+                if (File.Exists(destinationPath))
+                {
+                    destinationPath = Path.Combine(Path.GetDirectoryName(destinationPath), $"{Path.GetFileNameWithoutExtension(destinationPath)}-{Guid.NewGuid()}{Path.GetExtension(destinationPath)}");
                 }
 
-                var attachment = new Attachment()
+                // copy
+                File.Copy(fullPath, destinationPath);
+            }
+
+            using (var db = new DatabaseContext())
+            {
+                var attachment = new Database.Entities.AttachmentDB()
                 {
                     Id = Guid.NewGuid().ToString(),
                     FilePath = Path.Combine("images", Path.GetFileName(destinationPath))
                 };
+                db.Attachments.Add(attachment);
 
-                using (var db = new DatabaseContext())
+                if (SelectedTreeViewItem is TreeItemSession session)
                 {
-                    var a = new Database.Entities.AttachmentDB()
-                    {
-                        Id = attachment.Id,
-                        FilePath = attachment.FilePath
-                    };
-                    db.Attachments.Add(a);
-                    
-                    if (parent is TreeItemSession session)
-                    {
-                        var existing = db.Sessions.Include(x => x.Attachments).First(x => x.Id == session.Id);
-                        existing.Attachments.Add(a);
-                    }
-                    else if (parent is TreeItemObservation observation)
-                    {
-                        var existing = db.Observations.Include(x => x.Attachments).First(x => x.Id == observation.Id);
-                        existing.Attachments.Add(a);
-                    }
-
-                    db.SaveChanges();
-
-                    LoadJournalItemDetails();
+                    var existing = db.Sessions.Include(x => x.Attachments).First(x => x.Id == session.Id);
+                    existing.Attachments.Add(attachment);
                 }
+                else if (SelectedTreeViewItem is TreeItemObservation observation)
+                {
+                    var existing = db.Observations.Include(x => x.Attachments).First(x => x.Id == observation.Id);
+                    existing.Attachments.Add(attachment);
+                }
+
+                db.SaveChanges();
+
+                LoadJournalItemDetails();
             }
         }
 
         private void OpenAttachmentInSystemViewer(Attachment attachment)
         {
-            System.Diagnostics.Process.Start(attachment.FilePath);
+            try
+            {
+                System.Diagnostics.Process.Start(attachment.FilePath);
+            }
+            catch (Exception ex)
+            {
+                ViewManager.ShowMessageBox("$Error", ex.Message);
+            }
         }
 
         private void OpenImage(Attachment attachment)
@@ -319,6 +354,14 @@ namespace Astrarium.Plugins.Journal.ViewModels
             ViewManager.ShowDialog(model);
         }
 
+        private void DropAttachments(string[] files)
+        {
+            foreach (var file in files)
+            {
+                CreateAttachment(file);
+            }
+        }
+
         private void DeleteAttachment(Attachment attachment)
         {
             if (ViewManager.ShowMessageBox("Warning", "Do you really want to delete the attachment? This action can not be undone.", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)
@@ -328,6 +371,27 @@ namespace Astrarium.Plugins.Journal.ViewModels
                     var existing = db.Attachments.FirstOrDefault(x => x.Id == attachment.Id);
                     db.Attachments.Remove(existing);
                     db.SaveChanges();
+
+                    if (File.Exists(attachment.FilePath))
+                    {
+                        var filePaths = db.Attachments.Select(x => x.FilePath).ToArray();
+                        if (!filePaths.Any(x => Utils.ArePathsEqual(existing.FilePath, x)))
+                        {
+                            
+                            try
+                            {
+                                File.Delete(attachment.FilePath);
+                            }
+                            catch (Exception ex)
+                            {
+
+                            }
+                        }
+                        else
+                        {
+                            // file is used
+                        }
+                    }
 
                     LoadJournalItemDetails();
                 }

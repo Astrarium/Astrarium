@@ -119,7 +119,7 @@ namespace Astrarium.Plugins.Journal.Controls
 
         private void Zoom(double zoom, Point relative)
         {
-            if (child != null)
+            if (child != null && child.Source != null)
             {
                 double absoluteX;
                 double absoluteY;

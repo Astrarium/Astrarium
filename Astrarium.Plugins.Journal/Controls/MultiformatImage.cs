@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,6 +18,7 @@ namespace Astrarium.Plugins.Journal.Controls
     public class MultiformatImage : Image
     {
         private AutoResetEvent animationResetEvent = new AutoResetEvent(false);
+        private string imageErrorText = null;
 
         public MultiformatImage()
         {
@@ -36,6 +39,8 @@ namespace Astrarium.Plugins.Journal.Controls
 
         ~MultiformatImage()
         {
+            Dispatcher.Invoke(() => { Source = null; });
+           
             animationResetEvent.Set();
         }
 
@@ -43,18 +48,57 @@ namespace Astrarium.Plugins.Journal.Controls
         {
             try
             {
-                Uri imageUri = new Uri(Source.ToString());
-                if (Path.GetExtension(imageUri.AbsolutePath).ToLower().Equals(".gif"))
+                if (Source != null)
                 {
-                    ProcessGif(imageUri);
+                    
+                    Uri imageUri = new Uri(Source.ToString());
+
+                    if (!File.Exists(imageUri.AbsolutePath))
+                    {
+                        imageErrorText = "Image not found";
+                        InvalidateVisual();
+                    }
+                    else if (Path.GetExtension(imageUri.AbsolutePath).ToLower().Equals(".gif"))
+                    {
+                        ProcessGif(imageUri);
+                    }
+                    else
+                    {
+                        // TODO: process other types if required
+                    }
                 }
-                // TODO: process other types if required
+                else
+                {
+                    imageErrorText = "Image not found";
+                    InvalidateVisual();
+                }
             }
             catch
             {
-                
+                imageErrorText = "Bad image";
+                InvalidateVisual();
             }
         }
+
+        protected override void OnRender(DrawingContext ctx)
+        {
+            if (imageErrorText != null)
+            {
+                DrawText(ctx, imageErrorText, new Point(ActualWidth  / 2, ActualHeight / 2), 14, Brushes.Red);
+            }
+            else if (Source != null)
+            {
+                base.OnRender(ctx);
+            }
+        }
+
+        private void DrawText(DrawingContext ctx, string text, Point point, double size, Brush brush)
+        {
+            var typeface = new Typeface(new FontFamily("#Noto Sans"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
+            FormattedText formattedText = new FormattedText(text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, size, brush);
+            ctx.DrawText(formattedText, new Point(point.X - formattedText.Width / 2, point.Y - formattedText.Height / 2));
+        }
+
         private void ProcessGif(Uri imageUri)
         {
             var gifDecoder = new GifBitmapDecoder(imageUri, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
