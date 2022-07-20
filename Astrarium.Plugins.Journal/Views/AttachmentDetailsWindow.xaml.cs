@@ -23,5 +23,35 @@ namespace Astrarium.Plugins.Journal.Views
         {
             InitializeComponent();
         }
+
+        private void ZoomInContextMenu(object sender, RoutedEventArgs e)
+        {
+            zoomBorder.ZoomIn();
+        }
+
+        private void ZoomOutContextMenu(object sender, RoutedEventArgs e)
+        {
+            zoomBorder.ZoomOut();
+        }
+
+        private void ZoomIn(object sender, RoutedEventArgs e)
+        {
+            zoomBorder.ZoomIn();
+        }
+
+        private void ZoomOut(object sender, RoutedEventArgs e)
+        {
+            zoomBorder.ZoomOut();
+        }
+
+        private void FitToWindow(object sender, RoutedEventArgs e)
+        {
+            zoomBorder.FitToWindow();
+        }
+
+        private void SetActualSize(object sender, RoutedEventArgs e)
+        {
+            zoomBorder.SetActualSize();
+        }
     }
 }

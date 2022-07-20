@@ -29,6 +29,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         public ICommand ExpandCollapseCommand { get; private set; }
         public ICommand OpenImageCommand { get; private set; }
+        public ICommand OpenAttachmentInSystemViewerCommand { get; private set; }
         public ICommand DeleteAttachmentCommand { get; private set; }
         public ICommand OpenAttachmentLocationCommand { get; private set; }
         public ICommand CreateAttachmentCommand { get; private set; }
@@ -39,9 +40,10 @@ namespace Astrarium.Plugins.Journal.ViewModels
         public JournalVM()
         {
             ExpandCollapseCommand = new Command(ExpandCollapse);
-            OpenImageCommand = new Command<Attachment>(ShowAttachmentDetails);
+            OpenImageCommand = new Command<Attachment>(OpenImage);
             DeleteAttachmentCommand = new Command<Attachment>(DeleteAttachment);
             OpenAttachmentLocationCommand = new Command<Attachment>(OpenAttachmentLocation);
+            OpenAttachmentInSystemViewerCommand = new Command<Attachment>(OpenAttachmentInSystemViewer);
             CreateAttachmentCommand = new Command<DBStoredEntity>(CreateAttachment);
             ShowAttachmentDetailsCommand = new Command<Attachment>(ShowAttachmentDetails);
         }
@@ -243,11 +245,6 @@ namespace Astrarium.Plugins.Journal.ViewModels
             }
         }
 
-        private void OpenImage(Attachment attachment)
-        {
-            System.Diagnostics.Process.Start(attachment.FilePath);
-        }
-
         private void OpenAttachmentLocation(Attachment attachment)
         {
             System.Diagnostics.Process.Start("explorer.exe", $@"/e,/select,{attachment.FilePath}");
@@ -271,7 +268,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
                 var attachment = new Attachment()
                 {
                     Id = Guid.NewGuid().ToString(),
-                    FilePath = destinationPath
+                    FilePath = Path.Combine("images", Path.GetFileName(destinationPath))
                 };
 
                 using (var db = new DatabaseContext())
@@ -301,14 +298,25 @@ namespace Astrarium.Plugins.Journal.ViewModels
             }
         }
 
+        private void OpenAttachmentInSystemViewer(Attachment attachment)
+        {
+            System.Diagnostics.Process.Start(attachment.FilePath);
+        }
+
+        private void OpenImage(Attachment attachment)
+        {
+            var model = ViewManager.CreateViewModel<AttachmentDetailsVM>();
+            model.SetAttachment(attachment);
+            model.ShowImage();
+            ViewManager.ShowDialog(model);
+        }
+
         private void ShowAttachmentDetails(Attachment attachment)
         {
             var model = ViewManager.CreateViewModel<AttachmentDetailsVM>();
             model.SetAttachment(attachment);
-            if (ViewManager.ShowDialog(model) == true)
-            {
-                LoadJournalItemDetails();
-            }
+            model.ShowDetails();
+            ViewManager.ShowDialog(model);
         }
 
         private void DeleteAttachment(Attachment attachment)

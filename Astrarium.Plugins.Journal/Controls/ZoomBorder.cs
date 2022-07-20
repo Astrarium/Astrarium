@@ -20,8 +20,8 @@ namespace Astrarium.Plugins.Journal.Controls
             get { return base.Child; }
             set
             {
-                if (value != null && value != this.Child)
-                    this.Initialize(value);
+                if (value != null && value != child)
+                    Initialize(value);
                 base.Child = value;
             }
         }
@@ -35,48 +35,70 @@ namespace Astrarium.Plugins.Journal.Controls
                 group.Children.Add(scaleTransform);
                 group.Children.Add(translateTransform);
                 child.RenderTransform = group;
-                child.RenderTransformOrigin = new Point(0, 0);
+                child.RenderTransformOrigin = new Point(0.5, 0.5);
                 MouseWheel += child_MouseWheel;
                 MouseLeftButtonDown += child_MouseLeftButtonDown;
                 MouseLeftButtonUp += child_MouseLeftButtonUp;
                 MouseMove += child_MouseMove;
-                PreviewMouseRightButtonDown += new MouseButtonEventHandler(child_PreviewMouseRightButtonDown);
             }
         }
 
-
-        protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+        public void ZoomIn()
         {
-            base.OnRenderSizeChanged(sizeInfo);
-            if (child.Source != null)
-            {
-                int w = (child.Source as BitmapSource).PixelWidth;
-                int h = (child.Source as BitmapSource).PixelHeight;
-                translateTransform.X = (sizeInfo.NewSize.Width - w) / 2;
-                translateTransform.Y = (sizeInfo.NewSize.Height - h) / 2;
-            }
+            Zoom(0.2, new Point(0, 0));
+
+            // reset pan
+            translateTransform.X = 0;
+            translateTransform.Y = 0;
         }
 
-        public void Reset()
+        public void ZoomOut()
+        {
+            Zoom(-0.2, new Point(0, 0));
+
+            // reset pan
+            translateTransform.X = 0;
+            translateTransform.Y = 0;
+        }
+
+        public void FitToWindow()
+        {
+            ResetSize(true);
+        }
+
+        public void SetActualSize()
+        {
+            ResetSize(false);
+        }
+
+        private void ResetSize(bool fit)
         {
             if (child != null)
             {
-                int w = (child.Source as BitmapSource).PixelWidth;
-                int h = (child.Source as BitmapSource).PixelHeight;
+                // fit
+                if (fit)
+                {
+                    // reset zoom
+                    scaleTransform.ScaleX = 1;
+                    scaleTransform.ScaleY = 1;
+                }
+                else
+                {
+                    int w = (child.Source as BitmapSource).PixelWidth;
+                    int h = (child.Source as BitmapSource).PixelHeight;
 
-                double scaleX = w / this.ActualWidth;
-                double scaleY = h / this.ActualHeight;
+                    double scaleX = w / ActualWidth;
+                    double scaleY = h / ActualHeight;
 
+                    double scale = System.Math.Max(scaleX, scaleY);
 
-                double scale = System.Math.Max(scaleX, scaleY);
-
-                // reset zoom
-                scaleTransform.ScaleX = scale;
-                scaleTransform.ScaleY = scale;
+                    scaleTransform.ScaleX = scale;
+                    scaleTransform.ScaleY = scale;
+                }
 
                 // reset pan
-                translateTransform.X = (ActualWidth - w) / 2;
-                translateTransform.Y = (ActualHeight - h) / 2;
+                translateTransform.X = 0;
+                translateTransform.Y = 0;
             }
         }
 
@@ -84,31 +106,44 @@ namespace Astrarium.Plugins.Journal.Controls
 
         private void child_MouseWheel(object sender, MouseWheelEventArgs e)
         {
+            if (!(e.Delta > 0) && (scaleTransform.ScaleX < .5 || scaleTransform.ScaleY < .5))
+                return;
+
             if (child != null)
             {
-                double zoom = e.Delta > 0 ? .2 : -.2;
-                if (!(e.Delta > 0) && (scaleTransform.ScaleX < .5 || scaleTransform.ScaleY < .5))
-                    return;
-
                 Point relative = e.GetPosition(child);
+                double zoom = e.Delta > 0 ? .2 : -.2;
+                Zoom(zoom, relative);
+            }
+        }
+
+        private void Zoom(double zoom, Point relative)
+        {
+            if (child != null)
+            {
                 double absoluteX;
                 double absoluteY;
 
+                int w = (child.Source as BitmapSource).PixelWidth;
+                int h = (child.Source as BitmapSource).PixelHeight;
+
+                relative.X -= ActualHeight / 2 * w / h;
+                relative.Y -= ActualHeight / 2;
+
                 absoluteX = relative.X * scaleTransform.ScaleX + translateTransform.X;
-                absoluteY = relative.Y * scaleTransform.ScaleY + translateTransform.Y;
+                absoluteY = relative.Y * scaleTransform.ScaleY + translateTransform.Y ;
 
                 double zoomCorrected = zoom * scaleTransform.ScaleX;
                 scaleTransform.ScaleX += zoomCorrected;
                 scaleTransform.ScaleY += zoomCorrected;
 
-                if (scaleTransform.ScaleX > 15) scaleTransform.ScaleX = 15;
-                if (scaleTransform.ScaleY > 15) scaleTransform.ScaleY = 15;
+                if (scaleTransform.ScaleX > 15)
+                    scaleTransform.ScaleX = 15;
+                if (scaleTransform.ScaleY > 15)
+                    scaleTransform.ScaleY = 15;
 
                 translateTransform.X = absoluteX - relative.X * scaleTransform.ScaleX;
                 translateTransform.Y = absoluteY - relative.Y * scaleTransform.ScaleY;
-
-                //if (tt.X > 0) tt.X = 0;
-                //if (tt.Y > 0) tt.Y = 0;
             }
         }
 
@@ -132,24 +167,13 @@ namespace Astrarium.Plugins.Journal.Controls
             }
         }
 
-        void child_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            Reset();
-        }
-
         private void child_MouseMove(object sender, MouseEventArgs e)
         {
-            if (child != null)
+            if (child != null && child.IsMouseCaptured)
             {
-                if (child.IsMouseCaptured)
-                {
-                    Vector v = start - e.GetPosition(this);
-                    translateTransform.X = origin.X - v.X;
-                    translateTransform.Y = origin.Y - v.Y;
-
-                    //if (tt.X > 0) tt.X = 0;
-                    //if (tt.Y > 0) tt.Y = 0;
-                }
+                Vector v = start - e.GetPosition(this);
+                translateTransform.X = origin.X - v.X;
+                translateTransform.Y = origin.Y - v.Y;
             }
         }
 

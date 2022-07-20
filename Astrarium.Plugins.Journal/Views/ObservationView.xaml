@@ -172,7 +172,7 @@
                 </Grid>
 
             </TabItem>
-            <TabItem Header="Images &amp; Files">
+            <TabItem Header="Images">
                 <v:AttachmentsView />
             </TabItem>
         </TabControl>

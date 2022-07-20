@@ -8,11 +8,11 @@
         Style="{StaticResource {x:Type Window}}" 
         WindowStartupLocation="CenterOwner"
         WindowState="Maximized"
-        Title="Attachment details" 
+        Title="Image viewer" 
         MinHeight="300" MinWidth="300"
         Height="600" Width="600">
 
-    <TabControl>
+    <TabControl SelectedIndex="{Binding ActiveTabIndex}">
         <TabItem Header="Image">
             <Grid>
                 <Grid.RowDefinitions>
@@ -20,14 +20,25 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <ToolBar ToolBarTray.IsLocked="True" Grid.Row="0">
-                    <Button Margin="2" Height="24" Width="24" Content="+" ToolTip="Zoom In" />
-                    <Button Margin="2" Width="24" Content="-" ToolTip="Zoom Out" />
-                    <Button Margin="2" Width="24" Content="1:1" ToolTip="Actual size" />
-                    <Button Margin="2" Width="24" Content="Fit" ToolTip="Fit to window" />
+                    <Button Margin="2" Height="24" Width="24" Content="+" ToolTip="Zoom In" Click="ZoomIn" />
+                    <Button Margin="2" Width="24" Content="-" ToolTip="Zoom Out" Click="ZoomOut" />
+                    <Button Margin="2" Width="24" Content="1:1" ToolTip="Actual size" Click="SetActualSize" />
+                    <Button Margin="2" Width="24" Content="Fit" ToolTip="Fit to window" Click="FitToWindow" />
                 </ToolBar>
                     
-                <c:ZoomBorder Grid.Row="1" ClipToBounds="True" Background="Black">
-                    <c:MultiformatImage Source="{Binding FilePath}" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                <c:ZoomBorder x:Name="zoomBorder" Grid.Row="1" ClipToBounds="True" Background="Black">
+                    <c:MultiformatImage Source="{Binding FilePath}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <c:ZoomBorder.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Zoom IN" Click="ZoomInContextMenu" />
+                            <MenuItem Header="Zoom OUT" Click="ZoomOutContextMenu" />
+                            <Separator />
+                            <MenuItem Header="Actual size" Click="SetActualSize" />
+                            <MenuItem Header="Fit to window" Click="FitToWindow"  />
+                            <Separator />
+                            <MenuItem Header="Details" Command="{Binding ShowDetailsCommand}"  />
+                        </ContextMenu>
+                    </c:ZoomBorder.ContextMenu>
                 </c:ZoomBorder>
             </Grid>
         </TabItem>

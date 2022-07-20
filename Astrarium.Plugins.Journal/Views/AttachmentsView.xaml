@@ -78,7 +78,8 @@
 
                         <Grid.ContextMenu>
                             <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
-                                <MenuItem Header="View" Command="{Binding Tag.OpenImageCommand}" CommandParameter="{Binding DataContext}" />
+                                <MenuItem Header="Show" Command="{Binding Tag.OpenImageCommand}" CommandParameter="{Binding DataContext}" />
+                                <MenuItem Header="Show in system viewer" Command="{Binding Tag.OpenAttachmentInSystemViewerCommand}" CommandParameter="{Binding DataContext}" />
                                 <MenuItem Header="Details" Command="{Binding Tag.ShowAttachmentDetailsCommand}" CommandParameter="{Binding DataContext}" />
                                 <MenuItem Header="Open file location" Command="{Binding Tag.OpenAttachmentLocationCommand}" CommandParameter="{Binding DataContext}" />
                                 <MenuItem Header="Delete" Command="{Binding Tag.DeleteAttachmentCommand}" CommandParameter="{Binding DataContext}" />
