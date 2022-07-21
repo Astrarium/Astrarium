@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Astrarium.Plugins.Journal.ViewModels
+namespace Astrarium.Plugins.Journal.Types
 {
     public static class Equipment
     {

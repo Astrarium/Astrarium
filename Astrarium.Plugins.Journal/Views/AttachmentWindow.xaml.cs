@@ -3,11 +3,11 @@
 namespace Astrarium.Plugins.Journal.Views
 {
     /// <summary>
-    /// Interaction logic for AttachmentDetailsWindow.xaml
+    /// Interaction logic for AttachmentWindow.xaml
     /// </summary>
-    public partial class AttachmentDetailsWindow : Window
+    public partial class AttachmentWindow : Window
     {
-        public AttachmentDetailsWindow()
+        public AttachmentWindow()
         {
             InitializeComponent();
         }

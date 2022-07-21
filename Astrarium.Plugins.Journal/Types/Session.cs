@@ -6,13 +6,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Astrarium.Plugins.Journal.ViewModels
+namespace Astrarium.Plugins.Journal.Types
 {
-    public class TreeItemSession : DBStoredEntity
+    public class Session : DBStoredEntity
     {
         public string Id { get; private set; }
 
-        public TreeItemSession(string id)
+        public Session(string id)
         {
             Id = id;
         }
@@ -39,6 +39,9 @@ namespace Astrarium.Plugins.Journal.ViewModels
             set => SetValue(nameof(Weather), value);
         }
 
+        /// <summary>
+        /// Seeing (Antoniadi scale)
+        /// </summary>
         [DBStored(Entity = typeof(SessionDB), Field = "Seeing")]
         public int? Seeing
         {
@@ -46,6 +49,9 @@ namespace Astrarium.Plugins.Journal.ViewModels
             set => SetValue(nameof(Seeing), value);
         }
 
+        /// <summary>
+        /// Flag indicating sky quality field is specified
+        /// </summary>
         public bool SkyQualitySpecified
         {
             get => GetValue(nameof(SkyQualitySpecified), false);
@@ -110,6 +116,6 @@ namespace Astrarium.Plugins.Journal.ViewModels
             get => Observations.Count;
         }
 
-        public ObservableCollection<TreeItemObservation> Observations { get; private set; } = new ObservableCollection<TreeItemObservation>();
+        public ObservableCollection<Observation> Observations { get; private set; } = new ObservableCollection<Observation>();
     }
 }

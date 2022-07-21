@@ -124,7 +124,7 @@
                         <ComboBox.ItemsSource>
                             <CompositeCollection>
                                 <e:OpticsDB Id="{x:Null}" Model="None" />
-                                <CollectionContainer Collection="{Binding Source={x:Static vm:Equipment.Telescopes}}" />
+                                <CollectionContainer Collection="{Binding Source={x:Static t:Equipment.Telescopes}}" />
                             </CompositeCollection>
                         </ComboBox.ItemsSource>
                     </ComboBox>
@@ -134,7 +134,7 @@
                         <ComboBox.ItemsSource>
                             <CompositeCollection>
                                 <e:EyepieceDB Id="{x:Null}" Model="None" />
-                                <CollectionContainer Collection="{Binding Source={x:Static vm:Equipment.Eyepieces}}" />
+                                <CollectionContainer Collection="{Binding Source={x:Static t:Equipment.Eyepieces}}" />
                             </CompositeCollection>
                         </ComboBox.ItemsSource>
                     </ComboBox>
@@ -144,7 +144,7 @@
                         <ComboBox.ItemsSource>
                             <CompositeCollection>
                                 <e:LensDB Id="{x:Null}" Model="None" />
-                                <CollectionContainer Collection="{Binding Source={x:Static vm:Equipment.Lenses}}" />
+                                <CollectionContainer Collection="{Binding Source={x:Static t:Equipment.Lenses}}" />
                             </CompositeCollection>
                         </ComboBox.ItemsSource>
                     </ComboBox>
@@ -154,7 +154,7 @@
                         <ComboBox.ItemsSource>
                             <CompositeCollection>
                                 <e:FilterDB Id="{x:Null}" Model="None" />
-                                <CollectionContainer Collection="{Binding Source={x:Static vm:Equipment.Filters}}" />
+                                <CollectionContainer Collection="{Binding Source={x:Static t:Equipment.Filters}}" />
                             </CompositeCollection>
                         </ComboBox.ItemsSource>
                     </ComboBox>
@@ -164,7 +164,7 @@
                         <ComboBox.ItemsSource>
                             <CompositeCollection>
                                 <e:ImagerDB Id="{x:Null}" Model="None" />
-                                <CollectionContainer Collection="{Binding Source={x:Static vm:Equipment.Cameras}}" />
+                                <CollectionContainer Collection="{Binding Source={x:Static t:Equipment.Cameras}}" />
                             </CompositeCollection>
                         </ComboBox.ItemsSource>
                     </ComboBox>
@@ -172,7 +172,13 @@
                 </Grid>
 
             </TabItem>
-            <TabItem Header="Images">
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Images" />
+                        <TextBlock VerticalAlignment="Center" FontSize="10" Opacity="0.25" Padding="6 0 0 0" Text="{Binding Attachments.Count}" />
+                    </StackPanel>
+                </TabItem.Header>
                 <v:AttachmentsView />
             </TabItem>
         </TabControl>

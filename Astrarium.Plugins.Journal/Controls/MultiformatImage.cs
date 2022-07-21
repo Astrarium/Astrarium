@@ -39,7 +39,7 @@ namespace Astrarium.Plugins.Journal.Controls
 
         ~MultiformatImage()
         {
-            Dispatcher.Invoke(() => { Source = null; });
+            Dispatcher.Invoke(() => { try { Source = null; } catch { } });
            
             animationResetEvent.Set();
         }

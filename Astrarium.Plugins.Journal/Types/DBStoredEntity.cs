@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Astrarium.Plugins.Journal.ViewModels
+namespace Astrarium.Plugins.Journal.Types
 {
     public abstract class DBStoredEntity : PropertyChangedBase
     {

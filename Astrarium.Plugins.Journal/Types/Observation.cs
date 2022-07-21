@@ -9,15 +9,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Astrarium.Plugins.Journal.ViewModels
+namespace Astrarium.Plugins.Journal.Types
 {
-    public class TreeItemObservation : DBStoredEntity
+    public class Observation : DBStoredEntity
     {
         private static JsonSerializerSettings jsonSettings = new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.None };
 
         public string Id { get; private set; }
 
-        public TreeItemObservation(string id)
+        public Observation(string id)
         {
             Id = id;
         }
@@ -27,7 +27,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
         /// <summary>
         /// Session instance associated with the observation
         /// </summary>
-        public TreeItemSession Session { get; set; }
+        public Session Session { get; set; }
 
         /// <summary>
         /// Required by the tree view control

@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+              xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types" 
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
@@ -16,18 +17,22 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Aliases:" Grid.Column="0" VerticalAlignment="Center" Margin="2" Grid.Row="0" />
-        <TextBox Text="{Binding ObjectNameAliases, Mode=OneWay}" IsReadOnly="True" Grid.Column="1" Margin="2" Grid.Row="0" />
+        <TextBlock Text="Object type:" Grid.Column="0" VerticalAlignment="Center" Margin="2" Grid.Row="0" />
+        <TextBox Text="{Binding ObjectType, Converter={s:CelestialObjectTypeDescriptionConverter}, Mode=OneWay}" IsReadOnly="True" Grid.Column="1" Margin="2" Grid.Row="0" />
+        
+        <TextBlock Text="Aliases:" Grid.Column="0" VerticalAlignment="Center" Margin="2" Grid.Row="1" />
+        <TextBox Text="{Binding ObjectNameAliases, Mode=OneWay}" IsReadOnly="True" Grid.Column="1" Margin="2" Grid.Row="1" />
 
-        <TextBlock Text="Constellation:" Grid.Column="0" VerticalAlignment="Center" Margin="2" Grid.Row="1" />
-        <TextBox Text="{Binding Constellation, Mode=OneWay}" IsReadOnly="True" Grid.Column="1" Margin="2" Grid.Row="1" />
+        <TextBlock Text="Constellation:" Grid.Column="0" VerticalAlignment="Center" Margin="2" Grid.Row="2" />
+        <TextBox Text="{Binding Constellation, Mode=OneWay}" IsReadOnly="True" Grid.Column="1" Margin="2" Grid.Row="2" />
 
-        <TextBlock Text="Equatorial coordinates:" Grid.Column="0" VerticalAlignment="Center" Margin="2" Grid.Row="2" />
-        <TextBox Text="{Binding EquatorialCoordinates, Mode=OneWay}" IsReadOnly="True" Grid.Column="1" Margin="2" Grid.Row="2" />
+        <TextBlock Text="Equatorial coordinates:" Grid.Column="0" VerticalAlignment="Center" Margin="2" Grid.Row="3" />
+        <TextBox Text="{Binding EquatorialCoordinates, Mode=OneWay}" IsReadOnly="True" Grid.Column="1" Margin="2" Grid.Row="3" />
 
-        <TextBlock Text="Horizontal coordinates:" Grid.Column="0" VerticalAlignment="Center" Margin="2" Grid.Row="3" />
-        <TextBox Text="{Binding HorizontalCoordinates, Mode=OneWay}" IsReadOnly="True" Grid.Column="1" Margin="2" Grid.Row="3" />
+        <TextBlock Text="Horizontal coordinates:" Grid.Column="0" VerticalAlignment="Center" Margin="2" Grid.Row="4" />
+        <TextBox Text="{Binding HorizontalCoordinates, Mode=OneWay}" IsReadOnly="True" Grid.Column="1" Margin="2" Grid.Row="4" />
     </Grid>
 </UserControl>

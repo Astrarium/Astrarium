@@ -104,7 +104,13 @@
                 
             </TabItem>
 
-            <TabItem Header="Images">
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Images" />
+                        <TextBlock VerticalAlignment="Center" FontSize="10" Opacity="0.25" Padding="6 0 0 0" Text="{Binding Attachments.Count}" />
+                    </StackPanel>
+                </TabItem.Header>
                 <v:AttachmentsView />
             </TabItem>
         </TabControl>

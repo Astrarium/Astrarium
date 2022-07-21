@@ -1,4 +1,5 @@
-﻿using Astrarium.Types;
+﻿using Astrarium.Plugins.Journal.Types;
+using Astrarium.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,7 +43,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
         public DateTime Begin { get; set; }
         public DateTime End { get; set; }
 
-        public TreeItemObservation Observation
+        public Observation Observation
         {
             get; set;
         }

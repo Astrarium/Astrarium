@@ -16,7 +16,6 @@ namespace Astrarium.Plugins.Journal.Database.Entities
         public string TargetId { get; set; }
         public string SessionId { get; set; }
 
-        
         public double? Magnification { get; set; }
         public string Accessories { get; set; }
 

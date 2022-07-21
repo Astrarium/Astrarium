@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:v="clr-namespace:Astrarium.Plugins.Journal.Views"
         xmlns:vm="clr-namespace:Astrarium.Plugins.Journal.ViewModels"
+        xmlns:t="clr-namespace:Astrarium.Plugins.Journal.Types"
         xmlns:c="clr-namespace:Astrarium.Plugins.Journal.Controls"
         xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
         xmlns:tc="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
@@ -12,13 +13,14 @@
         Name="Window"
         Style="{StaticResource {x:Type Window}}" 
         WindowStartupLocation="CenterScreen"
-        Title="JournalWindow" Height="450" Width="800"
+        WindowState="Maximized"
+        Title="Journal" Height="450" Width="800"
         MinWidth="350">
 
     <Window.Resources>
 
         <!-- Session tree view item  -->
-        <HierarchicalDataTemplate DataType="{x:Type vm:TreeItemSession}" ItemsSource="{Binding Observations}">
+        <HierarchicalDataTemplate DataType="{x:Type t:Session}" ItemsSource="{Binding Observations}">
             <Grid Background="#01000000" Tag="{Binding DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Window}}}">
                 <Grid.ContextMenu>
                     <ContextMenu>
@@ -45,7 +47,7 @@
         </HierarchicalDataTemplate>
 
         <!-- Observation tree view item  -->
-        <HierarchicalDataTemplate DataType="{x:Type vm:TreeItemObservation}">
+        <HierarchicalDataTemplate DataType="{x:Type t:Observation}">
             <StackPanel Orientation="Horizontal" Background="#01000000" Tag="{Binding DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Window}}}">
 
                 <StackPanel.ContextMenu>
@@ -166,10 +168,10 @@
 
         <ContentControl Grid.Column="2" Content="{Binding SelectedTreeViewItem}">
             <ContentControl.Resources>
-                <DataTemplate DataType="{x:Type vm:TreeItemSession}">
+                <DataTemplate DataType="{x:Type t:Session}">
                     <v:SessionView DataContext="{Binding}" />
                 </DataTemplate>
-                <DataTemplate DataType="{x:Type vm:TreeItemObservation}">
+                <DataTemplate DataType="{x:Type t:Observation}">
                     <v:ObservationView DataContext="{Binding}" />
                 </DataTemplate>
             </ContentControl.Resources>

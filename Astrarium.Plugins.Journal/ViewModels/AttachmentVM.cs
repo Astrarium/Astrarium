@@ -1,15 +1,10 @@
-﻿using Astrarium.Plugins.Journal.Database;
+﻿using Astrarium.Plugins.Journal.Types;
 using Astrarium.Types;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Astrarium.Plugins.Journal.ViewModels
 {
-    public class AttachmentDetailsVM : ViewModelBase
+    public class AttachmentVM : ViewModelBase
     {
         private Attachment attachment;
 
@@ -45,7 +40,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
             set
             {
                 attachment.Title = value;
-                Save();
+                DatabaseManager.SaveAttachment(attachment);
                 NotifyPropertyChanged(nameof(Title));
             }
         }
@@ -56,25 +51,8 @@ namespace Astrarium.Plugins.Journal.ViewModels
             set
             {
                 attachment.Comments = value;
-                Save();
+                DatabaseManager.SaveAttachment(attachment);
                 NotifyPropertyChanged(nameof(Comments));
-            }
-        }
-
-        public override void Close()
-        {
-            base.Close();
-
-        }
-
-        private void Save()
-        {
-            using (var ctx = new DatabaseContext())
-            {
-                var a = ctx.Attachments.FirstOrDefault(x => x.Id == attachment.Id);
-                a.Title = Title;
-                a.Comments = Comments;
-                ctx.SaveChanges();
             }
         }
     }

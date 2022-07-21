@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Astrarium.Plugins.Journal.ViewModels
+namespace Astrarium.Plugins.Journal.Types
 {
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
     public class DBStoredAttribute : Attribute
