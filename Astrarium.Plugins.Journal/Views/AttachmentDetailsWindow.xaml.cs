@@ -53,5 +53,15 @@ namespace Astrarium.Plugins.Journal.Views
         {
             zoomBorder.SetActualSize();
         }
+
+        private void FlipHorizontal(object sender, RoutedEventArgs e)
+        {
+            btnFlipHorizontal.IsChecked = mnuFlipHorizontal.IsChecked = zoomBorder.FlipHorizontal();
+        }
+
+        private void FlipVertical(object sender, RoutedEventArgs e)
+        {
+            btnFlipVertical.IsChecked = mnuFlipVertical.IsChecked = zoomBorder.FlipVertical();
+        }
     }
 }

@@ -12,6 +12,14 @@
         MinHeight="300" MinWidth="300"
         Height="600" Width="600">
 
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/Astrarium.Plugins.Journal;component/Themes/Images.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
     <TabControl SelectedIndex="{Binding ActiveTabIndex}">
         <TabItem Header="Image">
             <Grid>
@@ -20,10 +28,27 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <ToolBar ToolBarTray.IsLocked="True" Grid.Row="0">
-                    <Button Margin="2" Height="24" Width="24" Content="+" ToolTip="Zoom In" Click="ZoomIn" />
-                    <Button Margin="2" Width="24" Content="-" ToolTip="Zoom Out" Click="ZoomOut" />
-                    <Button Margin="2" Width="24" Content="1:1" ToolTip="Actual size" Click="SetActualSize" />
-                    <Button Margin="2" Width="24" Content="Fit" ToolTip="Fit to window" Click="FitToWindow" />
+                    <Button Style="{StaticResource ToolbarButtonStyle}" ToolTip="Zoom In" Click="ZoomIn">
+                        <Image Source="{StaticResource IconZoomIn}" Style="{StaticResource ImageStyle}" />
+                    </Button>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" ToolTip="Zoom Out" Click="ZoomOut">
+                        <Image Source="{StaticResource IconZoomOut}" Style="{StaticResource ImageStyle}" />
+                    </Button>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" ToolTip="Actual size" Click="SetActualSize">
+                        <Image Source="{StaticResource IconActualSize}" Style="{StaticResource ImageStyle}" />
+                    </Button>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" ToolTip="Fit to window" Click="FitToWindow">
+                        <Image Source="{StaticResource IconFitToWindow}" Style="{StaticResource ImageStyle}" />
+                    </Button>
+
+                    <ToggleButton Name="btnFlipHorizontal" Style="{StaticResource ToolbarToggleButtonStyle}" ToolTip="Flip horizontal" Click="FlipHorizontal">
+                        <Image Source="{StaticResource IconFlipHorizontal}" Style="{StaticResource ImageStyle}" />
+                    </ToggleButton>
+
+                    <ToggleButton Name="btnFlipVertical" Style="{StaticResource ToolbarToggleButtonStyle}" ToolTip="Flip vertical" Click="FlipVertical">
+                        <Image Source="{StaticResource IconFlipVertical}" Style="{StaticResource ImageStyle}" />
+                    </ToggleButton>
+
                 </ToolBar>
                     
                 <c:ZoomBorder x:Name="zoomBorder" Grid.Row="1" ClipToBounds="True" Background="Black">
@@ -35,6 +60,9 @@
                             <Separator />
                             <MenuItem Header="Actual size" Click="SetActualSize" />
                             <MenuItem Header="Fit to window" Click="FitToWindow"  />
+                            <Separator />
+                            <MenuItem Name="mnuFlipHorizontal" Header="Flip horizontal" Click="FlipHorizontal" IsCheckable="True" />
+                            <MenuItem Name="mnuFlipVertical" Header="Flip vertical" Click="FlipVertical" IsCheckable="True" />
                             <Separator />
                             <MenuItem Header="Details" Command="{Binding ShowDetailsCommand}"  />
                         </ContextMenu>

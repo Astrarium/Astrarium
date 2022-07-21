@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using Astrarium.Algorithms;
+using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -71,6 +73,26 @@ namespace Astrarium.Plugins.Journal.Controls
             ResetSize(false);
         }
 
+        public bool FlipHorizontal()
+        {
+            if (child != null)
+            {
+                scaleTransform.ScaleX *= -1;
+                return scaleTransform.ScaleX < 0;
+            }
+            return false;
+        }
+
+        public bool FlipVertical()
+        {
+            if (child != null)
+            {
+                scaleTransform.ScaleY *= -1;
+                return scaleTransform.ScaleY < 0;
+            }
+            return false;
+        }
+
         private void ResetSize(bool fit)
         {
             if (child != null)
@@ -79,8 +101,8 @@ namespace Astrarium.Plugins.Journal.Controls
                 if (fit)
                 {
                     // reset zoom
-                    scaleTransform.ScaleX = 1;
-                    scaleTransform.ScaleY = 1;
+                    scaleTransform.ScaleX = 1 * Math.Sign(scaleTransform.ScaleX);
+                    scaleTransform.ScaleY = 1 * Math.Sign(scaleTransform.ScaleY);
                 }
                 else
                 {
@@ -90,10 +112,10 @@ namespace Astrarium.Plugins.Journal.Controls
                     double scaleX = w / ActualWidth;
                     double scaleY = h / ActualHeight;
 
-                    double scale = System.Math.Max(scaleX, scaleY);
+                    double scale = Math.Max(scaleX, scaleY);
 
-                    scaleTransform.ScaleX = scale;
-                    scaleTransform.ScaleY = scale;
+                    scaleTransform.ScaleX = Math.Sign(scaleTransform.ScaleX) * scale;
+                    scaleTransform.ScaleY = Math.Sign(scaleTransform.ScaleY) * scale;
                 }
 
                 // reset pan
@@ -106,7 +128,7 @@ namespace Astrarium.Plugins.Journal.Controls
 
         private void child_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (!(e.Delta > 0) && (scaleTransform.ScaleX < .5 || scaleTransform.ScaleY < .5))
+            if (!(e.Delta > 0) && (Math.Abs(scaleTransform.ScaleX) < .5 || Math.Abs(scaleTransform.ScaleY) < .5))
                 return;
 
             if (child != null)
@@ -131,16 +153,16 @@ namespace Astrarium.Plugins.Journal.Controls
                 relative.Y -= ActualHeight / 2;
 
                 absoluteX = relative.X * scaleTransform.ScaleX + translateTransform.X;
-                absoluteY = relative.Y * scaleTransform.ScaleY + translateTransform.Y ;
+                absoluteY = relative.Y * scaleTransform.ScaleY + translateTransform.Y;
 
-                double zoomCorrected = zoom * scaleTransform.ScaleX;
-                scaleTransform.ScaleX += zoomCorrected;
-                scaleTransform.ScaleY += zoomCorrected;
+                double zoomCorrected = zoom * Math.Abs(scaleTransform.ScaleX);
+                scaleTransform.ScaleX += Math.Sign(scaleTransform.ScaleX) * zoomCorrected;
+                scaleTransform.ScaleY += Math.Sign(scaleTransform.ScaleY) * zoomCorrected;
 
-                if (scaleTransform.ScaleX > 15)
-                    scaleTransform.ScaleX = 15;
-                if (scaleTransform.ScaleY > 15)
-                    scaleTransform.ScaleY = 15;
+                if (Math.Abs(scaleTransform.ScaleX) > 15)
+                    scaleTransform.ScaleX = 15 * Math.Sign(scaleTransform.ScaleX);
+                if (Math.Abs(scaleTransform.ScaleY) > 15)
+                    scaleTransform.ScaleY = 15 * Math.Sign(scaleTransform.ScaleY);
 
                 translateTransform.X = absoluteX - relative.X * scaleTransform.ScaleX;
                 translateTransform.Y = absoluteY - relative.Y * scaleTransform.ScaleY;
@@ -172,6 +194,10 @@ namespace Astrarium.Plugins.Journal.Controls
             if (child != null && child.IsMouseCaptured)
             {
                 Vector v = start - e.GetPosition(this);
+
+                //v.X = v.X * Math.Cos(Angle.ToRadians(rotateTransform.Angle));
+                //v.Y = v.Y * Math.Sin(Angle.ToRadians(rotateTransform.Angle));
+
                 translateTransform.X = origin.X - v.X;
                 translateTransform.Y = origin.Y - v.Y;
             }
