@@ -33,7 +33,7 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Margin="2" Content="Del" />
                 <Button Margin="2" Content="Edit" />
-                <Button Margin="2" Content="Add" />
+                <Button Margin="2" Content="Add" Command="{Binding Path=DataContext.CreateObservationCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}, Mode=FindAncestor}}" CommandParameter="{Binding}" />
             </StackPanel>
 
         </DockPanel>

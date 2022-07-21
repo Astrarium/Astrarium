@@ -19,10 +19,10 @@
 
         <!-- Session tree view item  -->
         <HierarchicalDataTemplate DataType="{x:Type vm:TreeItemSession}" ItemsSource="{Binding Observations}">
-            <Grid Background="#01000000">
+            <Grid Background="#01000000" Tag="{Binding DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Window}}}">
                 <Grid.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Add observation..." />
+                        <MenuItem Header="Add observation..." Command="{Binding PlacementTarget.Tag.CreateObservationCommand,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
                         <Separator />
                         <MenuItem Header="Edit..." />
                         <MenuItem Header="Delete" />
@@ -46,12 +46,12 @@
 
         <!-- Observation tree view item  -->
         <HierarchicalDataTemplate DataType="{x:Type vm:TreeItemObservation}">
-            <StackPanel Orientation="Horizontal" Background="#01000000">
+            <StackPanel Orientation="Horizontal" Background="#01000000" Tag="{Binding DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Window}}}">
 
                 <StackPanel.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Edit..." />
-                        <MenuItem Header="Delete" />
+                        <MenuItem Header="Delete" Command="{Binding PlacementTarget.Tag.DeleteObservationCommand,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
                     </ContextMenu>
                 </StackPanel.ContextMenu>
 

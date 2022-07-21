@@ -194,10 +194,6 @@ namespace Astrarium.Plugins.Journal.Controls
             if (child != null && child.IsMouseCaptured)
             {
                 Vector v = start - e.GetPosition(this);
-
-                //v.X = v.X * Math.Cos(Angle.ToRadians(rotateTransform.Angle));
-                //v.Y = v.Y * Math.Sin(Angle.ToRadians(rotateTransform.Angle));
-
                 translateTransform.X = origin.X - v.X;
                 translateTransform.Y = origin.Y - v.Y;
             }

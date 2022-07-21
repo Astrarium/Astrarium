@@ -29,6 +29,9 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         #region Commands
 
+        public ICommand CreateObservationCommand { get; set; }
+        public ICommand DeleteObservationCommand { get; set; }
+
         public ICommand ExpandCollapseCommand { get; private set; }
         public ICommand OpenImageCommand { get; private set; }
         public ICommand OpenAttachmentInSystemViewerCommand { get; private set; }
@@ -47,6 +50,10 @@ namespace Astrarium.Plugins.Journal.ViewModels
             imagesPath = Path.Combine(rootPath, "images");
 
             ExpandCollapseCommand = new Command(ExpandCollapse);
+
+            CreateObservationCommand = new Command<TreeItemSession>(CreateObservation);
+            DeleteObservationCommand = new Command<TreeItemObservation>(DeleteObservation);
+
             OpenImageCommand = new Command<Attachment>(OpenImage);
             DeleteAttachmentCommand = new Command<Attachment>(DeleteAttachment);
             OpenAttachmentLocationCommand = new Command<Attachment>(OpenAttachmentLocation);
@@ -54,6 +61,8 @@ namespace Astrarium.Plugins.Journal.ViewModels
             CreateAttachmentCommand = new Command(CreateAttachment);
             ShowAttachmentDetailsCommand = new Command<Attachment>(ShowAttachmentDetails);
             DropAttachmentsCommand = new Command<string[]>(DropAttachments);
+
+            Task.Run(Load);
         }
 
         public ObservableCollection<TreeItemSession> AllSessions { get; private set; } = new ObservableCollection<TreeItemSession>();
@@ -174,7 +183,6 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         private void LoadJournalItemDetails()
         {
-            
             string databaseFolder = Path.GetDirectoryName(databasePath);
 
             if (SelectedTreeViewItem is TreeItemSession session)
@@ -251,6 +259,72 @@ namespace Astrarium.Plugins.Journal.ViewModels
                     s.IsExpanded = false;
                 }
             }
+        }
+
+        private void DeleteObservation(TreeItemObservation observation)
+        {
+            if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete the observation?", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)
+            {
+                observation.Session.Observations.Remove(observation);
+
+                using (var ctx = new DatabaseContext())
+                {
+                    var existing = ctx.Observations.FirstOrDefault(x => x.Id == observation.Id);
+                    if (existing != null)
+                    {
+                        ctx.Observations.Remove(existing);
+                        ctx.SaveChanges();
+                    }
+                }
+            }
+        }
+
+        private void CreateObservation(TreeItemSession session)
+        {
+            var model = ViewManager.CreateViewModel<ObservationVM>();
+            if (ViewManager.ShowDialog(model) ?? false)
+            {
+                var target = new Database.Entities.TargetDB()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Aliases = SerializeAliases(model.CelestialBody.Names),
+                    Type = model.CelestialBody.Type,
+                    Name = model.CelestialBody.Names.First(),
+                    Source = "Astrarium"
+                };
+
+                var observation = new Database.Entities.ObservationDB()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Begin = model.Begin,
+                    End = model.End,
+                    TargetId = target.Id,
+                    SessionId = session.Id,
+                    Details = JsonConvert.SerializeObject(CreateObservationDetails(model.CelestialBody.Type))
+                };
+
+                using (var ctx = new DatabaseContext())
+                {
+                    ctx.Targets.Add(target);
+                    ctx.Observations.Add(observation);
+                    ctx.SaveChanges();
+                }
+
+                var obs = new TreeItemObservation(observation.Id)
+                {
+                    Session = session,
+                    Begin = observation.Begin,
+                    End = observation.End,
+                    ObjectName = observation.Target.Name,
+                    ObjectType = observation.Target.Type,
+                    ObjectNameAliases = DeserializeAliases(observation.Target.Aliases)
+                };
+                session.Observations.Add(obs);
+
+                SelectedTreeViewItem = obs;
+            }
+
+
         }
 
         private void OpenAttachmentLocation(Attachment attachment)
@@ -400,6 +474,11 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         #endregion Command handlers
 
+        private string SerializeAliases(string[] aliases)
+        {
+            return JsonConvert.SerializeObject(aliases);
+        }
+
         private string DeserializeAliases(string aliases)
         {
             if (string.IsNullOrEmpty(aliases))
@@ -410,6 +489,27 @@ namespace Astrarium.Plugins.Journal.ViewModels
                 return null;
             else
                 return value;
+        }
+
+        private PropertyChangedBase CreateObservationDetails(string targetType)
+        {
+            if (targetType == "VarStar" || targetType == "Nova")
+            {
+                return new VariableStarObservationDetails();
+            }
+            else if (targetType == "DeepSky.OpenCluster")
+            {
+                return new OpenClusterObservationDetails();
+            }
+            else if (targetType == "DeepSky.DoubleStar")
+            {
+                return new DoubleStarObservationDetails();
+            }
+            if (targetType.StartsWith("DeepSky"))
+            {
+                return new DeepSkyObservationDetails();
+            }
+            return null;
         }
 
         private PropertyChangedBase DeserializeObservationDetails(string targetType, string details)

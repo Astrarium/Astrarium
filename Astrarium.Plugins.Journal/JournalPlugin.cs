@@ -31,9 +31,7 @@ namespace Astrarium.Plugins.Journal
 
         private void ShowJournal()
         {
-            var vm = ViewManager.CreateViewModel<JournalVM>();
-            ViewManager.ShowWindow(vm);
-            vm.Load();
+            ViewManager.ShowWindow<JournalVM>(isSingleInstance: true);
         }
 
         private void DoImport()

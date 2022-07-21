@@ -70,6 +70,10 @@ namespace Astrarium
                 if (window != null)
                 {
                     window.Activate();
+                    if (window.WindowState == WindowState.Minimized)
+                    {
+                        SystemCommands.RestoreWindow(window);
+                    }
                     return null;
                 }
             }
