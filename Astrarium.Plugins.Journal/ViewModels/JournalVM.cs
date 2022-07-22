@@ -7,10 +7,12 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace Astrarium.Plugins.Journal.ViewModels
@@ -119,10 +121,40 @@ namespace Astrarium.Plugins.Journal.ViewModels
                     // subscribe for changes
                     if (value != null)
                     {
-                        value.DatabasePropertyChanged += DatabaseManager.SaveDatabaseEntityProperty;
                         SetValue(nameof(CalendarDate), value.SessionDate);
                     }
                 }
+            }
+        }
+
+        public string FilterString
+        {
+            get => GetValue<string>(nameof(FilterString));
+            set
+            {
+                SetValue(nameof(FilterString), value);
+                FilteredSessions.Refresh();
+                NotifyPropertyChanged(nameof(FilteredSessions));
+            }
+        }
+
+        public ICollectionView FilteredSessions
+        {
+            get
+            {
+                var source = CollectionViewSource.GetDefaultView(AllSessions);
+
+                if (string.IsNullOrWhiteSpace(FilterString))
+                {
+                    source.Filter = x => true;
+                }
+                else
+                {
+                    source.Filter = x => (x as Session).Observations.Any(obs => obs.ObjectName.ToLowerInvariant().Equals(FilterString.ToLowerInvariant()));
+                }
+
+                    
+                return source;
             }
         }
 
@@ -130,7 +162,10 @@ namespace Astrarium.Plugins.Journal.ViewModels
         {
             var sessions = await DatabaseManager.GetSessions();
             AllSessions = new ObservableCollection<Session>(sessions);
-            NotifyPropertyChanged(nameof(AllSessions), nameof(SessionDates));
+
+            
+
+            NotifyPropertyChanged(nameof(AllSessions), nameof(FilteredSessions), nameof(SessionDates));
         }
 
         private async void LoadJournalItemDetails()

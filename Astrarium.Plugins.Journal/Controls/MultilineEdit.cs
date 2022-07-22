@@ -1,6 +1,9 @@
-﻿using System.Windows;
+﻿using System.Collections.Generic;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Astrarium.Plugins.Journal.Controls
 {
@@ -54,7 +57,7 @@ namespace Astrarium.Plugins.Journal.Controls
                 var placeholder = (o as MultilineEdit)._placeholder;
                 if (placeholder != null)
                 {
-                    placeholder.Visibility = string.IsNullOrWhiteSpace(value) ? Visibility.Visible : Visibility.Collapsed;
+                    placeholder.Visibility = !(o as MultilineEdit).IsEditMode && string.IsNullOrWhiteSpace(value) ? Visibility.Visible : Visibility.Collapsed;
                 }
             })
             {
@@ -75,7 +78,7 @@ namespace Astrarium.Plugins.Journal.Controls
                 AffectsRender = true
             });
 
-        public static readonly DependencyProperty IsEditModeProperty = DependencyProperty.Register(nameof(IsEditMode), typeof(bool), typeof(MultilineEdit), new FrameworkPropertyMetadata(false) { BindsTwoWayByDefault = false, AffectsRender = true });
+        public static readonly DependencyProperty IsEditModeProperty = DependencyProperty.Register(nameof(IsEditMode), typeof(bool), typeof(MultilineEdit), new FrameworkPropertyMetadata(false) { BindsTwoWayByDefault = false, AffectsRender = true, PropertyChangedCallback = IsEditModeChanged });
 
         private TextBox _editor;
         private Button _applyButton;
@@ -97,6 +100,18 @@ namespace Astrarium.Plugins.Journal.Controls
 
             _applyButton = Template.FindName(PartApplyButton, this) as Button;
             _applyButton.Click += _applyButton_Click;
+
+            
+
+        }
+
+        private static void IsEditModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var control = d as MultilineEdit;
+            if (control != null)
+            {
+                control._applyButton.Visibility = (bool)e.NewValue ? Visibility.Visible : Visibility.Collapsed;
+            }
         }
 
         private void _placeholder_MouseDown(object sender, MouseButtonEventArgs e)
@@ -148,7 +163,19 @@ namespace Astrarium.Plugins.Journal.Controls
             _text = Text;
             IsEditMode = true;
             _placeholder.Visibility = Visibility.Collapsed;
+            _applyButton.Visibility = Visibility.Visible;
             _editor.Focus();
+
+            //var adornerLayer = AdornerLayer.GetAdornerLayer(_editor);
+            //if (adornerLayer != null)
+            //{
+            //    adornerLayer.Update(_editor);
+            //}
+            //else
+            //{
+            //    var adornErrorText = new AdornErrorText(_editor);
+            //    adornerLayer.Add(adornErrorText);
+            //}
         }
 
         private void SetReadMode(bool applyChanges)
@@ -164,9 +191,44 @@ namespace Astrarium.Plugins.Journal.Controls
                Text = _text;
             }
 
+           
+
             IsEditMode = false;
+            _applyButton.Visibility = Visibility.Collapsed;
             _placeholder.Visibility = string.IsNullOrWhiteSpace(_editor.Text) ? Visibility.Visible : Visibility.Collapsed;
             Keyboard.ClearFocus();
+        }
+
+        internal class AdornErrorText : Adorner
+        {
+
+            internal AdornErrorText(UIElement targetElement) : base(targetElement)
+            {
+
+            }
+
+            protected override void OnRender(DrawingContext drawingContext)
+            {
+                TextBox textBox = this.AdornedElement as TextBox;
+
+                drawingContext.PushClip(new RectangleGeometry(new Rect(0, 0, this.AdornedElement.RenderSize.Width, this.AdornedElement.RenderSize.Height)));
+
+                Dictionary<int, string> wordList = new Dictionary<int, string>();
+                wordList.Add(11, "test");
+
+                try
+                {
+                    foreach (KeyValuePair<int, string> keyValuePair in wordList)
+                    {
+                        Rect startPosition = textBox.GetRectFromCharacterIndex(keyValuePair.Key);
+                        Rect endPosition = textBox.GetRectFromCharacterIndex(keyValuePair.Key + keyValuePair.Value.Length - 1, true);
+                        Rect rectUnion = Rect.Union(startPosition, endPosition);
+                        drawingContext.DrawLine(new Pen(Brushes.Red, 1), rectUnion.BottomLeft, rectUnion.BottomRight);
+                    }
+                }
+                catch { }
+                drawingContext.Pop();
+            }
         }
     }
 }

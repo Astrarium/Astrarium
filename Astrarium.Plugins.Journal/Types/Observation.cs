@@ -59,6 +59,13 @@ namespace Astrarium.Plugins.Journal.Types
             set => SetValue(nameof(Findings), value);
         }
 
+        [DBStored(Entity = typeof(ObservationDB), Field = "Accessories")]
+        public string Accessories
+        {
+            get => GetValue<string>(nameof(Accessories));
+            set => SetValue(nameof(Accessories), value);
+        }
+
         [DBStored(Entity = typeof(ObservationDB), Field = "Details")]
         private string details => JsonConvert.SerializeObject(Details, jsonSettings);
 
@@ -89,6 +96,19 @@ namespace Astrarium.Plugins.Journal.Types
         {
             get => GetValue<object>(nameof(TargetDetails));
             set => SetValue(nameof(TargetDetails), value);
+        }
+
+        public string TargetId
+        {
+            get => GetValue<string>(nameof(TargetId));
+            set => SetValue(nameof(TargetId), value);
+        }
+
+        [DBStored(Entity = typeof(TargetDB), Field = "Notes", Key = "TargetId")]
+        public string TargetNotes
+        {
+            get => GetValue<string>(nameof(TargetNotes));
+            set => SetValue(nameof(TargetNotes), value);
         }
 
         [DBStored(Entity = typeof(ObservationDB), Field = "ScopeId")]

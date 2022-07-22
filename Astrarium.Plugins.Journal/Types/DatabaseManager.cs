@@ -65,9 +65,12 @@ namespace Astrarium.Plugins.Journal.Types
         {
             return Task.Run(() =>
             {
+                session.DatabasePropertyChanged -= SaveDatabaseEntityProperty;
+
                 using (var db = new DatabaseContext())
                 {
                     var s = db.Sessions.Include(x => x.Attachments).FirstOrDefault(x => x.Id == session.Id);
+
                     session.Weather = s.Weather;
                     session.Seeing = s.Seeing;
                     session.FaintestStar = s.FaintestStar != null ? (decimal)s.FaintestStar.Value : 6m;
@@ -85,6 +88,8 @@ namespace Astrarium.Plugins.Journal.Types
                         Comments = x.Comments
                     }).ToList();
                 }
+
+                session.DatabasePropertyChanged += SaveDatabaseEntityProperty;
             });
         }
 
@@ -92,6 +97,8 @@ namespace Astrarium.Plugins.Journal.Types
         {
             return Task.Run(() =>
             {
+                observation.DatabasePropertyChanged -= SaveDatabaseEntityProperty;
+
                 using (var db = new DatabaseContext())
                 {
                     var obs = db.Observations
@@ -100,6 +107,9 @@ namespace Astrarium.Plugins.Journal.Types
                         .FirstOrDefault(x => x.Id == observation.Id);
 
                     observation.Findings = obs.Result;
+                    observation.Accessories = obs.Accessories;
+                    observation.TargetId = obs.TargetId;
+                    observation.TargetNotes = obs.Target.Notes;
                     observation.Details = DeserializeObservationDetails(obs.Target.Type, obs.Details);
                     observation.TargetDetails = DeserializeTargetDetails(obs.Target.Type, obs.Target.Details);
 
@@ -120,6 +130,8 @@ namespace Astrarium.Plugins.Journal.Types
                         Comments = x.Comments
                     }).ToList();
                 }
+
+                observation.DatabasePropertyChanged += SaveDatabaseEntityProperty;
             });
         }
 
