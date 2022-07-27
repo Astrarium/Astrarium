@@ -5,6 +5,7 @@ using Astrarium.Plugins.Journal.Types;
 using Astrarium.Types;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -207,6 +208,8 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
             FilteredSessions = CollectionViewSource.GetDefaultView(AllSessions);
             FilteredSessions.Filter = x => FilterSession(x as Session);
+
+            Optics = await DatabaseManager.GetOptics();
 
             NotifyPropertyChanged(
                 nameof(AllSessions), 
@@ -423,14 +426,22 @@ namespace Astrarium.Plugins.Journal.ViewModels
             ViewManager.ShowDialog<JournalSettingsVM>();
         }
 
-        private void EditOptics(string id)
+        private async void EditOptics(string id)
         {
             var model = ViewManager.CreateViewModel<OpticsVM>();
             model.Load(id);
             if (ViewManager.ShowDialog(model) ?? false)
             {
-                
+                SelectedTreeViewItem.DatabasePropertyChanged -= DatabaseManager.SaveDatabaseEntityProperty;
+                Optics = await DatabaseManager.GetOptics();
+                LoadJournalItemDetails();
             }
+        }
+
+        public ICollection Optics
+        {
+            get => GetValue<ICollection>(nameof(Optics));
+            private set => SetValue(nameof(Optics), value);
         }
 
         #endregion Command handlers

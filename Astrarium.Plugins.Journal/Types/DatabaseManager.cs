@@ -14,6 +14,7 @@ using System.Windows;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Data;
+using System.Collections;
 
 namespace Astrarium.Plugins.Journal.Types
 {
@@ -225,6 +226,19 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
+        public static Task<ICollection> GetOptics()
+        {
+            return Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    var list = db.Optics.ToList();
+                    list.Insert(0, new OpticsDB());
+                    return (ICollection)list;
+                }
+            });
+        }
+
         public static Task<Optics> GetOptics(string id)
         {
             return Task.Run(() =>
@@ -296,12 +310,12 @@ namespace Astrarium.Plugins.Journal.Types
                     }
 
                     db.SaveChanges();
-                    Optics.Refresh();
+
+                    //Optics.
+                    //Optics.Refresh();
                 }
             });
         }
-
-        public static ICollectionView Optics => CollectionViewSource.GetDefaultView(optics.Value);
 
         public static ObservableCollection<Site> Sites => sites.Value;
 
@@ -344,14 +358,6 @@ namespace Astrarium.Plugins.Journal.Types
                 }
             });
         }
-
-        private static Lazy<ICollection<OpticsDB>> optics => new Lazy<ICollection<OpticsDB>>(() =>
-        {
-            using (var db = new DatabaseContext())
-            {
-                return db.Optics.ToArray();
-            }
-        });
 
         private static Lazy<ObservableCollection<Site>> sites = new Lazy<ObservableCollection<Site>>(() =>
         {

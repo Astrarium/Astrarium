@@ -10,7 +10,6 @@
              xmlns:vm="clr-namespace:Astrarium.Plugins.Journal.ViewModels"
              xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
              mc:Ignorable="d" 
-             x:Name="view"
              d:DesignHeight="450" d:DesignWidth="800">
 
     <UserControl.Resources>
@@ -19,14 +18,9 @@
                 <ResourceDictionary Source="pack://application:,,,/Astrarium.Plugins.Journal;component/Themes/Styles.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/Astrarium.Plugins.Journal;component/Themes/Images.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <DataTemplate x:Key="ComboBoxWithNullDataTemplate">
-                <TextBlock Name="textBlock" Text="{Binding}"/>
-                <DataTemplate.Triggers>
-                    <DataTrigger Binding="{Binding Id}" Value="{x:Null}">
-                        <Setter TargetName="textBlock" Property="Foreground" Value="{StaticResource BrushControlLightBackground}" />
-                    </DataTrigger>
-                </DataTemplate.Triggers>
-            </DataTemplate>
+
+
+            <CollectionViewSource x:Key="Optics" Source="{Binding RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}, Path=DataContext.Optics}" />
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -124,14 +118,7 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Telescope / Other optics" VerticalAlignment="Center" Padding="6" />
-                        <ComboBox Grid.Column="1" SelectedValue="{Binding TelescopeId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}">
-                            <ComboBox.ItemsSource>
-                                <CompositeCollection>
-                                    <e:OpticsDB Id="{x:Null}" Model="None" />
-                                    <CollectionContainer Collection="{Binding Source={x:Static t:DatabaseManager.Optics}}" />
-                                </CompositeCollection>
-                            </ComboBox.ItemsSource>
-                        </ComboBox>
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.Optics}" SelectedValue="{Binding TelescopeId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}" />
                         <StackPanel Orientation="Horizontal" Grid.Column="2" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=IsMouseOver, Converter={s:BoolToVisibilityConverter}}">
                             <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding TelescopeId, Converter={s:NotNullToBoolConverter}}" Command="{Binding Path=DataContext.EditOpticsCommand, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}" CommandParameter="{Binding TelescopeId}">
                                 <Image Width="12" Height="12" Source="{StaticResource IconEdit}"  />

@@ -8,7 +8,7 @@ namespace Astrarium.Plugins.Journal.Database.Entities
 {
     public class OpticsDB : IEntity
     {
-        public string Id { get; set; }
+        public string Id { get; set; } = null;
 
         public double Aperture { get; set; }
 

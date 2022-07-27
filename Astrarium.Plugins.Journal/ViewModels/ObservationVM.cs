@@ -44,10 +44,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
         public TimeSpan End { get; set; }
         public DateTime Date { get; set; }
 
-        public Observation Observation
-        {
-            get; set;
-        }
+        public Observation Observation { get; set; }
 
         public CelestialObject CelestialBody
         {
