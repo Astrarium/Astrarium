@@ -21,6 +21,8 @@ namespace Astrarium.Plugins.Journal.Types
 
         public static ObservableCollection<ImagerDB> Cameras => cameras.Value;
 
+        public static ObservableCollection<SiteDB> Sites => sites.Value;
+
         private static Lazy<ObservableCollection<OpticsDB>> telescopes = new Lazy<ObservableCollection<OpticsDB>>(() =>
         {
             using (var db = new DatabaseContext())
@@ -58,6 +60,14 @@ namespace Astrarium.Plugins.Journal.Types
             using (var db = new DatabaseContext())
             {
                 return new ObservableCollection<ImagerDB>(db.Imagers.ToArray());
+            }
+        });
+
+        private static Lazy<ObservableCollection<SiteDB>> sites = new Lazy<ObservableCollection<SiteDB>>(() =>
+        {
+            using (var db = new DatabaseContext())
+            {
+                return new ObservableCollection<SiteDB>(db.Sites.ToArray());
             }
         });
     }

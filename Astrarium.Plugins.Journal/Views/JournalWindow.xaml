@@ -65,7 +65,7 @@
                         <ImageBrush ImageSource="{Binding ObjectType, Converter={s:CelestialObjectTypeToIconConverter}}" Stretch="Uniform" />
                     </Rectangle.OpacityMask>
                 </Rectangle>
-                <TextBlock Padding="4 0 0 0" Text="{Binding ObjectName}" ToolTip="{Binding ObjectNameAliases}" ToolTipService.IsEnabled="{Binding ObjectNameAliases, Converter={s:NotNullToBoolConverter}}" VerticalAlignment="Center" />
+                <TextBlock IsEnabled="{Binding IsEnabled}" Padding="4 0 0 0" Text="{Binding ObjectName}" ToolTip="{Binding ObjectNameAliases}" ToolTipService.IsEnabled="{Binding ObjectNameAliases, Converter={s:NotNullToBoolConverter}}" VerticalAlignment="Center" />
             </StackPanel>
         </HierarchicalDataTemplate>
 
@@ -156,14 +156,14 @@
                 SelectedTreeViewItem="{Binding SelectedTreeViewItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                 ItemsSource="{Binding FilteredSessions}"
                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                VirtualizingPanel.IsContainerVirtualizable="True"
                 VirtualizingPanel.VirtualizationMode="Recycling"
                 VirtualizingPanel.IsVirtualizing="True"
+                VirtualizingPanel.IsContainerVirtualizable="True"
                 Margin="4"
                 Grid.Row="2">
             </c:BindableTreeView>
         </Grid>
-        
+
         <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Center" VerticalAlignment="Stretch" />
 
         <ContentControl Grid.Column="2" Content="{Binding SelectedTreeViewItem}">
@@ -179,9 +179,29 @@
 
         <StatusBar Grid.Row="1" Grid.ColumnSpan="3" Background="{StaticResource BrushControlDarkBackground}">
             <StatusBarItem>
-                <TextBlock Text="Status bar text" HorizontalAlignment="Left" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                    <TextBlock Text="Sessions/Observations: " />
+                    <TextBlock Text="{Binding SessionsCount}"  />
+                    <TextBlock Text="/" />
+                    <TextBlock Text="{Binding ObservationsCount}"  />
+                </StackPanel>
             </StatusBarItem>
             <Separator />
+            <StatusBarItem>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                    <TextBlock Text="Filtered: " />
+                    <TextBlock Text="{Binding FilteredSessionsCount}" />
+                    <TextBlock Text="/" />
+                    <TextBlock Text="{Binding FilteredObservationsCount}" />
+                </StackPanel>
+            </StatusBarItem>
+            <Separator />
+            <StatusBarItem>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                    <TextBlock Text="Logged time: " />
+                    <TextBlock Text="{Binding LoggedTime}" />
+                </StackPanel>
+            </StatusBarItem>
         </StatusBar>
 
     </Grid>

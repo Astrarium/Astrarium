@@ -24,7 +24,6 @@ namespace Astrarium.Plugins.Journal.ViewModels
         private DateTimeComparer dateComparer = new DateTimeComparer();
 
         private readonly string rootPath;
-        private readonly string databasePath;
         private readonly string imagesPath;
 
         #endregion Private fields
@@ -42,6 +41,9 @@ namespace Astrarium.Plugins.Journal.ViewModels
         public ICommand CreateAttachmentCommand { get; private set; }
         public ICommand ShowAttachmentDetailsCommand { get; private set; }
         public ICommand DropAttachmentsCommand { get; private set; }
+        public ICommand EditSitesCommand { get; private set; }
+
+        public ICommand EditOpticsCommand { get; private set; }
 
         #endregion Commands
 
@@ -63,12 +65,23 @@ namespace Astrarium.Plugins.Journal.ViewModels
             ShowAttachmentDetailsCommand = new Command<Attachment>(ShowAttachmentDetails);
             DropAttachmentsCommand = new Command<string[]>(DropAttachments);
 
+            EditSitesCommand = new Command(EditSites);
+            EditOpticsCommand = new Command<string>(EditOptics);
+
             Task.Run(Load);
         }
 
         public ObservableCollection<Session> AllSessions { get; private set; } = new ObservableCollection<Session>();
 
-        public ICollection<DateTime> SessionDates => AllSessions.Select(x => x.SessionDate).Distinct(dateComparer).ToArray();
+        public int SessionsCount => AllSessions.Count;
+        public int ObservationsCount => AllSessions.SelectMany(x => x.Observations).Count();
+
+        public int FilteredSessionsCount => AllSessions.Where(x => x.IsEnabled).Count();
+        public int FilteredObservationsCount => AllSessions.SelectMany(x => x.Observations).Where(x => x.IsEnabled).Count();
+
+        public string LoggedTime => AllSessions.Sum(x => (x.End - x.Begin).TotalMinutes).ToString();
+
+        public ICollection<DateTime> SessionDates => AllSessions.Where(x => x.IsEnabled).Select(x => x.SessionDate).Distinct(dateComparer).ToArray();
 
         /// <summary>
         /// Binds to date selected in the calendar view
@@ -97,9 +110,9 @@ namespace Astrarium.Plugins.Journal.ViewModels
         /// <summary>
         /// Binds to journal item currently displayed in the window
         /// </summary>
-        public DBStoredEntity SelectedTreeViewItem
+        public JournalEntity SelectedTreeViewItem
         {
-            get => GetValue<DBStoredEntity>(nameof(SelectedTreeViewItem));
+            get => GetValue<JournalEntity>(nameof(SelectedTreeViewItem));
             set
             {
                 if (SelectedTreeViewItem != value)
@@ -132,30 +145,59 @@ namespace Astrarium.Plugins.Journal.ViewModels
             get => GetValue<string>(nameof(FilterString));
             set
             {
-                SetValue(nameof(FilterString), value);
-                FilteredSessions.Refresh();
-                NotifyPropertyChanged(nameof(FilteredSessions));
+                if (value != FilterString)
+                {
+                    SetValue(nameof(FilterString), value);
+                    FilteredSessions.Refresh();
+                    
+                    NotifyPropertyChanged(
+                        nameof(AllSessions),
+                        nameof(FilteredSessions),
+                        nameof(SessionDates),
+                        nameof(SessionsCount),
+                        nameof(ObservationsCount),
+                        nameof(FilteredSessionsCount),
+                        nameof(FilteredObservationsCount),
+                        nameof(LoggedTime));
+                }
             }
         }
 
-        public ICollectionView FilteredSessions
-        {
-            get
-            {
-                var source = CollectionViewSource.GetDefaultView(AllSessions);
+        public ICollectionView FilteredSessions { get; private set; }
 
+        private bool FilterSession(Session session)
+        {
+            foreach (var obs in session.Observations)
+            {
                 if (string.IsNullOrWhiteSpace(FilterString))
                 {
-                    source.Filter = x => true;
+                    obs.IsEnabled = true;
                 }
                 else
                 {
-                    source.Filter = x => (x as Session).Observations.Any(obs => obs.ObjectName.ToLowerInvariant().Equals(FilterString.ToLowerInvariant()));
-                }
+                    string filterString = FilterString.ToLowerInvariant().Trim();
+                    obs.IsEnabled = false;
 
-                    
-                return source;
+                    if (obs.ObjectName.ToLowerInvariant().Contains(filterString))
+                        obs.IsEnabled = true;
+
+                    if (obs.ObjectNameAliases != null && obs.ObjectNameAliases.Split(',').Any(x => x.Trim().ToLowerInvariant().Contains(filterString)))
+                        obs.IsEnabled = true;
+
+                    if (obs.ObjectType.Split('.').Any(x => x.Trim().ToLowerInvariant().Equals(filterString)))
+                        obs.IsEnabled = true;
+
+                    if (obs.Begin.Year.ToString().Equals(filterString))
+                        obs.IsEnabled = true;
+
+                    if ($"{obs.Begin.Month:00}.{obs.Begin.Year}".Equals(filterString))
+                        obs.IsEnabled = true;
+
+                    if ($"{obs.Begin.Year}".Equals(filterString))
+                        obs.IsEnabled = true;
+                }
             }
+            return session.Observations.Any(x => x.IsEnabled);
         }
 
         public async void Load()
@@ -163,9 +205,18 @@ namespace Astrarium.Plugins.Journal.ViewModels
             var sessions = await DatabaseManager.GetSessions();
             AllSessions = new ObservableCollection<Session>(sessions);
 
-            
+            FilteredSessions = CollectionViewSource.GetDefaultView(AllSessions);
+            FilteredSessions.Filter = x => FilterSession(x as Session);
 
-            NotifyPropertyChanged(nameof(AllSessions), nameof(FilteredSessions), nameof(SessionDates));
+            NotifyPropertyChanged(
+                nameof(AllSessions), 
+                nameof(FilteredSessions), 
+                nameof(SessionDates),
+                nameof(SessionsCount),
+                nameof(ObservationsCount),
+                nameof(FilteredSessionsCount),
+                nameof(FilteredObservationsCount),
+                nameof(LoggedTime));
         }
 
         private async void LoadJournalItemDetails()
@@ -212,11 +263,12 @@ namespace Astrarium.Plugins.Journal.ViewModels
         private async void CreateObservation(Session session)
         {
             var model = ViewManager.CreateViewModel<ObservationVM>();
-            model.Begin = session.Begin;
-            model.End = session.End;
+            model.Date = session.Begin.Date;
+            model.Begin = session.Begin.TimeOfDay;
+            model.End = session.End.TimeOfDay;
             if (ViewManager.ShowDialog(model) ?? false)
             {
-                var observation = await DatabaseManager.CreateObservation(session, model.CelestialBody, model.Begin, model.End);
+                var observation = await DatabaseManager.CreateObservation(session, model.CelestialBody, model.Date.Date + model.Begin, model.Date.Date + model.End);
                 session.Observations.Add(observation);
                 SelectedTreeViewItem = observation;
             }
@@ -363,6 +415,21 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
                     LoadJournalItemDetails();
                 }
+            }
+        }
+
+        private void EditSites()
+        {
+            ViewManager.ShowDialog<JournalSettingsVM>();
+        }
+
+        private void EditOptics(string id)
+        {
+            var model = ViewManager.CreateViewModel<OpticsVM>();
+            model.Load(id);
+            if (ViewManager.ShowDialog(model) ?? false)
+            {
+                
             }
         }
 

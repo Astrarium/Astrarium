@@ -1,0 +1,116 @@
+﻿<Window x:Class="Astrarium.Plugins.Journal.Views.JournalSettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:t="clr-namespace:Astrarium.Plugins.Journal.Types"
+        xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+        xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Astrarium.Plugins.Journal.Views"
+        mc:Ignorable="d"
+        Style="{StaticResource {x:Type Window}}" 
+        Title="Settings" Height="450" Width="800">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/Astrarium.Plugins.Journal;component/Themes/Styles.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Astrarium.Plugins.Journal;component/Themes/Images.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" MinWidth="200" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" MinWidth="300" />
+        </Grid.ColumnDefinitions>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Orientation="Horizontal" Background="{StaticResource BrushControlDarkBackground}" Margin="4" Grid.Row="0">
+                <Button Style="{StaticResource ToolbarButtonStyle}" Command="{Binding AddSiteCommand}" ToolTip="Add observation place">
+                    <Image Style="{StaticResource ImageStyle}" Source="{StaticResource IconAdd}" />
+                </Button>
+                <Button Style="{StaticResource ToolbarButtonStyle}" Command="{Binding DeleteSiteCommand}" ToolTip="Delete observation place" CommandParameter="{Binding SelectedSite}" IsEnabled="{Binding SelectedSite, Converter={s:NotNullToBoolConverter}}">
+                    <Image Style="{StaticResource ImageStyle}" Source="{StaticResource IconDelete}" />
+                </Button>
+            </StackPanel>
+
+            <ListView 
+                Margin="4"
+                Grid.Row="1"
+                SelectionMode="Single"
+                ItemsSource="{Binding Source={x:Static t:DatabaseManager.Sites}}"
+                SelectedItem="{Binding SelectedSite}"
+                
+                HorizontalAlignment="Stretch">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <DockPanel HorizontalAlignment="Stretch">
+                            <TextBlock HorizontalAlignment="Stretch" Text="{Binding Name}" />
+                            <Image Opacity="0.3" Margin="4" HorizontalAlignment="Right" Width="10" Height="10" Source="{StaticResource IconFavorite}" />
+                        </DockPanel>
+                        
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+        </Grid>
+
+        <GridSplitter Width="3" Grid.Column="1" ResizeDirection="Columns" ResizeBehavior="PreviousAndNext" />
+
+        <StackPanel 
+            Margin="4"
+            IsEnabled="{Binding SelectedSite, Converter={s:NotNullToBoolConverter}}"
+            Orientation="Vertical" Grid.Column="2">
+            <TextBlock Text="Name" Padding="0 4" />
+            <TextBox Text="{Binding SelectedSite.Name}" />
+
+            <TextBlock Text="Latitude" Padding="0 8 0 0" />
+            <StackPanel Orientation="Horizontal">
+                <c:NumericUpDown DecimalPlaces="0" Value="{Binding SelectedSite.LatitudeDeg}" Minimum="0" Maximum="89" Step="1" Width="50" />
+                <TextBlock Text="°" Margin="2" />
+                <c:NumericUpDown DecimalPlaces="0" Value="{Binding SelectedSite.LatitudeMin}" Minimum="0" Maximum="59" Step="1" Width="50" />
+                <TextBlock Text="'" Margin="2" />
+                <c:NumericUpDown DecimalPlaces="0" Value="{Binding SelectedSite.LatitudeSec}" Minimum="0" Maximum="59" Step="1" Width="50" />
+                <TextBlock Text="''" Margin="2" />
+                <RadioButton IsChecked="{Binding SelectedSite.LatitudePositive}" Content="N" VerticalAlignment="Center" Margin="4" />
+                <RadioButton IsChecked="{Binding SelectedSite.LatitudePositive, Converter={s:InverseBoolConverter}, Mode=OneWay}" Content="S" VerticalAlignment="Center" Margin="4"  />
+            </StackPanel>
+
+            <TextBlock Text="Longitude" Padding="0 8 0 0" />
+            <StackPanel Orientation="Horizontal">
+                <c:NumericUpDown DecimalPlaces="0" Value="{Binding SelectedSite.LongitudeDeg}" Minimum="0" Maximum="179" Step="1" Width="50" />
+                <TextBlock Text="°" Margin="2" />
+                <c:NumericUpDown DecimalPlaces="0" Value="{Binding SelectedSite.LongitudeMin}" Minimum="0" Maximum="59" Step="1" Width="50" />
+                <TextBlock Text="'" Margin="2" />
+                <c:NumericUpDown DecimalPlaces="0" Value="{Binding SelectedSite.LongitudeSec}" Minimum="0" Maximum="59" Step="1" Width="50" />
+                <TextBlock Text="''" Margin="2" />
+                <RadioButton IsChecked="{Binding SelectedSite.LongitudePositive}" Content="E" VerticalAlignment="Center" Margin="4" />
+                <RadioButton IsChecked="{Binding SelectedSite.LongitudePositive, Converter={s:InverseBoolConverter}, Mode=OneWay}" Content="W" VerticalAlignment="Center" Margin="4"  />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Margin="0 8 0 0">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="UTC offset (hours)" />
+                    <c:NumericUpDown Minimum="-12" Maximum="14" Step="1" DecimalPlaces="1" Value="{Binding SelectedSite.Timezone}" Width="80" HorizontalAlignment="Left" />
+                </StackPanel>
+                <StackPanel Orientation="Vertical" Margin="16 0">
+                    <TextBlock Text="Elevation (meters)" />
+                    <c:NumericUpDown Minimum="-100" Maximum="8800" Step="10" DecimalPlaces="0" Value="{Binding SelectedSite.Elevation}" Width="80" HorizontalAlignment="Left" />
+                </StackPanel>
+            </StackPanel>
+
+            <TextBlock Text="IAU Observatory code, if applicable" Padding="0 4" />
+            <TextBox Text="{Binding SelectedSite.IAUCode}" />
+
+        </StackPanel>
+        
+    </Grid>
+</Window>

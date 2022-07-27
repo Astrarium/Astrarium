@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Journal.Types
 {
-    public class Observation : DBStoredEntity
+    public class Observation : JournalEntity
     {
         private static JsonSerializerSettings jsonSettings = new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.None };
 

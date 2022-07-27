@@ -40,8 +40,9 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         public ICommand OkCommand { get; private set; }
 
-        public DateTime Begin { get; set; }
-        public DateTime End { get; set; }
+        public TimeSpan Begin { get; set; }
+        public TimeSpan End { get; set; }
+        public DateTime Date { get; set; }
 
         public Observation Observation
         {

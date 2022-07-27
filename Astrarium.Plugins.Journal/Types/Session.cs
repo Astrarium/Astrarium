@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Journal.Types
 {
-    public class Session : DBStoredEntity
+    public class Session : JournalEntity
     {
         public string Id { get; private set; }
 
@@ -30,6 +30,13 @@ namespace Astrarium.Plugins.Journal.Types
         {
             get => GetValue<string>(nameof(Comments), null);
             set => SetValue(nameof(Comments), value);
+        }
+
+        [DBStored(Entity = typeof(SessionDB), Field = "SiteId")]
+        public string SiteId
+        {
+            get => GetValue<string>(nameof(SiteId));
+            set => SetValue(nameof(SiteId), value);
         }
 
         [DBStored(Entity = typeof(SessionDB), Field = "Weather")]

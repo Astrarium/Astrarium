@@ -4068,9 +4068,8 @@
                     </c:BorderFix>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter Property="Background" Value="{StaticResource BrushControlBackground}" />
                             <Setter Property="Background" TargetName="PART_TextBox" Value="{StaticResource BrushControlBackground}" />
-                            <Setter Property="Background" TargetName="PART_Border" Value="{StaticResource BrushControlBackground}" />
+                            <Setter Property="Background" TargetName="PART_Border" Value="Transparent" />
                             <Setter Property="Foreground" Value="{StaticResource BrushControlLightBackground}" />
                         </Trigger>
                     </ControlTemplate.Triggers>

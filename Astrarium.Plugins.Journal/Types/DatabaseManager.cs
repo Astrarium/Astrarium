@@ -11,6 +11,9 @@ using Astrarium.Types;
 using Astrarium.Algorithms;
 using Astrarium.Plugins.Journal.Database.Entities;
 using System.Windows;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Windows.Data;
 
 namespace Astrarium.Plugins.Journal.Types
 {
@@ -71,6 +74,7 @@ namespace Astrarium.Plugins.Journal.Types
                 {
                     var s = db.Sessions.Include(x => x.Attachments).FirstOrDefault(x => x.Id == session.Id);
 
+                    session.SiteId = s.SiteId;
                     session.Weather = s.Weather;
                     session.Seeing = s.Seeing;
                     session.FaintestStar = s.FaintestStar != null ? (decimal)s.FaintestStar.Value : 6m;
@@ -220,6 +224,150 @@ namespace Astrarium.Plugins.Journal.Types
                 }
             });
         }
+
+        public static Task<Optics> GetOptics(string id)
+        {
+            return Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    var opticsDb = db.Optics.FirstOrDefault(x => x.Id == id);
+                    if (opticsDb != null)
+                    {
+                        var optics = new Optics();
+
+                        optics.Id = opticsDb.Id;
+                        optics.Vendor = opticsDb.Vendor;
+                        optics.Model = opticsDb.Model;
+                        optics.Type = opticsDb.Type;
+                        optics.OpticsType = opticsDb.OpticsType;
+                        optics.Aperture = opticsDb.Aperture;
+                        optics.OrientationErect = opticsDb.OrientationErect;
+                        optics.OrientationTrueSided = opticsDb.OrientationTrueSided;
+
+                        if (optics.OpticsType == "Telescope")
+                        {
+                            var details = JsonConvert.DeserializeObject<ScopeDetails>(opticsDb.Details);
+                            optics.FocalLength = details.FocalLength;
+                        }
+                        else if (optics.OpticsType == "Fixed")
+                        {
+                            var details = JsonConvert.DeserializeObject<FixedOpticsDetails>(opticsDb.Details);
+                            optics.Magnification = details.Magnification;
+                            optics.TrueField = details.TrueField ?? 0;
+                            optics.TrueFieldSpecified = details.TrueField != null;
+                        }
+
+                        return optics;
+                    }
+
+                    return null;
+                }
+            });
+        }
+
+        public static Task SaveOptics(Optics optics)
+        {
+            return Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    var opticsDb = db.Optics.FirstOrDefault(x => x.Id == optics.Id);
+                    if (opticsDb == null)
+                    {
+                        opticsDb = new OpticsDB() { Id = Guid.NewGuid().ToString() };
+                    }
+
+                    opticsDb.Vendor = optics.Vendor;
+                    opticsDb.Model = optics.Model;
+                    opticsDb.Type = optics.Type;
+                    opticsDb.OpticsType = optics.OpticsType;
+                    opticsDb.Aperture = optics.Aperture;
+                    opticsDb.OrientationErect = optics.OrientationErect;
+                    opticsDb.OrientationTrueSided = optics.OrientationTrueSided;
+
+                    if (optics.OpticsType == "Telescope")
+                    {
+                        opticsDb.Details = JsonConvert.SerializeObject(new ScopeDetails() { FocalLength = optics.FocalLength });
+                    }
+                    else if (optics.OpticsType == "Fixed")
+                    {
+                        opticsDb.Details = JsonConvert.SerializeObject(new FixedOpticsDetails() { Magnification = optics.Magnification, TrueField = optics.TrueFieldSpecified ? optics.TrueField : (double?)null });
+                    }
+
+                    db.SaveChanges();
+                    Optics.Refresh();
+                }
+            });
+        }
+
+        public static ICollectionView Optics => CollectionViewSource.GetDefaultView(optics.Value);
+
+        public static ObservableCollection<Site> Sites => sites.Value;
+
+        public static Task AddSite(Site site)
+        {
+            return Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    db.Sites.Add(new SiteDB()
+                    {
+                        Id = site.Id,
+                        Name = site.Name
+                    });
+                    db.SaveChanges();
+
+                    Application.Current.Dispatcher.Invoke(() => Sites.Add(site));
+                }
+            });
+        }
+
+        public static Task DeleteSite(string id)
+        {
+            return Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    var existing = db.Sites.FirstOrDefault(x => x.Id == id);
+                    if (existing != null)
+                    {
+                        db.Sites.Remove(existing);
+                        db.Database.ExecuteSqlCommand($"UPDATE [Sessions] SET [SiteId] = NULL WHERE [SiteId] = '{id}'");
+                        db.SaveChanges();
+                        var e = Sites.FirstOrDefault(x => x.Id == id);
+                        if (e != null)
+                        {
+                            Application.Current.Dispatcher.Invoke(() => Sites.Remove(e));
+                        }
+                    }
+                }
+            });
+        }
+
+        private static Lazy<ICollection<OpticsDB>> optics => new Lazy<ICollection<OpticsDB>>(() =>
+        {
+            using (var db = new DatabaseContext())
+            {
+                return db.Optics.ToArray();
+            }
+        });
+
+        private static Lazy<ObservableCollection<Site>> sites = new Lazy<ObservableCollection<Site>>(() =>
+        {
+            using (var db = new DatabaseContext())
+            {
+                return new ObservableCollection<Site>(db.Sites.Select(x => new Site() {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Latitude = x.Latitude,
+                    Longitude = x.Longitude,
+                    Timezone = x.Timezone,
+                    Elevation = x.Elevation ?? 0,
+                    IAUCode = x.IAUCode
+                }));
+            }
+        });
 
         private static string DeserializeAliases(string aliases)
         {

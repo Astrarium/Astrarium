@@ -21,15 +21,15 @@
         <StackPanel Orientation="Vertical" Margin="8" Grid.Row="0">
             <DockPanel Margin="4">
                 <Label Content="Date of observation" VerticalAlignment="Center" />
-                <c:DatePicker JulianDay="{Binding JulianDay}" UtcOffset="{Binding UtcOffset}" Options="DateOnly" Grid.Column="3" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                <DatePicker IsEnabled="False" SelectedDate="{Binding Date}" Width="Auto" Margin="0" HorizontalAlignment="Right" VerticalAlignment="Center" />
             </DockPanel>
             <DockPanel Margin="4">
                 <Label Content="Begin" VerticalAlignment="Center" />
-                <c:TimeInput Value="{Binding TimeFrom}" ShowSeconds="False" Width="55" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                <c:TimeInput Value="{Binding Begin}" ShowSeconds="False" Width="55" HorizontalAlignment="Right" VerticalAlignment="Center" />
             </DockPanel>
             <DockPanel Margin="4">
                 <Label Content="End" VerticalAlignment="Center" />
-                <c:TimeInput Value="{Binding TimeTo}" ShowSeconds="False" Width="55" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                <c:TimeInput Value="{Binding End}" ShowSeconds="False" Width="55" HorizontalAlignment="Right" VerticalAlignment="Center" />
             </DockPanel>
 
             <DockPanel Margin="4">

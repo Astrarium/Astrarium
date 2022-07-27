@@ -128,9 +128,6 @@ namespace Astrarium.Plugins.Journal.Controls
 
         private void child_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (!(e.Delta > 0) && (Math.Abs(scaleTransform.ScaleX) < .5 || Math.Abs(scaleTransform.ScaleY) < .5))
-                return;
-
             if (child != null)
             {
                 Point relative = e.GetPosition(child);
@@ -163,6 +160,11 @@ namespace Astrarium.Plugins.Journal.Controls
                     scaleTransform.ScaleX = 15 * Math.Sign(scaleTransform.ScaleX);
                 if (Math.Abs(scaleTransform.ScaleY) > 15)
                     scaleTransform.ScaleY = 15 * Math.Sign(scaleTransform.ScaleY);
+
+                if (Math.Abs(scaleTransform.ScaleX) < 0.125)
+                    scaleTransform.ScaleX = 0.125 * Math.Sign(scaleTransform.ScaleX);
+                if (Math.Abs(scaleTransform.ScaleY) < 0.125)
+                    scaleTransform.ScaleY = 0.125 * Math.Sign(scaleTransform.ScaleY);
 
                 translateTransform.X = absoluteX - relative.X * scaleTransform.ScaleX;
                 translateTransform.Y = absoluteY - relative.Y * scaleTransform.ScaleY;

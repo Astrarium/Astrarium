@@ -8,33 +8,9 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Journal.Types
 {
-    public abstract class DBStoredEntity : PropertyChangedBase
+    public abstract class PersistantEntity : PropertyChangedBase
     {
         public event Action<object, Type, string, object> DatabasePropertyChanged;
-
-        public abstract DateTime SessionDate { get; }
-
-        public DateTime Begin
-        {
-            get => GetValue<DateTime>(nameof(Begin));
-            set => SetValue(nameof(Begin), value);
-        }
-
-        public DateTime End
-        {
-            get => GetValue<DateTime>(nameof(End));
-            set => SetValue(nameof(End), value);
-        }
-
-        public ICollection<Attachment> Attachments
-        {
-            get => GetValue<ICollection<Attachment>>(nameof(Attachments), new List<Attachment>());
-            set => SetValue(nameof(Attachments), value);
-        }
-
-        public string DateString => Begin.ToString("dd MMM yyyy");
-
-        public string TimeString => $"{Begin:HH:mm}-{End:HH:mm}";
 
         protected override void NotifyPropertyChanged(params string[] propertyNames)
         {

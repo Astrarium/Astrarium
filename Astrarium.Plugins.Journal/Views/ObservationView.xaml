@@ -10,12 +10,14 @@
              xmlns:vm="clr-namespace:Astrarium.Plugins.Journal.ViewModels"
              xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
              mc:Ignorable="d" 
+             x:Name="view"
              d:DesignHeight="450" d:DesignWidth="800">
 
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/Astrarium.Plugins.Journal;component/Themes/Styles.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Astrarium.Plugins.Journal;component/Themes/Images.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <DataTemplate x:Key="ComboBoxWithNullDataTemplate">
                 <TextBlock Name="textBlock" Text="{Binding}"/>
@@ -113,74 +115,147 @@
             </TabItem>
 
             <TabItem Header="Equipment">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="300" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
 
-                    <TextBlock Text="Telescope / Other optics" VerticalAlignment="Center" Padding="6" />
-                    <ComboBox Grid.Column="1" Grid.Row="0" SelectedValue="{Binding TelescopeId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}">
-                        <ComboBox.ItemsSource>
-                            <CompositeCollection>
-                                <e:OpticsDB Id="{x:Null}" Model="None" />
-                                <CollectionContainer Collection="{Binding Source={x:Static t:Equipment.Telescopes}}" />
-                            </CompositeCollection>
-                        </ComboBox.ItemsSource>
-                    </ComboBox>
+                <StackPanel Grid.IsSharedSizeScope="True" Orientation="Vertical" VerticalAlignment="Stretch">
+                    <Grid Background="#00000001">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="Title" />
+                            <ColumnDefinition Width="300" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Telescope / Other optics" VerticalAlignment="Center" Padding="6" />
+                        <ComboBox Grid.Column="1" SelectedValue="{Binding TelescopeId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}">
+                            <ComboBox.ItemsSource>
+                                <CompositeCollection>
+                                    <e:OpticsDB Id="{x:Null}" Model="None" />
+                                    <CollectionContainer Collection="{Binding Source={x:Static t:DatabaseManager.Optics}}" />
+                                </CompositeCollection>
+                            </ComboBox.ItemsSource>
+                        </ComboBox>
+                        <StackPanel Orientation="Horizontal" Grid.Column="2" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=IsMouseOver, Converter={s:BoolToVisibilityConverter}}">
+                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding TelescopeId, Converter={s:NotNullToBoolConverter}}" Command="{Binding Path=DataContext.EditOpticsCommand, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}" CommandParameter="{Binding TelescopeId}">
+                                <Image Width="12" Height="12" Source="{StaticResource IconEdit}"  />
+                            </Button>
+                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding TelescopeId, Converter={s:NotNullToBoolConverter}}">
+                                <Image Width="12" Height="12" Source="{StaticResource IconDelete}" />
+                            </Button>
+                            <Button Style="{StaticResource HoverButtonStyle}">
+                                <Image Width="12" Height="12" Source="{StaticResource IconAdd}" />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Background="#00000001">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="Title" />
+                            <ColumnDefinition Width="300" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Eyepiece" VerticalAlignment="Center" Padding="6" />
+                        <ComboBox Grid.Column="1" SelectedValue="{Binding EyepieceId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}">
+                            <ComboBox.ItemsSource>
+                                <CompositeCollection>
+                                    <e:EyepieceDB Id="{x:Null}" Model="None" />
+                                    <CollectionContainer Collection="{Binding Source={x:Static t:Equipment.Eyepieces}}" />
+                                </CompositeCollection>
+                            </ComboBox.ItemsSource>
+                        </ComboBox>
+                        <StackPanel Orientation="Horizontal" Grid.Column="2" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=IsMouseOver, Converter={s:BoolToVisibilityConverter}}">
+                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding EyepieceId, Converter={s:NotNullToBoolConverter}}">
+                                <Image Width="12" Height="12" Source="{StaticResource IconEdit}" />
+                            </Button>
+                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding EyepieceId, Converter={s:NotNullToBoolConverter}}">
+                                <Image Width="12" Height="12" Source="{StaticResource IconDelete}" />
+                            </Button>
+                            <Button Style="{StaticResource HoverButtonStyle}">
+                                <Image Width="12" Height="12" Source="{StaticResource IconAdd}" />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Background="#00000001">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="Title" />
+                            <ColumnDefinition Width="300" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Lens" VerticalAlignment="Center" Padding="6" />
+                        <ComboBox Grid.Column="1" SelectedValue="{Binding LensId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}">
+                            <ComboBox.ItemsSource>
+                                <CompositeCollection>
+                                    <e:LensDB Id="{x:Null}" Model="None" />
+                                    <CollectionContainer Collection="{Binding Source={x:Static t:Equipment.Lenses}}" />
+                                </CompositeCollection>
+                            </ComboBox.ItemsSource>
+                        </ComboBox>
+                        <StackPanel Orientation="Horizontal" Grid.Column="2" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=IsMouseOver, Converter={s:BoolToVisibilityConverter}}">
+                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding LensId, Converter={s:NotNullToBoolConverter}}">
+                                <Image Width="12" Height="12" Source="{StaticResource IconEdit}" />
+                            </Button>
+                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding LensId, Converter={s:NotNullToBoolConverter}}">
+                                <Image Width="12" Height="12" Source="{StaticResource IconDelete}" />
+                            </Button>
+                            <Button Style="{StaticResource HoverButtonStyle}">
+                                <Image Width="12" Height="12" Source="{StaticResource IconAdd}" />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Background="#00000001">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="Title" />
+                            <ColumnDefinition Width="300" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Filter" VerticalAlignment="Center" Padding="6" />
+                        <ComboBox Grid.Column="1" SelectedValue="{Binding FilterId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}">
+                            <ComboBox.ItemsSource>
+                                <CompositeCollection>
+                                    <e:FilterDB Id="{x:Null}" Model="None" />
+                                    <CollectionContainer Collection="{Binding Source={x:Static t:Equipment.Filters}}" />
+                                </CompositeCollection>
+                            </ComboBox.ItemsSource>
+                        </ComboBox>
+                        <StackPanel Orientation="Horizontal" Grid.Column="2" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=IsMouseOver, Converter={s:BoolToVisibilityConverter}}">
+                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding FilterId, Converter={s:NotNullToBoolConverter}}">
+                                <Image Width="12" Height="12" Source="{StaticResource IconEdit}" />
+                            </Button>
+                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding FilterId, Converter={s:NotNullToBoolConverter}}">
+                                <Image Width="12" Height="12" Source="{StaticResource IconDelete}" />
+                            </Button>
+                            <Button Style="{StaticResource HoverButtonStyle}">
+                                <Image Width="12" Height="12" Source="{StaticResource IconAdd}" />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Background="#00000001">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="Title" />
+                            <ColumnDefinition Width="300" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Camera" VerticalAlignment="Center" Padding="6" />
+                        <ComboBox Grid.Column="1" SelectedValue="{Binding CameraId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}">
+                            <ComboBox.ItemsSource>
+                                <CompositeCollection>
+                                    <e:ImagerDB Id="{x:Null}" Model="None" />
+                                    <CollectionContainer Collection="{Binding Source={x:Static t:Equipment.Cameras}}" />
+                                </CompositeCollection>
+                            </ComboBox.ItemsSource>
+                        </ComboBox>
+                        <StackPanel Orientation="Horizontal" Grid.Column="2" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=IsMouseOver, Converter={s:BoolToVisibilityConverter}}">
+                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding CameraId, Converter={s:NotNullToBoolConverter}}">
+                                <Image Width="12" Height="12" Source="{StaticResource IconEdit}" />
+                            </Button>
+                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding CameraId, Converter={s:NotNullToBoolConverter}}">
+                                <Image Width="12" Height="12" Source="{StaticResource IconDelete}" />
+                            </Button>
+                            <Button Style="{StaticResource HoverButtonStyle}">
+                                <Image Width="12" Height="12" Source="{StaticResource IconAdd}" />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
 
-                    <TextBlock Text="Eyepiece" VerticalAlignment="Center" Padding="6" Grid.Row="1" />
-                    <ComboBox Grid.Column="1" Grid.Row="1" SelectedValue="{Binding EyepieceId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}">
-                        <ComboBox.ItemsSource>
-                            <CompositeCollection>
-                                <e:EyepieceDB Id="{x:Null}" Model="None" />
-                                <CollectionContainer Collection="{Binding Source={x:Static t:Equipment.Eyepieces}}" />
-                            </CompositeCollection>
-                        </ComboBox.ItemsSource>
-                    </ComboBox>
+                    <c:MultilineEdit VerticalAlignment="Bottom" Title="Accessories" Placeholder="Enter list of additional accessories used - in free form" Text="{Binding Accessories}" />
 
-                    <TextBlock Text="Lens" VerticalAlignment="Center" Padding="6" Grid.Row="2" />
-                    <ComboBox Grid.Column="1" Grid.Row="2" SelectedValue="{Binding LensId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}">
-                        <ComboBox.ItemsSource>
-                            <CompositeCollection>
-                                <e:LensDB Id="{x:Null}" Model="None" />
-                                <CollectionContainer Collection="{Binding Source={x:Static t:Equipment.Lenses}}" />
-                            </CompositeCollection>
-                        </ComboBox.ItemsSource>
-                    </ComboBox>
-
-                    <TextBlock Text="Filter" VerticalAlignment="Center" Padding="6" Grid.Row="3" />
-                    <ComboBox Grid.Column="1" Grid.Row="3" SelectedValue="{Binding FilterId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}">
-                        <ComboBox.ItemsSource>
-                            <CompositeCollection>
-                                <e:FilterDB Id="{x:Null}" Model="None" />
-                                <CollectionContainer Collection="{Binding Source={x:Static t:Equipment.Filters}}" />
-                            </CompositeCollection>
-                        </ComboBox.ItemsSource>
-                    </ComboBox>
-
-                    <TextBlock Text="Camera" VerticalAlignment="Center" Padding="6" Grid.Row="4" />
-                    <ComboBox Grid.Column="1" Grid.Row="4" SelectedValue="{Binding CameraId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}">
-                        <ComboBox.ItemsSource>
-                            <CompositeCollection>
-                                <e:ImagerDB Id="{x:Null}" Model="None" />
-                                <CollectionContainer Collection="{Binding Source={x:Static t:Equipment.Cameras}}" />
-                            </CompositeCollection>
-                        </ComboBox.ItemsSource>
-                    </ComboBox>
-
-                    <c:MultilineEdit Grid.Row="5" Grid.ColumnSpan="3" Title="Accessories" Placeholder="Enter list of additional accessories used - in free form" Text="{Binding Accessories}" />
-
-                </Grid>
+                </StackPanel>
 
             </TabItem>
             <TabItem>
