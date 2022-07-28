@@ -12,9 +12,9 @@ namespace Astrarium.Plugins.Journal
     {
         public JournalPlugin()
         {
-            var menuItemJournal = new MenuItem("Journal");
+            var menuItemJournal = new MenuItem("Logbook");
 
-            menuItemJournal.SubItems.Add(new MenuItem("Show Journal", new Command(ShowJournal)));
+            menuItemJournal.SubItems.Add(new MenuItem("Show Logbook", new Command(ShowJournal)));
             menuItemJournal.SubItems.Add(new MenuItem("Import", new Command(DoImport)));
 
             MenuItems.Add(MenuItemPosition.MainMenuTop, menuItemJournal);

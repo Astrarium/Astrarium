@@ -18,12 +18,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
         public Optics Optics
         {
             get => GetValue<Optics>(nameof(Optics));
-            private set => SetValue(nameof(Optics), value);
-        }
-
-        public async void Load(string id)
-        {
-            Optics = await DatabaseManager.GetOptics(id);
+            set => SetValue(nameof(Optics), value);
         }
 
         private async void Ok()

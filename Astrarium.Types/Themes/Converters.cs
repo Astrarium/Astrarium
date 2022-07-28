@@ -54,6 +54,20 @@ namespace Astrarium.Types.Themes
         }
     }
 
+    public class MultiBoolToVisibilityConverter : MultiValueConverterBase
+    {
+        public override object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            Visibility falseState = parameter is Visibility ? (Visibility)parameter : Visibility.Collapsed;
+            return values.OfType<IConvertible>().All(System.Convert.ToBoolean) ? Visibility.Visible : falseState;
+        }
+
+        public override object[] ConvertBack(object value, Type[] targetTypes, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
+
     public class BoolToVisibilityConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)

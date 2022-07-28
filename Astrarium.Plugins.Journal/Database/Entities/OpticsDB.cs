@@ -8,16 +8,31 @@ namespace Astrarium.Plugins.Journal.Database.Entities
 {
     public class OpticsDB : IEntity
     {
-        public string Id { get; set; } = null;
+        /// <summary>
+        /// Empty element (equals to "Not selected")
+        /// </summary>
+        public static OpticsDB Empty = new OpticsDB() { Id = null };
+        
+        /// <inheritdoc />
+        public string Id { get; set; }
 
+        /// <summary>
+        /// Aperture, in mm
+        /// </summary>
         public double Aperture { get; set; }
 
-        public string Model { get; set; }
-
+        /// <summary>
+        /// Vendor name
+        /// </summary>
         public string Vendor { get; set; }
 
         /// <summary>
-        /// Type of optics. Not restricted to an enumeration to cover exotic constructions ;-)
+        /// Model name
+        /// </summary>
+        public string Model { get; set; }
+
+        /// <summary>
+        /// Optical scheme of optics. Not restricted to an enumeration to cover exotic constructions ;-)
         /// The type is optional but should be given if known!
         /// When applicable, the following coding(according to the DSL) should be used:
         /// A: Naked eye
@@ -29,7 +44,7 @@ namespace Astrarium.Plugins.Journal.Database.Entities
         /// R: Refractor 
         /// M: Maksutov
         /// </summary>
-        public string Type { get; set; }
+        public string Scheme { get; set; }
 
         /// <summary>
         /// Transmission factor, light efficiency
@@ -49,10 +64,10 @@ namespace Astrarium.Plugins.Journal.Database.Entities
         /// <summary>
         /// Only 2 types are used: Telescope, Fixed
         /// </summary>
-        public string OpticsType { get; set; }
+        public string Type { get; set; }
 
         /// <summary>
-        /// Object-type specific details
+        /// Object-type specific details, in JSON-serialized form
         /// </summary>
         public string Details { get; set; }
 

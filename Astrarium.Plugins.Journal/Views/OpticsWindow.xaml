@@ -7,90 +7,137 @@
         xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
         mc:Ignorable="d"
         Style="{StaticResource {x:Type Window}}"
-        Title="OpticsWindow" Height="450" Width="400">
-    <Grid Margin="4" SnapsToDevicePixels="True">
+        Title="Telescope/Optics" 
+        SnapsToDevicePixels="True"
+        MinHeight="400" Height="400"
+        MinWidth="450" Width="400">
+
+    <Grid Margin="4" SnapsToDevicePixels="True" Grid.IsSharedSizeScope="True">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel DataContext="{Binding Optics}" Orientation="Vertical" Margin="6">
+        <Grid Margin="6" DataContext="{Binding Optics}" Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="Title" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+        
+            <Label Margin="0 3" Content="Manufacturer" Grid.Row="0" Grid.Column="0" />
+            <TextBox Text="{Binding Vendor}" Grid.Row="0" Grid.Column="1" />
 
-            <Label Content="Vendor" />
-            <TextBox Text="{Binding Vendor}" />
-
-            <Label Content="Model" />
-            <TextBox Text="{Binding Model}" />
-
-            <Label Content="Type" />
-            <ComboBox IsEditable="True" Text="{Binding Type}">
-                <ComboBoxItem>Naked eye</ComboBoxItem>
-                <ComboBoxItem>Cassegrain</ComboBoxItem>
-                <ComboBoxItem>Binoculars</ComboBoxItem>
-                <ComboBoxItem>Schmidt-Cassegrain</ComboBoxItem>
-                <ComboBoxItem>Newtonian</ComboBoxItem>
-                <ComboBoxItem>Kutter (Schiefspiegler)</ComboBoxItem>
-                <ComboBoxItem>Refractor</ComboBoxItem>
-                <ComboBoxItem>Maksutov</ComboBoxItem>
-            </ComboBox>
-
-            <Label Content="Aperture" />
-            <c:NumericUpDown Value="{Binding Aperture}" DecimalPlaces="0" Minimum="1" Maximum="10000" />
-
-            <Label Content="OpticsType" />
-            <StackPanel Orientation="Horizontal">
-                <RadioButton Content="Telescope" IsChecked="{Binding OpticsType, Converter={s:EqualityConverter}, ConverterParameter='Telescope'}" />
-                <RadioButton Content="Fixed optics" IsChecked="{Binding OpticsType, Converter={s:EqualityConverter}, ConverterParameter='Fixed'}" />
+            <Label Content="Model" Grid.Row="1" Grid.Column="0" />
+            <TextBox Text="{Binding Model}" Grid.Row="1" Grid.Column="1" />
+            
+            <Label Margin="0 3" Content="Type" Grid.Row="2" Grid.Column="0" />
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Grid.Row="2" Grid.Column="1">
+                <RadioButton Content="Telescope" IsChecked="{Binding IsTelescope}" />
+                <RadioButton Margin="16 0" Content="Fixed optics" IsChecked="{Binding IsFixedOptics}"  />
             </StackPanel>
 
-            <ContentControl Content="{Binding}" DataContext="{Binding}">
-                <ContentControl.Style>
-                    <Style TargetType="ContentControl">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding OpticsType}" Value="Telescope">
-                                <Setter Property="ContentTemplate">
-                                    <Setter.Value>
-                                        <DataTemplate>
-                                            <StackPanel Orientation="Vertical">
-                                                <Label Content="Focal Length" />
-                                                <c:NumericUpDown Value="{Binding FocalLength}" DecimalPlaces="0" Minimum="1" Maximum="10000" />
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding OpticsType}" Value="Fixed">
-                                <Setter Property="ContentTemplate">
-                                    <Setter.Value>
-                                        <DataTemplate>
-                                            <StackPanel Orientation="Vertical">
-                                                <Label Content="Magnification" />
-                                                <c:NumericUpDown Value="{Binding Magnification}" DecimalPlaces="1" Minimum="1" Maximum="1000" />
+            <Label Margin="0 3" Content="Optical scheme" Grid.Row="3" Grid.Column="0" />
+            <ComboBox IsEditable="True" Text="{Binding Scheme}" Grid.Row="3" Grid.Column="1">
+                <ComboBoxItem>Naked eye</ComboBoxItem>
+                <ComboBoxItem>Monocular</ComboBoxItem>
+                <ComboBoxItem>Binocular</ComboBoxItem>
+                <ComboBoxItem>Cassegrain</ComboBoxItem>
+                <ComboBoxItem>Dall-Kirkham</ComboBoxItem>
+                <ComboBoxItem>Nasmyth</ComboBoxItem>
+                <ComboBoxItem>Ritchey-Chretien</ComboBoxItem>
+                <ComboBoxItem>Klevtsov-Cassegrain</ComboBoxItem>
+                <ComboBoxItem>Maksutov-Cassegrain</ComboBoxItem>
+                <ComboBoxItem>Maksutov-Newtonian</ComboBoxItem>
+                <ComboBoxItem>Schmidt-Cassegrain</ComboBoxItem>
+                <ComboBoxItem>Newtonian</ComboBoxItem>
+                <ComboBoxItem>Gregorian</ComboBoxItem>
+                <ComboBoxItem>Kutter (Schiefspiegler)</ComboBoxItem>
+                <ComboBoxItem>Refractor</ComboBoxItem>
+                <ComboBoxItem>Achromatic Refractor</ComboBoxItem>
+                <ComboBoxItem>Apochromatic Refractor</ComboBoxItem>
+            </ComboBox>
 
-                                                <CheckBox IsChecked="{Binding TrueFieldSpecified}" Content="True field of view" />
-                                                <c:NumericUpDown Value="{Binding TrueField}" DecimalPlaces="2" Minimum="0" Maximum="90" Visibility="{Binding TrueFieldSpecified, Converter={s:BoolToVisibilityConverter}}" />
+            <Label Content="Aperture, mm" Grid.Row="4" Grid.Column="0"  />
+            <c:NumericUpDown Grid.Row="4" Grid.Column="1" Value="{Binding Aperture}" DecimalPlaces="0" Minimum="1" Maximum="10000" />
+        </Grid>
 
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </ContentControl.Style>
-            </ContentControl>
+        <ContentControl Content="{Binding}" DataContext="{Binding Optics}" Grid.Row="1">
+            <ContentControl.Style>
+                <Style TargetType="ContentControl">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Type}" Value="Telescope">
+                            <Setter Property="ContentTemplate">
+                                <Setter.Value>
+                                    <DataTemplate>
+                                        <Grid Margin="6 0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="Title" MinWidth="200" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="Focal Length, mm" Grid.Column="0" />
+                                            <c:NumericUpDown Value="{Binding FocalLength}" Grid.Column="1" DecimalPlaces="0" Minimum="1" Maximum="10000" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Type}" Value="Fixed">
+                            <Setter Property="ContentTemplate">
+                                <Setter.Value>
+                                    <DataTemplate>
+                                        <Grid Margin="6 0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="Title" MinWidth="200" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
 
-            <GroupBox Header="Orientation" Padding="4">
-                <StackPanel Orientation="Vertical">
-                    <CheckBox Margin="4" Content="Erect" IsChecked="{Binding OrientationErect}" IsThreeState="True" />
-                    <CheckBox Margin="4" Content="True sided" IsChecked="{Binding OrientationTrueSided}" IsThreeState="True" />
-                </StackPanel>
-            </GroupBox>
-        </StackPanel>
+                                            <Label Content="Magnification" Grid.Row="0" Grid.Column="0" />
+                                            <c:NumericUpDown Grid.Row="0" Grid.Column="1" Value="{Binding Magnification}" DecimalPlaces="1" Minimum="1" Maximum="1000" />
 
-        <Separator Grid.Row="1" Margin="0 4 0 4" />
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <CheckBox VerticalAlignment="Center" Margin="4" Grid.Row="1" Grid.Column="0" IsChecked="{Binding TrueFieldSpecified}" Content="True field of view, degrees" />
+                                            <c:NumericUpDown Margin="0 6" Grid.Row="1" Grid.Column="1" Value="{Binding TrueField}" DecimalPlaces="2" Minimum="0" Maximum="90" IsEnabled="{Binding TrueFieldSpecified}" />
+
+                                        </Grid>
+                                    </DataTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ContentControl.Style>
+        </ContentControl>
+
+        <Grid Margin="6 0" Grid.Row="2" DataContext="{Binding Optics}" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="Title" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <CheckBox Margin="4" Grid.Row="0" Grid.ColumnSpan="2" Content="Erected image (not upside-down)" IsChecked="{Binding OrientationErect}" IsThreeState="True" />
+            <CheckBox Margin="4" Grid.Row="1" Grid.ColumnSpan="2" Content="True sided image (not mirrored)" IsChecked="{Binding OrientationTrueSided}" IsThreeState="True" />
+        </Grid>
+
+        <Separator Grid.Row="4" Margin="0 4 0 4" />
+        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding OkCommand}" Content="OK" />
             <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CancelCommand}" Content="Cancel" />
         </StackPanel>

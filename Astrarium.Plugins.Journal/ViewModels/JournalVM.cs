@@ -13,6 +13,7 @@ using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 
@@ -45,6 +46,8 @@ namespace Astrarium.Plugins.Journal.ViewModels
         public ICommand EditSitesCommand { get; private set; }
 
         public ICommand EditOpticsCommand { get; private set; }
+        public ICommand CreateOpticsCommand { get; private set; }
+        public ICommand DeleteOpticsCommand { get; private set; }
 
         #endregion Commands
 
@@ -68,6 +71,8 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
             EditSitesCommand = new Command(EditSites);
             EditOpticsCommand = new Command<string>(EditOptics);
+            CreateOpticsCommand = new Command(CreateOptics);
+            DeleteOpticsCommand = new Command<string>(DeleteOptics);
 
             Task.Run(Load);
         }
@@ -429,12 +434,34 @@ namespace Astrarium.Plugins.Journal.ViewModels
         private async void EditOptics(string id)
         {
             var model = ViewManager.CreateViewModel<OpticsVM>();
-            model.Load(id);
+            model.Optics = await DatabaseManager.GetOptics(id);
             if (ViewManager.ShowDialog(model) ?? false)
             {
+                Optics = await DatabaseManager.GetOptics();
+                (SelectedTreeViewItem as Observation).TelescopeId = model.Optics.Id;
+            }
+        }
+
+        private async void CreateOptics()
+        {
+            var model = ViewManager.CreateViewModel<OpticsVM>();
+            model.Optics = new Optics() { Id = Guid.NewGuid().ToString(), Type = "Telescope" };
+            if (ViewManager.ShowDialog(model) ?? false)
+            {
+                Optics = await DatabaseManager.GetOptics();
+                (SelectedTreeViewItem as Observation).TelescopeId = model.Optics.Id;
+            }
+        }
+
+        private async void DeleteOptics(string id)
+        {
+            if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete selected optics? This will be deleted from all observations. This action can not be undone.", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                await DatabaseManager.DeleteOptics(id);
                 SelectedTreeViewItem.DatabasePropertyChanged -= DatabaseManager.SaveDatabaseEntityProperty;
                 Optics = await DatabaseManager.GetOptics();
                 LoadJournalItemDetails();
+                (SelectedTreeViewItem as Observation).TelescopeId = null;
             }
         }
 

@@ -233,7 +233,7 @@ namespace Astrarium.Plugins.Journal.Types
                 using (var db = new DatabaseContext())
                 {
                     var list = db.Optics.ToList();
-                    list.Insert(0, new OpticsDB());
+                    list.Insert(0, OpticsDB.Empty);
                     return (ICollection)list;
                 }
             });
@@ -253,18 +253,18 @@ namespace Astrarium.Plugins.Journal.Types
                         optics.Id = opticsDb.Id;
                         optics.Vendor = opticsDb.Vendor;
                         optics.Model = opticsDb.Model;
+                        optics.Scheme = opticsDb.Scheme;
                         optics.Type = opticsDb.Type;
-                        optics.OpticsType = opticsDb.OpticsType;
                         optics.Aperture = opticsDb.Aperture;
                         optics.OrientationErect = opticsDb.OrientationErect;
                         optics.OrientationTrueSided = opticsDb.OrientationTrueSided;
 
-                        if (optics.OpticsType == "Telescope")
+                        if (optics.Type == "Telescope")
                         {
                             var details = JsonConvert.DeserializeObject<ScopeDetails>(opticsDb.Details);
                             optics.FocalLength = details.FocalLength;
                         }
-                        else if (optics.OpticsType == "Fixed")
+                        else if (optics.Type == "Fixed")
                         {
                             var details = JsonConvert.DeserializeObject<FixedOpticsDetails>(opticsDb.Details);
                             optics.Magnification = details.Magnification;
@@ -289,30 +289,45 @@ namespace Astrarium.Plugins.Journal.Types
                     var opticsDb = db.Optics.FirstOrDefault(x => x.Id == optics.Id);
                     if (opticsDb == null)
                     {
-                        opticsDb = new OpticsDB() { Id = Guid.NewGuid().ToString() };
+                        opticsDb = new OpticsDB() { Id = optics.Id };
+                        db.Optics.Add(opticsDb);
                     }
 
                     opticsDb.Vendor = optics.Vendor;
                     opticsDb.Model = optics.Model;
+                    opticsDb.Scheme = optics.Scheme;
                     opticsDb.Type = optics.Type;
-                    opticsDb.OpticsType = optics.OpticsType;
                     opticsDb.Aperture = optics.Aperture;
                     opticsDb.OrientationErect = optics.OrientationErect;
                     opticsDb.OrientationTrueSided = optics.OrientationTrueSided;
 
-                    if (optics.OpticsType == "Telescope")
+                    if (optics.Type == "Telescope")
                     {
                         opticsDb.Details = JsonConvert.SerializeObject(new ScopeDetails() { FocalLength = optics.FocalLength });
                     }
-                    else if (optics.OpticsType == "Fixed")
+                    else if (optics.Type == "Fixed")
                     {
                         opticsDb.Details = JsonConvert.SerializeObject(new FixedOpticsDetails() { Magnification = optics.Magnification, TrueField = optics.TrueFieldSpecified ? optics.TrueField : (double?)null });
                     }
 
                     db.SaveChanges();
+                }
+            });
+        }
 
-                    //Optics.
-                    //Optics.Refresh();
+        public static Task DeleteOptics(string id)
+        {
+            return Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    var existing = db.Optics.FirstOrDefault(x => x.Id == id);
+                    if (existing != null)
+                    {
+                        db.Optics.Remove(existing);
+                        db.Database.ExecuteSqlCommand($"UPDATE [Observations] SET [ScopeId] = NULL WHERE [ScopeId] = '{id}'");
+                        db.SaveChanges();
+                    }
                 }
             });
         }

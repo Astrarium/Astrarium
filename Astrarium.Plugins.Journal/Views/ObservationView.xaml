@@ -18,9 +18,6 @@
                 <ResourceDictionary Source="pack://application:,,,/Astrarium.Plugins.Journal;component/Themes/Styles.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/Astrarium.Plugins.Journal;component/Themes/Images.xaml" />
             </ResourceDictionary.MergedDictionaries>
-
-
-            <CollectionViewSource x:Key="Optics" Source="{Binding RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}, Path=DataContext.Optics}" />
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -104,14 +101,21 @@
                         <c:MultilineEdit Margin="0 0 4 4" Grid.Row="1" Title="Notes" Text="{Binding TargetNotes}" Placeholder="Enter observation target notes, for example, history of discovery or any other helpful info." VerticalAlignment="Stretch" />
                     </Grid>
                 </ScrollViewer>
-                
-                
             </TabItem>
 
             <TabItem Header="Equipment">
 
-                <StackPanel Grid.IsSharedSizeScope="True" Orientation="Vertical" VerticalAlignment="Stretch">
-                    <Grid Background="#00000001">
+                <Grid Grid.IsSharedSizeScope="True" VerticalAlignment="Stretch">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    
+                    <Grid Background="#00000001" Grid.Row="0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" SharedSizeGroup="Title" />
                             <ColumnDefinition Width="300" />
@@ -123,15 +127,15 @@
                             <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding TelescopeId, Converter={s:NotNullToBoolConverter}}" Command="{Binding Path=DataContext.EditOpticsCommand, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}" CommandParameter="{Binding TelescopeId}">
                                 <Image Width="12" Height="12" Source="{StaticResource IconEdit}"  />
                             </Button>
-                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding TelescopeId, Converter={s:NotNullToBoolConverter}}">
+                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding TelescopeId, Converter={s:NotNullToBoolConverter}}" Command="{Binding Path=DataContext.DeleteOpticsCommand, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}" CommandParameter="{Binding TelescopeId}">
                                 <Image Width="12" Height="12" Source="{StaticResource IconDelete}" />
                             </Button>
-                            <Button Style="{StaticResource HoverButtonStyle}">
-                                <Image Width="12" Height="12" Source="{StaticResource IconAdd}" />
+                            <Button Style="{StaticResource HoverButtonStyle}" Command="{Binding Path=DataContext.CreateOpticsCommand, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}">
+                                <Image Width="12" Height="12" Source="{StaticResource IconAdd}"  />
                             </Button>
                         </StackPanel>
                     </Grid>
-                    <Grid Background="#00000001">
+                    <Grid Background="#00000001" Grid.Row="1">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" SharedSizeGroup="Title" />
                             <ColumnDefinition Width="300" />
@@ -158,7 +162,7 @@
                             </Button>
                         </StackPanel>
                     </Grid>
-                    <Grid Background="#00000001">
+                    <Grid Background="#00000001" Grid.Row="2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" SharedSizeGroup="Title" />
                             <ColumnDefinition Width="300" />
@@ -185,7 +189,7 @@
                             </Button>
                         </StackPanel>
                     </Grid>
-                    <Grid Background="#00000001">
+                    <Grid Background="#00000001" Grid.Row="3">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" SharedSizeGroup="Title" />
                             <ColumnDefinition Width="300" />
@@ -212,7 +216,7 @@
                             </Button>
                         </StackPanel>
                     </Grid>
-                    <Grid Background="#00000001">
+                    <Grid Background="#00000001" Grid.Row="4">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" SharedSizeGroup="Title" />
                             <ColumnDefinition Width="300" />
@@ -240,9 +244,9 @@
                         </StackPanel>
                     </Grid>
 
-                    <c:MultilineEdit VerticalAlignment="Bottom" Title="Accessories" Placeholder="Enter list of additional accessories used - in free form" Text="{Binding Accessories}" />
+                    <c:MultilineEdit Grid.Row="5" VerticalAlignment="Stretch" Title="Accessories" Placeholder="Enter list of additional accessories used - in free form" Text="{Binding Accessories}" />
 
-                </StackPanel>
+                </Grid>
 
             </TabItem>
             <TabItem>

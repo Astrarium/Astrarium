@@ -248,18 +248,18 @@ namespace Astrarium.Plugins.Journal.OAL
             {
                 Id = optics.id,
                 Aperture = optics.aperture,
-                Type = optics.type,
+                Scheme = optics.type,
                 Vendor = optics.vendor,
                 Model = optics.model,
                 LightGrasp = optics.lightGraspSpecified ? optics.lightGrasp : (double?)null,
-                OpticsType = optics is scopeType ? "Telescope" : "Fixed",
+                Type = optics is scopeType ? "Telescope" : "Fixed",
                 OrientationErect = optics.orientation?.erect,
                 OrientationTrueSided = optics.orientation?.truesided,
             };
 
             if (optics is scopeType scope)
             {
-                scopeDb.OpticsType = "Telescope";
+                scopeDb.Type = "Telescope";
                 scopeDb.Details = JsonConvert.SerializeObject(new ScopeDetails()
                 {
                     FocalLength = scope.focalLength
@@ -267,7 +267,7 @@ namespace Astrarium.Plugins.Journal.OAL
             }
             else if (optics is fixedMagnificationOpticsType fixedOptics)
             {
-                scopeDb.OpticsType = "Fixed";
+                scopeDb.Type = "Fixed";
                 scopeDb.Details = JsonConvert.SerializeObject(new FixedOpticsDetails()
                 {
                     Magnification = fixedOptics.magnification,

@@ -23,16 +23,32 @@ namespace Astrarium.Plugins.Journal.Types
             set => SetValue(nameof(Model), value);
         }
 
-        public string Type
+        public string Scheme
         {
-            get => GetValue<string>(nameof(Type));
-            set => SetValue(nameof(Type), value);
+            get => GetValue<string>(nameof(Scheme));
+            set => SetValue(nameof(Scheme), value);
         }
 
-        public string OpticsType
+        public string Type { get; set; }
+
+        public bool IsTelescope
         {
-            get => GetValue<string>(nameof(OpticsType));
-            set => SetValue(nameof(OpticsType), value);
+            get => Type == "Telescope";
+            set
+            {
+                Type = "Telescope";
+                NotifyPropertyChanged(nameof(Type), nameof(IsTelescope), nameof(IsFixedOptics));
+            }
+        }
+
+        public bool IsFixedOptics
+        {
+            get => Type == "Fixed";
+            set
+            {
+                Type = "Fixed";
+                NotifyPropertyChanged(nameof(Type), nameof(IsTelescope), nameof(IsFixedOptics));
+            }
         }
 
         public double Aperture
