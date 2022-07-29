@@ -226,6 +226,19 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
+        public static Task<ICollection> GetSites()
+        {
+            return Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    var list = db.Sites.ToList();
+                    list.Insert(0, SiteDB.Empty);
+                    return (ICollection)list;
+                }
+            });
+        }
+
         public static Task<ICollection> GetOptics()
         {
             return Task.Run(() =>
@@ -332,63 +345,86 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static ObservableCollection<Site> Sites => sites.Value;
-
-        public static Task AddSite(Site site)
+        public static Task<ICollection> GetEyepieces()
         {
             return Task.Run(() =>
             {
                 using (var db = new DatabaseContext())
                 {
-                    db.Sites.Add(new SiteDB()
-                    {
-                        Id = site.Id,
-                        Name = site.Name
-                    });
-                    db.SaveChanges();
-
-                    Application.Current.Dispatcher.Invoke(() => Sites.Add(site));
+                    var list = db.Eyepieces.ToList();
+                    list.Insert(0, EyepieceDB.Empty);
+                    return (ICollection)list;
                 }
             });
         }
 
-        public static Task DeleteSite(string id)
+        public static Task<Eyepiece> GetEyepiece(string id)
         {
             return Task.Run(() =>
             {
                 using (var db = new DatabaseContext())
                 {
-                    var existing = db.Sites.FirstOrDefault(x => x.Id == id);
+                    var eyepieceDb = db.Eyepieces.FirstOrDefault(x => x.Id == id);
+                    if (eyepieceDb != null)
+                    {
+                        var eyepiece = new Eyepiece();
+
+                        eyepiece.Id = eyepieceDb.Id;
+                        eyepiece.Vendor = eyepieceDb.Vendor;
+                        eyepiece.Model = eyepieceDb.Model;
+                        eyepiece.FocalLength = eyepieceDb.FocalLength;
+                        eyepiece.MaxFocalLength = eyepieceDb.FocalLengthMax.HasValue ? eyepieceDb.FocalLengthMax.Value : 10;
+                        eyepiece.IsZoomEyepiece = eyepieceDb.FocalLengthMax.HasValue;
+                        eyepiece.ApparentFOV = eyepieceDb.ApparentFOV.HasValue ? eyepieceDb.ApparentFOV.Value : 50;
+                        eyepiece.ApparentFOVSpecified = eyepieceDb.ApparentFOV.HasValue;
+                        return eyepiece;
+                    }
+
+                    return null;
+                }
+            });
+        }
+
+        public static Task SaveEyepiece(Eyepiece eyepiece)
+        {
+            return Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    var eyepieceDb = db.Eyepieces.FirstOrDefault(x => x.Id == eyepiece.Id);
+                    if (eyepieceDb == null)
+                    {
+                        eyepieceDb = new EyepieceDB() { Id = eyepiece.Id };
+                        db.Eyepieces.Add(eyepieceDb);
+                    }
+
+                    eyepieceDb.Vendor = eyepiece.Vendor;
+                    eyepieceDb.Model = eyepiece.Model;
+                    eyepieceDb.FocalLength = eyepiece.FocalLength;
+                    eyepieceDb.FocalLengthMax = eyepiece.IsZoomEyepiece ? eyepiece.MaxFocalLength : (double?)null;
+                    eyepieceDb.ApparentFOV = eyepiece.ApparentFOVSpecified ? eyepiece.ApparentFOV : (double?)null;
+
+                    db.SaveChanges();
+                }
+            });
+        }
+
+        public static Task DeleteEyepiece(string id)
+        {
+            return Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    var existing = db.Eyepieces.FirstOrDefault(x => x.Id == id);
                     if (existing != null)
                     {
-                        db.Sites.Remove(existing);
-                        db.Database.ExecuteSqlCommand($"UPDATE [Sessions] SET [SiteId] = NULL WHERE [SiteId] = '{id}'");
+                        db.Eyepieces.Remove(existing);
+                        db.Database.ExecuteSqlCommand($"UPDATE [Observations] SET [EyepieceId] = NULL WHERE [EyepieceId] = '{id}'");
                         db.SaveChanges();
-                        var e = Sites.FirstOrDefault(x => x.Id == id);
-                        if (e != null)
-                        {
-                            Application.Current.Dispatcher.Invoke(() => Sites.Remove(e));
-                        }
                     }
                 }
             });
         }
-
-        private static Lazy<ObservableCollection<Site>> sites = new Lazy<ObservableCollection<Site>>(() =>
-        {
-            using (var db = new DatabaseContext())
-            {
-                return new ObservableCollection<Site>(db.Sites.Select(x => new Site() {
-                    Id = x.Id,
-                    Name = x.Name,
-                    Latitude = x.Latitude,
-                    Longitude = x.Longitude,
-                    Timezone = x.Timezone,
-                    Elevation = x.Elevation ?? 0,
-                    IAUCode = x.IAUCode
-                }));
-            }
-        });
 
         private static string DeserializeAliases(string aliases)
         {

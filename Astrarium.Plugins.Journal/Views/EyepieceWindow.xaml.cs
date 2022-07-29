@@ -15,11 +15,11 @@ using System.Windows.Shapes;
 namespace Astrarium.Plugins.Journal.Views
 {
     /// <summary>
-    /// Interaction logic for JournalSettingsWindow.xaml
+    /// Interaction logic for EyepieceWindow.xaml
     /// </summary>
-    public partial class JournalSettingsWindow : Window
+    public partial class EyepieceWindow : Window
     {
-        public JournalSettingsWindow()
+        public EyepieceWindow()
         {
             InitializeComponent();
         }

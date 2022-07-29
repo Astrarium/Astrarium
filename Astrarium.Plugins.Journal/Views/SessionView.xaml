@@ -74,14 +74,7 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock Margin="6" Text="Place of observation:" Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" />
-                    <ComboBox Grid.Column="1" Grid.Row="0" SelectedValue="{Binding SiteId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}">
-                        <ComboBox.ItemsSource>
-                            <CompositeCollection>
-                                <t:Site Id="{x:Null}" Name="Not set" />
-                                <CollectionContainer Collection="{Binding Source={x:Static t:DatabaseManager.Sites}}" />
-                            </CompositeCollection>
-                        </ComboBox.ItemsSource>
-                    </ComboBox>
+                    <ComboBox Grid.Column="1" Grid.Row="0"  ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.Sites}" SelectedValue="{Binding SiteId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}" />
                     <Button Style="{StaticResource HoverButtonStyle}" Grid.Column="3" HorizontalAlignment="Left" Margin="4 0" Width="24" Height="24" Grid.Row="0" ToolTip="Edit observation places..." Command="{Binding Path=DataContext.EditSitesCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}, Mode=FindAncestor}}">
                         <Image Style="{StaticResource ImageStyle}" Width="12" Height="12" Source="{StaticResource IconSettings}" />
                     </Button>

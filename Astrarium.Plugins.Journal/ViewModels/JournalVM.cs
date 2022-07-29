@@ -43,11 +43,14 @@ namespace Astrarium.Plugins.Journal.ViewModels
         public ICommand CreateAttachmentCommand { get; private set; }
         public ICommand ShowAttachmentDetailsCommand { get; private set; }
         public ICommand DropAttachmentsCommand { get; private set; }
-        public ICommand EditSitesCommand { get; private set; }
 
         public ICommand EditOpticsCommand { get; private set; }
         public ICommand CreateOpticsCommand { get; private set; }
         public ICommand DeleteOpticsCommand { get; private set; }
+
+        public ICommand EditEyepieceCommand { get; private set; }
+        public ICommand CreateEyepieceCommand { get; private set; }
+        public ICommand DeleteEyepieceCommand { get; private set; }
 
         #endregion Commands
 
@@ -69,10 +72,13 @@ namespace Astrarium.Plugins.Journal.ViewModels
             ShowAttachmentDetailsCommand = new Command<Attachment>(ShowAttachmentDetails);
             DropAttachmentsCommand = new Command<string[]>(DropAttachments);
 
-            EditSitesCommand = new Command(EditSites);
             EditOpticsCommand = new Command<string>(EditOptics);
             CreateOpticsCommand = new Command(CreateOptics);
             DeleteOpticsCommand = new Command<string>(DeleteOptics);
+
+            EditEyepieceCommand = new Command<string>(EditEyepiece);
+            CreateEyepieceCommand = new Command(CreateEyepiece);
+            DeleteEyepieceCommand = new Command<string>(DeleteEyepiece);
 
             Task.Run(Load);
         }
@@ -214,7 +220,9 @@ namespace Astrarium.Plugins.Journal.ViewModels
             FilteredSessions = CollectionViewSource.GetDefaultView(AllSessions);
             FilteredSessions.Filter = x => FilterSession(x as Session);
 
+            Sites = await DatabaseManager.GetSites();
             Optics = await DatabaseManager.GetOptics();
+            Eyepieces = await DatabaseManager.GetEyepieces();
 
             NotifyPropertyChanged(
                 nameof(AllSessions), 
@@ -426,11 +434,6 @@ namespace Astrarium.Plugins.Journal.ViewModels
             }
         }
 
-        private void EditSites()
-        {
-            ViewManager.ShowDialog<JournalSettingsVM>();
-        }
-
         private async void EditOptics(string id)
         {
             var model = ViewManager.CreateViewModel<OpticsVM>();
@@ -465,10 +468,56 @@ namespace Astrarium.Plugins.Journal.ViewModels
             }
         }
 
+        private async void EditEyepiece(string id)
+        {
+            var model = ViewManager.CreateViewModel<EyepieceVM>();
+            model.Eyepiece = await DatabaseManager.GetEyepiece(id);
+            if (ViewManager.ShowDialog(model) ?? false)
+            {
+                Eyepieces = await DatabaseManager.GetEyepieces();
+                (SelectedTreeViewItem as Observation).EyepieceId = model.Eyepiece.Id;
+            }
+        }
+
+        private async void CreateEyepiece()
+        {
+            var model = ViewManager.CreateViewModel<EyepieceVM>();
+            model.Eyepiece = new Eyepiece() { Id = Guid.NewGuid().ToString() };
+            if (ViewManager.ShowDialog(model) ?? false)
+            {
+                Eyepieces = await DatabaseManager.GetEyepieces();
+                (SelectedTreeViewItem as Observation).EyepieceId = model.Eyepiece.Id;
+            }
+        }
+
+        private async void DeleteEyepiece(string id)
+        {
+            if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete selected eyepiece? This will be deleted from all observations. This action can not be undone.", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                await DatabaseManager.DeleteEyepiece(id);
+                SelectedTreeViewItem.DatabasePropertyChanged -= DatabaseManager.SaveDatabaseEntityProperty;
+                Eyepieces = await DatabaseManager.GetEyepieces();
+                LoadJournalItemDetails();
+                (SelectedTreeViewItem as Observation).EyepieceId = null;
+            }
+        }
+
         public ICollection Optics
         {
             get => GetValue<ICollection>(nameof(Optics));
             private set => SetValue(nameof(Optics), value);
+        }
+
+        public ICollection Eyepieces
+        {
+            get => GetValue<ICollection>(nameof(Eyepieces));
+            private set => SetValue(nameof(Eyepieces), value);
+        }
+
+        public ICollection Sites
+        {
+            get => GetValue<ICollection>(nameof(Sites));
+            private set => SetValue(nameof(Sites), value);
         }
 
         #endregion Command handlers

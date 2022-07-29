@@ -11,6 +11,11 @@ namespace Astrarium.Plugins.Journal.Database.Entities
     /// </summary>
     public class EyepieceDB : IEntity
     {
+        /// <summary>
+        /// Empty element (equals to "Not selected")
+        /// </summary>
+        public static EyepieceDB Empty = new EyepieceDB() { Id = null };
+
         /// <inheritdoc />
         public string Id { get; set; }
 

@@ -8,6 +8,8 @@ namespace Astrarium.Plugins.Journal.Database.Entities
 {
     public class SiteDB : IEntity
     {
+        public static SiteDB Empty = new SiteDB() { Id = null };
+
         public string Id { get; set; }
         public string Name { get; set; }
         public double Latitude { get; set; }
@@ -15,5 +17,7 @@ namespace Astrarium.Plugins.Journal.Database.Entities
         public double? Elevation { get; set; }
         public double Timezone { get; set; }
         public string IAUCode { get; set; }
+
+        public override string ToString() => Name;
     }
 }

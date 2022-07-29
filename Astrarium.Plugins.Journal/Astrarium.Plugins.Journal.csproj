@@ -60,12 +60,25 @@
 	</ItemGroup>
 	
 	<ItemGroup>
+	  <Compile Update="Views\EyepieceWindow.xaml.cs">
+	    <SubType>Code</SubType>
+	  </Compile>
+	</ItemGroup>
+	
+	<ItemGroup>
 	  <None Update="x64\SQLite.Interop.dll">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="x86\SQLite.Interop.dll">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <Page Update="Views\EyepieceWindow.xaml">
+	    <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+	    <SubType>Designer</SubType>
+	  </Page>
 	</ItemGroup>
 
 </Project>
