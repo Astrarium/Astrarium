@@ -52,6 +52,11 @@ namespace Astrarium.Plugins.Journal.ViewModels
         public ICommand CreateEyepieceCommand { get; private set; }
         public ICommand DeleteEyepieceCommand { get; private set; }
 
+        public ICommand EditLensCommand { get; private set; }
+        public ICommand CreateLensCommand { get; private set; }
+        public ICommand DeleteLensCommand { get; private set; }
+
+
         #endregion Commands
 
         public JournalVM()
@@ -79,6 +84,10 @@ namespace Astrarium.Plugins.Journal.ViewModels
             EditEyepieceCommand = new Command<string>(EditEyepiece);
             CreateEyepieceCommand = new Command(CreateEyepiece);
             DeleteEyepieceCommand = new Command<string>(DeleteEyepiece);
+
+            EditLensCommand = new Command<string>(EditLens);
+            CreateLensCommand = new Command(CreateLens);
+            DeleteLensCommand = new Command<string>(DeleteLens);
 
             Task.Run(Load);
         }
@@ -223,6 +232,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
             Sites = await DatabaseManager.GetSites();
             Optics = await DatabaseManager.GetOptics();
             Eyepieces = await DatabaseManager.GetEyepieces();
+            Lenses = await DatabaseManager.GetLenses();
 
             NotifyPropertyChanged(
                 nameof(AllSessions), 
@@ -502,6 +512,40 @@ namespace Astrarium.Plugins.Journal.ViewModels
             }
         }
 
+        private async void EditLens(string id)
+        {
+            var model = ViewManager.CreateViewModel<LensVM>();
+            model.Lens = await DatabaseManager.GetLens(id);
+            if (ViewManager.ShowDialog(model) ?? false)
+            {
+                Lenses = await DatabaseManager.GetLenses();
+                (SelectedTreeViewItem as Observation).LensId = model.Lens.Id;
+            }
+        }
+
+        private async void CreateLens()
+        {
+            var model = ViewManager.CreateViewModel<LensVM>();
+            model.Lens = new Lens() { Id = Guid.NewGuid().ToString() };
+            if (ViewManager.ShowDialog(model) ?? false)
+            {
+                Lenses = await DatabaseManager.GetLenses();
+                (SelectedTreeViewItem as Observation).LensId = model.Lens.Id;
+            }
+        }
+
+        private async void DeleteLens(string id)
+        {
+            if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete selected lens? This will be deleted from all observations. This action can not be undone.", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                await DatabaseManager.DeleteLens(id);
+                SelectedTreeViewItem.DatabasePropertyChanged -= DatabaseManager.SaveDatabaseEntityProperty;
+                Lenses = await DatabaseManager.GetLenses();
+                LoadJournalItemDetails();
+                (SelectedTreeViewItem as Observation).LensId = null;
+            }
+        }
+
         public ICollection Optics
         {
             get => GetValue<ICollection>(nameof(Optics));
@@ -512,6 +556,12 @@ namespace Astrarium.Plugins.Journal.ViewModels
         {
             get => GetValue<ICollection>(nameof(Eyepieces));
             private set => SetValue(nameof(Eyepieces), value);
+        }
+
+        public ICollection Lenses
+        {
+            get => GetValue<ICollection>(nameof(Lenses));
+            private set => SetValue(nameof(Lenses), value);
         }
 
         public ICollection Sites

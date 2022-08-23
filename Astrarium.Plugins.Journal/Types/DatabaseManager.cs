@@ -358,6 +358,80 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
+        public static Task<ICollection> GetLenses()
+        {
+            return Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    var list = db.Lenses.ToList();
+                    list.Insert(0, LensDB.Empty);
+                    return (ICollection)list;
+                }
+            });
+        }
+
+        public static Task<Lens> GetLens(string id)
+        {
+            return Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    var lensDb = db.Lenses.FirstOrDefault(x => x.Id == id);
+                    if (lensDb != null)
+                    {
+                        var lens = new Lens();
+                        lens.Id = lensDb.Id;
+                        lens.Vendor = lensDb.Vendor;
+                        lens.Model = lensDb.Model;
+                        lens.Factor = lensDb.Factor;
+                        return lens;
+                    }
+
+                    return null;
+                }
+            });
+        }
+
+        public static Task SaveLens(Lens lens)
+        {
+            return Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    var lensDb = db.Lenses.FirstOrDefault(x => x.Id == lens.Id);
+                    if (lensDb == null)
+                    {
+                        lensDb = new LensDB() { Id = lens.Id };
+                        db.Lenses.Add(lensDb);
+                    }
+
+                    lensDb.Vendor = lens.Vendor;
+                    lensDb.Model = lens.Model;
+                    lensDb.Factor = lens.Factor;
+                    
+                    db.SaveChanges();
+                }
+            });
+        }
+
+        public static Task DeleteLens(string id)
+        {
+            return Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    var existing = db.Lenses.FirstOrDefault(x => x.Id == id);
+                    if (existing != null)
+                    {
+                        db.Lenses.Remove(existing);
+                        db.Database.ExecuteSqlCommand($"UPDATE [Observations] SET [LensId] = NULL WHERE [LensId] = '{id}'");
+                        db.SaveChanges();
+                    }
+                }
+            });
+        }
+
         public static Task<Eyepiece> GetEyepiece(string id)
         {
             return Task.Run(() =>

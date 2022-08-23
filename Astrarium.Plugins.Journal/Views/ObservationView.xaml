@@ -162,16 +162,9 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Lens" VerticalAlignment="Center" Padding="6" />
-                        <ComboBox Grid.Column="1" SelectedValue="{Binding LensId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}">
-                            <ComboBox.ItemsSource>
-                                <CompositeCollection>
-                                    <e:LensDB Id="{x:Null}" Model="None" />
-                                    <CollectionContainer Collection="{Binding Source={x:Static t:Equipment.Lenses}}" />
-                                </CompositeCollection>
-                            </ComboBox.ItemsSource>
-                        </ComboBox>
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.Lenses}" SelectedValue="{Binding LensId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}" />
                         <StackPanel Orientation="Horizontal" Grid.Column="2" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=IsMouseOver, Converter={s:BoolToVisibilityConverter}}">
-                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding LensId, Converter={s:NotNullToBoolConverter}}">
+                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding LensId, Converter={s:NotNullToBoolConverter}}" Command="{Binding Path=DataContext.EditLensCommand, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}" CommandParameter="{Binding LensId}">
                                 <Image Width="12" Height="12" Source="{StaticResource IconEdit}" />
                             </Button>
                             <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding LensId, Converter={s:NotNullToBoolConverter}}">
