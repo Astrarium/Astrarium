@@ -432,6 +432,100 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
+        public static Task SaveFilter(Filter filter)
+        {
+            return Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    var filterDb = db.Filters.FirstOrDefault(x => x.Id == filter.Id);
+                    if (filterDb == null)
+                    {
+                        filterDb = new FilterDB() { Id = filter.Id };
+                        db.Filters.Add(filterDb);
+                    }
+
+                    filterDb.Vendor = filter.Vendor;
+                    filterDb.Model = filter.Model;
+                    filterDb.Type = filter.Type;
+                    if (filter.Type == "color")
+                    {
+                        filterDb.Color = filter.Color;
+                        filterDb.Wratten = filter.Wratten;
+                        filterDb.Schott = filter.Schott;
+                    }
+                    else
+                    {
+                        filterDb.Color = null;
+                        filterDb.Wratten = null;
+                        filterDb.Schott = null;
+                    }
+
+                    db.SaveChanges();
+                }
+            });
+        }
+
+        public static Task<ICollection> GetFilters()
+        {
+            return Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    var list = db.Filters.ToList();
+                    list.Insert(0, FilterDB.Empty);
+                    return (ICollection)list;
+                }
+            });
+        }
+
+        public static Task<Filter> GetFilter(string id)
+        {
+            return Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    var filterDb = db.Filters.FirstOrDefault(x => x.Id == id);
+                    if (filterDb != null)
+                    {
+                        var filter = new Filter();
+
+                        filter.Id = filterDb.Id;
+                        filter.Vendor = filterDb.Vendor;
+                        filter.Model = filterDb.Model;
+                        filter.Type = filterDb.Type;
+                        if (filter.Type == "color")
+                        {
+                            filter.Color = filterDb.Color;
+                            filter.Wratten = filterDb.Wratten;
+                            filter.Schott = filterDb.Schott;
+                        }
+
+                        return filter;
+                    }
+
+                    return null;
+                }
+            });
+        }
+
+        public static Task DeleteFilter(string id)
+        {
+            return Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    var existing = db.Filters.FirstOrDefault(x => x.Id == id);
+                    if (existing != null)
+                    {
+                        db.Filters.Remove(existing);
+                        db.Database.ExecuteSqlCommand($"UPDATE [Observations] SET [FilterId] = NULL WHERE [FilterId] = '{id}'");
+                        db.SaveChanges();
+                    }
+                }
+            });
+        }
+
         public static Task<Eyepiece> GetEyepiece(string id)
         {
             return Task.Run(() =>

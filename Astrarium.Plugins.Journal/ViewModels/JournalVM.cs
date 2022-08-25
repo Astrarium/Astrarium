@@ -56,6 +56,9 @@ namespace Astrarium.Plugins.Journal.ViewModels
         public ICommand CreateLensCommand { get; private set; }
         public ICommand DeleteLensCommand { get; private set; }
 
+        public ICommand EditFilterCommand { get; private set; }
+        public ICommand CreateFilterCommand { get; private set; }
+        public ICommand DeleteFilterCommand { get; private set; }
 
         #endregion Commands
 
@@ -88,6 +91,10 @@ namespace Astrarium.Plugins.Journal.ViewModels
             EditLensCommand = new Command<string>(EditLens);
             CreateLensCommand = new Command(CreateLens);
             DeleteLensCommand = new Command<string>(DeleteLens);
+
+            EditFilterCommand = new Command<string>(EditFilter);
+            CreateFilterCommand = new Command(CreateFilter);
+            DeleteFilterCommand = new Command<string>(DeleteFilter);
 
             Task.Run(Load);
         }
@@ -233,6 +240,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
             Optics = await DatabaseManager.GetOptics();
             Eyepieces = await DatabaseManager.GetEyepieces();
             Lenses = await DatabaseManager.GetLenses();
+            Filters = await DatabaseManager.GetFilters();
 
             NotifyPropertyChanged(
                 nameof(AllSessions), 
@@ -546,6 +554,51 @@ namespace Astrarium.Plugins.Journal.ViewModels
             }
         }
 
+        private async void EditFilter(string id)
+        {
+            var model = ViewManager.CreateViewModel<FilterVM>();
+            model.Filter = await DatabaseManager.GetFilter(id);
+            if (ViewManager.ShowDialog(model) ?? false)
+            {
+                Filters = await DatabaseManager.GetFilters();
+                (SelectedTreeViewItem as Observation).FilterId = model.Filter.Id;
+            }
+        }
+
+        private async void CreateFilter()
+        {
+            var model = ViewManager.CreateViewModel<FilterVM>();
+            model.Filter = new Filter() { Id = Guid.NewGuid().ToString() };
+            if (ViewManager.ShowDialog(model) ?? false)
+            {
+                Filters = await DatabaseManager.GetFilters();
+                (SelectedTreeViewItem as Observation).FilterId = model.Filter.Id;
+            }
+        }
+
+        private async void DeleteFilter(string id)
+        {
+            if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete selected filter? This will be deleted from all observations. This action can not be undone.", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                await DatabaseManager.DeleteFilter(id);
+                SelectedTreeViewItem.DatabasePropertyChanged -= DatabaseManager.SaveDatabaseEntityProperty;
+                Filters = await DatabaseManager.GetFilters();
+                LoadJournalItemDetails();
+                (SelectedTreeViewItem as Observation).FilterId = null;
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
         public ICollection Optics
         {
             get => GetValue<ICollection>(nameof(Optics));
@@ -562,6 +615,12 @@ namespace Astrarium.Plugins.Journal.ViewModels
         {
             get => GetValue<ICollection>(nameof(Lenses));
             private set => SetValue(nameof(Lenses), value);
+        }
+
+        public ICollection Filters
+        {
+            get => GetValue<ICollection>(nameof(Filters));
+            private set => SetValue(nameof(Filters), value);
         }
 
         public ICollection Sites

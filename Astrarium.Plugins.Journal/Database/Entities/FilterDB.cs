@@ -8,6 +8,11 @@ namespace Astrarium.Plugins.Journal.Database.Entities
 {
     public class FilterDB : IEntity
     {
+        /// <summary>
+        /// Empty element (equals to "Not selected")
+        /// </summary>
+        public static FilterDB Empty = new FilterDB() { Id = null };
+
         /// <inheritdoc />
         public string Id { get; set; }
 
@@ -20,7 +25,15 @@ namespace Astrarium.Plugins.Journal.Database.Entities
         /// Filter vendor
         /// </summary>
         public string Vendor { get; set; }
+
+        /// <summary>
+        /// Filter type
+        /// </summary>
         public string Type { get; set; }
+
+        /// <summary>
+        /// Filter color
+        /// </summary>
         public string Color { get; set; }
 
         /// <summary>

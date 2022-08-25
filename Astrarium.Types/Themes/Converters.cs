@@ -232,12 +232,19 @@ namespace Astrarium.Types.Themes
     {
         public override object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            var castedParameter = System.Convert.ChangeType(parameter, value.GetType());
+            if (value != null)
+            {
+                var castedParameter = System.Convert.ChangeType(parameter, value.GetType());
 
-            if (object.Equals(value, castedParameter))
-                return Visibility.Visible;
+                if (object.Equals(value, castedParameter))
+                    return Visibility.Visible;
+                else
+                    return Visibility.Collapsed;
+            }
             else
+            {
                 return Visibility.Collapsed;
+            }
         }
     }
 

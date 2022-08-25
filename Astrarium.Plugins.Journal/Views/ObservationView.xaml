@@ -167,10 +167,10 @@
                             <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding LensId, Converter={s:NotNullToBoolConverter}}" Command="{Binding Path=DataContext.EditLensCommand, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}" CommandParameter="{Binding LensId}">
                                 <Image Width="12" Height="12" Source="{StaticResource IconEdit}" />
                             </Button>
-                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding LensId, Converter={s:NotNullToBoolConverter}}">
+                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding LensId, Converter={s:NotNullToBoolConverter}}" Command="{Binding Path=DataContext.DeleteLensCommand, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}" CommandParameter="{Binding LensId}">
                                 <Image Width="12" Height="12" Source="{StaticResource IconDelete}" />
                             </Button>
-                            <Button Style="{StaticResource HoverButtonStyle}">
+                            <Button Style="{StaticResource HoverButtonStyle}" Command="{Binding Path=DataContext.CreateLensCommand, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}">
                                 <Image Width="12" Height="12" Source="{StaticResource IconAdd}" />
                             </Button>
                         </StackPanel>
@@ -182,22 +182,15 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Filter" VerticalAlignment="Center" Padding="6" />
-                        <ComboBox Grid.Column="1" SelectedValue="{Binding FilterId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}">
-                            <ComboBox.ItemsSource>
-                                <CompositeCollection>
-                                    <e:FilterDB Id="{x:Null}" Model="None" />
-                                    <CollectionContainer Collection="{Binding Source={x:Static t:Equipment.Filters}}" />
-                                </CompositeCollection>
-                            </ComboBox.ItemsSource>
-                        </ComboBox>
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.Filters}" SelectedValue="{Binding FilterId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}" />
                         <StackPanel Orientation="Horizontal" Grid.Column="2" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=IsMouseOver, Converter={s:BoolToVisibilityConverter}}">
-                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding FilterId, Converter={s:NotNullToBoolConverter}}">
+                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding FilterId, Converter={s:NotNullToBoolConverter}}" Command="{Binding Path=DataContext.EditFilterCommand, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}" CommandParameter="{Binding FilterId}">
                                 <Image Width="12" Height="12" Source="{StaticResource IconEdit}" />
                             </Button>
-                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding FilterId, Converter={s:NotNullToBoolConverter}}">
+                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding FilterId, Converter={s:NotNullToBoolConverter}}" Command="{Binding Path=DataContext.DeleteFilterCommand, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}" CommandParameter="{Binding FilterId}">
                                 <Image Width="12" Height="12" Source="{StaticResource IconDelete}" />
                             </Button>
-                            <Button Style="{StaticResource HoverButtonStyle}">
+                            <Button Style="{StaticResource HoverButtonStyle}" Command="{Binding Path=DataContext.CreateFilterCommand, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}">
                                 <Image Width="12" Height="12" Source="{StaticResource IconAdd}" />
                             </Button>
                         </StackPanel>

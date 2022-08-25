@@ -1,0 +1,166 @@
+﻿<Window x:Class="Astrarium.Plugins.Journal.Views.FilterWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
+        xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+        mc:Ignorable="d"
+        Style="{StaticResource {x:Type Window}}"
+        Title="Filter" 
+        SnapsToDevicePixels="True"
+        MinHeight="400" Height="400"
+        MinWidth="450" Width="400">
+
+    <Grid Margin="4" SnapsToDevicePixels="True" Grid.IsSharedSizeScope="True">
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" SharedSizeGroup="Title" MinWidth="150" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Label Margin="0 3" Content="Manufacturer" Grid.Row="0" Grid.Column="0" />
+        <TextBox Text="{Binding Filter.Vendor}" Grid.Row="0" Grid.Column="1" />
+
+        <Label Content="Model" Grid.Row="1" Grid.Column="0" />
+        <TextBox Text="{Binding Filter.Model}" Grid.Row="1" Grid.Column="1" />
+
+        <Label Content="Type" Grid.Row="2" Grid.Column="0" />
+        <ComboBox Text="{Binding Filter.Type}" Grid.Row="2" Grid.Column="1">
+            <ComboBoxItem>other</ComboBoxItem>
+            <ComboBoxItem>broad band</ComboBoxItem>
+            <ComboBoxItem>narrow band</ComboBoxItem>
+            <ComboBoxItem>O-III</ComboBoxItem>
+            <ComboBoxItem>H-beta</ComboBoxItem>
+            <ComboBoxItem>H-alpha</ComboBoxItem>
+            <ComboBoxItem>color</ComboBoxItem>
+            <ComboBoxItem>neutral</ComboBoxItem>
+            <ComboBoxItem>corrective</ComboBoxItem>
+            <ComboBoxItem>solar</ComboBoxItem>
+        </ComboBox>
+
+        <Label Visibility="{Binding Filter.Type, Converter={s:VisibilityConverter}, ConverterParameter='color'}" Content="Color" Grid.Row="3" Grid.Column="0" />
+        <ComboBox Visibility="{Binding Filter.Type, Converter={s:VisibilityConverter}, ConverterParameter='color'}" Text="{Binding Filter.Color}" Grid.Row="3" Grid.Column="1">
+            <ComboBoxItem>light red</ComboBoxItem>
+            <ComboBoxItem>red</ComboBoxItem>
+            <ComboBoxItem>deep red</ComboBoxItem>
+            <ComboBoxItem>orange</ComboBoxItem>
+            <ComboBoxItem>light yellow</ComboBoxItem>
+            <ComboBoxItem>deep yellow</ComboBoxItem>
+            <ComboBoxItem>yellow</ComboBoxItem>
+            <ComboBoxItem>yellow-green</ComboBoxItem>
+            <ComboBoxItem>light green</ComboBoxItem>
+            <ComboBoxItem>green</ComboBoxItem>
+            <ComboBoxItem>medium blue</ComboBoxItem>
+            <ComboBoxItem>pale blue</ComboBoxItem>
+            <ComboBoxItem>blue</ComboBoxItem>
+            <ComboBoxItem>deep blue</ComboBoxItem>
+            <ComboBoxItem>violet</ComboBoxItem>
+        </ComboBox>
+
+        <Label Visibility="{Binding Filter.Type, Converter={s:VisibilityConverter}, ConverterParameter='color'}" Content="Wratten number" Grid.Row="4" Grid.Column="0" />
+        <ComboBox Visibility="{Binding Filter.Type, Converter={s:VisibilityConverter}, ConverterParameter='color'}" Text="{Binding Filter.Wratten}" Grid.Row="4" Grid.Column="1">
+            <ComboBoxItem>1A</ComboBoxItem>
+            <ComboBoxItem>2B</ComboBoxItem>
+            <ComboBoxItem>2A</ComboBoxItem>
+            <ComboBoxItem>2C</ComboBoxItem>
+            <ComboBoxItem>2E</ComboBoxItem>
+            <ComboBoxItem>3</ComboBoxItem>
+            <ComboBoxItem>4</ComboBoxItem>
+            <ComboBoxItem>6</ComboBoxItem>
+            <ComboBoxItem>8</ComboBoxItem>
+            <ComboBoxItem>9</ComboBoxItem>
+            <ComboBoxItem>11</ComboBoxItem>
+            <ComboBoxItem>12</ComboBoxItem>
+            <ComboBoxItem>13</ComboBoxItem>
+            <ComboBoxItem>15</ComboBoxItem>
+            <ComboBoxItem>16</ComboBoxItem>
+            <ComboBoxItem>18A</ComboBoxItem>
+            <ComboBoxItem>18B</ComboBoxItem>
+            <ComboBoxItem>21</ComboBoxItem>
+            <ComboBoxItem>22</ComboBoxItem>
+            <ComboBoxItem>23A</ComboBoxItem>
+            <ComboBoxItem>24</ComboBoxItem>
+            <ComboBoxItem>25</ComboBoxItem>
+            <ComboBoxItem>26</ComboBoxItem>
+            <ComboBoxItem>29</ComboBoxItem>
+            <ComboBoxItem>32</ComboBoxItem>
+            <ComboBoxItem>33</ComboBoxItem>
+            <ComboBoxItem>34</ComboBoxItem>
+            <ComboBoxItem>34A</ComboBoxItem>
+            <ComboBoxItem>35</ComboBoxItem>
+            <ComboBoxItem>38A</ComboBoxItem>
+            <ComboBoxItem>40</ComboBoxItem>
+            <ComboBoxItem>44</ComboBoxItem>
+            <ComboBoxItem>44A</ComboBoxItem>
+            <ComboBoxItem>47</ComboBoxItem>
+            <ComboBoxItem>47A</ComboBoxItem>
+            <ComboBoxItem>47B</ComboBoxItem>
+            <ComboBoxItem>50</ComboBoxItem>
+            <ComboBoxItem>56</ComboBoxItem>
+            <ComboBoxItem>57</ComboBoxItem>
+            <ComboBoxItem>58</ComboBoxItem>
+            <ComboBoxItem>60</ComboBoxItem>
+            <ComboBoxItem>61</ComboBoxItem>
+            <ComboBoxItem>70</ComboBoxItem>
+            <ComboBoxItem>74</ComboBoxItem>
+            <ComboBoxItem>80A</ComboBoxItem>
+            <ComboBoxItem>80B</ComboBoxItem>
+            <ComboBoxItem>80C</ComboBoxItem>
+            <ComboBoxItem>80D</ComboBoxItem>
+            <ComboBoxItem>81A</ComboBoxItem>
+            <ComboBoxItem>81B</ComboBoxItem>
+            <ComboBoxItem>81C</ComboBoxItem>
+            <ComboBoxItem>81D</ComboBoxItem>
+            <ComboBoxItem>81EF</ComboBoxItem>
+            <ComboBoxItem>82A</ComboBoxItem>
+            <ComboBoxItem>82B</ComboBoxItem>
+            <ComboBoxItem>82C</ComboBoxItem>
+            <ComboBoxItem>85</ComboBoxItem>
+            <ComboBoxItem>85B</ComboBoxItem>
+            <ComboBoxItem>85C</ComboBoxItem>
+            <ComboBoxItem>85N3</ComboBoxItem>
+            <ComboBoxItem>85N6</ComboBoxItem>
+            <ComboBoxItem>85N9</ComboBoxItem>
+            <ComboBoxItem>87</ComboBoxItem>
+            <ComboBoxItem>87A</ComboBoxItem>
+            <ComboBoxItem>87B</ComboBoxItem>
+            <ComboBoxItem>87C</ComboBoxItem>
+            <ComboBoxItem>88</ComboBoxItem>
+            <ComboBoxItem>88A</ComboBoxItem>
+            <ComboBoxItem>89B</ComboBoxItem>
+            <ComboBoxItem>90</ComboBoxItem>
+            <ComboBoxItem>92</ComboBoxItem>
+            <ComboBoxItem>93</ComboBoxItem>
+            <ComboBoxItem>94</ComboBoxItem>
+            <ComboBoxItem>96</ComboBoxItem>
+            <ComboBoxItem>98</ComboBoxItem>
+            <ComboBoxItem>99</ComboBoxItem>
+            <ComboBoxItem>102</ComboBoxItem>
+            <ComboBoxItem>106</ComboBoxItem>
+        </ComboBox>
+
+        <Label Visibility="{Binding Filter.Type, Converter={s:VisibilityConverter}, ConverterParameter='color'}" Content="Schott number" Grid.Row="5" Grid.Column="0" />
+        <TextBox Visibility="{Binding Filter.Type, Converter={s:VisibilityConverter}, ConverterParameter='color'}" Text="{Binding Filter.Schott}" Grid.Row="5" Grid.Column="1" />
+
+        <Separator Grid.Row="8" Grid.ColumnSpan="2" Margin="0 4 0 4" />
+        <StackPanel Grid.Row="9" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding OkCommand}" Content="OK" />
+            <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CancelCommand}" Content="Cancel" />
+        </StackPanel>
+
+    </Grid>
+
+</Window>
