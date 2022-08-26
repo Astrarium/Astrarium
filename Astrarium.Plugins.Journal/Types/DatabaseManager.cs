@@ -452,13 +452,11 @@ namespace Astrarium.Plugins.Journal.Types
                     {
                         filterDb.Color = filter.Color;
                         filterDb.Wratten = filter.Wratten;
-                        filterDb.Schott = filter.Schott;
                     }
                     else
                     {
                         filterDb.Color = null;
                         filterDb.Wratten = null;
-                        filterDb.Schott = null;
                     }
 
                     db.SaveChanges();
@@ -474,6 +472,19 @@ namespace Astrarium.Plugins.Journal.Types
                 {
                     var list = db.Filters.ToList();
                     list.Insert(0, FilterDB.Empty);
+                    return (ICollection)list;
+                }
+            });
+        }
+
+        public static Task<ICollection> GetCameras()
+        {
+            return Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    var list = db.Cameras.ToList();
+                    list.Insert(0, CameraDB.Empty);
                     return (ICollection)list;
                 }
             });
@@ -498,7 +509,6 @@ namespace Astrarium.Plugins.Journal.Types
                         {
                             filter.Color = filterDb.Color;
                             filter.Wratten = filterDb.Wratten;
-                            filter.Schott = filterDb.Schott;
                         }
 
                         return filter;

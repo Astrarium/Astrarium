@@ -202,14 +202,7 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Camera" VerticalAlignment="Center" Padding="6" />
-                        <ComboBox Grid.Column="1" SelectedValue="{Binding CameraId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}">
-                            <ComboBox.ItemsSource>
-                                <CompositeCollection>
-                                    <e:ImagerDB Id="{x:Null}" Model="None" />
-                                    <CollectionContainer Collection="{Binding Source={x:Static t:Equipment.Cameras}}" />
-                                </CompositeCollection>
-                            </ComboBox.ItemsSource>
-                        </ComboBox>
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.Cameras}" SelectedValue="{Binding CameraId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}"  />
                         <StackPanel Orientation="Horizontal" Grid.Column="2" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=IsMouseOver, Converter={s:BoolToVisibilityConverter}}">
                             <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding CameraId, Converter={s:NotNullToBoolConverter}}">
                                 <Image Width="12" Height="12" Source="{StaticResource IconEdit}" />

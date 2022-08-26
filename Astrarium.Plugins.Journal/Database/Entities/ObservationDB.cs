@@ -85,7 +85,7 @@ namespace Astrarium.Plugins.Journal.Database.Entities
         public virtual LensDB Lens { get; set; }
         public virtual FilterDB Filter { get; set; }
         public virtual TargetDB Target { get; set; }
-        public virtual ImagerDB Imager { get; set; }
+        public virtual CameraDB Camera { get; set; }
         public virtual ICollection<AttachmentDB> Attachments { get; set; }
     }
 }

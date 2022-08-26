@@ -70,8 +70,8 @@ namespace Astrarium.Plugins.Journal.OAL
 
                     foreach (var imager in data.imagers)
                     {
-                        ImagerDB imagerDB = imager.ToImager();
-                        db.Imagers.Add(imagerDB);
+                        CameraDB cameraDB = imager.ToCamera();
+                        db.Cameras.Add(cameraDB);
                     }
 
                     db.SaveChanges();
@@ -193,14 +193,13 @@ namespace Astrarium.Plugins.Journal.OAL
                 Vendor = filter.vendor,
                 Type = filter.type.ToStringEnum(),
                 Color = filter.colorSpecified ? filter.color.ToStringEnum() : null,
-                Schott = filter.schott,
                 Wratten = filter.wratten
             };
         }
 
-        private static ImagerDB ToImager(this imagerType imager)
+        private static CameraDB ToCamera(this imagerType imager)
         {
-            var imagerDb = new ImagerDB()
+            var cameraDb = new CameraDB()
             {
                 Id = imager.id,
                 Model = imager.model,
@@ -210,23 +209,18 @@ namespace Astrarium.Plugins.Journal.OAL
 
             if (imager is ccdCameraType ccd)
             {
-                CameraImagerDetails details = new CameraImagerDetails()
-                {
-                    PixelsX = int.Parse(ccd.pixelsX),
-                    PixelsY = int.Parse(ccd.pixelsY),
-                    PixelsXSize = ccd.pixelXSizeSpecified ? (double?)ccd.pixelXSize : (double?)null,
-                    PixelsYSize = ccd.pixelYSizeSpecified ? (double?)ccd.pixelYSize : (double?)null,
-                    Binning = int.Parse(ccd.binning)
-                };
-                imagerDb.Type = "Camera";
-                imagerDb.Details = JsonConvert.SerializeObject(details, jsonSettings);
+                cameraDb.PixelsX = int.Parse(ccd.pixelsX);
+                cameraDb.PixelsY = int.Parse(ccd.pixelsY);
+                cameraDb.PixelsXSize = ccd.pixelXSizeSpecified ? (double?)ccd.pixelXSize : (double?)null;
+                cameraDb.PixelsYSize = ccd.pixelYSizeSpecified ? (double?)ccd.pixelYSize : (double?)null;
+                cameraDb.Binning = int.Parse(ccd.binning);
             }
             else
             {
                 throw new NotImplementedException($"Unknown imager type: {imager.GetType()}");
             }
 
-            return imagerDb;
+            return cameraDb;
         }
 
         private static EyepieceDB ToEyepiece(this eyepieceType eyepiece)

@@ -139,7 +139,7 @@ namespace Astrarium.Plugins.Journal.Types
             set => SetValue(nameof(FilterId), value);
         }
 
-        [DBStored(Entity = typeof(ObservationDB), Field = "ImagerId")]
+        [DBStored(Entity = typeof(ObservationDB), Field = "CameraId")]
         public string CameraId
         {
             get => GetValue<string>(nameof(CameraId), null);

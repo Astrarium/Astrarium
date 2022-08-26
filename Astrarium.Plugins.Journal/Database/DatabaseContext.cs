@@ -22,7 +22,7 @@ namespace Astrarium.Plugins.Journal.Database
         public DbSet<EyepieceDB> Eyepieces { get; set; }
         public DbSet<LensDB> Lenses { get; set; }
         public DbSet<FilterDB> Filters { get; set; }
-        public DbSet<ImagerDB> Imagers { get; set; }
+        public DbSet<CameraDB> Cameras { get; set; }
         public DbSet<TargetDB> Targets { get; set; }
         public DbSet<ObservationDB> Observations { get; set; }
         public DbSet<AttachmentDB> Attachments { get; set; }
@@ -55,8 +55,8 @@ namespace Astrarium.Plugins.Journal.Database
                .ToTable("Filters")
                .HasKey(x => x.Id);
 
-            modelBuilder.Entity<ImagerDB>()
-               .ToTable("Imagers")
+            modelBuilder.Entity<CameraDB>()
+               .ToTable("Cameras")
                .HasKey(x => x.Id);
 
             modelBuilder.Entity<TargetDB>()
@@ -97,7 +97,7 @@ namespace Astrarium.Plugins.Journal.Database
                 .HasForeignKey(x => x.FilterId);
 
             modelBuilder.Entity<ObservationDB>()
-                .HasOptional(x => x.Imager)
+                .HasOptional(x => x.Camera)
                 .WithMany()
                 .HasForeignKey(x => x.ImagerId);
 

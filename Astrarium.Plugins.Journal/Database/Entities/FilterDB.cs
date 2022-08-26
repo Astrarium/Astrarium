@@ -42,11 +42,6 @@ namespace Astrarium.Plugins.Journal.Database.Entities
         /// </summary>
         public string Wratten { get; set; }
 
-        /// <summary>
-        /// Schott filter code number
-        /// </summary>
-        public string Schott { get; set; }
-
         /// <inheritdoc />
         public override string ToString()
         {

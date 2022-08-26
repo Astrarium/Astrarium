@@ -241,6 +241,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
             Eyepieces = await DatabaseManager.GetEyepieces();
             Lenses = await DatabaseManager.GetLenses();
             Filters = await DatabaseManager.GetFilters();
+            Cameras = await DatabaseManager.GetCameras();
 
             NotifyPropertyChanged(
                 nameof(AllSessions), 
@@ -588,17 +589,6 @@ namespace Astrarium.Plugins.Journal.ViewModels
             }
         }
 
-
-
-
-
-
-
-
-
-
-
-
         public ICollection Optics
         {
             get => GetValue<ICollection>(nameof(Optics));
@@ -621,6 +611,12 @@ namespace Astrarium.Plugins.Journal.ViewModels
         {
             get => GetValue<ICollection>(nameof(Filters));
             private set => SetValue(nameof(Filters), value);
+        }
+
+        public ICollection Cameras
+        {
+            get => GetValue<ICollection>(nameof(Cameras));
+            private set => SetValue(nameof(Cameras), value);
         }
 
         public ICollection Sites

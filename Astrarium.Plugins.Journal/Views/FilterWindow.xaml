@@ -25,7 +25,6 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -152,11 +151,8 @@
             <ComboBoxItem>106</ComboBoxItem>
         </ComboBox>
 
-        <Label Visibility="{Binding Filter.Type, Converter={s:VisibilityConverter}, ConverterParameter='color'}" Content="Schott number" Grid.Row="5" Grid.Column="0" />
-        <TextBox Visibility="{Binding Filter.Type, Converter={s:VisibilityConverter}, ConverterParameter='color'}" Text="{Binding Filter.Schott}" Grid.Row="5" Grid.Column="1" />
-
-        <Separator Grid.Row="8" Grid.ColumnSpan="2" Margin="0 4 0 4" />
-        <StackPanel Grid.Row="9" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
+        <Separator Grid.Row="7" Grid.ColumnSpan="2" Margin="0 4 0 4" />
+        <StackPanel Grid.Row="8" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding OkCommand}" Content="OK" />
             <Button MinWidth="80" Width="Auto" Margin="4 0 0 0" Padding="8 2" Command="{Binding CancelCommand}" Content="Cancel" />
         </StackPanel>
