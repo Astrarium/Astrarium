@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows;
 
 namespace Astrarium.ViewModels
 {
@@ -13,9 +14,10 @@ namespace Astrarium.ViewModels
     {
         public string Title { get; private set; }
         public string Subtitle { get; private set; }
-        public IList<InfoElement> InfoElements { get; private set; }        
+        public IList<InfoElement> InfoElements { get; private set; }
         public double JulianDay { get; private set; }
 
+        public ICommand CopyNameCommand { get; private set; }
         public ICommand LinkClickedCommand { get; private set; }
         public ICommand CloseCommand { get; private set; }
 
@@ -24,6 +26,7 @@ namespace Astrarium.ViewModels
             Title = info.Title;
             Subtitle = info.Subtitle;
             InfoElements = info.InfoElements;
+            CopyNameCommand = new Command(CopyName);
             LinkClickedCommand = new Command<double>(SelectJulianDay);
             CloseCommand = new Command(Close);
         }
@@ -32,6 +35,11 @@ namespace Astrarium.ViewModels
         {
             JulianDay = jd;
             Close(true);
+        }
+
+        private void CopyName()
+        {
+            Clipboard.SetText(Title, TextDataFormat.UnicodeText);
         }
     }
 }
