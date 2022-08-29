@@ -69,8 +69,12 @@ namespace Astrarium
         /// <inheritdoc />
         public Func<SkyContext, CrdsEquatorial> SunEquatorial { get; set; } = (c) => new CrdsEquatorial(0, 0);
 
-        public Sky()
+        private ISettings settings;
+
+        public Sky(ISettings settings)
         {
+            this.settings = settings;
+
             new Thread(() =>
             {
                 do
@@ -78,7 +82,8 @@ namespace Astrarium
                     dateTimeSyncResetEvent.WaitOne();
                     Context.JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
                     Calculate();
-                    Thread.Sleep(1000);
+                    int period = settings.Get("DateTimeSyncPeriod", 1) * 1000;
+                    Thread.Sleep(period);
                 }
                 while (true);
             })

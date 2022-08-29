@@ -22,5 +22,9 @@
         <CheckBox Margin="2" Content="{t:Text Settings.IsCompactMenu}" IsChecked="{Binding Settings.IsCompactMenu}" />
         <CheckBox Margin="2" Content="{t:Text Settings.IsToolbarVisible}" IsChecked="{Binding Settings.IsToolbarVisible}" />
         <CheckBox Margin="2" Content="{t:Text Settings.IsStatusBarVisible}" IsChecked="{Binding Settings.IsStatusBarVisible}" />
+        <StackPanel Margin="-2" Orientation="Horizontal">
+            <Label Margin="0" Content="{t:Text Settings.DateTimeSyncPeriod}" />
+            <ComboBox SelectedValue="{Binding Settings.DateTimeSyncPeriod}" SelectedValuePath="Value" DisplayMemberPath="Text" ItemsSource="{Binding DateTimeSyncPeriods}" MinWidth="80" />
+        </StackPanel>
     </StackPanel>
 </c:SettingsSection>
