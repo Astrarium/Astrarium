@@ -157,7 +157,7 @@
                                     <ImageBrush ImageSource="{Binding Converter={s:CelestialObjectToIconConverter}}" Stretch="Uniform" />
                                 </Rectangle.OpacityMask>
                             </Rectangle>
-                            <TextBlock Padding="4 0 0 0" Text="{Binding Names[0]}" VerticalAlignment="Center"/>
+                            <TextBlock Padding="4 0 0 0" Text="{Binding Converter={s:CelestialObjectFullNameConverter}}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </DataTemplate>
                 </c:AutoCompleteTextBox.ItemTemplate>

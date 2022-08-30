@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -331,7 +332,12 @@ namespace Astrarium
                     break;
                 }
             }
-            return results.OrderBy(b => string.Join(", ", b.Names)).Take(maxCount).ToList();
+
+            return results
+                .OrderBy(x => string.IsNullOrEmpty(searchString) ? 0 : x.Names.Where(n => !string.IsNullOrEmpty(n)).Select(n => Regex.Replace(n, searchString, "", RegexOptions.IgnoreCase).Length).Min())
+                .ThenBy(x => string.Join(", ", x.Names))
+                .Take(maxCount)
+                .ToList();
         }
 
         /// <inheritdoc />
