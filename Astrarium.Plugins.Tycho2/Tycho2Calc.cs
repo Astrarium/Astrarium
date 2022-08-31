@@ -474,7 +474,7 @@ namespace Astrarium.Plugins.Tycho2
             .AddRow("Magnitude", s.Magnitude);
         }
 
-        private readonly Regex searchRegex = new Regex("tyc\\s*(?<tyc1>\\d+)((\\s*-\\s*|\\s+)(?<tyc2>\\d+)((\\s*-\\s*|\\s+)(?<tyc3>\\d+))?)?");
+        private readonly Regex searchRegex = new Regex("^tyc\\s*(?<tyc1>\\d{1,4})((\\s*-\\s*|\\s+)(?<tyc2>\\d{1,5})((\\s*-\\s*|\\s+)(?<tyc3>\\d{1}))?)?$");
 
         public ICollection<CelestialObject> Search(SkyContext c, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
