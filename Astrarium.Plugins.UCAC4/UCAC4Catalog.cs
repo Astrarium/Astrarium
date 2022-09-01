@@ -390,15 +390,18 @@ namespace Astrarium.Plugins.UCAC4
 
         private UCAC4Star ReadStar(byte[] starsData, int offset, SkyContext context, int zn, int starIndex, Func<float, bool> magFilter)
         {
-            float vMag = BitConverter.ToInt16(starsData, 8 + offset) / 1000.0f;
-            if (magFilter(vMag))
+            float mag = BitConverter.ToInt16(starsData, 8 + offset) / 1000.0f;
+            if (magFilter(mag))
             {
+                float bmag = BitConverter.ToInt16(starsData, 46 + offset) / 1000.0f;
+                float vmag = BitConverter.ToInt16(starsData, 48 + offset) / 1000.0f;
                 var posData = ParsePositionData(starsData, offset, zn, starIndex);
                 UCAC4Star star = new UCAC4Star()
-                {                    
+                {
                     ZoneNumber = (ushort)zn,
                     RunningNumber = (uint)(starIndex + 1),
-                    Magnitude = vMag,
+                    Magnitude = mag,
+                    SpectralClass = SpectralClass(bmag, vmag),
                     Horizontal = Equatorial(context, posData).ToHorizontal(context.GeoLocation, context.SiderealTime)
                 };
                 return star;
@@ -561,6 +564,42 @@ namespace Astrarium.Plugins.UCAC4
             eq += eqN + eqA;
 
             return eq;
+        }
+
+        private char SpectralClass(float b, float v)
+        {
+            double B_V = b - v;
+
+            // Evaluating Stars Temperature Through the B-V Index
+            // Using a Virtual Real Experiment from Distance: A Case
+            // Scenario for Secondary Education.
+            // https://online-journals.org/index.php/i-joe/article/view/7842
+            double T = 4600 * (1.0 / (0.92 * (B_V) + 1.7) + 1.0 / (0.92 * (B_V) + 0.62));
+
+            // then, calculate color from spectral class:
+            // O	> 25,000K	H; HeI; HeII
+            // B	10,000-25,000K	H; HeI; HeII absent
+            // A	7,500-10,000K	H; CaII; HeI and HeII absent
+            // F	6,000-7,500K	H; metals (CaII, Fe, etc)
+            // G	5,000-6,000K	H; metals; some molecular species
+            // K	3,500-5,000K	metals; some molecular species
+            // M	< 3,500K	metals; molecular species (TiO!)
+            // C	< 3,500K	metals; molecular species (C2!)
+
+            if (T > 25000)
+                return 'O';
+            else if (T <= 25000 && T > 10000)
+                return 'B';
+            else if (T <= 10000 && T > 7500)
+                return 'A';
+            else if (T <= 7500 && T > 6000)
+                return 'F';
+            else if (T <= 6000 && T > 5000)
+                return 'G';
+            else if (T <= 5000 && T > 3500)
+                return 'K';
+            else
+                return 'M';
         }
 
         /// <summary>

@@ -33,7 +33,7 @@ namespace Astrarium.Plugins.UCAC4
                 Brush brushNames = new SolidBrush(map.GetColor("ColorStarsLabels"));
                 float magLimit = (float)(-1.73494 * Math.Log(0.000462398 * map.ViewAngle));
 
-                Brush brushStar = GetColor(map);
+                //Brush brushStar = GetColor(map);
 
                 PrecessionalElements pe = Precession.ElementsFK5(map.JulianDay, Date.EPOCH_J2000);
 
@@ -62,7 +62,7 @@ namespace Astrarium.Plugins.UCAC4
                                 {
                                     g.FillEllipse(Brushes.White, p.X - size / 2 - 1, p.Y - size / 2 - 1, size + 2, size + 2);
                                 }
-                                g.FillEllipse(brushStar, p.X - size / 2, p.Y - size / 2, size, size);
+                                g.FillEllipse(new SolidBrush(GetColor(map, star.SpectralClass)), p.X - size / 2, p.Y - size / 2, size, size);
 
                                 if (isLabels && map.ViewAngle < 1.0 / 60.0 && size > 2)
                                 {
@@ -90,6 +90,54 @@ namespace Astrarium.Plugins.UCAC4
                 case ColorSchema.White:
                     return Brushes.Black;
             }
+        }
+
+        private Color GetColor(IMapContext map, char spClass)
+        {
+            Color starColor;
+
+            if (map.Schema == ColorSchema.White)
+            {
+                return Color.Black;
+            }
+
+            if (settings.Get("StarsColors"))
+            {
+                switch (spClass)
+                {
+                    case 'O':
+                    case 'W':
+                        starColor = Color.LightBlue;
+                        break;
+                    case 'B':
+                        starColor = Color.LightCyan;
+                        break;
+                    case 'A':
+                        starColor = Color.White;
+                        break;
+                    case 'F':
+                        starColor = Color.LightYellow;
+                        break;
+                    case 'G':
+                        starColor = Color.Yellow;
+                        break;
+                    case 'K':
+                        starColor = Color.Orange;
+                        break;
+                    case 'M':
+                        starColor = Color.OrangeRed;
+                        break;
+                    default:
+                        starColor = Color.White;
+                        break;
+                }
+            }
+            else
+            {
+                starColor = Color.White;
+            }
+
+            return map.GetColor(starColor, Color.Transparent);
         }
     }
 }
