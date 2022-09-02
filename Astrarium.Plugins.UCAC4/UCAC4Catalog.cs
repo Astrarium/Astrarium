@@ -574,7 +574,7 @@ namespace Astrarium.Plugins.UCAC4
             // Using a Virtual Real Experiment from Distance: A Case
             // Scenario for Secondary Education.
             // https://online-journals.org/index.php/i-joe/article/view/7842
-            double T = 4600 * (1.0 / (0.92 * (B_V) + 1.7) + 1.0 / (0.92 * (B_V) + 0.62));
+            double T = 4600 * (1.0 / (0.92 * B_V + 1.7) + 1.0 / (0.92 * B_V + 0.62));
 
             // then, calculate color from spectral class:
             // O	> 25,000K	H; HeI; HeII

@@ -33,8 +33,6 @@ namespace Astrarium.Plugins.UCAC4
                 Brush brushNames = new SolidBrush(map.GetColor("ColorStarsLabels"));
                 float magLimit = (float)(-1.73494 * Math.Log(0.000462398 * map.ViewAngle));
 
-                //Brush brushStar = GetColor(map);
-
                 PrecessionalElements pe = Precession.ElementsFK5(map.JulianDay, Date.EPOCH_J2000);
 
                 var eq0 = map.Center.ToEquatorial(map.GeoLocation, map.SiderealTime);

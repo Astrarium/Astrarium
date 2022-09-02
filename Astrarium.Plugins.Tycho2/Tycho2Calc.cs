@@ -236,11 +236,11 @@ namespace Astrarium.Plugins.Tycho2
         {
             PrecessionalElements p = context.Get(PrecessionalElements);
             double years = context.Get(YearsSince2000);
-                       
-            // Take into account effect of proper motion:
-            // now coordinates are for the mean equinox of J2000.0,
-            // but for epoch of the target date
-            var eq0 = star.Equatorial0 + new CrdsEquatorial(star.PmRA * years / 3600000, star.PmDec * years / 3600000);
+
+            double pmDec = star.PmDec / 3600000.0;
+            double pmRa = star.PmRA / Math.Cos(Angle.ToRadians(star.Equatorial0.Delta)) / 3600000.0;
+
+            var eq0 = star.Equatorial0 + new CrdsEquatorial(pmRa * years, pmDec * years);
 
             // Equatorial coordinates for the mean equinox and epoch of the target date
             CrdsEquatorial eq = Precession.GetEquatorialCoordinates(eq0, p);
@@ -426,7 +426,7 @@ namespace Astrarium.Plugins.Tycho2
             // Using a Virtual Real Experiment from Distance: A Case
             // Scenario for Secondary Education.
             // https://online-journals.org/index.php/i-joe/article/view/7842
-            double T = 4600 * (1.0 / (0.92 * (B_V) + 1.7) + 1.0 / (0.92 * (B_V) + 0.62));
+            double T = 4600 * (1.0 / (0.92 * B_V + 1.7) + 1.0 / (0.92 * B_V + 0.62));
 
             // then, calculate color from spectral class:
             // O	> 25,000K	H; HeI; HeII
