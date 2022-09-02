@@ -31,6 +31,11 @@ namespace Astrarium.Plugins.UCAC4
         internal uint RunningNumber { get; set; }
 
         /// <summary>
+        /// Approximate spectral class, calculated from B-V index, used only for displaying stars colors
+        /// </summary>
+        internal char SpectralClass { get; set; }
+
+        /// <summary>
         /// Name of the setting(s) responsible for displaying the object
         /// </summary>
         public override string[] DisplaySettingNames => new[] { "Stars", "UCAC4" };

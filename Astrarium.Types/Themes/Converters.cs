@@ -398,6 +398,19 @@ namespace Astrarium.Types.Themes
         }
     }
 
+    public class CelestialObjectFullNameConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            CelestialObject body = value as CelestialObject;
+            if (body != null)
+            {
+                return string.Join(", ", body.Names);
+            }
+            return null;
+        }
+    }
+
     public class CelestialObjectTypeDescriptionConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
