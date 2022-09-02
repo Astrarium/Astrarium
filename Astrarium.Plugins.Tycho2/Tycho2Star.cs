@@ -49,6 +49,11 @@ namespace Astrarium.Plugins.Tycho2
         public float Magnitude { get; set; }
 
         /// <summary>
+        /// Approximate spectral class
+        /// </summary>
+        public char SpectralClass { get; set; }
+
+        /// <summary>
         /// Gets star names
         /// </summary>
         public override string[] Names => new[] { ToString() };

@@ -89,7 +89,7 @@ namespace Astrarium.Plugins.Tycho2
         /// <summary>
         /// Length of catalog record, in bytes
         /// </summary>
-        private const int CATALOG_RECORD_LEN = 33;
+        private const int CATALOG_RECORD_LEN = 37;
 
         /// <summary>
         /// Mean diameter of segment of celestial sphere (in degrees) that's defined by <see cref="Tycho2Region"/>.   
@@ -345,12 +345,14 @@ namespace Astrarium.Plugins.Tycho2
         /// <param name="angle">Maximal angular separation between map center and star coorinates (both coordinates for J2000.0 epoch)</param>        
         /// <remarks>
         /// Record format:
-        /// [Tyc1][Tyc2][Tyc3][RA][Dec][PmRA][PmDec][Mag]
-        /// [   2][   2][   1][ 8][  8][   4][    4][  4]
+        /// [Tyc1][Tyc2][Tyc3][RA][Dec][PmRA][PmDec][BTMag][VTMag]
+        /// [   2][   2][   1][ 8][  8][   4][    4][    4][    4]
         /// </remarks>
         private Tycho2Star GetStar(SkyContext c, byte[] buffer, int offset, CrdsEquatorial eqCenter, double angle, Func<float, bool> magFilter)
         {
-            float mag = BitConverter.ToSingle(buffer, offset + 29);
+            float btmag = BitConverter.ToSingle(buffer, offset + 29);
+            float vtmag = BitConverter.ToSingle(buffer, offset + 33);
+            float mag = (float)(vtmag - 0.090 * (btmag - vtmag));
             if (magFilter(mag))
             {
                 // Star coordinates at epoch J2000.0 
@@ -398,7 +400,12 @@ namespace Astrarium.Plugins.Tycho2
             star.Tyc1 = BitConverter.ToInt16(buffer, offset);
             star.Tyc2 = BitConverter.ToInt16(buffer, offset + 2);
             star.Tyc3 = (char)buffer[offset + 4];
-            star.Magnitude = BitConverter.ToSingle(buffer, offset + 29);
+            float btmag = BitConverter.ToSingle(buffer, offset + 29);
+            float vtmag = BitConverter.ToSingle(buffer, offset + 33);
+            float mag = (float)(vtmag - 0.090 * (btmag - vtmag));
+            double B_V = 0.850 * (btmag - vtmag);
+            star.SpectralClass = SpectralClass(B_V);
+            star.Magnitude = mag;
             star.PmRA = BitConverter.ToSingle(buffer, offset + 21);
             star.PmDec = BitConverter.ToSingle(buffer, offset + 25);
 
@@ -411,6 +418,40 @@ namespace Astrarium.Plugins.Tycho2
                 CalculateCoordinates(c, star);
                 return star;
             }
+        }
+
+        private char SpectralClass(double B_V)
+        {
+            // Evaluating Stars Temperature Through the B-V Index
+            // Using a Virtual Real Experiment from Distance: A Case
+            // Scenario for Secondary Education.
+            // https://online-journals.org/index.php/i-joe/article/view/7842
+            double T = 4600 * (1.0 / (0.92 * (B_V) + 1.7) + 1.0 / (0.92 * (B_V) + 0.62));
+
+            // then, calculate color from spectral class:
+            // O	> 25,000K	H; HeI; HeII
+            // B	10,000-25,000K	H; HeI; HeII absent
+            // A	7,500-10,000K	H; CaII; HeI and HeII absent
+            // F	6,000-7,500K	H; metals (CaII, Fe, etc)
+            // G	5,000-6,000K	H; metals; some molecular species
+            // K	3,500-5,000K	metals; some molecular species
+            // M	< 3,500K	metals; molecular species (TiO!)
+            // C	< 3,500K	metals; molecular species (C2!)
+
+            if (T > 25000)
+                return 'O';
+            else if (T <= 25000 && T > 10000)
+                return 'B';
+            else if (T <= 10000 && T > 7500)
+                return 'A';
+            else if (T <= 7500 && T > 6000)
+                return 'F';
+            else if (T <= 6000 && T > 5000)
+                return 'G';
+            else if (T <= 5000 && T > 3500)
+                return 'K';
+            else
+                return 'M';
         }
 
         public override void Calculate(SkyContext context)
