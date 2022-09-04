@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Astrarium.Types;
+using System.Collections.Concurrent;
 
 namespace Astrarium.Plugins.ASCOM
 {
@@ -14,6 +15,8 @@ namespace Astrarium.Plugins.ASCOM
     {
         private Telescope telescope = null;
         private Thread watcherThread = null;
+        private AxisRates axisRates = null;
+        private ConcurrentQueue<ButtonCommand> commands = new ConcurrentQueue<ButtonCommand>();
         private ManualResetEvent watcherResetEvent = new ManualResetEvent(false);
         private object locker = new object();
         private bool isDisposed = false;
@@ -130,7 +133,7 @@ namespace Astrarium.Plugins.ASCOM
                 {
                     if (telescope != null && !telescope.AtHome && telescope.CanFindHome)
                     {
-                        UnparkIfPossible();
+                        UnparkIfRequired();
                         Task.Run(() => telescope.FindHome());
                         NotifyPropertyChanged(nameof(IsSlewing));
                     }
@@ -171,7 +174,7 @@ namespace Astrarium.Plugins.ASCOM
             {
                 lock (locker)
                 {
-                    UnparkIfPossible();
+                    UnparkIfRequired();
                     NotifyPropertyChanged(nameof(AtPark));
                 }
             }
@@ -193,7 +196,7 @@ namespace Astrarium.Plugins.ASCOM
                     {
                         if (telescope.AtPark)
                         {
-                            UnparkIfPossible();
+                            UnparkIfRequired();
                         }
 
                         telescope.Tracking = !telescope.Tracking;
@@ -286,6 +289,8 @@ namespace Astrarium.Plugins.ASCOM
             }
         }
 
+        private bool CanDoCommand => IsConnected && telescope != null;
+
         private bool _IsSlewing = false;
 
         /// <inheritdoc/>
@@ -362,7 +367,7 @@ namespace Astrarium.Plugins.ASCOM
                 {
                     if (telescope != null && telescope.Connected)
                     {
-                        UnparkIfPossible();
+                        UnparkIfRequired();
                         EnableTrackingIfPossible();
 
                         var eqT = ConvertCoordinatesToTelescopeEpoch(eq);
@@ -384,6 +389,12 @@ namespace Astrarium.Plugins.ASCOM
                 Log.Error($"Unable to slew telescope: {ex}");
                 RaiseOnMessageShow("$Ascom.Messages.UnableSlew");
             }
+        }
+
+        /// <inheritdoc/>
+        public void ProcessCommand(ButtonCommand command)
+        {
+            commands.Enqueue(command);
         }
 
         /// <inheritdoc/>
@@ -419,7 +430,7 @@ namespace Astrarium.Plugins.ASCOM
                 {
                     if (telescope != null && telescope.Connected)
                     {
-                        UnparkIfPossible();
+                        UnparkIfRequired();
                         EnableTrackingIfPossible();
 
                         if (telescope.CanSync)
@@ -513,9 +524,9 @@ namespace Astrarium.Plugins.ASCOM
         }
 
         /// <summary>
-        /// Unparks telescope if it's possible
+        /// Unparks telescope if it's required
         /// </summary>
-        private void UnparkIfPossible()
+        private void UnparkIfRequired()
         {
             try
             {
@@ -581,6 +592,13 @@ namespace Astrarium.Plugins.ASCOM
 
                     if (IsConnected)
                     {
+                        if (axisRates == null)
+                        {
+                            var primary = telescope.AxisRates(TelescopeAxes.axisPrimary)[1];
+                            var secondary = telescope.AxisRates(TelescopeAxes.axisSecondary)[1];
+                            axisRates = new AxisRates(primary.Minimum, primary.Maximum, secondary.Minimum, secondary.Maximum);
+                        }
+
                         bool isMoving = false;
 
                         if (Math.Abs(eq.Alpha - Position.Alpha) > 1e-6 || Math.Abs(eq.Delta - Position.Delta) > 1e-6)
@@ -601,6 +619,11 @@ namespace Astrarium.Plugins.ASCOM
                         AtPark = telescope.AtPark;
                         IsTracking = telescope.Tracking;
                         TelescopeName = telescope.Name;
+
+                        while (commands.TryDequeue(out ButtonCommand command))
+                        {
+                            HandleCommand(command);
+                        }
                     }
                     else
                     {
@@ -608,6 +631,8 @@ namespace Astrarium.Plugins.ASCOM
                         AtHome = false;
                         AtPark = false;
                         IsTracking = false;
+
+                        while (commands.TryDequeue(out ButtonCommand command));
                     }
                 }
                 catch 
@@ -707,6 +732,131 @@ namespace Astrarium.Plugins.ASCOM
         private void NotifyPropertyChanged(string property)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
+        }
+
+        /// <summary>
+        /// Handles command from joystick device
+        /// </summary>
+        /// <param name="command"></param>
+        private void HandleCommand(ButtonCommand command)
+        {
+            if (command.IsPressed)
+            {
+                switch (command.Action)
+                {
+                    case ButtonAction.RotatePrimary: RotatePrimary(); break;
+                    case ButtonAction.RotateSecondary: RotateSecondary(); break;
+                    case ButtonAction.RotatePrimaryReverse: RotatePrimaryReverse(); break;
+                    case ButtonAction.RotateSecondaryReverse: RotateSecondaryReverse(); break;
+                    case ButtonAction.SetMaxRotationSpeed: SetMaxRotationSpeed(); break;
+                    case ButtonAction.SetMinRotationSpeed: SetMinRotationSpeed(); break;
+                    case ButtonAction.IncreaseRotationSpeed: IncreaseRotationSpeed(); break;
+                    case ButtonAction.DecreaseRotationSpeed: DecreaseRotationSpeed(); break;
+                    case ButtonAction.SwitchTracking: SwitchTracking(); break;
+                    case ButtonAction.AbortSlewing: AbortSlewing(); break;
+                    default: break;
+                }
+            }
+            else
+            {
+                switch (command.Action)
+                {
+                    case ButtonAction.RotatePrimary:
+                    case ButtonAction.RotatePrimaryReverse:
+                        StopRotatePrimaryAxis();
+                        break;
+                    case ButtonAction.RotateSecondary:
+                    case ButtonAction.RotateSecondaryReverse:
+                        StopRotateSecondaryAxis();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        private void RotatePrimary()
+        {
+            if (CanDoCommand)
+            {
+                UnparkIfRequired();
+                telescope.MoveAxis(TelescopeAxes.axisPrimary, axisRates.Primary);
+            }
+        }
+
+        private void RotateSecondary()
+        {
+            if (CanDoCommand)
+            {
+                UnparkIfRequired();
+                telescope.MoveAxis(TelescopeAxes.axisSecondary, axisRates.Secondary);
+            }
+        }
+
+        private void RotatePrimaryReverse()
+        {
+            if (CanDoCommand)
+            {
+                UnparkIfRequired();
+                telescope.MoveAxis(TelescopeAxes.axisPrimary, -axisRates.Primary);
+            }
+        }
+
+        private void RotateSecondaryReverse()
+        {
+            if (CanDoCommand)
+            {
+                UnparkIfRequired();
+                telescope.MoveAxis(TelescopeAxes.axisSecondary, -axisRates.Secondary);
+            }
+        }
+
+        private void SetMaxRotationSpeed()
+        {
+            if (CanDoCommand)
+            {
+                axisRates.SetMax();
+            }
+        }
+
+        private void SetMinRotationSpeed()
+        {
+            if (CanDoCommand)
+            {
+                axisRates.SetMin();
+            }
+        }
+
+        private void IncreaseRotationSpeed()
+        {
+            if (CanDoCommand)
+            {
+                axisRates.Increase();
+            }
+        }
+
+        private void DecreaseRotationSpeed()
+        {
+            if (CanDoCommand)
+            {
+                axisRates.Decrease();
+            }
+        }
+
+        private void StopRotatePrimaryAxis()
+        {
+            if (CanDoCommand && !telescope.AtPark)
+            {
+                telescope.MoveAxis(TelescopeAxes.axisPrimary, 0);
+            }
+        }
+
+        private void StopRotateSecondaryAxis()
+        {
+            if (CanDoCommand && !telescope.AtPark)
+            {
+                telescope.MoveAxis(TelescopeAxes.axisSecondary, 0);
+            }
         }
     }
 }

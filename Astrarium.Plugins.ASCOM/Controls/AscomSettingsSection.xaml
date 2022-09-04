@@ -7,16 +7,92 @@
     xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
     xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
     xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+    xmlns:local="clr-namespace:Astrarium.Plugins.ASCOM" 
     Title="{t:Text Section.Ascom}"
     mc:Ignorable="d"
     d:DesignHeight="450" 
     d:DesignWidth="800">
+
+    <c:SettingsSection.Resources>
+        <ObjectDataProvider x:Key="ButtonActionsEnum" MethodName="GetValues" ObjectType="{x:Type local:ButtonAction}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type Type="local:ButtonAction"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </c:SettingsSection.Resources>
+    
     <StackPanel Orientation="Vertical" Margin="6">
         <CheckBox Content="{t:Text Settings.TelescopeMarkerLabel}" IsChecked="{Binding Settings.TelescopeMarkerLabel}" Margin="2" />
         <CheckBox Content="{t:Text Settings.TelescopeFindCurrentPointAfterConnect}" IsChecked="{Binding Settings.TelescopeFindCurrentPointAfterConnect}" Margin="2" />
         <StackPanel Orientation="Horizontal" Margin="-2">
             <Label Content="{t:Text Settings.TelescopePollingPeriod}"/>
             <c:NumericUpDown Width="60" DecimalPlaces="0" Minimum="0" Maximum="5000" HorizontalAlignment="Left" Value="{Binding Settings.TelescopePollingPeriod}" />
+        </StackPanel>
+        <CheckBox Content="Control telescope with gamepad/joystick" />
+        <StackPanel Orientation="Vertical">
+            <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding JoystickDevices}" SelectedValue="{Binding SelectedDevice}">
+                <ComboBox.ItemTemplate>
+                    <ItemContainerTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse HorizontalAlignment="Left" Margin="2" Fill="Lime" Cursor="Help" ToolTip="Connected" Width="8" Height="8" Visibility="{Binding IsConnected, Converter={s:BoolToVisibilityConverter}}" />
+                            <Ellipse HorizontalAlignment="Left" Margin="2" Fill="Red" Cursor="Help" ToolTip="Disconnected" Width="8" Height="8" Visibility="{Binding IsConnected, Converter={s:InverseBoolToVisibilityConverter}}" />
+                            <TextBlock VerticalAlignment="Center" Margin="6 2" Text="{Binding Name}" />
+                        </StackPanel>
+                    </ItemContainerTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+
+            <TextBlock Text="Button mappings" />
+
+            <DataGrid 
+                Margin="8"
+                RowHeight="24" 
+                CanUserAddRows="False" 
+                IsReadOnly="False" 
+                EnableColumnVirtualization="True" 
+                VirtualizingPanel.VirtualizationMode="Recycling"
+                EnableRowVirtualization="True"
+                ItemsSource="{Binding ButtonsMappings}" 
+                AutoGenerateColumns="False">
+                <DataGrid.CellStyle>
+                    <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource DataGridCellStyle}">
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="{x:Null}" />
+                                <Setter Property="BorderBrush" Value="{x:Null}" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.CellStyle>
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Button" IsReadOnly="True">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse x:Name="ellipse" HorizontalAlignment="Left" Margin="4 0"  Stroke="{StaticResource BrushControlLightBackground}" Fill="Transparent" Cursor="Help" ToolTip="This bubble lights green when button is pressed" Width="10" Height="10" />
+                                    <TextBlock Text="{Binding Button}" />
+                                </StackPanel>
+
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding IsPressed}" Value="True">
+                                        <Setter TargetName="ellipse" Property="Fill" Value="Lime" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Action">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox Margin="-5 0" VerticalContentAlignment="Center"  SelectedValue="{Binding Action, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource ButtonActionsEnum}}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+
+
         </StackPanel>
     </StackPanel>
 </c:SettingsSection>

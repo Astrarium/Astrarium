@@ -1,8 +1,10 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Plugins.ASCOM.Controls;
+using Astrarium.Plugins.ASCOM.ViewModels;
 using Astrarium.Types;
 using System;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,15 +17,19 @@ namespace Astrarium.Plugins.ASCOM
         private readonly ISkyMap map;
         private readonly ISky sky;
         private readonly ISettings settings;
+        private readonly IJoystickManager joystickManager;
 
-        public Plugin(ISkyMap map, ISky sky, ISettings settings)
+        public Plugin(ISkyMap map, ISky sky, IJoystickManager joystickManager, ISettings settings)
         {
             var menuAscom = new MenuItem("$Menu.Telescope");
 
             this.ascom = Ascom.Proxy;
+            this.joystickManager = joystickManager;
             this.map = map;
             this.sky = sky;
             this.settings = settings;
+
+            this.joystickManager.ButtonStateChanged += HandleButtonStateChanged;
 
             DefineSetting("ASCOMTelescopeId", "", isPermanent: true);
 
@@ -97,7 +103,7 @@ namespace Astrarium.Plugins.ASCOM
             DefineSetting("TelescopeFindCurrentPointAfterConnect", false);
             DefineSetting("TelescopePollingPeriod", 500m);
 
-            DefineSettingsSection<AscomSettingsSection, SettingsViewModel>();
+            DefineSettingsSection<AscomSettingsSection, AscomSettingsViewModel>();
 
             settings.SettingValueChanged += Settings_SettingValueChanged;
         }
@@ -117,6 +123,25 @@ namespace Astrarium.Plugins.ASCOM
                     ascom.PollingPeriod = period;
                 }
             }
+        }
+
+        private void HandleButtonStateChanged(string buttonName, bool isPressed)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    var button = joystickManager.SelectedDevice?.Buttons.FirstOrDefault<JoystickButton>(b => b.Button == buttonName);
+                    if (button != null)
+                    {
+                        ascom.ProcessCommand(new ButtonCommand() { Action = button.Action, IsPressed = button.IsPressed });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error($"ERROR: {ex.Message}");
+                }
+            });
         }
 
         private void Ascom_OnMessageShow(string message)
