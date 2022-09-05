@@ -15,7 +15,6 @@ namespace Astrarium.Plugins.ASCOM.ViewModels
         {
             this.joystickManager = joystickManager;
             this.joystickManager.DevicesListChanged += () => NotifyPropertyChanged(nameof(JoystickDevices));
-            this.joystickManager.ButtonStateChanged += HandleButtonStateChanged;
         }
 
         public JoystickDevice SelectedDevice
@@ -24,34 +23,12 @@ namespace Astrarium.Plugins.ASCOM.ViewModels
             set
             {
                 joystickManager.SelectedDevice = value;
+                Settings.Set("TelescopeControlJoystickDevice", value.Id);
                 NotifyPropertyChanged(nameof(SelectedDevice), nameof(ButtonsMappings));
             }
         }
 
         public ICollection<JoystickDevice> JoystickDevices => joystickManager.Devices;
         public ICollection<JoystickButton> ButtonsMappings => SelectedDevice?.Buttons;
-
-        private void HandleButtonStateChanged(string button, bool isPressed)
-        {
-            //Task.Run(() =>
-            //{
-            //    try
-            //    {
-            //        var mapping = ButtonsMappings.FirstOrDefault(b => b.Button == button);
-            //        if (mapping != null)
-            //        {
-            //            mapping.IsPressed = isPressed;
-            //            //if (SelectedTab == Tabs.Telescope)
-            //            //{
-            //            //    telescope?.ProcessCommand(new ButtonCommand() { Action = mapping.Action, IsPressed = mapping.IsPressed });
-            //            //}
-            //        }
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        Log.Error($"ERROR: {ex.Message}");
-            //    }
-            //});
-        }
     }
 }

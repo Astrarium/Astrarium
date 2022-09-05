@@ -27,6 +27,7 @@ namespace Astrarium.Plugins.ASCOM
 
         public JoystickDevice SelectedDevice { get; set; }
 
+
         public JoystickManager()
         {
             Thread joystickThread = new Thread(Poll) { IsBackground = true };
@@ -51,7 +52,6 @@ namespace Astrarium.Plugins.ASCOM
             {
                 var device = allDevices[i];
                 device.IsConnected = GamePad.GetState(i).IsConnected;
-
                 Guid id = Joystick.GetGuid(i);
                 if (id != device.Id)
                 {

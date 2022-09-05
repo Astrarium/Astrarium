@@ -7,7 +7,6 @@ namespace Astrarium.Plugins.ASCOM
     {
         ICollection<JoystickDevice> Devices { get; }
         JoystickDevice SelectedDevice { get; set; }
-
         event Action<string, bool> ButtonStateChanged;
         event Action DevicesListChanged;
     }

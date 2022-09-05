@@ -635,7 +635,7 @@ namespace Astrarium.Plugins.ASCOM
                         while (commands.TryDequeue(out ButtonCommand command));
                     }
                 }
-                catch 
+                catch
                 {
                     IsConnected = false; 
                     IsSlewing = false;

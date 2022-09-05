@@ -43,6 +43,11 @@ namespace Astrarium.Config
         public event Action<string, object> SettingValueChanged;
 
         /// <summary>
+        /// Raised when settings is saving
+        /// </summary>
+        public event Action OnSaving;
+
+        /// <summary>
         /// Raised when property value is changed
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
@@ -235,6 +240,7 @@ namespace Astrarium.Config
 
         public void Save()
         {
+            OnSaving?.Invoke();
             Directory.CreateDirectory(Path.GetDirectoryName(SETTINGS_PATH));
             using (var stream = new FileStream(SETTINGS_PATH, FileMode.Create))
             {

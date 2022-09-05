@@ -53,6 +53,11 @@ namespace Astrarium.Types
         event Action<string, object> SettingValueChanged;
 
         /// <summary>
+        /// Raised when settings is saving
+        /// </summary>
+        event Action OnSaving;
+
+        /// <summary>
         /// Gets value indicating settings have been modified
         /// </summary>
         bool IsChanged { get; }

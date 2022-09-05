@@ -3,6 +3,7 @@ using Astrarium.Plugins.ASCOM.Controls;
 using Astrarium.Plugins.ASCOM.ViewModels;
 using Astrarium.Types;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -103,14 +104,41 @@ namespace Astrarium.Plugins.ASCOM
             DefineSetting("TelescopeFindCurrentPointAfterConnect", false);
             DefineSetting("TelescopePollingPeriod", 500m);
 
+            DefineSetting("TelescopeControlJoystick", false, true);
+            DefineSetting("TelescopeControlJoystickDevice", Guid.Empty, true);
+            DefineSetting("TelescopeControlJoystickButtons", new List<JoystickButton>(), true);
+
             DefineSettingsSection<AscomSettingsSection, AscomSettingsViewModel>();
 
             settings.SettingValueChanged += Settings_SettingValueChanged;
+            settings.OnSaving += Settings_OnSaving;
+        }
+
+        private void Settings_OnSaving()
+        {
+            settings.Set("TelescopeControlJoystickButtons", this.joystickManager.SelectedDevice?.Buttons);
         }
 
         public override void Initialize()
         {
             this.ascom.PollingPeriod = (int)settings.Get<decimal>("TelescopePollingPeriod");
+
+            var device = this.joystickManager.Devices.FirstOrDefault(x => x.Id == settings.Get<Guid>("TelescopeControlJoystickDevice"));
+
+            if (device != null)
+            {
+                var buttonsMappings = settings.Get<List<JoystickButton>>("TelescopeControlJoystickButtons").Where(x => x.Action != ButtonAction.None);
+                foreach (var map in buttonsMappings)
+                {
+                    var button = device.Buttons.FirstOrDefault(x => x.Button == map.Button);
+                    if (button != null)
+                    { 
+                         button.Action = map.Action;
+                    }
+                }
+            }
+
+            this.joystickManager.SelectedDevice = device;
         }
 
         private void Settings_SettingValueChanged(string settingName, object value)
@@ -129,17 +157,20 @@ namespace Astrarium.Plugins.ASCOM
         {
             Task.Run(() =>
             {
-                try
+                if (settings.Get("TelescopeControlJoystick"))
                 {
-                    var button = joystickManager.SelectedDevice?.Buttons.FirstOrDefault<JoystickButton>(b => b.Button == buttonName);
-                    if (button != null)
+                    try
                     {
-                        ascom.ProcessCommand(new ButtonCommand() { Action = button.Action, IsPressed = button.IsPressed });
+                        var button = joystickManager.SelectedDevice?.Buttons.FirstOrDefault<JoystickButton>(b => b.Button == buttonName);
+                        if (button != null)
+                        {
+                            ascom.ProcessCommand(new ButtonCommand() { Action = button.Action, IsPressed = button.IsPressed });
+                        }
                     }
-                }
-                catch (Exception ex)
-                {
-                    Log.Error($"ERROR: {ex.Message}");
+                    catch (Exception ex)
+                    {
+                        Log.Error($"ERROR: {ex.Message}");
+                    }
                 }
             });
         }
