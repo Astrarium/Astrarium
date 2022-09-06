@@ -34,8 +34,8 @@
                     <ComboBox.ItemTemplate>
                         <ItemContainerTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <Ellipse HorizontalAlignment="Left" Margin="2" Fill="Lime" Cursor="Help" ToolTip="Connected" Width="8" Height="8" Visibility="{Binding IsConnected, Converter={s:BoolToVisibilityConverter}}" />
-                                <Ellipse HorizontalAlignment="Left" Margin="2" Fill="Red" Cursor="Help" ToolTip="Disconnected" Width="8" Height="8" Visibility="{Binding IsConnected, Converter={s:InverseBoolToVisibilityConverter}}" />
+                                <Ellipse HorizontalAlignment="Left" Margin="2" Fill="Lime" Cursor="Help" ToolTip="{t:Text Settings.TelescopeControlJoystick.ConnectionStateHint.Connected}" Width="8" Height="8" Visibility="{Binding IsConnected, Converter={s:BoolToVisibilityConverter}}" />
+                                <Ellipse HorizontalAlignment="Left" Margin="2" Fill="Red" Cursor="Help" ToolTip="{t:Text Settings.TelescopeControlJoystick.ConnectionStateHint.Disconnected}" Width="8" Height="8" Visibility="{Binding IsConnected, Converter={s:InverseBoolToVisibilityConverter}}" />
                                 <TextBlock VerticalAlignment="Center" Margin="4 -1" Text="{Binding Name}" />
                             </StackPanel>
                         </ItemContainerTemplate>
