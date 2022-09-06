@@ -13,42 +13,45 @@
     d:DesignHeight="450" 
     d:DesignWidth="800">
     
-    <StackPanel Orientation="Vertical" Margin="6">
-        <CheckBox Content="{t:Text Settings.TelescopeMarkerLabel}" IsChecked="{Binding Settings.TelescopeMarkerLabel}" Margin="2" />
-        <CheckBox Content="{t:Text Settings.TelescopeFindCurrentPointAfterConnect}" IsChecked="{Binding Settings.TelescopeFindCurrentPointAfterConnect}" Margin="2" />
-        <StackPanel Orientation="Horizontal" Margin="-2">
+    <StackPanel Orientation="Vertical" Margin="6 0 6 0">
+        <StackPanel Orientation="Horizontal" Margin="-2 2 -2 -2">
             <Label Content="{t:Text Settings.TelescopePollingPeriod}"/>
             <c:NumericUpDown Width="60" DecimalPlaces="0" Minimum="0" Maximum="5000" HorizontalAlignment="Left" Value="{Binding Settings.TelescopePollingPeriod}" />
         </StackPanel>
-        <CheckBox Margin="2" Content="Control telescope with gamepad/joystick" IsChecked="{Binding Settings.TelescopeControlJoystick}" />
-        <StackPanel Orientation="Vertical" Visibility="{Binding Settings.TelescopeControlJoystick, Converter={s:BoolToVisibilityConverter}}">
-            <Grid Margin="2 4">
-                <ComboBox Name="cmbSelectedDevice" HorizontalAlignment="Stretch" ItemsSource="{Binding JoystickDevices}" SelectedValue="{Binding SelectedDevice}">
+        
+        <CheckBox Content="{t:Text Settings.TelescopeMarkerLabel}" IsChecked="{Binding Settings.TelescopeMarkerLabel}" Margin="2" />
+        <CheckBox Content="{t:Text Settings.TelescopeFindCurrentPointAfterConnect}" IsChecked="{Binding Settings.TelescopeFindCurrentPointAfterConnect}" Margin="2" />
+
+        <CheckBox Margin="2" Content="{t:Text Settings.TelescopeControlJoystick}" IsChecked="{Binding JoystickEnabled}" />
+        <Grid Visibility="{Binding Settings.TelescopeControlJoystick, Converter={s:BoolToVisibilityConverter}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            
+            <Grid Margin="2 4" Grid.Column="0">
+                <ComboBox Name="cmbSelectedDevice" MinWidth="300" HorizontalAlignment="Stretch" ItemsSource="{Binding JoystickDevices}" SelectedValue="{Binding SelectedDevice}">
                     <ComboBox.ItemTemplate>
                         <ItemContainerTemplate>
                             <StackPanel Orientation="Horizontal">
                                 <Ellipse HorizontalAlignment="Left" Margin="2" Fill="Lime" Cursor="Help" ToolTip="Connected" Width="8" Height="8" Visibility="{Binding IsConnected, Converter={s:BoolToVisibilityConverter}}" />
                                 <Ellipse HorizontalAlignment="Left" Margin="2" Fill="Red" Cursor="Help" ToolTip="Disconnected" Width="8" Height="8" Visibility="{Binding IsConnected, Converter={s:InverseBoolToVisibilityConverter}}" />
-                                <TextBlock VerticalAlignment="Center" Margin="6 2" Text="{Binding Name}" />
+                                <TextBlock VerticalAlignment="Center" Margin="4 -1" Text="{Binding Name}" />
                             </StackPanel>
                         </ItemContainerTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
-                <TextBlock
+                <TextBlock                    
                     Foreground="{StaticResource BrushControlLightBackground}"
                     Visibility="{Binding SelectedItem, ElementName=cmbSelectedDevice, Converter={s:NullToVisibilityConverter}}"
                     IsHitTestVisible="False"
                     VerticalAlignment="Center"
                     Padding="4 0"
-                    Text="Select joystick device..." />
+                    Text="{t:Text Settings.TelescopeControlJoystick.Empty}" />
             </Grid>
 
-            <Button Content="Button commands..." MinWidth="200" HorizontalAlignment="Left" Command="{Binding EditButtonsMappingCommand}" />
+            <Button Grid.Column="1" Margin="2 0 0 0" IsEnabled="{Binding SelectedItem, ElementName=cmbSelectedDevice, Converter={s:NotNullToBoolConverter}}" Content="{t:Text Settings.TelescopeControlJoystick.ButtonCommands}" MinWidth="80" Padding="4 0" HorizontalAlignment="Left" Command="{Binding EditButtonsMappingCommand}" />
 
-            <StackPanel Orientation="Vertical" Visibility="{Binding SelectedItem, ElementName=cmbSelectedDevice, Converter={s:NotNullToVisibilityConverter}}">
-                <TextBlock Margin="2" Text="Button mappings:" />
-                
-            </StackPanel>
-        </StackPanel>
+        </Grid>
     </StackPanel>
 </c:SettingsSection>

@@ -14,6 +14,9 @@ namespace Astrarium.Plugins.ASCOM
     {
         public event Action DevicesListChanged;
         public event Action<string, bool> ButtonStateChanged;
+        public event Action SelectedDeviceChanged;
+
+        private ManualResetEvent isEnabledEvent = new ManualResetEvent(false);
 
         private readonly List<JoystickDevice> allDevices = new List<JoystickDevice>()
         {
@@ -23,10 +26,39 @@ namespace Astrarium.Plugins.ASCOM
             new JoystickDevice() { Index = 3 }
         };
 
+        private bool isEnabled = false;
+        public bool IsEnabled
+        {
+            get => isEnabled;
+            set
+            {
+                isEnabled = value;
+                if (isEnabled)
+                {
+                    isEnabledEvent.Set();
+                }
+                else
+                {
+                    isEnabledEvent.Reset();
+                }
+            }
+        }
+
         public ICollection<JoystickDevice> Devices => allDevices.Where(x => !string.IsNullOrEmpty(x.Name) && x.Buttons.Count > 0).ToArray();
 
-        public JoystickDevice SelectedDevice { get; set; }
-
+        private JoystickDevice selectedDevice = null;
+        public JoystickDevice SelectedDevice
+        {
+            get => selectedDevice;
+            set
+            {
+                if (selectedDevice != value)
+                {
+                    selectedDevice = value;
+                }
+                SelectedDeviceChanged?.Invoke();
+            }
+        }
 
         public JoystickManager()
         {
@@ -41,6 +73,7 @@ namespace Astrarium.Plugins.ASCOM
                 RefreshDevicesList();
                 RefreshButtonStates();
                 Thread.Sleep(10);
+                isEnabledEvent.WaitOne();
             }
         }
 

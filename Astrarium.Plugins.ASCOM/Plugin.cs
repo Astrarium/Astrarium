@@ -116,9 +116,14 @@ namespace Astrarium.Plugins.ASCOM
         public override void Initialize()
         {
             this.ascom.PollingPeriod = (int)settings.Get<decimal>("TelescopePollingPeriod");
+            this.joystickManager.SelectedDeviceChanged += JoystickManager_SelectedDeviceChanged;
+            this.joystickManager.SelectedDevice = joystickManager.Devices.FirstOrDefault(x => x.Id == settings.Get<Guid>("TelescopeControlJoystickDevice"));
+            this.joystickManager.IsEnabled = settings.Get("TelescopeControlJoystick");
+        }
 
-            var device = this.joystickManager.Devices.FirstOrDefault(x => x.Id == settings.Get<Guid>("TelescopeControlJoystickDevice"));
-
+        private void JoystickManager_SelectedDeviceChanged()
+        {
+            var device = joystickManager.SelectedDevice;
             if (device != null)
             {
                 var buttonsMappings = settings.Get<List<JoystickButton>>("TelescopeControlJoystickButtons").Where(x => x.Action != ButtonAction.None);
@@ -126,13 +131,11 @@ namespace Astrarium.Plugins.ASCOM
                 {
                     var button = device.Buttons.FirstOrDefault(x => x.Button == map.Button);
                     if (button != null)
-                    { 
-                         button.Action = map.Action;
+                    {
+                        button.Action = map.Action;
                     }
                 }
             }
-
-            this.joystickManager.SelectedDevice = device;
         }
 
         private void Settings_SettingValueChanged(string settingName, object value)

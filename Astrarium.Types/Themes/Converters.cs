@@ -356,7 +356,7 @@ namespace Astrarium.Types.Themes
             return
                 Text.Get(
                     memberInfo?.GetCustomAttribute<DescriptionAttribute>()
-                    ?.Description ?? memberInfo.Name);
+                    ?.Description ?? memberInfo?.Name);
         }
     }
 

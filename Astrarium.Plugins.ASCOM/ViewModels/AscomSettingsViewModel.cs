@@ -10,9 +10,11 @@ namespace Astrarium.Plugins.ASCOM.ViewModels
 {
     public class AscomSettingsViewModel : SettingsViewModel
     {
+        private readonly IJoystickManager joystickManager;
+
         public ICommand EditButtonsMappingCommand { get; private set; }
 
-        private readonly IJoystickManager joystickManager;
+        public ICollection<JoystickDevice> JoystickDevices => joystickManager.Devices;
 
         public AscomSettingsViewModel(IJoystickManager joystickManager, ISettings settings) : base(settings)
         {
@@ -27,42 +29,26 @@ namespace Astrarium.Plugins.ASCOM.ViewModels
             get => joystickManager.SelectedDevice;
             set
             {
-                var oldDevice = joystickManager.SelectedDevice;
-
-                if (oldDevice != null)
-                {
-                    oldDevice.Buttons.ForEach(x => x.ActionChanged -= ButtonActionChanged);
-                }
-
                 joystickManager.SelectedDevice = value;
-
-
-
                 Settings.Set("TelescopeControlJoystickDevice", value.Id);
-
-
-                joystickManager.SelectedDevice.Buttons.ForEach(x => x.ActionChanged += ButtonActionChanged);
-
-                NotifyPropertyChanged(nameof(SelectedDevice), nameof(ButtonsMappings));
-
-
+                NotifyPropertyChanged(nameof(SelectedDevice));
             }
         }
 
-        public ICollection<JoystickDevice> JoystickDevices => joystickManager.Devices;
-        public ICollection<JoystickButton> ButtonsMappings => SelectedDevice?.Buttons;
-
-        private void ButtonActionChanged(string button, ButtonAction action)
+        public bool JoystickEnabled
         {
-            Settings.Set("TelescopeControlJoystickButtons", joystickManager.SelectedDevice?.Buttons ?? new List<JoystickButton>());
+            get => joystickManager.IsEnabled;
+            set
+            {
+                joystickManager.IsEnabled = value;
+                Settings.Set("TelescopeControlJoystick", value);
+                NotifyPropertyChanged(nameof(JoystickEnabled));
+            }
         }
 
         private void EditButtonsMapping()
         {
-            if (ViewManager.ShowDialog<JoystickButtonsMappingVM>() == true)
-            {
-
-            }
+            ViewManager.ShowDialog<JoystickButtonsMappingVM>();
         }
     }
 }

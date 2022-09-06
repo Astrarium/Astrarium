@@ -1,17 +1,10 @@
 ﻿using Astrarium.Types;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.ASCOM
 {
     public class JoystickButton : PropertyChangedBase
     {
-        public event Action<string, ButtonAction> ActionChanged;
-
         [JsonProperty("Button")]
         public string Button { get; set; }
 
@@ -19,11 +12,7 @@ namespace Astrarium.Plugins.ASCOM
         public ButtonAction Action
         {
             get => GetValue<ButtonAction>(nameof(Action));
-            set
-            {
-                SetValue(nameof(Action), value);
-                ActionChanged?.Invoke(Button, value);
-            }
+            set => SetValue(nameof(Action), value);
         }
 
         [JsonIgnore]

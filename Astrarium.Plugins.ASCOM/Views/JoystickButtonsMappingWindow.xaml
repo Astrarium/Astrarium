@@ -3,12 +3,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+        xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
         xmlns:local="clr-namespace:Astrarium.Plugins.ASCOM" 
         mc:Ignorable="d"
-        Title="JoystickButtonsMappingWindow" 
+        Title="{t:Text ButtonsMappingWindow.Title}" 
         Style="{StaticResource {x:Type Window}}"
         WindowStartupLocation="CenterOwner"
-        Height="450" Width="800">
+        s:WindowProperties.MinButtonVisible="Collapsed"
+        s:WindowProperties.MaxButtonVisible="Collapsed"
+        Height="400" Width="400">
 
     <Window.Resources>
         <ObjectDataProvider x:Key="ButtonActionsEnum" MethodName="GetValues" ObjectType="{x:Type local:ButtonAction}">
@@ -19,11 +23,21 @@
     </Window.Resources>
 
     <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Margin="6" IsEnabled="False" Text="{t:Text ButtonsMappingWindow.Hint}" TextWrapping="Wrap" />
+
         <DataGrid 
-            Margin="8"
+            Grid.Row="1"
+            Margin="6"
             RowHeight="24" 
             CanUserAddRows="False" 
-            MinColumnWidth="200"
+            MinColumnWidth="150"
             IsReadOnly="False" 
             EnableColumnVirtualization="True" 
             VirtualizingPanel.VirtualizationMode="Recycling"
@@ -41,11 +55,11 @@
                 </Style>
             </DataGrid.CellStyle>
             <DataGrid.Columns>
-                <DataGridTemplateColumn Header="Button" IsReadOnly="True">
+                <DataGridTemplateColumn Header="{t:Text ButtonsMappingWindow.Button}" IsReadOnly="True">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <Ellipse x:Name="ellipse" HorizontalAlignment="Left" Margin="4 0"  Stroke="{StaticResource BrushControlLightBackground}" Fill="Transparent" Cursor="Help" ToolTip="This bubble lights green when button is pressed" Width="10" Height="10" />
+                                <Ellipse x:Name="ellipse" HorizontalAlignment="Left" Margin="4 0"  Stroke="{StaticResource BrushControlLightBackground}" Fill="Transparent" Cursor="Help" ToolTip="{t:Text ButtonsMappingWindow.ButtonPressedHint}" Width="10" Height="10" />
                                 <TextBlock Text="{Binding Button}" />
                             </StackPanel>
 
@@ -57,14 +71,25 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Action">
+                <DataGridTemplateColumn Header="{t:Text ButtonsMappingWindow.Action}">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <ComboBox Margin="-4 0" VerticalContentAlignment="Center" SelectedValue="{Binding Action, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource ButtonActionsEnum}}" />
+                            <ComboBox Margin="-4 0" VerticalContentAlignment="Center" SelectedValue="{Binding Action, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource ButtonActionsEnum}}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Converter={s:EnumValueToEnumDescriptionConverter}}"/>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right">
+            <Button Command="{Binding CloseCommand}" MinWidth="80" Margin="6 0 6 6" Padding="4 0" Content="{t:Text Close}" />
+        </StackPanel>
+
     </Grid>
 </Window>

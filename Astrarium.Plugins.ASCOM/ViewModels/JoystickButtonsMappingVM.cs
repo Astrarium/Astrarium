@@ -10,28 +10,24 @@ namespace Astrarium.Plugins.ASCOM.ViewModels
 {
     public class JoystickButtonsMappingVM : ViewModelBase
     {
-        //public ICommand OkCommand
-
         private readonly ISettings settings;
-        private readonly IJoystickManager joystickManager;
+
+        public ICommand CloseCommand { get; private set; }
+        public List<JoystickButton> Buttons { get; private set; }
 
         public JoystickButtonsMappingVM(ISettings settings, IJoystickManager joystickManager)
         {
+            CloseCommand = new Command(Close);
             this.settings = settings;
-            this.joystickManager = joystickManager;
-
             if (joystickManager.SelectedDevice != null)
             {
                 Buttons = joystickManager.SelectedDevice.Buttons;
             }
         }
 
-        public List<JoystickButton> Buttons { get; private set; }
-
         public override void Close()
         {
-            
-
+            settings.Set("TelescopeControlJoystickButtons", Buttons);
             base.Close();
         }
     }
