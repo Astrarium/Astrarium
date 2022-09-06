@@ -19,9 +19,14 @@ namespace Astrarium.Plugins.ASCOM.ViewModels
         public AscomSettingsViewModel(IJoystickManager joystickManager, ISettings settings) : base(settings)
         {
             this.joystickManager = joystickManager;
-            this.joystickManager.DevicesListChanged += () => NotifyPropertyChanged(nameof(JoystickDevices));
-
+            this.joystickManager.DevicesListChanged += LoadDevices;
             EditButtonsMappingCommand = new Command(EditButtonsMapping);
+            LoadDevices();
+        }
+
+        private void LoadDevices()
+        {
+            NotifyPropertyChanged(nameof(JoystickDevices));
         }
 
         public JoystickDevice SelectedDevice
