@@ -16,9 +16,27 @@ namespace Astrarium.Plugins.UCAC4
         public float Magnitude { get; set; }
 
         /// <summary>
+        /// Proper name, if exists
+        /// </summary>
+        public string ProperName { get; set; }
+
+        /// <summary>
         /// Gets star names
         /// </summary>
-        public override string[] Names => new[] { ToString() };
+        public override string[] Names
+        {
+            get
+            {
+                if (ProperName != null)
+                {
+                    return new string[] { ProperName, ToString() };
+                }
+                else
+                {
+                    return new string[] { ToString() };
+                }
+            }
+        }
 
         /// <summary>
         /// UCAC4 zone number for this star, 1...9000

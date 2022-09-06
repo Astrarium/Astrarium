@@ -82,6 +82,11 @@ namespace Astrarium.Plugins.Tycho2
         private HashSet<string> SkippedEntries = new HashSet<string>();
 
         /// <summary>
+        /// Dictionary of proper names of Tycho2 stars
+        /// </summary>
+        private Dictionary<string, string> ProperNames = null;
+
+        /// <summary>
         /// Binary Reader for accessing catalog data
         /// </summary>
         private BinaryReader CatalogReader;
@@ -137,6 +142,8 @@ namespace Astrarium.Plugins.Tycho2
 
                 LoadIndex(indexFile);
                 LoadCrossReference(crossRefFile);
+
+                ProperNames = Sky.StarNames.Where(x => x.Key.StartsWith("TYC")).ToDictionary(x => x.Key, x => x.Value);
 
                 // Open Tycho2 catalog file
                 CatalogReader = new BinaryReader(File.Open(catalogFile, FileMode.Open, FileAccess.Read));
@@ -408,6 +415,7 @@ namespace Astrarium.Plugins.Tycho2
             star.Magnitude = mag;
             star.PmRA = BitConverter.ToSingle(buffer, offset + 21);
             star.PmDec = BitConverter.ToSingle(buffer, offset + 25);
+            star.ProperName = ProperNames.ContainsKey(star.Names[0]) ? ProperNames[star.Names[0]] : null;
 
             if (SkippedEntries.Contains($"{star.Tyc1}-{star.Tyc2}-{star.Tyc3}"))
             {
@@ -488,7 +496,7 @@ namespace Astrarium.Plugins.Tycho2
             string constellation = Constellations.FindConstellation(s.Equatorial, c.JulianDay);
 
             info
-            .SetTitle(s.ToString())
+            .SetTitle(string.Join(", ", s.Names))
             .SetSubtitle(Text.Get("Tycho2Star.Type"))
 
             .AddRow("Constellation", constellation)
@@ -519,6 +527,12 @@ namespace Astrarium.Plugins.Tycho2
 
         public ICollection<CelestialObject> Search(SkyContext c, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
+            var starWithProperName = ProperNames.FirstOrDefault(kv => kv.Value.StartsWith(searchString, StringComparison.OrdinalIgnoreCase));
+            if (starWithProperName.Key != null)
+            {
+                searchString = starWithProperName.Key;
+            }
+
             var match = searchRegex.Match(searchString.ToLowerInvariant());
             if (match.Success)
             {

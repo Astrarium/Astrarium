@@ -59,6 +59,9 @@ namespace Astrarium
         /// <inheritdoc />
         public ICollection<Tuple<int, int>> ConstellationLines { get; set; } = new Tuple<int, int>[0];
 
+        /// <inheritdoc />
+        public IDictionary<string, string> StarNames { get; private set; } = new Dictionary<string, string>();
+
         public IEnumerable<CelestialObject> CelestialObjects
         {
             get
@@ -96,7 +99,10 @@ namespace Astrarium
             Context = context;
             Calculators.AddRange(calculators);
             EventProviders.AddRange(eventProviders);
-            
+
+            LoadConstNames();
+            LoadStarNames();
+
             foreach (var calc in Calculators)
             {
                 calc.Initialize();
@@ -147,7 +153,7 @@ namespace Astrarium
                 }
             }
 
-            LoadConstNames();
+
         }
 
         /// <summary>
@@ -174,6 +180,27 @@ namespace Astrarium
                         LatinName = name,
                         LatinGenitiveName = genitive
                     });
+                }
+            }
+        }
+
+        // TODO: move to reader
+        private void LoadStarNames()
+        {
+            string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/StarsNames.dat");
+            string line = "";
+            using (var sr = new StreamReader(file, Encoding.Default))
+            {
+                while (line != null && !sr.EndOfStream)
+                {
+                    line = sr.ReadLine();
+                    var chunks = line.Split(',');
+                    string name = chunks[0].Trim();
+                    
+                    foreach (var designation in chunks.Skip(1))
+                    {
+                        StarNames[designation.Trim()] = name;
+                    }
                 }
             }
         }

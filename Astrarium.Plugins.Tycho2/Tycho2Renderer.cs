@@ -72,7 +72,7 @@ namespace Astrarium.Plugins.Tycho2
 
                                 if (isLabels && map.ViewAngle < 1 && size > 3)
                                 {
-                                    map.DrawObjectCaption(fontNames, brushNames, star.ToString(), p, size);
+                                    map.DrawObjectCaption(fontNames, brushNames, star.Names.First(), p, size);
                                 }
                                 map.AddDrawnObject(star);
                             }

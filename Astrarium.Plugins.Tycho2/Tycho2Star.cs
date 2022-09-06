@@ -54,9 +54,27 @@ namespace Astrarium.Plugins.Tycho2
         public char SpectralClass { get; set; }
 
         /// <summary>
+        /// Proper name of the star, if exists
+        /// </summary>
+        public string ProperName { get; set; }
+
+        /// <summary>
         /// Gets star names
         /// </summary>
-        public override string[] Names => new[] { ToString() };
+        public override string[] Names
+        {
+            get 
+            {
+                if (ProperName != null)
+                {
+                    return new string[] { ProperName, ToString() };
+                }
+                else
+                {
+                    return new string[] { ToString() };
+                }
+            }
+        }
 
         /// <summary>
         /// Gets Tycho2 star designation name

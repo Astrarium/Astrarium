@@ -384,7 +384,7 @@ namespace Astrarium.Plugins.BrightStars
 
             if (!string.IsNullOrEmpty(conName))
             {
-                conName = sky.GetConstellation(conName).LatinGenitiveName;
+                conName = sky.GetConstellation(conName)?.LatinGenitiveName;
             }
 
             if (s.ProperName != null)
@@ -404,7 +404,7 @@ namespace Astrarium.Plugins.BrightStars
                 string[] varName = s.VariableName.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                 if (varName.Length > 1)
                 {
-                    conName = sky.GetConstellation(varName[1]).LatinGenitiveName;
+                    conName = sky.GetConstellation(varName[1])?.LatinGenitiveName;
                     names.Add($"{varName[0]} {conName}");
                 }
                 else

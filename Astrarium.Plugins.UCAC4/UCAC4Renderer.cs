@@ -64,7 +64,7 @@ namespace Astrarium.Plugins.UCAC4
 
                                 if (isLabels && map.ViewAngle < 1.0 / 60.0 && size > 2)
                                 {
-                                    map.DrawObjectCaption(fontNames, brushNames, star.ToString(), p, size);
+                                    map.DrawObjectCaption(fontNames, brushNames, star.Names.First(), p, size);
                                 }
                                 map.AddDrawnObject(star);
                             }

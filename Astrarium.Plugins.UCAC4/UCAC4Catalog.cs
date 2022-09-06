@@ -21,6 +21,8 @@ namespace Astrarium.Plugins.UCAC4
 
         private readonly ISettings settings;
         private BinaryReader indexReader;
+        private Dictionary<string, string> properNames;
+        private readonly ISky sky;
         private readonly BinaryReader[] zoneReaders = new BinaryReader[ZONES_COUNT];
         private readonly bool[] zoneAvailable = new bool[ZONES_COUNT];
         private readonly List<UCAC4HPMStarData> hpmStars = new List<UCAC4HPMStarData>();
@@ -47,8 +49,9 @@ namespace Astrarium.Plugins.UCAC4
             get => zoneAvailable.Where(z => z).Count();
         }
 
-        public UCAC4Catalog(ISettings settings)
+        public UCAC4Catalog(ISky sky, ISettings settings)
         {
+            this.sky = sky;
             this.settings = settings;
             this.settings.SettingValueChanged += Settings_SettingValueChanged;
         }
@@ -159,6 +162,8 @@ namespace Astrarium.Plugins.UCAC4
                     {
                         Log.Error($"UCAC4 HPM data file not found, search path: {hpmFilePath}");
                     }
+
+                    properNames = sky.StarNames.Where(x => x.Key.StartsWith("UCAC4")).ToDictionary(x => x.Key, x => x.Value);
 
                     IsLoaded = true;
                 }
@@ -404,6 +409,9 @@ namespace Astrarium.Plugins.UCAC4
                     SpectralClass = SpectralClass(bmag, vmag),
                     Horizontal = Equatorial(context, posData).ToHorizontal(context.GeoLocation, context.SiderealTime)
                 };
+
+                star.ProperName = properNames.ContainsKey(star.Names[0]) ? properNames[star.Names[0]] : null;
+
                 return star;
             }
             else
@@ -649,6 +657,13 @@ namespace Astrarium.Plugins.UCAC4
         public ICollection<CelestialObject> Search(SkyContext context, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
             List<CelestialObject> stars = new List<CelestialObject>();
+
+            var starWithProperName = properNames.FirstOrDefault(kv => kv.Value.StartsWith(searchString, StringComparison.OrdinalIgnoreCase));
+            if (starWithProperName.Key != null)
+            {
+                searchString = starWithProperName.Key;
+            }
+
             var match = searchRegex.Match(searchString.Trim().ToLowerInvariant());
             if (match.Success)
             {
