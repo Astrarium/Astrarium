@@ -10,6 +10,8 @@ namespace Astrarium.Plugins.ASCOM
 {
     public class JoystickButton : PropertyChangedBase
     {
+        public event Action<string, ButtonAction> ActionChanged;
+
         [JsonProperty("Button")]
         public string Button { get; set; }
 
@@ -17,7 +19,11 @@ namespace Astrarium.Plugins.ASCOM
         public ButtonAction Action
         {
             get => GetValue<ButtonAction>(nameof(Action));
-            set => SetValue(nameof(Action), value);
+            set
+            {
+                SetValue(nameof(Action), value);
+                ActionChanged?.Invoke(Button, value);
+            }
         }
 
         [JsonIgnore]

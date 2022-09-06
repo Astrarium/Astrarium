@@ -111,12 +111,6 @@ namespace Astrarium.Plugins.ASCOM
             DefineSettingsSection<AscomSettingsSection, AscomSettingsViewModel>();
 
             settings.SettingValueChanged += Settings_SettingValueChanged;
-            settings.OnSaving += Settings_OnSaving;
-        }
-
-        private void Settings_OnSaving()
-        {
-            settings.Set("TelescopeControlJoystickButtons", this.joystickManager.SelectedDevice?.Buttons);
         }
 
         public override void Initialize()

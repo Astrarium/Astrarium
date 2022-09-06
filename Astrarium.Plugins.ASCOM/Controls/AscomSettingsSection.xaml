@@ -7,19 +7,11 @@
     xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
     xmlns:c="clr-namespace:Astrarium.Types.Controls;assembly=Astrarium.Types"
     xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
-    xmlns:local="clr-namespace:Astrarium.Plugins.ASCOM" 
+    
     Title="{t:Text Section.Ascom}"
     mc:Ignorable="d"
     d:DesignHeight="450" 
     d:DesignWidth="800">
-
-    <c:SettingsSection.Resources>
-        <ObjectDataProvider x:Key="ButtonActionsEnum" MethodName="GetValues" ObjectType="{x:Type local:ButtonAction}">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type Type="local:ButtonAction"/>
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
-    </c:SettingsSection.Resources>
     
     <StackPanel Orientation="Vertical" Margin="6">
         <CheckBox Content="{t:Text Settings.TelescopeMarkerLabel}" IsChecked="{Binding Settings.TelescopeMarkerLabel}" Margin="2" />
@@ -51,56 +43,11 @@
                     Text="Select joystick device..." />
             </Grid>
 
+            <Button Content="Button commands..." MinWidth="200" HorizontalAlignment="Left" Command="{Binding EditButtonsMappingCommand}" />
+
             <StackPanel Orientation="Vertical" Visibility="{Binding SelectedItem, ElementName=cmbSelectedDevice, Converter={s:NotNullToVisibilityConverter}}">
                 <TextBlock Margin="2" Text="Button mappings:" />
-                <DataGrid 
-                    Margin="2"
-                    RowHeight="24" 
-                    CanUserAddRows="False" 
-                    MinColumnWidth="200"
-                    IsReadOnly="False" 
-                    EnableColumnVirtualization="True" 
-                    VirtualizingPanel.VirtualizationMode="Recycling"
-                    EnableRowVirtualization="True"
-                    ItemsSource="{Binding ButtonsMappings}" 
-                    AutoGenerateColumns="False">
-                    <DataGrid.CellStyle>
-                        <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource DataGridCellStyle}">
-                            <Style.Triggers>
-                                <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="Background" Value="{x:Null}" />
-                                    <Setter Property="BorderBrush" Value="{x:Null}" />
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </DataGrid.CellStyle>
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn Header="Button" IsReadOnly="True">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-
-                                    <StackPanel Orientation="Horizontal">
-                                        <Ellipse x:Name="ellipse" HorizontalAlignment="Left" Margin="4 0"  Stroke="{StaticResource BrushControlLightBackground}" Fill="Transparent" Cursor="Help" ToolTip="This bubble lights green when button is pressed" Width="10" Height="10" />
-                                        <TextBlock Text="{Binding Button}" />
-                                    </StackPanel>
-
-                                    <DataTemplate.Triggers>
-                                        <DataTrigger Binding="{Binding IsPressed}" Value="True">
-                                            <Setter TargetName="ellipse" Property="Fill" Value="Lime" />
-                                        </DataTrigger>
-                                    </DataTemplate.Triggers>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="Action">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <ComboBox Margin="-4 0" VerticalContentAlignment="Center" SelectedValue="{Binding Action, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource ButtonActionsEnum}}" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
+                
             </StackPanel>
         </StackPanel>
     </StackPanel>
