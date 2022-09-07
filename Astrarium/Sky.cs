@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -58,6 +59,9 @@ namespace Astrarium
         /// <inheritdoc />
         public ICollection<Tuple<int, int>> ConstellationLines { get; set; } = new Tuple<int, int>[0];
 
+        /// <inheritdoc />
+        public IDictionary<string, string> StarNames { get; private set; } = new Dictionary<string, string>();
+
         public IEnumerable<CelestialObject> CelestialObjects
         {
             get
@@ -69,8 +73,12 @@ namespace Astrarium
         /// <inheritdoc />
         public Func<SkyContext, CrdsEquatorial> SunEquatorial { get; set; } = (c) => new CrdsEquatorial(0, 0);
 
-        public Sky()
+        private ISettings settings;
+
+        public Sky(ISettings settings)
         {
+            this.settings = settings;
+
             new Thread(() =>
             {
                 do
@@ -78,7 +86,8 @@ namespace Astrarium
                     dateTimeSyncResetEvent.WaitOne();
                     Context.JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
                     Calculate();
-                    Thread.Sleep(1000);
+                    int period = settings.Get("DateTimeSyncPeriod", 1) * 1000;
+                    Thread.Sleep(period);
                 }
                 while (true);
             })
@@ -90,7 +99,10 @@ namespace Astrarium
             Context = context;
             Calculators.AddRange(calculators);
             EventProviders.AddRange(eventProviders);
-            
+
+            LoadConstNames();
+            LoadStarNames();
+
             foreach (var calc in Calculators)
             {
                 calc.Initialize();
@@ -141,7 +153,7 @@ namespace Astrarium
                 }
             }
 
-            LoadConstNames();
+
         }
 
         /// <summary>
@@ -168,6 +180,27 @@ namespace Astrarium
                         LatinName = name,
                         LatinGenitiveName = genitive
                     });
+                }
+            }
+        }
+
+        // TODO: move to reader
+        private void LoadStarNames()
+        {
+            string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/StarsNames.dat");
+            string line = "";
+            using (var sr = new StreamReader(file, Encoding.Default))
+            {
+                while (line != null && !sr.EndOfStream)
+                {
+                    line = sr.ReadLine();
+                    var chunks = line.Split(',');
+                    string name = chunks[0].Trim();
+                    
+                    foreach (var designation in chunks.Skip(1))
+                    {
+                        StarNames[designation.Trim()] = name;
+                    }
                 }
             }
         }
@@ -326,7 +359,12 @@ namespace Astrarium
                     break;
                 }
             }
-            return results.OrderBy(b => string.Join(", ", b.Names)).Take(maxCount).ToList();
+
+            return results
+                .OrderBy(x => string.IsNullOrEmpty(searchString) ? 0 : x.Names.Where(n => !string.IsNullOrEmpty(n)).Select(n => Regex.Replace(n, searchString, "", RegexOptions.IgnoreCase).Length).Min())
+                .ThenBy(x => string.Join(", ", x.Names))
+                .Take(maxCount)
+                .ToList();
         }
 
         /// <inheritdoc />

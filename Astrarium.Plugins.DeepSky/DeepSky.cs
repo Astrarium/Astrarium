@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Astrarium.Plugins.DeepSky
 {
-    public class DeepSky : SizeableCelestialObject
+    public class DeepSky : SizeableCelestialObject, IMagnitudeObject
     {
         /// <inheritdoc />
         public override string Type => Status.IsEmpty() ? null : $"DeepSky.{Status}";
@@ -52,7 +52,7 @@ namespace Astrarium.Plugins.DeepSky
         /// <summary>
         /// Visual (if present) or photographic magnitude
         /// </summary>
-        public float? Mag { get; set; }
+        public float Magnitude { get; set; }
 
         /// <summary>
         /// Larger diameter, in seconds of arc

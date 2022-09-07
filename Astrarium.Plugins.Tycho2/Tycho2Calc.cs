@@ -82,14 +82,24 @@ namespace Astrarium.Plugins.Tycho2
         private HashSet<string> SkippedEntries = new HashSet<string>();
 
         /// <summary>
+        /// Dictionary of proper names of Tycho2 stars
+        /// </summary>
+        private Dictionary<string, string> ProperNames = null;
+
+        /// <summary>
         /// Binary Reader for accessing catalog data
         /// </summary>
         private BinaryReader CatalogReader;
 
         /// <summary>
+        /// Flag indicating the catalog has been initialized
+        /// </summary>
+        private bool isInitialized = false;
+
+        /// <summary>
         /// Length of catalog record, in bytes
         /// </summary>
-        private const int CATALOG_RECORD_LEN = 33;
+        private const int CATALOG_RECORD_LEN = 37;
 
         /// <summary>
         /// Mean diameter of segment of celestial sphere (in degrees) that's defined by <see cref="Tycho2Region"/>.   
@@ -119,31 +129,115 @@ namespace Astrarium.Plugins.Tycho2
         /// <inheritdoc />
         public IEnumerable<Tycho2Star> GetCelestialObjects() => new Tycho2Star[0];
 
-        private readonly string dataPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data");
+        /// <summary>
+        /// Flag indicating the catalog data has been found and loaded
+        /// </summary>
+        public bool IsLoaded
+        {
+            get => GetValue<bool>(nameof(IsLoaded));
+            private set
+            {
+                SetValue(nameof(IsLoaded), value);
+            }
+        }
 
         public Tycho2Calc(ISettings settings, ISky sky)
         {
             Settings = settings;
+            Settings.SettingValueChanged += Settings_SettingValueChanged;
             Sky = sky;
-        } 
-        
+        }
+
+        private void Settings_SettingValueChanged(string settingName, object settingValue)
+        {
+            if (isInitialized && settingName == "Tycho2RootDir")
+            {
+                Initialize();
+            }
+        }
+
+        public bool Validate(string rootDir, bool verbose = false)
+        {
+            if (string.IsNullOrEmpty(rootDir))
+            {
+                Log.Error("Tycho2 root directory is not set.");
+                return false;
+            }
+
+            if (!Directory.Exists(rootDir))
+            {
+                Log.Error("Tycho2 root directory is not exist.");
+                return false;
+            }
+
+            string indexFile = Path.Combine(rootDir, "tycho2.idx");
+            string catalogFile = Path.Combine(rootDir, "tycho2.dat");
+            string crossRefFile = Path.Combine(rootDir, "tycho2.ref");
+
+            if (!File.Exists(indexFile))
+            {
+                Log.Error($"Tycho2 index file not found, search path: {indexFile}");
+                if (verbose)
+                {
+                    ViewManager.ShowMessageBox("$Error", Text.Get("Tycho2.Errors.IndexFileNotFound", ("indexFilePath", indexFile)));
+                }
+                return false;
+            }
+
+            if (!File.Exists(catalogFile))
+            {
+                Log.Error($"Tycho2 catalog file not found, search path: {catalogFile}");
+                if (verbose)
+                {
+                    ViewManager.ShowMessageBox("$Error", Text.Get("Tycho2.Errors.CatalogFileNotFound", ("catalogFilePath", catalogFile)));
+                }
+                return false;
+            }
+
+            if (!File.Exists(crossRefFile))
+            {
+                Log.Error($"Tycho2 cross-reference file not found, search path: {crossRefFile}");
+                if (verbose)
+                {
+                    ViewManager.ShowMessageBox("$Error", Text.Get("Tycho2.Errors.CrossRefFileNotFound", ("crossRefFilePath", crossRefFile)));
+                }
+                return false;
+            }
+
+            return true;
+        }
+
         public override void Initialize()
         {
             try
             {
-                string indexFile = Path.Combine(dataPath, "tycho2.idx");
-                string catalogFile = Path.Combine(dataPath, "tycho2.dat");
-                string crossRefFile = Path.Combine(dataPath, "tycho2.ref");
+                string rootDir = Settings.Get<string>("Tycho2RootDir", null);
+                IsLoaded = false;
 
-                LoadIndex(indexFile);
-                LoadCrossReference(crossRefFile);
+                if (Validate(rootDir))
+                {
+                    string indexFile = Path.Combine(rootDir, "tycho2.idx");
+                    string catalogFile = Path.Combine(rootDir, "tycho2.dat");
+                    string crossRefFile = Path.Combine(rootDir, "tycho2.ref");
 
-                // Open Tycho2 catalog file
-                CatalogReader = new BinaryReader(File.Open(catalogFile, FileMode.Open, FileAccess.Read));
+                    LoadIndex(indexFile);
+                    LoadCrossReference(crossRefFile);
+
+                    ProperNames = Sky.StarNames.Where(x => x.Key.StartsWith("TYC")).ToDictionary(x => x.Key, x => x.Value);
+
+                    // Open Tycho2 catalog file
+                    CatalogReader = new BinaryReader(File.Open(catalogFile, FileMode.Open, FileAccess.Read));
+
+                    IsLoaded = true;
+                }
             }
             catch (Exception ex)
             {
                 Log.Error($"Unable to initialize Tycho2 calculator: {ex}");
+            }
+            finally
+            {
+                isInitialized = true;
             }
         }
 
@@ -236,11 +330,11 @@ namespace Astrarium.Plugins.Tycho2
         {
             PrecessionalElements p = context.Get(PrecessionalElements);
             double years = context.Get(YearsSince2000);
-                       
-            // Take into account effect of proper motion:
-            // now coordinates are for the mean equinox of J2000.0,
-            // but for epoch of the target date
-            var eq0 = star.Equatorial0 + new CrdsEquatorial(star.PmRA * years / 3600000, star.PmDec * years / 3600000);
+
+            double pmDec = star.PmDec / 3600000.0;
+            double pmRa = star.PmRA / Math.Cos(Angle.ToRadians(star.Equatorial0.Delta)) / 3600000.0;
+
+            var eq0 = star.Equatorial0 + new CrdsEquatorial(pmRa * years, pmDec * years);
 
             // Equatorial coordinates for the mean equinox and epoch of the target date
             CrdsEquatorial eq = Precession.GetEquatorialCoordinates(eq0, p);
@@ -345,12 +439,14 @@ namespace Astrarium.Plugins.Tycho2
         /// <param name="angle">Maximal angular separation between map center and star coorinates (both coordinates for J2000.0 epoch)</param>        
         /// <remarks>
         /// Record format:
-        /// [Tyc1][Tyc2][Tyc3][RA][Dec][PmRA][PmDec][Mag]
-        /// [   2][   2][   1][ 8][  8][   4][    4][  4]
+        /// [Tyc1][Tyc2][Tyc3][RA][Dec][PmRA][PmDec][BTMag][VTMag]
+        /// [   2][   2][   1][ 8][  8][   4][    4][    4][    4]
         /// </remarks>
         private Tycho2Star GetStar(SkyContext c, byte[] buffer, int offset, CrdsEquatorial eqCenter, double angle, Func<float, bool> magFilter)
         {
-            float mag = BitConverter.ToSingle(buffer, offset + 29);
+            float btmag = BitConverter.ToSingle(buffer, offset + 29);
+            float vtmag = BitConverter.ToSingle(buffer, offset + 33);
+            float mag = (float)(vtmag - 0.090 * (btmag - vtmag));
             if (magFilter(mag))
             {
                 // Star coordinates at epoch J2000.0 
@@ -398,9 +494,15 @@ namespace Astrarium.Plugins.Tycho2
             star.Tyc1 = BitConverter.ToInt16(buffer, offset);
             star.Tyc2 = BitConverter.ToInt16(buffer, offset + 2);
             star.Tyc3 = (char)buffer[offset + 4];
-            star.Magnitude = BitConverter.ToSingle(buffer, offset + 29);
+            float btmag = BitConverter.ToSingle(buffer, offset + 29);
+            float vtmag = BitConverter.ToSingle(buffer, offset + 33);
+            float mag = (float)(vtmag - 0.090 * (btmag - vtmag));
+            double B_V = 0.850 * (btmag - vtmag);
+            star.SpectralClass = SpectralClass(B_V);
+            star.Magnitude = mag;
             star.PmRA = BitConverter.ToSingle(buffer, offset + 21);
             star.PmDec = BitConverter.ToSingle(buffer, offset + 25);
+            star.ProperName = ProperNames.ContainsKey(star.Names[0]) ? ProperNames[star.Names[0]] : null;
 
             if (SkippedEntries.Contains($"{star.Tyc1}-{star.Tyc2}-{star.Tyc3}"))
             {
@@ -411,6 +513,40 @@ namespace Astrarium.Plugins.Tycho2
                 CalculateCoordinates(c, star);
                 return star;
             }
+        }
+
+        private char SpectralClass(double B_V)
+        {
+            // Evaluating Stars Temperature Through the B-V Index
+            // Using a Virtual Real Experiment from Distance: A Case
+            // Scenario for Secondary Education.
+            // https://online-journals.org/index.php/i-joe/article/view/7842
+            double T = 4600 * (1.0 / (0.92 * B_V + 1.7) + 1.0 / (0.92 * B_V + 0.62));
+
+            // then, calculate color from spectral class:
+            // O	> 25,000K	H; HeI; HeII
+            // B	10,000-25,000K	H; HeI; HeII absent
+            // A	7,500-10,000K	H; CaII; HeI and HeII absent
+            // F	6,000-7,500K	H; metals (CaII, Fe, etc)
+            // G	5,000-6,000K	H; metals; some molecular species
+            // K	3,500-5,000K	metals; some molecular species
+            // M	< 3,500K	metals; molecular species (TiO!)
+            // C	< 3,500K	metals; molecular species (C2!)
+
+            if (T > 25000)
+                return 'O';
+            else if (T <= 25000 && T > 10000)
+                return 'B';
+            else if (T <= 10000 && T > 7500)
+                return 'A';
+            else if (T <= 7500 && T > 6000)
+                return 'F';
+            else if (T <= 6000 && T > 5000)
+                return 'G';
+            else if (T <= 5000 && T > 3500)
+                return 'K';
+            else
+                return 'M';
         }
 
         public override void Calculate(SkyContext context)
@@ -447,7 +583,7 @@ namespace Astrarium.Plugins.Tycho2
             string constellation = Constellations.FindConstellation(s.Equatorial, c.JulianDay);
 
             info
-            .SetTitle(s.ToString())
+            .SetTitle(string.Join(", ", s.Names))
             .SetSubtitle(Text.Get("Tycho2Star.Type"))
 
             .AddRow("Constellation", constellation)
@@ -474,10 +610,16 @@ namespace Astrarium.Plugins.Tycho2
             .AddRow("Magnitude", s.Magnitude);
         }
 
-        private readonly Regex searchRegex = new Regex("tyc\\s*(?<tyc1>\\d+)((\\s*-\\s*|\\s+)(?<tyc2>\\d+)((\\s*-\\s*|\\s+)(?<tyc3>\\d+))?)?");
+        private readonly Regex searchRegex = new Regex("^tyc\\s*(?<tyc1>\\d{1,4})((\\s*-\\s*|\\s+)(?<tyc2>\\d{1,5})((\\s*-\\s*|\\s+)(?<tyc3>\\d{1}))?)?$");
 
         public ICollection<CelestialObject> Search(SkyContext c, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
+            var starWithProperName = ProperNames.FirstOrDefault(kv => kv.Value.StartsWith(searchString, StringComparison.OrdinalIgnoreCase));
+            if (starWithProperName.Key != null)
+            {
+                searchString = starWithProperName.Key;
+            }
+
             var match = searchRegex.Match(searchString.ToLowerInvariant());
             if (match.Success)
             {

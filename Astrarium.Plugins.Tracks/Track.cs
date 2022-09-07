@@ -37,21 +37,16 @@ namespace Astrarium.Plugins.Tracks
         {
             get
             {
-                // smallest labels step = default calculation step
-                double step = SmallestLabelsStep();
+                // mean daily motion, in degrees
+                double dailyMotion = (Body as IMovingObject).AverageDailyMotion;
+
+                // recommended calculation step, in days
+                double calcStep = dailyMotion > 1 ? 1 / dailyMotion : 1;
 
                 // labels step, in days
                 double labelsStep = LabelsStep.TotalDays;
-                
-                if (step <= labelsStep)
-                {
-                    int f = (int)Math.Round(labelsStep / step);
-                    return labelsStep / f;
-                }
-                else
-                {
-                    return step;
-                }
+
+                return DrawLabels ? Math.Min(calcStep, labelsStep) : calcStep;
             }
         }
 
@@ -92,7 +87,7 @@ namespace Astrarium.Plugins.Tracks
             double dailyMotion = (Body as IMovingObject).AverageDailyMotion;
 
             // recommended calculation step, in days
-            return dailyMotion > 1 ? 1 / dailyMotion : 1;
+            return dailyMotion > 1 ? 1 / dailyMotion : dailyMotion;
         }
     }
 }

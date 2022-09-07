@@ -83,18 +83,18 @@ namespace Astrarium.Plugins.BrightStars
 
                 foreach (var star in stars)
                 {
-                    float diam = map.GetPointSize(star.Mag);
-                    if ((int)diam > 0)
+                    float size = map.GetPointSize(star.Magnitude);
+                    if (size > 0)
                     {
                         PointF p = map.Project(star.Horizontal);
                         if (!map.IsOutOfScreen(p))
                         {
                             if (map.Schema == ColorSchema.White)
                             {
-                                g.FillEllipse(Brushes.White, p.X - diam / 2 - 1, p.Y - diam / 2 - 1, diam + 2, diam + 2);
+                                g.FillEllipse(Brushes.White, p.X - size / 2 - 1, p.Y - size / 2 - 1, size + 2, size + 2);
                             }
 
-                            g.FillEllipse(new SolidBrush(GetColor(map, star.Color)), p.X - diam / 2, p.Y - diam / 2, diam, diam);
+                            g.FillEllipse(new SolidBrush(GetColor(map, star.Color)), p.X - size / 2, p.Y - size / 2, size, size);
 
                             map.AddDrawnObject(star);
                         }
@@ -107,13 +107,13 @@ namespace Astrarium.Plugins.BrightStars
 
                     foreach (var star in stars)
                     {
-                        float diam = map.GetPointSize(star.Mag);
-                        if ((int)diam > 0)
+                        float size = map.GetPointSize(star.Magnitude);
+                        if (size > 0)
                         {
                             PointF p = map.Project(star.Horizontal);
                             if (!map.IsOutOfScreen(p))
                             {
-                                DrawStarName(map, p, star, diam);
+                                DrawStarName(map, p, star, size);
                             }
                         }
                     }

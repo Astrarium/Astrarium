@@ -3,7 +3,7 @@ using Astrarium.Types;
 
 namespace Astrarium.Plugins.SolarSystem.Objects
 {
-    public class NeptuneMoon : SizeableCelestialObject, IPlanetMoon, ISolarSystemObject, IMovingObject
+    public class NeptuneMoon : SizeableCelestialObject, IPlanetMoon, ISolarSystemObject, IMovingObject, IMagnitudeObject
     {
         public NeptuneMoon(int number)
         {

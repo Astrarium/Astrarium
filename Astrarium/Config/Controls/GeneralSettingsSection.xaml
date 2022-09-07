@@ -16,10 +16,15 @@
         <TextBlock Text="{t:Text Settings.AppTheme}" Margin="2 8 2 2" />
         <ComboBox Margin="2 0 2 2" ItemsSource="{Binding Themes}" SelectedValue="{Binding SelectedTheme}" />
 
-        <CheckBox Margin="2 8 2 2" Content="{t:Text Settings.StartMaximized}" IsChecked="{Binding Settings.StartMaximized}" />
+        <CheckBox Margin="2 8 2 2" Content="{t:Text Settings.CheckUpdatesOnStart}" IsChecked="{Binding Settings.CheckUpdatesOnStart}" />
+        <CheckBox Margin="2" Content="{t:Text Settings.StartMaximized}" IsChecked="{Binding Settings.StartMaximized}" />
         <CheckBox Margin="2" Content="{t:Text Settings.RememberWindowSize}" IsChecked="{Binding Settings.RememberWindowSize}" IsEnabled="{Binding Settings.StartMaximized, Converter={s:InverseBoolConverter}}" />
         <CheckBox Margin="2" Content="{t:Text Settings.IsCompactMenu}" IsChecked="{Binding Settings.IsCompactMenu}" />
         <CheckBox Margin="2" Content="{t:Text Settings.IsToolbarVisible}" IsChecked="{Binding Settings.IsToolbarVisible}" />
         <CheckBox Margin="2" Content="{t:Text Settings.IsStatusBarVisible}" IsChecked="{Binding Settings.IsStatusBarVisible}" />
+        <StackPanel Margin="-2" Orientation="Horizontal">
+            <Label Margin="0" Content="{t:Text Settings.DateTimeSyncPeriod}" />
+            <ComboBox SelectedValue="{Binding Settings.DateTimeSyncPeriod}" SelectedValuePath="Value" DisplayMemberPath="Text" ItemsSource="{Binding DateTimeSyncPeriods}" MinWidth="80" />
+        </StackPanel>
     </StackPanel>
 </c:SettingsSection>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -25,11 +26,29 @@ namespace Astrarium.Plugins.Constellations
         /// </summary>
         public List<Tuple<int, int>> ConstLinesTraditional { get; private set; } = new List<Tuple<int, int>>();
 
+        /// <summary>
+        /// List of constellation lines (H.A.Rey, "The Stars: A New Way To See Them")
+        /// </summary>
+        public List<Tuple<int, int>> ConstLinesRey { get; private set; } = new List<Tuple<int, int>>();
+
         private ISky sky;
 
-        public ConstellationsCalc(ISky sky)
+        private ISettings settings;
+
+        public ConstellationsCalc(ISky sky, ISettings settings)
         {
             this.sky = sky;
+            this.settings = settings;
+
+            this.settings.SettingValueChanged += Settings_SettingValueChanged;
+        }
+
+        private void Settings_SettingValueChanged(string settingName, object settingValue)
+        {
+            if (settingName == "ConstLinesType")
+            {
+                SetConstellationLinesType();
+            }
         }
 
         public override void Calculate(SkyContext context)
@@ -62,7 +81,23 @@ namespace Astrarium.Plugins.Constellations
         {
             LoadBordersData();
             LoadLabelsData();
-            LoadLinesData();
+            ConstLinesTraditional = LoadLinesData("ConLines-Traditional.dat");
+            ConstLinesRey = LoadLinesData("ConLines-Rey.dat");
+            SetConstellationLinesType();
+        }
+
+        private void SetConstellationLinesType()
+        {
+            switch (settings.Get<LineType>("ConstLinesType"))
+            {
+                default:
+                case LineType.Traditional:
+                    sky.ConstellationLines = ConstLinesTraditional;
+                    break;
+                case LineType.Rey:
+                    sky.ConstellationLines = ConstLinesRey;
+                    break;
+            }
         }
 
         /// <summary>
@@ -112,9 +147,10 @@ namespace Astrarium.Plugins.Constellations
             }
         }
 
-        private void LoadLinesData()
+        private List<Tuple<int, int>> LoadLinesData(string fileName)
         {
-            string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/ConLines.dat");
+            List<Tuple<int, int>> lines = new List<Tuple<int, int>>();
+            string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), $"Data/{fileName}");
             string[] chunks = null;
             int from, to;
             string line = "";
@@ -128,11 +164,23 @@ namespace Astrarium.Plugins.Constellations
                     from = Convert.ToInt32(chunks[0]) - 1;
                     to = Convert.ToInt32(chunks[1]) - 1;
 
-                    ConstLinesTraditional.Add(new Tuple<int, int>(from, to));
+                    lines.Add(new Tuple<int, int>(from, to));
                 }
-
-                sky.ConstellationLines = ConstLinesTraditional;
             }
+
+            return lines;
+        }
+
+        /// <summary>
+        /// Type of constellation line
+        /// </summary>
+        public enum LineType
+        {
+            [Description("Settings.ConstLinesType.Traditional")]
+            Traditional = 0,
+
+            [Description("Settings.ConstLinesType.Rey")]
+            Rey = 1,
         }
     }
 }

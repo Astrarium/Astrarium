@@ -1,8 +1,11 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Plugins.ASCOM.Controls;
+using Astrarium.Plugins.ASCOM.ViewModels;
 using Astrarium.Types;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,15 +18,19 @@ namespace Astrarium.Plugins.ASCOM
         private readonly ISkyMap map;
         private readonly ISky sky;
         private readonly ISettings settings;
+        private readonly IJoystickManager joystickManager;
 
-        public Plugin(ISkyMap map, ISky sky, ISettings settings)
+        public Plugin(ISkyMap map, ISky sky, IJoystickManager joystickManager, ISettings settings)
         {
             var menuAscom = new MenuItem("$Menu.Telescope");
 
             this.ascom = Ascom.Proxy;
+            this.joystickManager = joystickManager;
             this.map = map;
             this.sky = sky;
             this.settings = settings;
+
+            this.joystickManager.ButtonStateChanged += HandleButtonStateChanged;
 
             DefineSetting("ASCOMTelescopeId", "", isPermanent: true);
 
@@ -97,7 +104,11 @@ namespace Astrarium.Plugins.ASCOM
             DefineSetting("TelescopeFindCurrentPointAfterConnect", false);
             DefineSetting("TelescopePollingPeriod", 500m);
 
-            DefineSettingsSection<AscomSettingsSection, SettingsViewModel>();
+            DefineSetting("TelescopeControlJoystick", false, true);
+            DefineSetting("TelescopeControlJoystickDevice", Guid.Empty, true);
+            DefineSetting("TelescopeControlJoystickButtons", new List<JoystickButton>(), true);
+
+            DefineSettingsSection<AscomSettingsSection, AscomSettingsViewModel>();
 
             settings.SettingValueChanged += Settings_SettingValueChanged;
         }
@@ -105,6 +116,26 @@ namespace Astrarium.Plugins.ASCOM
         public override void Initialize()
         {
             this.ascom.PollingPeriod = (int)settings.Get<decimal>("TelescopePollingPeriod");
+            this.joystickManager.SelectedDeviceChanged += JoystickManager_SelectedDeviceChanged;
+            this.joystickManager.SelectedDevice = joystickManager.Devices.FirstOrDefault(x => x.Id == settings.Get<Guid>("TelescopeControlJoystickDevice"));
+            this.joystickManager.IsEnabled = settings.Get("TelescopeControlJoystick");
+        }
+
+        private void JoystickManager_SelectedDeviceChanged()
+        {
+            var device = joystickManager.SelectedDevice;
+            if (device != null)
+            {
+                var buttonsMappings = settings.Get<List<JoystickButton>>("TelescopeControlJoystickButtons").Where(x => x.Action != ButtonAction.None);
+                foreach (var map in buttonsMappings)
+                {
+                    var button = device.Buttons.FirstOrDefault(x => x.Button == map.Button);
+                    if (button != null)
+                    {
+                        button.Action = map.Action;
+                    }
+                }
+            }
         }
 
         private void Settings_SettingValueChanged(string settingName, object value)
@@ -117,6 +148,28 @@ namespace Astrarium.Plugins.ASCOM
                     ascom.PollingPeriod = period;
                 }
             }
+        }
+
+        private void HandleButtonStateChanged(string buttonName, bool isPressed)
+        {
+            Task.Run(() =>
+            {
+                if (settings.Get("TelescopeControlJoystick"))
+                {
+                    try
+                    {
+                        var button = joystickManager.SelectedDevice?.Buttons.FirstOrDefault<JoystickButton>(b => b.Button == buttonName);
+                        if (button != null)
+                        {
+                            ascom.ProcessCommand(new ButtonCommand() { Action = button.Action, IsPressed = button.IsPressed });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error($"ERROR: {ex.Message}");
+                    }
+                }
+            });
         }
 
         private void Ascom_OnMessageShow(string message)

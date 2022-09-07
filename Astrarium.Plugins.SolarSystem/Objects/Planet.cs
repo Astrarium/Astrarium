@@ -6,7 +6,7 @@ namespace Astrarium.Plugins.SolarSystem.Objects
     /// <summary>
     /// Contains coordinates and visual appearance data for the major planet for given instant of time.
     /// </summary>
-    public class Planet : SizeableCelestialObject, IPlanet, ISolarSystemObject, IMovingObject
+    public class Planet : SizeableCelestialObject, IPlanet, ISolarSystemObject, IMovingObject, IMagnitudeObject
     {
         public Planet(int number)
         {

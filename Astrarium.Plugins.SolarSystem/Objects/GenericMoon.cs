@@ -3,7 +3,7 @@ using Astrarium.Types;
 
 namespace Astrarium.Plugins.SolarSystem.Objects
 {
-    public class GenericMoon : SizeableCelestialObject, IPlanetMoon, ISolarSystemObject, IMovingObject
+    public class GenericMoon : SizeableCelestialObject, IPlanetMoon, ISolarSystemObject, IMovingObject, IMagnitudeObject
     {
         /// <inheritdoc />
         public override string Type => "PlanetMoon";
