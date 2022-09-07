@@ -78,8 +78,8 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
         GoToNextFile(path, handle, size + FileSize(filename))
 
 [CustomMessages]
-ru.Astarium                                 = ядро программы Astrarium 
-en.Astarium                                 = Astrarium application core
+ru.Astrarium                                = ядро программы Astrarium 
+en.Astrarium                                = Astrarium application core
 #define sz_Astrarium                        = CalcDirSize('..\Deploy\Astrarium')
 sz_Astrarium                                = {#CalcPackageSize('..\Deploy\Astrarium')}
 
@@ -179,7 +179,7 @@ en.Astrarium_Plugins_Planner                = Observation planner
 sz_Astrarium_Plugins_Planner                = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Planner')}
 
 [Components]
-Name: Astrarium;                        Description: {cm:Astarium};                         Types: full compact custom; Flags: fixed; ExtraDiskSpaceRequired: {#sz_Astrarium};
+Name: Astrarium;                        Description: {cm:Astrarium};                        Types: full compact custom; Flags: fixed; ExtraDiskSpaceRequired: {#sz_Astrarium};
 Name: Astrarium_Plugins_SolarSystem;    Description: {cm:Astrarium_Plugins_SolarSystem};    Types: full compact custom; Flags: fixed; ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_SolarSystem};  
 Name: Astrarium_Plugins_BrightStars;    Description: {cm:Astrarium_Plugins_BrightStars};    Types: full compact custom; Flags: fixed; ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_BrightStars};  
 Name: Astrarium_Plugins_Constellations; Description: {cm:Astrarium_Plugins_Constellations}; Types: full compact custom; Flags: fixed; ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Constellations};
@@ -216,7 +216,7 @@ Type: filesandordirs; Name: "{app}\Astrarium"
 Type: filesandordirs; Name: "{app}\Astrarium"
 
 [Run]
-Filename: {app}\Astrarium\Astrarium.exe; Description: {cm:LaunchProgram,Astarium}; Flags: nowait postinstall skipifsilent
+Filename: {app}\Astrarium\Astrarium.exe; Description: {cm:LaunchProgram,Astrarium}; Flags: nowait postinstall skipifsilent
 
 [Code]
 
