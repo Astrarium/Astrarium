@@ -209,6 +209,9 @@ Name: "{group}\Astrarium"; Filename: "{app}\Astrarium\Astrarium.exe"
 Name: "{userdesktop}\Astrarium"; Filename: "{app}\Astrarium\Astrarium.exe"; Tasks: desktopicon
 Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\Astrarium"; Filename: "{app}\Astrarium"; Tasks: quicklaunchicon
 
+[InstallDelete]
+Type: filesandordirs; Name: "{app}\Astrarium"
+
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}\Astrarium"
 
@@ -216,6 +219,7 @@ Type: filesandordirs; Name: "{app}\Astrarium"
 Filename: {app}\Astrarium\Astrarium.exe; Description: {cm:LaunchProgram,Astarium}; Flags: nowait postinstall skipifsilent
 
 [Code]
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 { gets package file name by component name }
 function GetPackageFileName(ComponentName: String) : String;
