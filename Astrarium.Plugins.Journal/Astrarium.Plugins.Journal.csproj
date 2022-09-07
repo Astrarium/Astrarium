@@ -46,7 +46,7 @@
 
 	<ItemGroup>
 	  <PackageReference Include="EntityFramework" Version="6.4.4" />
-	  <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+	  <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 	  <PackageReference Include="SQLite.CodeFirst" Version="1.7.0.34" />
 	  <PackageReference Include="System.Data.SQLite.Core" Version="1.0.116" />
 	  <PackageReference Include="System.Data.SQLite.EF6" Version="1.0.116" />

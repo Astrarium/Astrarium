@@ -163,6 +163,11 @@ en.Astrarium_Plugins_Tycho2                 = Tycho2 star catalogue
 #define sz_Astrarium_Plugins_Tycho2         = CalcDirSize('..\Deploy\Astrarium.Plugins.Tycho2')
 sz_Astrarium_Plugins_Tycho2                 = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.Tycho2')}
 
+ru.Astrarium_Plugins_UCAC4                  = «вЄздный каталог UCAC4
+en.Astrarium_Plugins_UCAC4                  = UCAC4 star catalogue
+#define sz_Astrarium_Plugins_UCAC4          = CalcDirSize('..\Deploy\Astrarium.Plugins.UCAC4')
+sz_Astrarium_Plugins_UCAC4                  = {#CalcPackageSize('..\Deploy\Astrarium.Plugins.UCAC4')}
+
 ru.Astrarium_Plugins_ASCOM                  = ”правление телескопом через ASCOM
 en.Astrarium_Plugins_ASCOM                  = ASCOM telescope control
 #define sz_Astrarium_Plugins_ASCOM          = CalcDirSize('..\Deploy\Astrarium.Plugins.ASCOM')
@@ -191,6 +196,7 @@ Name: Astrarium_Plugins_MeasureTool;    Description: {cm:Astrarium_Plugins_Measu
 Name: Astrarium_Plugins_Tracks;         Description: {cm:Astrarium_Plugins_Tracks};         Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Tracks};
 Name: Astrarium_Plugins_FOV;            Description: {cm:Astrarium_Plugins_FOV};            Types: full compact custom;               ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_FOV};
 Name: Astrarium_Plugins_Tycho2;         Description: {cm:Astrarium_Plugins_Tycho2};         Types: full;                              ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Tycho2};
+Name: Astrarium_Plugins_UCAC4;          Description: {cm:Astrarium_Plugins_UCAC4};          Types: full;                              ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_UCAC4};
 Name: Astrarium_Plugins_ASCOM;          Description: {cm:Astrarium_Plugins_ASCOM};          Types: full;                              ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_ASCOM};
 Name: Astrarium_Plugins_Planner;        Description: {cm:Astrarium_Plugins_Planner};        Types: full;                              ExtraDiskSpaceRequired: {#sz_Astrarium_Plugins_Planner};
 
