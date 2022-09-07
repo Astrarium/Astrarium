@@ -92,6 +92,11 @@ namespace Astrarium.Plugins.Tycho2
         private BinaryReader CatalogReader;
 
         /// <summary>
+        /// Flag indicating the catalog has been initialized
+        /// </summary>
+        private bool isInitialized = false;
+
+        /// <summary>
         /// Length of catalog record, in bytes
         /// </summary>
         private const int CATALOG_RECORD_LEN = 37;
@@ -124,33 +129,115 @@ namespace Astrarium.Plugins.Tycho2
         /// <inheritdoc />
         public IEnumerable<Tycho2Star> GetCelestialObjects() => new Tycho2Star[0];
 
-        private readonly string dataPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data");
+        /// <summary>
+        /// Flag indicating the catalog data has been found and loaded
+        /// </summary>
+        public bool IsLoaded
+        {
+            get => GetValue<bool>(nameof(IsLoaded));
+            private set
+            {
+                SetValue(nameof(IsLoaded), value);
+            }
+        }
 
         public Tycho2Calc(ISettings settings, ISky sky)
         {
             Settings = settings;
+            Settings.SettingValueChanged += Settings_SettingValueChanged;
             Sky = sky;
-        } 
-        
+        }
+
+        private void Settings_SettingValueChanged(string settingName, object settingValue)
+        {
+            if (isInitialized && settingName == "Tycho2RootDir")
+            {
+                Initialize();
+            }
+        }
+
+        public bool Validate(string rootDir, bool verbose = false)
+        {
+            if (string.IsNullOrEmpty(rootDir))
+            {
+                Log.Error("Tycho2 root directory is not set.");
+                return false;
+            }
+
+            if (!Directory.Exists(rootDir))
+            {
+                Log.Error("Tycho2 root directory is not exist.");
+                return false;
+            }
+
+            string indexFile = Path.Combine(rootDir, "tycho2.idx");
+            string catalogFile = Path.Combine(rootDir, "tycho2.dat");
+            string crossRefFile = Path.Combine(rootDir, "tycho2.ref");
+
+            if (!File.Exists(indexFile))
+            {
+                Log.Error($"Tycho2 index file not found, search path: {indexFile}");
+                if (verbose)
+                {
+                    ViewManager.ShowMessageBox("$Error", Text.Get("Tycho2.Errors.IndexFileNotFound", ("indexFilePath", indexFile)));
+                }
+                return false;
+            }
+
+            if (!File.Exists(catalogFile))
+            {
+                Log.Error($"Tycho2 catalog file not found, search path: {catalogFile}");
+                if (verbose)
+                {
+                    ViewManager.ShowMessageBox("$Error", Text.Get("Tycho2.Errors.CatalogFileNotFound", ("catalogFilePath", catalogFile)));
+                }
+                return false;
+            }
+
+            if (!File.Exists(crossRefFile))
+            {
+                Log.Error($"Tycho2 cross-reference file not found, search path: {crossRefFile}");
+                if (verbose)
+                {
+                    ViewManager.ShowMessageBox("$Error", Text.Get("Tycho2.Errors.CrossRefFileNotFound", ("crossRefFilePath", crossRefFile)));
+                }
+                return false;
+            }
+
+            return true;
+        }
+
         public override void Initialize()
         {
             try
             {
-                string indexFile = Path.Combine(dataPath, "tycho2.idx");
-                string catalogFile = Path.Combine(dataPath, "tycho2.dat");
-                string crossRefFile = Path.Combine(dataPath, "tycho2.ref");
+                string rootDir = Settings.Get<string>("Tycho2RootDir", null);
+                IsLoaded = false;
 
-                LoadIndex(indexFile);
-                LoadCrossReference(crossRefFile);
+                if (Validate(rootDir))
+                {
+                    string indexFile = Path.Combine(rootDir, "tycho2.idx");
+                    string catalogFile = Path.Combine(rootDir, "tycho2.dat");
+                    string crossRefFile = Path.Combine(rootDir, "tycho2.ref");
 
-                ProperNames = Sky.StarNames.Where(x => x.Key.StartsWith("TYC")).ToDictionary(x => x.Key, x => x.Value);
+                    LoadIndex(indexFile);
+                    LoadCrossReference(crossRefFile);
 
-                // Open Tycho2 catalog file
-                CatalogReader = new BinaryReader(File.Open(catalogFile, FileMode.Open, FileAccess.Read));
+                    ProperNames = Sky.StarNames.Where(x => x.Key.StartsWith("TYC")).ToDictionary(x => x.Key, x => x.Value);
+
+                    // Open Tycho2 catalog file
+                    CatalogReader = new BinaryReader(File.Open(catalogFile, FileMode.Open, FileAccess.Read));
+
+                    IsLoaded = true;
+                }
             }
             catch (Exception ex)
             {
                 Log.Error($"Unable to initialize Tycho2 calculator: {ex}");
+            }
+            finally
+            {
+                isInitialized = true;
             }
         }
 
