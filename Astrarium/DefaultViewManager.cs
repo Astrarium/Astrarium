@@ -13,6 +13,7 @@ using System.Windows;
 using WF = System.Windows.Forms;
 using System.Drawing.Printing;
 using System.Drawing;
+using System.IO;
 
 namespace Astrarium
 {
@@ -69,6 +70,10 @@ namespace Astrarium
                 if (window != null)
                 {
                     window.Activate();
+                    if (window.WindowState == WindowState.Minimized)
+                    {
+                        SystemCommands.RestoreWindow(window);
+                    }
                     return null;
                 }
             }
@@ -267,15 +272,16 @@ namespace Astrarium
             }
         }
 
-        public string ShowOpenFileDialog(string caption, string filter, out int selectedFilterIndex)
+        public string[] ShowOpenFileDialog(string caption, string filter, bool multiSelect, out int selectedFilterIndex)
         {
             var dialog = new OpenFileDialog();
             dialog.Title = caption.StartsWith("$") ? Text.Get(caption.Substring(1)) : caption;
             dialog.Filter = filter;
+            dialog.Multiselect = multiSelect;
             if (dialog.ShowDialog() ?? false)
             {
                 selectedFilterIndex = dialog.FilterIndex;
-                return dialog.FileName;
+                return dialog.FileNames;
             }
             else
             {
@@ -315,10 +321,11 @@ namespace Astrarium
         {
             var dialog = new WF.FolderBrowserDialog();
             dialog.Description = caption;
+            if (Directory.Exists(path))
+            {
+                dialog.SelectedPath = path;
+            }
             return (WF.DialogResult.OK == dialog.ShowDialog()) ? dialog.SelectedPath : null;
-            //var vm = new SelectFolderVM();
-            //vm.SelectedPath = path;
-            //return (ShowDialog(vm) ?? false) ? vm.SelectedPath : null;
         }
 
         public double? ShowDateDialog(double jd, double utcOffset, DateOptions displayMode = DateOptions.DateTime)

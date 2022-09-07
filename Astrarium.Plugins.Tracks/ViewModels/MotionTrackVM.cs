@@ -3,6 +3,8 @@ using Astrarium.Types;
 using System;
 using System.Drawing;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Tracks.ViewModels
 {
@@ -68,12 +70,6 @@ namespace Astrarium.Plugins.Tracks.ViewModels
                 return;
             }
 
-            if (LabelsStep.TotalDays < track.SmallestLabelsStep())
-            {
-                ViewManager.ShowMessageBox("$MotionTrackWindow.WarningTitle", "$MotionTrackWindow.StepWarningText", System.Windows.MessageBoxButton.OK);
-                return;
-            }
-
             if ((JulianDayTo - JulianDayFrom) / track.Step > 10000)
             {
                 ViewManager.ShowMessageBox("$MotionTrackWindow.WarningTitle", "$MotionTrackWindow.StepDateRangeMismatchText", System.Windows.MessageBoxButton.OK);
@@ -81,10 +77,9 @@ namespace Astrarium.Plugins.Tracks.ViewModels
             }
 
             AddOrEditTrack(track);
-            Close(true);
         }
 
-        private void AddOrEditTrack(Track track)
+        private async void AddOrEditTrack(Track track)
         {
             var categories = sky.GetEphemerisCategories(track.Body);
             if (!(categories.Contains("Equatorial.Alpha") && categories.Contains("Equatorial.Delta")))
@@ -92,22 +87,36 @@ namespace Astrarium.Plugins.Tracks.ViewModels
                 throw new Exception($"Ephemeris provider for type {track.Body.GetType().Name} does not provide \"Equatorial.Alpha\" and \"Equatorial.Delta\" ephemeris.");
             }
 
-            var positions = sky.GetEphemerides(track.Body, track.From, track.To + track.Step, track.Step, new[] { "Equatorial.Alpha", "Equatorial.Delta" });
-            foreach (var eq in positions)
+            var tokenSource = new CancellationTokenSource();
+
+            ViewManager.ShowProgress("$MotionTrackWindow.WaitTitle", "$MotionTrackWindow.WaitText", tokenSource);
+
+            double trackStep = Math.Min(track.Step, track.To - track.From);
+
+            var positions = await Task.Run(() => sky.GetEphemerides(track.Body, track.From, track.To + 1e-6, trackStep, new[] { "Equatorial.Alpha", "Equatorial.Delta" }, tokenSource.Token));
+
+            if (!tokenSource.IsCancellationRequested)
             {
-                track.Points.Add(new CelestialPoint() { Equatorial0 = new CrdsEquatorial(eq.GetValue<double>("Equatorial.Alpha"), eq.GetValue<double>("Equatorial.Delta")) });
+                tokenSource.Cancel();
+
+                foreach (var eq in positions)
+                {
+                    track.Points.Add(new CelestialPoint() { Equatorial0 = new CrdsEquatorial(eq.GetValue<double>("Equatorial.Alpha"), eq.GetValue<double>("Equatorial.Delta")) });
+                }
+
+                Track existing = trackCalc.Tracks.FirstOrDefault(t => t.Id == track.Id);
+                if (existing != null)
+                {
+                    int index = trackCalc.Tracks.IndexOf(existing);
+                    trackCalc.Tracks[index] = track;
+                }
+                else
+                {
+                    trackCalc.Tracks.Add(track);
+                }
             }
 
-            Track existing = trackCalc.Tracks.FirstOrDefault(t => t.Id == track.Id);            
-            if (existing != null)
-            {
-                int index = trackCalc.Tracks.IndexOf(existing);
-                trackCalc.Tracks[index] = track;
-            }
-            else
-            {
-                trackCalc.Tracks.Add(track);
-            }            
+            Close(true);
         }
     }
 }

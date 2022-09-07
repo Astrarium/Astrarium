@@ -22,7 +22,24 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Label FontFamily="Times New Roman" Padding="5 5 5 0" FontWeight="Bold" Grid.Row="0" Content="{Binding Title}" />
+        <StackPanel Grid.Row="0" Orientation="Horizontal">
+            <TextBlock Padding="5 4" Margin="0" FontWeight="Bold" ToolTip="{t:Text ObjectInfoWindow.CopyTitleHint}"  Text="{Binding Title, FallbackValue='Object Name'}">
+                <TextBlock.InputBindings>
+                    <MouseBinding Command="{Binding CopyNameCommand}" MouseAction="LeftClick" />
+                </TextBlock.InputBindings>
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource BrushControlBackground}" />
+                                <Setter Property="Cursor" Value="Hand" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </StackPanel>
+                
         <Label FontSize="8" Grid.Row="1" Content="{Binding Subtitle}" />
         
         <Separator Grid.Row="2" Height="1" />

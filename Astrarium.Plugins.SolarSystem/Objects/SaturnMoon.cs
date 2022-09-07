@@ -6,7 +6,7 @@ namespace Astrarium.Plugins.SolarSystem.Objects
     /// <summary>
     /// Contains coordinates and visual appearance data for the major moon of Saturn for given instant of time.
     /// </summary>
-    public class SaturnMoon : SizeableCelestialObject, IPlanetMoon, ISolarSystemObject
+    public class SaturnMoon : SizeableCelestialObject, IPlanetMoon, ISolarSystemObject, IMagnitudeObject
     {
         public SaturnMoon(int number)
         {

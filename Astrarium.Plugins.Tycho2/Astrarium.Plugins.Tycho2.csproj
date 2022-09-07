@@ -37,12 +37,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Data\*.*">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Update="Controls\Tycho2SettingsSection.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -23,14 +24,19 @@ namespace Astrarium.Plugins.BrightStars
         private readonly string STARS_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Stars.dat");
 
         /// <summary>
-        /// File path to the file with stars proper names
-        /// </summary>
-        private readonly string NAMES_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/StarNames.dat");
-
-        /// <summary>
         /// File with greek alphabet letters abbreviations and full names
         /// </summary>
         private readonly string ALPHABET_FILE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Alphabet.dat");
+
+        /// <summary>
+        /// Sky instance
+        /// </summary>
+        private readonly ISky sky;
+
+        public StarsReader(ISky sky)
+        {
+            this.sky = sky;
+        }
 
         /// <summary>
         /// Reads stars data
@@ -103,25 +109,20 @@ namespace Astrarium.Plugins.BrightStars
                             star.PmDelta = Convert.ToSingle(line.Substring(154, 6), CultureInfo.InvariantCulture);
                         }
 
-                        star.Mag = Convert.ToSingle(line.Substring(102, 5), CultureInfo.InvariantCulture);
+                        star.Magnitude = Convert.ToSingle(line.Substring(102, 5), CultureInfo.InvariantCulture);
                         star.Color = line[129];
+
+                        string identifier = star.Names.FirstOrDefault(n => sky.StarNames.ContainsKey(n));
+                        if (identifier != null)
+                        {
+                            star.ProperName = sky.StarNames[identifier];
+                        }
                     }
 
                     stars.Add(star);
                 }
 
                 RecordLength = (int)Math.Round(sr.BaseStream.Length / 9110.0);
-            }
-
-            using (var sr = new StreamReader(NAMES_FILE, Encoding.Default))
-            {
-                while (line != null && !sr.EndOfStream)
-                {
-                    line = sr.ReadLine();
-                    string[] parts = line.Split('=');
-                    int number = int.Parse(parts[0].Trim());
-                    stars[number - 1].ProperName = parts[1].Trim();
-                }
             }
 
             return stars;

@@ -122,6 +122,12 @@ namespace Astrarium.Plugins.ASCOM
         void Slew(CrdsEquatorial eq);
 
         /// <summary>
+        /// Processes command from joystick device.
+        /// </summary>
+        /// <param name="command">Command to be processed.</param>
+        void ProcessCommand(ButtonCommand command);
+
+        /// <summary>
         /// Gets info about telescope and installed ASCOM platform
         /// </summary>
         AscomInfo Info { get; }

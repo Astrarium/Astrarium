@@ -105,8 +105,15 @@ namespace Astrarium
         {
             get
             {
+                // no limit
+                float limitMag = float.MaxValue;
+
+                // log fit {90,6},{45,7},{8,9},{1,12},{0.25,17}
+                return Math.Min(limitMag, (float)(-1.73494 * Math.Log(0.000462398 * ViewAngle)));
+
+                // OLD formula:
                 // log fit {90,6},{45,6.5},{20,7.3},{8,9},{4,10.5}
-                return (float)(-1.44995 * Math.Log(0.000230685 * ViewAngle));
+                // return (float)(-1.44995 * Math.Log(0.000230685 * ViewAngle));
             }
         }
 

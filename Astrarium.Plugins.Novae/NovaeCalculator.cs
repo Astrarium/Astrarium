@@ -28,7 +28,7 @@ namespace Astrarium.Plugins.Novae
             foreach (var nova in Novae)
             {
                 nova.Horizontal = ctx.Get(Horizontal, nova);
-                nova.Mag = ctx.Get(Magnitude, nova);
+                nova.Magnitude = ctx.Get(Magnitude, nova);
             }
         }
 

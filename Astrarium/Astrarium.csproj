@@ -74,7 +74,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Ninject" Version="3.3.4" />
     <PackageReference Include="NLog" Version="4.7.13" />
   </ItemGroup>
@@ -155,6 +155,11 @@
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <Private>false</Private>
     </ProjectReference>
+	<ProjectReference Include="..\Astrarium.Plugins.UCAC4\Astrarium.Plugins.UCAC4.csproj">
+	  <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+	  <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+	  <Private>false</Private>
+	</ProjectReference>
     <ProjectReference Include="..\Astrarium.Plugins.FOV\Astrarium.Plugins.FOV.csproj">
       <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
@@ -204,10 +209,6 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Logging\" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

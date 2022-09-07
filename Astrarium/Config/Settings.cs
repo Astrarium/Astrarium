@@ -123,7 +123,7 @@ namespace Astrarium.Config
             if (SettingsValues.ContainsKey(settingName))
             {
                 var oldValue = SettingsValues[settingName];
-                if (!oldValue.Equals(value))
+                if (!object.Equals(oldValue, value))
                 {
                     SettingsValues[settingName] = value;
                     SettingValueChanged?.Invoke(settingName, value);

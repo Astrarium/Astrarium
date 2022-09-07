@@ -11,7 +11,7 @@ namespace Astrarium.Plugins.Novae
     /// <summary>
     /// Represents nova star
     /// </summary>
-    public class Nova : CelestialObject
+    public class Nova : CelestialObject, IMagnitudeObject
     {
         /// <inheritdoc />
         public override string Type => "Nova";
@@ -52,7 +52,7 @@ namespace Astrarium.Plugins.Novae
         /// <summary>
         /// Current value of magnitude
         /// </summary>
-        public float Mag { get; set; }
+        public float Magnitude { get; set; }
 
         /// <summary>
         /// Equatorial coordinates for J2000.0 epoch

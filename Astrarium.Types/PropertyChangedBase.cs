@@ -18,7 +18,7 @@ namespace Astrarium.Types
         /// Notifies subscribers about changing property or properties. 
         /// </summary>
         /// <param name="propertyName">Changed property name(s).</param>
-        protected void NotifyPropertyChanged(params string[] propertyName)
+        protected virtual void NotifyPropertyChanged(params string[] propertyName)
         {
             foreach (string pn in propertyName)
             {
@@ -33,7 +33,10 @@ namespace Astrarium.Types
             binding.Source.PropertyChanged += SourcePropertyChangedHandler;
         }
 
-        public IReadOnlyCollection<SimpleBinding> Bindings => bindings;
+        public SimpleBinding FindBinding(string targetPropertyName)
+        {
+            return bindings.FirstOrDefault(b => b.TargetPropertyName == targetPropertyName);
+        }
 
         private void SourcePropertyChangedHandler(object sender, PropertyChangedEventArgs e)
         {

@@ -25,6 +25,7 @@ namespace Astrarium.Types
         CelestialObjectInfo GetInfo(CelestialObject body);
         Constellation GetConstellation(string code);
         ICollection<Tuple<int, int>> ConstellationLines { get; set; }
+        IDictionary<string, string> StarNames { get; }
         IEnumerable<CelestialObject> CelestialObjects { get; }
 
         /// <summary>

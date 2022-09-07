@@ -10,6 +10,7 @@ using WF = System.Windows.Forms;
 using Astrarium.Types.Themes;
 using Astrarium.Types;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Astrarium
 {
@@ -380,6 +381,32 @@ namespace Astrarium
             {
                 string text = Text.Get("MapIsLockedOn", ("objectName", map.LockedObject.Names.First()));
                 ViewManager.ShowPopupMessage(text);
+            }
+
+            if ((WF.Control.ModifierKeys & WF.Keys.Control) != 0)
+            {
+                var body = map.FindObject(new PointF(e.X, e.Y));
+                if (body != null)
+                {
+                    if (body is IMagnitudeObject mo)
+                    {
+                        skyToolTip.Content = $"{body.Names.First()} {Formatters.Magnitude.Format(mo.Magnitude)}";
+                    }
+                    else
+                    {
+                        skyToolTip.Content = body.Names.First();
+                    }
+                    skyToolTip.PlacementRectangle = new Rect(e.X, e.Y, 0, 0);
+                    skyToolTip.IsOpen = true;
+                }
+                else
+                {
+                    skyToolTip.IsOpen = false;
+                }
+            }
+            else
+            {
+                skyToolTip.IsOpen = false;
             }
         }
 

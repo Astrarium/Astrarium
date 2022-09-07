@@ -1,0 +1,95 @@
+﻿<Window x:Class="Astrarium.Plugins.ASCOM.Views.JoystickButtonsMappingWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types"
+        xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
+        xmlns:local="clr-namespace:Astrarium.Plugins.ASCOM" 
+        mc:Ignorable="d"
+        Title="{t:Text ButtonsMappingWindow.Title}" 
+        Style="{StaticResource {x:Type Window}}"
+        WindowStartupLocation="CenterOwner"
+        s:WindowProperties.MinButtonVisible="Collapsed"
+        s:WindowProperties.MaxButtonVisible="Collapsed"
+        Height="400" Width="400">
+
+    <Window.Resources>
+        <ObjectDataProvider x:Key="ButtonActionsEnum" MethodName="GetValues" ObjectType="{x:Type local:ButtonAction}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type Type="local:ButtonAction"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </Window.Resources>
+
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Margin="6" IsEnabled="False" Text="{t:Text ButtonsMappingWindow.Hint}" TextWrapping="Wrap" />
+
+        <DataGrid 
+            Grid.Row="1"
+            Margin="6"
+            RowHeight="24" 
+            CanUserAddRows="False" 
+            MinColumnWidth="150"
+            IsReadOnly="False" 
+            EnableColumnVirtualization="True" 
+            VirtualizingPanel.VirtualizationMode="Recycling"
+            EnableRowVirtualization="True"
+            ItemsSource="{Binding Buttons}" 
+            AutoGenerateColumns="False">
+            <DataGrid.CellStyle>
+                <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource DataGridCellStyle}">
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="{x:Null}" />
+                            <Setter Property="BorderBrush" Value="{x:Null}" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.CellStyle>
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="{t:Text ButtonsMappingWindow.Button}" IsReadOnly="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse x:Name="ellipse" HorizontalAlignment="Left" Margin="4 0"  Stroke="{StaticResource BrushControlLightBackground}" Fill="Transparent" Cursor="Help" ToolTip="{t:Text ButtonsMappingWindow.ButtonPressedHint}" Width="10" Height="10" />
+                                <TextBlock Text="{Binding Button}" />
+                            </StackPanel>
+
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding IsPressed}" Value="True">
+                                    <Setter TargetName="ellipse" Property="Fill" Value="Lime" />
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="{t:Text ButtonsMappingWindow.Action}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ComboBox Margin="-4 0" VerticalContentAlignment="Center" SelectedValue="{Binding Action, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource ButtonActionsEnum}}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Converter={s:EnumValueToEnumDescriptionConverter}}"/>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right">
+            <Button Command="{Binding CloseCommand}" MinWidth="80" Margin="6 0 6 6" Padding="4 0" Content="{t:Text Close}" />
+        </StackPanel>
+
+    </Grid>
+</Window>

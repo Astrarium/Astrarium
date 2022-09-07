@@ -142,7 +142,7 @@ namespace Astrarium.Plugins.DeepSky
             e["Horizontal.Azimuth"] = (c, ds) => c.Get(Horizontal, ds).Azimuth;
             e["Equatorial.Alpha"] = (c, ds) => c.Get(Equatorial, ds).Alpha;
             e["Equatorial.Delta"] = (c, ds) => c.Get(Equatorial, ds).Delta;
-            e["Magnitude"] = (c, ds) => ds.Mag;
+            e["Magnitude"] = (c, ds) => ds.Magnitude;
             e["RTS.Rise"] = (c, ds) => c.GetDateFromTime(c.Get(RiseTransitSet, ds).Rise);
             e["RTS.Transit"] = (c, ds) => c.GetDateFromTime(c.Get(RiseTransitSet, ds).Transit);
             e["RTS.Set"] = (c, ds) => c.GetDateFromTime(c.Get(RiseTransitSet, ds).Set);
@@ -195,9 +195,9 @@ namespace Astrarium.Plugins.DeepSky
             .AddHeader(Text.Get("DeepSky.Properties"));
 
             info.AddRow("Type", details.ObjectType);
-            if (ds.Mag != null)
+            if (ds.Magnitude != float.NaN)
             {
-                info.AddRow("VisualMagnitude", ds.Mag, Formatters.Magnitude);
+                info.AddRow("VisualMagnitude", ds.Magnitude, Formatters.Magnitude);
             }
             if (details.PhotoMagnitude != null)
             {
@@ -307,7 +307,7 @@ namespace Astrarium.Plugins.DeepSky
                         Component = line.Substring(5, 1)[0],
                         Equatorial0 = new CrdsEquatorial(ra, dec),
                         Status = status,
-                        Mag = string.IsNullOrWhiteSpace(mag) ? (float?)null : float.Parse(mag, CultureInfo.InvariantCulture),
+                        Magnitude = string.IsNullOrWhiteSpace(mag) ? float.NaN : float.Parse(mag, CultureInfo.InvariantCulture),
                         SizeA = float.Parse(string.IsNullOrWhiteSpace(sizeA) ? "0" : sizeA, CultureInfo.InvariantCulture),
                         SizeB = float.Parse(string.IsNullOrWhiteSpace(sizeB) ? "0" : sizeB, CultureInfo.InvariantCulture),
                         PA = short.Parse(string.IsNullOrWhiteSpace(PA) ? "0" : PA),

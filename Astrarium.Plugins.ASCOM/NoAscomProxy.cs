@@ -27,6 +27,7 @@ namespace Astrarium.Plugins.ASCOM
         public void SetLocation(CrdsGeographical geo) { }
         public void SetDateTime(DateTime utc) { }
         public void Slew(CrdsEquatorial eq) { }
+        public void ProcessCommand(ButtonCommand command) { }
         public void Sync(CrdsEquatorial eq) { }
         public void ShowSetupDialog() { }
         public void AbortSlewing() { }

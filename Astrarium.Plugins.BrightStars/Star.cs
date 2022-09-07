@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Astrarium.Plugins.BrightStars
 {
-    public class Star : CelestialObject
+    public class Star : CelestialObject, IMagnitudeObject
     {
         /// <summary>
         /// Greek alphabet abbreviations
@@ -118,7 +118,7 @@ namespace Astrarium.Plugins.BrightStars
         /// <summary>
         /// Apparent magnitude of the star
         /// </summary>
-        public float Mag { get; set; }
+        public float Magnitude { get; set; }
 
         /// <summary>
         /// Star color, i.e. spectral class

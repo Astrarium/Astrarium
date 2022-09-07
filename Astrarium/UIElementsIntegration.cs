@@ -26,9 +26,15 @@ namespace Astrarium
             // App theme
             SettingDefinitions.Add(new SettingDefinition("AppTheme", "DeepBlue"));
 
+            // DateTime sync period
+            SettingDefinitions.Add(new SettingDefinition("DateTimeSyncPeriod", 1));
+
             // Flag indicating main window should be maximized on startup
             SettingDefinitions.Add(new SettingDefinition("StartMaximized", false));
-            
+
+            // Check app updates on start
+            SettingDefinitions.Add(new SettingDefinition("CheckUpdatesOnStart", true));
+
             // If set to true, window size will be remembered
             SettingDefinitions.Add(new SettingDefinition("RememberWindowSize", false));
 

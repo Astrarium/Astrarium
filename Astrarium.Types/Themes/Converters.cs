@@ -54,6 +54,20 @@ namespace Astrarium.Types.Themes
         }
     }
 
+    public class MultiBoolToVisibilityConverter : MultiValueConverterBase
+    {
+        public override object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            Visibility falseState = parameter is Visibility ? (Visibility)parameter : Visibility.Collapsed;
+            return values.OfType<IConvertible>().All(System.Convert.ToBoolean) ? Visibility.Visible : falseState;
+        }
+
+        public override object[] ConvertBack(object value, Type[] targetTypes, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
+
     public class BoolToVisibilityConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -153,6 +167,15 @@ namespace Astrarium.Types.Themes
         }
     }
 
+    [ValueConversion(typeof(string), typeof(Visibility))]
+    public class NullOrEmptyToVisibilityConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return string.IsNullOrEmpty(value as string) ? Visibility.Visible : Visibility.Collapsed;
+        }
+    }
+
     [ValueConversion(typeof(bool), typeof(Visibility))]
     public class NullToVisibilityConverter : ValueConverterBase
     {
@@ -209,12 +232,19 @@ namespace Astrarium.Types.Themes
     {
         public override object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            var castedParameter = System.Convert.ChangeType(parameter, value.GetType());
+            if (value != null)
+            {
+                var castedParameter = System.Convert.ChangeType(parameter, value.GetType());
 
-            if (object.Equals(value, castedParameter))
-                return Visibility.Visible;
+                if (object.Equals(value, castedParameter))
+                    return Visibility.Visible;
+                else
+                    return Visibility.Collapsed;
+            }
             else
+            {
                 return Visibility.Collapsed;
+            }
         }
     }
 
@@ -260,6 +290,11 @@ namespace Astrarium.Types.Themes
     public class InverseBoolConverter : ValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return !(bool)value;
+        }
+
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return !(bool)value;
         }
@@ -321,7 +356,7 @@ namespace Astrarium.Types.Themes
             return
                 Text.Get(
                     memberInfo?.GetCustomAttribute<DescriptionAttribute>()
-                    ?.Description ?? memberInfo.Name);
+                    ?.Description ?? memberInfo?.Name);
         }
     }
 
@@ -340,7 +375,37 @@ namespace Astrarium.Types.Themes
                 if (key != null)
                 {
                     return Application.Current.Resources[key];
-                }                
+                }
+            }
+            return null;
+        }
+    }
+
+    public class CelestialObjectTypeToIconConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            string bodyType = value as string;
+            if (bodyType != null)
+            {
+                string key = $"Icon{bodyType.Split('.').First()}";
+                if (Application.Current.Resources.Contains(key))
+                {
+                    return Application.Current.Resources[key];
+                }
+            }
+            return null;
+        }
+    }
+
+    public class CelestialObjectFullNameConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            CelestialObject body = value as CelestialObject;
+            if (body != null)
+            {
+                return string.Join(", ", body.Names);
             }
             return null;
         }
@@ -350,7 +415,18 @@ namespace Astrarium.Types.Themes
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return Text.Get($"{(value as CelestialObject).Type}.Type");
+            if (value is string type)
+            {
+                return Text.Get($"{type}.Type");
+            }
+            else if (value is CelestialObject body)
+            {
+                return Text.Get($"{body.Type}.Type");
+            }
+            else
+            {
+                throw new NotImplementedException("Value type is not supported");
+            }
         }
     }
 }

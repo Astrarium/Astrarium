@@ -159,7 +159,7 @@ namespace Astrarium.Plugins.Planner
 
         private void OpenPlan()
         {
-            string filePath = ViewManager.ShowOpenFileDialog("$Planner.Menu.OpenPlan.DialogTitle", planManagerFactory.FormatsString, out int selectedExtensionIndex);
+            string filePath = ViewManager.ShowOpenFileDialog("$Planner.Menu.OpenPlan.DialogTitle", planManagerFactory.FormatsString, multiSelect: false, out int selectedExtensionIndex)?.FirstOrDefault();
             if (filePath != null)
             {
                 LoadPlan(filePath, planManagerFactory.GetFormat(selectedExtensionIndex));

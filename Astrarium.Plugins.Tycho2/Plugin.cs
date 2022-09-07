@@ -15,7 +15,8 @@ namespace Astrarium.Plugins.Tycho2
             #region Settings
 
             DefineSetting("Tycho2", defaultValue: true);
-            DefineSettingsSection<Tycho2SettingsSection, SettingsViewModel>();
+            DefineSetting("Tycho2RootDir", defaultValue: "", isPermanent: true);
+            DefineSettingsSection<Tycho2SettingsSection, Tycho2SettingsViewModel>();
 
             #endregion Settings
 

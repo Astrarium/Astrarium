@@ -3,6 +3,6 @@
     <Version>$(DeploymentVersion)</Version>
     <ProductVersion>$(DeploymentVersion)</ProductVersion>
     <InformationalVersion>$(DeploymentVersion)</InformationalVersion>
-    <Copyright>© Alexander Krutov, 2018-2021</Copyright>
+    <Copyright>© Alexander Krutov, 2018-2022</Copyright>
   </PropertyGroup>
 </Project>

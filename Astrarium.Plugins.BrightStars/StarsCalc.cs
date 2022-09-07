@@ -160,7 +160,7 @@ namespace Astrarium.Plugins.BrightStars
             e["Equatorial.Delta"] = (c, s) => c.Get(Equatorial, s.Number).Delta;
             e["Horizontal.Azimuth"] = (c, s) => c.Get(Horizontal, s.Number).Azimuth;
             e["Horizontal.Altitude"] = (c, s) => c.Get(Horizontal, s.Number).Altitude;
-            e["Magnitude"] = (c, s) => s.Mag;
+            e["Magnitude"] = (c, s) => s.Magnitude;
             e["RTS.Rise"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet, s.Number).Rise);
             e["RTS.Transit"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet, s.Number).Transit);
             e["RTS.Set"] = (c, s) => c.GetDateFromTime(c.Get(RiseTransitSet, s.Number).Set);
@@ -211,7 +211,7 @@ namespace Astrarium.Plugins.BrightStars
             .AddRow("Visibility.Period")
 
             .AddHeader(Text.Get("Star.Properties"))
-            .AddRow("Magnitude", s.Mag)
+            .AddRow("Magnitude", s.Magnitude)
             .AddRow("IsInfraredSource", details.IsInfraredSource)
             .AddRow("SpectralClass", details.SpectralClass);
 
@@ -384,7 +384,7 @@ namespace Astrarium.Plugins.BrightStars
 
             if (!string.IsNullOrEmpty(conName))
             {
-                conName = sky.GetConstellation(conName).LatinGenitiveName;
+                conName = sky.GetConstellation(conName)?.LatinGenitiveName;
             }
 
             if (s.ProperName != null)
@@ -404,7 +404,7 @@ namespace Astrarium.Plugins.BrightStars
                 string[] varName = s.VariableName.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                 if (varName.Length > 1)
                 {
-                    conName = sky.GetConstellation(varName[1]).LatinGenitiveName;
+                    conName = sky.GetConstellation(varName[1])?.LatinGenitiveName;
                     names.Add($"{varName[0]} {conName}");
                 }
                 else
