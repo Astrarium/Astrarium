@@ -89,7 +89,7 @@ namespace Astrarium.Plugins.SolarSystem
             return MartianMoons.Semidiameter(m, distance);
         }
 
-        private float MarsMoon_Magnitude(SkyContext c, int m)
+        internal float MarsMoon_Magnitude(SkyContext c, int m)
         {
             var r = c.Get(Planet_DistanceFromEarth, Planet.MARS);
             var R = c.Get(Planet_DistanceFromSun, Planet.MARS);
