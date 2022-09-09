@@ -658,6 +658,11 @@ namespace Astrarium.Plugins.UCAC4
         {
             List<CelestialObject> stars = new List<CelestialObject>();
 
+            if (!IsLoaded)
+            {
+                return stars;
+            }
+
             var starWithProperName = properNames.FirstOrDefault(kv => kv.Value.StartsWith(searchString, StringComparison.OrdinalIgnoreCase));
             if (starWithProperName.Key != null)
             {

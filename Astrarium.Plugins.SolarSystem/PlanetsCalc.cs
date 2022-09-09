@@ -124,6 +124,7 @@ namespace Astrarium.Plugins.SolarSystem
                         m.Equatorial = context.Get(MarsMoon_Equatorial, mn);
                         m.Horizontal = context.Get(MarsMoon_Horizontal, mn);
                         m.Semidiameter = context.Get(MarsMoon_Semidiameter, mn);
+                        m.Magnitude = context.Get(MarsMoon_Magnitude, mn);
                         m.DistanceFromEarth = context.Get(MarsMoon_Ecliptical, mn).Distance;
                     }
 
