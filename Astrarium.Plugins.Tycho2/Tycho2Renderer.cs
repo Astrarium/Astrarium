@@ -31,7 +31,7 @@ namespace Astrarium.Plugins.Tycho2
 
         public override void Render(IMapContext map)
         {
-            Graphics g = map.Graphics;            
+            Graphics g = map.Graphics;
             bool isGround = settings.Get<bool>("Ground");
             bool isLabels = settings.Get<bool>("StarsLabels");
             Brush brushNames = new SolidBrush(map.GetColor("ColorStarsLabels"));

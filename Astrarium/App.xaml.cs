@@ -113,6 +113,7 @@ namespace Astrarium
             kernel.Bind<ISky, Sky>().To<Sky>().InSingletonScope();
             kernel.Bind<ISkyMap, SkyMap>().To<SkyMap>().InSingletonScope();
             kernel.Bind<IGeoLocationsManager, GeoLocationsManager>().To<GeoLocationsManager>().InSingletonScope();
+            kernel.Bind<ITelescopeManager, TelescopeManagerStub>().To<TelescopeManagerStub>().InSingletonScope();
             kernel.Bind<IMainWindow, MainVM>().To<MainVM>().InSingletonScope();
             kernel.Bind<UIElementsIntegration>().ToSelf().InSingletonScope();
             UIElementsIntegration uiIntegration = kernel.Get<UIElementsIntegration>();
@@ -141,7 +142,7 @@ namespace Astrarium
                             {
                                 throw new Exception($"Interface type {singletonAttr.InterfaceType} is not assignable from {singletonImpl}");
                             }
-                            kernel.Bind(singletonAttr.InterfaceType).To(singletonImpl).InSingletonScope();
+                            kernel.Rebind(singletonAttr.InterfaceType).To(singletonImpl).InSingletonScope();
                         }
                         else
                         {

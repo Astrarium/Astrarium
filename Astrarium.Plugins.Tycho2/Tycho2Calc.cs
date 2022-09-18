@@ -614,6 +614,11 @@ namespace Astrarium.Plugins.Tycho2
 
         public ICollection<CelestialObject> Search(SkyContext c, string searchString, Func<CelestialObject, bool> filterFunc, int maxCount = 50)
         {
+            if (!IsLoaded)
+            {
+                return new CelestialObject[0];
+            }
+
             var starWithProperName = ProperNames.FirstOrDefault(kv => kv.Value.StartsWith(searchString, StringComparison.OrdinalIgnoreCase));
             if (starWithProperName.Key != null)
             {
