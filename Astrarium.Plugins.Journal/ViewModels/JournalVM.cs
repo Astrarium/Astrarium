@@ -311,10 +311,9 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         private void OpenAttachmentLocation(Attachment attachment)
         {
-            string path = Path.Combine(rootPath, attachment.FilePath);
             try
             {
-                System.Diagnostics.Process.Start("explorer.exe", $@"/e,/select,{path}");
+                System.Diagnostics.Process.Start("explorer.exe", $@"/e,/select,{attachment.FilePath}");
             }
             catch (Exception ex)
             {

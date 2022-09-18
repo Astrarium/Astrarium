@@ -88,7 +88,7 @@ namespace Astrarium.Plugins.Journal.Types
                     session.Attachments = s.Attachments.ToArray().Select(x => new Attachment()
                     {
                         Id = x.Id,
-                        FilePath = Path.Combine(rootPath, x.FilePath),
+                        FilePath = Path.GetFullPath(Path.Combine(rootPath, x.FilePath)),
                         Title = x.Title,
                         Comments = x.Comments
                     }).ToList();
@@ -130,7 +130,7 @@ namespace Astrarium.Plugins.Journal.Types
                     observation.Attachments = obs.Attachments.ToArray().Select(x => new Attachment()
                     {
                         Id = x.Id,
-                        FilePath = Path.Combine(rootPath, x.FilePath),
+                        FilePath = Path.GetFullPath(Path.Combine(rootPath, x.FilePath)),
                         Title = x.Title,
                         Comments = x.Comments
                     }).ToList();
