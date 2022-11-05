@@ -39,7 +39,14 @@ namespace Astrarium.ViewModels
 
         private void CopyName()
         {
-            Clipboard.SetText(Title, TextDataFormat.UnicodeText);
+            try
+            {
+                Clipboard.SetText(Title, TextDataFormat.UnicodeText);
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Unable to copy object name. Reason: {ex.Message}");
+            }
         }
     }
 }
