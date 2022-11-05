@@ -211,8 +211,8 @@ namespace Astrarium.Plugins.Journal.OAL
             {
                 cameraDb.PixelsX = int.Parse(ccd.pixelsX);
                 cameraDb.PixelsY = int.Parse(ccd.pixelsY);
-                cameraDb.PixelsXSize = ccd.pixelXSizeSpecified ? (double?)ccd.pixelXSize : (double?)null;
-                cameraDb.PixelsYSize = ccd.pixelYSizeSpecified ? (double?)ccd.pixelYSize : (double?)null;
+                cameraDb.PixelXSize = ccd.pixelXSizeSpecified ? (double?)ccd.pixelXSize : (double?)null;
+                cameraDb.PixelYSize = ccd.pixelYSizeSpecified ? (double?)ccd.pixelYSize : (double?)null;
                 cameraDb.Binning = int.Parse(ccd.binning);
             }
             else
@@ -399,7 +399,7 @@ namespace Astrarium.Plugins.Journal.OAL
                 EyepieceId = !string.IsNullOrEmpty(observation.eyepiece) ? observation.eyepiece : null,
                 LensId = !string.IsNullOrEmpty(observation.lens) ? observation.lens : null,
                 FilterId = !string.IsNullOrEmpty(observation.filter) ? observation.filter : null,
-                ImagerId = !string.IsNullOrEmpty(observation.imager) ? observation.imager : null,
+                CameraId = !string.IsNullOrEmpty(observation.imager) ? observation.imager : null,
                 Attachments = observation.image.ToAttachments()
             };
 

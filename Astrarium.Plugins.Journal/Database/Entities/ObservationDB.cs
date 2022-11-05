@@ -76,7 +76,7 @@ namespace Astrarium.Plugins.Journal.Database.Entities
         /// <summary>
         /// Id of imager (camera/CCD) used
         /// </summary>
-        public string ImagerId { get; set; }
+        public string CameraId { get; set; }
 
         // related entities
 

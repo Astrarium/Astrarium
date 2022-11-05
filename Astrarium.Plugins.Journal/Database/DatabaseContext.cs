@@ -99,7 +99,7 @@ namespace Astrarium.Plugins.Journal.Database
             modelBuilder.Entity<ObservationDB>()
                 .HasOptional(x => x.Camera)
                 .WithMany()
-                .HasForeignKey(x => x.ImagerId);
+                .HasForeignKey(x => x.CameraId);
 
             modelBuilder.Entity<SessionDB>()
                 .ToTable("Sessions")

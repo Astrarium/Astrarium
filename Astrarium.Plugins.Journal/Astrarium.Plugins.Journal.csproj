@@ -60,6 +60,9 @@
 	</ItemGroup>
 	
 	<ItemGroup>
+	  <Compile Update="Views\CameraWindow.xaml.cs">
+	    <SubType>Code</SubType>
+	  </Compile>
 	  <Compile Update="Views\FilterWindow.xaml.cs">
 	    <SubType>Code</SubType>
 	  </Compile>
@@ -81,6 +84,10 @@
 	</ItemGroup>
 	
 	<ItemGroup>
+	  <Page Update="Views\CameraWindow.xaml">
+	    <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+	    <SubType>Designer</SubType>
+	  </Page>
 	  <Page Update="Views\FilterWindow.xaml">
 	    <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
 	    <SubType>Designer</SubType>

@@ -60,6 +60,10 @@ namespace Astrarium.Plugins.Journal.ViewModels
         public ICommand CreateFilterCommand { get; private set; }
         public ICommand DeleteFilterCommand { get; private set; }
 
+        public ICommand EditCameraCommand { get; private set; }
+        public ICommand CreateCameraCommand { get; private set; }
+        public ICommand DeleteCameraCommand { get; private set; }
+
         #endregion Commands
 
         public JournalVM()
@@ -95,6 +99,10 @@ namespace Astrarium.Plugins.Journal.ViewModels
             EditFilterCommand = new Command<string>(EditFilter);
             CreateFilterCommand = new Command(CreateFilter);
             DeleteFilterCommand = new Command<string>(DeleteFilter);
+
+            EditCameraCommand = new Command<string>(EditCamera);
+            CreateCameraCommand = new Command(CreateCamera);
+            DeleteCameraCommand = new Command<string>(DeleteCamera);
 
             Task.Run(Load);
         }
@@ -585,6 +593,40 @@ namespace Astrarium.Plugins.Journal.ViewModels
                 Filters = await DatabaseManager.GetFilters();
                 LoadJournalItemDetails();
                 (SelectedTreeViewItem as Observation).FilterId = null;
+            }
+        }
+
+        private async void EditCamera(string id)
+        {
+            var model = ViewManager.CreateViewModel<CameraVM>();
+            model.Camera = await DatabaseManager.GetCamera(id);
+            if (ViewManager.ShowDialog(model) ?? false)
+            {
+                Cameras = await DatabaseManager.GetCameras();
+                (SelectedTreeViewItem as Observation).CameraId = model.Camera.Id;
+            }
+        }
+
+        private async void CreateCamera()
+        {
+            var model = ViewManager.CreateViewModel<CameraVM>();
+            model.Camera = new Camera() { Id = Guid.NewGuid().ToString() };
+            if (ViewManager.ShowDialog(model) ?? false)
+            {
+                Cameras = await DatabaseManager.GetCameras();
+                (SelectedTreeViewItem as Observation).CameraId = model.Camera.Id;
+            }
+        }
+
+        private async void DeleteCamera(string id)
+        {
+            if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete selected camera? This will be deleted from all observations. This action can not be undone.", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                await DatabaseManager.DeleteCamera(id);
+                SelectedTreeViewItem.DatabasePropertyChanged -= DatabaseManager.SaveDatabaseEntityProperty;
+                Cameras = await DatabaseManager.GetCameras();
+                LoadJournalItemDetails();
+                (SelectedTreeViewItem as Observation).CameraId = null;
             }
         }
 

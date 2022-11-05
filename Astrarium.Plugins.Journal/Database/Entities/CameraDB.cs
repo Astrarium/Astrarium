@@ -20,8 +20,8 @@ namespace Astrarium.Plugins.Journal.Database.Entities
 
         public int PixelsX { get; set; }
         public int PixelsY { get; set; }
-        public double? PixelsXSize { get; set; }
-        public double? PixelsYSize { get; set; }
+        public double? PixelXSize { get; set; }
+        public double? PixelYSize { get; set; }
         public int Binning { get; set; }
 
         /// <inheritdoc />

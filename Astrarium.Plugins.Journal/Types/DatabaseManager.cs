@@ -122,7 +122,7 @@ namespace Astrarium.Plugins.Journal.Types
                     observation.EyepieceId = obs.EyepieceId;
                     observation.LensId = obs.LensId;
                     observation.FilterId = obs.FilterId;
-                    observation.CameraId = obs.ImagerId;
+                    observation.CameraId = obs.CameraId;
 
                     observation.Constellation = obs.Target?.Constellation;
                     observation.EquatorialCoordinates = obs.Target?.RightAscension != null && obs.Target?.Declination != null ? new CrdsEquatorial((double)obs.Target?.RightAscension.Value, (double)obs.Target?.Declination.Value) : null;
@@ -598,6 +598,79 @@ namespace Astrarium.Plugins.Journal.Types
                     {
                         db.Eyepieces.Remove(existing);
                         db.Database.ExecuteSqlCommand($"UPDATE [Observations] SET [EyepieceId] = NULL WHERE [EyepieceId] = '{id}'");
+                        db.SaveChanges();
+                    }
+                }
+            });
+        }
+
+        public static Task<Camera> GetCamera(string id)
+        {
+            return Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    var cameraDb = db.Cameras.FirstOrDefault(x => x.Id == id);
+                    if (cameraDb != null)
+                    {
+                        var camera = new Camera();
+
+                        camera.Id = cameraDb.Id;
+                        camera.Vendor = cameraDb.Vendor;
+                        camera.Model = cameraDb.Model;
+                        camera.PixelsX = cameraDb.PixelsX;
+                        camera.PixelsY = cameraDb.PixelsY;
+                        camera.PixelXSize = cameraDb.PixelXSize;
+                        camera.PixelYSize = cameraDb.PixelYSize;
+                        camera.Binning = cameraDb.Binning;
+                        camera.Remarks = cameraDb.Remarks;
+
+                        return camera;
+                    }
+
+                    return null;
+                }
+            });
+        }
+
+        public static Task SaveCamera(Camera camera)
+        {
+            return Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    var cameraDb = db.Cameras.FirstOrDefault(x => x.Id == camera.Id);
+                    if (cameraDb == null)
+                    {
+                        cameraDb = new CameraDB() { Id = camera.Id };
+                        db.Cameras.Add(cameraDb);
+                    }
+
+                    cameraDb.Vendor = camera.Vendor;
+                    cameraDb.Model = camera.Model;
+                    cameraDb.PixelsX = camera.PixelsX;
+                    cameraDb.PixelsY = camera.PixelsY;
+                    cameraDb.PixelXSize = camera.PixelXSize;
+                    cameraDb.PixelYSize = camera.PixelYSize;
+                    cameraDb.Binning = camera.Binning;
+                    cameraDb.Remarks = camera.Remarks;
+
+                    db.SaveChanges();
+                }
+            });
+        }
+
+        public static Task DeleteCamera(string id)
+        {
+            return Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    var existing = db.Cameras.FirstOrDefault(x => x.Id == id);
+                    if (existing != null)
+                    {
+                        db.Cameras.Remove(existing);
+                        db.Database.ExecuteSqlCommand($"UPDATE [Observations] SET [CameraId] = NULL WHERE [CameraId] = '{id}'");
                         db.SaveChanges();
                     }
                 }

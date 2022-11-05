@@ -204,13 +204,13 @@
                         <TextBlock Text="Camera" VerticalAlignment="Center" Padding="6" />
                         <ComboBox Grid.Column="1" ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.Cameras}" SelectedValue="{Binding CameraId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}"  />
                         <StackPanel Orientation="Horizontal" Grid.Column="2" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=IsMouseOver, Converter={s:BoolToVisibilityConverter}}">
-                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding CameraId, Converter={s:NotNullToBoolConverter}}">
+                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding CameraId, Converter={s:NotNullToBoolConverter}}" Command="{Binding Path=DataContext.EditCameraCommand, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}" CommandParameter="{Binding CameraId}">
                                 <Image Width="12" Height="12" Source="{StaticResource IconEdit}" />
                             </Button>
-                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding CameraId, Converter={s:NotNullToBoolConverter}}">
+                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding CameraId, Converter={s:NotNullToBoolConverter}}" Command="{Binding Path=DataContext.DeleteCameraCommand, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}" CommandParameter="{Binding CameraId}">
                                 <Image Width="12" Height="12" Source="{StaticResource IconDelete}" />
                             </Button>
-                            <Button Style="{StaticResource HoverButtonStyle}">
+                            <Button Style="{StaticResource HoverButtonStyle}" Command="{Binding Path=DataContext.CreateCameraCommand, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}">
                                 <Image Width="12" Height="12" Source="{StaticResource IconAdd}" />
                             </Button>
                         </StackPanel>
