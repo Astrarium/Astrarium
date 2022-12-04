@@ -52,7 +52,7 @@
 
                 <StackPanel.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Edit..." />
+                        <MenuItem Header="Edit..." Command="{Binding PlacementTarget.Tag.EditObservationCommand,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
                         <MenuItem Header="Delete" Command="{Binding PlacementTarget.Tag.DeleteObservationCommand,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
                     </ContextMenu>
                 </StackPanel.ContextMenu>

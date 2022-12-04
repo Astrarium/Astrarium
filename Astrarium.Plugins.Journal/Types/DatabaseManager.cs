@@ -177,6 +177,7 @@ namespace Astrarium.Plugins.Journal.Types
                     Aliases = JsonConvert.SerializeObject(body.Names),
                     Type = body.Type,
                     Name = body.Names.First(),
+                    CommonName = body.CommonName,
                     Source = "Astrarium"
                 };
 
@@ -204,10 +205,53 @@ namespace Astrarium.Plugins.Journal.Types
                     End = observation.End,
                     ObjectName = observation.Target.Name,
                     ObjectType = observation.Target.Type,
-                    ObjectNameAliases = DeserializeAliases(observation.Target.Aliases)
+                    ObjectNameAliases = DeserializeAliases(observation.Target.Aliases),
+                    // TODO: save coordinates of the body
                 };
 
                 return obs;
+            });
+        }
+
+        public static Task EditObservation(Observation observation, CelestialObject body, DateTime begin, DateTime end)
+        {
+            return Task.Run(() =>
+            {
+                using (var ctx = new DatabaseContext())
+                {
+                    var observationDb = ctx.Observations.FirstOrDefault(x => x.Id == observation.Id);
+                    if (observationDb != null)
+                    {
+                        observationDb.Begin = begin;
+                        observationDb.End = end;
+                        var targetDb = ctx.Targets.FirstOrDefault(x => x.Id == observationDb.TargetId);
+                        if (targetDb != null)
+                        {
+                            // target has been changed
+                            if (body.Type != targetDb.Type || body.CommonName != targetDb.CommonName)
+                            {
+                                targetDb.Aliases = JsonConvert.SerializeObject(body.Names);
+                                targetDb.Type = body.Type;
+                                targetDb.Name = body.Names.First();
+                                targetDb.CommonName = body.CommonName;
+                                
+                                // TODO: save coordinates of the body
+
+                                targetDb.Source = "Astrarium";
+                                // if target has been changed, we have to change observation details too
+                                observationDb.Details = JsonConvert.SerializeObject(CreateObservationDetails(body.Type));
+                            }
+                        }
+
+                        ctx.SaveChanges();
+
+                        observation.Begin = begin;
+                        observation.End = end;
+                        observation.ObjectName = body.Names.First();
+                        observation.ObjectType = body.Type;
+                        observation.ObjectNameAliases = string.Join(", ", body.Names);
+                    }
+                }
             });
         }
 
@@ -354,6 +398,44 @@ namespace Astrarium.Plugins.Journal.Types
                     var list = db.Eyepieces.ToList();
                     list.Insert(0, EyepieceDB.Empty);
                     return (ICollection)list;
+                }
+            });
+        }
+
+        /// <summary>
+        /// Holder class to adapt observation target entry to CelestialObjectPicker control
+        /// </summary>
+        private class DummyCelestialObject : CelestialObject
+        {
+            public string TypeHolder { get; set; }
+            public string CommonNameHolder { get; set; }
+            public string NameHolder { get; set; }
+
+            public override string[] Names => new string[] { NameHolder };
+            public override string[] DisplaySettingNames => new string[0];
+            public override string Type => TypeHolder;
+            public override string CommonName => CommonNameHolder;
+        }
+
+        public static Task<CelestialObject> GetTarget(string id)
+        {
+            return Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    var targetDb = db.Targets.FirstOrDefault(x => x.Id == id);
+                    if (targetDb != null)
+                    {
+                        var target = new DummyCelestialObject()
+                        {
+                            NameHolder = targetDb.Name,
+                            CommonNameHolder = targetDb.CommonName,
+                            TypeHolder = targetDb.Type
+                        };
+                        return (CelestialObject)target;
+                    }
+
+                    return null;
                 }
             });
         }

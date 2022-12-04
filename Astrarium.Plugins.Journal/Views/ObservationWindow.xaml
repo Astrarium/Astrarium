@@ -25,11 +25,11 @@
             </DockPanel>
             <DockPanel Margin="4">
                 <Label Content="Begin" VerticalAlignment="Center" />
-                <c:TimeInput Value="{Binding Begin}" ShowSeconds="False" Width="55" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                <c:TimeInput Value="{Binding Begin, UpdateSourceTrigger=PropertyChanged}" ShowSeconds="False" Width="55" HorizontalAlignment="Right" VerticalAlignment="Center" />
             </DockPanel>
             <DockPanel Margin="4">
                 <Label Content="End" VerticalAlignment="Center" />
-                <c:TimeInput Value="{Binding End}" ShowSeconds="False" Width="55" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                <c:TimeInput Value="{Binding End, UpdateSourceTrigger=PropertyChanged}" ShowSeconds="False" Width="55" HorizontalAlignment="Right" VerticalAlignment="Center" />
             </DockPanel>
 
             <DockPanel Margin="4">
@@ -40,7 +40,7 @@
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2">
             <Button MinWidth="80" Margin="2" Content="OK" Command="{Binding OkCommand}" />
-            <Button  MinWidth="80" Margin="2" Content="Cancel" />
+            <Button  MinWidth="80" Margin="2" Content="Cancel" Command="{Binding CancelCommand}" />
         </StackPanel>
     </Grid>
 </Window>
