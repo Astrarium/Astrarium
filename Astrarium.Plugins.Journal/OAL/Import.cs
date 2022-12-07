@@ -750,6 +750,7 @@ namespace Astrarium.Plugins.Journal.OAL
 
             result.Id = target.id;
             result.Name = target.name;
+            result.CommonName = target.name;
             result.Aliases = target.alias.ToListOfValues();
             result.Source = target.Item;
 

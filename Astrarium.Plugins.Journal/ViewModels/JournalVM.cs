@@ -25,6 +25,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         private DateTimeComparer dateComparer = new DateTimeComparer();
 
+        private readonly ISky sky;
         private readonly string rootPath;
         private readonly string imagesPath;
 
@@ -33,6 +34,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
         #region Commands
 
         public ICommand CreateObservationCommand { get; set; }
+        public ICommand EditObservationCommand { get; set; }
         public ICommand DeleteObservationCommand { get; set; }
 
         public ICommand ExpandCollapseCommand { get; private set; }
@@ -66,14 +68,17 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         #endregion Commands
 
-        public JournalVM()
+        public JournalVM(ISky sky)
         {
+            this.sky = sky;
+
             rootPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Observations");
             imagesPath = Path.Combine(rootPath, "images");
 
             ExpandCollapseCommand = new Command(ExpandCollapse);
 
             CreateObservationCommand = new Command<Session>(CreateObservation);
+            EditObservationCommand = new Command<Observation>(EditObservation);
             DeleteObservationCommand = new Command<Observation>(DeleteObservation);
 
             OpenImageCommand = new Command<Attachment>(OpenImage);
@@ -314,6 +319,21 @@ namespace Astrarium.Plugins.Journal.ViewModels
                 var observation = await DatabaseManager.CreateObservation(session, model.CelestialBody, model.Date.Date + model.Begin, model.Date.Date + model.End);
                 session.Observations.Add(observation);
                 SelectedTreeViewItem = observation;
+            }
+        }
+
+        private async void EditObservation(Observation observation)
+        {
+            var model = ViewManager.CreateViewModel<ObservationVM>();
+            model.Date = observation.Begin.Date;
+            model.Begin = observation.Begin.TimeOfDay;
+            model.End = observation.End.TimeOfDay;
+            model.CelestialBody = await DatabaseManager.GetTarget(observation.TargetId);
+            
+            if (ViewManager.ShowDialog(model) ?? false)
+            {                
+                await DatabaseManager.EditObservation(observation, model.CelestialBody, model.Date.Date + model.Begin, model.Date.Date + model.End);
+                LoadJournalItemDetails();
             }
         }
 

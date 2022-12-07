@@ -11,40 +11,32 @@ namespace Astrarium.Plugins.Journal.ViewModels
 {
     public class ObservationVM : ViewModelBase
     {
-        /// <summary>
-        /// Holder class to adapt observation target entry to CelestialObjectPicker control
-        /// </summary>
-        private class DummyCelestialObject : CelestialObject
-        {
-            public string TypeHolder { get; set; }
-            public string CommonNameHolder { get; set; }
-            public string NameHolder { get; set; }
-
-            public override string[] Names => new string[] { NameHolder };
-            public override string[] DisplaySettingNames => new string[0];
-            public override string Type => TypeHolder;
-            public override string CommonName => CommonNameHolder;
-        }
-
         public ObservationVM()
         {
             OkCommand = new Command(Ok);
-
-            CelestialBody = new DummyCelestialObject()
-            {
-                NameHolder = "(17) Acrux",
-                CommonNameHolder = "(17) Acrux",
-                TypeHolder = "Asteroid"
-            };
+            CancelCommand = new Command(Close);
         }
 
         public ICommand OkCommand { get; private set; }
+        public ICommand CancelCommand { get; private set; }
 
-        public TimeSpan Begin { get; set; }
-        public TimeSpan End { get; set; }
-        public DateTime Date { get; set; }
+        public TimeSpan Begin 
+        {
+            get => GetValue<TimeSpan>(nameof(Begin));
+            set => SetValue(nameof(Begin), value);
+        }
 
-        public Observation Observation { get; set; }
+        public TimeSpan End
+        {
+            get => GetValue<TimeSpan>(nameof(End));
+            set => SetValue(nameof(End), value);
+        }
+
+        public DateTime Date
+        {
+            get => GetValue<DateTime>(nameof(Date));
+            set => SetValue(nameof(Date), value);
+        }
 
         public CelestialObject CelestialBody
         {
@@ -54,6 +46,12 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         private void Ok()
         {
+            if (CelestialBody == null)
+            {
+                ViewManager.ShowMessageBox("$Warning", "Please specifiy celestial object");
+                return;
+            }
+
             Close(true);
         }
     }

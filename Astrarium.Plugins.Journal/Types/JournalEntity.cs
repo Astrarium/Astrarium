@@ -18,13 +18,21 @@ namespace Astrarium.Plugins.Journal.Types
         public DateTime Begin
         {
             get => GetValue<DateTime>(nameof(Begin));
-            set => SetValue(nameof(Begin), value);
+            set
+            {
+                SetValue(nameof(Begin), value);
+                NotifyPropertyChanged(nameof(DateString), nameof(TimeString));
+            }
         }
 
         public DateTime End
         {
             get => GetValue<DateTime>(nameof(End));
-            set => SetValue(nameof(End), value);
+            set 
+            { 
+                SetValue(nameof(End), value);
+                NotifyPropertyChanged(nameof(DateString), nameof(TimeString));
+            }
         }
 
         public ICollection<Attachment> Attachments

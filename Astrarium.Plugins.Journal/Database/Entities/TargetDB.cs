@@ -16,9 +16,14 @@ namespace Astrarium.Plugins.Journal.Database.Entities
         public string Type { get; set; }
 
         /// <summary>
-        /// Common name of the object
+        /// Name of the object
         /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// Common name of the object
+        /// </summary>
+        public string CommonName { get; set; }
 
         /// <summary>
         /// Comma-separated list of alias names
