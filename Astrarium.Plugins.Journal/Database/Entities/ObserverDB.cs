@@ -12,6 +12,10 @@ namespace Astrarium.Plugins.Journal.Database.Entities
         public string FirstName { get; set; }
         public string MiddleName { get; set; }
         public string LastName { get; set; }
+
+        /// <summary>
+        /// JSON-serialized observer contacts
+        /// </summary>
         public string Contacts { get; set; }
 
         /// <summary>

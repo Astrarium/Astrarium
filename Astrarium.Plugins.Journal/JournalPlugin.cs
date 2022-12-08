@@ -16,6 +16,7 @@ namespace Astrarium.Plugins.Journal
 
             menuItemJournal.SubItems.Add(new MenuItem("Show Logbook", new Command(ShowJournal)));
             menuItemJournal.SubItems.Add(new MenuItem("Import", new Command(DoImport)));
+            menuItemJournal.SubItems.Add(new MenuItem("Export...", new Command(DoExport)));
 
             MenuItems.Add(MenuItemPosition.MainMenuTop, menuItemJournal);
 
@@ -44,6 +45,15 @@ namespace Astrarium.Plugins.Journal
                 
 
                 Import.ImportFromOAL(file);
+            }
+        }
+
+        private void DoExport()
+        {
+            string file = ViewManager.ShowSaveFileDialog("Export to OAL file", "Observations", ".xml", "Open Astronomy Log files (*.xml)|*.xml", out int index);
+            if (file != null)
+            {
+                Export.ExportToOAL(file);
             }
         }
     }

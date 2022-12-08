@@ -321,6 +321,11 @@ namespace Astrarium.Plugins.Journal.OAL
             // json-serialized finding details
             string jsonDetails = null;
 
+            if (observation.result.Length > 1)
+            {
+                // TODO: what to to in this case?
+            }
+
             var finding = observation.result.FirstOrDefault();
             if (finding != null)
             {
@@ -389,10 +394,9 @@ namespace Astrarium.Plugins.Journal.OAL
                 SessionId = observation.session,
                 Begin = observation.begin,
                 End = observation.endSpecified ? observation.end : observation.begin,
-
                 Magnification = observation.magnificationSpecified ? observation.magnification : (double?)null,
                 Accessories = observation.accessories,
-                Target = target.ToTarget(),
+                Target = target.ToTarget(data),
                 Result = finding?.description,
                 Details = jsonDetails,
                 ScopeId = !string.IsNullOrEmpty(observation.scope) ? observation.scope : null,
@@ -574,7 +578,7 @@ namespace Astrarium.Plugins.Journal.OAL
             return details;
         }
 
-        private static TargetDB ToTarget(this observationTargetType target)
+        private static TargetDB ToTarget(this observationTargetType target, observations data)
         {
             TargetDB result = new TargetDB();
 
@@ -600,6 +604,8 @@ namespace Astrarium.Plugins.Journal.OAL
                         VarStarType = vs.type,
                         Classification = vs.classification
                     }, jsonSettings);
+
+                    // TODO: handle "Nova" by checking Outburst in finding details, or checking VarStarType
                 }
             }
             // Multiple star (don't know why it's prefixed as "deepSky" in OAL)
@@ -753,11 +759,19 @@ namespace Astrarium.Plugins.Journal.OAL
             result.CommonName = target.name;
             result.Aliases = target.alias.ToListOfValues();
             result.Source = target.Item;
+            if (target.ItemElementName == ItemChoiceType.observer)
+            {
+                var observer = data.observers.FirstOrDefault(x => x.id == target.Item);
+                if (observer != null)
+                {
+                    result.Source = $"Observer: {observer.name} {observer.surname}".Trim();
+                }
+            }
 
-            // TODO: convert to J2000
+            // TODO: convert to equinox of date 
             result.RightAscension = target.position?.ra.ToAngle();
 
-            // TODO: convert to J2000
+            // TODO: convert to equinox of date
             result.Declination = target.position?.dec.ToAngle();
 
             result.Constellation = target.constellation;

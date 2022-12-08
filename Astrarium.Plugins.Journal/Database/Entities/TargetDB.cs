@@ -26,7 +26,7 @@ namespace Astrarium.Plugins.Journal.Database.Entities
         public string CommonName { get; set; }
 
         /// <summary>
-        /// Comma-separated list of alias names
+        /// JSON-serialized list of alias names
         /// </summary>
         public string Aliases { get; set; }
 

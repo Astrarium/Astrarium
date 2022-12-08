@@ -41,10 +41,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="OAL\" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <PackageReference Include="EntityFramework" Version="6.4.4" />
 	  <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 	  <PackageReference Include="SQLite.CodeFirst" Version="1.7.0.34" />

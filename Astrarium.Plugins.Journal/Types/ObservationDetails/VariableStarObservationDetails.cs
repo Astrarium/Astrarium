@@ -36,6 +36,9 @@ namespace Astrarium.Plugins.Journal.Types
             set => SetValue(nameof(VisMagFainterThan), value);
         }
 
+        /// <summary>
+        /// JSON-serialized list of comparison stars
+        /// </summary>
         public string ComparisonStars
         {
             get => GetValue<string>(nameof(ComparisonStars));
