@@ -15,25 +15,17 @@ namespace Astrarium.Plugins.Journal.OAL {
     using System.Xml.Serialization;
     
     
-    /// <remarks/>
+    /// <summary>
+    /// Root element for OAL data
+    /// </summary>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://groups.google.com/group/openastronomylog")]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace="http://groups.google.com/group/openastronomylog", IsNullable=false)]
-    public partial class observations {
-        
-        private observerType[] observersField;
-        
-        private siteType[] sitesField;
-        
-        private sessionType[] sessionsField;
-        
-        private observationTargetType[] targetsField;
-        
-        private opticsType[] scopesField;
-        
+    [System.Xml.Serialization.XmlRootAttribute(ElementName = "observations", Namespace ="http://groups.google.com/group/openastronomylog", IsNullable=false)]
+    public partial class OALData {
+
         private eyepieceType[] eyepiecesField;
         
         private lensType[] lensesField;
@@ -46,65 +38,40 @@ namespace Astrarium.Plugins.Journal.OAL {
         
         private string versionField;
         
-        /// <remarks/>
-        [System.Xml.Serialization.XmlArrayAttribute(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        [System.Xml.Serialization.XmlArrayItemAttribute("observer", Form=System.Xml.Schema.XmlSchemaForm.Unqualified, IsNullable=false)]
-        public observerType[] observers {
-            get {
-                return this.observersField;
-            }
-            set {
-                this.observersField = value;
-            }
-        }
+        /// <summary>
+        /// Observers and coobservers
+        /// </summary>
+        [System.Xml.Serialization.XmlArrayAttribute(ElementName = "observers", Form = System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [System.Xml.Serialization.XmlArrayItemAttribute(ElementName = "observer", Form = System.Xml.Schema.XmlSchemaForm.Unqualified, IsNullable = false)]
+        public OALObserver[] Observers { get; set; }
         
-        /// <remarks/>
-        [System.Xml.Serialization.XmlArrayAttribute(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        [System.Xml.Serialization.XmlArrayItemAttribute("site", Form=System.Xml.Schema.XmlSchemaForm.Unqualified, IsNullable=false)]
-        public siteType[] sites {
-            get {
-                return this.sitesField;
-            }
-            set {
-                this.sitesField = value;
-            }
-        }
+        /// <summary>
+        /// Sites (places) of observation
+        /// </summary>
+        [System.Xml.Serialization.XmlArrayAttribute(ElementName = "sites", Form = System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [System.Xml.Serialization.XmlArrayItemAttribute(ElementName = "site", Form = System.Xml.Schema.XmlSchemaForm.Unqualified, IsNullable = false)]
+        public OALSite[] Sites { get; set; }
         
-        /// <remarks/>
-        [System.Xml.Serialization.XmlArrayAttribute(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        [System.Xml.Serialization.XmlArrayItemAttribute("session", Form=System.Xml.Schema.XmlSchemaForm.Unqualified, IsNullable=false)]
-        public sessionType[] sessions {
-            get {
-                return this.sessionsField;
-            }
-            set {
-                this.sessionsField = value;
-            }
-        }
+        /// <summary>
+        /// Sessions (series of observations)
+        /// </summary>
+        [System.Xml.Serialization.XmlArrayAttribute(ElementName = "sessions", Form = System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [System.Xml.Serialization.XmlArrayItemAttribute(ElementName = "session", Form = System.Xml.Schema.XmlSchemaForm.Unqualified, IsNullable = false)]
+        public OALSession[] Sessions { get; set; }
         
-        /// <remarks/>
-        [System.Xml.Serialization.XmlArrayAttribute(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        [System.Xml.Serialization.XmlArrayItemAttribute("target", Form=System.Xml.Schema.XmlSchemaForm.Unqualified, IsNullable=false)]
-        public observationTargetType[] targets {
-            get {
-                return this.targetsField;
-            }
-            set {
-                this.targetsField = value;
-            }
-        }
+        /// <summary>
+        /// Observation targets (celestial objects)
+        /// </summary>
+        [System.Xml.Serialization.XmlArrayAttribute(ElementName = "targets", Form = System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [System.Xml.Serialization.XmlArrayItemAttribute(ElementName = "target", Form = System.Xml.Schema.XmlSchemaForm.Unqualified, IsNullable = false)]
+        public OALTarget[] Targets { get; set; }
         
-        /// <remarks/>
-        [System.Xml.Serialization.XmlArrayAttribute(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        [System.Xml.Serialization.XmlArrayItemAttribute("scope", Form=System.Xml.Schema.XmlSchemaForm.Unqualified, IsNullable=false)]
-        public opticsType[] scopes {
-            get {
-                return this.scopesField;
-            }
-            set {
-                this.scopesField = value;
-            }
-        }
+        /// <summary>
+        /// Optical devices (telescopes, binoculars, optical tubes etc.)
+        /// </summary>
+        [System.Xml.Serialization.XmlArrayAttribute(ElementName = "scopes", Form = System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [System.Xml.Serialization.XmlArrayItemAttribute(ElementName = "scope", Form = System.Xml.Schema.XmlSchemaForm.Unqualified, IsNullable = false)]
+        public OALOptics[] Optics { get; set; }
         
         /// <remarks/>
         [System.Xml.Serialization.XmlArrayAttribute(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
@@ -183,7 +150,7 @@ namespace Astrarium.Plugins.Journal.OAL {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class observerType {
+    public partial class OALObserver {
         
         private string nameField;
         
@@ -2209,7 +2176,7 @@ namespace Astrarium.Plugins.Journal.OAL {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public abstract partial class opticsType {
+    public abstract partial class OALOptics {
         
         private string modelField;
         
@@ -2357,7 +2324,7 @@ namespace Astrarium.Plugins.Journal.OAL {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class fixedMagnificationOpticsType : opticsType {
+    public partial class fixedMagnificationOpticsType : OALOptics {
         
         private double magnificationField;
         
@@ -2392,7 +2359,7 @@ namespace Astrarium.Plugins.Journal.OAL {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class scopeType : opticsType {
+    public partial class scopeType : OALOptics {
         
         private double focalLengthField;
         
@@ -2552,7 +2519,7 @@ namespace Astrarium.Plugins.Journal.OAL {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class observationTargetType {
+    public partial class OALTarget {
         
         private string itemField;
         
@@ -2687,7 +2654,7 @@ namespace Astrarium.Plugins.Journal.OAL {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public abstract partial class SolarSystemTargetType : observationTargetType {
+    public abstract partial class SolarSystemTargetType : OALTarget {
     }
     
     /// <remarks/>
@@ -2753,7 +2720,7 @@ namespace Astrarium.Plugins.Journal.OAL {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public abstract partial class deepSkyTargetType : observationTargetType {
+    public abstract partial class deepSkyTargetType : OALTarget {
         
         private nonNegativeAngleType smallDiameterField;
         
@@ -3234,7 +3201,7 @@ namespace Astrarium.Plugins.Journal.OAL {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class deepSkyMS : observationTargetType {
+    public partial class deepSkyMS : OALTarget {
         
         private string[] componentField;
         
@@ -3257,7 +3224,7 @@ namespace Astrarium.Plugins.Journal.OAL {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class starTargetType : observationTargetType {
+    public partial class starTargetType : OALTarget {
         
         private double apparentMagField;
         
@@ -3379,7 +3346,7 @@ namespace Astrarium.Plugins.Journal.OAL {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class sessionType {
+    public partial class OALSession {
         
         private System.DateTime beginField;
         
@@ -3518,7 +3485,7 @@ namespace Astrarium.Plugins.Journal.OAL {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class siteType {
+    public partial class OALSite {
         
         private string nameField;
         
@@ -3536,7 +3503,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         
         private string idField;
         
-        public siteType() {
+        public OALSite() {
             this.timezoneField = "0";
         }
         

@@ -20,10 +20,10 @@ namespace Astrarium.Plugins.Journal.OAL
         {
             using (var db = new DatabaseContext())
             {
-                var data = new observations();
-                data.sites = db.Sites.ToArray().Select(x => x.ToSite()).ToArray();
-                data.observers = db.Observers.ToArray().Select(x => x.ToObserver()).ToArray();
-                data.scopes = db.Optics.ToArray().Select(x => x.ToOptics()).ToArray();
+                var data = new OALData();
+                data.Sites = db.Sites.ToArray().Select(x => x.ToSite()).ToArray();
+                data.Observers = db.Observers.ToArray().Select(x => x.ToObserver()).ToArray();
+                data.Optics = db.Optics.ToArray().Select(x => x.ToOptics()).ToArray();
                 data.eyepieces = db.Eyepieces.ToArray().Select(x => x.ToEyepiece()).ToArray();
                 data.lenses = db.Lenses.ToArray().Select(x => x.ToLens()).ToArray();
                 data.filters = db.Filters.ToArray().Select(x => x.ToFilter()).ToArray();
@@ -32,11 +32,11 @@ namespace Astrarium.Plugins.Journal.OAL
                 ICollection<SessionDB> sessions = db.Sessions.Include(x => x.CoObservers).Include(x => x.Attachments).ToArray();
                 ICollection<TargetDB> targets = db.Targets.ToArray();
 
-                data.sessions = sessions.Select(x => x.ToSession()).ToArray();
+                data.Sessions = sessions.Select(x => x.ToSession()).ToArray();
                 data.observation = db.Observations.Include(x => x.Target).Include(x => x.Attachments).ToArray().Select(x => x.ToObservation(sessions)).ToArray();
-                data.targets = targets.Select(x => x.ToTarget()).ToArray();
+                data.Targets = targets.Select(x => x.ToTarget()).ToArray();
 
-                var serializer = new XmlSerializer(typeof(observations));
+                var serializer = new XmlSerializer(typeof(OALData));
                 using (var stream = new StreamWriter(file))
                 {
                     serializer.Serialize(stream, data);
@@ -44,9 +44,9 @@ namespace Astrarium.Plugins.Journal.OAL
             }
         }
 
-        private static siteType ToSite(this SiteDB site)
+        private static OALSite ToSite(this SiteDB site)
         {
-            return new siteType()
+            return new OALSite()
             {
                 id = site.Id,
                 name = site.Name,
@@ -59,9 +59,9 @@ namespace Astrarium.Plugins.Journal.OAL
             };
         }
 
-        private static observerType ToObserver(this ObserverDB observer)
+        private static OALObserver ToObserver(this ObserverDB observer)
         {
-            return new observerType()
+            return new OALObserver()
             {
                 id = observer.Id,
                 name = observer.FirstName,
@@ -75,9 +75,9 @@ namespace Astrarium.Plugins.Journal.OAL
             };
         }
 
-        private static opticsType ToOptics(this OpticsDB optics)
+        private static OALOptics ToOptics(this OpticsDB optics)
         {
-            opticsType opt = null;
+            OALOptics opt = null;
 
             if (optics.Type == "Telescope")
             {
@@ -174,9 +174,9 @@ namespace Astrarium.Plugins.Journal.OAL
             };
         }
 
-        private static sessionType ToSession(this SessionDB session)
+        private static OALSession ToSession(this SessionDB session)
         {
-            return new sessionType()
+            return new OALSession()
             {
                 id = session.Id,
                 begin = session.Begin,
@@ -268,9 +268,9 @@ namespace Astrarium.Plugins.Journal.OAL
             };
         }
 
-        private static observationTargetType ToTarget(this TargetDB target)
+        private static OALTarget ToTarget(this TargetDB target)
         {
-            observationTargetType tar = null;
+            OALTarget tar = null;
             object details = null;
 
             switch (target.Type)
