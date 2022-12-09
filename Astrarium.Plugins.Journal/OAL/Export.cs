@@ -237,6 +237,8 @@ namespace Astrarium.Plugins.Journal.OAL
                 };
             }
 
+            // TODO: other types of ObservationDetails
+
             findings.description = observation.Result;
 
             return new observationType()
@@ -269,130 +271,164 @@ namespace Astrarium.Plugins.Journal.OAL
         private static observationTargetType ToTarget(this TargetDB target)
         {
             observationTargetType tar = null;
+            object details = null;
 
             switch (target.Type)
             {
                 case "Star":
-                    var details = JsonConvert.DeserializeObject<StarTargetDetails>(target.Details);
-                    tar = new starTargetType()
-                    {
-                        apparentMag = details.Magnitude ?? 0,
-                        apparentMagSpecified = details.Magnitude != null,
-                        classification = details.Classification
-                    };
+                    details = JsonConvert.DeserializeObject<StarTargetDetails>(target.Details);
+                    tar = new starTargetType();
                     break;
                 case "Nova":
                 case "VarStar":
-                    tar = new variableStarTargetType()
-                    {
-                        
-                    };
+                    details = JsonConvert.DeserializeObject<VariableStarTargetDetails>(target.Details);
+                    tar = new variableStarTargetType();
                     break;
                 case "Asterism":
-                    tar = new deepSkyAS()
-                    {
-
-                    };
+                    details = JsonConvert.DeserializeObject<DeepSkyAsterismTargetDetails>(target.Details);
+                    tar = new deepSkyAS();
                     break;
                 case "DeepSky.GlobularCluster":
-                    tar = new deepSkyGC()
-                    {
-
-                    };
+                    details = JsonConvert.DeserializeObject<DeepSkyGlobularClusterTargetDetails>(target.Details);
+                    tar = new deepSkyGC();
                     break;
                 case "DeepSky.GalaxyCluster":
-                    tar = new deepSkyCG()
-                    {
-
-                    };
+                    tar = new deepSkyCG();
+                    details = JsonConvert.DeserializeObject<DeepSkyClusterOfGalaxiesTargetDetails>(target.Details);
                     break;
                 case "DeepSky.DarkNebula":
-                    tar = new deepSkyDN()
-                    {
-
-                    };
+                    tar = new deepSkyDN();
+                    details = JsonConvert.DeserializeObject<DeepSkyDarkNebulaTargetDetails>(target.Details);
                     break;
                 case "DeepSky.DoubleStar":
-                    tar = new deepSkyDS()
-                    {
-
-                    };
+                    tar = new deepSkyDS();
+                    details = JsonConvert.DeserializeObject<DeepSkyDoubleStarTargetDetails>(target.Details);
                     break;
                 case "DeepSky.Galaxy":
-                    tar = new deepSkyGX()
-                    {
-
-                    };
+                    tar = new deepSkyGX();
+                    details = JsonConvert.DeserializeObject<DeepSkyGalaxyTargetDetails>(target.Details);
                     break;
                 case "DeepSky.GalacticNebula":
-                    tar = new deepSkyGN()
-                    {
-
-                    };
+                    tar = new deepSkyGN();
+                    details = JsonConvert.DeserializeObject<DeepSkyGalaxyNebulaTargetDetails>(target.Details);
                     break;
                 case "DeepSky.OpenCluster":
-                    tar = new deepSkyOC()
-                    {
-
-                    };
+                    tar = new deepSkyOC();
+                    details = JsonConvert.DeserializeObject<DeepSkyOpenClusterTargetDetails>(target.Details);
                     break;
                 case "DeepSky.PlanetaryNebula":
-                    tar = new deepSkyPN()
-                    {
-
-                    };
+                    tar = new deepSkyPN();
+                    details = JsonConvert.DeserializeObject<DeepSkyPlanetaryNebulaTargetDetails>(target.Details);
                     break;
                 case "DeepSky.Quasar":
-                    tar = new deepSkyQS()
-                    {
-
-                    };
+                    tar = new deepSkyQS();
+                    details = JsonConvert.DeserializeObject<DeepSkyQuasarTargetDetails>(target.Details);
                     break;
                 case "DeepSky.StarCloud":
-                    tar = new deepSkySC()
-                    {
-
-                    };
+                    tar = new deepSkySC();
+                    details = JsonConvert.DeserializeObject<DeepSkyStarCloudTargetDetails>(target.Details);
                     break;
                 case "DeepSky.Unspecified":
-                    tar = new deepSkyNA()
-                    {
-
-                    };
+                    tar = new deepSkyNA();
+                    details = JsonConvert.DeserializeObject<DeepSkyUnspecifiedTargetDetails>(target.Details);
                     break;
                 case "Comet":
-                    tar = new CometTargetType()
-                    {
-
-                    };
+                    tar = new CometTargetType();
+                    details = JsonConvert.DeserializeObject<DeepSkyPlanetaryNebulaTargetDetails>(target.Details);
                     break;
                 case "Asteroid":
-                    tar = new MinorPlanetTargetType()
-                    {
-
-                    };
+                    tar = new MinorPlanetTargetType();
                     break;
                 case "Moon":
-                    tar = new MoonTargetType()
-                    {
-
-                    };
+                    tar = new MoonTargetType();
                     break;
                 case "Planet":
-                    tar = new PlanetTargetType()
-                    {
-
-                    };
+                    tar = new PlanetTargetType();
                     break;
                 case "Sun":
-                    tar = new SunTargetType()
-                    {
-
-                    };
+                    tar = new SunTargetType();
                     break;
                 default:
                     throw new Exception("Unknown target type");
             }
+            if (tar is starTargetType star)
+            {
+                var d = details as StarTargetDetails;
+                star.apparentMag = d.Magnitude ?? 0;
+                star.apparentMagSpecified = d.Magnitude != null;
+                star.classification = d.Classification;
+            }
+            if (tar is variableStarTargetType varStar)
+            {
+                var d = details as VariableStarTargetDetails;
+                varStar.maxApparentMag = d.MaxMagnitude ?? 0;
+                varStar.maxApparentMagSpecified = d.MaxMagnitude != null;
+                varStar.type = d.VarStarType;
+                varStar.period = d.Period ?? 0;
+                varStar.periodSpecified = d.Period != null;
+            }
+            if (tar is deepSkyTargetType deepSky)
+            {
+                var d = details as DeepSkyTargetDetails;
+                if (d.SmallDiameter != null)
+                {
+                    deepSky.smallDiameter = new nonNegativeAngleType() { Value = d.SmallDiameter.Value, unit = angleUnit.arcsec };
+                }
+                if (d.LargeDiameter != null)
+                {
+                    deepSky.largeDiameter = new nonNegativeAngleType() { Value = d.LargeDiameter.Value, unit = angleUnit.arcsec };
+                }
+                if (d.Brightness != null)
+                {
+                    deepSky.surfBr = new surfaceBrightnessType() { Value = d.Brightness.Value, unit = surfaceBrightnessUnit.magspersquarearcsec };
+                }
+                deepSky.visMag = d.Magnitude ?? 0;
+                deepSky.visMagSpecified = d.Magnitude != null;
+            }
+            if (tar is deepSkyAS asterism)
+            {
+                var d = details as DeepSkyAsterismTargetDetails;
+                asterism.pa = d.PositionAngle?.ToString();
+            }
+            if (tar is deepSkyGC gc)
+            {
+                var d = details as DeepSkyGlobularClusterTargetDetails;
+                gc.magStars = d.MagStars ?? 0;
+                gc.magStarsSpecified = d.MagStars != null;
+                gc.conc = d.Concentration;
+            }
+            if (tar is deepSkyCG cg)
+            {
+                var d = details as DeepSkyClusterOfGalaxiesTargetDetails;
+                cg.mag10 = d.Mag10 ?? 0;
+                cg.mag10Specified = d.Mag10 != null;
+            }
+            if (tar is deepSkyDN dn)
+            {
+                var d = details as DeepSkyDarkNebulaTargetDetails;
+                dn.pa = d.PositionAngle?.ToString();
+                dn.opacity = d.Opacity?.ToString();
+            }
+            if (tar is deepSkyDS ds)
+            {
+                var d = details as DeepSkyDoubleStarTargetDetails;
+                ds.pa = d.PositionAngle?.ToString();
+                ds.magComp = d.CompanionMagnitude ?? 0;
+                ds.magCompSpecified = d.CompanionMagnitude != null;
+                if (d.Separation != null)
+                {
+                    ds.separation = new nonNegativeAngleType() { Value = d.Separation.Value, unit = angleUnit.arcsec };
+                }
+            }
+
+            // TODO: handle other types
+            //deepSkyGX
+            //deepSkyGN
+            //deepSkyOC
+            //deepSkyPN
+            //deepSkyQS
+            //deepSkySC
+            //deepSkyNA
 
             tar.id = target.Id;
             tar.alias = JsonConvert.DeserializeObject<string[]>(target.Aliases);
