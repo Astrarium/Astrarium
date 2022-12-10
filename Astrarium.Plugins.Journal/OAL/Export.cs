@@ -24,22 +24,26 @@ namespace Astrarium.Plugins.Journal.OAL
                 data.Sites = db.Sites.ToArray().Select(x => x.ToSite()).ToArray();
                 data.Observers = db.Observers.ToArray().Select(x => x.ToObserver()).ToArray();
                 data.Optics = db.Optics.ToArray().Select(x => x.ToOptics()).ToArray();
-                data.eyepieces = db.Eyepieces.ToArray().Select(x => x.ToEyepiece()).ToArray();
-                data.lenses = db.Lenses.ToArray().Select(x => x.ToLens()).ToArray();
-                data.filters = db.Filters.ToArray().Select(x => x.ToFilter()).ToArray();
-                data.imagers = db.Cameras.ToArray().Select(x => x.ToImager()).ToArray();
+                data.Eyepieces = db.Eyepieces.ToArray().Select(x => x.ToEyepiece()).ToArray();
+                data.Lenses = db.Lenses.ToArray().Select(x => x.ToLens()).ToArray();
+                data.Filters = db.Filters.ToArray().Select(x => x.ToFilter()).ToArray();
+                data.Cameras = db.Cameras.ToArray().Select(x => x.ToImager()).ToArray();
 
                 ICollection<SessionDB> sessions = db.Sessions.Include(x => x.CoObservers).Include(x => x.Attachments).ToArray();
                 ICollection<TargetDB> targets = db.Targets.ToArray();
 
                 data.Sessions = sessions.Select(x => x.ToSession()).ToArray();
-                data.observation = db.Observations.Include(x => x.Target).Include(x => x.Attachments).ToArray().Select(x => x.ToObservation(sessions)).ToArray();
+                data.Observations = db.Observations.Include(x => x.Target).Include(x => x.Attachments).ToArray().Select(x => x.ToObservation(sessions)).ToArray();
                 data.Targets = targets.Select(x => x.ToTarget()).ToArray();
 
                 var serializer = new XmlSerializer(typeof(OALData));
                 using (var stream = new StreamWriter(file))
                 {
-                    serializer.Serialize(stream, data);
+                    var serializerNamespaces = new XmlSerializerNamespaces();
+                    serializerNamespaces.Add("oal", "http://groups.google.com/group/openastronomylog");
+                    serializerNamespaces.Add("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+                    
+                    serializer.Serialize(stream, data, serializerNamespaces);
                 }
             }
         }
@@ -63,15 +67,15 @@ namespace Astrarium.Plugins.Journal.OAL
         {
             return new OALObserver()
             {
-                id = observer.Id,
-                name = observer.FirstName,
-                surname = observer.LastName,
-                account = JsonConvert.DeserializeObject<Dictionary<string, string>>(observer.Accounts)
-                    .Select(kv => new observerAccountType() { name = kv.Key, Value = kv.Value })
+                Id = observer.Id,
+                Name = observer.FirstName,
+                Surname = observer.LastName,
+                Account = JsonConvert.DeserializeObject<Dictionary<string, string>>(observer.Accounts)
+                    .Select(kv => new OALObserverAccount() { Name = kv.Key, Value = kv.Value })
                     .ToArray(),
-                contact = JsonConvert.DeserializeObject<string[]>(observer.Contacts),
-                fstOffset = observer.FSTOffset != null ? observer.FSTOffset.Value : 0,
-                fstOffsetSpecified = observer.FSTOffset != null
+                Contact = JsonConvert.DeserializeObject<string[]>(observer.Contacts),
+                FSTOffset = observer.FSTOffset != null ? observer.FSTOffset.Value : 0,
+                FSTOffsetSpecified = observer.FSTOffset != null
             };
         }
 
@@ -117,9 +121,9 @@ namespace Astrarium.Plugins.Journal.OAL
             return opt;
         }
 
-        private static eyepieceType ToEyepiece(this EyepieceDB eyepiece)
+        private static OALEyepiece ToEyepiece(this EyepieceDB eyepiece)
         {
-            return new eyepieceType()
+            return new OALEyepiece()
             {
                 id = eyepiece.Id,
                 model = eyepiece.Model,
@@ -131,9 +135,9 @@ namespace Astrarium.Plugins.Journal.OAL
             };
         }
 
-        private static lensType ToLens(this LensDB lens)
+        private static OALLens ToLens(this LensDB lens)
         {
-            return new lensType()
+            return new OALLens()
             {
                 id = lens.Id,
                 factor = lens.Factor,
@@ -142,9 +146,9 @@ namespace Astrarium.Plugins.Journal.OAL
             };
         }
 
-        private static filterType ToFilter(this FilterDB filter)
+        private static OALFilter ToFilter(this FilterDB filter)
         {
-            return new filterType()
+            return new OALFilter()
             {
                 id = filter.Id,
                 vendor = filter.Vendor,
@@ -156,7 +160,7 @@ namespace Astrarium.Plugins.Journal.OAL
             };
         }
 
-        private static imagerType ToImager(this CameraDB camera)
+        private static OALCamera ToImager(this CameraDB camera)
         {
             return new ccdCameraType()
             {
@@ -190,7 +194,7 @@ namespace Astrarium.Plugins.Journal.OAL
             };
         }
 
-        private static observationType ToObservation(this ObservationDB observation, ICollection<SessionDB> sessions)
+        private static OALObservation ToObservation(this ObservationDB observation, ICollection<SessionDB> sessions)
         {
             var session = sessions.FirstOrDefault(x => x.Id == observation.SessionId);
 
@@ -241,7 +245,7 @@ namespace Astrarium.Plugins.Journal.OAL
 
             findings.description = observation.Result;
 
-            return new observationType()
+            return new OALObservation()
             {
                 id = observation.Id,
                 begin = observation.Begin,
@@ -334,7 +338,6 @@ namespace Astrarium.Plugins.Journal.OAL
                     break;
                 case "Comet":
                     tar = new CometTargetType();
-                    details = JsonConvert.DeserializeObject<DeepSkyPlanetaryNebulaTargetDetails>(target.Details);
                     break;
                 case "Asteroid":
                     tar = new MinorPlanetTargetType();

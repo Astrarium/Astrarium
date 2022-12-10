@@ -25,6 +25,7 @@ namespace Astrarium.Plugins.Journal.OAL
         public static void ImportFromOAL(string file)
         {
             var serializer = new XmlSerializer(typeof(OALData));
+
             var stringData = File.ReadAllText(file);
             using (TextReader reader = new StringReader(stringData))
             {
@@ -50,25 +51,25 @@ namespace Astrarium.Plugins.Journal.OAL
                         db.Optics.Add(opticsDB);
                     }
 
-                    foreach (var eyepiece in data.eyepieces)
+                    foreach (var eyepiece in data.Eyepieces)
                     {
                         EyepieceDB eyepieceDB = eyepiece.ToEyepiece();
                         db.Eyepieces.Add(eyepieceDB);
                     }
 
-                    foreach (var lens in data.lenses)
+                    foreach (var lens in data.Lenses)
                     {
                         LensDB lensDB = lens.ToLens();
                         db.Lenses.Add(lensDB);
                     }
 
-                    foreach (var filter in data.filters)
+                    foreach (var filter in data.Filters)
                     {
                         FilterDB filterDB = filter.ToFilter();
                         db.Filters.Add(filterDB);
                     }
 
-                    foreach (var imager in data.imagers)
+                    foreach (var imager in data.Cameras)
                     {
                         CameraDB cameraDB = imager.ToCamera();
                         db.Cameras.Add(cameraDB);
@@ -94,7 +95,7 @@ namespace Astrarium.Plugins.Journal.OAL
                     }
                 }
 
-                foreach (var obs in data.observation)
+                foreach (var obs in data.Observations)
                 {
                     ObservationDB obsDB = obs.ToObservation(data);
 
@@ -144,7 +145,7 @@ namespace Astrarium.Plugins.Journal.OAL
             return attribute.Name;
         }
 
-        private static LensDB ToLens(this lensType lens)
+        private static LensDB ToLens(this OALLens lens)
         {
             return new LensDB()
             {
@@ -171,20 +172,20 @@ namespace Astrarium.Plugins.Journal.OAL
                 return files.Select(i => new AttachmentDB() { Id = Guid.NewGuid().ToString(), FilePath = i }).ToList();
         }
 
-        private static string ToAccounts(this observerAccountType[] accounts)
+        private static string ToAccounts(this OALObserverAccount[] accounts)
         {
             Dictionary<string, string> accountsObject = new Dictionary<string, string>();
             if (accounts != null)
             {
                 foreach (var a in accounts)
                 {
-                    accountsObject[a.name] = a.Value;
+                    accountsObject[a.Name] = a.Value;
                 }
             }
             return JsonConvert.SerializeObject(accountsObject, jsonSettings);
         }
 
-        private static FilterDB ToFilter(this filterType filter)
+        private static FilterDB ToFilter(this OALFilter filter)
         {
             return new FilterDB()
             {
@@ -197,7 +198,7 @@ namespace Astrarium.Plugins.Journal.OAL
             };
         }
 
-        private static CameraDB ToCamera(this imagerType imager)
+        private static CameraDB ToCamera(this OALCamera imager)
         {
             var cameraDb = new CameraDB()
             {
@@ -223,7 +224,7 @@ namespace Astrarium.Plugins.Journal.OAL
             return cameraDb;
         }
 
-        private static EyepieceDB ToEyepiece(this eyepieceType eyepiece)
+        private static EyepieceDB ToEyepiece(this OALEyepiece eyepiece)
         {
             return new EyepieceDB()
             {
@@ -280,12 +281,12 @@ namespace Astrarium.Plugins.Journal.OAL
         {
             return new ObserverDB()
             {
-                Id = observer.id,
-                FirstName = observer.name,
-                LastName = observer.surname,
-                Accounts = observer.account.ToAccounts(),
-                Contacts = observer.contact.ToListOfValues(),
-                FSTOffset = observer.fstOffsetSpecified ? observer.fstOffset : (double?)null
+                Id = observer.Id,
+                FirstName = observer.Name,
+                LastName = observer.Surname,
+                Accounts = observer.Account.ToAccounts(),
+                Contacts = observer.Contact.ToListOfValues(),
+                FSTOffset = observer.FSTOffsetSpecified ? observer.FSTOffset : (double?)null
             };
         }
 
@@ -295,7 +296,7 @@ namespace Astrarium.Plugins.Journal.OAL
         /// </summary>
         /// <param name="observation"></param>
         /// <returns></returns>
-        private static SessionDB ToSession(this observationType observation)
+        private static SessionDB ToSession(this OALObservation observation)
         {
             return new SessionDB()
             {
@@ -313,7 +314,7 @@ namespace Astrarium.Plugins.Journal.OAL
             };
         }
 
-        private static ObservationDB ToObservation(this observationType observation, OALData data)
+        private static ObservationDB ToObservation(this OALObservation observation, OALData data)
         {
             // get target
             var target = data.Targets.First(t => t.id == observation.target);
@@ -415,7 +416,7 @@ namespace Astrarium.Plugins.Journal.OAL
 
         private static SessionDB ToSession(this OALSession session, OALData data)
         {
-            var observations = data.observation.Where(i => i.session == session.id);
+            var observations = data.Observations.Where(i => i.session == session.id);
             string observerId = observations.Select(o => o.observer).FirstOrDefault();
             string[] coObserverIds = session.coObserver ?? new string[0];
             string siteId = observations.Select(o => o.site).FirstOrDefault();
@@ -445,7 +446,7 @@ namespace Astrarium.Plugins.Journal.OAL
                 Begin = begin,
                 End = end,
                 Equipment = session.equipment,
-                CoObservers = data.Observers.Where(o => coObserverIds.Contains(o.id)).Select(x => x.ToObserver()).ToList(),
+                CoObservers = data.Observers.Where(o => coObserverIds.Contains(o.Id)).Select(x => x.ToObserver()).ToList(),
                 Attachments = session.image.ToAttachments(),
                 Comments = session.comments,
                 Weather = session.weather,
@@ -761,10 +762,10 @@ namespace Astrarium.Plugins.Journal.OAL
             result.Source = target.Item;
             if (target.ItemElementName == ItemChoiceType.observer)
             {
-                var observer = data.Observers.FirstOrDefault(x => x.id == target.Item);
+                var observer = data.Observers.FirstOrDefault(x => x.Id == target.Item);
                 if (observer != null)
                 {
-                    result.Source = $"Observer: {observer.name} {observer.surname}".Trim();
+                    result.Source = $"Observer: {observer.Name} {observer.Surname}".Trim();
                 }
             }
 
