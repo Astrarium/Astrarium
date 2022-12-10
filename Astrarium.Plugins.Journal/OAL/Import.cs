@@ -335,14 +335,14 @@ namespace Astrarium.Plugins.Journal.OAL
                 {
                     var details = new VariableStarObservationDetails();
                     details.VisMag = vs.visMag.Value;
-                    details.VisMagUncertain = vs.visMag.uncertainSpecified ? vs.visMag.uncertain : (bool?)null;
-                    details.VisMagFainterThan = vs.visMag.fainterThanSpecified ? vs.visMag.fainterThan : (bool?)null;
+                    details.VisMagUncertain = vs.visMag.UncertainSpecified ? vs.visMag.Uncertain : (bool?)null;
+                    details.VisMagFainterThan = vs.visMag.FainterThanSpecified ? vs.visMag.FainterThan : (bool?)null;
 
                     details.ComparisonStars = vs.comparisonStar.ToListOfValues();
 
                     // AAVSO chart date identifier
                     details.ChartDate = vs.chartID?.Value;
-                    details.NonAAVSOChart = vs.chartID?.nonAAVSOchartSpecified == true ? vs.chartID.nonAAVSOchart : (bool?)null;
+                    details.NonAAVSOChart = vs.chartID?.NonAAVSOChartSpecified == true ? vs.chartID.NonAAVSOChart : (bool?)null;
 
                     details.BrightSky = vs.brightSkySpecified ? vs.brightSky : (bool?)null;
                     details.Clouds = vs.cloudsSpecified ? vs.clouds : (bool?)null;

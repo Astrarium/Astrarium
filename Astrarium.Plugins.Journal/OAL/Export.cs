@@ -205,20 +205,20 @@ namespace Astrarium.Plugins.Journal.OAL
                 var details = JsonConvert.DeserializeObject<VariableStarObservationDetails>(observation.Details);
                 findings = new findingsVariableStarType()
                 {
-                    visMag = new variableStarVisMagType()
+                    visMag = new VariableStarVisMagType()
                     {
-                        fainterThan = details.VisMagFainterThan ?? false,
-                        fainterThanSpecified = details.VisMagFainterThan != null,
-                        uncertain = details.VisMagUncertain ?? false,
-                        uncertainSpecified = details.VisMagUncertain != null,
+                        FainterThan = details.VisMagFainterThan ?? false,
+                        FainterThanSpecified = details.VisMagFainterThan != null,
+                        Uncertain = details.VisMagUncertain ?? false,
+                        UncertainSpecified = details.VisMagUncertain != null,
                         Value = details.VisMag
                     },
                     brightSky = details.BrightSky ?? false,
                     brightSkySpecified = details.BrightSky != null,
-                    chartID = new variableStarChartIDType()
+                    chartID = new VariableStarChartId()
                     {
-                        nonAAVSOchart = details.NonAAVSOChart ?? false,
-                        nonAAVSOchartSpecified = details.NonAAVSOChart != null,
+                        NonAAVSOChart = details.NonAAVSOChart ?? false,
+                        NonAAVSOChartSpecified = details.NonAAVSOChart != null,
                         Value = details.ChartDate
                     },
                     clouds = details.Clouds ?? false,
@@ -240,6 +240,11 @@ namespace Astrarium.Plugins.Journal.OAL
                     unusualActivitySpecified = details.UnusualActivity != null
                 };
             }
+
+            //if (observation.Target.Type == "Planet")
+            //{
+
+            //}
 
             // TODO: other types of ObservationDetails
 
