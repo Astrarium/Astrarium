@@ -97,7 +97,7 @@ namespace Astrarium.Plugins.Journal.OAL
                 opt = new fixedMagnificationOpticsType()
                 {
                     magnification = details.Magnification,
-                    trueField = details.TrueField != null ? new nonNegativeAngleType() { unit = angleUnit.deg, Value = details.TrueField.Value } : null
+                    trueField = details.TrueField != null ? new OALNonNegativeAngle() { Unit = OALAngleUnit.Deg, Value = details.TrueField.Value } : null
                 };
             }
             else
@@ -128,7 +128,7 @@ namespace Astrarium.Plugins.Journal.OAL
                 id = eyepiece.Id,
                 model = eyepiece.Model,
                 vendor = eyepiece.Vendor,
-                apparentFOV = eyepiece.ApparentFOV != null ? new nonNegativeAngleType() { unit = angleUnit.deg, Value = eyepiece.ApparentFOV.Value } : null,
+                apparentFOV = eyepiece.ApparentFOV != null ? new OALNonNegativeAngle() { Unit = OALAngleUnit.Deg, Value = eyepiece.ApparentFOV.Value } : null,
                 focalLength = eyepiece.FocalLength,
                 maxFocalLength = eyepiece.FocalLengthMax ?? 0,
                 maxFocalLengthSpecified = eyepiece.FocalLengthMax != null
@@ -150,31 +150,31 @@ namespace Astrarium.Plugins.Journal.OAL
         {
             return new OALFilter()
             {
-                id = filter.Id,
-                vendor = filter.Vendor,
-                model = filter.Model,
-                type = GetValueFromXmlEnumAttribute<filterKind>(filter.Type),
-                color = filter.Color != null ? GetValueFromXmlEnumAttribute<filterColorType>(filter.Color) : filterColorType.lightred,
-                colorSpecified = filter.Color != null,
-                wratten = filter.Wratten
+                Id = filter.Id,
+                Vendor = filter.Vendor,
+                Model = filter.Model,
+                Type = GetValueFromXmlEnumAttribute<filterKind>(filter.Type),
+                Color = filter.Color != null ? GetValueFromXmlEnumAttribute<filterColorType>(filter.Color) : filterColorType.lightred,
+                ColorSpecified = filter.Color != null,
+                Wratten = filter.Wratten
             };
         }
 
-        private static OALCamera ToImager(this CameraDB camera)
+        private static OALImager ToImager(this CameraDB camera)
         {
-            return new ccdCameraType()
+            return new OALCamera()
             {
-                id = camera.Id,
-                vendor = camera.Vendor,
-                model = camera.Model,
-                binning = camera.Binning.ToString(),
-                pixelsX = camera.PixelsX.ToString(),
-                pixelsY = camera.PixelsY.ToString(),
-                pixelXSize = (decimal)(camera.PixelXSize ?? 0),
-                pixelXSizeSpecified = camera.PixelXSize != null,
-                pixelYSize = (decimal)(camera.PixelYSize ?? 0),
-                pixelYSizeSpecified = camera.PixelYSize != null,
-                remarks = camera.Remarks
+                Id = camera.Id,
+                Vendor = camera.Vendor,
+                Model = camera.Model,
+                Binning = camera.Binning.ToString(),
+                PixelsX = camera.PixelsX.ToString(),
+                PixelsY = camera.PixelsY.ToString(),
+                PixelXSize = (decimal)(camera.PixelXSize ?? 0),
+                PixelXSizeSpecified = camera.PixelXSize != null,
+                PixelYSize = (decimal)(camera.PixelYSize ?? 0),
+                PixelYSizeSpecified = camera.PixelYSize != null,
+                Remarks = camera.Remarks
             };
         }
 
@@ -198,14 +198,14 @@ namespace Astrarium.Plugins.Journal.OAL
         {
             var session = sessions.FirstOrDefault(x => x.Id == observation.SessionId);
 
-            var findings = new findingsType();
+            var findings = new OALFindings();
 
             if (observation.Target.Type == "VarStar" || observation.Target.Type == "Nova")
             {
                 var details = JsonConvert.DeserializeObject<VariableStarObservationDetails>(observation.Details);
-                findings = new findingsVariableStarType()
+                findings = new OALFindingsVariableStar()
                 {
-                    visMag = new VariableStarVisMagType()
+                    VisMag = new VariableStarVisMag()
                     {
                         FainterThan = details.VisMagFainterThan ?? false,
                         FainterThanSpecified = details.VisMagFainterThan != null,
@@ -213,67 +213,76 @@ namespace Astrarium.Plugins.Journal.OAL
                         UncertainSpecified = details.VisMagUncertain != null,
                         Value = details.VisMag
                     },
-                    brightSky = details.BrightSky ?? false,
-                    brightSkySpecified = details.BrightSky != null,
-                    chartID = new VariableStarChartId()
+                    BrightSky = details.BrightSky ?? false,
+                    BrightSkySpecified = details.BrightSky != null,
+                    ChartId = new VariableStarChartId()
                     {
                         NonAAVSOChart = details.NonAAVSOChart ?? false,
                         NonAAVSOChartSpecified = details.NonAAVSOChart != null,
                         Value = details.ChartDate
                     },
-                    clouds = details.Clouds ?? false,
-                    cloudsSpecified = details.Clouds != null,
-                    comparismSequenceProblem = details.ComparismSequenceProblem ?? false,
-                    comparismSequenceProblemSpecified = details.ComparismSequenceProblem != null,
-                    comparisonStar = JsonConvert.DeserializeObject<string[]>(details.ComparisonStars ?? "[]"),
-                    faintStar = details.FaintStar ?? false,
-                    faintStarSpecified = details.FaintStar != null,
-                    nearHorizion = details.NearHorizion ?? false,
-                    nearHorizionSpecified = details.NearHorizion != null,
-                    outburst = details.Outburst ?? false,
-                    outburstSpecified = details.Outburst != null,
-                    poorSeeing = details.PoorSeeing ?? false,
-                    poorSeeingSpecified = details.PoorSeeing != null,
-                    starIdentificationUncertain = details.StarIdentificationUncertain ?? false,
-                    starIdentificationUncertainSpecified = details.StarIdentificationUncertain != null,
-                    unusualActivity = details.UnusualActivity ?? false,
-                    unusualActivitySpecified = details.UnusualActivity != null
+                    Clouds = details.Clouds ?? false,
+                    CloudsSpecified = details.Clouds != null,
+                    ComparismSequenceProblem = details.ComparismSequenceProblem ?? false,
+                    ComparismSequenceProblemSpecified = details.ComparismSequenceProblem != null,
+                    ComparisonStar = JsonConvert.DeserializeObject<string[]>(details.ComparisonStars ?? "[]"),
+                    FaintStar = details.FaintStar ?? false,
+                    FaintStarSpecified = details.FaintStar != null,
+                    NearHorizion = details.NearHorizion ?? false,
+                    NearHorizionSpecified = details.NearHorizion != null,
+                    Outburst = details.Outburst ?? false,
+                    OutburstSpecified = details.Outburst != null,
+                    PoorSeeing = details.PoorSeeing ?? false,
+                    PoorSeeingSpecified = details.PoorSeeing != null,
+                    StarIdentificationUncertain = details.StarIdentificationUncertain ?? false,
+                    StarIdentificationUncertainSpecified = details.StarIdentificationUncertain != null,
+                    UnusualActivity = details.UnusualActivity ?? false,
+                    UnusualActivitySpecified = details.UnusualActivity != null
                 };
             }
 
-            //if (observation.Target.Type == "Planet")
-            //{
-
-            //}
+            if (observation.Target.Type.StartsWith("DeepSky."))
+            {
+                if (observation.Target.Type == "DeepSky.DoubleStar")
+                {
+                    var details = JsonConvert.DeserializeObject<DoubleStarObservationDetails>(observation.Details);
+                    findings = new OALFindingsDeepSkyDS()
+                    {
+                        EqualBrightness = details.EqualBrightness ?? false,
+                        EqualBrightnessSpecified = details.EqualBrightness != null
+                        // TODO: other fields
+                    };
+                }
+            }
 
             // TODO: other types of ObservationDetails
 
-            findings.description = observation.Result;
+            findings.Description = observation.Result;
 
             return new OALObservation()
             {
-                id = observation.Id,
-                begin = observation.Begin,
-                end = observation.End,
-                endSpecified = true,
-                accessories = observation.Accessories,
-                eyepiece = observation.EyepieceId,
-                filter = observation.FilterId,
-                imager = observation.CameraId,
-                lens = observation.LensId,
-                scope = observation.ScopeId,
-                session = observation.SessionId,
-                target = observation.TargetId,
-                faintestStarSpecified = false,
-                magnification = observation.Magnification ?? 0,
-                magnificationSpecified = observation.Magnification != null,
-                image = observation.Attachments?.Select(x => x.FilePath).ToArray(),                
-                observer = session?.ObserverId,
-                faintestStar = session?.FaintestStar ?? 0,
-                seeing = session?.Seeing?.ToString(),
-                site = session?.SiteId,
-                skyquality = session?.SkyQuality != null ? new surfaceBrightnessType() { unit = surfaceBrightnessUnit.magspersquarearcsec, Value = session.SkyQuality.Value } : null,
-                result = new findingsType[] { findings }
+                Id = observation.Id,
+                Begin = observation.Begin,
+                End = observation.End,
+                EndSpecified = true,
+                Accessories = observation.Accessories,
+                EyepieceId = observation.EyepieceId,
+                FilterId = observation.FilterId,
+                CameraId = observation.CameraId,
+                LensId = observation.LensId,
+                ScopeId = observation.ScopeId,
+                SessionId = observation.SessionId,
+                TargetId = observation.TargetId,
+                FaintestStarSpecified = false,
+                Magnification = observation.Magnification ?? 0,
+                MagnificationSpecified = observation.Magnification != null,
+                Image = observation.Attachments?.Select(x => x.FilePath).ToArray(),                
+                ObserverId = session?.ObserverId,
+                FaintestStar = session?.FaintestStar ?? 0,
+                Seeing = session?.Seeing?.ToString(),
+                SiteId = session?.SiteId,
+                SkyQuality = session?.SkyQuality != null ? new OALSurfaceBrightness() { unit = OALSurfaceBrightnessUnit.MagsPerSquareArcSec, Value = session.SkyQuality.Value } : null,
+                Result = new OALFindings[] { findings }
             };
         }
 
@@ -322,19 +331,19 @@ namespace Astrarium.Plugins.Journal.OAL
                     details = JsonConvert.DeserializeObject<DeepSkyGalaxyNebulaTargetDetails>(target.Details);
                     break;
                 case "DeepSky.OpenCluster":
-                    tar = new deepSkyOC();
+                    tar = new OALTargetDeepSkyOC();
                     details = JsonConvert.DeserializeObject<DeepSkyOpenClusterTargetDetails>(target.Details);
                     break;
                 case "DeepSky.PlanetaryNebula":
-                    tar = new deepSkyPN();
+                    tar = new OALTargetDeepSkyPN();
                     details = JsonConvert.DeserializeObject<DeepSkyPlanetaryNebulaTargetDetails>(target.Details);
                     break;
                 case "DeepSky.Quasar":
-                    tar = new deepSkyQS();
+                    tar = new OALTargetDeepSkyQS();
                     details = JsonConvert.DeserializeObject<DeepSkyQuasarTargetDetails>(target.Details);
                     break;
                 case "DeepSky.StarCloud":
-                    tar = new deepSkySC();
+                    tar = new OALTargetDeepSkySC();
                     details = JsonConvert.DeserializeObject<DeepSkyStarCloudTargetDetails>(target.Details);
                     break;
                 case "DeepSky.Unspecified":
@@ -342,19 +351,19 @@ namespace Astrarium.Plugins.Journal.OAL
                     details = JsonConvert.DeserializeObject<DeepSkyUnspecifiedTargetDetails>(target.Details);
                     break;
                 case "Comet":
-                    tar = new CometTargetType();
+                    tar = new OALTargetComet();
                     break;
                 case "Asteroid":
-                    tar = new MinorPlanetTargetType();
+                    tar = new OALTargetMinorPlanet();
                     break;
                 case "Moon":
-                    tar = new MoonTargetType();
+                    tar = new OALTargetMoon();
                     break;
                 case "Planet":
-                    tar = new PlanetTargetType();
+                    tar = new OALTargetPlanet();
                     break;
                 case "Sun":
-                    tar = new SunTargetType();
+                    tar = new OALTargetSun();
                     break;
                 default:
                     throw new Exception("Unknown target type");
@@ -375,23 +384,23 @@ namespace Astrarium.Plugins.Journal.OAL
                 varStar.period = d.Period ?? 0;
                 varStar.periodSpecified = d.Period != null;
             }
-            if (tar is deepSkyTargetType deepSky)
+            if (tar is OALTargetDeepSky deepSky)
             {
                 var d = details as DeepSkyTargetDetails;
                 if (d.SmallDiameter != null)
                 {
-                    deepSky.smallDiameter = new nonNegativeAngleType() { Value = d.SmallDiameter.Value, unit = angleUnit.arcsec };
+                    deepSky.SmallDiameter = new OALNonNegativeAngle() { Value = d.SmallDiameter.Value, Unit = OALAngleUnit.ArcSec };
                 }
                 if (d.LargeDiameter != null)
                 {
-                    deepSky.largeDiameter = new nonNegativeAngleType() { Value = d.LargeDiameter.Value, unit = angleUnit.arcsec };
+                    deepSky.LargeDiameter = new OALNonNegativeAngle() { Value = d.LargeDiameter.Value, Unit = OALAngleUnit.ArcSec };
                 }
                 if (d.Brightness != null)
                 {
-                    deepSky.surfBr = new surfaceBrightnessType() { Value = d.Brightness.Value, unit = surfaceBrightnessUnit.magspersquarearcsec };
+                    deepSky.SurfBr = new OALSurfaceBrightness() { Value = d.Brightness.Value, unit = OALSurfaceBrightnessUnit.MagsPerSquareArcSec };
                 }
-                deepSky.visMag = d.Magnitude ?? 0;
-                deepSky.visMagSpecified = d.Magnitude != null;
+                deepSky.VisMag = d.Magnitude ?? 0;
+                deepSky.VisMagSpecified = d.Magnitude != null;
             }
             if (tar is deepSkyAS asterism)
             {
@@ -425,7 +434,7 @@ namespace Astrarium.Plugins.Journal.OAL
                 ds.magCompSpecified = d.CompanionMagnitude != null;
                 if (d.Separation != null)
                 {
-                    ds.separation = new nonNegativeAngleType() { Value = d.Separation.Value, unit = angleUnit.arcsec };
+                    ds.separation = new OALNonNegativeAngle() { Value = d.Separation.Value, Unit = OALAngleUnit.ArcSec };
                 }
             }
 
@@ -438,16 +447,16 @@ namespace Astrarium.Plugins.Journal.OAL
             //deepSkySC
             //deepSkyNA
 
-            tar.id = target.Id;
-            tar.alias = JsonConvert.DeserializeObject<string[]>(target.Aliases);
-            tar.constellation = target.Constellation;
-            tar.name = target.Name;
-            tar.notes = target.Notes;
+            tar.Id = target.Id;
+            tar.Alias = JsonConvert.DeserializeObject<string[]>(target.Aliases);
+            tar.Constellation = target.Constellation;
+            tar.Name = target.Name;
+            tar.Notes = target.Notes;
             tar.Item = target.Source;
             tar.ItemElementName = ItemChoiceType.datasource;
             if (target.RightAscension != null && target.Declination != null)
             {
-                tar.position = new equPosType()
+                tar.Position = new equPosType()
                 {
                     ra = ToUnsignedAngle(target.RightAscension.Value),
                     dec = ToAngle(target.Declination.Value),
@@ -460,17 +469,18 @@ namespace Astrarium.Plugins.Journal.OAL
                     }
                 };
             }
+
             return tar;
         }
 
-        private static angleType ToAngle(this double angle)
+        private static OALAngle ToAngle(this double angle)
         {
-            return new angleType() { unit = angleUnit.deg, Value = angle };
+            return new OALAngle() { Unit = OALAngleUnit.Deg, Value = angle };
         }
 
-        private static nonNegativeAngleType ToUnsignedAngle(this double angle)
+        private static OALNonNegativeAngle ToUnsignedAngle(this double angle)
         {
-            return new nonNegativeAngleType() { unit = angleUnit.deg, Value = angle };
+            return new OALNonNegativeAngle() { Unit = OALAngleUnit.Deg, Value = angle };
         }
 
         private static T GetValueFromXmlEnumAttribute<T>(string value) where T : Enum

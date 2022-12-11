@@ -13,24 +13,26 @@
 // 
 
 using System;
+using System.Xml.Schema;
 using System.Xml.Serialization;
 
-namespace Astrarium.Plugins.Journal.OAL {
-
+namespace Astrarium.Plugins.Journal.OAL 
+{
     /// <summary>
     /// Root element for OAL data
     /// </summary>
-
     [Serializable]
-    [XmlType(AnonymousType = true, Namespace = "http://groups.google.com/group/openastronomylog")]
-    [XmlRoot(ElementName = "observations", Namespace = "http://groups.google.com/group/openastronomylog", IsNullable = false)]
+    [XmlType(AnonymousType = true, Namespace = OAL)]
+    [XmlRoot(ElementName = "observations", Namespace = OAL, IsNullable = false)]
     public partial class OALData
     {
+        public const string OAL = "http://groups.google.com/group/openastronomylog";
+
         /// <summary>
         /// Schema location
         /// </summary>
         [XmlAttribute(AttributeName = "schemaLocation", Namespace = "http://www.w3.org/2001/XMLSchema-instance")]
-        public string SchemaLocation { get; set; } = "http://groups.google.com/group/openastronomylog oal21.xsd";
+        public string SchemaLocation { get; set; } = $"{OAL} oal21.xsd";
 
         /// <summary>
         /// OAL document version (use 2.1 for export)
@@ -99,7 +101,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         /// </summary>
         [XmlArray(ElementName = "imagers", Namespace = "")]
         [XmlArrayItem(ElementName = "imager", Namespace = "", IsNullable = false)]
-        public OALCamera[] Cameras { get; set; }
+        public OALImager[] Cameras { get; set; }
 
         /// <summary>
         /// Observations
@@ -219,8 +221,8 @@ namespace Astrarium.Plugins.Journal.OAL {
     /// Type for variable star visual magnitude
     /// </summary>
     [Serializable]
-    [XmlType]
-    public partial class VariableStarVisMagType
+    [XmlType(TypeName = "variableStarVisMagType")]
+    public partial class VariableStarVisMag
     {
         /// <remarks/>
         [XmlAttribute(AttributeName = "fainterThan")]
@@ -243,1519 +245,638 @@ namespace Astrarium.Plugins.Journal.OAL {
     }
     
     /// <remarks/>
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(findingsVariableStarType))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(findingsDeepSkyType))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(findingsDeepSkyDSType))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(findingsDeepSkyOCType))]
+    [XmlInclude(typeof(OALFindingsVariableStar))]
+    [XmlInclude(typeof(OALFindingsDeepSky))]
+    [XmlInclude(typeof(OALFindingsDeepSkyDS))]
+    [XmlInclude(typeof(OALFindingsDeepSkyOC))]
     [Serializable]
-    [XmlType(TypeName = "findingsType", Namespace ="http://groups.google.com/group/openastronomylog")]
-    public partial class findingsType {
+    [XmlType(TypeName = "findingsType", Namespace = OALData.OAL)]
+    public partial class OALFindings 
+    {
+        /// <remarks/>
+        [XmlElement(ElementName = "description", Form = XmlSchemaForm.Unqualified)]
+        public string Description { get; set; }
+        
+        /// <remarks/>
+        [XmlAttribute(AttributeName = "lang")]
+        // TODO: save in Database!
+        public string Lang { get; set; }
+    }
+    
+    /// <remarks/>
+    [Serializable]
+    [XmlType(TypeName = "findingsVariableStarType", Namespace = OALData.OAL)]
+    public partial class OALFindingsVariableStar : OALFindings 
+    {        
+        /// <remarks/>
+        [XmlElement(ElementName = "visMag", Form = XmlSchemaForm.Unqualified)]
+        public VariableStarVisMag VisMag { get; set; }
+        
+        /// <remarks/>
+        [XmlElement(ElementName = "comparisonStar", Form = XmlSchemaForm.Unqualified)]
+        public string[] ComparisonStar { get; set; }
 
-        private string descriptionField;
-        
-        private string langField;
-        
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public string description {
-            get {
-                return this.descriptionField;
-            }
-            set {
-                this.descriptionField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public string lang {
-            get {
-                return this.langField;
-            }
-            set {
-                this.langField = value;
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class findingsVariableStarType : findingsType {
-        
-        private VariableStarVisMagType visMagField;
-        
-        private string[] comparisonStarField;
-        
-        private VariableStarChartId chartIDField;
-        
-        private bool brightSkyField;
-        
-        private bool brightSkyFieldSpecified;
-        
-        private bool cloudsField;
-        
-        private bool cloudsFieldSpecified;
-        
-        private bool poorSeeingField;
-        
-        private bool poorSeeingFieldSpecified;
-        
-        private bool nearHorizionField;
-        
-        private bool nearHorizionFieldSpecified;
-        
-        private bool unusualActivityField;
-        
-        private bool unusualActivityFieldSpecified;
-        
-        private bool outburstField;
-        
-        private bool outburstFieldSpecified;
-        
-        private bool comparismSequenceProblemField;
-        
-        private bool comparismSequenceProblemFieldSpecified;
-        
-        private bool starIdentificationUncertainField;
-        
-        private bool starIdentificationUncertainFieldSpecified;
-        
-        private bool faintStarField;
-        
-        private bool faintStarFieldSpecified;
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public VariableStarVisMagType visMag {
-            get {
-                return this.visMagField;
-            }
-            set {
-                this.visMagField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement("comparisonStar", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public string[] comparisonStar {
-            get {
-                return this.comparisonStarField;
-            }
-            set {
-                this.comparisonStarField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public VariableStarChartId chartID {
-            get {
-                return this.chartIDField;
-            }
-            set {
-                this.chartIDField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public bool brightSky {
-            get {
-                return this.brightSkyField;
-            }
-            set {
-                this.brightSkyField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool brightSkySpecified {
-            get {
-                return this.brightSkyFieldSpecified;
-            }
-            set {
-                this.brightSkyFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public bool clouds {
-            get {
-                return this.cloudsField;
-            }
-            set {
-                this.cloudsField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool cloudsSpecified {
-            get {
-                return this.cloudsFieldSpecified;
-            }
-            set {
-                this.cloudsFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public bool poorSeeing {
-            get {
-                return this.poorSeeingField;
-            }
-            set {
-                this.poorSeeingField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool poorSeeingSpecified {
-            get {
-                return this.poorSeeingFieldSpecified;
-            }
-            set {
-                this.poorSeeingFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public bool nearHorizion {
-            get {
-                return this.nearHorizionField;
-            }
-            set {
-                this.nearHorizionField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool nearHorizionSpecified {
-            get {
-                return this.nearHorizionFieldSpecified;
-            }
-            set {
-                this.nearHorizionFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public bool unusualActivity {
-            get {
-                return this.unusualActivityField;
-            }
-            set {
-                this.unusualActivityField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool unusualActivitySpecified {
-            get {
-                return this.unusualActivityFieldSpecified;
-            }
-            set {
-                this.unusualActivityFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public bool outburst {
-            get {
-                return this.outburstField;
-            }
-            set {
-                this.outburstField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool outburstSpecified {
-            get {
-                return this.outburstFieldSpecified;
-            }
-            set {
-                this.outburstFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public bool comparismSequenceProblem {
-            get {
-                return this.comparismSequenceProblemField;
-            }
-            set {
-                this.comparismSequenceProblemField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool comparismSequenceProblemSpecified {
-            get {
-                return this.comparismSequenceProblemFieldSpecified;
-            }
-            set {
-                this.comparismSequenceProblemFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public bool starIdentificationUncertain {
-            get {
-                return this.starIdentificationUncertainField;
-            }
-            set {
-                this.starIdentificationUncertainField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool starIdentificationUncertainSpecified {
-            get {
-                return this.starIdentificationUncertainFieldSpecified;
-            }
-            set {
-                this.starIdentificationUncertainFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public bool faintStar {
-            get {
-                return this.faintStarField;
-            }
-            set {
-                this.faintStarField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool faintStarSpecified {
-            get {
-                return this.faintStarFieldSpecified;
-            }
-            set {
-                this.faintStarFieldSpecified = value;
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(findingsDeepSkyDSType))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(findingsDeepSkyOCType))]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class findingsDeepSkyType : findingsType {
+        [XmlElement(ElementName = "chartID", Form = XmlSchemaForm.Unqualified)]
+        public VariableStarChartId ChartId { get; set; }
 
-        private nonNegativeAngleType smallDiameterField;
-        
-        private nonNegativeAngleType largeDiameterField;
-        
-        private findingsDeepSkyTypeRating ratingField;
-        
-        private bool stellarField;
-        
-        private bool stellarFieldSpecified;
-        
-        private bool extendedField;
-        
-        private bool extendedFieldSpecified;
-        
-        private bool resolvedField;
-        
-        private bool resolvedFieldSpecified;
-        
-        private bool mottledField;
-        
-        private bool mottledFieldSpecified;
-        
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public nonNegativeAngleType smallDiameter {
-            get {
-                return this.smallDiameterField;
-            }
-            set {
-                this.smallDiameterField = value;
-            }
-        }
-        
+        [XmlAttribute(AttributeName = "brightSky")]
+        public bool BrightSky { get; set; }
+
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public nonNegativeAngleType largeDiameter {
-            get {
-                return this.largeDiameterField;
-            }
-            set {
-                this.largeDiameterField = value;
-            }
-        }
-        
+        [XmlIgnore]
+        public bool BrightSkySpecified { get; set; }
+
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public findingsDeepSkyTypeRating rating {
-            get {
-                return this.ratingField;
-            }
-            set {
-                this.ratingField = value;
-            }
-        }
-        
+        [XmlAttribute(AttributeName = "clouds")]
+        public bool Clouds { get; set; }
+
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public bool stellar {
-            get {
-                return this.stellarField;
-            }
-            set {
-                this.stellarField = value;
-            }
-        }
-        
+        [XmlIgnore]
+        public bool CloudsSpecified { get; set; }
+
         /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool stellarSpecified {
-            get {
-                return this.stellarFieldSpecified;
-            }
-            set {
-                this.stellarFieldSpecified = value;
-            }
-        }
-        
+        [XmlAttribute(AttributeName = "poorSeeing")]
+        public bool PoorSeeing { get; set; }
+
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public bool extended {
-            get {
-                return this.extendedField;
-            }
-            set {
-                this.extendedField = value;
-            }
-        }
-        
+        [XmlIgnore]
+        public bool PoorSeeingSpecified { get; set; }
+
         /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool extendedSpecified {
-            get {
-                return this.extendedFieldSpecified;
-            }
-            set {
-                this.extendedFieldSpecified = value;
-            }
-        }
-        
+        [XmlAttribute(AttributeName = "nearHorizion")]
+        public bool NearHorizion { get; set; }
+
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public bool resolved {
-            get {
-                return this.resolvedField;
-            }
-            set {
-                this.resolvedField = value;
-            }
-        }
-        
+        [XmlIgnore]
+        public bool NearHorizionSpecified { get; set; }
+
         /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool resolvedSpecified {
-            get {
-                return this.resolvedFieldSpecified;
-            }
-            set {
-                this.resolvedFieldSpecified = value;
-            }
-        }
-        
+        [XmlAttribute(AttributeName = "unusualActivity")]
+        public bool UnusualActivity { get; set; }
+
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public bool mottled {
-            get {
-                return this.mottledField;
-            }
-            set {
-                this.mottledField = value;
-            }
-        }
-        
+        [XmlIgnore]
+        public bool UnusualActivitySpecified { get; set; }
+
         /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool mottledSpecified {
-            get {
-                return this.mottledFieldSpecified;
-            }
-            set {
-                this.mottledFieldSpecified = value;
-            }
-        }
+        [XmlAttribute(AttributeName = "outburst")]
+        public bool Outburst { get; set; }
+
+        /// <remarks/>
+        [XmlIgnore]
+        public bool OutburstSpecified { get; set; }
+
+        /// <remarks/>
+        [XmlAttribute(AttributeName = "comparismSequenceProblem")]
+        public bool ComparismSequenceProblem { get; set; }
+
+        /// <remarks/>
+        [XmlIgnore]
+        public bool ComparismSequenceProblemSpecified { get; set; }
+
+        /// <remarks/>
+        [XmlAttribute(AttributeName = "starIdentificationUncertain")]
+        public bool StarIdentificationUncertain { get; set; }
+
+        /// <remarks/>
+        [XmlIgnore]
+        public bool StarIdentificationUncertainSpecified { get; set; }
+
+        /// <remarks/>
+        [XmlAttribute(AttributeName = "faintStar")]
+        public bool FaintStar { get; set; }
+
+        /// <remarks/>
+        [XmlIgnore]
+        public bool FaintStarSpecified { get; set; }
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class nonNegativeAngleType : angleType {
+    [XmlInclude(typeof(OALFindingsDeepSkyDS))]
+    [XmlInclude(typeof(OALFindingsDeepSkyOC))]
+    [Serializable]
+    [XmlType(TypeName = "findingsDeepSkyType", Namespace = OALData.OAL)]
+    public partial class OALFindingsDeepSky : OALFindings 
+    {
+        /// <remarks/>
+        [XmlElement(ElementName = "smallDiameter", Form = XmlSchemaForm.Unqualified)]
+        public OALNonNegativeAngle SmallDiameter { get; set; }
+        
+        /// <remarks/>
+        [XmlElement(ElementName = "largeDiameter", Form = XmlSchemaForm.Unqualified)]
+        public OALNonNegativeAngle LargeDiameter { get; set; }
+
+        /// <remarks/>
+        [XmlElement(ElementName = "rating", Form = XmlSchemaForm.Unqualified)]
+        public OALFindingsDeepSkyRating Rating { get; set; }
+
+        /// <remarks/>
+        [XmlAttribute(AttributeName = "stellar")]
+        public bool Stellar { get; set; }
+
+        /// <remarks/>
+        [XmlIgnore]
+        public bool StellarSpecified { get; set; }
+
+        /// <remarks/>
+        [XmlAttribute(AttributeName = "extended")]
+        public bool Extended { get; set; }
+
+        /// <remarks/>
+        [XmlIgnore]
+        public bool ExtendedSpecified { get; set; }
+
+        /// <remarks/>
+        [XmlAttribute(AttributeName = "resolved")]
+        public bool Resolved { get; set; }
+
+        /// <remarks/>
+        [XmlIgnore]
+        public bool ResolvedSpecified { get; set; }
+
+        /// <remarks/>
+        [XmlAttribute(AttributeName = "mottled")]
+        public bool Mottled { get; set; }
+
+        /// <remarks/>
+        [XmlIgnore]
+        public bool MottledSpecified { get; set; }
     }
     
     /// <remarks/>
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(nonNegativeAngleType))]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class angleType {
-        
-        private angleUnit unitField;
-        
-        private double valueField;
-        
+    [Serializable]
+    [XmlType(TypeName = "nonNegativeAngleType", Namespace = OALData.OAL)]
+    public partial class OALNonNegativeAngle : OALAngle { }
+    
+    /// <remarks/>
+    [XmlInclude(typeof(OALNonNegativeAngle))]
+    [Serializable]
+    [XmlType(TypeName = "angleType", Namespace = OALData.OAL)]
+    public partial class OALAngle 
+    {    
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public angleUnit unit {
-            get {
-                return this.unitField;
-            }
-            set {
-                this.unitField = value;
-            }
-        }
+        [XmlAttribute(AttributeName = "unit")]
+        public OALAngleUnit Unit { get; set; }
         
-        /// <remarks/>
-        [System.Xml.Serialization.XmlTextAttribute()]
-        public double Value {
-            get {
-                return this.valueField;
-            }
-            set {
-                this.valueField = value;
-            }
-        }
+        [XmlText]
+        public double Value { get; set; }
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public enum angleUnit {
+    [Serializable]
+    [XmlType(TypeName = "angleUnit", Namespace = OALData.OAL)]
+    public enum OALAngleUnit 
+    {
+        /// <remarks/>
+        [XmlEnum("arcsec")]
+        ArcSec,
+
+        /// <remarks/>
+        [XmlEnum("arcmin")]
+        ArcMin,
+
+        /// <remarks/>
+        [XmlEnum("deg")]
+        Deg,
+
+        /// <remarks/>
+        [XmlEnum("rad")]
+        Rad,
+    }
+
+    /// <summary>
+    /// Deep sky object's visual rating according to the scale of the "Deep Sky Liste"
+    /// </summary>
+    [Serializable]
+    [XmlType(AnonymousType = true, Namespace = OALData.OAL)]
+    public enum OALFindingsDeepSkyRating
+    {        
+        /// <remarks/>
+        [XmlEnum("1")]
+        Rating1,
         
         /// <remarks/>
-        arcsec,
+        [XmlEnum("2")]
+        Rating2,
         
         /// <remarks/>
-        arcmin,
+        [XmlEnum("3")]
+        Rating3,
         
         /// <remarks/>
-        deg,
+        [XmlEnum("4")]
+        Rating4,
         
         /// <remarks/>
-        rad,
+        [XmlEnum("5")]
+        Rating5,
+        
+        /// <remarks/>
+        [XmlEnum("6")]
+        Rating6,
+        
+        /// <remarks/>
+        [XmlEnum("7")]
+        Rating7,
+        
+        /// <remarks/>
+        [XmlEnum("99")]
+        Unknown,
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://groups.google.com/group/openastronomylog")]
-    public enum findingsDeepSkyTypeRating {
+    [Serializable]
+    [XmlType(TypeName = "findingsDeepSkyDSType", Namespace = OALData.OAL)]
+    public partial class OALFindingsDeepSkyDS : OALFindingsDeepSky 
+    {
+        /// <remarks/>
+        [XmlElement(ElementName = "colorMain", Form = XmlSchemaForm.Unqualified)]
+        public starColorType ColorMain { get; set; }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("1")]
-        Item1,
-        
+        [XmlIgnore]
+        public bool ColorMainSpecified { get; set; }
+
         /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("2")]
-        Item2,
-        
+        [XmlElement(ElementName = "colorCompanion", Form = XmlSchemaForm.Unqualified)]
+        public starColorType ColorCompanion { get; set; }
+
         /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("3")]
-        Item3,
-        
+        [XmlIgnore]
+        public bool ColorCompanionSpecified { get; set; }
+
         /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("4")]
-        Item4,
-        
+        [XmlAttribute(AttributeName = "equalBrightness")]
+        public bool EqualBrightness { get; set; }
+
         /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("5")]
-        Item5,
-        
+        [XmlIgnore]
+        public bool EqualBrightnessSpecified { get; set; }
+
         /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("6")]
-        Item6,
-        
+        [XmlAttribute(AttributeName = "niceSurrounding")]
+        public bool NiceSurrounding { get; set; }
+
         /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("7")]
-        Item7,
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("99")]
-        Item99,
+        [XmlIgnore]
+        public bool NiceSurroundingSpecified { get; set; }
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class findingsDeepSkyDSType : findingsDeepSkyType {
-        
-        private starColorType colorMainField;
-        
-        private bool colorMainFieldSpecified;
-        
-        private starColorType colorCompanionField;
-        
-        private bool colorCompanionFieldSpecified;
-        
-        private bool equalBrightnessField;
-        
-        private bool equalBrightnessFieldSpecified;
-        
-        private bool niceSurroundingField;
-        
-        private bool niceSurroundingFieldSpecified;
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public starColorType colorMain {
-            get {
-                return this.colorMainField;
-            }
-            set {
-                this.colorMainField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool colorMainSpecified {
-            get {
-                return this.colorMainFieldSpecified;
-            }
-            set {
-                this.colorMainFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public starColorType colorCompanion {
-            get {
-                return this.colorCompanionField;
-            }
-            set {
-                this.colorCompanionField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool colorCompanionSpecified {
-            get {
-                return this.colorCompanionFieldSpecified;
-            }
-            set {
-                this.colorCompanionFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public bool equalBrightness {
-            get {
-                return this.equalBrightnessField;
-            }
-            set {
-                this.equalBrightnessField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool equalBrightnessSpecified {
-            get {
-                return this.equalBrightnessFieldSpecified;
-            }
-            set {
-                this.equalBrightnessFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public bool niceSurrounding {
-            get {
-                return this.niceSurroundingField;
-            }
-            set {
-                this.niceSurroundingField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool niceSurroundingSpecified {
-            get {
-                return this.niceSurroundingFieldSpecified;
-            }
-            set {
-                this.niceSurroundingFieldSpecified = value;
-            }
-        }
+    [Serializable]
+    [XmlType(TypeName = "starColorType", Namespace = OALData.OAL)]
+    public enum starColorType 
+    {
+        [XmlEnum("white")]
+        White,
+
+        [XmlEnum("red")]
+        Red,
+
+        [XmlEnum("orange")]
+        Orange,
+
+        [XmlEnum("yellow")]
+        Yellow,
+
+        [XmlEnum("green")]
+        Green,
+
+        [XmlEnum("blue")]
+        Blue,
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public enum starColorType {
+
+    [Serializable]
+    [XmlType(TypeName = "findingsDeepSkyOCType", Namespace = OALData.OAL)]
+    public partial class OALFindingsDeepSkyOC : OALFindingsDeepSky
+    {
+        /// <remarks/>
+        [XmlElement(ElementName = "character", Form = XmlSchemaForm.Unqualified)]
+        public OALClusterCharacter Character { get; set; }
         
         /// <remarks/>
-        white,
-        
+        [XmlIgnore]
+        public bool CharacterSpecified { get; set; }
+
         /// <remarks/>
-        red,
-        
+        [XmlAttribute(AttributeName = "unusualShape")]
+        public bool UnusualShape { get; set; }
+
         /// <remarks/>
-        orange,
-        
+        [XmlIgnore]
+        public bool UnusualShapeSpecified { get; set; }
+
         /// <remarks/>
-        yellow,
-        
+        [XmlAttribute(AttributeName = "partlyUnresolved")]
+        public bool PartlyUnresolved { get; set; }
+
         /// <remarks/>
-        green,
-        
+        [XmlIgnore]
+        public bool PartlyUnresolvedSpecified { get; set; }
+
         /// <remarks/>
-        blue,
+        [XmlAttribute(AttributeName = "colorContrasts")]
+        public bool ColorContrasts { get; set; }
+
+        /// <remarks/>
+        [XmlIgnore]
+        public bool ColorContrastsSpecified { get; set; }
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class findingsDeepSkyOCType : findingsDeepSkyType {
-        
-        private clusterCharacterType characterField;
-        
-        private bool characterFieldSpecified;
-        
-        private bool unusualShapeField;
-        
-        private bool unusualShapeFieldSpecified;
-        
-        private bool partlyUnresolvedField;
-        
-        private bool partlyUnresolvedFieldSpecified;
-        
-        private bool colorContrastsField;
-        
-        private bool colorContrastsFieldSpecified;
-        
+    [Serializable]
+    [XmlType(TypeName = "clusterCharacterType", Namespace = OALData.OAL)]
+    public enum OALClusterCharacter 
+    {
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public clusterCharacterType character {
-            get {
-                return this.characterField;
-            }
-            set {
-                this.characterField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool characterSpecified {
-            get {
-                return this.characterFieldSpecified;
-            }
-            set {
-                this.characterFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public bool unusualShape {
-            get {
-                return this.unusualShapeField;
-            }
-            set {
-                this.unusualShapeField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool unusualShapeSpecified {
-            get {
-                return this.unusualShapeFieldSpecified;
-            }
-            set {
-                this.unusualShapeFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public bool partlyUnresolved {
-            get {
-                return this.partlyUnresolvedField;
-            }
-            set {
-                this.partlyUnresolvedField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool partlyUnresolvedSpecified {
-            get {
-                return this.partlyUnresolvedFieldSpecified;
-            }
-            set {
-                this.partlyUnresolvedFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public bool colorContrasts {
-            get {
-                return this.colorContrastsField;
-            }
-            set {
-                this.colorContrastsField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool colorContrastsSpecified {
-            get {
-                return this.colorContrastsFieldSpecified;
-            }
-            set {
-                this.colorContrastsFieldSpecified = value;
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public enum clusterCharacterType {
-        
-        /// <remarks/>
+        [XmlEnum("A")]
         A,
-        
+
         /// <remarks/>
+        [XmlEnum("B")]
         B,
-        
+
         /// <remarks/>
+        [XmlEnum("C")]
         C,
-        
+
         /// <remarks/>
+        [XmlEnum("D")]
         D,
-        
+
         /// <remarks/>
+        [XmlEnum("E")]
         E,
-        
+
         /// <remarks/>
+        [XmlEnum("F")]
         F,
-        
+
         /// <remarks/>
+        [XmlEnum("G")]
         G,
-        
+
         /// <remarks/>
+        [XmlEnum("H")]
         H,
-        
+
         /// <remarks/>
+        [XmlEnum("I")]
         I,
+
+        /// <remarks/>
+        [XmlEnum("X")]
+        X
+    }
+    
+    /// <remarks/>
+    [Serializable]
+    [XmlType(TypeName = "observation", Namespace = OALData.OAL)]
+    public partial class OALObservation 
+    {  
+        /// <remarks/>
+        [XmlElement(ElementName = "observer", Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
+        public string ObserverId { get; set; }
         
         /// <remarks/>
-        X,
+        [XmlElement(ElementName = "site", Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
+        public string SiteId { get; set; }
+
+        /// <remarks/>
+        [XmlElement(ElementName = "session", Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
+        public string SessionId { get; set; }
+
+        /// <remarks/>
+        [XmlElement(ElementName = "target", Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
+        public string TargetId { get; set; }
+
+        /// <remarks/>
+        [XmlElement(ElementName = "begin", Form = XmlSchemaForm.Unqualified)]
+        public DateTime Begin { get; set; }
+
+        /// <remarks/>
+        [XmlElement(ElementName = "end", Form = XmlSchemaForm.Unqualified)]
+        public DateTime End { get; set; }
+
+        /// <remarks/>
+        [XmlIgnore]
+        public bool EndSpecified { get; set; }
+
+        /// <remarks/>
+        [XmlElement(ElementName = "faintestStar", Form = XmlSchemaForm.Unqualified)]
+        public double FaintestStar { get; set; }
+
+        /// <remarks/>
+        [XmlIgnore]
+        public bool FaintestStarSpecified { get; set; }
+
+        /// <remarks/>
+        [XmlElement(ElementName = "sky-quality", Form = XmlSchemaForm.Unqualified)]
+        public OALSurfaceBrightness SkyQuality { get; set; }
+
+        /// <remarks/>
+        [XmlElement(ElementName = "seeing", Form = XmlSchemaForm.Unqualified, DataType = "nonNegativeInteger")]
+        public string Seeing { get; set; }
+
+        /// <remarks/>
+        [XmlElement(ElementName = "scope", Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
+        public string ScopeId { get; set; }
+
+        /// <remarks/>
+        [XmlElement(ElementName = "accessories", Form = XmlSchemaForm.Unqualified)]
+        public string Accessories { get; set; }
+
+        /// <remarks/>
+        [XmlElement(ElementName = "eyepiece", Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
+        public string EyepieceId { get; set; }
+
+        /// <remarks/>
+        [XmlElement(ElementName = "lens", Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
+        public string LensId { get; set; }
+
+        /// <remarks/>
+        [XmlElement(ElementName = "filter", Form=XmlSchemaForm.Unqualified, DataType = "IDREF")]
+        public string FilterId { get; set; }
+
+        /// <remarks/>
+        [XmlElement(ElementName = "magnification", Form = XmlSchemaForm.Unqualified)]
+        public double Magnification { get; set; }
+
+        /// <remarks/>
+        [XmlIgnore]
+        public bool MagnificationSpecified { get; set; }
+
+        /// <remarks/>
+        [XmlElement(ElementName = "imager", Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
+        public string CameraId { get; set; }
+
+        /// <remarks/>
+        [XmlElement(ElementName = "result", Form = XmlSchemaForm.Unqualified)]
+        public OALFindings[] Result { get; set; }
+        
+        /// <remarks/>
+        [XmlElement(ElementName = "image", Form = XmlSchemaForm.Unqualified)]
+        public string[] Image { get; set; }
+
+        /// <remarks/>
+        [XmlAttribute(AttributeName = "id", DataType = "ID")]
+        public string Id { get; set; }
+    }
+    
+    /// <remarks/>
+    [Serializable]
+    [XmlType(TypeName = "surfaceBrightnessType", Namespace = OALData.OAL)]
+    public partial class OALSurfaceBrightness 
+    {        
+        /// <remarks/>
+        [XmlAttribute(AttributeName = "unit")]
+        public OALSurfaceBrightnessUnit unit { get; set; }
+        
+        /// <remarks/>
+        [XmlText]
+        public double Value { get; set; }
+    }
+    
+    /// <remarks/>
+    [Serializable]
+    [XmlType(TypeName = "surfaceBrightnessUnit", Namespace = OALData.OAL)]
+    public enum OALSurfaceBrightnessUnit 
+    {    
+        /// <remarks/>
+        [XmlEnum("mags-per-squarearcsec")]
+        MagsPerSquareArcSec,
+        
+        /// <remarks/>
+        [XmlEnum("mags-per-squarearcmin")]
+        MagsPerSquareArcMin,
+    }
+    
+    /// <remarks />
+    [XmlInclude(typeof(OALCamera))]
+    [Serializable]
+    [XmlType(TypeName = "imagerType", Namespace = OALData.OAL)]
+    public abstract partial class OALImager 
+    {        
+        /// <remarks/>
+        [XmlElement(ElementName = "model", Form = XmlSchemaForm.Unqualified)]
+        public string Model { get; set; }
+        
+        /// <remarks/>
+        [XmlElement(ElementName = "vendor", Form = XmlSchemaForm.Unqualified)]
+        public string Vendor { get; set; }
+
+        /// <remarks/>
+        [XmlElement(ElementName = "remarks", Form = XmlSchemaForm.Unqualified)]
+        public string Remarks { get; set; }
+
+        /// <remarks/>
+        [XmlAttribute(AttributeName = "id", DataType="ID")]
+        public string Id { get; set; }
+    }
+    
+    /// <remarks/>
+    [Serializable]
+    [XmlType(TypeName = "ccdCameraType", Namespace = OALData.OAL)]
+    public partial class OALCamera : OALImager 
+    {        
+        /// <remarks/>
+        [XmlElement(ElementName = "pixelsX", Form = XmlSchemaForm.Unqualified, DataType = "positiveInteger")]
+        public string PixelsX { get; set; }
+        
+        /// <remarks/>
+        [XmlElement(ElementName = "pixelsY", Form = XmlSchemaForm.Unqualified, DataType="positiveInteger")]
+        public string PixelsY { get; set; }
+
+        /// <remarks/>
+        [XmlElement(ElementName = "pixelXSize", Form = XmlSchemaForm.Unqualified)]
+        public decimal PixelXSize { get; set; }
+
+        /// <remarks/>
+        [XmlIgnore]
+        public bool PixelXSizeSpecified { get; set; }
+
+        /// <remarks/>
+        [XmlElement(ElementName = "pixelYSize", Form = XmlSchemaForm.Unqualified)]
+        public decimal PixelYSize { get; set; }
+
+        /// <remarks/>
+        [XmlIgnore]
+        public bool PixelYSizeSpecified { get; set; }
+
+        /// <remarks/>
+        [XmlElement(ElementName = "binning", Form = XmlSchemaForm.Unqualified, DataType = "integer")]
+        public string Binning { get; set; } = "1";
+    }
+    
+    /// <remarks/>
+    [Serializable]
+    [XmlType(TypeName = "filterType", Namespace = OALData.OAL)]
+    public partial class OALFilter 
+    {
+        /// <remarks/>
+        [XmlElement(ElementName = "model", Form = XmlSchemaForm.Unqualified)]
+        public string Model { get; set; }
+        
+        /// <remarks/>
+        [XmlElement(ElementName = "vendor", Form = XmlSchemaForm.Unqualified)]
+        public string Vendor { get; set; }
+
+        /// <remarks/>
+        [XmlElement(ElementName = "type", Form = XmlSchemaForm.Unqualified)]
+        public filterKind Type { get; set; }
+
+        /// <remarks/>
+        [XmlElement(ElementName = "color", Form = XmlSchemaForm.Unqualified)]
+        public filterColorType Color { get; set; }
+            
+        /// <remarks/>
+        [XmlIgnore]
+        public bool ColorSpecified { get; set; }
+
+        /// <remarks/>
+        [XmlElement(ElementName = "wratten", Form =XmlSchemaForm.Unqualified)]
+        public string Wratten { get; set; }
+
+        /// <remarks/>
+        [XmlElement(ElementName = "schott", Form =XmlSchemaForm.Unqualified)]
+        public string Schott { get; set; }
+
+        /// <remarks/>
+        [XmlAttribute(AttributeName = "id", DataType = "ID")]
+        public string Id { get; set; }
     }
     
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class OALObservation {
-        
-        private string observerField;
-        
-        private string siteField;
-        
-        private string sessionField;
-        
-        private string targetField;
-        
-        private System.DateTime beginField;
-        
-        private System.DateTime endField;
-        
-        private bool endFieldSpecified;
-        
-        private double faintestStarField;
-        
-        private bool faintestStarFieldSpecified;
-        
-        private surfaceBrightnessType skyqualityField;
-        
-        private string seeingField;
-        
-        private string scopeField;
-        
-        private string accessoriesField;
-        
-        private string eyepieceField;
-        
-        private string lensField;
-        
-        private string filterField;
-        
-        private double magnificationField;
-        
-        private bool magnificationFieldSpecified;
-        
-        private string imagerField;
-        
-        private findingsType[] resultField;
-        
-        private string[] imageField;
-        
-        private string idField;
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="IDREF")]
-        public string observer {
-            get {
-                return this.observerField;
-            }
-            set {
-                this.observerField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="IDREF")]
-        public string site {
-            get {
-                return this.siteField;
-            }
-            set {
-                this.siteField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="IDREF")]
-        public string session {
-            get {
-                return this.sessionField;
-            }
-            set {
-                this.sessionField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="IDREF")]
-        public string target {
-            get {
-                return this.targetField;
-            }
-            set {
-                this.targetField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public System.DateTime begin {
-            get {
-                return this.beginField;
-            }
-            set {
-                this.beginField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public System.DateTime end {
-            get {
-                return this.endField;
-            }
-            set {
-                this.endField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool endSpecified {
-            get {
-                return this.endFieldSpecified;
-            }
-            set {
-                this.endFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public double faintestStar {
-            get {
-                return this.faintestStarField;
-            }
-            set {
-                this.faintestStarField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool faintestStarSpecified {
-            get {
-                return this.faintestStarFieldSpecified;
-            }
-            set {
-                this.faintestStarFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement("sky-quality", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public surfaceBrightnessType skyquality {
-            get {
-                return this.skyqualityField;
-            }
-            set {
-                this.skyqualityField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="nonNegativeInteger")]
-        public string seeing {
-            get {
-                return this.seeingField;
-            }
-            set {
-                this.seeingField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="IDREF")]
-        public string scope {
-            get {
-                return this.scopeField;
-            }
-            set {
-                this.scopeField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public string accessories {
-            get {
-                return this.accessoriesField;
-            }
-            set {
-                this.accessoriesField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="IDREF")]
-        public string eyepiece {
-            get {
-                return this.eyepieceField;
-            }
-            set {
-                this.eyepieceField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="IDREF")]
-        public string lens {
-            get {
-                return this.lensField;
-            }
-            set {
-                this.lensField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="IDREF")]
-        public string filter {
-            get {
-                return this.filterField;
-            }
-            set {
-                this.filterField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public double magnification {
-            get {
-                return this.magnificationField;
-            }
-            set {
-                this.magnificationField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool magnificationSpecified {
-            get {
-                return this.magnificationFieldSpecified;
-            }
-            set {
-                this.magnificationFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="IDREF")]
-        public string imager {
-            get {
-                return this.imagerField;
-            }
-            set {
-                this.imagerField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement("result", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public findingsType[] result {
-            get {
-                return this.resultField;
-            }
-            set {
-                this.resultField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement("image", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public string[] image {
-            get {
-                return this.imageField;
-            }
-            set {
-                this.imageField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType="ID")]
-        public string id {
-            get {
-                return this.idField;
-            }
-            set {
-                this.idField = value;
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class surfaceBrightnessType {
-        
-        private surfaceBrightnessUnit unitField;
-        
-        private double valueField;
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public surfaceBrightnessUnit unit {
-            get {
-                return this.unitField;
-            }
-            set {
-                this.unitField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlTextAttribute()]
-        public double Value {
-            get {
-                return this.valueField;
-            }
-            set {
-                this.valueField = value;
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public enum surfaceBrightnessUnit {
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("mags-per-squarearcsec")]
-        magspersquarearcsec,
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("mags-per-squarearcmin")]
-        magspersquarearcmin,
-    }
-    
-    /// <remarks/>
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(ccdCameraType))]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public abstract partial class OALCamera {
-        
-        private string modelField;
-        
-        private string vendorField;
-        
-        private string remarksField;
-        
-        private string idField;
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public string model {
-            get {
-                return this.modelField;
-            }
-            set {
-                this.modelField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public string vendor {
-            get {
-                return this.vendorField;
-            }
-            set {
-                this.vendorField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public string remarks {
-            get {
-                return this.remarksField;
-            }
-            set {
-                this.remarksField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType="ID")]
-        public string id {
-            get {
-                return this.idField;
-            }
-            set {
-                this.idField = value;
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class ccdCameraType : OALCamera {
-        
-        private string pixelsXField;
-        
-        private string pixelsYField;
-        
-        private decimal pixelXSizeField;
-        
-        private bool pixelXSizeFieldSpecified;
-        
-        private decimal pixelYSizeField;
-        
-        private bool pixelYSizeFieldSpecified;
-        
-        private string binningField;
-        
-        public ccdCameraType() {
-            this.binningField = "1";
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="positiveInteger")]
-        public string pixelsX {
-            get {
-                return this.pixelsXField;
-            }
-            set {
-                this.pixelsXField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="positiveInteger")]
-        public string pixelsY {
-            get {
-                return this.pixelsYField;
-            }
-            set {
-                this.pixelsYField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public decimal pixelXSize {
-            get {
-                return this.pixelXSizeField;
-            }
-            set {
-                this.pixelXSizeField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool pixelXSizeSpecified {
-            get {
-                return this.pixelXSizeFieldSpecified;
-            }
-            set {
-                this.pixelXSizeFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public decimal pixelYSize {
-            get {
-                return this.pixelYSizeField;
-            }
-            set {
-                this.pixelYSizeField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool pixelYSizeSpecified {
-            get {
-                return this.pixelYSizeFieldSpecified;
-            }
-            set {
-                this.pixelYSizeFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="integer")]
-        public string binning {
-            get {
-                return this.binningField;
-            }
-            set {
-                this.binningField = value;
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class OALFilter {
-        
-        private string modelField;
-        
-        private string vendorField;
-        
-        private filterKind typeField;
-        
-        private filterColorType colorField;
-        
-        private bool colorFieldSpecified;
-        
-        private string wrattenField;
-        
-        private string schottField;
-        
-        private string idField;
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public string model {
-            get {
-                return this.modelField;
-            }
-            set {
-                this.modelField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public string vendor {
-            get {
-                return this.vendorField;
-            }
-            set {
-                this.vendorField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public filterKind type {
-            get {
-                return this.typeField;
-            }
-            set {
-                this.typeField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public filterColorType color {
-            get {
-                return this.colorField;
-            }
-            set {
-                this.colorField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool colorSpecified {
-            get {
-                return this.colorFieldSpecified;
-            }
-            set {
-                this.colorFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public string wratten {
-            get {
-                return this.wrattenField;
-            }
-            set {
-                this.wrattenField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public string schott {
-            get {
-                return this.schottField;
-            }
-            set {
-                this.schottField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType="ID")]
-        public string id {
-            get {
-                return this.idField;
-            }
-            set {
-                this.idField = value;
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
+    [Serializable]
+    [XmlType(Namespace=OALData.OAL)]
     public enum filterKind {
         
         /// <remarks/>
         other,
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("broad band")]
+        [XmlEnumAttribute("broad band")]
         broadband,
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("narrow band")]
+        [XmlEnumAttribute("narrow band")]
         narrowband,
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("O-III")]
+        [XmlEnumAttribute("O-III")]
         OIII,
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("H-beta")]
+        [XmlEnumAttribute("H-beta")]
         Hbeta,
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("H-alpha")]
+        [XmlEnumAttribute("H-alpha")]
         Halpha,
         
         /// <remarks/>
@@ -1773,59 +894,59 @@ namespace Astrarium.Plugins.Journal.OAL {
     
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
+    [Serializable]
+    [XmlType(Namespace=OALData.OAL)]
     public enum filterColorType {
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("light red")]
+        [XmlEnumAttribute("light red")]
         lightred,
         
         /// <remarks/>
         red,
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("deep red")]
+        [XmlEnumAttribute("deep red")]
         deepred,
         
         /// <remarks/>
         orange,
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("light yellow")]
+        [XmlEnumAttribute("light yellow")]
         lightyellow,
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("deep yellow")]
+        [XmlEnumAttribute("deep yellow")]
         deepyellow,
         
         /// <remarks/>
         yellow,
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("yellow-green")]
+        [XmlEnumAttribute("yellow-green")]
         yellowgreen,
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("light green")]
+        [XmlEnumAttribute("light green")]
         lightgreen,
         
         /// <remarks/>
         green,
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("medium blue")]
+        [XmlEnumAttribute("medium blue")]
         mediumblue,
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("pale blue")]
+        [XmlEnumAttribute("pale blue")]
         paleblue,
         
         /// <remarks/>
         blue,
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("deep blue")]
+        [XmlEnumAttribute("deep blue")]
         deepblue,
         
         /// <remarks/>
@@ -1834,10 +955,10 @@ namespace Astrarium.Plugins.Journal.OAL {
     
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
+    [Serializable]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
+    [XmlType(Namespace=OALData.OAL)]
     public partial class OALLens {
         
         private string modelField;
@@ -1849,7 +970,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         private string idField;
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public string model {
             get {
                 return this.modelField;
@@ -1860,7 +981,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public string vendor {
             get {
                 return this.vendorField;
@@ -1871,7 +992,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public double factor {
             get {
                 return this.factorField;
@@ -1882,7 +1003,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType="ID")]
+        [XmlAttribute(DataType="ID")]
         public string id {
             get {
                 return this.idField;
@@ -1895,10 +1016,10 @@ namespace Astrarium.Plugins.Journal.OAL {
     
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
+    [Serializable]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(TypeName = "eyepiece", Namespace="http://groups.google.com/group/openastronomylog")]
+    [XmlType(TypeName = "eyepiece", Namespace=OALData.OAL)]
     public partial class OALEyepiece {
         
         private string modelField;
@@ -1911,7 +1032,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         
         private bool maxFocalLengthFieldSpecified;
         
-        private nonNegativeAngleType apparentFOVField;
+        private OALNonNegativeAngle apparentFOVField;
         
         private string idField;
         
@@ -1927,7 +1048,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public string vendor {
             get {
                 return this.vendorField;
@@ -1938,7 +1059,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public double focalLength {
             get {
                 return this.focalLengthField;
@@ -1949,7 +1070,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public double maxFocalLength {
             get {
                 return this.maxFocalLengthField;
@@ -1960,7 +1081,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        [XmlIgnore]
         public bool maxFocalLengthSpecified {
             get {
                 return this.maxFocalLengthFieldSpecified;
@@ -1971,8 +1092,8 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public nonNegativeAngleType apparentFOV {
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
+        public OALNonNegativeAngle apparentFOV {
             get {
                 return this.apparentFOVField;
             }
@@ -1982,7 +1103,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType="ID")]
+        [XmlAttribute(DataType="ID")]
         public string id {
             get {
                 return this.idField;
@@ -1994,13 +1115,13 @@ namespace Astrarium.Plugins.Journal.OAL {
     }
     
     /// <remarks/>
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(fixedMagnificationOpticsType))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(scopeType))]
+    [XmlInclude(typeof(fixedMagnificationOpticsType))]
+    [XmlInclude(typeof(scopeType))]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
+    [Serializable]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
+    [XmlType(Namespace=OALData.OAL)]
     public abstract partial class OALOptics {
         
         private string modelField;
@@ -2020,7 +1141,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         private string idField;
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public string model {
             get {
                 return this.modelField;
@@ -2031,7 +1152,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public string type {
             get {
                 return this.typeField;
@@ -2042,7 +1163,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public string vendor {
             get {
                 return this.vendorField;
@@ -2053,7 +1174,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public double aperture {
             get {
                 return this.apertureField;
@@ -2064,7 +1185,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public double lightGrasp {
             get {
                 return this.lightGraspField;
@@ -2075,7 +1196,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        [XmlIgnore]
         public bool lightGraspSpecified {
             get {
                 return this.lightGraspFieldSpecified;
@@ -2086,7 +1207,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public opticsTypeOrientation orientation {
             get {
                 return this.orientationField;
@@ -2097,7 +1218,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType="ID")]
+        [XmlAttribute(DataType="ID")]
         public string id {
             get {
                 return this.idField;
@@ -2110,10 +1231,10 @@ namespace Astrarium.Plugins.Journal.OAL {
     
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
+    [Serializable]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://groups.google.com/group/openastronomylog")]
+    [XmlType(AnonymousType=true, Namespace=OALData.OAL)]
     public partial class opticsTypeOrientation {
         
         private bool erectField;
@@ -2121,7 +1242,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         private bool truesidedField;
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [XmlAttribute()]
         public bool erect {
             get {
                 return this.erectField;
@@ -2132,7 +1253,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [XmlAttribute()]
         public bool truesided {
             get {
                 return this.truesidedField;
@@ -2145,18 +1266,18 @@ namespace Astrarium.Plugins.Journal.OAL {
     
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
+    [Serializable]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
+    [XmlType(Namespace=OALData.OAL)]
     public partial class fixedMagnificationOpticsType : OALOptics {
         
         private double magnificationField;
         
-        private nonNegativeAngleType trueFieldField;
+        private OALNonNegativeAngle trueFieldField;
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public double magnification {
             get {
                 return this.magnificationField;
@@ -2167,8 +1288,8 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public nonNegativeAngleType trueField {
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
+        public OALNonNegativeAngle trueField {
             get {
                 return this.trueFieldField;
             }
@@ -2180,16 +1301,16 @@ namespace Astrarium.Plugins.Journal.OAL {
     
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
+    [Serializable]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
+    [XmlType(Namespace=OALData.OAL)]
     public partial class scopeType : OALOptics {
         
         private double focalLengthField;
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public double focalLength {
             get {
                 return this.focalLengthField;
@@ -2202,10 +1323,10 @@ namespace Astrarium.Plugins.Journal.OAL {
     
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
+    [Serializable]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
+    [XmlType(Namespace=OALData.OAL)]
     public partial class referenceFrameType {
         
         private referenceFrameTypeOrigin originField;
@@ -2217,7 +1338,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public referenceFrameTypeOrigin origin {
             get {
                 return this.originField;
@@ -2228,7 +1349,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public referenceFrameTypeEquinox equinox {
             get {
                 return this.equinoxField;
@@ -2241,8 +1362,8 @@ namespace Astrarium.Plugins.Journal.OAL {
     
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://groups.google.com/group/openastronomylog")]
+    [Serializable]
+    [XmlType(AnonymousType=true, Namespace=OALData.OAL)]
     public enum referenceFrameTypeOrigin {
         
         /// <remarks/>
@@ -2254,8 +1375,8 @@ namespace Astrarium.Plugins.Journal.OAL {
     
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://groups.google.com/group/openastronomylog")]
+    [Serializable]
+    [XmlType(AnonymousType=true, Namespace=OALData.OAL)]
     public enum referenceFrameTypeEquinox {
         
         /// <remarks/>
@@ -2270,21 +1391,21 @@ namespace Astrarium.Plugins.Journal.OAL {
     
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
+    [Serializable]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
+    [XmlType(Namespace=OALData.OAL)]
     public partial class equPosType {
         
-        private nonNegativeAngleType raField;
+        private OALNonNegativeAngle raField;
         
-        private angleType decField;
+        private OALAngle decField;
         
         private referenceFrameType frameField;
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public nonNegativeAngleType ra {
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
+        public OALNonNegativeAngle ra {
             get {
                 return this.raField;
             }
@@ -2294,8 +1415,8 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public angleType dec {
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
+        public OALAngle dec {
             get {
                 return this.decField;
             }
@@ -2305,7 +1426,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public referenceFrameType frame {
             get {
                 return this.frameField;
@@ -2317,376 +1438,211 @@ namespace Astrarium.Plugins.Journal.OAL {
     }
     
     /// <remarks/>
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(SolarSystemTargetType))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(SunTargetType))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(PlanetTargetType))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(MoonTargetType))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(MinorPlanetTargetType))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(CometTargetType))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkyTargetType))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkySC))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkyQS))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkyPN))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkyOC))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkyNA))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkyGX))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkyGN))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkyGC))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkyDS))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkyDN))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkyCG))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkyAS))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkyMS))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(starTargetType))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(variableStarTargetType))]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class OALTarget {
-        
-        private string itemField;
-        
-        private ItemChoiceType itemElementNameField;
-        
-        private string nameField;
-        
-        private string[] aliasField;
-        
-        private equPosType positionField;
-        
-        private string constellationField;
-        
-        private string notesField;
-        
-        private string idField;
+    [XmlInclude(typeof(OALTargetSolarSystem))]
+    [XmlInclude(typeof(OALTargetSun))]
+    [XmlInclude(typeof(OALTargetPlanet))]
+    [XmlInclude(typeof(OALTargetMoon))]
+    [XmlInclude(typeof(OALTargetMinorPlanet))]
+    [XmlInclude(typeof(OALTargetComet))]
+    [XmlInclude(typeof(OALTargetDeepSky))]
+    [XmlInclude(typeof(OALTargetDeepSkySC))]
+    [XmlInclude(typeof(OALTargetDeepSkyQS))]
+    [XmlInclude(typeof(OALTargetDeepSkyPN))]
+    [XmlInclude(typeof(OALTargetDeepSkyOC))]
+    [XmlInclude(typeof(deepSkyNA))]
+    [XmlInclude(typeof(deepSkyGX))]
+    [XmlInclude(typeof(deepSkyGN))]
+    [XmlInclude(typeof(deepSkyGC))]
+    [XmlInclude(typeof(deepSkyDS))]
+    [XmlInclude(typeof(deepSkyDN))]
+    [XmlInclude(typeof(deepSkyCG))]
+    [XmlInclude(typeof(deepSkyAS))]
+    [XmlInclude(typeof(deepSkyMS))]
+    [XmlInclude(typeof(starTargetType))]
+    [XmlInclude(typeof(variableStarTargetType))]
+    [Serializable]
+    [XmlType(Namespace=OALData.OAL)]
+    public partial class OALTarget 
+    {
+        /// <remarks/>
+        [XmlElement("datasource", typeof(string), Form = XmlSchemaForm.Unqualified)]
+        [XmlElement("observer", typeof(string), Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
+        [XmlChoiceIdentifier("ItemElementName")]
+        public string Item { get; set; }
         
         /// <remarks/>
-        [XmlElement("datasource", typeof(string), Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        [XmlElement("observer", typeof(string), Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="IDREF")]
-        [System.Xml.Serialization.XmlChoiceIdentifierAttribute("ItemElementName")]
-        public string Item {
-            get {
-                return this.itemField;
-            }
-            set {
-                this.itemField = value;
-            }
-        }
+        [XmlIgnore]
+        public ItemChoiceType ItemElementName { get; set; }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public ItemChoiceType ItemElementName {
-            get {
-                return this.itemElementNameField;
-            }
-            set {
-                this.itemElementNameField = value;
-            }
-        }
+        [XmlElement(ElementName = "name", Form = XmlSchemaForm.Unqualified)]
+        public string Name { get; set; }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public string name {
-            get {
-                return this.nameField;
-            }
-            set {
-                this.nameField = value;
-            }
-        }
+        [XmlElement(ElementName = "alias", Form = XmlSchemaForm.Unqualified)]
+        public string[] Alias { get; set; }
         
         /// <remarks/>
-        [XmlElement("alias", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public string[] alias {
-            get {
-                return this.aliasField;
-            }
-            set {
-                this.aliasField = value;
-            }
-        }
+        [XmlElement(ElementName = "position", Form = XmlSchemaForm.Unqualified)]
+        public equPosType Position { get; set; }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public equPosType position {
-            get {
-                return this.positionField;
-            }
-            set {
-                this.positionField = value;
-            }
-        }
+        [XmlElement(ElementName = "constellation", Form = XmlSchemaForm.Unqualified)]
+        public string Constellation { get; set; }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public string constellation {
-            get {
-                return this.constellationField;
-            }
-            set {
-                this.constellationField = value;
-            }
-        }
+        [XmlElement(ElementName = "notes", Form = XmlSchemaForm.Unqualified)]
+        public string Notes { get; set; }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public string notes {
-            get {
-                return this.notesField;
-            }
-            set {
-                this.notesField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType="ID")]
-        public string id {
-            get {
-                return this.idField;
-            }
-            set {
-                this.idField = value;
-            }
-        }
+        [XmlAttribute(AttributeName = "id", DataType = "ID")]
+        public string Id { get; set; }
     }
     
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog", IncludeInSchema=false)]
+    [Serializable]
+    [XmlType(Namespace=OALData.OAL, IncludeInSchema = false)]
     public enum ItemChoiceType {
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute(":datasource")]
+        [XmlEnumAttribute(":datasource")]
         datasource,
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute(":observer")]
+        [XmlEnumAttribute(":observer")]
         observer,
     }
+
+    /// <summary>
+    /// OAL abstract target type for solar system objects
+    /// </summary>
+    [XmlInclude(typeof(OALTargetSun))]
+    [XmlInclude(typeof(OALTargetPlanet))]
+    [XmlInclude(typeof(OALTargetMoon))]
+    [XmlInclude(typeof(OALTargetMinorPlanet))]
+    [XmlInclude(typeof(OALTargetComet))]
+    [Serializable]
+    [XmlType(TypeName = "SolarSystemTargetType", Namespace = OALData.OAL)]
+    public abstract partial class OALTargetSolarSystem : OALTarget { }
     
-    /// <remarks/>
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(SunTargetType))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(PlanetTargetType))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(MoonTargetType))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(MinorPlanetTargetType))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(CometTargetType))]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public abstract partial class SolarSystemTargetType : OALTarget {
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class SunTargetType : SolarSystemTargetType {
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class PlanetTargetType : SolarSystemTargetType {
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class MoonTargetType : SolarSystemTargetType {
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class MinorPlanetTargetType : SolarSystemTargetType {
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class CometTargetType : SolarSystemTargetType {
-    }
-    
-    /// <remarks/>
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkySC))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkyQS))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkyPN))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkyOC))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkyNA))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkyGX))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkyGN))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkyGC))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkyDS))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkyDN))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkyCG))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(deepSkyAS))]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public abstract partial class deepSkyTargetType : OALTarget {
-        
-        private nonNegativeAngleType smallDiameterField;
-        
-        private nonNegativeAngleType largeDiameterField;
-        
-        private double visMagField;
-        
-        private bool visMagFieldSpecified;
-        
-        private surfaceBrightnessType surfBrField;
+    /// <summary>
+    /// OAL target type for Sun
+    /// </summary>
+    [Serializable]
+    [XmlType(TypeName = "SunTargetType", Namespace = OALData.OAL)]
+    public partial class OALTargetSun : OALTargetSolarSystem { }
+
+    /// <summary>
+    /// OAL target type for planets
+    /// </summary>
+    [Serializable]
+    [XmlType(TypeName = "PlanetTargetType", Namespace = OALData.OAL)]
+    public partial class OALTargetPlanet : OALTargetSolarSystem { }
+
+    /// <summary>
+    /// OAL target type for Moon
+    /// </summary>
+    [Serializable]
+    [XmlType(TypeName = "MoonTargetType", Namespace = OALData.OAL)]
+    public partial class OALTargetMoon : OALTargetSolarSystem { }
+
+    /// <summary>
+    /// OAL target type for minor planets
+    /// </summary>
+    [Serializable]
+    [XmlType(TypeName = "MinorPlanetTargetType", Namespace = OALData.OAL)]
+    public partial class OALTargetMinorPlanet : OALTargetSolarSystem { }
+
+    /// <summary>
+    /// OAL target type for comets
+    /// </summary>
+    [Serializable]
+    [XmlType(TypeName = "CometTargetType", Namespace = OALData.OAL)]
+    public partial class OALTargetComet : OALTargetSolarSystem { }
+
+    /// <summary>
+    /// OAL abstract target type for deep sky objects
+    /// </summary>
+    [XmlInclude(typeof(OALTargetDeepSkySC))]
+    [XmlInclude(typeof(OALTargetDeepSkyQS))]
+    [XmlInclude(typeof(OALTargetDeepSkyPN))]
+    [XmlInclude(typeof(OALTargetDeepSkyOC))]
+    [XmlInclude(typeof(deepSkyNA))]
+    [XmlInclude(typeof(deepSkyGX))]
+    [XmlInclude(typeof(deepSkyGN))]
+    [XmlInclude(typeof(deepSkyGC))]
+    [XmlInclude(typeof(deepSkyDS))]
+    [XmlInclude(typeof(deepSkyDN))]
+    [XmlInclude(typeof(deepSkyCG))]
+    [XmlInclude(typeof(deepSkyAS))]   
+    [Serializable]
+    [XmlType(TypeName = "deepSkyTargetType", Namespace = OALData.OAL)]
+    public abstract partial class OALTargetDeepSky : OALTarget 
+    {  
+        /// <remarks/>
+        [XmlElement(ElementName = "smallDiameter", Form = XmlSchemaForm.Unqualified)]
+        public OALNonNegativeAngle SmallDiameter { get; set; }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public nonNegativeAngleType smallDiameter {
-            get {
-                return this.smallDiameterField;
-            }
-            set {
-                this.smallDiameterField = value;
-            }
-        }
-        
+        [XmlElement(ElementName = "largeDiameter", Form = XmlSchemaForm.Unqualified)]
+        public OALNonNegativeAngle LargeDiameter { get; set; }
+
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public nonNegativeAngleType largeDiameter {
-            get {
-                return this.largeDiameterField;
-            }
-            set {
-                this.largeDiameterField = value;
-            }
-        }
-        
+        [XmlElement(ElementName = "visMag", Form = XmlSchemaForm.Unqualified)]
+        public double VisMag { get; set; }
+
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public double visMag {
-            get {
-                return this.visMagField;
-            }
-            set {
-                this.visMagField = value;
-            }
-        }
-        
+        [XmlIgnore]
+        public bool VisMagSpecified { get; set; }
+
         /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool visMagSpecified {
-            get {
-                return this.visMagFieldSpecified;
-            }
-            set {
-                this.visMagFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public surfaceBrightnessType surfBr {
-            get {
-                return this.surfBrField;
-            }
-            set {
-                this.surfBrField = value;
-            }
-        }
+        [XmlElement(ElementName = "surfBr", Form = XmlSchemaForm.Unqualified)]
+        public OALSurfaceBrightness SurfBr { get; set; }
     }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class deepSkySC : deepSkyTargetType {
-        
-        private string paField;
-        
-        /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="integer")]
-        public string pa {
-            get {
-                return this.paField;
-            }
-            set {
-                this.paField = value;
-            }
-        }
+
+    /// <summary>
+    /// OAL target type for star clouds (deep sky)
+    /// </summary>
+    [Serializable]
+    [XmlType(TypeName = "deepSkySC", Namespace = OALData.OAL)]
+    public partial class OALTargetDeepSkySC : OALTargetDeepSky 
+    {
+        /// <summary>
+        /// Position angle of large axis in degrees
+        /// </summary>
+        [XmlElement(ElementName = "pa", Form = XmlSchemaForm.Unqualified, DataType = "integer")]
+        public string PositionAngle { get; set; }
     }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class deepSkyQS : deepSkyTargetType {
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class deepSkyPN : deepSkyTargetType {
-        
-        private double magStarField;
-        
-        private bool magStarFieldSpecified;
-        
+
+    /// <summary>
+    ///  OAL target type for quasars (deep sky)
+    /// </summary>
+    [Serializable]
+    [XmlType(TypeName = "deepSkyQS", Namespace = OALData.OAL)]
+    public partial class OALTargetDeepSkyQS : OALTargetDeepSky { }
+
+
+    /// <summary>
+    /// OAL target type for planetary nebulae (deep sky)
+    /// </summary>
+    [Serializable]
+    [XmlType(TypeName = "deepSkyPN", Namespace = OALData.OAL)]
+    public partial class OALTargetDeepSkyPN : OALTargetDeepSky
+    {
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public double magStar {
-            get {
-                return this.magStarField;
-            }
-            set {
-                this.magStarField = value;
-            }
-        }
-        
+        [XmlElement(ElementName = "magStar", Form = XmlSchemaForm.Unqualified)]
+        public double MagStar { get; set; }
+
         /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool magStarSpecified {
-            get {
-                return this.magStarFieldSpecified;
-            }
-            set {
-                this.magStarFieldSpecified = value;
-            }
-        }
+        [XmlIgnore]
+        public bool MagStarSpecified { get; set; }
     }
-    
+       
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class deepSkyOC : deepSkyTargetType {
-        
+    
+    [Serializable]
+    [XmlType(TypeName = "deepSkyOC", Namespace = OALData.OAL)]
+    public partial class OALTargetDeepSkyOC : OALTargetDeepSky 
+    {   
         private string starsField;
         
         private double brightestStarField;
@@ -2696,7 +1652,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         private string classField;
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="positiveInteger")]
+        [XmlElement(Form=XmlSchemaForm.Unqualified, DataType="positiveInteger")]
         public string stars {
             get {
                 return this.starsField;
@@ -2707,7 +1663,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public double brightestStar {
             get {
                 return this.brightestStarField;
@@ -2718,7 +1674,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        [XmlIgnore]
         public bool brightestStarSpecified {
             get {
                 return this.brightestStarFieldSpecified;
@@ -2729,7 +1685,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public string @class {
             get {
                 return this.classField;
@@ -2742,27 +1698,27 @@ namespace Astrarium.Plugins.Journal.OAL {
     
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
+    [Serializable]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class deepSkyNA : deepSkyTargetType {
+    [XmlType(Namespace=OALData.OAL)]
+    public partial class deepSkyNA : OALTargetDeepSky {
     }
     
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
+    [Serializable]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class deepSkyGX : deepSkyTargetType {
+    [XmlType(Namespace=OALData.OAL)]
+    public partial class deepSkyGX : OALTargetDeepSky {
         
         private string hubbleTypeField;
         
         private string paField;
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public string hubbleType {
             get {
                 return this.hubbleTypeField;
@@ -2773,7 +1729,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="integer")]
+        [XmlElement(Form=XmlSchemaForm.Unqualified, DataType="integer")]
         public string pa {
             get {
                 return this.paField;
@@ -2786,18 +1742,18 @@ namespace Astrarium.Plugins.Journal.OAL {
     
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
+    [Serializable]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class deepSkyGN : deepSkyTargetType {
+    [XmlType(Namespace=OALData.OAL)]
+    public partial class deepSkyGN : OALTargetDeepSky {
         
         private string nebulaTypeField;
         
         private string paField;
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public string nebulaType {
             get {
                 return this.nebulaTypeField;
@@ -2808,7 +1764,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="integer")]
+        [XmlElement(Form=XmlSchemaForm.Unqualified, DataType="integer")]
         public string pa {
             get {
                 return this.paField;
@@ -2821,11 +1777,11 @@ namespace Astrarium.Plugins.Journal.OAL {
     
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
+    [Serializable]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class deepSkyGC : deepSkyTargetType {
+    [XmlType(Namespace=OALData.OAL)]
+    public partial class deepSkyGC : OALTargetDeepSky {
         
         private double magStarsField;
         
@@ -2834,7 +1790,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         private string concField;
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public double magStars {
             get {
                 return this.magStarsField;
@@ -2845,7 +1801,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        [XmlIgnore]
         public bool magStarsSpecified {
             get {
                 return this.magStarsFieldSpecified;
@@ -2856,7 +1812,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public string conc {
             get {
                 return this.concField;
@@ -2869,13 +1825,13 @@ namespace Astrarium.Plugins.Journal.OAL {
     
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
+    [Serializable]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class deepSkyDS : deepSkyTargetType {
+    [XmlType(Namespace=OALData.OAL)]
+    public partial class deepSkyDS : OALTargetDeepSky {
         
-        private nonNegativeAngleType separationField;
+        private OALNonNegativeAngle separationField;
         
         private string paField;
         
@@ -2884,8 +1840,8 @@ namespace Astrarium.Plugins.Journal.OAL {
         private bool magCompFieldSpecified;
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public nonNegativeAngleType separation {
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
+        public OALNonNegativeAngle separation {
             get {
                 return this.separationField;
             }
@@ -2895,7 +1851,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="integer")]
+        [XmlElement(Form=XmlSchemaForm.Unqualified, DataType="integer")]
         public string pa {
             get {
                 return this.paField;
@@ -2906,7 +1862,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public double magComp {
             get {
                 return this.magCompField;
@@ -2917,7 +1873,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        [XmlIgnore]
         public bool magCompSpecified {
             get {
                 return this.magCompFieldSpecified;
@@ -2930,18 +1886,18 @@ namespace Astrarium.Plugins.Journal.OAL {
     
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
+    [Serializable]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class deepSkyDN : deepSkyTargetType {
+    [XmlType(Namespace=OALData.OAL)]
+    public partial class deepSkyDN : OALTargetDeepSky {
         
         private string paField;
         
         private string opacityField;
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="integer")]
+        [XmlElement(Form=XmlSchemaForm.Unqualified, DataType="integer")]
         public string pa {
             get {
                 return this.paField;
@@ -2952,7 +1908,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="integer")]
+        [XmlElement(Form=XmlSchemaForm.Unqualified, DataType="integer")]
         public string opacity {
             get {
                 return this.opacityField;
@@ -2965,18 +1921,18 @@ namespace Astrarium.Plugins.Journal.OAL {
     
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
+    [Serializable]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class deepSkyCG : deepSkyTargetType {
+    [XmlType(Namespace=OALData.OAL)]
+    public partial class deepSkyCG : OALTargetDeepSky {
         
         private double mag10Field;
         
         private bool mag10FieldSpecified;
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public double mag10 {
             get {
                 return this.mag10Field;
@@ -2987,7 +1943,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        [XmlIgnore]
         public bool mag10Specified {
             get {
                 return this.mag10FieldSpecified;
@@ -3000,16 +1956,16 @@ namespace Astrarium.Plugins.Journal.OAL {
     
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
+    [Serializable]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
-    public partial class deepSkyAS : deepSkyTargetType {
+    [XmlType(Namespace=OALData.OAL)]
+    public partial class deepSkyAS : OALTargetDeepSky {
         
         private string paField;
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="integer")]
+        [XmlElement(Form=XmlSchemaForm.Unqualified, DataType="integer")]
         public string pa {
             get {
                 return this.paField;
@@ -3022,16 +1978,16 @@ namespace Astrarium.Plugins.Journal.OAL {
     
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
+    [Serializable]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
+    [XmlType(Namespace=OALData.OAL)]
     public partial class deepSkyMS : OALTarget {
         
         private string[] componentField;
         
         /// <remarks/>
-        [XmlElement("component", Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="IDREF")]
+        [XmlElement("component", Form=XmlSchemaForm.Unqualified, DataType="IDREF")]
         public string[] component {
             get {
                 return this.componentField;
@@ -3043,12 +1999,12 @@ namespace Astrarium.Plugins.Journal.OAL {
     }
     
     /// <remarks/>
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(variableStarTargetType))]
+    [XmlInclude(typeof(variableStarTargetType))]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
+    [Serializable]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
+    [XmlType(Namespace=OALData.OAL)]
     public partial class starTargetType : OALTarget {
         
         private double apparentMagField;
@@ -3058,7 +2014,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         private string classificationField;
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public double apparentMag {
             get {
                 return this.apparentMagField;
@@ -3069,7 +2025,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        [XmlIgnore]
         public bool apparentMagSpecified {
             get {
                 return this.apparentMagFieldSpecified;
@@ -3080,7 +2036,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public string classification {
             get {
                 return this.classificationField;
@@ -3093,10 +2049,10 @@ namespace Astrarium.Plugins.Journal.OAL {
     
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
+    [Serializable]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
+    [XmlType(Namespace=OALData.OAL)]
     public partial class variableStarTargetType : starTargetType {
         
         private string typeField;
@@ -3110,7 +2066,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         private bool periodFieldSpecified;
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public string type {
             get {
                 return this.typeField;
@@ -3121,7 +2077,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public double maxApparentMag {
             get {
                 return this.maxApparentMagField;
@@ -3132,7 +2088,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        [XmlIgnore]
         public bool maxApparentMagSpecified {
             get {
                 return this.maxApparentMagFieldSpecified;
@@ -3143,7 +2099,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public double period {
             get {
                 return this.periodField;
@@ -3154,7 +2110,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        [XmlIgnore]
         public bool periodSpecified {
             get {
                 return this.periodFieldSpecified;
@@ -3167,10 +2123,10 @@ namespace Astrarium.Plugins.Journal.OAL {
     
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
+    [Serializable]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
+    [XmlType(Namespace=OALData.OAL)]
     public partial class OALSession {
         
         private System.DateTime beginField;
@@ -3194,7 +2150,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         private string langField;
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public System.DateTime begin {
             get {
                 return this.beginField;
@@ -3205,7 +2161,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public System.DateTime end {
             get {
                 return this.endField;
@@ -3216,7 +2172,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="IDREF")]
+        [XmlElement(Form=XmlSchemaForm.Unqualified, DataType="IDREF")]
         public string site {
             get {
                 return this.siteField;
@@ -3227,7 +2183,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement("coObserver", Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="IDREF")]
+        [XmlElement("coObserver", Form=XmlSchemaForm.Unqualified, DataType="IDREF")]
         public string[] coObserver {
             get {
                 return this.coObserverField;
@@ -3238,7 +2194,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public string weather {
             get {
                 return this.weatherField;
@@ -3249,7 +2205,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public string equipment {
             get {
                 return this.equipmentField;
@@ -3260,7 +2216,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public string comments {
             get {
                 return this.commentsField;
@@ -3271,7 +2227,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement("image", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement("image", Form=XmlSchemaForm.Unqualified)]
         public string[] image {
             get {
                 return this.imageField;
@@ -3282,7 +2238,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType="ID")]
+        [XmlAttribute(DataType="ID")]
         public string id {
             get {
                 return this.idField;
@@ -3293,7 +2249,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [XmlAttribute()]
         public string lang {
             get {
                 return this.langField;
@@ -3306,17 +2262,17 @@ namespace Astrarium.Plugins.Journal.OAL {
     
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
-    [System.SerializableAttribute()]
+    [Serializable]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://groups.google.com/group/openastronomylog")]
+    [XmlType(Namespace=OALData.OAL)]
     public partial class OALSite {
         
         private string nameField;
         
-        private angleType longitudeField;
+        private OALAngle longitudeField;
         
-        private angleType latitudeField;
+        private OALAngle latitudeField;
         
         private double elevationField;
         
@@ -3333,7 +2289,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public string name {
             get {
                 return this.nameField;
@@ -3344,8 +2300,8 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public angleType longitude {
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
+        public OALAngle longitude {
             get {
                 return this.longitudeField;
             }
@@ -3355,8 +2311,8 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public angleType latitude {
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
+        public OALAngle latitude {
             get {
                 return this.latitudeField;
             }
@@ -3366,7 +2322,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        [XmlElement(Form=XmlSchemaForm.Unqualified)]
         public double elevation {
             get {
                 return this.elevationField;
@@ -3377,7 +2333,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        [XmlIgnore]
         public bool elevationSpecified {
             get {
                 return this.elevationFieldSpecified;
@@ -3388,7 +2344,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="integer")]
+        [XmlElement(Form=XmlSchemaForm.Unqualified, DataType="integer")]
         public string timezone {
             get {
                 return this.timezoneField;
@@ -3399,7 +2355,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [XmlElement(Form=System.Xml.Schema.XmlSchemaForm.Unqualified, DataType="integer")]
+        [XmlElement(Form=XmlSchemaForm.Unqualified, DataType="integer")]
         public string code {
             get {
                 return this.codeField;
@@ -3410,7 +2366,7 @@ namespace Astrarium.Plugins.Journal.OAL {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType="ID")]
+        [XmlAttribute(DataType="ID")]
         public string id {
             get {
                 return this.idField;
