@@ -26,6 +26,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
         private DateTimeComparer dateComparer = new DateTimeComparer();
 
         private readonly ISky sky;
+        private readonly IDatabaseManager dbManager;
         private readonly string rootPath;
         private readonly string imagesPath;
 
@@ -68,9 +69,10 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         #endregion Commands
 
-        public JournalVM(ISky sky)
+        public JournalVM(ISky sky, IDatabaseManager dbManager)
         {
             this.sky = sky;
+            this.dbManager = dbManager;
 
             rootPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Observations");
             imagesPath = Path.Combine(rootPath, "images");
@@ -161,7 +163,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
                     // unsubscribe from changes
                     if (SelectedTreeViewItem != null)
                     {
-                        SelectedTreeViewItem.DatabasePropertyChanged -= DatabaseManager.SaveDatabaseEntityProperty;
+                        SelectedTreeViewItem.DatabasePropertyChanged -= dbManager.SaveDatabaseEntityProperty;
                     }
 
                     // update backing field
@@ -243,18 +245,18 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         public async void Load()
         {
-            var sessions = await DatabaseManager.GetSessions();
+            var sessions = await dbManager.GetSessions();
             AllSessions = new ObservableCollection<Session>(sessions);
 
             FilteredSessions = CollectionViewSource.GetDefaultView(AllSessions);
             FilteredSessions.Filter = x => FilterSession(x as Session);
 
-            Sites = await DatabaseManager.GetSites();
-            Optics = await DatabaseManager.GetOptics();
-            Eyepieces = await DatabaseManager.GetEyepieces();
-            Lenses = await DatabaseManager.GetLenses();
-            Filters = await DatabaseManager.GetFilters();
-            Cameras = await DatabaseManager.GetCameras();
+            Sites = await dbManager.GetSites();
+            Optics = await dbManager.GetOptics();
+            Eyepieces = await dbManager.GetEyepieces();
+            Lenses = await dbManager.GetLenses();
+            Filters = await dbManager.GetFilters();
+            Cameras = await dbManager.GetCameras();
 
             NotifyPropertyChanged(
                 nameof(AllSessions), 
@@ -271,11 +273,11 @@ namespace Astrarium.Plugins.Journal.ViewModels
         {
             if (SelectedTreeViewItem is Session session)
             {
-                await DatabaseManager.LoadSession(session);
+                await dbManager.LoadSession(session);
             }
             else if (SelectedTreeViewItem is Observation observation)
             {
-                await DatabaseManager.LoadObservation(observation);
+                await dbManager.LoadObservation(observation);
             }
         }
 
@@ -304,7 +306,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
             if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete the observation?", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)
             {
                 observation.Session.Observations.Remove(observation);
-                await DatabaseManager.DeleteObservation(observation.Id);
+                await dbManager.DeleteObservation(observation.Id);
             }
         }
 
@@ -316,7 +318,9 @@ namespace Astrarium.Plugins.Journal.ViewModels
             model.End = session.End.TimeOfDay;
             if (ViewManager.ShowDialog(model) ?? false)
             {
-                var observation = await DatabaseManager.CreateObservation(session, model.CelestialBody, model.Date.Date + model.Begin, model.Date.Date + model.End);
+                double jd = new Date(model.Date.Year, model.Date.Month, model.Date.Day + model.Begin.TotalDays, sky.Context.GeoLocation.UtcOffset).ToJulianEphemerisDay();
+                var targetDetails = CreateTargetDetails(jd, model.CelestialBody);
+                var observation = await dbManager.CreateObservation(session, model.CelestialBody, targetDetails, model.Date.Date + model.Begin, model.Date.Date + model.End);
                 session.Observations.Add(observation);
                 SelectedTreeViewItem = observation;
             }
@@ -328,11 +332,11 @@ namespace Astrarium.Plugins.Journal.ViewModels
             model.Date = observation.Begin.Date;
             model.Begin = observation.Begin.TimeOfDay;
             model.End = observation.End.TimeOfDay;
-            model.CelestialBody = await DatabaseManager.GetTarget(observation.TargetId);
+            model.CelestialBody = await dbManager.GetTarget(observation.TargetId);
             
             if (ViewManager.ShowDialog(model) ?? false)
             {                
-                await DatabaseManager.EditObservation(observation, model.CelestialBody, model.Date.Date + model.Begin, model.Date.Date + model.End);
+                await dbManager.EditObservation(observation, model.CelestialBody, model.Date.Date + model.Begin, model.Date.Date + model.End);
                 LoadJournalItemDetails();
             }
         }
@@ -483,10 +487,10 @@ namespace Astrarium.Plugins.Journal.ViewModels
         private async void EditOptics(string id)
         {
             var model = ViewManager.CreateViewModel<OpticsVM>();
-            model.Optics = await DatabaseManager.GetOptics(id);
+            model.Optics = await dbManager.GetOptics(id);
             if (ViewManager.ShowDialog(model) ?? false)
             {
-                Optics = await DatabaseManager.GetOptics();
+                Optics = await dbManager.GetOptics();
                 (SelectedTreeViewItem as Observation).TelescopeId = model.Optics.Id;
             }
         }
@@ -497,7 +501,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
             model.Optics = new Optics() { Id = Guid.NewGuid().ToString(), Type = "Telescope" };
             if (ViewManager.ShowDialog(model) ?? false)
             {
-                Optics = await DatabaseManager.GetOptics();
+                Optics = await dbManager.GetOptics();
                 (SelectedTreeViewItem as Observation).TelescopeId = model.Optics.Id;
             }
         }
@@ -506,9 +510,9 @@ namespace Astrarium.Plugins.Journal.ViewModels
         {
             if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete selected optics? This will be deleted from all observations. This action can not be undone.", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
-                await DatabaseManager.DeleteOptics(id);
-                SelectedTreeViewItem.DatabasePropertyChanged -= DatabaseManager.SaveDatabaseEntityProperty;
-                Optics = await DatabaseManager.GetOptics();
+                await dbManager.DeleteOptics(id);
+                SelectedTreeViewItem.DatabasePropertyChanged -= dbManager.SaveDatabaseEntityProperty;
+                Optics = await dbManager.GetOptics();
                 LoadJournalItemDetails();
                 (SelectedTreeViewItem as Observation).TelescopeId = null;
             }
@@ -517,10 +521,10 @@ namespace Astrarium.Plugins.Journal.ViewModels
         private async void EditEyepiece(string id)
         {
             var model = ViewManager.CreateViewModel<EyepieceVM>();
-            model.Eyepiece = await DatabaseManager.GetEyepiece(id);
+            model.Eyepiece = await dbManager.GetEyepiece(id);
             if (ViewManager.ShowDialog(model) ?? false)
             {
-                Eyepieces = await DatabaseManager.GetEyepieces();
+                Eyepieces = await dbManager.GetEyepieces();
                 (SelectedTreeViewItem as Observation).EyepieceId = model.Eyepiece.Id;
             }
         }
@@ -531,7 +535,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
             model.Eyepiece = new Eyepiece() { Id = Guid.NewGuid().ToString() };
             if (ViewManager.ShowDialog(model) ?? false)
             {
-                Eyepieces = await DatabaseManager.GetEyepieces();
+                Eyepieces = await dbManager.GetEyepieces();
                 (SelectedTreeViewItem as Observation).EyepieceId = model.Eyepiece.Id;
             }
         }
@@ -540,9 +544,9 @@ namespace Astrarium.Plugins.Journal.ViewModels
         {
             if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete selected eyepiece? This will be deleted from all observations. This action can not be undone.", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
-                await DatabaseManager.DeleteEyepiece(id);
-                SelectedTreeViewItem.DatabasePropertyChanged -= DatabaseManager.SaveDatabaseEntityProperty;
-                Eyepieces = await DatabaseManager.GetEyepieces();
+                await dbManager.DeleteEyepiece(id);
+                SelectedTreeViewItem.DatabasePropertyChanged -= dbManager.SaveDatabaseEntityProperty;
+                Eyepieces = await dbManager.GetEyepieces();
                 LoadJournalItemDetails();
                 (SelectedTreeViewItem as Observation).EyepieceId = null;
             }
@@ -551,10 +555,10 @@ namespace Astrarium.Plugins.Journal.ViewModels
         private async void EditLens(string id)
         {
             var model = ViewManager.CreateViewModel<LensVM>();
-            model.Lens = await DatabaseManager.GetLens(id);
+            model.Lens = await dbManager.GetLens(id);
             if (ViewManager.ShowDialog(model) ?? false)
             {
-                Lenses = await DatabaseManager.GetLenses();
+                Lenses = await dbManager.GetLenses();
                 (SelectedTreeViewItem as Observation).LensId = model.Lens.Id;
             }
         }
@@ -565,7 +569,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
             model.Lens = new Lens() { Id = Guid.NewGuid().ToString() };
             if (ViewManager.ShowDialog(model) ?? false)
             {
-                Lenses = await DatabaseManager.GetLenses();
+                Lenses = await dbManager.GetLenses();
                 (SelectedTreeViewItem as Observation).LensId = model.Lens.Id;
             }
         }
@@ -574,9 +578,9 @@ namespace Astrarium.Plugins.Journal.ViewModels
         {
             if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete selected lens? This will be deleted from all observations. This action can not be undone.", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
-                await DatabaseManager.DeleteLens(id);
-                SelectedTreeViewItem.DatabasePropertyChanged -= DatabaseManager.SaveDatabaseEntityProperty;
-                Lenses = await DatabaseManager.GetLenses();
+                await dbManager.DeleteLens(id);
+                SelectedTreeViewItem.DatabasePropertyChanged -= dbManager.SaveDatabaseEntityProperty;
+                Lenses = await dbManager.GetLenses();
                 LoadJournalItemDetails();
                 (SelectedTreeViewItem as Observation).LensId = null;
             }
@@ -585,10 +589,10 @@ namespace Astrarium.Plugins.Journal.ViewModels
         private async void EditFilter(string id)
         {
             var model = ViewManager.CreateViewModel<FilterVM>();
-            model.Filter = await DatabaseManager.GetFilter(id);
+            model.Filter = await dbManager.GetFilter(id);
             if (ViewManager.ShowDialog(model) ?? false)
             {
-                Filters = await DatabaseManager.GetFilters();
+                Filters = await dbManager.GetFilters();
                 (SelectedTreeViewItem as Observation).FilterId = model.Filter.Id;
             }
         }
@@ -599,7 +603,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
             model.Filter = new Filter() { Id = Guid.NewGuid().ToString() };
             if (ViewManager.ShowDialog(model) ?? false)
             {
-                Filters = await DatabaseManager.GetFilters();
+                Filters = await dbManager.GetFilters();
                 (SelectedTreeViewItem as Observation).FilterId = model.Filter.Id;
             }
         }
@@ -608,9 +612,9 @@ namespace Astrarium.Plugins.Journal.ViewModels
         {
             if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete selected filter? This will be deleted from all observations. This action can not be undone.", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
-                await DatabaseManager.DeleteFilter(id);
-                SelectedTreeViewItem.DatabasePropertyChanged -= DatabaseManager.SaveDatabaseEntityProperty;
-                Filters = await DatabaseManager.GetFilters();
+                await dbManager.DeleteFilter(id);
+                SelectedTreeViewItem.DatabasePropertyChanged -= dbManager.SaveDatabaseEntityProperty;
+                Filters = await dbManager.GetFilters();
                 LoadJournalItemDetails();
                 (SelectedTreeViewItem as Observation).FilterId = null;
             }
@@ -619,10 +623,10 @@ namespace Astrarium.Plugins.Journal.ViewModels
         private async void EditCamera(string id)
         {
             var model = ViewManager.CreateViewModel<CameraVM>();
-            model.Camera = await DatabaseManager.GetCamera(id);
+            model.Camera = await dbManager.GetCamera(id);
             if (ViewManager.ShowDialog(model) ?? false)
             {
-                Cameras = await DatabaseManager.GetCameras();
+                Cameras = await dbManager.GetCameras();
                 (SelectedTreeViewItem as Observation).CameraId = model.Camera.Id;
             }
         }
@@ -633,7 +637,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
             model.Camera = new Camera() { Id = Guid.NewGuid().ToString() };
             if (ViewManager.ShowDialog(model) ?? false)
             {
-                Cameras = await DatabaseManager.GetCameras();
+                Cameras = await dbManager.GetCameras();
                 (SelectedTreeViewItem as Observation).CameraId = model.Camera.Id;
             }
         }
@@ -642,12 +646,39 @@ namespace Astrarium.Plugins.Journal.ViewModels
         {
             if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete selected camera? This will be deleted from all observations. This action can not be undone.", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
-                await DatabaseManager.DeleteCamera(id);
-                SelectedTreeViewItem.DatabasePropertyChanged -= DatabaseManager.SaveDatabaseEntityProperty;
-                Cameras = await DatabaseManager.GetCameras();
+                await dbManager.DeleteCamera(id);
+                SelectedTreeViewItem.DatabasePropertyChanged -= dbManager.SaveDatabaseEntityProperty;
+                Cameras = await dbManager.GetCameras();
                 LoadJournalItemDetails();
                 (SelectedTreeViewItem as Observation).CameraId = null;
             }
+        }
+
+        private TargetDetails CreateTargetDetails(double jd, CelestialObject body)
+        {
+            TargetDetails targetDetails = null;
+
+            // Sky context instance to calculate ephemerides
+            var context = new SkyContext(jd, sky.Context.GeoLocation);
+
+            // Create target details depending on type
+            if (body.Type == "Star")
+            {
+                var ephemerides = sky.GetEphemerides(body, context, new[] { "Equatorial.Alpha", "Equatorial.Delta", "Horizontal.Altitude", "Horizontal.Azimuth", "Magnitude", "SpectralClass", "Constellation" });
+
+                targetDetails = new StarTargetDetails()
+                {
+                    RA = ephemerides.GetValueOrDefault<double?>("Equatorial.Alpha"),
+                    Dec = ephemerides.GetValueOrDefault<double?>("Equatorial.Delta"),
+                    Alt = ephemerides.GetValueOrDefault<double?>("Horizontal.Altitude"),
+                    Azi = ephemerides.GetValueOrDefault<double?>("Horizontal.Azimuth"),
+                    Constellation = ephemerides.GetValueOrDefault<string>("Constellation"),
+                    Magnitude = ephemerides.GetValueOrDefault<float?>("Magnitude"),
+                    Classification = ephemerides.GetValueOrDefault<string>("SpectralClass"),
+                };
+            }
+
+            return targetDetails;
         }
 
         public ICollection Optics

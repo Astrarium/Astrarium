@@ -9,8 +9,11 @@ namespace Astrarium.Plugins.Journal.ViewModels
         public ICommand OkCommand { get; }
         public ICommand CancelCommand { get; }
 
-        public OpticsVM()
+        private IDatabaseManager dbManager;
+
+        public OpticsVM(IDatabaseManager dbManager)
         {
+            this.dbManager = dbManager;
             OkCommand = new Command(Ok);
             CancelCommand = new Command(Close);
         }
@@ -33,7 +36,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
             }
             else
             {
-                await DatabaseManager.SaveOptics(Optics);
+                await dbManager.SaveOptics(Optics);
                 Close(true);
             }
         }

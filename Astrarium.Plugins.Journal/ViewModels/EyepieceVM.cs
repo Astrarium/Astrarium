@@ -9,8 +9,11 @@ namespace Astrarium.Plugins.Journal.ViewModels
         public ICommand OkCommand { get; }
         public ICommand CancelCommand { get; }
 
-        public EyepieceVM()
+        private IDatabaseManager dbManager;
+
+        public EyepieceVM(IDatabaseManager dbManager)
         {
+            this.dbManager = dbManager;
             OkCommand = new Command(Ok);
             CancelCommand = new Command(Close);
         }
@@ -33,7 +36,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
             }
             else
             {
-                await DatabaseManager.SaveEyepiece(Eyepiece);
+                await dbManager.SaveEyepiece(Eyepiece);
                 Close(true);
             }
         }

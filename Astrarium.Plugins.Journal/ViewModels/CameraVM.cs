@@ -9,8 +9,11 @@ namespace Astrarium.Plugins.Journal.ViewModels
         public ICommand OkCommand { get; }
         public ICommand CancelCommand { get; }
 
-        public CameraVM()
+        private IDatabaseManager dbManager;
+
+        public CameraVM(IDatabaseManager dbManager)
         {
+            this.dbManager = dbManager;
             OkCommand = new Command(Ok);
             CancelCommand = new Command(Close);
         }
@@ -33,7 +36,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
             }
             else
             {
-                await DatabaseManager.SaveCamera(Camera);
+                await dbManager.SaveCamera(Camera);
                 Close(true);
             }
         }

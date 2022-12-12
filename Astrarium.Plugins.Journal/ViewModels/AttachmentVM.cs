@@ -6,9 +6,15 @@ namespace Astrarium.Plugins.Journal.ViewModels
 {
     public class AttachmentVM : ViewModelBase
     {
+        private IDatabaseManager dbManager;
         private Attachment attachment;
 
         public ICommand ShowDetailsCommand { get; private set; }
+
+        public AttachmentVM(IDatabaseManager dbManager)
+        {
+            this.dbManager = dbManager;
+        }
 
         public void SetAttachment(Attachment attachment)
         {
@@ -40,8 +46,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
             set
             {
                 attachment.Title = value;
-                DatabaseManager.SaveAttachment(attachment);
-                NotifyPropertyChanged(nameof(Title));
+                SaveAndNotify(nameof(Title));
             }
         }
 
@@ -51,9 +56,14 @@ namespace Astrarium.Plugins.Journal.ViewModels
             set
             {
                 attachment.Comments = value;
-                DatabaseManager.SaveAttachment(attachment);
-                NotifyPropertyChanged(nameof(Comments));
+                SaveAndNotify(nameof(Comments));
             }
+        }
+
+        private async void SaveAndNotify(string propertyName)
+        {
+            await dbManager.SaveAttachment(attachment);
+            NotifyPropertyChanged(propertyName);
         }
     }
 }

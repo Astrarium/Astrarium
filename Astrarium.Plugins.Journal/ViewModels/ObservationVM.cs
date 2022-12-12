@@ -20,7 +20,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
         public ICommand OkCommand { get; private set; }
         public ICommand CancelCommand { get; private set; }
 
-        public TimeSpan Begin 
+        public TimeSpan Begin
         {
             get => GetValue<TimeSpan>(nameof(Begin));
             set => SetValue(nameof(Begin), value);

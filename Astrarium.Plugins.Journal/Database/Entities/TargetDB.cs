@@ -31,31 +31,6 @@ namespace Astrarium.Plugins.Journal.Database.Entities
         public string Aliases { get; set; }
 
         /// <summary>
-        /// Right Ascension at the moment of observation, if available, in degrees, J2000
-        /// </summary>
-        public double? RightAscension { get; set; }
-
-        /// <summary>
-        /// Declination at the moment of observation, if available, in degrees, J2000
-        /// </summary>
-        public double? Declination { get; set; }
-
-        /// <summary>
-        /// Local altitude of the target at the moment of observation, if available, in degrees
-        /// </summary>
-        public double? Altitude { get; set; }
-
-        /// <summary>
-        /// Local azimuth of the target at the moment of observation, if available, in degrees
-        /// </summary>
-        public double? Azimuth { get; set; }
-
-        /// <summary>
-        /// Constellation of the object location at the moment of observation, if available
-        /// </summary>
-        public string Constellation { get; set; }
-
-        /// <summary>
         /// Source of data, for example application name the position and details are taken from
         /// </summary>
         public string Source { get; set; }
@@ -66,7 +41,7 @@ namespace Astrarium.Plugins.Journal.Database.Entities
         public string Notes { get; set; }
 
         /// <summary>
-        /// Details of the target
+        /// Details of the target, in JSON form
         /// </summary>
         public string Details { get; set; }
     }

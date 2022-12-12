@@ -3,26 +3,27 @@ using System;
 using System.Data.Entity;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.IO;
 using Astrarium.Types;
 using Astrarium.Algorithms;
 using Astrarium.Plugins.Journal.Database.Entities;
-using System.Windows;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Windows.Data;
 using System.Collections;
 
 namespace Astrarium.Plugins.Journal.Types
 {
-    public static class DatabaseManager
+    [Singleton(typeof(IDatabaseManager))]
+    public class DatabaseManager : IDatabaseManager
     {
-        private static readonly string rootPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Observations");
+        private readonly string rootPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Observations");
 
-        public static Task<List<Session>> GetSessions()
+        public DatabaseManager()
+        {
+            Log.Debug("DB manager created");
+        }
+
+        public Task<List<Session>> GetSessions()
         {
             return Task.Run(() =>
             {
@@ -65,7 +66,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static Task LoadSession(Session session)
+        public Task LoadSession(Session session)
         {
             return Task.Run(() =>
             {
@@ -98,7 +99,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static Task LoadObservation(Observation observation)
+        public Task LoadObservation(Observation observation)
         {
             return Task.Run(() =>
             {
@@ -124,9 +125,6 @@ namespace Astrarium.Plugins.Journal.Types
                     observation.FilterId = obs.FilterId;
                     observation.CameraId = obs.CameraId;
 
-                    observation.Constellation = obs.Target?.Constellation;
-                    observation.EquatorialCoordinates = obs.Target?.RightAscension != null && obs.Target?.Declination != null ? new CrdsEquatorial((double)obs.Target?.RightAscension.Value, (double)obs.Target?.Declination.Value) : null;
-
                     observation.Attachments = obs.Attachments.ToArray().Select(x => new Attachment()
                     {
                         Id = x.Id,
@@ -140,7 +138,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static async void SaveDatabaseEntityProperty(object value, Type entityType, string column, object key)
+        public async void SaveDatabaseEntityProperty(object value, Type entityType, string column, object key)
         {
             await Task.Run(() =>
             {
@@ -153,7 +151,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static Task SaveAttachment(Attachment attachment)
+        public Task SaveAttachment(Attachment attachment)
         {
             return Task.Run(() =>
             {
@@ -167,7 +165,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static Task<Observation> CreateObservation(Session session, CelestialObject body, DateTime begin, DateTime end)
+        public Task<Observation> CreateObservation(Session session, CelestialObject body, TargetDetails targetDetails, DateTime begin, DateTime end)
         {
             return Task.Run(() =>
             {
@@ -179,7 +177,7 @@ namespace Astrarium.Plugins.Journal.Types
                     Name = body.Names.First(),
                     CommonName = body.CommonName,
                     Source = "Astrarium",
-                    Details = JsonConvert.SerializeObject(CreateTargetDetails(body))
+                    Details = JsonConvert.SerializeObject(targetDetails)
                 };
 
                 var observation = new ObservationDB()
@@ -206,16 +204,16 @@ namespace Astrarium.Plugins.Journal.Types
                     End = observation.End,
                     ObjectName = observation.Target.Name,
                     ObjectType = observation.Target.Type,
-                    ObjectNameAliases = DeserializeAliases(observation.Target.Aliases),                    
+                    ObjectNameAliases = DeserializeAliases(observation.Target.Aliases),
                     // TODO: save coordinates of the body
-                    // TargetDetails = 
+                    //TargetDetails = 
                 };
 
                 return obs;
             });
         }
 
-        public static Task EditObservation(Observation observation, CelestialObject body, DateTime begin, DateTime end)
+        public Task EditObservation(Observation observation, CelestialObject body, DateTime begin, DateTime end)
         {
             return Task.Run(() =>
             {
@@ -236,7 +234,7 @@ namespace Astrarium.Plugins.Journal.Types
                                 targetDb.Type = body.Type;
                                 targetDb.Name = body.Names.First();
                                 targetDb.CommonName = body.CommonName;
-                                
+
                                 // TODO: save coordinates of the body
 
                                 targetDb.Source = "Astrarium";
@@ -257,9 +255,10 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static Task DeleteObservation(string id)
+        public Task DeleteObservation(string id)
         {
-            return Task.Run(() => {
+            return Task.Run(() =>
+            {
                 using (var ctx = new DatabaseContext())
                 {
                     var existing = ctx.Observations.FirstOrDefault(x => x.Id == id);
@@ -272,7 +271,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static Task<ICollection> GetSites()
+        public Task<ICollection> GetSites()
         {
             return Task.Run(() =>
             {
@@ -285,7 +284,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static Task<ICollection> GetOptics()
+        public Task<ICollection> GetOptics()
         {
             return Task.Run(() =>
             {
@@ -298,7 +297,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static Task<Optics> GetOptics(string id)
+        public Task<Optics> GetOptics(string id)
         {
             return Task.Run(() =>
             {
@@ -339,7 +338,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static Task SaveOptics(Optics optics)
+        public Task SaveOptics(Optics optics)
         {
             return Task.Run(() =>
             {
@@ -374,7 +373,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static Task DeleteOptics(string id)
+        public Task DeleteOptics(string id)
         {
             return Task.Run(() =>
             {
@@ -391,7 +390,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static Task<ICollection> GetEyepieces()
+        public Task<ICollection> GetEyepieces()
         {
             return Task.Run(() =>
             {
@@ -419,7 +418,7 @@ namespace Astrarium.Plugins.Journal.Types
             public override string CommonName => CommonNameHolder;
         }
 
-        public static Task<CelestialObject> GetTarget(string id)
+        public Task<CelestialObject> GetTarget(string id)
         {
             return Task.Run(() =>
             {
@@ -442,7 +441,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static Task<ICollection> GetLenses()
+        public Task<ICollection> GetLenses()
         {
             return Task.Run(() =>
             {
@@ -455,7 +454,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static Task<Lens> GetLens(string id)
+        public Task<Lens> GetLens(string id)
         {
             return Task.Run(() =>
             {
@@ -477,7 +476,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static Task SaveLens(Lens lens)
+        public Task SaveLens(Lens lens)
         {
             return Task.Run(() =>
             {
@@ -493,13 +492,13 @@ namespace Astrarium.Plugins.Journal.Types
                     lensDb.Vendor = lens.Vendor;
                     lensDb.Model = lens.Model;
                     lensDb.Factor = lens.Factor;
-                    
+
                     db.SaveChanges();
                 }
             });
         }
 
-        public static Task DeleteLens(string id)
+        public Task DeleteLens(string id)
         {
             return Task.Run(() =>
             {
@@ -516,7 +515,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static Task SaveFilter(Filter filter)
+        public Task SaveFilter(Filter filter)
         {
             return Task.Run(() =>
             {
@@ -548,7 +547,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static Task<ICollection> GetFilters()
+        public Task<ICollection> GetFilters()
         {
             return Task.Run(() =>
             {
@@ -561,7 +560,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static Task<ICollection> GetCameras()
+        public Task<ICollection> GetCameras()
         {
             return Task.Run(() =>
             {
@@ -574,7 +573,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static Task<Filter> GetFilter(string id)
+        public Task<Filter> GetFilter(string id)
         {
             return Task.Run(() =>
             {
@@ -603,7 +602,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static Task DeleteFilter(string id)
+        public Task DeleteFilter(string id)
         {
             return Task.Run(() =>
             {
@@ -620,7 +619,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static Task<Eyepiece> GetEyepiece(string id)
+        public Task<Eyepiece> GetEyepiece(string id)
         {
             return Task.Run(() =>
             {
@@ -647,7 +646,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static Task SaveEyepiece(Eyepiece eyepiece)
+        public Task SaveEyepiece(Eyepiece eyepiece)
         {
             return Task.Run(() =>
             {
@@ -671,7 +670,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static Task DeleteEyepiece(string id)
+        public Task DeleteEyepiece(string id)
         {
             return Task.Run(() =>
             {
@@ -688,7 +687,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static Task<Camera> GetCamera(string id)
+        public Task<Camera> GetCamera(string id)
         {
             return Task.Run(() =>
             {
@@ -717,7 +716,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static Task SaveCamera(Camera camera)
+        public Task SaveCamera(Camera camera)
         {
             return Task.Run(() =>
             {
@@ -744,7 +743,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        public static Task DeleteCamera(string id)
+        public Task DeleteCamera(string id)
         {
             return Task.Run(() =>
             {
@@ -761,7 +760,7 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
-        private static string DeserializeAliases(string aliases)
+        private string DeserializeAliases(string aliases)
         {
             if (string.IsNullOrEmpty(aliases))
                 return null;
@@ -773,7 +772,7 @@ namespace Astrarium.Plugins.Journal.Types
                 return value;
         }
 
-        private static PropertyChangedBase CreateObservationDetails(string targetType)
+        private PropertyChangedBase CreateObservationDetails(string targetType)
         {
             if (targetType == "VarStar" || targetType == "Nova")
             {
@@ -794,12 +793,7 @@ namespace Astrarium.Plugins.Journal.Types
             return null;
         }
 
-        private static object CreateTargetDetails(CelestialObject body)
-        {
-            return null;
-        }
-
-        private static PropertyChangedBase DeserializeObservationDetails(string targetType, string details)
+        private PropertyChangedBase DeserializeObservationDetails(string targetType, string details)
         {
             if (details != null)
             {
@@ -824,7 +818,7 @@ namespace Astrarium.Plugins.Journal.Types
             return null;
         }
 
-        private static object DeserializeTargetDetails(string targetType, string details)
+        private TargetDetails DeserializeTargetDetails(string targetType, string details)
         {
             if (details != null)
             {
@@ -840,6 +834,21 @@ namespace Astrarium.Plugins.Journal.Types
                 {
                     return JsonConvert.DeserializeObject<DeepSkyAsterismTargetDetails>(details);
                 }
+                else if (targetType == "Star")
+                {
+                    return JsonConvert.DeserializeObject<StarTargetDetails>(details);
+                }
+                // TODO: other types
+
+
+                else
+                {
+                    return JsonConvert.DeserializeObject<TargetDetails>(details);
+                }
+
+
+
+
                 //else if (targetType.StartsWith("DeepSky"))
                 //{
                 //    return JsonConvert.DeserializeObject<DeepSkyTargetDetails>(details);

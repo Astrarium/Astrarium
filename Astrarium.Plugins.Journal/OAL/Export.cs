@@ -328,7 +328,7 @@ namespace Astrarium.Plugins.Journal.OAL
         private static OALTarget ToTarget(this TargetDB target)
         {
             OALTarget tar = null;
-            object details = null;
+            TargetDetails details = null;
 
             switch (target.Type)
             {
@@ -488,22 +488,20 @@ namespace Astrarium.Plugins.Journal.OAL
 
             tar.Id = target.Id;
             tar.Alias = JsonConvert.DeserializeObject<string[]>(target.Aliases);
-            tar.Constellation = target.Constellation;
+            tar.Constellation = details.Constellation;
             tar.Name = target.Name;
             tar.Notes = target.Notes;
             tar.Item = target.Source;
             tar.ItemElementName = OALDataSource.DataSource;
-            if (target.RightAscension != null && target.Declination != null)
+            if (details.RA != null && details.Dec != null)
             {
                 tar.Position = new OALEquPosType()
                 {
-                    RA = ToUnsignedAngle(target.RightAscension.Value),
-                    Dec = ToAngle(target.Declination.Value),
+                    RA = ToUnsignedAngle(details.RA.Value),
+                    Dec = ToAngle(details.Dec.Value),
                     Frame = new OALReferenceFrame()
                     {
                         Equinox = OALReferenceFrameEquinox.EqOfDate,
-
-                        // TODO: is it correct?
                         Origin = OALReferenceFrameOrigin.Topo
                     }
                 };

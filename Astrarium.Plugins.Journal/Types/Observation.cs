@@ -92,9 +92,9 @@ namespace Astrarium.Plugins.Journal.Types
             NotifyPropertyChanged(nameof(details));
         }
 
-        public object TargetDetails
+        public TargetDetails TargetDetails
         {
-            get => GetValue<object>(nameof(TargetDetails));
+            get => GetValue<TargetDetails>(nameof(TargetDetails));
             set => SetValue(nameof(TargetDetails), value);
         }
 
@@ -148,20 +148,31 @@ namespace Astrarium.Plugins.Journal.Types
 
         public string Constellation
         {
-            get => GetValue<string>(nameof(Constellation), null);
-            set => SetValue(nameof(Constellation), value);
+            get => TargetDetails != null ? TargetDetails.Constellation : null;
         }
 
         public CrdsEquatorial EquatorialCoordinates
         {
-            get => GetValue<CrdsEquatorial>(nameof(EquatorialCoordinates), null);
-            set => SetValue(nameof(EquatorialCoordinates), value);
+            get
+            { 
+                if (TargetDetails != null && TargetDetails.RA != null && TargetDetails.Dec != null)
+                {
+                    return new CrdsEquatorial(TargetDetails.RA.Value, TargetDetails.Dec.Value);
+                }
+                return null;
+            }
         }
 
         public CrdsHorizontal HorizontalCoordinates
         {
-            get => GetValue<CrdsHorizontal>(nameof(HorizontalCoordinates), null);
-            set => SetValue(nameof(HorizontalCoordinates), value);
+            get
+            {
+                if (TargetDetails != null && TargetDetails.Azi != null && TargetDetails.Alt != null)
+                {
+                    return new CrdsHorizontal(TargetDetails.Azi.Value, TargetDetails.Alt.Value);
+                }
+                return null;
+            }
         }
     }
 }

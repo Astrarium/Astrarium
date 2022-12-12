@@ -560,6 +560,12 @@ namespace Astrarium.Plugins.Journal.OAL
         private static T BuildDeepSkyTargetDetails<T>(OALTargetDeepSky ds) where T : DeepSkyTargetDetails, new()
         {
             var details = new T();
+
+            // TODO: convert to equinox of date
+            details.RA = ds.Position?.RA.ToAngle();
+            details.Dec = ds.Position?.Dec.ToAngle();
+            details.Constellation = ds.Constellation;
+
             details.LargeDiameter = ds.LargeDiameter.ToAngle(unit: OALAngleUnit.ArcSec);
             details.SmallDiameter = ds.SmallDiameter.ToAngle(unit: OALAngleUnit.ArcSec);
             details.Brightness = ds.SurfBr?.ToBrightness();
@@ -584,12 +590,20 @@ namespace Astrarium.Plugins.Journal.OAL
         {
             TargetDB result = new TargetDB();
 
+            // TODO: convert to equinoq of date
+            double? ra = target.Position?.RA.ToAngle();
+            double? dec = target.Position?.Dec.ToAngle();
+            string consellation = target.Constellation;
+
             // Single star
             if (target is OALTargetStar st)
             {
                 result.Type = "Star";
                 result.Details = JsonConvert.SerializeObject(new StarTargetDetails()
                 {
+                    RA = ra,
+                    Dec = dec,
+                    Constellation = consellation,
                     Magnitude = st.ApparentMagSpecified ? st.ApparentMag : (double?)null,
                     Classification = st.Classification
                 }, jsonSettings);
@@ -603,6 +617,9 @@ namespace Astrarium.Plugins.Journal.OAL
 
                     result.Details = JsonConvert.SerializeObject(new VariableStarTargetDetails()
                     {
+                        RA = ra,
+                        Dec = dec,
+                        Constellation = consellation,
                         Magnitude = vs.ApparentMagSpecified ? vs.ApparentMag : (double?)null,
                         MaxMagnitude = vs.MaxApparentMagSpecified ? vs.MaxApparentMag : (double?)null,
                         Period = vs.PeriodSpecified ? vs.Period : (double?)null,
@@ -615,7 +632,12 @@ namespace Astrarium.Plugins.Journal.OAL
             else if (target is OALTargetDeepSkyMS ms)
             {
                 result.Type = "Star";
-                result.Details = JsonConvert.SerializeObject(new StarTargetDetails(), jsonSettings);
+                result.Details = JsonConvert.SerializeObject(new StarTargetDetails()
+                {
+                    RA = ra,
+                    Dec = dec,
+                    Constellation = consellation
+                }, jsonSettings);
             }
             // DeepSky object
             else if (target is OALTargetDeepSky)
@@ -750,6 +772,12 @@ namespace Astrarium.Plugins.Journal.OAL
                 {
                     result.Type = "Sun";
                 }
+                result.Details = JsonConvert.SerializeObject(new TargetDetails()
+                {
+                    RA = ra,
+                    Dec = dec,
+                    Constellation = consellation
+                }, jsonSettings);
             }
 
             else
@@ -771,13 +799,6 @@ namespace Astrarium.Plugins.Journal.OAL
                 }
             }
 
-            // TODO: convert to equinox of date 
-            result.RightAscension = target.Position?.RA.ToAngle();
-
-            // TODO: convert to equinox of date
-            result.Declination = target.Position?.Dec.ToAngle();
-
-            result.Constellation = target.Constellation;
             result.Notes = target.Notes;
 
             return result;

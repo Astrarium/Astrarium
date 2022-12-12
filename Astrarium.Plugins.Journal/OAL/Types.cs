@@ -1195,13 +1195,11 @@ namespace Astrarium.Plugins.Journal.OAL
     
     [Serializable]
     [XmlType(TypeName = "referenceFrameType", Namespace = OALData.OAL)]
-    public partial class OALReferenceFrame 
-    {   
-        
+    public partial class OALReferenceFrame
+    {
         [XmlElement(ElementName = "origin", Form = XmlSchemaForm.Unqualified)]
         public OALReferenceFrameOrigin Origin { get; set; }
 
-        
         [XmlElement(ElementName = "equinox", Form = XmlSchemaForm.Unqualified)]
         public OALReferenceFrameEquinox Equinox { get; set; } = OALReferenceFrameEquinox.J2000;
     }
