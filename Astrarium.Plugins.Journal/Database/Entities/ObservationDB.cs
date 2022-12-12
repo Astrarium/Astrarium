@@ -44,6 +44,11 @@ namespace Astrarium.Plugins.Journal.Database.Entities
         public string Result { get; set; }
 
         /// <summary>
+        /// Language (2-letter ISO code)
+        /// </summary>
+        public string Lang { get; set; }
+
+        /// <summary>
         /// Finding details specific for target type, in JSON form.
         /// </summary>
         public string Details { get; set; }

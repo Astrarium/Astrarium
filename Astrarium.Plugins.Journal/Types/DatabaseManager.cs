@@ -178,7 +178,8 @@ namespace Astrarium.Plugins.Journal.Types
                     Type = body.Type,
                     Name = body.Names.First(),
                     CommonName = body.CommonName,
-                    Source = "Astrarium"
+                    Source = "Astrarium",
+                    Details = JsonConvert.SerializeObject(CreateTargetDetails(body))
                 };
 
                 var observation = new ObservationDB()
@@ -205,8 +206,9 @@ namespace Astrarium.Plugins.Journal.Types
                     End = observation.End,
                     ObjectName = observation.Target.Name,
                     ObjectType = observation.Target.Type,
-                    ObjectNameAliases = DeserializeAliases(observation.Target.Aliases),
+                    ObjectNameAliases = DeserializeAliases(observation.Target.Aliases),                    
                     // TODO: save coordinates of the body
+                    // TargetDetails = 
                 };
 
                 return obs;
@@ -789,6 +791,11 @@ namespace Astrarium.Plugins.Journal.Types
             {
                 return new DeepSkyObservationDetails();
             }
+            return null;
+        }
+
+        private static object CreateTargetDetails(CelestialObject body)
+        {
             return null;
         }
 
