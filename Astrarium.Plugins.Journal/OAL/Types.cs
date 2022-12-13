@@ -1392,24 +1392,19 @@ namespace Astrarium.Plugins.Journal.OAL
     [Serializable]
     [XmlType(TypeName = "deepSkyTargetType", Namespace = OALData.OAL)]
     public abstract partial class OALTargetDeepSky : OALTarget 
-    {  
-        
+    {
         [XmlElement(ElementName = "smallDiameter", Form = XmlSchemaForm.Unqualified)]
         public OALNonNegativeAngle SmallDiameter { get; set; }
         
-        
         [XmlElement(ElementName = "largeDiameter", Form = XmlSchemaForm.Unqualified)]
         public OALNonNegativeAngle LargeDiameter { get; set; }
-
         
         [XmlElement(ElementName = "visMag", Form = XmlSchemaForm.Unqualified)]
         public double VisMag { get; set; }
 
-        
         [XmlIgnore]
         public bool VisMagSpecified { get; set; }
 
-        
         [XmlElement(ElementName = "surfBr", Form = XmlSchemaForm.Unqualified)]
         public OALSurfaceBrightness SurfBr { get; set; }
     }
@@ -1486,22 +1481,24 @@ namespace Astrarium.Plugins.Journal.OAL
     [Serializable]
     [XmlType(TypeName = "deepSkyNA", Namespace = OALData.OAL)]
     public partial class OALTargetDeepSkyNA : OALTargetDeepSky { }
-    
-    [Serializable]
+
     [CelestialObjectType("DeepSky.Galaxy")]
+    [Serializable]
     [XmlType(TypeName = "deepSkyGX", Namespace = OALData.OAL)]
-    public partial class OALTargetDeepSkyGX : OALTargetDeepSky 
+    public partial class OALTargetDeepSkyGX : OALTargetDeepSky
     {
+        [OALConverter(Property = nameof(DeepSkyGalaxyTargetDetails.HubbleType))]
         [XmlElement(ElementName = "hubbleType", Form = XmlSchemaForm.Unqualified)]
         public string HubbleType { get; set; }
-        
+
+        [OALConverter(Property = nameof(DeepSkyGalaxyTargetDetails.PositionAngle), ImportConverter = typeof(ToNullableIntConverter), ExportConverter = typeof(ToStringConverter))]
         [XmlElement(ElementName = "pa", Form = XmlSchemaForm.Unqualified, DataType = "integer")]
         public string PositionAngle { get; set; }
     }
     
     [Serializable]
     [XmlType(TypeName = "deepSkyGN", Namespace = OALData.OAL)]
-    public partial class OALTargetDeepSkyGN : OALTargetDeepSky 
+    public partial class OALTargetDeepSkyGN : OALTargetDeepSky
     {
         [XmlElement(ElementName = "nebulaType", Form = XmlSchemaForm.Unqualified)]
         public string NebulaType { get; set; }
