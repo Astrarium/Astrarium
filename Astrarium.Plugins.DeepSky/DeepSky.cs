@@ -57,17 +57,17 @@ namespace Astrarium.Plugins.DeepSky
         /// <summary>
         /// Larger diameter, in seconds of arc
         /// </summary>
-        public float SizeA { get; set; }
+        public float? LargeDiameter { get; set; }
 
         /// <summary>
         /// Smaller diameter, in seconds of arc
         /// </summary>
-        public float SizeB { get; set; }
+        public float? SmallDiameter { get; set; }
 
         /// <summary>
         /// Position angle
         /// </summary>
-        public short PA { get; set; }
+        public short? PA { get; set; }
 
         /// <summary>
         /// Proper name of NGC/IC object
@@ -117,7 +117,7 @@ namespace Astrarium.Plugins.DeepSky
             }
         }
 
-        public override double Semidiameter { get => Math.Max(SizeA, SizeB) * 30; }
+        public override double Semidiameter { get => Math.Max(LargeDiameter ?? 0, SmallDiameter ?? 0) * 30; }
 
         public ICollection<CelestialPoint> Outline { get; set; }
 

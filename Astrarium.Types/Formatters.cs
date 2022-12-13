@@ -187,6 +187,8 @@ namespace Astrarium.Types
         {
             public virtual string Format(object value)
             {
+                if (value == null) return null;
+
                 double angle = Convert.ToDouble(value);
                 var a = new DMS(angle);
                 
@@ -298,6 +300,8 @@ namespace Astrarium.Types
 
             public string Format(object value)
             {
+                if (value == null) return null;
+
                 double v = Convert.ToDouble(value);
                 if (double.IsInfinity(v) || double.IsNaN(v))
                 {

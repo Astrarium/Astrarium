@@ -261,10 +261,15 @@ namespace Astrarium.Plugins.Journal.Types
             {
                 using (var ctx = new DatabaseContext())
                 {
-                    var existing = ctx.Observations.FirstOrDefault(x => x.Id == id);
-                    if (existing != null)
+                    var observation = ctx.Observations.FirstOrDefault(x => x.Id == id);
+                    if (observation != null)
                     {
-                        ctx.Observations.Remove(existing);
+                        var target = ctx.Targets.FirstOrDefault(x => x.Id == observation.TargetId);
+                        if (target != null)
+                        {
+                            ctx.Targets.Remove(target);
+                        }
+                        ctx.Observations.Remove(observation);
                         ctx.SaveChanges();
                     }
                 }

@@ -26,6 +26,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
         private DateTimeComparer dateComparer = new DateTimeComparer();
 
         private readonly ISky sky;
+        private readonly ITargetDetailsFactory targetDetailsFactory;
         private readonly IDatabaseManager dbManager;
         private readonly string rootPath;
         private readonly string imagesPath;
@@ -69,9 +70,10 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         #endregion Commands
 
-        public JournalVM(ISky sky, IDatabaseManager dbManager)
+        public JournalVM(ISky sky, ITargetDetailsFactory targetDetailsFactory, IDatabaseManager dbManager)
         {
             this.sky = sky;
+            this.targetDetailsFactory = targetDetailsFactory;
             this.dbManager = dbManager;
 
             rootPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Observations");
@@ -656,28 +658,8 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         private TargetDetails CreateTargetDetails(double jd, CelestialObject body)
         {
-            TargetDetails targetDetails = null;
-
-            // Sky context instance to calculate ephemerides
             var context = new SkyContext(jd, sky.Context.GeoLocation);
-
-            // Create target details depending on type
-            if (body.Type == "Star")
-            {
-                var ephemerides = sky.GetEphemerides(body, context, new[] { "Equatorial.Alpha", "Equatorial.Delta", "Horizontal.Altitude", "Horizontal.Azimuth", "Magnitude", "SpectralClass", "Constellation" });
-
-                targetDetails = new StarTargetDetails()
-                {
-                    RA = ephemerides.GetValueOrDefault<double?>("Equatorial.Alpha"),
-                    Dec = ephemerides.GetValueOrDefault<double?>("Equatorial.Delta"),
-                    Alt = ephemerides.GetValueOrDefault<double?>("Horizontal.Altitude"),
-                    Azi = ephemerides.GetValueOrDefault<double?>("Horizontal.Azimuth"),
-                    Constellation = ephemerides.GetValueOrDefault<string>("Constellation"),
-                    Magnitude = ephemerides.GetValueOrDefault<float?>("Magnitude"),
-                    Classification = ephemerides.GetValueOrDefault<string>("SpectralClass"),
-                };
-            }
-
+            TargetDetails targetDetails = targetDetailsFactory.BuildTargetDetails(body, context);
             return targetDetails;
         }
 

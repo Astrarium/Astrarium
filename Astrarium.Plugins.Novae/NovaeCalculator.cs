@@ -191,7 +191,7 @@ namespace Astrarium.Plugins.Novae
                 int dt = 3;
                 if (delta <= dt)
                 {
-                    float step = (n.MinMagnitude - n.MaxMagnitude) / dt; 
+                    float step = (n.MinMagnitude - n.MaxMagnitude) / dt;
                     mag = n.MaxMagnitude + step * delta;
                 }
             }
@@ -228,7 +228,10 @@ namespace Astrarium.Plugins.Novae
             e["Equatorial.Delta"] = (c, m) => c.Get(Equatorial, m).Delta;
             e["Horizontal.Altitude"] = (c, m) => c.Get(Horizontal, m).Altitude;
             e["Horizontal.Azimuth"] = (c, m) => c.Get(Horizontal, m).Azimuth;
+            e["VarStarType"] = (c, m) => m.NovaType;
             e["Magnitude"] = (c, m) => c.Get(Magnitude, m);
+            e["MinMagnitude", Formatters.Magnitude] = (c, m) => m.MinMagnitude;
+            e["MaxMagnitude", Formatters.Magnitude] = (c, m) => m.MaxMagnitude;
             e["RTS.Rise"] = (c, m) => c.GetDateFromTime(c.Get(RiseTransitSet, m).Rise);
             e["RTS.Transit"] = (c, m) => c.GetDateFromTime(c.Get(RiseTransitSet, m).Transit);
             e["RTS.Set"] = (c, m) => c.GetDateFromTime(c.Get(RiseTransitSet, m).Set);
@@ -266,7 +269,7 @@ namespace Astrarium.Plugins.Novae
                 .AddRow("PeakDate", new Date(n.JulianDayPeak), Formatters.Date)
                 .AddRow("MaxMagnitude", n.MaxMagnitude, Formatters.Magnitude)
                 .AddRow("MinMagnitude", n.MinMagnitude, Formatters.Magnitude)
-                .AddRow("Type", n.NovaType + NovaTypeDescription(n))
+                .AddRow("VarStarType", n.NovaType + NovaTypeDescription(n))
 
                 .AddHeader(Text.Get("Nova.RTS"))
                 .AddRow("RTS.Rise")

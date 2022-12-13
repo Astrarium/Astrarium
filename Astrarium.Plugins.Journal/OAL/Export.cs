@@ -400,12 +400,17 @@ namespace Astrarium.Plugins.Journal.OAL
                     break;
                 case "Planet":
                     tar = new OALTargetPlanet();
+                    details = JsonConvert.DeserializeObject<PlanetTargetDetails>(target.Details);
                     break;
                 case "Sun":
                     tar = new OALTargetSun();
                     break;
+
+                // any other types of objects
                 default:
-                    throw new Exception("Unknown target type");
+                    tar = new OALTarget();
+                    details = JsonConvert.DeserializeObject<TargetDetails>(target.Details);
+                    break;
             }
             if (tar is OALTargetStar star)
             {
@@ -476,9 +481,14 @@ namespace Astrarium.Plugins.Journal.OAL
                     ds.Separation = new OALNonNegativeAngle() { Value = d.Separation.Value, Unit = OALAngleUnit.ArcSec };
                 }
             }
+            if (tar is OALTargetDeepSkyGX gx)
+            {
+                var d = details as DeepSkyGalaxyTargetDetails;
+                gx.HubbleType = d.HubbleType;
+                gx.PositionAngle = d.PositionAngle?.ToString();
+            }
 
             // TODO: handle other types
-            //deepSkyGX
             //deepSkyGN
             //deepSkyOC
             //deepSkyPN
@@ -488,12 +498,12 @@ namespace Astrarium.Plugins.Journal.OAL
 
             tar.Id = target.Id;
             tar.Alias = JsonConvert.DeserializeObject<string[]>(target.Aliases);
-            tar.Constellation = details.Constellation;
+            tar.Constellation = details?.Constellation;
             tar.Name = target.Name;
             tar.Notes = target.Notes;
             tar.Item = target.Source;
             tar.ItemElementName = OALDataSource.DataSource;
-            if (details.RA != null && details.Dec != null)
+            if (details != null && details.RA != null && details.Dec != null)
             {
                 tar.Position = new OALEquPosType()
                 {

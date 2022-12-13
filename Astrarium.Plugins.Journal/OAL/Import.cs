@@ -566,8 +566,8 @@ namespace Astrarium.Plugins.Journal.OAL
             details.Dec = ds.Position?.Dec.ToAngle();
             details.Constellation = ds.Constellation;
 
-            details.LargeDiameter = ds.LargeDiameter.ToAngle(unit: OALAngleUnit.ArcSec);
-            details.SmallDiameter = ds.SmallDiameter.ToAngle(unit: OALAngleUnit.ArcSec);
+            details.LargeDiameter = (float?)ds.LargeDiameter.ToAngle(unit: OALAngleUnit.ArcSec);
+            details.SmallDiameter = (float?)ds.SmallDiameter.ToAngle(unit: OALAngleUnit.ArcSec);
             details.Brightness = ds.SurfBr?.ToBrightness();
             details.Magnitude = ds.VisMagSpecified ? ds.VisMag : (double?)null;
             return details;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Astrarium.Plugins.Journal.Types;
+using System;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
@@ -1277,9 +1278,8 @@ namespace Astrarium.Plugins.Journal.OAL
     [XmlInclude(typeof(OALTargetVariableStar))]
     [Serializable]
     [XmlType(TypeName = "observationTargetType", Namespace = OALData.OAL)]
-    public partial class OALTarget 
+    public partial class OALTarget
     {
-        
         [XmlElement("datasource", typeof(string), Form = XmlSchemaForm.Unqualified)]
         [XmlElement("observer", typeof(string), Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
         [XmlChoiceIdentifier(nameof(ItemElementName))]
@@ -1488,13 +1488,12 @@ namespace Astrarium.Plugins.Journal.OAL
     public partial class OALTargetDeepSkyNA : OALTargetDeepSky { }
     
     [Serializable]
-    [XmlType(TypeName = "deepSkyGX", Namespace=OALData.OAL)]
+    [CelestialObjectType("DeepSky.Galaxy")]
+    [XmlType(TypeName = "deepSkyGX", Namespace = OALData.OAL)]
     public partial class OALTargetDeepSkyGX : OALTargetDeepSky 
     {
-        
         [XmlElement(ElementName = "hubbleType", Form = XmlSchemaForm.Unqualified)]
         public string HubbleType { get; set; }
-        
         
         [XmlElement(ElementName = "pa", Form = XmlSchemaForm.Unqualified, DataType = "integer")]
         public string PositionAngle { get; set; }
@@ -1504,7 +1503,6 @@ namespace Astrarium.Plugins.Journal.OAL
     [XmlType(TypeName = "deepSkyGN", Namespace = OALData.OAL)]
     public partial class OALTargetDeepSkyGN : OALTargetDeepSky 
     {
-        
         [XmlElement(ElementName = "nebulaType", Form = XmlSchemaForm.Unqualified)]
         public string NebulaType { get; set; }
         

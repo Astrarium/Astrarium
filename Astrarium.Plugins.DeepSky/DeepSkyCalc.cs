@@ -36,6 +36,10 @@ namespace Astrarium.Plugins.DeepSky
 
         private readonly ISky sky;
 
+        private readonly IEphemFormatter angularSizeFormatter = new DeepSkyAngularSizeFormatter();
+        private readonly IEphemFormatter surfaceBrightnessFormatter = new DeepSkySurfaceBrightnessFormatter();
+        private readonly IEphemFormatter posAngleFormatter = new DeepSkyPositionAngleFormatter();
+
         public DeepSkyCalc(ISky sky)
         {
             this.sky = sky;
@@ -143,6 +147,11 @@ namespace Astrarium.Plugins.DeepSky
             e["Equatorial.Alpha"] = (c, ds) => c.Get(Equatorial, ds).Alpha;
             e["Equatorial.Delta"] = (c, ds) => c.Get(Equatorial, ds).Delta;
             e["Magnitude"] = (c, ds) => ds.Magnitude;
+            e["ObjectType", Formatters.Simple] = (c, ds) => c.Get(ReadDeepSkyDetails, ds)?.ObjectType;
+            e["PositionAngle", posAngleFormatter] = (c, ds) => ds.PA;
+            e["LargeDiameter", angularSizeFormatter] = (c, ds) => ds.LargeDiameter;
+            e["SmallDiameter", angularSizeFormatter] = (c, ds) => ds.SmallDiameter;
+            e["SurfaceBrightness", surfaceBrightnessFormatter] = (c, ds) => c.Get(ReadDeepSkyDetails, ds)?.SurfaceBrightness;
             e["RTS.Rise"] = (c, ds) => c.GetDateFromTime(c.Get(RiseTransitSet, ds).Rise);
             e["RTS.Transit"] = (c, ds) => c.GetDateFromTime(c.Get(RiseTransitSet, ds).Transit);
             e["RTS.Set"] = (c, ds) => c.GetDateFromTime(c.Get(RiseTransitSet, ds).Set);
@@ -194,7 +203,7 @@ namespace Astrarium.Plugins.DeepSky
 
             .AddHeader(Text.Get("DeepSky.Properties"));
 
-            info.AddRow("Type", details.ObjectType);
+            info.AddRow("ObjectType", details.ObjectType);
             if (ds.Magnitude != float.NaN)
             {
                 info.AddRow("VisualMagnitude", ds.Magnitude, Formatters.Magnitude);
@@ -205,21 +214,21 @@ namespace Astrarium.Plugins.DeepSky
             }
             if (details.SurfaceBrightness != null)
             {
-                info.AddRow("SurfaceBrightness", details.SurfaceBrightness, new Formatters.SignedDoubleFormatter(2, " mag/sq.arcsec"));
+                info.AddRow("SurfaceBrightness");
             }
 
-            if (ds.SizeA > 0)
+            if (ds.LargeDiameter != null)
             {
-                string size = $"{Formatters.Angle.Format(ds.SizeA / 60)}";
-                if (ds.SizeB > 0)
+                string size = angularSizeFormatter.Format(ds.LargeDiameter);
+                if (ds.SmallDiameter != null)
                 {
-                    size += $" x {Formatters.Angle.Format(ds.SizeB / 60)}";
+                    size += $" x {angularSizeFormatter.Format(ds.SmallDiameter)}";
                 }
                 info.AddRow("AngularDiameter", size, Formatters.Simple);
             }
-            if (ds.PA > 0)
+            if (ds.PA != null)
             {
-                info.AddRow("PositionAngle", ds.PA, new Formatters.UnsignedDoubleFormatter(2, "\u00B0"));
+                info.AddRow("PositionAngle");
             }
 
             if (details.Identifiers.Any() || details.PGC != null)
@@ -308,9 +317,9 @@ namespace Astrarium.Plugins.DeepSky
                         Equatorial0 = new CrdsEquatorial(ra, dec),
                         Status = status,
                         Magnitude = string.IsNullOrWhiteSpace(mag) ? float.NaN : float.Parse(mag, CultureInfo.InvariantCulture),
-                        SizeA = float.Parse(string.IsNullOrWhiteSpace(sizeA) ? "0" : sizeA, CultureInfo.InvariantCulture),
-                        SizeB = float.Parse(string.IsNullOrWhiteSpace(sizeB) ? "0" : sizeB, CultureInfo.InvariantCulture),
-                        PA = short.Parse(string.IsNullOrWhiteSpace(PA) ? "0" : PA),
+                        LargeDiameter = !string.IsNullOrWhiteSpace(sizeA) ? float.Parse(sizeA, CultureInfo.InvariantCulture) : (float?)null,
+                        SmallDiameter = !string.IsNullOrWhiteSpace(sizeB) ? float.Parse(sizeB, CultureInfo.InvariantCulture) : (float?)null,
+                        PA = !string.IsNullOrWhiteSpace(PA) ? short.Parse(PA) : (short?)null,
                         Messier = messier,
                     };
 

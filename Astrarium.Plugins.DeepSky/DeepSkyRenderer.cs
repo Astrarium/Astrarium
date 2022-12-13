@@ -223,23 +223,26 @@ namespace Astrarium.Plugins.DeepSky
             {
                 PointF p = map.Project(ds.Horizontal);
 
-                float sizeA = GetDiameter(map, ds.SizeA);
-                float sizeB = GetDiameter(map, ds.SizeB);
+                float sizeA = GetDiameter(map, ds.LargeDiameter);
+                float sizeB = GetDiameter(map, ds.SmallDiameter);
 
                 // elliptic object with known size
                 if (sizeB > 0 && sizeB != sizeA)
                 {
-                    float diamA = GetDiameter(map, ds.SizeA);
+                    float diamA = GetDiameter(map, ds.LargeDiameter);
                     if (diamA > 10)
                     {
-                        float diamB = GetDiameter(map, ds.SizeB);
+                        float diamB = GetDiameter(map, ds.SmallDiameter);
                         if (ds.Outline != null && settings.Get<bool>("DeepSkyOutlines"))
                         {
                             DrawOutline(map, ds.Outline);
                         }
                         else
                         {
-                            map.Rotate(p, ds.Equatorial, ds.PA + 90);
+                            if (ds.PA != null)
+                            {
+                                map.Rotate(p, ds.Equatorial, ds.PA.Value + 90);
+                            }
                             DrawEllipticObject(map.Graphics, diamA, diamB);
                             map.Graphics.ResetTransform();
                         }
@@ -255,7 +258,7 @@ namespace Astrarium.Plugins.DeepSky
                 // round object
                 else if (sizeA > 0)
                 {
-                    float diamA = GetDiameter(map, ds.SizeA);
+                    float diamA = GetDiameter(map, ds.LargeDiameter);
                     if (diamA > 10)
                     {
                         if (ds.Outline != null && settings.Get<bool>("DeepSkyOutlines"))
@@ -264,7 +267,10 @@ namespace Astrarium.Plugins.DeepSky
                         }
                         else
                         {
-                            map.Rotate(p, ds.Equatorial, ds.PA + 90);
+                            if (ds.PA != null)
+                            {
+                                map.Rotate(p, ds.Equatorial, ds.PA.Value + 90);
+                            }
                             DrawRoundObject(map.Graphics, diamA);
                             map.Graphics.ResetTransform();
                         }
@@ -325,10 +331,17 @@ namespace Astrarium.Plugins.DeepSky
                 }
             }
 
-            private float GetDiameter(IMapContext map, double diam)
+            private float GetDiameter(IMapContext map, double? diam)
             {
-                double r = Math.Sqrt(map.Width * map.Width + map.Height * map.Height);
-                return (float)(diam / 60 / map.ViewAngle * r / 2);
+                if (diam == null)
+                {
+                    return 0;
+                }
+                else
+                {
+                    double r = Math.Sqrt(map.Width * map.Width + map.Height * map.Height);
+                    return (float)(diam / 60 / map.ViewAngle * r / 2);
+                }
             }
         }
 
