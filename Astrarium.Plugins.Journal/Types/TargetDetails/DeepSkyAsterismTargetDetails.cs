@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Journal.Types
 {
+    [CelestialObjectType("DeepSky.Asterism")]
     public class DeepSkyAsterismTargetDetails : DeepSkyTargetDetails
     {
         /// <summary>

@@ -350,23 +350,18 @@ namespace Astrarium.Plugins.Journal.OAL
     [XmlType(TypeName = "findingsDeepSkyType", Namespace = OALData.OAL)]
     public class OALFindingsDeepSky : OALFindings
     {
-        
         [XmlElement(ElementName = "smallDiameter", Form = XmlSchemaForm.Unqualified)]
         public OALNonNegativeAngle SmallDiameter { get; set; }
-        
-        
+
         [XmlElement(ElementName = "largeDiameter", Form = XmlSchemaForm.Unqualified)]
         public OALNonNegativeAngle LargeDiameter { get; set; }
 
-        
         [XmlElement(ElementName = "rating", Form = XmlSchemaForm.Unqualified)]
         public OALFindingsDeepSkyRating Rating { get; set; }
 
-        
         [XmlAttribute(AttributeName = "stellar")]
         public bool Stellar { get; set; }
 
-        
         [XmlIgnore]
         public bool StellarSpecified { get; set; }
 
@@ -724,8 +719,7 @@ namespace Astrarium.Plugins.Journal.OAL
     {        
         
         [XmlAttribute(AttributeName = "unit")]
-        public OALSurfaceBrightnessUnit unit { get; set; }
-        
+        public OALSurfaceBrightnessUnit Unit { get; set; }
         
         [XmlText]
         public double Value { get; set; }
@@ -735,11 +729,9 @@ namespace Astrarium.Plugins.Journal.OAL
     [Serializable]
     [XmlType(TypeName = "surfaceBrightnessUnit", Namespace = OALData.OAL)]
     public enum OALSurfaceBrightnessUnit 
-    {    
-        
+    {
         [XmlEnum("mags-per-squarearcsec")]
         MagsPerSquareArcSec,
-        
         
         [XmlEnum("mags-per-squarearcmin")]
         MagsPerSquareArcMin,
@@ -1285,30 +1277,23 @@ namespace Astrarium.Plugins.Journal.OAL
         [XmlChoiceIdentifier(nameof(ItemElementName))]
         public string Item { get; set; }
         
-        
         [XmlIgnore]
         public OALDataSource ItemElementName { get; set; }
-        
-        
+
         [XmlElement(ElementName = "name", Form = XmlSchemaForm.Unqualified)]
         public string Name { get; set; }
-        
         
         [XmlElement(ElementName = "alias", Form = XmlSchemaForm.Unqualified)]
         public string[] Alias { get; set; }
         
-        
         [XmlElement(ElementName = "position", Form = XmlSchemaForm.Unqualified)]
         public OALEquPosType Position { get; set; }
-        
-        
+               
         [XmlElement(ElementName = "constellation", Form = XmlSchemaForm.Unqualified)]
         public string Constellation { get; set; }
         
-        
         [XmlElement(ElementName = "notes", Form = XmlSchemaForm.Unqualified)]
         public string Notes { get; set; }
-        
         
         [XmlAttribute(AttributeName = "id", DataType = "ID")]
         public string Id { get; set; }
@@ -1388,23 +1373,27 @@ namespace Astrarium.Plugins.Journal.OAL
     [XmlInclude(typeof(OALTargetDeepSkyDS))]
     [XmlInclude(typeof(OALTargetDeepSkyDN))]
     [XmlInclude(typeof(OALTargetDeepSkyCG))]
-    [XmlInclude(typeof(OALTargetDeepSkyAS))]   
+    [XmlInclude(typeof(OALTargetDeepSkyAS))]
     [Serializable]
     [XmlType(TypeName = "deepSkyTargetType", Namespace = OALData.OAL)]
-    public abstract partial class OALTargetDeepSky : OALTarget 
+    public abstract partial class OALTargetDeepSky : OALTarget
     {
+        [OALConverter(Property = nameof(DeepSkyTargetDetails.SmallDiameter), ExportConverter = typeof(ExportArcSecondsConverter), ImportConverter = null)]
         [XmlElement(ElementName = "smallDiameter", Form = XmlSchemaForm.Unqualified)]
         public OALNonNegativeAngle SmallDiameter { get; set; }
-        
+
+        [OALConverter(Property = nameof(DeepSkyTargetDetails.LargeDiameter), ExportConverter = typeof(ExportArcSecondsConverter), ImportConverter = null)]
         [XmlElement(ElementName = "largeDiameter", Form = XmlSchemaForm.Unqualified)]
         public OALNonNegativeAngle LargeDiameter { get; set; }
-        
+
+        [OALConverter(Property = nameof(DeepSkyTargetDetails.Magnitude), ExportConverter = typeof(ExportNullableDoubleConverter), ImportConverter = null)]
         [XmlElement(ElementName = "visMag", Form = XmlSchemaForm.Unqualified)]
         public double VisMag { get; set; }
 
         [XmlIgnore]
         public bool VisMagSpecified { get; set; }
 
+        [OALConverter(Property = nameof(DeepSkyTargetDetails.Brightness), ExportConverter = typeof(ExportSurfBrightnessConverter), ImportConverter = null)]
         [XmlElement(ElementName = "surfBr", Form = XmlSchemaForm.Unqualified)]
         public OALSurfaceBrightness SurfBr { get; set; }
     }
@@ -1414,7 +1403,7 @@ namespace Astrarium.Plugins.Journal.OAL
     /// </summary>
     [Serializable]
     [XmlType(TypeName = "deepSkySC", Namespace = OALData.OAL)]
-    public partial class OALTargetDeepSkySC : OALTargetDeepSky 
+    public partial class OALTargetDeepSkySC : OALTargetDeepSky
     {
         /// <summary>
         /// Position angle of large axis in degrees
@@ -1491,151 +1480,151 @@ namespace Astrarium.Plugins.Journal.OAL
         [XmlElement(ElementName = "hubbleType", Form = XmlSchemaForm.Unqualified)]
         public string HubbleType { get; set; }
 
-        [OALConverter(Property = nameof(DeepSkyGalaxyTargetDetails.PositionAngle), ImportConverter = typeof(ToNullableIntConverter), ExportConverter = typeof(ToStringConverter))]
+        [OALConverter(Property = nameof(DeepSkyGalaxyTargetDetails.PositionAngle), ImportConverter = typeof(ImportNullableIntConverter), ExportConverter = typeof(ToStringConverter))]
         [XmlElement(ElementName = "pa", Form = XmlSchemaForm.Unqualified, DataType = "integer")]
         public string PositionAngle { get; set; }
     }
-    
+
+    [CelestialObjectType("DeepSky.GalacticNebula")]
     [Serializable]
     [XmlType(TypeName = "deepSkyGN", Namespace = OALData.OAL)]
     public partial class OALTargetDeepSkyGN : OALTargetDeepSky
     {
+        [OALConverter(Property = nameof(DeepSkyGalaxyNebulaTargetDetails.NebulaType))]
         [XmlElement(ElementName = "nebulaType", Form = XmlSchemaForm.Unqualified)]
         public string NebulaType { get; set; }
-        
-        
+
+        [OALConverter(Property = nameof(DeepSkyGalaxyNebulaTargetDetails.PositionAngle), ImportConverter = typeof(ImportNullableIntConverter), ExportConverter = typeof(ToStringConverter))]
         [XmlElement(ElementName = "pa", Form = XmlSchemaForm.Unqualified, DataType="integer")]
         public string PositionAngle { get; set; }
     }
 
+    [CelestialObjectType("DeepSky.GlobularCluster")]
     [Serializable]
     [XmlType(TypeName = "deepSkyGC", Namespace = OALData.OAL)]
-    public partial class OALTargetDeepSkyGC : OALTargetDeepSky 
-    {   
-        
+    public partial class OALTargetDeepSkyGC : OALTargetDeepSky
+    {
+        [OALConverter(Property = nameof(DeepSkyGlobularClusterTargetDetails.MagStars), ExportConverter = typeof(ExportNullableDoubleConverter), ImportConverter = null)]
         [XmlElement(ElementName = "magStars", Form = XmlSchemaForm.Unqualified)]
         public double MagStars { get; set; }
-        
-        
+
         [XmlIgnore]
         public bool MagStarsSpecified { get; set; }
 
-        
+        [OALConverter(Property = nameof(DeepSkyGlobularClusterTargetDetails.Concentration))]
         [XmlElement(ElementName = "conc", Form = XmlSchemaForm.Unqualified)]
         public string Conc { get; set; }
     }
     
+    [CelestialObjectType("DeepSky.DoubleStar")]
     [Serializable]
     [XmlType(TypeName = "deepSkyDS", Namespace = OALData.OAL)]
-    public partial class OALTargetDeepSkyDS : OALTargetDeepSky 
+    public partial class OALTargetDeepSkyDS : OALTargetDeepSky
     {
-        
+        [OALConverter(Property = nameof(DeepSkyDoubleStarTargetDetails.Separation), ExportConverter = typeof(ExportArcSecondsConverter), ImportConverter = null)]
         [XmlElement(ElementName = "separation", Form = XmlSchemaForm.Unqualified)]
         public OALNonNegativeAngle Separation { get; set; }
-        
-        
-        [XmlElement(ElementName = "pa", Form = XmlSchemaForm.Unqualified, DataType="integer")]
+
+        [OALConverter(Property = nameof(DeepSkyDoubleStarTargetDetails.PositionAngle), ImportConverter = typeof(ImportNullableIntConverter), ExportConverter = typeof(ToStringConverter))]
+        [XmlElement(ElementName = "pa", Form = XmlSchemaForm.Unqualified, DataType = "integer")]
         public string PositionAngle { get; set; }
 
-        
+        [OALConverter(Property = nameof(DeepSkyDoubleStarTargetDetails.CompanionMagnitude), ExportConverter = typeof(ExportNullableDoubleConverter), ImportConverter = null)]
         [XmlElement(ElementName = "magComp", Form = XmlSchemaForm.Unqualified)]
         public double MagComp { get; set; }
-
         
         [XmlIgnore]
         public bool MagCompSpecified { get; set; }
     }
     
     
-
+    [CelestialObjectType("DeepSky.DarkNebula")]
     [Serializable]
     [XmlType(TypeName = "deepSkyDN", Namespace = OALData.OAL)]
     public partial class OALTargetDeepSkyDN : OALTargetDeepSky 
     {
-        
+        [OALConverter(Property = nameof(DeepSkyDarkNebulaTargetDetails.PositionAngle), ExportConverter = typeof(ExportPosAngleConverter), ImportConverter = null)]
         [XmlElement(ElementName = "pa", Form = XmlSchemaForm.Unqualified, DataType = "integer")]
         public string PositionAngle { get; set; }
-        
-        
-        [XmlElement(ElementName = "opacity", Form=XmlSchemaForm.Unqualified, DataType = "integer")]
+
+        [OALConverter(Property = nameof(DeepSkyDarkNebulaTargetDetails.Opacity), ExportConverter = typeof(ToStringConverter), ImportConverter = null)]
+        [XmlElement(ElementName = "opacity", Form = XmlSchemaForm.Unqualified, DataType = "integer")]
         public string Opacity { get; set; }
     }
     
-    
-
+    [CelestialObjectType("DeepSky.GalaxyCluster")]
     [Serializable]
     [XmlType(TypeName = "deepSkyCG", Namespace = OALData.OAL)]
-    public partial class OALTargetDeepSkyCG : OALTargetDeepSky 
+    public partial class OALTargetDeepSkyCG : OALTargetDeepSky
     {
-        
+        [OALConverter(Property = nameof(DeepSkyClusterOfGalaxiesTargetDetails.Mag10), ExportConverter = typeof(ExportNullableDoubleConverter), ImportConverter = null)]
         [XmlElement(ElementName = "mag10", Form = XmlSchemaForm.Unqualified)]
         public double Mag10 { get; set; }
-        
-        
+       
         [XmlIgnore]
         public bool Mag10Specified { get; set; }
     }
-    
-    
 
+
+    [CelestialObjectType("DeepSky.Asterism")]
     [Serializable]
     [XmlType(TypeName = "deepSkyAS", Namespace = OALData.OAL)]
-    public partial class OALTargetDeepSkyAS : OALTargetDeepSky {
-       
-        
+    public partial class OALTargetDeepSkyAS : OALTargetDeepSky 
+    {
+        [OALConverter(Property = nameof(DeepSkyAsterismTargetDetails.PositionAngle), ExportConverter = typeof(ExportPosAngleConverter), ImportConverter = null)]
         [XmlElement(ElementName = "pa", Form = XmlSchemaForm.Unqualified, DataType = "integer")]
         public string PositionAngle { get; set; }
     }
-    
+
+    [CelestialObjectType("DeepSky.MultipleStar")]
     [Serializable]
     [XmlType(TypeName = "deepSkyMS", Namespace = OALData.OAL)]
-    public partial class OALTargetDeepSkyMS : OALTarget 
+    public partial class OALTargetDeepSkyMS : OALTarget
     {
+        [OALConverter(Property = nameof(DeepSkyMultipleStarTargetDetails.Component))]
         [XmlElement(ElementName = "component", Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
         public string[] Component { get; set; }
     }
-    
+
+    [CelestialObjectType("Star")]
     [XmlInclude(typeof(OALTargetVariableStar))]
     [Serializable]
     [XmlType(TypeName = "starTargetType", Namespace = OALData.OAL)]
-    public partial class OALTargetStar : OALTarget 
+    public partial class OALTargetStar : OALTarget
     {
-        
+        [OALConverter(Property = nameof(StarTargetDetails.Magnitude), ExportConverter = typeof(ExportNullableDoubleConverter), ImportConverter = null)]
         [XmlElement(ElementName = "apparentMag", Form = XmlSchemaForm.Unqualified)]
         public double ApparentMag { get; set; }
-        
         
         [XmlIgnore]
         public bool ApparentMagSpecified { get; set; }
 
-        
+        [OALConverter(Property = nameof(StarTargetDetails.Classification))]
         [XmlElement(ElementName = "classification", Form=XmlSchemaForm.Unqualified)]
         public string Classification { get; set; }
     }
-    
-    
 
+    [CelestialObjectType("VarStar")]
+    [CelestialObjectType("Nova")]
     [Serializable]
-    [XmlType(TypeName = "variableStarTargetType", Namespace=OALData.OAL)]
-    public partial class OALTargetVariableStar : OALTargetStar 
-    {    
-        
+    [XmlType(TypeName = "variableStarTargetType", Namespace = OALData.OAL)]
+    public partial class OALTargetVariableStar : OALTargetStar
+    {
+        [OALConverter(Property = nameof(VariableStarTargetDetails.VarStarType))]
         [XmlElement(ElementName = "type", Form = XmlSchemaForm.Unqualified)]
         public string Type { get; set; }
-        
-        
+
+        [OALConverter(Property = nameof(VariableStarTargetDetails.MaxMagnitude), ExportConverter = typeof(ExportNullableDoubleConverter), ImportConverter = null)]
         [XmlElement(ElementName = "maxApparentMag", Form = XmlSchemaForm.Unqualified)]
         public double MaxApparentMag { get; set; }
 
-        
         [XmlIgnore]
         public bool MaxApparentMagSpecified { get; set; }
-        
-        
+
+        [OALConverter(Property = nameof(VariableStarTargetDetails.Period), ExportConverter = typeof(ExportNullableDoubleConverter), ImportConverter = null)]
         [XmlElement(ElementName = "period", Form = XmlSchemaForm.Unqualified)]
         public double Period { get; set; }
 
-        
         [XmlIgnore]
         public bool PeriodSpecified { get; set; }
     }

@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Astrarium.Plugins.Journal.Types;
+using System.Reflection;
 
 namespace Astrarium.Plugins.Journal.OAL
 {
@@ -312,62 +313,72 @@ namespace Astrarium.Plugins.Journal.OAL
                 ScopeId = observation.ScopeId,
                 SessionId = observation.SessionId,
                 TargetId = observation.TargetId,
-                FaintestStarSpecified = false,
+                FaintestStar = session?.FaintestStar ?? 0,
+                FaintestStarSpecified = session?.FaintestStar != null,
                 Magnification = observation.Magnification ?? 0,
                 MagnificationSpecified = observation.Magnification != null,
-                Image = observation.Attachments?.Select(x => x.FilePath).ToArray(),                
+                Image = observation.Attachments?.Select(x => x.FilePath).ToArray(),
                 ObserverId = session?.ObserverId,
-                FaintestStar = session?.FaintestStar ?? 0,
                 Seeing = session?.Seeing?.ToString(),
                 SiteId = session?.SiteId,
-                SkyQuality = session?.SkyQuality != null ? new OALSurfaceBrightness() { unit = OALSurfaceBrightnessUnit.MagsPerSquareArcSec, Value = session.SkyQuality.Value } : null,
+                SkyQuality = session?.SkyQuality != null ? new OALSurfaceBrightness() { Unit = OALSurfaceBrightnessUnit.MagsPerSquareArcSec, Value = session.SkyQuality.Value } : null,
                 Result = new OALFindings[] { findings }
             };
         }
 
         private static OALTarget ToTarget(this TargetDB target)
         {
-            OALTarget tar = null;
-            TargetDetails details = null;
+            // Celestial object type
+            string bodyType = target.Type;
+
+            // OALTarget class related to that celestial object type
+            Type oalTargetType = Assembly.GetAssembly(typeof(Export))
+                .GetTypes().FirstOrDefault(x => typeof(OALTarget).IsAssignableFrom(x) && x.GetCustomAttributes<CelestialObjectTypeAttribute>().Any(a => a.CelestialObjectType == bodyType)) ?? typeof(OALTarget);
+
+            // TargetDetails class related to that celestial object type
+            Type targetDetailsType = Assembly.GetAssembly(typeof(Export))
+                .GetTypes().FirstOrDefault(x => typeof(TargetDetails).IsAssignableFrom(x) && x.GetCustomAttributes<CelestialObjectTypeAttribute>().Any(a => a.CelestialObjectType == bodyType)) ?? typeof(TargetDetails);
+
+            // Create empty OALTarget
+            OALTarget tar = (OALTarget)Activator.CreateInstance(oalTargetType);
+
+            // Get names of properties
+            var properties = oalTargetType.GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.Instance | BindingFlags.Public).Where(x => x.GetCustomAttribute<OALConverterAttribute>(true) != null);
+
+            TargetDetails details = (TargetDetails)JsonConvert.DeserializeObject(target.Details, targetDetailsType);
+
+            // Fill OALTarget
+            foreach (var prop in properties)
+            {
+                var attr = prop.GetCustomAttribute<OALConverterAttribute>();
+                var converter = (IOALConverter)Activator.CreateInstance(attr.ExportConverter);
+
+                object value = targetDetailsType.GetProperty(attr.Property).GetValue(details);
+
+                object convertedValue = converter.Convert(value, details);
+                prop.SetValue(tar, convertedValue);
+
+                var specifiedProperty = oalTargetType.GetProperty($"{prop.Name}Specified");
+                if (specifiedProperty != null && value != null)
+                {
+                    // set Specified property to "true"
+                    specifiedProperty.SetValue(tar, true);
+                }
+            }
 
             switch (target.Type)
             {
                 case "Star":
-                    details = JsonConvert.DeserializeObject<StarTargetDetails>(target.Details);
-                    tar = new OALTargetStar();
-                    break;
                 case "Nova":
                 case "VarStar":
-                    details = JsonConvert.DeserializeObject<VariableStarTargetDetails>(target.Details);
-                    tar = new OALTargetVariableStar();
-                    break;
-                case "Asterism":
-                    details = JsonConvert.DeserializeObject<DeepSkyAsterismTargetDetails>(target.Details);
-                    tar = new OALTargetDeepSkyAS();
-                    break;
+                case "DeepSky.Asterism":
+                case "DeepSky.MultipleStar":
                 case "DeepSky.GlobularCluster":
-                    details = JsonConvert.DeserializeObject<DeepSkyGlobularClusterTargetDetails>(target.Details);
-                    tar = new OALTargetDeepSkyGC();
-                    break;
                 case "DeepSky.GalaxyCluster":
-                    tar = new OALTargetDeepSkyCG();
-                    details = JsonConvert.DeserializeObject<DeepSkyClusterOfGalaxiesTargetDetails>(target.Details);
-                    break;
                 case "DeepSky.DarkNebula":
-                    tar = new OALTargetDeepSkyDN();
-                    details = JsonConvert.DeserializeObject<DeepSkyDarkNebulaTargetDetails>(target.Details);
-                    break;
                 case "DeepSky.DoubleStar":
-                    tar = new OALTargetDeepSkyDS();
-                    details = JsonConvert.DeserializeObject<DeepSkyDoubleStarTargetDetails>(target.Details);
-                    break;
                 case "DeepSky.Galaxy":
-                    tar = new OALTargetDeepSkyGX();
-                    details = JsonConvert.DeserializeObject<DeepSkyGalaxyTargetDetails>(target.Details);
-                    break;
                 case "DeepSky.GalacticNebula":
-                    tar = new OALTargetDeepSkyGN();
-                    details = JsonConvert.DeserializeObject<DeepSkyGalaxyNebulaTargetDetails>(target.Details);
                     break;
                 case "DeepSky.OpenCluster":
                     tar = new OALTargetDeepSkyOC();
@@ -412,89 +423,6 @@ namespace Astrarium.Plugins.Journal.OAL
                     details = JsonConvert.DeserializeObject<TargetDetails>(target.Details);
                     break;
             }
-            if (tar is OALTargetStar star)
-            {
-                var d = details as StarTargetDetails;
-                star.ApparentMag = d.Magnitude ?? 0;
-                star.ApparentMagSpecified = d.Magnitude != null;
-                star.Classification = d.Classification;
-            }
-            if (tar is OALTargetVariableStar varStar)
-            {
-                var d = details as VariableStarTargetDetails;
-                varStar.MaxApparentMag = d.MaxMagnitude ?? 0;
-                varStar.MaxApparentMagSpecified = d.MaxMagnitude != null;
-                varStar.Type = d.VarStarType;
-                varStar.Period = d.Period ?? 0;
-                varStar.PeriodSpecified = d.Period != null;
-            }
-            if (tar is OALTargetDeepSky deepSky)
-            {
-                var d = details as DeepSkyTargetDetails;
-                if (d.SmallDiameter != null)
-                {
-                    deepSky.SmallDiameter = new OALNonNegativeAngle() { Value = d.SmallDiameter.Value, Unit = OALAngleUnit.ArcSec };
-                }
-                if (d.LargeDiameter != null)
-                {
-                    deepSky.LargeDiameter = new OALNonNegativeAngle() { Value = d.LargeDiameter.Value, Unit = OALAngleUnit.ArcSec };
-                }
-                if (d.Brightness != null)
-                {
-                    deepSky.SurfBr = new OALSurfaceBrightness() { Value = d.Brightness.Value, unit = OALSurfaceBrightnessUnit.MagsPerSquareArcSec };
-                }
-                deepSky.VisMag = d.Magnitude ?? 0;
-                deepSky.VisMagSpecified = d.Magnitude != null;
-            }
-            if (tar is OALTargetDeepSkyAS asterism)
-            {
-                var d = details as DeepSkyAsterismTargetDetails;
-                asterism.PositionAngle = d.PositionAngle?.ToString();
-            }
-            if (tar is OALTargetDeepSkyGC gc)
-            {
-                var d = details as DeepSkyGlobularClusterTargetDetails;
-                gc.MagStars = d.MagStars ?? 0;
-                gc.MagStarsSpecified = d.MagStars != null;
-                gc.Conc = d.Concentration;
-            }
-            if (tar is OALTargetDeepSkyCG cg)
-            {
-                var d = details as DeepSkyClusterOfGalaxiesTargetDetails;
-                cg.Mag10 = d.Mag10 ?? 0;
-                cg.Mag10Specified = d.Mag10 != null;
-            }
-            if (tar is OALTargetDeepSkyDN dn)
-            {
-                var d = details as DeepSkyDarkNebulaTargetDetails;
-                dn.PositionAngle = d.PositionAngle?.ToString();
-                dn.Opacity = d.Opacity?.ToString();
-            }
-            if (tar is OALTargetDeepSkyDS ds)
-            {
-                var d = details as DeepSkyDoubleStarTargetDetails;
-                ds.PositionAngle = d.PositionAngle?.ToString();
-                ds.MagComp = d.CompanionMagnitude ?? 0;
-                ds.MagCompSpecified = d.CompanionMagnitude != null;
-                if (d.Separation != null)
-                {
-                    ds.Separation = new OALNonNegativeAngle() { Value = d.Separation.Value, Unit = OALAngleUnit.ArcSec };
-                }
-            }
-            if (tar is OALTargetDeepSkyGX gx)
-            {
-                var d = details as DeepSkyGalaxyTargetDetails;
-                gx.HubbleType = d.HubbleType;
-                gx.PositionAngle = d.PositionAngle?.ToString();
-            }
-
-            // TODO: handle other types
-            //deepSkyGN
-            //deepSkyOC
-            //deepSkyPN
-            //deepSkyQS
-            //deepSkySC
-            //deepSkyNA
 
             tar.Id = target.Id;
             tar.Alias = JsonConvert.DeserializeObject<string[]>(target.Aliases);

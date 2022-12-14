@@ -551,7 +551,7 @@ namespace Astrarium.Plugins.Journal.OAL
 
         private static double? ToBrightness(this OALSurfaceBrightness surfaceBrightness)
         {
-            if (surfaceBrightness.unit == OALSurfaceBrightnessUnit.MagsPerSquareArcSec)
+            if (surfaceBrightness.Unit == OALSurfaceBrightnessUnit.MagsPerSquareArcSec)
                 return surfaceBrightness.Value;
             else
                 return surfaceBrightness.Value / 3600;
@@ -645,7 +645,7 @@ namespace Astrarium.Plugins.Journal.OAL
                 // Asterism 
                 if (target is OALTargetDeepSkyAS a)
                 {
-                    result.Type = "Asterism";
+                    result.Type = "DeepSky.Asterism";
                     var details = BuildDeepSkyTargetDetails<DeepSkyAsterismTargetDetails>(a);
                     details.PositionAngle = a.PositionAngle.ToIntNullable();
                     result.Details = JsonConvert.SerializeObject(details, jsonSettings);
