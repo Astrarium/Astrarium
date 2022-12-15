@@ -253,27 +253,26 @@ namespace Astrarium.Plugins.Journal.OAL
         public string Lang { get; set; }
     }
     
-    
+    [CelestialObjectType("Nova")]
+    [CelestialObjectType("VarStar")]
     [Serializable]
     [XmlType(TypeName = "findingsVariableStarType", Namespace = OALData.OAL)]
     public partial class OALFindingsVariableStar : OALFindings 
-    {        
-        
+    {
+        [OALConverter(ExportConverter = typeof(ExportVariableStarVisMagConverter), ImportConverter = null)]
         [XmlElement(ElementName = "visMag", Form = XmlSchemaForm.Unqualified)]
         public OALVariableStarVisMag VisMag { get; set; }
         
-        
+        [OALConverter(Property = nameof(VariableStarObservationDetails.ComparisonStars), ExportConverter = typeof(ExportJsonConverter), ImportConverter = null)]
         [XmlElement(ElementName = "comparisonStar", Form = XmlSchemaForm.Unqualified)]
         public string[] ComparisonStar { get; set; }
 
-        
+        // TODO: continue from here
         [XmlElement(ElementName = "chartID", Form = XmlSchemaForm.Unqualified)]
         public OALVariableStarChartId ChartId { get; set; }
-
-        
+       
         [XmlAttribute(AttributeName = "brightSky")]
         public bool BrightSky { get; set; }
-
         
         [XmlIgnore]
         public bool BrightSkySpecified { get; set; }

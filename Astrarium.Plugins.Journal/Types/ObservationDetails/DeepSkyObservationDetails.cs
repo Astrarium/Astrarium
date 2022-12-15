@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Journal.Types
 {
-    public class DeepSkyObservationDetails : PropertyChangedBase
+    public class DeepSkyObservationDetails : ObservationDetails
     {
         [JsonIgnore]
         public bool SmallDiameterSpecified

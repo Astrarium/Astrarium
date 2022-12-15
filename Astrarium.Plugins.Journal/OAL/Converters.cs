@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Astrarium.Plugins.Journal.Types;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,12 +10,12 @@ namespace Astrarium.Plugins.Journal.OAL
 {
     public interface IOALConverter
     {
-        object Convert(object value, object context);
+        object Convert(object value);
     } 
 
     public class SimpleConverter : IOALConverter
     {
-        public object Convert(object value, object context)
+        public object Convert(object value)
         {
             return value;
         }
@@ -21,7 +23,7 @@ namespace Astrarium.Plugins.Journal.OAL
 
     public class ToStringConverter : IOALConverter
     {
-        public object Convert(object value, object context)
+        public object Convert(object value)
         {
             return value?.ToString();
         }
@@ -29,7 +31,7 @@ namespace Astrarium.Plugins.Journal.OAL
 
     public class ImportNullableIntConverter : IOALConverter
     {
-        public object Convert(object value, object context)
+        public object Convert(object value)
         {
             if (value == null || (value is string s && s.Trim().Equals("")))
                 return null;
@@ -42,7 +44,7 @@ namespace Astrarium.Plugins.Journal.OAL
 
     public class ExportArcSecondsConverter : IOALConverter
     {
-        public object Convert(object value, object context)
+        public object Convert(object value)
         {
             if (value == null)
                 return null;
@@ -56,7 +58,7 @@ namespace Astrarium.Plugins.Journal.OAL
     /// </summary>
     public class ImportArcSecondsConverter : IOALConverter
     {
-        public object Convert(object value, object context)
+        public object Convert(object value)
         {
             if (value == null)
                 return null;
@@ -65,9 +67,25 @@ namespace Astrarium.Plugins.Journal.OAL
         }
     }
 
+    public class ExportVariableStarVisMagConverter : IOALConverter
+    {
+        public object Convert(object value)
+        {
+            var details = value as VariableStarObservationDetails;
+            return new OALVariableStarVisMag()
+            {
+                FainterThan = details.VisMagFainterThan ?? false,
+                FainterThanSpecified = details.VisMagFainterThan != null,
+                Uncertain = details.VisMagUncertain ?? false,
+                UncertainSpecified = details.VisMagUncertain != null,
+                Value = details.VisMag
+            };
+        }
+    }
+
     public class ExportNullableDoubleConverter : IOALConverter
     {
-        public object Convert(object value, object context)
+        public object Convert(object value)
         {
             if (value == null)
                 return 0;
@@ -78,7 +96,7 @@ namespace Astrarium.Plugins.Journal.OAL
 
     public class ExportPosAngleConverter : IOALConverter
     {
-        public object Convert(object value, object context)
+        public object Convert(object value)
         {
             if (value == null)
                 return null;
@@ -87,9 +105,17 @@ namespace Astrarium.Plugins.Journal.OAL
         }
     }
 
+    public class ExportJsonConverter : IOALConverter
+    {
+        public object Convert(object value)
+        {
+            return JsonConvert.DeserializeObject<string[]>(value as string);
+        }
+    }
+
     public class ExportSurfBrightnessConverter : IOALConverter
     {
-        public object Convert(object value, object context)
+        public object Convert(object value)
         {
             if (value == null)
                 return null;

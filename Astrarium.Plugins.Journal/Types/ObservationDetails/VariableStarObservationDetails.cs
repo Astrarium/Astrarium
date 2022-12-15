@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Journal.Types
 {
-    public class VariableStarObservationDetails : PropertyChangedBase
+    [CelestialObjectType("Nova")]
+    [CelestialObjectType("VarStar")]
+    public class VariableStarObservationDetails : ObservationDetails
     {
         /// <summary>
         /// Observed visual magnitude of the variable star
