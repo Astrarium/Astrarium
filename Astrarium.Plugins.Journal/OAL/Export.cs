@@ -366,64 +366,6 @@ namespace Astrarium.Plugins.Journal.OAL
                 }
             }
 
-            switch (target.Type)
-            {
-                case "Star":
-                case "Nova":
-                case "VarStar":
-                case "DeepSky.Asterism":
-                case "DeepSky.MultipleStar":
-                case "DeepSky.GlobularCluster":
-                case "DeepSky.GalaxyCluster":
-                case "DeepSky.DarkNebula":
-                case "DeepSky.DoubleStar":
-                case "DeepSky.Galaxy":
-                case "DeepSky.GalacticNebula":
-                    break;
-                case "DeepSky.OpenCluster":
-                    tar = new OALTargetDeepSkyOC();
-                    details = JsonConvert.DeserializeObject<DeepSkyOpenClusterTargetDetails>(target.Details);
-                    break;
-                case "DeepSky.PlanetaryNebula":
-                    tar = new OALTargetDeepSkyPN();
-                    details = JsonConvert.DeserializeObject<DeepSkyPlanetaryNebulaTargetDetails>(target.Details);
-                    break;
-                case "DeepSky.Quasar":
-                    tar = new OALTargetDeepSkyQS();
-                    details = JsonConvert.DeserializeObject<DeepSkyQuasarTargetDetails>(target.Details);
-                    break;
-                case "DeepSky.StarCloud":
-                    tar = new OALTargetDeepSkySC();
-                    details = JsonConvert.DeserializeObject<DeepSkyStarCloudTargetDetails>(target.Details);
-                    break;
-                case "DeepSky.Unspecified":
-                    tar = new OALTargetDeepSkyNA();
-                    details = JsonConvert.DeserializeObject<DeepSkyUnspecifiedTargetDetails>(target.Details);
-                    break;
-                case "Comet":
-                    tar = new OALTargetComet();
-                    break;
-                case "Asteroid":
-                    tar = new OALTargetMinorPlanet();
-                    break;
-                case "Moon":
-                    tar = new OALTargetMoon();
-                    break;
-                case "Planet":
-                    tar = new OALTargetPlanet();
-                    details = JsonConvert.DeserializeObject<PlanetTargetDetails>(target.Details);
-                    break;
-                case "Sun":
-                    tar = new OALTargetSun();
-                    break;
-
-                // any other types of objects
-                default:
-                    tar = new OALTarget();
-                    details = JsonConvert.DeserializeObject<TargetDetails>(target.Details);
-                    break;
-            }
-
             tar.Id = target.Id;
             tar.Alias = JsonConvert.DeserializeObject<string[]>(target.Aliases);
             tar.Constellation = details?.Constellation;

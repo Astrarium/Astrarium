@@ -1323,10 +1323,11 @@ namespace Astrarium.Plugins.Journal.OAL
     [Serializable]
     [XmlType(TypeName = "SolarSystemTargetType", Namespace = OALData.OAL)]
     public abstract partial class OALTargetSolarSystem : OALTarget { }
-    
+
     /// <summary>
     /// OAL target type for Sun
     /// </summary>
+    [CelestialObjectType("Sun")]
     [Serializable]
     [XmlType(TypeName = "SunTargetType", Namespace = OALData.OAL)]
     public partial class OALTargetSun : OALTargetSolarSystem { }
@@ -1334,6 +1335,7 @@ namespace Astrarium.Plugins.Journal.OAL
     /// <summary>
     /// OAL target type for planets
     /// </summary>
+    [CelestialObjectType("Planet")]
     [Serializable]
     [XmlType(TypeName = "PlanetTargetType", Namespace = OALData.OAL)]
     public partial class OALTargetPlanet : OALTargetSolarSystem { }
@@ -1341,6 +1343,7 @@ namespace Astrarium.Plugins.Journal.OAL
     /// <summary>
     /// OAL target type for Moon
     /// </summary>
+    [CelestialObjectType("Moon")]
     [Serializable]
     [XmlType(TypeName = "MoonTargetType", Namespace = OALData.OAL)]
     public partial class OALTargetMoon : OALTargetSolarSystem { }
@@ -1348,6 +1351,7 @@ namespace Astrarium.Plugins.Journal.OAL
     /// <summary>
     /// OAL target type for minor planets
     /// </summary>
+    [CelestialObjectType("Asteroid")]
     [Serializable]
     [XmlType(TypeName = "MinorPlanetTargetType", Namespace = OALData.OAL)]
     public partial class OALTargetMinorPlanet : OALTargetSolarSystem { }
@@ -1355,6 +1359,7 @@ namespace Astrarium.Plugins.Journal.OAL
     /// <summary>
     /// OAL target type for comets
     /// </summary>
+    [CelestialObjectType("Comet")]
     [Serializable]
     [XmlType(TypeName = "CometTargetType", Namespace = OALData.OAL)]
     public partial class OALTargetComet : OALTargetSolarSystem { }
@@ -1401,6 +1406,7 @@ namespace Astrarium.Plugins.Journal.OAL
     /// <summary>
     /// OAL target type for star clouds (deep sky)
     /// </summary>
+    [CelestialObjectType("DeepSky.StarCloud")]
     [Serializable]
     [XmlType(TypeName = "deepSkySC", Namespace = OALData.OAL)]
     public partial class OALTargetDeepSkySC : OALTargetDeepSky
@@ -1408,6 +1414,7 @@ namespace Astrarium.Plugins.Journal.OAL
         /// <summary>
         /// Position angle of large axis in degrees
         /// </summary>
+        [OALConverter(Property = nameof(DeepSkyStarCloudTargetDetails.PositionAngle), ExportConverter = typeof(ToStringConverter), ImportConverter = null)]
         [XmlElement(ElementName = "pa", Form = XmlSchemaForm.Unqualified, DataType = "integer")]
         public string PositionAngle { get; set; }
     }
@@ -1415,29 +1422,29 @@ namespace Astrarium.Plugins.Journal.OAL
     /// <summary>
     ///  OAL target type for quasars (deep sky)
     /// </summary>
+    [CelestialObjectType("DeepSky.Quasar")]
     [Serializable]
     [XmlType(TypeName = "deepSkyQS", Namespace = OALData.OAL)]
     public partial class OALTargetDeepSkyQS : OALTargetDeepSky { }
 
-
     /// <summary>
     /// OAL target type for planetary nebulae (deep sky)
     /// </summary>
+    [CelestialObjectType("DeepSky.PlanetaryNebula")]
     [Serializable]
     [XmlType(TypeName = "deepSkyPN", Namespace = OALData.OAL)]
     public partial class OALTargetDeepSkyPN : OALTargetDeepSky
     {
-        
+        [OALConverter(Property = nameof(DeepSkyPlanetaryNebulaTargetDetails.CentralStarMagnitude), ExportConverter = typeof(ExportNullableDoubleConverter), ImportConverter = null)]
         [XmlElement(ElementName = "magStar", Form = XmlSchemaForm.Unqualified)]
         public double MagStar { get; set; }
-
         
         [XmlIgnore]
         public bool MagStarSpecified { get; set; }
     }
        
     
-    
+    [CelestialObjectType("DeepSky.OpenCluster")]
     [Serializable]
     [XmlType(TypeName = "deepSkyOC", Namespace = OALData.OAL)]
     public partial class OALTargetDeepSkyOC : OALTargetDeepSky 
@@ -1445,12 +1452,14 @@ namespace Astrarium.Plugins.Journal.OAL
         /// <summary>
         /// Number of stars
         /// </summary>
+        [OALConverter(Property = nameof(DeepSkyOpenClusterTargetDetails.StarsCount), ExportConverter = typeof(ToStringConverter), ImportConverter = null)]
         [XmlElement(ElementName = "stars", Form = XmlSchemaForm.Unqualified, DataType = "positiveInteger")]
         public string Stars { get; set; }
 
         /// <summary>
         /// Magnitude of brightest star in [mag] 
         /// </summary>
+        [OALConverter(Property = nameof(DeepSkyOpenClusterTargetDetails.BrightestStarMagnitude), ExportConverter = typeof(ExportNullableDoubleConverter), ImportConverter = null)]
         [XmlElement(ElementName = "brightestStar", Form = XmlSchemaForm.Unqualified)]
         public double BrightestStar { get; set; }
 
@@ -1463,10 +1472,12 @@ namespace Astrarium.Plugins.Journal.OAL
         /// <summary>
         /// Classification according to Trumpler
         /// </summary>
+        [OALConverter(Property = nameof(DeepSkyOpenClusterTargetDetails.TrumplerClass))]
         [XmlElement(ElementName = "class", Form = XmlSchemaForm.Unqualified)]
         public string TrumplerClass { get; set; }
     }
     
+    [CelestialObjectType("DeepSky.Unspecified")]
     [Serializable]
     [XmlType(TypeName = "deepSkyNA", Namespace = OALData.OAL)]
     public partial class OALTargetDeepSkyNA : OALTargetDeepSky { }
