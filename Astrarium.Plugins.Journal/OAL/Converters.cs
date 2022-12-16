@@ -100,7 +100,23 @@ namespace Astrarium.Plugins.Journal.OAL
             if (value == null)
                 return null;
             else
-                return ((double)value) / 3600.0;
+            {
+                var angle = value as OALNonNegativeAngle;
+                //double value = angle.Value;
+                switch (angle.Unit)
+                {
+                    case OALAngleUnit.ArcMin:
+                        return angle.Value * 60.0;
+                    case OALAngleUnit.ArcSec:
+                        return angle.Value;
+                    case OALAngleUnit.Deg:
+                        return angle.Value * 3600.0;
+                    case OALAngleUnit.Rad:
+                        return Algorithms.Angle.ToDegrees(angle.Value) * 3600.0;
+                    default:
+                        throw new Exception();
+                }
+            }
         }
     }
 
@@ -175,5 +191,26 @@ namespace Astrarium.Plugins.Journal.OAL
         }
     }
 
-    
+    public class ImportSurfBrightnessConverter : IOALConverter
+    {
+        public object Convert(object value)
+        {
+            if (value == null)
+                return null;
+            else
+            {
+                OALSurfaceBrightness surfBr = value as OALSurfaceBrightness;
+                switch (surfBr.Unit)
+                {
+                    case OALSurfaceBrightnessUnit.MagsPerSquareArcMin:
+                        return surfBr.Value * 3600;
+                    case OALSurfaceBrightnessUnit.MagsPerSquareArcSec:
+                        return surfBr.Value;
+                    default:
+                        throw new Exception();
+                }
+            }
+        }
+    }
+
 }

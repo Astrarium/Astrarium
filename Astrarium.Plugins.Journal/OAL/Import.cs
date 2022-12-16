@@ -588,202 +588,245 @@ namespace Astrarium.Plugins.Journal.OAL
 
         private static TargetDB ToTarget(this OALTarget target, OALData data)
         {
+            // Type of OALTarget
+            Type oalTargetType = target.GetType();
+
+            // Get celestial object type name 
+            string bodyType = oalTargetType.GetCustomAttribute<CelestialObjectTypeAttribute>()?.CelestialObjectType;
+
+            // TargetDetails class related to that celestial object type
+            Type targetDetailsType = Assembly.GetAssembly(typeof(Import))
+                .GetTypes().FirstOrDefault(x => typeof(TargetDetails).IsAssignableFrom(x) && x.GetCustomAttributes<CelestialObjectTypeAttribute>().Any(a => a.CelestialObjectType == bodyType)) ?? typeof(TargetDetails);
+
+            // Create empty TargetDetails
+            TargetDetails details = (TargetDetails)Activator.CreateInstance(targetDetailsType);
+
+            // Get names of properties
+            var properties = oalTargetType.GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.Instance | BindingFlags.Public).Where(x => x.GetCustomAttribute<OALConverterAttribute>(true) != null);
+
+            // Fill target details
+            foreach (var prop in properties)
+            {
+                var attr = prop.GetCustomAttribute<OALConverterAttribute>();
+                var converter = (IOALConverter)Activator.CreateInstance(attr.ImportConverter);
+
+                object value = prop.GetValue(target);
+
+                var specifiedProperty = oalTargetType.GetProperty($"{prop.Name}Specified");
+                if (specifiedProperty == null || (bool)specifiedProperty.GetValue(target))
+                {
+                    object convertedValue = converter.Convert(value);
+
+                    //if (attr.Property != null) 
+                    //{
+
+                    //}
+                    details.GetType().GetProperty(attr.Property).SetValue(details, convertedValue);
+                    
+                    //prop.SetValue(details, convertedValue);
+                }
+            }
+
             TargetDB result = new TargetDB();
 
+            result.Type = bodyType;
+
+
             // TODO: convert to equinox of date
-            double? ra = target.Position?.RA.ToAngle();
-            double? dec = target.Position?.Dec.ToAngle();
-            string consellation = target.Constellation;
+            details.RA = target.Position?.RA.ToAngle();
+            details.Dec = target.Position?.Dec.ToAngle();
+            details.Constellation = target.Constellation;
+            result.Details = JsonConvert.SerializeObject(details);
 
-            // Single star
-            if (target is OALTargetStar st)
-            {
-                result.Type = "Star";
-                result.Details = JsonConvert.SerializeObject(new StarTargetDetails()
-                {
-                    RA = ra,
-                    Dec = dec,
-                    Constellation = consellation,
-                    Magnitude = st.ApparentMagSpecified ? st.ApparentMag : (double?)null,
-                    Classification = st.Classification
-                }, jsonSettings);
+            //Single star
+            //if (target is OALTargetStar st)
+            //{
+            //    result.Type = "Star";
+            //    result.Details = JsonConvert.SerializeObject(new StarTargetDetails()
+            //    {
+            //        RA = ra,
+            //        Dec = dec,
+            //        Constellation = consellation,
+            //        Magnitude = st.ApparentMagSpecified ? st.ApparentMag : (double?)null,
+            //        Classification = st.Classification
+            //    }, jsonSettings);
 
-                // Variable star
-                if (target is OALTargetVariableStar vs)
-                {
-                    string[] novae = new string[] { "Nova", "Novae", "NA", "NB", "NC", "NR", "RN" };
+            //    Variable star
+            //    if (target is OALTargetVariableStar vs)
+            //    {
+            //        string[] novae = new string[] { "Nova", "Novae", "NA", "NB", "NC", "NR", "RN" };
 
-                    result.Type = vs.Type != null && novae.Any(x => vs.Type.Equals(x, StringComparison.OrdinalIgnoreCase)) ? "Nova" : "VarStar";
+            //        result.Type = vs.Type != null && novae.Any(x => vs.Type.Equals(x, StringComparison.OrdinalIgnoreCase)) ? "Nova" : "VarStar";
 
-                    result.Details = JsonConvert.SerializeObject(new VariableStarTargetDetails()
-                    {
-                        RA = ra,
-                        Dec = dec,
-                        Constellation = consellation,
-                        Magnitude = vs.ApparentMagSpecified ? vs.ApparentMag : (double?)null,
-                        MaxMagnitude = vs.MaxApparentMagSpecified ? vs.MaxApparentMag : (double?)null,
-                        Period = vs.PeriodSpecified ? vs.Period : (double?)null,
-                        VarStarType = vs.Type,
-                        Classification = vs.Classification
-                    }, jsonSettings);
-                }
-            }
-            // Multiple star (don't know why it's prefixed as "deepSky" in OAL)
-            else if (target is OALTargetDeepSkyMS ms)
-            {
-                result.Type = "Star";
-                result.Details = JsonConvert.SerializeObject(new StarTargetDetails()
-                {
-                    RA = ra,
-                    Dec = dec,
-                    Constellation = consellation
-                }, jsonSettings);
-            }
-            // DeepSky object
-            else if (target is OALTargetDeepSky)
-            {
-                // Asterism 
-                if (target is OALTargetDeepSkyAS a)
-                {
-                    result.Type = "DeepSky.Asterism";
-                    var details = BuildDeepSkyTargetDetails<DeepSkyAsterismTargetDetails>(a);
-                    details.PositionAngle = a.PositionAngle.ToIntNullable();
-                    result.Details = JsonConvert.SerializeObject(details, jsonSettings);
-                }
-                // Globular Cluster
-                else if (target is OALTargetDeepSkyGC gc)
-                {
-                    result.Type = "DeepSky.GlobularCluster";
-                    var details = BuildDeepSkyTargetDetails<DeepSkyGlobularClusterTargetDetails>(gc);
-                    details.MagStars = gc.MagStarsSpecified ? gc.MagStars : (double?)null;
-                    details.Concentration = gc.Conc;
-                    result.Details = JsonConvert.SerializeObject(details, jsonSettings);
-                }
-                // Cluster of Galaxies 
-                else if (target is OALTargetDeepSkyCG cg)
-                {
-                    result.Type = "DeepSky.GalaxyCluster";
-                    var details = BuildDeepSkyTargetDetails<DeepSkyClusterOfGalaxiesTargetDetails>(cg);
-                    details.Mag10 = cg.Mag10Specified ? cg.Mag10 : (double?)null;
-                    result.Details = JsonConvert.SerializeObject(details, jsonSettings);
-                }
-                // Dark nebula
-                else if (target is OALTargetDeepSkyDN dn)
-                {
-                    result.Type = "DeepSky.DarkNebula";
-                    var details = BuildDeepSkyTargetDetails<DeepSkyDarkNebulaTargetDetails>(dn);
-                    details.PositionAngle = dn.PositionAngle.ToIntNullable();
-                    details.Opacity = dn.Opacity.ToIntNullable();
-                    result.Details = JsonConvert.SerializeObject(details, jsonSettings);
-                }
-                // Double star
-                else if (target is OALTargetDeepSkyDS ds)
-                {
-                    result.Type = "DeepSky.DoubleStar";
-                    var details = BuildDeepSkyTargetDetails<DeepSkyDoubleStarTargetDetails>(ds);
-                    details.PositionAngle = ds.PositionAngle.ToIntNullable();
-                    details.Separation = ds.Separation.ToAngle(unit: OALAngleUnit.ArcSec);
-                    details.CompanionMagnitude = ds.MagCompSpecified ? ds.MagComp : (double?)null;
-                    result.Details = JsonConvert.SerializeObject(details, jsonSettings);
-                }
-                // Galaxy
-                else if (target is OALTargetDeepSkyGX gx)
-                {
-                    result.Type = "DeepSky.Galaxy";
-                    var details = BuildDeepSkyTargetDetails<DeepSkyGalaxyTargetDetails>(gx);
-                    details.PositionAngle = gx.PositionAngle.ToIntNullable();
-                    details.HubbleType = gx.HubbleType;
-                    result.Details = JsonConvert.SerializeObject(details, jsonSettings);
-                }
-                // Galaxy nebula
-                else if (target is OALTargetDeepSkyGN gn)
-                {
-                    result.Type = "DeepSky.GalacticNebula";
-                    var details = BuildDeepSkyTargetDetails<DeepSkyGalaxyNebulaTargetDetails>(gn);
-                    details.PositionAngle = gn.PositionAngle.ToIntNullable();
-                    details.NebulaType = gn.NebulaType;
-                    result.Details = JsonConvert.SerializeObject(details, jsonSettings);
-                }
-                // Open Cluster
-                else if (target is OALTargetDeepSkyOC oc)
-                {
-                    result.Type = "DeepSky.OpenCluster";
-                    var details = BuildDeepSkyTargetDetails<DeepSkyOpenClusterTargetDetails>(oc);
-                    details.BrightestStarMagnitude = oc.BrightestStarSpecified ? oc.BrightestStar : (double?)null;
-                    details.StarsCount = oc.Stars.ToIntNullable();
-                    details.TrumplerClass = oc.TrumplerClass;
-                    result.Details = JsonConvert.SerializeObject(details, jsonSettings);
-                }
-                // Planetary Nebula
-                else if (target is OALTargetDeepSkyPN pn)
-                {
-                    result.Type = "DeepSky.PlanetaryNebula";
-                    var details = BuildDeepSkyTargetDetails<DeepSkyPlanetaryNebulaTargetDetails>(pn);
-                    details.CentralStarMagnitude = pn.MagStarSpecified ? pn.MagStar : (double?)null;
-                    result.Details = JsonConvert.SerializeObject(details, jsonSettings);
-                }
-                // Quasar
-                else if (target is OALTargetDeepSkyQS qs)
-                {
-                    result.Type = "DeepSky.Quasar";
-                    var details = BuildDeepSkyTargetDetails<DeepSkyQuasarTargetDetails>(qs);
-                    result.Details = JsonConvert.SerializeObject(details, jsonSettings);
-                }
-                // Star Cloud
-                else if (target is OALTargetDeepSkySC sc)
-                {
-                    result.Type = "DeepSky.StarCloud";
-                    var details = BuildDeepSkyTargetDetails<DeepSkyStarCloudTargetDetails>(sc);
-                    details.PositionAngle = sc.PositionAngle.ToIntNullable();
-                    result.Details = JsonConvert.SerializeObject(details, jsonSettings);
-                }
-                // Unspecified
-                else if (target is OALTargetDeepSkyNA na)
-                {
-                    result.Type = "DeepSky.Unspecified";
-                    var details = BuildDeepSkyTargetDetails<DeepSkyUnspecifiedTargetDetails>(na);
-                    result.Details = JsonConvert.SerializeObject(details, jsonSettings);
-                }
-                // Other?
-                else
-                {
-                    throw new NotImplementedException("This type is not supported.");
-                }
-            }
-            else if (target is OALTargetSolarSystem)
-            {
-                if (target is OALTargetComet)
-                {
-                    result.Type = "Comet";
-                }
-                else if (target is OALTargetMinorPlanet)
-                {
-                    result.Type = "Asteroid";
-                }
-                else if (target is OALTargetMoon)
-                {
-                    result.Type = "Moon";
-                }
-                else if (target is OALTargetPlanet)
-                {
-                    result.Type = "Planet";
-                }
-                else if (target is OALTargetSun)
-                {
-                    result.Type = "Sun";
-                }
-                result.Details = JsonConvert.SerializeObject(new TargetDetails()
-                {
-                    RA = ra,
-                    Dec = dec,
-                    Constellation = consellation
-                }, jsonSettings);
-            }
+            //        result.Details = JsonConvert.SerializeObject(new VariableStarTargetDetails()
+            //        {
+            //            RA = ra,
+            //            Dec = dec,
+            //            Constellation = consellation,
+            //            Magnitude = vs.ApparentMagSpecified ? vs.ApparentMag : (double?)null,
+            //            MaxMagnitude = vs.MaxApparentMagSpecified ? vs.MaxApparentMag : (double?)null,
+            //            Period = vs.PeriodSpecified ? vs.Period : (double?)null,
+            //            VarStarType = vs.Type,
+            //            Classification = vs.Classification
+            //        }, jsonSettings);
+            //    }
+            //}
+            //Multiple star(don't know why it's prefixed as "deepSky" in OAL)
+            //else if (target is OALTargetDeepSkyMS ms)
+            //{
+            //    result.Type = "Star";
+            //    result.Details = JsonConvert.SerializeObject(new StarTargetDetails()
+            //    {
+            //        RA = ra,
+            //        Dec = dec,
+            //        Constellation = consellation
+            //    }, jsonSettings);
+            //}
+            //DeepSky object
+            //else if (target is OALTargetDeepSky)
+            //{
+            //    Asterism
+            //    if (target is OALTargetDeepSkyAS a)
+            //    {
+            //        result.Type = "DeepSky.Asterism";
+            //        var details = BuildDeepSkyTargetDetails<DeepSkyAsterismTargetDetails>(a);
+            //        details.PositionAngle = a.PositionAngle.ToIntNullable();
+            //        result.Details = JsonConvert.SerializeObject(details, jsonSettings);
+            //    }
+            //    Globular Cluster
+            //    else if (target is OALTargetDeepSkyGC gc)
+            //    {
+            //        result.Type = "DeepSky.GlobularCluster";
+            //        var details = BuildDeepSkyTargetDetails<DeepSkyGlobularClusterTargetDetails>(gc);
+            //        details.MagStars = gc.MagStarsSpecified ? gc.MagStars : (double?)null;
+            //        details.Concentration = gc.Conc;
+            //        result.Details = JsonConvert.SerializeObject(details, jsonSettings);
+            //    }
+            //    Cluster of Galaxies
+            //    else if (target is OALTargetDeepSkyCG cg)
+            //    {
+            //        result.Type = "DeepSky.GalaxyCluster";
+            //        var details = BuildDeepSkyTargetDetails<DeepSkyClusterOfGalaxiesTargetDetails>(cg);
+            //        details.Mag10 = cg.Mag10Specified ? cg.Mag10 : (double?)null;
+            //        result.Details = JsonConvert.SerializeObject(details, jsonSettings);
+            //    }
+            //    Dark nebula
+            //    else if (target is OALTargetDeepSkyDN dn)
+            //    {
+            //        result.Type = "DeepSky.DarkNebula";
+            //        var details = BuildDeepSkyTargetDetails<DeepSkyDarkNebulaTargetDetails>(dn);
+            //        details.PositionAngle = dn.PositionAngle.ToIntNullable();
+            //        details.Opacity = dn.Opacity.ToIntNullable();
+            //        result.Details = JsonConvert.SerializeObject(details, jsonSettings);
+            //    }
+            //    Double star
+            //    else if (target is OALTargetDeepSkyDS ds)
+            //    {
+            //        result.Type = "DeepSky.DoubleStar";
+            //        var details = BuildDeepSkyTargetDetails<DeepSkyDoubleStarTargetDetails>(ds);
+            //        details.PositionAngle = ds.PositionAngle.ToIntNullable();
+            //        details.Separation = ds.Separation.ToAngle(unit: OALAngleUnit.ArcSec);
+            //        details.CompanionMagnitude = ds.MagCompSpecified ? ds.MagComp : (double?)null;
+            //        result.Details = JsonConvert.SerializeObject(details, jsonSettings);
+            //    }
+            //    Galaxy
+            //    else if (target is OALTargetDeepSkyGX gx)
+            //    {
+            //        result.Type = "DeepSky.Galaxy";
+            //        var details = BuildDeepSkyTargetDetails<DeepSkyGalaxyTargetDetails>(gx);
+            //        details.PositionAngle = gx.PositionAngle.ToIntNullable();
+            //        details.HubbleType = gx.HubbleType;
+            //        result.Details = JsonConvert.SerializeObject(details, jsonSettings);
+            //    }
+            //    Galaxy nebula
+            //    else if (target is OALTargetDeepSkyGN gn)
+            //    {
+            //        result.Type = "DeepSky.GalacticNebula";
+            //        var details = BuildDeepSkyTargetDetails<DeepSkyGalaxyNebulaTargetDetails>(gn);
+            //        details.PositionAngle = gn.PositionAngle.ToIntNullable();
+            //        details.NebulaType = gn.NebulaType;
+            //        result.Details = JsonConvert.SerializeObject(details, jsonSettings);
+            //    }
+            //    Open Cluster
+            //    else if (target is OALTargetDeepSkyOC oc)
+            //    {
+            //        result.Type = "DeepSky.OpenCluster";
+            //        var details = BuildDeepSkyTargetDetails<DeepSkyOpenClusterTargetDetails>(oc);
+            //        details.BrightestStarMagnitude = oc.BrightestStarSpecified ? oc.BrightestStar : (double?)null;
+            //        details.StarsCount = oc.Stars.ToIntNullable();
+            //        details.TrumplerClass = oc.TrumplerClass;
+            //        result.Details = JsonConvert.SerializeObject(details, jsonSettings);
+            //    }
+            //    Planetary Nebula
+            //    else if (target is OALTargetDeepSkyPN pn)
+            //    {
+            //        result.Type = "DeepSky.PlanetaryNebula";
+            //        var details = BuildDeepSkyTargetDetails<DeepSkyPlanetaryNebulaTargetDetails>(pn);
+            //        details.CentralStarMagnitude = pn.MagStarSpecified ? pn.MagStar : (double?)null;
+            //        result.Details = JsonConvert.SerializeObject(details, jsonSettings);
+            //    }
+            //    Quasar
+            //    else if (target is OALTargetDeepSkyQS qs)
+            //    {
+            //        result.Type = "DeepSky.Quasar";
+            //        var details = BuildDeepSkyTargetDetails<DeepSkyQuasarTargetDetails>(qs);
+            //        result.Details = JsonConvert.SerializeObject(details, jsonSettings);
+            //    }
+            //    Star Cloud
+            //    else if (target is OALTargetDeepSkySC sc)
+            //    {
+            //        result.Type = "DeepSky.StarCloud";
+            //        var details = BuildDeepSkyTargetDetails<DeepSkyStarCloudTargetDetails>(sc);
+            //        details.PositionAngle = sc.PositionAngle.ToIntNullable();
+            //        result.Details = JsonConvert.SerializeObject(details, jsonSettings);
+            //    }
+            //    Unspecified
+            //    else if (target is OALTargetDeepSkyNA na)
+            //    {
+            //        result.Type = "DeepSky.Unspecified";
+            //        var details = BuildDeepSkyTargetDetails<DeepSkyUnspecifiedTargetDetails>(na);
+            //        result.Details = JsonConvert.SerializeObject(details, jsonSettings);
+            //    }
+            //    Other ?
+            //    else
+            //    {
+            //        throw new NotImplementedException("This type is not supported.");
+            //    }
+            //}
+            //else if (target is OALTargetSolarSystem)
+            //{
+            //    if (target is OALTargetComet)
+            //    {
+            //        result.Type = "Comet";
+            //    }
+            //    else if (target is OALTargetMinorPlanet)
+            //    {
+            //        result.Type = "Asteroid";
+            //    }
+            //    else if (target is OALTargetMoon)
+            //    {
+            //        result.Type = "Moon";
+            //    }
+            //    else if (target is OALTargetPlanet)
+            //    {
+            //        result.Type = "Planet";
+            //    }
+            //    else if (target is OALTargetSun)
+            //    {
+            //        result.Type = "Sun";
+            //    }
+            //    result.Details = JsonConvert.SerializeObject(new TargetDetails()
+            //    {
+            //        RA = ra,
+            //        Dec = dec,
+            //        Constellation = consellation
+            //    }, jsonSettings);
+            //}
 
-            else
-            {
-                throw new NotImplementedException($"Type of target {target.GetType()} not supported.");
-            }
+            //else
+            //{
+            //    throw new NotImplementedException($"Type of target {target.GetType()} not supported.");
+            //}
 
             result.Id = target.Id;
             result.Name = target.Name;
