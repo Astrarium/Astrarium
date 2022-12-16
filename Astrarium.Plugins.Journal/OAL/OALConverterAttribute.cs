@@ -10,7 +10,28 @@ namespace Astrarium.Plugins.Journal.OAL
     public class OALConverterAttribute : Attribute
     {
         public string Property { get; set; }
-        public Type ImportConverter { get; set; } = typeof(SimpleConverter);
+
+        private Type importConverter = typeof(SimpleConverter);
+
+        public Type ImportConverter
+        {
+            get => importConverter;
+            set
+            {
+                if (importConverter != null && !(importConverter is IOALConverter))
+                {
+                    throw new ArgumentException($"{nameof(ImportConverter)} should implement {nameof(IOALConverter)} interface");
+                }
+                importConverter = value;
+            }
+        }
+
         public Type ExportConverter { get; set; } = typeof(SimpleConverter);
+
+        public OALConverterAttribute()
+        {
+            // sanity checks
+
+        }
     }
 }

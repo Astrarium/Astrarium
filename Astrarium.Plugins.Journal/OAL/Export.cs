@@ -321,7 +321,7 @@ namespace Astrarium.Plugins.Journal.OAL
                 // Get names of properties
                 var properties = oalFindingsType.GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.Instance | BindingFlags.Public).Where(x => x.GetCustomAttribute<OALConverterAttribute>(true) != null);
 
-                ObservationDetails details = (ObservationDetails)JsonConvert.DeserializeObject(observation.Details, observationDetailsType);
+                ObservationDetails details = (ObservationDetails)JsonConvert.DeserializeObject(observation.Details ?? "{}", observationDetailsType);
 
                 // Fill OALFindings
                 foreach (var prop in properties)

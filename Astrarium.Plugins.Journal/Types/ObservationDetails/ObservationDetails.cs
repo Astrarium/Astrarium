@@ -7,7 +7,16 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Journal.Types
 {
-    public class ObservationDetails : PropertyChangedBase
-    {
-    }
+    public class ObservationDetails : PropertyChangedBase { }
+
+    /*
+    [CelestialObjectType("Planet")]
+    public class PlanetObservationDetails : ObservationDetails { }
+
+    [CelestialObjectType("Comet")]
+    public class CometObservationDetails : ObservationDetails { }
+
+    [CelestialObjectType("Asteroid")]
+    public class AsteroidObservationDetails : ObservationDetails { }
+    */
 }

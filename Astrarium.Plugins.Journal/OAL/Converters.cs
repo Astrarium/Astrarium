@@ -40,6 +40,16 @@ namespace Astrarium.Plugins.Journal.OAL
         }
     }
 
+    public class ExportNullableBoolConverter : IOALConverter
+    {
+        public object Convert(object value)
+        {
+            if (value == null)
+                return null;
+            else
+                return (bool)value;
+        }
+    }
 
 
     public class ExportArcSecondsConverter : IOALConverter
@@ -79,6 +89,20 @@ namespace Astrarium.Plugins.Journal.OAL
                 Uncertain = details.VisMagUncertain ?? false,
                 UncertainSpecified = details.VisMagUncertain != null,
                 Value = details.VisMag
+            };
+        }
+    }
+
+    public class ExportVariableStarChartIdconverter : IOALConverter
+    {
+        public object Convert(object value)
+        {
+            var details = value as VariableStarObservationDetails;
+            return new OALVariableStarChartId()
+            {
+                NonAAVSOChart = details.NonAAVSOChart ?? false,
+                NonAAVSOChartSpecified = details.NonAAVSOChart != null,
+                Value = details.ChartDate
             };
         }
     }

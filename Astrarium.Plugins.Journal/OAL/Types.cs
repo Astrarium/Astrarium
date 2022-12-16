@@ -262,82 +262,75 @@ namespace Astrarium.Plugins.Journal.OAL
         [OALConverter(ExportConverter = typeof(ExportVariableStarVisMagConverter), ImportConverter = null)]
         [XmlElement(ElementName = "visMag", Form = XmlSchemaForm.Unqualified)]
         public OALVariableStarVisMag VisMag { get; set; }
-        
+
         [OALConverter(Property = nameof(VariableStarObservationDetails.ComparisonStars), ExportConverter = typeof(ExportJsonConverter), ImportConverter = null)]
         [XmlElement(ElementName = "comparisonStar", Form = XmlSchemaForm.Unqualified)]
         public string[] ComparisonStar { get; set; }
 
-        // TODO: continue from here
+        [OALConverter(ExportConverter = typeof(ExportVariableStarChartIdconverter), ImportConverter = null)]
         [XmlElement(ElementName = "chartID", Form = XmlSchemaForm.Unqualified)]
         public OALVariableStarChartId ChartId { get; set; }
-       
+
+        [OALConverter(Property = nameof(VariableStarObservationDetails.BrightSky), ExportConverter = typeof(ExportNullableBoolConverter), ImportConverter = null)]
         [XmlAttribute(AttributeName = "brightSky")]
         public bool BrightSky { get; set; }
-        
+
         [XmlIgnore]
         public bool BrightSkySpecified { get; set; }
 
-        
+        [OALConverter(Property = nameof(VariableStarObservationDetails.Clouds), ExportConverter = typeof(ExportNullableBoolConverter), ImportConverter = null)]
         [XmlAttribute(AttributeName = "clouds")]
         public bool Clouds { get; set; }
 
-        
         [XmlIgnore]
         public bool CloudsSpecified { get; set; }
 
-        
+        [OALConverter(Property = nameof(VariableStarObservationDetails.PoorSeeing), ExportConverter = typeof(ExportNullableBoolConverter), ImportConverter = null)]
         [XmlAttribute(AttributeName = "poorSeeing")]
         public bool PoorSeeing { get; set; }
 
-        
         [XmlIgnore]
         public bool PoorSeeingSpecified { get; set; }
 
-        
+        [OALConverter(Property = nameof(VariableStarObservationDetails.NearHorizion), ExportConverter = typeof(ExportNullableBoolConverter), ImportConverter = null)]
         [XmlAttribute(AttributeName = "nearHorizion")]
         public bool NearHorizion { get; set; }
 
-        
         [XmlIgnore]
         public bool NearHorizionSpecified { get; set; }
 
-        
+        [OALConverter(Property = nameof(VariableStarObservationDetails.UnusualActivity), ExportConverter = typeof(ExportNullableBoolConverter), ImportConverter = null)]
         [XmlAttribute(AttributeName = "unusualActivity")]
         public bool UnusualActivity { get; set; }
 
-        
         [XmlIgnore]
         public bool UnusualActivitySpecified { get; set; }
 
-        
+        [OALConverter(Property = nameof(VariableStarObservationDetails.Outburst), ExportConverter = typeof(ExportNullableBoolConverter), ImportConverter = null)]
         [XmlAttribute(AttributeName = "outburst")]
         public bool Outburst { get; set; }
 
-        
         [XmlIgnore]
         public bool OutburstSpecified { get; set; }
 
-        
+        [OALConverter(Property = nameof(VariableStarObservationDetails.ComparismSequenceProblem), ExportConverter = typeof(ExportNullableBoolConverter), ImportConverter = null)]
         [XmlAttribute(AttributeName = "comparismSequenceProblem")]
         public bool ComparismSequenceProblem { get; set; }
 
-        
         [XmlIgnore]
         public bool ComparismSequenceProblemSpecified { get; set; }
 
-        
+        [OALConverter(Property = nameof(VariableStarObservationDetails.StarIdentificationUncertain), ExportConverter = typeof(ExportNullableBoolConverter), ImportConverter = null)]
         [XmlAttribute(AttributeName = "starIdentificationUncertain")]
         public bool StarIdentificationUncertain { get; set; }
 
-        
         [XmlIgnore]
         public bool StarIdentificationUncertainSpecified { get; set; }
 
-        
+        [OALConverter(Property = nameof(VariableStarObservationDetails.FaintStar), ExportConverter = typeof(ExportNullableBoolConverter), ImportConverter = null)]
         [XmlAttribute(AttributeName = "faintStar")]
         public bool FaintStar { get; set; }
 
-        
         [XmlIgnore]
         public bool FaintStarSpecified { get; set; }
     }
