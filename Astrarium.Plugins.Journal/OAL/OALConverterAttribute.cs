@@ -12,21 +12,33 @@ namespace Astrarium.Plugins.Journal.OAL
         public string Property { get; set; }
 
         private Type importConverter = typeof(SimpleConverter);
+        private Type exportConverter = typeof(SimpleConverter);
 
         public Type ImportConverter
         {
             get => importConverter;
             set
             {
-                if (importConverter != null && !(importConverter is IOALConverter))
+                if (value != null && !typeof(IOALConverter).IsAssignableFrom(value))
                 {
-                    throw new ArgumentException($"{nameof(ImportConverter)} should implement {nameof(IOALConverter)} interface");
+                    throw new ArgumentException($"{ImportConverter.Name} should implement {nameof(IOALConverter)} interface");
                 }
                 importConverter = value;
             }
         }
 
-        public Type ExportConverter { get; set; } = typeof(SimpleConverter);
+        public Type ExportConverter
+        {
+            get => exportConverter;
+            set
+            {
+                if (value != null && !typeof(IOALConverter).IsAssignableFrom(value))
+                {
+                    throw new ArgumentException($"{ExportConverter.Name} should implement {nameof(IOALConverter)} interface");
+                }
+                exportConverter = value;
+            }
+        }
 
         public OALConverterAttribute()
         {

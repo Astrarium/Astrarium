@@ -3,15 +3,17 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace Astrarium.Plugins.Journal.OAL
 {
     public interface IOALConverter
     {
         object Convert(object value);
-    } 
+    }
 
     public class SimpleConverter : IOALConverter
     {
@@ -51,6 +53,31 @@ namespace Astrarium.Plugins.Journal.OAL
         }
     }
 
+    public abstract class ExportStringAsEnumConverter<T> : IOALConverter where T : Enum
+    {
+        private static string GetXmlAttrNameFromEnumValue(T enumValue)
+        {
+            Type type = enumValue.GetType();
+            FieldInfo info = type.GetField(Enum.GetName(typeof(T), enumValue));
+            XmlEnumAttribute att = (XmlEnumAttribute)info.GetCustomAttributes(typeof(XmlEnumAttribute), false)[0];
+            return att.Name;
+        }
+
+        protected T GetValueFromString(string value)
+        {
+            return Enum.GetValues(typeof(T)).OfType<T>().FirstOrDefault(x => GetXmlAttrNameFromEnumValue(x).Equals(value, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public object Convert(object value)
+        {
+            return GetValueFromString(value as string);
+        }
+    }
+
+
+    public class ExportStarColorConverter : ExportStringAsEnumConverter<OALStarColor> { }
+
+    public class ExportClusterCharacterConverter : ExportStringAsEnumConverter<OALClusterCharacter> { }
 
     public class ExportArcSecondsConverter : IOALConverter
     {

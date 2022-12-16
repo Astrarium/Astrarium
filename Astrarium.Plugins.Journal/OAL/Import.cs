@@ -590,7 +590,7 @@ namespace Astrarium.Plugins.Journal.OAL
         {
             TargetDB result = new TargetDB();
 
-            // TODO: convert to equinoq of date
+            // TODO: convert to equinox of date
             double? ra = target.Position?.RA.ToAngle();
             double? dec = target.Position?.Dec.ToAngle();
             string consellation = target.Constellation;

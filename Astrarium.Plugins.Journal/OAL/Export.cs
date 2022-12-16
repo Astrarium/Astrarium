@@ -199,181 +199,73 @@ namespace Astrarium.Plugins.Journal.OAL
         {
             var session = sessions.FirstOrDefault(x => x.Id == observation.SessionId);
 
+            // Celestial object type
+            string bodyType = observation.Target.Type;
+
+            // OALFindings class related to that celestial object type
+            Type oalFindingsType = Assembly.GetAssembly(typeof(Export))
+                .GetTypes().FirstOrDefault(x => typeof(OALFindings).IsAssignableFrom(x) && x.GetCustomAttributes<CelestialObjectTypeAttribute>().Any(a => a.CelestialObjectType == bodyType)) ?? typeof(OALFindings);
+
+            // ObservationDetails class related to that celestial object type
+            Type observationDetailsType = Assembly.GetAssembly(typeof(Export))
+                .GetTypes().FirstOrDefault(x => typeof(ObservationDetails).IsAssignableFrom(x) && x.GetCustomAttributes<CelestialObjectTypeAttribute>().Any(a => a.CelestialObjectType == bodyType)) ?? typeof(ObservationDetails);
+
+            // Create empty OALFindings
+            OALFindings findings = (OALFindings)Activator.CreateInstance(oalFindingsType);
+
+            // Get names of properties
+            var properties = oalFindingsType.GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.Instance | BindingFlags.Public).Where(x => x.GetCustomAttribute<OALConverterAttribute>(true) != null);
+
+            ObservationDetails details = (ObservationDetails)JsonConvert.DeserializeObject(observation.Details ?? "{}", observationDetailsType);
+
+            // Fill OALFindings
+            foreach (var prop in properties)
             {
-                OALFindings findings = new OALFindings();
+                var attr = prop.GetCustomAttribute<OALConverterAttribute>();
+                var converter = (IOALConverter)Activator.CreateInstance(attr.ExportConverter);
 
-                if (observation.Target.Type == "VarStar" || observation.Target.Type == "Nova")
+                object value = attr.Property != null ?
+                    observationDetailsType.GetProperty(attr.Property).GetValue(details) : details;
+
+                object convertedValue = converter.Convert(value);
+                prop.SetValue(findings, convertedValue);
+
+                var specifiedProperty = oalFindingsType.GetProperty($"{prop.Name}Specified");
+                if (specifiedProperty != null && value != null)
                 {
-                    var details = JsonConvert.DeserializeObject<VariableStarObservationDetails>(observation.Details);
-                    findings = new OALFindingsVariableStar()
-                    {
-                        VisMag = new OALVariableStarVisMag()
-                        {
-                            FainterThan = details.VisMagFainterThan ?? false,
-                            FainterThanSpecified = details.VisMagFainterThan != null,
-                            Uncertain = details.VisMagUncertain ?? false,
-                            UncertainSpecified = details.VisMagUncertain != null,
-                            Value = details.VisMag
-                        },
-                        BrightSky = details.BrightSky ?? false,
-                        BrightSkySpecified = details.BrightSky != null,
-                        ChartId = new OALVariableStarChartId()
-                        {
-                            NonAAVSOChart = details.NonAAVSOChart ?? false,
-                            NonAAVSOChartSpecified = details.NonAAVSOChart != null,
-                            Value = details.ChartDate
-                        },
-                        Clouds = details.Clouds ?? false,
-                        CloudsSpecified = details.Clouds != null,
-                        ComparismSequenceProblem = details.ComparismSequenceProblem ?? false,
-                        ComparismSequenceProblemSpecified = details.ComparismSequenceProblem != null,
-                        ComparisonStar = JsonConvert.DeserializeObject<string[]>(details.ComparisonStars ?? "[]"),
-                        FaintStar = details.FaintStar ?? false,
-                        FaintStarSpecified = details.FaintStar != null,
-                        NearHorizion = details.NearHorizion ?? false,
-                        NearHorizionSpecified = details.NearHorizion != null,
-                        Outburst = details.Outburst ?? false,
-                        OutburstSpecified = details.Outburst != null,
-                        PoorSeeing = details.PoorSeeing ?? false,
-                        PoorSeeingSpecified = details.PoorSeeing != null,
-                        StarIdentificationUncertain = details.StarIdentificationUncertain ?? false,
-                        StarIdentificationUncertainSpecified = details.StarIdentificationUncertain != null,
-                        UnusualActivity = details.UnusualActivity ?? false,
-                        UnusualActivitySpecified = details.UnusualActivity != null
-                    };
+                    // set Specified property to "true"
+                    specifiedProperty.SetValue(findings, true);
                 }
-                else if (observation.Target.Type.StartsWith("DeepSky."))
-                {
-                    DeepSkyObservationDetails detailsDs = null;
-                    if (observation.Target.Type == "DeepSky.DoubleStar")
-                    {
-                        var details = JsonConvert.DeserializeObject<DoubleStarObservationDetails>(observation.Details);
-                        findings = new OALFindingsDeepSkyDS()
-                        {
-                            EqualBrightness = details.EqualBrightness ?? false,
-                            EqualBrightnessSpecified = details.EqualBrightness != null,
-                            ColorMain = GetValueFromXmlEnumAttribute<OALStarColor>(details.ColorMainComponent),
-                            ColorMainSpecified = !string.IsNullOrEmpty(details.ColorMainComponent),
-                            ColorCompanion = GetValueFromXmlEnumAttribute<OALStarColor>(details.ColorCompanionComponent),
-                            ColorCompanionSpecified = !string.IsNullOrEmpty(details.ColorCompanionComponent),
-                            NiceSurrounding = details.NiceSurrounding ?? false,
-                            NiceSurroundingSpecified = details.NiceSurrounding != null
-                        };
-                        detailsDs = details;
-                    }
-                    if (observation.Target.Type == "DeepSky.OpenCluster")
-                    {
-                        var details = JsonConvert.DeserializeObject<OpenClusterObservationDetails>(observation.Details);
-                        findings = new OALFindingsDeepSkyOC()
-                        {
-                            Character = GetValueFromXmlEnumAttribute<OALClusterCharacter>(details.Character),
-                            CharacterSpecified = !string.IsNullOrEmpty(details.Character),
-                            UnusualShape = details.UnusualShape ?? false,
-                            UnusualShapeSpecified = details.UnusualShape != null,
-                            PartlyUnresolved = details.PartlyUnresolved ?? false,
-                            PartlyUnresolvedSpecified = details.PartlyUnresolved != null,
-                            ColorContrasts = details.ColorContrasts ?? false,
-                            ColorContrastsSpecified = details.ColorContrasts != null
-                        };
-                        detailsDs = details;
-                    }
-
-
-                    var findingsDs = findings as OALFindingsDeepSky;
-
-                    if (findingsDs != null)
-                    {
-                        findingsDs.Extended = detailsDs.Extended ?? false;
-                        findingsDs.ExtendedSpecified = detailsDs != null;
-                        findingsDs.LargeDiameter = detailsDs.LargeDiameter != null ? new OALNonNegativeAngle() { Unit = OALAngleUnit.ArcSec, Value = detailsDs.LargeDiameter.Value } : null;
-                        findingsDs.SmallDiameter = detailsDs.SmallDiameter != null ? new OALNonNegativeAngle() { Unit = OALAngleUnit.ArcSec, Value = detailsDs.SmallDiameter.Value } : null;
-                        findingsDs.Mottled = detailsDs.Mottled ?? false;
-                        findingsDs.MottledSpecified = detailsDs.Mottled != null;
-                        findingsDs.Rating = (OALFindingsDeepSkyRating)detailsDs.Rating;
-                        findingsDs.Resolved = detailsDs.Resolved ?? false;
-                        findingsDs.ResolvedSpecified = detailsDs.Resolved != null;
-                        findingsDs.Stellar = detailsDs.Stellar ?? false;
-                        findingsDs.StellarSpecified = detailsDs.Stellar != null;
-                    }
-                }
-
-                findings.Description = observation.Result;
-                findings.Lang = observation.Lang;
-
             }
 
+            findings.Description = observation.Result;
+            findings.Lang = observation.Lang;
+
+            return new OALObservation()
             {
-
-                // Celestial object type
-                string bodyType = observation.Target.Type;
-
-                // OALFindings class related to that celestial object type
-                Type oalFindingsType = Assembly.GetAssembly(typeof(Export))
-                    .GetTypes().FirstOrDefault(x => typeof(OALFindings).IsAssignableFrom(x) && x.GetCustomAttributes<CelestialObjectTypeAttribute>().Any(a => a.CelestialObjectType == bodyType)) ?? typeof(OALFindings);
-
-                // ObservationDetails class related to that celestial object type
-                Type observationDetailsType = Assembly.GetAssembly(typeof(Export))
-                    .GetTypes().FirstOrDefault(x => typeof(ObservationDetails).IsAssignableFrom(x) && x.GetCustomAttributes<CelestialObjectTypeAttribute>().Any(a => a.CelestialObjectType == bodyType)) ?? typeof(ObservationDetails);
-
-                // Create empty OALFindings
-                OALFindings findings = (OALFindings)Activator.CreateInstance(oalFindingsType);
-
-                // Get names of properties
-                var properties = oalFindingsType.GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.Instance | BindingFlags.Public).Where(x => x.GetCustomAttribute<OALConverterAttribute>(true) != null);
-
-                ObservationDetails details = (ObservationDetails)JsonConvert.DeserializeObject(observation.Details ?? "{}", observationDetailsType);
-
-                // Fill OALFindings
-                foreach (var prop in properties)
-                {
-                    var attr = prop.GetCustomAttribute<OALConverterAttribute>();
-                    var converter = (IOALConverter)Activator.CreateInstance(attr.ExportConverter);
-
-                    object value = attr.Property != null ?
-                        observationDetailsType.GetProperty(attr.Property).GetValue(details) : details;
-
-                    object convertedValue = converter.Convert(value);
-                    prop.SetValue(findings, convertedValue);
-
-                    var specifiedProperty = oalFindingsType.GetProperty($"{prop.Name}Specified");
-                    if (specifiedProperty != null && value != null)
-                    {
-                        // set Specified property to "true"
-                        specifiedProperty.SetValue(findings, true);
-                    }
-                }
-
-                findings.Description = observation.Result;
-                findings.Lang = observation.Lang;
-
-                return new OALObservation()
-                {
-                    Id = observation.Id,
-                    Begin = observation.Begin,
-                    End = observation.End,
-                    EndSpecified = true,
-                    Accessories = observation.Accessories,
-                    EyepieceId = observation.EyepieceId,
-                    FilterId = observation.FilterId,
-                    CameraId = observation.CameraId,
-                    LensId = observation.LensId,
-                    ScopeId = observation.ScopeId,
-                    SessionId = observation.SessionId,
-                    TargetId = observation.TargetId,
-                    FaintestStar = session?.FaintestStar ?? 0,
-                    FaintestStarSpecified = session?.FaintestStar != null,
-                    Magnification = observation.Magnification ?? 0,
-                    MagnificationSpecified = observation.Magnification != null,
-                    Image = observation.Attachments?.Select(x => x.FilePath).ToArray(),
-                    ObserverId = session?.ObserverId,
-                    Seeing = session?.Seeing?.ToString(),
-                    SiteId = session?.SiteId,
-                    SkyQuality = session?.SkyQuality != null ? new OALSurfaceBrightness() { Unit = OALSurfaceBrightnessUnit.MagsPerSquareArcSec, Value = session.SkyQuality.Value } : null,
-                    Result = new OALFindings[] { findings }
-                };
-
-            }
-            
+                Id = observation.Id,
+                Begin = observation.Begin,
+                End = observation.End,
+                EndSpecified = true,
+                Accessories = observation.Accessories,
+                EyepieceId = observation.EyepieceId,
+                FilterId = observation.FilterId,
+                CameraId = observation.CameraId,
+                LensId = observation.LensId,
+                ScopeId = observation.ScopeId,
+                SessionId = observation.SessionId,
+                TargetId = observation.TargetId,
+                FaintestStar = session?.FaintestStar ?? 0,
+                FaintestStarSpecified = session?.FaintestStar != null,
+                Magnification = observation.Magnification ?? 0,
+                MagnificationSpecified = observation.Magnification != null,
+                Image = observation.Attachments?.Select(x => x.FilePath).ToArray(),
+                ObserverId = session?.ObserverId,
+                Seeing = session?.Seeing?.ToString(),
+                SiteId = session?.SiteId,
+                SkyQuality = session?.SkyQuality != null ? new OALSurfaceBrightness() { Unit = OALSurfaceBrightnessUnit.MagsPerSquareArcSec, Value = session.SkyQuality.Value } : null,
+                Result = new OALFindings[] { findings }
+            };
         }
 
         private static OALTarget ToTarget(this TargetDB target)
