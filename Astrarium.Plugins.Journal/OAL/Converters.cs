@@ -213,4 +213,16 @@ namespace Astrarium.Plugins.Journal.OAL
         }
     }
 
+    public class OALTargetVariableStarDicriminator : ICelestialObjectTypeDiscriminator
+    {
+        public string Discriminate(object dataObject)
+        {
+            OALTargetVariableStar varStar = dataObject as OALTargetVariableStar;
+            string[] novae = new string[] { "Nova", "Novae", "NA", "NB", "NC", "NR", "RN" };
+            return 
+                varStar.Name?.Contains("Nova") == true || 
+                varStar.Alias?.Any(x => x.Contains("Nova")) == true || 
+                (varStar.Type != null && novae.Any(x => varStar.Type.Equals(x, StringComparison.OrdinalIgnoreCase))) ? "Nova" : "VarStar";
+        }
+    }
 }

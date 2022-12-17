@@ -1583,6 +1583,7 @@ namespace Astrarium.Plugins.Journal.OAL
         public string Classification { get; set; }
     }
 
+    [CelestialObjectTypeDiscriminator(typeof(OALTargetVariableStarDicriminator))]
     [CelestialObjectType("VarStar")]
     [CelestialObjectType("Nova")]
     [Serializable]

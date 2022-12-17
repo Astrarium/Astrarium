@@ -204,11 +204,11 @@ namespace Astrarium.Plugins.Journal.OAL
 
             // OALFindings class related to that celestial object type
             Type oalFindingsType = Assembly.GetAssembly(typeof(Export))
-                .GetTypes().FirstOrDefault(x => typeof(OALFindings).IsAssignableFrom(x) && x.GetCustomAttributes<CelestialObjectTypeAttribute>().Any(a => a.CelestialObjectType == bodyType)) ?? typeof(OALFindings);
+                .GetTypes().FirstOrDefault(x => typeof(OALFindings).IsAssignableFrom(x) && x.GetCustomAttributes<CelestialObjectTypeAttribute>(inherit: false).Any(a => a.CelestialObjectType == bodyType)) ?? typeof(OALFindings);
 
             // ObservationDetails class related to that celestial object type
             Type observationDetailsType = Assembly.GetAssembly(typeof(Export))
-                .GetTypes().FirstOrDefault(x => typeof(ObservationDetails).IsAssignableFrom(x) && x.GetCustomAttributes<CelestialObjectTypeAttribute>().Any(a => a.CelestialObjectType == bodyType)) ?? typeof(ObservationDetails);
+                .GetTypes().FirstOrDefault(x => typeof(ObservationDetails).IsAssignableFrom(x) && x.GetCustomAttributes<CelestialObjectTypeAttribute>(inherit: false).Any(a => a.CelestialObjectType == bodyType)) ?? typeof(ObservationDetails);
 
             // Create empty OALFindings
             OALFindings findings = (OALFindings)Activator.CreateInstance(oalFindingsType);

@@ -317,7 +317,9 @@ namespace Astrarium.Plugins.Journal.OAL
         private static ObservationDB ToObservation(this OALObservation observation, OALData data)
         {
             // get target
-            var target = data.Targets.First(t => t.Id == observation.TargetId);
+            OALTarget target = data.Targets.First(t => t.Id == observation.TargetId);
+
+            Type oalTargetType = target.GetType();
 
             // json-serialized finding details
             string jsonDetails = null;
@@ -327,9 +329,54 @@ namespace Astrarium.Plugins.Journal.OAL
                 // TODO: what to to in this case?
             }
 
-            var finding = observation.Result.FirstOrDefault();
+            OALFindings finding = observation.Result.FirstOrDefault();
+
             if (finding != null)
             {
+                Type findingsType = finding.GetType();
+
+                string[] bodyTypes = oalTargetType.GetCustomAttributes<CelestialObjectTypeAttribute>(inherit: false).Select(a => a.CelestialObjectType).ToArray();
+
+                string bodyType = bodyTypes[0];
+
+                if (bodyTypes.Length > 1)
+                {
+                    Type discriminatorType = target.GetType().GetCustomAttribute<CelestialObjectTypeDiscriminatorAttribute>(inherit: false)?.Discriminator;
+                    if (discriminatorType != null)
+                    {
+                        var discriminator = (ICelestialObjectTypeDiscriminator)Activator.CreateInstance(discriminatorType);
+                        bodyType = discriminator.Discriminate(target);
+                    }
+                }
+
+                // ObservationDetails class related to that celestial object type
+                Type observationDetailsType = Assembly.GetAssembly(typeof(Import))
+                    .GetTypes().FirstOrDefault(x => typeof(ObservationDetails).IsAssignableFrom(x) && x.GetCustomAttributes<CelestialObjectTypeAttribute>(inherit: false).Any(a => a.CelestialObjectType == bodyType)) ?? typeof(ObservationDetails);
+                
+                // Create empty TargetDetails
+                ObservationDetails details = (ObservationDetails)Activator.CreateInstance(observationDetailsType);
+
+                // Get names of properties
+                var properties = findingsType.GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.Instance | BindingFlags.Public).Where(x => x.GetCustomAttribute<OALConverterAttribute>(true) != null);
+
+                // Fill target details
+                foreach (var prop in properties)
+                {
+                    var attr = prop.GetCustomAttribute<OALConverterAttribute>();
+                    var converter = (IOALConverter)Activator.CreateInstance(attr.ImportConverter);
+
+                    object value = prop.GetValue(finding);
+
+                    var specifiedProperty = findingsType.GetProperty($"{prop.Name}Specified");
+                    if (specifiedProperty == null || (bool)specifiedProperty.GetValue(finding))
+                    {
+                        object convertedValue = converter.Convert(value);
+                        details.GetType().GetProperty(attr.Property).SetValue(details, convertedValue);
+                    }
+                }
+
+
+                /*
                 // Variable star
                 if (finding is OALFindingsVariableStar vs)
                 {
@@ -380,12 +427,16 @@ namespace Astrarium.Plugins.Journal.OAL
                     }
 
                     // Other deep sky objects
-                    else 
+                    else
                     {
                         var details = BuildDeepSkyObservationDetails<DeepSkyObservationDetails>(dst);
                         jsonDetails = JsonConvert.SerializeObject(details, jsonSettings);
                     }
                 }
+
+                */
+
+
             }
 
             // basic data
@@ -557,21 +608,21 @@ namespace Astrarium.Plugins.Journal.OAL
                 return surfaceBrightness.Value / 3600;
         }
 
-        private static T BuildDeepSkyTargetDetails<T>(OALTargetDeepSky ds) where T : DeepSkyTargetDetails, new()
-        {
-            var details = new T();
+        //private static T BuildDeepSkyTargetDetails<T>(OALTargetDeepSky ds) where T : DeepSkyTargetDetails, new()
+        //{
+        //    var details = new T();
 
-            // TODO: convert to equinox of date
-            details.RA = ds.Position?.RA.ToAngle();
-            details.Dec = ds.Position?.Dec.ToAngle();
-            details.Constellation = ds.Constellation;
+        //    // TODO: convert to equinox of date
+        //    details.RA = ds.Position?.RA.ToAngle();
+        //    details.Dec = ds.Position?.Dec.ToAngle();
+        //    details.Constellation = ds.Constellation;
 
-            details.LargeDiameter = (float?)ds.LargeDiameter.ToAngle(unit: OALAngleUnit.ArcSec);
-            details.SmallDiameter = (float?)ds.SmallDiameter.ToAngle(unit: OALAngleUnit.ArcSec);
-            details.Brightness = ds.SurfBr?.ToBrightness();
-            details.Magnitude = ds.VisMagSpecified ? ds.VisMag : (double?)null;
-            return details;
-        }
+        //    details.LargeDiameter = (float?)ds.LargeDiameter.ToAngle(unit: OALAngleUnit.ArcSec);
+        //    details.SmallDiameter = (float?)ds.SmallDiameter.ToAngle(unit: OALAngleUnit.ArcSec);
+        //    details.Brightness = ds.SurfBr?.ToBrightness();
+        //    details.Magnitude = ds.VisMagSpecified ? ds.VisMag : (double?)null;
+        //    return details;
+        //}
 
         private static T BuildDeepSkyObservationDetails<T>(OALFindingsDeepSky ds) where T : DeepSkyObservationDetails, new()
         {
@@ -591,12 +642,24 @@ namespace Astrarium.Plugins.Journal.OAL
             // Type of OALTarget
             Type oalTargetType = target.GetType();
 
-            // Get celestial object type name 
-            string bodyType = oalTargetType.GetCustomAttribute<CelestialObjectTypeAttribute>()?.CelestialObjectType;
+            // Get celestial object type name(s)
+            string[] bodyTypes = oalTargetType.GetCustomAttributes<CelestialObjectTypeAttribute>(inherit: false).Select(x => x.CelestialObjectType).ToArray();
+
+            string bodyType = bodyTypes[0];
+
+            if (bodyTypes.Length > 1)
+            {
+                Type discriminatorType = oalTargetType.GetCustomAttribute<CelestialObjectTypeDiscriminatorAttribute>(inherit: false)?.Discriminator;
+                if (discriminatorType != null)
+                {
+                    var discriminator = (ICelestialObjectTypeDiscriminator)Activator.CreateInstance(discriminatorType);
+                    bodyType = discriminator.Discriminate(target);
+                }
+            }
 
             // TargetDetails class related to that celestial object type
             Type targetDetailsType = Assembly.GetAssembly(typeof(Import))
-                .GetTypes().FirstOrDefault(x => typeof(TargetDetails).IsAssignableFrom(x) && x.GetCustomAttributes<CelestialObjectTypeAttribute>().Any(a => a.CelestialObjectType == bodyType)) ?? typeof(TargetDetails);
+                .GetTypes().FirstOrDefault(x => typeof(TargetDetails).IsAssignableFrom(x) && x.GetCustomAttributes<CelestialObjectTypeAttribute>(inherit: false).Any(a => a.CelestialObjectType == bodyType)) ?? typeof(TargetDetails);
 
             // Create empty TargetDetails
             TargetDetails details = (TargetDetails)Activator.CreateInstance(targetDetailsType);
@@ -616,21 +679,13 @@ namespace Astrarium.Plugins.Journal.OAL
                 if (specifiedProperty == null || (bool)specifiedProperty.GetValue(target))
                 {
                     object convertedValue = converter.Convert(value);
-
-                    //if (attr.Property != null) 
-                    //{
-
-                    //}
                     details.GetType().GetProperty(attr.Property).SetValue(details, convertedValue);
-                    
-                    //prop.SetValue(details, convertedValue);
                 }
             }
 
             TargetDB result = new TargetDB();
 
             result.Type = bodyType;
-
 
             // TODO: convert to equinox of date
             details.RA = target.Position?.RA.ToAngle();
