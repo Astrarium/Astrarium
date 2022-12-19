@@ -259,15 +259,15 @@ namespace Astrarium.Plugins.Journal.OAL
     [XmlType(TypeName = "findingsVariableStarType", Namespace = OALData.OAL)]
     public partial class OALFindingsVariableStar : OALFindings
     {
-        [OALConverter(ExportConverter = typeof(ExportVariableStarVisMagConverter), ImportConverter = null)]
+        [OALConverter(ExportConverter = typeof(ExportVariableStarVisMagConverter), ImportConverter = typeof(ImportVariableStarVisMagConverter))]
         [XmlElement(ElementName = "visMag", Form = XmlSchemaForm.Unqualified)]
         public OALVariableStarVisMag VisMag { get; set; }
 
-        [OALConverter(Property = nameof(VariableStarObservationDetails.ComparisonStars), ExportConverter = typeof(ExportJsonConverter), ImportConverter = null)]
+        [OALConverter(Property = nameof(VariableStarObservationDetails.ComparisonStars), ExportConverter = typeof(ExportJsonConverter), ImportConverter = typeof(ImportJsonConverter))]
         [XmlElement(ElementName = "comparisonStar", Form = XmlSchemaForm.Unqualified)]
         public string[] ComparisonStar { get; set; }
 
-        [OALConverter(ExportConverter = typeof(ExportVariableStarChartIdconverter), ImportConverter = null)]
+        [OALConverter(ExportConverter = typeof(ExportVariableStarChartIdconverter), ImportConverter = typeof(ImportVariableStarChartIdconverter))]
         [XmlElement(ElementName = "chartID", Form = XmlSchemaForm.Unqualified)]
         public OALVariableStarChartId ChartId { get; set; }
 
@@ -467,14 +467,14 @@ namespace Astrarium.Plugins.Journal.OAL
     [XmlType(TypeName = "findingsDeepSkyDSType", Namespace = OALData.OAL)]
     public partial class OALFindingsDeepSkyDS : OALFindingsDeepSky
     {
-        [OALConverter(Property = nameof(DoubleStarObservationDetails.ColorMainComponent), ExportConverter = typeof(ExportStarColorConverter), ImportConverter = null)]
+        [OALConverter(Property = nameof(DoubleStarObservationDetails.ColorMainComponent), ExportConverter = typeof(ExportStarColorConverter), ImportConverter = typeof(ImportEnumAsStringConverter))]
         [XmlElement(ElementName = "colorMain", Form = XmlSchemaForm.Unqualified)]
         public OALStarColor ColorMain { get; set; }
 
         [XmlIgnore]
         public bool ColorMainSpecified { get; set; }
 
-        [OALConverter(Property = nameof(DoubleStarObservationDetails.ColorCompanionComponent), ExportConverter = typeof(ExportStarColorConverter), ImportConverter = null)]
+        [OALConverter(Property = nameof(DoubleStarObservationDetails.ColorCompanionComponent), ExportConverter = typeof(ExportStarColorConverter), ImportConverter = typeof(ImportEnumAsStringConverter))]
         [XmlElement(ElementName = "colorCompanion", Form = XmlSchemaForm.Unqualified)]
         public OALStarColor ColorCompanion { get; set; }
 
@@ -524,7 +524,7 @@ namespace Astrarium.Plugins.Journal.OAL
     [XmlType(TypeName = "findingsDeepSkyOCType", Namespace = OALData.OAL)]
     public partial class OALFindingsDeepSkyOC : OALFindingsDeepSky
     {
-        [OALConverter(Property = nameof(OpenClusterObservationDetails.Character), ExportConverter = typeof(ExportClusterCharacterConverter), ImportConverter = null)]
+        [OALConverter(Property = nameof(OpenClusterObservationDetails.Character), ExportConverter = typeof(ExportClusterCharacterConverter), ImportConverter = typeof(ImportEnumAsStringConverter))]
         [XmlElement(ElementName = "character", Form = XmlSchemaForm.Unqualified)]
         public OALClusterCharacter Character { get; set; }
 

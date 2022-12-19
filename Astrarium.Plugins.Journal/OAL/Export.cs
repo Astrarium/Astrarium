@@ -43,7 +43,6 @@ namespace Astrarium.Plugins.Journal.OAL
                     var serializerNamespaces = new XmlSerializerNamespaces();
                     serializerNamespaces.Add("oal", "http://groups.google.com/group/openastronomylog");
                     serializerNamespaces.Add("xsi", "http://www.w3.org/2001/XMLSchema-instance");
-                    
                     serializer.Serialize(stream, data, serializerNamespaces);
                 }
             }

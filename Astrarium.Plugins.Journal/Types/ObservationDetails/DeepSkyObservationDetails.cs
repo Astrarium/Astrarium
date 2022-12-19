@@ -8,6 +8,17 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Journal.Types
 {
+    [CelestialObjectType("DeepSky.PlanetaryNebula")]
+    [CelestialObjectType("DeepSky.Asterism")]
+    [CelestialObjectType("DeepSky.GalaxyCluster")]
+    [CelestialObjectType("DeepSky.DarkNebula")]
+    [CelestialObjectType("DeepSky.GalacticNebula")]
+    [CelestialObjectType("DeepSky.Galaxy")]
+    [CelestialObjectType("DeepSky.GlobularCluster")]
+    [CelestialObjectType("DeepSky.MultipleStar")]
+    [CelestialObjectType("DeepSky.Quasar")]
+    [CelestialObjectType("DeepSky.StarCloud")]
+    [CelestialObjectType("DeepSky.Unspecified")]
     public class DeepSkyObservationDetails : ObservationDetails
     {
         [JsonIgnore]

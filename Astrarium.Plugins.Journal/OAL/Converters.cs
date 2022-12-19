@@ -53,6 +53,22 @@ namespace Astrarium.Plugins.Journal.OAL
         }
     }
 
+    public class ImportEnumAsStringConverter : IOALConverter
+    {
+        private static string GetXmlAttrNameFromEnumValue(object enumValue)
+        {
+            Type type = enumValue.GetType();
+            FieldInfo info = type.GetField(Enum.GetName(type, enumValue));
+            XmlEnumAttribute att = (XmlEnumAttribute)info.GetCustomAttributes(typeof(XmlEnumAttribute), false)[0];
+            return att.Name;
+        }
+
+        public object Convert(object value)
+        {
+            return GetXmlAttrNameFromEnumValue(value);
+        }
+    }
+
     public abstract class ExportStringAsEnumConverter<T> : IOALConverter where T : Enum
     {
         private static string GetXmlAttrNameFromEnumValue(T enumValue)
@@ -136,6 +152,20 @@ namespace Astrarium.Plugins.Journal.OAL
         }
     }
 
+    public class ImportVariableStarVisMagConverter : IOALConverter
+    {
+        public object Convert(object value)
+        {
+            var visMag = value as OALVariableStarVisMag;
+            return new Dictionary<string, object>
+            {
+                [nameof(VariableStarObservationDetails.VisMagFainterThan)] = visMag.FainterThanSpecified ? visMag.FainterThan : (bool?)null,
+                [nameof(VariableStarObservationDetails.VisMagUncertain)] = visMag.UncertainSpecified ? visMag.Uncertain : (bool?)null,
+                [nameof(VariableStarObservationDetails.VisMag)] = visMag.Value
+            };
+        }
+    }
+
     public class ExportVariableStarChartIdconverter : IOALConverter
     {
         public object Convert(object value)
@@ -146,6 +176,19 @@ namespace Astrarium.Plugins.Journal.OAL
                 NonAAVSOChart = details.NonAAVSOChart ?? false,
                 NonAAVSOChartSpecified = details.NonAAVSOChart != null,
                 Value = details.ChartDate
+            };
+        }
+    }
+
+    public class ImportVariableStarChartIdconverter : IOALConverter
+    {
+        public object Convert(object value)
+        {
+            var chartId = value as OALVariableStarChartId;
+            return new Dictionary<string, object>()
+            {
+                [nameof(VariableStarObservationDetails.NonAAVSOChart)] = chartId.NonAAVSOChartSpecified ? chartId.NonAAVSOChart : (bool?)null,
+                [nameof(VariableStarObservationDetails.ChartDate)] = chartId.Value
             };
         }
     }
@@ -177,6 +220,14 @@ namespace Astrarium.Plugins.Journal.OAL
         public object Convert(object value)
         {
             return JsonConvert.DeserializeObject<string[]>(value as string);
+        }
+    }
+
+    public class ImportJsonConverter : IOALConverter
+    {
+        public object Convert(object value)
+        {
+            return value != null ? JsonConvert.SerializeObject(value) : null;
         }
     }
 
