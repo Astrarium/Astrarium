@@ -239,10 +239,7 @@ namespace Astrarium.Plugins.DeepSky
                         }
                         else
                         {
-                            if (ds.PA != null)
-                            {
-                                map.Rotate(p, ds.Equatorial, ds.PA.Value + 90);
-                            }
+                            map.Rotate(p, ds.Equatorial, ds.PA ?? 0 + 90);
                             DrawEllipticObject(map.Graphics, diamA, diamB);
                             map.Graphics.ResetTransform();
                         }
@@ -267,10 +264,7 @@ namespace Astrarium.Plugins.DeepSky
                         }
                         else
                         {
-                            if (ds.PA != null)
-                            {
-                                map.Rotate(p, ds.Equatorial, ds.PA.Value + 90);
-                            }
+                            map.Rotate(p, ds.Equatorial, ds.PA ?? 0 + 90);
                             DrawRoundObject(map.Graphics, diamA);
                             map.Graphics.ResetTransform();
                         }
