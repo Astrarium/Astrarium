@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Astrarium.Plugins.Journal.Types;
+using System.Xml;
 
 namespace Astrarium.Plugins.Journal.OAL
 {
@@ -24,13 +25,31 @@ namespace Astrarium.Plugins.Journal.OAL
 
         public static void ImportFromOAL(string file)
         {
-            var serializer = new XmlSerializer(typeof(OALData));
+            var document = new XmlDocument();
+            using (XmlReader xmlReader = XmlReader.Create(file, new XmlReaderSettings() { CheckCharacters = false }))
+            {
+                xmlReader.MoveToContent();
+                document.Load(xmlReader);
+            }
 
-            var stringData = File.ReadAllText(file);
-            using (TextReader reader = new StringReader(stringData))
+            var namespaceManager = new XmlNamespaceManager(document.NameTable);
+            namespaceManager.AddNamespace("xsi", OALData.XSI);
+            XmlNodeList nodes = document.SelectNodes("//*[@xsi:type]", namespaceManager);
+
+            foreach (XmlNode node in nodes)
+            {
+                XmlAttribute typeAttr = node.Attributes["xsi:type"];
+                // Take only types within "oal:" namespace
+                if (!typeAttr.Value.StartsWith("oal:"))
+                {
+                    node.ParentNode.RemoveChild(node);
+                }
+            }
+
+            var serializer = new XmlSerializer(typeof(OALData));
+            using (var reader = new XmlTextReader(new StringReader(document.OuterXml)))
             {
                 var data = (OALData)serializer.Deserialize(reader);
-
                 using (var db = new DatabaseContext())
                 {
                     foreach (var site in data.Sites)
@@ -98,6 +117,8 @@ namespace Astrarium.Plugins.Journal.OAL
                 foreach (var obs in data.Observations)
                 {
                     ObservationDB obsDB = obs.ToObservation(data);
+
+                    if (obsDB == null) continue;
 
                     using (var db = new DatabaseContext())
                     {
@@ -317,7 +338,10 @@ namespace Astrarium.Plugins.Journal.OAL
         private static ObservationDB ToObservation(this OALObservation observation, OALData data)
         {
             // get target
-            OALTarget target = data.Targets.First(t => t.Id == observation.TargetId);
+            OALTarget target = data.Targets.FirstOrDefault(t => t.Id == observation.TargetId);
+
+            if (target == null)
+                return null;
 
             Type oalTargetType = target.GetType();
 

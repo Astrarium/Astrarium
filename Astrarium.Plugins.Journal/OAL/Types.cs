@@ -16,10 +16,12 @@ namespace Astrarium.Plugins.Journal.OAL
     {
         public const string OAL = "http://groups.google.com/group/openastronomylog";
 
+        public const string XSI = "http://www.w3.org/2001/XMLSchema-instance";
+
         /// <summary>
         /// Schema location
         /// </summary>
-        [XmlAttribute(AttributeName = "schemaLocation", Namespace = "http://www.w3.org/2001/XMLSchema-instance")]
+        [XmlAttribute(AttributeName = "schemaLocation", Namespace = XSI)]
         public string SchemaLocation { get; set; } = $"{OAL} oal21.xsd";
 
         /// <summary>
@@ -117,7 +119,10 @@ namespace Astrarium.Plugins.Journal.OAL
         [XmlElement(ElementName = "surname")]
         public string Surname { get; set; }
 
-        
+
+        /// <summary>
+        /// Contacts of the observer (for example, e-mail, address, phone and etc.)
+        /// </summary>
         [XmlElement(ElementName = "contact")]
         public string[] Contact { get; set; }
 
@@ -153,7 +158,9 @@ namespace Astrarium.Plugins.Journal.OAL
         [XmlIgnore]
         public bool FSTOffsetSpecified { get; set; }
 
-        
+        /// <summary>
+        /// Observer id
+        /// </summary>
         [XmlAttribute(AttributeName = "id", DataType = "ID")]
         public string Id { get; set; }
     }
@@ -187,7 +194,7 @@ namespace Astrarium.Plugins.Journal.OAL
     public partial class OALVariableStarChartId
     {
         /// <summary>
-        /// 
+        /// Flag indicating the <see cref="Value"/> is non-AAVSO chart number
         /// </summary>
         [XmlAttribute(AttributeName = "nonAAVSOchart")]
         public bool NonAAVSOChart { get; set; }
@@ -217,7 +224,7 @@ namespace Astrarium.Plugins.Journal.OAL
         /// </summary>
         [XmlAttribute(AttributeName = "fainterThan")]
         public bool FainterThan { get; set; }
-       
+
         [XmlIgnore]
         public bool FainterThanSpecified { get; set; }
 
@@ -229,15 +236,14 @@ namespace Astrarium.Plugins.Journal.OAL
 
         [XmlIgnore]
         public bool UncertainSpecified { get; set; }
-    
+
         /// <summary>
         /// Value of visual magnitude
         /// </summary>
         [XmlText]
         public double Value { get; set; }
     }
-    
-    
+
     [XmlInclude(typeof(OALFindingsVariableStar))]
     [XmlInclude(typeof(OALFindingsDeepSky))]
     [XmlInclude(typeof(OALFindingsDeepSkyDS))]
@@ -252,7 +258,7 @@ namespace Astrarium.Plugins.Journal.OAL
         [XmlAttribute(AttributeName = "lang")]
         public string Lang { get; set; }
     }
-    
+
     [CelestialObjectType("Nova")]
     [CelestialObjectType("VarStar")]
     [Serializable]
@@ -400,7 +406,7 @@ namespace Astrarium.Plugins.Journal.OAL
     [XmlInclude(typeof(OALNonNegativeAngle))]
     [Serializable]
     [XmlType(TypeName = "angleType", Namespace = OALData.OAL)]
-    public partial class OALAngle 
+    public partial class OALAngle
     {
         [XmlAttribute(AttributeName = "unit")]
         public OALAngleUnit Unit { get; set; }
@@ -548,8 +554,8 @@ namespace Astrarium.Plugins.Journal.OAL
         [XmlIgnore]
         public bool ColorContrastsSpecified { get; set; }
     }
-    
-    
+
+
     [Serializable]
     [XmlType(TypeName = "clusterCharacterType", Namespace = OALData.OAL)]
     public enum OALClusterCharacter
@@ -584,575 +590,610 @@ namespace Astrarium.Plugins.Journal.OAL
         [XmlEnum("X")]
         X
     }
-    
-    
+
+
     [Serializable]
     [XmlType(TypeName = "observation", Namespace = OALData.OAL)]
     public partial class OALObservation
-    {  
-        
+    {
+
         [XmlElement(ElementName = "observer", Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
         public string ObserverId { get; set; }
-        
-        
+
+
         [XmlElement(ElementName = "site", Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
         public string SiteId { get; set; }
 
-        
+
         [XmlElement(ElementName = "session", Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
         public string SessionId { get; set; }
 
-        
+
         [XmlElement(ElementName = "target", Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
         public string TargetId { get; set; }
 
-        
+
         [XmlElement(ElementName = "begin", Form = XmlSchemaForm.Unqualified)]
         public DateTime Begin { get; set; }
 
-        
+
         [XmlElement(ElementName = "end", Form = XmlSchemaForm.Unqualified)]
         public DateTime End { get; set; }
 
-        
+
         [XmlIgnore]
         public bool EndSpecified { get; set; }
 
-        
+
         [XmlElement(ElementName = "faintestStar", Form = XmlSchemaForm.Unqualified)]
         public double FaintestStar { get; set; }
 
-        
+
         [XmlIgnore]
         public bool FaintestStarSpecified { get; set; }
 
-        
+
         [XmlElement(ElementName = "sky-quality", Form = XmlSchemaForm.Unqualified)]
         public OALSurfaceBrightness SkyQuality { get; set; }
 
-        
+
         [XmlElement(ElementName = "seeing", Form = XmlSchemaForm.Unqualified, DataType = "nonNegativeInteger")]
         public string Seeing { get; set; }
 
-        
+
         [XmlElement(ElementName = "scope", Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
         public string ScopeId { get; set; }
 
-        
+
         [XmlElement(ElementName = "accessories", Form = XmlSchemaForm.Unqualified)]
         public string Accessories { get; set; }
 
-        
+
         [XmlElement(ElementName = "eyepiece", Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
         public string EyepieceId { get; set; }
 
-        
+
         [XmlElement(ElementName = "lens", Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
         public string LensId { get; set; }
 
-        
-        [XmlElement(ElementName = "filter", Form=XmlSchemaForm.Unqualified, DataType = "IDREF")]
+
+        [XmlElement(ElementName = "filter", Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
         public string FilterId { get; set; }
 
-        
+
         [XmlElement(ElementName = "magnification", Form = XmlSchemaForm.Unqualified)]
         public double Magnification { get; set; }
 
-        
+
         [XmlIgnore]
         public bool MagnificationSpecified { get; set; }
 
-        
+
         [XmlElement(ElementName = "imager", Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
         public string CameraId { get; set; }
 
-        
+
         [XmlElement(ElementName = "result", Form = XmlSchemaForm.Unqualified)]
         public OALFindings[] Result { get; set; }
-        
-        
+
+
         [XmlElement(ElementName = "image", Form = XmlSchemaForm.Unqualified)]
         public string[] Image { get; set; }
 
-        
+
         [XmlAttribute(AttributeName = "id", DataType = "ID")]
         public string Id { get; set; }
     }
-    
-    
+
+
     [Serializable]
     [XmlType(TypeName = "surfaceBrightnessType", Namespace = OALData.OAL)]
-    public partial class OALSurfaceBrightness 
-    {        
-        
+    public partial class OALSurfaceBrightness
+    {
+
         [XmlAttribute(AttributeName = "unit")]
         public OALSurfaceBrightnessUnit Unit { get; set; }
-        
+
         [XmlText]
         public double Value { get; set; }
     }
-    
-    
+
+
     [Serializable]
     [XmlType(TypeName = "surfaceBrightnessUnit", Namespace = OALData.OAL)]
-    public enum OALSurfaceBrightnessUnit 
+    public enum OALSurfaceBrightnessUnit
     {
         [XmlEnum("mags-per-squarearcsec")]
         MagsPerSquareArcSec,
-        
+
         [XmlEnum("mags-per-squarearcmin")]
         MagsPerSquareArcMin,
     }
-    
+
     /// <remarks />
     [XmlInclude(typeof(OALCamera))]
     [Serializable]
     [XmlType(TypeName = "imagerType", Namespace = OALData.OAL)]
-    public abstract partial class OALImager 
-    {        
-        
+    public abstract partial class OALImager
+    {
+
         [XmlElement(ElementName = "model", Form = XmlSchemaForm.Unqualified)]
         public string Model { get; set; }
-        
-        
+
+
         [XmlElement(ElementName = "vendor", Form = XmlSchemaForm.Unqualified)]
         public string Vendor { get; set; }
 
-        
+
         [XmlElement(ElementName = "remarks", Form = XmlSchemaForm.Unqualified)]
         public string Remarks { get; set; }
 
-        
-        [XmlAttribute(AttributeName = "id", DataType="ID")]
-        public string Id { get; set; }
-    }
-    
-    
-    [Serializable]
-    [XmlType(TypeName = "ccdCameraType", Namespace = OALData.OAL)]
-    public partial class OALCamera : OALImager 
-    {        
-        
-        [XmlElement(ElementName = "pixelsX", Form = XmlSchemaForm.Unqualified, DataType = "positiveInteger")]
-        public string PixelsX { get; set; }
-        
-        
-        [XmlElement(ElementName = "pixelsY", Form = XmlSchemaForm.Unqualified, DataType="positiveInteger")]
-        public string PixelsY { get; set; }
 
-        
-        [XmlElement(ElementName = "pixelXSize", Form = XmlSchemaForm.Unqualified)]
-        public decimal PixelXSize { get; set; }
-
-        
-        [XmlIgnore]
-        public bool PixelXSizeSpecified { get; set; }
-
-        
-        [XmlElement(ElementName = "pixelYSize", Form = XmlSchemaForm.Unqualified)]
-        public decimal PixelYSize { get; set; }
-
-        
-        [XmlIgnore]
-        public bool PixelYSizeSpecified { get; set; }
-
-        
-        [XmlElement(ElementName = "binning", Form = XmlSchemaForm.Unqualified, DataType = "integer")]
-        public string Binning { get; set; } = "1";
-    }
-    
-    
-    [Serializable]
-    [XmlType(TypeName = "filterType", Namespace = OALData.OAL)]
-    public partial class OALFilter 
-    {
-        
-        [XmlElement(ElementName = "model", Form = XmlSchemaForm.Unqualified)]
-        public string Model { get; set; }
-        
-        
-        [XmlElement(ElementName = "vendor", Form = XmlSchemaForm.Unqualified)]
-        public string Vendor { get; set; }
-
-        
-        [XmlElement(ElementName = "type", Form = XmlSchemaForm.Unqualified)]
-        public OALFilterKind Type { get; set; }
-
-        
-        [XmlElement(ElementName = "color", Form = XmlSchemaForm.Unqualified)]
-        public OALFilterColor Color { get; set; }
-            
-        
-        [XmlIgnore]
-        public bool ColorSpecified { get; set; }
-
-        
-        [XmlElement(ElementName = "wratten", Form =XmlSchemaForm.Unqualified)]
-        public string Wratten { get; set; }
-
-        
-        [XmlElement(ElementName = "schott", Form =XmlSchemaForm.Unqualified)]
-        public string Schott { get; set; }
-
-        
         [XmlAttribute(AttributeName = "id", DataType = "ID")]
         public string Id { get; set; }
     }
-    
-    
+
+
+    [Serializable]
+    [XmlType(TypeName = "ccdCameraType", Namespace = OALData.OAL)]
+    public partial class OALCamera : OALImager
+    {
+
+        [XmlElement(ElementName = "pixelsX", Form = XmlSchemaForm.Unqualified, DataType = "positiveInteger")]
+        public string PixelsX { get; set; }
+
+
+        [XmlElement(ElementName = "pixelsY", Form = XmlSchemaForm.Unqualified, DataType = "positiveInteger")]
+        public string PixelsY { get; set; }
+
+
+        [XmlElement(ElementName = "pixelXSize", Form = XmlSchemaForm.Unqualified)]
+        public decimal PixelXSize { get; set; }
+
+
+        [XmlIgnore]
+        public bool PixelXSizeSpecified { get; set; }
+
+
+        [XmlElement(ElementName = "pixelYSize", Form = XmlSchemaForm.Unqualified)]
+        public decimal PixelYSize { get; set; }
+
+
+        [XmlIgnore]
+        public bool PixelYSizeSpecified { get; set; }
+
+
+        [XmlElement(ElementName = "binning", Form = XmlSchemaForm.Unqualified, DataType = "integer")]
+        public string Binning { get; set; } = "1";
+    }
+
+
+    [Serializable]
+    [XmlType(TypeName = "filterType", Namespace = OALData.OAL)]
+    public partial class OALFilter
+    {
+
+        [XmlElement(ElementName = "model", Form = XmlSchemaForm.Unqualified)]
+        public string Model { get; set; }
+
+
+        [XmlElement(ElementName = "vendor", Form = XmlSchemaForm.Unqualified)]
+        public string Vendor { get; set; }
+
+
+        [XmlElement(ElementName = "type", Form = XmlSchemaForm.Unqualified)]
+        public OALFilterKind Type { get; set; }
+
+
+        [XmlElement(ElementName = "color", Form = XmlSchemaForm.Unqualified)]
+        public OALFilterColor Color { get; set; }
+
+
+        [XmlIgnore]
+        public bool ColorSpecified { get; set; }
+
+
+        [XmlElement(ElementName = "wratten", Form = XmlSchemaForm.Unqualified)]
+        public string Wratten { get; set; }
+
+
+        [XmlElement(ElementName = "schott", Form = XmlSchemaForm.Unqualified)]
+        public string Schott { get; set; }
+
+
+        [XmlAttribute(AttributeName = "id", DataType = "ID")]
+        public string Id { get; set; }
+    }
+
+
     [Serializable]
     [XmlType(TypeName = "filterKind", Namespace = OALData.OAL)]
-    public enum OALFilterKind 
+    public enum OALFilterKind
     {
-        
+
         [XmlEnum("other")]
         Other,
-        
-        
+
+
         [XmlEnum("broad band")]
         Broadband,
-        
-        
+
+
         [XmlEnum("narrow band")]
         Narrowband,
-        
-        
+
+
         [XmlEnum("O-III")]
         OIII,
-        
-        
+
+
         [XmlEnum("H-beta")]
         HBeta,
-        
-        
+
+
         [XmlEnum("H-alpha")]
         HAlpha,
 
-        
+
         [XmlEnum("color")]
         Color,
 
-        
+
         [XmlEnum("neutral")]
         Neutral,
 
-        
+
         [XmlEnum("corrective")]
         Corrective,
 
-        
+
         [XmlEnum("solar")]
         Solar
     }
-    
-    
+
+
     [Serializable]
     [XmlType(TypeName = "filterColorType", Namespace = OALData.OAL)]
-    public enum OALFilterColor 
+    public enum OALFilterColor
     {
-        
+
         [XmlEnum("light red")]
         LightRed,
 
-        
+
         [XmlEnum("red")]
         Red,
-        
-        
+
+
         [XmlEnum("deep red")]
         DeepRed,
 
-        
+
         [XmlEnum("orange")]
         Orange,
-        
-        
+
+
         [XmlEnum("light yellow")]
         LightYellow,
-        
-        
+
+
         [XmlEnum("deep yellow")]
         DeepYellow,
 
-        
+
         [XmlEnum("yellow")]
         Yellow,
-        
-        
+
+
         [XmlEnum("yellow-green")]
         YellowGreen,
-        
-        
+
+
         [XmlEnum("light green")]
         LightGreen,
 
-        
+
         [XmlEnum("green")]
         Green,
-        
-        
+
+
         [XmlEnum("medium blue")]
         MediumBlue,
-        
-        
+
+
         [XmlEnum("pale blue")]
         PaleBlue,
 
-        
+
         [XmlEnum("blue")]
         Blue,
-        
-        
+
+
         [XmlEnum("deep blue")]
         DeepBlue,
 
-        
+
         [XmlEnum("violet")]
         violet,
     }
-    
-    
+
+
 
     [Serializable]
 
 
-    [XmlType(Namespace=OALData.OAL)]
-    public partial class OALLens {
-        
+    [XmlType(Namespace = OALData.OAL)]
+    public partial class OALLens
+    {
+
         private string modelField;
-        
+
         private string vendorField;
-        
+
         private double factorField;
-        
+
         private string idField;
-        
-        
-        [XmlElement(Form=XmlSchemaForm.Unqualified)]
-        public string model {
-            get {
+
+
+        [XmlElement(Form = XmlSchemaForm.Unqualified)]
+        public string model
+        {
+            get
+            {
                 return this.modelField;
             }
-            set {
+            set
+            {
                 this.modelField = value;
             }
         }
-        
-        
-        [XmlElement(Form=XmlSchemaForm.Unqualified)]
-        public string vendor {
-            get {
+
+
+        [XmlElement(Form = XmlSchemaForm.Unqualified)]
+        public string vendor
+        {
+            get
+            {
                 return this.vendorField;
             }
-            set {
+            set
+            {
                 this.vendorField = value;
             }
         }
-        
-        
-        [XmlElement(Form=XmlSchemaForm.Unqualified)]
-        public double factor {
-            get {
+
+
+        [XmlElement(Form = XmlSchemaForm.Unqualified)]
+        public double factor
+        {
+            get
+            {
                 return this.factorField;
             }
-            set {
+            set
+            {
                 this.factorField = value;
             }
         }
-        
-        
-        [XmlAttribute(DataType="ID")]
-        public string id {
-            get {
+
+
+        [XmlAttribute(DataType = "ID")]
+        public string id
+        {
+            get
+            {
                 return this.idField;
             }
-            set {
+            set
+            {
                 this.idField = value;
             }
         }
     }
-    
-    
+
+
 
     [Serializable]
 
 
-    [XmlType(TypeName = "eyepiece", Namespace=OALData.OAL)]
-    public partial class OALEyepiece {
-        
+    [XmlType(TypeName = "eyepiece", Namespace = OALData.OAL)]
+    public partial class OALEyepiece
+    {
+
         private string modelField;
-        
+
         private string vendorField;
-        
+
         private double focalLengthField;
-        
+
         private double maxFocalLengthField;
-        
+
         private bool maxFocalLengthFieldSpecified;
-        
+
         private OALNonNegativeAngle apparentFOVField;
-        
+
         private string idField;
-        
-        
+
+
         [XmlElement(ElementName = "model")]
-        public string model {
-            get {
+        public string model
+        {
+            get
+            {
                 return this.modelField;
             }
-            set {
+            set
+            {
                 this.modelField = value;
             }
         }
-        
-        
-        [XmlElement(Form=XmlSchemaForm.Unqualified)]
-        public string vendor {
-            get {
+
+
+        [XmlElement(Form = XmlSchemaForm.Unqualified)]
+        public string vendor
+        {
+            get
+            {
                 return this.vendorField;
             }
-            set {
+            set
+            {
                 this.vendorField = value;
             }
         }
-        
-        
-        [XmlElement(Form=XmlSchemaForm.Unqualified)]
-        public double focalLength {
-            get {
+
+
+        [XmlElement(Form = XmlSchemaForm.Unqualified)]
+        public double focalLength
+        {
+            get
+            {
                 return this.focalLengthField;
             }
-            set {
+            set
+            {
                 this.focalLengthField = value;
             }
         }
-        
-        
-        [XmlElement(Form=XmlSchemaForm.Unqualified)]
-        public double maxFocalLength {
-            get {
+
+
+        [XmlElement(Form = XmlSchemaForm.Unqualified)]
+        public double maxFocalLength
+        {
+            get
+            {
                 return this.maxFocalLengthField;
             }
-            set {
+            set
+            {
                 this.maxFocalLengthField = value;
             }
         }
-        
-        
+
+
         [XmlIgnore]
-        public bool maxFocalLengthSpecified {
-            get {
+        public bool maxFocalLengthSpecified
+        {
+            get
+            {
                 return this.maxFocalLengthFieldSpecified;
             }
-            set {
+            set
+            {
                 this.maxFocalLengthFieldSpecified = value;
             }
         }
-        
-        
-        [XmlElement(Form=XmlSchemaForm.Unqualified)]
-        public OALNonNegativeAngle apparentFOV {
-            get {
+
+
+        [XmlElement(Form = XmlSchemaForm.Unqualified)]
+        public OALNonNegativeAngle apparentFOV
+        {
+            get
+            {
                 return this.apparentFOVField;
             }
-            set {
+            set
+            {
                 this.apparentFOVField = value;
             }
         }
-        
-        
-        [XmlAttribute(DataType="ID")]
-        public string id {
-            get {
+
+
+        [XmlAttribute(DataType = "ID")]
+        public string id
+        {
+            get
+            {
                 return this.idField;
             }
-            set {
+            set
+            {
                 this.idField = value;
             }
         }
     }
-    
-    
+
+
     [XmlInclude(typeof(OALFixedMagnificationOptics))]
     [XmlInclude(typeof(OALScope))]
     [Serializable]
     [XmlType(TypeName = "opticsType", Namespace = OALData.OAL)]
-    public abstract partial class OALOptics 
-    {   
-        
+    public abstract partial class OALOptics
+    {
+
         [XmlElement(ElementName = "model", Form = XmlSchemaForm.Unqualified)]
         public string Model { get; set; }
-        
-        
-        [XmlElement(ElementName = "type", Form=XmlSchemaForm.Unqualified)]
+
+
+        [XmlElement(ElementName = "type", Form = XmlSchemaForm.Unqualified)]
         public string Type { get; set; }
 
-        
+
         [XmlElement(ElementName = "vendor", Form = XmlSchemaForm.Unqualified)]
         public string Vendor { get; set; }
 
-        
+
         [XmlElement(ElementName = "aperture", Form = XmlSchemaForm.Unqualified)]
         public double Aperture { get; set; }
 
-        
+
         [XmlElement(ElementName = "lightGrasp", Form = XmlSchemaForm.Unqualified)]
         public double LightGrasp { get; set; }
 
-        
+
         [XmlIgnore]
         public bool LightGraspSpecified { get; set; }
 
-        
+
         [XmlElement(ElementName = "orientation", Form = XmlSchemaForm.Unqualified)]
         public OALOpticsOrientation Orientation { get; set; }
 
-        
-        [XmlAttribute(AttributeName = "id", DataType="ID")]
+
+        [XmlAttribute(AttributeName = "id", DataType = "ID")]
         public string Id { get; set; }
     }
-    
-    
+
+
 
     [Serializable]
     [XmlType(AnonymousType = true, Namespace = OALData.OAL)]
-    public class OALOpticsOrientation 
+    public class OALOpticsOrientation
     {
-        
+
         [XmlAttribute(AttributeName = "erect")]
         public bool Erect { get; set; }
-        
-        
+
+
         [XmlAttribute(AttributeName = "truesided")]
         public bool TrueSided { get; set; }
     }
-    
-    
+
+
 
     [Serializable]
-    [XmlType(TypeName = "fixedMagnificationOpticsType", Namespace=OALData.OAL)]
-    public partial class OALFixedMagnificationOptics : OALOptics 
+    [XmlType(TypeName = "fixedMagnificationOpticsType", Namespace = OALData.OAL)]
+    public partial class OALFixedMagnificationOptics : OALOptics
     {
-        
-        [XmlElement(ElementName = "magnification", Form=XmlSchemaForm.Unqualified)]
+
+        [XmlElement(ElementName = "magnification", Form = XmlSchemaForm.Unqualified)]
         public double Magnification { get; set; }
-        
-        
-        [XmlElement(ElementName = "trueField", Form=XmlSchemaForm.Unqualified)]
+
+
+        [XmlElement(ElementName = "trueField", Form = XmlSchemaForm.Unqualified)]
         public OALNonNegativeAngle TrueField { get; set; }
     }
-    
-    
+
+
 
     [Serializable]
     [XmlType(TypeName = "scopeType", Namespace = OALData.OAL)]
-    public partial class OALScope : OALOptics 
-    {    
-        
+    public partial class OALScope : OALOptics
+    {
+
         [XmlElement(ElementName = "focalLength", Form = XmlSchemaForm.Unqualified)]
         public double FocalLength { get; set; }
     }
-    
+
     [Serializable]
     [XmlType(TypeName = "referenceFrameType", Namespace = OALData.OAL)]
     public partial class OALReferenceFrame
@@ -1163,27 +1204,27 @@ namespace Astrarium.Plugins.Journal.OAL
         [XmlElement(ElementName = "equinox", Form = XmlSchemaForm.Unqualified)]
         public OALReferenceFrameEquinox Equinox { get; set; } = OALReferenceFrameEquinox.J2000;
     }
-    
-    
+
+
 
     [Serializable]
     [XmlType(AnonymousType = true, Namespace = OALData.OAL)]
-    public enum OALReferenceFrameOrigin 
-    {    
-        
+    public enum OALReferenceFrameOrigin
+    {
+
         [XmlEnum("geo")]
         Geo,
 
-        
+
         [XmlEnum("topo")]
         Topo
     }
-    
-    
+
+
 
     [Serializable]
     [XmlType(AnonymousType = true, Namespace = OALData.OAL)]
-    public enum OALReferenceFrameEquinox 
+    public enum OALReferenceFrameEquinox
     {
         [XmlEnum("J2000")]
         J2000,
@@ -1194,25 +1235,25 @@ namespace Astrarium.Plugins.Journal.OAL
         [XmlEnum("EqOfDate")]
         EqOfDate,
     }
-    
+
     [Serializable]
     [XmlType(TypeName = "equPosType", Namespace = OALData.OAL)]
-    public partial class OALEquPosType 
-    {   
-        
+    public partial class OALEquPosType
+    {
+
         [XmlElement(ElementName = "ra", Form = XmlSchemaForm.Unqualified)]
         public OALNonNegativeAngle RA { get; set; }
-        
-        
+
+
         [XmlElement(ElementName = "dec", Form = XmlSchemaForm.Unqualified)]
         public OALAngle Dec { get; set; }
 
-        
+
         [XmlElement(ElementName = "frame", Form = XmlSchemaForm.Unqualified)]
         public OALReferenceFrame Frame { get; set; }
     }
-    
-    
+
+
     [XmlInclude(typeof(OALTargetSolarSystem))]
     [XmlInclude(typeof(OALTargetSun))]
     [XmlInclude(typeof(OALTargetPlanet))]
@@ -1243,38 +1284,38 @@ namespace Astrarium.Plugins.Journal.OAL
         [XmlElement("observer", typeof(string), Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
         [XmlChoiceIdentifier(nameof(ItemElementName))]
         public string Item { get; set; }
-        
+
         [XmlIgnore]
         public OALDataSource ItemElementName { get; set; }
 
         [XmlElement(ElementName = "name", Form = XmlSchemaForm.Unqualified)]
         public string Name { get; set; }
-        
+
         [XmlElement(ElementName = "alias", Form = XmlSchemaForm.Unqualified)]
         public string[] Alias { get; set; }
-        
+
         [XmlElement(ElementName = "position", Form = XmlSchemaForm.Unqualified)]
         public OALEquPosType Position { get; set; }
-               
+
         [XmlElement(ElementName = "constellation", Form = XmlSchemaForm.Unqualified)]
         public string Constellation { get; set; }
-        
+
         [XmlElement(ElementName = "notes", Form = XmlSchemaForm.Unqualified)]
         public string Notes { get; set; }
-        
+
         [XmlAttribute(AttributeName = "id", DataType = "ID")]
         public string Id { get; set; }
     }
-    
+
     [Serializable]
     [XmlType(Namespace = OALData.OAL, IncludeInSchema = false)]
-    public enum OALDataSource 
-    {    
-        
+    public enum OALDataSource
+    {
+
         [XmlEnum(":datasource")]
         DataSource,
-        
-        
+
+
         [XmlEnum(":observer")]
         Observer
     }
@@ -1442,7 +1483,7 @@ namespace Astrarium.Plugins.Journal.OAL
         [XmlElement(ElementName = "class", Form = XmlSchemaForm.Unqualified)]
         public string TrumplerClass { get; set; }
     }
-    
+
     [CelestialObjectType("DeepSky.Unspecified")]
     [Serializable]
     [XmlType(TypeName = "deepSkyNA", Namespace = OALData.OAL)]
@@ -1472,7 +1513,7 @@ namespace Astrarium.Plugins.Journal.OAL
         public string NebulaType { get; set; }
 
         [OALConverter(Property = nameof(DeepSkyGalaxyNebulaTargetDetails.PositionAngle), ImportConverter = typeof(ImportNullableIntConverter), ExportConverter = typeof(ToStringConverter))]
-        [XmlElement(ElementName = "pa", Form = XmlSchemaForm.Unqualified, DataType="integer")]
+        [XmlElement(ElementName = "pa", Form = XmlSchemaForm.Unqualified, DataType = "integer")]
         public string PositionAngle { get; set; }
     }
 
@@ -1492,7 +1533,7 @@ namespace Astrarium.Plugins.Journal.OAL
         [XmlElement(ElementName = "conc", Form = XmlSchemaForm.Unqualified)]
         public string Conc { get; set; }
     }
-    
+
     [CelestialObjectType("DeepSky.DoubleStar")]
     [Serializable]
     [XmlType(TypeName = "deepSkyDS", Namespace = OALData.OAL)]
@@ -1570,12 +1611,12 @@ namespace Astrarium.Plugins.Journal.OAL
         [OALConverter(Property = nameof(StarTargetDetails.Magnitude), ExportConverter = typeof(ExportNullableDoubleConverter), ImportConverter = typeof(SimpleConverter))]
         [XmlElement(ElementName = "apparentMag", Form = XmlSchemaForm.Unqualified)]
         public double ApparentMag { get; set; }
-        
+
         [XmlIgnore]
         public bool ApparentMagSpecified { get; set; }
 
         [OALConverter(Property = nameof(StarTargetDetails.Classification))]
-        [XmlElement(ElementName = "classification", Form=XmlSchemaForm.Unqualified)]
+        [XmlElement(ElementName = "classification", Form = XmlSchemaForm.Unqualified)]
         public string Classification { get; set; }
     }
 
@@ -1610,7 +1651,7 @@ namespace Astrarium.Plugins.Journal.OAL
     /// </summary>
     [Serializable]
     [XmlType(TypeName = "sessionType", Namespace = OALData.OAL)]
-    public partial class OALSession 
+    public partial class OALSession
     {
         /// <summary>
         /// Start of observation session
@@ -1627,13 +1668,13 @@ namespace Astrarium.Plugins.Journal.OAL
         /// <summary>
         /// Site where session took place
         /// </summary>
-        [XmlElement(ElementName = "site", Form = XmlSchemaForm.Unqualified, DataType="IDREF")]
+        [XmlElement(ElementName = "site", Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
         public string SiteId { get; set; }
 
         /// <summary>
         /// Who participated in the observation session?
         /// </summary>
-        [XmlElement(ElementName = "coObserver", Form=XmlSchemaForm.Unqualified, DataType="IDREF")]
+        [XmlElement(ElementName = "coObserver", Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
         public string[] CoObservers { get; set; }
 
         /// <summary>
@@ -1657,7 +1698,7 @@ namespace Astrarium.Plugins.Journal.OAL
         /// <summary>
         /// Image files related to the session
         /// </summary>
-        [XmlElement(ElementName = "image", Form=XmlSchemaForm.Unqualified)]
+        [XmlElement(ElementName = "image", Form = XmlSchemaForm.Unqualified)]
         public string[] Images { get; set; }
 
         /// <summary>
@@ -1682,9 +1723,9 @@ namespace Astrarium.Plugins.Journal.OAL
     /// </summary>
     [Serializable]
     [XmlType(TypeName = "siteType", Namespace = OALData.OAL)]
-    public partial class OALSite 
-    {   
-        
+    public partial class OALSite
+    {
+
         [XmlElement(ElementName = "name", Form = XmlSchemaForm.Unqualified)]
         public string Name { get; set; }
 
@@ -1706,7 +1747,7 @@ namespace Astrarium.Plugins.Journal.OAL
         [XmlElement(ElementName = "elevation", Form = XmlSchemaForm.Unqualified)]
         public double Elevation { get; set; }
 
-        
+
         [XmlIgnore]
         public bool ElevationSpecified { get; set; }
 
@@ -1721,9 +1762,9 @@ namespace Astrarium.Plugins.Journal.OAL
         /// </summary>
         [XmlElement(ElementName = "code", Form = XmlSchemaForm.Unqualified, DataType = "integer")]
         public string Code { get; set; }
-        
-        
-        [XmlAttribute(AttributeName = "id", DataType="ID")]
+
+
+        [XmlAttribute(AttributeName = "id", DataType = "ID")]
         public string Id { get; set; }
     }
 }

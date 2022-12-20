@@ -18,7 +18,7 @@
         MinWidth="800" MinHeight="400">
 
     <Window.Resources>
-
+        
         <!-- Session tree view item  -->
         <HierarchicalDataTemplate DataType="{x:Type t:Session}" ItemsSource="{Binding Observations}">
             <Grid Background="#01000000" Tag="{Binding DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Window}}}">
@@ -152,7 +152,8 @@
                 CalendarDayButtonStyle="{StaticResource JournalCalendarDayButtonStyle}" />
 
             <c:BindableTreeView
-                Style="{StaticResource {x:Type TreeView}}" 
+                Background="{StaticResource BrushWindowBackground}"
+                BorderBrush="{StaticResource BrushWindowBackground}"
                 SelectedTreeViewItem="{Binding SelectedTreeViewItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                 ItemsSource="{Binding FilteredSessions}"
                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
