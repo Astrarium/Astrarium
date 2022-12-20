@@ -813,7 +813,7 @@ namespace Astrarium.Plugins.Journal.Types
             {
                 Type targetDetailsType = Assembly.GetAssembly(GetType()).GetTypes()
                     .Where(x => typeof(TargetDetails).IsAssignableFrom(x) && x.GetCustomAttributes<CelestialObjectTypeAttribute>()
-                    .Any(a => a.CelestialObjectType == targetType)).FirstOrDefault();
+                    .Any(a => a.CelestialObjectType == targetType)).FirstOrDefault() ?? typeof(TargetDetails);
 
                 if (targetDetailsType != null)
                 {

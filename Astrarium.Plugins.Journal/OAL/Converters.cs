@@ -90,6 +90,7 @@ namespace Astrarium.Plugins.Journal.OAL
         }
     }
 
+    public class ExportDeepSkyRatingConverter : ExportStringAsEnumConverter<OALFindingsDeepSkyRating> { }
 
     public class ExportStarColorConverter : ExportStringAsEnumConverter<OALStarColor> { }
 

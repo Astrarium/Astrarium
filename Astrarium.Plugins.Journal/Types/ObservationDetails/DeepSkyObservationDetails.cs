@@ -112,9 +112,9 @@ namespace Astrarium.Plugins.Journal.Types
         /// <summary>
         /// Rating according to the scale of the "Deep Sky Liste", 99 means "unknown"
         /// </summary>
-        public int Rating
+        public string Rating
         {
-            get => GetValue<int>(nameof(Rating), 99);
+            get => GetValue(nameof(Rating), "99");
             set => SetValue(nameof(Rating), value);
         }
     }

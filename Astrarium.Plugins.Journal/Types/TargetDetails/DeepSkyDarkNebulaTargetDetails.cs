@@ -12,10 +12,11 @@ namespace Astrarium.Plugins.Journal.Types
         /// <summary>
         /// Position angle of axis, in degrees
         /// </summary>
+        [Ephemeris("PositionAngle")]
         public int? PositionAngle { get; set; }
 
         /// <summary>
-        /// Opacity acc. to Lynds (1: min, 6:max)
+        /// Opacity acc. to Lynds (1: min, 6: max)
         /// </summary>
         public int? Opacity { get; set; }
     }

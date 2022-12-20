@@ -244,11 +244,11 @@ namespace Astrarium.Plugins.Journal.OAL
     [XmlInclude(typeof(OALFindingsDeepSkyOC))]
     [Serializable]
     [XmlType(TypeName = "findingsType", Namespace = OALData.OAL)]
-    public partial class OALFindings 
-    {        
+    public partial class OALFindings
+    {
         [XmlElement(ElementName = "description", Form = XmlSchemaForm.Unqualified)]
         public string Description { get; set; }
-        
+
         [XmlAttribute(AttributeName = "lang")]
         public string Lang { get; set; }
     }
@@ -335,6 +335,17 @@ namespace Astrarium.Plugins.Journal.OAL
         public bool FaintStarSpecified { get; set; }
     }
 
+    [CelestialObjectType("DeepSky.PlanetaryNebula")]
+    [CelestialObjectType("DeepSky.Asterism")]
+    [CelestialObjectType("DeepSky.GalaxyCluster")]
+    [CelestialObjectType("DeepSky.DarkNebula")]
+    [CelestialObjectType("DeepSky.GalacticNebula")]
+    [CelestialObjectType("DeepSky.Galaxy")]
+    [CelestialObjectType("DeepSky.GlobularCluster")]
+    [CelestialObjectType("DeepSky.MultipleStar")]
+    [CelestialObjectType("DeepSky.Quasar")]
+    [CelestialObjectType("DeepSky.StarCloud")]
+    [CelestialObjectType("DeepSky.Unspecified")]
     [XmlInclude(typeof(OALFindingsDeepSkyDS))]
     [XmlInclude(typeof(OALFindingsDeepSkyOC))]
     [Serializable]
@@ -349,7 +360,7 @@ namespace Astrarium.Plugins.Journal.OAL
         [XmlElement(ElementName = "largeDiameter", Form = XmlSchemaForm.Unqualified)]
         public OALNonNegativeAngle LargeDiameter { get; set; }
 
-        [OALConverter(Property = nameof(DeepSkyObservationDetails.Rating), ExportConverter = typeof(SimpleConverter), ImportConverter = typeof(SimpleConverter))]
+        [OALConverter(Property = nameof(DeepSkyObservationDetails.Rating), ExportConverter = typeof(ExportDeepSkyRatingConverter), ImportConverter = typeof(ImportEnumAsStringConverter))]
         [XmlElement(ElementName = "rating", Form = XmlSchemaForm.Unqualified)]
         public OALFindingsDeepSkyRating Rating { get; set; }
 
@@ -385,39 +396,32 @@ namespace Astrarium.Plugins.Journal.OAL
     [Serializable]
     [XmlType(TypeName = "nonNegativeAngleType", Namespace = OALData.OAL)]
     public partial class OALNonNegativeAngle : OALAngle { }
-    
-    
+
     [XmlInclude(typeof(OALNonNegativeAngle))]
     [Serializable]
     [XmlType(TypeName = "angleType", Namespace = OALData.OAL)]
     public partial class OALAngle 
-    {    
-        
+    {
         [XmlAttribute(AttributeName = "unit")]
         public OALAngleUnit Unit { get; set; }
-        
+
         [XmlText]
         public double Value { get; set; }
     }
-    
-    
+
     [Serializable]
     [XmlType(TypeName = "angleUnit", Namespace = OALData.OAL)]
-    public enum OALAngleUnit 
+    public enum OALAngleUnit
     {
-        
         [XmlEnum("arcsec")]
         ArcSec,
 
-        
         [XmlEnum("arcmin")]
         ArcMin,
 
-        
         [XmlEnum("deg")]
         Deg,
 
-        
         [XmlEnum("rad")]
         Rad,
     }
@@ -428,36 +432,28 @@ namespace Astrarium.Plugins.Journal.OAL
     [Serializable]
     [XmlType(AnonymousType = true, Namespace = OALData.OAL)]
     public enum OALFindingsDeepSkyRating
-    {        
-        
+    {
         [XmlEnum("1")]
         Rating1,
-        
-        
+
         [XmlEnum("2")]
         Rating2,
-        
-        
+
         [XmlEnum("3")]
         Rating3,
-        
-        
+
         [XmlEnum("4")]
         Rating4,
-        
-        
+
         [XmlEnum("5")]
         Rating5,
-        
-        
+
         [XmlEnum("6")]
         Rating6,
-        
-        
+
         [XmlEnum("7")]
         Rating7,
-        
-        
+
         [XmlEnum("99")]
         Unknown,
     }

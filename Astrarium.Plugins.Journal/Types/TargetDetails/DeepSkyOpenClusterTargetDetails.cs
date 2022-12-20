@@ -22,6 +22,7 @@ namespace Astrarium.Plugins.Journal.Types
         /// <summary>
         /// Classification according to Trumpler
         /// </summary>
+        [Ephemeris("ObjectType")]
         public string TrumplerClass { get; set; }
     }
 }

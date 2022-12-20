@@ -15,8 +15,9 @@ namespace Astrarium.Plugins.Journal.Types
         public double? MagStars { get; set; }
 
         /// <summary>
-        /// Degree of concentration [I..XII]
+        /// Degree of concentration [I..XII], aka Shapley Sawyer Concentration Class
         /// </summary>
+        [Ephemeris("ObjectType")]
         public string Concentration { get; set; }
     }
 }
