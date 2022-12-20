@@ -2,8 +2,10 @@
 using Astrarium.Plugins.Journal.OAL;
 using Astrarium.Plugins.Journal.ViewModels;
 using Astrarium.Types;
+using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Journal
@@ -35,16 +37,31 @@ namespace Astrarium.Plugins.Journal
             ViewManager.ShowWindow<JournalVM>(isSingleInstance: true);
         }
 
-        private void DoImport()
+        private async void DoImport()
         {
             string file = ViewManager.ShowOpenFileDialog("Import from OAL file", "Open Astronomy Log files (*.xml)|*.xml|All files|*.*", multiSelect: false, out int filterIndex)?.FirstOrDefault();
            
             if (file != null)
             {
-                //System.Data.Entity.Database.Delete("db");
-                
+                var tokenSource = new CancellationTokenSource();
+                var progress = new Progress<double>();
+                ViewManager.ShowProgress("Please wait", "Importing data...", tokenSource, progress);
 
-                Import.ImportFromOAL(file);
+                try
+                {
+                    await Task.Run(() => Import.ImportFromOAL(file, tokenSource.Token, progress));
+                }
+                catch (Exception ex)
+                {
+                    tokenSource.Cancel();
+                    Log.Error($"Unable to import OAL data: {ex}");
+                    //ViewManager.ShowMessageBox("$Error", $"{Text.Get("Importing.Error")}: {ex.Message}");
+                }
+
+                if (!tokenSource.IsCancellationRequested)
+                {
+                    tokenSource.Cancel();
+                }
             }
         }
 

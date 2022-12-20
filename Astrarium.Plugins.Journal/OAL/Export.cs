@@ -125,13 +125,13 @@ namespace Astrarium.Plugins.Journal.OAL
         {
             return new OALEyepiece()
             {
-                id = eyepiece.Id,
-                model = eyepiece.Model,
-                vendor = eyepiece.Vendor,
-                apparentFOV = eyepiece.ApparentFOV != null ? new OALNonNegativeAngle() { Unit = OALAngleUnit.Deg, Value = eyepiece.ApparentFOV.Value } : null,
-                focalLength = eyepiece.FocalLength,
-                maxFocalLength = eyepiece.FocalLengthMax ?? 0,
-                maxFocalLengthSpecified = eyepiece.FocalLengthMax != null
+                Id = eyepiece.Id,
+                Model = eyepiece.Model,
+                Vendor = eyepiece.Vendor,
+                ApparentFOV = eyepiece.ApparentFOV != null ? new OALNonNegativeAngle() { Unit = OALAngleUnit.Deg, Value = eyepiece.ApparentFOV.Value } : null,
+                FocalLength = eyepiece.FocalLength,
+                MaxFocalLength = eyepiece.FocalLengthMax ?? 0,
+                MaxFocalLengthSpecified = eyepiece.FocalLengthMax != null
             };
         }
 
@@ -139,10 +139,10 @@ namespace Astrarium.Plugins.Journal.OAL
         {
             return new OALLens()
             {
-                id = lens.Id,
-                factor = lens.Factor,
-                model = lens.Model,
-                vendor = lens.Vendor
+                Id = lens.Id,
+                Factor = lens.Factor,
+                Model = lens.Model,
+                Vendor = lens.Vendor
             };
         }
 

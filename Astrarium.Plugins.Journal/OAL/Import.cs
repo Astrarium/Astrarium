@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Astrarium.Plugins.Journal.Types;
 using System.Xml;
+using System.Threading;
 
 namespace Astrarium.Plugins.Journal.OAL
 {
@@ -23,7 +24,7 @@ namespace Astrarium.Plugins.Journal.OAL
             NullValueHandling = NullValueHandling.Ignore
         };
 
-        public static void ImportFromOAL(string file)
+        public static void ImportFromOAL(string file, CancellationToken? token = null, IProgress<double> progress = null)
         {
             var document = new XmlDocument();
             using (XmlReader xmlReader = XmlReader.Create(file, new XmlReaderSettings() { CheckCharacters = false }))
@@ -49,6 +50,9 @@ namespace Astrarium.Plugins.Journal.OAL
             var serializer = new XmlSerializer(typeof(OALData));
             using (var reader = new XmlTextReader(new StringReader(document.OuterXml)))
             {
+                long current = 0;
+                long count = 0;
+
                 var data = (OALData)serializer.Deserialize(reader);
                 using (var db = new DatabaseContext())
                 {
@@ -114,22 +118,34 @@ namespace Astrarium.Plugins.Journal.OAL
                     }
                 }
 
-                foreach (var obs in data.Observations)
+                current = 0;
+                count = data.Observations.Count();
+
+                using (var db = new DatabaseContext())
                 {
-                    ObservationDB obsDB = obs.ToObservation(data);
-
-                    if (obsDB == null) continue;
-
-                    using (var db = new DatabaseContext())
+                    foreach (var obs in data.Observations)
                     {
-                        // observation has no session, create new one
+                        ObservationDB obsDB = obs.ToObservation(data);
+
+                        if (obsDB == null) continue;
+
+                        // get observation without sessions that have place at the same time
+                        var sameSessionObs = data.Observations.Where(x =>
+                            string.IsNullOrEmpty(x.SessionId) &&
+                            x.ObserverId == obs.ObserverId &&
+                            x.SiteId == obs.SiteId &&
+                            x.Begin.Equals(obs.Begin)).ToList(); // TODO: what if "Begin" differs not more, for example, than 3 hours?
+
+                        ++current;
+                        progress?.Report(current / (double)count * 100);
+
+                        // attach session to observations
                         // because Astrarium OAL implementation of observation requires session
-                        if (string.IsNullOrEmpty(obsDB.SessionId))
+                        if (sameSessionObs.Any())
                         {
                             SessionDB sessionDB = obs.ToSession();
-
-                            // attach session to observation
                             obsDB.SessionId = sessionDB.Id;
+                            sameSessionObs.ForEach(x => x.SessionId = sessionDB.Id);
                             db.Sessions.Add(sessionDB);
 
                             // do not add co-observers repeatedly
@@ -143,8 +159,13 @@ namespace Astrarium.Plugins.Journal.OAL
                         db.Targets.Add(obsDB.Target);
                         db.Observations.Add(obsDB);
 
-                        db.SaveChanges();
+                        // save changes each 1000 records
+                        //if (current % 1000 == 0)
+                        //{
+                            db.SaveChanges();
+                        //}
                     }
+                    //db.SaveChanges();
                 }
             }
         }
@@ -170,10 +191,10 @@ namespace Astrarium.Plugins.Journal.OAL
         {
             return new LensDB()
             {
-                Id = lens.id,
-                Model = lens.model,
-                Vendor = lens.vendor,
-                Factor = lens.factor
+                Id = lens.Id,
+                Model = lens.Model,
+                Vendor = lens.Vendor,
+                Factor = lens.Factor
             };
         }
 
@@ -249,12 +270,12 @@ namespace Astrarium.Plugins.Journal.OAL
         {
             return new EyepieceDB()
             {
-                Id = eyepiece.id,
-                Model = eyepiece.model,
-                Vendor = eyepiece.vendor,
-                FocalLength = eyepiece.focalLength,
-                FocalLengthMax = eyepiece.maxFocalLengthSpecified ? eyepiece.maxFocalLength : (double?)null,
-                ApparentFOV = eyepiece.apparentFOV.ToAngle()
+                Id = eyepiece.Id,
+                Model = eyepiece.Model,
+                Vendor = eyepiece.Vendor,
+                FocalLength = eyepiece.FocalLength,
+                FocalLengthMax = eyepiece.MaxFocalLengthSpecified ? eyepiece.MaxFocalLength : (double?)null,
+                ApparentFOV = eyepiece.ApparentFOV.ToAngle()
             };
         }
 
