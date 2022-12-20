@@ -261,8 +261,8 @@ namespace Astrarium.Plugins.Journal.ViewModels
             Cameras = await dbManager.GetCameras();
 
             NotifyPropertyChanged(
-                nameof(AllSessions), 
-                nameof(FilteredSessions), 
+                nameof(AllSessions),
+                nameof(FilteredSessions),
                 nameof(SessionDates),
                 nameof(SessionsCount),
                 nameof(ObservationsCount),

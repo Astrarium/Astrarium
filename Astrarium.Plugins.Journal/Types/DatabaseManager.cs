@@ -778,23 +778,15 @@ namespace Astrarium.Plugins.Journal.Types
                 return value;
         }
 
-        private PropertyChangedBase CreateObservationDetails(string targetType)
+        private ObservationDetails CreateObservationDetails(string targetType)
         {
-            if (targetType == "VarStar" || targetType == "Nova")
+            Type observationDetailsType = Assembly.GetAssembly(GetType()).GetTypes()
+                .Where(x => typeof(ObservationDetails).IsAssignableFrom(x) && x.GetCustomAttributes<CelestialObjectTypeAttribute>()
+                .Any(a => a.CelestialObjectType == targetType)).FirstOrDefault();
+
+            if (observationDetailsType != null)
             {
-                return new VariableStarObservationDetails();
-            }
-            else if (targetType == "DeepSky.OpenCluster")
-            {
-                return new OpenClusterObservationDetails();
-            }
-            else if (targetType == "DeepSky.DoubleStar")
-            {
-                return new DoubleStarObservationDetails();
-            }
-            if (targetType.StartsWith("DeepSky"))
-            {
-                return new DeepSkyObservationDetails();
+                return (ObservationDetails)Activator.CreateInstance(observationDetailsType);
             }
             return null;
         }
