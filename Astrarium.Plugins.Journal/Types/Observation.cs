@@ -69,9 +69,9 @@ namespace Astrarium.Plugins.Journal.Types
         [DBStored(Entity = typeof(ObservationDB), Field = "Details")]
         private string details => JsonConvert.SerializeObject(Details, jsonSettings);
 
-        public PropertyChangedBase Details
+        public ObservationDetails Details
         {
-            get => GetValue<PropertyChangedBase>(nameof(Details));
+            get => GetValue<ObservationDetails>(nameof(Details));
             set
             {
                 var old = Details;

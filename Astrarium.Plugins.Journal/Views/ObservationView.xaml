@@ -88,21 +88,7 @@
                         </Grid.RowDefinitions>
                         <StackPanel Grid.Row="0" Margin="4 0" Orientation="Vertical" Grid.IsSharedSizeScope="True">
                             <v:TargetDetailsView DataContext="{Binding}" />
-                            <ContentControl Content="{Binding TargetDetails}" Visibility="{Binding TargetDetails, Converter={s:NotNullToVisibilityConverter}}">
-                                <ContentControl.Resources>
-                                    <DataTemplate DataType="{x:Type t:DeepSkyAsterismTargetDetails}">
-                                        <v:DeepSkyAsterismTargetDetailsView DataContext="{Binding}" />
-                                    </DataTemplate>
-                                    <DataTemplate DataType="{x:Type t:DeepSkyClusterOfGalaxiesTargetDetails}">
-                                        <v:DeepSkyClusterOfGalaxiesTargetDetailsView DataContext="{Binding}" />
-                                    </DataTemplate>
-                                    <DataTemplate DataType="{x:Type t:DeepSkyOpenClusterTargetDetails}">
-                                        <v:DeepSkyOpenClusterTargetDetailsView DataContext="{Binding}" />
-                                    </DataTemplate>
-                                </ContentControl.Resources>
-                            </ContentControl>
                         </StackPanel>
-
                         <c:MultilineEdit Margin="0 0 4 4" Grid.Row="1" Title="Notes" Text="{Binding TargetNotes}" Placeholder="Enter observation target notes, for example, history of discovery or any other helpful info." VerticalAlignment="Stretch" />
                     </Grid>
                 </ScrollViewer>

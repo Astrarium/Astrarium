@@ -10,6 +10,7 @@ using Astrarium.Types;
 using Astrarium.Algorithms;
 using Astrarium.Plugins.Journal.Database.Entities;
 using System.Collections;
+using System.Reflection;
 
 namespace Astrarium.Plugins.Journal.Types
 {
@@ -798,26 +799,17 @@ namespace Astrarium.Plugins.Journal.Types
             return null;
         }
 
-        private PropertyChangedBase DeserializeObservationDetails(string targetType, string details)
+        private ObservationDetails DeserializeObservationDetails(string targetType, string details)
         {
             if (details != null)
             {
-                if (targetType == "VarStar" || targetType == "Nova")
-                {
-                    return JsonConvert.DeserializeObject<VariableStarObservationDetails>(details);
-                }
-                else if (targetType == "DeepSky.OpenCluster")
-                {
-                    return JsonConvert.DeserializeObject<OpenClusterObservationDetails>(details);
-                }
-                else if (targetType == "DeepSky.DoubleStar")
-                {
-                    return JsonConvert.DeserializeObject<DoubleStarObservationDetails>(details);
-                }
+                Type observationDetailsType = Assembly.GetAssembly(GetType()).GetTypes()
+                    .Where(x => typeof(ObservationDetails).IsAssignableFrom(x) && x.GetCustomAttributes<CelestialObjectTypeAttribute>()
+                    .Any(a => a.CelestialObjectType == targetType)).FirstOrDefault();
 
-                if (targetType.StartsWith("DeepSky"))
+                if (observationDetailsType != null)
                 {
-                    return JsonConvert.DeserializeObject<DeepSkyObservationDetails>(details);
+                    return (ObservationDetails)JsonConvert.DeserializeObject(details, observationDetailsType);
                 }
             }
             return null;
@@ -827,37 +819,14 @@ namespace Astrarium.Plugins.Journal.Types
         {
             if (details != null)
             {
-                if (targetType == "DeepSky.OpenCluster")
+                Type targetDetailsType = Assembly.GetAssembly(GetType()).GetTypes()
+                    .Where(x => typeof(TargetDetails).IsAssignableFrom(x) && x.GetCustomAttributes<CelestialObjectTypeAttribute>()
+                    .Any(a => a.CelestialObjectType == targetType)).FirstOrDefault();
+
+                if (targetDetailsType != null)
                 {
-                    return JsonConvert.DeserializeObject<DeepSkyOpenClusterTargetDetails>(details);
+                    return (TargetDetails)JsonConvert.DeserializeObject(details, targetDetailsType);
                 }
-                else if (targetType == "DeepSky.GalaxyCluster")
-                {
-                    return JsonConvert.DeserializeObject<DeepSkyClusterOfGalaxiesTargetDetails>(details);
-                }
-                else if (targetType == "Asterism")
-                {
-                    return JsonConvert.DeserializeObject<DeepSkyAsterismTargetDetails>(details);
-                }
-                else if (targetType == "Star")
-                {
-                    return JsonConvert.DeserializeObject<StarTargetDetails>(details);
-                }
-                // TODO: other types
-
-
-                else
-                {
-                    return JsonConvert.DeserializeObject<TargetDetails>(details);
-                }
-
-
-
-
-                //else if (targetType.StartsWith("DeepSky"))
-                //{
-                //    return JsonConvert.DeserializeObject<DeepSkyTargetDetails>(details);
-                //}
             }
             return null;
         }
