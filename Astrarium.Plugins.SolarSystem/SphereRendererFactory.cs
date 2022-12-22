@@ -16,22 +16,24 @@ namespace Astrarium.Plugins.SolarSystem
         {
             try
             {
-                using (var window = new GameWindow())
-                {
-                    // Version should be at least 3.0.
-                    string openGLversion = GL.GetString(StringName.Version);
+                //using (var window = new GameWindow())
+                //{
+                //    // Version should be at least 3.0.
+                //    string openGLversion = GL.GetString(StringName.Version);
 
-                    if (int.TryParse(openGLversion.Split(' ').First().Split('.').First(), out int majorVersion) && majorVersion >= 3)
-                    {
-                        Log.Debug($"OpenGL sphere renderer is used (OpenGL version: {openGLversion})");
-                        return new GLSphereRenderer();
-                    }
-                    else
-                    {
-                        Log.Warn($"WPF sphere renderer is used (OpenGL version: {openGLversion}). Only low-level quality texures are supported. To get high-level textures support, upgrade OpenGL to 3.0 version or higher.");
-                        return new WpfSphereRenderer();
-                    }
-                }
+                //    if (int.TryParse(openGLversion.Split(' ').First().Split('.').First(), out int majorVersion) && majorVersion >= 3)
+                //    {
+                //        Log.Debug($"OpenGL sphere renderer is used (OpenGL version: {openGLversion})");
+                //        return new GLSphereRenderer();
+                //    }
+                //    else
+                //    {
+                //        Log.Warn($"WPF sphere renderer is used (OpenGL version: {openGLversion}). Only low-level quality texures are supported. To get high-level textures support, upgrade OpenGL to 3.0 version or higher.");
+                //        return new WpfSphereRenderer();
+                //    }
+                //}
+                return new OpenGLSphereRenderer();
+
             }
             catch (Exception ex)
             {
