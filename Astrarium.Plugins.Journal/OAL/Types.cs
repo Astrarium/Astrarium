@@ -14,8 +14,14 @@ namespace Astrarium.Plugins.Journal.OAL
     [XmlRoot(ElementName = "observations", Namespace = OAL, IsNullable = false)]
     public class OALData
     {
+        /// <summary>
+        /// OAL scheme URI
+        /// </summary>
         public const string OAL = "http://groups.google.com/group/openastronomylog";
 
+        /// <summary>
+        /// XSI scheme URI
+        /// </summary>
         public const string XSI = "http://www.w3.org/2001/XMLSchema-instance";
 
         /// <summary>
@@ -118,7 +124,6 @@ namespace Astrarium.Plugins.Journal.OAL
         /// </summary>
         [XmlElement(ElementName = "surname")]
         public string Surname { get; set; }
-
 
         /// <summary>
         /// Contacts of the observer (for example, e-mail, address, phone and etc.)
@@ -225,6 +230,9 @@ namespace Astrarium.Plugins.Journal.OAL
         [XmlAttribute(AttributeName = "fainterThan")]
         public bool FainterThan { get; set; }
 
+        /// <summary>
+        /// Flag indicating <see cref="FainterThan" /> is specified
+        /// </summary>
         [XmlIgnore]
         public bool FainterThanSpecified { get; set; }
 
@@ -234,6 +242,9 @@ namespace Astrarium.Plugins.Journal.OAL
         [XmlAttribute(AttributeName = "uncertain")]
         public bool Uncertain { get; set; }
 
+        /// <summary>
+        /// Flag indicating <see cref="Uncertain" /> is specified
+        /// </summary>
         [XmlIgnore]
         public bool UncertainSpecified { get; set; }
 
@@ -244,6 +255,9 @@ namespace Astrarium.Plugins.Journal.OAL
         public double Value { get; set; }
     }
 
+    /// <summary>
+    /// Base class for all findings (results of observations)
+    /// </summary>
     [XmlInclude(typeof(OALFindingsVariableStar))]
     [XmlInclude(typeof(OALFindingsDeepSky))]
     [XmlInclude(typeof(OALFindingsDeepSkyDS))]
@@ -252,9 +266,15 @@ namespace Astrarium.Plugins.Journal.OAL
     [XmlType(TypeName = "findingsType", Namespace = OALData.OAL)]
     public class OALFindings
     {
+        /// <summary>
+        /// Description of the finding
+        /// </summary>
         [XmlElement(ElementName = "description", Form = XmlSchemaForm.Unqualified)]
         public string Description { get; set; }
 
+        /// <summary>
+        /// Language of the description (2-letter code)
+        /// </summary>
         [XmlAttribute(AttributeName = "lang")]
         public string Lang { get; set; }
     }

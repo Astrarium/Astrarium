@@ -27,11 +27,17 @@ namespace Astrarium.Plugins.Journal.OAL
         public static void ImportFromOAL(string file, CancellationToken? token = null, IProgress<double> progress = null)
         {
             var document = new XmlDocument();
-            using (XmlReader xmlReader = XmlReader.Create(file, new XmlReaderSettings() { CheckCharacters = false }))
+
+            using (var xmlReader = new FilterInvalidXmlReader(File.OpenRead(file)))
             {
-                xmlReader.MoveToContent();
                 document.Load(xmlReader);
             }
+
+            //using (XmlReader xmlReader = XmlReader.Create(file, new XmlReaderSettings() { CheckCharacters = false }))
+            //{
+            //    xmlReader.MoveToContent();
+            //    document.Load(xmlReader);
+            //}
 
             var namespaceManager = new XmlNamespaceManager(document.NameTable);
             namespaceManager.AddNamespace("xsi", OALData.XSI);
@@ -56,6 +62,8 @@ namespace Astrarium.Plugins.Journal.OAL
                 var data = (OALData)serializer.Deserialize(reader);
                 using (var db = new DatabaseContext())
                 {
+                    db.Configuration.AutoDetectChangesEnabled = false;
+
                     foreach (var site in data.Sites)
                     {
                         SiteDB siteDB = site.ToSite();
@@ -105,6 +113,8 @@ namespace Astrarium.Plugins.Journal.OAL
                 {
                     using (var db = new DatabaseContext())
                     {
+                        db.Configuration.AutoDetectChangesEnabled = false;
+
                         SessionDB sessionDB = session.ToSession(data);
                         db.Sessions.Add(sessionDB);
 
@@ -123,6 +133,8 @@ namespace Astrarium.Plugins.Journal.OAL
 
                 using (var db = new DatabaseContext())
                 {
+                    db.Configuration.AutoDetectChangesEnabled = false;
+
                     foreach (var obs in data.Observations)
                     {
                         ObservationDB obsDB = obs.ToObservation(data);
@@ -160,12 +172,12 @@ namespace Astrarium.Plugins.Journal.OAL
                         db.Observations.Add(obsDB);
 
                         // save changes each 1000 records
-                        //if (current % 1000 == 0)
-                        //{
+                        if (current % 1000 == 0)
+                        {
                             db.SaveChanges();
-                        //}
+                        }
                     }
-                    //db.SaveChanges();
+                    db.SaveChanges();
                 }
             }
         }
