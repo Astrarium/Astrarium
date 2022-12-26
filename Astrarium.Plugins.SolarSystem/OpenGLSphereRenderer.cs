@@ -1,13 +1,9 @@
 ﻿using Astrarium.Types;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.SolarSystem
 {
@@ -17,6 +13,7 @@ namespace Astrarium.Plugins.SolarSystem
         private const string GDI32 = "gdi32";
         private const string OPENGL32 = "opengl32";
         private const string GLU32 = "glu32";
+        private const string GLFW = "glfw";
 
         private const int GL_TRUE = 1;
 
@@ -39,6 +36,11 @@ namespace Astrarium.Plugins.SolarSystem
         private const int GL_UNSIGNED_BYTE = 0x1401;
         private const int GL_TEXTURE_2D = 0xDE1;
         private const int GL_RGBA = 0x1908;
+
+        private const int GLFW_CONTEXT_VERSION_MAJOR = 0x00022002;
+        private const int GLFW_CONTEXT_VERSION_MINOR = 0x00022003;
+        private const int GLFW_VISIBLE = 0x00020004;
+        private const int GLFW_FALSE = 0;
 
         [StructLayout(LayoutKind.Sequential)]
         private struct PixelFormatDescriptor
@@ -183,6 +185,21 @@ namespace Astrarium.Plugins.SolarSystem
         [DllImport(GLU32)]
         private static extern void gluDeleteQuadric(IntPtr quadric);
 
+        [DllImport(GLFW)]
+        private static extern bool glfwInit();
+
+        [DllImport(GLFW)]
+        private static extern IntPtr glfwCreateWindow(int width, int height, string title, IntPtr monitor, IntPtr share);
+
+        [DllImport(GLFW)]
+        private static extern void glfwMakeContextCurrent(IntPtr window);
+
+        [DllImport(GLFW)]
+        private static extern void glfwWindowHint(int hint, int value);
+
+        [DllImport(GLFW)]
+        private static extern void glfwDestroyWindow(IntPtr window);
+
         private delegate void glGenFramebuffers(int n, ref uint buffers);
         private delegate void glGenRenderbuffers(int n, ref uint buffer);
         private delegate void glBindFramebuffer(uint target, uint buffer);
@@ -225,32 +242,31 @@ namespace Astrarium.Plugins.SolarSystem
 
         public OpenGLSphereRenderer()
         {
-            var hDC = GetDC(IntPtr.Zero);
-            var pfd = PixelFormatDescriptor.Build();
-            var pixelFormat = ChoosePixelFormat(hDC, ref pfd);
-            SetPixelFormat(hDC, pixelFormat, ref pfd);
-            var hRC = wglCreateContext(hDC);
-            wglMakeCurrent(hDC, hRC);
-
+            glfwInit();
+            IntPtr window = CreateWindow();
             LoadFunctionPointers();
+            glfwDestroyWindow(window);
+        }
 
-            wglMakeCurrent(IntPtr.Zero, 0);
-            wglDeleteContext(hRC);
+        private IntPtr CreateWindow()
+        {
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+            glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+            IntPtr window = glfwCreateWindow(1, 1, "", IntPtr.Zero, IntPtr.Zero);
+            glfwMakeContextCurrent(window);
+            return window;
         }
 
         [HandleProcessCorruptedStateExceptions]
         public override Image Render(RendererOptions options)
         {
+            IntPtr window = IntPtr.Zero;
             try
             {
                 Image result;
 
-                var hDC = GetDC(IntPtr.Zero);
-                var pfd = PixelFormatDescriptor.Build();
-                var pixelFormat = ChoosePixelFormat(hDC, ref pfd);
-                SetPixelFormat(hDC, pixelFormat, ref pfd);
-                var hRC = wglCreateContext(hDC);
-                wglMakeCurrent(hDC, hRC);
+                window = CreateWindow();
 
                 int size = (int)options.OutputImageSize;
 
@@ -322,18 +338,19 @@ namespace Astrarium.Plugins.SolarSystem
                 DeleteFramebuffers(1, ref fbo);
                 DeleteRenderbuffers(1, ref rbo);
 
-                // make the rendering context not current  
-                wglMakeCurrent(IntPtr.Zero, 0);
-
-                // delete the rendering context  
-                wglDeleteContext(hRC);
-
                 return result;
             }
             catch (Exception ex)
             {
                 Log.Error($"Error on creating texture with OpenGLSphereRenderer: {ex} Use WPFSphereRenderer instead.");
                 return base.Render(options);
+            }
+            finally
+            {
+                if (window != IntPtr.Zero)
+                {
+                    glfwDestroyWindow(window);
+                }
             }
         }
 

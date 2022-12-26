@@ -98,7 +98,14 @@ namespace Astrarium.Config
         {
             if (SettingsValues.ContainsKey(settingName))
             {
-                return (T)SettingsValues[settingName];
+                try
+                {
+                    return (T)SettingsValues[settingName];
+                }
+                catch
+                {
+                    return defaultValue;
+                }
             }
             else
             {

@@ -117,7 +117,7 @@ namespace Astrarium.Plugins.ASCOM
         {
             this.ascom.PollingPeriod = (int)settings.Get<decimal>("TelescopePollingPeriod");
             this.joystickManager.SelectedDeviceChanged += JoystickManager_SelectedDeviceChanged;
-            this.joystickManager.SelectedDevice = joystickManager.Devices.FirstOrDefault(x => x.Id == settings.Get<Guid>("TelescopeControlJoystickDevice"));
+            this.joystickManager.SelectedDevice = joystickManager.Devices.FirstOrDefault(x => x.Index == settings.Get<int>("TelescopeControlJoystickDevice"));
             this.joystickManager.IsEnabled = settings.Get("TelescopeControlJoystick");
         }
 
