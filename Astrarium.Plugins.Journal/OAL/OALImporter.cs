@@ -5,182 +5,222 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Astrarium.Plugins.Journal.Types;
 using System.Xml;
 using System.Threading;
+using System.Data.Common;
+using System.Data.SQLite;
+using Astrarium.Types;
 
 namespace Astrarium.Plugins.Journal.OAL
 {
-    public static class Import
+    [Singleton(typeof(IOALImporter))]
+    public class OALImporter : IOALImporter
+    {
+        public event Action OnImportBegin;
+        public event Action<bool> OnImportEnd;
+
+        public void ImportFromOAL(string file, CancellationToken? token = null, IProgress<double> progress = null)
+        {
+            using (XmlReader reader = new OALXmlReader(file))
+            {
+                long current = 0;
+                long count = 0;
+
+                var data = (OALData)new XmlSerializer(typeof(OALData)).Deserialize(reader);
+
+                var connectionFactory = new DatabaseConnectionFactory();
+
+                using (DbConnection conn = connectionFactory.CreateConnection())
+                {
+                    conn.Open();
+                    var trans = conn.BeginTransaction();
+
+                    OnImportBegin?.Invoke();
+
+                    try
+                    {
+                        using (var db = new DatabaseContext(conn, contextOwnsConnection: false))
+                        {
+                            db.Configuration.AutoDetectChangesEnabled = false;
+
+                            foreach (var site in data.Sites)
+                            {
+                                SiteDB siteDB = site.ToSite();
+                                db.Sites.Add(siteDB);
+                                token.GetValueOrDefault().ThrowIfCancellationRequested();
+                            }
+
+                            foreach (var observer in data.Observers)
+                            {
+                                ObserverDB observerDB = observer.ToObserver();
+                                db.Observers.Add(observerDB);
+                                token.GetValueOrDefault().ThrowIfCancellationRequested();
+                            }
+
+                            foreach (var optics in data.Optics)
+                            {
+                                OpticsDB opticsDB = optics.ToOptics();
+                                db.Optics.Add(opticsDB);
+                                token.GetValueOrDefault().ThrowIfCancellationRequested();
+                            }
+
+                            foreach (var eyepiece in data.Eyepieces)
+                            {
+                                EyepieceDB eyepieceDB = eyepiece.ToEyepiece();
+                                db.Eyepieces.Add(eyepieceDB);
+                                token.GetValueOrDefault().ThrowIfCancellationRequested();
+                            }
+
+                            foreach (var lens in data.Lenses)
+                            {
+                                LensDB lensDB = lens.ToLens();
+                                db.Lenses.Add(lensDB);
+                                token.GetValueOrDefault().ThrowIfCancellationRequested();
+                            }
+
+                            foreach (var filter in data.Filters)
+                            {
+                                FilterDB filterDB = filter.ToFilter();
+                                db.Filters.Add(filterDB);
+                                token.GetValueOrDefault().ThrowIfCancellationRequested();
+                            }
+
+                            foreach (var imager in data.Cameras)
+                            {
+                                CameraDB cameraDB = imager.ToCamera();
+                                db.Cameras.Add(cameraDB);
+                                token.GetValueOrDefault().ThrowIfCancellationRequested();
+                            }
+
+                            db.SaveChanges();
+                        }
+
+                        foreach (var session in data.Sessions)
+                        {
+                            using (var db = new DatabaseContext(conn, contextOwnsConnection: false))
+                            {
+                                db.Configuration.AutoDetectChangesEnabled = false;
+
+                                SessionDB sessionDB = session.ToSession(data);
+                                db.Sessions.Add(sessionDB);
+
+                                // do not add co-observers repeatedly
+                                foreach (var coObserver in sessionDB.CoObservers)
+                                {
+                                    db.Entry(coObserver).State = EntityState.Unchanged;
+                                }
+
+                                token.GetValueOrDefault().ThrowIfCancellationRequested();
+
+                                db.SaveChanges();
+                            }
+                        }
+
+                        current = 0;
+                        count = data.Observations.Count();
+
+                        using (var db = new DatabaseContext(conn, contextOwnsConnection: false))
+                        {
+                            db.Configuration.AutoDetectChangesEnabled = false;
+
+                            foreach (var obs in data.Observations)
+                            {
+                                ObservationDB obsDB = obs.ToObservation(data);
+
+                                if (obsDB == null) continue;
+
+                                // get observation without sessions that have place at the same time
+                                var sameSessionObs = data.Observations.Where(x =>
+                                    string.IsNullOrEmpty(x.SessionId) &&
+                                    x.ObserverId == obs.ObserverId &&
+                                    x.SiteId == obs.SiteId &&
+                                    x.Begin.Equals(obs.Begin)).ToList(); // TODO: what if "Begin" differs not more, for example, than 3 hours?
+
+                                ++current;
+                                progress?.Report(current / (double)count * 100);
+
+                                // attach session to observations
+                                // because Astrarium OAL implementation of observation requires session
+                                if (sameSessionObs.Any())
+                                {
+                                    SessionDB sessionDB = obs.ToSession();
+                                    obsDB.SessionId = sessionDB.Id;
+                                    sameSessionObs.ForEach(x => x.SessionId = sessionDB.Id);
+                                    db.Sessions.Add(sessionDB);
+
+                                    // do not add co-observers repeatedly
+                                    foreach (var coObserver in sessionDB.CoObservers)
+                                    {
+                                        db.Entry(coObserver).State = EntityState.Unchanged;
+                                    }
+                                }
+
+                                // create target copy for each observation
+                                db.Targets.Add(obsDB.Target);
+                                db.Observations.Add(obsDB);
+
+                                // save changes each 1000 records
+                                if (current % 1000 == 0)
+                                {
+                                    db.SaveChanges();
+                                }
+
+                                token.GetValueOrDefault().ThrowIfCancellationRequested();
+                            }
+                            db.SaveChanges();
+                        }
+
+                        trans.Commit();
+
+                        OnImportEnd?.Invoke(true);
+                    }
+                    catch (Exception ex)
+                    {
+                        try
+                        {
+                            trans.Rollback();
+                        }
+                        catch { }
+
+                        OnImportEnd?.Invoke(false);
+
+                        if (ex is OperationCanceledException)
+                            return;
+
+                        Exception ie = ex;
+                        while (ie != null)
+                        {
+                            if (ie is SQLiteException sqlEx)
+                            {
+                                break;
+                            }
+                            ie = ie.InnerException;
+                        }
+
+                        if (ie != null)
+                            throw ie;
+                        else
+                            throw ex;
+                    }
+                    finally
+                    {
+                        trans?.Dispose();
+                    }
+                }
+            }
+        }
+    }
+
+    public static class ImportExtensions
     {
         private static JsonSerializerSettings jsonSettings = new JsonSerializerSettings
         {
             NullValueHandling = NullValueHandling.Ignore
         };
-
-        public static void ImportFromOAL(string file, CancellationToken? token = null, IProgress<double> progress = null)
-        {
-            var document = new XmlDocument();
-
-            using (var xmlReader = new FilterInvalidXmlReader(File.OpenRead(file)))
-            {
-                document.Load(xmlReader);
-            }
-
-            //using (XmlReader xmlReader = XmlReader.Create(file, new XmlReaderSettings() { CheckCharacters = false }))
-            //{
-            //    xmlReader.MoveToContent();
-            //    document.Load(xmlReader);
-            //}
-
-            var namespaceManager = new XmlNamespaceManager(document.NameTable);
-            namespaceManager.AddNamespace("xsi", OALData.XSI);
-            XmlNodeList nodes = document.SelectNodes("//*[@xsi:type]", namespaceManager);
-
-            foreach (XmlNode node in nodes)
-            {
-                XmlAttribute typeAttr = node.Attributes["xsi:type"];
-                // Take only types within "oal:" namespace
-                if (!typeAttr.Value.StartsWith("oal:"))
-                {
-                    node.ParentNode.RemoveChild(node);
-                }
-            }
-
-            var serializer = new XmlSerializer(typeof(OALData));
-            using (var reader = new XmlTextReader(new StringReader(document.OuterXml)))
-            {
-                long current = 0;
-                long count = 0;
-
-                var data = (OALData)serializer.Deserialize(reader);
-                using (var db = new DatabaseContext())
-                {
-                    db.Configuration.AutoDetectChangesEnabled = false;
-
-                    foreach (var site in data.Sites)
-                    {
-                        SiteDB siteDB = site.ToSite();
-                        db.Sites.Add(siteDB);
-                    }
-
-                    foreach (var observer in data.Observers)
-                    {
-                        ObserverDB observerDB = observer.ToObserver();
-                        db.Observers.Add(observerDB);
-                    }
-
-                    foreach (var optics in data.Optics)
-                    {
-                        OpticsDB opticsDB = optics.ToOptics();
-                        db.Optics.Add(opticsDB);
-                    }
-
-                    foreach (var eyepiece in data.Eyepieces)
-                    {
-                        EyepieceDB eyepieceDB = eyepiece.ToEyepiece();
-                        db.Eyepieces.Add(eyepieceDB);
-                    }
-
-                    foreach (var lens in data.Lenses)
-                    {
-                        LensDB lensDB = lens.ToLens();
-                        db.Lenses.Add(lensDB);
-                    }
-
-                    foreach (var filter in data.Filters)
-                    {
-                        FilterDB filterDB = filter.ToFilter();
-                        db.Filters.Add(filterDB);
-                    }
-
-                    foreach (var imager in data.Cameras)
-                    {
-                        CameraDB cameraDB = imager.ToCamera();
-                        db.Cameras.Add(cameraDB);
-                    }
-
-                    db.SaveChanges();
-                }
-
-                foreach (var session in data.Sessions)
-                {
-                    using (var db = new DatabaseContext())
-                    {
-                        db.Configuration.AutoDetectChangesEnabled = false;
-
-                        SessionDB sessionDB = session.ToSession(data);
-                        db.Sessions.Add(sessionDB);
-
-                        // do not add co-observers repeatedly
-                        foreach (var coObserver in sessionDB.CoObservers)
-                        {
-                            db.Entry(coObserver).State = EntityState.Unchanged;
-                        }
-
-                        db.SaveChanges();
-                    }
-                }
-
-                current = 0;
-                count = data.Observations.Count();
-
-                using (var db = new DatabaseContext())
-                {
-                    db.Configuration.AutoDetectChangesEnabled = false;
-
-                    foreach (var obs in data.Observations)
-                    {
-                        ObservationDB obsDB = obs.ToObservation(data);
-
-                        if (obsDB == null) continue;
-
-                        // get observation without sessions that have place at the same time
-                        var sameSessionObs = data.Observations.Where(x =>
-                            string.IsNullOrEmpty(x.SessionId) &&
-                            x.ObserverId == obs.ObserverId &&
-                            x.SiteId == obs.SiteId &&
-                            x.Begin.Equals(obs.Begin)).ToList(); // TODO: what if "Begin" differs not more, for example, than 3 hours?
-
-                        ++current;
-                        progress?.Report(current / (double)count * 100);
-
-                        // attach session to observations
-                        // because Astrarium OAL implementation of observation requires session
-                        if (sameSessionObs.Any())
-                        {
-                            SessionDB sessionDB = obs.ToSession();
-                            obsDB.SessionId = sessionDB.Id;
-                            sameSessionObs.ForEach(x => x.SessionId = sessionDB.Id);
-                            db.Sessions.Add(sessionDB);
-
-                            // do not add co-observers repeatedly
-                            foreach (var coObserver in sessionDB.CoObservers)
-                            {
-                                db.Entry(coObserver).State = EntityState.Unchanged;
-                            }
-                        }
-
-                        // create target copy for each observation
-                        db.Targets.Add(obsDB.Target);
-                        db.Observations.Add(obsDB);
-
-                        // save changes each 1000 records
-                        if (current % 1000 == 0)
-                        {
-                            db.SaveChanges();
-                        }
-                    }
-                    db.SaveChanges();
-                }
-            }
-        }
 
         private static string ToStringEnum<TEnum>(this TEnum value) where TEnum : struct, IConvertible
         {
@@ -199,7 +239,7 @@ namespace Astrarium.Plugins.Journal.OAL
             return attribute.Name;
         }
 
-        private static LensDB ToLens(this OALLens lens)
+        public static LensDB ToLens(this OALLens lens)
         {
             return new LensDB()
             {
@@ -239,7 +279,7 @@ namespace Astrarium.Plugins.Journal.OAL
             return JsonConvert.SerializeObject(accountsObject, jsonSettings);
         }
 
-        private static FilterDB ToFilter(this OALFilter filter)
+        public static FilterDB ToFilter(this OALFilter filter)
         {
             return new FilterDB()
             {
@@ -252,7 +292,7 @@ namespace Astrarium.Plugins.Journal.OAL
             };
         }
 
-        private static CameraDB ToCamera(this OALImager imager)
+        public static CameraDB ToCamera(this OALImager imager)
         {
             var cameraDb = new CameraDB()
             {
@@ -278,7 +318,7 @@ namespace Astrarium.Plugins.Journal.OAL
             return cameraDb;
         }
 
-        private static EyepieceDB ToEyepiece(this OALEyepiece eyepiece)
+        public static EyepieceDB ToEyepiece(this OALEyepiece eyepiece)
         {
             return new EyepieceDB()
             {
@@ -291,7 +331,7 @@ namespace Astrarium.Plugins.Journal.OAL
             };
         }
 
-        private static OpticsDB ToOptics(this OALOptics optics)
+        public static OpticsDB ToOptics(this OALOptics optics)
         {
             var scopeDb = new OpticsDB()
             {
@@ -331,7 +371,7 @@ namespace Astrarium.Plugins.Journal.OAL
             return scopeDb;
         }
 
-        private static ObserverDB ToObserver(this OALObserver observer)
+        public static ObserverDB ToObserver(this OALObserver observer)
         {
             return new ObserverDB()
             {
@@ -350,7 +390,7 @@ namespace Astrarium.Plugins.Journal.OAL
         /// </summary>
         /// <param name="observation"></param>
         /// <returns></returns>
-        private static SessionDB ToSession(this OALObservation observation)
+        public static SessionDB ToSession(this OALObservation observation)
         {
             return new SessionDB()
             {
@@ -368,7 +408,7 @@ namespace Astrarium.Plugins.Journal.OAL
             };
         }
 
-        private static ObservationDB ToObservation(this OALObservation observation, OALData data)
+        public static ObservationDB ToObservation(this OALObservation observation, OALData data)
         {
             // get target
             OALTarget target = data.Targets.FirstOrDefault(t => t.Id == observation.TargetId);
@@ -407,9 +447,9 @@ namespace Astrarium.Plugins.Journal.OAL
                 }
 
                 // ObservationDetails class related to that celestial object type
-                Type observationDetailsType = Assembly.GetAssembly(typeof(Import))
+                Type observationDetailsType = Assembly.GetAssembly(typeof(OALImporter))
                     .GetTypes().FirstOrDefault(x => typeof(ObservationDetails).IsAssignableFrom(x) && x.GetCustomAttributes<CelestialObjectTypeAttribute>(inherit: false).Any(a => a.CelestialObjectType == bodyType)) ?? typeof(ObservationDetails);
-                
+
                 // Create empty TargetDetails
                 ObservationDetails details = (ObservationDetails)Activator.CreateInstance(observationDetailsType);
 
@@ -428,7 +468,7 @@ namespace Astrarium.Plugins.Journal.OAL
                     if (specifiedProperty == null || (bool)specifiedProperty.GetValue(finding))
                     {
                         object convertedValue = converter.Convert(value);
-                        
+
                         if (attr.Property != null)
                         {
                             observationDetailsType.GetProperty(attr.Property).SetValue(details, convertedValue);
@@ -474,7 +514,7 @@ namespace Astrarium.Plugins.Journal.OAL
             return obs;
         }
 
-        private static SessionDB ToSession(this OALSession session, OALData data)
+        public static SessionDB ToSession(this OALSession session, OALData data)
         {
             var observations = data.Observations.Where(i => i.SessionId == session.Id);
             string observerId = observations.Select(o => o.ObserverId).FirstOrDefault();
@@ -516,7 +556,7 @@ namespace Astrarium.Plugins.Journal.OAL
             };
         }
 
-        private static SiteDB ToSite(this OALSite site)
+        public static SiteDB ToSite(this OALSite site)
         {
             return new SiteDB()
             {
@@ -540,7 +580,7 @@ namespace Astrarium.Plugins.Journal.OAL
                     return result;
                 else
                     return 0;
-            } 
+            }
         }
 
         private static int? ToIntNullable(this string value)
@@ -612,7 +652,7 @@ namespace Astrarium.Plugins.Journal.OAL
             }
 
             // TargetDetails class related to that celestial object type
-            Type targetDetailsType = Assembly.GetAssembly(typeof(Import))
+            Type targetDetailsType = Assembly.GetAssembly(typeof(OALImporter))
                 .GetTypes().FirstOrDefault(x => typeof(TargetDetails).IsAssignableFrom(x) && x.GetCustomAttributes<CelestialObjectTypeAttribute>(inherit: false).Any(a => a.CelestialObjectType == bodyType)) ?? typeof(TargetDetails);
 
             // Create empty TargetDetails

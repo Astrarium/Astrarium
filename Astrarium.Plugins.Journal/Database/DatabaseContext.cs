@@ -1,7 +1,9 @@
 ﻿using Astrarium.Plugins.Journal.Database.Entities;
 using Astrarium.Types;
 using SQLite.CodeFirst;
+using System.Data.Common;
 using System.Data.Entity;
+using System.Data.SqlClient;
 
 namespace Astrarium.Plugins.Journal.Database
 {
@@ -9,10 +11,18 @@ namespace Astrarium.Plugins.Journal.Database
     {
         public DatabaseContext() : base()
         {
+            SetConfiguration();
+        }
+
+        public DatabaseContext(DbConnection conn, bool contextOwnsConnection) : base(conn, contextOwnsConnection)
+        {
+            SetConfiguration();
+        }
+
+        private void SetConfiguration()
+        {
             Configuration.ProxyCreationEnabled = false;
             Configuration.LazyLoadingEnabled = false;
-
-            //Database.Log = s => System.Diagnostics.Debug.Write($"Observations DB: {s}");
         }
 
         public DbSet<SessionDB> Sessions { get; set; }

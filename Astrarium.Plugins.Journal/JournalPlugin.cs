@@ -12,13 +12,18 @@ namespace Astrarium.Plugins.Journal
 {
     public class JournalPlugin : AbstractPlugin
     {
-        public JournalPlugin()
+        private readonly IOALImporter importer;
+
+        public JournalPlugin(IOALImporter importer)
         {
+            this.importer = importer;
+
             var menuItemJournal = new MenuItem("Logbook");
 
             menuItemJournal.SubItems.Add(new MenuItem("Show Logbook", new Command(ShowJournal)));
-            menuItemJournal.SubItems.Add(new MenuItem("Import", new Command(DoImport)));
-            menuItemJournal.SubItems.Add(new MenuItem("Export...", new Command(DoExport)));
+            menuItemJournal.SubItems.Add(null);
+            menuItemJournal.SubItems.Add(new MenuItem("Import from OAL file...", new Command(DoImport)));
+            menuItemJournal.SubItems.Add(new MenuItem("Export to OAL file...", new Command(DoExport)));
 
             MenuItems.Add(MenuItemPosition.MainMenuTop, menuItemJournal);
 
@@ -49,13 +54,13 @@ namespace Astrarium.Plugins.Journal
 
                 try
                 {
-                    await Task.Run(() => Import.ImportFromOAL(file, tokenSource.Token, progress));
+                    await Task.Run(() => importer.ImportFromOAL(file, tokenSource.Token, progress));
                 }
                 catch (Exception ex)
                 {
                     tokenSource.Cancel();
                     Log.Error($"Unable to import OAL data: {ex}");
-                    //ViewManager.ShowMessageBox("$Error", $"{Text.Get("Importing.Error")}: {ex.Message}");
+                    ViewManager.ShowMessageBox("$Error", $"Import error: {ex.Message}");
                 }
 
                 if (!tokenSource.IsCancellationRequested)

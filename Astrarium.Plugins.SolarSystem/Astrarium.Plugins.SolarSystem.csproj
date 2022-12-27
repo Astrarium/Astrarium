@@ -61,9 +61,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="glfw.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+	<ContentWithTargetPath Include="Libs\glfw.dll">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  <TargetPath>glfw.dll</TargetPath>
+	</ContentWithTargetPath>
+	<None Include="Libs\glfw.dll" />
   </ItemGroup>
   
   <ItemGroup>

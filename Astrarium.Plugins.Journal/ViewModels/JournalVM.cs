@@ -3,7 +3,6 @@ using Astrarium.Plugins.Journal.Controls;
 using Astrarium.Plugins.Journal.Database;
 using Astrarium.Plugins.Journal.Types;
 using Astrarium.Types;
-using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -25,9 +24,10 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         private DateTimeComparer dateComparer = new DateTimeComparer();
 
-        private readonly ISky sky;
-        private readonly ITargetDetailsFactory targetDetailsFactory;
-        private readonly IDatabaseManager dbManager;
+        private ISky sky;
+        private IOALImporter importer;
+        private ITargetDetailsFactory targetDetailsFactory;
+        private IDatabaseManager dbManager;
         private readonly string rootPath;
         private readonly string imagesPath;
 
@@ -70,11 +70,15 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         #endregion Commands
 
-        public JournalVM(ISky sky, ITargetDetailsFactory targetDetailsFactory, IDatabaseManager dbManager)
+        public JournalVM(ISky sky, ITargetDetailsFactory targetDetailsFactory, IOALImporter importer, IDatabaseManager dbManager)
         {
             this.sky = sky;
+            this.importer = importer;
             this.targetDetailsFactory = targetDetailsFactory;
             this.dbManager = dbManager;
+
+            this.importer.OnImportBegin += Importer_OnImportBegin;
+            this.importer.OnImportEnd += Importer_OnImportCompleted;
 
             rootPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Observations");
             imagesPath = Path.Combine(rootPath, "images");
@@ -114,6 +118,51 @@ namespace Astrarium.Plugins.Journal.ViewModels
             DeleteCameraCommand = new Command<string>(DeleteCamera);
 
             Task.Run(Load);
+        }
+
+
+        public override void Dispose()
+        {
+            base.Dispose();
+
+            AllSessions = null;
+            FilteredSessions = null;
+
+            Sites = null; 
+            Optics = null;
+            Eyepieces = null;
+            Lenses = null;
+            Filters = null;
+            Cameras = null;
+
+            importer.OnImportBegin -= Importer_OnImportBegin;
+            importer.OnImportEnd -= Importer_OnImportCompleted;
+
+            sky = null;
+            importer = null;
+            targetDetailsFactory = null;
+            dbManager = null;
+
+            GC.Collect();
+        }
+
+        private void Importer_OnImportBegin()
+        {
+            IsLoading = true;
+        }
+
+        private void Importer_OnImportCompleted(bool state)
+        {
+            if (state)
+                Task.Run(Load);
+            else
+                IsLoading = false;
+        }
+
+        public bool IsLoading
+        {
+            get => GetValue<bool>(nameof(IsLoading));
+            set => SetValue(nameof(IsLoading), value);
         }
 
         public ObservableCollection<Session> AllSessions { get; private set; } = new ObservableCollection<Session>();
@@ -247,6 +296,8 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         public async void Load()
         {
+            IsLoading = true;
+
             var sessions = await dbManager.GetSessions();
             AllSessions = new ObservableCollection<Session>(sessions);
 
@@ -259,6 +310,8 @@ namespace Astrarium.Plugins.Journal.ViewModels
             Lenses = await dbManager.GetLenses();
             Filters = await dbManager.GetFilters();
             Cameras = await dbManager.GetCameras();
+
+            IsLoading = false;
 
             NotifyPropertyChanged(
                 nameof(AllSessions),

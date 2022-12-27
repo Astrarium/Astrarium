@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -83,10 +84,27 @@ namespace Astrarium.Plugins.ASCOM
             joystickThread.Start();
         }
 
+        [HandleProcessCorruptedStateExceptions]
         private void Poll()
         {
-            glfwInit();
-
+            int retryCount = 0;
+            while (true)
+            {
+                try
+                {
+                    glfwInit();
+                    break;
+                }
+                catch
+                {
+                    retryCount++;
+                    if (retryCount < 5)
+                        Thread.Sleep(1000);
+                    else
+                        break;
+                }
+            }
+            
             while (true)
             {
                 glfwPollEvents();
