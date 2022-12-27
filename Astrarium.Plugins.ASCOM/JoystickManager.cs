@@ -85,7 +85,7 @@ namespace Astrarium.Plugins.ASCOM
         }
 
         [HandleProcessCorruptedStateExceptions]
-        private void Poll()
+        private void Init()
         {
             int retryCount = 0;
             while (true)
@@ -104,6 +104,11 @@ namespace Astrarium.Plugins.ASCOM
                         break;
                 }
             }
+        }
+        
+        private void Poll()
+        {
+            Init();
             
             while (true)
             {

@@ -7,48 +7,89 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Astrarium.Plugins.Journal.Types;
 using System.Reflection;
+using Astrarium.Types;
+using System.Threading;
 
 namespace Astrarium.Plugins.Journal.OAL
 {
-    public static class Export
+    [Singleton(typeof(IOALExporter))]
+    public class Export : IOALExporter
     {
-        public static void ExportToOAL(string file)
+        public void ExportToOAL(string file, CancellationToken? token = null)
         {
-            using (var db = new DatabaseContext())
+            bool isCompleted = false;
+
+            try
             {
-                var data = new OALData();
-                data.Sites = db.Sites.ToArray().Select(x => x.ToSite()).ToArray();
-                data.Observers = db.Observers.ToArray().Select(x => x.ToObserver()).ToArray();
-                data.Optics = db.Optics.ToArray().Select(x => x.ToOptics()).ToArray();
-                data.Eyepieces = db.Eyepieces.ToArray().Select(x => x.ToEyepiece()).ToArray();
-                data.Lenses = db.Lenses.ToArray().Select(x => x.ToLens()).ToArray();
-                data.Filters = db.Filters.ToArray().Select(x => x.ToFilter()).ToArray();
-                data.Cameras = db.Cameras.ToArray().Select(x => x.ToImager()).ToArray();
-
-                ICollection<SessionDB> sessions = db.Sessions.Include(x => x.CoObservers).Include(x => x.Attachments).ToArray();
-                ICollection<TargetDB> targets = db.Targets.ToArray();
-
-                data.Sessions = sessions.Select(x => x.ToSession()).ToArray();
-                data.Observations = db.Observations.Include(x => x.Target).Include(x => x.Attachments).ToArray().Select(x => x.ToObservation(sessions)).ToArray();
-                data.Targets = targets.Select(x => x.ToTarget()).ToArray();
-
-                var serializer = new XmlSerializer(typeof(OALData));
-                using (var stream = new StreamWriter(file))
+                using (var db = new DatabaseContext())
                 {
-                    var serializerNamespaces = new XmlSerializerNamespaces();
-                    serializerNamespaces.Add("oal", "http://groups.google.com/group/openastronomylog");
-                    serializerNamespaces.Add("xsi", "http://www.w3.org/2001/XMLSchema-instance");
-                    serializer.Serialize(stream, data, serializerNamespaces);
+                    if (token.HasValue)
+                    {
+                        // here is a hack to cancel reading from DB:
+                        // run a timer that will check cancel token state
+                        // and close the DB connection if cancellation is requested.
+                        // That will cause and exception
+                        new Thread(() =>
+                        {
+                            while (!isCompleted)
+                            {
+                                if (token.Value.IsCancellationRequested)
+                                {
+                                    db.Database.Connection.Close();
+                                    break;
+                                }
+                                Thread.Sleep(10);
+                            }
+                        })
+                        { IsBackground = true }.Start();
+                    }
+
+                    var data = new OALData();
+                    data.Sites = db.Sites.ToArray().Select(x => x.ToSite()).ToArray();
+                    data.Observers = db.Observers.ToArray().Select(x => x.ToObserver()).ToArray();
+                    data.Optics = db.Optics.ToArray().Select(x => x.ToOptics()).ToArray();
+                    data.Eyepieces = db.Eyepieces.ToArray().Select(x => x.ToEyepiece()).ToArray();
+                    data.Lenses = db.Lenses.ToArray().Select(x => x.ToLens()).ToArray();
+                    data.Filters = db.Filters.ToArray().Select(x => x.ToFilter()).ToArray();
+                    data.Cameras = db.Cameras.ToArray().Select(x => x.ToImager()).ToArray();
+
+                    ICollection<SessionDB> sessions = db.Sessions.Include(x => x.CoObservers).Include(x => x.Attachments).ToArray();
+                    ICollection<TargetDB> targets = db.Targets.ToArray();
+
+                    data.Sessions = sessions.Select(x => x.ToSession()).ToArray();
+
+                    data.Observations = db.Observations.Include(x => x.Target).Include(x => x.Attachments).ToArray().Select(x => x.ToObservation(sessions)).ToArray();
+                    data.Targets = targets.Select(x => x.ToTarget()).ToArray();
+
+                    var serializer = new XmlSerializer(typeof(OALData));
+
+                    using (var stream = new StreamWriter(file))
+                    {
+                        var serializerNamespaces = new XmlSerializerNamespaces();
+                        serializerNamespaces.Add("oal", "http://groups.google.com/group/openastronomylog");
+                        serializerNamespaces.Add("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+                        serializer.Serialize(stream, data, serializerNamespaces);
+                    }
                 }
             }
+            catch
+            {
+                if (!(token.HasValue && token.Value.IsCancellationRequested))
+                    throw;
+            }
+            finally
+            {
+                isCompleted = true;
+            }
         }
+    }
 
-        private static OALSite ToSite(this SiteDB site)
+    public static class ExportExtensions
+    {
+        public static OALSite ToSite(this SiteDB site)
         {
             return new OALSite()
             {
@@ -63,7 +104,7 @@ namespace Astrarium.Plugins.Journal.OAL
             };
         }
 
-        private static OALObserver ToObserver(this ObserverDB observer)
+        public static OALObserver ToObserver(this ObserverDB observer)
         {
             return new OALObserver()
             {
@@ -79,7 +120,7 @@ namespace Astrarium.Plugins.Journal.OAL
             };
         }
 
-        private static OALOptics ToOptics(this OpticsDB optics)
+        public static OALOptics ToOptics(this OpticsDB optics)
         {
             OALOptics opt = null;
 
@@ -121,7 +162,7 @@ namespace Astrarium.Plugins.Journal.OAL
             return opt;
         }
 
-        private static OALEyepiece ToEyepiece(this EyepieceDB eyepiece)
+        public static OALEyepiece ToEyepiece(this EyepieceDB eyepiece)
         {
             return new OALEyepiece()
             {
@@ -135,7 +176,7 @@ namespace Astrarium.Plugins.Journal.OAL
             };
         }
 
-        private static OALLens ToLens(this LensDB lens)
+        public static OALLens ToLens(this LensDB lens)
         {
             return new OALLens()
             {
@@ -146,7 +187,7 @@ namespace Astrarium.Plugins.Journal.OAL
             };
         }
 
-        private static OALFilter ToFilter(this FilterDB filter)
+        public static OALFilter ToFilter(this FilterDB filter)
         {
             return new OALFilter()
             {
@@ -160,7 +201,7 @@ namespace Astrarium.Plugins.Journal.OAL
             };
         }
 
-        private static OALImager ToImager(this CameraDB camera)
+        public static OALImager ToImager(this CameraDB camera)
         {
             return new OALCamera()
             {
@@ -178,7 +219,7 @@ namespace Astrarium.Plugins.Journal.OAL
             };
         }
 
-        private static OALSession ToSession(this SessionDB session)
+        public static OALSession ToSession(this SessionDB session)
         {
             return new OALSession()
             {
@@ -194,7 +235,7 @@ namespace Astrarium.Plugins.Journal.OAL
             };
         }
 
-        private static OALObservation ToObservation(this ObservationDB observation, ICollection<SessionDB> sessions)
+        public static OALObservation ToObservation(this ObservationDB observation, ICollection<SessionDB> sessions)
         {
             var session = sessions.FirstOrDefault(x => x.Id == observation.SessionId);
 
@@ -267,7 +308,7 @@ namespace Astrarium.Plugins.Journal.OAL
             };
         }
 
-        private static OALTarget ToTarget(this TargetDB target)
+        public static OALTarget ToTarget(this TargetDB target)
         {
             // Celestial object type
             string bodyType = target.Type;
@@ -332,17 +373,17 @@ namespace Astrarium.Plugins.Journal.OAL
             return tar;
         }
 
-        private static OALAngle ToAngle(this double angle)
+        public static OALAngle ToAngle(this double angle)
         {
             return new OALAngle() { Unit = OALAngleUnit.Deg, Value = angle };
         }
 
-        private static OALNonNegativeAngle ToUnsignedAngle(this double angle)
+        public static OALNonNegativeAngle ToUnsignedAngle(this double angle)
         {
             return new OALNonNegativeAngle() { Unit = OALAngleUnit.Deg, Value = angle };
         }
 
-        private static T GetValueFromXmlEnumAttribute<T>(string value) where T : Enum
+        public static T GetValueFromXmlEnumAttribute<T>(string value) where T : Enum
         {
             if (value == null) return default(T);
 

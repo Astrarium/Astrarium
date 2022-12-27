@@ -1,5 +1,6 @@
 ﻿using Astrarium.Plugins.Journal.Database;
 using Astrarium.Plugins.Journal.OAL;
+using Astrarium.Plugins.Journal.Types;
 using Astrarium.Plugins.Journal.ViewModels;
 using Astrarium.Types;
 using System;
@@ -13,10 +14,12 @@ namespace Astrarium.Plugins.Journal
     public class JournalPlugin : AbstractPlugin
     {
         private readonly IOALImporter importer;
+        private readonly IOALExporter exporter;
 
-        public JournalPlugin(IOALImporter importer)
+        public JournalPlugin(IOALImporter importer, IOALExporter exporter)
         {
             this.importer = importer;
+            this.exporter = exporter;
 
             var menuItemJournal = new MenuItem("Logbook");
 
@@ -70,12 +73,29 @@ namespace Astrarium.Plugins.Journal
             }
         }
 
-        private void DoExport()
+        private async void DoExport()
         {
             string file = ViewManager.ShowSaveFileDialog("Export to OAL file", "Observations", ".xml", "Open Astronomy Log files (*.xml)|*.xml", out int index);
             if (file != null)
             {
-                Export.ExportToOAL(file);
+                var tokenSource = new CancellationTokenSource();
+                ViewManager.ShowProgress("Please wait", "Exporing data...", tokenSource);
+
+                try
+                {
+                    await Task.Run(() => exporter.ExportToOAL(file, tokenSource.Token));
+                }
+                catch (Exception ex)
+                {
+                    tokenSource.Cancel();
+                    Log.Error($"Unable to export to OAL: {ex}");
+                    ViewManager.ShowMessageBox("$Error", $"Export error: {ex.Message}");
+                }
+
+                if (!tokenSource.IsCancellationRequested)
+                {
+                    tokenSource.Cancel();
+                }
             }
         }
     }

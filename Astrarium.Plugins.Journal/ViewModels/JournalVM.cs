@@ -120,6 +120,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
             Task.Run(Load);
         }
 
+        private bool isDisposed = false;
 
         public override void Dispose()
         {
@@ -135,13 +136,18 @@ namespace Astrarium.Plugins.Journal.ViewModels
             Filters = null;
             Cameras = null;
 
-            importer.OnImportBegin -= Importer_OnImportBegin;
-            importer.OnImportEnd -= Importer_OnImportCompleted;
+            if (importer != null)
+            {
+                importer.OnImportBegin -= Importer_OnImportBegin;
+                importer.OnImportEnd -= Importer_OnImportCompleted;
+            }
 
             sky = null;
             importer = null;
             targetDetailsFactory = null;
             dbManager = null;
+
+            isDisposed = true;
 
             GC.Collect();
         }
@@ -296,22 +302,34 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         public async void Load()
         {
-            IsLoading = true;
+            try
+            {
+                IsLoading = true;
 
-            var sessions = await dbManager.GetSessions();
-            AllSessions = new ObservableCollection<Session>(sessions);
+                var sessions = await dbManager?.GetSessions();
+                AllSessions = new ObservableCollection<Session>(sessions);
 
-            FilteredSessions = CollectionViewSource.GetDefaultView(AllSessions);
-            FilteredSessions.Filter = x => FilterSession(x as Session);
+                FilteredSessions = CollectionViewSource.GetDefaultView(AllSessions);
+                FilteredSessions.Filter = x => FilterSession(x as Session);
 
-            Sites = await dbManager.GetSites();
-            Optics = await dbManager.GetOptics();
-            Eyepieces = await dbManager.GetEyepieces();
-            Lenses = await dbManager.GetLenses();
-            Filters = await dbManager.GetFilters();
-            Cameras = await dbManager.GetCameras();
+                Sites = await dbManager.GetSites();
+                Optics = await dbManager.GetOptics();
+                Eyepieces = await dbManager.GetEyepieces();
+                Lenses = await dbManager.GetLenses();
+                Filters = await dbManager.GetFilters();
+                Cameras = await dbManager.GetCameras();
 
-            IsLoading = false;
+                IsLoading = false;
+
+            }
+            catch
+            {
+                if (isDisposed)
+                {
+                    Dispose();
+                    return;
+                }
+            }
 
             NotifyPropertyChanged(
                 nameof(AllSessions),
@@ -322,6 +340,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
                 nameof(FilteredSessionsCount),
                 nameof(FilteredObservationsCount),
                 nameof(LoggedTime));
+
         }
 
         private async void LoadJournalItemDetails()

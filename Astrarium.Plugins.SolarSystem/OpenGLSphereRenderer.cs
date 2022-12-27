@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Astrarium.Plugins.SolarSystem
 {
@@ -242,10 +243,32 @@ namespace Astrarium.Plugins.SolarSystem
 
         public OpenGLSphereRenderer()
         {
-            glfwInit();
+            Init();
             IntPtr window = CreateWindow();
             LoadFunctionPointers();
             glfwDestroyWindow(window);
+        }
+
+        [HandleProcessCorruptedStateExceptions]
+        private void Init()
+        {
+            int retryCount = 0;
+            while (true)
+            {
+                try
+                {
+                    glfwInit();
+                    break;
+                }
+                catch
+                {
+                    retryCount++;
+                    if (retryCount < 5)
+                        Thread.Sleep(1000);
+                    else
+                        break;
+                }
+            }
         }
 
         private IntPtr CreateWindow()
