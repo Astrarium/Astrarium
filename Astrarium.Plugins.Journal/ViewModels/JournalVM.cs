@@ -446,6 +446,8 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
             string destinationPath = fullPath;
             
+            // TODO: move to Utils
+
             // copying is needed
             if (!Utils.ArePathsEqual(directory, imagesPath))
             {
@@ -454,7 +456,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
                 // new name is needed (already exists), just add a guid string
                 if (File.Exists(destinationPath))
                 {
-                    destinationPath = Path.Combine(Path.GetDirectoryName(destinationPath), $"{Path.GetFileNameWithoutExtension(destinationPath)}-{Guid.NewGuid()}{Path.GetExtension(destinationPath)}");
+                    destinationPath = Path.Combine(Path.GetDirectoryName(destinationPath), $"{Path.GetFileNameWithoutExtension(destinationPath)}_{Guid.NewGuid()}{Path.GetExtension(destinationPath)}");
                 }
 
                 // copy

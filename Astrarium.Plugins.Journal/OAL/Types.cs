@@ -680,26 +680,20 @@ namespace Astrarium.Plugins.Journal.OAL
         [XmlElement(ElementName = "filter", Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
         public string FilterId { get; set; }
 
-
         [XmlElement(ElementName = "magnification", Form = XmlSchemaForm.Unqualified)]
         public double Magnification { get; set; }
-
 
         [XmlIgnore]
         public bool MagnificationSpecified { get; set; }
 
-
         [XmlElement(ElementName = "imager", Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
         public string CameraId { get; set; }
-
 
         [XmlElement(ElementName = "result", Form = XmlSchemaForm.Unqualified)]
         public OALFindings[] Result { get; set; }
 
-
         [XmlElement(ElementName = "image", Form = XmlSchemaForm.Unqualified)]
-        public string[] Image { get; set; }
-
+        public string[] Images { get; set; }
 
         [XmlAttribute(AttributeName = "id", DataType = "ID")]
         public string Id { get; set; }

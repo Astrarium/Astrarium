@@ -12,11 +12,12 @@ using Astrarium.Plugins.Journal.Types;
 using System.Reflection;
 using Astrarium.Types;
 using System.Threading;
+using System.IO.Compression;
 
 namespace Astrarium.Plugins.Journal.OAL
 {
     [Singleton(typeof(IOALExporter))]
-    public class Export : IOALExporter
+    public class OALExporter : IOALExporter
     {
         public void ExportToOAL(string file, CancellationToken? token = null)
         {
@@ -73,6 +74,32 @@ namespace Astrarium.Plugins.Journal.OAL
                         serializerNamespaces.Add("xsi", "http://www.w3.org/2001/XMLSchema-instance");
                         serializer.Serialize(stream, data, serializerNamespaces);
                     }
+
+                    // ZIPPING
+
+                    string rootPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Observations");
+
+                    string[] attachments = data.Sessions.SelectMany(s => s.Images)
+                        .Concat(data.Observations.SelectMany(x => x.Images))
+                        .Select(x => Path.GetFullPath(Path.Combine(rootPath, x)))
+                        .Where(x => File.Exists(x))
+                        .ToArray();
+
+                    using (var fileStream = new FileStream(file + ".zip", FileMode.CreateNew))
+                    {
+                        using (var archive = new ZipArchive(fileStream, ZipArchiveMode.Create, true))
+                        {
+                            // add OAL xml file itself
+                            archive.CreateEntryFromFile(file, "Observations.xml", CompressionLevel.Optimal);
+
+                            // add image files
+                            foreach (string attachment in attachments)
+                            {
+                                string relativePath = GetRelativePath(rootPath, attachment);
+                                archive.CreateEntryFromFile(attachment, relativePath, CompressionLevel.Optimal);
+                            }
+                        }
+                    }
                 }
             }
             catch
@@ -84,6 +111,51 @@ namespace Astrarium.Plugins.Journal.OAL
             {
                 isCompleted = true;
             }
+        }
+
+        // TODO: move to Utils
+
+        public static string GetRelativePath(string fromPath, string toPath)
+        {
+            if (string.IsNullOrEmpty(fromPath))
+            {
+                throw new ArgumentNullException("fromPath");
+            }
+
+            if (string.IsNullOrEmpty(toPath))
+            {
+                throw new ArgumentNullException("toPath");
+            }
+
+            Uri fromUri = new Uri(AppendDirectorySeparatorChar(fromPath));
+            Uri toUri = new Uri(AppendDirectorySeparatorChar(toPath));
+
+            if (fromUri.Scheme != toUri.Scheme)
+            {
+                return toPath;
+            }
+
+            Uri relativeUri = fromUri.MakeRelativeUri(toUri);
+            string relativePath = Uri.UnescapeDataString(relativeUri.ToString());
+
+            if (string.Equals(toUri.Scheme, Uri.UriSchemeFile, StringComparison.OrdinalIgnoreCase))
+            {
+                relativePath = relativePath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+            }
+
+            return relativePath;
+        }
+
+        private static string AppendDirectorySeparatorChar(string path)
+        {
+            // Append a slash only if the path is a directory and does not have a slash.
+            if (!Path.HasExtension(path) &&
+                !path.EndsWith(Path.DirectorySeparatorChar.ToString()))
+            {
+                return path + Path.DirectorySeparatorChar;
+            }
+
+            return path;
         }
     }
 
@@ -243,11 +315,11 @@ namespace Astrarium.Plugins.Journal.OAL
             string bodyType = observation.Target.Type;
 
             // OALFindings class related to that celestial object type
-            Type oalFindingsType = Assembly.GetAssembly(typeof(Export))
+            Type oalFindingsType = Assembly.GetAssembly(typeof(OALExporter))
                 .GetTypes().FirstOrDefault(x => typeof(OALFindings).IsAssignableFrom(x) && x.GetCustomAttributes<CelestialObjectTypeAttribute>(inherit: false).Any(a => a.CelestialObjectType == bodyType)) ?? typeof(OALFindings);
 
             // ObservationDetails class related to that celestial object type
-            Type observationDetailsType = Assembly.GetAssembly(typeof(Export))
+            Type observationDetailsType = Assembly.GetAssembly(typeof(OALExporter))
                 .GetTypes().FirstOrDefault(x => typeof(ObservationDetails).IsAssignableFrom(x) && x.GetCustomAttributes<CelestialObjectTypeAttribute>(inherit: false).Any(a => a.CelestialObjectType == bodyType)) ?? typeof(ObservationDetails);
 
             // Create empty OALFindings
@@ -299,7 +371,7 @@ namespace Astrarium.Plugins.Journal.OAL
                 FaintestStarSpecified = session?.FaintestStar != null,
                 Magnification = observation.Magnification ?? 0,
                 MagnificationSpecified = observation.Magnification != null,
-                Image = observation.Attachments?.Select(x => x.FilePath).ToArray(),
+                Images = observation.Attachments?.Select(x => x.FilePath).ToArray(),
                 ObserverId = session?.ObserverId,
                 Seeing = session?.Seeing?.ToString(),
                 SiteId = session?.SiteId,
@@ -314,11 +386,11 @@ namespace Astrarium.Plugins.Journal.OAL
             string bodyType = target.Type;
 
             // OALTarget class related to that celestial object type
-            Type oalTargetType = Assembly.GetAssembly(typeof(Export))
+            Type oalTargetType = Assembly.GetAssembly(typeof(OALExporter))
                 .GetTypes().FirstOrDefault(x => typeof(OALTarget).IsAssignableFrom(x) && x.GetCustomAttributes<CelestialObjectTypeAttribute>().Any(a => a.CelestialObjectType == bodyType)) ?? typeof(OALTarget);
 
             // TargetDetails class related to that celestial object type
-            Type targetDetailsType = Assembly.GetAssembly(typeof(Export))
+            Type targetDetailsType = Assembly.GetAssembly(typeof(OALExporter))
                 .GetTypes().FirstOrDefault(x => typeof(TargetDetails).IsAssignableFrom(x) && x.GetCustomAttributes<CelestialObjectTypeAttribute>().Any(a => a.CelestialObjectType == bodyType)) ?? typeof(TargetDetails);
 
             // Create empty OALTarget

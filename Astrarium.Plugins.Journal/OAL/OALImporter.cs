@@ -14,6 +14,8 @@ using System.Threading;
 using System.Data.Common;
 using System.Data.SQLite;
 using Astrarium.Types;
+using System.IO;
+using System.IO.Compression;
 
 namespace Astrarium.Plugins.Journal.OAL
 {
@@ -23,133 +25,193 @@ namespace Astrarium.Plugins.Journal.OAL
         public event Action OnImportBegin;
         public event Action<bool> OnImportEnd;
 
+        private enum ImageFileConflictBehaviour
+        {
+            /// <summary>
+            /// Skip (existing file will remain)
+            /// </summary>
+            Skip = 0,
+            /// <summary>
+            /// Create a copy of importing file with another name
+            /// </summary>
+            CreateCopy = 1,
+            /// <summary>
+            /// Overwrites existing file with new one
+            /// </summary>
+            Overwrite = 2
+        }
+
+        private string[] ImportImages(string[] images, string rootSourcePath, string targetImagesDir, ImageFileConflictBehaviour imageFileConflictBehaviour)
+        {
+            for (int i = 0; i < images.Length; i++)
+            {
+                string relativeImagePath = images[i];
+                string fullImagePath = Path.GetFullPath(Path.Combine(rootSourcePath, relativeImagePath));
+                if (File.Exists(fullImagePath))
+                {
+                    string fileName = Path.GetFileName(fullImagePath);
+
+                    string destinationFullPath = Path.Combine(targetImagesDir, fileName);
+
+                    // file already exists, create another name
+                    if (File.Exists(destinationFullPath) && imageFileConflictBehaviour == ImageFileConflictBehaviour.CreateCopy)
+                    {
+                        // TODO: move to Utils
+
+                        fileName = $"{Path.GetFileNameWithoutExtension(fileName)}_{Guid.NewGuid()}{Path.GetExtension(fileName)}";
+                        destinationFullPath = Path.Combine(targetImagesDir, fileName);
+                    }
+
+                    if (!(File.Exists(destinationFullPath) && imageFileConflictBehaviour == ImageFileConflictBehaviour.Skip))
+                    {
+                        File.Copy(fullImagePath, destinationFullPath, true);
+                    }
+
+                    images[i] = Path.Combine("images", fileName);
+                }
+                else
+                {
+                    images[i] = null;
+                }
+            }
+
+            return images.Where(x => x != null).ToArray();
+        }
+
+
         public void ImportFromOAL(string file, CancellationToken? token = null, IProgress<double> progress = null)
         {
-            using (XmlReader reader = new OALXmlReader(file))
+            // this is required if importing ZIP archive
+            string tempDirectory = null;
+
+            try
             {
-                long current = 0;
-                long count = 0;
-
-                var data = (OALData)new XmlSerializer(typeof(OALData)).Deserialize(reader);
-
-                var connectionFactory = new DatabaseConnectionFactory();
-
-                using (DbConnection conn = connectionFactory.CreateConnection())
+                if (Path.GetExtension(file).ToLower() == ".zip")
                 {
-                    conn.Open();
-                    var trans = conn.BeginTransaction();
+                    string oalFile = ZipFile.OpenRead(file)
+                        // order by nesting to pick a highest-level XML
+                        .Entries.OrderBy(x => x.FullName.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries).Length)
+                        // take first XML one, expected this is an OAL file
+                        .FirstOrDefault(x => x.FullName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase)).FullName;
 
-                    OnImportBegin?.Invoke();
-
-                    try
+                    if (string.IsNullOrEmpty(oalFile))
                     {
-                        using (var db = new DatabaseContext(conn, contextOwnsConnection: false))
-                        {
-                            db.Configuration.AutoDetectChangesEnabled = false;
+                        throw new Exception("The ZIP archive does not contain XML with OAL data.");
+                    }
 
-                            foreach (var site in data.Sites)
-                            {
-                                SiteDB siteDB = site.ToSite();
-                                db.Sites.Add(siteDB);
-                                token.GetValueOrDefault().ThrowIfCancellationRequested();
-                            }
+                    // create temp directory for extracting ZIP archive
+                    tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
 
-                            foreach (var observer in data.Observers)
-                            {
-                                ObserverDB observerDB = observer.ToObserver();
-                                db.Observers.Add(observerDB);
-                                token.GetValueOrDefault().ThrowIfCancellationRequested();
-                            }
+                    // extract ZIP
+                    ZipFile.ExtractToDirectory(file, tempDirectory);
 
-                            foreach (var optics in data.Optics)
-                            {
-                                OpticsDB opticsDB = optics.ToOptics();
-                                db.Optics.Add(opticsDB);
-                                token.GetValueOrDefault().ThrowIfCancellationRequested();
-                            }
+                    // now this points to extracted XML file
+                    file = Path.Combine(tempDirectory, oalFile);
+                }
 
-                            foreach (var eyepiece in data.Eyepieces)
-                            {
-                                EyepieceDB eyepieceDB = eyepiece.ToEyepiece();
-                                db.Eyepieces.Add(eyepieceDB);
-                                token.GetValueOrDefault().ThrowIfCancellationRequested();
-                            }
+                using (XmlReader reader = new OALXmlReader(file))
+                {
+                    long current = 0;
+                    long count = 0;
 
-                            foreach (var lens in data.Lenses)
-                            {
-                                LensDB lensDB = lens.ToLens();
-                                db.Lenses.Add(lensDB);
-                                token.GetValueOrDefault().ThrowIfCancellationRequested();
-                            }
+                    // parse OAL data
+                    var data = (OALData)new XmlSerializer(typeof(OALData)).Deserialize(reader);
 
-                            foreach (var filter in data.Filters)
-                            {
-                                FilterDB filterDB = filter.ToFilter();
-                                db.Filters.Add(filterDB);
-                                token.GetValueOrDefault().ThrowIfCancellationRequested();
-                            }
+                    // root folder containing OAL file
+                    string rootSourcePath = Path.GetDirectoryName(file);
 
-                            foreach (var imager in data.Cameras)
-                            {
-                                CameraDB cameraDB = imager.ToCamera();
-                                db.Cameras.Add(cameraDB);
-                                token.GetValueOrDefault().ThrowIfCancellationRequested();
-                            }
+                    // target folder for images
+                    string targetImagesDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Observations", "images");
+                    
+                    // make sure images directory exists
+                    Directory.CreateDirectory(targetImagesDir);
 
-                            db.SaveChanges();
-                        }
+                    foreach (var observation in data.Observations)
+                    {
+                        if (observation.Images == null) continue;
+                        observation.Images = ImportImages(observation.Images, rootSourcePath, targetImagesDir, ImageFileConflictBehaviour.Overwrite);
+                    }
 
-                        foreach (var session in data.Sessions)
+                    foreach (var session in data.Sessions)
+                    {
+                        if (session.Images == null) continue;
+                        session.Images = ImportImages(session.Images, rootSourcePath, targetImagesDir, ImageFileConflictBehaviour.Overwrite);
+                    }
+
+                    var connectionFactory = new DatabaseConnectionFactory();
+
+                    using (DbConnection conn = connectionFactory.CreateConnection())
+                    {
+                        conn.Open();
+                        var trans = conn.BeginTransaction();
+
+                        OnImportBegin?.Invoke();
+
+                        try
                         {
                             using (var db = new DatabaseContext(conn, contextOwnsConnection: false))
                             {
                                 db.Configuration.AutoDetectChangesEnabled = false;
 
-                                SessionDB sessionDB = session.ToSession(data);
-                                db.Sessions.Add(sessionDB);
-
-                                // do not add co-observers repeatedly
-                                foreach (var coObserver in sessionDB.CoObservers)
+                                foreach (var site in data.Sites)
                                 {
-                                    db.Entry(coObserver).State = EntityState.Unchanged;
+                                    SiteDB siteDB = site.ToSite();
+                                    db.Sites.Add(siteDB);
+                                    token.GetValueOrDefault().ThrowIfCancellationRequested();
                                 }
 
-                                token.GetValueOrDefault().ThrowIfCancellationRequested();
+                                foreach (var observer in data.Observers)
+                                {
+                                    ObserverDB observerDB = observer.ToObserver();
+                                    db.Observers.Add(observerDB);
+                                    token.GetValueOrDefault().ThrowIfCancellationRequested();
+                                }
+
+                                foreach (var optics in data.Optics)
+                                {
+                                    OpticsDB opticsDB = optics.ToOptics();
+                                    db.Optics.Add(opticsDB);
+                                    token.GetValueOrDefault().ThrowIfCancellationRequested();
+                                }
+
+                                foreach (var eyepiece in data.Eyepieces)
+                                {
+                                    EyepieceDB eyepieceDB = eyepiece.ToEyepiece();
+                                    db.Eyepieces.Add(eyepieceDB);
+                                    token.GetValueOrDefault().ThrowIfCancellationRequested();
+                                }
+
+                                foreach (var lens in data.Lenses)
+                                {
+                                    LensDB lensDB = lens.ToLens();
+                                    db.Lenses.Add(lensDB);
+                                    token.GetValueOrDefault().ThrowIfCancellationRequested();
+                                }
+
+                                foreach (var filter in data.Filters)
+                                {
+                                    FilterDB filterDB = filter.ToFilter();
+                                    db.Filters.Add(filterDB);
+                                    token.GetValueOrDefault().ThrowIfCancellationRequested();
+                                }
+
+                                foreach (var imager in data.Cameras)
+                                {
+                                    CameraDB cameraDB = imager.ToCamera();
+                                    db.Cameras.Add(cameraDB);
+                                    token.GetValueOrDefault().ThrowIfCancellationRequested();
+                                }
 
                                 db.SaveChanges();
                             }
-                        }
 
-                        current = 0;
-                        count = data.Observations.Count();
-
-                        using (var db = new DatabaseContext(conn, contextOwnsConnection: false))
-                        {
-                            db.Configuration.AutoDetectChangesEnabled = false;
-
-                            foreach (var obs in data.Observations)
+                            foreach (var session in data.Sessions)
                             {
-                                ObservationDB obsDB = obs.ToObservation(data);
-
-                                if (obsDB == null) continue;
-
-                                // get observation without sessions that have place at the same time
-                                var sameSessionObs = data.Observations.Where(x =>
-                                    string.IsNullOrEmpty(x.SessionId) &&
-                                    x.ObserverId == obs.ObserverId &&
-                                    x.SiteId == obs.SiteId &&
-                                    x.Begin.Equals(obs.Begin)).ToList(); // TODO: what if "Begin" differs not more, for example, than 3 hours?
-
-                                ++current;
-                                progress?.Report(current / (double)count * 100);
-
-                                // attach session to observations
-                                // because Astrarium OAL implementation of observation requires session
-                                if (sameSessionObs.Any())
+                                using (var db = new DatabaseContext(conn, contextOwnsConnection: false))
                                 {
-                                    SessionDB sessionDB = obs.ToSession();
-                                    obsDB.SessionId = sessionDB.Id;
-                                    sameSessionObs.ForEach(x => x.SessionId = sessionDB.Id);
+                                    db.Configuration.AutoDetectChangesEnabled = false;
+
+                                    SessionDB sessionDB = session.ToSession(data);
                                     db.Sessions.Add(sessionDB);
 
                                     // do not add co-observers repeatedly
@@ -157,59 +219,112 @@ namespace Astrarium.Plugins.Journal.OAL
                                     {
                                         db.Entry(coObserver).State = EntityState.Unchanged;
                                     }
-                                }
 
-                                // create target copy for each observation
-                                db.Targets.Add(obsDB.Target);
-                                db.Observations.Add(obsDB);
+                                    token.GetValueOrDefault().ThrowIfCancellationRequested();
 
-                                // save changes each 1000 records
-                                if (current % 1000 == 0)
-                                {
                                     db.SaveChanges();
                                 }
-
-                                token.GetValueOrDefault().ThrowIfCancellationRequested();
                             }
-                            db.SaveChanges();
-                        }
 
-                        trans.Commit();
+                            current = 0;
+                            count = data.Observations.Count();
 
-                        OnImportEnd?.Invoke(true);
-                    }
-                    catch (Exception ex)
-                    {
-                        try
-                        {
-                            trans.Rollback();
-                        }
-                        catch { }
-
-                        OnImportEnd?.Invoke(false);
-
-                        if (ex is OperationCanceledException)
-                            return;
-
-                        Exception ie = ex;
-                        while (ie != null)
-                        {
-                            if (ie is SQLiteException sqlEx)
+                            using (var db = new DatabaseContext(conn, contextOwnsConnection: false))
                             {
-                                break;
-                            }
-                            ie = ie.InnerException;
-                        }
+                                db.Configuration.AutoDetectChangesEnabled = false;
 
-                        if (ie != null)
-                            throw ie;
-                        else
-                            throw ex;
+                                foreach (var obs in data.Observations)
+                                {
+                                    ObservationDB obsDB = obs.ToObservation(data);
+
+                                    if (obsDB == null) continue;
+
+                                    // get observation without sessions that have place at the same time
+                                    var sameSessionObs = data.Observations.Where(x =>
+                                        string.IsNullOrEmpty(x.SessionId) &&
+                                        x.ObserverId == obs.ObserverId &&
+                                        x.SiteId == obs.SiteId &&
+                                        x.Begin.Equals(obs.Begin)).ToList(); // TODO: what if "Begin" differs not more, for example, than 3 hours?
+
+                                    ++current;
+                                    progress?.Report(current / (double)count * 100);
+
+                                    // attach session to observations
+                                    // because Astrarium OAL implementation of observation requires session
+                                    if (sameSessionObs.Any())
+                                    {
+                                        SessionDB sessionDB = obs.ToSession();
+                                        obsDB.SessionId = sessionDB.Id;
+                                        sameSessionObs.ForEach(x => x.SessionId = sessionDB.Id);
+                                        db.Sessions.Add(sessionDB);
+
+                                        // do not add co-observers repeatedly
+                                        foreach (var coObserver in sessionDB.CoObservers)
+                                        {
+                                            db.Entry(coObserver).State = EntityState.Unchanged;
+                                        }
+                                    }
+
+                                    // create target copy for each observation
+                                    db.Targets.Add(obsDB.Target);
+                                    db.Observations.Add(obsDB);
+
+                                    // save changes each 1000 records
+                                    if (current % 1000 == 0)
+                                    {
+                                        db.SaveChanges();
+                                    }
+
+                                    token.GetValueOrDefault().ThrowIfCancellationRequested();
+                                }
+                                db.SaveChanges();
+                            }
+
+                            trans.Commit();
+
+                            OnImportEnd?.Invoke(true);
+                        }
+                        catch (Exception ex)
+                        {
+                            try
+                            {
+                                trans.Rollback();
+                            }
+                            catch { }
+
+                            OnImportEnd?.Invoke(false);
+
+                            if (ex is OperationCanceledException)
+                                return;
+
+                            Exception ie = ex;
+                            while (ie != null)
+                            {
+                                if (ie is SQLiteException sqlEx)
+                                {
+                                    break;
+                                }
+                                ie = ie.InnerException;
+                            }
+
+                            if (ie != null)
+                                throw ie;
+                            else
+                                throw ex;
+                        }
+                        finally
+                        {
+                            trans?.Dispose();
+                        }
                     }
-                    finally
-                    {
-                        trans?.Dispose();
-                    }
+                }
+            }
+            finally
+            {
+                // delete temp directory, if required
+                if (!string.IsNullOrEmpty(tempDirectory))
+                {
+                    Directory.Delete(tempDirectory, true);
                 }
             }
         }
@@ -505,7 +620,7 @@ namespace Astrarium.Plugins.Journal.OAL
                 LensId = !string.IsNullOrEmpty(observation.LensId) ? observation.LensId : null,
                 FilterId = !string.IsNullOrEmpty(observation.FilterId) ? observation.FilterId : null,
                 CameraId = !string.IsNullOrEmpty(observation.CameraId) ? observation.CameraId : null,
-                Attachments = observation.Image.ToAttachments()
+                Attachments = observation.Images.ToAttachments()
             };
 
             obs.Target.Id = Guid.NewGuid().ToString();
