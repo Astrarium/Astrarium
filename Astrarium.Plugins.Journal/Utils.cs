@@ -60,6 +60,11 @@ namespace Astrarium.Plugins.Journal
             return relativePath;
         }
 
+        public static string GenerateNewFileName(string oldFilePath)
+        {
+            return Path.Combine(Path.GetDirectoryName(oldFilePath), $"{Path.GetFileNameWithoutExtension(oldFilePath)}_{Guid.NewGuid()}{Path.GetExtension(oldFilePath)}");
+        }
+
         private static string AppendDirectorySeparatorChar(string path)
         {
             // Append a slash only if the path is a directory and does not have a slash.

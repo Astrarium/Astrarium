@@ -31,5 +31,15 @@ namespace Astrarium.Plugins.Journal.Views
             await Task.Delay(100);
             calendar.DisplayDate = calendar.SelectedDate.Value;
         }
+
+        private void TreeViewItem_Selected(object sender, RoutedEventArgs e)
+        {
+            TreeViewItem item = sender as TreeViewItem;
+            if (item != null)
+            {
+                item.BringIntoView();
+                e.Handled = true;
+            }
+        }
     }
 }

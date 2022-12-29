@@ -64,12 +64,19 @@ namespace Astrarium.Plugins.Journal.Controls
             if (path == null || !File.Exists(path))
                 return null;
 
-            var bmp = new BitmapImage();
-            bmp.BeginInit();
-            bmp.CacheOption = BitmapCacheOption.OnLoad;
-            bmp.UriSource = new Uri(path, UriKind.RelativeOrAbsolute);
-            bmp.EndInit();
-            return bmp;
+            try
+            {
+                var bmp = new BitmapImage();
+                bmp.BeginInit();
+                bmp.CacheOption = BitmapCacheOption.OnLoad;
+                bmp.UriSource = new Uri(path, UriKind.RelativeOrAbsolute);
+                bmp.EndInit();
+                return bmp;
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

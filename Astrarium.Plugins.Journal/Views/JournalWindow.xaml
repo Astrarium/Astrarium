@@ -159,16 +159,22 @@
                 CalendarDayButtonStyle="{StaticResource JournalCalendarDayButtonStyle}" />
 
                 <c:BindableTreeView
-                Background="{StaticResource BrushWindowBackground}"
-                BorderBrush="{StaticResource BrushWindowBackground}"
-                SelectedTreeViewItem="{Binding SelectedTreeViewItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                ItemsSource="{Binding FilteredSessions}"
-                ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                VirtualizingPanel.VirtualizationMode="Recycling"
-                VirtualizingPanel.IsVirtualizing="True"
-                VirtualizingPanel.IsContainerVirtualizable="True"
-                Margin="4"
-                Grid.Row="2">
+                    x:Name="treeView"
+                    Background="{StaticResource BrushWindowBackground}"
+                    BorderBrush="{StaticResource BrushWindowBackground}"
+                    SelectedTreeViewItem="{Binding SelectedTreeViewItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                    ItemsSource="{Binding FilteredSessions}"
+                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                    VirtualizingPanel.VirtualizationMode="Recycling"
+                    VirtualizingPanel.IsVirtualizing="True"
+                    VirtualizingPanel.IsContainerVirtualizable="True"
+                    Margin="4"
+                    Grid.Row="2">
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}">
+                            <EventSetter Event="Selected" Handler="TreeViewItem_Selected" />
+                        </Style>
+                    </TreeView.ItemContainerStyle>
                 </c:BindableTreeView>
             </Grid>
 

@@ -56,10 +56,7 @@ namespace Astrarium.Plugins.Journal.OAL
                     // file already exists, create another name
                     if (File.Exists(destinationFullPath) && imageFileConflictBehaviour == ImageFileConflictBehaviour.CreateCopy)
                     {
-                        // TODO: move to Utils
-
-                        fileName = $"{Path.GetFileNameWithoutExtension(fileName)}_{Guid.NewGuid()}{Path.GetExtension(fileName)}";
-                        destinationFullPath = Path.Combine(targetImagesDir, fileName);
+                        destinationFullPath = Utils.GenerateNewFileName(destinationFullPath);
                     }
 
                     if (!(File.Exists(destinationFullPath) && imageFileConflictBehaviour == ImageFileConflictBehaviour.Skip))
@@ -129,13 +126,13 @@ namespace Astrarium.Plugins.Journal.OAL
                     foreach (var observation in data.Observations)
                     {
                         if (observation.Images == null) continue;
-                        observation.Images = ImportImages(observation.Images, rootSourcePath, targetImagesDir, ImageFileConflictBehaviour.Overwrite);
+                        observation.Images = ImportImages(observation.Images, rootSourcePath, targetImagesDir, ImageFileConflictBehaviour.CreateCopy);
                     }
 
                     foreach (var session in data.Sessions)
                     {
                         if (session.Images == null) continue;
-                        session.Images = ImportImages(session.Images, rootSourcePath, targetImagesDir, ImageFileConflictBehaviour.Overwrite);
+                        session.Images = ImportImages(session.Images, rootSourcePath, targetImagesDir, ImageFileConflictBehaviour.CreateCopy);
                     }
 
                     var connectionFactory = new DatabaseConnectionFactory();

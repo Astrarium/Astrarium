@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.Data.Entity;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
@@ -276,13 +277,36 @@ namespace Astrarium.Plugins.Journal.ViewModels
                 else
                 {
                     string filterString = FilterString.ToLowerInvariant().Trim();
+                    bool fullMatch = false;
+
+                    // TODO: more complicated parsing cases
+
+                    // word in quotes, for example, "IC 27" should search by exact match
+                    var match = Regex.Match(filterString, "\"(.+)\"");
+                    if (match.Success)
+                    {
+                        filterString = match.Groups[1].Value.Trim();
+                        fullMatch = true;
+                    }
+
                     obs.IsEnabled = false;
 
-                    if (obs.ObjectName.ToLowerInvariant().Contains(filterString))
-                        obs.IsEnabled = true;
+                    if (fullMatch)
+                    {
+                        if (obs.ObjectName.ToLowerInvariant().Equals(filterString))
+                            obs.IsEnabled = true;
 
-                    if (obs.ObjectNameAliases != null && obs.ObjectNameAliases.Split(',').Any(x => x.Trim().ToLowerInvariant().Contains(filterString)))
-                        obs.IsEnabled = true;
+                        if (obs.ObjectNameAliases != null && obs.ObjectNameAliases.Split(',').Any(x => x.Trim().ToLowerInvariant().Equals(filterString)))
+                            obs.IsEnabled = true;
+                    }
+                    else
+                    {
+                        if (obs.ObjectName.ToLowerInvariant().Contains(filterString))
+                            obs.IsEnabled = true;
+
+                        if (obs.ObjectNameAliases != null && obs.ObjectNameAliases.Split(',').Any(x => x.Trim().ToLowerInvariant().Contains(filterString)))
+                            obs.IsEnabled = true;
+                    }
 
                     if (obs.ObjectType.Split('.').Any(x => x.Trim().ToLowerInvariant().Equals(filterString)))
                         obs.IsEnabled = true;
@@ -293,7 +317,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
                     if ($"{obs.Begin.Month:00}.{obs.Begin.Year}".Equals(filterString))
                         obs.IsEnabled = true;
 
-                    if ($"{obs.Begin.Year}".Equals(filterString))
+                    if ($"{obs.Begin.Day:00}.{obs.Begin.Month:00}.{obs.Begin.Year}".Equals(filterString))
                         obs.IsEnabled = true;
                 }
             }
@@ -456,7 +480,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
                 // new name is needed (already exists), just add a guid string
                 if (File.Exists(destinationPath))
                 {
-                    destinationPath = Path.Combine(Path.GetDirectoryName(destinationPath), $"{Path.GetFileNameWithoutExtension(destinationPath)}_{Guid.NewGuid()}{Path.GetExtension(destinationPath)}");
+                    destinationPath = Utils.GenerateNewFileName(destinationPath);
                 }
 
                 // copy
