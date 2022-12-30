@@ -72,11 +72,12 @@
         <Style x:Key="JournalCalendarDayButtonStyle" BasedOn="{StaticResource CalendarDayButtonStyle}" TargetType="CalendarDayButton">
             
             <Style.Setters>
+                <EventSetter Event="MouseRightButtonDown" Handler="CalendarDayButton_MouseRightButtonDown" />
                 <Setter Property="Focusable" Value="False" />
                 <Setter Property="ContextMenu">
                     <Setter.Value>
                         <ContextMenu>
-                            <MenuItem Header="test" Command=""/>
+                            <MenuItem Header="Create session..." />
                         </ContextMenu>
                     </Setter.Value>
                 </Setter>

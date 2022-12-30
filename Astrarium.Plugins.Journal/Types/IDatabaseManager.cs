@@ -34,6 +34,7 @@ namespace Astrarium.Plugins.Journal.Types
         Task<CelestialObject> GetTarget(string id);
         Task LoadObservation(Observation observation);
         Task LoadSession(Session session);
+        Task<ICollection<string>> GetObservationFiles(string observationId);
         Task<ICollection<string>> GetSessionFiles(string sessionId);
         Task SaveAttachment(Attachment attachment);
         Task SaveCamera(Camera camera);

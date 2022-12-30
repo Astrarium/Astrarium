@@ -41,5 +41,17 @@ namespace Astrarium.Plugins.Journal.Views
                 e.Handled = true;
             }
         }
+
+        private void CalendarDayButton_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var button = sender as CalendarDayButton;
+            calendar.SelectedDate = (DateTime)button.DataContext;
+        }
+
+        private void ContextMenu_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            var menu = sender as ContextMenu;
+            menu.DataContext = DataContext;
+        }
     }
 }

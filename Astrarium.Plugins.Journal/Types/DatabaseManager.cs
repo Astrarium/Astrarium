@@ -104,17 +104,23 @@ namespace Astrarium.Plugins.Journal.Types
         {
             return Task.Run(() =>
             {
-                using (var db = new DatabaseContext())
+                using (var ctx = new DatabaseContext())
                 {
-                    var session = db.Sessions
-                        .Include(s => s.Attachments)
-                        .Include(s => s.Observations.Select(obs => obs.Attachments))
-                        .Where(s => s.Id == sessionId)
-                        .FirstOrDefault();
+                    var files = new List<string>();
+                    files.AddRange(ctx.Database.SqlQuery<string>($"SELECT \"FilePath\" FROM \"Attachments\" WHERE \"Id\" IN (SELECT \"AttachmentId\" FROM \"ObservationAttachments\" WHERE \"ObservationId\" IN (SELECT \"Id\" FROM \"Observations\" WHERE \"SessionId\" = @p0))", sessionId));
+                    files.AddRange(ctx.Database.SqlQuery<string>($"SELECT \"FilePath\" FROM \"Attachments\" WHERE \"Id\" IN (SELECT \"AttachmentId\" FROM \"SessionAttachments\" WHERE \"SessionId\" = @p0)", sessionId));
+                    return (ICollection<string>)files;
+                }
+            });
+        }
 
-                    var attachments = session.Attachments.Concat(session.Observations.SelectMany(obs => obs.Attachments));
-
-                    return (ICollection<string>)attachments.Select(x => x.FilePath).ToArray();
+        public Task<ICollection<string>> GetObservationFiles(string observationId)
+        {
+            return Task.Run(() =>
+            {
+                using (var ctx = new DatabaseContext())
+                {
+                    return (ICollection<string>)ctx.Database.SqlQuery<string>($"SELECT \"FilePath\" FROM \"Attachments\" WHERE \"Id\" IN (SELECT \"AttachmentId\" FROM \"ObservationAttachments\" WHERE \"ObservationId\" = @p0)", observationId).ToArray();
                 }
             });
         }
@@ -284,16 +290,27 @@ namespace Astrarium.Plugins.Journal.Types
             {
                 using (var ctx = new DatabaseContext())
                 {
-                    var observation = ctx.Observations.FirstOrDefault(x => x.Id == id);
-                    if (observation != null)
+                    DbContextTransaction trans = null;
+
+                    try
                     {
-                        var target = ctx.Targets.FirstOrDefault(x => x.Id == observation.TargetId);
-                        if (target != null)
-                        {
-                            ctx.Targets.Remove(target);
-                        }
-                        ctx.Observations.Remove(observation);
-                        ctx.SaveChanges();
+                        trans = ctx.Database.BeginTransaction();
+
+                        // targets related to the observation
+                        ctx.Database.ExecuteSqlCommand($"DELETE FROM \"Targets\" WHERE \"Id\" IN (SELECT \"TargetId\" FROM \"Observations\" WHERE \"Id\" = @p0)", id);
+
+                        // attachments related to the observation
+                        ctx.Database.ExecuteSqlCommand($"DELETE FROM \"Attachments\" WHERE \"Id\" IN (SELECT \"AttachmentId\" FROM \"ObservationAttachments\" WHERE \"ObservationId\" = @p0)", id);
+                        ctx.Database.ExecuteSqlCommand($"DELETE FROM \"ObservationAttachments\" WHERE \"ObservationId\" = @p0", id);
+
+                        // session itself
+                        ctx.Database.ExecuteSqlCommand("DELETE FROM \"Observations\" WHERE \"Id\" = @p0", id);
+
+                        trans.Commit();
+                    }
+                    catch
+                    {
+                        trans?.Rollback();
                     }
                 }
             });

@@ -407,17 +407,34 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         private async void DeleteObservation(Observation observation)
         {
-            if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete the observation?", MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)
+            if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete the observation?\r\nThis action can not be undone.\r\nAll related data, including attached files, will be deleted.", MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)
             {
-                observation.Session.Observations.Remove(observation);
+                var files = await dbManager.GetObservationFiles(observation.Id);
+
+                // delete from DB
                 await dbManager.DeleteObservation(observation.Id);
 
-                // TODO: delete related attachment files
+                // delete attachments files
+                foreach (var file in files)
+                {
+                    string fullPath = Path.GetFullPath(Path.Combine(JournalPlugin.PluginDataPath, file));
+                    if (File.Exists(fullPath))
+                    {
+                        Utils.SafeFileDelete(fullPath);
+                    }
+                }
+
+                observation.Session.Observations.Remove(observation);
+
+                FilteredSessions.Refresh();
+
+                SelectedTreeViewItem = observation.Session;
             }
         }
 
         private void CreateSession()
         {
+            var date = CalendarDate;
             // TODO: not implemented
         }
 
@@ -428,7 +445,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         private async void DeleteSession(Session session)
         {
-            if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete the session?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete the session?\r\nThis action can not be undone.\r\nAll related observations, including attached files, will be deleted.", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
                 var files = await dbManager.GetSessionFiles(session.Id);
 
