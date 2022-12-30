@@ -65,43 +65,43 @@ namespace Astrarium.Plugins.Journal.OAL
                     data.Sessions = sessions.Select(x => x.ToSession()).ToArray();
                     data.Observations = db.Observations.Include(x => x.Target).Include(x => x.Attachments).ToArray().Select(x => x.ToObservation(sessions)).ToArray();
                     data.Targets = targets.Select(x => x.ToTarget()).ToArray();
-                }
 
-                // CREATING XML
+                    // CREATING XML
 
-                var serializer = new XmlSerializer(typeof(OALData));
-                using (var stream = new StreamWriter(oalFile))
-                {
-                    var serializerNamespaces = new XmlSerializerNamespaces();
-                    serializerNamespaces.Add("oal", "http://groups.google.com/group/openastronomylog");
-                    serializerNamespaces.Add("xsi", "http://www.w3.org/2001/XMLSchema-instance");
-                    serializer.Serialize(stream, data, serializerNamespaces);
-                }
-
-                // ZIPPING
-
-                if (isZipArchive)
-                {
-                    string rootPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Observations");
-
-                    string[] attachments = data.Sessions.SelectMany(s => s.Images)
-                        .Concat(data.Observations.SelectMany(x => x.Images))
-                        .Select(x => Path.GetFullPath(Path.Combine(rootPath, x)))
-                        .Where(x => File.Exists(x))
-                        .ToArray();
-
-                    using (var fileStream = new FileStream(file, FileMode.Create))
+                    var serializer = new XmlSerializer(typeof(OALData));
+                    using (var stream = new StreamWriter(oalFile))
                     {
-                        using (var archive = new ZipArchive(fileStream, ZipArchiveMode.Create, true))
-                        {
-                            // add OAL xml file itself
-                            archive.CreateEntryFromFile(oalFile, "Observations.xml", CompressionLevel.Optimal);
+                        var serializerNamespaces = new XmlSerializerNamespaces();
+                        serializerNamespaces.Add("oal", "http://groups.google.com/group/openastronomylog");
+                        serializerNamespaces.Add("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+                        serializer.Serialize(stream, data, serializerNamespaces);
+                    }
 
-                            // add image files
-                            foreach (string attachment in attachments)
+                    // ZIPPING
+
+                    if (isZipArchive)
+                    {
+                        string rootPath = JournalPlugin.PluginDataPath;
+
+                        string[] attachments = data.Sessions.SelectMany(s => s.Images)
+                            .Concat(data.Observations.SelectMany(x => x.Images))
+                            .Select(x => Path.GetFullPath(Path.Combine(rootPath, x)))
+                            .Where(x => File.Exists(x))
+                            .ToArray();
+
+                        using (var fileStream = new FileStream(file, FileMode.Create))
+                        {
+                            using (var archive = new ZipArchive(fileStream, ZipArchiveMode.Create, true))
                             {
-                                string relativePath = Utils.GetRelativePath(rootPath, attachment);
-                                archive.CreateEntryFromFile(attachment, relativePath, CompressionLevel.Optimal);
+                                // add OAL xml file itself
+                                archive.CreateEntryFromFile(oalFile, "Observations.xml", CompressionLevel.Optimal);
+
+                                // add image files
+                                foreach (string attachment in attachments)
+                                {
+                                    string relativePath = Utils.GetRelativePath(rootPath, attachment);
+                                    archive.CreateEntryFromFile(attachment, relativePath, CompressionLevel.Optimal);
+                                }
                             }
                         }
                     }
@@ -116,11 +116,7 @@ namespace Astrarium.Plugins.Journal.OAL
             {
                 if (isZipArchive && File.Exists(oalFile))
                 {
-                    try
-                    {
-                        File.Delete(oalFile);
-                    }
-                    catch { }
+                    Utils.SafeFileDelete(oalFile);
                 }
 
                 isCompleted = true;

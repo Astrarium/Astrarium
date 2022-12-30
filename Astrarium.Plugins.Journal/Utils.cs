@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Astrarium.Types;
+using System;
 using System.Collections.Generic;
 using System.Drawing.Imaging;
 using System.IO;
@@ -10,6 +11,12 @@ namespace Astrarium.Plugins.Journal
 {
     public static class Utils
     {
+        /// <summary>
+        /// Checks two paths are equal
+        /// </summary>
+        /// <param name="path1">Path 1</param>
+        /// <param name="path2">Path 2</param>
+        /// <returns>True if paths are equal (point to the same file)</returns>
         public static bool ArePathsEqual(string path1, string path2)
         {
             path1 = path1.Replace('\\', Path.PathSeparator).Replace('/', Path.PathSeparator);
@@ -60,6 +67,11 @@ namespace Astrarium.Plugins.Journal
             return relativePath;
         }
 
+        /// <summary>
+        /// Generates new file name by full file path
+        /// </summary>
+        /// <param name="oldFilePath"></param>
+        /// <returns></returns>
         public static string GenerateNewFileName(string oldFilePath)
         {
             return Path.Combine(Path.GetDirectoryName(oldFilePath), $"{Path.GetFileNameWithoutExtension(oldFilePath)}_{Guid.NewGuid()}{Path.GetExtension(oldFilePath)}");
@@ -89,6 +101,48 @@ namespace Astrarium.Plugins.Journal
                 sb.Append($"|{c.FormatDescription} files ({c.FilenameExtension})|{c.FilenameExtension}");
             }
             return sb.ToString();
+        }
+
+        public static bool SafeFileCopy(string sourceFileName, string destFileName)
+        {
+            try
+            {
+                File.Copy(sourceFileName, destFileName, overwrite: true);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Unable to copy file: `{sourceFileName}` to `{destFileName}`: {ex}");
+                return false;
+            }
+        }
+
+        public static bool SafeDirectoryDelete(string path)
+        {
+            try
+            {
+                Directory.Delete(path, recursive: true);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Unable to delete directory: `{path}`: {ex}");
+                return false;
+            }
+        }
+
+        public static bool SafeFileDelete(string path)
+        {
+            try
+            {
+                File.Delete(path);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Unable to delete file: `{path}`: {ex}");
+                return false;
+            }
         }
     }
 }

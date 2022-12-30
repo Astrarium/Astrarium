@@ -1,5 +1,4 @@
 ﻿using Astrarium.Plugins.Journal.Database;
-using Astrarium.Plugins.Journal.OAL;
 using Astrarium.Plugins.Journal.Types;
 using Astrarium.Plugins.Journal.ViewModels;
 using Astrarium.Types;
@@ -13,6 +12,21 @@ namespace Astrarium.Plugins.Journal
 {
     public class JournalPlugin : AbstractPlugin
     {
+        /// <summary>
+        /// Path to data directory used by this plugin
+        /// </summary>
+        public static string PluginDataPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Observations");
+
+        /// <summary>
+        /// Path to database file, located in data directory
+        /// </summary>
+        public static string DatabaseFilePath => Path.Combine(PluginDataPath, "Observations.db");
+
+        /// <summary>
+        /// Path to folder "images" inside data directory
+        /// </summary>
+        public static string ImagesDirectoryPath => Path.Combine(PluginDataPath, "images");
+
         private readonly IOALImporter importer;
         private readonly IOALExporter exporter;
 
@@ -47,7 +61,7 @@ namespace Astrarium.Plugins.Journal
 
         private async void DoImport()
         {
-            string file = ViewManager.ShowOpenFileDialog("Import from OAL file", "Open Astronomy Log files (*.xml)|*.xml|All files|*.*", multiSelect: false, out int filterIndex)?.FirstOrDefault();
+            string file = ViewManager.ShowOpenFileDialog("Import from OAL file", "Open Astronomy Log files (*.xml)|*.xml|Zipped Open Astronomy Log archives (*.zip)|*.zip|All files|*.*", multiSelect: false, out int filterIndex)?.FirstOrDefault();
            
             if (file != null)
             {
@@ -75,7 +89,7 @@ namespace Astrarium.Plugins.Journal
 
         private async void DoExport()
         {
-            string file = ViewManager.ShowSaveFileDialog("Export to OAL file", "Observations", ".xml", "Open Astronomy Log files (*.xml)|*.xml", out int index);
+            string file = ViewManager.ShowSaveFileDialog("Export to OAL file", "Observations", ".xml", "Open Astronomy Log files (*.xml)|*.xml|Zipped Open Astronomy Log archives (*.zip)|*.zip|All files|*.*", out int index);
             if (file != null)
             {
                 var tokenSource = new CancellationTokenSource();

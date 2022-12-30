@@ -17,7 +17,7 @@ namespace Astrarium.Plugins.Journal.Types
     [Singleton(typeof(IDatabaseManager))]
     public class DatabaseManager : IDatabaseManager
     {
-        private readonly string rootPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Observations");
+        private readonly string rootPath = JournalPlugin.PluginDataPath;
 
         public DatabaseManager()
         {
@@ -100,6 +100,25 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
+        public Task<ICollection<string>> GetSessionFiles(string sessionId)
+        {
+            return Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    var session = db.Sessions
+                        .Include(s => s.Attachments)
+                        .Include(s => s.Observations.Select(obs => obs.Attachments))
+                        .Where(s => s.Id == sessionId)
+                        .FirstOrDefault();
+
+                    var attachments = session.Attachments.Concat(session.Observations.SelectMany(obs => obs.Attachments));
+
+                    return (ICollection<string>)attachments.Select(x => x.FilePath).ToArray();
+                }
+            });
+        }
+
         public Task LoadObservation(Observation observation)
         {
             return Task.Run(() =>
@@ -146,8 +165,11 @@ namespace Astrarium.Plugins.Journal.Types
                 using (var db = new DatabaseContext())
                 {
                     var entity = db.Set(entityType).Find(key);
-                    db.Entry(entity).Property(column).CurrentValue = value;
-                    db.SaveChanges();
+                    if (entity != null)
+                    {
+                        db.Entry(entity).Property(column).CurrentValue = value;
+                        db.SaveChanges();
+                    }
                 }
             });
         }
@@ -273,6 +295,45 @@ namespace Astrarium.Plugins.Journal.Types
                         ctx.Observations.Remove(observation);
                         ctx.SaveChanges();
                     }
+                }
+            });
+        }
+
+        public Task DeleteSession(string id)
+        {
+            return Task.Run(() =>
+            {
+                using (var ctx = new DatabaseContext())
+                {
+                    DbContextTransaction trans = null;
+
+                    try
+                    {
+                        trans = ctx.Database.BeginTransaction();
+
+                        // targets related to the session's observations
+                        ctx.Database.ExecuteSqlCommand($"DELETE FROM \"Targets\" WHERE \"Id\" IN (SELECT \"TargetId\" FROM \"Observations\" WHERE \"SessionId\" = @p0)", id);
+
+                        // attachments related to the session's observations
+                        ctx.Database.ExecuteSqlCommand($"DELETE FROM \"Attachments\" WHERE \"Id\" IN (SELECT \"AttachmentId\" FROM \"ObservationAttachments\" WHERE \"ObservationId\" IN (SELECT \"Id\" FROM \"Observations\" WHERE \"SessionId\" = @p0))", id);
+                        ctx.Database.ExecuteSqlCommand($"DELETE FROM \"ObservationAttachments\" WHERE \"ObservationId\" IN (SELECT \"Id\" FROM \"Observations\" WHERE \"SessionId\" = @p0)", id);
+
+                        // attachments related to the session
+                        ctx.Database.ExecuteSqlCommand($"DELETE FROM \"Attachments\" WHERE \"Id\" IN (SELECT \"AttachmentId\" FROM \"SessionAttachments\" WHERE \"SessionId\" = @p0)", id);
+                        ctx.Database.ExecuteSqlCommand($"DELETE FROM \"SessionAttachments\" WHERE \"SessionId\" = @p0", id);
+
+                        // observations related to the session
+                        ctx.Database.ExecuteSqlCommand("DELETE FROM \"Observations\" WHERE \"SessionId\" = @p0", id);
+
+                        // session itself
+                        ctx.Database.ExecuteSqlCommand("DELETE FROM \"Sessions\" WHERE \"Id\" = @p0", id);
+
+                        trans.Commit();
+                    }
+                    catch
+                    {
+                        trans?.Rollback();
+                    }                    
                 }
             });
         }

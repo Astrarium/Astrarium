@@ -58,10 +58,11 @@ namespace Astrarium.Types
 
         public static void SetLocale(CultureInfo culture)
         {
+            CultureInfo.DefaultThreadCurrentCulture = culture;
+            CultureInfo.DefaultThreadCurrentUICulture = culture;
+
             if (!culture.Equals(currentCulture))
-            {
-                CultureInfo.DefaultThreadCurrentCulture = culture;
-                CultureInfo.DefaultThreadCurrentUICulture = culture;
+            {                
                 LoadLocalizationStrings();
                 currentCulture = culture;
                 LocaleChanged?.Invoke();

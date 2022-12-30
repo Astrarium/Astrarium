@@ -14,7 +14,7 @@ namespace Astrarium.Plugins.Journal.Database
     {
         public DbConnection CreateConnection()
         {
-            string databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Observations", "Observations.db");
+            string databasePath = JournalPlugin.DatabaseFilePath;
             string databaseFolder = Path.GetDirectoryName(databasePath);
             if (!Directory.Exists(databaseFolder))
             {

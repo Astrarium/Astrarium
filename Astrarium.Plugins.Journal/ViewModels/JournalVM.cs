@@ -12,10 +12,12 @@ using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace Astrarium.Plugins.Journal.ViewModels
 {
@@ -36,10 +38,12 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         #region Commands
 
-        public ICommand CreateObservationCommand { get; set; }
-        public ICommand EditObservationCommand { get; set; }
-        public ICommand DeleteObservationCommand { get; set; }
-
+        public ICommand CreateSessionCommand { get; private set; }
+        public ICommand EditSessionCommand { get; private set; }
+        public ICommand DeleteSessionCommand { get; private set; }
+        public ICommand CreateObservationCommand { get; private set; }
+        public ICommand EditObservationCommand { get; private set; }
+        public ICommand DeleteObservationCommand { get; private set; }
         public ICommand ExpandCollapseCommand { get; private set; }
         public ICommand OpenImageCommand { get; private set; }
         public ICommand OpenAttachmentInSystemViewerCommand { get; private set; }
@@ -81,10 +85,14 @@ namespace Astrarium.Plugins.Journal.ViewModels
             this.importer.OnImportBegin += Importer_OnImportBegin;
             this.importer.OnImportEnd += Importer_OnImportCompleted;
 
-            rootPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Observations");
-            imagesPath = Path.Combine(rootPath, "images");
+            rootPath = JournalPlugin.PluginDataPath;
+            imagesPath = JournalPlugin.ImagesDirectoryPath;
 
             ExpandCollapseCommand = new Command(ExpandCollapse);
+
+            CreateSessionCommand = new Command(CreateSession);
+            EditSessionCommand = new Command<Session>(EditSession);
+            DeleteSessionCommand = new Command<Session>(DeleteSession);
 
             CreateObservationCommand = new Command<Session>(CreateObservation);
             EditObservationCommand = new Command<Observation>(EditObservation);
@@ -127,7 +135,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
         {
             base.Dispose();
 
-            AllSessions = null;
+            sessions = null;
             FilteredSessions = null;
 
             Sites = null; 
@@ -172,17 +180,17 @@ namespace Astrarium.Plugins.Journal.ViewModels
             set => SetValue(nameof(IsLoading), value);
         }
 
-        public ObservableCollection<Session> AllSessions { get; private set; } = new ObservableCollection<Session>();
+        private ICollection<Session> sessions { get; set; } = new List<Session>();
 
-        public int SessionsCount => AllSessions.Count;
-        public int ObservationsCount => AllSessions.SelectMany(x => x.Observations).Count();
+        public int SessionsCount => sessions.Count;
+        public int ObservationsCount => sessions.SelectMany(x => x.Observations).Count();
 
-        public int FilteredSessionsCount => AllSessions.Where(x => x.IsEnabled).Count();
-        public int FilteredObservationsCount => AllSessions.SelectMany(x => x.Observations).Where(x => x.IsEnabled).Count();
+        public int FilteredSessionsCount => sessions.Where(x => x.IsEnabled).Count();
+        public int FilteredObservationsCount => sessions.SelectMany(x => x.Observations).Where(x => x.IsEnabled).Count();
 
-        public string LoggedTime => AllSessions.Sum(x => (x.End - x.Begin).TotalMinutes).ToString();
+        public string LoggedTime => sessions.Sum(x => (x.End - x.Begin).TotalMinutes).ToString();
 
-        public ICollection<DateTime> SessionDates => AllSessions.Where(x => x.IsEnabled).Select(x => x.SessionDate).Distinct(dateComparer).ToArray();
+        public ICollection<DateTime> SessionDates => sessions.Where(x => x.IsEnabled).Select(x => x.SessionDate).Distinct(dateComparer).ToArray();
 
         /// <summary>
         /// Binds to date selected in the calendar view
@@ -197,7 +205,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
                     SetValue(nameof(CalendarDate), value);
                     if (SessionDates.Contains(value, dateComparer))
                     {
-                        SelectedTreeViewItem = AllSessions.FirstOrDefault(x => dateComparer.Equals(x.Begin, value));
+                        SelectedTreeViewItem = sessions.FirstOrDefault(x => dateComparer.Equals(x.Begin, value));
                     }
                 }
             }
@@ -252,7 +260,6 @@ namespace Astrarium.Plugins.Journal.ViewModels
                     FilteredSessions.Refresh();
                     
                     NotifyPropertyChanged(
-                        nameof(AllSessions),
                         nameof(FilteredSessions),
                         nameof(SessionDates),
                         nameof(SessionsCount),
@@ -330,10 +337,9 @@ namespace Astrarium.Plugins.Journal.ViewModels
             {
                 IsLoading = true;
 
-                var sessions = await dbManager?.GetSessions();
-                AllSessions = new ObservableCollection<Session>(sessions);
+                sessions = await dbManager?.GetSessions();
 
-                FilteredSessions = CollectionViewSource.GetDefaultView(AllSessions);
+                FilteredSessions = CollectionViewSource.GetDefaultView(sessions);
                 FilteredSessions.Filter = x => FilterSession(x as Session);
 
                 Sites = await dbManager.GetSites();
@@ -356,7 +362,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
             }
 
             NotifyPropertyChanged(
-                nameof(AllSessions),
+                nameof(sessions),
                 nameof(FilteredSessions),
                 nameof(SessionDates),
                 nameof(SessionsCount),
@@ -383,16 +389,16 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         private void ExpandCollapse()
         {
-            if (AllSessions.Any(x => !x.IsExpanded))
+            if (sessions.Any(x => !x.IsExpanded))
             {
-                foreach (var s in AllSessions)
+                foreach (var s in sessions)
                 {
                     s.IsExpanded = true;
                 }
             }
             else
             {
-                foreach (var s in AllSessions)
+                foreach (var s in sessions)
                 {
                     s.IsExpanded = false;
                 }
@@ -401,10 +407,48 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         private async void DeleteObservation(Observation observation)
         {
-            if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete the observation?", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)
+            if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete the observation?", MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)
             {
                 observation.Session.Observations.Remove(observation);
                 await dbManager.DeleteObservation(observation.Id);
+
+                // TODO: delete related attachment files
+            }
+        }
+
+        private void CreateSession()
+        {
+            // TODO: not implemented
+        }
+
+        private void EditSession(Session session)
+        {
+            // TODO: not implemented
+        }
+
+        private async void DeleteSession(Session session)
+        {
+            if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete the session?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                var files = await dbManager.GetSessionFiles(session.Id);
+
+                // delete from DB
+                await dbManager.DeleteSession(session.Id);
+
+                // delete attachments files
+                foreach (var file in files)
+                {
+                    string fullPath = Path.GetFullPath(Path.Combine(JournalPlugin.PluginDataPath, file));
+                    if (File.Exists(fullPath))
+                    {
+                        Utils.SafeFileDelete(fullPath);
+                    }
+                }
+
+                sessions.Remove(session);
+                FilteredSessions.Refresh();
+
+                SelectedTreeViewItem = null;
             }
         }
 
@@ -553,6 +597,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
         {
             if (ViewManager.ShowMessageBox("Warning", "Do you really want to delete the attachment? This action can not be undone.", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)
             {
+                // TODO: move to DB manager
                 using (var db = new DatabaseContext())
                 {
                     var existing = db.Attachments.FirstOrDefault(x => x.Id == attachment.Id);
@@ -564,18 +609,8 @@ namespace Astrarium.Plugins.Journal.ViewModels
                         var filePaths = db.Attachments.Select(x => x.FilePath).ToArray();
                         if (!filePaths.Any(x => Utils.ArePathsEqual(existing.FilePath, x)))
                         {
-                            try
-                            {
-                                File.Delete(attachment.FilePath);
-                            }
-                            catch (Exception ex)
-                            {
-
-                            }
-                        }
-                        else
-                        {
-                            // file is used
+                            // file is not used by another attachment
+                            Utils.SafeFileDelete(attachment.FilePath);
                         }
                     }
 

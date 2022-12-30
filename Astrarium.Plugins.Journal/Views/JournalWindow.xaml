@@ -24,10 +24,10 @@
             <Grid Background="#01000000" Tag="{Binding DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Window}}}">
                 <Grid.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Add observation..." Command="{Binding PlacementTarget.Tag.CreateObservationCommand,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
+                        <MenuItem Header="Add observation..." Command="{Binding PlacementTarget.Tag.CreateObservationCommand, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
                         <Separator />
-                        <MenuItem Header="Edit..." />
-                        <MenuItem Header="Delete" />
+                        <MenuItem Header="Edit session..."  />
+                        <MenuItem Header="Delete session" Command="{Binding PlacementTarget.Tag.DeleteSessionCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
                     </ContextMenu>
                 </Grid.ContextMenu>
                 <Grid.ColumnDefinitions>
@@ -148,15 +148,15 @@
                 </Grid>
 
                 <Calendar 
-                x:Name="calendar"
-                Grid.Row="0"
-                SelectedDate="{Binding CalendarDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                SelectedDatesChanged="calendar_SelectedDatesChanged"
-                SelectionMode="SingleDate"
-                Margin="4"
-                HorizontalAlignment="Stretch"
-                IsTodayHighlighted="False"
-                CalendarDayButtonStyle="{StaticResource JournalCalendarDayButtonStyle}" />
+                    x:Name="calendar"
+                    Grid.Row="0"
+                    SelectedDate="{Binding CalendarDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    SelectedDatesChanged="calendar_SelectedDatesChanged"
+                    SelectionMode="SingleDate"
+                    Margin="4"
+                    HorizontalAlignment="Stretch"
+                    IsTodayHighlighted="False"
+                    CalendarDayButtonStyle="{StaticResource JournalCalendarDayButtonStyle}" />
 
                 <c:BindableTreeView
                     x:Name="treeView"
@@ -178,7 +178,7 @@
                 </c:BindableTreeView>
             </Grid>
 
-            <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Center" VerticalAlignment="Stretch" />
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch" />
 
             <ContentControl Grid.Column="2" Content="{Binding SelectedTreeViewItem}">
                 <ContentControl.Resources>

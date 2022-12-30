@@ -14,6 +14,9 @@ namespace Astrarium.Plugins.Journal.Types
         Task DeleteFilter(string id);
         Task DeleteLens(string id);
         Task DeleteObservation(string id);
+
+        Task DeleteSession(string id);
+
         Task DeleteOptics(string id);
         Task EditObservation(Observation observation, CelestialObject body, DateTime begin, DateTime end);
         Task<Camera> GetCamera(string id);
@@ -31,6 +34,7 @@ namespace Astrarium.Plugins.Journal.Types
         Task<CelestialObject> GetTarget(string id);
         Task LoadObservation(Observation observation);
         Task LoadSession(Session session);
+        Task<ICollection<string>> GetSessionFiles(string sessionId);
         Task SaveAttachment(Attachment attachment);
         Task SaveCamera(Camera camera);
         void SaveDatabaseEntityProperty(object value, Type entityType, string column, object key);

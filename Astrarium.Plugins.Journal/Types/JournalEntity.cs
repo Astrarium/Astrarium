@@ -47,7 +47,7 @@ namespace Astrarium.Plugins.Journal.Types
             set => SetValue(nameof(IsEnabled), value);
         }
 
-        public string DateString => Begin.ToString("dd MMM yyyy");
+        public string DateString => Formatters.Date.Format(Begin);
 
         public string TimeString => $"{Begin:HH:mm}-{End:HH:mm}";
     }

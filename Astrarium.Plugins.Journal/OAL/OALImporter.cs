@@ -61,7 +61,7 @@ namespace Astrarium.Plugins.Journal.OAL
 
                     if (!(File.Exists(destinationFullPath) && imageFileConflictBehaviour == ImageFileConflictBehaviour.Skip))
                     {
-                        File.Copy(fullImagePath, destinationFullPath, true);
+                        Utils.SafeFileCopy(fullImagePath, destinationFullPath);
                     }
 
                     images[i] = Path.Combine("images", fileName);
@@ -118,7 +118,7 @@ namespace Astrarium.Plugins.Journal.OAL
                     string rootSourcePath = Path.GetDirectoryName(file);
 
                     // target folder for images
-                    string targetImagesDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "Observations", "images");
+                    string targetImagesDir = JournalPlugin.ImagesDirectoryPath;
                     
                     // make sure images directory exists
                     Directory.CreateDirectory(targetImagesDir);
@@ -321,7 +321,7 @@ namespace Astrarium.Plugins.Journal.OAL
                 // delete temp directory, if required
                 if (!string.IsNullOrEmpty(tempDirectory))
                 {
-                    Directory.Delete(tempDirectory, true);
+                    Utils.SafeDirectoryDelete(tempDirectory);
                 }
             }
         }
@@ -790,7 +790,6 @@ namespace Astrarium.Plugins.Journal.OAL
             }
 
             TargetDB result = new TargetDB();
-
 
             // TODO: convert to equinox of date
             details.RA = target.Position?.RA.ToAngle();
