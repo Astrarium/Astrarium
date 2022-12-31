@@ -52,8 +52,8 @@
 
                 <StackPanel.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Edit..." Command="{Binding PlacementTarget.Tag.EditObservationCommand,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
-                        <MenuItem Header="Delete" Command="{Binding PlacementTarget.Tag.DeleteObservationCommand,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
+                        <MenuItem Header="Edit observation..." Command="{Binding PlacementTarget.Tag.EditObservationCommand,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
+                        <MenuItem Header="Delete observation" Command="{Binding PlacementTarget.Tag.DeleteObservationCommand,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
                     </ContextMenu>
                 </StackPanel.ContextMenu>
 
@@ -69,6 +69,23 @@
             </StackPanel>
         </HierarchicalDataTemplate>
 
+        <Style x:Key="MenuItemHeader" TargetType="{x:Type MenuItem}">
+            <Setter Property="IsEnabled" Value="False" />
+            <Setter Property="BorderBrush" Value="{StaticResource BrushControlBackground}" />
+            <Setter Property="Foreground" Value="{StaticResource BrushControlLightBackground}" />
+            <Setter Property="Background" Value="{StaticResource BrushControlDarkBackground}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type MenuItem}">
+                        <StackPanel Orientation="Vertical" Height="Auto">
+                            <tc:BorderFix Height="2" Margin="-1" Background="{TemplateBinding BorderBrush}" />
+                            <TextBlock FontSize="12" Padding="30 4 12 4" Text="{TemplateBinding Header}" Foreground="{TemplateBinding Foreground}" Background="{TemplateBinding Background}" />
+                        </StackPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="JournalCalendarDayButtonStyle" BasedOn="{StaticResource CalendarDayButtonStyle}" TargetType="CalendarDayButton">
             
             <Style.Setters>
@@ -76,8 +93,9 @@
                 <Setter Property="Focusable" Value="False" />
                 <Setter Property="ContextMenu">
                     <Setter.Value>
-                        <ContextMenu>
-                            <MenuItem Header="Create session..." />
+                        <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
+                            <MenuItem Style="{StaticResource MenuItemHeader}" Header="{Binding Parent.DataContext.CalendarDate, Converter={s:DateToStringConverter}}" IsEnabled="False" />
+                            <MenuItem Header="Create session..." Command="{Binding Parent.DataContext.CreateSessionCommand}"  />
                         </ContextMenu>
                     </Setter.Value>
                 </Setter>
@@ -157,6 +175,7 @@
                     Margin="4"
                     HorizontalAlignment="Stretch"
                     IsTodayHighlighted="False"
+                    Tag="{Binding}"
                     CalendarDayButtonStyle="{StaticResource JournalCalendarDayButtonStyle}" />
 
                 <c:BindableTreeView

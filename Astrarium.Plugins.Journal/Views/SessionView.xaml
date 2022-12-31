@@ -33,8 +33,8 @@
             <TextBlock Padding="8" FontSize="18" Text="{Binding TimeString}" VerticalAlignment="Center" />
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Margin="2" Content="Del" />
-                <Button Margin="2" Content="Edit" />
+                <Button Margin="2" Content="Del" Command="{Binding Path=DataContext.DeleteSessionCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}, Mode=FindAncestor}}" CommandParameter="{Binding}" />
+                <Button Margin="2" Content="Edit" Command="{Binding Path=DataContext.EditSessionCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}, Mode=FindAncestor}}" CommandParameter="{Binding}" />
                 <Button Margin="2" Content="Add" Command="{Binding Path=DataContext.CreateObservationCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}, Mode=FindAncestor}}" CommandParameter="{Binding}" />
             </StackPanel>
 

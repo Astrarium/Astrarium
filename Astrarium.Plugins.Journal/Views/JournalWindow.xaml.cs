@@ -52,6 +52,7 @@ namespace Astrarium.Plugins.Journal.Views
         {
             var menu = sender as ContextMenu;
             menu.DataContext = DataContext;
+            menu.Placement = PlacementMode.Mouse;
         }
     }
 }
