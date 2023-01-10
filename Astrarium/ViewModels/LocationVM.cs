@@ -884,7 +884,7 @@ namespace Astrarium.ViewModels
             locationsManager.TimeZonesLoaded -= OnTimeZonesLoaded;
             locationsManager.Unload();
             base.Dispose();
-            GC.Collect();
+            Task.Run(() => GC.Collect());
         }
 
         /// <summary>

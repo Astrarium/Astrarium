@@ -8,6 +8,53 @@
                     xmlns:t="clr-namespace:Astrarium.Types;assembly=Astrarium.Types"
                     mc:Ignorable="d">
 
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/Astrarium.Plugins.Journal;component/Themes/Images.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <Style x:Key="ImageStyle" TargetType="Image">
+        <Style.Setters>
+            <Setter Property="Width" Value="16" />
+            <Setter Property="Height" Value="16" />
+        </Style.Setters>
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.25"></Setter>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ToolbarButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Style.Setters>
+            <Setter Property="Margin" Value="2" />
+            <Setter Property="Height" Value="24" />
+            <Setter Property="Width" Value="24" />
+        </Style.Setters>
+    </Style>
+
+    <Style x:Key="HoverButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Style.Setters>
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Margin" Value="2" />
+            <Setter Property="Height" Value="24" />
+            <Setter Property="Width" Value="24" />
+        </Style.Setters>
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Opacity" Value="0.15" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ToolbarToggleButtonStyle" TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+        <Style.Setters>
+            <Setter Property="Margin" Value="1 2" />
+            <Setter Property="Height" Value="26.5" />
+            <Setter Property="Width" Value="26.5" />
+        </Style.Setters>
+    </Style>
+    
     <Style TargetType="{x:Type q:MultilineEdit}">
         <Setter Property="Template">
             <Setter.Value>
@@ -21,10 +68,25 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
                         <Label FontWeight="Bold" Grid.Row="0" Content="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Title}" />
 
+                        <Button 
+                            Focusable="False"
+                            Name="PART_CancelButton"
+                            Background="{StaticResource BrushControlDarkBackground}"
+                            BorderBrush="{StaticResource BrushControlLightBackground}"
+                            BorderThickness="1"
+                            Visibility="{TemplateBinding IsEditMode, Converter={s:BoolToVisibilityConverter}}"
+                            Grid.Row="0" Grid.Column="1" Margin="1 0 0 1" Padding="8 0" Width="Auto" Height="24" VerticalAlignment="Bottom" >
+                            <StackPanel Orientation="Horizontal">
+                                <Image IsEnabled="False" Height="10" Width="10" Margin="4 0 8 0" Style="{StaticResource ImageStyle}" Source="{StaticResource IconCancel}" />
+                                <TextBlock FontSize="10">CANCEL</TextBlock>
+                            </StackPanel>
+                        </Button>
+                        
                         <Button 
                             Focusable="False"
                             Name="PART_ApplyButton"
@@ -32,15 +94,18 @@
                             BorderBrush="{StaticResource BrushControlLightBackground}"
                             BorderThickness="1"
                             Visibility="{TemplateBinding IsEditMode, Converter={s:BoolToVisibilityConverter}}"
-                            Grid.Row="0" Grid.Column="1" Margin="1" Padding="8 0" Width="Auto" Height="24" HorizontalAlignment="Right" VerticalAlignment="Bottom" >
-                            <Run FontSize="10">SAVE</Run>
+                            Grid.Row="0" Grid.Column="2" Margin="1 0 0 1" Padding="8 0" Width="Auto" Height="24" VerticalAlignment="Bottom" >
+                            <StackPanel Orientation="Horizontal">
+                                <Image IsEnabled="False" Height="10" Width="10" Margin="4 0 8 0" Style="{StaticResource ImageStyle}" Source="{StaticResource IconCheckmark}" />
+                                <TextBlock FontSize="10">SAVE</TextBlock>
+                            </StackPanel>
                         </Button>
 
                         <TextBox                             
                             Name="PART_Editor" 
                             Padding="2"
                             Grid.Row="1" 
-                            Grid.ColumnSpan="2"
+                            Grid.ColumnSpan="3"
                             BorderThickness="1"
                             ScrollViewer.VerticalScrollBarVisibility="Visible"
                             ScrollViewer.HorizontalScrollBarVisibility="Auto"
@@ -96,49 +161,6 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-    </Style>
-
-    <Style x:Key="ImageStyle" TargetType="Image">
-        <Style.Setters>
-            <Setter Property="Width" Value="16" />
-            <Setter Property="Height" Value="16" />
-        </Style.Setters>
-        <Style.Triggers>
-            <Trigger Property="IsEnabled" Value="False">
-                <Setter Property="Opacity" Value="0.25"></Setter>
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-
-    <Style x:Key="ToolbarButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-        <Style.Setters>
-            <Setter Property="Margin" Value="2" />
-            <Setter Property="Height" Value="24" />
-            <Setter Property="Width" Value="24" />
-        </Style.Setters>
-    </Style>
-
-    <Style x:Key="HoverButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-        <Style.Setters>
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Margin" Value="2" />
-            <Setter Property="Height" Value="24" />
-            <Setter Property="Width" Value="24" />
-        </Style.Setters>
-        <Style.Triggers>
-            <Trigger Property="IsEnabled" Value="False">
-                <Setter Property="Background" Value="Transparent" />
-                <Setter Property="Opacity" Value="0.15" />
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-
-    <Style x:Key="ToolbarToggleButtonStyle" TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
-        <Style.Setters>
-            <Setter Property="Margin" Value="1 2" />
-            <Setter Property="Height" Value="26.5" />
-            <Setter Property="Width" Value="26.5" />
-        </Style.Setters>
     </Style>
 
     <DataTemplate x:Key="ComboBoxWithNullDataTemplate">

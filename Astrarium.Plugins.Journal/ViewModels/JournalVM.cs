@@ -74,6 +74,8 @@ namespace Astrarium.Plugins.Journal.ViewModels
         public ICommand CreateCameraCommand { get; private set; }
         public ICommand DeleteCameraCommand { get; private set; }
 
+        public ICommand EditSiteCommand { get; private set; }
+
         #endregion Commands
 
         public JournalVM(ISky sky, ITargetDetailsFactory targetDetailsFactory, IOALImporter importer, IDatabaseManager dbManager)
@@ -126,6 +128,8 @@ namespace Astrarium.Plugins.Journal.ViewModels
             EditCameraCommand = new Command<string>(EditCamera);
             CreateCameraCommand = new Command(CreateCamera);
             DeleteCameraCommand = new Command<string>(DeleteCamera);
+
+            EditSiteCommand = new Command<string>(EditSite);
 
             Task.Run(Load);
         }
@@ -806,6 +810,39 @@ namespace Astrarium.Plugins.Journal.ViewModels
                 LoadJournalItemDetails();
                 (SelectedTreeViewItem as Observation).CameraId = null;
             }
+        }
+
+        private async void EditSite(string id)
+        {
+            var site = await dbManager.GetSite(id);
+            var location = new CrdsGeographical()
+            {
+                Elevation = site.Elevation,
+                Latitude = site.Latitude,
+                Longitude = -site.Longitude,
+                LocationName = site.Name,
+                UtcOffset = site.Timezone,
+                TimeZoneId = ""
+            };
+
+
+            var model = ViewManager.ShowLocationDialog(location);
+            if (model != null)
+            {
+                site.Elevation = location.Elevation;
+                site.Latitude = location.Latitude;
+                site.Longitude = location.Longitude;
+                site.Name = location.LocationName;
+                site.Timezone = location.UtcOffset;
+
+                //await dbManager.sa(id)
+            };
+
+            //if (ViewManager.ShowDialog(model) ?? false)
+            //{
+            //    Cameras = await dbManager.GetCameras();
+            //    (SelectedTreeViewItem as Observation).CameraId = model.Camera.Id;
+            //}
         }
 
         private TargetDetails CreateTargetDetails(double jd, CelestialObject body)

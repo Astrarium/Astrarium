@@ -9,10 +9,12 @@ namespace Astrarium.Plugins.Journal.Controls
 {
     [TemplatePart(Name = PartEditor, Type = typeof(TextBox))]
     [TemplatePart(Name = PartApplyButton, Type = typeof(Button))]
+    [TemplatePart(Name = PartCancelButton, Type = typeof(Button))]
     [TemplatePart(Name = PartPlaceholder, Type = typeof(TextBlock))]
     public class MultilineEdit : Control
     {
         public const string PartEditor = "PART_Editor";
+        public const string PartCancelButton = "PART_CancelButton";
         public const string PartApplyButton = "PART_ApplyButton";
         public const string PartPlaceholder = "PART_Placeholder";
 
@@ -81,6 +83,7 @@ namespace Astrarium.Plugins.Journal.Controls
         public static readonly DependencyProperty IsEditModeProperty = DependencyProperty.Register(nameof(IsEditMode), typeof(bool), typeof(MultilineEdit), new FrameworkPropertyMetadata(false) { BindsTwoWayByDefault = false, AffectsRender = true, PropertyChangedCallback = IsEditModeChanged });
 
         private TextBox _editor;
+        private Button _cancelButton;
         private Button _applyButton;
         private TextBlock _placeholder;
 
@@ -98,11 +101,11 @@ namespace Astrarium.Plugins.Journal.Controls
             _placeholder = Template.FindName(PartPlaceholder, this) as TextBlock;
             _placeholder.MouseDown += _placeholder_MouseDown;
 
+            _cancelButton = Template.FindName(PartCancelButton, this) as Button;
+            _cancelButton.Click += _cancelButton_Click;
+
             _applyButton = Template.FindName(PartApplyButton, this) as Button;
             _applyButton.Click += _applyButton_Click;
-
-            
-
         }
 
         private static void IsEditModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -125,6 +128,11 @@ namespace Astrarium.Plugins.Journal.Controls
         private void _applyButton_Click(object sender, RoutedEventArgs e)
         {
             SetReadMode(true);
+        }
+
+        private void _cancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            SetReadMode(false);
         }
 
         private void _editor_PreviewKeyDown(object sender, KeyEventArgs e)

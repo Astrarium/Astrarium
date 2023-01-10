@@ -14,8 +14,8 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/Astrarium.Plugins.Journal;component/Themes/Styles.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/Astrarium.Plugins.Journal;component/Themes/Images.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Astrarium.Plugins.Journal;component/Themes/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -59,12 +59,8 @@
             </TabItem>
 
             <TabItem Header="Weather &amp; Location">
-                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
+                
+                <Grid Grid.IsSharedSizeScope="True" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -73,30 +69,73 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <TextBlock Margin="6" Text="Place of observation:" Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" />
-                    <ComboBox Grid.Column="1" Grid.Row="0"  ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.Sites}" SelectedValue="{Binding SiteId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}" />
-                    <Button Style="{StaticResource HoverButtonStyle}" Grid.Column="3" HorizontalAlignment="Left" Margin="4 0" Width="24" Height="24" Grid.Row="0" ToolTip="Edit observation places..." Command="{Binding Path=DataContext.EditSitesCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}, Mode=FindAncestor}}">
-                        <Image Style="{StaticResource ImageStyle}" Width="12" Height="12" Source="{StaticResource IconSettings}" />
-                    </Button>
+                    <Grid Background="#00000001" Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="Title" />
+                            <ColumnDefinition Width="300" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
 
-                    <TextBlock Margin="6" Text="Seeing by Antoniadi scale:" Grid.Column="0" Grid.Row="1" VerticalAlignment="Center" />
-                    <ComboBox SelectedValuePath="Tag" SelectedValue="{Binding Seeing}" Width="300" IsEditable="False" Grid.Column="1" Grid.Row="1">
-                        <ComboBoxItem Tag="{x:Null}">
-                            <TextBlock IsEnabled="False" Text="Not set" />
-                        </ComboBoxItem>
-                        <ComboBoxItem Content="(1) Perfect seeing, the perfect image without shaking" Tag="1"/>
-                        <ComboBoxItem Content="(2) Good seeing, slight shaking of the objects" Tag="2"/>
-                        <ComboBoxItem Content="(3) Moderate seeing the image is still not absolutely sharp" Tag="3"/>
-                        <ComboBoxItem Content="(4) Poor seeing, undulation of the image" Tag="4"/>
-                        <ComboBoxItem Content="(5) Very poor seeing, the flashing image" Tag="5"/>
-                    </ComboBox>
+                        <TextBlock Margin="6" Text="Place of observation:" Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" />
+                        <ComboBox Grid.Column="1" Grid.Row="0"  ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.Sites}" SelectedValue="{Binding SiteId, Mode=TwoWay}" SelectedValuePath="Id" IsEditable="False" ItemTemplate="{StaticResource ComboBoxWithNullDataTemplate}" />
 
-                    <CheckBox Margin="4" Content="Magnitude of faintest star" Grid.Column="0" Grid.Row="2" VerticalAlignment="Center" IsChecked="{Binding FaintestStarSpecified}" />
-                    <cc:NumericUpDown Width="70" HorizontalAlignment="Left" DecimalPlaces="1" Step="0.1" Minimum="-4" Maximum="8" Value="{Binding FaintestStar}" Grid.Column="1" Grid.Row="2" Visibility="{Binding FaintestStarSpecified, Converter={s:BoolToVisibilityConverter}}" />
+                        <StackPanel Orientation="Horizontal" Grid.Column="2" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=IsMouseOver, Converter={s:BoolToVisibilityConverter}}">
+                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding SiteId, Converter={s:NotNullToBoolConverter}}" Command="{Binding Path=DataContext.EditSiteCommand, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}" CommandParameter="{Binding SiteId}">
+                                <Image Width="12" Height="12" Source="{StaticResource IconEdit}"  />
+                            </Button>
+                            <Button Style="{StaticResource HoverButtonStyle}" IsEnabled="{Binding SiteId, Converter={s:NotNullToBoolConverter}}" Command="{Binding Path=DataContext.DeleteSiteCommand, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}" CommandParameter="{Binding SiteId}">
+                                <Image Width="12" Height="12" Source="{StaticResource IconDelete}" />
+                            </Button>
+                            <Button Style="{StaticResource HoverButtonStyle}" Command="{Binding Path=DataContext.CreateSiteCommand, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}">
+                                <Image Width="12" Height="12" Source="{StaticResource IconAdd}"  />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
 
-                    <CheckBox Margin="4" Content="Sky quality, mag/sq. arcsec" Grid.Column="0" Grid.Row="3" VerticalAlignment="Center" IsChecked="{Binding SkyQualitySpecified}"  />
-                    <cc:NumericUpDown Width="70" HorizontalAlignment="Left" DecimalPlaces="2" Step="0.1" Minimum="16" Maximum="22" Value="{Binding SkyQuality}" Grid.Column="1" Grid.Row="3" Visibility="{Binding SkyQualitySpecified, Converter={s:BoolToVisibilityConverter}}" />
 
+                    <Grid Background="#00000001" Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="Title" />
+                            <ColumnDefinition Width="300" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Margin="6" Text="Seeing by Antoniadi scale:" Grid.Column="0" Grid.Row="1" VerticalAlignment="Center" />
+                        <ComboBox SelectedValuePath="Tag" SelectedValue="{Binding Seeing}" Width="300" IsEditable="False" Grid.Column="1" Grid.Row="1">
+                            <ComboBoxItem Tag="{x:Null}">
+                                <TextBlock IsEnabled="False" Text="Not set" />
+                            </ComboBoxItem>
+                            <ComboBoxItem Content="(1) Perfect seeing, the perfect image without shaking" Tag="1"/>
+                            <ComboBoxItem Content="(2) Good seeing, slight shaking of the objects" Tag="2"/>
+                            <ComboBoxItem Content="(3) Moderate seeing the image is still not absolutely sharp" Tag="3"/>
+                            <ComboBoxItem Content="(4) Poor seeing, undulation of the image" Tag="4"/>
+                            <ComboBoxItem Content="(5) Very poor seeing, the flashing image" Tag="5"/>
+                        </ComboBox>
+                    </Grid>
+
+                    <Grid Background="#00000001" Grid.Row="2" Margin="0 3">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="Title" />
+                            <ColumnDefinition Width="300" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <CheckBox Margin="4" Content="Magnitude of faintest star" Grid.Column="0" VerticalAlignment="Center" IsChecked="{Binding FaintestStarSpecified}" />
+                        <cc:NumericUpDown Width="70" HorizontalAlignment="Left" DecimalPlaces="1" Step="0.1" Minimum="-4" Maximum="8" Value="{Binding FaintestStar}" Grid.Column="1" Visibility="{Binding FaintestStarSpecified, Converter={s:BoolToVisibilityConverter}}" />
+                        <Label BorderBrush="{StaticResource BrushControlBackground}" Width="70" Height="24" HorizontalAlignment="Left" BorderThickness="1" IsEnabled="False" Padding="4 2" Margin="0" Content="Not set" Grid.Column="1" Visibility="{Binding FaintestStarSpecified, Converter={s:InverseBoolToVisibilityConverter}}" />
+                    </Grid>
+
+                    <Grid Background="#00000001" Grid.Row="3" Margin="0 3">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="Title" />
+                            <ColumnDefinition Width="300" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <CheckBox Margin="4" Content="Sky quality, mag/sq. arcsec" Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" IsChecked="{Binding SkyQualitySpecified}"  />
+                        <cc:NumericUpDown Width="70" HorizontalAlignment="Left" DecimalPlaces="2" Step="0.1" Minimum="16" Maximum="22" Value="{Binding SkyQuality}" Grid.Column="1" Grid.Row="1" Visibility="{Binding SkyQualitySpecified, Converter={s:BoolToVisibilityConverter}}" />
+                        <Label BorderBrush="{StaticResource BrushControlBackground}" Width="70" Height="24" HorizontalAlignment="Left" BorderThickness="1" IsEnabled="False" Padding="4 2" Margin="0" Content="Not set" Grid.Column="1" Visibility="{Binding SkyQualitySpecified, Converter={s:InverseBoolToVisibilityConverter}}" />
+                    </Grid>
+                    
                     <c:MultilineEdit 
                         Grid.Row="4"
                         Grid.ColumnSpan="3"

@@ -30,6 +30,7 @@ namespace Astrarium.Plugins.Journal.Types
         Task<ICollection> GetOptics();
         Task<Optics> GetOptics(string id);
         Task<List<Session>> GetSessions();
+        Task<Site> GetSite(string id);
         Task<ICollection> GetSites();
         Task<CelestialObject> GetTarget(string id);
         Task LoadObservation(Observation observation);

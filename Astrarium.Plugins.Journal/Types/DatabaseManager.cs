@@ -355,6 +355,32 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
+        public Task<Site> GetSite(string id)
+        {
+            return Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    var siteDb = db.Sites.FirstOrDefault(x => x.Id == id);
+                    if (siteDb != null)
+                    {
+                        var site = new Site();
+                        site.Id = siteDb.Id;
+                        site.Name = siteDb.Name;
+                        site.Elevation = siteDb.Elevation ?? 0;
+                        site.IAUCode = siteDb.IAUCode;
+                        site.Latitude = siteDb.Latitude;
+                        site.Longitude = siteDb.Longitude;
+                        site.Timezone = siteDb.Timezone;
+
+                        return site;
+                    }
+
+                    return null;
+                }
+            });
+        }
+
         public Task<ICollection> GetSites()
         {
             return Task.Run(() =>
