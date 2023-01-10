@@ -127,6 +127,8 @@ namespace Astrarium
             {
                 timeZones.Clear();
                 allLocations.Clear();
+                timeZones = null;
+                allLocations = null;
                 isLoaded = false;
             }
         }
@@ -142,11 +144,12 @@ namespace Astrarium
             lock (locker)
             {
                 // Do not read time zones again
-                if (timeZones.Count > 0)
+                if (timeZones != null && timeZones.Count > 0)
                 {
                     return;
                 }
 
+                timeZones = new List<TimeZoneItem>();
                 string line;
                 string filePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data", "TimeZones.dat");
                 using (StreamReader file = new StreamReader(filePath))
@@ -176,11 +179,12 @@ namespace Astrarium
             lock (locker)
             {
                 // Do not read cities again
-                if (allLocations.Count > 0)
+                if (allLocations != null && allLocations.Count > 0)
                 {
                     return;
                 }
 
+                allLocations = new List<GeoLocation>();
                 FileStream fileStream = null;
                 try
                 {

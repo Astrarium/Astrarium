@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Astrarium.Algorithms;
+using System;
 using System.Drawing;
 using System.Drawing.Printing;
 using System.Threading;
@@ -144,6 +145,11 @@ namespace Astrarium.Types
         public static CelestialObject ShowSearchDialog(Func<CelestialObject, bool> filter = null)
         {
             return viewManager.ShowSearchDialog(filter);
+        }
+
+        public static CrdsGeographical ShowLocationDialog(CrdsGeographical location)
+        {
+            return viewManager.ShowLocationDialog(location);
         }
 
         public static TimeSpan? ShowTimeSpanDialog(TimeSpan timeSpan)

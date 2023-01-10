@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Astrarium.Algorithms;
+using System;
 using System.Drawing;
 using System.Drawing.Printing;
 using System.Threading;
@@ -131,6 +132,13 @@ namespace Astrarium.Types
         /// <param name="filter">Predicate function to filder celestial objects</param>
         /// <returns>Celestial object picked by user, or null if no object picked</returns>
         CelestialObject ShowSearchDialog(Func<CelestialObject, bool> filter = null);
+
+        /// <summary>
+        /// Shows geo location chooser dialog.
+        /// </summary>
+        /// <param name="location">Current geo location</param>
+        /// <returns>Geo location choosen by user.</returns>
+        CrdsGeographical ShowLocationDialog(CrdsGeographical location);
 
         /// <summary>
         /// Shows dialog to select a time span

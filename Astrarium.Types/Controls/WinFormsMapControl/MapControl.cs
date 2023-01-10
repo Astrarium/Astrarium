@@ -787,16 +787,17 @@ namespace System.Windows.Forms
                 var p = Project(m.Point);
                 Draw(gr, () =>
                 {
+                    var eventArgs = new DrawMarkerEventArgs()
+                    {
+                        Graphics = gr,
+                        Marker = m,
+                        Point = p
+                    };
+
+                    DrawMarker?.Invoke(this, eventArgs);
+
                     if (gr.IsVisible(p))
                     {
-                        var eventArgs = new DrawMarkerEventArgs()
-                        {
-                            Graphics = gr,
-                            Marker = m,
-                            Point = p
-                        };
-
-                        DrawMarker?.Invoke(this, eventArgs);
                         if (!eventArgs.Handled)
                         {
                             if (m.Style.MarkerBrush != null)

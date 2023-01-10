@@ -14,6 +14,7 @@ using WF = System.Windows.Forms;
 using System.Drawing.Printing;
 using System.Drawing;
 using System.IO;
+using Astrarium.Algorithms;
 
 namespace Astrarium
 {
@@ -351,6 +352,15 @@ namespace Astrarium
             }
 
             return (ShowDialog(vm) ?? false) ? vm.SelectedItem.Body : null;
+        }
+
+        public CrdsGeographical ShowLocationDialog(CrdsGeographical location)
+        {
+            using (var vm = CreateViewModel<LocationVM>())
+            {
+                vm.SetLocation(new CrdsGeographical(location));
+                return (ShowDialog(vm) ?? false) ? new CrdsGeographical(vm.ObserverLocation) : null;
+            }
         }
 
         public TimeSpan? ShowTimeSpanDialog(TimeSpan timeSpan)

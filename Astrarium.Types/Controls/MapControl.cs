@@ -60,6 +60,9 @@ namespace Astrarium.Types.Controls
         public static readonly DependencyProperty PolygonsProperty =
             DependencyProperty.Register(nameof(Polygons), typeof(ObservableCollection<Polygon>), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged) });
 
+        public static readonly DependencyProperty OnMarkerDrawProperty =
+            DependencyProperty.Register(nameof(OnMarkerDraw), typeof(Command<DrawMarkerEventArgs>), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
+
         public static readonly DependencyProperty OnDoubleClickProperty =
             DependencyProperty.Register(nameof(OnDoubleClick), typeof(ICommand), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged });
 
@@ -195,6 +198,12 @@ namespace Astrarium.Types.Controls
             set => SetValue(OnDoubleClickProperty, value);
         }
 
+        public Command<DrawMarkerEventArgs> OnMarkerDraw
+        {
+            get => (Command<DrawMarkerEventArgs>)GetValue(OnMarkerDrawProperty);
+            set => SetValue(OnMarkerDrawProperty, value);
+        }
+
         public ICommand OnRightClick
         {
             get => (ICommand)GetValue(OnRightClickProperty);
@@ -222,19 +231,21 @@ namespace Astrarium.Types.Controls
         public MapControl()
         {
             mapControl.MouseEnter += (s, e) => IsMouseOverMap = true;
-            mapControl.MouseLeave += (s, e) => IsMouseOverMap = false;
+            mapControl.MouseLeave += (s, e) => { mapControl.Enabled = false; mapControl.Enabled = true; IsMouseOverMap = false; };
             mapControl.MouseEnter += (s, e) => mapControl.Focus();
             mapControl.MouseDown += (s, e) => mapControl.Focus();
             mapControl.MouseUp += (s, e) => mapControl.Focus();
             mapControl.MouseDoubleClick += (s, e) => { if (e.Button == MouseButtons.Left) OnDoubleClick?.Execute(null); };
-            mapControl.MouseClick += (s, e) => { 
-                if (e.Button == MouseButtons.Right) 
+            mapControl.MouseClick += (s, e) => {
+                if (e.Button == MouseButtons.Right)
                 {
                     OnRightClick?.Execute(null);
-                    if (ContextMenu != null) 
-                        ContextMenu.IsOpen = true; 
-                } 
+                    if (ContextMenu != null)
+                        ContextMenu.IsOpen = true;
+                }
             };
+
+            mapControl.DrawMarker += (s, e) => { OnMarkerDraw?.Execute(e); };
 
             mapControl.TileServerChanged += (s, e) =>
             {
@@ -250,9 +261,15 @@ namespace Astrarium.Types.Controls
             mapControl.ForeColorChanged += (s, e) => ForeColor = mapControl.ForeColor;
             mapControl.ZoomLevelChaged += (s, e) => ZoomLevel = mapControl.ZoomLevel;
 
+            mapControl.Dock = DockStyle.Fill;
             mapControl.Resize += MapControl_Resize;
             Child = mapControl;
             mapControl.Focus();
+        }
+
+        private void MapControl_Paint(object sender, PaintEventArgs e)
+        {
+            e.Graphics.DrawLine(Pens.Red, 0, 0, 100, 100);
         }
 
         private void MapControl_Resize(object sender, System.EventArgs e)

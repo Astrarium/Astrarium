@@ -50,6 +50,9 @@ namespace Astrarium
             // Default observer location
             SettingDefinitions.Add(new SettingDefinition("ObserverLocation", new CrdsGeographical(-44, 56.3333, +3, 80, "Europe/Moscow", "Nizhny Novgorod"), isPermanent: true));
 
+            // Default tile server
+            SettingDefinitions.Add(new SettingDefinition("ObserverLocationTileServer", "Offline map"));
+
             // Default size of main window
             SettingDefinitions.Add(new SettingDefinition("WindowSize", System.Drawing.Size.Empty));
 

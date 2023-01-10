@@ -917,14 +917,12 @@ namespace Astrarium.ViewModels
 
         private void SelectLocation()
         {
-            using (var vm = ViewManager.CreateViewModel<LocationVM>())
+            CrdsGeographical location = ViewManager.ShowLocationDialog(sky.Context.GeoLocation);
+            if (location != null)
             {
-                if (ViewManager.ShowDialog(vm) ?? false)
-                {
-                    sky.Context.GeoLocation = new CrdsGeographical(vm.ObserverLocation);
-                    settings.SetAndSave("ObserverLocation", vm.ObserverLocation);
-                    sky.Calculate();
-                }
+                sky.Context.GeoLocation = new CrdsGeographical(location);
+                settings.SetAndSave("ObserverLocation", location);
+                sky.Calculate();
             }
         }
     }

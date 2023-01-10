@@ -53,6 +53,15 @@ namespace Astrarium.Plugins.SolarSystem
         private readonly Func<Planet, bool> IsJupiter = p => p.Number == Planet.JUPITER;
         private readonly Func<Planet, bool> IsSaturn = p => p.Number == Planet.SATURN;
 
+        public override void Initialize()
+        {
+            var orbits = new OrbitalElementsManager(settings).Load();
+            foreach (var orbit in orbits)
+            {
+                genericMoons.Add(new GenericMoon() { Data = orbit });
+            }
+        }
+
         public PlanetsCalc(ISettings settings)
         {
             this.settings = settings;
@@ -85,12 +94,6 @@ namespace Astrarium.Plugins.SolarSystem
             for (int i = 0; i < NeptuneMoons.Count; i++)
             {
                 neptuneMoons[i] = new NeptuneMoon(i + 1);
-            }
-
-            var orbits = new OrbitalElementsManager(settings).Load();
-            foreach (var orbit in orbits)
-            {
-                genericMoons.Add(new GenericMoon() { Data = orbit });
             }
 
             planets[Planet.JUPITER - 1].Flattening = 0.064874f;

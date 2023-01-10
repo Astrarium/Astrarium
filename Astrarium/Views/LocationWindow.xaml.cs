@@ -1,13 +1,4 @@
-﻿using Astrarium.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 
 namespace Astrarium.Views
 {
@@ -19,6 +10,14 @@ namespace Astrarium.Views
         public LocationWindow()
         {
             InitializeComponent();
+        }
+
+        private void ContextMenu_Opened(object sender, RoutedEventArgs e)
+        {
+            if (Map.ContextMenu.DataContext == null)
+            {
+                Map.ContextMenu.DataContext = DataContext;
+            }
         }
     }
 }

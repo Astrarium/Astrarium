@@ -12,6 +12,7 @@
     <sys:Double x:Key="FontSize">12.7</sys:Double>
     
     <SolidColorBrush x:Key="BrushForeground" Color="{DynamicResource ColorForeground}" />
+    <SolidColorBrush x:Key="BrushWindowBorder" Color="{DynamicResource ColorWindowBorder}" />
     <SolidColorBrush x:Key="BrushWindowBackground" Color="{DynamicResource ColorWindowBackground}" />
     <SolidColorBrush x:Key="BrushWindowTitleBackground" Color="{DynamicResource ColorWindowTitleBackground}" />
     <SolidColorBrush x:Key="BrushWindowTitleForeground" Color="{DynamicResource ColorWindowTitleForeground}" />

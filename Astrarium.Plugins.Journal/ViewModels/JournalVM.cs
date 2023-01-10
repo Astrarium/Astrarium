@@ -278,13 +278,25 @@ namespace Astrarium.Plugins.Journal.ViewModels
         {
             string filterString = FilterString?.ToLowerInvariant().Trim();
 
-            if (string.IsNullOrWhiteSpace(filterString) || session.DateString.Replace(" ", "").Contains(filterString.Replace(" ", "")))
+            if (string.IsNullOrWhiteSpace(filterString) || session.DateString.ToLower().Replace(" ", "").Contains(filterString.Replace(" ", "")))
             {
                 foreach (var obs in session.Observations)
                 {
                     obs.IsEnabled = true;
                 }
                 return true;
+            }
+
+            bool fullMatch = false;
+
+            // TODO: more complicated parsing cases
+
+            // word in quotes, for example, "IC 27" should search by exact match
+            var match = Regex.Match(filterString, "\"(.+)\"");
+            if (match.Success)
+            {
+                filterString = match.Groups[1].Value.Trim();
+                fullMatch = true;
             }
 
             foreach (var obs in session.Observations)
@@ -295,19 +307,6 @@ namespace Astrarium.Plugins.Journal.ViewModels
                 }
                 else
                 {
-                    
-                    bool fullMatch = false;
-
-                    // TODO: more complicated parsing cases
-
-                    // word in quotes, for example, "IC 27" should search by exact match
-                    var match = Regex.Match(filterString, "\"(.+)\"");
-                    if (match.Success)
-                    {
-                        filterString = match.Groups[1].Value.Trim();
-                        fullMatch = true;
-                    }
-
                     obs.IsEnabled = false;
 
                     if (fullMatch)
@@ -329,17 +328,6 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
                     if (obs.ObjectType.Split('.').Any(x => x.Trim().ToLowerInvariant().Equals(filterString)))
                         obs.IsEnabled = true;
-
-
-
-                    //if (obs.Begin.Year.ToString().Equals(filterString))
-                    //    obs.IsEnabled = true;
-
-                    //if ($"{obs.Begin.Month:00}.{obs.Begin.Year}".Equals(filterString))
-                    //    obs.IsEnabled = true;
-
-                    //if ($"{obs.Begin.Day:00}.{obs.Begin.Month:00}.{obs.Begin.Year}".Equals(filterString))
-                    //    obs.IsEnabled = true;
                 }
             }
             return session.Observations.Any(x => x.IsEnabled);

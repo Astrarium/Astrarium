@@ -6,6 +6,7 @@
     xmlns:c="clr-namespace:Astrarium.Types.Controls">
 
     <Style TargetType="{x:Type Window}">
+        <Setter Property="t:WindowProperties.WindowBorderBrush" Value="{StaticResource BrushWindowBorder}" />
         <Setter Property="Foreground" Value="{StaticResource BrushWindowTitleForeground}" />
         <Setter Property="BorderBrush" Value="{StaticResource BrushWindowTitleBackground}" />
         <Setter Property="Background" Value="{StaticResource BrushWindowBackground}" />
@@ -18,7 +19,7 @@
                         <!-- Thin border around window -->
                         <c:BorderFix
                             BorderThickness="1"
-                            BorderBrush="{TemplateBinding BorderBrush}">
+                            BorderBrush="{Binding Path=(t:WindowProperties.WindowBorderBrush), RelativeSource={RelativeSource TemplatedParent}}">
                             <c:BorderFix.Style>
                                 <Style TargetType="{x:Type c:BorderFix}" BasedOn="{StaticResource {x:Type c:BorderFix}}">
                                     <Style.Triggers>
