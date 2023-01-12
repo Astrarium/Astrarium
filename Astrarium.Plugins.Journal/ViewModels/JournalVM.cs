@@ -851,20 +851,32 @@ namespace Astrarium.Plugins.Journal.ViewModels
             //}
         }
 
-        private void GoToCoordinates()
+        private async void GoToCoordinates()
         {
             var obs = SelectedTreeViewItem as Observation;
             var details = obs.TargetDetails;
 
             if (details.RA != null && details.Dec != null)
             {
-                // TODO: take UTC offset into account
-
-
                 double jd = Date.JulianEphemerisDay(new Date(obs.Begin.UtcDateTime));
 
-                // get location from session
-                //sky.Context.GeoLocation = obs.Session.SiteId;
+                if (obs.Session.SiteId != null)
+                {
+                    var site = await dbManager.GetSite(obs.Session.SiteId);
+                    var geo = new CrdsGeographical(-site.Longitude, site.Latitude, site.Timezone, site.Elevation, null, site.Name);
+
+                    if (sky.Context.GeoLocation.DistanceTo(geo) >= 5)
+                    {
+                        if (ViewManager.ShowMessageBox("$Warning", "The observation's location place differs than selected one. Do you want to change the location and show the target as it seen from it?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                        {
+                            sky.Context.GeoLocation = geo;
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
+                }
 
                 sky.Context.JulianDay = jd;
 
