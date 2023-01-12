@@ -370,7 +370,7 @@ namespace Astrarium
         /// <inheritdoc />
         public CelestialObject Search(string objectType, string commonName = null)
         {
-            return Search(commonName ?? "", x => x.Type == objectType && (!string.IsNullOrEmpty(commonName) ? x.CommonName == commonName : true), 1).FirstOrDefault();
+            return Search(commonName ?? "", x => x.Type == objectType && (!string.IsNullOrEmpty(commonName) ? x.CommonName.Equals(commonName, StringComparison.OrdinalIgnoreCase) : true), 1).FirstOrDefault();
         }
 
         /// <inheritdoc />

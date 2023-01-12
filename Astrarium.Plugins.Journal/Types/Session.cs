@@ -17,7 +17,7 @@ namespace Astrarium.Plugins.Journal.Types
             Id = id;
         }
 
-        public override DateTime SessionDate => Begin;
+        public override DateTime SessionDate => Begin.DateTime.Date;
 
         public bool IsExpanded
         {

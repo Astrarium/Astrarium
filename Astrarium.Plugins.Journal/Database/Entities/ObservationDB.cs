@@ -16,12 +16,12 @@ namespace Astrarium.Plugins.Journal.Database.Entities
         /// <summary>
         /// Begin date and time of observation
         /// </summary>
-        public DateTime Begin { get; set; }
+        public string Begin { get; set; }
 
         /// <summary>
         /// End date and time of observation
         /// </summary>
-        public DateTime End { get; set; }
+        public string End { get; set; }
 
         /// <summary>
         /// Id of parent session

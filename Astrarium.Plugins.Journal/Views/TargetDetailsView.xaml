@@ -6,10 +6,21 @@
               xmlns:s="clr-namespace:Astrarium.Types.Themes;assembly=Astrarium.Types" 
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/Astrarium.Plugins.Journal;component/Themes/Images.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Astrarium.Plugins.Journal;component/Themes/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" SharedSizeGroup="Title" />
             <ColumnDefinition Width="300" />
+            <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
@@ -35,7 +46,10 @@
 
         <TextBlock Text="Equatorial coordinates:" Grid.Column="0" VerticalAlignment="Center" Margin="2" Grid.Row="4" />
         <TextBox Text="{Binding EquatorialCoordinates, Mode=OneWay}" IsReadOnly="True" Grid.Column="1" Margin="2" Grid.Row="4" />
-
+        <Button Style="{StaticResource HoverButtonStyle}" Grid.Row="4" Grid.Column="2" Visibility="{Binding EquatorialCoordinates, Converter={s:NotNullToVisibilityConverter}}" Command="{Binding Path=DataContext.GoToCoordinatesCommand, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}">
+            <Image Width="12" Height="12" Source="{StaticResource IconGoTo}"  />
+        </Button>
+        
         <TextBlock Text="Horizontal coordinates:" Grid.Column="0" VerticalAlignment="Center" Margin="2" Grid.Row="5" />
         <TextBox Text="{Binding HorizontalCoordinates, Mode=OneWay}" IsReadOnly="True" Grid.Column="1" Margin="2" Grid.Row="5" />
     </Grid>

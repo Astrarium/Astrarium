@@ -22,7 +22,7 @@ namespace Astrarium.Plugins.Journal.Types
             Id = id;
         }
 
-        public override DateTime SessionDate => Session.Begin;
+        public override DateTime SessionDate => Session.Begin.Date;
 
         /// <summary>
         /// Session instance associated with the observation
@@ -38,6 +38,12 @@ namespace Astrarium.Plugins.Journal.Types
         {
             get => GetValue<string>(nameof(ObjectName));
             set => SetValue(nameof(ObjectName), value);
+        }
+
+        public string ObjectCommonName
+        {
+            get => GetValue<string>(nameof(ObjectCommonName));
+            set => SetValue(nameof(ObjectCommonName), value);
         }
 
         public string ObjectNameAliases
@@ -95,7 +101,14 @@ namespace Astrarium.Plugins.Journal.Types
         public TargetDetails TargetDetails
         {
             get => GetValue<TargetDetails>(nameof(TargetDetails));
-            set => SetValue(nameof(TargetDetails), value);
+            set { 
+                
+                SetValue(nameof(TargetDetails), value);
+                NotifyPropertyChanged(
+                    nameof(EquatorialCoordinates),
+                    nameof(HorizontalCoordinates),
+                    nameof(Constellation));
+            }
         }
 
         public string TargetId
@@ -154,7 +167,7 @@ namespace Astrarium.Plugins.Journal.Types
         public CrdsEquatorial EquatorialCoordinates
         {
             get
-            { 
+            {
                 if (TargetDetails != null && TargetDetails.RA != null && TargetDetails.Dec != null)
                 {
                     return new CrdsEquatorial(TargetDetails.RA.Value, TargetDetails.Dec.Value);

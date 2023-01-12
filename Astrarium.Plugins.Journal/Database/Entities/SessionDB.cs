@@ -9,8 +9,8 @@ namespace Astrarium.Plugins.Journal.Database.Entities
     public class SessionDB : IEntity
     {
         public string Id { get; set; }
-        public DateTime Begin { get; set; }
-        public DateTime End { get; set; }
+        public string Begin { get; set; }
+        public string End { get; set; }
 
         public int? Seeing { get; set; }
         public double? SkyQuality { get; set; }

@@ -261,8 +261,8 @@ namespace Astrarium.Plugins.Journal.OAL
             return new OALSession()
             {
                 Id = session.Id,
-                Begin = session.Begin,
-                End = session.End,
+                Begin = session.Begin.ToString(),
+                End = session.End.ToString(),
                 SiteId = session.SiteId,
                 Equipment = session.Equipment,
                 Comments = session.Comments,
@@ -321,8 +321,8 @@ namespace Astrarium.Plugins.Journal.OAL
             return new OALObservation()
             {
                 Id = observation.Id,
-                Begin = observation.Begin,
-                End = observation.End,
+                Begin = observation.Begin.ToString(),
+                End = observation.End.ToString(),
                 EndSpecified = true,
                 Accessories = observation.Accessories,
                 EyepieceId = observation.EyepieceId,

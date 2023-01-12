@@ -35,14 +35,15 @@ namespace Astrarium.Plugins.Journal.Types
                     var dbSessions = db.Sessions
                         .Include(x => x.Observations)
                         .Include(x => x.Observations.Select(o => o.Target))
-                        .OrderByDescending(x => x.Begin).ToArray();
+                        .ToArray()
+                        .OrderByDescending(x => x.Begin);
 
                     foreach (var s in dbSessions)
                     {
                         var session = new Session(s.Id)
                         {
-                            Begin = s.Begin,
-                            End = s.End
+                            Begin = DateTimeOffset.Parse(s.Begin),
+                            End = DateTimeOffset.Parse(s.End)
                         };
 
                         var observations = s.Observations.OrderByDescending(x => x.Begin);
@@ -51,9 +52,10 @@ namespace Astrarium.Plugins.Journal.Types
                             session.Observations.Add(new Observation(obs.Id)
                             {
                                 Session = session,
-                                Begin = obs.Begin,
-                                End = obs.End,
+                                Begin = DateTimeOffset.Parse(obs.Begin),
+                                End = DateTimeOffset.Parse(obs.End),
                                 ObjectName = obs.Target.Name,
+                                ObjectCommonName = obs.Target.CommonName,
                                 ObjectType = obs.Target.Type,
                                 ObjectNameAliases = DeserializeAliases(obs.Target.Aliases)
                             });
@@ -212,8 +214,8 @@ namespace Astrarium.Plugins.Journal.Types
                 var observation = new ObservationDB()
                 {
                     Id = Guid.NewGuid().ToString(),
-                    Begin = begin,
-                    End = end,
+                    Begin = begin.ToString(),
+                    End = end.ToString(),
                     TargetId = target.Id,
                     SessionId = session.Id,
                     Details = JsonConvert.SerializeObject(CreateObservationDetails(body.Type))
@@ -229,8 +231,8 @@ namespace Astrarium.Plugins.Journal.Types
                 var obs = new Observation(observation.Id)
                 {
                     Session = session,
-                    Begin = observation.Begin,
-                    End = observation.End,
+                    Begin = DateTimeOffset.Parse(observation.Begin),
+                    End = DateTimeOffset.Parse(observation.End),
                     ObjectName = observation.Target.Name,
                     ObjectType = observation.Target.Type,
                     ObjectNameAliases = DeserializeAliases(observation.Target.Aliases),
@@ -251,8 +253,8 @@ namespace Astrarium.Plugins.Journal.Types
                     var observationDb = ctx.Observations.FirstOrDefault(x => x.Id == observation.Id);
                     if (observationDb != null)
                     {
-                        observationDb.Begin = begin;
-                        observationDb.End = end;
+                        observationDb.Begin = begin.ToString();
+                        observationDb.End = end.ToString();
                         var targetDb = ctx.Targets.FirstOrDefault(x => x.Id == observationDb.TargetId);
                         if (targetDb != null)
                         {

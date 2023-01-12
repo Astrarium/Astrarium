@@ -632,18 +632,14 @@ namespace Astrarium.Plugins.Journal.OAL
         [XmlElement(ElementName = "target", Form = XmlSchemaForm.Unqualified, DataType = "IDREF")]
         public string TargetId { get; set; }
 
-
         [XmlElement(ElementName = "begin", Form = XmlSchemaForm.Unqualified)]
-        public DateTime Begin { get; set; }
-
+        public string Begin { get; set; }
 
         [XmlElement(ElementName = "end", Form = XmlSchemaForm.Unqualified)]
-        public DateTime End { get; set; }
-
+        public string End { get; set; }
 
         [XmlIgnore]
         public bool EndSpecified { get; set; }
-
 
         [XmlElement(ElementName = "faintestStar", Form = XmlSchemaForm.Unqualified)]
         public double FaintestStar { get; set; }
@@ -1450,13 +1446,13 @@ namespace Astrarium.Plugins.Journal.OAL
         /// Start of observation session
         /// </summary>
         [XmlElement(ElementName = "begin", Form = XmlSchemaForm.Unqualified)]
-        public DateTime Begin { get; set; }
+        public string Begin { get; set; }
 
         /// <summary>
         /// End of observation session
         /// </summary>
         [XmlElement(ElementName = "end", Form = XmlSchemaForm.Unqualified)]
-        public DateTime End { get; set; }
+        public string End { get; set; }
 
         /// <summary>
         /// Site where session took place

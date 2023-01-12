@@ -16,6 +16,7 @@ using System.Data.SQLite;
 using Astrarium.Types;
 using System.IO;
 using System.IO.Compression;
+using Astrarium.Algorithms;
 
 namespace Astrarium.Plugins.Journal.OAL
 {
@@ -608,7 +609,7 @@ namespace Astrarium.Plugins.Journal.OAL
                 End = observation.EndSpecified ? observation.End : observation.Begin,
                 Magnification = observation.MagnificationSpecified ? observation.Magnification : (double?)null,
                 Accessories = observation.Accessories,
-                Target = target.ToTarget(data),
+                Target = target.ToTarget(XmlConvert.ToDateTimeOffset(observation.Begin), data),
                 Result = finding?.Description,
                 Lang = finding?.Lang,
                 Details = jsonDetails,
@@ -638,16 +639,16 @@ namespace Astrarium.Plugins.Journal.OAL
             double? faintestStar = observations.Select(o => o.FaintestStarSpecified ? o.FaintestStar : (double?)null).Min();
             double? skyQuality = observations.Select(o => o.SkyQuality?.ToBrightness()).Min();
 
-            DateTime begin = observations.Min(obs => obs.Begin);
-            if (session.Begin < begin)
+            DateTimeOffset begin = observations.Min(obs => XmlConvert.ToDateTimeOffset(obs.Begin));
+            if (XmlConvert.ToDateTimeOffset(session.Begin) < begin)
             {
-                begin = session.Begin;
+                begin = XmlConvert.ToDateTimeOffset(session.Begin);
             }
 
-            DateTime end = observations.Max(obs => obs.EndSpecified ? obs.End : obs.Begin);
-            if (session.End > end)
+            DateTimeOffset end = observations.Max(obs => obs.EndSpecified ? XmlConvert.ToDateTimeOffset(obs.End) : XmlConvert.ToDateTimeOffset(obs.Begin));
+            if (XmlConvert.ToDateTimeOffset(session.End) > end)
             {
-                end = session.End;
+                end = XmlConvert.ToDateTimeOffset(session.End);
             }
 
             return new SessionDB()
@@ -655,8 +656,8 @@ namespace Astrarium.Plugins.Journal.OAL
                 Id = session.Id,
                 SiteId = session.SiteId,
                 ObserverId = observerId,
-                Begin = begin,
-                End = end,
+                Begin = begin.ToString("yyyy-MM-ddTHH:mm:sszzzzzzz"),
+                End = end.ToString("yyyy-MM-ddTHH:mm:sszzzzzzz"),
                 Equipment = session.Equipment,
                 CoObservers = data.Observers.Where(o => coObserverIds.Contains(o.Id)).Select(x => x.ToObserver()).ToList(),
                 Attachments = session.Images.ToAttachments(),
@@ -735,6 +736,37 @@ namespace Astrarium.Plugins.Journal.OAL
             return value;
         }
 
+        private static CrdsEquatorial ToEquatorial(this OALEquPosType pos, DateTimeOffset dateTime)
+        {
+            if (pos == null)
+                return null;
+
+            double ra = (double)pos.RA.ToAngle();
+            double dec = (double)pos.Dec.ToAngle();
+
+            var eq = new CrdsEquatorial(ra, dec);
+
+            if (pos.Frame?.Equinox == OALReferenceFrameEquinox.EqOfDate)
+            {
+                return eq;
+            }
+
+            double jd = Date.JulianEphemerisDay(new Date(dateTime.UtcDateTime));
+            
+            if (pos.Frame == null || pos.Frame.Equinox == OALReferenceFrameEquinox.J2000)
+            {
+                PrecessionalElements pe = Precession.ElementsFK5(Date.EPOCH_J2000, jd);
+                return Precession.GetEquatorialCoordinates(eq, pe);
+            }
+            else if (pos.Frame?.Equinox == OALReferenceFrameEquinox.B1950)
+            {
+                PrecessionalElements pe = Precession.ElementsFK5(Date.EPOCH_B1950, jd);
+                return Precession.GetEquatorialCoordinates(eq, pe);
+            }
+
+            return null;
+        }
+
         private static double? ToBrightness(this OALSurfaceBrightness surfaceBrightness)
         {
             if (surfaceBrightness.Unit == OALSurfaceBrightnessUnit.MagsPerSquareArcSec)
@@ -743,7 +775,7 @@ namespace Astrarium.Plugins.Journal.OAL
                 return surfaceBrightness.Value / 3600;
         }
 
-        private static TargetDB ToTarget(this OALTarget target, OALData data)
+        private static TargetDB ToTarget(this OALTarget target, DateTimeOffset dateTime, OALData data)
         {
             // Type of OALTarget
             Type oalTargetType = target.GetType();
@@ -791,9 +823,10 @@ namespace Astrarium.Plugins.Journal.OAL
 
             TargetDB result = new TargetDB();
 
-            // TODO: convert to equinox of date
-            details.RA = target.Position?.RA.ToAngle();
-            details.Dec = target.Position?.Dec.ToAngle();
+            var eq = target.Position?.ToEquatorial(dateTime);
+
+            details.RA = eq?.Alpha;
+            details.Dec = eq?.Delta;
             details.Constellation = target.Constellation;
 
             result.Id = target.Id;

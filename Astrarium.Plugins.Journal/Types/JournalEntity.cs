@@ -15,9 +15,9 @@ namespace Astrarium.Plugins.Journal.Types
     {
         public abstract DateTime SessionDate { get; }
 
-        public DateTime Begin
+        public DateTimeOffset Begin
         {
-            get => GetValue<DateTime>(nameof(Begin));
+            get => GetValue<DateTimeOffset>(nameof(Begin));
             set
             {
                 SetValue(nameof(Begin), value);
@@ -25,11 +25,11 @@ namespace Astrarium.Plugins.Journal.Types
             }
         }
 
-        public DateTime End
+        public DateTimeOffset End
         {
-            get => GetValue<DateTime>(nameof(End));
-            set 
-            { 
+            get => GetValue<DateTimeOffset>(nameof(End));
+            set
+            {
                 SetValue(nameof(End), value);
                 NotifyPropertyChanged(nameof(DateString), nameof(TimeString));
             }
@@ -47,7 +47,7 @@ namespace Astrarium.Plugins.Journal.Types
             set => SetValue(nameof(IsEnabled), value);
         }
 
-        public string DateString => Formatters.Date.Format(Begin);
+        public string DateString => Formatters.Date.Format(Begin.Date);
 
         public string TimeString => $"{Begin:HH:mm}-{End:HH:mm}";
     }

@@ -29,6 +29,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
         private DateTimeComparer dateComparer = new DateTimeComparer();
 
         private ISky sky;
+        private ISkyMap map;
         private IOALImporter importer;
         private ITargetDetailsFactory targetDetailsFactory;
         private IDatabaseManager dbManager;
@@ -76,11 +77,14 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         public ICommand EditSiteCommand { get; private set; }
 
+        public ICommand GoToCoordinatesCommand { get; private set; }
+
         #endregion Commands
 
-        public JournalVM(ISky sky, ITargetDetailsFactory targetDetailsFactory, IOALImporter importer, IDatabaseManager dbManager)
+        public JournalVM(ISky sky, ISkyMap map, ITargetDetailsFactory targetDetailsFactory, IOALImporter importer, IDatabaseManager dbManager)
         {
             this.sky = sky;
+            this.map = map;
             this.importer = importer;
             this.targetDetailsFactory = targetDetailsFactory;
             this.dbManager = dbManager;
@@ -130,6 +134,8 @@ namespace Astrarium.Plugins.Journal.ViewModels
             DeleteCameraCommand = new Command<string>(DeleteCamera);
 
             EditSiteCommand = new Command<string>(EditSite);
+
+            GoToCoordinatesCommand = new Command(GoToCoordinates);
 
             Task.Run(Load);
         }
@@ -210,7 +216,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
                     SetValue(nameof(CalendarDate), value);
                     if (SessionDates.Contains(value, dateComparer))
                     {
-                        SelectedTreeViewItem = sessions.FirstOrDefault(x => dateComparer.Equals(x.Begin, value));
+                        SelectedTreeViewItem = sessions.FirstOrDefault(x => dateComparer.Equals(x.Begin.DateTime, value));
                     }
                 }
             }
@@ -843,6 +849,38 @@ namespace Astrarium.Plugins.Journal.ViewModels
             //    Cameras = await dbManager.GetCameras();
             //    (SelectedTreeViewItem as Observation).CameraId = model.Camera.Id;
             //}
+        }
+
+        private void GoToCoordinates()
+        {
+            var obs = SelectedTreeViewItem as Observation;
+            var details = obs.TargetDetails;
+
+            if (details.RA != null && details.Dec != null)
+            {
+                // TODO: take UTC offset into account
+
+
+                double jd = Date.JulianEphemerisDay(new Date(obs.Begin.UtcDateTime));
+
+                // get location from session
+                //sky.Context.GeoLocation = obs.Session.SiteId;
+
+                sky.Context.JulianDay = jd;
+
+                sky.Calculate();
+
+                var body = sky.Search(obs.ObjectType, obs.ObjectCommonName);
+
+                map.SelectedObject = body;
+
+                // calculate horizontal coordinates
+                var eq = new CrdsEquatorial(details.RA.Value, details.Dec.Value);
+
+                var hor = eq.ToHorizontal(sky.Context.GeoLocation, sky.Context.SiderealTime);
+
+                map.GoToPoint(hor, 1);
+            }           
         }
 
         private TargetDetails CreateTargetDetails(double jd, CelestialObject body)
