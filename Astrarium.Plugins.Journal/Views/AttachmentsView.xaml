@@ -51,7 +51,7 @@
                     <Image Style="{StaticResource ImageStyle}" Margin="2 0" Width="12" Height="12" Source="{StaticResource IconDeleteAttachment}" />
                 </Button>
             </StackPanel>
-            
+
             <Slider ToolTip="Thumbnail size" Grid.Column="1" x:Name="SliderPreviewSize" Minimum="100" Maximum="400" Value="200" Width="200" Orientation="Horizontal" VerticalAlignment="Center" />
 
             <Button ToolTip="Create" Grid.Column="3" Style="{StaticResource ToolbarButtonStyle}" Command="{Binding Path=DataContext.CreateAttachmentCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">

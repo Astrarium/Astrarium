@@ -54,6 +54,8 @@
                     <ContextMenu>
                         <MenuItem Header="Edit observation..." Command="{Binding PlacementTarget.Tag.EditObservationCommand,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
                         <MenuItem Header="Delete observation" Command="{Binding PlacementTarget.Tag.DeleteObservationCommand,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
+                        <Separator />
+                        <MenuItem Header="Go to observation target" Command="{Binding PlacementTarget.Tag.GoToCoordinatesCommand,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ContextMenu}}" />
                     </ContextMenu>
                 </StackPanel.ContextMenu>
 
@@ -87,7 +89,6 @@
         </Style>
 
         <Style x:Key="JournalCalendarDayButtonStyle" BasedOn="{StaticResource CalendarDayButtonStyle}" TargetType="CalendarDayButton">
-            
             <Style.Setters>
                 <EventSetter Event="MouseRightButtonDown" Handler="CalendarDayButton_MouseRightButtonDown" />
                 <Setter Property="Focusable" Value="False" />
@@ -171,6 +172,7 @@
                     Grid.Row="0"
                     SelectedDate="{Binding CalendarDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     SelectedDatesChanged="calendar_SelectedDatesChanged"
+                    GotMouseCapture="calendar_GotMouseCapture"
                     SelectionMode="SingleDate"
                     Margin="4"
                     HorizontalAlignment="Stretch"
@@ -190,11 +192,6 @@
                     VirtualizingPanel.IsContainerVirtualizable="True"
                     Margin="4"
                     Grid.Row="2">
-                    <TreeView.ItemContainerStyle>
-                        <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}">
-                            <EventSetter Event="Selected" Handler="TreeViewItem_Selected" />
-                        </Style>
-                    </TreeView.ItemContainerStyle>
                 </c:BindableTreeView>
             </Grid>
 

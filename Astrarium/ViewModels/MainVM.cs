@@ -842,7 +842,7 @@ namespace Astrarium.ViewModels
             map.Invalidate();
         }
 
-        private void CenterOnPoint(CrdsHorizontal hor, double targetViewAngle)
+        public void CenterOnPoint(CrdsHorizontal hor, double targetViewAngle)
         {
             if (settings.Get<bool>("Ground") && hor.Altitude <= 0)
             {
@@ -869,6 +869,11 @@ namespace Astrarium.ViewModels
             }
 
             map.GoToPoint(hor, TimeSpan.FromSeconds(1), targetViewAngle);
+        }
+
+        public void Focus()
+        {
+            ViewManager.ShowWindow<MainVM>(true);
         }
 
         private void LockOnObject(CelestialObject body)

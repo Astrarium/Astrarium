@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Data;
 
 namespace Astrarium.Plugins.Journal.Controls
 {
@@ -35,7 +36,7 @@ namespace Astrarium.Plugins.Journal.Controls
             DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged,
             AffectsRender = true,
             BindsTwoWayByDefault = true,
-            PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged)
+            PropertyChangedCallback = new PropertyChangedCallback(SelectedTreeViewItemPropertyChanged)
         });
 
         protected override void OnPreviewMouseRightButtonDown(MouseButtonEventArgs e)
@@ -57,14 +58,51 @@ namespace Astrarium.Plugins.Journal.Controls
             return source as TreeViewItem;
         }
 
-        private static void DependencyPropertyChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private static void SelectedTreeViewItemPropertyChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             var treeView = sender as BindableTreeView;
-            var tvi = treeView.ItemContainerGenerator.ContainerFromItem(e.NewValue) as TreeViewItem;
-            if (tvi != null)
+            var collectionView = treeView.ItemsSource as CollectionView;
+
+            if (collectionView != null)
             {
-                tvi.IsSelected = true;
+                var value = e.NewValue;
+                int index = collectionView.IndexOf(value);
+                if (index >= 0)
+                {
+                    VirtualizingStackPanel itemHost = FindVisualChild<VirtualizingStackPanel>(treeView);
+                    if (itemHost != null)
+                    {
+                        itemHost.BringIndexIntoViewPublic(index);
+                        ItemContainerGenerator gen = treeView.ItemContainerGenerator;
+                        TreeViewItem tvi = gen.ContainerFromItem(value) as TreeViewItem;
+                        tvi.IsSelected = true;
+                    }
+                }
             }
+        }
+
+        private static T FindVisualChild<T>(Visual visual) where T : Visual
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(visual); i++)
+            {
+                Visual child = (Visual)VisualTreeHelper.GetChild(visual, i);
+                if (child != null)
+                {
+                    T correctlyTyped = child as T;
+                    if (correctlyTyped != null)
+                    {
+                        return correctlyTyped;
+                    }
+
+                    T descendent = FindVisualChild<T>(child);
+                    if (descendent != null)
+                    {
+                        return descendent;
+                    }
+                }
+            }
+
+            return null;
         }
     }
 }

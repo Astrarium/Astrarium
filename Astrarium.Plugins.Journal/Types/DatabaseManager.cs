@@ -35,6 +35,7 @@ namespace Astrarium.Plugins.Journal.Types
                     var dbSessions = db.Sessions
                         .Include(x => x.Observations)
                         .Include(x => x.Observations.Select(o => o.Target))
+                        .AsNoTracking()
                         .ToArray()
                         .OrderByDescending(x => x.Begin);
 

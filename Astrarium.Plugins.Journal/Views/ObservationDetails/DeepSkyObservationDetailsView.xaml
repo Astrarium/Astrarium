@@ -18,7 +18,7 @@
 
         <StackPanel Orientation="Horizontal" Margin="4 8">
             <TextBlock Margin="2 0" Text="Visual rating:" VerticalAlignment="Center" />
-            <ComboBox Margin="2 0" SelectedValuePath="Tag" SelectedValue="{Binding Rating}" IsEditable="False" Width="300" HorizontalAlignment="Left">
+            <ComboBox Margin="2 0" SelectedValuePath="Tag" SelectedValue="{Binding Rating, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEditable="False" Width="300" HorizontalAlignment="Left">
                 <ComboBoxItem Tag="99">
                     <TextBlock IsEnabled="False" Text="Not set  " />
                 </ComboBoxItem>

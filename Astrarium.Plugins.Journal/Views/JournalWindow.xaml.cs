@@ -32,16 +32,6 @@ namespace Astrarium.Plugins.Journal.Views
             calendar.DisplayDate = calendar.SelectedDate.Value;
         }
 
-        private void TreeViewItem_Selected(object sender, RoutedEventArgs e)
-        {
-            TreeViewItem item = sender as TreeViewItem;
-            if (item != null)
-            {
-                item.BringIntoView();
-                e.Handled = true;
-            }
-        }
-
         private void CalendarDayButton_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             var button = sender as CalendarDayButton;
@@ -53,6 +43,15 @@ namespace Astrarium.Plugins.Journal.Views
             var menu = sender as ContextMenu;
             menu.DataContext = DataContext;
             menu.Placement = PlacementMode.Mouse;
+        }
+
+        private void calendar_GotMouseCapture(object sender, MouseEventArgs e)
+        {
+            UIElement originalElement = e.OriginalSource as UIElement;
+            if (originalElement is CalendarDayButton || originalElement is CalendarItem)
+            {
+                originalElement.ReleaseMouseCapture();
+            }
         }
     }
 }

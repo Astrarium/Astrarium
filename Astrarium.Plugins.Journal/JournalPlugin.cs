@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace Astrarium.Plugins.Journal
 {
@@ -37,7 +38,7 @@ namespace Astrarium.Plugins.Journal
 
             var menuItemJournal = new MenuItem("Logbook");
 
-            menuItemJournal.SubItems.Add(new MenuItem("Show Logbook", new Command(ShowJournal)));
+            menuItemJournal.SubItems.Add(new MenuItem("Show Logbook", new Command(ShowJournal)) { HotKey = new KeyGesture(Key.J, ModifierKeys.Control, "Ctrl+J") });
             menuItemJournal.SubItems.Add(null);
             menuItemJournal.SubItems.Add(new MenuItem("Import from OAL file...", new Command(DoImport)));
             menuItemJournal.SubItems.Add(new MenuItem("Export to OAL file...", new Command(DoExport)));

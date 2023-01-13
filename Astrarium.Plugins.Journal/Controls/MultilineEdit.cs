@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Astrarium.Types;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -162,7 +163,15 @@ namespace Astrarium.Plugins.Journal.Controls
         {
             if (IsEditMode)
             {
-                SetReadMode(false);
+                if (!string.Equals(_text, Text) && ViewManager.ShowMessageBox("SaveChanges?", "Save?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                {
+                    SetReadMode(true);
+                }
+                else
+                {
+
+                    SetReadMode(false);
+                }
             }
         }
 
@@ -199,7 +208,6 @@ namespace Astrarium.Plugins.Journal.Controls
                Text = _text;
             }
 
-           
 
             IsEditMode = false;
             _applyButton.Visibility = Visibility.Collapsed;

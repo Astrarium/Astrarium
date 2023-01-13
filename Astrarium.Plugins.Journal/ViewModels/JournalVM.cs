@@ -29,7 +29,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
         private DateTimeComparer dateComparer = new DateTimeComparer();
 
         private ISky sky;
-        private ISkyMap map;
+        private IMainWindow mainWindow;
         private IOALImporter importer;
         private ITargetDetailsFactory targetDetailsFactory;
         private IDatabaseManager dbManager;
@@ -76,15 +76,18 @@ namespace Astrarium.Plugins.Journal.ViewModels
         public ICommand DeleteCameraCommand { get; private set; }
 
         public ICommand EditSiteCommand { get; private set; }
+        public ICommand CreateSiteCommand { get; private set; }
+        public ICommand DeleteSiteCommand { get; private set; }
+
 
         public ICommand GoToCoordinatesCommand { get; private set; }
 
         #endregion Commands
 
-        public JournalVM(ISky sky, ISkyMap map, ITargetDetailsFactory targetDetailsFactory, IOALImporter importer, IDatabaseManager dbManager)
+        public JournalVM(ISky sky, IMainWindow mainWindow, ITargetDetailsFactory targetDetailsFactory, IOALImporter importer, IDatabaseManager dbManager)
         {
             this.sky = sky;
-            this.map = map;
+            this.mainWindow = mainWindow;
             this.importer = importer;
             this.targetDetailsFactory = targetDetailsFactory;
             this.dbManager = dbManager;
@@ -134,6 +137,8 @@ namespace Astrarium.Plugins.Journal.ViewModels
             DeleteCameraCommand = new Command<string>(DeleteCamera);
 
             EditSiteCommand = new Command<string>(EditSite);
+            CreateSiteCommand = new Command(CreateSite);
+            DeleteSiteCommand = new Command<string>(DeleteSite);
 
             GoToCoordinatesCommand = new Command(GoToCoordinates);
 
@@ -294,6 +299,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
                 {
                     obs.IsEnabled = true;
                 }
+                session.IsEnabled = true;
                 return true;
             }
 
@@ -340,7 +346,9 @@ namespace Astrarium.Plugins.Journal.ViewModels
                         obs.IsEnabled = true;
                 }
             }
-            return session.Observations.Any(x => x.IsEnabled);
+
+            session.IsEnabled = session.Observations.Any(x => x.IsEnabled);
+            return session.IsEnabled;
         }
 
         public async void Load()
@@ -476,7 +484,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
                 sessions.Remove(session);
                 FilteredSessions.Refresh();
-
+                NotifyPropertyChanged(nameof(SessionDates));
                 SelectedTreeViewItem = null;
             }
         }
@@ -493,6 +501,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
                 var targetDetails = CreateTargetDetails(jd, model.CelestialBody);
                 var observation = await dbManager.CreateObservation(session, model.CelestialBody, targetDetails, model.Date.Date + model.Begin, model.Date.Date + model.End);
                 session.Observations.Add(observation);
+                FilteredSessions.Refresh();
                 SelectedTreeViewItem = observation;
             }
         }
@@ -603,7 +612,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
             var model = ViewManager.CreateViewModel<AttachmentVM>();
             model.SetAttachment(attachment);
             model.ShowImage();
-            ViewManager.ShowDialog(model);
+            ViewManager.ShowWindow(model);
         }
 
         private void ShowAttachmentDetails(Attachment attachment)
@@ -611,7 +620,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
             var model = ViewManager.CreateViewModel<AttachmentVM>();
             model.SetAttachment(attachment);
             model.ShowDetails();
-            ViewManager.ShowDialog(model);
+            ViewManager.ShowWindow(model);
         }
 
         private void DropAttachments(string[] files)
@@ -840,15 +849,17 @@ namespace Astrarium.Plugins.Journal.ViewModels
                 site.Longitude = location.Longitude;
                 site.Name = location.LocationName;
                 site.Timezone = location.UtcOffset;
-
-                //await dbManager.sa(id)
             };
+        }
 
-            //if (ViewManager.ShowDialog(model) ?? false)
-            //{
-            //    Cameras = await dbManager.GetCameras();
-            //    (SelectedTreeViewItem as Observation).CameraId = model.Camera.Id;
-            //}
+        private void CreateSite()
+        {
+
+        }
+
+        private void DeleteSite(string siteId)
+        {
+
         }
 
         private async void GoToCoordinates()
@@ -856,43 +867,68 @@ namespace Astrarium.Plugins.Journal.ViewModels
             var obs = SelectedTreeViewItem as Observation;
             var details = obs.TargetDetails;
 
-            if (details.RA != null && details.Dec != null)
+            CelestialObject body = null;
+            foreach (string name in Enumerable.Concat(new[] { obs.ObjectCommonName }, obs.ObjectNameAliases?.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries) ?? new string[0]))
             {
-                double jd = Date.JulianEphemerisDay(new Date(obs.Begin.UtcDateTime));
+                body = sky.Search(obs.ObjectType, name);
+                if (body != null) break;
+            }
 
-                if (obs.Session.SiteId != null)
+            if (body == null && (details.RA == null || details.Dec == null))
+            {
+                ViewManager.ShowMessageBox("$Error", "Unable to resolve the observation target.", MessageBoxButton.OK);
+                return;
+            }
+
+            bool locationChanged = false;
+            if (obs.Session.SiteId != null)
+            {
+                var site = await dbManager.GetSite(obs.Session.SiteId);
+                var geo = new CrdsGeographical(-site.Longitude, site.Latitude, site.Timezone, site.Elevation, null, site.Name);
+
+                // location is different than selected one
+                if (sky.Context.GeoLocation.DistanceTo(geo) >= 1)
                 {
-                    var site = await dbManager.GetSite(obs.Session.SiteId);
-                    var geo = new CrdsGeographical(-site.Longitude, site.Latitude, site.Timezone, site.Elevation, null, site.Name);
-
-                    if (sky.Context.GeoLocation.DistanceTo(geo) >= 5)
+                    if (ViewManager.ShowMessageBox("$Warning", $"The observation's location place ({site.Name}) differs than current one ({sky.Context.GeoLocation.LocationName}).\r\nDo you want to change the location and show the target as it seen from it?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                     {
-                        if (ViewManager.ShowMessageBox("$Warning", "The observation's location place differs than selected one. Do you want to change the location and show the target as it seen from it?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
-                        {
-                            sky.Context.GeoLocation = geo;
-                        }
-                        else
-                        {
-                            return;
-                        }
+                        sky.Context.GeoLocation = geo;
+                        locationChanged = true;
+                    }
+                    else
+                    {
+                        return;
                     }
                 }
+            }
 
-                sky.Context.JulianDay = jd;
+            // set julian day corresponding to logged observation
+            sky.Context.JulianDay = Date.JulianEphemerisDay(new Date(obs.Begin.UtcDateTime));
 
-                sky.Calculate();
+            await Task.Run(() => sky.Calculate());
 
-                var body = sky.Search(obs.ObjectType, obs.ObjectCommonName);
-
-                map.SelectedObject = body;
-
-                // calculate horizontal coordinates
+            if (details.RA != null && details.Dec != null)
+            {
                 var eq = new CrdsEquatorial(details.RA.Value, details.Dec.Value);
-
                 var hor = eq.ToHorizontal(sky.Context.GeoLocation, sky.Context.SiderealTime);
+                mainWindow.CenterOnPoint(hor, 1);
+                mainWindow.Focus();
+            }
+            else if (body != null)
+            {
+                if (mainWindow.CenterOnObject(body))
+                {
+                    mainWindow.Focus();
+                }
+                else
+                {
+                    ViewManager.ShowMessageBox("$Error", "Unable to resolve the observation target.", MessageBoxButton.OK);
+                }
+            }
 
-                map.GoToPoint(hor, 1);
-            }           
+            if (locationChanged)
+            {
+                ViewManager.ShowPopupMessage($"Observer location changed to {sky.Context.GeoLocation.LocationName}");
+            }
         }
 
         private TargetDetails CreateTargetDetails(double jd, CelestialObject body)
