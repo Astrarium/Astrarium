@@ -15,12 +15,6 @@ namespace Astrarium.Plugins.Journal.Types
         [Ephemeris("Equatorial.Delta")]
         public double? Dec { get; set; }
 
-        [Ephemeris("Horizontal.Altitude")]
-        public double? Alt { get; set; }
-
-        [Ephemeris("Horizontal.Azimuth")]
-        public double? Azi { get; set; }
-
         [Ephemeris("Constellation")]
         public string Constellation { get; set; }
     }

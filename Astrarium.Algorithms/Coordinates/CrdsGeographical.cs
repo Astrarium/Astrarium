@@ -64,34 +64,18 @@ namespace Astrarium.Algorithms
         public double UtcOffset { get; set; }
 
         /// <summary>
-        /// Time Zone Id
-        /// </summary>
-        public string TimeZoneId { get; set; }
-
-        /// <summary>
         /// Name of the location
         /// </summary>
         public string LocationName { get; set; }
 
-        /// <summary>
-        /// Optional country code
-        /// </summary>
-        public string CountryCode { get; set; }
-
-        /// <summary>
-        /// Optional other names of the location
-        /// </summary>
-        public string[] OtherNames { get; set; }
-
         public CrdsGeographical() { }
 
-        public CrdsGeographical(double longitude, double latitude, double utcOffset = 0, double elevation = 0, string timeZoneId = null, string locationName = null)
+        public CrdsGeographical(double longitude, double latitude, double utcOffset = 0, double elevation = 0, string locationName = null)
         {
             Latitude = latitude;
             Longitude = longitude;
             UtcOffset = utcOffset;
             Elevation = elevation;
-            TimeZoneId = timeZoneId;
             LocationName = locationName;
         }
 
@@ -99,7 +83,7 @@ namespace Astrarium.Algorithms
             : this(longitude.ToDecimalAngle(), latitude.ToDecimalAngle(), utcOffset, elevation) { }
 
         public CrdsGeographical(CrdsGeographical other)
-            : this(other.Longitude, other.Latitude, other.UtcOffset, other.Elevation, other.TimeZoneId, other.LocationName) { }
+            : this(other.Longitude, other.Latitude, other.UtcOffset, other.Elevation, other.LocationName) { }
 
         public override string ToString()
         {

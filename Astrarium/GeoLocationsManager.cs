@@ -17,11 +17,6 @@ namespace Astrarium
     public class GeoLocationsManager : IGeoLocationsManager
     {
         /// <summary>
-        /// List of timezones
-        /// </summary>
-        private List<TimeZoneItem> timeZones = new List<TimeZoneItem>();
-
-        /// <summary>
         /// List of all locations
         /// </summary>
         private List<GeoLocation> allLocations = new List<GeoLocation>();
@@ -45,22 +40,21 @@ namespace Astrarium
                 {
                     return allLocations.Where(c => c.DistanceTo(center) <= radius).Select(c =>
                     {
+                        // TODO: constructor
                         return new CrdsGeographical()
                         {
-                            CountryCode = c.Country,
                             Elevation = c.Elevation,
                             Latitude = c.Latitude,
                             Longitude = c.Longitude,
                             LocationName = c.Names.FirstOrDefault(),
-                            TimeZoneId = c.TimeZone?.TimeZoneId,
-                            UtcOffset = c.TimeZone?.UtcOffset ?? 0
+                            UtcOffset = c.TimeZone?.BaseUtcOffset.TotalHours ?? 0
                         };
                     }).ToArray();
                 }
             }
             else
             {
-                return new CrdsGeographical[0];                
+                return new CrdsGeographical[0];
             }
         }
 
@@ -73,19 +67,18 @@ namespace Astrarium
                     return allLocations
                         .Where(c => c.Names.Any(n => n.Replace("\'", "").StartsWith(searchString, StringComparison.OrdinalIgnoreCase)))
                         .Take(maxCount)
-                        .Select(c => 
+                        .Select(c =>
                         {
                             string name = c.Names.First(n => n.Replace("\'", "").StartsWith(searchString, StringComparison.OrdinalIgnoreCase));
                             return new CrdsGeographical()
                             {
-                                CountryCode = c.Country,
+                                //CountryCode = c.Country,
                                 Elevation = c.Elevation,
                                 Latitude = c.Latitude,
                                 Longitude = c.Longitude,
                                 LocationName = name,
-                                OtherNames = c.Names.Distinct().Except(new[] { name }).ToArray(),
-                                TimeZoneId = c.TimeZone?.TimeZoneId,
-                                UtcOffset = c.TimeZone?.UtcOffset ?? 0
+                                //OtherNames = c.Names.Distinct().Except(new[] { name }).ToArray(),
+                                UtcOffset = c.TimeZone?.BaseUtcOffset.TotalHours ?? 0
                             };
                         })
                         .OrderBy(c => c.LocationName)
@@ -99,22 +92,10 @@ namespace Astrarium
         }
 
         /// <inheritdoc/>
-        public ICollection<TimeZoneInfo> TimeZones
-        {
-            get 
-            {
-                return timeZones.Select(tz =>
-                    TimeZoneInfo.CreateCustomTimeZone(tz.TimeZoneId, TimeSpan.FromHours(tz.UtcOffset), tz.Name, tz.Name))
-                    .ToArray();
-            }
-        }
-
-        /// <inheritdoc/>
         public void Load()
         {
             Task.Run(() =>
             {
-                LoadTimeZones();
                 LoadLocations();
                 isLoaded = true;
             });
@@ -125,51 +106,14 @@ namespace Astrarium
         {
             lock (locker)
             {
-                timeZones.Clear();
                 allLocations.Clear();
-                timeZones = null;
                 allLocations = null;
                 isLoaded = false;
             }
         }
 
         /// <inheritdoc/>
-        public event Action TimeZonesLoaded;
-
-        /// <inheritdoc/>
         public event Action LocationsLoaded;
-
-        private void LoadTimeZones()
-        {
-            lock (locker)
-            {
-                // Do not read time zones again
-                if (timeZones != null && timeZones.Count > 0)
-                {
-                    return;
-                }
-
-                timeZones = new List<TimeZoneItem>();
-                string line;
-                string filePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data", "TimeZones.dat");
-                using (StreamReader file = new StreamReader(filePath))
-                {
-                    while ((line = file.ReadLine()) != null)
-                    {
-                        // skip first and empty lines
-                        if (line.StartsWith("CountryCode") || string.IsNullOrWhiteSpace(line))
-                        {
-                            continue;
-                        }
-
-                        string[] chunks = line.Split('\t');
-                        timeZones.Add(new TimeZoneItem() { TimeZoneId = chunks[1], UtcOffset = double.Parse(chunks[4], CultureInfo.InvariantCulture) });
-                    }
-                    file.Close();
-                }
-            }
-            TimeZonesLoaded?.Invoke();
-        }
 
         /// <summary>
         /// Loads cities from file
@@ -193,6 +137,8 @@ namespace Astrarium
 
                     using (var fileReader = new StreamReader(fileStream, Encoding.UTF8))
                     {
+                        var timeZones = TimeZoneInfo.GetSystemTimeZones();
+
                         string line = null;
                         while ((line = fileReader.ReadLine()) != null)
                         {
@@ -202,20 +148,20 @@ namespace Astrarium
                                 float latitude = float.Parse(chunks[4], CultureInfo.InvariantCulture);
                                 float longitude = float.Parse(chunks[5], CultureInfo.InvariantCulture);
                                 float elevation = float.Parse(string.IsNullOrWhiteSpace(chunks[15]) ? "0" : chunks[15], CultureInfo.InvariantCulture);
-                                TimeZoneItem timeZone = timeZones.FirstOrDefault(tz => tz.TimeZoneId.Equals(chunks[17], StringComparison.InvariantCultureIgnoreCase));
+                                TimeZoneInfo timeZone = timeZones.FirstOrDefault(tz => tz.Id.Equals(chunks[17], StringComparison.InvariantCultureIgnoreCase));
 
                                 var names = new List<string>();
                                 names.Add(chunks[1]);
                                 names.AddRange(chunks[3].Split(','));
 
-                                allLocations.Add(new GeoLocation() 
+                                allLocations.Add(new GeoLocation()
                                 { 
                                     Names = names.ToArray(),
                                     Country = chunks[8],
                                     Elevation = elevation,
                                     Latitude = latitude,
                                     Longitude = -longitude,
-                                    TimeZone = timeZone,                                    
+                                    TimeZone = timeZone,
                                 });
                             }
                             catch (Exception ex)
@@ -248,7 +194,7 @@ namespace Astrarium
             public float Latitude { get; set; }
             public float Longitude { get; set; }
             public float Elevation { get; set; }
-            public TimeZoneItem TimeZone { get; set; }
+            public TimeZoneInfo TimeZone { get; set; }
 
             public double DistanceTo(CrdsGeographical g)
             {

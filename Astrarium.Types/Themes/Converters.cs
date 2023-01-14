@@ -455,4 +455,19 @@ namespace Astrarium.Types.Themes
             throw new NotImplementedException();
         }
     }
+
+    public class TimeZoneConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null) return null;
+            TimeSpan offset = (TimeSpan)value;
+            return $"UTC{(offset.Ticks < 0 ? "−" : "+")}{offset:hh\\:mm}";
+        }
+
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

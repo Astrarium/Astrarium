@@ -89,7 +89,7 @@ namespace Astrarium.Plugins.Eclipses.ImportExport
                                 throw new Exception($"Incorrect value at row {row}, column 4. Expected decimal UTC offset value, actual = {(string.IsNullOrWhiteSpace(timeZoneStr) ? "<empty>" : timeZoneStr)}.");
                         }
 
-                        locations.Add(new CrdsGeographical(-longitude, latitude, timeZone, 0, null, name));
+                        locations.Add(new CrdsGeographical(-longitude, latitude, timeZone, elevation: 0, name));
                     }
                     else
                     {

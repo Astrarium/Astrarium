@@ -39,16 +39,6 @@ namespace Astrarium.Types
         ICollection<CrdsGeographical> Search(string searchString, int maxCount);
 
         /// <summary>
-        /// Gets collection of timezones
-        /// </summary>
-        ICollection<TimeZoneInfo> TimeZones { get; }
-
-        /// <summary>
-        /// Fired when list of timezones has been loaded
-        /// </summary>
-        event Action TimeZonesLoaded;
-
-        /// <summary>
         /// Fired when list of locations has been loaded
         /// </summary>
         event Action LocationsLoaded;

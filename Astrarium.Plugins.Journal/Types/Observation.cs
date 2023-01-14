@@ -101,12 +101,11 @@ namespace Astrarium.Plugins.Journal.Types
         public TargetDetails TargetDetails
         {
             get => GetValue<TargetDetails>(nameof(TargetDetails));
-            set { 
-                
+            set
+            {
                 SetValue(nameof(TargetDetails), value);
                 NotifyPropertyChanged(
                     nameof(EquatorialCoordinates),
-                    nameof(HorizontalCoordinates),
                     nameof(Constellation));
             }
         }
@@ -171,18 +170,6 @@ namespace Astrarium.Plugins.Journal.Types
                 if (TargetDetails != null && TargetDetails.RA != null && TargetDetails.Dec != null)
                 {
                     return new CrdsEquatorial(TargetDetails.RA.Value, TargetDetails.Dec.Value);
-                }
-                return null;
-            }
-        }
-
-        public CrdsHorizontal HorizontalCoordinates
-        {
-            get
-            {
-                if (TargetDetails != null && TargetDetails.Azi != null && TargetDetails.Alt != null)
-                {
-                    return new CrdsHorizontal(TargetDetails.Azi.Value, TargetDetails.Alt.Value);
                 }
                 return null;
             }

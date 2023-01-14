@@ -46,7 +46,6 @@ namespace Astrarium.ViewModels
             this.settings.SettingValueChanged += OnSettingValueChanged;
 
             this.locationsManager = locationsManager;
-            this.locationsManager.TimeZonesLoaded += OnTimeZonesLoaded;
             this.locationsManager.Load();
 
             IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
@@ -322,7 +321,7 @@ namespace Astrarium.ViewModels
             {
                 var latitude = new DMS(ObserverLocation.Latitude);
                 latitude.Degrees = (uint)value;
-                ObserverLocation = new CrdsGeographical(ObserverLocation.Longitude, latitude.ToDecimalAngle(), ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.TimeZoneId, ObserverLocation.LocationName);
+                ObserverLocation = new CrdsGeographical(ObserverLocation.Longitude, latitude.ToDecimalAngle(), ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.LocationName);
             }
         }
 
@@ -339,7 +338,7 @@ namespace Astrarium.ViewModels
             {
                 var latitude = new DMS(ObserverLocation.Latitude);
                 latitude.Minutes = (uint)value;
-                ObserverLocation = new CrdsGeographical(ObserverLocation.Longitude, latitude.ToDecimalAngle(), ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.TimeZoneId, ObserverLocation.LocationName);
+                ObserverLocation = new CrdsGeographical(ObserverLocation.Longitude, latitude.ToDecimalAngle(), ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.LocationName);
             }
         }
 
@@ -356,7 +355,7 @@ namespace Astrarium.ViewModels
             {
                 var latitude = new DMS(ObserverLocation.Latitude);
                 latitude.Seconds = (uint)value;
-                ObserverLocation = new CrdsGeographical(ObserverLocation.Longitude, latitude.ToDecimalAngle(), ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.TimeZoneId, ObserverLocation.LocationName);
+                ObserverLocation = new CrdsGeographical(ObserverLocation.Longitude, latitude.ToDecimalAngle(), ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.LocationName);
             }
         }
 
@@ -373,7 +372,7 @@ namespace Astrarium.ViewModels
             {
                 if (value != (ObserverLocation.Latitude >= 0))
                 {
-                    ObserverLocation = new CrdsGeographical(ObserverLocation.Longitude, -ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.TimeZoneId, ObserverLocation.LocationName);
+                    ObserverLocation = new CrdsGeographical(ObserverLocation.Longitude, -ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.LocationName);
                 }
             }
         }
@@ -391,7 +390,7 @@ namespace Astrarium.ViewModels
             {
                 if (value != (ObserverLocation.Latitude < 0))
                 {
-                    ObserverLocation = new CrdsGeographical(ObserverLocation.Longitude, -ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.TimeZoneId, ObserverLocation.LocationName);
+                    ObserverLocation = new CrdsGeographical(ObserverLocation.Longitude, -ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.LocationName);
                 }
             }
         }
@@ -413,7 +412,7 @@ namespace Astrarium.ViewModels
             {
                 var longitude = new DMS(ObserverLocation.Longitude);
                 longitude.Degrees = (uint)value;
-                ObserverLocation = new CrdsGeographical(longitude.ToDecimalAngle(), ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.TimeZoneId, ObserverLocation.LocationName);
+                ObserverLocation = new CrdsGeographical(longitude.ToDecimalAngle(), ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.LocationName);
             }
         }
 
@@ -430,7 +429,7 @@ namespace Astrarium.ViewModels
             {
                 var longitude = new DMS(ObserverLocation.Longitude);
                 longitude.Minutes = (uint)value;
-                ObserverLocation = new CrdsGeographical(longitude.ToDecimalAngle(), ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.TimeZoneId, ObserverLocation.LocationName);
+                ObserverLocation = new CrdsGeographical(longitude.ToDecimalAngle(), ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.LocationName);
             }
         }
 
@@ -447,7 +446,7 @@ namespace Astrarium.ViewModels
             {
                 var longitude = new DMS(ObserverLocation.Longitude);
                 longitude.Seconds = (uint)value;
-                ObserverLocation = new CrdsGeographical(longitude.ToDecimalAngle(), ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.TimeZoneId, ObserverLocation.LocationName);
+                ObserverLocation = new CrdsGeographical(longitude.ToDecimalAngle(), ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.LocationName);
             }
         }
 
@@ -464,7 +463,7 @@ namespace Astrarium.ViewModels
             {
                 if (value != (ObserverLocation.Longitude <= 0))
                 {
-                    ObserverLocation = new CrdsGeographical(-ObserverLocation.Longitude, ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.TimeZoneId, ObserverLocation.LocationName);
+                    ObserverLocation = new CrdsGeographical(-ObserverLocation.Longitude, ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.LocationName);
                 }
             }
         }
@@ -482,7 +481,7 @@ namespace Astrarium.ViewModels
             {
                 if (value != (ObserverLocation.Longitude > 0))
                 {
-                    ObserverLocation = new CrdsGeographical(-ObserverLocation.Longitude, ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.TimeZoneId, ObserverLocation.LocationName);
+                    ObserverLocation = new CrdsGeographical(-ObserverLocation.Longitude, ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.LocationName);
                 }
             }
         }
@@ -494,26 +493,17 @@ namespace Astrarium.ViewModels
         /// <summary>
         /// Gets timezones list
         /// </summary>
-        public ICollection<TimeZoneInfo> TimeZones
+        public ICollection<TimeSpan> TimeZones
         {
-            get => locationsManager.TimeZones;
+            get => TimeZoneInfo.GetSystemTimeZones().Select(x => x.BaseUtcOffset).OrderBy(x => x).Distinct().ToArray();
         }
 
-        /// <summary>
-        /// Gets/sets a time zone associated with the observer location
-        /// </summary>
-        public TimeZoneInfo TimeZone
+        public TimeSpan TimeZone
         {
-            get
-            {
-                return locationsManager.TimeZones.FirstOrDefault(tz => tz.Id.Equals(ObserverLocation.TimeZoneId, StringComparison.InvariantCultureIgnoreCase));
-            }
+            get => TimeSpan.FromHours(ObserverLocation.UtcOffset);
             set
             {
-                if (value != null)
-                {
-                    ObserverLocation = new CrdsGeographical(ObserverLocation.Longitude, ObserverLocation.Latitude, value.BaseUtcOffset.TotalHours, ObserverLocation.Elevation, value.Id, ObserverLocation.LocationName);
-                }
+                ObserverLocation.UtcOffset = value.TotalHours;
                 NotifyPropertyChanged(nameof(TimeZone));
             }
         }
@@ -635,10 +625,10 @@ namespace Astrarium.ViewModels
 
             return locationsManager.Search(searchString, 20).Select(c => new LocationSearchItem()
             {
-                Country = c.CountryCode,
+                Country = "", //c.CountryCode,
                 Location = c,
                 Name = c.LocationName,
-                Names = string.Join(", ", c.OtherNames)
+                Names = "", //string.Join(", ", c.OtherNames)
             }).ToList();
         }
 
@@ -678,15 +668,6 @@ namespace Astrarium.ViewModels
         }
 
         /// <summary>
-        /// <see cref="IGeoLocationsManager.TimeZonesLoaded"/> handler
-        /// </summary>
-        private void OnTimeZonesLoaded()
-        {
-            NotifyPropertyChanged(nameof(TimeZones));
-            NotifyPropertyChanged(nameof(TimeZone));
-        }
-
-        /// <summary>
         /// Handler for double click on the map
         /// </summary>
         private void OnMouseDoubleClick()
@@ -696,17 +677,16 @@ namespace Astrarium.ViewModels
             CrdsGeographical nearestKnown = locationsManager.Search(mouse, 100).OrderBy(x => x.DistanceTo(mouse)).FirstOrDefault();
 
             string name = Text.Get("LocationWindow.UnnamedLocation");
-            string tz = ObserverLocation.TimeZoneId;
             double utcOffset = ObserverLocation.UtcOffset;
             if (nearestKnown != null)
             {
                 int dist = (int)nearestKnown.DistanceTo(mouse);
                 name = $"{nearestKnown.LocationName} ({dist} km)";
-                tz = nearestKnown.TimeZoneId;
                 utcOffset = nearestKnown.UtcOffset;
             }
 
-            ObserverLocation = new CrdsGeographical(-MapMouse.Longitude, MapMouse.Latitude) { LocationName = name, TimeZoneId = tz, UtcOffset = utcOffset };
+            // TODO: use another constructor
+            ObserverLocation = new CrdsGeographical(-MapMouse.Longitude, MapMouse.Latitude) { LocationName = name, UtcOffset = utcOffset };
         }
 
         /// <summary>
@@ -881,7 +861,6 @@ namespace Astrarium.ViewModels
         public override void Dispose()
         {
             settings.SettingValueChanged -= OnSettingValueChanged;
-            locationsManager.TimeZonesLoaded -= OnTimeZonesLoaded;
             locationsManager.Unload();
             base.Dispose();
             Task.Run(() => GC.Collect());

@@ -258,13 +258,13 @@
                 <TextBox Margin="4 10 4 10" Text="{Binding LocationName}"></TextBox>
             </GroupBox>
 
-            <GroupBox Grid.Row="3" Header="{t:Text LocationWindow.TimeZone}" Margin="4">
-                <ComboBox Margin="4 10 4 10" ItemsSource="{Binding TimeZones}" SelectedItem="{Binding TimeZone}" DisplayMemberPath="DisplayName">
-                    <ComboBox.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <VirtualizingStackPanel />
-                        </ItemsPanelTemplate>
-                    </ComboBox.ItemsPanel>
+            <GroupBox Grid.Row="3" Header="{t:Text LocationWindow.UTCOffset}" Margin="4">
+                <ComboBox Margin="4 10 4 10" ItemsSource="{Binding TimeZones}" SelectedItem="{Binding TimeZone}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={s:TimeZoneConverter}}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
                 </ComboBox>
             </GroupBox>
 

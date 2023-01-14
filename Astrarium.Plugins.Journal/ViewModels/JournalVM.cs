@@ -836,10 +836,8 @@ namespace Astrarium.Plugins.Journal.ViewModels
                 Latitude = site.Latitude,
                 Longitude = -site.Longitude,
                 LocationName = site.Name,
-                UtcOffset = site.Timezone,
-                TimeZoneId = ""
+                UtcOffset = site.Timezone
             };
-
 
             var model = ViewManager.ShowLocationDialog(location);
             if (model != null)
@@ -884,7 +882,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
             if (obs.Session.SiteId != null)
             {
                 var site = await dbManager.GetSite(obs.Session.SiteId);
-                var geo = new CrdsGeographical(-site.Longitude, site.Latitude, site.Timezone, site.Elevation, null, site.Name);
+                var geo = new CrdsGeographical(-site.Longitude, site.Latitude, site.Timezone, site.Elevation, site.Name);
 
                 // location is different than selected one
                 if (sky.Context.GeoLocation.DistanceTo(geo) >= 1)
