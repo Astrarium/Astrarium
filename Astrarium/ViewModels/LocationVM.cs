@@ -625,10 +625,10 @@ namespace Astrarium.ViewModels
 
             return locationsManager.Search(searchString, 20).Select(c => new LocationSearchItem()
             {
-                Country = "", //c.CountryCode,
+                Country = c.Country,
                 Location = c,
-                Name = c.LocationName,
-                Names = "", //string.Join(", ", c.OtherNames)
+                Name = c.Names.FirstOrDefault(n => n.Replace("\'", "").StartsWith(searchString, StringComparison.OrdinalIgnoreCase)),
+                Names = string.Join(", ", c.Names)
             }).ToList();
         }
 
