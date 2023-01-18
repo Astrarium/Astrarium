@@ -359,7 +359,10 @@ namespace Astrarium
             using (var vm = CreateViewModel<LocationVM>())
             {
                 vm.SetLocation(new CrdsGeographical(location));
-                return (ShowDialog(vm) ?? false) ? new CrdsGeographical(vm.ObserverLocation) : null;
+                if (ShowDialog(vm) == true)
+                    return new CrdsGeographical(vm.ObserverLocation);
+                else
+                    return null;
             }
         }
 

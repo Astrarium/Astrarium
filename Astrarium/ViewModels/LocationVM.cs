@@ -46,7 +46,6 @@ namespace Astrarium.ViewModels
             this.settings.SettingValueChanged += OnSettingValueChanged;
 
             this.locationsManager = locationsManager;
-            this.locationsManager.Load();
 
             IsDarkMode = settings.Get<ColorSchema>("Schema") == ColorSchema.Red;
             MapZoomLevel = 7;
@@ -54,12 +53,20 @@ namespace Astrarium.ViewModels
 
             SetMapColors();
 
+            string userAgent = "Astrarium/1.0";
+
             TileServers = new List<ITileServer>()
             {
                 new OfflineTileServer(),
-                new OpenStreetMapTileServer("Astrarium v1.0 contact astrarium@astrarium.space"),
+                new OpenStreetMapTileServer(userAgent),
                 new StamenTerrainTileServer(),
                 new OpenTopoMapServer()
+            };
+
+            OverlayTileServers = new List<ITileServer>()
+            {
+                null,
+                new LightPollutionTileServer(userAgent)
             };
 
             string tileServerName = settings.Get<string>(TILE_SERVER_SETTING_NAME);
@@ -212,12 +219,33 @@ namespace Astrarium.ViewModels
         }
 
         /// <summary>
+        /// Overlay tile server of the map
+        /// </summary>
+        public ITileServer OverlayTileServer
+        {
+            get => GetValue<ITileServer>(nameof(OverlayTileServer));
+            set
+            {
+                SetValue(nameof(OverlayTileServer), value);
+            }
+        }
+
+        /// <summary>
         /// Collection of map tile servers to switch between them
         /// </summary>
         public ICollection<ITileServer> TileServers
         {
             get => GetValue<ICollection<ITileServer>>(nameof(TileServers));
             protected set => SetValue(nameof(TileServers), value);
+        }
+
+        /// <summary>
+        /// Collection of overlay tile servers to switch between them
+        /// </summary>
+        public ICollection<ITileServer> OverlayTileServers
+        {
+            get => GetValue<ICollection<ITileServer>>(nameof(OverlayTileServers));
+            protected set => SetValue(nameof(OverlayTileServers), value);
         }
 
         /// <summary>
@@ -287,7 +315,7 @@ namespace Astrarium.ViewModels
 
                 var geoPoint = new GeoPoint(-(float)value.Longitude, (float)value.Latitude);
                 Markers.Clear();
-                Markers.Add(new Marker(geoPoint, value.LocationName));
+                Markers.Add(new Marker(geoPoint, value.Name));
 
                 NotifyPropertyChanged(
                     nameof(LatitudeDegrees),
@@ -300,7 +328,8 @@ namespace Astrarium.ViewModels
                     nameof(LongitudeSeconds),
                     nameof(LongitudeEast),
                     nameof(LongitudeWest),
-                    nameof(TimeZone),
+                    nameof(UtcOffset),
+                    nameof(Elevation),
                     nameof(LocationName)
                 );
             }
@@ -321,7 +350,7 @@ namespace Astrarium.ViewModels
             {
                 var latitude = new DMS(ObserverLocation.Latitude);
                 latitude.Degrees = (uint)value;
-                ObserverLocation = new CrdsGeographical(ObserverLocation.Longitude, latitude.ToDecimalAngle(), ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.LocationName);
+                ObserverLocation = new CrdsGeographical(ObserverLocation.Longitude, latitude.ToDecimalAngle(), ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.Name);
             }
         }
 
@@ -338,7 +367,7 @@ namespace Astrarium.ViewModels
             {
                 var latitude = new DMS(ObserverLocation.Latitude);
                 latitude.Minutes = (uint)value;
-                ObserverLocation = new CrdsGeographical(ObserverLocation.Longitude, latitude.ToDecimalAngle(), ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.LocationName);
+                ObserverLocation = new CrdsGeographical(ObserverLocation.Longitude, latitude.ToDecimalAngle(), ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.Name);
             }
         }
 
@@ -355,7 +384,7 @@ namespace Astrarium.ViewModels
             {
                 var latitude = new DMS(ObserverLocation.Latitude);
                 latitude.Seconds = (uint)value;
-                ObserverLocation = new CrdsGeographical(ObserverLocation.Longitude, latitude.ToDecimalAngle(), ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.LocationName);
+                ObserverLocation = new CrdsGeographical(ObserverLocation.Longitude, latitude.ToDecimalAngle(), ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.Name);
             }
         }
 
@@ -372,7 +401,7 @@ namespace Astrarium.ViewModels
             {
                 if (value != (ObserverLocation.Latitude >= 0))
                 {
-                    ObserverLocation = new CrdsGeographical(ObserverLocation.Longitude, -ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.LocationName);
+                    ObserverLocation = new CrdsGeographical(ObserverLocation.Longitude, -ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.Name);
                 }
             }
         }
@@ -390,7 +419,7 @@ namespace Astrarium.ViewModels
             {
                 if (value != (ObserverLocation.Latitude < 0))
                 {
-                    ObserverLocation = new CrdsGeographical(ObserverLocation.Longitude, -ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.LocationName);
+                    ObserverLocation = new CrdsGeographical(ObserverLocation.Longitude, -ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.Name);
                 }
             }
         }
@@ -412,7 +441,7 @@ namespace Astrarium.ViewModels
             {
                 var longitude = new DMS(ObserverLocation.Longitude);
                 longitude.Degrees = (uint)value;
-                ObserverLocation = new CrdsGeographical(longitude.ToDecimalAngle(), ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.LocationName);
+                ObserverLocation = new CrdsGeographical(longitude.ToDecimalAngle(), ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.Name);
             }
         }
 
@@ -429,7 +458,7 @@ namespace Astrarium.ViewModels
             {
                 var longitude = new DMS(ObserverLocation.Longitude);
                 longitude.Minutes = (uint)value;
-                ObserverLocation = new CrdsGeographical(longitude.ToDecimalAngle(), ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.LocationName);
+                ObserverLocation = new CrdsGeographical(longitude.ToDecimalAngle(), ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.Name);
             }
         }
 
@@ -446,7 +475,7 @@ namespace Astrarium.ViewModels
             {
                 var longitude = new DMS(ObserverLocation.Longitude);
                 longitude.Seconds = (uint)value;
-                ObserverLocation = new CrdsGeographical(longitude.ToDecimalAngle(), ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.LocationName);
+                ObserverLocation = new CrdsGeographical(longitude.ToDecimalAngle(), ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.Name);
             }
         }
 
@@ -463,7 +492,7 @@ namespace Astrarium.ViewModels
             {
                 if (value != (ObserverLocation.Longitude <= 0))
                 {
-                    ObserverLocation = new CrdsGeographical(-ObserverLocation.Longitude, ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.LocationName);
+                    ObserverLocation = new CrdsGeographical(-ObserverLocation.Longitude, ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.Name);
                 }
             }
         }
@@ -481,7 +510,7 @@ namespace Astrarium.ViewModels
             {
                 if (value != (ObserverLocation.Longitude > 0))
                 {
-                    ObserverLocation = new CrdsGeographical(-ObserverLocation.Longitude, ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.LocationName);
+                    ObserverLocation = new CrdsGeographical(-ObserverLocation.Longitude, ObserverLocation.Latitude, ObserverLocation.UtcOffset, ObserverLocation.Elevation, ObserverLocation.Name);
                 }
             }
         }
@@ -498,13 +527,29 @@ namespace Astrarium.ViewModels
             get => TimeZoneInfo.GetSystemTimeZones().Select(x => x.BaseUtcOffset).OrderBy(x => x).Distinct().ToArray();
         }
 
-        public TimeSpan TimeZone
+        /// <summary>
+        /// Offset from UTC
+        /// </summary>
+        public TimeSpan UtcOffset
         {
             get => TimeSpan.FromHours(ObserverLocation.UtcOffset);
             set
             {
                 ObserverLocation.UtcOffset = value.TotalHours;
-                NotifyPropertyChanged(nameof(TimeZone));
+                NotifyPropertyChanged(nameof(UtcOffset));
+            }
+        }
+
+        /// <summary>
+        /// Elevation above sea level
+        /// </summary>
+        public decimal Elevation
+        {
+            get => (decimal)ObserverLocation.Elevation;
+            set
+            {
+                ObserverLocation.Elevation = (double)value;
+                NotifyPropertyChanged(nameof(Elevation));
             }
         }
 
@@ -513,13 +558,10 @@ namespace Astrarium.ViewModels
         /// </summary>
         public string LocationName
         {
-            get
-            {
-                return ObserverLocation.LocationName;
-            }
+            get => ObserverLocation.Name;
             set
             {
-                ObserverLocation.LocationName = value;
+                ObserverLocation.Name = value;
                 NotifyPropertyChanged(nameof(LocationName));
             }
         }
@@ -582,12 +624,12 @@ namespace Astrarium.ViewModels
         /// <summary>
         /// Collection of found items.
         /// </summary>
-        public ObservableCollection<LocationSearchItem> SearchResults { get; private set; } = new ObservableCollection<LocationSearchItem>();
+        public ObservableCollection<CrdsGeographical> SearchResults { get; private set; } = new ObservableCollection<CrdsGeographical>();
 
         /// <summary>
         /// Backing field for <see cref="SelectedItem"/>
         /// </summary>
-        private LocationSearchItem _SelectedItem;
+        private CrdsGeographical _SelectedItem;
 
         /// <summary>
         /// Previously saved location, needed in case when user cancels the search mode
@@ -597,7 +639,7 @@ namespace Astrarium.ViewModels
         /// <summary>
         /// Gets or sets location item currently selected in the search list
         /// </summary>
-        public LocationSearchItem SelectedItem
+        public CrdsGeographical SelectedItem
         {
             get => _SelectedItem;
             set
@@ -605,9 +647,13 @@ namespace Astrarium.ViewModels
                 _SelectedItem = value;
                 if (_SelectedItem != null)
                 {
-                    ObserverLocation = _SelectedItem.Location;
+                    ObserverLocation = _SelectedItem;
                 }
-                NotifyPropertyChanged(nameof(SelectedItem), nameof(TimeZone));
+                NotifyPropertyChanged(
+                    nameof(SelectedItem),
+                    nameof(UtcOffset),
+                    nameof(Elevation),
+                    nameof(LocationName));
             }
         }
 
@@ -616,20 +662,16 @@ namespace Astrarium.ViewModels
         /// </summary>
         /// <param name="searchString">String to search</param>
         /// <returns>List of location items matching the specified search string</returns>
-        private List<LocationSearchItem> Search(string searchString)
+        private ICollection<CrdsGeographical> Search(string searchString)
         {
             if (searchString.Length == 0)
             {
-                return new List<LocationSearchItem>();
+                return new CrdsGeographical[0];
             }
-
-            return locationsManager.Search(searchString, 20).Select(c => new LocationSearchItem()
+            else
             {
-                Country = c.Country,
-                Location = c,
-                Name = c.Names.FirstOrDefault(n => n.Replace("\'", "").StartsWith(searchString, StringComparison.OrdinalIgnoreCase)),
-                Names = string.Join(", ", c.Names)
-            }).ToList();
+                return locationsManager.Search(searchString, 20);
+            }
         }
 
         /// <summary>
@@ -681,12 +723,12 @@ namespace Astrarium.ViewModels
             if (nearestKnown != null)
             {
                 int dist = (int)nearestKnown.DistanceTo(mouse);
-                name = $"{nearestKnown.LocationName} ({dist} km)";
+                name = $"{nearestKnown.Name} ({dist} km)";
                 utcOffset = nearestKnown.UtcOffset;
             }
 
             // TODO: use another constructor
-            ObserverLocation = new CrdsGeographical(-MapMouse.Longitude, MapMouse.Latitude) { LocationName = name, UtcOffset = utcOffset };
+            ObserverLocation = new CrdsGeographical(-MapMouse.Longitude, MapMouse.Latitude) { Name = name, UtcOffset = utcOffset };
         }
 
         /// <summary>
@@ -861,35 +903,8 @@ namespace Astrarium.ViewModels
         public override void Dispose()
         {
             settings.SettingValueChanged -= OnSettingValueChanged;
-            locationsManager.Unload();
             base.Dispose();
             Task.Run(() => GC.Collect());
-        }
-
-        /// <summary>
-        /// Represents single search result item of geographical locations
-        /// </summary>
-        public class LocationSearchItem
-        {
-            /// <summary>
-            /// Name of the location
-            /// </summary>
-            public string Name { get; set; }
-
-            /// <summary>
-            /// Country code of the location
-            /// </summary>
-            public string Country { get; set; }
-
-            /// <summary>
-            /// Other names of the location, comma-separated and joined into single string
-            /// </summary>
-            public string Names { get; set; }
-
-            /// <summary>
-            /// Geographical location
-            /// </summary>
-            public CrdsGeographical Location { get; set; }
         }
     }
 }

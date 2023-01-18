@@ -102,41 +102,11 @@
                 </Button>
             </Grid>
 
-            <c:MapControl
-                x:Name="Map"
-                Grid.Row="1"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                Visibility="{Binding SearchMode, Converter={s:InverseBoolToVisibilityConverter}}"
-                BackColor="{Binding MapThumbnailBackColor}"                       
-                TileServer="{Binding TileServer, Mode=TwoWay}" 
-                CacheFolder="{Binding CacheFolder, Mode=OneTime}"
-                Markers="{Binding Markers}"
-                Center="{Binding MapCenter, Mode=TwoWay}"
-                ZoomLevel="{Binding MapZoomLevel, Mode=TwoWay}"
-                ThumbnailBackColor="{Binding MapThumbnailBackColor}"
-                ThumbnailForeColor="{Binding MapThumbnailForeColor}"
-                IsMouseOverMap="{Binding IsMouseOverMap, Mode=OneWayToSource}"
-                TileImageAttributes="{Binding TileImageAttributes}"
-                OnDoubleClick="{Binding OnMouseDoubleClickCommand}"
-                OnMarkerDraw="{Binding OnDrawMarkerCommand}"
-                OnRightClick="{Binding OnMouseRightClickCommand}"
-                Mouse="{Binding MapMouse, Mode=OneWayToSource}" 
-                Margin="0,0,0,25">
-                <c:MapControl.ContextMenu>
-                    <ContextMenu Opened="ContextMenu_Opened">
-                        <MenuItem Style="{StaticResource MenuItemHeader}" Header="{Binding MapMouseString}" IsEnabled="False" />
-                        <MenuItem Header="{t:Text LocationWindow.Select}" Command="{Binding SelectCurrentMousePositionCommand}" />
-                        <MenuItem Style="{StaticResource MenuItemHeader}" Visibility="{Binding NearestLocation, Converter={s:NotNullToVisibilityConverter}}" Header="{Binding NearestLocation.LocationName}" />
-                        <MenuItem Header="{t:Text LocationWindow.Select}" Command="{Binding SelectNearestLocationCommand}" Visibility="{Binding NearestLocation, Converter={s:NotNullToVisibilityConverter}}" />
-                    </ContextMenu>
-                </c:MapControl.ContextMenu>
-            </c:MapControl>
-
             <c:BindableListView Grid.Row="1" 
                 Margin="0 4 0 4"
                 x:Name="lstResults"
-                Opacity="0.9"
+                VerticalAlignment="Stretch"
+                                MinHeight="0"
                 ItemsSource="{Binding Path=SearchResults, Mode=OneWay}"
                 SelectedItem="{Binding SelectedItem}"                            
                 MouseDoubleClickCommand="{Binding SelectLocationCommand}"
@@ -162,12 +132,44 @@
                         <GridView.Columns>
                             <GridViewColumn Header="{t:Text LocationWindow.Table.Country}" Width="55" DisplayMemberBinding="{Binding Path=Country}" />
                             <GridViewColumn Header="{t:Text LocationWindow.Table.Name}" Width="200" DisplayMemberBinding="{Binding Path=Name}" />
-                            <GridViewColumn Header="{t:Text LocationWindow.Table.OtherNames}" Width="220" DisplayMemberBinding="{Binding Path=Names}" />
+                            <GridViewColumn Header="{t:Text LocationWindow.Table.OtherNames}" Width="220" DisplayMemberBinding="{Binding Path=Names, Converter={s:StringCollectionToStringConverter}}" />
                         </GridView.Columns>
                     </GridView>
                 </ListView.View>
             </c:BindableListView>
 
+            <c:MapControl
+                x:Name="Map"
+                Grid.Row="1"
+                Grid.RowSpan="2"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Visibility="{Binding SearchMode, Converter={s:InverseBoolToVisibilityConverter}}"
+                BackColor="{Binding MapThumbnailBackColor}"                       
+                TileServer="{Binding TileServer, Mode=OneWay}"
+                OverlayTileServer="{Binding OverlayTileServer, Mode=OneWay}"
+                CacheFolder="{Binding CacheFolder, Mode=OneTime}"
+                Markers="{Binding Markers}"
+                Center="{Binding MapCenter, Mode=TwoWay}"
+                ZoomLevel="{Binding MapZoomLevel, Mode=TwoWay}"
+                ThumbnailBackColor="{Binding MapThumbnailBackColor}"
+                ThumbnailForeColor="{Binding MapThumbnailForeColor}"
+                IsMouseOverMap="{Binding IsMouseOverMap, Mode=OneWayToSource}"
+                TileImageAttributes="{Binding TileImageAttributes}"
+                OnDoubleClick="{Binding OnMouseDoubleClickCommand}"
+                OnMarkerDraw="{Binding OnDrawMarkerCommand}"
+                OnRightClick="{Binding OnMouseRightClickCommand}"
+                Mouse="{Binding MapMouse, Mode=OneWayToSource}" 
+                Margin="0,0,0,25">
+                <c:MapControl.ContextMenu>
+                    <ContextMenu Opened="ContextMenu_Opened">
+                        <MenuItem Style="{StaticResource MenuItemHeader}" Header="{Binding MapMouseString}" IsEnabled="False" />
+                        <MenuItem Header="{t:Text LocationWindow.Select}" Command="{Binding SelectCurrentMousePositionCommand}" />
+                        <MenuItem Style="{StaticResource MenuItemHeader}" Visibility="{Binding NearestLocation, Converter={s:NotNullToVisibilityConverter}}" Header="{Binding NearestLocation.Name}" />
+                        <MenuItem Header="{t:Text LocationWindow.Select}" Command="{Binding SelectNearestLocationCommand}" Visibility="{Binding NearestLocation, Converter={s:NotNullToVisibilityConverter}}" />
+                    </ContextMenu>
+                </c:MapControl.ContextMenu>
+            </c:MapControl>
 
             <TextBlock Grid.Row="1" Name="lstEmpty" 
                 Text="{t:Text LocationWindow.Table.NothingFound}" 
@@ -176,18 +178,20 @@
                 TextAlignment="Center" 
                 VerticalAlignment="Center" />
 
-            <Grid Margin="2,4,2,4" Grid.Row="2"  Visibility="{Binding SearchMode, Converter={s:InverseBoolToVisibilityConverter}}" HorizontalAlignment="Stretch">
+            <Grid Margin="2" Height="20" Grid.Row="2" Visibility="{Binding SearchMode, Converter={s:InverseBoolToVisibilityConverter}}" HorizontalAlignment="Stretch">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="1*" MinWidth="200" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" MinWidth="200" />
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <ComboBox Grid.Column="0" Padding="2 0" Margin="0" Width="200" Height="18" ItemsSource="{Binding TileServers, Mode=OneTime}" DisplayMemberPath="Name" SelectedItem="{Binding TileServer}" />
-                <Slider Padding="16 0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Column="1" Orientation="Horizontal" 
+                <ComboBox Grid.Column="1" Padding="2 2" Margin="0" Width="200" Height="18" ItemsSource="{Binding OverlayTileServers, Mode=OneTime}" DisplayMemberPath="Name" SelectedItem="{Binding OverlayTileServer}" />
+                <Slider Padding="16 0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Column="2" Orientation="Horizontal" 
                                 Minimum="{Binding ElementName=Map, Path=MinZoomLevel, Mode=OneWay}"
                                 Maximum="{Binding ElementName=Map, Path=MaxZoomLevel, Mode=OneWay}"
                                 Value="{Binding ElementName=Map, Path=ZoomLevel, Mode=TwoWay}" />
-                <c:HtmlTextBlock Grid.Column="2" Foreground="{StaticResource BrushControlLightBackground}" VerticalAlignment="Center" HorizontalAlignment="Right" Padding="2 0 4 0" FontSize="12" FormattedText="{Binding TileServer.AttributionText, FallbackValue='AttributionText'}" />
+                <c:HtmlTextBlock Grid.Column="3" Foreground="{StaticResource BrushControlLightBackground}" VerticalAlignment="Center" HorizontalAlignment="Right" Padding="2 0 4 0" FontSize="12" FormattedText="{Binding TileServer.AttributionText, FallbackValue='AttributionText'}" />
             </Grid>
         </Grid>
 
@@ -195,80 +199,84 @@
 
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <GroupBox Grid.Row="0" Header="{t:Text LocationWindow.Latitude}" Margin="4">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1*" />
-                        <ColumnDefinition Width="1*" />
-                        <ColumnDefinition Width="1*" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="26" />
-                        <RowDefinition Height="26" />
-                    </Grid.RowDefinitions>
+            <StackPanel Orientation="Vertical">
+                <GroupBox Header="{t:Text LocationWindow.Latitude}" Margin="4">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="26" />
+                            <RowDefinition Height="26" />
+                        </Grid.RowDefinitions>
 
-                    <Label Grid.Column="0" Content="{t:Text LocationWindow.Degrees}" />
-                    <Label Grid.Column="1" Content="{t:Text LocationWindow.Minutes}" />
-                    <Label Grid.Column="2" Content="{t:Text LocationWindow.Seconds}" />
-                    <RadioButton Grid.Column="3" VerticalAlignment="Center" Margin="4" IsChecked="{Binding LatitudeNorth}" Content="{t:Text LocationWindow.North}" />
+                        <Label Grid.Column="0" Content="{t:Text LocationWindow.Degrees}" />
+                        <Label Grid.Column="1" Content="{t:Text LocationWindow.Minutes}" />
+                        <Label Grid.Column="2" Content="{t:Text LocationWindow.Seconds}" />
+                        <RadioButton Grid.Column="3" VerticalAlignment="Center" Margin="4" IsChecked="{Binding LatitudeNorth}" Content="{t:Text LocationWindow.North}" />
 
-                    <c:NumericUpDown Margin="3 0" Grid.Column="0" Grid.Row="1" Minimum="0" Maximum="89" Value="{Binding LatitudeDegrees, Converter={s:NumericConverter}}" DecimalPlaces="0" />
-                    <c:NumericUpDown Margin="3 0" Grid.Column="1" Grid.Row="1" Minimum="0" Maximum="59" Value="{Binding LatitudeMinutes, Converter={s:NumericConverter}}" DecimalPlaces="0" />
-                    <c:NumericUpDown Margin="3 0" Grid.Column="2" Grid.Row="1" Minimum="0" Maximum="59" Value="{Binding LatitudeSeconds, Converter={s:NumericConverter}}" DecimalPlaces="0" />
-                    <RadioButton Grid.Column="3" Grid.Row="1" VerticalAlignment="Center" Margin="4" IsChecked="{Binding LatitudeSouth}" Content="{t:Text LocationWindow.South}" />
+                        <c:NumericUpDown Margin="3 0" Grid.Column="0" Grid.Row="1" Minimum="0" Maximum="89" Value="{Binding LatitudeDegrees, Converter={s:NumericConverter}}" DecimalPlaces="0" />
+                        <c:NumericUpDown Margin="3 0" Grid.Column="1" Grid.Row="1" Minimum="0" Maximum="59" Value="{Binding LatitudeMinutes, Converter={s:NumericConverter}}" DecimalPlaces="0" />
+                        <c:NumericUpDown Margin="3 0" Grid.Column="2" Grid.Row="1" Minimum="0" Maximum="59" Value="{Binding LatitudeSeconds, Converter={s:NumericConverter}}" DecimalPlaces="0" />
+                        <RadioButton Grid.Column="3" Grid.Row="1" VerticalAlignment="Center" Margin="4" IsChecked="{Binding LatitudeSouth}" Content="{t:Text LocationWindow.South}" />
 
-                </Grid>
-            </GroupBox>
+                    </Grid>
+                </GroupBox>
 
-            <GroupBox Grid.Row="1" Header="{t:Text LocationWindow.Longitude}" Margin="4">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1*" />
-                        <ColumnDefinition Width="1*" />
-                        <ColumnDefinition Width="1*" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="26" />
-                        <RowDefinition Height="26" />
-                    </Grid.RowDefinitions>
+                <GroupBox Header="{t:Text LocationWindow.Longitude}" Margin="4">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="26" />
+                            <RowDefinition Height="26" />
+                        </Grid.RowDefinitions>
 
-                    <Label Grid.Column="0" Content="{t:Text LocationWindow.Degrees}" />
-                    <Label Grid.Column="1" Content="{t:Text LocationWindow.Minutes}" />
-                    <Label Grid.Column="2" Content="{t:Text LocationWindow.Seconds}" />
-                    <RadioButton Grid.Column="3" VerticalAlignment="Center" Margin="4" IsChecked="{Binding LongitudeEast}" Content="{t:Text LocationWindow.East}" />
+                        <Label Grid.Column="0" Content="{t:Text LocationWindow.Degrees}" />
+                        <Label Grid.Column="1" Content="{t:Text LocationWindow.Minutes}" />
+                        <Label Grid.Column="2" Content="{t:Text LocationWindow.Seconds}" />
+                        <RadioButton Grid.Column="3" VerticalAlignment="Center" Margin="4" IsChecked="{Binding LongitudeEast}" Content="{t:Text LocationWindow.East}" />
 
-                    <c:NumericUpDown Margin="3 0" Grid.Column="0" Grid.Row="1" Minimum="0" Maximum="179" Value="{Binding LongitudeDegrees, Converter={s:NumericConverter}}" DecimalPlaces="0" />
-                    <c:NumericUpDown Margin="3 0" Grid.Column="1" Grid.Row="1" Minimum="0" Maximum="59" Value="{Binding LongitudeMinutes, Converter={s:NumericConverter}}" DecimalPlaces="0" />
-                    <c:NumericUpDown Margin="3 0" Grid.Column="2" Grid.Row="1" Minimum="0" Maximum="59" Value="{Binding LongitudeSeconds, Converter={s:NumericConverter}}" DecimalPlaces="0" />
-                    <RadioButton Grid.Column="3" Grid.Row="1" VerticalAlignment="Center" Margin="4" IsChecked="{Binding LongitudeWest}" Content="{t:Text LocationWindow.West}" />
+                        <c:NumericUpDown Margin="3 0" Grid.Column="0" Grid.Row="1" Minimum="0" Maximum="179" Value="{Binding LongitudeDegrees, Converter={s:NumericConverter}}" DecimalPlaces="0" />
+                        <c:NumericUpDown Margin="3 0" Grid.Column="1" Grid.Row="1" Minimum="0" Maximum="59" Value="{Binding LongitudeMinutes, Converter={s:NumericConverter}}" DecimalPlaces="0" />
+                        <c:NumericUpDown Margin="3 0" Grid.Column="2" Grid.Row="1" Minimum="0" Maximum="59" Value="{Binding LongitudeSeconds, Converter={s:NumericConverter}}" DecimalPlaces="0" />
+                        <RadioButton Grid.Column="3" Grid.Row="1" VerticalAlignment="Center" Margin="4" IsChecked="{Binding LongitudeWest}" Content="{t:Text LocationWindow.West}" />
 
-                </Grid>
-            </GroupBox>
+                    </Grid>
+                </GroupBox>
 
-            <GroupBox Grid.Row="2" Header="{t:Text LocationWindow.LocationName}" Margin="4">
-                <TextBox Margin="4 10 4 10" Text="{Binding LocationName}"></TextBox>
-            </GroupBox>
+                <GroupBox Header="{t:Text LocationWindow.LocationName}" Margin="4">
+                    <TextBox Margin="4 10 4 10" Text="{Binding LocationName}"></TextBox>
+                </GroupBox>
 
-            <GroupBox Grid.Row="3" Header="{t:Text LocationWindow.UTCOffset}" Margin="4">
-                <ComboBox Margin="4 10 4 10" ItemsSource="{Binding TimeZones}" SelectedItem="{Binding TimeZone}">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Converter={s:TimeZoneConverter}}"/>
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
-            </GroupBox>
+                <GroupBox Header="{t:Text LocationWindow.Elevation}" Margin="4">
+                    <c:NumericUpDown Step="1" DecimalPlaces="0" Minimum="-430" Maximum="8848" Margin="4 10 4 10" Value="{Binding Elevation}" />
+                </GroupBox>
 
-            <StackPanel Margin="8" Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="5">
+                <GroupBox Header="{t:Text LocationWindow.UTCOffset}" Margin="4">
+                    <ComboBox Margin="4 10 4 10" ItemsSource="{Binding TimeZones}" SelectedItem="{Binding UtcOffset}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={s:TimeZoneConverter}}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </GroupBox>
+            </StackPanel>
+            
+
+            <StackPanel Margin="8" Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2">
                 <Button MinWidth="80" Margin="0 0 4 0" Command="{Binding OkCommand}"  Content="{t:Text Select}" />
                 <Button MinWidth="80" Command="{Binding CancelCommand}" Content="{t:Text Close}" />
             </StackPanel>

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
@@ -393,6 +395,19 @@ namespace Astrarium.Types.Themes
                 {
                     return Application.Current.Resources[key];
                 }
+            }
+            return null;
+        }
+    }
+
+    public class StringCollectionToStringConverter : ValueConverterBase
+    {
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            ICollection<string> collection = value as ICollection<string>;
+            if (collection != null)
+            {
+                return string.Join(", ", collection);
             }
             return null;
         }

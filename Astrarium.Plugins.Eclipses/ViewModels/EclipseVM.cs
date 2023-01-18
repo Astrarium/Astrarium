@@ -436,12 +436,11 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             this.observerLocation = settings.Get<CrdsGeographical>("ObserverLocation");
             this.locationsManager = locationsManager;
             this.eclipsesCalculator = eclipsesCalculator;
-            this.locationsManager.Load();
 
             SetMapColors();
 
             ChartZoomLevel = 1;
-            SettingsLocationName = $"{Text.Get("EclipseView.SettingsLocationName")} ({observerLocation.LocationName})";
+            SettingsLocationName = $"{Text.Get("EclipseView.SettingsLocationName")} ({observerLocation.Name})";
             CacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "MapsCache");
 
             TileServers = new List<ITileServer>()
@@ -476,12 +475,12 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         protected void AddLocationMarker()
         {
             Markers.Remove(Markers.FirstOrDefault(m => m.Data as string == "CurrentLocation"));
-            Markers.Add(new Marker(ToGeo(observerLocation), observerLocationMarkerStyle, observerLocation.LocationName) { Data = "CurrentLocation" });
+            Markers.Add(new Marker(ToGeo(observerLocation), observerLocationMarkerStyle, observerLocation.Name) { Data = "CurrentLocation" });
         }
 
         protected void AddCitiesListMarker(CrdsGeographical g)
         {
-            Markers.Add(new Marker(ToGeo(g), citiesListMarkerStyle, g.LocationName) { MinZoomToDisplayLabel = 10, Data = "CitiesList" });
+            Markers.Add(new Marker(ToGeo(g), citiesListMarkerStyle, g.Name) { MinZoomToDisplayLabel = 10, Data = "CitiesList" });
         }
 
         private void ChartZoomIn()
@@ -529,7 +528,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         private void LockOnCurrentPosition()
         {
             var g = FromGeoPoint(MapMouse);
-            g.LocationName = Text.Get("EclipseView.LockedPoint");
+            g.Name = Text.Get("EclipseView.LockedPoint");
             LockOn(g);
         }
 
@@ -549,7 +548,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
         private void AddCurrentPositionToCitiesList()
         {
             var g = FromGeoPoint(MapMouse);
-            g.LocationName = Text.Get("EclipseView.NoName");
+            g.Name = Text.Get("EclipseView.NoName");
             AddToCitiesList(g);
         }
 

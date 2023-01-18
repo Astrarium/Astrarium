@@ -115,7 +115,6 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             Tracks.Clear();
             Markers.Clear();
             Polygons.Clear();
-            locationsManager.Unload();
             base.Dispose();
             GC.Collect();
         }
@@ -375,7 +374,7 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
                 LocalContactsTable[4] = new SolarEclipseLocalContactsTableItem(Text.Get("SolarEclipseView.LocalCircumstances.C4"), local.PartialEnd);
             });
 
-            ObserverLocationName = (IsMouseOverMap && !IsMapLocked) ? $"{Text.Get("EclipseView.MouseCoordinates")} ({Format.Geo.Format(FromGeoPoint(MapMouse))})" : $"{observerLocation.LocationName} ({Format.Geo.Format(observerLocation)})";            
+            ObserverLocationName = (IsMouseOverMap && !IsMapLocked) ? $"{Text.Get("EclipseView.MouseCoordinates")} ({Format.Geo.Format(FromGeoPoint(MapMouse))})" : $"{observerLocation.Name} ({Format.Geo.Format(observerLocation)})";            
             LocalVisibilityDescription = eclipsesCalculator.GetLocalVisibilityString(eclipse, local);
             IsVisibleFromCurrentPlace = !local.IsInvisible;
             LocalCircumstances = local;

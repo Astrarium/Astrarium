@@ -27,6 +27,26 @@ namespace Astrarium.Algorithms
         public double Elevation { get; set; }
 
         /// <summary>
+        /// Utc offset, in hours
+        /// </summary>
+        public double UtcOffset { get; set; }
+
+        /// <summary>
+        /// Name of the location
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Alternative names of the location
+        /// </summary>
+        public string[] Names { get; set; }
+
+        /// <summary>
+        /// Country code (2 letters)
+        /// </summary>
+        public string Country { get; set; }
+
+        /// <summary>
         /// Term needed for calculation of parallax effect.
         /// </summary>
         /// <remarks>
@@ -38,7 +58,7 @@ namespace Astrarium.Algorithms
             {
                 double latitude = Angle.ToRadians(Latitude);
                 double u = Math.Atan(0.99664719 * Math.Tan(latitude));
-                return Math.Cos(u) + Elevation / 6378140.0 * Math.Cos(latitude);               
+                return Math.Cos(u) + Elevation / 6378140.0 * Math.Cos(latitude);
             }
         }
 
@@ -58,32 +78,22 @@ namespace Astrarium.Algorithms
             }
         }
 
-        /// <summary>
-        /// Utc offset, in hours
-        /// </summary>
-        public double UtcOffset { get; set; }
-
-        /// <summary>
-        /// Name of the location
-        /// </summary>
-        public string LocationName { get; set; }
-
         public CrdsGeographical() { }
 
-        public CrdsGeographical(double longitude, double latitude, double utcOffset = 0, double elevation = 0, string locationName = null)
+        public CrdsGeographical(double longitude, double latitude, double utcOffset = 0, double elevation = 0, string name = null)
         {
             Latitude = latitude;
             Longitude = longitude;
             UtcOffset = utcOffset;
             Elevation = elevation;
-            LocationName = locationName;
+            Name = name;
         }
 
         public CrdsGeographical(DMS longitude, DMS latitude, double utcOffset = 0, double elevation = 0)
             : this(longitude.ToDecimalAngle(), latitude.ToDecimalAngle(), utcOffset, elevation) { }
 
         public CrdsGeographical(CrdsGeographical other)
-            : this(other.Longitude, other.Latitude, other.UtcOffset, other.Elevation, other.LocationName) { }
+            : this(other.Longitude, other.Latitude, other.UtcOffset, other.Elevation, other.Name) { }
 
         public override string ToString()
         {
@@ -96,8 +106,11 @@ namespace Astrarium.Algorithms
                 return false;
             else if (obj is CrdsGeographical other)
                 return
-                    other.Latitude == other.Latitude &&
-                    other.Longitude == other.Longitude;
+                    Name == other.Name &&
+                    Elevation == other.Elevation &&
+                    UtcOffset == other.UtcOffset &&
+                    Latitude == other.Latitude &&
+                    Longitude == other.Longitude;
             else 
                 return false;
         }
@@ -107,6 +120,9 @@ namespace Astrarium.Algorithms
             unchecked
             {
                 int hash = 17;
+                hash = hash * 23 + (Name ?? "").GetHashCode();
+                hash = hash * 23 + Elevation.GetHashCode();
+                hash = hash * 23 + UtcOffset.GetHashCode();
                 hash = hash * 23 + Latitude.GetHashCode();
                 hash = hash * 23 + Longitude.GetHashCode();
                 return hash;

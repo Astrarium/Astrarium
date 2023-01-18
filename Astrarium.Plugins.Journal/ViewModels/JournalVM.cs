@@ -835,7 +835,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
                 Elevation = site.Elevation,
                 Latitude = site.Latitude,
                 Longitude = -site.Longitude,
-                LocationName = site.Name,
+                Name = site.Name,
                 UtcOffset = site.Timezone
             };
 
@@ -845,7 +845,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
                 site.Elevation = location.Elevation;
                 site.Latitude = location.Latitude;
                 site.Longitude = location.Longitude;
-                site.Name = location.LocationName;
+                site.Name = location.Name;
                 site.Timezone = location.UtcOffset;
             };
         }
@@ -887,7 +887,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
                 // location is different than selected one
                 if (sky.Context.GeoLocation.DistanceTo(geo) >= 1)
                 {
-                    if (ViewManager.ShowMessageBox("$Warning", $"The observation's location place ({site.Name}) differs than current one ({sky.Context.GeoLocation.LocationName}).\r\nDo you want to change the location and show the target as it seen from it?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                    if (ViewManager.ShowMessageBox("$Warning", $"The observation's location place ({site.Name}) differs than current one ({sky.Context.GeoLocation.Name}).\r\nDo you want to change the location and show the target as it seen from it?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                     {
                         sky.Context.GeoLocation = geo;
                         locationChanged = true;
@@ -925,7 +925,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
             if (locationChanged)
             {
-                ViewManager.ShowPopupMessage($"Observer location changed to {sky.Context.GeoLocation.LocationName}");
+                ViewManager.ShowPopupMessage($"Observer location changed to {sky.Context.GeoLocation.Name}");
             }
         }
 

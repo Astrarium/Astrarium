@@ -21,6 +21,9 @@ namespace Astrarium.Types.Controls
         public static readonly DependencyProperty TileServerProperty =
             DependencyProperty.Register(nameof(TileServer), typeof(ITileServer), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = true, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged) });
 
+        public static readonly DependencyProperty OverlayTileServerProperty =
+           DependencyProperty.Register(nameof(OverlayTileServer), typeof(ITileServer), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = true, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged) });
+
         public static readonly DependencyProperty CenterProperty =
             DependencyProperty.Register(nameof(Center), typeof(GeoPoint), typeof(MapControl), new FrameworkPropertyMetadata(new GeoPoint(0, 0)) { BindsTwoWayByDefault = true, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged) });
 
@@ -88,6 +91,12 @@ namespace Astrarium.Types.Controls
         {
             get => (ITileServer)GetValue(TileServerProperty);
             set => SetValue(TileServerProperty, value);
+        }
+
+        public ITileServer OverlayTileServer
+        {
+            get => (ITileServer)GetValue(OverlayTileServerProperty);
+            set => SetValue(OverlayTileServerProperty, value);
         }
 
         public string CacheFolder
