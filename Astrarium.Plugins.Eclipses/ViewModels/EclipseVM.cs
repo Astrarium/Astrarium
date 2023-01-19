@@ -442,13 +442,14 @@ namespace Astrarium.Plugins.Eclipses.ViewModels
             ChartZoomLevel = 1;
             SettingsLocationName = $"{Text.Get("EclipseView.SettingsLocationName")} ({observerLocation.Name})";
             CacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Astrarium", "MapsCache");
+            string userAgent = $"Astrarium/{Application.ProductVersion}";
 
             TileServers = new List<ITileServer>()
             {
                 new OfflineTileServer(),
-                new OpenStreetMapTileServer("Astrarium v1.0 contact astrarium@astrarium.space"),
+                new OpenStreetMapTileServer(userAgent),
                 new StamenTerrainTileServer(),
-                new OpenTopoMapServer()
+                new OpenTopoMapServer(userAgent)
             };
 
             string tileServerName = settings.Get<string>("EclipseMapTileServer");

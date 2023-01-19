@@ -264,6 +264,14 @@ namespace Astrarium.Types.Controls
                 MapControl_Resize(mapControl, EventArgs.Empty);
             };
 
+            mapControl.OverlayTileServerChanged += (s, e) =>
+            {
+                OverlayTileServer = mapControl.OverlayTileServer;
+                MinZoomLevel = mapControl.MinZoomLevel;
+                MaxZoomLevel = mapControl.MaxZoomLevel;
+                MapControl_Resize(mapControl, EventArgs.Empty);
+            };
+
             mapControl.CenterChanged += (s, e) => Center = mapControl.Center;
             mapControl.MouseChanged += (s, e) => Mouse = mapControl.Mouse;
             mapControl.BackColorChanged += (s, e) => BackColor = mapControl.BackColor;

@@ -53,21 +53,10 @@ namespace Astrarium.ViewModels
 
             SetMapColors();
 
-            string userAgent = "Astrarium/1.0";
+            string userAgent = $"Astrarium/{Application.ProductVersion}";
 
-            TileServers = new List<ITileServer>()
-            {
-                new OfflineTileServer(),
-                new OpenStreetMapTileServer(userAgent),
-                new StamenTerrainTileServer(),
-                new OpenTopoMapServer()
-            };
-
-            OverlayTileServers = new List<ITileServer>()
-            {
-                null,
-                new LightPollutionTileServer(userAgent)
-            };
+            TileServers = MapControl.CreateTileServers(userAgent);
+            OverlayTileServers = MapControl.CreateOverlayServers(userAgent);
 
             string tileServerName = settings.Get<string>(TILE_SERVER_SETTING_NAME);
             var tileServer = TileServers.FirstOrDefault(s => s.Name.Equals(tileServerName));

@@ -10,6 +10,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.Windows.Forms
 {
@@ -93,7 +94,6 @@ namespace System.Windows.Forms
 
                 SetZoomLevel(value, new Drawing.Point(Width / 2, Height / 2));
                 CenterChanged?.Invoke(this, EventArgs.Empty);
-                
             }
         }
 
@@ -273,7 +273,7 @@ namespace System.Windows.Forms
                 var center = WorldToTilePos(value);
                 _Offset.X = -(int)(center.X * TILE_SIZE) + Width / 2;
                 _Offset.Y = -(int)(center.Y * TILE_SIZE) + Height / 2;
-                _Offset.X = (int)(_Offset.X % FullMapSizeInPixels);                
+                _Offset.X = _Offset.X % FullMapSizeInPixels;
                 Invalidate();
                 CenterChanged?.Invoke(this, EventArgs.Empty);
             }
@@ -518,6 +518,42 @@ namespace System.Windows.Forms
             Cursor = Cursors.Cross;
         }
 
+        public static ICollection<ITileServer> CreateTileServers(string userAgent)
+        {
+            return new ITileServer[]
+            {
+                new OfflineTileServer(),
+                new OpenStreetMapTileServer(userAgent),
+                new StamenTerrainTileServer(),
+                new OpenTopoMapServer(userAgent),
+                new EsriTileServer(userAgent),
+                new GoogleSatelliteTileServer(userAgent),
+                new GoogleRoadmapTileServer(userAgent),
+                new GoogleHybridTileServer(userAgent),
+                new BingMapsAerialTileServer(),
+                new BingMapsRoadsTileServer(),
+                new BingMapsHybridTileServer(),
+            };
+        }
+
+        public static ICollection<ITileServer> CreateOverlayServers(string userAgent)
+        {
+            return new ITileServer[]
+            {
+                new LightPollutionWA2015TileServer(userAgent),
+                new LightPollutionVIIRS2021TileServer(userAgent),
+                new LightPollutionVIIRS2020TileServer(userAgent),
+                new LightPollutionVIIRS2019TileServer(userAgent),
+                new LightPollutionVIIRS2018TileServer(userAgent),
+                new LightPollutionVIIRS2017TileServer(userAgent),
+                new LightPollutionVIIRS2016TileServer(userAgent),
+                new LightPollutionVIIRS2015TileServer(userAgent),
+                new LightPollutionVIIRS2014TileServer(userAgent),
+                new LightPollutionVIIRS2013TileServer(userAgent),
+                new LightPollutionVIIRS2012TileServer(userAgent),
+            };
+        }
+
         /// <summary>
         /// Called on creating control.
         /// </summary>
@@ -611,6 +647,8 @@ namespace System.Windows.Forms
             }
 
             base.OnPaint(pe);
+
+            _WorkerWaitHandle.Reset();
         }
 
         /// <summary>
@@ -649,7 +687,7 @@ namespace System.Windows.Forms
         {
             if (_IsDragging)
             {
-                _Offset.X += (e.X - _LastMouse.X);
+                _Offset.X += e.X - _LastMouse.X;
                 _Offset.Y += (e.Y - _LastMouse.Y);
 
                 _Offset.X = (int)(_Offset.X % FullMapSizeInPixels);
@@ -772,17 +810,17 @@ namespace System.Windows.Forms
                 c.Used = false;
             }
 
-            for (int x = fromX; x <= toX; x++)
+            foreach (var tileServer in TileServers)
             {
-                for (int y = fromY; y <= toY; y++)
-                {
-                    int x_ = (int)NormalizeTileNumber(x);
-                    if (y >= 0 && y < FullMapSizeInTiles)
-                    {
-                        foreach (var tileServer in TileServers)
-                        {
-                            bool isOverlay = tileServer is IOverlayTileServer;
+                bool isOverlay = tileServer is IOverlayTileServer;
 
+                for (int x = fromX; x <= toX; x++)
+                {
+                    for (int y = fromY; y <= toY; y++)
+                    {
+                        int x_ = (int)NormalizeTileNumber(x);
+                        if (y >= 0 && y < FullMapSizeInTiles)
+                        {
                             Tile tile = GetTile(tileServer, x_, y, ZoomLevel);
 
                             // tile for current zoom and position found
@@ -826,7 +864,10 @@ namespace System.Windows.Forms
                                     if (tile != null && tile.Image != null)
                                     {
                                         tile.Used = true;
-                                        DrawTilePart(g, x, y, x_ % f, y % f, f, tile.Image, isOverlay);
+                                        if (!isOverlay)
+                                        {
+                                            DrawTilePart(g, x, y, x_ % f, y % f, f, tile.Image, isOverlay);
+                                        }
                                         break;
                                     }
 
@@ -1030,6 +1071,7 @@ namespace System.Windows.Forms
             gr.CompositingQuality = CompositingQuality.HighSpeed;
 
             gr.DrawImage(image, destRect, srcRect.X, srcRect.Y, srcRect.Width, srcRect.Height, GraphicsUnit.Pixel, GetImageAttributes(isOverlay));
+
             gr.Restore(state);
         }
 
@@ -1183,7 +1225,7 @@ namespace System.Windows.Forms
                         }
                     }
                 }
-                
+
                 // get tile from the server
                 if (!fromCacheOnly)
                 {
@@ -1222,12 +1264,32 @@ namespace System.Windows.Forms
             }
         }
 
+        /// <summary>
+        /// Processes tile request for the specified tile server
+        /// </summary>
+        /// <param name="tileServer">Tile server to request the tile</param>
+        /// <param name="tile">Tile to be requested</param>
         private void ProcessRequest(ITileServer tileServer, Tile tile)
         {
             try
             {
-                // ignore pooled items with different zoom level and another tile server
-                if (tile.TileServer == tileServer.GetType().Name && tile.Z == ZoomLevel)
+                // indices of first visible tile
+                int fromX = (int)Math.Floor(-(float)_Offset.X / TILE_SIZE);
+                int fromY = (int)Math.Floor(-(float)_Offset.Y / TILE_SIZE);
+
+                // count of visible tiles (vertically and horizontally)
+                int tilesByWidth = (int)Math.Ceiling((float)Width / TILE_SIZE);
+                int tilesByHeight = (int)Math.Ceiling((float)Height / TILE_SIZE);
+
+                // indices of last visible tile
+                int toX = fromX + tilesByWidth;
+                int toY = fromY + tilesByHeight;
+
+                // request tiles matching the current zoom level, server name and position
+                if (tile.TileServer == tileServer.GetType().Name &&
+                    tile.Z == ZoomLevel &&
+                    tile.X >= fromX && tile.X <= toX &&
+                    tile.Y >= fromY && tile.Y <= toY)
                 {
                     tile.Image = tileServer.GetTile(tile.X, tile.Y, tile.Z);
                     tile.Used = true;
@@ -1263,9 +1325,6 @@ namespace System.Windows.Forms
 
                 // remove the tile from requests pool
                 _RequestPool.TryTake(out tile);
-
-                // redraw the map
-                Invalidate();
             }
         }
 
@@ -1281,11 +1340,11 @@ namespace System.Windows.Forms
             {
                 if (_RequestPool.TryPeek(out Tile tile))
                 {
-                    ProcessRequest(TileServer, tile);
-                    if (OverlayTileServer != null)
+                    foreach (var tileServer in TileServers)
                     {
-                        ProcessRequest(OverlayTileServer, tile);
+                        ProcessRequest(tileServer, tile);
                     }
+                    Invalidate();
                 }
                 else
                 {
