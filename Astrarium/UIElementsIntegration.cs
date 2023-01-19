@@ -52,6 +52,8 @@ namespace Astrarium
 
             // Default tile server
             SettingDefinitions.Add(new SettingDefinition("ObserverLocationTileServer", "Offline map"));
+            SettingDefinitions.Add(new SettingDefinition("ObserverLocationOverlayTileServer", ""));
+            SettingDefinitions.Add(new SettingDefinition("ObserverLocationOverlayOpacity", 0.5f));
 
             // Default size of main window
             SettingDefinitions.Add(new SettingDefinition("WindowSize", System.Drawing.Size.Empty));

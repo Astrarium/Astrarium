@@ -23,6 +23,16 @@ namespace Astrarium.ViewModels
         private const string TILE_SERVER_SETTING_NAME = "ObserverLocationTileServer";
 
         /// <summary>
+        /// Name of the setting to store map's overlay tile server
+        /// </summary>
+        private const string OVERLAY_TILE_SERVER_SETTING_NAME = "ObserverLocationOverlayTileServer";
+
+        /// <summary>
+        /// Name of the setting to store map's overlay opacity
+        /// </summary>
+        private const string OVERLAY_OPACITY_SETTING_NAME = "ObserverLocationOverlayOpacity";
+
+        /// <summary>
         /// Application settings instance.
         /// </summary>
         private readonly ISettings settings;
@@ -60,7 +70,13 @@ namespace Astrarium.ViewModels
 
             string tileServerName = settings.Get<string>(TILE_SERVER_SETTING_NAME);
             var tileServer = TileServers.FirstOrDefault(s => s.Name.Equals(tileServerName));
-            TileServer = tileServer ?? TileServers.First();
+
+            string overlayServerName = settings.Get<string>(OVERLAY_TILE_SERVER_SETTING_NAME);
+            var overlayServer = OverlayTileServers.FirstOrDefault(s => s.Name.Equals(overlayServerName));
+
+            SetValue(nameof(TileServer), tileServer ?? TileServers.First());
+            SetValue(nameof(OverlayTileServer), overlayServer);
+            SetValue(nameof(OverlayOpacity), settings.Get(OVERLAY_OPACITY_SETTING_NAME, 0.5f));
         }
 
         #region Commands
@@ -216,6 +232,14 @@ namespace Astrarium.ViewModels
             set
             {
                 SetValue(nameof(OverlayTileServer), value);
+                if (value == null)
+                {
+                    settings.SetAndSave(OVERLAY_TILE_SERVER_SETTING_NAME, "");
+                }
+                else if (settings.Get<string>(OVERLAY_TILE_SERVER_SETTING_NAME) != value.Name)
+                {
+                    settings.SetAndSave(OVERLAY_TILE_SERVER_SETTING_NAME, value.Name);
+                }
             }
         }
 
@@ -226,6 +250,27 @@ namespace Astrarium.ViewModels
         {
             get => GetValue<ICollection<ITileServer>>(nameof(TileServers));
             protected set => SetValue(nameof(TileServers), value);
+        }
+
+        public float OverlayOpacity
+        {
+            get => GetValue(nameof(OverlayOpacity), 0.5f);
+            set
+            {
+                SetValue(nameof(OverlayOpacity), value);
+                if (settings.Get<float>(nameof(OverlayOpacity)) != value)
+                {
+                    settings.SetAndSave(OVERLAY_OPACITY_SETTING_NAME, value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Collection of allowed overlay opacities
+        /// </summary>
+        public IEnumerable<float> OverlayOpacities
+        {
+            get => Enumerable.Range(1, 9).Select(x => x / 10f);
         }
 
         /// <summary>

@@ -149,6 +149,7 @@
                 BackColor="{Binding MapThumbnailBackColor}"                       
                 TileServer="{Binding TileServer, Mode=TwoWay}"
                 OverlayTileServer="{Binding OverlayTileServer, Mode=TwoWay}"
+                OverlayOpacity="{Binding OverlayOpacity, Mode=TwoWay}"
                 CacheFolder="{Binding CacheFolder, Mode=OneTime}"
                 Markers="{Binding Markers}"
                 Center="{Binding MapCenter, Mode=TwoWay}"
@@ -188,14 +189,20 @@
 
                 <StackPanel Orientation="Horizontal" Grid.Column="0">
                     <TextBlock Text="Map:" Margin="2 0 4 0" />
-                    <ComboBox Padding="4 -1" Margin="2 0" Width="130" Height="18" ItemsSource="{Binding TileServers, Mode=OneTime}" DisplayMemberPath="Name" SelectedItem="{Binding TileServer}" />
+                    <ComboBox Padding="4 -1" Margin="2 0" Width="140" Height="18" ItemsSource="{Binding TileServers, Mode=OneTime}" DisplayMemberPath="Name" SelectedItem="{Binding TileServer}" />
                     <TextBlock Text="Light Pollution Overlay:" Margin="4 0 4 0" />
                     
                     <c:NullItemSelectorAdapter NullItem="None" ItemsSource="{Binding OverlayTileServers, Mode=OneTime}">
                         <ComboBox Padding="4 -1" Margin="2 0" Width="100" Height="18" SelectedItem="{Binding OverlayTileServer}" />
                     </c:NullItemSelectorAdapter>
 
-                    <c:NumericUpDown Minimum="10" Width="40" Margin="2 0" Padding="4 -1" Height="18" Maximum="100" Step="10" DecimalPlaces="0" Value="{Binding OverlayOpacity}" />
+                    <ComboBox Padding="4 -1" Margin="2 0" Width="60" Height="18" ItemsSource="{Binding OverlayOpacities, Mode=OneTime}" SelectedItem="{Binding OverlayOpacity}" Visibility="{Binding OverlayTileServer, Converter={s:NotNullToVisibilityConverter}}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding StringFormat='P0'}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
 
                 </StackPanel>
 

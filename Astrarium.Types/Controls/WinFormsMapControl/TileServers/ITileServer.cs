@@ -3,6 +3,11 @@
 namespace System.Windows.Forms
 {
     /// <summary>
+    /// Indicates the server is overlay tile server
+    /// </summary>
+    public interface IOverlayTileServer { }
+
+    /// <summary>
     /// Provides the functionality of a Tile Server implementations
     /// </summary>
     public interface ITileServer

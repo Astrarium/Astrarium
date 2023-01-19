@@ -18,6 +18,9 @@ namespace Astrarium.Types.Controls
         public static readonly DependencyProperty CacheFolderProperty =
             DependencyProperty.Register(nameof(CacheFolder), typeof(string), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged) });
 
+        public static readonly DependencyProperty OverlayOpacityProperty =
+            DependencyProperty.Register(nameof(OverlayOpacity), typeof(float), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = false, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged), DefaultValue = 0.5f });
+
         public static readonly DependencyProperty TileServerProperty =
             DependencyProperty.Register(nameof(TileServer), typeof(ITileServer), typeof(MapControl), new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = true, AffectsRender = true, DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged, PropertyChangedCallback = new PropertyChangedCallback(DependencyPropertyChanged) });
 
@@ -103,6 +106,12 @@ namespace Astrarium.Types.Controls
         {
             get => (string)GetValue(CacheFolderProperty);
             set => SetValue(CacheFolderProperty, value);
+        }
+
+        public float OverlayOpacity
+        {
+            get => (float)GetValue(OverlayOpacityProperty);
+            set => SetValue(OverlayOpacityProperty, value);
         }
 
         public GeoPoint Center

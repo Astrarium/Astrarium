@@ -98,6 +98,29 @@ namespace System.Windows.Forms
         }
 
         /// <summary>
+        /// Backing field for <see cref="OverlayOpacity"/> property.
+        /// </summary>
+        private float _OverlayOpacity = 0.5f;
+
+        /// <summary>
+        /// Map zoom level.
+        /// </summary>
+        [Description("Overlay opacity"), Category("Behavior")]
+        public float OverlayOpacity
+        {
+            get => _OverlayOpacity;
+            set
+            {
+                if (value < 0 || value > 1)
+                    throw new ArgumentException($"{value} is an incorrect value for {nameof(OverlayOpacity)} property. Value should be in range from 0 to 1.");
+
+                _OverlayOpacity = value;
+                OverlayOpacityChanged?.Invoke(this, EventArgs.Empty);
+                Invalidate();
+            }
+        }
+
+        /// <summary>
         /// Backing field for <see cref="CacheFolder"/> property.
         /// </summary>
         private string _CacheFolder = null;
@@ -489,6 +512,11 @@ namespace System.Windows.Forms
         public event EventHandler<EventArgs> CenterChanged;
 
         /// <summary>
+        /// Raised when <see cref="OverlayOpacity"/> property value is changed.
+        /// </summary>
+        public event EventHandler<EventArgs> OverlayOpacityChanged;
+
+        /// <summary>
         /// Raised when <see cref="Mouse"/> property value is changed.
         /// </summary>
         public event EventHandler<EventArgs> MouseChanged;
@@ -526,10 +554,10 @@ namespace System.Windows.Forms
                 new OpenStreetMapTileServer(userAgent),
                 new StamenTerrainTileServer(),
                 new OpenTopoMapServer(userAgent),
-                new EsriTileServer(userAgent),
-                new GoogleSatelliteTileServer(userAgent),
-                new GoogleRoadmapTileServer(userAgent),
-                new GoogleHybridTileServer(userAgent),
+                new EsriSatelliteMapsTileServer(userAgent),
+                new GoogleMapsSatelliteTileServer(userAgent),
+                new GoogleMapsRoadmapTileServer(userAgent),
+                new GoogleMapsHybridTileServer(userAgent),
                 new BingMapsAerialTileServer(),
                 new BingMapsRoadsTileServer(),
                 new BingMapsHybridTileServer(),
@@ -1081,13 +1109,13 @@ namespace System.Windows.Forms
             {
                 var attrs = (ImageAttributes)TileImageAttributes?.Clone() ?? new ImageAttributes();
 
-                //create a color matrix object  
+                // create a color matrix object  
                 ColorMatrix matrix = new ColorMatrix();
 
-                //set the opacity  
-                matrix.Matrix33 = 0.5f;
+                // set the opacity  
+                matrix.Matrix33 = OverlayOpacity;
 
-                //set the color(opacity) of the image  
+                // set the color( opacity) of the image  
                 attrs.SetColorMatrix(matrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
 
                 return attrs;

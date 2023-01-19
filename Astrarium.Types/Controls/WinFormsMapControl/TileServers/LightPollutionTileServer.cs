@@ -1,12 +1,5 @@
-﻿using System.Drawing;
-
-namespace System.Windows.Forms
+﻿namespace System.Windows.Forms
 {
-    /// <summary>
-    /// Indicates the server is overlay tile server
-    /// </summary>
-    public interface IOverlayTileServer { }
-
     /// <summary>
     /// Base class for all light pollition maps tile servers
     /// </summary>
@@ -117,75 +110,5 @@ namespace System.Windows.Forms
         public override string Name => "VIIRS 2012";
         protected override string LayerId => "PostGIS:VIIRS_2012";
         public LightPollutionVIIRS2012TileServer(string userAgent) : base(userAgent) { }
-    }
-
-    public abstract class GoogleTileServer : WebTileServer
-    {
-        /// <summary>
-        /// Used to access random tile subdomains.
-        /// </summary>
-        private readonly Random _Random = new Random();
-
-        /// <inheritdoc />
-        public override string UserAgent { get; set; }
-
-        protected abstract string LayerType { get; }
-
-        public override string AttributionText => "(c) Google";
-
-        public override Uri GetTileUri(int x, int y, int z)
-        {
-            int ind = _Random.Next(0, 4);
-            return new Uri($"http://mt{ind}.google.com/vt/lyrs={LayerType}&hl=en&x={x}&y={y}&z={z}");
-        }
-
-        public GoogleTileServer(string userAgent)
-        {
-            UserAgent = userAgent;
-        }
-    }
-
-    public class GoogleHybridTileServer : GoogleTileServer
-    {
-        public override string Name => "Google Hybrid";
-        protected override string LayerType => "y";
-        public GoogleHybridTileServer(string userAgent) : base(userAgent) { }
-    }
-
-    public class GoogleSatelliteTileServer : GoogleTileServer
-    {
-        public override string Name => "Google Satellite";
-        protected override string LayerType => "s";
-        public GoogleSatelliteTileServer(string userAgent) : base(userAgent) { }
-    }
-
-    public class GoogleRoadmapTileServer : GoogleTileServer
-    {
-        public override string Name => "Google Roadmap";
-        protected override string LayerType => "m";
-        public GoogleRoadmapTileServer(string userAgent) : base(userAgent) { }
-    }
-
-
-    public class EsriTileServer : WebTileServer
-    {
-
-        /// <inheritdoc />
-        public override string UserAgent { get; set; }
-
-
-        public override string AttributionText => "(c) Esri";
-
-        public override string Name => "Esri";
-
-        public override Uri GetTileUri(int x, int y, int z)
-        {
-            return new Uri($"https://server.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}");
-        }
-
-        public EsriTileServer(string userAgent)
-        {
-            UserAgent = userAgent;
-        }
     }
 }
