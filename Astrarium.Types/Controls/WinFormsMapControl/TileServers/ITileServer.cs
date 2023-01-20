@@ -35,6 +35,11 @@ namespace System.Windows.Forms
         int MaxZoomLevel { get; }
 
         /// <summary>
+        /// Gets projection used by the tile server
+        /// </summary>
+        IProjection Projection { get; }
+
+        /// <summary>
         /// Requests tile image by X and Y indices of the tile and zoom level Z.
         /// </summary>
         /// <param name="x">X-index of the tile.</param>

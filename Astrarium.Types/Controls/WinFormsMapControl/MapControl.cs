@@ -210,11 +210,15 @@ namespace System.Windows.Forms
             get => _TileServer;
             set
             {
+                var center = Center;
+
                 _TileServer = value;
 
                 if (value != null)
                 {
                     _Cache = new ConcurrentBag<Tile>();
+
+                    Center = center;
 
                     if (_TileServer.AttributionText != null)
                     {
@@ -554,6 +558,7 @@ namespace System.Windows.Forms
                 new OpenStreetMapTileServer(userAgent),
                 new StamenTerrainTileServer(),
                 new OpenTopoMapServer(userAgent),
+                new WikimapiaTileServer(userAgent),
                 new EsriSatelliteMapsTileServer(userAgent),
                 new GoogleMapsSatelliteTileServer(userAgent),
                 new GoogleMapsRoadmapTileServer(userAgent),
@@ -561,6 +566,9 @@ namespace System.Windows.Forms
                 new BingMapsAerialTileServer(),
                 new BingMapsRoadsTileServer(),
                 new BingMapsHybridTileServer(),
+                new YandexRoadMapsTileServer(userAgent),
+                new YandexSatelliteMapsTileServer(userAgent),
+                new YandexHybridTileServer(userAgent)
             };
         }
 
@@ -665,7 +673,7 @@ namespace System.Windows.Forms
                     pe.Graphics.Restore(gs);
 
                 }
-                catch (Exception ex) 
+                catch (Exception ex)
                 {
                     if (!(ex is InvalidOperationException))
                     {
@@ -674,9 +682,9 @@ namespace System.Windows.Forms
                 }
             }
 
-            base.OnPaint(pe);
-
             _WorkerWaitHandle.Reset();
+
+            base.OnPaint(pe);
         }
 
         /// <summary>
@@ -716,9 +724,9 @@ namespace System.Windows.Forms
             if (_IsDragging)
             {
                 _Offset.X += e.X - _LastMouse.X;
-                _Offset.Y += (e.Y - _LastMouse.Y);
+                _Offset.Y += e.Y - _LastMouse.Y;
 
-                _Offset.X = (int)(_Offset.X % FullMapSizeInPixels);
+                _Offset.X = _Offset.X % FullMapSizeInPixels;
 
                 if (_Offset.Y < -(int)FullMapSizeInPixels)
                     _Offset.Y = -(int)FullMapSizeInPixels;
@@ -726,7 +734,7 @@ namespace System.Windows.Forms
                 if (_Offset.Y > Height)
                     _Offset.Y = Height;
 
-                AdjustMapBounds();                
+                AdjustMapBounds();
                 Invalidate();
                 CenterChanged?.Invoke(this, EventArgs.Empty);
             }
@@ -820,17 +828,9 @@ namespace System.Windows.Forms
         /// <param name="g">Graphics instance to draw on.</param>
         private void DrawTiles(Graphics g)
         {
-            // indices of first visible tile
-            int fromX = (int)Math.Floor(-(float)_Offset.X / TILE_SIZE);
-            int fromY = (int)Math.Floor(-(float)_Offset.Y / TILE_SIZE);
-
             // count of visible tiles (vertically and horizontally)
             int tilesByWidth = (int)Math.Ceiling((float)Width / TILE_SIZE);
             int tilesByHeight = (int)Math.Ceiling((float)Height / TILE_SIZE);
-            
-            // indices of last visible tile
-            int toX = fromX + tilesByWidth;
-            int toY = fromY + tilesByHeight;
 
             // flush used flag for all memory-cached tiles
             foreach (var c in _Cache)
@@ -841,6 +841,14 @@ namespace System.Windows.Forms
             foreach (var tileServer in TileServers)
             {
                 bool isOverlay = tileServer is IOverlayTileServer;
+
+                // indices of first visible tile
+                int fromX = (int)Math.Floor(-(float)_Offset.X / TILE_SIZE);
+                int fromY = (int)Math.Floor(-(float)_Offset.Y / TILE_SIZE);
+
+                // indices of last visible tile
+                int toX = fromX + tilesByWidth;
+                int toY = fromY + tilesByHeight;
 
                 for (int x = fromX; x <= toX; x++)
                 {
@@ -1209,7 +1217,7 @@ namespace System.Windows.Forms
 
                 _ZoomLevel = z;
 
-                _Offset.X = (int)(_Offset.X % FullMapSizeInPixels);
+                _Offset.X = _Offset.X % FullMapSizeInPixels;
                 Invalidate();
 
                 ZoomLevelChaged?.Invoke(this, EventArgs.Empty);
@@ -1386,9 +1394,9 @@ namespace System.Windows.Forms
         /// </summary>
         /// <param name="g">Point with geographical coordinates.</param>
         /// <returns><see cref="PointF"/> object representing projection of the specified geographical coordinates on the map.</returns>
-        public PointF Project(GeoPoint g)
+        private PointF Project(GeoPoint g)
         {
-            var p = WorldToTilePos(g);
+            var p = TileServer.Projection.WorldToTilePos(g, ZoomLevel);
             return new PointF(p.X * TILE_SIZE + _Offset.X, p.Y * TILE_SIZE + _Offset.Y);
         }
 
@@ -1397,14 +1405,9 @@ namespace System.Windows.Forms
         /// </summary>
         /// <param name="g">Point with geographical coordinates.</param>
         /// <returns>Point representing X/Y indices of the specified geographical coordinates in Slippy map scheme.</returns>
-        public PointF WorldToTilePos(GeoPoint g)
+        private PointF WorldToTilePos(GeoPoint g)
         {
-            var p = new Drawing.PointF();
-            p.X = (float)((g.Longitude + 180.0) / 360.0 * (1 << ZoomLevel));
-            p.Y = (float)((1.0 - Math.Log(Math.Tan(g.Latitude * Math.PI / 180.0) +
-                1.0 / Math.Cos(g.Latitude * Math.PI / 180.0)) / Math.PI) / 2.0 * (1 << ZoomLevel));
-
-            return p;
+            return TileServer?.Projection.WorldToTilePos(g, ZoomLevel) ?? PointF.Empty;
         }
 
         /// <summary>
@@ -1413,13 +1416,9 @@ namespace System.Windows.Forms
         /// <param name="x">X-index of the tile.</param>
         /// <param name="y">Y-index of the tile.</param>
         /// <returns>Point representing geographical coordinates.</returns>
-        public GeoPoint TileToWorldPos(double x, double y)
+        private GeoPoint TileToWorldPos(double x, double y)
         {
-            GeoPoint g = new GeoPoint();
-            double n = Math.PI - ((2.0 * Math.PI * y) / Math.Pow(2.0, ZoomLevel));
-            g.Longitude = (float)((x / Math.Pow(2.0, ZoomLevel) * 360.0) - 180.0);
-            g.Latitude = (float)(180.0 / Math.PI * Math.Atan(Math.Sinh(n)));
-            return g;
+            return TileServer?.Projection.TileToWorldPos(x, y, ZoomLevel) ?? GeoPoint.Empty;
         }
 
         /// <summary>

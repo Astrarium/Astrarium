@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace System.Windows.Forms
+﻿namespace System.Windows.Forms
 {
     public abstract class GoogleMapsTileServer : WebTileServer
     {
@@ -16,10 +10,15 @@ namespace System.Windows.Forms
         /// <inheritdoc />
         public override string UserAgent { get; set; }
 
+        /// <summary>
+        /// Type of map layer (roads, satellite, hybrid).
+        /// </summary>
         protected abstract string LayerType { get; }
 
+        /// <inheritdoc />
         public override string AttributionText => "© <a href='https://www.google.com/maps'>Google Maps</a>";
 
+        /// <inheritdoc />
         public override Uri GetTileUri(int x, int y, int z)
         {
             int ind = _Random.Next(0, 4);

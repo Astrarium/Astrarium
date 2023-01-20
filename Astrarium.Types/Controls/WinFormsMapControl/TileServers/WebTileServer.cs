@@ -1,9 +1,7 @@
 ﻿using System.Drawing;
 using System.IO;
 using System.Net;
-using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace System.Windows.Forms
 {
@@ -20,6 +18,10 @@ namespace System.Windows.Forms
         /// <param name="z">Zoom level.</param>
         /// <returns><see cref="Uri"/> instance.</returns>
         public abstract Uri GetTileUri(int x, int y, int z);
+
+        public virtual int LayersCount => 1;
+
+        public virtual Uri GetTileUri(int x, int y, int z, int layer) => GetTileUri(x, y, z); 
 
         /// <summary>
         /// User-Agent string used to dowload tile images from the tile server.
@@ -38,6 +40,11 @@ namespace System.Windows.Forms
         /// For example, for OpenStretMap tile expiration period should not be smaller than 7 days: <see href="https://operations.osmfoundation.org/policies/tiles/"/>
         /// </remarks>
         public virtual TimeSpan TileExpirationPeriod { get; set; } = TimeSpan.FromDays(30);
+
+        /// <summary>
+        /// Gets projection used by the tile server
+        /// </summary>
+        public virtual IProjection Projection => SphericalMercatorProjection.Instance;
 
         /// <summary>
         /// Displayable name of the tile server, i.e. human-readable map name, for example, "Open Street Map".
@@ -70,16 +77,39 @@ namespace System.Windows.Forms
         /// <returns></returns>
         public Image GetTile(int x, int y, int z)
         {
+            Graphics graphics = null;
             try
             {
-                Uri uri = GetTileUri(x, y, z);
-                var request = (HttpWebRequest)WebRequest.Create(uri);
-                request.UserAgent = UserAgent;
-                using (var response = request.GetResponse())
-                using (Stream stream = response.GetResponseStream())
+                Image image = null;
+                for (int layer = 0; layer < LayersCount; layer++)
                 {
-                    return Image.FromStream(stream);
+                    Uri uri = GetTileUri(x, y, z, layer);
+                    var request = (HttpWebRequest)WebRequest.Create(uri);
+                    request.UserAgent = UserAgent;
+
+                    using (var response = request.GetResponse())
+                    using (Stream stream = response.GetResponseStream())
+                    {
+                        var img = Image.FromStream(stream);
+                        if (layer == 0)
+                        {
+                            image = img;
+                        }
+                        if (LayersCount > 1)
+                        {
+                            if (layer == 0)
+                            {
+                                graphics = Graphics.FromImage(image);
+                            }
+                            else if (layer > 0)
+                            {
+                                graphics.DrawImageUnscaled(img, 0, 0);
+                            }
+                        }
+                    }
                 }
+
+                return image;
             }
             catch (Exception ex)
             {
@@ -92,6 +122,10 @@ namespace System.Windows.Forms
                 }
 
                 throw new Exception($"Unable to download tile.\n{ex.Message}");
+            }
+            finally
+            {
+                graphics?.Dispose();
             }
         }
 
