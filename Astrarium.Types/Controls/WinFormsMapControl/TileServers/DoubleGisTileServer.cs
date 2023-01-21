@@ -1,25 +1,24 @@
 ﻿namespace System.Windows.Forms
 {
     /// <summary>
-    /// Represents <see href="https://wikimapia.org/">Wikimapia</see> web tile server.
+    /// Represents <see href="https://maps.2gis.com/">2GIS</see> web tile server.
     /// </summary>
-    public class WikimapiaTileServer : WebTileServer
+    public class DoubleGisTileServer : WebTileServer
     {
         /// <summary>
         /// Used to access random tile subdomains.
         /// </summary>
         private readonly Random _Random = new Random();
 
-
         /// <summary>
         /// Gets displayable name of the Tile server.
         /// </summary>
-        public override string Name => "Wikimapia";
+        public override string Name => "2GIS";
 
         /// <summary>
         /// Gets attribution text.
         /// </summary>
-        public override string AttributionText => "Map data: © <a href='https://wikimapia.org'>Wikimapia.org</a>";
+        public override string AttributionText => "© <a href='https://maps.2gis.com'>2GIS</a>";
 
         /// <summary>
         /// Minimal zoom level.
@@ -29,7 +28,7 @@
         /// <summary>
         /// Maximal zoom level.
         /// </summary>
-        public override int MaxZoomLevel => 19;
+        public override int MaxZoomLevel => 8;
 
         /// <summary>
         /// User-Agent string used to dowload tile images from the tile server.
@@ -47,15 +46,15 @@
         /// <returns><see cref="Uri"/> instance.</returns>
         public override Uri GetTileUri(int x, int y, int z)
         {
-            int server = x % 4 + (y % 4) * 4;
-            return new Uri($"http://i{server}.wikimapia.org/?x={x}&y={y}&zoom={z}&type=map&lng=0");
+            int server = _Random.Next(0, 5);
+            return new Uri($"https://tile{server}.maps.2gis.com/tiles?x={x}&y={y}&z={z}");
         }
 
         /// <summary>
-        /// Creates new instance of <see cref="WikimapiaTileServer"/>.
+        /// Creates new instance of <see cref="DoubleGisTileServer"/>.
         /// </summary>
-        /// <param name="userAgent">User-Agent string used to dowload tile images from Wikimapia tile servers.</param>
-        public WikimapiaTileServer(string userAgent)
+        /// <param name="userAgent">User-Agent string used to dowload tile images from 2GIS tile servers.</param>
+        public DoubleGisTileServer(string userAgent)
         {
             UserAgent = userAgent;
         }

@@ -195,10 +195,30 @@ namespace System.Windows.Forms
             }
         }
 
+
+        private ObservableCollection<Layer> _Layers = new ObservableCollection<Layer>();
+
         /// <summary>
-        /// Backing field for <see cref="TileServer"/> property.
+        /// Gets or sets collection of layers to be displayed on the map.
         /// </summary>
-        private ITileServer _TileServer;
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public ObservableCollection<Layer> Layers
+        {
+            get => _Layers;
+            set
+            {
+                if (value != _Layers)
+                {
+                    _Layers.CollectionChanged -= OverlayItemsChanged;
+                    _Layers = value;
+                    if (value != null)
+                    {
+                        _Layers.CollectionChanged += OverlayItemsChanged;
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Gets or sets tile server instance used to obtain map tiles.
@@ -207,12 +227,12 @@ namespace System.Windows.Forms
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public ITileServer TileServer
         {
-            get => _TileServer;
+            get => Layers[0].TileServer;
             set
             {
                 var center = Center;
 
-                _TileServer = value;
+                Layers[0].TileServer = value;
 
                 if (value != null)
                 {
@@ -220,7 +240,7 @@ namespace System.Windows.Forms
 
                     Center = center;
 
-                    if (_TileServer.AttributionText != null)
+                    if (TileServer.AttributionText != null)
                     {
                         OnSizeChanged(new EventArgs());
                     }
@@ -241,27 +261,22 @@ namespace System.Windows.Forms
         }
 
         /// <summary>
-        /// Backing field for <see cref="OverlayTileServer"/> property.
-        /// </summary>
-        private ITileServer _OverlayTileServer;
-
-        /// <summary>
         /// Gets or sets tile server instance used to obtain overlay tiles.
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public ITileServer OverlayTileServer
         {
-            get => _OverlayTileServer;
+            get => Layers[1].TileServer;
             set
             {
-                _OverlayTileServer = value;
+                Layers[1].TileServer = value;
 
                 if (value != null)
                 {
                     _Cache = new ConcurrentBag<Tile>();
 
-                    if (_OverlayTileServer.AttributionText != null)
+                    if (Layers[1].TileServer.AttributionText != null)
                     {
                         OnSizeChanged(new EventArgs());
                     }
@@ -338,11 +353,11 @@ namespace System.Windows.Forms
             {
                 if (value != _Markers)
                 {
-                    _Markers.CollectionChanged -= OverayItemsChanged;
+                    _Markers.CollectionChanged -= OverlayItemsChanged;
                     _Markers = value;
                     if (value != null)
                     {
-                        _Markers.CollectionChanged += OverayItemsChanged;
+                        _Markers.CollectionChanged += OverlayItemsChanged;
                     }
                 }
             }
@@ -365,11 +380,11 @@ namespace System.Windows.Forms
             {
                 if (value != _Tracks)
                 {
-                    _Tracks.CollectionChanged -= OverayItemsChanged;
+                    _Tracks.CollectionChanged -= OverlayItemsChanged;
                     _Tracks = value;
                     if (value != null)
                     {
-                        _Tracks.CollectionChanged += OverayItemsChanged;
+                        _Tracks.CollectionChanged += OverlayItemsChanged;
                     }
                 }
             }
@@ -392,11 +407,11 @@ namespace System.Windows.Forms
             {
                 if (value != _Polygons)
                 {
-                    _Polygons.CollectionChanged -= OverayItemsChanged;
+                    _Polygons.CollectionChanged -= OverlayItemsChanged;
                     _Polygons = value;
                     if (value != null)
                     {
-                        _Polygons.CollectionChanged += OverayItemsChanged;
+                        _Polygons.CollectionChanged += OverlayItemsChanged;
                     }
                 }
             }
@@ -548,6 +563,9 @@ namespace System.Windows.Forms
             InitializeComponent();
             DoubleBuffered = true;
             Cursor = Cursors.Cross;
+
+            Layers.Add(new Layer() { ZIndex = 0 });
+            Layers.Add(new Layer() { ZIndex = 1 });
         }
 
         public static ICollection<ITileServer> CreateTileServers(string userAgent)
@@ -560,6 +578,7 @@ namespace System.Windows.Forms
                 new OpenTopoMapServer(userAgent),
                 new WikimapiaTileServer(userAgent),
                 new EsriSatelliteMapsTileServer(userAgent),
+                new DoubleGisTileServer(userAgent),
                 new GoogleMapsSatelliteTileServer(userAgent),
                 new GoogleMapsRoadmapTileServer(userAgent),
                 new GoogleMapsHybridTileServer(userAgent),
@@ -602,7 +621,7 @@ namespace System.Windows.Forms
         /// <summary>
         /// Raised when overlay items (markers, tracks, polygons) changed.
         /// </summary>
-        private void OverayItemsChanged(object sender, Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        private void OverlayItemsChanged(object sender, Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             Invalidate();
         }
@@ -636,13 +655,11 @@ namespace System.Windows.Forms
                     DrawErrorString(pe.Graphics, $"{nameof(TileServer)} property value is not set.\nPlease specify tile server instance to obtain map images before using the map control.");
                 }
             }
-            // use offline maps in design mode
+            // design mode
             else
             {
-                if (TileServer == null)
-                {
-                    TileServer = new OfflineTileServer();
-                }
+                drawContent = false;
+                DrawErrorString(pe.Graphics, $"Map is unavailable in design mode.");
             }
 
             if (drawContent)
@@ -728,8 +745,8 @@ namespace System.Windows.Forms
 
                 _Offset.X = _Offset.X % FullMapSizeInPixels;
 
-                if (_Offset.Y < -(int)FullMapSizeInPixels)
-                    _Offset.Y = -(int)FullMapSizeInPixels;
+                if (_Offset.Y < -FullMapSizeInPixels)
+                    _Offset.Y = -FullMapSizeInPixels;
 
                 if (_Offset.Y > Height)
                     _Offset.Y = Height;
