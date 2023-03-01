@@ -19,10 +19,6 @@ namespace System.Windows.Forms
         /// <returns><see cref="Uri"/> instance.</returns>
         public abstract Uri GetTileUri(int x, int y, int z);
 
-        public virtual int LayersCount => 1;
-
-        public virtual Uri GetTileUri(int x, int y, int z, int layer) => GetTileUri(x, y, z); 
-
         /// <summary>
         /// User-Agent string used to dowload tile images from the tile server.
         /// </summary>
@@ -77,39 +73,16 @@ namespace System.Windows.Forms
         /// <returns></returns>
         public Image GetTile(int x, int y, int z)
         {
-            Graphics graphics = null;
             try
             {
-                Image image = null;
-                for (int layer = 0; layer < LayersCount; layer++)
+                Uri uri = GetTileUri(x, y, z);
+                var request = (HttpWebRequest)WebRequest.Create(uri);
+                request.UserAgent = UserAgent;
+                using (var response = request.GetResponse())
+                using (Stream stream = response.GetResponseStream())
                 {
-                    Uri uri = GetTileUri(x, y, z, layer);
-                    var request = (HttpWebRequest)WebRequest.Create(uri);
-                    request.UserAgent = UserAgent;
-
-                    using (var response = request.GetResponse())
-                    using (Stream stream = response.GetResponseStream())
-                    {
-                        var img = Image.FromStream(stream);
-                        if (layer == 0)
-                        {
-                            image = img;
-                        }
-                        if (LayersCount > 1)
-                        {
-                            if (layer == 0)
-                            {
-                                graphics = Graphics.FromImage(image);
-                            }
-                            else if (layer > 0)
-                            {
-                                graphics.DrawImageUnscaled(img, 0, 0);
-                            }
-                        }
-                    }
+                    return Image.FromStream(stream);
                 }
-
-                return image;
             }
             catch (Exception ex)
             {
@@ -122,10 +95,6 @@ namespace System.Windows.Forms
                 }
 
                 throw new Exception($"Unable to download tile.\n{ex.Message}");
-            }
-            finally
-            {
-                graphics?.Dispose();
             }
         }
 

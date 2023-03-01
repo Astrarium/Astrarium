@@ -23,8 +23,13 @@ namespace System.Windows.Forms
         public ITileServer TileServer { get; set; }
 
         /// <summary>
-        /// Defines offset of the first tile of the layer.
+        /// Defines the X-offset of the first tile of the layer.
         /// </summary>
-        internal Drawing.Point Offset { get; set; } = Drawing.Point.Empty;
+        internal int OffsetX { get; set; }
+
+        /// <summary>
+        /// Defines the Y-offset of the first tile of the layer.
+        /// </summary>
+        internal int OffsetY { get; set; }
     }
 }

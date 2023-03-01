@@ -6,12 +6,6 @@
     public class WikimapiaTileServer : WebTileServer
     {
         /// <summary>
-        /// Used to access random tile subdomains.
-        /// </summary>
-        private readonly Random _Random = new Random();
-
-
-        /// <summary>
         /// Gets displayable name of the Tile server.
         /// </summary>
         public override string Name => "Wikimapia";

@@ -5,7 +5,7 @@
         /// <summary>
         /// Gets attribution text.
         /// </summary>
-        public override string AttributionText => "© <a href='http://yandex.ru'>Yandex</a>";
+        public override string AttributionText => "© <a href='https://yandex.ru/maps/'>Yandex</a>";
 
         /// <summary>
         /// User-Agent string used to dowload tile images from the tile server.
@@ -66,28 +66,5 @@
         }
 
         public YandexRoadMapsTileServer(string userAgent) : base(userAgent) { }
-    }
-
-    public class YandexHybridTileServer : YandexMapsTileServer
-    {
-        public override string Name => "Yandex Hybrid";
-
-        public override int LayersCount => 2;
-
-        // this is not used
-        public override Uri GetTileUri(int x, int y, int z)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Uri GetTileUri(int x, int y, int z, int layer)
-        {
-            if (layer == 0)
-                return new Uri($"https://core-sat.maps.yandex.net/tiles?l=sat&x={x}&y={y}&z={z}");
-            else
-                return new Uri($"https://core-renderer-tiles.maps.yandex.net/tiles?l=skl&x={x}&y={y}&z={z}");
-        }
-
-        public YandexHybridTileServer(string userAgent) : base(userAgent) { }
     }
 }

@@ -26,11 +26,6 @@ namespace System.Windows.Forms
         private const int TILE_SIZE = 256;
 
         /// <summary>
-        /// First tile offset.
-        /// </summary>
-        private Drawing.Point _Offset = new Drawing.Point();
-
-        /// <summary>
         /// Last known mouse position.
         /// </summary>
         private Drawing.Point _LastMouse = new Drawing.Point();
@@ -306,18 +301,33 @@ namespace System.Windows.Forms
         {
             get
             {
-                float x = NormalizeTileNumber(-(float)(_Offset.X - Width / 2) / TILE_SIZE);
-                float y = -(float)(_Offset.Y - Height / 2) / TILE_SIZE;
-                return TileToWorldPos(x, y);
+
+                if (Layers[0].TileServer != null)
+                {
+                    float x = NormalizeTileNumber(-(float)(Layers[0].OffsetX - Width / 2) / TILE_SIZE);
+                    float y = -(float)(Layers[0].OffsetY - Height / 2) / TILE_SIZE;
+                    return Layers[0].TileServer.Projection.TileToWorldPos(x, y, ZoomLevel);
+                }
+                else
+                {
+                    return new GeoPoint();
+                }
             }
             set
             {
-                var center = WorldToTilePos(value);
-                _Offset.X = -(int)(center.X * TILE_SIZE) + Width / 2;
-                _Offset.Y = -(int)(center.Y * TILE_SIZE) + Height / 2;
-                _Offset.X = _Offset.X % FullMapSizeInPixels;
-                Invalidate();
-                CenterChanged?.Invoke(this, EventArgs.Empty);
+                if (Layers[0].TileServer != null)
+                {
+                    foreach (var layer in Layers.Where(n => n.TileServer != null))
+                    {
+                        var center = layer.TileServer.Projection.WorldToTilePos(value, ZoomLevel);
+                        layer.OffsetX = -(int)(center.X * TILE_SIZE) + Width / 2;
+                        layer.OffsetY = -(int)(center.Y * TILE_SIZE) + Height / 2;
+                        layer.OffsetX = layer.OffsetX % FullMapSizeInPixels;
+                    }
+
+                    Invalidate();
+                    CenterChanged?.Invoke(this, EventArgs.Empty);
+                }
             }
         }
 
@@ -330,9 +340,9 @@ namespace System.Windows.Forms
         {
             get
             {
-                float x = NormalizeTileNumber(-(float)(_Offset.X - _LastMouse.X) / TILE_SIZE);
-                float y = -(float)(_Offset.Y - _LastMouse.Y) / TILE_SIZE;
-                return TileToWorldPos(x, y);
+                float x = NormalizeTileNumber(-(float)(Layers[0].OffsetX - _LastMouse.X) / TILE_SIZE);
+                float y = -(float)(Layers[0].OffsetY - _LastMouse.Y) / TILE_SIZE;
+                return Layers[0].TileServer.Projection.TileToWorldPos(x, y, ZoomLevel);
             }
         }
 
@@ -586,8 +596,7 @@ namespace System.Windows.Forms
                 new BingMapsRoadsTileServer(),
                 new BingMapsHybridTileServer(),
                 new YandexRoadMapsTileServer(userAgent),
-                new YandexSatelliteMapsTileServer(userAgent),
-                new YandexHybridTileServer(userAgent)
+                new YandexSatelliteMapsTileServer(userAgent)
             };
         }
 
@@ -679,13 +688,13 @@ namespace System.Windows.Forms
 
                     var gs = pe.Graphics.Save();
                     pe.Graphics.SmoothingMode = SmoothingMode.None;
-                    if (_Offset.Y > 0)
+                    if (_Layers[0].OffsetY > 0)
                     {
-                        pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, -1, Width, _Offset.Y + 1);
+                        pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, -1, Width, Layers[0].OffsetY + 1);
                     }
-                    if (_Offset.Y + FullMapSizeInPixels < Height)
+                    if (Layers[0].OffsetY + FullMapSizeInPixels < Height)
                     {
-                        pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, _Offset.Y + FullMapSizeInPixels, Width, _Offset.Y + FullMapSizeInPixels);
+                        pe.Graphics.FillRectangle(new SolidBrush(BackColor), 0, Layers[0].OffsetY + FullMapSizeInPixels, Width, Layers[0].OffsetY + FullMapSizeInPixels);
                     }
                     pe.Graphics.Restore(gs);
 
@@ -740,16 +749,16 @@ namespace System.Windows.Forms
         {
             if (_IsDragging)
             {
-                _Offset.X += e.X - _LastMouse.X;
-                _Offset.Y += e.Y - _LastMouse.Y;
+                Layers[0].OffsetX += e.X - _LastMouse.X;
+                Layers[0].OffsetY += e.Y - _LastMouse.Y;
 
-                _Offset.X = _Offset.X % FullMapSizeInPixels;
+                Layers[0].OffsetX = Layers[0].OffsetX % FullMapSizeInPixels;
 
-                if (_Offset.Y < -FullMapSizeInPixels)
-                    _Offset.Y = -FullMapSizeInPixels;
+                if (Layers[0].OffsetY < -FullMapSizeInPixels)
+                    Layers[0].OffsetY = -FullMapSizeInPixels;
 
-                if (_Offset.Y > Height)
-                    _Offset.Y = Height;
+                if (Layers[0].OffsetY > Height)
+                    Layers[0].OffsetY = Height;
 
                 AdjustMapBounds();
                 Invalidate();
@@ -798,13 +807,13 @@ namespace System.Windows.Forms
             {
                 if (FullMapSizeInPixels > Height)
                 {
-                    if (_Offset.Y > 0) _Offset.Y = 0;
-                    if (_Offset.Y + FullMapSizeInPixels < Height) _Offset.Y = Height - FullMapSizeInPixels;
+                    if (Layers[0].OffsetY > 0) Layers[0].OffsetY = 0;
+                    if (Layers[0].OffsetY + FullMapSizeInPixels < Height) Layers[0].OffsetY = Height - FullMapSizeInPixels;
                 }
                 else
                 {
-                    if (_Offset.Y > Height - FullMapSizeInPixels) _Offset.Y = Height - FullMapSizeInPixels;
-                    if (_Offset.Y < 0) _Offset.Y = 0;
+                    if (Layers[0].OffsetY > Height - FullMapSizeInPixels) Layers[0].OffsetY = Height - FullMapSizeInPixels;
+                    if (Layers[0].OffsetY < 0) Layers[0].OffsetY = 0;
                 }
             }
         }
@@ -855,13 +864,15 @@ namespace System.Windows.Forms
                 c.Used = false;
             }
 
-            foreach (var tileServer in TileServers)
+            foreach (var layer in Layers.OrderBy(n => n.ZIndex).Where(n => n.TileServer != null))
             {
+                ITileServer tileServer = layer.TileServer;
+
                 bool isOverlay = tileServer is IOverlayTileServer;
 
                 // indices of first visible tile
-                int fromX = (int)Math.Floor(-(float)_Offset.X / TILE_SIZE);
-                int fromY = (int)Math.Floor(-(float)_Offset.Y / TILE_SIZE);
+                int fromX = (int)Math.Floor(-(float)layer.OffsetX / TILE_SIZE);
+                int fromY = (int)Math.Floor(-(float)layer.OffsetY / TILE_SIZE);
 
                 // indices of last visible tile
                 int toX = fromX + tilesByWidth;
@@ -882,14 +893,14 @@ namespace System.Windows.Forms
                                 if (tile.Image != null)
                                 {
                                     tile.Used = true;
-                                    DrawTile(g, x, y, tile.Image, isOverlay);
+                                    DrawTile(g, x, y, tile.Image, layer, isOverlay);
                                 }
                                 else
                                 {
                                     tile.Used = true;
                                     if (!isOverlay)
                                     {
-                                        DrawThumbnail(g, x, y, tile.ErrorMessage, true);
+                                        DrawThumbnail(g, layer, x, y, tile.ErrorMessage, true);
                                     }
                                 }
                             }
@@ -899,7 +910,7 @@ namespace System.Windows.Forms
                                 // draw thumbnail first
                                 if (!isOverlay)
                                 {
-                                    DrawThumbnail(g, x, y, ThumbnailText, false);
+                                    DrawThumbnail(g, layer, x, y, ThumbnailText, false);
                                 }
 
                                 // try to find out tile with less zoom level, and draw scaled part of that tile
@@ -919,7 +930,7 @@ namespace System.Windows.Forms
                                         tile.Used = true;
                                         if (!isOverlay)
                                         {
-                                            DrawTilePart(g, x, y, x_ % f, y % f, f, tile.Image, isOverlay);
+                                            DrawTilePart(g, x, y, x_ % f, y % f, f, tile.Image, layer, isOverlay);
                                         }
                                         break;
                                     }
@@ -1104,12 +1115,12 @@ namespace System.Windows.Forms
         /// <param name="yRemainder">Y-index of a tile portion to be drawn.</param>
         /// <param name="frac">Portion of a tile to be drawn, 2 means 1/2, 4 means 1/4 etc.</param>
         /// <param name="image">Full tile image.</param>
-        private void DrawTilePart(Graphics gr, int x, int y, int xRemainder, int yRemainder, int frac, Image image, bool isOverlay)
+        private void DrawTilePart(Graphics gr, int x, int y, int xRemainder, int yRemainder, int frac, Image image, Layer layer, bool isOverlay)
         {
             // coordinates of a tile on the map
             var p = new Drawing.Point();
-            p.X = _Offset.X + x * TILE_SIZE;
-            p.Y = _Offset.Y + y * TILE_SIZE;
+            p.X = layer.OffsetX + x * TILE_SIZE;
+            p.Y = layer.OffsetY + y * TILE_SIZE;
 
             // Calc source portion of the tile
             Rectangle srcRect = new Rectangle(TILE_SIZE / frac * xRemainder, TILE_SIZE / frac * yRemainder, TILE_SIZE / frac, TILE_SIZE / frac);
@@ -1158,11 +1169,11 @@ namespace System.Windows.Forms
         /// <param name="x">X-index of the tile.</param>
         /// <param name="y">Y-index of the tile.</param>
         /// <param name="image">Tile image.</param>
-        private void DrawTile(Graphics gr, int x, int y, Image image, bool isOverlay)
+        private void DrawTile(Graphics gr, int x, int y, Image image, Layer layer, bool isOverlay)
         {
             var p = new Drawing.Point();
-            p.X = _Offset.X + x * TILE_SIZE;
-            p.Y = _Offset.Y + y * TILE_SIZE;
+            p.X = layer.OffsetX + x * TILE_SIZE;
+            p.Y = layer.OffsetY + y * TILE_SIZE;
 
             gr.DrawImage(image, new Rectangle(p, new Drawing.Size(TILE_SIZE, TILE_SIZE)), 0, 0, TILE_SIZE, TILE_SIZE, GraphicsUnit.Pixel, GetImageAttributes(isOverlay));
         }
@@ -1175,13 +1186,13 @@ namespace System.Windows.Forms
         /// <param name="y">Y-index of the tile.</param>
         /// <param name="message">Message to be displayed instead of the tile.</param>
         /// <param name="isError">Flag indicating the message should be displayed with error color.</param>
-        private void DrawThumbnail(Graphics gr, int x, int y, string message, bool isError)
+        private void DrawThumbnail(Graphics gr, Layer layer, int x, int y, string message, bool isError)
         {
             if (ShowThumbnails || isError)
             {
                 var p = new Drawing.Point();
-                p.X = _Offset.X + x * TILE_SIZE;
-                p.Y = _Offset.Y + y * TILE_SIZE;
+                p.X = layer.OffsetX + x * TILE_SIZE;
+                p.Y = layer.OffsetY + y * TILE_SIZE;
                 Rectangle rectangle = new Rectangle(p.X, p.Y, TILE_SIZE, TILE_SIZE);
                 gr.FillRectangle(new SolidBrush(ThumbnailBackColor), rectangle);
                 gr.DrawRectangle(new Pen(ThumbnailForeColor) { DashStyle = DashStyle.Dot }, rectangle);
@@ -1229,12 +1240,16 @@ namespace System.Windows.Forms
             if (z != ZoomLevel)
             {
                 double factor = Math.Pow(2, z - ZoomLevel);
-                _Offset.X = (int)((_Offset.X - p.X) * factor) + p.X;
-                _Offset.Y = (int)((_Offset.Y - p.Y) * factor) + p.Y;
 
                 _ZoomLevel = z;
 
-                _Offset.X = _Offset.X % FullMapSizeInPixels;
+                foreach (var layer in Layers)
+                {
+                    layer.OffsetX = (int)((layer.OffsetX - p.X) * factor) + p.X;
+                    layer.OffsetY = (int)((layer.OffsetY - p.Y) * factor) + p.Y;
+
+                    layer.OffsetX = layer.OffsetX % FullMapSizeInPixels;
+                }
                 Invalidate();
 
                 ZoomLevelChaged?.Invoke(this, EventArgs.Empty);
@@ -1322,13 +1337,13 @@ namespace System.Windows.Forms
         /// </summary>
         /// <param name="tileServer">Tile server to request the tile</param>
         /// <param name="tile">Tile to be requested</param>
-        private void ProcessRequest(ITileServer tileServer, Tile tile)
+        private void ProcessRequest(Layer layer, Tile tile)
         {
             try
             {
                 // indices of first visible tile
-                int fromX = (int)Math.Floor(-(float)_Offset.X / TILE_SIZE);
-                int fromY = (int)Math.Floor(-(float)_Offset.Y / TILE_SIZE);
+                int fromX = (int)Math.Floor(-(float)layer.OffsetX / TILE_SIZE);
+                int fromY = (int)Math.Floor(-(float)layer.OffsetY / TILE_SIZE);
 
                 // count of visible tiles (vertically and horizontally)
                 int tilesByWidth = (int)Math.Ceiling((float)Width / TILE_SIZE);
@@ -1339,12 +1354,12 @@ namespace System.Windows.Forms
                 int toY = fromY + tilesByHeight;
 
                 // request tiles matching the current zoom level, server name and position
-                if (tile.TileServer == tileServer.GetType().Name &&
+                if (tile.TileServer == layer.TileServer.GetType().Name &&
                     tile.Z == ZoomLevel &&
                     tile.X >= fromX && tile.X <= toX &&
                     tile.Y >= fromY && tile.Y <= toY)
                 {
-                    tile.Image = tileServer.GetTile(tile.X, tile.Y, tile.Z);
+                    tile.Image = layer.TileServer.GetTile(tile.X, tile.Y, tile.Z);
                     tile.Used = true;
                 }
             }
@@ -1356,7 +1371,7 @@ namespace System.Windows.Forms
             finally
             {
                 // if we have obtained image from the server, save it in file system (if server supports file system cache)
-                if (tileServer is IFileCacheTileServer && tile.Image != null)
+                if (layer.TileServer is IFileCacheTileServer && tile.Image != null)
                 {
                     string localPath = Path.Combine(CacheFolder, tile.TileServer, $"{tile.Z}", $"{tile.X}", $"{tile.Y}.tile");
                     try
@@ -1393,9 +1408,9 @@ namespace System.Windows.Forms
             {
                 if (_RequestPool.TryPeek(out Tile tile))
                 {
-                    foreach (var tileServer in TileServers)
+                    foreach (var layer in Layers.Where(n => n.TileServer != null))
                     {
-                        ProcessRequest(tileServer, tile);
+                        ProcessRequest(layer, tile);
                     }
                     Invalidate();
                 }
@@ -1414,28 +1429,7 @@ namespace System.Windows.Forms
         private PointF Project(GeoPoint g)
         {
             var p = TileServer.Projection.WorldToTilePos(g, ZoomLevel);
-            return new PointF(p.X * TILE_SIZE + _Offset.X, p.Y * TILE_SIZE + _Offset.Y);
-        }
-
-        /// <summary>
-        /// Converts geographical coordinates to tile indices with fractions.
-        /// </summary>
-        /// <param name="g">Point with geographical coordinates.</param>
-        /// <returns>Point representing X/Y indices of the specified geographical coordinates in Slippy map scheme.</returns>
-        private PointF WorldToTilePos(GeoPoint g)
-        {
-            return TileServer?.Projection.WorldToTilePos(g, ZoomLevel) ?? PointF.Empty;
-        }
-
-        /// <summary>
-        /// Converts tile indices to geographical coordinates.
-        /// </summary>
-        /// <param name="x">X-index of the tile.</param>
-        /// <param name="y">Y-index of the tile.</param>
-        /// <returns>Point representing geographical coordinates.</returns>
-        private GeoPoint TileToWorldPos(double x, double y)
-        {
-            return TileServer?.Projection.TileToWorldPos(x, y, ZoomLevel) ?? GeoPoint.Empty;
+            return new PointF(p.X * TILE_SIZE + Layers[0].OffsetX, p.Y * TILE_SIZE + Layers[0].OffsetY);
         }
 
         /// <summary>
