@@ -39,10 +39,11 @@ namespace Astrarium.Plugins.Journal.Types
         Task<ICollection<string>> GetSessionFiles(string sessionId);
         Task SaveAttachment(Attachment attachment);
         Task SaveCamera(Camera camera);
-        void SaveDatabaseEntityProperty(object value, Type entityType, string column, object key);
+        Task SaveDatabaseEntityProperty(object value, Type entityType, string column, object key);
         Task SaveEyepiece(Eyepiece eyepiece);
         Task SaveFilter(Filter filter);
         Task SaveLens(Lens lens);
         Task SaveOptics(Optics optics);
+        Task SaveSite(Site site);
     }
 }

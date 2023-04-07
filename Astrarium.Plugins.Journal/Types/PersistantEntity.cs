@@ -8,8 +8,15 @@ using System.Threading.Tasks;
 
 namespace Astrarium.Plugins.Journal.Types
 {
+    /// <summary>
+    /// Base class for all models which can be stored in database
+    /// </summary>
     public abstract class PersistantEntity : PropertyChangedBase
     {
+        /// <summary>
+        /// This event is fired each time when model property marked with DBStored attribute is modified.
+        /// Normally the event handler should reflect this change in the database.
+        /// </summary>
         public event Action<object, Type, string, object> DatabasePropertyChanged;
 
         protected override void NotifyPropertyChanged(params string[] propertyNames)

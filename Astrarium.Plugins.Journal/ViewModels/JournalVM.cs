@@ -151,6 +151,8 @@ namespace Astrarium.Plugins.Journal.ViewModels
         {
             base.Dispose();
 
+            SelectedTreeViewItem = null;
+
             sessions = null;
             FilteredSessions = null;
 
@@ -245,7 +247,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
                     // unsubscribe from changes
                     if (SelectedTreeViewItem != null)
                     {
-                        SelectedTreeViewItem.DatabasePropertyChanged -= dbManager.SaveDatabaseEntityProperty;
+                        UnsubscribeFromChanges(SelectedTreeViewItem);
                     }
 
                     // update backing field
@@ -395,6 +397,8 @@ namespace Astrarium.Plugins.Journal.ViewModels
 
         private async void LoadJournalItemDetails()
         {
+            UnsubscribeFromChanges(SelectedTreeViewItem);
+
             if (SelectedTreeViewItem is Session session)
             {
                 await dbManager.LoadSession(session);
@@ -403,6 +407,8 @@ namespace Astrarium.Plugins.Journal.ViewModels
             {
                 await dbManager.LoadObservation(observation);
             }
+
+            SubscribeToChanges(SelectedTreeViewItem);
         }
 
         #region Command handlers
@@ -663,7 +669,9 @@ namespace Astrarium.Plugins.Journal.ViewModels
             model.Optics = await dbManager.GetOptics(id);
             if (ViewManager.ShowDialog(model) ?? false)
             {
+                UnsubscribeFromChanges(SelectedTreeViewItem);
                 Optics = await dbManager.GetOptics();
+                LoadJournalItemDetails();
                 (SelectedTreeViewItem as Observation).TelescopeId = model.Optics.Id;
             }
         }
@@ -684,7 +692,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
             if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete selected optics? This will be deleted from all observations. This action can not be undone.", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
                 await dbManager.DeleteOptics(id);
-                SelectedTreeViewItem.DatabasePropertyChanged -= dbManager.SaveDatabaseEntityProperty;
+                UnsubscribeFromChanges(SelectedTreeViewItem);
                 Optics = await dbManager.GetOptics();
                 LoadJournalItemDetails();
                 (SelectedTreeViewItem as Observation).TelescopeId = null;
@@ -697,7 +705,9 @@ namespace Astrarium.Plugins.Journal.ViewModels
             model.Eyepiece = await dbManager.GetEyepiece(id);
             if (ViewManager.ShowDialog(model) ?? false)
             {
+                UnsubscribeFromChanges(SelectedTreeViewItem);
                 Eyepieces = await dbManager.GetEyepieces();
+                LoadJournalItemDetails();
                 (SelectedTreeViewItem as Observation).EyepieceId = model.Eyepiece.Id;
             }
         }
@@ -718,7 +728,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
             if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete selected eyepiece? This will be deleted from all observations. This action can not be undone.", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
                 await dbManager.DeleteEyepiece(id);
-                SelectedTreeViewItem.DatabasePropertyChanged -= dbManager.SaveDatabaseEntityProperty;
+                UnsubscribeFromChanges(SelectedTreeViewItem);
                 Eyepieces = await dbManager.GetEyepieces();
                 LoadJournalItemDetails();
                 (SelectedTreeViewItem as Observation).EyepieceId = null;
@@ -731,7 +741,9 @@ namespace Astrarium.Plugins.Journal.ViewModels
             model.Lens = await dbManager.GetLens(id);
             if (ViewManager.ShowDialog(model) ?? false)
             {
+                UnsubscribeFromChanges(SelectedTreeViewItem);
                 Lenses = await dbManager.GetLenses();
+                LoadJournalItemDetails();
                 (SelectedTreeViewItem as Observation).LensId = model.Lens.Id;
             }
         }
@@ -752,7 +764,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
             if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete selected lens? This will be deleted from all observations. This action can not be undone.", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
                 await dbManager.DeleteLens(id);
-                SelectedTreeViewItem.DatabasePropertyChanged -= dbManager.SaveDatabaseEntityProperty;
+                UnsubscribeFromChanges(SelectedTreeViewItem);
                 Lenses = await dbManager.GetLenses();
                 LoadJournalItemDetails();
                 (SelectedTreeViewItem as Observation).LensId = null;
@@ -765,7 +777,9 @@ namespace Astrarium.Plugins.Journal.ViewModels
             model.Filter = await dbManager.GetFilter(id);
             if (ViewManager.ShowDialog(model) ?? false)
             {
+                UnsubscribeFromChanges(SelectedTreeViewItem);
                 Filters = await dbManager.GetFilters();
+                LoadJournalItemDetails();
                 (SelectedTreeViewItem as Observation).FilterId = model.Filter.Id;
             }
         }
@@ -786,7 +800,7 @@ namespace Astrarium.Plugins.Journal.ViewModels
             if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete selected filter? This will be deleted from all observations. This action can not be undone.", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
                 await dbManager.DeleteFilter(id);
-                SelectedTreeViewItem.DatabasePropertyChanged -= dbManager.SaveDatabaseEntityProperty;
+                UnsubscribeFromChanges(SelectedTreeViewItem);
                 Filters = await dbManager.GetFilters();
                 LoadJournalItemDetails();
                 (SelectedTreeViewItem as Observation).FilterId = null;
@@ -799,8 +813,9 @@ namespace Astrarium.Plugins.Journal.ViewModels
             model.Camera = await dbManager.GetCamera(id);
             if (ViewManager.ShowDialog(model) ?? false)
             {
+                UnsubscribeFromChanges(SelectedTreeViewItem);
                 Cameras = await dbManager.GetCameras();
-                (SelectedTreeViewItem as Observation).CameraId = model.Camera.Id;
+                LoadJournalItemDetails();
             }
         }
 
@@ -810,8 +825,10 @@ namespace Astrarium.Plugins.Journal.ViewModels
             model.Camera = new Camera() { Id = Guid.NewGuid().ToString() };
             if (ViewManager.ShowDialog(model) ?? false)
             {
-                Cameras = await dbManager.GetCameras();
                 (SelectedTreeViewItem as Observation).CameraId = model.Camera.Id;
+                UnsubscribeFromChanges(SelectedTreeViewItem);
+                Cameras = await dbManager.GetCameras();
+                LoadJournalItemDetails();
             }
         }
 
@@ -820,33 +837,40 @@ namespace Astrarium.Plugins.Journal.ViewModels
             if (ViewManager.ShowMessageBox("$Warning", "Do you really want to delete selected camera? This will be deleted from all observations. This action can not be undone.", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
                 await dbManager.DeleteCamera(id);
-                SelectedTreeViewItem.DatabasePropertyChanged -= dbManager.SaveDatabaseEntityProperty;
+                (SelectedTreeViewItem as Observation).CameraId = null;
+                UnsubscribeFromChanges(SelectedTreeViewItem);
                 Cameras = await dbManager.GetCameras();
                 LoadJournalItemDetails();
-                (SelectedTreeViewItem as Observation).CameraId = null;
             }
         }
 
         private async void EditSite(string id)
         {
             var site = await dbManager.GetSite(id);
-            var location = new CrdsGeographical()
+
+            var model = ViewManager.ShowLocationDialog(new CrdsGeographical()
             {
                 Elevation = site.Elevation,
                 Latitude = site.Latitude,
                 Longitude = -site.Longitude,
                 Name = site.Name,
                 UtcOffset = site.Timezone
-            };
+            });
 
-            var model = ViewManager.ShowLocationDialog(location);
             if (model != null)
             {
-                site.Elevation = location.Elevation;
-                site.Latitude = location.Latitude;
-                site.Longitude = location.Longitude;
-                site.Name = location.Name;
-                site.Timezone = location.UtcOffset;
+                site.Elevation = model.Elevation;
+                site.Latitude = model.Latitude;
+                site.Longitude = model.Longitude;
+                site.Name = model.Name;
+                site.Timezone = model.UtcOffset;
+
+                await dbManager.SaveSite(site);
+
+                UnsubscribeFromChanges(SelectedTreeViewItem);
+                Sites = await dbManager.GetSites();
+                LoadJournalItemDetails();
+                (SelectedTreeViewItem as Session).SiteId = site.Id;
             };
         }
 
@@ -858,6 +882,27 @@ namespace Astrarium.Plugins.Journal.ViewModels
         private void DeleteSite(string siteId)
         {
 
+        }
+
+        private async void HandleDatabasePropertyChanged(object value, Type entityType, string column, object key)
+        {
+            await dbManager.SaveDatabaseEntityProperty(value, entityType, column, key);
+        }
+
+        private void SubscribeToChanges(PersistantEntity entity)
+        {
+            if (entity != null)
+            {
+                entity.DatabasePropertyChanged += HandleDatabasePropertyChanged;
+            }
+        }
+
+        private void UnsubscribeFromChanges(PersistantEntity entity)
+        {
+            if (entity != null)
+            {
+                entity.DatabasePropertyChanged -= HandleDatabasePropertyChanged;
+            }
         }
 
         private async void GoToCoordinates()

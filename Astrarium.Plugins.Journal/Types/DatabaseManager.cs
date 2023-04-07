@@ -74,8 +74,6 @@ namespace Astrarium.Plugins.Journal.Types
         {
             return Task.Run(() =>
             {
-                session.DatabasePropertyChanged -= SaveDatabaseEntityProperty;
-
                 using (var db = new DatabaseContext())
                 {
                     var s = db.Sessions.Include(x => x.Attachments).FirstOrDefault(x => x.Id == session.Id);
@@ -97,9 +95,7 @@ namespace Astrarium.Plugins.Journal.Types
                         Title = x.Title,
                         Comments = x.Comments
                     }).ToList();
-                }
-
-                session.DatabasePropertyChanged += SaveDatabaseEntityProperty;
+                };
             });
         }
 
@@ -132,8 +128,6 @@ namespace Astrarium.Plugins.Journal.Types
         {
             return Task.Run(() =>
             {
-                observation.DatabasePropertyChanged -= SaveDatabaseEntityProperty;
-
                 using (var db = new DatabaseContext())
                 {
                     var obs = db.Observations
@@ -162,14 +156,12 @@ namespace Astrarium.Plugins.Journal.Types
                         Comments = x.Comments
                     }).ToList();
                 }
-
-                observation.DatabasePropertyChanged += SaveDatabaseEntityProperty;
             });
         }
 
-        public async void SaveDatabaseEntityProperty(object value, Type entityType, string column, object key)
+        public Task SaveDatabaseEntityProperty(object value, Type entityType, string column, object key)
         {
-            await Task.Run(() =>
+            return Task.Run(() =>
             {
                 using (var db = new DatabaseContext())
                 {
@@ -516,6 +508,31 @@ namespace Astrarium.Plugins.Journal.Types
             });
         }
 
+        public Task SaveSite(Site site)
+        {
+            return Task.Run(() =>
+            {
+                using (var db = new DatabaseContext())
+                {
+                    var siteDb = db.Sites.FirstOrDefault(x => x.Id == site.Id);
+                    if (siteDb == null)
+                    {
+                        siteDb = new SiteDB() { Id = site.Id };
+                        db.Sites.Add(siteDb);
+                    }
+
+                    siteDb.Name = site.Name;
+                    siteDb.Elevation = site.Elevation;
+                    siteDb.IAUCode = site.IAUCode;
+                    siteDb.Latitude = site.Latitude;
+                    siteDb.Longitude = siteDb.Longitude;
+                    siteDb.Timezone = siteDb.Timezone;
+
+                    db.SaveChanges();
+                }
+            });
+        }
+
         /// <summary>
         /// Holder class to adapt observation target entry to CelestialObjectPicker control
         /// </summary>
@@ -842,15 +859,7 @@ namespace Astrarium.Plugins.Journal.Types
                         db.Cameras.Add(cameraDb);
                     }
 
-                    cameraDb.Vendor = camera.Vendor;
-                    cameraDb.Model = camera.Model;
-                    cameraDb.PixelsX = camera.PixelsX;
-                    cameraDb.PixelsY = camera.PixelsY;
-                    cameraDb.PixelXSize = camera.PixelXSize;
-                    cameraDb.PixelYSize = camera.PixelYSize;
-                    cameraDb.Binning = camera.Binning;
-                    cameraDb.Remarks = camera.Remarks;
-
+                    camera.ToDB(cameraDb);
                     db.SaveChanges();
                 }
             });
