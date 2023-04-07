@@ -825,10 +825,8 @@ namespace Astrarium.Plugins.Journal.ViewModels
             model.Camera = new Camera() { Id = Guid.NewGuid().ToString() };
             if (ViewManager.ShowDialog(model) ?? false)
             {
-                (SelectedTreeViewItem as Observation).CameraId = model.Camera.Id;
-                UnsubscribeFromChanges(SelectedTreeViewItem);
                 Cameras = await dbManager.GetCameras();
-                LoadJournalItemDetails();
+                (SelectedTreeViewItem as Observation).CameraId = model.Camera.Id;
             }
         }
 
@@ -870,7 +868,6 @@ namespace Astrarium.Plugins.Journal.ViewModels
                 UnsubscribeFromChanges(SelectedTreeViewItem);
                 Sites = await dbManager.GetSites();
                 LoadJournalItemDetails();
-                (SelectedTreeViewItem as Session).SiteId = site.Id;
             };
         }
 
