@@ -345,7 +345,7 @@ namespace Astrarium.Plugins.Journal.Types
                     catch
                     {
                         trans?.Rollback();
-                    }                    
+                    }
                 }
             });
         }
@@ -356,22 +356,7 @@ namespace Astrarium.Plugins.Journal.Types
             {
                 using (var db = new DatabaseContext())
                 {
-                    var siteDb = db.Sites.FirstOrDefault(x => x.Id == id);
-                    if (siteDb != null)
-                    {
-                        var site = new Site();
-                        site.Id = siteDb.Id;
-                        site.Name = siteDb.Name;
-                        site.Elevation = siteDb.Elevation ?? 0;
-                        site.IAUCode = siteDb.IAUCode;
-                        site.Latitude = siteDb.Latitude;
-                        site.Longitude = siteDb.Longitude;
-                        site.Timezone = siteDb.Timezone;
-
-                        return site;
-                    }
-
-                    return null;
+                    return db.Sites.FirstOrDefault(x => x.Id == id)?.FromDBO();
                 }
             });
         }
@@ -408,37 +393,7 @@ namespace Astrarium.Plugins.Journal.Types
             {
                 using (var db = new DatabaseContext())
                 {
-                    var opticsDb = db.Optics.FirstOrDefault(x => x.Id == id);
-                    if (opticsDb != null)
-                    {
-                        var optics = new Optics();
-
-                        optics.Id = opticsDb.Id;
-                        optics.Vendor = opticsDb.Vendor;
-                        optics.Model = opticsDb.Model;
-                        optics.Scheme = opticsDb.Scheme;
-                        optics.Type = opticsDb.Type;
-                        optics.Aperture = opticsDb.Aperture;
-                        optics.OrientationErect = opticsDb.OrientationErect;
-                        optics.OrientationTrueSided = opticsDb.OrientationTrueSided;
-
-                        if (optics.Type == "Telescope")
-                        {
-                            var details = JsonConvert.DeserializeObject<ScopeDetails>(opticsDb.Details);
-                            optics.FocalLength = details.FocalLength;
-                        }
-                        else if (optics.Type == "Fixed")
-                        {
-                            var details = JsonConvert.DeserializeObject<FixedOpticsDetails>(opticsDb.Details);
-                            optics.Magnification = details.Magnification;
-                            optics.TrueField = details.TrueField ?? 0;
-                            optics.TrueFieldSpecified = details.TrueField != null;
-                        }
-
-                        return optics;
-                    }
-
-                    return null;
+                    return db.Optics.FirstOrDefault(x => x.Id == id)?.FromDBO();
                 }
             });
         }
@@ -449,30 +404,8 @@ namespace Astrarium.Plugins.Journal.Types
             {
                 using (var db = new DatabaseContext())
                 {
-                    var opticsDb = db.Optics.FirstOrDefault(x => x.Id == optics.Id);
-                    if (opticsDb == null)
-                    {
-                        opticsDb = new OpticsDB() { Id = optics.Id };
-                        db.Optics.Add(opticsDb);
-                    }
-
-                    opticsDb.Vendor = optics.Vendor;
-                    opticsDb.Model = optics.Model;
-                    opticsDb.Scheme = optics.Scheme;
-                    opticsDb.Type = optics.Type;
-                    opticsDb.Aperture = optics.Aperture;
-                    opticsDb.OrientationErect = optics.OrientationErect;
-                    opticsDb.OrientationTrueSided = optics.OrientationTrueSided;
-
-                    if (optics.Type == "Telescope")
-                    {
-                        opticsDb.Details = JsonConvert.SerializeObject(new ScopeDetails() { FocalLength = optics.FocalLength });
-                    }
-                    else if (optics.Type == "Fixed")
-                    {
-                        opticsDb.Details = JsonConvert.SerializeObject(new FixedOpticsDetails() { Magnification = optics.Magnification, TrueField = optics.TrueFieldSpecified ? optics.TrueField : (double?)null });
-                    }
-
+                    var opticsDb = GetOrCreate<OpticsDB>(db, optics.Id);
+                    optics.ToDBO(opticsDb);
                     db.SaveChanges();
                 }
             });
@@ -514,20 +447,8 @@ namespace Astrarium.Plugins.Journal.Types
             {
                 using (var db = new DatabaseContext())
                 {
-                    var siteDb = db.Sites.FirstOrDefault(x => x.Id == site.Id);
-                    if (siteDb == null)
-                    {
-                        siteDb = new SiteDB() { Id = site.Id };
-                        db.Sites.Add(siteDb);
-                    }
-
-                    siteDb.Name = site.Name;
-                    siteDb.Elevation = site.Elevation;
-                    siteDb.IAUCode = site.IAUCode;
-                    siteDb.Latitude = site.Latitude;
-                    siteDb.Longitude = siteDb.Longitude;
-                    siteDb.Timezone = siteDb.Timezone;
-
+                    var siteDb = GetOrCreate<SiteDB>(db, site.Id);
+                    site.ToDBO(siteDb);
                     db.SaveChanges();
                 }
             });
@@ -590,18 +511,7 @@ namespace Astrarium.Plugins.Journal.Types
             {
                 using (var db = new DatabaseContext())
                 {
-                    var lensDb = db.Lenses.FirstOrDefault(x => x.Id == id);
-                    if (lensDb != null)
-                    {
-                        var lens = new Lens();
-                        lens.Id = lensDb.Id;
-                        lens.Vendor = lensDb.Vendor;
-                        lens.Model = lensDb.Model;
-                        lens.Factor = lensDb.Factor;
-                        return lens;
-                    }
-
-                    return null;
+                    return db.Lenses.FirstOrDefault(x => x.Id == id)?.FromDBO();
                 }
             });
         }
@@ -612,17 +522,8 @@ namespace Astrarium.Plugins.Journal.Types
             {
                 using (var db = new DatabaseContext())
                 {
-                    var lensDb = db.Lenses.FirstOrDefault(x => x.Id == lens.Id);
-                    if (lensDb == null)
-                    {
-                        lensDb = new LensDB() { Id = lens.Id };
-                        db.Lenses.Add(lensDb);
-                    }
-
-                    lensDb.Vendor = lens.Vendor;
-                    lensDb.Model = lens.Model;
-                    lensDb.Factor = lens.Factor;
-
+                    var lensDb = GetOrCreate<LensDB>(db, lens.Id);
+                    lens.ToDBO(lensDb);
                     db.SaveChanges();
                 }
             });
@@ -755,23 +656,7 @@ namespace Astrarium.Plugins.Journal.Types
             {
                 using (var db = new DatabaseContext())
                 {
-                    var eyepieceDb = db.Eyepieces.FirstOrDefault(x => x.Id == id);
-                    if (eyepieceDb != null)
-                    {
-                        var eyepiece = new Eyepiece();
-
-                        eyepiece.Id = eyepieceDb.Id;
-                        eyepiece.Vendor = eyepieceDb.Vendor;
-                        eyepiece.Model = eyepieceDb.Model;
-                        eyepiece.FocalLength = eyepieceDb.FocalLength;
-                        eyepiece.MaxFocalLength = eyepieceDb.FocalLengthMax.HasValue ? eyepieceDb.FocalLengthMax.Value : 10;
-                        eyepiece.IsZoomEyepiece = eyepieceDb.FocalLengthMax.HasValue;
-                        eyepiece.ApparentFOV = eyepieceDb.ApparentFOV.HasValue ? eyepieceDb.ApparentFOV.Value : 50;
-                        eyepiece.ApparentFOVSpecified = eyepieceDb.ApparentFOV.HasValue;
-                        return eyepiece;
-                    }
-
-                    return null;
+                    return db.Eyepieces.FirstOrDefault(x => x.Id == id)?.FromDBO();
                 }
             });
         }
@@ -782,19 +667,8 @@ namespace Astrarium.Plugins.Journal.Types
             {
                 using (var db = new DatabaseContext())
                 {
-                    var eyepieceDb = db.Eyepieces.FirstOrDefault(x => x.Id == eyepiece.Id);
-                    if (eyepieceDb == null)
-                    {
-                        eyepieceDb = new EyepieceDB() { Id = eyepiece.Id };
-                        db.Eyepieces.Add(eyepieceDb);
-                    }
-
-                    eyepieceDb.Vendor = eyepiece.Vendor;
-                    eyepieceDb.Model = eyepiece.Model;
-                    eyepieceDb.FocalLength = eyepiece.FocalLength;
-                    eyepieceDb.FocalLengthMax = eyepiece.IsZoomEyepiece ? eyepiece.MaxFocalLength : (double?)null;
-                    eyepieceDb.ApparentFOV = eyepiece.ApparentFOVSpecified ? eyepiece.ApparentFOV : (double?)null;
-
+                    var eyepieceDb = GetOrCreate<EyepieceDB>(db, eyepiece.Id);
+                    eyepiece.ToDBO(eyepieceDb);
                     db.SaveChanges();
                 }
             });
@@ -806,13 +680,9 @@ namespace Astrarium.Plugins.Journal.Types
             {
                 using (var db = new DatabaseContext())
                 {
-                    var existing = db.Eyepieces.FirstOrDefault(x => x.Id == id);
-                    if (existing != null)
-                    {
-                        db.Eyepieces.Remove(existing);
-                        db.Database.ExecuteSqlCommand($"UPDATE [Observations] SET [EyepieceId] = NULL WHERE [EyepieceId] = '{id}'");
-                        db.SaveChanges();
-                    }
+                    db.Database.ExecuteSqlCommand($"DELETE FROM [Eyepieces] WHERE [Id] = '{id}'");
+                    db.Database.ExecuteSqlCommand($"UPDATE [Observations] SET [EyepieceId] = NULL WHERE [EyepieceId] = '{id}'");
+                    db.SaveChanges();
                 }
             });
         }
@@ -823,25 +693,7 @@ namespace Astrarium.Plugins.Journal.Types
             {
                 using (var db = new DatabaseContext())
                 {
-                    var cameraDb = db.Cameras.FirstOrDefault(x => x.Id == id);
-                    if (cameraDb != null)
-                    {
-                        var camera = new Camera();
-
-                        camera.Id = cameraDb.Id;
-                        camera.Vendor = cameraDb.Vendor;
-                        camera.Model = cameraDb.Model;
-                        camera.PixelsX = cameraDb.PixelsX;
-                        camera.PixelsY = cameraDb.PixelsY;
-                        camera.PixelXSize = cameraDb.PixelXSize;
-                        camera.PixelYSize = cameraDb.PixelYSize;
-                        camera.Binning = cameraDb.Binning;
-                        camera.Remarks = cameraDb.Remarks;
-
-                        return camera;
-                    }
-
-                    return null;
+                    return db.Cameras.FirstOrDefault(x => x.Id == id)?.FromDBO();
                 }
             });
         }
@@ -852,14 +704,8 @@ namespace Astrarium.Plugins.Journal.Types
             {
                 using (var db = new DatabaseContext())
                 {
-                    var cameraDb = db.Cameras.FirstOrDefault(x => x.Id == camera.Id);
-                    if (cameraDb == null)
-                    {
-                        cameraDb = new CameraDB() { Id = camera.Id };
-                        db.Cameras.Add(cameraDb);
-                    }
-
-                    camera.ToDB(cameraDb);
+                    var cameraDb = GetOrCreate<CameraDB>(db, camera.Id);
+                    camera.ToDBO(cameraDb);
                     db.SaveChanges();
                 }
             });
@@ -937,6 +783,17 @@ namespace Astrarium.Plugins.Journal.Types
                 }
             }
             return null;
+        }
+
+        private TEntity GetOrCreate<TEntity>(DatabaseContext ctx, string id) where TEntity : class, IEntity, new()
+        {
+            var entity = ctx.Set<TEntity>().FirstOrDefault(x => x.Id == id);
+            if (entity == null)
+            {
+                entity = new TEntity() { Id = id };
+                ctx.Set<TEntity>().Add(entity);
+            }
+            return entity;
         }
     }
 }
