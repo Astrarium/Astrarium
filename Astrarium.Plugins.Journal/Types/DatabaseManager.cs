@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.IO;
 using Astrarium.Types;
-using Astrarium.Algorithms;
 using Astrarium.Plugins.Journal.Database.Entities;
 using System.Collections;
 using System.Reflection;
@@ -415,14 +414,19 @@ namespace Astrarium.Plugins.Journal.Types
         {
             return Task.Run(() =>
             {
-                using (var db = new DatabaseContext())
+                using (var ctx = new DatabaseContext())
                 {
-                    var existing = db.Optics.FirstOrDefault(x => x.Id == id);
-                    if (existing != null)
+                    DbContextTransaction trans = null;
+                    try
                     {
-                        db.Optics.Remove(existing);
-                        db.Database.ExecuteSqlCommand($"UPDATE [Observations] SET [ScopeId] = NULL WHERE [ScopeId] = '{id}'");
-                        db.SaveChanges();
+                        trans = ctx.Database.BeginTransaction();
+                        ctx.Database.ExecuteSqlCommand($"DELETE FROM [Optics] WHERE [Id] = @p0", id);
+                        ctx.Database.ExecuteSqlCommand($"UPDATE [Observations] SET [ScopeId] = NULL WHERE [ScopeId] = @p0", id);
+                        trans.Commit();
+                    }
+                    catch
+                    {
+                        trans?.Rollback();
                     }
                 }
             });
@@ -533,14 +537,19 @@ namespace Astrarium.Plugins.Journal.Types
         {
             return Task.Run(() =>
             {
-                using (var db = new DatabaseContext())
+                using (var ctx = new DatabaseContext())
                 {
-                    var existing = db.Lenses.FirstOrDefault(x => x.Id == id);
-                    if (existing != null)
+                    DbContextTransaction trans = null;
+                    try
                     {
-                        db.Lenses.Remove(existing);
-                        db.Database.ExecuteSqlCommand($"UPDATE [Observations] SET [LensId] = NULL WHERE [LensId] = '{id}'");
-                        db.SaveChanges();
+                        trans = ctx.Database.BeginTransaction();
+                        ctx.Database.ExecuteSqlCommand($"DELETE FROM [Lenses] WHERE [Id] = @p0", id);
+                        ctx.Database.ExecuteSqlCommand($"UPDATE [Observations] SET [LensId] = NULL WHERE [LensId] = @p0", id);
+                        trans.Commit();
+                    }
+                    catch
+                    {
+                        trans?.Rollback();
                     }
                 }
             });
@@ -552,27 +561,8 @@ namespace Astrarium.Plugins.Journal.Types
             {
                 using (var db = new DatabaseContext())
                 {
-                    var filterDb = db.Filters.FirstOrDefault(x => x.Id == filter.Id);
-                    if (filterDb == null)
-                    {
-                        filterDb = new FilterDB() { Id = filter.Id };
-                        db.Filters.Add(filterDb);
-                    }
-
-                    filterDb.Vendor = filter.Vendor;
-                    filterDb.Model = filter.Model;
-                    filterDb.Type = filter.Type;
-                    if (filter.Type == "color")
-                    {
-                        filterDb.Color = filter.Color;
-                        filterDb.Wratten = filter.Wratten;
-                    }
-                    else
-                    {
-                        filterDb.Color = null;
-                        filterDb.Wratten = null;
-                    }
-
+                    var filterDb = GetOrCreate<FilterDB>(db, filter.Id);
+                    filter.ToDBO(filterDb);
                     db.SaveChanges();
                 }
             });
@@ -610,25 +600,7 @@ namespace Astrarium.Plugins.Journal.Types
             {
                 using (var db = new DatabaseContext())
                 {
-                    var filterDb = db.Filters.FirstOrDefault(x => x.Id == id);
-                    if (filterDb != null)
-                    {
-                        var filter = new Filter();
-
-                        filter.Id = filterDb.Id;
-                        filter.Vendor = filterDb.Vendor;
-                        filter.Model = filterDb.Model;
-                        filter.Type = filterDb.Type;
-                        if (filter.Type == "color")
-                        {
-                            filter.Color = filterDb.Color;
-                            filter.Wratten = filterDb.Wratten;
-                        }
-
-                        return filter;
-                    }
-
-                    return null;
+                    return db.Filters.FirstOrDefault(x => x.Id == id)?.FromDBO();
                 }
             });
         }
@@ -637,14 +609,19 @@ namespace Astrarium.Plugins.Journal.Types
         {
             return Task.Run(() =>
             {
-                using (var db = new DatabaseContext())
+                using (var ctx = new DatabaseContext())
                 {
-                    var existing = db.Filters.FirstOrDefault(x => x.Id == id);
-                    if (existing != null)
+                    DbContextTransaction trans = null;
+                    try
                     {
-                        db.Filters.Remove(existing);
-                        db.Database.ExecuteSqlCommand($"UPDATE [Observations] SET [FilterId] = NULL WHERE [FilterId] = '{id}'");
-                        db.SaveChanges();
+                        trans = ctx.Database.BeginTransaction();
+                        ctx.Database.ExecuteSqlCommand($"DELETE FROM [Filters] WHERE [Id] = @p0", id);
+                        ctx.Database.ExecuteSqlCommand($"UPDATE [Observations] SET [FilterId] = NULL WHERE [FilterId] = @p0", id);
+                        trans.Commit();
+                    }
+                    catch
+                    {
+                        trans?.Rollback();
                     }
                 }
             });
@@ -678,11 +655,20 @@ namespace Astrarium.Plugins.Journal.Types
         {
             return Task.Run(() =>
             {
-                using (var db = new DatabaseContext())
+                using (var ctx = new DatabaseContext())
                 {
-                    db.Database.ExecuteSqlCommand($"DELETE FROM [Eyepieces] WHERE [Id] = '{id}'");
-                    db.Database.ExecuteSqlCommand($"UPDATE [Observations] SET [EyepieceId] = NULL WHERE [EyepieceId] = '{id}'");
-                    db.SaveChanges();
+                    DbContextTransaction trans = null;
+                    try
+                    {
+                        trans = ctx.Database.BeginTransaction();
+                        ctx.Database.ExecuteSqlCommand($"DELETE FROM [Eyepieces] WHERE [Id] = @p0", id);
+                        ctx.Database.ExecuteSqlCommand($"UPDATE [Observations] SET [EyepieceId] = NULL WHERE [EyepieceId] = @p0", id);
+                        trans.Commit();
+                    }
+                    catch
+                    {
+                        trans?.Rollback();
+                    }
                 }
             });
         }
@@ -715,14 +701,19 @@ namespace Astrarium.Plugins.Journal.Types
         {
             return Task.Run(() =>
             {
-                using (var db = new DatabaseContext())
+                using (var ctx = new DatabaseContext())
                 {
-                    var existing = db.Cameras.FirstOrDefault(x => x.Id == id);
-                    if (existing != null)
+                    DbContextTransaction trans = null;
+                    try
                     {
-                        db.Cameras.Remove(existing);
-                        db.Database.ExecuteSqlCommand($"UPDATE [Observations] SET [CameraId] = NULL WHERE [CameraId] = '{id}'");
-                        db.SaveChanges();
+                        trans = ctx.Database.BeginTransaction();
+                        ctx.Database.ExecuteSqlCommand($"DELETE FROM [Cameras] WHERE [Id] = @p0", id);
+                        ctx.Database.ExecuteSqlCommand($"UPDATE [Observations] SET [CameraId] = NULL WHERE [CameraId] = @p0", id);
+                        trans.Commit();
+                    }
+                    catch
+                    {
+                        trans?.Rollback();
                     }
                 }
             });

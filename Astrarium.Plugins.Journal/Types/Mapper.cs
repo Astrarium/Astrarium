@@ -203,6 +203,44 @@ namespace Astrarium.Plugins.Journal.Types
             };
         }
 
+        public static FilterDB ToDBO(this Filter filter, FilterDB dbo = null)
+        {
+            if (dbo == null)
+            {
+                dbo = new FilterDB();
+            }
+
+            dbo.Id = filter.Id;
+            dbo.Vendor = filter.Vendor;
+            dbo.Model = filter.Model;
+            dbo.Type = filter.Type;
+            if (filter.Type == "color")
+            {
+                dbo.Color = filter.Color;
+                dbo.Wratten = filter.Wratten;
+            }
+            else
+            {
+                dbo.Color = null;
+                dbo.Wratten = null;
+            }
+
+            return dbo;
+        }
+
+        public static Filter FromDBO(this FilterDB dbo)
+        {
+            return new Filter()
+            {
+                Id = dbo.Id,
+                Vendor = dbo.Vendor,
+                Model = dbo.Model,
+                Type = dbo.Type,
+                Color = dbo.Type == "color" ? dbo.Color : null,
+                Wratten = dbo.Type == "color" ? dbo.Wratten : null,
+            };
+        }
+
         // TODO: move other mapping logic here
     }
 }
