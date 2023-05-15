@@ -11,6 +11,8 @@ using Astrarium.Types.Themes;
 using Astrarium.Types;
 using System.Linq;
 using System.Threading.Tasks;
+using OpenTK.Graphics.OpenGL;
+using Astrarium.Algorithms;
 
 namespace Astrarium
 {
@@ -257,27 +259,113 @@ namespace Astrarium
             return WF.Screen.FromPoint(new System.Drawing.Point((int)window.Left, (int)window.Top));
         }
 
+        private readonly SkyViewControl skyViewControl;
         private readonly ISkyMap map;
 
-        public MainWindow(SkyMap map)
+        private Projection projection;
+
+        public MainWindow(ISettings settings, SkyMap map)
         {
             InitializeComponent();
 
             this.map = map;
             this.StateChanged += MainWindow_StateChanged;
+
+            projection = Projection.Create<StereographicProjection>(map.Context);
+            projection.Fov = 90;
+            projection.SetVision(new CrdsHorizontal(0, 0));
+
+            projection.FlipVertical = true;
+
+            /*
             var skyView = new SkyView();
             skyView.SkyMap = map;
             skyView.MouseDoubleClick += (o, e) => GetMapDoubleClick(this)?.Execute(new PointF(e.X, e.Y));
             skyView.MouseClick += SkyView_MouseClick;
             skyView.MouseMove += SkyView_MouseMove;
-            skyView.MouseWheel += (o, e) => GetMapZoom(this)?.Execute(e.Delta);
+            skyView.MouseWheel += (o, e) => GetMapZoom(this)?.Execute(e.Delta);            
+            Host.Child = skyView;
+            */
+
+            skyViewControl = new SkyViewControl();
+            //skyView.MouseDoubleClick += (o, e) => GetMapDoubleClick(this)?.Execute(new PointF(e.X, e.Y));
+            //skyView.MouseClick += SkyView_MouseClick;
+            //skyView.MouseMove += SkyView_MouseMove;
+            //skyView.MouseWheel += (o, e) => GetMapZoom(this)?.Execute(e.Delta);
+            skyViewControl.Paint += SkyView_Paint;
+            skyViewControl.Resize += SkyView_Resize;
+            skyViewControl.MouseMove += SkyView_MouseMove1;
+            skyViewControl.MouseUp += SkyViewControl_MouseUp;
+            skyViewControl.MouseWheel += SkyViewControl_MouseWheel;
+            skyViewControl.MouseClick += SkyView_MouseClick;
+            settings.SettingValueChanged += (s, v) => skyViewControl.Invalidate();
+
+            Host.Child = skyViewControl;
+
             Host.Loaded += (o, e) => WF.Application.AddMessageFilter(this);
             Host.KeyDown += (o, e) => GetMapKeyDown(this)?.Execute(e);
-            Host.Child = skyView;
 
             this.Loaded += MainWindow_Loaded;
             this.Closing += MainWindow_Closing;
             this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        }
+
+        private void SkyViewControl_MouseWheel(object sender, WF.MouseEventArgs e)
+        {
+            projection.Fov *= Math.Pow(1.1, -e.Delta / 120);
+            skyViewControl.Invalidate();
+        }
+
+        private void SkyViewControl_MouseUp(object sender, WF.MouseEventArgs e)
+        {
+            pOld = System.Drawing.Point.Empty;
+        }
+
+        System.Drawing.Point pOld = new System.Drawing.Point();
+
+        private void SkyView_MouseMove1(object sender, WF.MouseEventArgs e)
+        {
+            if (e.Button == WF.MouseButtons.Left)
+            {
+                if (pOld != System.Drawing.Point.Empty)
+                {
+                    double dx = pOld.X - e.X;
+                    double dy = pOld.Y - e.Y;
+                    
+                    projection.Move(new Vec2(pOld.X, skyViewControl.Height - pOld.Y), new Vec2(e.X, skyViewControl.Height - e.Y));
+                    skyViewControl.Invalidate();
+                    pOld = new System.Drawing.Point(e.X, e.Y);
+                }
+
+                pOld = new System.Drawing.Point(e.X, e.Y);
+            }
+        }
+
+        private void SkyView_Resize(object sender, EventArgs e)
+        {
+            projection.SetScreenSize(skyViewControl.Width, skyViewControl.Height);
+            GL.Viewport(0, 0, skyViewControl.Width, skyViewControl.Height);
+            skyViewControl.Invalidate();
+        }
+
+        private void SkyView_Paint(object sender, WF.PaintEventArgs e)
+        {
+            Color color = Color.Black;
+
+            GL.ClearColor(color);
+            GL.Clear(ClearBufferMask.ColorBufferBit);
+            GL.Clear(ClearBufferMask.StencilBufferBit);
+
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.PushMatrix();
+            GL.LoadIdentity();
+            GL.Ortho(0, projection.ScreenWidth,
+                     0, projection.ScreenHeight, -1, 1);
+
+
+            map.Render(projection);
+
+            (sender as SkyViewControl).SwapBuffers();
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)

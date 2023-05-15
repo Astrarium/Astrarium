@@ -110,6 +110,7 @@ namespace Astrarium
             kernel.Bind<ICommandLineArgs>().ToConstant(commandLineArgs).InSingletonScope();
             kernel.Bind<ISettings, Settings>().To<Settings>().InSingletonScope();
             kernel.Bind<IAppUpdater>().To<AppUpdater>().InSingletonScope();
+            kernel.Bind<ITextureManager, TextureManager>().To<TextureManager>().InSingletonScope();
             kernel.Bind<ISky, Sky>().To<Sky>().InSingletonScope();
             kernel.Bind<ISkyMap, SkyMap>().To<SkyMap>().InSingletonScope();
             kernel.Bind<IGeoLocationsManager, GeoLocationsManager>().To<GeoLocationsManager>().InSingletonScope();

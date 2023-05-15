@@ -1,10 +1,13 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
+using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,6 +16,7 @@ namespace Astrarium.Plugins.Horizon
     public class GroundRenderer : BaseRenderer
     {
         private readonly ISettings settings;
+        private readonly ITextureManager textureManager;
 
         // TODO: move to settings!
         private readonly Color colorGroundNight = Color.FromArgb(4, 10, 10);
@@ -20,8 +24,11 @@ namespace Astrarium.Plugins.Horizon
 
         private readonly string[] cardinalDirections = new string[] { "S", "SW", "W", "NW", "N", "NE", "E", "SE" };
 
-        public GroundRenderer(ISettings settings)
+        private readonly string basePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+        public GroundRenderer(ITextureManager textureManager, ISettings settings)
         {
+            this.textureManager = textureManager;
             this.settings = settings;
         }
 
@@ -140,6 +147,106 @@ namespace Astrarium.Plugins.Horizon
                             map.Graphics.DrawString(Text.Get($"CardinalDirections.{cardinalDirections[i]}"), font, brushCardinalLabels, p, format);
                         }
                     }
+                }
+            }
+        }
+
+        public override void Render(Projection prj)
+        {
+            if (!settings.Get<bool>("Ground")) return;
+
+            GL.Enable(EnableCap.Texture2D);
+            GL.Enable(EnableCap.CullFace);
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+
+            // if only one of the flipping enabled
+            if (prj.FlipVertical ^ prj.FlipHorizontal)
+            {
+                GL.CullFace(CullFaceMode.Back);
+            }
+            else
+            {
+                GL.CullFace(CullFaceMode.Front);
+            }
+
+            /*
+            string texture;
+            string fallbackTexture = "pano2-2k.png";
+            if (prj.Fov > 45)
+            {
+                texture = "pano2-2k.png";
+            }
+            else if (prj.Fov > 20)
+            {
+                texture = "pano2-4k.png";
+            }
+            else
+            {
+                texture = "pano2-8k.png";
+            }
+
+            GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(texture, fallbackTexture));
+            */
+            GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(Path.Combine(basePath, "Data", "pano.png")));
+
+
+            int steps = prj.Fov < 90 ? 32 : 128;
+
+            // tint color
+            int c = 10 + (int)((255 - 10) * 1/* atm.DaylightFactor*/);
+            GL.Color4(Color.FromArgb(c, c, c));
+
+
+            for (double lat = -80; lat <= 90; lat += 10)
+            {
+                GL.Begin(PrimitiveType.TriangleStrip);
+
+                for (int i = 0; i <= steps; i++)
+                {
+                    for (int k = 0; k < 2; k++)
+                    {
+                        var p = prj.Project(new CrdsHorizontal(i / (double)steps * 360, lat - k * 10));
+
+                        if (p != null)
+                        {
+                            double s = 1 - (double)i / steps;
+                            double t = (90 - (lat - k * 10)) / 180.0;
+
+                            GL.TexCoord2(s, t);
+                            GL.Vertex2(p.X, p.Y);
+                        }
+                        else
+                        {
+                            GL.End();
+                            GL.Begin(PrimitiveType.TriangleStrip);
+                            break;
+                        }
+                    }
+                }
+                GL.End();
+            }
+
+
+            GL.Disable(EnableCap.Texture2D);
+            GL.Disable(EnableCap.CullFace);
+            GL.Disable(EnableCap.Blend);
+
+
+            string[] cardinals = new string[] { "S", "W", "N", "E" };
+
+            // Cardinals
+
+            var font = new Font(SystemFonts.DefaultFont.FontFamily, 14);
+
+            for (int i = 0; i < cardinals.Length; i++)
+            {
+                var p = prj.Project(new CrdsHorizontal((double)i / cardinals.Length * 360, 0));
+                if (prj.IsInsideScreen(p))
+                {
+                    
+                    //var size = System.Windows.Forms.TextRenderer.MeasureText(cardinals[i], font);
+                    //textRenderer.DrawString(cardinals[i], font, Brushes.DarkGreen, new PointF((int)(p.X - size.Width / 2), (int)(prj.ScreenHeight - p.Y - size.Height)), prj.ScreenWidth, prj.ScreenHeight);
                 }
             }
         }

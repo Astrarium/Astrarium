@@ -57,6 +57,8 @@ namespace Astrarium.Types
         /// <param name="g">Graphics to render the map.</param>
         void Render(Graphics g);
 
+        void Render(Projection p);
+
         CelestialObject FindObject(PointF point);
 
         void GoToObject(CelestialObject body, double viewAngleTarget);

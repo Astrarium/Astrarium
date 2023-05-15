@@ -14,6 +14,8 @@ namespace Astrarium.Types
         /// <param name="map"><see cref="IMapContext"/> instance.</param>
         public abstract void Render(IMapContext map);
 
+        public virtual void Render(Projection projection) { }
+
         /// <summary>
         /// Intitialization logic should be placed here.
         /// </summary>

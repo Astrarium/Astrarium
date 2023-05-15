@@ -220,8 +220,11 @@ namespace Astrarium
             this.commandLineArgs = commandLineArgs;
         }
 
+        public SkyContext Context { get; private set; }
+
         public void Initialize(SkyContext skyContext, ICollection<BaseRenderer> renderers)
         {
+            Context = skyContext;
             mapContext = new MapContext(this, skyContext);
 
             Projection = new ArcProjection(mapContext);
@@ -275,6 +278,22 @@ namespace Astrarium
         }
 
         public ColorSchema Schema { get; private set; } = ColorSchema.Night;
+
+        public void Render(Projection projection)
+        {
+            for (int i = 0; i < renderers.Count(); i++)
+            {
+                try
+                {
+                    renderers.ElementAt(i).Render(projection);
+                }
+                catch (Exception ex)
+                {
+                    Log.Debug($"Rendering error: {ex}");
+                }
+                
+            }
+        }
 
         public void Render(Graphics g)
         {

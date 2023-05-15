@@ -21,6 +21,10 @@
   </Target>
 
   <ItemGroup>
+    <PackageReference Include="OpenTK" Version="3.3.3" />
+  </ItemGroup>
+	
+  <ItemGroup>
     <None Remove="Text.ini" />
     <EmbeddedResource Include="Text.ini" />
   </ItemGroup>
@@ -47,6 +51,16 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Data\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Data\pano.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

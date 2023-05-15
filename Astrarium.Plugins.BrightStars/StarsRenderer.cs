@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
+using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -38,6 +39,101 @@ namespace Astrarium.Plugins.BrightStars
             penConLine.DashStyle = DashStyle.Custom;
             penConLine.DashPattern = new float[] { 2, 2 };
             starColor = Color.White;
+        }
+
+        public override void Render(Projection prj)
+        {
+            GL.Enable(EnableCap.PointSmooth);
+            GL.Enable(EnableCap.LineSmooth);
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+            GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
+            GL.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
+
+            // Color of const. lines
+            GL.Color3((byte)50, (byte)50, (byte)50);
+
+            var allStars = starsCalc.Stars;
+
+            if (settings.Get("ConstLines"))
+            {
+                CrdsEquatorial eq1, eq2;
+
+                foreach (var line in sky.ConstellationLines)
+                {
+                    // TODO: take precession and proper motion into account
+                    eq1 = allStars.ElementAt(line.Item1).Equatorial0;
+                    eq2 = allStars.ElementAt(line.Item2).Equatorial0;
+
+                    if (Angle.Separation(prj.CenterEquatorial, eq1) < prj.MaxFov * 0.7 &&
+                        Angle.Separation(prj.CenterEquatorial, eq2) < prj.MaxFov * 0.7)
+                    {
+                        var p1 = prj.Project(eq1);
+                        var p2 = prj.Project(eq2);
+
+                        GL.Begin(PrimitiveType.Lines);
+                        GL.Vertex2(p1.X, p1.Y);
+                        GL.Vertex2(p2.X, p2.Y);
+                        GL.End();
+                    }
+                }
+            }
+
+
+
+
+
+
+            // no stars if the Sun above horizon
+            //if (atm.SunAltitude >= 0) return;
+
+            float daylightFactor = 0; // (float)atm.DaylightFactor;
+
+            float minStarSize = daylightFactor * 3; // empiric
+
+            float starDimming = 1 - daylightFactor; // no stars visible on day (daylightFactor = 1)
+
+            
+
+            var labelBrush = new SolidBrush(Color.DimGray);
+
+            // TODO: take precession and proper motion into account
+            var stars = allStars.Where(s => s != null && Angle.Separation(prj.CenterEquatorial, s.Equatorial0) < prj.Fov);
+
+
+            foreach (var star in stars)
+            {
+                float size = prj.GetPointSize(star.Magnitude) * starDimming;
+                if (size > minStarSize)
+                {
+                    Vec2 vec = prj.Project(star.Equatorial0);
+
+                    if (prj.IsInsideScreen(vec))
+                    {
+                        GL.PointSize(size);
+                        GL.Color3((byte)255, (byte)255, (byte)255);
+
+                        GL.Begin(PrimitiveType.Points);
+                        GL.Vertex2(vec.X, vec.Y);
+                        GL.End();
+
+                        //if (star == selected)
+                        //{
+                        //    Primitives.DrawEllipse(vec, Pens.Red, 20, 10, 20);
+                        //}
+
+                        //if (size > 5 && !string.IsNullOrEmpty(star.name))
+                        //{
+                        //    renderer.DrawString(star.name, SystemFonts.DefaultFont, labelBrush,
+                        //        new PointF((int)(vec.X + size), (int)(projector.ScreenHeight - vec.Y + size)), projector.ScreenWidth, projector.ScreenHeight);
+                        //}
+                    }
+                }
+            }
+
+            GL.Disable(EnableCap.PointSmooth);
+            GL.Disable(EnableCap.Blend);
+
         }
 
         public override void Render(IMapContext map)
