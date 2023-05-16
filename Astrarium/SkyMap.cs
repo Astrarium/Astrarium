@@ -281,6 +281,8 @@ namespace Astrarium
 
         public void Render(Projection projection)
         {
+            renderStopWatch.Restart();
+
             for (int i = 0; i < renderers.Count(); i++)
             {
                 try
@@ -293,6 +295,11 @@ namespace Astrarium
                 }
                 
             }
+
+            renderStopWatch.Stop();
+            int fps = (int)(1000f / renderStopWatch.ElapsedMilliseconds);
+
+            Debug.WriteLine($"FPS = {fps}");
         }
 
         public void Render(Graphics g)

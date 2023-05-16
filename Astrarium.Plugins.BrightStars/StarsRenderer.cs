@@ -55,21 +55,40 @@ namespace Astrarium.Plugins.BrightStars
 
             var allStars = starsCalc.Stars;
 
+            double maxFov = Angle.ToRadians(prj.MaxFov) * 0.7;
+
+            // fov in radians
+            double fov = Angle.ToRadians(prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight));
+
+            // matrix for projection
+            var mat = prj.MatEquatorialToVision * starsCalc.MatPrecession;
+
+            // equatorial vision vector in J2000 coords
+            var eqVision0 = starsCalc.MatPrecession0 * prj.VecEquatorialVision;
+
+            // years since 2000.0
+            double t = prj.Context.Get(starsCalc.YearsSince2000);
+
             if (settings.Get("ConstLines"))
             {
-                CrdsEquatorial eq1, eq2;
+                Vec3 c1, c2;
 
                 foreach (var line in sky.ConstellationLines)
                 {
-                    // TODO: take precession and proper motion into account
-                    eq1 = allStars.ElementAt(line.Item1).Equatorial0;
-                    eq2 = allStars.ElementAt(line.Item2).Equatorial0;
+                    var s1 = allStars.ElementAt(line.Item1);
+                    var s2 = allStars.ElementAt(line.Item2);
 
-                    if (Angle.Separation(prj.CenterEquatorial, eq1) < prj.MaxFov * 0.7 &&
-                        Angle.Separation(prj.CenterEquatorial, eq2) < prj.MaxFov * 0.7)
+                    // TODO: take precession and proper motion into account
+                    c1 = s1.Cartesian;
+                    c2 = s2.Cartesian;
+
+                    c1 = (Mat4.ZRotation(-s1.Alpha0) * Mat4.YRotation(s1.Delta0 - Math.PI / 2) * Mat4.ZRotation(s1.PmPhi0) * Mat4.YRotation(s1.PmMu * t) * Mat4.ZRotation(-s1.PmPhi0) * Mat4.YRotation(Math.PI / 2 - s1.Delta0) * Mat4.ZRotation(s1.Alpha0)).Inverse() * s1.Cartesian;
+                    c2 = (Mat4.ZRotation(-s2.Alpha0) * Mat4.YRotation(s2.Delta0 - Math.PI / 2) * Mat4.ZRotation(s2.PmPhi0) * Mat4.YRotation(s2.PmMu * t) * Mat4.ZRotation(-s2.PmPhi0) * Mat4.YRotation(Math.PI / 2 - s2.Delta0) * Mat4.ZRotation(s2.Alpha0)).Inverse() * s2.Cartesian;
+
+                    if (eqVision0.Angle(c1) < maxFov && eqVision0.Angle(c2) < maxFov)
                     {
-                        var p1 = prj.Project(eq1);
-                        var p2 = prj.Project(eq2);
+                        var p1 = prj.Project(c1, mat);
+                        var p2 = prj.Project(c2, mat);
 
                         GL.Begin(PrimitiveType.Lines);
                         GL.Vertex2(p1.X, p1.Y);
@@ -78,10 +97,6 @@ namespace Astrarium.Plugins.BrightStars
                     }
                 }
             }
-
-
-
-
 
 
             // no stars if the Sun above horizon
@@ -93,30 +108,25 @@ namespace Astrarium.Plugins.BrightStars
 
             float starDimming = 1 - daylightFactor; // no stars visible on day (daylightFactor = 1)
 
-            
-
             var labelBrush = new SolidBrush(Color.DimGray);
 
-            // TODO: take precession and proper motion into account
-            var stars = allStars.Where(s => s != null && Angle.Separation(prj.CenterEquatorial, s.Equatorial0) < prj.Fov);
-
+            // TODO: proper motion into account ?
+            var stars = allStars.Where(s => s != null && s.Cartesian.Angle(eqVision0) < fov);
 
             foreach (var star in stars)
             {
                 float size = prj.GetPointSize(star.Magnitude) * starDimming;
                 if (size > minStarSize)
                 {
-                    // TODO: check performance
-                    var eq = prj.Context.Get(starsCalc.Equatorial, star.Number);
-                    Vec2 vec = prj.Project(eq);
+                    var p = prj.Project(star.Cartesian, mat);
 
-                    if (prj.IsInsideScreen(vec))
+                    if (prj.IsInsideScreen(p))
                     {
                         GL.PointSize(size);
                         GL.Color3((byte)255, (byte)255, (byte)255);
 
                         GL.Begin(PrimitiveType.Points);
-                        GL.Vertex2(vec.X, vec.Y);
+                        GL.Vertex2(p.X, p.Y);
                         GL.End();
 
                         //if (star == selected)

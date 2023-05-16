@@ -121,6 +121,15 @@ namespace Astrarium.ViewModels
             }
         }
 
+        public CrdsEquatorial MapEquatorialCoordinates
+        {
+            set
+            {
+                MapEquatorialCoordinatesString = value?.ToString();
+                NotifyPropertyChanged(MapEquatorialCoordinatesString);
+            }
+        }
+
         public PointF SkyMousePosition
         {
             set

@@ -31,6 +31,9 @@ namespace Astrarium.Plugins.BrightStars
         /// <inheritdoc />
         public IEnumerable<Star> GetCelestialObjects() => Stars.Where(s => s != null);
 
+        public Mat4 MatPrecession { get; private set; }
+        public Mat4 MatPrecession0 { get; private set; }
+
         /// <summary>
         /// Stars data reader
         /// </summary>
@@ -45,6 +48,22 @@ namespace Astrarium.Plugins.BrightStars
 
         public override void Calculate(SkyContext context)
         {
+            // precessional elements from J2000 to current epoch
+            var p = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
+
+            // precessional elements from current epoch to J2000
+            var p0 = Precession.ElementsFK5(context.JulianDay, Date.EPOCH_J2000);
+
+            MatPrecession =
+                (Mat4.ZRotation(Angle.ToRadians(-p.z)) *
+                Mat4.YRotation(Angle.ToRadians(p.theta)) *
+                Mat4.ZRotation(Angle.ToRadians(-p.zeta))).Transpose();
+
+            MatPrecession0 =
+                (Mat4.ZRotation(Angle.ToRadians(-p0.z)) *
+                Mat4.YRotation(Angle.ToRadians(p0.theta)) *
+                Mat4.ZRotation(Angle.ToRadians(-p0.zeta))).Transpose();
+
             foreach (var star in Stars)
             {
                 if (star != null)
@@ -65,7 +84,7 @@ namespace Astrarium.Plugins.BrightStars
         /// <summary>
         /// Gets number of years (with fractions) since J2000.0 epoch
         /// </summary>
-        private double YearsSince2000(SkyContext c)
+        public double YearsSince2000(SkyContext c)
         {
             return (c.JulianDay - Date.EPOCH_J2000) / 365.25;
         }

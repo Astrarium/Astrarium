@@ -34,6 +34,19 @@ namespace Astrarium
             return (PointF)target.GetValue(MousePositionProperty);
         }
 
+        public static readonly DependencyProperty MouseEquatorialPositionProperty = DependencyProperty.RegisterAttached(
+            "MouseEquatorialPosition", typeof(CrdsEquatorial), typeof(MainWindow), new PropertyMetadata(null));
+
+        public static void SetMouseEquatorialPosition(DependencyObject target, CrdsEquatorial value)
+        {
+            target.SetValue(MouseEquatorialPositionProperty, value);
+        }
+
+        public static CrdsEquatorial GetMouseEquatorialPosition(DependencyObject target)
+        {
+            return (CrdsEquatorial)target.GetValue(MouseEquatorialPositionProperty);
+        }
+
         public static readonly DependencyProperty MapKeyDownProperty = DependencyProperty.RegisterAttached(
             "MapKeyDown", typeof(Command<KeyEventArgs>), typeof(MainWindow));
 
@@ -325,6 +338,14 @@ namespace Astrarium
 
         private void SkyView_MouseMove1(object sender, WF.MouseEventArgs e)
         {
+            var hor = projection.UnprojectHorizontal(e.X, projection.ScreenHeight - e.Y);
+            var eq = projection.UnprojectEquatorial(e.X, projection.ScreenHeight - e.Y);
+
+            if (eq != null)
+            {
+                SetMouseEquatorialPosition(this, eq);
+            }
+
             if (e.Button == WF.MouseButtons.Left)
             {
                 if (pOld != System.Drawing.Point.Empty)

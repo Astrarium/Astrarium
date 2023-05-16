@@ -106,6 +106,31 @@ namespace Astrarium.Plugins.BrightStars
         public CrdsEquatorial Equatorial0 { get; set; } = new CrdsEquatorial();
 
         /// <summary>
+        /// RA for the catalogue epoch, in radians 
+        /// </summary>
+        public float Alpha0 { get; set; }
+
+        /// <summary>
+        /// Dec for the catalogue epoch, in radians 
+        /// </summary>
+        public float Delta0 { get; set; }
+
+        /// <summary>
+        /// Cartesian coordinates of a star for catalogue epoch
+        /// </summary>
+        public Vec3 Cartesian { get; set; }
+
+        /// <summary>
+        /// Phi0 angle of proper motion, in radians (see Abalakin, p. 125)
+        /// </summary>
+        public float PmPhi0 { get; set; }
+
+        /// <summary>
+        /// Mu angle of proper motion, in radians (see Abalakin, p. 125)
+        /// </summary>
+        public float PmMu { get; set; }
+
+        /// <summary>
         /// Annual proper motion in RA J2000, FK5 system, arcsec/yr
         /// </summary>
         public float PmAlpha { get; set; }
