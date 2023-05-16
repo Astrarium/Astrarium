@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
+using OpenTK.Graphics.OpenGL;
 using System;
 using System.ComponentModel;
 using System.Drawing;
@@ -20,12 +21,24 @@ namespace Astrarium.Plugins.Constellations
             GetConstellation = sky.GetConstellation;
         }
 
-        public override void Render(IMapContext map)
+        public override void Render(Projection projection)
         {
             if (settings.Get<bool>("ConstBorders"))
             {
-                RenderBorders(map);
+                RenderBorders(projection);
             }
+            if (settings.Get<bool>("ConstLabels"))
+            {
+                //RenderConstLabels(map);
+            }
+        }
+
+        public override void Render(IMapContext map)
+        {
+            //if (settings.Get<bool>("ConstBorders"))
+            //{
+            //    RenderBorders(map);
+            //}
             if (settings.Get<bool>("ConstLabels"))
             {
                 RenderConstLabels(map);
@@ -34,37 +47,84 @@ namespace Astrarium.Plugins.Constellations
 
         public override RendererOrder Order => RendererOrder.Grids;
 
-        /// <summary>
-        /// Renders constellation borders on the map
-        /// </summary>
-        private void RenderBorders(IMapContext map)
-        {
-            PointF p1, p2;
-            CrdsHorizontal h1, h2;
-            var borders = constellationsCalc.ConstBorders;
-            bool isGround = settings.Get<bool>("Ground");
-            Pen penBorder = new Pen(map.GetColor("ColorConstBorders"));
+        ///// <summary>
+        ///// Renders constellation borders on the map
+        ///// </summary>
+        //private void RenderBorders(IMapContext map)
+        //{
+        //    PointF p1, p2;
+        //    CrdsHorizontal h1, h2;
+        //    var borders = constellationsCalc.ConstBorders;
+        //    bool isGround = settings.Get<bool>("Ground");
+        //    Pen penBorder = new Pen(map.GetColor("ColorConstBorders"));
 
-            foreach (var block in borders)
+        //    foreach (var block in borders)
+        //    {
+        //        for (int i = 0; i < block.Count - 1; i++)
+        //        {
+        //            h1 = block.ElementAt(i).Horizontal;
+        //            h2 = block.ElementAt(i + 1).Horizontal;
+
+        //            if ((!isGround || h1.Altitude >= 0 || h2.Altitude >= 0) &&
+        //                Angle.Separation(map.Center, h1) < 90 &&
+        //                Angle.Separation(map.Center, h2) < 90)
+        //            {
+        //                p1 = map.Project(h1);
+        //                p2 = map.Project(h2);
+
+        //                var points = map.SegmentScreenIntersection(p1, p2);
+        //                if (points.Length == 2)
+        //                {
+        //                    map.Graphics.DrawLine(penBorder, points[0], points[1]);
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
+
+        private void RenderBorders(Projection projection)
+        {
+            GL.Enable(EnableCap.Blend);
+            GL.Enable(EnableCap.LineSmooth);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+
+            // eq vision vector in J2000 coords
+            var equ_vision0 = constellationsCalc.MatPrecession0 * projection.VecEquatorialVision;
+
+            // matrix for projection
+            var mat = projection.MatEquatorialToVision * constellationsCalc.MatPrecession;
+
+            // max angular distance from current vision vector
+            // 0.7 coeff is an empyrical
+            double fov = Angle.ToRadians(projection.MaxFov * 0.7);
+
+            GL.Color3(Color.Brown);
+
+            foreach (var block in constellationsCalc.Borders)
             {
                 for (int i = 0; i < block.Count - 1; i++)
                 {
-                    h1 = block.ElementAt(i).Horizontal;
-                    h2 = block.ElementAt(i + 1).Horizontal;
-
-                    if ((!isGround || h1.Altitude >= 0 || h2.Altitude >= 0) &&
-                        Angle.Separation(map.Center, h1) < 90 &&
-                        Angle.Separation(map.Center, h2) < 90)
+                    if (equ_vision0.Angle(block[i]) > fov && equ_vision0.Angle(block[i + 1]) > fov)
                     {
-                        p1 = map.Project(h1);
-                        p2 = map.Project(h2);
-
-                        var points = map.SegmentScreenIntersection(p1, p2);
-                        if (points.Length == 2)
-                        {
-                            map.Graphics.DrawLine(penBorder, points[0], points[1]);
-                        }
+                        continue;
                     }
+
+                    var p1 = projection.Project(block[i], mat);
+                    if (p1 == null)
+                    {
+                        continue;
+                    }
+
+                    var p2 = projection.Project(block[i + 1], mat);
+                    if (p2 == null)
+                    {
+                        continue;
+                    }
+
+                    GL.Begin(PrimitiveType.Lines);
+                    GL.Vertex2(p1.X, p1.Y);
+                    GL.Vertex2(p2.X, p2.Y);
+                    GL.End();
                 }
             }
         }

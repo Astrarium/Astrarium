@@ -19,7 +19,9 @@ namespace Astrarium.Plugins.Constellations
         /// <summary>
         /// Constellations borders coordinates
         /// </summary>
-        public List<List<CelestialPoint>> ConstBorders { get; private set; } = new List<List<CelestialPoint>>();
+        //public List<List<CelestialPoint>> ConstBorders { get; private set; } = new List<List<CelestialPoint>>();
+
+        public List<List<Vec3>> Borders { get; private set; } = new List<List<Vec3>>();
 
         /// <summary>
         /// List of constellation lines (traditional)
@@ -34,6 +36,9 @@ namespace Astrarium.Plugins.Constellations
         private ISky sky;
 
         private ISettings settings;
+
+        public Mat4 MatPrecession { get; private set; }
+        public Mat4 MatPrecession0 { get; private set; }
 
         public ConstellationsCalc(ISky sky, ISettings settings)
         {
@@ -53,28 +58,53 @@ namespace Astrarium.Plugins.Constellations
 
         public override void Calculate(SkyContext context)
         {
+            // precessional elements from J2000 to current epoch
             var p = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
 
-            foreach (var b in ConstBorders)
-            {
-                foreach (var bp in b)
-                {
-                    // Equatorial coordinates for the mean equinox and epoch of the target date
-                    var eq = Precession.GetEquatorialCoordinates(bp.Equatorial0, p);
+            // precessional elements from current epoch to J2000
+            var p0 = Precession.ElementsFK5(context.JulianDay, Date.EPOCH_J2000);
 
-                    // Apparent horizontal coordinates
-                    bp.Horizontal = eq.ToHorizontal(context.GeoLocation, context.SiderealTime);
-                }
-            }
+            // Precession matrix formula is taken from
+            // "New precession expressions, valid for long time intervals", 
+            // J. Vondrák, N. Capitaine, and P. Wallace
+            // 
+            // http://dx.doi.org/10.1051/0004-6361/201117274
+            // https://www.aanda.org/articles/aa/full_html/2011/10/aa17274-11/aa17274-11.html [16]
+            // 
+            // P = Rz(-z) * Ry(theta) * Rz(-zeta)
+            //
+            // transposed due to column-major (?)
 
-            foreach (var c in ConstLabels)
-            {
-                // Equatorial coordinates for the mean equinox and epoch of the target date
-                var eq = Precession.GetEquatorialCoordinates(c.Equatorial0, p);
+            MatPrecession =
+                (Mat4.ZRotation(Angle.ToRadians(-p.z)) *
+                Mat4.YRotation(Angle.ToRadians(p.theta)) *
+                Mat4.ZRotation(Angle.ToRadians(-p.zeta))).Transpose();
 
-                // Apparent horizontal coordinates
-                c.Horizontal = eq.ToHorizontal(context.GeoLocation, context.SiderealTime);
-            }
+            MatPrecession0 =
+                (Mat4.ZRotation(Angle.ToRadians(-p0.z)) *
+                Mat4.YRotation(Angle.ToRadians(p0.theta)) *
+                Mat4.ZRotation(Angle.ToRadians(-p0.zeta))).Transpose();
+
+            //foreach (var b in ConstBorders)
+            //{
+            //    foreach (var bp in b)
+            //    {
+            //        // Equatorial coordinates for the mean equinox and epoch of the target date
+            //        var eq = Precession.GetEquatorialCoordinates(bp.Equatorial0, p);
+
+            //        // Apparent horizontal coordinates
+            //        bp.Horizontal = eq.ToHorizontal(context.GeoLocation, context.SiderealTime);
+            //    }
+            //}
+
+            //foreach (var c in ConstLabels)
+            //{
+            //    // Equatorial coordinates for the mean equinox and epoch of the target date
+            //    var eq = Precession.GetEquatorialCoordinates(c.Equatorial0, PrecessionalElementsJ2000ToCurrent);
+
+            //    // Apparent horizontal coordinates
+            //    c.Horizontal = eq.ToHorizontal(context.GeoLocation, context.SiderealTime);
+            //}
         }
 
         public override void Initialize()
@@ -106,23 +136,25 @@ namespace Astrarium.Plugins.Constellations
         private void LoadBordersData()
         {
             string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/Borders.dat");
-
+            
             using (var sr = new BinaryReader(new FileStream(file, FileMode.Open, FileAccess.Read)))
             {
-                List<CelestialPoint> block = null;
+                List<Vec3> block = null;
                 while (sr.BaseStream.Position != sr.BaseStream.Length)
                 {
                     bool start = sr.ReadBoolean();
                     if (start)
                     {
-                        block = new List<CelestialPoint>();
-                        ConstBorders.Add(block);
+                        block = new List<Vec3>();
+                        Borders.Add(block);
                     }
 
-                    block.Add(new CelestialPoint()
-                    {
-                        Equatorial0 = new CrdsEquatorial(sr.ReadDouble(), sr.ReadDouble())
-                    });
+                    double lon = Angle.ToRadians(sr.ReadDouble());
+                    double lat = Angle.ToRadians(sr.ReadDouble());
+
+                    var vec = Projection.SphericalToCartesian(lon, lat);
+
+                    block.Add(vec);
                 }
             }
         }

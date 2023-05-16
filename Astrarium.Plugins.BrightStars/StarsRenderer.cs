@@ -106,7 +106,9 @@ namespace Astrarium.Plugins.BrightStars
                 float size = prj.GetPointSize(star.Magnitude) * starDimming;
                 if (size > minStarSize)
                 {
-                    Vec2 vec = prj.Project(star.Equatorial0);
+                    // TODO: check performance
+                    var eq = prj.Context.Get(starsCalc.Equatorial, star.Number);
+                    Vec2 vec = prj.Project(eq);
 
                     if (prj.IsInsideScreen(vec))
                     {
