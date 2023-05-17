@@ -14,8 +14,11 @@
         WindowState="{Binding WindowState, Mode=OneTime}"
         ResizeMode="CanResize"
         WindowStartupLocation="CenterScreen"
-        a:MainWindow.FullScreen="{Binding FullScreen, Mode=OneWay}"        
-        a:MainWindow.MouseEquatorialPosition="{Binding MapEquatorialCoordinates, Mode=OneWayToSource}"
+        a:MainWindow.FullScreen="{Binding FullScreen, Mode=OneWay}"
+        a:MainWindow.MousePositionConstellation="{Binding MouseConstellation, Mode=OneWayToSource}"
+        a:MainWindow.MouseEquatorialPosition="{Binding MouseEquatorialCoordinates, Mode=OneWayToSource}"
+        a:MainWindow.MouseHorizontalPosition="{Binding MouseHorizontalCoordinates, Mode=OneWayToSource}"
+        a:MainWindow.FPS="{Binding FPS, Mode=OneWayToSource}"        
         a:MainWindow.MapKeyDown="{Binding MapKeyDownCommand}"
         a:MainWindow.MapDoubleClick="{Binding MapDoubleClickCommand}"
         a:MainWindow.MapRightClick="{Binding MapRightClickCommand}"
@@ -206,13 +209,15 @@
 
         <!-- STATUS BAR -->
         <StatusBar Grid.Row="3" Visibility="{Binding IsStatusBarVisible, Converter={s:BoolToVisibilityConverter}}" Grid.ColumnSpan="2">
-            <TextBlock Width="30" TextAlignment="Center" Text="{Binding MapConstellationNameString, FallbackValue='Con'}" ToolTip="{t:Text StatusBar.Constellation}" />
+            <TextBlock Width="30" TextAlignment="Center" Text="{Binding MouseConstellation, FallbackValue='Con'}" ToolTip="{t:Text StatusBar.Constellation}" />
             <Separator />
-            <TextBlock Width="240" Text="{Binding MapEquatorialCoordinatesString, FallbackValue='Equatorial coordinates'}" ToolTip="{t:Text StatusBar.EquatorialCoordinates}" />
+            <TextBlock Width="240" Text="{Binding MouseEquatorialCoordinates, FallbackValue='Equatorial coordinates'}" ToolTip="{t:Text StatusBar.EquatorialCoordinates}" />
             <Separator />
-            <TextBlock Width="240" Text="{Binding MapHorizontalCoordinatesString, FallbackValue='Horizontal coordinates'}" ToolTip="{t:Text StatusBar.HorizontalCoordinates}" />
+            <TextBlock Width="240" Text="{Binding MouseHorizontalCoordinates, FallbackValue='Horizontal coordinates'}" ToolTip="{t:Text StatusBar.HorizontalCoordinates}" />
             <Separator />
             <TextBlock Width="100" Text="{Binding MapViewAngleString, FallbackValue='Field of view'}" ToolTip="{t:Text StatusBar.ViewAngle}" />
+            <Separator />
+            <TextBlock Width="80" Text="{Binding FPS, FallbackValue='FPS'}" />
             <Separator />
 
             <StatusBarItem>

@@ -64,26 +64,15 @@ namespace Astrarium.Plugins.Constellations
             // precessional elements from current epoch to J2000
             var p0 = Precession.ElementsFK5(context.JulianDay, Date.EPOCH_J2000);
 
-            // Precession matrix formula is taken from
-            // "New precession expressions, valid for long time intervals", 
-            // J. Vondrák, N. Capitaine, and P. Wallace
-            // 
-            // http://dx.doi.org/10.1051/0004-6361/201117274
-            // https://www.aanda.org/articles/aa/full_html/2011/10/aa17274-11/aa17274-11.html [16]
-            // 
-            // P = Rz(-z) * Ry(theta) * Rz(-zeta)
-            //
-            // transposed due to column-major (?)
-
             MatPrecession =
-                (Mat4.ZRotation(Angle.ToRadians(-p.z)) *
-                Mat4.YRotation(Angle.ToRadians(p.theta)) *
-                Mat4.ZRotation(Angle.ToRadians(-p.zeta))).Transpose();
+                Mat4.ZRotation(Angle.ToRadians(p.z)) *
+                Mat4.YRotation(Angle.ToRadians(-p.theta)) *
+                Mat4.ZRotation(Angle.ToRadians(p.zeta));
 
             MatPrecession0 =
-                (Mat4.ZRotation(Angle.ToRadians(-p0.z)) *
-                Mat4.YRotation(Angle.ToRadians(p0.theta)) *
-                Mat4.ZRotation(Angle.ToRadians(-p0.zeta))).Transpose();
+                Mat4.ZRotation(Angle.ToRadians(p0.z)) *
+                Mat4.YRotation(Angle.ToRadians(-p0.theta)) *
+                Mat4.ZRotation(Angle.ToRadians(p0.zeta));
 
             //foreach (var b in ConstBorders)
             //{

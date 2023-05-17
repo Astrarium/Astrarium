@@ -21,11 +21,11 @@ namespace Astrarium.Plugins.Constellations
             GetConstellation = sky.GetConstellation;
         }
 
-        public override void Render(Projection projection)
+        public override void Render(ISkyMap map)
         {
             if (settings.Get<bool>("ConstBorders"))
             {
-                RenderBorders(projection);
+                RenderBorders(map);
             }
             if (settings.Get<bool>("ConstLabels"))
             {
@@ -82,8 +82,10 @@ namespace Astrarium.Plugins.Constellations
         //    }
         //}
 
-        private void RenderBorders(Projection projection)
+        private void RenderBorders(ISkyMap map)
         {
+            var projection = map.SkyProjection;
+
             GL.Enable(EnableCap.Blend);
             GL.Enable(EnableCap.LineSmooth);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
@@ -96,9 +98,11 @@ namespace Astrarium.Plugins.Constellations
 
             // max angular distance from current vision vector
             // 0.7 coeff is an empyrical
-            double fov = Angle.ToRadians(projection.MaxFov * 0.7);
+            double fov = Angle.ToRadians(projection.Fov + 1);
 
-            GL.Color3(Color.Brown);
+            var color = settings.Get<SkyColor>("ColorConstBorders").GetColor(ColorSchema.Night);
+
+            GL.Color3(color);
 
             foreach (var block in constellationsCalc.Borders)
             {

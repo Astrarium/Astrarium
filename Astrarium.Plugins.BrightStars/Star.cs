@@ -116,11 +116,6 @@ namespace Astrarium.Plugins.BrightStars
         public float Delta0 { get; set; }
 
         /// <summary>
-        /// Cartesian coordinates of a star for catalogue epoch
-        /// </summary>
-        public Vec3 Cartesian { get; set; }
-
-        /// <summary>
         /// Phi0 angle of proper motion, in radians (see Abalakin, p. 125)
         /// </summary>
         public float PmPhi0 { get; set; }

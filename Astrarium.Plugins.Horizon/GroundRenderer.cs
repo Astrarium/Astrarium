@@ -151,8 +151,9 @@ namespace Astrarium.Plugins.Horizon
             }
         }
 
-        public override void Render(Projection prj)
+        public override void Render(ISkyMap map)
         {
+            var prj = map.SkyProjection;
             if (!settings.Get<bool>("Ground")) return;
 
             GL.Enable(EnableCap.Texture2D);

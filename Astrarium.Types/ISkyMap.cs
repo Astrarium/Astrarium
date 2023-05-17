@@ -49,6 +49,8 @@ namespace Astrarium.Types
         /// </summary>
         IProjection Projection { get; }
 
+        Projection SkyProjection { get; }
+
         void Invalidate();
 
         /// <summary>
@@ -57,7 +59,7 @@ namespace Astrarium.Types
         /// <param name="g">Graphics to render the map.</param>
         void Render(Graphics g);
 
-        void Render(Projection p);
+        void Render();
 
         CelestialObject FindObject(PointF point);
 
@@ -68,7 +70,10 @@ namespace Astrarium.Types
         void GoToPoint(CrdsHorizontal hor, TimeSpan animationDuration);
         void GoToPoint(CrdsHorizontal hor, TimeSpan animationDuration, double viewAngleTarget);
 
+        [Obsolete]
         void AddDrawnObject(CelestialObject obj);
+
+        void AddDrawnObject(PointF p, CelestialObject obj);
 
         /// <summary>
         /// Occurs when map's View Angle is changed.

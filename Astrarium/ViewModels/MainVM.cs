@@ -25,9 +25,6 @@ namespace Astrarium.ViewModels
         private readonly ISettings settings;
         private readonly IAppUpdater appUpdater;
 
-        public string MapEquatorialCoordinatesString { get; private set; }
-        public string MapHorizontalCoordinatesString { get; private set; }
-        public string MapConstellationNameString { get; private set; }
         public string MapViewAngleString { get; private set; }
         public string DateString { get; private set; }
 
@@ -121,13 +118,28 @@ namespace Astrarium.ViewModels
             }
         }
 
-        public CrdsEquatorial MapEquatorialCoordinates
+        public string FPS
         {
-            set
-            {
-                MapEquatorialCoordinatesString = value?.ToString();
-                NotifyPropertyChanged(MapEquatorialCoordinatesString);
-            }
+            set => SetValue(nameof(FPS), value);
+            get => GetValue<string>(nameof(FPS));
+        }
+
+        public string MouseConstellation
+        {
+            set => SetValue(nameof(MouseConstellation), value);
+            get => GetValue<string>(nameof(MouseConstellation));
+        }
+
+        public CrdsEquatorial MouseEquatorialCoordinates
+        {
+            set => SetValue(nameof(MouseEquatorialCoordinates), value);
+            get => GetValue<CrdsEquatorial>(nameof(MouseEquatorialCoordinates));
+        }
+
+        public CrdsHorizontal MouseHorizontalCoordinates
+        {
+            set => SetValue(nameof(MouseHorizontalCoordinates), value);
+            get => GetValue<CrdsHorizontal>(nameof(MouseHorizontalCoordinates));
         }
 
         public PointF SkyMousePosition
@@ -136,16 +148,10 @@ namespace Astrarium.ViewModels
             {
                 var hor = map.Projection.Invert(value);
                 var eq = hor.ToEquatorial(sky.Context.GeoLocation, sky.Context.SiderealTime);
-
-                MapEquatorialCoordinatesString = eq.ToString();
-                MapHorizontalCoordinatesString = hor.ToString();
-                MapConstellationNameString = Constellations.FindConstellation(eq, sky.Context.JulianDay);
+                
                 MapViewAngleString = Formatters.Angle.Format(map.ViewAngle);
 
                 NotifyPropertyChanged(
-                    nameof(MapEquatorialCoordinatesString),
-                    nameof(MapHorizontalCoordinatesString),
-                    nameof(MapConstellationNameString),
                     nameof(MapViewAngleString));
             }
         }

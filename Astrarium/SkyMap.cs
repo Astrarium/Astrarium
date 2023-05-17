@@ -184,6 +184,12 @@ namespace Astrarium
         /// </summary>
         public event Action<CelestialObject> SelectedObjectChanged;
 
+
+        private Projection projection;
+
+        public Projection SkyProjection => projection;
+
+        [Obsolete]
         /// <summary>
         /// Projection used to render the map
         /// </summary>
@@ -198,6 +204,11 @@ namespace Astrarium
         /// Collection of celestial objects drawn on the map
         /// </summary>
         private ICollection<CelestialObject> drawnObjects = new List<CelestialObject>();
+
+        /// <summary>
+        /// Collection of celestial objects drawn on the map
+        /// </summary>
+        private ICollection<Tuple<PointF, CelestialObject>> celestialObjects = new List<Tuple<PointF, CelestialObject>>();
 
         /// <summary>
         /// <see cref="MapContext"/> instance
@@ -226,6 +237,12 @@ namespace Astrarium
         {
             Context = skyContext;
             mapContext = new MapContext(this, skyContext);
+
+            projection = Types.Projection.Create<StereographicProjection>(Context);
+            projection.Fov = 90;
+            projection.SetVision(new CrdsHorizontal(0, 0));
+            projection.FlipVertical = true;
+
 
             Projection = new ArcProjection(mapContext);
             Projection.IsInverted = settings.Get("IsInverted");
@@ -279,27 +296,21 @@ namespace Astrarium
 
         public ColorSchema Schema { get; private set; } = ColorSchema.Night;
 
-        public void Render(Projection projection)
+        public void Render()
         {
-            renderStopWatch.Restart();
-
+            celestialObjects.Clear();
+            
             for (int i = 0; i < renderers.Count(); i++)
             {
                 try
                 {
-                    renderers.ElementAt(i).Render(projection);
+                    renderers.ElementAt(i).Render(this);
                 }
                 catch (Exception ex)
                 {
-                    Log.Debug($"Rendering error: {ex}");
+                    Log.Error($"Rendering error: {ex}");
                 }
-                
             }
-
-            renderStopWatch.Stop();
-            int fps = (int)(1000f / renderStopWatch.ElapsedMilliseconds);
-
-            Debug.WriteLine($"FPS = {fps}");
         }
 
         public void Render(Graphics g)
@@ -455,6 +466,7 @@ namespace Astrarium
 
         public CelestialObject FindObject(PointF point)
         {
+            /*
             var hor = Projection.Invert(point);
 
             foreach (var body in drawnObjects.OrderBy(c => Angle.Separation(hor, c.Horizontal)))
@@ -469,6 +481,20 @@ namespace Astrarium
                 if (mapContext.DistanceBetweenPoints(p, point) <= size / 2)
                 {
                     return body;
+                }
+            }
+            */
+
+            foreach (var x in celestialObjects.OrderBy(c => (point.X - c.Item1.X) * (point.X - c.Item1.X) + (point.Y - c.Item1.Y) * (point.Y - c.Item1.Y)))
+            {
+                double sd = (x.Item2 is SizeableCelestialObject) ?
+                    (x.Item2 as SizeableCelestialObject).Semidiameter : 0;
+
+                double size = projection.GetDiskSize(sd, 10);
+
+                if (Math.Sqrt((x.Item1.X - point.X) * (x.Item1.X - point.X) + (x.Item1.Y - point.Y) * (x.Item1.Y - point.Y)) < size / 2)
+                {
+                    return x.Item2;
                 }
             }
 
@@ -540,6 +566,11 @@ namespace Astrarium
         public void AddDrawnObject(CelestialObject obj)
         {
             drawnObjects.Add(obj);
+        }
+
+        public void AddDrawnObject(PointF p, CelestialObject obj)
+        {
+            celestialObjects.Add(new Tuple<PointF, CelestialObject>(p, obj));
         }
 
         private bool DrawSelectedObject(Graphics g)

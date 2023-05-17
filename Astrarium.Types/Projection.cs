@@ -128,7 +128,7 @@ namespace Astrarium.Types
         public float GetDiskSize(double semidiameter, double minSize = 0)
         {
             // TODO: check it!
-            return (float)(ScreenWidth / Fov * (2 * semidiameter / 3600));
+            return (float)Math.Max(minSize, (float)(ScreenWidth / Fov * (2 * semidiameter / 3600)));
         }
 
         public float GetPointSize(float mag)
@@ -313,6 +313,7 @@ namespace Astrarium.Types
                 Mat4.YRotation(Angle.ToRadians(90 - Context.GeoLocation.Latitude));
 
             // inverse transformation is a transposed matrix
+            // TODO: may be .Inverse() ?
             MatEquatorialToHorizontal = MatHorizontalToEquatorial.Transpose();
         }
 

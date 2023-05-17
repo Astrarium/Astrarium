@@ -21,19 +21,6 @@ namespace Astrarium
     /// </summary>
     public partial class MainWindow : Window, WF.IMessageFilter
     {
-        public static readonly DependencyProperty MousePositionProperty = DependencyProperty.RegisterAttached(
-            "MousePosition", typeof(PointF), typeof(MainWindow), new PropertyMetadata(PointF.Empty));
-
-        public static void SetMousePosition(DependencyObject target, PointF value)
-        {
-            target.SetValue(MousePositionProperty, value);
-        }
-
-        public static PointF GetMousePosition(DependencyObject target)
-        {
-            return (PointF)target.GetValue(MousePositionProperty);
-        }
-
         public static readonly DependencyProperty MouseEquatorialPositionProperty = DependencyProperty.RegisterAttached(
             "MouseEquatorialPosition", typeof(CrdsEquatorial), typeof(MainWindow), new PropertyMetadata(null));
 
@@ -46,6 +33,57 @@ namespace Astrarium
         {
             return (CrdsEquatorial)target.GetValue(MouseEquatorialPositionProperty);
         }
+
+        public static readonly DependencyProperty MouseHorizontalPositionProperty = DependencyProperty.RegisterAttached(
+            "MouseHorizontalPosition", typeof(CrdsHorizontal), typeof(MainWindow), new PropertyMetadata(null));
+
+        public static void SetMouseHorizontalPosition(DependencyObject target, CrdsHorizontal value)
+        {
+            target.SetValue(MouseHorizontalPositionProperty, value);
+        }
+
+        public static CrdsHorizontal GetMouseHorizontalPosition(DependencyObject target)
+        {
+            return (CrdsHorizontal)target.GetValue(MouseHorizontalPositionProperty);
+        }
+
+
+
+
+
+        public static readonly DependencyProperty MousePositionConstellationProperty = DependencyProperty.RegisterAttached(
+            "MousePositionConstellation", typeof(string), typeof(MainWindow), new PropertyMetadata(null));
+
+        public static void SetMousePositionConstellation(DependencyObject target, string value)
+        {
+            target.SetValue(MousePositionConstellationProperty, value);
+        }
+
+        public static string GetMousePositionConstellation(DependencyObject target)
+        {
+            return (string)target.GetValue(MousePositionConstellationProperty);
+        }
+
+
+
+
+        public static readonly DependencyProperty FPSProperty = DependencyProperty.RegisterAttached(
+            "FPS", typeof(string), typeof(MainWindow), new PropertyMetadata(null));
+
+        public static void SetFPS(DependencyObject target, string value)
+        {
+            target.SetValue(FPSProperty, value);
+        }
+
+        public static string GetFPS(DependencyObject target)
+        {
+            return (string)target.GetValue(FPSProperty);
+        }
+
+
+
+
+
 
         public static readonly DependencyProperty MapKeyDownProperty = DependencyProperty.RegisterAttached(
             "MapKeyDown", typeof(Command<KeyEventArgs>), typeof(MainWindow));
@@ -275,8 +313,6 @@ namespace Astrarium
         private readonly SkyViewControl skyViewControl;
         private readonly ISkyMap map;
 
-        private Projection projection;
-
         public MainWindow(ISettings settings, SkyMap map)
         {
             InitializeComponent();
@@ -284,11 +320,7 @@ namespace Astrarium
             this.map = map;
             this.StateChanged += MainWindow_StateChanged;
 
-            projection = Projection.Create<StereographicProjection>(map.Context);
-            projection.Fov = 90;
-            projection.SetVision(new CrdsHorizontal(0, 0));
-
-            projection.FlipVertical = true;
+            
 
             /*
             var skyView = new SkyView();
@@ -311,6 +343,7 @@ namespace Astrarium
             skyViewControl.MouseUp += SkyViewControl_MouseUp;
             skyViewControl.MouseWheel += SkyViewControl_MouseWheel;
             skyViewControl.MouseClick += SkyView_MouseClick;
+            skyViewControl.MouseDoubleClick += SkyViewControl_MouseDoubleClick;
             settings.SettingValueChanged += (s, v) => skyViewControl.Invalidate();
 
             Host.Child = skyViewControl;
@@ -323,9 +356,14 @@ namespace Astrarium
             this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
         }
 
+        private void SkyViewControl_MouseDoubleClick(object sender, WF.MouseEventArgs e)
+        {
+            GetMapDoubleClick(this)?.Execute(new PointF(e.X, e.Y));
+        }
+
         private void SkyViewControl_MouseWheel(object sender, WF.MouseEventArgs e)
         {
-            projection.Fov *= Math.Pow(1.1, -e.Delta / 120);
+            map.SkyProjection.Fov *= Math.Pow(1.1, -e.Delta / 120);
             skyViewControl.Invalidate();
         }
 
@@ -338,22 +376,18 @@ namespace Astrarium
 
         private void SkyView_MouseMove1(object sender, WF.MouseEventArgs e)
         {
-            var hor = projection.UnprojectHorizontal(e.X, projection.ScreenHeight - e.Y);
-            var eq = projection.UnprojectEquatorial(e.X, projection.ScreenHeight - e.Y);
+            var hor = map.SkyProjection.UnprojectHorizontal(e.X, map.SkyProjection.ScreenHeight - e.Y);
+            var eq = map.SkyProjection.UnprojectEquatorial(e.X, map.SkyProjection.ScreenHeight - e.Y);
 
-            if (eq != null)
-            {
-                SetMouseEquatorialPosition(this, eq);
-            }
+            SetMouseEquatorialPosition(this, eq);
+            SetMouseHorizontalPosition(this, hor);
+            SetMousePositionConstellation(this, eq != null ? Constellations.FindConstellation(eq, map.SkyProjection.Context.JulianDay) : null);
 
             if (e.Button == WF.MouseButtons.Left)
             {
                 if (pOld != System.Drawing.Point.Empty)
                 {
-                    double dx = pOld.X - e.X;
-                    double dy = pOld.Y - e.Y;
-                    
-                    projection.Move(new Vec2(pOld.X, skyViewControl.Height - pOld.Y), new Vec2(e.X, skyViewControl.Height - e.Y));
+                    map.SkyProjection.Move(new Vec2(pOld.X, skyViewControl.Height - pOld.Y), new Vec2(e.X, skyViewControl.Height - e.Y));
                     skyViewControl.Invalidate();
                     pOld = new System.Drawing.Point(e.X, e.Y);
                 }
@@ -364,10 +398,12 @@ namespace Astrarium
 
         private void SkyView_Resize(object sender, EventArgs e)
         {
-            projection.SetScreenSize(skyViewControl.Width, skyViewControl.Height);
+            map.SkyProjection.SetScreenSize(skyViewControl.Width, skyViewControl.Height);
             GL.Viewport(0, 0, skyViewControl.Width, skyViewControl.Height);
             skyViewControl.Invalidate();
         }
+
+        private System.Diagnostics.Stopwatch renderStopWatch = new System.Diagnostics.Stopwatch();
 
         private void SkyView_Paint(object sender, WF.PaintEventArgs e)
         {
@@ -380,12 +416,30 @@ namespace Astrarium
             GL.MatrixMode(MatrixMode.Projection);
             GL.PushMatrix();
             GL.LoadIdentity();
-            GL.Ortho(0, projection.ScreenWidth,
-                     0, projection.ScreenHeight, -1, 1);
+            GL.Ortho(0, map.SkyProjection.ScreenWidth,
+                     0, map.SkyProjection.ScreenHeight, -1, 1);
 
+            renderStopWatch.Restart();
 
-            map.Render(projection);
+            map.Render();
 
+            renderStopWatch.Stop();
+            int fps = (int)(1000f / renderStopWatch.ElapsedMilliseconds);
+            SetFPS(this, $"FPS = {fps}");
+
+            /*
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactor.DstColor, BlendingFactor.SrcColor);
+
+            GL.Color4(Color.Red);
+            GL.Begin(PrimitiveType.Quads);
+            GL.Vertex2(0, 0);
+            GL.Vertex2(0, projection.ScreenHeight);
+            GL.Vertex2(projection.ScreenWidth, projection.ScreenHeight);
+            GL.Vertex2(projection.ScreenWidth, 0);
+            GL.End();
+            
+            */
             (sender as SkyViewControl).SwapBuffers();
         }
 
@@ -485,7 +539,7 @@ namespace Astrarium
 
         private void SkyView_MouseMove(object sender, WF.MouseEventArgs e)
         {
-            SetMousePosition(this, new PointF(e.X, e.Y));
+            
             if (map.LockedObject != null && e.Button == WF.MouseButtons.Left)
             {
                 string text = Text.Get("MapIsLockedOn", ("objectName", map.LockedObject.Names.First()));

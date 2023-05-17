@@ -55,14 +55,14 @@ namespace Astrarium.Plugins.BrightStars
             var p0 = Precession.ElementsFK5(context.JulianDay, Date.EPOCH_J2000);
 
             MatPrecession =
-                (Mat4.ZRotation(Angle.ToRadians(-p.z)) *
-                Mat4.YRotation(Angle.ToRadians(p.theta)) *
-                Mat4.ZRotation(Angle.ToRadians(-p.zeta))).Transpose();
+                Mat4.ZRotation(Angle.ToRadians(p.z)) *
+                Mat4.YRotation(Angle.ToRadians(-p.theta)) *
+                Mat4.ZRotation(Angle.ToRadians(p.zeta));
 
             MatPrecession0 =
-                (Mat4.ZRotation(Angle.ToRadians(-p0.z)) *
-                Mat4.YRotation(Angle.ToRadians(p0.theta)) *
-                Mat4.ZRotation(Angle.ToRadians(-p0.zeta))).Transpose();
+                Mat4.ZRotation(Angle.ToRadians(p0.z)) *
+                Mat4.YRotation(Angle.ToRadians(-p0.theta)) *
+                Mat4.ZRotation(Angle.ToRadians(p0.zeta));
 
             foreach (var star in Stars)
             {

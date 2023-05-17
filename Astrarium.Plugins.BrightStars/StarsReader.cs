@@ -103,8 +103,6 @@ namespace Astrarium.Plugins.BrightStars
                         star.Alpha0 = (float)Angle.ToRadians(star.Equatorial0.Alpha);
                         star.Delta0 = (float)Angle.ToRadians(star.Equatorial0.Delta);
 
-                        star.Cartesian = Projection.SphericalToCartesian(star.Alpha0, star.Delta0);
-
                         if (line[148] != ' ')
                         {
                             star.PmAlpha = Convert.ToSingle(line.Substring(148, 6), CultureInfo.InvariantCulture);

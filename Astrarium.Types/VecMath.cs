@@ -8,7 +8,7 @@ namespace Astrarium.Types
 {
     public class Mat4
     {
-        private double[] r = new double[16];
+        private readonly double[] r = new double[16];
 
         public Mat4() { }
 
