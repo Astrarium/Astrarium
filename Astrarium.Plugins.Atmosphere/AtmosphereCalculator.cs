@@ -157,7 +157,7 @@ namespace Astrarium.Plugins.Atmosphere
                     double s1 = r1 * r1 * Sin(f1 - Sin(f1)) / 2;
                     double s2 = r2 * r2 * Sin(f2 - Sin(f2)) / 2;
 
-                    // area of overlapping area
+                    // area of overlapping
                     double s = s1 + s2;
 
                     // area of Sun disk

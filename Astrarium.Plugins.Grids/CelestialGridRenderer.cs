@@ -43,6 +43,8 @@ namespace Astrarium.Plugins.Grids
         private string[] equatorialLabels = new string[] { Text.Get("CelestialGridRenderer.NCP"), Text.Get("CelestialGridRenderer.SCP") };
         private GridPoint[] polePoints = new GridPoint[] { new GridPoint(0, 90), new GridPoint(0, -90) };
 
+        private TextRenderer textRenderer;
+
         public CelestialGridRenderer(CelestialGridCalculator calc, ISettings settings)
         {
             this.calc = calc;
@@ -112,11 +114,18 @@ namespace Astrarium.Plugins.Grids
         {
             var prj = map.SkyProjection;
 
+            if (textRenderer == null)
+            {
+                textRenderer = new TextRenderer(64, 64);
+            }
+
             Color colorGridEquatorial = settings.Get<SkyColor>("ColorEquatorialGrid").Night;
             Color colorGridHorizontal = settings.Get<SkyColor>("ColorHorizontalGrid").Night;
             Color colorLineEcliptic = settings.Get<SkyColor>("ColorEcliptic").Night;
             Color colorLineGalactic = settings.Get<SkyColor>("ColorGalacticEquator").Night;
             Color colorLineMeridian = settings.Get<SkyColor>("ColorMeridian").Night;
+
+            Brush brushGridEquatorial = new SolidBrush(colorGridEquatorial);
 
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.Enable(EnableCap.Blend);
@@ -151,6 +160,25 @@ namespace Astrarium.Plugins.Grids
             if (settings.Get<bool>("EquatorialGrid"))
             {
                 DrawGridLines(prj, prj.MatEquatorialToVision, prj.VecEquatorialVision, colorGridEquatorial);
+            
+                if (settings.Get("LabelEquatorialPoles"))
+                {
+                    for (int i = 0; i < 2; i++)
+                    {
+                        Vec3 v = Projection.SphericalToCartesian(0, Math.PI / 2 * (1 - 2 * i));
+                        Vec2 p = prj.Project(v, prj.MatEquatorialToVision);
+
+                        if (prj.IsInsideScreen(p))
+                        {
+                            textRenderer.DrawString(equatorialLabels[i], SystemFonts.DefaultFont, brushGridEquatorial, p);
+                        }
+                    }
+                }
+            }
+
+            if (settings.Get("MeridianLine"))
+            {
+                DrawLine(prj, prj.MatHorizontalToVision * calc.MatMeridian, prj.VecHorizontalVision, colorLineMeridian);
             }
 
             GL.Disable(EnableCap.Blend);
@@ -172,7 +200,7 @@ namespace Astrarium.Plugins.Grids
             {
                 Vec3 v = Projection.SphericalToCartesian(Angle.ToRadians(i / (double)segments * 360), 0);
                 var p = prj.Project(v, mat);
-                if (p != null && vision.Angle(v) < Angle.ToRadians(prj.MaxFov * 0.7))
+                if (p != null)
                 {
                     GL.Vertex2(p.X, p.Y);
                 }

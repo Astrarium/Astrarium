@@ -57,13 +57,23 @@ namespace Astrarium.Plugins.BrightStars
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
             GL.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
+            GL.Enable(EnableCap.CullFace);
+
+            if (prj.FlipVertical ^ prj.FlipHorizontal)
+            {
+                GL.CullFace(CullFaceMode.Back);
+            }
+            else
+            {
+                GL.CullFace(CullFaceMode.Front);
+            }
 
             // Color of const. lines
             GL.Color3(settings.Get<SkyColor>("ColorConstLines").GetColor(ColorSchema.Night));
 
             var allStars = starsCalc.Stars;
 
-            double maxFov = Angle.ToRadians(prj.Fov + 30);
+            double maxFov = Angle.ToRadians(prj.MaxFov * 0.7);
 
             // fov in radians
             double fov = Angle.ToRadians(prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight));
@@ -150,6 +160,7 @@ namespace Astrarium.Plugins.BrightStars
 
             GL.Disable(EnableCap.PointSmooth);
             GL.Disable(EnableCap.Blend);
+            GL.Disable(EnableCap.CullFace);
         }
 
         private Vec3 CartesianWithProperMotion(Star s, double t)
