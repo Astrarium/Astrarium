@@ -18,6 +18,11 @@ namespace Astrarium.Plugins.SolarSystem
 
         public IEnumerable<Moon> GetCelestialObjects() => new Moon[] { Moon };
 
+        public LunarCalc(ISky sky)
+        {
+            sky.MoonEquatorial = Equatorial;
+        }
+
         public override void Calculate(SkyContext c)
         {
             Moon.Equatorial = c.Get(Equatorial);

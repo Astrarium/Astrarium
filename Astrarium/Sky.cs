@@ -73,6 +73,9 @@ namespace Astrarium
         /// <inheritdoc />
         public Func<SkyContext, CrdsEquatorial> SunEquatorial { get; set; } = (c) => new CrdsEquatorial(0, 0);
 
+        /// <inheritdoc />
+        public Func<SkyContext, CrdsEquatorial> MoonEquatorial { get; set; } = (c) => new CrdsEquatorial(0, 0);
+
         private ISettings settings;
 
         public Sky(ISettings settings)

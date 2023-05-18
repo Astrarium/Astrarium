@@ -54,6 +54,11 @@ namespace Astrarium.Types
         Func<SkyContext, CrdsEquatorial> SunEquatorial { get; set; }
 
         /// <summary>
+        /// Function that gets equatorial coordinates of the Moon
+        /// </summary>
+        Func<SkyContext, CrdsEquatorial> MoonEquatorial { get; set; }
+
+        /// <summary>
         /// Searches celestial objects by string.
         /// </summary>
         /// <param name="searchString">String containing object name.</param>

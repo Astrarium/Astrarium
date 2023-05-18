@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
+using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -10,6 +11,7 @@ namespace Astrarium.Plugins.Grids
 {
     public class CelestialGridRenderer : BaseRenderer
     {
+        private readonly CelestialGridCalculator calc;
         private readonly ISettings settings;
 
         private PrecessionalElements peFrom1950 = null;
@@ -41,8 +43,9 @@ namespace Astrarium.Plugins.Grids
         private string[] equatorialLabels = new string[] { Text.Get("CelestialGridRenderer.NCP"), Text.Get("CelestialGridRenderer.SCP") };
         private GridPoint[] polePoints = new GridPoint[] { new GridPoint(0, 90), new GridPoint(0, -90) };
 
-        public CelestialGridRenderer(ISettings settings)
+        public CelestialGridRenderer(CelestialGridCalculator calc, ISettings settings)
         {
+            this.calc = calc;
             this.settings = settings;
 
             penGridEquatorial = new Pen(Brushes.Transparent);
@@ -103,6 +106,142 @@ namespace Astrarium.Plugins.Grids
                 var eq = new CrdsEquatorial(c.Longitude, c.Latitude);
                 return eq.ToHorizontal(ctx.GeoLocation, ctx.SiderealTime);
             };
+        }
+
+        public override void Render(ISkyMap map)
+        {
+            var prj = map.SkyProjection;
+
+            Color colorGridEquatorial = settings.Get<SkyColor>("ColorEquatorialGrid").Night;
+            Color colorGridHorizontal = settings.Get<SkyColor>("ColorHorizontalGrid").Night;
+            Color colorLineEcliptic = settings.Get<SkyColor>("ColorEcliptic").Night;
+            Color colorLineGalactic = settings.Get<SkyColor>("ColorGalacticEquator").Night;
+            Color colorLineMeridian = settings.Get<SkyColor>("ColorMeridian").Night;
+
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+            GL.Enable(EnableCap.Blend);
+            GL.Enable(EnableCap.LineSmooth);
+            GL.Enable(EnableCap.LineStipple);
+            GL.Enable(EnableCap.CullFace);
+
+            if (prj.FlipVertical ^ prj.FlipHorizontal)
+            {
+                GL.CullFace(CullFaceMode.Back);
+            }
+            else
+            {
+                GL.CullFace(CullFaceMode.Front);
+            }
+
+            if (settings.Get("GalacticEquator"))
+            {
+                DrawLine(prj, prj.MatEquatorialToVision * calc.MatGalactic, prj.VecEquatorialVision, colorLineGalactic);
+            }
+
+            if (settings.Get("EclipticLine"))
+            {
+                DrawLine(prj, prj.MatEquatorialToVision * calc.MatEcliptic, prj.VecEquatorialVision, colorLineEcliptic);
+            }
+
+            if (settings.Get<bool>("HorizontalGrid"))
+            {
+                DrawGridLines(prj, prj.MatHorizontalToVision, prj.VecHorizontalVision, colorGridHorizontal);
+            }
+
+            if (settings.Get<bool>("EquatorialGrid"))
+            {
+                DrawGridLines(prj, prj.MatEquatorialToVision, prj.VecEquatorialVision, colorGridEquatorial);
+            }
+
+            GL.Disable(EnableCap.Blend);
+            GL.Disable(EnableCap.LineSmooth);
+            GL.Disable(EnableCap.LineStipple);
+            GL.Disable(EnableCap.CullFace);
+        }
+
+        private void DrawLine(Projection prj, Mat4 mat, Vec3 vision, Color color)
+        {
+            int segments = prj.Fov < 45 ? 128 : 64;
+
+            GL.Color3(color);
+            GL.LineStipple(1, 0xAAAA);
+
+            GL.Begin(PrimitiveType.LineStrip);
+
+            for (int i = 0; i <= segments; i++)
+            {
+                Vec3 v = Projection.SphericalToCartesian(Angle.ToRadians(i / (double)segments * 360), 0);
+                var p = prj.Project(v, mat);
+                if (p != null && vision.Angle(v) < Angle.ToRadians(prj.MaxFov * 0.7))
+                {
+                    GL.Vertex2(p.X, p.Y);
+                }
+                else
+                {
+                    GL.End();
+                    GL.Begin(PrimitiveType.LineStrip);
+                }
+            }
+
+            GL.End();
+        }
+
+        private void DrawGridLines(Projection prj, Mat4 mat, Vec3 vision, Color color)
+        {
+            int segments = prj.Fov < 45 ? 128 : 64;
+
+            GL.Color3(color);
+            GL.LineStipple(1, 0xAAAA);
+
+            // HOR. GRID
+            {
+                // parallels
+                for (int alt = -80; alt <= 80; alt += 10)
+                {
+                    GL.Begin(PrimitiveType.LineStrip);
+
+                    for (int i = 0; i <= segments; i++)
+                    {
+                        Vec3 v = Projection.SphericalToCartesian(Angle.ToRadians(i / (double)segments * 360), Angle.ToRadians(alt));
+                        var p = prj.Project(v, mat);
+
+                        if (p != null && vision.Angle(v) < Angle.ToRadians(prj.MaxFov * 0.7))
+                        {
+                            GL.Vertex2(p.X, p.Y);
+                        }
+                        else
+                        {
+                            GL.End();
+                            GL.Begin(PrimitiveType.LineStrip);
+                        }
+                    }
+
+                    GL.End();
+                }
+
+                // meridians
+                for (int i = 0; i < 24; i++)
+                {
+                    GL.Begin(PrimitiveType.LineStrip);
+
+                    for (int alt = -80; alt <= 80; alt += 2)
+                    {
+                        Vec3 v = Projection.SphericalToCartesian(Angle.ToRadians(i / (double)24 * 360), Angle.ToRadians(alt));
+                        var p = prj.Project(v, mat);
+                        if (p != null && vision.Angle(v) < Angle.ToRadians(prj.MaxFov * 0.7))
+                        {
+                            GL.Vertex2(p.X, p.Y);
+                        }
+                        else
+                        {
+                            GL.End();
+                            GL.Begin(PrimitiveType.LineStrip);
+                        }
+                    }
+
+                    GL.End();
+                }
+            }
         }
 
         public override void Render(IMapContext map)

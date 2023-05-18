@@ -88,7 +88,10 @@ namespace Astrarium.Plugins.Atmosphere
         public override void Calculate(SkyContext context)
         {
             sun = context.Get(sky.SunEquatorial).ToHorizontal(context.GeoLocation, context.SiderealTime);
+            moon = context.Get(sky.MoonEquatorial).ToHorizontal(context.GeoLocation, context.SiderealTime);
 
+            sdSun = 0.5;
+            sdMoon = 0.5;
 
             // solar zenith distance, in radians
             thetaSun = Angle.ToRadians(90 - sun.Altitude);
@@ -148,19 +151,19 @@ namespace Astrarium.Plugins.Atmosphere
 
                     double r1 = sdSun;
                     double r2 = sdMoon;
-                    double f1 = 2 * Math.Acos((r1 * r1 - r2 * r2 + delta * delta) / (2 * r1 * delta));
-                    double f2 = 2 * Math.Acos((r2 * r2 - r1 * r1 + delta * delta) / (2 * r2 * delta));
+                    double f1 = 2 * Acos((r1 * r1 - r2 * r2 + delta * delta) / (2 * r1 * delta));
+                    double f2 = 2 * Acos((r2 * r2 - r1 * r1 + delta * delta) / (2 * r2 * delta));
 
-                    double s1 = r1 * r1 * Math.Sin(f1 - Math.Sin(f1)) / 2;
-                    double s2 = r2 * r2 * Math.Sin(f2 - Math.Sin(f2)) / 2;
+                    double s1 = r1 * r1 * Sin(f1 - Sin(f1)) / 2;
+                    double s2 = r2 * r2 * Sin(f2 - Sin(f2)) / 2;
 
                     // area of overlapping area
                     double s = s1 + s2;
 
                     // area of Sun disk
-                    double ss = Math.PI * r1 * r1;
+                    double ss = PI * r1 * r1;
 
-                    double percentage = Math.Abs(s / ss);
+                    double percentage = Abs(s / ss);
 
                     if (percentage <= 0.1)
                     {
@@ -214,8 +217,6 @@ namespace Astrarium.Plugins.Atmosphere
             return (1 + a * A[i] * Exp(b * B[i] / Cos(theta))) * (1 + c * C[i] * Exp(d * D[i] * gamma) + e * E[i] * Cos(gamma) * Cos(gamma));
         }
 
-        public double DaylightFactor { get; private set; } = 1;
-
         public Color GetColor(CrdsHorizontal p)
         {
             double thetaP = Angle.ToRadians(90 - p.Altitude);
@@ -229,7 +230,7 @@ namespace Astrarium.Plugins.Atmosphere
                 L[i] = Z[i] * (F(i, thetaP, gammaP) / F(i, 0, thetaSun));
             }
 
-            L[0] *= DaylightFactor;
+            L[0] *= map.DaylightFactor;
             //L[1] = 1;
             //L[2] = 1;
 
