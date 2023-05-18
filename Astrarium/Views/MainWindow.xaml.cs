@@ -344,6 +344,8 @@ namespace Astrarium
             skyViewControl.MouseWheel += SkyViewControl_MouseWheel;
             skyViewControl.MouseClick += SkyView_MouseClick;
             skyViewControl.MouseDoubleClick += SkyViewControl_MouseDoubleClick;
+            map.OnInvalidate += skyViewControl.Invalidate;
+
             settings.SettingValueChanged += (s, v) => skyViewControl.Invalidate();
 
             Host.Child = skyViewControl;

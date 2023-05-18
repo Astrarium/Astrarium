@@ -195,9 +195,16 @@ namespace Astrarium.Plugins.Horizon
             int steps = prj.Fov < 90 ? 32 : 128;
 
             // tint color
-            int c = 10 + (int)((255 - 10) * 1/* atm.DaylightFactor*/);
-            GL.Color4(Color.FromArgb(c, c, c));
+            int c = 10 + (int)((255 - 10) * map.DaylightFactor);
 
+            if (settings.Get<ColorSchema>("Schema") == ColorSchema.Red)
+            {
+                GL.Color4(Color.FromArgb(c, 0, 0));
+            }
+            else
+            {
+                GL.Color4(Color.FromArgb(c, c, c));
+            }
 
             for (double lat = -80; lat <= 90; lat += 10)
             {

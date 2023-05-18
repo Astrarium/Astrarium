@@ -24,6 +24,8 @@ namespace Astrarium.Types
         ICollection<string> GetEventsCategories();
         CelestialObjectInfo GetInfo(CelestialObject body);
         Constellation GetConstellation(string code);
+
+        // TODO: move to ISkyMap
         ICollection<Tuple<int, int>> ConstellationLines { get; set; }
         IDictionary<string, string> StarNames { get; }
         IEnumerable<CelestialObject> CelestialObjects { get; }

@@ -131,13 +131,12 @@ namespace Astrarium.Types
             return (float)Math.Max(minSize, (float)(ScreenWidth / Fov * (2 * semidiameter / 3600)));
         }
 
+        // log fit {90,6},{45,7},{8,9},{1,12},{0.25,17}
+        public float MagLimit => Math.Min(float.MaxValue /* TODO: add option to set by user */, (float)(-1.73494 * Math.Log(0.000462398 * Fov)));
+
         public float GetPointSize(float mag)
         {
-            // no limit
-            float limitMag = float.MaxValue;
-
-            // log fit {90,6},{45,7},{8,9},{1,12},{0.25,17}
-            float mag0 = Math.Min(limitMag, (float)(-1.73494 * Math.Log(0.000462398 * Fov)));
+            float mag0 = MagLimit;
 
             float size;
 

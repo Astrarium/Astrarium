@@ -32,6 +32,8 @@ namespace Astrarium.Types
         /// </summary>
         CrdsHorizontal Center { get; }
 
+        float DaylightFactor { get; set; }
+
         /// <summary>
         /// Selected celestial object
         /// </summary>
@@ -47,6 +49,7 @@ namespace Astrarium.Types
         /// <summary>
         /// Gets or sets projection which is used for converting celestial coordinates to the sky map plane.
         /// </summary>
+        [Obsolete]
         IProjection Projection { get; }
 
         Projection SkyProjection { get; }
@@ -57,6 +60,7 @@ namespace Astrarium.Types
         /// Renders the celestial map on provided Graphics object
         /// </summary>
         /// <param name="g">Graphics to render the map.</param>
+        [Obsolete]
         void Render(Graphics g);
 
         void Render();

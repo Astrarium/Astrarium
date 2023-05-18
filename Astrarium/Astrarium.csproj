@@ -90,6 +90,11 @@
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <Private>false</Private>
     </ProjectReference>
+	<ProjectReference Include="..\Astrarium.Plugins.Atmosphere\Astrarium.Plugins.Atmosphere.csproj">
+	  <Private>false</Private>
+	  <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+	  <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+	</ProjectReference>
     <ProjectReference Include="..\Astrarium.Plugins.BrightStars\Astrarium.Plugins.BrightStars.csproj">
       <Private>false</Private>
       <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>

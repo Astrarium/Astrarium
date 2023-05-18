@@ -59,7 +59,7 @@ namespace Astrarium.Plugins.BrightStars
             GL.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
 
             // Color of const. lines
-            GL.Color3((byte)50, (byte)50, (byte)50);
+            GL.Color3(settings.Get<SkyColor>("ColorConstLines").GetColor(ColorSchema.Night));
 
             var allStars = starsCalc.Stars;
 
@@ -109,14 +109,14 @@ namespace Astrarium.Plugins.BrightStars
 
             if (settings.Get("Stars"))
             {
-                // no stars if the Sun above horizon
-                //if (atm.SunAltitude >= 0) return;
+                float daylightFactor = map.DaylightFactor;
 
-                float daylightFactor = 0; // (float)atm.DaylightFactor;
+                // no stars if the Sun above horizon
+                if (daylightFactor == 1) return;
+
+                float starDimming = 1 - daylightFactor;
 
                 float minStarSize = daylightFactor * 3; // empiric
-
-                float starDimming = 1 - daylightFactor; // no stars visible on day (daylightFactor = 1)
 
                 var labelBrush = new SolidBrush(Color.DimGray);
 

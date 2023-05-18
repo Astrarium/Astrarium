@@ -122,6 +122,7 @@ namespace Astrarium
         /// </summary>
         public event Action<double> ViewAngleChanged;
 
+        public float DaylightFactor { get; set; }
         public CrdsHorizontal Center { get; } = new CrdsHorizontal(0, 0);
         public bool Antialias { get; set; } = true;
 
@@ -299,18 +300,56 @@ namespace Astrarium
         public void Render()
         {
             celestialObjects.Clear();
-            
+
+            bool needDrawSelectedObject = true;
+
             for (int i = 0; i < renderers.Count(); i++)
             {
                 try
                 {
                     renderers.ElementAt(i).Render(this);
+
+                    if (needDrawSelectedObject)
+                    {
+                        needDrawSelectedObject = !DrawSelectedObject();
+                    }
                 }
                 catch (Exception ex)
                 {
                     Log.Error($"Rendering error: {ex}");
                 }
             }
+        }
+
+        private bool DrawSelectedObject()
+        {
+            if (SelectedObject != null)
+            {
+                var bodyAndPosition = celestialObjects.FirstOrDefault(x => x.Item2 == SelectedObject);
+
+                if (bodyAndPosition != null)
+                {
+                    PointF pos = bodyAndPosition.Item1;
+                    CelestialObject body = bodyAndPosition.Item2;
+
+                    double sd = (body is SizeableCelestialObject) ? (body as SizeableCelestialObject).Semidiameter : 0;
+
+                    float mag = (body is IMagnitudeObject) ? (body as IMagnitudeObject).Magnitude : projection.MagLimit;
+
+                    double diskSize = projection.GetDiskSize(sd, 10);
+                    double pointSize = projection.GetPointSize(mag);
+
+                    double size = Math.Max(diskSize, pointSize);
+
+                    Vec2 p = new Vec2(pos.X, pos.Y);
+
+                    Primitives.DrawEllipse(p, Pens.Red, (size + 8) / 2);
+
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public void Render(Graphics g)
@@ -485,14 +524,14 @@ namespace Astrarium
             }
             */
 
-            foreach (var x in celestialObjects.OrderBy(c => (point.X - c.Item1.X) * (point.X - c.Item1.X) + (point.Y - c.Item1.Y) * (point.Y - c.Item1.Y)))
+            foreach (var x in celestialObjects.OrderBy(c => (point.X - c.Item1.X) * (point.X - c.Item1.X) + (projection.ScreenHeight - point.Y - c.Item1.Y) * (projection.ScreenHeight - point.Y - c.Item1.Y)))
             {
                 double sd = (x.Item2 is SizeableCelestialObject) ?
                     (x.Item2 as SizeableCelestialObject).Semidiameter : 0;
 
                 double size = projection.GetDiskSize(sd, 10);
 
-                if (Math.Sqrt((x.Item1.X - point.X) * (x.Item1.X - point.X) + (x.Item1.Y - point.Y) * (x.Item1.Y - point.Y)) < size / 2)
+                if (Math.Sqrt((x.Item1.X - point.X) * (x.Item1.X - point.X) + (projection.ScreenHeight - x.Item1.Y - point.Y) * (projection.ScreenHeight - x.Item1.Y - point.Y)) < size / 2)
                 {
                     return x.Item2;
                 }
