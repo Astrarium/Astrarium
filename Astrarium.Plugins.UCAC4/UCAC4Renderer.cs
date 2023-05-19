@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
+using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -21,6 +22,51 @@ namespace Astrarium.Plugins.UCAC4
             this.settings = settings;
 
             fontNames = new Font("Arial", 6);
+        }
+
+        public override void Render(ISkyMap map)
+        {
+            var prj = map.SkyProjection;
+            if (prj.Fov < 1.5 && settings.Get("Stars") && settings.Get("UCAC4"))
+            {
+                GL.Enable(EnableCap.PointSmooth);
+                GL.Enable(EnableCap.Blend);
+                GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+                GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
+
+                float magLimit = prj.MagLimit;// 20; // (float)(-1.73494 * Math.Log(0.000462398 * prj.Fov));
+
+                PrecessionalElements pe = Precession.ElementsFK5(prj.Context.JulianDay, Date.EPOCH_J2000);
+
+                var eq0 = prj.CenterEquatorial;
+
+                CrdsEquatorial eq = Precession.GetEquatorialCoordinates(eq0, pe);
+
+                SkyContext context = new SkyContext(prj.Context.JulianDay, prj.Context.GeoLocation);
+
+                var stars = catalog.GetStars(context, eq, prj.Fov, m => m <= magLimit);
+
+                foreach (var star in stars)
+                {
+                    var p = prj.Project(star.Horizontal);
+
+                    if (prj.IsInsideScreen(p))
+                    {
+                        float size = prj.GetPointSize(star.Magnitude);
+                        if (size > 0)
+                        {
+                            GL.PointSize(size);
+                            GL.Color3(GetColor(star.SpectralClass));
+
+                            GL.Begin(PrimitiveType.Points);
+                            GL.Vertex2(p.X, p.Y);
+                            GL.End();
+
+                            map.AddDrawnObject(p, star);
+                        }
+                    }
+                }
+            }
         }
 
         public override void Render(IMapContext map)
@@ -136,6 +182,48 @@ namespace Astrarium.Plugins.UCAC4
             }
 
             return map.GetColor(starColor, Color.Transparent);
+        }
+
+        private Color GetColor(char spClass)
+        {
+            Color starColor;
+            if (settings.Get("StarsColors"))
+            {
+                switch (spClass)
+                {
+                    case 'O':
+                    case 'W':
+                        starColor = Color.LightBlue;
+                        break;
+                    case 'B':
+                        starColor = Color.LightCyan;
+                        break;
+                    case 'A':
+                        starColor = Color.White;
+                        break;
+                    case 'F':
+                        starColor = Color.LightYellow;
+                        break;
+                    case 'G':
+                        starColor = Color.Yellow;
+                        break;
+                    case 'K':
+                        starColor = Color.Orange;
+                        break;
+                    case 'M':
+                        starColor = Color.OrangeRed;
+                        break;
+                    default:
+                        starColor = Color.White;
+                        break;
+                }
+            }
+            else
+            {
+                starColor = Color.White;
+            }
+
+            return starColor;
         }
     }
 }

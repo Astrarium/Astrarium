@@ -91,7 +91,7 @@ namespace Astrarium.Plugins.Constellations
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
             // eq vision vector in J2000 coords
-            var equ_vision0 = constellationsCalc.MatPrecession0 * prj.VecEquatorialVision;
+            var vecVision = constellationsCalc.MatPrecession0 * prj.VecEquatorialVision;
 
             // matrix for projection
             var mat = prj.MatEquatorialToVision * constellationsCalc.MatPrecession;
@@ -108,7 +108,7 @@ namespace Astrarium.Plugins.Constellations
             {
                 for (int i = 0; i < block.Count - 1; i++)
                 {
-                    if (equ_vision0.Angle(block[i]) > fov && equ_vision0.Angle(block[i + 1]) > fov)
+                    if (vecVision.Angle(block[i]) > fov && vecVision.Angle(block[i + 1]) > fov)
                     {
                         continue;
                     }

@@ -90,6 +90,7 @@ namespace Astrarium.Plugins.Atmosphere
             sun = context.Get(sky.SunEquatorial).ToHorizontal(context.GeoLocation, context.SiderealTime);
             moon = context.Get(sky.MoonEquatorial).ToHorizontal(context.GeoLocation, context.SiderealTime);
 
+            // TODO: get from sky
             sdSun = 0.5;
             sdMoon = 0.5;
 
@@ -112,10 +113,9 @@ namespace Astrarium.Plugins.Atmosphere
                 (-0.04214 * thetaSun3 + 0.08970 * thetaSun2 - 0.04153 * thetaSun + 0.00516) * T +
                 (0.15346 * thetaSun3 - 0.26756 * thetaSun2 + 0.06670 * thetaSun + 0.26688);
 
-
             if (sun.Altitude > -18)
             {
-                Z[0] = Z[0] + 20;
+                Z[0] += 20;
             }
 
             // this will compensate sky color during twilight
