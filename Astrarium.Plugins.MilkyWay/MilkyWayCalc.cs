@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -12,51 +13,39 @@ namespace Astrarium.Plugins.MilkyWay
     public class MilkyWayCalc : BaseCalc
     {
         /// <summary>
-        /// Outline points
+        /// Altitude of the Sun above horizon
         /// </summary>
-        public List<List<CelestialPoint>> MilkyWay { get; private set; } = new List<List<CelestialPoint>>();
+        public double SunAltitude { get; private set; }
+        
+        public Mat4 MatGalactic { get; private set; }
+
+        private readonly ISky sky;
+
+        public MilkyWayCalc(ISky sky)
+        {
+            this.sky = sky;
+        }
 
         public override void Calculate(SkyContext context)
         {
+            // solar altitude, in degrees
+            SunAltitude = context.Get(sky.SunEquatorial).ToHorizontal(context.GeoLocation, context.SiderealTime).Altitude;
+
+            // precessional elements from J2000 to current epoch
             var p = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
 
-            foreach (var block in MilkyWay)
-            {
-                foreach (var bp in block)
-                {
-                    // Equatorial coordinates for the mean equinox and epoch of the target date
-                    var eq = Precession.GetEquatorialCoordinates(bp.Equatorial0, p);
+            // precession matrix used to convert J2000.0 galactical coordinates to current epoch
+            var matPrecession =
+                Mat4.ZRotation(Angle.ToRadians(p.z)) *
+                Mat4.YRotation(Angle.ToRadians(-p.theta)) *
+                Mat4.ZRotation(Angle.ToRadians(p.zeta));
 
-                    // Apparent horizontal coordinates
-                    bp.Horizontal = eq.ToHorizontal(context.GeoLocation, context.SiderealTime);
-                }
-            }
-        }
+            // J2000.0 galactical reference points
+            // 192.855 = 12h 51.4m (alpha0)
+            // 27.12825 (delta0)
+            // 122.93314 (lon)
+            MatGalactic = matPrecession * Mat4.ZRotation(Angle.ToRadians(192.855)) * Mat4.YRotation(Angle.ToRadians(90 - 27.12825)) * Mat4.ZRotation(Angle.ToRadians(180 - 122.93314));
 
-        public override void Initialize()
-        {
-            string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data/MilkyWay.dat");
-
-            List<CelestialPoint> block = null;
-            using (var sr = new BinaryReader(new FileStream(file, FileMode.Open, FileAccess.Read)))
-            {
-                int fragment = -1;
-                while (sr.BaseStream.Position != sr.BaseStream.Length)
-                {
-                    int f = sr.ReadChar();
-                    if (f != fragment)
-                    {
-                        fragment = f;
-                        block = new List<CelestialPoint>();
-                        MilkyWay.Add(block);
-                    }
-
-                    block.Add(new CelestialPoint()
-                    {
-                        Equatorial0 = new CrdsEquatorial(sr.ReadSingle(), sr.ReadSingle())
-                    });
-                }
-            }
         }
     }
 }

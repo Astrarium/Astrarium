@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
+using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -16,67 +17,114 @@ namespace Astrarium.Plugins.MilkyWay
     public class MilkyWayRenderer : BaseRenderer
     {
         private readonly MilkyWayCalc milkyWayCalc;
+        private readonly ISky sky;
         private readonly ISettings settings;
-
-        private double minAlpha = 255;
-        private double maxAlpha = 10;
-        private double minZoom = 90;
-        private double maxZoom = 5;
-        private double k;
-        private double b;
-
-        public MilkyWayRenderer(MilkyWayCalc milkyWayCalc, ISettings settings)
-        {
-            this.milkyWayCalc = milkyWayCalc;
-            this.settings = settings;
-
-            k = -(minAlpha - maxAlpha) / (maxZoom - minZoom);
-            b = -(minZoom * maxAlpha - maxZoom * minAlpha) / (maxZoom - minZoom);
-        }
-
-        public override void Render(IMapContext map)
-        {
-            if (settings.Get<bool>("MilkyWay"))
-            {
-                int alpha = Math.Min((int)(k * map.ViewAngle + b), 255);
-                if (alpha > maxAlpha)
-                {
-                    var smoothing = map.Graphics.SmoothingMode;
-                    map.Graphics.SmoothingMode = SmoothingMode.None;
-
-                    if (map.Schema == ColorSchema.Day)
-                    {
-                        alpha = (int)(alpha * (1 - map.DayLightFactor));
-                    }
-
-                    for (int i = 0; i < milkyWayCalc.MilkyWay.Count(); i++)
-                    {
-                        var points = new List<PointF>();
-
-                        for (int j = 0; j < milkyWayCalc.MilkyWay[i].Count; j++)
-                        {
-                            var h = milkyWayCalc.MilkyWay[i][j].Horizontal;
-                            double ad = Angle.Separation(h, map.Center);
-
-                            // 130 degrees value limit has been chosen experimentally
-                            if (ad < 130)
-                            {
-                                points.Add(map.Project(h));
-                            }                            
-                        }
-
-                        if (points.Count >= 3)
-                        {
-                            Color color = Color.FromArgb(alpha, map.GetColor("ColorMilkyWay"));
-                            map.Graphics.FillPolygon(new SolidBrush(color), points.ToArray(), FillMode.Winding);
-                        }
-                    }
-
-                    map.Graphics.SmoothingMode = smoothing;
-                }
-            }
-        }
+        private readonly ITextureManager textureManager;
+        private readonly string texturePath;
 
         public override RendererOrder Order => RendererOrder.Background;
+
+        public MilkyWayRenderer(MilkyWayCalc milkyWayCalc, ITextureManager textureManager, ISky sky, ISettings settings)
+        {
+            this.milkyWayCalc = milkyWayCalc;
+            this.textureManager = textureManager;
+            this.sky = sky;
+            this.settings = settings;
+
+            texturePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data", "MilkyWay.jpg");
+        }
+
+        public override void Render(ISkyMap map)
+        {
+            if (!settings.Get("MilkyWay")) return;
+            var prj = map.SkyProjection;
+
+            // nautical twilight: suppose Milky Way is not visible
+            if (milkyWayCalc.SunAltitude > -12) return;
+
+            const double maxAlpha = 80;
+            const double minAlpha = 1;
+            const double minFov = 1;
+
+            double maxFov = prj.MaxFov;
+
+            double a = -(maxAlpha - minAlpha) / (minFov - maxFov);
+            double b = -(maxFov * minAlpha - minFov * maxAlpha) / (minFov - maxFov);
+
+            // milky way dimming
+            int alpha = Math.Min((int)(a * prj.Fov + b), 255);
+
+            // astronomical twilight: Milky Way is appearing with linear transparency coeff.: 0...1
+            if (milkyWayCalc.SunAltitude >= -18 && milkyWayCalc.SunAltitude <= -12)
+            {
+                alpha = (int)(alpha * (-milkyWayCalc.SunAltitude / 6 - 2));
+            }
+
+            if (alpha < minAlpha) return;
+
+            GL.Enable(EnableCap.Texture2D);
+            GL.Enable(EnableCap.CullFace);
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+
+            // if only one of the flipping enabled
+            if (prj.FlipVertical ^ prj.FlipHorizontal)
+            {
+                GL.CullFace(CullFaceMode.Back);
+            }
+            else
+            {
+                GL.CullFace(CullFaceMode.Front);
+            }
+
+            GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(texturePath));
+
+            var mat = prj.MatEquatorialToVision * milkyWayCalc.MatGalactic;
+
+            const int steps = 32;
+
+            // tint color
+            GL.Color4(Color.FromArgb(alpha, 255, 255, 255));
+
+            System.Diagnostics.Debug.WriteLine($"alpha = {alpha}");
+
+            for (double lat = -80; lat <= 90; lat += 10)
+            {
+                GL.Begin(PrimitiveType.TriangleStrip);
+
+                for (int i = 0; i <= steps; i++)
+                {
+                    double lon = Angle.ToRadians(360 - i / (double)steps * 360);
+                    for (int k = 0; k < 2; k++)
+                    {
+                        var v = Projection.SphericalToCartesian(lon, Angle.ToRadians(lat - k * 10));
+                        var p = prj.Project(v, mat);
+
+                        if (p != null)
+                        {
+                            double s = (double)i / steps;
+                            double t = (90 - (lat - k * 10)) / 180.0;
+
+                            GL.TexCoord2(s, t);
+                            GL.Vertex2(p.X, p.Y);
+                        }
+                        else
+                        {
+                            GL.End();
+                            GL.Begin(PrimitiveType.TriangleStrip);
+                            break;
+                        }
+                    }
+                }
+                GL.End();
+            }
+
+            GL.Disable(EnableCap.Texture2D);
+            GL.Disable(EnableCap.CullFace);
+            GL.Disable(EnableCap.Blend);
+        }
+
+        [Obsolete]
+        public override void Render(IMapContext map) { }
     }
 }

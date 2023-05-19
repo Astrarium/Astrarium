@@ -33,18 +33,16 @@ namespace Astrarium.Plugins.Constellations
         /// </summary>
         public List<Tuple<int, int>> ConstLinesRey { get; private set; } = new List<Tuple<int, int>>();
 
-        private ISky sky;
-
-        private ISettings settings;
-
         public Mat4 MatPrecession { get; private set; }
         public Mat4 MatPrecession0 { get; private set; }
+
+        private readonly ISky sky;
+        private readonly ISettings settings;
 
         public ConstellationsCalc(ISky sky, ISettings settings)
         {
             this.sky = sky;
             this.settings = settings;
-
             this.settings.SettingValueChanged += Settings_SettingValueChanged;
         }
 
@@ -73,27 +71,6 @@ namespace Astrarium.Plugins.Constellations
                 Mat4.ZRotation(Angle.ToRadians(p0.z)) *
                 Mat4.YRotation(Angle.ToRadians(-p0.theta)) *
                 Mat4.ZRotation(Angle.ToRadians(p0.zeta));
-
-            //foreach (var b in ConstBorders)
-            //{
-            //    foreach (var bp in b)
-            //    {
-            //        // Equatorial coordinates for the mean equinox and epoch of the target date
-            //        var eq = Precession.GetEquatorialCoordinates(bp.Equatorial0, p);
-
-            //        // Apparent horizontal coordinates
-            //        bp.Horizontal = eq.ToHorizontal(context.GeoLocation, context.SiderealTime);
-            //    }
-            //}
-
-            //foreach (var c in ConstLabels)
-            //{
-            //    // Equatorial coordinates for the mean equinox and epoch of the target date
-            //    var eq = Precession.GetEquatorialCoordinates(c.Equatorial0, PrecessionalElementsJ2000ToCurrent);
-
-            //    // Apparent horizontal coordinates
-            //    c.Horizontal = eq.ToHorizontal(context.GeoLocation, context.SiderealTime);
-            //}
         }
 
         public override void Initialize()
@@ -158,11 +135,11 @@ namespace Astrarium.Plugins.Constellations
             {
                 while (sr.BaseStream.Position != sr.BaseStream.Length)
                 {
-                    string code = sr.ReadString();                
+                    string code = sr.ReadString();
                     ConstLabels.Add(new ConstellationLabel()
                     {
                         Code = code.Substring(0, 3),
-                        Equatorial0 = new CrdsEquatorial(sr.ReadSingle(), sr.ReadSingle())
+                        Cartesian = Projection.SphericalToCartesian(Angle.ToRadians(sr.ReadSingle()), Angle.ToRadians(sr.ReadSingle()))
                     });
                 }
             }
