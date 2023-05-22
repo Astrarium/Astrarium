@@ -63,6 +63,11 @@ namespace Astrarium.Plugins.UCAC4
         /// </summary>
         internal UCAC4StarPosData PositionData { get; set; }
 
+        /// <summary>
+        /// Cartesian coordinates of a star
+        /// </summary>
+        internal Vec3 Cartesian { get; set; }
+
         public override string ToString()
         {
             return $"UCAC4 {ZoneNumber:000}-{RunningNumber:000000}";

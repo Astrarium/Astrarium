@@ -209,6 +209,7 @@ namespace Astrarium.ViewModels
             sky.DateTimeSyncChanged += () => NotifyPropertyChanged(nameof(DateTimeSync));
             map.SelectedObjectChanged += Map_SelectedObjectChanged;
             map.ViewAngleChanged += Map_ViewAngleChanged;
+            map.SkyProjection.FovChanged += Map_ViewAngleChanged;
             settings.SettingValueChanged += (s, v) => map.Invalidate();
 
             AddBinding(new SimpleBinding(settings, "IsToolbarVisible", nameof(IsToolbarVisible)));
@@ -519,7 +520,7 @@ namespace Astrarium.ViewModels
 
         private void Map_ViewAngleChanged(double viewAngle)
         {
-            MapViewAngleString = Formatters.Angle.Format(map.ViewAngle);
+            MapViewAngleString = Formatters.Angle.Format(viewAngle);
             NotifyPropertyChanged(nameof(MapViewAngleString));
         }
 
@@ -555,7 +556,8 @@ namespace Astrarium.ViewModels
 
         private void Zoom(int delta)
         {
-            map.ViewAngle *= Math.Pow(1.1, -delta / 120);
+            map.SkyProjection.Fov *= Math.Pow(1.1, -delta / 120);
+            map.Invalidate();
         }
        
         private IEnumerable<MenuItem> GetMenuItems(IEnumerable<MenuItem> items)

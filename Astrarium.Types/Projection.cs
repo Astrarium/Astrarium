@@ -235,8 +235,12 @@ namespace Astrarium.Types
 
                 UpdateScreenScalingFactor();
                 UpdateProjectionMatrix();
+
+                FovChanged?.Invoke(fov);
             }
         }
+
+        public event Action<double> FovChanged;
 
         public Vec2 Project(CrdsEquatorial eq)
         {

@@ -47,10 +47,6 @@ namespace Astrarium
             return (CrdsHorizontal)target.GetValue(MouseHorizontalPositionProperty);
         }
 
-
-
-
-
         public static readonly DependencyProperty MousePositionConstellationProperty = DependencyProperty.RegisterAttached(
             "MousePositionConstellation", typeof(string), typeof(MainWindow), new PropertyMetadata(null));
 
@@ -64,9 +60,6 @@ namespace Astrarium
             return (string)target.GetValue(MousePositionConstellationProperty);
         }
 
-
-
-
         public static readonly DependencyProperty FPSProperty = DependencyProperty.RegisterAttached(
             "FPS", typeof(string), typeof(MainWindow), new PropertyMetadata(null));
 
@@ -79,11 +72,6 @@ namespace Astrarium
         {
             return (string)target.GetValue(FPSProperty);
         }
-
-
-
-
-
 
         public static readonly DependencyProperty MapKeyDownProperty = DependencyProperty.RegisterAttached(
             "MapKeyDown", typeof(Command<KeyEventArgs>), typeof(MainWindow));
@@ -357,6 +345,7 @@ namespace Astrarium
             this.Closing += MainWindow_Closing;
             this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
         }
+
 
         private void SkyViewControl_MouseDoubleClick(object sender, WF.MouseEventArgs e)
         {

@@ -323,9 +323,9 @@ namespace Astrarium
 
         private bool DrawSelectedObject()
         {
-            if (SelectedObject != null)
+            if (SelectedObject != null && celestialObjects.Any())
             {
-                var bodyAndPosition = celestialObjects.FirstOrDefault(x => x.Item2 == SelectedObject);
+                var bodyAndPosition = celestialObjects.FirstOrDefault(x => x.Item2.Equals(SelectedObject));
 
                 if (bodyAndPosition != null)
                 {

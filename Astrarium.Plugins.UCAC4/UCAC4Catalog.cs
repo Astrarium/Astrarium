@@ -27,7 +27,10 @@ namespace Astrarium.Plugins.UCAC4
         private readonly bool[] zoneAvailable = new bool[ZONES_COUNT];
         private readonly List<UCAC4HPMStarData> hpmStars = new List<UCAC4HPMStarData>();
         private bool isInitialized = false;
-        
+
+        public Mat4 MatPrecession { get; private set; }
+        public Mat4 MatPrecession0 { get; private set; }
+
         /// <summary>
         /// Flag indicating the catalog data has been found and loaded
         /// </summary>
@@ -235,7 +238,7 @@ namespace Astrarium.Plugins.UCAC4
         /// <param name="angle">Area radius, in degrees</param>
         /// <param name="magFilter">Magnitude filter function, returns true if star is visible and should be included in results</param>
         /// <returns>Collection of <see cref="UCAC4Star"/> objects</returns>
-        public IEnumerable<UCAC4Star> GetStars(SkyContext context, CrdsEquatorial eq, double angle, Func<float, bool> magFilter)
+        public IEnumerable<UCAC4Star> GetStars(double t, CrdsEquatorial eq, double angle, Func<float, bool> magFilter)
         {
             int j = (int)(eq.Alpha / 0.25) + 1;
             int zn = (int)((eq.Delta + 90) / 0.2) + 1;
@@ -249,7 +252,7 @@ namespace Astrarium.Plugins.UCAC4
                     for (int z = 1; z <= 10; z++)
                     {
                         var bin = GetBin(z, BINS_IN_ZONE);
-                        stars.AddRange(ReadStarsForZone(z, (int)(bin.N0 + bin.NN), context, magFilter));
+                        stars.AddRange(ReadStarsForZone(z, (int)(bin.N0 + bin.NN), t, magFilter));
                     }
                 }
                 else if (zn >= ZONES_COUNT - 5 && angle > 0.25)
@@ -257,7 +260,7 @@ namespace Astrarium.Plugins.UCAC4
                     for (int z = ZONES_COUNT - 10; z <= ZONES_COUNT; z++)
                     {
                         var bin = GetBin(z, BINS_IN_ZONE);
-                        stars.AddRange(ReadStarsForZone(z, (int)(bin.N0 + bin.NN), context, magFilter));
+                        stars.AddRange(ReadStarsForZone(z, (int)(bin.N0 + bin.NN), t, magFilter));
                     }
                 }
                 else
@@ -265,7 +268,7 @@ namespace Astrarium.Plugins.UCAC4
                     List<Bin> bins = FindVisibleBins(eq, angle, zn);
                     foreach (var bin in bins)
                     {
-                        stars.AddRange(ReadStarsForBin(bin, context, magFilter));
+                        stars.AddRange(ReadStarsForBin(bin, t, magFilter));
                     }
                 }
             }
@@ -393,7 +396,17 @@ namespace Astrarium.Plugins.UCAC4
             return p;
         }
 
-        private UCAC4Star ReadStar(byte[] starsData, int offset, SkyContext context, int zn, int starIndex, Func<float, bool> magFilter)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="starsData"></param>
+        /// <param name="offset"></param>
+        /// <param name="t">Years since J2000. epoch</param>
+        /// <param name="zn"></param>
+        /// <param name="starIndex"></param>
+        /// <param name="magFilter"></param>
+        /// <returns></returns>
+        private UCAC4Star ReadStar(byte[] starsData, int offset, double t, int zn, int starIndex, Func<float, bool> magFilter)
         {
             float mag = BitConverter.ToInt16(starsData, 8 + offset) / 1000.0f;
             if (magFilter(mag))
@@ -407,7 +420,8 @@ namespace Astrarium.Plugins.UCAC4
                     RunningNumber = (uint)(starIndex + 1),
                     Magnitude = mag,
                     SpectralClass = SpectralClass(bmag, vmag),
-                    Horizontal = Equatorial(context, posData).ToHorizontal(context.GeoLocation, context.SiderealTime)
+                    Cartesian = CartesianWithProperMotion(posData, t)
+                    //Horizontal = Equatorial(context, posData).ToHorizontal(context.GeoLocation, context.SiderealTime)
                 };
 
                 star.ProperName = properNames.ContainsKey(star.Names[0]) ? properNames[star.Names[0]] : null;
@@ -420,7 +434,7 @@ namespace Astrarium.Plugins.UCAC4
             }
         }
 
-        private List<UCAC4Star> ReadStarsForZone(int zn, int totalCount, SkyContext context, Func<float, bool> magFilter)
+        private List<UCAC4Star> ReadStarsForZone(int zn, int totalCount, double t, Func<float, bool> magFilter)
         {
             List<UCAC4Star> stars = new List<UCAC4Star>();
             if (zoneAvailable[zn - 1])
@@ -428,7 +442,7 @@ namespace Astrarium.Plugins.UCAC4
                 byte[] starsData = ReadDataBuffer(zn, 0, totalCount);
                 for (int i = 0; i < totalCount; i++)
                 {
-                    var star = ReadStar(starsData, i * RECORD_LEN, context, zn, i, magFilter);
+                    var star = ReadStar(starsData, i * RECORD_LEN, t, zn, i, magFilter);
                     if (star != null)
                     {
                         stars.Add(star);
@@ -438,13 +452,13 @@ namespace Astrarium.Plugins.UCAC4
             return stars;
         }
 
-        private UCAC4Star ReadStarAtPosition(int zn, int runningNumber, SkyContext context)
+        private UCAC4Star ReadStarAtPosition(int zn, int runningNumber, double t)
         {
             byte[] starsData = ReadDataBuffer(zn, runningNumber - 1, 1);
-            return ReadStar(starsData, 0, context, zn, runningNumber - 1, m => true);
+            return ReadStar(starsData, 0, t, zn, runningNumber - 1, m => true);
         }
 
-        private List<UCAC4Star> ReadStarsForBin(Bin bin, SkyContext context, Func<float, bool> magFilter)
+        private List<UCAC4Star> ReadStarsForBin(Bin bin, double t, Func<float, bool> magFilter)
         {
             List<UCAC4Star> stars = new List<UCAC4Star>();
             if (zoneAvailable[bin.ZN - 1])
@@ -453,7 +467,7 @@ namespace Astrarium.Plugins.UCAC4
                 for (int i = 0; i < bin.NN; i++)
                 {
                     int offset = i * RECORD_LEN;
-                    var star = ReadStar(starsData, offset, context, bin.ZN, (int)(bin.N0 + i), magFilter);
+                    var star = ReadStar(starsData, offset, t, bin.ZN, (int)(bin.N0 + i), magFilter);
                     if (star != null)
                     {
                         stars.Add(star);
@@ -466,7 +480,7 @@ namespace Astrarium.Plugins.UCAC4
         /// <summary>
         /// Gets number of years (with fractions) since J2000.0 epoch
         /// </summary>
-        private double YearsSince2000(SkyContext c)
+        public double YearsSince2000(SkyContext c)
         {
             return (c.JulianDay - Date.EPOCH_J2000) / 365.25;
         }
@@ -544,6 +558,17 @@ namespace Astrarium.Plugins.UCAC4
         private string FindConstellation(SkyContext context, UCAC4Star star)
         {
             return Constellations.FindConstellation(context.Get(Equatorial, star), context.JulianDay);
+        }
+
+        private Vec3 CartesianWithProperMotion(UCAC4StarPosData s, double years)
+        {
+            double alpha = s.PmRA * years;
+            double delta = s.PmDec * years;
+
+            alpha = Angle.ToRadians(s.RA2000 + alpha);
+            delta = Angle.ToRadians(s.Dec2000 + delta);
+
+            return Projection.SphericalToCartesian(alpha, delta);
         }
 
         private CrdsEquatorial Equatorial(SkyContext context, UCAC4StarPosData pos)
@@ -672,6 +697,8 @@ namespace Astrarium.Plugins.UCAC4
             var match = searchRegex.Match(searchString.Trim().ToLowerInvariant());
             if (match.Success)
             {
+                double t = context.Get(YearsSince2000);
+
                 ushort zone = ushort.Parse(match.Groups["zone"].Value);
 
                 uint? number = match.Groups["number"].Success ? (uint?)uint.Parse(match.Groups["number"].Value) : null;
@@ -685,14 +712,14 @@ namespace Astrarium.Plugins.UCAC4
                     {
                         for (int i = 0; i < Math.Min(maxCount, starsInBin); i++)
                         {
-                            stars.Add(ReadStarAtPosition(zone, i + 1, context));
+                            stars.Add(ReadStarAtPosition(zone, i + 1, t));
                         }
                     }
                     else if (number <= starsInBin)
                     {
                         if (number > 0)
                         {
-                            stars.Add(ReadStarAtPosition(zone, (int)number.Value, context));
+                            stars.Add(ReadStarAtPosition(zone, (int)number.Value, t));
                         }
 
                         for (int i = 0; i < maxCount - 1; i++)
@@ -705,7 +732,7 @@ namespace Astrarium.Plugins.UCAC4
                             {
                                 if (n > 0)
                                 {
-                                    stars.Add(ReadStarAtPosition(zone, (int)n, context));
+                                    stars.Add(ReadStarAtPosition(zone, (int)n, t));
                                 }
                             }
                             else
@@ -733,6 +760,22 @@ namespace Astrarium.Plugins.UCAC4
             {
                 SelectedStar.Horizontal = context.Get(Horizontal, SelectedStar);
             }
+
+            // precessional elements from J2000 to current epoch
+            var p = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
+
+            // precessional elements from current epoch to J2000
+            var p0 = Precession.ElementsFK5(context.JulianDay, Date.EPOCH_J2000);
+
+            MatPrecession =
+                Mat4.ZRotation(Angle.ToRadians(p.z)) *
+                Mat4.YRotation(Angle.ToRadians(-p.theta)) *
+                Mat4.ZRotation(Angle.ToRadians(p.zeta));
+
+            MatPrecession0 =
+                Mat4.ZRotation(Angle.ToRadians(p0.z)) *
+                Mat4.YRotation(Angle.ToRadians(-p0.theta)) *
+                Mat4.ZRotation(Angle.ToRadians(p0.zeta));
         }
     }
 }

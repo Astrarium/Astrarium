@@ -195,87 +195,8 @@ namespace Astrarium.Plugins.BrightStars
                 Mat4.ZRotation(-s.Alpha0);
         }
 
-        public override void Render(IMapContext map)
-        {
-            Graphics g = map.Graphics;
-            var allStars = starsCalc.Stars;
-            bool isGround = settings.Get<bool>("Ground");
-
-            if (settings.Get<bool>("ConstLines"))
-            {
-                PointF p1, p2;
-                CrdsHorizontal h1, h2;
-                penConLine.Brush = new SolidBrush(map.GetColor("ColorConstLines"));
-
-                foreach (var line in sky.ConstellationLines)
-                {
-                    h1 = allStars.ElementAt(line.Item1).Horizontal;
-                    h2 = allStars.ElementAt(line.Item2).Horizontal;
-
-                    if ((!isGround || h1.Altitude > 0 || h2.Altitude > 0) &&
-                        Angle.Separation(map.Center, h1) < 90 &&
-                        Angle.Separation(map.Center, h2) < 90)
-                    {
-                        p1 = map.Project(h1);
-                        p2 = map.Project(h2);
-
-                        var points = map.SegmentScreenIntersection(p1, p2);
-                        if (points.Length == 2)
-                        {
-                            g.DrawLine(penConLine, points[0], points[1]);
-                        }
-                    }
-                }
-            }
-
-            if (settings.Get<bool>("Stars") && !(map.Schema == ColorSchema.Day && map.DayLightFactor == 1))
-            {
-                var stars = allStars.Where(s => s != null && Angle.Separation(map.Center, s.Horizontal) < map.ViewAngle);
-                if (isGround)
-                {
-                    stars = stars.Where(s => s.Horizontal.Altitude >= 0);
-                }
-
-                foreach (var star in stars)
-                {
-                    float size = map.GetPointSize(star.Magnitude);
-                    if (size > 0)
-                    {
-                        PointF p = map.Project(star.Horizontal);
-                        if (!map.IsOutOfScreen(p))
-                        {
-                            if (map.Schema == ColorSchema.White)
-                            {
-                                g.FillEllipse(Brushes.White, p.X - size / 2 - 1, p.Y - size / 2 - 1, size + 2, size + 2);
-                            }
-
-                            g.FillEllipse(new SolidBrush(GetColor(star.Color)), p.X - size / 2, p.Y - size / 2, size, size);
-
-                            map.AddDrawnObject(star);
-                        }
-                    }
-                }
-
-                if (settings.Get<bool>("StarsLabels") && map.ViewAngle <= limitAllNames)
-                {
-                    var color = settings.Get<SkyColor>("ColorStarsLabels").GetColor(ColorSchema.Night);
-                    brushStarNames = new SolidBrush(color);
-
-                    foreach (var star in stars)
-                    {
-                        float size = map.GetPointSize(star.Magnitude);
-                        if (size > 0)
-                        {
-                            PointF p = map.Project(star.Horizontal);
-                            if (!map.IsOutOfScreen(p))
-                            {
-                                DrawStarName(map, p, star, size);
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        [Obsolete]
+        public override void Render(IMapContext map) { }
 
         private Color GetColor(char spClass)
         {
@@ -345,88 +266,33 @@ namespace Astrarium.Plugins.BrightStars
                     return;
                 }
             }
-            /*
+            
             // Star has Flamsteed number
-            if (map.ViewAngle < limitFlamsteedNames)
+            if (prj.Fov < limitFlamsteedNames)
             {
                 string flamsteedNumber = s.FlamsteedNumber;
                 if (flamsteedNumber != null)
                 {
-                    map.DrawObjectCaption(fontStarNames, brushStarNames, flamsteedNumber, point, diam);
+                    textRenderer.DrawString(flamsteedNumber, fontStarNames, brushStarNames, new PointF(point.X + diam / 2, point.Y - diam / 2));
                     return;
                 }
             }
 
             // Star has variable id
-            if (map.ViewAngle < limitVarNames && s.VariableName != null)
+            if (prj.Fov < limitVarNames && s.VariableName != null)
             {
                 string varName = s.VariableName.Split(' ')[0];
                 if (!varName.All(char.IsDigit))
                 {
-                    map.DrawObjectCaption(fontStarNames, brushStarNames, varName, point, diam);
+                    textRenderer.DrawString(varName, fontStarNames, brushStarNames, new PointF(point.X + diam / 2, point.Y - diam / 2));
                     return;
                 }
             }
 
             // Star doesn't have any names
-            if (map.ViewAngle < 2)
+            if (prj.Fov < 2)
             {
-                map.DrawObjectCaption(fontStarNames, brushStarNames, $"HR {s.Number}", point, diam);
-            }
-            */
-        }
-
-
-        /// <summary>
-        /// Draws star name
-        /// </summary>
-        private void DrawStarName(IMapContext map, PointF point, Star s, float diam)
-        {
-            var fontStarNames = settings.Get<Font>("StarsLabelsFont");
-
-            // Star has proper name
-            if (map.ViewAngle < limitProperNames && settings.Get<bool>("StarsProperNames") && s.ProperName != null)
-            {
-                map.DrawObjectCaption(fontStarNames, brushStarNames, s.ProperName, point, diam);
-                return;
-            }
-
-            // Star has Bayer name (greek letter)
-            if (map.ViewAngle < limitBayerNames)
-            {
-                string bayerName = s.BayerName;
-                if (bayerName != null)
-                {
-                    map.DrawObjectCaption(fontStarNames, brushStarNames, bayerName, point, diam);
-                    return;
-                }
-            }
-            // Star has Flamsteed number
-            if (map.ViewAngle < limitFlamsteedNames)
-            {
-                string flamsteedNumber = s.FlamsteedNumber;
-                if (flamsteedNumber != null)
-                {
-                    map.DrawObjectCaption(fontStarNames, brushStarNames, flamsteedNumber, point, diam);
-                    return;
-                }
-            }
-
-            // Star has variable id
-            if (map.ViewAngle < limitVarNames && s.VariableName != null)
-            {
-                string varName = s.VariableName.Split(' ')[0];
-                if (!varName.All(char.IsDigit))
-                {
-                    map.DrawObjectCaption(fontStarNames, brushStarNames, varName, point, diam);
-                    return;
-                }
-            }
-
-            // Star doesn't have any names
-            if (map.ViewAngle < 2)
-            {
-                map.DrawObjectCaption(fontStarNames, brushStarNames, $"HR {s.Number}", point, diam);
+                textRenderer.DrawString($"HR {s.Number}", fontStarNames, brushStarNames, new PointF(point.X + diam / 2, point.Y - diam / 2));
             }
         }
 

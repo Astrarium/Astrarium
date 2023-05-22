@@ -15,13 +15,13 @@ namespace Astrarium.Plugins.UCAC4
         private Font fontNames;
         private readonly UCAC4Catalog catalog;
         private readonly ISettings settings;
+        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(128, 32));
 
         public UCAC4Renderer(UCAC4Catalog catalog, ISettings settings)
         {
             this.catalog = catalog;
             this.settings = settings;
-
-            fontNames = new Font("Arial", 6);
+            fontNames = new Font("Arial", 8);
         }
 
         public override void Render(ISkyMap map)
@@ -29,12 +29,15 @@ namespace Astrarium.Plugins.UCAC4
             var prj = map.SkyProjection;
             if (prj.Fov < 1.5 && settings.Get("Stars") && settings.Get("UCAC4"))
             {
+                bool isLabels = settings.Get("StarsLabels") && prj.Fov < 1 / 60d;
+                Brush brushNames = new SolidBrush(settings.Get<SkyColor>("ColorStarsLabels").Night);
+
                 GL.Enable(EnableCap.PointSmooth);
                 GL.Enable(EnableCap.Blend);
                 GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
                 GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
 
-                float magLimit = prj.MagLimit;// 20; // (float)(-1.73494 * Math.Log(0.000462398 * prj.Fov));
+                float magLimit = prj.MagLimit;
 
                 PrecessionalElements pe = Precession.ElementsFK5(prj.Context.JulianDay, Date.EPOCH_J2000);
 
@@ -42,18 +45,28 @@ namespace Astrarium.Plugins.UCAC4
 
                 CrdsEquatorial eq = Precession.GetEquatorialCoordinates(eq0, pe);
 
-                SkyContext context = new SkyContext(prj.Context.JulianDay, prj.Context.GeoLocation);
+                double t = prj.Context.Get(catalog.YearsSince2000);
 
-                var stars = catalog.GetStars(context, eq, prj.Fov, m => m <= magLimit);
+                // matrix for projection, with respect of precession
+                var mat = prj.MatEquatorialToVision * catalog.MatPrecession;
+
+                // equatorial vision vector in J2000 coords
+                var eqVision0 = catalog.MatPrecession0 * prj.VecEquatorialVision;
+
+                var stars = catalog.GetStars(t, eq, prj.Fov, m => m <= magLimit);
+
+                //catalog.LockedStar = map.LockedObject as UCAC4Star;
+                //catalog.SelectedStar = map.SelectedObject as UCAC4Star;
 
                 foreach (var star in stars)
                 {
-                    var p = prj.Project(star.Horizontal);
+                    float size = prj.GetPointSize(star.Magnitude);
 
-                    if (prj.IsInsideScreen(p))
+                    if (size > 1)
                     {
-                        float size = prj.GetPointSize(star.Magnitude);
-                        if (size > 0)
+                        var p = prj.Project(star.Cartesian, mat);
+
+                        if (prj.IsInsideScreen(p))
                         {
                             GL.PointSize(size);
                             GL.Color3(GetColor(star.SpectralClass));
@@ -63,6 +76,11 @@ namespace Astrarium.Plugins.UCAC4
                             GL.End();
 
                             map.AddDrawnObject(p, star);
+
+                            if (isLabels && size > 2)
+                            {
+                                textRenderer.Value.DrawString(star.Names.First(), fontNames, brushNames, new PointF((float)p.X + size / 2, (float)p.Y - size / 2));
+                            }
                         }
                     }
                 }
@@ -90,7 +108,7 @@ namespace Astrarium.Plugins.UCAC4
                 catalog.LockedStar = map.LockedObject as UCAC4Star;
                 catalog.SelectedStar = map.SelectedObject as UCAC4Star;
 
-                var stars = catalog.GetStars(context, eq, map.ViewAngle, m => m <= magLimit);
+                var stars = catalog.GetStars(0, eq, map.ViewAngle, m => m <= magLimit);
 
                 foreach (var star in stars)
                 {
