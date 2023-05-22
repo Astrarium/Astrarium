@@ -47,6 +47,7 @@ namespace Astrarium.Plugins.DeepSky
 
         public override void Calculate(SkyContext context)
         {
+            /*
             // precessional elements
             var p = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
 
@@ -77,7 +78,7 @@ namespace Astrarium.Plugins.DeepSky
                         op.Horizontal = eq.ToHorizontal(context.GeoLocation, context.SiderealTime);
                     }
                 }
-            }
+            }*/
         }
 
         /// <summary>

@@ -367,23 +367,31 @@ namespace Astrarium
 
         private void SkyView_MouseMove1(object sender, WF.MouseEventArgs e)
         {
-            var hor = map.SkyProjection.UnprojectHorizontal(e.X, map.SkyProjection.ScreenHeight - e.Y);
-            var eq = map.SkyProjection.UnprojectEquatorial(e.X, map.SkyProjection.ScreenHeight - e.Y);
-
-            SetMouseEquatorialPosition(this, eq);
-            SetMouseHorizontalPosition(this, hor);
-            SetMousePositionConstellation(this, eq != null ? Constellations.FindConstellation(eq, map.SkyProjection.Context.JulianDay) : null);
-
-            if (e.Button == WF.MouseButtons.Left)
+            if (map.LockedObject != null && e.Button == WF.MouseButtons.Left)
             {
-                if (pOld != System.Drawing.Point.Empty)
+                string text = Text.Get("MapIsLockedOn", ("objectName", map.LockedObject.Names.First()));
+                ViewManager.ShowPopupMessage(text);
+            }
+            else
+            {
+                var hor = map.SkyProjection.UnprojectHorizontal(e.X, map.SkyProjection.ScreenHeight - e.Y);
+                var eq = map.SkyProjection.UnprojectEquatorial(e.X, map.SkyProjection.ScreenHeight - e.Y);
+
+                SetMouseEquatorialPosition(this, eq);
+                SetMouseHorizontalPosition(this, hor);
+                SetMousePositionConstellation(this, eq != null ? Constellations.FindConstellation(eq, map.SkyProjection.Context.JulianDay) : null);
+
+                if (e.Button == WF.MouseButtons.Left)
                 {
-                    map.SkyProjection.Move(new Vec2(pOld.X, skyViewControl.Height - pOld.Y), new Vec2(e.X, skyViewControl.Height - e.Y));
-                    skyViewControl.Invalidate();
+                    if (pOld != System.Drawing.Point.Empty)
+                    {
+                        map.SkyProjection.Move(new Vec2(pOld.X, skyViewControl.Height - pOld.Y), new Vec2(e.X, skyViewControl.Height - e.Y));
+                        skyViewControl.Invalidate();
+                        pOld = new System.Drawing.Point(e.X, e.Y);
+                    }
+
                     pOld = new System.Drawing.Point(e.X, e.Y);
                 }
-
-                pOld = new System.Drawing.Point(e.X, e.Y);
             }
         }
 

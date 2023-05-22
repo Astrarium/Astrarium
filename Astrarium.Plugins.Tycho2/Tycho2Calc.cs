@@ -16,11 +16,12 @@ namespace Astrarium.Plugins.Tycho2
         /// <summary>
         /// Gets stars in specified circular area
         /// </summary>
+        /// <param name="t">Years since J2000.0 epoch</param>
         /// <param name="eq">Equatorial coordinates of area center, at epoch J2000.0</param>
         /// <param name="angle">Area radius, in degrees</param>
         /// <param name="magFilter">Magnitude filter function, returns true if star is visible and should be included in results</param>
         /// <returns>Collection of <see cref="Tycho2Star"/> objects</returns>
-        ICollection<Tycho2Star> GetStars(SkyContext context, CrdsEquatorial eq, double angle, Func<float, bool> magFilter);
+        ICollection<Tycho2Star> GetStars(double t, CrdsEquatorial eq, double angle, Func<float, bool> magFilter);
 
         /// <summary>
         /// Gets or sets Tycho2Star object that the map is locked on
@@ -31,6 +32,26 @@ namespace Astrarium.Plugins.Tycho2
         /// Gets or sets Tycho2Star object that currently selected
         /// </summary>
         Tycho2Star SelectedStar { get; set; }
+
+        /// <summary>
+        /// Calculates number of years since J2000.0 epoch
+        /// </summary>
+        double YearsSince2000(SkyContext c);
+
+        /// <summary>
+        /// Gets J2000.0 precession matrix
+        /// </summary>
+        Mat4 MatPrecession0 { get; }
+
+        /// <summary>
+        /// Gets precession matrix for current epoch
+        /// </summary>
+        Mat4 MatPrecession { get; }
+
+        /// <summary>
+        /// Precessional elements for J2000.0 epoch
+        /// </summary>
+        PrecessionalElements PrecessionalElements0 { get; }
     }
 
     public class Tycho2Calc : BaseCalc, ICelestialObjectCalc<Tycho2Star>, ITycho2Catalog
@@ -125,6 +146,21 @@ namespace Astrarium.Plugins.Tycho2
         /// Gets or sets Tycho2Star object that currently selected
         /// </summary>
         public Tycho2Star SelectedStar { get; set; }
+
+        /// <summary>
+        /// Precession matrix for current epoch
+        /// </summary>
+        public Mat4 MatPrecession { get; private set; }
+
+        /// <summary>
+        /// Precession matrix for J2000.0 epoch
+        /// </summary>
+        public Mat4 MatPrecession0 { get; private set; }
+
+        /// <summary>
+        /// Precessional elements for J2000.0 epoch
+        /// </summary>
+        public PrecessionalElements PrecessionalElements0 { get; private set; }
 
         /// <inheritdoc />
         public IEnumerable<Tycho2Star> GetCelestialObjects() => new Tycho2Star[0];
@@ -288,16 +324,7 @@ namespace Astrarium.Plugins.Tycho2
             Sky.AddCrossReferences("Star", starsCrossRefs);
         }
 
-        private void CalculateCoordinates(SkyContext c, Tycho2Star star)
-        {
-            // current equatorial coordinates
-            star.Equatorial = c.Get(Equatorial, star);
-
-            // current horizontal coordinates
-            star.Horizontal = c.Get(Horizontal, star);
-        }
-
-        public ICollection<Tycho2Star> GetStars(SkyContext c, CrdsEquatorial eq, double angle, Func<float, bool> magFilter)
+        public ICollection<Tycho2Star> GetStars(double t, CrdsEquatorial eq, double angle, Func<float, bool> magFilter)
         {
             // take current field of view plus half of a segment
             double ang = angle + SEGMENT_DIAM / 2.0;
@@ -309,7 +336,7 @@ namespace Astrarium.Plugins.Tycho2
             var stars = new List<Tycho2Star>();
             foreach (Tycho2Region r in regions)
             {
-                stars.AddRange(GetStarsInRegion(c, r, eq, ang, magFilter));
+                stars.AddRange(GetStarsInRegion(t, r, eq, ang, magFilter));
             }
 
             return stars;
@@ -332,9 +359,10 @@ namespace Astrarium.Plugins.Tycho2
             double years = context.Get(YearsSince2000);
 
             double pmDec = star.PmDec / 3600000.0;
-            double pmRa = star.PmRA / Math.Cos(Angle.ToRadians(star.Equatorial0.Delta)) / 3600000.0;
+            double pmRa = star.PmRA / Math.Cos(Angle.ToRadians(star.Delta0)) / 3600000.0;
 
-            var eq0 = star.Equatorial0 + new CrdsEquatorial(pmRa * years, pmDec * years);
+            // Equatorial coordinates for J2000.0 epoch, but with respect of proper motion
+            var eq0 = new CrdsEquatorial(star.Alpha0 + pmRa * years, star.Delta0 + pmDec * years);
 
             // Equatorial coordinates for the mean equinox and epoch of the target date
             CrdsEquatorial eq = Precession.GetEquatorialCoordinates(eq0, p);
@@ -375,12 +403,12 @@ namespace Astrarium.Plugins.Tycho2
         /// <summary>
         /// Gets number of years (with fractions) since J2000.0 epoch
         /// </summary>
-        private double YearsSince2000(SkyContext c)
+        public double YearsSince2000(SkyContext c)
         {
             return (c.JulianDay - Date.EPOCH_J2000) / 365.25;
         }
 
-        private ICollection<Tycho2Star> GetStarsInRegion(SkyContext c, Tycho2Region region, CrdsEquatorial eq, double angle, Func<float, bool> magFilter)
+        private ICollection<Tycho2Star> GetStarsInRegion(double t, Tycho2Region region, CrdsEquatorial eq, double angle, Func<float, bool> magFilter)
         {
             // seek reading position 
             CatalogReader.BaseStream.Seek(CATALOG_RECORD_LEN * (region.FirstStarId - 1), SeekOrigin.Begin);
@@ -395,7 +423,7 @@ namespace Astrarium.Plugins.Tycho2
 
             for (int i = 0; i < count; i++)
             {
-                Tycho2Star star = GetStar(c, buffer, i * CATALOG_RECORD_LEN, eq, angle, magFilter);
+                Tycho2Star star = GetStar(t, buffer, i * CATALOG_RECORD_LEN, eq, angle, magFilter);
                 if (star != null)
                 {
                     stars.Add(star);
@@ -405,7 +433,7 @@ namespace Astrarium.Plugins.Tycho2
             return stars;
         }
 
-        private ICollection<Tycho2Star> GetStarsInRegion(Tycho2Region region, SkyContext c, short? tyc2, string tyc3)
+        private ICollection<Tycho2Star> GetStarsInRegion(Tycho2Region region, double t, short? tyc2, string tyc3)
         {
             // seek reading position 
             CatalogReader.BaseStream.Seek(CATALOG_RECORD_LEN * (region.FirstStarId - 1), SeekOrigin.Begin);
@@ -420,7 +448,7 @@ namespace Astrarium.Plugins.Tycho2
 
             for (int i = 0; i < count && stars.Count < 50; i++)
             {
-                Tycho2Star star = GetStar(c, buffer, i * CATALOG_RECORD_LEN, tyc2, tyc3);
+                Tycho2Star star = GetStar(t, buffer, i * CATALOG_RECORD_LEN, tyc2, tyc3);
                 if (star != null)
                 {
                     stars.Add(star);
@@ -442,7 +470,7 @@ namespace Astrarium.Plugins.Tycho2
         /// [Tyc1][Tyc2][Tyc3][RA][Dec][PmRA][PmDec][BTMag][VTMag]
         /// [   2][   2][   1][ 8][  8][   4][    4][    4][    4]
         /// </remarks>
-        private Tycho2Star GetStar(SkyContext c, byte[] buffer, int offset, CrdsEquatorial eqCenter, double angle, Func<float, bool> magFilter)
+        private Tycho2Star GetStar(double t, byte[] buffer, int offset, CrdsEquatorial eqCenter, double angle, Func<float, bool> magFilter)
         {
             float btmag = BitConverter.ToSingle(buffer, offset + 29);
             float vtmag = BitConverter.ToSingle(buffer, offset + 33);
@@ -456,7 +484,7 @@ namespace Astrarium.Plugins.Tycho2
 
                 if (Angle.Separation(eq0, eqCenter) <= angle)
                 {
-                    return ReadStar(c, buffer, offset);
+                    return ReadStar(t, buffer, offset);
                 }
                 else
                 {
@@ -469,14 +497,14 @@ namespace Astrarium.Plugins.Tycho2
             }
         }
 
-        private Tycho2Star GetStar(SkyContext c, byte[] buffer, int offset, short? tyc2, string tyc3)
+        private Tycho2Star GetStar(double t, byte[] buffer, int offset, short? tyc2, string tyc3)
         {
             short t2 = BitConverter.ToInt16(buffer, offset + 2);
             char t3 = (char)buffer[offset + 4];
 
             if ((tyc2 == null || tyc2.Value == t2) && (string.IsNullOrEmpty(tyc3) || tyc3[0] == t3))
             {
-                return ReadStar(c, buffer, offset);
+                return ReadStar(t, buffer, offset);
             }
             else
             {
@@ -484,13 +512,12 @@ namespace Astrarium.Plugins.Tycho2
             }
         }
 
-        private Tycho2Star ReadStar(SkyContext c, byte[] buffer, int offset)
+        private Tycho2Star ReadStar(double t, byte[] buffer, int offset)
         {
             Tycho2Star star = new Tycho2Star();
 
-            star.Equatorial0 = new CrdsEquatorial(
-            BitConverter.ToDouble(buffer, offset + 5),
-            BitConverter.ToDouble(buffer, offset + 13));
+            star.Alpha0 = BitConverter.ToDouble(buffer, offset + 5);
+            star.Delta0 = BitConverter.ToDouble(buffer, offset + 13);
             star.Tyc1 = BitConverter.ToInt16(buffer, offset);
             star.Tyc2 = BitConverter.ToInt16(buffer, offset + 2);
             star.Tyc3 = (char)buffer[offset + 4];
@@ -510,9 +537,23 @@ namespace Astrarium.Plugins.Tycho2
             }
             else
             {
-                CalculateCoordinates(c, star);
+                star.Cartesian = CartesianWithProperMotion(star, t);
                 return star;
             }
+        }
+
+        private Vec3 CartesianWithProperMotion(Tycho2Star star, double years)
+        {
+            double alpha = Angle.ToRadians(star.Alpha0);
+            double delta = Angle.ToRadians(star.Delta0);
+
+            double pmDec = Angle.ToRadians(star.PmDec / 3600000.0);
+            double pmRa = Angle.ToRadians(star.PmRA / Math.Cos(delta) / 3600000.0);
+
+            alpha += pmRa * years;
+            delta += pmDec * years;
+
+            return Projection.SphericalToCartesian(alpha, delta);
         }
 
         private char SpectralClass(double B_V)
@@ -551,15 +592,23 @@ namespace Astrarium.Plugins.Tycho2
 
         public override void Calculate(SkyContext context)
         {
-            if (LockedStar != null)
-            {
-                CalculateCoordinates(context, LockedStar);
-            }
+            // precessional elements from J2000 to current epoch
+            var p = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
 
-            if (SelectedStar != null)
-            {
-                CalculateCoordinates(context, SelectedStar);
-            }
+            // precessional elements from current epoch to J2000
+            var p0 = Precession.ElementsFK5(context.JulianDay, Date.EPOCH_J2000);
+
+            MatPrecession =
+                Mat4.ZRotation(Angle.ToRadians(p.z)) *
+                Mat4.YRotation(Angle.ToRadians(-p.theta)) *
+                Mat4.ZRotation(Angle.ToRadians(p.zeta));
+
+            MatPrecession0 =
+                Mat4.ZRotation(Angle.ToRadians(p0.z)) *
+                Mat4.YRotation(Angle.ToRadians(-p0.theta)) *
+                Mat4.ZRotation(Angle.ToRadians(p0.zeta));
+
+            PrecessionalElements0 = p0;
         }
 
         public void ConfigureEphemeris(EphemerisConfig<Tycho2Star> e)
@@ -580,7 +629,7 @@ namespace Astrarium.Plugins.Tycho2
         {
             Tycho2Star s = info.Body;
             SkyContext c = info.Context;
-            string constellation = Constellations.FindConstellation(s.Equatorial, c.JulianDay);
+            string constellation = Constellations.FindConstellation(c.Get(Equatorial, s), c.JulianDay);
 
             info
             .SetTitle(string.Join(", ", s.Names))
@@ -593,8 +642,8 @@ namespace Astrarium.Plugins.Tycho2
             .AddRow("Equatorial.Delta", c.Get(Equatorial, s).Delta)
 
             .AddHeader(Text.Get("Tycho2Star.Equatorial0"))
-            .AddRow("Equatorial0.Alpha", s.Equatorial0.Alpha)
-            .AddRow("Equatorial0.Delta", s.Equatorial0.Delta)
+            .AddRow("Equatorial0.Alpha", s.Alpha0)
+            .AddRow("Equatorial0.Delta", s.Delta0)
 
             .AddHeader(Text.Get("Tycho2Star.Horizontal"))
             .AddRow("Horizontal.Azimuth")
@@ -628,13 +677,14 @@ namespace Astrarium.Plugins.Tycho2
             var match = searchRegex.Match(searchString.ToLowerInvariant());
             if (match.Success)
             {
+                double t = c.Get(YearsSince2000);
                 int tyc1 = int.Parse(match.Groups["tyc1"].Value);
                 short? tyc2 = match.Groups["tyc2"].Success ? short.Parse(match.Groups["tyc2"].Value) : (short?)null;
                 string tyc3 = match.Groups["tyc3"].Value;
                 if (tyc1 > 0 && tyc1 <= 9537)
                 {
                     Tycho2Region region = IndexRegions.ElementAt(tyc1 - 1);
-                    var stars = GetStarsInRegion(region, c, tyc2, tyc3);
+                    var stars = GetStarsInRegion(region, t, tyc2, tyc3);
                     return stars.Where(filterFunc).Take(maxCount).ToArray();
                 }
             }

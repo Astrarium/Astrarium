@@ -15,17 +15,34 @@ namespace Astrarium.Plugins.Tycho2
         public override string CommonName => ToString();
 
         /// <summary>
-        /// Equatorial coordinates of the star at current epoch
-        /// </summary>
-        public CrdsEquatorial Equatorial { get; set; }
-
-        /// <summary>
         /// Equatorial coordinates of the at J2000.0 epoch
         /// </summary>
-        public CrdsEquatorial Equatorial0 { get; set; }
+        //public CrdsEquatorial Equatorial0 { get; set; }
 
+
+        /// <summary>
+        /// Right ascension at J2000.0 epoch, in degrees
+        /// </summary>
+        public double Alpha0 { get; set; }
+
+        /// <summary>
+        /// Declination at J2000.0 epoch, in degrees
+        /// </summary>
+        public double Delta0 { get; set; }
+
+        /// <summary>
+        /// Cartesian coordinates of the star
+        /// </summary>
+        public Vec3 Cartesian { get; set; }
+
+        /// <summary>
+        /// Proper motion in RA
+        /// </summary>
         public float PmRA { get; set; }
 
+        /// <summary>
+        /// Proper motion in Dec
+        /// </summary>
         public float PmDec { get; set; }
 
         /// <summary>

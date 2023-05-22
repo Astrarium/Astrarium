@@ -63,14 +63,6 @@ namespace Astrarium.Plugins.BrightStars
                 Mat4.ZRotation(Angle.ToRadians(p0.z)) *
                 Mat4.YRotation(Angle.ToRadians(-p0.theta)) *
                 Mat4.ZRotation(Angle.ToRadians(p0.zeta));
-
-            foreach (var star in Stars)
-            {
-                if (star != null)
-                {
-                    star.Horizontal = context.Get(Horizontal, star.Number);
-                }
-            }
         }
 
         public override void Initialize()

@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
+using OpenTK.Graphics.OpenGL;
 using System;
 using System.Drawing;
 using System.IO;
@@ -12,25 +13,76 @@ namespace Astrarium.Plugins.Tycho2
 {
     public class Tycho2Renderer : BaseRenderer
     {
-        private Font fontNames;
         private readonly ITycho2Catalog tycho2;
         private readonly ISettings settings;
+
+        private readonly Font fontNames = new Font("Arial", 8);
+        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(128, 32));
 
         public Tycho2Renderer(ITycho2Catalog tycho2, ISettings settings)
         {
             this.tycho2 = tycho2;
             this.settings = settings;
-
-            fontNames = new Font("Arial", 6);
         }
 
-        private bool MagFilter(float mag, float magLimit)
+        public override void Render(ISkyMap map)
         {
-            return mag <= magLimit;
+            Projection prj = map.SkyProjection;
+            if (prj.MagLimit > 8 && settings.Get("Stars") && settings.Get("Tycho2"))
+            {
+                bool isLabels = settings.Get<bool>("StarsLabels");
+                Brush brushNames = new SolidBrush(settings.Get<SkyColor>("ColorStarsLabels").Night);
+
+                GL.Enable(EnableCap.PointSmooth);
+                GL.Enable(EnableCap.Blend);
+                GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+                GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
+
+                // J2000 equatorial coordinates of screen center
+                CrdsEquatorial eq = Precession.GetEquatorialCoordinates(prj.CenterEquatorial, tycho2.PrecessionalElements0);
+
+                // years since initial catalogue epoch
+                double t = prj.Context.Get(tycho2.YearsSince2000);
+
+                // matrix for projection, with respect of precession
+                var mat = prj.MatEquatorialToVision * tycho2.MatPrecession;
+
+                var stars = tycho2.GetStars(t, eq, prj.Fov, m => m <= prj.MagLimit);
+
+                foreach (var star in stars)
+                {
+                    float size = prj.GetPointSize(star.Magnitude);
+
+                    if (size > 1)
+                    {
+                        var p = prj.Project(star.Cartesian, mat);
+
+                        if (prj.IsInsideScreen(p))
+                        {
+                            GL.PointSize(size);
+                            GL.Color3(GetColor(star.SpectralClass));
+
+                            GL.Begin(PrimitiveType.Points);
+                            GL.Vertex2(p.X, p.Y);
+                            GL.End();
+
+                            map.AddDrawnObject(p, star);
+
+                            if (isLabels && prj.Fov < 1 && size > 3)
+                            {
+                                textRenderer.Value.DrawString(star.Names.First(), fontNames, brushNames, new PointF((float)p.X + size / 2, (float)p.Y - size / 2));
+                            }
+                        }
+                    }
+                }
+            }
+
+            
         }
 
         public override void Render(IMapContext map)
         {
+
             Graphics g = map.Graphics;
             bool isGround = settings.Get<bool>("Ground");
             bool isLabels = settings.Get<bool>("StarsLabels");
@@ -49,8 +101,9 @@ namespace Astrarium.Plugins.Tycho2
                 tycho2.LockedStar = map.LockedObject as Tycho2Star;
                 tycho2.SelectedStar = map.SelectedObject as Tycho2Star;
 
+                double t = context.Get(tycho2.YearsSince2000);
                 float magLimit = (float)(-1.44995 * Math.Log(0.000230685 * map.ViewAngle));
-                var stars = tycho2.GetStars(context, eq, map.ViewAngle, m => m <= magLimit);
+                var stars = tycho2.GetStars(t, eq, map.ViewAngle, m => m <= magLimit);
 
                 foreach (var star in stars)
                 {
@@ -130,6 +183,48 @@ namespace Astrarium.Plugins.Tycho2
             }
 
             return map.GetColor(starColor, Color.Transparent);
+        }
+
+        private Color GetColor(char spClass)
+        {
+            Color starColor;
+            if (settings.Get("StarsColors"))
+            {
+                switch (spClass)
+                {
+                    case 'O':
+                    case 'W':
+                        starColor = Color.LightBlue;
+                        break;
+                    case 'B':
+                        starColor = Color.LightCyan;
+                        break;
+                    case 'A':
+                        starColor = Color.White;
+                        break;
+                    case 'F':
+                        starColor = Color.LightYellow;
+                        break;
+                    case 'G':
+                        starColor = Color.Yellow;
+                        break;
+                    case 'K':
+                        starColor = Color.Orange;
+                        break;
+                    case 'M':
+                        starColor = Color.OrangeRed;
+                        break;
+                    default:
+                        starColor = Color.White;
+                        break;
+                }
+            }
+            else
+            {
+                starColor = Color.White;
+            }
+
+            return starColor;
         }
     }
 }
