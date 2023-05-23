@@ -1,6 +1,7 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Plugins.SolarSystem.Objects;
 using Astrarium.Types;
+using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -19,6 +20,7 @@ namespace Astrarium.Plugins.SolarSystem
     {
         private readonly PlanetsCalc planetsCalc;
         private readonly ISettings settings;
+        private readonly ITextureManager textureManager;
 
         private readonly Sun sun;
         private readonly Moon moon;
@@ -59,9 +61,10 @@ namespace Astrarium.Plugins.SolarSystem
 
         private readonly string dataPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data");
 
-        public SolarSystemRenderer(LunarCalc lunarCalc, SolarCalc solarCalc, PlanetsCalc planetsCalc, ISettings settings)
+        public SolarSystemRenderer(LunarCalc lunarCalc, SolarCalc solarCalc, PlanetsCalc planetsCalc, ITextureManager textureManager, ISettings settings)
         {
             this.planetsCalc = planetsCalc;
+            this.textureManager = textureManager;
             this.settings = settings;
 
             this.sun = solarCalc.Sun;
@@ -77,6 +80,411 @@ namespace Astrarium.Plugins.SolarSystem
         }
 
         public override RendererOrder Order => RendererOrder.SolarSystem;
+
+        public override void Render(ISkyMap map)
+        {
+            var prj = map.SkyProjection;
+
+            Vec2 v = prj.Project(moon.Equatorial + new CrdsEquatorial(0, 1));
+            Vec2 v0 = prj.Project(moon.Equatorial);
+
+
+            Vec2 w = prj.Project((moon.Ecliptical0 + new CrdsEcliptical(0, 1)).ToEquatorial(prj.Context.Epsilon));
+            Vec2 w0 = prj.Project(moon.Ecliptical0.ToEquatorial(prj.Context.Epsilon));
+
+            double rot = Angle.ToDegrees(v.Angle(v + v0));
+            double rotPhase = Angle.ToDegrees(w.Angle(w + w0));
+
+            // Moon
+            DrawPlanet(map, new SphereParameters() { 
+                Equatorial = moon.Equatorial, 
+                TextureName = Path.Combine(dataPath, "Moon-2k.jpg"), 
+                Semidiameter = moon.Semidiameter,
+                Phase = moon.Phase,
+                Elongation = moon.Elongation,
+                LatitudeShift = moon.Libration.b,
+                LongitudeShift = moon.Libration.l,
+                RotationAxis = rot + moon.PAaxis,
+                RotationPhase = rotPhase,
+                SmoothShadow = false
+            });
+        }
+
+        private class SphereParameters
+        {
+            public bool SmoothShadow { get; set; }
+            public CrdsEquatorial Equatorial { get; set; }
+            public string TextureName { get; set; }
+            public string FallbackTextureName { get; set; }
+
+            /// <summary>
+            /// Body semidiameter, in seconds of arc
+            /// </summary>
+            public double Semidiameter { get; set; }
+            public ShadowAppearance EarthShadowApperance { get; set; }
+            public CrdsEquatorial EarthShadowCoordinates { get; set; }
+            public RingsAppearance? Rings { get; set; }
+
+            public double RotationAxis { get; set; }
+
+            public double RotationPhase { get; set; }
+
+            public double Phase { get; set; }
+            public double Elongation { get; set; }
+
+            public double LongitudeShift { get; set; }
+            public double LatitudeShift { get; set; }
+        }
+
+        private void DrawPlanet(ISkyMap map, SphereParameters data)
+        {
+            var prj = map.SkyProjection;
+
+            // do not draw if out of screen
+            if (Angle.Separation(prj.CenterEquatorial, data.Equatorial) > prj.Fov + 1) return;
+
+            GL.Enable(EnableCap.Texture2D);
+
+            float[] zero = new float[4] { 0, 0, 0, 0 };
+            float[] ambient = new float[4] { 0, 0, 0, 1 };
+            float[] diffuse = new float[4] { 1, 1, 1, 1 }; // color tint here!
+            GL.Light(LightName.Light0, LightParameter.Ambient, ambient);
+            GL.Light(LightName.Light0, LightParameter.Diffuse, diffuse);
+            GL.Light(LightName.Light0, LightParameter.Specular, zero);
+            GL.Light(LightName.Light0, LightParameter.ConstantAttenuation, 1.0f);
+
+            GL.Material(MaterialFace.Front, MaterialParameter.Ambient, new float[4] { 0.5f, 0.5f, 0.5f, 0.5f });
+            GL.Material(MaterialFace.Front, MaterialParameter.Diffuse, diffuse);
+            GL.Material(MaterialFace.Front, MaterialParameter.Emission, zero);
+            GL.Material(MaterialFace.Front, MaterialParameter.Shininess, zero);
+            GL.Material(MaterialFace.Front, MaterialParameter.Specular, zero);
+
+            double moonDiamInDegrees = data.Semidiameter / 3600;
+
+            GL.Enable(EnableCap.Light0);
+            GL.Enable(EnableCap.Lighting);
+            GL.Enable(EnableCap.CullFace);
+            GL.Enable(EnableCap.Blend);
+            GL.CullFace(CullFaceMode.Front);
+
+            DrawPlanetSphere(map, data);
+            
+            GL.Disable(EnableCap.Light0);
+            GL.Disable(EnableCap.Lighting);
+            GL.Disable(EnableCap.CullFace);
+            GL.Disable(EnableCap.Blend);
+
+
+            GL.Disable(EnableCap.Texture2D);
+
+            if (data.EarthShadowApperance != null && data.EarthShadowCoordinates != null)
+            {
+                // Earth shadow
+                var eqShadow = data.EarthShadowCoordinates;
+
+                var winMoon = prj.Project(data.Equatorial);
+                if (winMoon == null) return;
+
+                // moon radius in pixels
+                double moonRadius = prj.GetDiskSize(data.Semidiameter) / 2 + 1;
+
+                GL.PushMatrix();
+                GL.Translate(winMoon.X, winMoon.Y, 0);
+
+                GL.Enable(EnableCap.StencilTest);
+                GL.Clear(ClearBufferMask.StencilBufferBit);
+                GL.StencilMask(0xFF);
+
+                GL.ColorMask(false, false, false, false);
+
+                GL.StencilFunc(StencilFunction.Always, 1, 0xFF);
+                GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Replace);
+
+                // draw stencil pattern
+
+                GL.Begin(PrimitiveType.TriangleFan);
+
+                for (int i = 0; i <= 64; i++)
+                {
+                    double ang = i / 64.0 * 2 * Math.PI;
+                    Vec2 v = new Vec2(moonRadius * Math.Cos(ang), moonRadius * Math.Sin(ang));
+
+                    GL.Vertex2(v.X, v.Y);
+                }
+
+                GL.End();
+                GL.PopMatrix();
+
+
+                // draw shadow
+
+                GL.StencilFunc(StencilFunction.Equal, 1, 0xFF);
+                GL.StencilOp(StencilOp.Keep, StencilOp.Replace, StencilOp.Replace);
+                GL.ColorMask(true, true, true, true);
+
+                // moon radius in degrees
+                double sdMoonDegrees = moonDiamInDegrees / 2;
+
+                // semidiameter of penumbra in degrees
+                double sdPenumbraDegrees = data.EarthShadowApperance.PenumbraRadius * 6378.0 / 1738.0 * sdMoonDegrees;
+
+                // semidiameter of umbra in degrees
+                double sdUmbraDegrees = sdPenumbraDegrees / data.EarthShadowApperance.Ratio;
+
+                // semidiameter of penumbra in pixels
+                double sdPenumbra = prj.GetDiskSize(sdPenumbraDegrees * 3600) / 2;
+
+                // semidiameter of umbra in pixels
+                double sdUmbra = sdPenumbra / data.EarthShadowApperance.Ratio;
+
+                var winShadow = prj.Project(eqShadow);
+
+                GL.PushMatrix();
+                GL.Translate(winShadow.X, winShadow.Y, 0);
+
+                GL.Enable(EnableCap.Blend);
+                GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+
+                // distance, in degrees, between lunar center and center of the Earth shadow
+                double dist = Angle.Separation(data.Equatorial, eqShadow);
+
+                // color of umbra center
+                Color colorCenter = Color.FromArgb(220, 10, 0, 0);// Color.FromArgb(240, Color.Black);
+
+                // color of umbra edge
+                Color colorEdge = Color.FromArgb(230, Color.Black);
+
+                double maxDist = (sdUmbraDegrees - sdMoonDegrees) * 2;
+
+                if (dist < maxDist)
+                {
+                    colorCenter = Color.FromArgb(220, 10, 0, 0);
+
+                    // dark red of edge
+                    colorEdge = GradientColor(Color.FromArgb(220, 120, 40, 0), colorEdge, dist / maxDist);
+                }
+
+
+                double[] radii = new double[] { 0, sdUmbra * 0.99, sdUmbra, sdUmbra * 1.01, sdPenumbra };
+                Color[] colors = new Color[] { colorCenter, colorEdge, colorEdge, Color.FromArgb(200, Color.Black), Color.Transparent };
+
+
+                for (int i = 0; i < radii.Length; i++)
+                {
+                    GL.Begin(PrimitiveType.TriangleStrip);
+
+                    for (int j = 0; j <= 63; j++)
+                    {
+                        double ang = j / 63.0 * 2 * Math.PI;
+
+                        // outer
+                        {
+                            Vec2 v = new Vec2(radii[i] * Math.Cos(ang), radii[i] * Math.Sin(ang));
+                            GL.Color4(colors[i]);
+                            GL.Vertex2(v.X, v.Y);
+                        }
+
+                        // inner
+                        if (i > 0)
+                        {
+                            Vec2 v = new Vec2(radii[i - 1] * Math.Cos(ang), radii[i - 1] * Math.Sin(ang));
+                            GL.Color4(colors[i - 1]);
+                            GL.Vertex2(v.X, v.Y);
+
+                        }
+                        else
+                        {
+                            GL.Color4(colors[0]);
+                            GL.Vertex2(0, 0);
+
+                        }
+                    }
+
+                    GL.End();
+                }
+
+
+                // disable stencil
+
+                GL.Disable(EnableCap.Blend);
+                GL.Disable(EnableCap.StencilTest);
+
+                GL.PopMatrix();
+
+                // draw shadow outline
+
+                GL.PushMatrix();
+                GL.Translate(winShadow.X, winShadow.Y, 0);
+
+                Primitives.DrawEllipse(new Vec2(0, 0), Pens.DarkRed, sdPenumbra);
+                Primitives.DrawEllipse(new Vec2(0, 0), Pens.DarkRed, sdUmbra);
+
+                GL.PopMatrix();
+            }
+
+            /*
+            if (drawFeatures)
+            {
+                double bodyDiameter = 3474;
+
+                // radius of celestial body disk, in pixels
+                float r = prj.GetDiskSize(0.5 / 2 * 3600) / 2;
+
+                // visible coordinates of body disk center, assume as zero point 
+                CrdsGeographical c = new CrdsGeographical(0, 0);
+
+                // visible coordinates of the feature relative to body disk center
+                var v = GetVisibleFeatureCoordinates(51.62, 350.62, POSVISY, POSVISX);
+
+                double sep = Angle.Separation(v, c);
+                if (sep < 85)
+                {
+                    // feature outline radius, in pixels
+                    double fr = feature.Diameter / bodyDiameter * r;
+
+                    // visible flattening of feature outline,
+                    // depends on angular distance between feature and visible center of the body disk
+                    float f = (float)Math.Cos(Angle.ToRadians(sep));
+
+                    var winMoon = prj.Project(eq);
+
+                    GL.PushMatrix();
+                    GL.Translate(winMoon.X, winMoon.Y, 0);
+
+                    Vec2 w = GetCartesianFeatureCoordinates(prj, r, v, POSROT);
+
+                    double rot = 90 + Angle.ToDegrees(Math.Atan2(w.Y, w.X));
+
+                    Primitives.DrawEllipse(new Vec2(w.X, w.Y), Pens.DarkRed, fr, fr * f, rot);
+
+                    GL.PopMatrix();
+
+                }
+            }
+            */
+        }
+
+        private void DrawPlanetSphere(ISkyMap map, SphereParameters data)
+        {
+            var prj = map.SkyProjection;
+
+            var win = prj.Project(data.Equatorial);
+
+            GL.PushMatrix();
+            GL.Translate(win.X, win.Y, 0);
+
+            double x, y, z;
+            double s, t, delta;
+            int i, j;
+
+            const int segments = 64;
+            double drho = Math.PI / segments;
+            double[] cos_sin_rho = new double[2 * (segments + 1)];
+
+            // radius of sphere, in pixels
+            double radius = prj.GetDiskSize(data.Semidiameter) / 2;
+
+            for (i = 0; i <= segments; i++)
+            {
+                double rho = i * drho;
+                cos_sin_rho[2 * i] = Math.Cos(rho);
+                cos_sin_rho[2 * i + 1] = Math.Sin(rho);
+            }
+
+            double dtheta = 2.0 * Math.PI / segments;
+            double[] cos_sin_theta = new double[2 * (segments + 1)];
+
+            for (i = 0; i <= segments; i++)
+            {
+                double theta = (i == segments) ? 0.0 : i * dtheta;
+                cos_sin_theta[2 * i] = Math.Cos(theta);
+                cos_sin_theta[2 * i + 1] = Math.Sin(theta);
+            }
+
+            delta = 1.0 / segments;
+            t = 1.0;
+
+            // rotation of axis
+            double rotAxis = Angle.ToRadians(data.RotationAxis) * (prj.FlipHorizontal ? -1 : 1) * (prj.FlipVertical ? -1 : 1);
+
+            // rotation of phase
+            double rotPhase = Angle.ToRadians(data.RotationPhase) * (prj.FlipHorizontal ? -1 : 1) * (prj.FlipVertical ? -1 : 1);
+
+            // rotation matrix to proper orient sphere 
+            var matVision = Mat4.ZRotation(rotAxis) * Mat4.XRotation(-Math.PI / 2 - Angle.ToRadians(data.LatitudeShift) * (prj.FlipVertical ? -1 : 1)) * Mat4.ZRotation(Math.PI + Angle.ToRadians(-data.LongitudeShift) * (prj.FlipHorizontal ? -1 : 1));
+
+            // illumination matrix (phase)
+            var matLight = Mat4.YRotation(Angle.ToRadians(180 - data.Elongation) * (prj.FlipHorizontal ? -1 : 1)) * Mat4.ZRotation(rotPhase) * matVision;
+
+            float shadowSmoothness = data.SmoothShadow ? 1 : 5;
+
+            GL.Enable(EnableCap.Texture2D);
+
+            for (int texture = 0; texture < 1; texture++)
+            {
+                if (texture == 0)
+                {
+                    GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(data.TextureName, data.FallbackTextureName));
+                }
+                else
+                {
+                    GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture("PolarCap.png"));
+                }
+
+                for (i = 0; i < segments; i++)
+                {
+                    GL.Begin(PrimitiveType.QuadStrip);
+                    s = 0;
+
+                    Vec3 vecVision;
+                    Vec3 vecLight;
+
+                    for (j = 0; j <= segments; j++)
+                    {
+                        x = -cos_sin_theta[j * 2 + 1] * cos_sin_rho[i * 2 + 1];
+                        y = cos_sin_theta[j * 2 + 0] * cos_sin_rho[i * 2 + 1];
+                        z = cos_sin_rho[i * 2 + 0];
+
+                        vecVision = matVision * new Vec3(x, y, z);
+                        vecLight = matLight * new Vec3(-x, -y, -z);
+
+                        GL.Normal3(vecLight.X * shadowSmoothness, vecLight.Y * shadowSmoothness, vecLight.Z * shadowSmoothness);
+                        GL.TexCoord2(-s * (prj.FlipHorizontal ? -1 : 1), t * (prj.FlipVertical ? -1 : 1));
+                        GL.Vertex3(vecVision.X * radius, vecVision.Y * radius, 0);
+
+                        x = -cos_sin_theta[j * 2 + 1] * cos_sin_rho[i * 2 + 3];
+                        y = cos_sin_theta[j * 2 + 0] * cos_sin_rho[i * 2 + 3];
+                        z = cos_sin_rho[i * 2 + 2];
+
+                        vecVision = matVision * new Vec3(x, y, z);
+                        vecLight = matLight * new Vec3(-x, -y, -z);
+
+                        GL.Normal3(vecLight.X * shadowSmoothness, vecLight.Y * shadowSmoothness, vecLight.Z * shadowSmoothness);
+                        GL.TexCoord2(-s * (prj.FlipHorizontal ? -1 : 1), (t - delta) * (prj.FlipVertical ? -1 : 1));
+                        GL.Vertex3(vecVision.X * radius, vecVision.Y * radius, 0);
+
+                        s += delta;
+                    }
+                    GL.End();
+                    t -= delta;
+                }
+            }
+
+            GL.PopMatrix();
+
+            GL.Disable(EnableCap.Texture2D);
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (int)TextureEnvMode.Modulate);
+        }
+
+        private Color GradientColor(Color color1, Color color2, double percent)
+        {
+            double r = color1.R + percent * (color2.R - color1.R);
+            double g = color1.G + percent * (color2.G - color1.G);
+            double b = color1.B + percent * (color2.B - color1.B);
+            double a = color1.A + percent * (color2.A - color1.A);
+            return Color.FromArgb((byte)a, (byte)r, (byte)g, (byte)b);
+        }
 
         public override void Render(IMapContext map)
         {
