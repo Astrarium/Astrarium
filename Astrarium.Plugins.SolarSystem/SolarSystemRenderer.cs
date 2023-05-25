@@ -88,12 +88,12 @@ namespace Astrarium.Plugins.SolarSystem
             Vec2 v = prj.Project(moon.Equatorial + new CrdsEquatorial(0, 1));
             Vec2 v0 = prj.Project(moon.Equatorial);
 
-
             Vec2 w = prj.Project((moon.Ecliptical0 + new CrdsEcliptical(0, 1)).ToEquatorial(prj.Context.Epsilon));
             Vec2 w0 = prj.Project(moon.Ecliptical0.ToEquatorial(prj.Context.Epsilon));
 
-            double rot = Angle.ToDegrees(v.Angle(v + v0));
-            double rotPhase = Angle.ToDegrees(w.Angle(w + w0));
+            double rotAxis = Angle.ToDegrees(Math.Atan2(v.Y - v0.Y, v.X - v0.X)) - 90;
+            
+            double rotPhase = Angle.ToDegrees(Math.Atan2(w.Y - w0.Y, w.X - w0.X)) - 90;
 
             // Moon
             DrawPlanet(map, new SphereParameters() { 
@@ -103,8 +103,8 @@ namespace Astrarium.Plugins.SolarSystem
                 Phase = moon.Phase,
                 Elongation = moon.Elongation,
                 LatitudeShift = moon.Libration.b,
-                LongitudeShift = moon.Libration.l,
-                RotationAxis = rot + moon.PAaxis,
+                LongitudeShift = -moon.Libration.l,
+                RotationAxis = rotAxis + moon.PAaxis,
                 RotationPhase = rotPhase,
                 SmoothShadow = false
             });
@@ -158,8 +158,6 @@ namespace Astrarium.Plugins.SolarSystem
             GL.Material(MaterialFace.Front, MaterialParameter.Emission, zero);
             GL.Material(MaterialFace.Front, MaterialParameter.Shininess, zero);
             GL.Material(MaterialFace.Front, MaterialParameter.Specular, zero);
-
-            double moonDiamInDegrees = data.Semidiameter / 3600;
 
             GL.Enable(EnableCap.Light0);
             GL.Enable(EnableCap.Lighting);
@@ -215,27 +213,26 @@ namespace Astrarium.Plugins.SolarSystem
                 GL.End();
                 GL.PopMatrix();
 
-
                 // draw shadow
 
                 GL.StencilFunc(StencilFunction.Equal, 1, 0xFF);
                 GL.StencilOp(StencilOp.Keep, StencilOp.Replace, StencilOp.Replace);
                 GL.ColorMask(true, true, true, true);
 
-                // moon radius in degrees
-                double sdMoonDegrees = moonDiamInDegrees / 2;
+                // moon semidiameter in seconds of arc
+                double sdMoon = data.Semidiameter;
 
-                // semidiameter of penumbra in degrees
-                double sdPenumbraDegrees = data.EarthShadowApperance.PenumbraRadius * 6378.0 / 1738.0 * sdMoonDegrees;
+                // semidiameter of penumbra in seconds of arc
+                double sdPenumbra = data.EarthShadowApperance.PenumbraRadius * 6378.0 / 1738.0 * sdMoon;
 
-                // semidiameter of umbra in degrees
-                double sdUmbraDegrees = sdPenumbraDegrees / data.EarthShadowApperance.Ratio;
+                // semidiameter of umbra in seconds of arc
+                double sdUmbra = sdPenumbra / data.EarthShadowApperance.Ratio;
 
                 // semidiameter of penumbra in pixels
-                double sdPenumbra = prj.GetDiskSize(sdPenumbraDegrees * 3600) / 2;
+                double sdPenumbraPixels = prj.GetDiskSize(sdPenumbra) / 2;
 
                 // semidiameter of umbra in pixels
-                double sdUmbra = sdPenumbra / data.EarthShadowApperance.Ratio;
+                double sdUmbraPixels = sdPenumbraPixels / data.EarthShadowApperance.Ratio;
 
                 var winShadow = prj.Project(eqShadow);
 
@@ -254,7 +251,7 @@ namespace Astrarium.Plugins.SolarSystem
                 // color of umbra edge
                 Color colorEdge = Color.FromArgb(230, Color.Black);
 
-                double maxDist = (sdUmbraDegrees - sdMoonDegrees) * 2;
+                double maxDist = (sdUmbra - sdMoon) * 2;
 
                 if (dist < maxDist)
                 {
@@ -264,10 +261,8 @@ namespace Astrarium.Plugins.SolarSystem
                     colorEdge = GradientColor(Color.FromArgb(220, 120, 40, 0), colorEdge, dist / maxDist);
                 }
 
-
-                double[] radii = new double[] { 0, sdUmbra * 0.99, sdUmbra, sdUmbra * 1.01, sdPenumbra };
+                double[] radii = new double[] { 0, sdUmbraPixels * 0.99, sdUmbraPixels, sdUmbraPixels * 1.01, sdPenumbraPixels };
                 Color[] colors = new Color[] { colorCenter, colorEdge, colorEdge, Color.FromArgb(200, Color.Black), Color.Transparent };
-
 
                 for (int i = 0; i < radii.Length; i++)
                 {
@@ -290,13 +285,11 @@ namespace Astrarium.Plugins.SolarSystem
                             Vec2 v = new Vec2(radii[i - 1] * Math.Cos(ang), radii[i - 1] * Math.Sin(ang));
                             GL.Color4(colors[i - 1]);
                             GL.Vertex2(v.X, v.Y);
-
                         }
                         else
                         {
                             GL.Color4(colors[0]);
                             GL.Vertex2(0, 0);
-
                         }
                     }
 
@@ -316,8 +309,8 @@ namespace Astrarium.Plugins.SolarSystem
                 GL.PushMatrix();
                 GL.Translate(winShadow.X, winShadow.Y, 0);
 
-                Primitives.DrawEllipse(new Vec2(0, 0), Pens.DarkRed, sdPenumbra);
-                Primitives.DrawEllipse(new Vec2(0, 0), Pens.DarkRed, sdUmbra);
+                Primitives.DrawEllipse(new Vec2(0, 0), Pens.DarkRed, sdPenumbraPixels);
+                Primitives.DrawEllipse(new Vec2(0, 0), Pens.DarkRed, sdUmbraPixels);
 
                 GL.PopMatrix();
             }
@@ -382,7 +375,7 @@ namespace Astrarium.Plugins.SolarSystem
             double[] cos_sin_rho = new double[2 * (segments + 1)];
 
             // radius of sphere, in pixels
-            double radius = prj.GetDiskSize(data.Semidiameter) / 2;
+            double radius = prj.GetDiskSize(data.Semidiameter, 10) / 2;
 
             for (i = 0; i <= segments; i++)
             {
@@ -405,7 +398,7 @@ namespace Astrarium.Plugins.SolarSystem
             t = 1.0;
 
             // rotation of axis
-            double rotAxis = Angle.ToRadians(data.RotationAxis) * (prj.FlipHorizontal ? -1 : 1) * (prj.FlipVertical ? -1 : 1);
+            double rotAxis = Angle.ToRadians(-data.RotationAxis) * (prj.FlipHorizontal ? -1 : 1) * (prj.FlipVertical ? -1 : 1);
 
             // rotation of phase
             double rotPhase = Angle.ToRadians(data.RotationPhase) * (prj.FlipHorizontal ? -1 : 1) * (prj.FlipVertical ? -1 : 1);

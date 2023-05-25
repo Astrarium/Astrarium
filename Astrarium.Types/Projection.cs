@@ -128,7 +128,7 @@ namespace Astrarium.Types
         public float GetDiskSize(double semidiameter, double minSize = 0)
         {
             // TODO: check it!
-            return (float)Math.Max(minSize, (float)(ScreenWidth / Fov * (2 * semidiameter / 3600)));
+            return (float)Math.Max(minSize, (float)(Math.Min(ScreenWidth, ScreenHeight) / Fov * (2 * semidiameter / 3600)));
         }
 
         // log fit {90,6},{45,7},{8,9},{1,12},{0.25,17}

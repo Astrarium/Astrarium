@@ -438,8 +438,16 @@ namespace Astrarium
             GL.Vertex2(projection.ScreenWidth, 0);
             GL.End();
             
+
+
             */
+
+
+            GL.PopMatrix();
+
             (sender as SkyViewControl).SwapBuffers();
+
+
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
