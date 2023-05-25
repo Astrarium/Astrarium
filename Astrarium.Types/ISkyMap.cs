@@ -46,6 +46,8 @@ namespace Astrarium.Types
 
         CrdsHorizontal MousePosition { get; }
 
+        PointF MouseCoordinates { get; }
+
         /// <summary>
         /// Gets or sets projection which is used for converting celestial coordinates to the sky map plane.
         /// </summary>

@@ -106,6 +106,8 @@ namespace Astrarium.Plugins.SolarSystem
                 LongitudeShift = -moon.Libration.l,
                 RotationAxis = rotAxis + moon.PAaxis,
                 RotationPhase = rotPhase,
+                BodyPhysicalDiameter = 3474,
+                SurfaceFeatures = lunarFeatures,
                 SmoothShadow = false
             });
         }
@@ -116,6 +118,13 @@ namespace Astrarium.Plugins.SolarSystem
             public CrdsEquatorial Equatorial { get; set; }
             public string TextureName { get; set; }
             public string FallbackTextureName { get; set; }
+
+            public ICollection<SurfaceFeature> SurfaceFeatures { get; set; }
+
+            /// <summary>
+            /// Physical diameter of celestial body, in kilometers
+            /// </summary>
+            public double BodyPhysicalDiameter { get; set; }
 
             /// <summary>
             /// Body semidiameter, in seconds of arc
@@ -315,46 +324,64 @@ namespace Astrarium.Plugins.SolarSystem
                 GL.PopMatrix();
             }
 
-            /*
-            if (drawFeatures)
+            if (data.SurfaceFeatures != null)
             {
-                double bodyDiameter = 3474;
+                var p = prj.Project(data.Equatorial);
 
                 // radius of celestial body disk, in pixels
-                float r = prj.GetDiskSize(0.5 / 2 * 3600) / 2;
+                float r = prj.GetDiskSize(data.Semidiameter) / 2;
 
-                // visible coordinates of body disk center, assume as zero point 
-                CrdsGeographical c = new CrdsGeographical(0, 0);
-
-                // visible coordinates of the feature relative to body disk center
-                var v = GetVisibleFeatureCoordinates(51.62, 350.62, POSVISY, POSVISX);
-
-                double sep = Angle.Separation(v, c);
-                if (sep < 85)
+                if (r > 100)
                 {
-                    // feature outline radius, in pixels
-                    double fr = feature.Diameter / bodyDiameter * r;
+                    // minimal diameter of feature, in pixels, that is allowed to be drawn on current magnification
+                    const float minDiameterPx = 5;
 
-                    // visible flattening of feature outline,
-                    // depends on angular distance between feature and visible center of the body disk
-                    float f = (float)Math.Cos(Angle.ToRadians(sep));
+                    // minimal diameter of feature, converted to km
+                    double minDiameterKm = data.BodyPhysicalDiameter / (2 * r) * minDiameterPx;
 
-                    var winMoon = prj.Project(eq);
+                    // visible coordinates of body disk center, assume as zero point 
+                    CrdsGeographical c = new CrdsGeographical(0, 0);
 
-                    GL.PushMatrix();
-                    GL.Translate(winMoon.X, winMoon.Y, 0);
+                    foreach (var feature in data.SurfaceFeatures.TakeWhile(f => f.Diameter > minDiameterKm))
+                    {
+                        // visible coordinates of the feature relative to body disk center
+                        var v = GetVisibleFeatureCoordinates(feature.Latitude, feature.Longitude, data.LatitudeShift, data.LongitudeShift);
+                        
+                        double sep = Angle.Separation(v, c);
+                        if (sep < 85)
+                        {
+                            Vec2 pFeature = GetCartesianFeatureCoordinates(prj, r, v, data.RotationAxis);
 
-                    Vec2 w = GetCartesianFeatureCoordinates(prj, r, v, POSROT);
+                            // feature outline radius, in pixels
+                            double fr = feature.Diameter / data.BodyPhysicalDiameter * r;
 
-                    double rot = 90 + Angle.ToDegrees(Math.Atan2(w.Y, w.X));
+                            // distance, in pixels, between center of the feature and current mouse position
+                            double d = Math.Sqrt(Math.Pow(map.MouseCoordinates.X - pFeature.X - p.X, 2) + Math.Pow(map.MouseCoordinates.Y - pFeature.Y - p.Y, 2));
 
-                    Primitives.DrawEllipse(new Vec2(w.X, w.Y), Pens.DarkRed, fr, fr * f, rot);
+                            if (fr > 100 || d < fr)
+                            {
+                                GL.PushMatrix();
+                                GL.Translate(p.X, p.Y, 0);
 
-                    GL.PopMatrix();
+                                // visible flattening of feature outline,
+                                // depends on angular distance between feature and visible center of the body disk
+                                float f = (float)Math.Cos(Angle.ToRadians(sep));
 
+                                double rot = 90 + Angle.ToDegrees(Math.Atan2(pFeature.Y, pFeature.X));
+
+                                Primitives.DrawEllipse(new Vec2(pFeature.X, pFeature.Y), Pens.DarkRed, fr, fr * f, rot);
+
+                                GL.PopMatrix();
+                            }
+                        }
+                    }
                 }
             }
-            */
+        }
+
+        private void DrawPlanetFeatures(ISkyMap map, SphereParameters data)
+        {
+
         }
 
         private void DrawPlanetSphere(ISkyMap map, SphereParameters data)
@@ -564,6 +591,12 @@ namespace Astrarium.Plugins.SolarSystem
             return mouseButton == MouseButton.None &&
                 (Angle.Separation(mouse, moon.Horizontal) < moon.Semidiameter / 3600 ||
                  Angle.Separation(mouse, mars.Horizontal) < mars.Semidiameter / 3600);
+        }
+
+        public override bool OnMouseMove(PointF mouse, MouseButton mouseButton)
+        {
+            // TODO: temp! 
+            return true;
         }
 
         private void RenderSun(IMapContext map)
@@ -886,6 +919,25 @@ namespace Astrarium.Plugins.SolarSystem
             }
         }
 
+        private Vec2 GetCartesianFeatureCoordinates(Projection prj, float r, CrdsGeographical c, double axisRotation)
+        {
+            // rotation of axis
+            axisRotation = Angle.ToRadians(-axisRotation) * (prj.FlipHorizontal ? -1 : 1) * (prj.FlipVertical ? -1 : 1);
+
+            // convert to orthographic polar coordinates 
+            double Y = r * Math.Sin(Angle.ToRadians(c.Latitude));
+            double X = r * Math.Cos(Angle.ToRadians(c.Latitude)) * Math.Sin(Angle.ToRadians(c.Longitude));
+
+            Y = -Y * (prj.FlipVertical ? -1 : 1);
+            X = X * (prj.FlipHorizontal ? -1 : 1);
+
+            // polar coordinates rotated around of visible center of the body disk
+            double X_ = X * Math.Cos(axisRotation) - Y * Math.Sin(axisRotation);
+            double Y_ = X * Math.Sin(axisRotation) + Y * Math.Cos(axisRotation);
+
+            return new Vec2(X_, Y_);
+        }
+
         private PointF GetCartesianFeatureCoordinates(float r, CrdsGeographical c, float axisRotation)
         {
             // convert to orthographic polar coordinates 
@@ -911,12 +963,12 @@ namespace Astrarium.Plugins.SolarSystem
             double[] v = new double[] { x, y, z };
 
             // rotate around Z axis (longitude / phi)
-            double aZ = Angle.ToRadians(longitudeShift);
+            double aZ = Angle.ToRadians(-longitudeShift);
             double[,] mZ = new double[3, 3] { { Math.Cos(aZ), -Math.Sin(aZ), 0 }, { Math.Sin(aZ), Math.Cos(aZ), 0 }, { 0, 0, 1 } };
             Rotate(v, mZ);
 
             // rotate around Y axis (latitude / theta)
-            double aY = Angle.ToRadians(-latitudeShift);
+            double aY = Angle.ToRadians(latitudeShift);
             double[,] mY = new double[3, 3] { { Math.Cos(aY), 0, Math.Sin(aY) }, { 0, 1, 0 }, { -Math.Sin(aY), 0, Math.Cos(aY) } };
             Rotate(v, mY);
 

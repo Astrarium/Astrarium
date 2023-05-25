@@ -179,6 +179,23 @@ namespace Astrarium
             }
         }
 
+        private PointF mouseCoordinates;
+
+        public PointF MouseCoordinates
+        {
+            get => mouseCoordinates;
+            set
+            {
+                mouseCoordinates = value;
+                bool needRedraw = renderers.Any(r => r.OnMouseMove(mouseCoordinates, MouseButton));
+                if (MouseButton == MouseButton.None && (needRedraw || lastNeedRedraw))
+                {
+                    lastNeedRedraw = needRedraw;
+                    Invalidate();
+                }
+            }
+        }
+
         public MouseButton MouseButton { get; set; }
 
         /// <summary>

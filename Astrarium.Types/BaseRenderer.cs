@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
+using System.Drawing;
 
 namespace Astrarium.Types
 {
@@ -35,6 +36,8 @@ namespace Astrarium.Types
         /// <param name="mouse">Current mouse position on sky map</param>
         /// <returns>True if repaint of map is required, otherwise false.</returns>
         public virtual bool OnMouseMove(CrdsHorizontal mouse, MouseButton mouseButton) { return false; }
+
+        public virtual bool OnMouseMove(PointF mouse, MouseButton mouseButton) { return false; }
     }
 
     /// <summary>

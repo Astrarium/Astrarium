@@ -299,7 +299,7 @@ namespace Astrarium
         }
 
         private readonly SkyViewControl skyViewControl;
-        private readonly ISkyMap map;
+        private readonly SkyMap map;
 
         public MainWindow(ISettings settings, SkyMap map)
         {
@@ -380,6 +380,8 @@ namespace Astrarium
                 SetMouseEquatorialPosition(this, eq);
                 SetMouseHorizontalPosition(this, hor);
                 SetMousePositionConstellation(this, eq != null ? Constellations.FindConstellation(eq, map.SkyProjection.Context.JulianDay) : null);
+
+                map.MouseCoordinates = new PointF(e.X, map.SkyProjection.ScreenHeight - e.Y);
 
                 if (e.Button == WF.MouseButtons.Left)
                 {
