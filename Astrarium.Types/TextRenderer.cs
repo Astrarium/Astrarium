@@ -25,7 +25,6 @@ namespace Astrarium.Types
         {
             bmp = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             gfx = Graphics.FromImage(bmp);
-            gfx.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
 
             texture = GL.GenTexture();
 
@@ -53,10 +52,12 @@ namespace Astrarium.Types
 
             GL.Color3(Color.Transparent);
             GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+
+            // this needed for proper texture overlapping
+            GL.BlendFunc(BlendingFactor.One, BlendingFactor.One);
 
             GL.Enable(EnableCap.Texture2D);
-            
+
             GetBitmapData();
 
             GL.Begin(PrimitiveType.Quads);
@@ -69,6 +70,9 @@ namespace Astrarium.Types
 
             GL.End();
             GL.Disable(EnableCap.Texture2D);
+
+            // revert to "default" blending func
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
         }
 
 

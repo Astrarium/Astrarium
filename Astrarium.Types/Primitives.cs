@@ -58,6 +58,9 @@ namespace Astrarium.Types
             GL.Enable(EnableCap.LineSmooth);
             GL.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
 
+            GL.LineWidth(pen.Width);
+            GL.Color3(pen.Color);
+
             if (pen.DashStyle != DashStyle.Solid)
             {
                 GL.Enable(EnableCap.LineStipple);
@@ -74,10 +77,9 @@ namespace Astrarium.Types
                 }
             }
 
-            GL.Begin(PrimitiveType.LineStrip);
 
-            GL.LineWidth(pen.Width);
-            GL.Color3(pen.Color);
+
+            GL.Begin(PrimitiveType.LineStrip);
 
             int count = 64;
 
@@ -97,6 +99,8 @@ namespace Astrarium.Types
             }
 
             GL.End();
+
+            GL.Disable(EnableCap.LineStipple);
         }
     }
 }

@@ -187,7 +187,7 @@ namespace Astrarium
             set
             {
                 mouseCoordinates = value;
-                bool needRedraw = renderers.Any(r => r.OnMouseMove(mouseCoordinates, MouseButton));
+                bool needRedraw = renderers.Any(r => r.OnMouseMove(this, mouseCoordinates, MouseButton));
                 if (MouseButton == MouseButton.None && (needRedraw || lastNeedRedraw))
                 {
                     lastNeedRedraw = needRedraw;

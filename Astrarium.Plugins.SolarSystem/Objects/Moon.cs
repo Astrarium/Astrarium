@@ -58,7 +58,7 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         /// <summary>
         /// Topocentrical coordinates of Earth shadow
         /// </summary>
-        public CrdsHorizontal EarthShadowCoordinates { get; set; }
+        public CrdsEquatorial EarthShadowCoordinates { get; set; }
 
         /// <summary>
         /// Mean daily motion of the Moon, in degrees

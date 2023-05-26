@@ -247,7 +247,7 @@ namespace Astrarium.Plugins.SolarSystem
         /// <summary>
         /// Gets horizontal topocentrical coordinates of Earth Shadow
         /// </summary>
-        private CrdsHorizontal EarthShadowCoordinates(SkyContext c)
+        private CrdsEquatorial EarthShadowCoordinates(SkyContext c)
         {
             // Ecliptical coordinates of Sun
             var eclSun = c.Get(SunEcliptical);
@@ -259,10 +259,7 @@ namespace Astrarium.Plugins.SolarSystem
             var eq0 = eclShadow.ToEquatorial(c.Epsilon);
 
             // Topocentrical equatorial coordinates
-            var eq = eq0.ToTopocentric(c.GeoLocation, c.SiderealTime, c.Get(Parallax));
-
-            // finally get the horizontal coordinates
-            return eq.ToHorizontal(c.GeoLocation, c.SiderealTime);
+            return eq0.ToTopocentric(c.GeoLocation, c.SiderealTime, c.Get(Parallax));
         }
 
         /// <summary>

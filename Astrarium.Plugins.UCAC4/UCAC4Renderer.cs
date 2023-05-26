@@ -21,7 +21,7 @@ namespace Astrarium.Plugins.UCAC4
         {
             this.catalog = catalog;
             this.settings = settings;
-            fontNames = new Font("Arial", 8);
+            fontNames = new Font("Arial", 7);
         }
 
         public override void Render(ISkyMap map)
@@ -29,6 +29,15 @@ namespace Astrarium.Plugins.UCAC4
             var prj = map.SkyProjection;
             if (prj.Fov < 1.5 && settings.Get("Stars") && settings.Get("UCAC4"))
             {
+                float daylightFactor = map.DaylightFactor;
+
+                // no stars if the Sun above horizon
+                if (daylightFactor == 1) return;
+
+                float starDimming = 1 - daylightFactor;
+
+                float minStarSize = daylightFactor * 3; // empiric
+
                 bool isLabels = settings.Get("StarsLabels") && prj.Fov < 1 / 60d;
                 Brush brushNames = new SolidBrush(settings.Get<SkyColor>("ColorStarsLabels").Night);
 
@@ -60,9 +69,9 @@ namespace Astrarium.Plugins.UCAC4
 
                 foreach (var star in stars)
                 {
-                    float size = prj.GetPointSize(star.Magnitude);
+                    float size = prj.GetPointSize(star.Magnitude) * starDimming;
 
-                    if (size > 1)
+                    if (size > minStarSize)
                     {
                         var p = prj.Project(star.Cartesian, mat);
 

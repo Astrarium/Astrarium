@@ -16,7 +16,7 @@ namespace Astrarium.Plugins.Tycho2
         private readonly ITycho2Catalog tycho2;
         private readonly ISettings settings;
 
-        private readonly Font fontNames = new Font("Arial", 8);
+        private readonly Font fontNames = new Font("Arial", 7);
         private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(128, 32));
 
         public Tycho2Renderer(ITycho2Catalog tycho2, ISettings settings)
@@ -30,6 +30,15 @@ namespace Astrarium.Plugins.Tycho2
             Projection prj = map.SkyProjection;
             if (prj.MagLimit > 8 && settings.Get("Stars") && settings.Get("Tycho2"))
             {
+                float daylightFactor = map.DaylightFactor;
+
+                // no stars if the Sun above horizon
+                if (daylightFactor == 1) return;
+
+                float starDimming = 1 - daylightFactor;
+
+                float minStarSize = daylightFactor * 3; // empiric
+
                 bool isLabels = settings.Get<bool>("StarsLabels");
                 Brush brushNames = new SolidBrush(settings.Get<SkyColor>("ColorStarsLabels").Night);
 
@@ -51,9 +60,9 @@ namespace Astrarium.Plugins.Tycho2
 
                 foreach (var star in stars)
                 {
-                    float size = prj.GetPointSize(star.Magnitude);
+                    float size = prj.GetPointSize(star.Magnitude) * starDimming;
 
-                    if (size > 1)
+                    if (size > minStarSize)
                     {
                         var p = prj.Project(star.Cartesian, mat);
 
