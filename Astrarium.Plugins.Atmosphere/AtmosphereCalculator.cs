@@ -115,7 +115,16 @@ namespace Astrarium.Plugins.Atmosphere
 
             if (sun.Altitude > -18)
             {
-                Z[0] += 20;
+                double a = sun.Altitude;
+
+                if (a > 60)
+                {
+                    Z[0] += 0.0554113 * a * a - 6.15065 * a + 188.225;
+                }
+                else
+                {
+                    Z[0] += 20;
+                }
             }
 
             // this will compensate sky color during twilight
@@ -209,10 +218,12 @@ namespace Astrarium.Plugins.Atmosphere
             double alt = sun.Altitude;
 
             double a = alt <= -12 ? 0.001 : (alt >= -5 ? 0.516 : (0.883857 + 0.0735714 * alt));
-            double b = -0.000423647 * alt * alt + 0.0149816 * alt + 0.47203; // (quadratic);// 10; // -6.65374e-7 * Pow(alt, 4) + 0.000121364 * Pow(alt, 3) - 0.00412819 * Pow(alt, 2) - 0.0215041 * alt + 0.554583;
+            double b = Max(0.0764, -0.000423647 * alt * alt + 0.0149816 * alt + 0.47203); // (quadratic);// 10; // -6.65374e-7 * Pow(alt, 4) + 0.000121364 * Pow(alt, 3) - 0.00412819 * Pow(alt, 2) - 0.0215041 * alt + 0.554583;
             double c = alt <= -5 ? 0.001 : (alt > 0 ? 1.028 : 0.2054 * alt + 1.028);
             double d = alt <= -5 ? 10 : (alt >= 0 ? 2.504 : (2.504 - 1.4992 * alt));
             double e = 1;// alt <= 0 ? 0.001 : 0.847;
+
+            //a = 1; b = 0; c = 0; d = 0; e = 0;
 
             return (1 + a * A[i] * Exp(b * B[i] / Cos(theta))) * (1 + c * C[i] * Exp(d * D[i] * gamma) + e * E[i] * Cos(gamma) * Cos(gamma));
         }

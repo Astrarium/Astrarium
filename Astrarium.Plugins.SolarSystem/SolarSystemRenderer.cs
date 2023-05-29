@@ -88,6 +88,56 @@ namespace Astrarium.Plugins.SolarSystem
 
             var prj = map.SkyProjection;
 
+            if (settings.Get("Sun"))
+            {
+                Vec2 w = prj.Project((sun.Ecliptical + new CrdsEcliptical(0, 1)).ToEquatorial(prj.Context.Epsilon));
+                Vec2 w0 = prj.Project(sun.Ecliptical.ToEquatorial(prj.Context.Epsilon));
+
+                double rotAxis = Angle.ToDegrees(Math.Atan2(w.Y - w0.Y, w.X - w0.X)) - 90;
+                double size = prj.GetDiskSize(sun.Semidiameter, 10);
+                double r = size / 2;
+
+                GL.Enable(EnableCap.Texture2D);
+                GL.Enable(EnableCap.Blend);
+                GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+
+                Date date = new Date(prj.Context.JulianDay);
+                DateTime dt = new DateTime(date.Year, date.Month, (int)date.Day, 0, 0, 0, DateTimeKind.Utc);
+
+                // TODO: get texture by id
+                //solarTextureDownloader.Download(dt);
+                int textureId = -1;
+                GL.BindTexture(TextureTarget.Texture2D, textureId);
+
+                GL.PushMatrix();
+                GL.Translate(w0.X, w0.Y, 0);
+
+                GL.Begin(PrimitiveType.TriangleFan);
+
+                GL.Color4(Color.Orange);
+
+                for (int i = 0; i <= 64; i++)
+                {
+                    double ang = Angle.ToRadians(i / 64.0 * 360 + rotAxis);
+                    double angt = Angle.ToRadians(i / 64.0 * 360);
+                    Vec2 v = new Vec2(r * Math.Cos(ang), r * Math.Sin(ang));
+
+                    Vec2 vt = new Vec2(Math.Cos(angt), -Math.Sin(angt));
+
+                    GL.TexCoord2(0.5f + 0.499f * vt.X, 0.5f + 0.499f * vt.Y);
+                    GL.Vertex2(v.X, v.Y);
+                }
+
+
+                GL.End();
+
+                GL.PopMatrix();
+
+                GL.Disable(EnableCap.Texture2D);
+                GL.Disable(EnableCap.Blend);
+            }
+
+
             // Moon
 
             if (settings.Get("Moon"))
@@ -178,7 +228,6 @@ namespace Astrarium.Plugins.SolarSystem
                 float[] zero = new float[4] { 0, 0, 0, 0 };
                 float[] ambient;
                 float[] diffuse;
-
 
                 if (settings.Get<ColorSchema>("Schema") == ColorSchema.Red)
                 {

@@ -595,13 +595,13 @@ namespace Astrarium.ViewModels
                 // "A" = [A]dd
                 else if (key == Key.A)
                 {
-                    sky.Context.JulianDay += 1;
+                    sky.Context.JulianDay += 5.0 / 24 / 60;
                     sky.Calculate();
                 }
                 // "S" = [S]ubtract
                 else if (key == Key.S)
                 {
-                    sky.Context.JulianDay -= 1;
+                    sky.Context.JulianDay -= 5.0 / 24 / 60;
                     sky.Calculate();
                 }
             }
