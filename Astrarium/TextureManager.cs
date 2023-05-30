@@ -85,6 +85,7 @@ namespace Astrarium
         private void BindTexture(string key, BitmapData data)
         {
             int textureId = GL.GenTexture();
+
             GL.BindTexture(TextureTarget.Texture2D, textureId);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
