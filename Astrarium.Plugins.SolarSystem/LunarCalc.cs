@@ -29,6 +29,7 @@ namespace Astrarium.Plugins.SolarSystem
             Moon.Horizontal = c.Get(Horizontal);
             Moon.PAaxis = c.Get(PAaxis);
             Moon.Phase = c.Get(Phase);
+            Moon.PhaseAngle = Math.Sign(c.Get(Elongation)) * c.Get(PhaseAngle);
             Moon.Ecliptical0 = c.Get(Ecliptical0);
             Moon.Semidiameter = c.Get(Semidiameter);
             Moon.Elongation = c.Get(Elongation);

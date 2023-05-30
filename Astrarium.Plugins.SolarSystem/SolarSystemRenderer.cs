@@ -88,10 +88,102 @@ namespace Astrarium.Plugins.SolarSystem
         public override void Render(ISkyMap map)
         {
             brushLabel = new SolidBrush(settings.Get<SkyColor>("ColorSolarSystemLabel").Night);
-
             bool drawLabelMag = settings.Get("PlanetsLabelsMag");
-
             var prj = map.SkyProjection;
+
+            var bodies = planetsCalc.Planets
+                .Where(p => p.Number != Planet.EARTH)
+                .Cast<ISolarSystemObject>()
+                .Concat(new[] { pluto })
+                .Concat(new[] { sun })
+                .Concat(planetsCalc.MarsMoons)
+                .Concat(planetsCalc.JupiterMoons)
+                .Concat(planetsCalc.SaturnMoons)
+                .Concat(planetsCalc.UranusMoons)
+                .Concat(planetsCalc.NeptuneMoons)
+                .Concat(planetsCalc.GenericMoons)
+                .OrderByDescending(body => body.DistanceFromEarth)
+                .ToArray();
+
+            foreach (var body in bodies)
+            {
+                if (body is Planet planet)
+                {
+                    float size = prj.GetPointSize(planet.Magnitude, maxDrawingSize: 7);
+                    double diam = prj.GetDiskSize(planet.Semidiameter);
+
+                    if (size < 1)
+                    {
+                        if (settings.Get("PlanetsDrawAll"))
+                        {
+                            size = 1;
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+
+                    // draw as point
+                    if (size >= diam)
+                    {
+                        var p = prj.Project(planet.Equatorial);
+                        if (prj.IsInsideScreen(p))
+                        {
+                            GL.Enable(EnableCap.PointSmooth);
+                            GL.Enable(EnableCap.Blend);
+                            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+                            GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
+
+                            GL.PointSize(size);
+                            GL.Begin(PrimitiveType.Points);
+                            GL.Color3(GetPlanetColor(planet.Number));
+                            GL.Vertex2(p.X, p.Y);
+                            GL.End();
+
+                            if (settings.Get("PlanetsLabels"))
+                            {
+                                string label = drawLabelMag ? $"{planet.Name} {Formatters.Magnitude.Format(planet.Magnitude)}" : planet.Name;
+                                var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
+                                textRenderer.Value.DrawString(label, fontLabel, brushLabel, p);
+                            }
+                        }
+                    }
+                    // draw as sphere
+                    else
+                    {
+                        Vec2 v = prj.Project(planet.Equatorial + new CrdsEquatorial(0, 1));
+                        Vec2 v0 = prj.Project(planet.Equatorial);
+
+                        Vec2 w = prj.Project((planet.Ecliptical + new CrdsEcliptical(0, 1)).ToEquatorial(prj.Context.Epsilon));
+                        Vec2 w0 = prj.Project(planet.Ecliptical.ToEquatorial(prj.Context.Epsilon));
+
+                        double rotAxis = Angle.ToDegrees(Math.Atan2(v.Y - v0.Y, v.X - v0.X)) - 90;
+                        double rotPhase = Angle.ToDegrees(Math.Atan2(w.Y - w0.Y, w.X - w0.X)) - 90;
+
+                        string textureName = $"{planet.Number}.jpg";
+
+                        DrawPlanet(map, planet, new SphereParameters()
+                        {
+                            Equatorial = planet.Equatorial,
+                            TextureName = Path.Combine(dataPath, textureName),
+                            FallbackTextureName = Path.Combine(dataPath),
+                            Semidiameter = planet.Semidiameter,
+                            PhaseAngle = planet.PhaseAngle,
+                            Flattening = planet.Flattening,
+                            LatitudeShift = -planet.Appearance.D,
+                            LongitudeShift = planet.Appearance.CM - (planet.Number == Planet.JUPITER ? planetsCalc.GreatRedSpotLongitude : 0),
+                            RotationAxis = rotAxis + planet.Appearance.P,
+                            RotationPhase = rotPhase,
+                            BodyPhysicalDiameter = planet.Number == Planet.MARS ? 6779 : 0,
+                            SurfaceFeatures = planet.Number == Planet.MARS && settings.Get("PlanetsSurfaceFeatures") ? martianFeatures : null,
+                            SmoothShadow = planet.Number > Planet.MARS,
+                            DrawPhase = true,
+                            DrawLabel = settings.Get("PlanetsLabels")
+                        });
+                    }
+                }
+            }
 
             if (settings.Get("Sun"))
             {
@@ -151,77 +243,7 @@ namespace Astrarium.Plugins.SolarSystem
                 GL.Disable(EnableCap.Blend);
             }
 
-            // Venus
-
-            if (settings.Get("Planets"))
-            {
-                Planet planet = planetsCalc.Planets.ElementAt(1);
-
-                float size = prj.GetPointSize(planet.Magnitude, maxDrawingSize: 7);
-                double diam = prj.GetDiskSize(planet.Semidiameter);
-
-                // draw as point
-                if (size >= diam)
-                {
-                    var p = prj.Project(planet.Equatorial);
-                    if (prj.IsInsideScreen(p))
-                    {
-                        GL.Enable(EnableCap.PointSmooth);
-                        GL.Enable(EnableCap.Blend);
-                        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-                        GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
-
-                        GL.PointSize(size);
-                        GL.Begin(PrimitiveType.Points);
-                        GL.Color3(GetPlanetColor(planet.Number));
-                        GL.Vertex2(p.X, p.Y);
-                        GL.End();
-
-                        if (settings.Get("PlanetsLabels"))
-                        {
-                            string label = drawLabelMag ? $"{planet.Name} {Formatters.Magnitude.Format(planet.Magnitude)}" : planet.Name;
-                            var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
-                            textRenderer.Value.DrawString(label, fontLabel, brushLabel, p);
-                        }
-                    }
-                }
-                // draw as sphere
-                else
-                {
-                    Vec2 v = prj.Project(planet.Equatorial + new CrdsEquatorial(0, 1));
-                    Vec2 v0 = prj.Project(planet.Equatorial);
-
-                    Vec2 w = prj.Project((planet.Ecliptical + new CrdsEcliptical(0, 1)).ToEquatorial(prj.Context.Epsilon));
-                    Vec2 w0 = prj.Project(planet.Ecliptical.ToEquatorial(prj.Context.Epsilon));
-
-                    double rotAxis = Angle.ToDegrees(Math.Atan2(v.Y - v0.Y, v.X - v0.X)) - 90;
-                    double rotPhase = Angle.ToDegrees(Math.Atan2(w.Y - w0.Y, w.X - w0.X)) - 90;
-
-                    string textureName = $"{planet.Number}.jpg";
-
-                    DrawPlanet(map, planet, new SphereParameters()
-                    {
-                        Equatorial = planet.Equatorial,
-                        TextureName = Path.Combine(dataPath, textureName),
-                        FallbackTextureName = Path.Combine(dataPath),
-                        Semidiameter = planet.Semidiameter,
-                        Phase = planet.Phase,
-                        Elongation = planet.Elongation,
-                        LatitudeShift = planet.Appearance.D,
-                        LongitudeShift = planet.Appearance.CM,
-                        RotationAxis = rotAxis + planet.Appearance.P,
-                        RotationPhase = rotPhase,
-                        //BodyPhysicalDiameter = 0,
-                        //SurfaceFeatures = nullsettings.Get("MoonSurfaceFeatures") ? lunarFeatures : null,
-                        //EarthShadowApperance = moon.EarthShadow,
-                        //EarthShadowCoordinates = moon.EarthShadowCoordinates,
-                        SmoothShadow = false,
-                        DrawPhase = true,
-                        //DrawPhase = settings.Get("MoonPhase"),
-                        DrawLabel = settings.Get("PlanetsLabels")
-                    });
-                }
-            }
+        
 
             // Moon
 
@@ -246,8 +268,7 @@ namespace Astrarium.Plugins.SolarSystem
                     TextureName = Path.Combine(dataPath, textureName),
                     FallbackTextureName = Path.Combine(dataPath, "Moon-2k.jpg"),
                     Semidiameter = moon.Semidiameter,
-                    Phase = moon.Phase,
-                    Elongation = moon.Elongation,
+                    PhaseAngle = moon.PhaseAngle,
                     LatitudeShift = moon.Libration.b,
                     LongitudeShift = -moon.Libration.l,
                     RotationAxis = rotAxis + moon.PAaxis,
@@ -295,8 +316,8 @@ namespace Astrarium.Plugins.SolarSystem
             /// </summary>
             public double RotationPhase { get; set; }
 
-            public double Phase { get; set; }
-            public double Elongation { get; set; }
+            public double PhaseAngle { get; set; }
+            public double Flattening { get; set; }
 
             public double LongitudeShift { get; set; }
             public double LatitudeShift { get; set; }
@@ -681,7 +702,7 @@ namespace Astrarium.Plugins.SolarSystem
             var matVision = Mat4.ZRotation(rotAxis) * Mat4.XRotation(-Math.PI / 2 - Angle.ToRadians(data.LatitudeShift) * (prj.FlipVertical ? -1 : 1)) * Mat4.ZRotation(Math.PI + Angle.ToRadians(-data.LongitudeShift) * (prj.FlipHorizontal ? -1 : 1));
 
             // illumination matrix (phase)
-            var matLight = Mat4.YRotation(Angle.ToRadians(180 - data.Elongation) * (prj.FlipHorizontal ? -1 : 1)) * Mat4.ZRotation(rotPhase) * matVision;
+            var matLight = Mat4.YRotation(Angle.ToRadians(data.PhaseAngle) * (prj.FlipHorizontal ? -1 : 1)) * Mat4.ZRotation(rotPhase) * matVision;
 
             float shadowSmoothness = data.SmoothShadow ? 1 : 5;
 
@@ -855,9 +876,22 @@ namespace Astrarium.Plugins.SolarSystem
         public override bool OnMouseMove(ISkyMap map, PointF mouse, MouseButton mouseButton)
         {
             if (mouseButton != MouseButton.None) return false;
-            var p = map.SkyProjection.Project(moon.Equatorial);
-            double r = map.SkyProjection.GetDiskSize(moon.Semidiameter) / 2;
-            return (mouse.X - p.X) * (mouse.X - p.X) + (mouse.Y - p.Y) * (mouse.Y - p.Y) < r * r;
+            
+            {
+                var p = map.SkyProjection.Project(moon.Equatorial);
+                double r = map.SkyProjection.GetDiskSize(moon.Semidiameter) / 2;
+                bool needDraw = (mouse.X - p.X) * (mouse.X - p.X) + (mouse.Y - p.Y) * (mouse.Y - p.Y) < r * r;
+                if (needDraw) return true;
+            }
+
+            {
+                var p = map.SkyProjection.Project(mars.Equatorial);
+                double r = map.SkyProjection.GetDiskSize(mars.Semidiameter) / 2;
+                bool needDraw = (mouse.X - p.X) * (mouse.X - p.X) + (mouse.Y - p.Y) * (mouse.Y - p.Y) < r * r;
+                if (needDraw) return true;
+            }
+
+            return false;
         }
 
         private void RenderSun(IMapContext map)

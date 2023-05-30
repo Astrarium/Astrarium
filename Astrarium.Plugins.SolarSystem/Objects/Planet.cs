@@ -65,6 +65,11 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         public double Phase { get; set; }
 
         /// <summary>
+        /// Phase angle of the planet, signed.
+        /// </summary>
+        public double PhaseAngle { get; set; }
+
+        /// <summary>
         /// Magnitude of planet
         /// </summary>
         public float Magnitude { get; set; }

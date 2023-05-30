@@ -36,6 +36,11 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         public double Phase { get; set; }
 
         /// <summary>
+        /// Phase angle of the Moon, signed
+        /// </summary>
+        public double PhaseAngle { get; set; }
+
+        /// <summary>
         /// Position angle of Moon axis, in degrees.
         /// </summary>
         public double PAaxis { get; set; }

@@ -115,6 +115,7 @@ namespace Astrarium.Plugins.SolarSystem
                 p.DistanceFromSun = context.Get(Planet_DistanceFromSun, n);
                 p.Semidiameter = context.Get(Planet_Semidiameter, n);
                 p.Phase = context.Get(Planet_Phase, n);
+                p.PhaseAngle = Math.Sign(context.Get(Planet_Elongation, n)) * context.Get(Planet_PhaseAngle, n);
                 p.Elongation = context.Get(Planet_Elongation, n);
                 p.Ecliptical = context.Get(Planet_Ecliptical, n);
 
