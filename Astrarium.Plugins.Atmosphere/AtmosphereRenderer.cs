@@ -29,6 +29,9 @@ namespace Astrarium.Plugins.Atmosphere
 
         public override void Render(ISkyMap map)
         {
+            if (!settings.Get("Ground")) return;
+            if (!settings.Get("Atmosphere")) return;
+
             var prj = map.SkyProjection;
 
             GL.Enable(EnableCap.CullFace);

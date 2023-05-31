@@ -21,7 +21,7 @@ namespace Astrarium.Plugins.SolarSystem
         private readonly PlanetsCalc planetsCalc;
         private readonly ISettings settings;
         private readonly ITextureManager textureManager;
-        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(128, 32));
+        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
 
         private readonly Sun sun;
         private readonly Moon moon;
@@ -79,6 +79,8 @@ namespace Astrarium.Plugins.SolarSystem
 
             solarTextureManager = new SolarTextureManager();
             solarTextureManager.FallbackAction += () => map.Invalidate();
+
+            textureManager.FallbackAction += () => map.Invalidate();
 
             sphereRenderer = new SphereRendererFactory().CreateRenderer();
         }
@@ -161,13 +163,10 @@ namespace Astrarium.Plugins.SolarSystem
                         double rotAxis = Angle.ToDegrees(Math.Atan2(v.Y - v0.Y, v.X - v0.X)) - 90;
                         double rotPhase = Angle.ToDegrees(Math.Atan2(w.Y - w0.Y, w.X - w0.X)) - 90;
 
-                        string textureName = $"{planet.Number}.jpg";
-
                         DrawPlanet(map, planet, new SphereParameters()
                         {
                             Equatorial = planet.Equatorial,
-                            TextureName = Path.Combine(dataPath, textureName),
-                            FallbackTextureName = Path.Combine(dataPath),
+                            TextureName = Path.Combine(dataPath, $"{planet.Number}.jpg"),
                             Semidiameter = planet.Semidiameter,
                             PhaseAngle = planet.PhaseAngle,
                             Flattening = planet.Flattening,
@@ -600,7 +599,7 @@ namespace Astrarium.Plugins.SolarSystem
                 // visible coordinates of body disk center, assume as zero point 
                 CrdsGeographical c = new CrdsGeographical(0, 0);
 
-                foreach (SurfaceFeature feature in data.SurfaceFeatures.TakeWhile(f => f.Diameter > minDiameterKm))
+                foreach (SurfaceFeature feature in data.SurfaceFeatures.TakeWhile(f => f.Diameter == 0 || f.Diameter > minDiameterKm))
                 {
                     // visible coordinates of the feature relative to body disk center
                     CrdsGeographical v = GetVisibleFeatureCoordinates(feature.Latitude, feature.Longitude, data.LatitudeShift, data.LongitudeShift);
@@ -616,7 +615,7 @@ namespace Astrarium.Plugins.SolarSystem
                         if (prj.IsInsideScreen(p + pFeature))
                         {
                             // feature outline radius, in pixels
-                            double fr = feature.Diameter / data.BodyPhysicalDiameter * r;
+                            double fr = (feature.Diameter > 0 ? feature.Diameter : data.BodyPhysicalDiameter / 6) / data.BodyPhysicalDiameter * r;
 
                             // distance, in pixels, between center of the feature and current mouse position
                             double d = Math.Sqrt(Math.Pow(map.MouseCoordinates.X - pFeature.X - p.X, 2) + Math.Pow(map.MouseCoordinates.Y - pFeature.Y - p.Y, 2));
@@ -640,8 +639,9 @@ namespace Astrarium.Plugins.SolarSystem
                                 }
                                 else if (centeredFeatures.Contains(feature.TypeCode))
                                 {
-                                    var size = System.Windows.Forms.TextRenderer.MeasureText(feature.Name, fontLabel, Size.Empty, System.Windows.Forms.TextFormatFlags.HorizontalCenter | System.Windows.Forms.TextFormatFlags.VerticalCenter);
-                                    textRenderer.Value.DrawString(feature.Name, fontLabel, brush, new Vec2(pFeature.X - size.Width / 2, pFeature.Y + size.Height / 2));
+                                    string label = feature.Name.Contains("Mare") || feature.TypeCode == "MA" || feature.TypeCode == "OC" ? feature.Name.ToUpper() : feature.Name;
+                                    var size = System.Windows.Forms.TextRenderer.MeasureText(label, fontLabel, Size.Empty, System.Windows.Forms.TextFormatFlags.HorizontalCenter | System.Windows.Forms.TextFormatFlags.VerticalCenter);
+                                    textRenderer.Value.DrawString(label, fontLabel, brush, new Vec2(pFeature.X - size.Width / 2, pFeature.Y + size.Height / 2));
                                 }
 
                                 GL.PopMatrix();

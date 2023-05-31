@@ -57,11 +57,13 @@ namespace Astrarium.Plugins.Atmosphere
 
         private readonly ISky sky;
         private readonly ISkyMap map;
+        private readonly ISettings settings;
 
-        public AtmosphereCalculator(ISky sky, ISkyMap map)
+        public AtmosphereCalculator(ISky sky, ISkyMap map, ISettings settings)
         {
             this.sky = sky;
             this.map = map;
+            this.settings = settings;
 
             // 0 = Y
             A[0] = 0.17872 * T - 1.46303;
@@ -83,6 +85,16 @@ namespace Astrarium.Plugins.Atmosphere
             C[2] = -0.0079 * T + 0.2102;
             D[2] = -0.0441 * T - 1.6537;
             E[2] = -0.0109 * T + 0.0529;
+
+            settings.SettingValueChanged += Settings_SettingValueChanged;
+        }
+
+        private void Settings_SettingValueChanged(string settingName, object settingValue)
+        {
+            if (settingName == "Ground" || settingName == "Atmosphere")
+            {
+                map.DaylightFactor = CalcDaylightFactor();
+            }
         }
 
         public override void Calculate(SkyContext context)
@@ -140,6 +152,9 @@ namespace Astrarium.Plugins.Atmosphere
 
         private float CalcDaylightFactor()
         {
+            if (!settings.Get("Ground")) return 0;
+            if (!settings.Get("Atmosphere", true)) return 0;
+
             double alt = sun.Altitude;
 
             if (alt >= 0)

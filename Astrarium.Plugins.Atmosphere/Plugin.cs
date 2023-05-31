@@ -7,7 +7,7 @@ namespace Astrarium.Plugins.Atmosphere
     {
         public Plugin(ISettings settings)
         {
-            
+            DefineSetting("Atmosphere", true);
         }
     }
 }
