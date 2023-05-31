@@ -114,16 +114,13 @@ namespace Astrarium.Plugins.SolarSystem
                     float size = prj.GetPointSize(planet.Magnitude, maxDrawingSize: 7);
                     double diam = prj.GetDiskSize(planet.Semidiameter);
 
+                    // draw planets regardless zoom level
                     if (size < 1)
                     {
                         if (settings.Get("PlanetsDrawAll"))
-                        {
                             size = 1;
-                        }
                         else
-                        {
                             continue;
-                        }
                     }
 
                     // draw as point
@@ -142,6 +139,8 @@ namespace Astrarium.Plugins.SolarSystem
                             GL.Color3(GetPlanetColor(planet.Number));
                             GL.Vertex2(p.X, p.Y);
                             GL.End();
+
+                            map.AddDrawnObject(p, planet);
 
                             if (settings.Get("PlanetsLabels"))
                             {
@@ -177,6 +176,7 @@ namespace Astrarium.Plugins.SolarSystem
                             BodyPhysicalDiameter = planet.Number == Planet.MARS ? 6779 : 0,
                             SurfaceFeatures = planet.Number == Planet.MARS && settings.Get("PlanetsSurfaceFeatures") ? martianFeatures : null,
                             SmoothShadow = planet.Number > Planet.MARS,
+                            Rings = planet.Number == Planet.SATURN ? planetsCalc.SaturnRings : (RingsAppearance?)null,
                             DrawPhase = true,
                             DrawLabel = settings.Get("PlanetsLabels")
                         });
@@ -714,7 +714,7 @@ namespace Astrarium.Plugins.SolarSystem
                 {
                     GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(data.TextureName, data.FallbackTextureName));
                 }
-                else
+                else if (texture == 1)
                 {
                     GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture("PolarCap.png"));
                 }
@@ -731,7 +731,7 @@ namespace Astrarium.Plugins.SolarSystem
                     {
                         x = -cos_sin_theta[j * 2 + 1] * cos_sin_rho[i * 2 + 1];
                         y = cos_sin_theta[j * 2 + 0] * cos_sin_rho[i * 2 + 1];
-                        z = cos_sin_rho[i * 2 + 0];
+                        z = cos_sin_rho[i * 2 + 0] * (1 - data.Flattening);
 
                         vecVision = matVision * new Vec3(x, y, z);
                         
@@ -746,7 +746,7 @@ namespace Astrarium.Plugins.SolarSystem
 
                         x = -cos_sin_theta[j * 2 + 1] * cos_sin_rho[i * 2 + 3];
                         y = cos_sin_theta[j * 2 + 0] * cos_sin_rho[i * 2 + 3];
-                        z = cos_sin_rho[i * 2 + 2];
+                        z = cos_sin_rho[i * 2 + 2] * (1 - data.Flattening);
 
                         vecVision = matVision * new Vec3(x, y, z);
                         
@@ -764,6 +764,36 @@ namespace Astrarium.Plugins.SolarSystem
                     GL.End();
                     t -= delta;
                 }
+            }
+
+            if (data.Rings != null)
+            {
+                GL.Disable(EnableCap.Lighting);
+                // rotation matrix to proper orient rings 
+                matVision = Mat4.ZRotation(( rotAxis + Math.PI / 2) * (prj.FlipVertical ? -1 : 1) * (prj.FlipHorizontal ? -1 : 1)) * Mat4.XRotation(Angle.ToRadians(90 + data.LatitudeShift));
+
+                GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(Path.Combine(dataPath, "Rings.png")));
+
+                GL.Begin(PrimitiveType.TriangleFan);
+
+                Vec3 vecVision = new Vec3(0, 0, 0);
+
+                // center of rings
+                GL.TexCoord2(1, 0);
+                GL.Vertex3(0, 0, 0);
+
+                for (i = 0; i <= segments; i++)
+                {
+                    x = Math.Sin(i / (double)segments * 2 * Math.PI) * radius * 2;
+                    y = Math.Cos(i / (double)segments * 2 * Math.PI) * radius * 2;
+
+                    vecVision = matVision * new Vec3(x, y, 0);
+
+                    GL.Color3(Color.White);
+                    GL.TexCoord2(0, 0);
+                    GL.Vertex3(vecVision.X , vecVision.Y, Math.Min(0, vecVision.Z));
+                }
+                GL.End();
             }
 
             GL.PopMatrix();
@@ -875,6 +905,8 @@ namespace Astrarium.Plugins.SolarSystem
 
         public override bool OnMouseMove(ISkyMap map, PointF mouse, MouseButton mouseButton)
         {
+            // TODO: use CelestialObject.Equatorial for this
+
             if (mouseButton != MouseButton.None) return false;
             
             {
