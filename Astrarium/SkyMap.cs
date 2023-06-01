@@ -260,8 +260,8 @@ namespace Astrarium
             projection = Types.Projection.Create<StereographicProjection>(Context);
             projection.Fov = 90;
             projection.SetVision(new CrdsHorizontal(0, 0));
-            projection.FlipVertical = true;
-
+            projection.FlipVertical = !settings.Get("IsInverted");
+            projection.FlipHorizontal = settings.Get("IsMirrored");
 
             Projection = new ArcProjection(mapContext);
             Projection.IsInverted = settings.Get("IsInverted");
@@ -301,13 +301,15 @@ namespace Astrarium
 
                 if (name == "IsMirrored")
                 {
-                    Projection.IsMirrored = settings.Get("IsMirrored");
+                    SkyProjection.FlipHorizontal = settings.Get("IsMirrored");
+                    //Projection.IsMirrored = settings.Get("IsMirrored");
                     Invalidate();
                 }
 
                 if (name == "IsInverted")
                 {
-                    Projection.IsInverted = settings.Get("IsInverted");
+                    SkyProjection.FlipVertical = !settings.Get("IsInverted");
+                    //Projection.IsInverted = settings.Get("IsInverted");
                     Invalidate();
                 }
             };

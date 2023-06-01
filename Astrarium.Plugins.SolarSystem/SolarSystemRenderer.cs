@@ -176,7 +176,7 @@ namespace Astrarium.Plugins.SolarSystem
                             BodyPhysicalDiameter = planet.Number == Planet.MARS ? 6779 : 0,
                             SurfaceFeatures = planet.Number == Planet.MARS && settings.Get("PlanetsSurfaceFeatures") ? martianFeatures : null,
                             SmoothShadow = planet.Number > Planet.MARS,
-                            Rings = planet.Number == Planet.SATURN ? planetsCalc.SaturnRings : (RingsAppearance?)null,
+                            DrawRings = planet.Number == Planet.SATURN,
                             DrawPhase = true,
                             DrawLabel = settings.Get("PlanetsLabels")
                         });
@@ -255,7 +255,7 @@ namespace Astrarium.Plugins.SolarSystem
                 Vec2 w0 = prj.Project(moon.Ecliptical0.ToEquatorial(prj.Context.Epsilon));
 
                 double rotAxis = Angle.ToDegrees(Math.Atan2(v.Y - v0.Y, v.X - v0.X)) - 90;
-                double rotPhase = Angle.ToDegrees(Math.Atan2(w.Y - w0.Y, w.X - w0.X)) - 90;
+                double rotPhase = 90 - Angle.ToDegrees(Math.Atan2(w.Y - w0.Y, w.X - w0.X));
 
                 double size = prj.GetDiskSize(moon.Semidiameter, 10);
                 int q = Math.Min((int)settings.Get<TextureQuality>("MoonTextureQuality"), size < 256 ? 2 : (size < 1024 ? 4 : 8));
@@ -303,7 +303,7 @@ namespace Astrarium.Plugins.SolarSystem
             public double Semidiameter { get; set; }
             public ShadowAppearance EarthShadowApperance { get; set; }
             public CrdsEquatorial EarthShadowCoordinates { get; set; }
-            public RingsAppearance? Rings { get; set; }
+            public bool DrawRings { get; set; }
 
             /// <summary>
             /// Rotation of axis, measured counter-clockwise from top of screen
@@ -667,7 +667,10 @@ namespace Astrarium.Plugins.SolarSystem
 
             const int segments = 64;
             double drho = Math.PI / segments;
+            double dtheta = 2.0 * Math.PI / segments;
+
             double[] cos_sin_rho = new double[2 * (segments + 1)];
+            double[] cos_sin_theta = new double[2 * (segments + 1)];
 
             // radius of sphere, in pixels
             double radius = prj.GetDiskSize(data.Semidiameter, 10) / 2;
@@ -677,14 +680,8 @@ namespace Astrarium.Plugins.SolarSystem
                 double rho = i * drho;
                 cos_sin_rho[2 * i] = Math.Cos(rho);
                 cos_sin_rho[2 * i + 1] = Math.Sin(rho);
-            }
 
-            double dtheta = 2.0 * Math.PI / segments;
-            double[] cos_sin_theta = new double[2 * (segments + 1)];
-
-            for (i = 0; i <= segments; i++)
-            {
-                double theta = (i == segments) ? 0.0 : i * dtheta;
+                double theta = i * dtheta;
                 cos_sin_theta[2 * i] = Math.Cos(theta);
                 cos_sin_theta[2 * i + 1] = Math.Sin(theta);
             }
@@ -693,20 +690,55 @@ namespace Astrarium.Plugins.SolarSystem
             t = 1.0;
 
             // rotation of axis
-            double rotAxis = Angle.ToRadians(-data.RotationAxis) * (prj.FlipHorizontal ? -1 : 1) * (prj.FlipVertical ? -1 : 1);
+            double rotAxis = 0; // Angle.ToRadians(data.RotationAxis);
 
             // rotation of phase
-            double rotPhase = Angle.ToRadians(data.RotationPhase) * (prj.FlipHorizontal ? -1 : 1) * (prj.FlipVertical ? -1 : 1);
+            double rotPhase = 0;// Angle.ToRadians(data.RotationPhase);
 
             // rotation matrix to proper orient sphere 
             var matVision = Mat4.ZRotation(rotAxis) * Mat4.XRotation(-Math.PI / 2 - Angle.ToRadians(data.LatitudeShift) * (prj.FlipVertical ? -1 : 1)) * Mat4.ZRotation(Math.PI + Angle.ToRadians(-data.LongitudeShift) * (prj.FlipHorizontal ? -1 : 1));
 
+            // rotation matrix for rings vision
+            var matRings = Mat4.ZRotation(rotAxis) * Mat4.XRotation(-Math.PI / 2 + Angle.ToRadians(Math.Abs(data.LatitudeShift)) * (prj.FlipVertical ? -1 : 1));
+
             // illumination matrix (phase)
             var matLight = Mat4.YRotation(Angle.ToRadians(data.PhaseAngle) * (prj.FlipHorizontal ? -1 : 1)) * Mat4.ZRotation(rotPhase) * matVision;
+
+            // radius of outer ring relative to Saturn equatorial radius
+            const double ringsRatio = 2.320;
 
             float shadowSmoothness = data.SmoothShadow ? 1 : 5;
 
             GL.Enable(EnableCap.Texture2D);
+
+            Vec3 vecVision;
+            Vec3 vecLight;
+
+            if (data.DrawRings)
+            {
+                GL.Disable(EnableCap.Lighting);
+                GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(Path.Combine(dataPath, "Rings.png")));
+
+                GL.Begin(PrimitiveType.TriangleFan);
+
+                GL.Color3(Color.White);
+                GL.TexCoord2(1, 0);
+                GL.Vertex3(0, 0, 0);
+
+                for (j = 0; j <= segments / 2; j++)
+                {
+                    double ang = j / (double)segments * 2 * Math.PI - Math.Sign(data.LatitudeShift) * Math.PI / 2 * (prj.FlipVertical ? 1 : -1);
+                    x = -Math.Sin(ang);
+                    y = Math.Cos(ang);
+                    vecVision = matRings * new Vec3(x, y, 0);
+                    GL.Color3(Color.White);
+                    GL.TexCoord2(0, 0);
+                    GL.Vertex3(radius * ringsRatio * vecVision.X, radius * ringsRatio * vecVision.Y, 0);
+                }
+                GL.End();
+
+                GL.Enable(EnableCap.Lighting);
+            }
 
             for (int texture = 0; texture < 1; texture++)
             {
@@ -724,9 +756,6 @@ namespace Astrarium.Plugins.SolarSystem
                     GL.Begin(PrimitiveType.QuadStrip);
                     s = 0;
 
-                    Vec3 vecVision;
-                    Vec3 vecLight;
-
                     for (j = 0; j <= segments; j++)
                     {
                         x = -cos_sin_theta[j * 2 + 1] * cos_sin_rho[i * 2 + 1];
@@ -734,7 +763,7 @@ namespace Astrarium.Plugins.SolarSystem
                         z = cos_sin_rho[i * 2 + 0] * (1 - data.Flattening);
 
                         vecVision = matVision * new Vec3(x, y, z);
-                        
+
                         if (data.DrawPhase)
                         {
                             vecLight = matLight * new Vec3(-x, -y, -z);
@@ -748,8 +777,8 @@ namespace Astrarium.Plugins.SolarSystem
                         y = cos_sin_theta[j * 2 + 0] * cos_sin_rho[i * 2 + 3];
                         z = cos_sin_rho[i * 2 + 2] * (1 - data.Flattening);
 
-                        vecVision = matVision * new Vec3(x, y, z);
-                        
+                        vecVision = matVision * new Vec3(x, y, z);                        
+
                         if (data.DrawPhase)
                         {
                             vecLight = matLight * new Vec3(-x, -y, -z);
@@ -762,38 +791,35 @@ namespace Astrarium.Plugins.SolarSystem
                         s += delta;
                     }
                     GL.End();
+
                     t -= delta;
                 }
             }
 
-            if (data.Rings != null)
+            if (data.DrawRings)
             {
                 GL.Disable(EnableCap.Lighting);
-                // rotation matrix to proper orient rings 
-                matVision = Mat4.ZRotation(( rotAxis + Math.PI / 2) * (prj.FlipVertical ? -1 : 1) * (prj.FlipHorizontal ? -1 : 1)) * Mat4.XRotation(Angle.ToRadians(90 + data.LatitudeShift));
-
                 GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(Path.Combine(dataPath, "Rings.png")));
 
                 GL.Begin(PrimitiveType.TriangleFan);
 
-                Vec3 vecVision = new Vec3(0, 0, 0);
-
-                // center of rings
+                GL.Color3(Color.White);
                 GL.TexCoord2(1, 0);
                 GL.Vertex3(0, 0, 0);
 
-                for (i = 0; i <= segments; i++)
+                for (j = 0; j <= segments / 2; j++)
                 {
-                    x = Math.Sin(i / (double)segments * 2 * Math.PI) * radius * 2;
-                    y = Math.Cos(i / (double)segments * 2 * Math.PI) * radius * 2;
-
-                    vecVision = matVision * new Vec3(x, y, 0);
-
+                    double ang = j / (double)segments * 2 * Math.PI + Math.Sign(data.LatitudeShift) * Math.PI / 2 * (prj.FlipVertical ? 1 : -1);
+                    x = -Math.Sin(ang);
+                    y = Math.Cos(ang);
+                    vecVision = matRings * new Vec3(x, y, 0);
                     GL.Color3(Color.White);
                     GL.TexCoord2(0, 0);
-                    GL.Vertex3(vecVision.X , vecVision.Y, Math.Min(0, vecVision.Z));
+                    GL.Vertex3(radius * ringsRatio * vecVision.X, radius * ringsRatio * vecVision.Y, 0);
                 }
                 GL.End();
+
+                GL.Enable(EnableCap.Lighting);
             }
 
             GL.PopMatrix();
