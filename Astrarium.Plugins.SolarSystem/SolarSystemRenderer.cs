@@ -13,6 +13,9 @@ using static Astrarium.Plugins.SolarSystem.Plugin;
 
 namespace Astrarium.Plugins.SolarSystem
 {
+
+
+
     /// <summary>
     /// Draws solar system objects (Sun, Moon and planets) on the map.
     /// </summary>
@@ -257,6 +260,8 @@ namespace Astrarium.Plugins.SolarSystem
                 double rotAxis = Angle.ToDegrees(Math.Atan2(v.Y - v0.Y, v.X - v0.X)) - 90;
                 double rotPhase = 90 - Angle.ToDegrees(Math.Atan2(w.Y - w0.Y, w.X - w0.X));
 
+                if (!prj.FlipVertical) rotAxis = 180 - rotAxis;
+
                 double size = prj.GetDiskSize(moon.Semidiameter, 10);
                 int q = Math.Min((int)settings.Get<TextureQuality>("MoonTextureQuality"), size < 256 ? 2 : (size < 1024 ? 4 : 8));
                 string textureName = $"Moon-{q}k.jpg";
@@ -268,9 +273,9 @@ namespace Astrarium.Plugins.SolarSystem
                     FallbackTextureName = Path.Combine(dataPath, "Moon-2k.jpg"),
                     Semidiameter = moon.Semidiameter,
                     PhaseAngle = moon.PhaseAngle,
-                    LatitudeShift = moon.Libration.b,
+                    LatitudeShift = -moon.Libration.b,
                     LongitudeShift = -moon.Libration.l,
-                    RotationAxis = rotAxis + moon.PAaxis,
+                    RotationAxis = rotAxis + (prj.FlipHorizontal ? -1 : 1) * moon.PAaxis,
                     RotationPhase = rotPhase,
                     BodyPhysicalDiameter = 3474,
                     SurfaceFeatures = settings.Get("MoonSurfaceFeatures") ? lunarFeatures : null,
@@ -689,20 +694,25 @@ namespace Astrarium.Plugins.SolarSystem
             delta = 1.0 / segments;
             t = 1.0;
 
-            // rotation of axis
-            double rotAxis = 0; // Angle.ToRadians(data.RotationAxis);
-
-            // rotation of phase
-            double rotPhase = 0;// Angle.ToRadians(data.RotationPhase);
 
             // rotation matrix to proper orient sphere 
-            var matVision = Mat4.ZRotation(rotAxis) * Mat4.XRotation(-Math.PI / 2 - Angle.ToRadians(data.LatitudeShift) * (prj.FlipVertical ? -1 : 1)) * Mat4.ZRotation(Math.PI + Angle.ToRadians(-data.LongitudeShift) * (prj.FlipHorizontal ? -1 : 1));
+            var matVision = Mat4.XRotation(-Math.PI / 2 + Angle.ToRadians(data.LatitudeShift)) * Mat4.ZRotation(Math.PI + Angle.ToRadians(-data.LongitudeShift) * (prj.FlipHorizontal ? -1 : 1));
 
             // rotation matrix for rings vision
-            var matRings = Mat4.ZRotation(rotAxis) * Mat4.XRotation(-Math.PI / 2 + Angle.ToRadians(Math.Abs(data.LatitudeShift)) * (prj.FlipVertical ? -1 : 1));
+            // TODO: check this
+            var matRings = Mat4.XRotation(-Math.PI / 2 + Angle.ToRadians(Math.Abs(data.LatitudeShift)) * (prj.FlipVertical ? -1 : 1));
 
             // illumination matrix (phase)
-            var matLight = Mat4.YRotation(Angle.ToRadians(data.PhaseAngle) * (prj.FlipHorizontal ? -1 : 1)) * Mat4.ZRotation(rotPhase) * matVision;
+            var matLight = Mat4.YRotation(Angle.ToRadians(data.PhaseAngle) * (prj.FlipHorizontal ? -1 : 1)) * matVision;
+
+            // rotation of axis
+            double rotAxis = Angle.ToRadians(data.RotationAxis);
+
+            // rotation of phase
+            double rotPhase = Angle.ToRadians(data.RotationPhase);
+
+            matVision = Mat4.ZRotation((prj.FlipVertical ? 1 : -1) *  rotAxis) * matVision;
+            matLight = Mat4.ZRotation(rotPhase) * matLight;
 
             // radius of outer ring relative to Saturn equatorial radius
             const double ringsRatio = 2.320;
@@ -1869,6 +1879,7 @@ namespace Astrarium.Plugins.SolarSystem
             }
         }
 
+        [Obsolete]
         private void DrawPlanetGlobe<TPlanet>(IMapContext map, TPlanet planet, float diam) where TPlanet : SizeableCelestialObject, IPlanet
         {
             Graphics g = map.Graphics;

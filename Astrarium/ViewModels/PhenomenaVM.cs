@@ -60,18 +60,17 @@ namespace Astrarium.ViewModels
 
         private void SaveToFile()
         {
-            var file = ViewManager.ShowSaveFileDialog(Text.Get("PhenomenaWindow.ExportTitle"), "Phenomena", ".ics", string.Join("|", exportFormats.Keys), out int selectedFilterIndex);
+            var file = ViewManager.ShowSaveFileDialog("$PhenomenaWindow.ExportTitle", "Phenomena", ".ics", string.Join("|", exportFormats.Keys), out int selectedFilterIndex); ;
             if (file != null)
             {
-                IAstroEventsWriter writer = null;
                 Type format = GetExportFormat(selectedFilterIndex);
-                writer = (IAstroEventsWriter)Activator.CreateInstance(format);
+                IAstroEventsWriter writer = (IAstroEventsWriter)Activator.CreateInstance(format);
                 writer?.Write(events, file, sky.Context.GeoLocation.UtcOffset);
 
                 var answer = ViewManager.ShowMessageBox("$PhenomenaWindow.ExportDoneTitle", "$PhenomenaWindow.ExportDoneText", MessageBoxButton.YesNo);
                 if (answer == MessageBoxResult.Yes)
                 {
-                    System.Diagnostics.Process.Start(file);
+                    Process.Start(file);
                 }
             }
         }
