@@ -156,14 +156,15 @@ namespace Astrarium.Plugins.SolarSystem
                     // draw as sphere
                     else
                     {
+                        // TODO: move this to separate method (used by Moon and planet drawing)
                         Vec2 v = prj.Project(planet.Equatorial + new CrdsEquatorial(0, 1));
                         Vec2 v0 = prj.Project(planet.Equatorial);
 
                         Vec2 w = prj.Project((planet.Ecliptical + new CrdsEcliptical(0, 1)).ToEquatorial(prj.Context.Epsilon));
                         Vec2 w0 = prj.Project(planet.Ecliptical.ToEquatorial(prj.Context.Epsilon));
 
-                        double rotAxis = Angle.ToDegrees(Math.Atan2(v.Y - v0.Y, v.X - v0.X)) - 90;
-                        double rotPhase = Angle.ToDegrees(Math.Atan2(w.Y - w0.Y, w.X - w0.X)) - 90;
+                        double rotAxis = (prj.FlipVertical ? -1 : 1) * (90 - (prj.FlipHorizontal ? -1 : 1) * planet.Appearance.P) + Angle.ToDegrees(Math.Atan2(v.Y - v0.Y, v.X - v0.X));
+                        double rotPhase = 90 - Angle.ToDegrees(Math.Atan2(w.Y - w0.Y, w.X - w0.X));
 
                         DrawPlanet(map, planet, new SphereParameters()
                         {
@@ -174,7 +175,7 @@ namespace Astrarium.Plugins.SolarSystem
                             Flattening = planet.Flattening,
                             LatitudeShift = -planet.Appearance.D,
                             LongitudeShift = planet.Appearance.CM - (planet.Number == Planet.JUPITER ? planetsCalc.GreatRedSpotLongitude : 0),
-                            RotationAxis = rotAxis + planet.Appearance.P,
+                            RotationAxis = rotAxis,
                             RotationPhase = rotPhase,
                             BodyPhysicalDiameter = planet.Number == Planet.MARS ? 6779 : 0,
                             SurfaceFeatures = planet.Number == Planet.MARS && settings.Get("PlanetsSurfaceFeatures") ? martianFeatures : null,
@@ -700,8 +701,7 @@ namespace Astrarium.Plugins.SolarSystem
             var matVision = Mat4.XRotation(-Math.PI / 2 + Angle.ToRadians((prj.FlipVertical ? 1 : -1) * data.LatitudeShift)) * Mat4.ZRotation(Math.PI + Angle.ToRadians(-data.LongitudeShift) * (prj.FlipHorizontal ? -1 : 1));
 
             // rotation matrix for rings vision
-            // TODO: check this
-            var matRings = Mat4.XRotation(-Math.PI / 2 + Angle.ToRadians(Math.Abs(data.LatitudeShift)) * (prj.FlipVertical ? -1 : 1));
+            var matRings = Mat4.XRotation(-Math.PI / 2 + Angle.ToRadians(data.LatitudeShift));
 
             // illumination matrix (phase)
             var matLight = Mat4.YRotation(Angle.ToRadians(data.PhaseAngle) * (prj.FlipHorizontal ? -1 : 1)) * matVision;
@@ -713,6 +713,7 @@ namespace Astrarium.Plugins.SolarSystem
             double rotPhase = Angle.ToRadians(data.RotationPhase);
 
             matVision = Mat4.ZRotation(rotAxis) * matVision;
+            matRings = Mat4.ZRotation(rotAxis) * matRings;
             matLight = Mat4.ZRotation(rotPhase) * matLight;
 
             // radius of outer ring relative to Saturn equatorial radius
@@ -740,7 +741,7 @@ namespace Astrarium.Plugins.SolarSystem
                 {
                     double ang = j / (double)segments * 2 * Math.PI - Math.Sign(data.LatitudeShift) * Math.PI / 2 * (prj.FlipVertical ? 1 : -1);
                     x = -Math.Sin(ang);
-                    y = Math.Cos(ang);
+                    y = -Math.Sign(data.LatitudeShift) * Math.Cos(ang);
                     vecVision = matRings * new Vec3(x, y, 0);
                     GL.Color3(Color.White);
                     GL.TexCoord2(0, 0);
@@ -822,7 +823,7 @@ namespace Astrarium.Plugins.SolarSystem
                 {
                     double ang = j / (double)segments * 2 * Math.PI + Math.Sign(data.LatitudeShift) * Math.PI / 2 * (prj.FlipVertical ? 1 : -1);
                     x = -Math.Sin(ang);
-                    y = Math.Cos(ang);
+                    y = -Math.Sign(data.LatitudeShift) * Math.Cos(ang);
                     vecVision = matRings * new Vec3(x, y, 0);
                     GL.Color3(Color.White);
                     GL.TexCoord2(0, 0);
