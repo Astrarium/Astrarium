@@ -183,12 +183,11 @@ namespace Astrarium.Plugins.SolarSystem
 
             if (settings.Get("Sun"))
             {
-                Vec2 w = prj.Project((sun.Ecliptical + new CrdsEcliptical(0, 1)).ToEquatorial(prj.Context.Epsilon));
-                Vec2 w0 = prj.Project(sun.Ecliptical.ToEquatorial(prj.Context.Epsilon));
-
-                double rotAxis = Math.Atan2(w.Y - w0.Y, w.X - w0.X) - Math.PI / 2;
+                double rotAxis = Angle.ToRadians(prj.GetAxisRotation(sun.Equatorial, -prj.Context.Epsilon));
+                
                 double size = prj.GetDiskSize(sun.Semidiameter, 10);
                 double r = size / 2;
+                Vec2 p = prj.Project(sun.Equatorial);
 
                 GL.Enable(EnableCap.Texture2D);
                 GL.Enable(EnableCap.Blend);
@@ -203,7 +202,7 @@ namespace Astrarium.Plugins.SolarSystem
                 }
 
                 GL.PushMatrix();
-                GL.Translate(w0.X, w0.Y, 0);
+                GL.Translate(p.X, p.Y, 0);
 
                 GL.Begin(PrimitiveType.TriangleFan);
 
@@ -225,7 +224,9 @@ namespace Astrarium.Plugins.SolarSystem
 
                     if (textureId > 0)
                     {
-                        Vec2 vt = new Vec2(Math.Cos(ang0), -Math.Sin(ang0));
+                        double tx = (prj.FlipHorizontal ? -1 : 1) * Math.Cos(ang0);
+                        double ty = (prj.FlipVertical ? -1 : 1) * Math.Sin(ang0);
+                        Vec2 vt = new Vec2(tx, ty);
                         GL.TexCoord2(0.5f + 0.499f * vt.X, 0.5f + 0.499f * vt.Y);
                     }
                     GL.Vertex2(v.X, v.Y);
