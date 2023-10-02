@@ -257,10 +257,8 @@ namespace Astrarium.Plugins.SolarSystem
                 Vec2 w = prj.Project((moon.Ecliptical0 + new CrdsEcliptical(0, 1)).ToEquatorial(prj.Context.Epsilon));
                 Vec2 w0 = prj.Project(moon.Ecliptical0.ToEquatorial(prj.Context.Epsilon));
 
-                double rotAxis = Angle.ToDegrees(Math.Atan2(v.Y - v0.Y, v.X - v0.X)) - 90;
+                double rotAxis = (prj.FlipVertical ? -1 : 1) * (90 - (prj.FlipHorizontal ? -1 : 1) * moon.PAaxis) + Angle.ToDegrees(Math.Atan2(v.Y - v0.Y, v.X - v0.X));
                 double rotPhase = 90 - Angle.ToDegrees(Math.Atan2(w.Y - w0.Y, w.X - w0.X));
-
-                if (!prj.FlipVertical) rotAxis = 180 - rotAxis;
 
                 double size = prj.GetDiskSize(moon.Semidiameter, 10);
                 int q = Math.Min((int)settings.Get<TextureQuality>("MoonTextureQuality"), size < 256 ? 2 : (size < 1024 ? 4 : 8));
@@ -275,7 +273,7 @@ namespace Astrarium.Plugins.SolarSystem
                     PhaseAngle = moon.PhaseAngle,
                     LatitudeShift = -moon.Libration.b,
                     LongitudeShift = -moon.Libration.l,
-                    RotationAxis = rotAxis + (prj.FlipHorizontal ? -1 : 1) * moon.PAaxis,
+                    RotationAxis = rotAxis,
                     RotationPhase = rotPhase,
                     BodyPhysicalDiameter = 3474,
                     SurfaceFeatures = settings.Get("MoonSurfaceFeatures") ? lunarFeatures : null,
@@ -347,13 +345,16 @@ namespace Astrarium.Plugins.SolarSystem
 
                 if (settings.Get<ColorSchema>("Schema") == ColorSchema.Red)
                 {
-                    diffuse = new float[4] { 0.4f, 0, 0, 1f };
+                    diffuse = new float[4] { 0.5f, 0, 0, 1f };
                     ambient = new float[4] { 0.5f, 0, 0, 0.5f };
                 }
                 else
                 {
+                    // color of illuminated part
                     diffuse = new float[4] { 1, 1, 1, 1 };
-                    ambient = new float[4] { 1, 1, 1, 0.5f };
+
+                    // color of unilluminated part
+                    ambient = new float[4] { 0.25f, 0.25f, 0.25f, 1f };
                 }
 
                 GL.Light(LightName.Light0, LightParameter.Ambient, new float[4] { 0, 0, 0, 1 });
@@ -696,7 +697,7 @@ namespace Astrarium.Plugins.SolarSystem
 
 
             // rotation matrix to proper orient sphere 
-            var matVision = Mat4.XRotation(-Math.PI / 2 + Angle.ToRadians(data.LatitudeShift)) * Mat4.ZRotation(Math.PI + Angle.ToRadians(-data.LongitudeShift) * (prj.FlipHorizontal ? -1 : 1));
+            var matVision = Mat4.XRotation(-Math.PI / 2 + Angle.ToRadians((prj.FlipVertical ? 1 : -1) * data.LatitudeShift)) * Mat4.ZRotation(Math.PI + Angle.ToRadians(-data.LongitudeShift) * (prj.FlipHorizontal ? -1 : 1));
 
             // rotation matrix for rings vision
             // TODO: check this
@@ -711,7 +712,7 @@ namespace Astrarium.Plugins.SolarSystem
             // rotation of phase
             double rotPhase = Angle.ToRadians(data.RotationPhase);
 
-            matVision = Mat4.ZRotation((prj.FlipVertical ? 1 : -1) *  rotAxis) * matVision;
+            matVision = Mat4.ZRotation(rotAxis) * matVision;
             matLight = Mat4.ZRotation(rotPhase) * matLight;
 
             // radius of outer ring relative to Saturn equatorial radius
@@ -1288,7 +1289,7 @@ namespace Astrarium.Plugins.SolarSystem
         private Vec2 GetCartesianFeatureCoordinates(Projection prj, float r, CrdsGeographical c, double axisRotation)
         {
             // rotation of axis
-            axisRotation = Angle.ToRadians(-axisRotation) * (prj.FlipHorizontal ? -1 : 1) * (prj.FlipVertical ? -1 : 1);
+            axisRotation = Angle.ToRadians(axisRotation);
 
             // convert to orthographic polar coordinates 
             double Y = r * Math.Sin(Angle.ToRadians(c.Latitude));
