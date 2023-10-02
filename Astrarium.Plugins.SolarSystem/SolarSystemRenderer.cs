@@ -156,15 +156,8 @@ namespace Astrarium.Plugins.SolarSystem
                     // draw as sphere
                     else
                     {
-                        // TODO: move this to separate method (used by Moon and planet drawing)
-                        Vec2 v = prj.Project(planet.Equatorial + new CrdsEquatorial(0, 1));
-                        Vec2 v0 = prj.Project(planet.Equatorial);
-
-                        Vec2 w = prj.Project((planet.Ecliptical + new CrdsEcliptical(0, 1)).ToEquatorial(prj.Context.Epsilon));
-                        Vec2 w0 = prj.Project(planet.Ecliptical.ToEquatorial(prj.Context.Epsilon));
-
-                        double rotAxis = (prj.FlipVertical ? -1 : 1) * (90 - (prj.FlipHorizontal ? -1 : 1) * planet.Appearance.P) + Angle.ToDegrees(Math.Atan2(v.Y - v0.Y, v.X - v0.X));
-                        double rotPhase = 90 - Angle.ToDegrees(Math.Atan2(w.Y - w0.Y, w.X - w0.X));
+                        double rotAxis = prj.GetAxisRotation(planet.Equatorial, planet.Appearance.P);
+                        double rotPhase = prj.GetPhaseRotation(planet.Ecliptical);
 
                         DrawPlanet(map, planet, new SphereParameters()
                         {
@@ -252,14 +245,8 @@ namespace Astrarium.Plugins.SolarSystem
 
             if (settings.Get("Moon"))
             {
-                Vec2 v = prj.Project(moon.Equatorial + new CrdsEquatorial(0, 1));
-                Vec2 v0 = prj.Project(moon.Equatorial);
-
-                Vec2 w = prj.Project((moon.Ecliptical0 + new CrdsEcliptical(0, 1)).ToEquatorial(prj.Context.Epsilon));
-                Vec2 w0 = prj.Project(moon.Ecliptical0.ToEquatorial(prj.Context.Epsilon));
-
-                double rotAxis = (prj.FlipVertical ? -1 : 1) * (90 - (prj.FlipHorizontal ? -1 : 1) * moon.PAaxis) + Angle.ToDegrees(Math.Atan2(v.Y - v0.Y, v.X - v0.X));
-                double rotPhase = 90 - Angle.ToDegrees(Math.Atan2(w.Y - w0.Y, w.X - w0.X));
+                double rotAxis = prj.GetAxisRotation(moon.Equatorial, moon.PAaxis);
+                double rotPhase = prj.GetPhaseRotation(moon.Ecliptical0);
 
                 double size = prj.GetDiskSize(moon.Semidiameter, 10);
                 int q = Math.Min((int)settings.Get<TextureQuality>("MoonTextureQuality"), size < 256 ? 2 : (size < 1024 ? 4 : 8));
