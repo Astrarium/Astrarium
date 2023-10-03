@@ -181,6 +181,47 @@ namespace Astrarium.Plugins.SolarSystem
                         });
                     }
                 }
+                else if (body is JupiterMoon jupiterMoon)
+                {
+                    float size = prj.GetPointSize(jupiterMoon.Magnitude, 1);
+                    double diam = prj.GetDiskSize(jupiterMoon.Semidiameter, 1);
+
+                    if (size < 1) continue;
+
+                    // draw as point
+                    if (size >= diam)
+                    {
+                        var p = prj.Project(jupiterMoon.Equatorial);
+                        if (prj.IsInsideScreen(p))
+                        {
+                            GL.Enable(EnableCap.PointSmooth);
+                            GL.Enable(EnableCap.Blend);
+                            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+                            GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
+
+                            GL.PointSize(size);
+                            GL.Begin(PrimitiveType.Points);
+                            GL.Color3(Color.White);
+                            GL.Vertex2(p.X, p.Y);
+                            GL.End();
+
+                            map.AddDrawnObject(p, jupiterMoon);
+                        }
+                    }
+                    else
+                    {
+                        double rotAxis = prj.GetAxisRotation(jupiterMoon.Equatorial, planetsCalc.Planets.ElementAt(Planet.JUPITER - 1).Appearance.P);
+                        DrawPlanet(map, jupiterMoon, new SphereParameters()
+                        {
+                            Equatorial = jupiterMoon.Equatorial,
+                            TextureName = Path.Combine(dataPath, $"5-{jupiterMoon.Number}.jpg"),
+                            Semidiameter = jupiterMoon.Semidiameter,
+                            LongitudeShift = jupiterMoon.CM,
+                            RotationAxis = rotAxis,
+                            DrawLabel = settings.Get("PlanetsLabels")
+                        });
+                    }
+                }
                 else if (body is Sun && settings.Get("Sun"))
                 {
                     double rotAxis = Angle.ToRadians(prj.GetAxisRotation(sun.Equatorial, -prj.Context.Epsilon));
@@ -321,12 +362,14 @@ namespace Astrarium.Plugins.SolarSystem
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.MirroredRepeat);
         }
 
-        private void DrawPlanet(ISkyMap map, CelestialObject body, SphereParameters data)
+        private void DrawPlanet(ISkyMap map, SizeableCelestialObject body, SphereParameters data)
         {
             var prj = map.SkyProjection;
 
             // do not draw if out of screen
-            if (Angle.Separation(prj.CenterEquatorial, data.Equatorial) > prj.Fov + 1) return;
+            double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
+
+            if (Angle.Separation(prj.CenterEquatorial, data.Equatorial) > fov + body.Semidiameter / 3600 * 2) return;
 
             GL.Enable(EnableCap.Texture2D);
 
@@ -842,8 +885,6 @@ namespace Astrarium.Plugins.SolarSystem
             GL.PopMatrix();
 
             GL.Disable(EnableCap.Texture2D);
-            //GL.ActiveTexture(TextureUnit.Texture0);
-            //GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (int)TextureEnvMode.Modulate);
 
             map.AddDrawnObject(p, body);
         }
