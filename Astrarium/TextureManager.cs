@@ -18,6 +18,7 @@ namespace Astrarium
         private ConcurrentDictionary<string, int> textureIds = new ConcurrentDictionary<string, int>();
 
         private ConcurrentQueue<string> requests = new ConcurrentQueue<string>();
+        private ConcurrentDictionary<string, Action> textureParameterActions = new ConcurrentDictionary<string, Action>();
 
         private AutoResetEvent autoReset = new AutoResetEvent(false);
 
@@ -60,15 +61,20 @@ namespace Astrarium
             }
         }
 
+        public void SetTextureParams(string path, Action action)
+        {
+            textureParameterActions[path] = action;
+        }
+
         private void ProcessPoll()
         {
             while (true)
             {
                 autoReset.WaitOne();
 
-                while (requests.TryDequeue(out string path))
+                while (requests.TryDequeue(out string key))
                 {
-                    LoadTexture(path);
+                    LoadTexture(key);
                 }
             }
         }
@@ -93,6 +99,11 @@ namespace Astrarium
 
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+
+            if (textureParameterActions.ContainsKey(key))
+            {
+                textureParameterActions[key].Invoke();
+            }
 
             textureIds[key] = textureId;
 

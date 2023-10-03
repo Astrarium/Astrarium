@@ -6,5 +6,6 @@ namespace Astrarium.Types
     {
         Action FallbackAction { get; set; }
         int GetTexture(string path, string fallbackPath = null);
+        void SetTextureParams(string path, Action action);
     }
 }

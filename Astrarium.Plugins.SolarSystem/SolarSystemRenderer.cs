@@ -13,9 +13,6 @@ using static Astrarium.Plugins.SolarSystem.Plugin;
 
 namespace Astrarium.Plugins.SolarSystem
 {
-
-
-
     /// <summary>
     /// Draws solar system objects (Sun, Moon and planets) on the map.
     /// </summary>
@@ -84,9 +81,11 @@ namespace Astrarium.Plugins.SolarSystem
             solarTextureManager.FallbackAction += () => map.Invalidate();
 
             textureManager.FallbackAction += () => map.Invalidate();
+            textureManager.SetTextureParams(Path.Combine(dataPath, "PolarCap.png"), SetPolarCapTextureParameters);
 
             sphereRenderer = new SphereRendererFactory().CreateRenderer();
         }
+
 
         public override RendererOrder Order => RendererOrder.SolarSystem;
 
@@ -175,6 +174,9 @@ namespace Astrarium.Plugins.SolarSystem
                             SmoothShadow = planet.Number > Planet.MARS,
                             DrawRings = planet.Number == Planet.SATURN,
                             DrawPhase = true,
+                            DrawPolarCap = planet.Number == Planet.MARS && settings.Get("PlanetsMartianPolarCaps"),
+                            NorthernPolarCap = planet.Number == Planet.MARS ? planetsCalc.MarsNPCWidth : 0,
+                            SouthernPolarCap = planet.Number == Planet.MARS ? planetsCalc.MarsSPCWidth : 0,
                             DrawLabel = settings.Get("PlanetsLabels")
                         });
                     }
@@ -315,6 +317,16 @@ namespace Astrarium.Plugins.SolarSystem
 
             public bool DrawPhase { get; set; }
             public bool DrawLabel { get; set; }
+
+            public bool DrawPolarCap { get; set; }
+            public double NorthernPolarCap { get; set; }
+            public double SouthernPolarCap { get; set; }
+        }
+
+        private void SetPolarCapTextureParameters()
+        {
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.MirroredRepeat);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.MirroredRepeat);
         }
 
         private void DrawPlanet(ISkyMap map, CelestialObject body, SphereParameters data)
@@ -647,6 +659,59 @@ namespace Astrarium.Plugins.SolarSystem
             }
         }
 
+        private void DrawRings(ISkyMap map, SphereParameters data, int sign)
+        {
+            int j;
+            double x, y;
+
+            // number or segments
+            const int segments = 64;
+
+            // radius of outer ring relative to Saturn equatorial radius
+            const double ringsRatio = 2.320;
+
+            var prj = map.SkyProjection;
+
+            GL.Disable(EnableCap.Lighting);
+            GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(Path.Combine(dataPath, "Rings.png")));
+
+            if (settings.Get<ColorSchema>("Schema") == ColorSchema.Red)
+            {
+                GL.Color3(Color.DarkRed);
+            }
+            else
+            {
+                GL.Color3(Color.White);
+            }
+
+            GL.Begin(PrimitiveType.TriangleFan);
+
+            GL.TexCoord2(1, 0);
+            GL.Vertex3(0, 0, 0);
+
+            // radius of outer ring, in pixels
+            double r = prj.GetDiskSize(data.Semidiameter, 10) / 2 * ringsRatio;
+
+            // rotation of axis
+            double rotAxis = Angle.ToRadians(data.RotationAxis);
+
+            // rotation matrix for rings vision
+            var matRings = Mat4.ZRotation(rotAxis) * Mat4.XRotation(Angle.ToRadians(data.LatitudeShift - 90));
+
+            for (j = 0; j <= segments / 2; j++)
+            {
+                double ang = j / (double)segments * 2 * Math.PI - sign * Math.Sign(data.LatitudeShift) * Math.PI / 2 * (prj.FlipVertical ? 1 : -1);
+                x = -Math.Sin(ang);
+                y = -Math.Sign(data.LatitudeShift) * Math.Cos(ang);
+                Vec3 vecVision = matRings * new Vec3(x, y, 0);
+                GL.TexCoord2(0, 0);
+                GL.Vertex3(r * vecVision.X, r * vecVision.Y, 0);
+            }
+            GL.End();
+
+            GL.Enable(EnableCap.Lighting);
+        }
+
         private void DrawPlanetSphere(ISkyMap map, CelestialObject body, SphereParameters data)
         {
             var prj = map.SkyProjection;
@@ -682,14 +747,9 @@ namespace Astrarium.Plugins.SolarSystem
             }
 
             delta = 1.0 / segments;
-            t = 1.0;
-
 
             // rotation matrix to proper orient sphere 
             var matVision = Mat4.XRotation(-Math.PI / 2 + Angle.ToRadians((prj.FlipVertical ? 1 : -1) * data.LatitudeShift)) * Mat4.ZRotation(Math.PI + Angle.ToRadians(-data.LongitudeShift) * (prj.FlipHorizontal ? -1 : 1));
-
-            // rotation matrix for rings vision
-            var matRings = Mat4.XRotation(-Math.PI / 2 + Angle.ToRadians(data.LatitudeShift));
 
             // illumination matrix (phase)
             var matLight = Mat4.YRotation(Angle.ToRadians(data.PhaseAngle) * (prj.FlipHorizontal ? -1 : 1)) * matVision;
@@ -701,11 +761,7 @@ namespace Astrarium.Plugins.SolarSystem
             double rotPhase = Angle.ToRadians(data.RotationPhase);
 
             matVision = Mat4.ZRotation(rotAxis) * matVision;
-            matRings = Mat4.ZRotation(rotAxis) * matRings;
             matLight = Mat4.ZRotation(rotPhase) * matLight;
-
-            // radius of outer ring relative to Saturn equatorial radius
-            const double ringsRatio = 2.320;
 
             float shadowSmoothness = data.SmoothShadow ? 1 : 5;
 
@@ -716,39 +772,34 @@ namespace Astrarium.Plugins.SolarSystem
 
             if (data.DrawRings)
             {
-                GL.Disable(EnableCap.Lighting);
-                GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(Path.Combine(dataPath, "Rings.png")));
-
-                GL.Begin(PrimitiveType.TriangleFan);
-
-                GL.Color3(Color.White);
-                GL.TexCoord2(1, 0);
-                GL.Vertex3(0, 0, 0);
-
-                for (j = 0; j <= segments / 2; j++)
-                {
-                    double ang = j / (double)segments * 2 * Math.PI - Math.Sign(data.LatitudeShift) * Math.PI / 2 * (prj.FlipVertical ? 1 : -1);
-                    x = -Math.Sin(ang);
-                    y = -Math.Sign(data.LatitudeShift) * Math.Cos(ang);
-                    vecVision = matRings * new Vec3(x, y, 0);
-                    GL.Color3(Color.White);
-                    GL.TexCoord2(0, 0);
-                    GL.Vertex3(radius * ringsRatio * vecVision.X, radius * ringsRatio * vecVision.Y, 0);
-                }
-                GL.End();
-
-                GL.Enable(EnableCap.Lighting);
+                DrawRings(map, data, 1);
             }
 
-            for (int texture = 0; texture < 1; texture++)
+            const int LAYER_PLANET = 0;
+            const int LAYER_POLAR_CAP = 1;
+            int layers = data.DrawPolarCap ? 2 : 1;
+
+            double cap1 = 0;
+            double cap2 = 0;
+
+            for (int layer = 0; layer < layers; layer++)
             {
-                if (texture == 0)
+                t = 1;
+
+                // polar cap limits, in fractions of planet diameter
+                if (layer == LAYER_POLAR_CAP)
+                {
+                    cap1 = prj.FlipVertical ? 1 - data.NorthernPolarCap / 180 : 1 - data.SouthernPolarCap / 180;
+                    cap2 = prj.FlipVertical ? data.SouthernPolarCap / 180 : data.NorthernPolarCap / 180;
+                }
+
+                if (layer == LAYER_PLANET)
                 {
                     GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(data.TextureName, data.FallbackTextureName));
                 }
-                else if (texture == 1)
+                else if (layer == LAYER_POLAR_CAP)
                 {
-                    GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture("PolarCap.png"));
+                    GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(Path.Combine(dataPath, "PolarCap.png")));
                 }
 
                 for (i = 0; i < segments; i++)
@@ -770,22 +821,52 @@ namespace Astrarium.Plugins.SolarSystem
                             GL.Normal3(vecLight.X * shadowSmoothness, vecLight.Y * shadowSmoothness, vecLight.Z * shadowSmoothness);
                         }
 
-                        GL.TexCoord2(-s * (prj.FlipHorizontal ? -1 : 1), t * (prj.FlipVertical ? -1 : 1));
+                        if (layer == LAYER_PLANET)
+                        {
+                            GL.TexCoord2(-s * (prj.FlipHorizontal ? -1 : 1), t * (prj.FlipVertical ? -1 : 1));
+                        }
+                        else if (layer == LAYER_POLAR_CAP)
+                        {
+                            if (t > cap1 || t < cap2)
+                            {
+                                GL.TexCoord2(0, 1);
+                            }
+                            else
+                            {
+                                GL.TexCoord2(0, 0);
+                            }
+                        }
+
                         GL.Vertex3(vecVision.X * radius, vecVision.Y * radius, 0);
 
                         x = -cos_sin_theta[j * 2 + 1] * cos_sin_rho[i * 2 + 3];
                         y = cos_sin_theta[j * 2 + 0] * cos_sin_rho[i * 2 + 3];
                         z = cos_sin_rho[i * 2 + 2] * (1 - data.Flattening);
 
-                        vecVision = matVision * new Vec3(x, y, z);                        
+                        vecVision = matVision * new Vec3(x, y, z);
 
                         if (data.DrawPhase)
                         {
                             vecLight = matLight * new Vec3(-x, -y, -z);
                             GL.Normal3(vecLight.X * shadowSmoothness, vecLight.Y * shadowSmoothness, vecLight.Z * shadowSmoothness);
                         }
-                            
-                        GL.TexCoord2(-s * (prj.FlipHorizontal ? -1 : 1), (t - delta) * (prj.FlipVertical ? -1 : 1));
+
+                        if (layer == LAYER_PLANET)
+                        {
+                            GL.TexCoord2(-s * (prj.FlipHorizontal ? -1 : 1), (t - delta) * (prj.FlipVertical ? -1 : 1));
+                        }
+                        else if (layer == LAYER_POLAR_CAP)
+                        {
+                            if (t - delta > cap1 || t - delta < cap2)
+                            {
+                                GL.TexCoord2(0, 1);
+                            }
+                            else
+                            {
+                                GL.TexCoord2(0, 0);
+                            }
+                        }
+
                         GL.Vertex3(vecVision.X * radius, vecVision.Y * radius, 0);
 
                         s += delta;
@@ -798,28 +879,7 @@ namespace Astrarium.Plugins.SolarSystem
 
             if (data.DrawRings)
             {
-                GL.Disable(EnableCap.Lighting);
-                GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(Path.Combine(dataPath, "Rings.png")));
-
-                GL.Begin(PrimitiveType.TriangleFan);
-
-                GL.Color3(Color.White);
-                GL.TexCoord2(1, 0);
-                GL.Vertex3(0, 0, 0);
-
-                for (j = 0; j <= segments / 2; j++)
-                {
-                    double ang = j / (double)segments * 2 * Math.PI + Math.Sign(data.LatitudeShift) * Math.PI / 2 * (prj.FlipVertical ? 1 : -1);
-                    x = -Math.Sin(ang);
-                    y = -Math.Sign(data.LatitudeShift) * Math.Cos(ang);
-                    vecVision = matRings * new Vec3(x, y, 0);
-                    GL.Color3(Color.White);
-                    GL.TexCoord2(0, 0);
-                    GL.Vertex3(radius * ringsRatio * vecVision.X, radius * ringsRatio * vecVision.Y, 0);
-                }
-                GL.End();
-
-                GL.Enable(EnableCap.Lighting);
+                DrawRings(map, data, -1);
             }
 
             GL.PopMatrix();
