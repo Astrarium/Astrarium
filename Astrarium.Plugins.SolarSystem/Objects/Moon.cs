@@ -6,7 +6,7 @@ namespace Astrarium.Plugins.SolarSystem.Objects
     /// <summary>
     /// Contains coordinates and visual appearance data for the Moon for given instant of time.
     /// </summary>
-    public class Moon : SizeableCelestialObject, IMovingObject
+    public class Moon : SizeableCelestialObject, ISolarSystemObject, IMovingObject
     {
         /// <inheritdoc />
         public override string Type => "Moon";
@@ -23,6 +23,11 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         /// Geocentrical ecliptical corrdinates
         /// </summary>
         public CrdsEcliptical Ecliptical0 { get; set; }
+
+        /// <summary>
+        /// Distance from Earth, in AU
+        /// </summary>
+        public double DistanceFromEarth => Ecliptical0.Distance / 149597870;
 
         /// <summary>
         /// Elongation angle, i.e. angular distance from the Sun. 

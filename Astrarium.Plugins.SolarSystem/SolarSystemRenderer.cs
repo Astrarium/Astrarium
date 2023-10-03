@@ -100,6 +100,7 @@ namespace Astrarium.Plugins.SolarSystem
                 .Cast<ISolarSystemObject>()
                 .Concat(new[] { pluto })
                 .Concat(new[] { sun })
+                .Concat(new[] { moon })
                 .Concat(planetsCalc.MarsMoons)
                 .Concat(planetsCalc.JupiterMoons)
                 .Concat(planetsCalc.SaturnMoons)
@@ -111,7 +112,7 @@ namespace Astrarium.Plugins.SolarSystem
 
             foreach (var body in bodies)
             {
-                if (body is Planet planet)
+                if (body is Planet planet && settings.Get("Planets"))
                 {
                     float size = prj.GetPointSize(planet.Magnitude, maxDrawingSize: 7);
                     double diam = prj.GetDiskSize(planet.Semidiameter);
@@ -173,7 +174,6 @@ namespace Astrarium.Plugins.SolarSystem
                             SurfaceFeatures = planet.Number == Planet.MARS && settings.Get("PlanetsSurfaceFeatures") ? martianFeatures : null,
                             SmoothShadow = planet.Number > Planet.MARS,
                             DrawRings = planet.Number == Planet.SATURN,
-                            DrawPhase = true,
                             DrawPolarCap = planet.Number == Planet.MARS && settings.Get("PlanetsMartianPolarCaps"),
                             NorthernPolarCap = planet.Number == Planet.MARS ? planetsCalc.MarsNPCWidth : 0,
                             SouthernPolarCap = planet.Number == Planet.MARS ? planetsCalc.MarsSPCWidth : 0,
@@ -181,99 +181,92 @@ namespace Astrarium.Plugins.SolarSystem
                         });
                     }
                 }
-            }
-
-            if (settings.Get("Sun"))
-            {
-                double rotAxis = Angle.ToRadians(prj.GetAxisRotation(sun.Equatorial, -prj.Context.Epsilon));
-                
-                double size = prj.GetDiskSize(sun.Semidiameter, 10);
-                double r = size / 2;
-                Vec2 p = prj.Project(sun.Equatorial);
-
-                GL.Enable(EnableCap.Texture2D);
-                GL.Enable(EnableCap.Blend);
-                GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-
-                int textureId = -1;
-
-                if (settings.Get("SunTexture"))
+                else if (body is Sun && settings.Get("Sun"))
                 {
-                    textureId = solarTextureManager.GetTexture(prj.Context.JulianDay);
-                    GL.BindTexture(TextureTarget.Texture2D, textureId);
-                }
+                    double rotAxis = Angle.ToRadians(prj.GetAxisRotation(sun.Equatorial, -prj.Context.Epsilon));
 
-                GL.PushMatrix();
-                GL.Translate(p.X, p.Y, 0);
+                    double size = prj.GetDiskSize(sun.Semidiameter, 10);
+                    double r = size / 2;
+                    Vec2 p = prj.Project(sun.Equatorial);
 
-                GL.Begin(PrimitiveType.TriangleFan);
+                    GL.Enable(EnableCap.Texture2D);
+                    GL.Enable(EnableCap.Blend);
+                    GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
-                if (textureId > 0)
-                {
-                    // TODO: tint color
-                    GL.Color4(Color.White);
-                }
-                else
-                {
-                    GL.Color4(Color.Orange);
-                }
+                    int textureId = -1;
 
-                for (int i = 0; i <= 64; i++)
-                {
-                    double ang0 = Angle.ToRadians(i / 64.0 * 360);
-                    double ang = ang0 + rotAxis;
-                    Vec2 v = new Vec2(r * Math.Cos(ang), r * Math.Sin(ang));
+                    if (settings.Get("SunTexture"))
+                    {
+                        textureId = solarTextureManager.GetTexture(prj.Context.JulianDay);
+                        GL.BindTexture(TextureTarget.Texture2D, textureId);
+                    }
+
+                    GL.PushMatrix();
+                    GL.Translate(p.X, p.Y, 0);
+
+                    GL.Begin(PrimitiveType.TriangleFan);
 
                     if (textureId > 0)
                     {
-                        double tx = (prj.FlipHorizontal ? -1 : 1) * Math.Cos(ang0);
-                        double ty = (prj.FlipVertical ? -1 : 1) * Math.Sin(ang0);
-                        Vec2 vt = new Vec2(tx, ty);
-                        GL.TexCoord2(0.5f + 0.499f * vt.X, 0.5f + 0.499f * vt.Y);
+                        // TODO: tint color
+                        GL.Color4(Color.White);
                     }
-                    GL.Vertex2(v.X, v.Y);
+                    else
+                    {
+                        GL.Color4(Color.Orange);
+                    }
+
+                    for (int i = 0; i <= 64; i++)
+                    {
+                        double ang0 = Angle.ToRadians(i / 64.0 * 360);
+                        double ang = ang0 + rotAxis;
+                        Vec2 v = new Vec2(r * Math.Cos(ang), r * Math.Sin(ang));
+
+                        if (textureId > 0)
+                        {
+                            double tx = (prj.FlipHorizontal ? -1 : 1) * Math.Cos(ang0);
+                            double ty = (prj.FlipVertical ? -1 : 1) * Math.Sin(ang0);
+                            Vec2 vt = new Vec2(tx, ty);
+                            GL.TexCoord2(0.5f + 0.499f * vt.X, 0.5f + 0.499f * vt.Y);
+                        }
+                        GL.Vertex2(v.X, v.Y);
+                    }
+
+                    GL.End();
+
+                    GL.PopMatrix();
+
+                    GL.Disable(EnableCap.Texture2D);
+                    GL.Disable(EnableCap.Blend);
                 }
-
-                GL.End();
-
-                GL.PopMatrix();
-
-                GL.Disable(EnableCap.Texture2D);
-                GL.Disable(EnableCap.Blend);
-            }
-
-        
-
-            // Moon
-
-            if (settings.Get("Moon"))
-            {
-                double rotAxis = prj.GetAxisRotation(moon.Equatorial, moon.PAaxis);
-                double rotPhase = prj.GetPhaseRotation(moon.Ecliptical0);
-
-                double size = prj.GetDiskSize(moon.Semidiameter, 10);
-                int q = Math.Min((int)settings.Get<TextureQuality>("MoonTextureQuality"), size < 256 ? 2 : (size < 1024 ? 4 : 8));
-                string textureName = $"Moon-{q}k.jpg";
-
-                DrawPlanet(map, moon, new SphereParameters()
+                else if (body is Moon && settings.Get("Moon"))
                 {
-                    Equatorial = moon.Equatorial,
-                    TextureName = Path.Combine(dataPath, textureName),
-                    FallbackTextureName = Path.Combine(dataPath, "Moon-2k.jpg"),
-                    Semidiameter = moon.Semidiameter,
-                    PhaseAngle = moon.PhaseAngle,
-                    LatitudeShift = -moon.Libration.b,
-                    LongitudeShift = -moon.Libration.l,
-                    RotationAxis = rotAxis,
-                    RotationPhase = rotPhase,
-                    BodyPhysicalDiameter = 3474,
-                    SurfaceFeatures = settings.Get("MoonSurfaceFeatures") ? lunarFeatures : null,
-                    EarthShadowApperance = moon.EarthShadow,
-                    EarthShadowCoordinates = moon.EarthShadowCoordinates,
-                    SmoothShadow = false,
-                    DrawPhase = settings.Get("MoonPhase"),
-                    DrawLabel = settings.Get("MoonLabel")
-                });
+                    double rotAxis = prj.GetAxisRotation(moon.Equatorial, moon.PAaxis);
+                    double rotPhase = prj.GetPhaseRotation(moon.Ecliptical0);
+
+                    double size = prj.GetDiskSize(moon.Semidiameter, 10);
+                    int q = Math.Min((int)settings.Get<TextureQuality>("MoonTextureQuality"), size < 256 ? 2 : (size < 1024 ? 4 : 8));
+                    string textureName = $"Moon-{q}k.jpg";
+
+                    DrawPlanet(map, moon, new SphereParameters()
+                    {
+                        Equatorial = moon.Equatorial,
+                        TextureName = Path.Combine(dataPath, textureName),
+                        FallbackTextureName = Path.Combine(dataPath, "Moon-2k.jpg"),
+                        Semidiameter = moon.Semidiameter,
+                        PhaseAngle = moon.PhaseAngle,
+                        LatitudeShift = -moon.Libration.b,
+                        LongitudeShift = -moon.Libration.l,
+                        RotationAxis = rotAxis,
+                        RotationPhase = rotPhase,
+                        BodyPhysicalDiameter = 3474,
+                        SurfaceFeatures = settings.Get("MoonSurfaceFeatures") ? lunarFeatures : null,
+                        EarthShadowApperance = moon.EarthShadow,
+                        EarthShadowCoordinates = moon.EarthShadowCoordinates,
+                        SmoothShadow = false,
+                        DrawLabel = settings.Get("MoonLabel")
+                    });
+                }
             }
         }
 
@@ -315,7 +308,6 @@ namespace Astrarium.Plugins.SolarSystem
             public double LongitudeShift { get; set; }
             public double LatitudeShift { get; set; }
 
-            public bool DrawPhase { get; set; }
             public bool DrawLabel { get; set; }
 
             public bool DrawPolarCap { get; set; }
@@ -338,51 +330,38 @@ namespace Astrarium.Plugins.SolarSystem
 
             GL.Enable(EnableCap.Texture2D);
 
-            if (data.DrawPhase)
+            float[] zero = new float[4] { 0, 0, 0, 0 };
+            float[] ambient;
+            float[] diffuse;
+
+            if (settings.Get<ColorSchema>("Schema") == ColorSchema.Red)
             {
-                float[] zero = new float[4] { 0, 0, 0, 0 };
-                float[] ambient;
-                float[] diffuse;
-
-                if (settings.Get<ColorSchema>("Schema") == ColorSchema.Red)
-                {
-                    diffuse = new float[4] { 0.5f, 0, 0, 1f };
-                    ambient = new float[4] { 0.5f, 0, 0, 0.5f };
-                }
-                else
-                {
-                    // color of illuminated part
-                    diffuse = new float[4] { 1, 1, 1, 1 };
-
-                    // color of unilluminated part
-                    ambient = new float[4] { 0.25f, 0.25f, 0.25f, 1f };
-                }
-
-                GL.Light(LightName.Light0, LightParameter.Ambient, new float[4] { 0, 0, 0, 1 });
-                GL.Light(LightName.Light0, LightParameter.Diffuse, diffuse);
-                GL.Light(LightName.Light0, LightParameter.Specular, zero);
-                GL.Light(LightName.Light0, LightParameter.ConstantAttenuation, 1.0f);
-
-                GL.Material(MaterialFace.Front, MaterialParameter.Ambient, ambient);
-                GL.Material(MaterialFace.Front, MaterialParameter.Diffuse, diffuse);
-                GL.Material(MaterialFace.Front, MaterialParameter.Emission, zero);
-                GL.Material(MaterialFace.Front, MaterialParameter.Shininess, zero);
-                GL.Material(MaterialFace.Front, MaterialParameter.Specular, zero);
-
-                GL.Enable(EnableCap.Light0);
-                GL.Enable(EnableCap.Lighting);
+                diffuse = new float[4] { 0.5f, 0, 0, 1f };
+                ambient = new float[4] { 0.5f, 0, 0, 0.5f };
             }
             else
             {
-                if (settings.Get<ColorSchema>("Schema") == ColorSchema.Red)
-                {
-                    GL.Color3(Color.DarkRed);
-                }
-                else
-                {
-                    GL.Color3(Color.White);
-                }
+                // color of illuminated part
+                diffuse = new float[4] { 1, 1, 1, 1 };
+
+                // color of unilluminated part
+                ambient = new float[4] { 0.25f, 0.25f, 0.25f, 1f };
             }
+
+            GL.Light(LightName.Light0, LightParameter.Ambient, new float[4] { 0, 0, 0, 1 });
+            GL.Light(LightName.Light0, LightParameter.Diffuse, diffuse);
+            GL.Light(LightName.Light0, LightParameter.Specular, zero);
+            GL.Light(LightName.Light0, LightParameter.ConstantAttenuation, 1.0f);
+
+            GL.Material(MaterialFace.Front, MaterialParameter.Ambient, ambient);
+            GL.Material(MaterialFace.Front, MaterialParameter.Diffuse, diffuse);
+            GL.Material(MaterialFace.Front, MaterialParameter.Emission, zero);
+            GL.Material(MaterialFace.Front, MaterialParameter.Shininess, zero);
+            GL.Material(MaterialFace.Front, MaterialParameter.Specular, zero);
+
+            GL.Enable(EnableCap.Light0);
+            GL.Enable(EnableCap.Lighting);
+            
 
             GL.Enable(EnableCap.CullFace);
             GL.Enable(EnableCap.Blend);
@@ -491,7 +470,7 @@ namespace Astrarium.Plugins.SolarSystem
                 double dist = Angle.Separation(data.Equatorial, eqShadow);
 
                 // color of umbra center
-                Color colorCenter = Color.FromArgb(220, 10, 0, 0);// Color.FromArgb(240, Color.Black);
+                Color colorCenter = Color.FromArgb(220, 10, 0, 0);
 
                 // color of umbra edge
                 Color colorEdge = Color.FromArgb(230, Color.Black);
@@ -722,31 +701,17 @@ namespace Astrarium.Plugins.SolarSystem
             GL.Translate(p.X, p.Y, 0);
 
             double x, y, z;
-            double s, t, delta;
+            double s, t;
             int i, j;
 
             const int segments = 64;
             double drho = Math.PI / segments;
             double dtheta = 2.0 * Math.PI / segments;
 
-            double[] cos_sin_rho = new double[2 * (segments + 1)];
-            double[] cos_sin_theta = new double[2 * (segments + 1)];
-
             // radius of sphere, in pixels
             double radius = prj.GetDiskSize(data.Semidiameter, 10) / 2;
 
-            for (i = 0; i <= segments; i++)
-            {
-                double rho = i * drho;
-                cos_sin_rho[2 * i] = Math.Cos(rho);
-                cos_sin_rho[2 * i + 1] = Math.Sin(rho);
-
-                double theta = i * dtheta;
-                cos_sin_theta[2 * i] = Math.Cos(theta);
-                cos_sin_theta[2 * i + 1] = Math.Sin(theta);
-            }
-
-            delta = 1.0 / segments;
+            double delta = 1.0 / segments;
 
             // rotation matrix to proper orient sphere 
             var matVision = Mat4.XRotation(-Math.PI / 2 + Angle.ToRadians((prj.FlipVertical ? 1 : -1) * data.LatitudeShift)) * Mat4.ZRotation(Math.PI + Angle.ToRadians(-data.LongitudeShift) * (prj.FlipHorizontal ? -1 : 1));
@@ -809,17 +774,13 @@ namespace Astrarium.Plugins.SolarSystem
 
                     for (j = 0; j <= segments; j++)
                     {
-                        x = -cos_sin_theta[j * 2 + 1] * cos_sin_rho[i * 2 + 1];
-                        y = cos_sin_theta[j * 2 + 0] * cos_sin_rho[i * 2 + 1];
-                        z = cos_sin_rho[i * 2 + 0] * (1 - data.Flattening);
+                        x = -Math.Sin(j * dtheta) * Math.Sin(i * drho);
+                        y = Math.Cos(j * dtheta) * Math.Sin(i * drho);
+                        z = Math.Cos(i * drho) * (1 - data.Flattening);
 
                         vecVision = matVision * new Vec3(x, y, z);
-
-                        if (data.DrawPhase)
-                        {
-                            vecLight = matLight * new Vec3(-x, -y, -z);
-                            GL.Normal3(vecLight.X * shadowSmoothness, vecLight.Y * shadowSmoothness, vecLight.Z * shadowSmoothness);
-                        }
+                        vecLight = matLight * new Vec3(-x, -y, -z);
+                        GL.Normal3(vecLight.X * shadowSmoothness, vecLight.Y * shadowSmoothness, vecLight.Z * shadowSmoothness);
 
                         if (layer == LAYER_PLANET)
                         {
@@ -839,17 +800,13 @@ namespace Astrarium.Plugins.SolarSystem
 
                         GL.Vertex3(vecVision.X * radius, vecVision.Y * radius, 0);
 
-                        x = -cos_sin_theta[j * 2 + 1] * cos_sin_rho[i * 2 + 3];
-                        y = cos_sin_theta[j * 2 + 0] * cos_sin_rho[i * 2 + 3];
-                        z = cos_sin_rho[i * 2 + 2] * (1 - data.Flattening);
+                        x = -Math.Sin(j * dtheta) * Math.Sin((i + 1) * drho);
+                        y = Math.Cos(j * dtheta) * Math.Sin((i + 1) * drho);
+                        z = Math.Cos((i + 1) * drho) * (1 - data.Flattening);
 
                         vecVision = matVision * new Vec3(x, y, z);
-
-                        if (data.DrawPhase)
-                        {
-                            vecLight = matLight * new Vec3(-x, -y, -z);
-                            GL.Normal3(vecLight.X * shadowSmoothness, vecLight.Y * shadowSmoothness, vecLight.Z * shadowSmoothness);
-                        }
+                        vecLight = matLight * new Vec3(-x, -y, -z);
+                        GL.Normal3(vecLight.X * shadowSmoothness, vecLight.Y * shadowSmoothness, vecLight.Z * shadowSmoothness);
 
                         if (layer == LAYER_PLANET)
                         {
@@ -885,8 +842,8 @@ namespace Astrarium.Plugins.SolarSystem
             GL.PopMatrix();
 
             GL.Disable(EnableCap.Texture2D);
-            GL.ActiveTexture(TextureUnit.Texture0);
-            GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (int)TextureEnvMode.Modulate);
+            //GL.ActiveTexture(TextureUnit.Texture0);
+            //GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (int)TextureEnvMode.Modulate);
 
             map.AddDrawnObject(p, body);
         }
