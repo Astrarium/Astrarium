@@ -199,7 +199,7 @@ namespace Astrarium.Plugins.Horizon
 
             if (settings.Get<ColorSchema>("Schema") == ColorSchema.Red)
             {
-                GL.Color4(Color.FromArgb(c, 0, 0));
+                GL.Color4(Color.FromArgb((int)(c * 0.6), 0, 0));
             }
             else
             {
@@ -218,7 +218,7 @@ namespace Astrarium.Plugins.Horizon
 
                         if (p != null)
                         {
-                            double s = 1 - (double)i / steps;
+                            double s = /*1 - */(double)i / steps;
                             double t = (90 - (lat - k * 10)) / 180.0;
 
                             GL.TexCoord2(s, t);

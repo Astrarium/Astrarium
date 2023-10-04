@@ -179,12 +179,52 @@ namespace Astrarium.Plugins.SolarSystem
                             SouthernPolarCap = planet.Number == Planet.MARS ? planetsCalc.MarsSPCWidth : 0,
                             DrawLabel = settings.Get("PlanetsLabels")
                         });
+
+                        if (planet.Number == Planet.JUPITER)
+                        {
+                            // draw moon shadows
+
+                            RenderJupiterMoonShadow(map, planet);
+                           
+                            
+                        }
                     }
                 }
+                else if (body is MarsMoon mm)
+                {
+                    float size = prj.GetPointSize(mm.Magnitude, 2f);
+                    if (size >= 1)
+                    {
+                        var p = prj.Project(mm.Equatorial);
+                        if (prj.IsInsideScreen(p))
+                        {
+                            GL.Enable(EnableCap.PointSmooth);
+                            GL.Enable(EnableCap.Blend);
+                            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+                            GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
+
+                            GL.PointSize(size);
+                            GL.Begin(PrimitiveType.Points);
+                            GL.Color3(Color.White);
+                            GL.Vertex2(p.X, p.Y);
+                            GL.End();
+
+                            map.AddDrawnObject(p, mm);
+
+                            if (settings.Get("PlanetsLabels"))
+                            {
+                                var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
+                                textRenderer.Value.DrawString(mm.Name, fontLabel, brushLabel, p);
+                            }
+                        }
+
+                    }
+                }
+
                 else if (body is JupiterMoon jupiterMoon)
                 {
-                    float size = prj.GetPointSize(jupiterMoon.Magnitude, 1);
-                    double diam = prj.GetDiskSize(jupiterMoon.Semidiameter, 1);
+                    float size = prj.GetPointSize(jupiterMoon.Magnitude, 3);
+                    double diam = prj.GetDiskSize(jupiterMoon.Semidiameter);
 
                     if (size < 1) continue;
 
@@ -210,16 +250,22 @@ namespace Astrarium.Plugins.SolarSystem
                     }
                     else
                     {
-                        double rotAxis = prj.GetAxisRotation(jupiterMoon.Equatorial, planetsCalc.Planets.ElementAt(Planet.JUPITER - 1).Appearance.P);
+                        var jupiter = planetsCalc.Planets.ElementAt(Planet.JUPITER - 1);
+                        double rotAxis = prj.GetAxisRotation(jupiterMoon.Equatorial, jupiter.Appearance.P);
+                        double rotPhase = prj.GetPhaseRotation(jupiter.Ecliptical);
                         DrawPlanet(map, jupiterMoon, new SphereParameters()
                         {
                             Equatorial = jupiterMoon.Equatorial,
                             TextureName = Path.Combine(dataPath, $"5-{jupiterMoon.Number}.jpg"),
                             Semidiameter = jupiterMoon.Semidiameter,
                             LongitudeShift = jupiterMoon.CM,
+                            PhaseAngle = jupiter.PhaseAngle,
                             RotationAxis = rotAxis,
+                            RotationPhase = rotPhase,
                             DrawLabel = settings.Get("PlanetsLabels")
                         });
+
+                        
                     }
                 }
                 else if (body is Sun && settings.Get("Sun"))
@@ -752,7 +798,7 @@ namespace Astrarium.Plugins.SolarSystem
             double dtheta = 2.0 * Math.PI / segments;
 
             // radius of sphere, in pixels
-            double radius = prj.GetDiskSize(data.Semidiameter, 10) / 2;
+            double radius = prj.GetDiskSize(data.Semidiameter) / 2;
 
             double delta = 1.0 / segments;
 
@@ -1797,6 +1843,155 @@ namespace Astrarium.Plugins.SolarSystem
             if (!regionU.IsEmpty(map.Graphics))
             {
                 map.DrawObjectCaption(fontShadowLabel, brushShadowLabel, Text.Get("EclipsedByJupiter"), pMoon, szB);
+            }
+        }
+
+        private void RenderEclipseShadow(Vec2 pBody, Vec2 pShadow, float radiusBody, float radiusPenumbra, float radiusUmbra)
+        {
+            GL.PushMatrix();
+            GL.Translate(pBody.X, pBody.Y, 0);
+
+            // initiate stencil
+            GL.Enable(EnableCap.StencilTest);
+            GL.Clear(ClearBufferMask.StencilBufferBit);
+            GL.StencilMask(0xFF);
+            GL.ColorMask(false, false, false, false);
+            GL.StencilFunc(StencilFunction.Always, 1, 0xFF);
+            GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Replace);
+
+            // draw stencil pattern (body outline)
+
+            GL.Begin(PrimitiveType.TriangleFan);
+
+            for (int i = 0; i <= 64; i++)
+            {
+                double ang = i / 64.0 * 2 * Math.PI;
+                Vec2 v = new Vec2(radiusBody * Math.Cos(ang), radiusBody * Math.Sin(ang));
+                GL.Vertex2(v.X, v.Y);
+            }
+
+            GL.End();
+            GL.PopMatrix();
+
+            // draw shadow
+
+            GL.StencilFunc(StencilFunction.Equal, 1, 0xFF);
+            GL.StencilOp(StencilOp.Keep, StencilOp.Replace, StencilOp.Replace);
+            GL.ColorMask(true, true, true, true);
+
+            GL.PushMatrix();
+            GL.Translate(pShadow.X, pShadow.Y, 0);
+
+            // enable blending because shadow is semitransparent
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+
+            double[] radii = new double[] { 0, radiusUmbra * 0.99, radiusUmbra, radiusPenumbra * 1.01, radiusPenumbra };
+            Color[] colors = new Color[] { Color.FromArgb(250, 0, 0, 0), Color.FromArgb(250, 0, 0, 0), Color.FromArgb(150, 0, 0, 0), Color.FromArgb(0, 0, 0, 0), Color.FromArgb(0, 0, 0, 0) };
+
+            for (int i = 0; i < radii.Length; i++)
+            {
+                GL.Begin(PrimitiveType.TriangleStrip);
+
+                for (int j = 0; j <= 63; j++)
+                {
+                    double ang = j / 63.0 * 2 * Math.PI;
+
+                    // outer
+                    {
+                        Vec2 v = new Vec2(radii[i] * Math.Cos(ang), radii[i] * Math.Sin(ang));
+                        GL.Color4(colors[i]);
+                        GL.Vertex2(v.X, v.Y);
+                    }
+
+                    // inner
+                    if (i > 0)
+                    {
+                        Vec2 v = new Vec2(radii[i - 1] * Math.Cos(ang), radii[i - 1] * Math.Sin(ang));
+                        GL.Color4(colors[i - 1]);
+                        GL.Vertex2(v.X, v.Y);
+                    }
+                    else
+                    {
+                        GL.Color4(colors[0]);
+                        GL.Vertex2(0, 0);
+                    }
+                }
+
+                GL.End();
+            }
+
+            // disable stencil
+
+            GL.Disable(EnableCap.Blend);
+            GL.Disable(EnableCap.StencilTest);
+
+            GL.PopMatrix();
+        }
+
+        private void RenderJupiterMoonShadow(ISkyMap map, SizeableCelestialObject eclipsedBody, CrdsRectangular rect = null)
+        {
+            if (!settings.Get("Planets")) return;
+            if (!settings.Get("PlanetMoons")) return;
+
+            Projection prj = map.SkyProjection;
+
+            if (rect == null)
+            {
+                rect = new CrdsRectangular();
+            }
+
+            // collect moons than can produce a shadow
+            var ecliptingMoons = planetsCalc.JupiterMoons.Where(m => m.RectangularS.Z < rect.Z);
+
+            if (ecliptingMoons.Any())
+            {
+                Planet jupiter = planetsCalc.Planets.ElementAt(Planet.JUPITER - 1);
+
+                // Jupiter radius, in pixels
+                float sd = prj.GetDiskSize(jupiter.Semidiameter) / 2;
+
+                // Center of eclipsed body
+                Vec2 pBody = prj.Project(eclipsedBody.Horizontal); // TODO: change to Equatorial
+
+                // elipsed body size, in pixels
+                float radiusBody = prj.GetDiskSize(eclipsedBody.Semidiameter) / 2;
+
+                foreach (var moon in ecliptingMoons)
+                {
+                    // umbra and penumbra radii, in acrseconds
+                    var shadow = GalileanMoons.Shadow(jupiter.Ecliptical.Distance, jupiter.DistanceFromSun, moon.Number - 1, moon.RectangularS, rect);
+
+                    // umbra and penumbra size, in pixels
+                    float radiusUmbra = prj.GetDiskSize(shadow.Umbra) / 2;
+                    float radiusPenumbra = prj.GetDiskSize(shadow.Penumbra) / 2;
+
+                    // coordinates of shadow relative to eclipsed body
+                    CrdsRectangular shadowRelative = moon.RectangularS - rect;
+
+                    // Center of shadow
+                    Vec2 p = new Vec2(shadowRelative.X * sd * (prj.FlipHorizontal ? -1 : 1), shadowRelative.Y * sd * (prj.FlipVertical ? 1 : -1));
+
+                    double rot = prj.GetAxisRotation(jupiter.Equatorial, jupiter.Appearance.P);
+
+                    p = Mat4.ZRotation(Angle.ToRadians(rot)) * p + pBody;
+
+
+                    // shadow has enough size to be rendered
+                    if ((int)radiusPenumbra > 0)
+                    {
+                        RenderEclipseShadow(pBody, p, radiusBody, radiusPenumbra, radiusUmbra);
+                        
+                        // outline
+                        //Primitives.DrawEllipse(p, Pens.Maroon, radiusPenumbra);
+                        //
+
+                        
+                        
+                    }
+
+                    //g.ResetTransform();
+                }
             }
         }
 
