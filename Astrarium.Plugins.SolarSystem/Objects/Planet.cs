@@ -104,6 +104,11 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         /// </summary>
         public static readonly double[] DAILY_MOTIONS = new[] { 1.3833, 1.2, 0, 0.542, 0.0831, 0.0336, 0.026666, 0.006668 };
 
+        /// <summary>
+        /// Equatorial radii of planets, in kilometers
+        /// </summary>
+        public static readonly double[] EQUATORIAL_RADIUS = new[] { 2439.7, 6051.8, 6371, 3389.5, 69911, 58232, 25362, 24622 };
+
         public const int MERCURY    = 1;
         public const int VENUS      = 2;
         public const int EARTH      = 3;

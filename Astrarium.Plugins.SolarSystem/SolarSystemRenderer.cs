@@ -33,13 +33,7 @@ namespace Astrarium.Plugins.SolarSystem
 
         private readonly Color clrSunDaylight = Color.FromArgb(255, 255, 200);
         private readonly Color clrSunNight = Color.FromArgb(250, 210, 10);
-        private static Color clrShadow = Color.FromArgb(10, 10, 10);
 
-        private Color clrPenumbraTransp = Color.Transparent;
-        private Color clrPenumbraGrayLight = Color.FromArgb(100, clrShadow);
-        private Color clrPenumbraGrayDark = Color.FromArgb(200, clrShadow);
-        private Color clrUmbraGray = Color.FromArgb(230, clrShadow);
-        private Color clrUmbraRed = Color.FromArgb(200, 50, 0, 0);
         private Color clrJupiterShadow = Color.FromArgb(200, 0, 0, 0);
         private Color clrJupiterMoonShadowLight = Color.FromArgb(128, 0, 0, 0);
         private Color clrJupiterMoonShadowDark = Color.FromArgb(64, 0, 0, 0);
@@ -68,10 +62,10 @@ namespace Astrarium.Plugins.SolarSystem
             this.textureManager = textureManager;
             this.settings = settings;
 
-            this.sun = solarCalc.Sun;
-            this.moon = lunarCalc.Moon;
-            this.mars = planetsCalc.Planets.ElementAt(Planet.MARS - 1);
-            this.pluto = planetsCalc.Pluto;
+            sun = solarCalc.Sun;
+            moon = lunarCalc.Moon;
+            mars = planetsCalc.Planets.ElementAt(Planet.MARS - 1);
+            pluto = planetsCalc.Pluto;
 
             var featuresReader = new SurfaceFeaturesReader();
             lunarFeatures = featuresReader.Read(Path.Combine(dataPath, "LunarFeatures.dat"));
@@ -170,7 +164,7 @@ namespace Astrarium.Plugins.SolarSystem
                             LongitudeShift = planet.Appearance.CM - (planet.Number == Planet.JUPITER ? planetsCalc.GreatRedSpotLongitude : 0),
                             RotationAxis = rotAxis,
                             RotationPhase = rotPhase,
-                            BodyPhysicalDiameter = planet.Number == Planet.MARS ? 6779 : 0,
+                            BodyPhysicalDiameter = 2 * Planet.EQUATORIAL_RADIUS[planet.Number - 1],
                             SurfaceFeatures = planet.Number == Planet.MARS && settings.Get("PlanetsSurfaceFeatures") ? martianFeatures : null,
                             SmoothShadow = planet.Number > Planet.MARS,
                             DrawRings = planet.Number == Planet.SATURN,
@@ -182,11 +176,8 @@ namespace Astrarium.Plugins.SolarSystem
 
                         if (planet.Number == Planet.JUPITER)
                         {
-                            // draw moon shadows
-
+                            // draw moon shadows over Jupiter
                             RenderJupiterMoonShadow(map, planet);
-                           
-                            
                         }
                     }
                 }
@@ -265,7 +256,8 @@ namespace Astrarium.Plugins.SolarSystem
                             DrawLabel = settings.Get("PlanetsLabels")
                         });
 
-                        
+                        RenderJupiterMoonShadow(map, jupiterMoon, jupiterMoon.RectangularS);
+                        //RenderJupiterShadow(map, jupiterMoon);
                     }
                 }
                 else if (body is Sun && settings.Get("Sun"))
@@ -488,48 +480,15 @@ namespace Astrarium.Plugins.SolarSystem
             var prj = map.SkyProjection;
 
             // moon radius in pixels (1 extra pixel added for better rendering)
-            double r = prj.GetDiskSize(data.Semidiameter) / 2 + 1;
+            float rMoon = prj.GetDiskSize(data.Semidiameter) / 2 + 1;
 
-            if (r > 5)
+            if (rMoon > 5)
             {
-                // Earth shadow
-                var eqShadow = data.EarthShadowCoordinates;
-
                 // center of the moon in screen coordinates
-                var p = prj.Project(data.Equatorial);
+                var pMoon = prj.Project(data.Equatorial);
 
-                GL.PushMatrix();
-                GL.Translate(p.X, p.Y, 0);
-
-                GL.Enable(EnableCap.StencilTest);
-                GL.Clear(ClearBufferMask.StencilBufferBit);
-                GL.StencilMask(0xFF);
-
-                GL.ColorMask(false, false, false, false);
-
-                GL.StencilFunc(StencilFunction.Always, 1, 0xFF);
-                GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Replace);
-
-                // draw stencil pattern
-
-                GL.Begin(PrimitiveType.TriangleFan);
-
-                for (int i = 0; i <= 64; i++)
-                {
-                    double ang = i / 64.0 * 2 * Math.PI;
-                    Vec2 v = new Vec2(r * Math.Cos(ang), r * Math.Sin(ang));
-
-                    GL.Vertex2(v.X, v.Y);
-                }
-
-                GL.End();
-                GL.PopMatrix();
-
-                // draw shadow
-
-                GL.StencilFunc(StencilFunction.Equal, 1, 0xFF);
-                GL.StencilOp(StencilOp.Keep, StencilOp.Replace, StencilOp.Replace);
-                GL.ColorMask(true, true, true, true);
+                // center of the shadow
+                var pShadow = prj.Project(data.EarthShadowCoordinates);
 
                 // moon semidiameter in seconds of arc
                 double sdMoon = data.Semidiameter;
@@ -546,17 +505,8 @@ namespace Astrarium.Plugins.SolarSystem
                 // semidiameter of umbra in pixels
                 double sdUmbraPixels = sdPenumbraPixels / data.EarthShadowApperance.Ratio;
 
-                // shadow center in screen coordinates
-                var s = prj.Project(eqShadow);
-
-                GL.PushMatrix();
-                GL.Translate(s.X, s.Y, 0);
-
-                GL.Enable(EnableCap.Blend);
-                GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-
                 // distance, in degrees, between lunar center and center of the Earth shadow
-                double dist = Angle.Separation(data.Equatorial, eqShadow);
+                double dist = Angle.Separation(data.Equatorial, data.EarthShadowCoordinates);
 
                 // color of umbra center
                 Color colorCenter = Color.FromArgb(220, 10, 0, 0);
@@ -569,73 +519,32 @@ namespace Astrarium.Plugins.SolarSystem
                 // full eclipse (moon inside umbra)
                 if (dist < maxDist)
                 {
+                    // center of umbra stays black
                     colorCenter = Color.FromArgb(220, 10, 0, 0);
 
-                    // dark red of edge
+                    // whereas the umbra edges are dark red 
                     colorEdge = GradientColor(Color.FromArgb(220, 120, 40, 0), colorEdge, dist / maxDist);
                 }
 
-                double[] radii = new double[] { 0, sdUmbraPixels * 0.99, sdUmbraPixels, sdUmbraPixels * 1.01, sdPenumbraPixels };
-                Color[] colors = new Color[] { colorCenter, colorEdge, colorEdge, Color.FromArgb(200, Color.Black), Color.Transparent };
+                double[] shadowRadii = new double[] { 0, sdUmbraPixels * 0.99, sdUmbraPixels, sdUmbraPixels * 1.01, sdPenumbraPixels };
+                Color[] shadowColors = new Color[] { colorCenter, colorEdge, colorEdge, Color.FromArgb(200, Color.Black), Color.FromArgb(0, 0, 0, 0) };
 
-                for (int i = 0; i < radii.Length; i++)
-                {
-                    GL.Begin(PrimitiveType.TriangleStrip);
-
-                    for (int j = 0; j <= 63; j++)
-                    {
-                        double ang = j / 63.0 * 2 * Math.PI;
-
-                        // outer
-                        {
-                            Vec2 v = new Vec2(radii[i] * Math.Cos(ang), radii[i] * Math.Sin(ang));
-                            GL.Color4(colors[i]);
-                            GL.Vertex2(v.X, v.Y);
-                        }
-
-                        // inner
-                        if (i > 0)
-                        {
-                            Vec2 v = new Vec2(radii[i - 1] * Math.Cos(ang), radii[i - 1] * Math.Sin(ang));
-                            GL.Color4(colors[i - 1]);
-                            GL.Vertex2(v.X, v.Y);
-                        }
-                        else
-                        {
-                            GL.Color4(colors[0]);
-                            GL.Vertex2(0, 0);
-                        }
-                    }
-
-                    GL.End();
-                }
-
-                // disable stencil
-
-                GL.Disable(EnableCap.Blend);
-                GL.Disable(EnableCap.StencilTest);
-
-                GL.PopMatrix();
+                // render shadow
+                RenderEclipseShadow(pMoon, pShadow, rMoon, shadowRadii, shadowColors);
 
                 // draw shadow outline
-
                 if (settings.Get("EarthShadowOutline"))
                 {
-                    GL.PushMatrix();
-                    GL.Translate(s.X, s.Y, 0);
-
                     var pen = new Pen(clrShadowOutline) { DashStyle = DashStyle.Dot };
 
-                    Primitives.DrawEllipse(new Vec2(0, 0), pen, sdPenumbraPixels);
-                    Primitives.DrawEllipse(new Vec2(0, 0), pen, sdUmbraPixels);
+                    Primitives.DrawEllipse(pShadow, pen, sdPenumbraPixels);
+                    Primitives.DrawEllipse(pShadow, pen, sdUmbraPixels);
 
                     if (map.SkyProjection.Fov <= 10)
                     {
                         var brush = new SolidBrush(clrShadowOutline);
                         textRenderer.Value.DrawString(Text.Get("EarthShadow.Label"), fontShadowLabel, brush, new Vec2(sdPenumbraPixels * 0.71, -sdPenumbraPixels * 0.71));
                     }
-
-                    GL.PopMatrix();
                 }
             }
         }
