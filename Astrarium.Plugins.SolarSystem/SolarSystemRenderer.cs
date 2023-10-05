@@ -1846,7 +1846,7 @@ namespace Astrarium.Plugins.SolarSystem
             }
         }
 
-        private void RenderEclipseShadow(Vec2 pBody, Vec2 pShadow, float radiusBody, float radiusPenumbra, float radiusUmbra)
+        private void RenderEclipseShadow(Vec2 pBody, Vec2 pShadow, float radiusBody, double[] shadowRadii, Color[] shadowColors)
         {
             GL.PushMatrix();
             GL.Translate(pBody.X, pBody.Y, 0);
@@ -1886,10 +1886,8 @@ namespace Astrarium.Plugins.SolarSystem
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
-            double[] radii = new double[] { 0, radiusUmbra * 0.99, radiusUmbra, radiusPenumbra * 1.01, radiusPenumbra };
-            Color[] colors = new Color[] { Color.FromArgb(250, 0, 0, 0), Color.FromArgb(250, 0, 0, 0), Color.FromArgb(150, 0, 0, 0), Color.FromArgb(0, 0, 0, 0), Color.FromArgb(0, 0, 0, 0) };
-
-            for (int i = 0; i < radii.Length; i++)
+            
+            for (int i = 0; i < shadowRadii.Length; i++)
             {
                 GL.Begin(PrimitiveType.TriangleStrip);
 
@@ -1899,21 +1897,21 @@ namespace Astrarium.Plugins.SolarSystem
 
                     // outer
                     {
-                        Vec2 v = new Vec2(radii[i] * Math.Cos(ang), radii[i] * Math.Sin(ang));
-                        GL.Color4(colors[i]);
+                        Vec2 v = new Vec2(shadowRadii[i] * Math.Cos(ang), shadowRadii[i] * Math.Sin(ang));
+                        GL.Color4(shadowColors[i]);
                         GL.Vertex2(v.X, v.Y);
                     }
 
                     // inner
                     if (i > 0)
                     {
-                        Vec2 v = new Vec2(radii[i - 1] * Math.Cos(ang), radii[i - 1] * Math.Sin(ang));
-                        GL.Color4(colors[i - 1]);
+                        Vec2 v = new Vec2(shadowRadii[i - 1] * Math.Cos(ang), shadowRadii[i - 1] * Math.Sin(ang));
+                        GL.Color4(shadowColors[i - 1]);
                         GL.Vertex2(v.X, v.Y);
                     }
                     else
                     {
-                        GL.Color4(colors[0]);
+                        GL.Color4(shadowColors[0]);
                         GL.Vertex2(0, 0);
                     }
                 }
@@ -1969,28 +1967,23 @@ namespace Astrarium.Plugins.SolarSystem
                     // coordinates of shadow relative to eclipsed body
                     CrdsRectangular shadowRelative = moon.RectangularS - rect;
 
-                    // Center of shadow
+                    // Center of shadow, relative to Jupiter center
                     Vec2 p = new Vec2(shadowRelative.X * sd * (prj.FlipHorizontal ? -1 : 1), shadowRelative.Y * sd * (prj.FlipVertical ? 1 : -1));
 
+                    // rotation angle of shadow center respect to center of Jupiter
                     double rot = prj.GetAxisRotation(jupiter.Equatorial, jupiter.Appearance.P);
 
+                    // Center of shadow
                     p = Mat4.ZRotation(Angle.ToRadians(rot)) * p + pBody;
-
 
                     // shadow has enough size to be rendered
                     if ((int)radiusPenumbra > 0)
                     {
-                        RenderEclipseShadow(pBody, p, radiusBody, radiusPenumbra, radiusUmbra);
-                        
-                        // outline
-                        //Primitives.DrawEllipse(p, Pens.Maroon, radiusPenumbra);
-                        //
+                        double[] shadowRadii = new double[] { 0, radiusUmbra * 0.99, radiusUmbra, radiusPenumbra * 1.01, radiusPenumbra };
+                        Color[] shadowColors = new Color[] { Color.FromArgb(250, 0, 0, 0), Color.FromArgb(250, 0, 0, 0), Color.FromArgb(150, 0, 0, 0), Color.FromArgb(0, 0, 0, 0), Color.FromArgb(0, 0, 0, 0) };
 
-                        
-                        
+                        RenderEclipseShadow(pBody, p, radiusBody, shadowRadii, shadowColors);
                     }
-
-                    //g.ResetTransform();
                 }
             }
         }
