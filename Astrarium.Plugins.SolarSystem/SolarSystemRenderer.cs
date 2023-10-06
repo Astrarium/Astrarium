@@ -256,8 +256,11 @@ namespace Astrarium.Plugins.SolarSystem
                             DrawLabel = settings.Get("PlanetsLabels")
                         });
 
+                        // shadow of other moons above current
                         RenderJupiterMoonShadow(map, jupiterMoon, jupiterMoon.RectangularS);
-                        //RenderJupiterShadow(map, jupiterMoon);
+
+                        // shadow of jupiter above current
+                        RenderJupiterShadow(map, jupiterMoon);
                     }
                 }
                 else if (body is Sun && settings.Get("Sun"))
@@ -455,6 +458,7 @@ namespace Astrarium.Plugins.SolarSystem
             GL.Disable(EnableCap.CullFace);
             GL.Disable(EnableCap.Blend);
             GL.Disable(EnableCap.Texture2D);
+
 
             if (data.EarthShadowApperance != null && data.EarthShadowCoordinates != null)
             {
@@ -1372,121 +1376,9 @@ namespace Astrarium.Plugins.SolarSystem
             return new SolidBrush(Color.FromArgb(220, map.GetSkyColor()));
         }
 
-        /*
-        private void RenderEarthShadow(IMapContext map)
-        {
-            // here and below suffixes meanings are: "M" = Moon, "P" = penumbra, "U" = umbra
-
-            // angular distance from center of map to earth shadow center
-            double ad = Angle.Separation(moon.EarthShadowCoordinates, map.Center);
-
-            // semidiameter of penumbra in seconds of arc
-            double sdP = moon.EarthShadow.PenumbraRadius * 6378.0 / 1738.0 * moon.Semidiameter;
-
-            bool isGround = settings.Get("Ground");
-            Graphics g = map.Graphics;
-
-            if ((!isGround || moon.EarthShadowCoordinates.Altitude + sdP / 3600 > 0) &&
-                ad < map.ViewAngle + sdP / 3600)
-            {
-                PointF p = map.Project(moon.EarthShadowCoordinates);
-                PointF pMoon = map.Project(moon.Horizontal);
-
-                // size of penumbra, in pixels
-                float szP = map.GetDiskSize(sdP);
-
-                // size of umbra, in pixels
-                float szU = szP / (float)moon.EarthShadow.Ratio;
-
-                // size of Moon, in pixels 
-                float szM = map.GetDiskSize(moon.Semidiameter);
-
-                // fraction of the penumbra ring (without umbra part)
-                float fr = 1 - szU / szP;
-
-                // do not render on large view angle
-                if (szM >= 10)
-                {
-                    // if eclipse takes place
-                    if (Angle.Separation(moon.Horizontal, moon.EarthShadowCoordinates) <= sdP / 3600)
-                    {
-                        var gpM = new GraphicsPath();
-                        var gpP = new GraphicsPath();
-                        var gpU = new GraphicsPath();
-
-                        gpP.AddEllipse(p.X - szP / 2, p.Y - szP / 2, szP, szP);
-                        gpU.AddEllipse(p.X - szU / 2, p.Y - szU / 2, szU, szU);
-                        gpM.AddEllipse(pMoon.X - szM / 2 - 0.5f, pMoon.Y - szM / 2 - 0.5f, szM + 1, szM + 1);
-
-                        gpP.Flatten();
-                        gpU.Flatten();
-                        gpM.Flatten();
-
-                        var brushP = new PathGradientBrush(gpP);
-                        brushP.CenterPoint = p;
-                        brushP.CenterColor = clrPenumbraGrayDark;
-                        brushP.SurroundColors = new Color[] { clrPenumbraTransp };
-
-                        var blendP = new ColorBlend();
-                        blendP.Colors = new Color[] { clrPenumbraTransp, clrPenumbraTransp, clrPenumbraGrayLight, clrPenumbraGrayDark, clrPenumbraGrayDark };
-                        blendP.Positions = new float[] { 0, fr / 2, fr * 0.95f, fr, 1 };
-                        brushP.InterpolationColors = blendP;
-
-                        var brushU = new PathGradientBrush(gpU);
-                        brushU.CenterColor = clrUmbraRed;
-                        brushU.SurroundColors = new Color[] { clrUmbraGray };
-                        brushU.Blend.Factors = new float[] { 0, 0.8f, 1 };
-                        brushU.Blend.Positions = new float[] { 0, 0.8f, 1 };
-
-                        var regionP = new Region(gpP);
-                        var regionU = new Region(gpU);
-
-                        regionP.Exclude(regionU);
-                        regionP.Intersect(gpM);
-                        regionU.Intersect(gpM);
-
-                        regionP.Intersect(new Rectangle(0, 0, map.Width, map.Height));
-                        regionU.Intersect(new Rectangle(0, 0, map.Width, map.Height));
-
-                        g.FillRegion(brushP, regionP);
-                        g.FillRegion(brushU, regionU);
-
-                        gpM.Dispose();
-                        gpP.Dispose();
-                        gpU.Dispose();
-
-                        brushP.Dispose();
-                        brushU.Dispose();
-                        regionP.Dispose();
-                        regionU.Dispose();
-
-                        // outline circles
-                        if (settings.Get("EarthShadowOutline") && map.ViewAngle > 0.5)
-                        {
-                            var brush = new SolidBrush(map.GetColor(clrShadowOutline));
-                            var pen = new Pen(brush) { DashStyle = DashStyle.Dot };
-
-                            g.TranslateTransform(p.X, p.Y);
-                            g.DrawEllipse(pen, -szP / 2, -szP / 2, szP, szP);
-                            g.DrawEllipse(pen, -szU / 2, -szU / 2, szU, szU);
-                            g.ResetTransform();
-                            if (map.ViewAngle <= 10)
-                            {
-                                map.DrawObjectCaption(fontShadowLabel, brush, Text.Get("EarthShadow.Label"), p, szP);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        */
-
         private void RenderPlanet<TPlanet>(IMapContext map, TPlanet planet) where TPlanet : SizeableCelestialObject, IPlanet
         {
-            if (!settings.Get("Planets"))
-            {
-                return;
-            }
+            if (!settings.Get("Planets")) return;
 
             Graphics g = map.Graphics;
             double ad = Angle.Separation(planet.Horizontal, map.Center);
@@ -1706,6 +1598,39 @@ namespace Astrarium.Plugins.SolarSystem
             return isDrawn;
         }
 
+        private void RenderJupiterShadow(ISkyMap map, JupiterMoon moon)
+        {
+            if (!moon.IsEclipsedByPlanet) return;
+            if (!settings.Get("Planets")) return;
+            if (!settings.Get("PlanetMoons")) return;
+
+            var prj = map.SkyProjection;
+            Planet jupiter = planetsCalc.Planets.ElementAt(Planet.JUPITER - 1);
+
+            // Jupiter radius, in pixels, and also radius of its shadow
+            float sd = prj.GetDiskSize(jupiter.Semidiameter) / 2;
+
+            // Center of shadow, relative to Jupiter center
+            Vec2 pShadow = new Vec2(-moon.RectangularS.X * sd * (prj.FlipHorizontal ? -1 : 1), -moon.RectangularS.Y * sd * (prj.FlipVertical ? 1 : -1));
+
+            // rotation angle of shadow center respect to center of Jupiter
+            double rot = prj.GetAxisRotation(jupiter.Equatorial, jupiter.Appearance.P);
+
+            // Center of Moon
+            var pMoon = prj.Project(moon.Horizontal); // TODO: change to equatorial
+
+            // Center of Jupiter shadow
+            pShadow = Mat4.ZRotation(Angle.ToRadians(rot)) * pShadow + pMoon;
+
+            // Radius of eclipsing moon
+            float sdMoon = prj.GetDiskSize(moon.Semidiameter) / 2;
+
+            RenderEclipseShadow(pMoon, pShadow, sdMoon, new double[] { 0, sd }, new Color[] { Color.Black, Color.Black }, rot, jupiter.Flattening);
+
+            // Jupiter shadow outline
+            Primitives.DrawEllipse(pShadow, Pens.Red, sd, sd * (1 - jupiter.Flattening), rot);
+        }
+
         private void RenderJupiterShadow(IMapContext map, JupiterMoon moon)
         {
             if (!moon.IsEclipsedByPlanet) return;
@@ -1755,7 +1680,7 @@ namespace Astrarium.Plugins.SolarSystem
             }
         }
 
-        private void RenderEclipseShadow(Vec2 pBody, Vec2 pShadow, float radiusBody, double[] shadowRadii, Color[] shadowColors)
+        private void RenderEclipseShadow(Vec2 pBody, Vec2 pShadow, float radiusBody, double[] shadowRadii, Color[] shadowColors, double rotAngle = 0, double flattening = 0)
         {
             GL.PushMatrix();
             GL.Translate(pBody.X, pBody.Y, 0);
@@ -1795,28 +1720,46 @@ namespace Astrarium.Plugins.SolarSystem
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
-            
+            // rotation angle of the shadow
+            double rot = Angle.ToRadians(rotAngle);
+            double cosRot = Math.Cos(rot);
+            double sinRot = Math.Sin(rot);
+
             for (int i = 0; i < shadowRadii.Length; i++)
             {
                 GL.Begin(PrimitiveType.TriangleStrip);
 
                 for (int j = 0; j <= 63; j++)
                 {
-                    double ang = j / 63.0 * 2 * Math.PI;
+                    double t = j / (double)63 * (2 * Math.PI);
+                    double cost = Math.Cos(t);
+                    double sint = Math.Sin(t);
 
                     // outer
                     {
-                        Vec2 v = new Vec2(shadowRadii[i] * Math.Cos(ang), shadowRadii[i] * Math.Sin(ang));
+                        double rx = shadowRadii[i];
+                        double ry = rx * (1 - flattening);
+
                         GL.Color4(shadowColors[i]);
-                        GL.Vertex2(v.X, v.Y);
+
+                        double x = rx * cost * cosRot - ry * sint * sinRot;
+                        double y = ry * sint * cosRot + rx * cost * sinRot;
+
+                        GL.Vertex2(x, y);
                     }
 
                     // inner
                     if (i > 0)
                     {
-                        Vec2 v = new Vec2(shadowRadii[i - 1] * Math.Cos(ang), shadowRadii[i - 1] * Math.Sin(ang));
+                        double rx = shadowRadii[i - 1];
+                        double ry = rx * (1 - flattening);
+
                         GL.Color4(shadowColors[i - 1]);
-                        GL.Vertex2(v.X, v.Y);
+
+                        double x = rx * cost * cosRot - ry * sint * sinRot;
+                        double y = ry * sint * cosRot + rx * cost * sinRot;
+
+                        GL.Vertex2(x, y);
                     }
                     else
                     {

@@ -77,8 +77,6 @@ namespace Astrarium.Types
                 }
             }
 
-
-
             GL.Begin(PrimitiveType.LineStrip);
 
             int count = 64;
