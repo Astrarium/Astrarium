@@ -320,6 +320,11 @@ namespace Astrarium.Types
             return new Vec2(v1[0] - v2[0], v1[1] - v2[1]);
         }
 
+        public static Vec2 operator +(Vec2 v, float f)
+        {
+            return new Vec2(v[0] + f, v[1] - f);
+        }
+
         /// <summary>
         /// Gets or sets X-coordinate of the vector
         /// </summary>

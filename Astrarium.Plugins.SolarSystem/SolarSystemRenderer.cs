@@ -211,7 +211,6 @@ namespace Astrarium.Plugins.SolarSystem
 
                     }
                 }
-
                 else if (body is JupiterMoon jupiterMoon)
                 {
                     float size = prj.GetPointSize(jupiterMoon.Magnitude, 3);
@@ -263,6 +262,108 @@ namespace Astrarium.Plugins.SolarSystem
                         RenderJupiterShadow(map, jupiterMoon);
                     }
                 }
+                else if (body is SaturnMoon saturnMoon)
+                {
+                    float size = prj.GetPointSize(saturnMoon.Magnitude, 1.5f);
+                    double diam = prj.GetDiskSize(saturnMoon.Semidiameter);
+
+                    if (size < 1) continue;
+
+                    // draw as point
+                    if (size >= diam)
+                    {
+                        var p = prj.Project(saturnMoon.Equatorial);
+                        if (prj.IsInsideScreen(p))
+                        {
+                            GL.Enable(EnableCap.PointSmooth);
+                            GL.Enable(EnableCap.Blend);
+                            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+                            GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
+
+                            GL.PointSize(size);
+                            GL.Begin(PrimitiveType.Points);
+                            GL.Color3(Color.White);
+                            GL.Vertex2(p.X, p.Y);
+                            GL.End();
+
+                            map.AddDrawnObject(p, saturnMoon);
+                        }
+                    }
+                    else
+                    {
+                        var saturn = planetsCalc.Planets.ElementAt(Planet.SATURN - 1);
+                        double rotAxis = prj.GetAxisRotation(saturnMoon.Equatorial, saturn.Appearance.P);
+                        double rotPhase = prj.GetPhaseRotation(saturn.Ecliptical);
+                        DrawPlanet(map, saturnMoon, new SphereParameters()
+                        {
+                            Equatorial = saturnMoon.Equatorial,
+                            TextureName = Path.Combine(dataPath, $"6-{saturnMoon.Number}.jpg"),
+                            FallbackTextureName = Path.Combine(dataPath, $"Unknown.jpg"),
+                            Semidiameter = saturnMoon.Semidiameter,
+                            LongitudeShift = saturnMoon.CM,
+                            PhaseAngle = saturn.PhaseAngle,
+                            RotationAxis = rotAxis,
+                            RotationPhase = rotPhase,
+                            DrawLabel = settings.Get("PlanetsLabels")
+                        });
+                    }
+                }
+                else if (body is UranusMoon uranusMoon)
+                {
+                    float size = prj.GetPointSize(uranusMoon.Magnitude, 1.5f);
+                    
+                    if (size < 1) continue;
+
+                    // draw as point
+                    var p = prj.Project(uranusMoon.Equatorial);
+                    if (prj.IsInsideScreen(p))
+                    {
+                        GL.Enable(EnableCap.PointSmooth);
+                        GL.Enable(EnableCap.Blend);
+                        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+                        GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
+
+                        GL.PointSize(size);
+                        GL.Begin(PrimitiveType.Points);
+                        GL.Color3(Color.White);
+                        GL.Vertex2(p.X, p.Y);
+                        GL.End();
+
+                        map.AddDrawnObject(p, uranusMoon);
+                    }
+                    
+                }
+                else if (body is NeptuneMoon neptuneMoon)
+                {
+                    float size = prj.GetPointSize(neptuneMoon.Magnitude, 2f);
+                    if (size < 1) continue;
+
+                    // draw as point
+                    var p = prj.Project(neptuneMoon.Equatorial);
+                    if (prj.IsInsideScreen(p))
+                    {
+                        GL.Enable(EnableCap.PointSmooth);
+                        GL.Enable(EnableCap.Blend);
+                        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+                        GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
+
+                        GL.PointSize(size);
+                        GL.Begin(PrimitiveType.Points);
+                        GL.Color3(Color.Gray);
+                        GL.Vertex2(p.X, p.Y);
+                        GL.End();
+
+                        if (settings.Get("PlanetsLabels"))
+                        {
+                            var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
+                            textRenderer.Value.DrawString(neptuneMoon.Name, fontLabel, brushLabel, p + (0.35f * size));
+                        }
+
+                        map.AddDrawnObject(p, neptuneMoon);
+                    }
+
+                }
+
                 else if (body is Sun && settings.Get("Sun"))
                 {
                     double rotAxis = Angle.ToRadians(prj.GetAxisRotation(sun.Equatorial, -prj.Context.Epsilon));
@@ -335,6 +436,7 @@ namespace Astrarium.Plugins.SolarSystem
                         Equatorial = moon.Equatorial,
                         TextureName = Path.Combine(dataPath, textureName),
                         FallbackTextureName = Path.Combine(dataPath, "Moon-2k.jpg"),
+                        MinimalSize = 10,
                         Semidiameter = moon.Semidiameter,
                         PhaseAngle = moon.PhaseAngle,
                         LatitudeShift = -moon.Libration.b,
@@ -345,7 +447,6 @@ namespace Astrarium.Plugins.SolarSystem
                         SurfaceFeatures = settings.Get("MoonSurfaceFeatures") ? lunarFeatures : null,
                         EarthShadowApperance = moon.EarthShadow,
                         EarthShadowCoordinates = moon.EarthShadowCoordinates,
-                        SmoothShadow = false,
                         DrawLabel = settings.Get("MoonLabel")
                     });
                 }
@@ -358,6 +459,8 @@ namespace Astrarium.Plugins.SolarSystem
             public CrdsEquatorial Equatorial { get; set; }
             public string TextureName { get; set; }
             public string FallbackTextureName { get; set; }
+
+            public float MinimalSize { get; set; }
 
             public ICollection<SurfaceFeature> SurfaceFeatures { get; set; }
 
@@ -706,12 +809,12 @@ namespace Astrarium.Plugins.SolarSystem
             double s, t;
             int i, j;
 
-            const int segments = 64;
+            // radius of sphere, in pixels
+            double radius = prj.GetDiskSize(data.Semidiameter, data.MinimalSize) / 2;
+
+            int segments = radius < 20 ? 16 : 64;
             double drho = Math.PI / segments;
             double dtheta = 2.0 * Math.PI / segments;
-
-            // radius of sphere, in pixels
-            double radius = prj.GetDiskSize(data.Semidiameter) / 2;
 
             double delta = 1.0 / segments;
 
