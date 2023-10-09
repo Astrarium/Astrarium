@@ -1625,7 +1625,7 @@ namespace Astrarium.Plugins.SolarSystem
             // Radius of eclipsing moon
             float sdMoon = prj.GetDiskSize(moon.Semidiameter) / 2;
 
-            RenderEclipseShadow(pMoon, pShadow, sdMoon, new double[] { 0, sd }, new Color[] { Color.Black, Color.Black }, rot, jupiter.Flattening);
+            RenderEclipseShadow(pMoon, pShadow, sdMoon + 1, new double[] { 0, sd }, new Color[] { Color.Black, Color.Black }, rot, jupiter.Flattening);
 
             // Jupiter shadow outline
             Primitives.DrawEllipse(pShadow, Pens.Red, sd, sd * (1 - jupiter.Flattening), rot);

@@ -119,6 +119,12 @@ namespace Astrarium.Plugins.JupiterMoons
                 // Y-scale stretching, squared (to avoid Jupiter flattening)
                 const double STRETCH = 1.14784224788;
 
+                // Radii of Galilean moons, in kilometers
+                double[] radii = new double[] { 1822, 1561, 2634, 2410 };
+
+                // Equatorial radius of Jupiter, in kilometers
+                const double JUP_RADIUS = 69911;
+
                 string[] moonNames = new[] { Text.Get("JupiterMoons.Io"), Text.Get("JupiterMoons.Europa"), Text.Get("JupiterMoons.Ganymede"), Text.Get("JupiterMoons.Callisto") };
                 string[] moonNamesGenitive = new[] { Text.Get("JupiterMoons.Io.Genitive"), Text.Get("JupiterMoons.Europa.Genitive"), Text.Get("JupiterMoons.Ganymede.Genitive"), Text.Get("JupiterMoons.Callisto.Genitive") };
                 string[] moonNamesDative = new[] { Text.Get("JupiterMoons.Io.Dative"), Text.Get("JupiterMoons.Europa.Dative"), Text.Get("JupiterMoons.Ganymede.Dative"), Text.Get("JupiterMoons.Callisto.Dative") };
@@ -167,13 +173,13 @@ namespace Astrarium.Plugins.JupiterMoons
                                     // instant of max transit/occultation
                                     double jd_x0 = FindRoots(f_x0, Begin + (h - 1) / 24.0, Begin + h / 24.0, eps);
 
-                                    // "Touch" function calculates distance between center of moon
+                                    // "Touch" function calculates distance between edge of moon
                                     // and Jupiter's edge (Y-coordinate is stretched
                                     // to compensate Jupiter flattening)
                                     Func<double, double> f_touch = (double jd) =>
                                     {
                                         var p = GetJupiterMoonsPosition(jd)[m, s];
-                                        return Math.Sqrt(p.X * p.X + p.Y * p.Y * STRETCH) - 1;
+                                        return Math.Sqrt(p.X * p.X + p.Y * p.Y * STRETCH) - 1 - radii[m] / JUP_RADIUS;
                                     };
 
                                     // event timings
