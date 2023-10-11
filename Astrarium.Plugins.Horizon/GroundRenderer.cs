@@ -10,11 +10,13 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using WF = System.Windows.Forms;
 
 namespace Astrarium.Plugins.Horizon
 {
     public class GroundRenderer : BaseRenderer
     {
+        private readonly ISkyMap map;
         private readonly ISettings settings;
         private readonly ITextureManager textureManager;
 
@@ -22,12 +24,14 @@ namespace Astrarium.Plugins.Horizon
         private readonly Color colorGroundNight = Color.FromArgb(4, 10, 10);
         private readonly Color colorGroundDay = Color.FromArgb(116, 185, 139);
 
-        private readonly string[] cardinalDirections = new string[] { "S", "SW", "W", "NW", "N", "NE", "E", "SE" };
+        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
 
+        private readonly string[] cardinalDirections = new string[] { "S", "SW", "W", "NW", "N", "NE", "E", "SE" };
         private readonly string basePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-        public GroundRenderer(ITextureManager textureManager, ISettings settings)
+        public GroundRenderer(ISkyMap map, ITextureManager textureManager, ISettings settings)
         {
+            this.map = map;
             this.textureManager = textureManager;
             this.settings = settings;
         }
@@ -153,6 +157,12 @@ namespace Astrarium.Plugins.Horizon
 
         public override void Render(ISkyMap map)
         {
+            RenderGround();
+            RenderCardinalLabels();
+        }
+
+        private void RenderGround()
+        {
             var prj = map.SkyProjection;
             if (!settings.Get<bool>("Ground")) return;
 
@@ -171,34 +181,16 @@ namespace Astrarium.Plugins.Horizon
                 GL.CullFace(CullFaceMode.Front);
             }
 
-            /*
-            string texture;
-            string fallbackTexture = "pano2-2k.png";
-            if (prj.Fov > 45)
-            {
-                texture = "pano2-2k.png";
-            }
-            else if (prj.Fov > 20)
-            {
-                texture = "pano2-4k.png";
-            }
-            else
-            {
-                texture = "pano2-8k.png";
-            }
-
-            GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(texture, fallbackTexture));
-            */
-            GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(Path.Combine(basePath, "Data", "pano.png")));
-
+            GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(Path.Combine(basePath, "Data", "pano.png"), fallbackPath: null, permanent: true));
 
             int steps = prj.Fov < 90 ? 32 : 128;
 
-            // tint color
+            // blackout coeff
             int c = 10 + (int)((255 - 10) * map.DaylightFactor);
 
             if (settings.Get<ColorSchema>("Schema") == ColorSchema.Red)
             {
+                // night vision tint
                 GL.Color4(Color.FromArgb((int)(c * 0.6), 0, 0));
             }
             else
@@ -218,7 +210,7 @@ namespace Astrarium.Plugins.Horizon
 
                         if (p != null)
                         {
-                            double s = /*1 - */(double)i / steps;
+                            double s = (double)i / steps;
                             double t = (90 - (lat - k * 10)) / 180.0;
 
                             GL.TexCoord2(s, t);
@@ -235,26 +227,33 @@ namespace Astrarium.Plugins.Horizon
                 GL.End();
             }
 
-
             GL.Disable(EnableCap.Texture2D);
             GL.Disable(EnableCap.CullFace);
             GL.Disable(EnableCap.Blend);
+        }
 
+        private void RenderCardinalLabels()
+        {
+            if (!settings.Get("LabelCardinalDirections")) return;
 
-            string[] cardinals = new string[] { "S", "W", "N", "E" };
+            var prj = map.SkyProjection;
 
-            // Cardinals
+            string[] cardinals = new string[] { "S", "SW", "W", "NW", "N", "NE", "E", "SE" };
 
             var font = new Font(SystemFonts.DefaultFont.FontFamily, 14);
 
+            var color = settings.Get<SkyColor>("ColorCardinalDirections").Night;
+
             for (int i = 0; i < cardinals.Length; i++)
             {
+                if (prj.Fov > 90 && i % 2 == 1) continue;
+
+                string label = Text.Get($"CardinalDirections.{cardinals[i]}");
                 var p = prj.Project(new CrdsHorizontal((double)i / cardinals.Length * 360, 0));
                 if (prj.IsInsideScreen(p))
                 {
-                    
-                    //var size = System.Windows.Forms.TextRenderer.MeasureText(cardinals[i], font);
-                    //textRenderer.DrawString(cardinals[i], font, Brushes.DarkGreen, new PointF((int)(p.X - size.Width / 2), (int)(prj.ScreenHeight - p.Y - size.Height)), prj.ScreenWidth, prj.ScreenHeight);
+                    var size = WF.TextRenderer.MeasureText(label, font);
+                    textRenderer.Value.DrawString(label, font, new SolidBrush(color), new Vec2(p.X - size.Width / 2, p.Y + size.Height / 2));
                 }
             }
         }

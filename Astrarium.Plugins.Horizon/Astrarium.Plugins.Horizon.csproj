@@ -4,6 +4,7 @@
     <TargetFrameworks>net451</TargetFrameworks>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <UseWpf>true</UseWpf>
+	<UseWindowsForms>true</UseWindowsForms>
     <Product>Horizon</Product>
     <Description>Horizon line and ground</Description>
     <Authors>Alexander Krutov</Authors>

@@ -47,15 +47,15 @@ namespace Astrarium.Plugins.DeepSky
 
         public override void Calculate(SkyContext context)
         {
-            /*
             // precessional elements
             var p = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
 
             foreach (var ds in deepSkies)
             {
                 ds.Equatorial = context.Get(Equatorial, ds);
-                ds.Horizontal = context.Get(Horizontal, ds);
+                //ds.Horizontal = context.Get(Horizontal, ds);
 
+                /*
                 if (ds.Outline != null)
                 {
                     foreach (var op in ds.Outline)
@@ -74,11 +74,13 @@ namespace Astrarium.Plugins.DeepSky
                         // Apparent coordinates of the object
                         eq += eq1 + eq2;
 
+                        
                         // Apparent horizontal coordinates
                         op.Horizontal = eq.ToHorizontal(context.GeoLocation, context.SiderealTime);
                     }
                 }
-            }*/
+                */
+            }
         }
 
         /// <summary>
@@ -187,8 +189,8 @@ namespace Astrarium.Plugins.DeepSky
             .AddRow("Equatorial0.Delta", ds.Equatorial0.Delta)
 
             .AddHeader(Text.Get("DeepSky.Horizontal"))
-            .AddRow("Horizontal.Azimuth", ds.Horizontal.Azimuth)
-            .AddRow("Horizontal.Altitude", ds.Horizontal.Altitude)
+            .AddRow("Horizontal.Azimuth")
+            .AddRow("Horizontal.Altitude")
 
             .AddHeader(Text.Get("DeepSky.RTS"))
             .AddRow("RTS.Rise")

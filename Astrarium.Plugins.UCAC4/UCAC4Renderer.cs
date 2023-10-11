@@ -24,6 +24,14 @@ namespace Astrarium.Plugins.UCAC4
             fontNames = new Font("Arial", 7);
         }
 
+        private bool isDrag = false;
+
+        public override bool OnMouseMove(ISkyMap map, PointF mouse, MouseButton mouseButton)
+        {
+            isDrag = mouseButton == MouseButton.Left;
+            return base.OnMouseMove(map, mouse, mouseButton);
+        }
+
         public override void Render(ISkyMap map)
         {
             var prj = map.SkyProjection;
@@ -35,8 +43,11 @@ namespace Astrarium.Plugins.UCAC4
                 if (daylightFactor == 1) return;
 
                 float starDimming = 1 - daylightFactor;
+                float minStarSize = Math.Max(0.5f, daylightFactor * 3); // empiric
 
-                float minStarSize = daylightFactor * 3; // empiric
+               // if (isDrag) minStarSize = Math.Max(2, minStarSize);
+
+
 
                 bool isLabels = settings.Get("StarsLabels") && prj.Fov < 1 / 60d;
                 Brush brushNames = new SolidBrush(settings.Get<SkyColor>("ColorStarsLabels").Night);
@@ -47,6 +58,8 @@ namespace Astrarium.Plugins.UCAC4
                 GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
 
                 float magLimit = prj.MagLimit;
+
+                magLimit = (float)(-1.73494 * Math.Log(0.000462398 * map.SkyProjection.Fov));
 
                 PrecessionalElements pe = Precession.ElementsFK5(prj.Context.JulianDay, Date.EPOCH_J2000);
 
@@ -71,7 +84,7 @@ namespace Astrarium.Plugins.UCAC4
                 {
                     float size = prj.GetPointSize(star.Magnitude) * starDimming;
 
-                    if (size > minStarSize)
+                    if (size >= minStarSize)
                     {
                         var p = prj.Project(star.Cartesian, mat);
 

@@ -36,8 +36,7 @@ namespace Astrarium.Plugins.Tycho2
                 if (daylightFactor == 1) return;
 
                 float starDimming = 1 - daylightFactor;
-
-                float minStarSize = daylightFactor * 3; // empiric
+                float minStarSize = Math.Max(0.5f, daylightFactor * 3); // empiric
 
                 bool isLabels = settings.Get<bool>("StarsLabels");
                 Brush brushNames = new SolidBrush(settings.Get<SkyColor>("ColorStarsLabels").Night);
@@ -56,13 +55,16 @@ namespace Astrarium.Plugins.Tycho2
                 // matrix for projection, with respect of precession
                 var mat = prj.MatEquatorialToVision * tycho2.MatPrecession;
 
-                var stars = tycho2.GetStars(t, eq, prj.Fov, m => m <= prj.MagLimit);
+                float magLimit = prj.MagLimit;
+                magLimit = (float)(-1.44995 * Math.Log(0.000230685 * prj.Fov));
+
+                var stars = tycho2.GetStars(t, eq, prj.Fov, m => m <= magLimit);
 
                 foreach (var star in stars)
                 {
                     float size = prj.GetPointSize(star.Magnitude) * starDimming;
 
-                    if (size > minStarSize)
+                    if (size >= minStarSize)
                     {
                         var p = prj.Project(star.Cartesian, mat);
 

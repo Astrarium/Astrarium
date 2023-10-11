@@ -10,6 +10,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace Astrarium
 {
@@ -357,7 +358,7 @@ namespace Astrarium
                     float mag = (body is IMagnitudeObject) ? (body as IMagnitudeObject).Magnitude : projection.MagLimit;
 
                     double diskSize = projection.GetDiskSize(sd, 10);
-                    double pointSize = projection.GetPointSize(mag);
+                    double pointSize = projection.GetPointSize(double.IsNaN( mag) ? projection.MagLimit : mag );
 
                     double size = Math.Max(diskSize, pointSize);
 

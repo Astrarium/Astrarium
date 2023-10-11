@@ -363,6 +363,110 @@ namespace Astrarium.Plugins.SolarSystem
                     }
 
                 }
+                else if (settings.Get("GenericMoons") && body is GenericMoon gm)
+                {
+                    float size = prj.GetPointSize(gm.Magnitude, 2f);
+                    if (size < 1) continue;
+
+                    // draw as point
+                    var p = prj.Project(gm.Equatorial);
+                    if (prj.IsInsideScreen(p))
+                    {
+                        GL.Enable(EnableCap.PointSmooth);
+                        GL.Enable(EnableCap.Blend);
+                        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+                        GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
+
+                        GL.PointSize(size);
+                        GL.Begin(PrimitiveType.Points);
+                        GL.Color3(Color.Gray);
+                        GL.Vertex2(p.X, p.Y);
+                        GL.End();
+
+                        if (settings.Get("PlanetsLabels"))
+                        {
+                            var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
+                            textRenderer.Value.DrawString(gm.Name, fontLabel, brushLabel, p + (0.35f * size));
+                        }
+
+                        map.AddDrawnObject(p, gm);
+                    }
+                }
+                else if (body is Pluto pluto)
+                {
+                    float size = prj.GetPointSize(pluto.Magnitude, maxDrawingSize: 7);
+                    double diam = prj.GetDiskSize(pluto.Semidiameter);
+
+                    // draw planets regardless zoom level
+                    if (size < 1)
+                    {
+                        if (settings.Get("PlanetsDrawAll"))
+                            size = 1;
+                        else
+                            continue;
+                    }
+
+                    // draw as point
+                    if (size >= diam)
+                    {
+                        var p = prj.Project(pluto.Equatorial);
+                        if (prj.IsInsideScreen(p))
+                        {
+                            GL.Enable(EnableCap.PointSmooth);
+                            GL.Enable(EnableCap.Blend);
+                            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+                            GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
+
+                            GL.PointSize(size);
+                            GL.Begin(PrimitiveType.Points);
+                            GL.Color3(GetPlanetColor(pluto.Number));
+                            GL.Vertex2(p.X, p.Y);
+                            GL.End();
+
+                            map.AddDrawnObject(p, pluto);
+
+                            if (settings.Get("PlanetsLabels"))
+                            {
+                                string label = drawLabelMag ? $"{pluto.Name} {Formatters.Magnitude.Format(pluto.Magnitude)}" : pluto.Name;
+                                var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
+                                textRenderer.Value.DrawString(label, fontLabel, brushLabel, p);
+                            }
+                        }
+                    }
+                    // draw as sphere
+                    else
+                    {
+                        double rotAxis = prj.GetAxisRotation(pluto.Equatorial, pluto.Appearance.P);
+                        double rotPhase = prj.GetPhaseRotation(pluto.Ecliptical);
+
+                        DrawPlanet(map, pluto, new SphereParameters()
+                        {
+                            Equatorial = pluto.Equatorial,
+                            TextureName = Path.Combine(dataPath, $"{pluto.Number}.jpg"),
+                            Semidiameter = pluto.Semidiameter,
+                            PhaseAngle = 0,
+                            Flattening = pluto.Flattening,
+                            LatitudeShift = -pluto.Appearance.D,
+                            LongitudeShift = pluto.Appearance.CM - (pluto.Number == Planet.JUPITER ? planetsCalc.GreatRedSpotLongitude : 0),
+                            RotationAxis = rotAxis,
+                            RotationPhase = rotPhase,
+                            BodyPhysicalDiameter = 2 * Planet.EQUATORIAL_RADIUS[pluto.Number - 1],
+                            SurfaceFeatures = pluto.Number == Planet.MARS && settings.Get("PlanetsSurfaceFeatures") ? martianFeatures : null,
+                            SmoothShadow = false,
+                            DrawRings = pluto.Number == Planet.SATURN,
+                            DrawPolarCap = pluto.Number == Planet.MARS && settings.Get("PlanetsMartianPolarCaps"),
+                            NorthernPolarCap = pluto.Number == Planet.MARS ? planetsCalc.MarsNPCWidth : 0,
+                            SouthernPolarCap = pluto.Number == Planet.MARS ? planetsCalc.MarsSPCWidth : 0,
+                            DrawLabel = settings.Get("PlanetsLabels")
+                        });
+
+                        if (pluto.Number == Planet.JUPITER)
+                        {
+                            // draw moon shadows over Jupiter
+                            RenderJupiterMoonShadow(map, pluto);
+                        }
+                    }
+                }
 
                 else if (body is Sun && settings.Get("Sun"))
                 {
@@ -548,7 +652,6 @@ namespace Astrarium.Plugins.SolarSystem
 
             GL.Enable(EnableCap.Light0);
             GL.Enable(EnableCap.Lighting);
-            
 
             GL.Enable(EnableCap.CullFace);
             GL.Enable(EnableCap.Blend);
@@ -561,7 +664,6 @@ namespace Astrarium.Plugins.SolarSystem
             GL.Disable(EnableCap.CullFace);
             GL.Disable(EnableCap.Blend);
             GL.Disable(EnableCap.Texture2D);
-
 
             if (data.EarthShadowApperance != null && data.EarthShadowCoordinates != null)
             {
@@ -576,9 +678,9 @@ namespace Astrarium.Plugins.SolarSystem
             if (data.DrawLabel)
             {
                 var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
-                double r = prj.GetDiskSize(data.Semidiameter, 10) / 2;
+                float s = prj.GetDiskSize(data.Semidiameter, 10);
                 Vec2 p = prj.Project(data.Equatorial);
-                textRenderer.Value.DrawString(body.Names.First(), fontLabel, brushLabel, new Vec2(p.X + 0.72 * r, p.Y - 0.72 * r));
+                textRenderer.Value.DrawString(body.Names.First(), fontLabel, brushLabel, p + 0.36f * s);
             }
         }
 
@@ -812,10 +914,16 @@ namespace Astrarium.Plugins.SolarSystem
             // radius of sphere, in pixels
             double radius = prj.GetDiskSize(data.Semidiameter, data.MinimalSize) / 2;
 
+            // number of segments to build the sphere
             int segments = radius < 20 ? 16 : 64;
+
+            // delta rho, step by latitude
             double drho = Math.PI / segments;
+
+            // delta theta, step by longitude
             double dtheta = 2.0 * Math.PI / segments;
 
+            // step by segments count
             double delta = 1.0 / segments;
 
             // rotation matrix to proper orient sphere 
@@ -865,12 +973,20 @@ namespace Astrarium.Plugins.SolarSystem
 
                 if (layer == LAYER_PLANET)
                 {
-                    GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(data.TextureName, data.FallbackTextureName));
+                    int tex = textureManager.GetTexture(data.TextureName, data.FallbackTextureName);
+                    if (tex == 0)
+                    {
+
+
+                    }
+                    GL.BindTexture(TextureTarget.Texture2D, tex);
                 }
                 else if (layer == LAYER_POLAR_CAP)
                 {
                     GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(Path.Combine(dataPath, "PolarCap.png")));
                 }
+
+                GL.ShadeModel(ShadingModel.Smooth);
 
                 for (i = 0; i < segments; i++)
                 {
@@ -885,6 +1001,7 @@ namespace Astrarium.Plugins.SolarSystem
 
                         vecVision = matVision * new Vec3(x, y, z);
                         vecLight = matLight * new Vec3(-x, -y, -z);
+
                         GL.Normal3(vecLight.X * shadowSmoothness, vecLight.Y * shadowSmoothness, vecLight.Z * shadowSmoothness);
 
                         if (layer == LAYER_PLANET)
@@ -911,6 +1028,7 @@ namespace Astrarium.Plugins.SolarSystem
 
                         vecVision = matVision * new Vec3(x, y, z);
                         vecLight = matLight * new Vec3(-x, -y, -z);
+
                         GL.Normal3(vecLight.X * shadowSmoothness, vecLight.Y * shadowSmoothness, vecLight.Z * shadowSmoothness);
 
                         if (layer == LAYER_PLANET)

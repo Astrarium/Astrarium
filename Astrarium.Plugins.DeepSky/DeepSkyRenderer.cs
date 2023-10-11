@@ -1,10 +1,13 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
+using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace Astrarium.Plugins.DeepSky
 {
@@ -27,10 +30,14 @@ namespace Astrarium.Plugins.DeepSky
 
         private readonly DeepSkyCalc deepSkyCalc;
         private readonly ISettings settings;
+        private readonly ITextureManager textureManager;
 
-        public DeepSkyRenderer(DeepSkyCalc deepSkyCalc, ISettings settings)
+        private readonly string basePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+        public DeepSkyRenderer(DeepSkyCalc deepSkyCalc, ITextureManager textureManager, ISettings settings)
         {
             this.deepSkyCalc = deepSkyCalc;
+            this.textureManager = textureManager;
             this.settings = settings;
 
             k = -(minAlpha - maxAlpha) / (maxZoom - minZoom);
@@ -49,6 +56,97 @@ namespace Astrarium.Plugins.DeepSky
                 { DeepSkyStatus.Star, new EmptyDrawingStrategy(this) },
                 { DeepSkyStatus.NotFound, new EmptyDrawingStrategy(this) }
             };
+        }
+
+        public override void Render(ISkyMap map)
+        {
+            if (!settings.Get<bool>("DeepSky")) return;
+
+            var prj = map.SkyProjection;
+
+            // do not draw if out of screen
+            double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
+
+            var deepSkies =
+                deepSkyCalc.deepSkies.Where(ds => !ds.Status.IsEmpty() &&                
+                
+                prj.GetDiskSize(ds.Semidiameter) > 10 &&
+                Angle.Separation(prj.CenterEquatorial, ds.Equatorial) < fov + ds.Semidiameter / 3600 * 2).ToList();
+
+            foreach (var ds in deepSkies)
+            {
+                //if (ds.Messier > 0)
+                //{
+                  
+                    
+                    
+
+                    int textureId = -1;
+
+                    string path = Path.Combine(basePath, "Data", $"{ds.CatalogName}.jpg");
+
+                    if (File.Exists(path)) 
+                    {
+                        textureId = textureManager.GetTexture(path);
+                        
+
+                        if (textureId > 0)
+                        {
+                            GL.Enable(EnableCap.Texture2D);
+                            GL.Enable(EnableCap.Blend);
+                            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+
+                            GL.BindTexture(TextureTarget.Texture2D, textureId);
+
+                            var p = prj.Project(ds.Equatorial);
+
+                            GL.Begin(PrimitiveType.TriangleFan);
+
+                            GL.TexCoord2(0.5, 0.5);
+                            // TODO: tint color depend on schema
+                            GL.Color4(Color.FromArgb(100, 255, 255, 255));
+                            GL.Vertex2(p.X, p.Y);
+
+                            double sd = ds.Semidiameter / 3600 * 2;
+                            double sdRA = sd / Math.Cos(Angle.ToRadians(ds.Equatorial.Delta));
+
+                            Vec2 p0 = prj.Project(ds.Equatorial + new CrdsEquatorial(sdRA, sd));
+
+                            GL.TexCoord2(0, 0);
+                            GL.Color4(Color.FromArgb(0, 0, 0, 0));
+                            GL.Vertex2(p0.X, p0.Y);
+
+                            Vec2 p1 = prj.Project(ds.Equatorial + new CrdsEquatorial(sdRA, -sd));
+                            GL.TexCoord2(0, 1);
+                            GL.Color4(Color.FromArgb(0, 0, 0, 0));
+                            GL.Vertex2(p1.X, p1.Y);
+
+                            Vec2 p2 = prj.Project(ds.Equatorial + new CrdsEquatorial(-sdRA, -sd));
+                            GL.TexCoord2(1, 1);
+                            GL.Color4(Color.FromArgb(0, 0, 0, 0));
+                            GL.Vertex2(p2.X, p2.Y);
+
+                            Vec2 p3 = prj.Project(ds.Equatorial + new CrdsEquatorial(-sdRA, sd));
+                            GL.TexCoord2(1, 0);
+                            GL.Color4(Color.FromArgb(0, 0, 0, 0));
+                            GL.Vertex2(p3.X, p3.Y);
+
+                            GL.TexCoord2(0, 0);
+                            GL.Color4(Color.FromArgb(0, 0, 0, 0));
+                            GL.Vertex2(p0.X, p0.Y);
+
+                            GL.End();
+
+                            GL.Disable(EnableCap.Texture2D);
+                            GL.Disable(EnableCap.Blend);
+
+                            map.AddDrawnObject(p, ds);
+                        }
+                    }
+                //}
+            }
+
+            textureManager.DeleteUnusedTextures();
         }
 
         public override void Render(IMapContext map)

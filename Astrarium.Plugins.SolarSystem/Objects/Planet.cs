@@ -107,7 +107,7 @@ namespace Astrarium.Plugins.SolarSystem.Objects
         /// <summary>
         /// Equatorial radii of planets, in kilometers
         /// </summary>
-        public static readonly double[] EQUATORIAL_RADIUS = new[] { 2439.7, 6051.8, 6371, 3389.5, 69911, 58232, 25362, 24622 };
+        public static readonly double[] EQUATORIAL_RADIUS = new[] { 2439.7, 6051.8, 6371, 3389.5, 69911, 58232, 25362, 24622, 1188 };
 
         public const int MERCURY    = 1;
         public const int VENUS      = 2;
