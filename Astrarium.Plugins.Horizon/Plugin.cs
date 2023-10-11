@@ -20,6 +20,7 @@ namespace Astrarium.Plugins.Horizon
 
             DefineSetting("Ground", true);
             DefineSetting("HorizonLine", true);
+            DefineSetting("GroundTextureNightDimming", 90m);
             DefineSetting("LabelCardinalDirections", true);
             DefineSetting("MeasureAzimuthFromNorth", false);
 
