@@ -61,6 +61,7 @@ namespace Astrarium.Plugins.DeepSky
         public override void Render(ISkyMap map)
         {
             if (!settings.Get<bool>("DeepSky")) return;
+            if (map.DaylightFactor == 1) return;
 
             var prj = map.SkyProjection;
 
@@ -68,85 +69,75 @@ namespace Astrarium.Plugins.DeepSky
             double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
 
             var deepSkies =
-                deepSkyCalc.deepSkies.Where(ds => !ds.Status.IsEmpty() &&                
-                
+                deepSkyCalc.deepSkies.Where(ds => !ds.Status.IsEmpty() &&
                 prj.GetDiskSize(ds.Semidiameter) > 10 &&
+                ((float.IsNaN(ds.Magnitude) ? 6 : ds.Magnitude) <= prj.MagLimit) && 
                 Angle.Separation(prj.CenterEquatorial, ds.Equatorial) < fov + ds.Semidiameter / 3600 * 2).ToList();
 
             foreach (var ds in deepSkies)
             {
-                //if (ds.Messier > 0)
-                //{
-                  
-                    
-                    
+                int textureId = -1;
 
-                    int textureId = -1;
+                string path = Path.Combine(basePath, "D:\\DeepSkySurvey2", $"{ds.CatalogName}.jpg");
 
-                    string path = Path.Combine(basePath, "Data", $"{ds.CatalogName}.jpg");
-
-                    if (File.Exists(path)) 
-                    {
-                        textureId = textureManager.GetTexture(path);
+                if (File.Exists(path))
+                {
+                    textureId = textureManager.GetTexture(path);
                         
+                    if (textureId > 0)
+                    {
+                        GL.Enable(EnableCap.Texture2D);
+                        GL.Enable(EnableCap.Blend);
+                        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
-                        if (textureId > 0)
-                        {
-                            GL.Enable(EnableCap.Texture2D);
-                            GL.Enable(EnableCap.Blend);
-                            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+                        GL.BindTexture(TextureTarget.Texture2D, textureId);
 
-                            GL.BindTexture(TextureTarget.Texture2D, textureId);
+                        var p = prj.Project(ds.Equatorial);
 
-                            var p = prj.Project(ds.Equatorial);
+                        GL.Begin(PrimitiveType.TriangleFan);
 
-                            GL.Begin(PrimitiveType.TriangleFan);
+                        GL.TexCoord2(0.5, 0.5);
+                        // TODO: tint color depend on schema
+                        GL.Color4(Color.FromArgb(100, 255, 255, 255));
+                        GL.Vertex2(p.X, p.Y);
 
-                            GL.TexCoord2(0.5, 0.5);
-                            // TODO: tint color depend on schema
-                            GL.Color4(Color.FromArgb(100, 255, 255, 255));
-                            GL.Vertex2(p.X, p.Y);
+                        double sd = ds.Semidiameter / 3600 * 2;
+                        double sdRA = sd / Math.Cos(Angle.ToRadians(ds.Equatorial.Delta));
 
-                            double sd = ds.Semidiameter / 3600 * 2;
-                            double sdRA = sd / Math.Cos(Angle.ToRadians(ds.Equatorial.Delta));
+                        Vec2 p0 = prj.Project(ds.Equatorial + new CrdsEquatorial(sdRA, sd));
 
-                            Vec2 p0 = prj.Project(ds.Equatorial + new CrdsEquatorial(sdRA, sd));
+                        GL.TexCoord2(0, 0);
+                        GL.Color4(Color.FromArgb(0, 0, 0, 0));
+                        GL.Vertex2(p0.X, p0.Y);
 
-                            GL.TexCoord2(0, 0);
-                            GL.Color4(Color.FromArgb(0, 0, 0, 0));
-                            GL.Vertex2(p0.X, p0.Y);
+                        Vec2 p1 = prj.Project(ds.Equatorial + new CrdsEquatorial(sdRA, -sd));
+                        GL.TexCoord2(0, 1);
+                        GL.Color4(Color.FromArgb(0, 0, 0, 0));
+                        GL.Vertex2(p1.X, p1.Y);
 
-                            Vec2 p1 = prj.Project(ds.Equatorial + new CrdsEquatorial(sdRA, -sd));
-                            GL.TexCoord2(0, 1);
-                            GL.Color4(Color.FromArgb(0, 0, 0, 0));
-                            GL.Vertex2(p1.X, p1.Y);
+                        Vec2 p2 = prj.Project(ds.Equatorial + new CrdsEquatorial(-sdRA, -sd));
+                        GL.TexCoord2(1, 1);
+                        GL.Color4(Color.FromArgb(0, 0, 0, 0));
+                        GL.Vertex2(p2.X, p2.Y);
 
-                            Vec2 p2 = prj.Project(ds.Equatorial + new CrdsEquatorial(-sdRA, -sd));
-                            GL.TexCoord2(1, 1);
-                            GL.Color4(Color.FromArgb(0, 0, 0, 0));
-                            GL.Vertex2(p2.X, p2.Y);
+                        Vec2 p3 = prj.Project(ds.Equatorial + new CrdsEquatorial(-sdRA, sd));
+                        GL.TexCoord2(1, 0);
+                        GL.Color4(Color.FromArgb(0, 0, 0, 0));
+                        GL.Vertex2(p3.X, p3.Y);
 
-                            Vec2 p3 = prj.Project(ds.Equatorial + new CrdsEquatorial(-sdRA, sd));
-                            GL.TexCoord2(1, 0);
-                            GL.Color4(Color.FromArgb(0, 0, 0, 0));
-                            GL.Vertex2(p3.X, p3.Y);
+                        GL.TexCoord2(0, 0);
+                        GL.Color4(Color.FromArgb(0, 0, 0, 0));
+                        GL.Vertex2(p0.X, p0.Y);
 
-                            GL.TexCoord2(0, 0);
-                            GL.Color4(Color.FromArgb(0, 0, 0, 0));
-                            GL.Vertex2(p0.X, p0.Y);
+                        GL.End();
 
-                            GL.End();
+                        GL.Disable(EnableCap.Texture2D);
+                        GL.Disable(EnableCap.Blend);
 
-                            GL.Disable(EnableCap.Texture2D);
-                            GL.Disable(EnableCap.Blend);
-
-                            map.AddDrawnObject(p, ds);
-                        }
+                        map.AddDrawnObject(p, ds);
                     }
-                //}
+                }
             }
-
-            textureManager.DeleteUnusedTextures();
         }
 
         public override void Render(IMapContext map)

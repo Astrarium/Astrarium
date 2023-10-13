@@ -973,13 +973,7 @@ namespace Astrarium.Plugins.SolarSystem
 
                 if (layer == LAYER_PLANET)
                 {
-                    int tex = textureManager.GetTexture(data.TextureName, data.FallbackTextureName);
-                    if (tex == 0)
-                    {
-
-
-                    }
-                    GL.BindTexture(TextureTarget.Texture2D, tex);
+                    GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(data.TextureName, data.FallbackTextureName));
                 }
                 else if (layer == LAYER_POLAR_CAP)
                 {
@@ -1003,6 +997,8 @@ namespace Astrarium.Plugins.SolarSystem
                         vecLight = matLight * new Vec3(-x, -y, -z);
 
                         GL.Normal3(vecLight.X * shadowSmoothness, vecLight.Y * shadowSmoothness, vecLight.Z * shadowSmoothness);
+
+                        
 
                         if (layer == LAYER_PLANET)
                         {

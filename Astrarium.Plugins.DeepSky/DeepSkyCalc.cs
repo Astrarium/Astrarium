@@ -97,18 +97,9 @@ namespace Astrarium.Plugins.DeepSky
         private CrdsEquatorial Equatorial(SkyContext c, DeepSky ds)
         {
             PrecessionalElements p = c.Get(GetPrecessionalElements);
-            
+
             // Equatorial coordinates for the mean equinox and epoch of the target date
             CrdsEquatorial eq = Precession.GetEquatorialCoordinates(ds.Equatorial0, p);
-
-            // Nutation effect
-            var eq1 = Nutation.NutationEffect(eq, c.NutationElements, c.Epsilon);
-
-            // Aberration effect
-            var eq2 = Aberration.AberrationEffect(eq, c.AberrationElements, c.Epsilon);
-
-            // Apparent coordinates of the object
-            eq += eq1 + eq2;
 
             return eq;
         }

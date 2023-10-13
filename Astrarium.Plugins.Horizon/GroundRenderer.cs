@@ -101,7 +101,12 @@ namespace Astrarium.Plugins.Horizon
                 GL.CullFace(CullFaceMode.Front);
             }
 
-            GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(Path.Combine(basePath, "Data", "pano.png"), fallbackPath: null, permanent: true));
+            int textureId = textureManager.GetTexture(Path.Combine(basePath, "Data", "pano.png"), fallbackPath: null, permanent: true);
+
+            //if (textureId > 0)
+            {
+                GL.BindTexture(TextureTarget.Texture2D, textureId);
+            }
 
             int steps = prj.Fov < 90 ? 32 : 128;
 
@@ -121,10 +126,15 @@ namespace Astrarium.Plugins.Horizon
             }
             else
             {
-                GL.Color4(Color.FromArgb(c, c, c));
+                if (textureId > 0)
+                    GL.Color4(Color.FromArgb(c, c, c));
+                else
+                    GL.Color4(Color.FromArgb(0, (int)(c * 0.6), 0));
             }
 
-            for (double lat = -80; lat <= 90; lat += 10)
+            double latStop = textureId > 0 ? 90 : 0; 
+
+            for (double lat = -80; lat <= latStop; lat += 10)
             {
                 GL.Begin(PrimitiveType.TriangleStrip);
 

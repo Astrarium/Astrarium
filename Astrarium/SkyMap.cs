@@ -245,8 +245,14 @@ namespace Astrarium
         /// </summary>
         private ICommandLineArgs commandLineArgs = null;
 
-        public SkyMap(ISettings settings, ICommandLineArgs commandLineArgs)
+        /// <summary>
+        /// Texture manager instance
+        /// </summary>
+        private ITextureManager textureManager = null;
+
+        public SkyMap(ITextureManager textureManager, ISettings settings, ICommandLineArgs commandLineArgs)
         {
+            this.textureManager = textureManager;
             this.settings = settings;
             this.commandLineArgs = commandLineArgs;
         }
@@ -314,12 +320,28 @@ namespace Astrarium
                     Invalidate();
                 }
             };
+
+            //Thread thread = new Thread(TimeSyncWorker) { IsBackground = true };
+            //thread.Start();
+        }
+
+        private void TimeSyncWorker()
+        {
+            while (true)
+            {
+                Context.JulianDay = new Date(DateTime.Now).ToJulianEphemerisDay();
+                Invalidate();
+
+                double rate = Math.Min(5000, Math.Max(10, SkyProjection.Fov * 100));
+                Thread.Sleep((int)rate);
+            }
         }
 
         public ColorSchema Schema { get; private set; } = ColorSchema.Night;
 
         public void Render()
         {
+            textureManager.Cleanup();
             celestialObjects.Clear();
 
             bool needDrawSelectedObject = true;

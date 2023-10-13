@@ -42,7 +42,7 @@ namespace Astrarium.Plugins.MilkyWay
             // nautical twilight: suppose Milky Way is not visible
             if (milkyWayCalc.SunAltitude > -12) return;
 
-            const double maxAlpha = 80;
+            const double maxAlpha = 60;
             const double minAlpha = 1;
             const double minFov = 1;
 
@@ -84,9 +84,7 @@ namespace Astrarium.Plugins.MilkyWay
             const int steps = 32;
 
             // tint color
-            GL.Color4(Color.FromArgb(alpha, 255, 255, 255));
-
-            System.Diagnostics.Debug.WriteLine($"alpha = {alpha}");
+            GL.Color4(Color.FromArgb(alpha, 205, 225, 255));
 
             for (double lat = -80; lat <= 90; lat += 10)
             {

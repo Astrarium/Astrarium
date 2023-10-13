@@ -47,14 +47,6 @@ namespace Astrarium.Plugins.Atmosphere
         // turbidity
         private double T = 3;
 
-        /*
-        public double CoeffA { get; set; } = 1;
-        public double CoeffB { get; set; } = 1;
-        public double CoeffC { get; set; } = 1;
-        public double CoeffD { get; set; } = 1;
-        public double CoeffE { get; set; } = 1;
-        */
-
         private readonly ISky sky;
         private readonly ISkyMap map;
         private readonly ISettings settings;
@@ -211,34 +203,16 @@ namespace Astrarium.Plugins.Atmosphere
         // Perez function
         private double F(int i, double theta, double gamma)
         {
-            /*
-            double a = 0.5 * Cos(Angle.ToRadians(sun.Altitude));
-            double b = 1 +  10 * Abs(Sin(Angle.ToRadians(sun.Altitude)));
-            double c = 1.5 - Cos(Angle.ToRadians(sun.Altitude));
-            double d = 2 - Cos(Angle.ToRadians(sun.Altitude));
-            double e = 1;
-            */
-
-            /*
-            double a = CoeffA;
-            double b = CoeffB;
-            double c = CoeffC;
-            double d = CoeffD;
-            double e = CoeffE;
-            */
-
-            //return (1 + CoeffA * A[i] * Exp(CoeffB * B[i] / Cos(theta))) * (1 + CoeffC * C[i] * Exp(CoeffD * D[i] * gamma) + CoeffE * E[i] * Cos(gamma) * Cos(gamma));
-
-
             double alt = sun.Altitude;
 
             double a = alt <= -12 ? 0.001 : (alt >= -5 ? 0.516 : (0.883857 + 0.0735714 * alt));
-            double b = Max(0.0764, -0.000423647 * alt * alt + 0.0149816 * alt + 0.47203); // (quadratic);// 10; // -6.65374e-7 * Pow(alt, 4) + 0.000121364 * Pow(alt, 3) - 0.00412819 * Pow(alt, 2) - 0.0215041 * alt + 0.554583;
+
+            double b = Max(0.0764, -0.000423647 * alt * alt + 0.0149816 * alt + 0.47203);
+            //if (alt > 5) b = 0;
+            
             double c = alt <= -5 ? 0.001 : (alt > 0 ? 1.028 : 0.2054 * alt + 1.028);
             double d = alt <= -5 ? 10 : (alt >= 0 ? 2.504 : (2.504 - 1.4992 * alt));
-            double e = 1;// alt <= 0 ? 0.001 : 0.847;
-
-            //a = 1; b = 0; c = 0; d = 0; e = 0;
+            double e = 1;
 
             return (1 + a * A[i] * Exp(b * B[i] / Cos(theta))) * (1 + c * C[i] * Exp(d * D[i] * gamma) + e * E[i] * Cos(gamma) * Cos(gamma));
         }
@@ -257,27 +231,9 @@ namespace Astrarium.Plugins.Atmosphere
             }
 
             L[0] *= map.DaylightFactor;
-            //L[1] = 1;
-            //L[2] = 1;
 
             return ConvertYxyToRGB(L);
         }
-
-        /*
-        public double GetTransparency()
-        {
-            const double nightAlt = 18;
-            double alt = sun.Altitude;
-
-            if (alt >= 0)
-                return 1 * CoeffT;
-            else if (alt < 0 && alt > -nightAlt)
-                return 1 - (double)(-alt / nightAlt);
-            else
-                return 0;
-        }
-        */
-
 
         // Convert from Yxy color system to RGB
         private Color ConvertYxyToRGB(double[] color)
@@ -306,8 +262,6 @@ namespace Astrarium.Plugins.Atmosphere
             if (R < 0) R = 0;
             if (G < 0) G = 0;
             if (B < 0) B = 0;
-
-            //int alpha = (int)(255 * GetTransp(sun.Altitude));
 
             return Color.FromArgb(R, G, B);
         }
