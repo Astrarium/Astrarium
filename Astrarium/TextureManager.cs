@@ -49,7 +49,7 @@ namespace Astrarium
 
         public Action FallbackAction { get; set; }
 
-        public int GetTexture(string path, string fallbackPath = null, bool permanent = false)
+        public int GetTexture(string path, string fallbackPath = null, bool permanent = false, Action action = null)
         {
             lock (locker)
             {
@@ -71,7 +71,8 @@ namespace Astrarium
                     textures.Add(new Texture()
                     {
                         Path = path,
-                        IsPermanent = permanent
+                        IsPermanent = permanent,
+                        Action = action
                     });
                     autoReset.Set();
                 }
@@ -91,18 +92,6 @@ namespace Astrarium
             lock (locker)
             {
                 textures.ForEach(x => x.UsageCounter++);
-            }
-        }
-
-        public void SetTextureParams(string path, Action action)
-        {
-            lock (locker)
-            {
-                var texture = textures.FirstOrDefault(x => x.Path == path);
-                if (texture != null)
-                {
-                    texture.Action = action;
-                }
             }
         }
 

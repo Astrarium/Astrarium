@@ -75,7 +75,6 @@ namespace Astrarium.Plugins.SolarSystem
             solarTextureManager.FallbackAction += () => map.Invalidate();
 
             textureManager.FallbackAction += () => map.Invalidate();
-            textureManager.SetTextureParams(Path.Combine(dataPath, "PolarCap.png"), SetPolarCapTextureParameters);
 
             sphereRenderer = new SphereRendererFactory().CreateRenderer();
         }
@@ -977,7 +976,7 @@ namespace Astrarium.Plugins.SolarSystem
                 }
                 else if (layer == LAYER_POLAR_CAP)
                 {
-                    GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(Path.Combine(dataPath, "PolarCap.png")));
+                    GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(Path.Combine(dataPath, "PolarCap.png"), fallbackPath: null, permanent: false, action: SetPolarCapTextureParameters));
                 }
 
                 GL.ShadeModel(ShadingModel.Smooth);
