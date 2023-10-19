@@ -95,8 +95,8 @@ namespace Astrarium.Plugins.Atmosphere
             moon = context.Get(sky.MoonEquatorial).ToHorizontal(context.GeoLocation, context.SiderealTime);
 
             // TODO: get from sky
-            sdSun = 0.5;
-            sdMoon = 0.5;
+            sdSun = 0.5 * 3600;
+            sdMoon = 0.5 * 3600;
 
             // solar zenith distance, in radians
             thetaSun = Angle.ToRadians(90 - sun.Altitude);
@@ -206,13 +206,12 @@ namespace Astrarium.Plugins.Atmosphere
             double alt = sun.Altitude;
 
             double a = alt <= -12 ? 0.001 : (alt >= -5 ? 0.516 : (0.883857 + 0.0735714 * alt));
-
             double b = Max(0.0764, -0.000423647 * alt * alt + 0.0149816 * alt + 0.47203);
-            //if (alt > 5) b = 0;
-            
             double c = alt <= -5 ? 0.001 : (alt > 0 ? 1.028 : 0.2054 * alt + 1.028);
             double d = alt <= -5 ? 10 : (alt >= 0 ? 2.504 : (2.504 - 1.4992 * alt));
             double e = 1;
+
+            //c = 1;
 
             return (1 + a * A[i] * Exp(b * B[i] / Cos(theta))) * (1 + c * C[i] * Exp(d * D[i] * gamma) + e * E[i] * Cos(gamma) * Cos(gamma));
         }

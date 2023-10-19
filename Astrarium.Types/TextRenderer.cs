@@ -80,7 +80,6 @@ namespace Astrarium.Types
 
         #region Private Members
 
-
         private void GetBitmapData()
         {
             System.Drawing.Imaging.BitmapData data = bmp.LockBits(new Rectangle(Point.Empty, bmp.Size),

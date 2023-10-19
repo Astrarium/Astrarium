@@ -78,6 +78,7 @@ namespace Astrarium.Plugins.DeepSky
             {
                 int textureId = -1;
 
+                // TODO: take from settings
                 string path = Path.Combine(basePath, "D:\\DeepSkySurvey2", $"{ds.CatalogName}.jpg");
 
                 if (File.Exists(path))
