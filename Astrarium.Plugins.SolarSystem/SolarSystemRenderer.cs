@@ -1084,19 +1084,6 @@ namespace Astrarium.Plugins.SolarSystem
             return new Vec2(X_, Y_);
         }
 
-        private PointF GetCartesianFeatureCoordinates(float r, CrdsGeographical c, float axisRotation)
-        {
-            // convert to orthographic polar coordinates 
-            float Y = r * (float)(-Math.Sin(Angle.ToRadians(c.Latitude)));
-            float X = r * (float)(Math.Cos(Angle.ToRadians(c.Latitude)) * Math.Sin(Angle.ToRadians(c.Longitude)));
-
-            // polar coordinates rotated around of visible center of the body disk
-            float X_ = (float)(X * Math.Cos(Angle.ToRadians(axisRotation)) - Y * Math.Sin(Angle.ToRadians(axisRotation)));
-            float Y_ = (float)(X * Math.Sin(Angle.ToRadians(axisRotation)) + Y * Math.Cos(Angle.ToRadians(axisRotation)));
-
-            return new PointF(X_, Y_);
-        }
-
         private CrdsGeographical GetVisibleFeatureCoordinates(double latitude, double longitude, double latitudeShift, double longitudeShift)
         {
             double theta = Angle.ToRadians(90 - latitude); // [0...180]
@@ -1106,17 +1093,9 @@ namespace Astrarium.Plugins.SolarSystem
             double x = Math.Sin(theta) * Math.Cos(phi);
             double y = Math.Sin(theta) * Math.Sin(phi);
             double z = Math.Cos(theta);
-            double[] v = new double[] { x, y, z };
+            Vec3 v = new Vec3(x, y, z);
 
-            // rotate around Z axis (longitude / phi)
-            double aZ = Angle.ToRadians(-longitudeShift);
-            double[,] mZ = new double[3, 3] { { Math.Cos(aZ), -Math.Sin(aZ), 0 }, { Math.Sin(aZ), Math.Cos(aZ), 0 }, { 0, 0, 1 } };
-            Rotate(v, mZ);
-
-            // rotate around Y axis (latitude / theta)
-            double aY = Angle.ToRadians(latitudeShift);
-            double[,] mY = new double[3, 3] { { Math.Cos(aY), 0, Math.Sin(aY) }, { 0, 1, 0 }, { -Math.Sin(aY), 0, Math.Cos(aY) } };
-            Rotate(v, mY);
+            v = Mat4.YRotation(Angle.ToRadians(latitudeShift)).Transpose() * Mat4.ZRotation(Angle.ToRadians(-longitudeShift)).Transpose() * v;
 
             x = v[0];
             y = v[1];
@@ -1127,21 +1106,6 @@ namespace Astrarium.Plugins.SolarSystem
             phi = Angle.ToDegrees(Math.Atan2(y, x));
 
             return new CrdsGeographical(phi, theta);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="v"></param>
-        /// <param name="m">First index: row, second: column</param>
-        private void Rotate(double[] v, double[,] m)
-        {
-            double x = v[0] * m[0, 0] + v[1] * m[1, 0] + v[2] * m[2, 0];
-            double y = v[0] * m[0, 1] + v[1] * m[1, 1] + v[2] * m[2, 1];
-            double z = v[0] * m[0, 2] + v[1] * m[1, 2] + v[2] * m[2, 2];
-            v[0] = x;
-            v[1] = y;
-            v[2] = z;
         }
 
         private void RenderJupiterShadow(ISkyMap map, JupiterMoon moon)
