@@ -76,13 +76,18 @@ namespace Astrarium.Types
         EarthOrbit = 5,
 
         /// <summary>
+        /// Rendering layer for athmosphere
+        /// </summary>
+        Atmosphere = 6,
+
+        /// <summary>
         /// Rendering layer for terrestrial objects
         /// </summary>
-        Terrestrial = 6,
+        Terrestrial = 7,
 
         /// <summary>
         /// Rendering layer for foreground objects which overlap all previous layers
         /// </summary>
-        Foreground = 7
+        Foreground = 8
     }
 }

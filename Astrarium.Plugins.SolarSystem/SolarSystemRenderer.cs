@@ -1303,40 +1303,18 @@ namespace Astrarium.Plugins.SolarSystem
 
         private Color GetPlanetColor(int planet)
         {
-            Color color = Color.Empty;
-
             switch (planet)
             {
-                case 1:
-                    color = Color.FromArgb(132, 131, 131);
-                    break;
-                case 2:
-                    color = Color.FromArgb(228, 189, 127);
-                    break;
-                case 4:
-                    color = Color.FromArgb(183, 98, 71);
-                    break;
-                case 5:
-                    color = Color.FromArgb(166, 160, 149);
-                    break;
-                case 6:
-                    color = Color.FromArgb(207, 192, 162);
-                    break;
-                case 7:
-                    color = Color.FromArgb(155, 202, 209);
-                    break;
-                case 8:
-                    color = Color.FromArgb(54, 79, 167);
-                    break;
-                case 9:
-                    color = Color.FromArgb(207, 192, 162);
-                    break;
-                default:
-                    color = Color.Gray;
-                    break;
+                case 1: return Color.FromArgb(132, 131, 131);
+                case 2: return Color.FromArgb(228, 189, 127);
+                case 4: return Color.FromArgb(183, 98, 71);
+                case 5: return Color.FromArgb(166, 160, 149);
+                case 6: return Color.FromArgb(207, 192, 162);
+                case 7: return Color.FromArgb(155, 202, 209);
+                case 8: return Color.FromArgb(54, 79, 167);
+                case 9: return Color.FromArgb(207, 192, 162);
+                default: return Color.Gray;
             }
-
-            return color;
         }
     }
 }

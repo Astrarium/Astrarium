@@ -11,7 +11,7 @@ namespace Astrarium.Plugins.Atmosphere
 {
     public class AtmosphereRenderer : BaseRenderer
     {
-        public override RendererOrder Order => RendererOrder.Terrestrial;
+        public override RendererOrder Order => RendererOrder.Atmosphere;
 
         private readonly AtmosphereCalculator calc;
         private readonly ISettings settings;
