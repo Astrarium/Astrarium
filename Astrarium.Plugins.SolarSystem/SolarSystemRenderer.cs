@@ -84,11 +84,18 @@ namespace Astrarium.Plugins.SolarSystem
                 .Concat(planetsCalc.NeptuneMoons)
                 .Concat(planetsCalc.GenericMoons)
                 .OrderByDescending(body => body.DistanceFromEarth)
+                .Cast<CelestialObject>()
                 .ToArray();
 
             foreach (var body in bodies)
             {
-                if (body is Planet planet && settings.Get("Planets"))
+                // do not draw if display setting is off
+                if (!body.DisplaySettingNames.All(x => settings.Get(x)))
+                {
+                    continue;
+                }
+
+                if (body is Planet planet)
                 {
                     double rotAxis = prj.GetAxisRotation(planet.Equatorial, planet.Appearance.P);
                     double rotPhase = prj.GetPhaseRotation(planet.Ecliptical);
@@ -101,7 +108,6 @@ namespace Astrarium.Plugins.SolarSystem
                         MinimalPointSize = settings.Get("PlanetsDrawAll") ? 1 : 0,
                         MaximalPointSize = 7,
                         TextureName = Path.Combine(dataPath, $"{planet.Number}.jpg"),
-                        Semidiameter = planet.Semidiameter,
                         PhaseAngle = planet.PhaseAngle,
                         Flattening = planet.Flattening,
                         LatitudeShift = -planet.Appearance.D,
@@ -111,8 +117,6 @@ namespace Astrarium.Plugins.SolarSystem
                         BodyPhysicalDiameter = 2 * Planet.EQUATORIAL_RADIUS[planet.Number - 1],
                         SurfaceFeatures = planet.Number == Planet.MARS && settings.Get("PlanetsSurfaceFeatures") ? martianFeatures : null,
                         SmoothShadow = planet.Number > Planet.MARS,
-                        NorthernPolarCap = planet.Number == Planet.MARS ? planetsCalc.MarsNPCWidth : 0,
-                        SouthernPolarCap = planet.Number == Planet.MARS ? planetsCalc.MarsSPCWidth : 0,
                         DrawLabel = settings.Get("PlanetsLabels"),
                         Label = label
                     });
@@ -120,7 +124,7 @@ namespace Astrarium.Plugins.SolarSystem
                     if (planet.Number == Planet.JUPITER)
                     {
                         // draw moon shadows over Jupiter
-                        RenderJupiterMoonShadow(map, planet);
+                        RenderJupiterMoonShadow(planet);
                     }
                 }
                 else if (body is MarsMoon mm)
@@ -129,7 +133,7 @@ namespace Astrarium.Plugins.SolarSystem
                     {
                         DrawLabel = settings.Get("PlanetsLabels"),
                         Equatorial = mm.Equatorial,
-                        MaximalDiskSize = 0, // do not render as sphere
+                        MaximalDiskSize = 0,
                         MaximalPointSize = 2
                     });
                 }
@@ -140,7 +144,6 @@ namespace Astrarium.Plugins.SolarSystem
                     RenderSolarSystemObject(jupiterMoon, new SphereParameters()
                     {
                         TextureName = Path.Combine(dataPath, $"5-{jupiterMoon.Number}.jpg"),
-                        Semidiameter = jupiterMoon.Semidiameter,
                         LongitudeShift = jupiterMoon.CM,
                         PhaseAngle = jupiter.PhaseAngle,
                         RotationAxis = rotAxis,
@@ -151,10 +154,10 @@ namespace Astrarium.Plugins.SolarSystem
                     });
 
                     // shadow of other moons above current
-                    RenderJupiterMoonShadow(map, jupiterMoon, jupiterMoon.RectangularS);
+                    RenderJupiterMoonShadow(jupiterMoon, jupiterMoon.RectangularS);
 
                     // shadow of jupiter above current
-                    RenderJupiterShadow(map, jupiterMoon);
+                    RenderJupiterShadow(jupiterMoon);
                 }
                 else if (body is SaturnMoon saturnMoon)
                 {
@@ -166,7 +169,6 @@ namespace Astrarium.Plugins.SolarSystem
                         MaximalPointSize = 1.5f,
                         TextureName = Path.Combine(dataPath, $"6-{saturnMoon.Number}.jpg"),
                         FallbackTextureName = Path.Combine(dataPath, $"Unknown.jpg"),
-                        Semidiameter = saturnMoon.Semidiameter,
                         LongitudeShift = saturnMoon.CM,
                         PhaseAngle = saturn.PhaseAngle,
                         RotationAxis = rotAxis,
@@ -218,7 +220,6 @@ namespace Astrarium.Plugins.SolarSystem
                         MinimalPointSize = settings.Get("PlanetsDrawAll") ? 1 : 0,
                         MaximalPointSize = 7,
                         TextureName = Path.Combine(dataPath, $"{pluto.Number}.jpg"),
-                        Semidiameter = pluto.Semidiameter,
                         LatitudeShift = -pluto.Appearance.D,
                         LongitudeShift = pluto.Appearance.CM,
                         RotationAxis = rotAxis,
@@ -228,65 +229,11 @@ namespace Astrarium.Plugins.SolarSystem
                         Label = label
                     });
                 }
-                else if (body is Sun && settings.Get("Sun"))
+                else if (body is Sun)
                 {
-                    double rotAxis = Angle.ToRadians(prj.GetAxisRotation(sun.Equatorial, -prj.Context.Epsilon));
-
-                    double size = prj.GetDiskSize(sun.Semidiameter, 10);
-                    double r = size / 2;
-                    Vec2 p = prj.Project(sun.Equatorial);
-
-                    GL.Enable(EnableCap.Texture2D);
-                    GL.Enable(EnableCap.Blend);
-                    GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-
-                    int textureId = -1;
-
-                    if (settings.Get("SunTexture"))
-                    {
-                        textureId = solarTextureManager.GetTexture(prj.Context.JulianDay);
-                        GL.BindTexture(TextureTarget.Texture2D, textureId);
-                    }
-
-                    GL.PushMatrix();
-                    GL.Translate(p.X, p.Y, 0);
-
-                    GL.Begin(PrimitiveType.TriangleFan);
-
-                    if (textureId > 0)
-                    {
-                        // TODO: tint color
-                        GL.Color4(Color.White);
-                    }
-                    else
-                    {
-                        GL.Color4(Color.Orange);
-                    }
-
-                    for (int i = 0; i <= 64; i++)
-                    {
-                        double ang0 = Angle.ToRadians(i / 64.0 * 360);
-                        double ang = ang0 + rotAxis;
-                        Vec2 v = new Vec2(r * Math.Cos(ang), r * Math.Sin(ang));
-
-                        if (textureId > 0)
-                        {
-                            double tx = (prj.FlipHorizontal ? -1 : 1) * Math.Cos(ang0);
-                            double ty = (prj.FlipVertical ? -1 : 1) * Math.Sin(ang0);
-                            Vec2 vt = new Vec2(tx, ty);
-                            GL.TexCoord2(0.5f + 0.499f * vt.X, 0.5f + 0.499f * vt.Y);
-                        }
-                        GL.Vertex2(v.X, v.Y);
-                    }
-
-                    GL.End();
-
-                    GL.PopMatrix();
-
-                    GL.Disable(EnableCap.Texture2D);
-                    GL.Disable(EnableCap.Blend);
+                    RenderSun();
                 }
-                else if (body is Moon && settings.Get("Moon"))
+                else if (body is Moon)
                 {
                     double rotAxis = prj.GetAxisRotation(moon.Equatorial, moon.PAaxis);
                     double rotPhase = prj.GetPhaseRotation(moon.Ecliptical0);
@@ -300,7 +247,6 @@ namespace Astrarium.Plugins.SolarSystem
                         TextureName = Path.Combine(dataPath, textureName),
                         FallbackTextureName = Path.Combine(dataPath, "Moon-2k.jpg"),
                         MinimalDiskSize = 10,
-                        Semidiameter = moon.Semidiameter,
                         PhaseAngle = moon.PhaseAngle,
                         LatitudeShift = -moon.Libration.b,
                         LongitudeShift = -moon.Libration.l,
@@ -324,7 +270,7 @@ namespace Astrarium.Plugins.SolarSystem
             public CrdsEquatorial Equatorial { get; set; }
 
             /// <summary>
-            /// Color of the celestial body when it' drawn as a point
+            /// Color of the celestial body when it's drawn as a point
             /// </summary>
             public Color Color { get; set; } = Color.White;
 
@@ -355,10 +301,6 @@ namespace Astrarium.Plugins.SolarSystem
             /// </summary>
             public double BodyPhysicalDiameter { get; set; }
 
-            /// <summary>
-            /// Body semidiameter, in seconds of arc
-            /// </summary>
-            public double Semidiameter { get; set; }
             public ShadowAppearance EarthShadowApperance { get; set; }
             public CrdsEquatorial EarthShadowCoordinates { get; set; }
 
@@ -378,11 +320,15 @@ namespace Astrarium.Plugins.SolarSystem
             public double LongitudeShift { get; set; }
             public double LatitudeShift { get; set; }
 
+            /// <summary>
+            /// Flag indicating body should be rendered with label.
+            /// </summary>
             public bool DrawLabel { get; set; }
-            public string Label { get; set; }
 
-            public double NorthernPolarCap { get; set; }
-            public double SouthernPolarCap { get; set; }
+            /// <summary>
+            /// Body label (name). If not set, body's primary name will be used.
+            /// </summary>
+            public string Label { get; set; }
         }
 
         private void SetPolarCapTextureParameters()
@@ -476,7 +422,7 @@ namespace Astrarium.Plugins.SolarSystem
                 int i, j;
 
                 // radius of sphere, in pixels
-                float radius = prj.GetDiskSize(data.Semidiameter, data.MinimalDiskSize) / 2;
+                float radius = prj.GetDiskSize(body.Semidiameter, data.MinimalDiskSize) / 2;
 
                 // number of segments to build the sphere
                 int segments = radius < 20 ? 16 : 64;
@@ -515,7 +461,7 @@ namespace Astrarium.Plugins.SolarSystem
 
                 if (drawRings)
                 {
-                    DrawRings(map, data, 1);
+                    RenderSaturnRings(data, 1);
                 }
 
                 const int LAYER_PLANET = 0;
@@ -532,8 +478,8 @@ namespace Astrarium.Plugins.SolarSystem
                     // polar cap limits, in fractions of planet diameter
                     if (layer == LAYER_POLAR_CAP)
                     {
-                        cap1 = prj.FlipVertical ? 1 - data.NorthernPolarCap / 180 : 1 - data.SouthernPolarCap / 180;
-                        cap2 = prj.FlipVertical ? data.SouthernPolarCap / 180 : data.NorthernPolarCap / 180;
+                        cap1 = prj.FlipVertical ? 1 - planetsCalc.MarsNPCWidth / 180 : 1 - planetsCalc.MarsSPCWidth / 180;
+                        cap2 = prj.FlipVertical ? planetsCalc.MarsSPCWidth / 180 : planetsCalc.MarsNPCWidth / 180;
                     }
 
                     int texture = 0;
@@ -547,7 +493,17 @@ namespace Astrarium.Plugins.SolarSystem
                         texture = textureManager.GetTexture(Path.Combine(dataPath, "PolarCap.png"), fallbackPath: null, permanent: false, action: SetPolarCapTextureParameters);
                     }
 
-                    GL.BindTexture(TextureTarget.Texture2D, texture);
+                    if (texture == 0)
+                    {
+                        float r = data.Color.R / 255f;
+                        float g = data.Color.G / 255f;
+                        float b = data.Color.B / 255f;
+                        GL.Light(LightName.Light0, LightParameter.Diffuse, new float[4] { r, g, b, 1f });
+                    }
+                    else
+                    {
+                        GL.BindTexture(TextureTarget.Texture2D, texture);
+                    }
 
                     GL.ShadeModel(ShadingModel.Smooth);
 
@@ -623,7 +579,7 @@ namespace Astrarium.Plugins.SolarSystem
 
                 if (drawRings)
                 {
-                    DrawRings(map, data, -1);
+                    RenderSaturnRings(data, -1);
                 }
 
                 GL.PopMatrix();
@@ -636,12 +592,12 @@ namespace Astrarium.Plugins.SolarSystem
 
                 if (data.EarthShadowApperance != null && data.EarthShadowCoordinates != null)
                 {
-                    DrawEarthShadow(map, data);
+                    RenderEarthShadow(data);
                 }
 
                 if (data.SurfaceFeatures != null)
                 {
-                    DrawPlanetFeatures(map, data);
+                    RenderPlanetFeatures(body, data);
                 }
             }
             else
@@ -659,12 +615,87 @@ namespace Astrarium.Plugins.SolarSystem
             }
         }
 
-        private void DrawEarthShadow(ISkyMap map, SphereParameters data)
+        private void RenderSun()
+        {
+            var prj = map.SkyProjection;
+
+            double rotAxis = Angle.ToRadians(prj.GetAxisRotation(sun.Equatorial, -prj.Context.Epsilon));
+
+            float diam = prj.GetDiskSize(sun.Semidiameter, 10);
+            float r = diam / 2;
+            Vec2 p = prj.Project(sun.Equatorial);
+
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+
+            int textureId = -1;
+
+            if (settings.Get("SunTexture"))
+            {
+                GL.Enable(EnableCap.Texture2D);
+                textureId = solarTextureManager.GetTexture(prj.Context.JulianDay);
+                GL.BindTexture(TextureTarget.Texture2D, textureId);
+            }
+
+            GL.PushMatrix();
+            GL.Translate(p.X, p.Y, 0);
+
+            if (settings.Get<ColorSchema>("Schema") == ColorSchema.Red)
+            {
+                GL.Color4(Color.Red);
+            }
+            else
+            {
+                if (textureId > 0)
+                {
+                    GL.Color3(Color.White);
+                }
+                else
+                {
+                    GL.Color3(Color.Orange);
+                }
+            }
+
+            GL.Begin(PrimitiveType.TriangleFan);
+
+            for (int i = 0; i <= 64; i++)
+            {
+                double ang0 = Angle.ToRadians(i / 64.0 * 360);
+                double ang = ang0 + rotAxis;
+                Vec2 v = new Vec2(r * Math.Cos(ang), r * Math.Sin(ang));
+
+                if (textureId > 0)
+                {
+                    double tx = (prj.FlipHorizontal ? -1 : 1) * Math.Cos(ang0);
+                    double ty = (prj.FlipVertical ? -1 : 1) * Math.Sin(ang0);
+                    GL.TexCoord2(0.5f + 0.499f * tx, 0.5f + 0.499f * ty);
+                }
+
+                GL.Vertex2(v.X, v.Y);
+            }
+
+            GL.End();
+
+            GL.PopMatrix();
+
+            GL.Disable(EnableCap.Texture2D);
+            GL.Disable(EnableCap.Blend);
+
+            map.AddDrawnObject(p, sun);
+
+            if (settings.Get("SunLabel"))
+            {
+                var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
+                textRenderer.Value.DrawString(sun.Name, fontLabel, brushLabel, p + (0.7f * r));
+            }
+        }
+
+        private void RenderEarthShadow(SphereParameters data)
         {
             var prj = map.SkyProjection;
 
             // moon radius in pixels (1 extra pixel added for better rendering)
-            float rMoon = prj.GetDiskSize(data.Semidiameter) / 2 + 1;
+            float rMoon = prj.GetDiskSize(moon.Semidiameter) / 2 + 1;
 
             if (rMoon > 5)
             {
@@ -675,7 +706,7 @@ namespace Astrarium.Plugins.SolarSystem
                 var pShadow = prj.Project(data.EarthShadowCoordinates);
 
                 // moon semidiameter in seconds of arc
-                double sdMoon = data.Semidiameter;
+                double sdMoon = moon.Semidiameter;
 
                 // semidiameter of penumbra in seconds of arc
                 double sdPenumbra = data.EarthShadowApperance.PenumbraRadius * 6378.0 / 1738.0 * sdMoon;
@@ -734,12 +765,12 @@ namespace Astrarium.Plugins.SolarSystem
             }
         }
 
-        private void DrawPlanetFeatures(ISkyMap map, SphereParameters data)
+        private void RenderPlanetFeatures(SizeableCelestialObject body, SphereParameters data)
         {
             var prj = map.SkyProjection;
 
             // radius of celestial body disk, in pixels
-            float r = prj.GetDiskSize(data.Semidiameter) / 2;
+            float r = prj.GetDiskSize(body.Semidiameter) / 2;
 
             if (r > 100)
             {
@@ -749,7 +780,7 @@ namespace Astrarium.Plugins.SolarSystem
                 // feature types that should be labeled in central point
                 string[] centeredFeatures = new string[] { "ME", "OC", "SI", "LC", "PA", "PR", "MO", "VA", "RU", "RI", "DO", "CA", "AL", "LF", "PL" };
 
-                // center of the Moon in screen coordinates
+                // center of the body in screen coordinates
                 var p = prj.Project(data.Equatorial);
 
                 // TODO: move color to settings
@@ -821,7 +852,7 @@ namespace Astrarium.Plugins.SolarSystem
             }
         }
 
-        private void DrawRings(ISkyMap map, SphereParameters data, int sign)
+        private void RenderSaturnRings(SphereParameters data, int sign)
         {
             int j;
             double x, y;
@@ -852,7 +883,7 @@ namespace Astrarium.Plugins.SolarSystem
             GL.Vertex3(0, 0, 0);
 
             // radius of outer ring, in pixels
-            double r = prj.GetDiskSize(data.Semidiameter, 10) / 2 * ringsRatio;
+            double r = prj.GetDiskSize(saturn.Semidiameter, data.MinimalDiskSize) / 2 * ringsRatio;
 
             // rotation of axis
             double rotAxis = Angle.ToRadians(data.RotationAxis);
@@ -951,11 +982,9 @@ namespace Astrarium.Plugins.SolarSystem
             return new CrdsGeographical(phi, theta);
         }
 
-        private void RenderJupiterShadow(ISkyMap map, JupiterMoon moon)
+        private void RenderJupiterShadow(JupiterMoon moon)
         {
             if (!moon.IsEclipsedByPlanet) return;
-            if (!settings.Get("Planets")) return;
-            if (!settings.Get("PlanetMoons")) return;
 
             var prj = map.SkyProjection;
             Planet jupiter = planetsCalc.Planets.ElementAt(Planet.JUPITER - 1);
@@ -1083,11 +1112,8 @@ namespace Astrarium.Plugins.SolarSystem
             GL.PopMatrix();
         }
 
-        private void RenderJupiterMoonShadow(ISkyMap map, SizeableCelestialObject eclipsedBody, CrdsRectangular rect = null)
+        private void RenderJupiterMoonShadow(SizeableCelestialObject eclipsedBody, CrdsRectangular rect = null)
         {
-            if (!settings.Get("Planets")) return;
-            if (!settings.Get("PlanetMoons")) return;
-
             Projection prj = map.SkyProjection;
 
             if (rect == null)
