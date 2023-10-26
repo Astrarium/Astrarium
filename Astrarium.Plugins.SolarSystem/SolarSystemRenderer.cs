@@ -127,12 +127,8 @@ namespace Astrarium.Plugins.SolarSystem
                 {
                     RenderSolarSystemObject(mm, new SphereParameters()
                     {
-                        Color = Color.White,
                         DrawLabel = settings.Get("PlanetsLabels"),
-                        Label = mm.Name,
                         Equatorial = mm.Equatorial,
-                        MinimalDiskSize = 0,
-                        MinimalPointSize = 0,
                         MaximalDiskSize = 0, // do not render as sphere
                         MaximalPointSize = 2
                     });
@@ -150,9 +146,7 @@ namespace Astrarium.Plugins.SolarSystem
                         RotationAxis = rotAxis,
                         RotationPhase = rotPhase,
                         Equatorial = jupiterMoon.Equatorial,
-                        Color = Color.White,
                         DrawLabel = settings.Get("PlanetsLabels"),
-                        Label = jupiterMoon.Name,
                         MaximalPointSize = 3
                     });
 
@@ -170,7 +164,6 @@ namespace Astrarium.Plugins.SolarSystem
                     {
                         Equatorial = saturnMoon.Equatorial,
                         MaximalPointSize = 1.5f,
-                        Color = Color.White,
                         TextureName = Path.Combine(dataPath, $"6-{saturnMoon.Number}.jpg"),
                         FallbackTextureName = Path.Combine(dataPath, $"Unknown.jpg"),
                         Semidiameter = saturnMoon.Semidiameter,
@@ -178,21 +171,16 @@ namespace Astrarium.Plugins.SolarSystem
                         PhaseAngle = saturn.PhaseAngle,
                         RotationAxis = rotAxis,
                         RotationPhase = rotPhase,
-                        DrawLabel = settings.Get("PlanetsLabels"),
-                        Label = saturnMoon.Name,
+                        DrawLabel = settings.Get("PlanetsLabels")
                     });
                 }
                 else if (body is UranusMoon uranusMoon)
                 {
                     RenderSolarSystemObject(uranusMoon, new SphereParameters()
                     {
-                        Color = Color.White,
                         DrawLabel = settings.Get("PlanetsLabels"),
-                        Label = uranusMoon.Name,
                         Equatorial = uranusMoon.Equatorial,
-                        MinimalDiskSize = 0,
-                        MinimalPointSize = 0,
-                        MaximalDiskSize = 0, // do not render as sphere
+                        MaximalDiskSize = 0,
                         MaximalPointSize = 2
                     });
                 }
@@ -200,13 +188,9 @@ namespace Astrarium.Plugins.SolarSystem
                 {
                     RenderSolarSystemObject(neptuneMoon, new SphereParameters()
                     {
-                        Color = Color.White,
                         DrawLabel = settings.Get("PlanetsLabels"),
-                        Label = neptuneMoon.Name,
                         Equatorial = neptuneMoon.Equatorial,
-                        MinimalDiskSize = 0,
-                        MinimalPointSize = 0,
-                        MaximalDiskSize = 0, // do not render as sphere
+                        MaximalDiskSize = 0,
                         MaximalPointSize = 2
                     });
 
@@ -215,13 +199,9 @@ namespace Astrarium.Plugins.SolarSystem
                 {
                     RenderSolarSystemObject(gm, new SphereParameters()
                     {
-                        Color = Color.White,
                         DrawLabel = settings.Get("PlanetsLabels"),
-                        Label = gm.Name,
                         Equatorial = gm.Equatorial,
-                        MinimalDiskSize = 0,
-                        MinimalPointSize = 0,
-                        MaximalDiskSize = 0, // do not render as sphere
+                        MaximalDiskSize = 0,
                         MaximalPointSize = 2
                     });
                 }
@@ -239,13 +219,11 @@ namespace Astrarium.Plugins.SolarSystem
                         MaximalPointSize = 7,
                         TextureName = Path.Combine(dataPath, $"{pluto.Number}.jpg"),
                         Semidiameter = pluto.Semidiameter,
-                        PhaseAngle = 0,
                         LatitudeShift = -pluto.Appearance.D,
                         LongitudeShift = pluto.Appearance.CM,
                         RotationAxis = rotAxis,
                         RotationPhase = rotPhase,
                         BodyPhysicalDiameter = 2 * Planet.EQUATORIAL_RADIUS[pluto.Number - 1],
-                        SmoothShadow = false,
                         DrawLabel = settings.Get("PlanetsLabels"),
                         Label = label
                     });
@@ -333,7 +311,6 @@ namespace Astrarium.Plugins.SolarSystem
                         EarthShadowApperance = moon.EarthShadow,
                         EarthShadowCoordinates = moon.EarthShadowCoordinates,
                         DrawLabel = settings.Get("MoonLabel"),
-                        Label = moon.Name
                     });
                 }
             }
@@ -346,7 +323,10 @@ namespace Astrarium.Plugins.SolarSystem
             /// </summary>
             public CrdsEquatorial Equatorial { get; set; }
 
-            public Color Color { get; set; }
+            /// <summary>
+            /// Color of the celestial body when it' drawn as a point
+            /// </summary>
+            public Color Color { get; set; } = Color.White;
 
             /// <summary>
             /// Texture name (path) to be used
@@ -556,20 +536,25 @@ namespace Astrarium.Plugins.SolarSystem
                         cap2 = prj.FlipVertical ? data.SouthernPolarCap / 180 : data.NorthernPolarCap / 180;
                     }
 
+                    int texture = 0;
+
                     if (layer == LAYER_PLANET)
                     {
-                        GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(data.TextureName, data.FallbackTextureName));
+                        texture = textureManager.GetTexture(data.TextureName, data.FallbackTextureName);
                     }
                     else if (layer == LAYER_POLAR_CAP)
                     {
-                        GL.BindTexture(TextureTarget.Texture2D, textureManager.GetTexture(Path.Combine(dataPath, "PolarCap.png"), fallbackPath: null, permanent: false, action: SetPolarCapTextureParameters));
+                        texture = textureManager.GetTexture(Path.Combine(dataPath, "PolarCap.png"), fallbackPath: null, permanent: false, action: SetPolarCapTextureParameters);
                     }
+
+                    GL.BindTexture(TextureTarget.Texture2D, texture);
 
                     GL.ShadeModel(ShadingModel.Smooth);
 
                     for (i = 0; i < segments; i++)
                     {
                         GL.Begin(PrimitiveType.QuadStrip);
+
                         s = 0;
 
                         for (j = 0; j <= segments; j++)
@@ -668,8 +653,9 @@ namespace Astrarium.Plugins.SolarSystem
 
             if (data.DrawLabel)
             {
+                string label = data.Label ?? body.Names.First();
                 var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
-                textRenderer.Value.DrawString(data.Label, fontLabel, brushLabel, p + (0.7f * Math.Max(size, diam) / 2));
+                textRenderer.Value.DrawString(label, fontLabel, brushLabel, p + (0.7f * Math.Max(size, diam) / 2));
             }
         }
 
