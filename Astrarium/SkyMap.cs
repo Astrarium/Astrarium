@@ -678,7 +678,7 @@ namespace Astrarium
                     float dx = x == 0 ? s : -s - b.Width;
                     float dy = y == 0 ? -s : s + b.Height;
                     RectangleF r = new RectangleF(p.X + dx, p.Y + dy, b.Width, b.Height);
-                    if (!labels.Any(l => l.IntersectsWith(r)) && !celestialObjects.Any(co => r.IntersectsWith(new RectangleF(r.X - co.Item3 / 2, r.Y - co.Item3 / 2, co.Item3, co.Item3))))
+                    if (!labels.Any(l => l.IntersectsWith(r)))
                     {
                         textRenderer.DrawString(label, font, brush, r.Location);
                         labels.Add(r);

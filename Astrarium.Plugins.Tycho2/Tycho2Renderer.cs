@@ -81,7 +81,7 @@ namespace Astrarium.Plugins.Tycho2
 
                             if (isLabels && prj.Fov < 1 && size > 3)
                             {
-                                textRenderer.Value.DrawString(star.Names.First(), fontNames, brushNames, new PointF((float)p.X + size / 2, (float)p.Y - size / 2));
+                                map.DrawObjectLabel(textRenderer.Value, star.Names.First(), fontNames, brushNames, p, size);
                             }
                         }
                     }

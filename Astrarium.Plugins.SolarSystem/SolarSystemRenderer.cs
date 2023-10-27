@@ -607,7 +607,7 @@ namespace Astrarium.Plugins.SolarSystem
 
             map.AddDrawnObject(p, body, diam);
 
-            if (data.DrawLabel )
+            if (data.DrawLabel)
             {
                 string label = data.Label ?? body.Names.First();
                 var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
@@ -620,11 +620,15 @@ namespace Astrarium.Plugins.SolarSystem
         {
             var prj = map.SkyProjection;
 
-            double rotAxis = Angle.ToRadians(prj.GetAxisRotation(sun.Equatorial, -prj.Context.Epsilon));
-
             float diam = prj.GetDiskSize(sun.Semidiameter, 10);
+
+            // do not draw if out of screen
+            double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
+            if (Angle.Separation(prj.CenterEquatorial, sun.Equatorial) > fov + sun.Semidiameter / 3600 * 2) return;
+
             float r = diam / 2;
             Vec2 p = prj.Project(sun.Equatorial);
+            double rotAxis = Angle.ToRadians(prj.GetAxisRotation(sun.Equatorial, -prj.Context.Epsilon));
 
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);

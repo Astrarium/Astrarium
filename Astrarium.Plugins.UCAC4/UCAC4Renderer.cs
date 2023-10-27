@@ -77,9 +77,6 @@ namespace Astrarium.Plugins.UCAC4
 
                 var stars = catalog.GetStars(t, eq, prj.Fov, m => m <= magLimit);
 
-                //catalog.LockedStar = map.LockedObject as UCAC4Star;
-                //catalog.SelectedStar = map.SelectedObject as UCAC4Star;
-
                 foreach (var star in stars)
                 {
                     float size = prj.GetPointSize(star.Magnitude) * starDimming;
@@ -101,7 +98,7 @@ namespace Astrarium.Plugins.UCAC4
 
                             if (isLabels && size > 2)
                             {
-                                textRenderer.Value.DrawString(star.Names.First(), fontNames, brushNames, new PointF((float)p.X + size / 2, (float)p.Y - size / 2));
+                                map.DrawObjectLabel(textRenderer.Value, star.Names.First(), fontNames, brushNames, p, size);
                             }
                         }
                     }
