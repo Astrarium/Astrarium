@@ -135,7 +135,7 @@ namespace Astrarium.Plugins.DeepSky
                         GL.Disable(EnableCap.Texture2D);
                         GL.Disable(EnableCap.Blend);
 
-                        map.AddDrawnObject(p, ds);
+                        map.AddDrawnObject(p, ds, 0);
                     }
                 }
             }

@@ -228,7 +228,7 @@ namespace Astrarium
         /// <summary>
         /// Collection of celestial objects drawn on the map
         /// </summary>
-        private ICollection<Tuple<PointF, CelestialObject>> celestialObjects = new List<Tuple<PointF, CelestialObject>>();
+        private ICollection<Tuple<CelestialObject, PointF, float>> celestialObjects = new List<Tuple<CelestialObject, PointF, float>>();
 
         /// <summary>
         /// <see cref="MapContext"/> instance
@@ -343,6 +343,7 @@ namespace Astrarium
         {
             textureManager.Cleanup();
             celestialObjects.Clear();
+            labels.Clear();
 
             bool needDrawSelectedObject = true;
 
@@ -368,19 +369,19 @@ namespace Astrarium
         {
             if (SelectedObject != null && celestialObjects.Any())
             {
-                var bodyAndPosition = celestialObjects.FirstOrDefault(x => x.Item2.Equals(SelectedObject));
+                var bodyAndPosition = celestialObjects.FirstOrDefault(x => x.Item1.Equals(SelectedObject));
 
                 if (bodyAndPosition != null)
                 {
-                    PointF pos = bodyAndPosition.Item1;
-                    CelestialObject body = bodyAndPosition.Item2;
+                    PointF pos = bodyAndPosition.Item2;
+                    CelestialObject body = bodyAndPosition.Item1;
 
                     double sd = (body is SizeableCelestialObject) ? (body as SizeableCelestialObject).Semidiameter : 0;
 
                     float mag = (body is IMagnitudeObject) ? (body as IMagnitudeObject).Magnitude : projection.MagLimit;
 
                     double diskSize = projection.GetDiskSize(sd, 10);
-                    double pointSize = projection.GetPointSize(double.IsNaN( mag) ? projection.MagLimit : mag );
+                    double pointSize = projection.GetPointSize(double.IsNaN(mag) ? projection.MagLimit : mag);
 
                     double size = Math.Max(diskSize, pointSize);
 
@@ -397,145 +398,145 @@ namespace Astrarium
 
         public void Render(Graphics g)
         {
-            try
-            {
-                renderStopWatch.Restart();
+//            try
+//            {
+//                renderStopWatch.Restart();
 
-                mapContext.Graphics = g;
+//                mapContext.Graphics = g;
 
-                g.Clear(mapContext.GetSkyColor());
-                g.PageUnit = GraphicsUnit.Display;
-                g.SmoothingMode = Antialias ? SmoothingMode.HighQuality : SmoothingMode.HighSpeed;
-                drawnObjects.Clear();
-                labels.Clear();
+//                g.Clear(mapContext.GetSkyColor());
+//                g.PageUnit = GraphicsUnit.Display;
+//                g.SmoothingMode = Antialias ? SmoothingMode.HighQuality : SmoothingMode.HighSpeed;
+//                drawnObjects.Clear();
+//                labels.Clear();
 
-                bool needDrawSelectedObject = true;
+//                bool needDrawSelectedObject = true;
 
-                if (LockedObject != null)
-                {
-                    Center.Altitude = LockedObject.Horizontal.Altitude;
-                    Center.Azimuth = LockedObject.Horizontal.Azimuth;
-                }
+//                if (LockedObject != null)
+//                {
+//                    Center.Altitude = LockedObject.Horizontal.Altitude;
+//                    Center.Azimuth = LockedObject.Horizontal.Azimuth;
+//                }
 
-                for (int i = 0; i < renderers.Count(); i++)
-                {
-                    try
-                    {
-                        renderers.ElementAt(i).Render(mapContext);
-                    }
-                    catch (Exception ex)
-                    {
-                        if (commandLineArgs.Contains("-debug", StringComparer.OrdinalIgnoreCase))
-                        {
-                            g.DrawString($"Rendering error:\n{ex}", fontDiagnosticText, Brushes.Red, new RectangleF(10, 10, Width - 20, Height - 20));
-                        }
-                        Log.Debug($"Rendering error: {ex}");
-                    }
-                    if (needDrawSelectedObject)
-                    {
-                        needDrawSelectedObject = !DrawSelectedObject(g);
-                    }
-                }
+//                for (int i = 0; i < renderers.Count(); i++)
+//                {
+//                    try
+//                    {
+//                        renderers.ElementAt(i).Render(mapContext);
+//                    }
+//                    catch (Exception ex)
+//                    {
+//                        if (commandLineArgs.Contains("-debug", StringComparer.OrdinalIgnoreCase))
+//                        {
+//                            g.DrawString($"Rendering error:\n{ex}", fontDiagnosticText, Brushes.Red, new RectangleF(10, 10, Width - 20, Height - 20));
+//                        }
+//                        Log.Debug($"Rendering error: {ex}");
+//                    }
+//                    if (needDrawSelectedObject)
+//                    {
+//                        needDrawSelectedObject = !DrawSelectedObject(g);
+//                    }
+//                }
 
-// TODO: this should be refactored and moved to separate "Printing" plugin
-#if DEBUG
-                // Map information
-                if (mapContext.Schema == ColorSchema.White) 
-                {
-                    float headerHeight = (int)(mapContext.GetPointSize(0) + 35);
-                    float margin = 10;
-                    
-                    g.FillRectangle(Brushes.White, new RectangleF(0, 0, mapContext.Width, headerHeight));
-                    g.DrawLine(Pens.Black, 0, headerHeight, mapContext.Width, headerHeight);
+//                // TODO: this should be refactored and moved to separate "Printing" plugin
+//#if DEBUG
+//                // Map information
+//                if (mapContext.Schema == ColorSchema.White)
+//                {
+//                    float headerHeight = (int)(mapContext.GetPointSize(0) + 35);
+//                    float margin = 10;
 
-                    var location = settings.Get<CrdsGeographical>("ObserverLocation");
-                    var date = new Date(mapContext.JulianDay, location.UtcOffset);
-                    double offset = location.UtcOffset;
-                    string tz = offset != 0 ? $"UTC{(offset < 0 ? "-" : "+")}{TimeSpan.FromHours(offset):h\\:mm}" : "UTC";
-                    string dateText = $"{Formatters.DateTime.Format(date)} {tz}";
+//                    g.FillRectangle(Brushes.White, new RectangleF(0, 0, mapContext.Width, headerHeight));
+//                    g.DrawLine(Pens.Black, 0, headerHeight, mapContext.Width, headerHeight);
 
-                    var dateTextSize = g.MeasureString(dateText, fontMapInformationText);
-                    g.DrawString(dateText, fontMapInformationText, Brushes.Black, margin, (headerHeight - dateTextSize.Height) / 2);
+//                    var location = settings.Get<CrdsGeographical>("ObserverLocation");
+//                    var date = new Date(mapContext.JulianDay, location.UtcOffset);
+//                    double offset = location.UtcOffset;
+//                    string tz = offset != 0 ? $"UTC{(offset < 0 ? "-" : "+")}{TimeSpan.FromHours(offset):h\\:mm}" : "UTC";
+//                    string dateText = $"{Formatters.DateTime.Format(date)} {tz}";
 
-                    var mapTransformSb = new StringBuilder();
-                    if (mapContext.IsInverted)
-                    {
-                        mapTransformSb.Append(" inverted");
-                    }
-                    if (mapContext.IsMirrored)
-                    {
-                        mapTransformSb.Append(" mirrored");
-                    }
-                    string mapTransformText = mapTransformSb.ToString().Trim();
-                    if (string.IsNullOrEmpty(mapTransformText))
-                    {
-                        mapTransformText = "Direct";
-                    }
+//                    var dateTextSize = g.MeasureString(dateText, fontMapInformationText);
+//                    g.DrawString(dateText, fontMapInformationText, Brushes.Black, margin, (headerHeight - dateTextSize.Height) / 2);
 
-                    var mapTransformTextSize = g.MeasureString(mapTransformText, fontMapInformationText);
+//                    var mapTransformSb = new StringBuilder();
+//                    if (mapContext.IsInverted)
+//                    {
+//                        mapTransformSb.Append(" inverted");
+//                    }
+//                    if (mapContext.IsMirrored)
+//                    {
+//                        mapTransformSb.Append(" mirrored");
+//                    }
+//                    string mapTransformText = mapTransformSb.ToString().Trim();
+//                    if (string.IsNullOrEmpty(mapTransformText))
+//                    {
+//                        mapTransformText = "Direct";
+//                    }
 
-                    g.DrawString(mapTransformText, fontMapInformationText, Brushes.Black, mapContext.Width - margin - mapTransformTextSize.Width, (headerHeight - mapTransformTextSize.Height) / 2);
-                    g.DrawRectangle(Pens.Black, new Rectangle(0, 0, mapContext.Width, mapContext.Height));
+//                    var mapTransformTextSize = g.MeasureString(mapTransformText, fontMapInformationText);
 
-                    var magLimit = mapContext.MagLimit;
-                    float r0 = mapContext.GetPointSize(0);
-                    float gap = r0 * 1.1f;
+//                    g.DrawString(mapTransformText, fontMapInformationText, Brushes.Black, mapContext.Width - margin - mapTransformTextSize.Width, (headerHeight - mapTransformTextSize.Height) / 2);
+//                    g.DrawRectangle(Pens.Black, new Rectangle(0, 0, mapContext.Width, mapContext.Height));
 
-                    float yLabel = headerHeight / 2 - r0 / 2 - fontMag.Height / 2 - 3;
+//                    var magLimit = mapContext.MagLimit;
+//                    float r0 = mapContext.GetPointSize(0);
+//                    float gap = r0 * 1.1f;
 
-                    float scaleWidth = ((int)magLimit) * gap;
+//                    float yLabel = headerHeight / 2 - r0 / 2 - fontMag.Height / 2 - 3;
 
-                    int magStep = 1;
-                    if (magLimit >= 14)
-                    {
-                        magStep = 2;
-                        scaleWidth = scaleWidth / 2;
-                    }
+//                    float scaleWidth = ((int)magLimit) * gap;
 
-                    int c = 0;
-                    for (int m = 0; m <= magLimit + magStep; m += magStep)
-                    {
-                        float r = mapContext.GetPointSize(m);
-                        if ((int)r > 0)
-                        {
-                            string label = m.ToString();
-                            float labelWidth = g.MeasureString(label, fontMag).Width;
+//                    int magStep = 1;
+//                    if (magLimit >= 14)
+//                    {
+//                        magStep = 2;
+//                        scaleWidth = scaleWidth / 2;
+//                    }
 
-                            float xCircle = mapContext.Width / 2 - scaleWidth / 2 + c * gap - r / 2;
-                            float xLabel = mapContext.Width / 2 - scaleWidth / 2 + c * gap - labelWidth / 2;
+//                    int c = 0;
+//                    for (int m = 0; m <= magLimit + magStep; m += magStep)
+//                    {
+//                        float r = mapContext.GetPointSize(m);
+//                        if ((int)r > 0)
+//                        {
+//                            string label = m.ToString();
+//                            float labelWidth = g.MeasureString(label, fontMag).Width;
 
-                            float yCircle = headerHeight / 2 - r / 2 + fontMag.Height / 2 + 3;
-                            
-                            g.DrawString(label, fontMag, Brushes.Black, xLabel, yLabel);
-                            g.FillEllipse(Brushes.Gray, xCircle, yCircle, r, r);
-                        }
-                        c++;
-                    }
-                }
-#endif
+//                            float xCircle = mapContext.Width / 2 - scaleWidth / 2 + c * gap - r / 2;
+//                            float xLabel = mapContext.Width / 2 - scaleWidth / 2 + c * gap - labelWidth / 2;
 
-                renderStopWatch.Stop();
-                rendersCount++;
+//                            float yCircle = headerHeight / 2 - r / 2 + fontMag.Height / 2 + 3;
 
-                int fps = (int)(1000f / renderStopWatch.ElapsedMilliseconds);
+//                            g.DrawString(label, fontMag, Brushes.Black, xLabel, yLabel);
+//                            g.FillEllipse(Brushes.Gray, xCircle, yCircle, r, r);
+//                        }
+//                        c++;
+//                    }
+//                }
+//#endif
 
-                // Calculate mean time of rendering with Cumulative Moving Average formula
-                meanRenderTime = (renderStopWatch.ElapsedMilliseconds + rendersCount * meanRenderTime) / (rendersCount + 1);
+//                renderStopWatch.Stop();
+//                rendersCount++;
 
-                // Diagnostic info
-                if (commandLineArgs.Contains("-debug", StringComparer.OrdinalIgnoreCase))
-                {
-                    g.DrawString($"FOV: {Formatters.Angle.Format(ViewAngle)}\nMag limit: {Formatters.Magnitude.Format(MagLimit)}\nFPS: {fps}\nDaylight factor: {mapContext.DayLightFactor:F2}", fontDiagnosticText, Brushes.Red, new PointF(10, 10));
-                }
-            }
-            catch (Exception ex)
-            {
-                if (commandLineArgs.Contains("-debug", StringComparer.OrdinalIgnoreCase))
-                {
-                    g.DrawString($"Rendering error:\n{ex}", fontDiagnosticText, Brushes.Red, new RectangleF(10, 10, Width - 20, Height - 20));
-                }
-                Log.Error($"Rendering error: {ex}");
-            }
+//                int fps = (int)(1000f / renderStopWatch.ElapsedMilliseconds);
+
+//                // Calculate mean time of rendering with Cumulative Moving Average formula
+//                meanRenderTime = (renderStopWatch.ElapsedMilliseconds + rendersCount * meanRenderTime) / (rendersCount + 1);
+
+//                // Diagnostic info
+//                if (commandLineArgs.Contains("-debug", StringComparer.OrdinalIgnoreCase))
+//                {
+//                    g.DrawString($"FOV: {Formatters.Angle.Format(ViewAngle)}\nMag limit: {Formatters.Magnitude.Format(MagLimit)}\nFPS: {fps}\nDaylight factor: {mapContext.DayLightFactor:F2}", fontDiagnosticText, Brushes.Red, new PointF(10, 10));
+//                }
+//            }
+//            catch (Exception ex)
+//            {
+//                if (commandLineArgs.Contains("-debug", StringComparer.OrdinalIgnoreCase))
+//                {
+//                    g.DrawString($"Rendering error:\n{ex}", fontDiagnosticText, Brushes.Red, new RectangleF(10, 10, Width - 20, Height - 20));
+//                }
+//                Log.Error($"Rendering error: {ex}");
+//            }
         }
 
         public void Invalidate()
@@ -567,16 +568,16 @@ namespace Astrarium
             }
             */
 
-            foreach (var x in celestialObjects.OrderBy(c => (point.X - c.Item1.X) * (point.X - c.Item1.X) + (projection.ScreenHeight - point.Y - c.Item1.Y) * (projection.ScreenHeight - point.Y - c.Item1.Y)))
+            foreach (var x in celestialObjects.OrderBy(c => (point.X - c.Item2.X) * (point.X - c.Item2.X) + (projection.ScreenHeight - point.Y - c.Item2.Y) * (projection.ScreenHeight - point.Y - c.Item2.Y)))
             {
-                double sd = (x.Item2 is SizeableCelestialObject) ?
-                    (x.Item2 as SizeableCelestialObject).Semidiameter : 0;
+                double sd = (x.Item1 is SizeableCelestialObject) ?
+                    (x.Item1 as SizeableCelestialObject).Semidiameter : 0;
 
                 double size = projection.GetDiskSize(sd, 10);
 
-                if (Math.Sqrt((x.Item1.X - point.X) * (x.Item1.X - point.X) + (projection.ScreenHeight - x.Item1.Y - point.Y) * (projection.ScreenHeight - x.Item1.Y - point.Y)) < size / 2)
+                if (Math.Sqrt((x.Item2.X - point.X) * (x.Item2.X - point.X) + (projection.ScreenHeight - x.Item2.Y - point.Y) * (projection.ScreenHeight - x.Item2.Y - point.Y)) < size / 2)
                 {
-                    return x.Item2;
+                    return x.Item1;
                 }
             }
 
@@ -645,43 +646,46 @@ namespace Astrarium
             }
         }
 
+        [Obsolete]
         public void AddDrawnObject(CelestialObject obj)
         {
             drawnObjects.Add(obj);
         }
 
-        public void AddDrawnObject(PointF p, CelestialObject obj)
+        public void AddDrawnObject(PointF p, CelestialObject obj, float size)
         {
-            celestialObjects.Add(new Tuple<PointF, CelestialObject>(p, obj));
+            celestialObjects.Add(new Tuple<CelestialObject, PointF, float>(obj, p, size));
         }
 
-        private bool DrawSelectedObject(Graphics g)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="textRenderer"></param>
+        /// <param name="label"></param>
+        /// <param name="font"></param>
+        /// <param name="brush"></param>
+        /// <param name="p"></param>
+        /// <param name="size">Object size, in pixels</param>
+        public void DrawObjectLabel(TextRenderer textRenderer, string label, Font font, Brush brush, PointF p, float size) 
         {
-            if (SelectedObject != null && drawnObjects.Contains(SelectedObject))
+            SizeF b = System.Windows.Forms.TextRenderer.MeasureText(label, font);
+
+            float s = size > 5 ? (size / 2.8284f + 2) : 1;
+            for (int x = 0; x < 2; x++)
             {
-                var body = SelectedObject;
-
-                double sd = (body is SizeableCelestialObject) ?
-                    (body as SizeableCelestialObject).Semidiameter : 0;
-
-                double size = Math.Max(10, mapContext.GetDiskSize(sd));
-
-                // do not draw selection circle if image is too large
-                bool drawCircle = true; // diam / 2 < diag;
-
-                if (drawCircle)
+                for (int y = 0; y < 2; y++)
                 {
-                    PointF p = Projection.Project(body.Horizontal);
-                    Pen pen = new Pen(Brushes.DarkRed, 2);
-                    pen.DashStyle = DashStyle.Dash;
-
-                    g.DrawEllipse(pen, (float)(p.X - (size + 6) / 2), (float)(p.Y - (size + 6) / 2), (float)(size + 6), (float)(size + 6));
-
-                    return true;
+                    float dx = x == 0 ? s : -s - b.Width;
+                    float dy = y == 0 ? -s : s + b.Height;
+                    RectangleF r = new RectangleF(p.X + dx, p.Y + dy, b.Width, b.Height);
+                    if (!labels.Any(l => l.IntersectsWith(r)) && !celestialObjects.Any(co => r.IntersectsWith(new RectangleF(r.X - co.Item3 / 2, r.Y - co.Item3 / 2, co.Item3, co.Item3))))
+                    {
+                        textRenderer.DrawString(label, font, brush, r.Location);
+                        labels.Add(r);
+                        return;
+                    }
                 }
             }
-
-            return false;
         }
 
         private class MapContext : IMapContext

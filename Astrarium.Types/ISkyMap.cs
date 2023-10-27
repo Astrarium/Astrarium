@@ -79,7 +79,9 @@ namespace Astrarium.Types
         [Obsolete]
         void AddDrawnObject(CelestialObject obj);
 
-        void AddDrawnObject(PointF p, CelestialObject obj);
+        void AddDrawnObject(PointF p, CelestialObject obj, float size);
+
+        void DrawObjectLabel(TextRenderer textRenderer, string label, Font font, Brush brush, PointF point, float size);
 
         /// <summary>
         /// Occurs when map's View Angle is changed.

@@ -149,7 +149,7 @@ namespace Astrarium.Plugins.SolarSystem
                         RotationAxis = rotAxis,
                         RotationPhase = rotPhase,
                         Equatorial = jupiterMoon.Equatorial,
-                        DrawLabel = settings.Get("PlanetsLabels"),
+                        DrawLabel = settings.Get("PlanetsLabels") && prj.Fov <= 1,
                         MaximalPointSize = 3
                     });
 
@@ -605,13 +605,14 @@ namespace Astrarium.Plugins.SolarSystem
                 return;
             }
 
-            map.AddDrawnObject(p, body);
+            map.AddDrawnObject(p, body, diam);
 
-            if (data.DrawLabel)
+            if (data.DrawLabel )
             {
                 string label = data.Label ?? body.Names.First();
                 var fontLabel = settings.Get<Font>("SolarSystemLabelsFont");
-                textRenderer.Value.DrawString(label, fontLabel, brushLabel, p + (0.7f * Math.Max(size, diam) / 2));
+
+                map.DrawObjectLabel(textRenderer.Value, label, fontLabel, brushLabel, p, Math.Max(size, diam));
             }
         }
 
@@ -681,7 +682,7 @@ namespace Astrarium.Plugins.SolarSystem
             GL.Disable(EnableCap.Texture2D);
             GL.Disable(EnableCap.Blend);
 
-            map.AddDrawnObject(p, sun);
+            map.AddDrawnObject(p, sun, diam);
 
             if (settings.Get("SunLabel"))
             {

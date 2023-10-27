@@ -77,7 +77,7 @@ namespace Astrarium.Plugins.Tycho2
                             GL.Vertex2(p.X, p.Y);
                             GL.End();
 
-                            map.AddDrawnObject(p, star);
+                            map.AddDrawnObject(p, star, size);
 
                             if (isLabels && prj.Fov < 1 && size > 3)
                             {
