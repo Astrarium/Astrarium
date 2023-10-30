@@ -24,7 +24,6 @@ namespace Astrarium.Plugins.DeepSky
 
         private Pen penOutlineDashed;
         private Pen penOutlineSolid;
-        private Brush brushCaption;
 
         private Dictionary<DeepSkyStatus, IDrawingStrategy> drawingHandlers = null;
 
@@ -33,6 +32,8 @@ namespace Astrarium.Plugins.DeepSky
         private readonly ITextureManager textureManager;
 
         private readonly string basePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(128, 32));
 
         public DeepSkyRenderer(DeepSkyCalc deepSkyCalc, ITextureManager textureManager, ISettings settings)
         {
@@ -62,20 +63,40 @@ namespace Astrarium.Plugins.DeepSky
         {
             if (!settings.Get<bool>("DeepSky")) return;
             if (map.DaylightFactor == 1) return;
+            bool drawOutlines = settings.Get("DeepSkyOutlines");
+            Color colorOutline = settings.Get<Color>("ColorDeepSkyOutline");
+            Brush brushLabel = new SolidBrush(settings.Get<Color>("ColorDeepSkyLabel"));
+            Font fontLabel = settings.Get<Font>("DeepSkyLabelsFont");
 
             var prj = map.SkyProjection;
 
-            // do not draw if out of screen
+            // J2000 equatorial coordinates of screen center
+            CrdsEquatorial eq = Precession.GetEquatorialCoordinates(prj.CenterEquatorial, deepSkyCalc.PrecessionalElements0);
+
+            // real circular FOV with respect of screen borders
             double fov = prj.Fov * Math.Max(prj.ScreenWidth, prj.ScreenHeight) / Math.Min(prj.ScreenWidth, prj.ScreenHeight);
 
+            // filter deep skies by:
             var deepSkies =
-                deepSkyCalc.deepSkies.Where(ds => !ds.Status.IsEmpty() &&
+                // take existing objects only (obviously, do not draw objects that are catalog errors)
+                deepSkyCalc.deepSkies.Where(ds => !ds.Status.IsEmpty() &&                
+                // do not draw small objects for current FOV
                 prj.GetDiskSize(ds.Semidiameter) > 10 &&
-                ((float.IsNaN(ds.Magnitude) ? 6 : ds.Magnitude) <= prj.MagLimit) && 
-                Angle.Separation(prj.CenterEquatorial, ds.Equatorial) < fov + ds.Semidiameter / 3600 * 2).ToList();
+                // do not draw dim objects (exceeding mag limit for current FOV)
+                ((float.IsNaN(ds.Magnitude) ? 6 : ds.Magnitude) <= prj.MagLimit) &&
+                // do not draw object outside current FOV
+                Angle.Separation(eq, ds.Equatorial0) < fov + ds.Semidiameter / 3600 * 2).ToList();
+
+            // matrix for projection, with respect of precession
+            var mat = prj.MatEquatorialToVision * deepSkyCalc.MatPrecession;
 
             foreach (var ds in deepSkies)
             {
+                ds.Equatorial = prj.Context.Get(deepSkyCalc.Equatorial, ds);
+
+                var p = prj.Project(ds.Equatorial);
+                float sz = prj.GetDiskSize(ds.Semidiameter);
+
                 int textureId = -1;
 
                 // TODO: take from settings
@@ -92,9 +113,6 @@ namespace Astrarium.Plugins.DeepSky
                         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
                         GL.BindTexture(TextureTarget.Texture2D, textureId);
-
-                        var p = prj.Project(ds.Equatorial);
-
                         GL.Begin(PrimitiveType.TriangleFan);
 
                         GL.TexCoord2(0.5, 0.5);
@@ -134,10 +152,55 @@ namespace Astrarium.Plugins.DeepSky
 
                         GL.Disable(EnableCap.Texture2D);
                         GL.Disable(EnableCap.Blend);
-
-                        map.AddDrawnObject(p, ds, 0);
                     }
                 }
+
+                if (drawOutlines && ds.Outline != null)
+                {
+                    GL.Enable(EnableCap.Blend);
+                    GL.Enable(EnableCap.LineSmooth);
+                    GL.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
+                    GL.Color4(colorOutline);
+                    GL.Begin(PrimitiveType.LineLoop);
+
+                    foreach (Vec3 ov in ds.Outline)
+                    {
+                        Vec2 op = prj.Project(ov, mat);
+                        
+                        GL.Vertex2(op.X, op.Y);
+                    }
+
+                    GL.End();
+
+                    if (sz > 20)
+                    {
+                        map.DrawObjectLabel(textRenderer.Value, ds.Names.First(), fontLabel, brushLabel, prj.Project(ds.Outline.First(), mat), 5);
+                    }
+                }
+                else
+                {
+                    if (ds.Status == DeepSkyStatus.Galaxy)
+                    {
+                        float rx = ds.LargeDiameter.HasValue ? prj.GetDiskSize(ds.LargeDiameter.Value / 2 * 60) / 2 : 0;
+                        float ry = ds.SmallDiameter.HasValue ? prj.GetDiskSize(ds.SmallDiameter.Value / 2 * 60) / 2 : 0;
+                        double rot = ds.PA.HasValue ? prj.GetAxisRotation(ds.Equatorial, 90 + ds.PA.Value) : 0;
+                        Pen pen = new Pen(colorOutline);
+                        Primitives.DrawEllipse(p, pen, rx, ry, rot);
+                    }
+                    else
+                    {
+                        Pen pen = new Pen(colorOutline);
+                        float r = prj.GetDiskSize(ds.Semidiameter, 4) / 2;
+                        Primitives.DrawEllipse(p, pen, r);
+                    }
+
+                    if (sz > 20)
+                    {
+                        map.DrawObjectLabel(textRenderer.Value, ds.Names.First(), fontLabel, brushLabel, p, sz);
+                    }
+                }
+
+                map.AddDrawnObject(p, ds, sz);
             }
         }
 
@@ -150,7 +213,7 @@ namespace Astrarium.Plugins.DeepSky
 
             var allDeepSkies = deepSkyCalc.deepSkies;
             bool isGround = settings.Get<bool>("Ground");
-            brushCaption = new SolidBrush(map.GetColor("ColorDeepSkyLabel"));
+            //brushCaption = new SolidBrush(map.GetColor("ColorDeepSkyLabel"));
 
             int alpha = Math.Max(0, Math.Min((int)(k * map.ViewAngle + b), 255));
             
@@ -325,7 +388,7 @@ namespace Astrarium.Plugins.DeepSky
                         float diamB = GetDiameter(map, ds.SmallDiameter);
                         if (ds.Outline != null && settings.Get<bool>("DeepSkyOutlines"))
                         {
-                            DrawOutline(map, ds.Outline);
+                            //DrawOutline(map, ds.Outline);
                         }
                         else
                         {
@@ -338,7 +401,7 @@ namespace Astrarium.Plugins.DeepSky
                         if (map.ViewAngle <= Renderer.limitLabels && settings.Get<bool>("DeepSkyLabels"))
                         {
                             var font = settings.Get<Font>("DeepSkyLabelsFont");
-                            map.DrawObjectCaption(font, Renderer.brushCaption, ds.DisplayName, p, Math.Min(diamA, diamB));
+                            //map.DrawObjectCaption(font, Renderer.brushCaption, ds.DisplayName, p, Math.Min(diamA, diamB));
                         }
                     }
                 }
@@ -350,7 +413,7 @@ namespace Astrarium.Plugins.DeepSky
                     {
                         if (ds.Outline != null && settings.Get<bool>("DeepSkyOutlines"))
                         {
-                            DrawOutline(map, ds.Outline);
+                            //DrawOutline(map, ds.Outline);
                         }
                         else
                         {
@@ -363,7 +426,7 @@ namespace Astrarium.Plugins.DeepSky
                         if (map.ViewAngle <= Renderer.limitLabels && settings.Get<bool>("DeepSkyLabels"))
                         {
                             var font = settings.Get<Font>("DeepSkyLabelsFont");
-                            map.DrawObjectCaption(font, Renderer.brushCaption, ds.DisplayName, p, diamA);
+                            //map.DrawObjectCaption(font, Renderer.brushCaption, ds.DisplayName, p, diamA);
                         }
                     }
                 }
@@ -375,7 +438,7 @@ namespace Astrarium.Plugins.DeepSky
                     {
                         if (ds.Outline != null && settings.Get<bool>("DeepSkyOutlines"))
                         {
-                            DrawOutline(map, ds.Outline);
+                            //DrawOutline(map, ds.Outline);
                         }
                         else
                         {
@@ -388,7 +451,7 @@ namespace Astrarium.Plugins.DeepSky
                         if (map.ViewAngle <= Renderer.limitLabels && settings.Get<bool>("DeepSkyLabels"))
                         {
                             var font = settings.Get<Font>("DeepSkyLabelsFont");
-                            map.DrawObjectCaption(font, Renderer.brushCaption, ds.DisplayName, p, 0);
+                           // map.DrawObjectCaption(font, Renderer.brushCaption, ds.DisplayName, p, 0);
                         }
                     }
                 }

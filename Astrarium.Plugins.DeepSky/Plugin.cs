@@ -20,8 +20,8 @@ namespace Astrarium.Plugins.DeepSky
             DefineSetting("DeepSkyOutlines", true);
 
             // Colors
-            DefineSetting("ColorDeepSkyOutline", new SkyColor(50, 50, 50));
-            DefineSetting("ColorDeepSkyLabel", new SkyColor(0, 64, 128));
+            DefineSetting("ColorDeepSkyOutline", Color.FromArgb(0, 50, 75));
+            DefineSetting("ColorDeepSkyLabel", Color.FromArgb(0, 64, 128));
 
             // Fonts
             DefineSetting("DeepSkyLabelsFont", new Font("Arial", 7));
