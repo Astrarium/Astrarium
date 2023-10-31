@@ -63,6 +63,7 @@ namespace Astrarium.Plugins.DeepSky
         {
             if (!settings.Get<bool>("DeepSky")) return;
             if (map.DaylightFactor == 1) return;
+            bool drawLabels = settings.Get("DeepSkyLabels");
             bool drawOutlines = settings.Get("DeepSkyOutlines");
             Color colorOutline = settings.Get<Color>("ColorDeepSkyOutline");
             Brush brushLabel = new SolidBrush(settings.Get<Color>("ColorDeepSkyLabel"));
@@ -166,13 +167,12 @@ namespace Astrarium.Plugins.DeepSky
                     foreach (Vec3 ov in ds.Outline)
                     {
                         Vec2 op = prj.Project(ov, mat);
-                        
                         GL.Vertex2(op.X, op.Y);
                     }
 
                     GL.End();
 
-                    if (sz > 20)
+                    if (drawLabels && sz > 20)
                     {
                         map.DrawObjectLabel(textRenderer.Value, ds.Names.First(), fontLabel, brushLabel, prj.Project(ds.Outline.First(), mat), 5);
                     }
@@ -194,7 +194,7 @@ namespace Astrarium.Plugins.DeepSky
                         Primitives.DrawEllipse(p, pen, r);
                     }
 
-                    if (sz > 20)
+                    if (drawLabels && sz > 20)
                     {
                         map.DrawObjectLabel(textRenderer.Value, ds.Names.First(), fontLabel, brushLabel, p, sz);
                     }
