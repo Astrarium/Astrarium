@@ -65,10 +65,13 @@ namespace Astrarium.Plugins.DeepSky
             if (map.DaylightFactor == 1) return;
             bool drawLabels = settings.Get("DeepSkyLabels");
             bool drawOutlines = settings.Get("DeepSkyOutlines");
-            Color colorOutline = settings.Get<Color>("ColorDeepSkyOutline");
-            Brush brushLabel = new SolidBrush(settings.Get<Color>("ColorDeepSkyLabel"));
+            var schema = settings.Get<ColorSchema>("Schema");
+            Color colorOutline = settings.Get<Color>("ColorDeepSkyOutline").Tint(schema);
+            Color colorLabel = settings.Get<Color>("ColorDeepSkyLabel").Tint(schema);
             Font fontLabel = settings.Get<Font>("DeepSkyLabelsFont");
-
+            string imagesPath = settings.Get<string>("DeepSkyImagesFolder");
+            bool drawImages = settings.Get("DeepSkyImages") && Directory.Exists(imagesPath);
+            Brush brushLabel = new SolidBrush(colorLabel);
             var prj = map.SkyProjection;
 
             // J2000 equatorial coordinates of screen center
@@ -98,61 +101,60 @@ namespace Astrarium.Plugins.DeepSky
                 var p = prj.Project(ds.Equatorial);
                 float sz = prj.GetDiskSize(ds.Semidiameter);
 
-                int textureId = -1;
-
-                // TODO: take from settings
-                string path = Path.Combine(basePath, "D:\\DeepSkySurvey2", $"{ds.CatalogName}.jpg");
-
-                if (File.Exists(path))
+                if (drawImages)
                 {
-                    textureId = textureManager.GetTexture(path);
-                        
-                    if (textureId > 0)
+                    string path = Path.Combine(imagesPath, $"{ds.CatalogName}.jpg");
+
+                    if (File.Exists(path))
                     {
-                        GL.Enable(EnableCap.Texture2D);
-                        GL.Enable(EnableCap.Blend);
-                        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+                        int textureId = textureManager.GetTexture(path);
 
-                        GL.BindTexture(TextureTarget.Texture2D, textureId);
-                        GL.Begin(PrimitiveType.TriangleFan);
+                        if (textureId > 0)
+                        {
+                            GL.Enable(EnableCap.Texture2D);
+                            GL.Enable(EnableCap.Blend);
+                            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
-                        GL.TexCoord2(0.5, 0.5);
-                        // TODO: tint color depend on schema
-                        GL.Color4(Color.FromArgb(100, 255, 255, 255));
-                        GL.Vertex2(p.X, p.Y);
+                            GL.BindTexture(TextureTarget.Texture2D, textureId);
+                            GL.Begin(PrimitiveType.TriangleFan);
 
-                        double sd = ds.Semidiameter / 3600 * 2;
-                        double sdRA = sd / Math.Cos(Angle.ToRadians(ds.Equatorial.Delta));
+                            GL.TexCoord2(0.5, 0.5);
+                            GL.Color4(Color.FromArgb(100, 255, 255, 255).Tint(schema));
+                            GL.Vertex2(p.X, p.Y);
 
-                        Vec2 p0 = prj.Project(ds.Equatorial + new CrdsEquatorial(sdRA, sd));
+                            double sd = ds.Semidiameter / 3600 * 2;
+                            double sdRA = sd / Math.Cos(Angle.ToRadians(ds.Equatorial.Delta));
 
-                        GL.TexCoord2(0, 0);
-                        GL.Color4(Color.FromArgb(0, 0, 0, 0));
-                        GL.Vertex2(p0.X, p0.Y);
+                            Vec2 p0 = prj.Project(ds.Equatorial + new CrdsEquatorial(sdRA, sd));
 
-                        Vec2 p1 = prj.Project(ds.Equatorial + new CrdsEquatorial(sdRA, -sd));
-                        GL.TexCoord2(0, 1);
-                        GL.Color4(Color.FromArgb(0, 0, 0, 0));
-                        GL.Vertex2(p1.X, p1.Y);
+                            GL.TexCoord2(0, 0);
+                            GL.Color4(Color.FromArgb(0, 0, 0, 0));
+                            GL.Vertex2(p0.X, p0.Y);
 
-                        Vec2 p2 = prj.Project(ds.Equatorial + new CrdsEquatorial(-sdRA, -sd));
-                        GL.TexCoord2(1, 1);
-                        GL.Color4(Color.FromArgb(0, 0, 0, 0));
-                        GL.Vertex2(p2.X, p2.Y);
+                            Vec2 p1 = prj.Project(ds.Equatorial + new CrdsEquatorial(sdRA, -sd));
+                            GL.TexCoord2(0, 1);
+                            GL.Color4(Color.FromArgb(0, 0, 0, 0));
+                            GL.Vertex2(p1.X, p1.Y);
 
-                        Vec2 p3 = prj.Project(ds.Equatorial + new CrdsEquatorial(-sdRA, sd));
-                        GL.TexCoord2(1, 0);
-                        GL.Color4(Color.FromArgb(0, 0, 0, 0));
-                        GL.Vertex2(p3.X, p3.Y);
+                            Vec2 p2 = prj.Project(ds.Equatorial + new CrdsEquatorial(-sdRA, -sd));
+                            GL.TexCoord2(1, 1);
+                            GL.Color4(Color.FromArgb(0, 0, 0, 0));
+                            GL.Vertex2(p2.X, p2.Y);
 
-                        GL.TexCoord2(0, 0);
-                        GL.Color4(Color.FromArgb(0, 0, 0, 0));
-                        GL.Vertex2(p0.X, p0.Y);
+                            Vec2 p3 = prj.Project(ds.Equatorial + new CrdsEquatorial(-sdRA, sd));
+                            GL.TexCoord2(1, 0);
+                            GL.Color4(Color.FromArgb(0, 0, 0, 0));
+                            GL.Vertex2(p3.X, p3.Y);
 
-                        GL.End();
+                            GL.TexCoord2(0, 0);
+                            GL.Color4(Color.FromArgb(0, 0, 0, 0));
+                            GL.Vertex2(p0.X, p0.Y);
 
-                        GL.Disable(EnableCap.Texture2D);
-                        GL.Disable(EnableCap.Blend);
+                            GL.End();
+
+                            GL.Disable(EnableCap.Texture2D);
+                            GL.Disable(EnableCap.Blend);
+                        }
                     }
                 }
 

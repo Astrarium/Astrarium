@@ -43,11 +43,12 @@ namespace Astrarium.Plugins.Constellations
         {
             var prj = map.SkyProjection;
 
+            var schema = settings.Get<ColorSchema>("Schema");
             Font defFont = settings.Get<Font>("ConstLabelsFont");
             float fontSize = Math.Max(8, (float)Math.Min((int)(800 / prj.Fov), defFont.Size));
             Font font = new Font(defFont.FontFamily, fontSize, defFont.Style);
             LabelType labelType = settings.Get<LabelType>("ConstLabelsType");
-            Brush brushLabel = new SolidBrush(settings.Get<SkyColor>("ColorConstLabels").Night);
+            Brush brushLabel = new SolidBrush(settings.Get<SkyColor>("ColorConstLabels").Night.Tint(schema));
             WF.TextFormatFlags formatFlags = WF.TextFormatFlags.HorizontalCenter | WF.TextFormatFlags.VerticalCenter;
 
             var mat = prj.MatEquatorialToVision * constellationsCalc.MatPrecession;
@@ -85,6 +86,7 @@ namespace Astrarium.Plugins.Constellations
         private void RenderBorders(ISkyMap map)
         {
             var prj = map.SkyProjection;
+            var schema = settings.Get<ColorSchema>("Schema");
 
             GL.Enable(EnableCap.Blend);
             GL.Enable(EnableCap.LineSmooth);
@@ -100,7 +102,7 @@ namespace Astrarium.Plugins.Constellations
             // 0.7 coeff is an empyrical
             double fov = Angle.ToRadians(prj.Fov + 1);
 
-            var color = settings.Get<SkyColor>("ColorConstBorders").GetColor(ColorSchema.Night);
+            var color = settings.Get<SkyColor>("ColorConstBorders").GetColor(ColorSchema.Night).Tint(schema);
 
             GL.Color3(color);
 

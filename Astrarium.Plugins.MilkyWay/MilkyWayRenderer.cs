@@ -62,6 +62,8 @@ namespace Astrarium.Plugins.MilkyWay
 
             if (alpha < minAlpha) return;
 
+            var schema = settings.Get<ColorSchema>("Schema");
+
             GL.Enable(EnableCap.Texture2D);
             GL.Enable(EnableCap.CullFace);
             GL.Enable(EnableCap.Blend);
@@ -83,8 +85,7 @@ namespace Astrarium.Plugins.MilkyWay
 
             const int steps = 32;
 
-            // tint color
-            GL.Color4(Color.FromArgb(alpha, 205, 225, 255));
+            GL.Color4(Color.FromArgb(alpha, 205, 225, 255).Tint(schema));
 
             for (double lat = -80; lat <= 90; lat += 10)
             {

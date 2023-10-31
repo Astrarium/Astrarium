@@ -35,6 +35,7 @@ namespace Astrarium.Plugins.UCAC4
         public override void Render(ISkyMap map)
         {
             var prj = map.SkyProjection;
+
             if (prj.Fov < 1.5 && settings.Get("Stars") && settings.Get("UCAC4"))
             {
                 float daylightFactor = map.DaylightFactor;
@@ -45,13 +46,12 @@ namespace Astrarium.Plugins.UCAC4
                 float starDimming = 1 - daylightFactor;
                 float minStarSize = Math.Max(0.5f, daylightFactor * 3); // empiric
 
-               // if (isDrag) minStarSize = Math.Max(2, minStarSize);
+                // if (isDrag) minStarSize = Math.Max(2, minStarSize);
 
-
-
+                ColorSchema schema = settings.Get<ColorSchema>("Schema");
                 bool isLabels = settings.Get("StarsLabels") && prj.Fov < 1 / 60d;
-                Brush brushNames = new SolidBrush(settings.Get<SkyColor>("ColorStarsLabels").Night);
-
+                Brush brushNames = new SolidBrush(settings.Get<SkyColor>("ColorStarsLabels").Night.Tint(schema));
+               
                 GL.Enable(EnableCap.PointSmooth);
                 GL.Enable(EnableCap.Blend);
                 GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
@@ -88,7 +88,7 @@ namespace Astrarium.Plugins.UCAC4
                         if (prj.IsInsideScreen(p))
                         {
                             GL.PointSize(size);
-                            GL.Color3(GetColor(star.SpectralClass));
+                            GL.Color3(GetColor(star.SpectralClass).Tint(schema));
 
                             GL.Begin(PrimitiveType.Points);
                             GL.Vertex2(p.X, p.Y);

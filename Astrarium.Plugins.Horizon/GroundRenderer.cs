@@ -20,10 +20,6 @@ namespace Astrarium.Plugins.Horizon
         private readonly ISettings settings;
         private readonly ITextureManager textureManager;
 
-        // TODO: move to settings!
-        //private readonly Color colorGroundNight = Color.FromArgb(4, 10, 10);
-        //private readonly Color colorGroundDay = Color.FromArgb(116, 185, 139);
-
         private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
 
         private readonly string[] cardinalDirections = new string[] { "S", "SW", "W", "NW", "N", "NE", "E", "SE" };
@@ -55,14 +51,16 @@ namespace Astrarium.Plugins.Horizon
             if (!settings.Get<bool>("HorizonLine") || settings.Get("Ground")) return;
 
             var prj = map.SkyProjection;
+            var schema = settings.Get<ColorSchema>("Schema");
 
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.Enable(EnableCap.LineSmooth);
+            GL.LineWidth(5);
 
             GL.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
             GL.Begin(PrimitiveType.LineLoop);
-            GL.Color4(settings.Get<SkyColor>("ColorHorizon").Night);
+            GL.Color4(settings.Get<SkyColor>("ColorHorizon").Night.Tint(schema));
 
             const int steps = 64;
             var hor = new CrdsHorizontal();
@@ -78,6 +76,7 @@ namespace Astrarium.Plugins.Horizon
 
             GL.End();
 
+            GL.LineWidth(1);
             GL.Disable(EnableCap.Blend);
         }
 
@@ -102,11 +101,7 @@ namespace Astrarium.Plugins.Horizon
             }
 
             int textureId = textureManager.GetTexture(Path.Combine(basePath, "Data", "pano.png"), fallbackPath: null, permanent: true);
-
-            //if (textureId > 0)
-            {
-                GL.BindTexture(TextureTarget.Texture2D, textureId);
-            }
+            GL.BindTexture(TextureTarget.Texture2D, textureId);
 
             int steps = prj.Fov < 90 ? 32 : 128;
 
@@ -132,7 +127,7 @@ namespace Astrarium.Plugins.Horizon
                     GL.Color4(Color.FromArgb(0, (int)(c * 0.6), 0));
             }
 
-            double latStop = textureId > 0 ? 90 : 0; 
+            double latStop = textureId > 0 ? 90 : 0;
 
             for (double lat = -80; lat <= latStop; lat += 10)
             {
@@ -174,10 +169,11 @@ namespace Astrarium.Plugins.Horizon
 
             var prj = map.SkyProjection;
 
+            var schema = settings.Get<ColorSchema>("Schema");
             var fontMajor = settings.Get<Font>("CardinalDirectionsFont");
             var fontMinor = new Font(fontMajor.FontFamily, fontMajor.Size * 0.75f, fontMajor.Style);
-
-            var color = settings.Get<SkyColor>("ColorCardinalDirections").Night;
+            var color = settings.Get<SkyColor>("ColorCardinalDirections").Night.Tint(schema);
+            var brush = new SolidBrush(color);
 
             for (int i = 0; i < cardinalDirections.Length; i++)
             {
@@ -189,7 +185,7 @@ namespace Astrarium.Plugins.Horizon
                     string label = Text.Get($"CardinalDirections.{cardinalDirections[i]}");
                     var font = i % 2 == 0 ? fontMajor : fontMinor;
                     var size = WF.TextRenderer.MeasureText(label, font);
-                    textRenderer.Value.DrawString(label, font, new SolidBrush(color), new Vec2(p.X - size.Width / 2, p.Y + size.Height / 2));
+                    textRenderer.Value.DrawString(label, font, brush, new Vec2(p.X - size.Width / 2, p.Y + size.Height / 2));
                 }
             }
         }

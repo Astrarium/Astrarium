@@ -67,9 +67,10 @@ namespace Astrarium.Plugins.SolarSystem
 
         public override void Render(ISkyMap map)
         {
-            brushLabel = new SolidBrush(settings.Get<SkyColor>("ColorSolarSystemLabel").Night);
             bool drawLabelMag = settings.Get("PlanetsLabelsMag");
             var prj = map.SkyProjection;
+            var schema = settings.Get<ColorSchema>("Schema");
+            brushLabel = new SolidBrush(settings.Get<SkyColor>("ColorSolarSystemLabel").Night.Tint(schema));
 
             var bodies = planetsCalc.Planets
                 .Where(p => p.Number != Planet.EARTH)
@@ -104,7 +105,7 @@ namespace Astrarium.Plugins.SolarSystem
                     RenderSolarSystemObject(planet, new SphereParameters()
                     {
                         Equatorial = planet.Equatorial,
-                        Color = GetPlanetColor(planet.Number),
+                        Color = GetPlanetColor(planet.Number).Tint(schema),
                         MinimalPointSize = settings.Get("PlanetsDrawAll") ? 1 : 0,
                         MaximalPointSize = 7,
                         TextureName = Path.Combine(dataPath, $"{planet.Number}.jpg"),
@@ -619,7 +620,7 @@ namespace Astrarium.Plugins.SolarSystem
         private void RenderSun()
         {
             var prj = map.SkyProjection;
-
+            var schema = settings.Get<ColorSchema>("Schema");
             float diam = prj.GetDiskSize(sun.Semidiameter, 10);
 
             // do not draw if out of screen
@@ -645,7 +646,7 @@ namespace Astrarium.Plugins.SolarSystem
             GL.PushMatrix();
             GL.Translate(p.X, p.Y, 0);
 
-            if (settings.Get<ColorSchema>("Schema") == ColorSchema.Red)
+            if (schema == ColorSchema.Red)
             {
                 GL.Color4(Color.Red);
             }

@@ -161,5 +161,18 @@ namespace Astrarium.Types
             path.CloseFigure();
             return path;
         }
+
+        public static Color Tint(this Color color, ColorSchema schema)
+        {
+            if (schema == ColorSchema.Red)
+            {
+                byte r = new byte[] { color.R, color.G, color.B }.Max();
+                return Color.FromArgb(color.A, r, 0, 0);
+            }
+            else
+            {
+                return color;
+            }
+        }
     }
 }

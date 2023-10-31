@@ -38,8 +38,9 @@ namespace Astrarium.Plugins.Tycho2
                 float starDimming = 1 - daylightFactor;
                 float minStarSize = Math.Max(0.5f, daylightFactor * 3); // empiric
 
+                var schema = settings.Get<ColorSchema>("Schema");
                 bool isLabels = settings.Get<bool>("StarsLabels");
-                Brush brushNames = new SolidBrush(settings.Get<SkyColor>("ColorStarsLabels").Night);
+                Brush brushNames = new SolidBrush(settings.Get<SkyColor>("ColorStarsLabels").Night.Tint(schema));
 
                 GL.Enable(EnableCap.PointSmooth);
                 GL.Enable(EnableCap.Blend);
@@ -71,7 +72,7 @@ namespace Astrarium.Plugins.Tycho2
                         if (prj.IsInsideScreen(p))
                         {
                             GL.PointSize(size);
-                            GL.Color3(GetColor(star.SpectralClass));
+                            GL.Color3(GetColor(star.SpectralClass).Tint(schema));
 
                             GL.Begin(PrimitiveType.Points);
                             GL.Vertex2(p.X, p.Y);

@@ -21,8 +21,8 @@ namespace Astrarium.Plugins.Grids
         private string[] equinoxLabels = new string[] { "\u2648", "\u264E" };
         private string[] horizontalLabels = new string[] { Text.Get("CelestialGridRenderer.Zenith"), Text.Get("CelestialGridRenderer.Nadir") };
         private string[] equatorialLabels = new string[] { Text.Get("CelestialGridRenderer.NCP"), Text.Get("CelestialGridRenderer.SCP") };
-        
-        private TextRenderer textRenderer;
+
+        private Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(64, 64));
 
         public CelestialGridRenderer(CelestialGridCalculator calc, ISettings settings)
         {
@@ -33,17 +33,13 @@ namespace Astrarium.Plugins.Grids
         public override void Render(ISkyMap map)
         {
             var prj = map.SkyProjection;
+            var schema = settings.Get<ColorSchema>("Schema");
 
-            if (textRenderer == null)
-            {
-                textRenderer = new TextRenderer(64, 64);
-            }
-
-            Color colorGridEquatorial = settings.Get<SkyColor>("ColorEquatorialGrid").Night;
-            Color colorGridHorizontal = settings.Get<SkyColor>("ColorHorizontalGrid").Night;
-            Color colorLineEcliptic = settings.Get<SkyColor>("ColorEcliptic").Night;
-            Color colorLineGalactic = settings.Get<SkyColor>("ColorGalacticEquator").Night;
-            Color colorLineMeridian = settings.Get<SkyColor>("ColorMeridian").Night;
+            Color colorGridEquatorial = settings.Get<SkyColor>("ColorEquatorialGrid").Night.Tint(schema);
+            Color colorGridHorizontal = settings.Get<SkyColor>("ColorHorizontalGrid").Night.Tint(schema);
+            Color colorLineEcliptic = settings.Get<SkyColor>("ColorEcliptic").Night.Tint(schema);
+            Color colorLineGalactic = settings.Get<SkyColor>("ColorGalacticEquator").Night.Tint(schema);
+            Color colorLineMeridian = settings.Get<SkyColor>("ColorMeridian").Night.Tint(schema);
 
             SolidBrush brushHorizontal = new SolidBrush(colorGridHorizontal);
             SolidBrush brushEquatorial = new SolidBrush(colorGridEquatorial);
@@ -131,7 +127,7 @@ namespace Astrarium.Plugins.Grids
                     GL.Begin(PrimitiveType.Points);
                     GL.Vertex2(p.X, p.Y);
                     GL.End();
-                    textRenderer.DrawString(labels[i], font, brush, new Vec2(p.X + 3, p.Y - 3));
+                    textRenderer.Value.DrawString(labels[i], font, brush, new Vec2(p.X + 3, p.Y - 3));
                 }
             }
         }
