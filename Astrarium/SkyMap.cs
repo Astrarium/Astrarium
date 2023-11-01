@@ -345,27 +345,22 @@ namespace Astrarium
             celestialObjects.Clear();
             labels.Clear();
 
-            bool needDrawSelectedObject = true;
-
             for (int i = 0; i < renderers.Count(); i++)
             {
                 try
                 {
                     renderers.ElementAt(i).Render(this);
-
-                    if (needDrawSelectedObject)
-                    {
-                        needDrawSelectedObject = !DrawSelectedObject();
-                    }
                 }
                 catch (Exception ex)
                 {
                     Log.Error($"Rendering error: {ex}");
                 }
             }
+
+            DrawSelectedObject();
         }
 
-        private bool DrawSelectedObject()
+        private void DrawSelectedObject()
         {
             if (SelectedObject != null && celestialObjects.Any())
             {
@@ -388,12 +383,8 @@ namespace Astrarium
                     Vec2 p = new Vec2(pos.X, pos.Y);
 
                     Primitives.DrawEllipse(p, Pens.Red, (size + 8) / 2);
-
-                    return true;
                 }
             }
-
-            return false;
         }
 
         public void Render(Graphics g)
