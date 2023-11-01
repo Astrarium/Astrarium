@@ -178,16 +178,6 @@ namespace Astrarium.Plugins.UCAC4
         }
 
         /// <summary>
-        /// Gets or sets UCAC4Star object that the map is locked on
-        /// </summary>
-        public UCAC4Star LockedStar { get; set; }
-
-        /// <summary>
-        /// Gets or sets UCAC4Star object that currently selected
-        /// </summary>
-        public UCAC4Star SelectedStar { get; set; }
-
-        /// <summary>
         /// Reads High Proper Motion stars from the file
         /// </summary>
         /// <param name="path">Full path to the HPM stars data</param>
@@ -751,16 +741,6 @@ namespace Astrarium.Plugins.UCAC4
 
         public override void Calculate(SkyContext context)
         {
-            if (LockedStar != null)
-            {
-                LockedStar.Horizontal = context.Get(Horizontal, LockedStar);
-            }
-
-            if (SelectedStar != null)
-            {
-                SelectedStar.Horizontal = context.Get(Horizontal, SelectedStar);
-            }
-
             // precessional elements from J2000 to current epoch
             var p = Precession.ElementsFK5(Date.EPOCH_J2000, context.JulianDay);
 

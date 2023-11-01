@@ -459,27 +459,6 @@ namespace Astrarium.Plugins.DeepSky
                 }
             }
 
-            protected virtual GraphicsPath DrawOutline(IMapContext map, ICollection<CelestialPoint> outline)
-            {
-                using (GraphicsPath gp = new GraphicsPath(FillMode.Winding))
-                {
-                    for (int i = 0; i < outline.Count - 1; i++)
-                    {
-                        var h1 = outline.ElementAt(i).Horizontal;
-                        var h2 = outline.ElementAt(i + 1).Horizontal;
-
-                        PointF p1, p2;
-                        p1 = map.Project(h1);
-                        p2 = map.Project(h2);
-                        gp.AddLine(p1, p2);
-                    }
-
-                    map.Graphics.DrawPath(Renderer.penOutlineSolid, gp);
-
-                    return gp;
-                }
-            }
-
             private float GetDiameter(IMapContext map, double? diam)
             {
                 if (diam == null)

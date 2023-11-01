@@ -101,7 +101,7 @@ namespace Astrarium.Plugins.Tracks.ViewModels
 
                 foreach (var eq in positions)
                 {
-                    track.Points.Add(new CelestialPoint() { Equatorial0 = new CrdsEquatorial(eq.GetValue<double>("Equatorial.Alpha"), eq.GetValue<double>("Equatorial.Delta")) });
+                    track.Points.Add(new CrdsEquatorial(eq.GetValue<double>("Equatorial.Alpha"), eq.GetValue<double>("Equatorial.Delta")));
                 }
 
                 Track existing = trackCalc.Tracks.FirstOrDefault(t => t.Id == track.Id);
