@@ -33,7 +33,7 @@ namespace Astrarium.Plugins.DeepSky
 
         private readonly string basePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(128, 32));
+        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
 
         public DeepSkyRenderer(DeepSkyCalc deepSkyCalc, ITextureManager textureManager, ISettings settings)
         {

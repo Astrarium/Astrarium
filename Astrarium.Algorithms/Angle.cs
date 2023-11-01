@@ -187,6 +187,54 @@ namespace Astrarium.Algorithms
 
         /// <summary>
         /// Calculates an intermediate point at any fraction along the great circle path 
+        /// between two points with equatorial coordinates
+        /// </summary>
+        /// <param name="p1">Equatorial coordinates of the first point</param>
+        /// <param name="p2">Equatorial coordinates of the second point</param>
+        /// <param name="fraction">Fraction along great circle route (f=0 is point 1, f=1 is point 2).</param>
+        /// <returns>
+        /// The intermediate point at specified fraction
+        /// </returns>
+        /// <remarks>
+        /// Formula is taken from <see href="http://www.movable-type.co.uk/scripts/latlong.html"/>
+        /// that is originally based on <see cref="http://www.edwilliams.org/avform.htm#Intermediate"/>.
+        /// </remarks>
+        public static CrdsEquatorial Intermediate(CrdsEquatorial p1, CrdsEquatorial p2, double fraction)
+        {
+            if (fraction < 0 || fraction > 1)
+                throw new ArgumentException("Fraction value should be in range [0, 1]", nameof(fraction));
+
+            double d = ToRadians(Separation(p1, p2));
+
+            double a, b;
+
+            if (d <= 1e-6)
+            {
+                a = 1 - fraction;
+                b = fraction;
+            }
+            else
+            {
+                a = Math.Sin((1 - fraction) * d) / Math.Sin(d);
+                b = Math.Sin(fraction * d) / Math.Sin(d);
+            }
+
+            double del1 = ToRadians(p1.Delta);
+            double del2 = ToRadians(p2.Delta);
+            double alp1 = ToRadians(p1.Alpha);
+            double alp2 = ToRadians(p2.Alpha);
+
+            double x = a * Math.Cos(del1) * Math.Cos(alp1) + b * Math.Cos(del2) * Math.Cos(alp2);
+            double y = a * Math.Cos(del1) * Math.Sin(alp1) + b * Math.Cos(del2) * Math.Sin(alp2);
+            double z = a * Math.Sin(del1) + b * Math.Sin(del2);
+            double del = Math.Atan2(z, Math.Sqrt(x * x + y * y));
+            double alp = Math.Atan2(y, x);
+
+            return new CrdsEquatorial(ToDegrees(alp), ToDegrees(del));
+        }
+
+        /// <summary>
+        /// Calculates an intermediate point at any fraction along the great circle path 
         /// between two points with geographical coordinates
         /// </summary>
         /// <param name="p1">Geographical coordinates of the first point</param>

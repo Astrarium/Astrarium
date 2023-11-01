@@ -1,5 +1,6 @@
 ﻿using Astrarium.Algorithms;
 using Astrarium.Types;
+using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -15,6 +16,10 @@ namespace Astrarium.Plugins.MeasureTool
     /// </summary>
     public class MeasureToolRenderer : BaseRenderer
     {
+        private readonly ISkyMap map;
+        private readonly ISettings settings;
+        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(128, 32));
+
         /// <summary>
         /// Font to print angular separation value
         /// </summary>
@@ -33,56 +38,77 @@ namespace Astrarium.Plugins.MeasureTool
         /// <summary>
         /// Flag indicating the ruler is on
         /// </summary>
-        public bool IsMeasureToolOn 
+        public bool IsMeasureToolOn
         {
             get { return _IsMeasureToolOn; } 
-            set 
-            { 
+            set
+            {
                 _IsMeasureToolOn = value;
                 NotifyPropertyChanged(nameof(IsMeasureToolOn));
-            } 
+            }
         }
 
         /// <summary>
         /// Measure tool origin
         /// </summary>
-        public CrdsHorizontal MeasureOrigin { get; set; }
+        public CrdsEquatorial MeasureOrigin { get; set; }
 
-        /// <summary>
-        /// Map should be renderer on MouseMove only if measure tool is on
-        /// </summary>
-        public override bool OnMouseMove(CrdsHorizontal mouse, MouseButton mouseButton)
+        public MeasureToolRenderer(ISkyMap map, ISettings settings)
+        {
+            this.map = map;
+            this.settings = settings;
+        }
+
+        ///// <summary>
+        ///// Map should be renderered on MouseMove only if measure tool is on
+        ///// </summary>
+        public override bool OnMouseMove(ISkyMap map, PointF mouse, MouseButton mouseButton)
         {
             return IsMeasureToolOn;
         }
 
-        /// <summary>
-        /// Does the rendering logic
-        /// </summary>
-        /// <param name="map">Map instance</param>
-        public override void Render(IMapContext map)
+        public override void Render(ISkyMap map)
         {
-            if (IsMeasureToolOn && map.MousePosition != null)
+            if (IsMeasureToolOn)
             {
-                List<PointF> points = new List<PointF>();
-                for (int f = 0; f <= 10; f++)
+                var prj = map.SkyProjection;
+                var schema = settings.Get<ColorSchema>("Schema");
+                var m = map.MouseCoordinates;
+                var mouse = prj.UnprojectEquatorial(m.X, m.Y);
+                const int segmentsCount = 32;
+                var color = Color.White.Tint(schema);
+                var brush = new SolidBrush(color);
+
+                GL.Enable(EnableCap.Blend);
+                GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+                GL.Enable(EnableCap.LineSmooth);
+                GL.Enable(EnableCap.LineStipple);
+
+                GL.Color3(color);
+                GL.LineWidth(2);
+                GL.LineStipple(1, 0xAAAA);
+
+                GL.Begin(PrimitiveType.LineStrip);
+
+                for (int i = 0; i <= segmentsCount; i++)
                 {
-                    CrdsHorizontal h = Angle.Intermediate(map.MousePosition, MeasureOrigin, f / 10.0);
-                    points.Add(map.Project(h));
-                    if (Angle.Separation(h, map.Center) > map.ViewAngle)
-                    {
-                        break;
-                    }
+                    CrdsEquatorial eq = Angle.Intermediate(mouse, MeasureOrigin, i / (float)segmentsCount);
+                    Vec2 p = prj.Project(eq);
+                    GL.Vertex2(p.X, p.Y);
                 }
 
-                if (points.Count > 1)
-                {
-                    map.Graphics.DrawCurve(new Pen(map.GetColor(Color.White)), points.ToArray());
-                    double angle = Angle.Separation(map.MousePosition, MeasureOrigin);
-                    PointF p = map.Project(map.MousePosition);
-                    map.Graphics.DrawString(Formatters.Angle.Format(angle), fontAngleValue, new SolidBrush(map.GetColor(Color.White)), p.X + 5, p.Y + 5);
-                }
+                GL.End();
+                GL.LineWidth(1);
+                GL.Disable(EnableCap.LineStipple);
+
+                // draw text with angle separation value
+                double angle = Angle.Separation(mouse, MeasureOrigin);
+                textRenderer.Value.DrawString(Formatters.Angle.Format(angle), fontAngleValue, brush, m);
+
             }
         }
+
+        [Obsolete]
+        public override void Render(IMapContext map) { }
     }
 }
