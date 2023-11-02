@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net451</TargetFrameworks>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <UseWindowsForms>true</UseWindowsForms>
     <UseWpf>true</UseWpf>
     <Product>FOV</Product>
     <Description>Field Of View</Description>
