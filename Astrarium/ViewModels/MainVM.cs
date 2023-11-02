@@ -288,6 +288,32 @@ namespace Astrarium.ViewModels
             });
             menuMapTransformInvert.AddBinding(new SimpleBinding(settings, "IsInverted", nameof(MenuItem.IsChecked)));
 
+            
+            var menuMountModeHorizontal = new MenuItem("Horizontal") { IsCheckable = true, IsChecked = true };
+            var menuMountModeEquatorial = new MenuItem("Equatorial") { IsCheckable = true };
+            
+            menuMountModeHorizontal.Command = new Command(() => {
+                menuMountModeHorizontal.IsChecked = true;
+                menuMountModeEquatorial.IsChecked = false;
+                map.SkyProjection.ViewMode = ProjectionViewType.Horizontal;
+                map.Invalidate();
+            });
+            
+            menuMountModeEquatorial.Command = new Command(() => {
+                menuMountModeEquatorial.IsChecked = true;
+                menuMountModeHorizontal.IsChecked = false;
+                map.SkyProjection.ViewMode = ProjectionViewType.Equatorial;
+                map.Invalidate();
+            });
+
+            var menuMapMountMode = new MenuItem("Mount Mode")
+            {
+                SubItems = new ObservableCollection<MenuItem>(new MenuItem[] {
+                    menuMountModeHorizontal,
+                    menuMountModeEquatorial
+                })
+            };
+
             var menuMapTransform = new MenuItem("$Menu.MapTransform")
             {
                 SubItems = new ObservableCollection<MenuItem>(new MenuItem[] {
@@ -317,6 +343,8 @@ namespace Astrarium.ViewModels
             };
 
             menuView.SubItems.Add(menuMapTransform);
+            menuView.SubItems.Add(menuMapMountMode);
+            menuView.SubItems.Add(null);
             menuView.SubItems.Add(menuColorSchema);
             menuView.SubItems.Add(null);
 

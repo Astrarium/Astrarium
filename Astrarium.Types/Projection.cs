@@ -157,7 +157,6 @@ namespace Astrarium.Types
         /// <summary>
         /// Gets body axis rotation angle respect to screen coordinates 
         /// </summary>
-        /// <param name="prj">Current projection</param>
         /// <param name="eq">Equatorial coordinates of body</param>
         /// <param name="posAngle">Position angle, in degrees</param>
         /// <returns>Axis rotation angle, in degrees</returns>
@@ -165,6 +164,19 @@ namespace Astrarium.Types
         {
             Vec2 p = Project(eq + new CrdsEquatorial(0, 1));
             Vec2 p0 = Project(eq);
+            return (FlipVertical ? -1 : 1) * (90 - (FlipHorizontal ? -1 : 1) * posAngle) + Angle.ToDegrees(Math.Atan2(p.Y - p0.Y, p.X - p0.X));
+        }
+
+        /// <summary>
+        /// Gets body axis rotation angle respect to screen coordinates 
+        /// </summary>
+        /// <param name="h">Horizontal coordinates of body</param>
+        /// <param name="posAngle">Position angle, in degrees</param>
+        /// <returns>Axis rotation angle, in degrees</returns>
+        public double GetAxisRotation(CrdsHorizontal h, double posAngle)
+        {
+            Vec2 p = Project(h + new CrdsHorizontal(0, 1));
+            Vec2 p0 = Project(h);
             return (FlipVertical ? -1 : 1) * (90 - (FlipHorizontal ? -1 : 1) * posAngle) + Angle.ToDegrees(Math.Atan2(p.Y - p0.Y, p.X - p0.X));
         }
 
