@@ -40,7 +40,7 @@ namespace Astrarium.Plugins.FOV
                     bool outer = true;
                     foreach (var size in sizes)
                     {
-                        DrawFovCircle(size, finderFrame, isOuter: outer);
+                        DrawFovCircle(size, finderFrame.Shading, finderFrame, isOuter: outer);
 
                         if (finderFrame.Crosslines && outer)
                         {
@@ -52,7 +52,7 @@ namespace Astrarium.Plugins.FOV
                             {
                                 var p = new Vec2(prj.ScreenWidth / 2, prj.ScreenHeight / 2);
                                 var pen = new Pen(finderFrame.Color.Night.Tint(schema));
-                                
+
                                 var v1 = new Vec2(p.X, p.Y - diam / 2);
                                 var v2 = new Vec2(p.X, p.Y + diam / 2);
                                 Primitives.DrawLine(v1, v2, pen);
@@ -68,7 +68,7 @@ namespace Astrarium.Plugins.FOV
                 }
                 else if (frame is CircularFovFrame circularFrame)
                 {
-                    DrawFovCircle(circularFrame.Size, circularFrame, isOuter: true);
+                    DrawFovCircle(circularFrame.Size, circularFrame.Shading, circularFrame, isOuter: true);
                 }
                 else if (frame is CameraFovFrame cameraFrame)
                 {
@@ -130,6 +130,8 @@ namespace Astrarium.Plugins.FOV
             }
         }
 
+        public override void Render(IMapContext map) { }
+
         private void DrawFrameLabel(FovFrame frame, Color color, float width, float height)
         {
             var labelSize = WF.TextRenderer.MeasureText(frame.Label, font, Size.Empty);
@@ -140,9 +142,7 @@ namespace Astrarium.Plugins.FOV
             }
         }
 
-        public override void Render(IMapContext map) { }
-
-        private void DrawFovCircle(float frameSize, FovFrame frame, bool isOuter)
+        private void DrawFovCircle(float frameSize, short shading, FovFrame frame, bool isOuter)
         {
             var prj = map.SkyProjection;
             var schema = settings.Get<ColorSchema>("Schema");
@@ -153,15 +153,15 @@ namespace Astrarium.Plugins.FOV
             // do not draw frame if its size exceeds screen bounds
             if (size < Math.Sqrt(prj.ScreenWidth * prj.ScreenWidth + prj.ScreenHeight * prj.ScreenHeight))
             {
+                if (isOuter && shading > 0 && frameSize >= prj.Fov / 2)
+                {
+                    DrawShading(shading, size);
+                }
+
                 var p = new Vec2(prj.ScreenWidth / 2, prj.ScreenHeight / 2);
 
                 GL.PushMatrix();
                 GL.Translate(p.X, p.Y, 0);
-
-                if (isOuter && frame.Shading > 0 && frameSize >= prj.Fov / 2)
-                {
-                    DrawShading(frame.Shading, size);
-                }
 
                 Primitives.DrawEllipse(new Vec2(), new Pen(color), size / 2);
 
@@ -179,6 +179,7 @@ namespace Astrarium.Plugins.FOV
             var prj = map.SkyProjection;
             int w = prj.ScreenWidth;
             int h = prj.ScreenHeight;
+            const int gap = 5;
 
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
@@ -196,30 +197,29 @@ namespace Astrarium.Plugins.FOV
             for (int i = 0; i <= 64; i++)
             {
                 double ang = i / 64.0 * 2 * Math.PI;
-                Vec2 v = new Vec2(size / 2 * Math.Cos(ang), size / 2 * Math.Sin(ang));
+                Vec2 v = new Vec2(w / 2 + size / 2 * Math.Cos(ang), h / 2 + size / 2 * Math.Sin(ang));
                 GL.Vertex2(v.X, v.Y);
             }
             GL.End();
 
-            // Draw rectangle, masking out fragments with 1's in the stencil buffer
             GL.ColorMask(true, true, true, true);
             GL.DepthMask(true);
             GL.StencilFunc(StencilFunction.Notequal, 1, 0xFF);
             GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
 
             GL.Begin(PrimitiveType.LineLoop);
-            GL.Vertex2(-w / 2, -h / 2);
-            GL.Vertex2(-w / 2, h / 2);
-            GL.Vertex2(w / 2, h / 2);
-            GL.Vertex2(w / 2, -h / 2);
+            GL.Vertex2(-gap, -gap);
+            GL.Vertex2(-gap, h + gap);
+            GL.Vertex2(w + gap, h + gap);
+            GL.Vertex2(w + gap, -gap);
             GL.End();
 
             GL.Begin(PrimitiveType.Quads);
             GL.Color4(Color.FromArgb((byte)(shading / 100f * 255), 0, 0, 0));
-            GL.Vertex2(-w / 2, -h / 2);
-            GL.Vertex2(-w / 2, h / 2);
-            GL.Vertex2(w / 2, h / 2);
-            GL.Vertex2(w / 2, -h / 2);
+            GL.Vertex2(-gap, -gap);
+            GL.Vertex2(-gap, h + gap);
+            GL.Vertex2(w + gap, h + gap);
+            GL.Vertex2(w + gap, -gap);
             GL.End();
 
             GL.Disable(EnableCap.Blend);

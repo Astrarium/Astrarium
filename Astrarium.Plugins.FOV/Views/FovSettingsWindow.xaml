@@ -113,9 +113,9 @@
                         <ColumnDefinition Width="Auto" MinWidth="120" SharedSizeGroup="g1" />
                     </Grid.ColumnDefinitions>
                     <Label Content="{t:Text FovSettingsWindow.Label}" Grid.Row="0" Grid.Column="0" />
-                    <TextBox Margin="2" Text="{Binding Label}" Grid.Row="1" Grid.Column="0" />
-                    <Label Content="{t:Text FovSettingsWindow.Shading}" Grid.Row="0" Grid.Column="1" />
-                    <c:NumericUpDown Margin="2" Value="{Binding Shading}" DecimalPlaces="0" Minimum="0" Maximum="100" Grid.Row="1" Grid.Column="1" />
+                    <TextBox Margin="2" Text="{Binding Label}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="{Binding LabelColspan}" />
+                    <Label Content="{t:Text FovSettingsWindow.Shading}" Visibility="{Binding ShadingVisible, Converter={s:BoolToVisibilityConverter}}" Grid.Row="0" Grid.Column="1" />
+                    <c:NumericUpDown Margin="2" Value="{Binding Shading}" Visibility="{Binding ShadingVisible, Converter={s:BoolToVisibilityConverter}}" DecimalPlaces="0" Minimum="0" Maximum="100" Grid.Row="1" Grid.Column="1" />
                     <Label Content="{t:Text FovSettingsWindow.Color}" Grid.Row="0" Grid.Column="2" />
                     <c:ColorPicker Margin="5" ColorSchema="{Binding ColorSchema}" SelectedColor="{Binding Color}" Grid.Row="1" Grid.Column="2">
                         <c:ColorPicker.Caption>

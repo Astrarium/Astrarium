@@ -358,6 +358,16 @@ namespace Astrarium.Plugins.FOV
             }
         }
 
+        public bool ShadingVisible
+        {
+            get => FrameType != FrameType.Camera;
+        }
+
+        public int LabelColspan
+        {
+            get => FrameType != FrameType.Camera ? 1 : 2;
+        }
+
         public Binocular Binocular => Binoculars.FirstOrDefault(t => t.Id == BinocularId);
         public Telescope Telescope => Telescopes.FirstOrDefault(t => t.Id == TelescopeId);
         public Eyepiece Eyepiece => Eyepieces.FirstOrDefault(t => t.Id == EyepieceId);
@@ -423,8 +433,10 @@ namespace Astrarium.Plugins.FOV
                     nameof(BinocularVisible),
                     nameof(CameraVisible),
                     nameof(LensVisible),
-                    nameof(FinderVisible)
-                    );
+                    nameof(FinderVisible),
+                    nameof(ShadingVisible),
+                    nameof(LabelColspan)
+                );
                 Calculate();
             }
         }
@@ -482,7 +494,6 @@ namespace Astrarium.Plugins.FOV
                         Id = _Id,
                         Color = Color,
                         Label = Label,
-                        Shading = Shading,
                         Enabled = true,
                         LensId = LensId,
                         Width = cameraFieldOfView.Size.Width,
@@ -514,8 +525,8 @@ namespace Astrarium.Plugins.FOV
                         Id = _Id,
                         Color = Color,
                         Label = Label,
-                        Shading = Shading,
                         Enabled = true,
+                        Shading = Shading,
                         Sizes = new float?[] {
                             (float?)FinderSize1,
                             FinderSize2Enabled ? (float?)FinderSize2 : null,
@@ -537,6 +548,7 @@ namespace Astrarium.Plugins.FOV
                     TelescopeId = telescopeFrame.TelescopeId;
                     EyepieceId = telescopeFrame.EyepieceId;
                     LensId = telescopeFrame.LensId;
+                    Shading = telescopeFrame.Shading;
                     FrameType = FrameType.Telescope;
                 }
                 else if (value is CameraFovFrame cameraFrame)
@@ -552,7 +564,8 @@ namespace Astrarium.Plugins.FOV
                 else if (value is BinocularFovFrame binocularFrame)
                 {
                     BinocularId = binocularFrame.BinocularId;
-                    FrameType = FrameType.Binocular;
+                    Shading = binocularFrame.Shading;
+                    FrameType = FrameType.Binocular;                    
                 }
                 else if (value is FinderFovFrame finderFrame)
                 {
@@ -567,12 +580,12 @@ namespace Astrarium.Plugins.FOV
                         FinderSize3Enabled = true;
                         FinderSize3 = (decimal)finderFrame.Sizes[2];
                     }
+                    Shading = finderFrame.Shading;
                     FinderCrosslines = finderFrame.Crosslines;
                     FrameType = FrameType.Finder;
                 }
 
                 _Id = value.Id;
-                Shading = value.Shading;
                 Color = value.Color;
                 Label = value.Label;
             }
