@@ -4,6 +4,7 @@
     <TargetFrameworks>net451</TargetFrameworks>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <UseWpf>true</UseWpf>
+	<UseWindowsForms>true</UseWindowsForms>
     <Product>ASCOM Plugin</Product>
     <Description>Allows to control telescope via ASCOM platform</Description>
     <Authors>Alexander Krutov</Authors>

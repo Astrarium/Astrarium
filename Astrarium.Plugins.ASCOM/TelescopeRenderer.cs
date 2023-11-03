@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WF = System.Windows.Forms;
 
 namespace Astrarium.Plugins.ASCOM
 {
@@ -15,9 +16,10 @@ namespace Astrarium.Plugins.ASCOM
     /// </summary>
     public class TelescopeRenderer : BaseRenderer
     {
-        private IAscomProxy ascom;
-        private ISkyMap map;
-        private ISettings settings;
+        private readonly IAscomProxy ascom;
+        private readonly ISkyMap map;
+        private readonly ISettings settings;
+        private readonly Lazy<TextRenderer> textRenderer = new Lazy<TextRenderer>(() => new TextRenderer(256, 32));
 
         public override RendererOrder Order => RendererOrder.Foreground;
        
@@ -42,38 +44,39 @@ namespace Astrarium.Plugins.ASCOM
             }
         }
 
-        public override void Render(IMapContext map)
+        public override void Render(ISkyMap map)
         {
             if (ascom.IsConnected)
             {
                 try
                 {
-                    var hor = ascom.Position.ToHorizontal(map.GeoLocation, map.SiderealTime);
-                    var p = map.Project(hor);
-
-                    var color = map.GetColor("TelescopeMarkerColor");
+                    var prj = map.SkyProjection;
+                    ColorSchema schema = settings.Get<ColorSchema>("Schema");
+                    var color = settings.Get<SkyColor>("TelescopeMarkerColor").Night.Tint(schema);
                     Pen marker = new Pen(color, 2);
-                    marker.DashStyle = System.Drawing.Drawing2D.DashStyle.Dot;
+
+                    Vec2 p = prj.Project(ascom.Position);
 
                     float r = 16;
                     float a0 = (float)(Math.PI / 4);
                     for (double a = 0; a < 2 * Math.PI; a += Math.PI / 2)
                     {
-                        float x0 = p.X + (r / 2) * (float)Math.Cos(a + a0);
-                        float y0 = p.Y + (r / 2) * (float)Math.Sin(a + a0);
-
-                        float x1 = p.X + r * (float)Math.Cos(a + a0);
-                        float y1 = p.Y + r * (float)Math.Sin(a + a0);
-
-                        map.Graphics.DrawLine(marker, new PointF(x0, y0), new PointF(x1, y1));
+                        double x0 = p.X + r / 2 * (float)Math.Cos(a + a0);
+                        double y0 = p.Y + r / 2 * (float)Math.Sin(a + a0);
+                        double x1 = p.X + r * (float)Math.Cos(a + a0);
+                        double y1 = p.Y + r * (float)Math.Sin(a + a0);
+                        Primitives.DrawLine(new Vec2(x0, y0), new Vec2(x1, y1), marker);
                     }
-                    map.Graphics.DrawEllipse(marker, p.X - 16, p.Y - 16, 32, 32);
+
+                    Primitives.DrawEllipse(p, marker, r);
 
                     if (settings.Get("TelescopeMarkerLabel"))
                     {
+                        string label = ascom.TelescopeName;
                         var font = settings.Get<Font>("TelescopeMarkerFont");
-                        var brush = new SolidBrush(map.GetColor("TelescopeMarkerColor"));
-                        map.Graphics.DrawString(ascom.TelescopeName, font, brush, new PointF(p.X + 16 * 0.8f, p.Y + 16 * 0.8f));
+                        var labelSize = WF.TextRenderer.MeasureText(label, font, Size.Empty);
+                        var brush = new SolidBrush(color);
+                        textRenderer.Value.DrawString(label, font, brush, new PointF((float)(p.X - labelSize.Width / 2), (float)(p.Y - r - labelSize.Height / 2)));                       
                     }
                 }
                 catch (Exception ex)
@@ -82,5 +85,7 @@ namespace Astrarium.Plugins.ASCOM
                 }
             }
         }
+
+        public override void Render(IMapContext map) { }
     }
 }
